@@ -27,7 +27,7 @@
 #		2005-08-14 RSB	Compensated for funky naming rules now in the
 #				pthreads library.
 
-yaAGS.exe:	mainAGS.o ../yaAGC/nbfgets.o ../yaAGC/symbol_table.o \
+yaAGS.exe:	mainAGS.o symbol_table.o nbfgets.o Backtrace.o \
 		../yaAGC/regex.o libyaAGS.a
 	gcc ${CFLAGS} -o $@ $^ -L. -L../yaAGC -lpthreadAGC -lkernel32 -lyaAGC -lyaAGS -lwsock32
 
