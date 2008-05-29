@@ -1,0 +1,202 @@
+LM Simulator Tutorial
+=====================
+
+Index:
+======
+0.0 Fast Start
+0.1 AGC/LGC Initialization
+1.0 IMU Introduction
+1.1 IMU Start
+1.2 IMU Pre-flight Checkout
+1.3 IMU Coarse Align
+1.4 IMU Fine Align
+1.5 Zero IMU
+1.6 Monitor Gimbal Angles
+1.7 Monitor PIPA Counter Values
+2.0 DAP (Digital Autopilot) Data Initialization
+2.1 DAP Activation and Modes
+2.2 DAP - V49 Crew Defined Maneuver
+2.3 DAP - FDAI Error Needle Modes
+3.0 Show Alarm Codes & Data
+4.0 Useful Verbs & Nouns
+
+
+0.0 Fast Start:
+===============
+If you want to do a real fast startup without doing 0.1 to 1.4 then you should
+execute the following steps:
+- Switch the DAP to "ATTITUDE HOLD MODE ON" (AGC Crew Inputs)
+- Wait until "DRIVE CDU Z to X" goes on (AGC Outputs)
+- Type into the DSKY: V37E 00E to send the AGC into the idle loop
+- DSKY: V77E (Normal DAP Mode) or V76E (Minimum Impulse Mode)
+- DSKY: V37E 00E to be sure that the AGC is in the idle mode
+
+Now the vessel can be controlled by the RHC (Rotational Hand Controller) which
+can be found within the AGC Crew Inputs window.
+
+
+0.1 AGC/LGC Initialization:
+---------------------------
+After a fresh AGC start there is a need to do a reset by typing V36E. To go into
+the idle loop it is necessary to change the program by V37E 00E. Probably that
+has to be repeated a couple of times until "PROG" shows 00.
+
+
+1.0 IMU Introduction:
+=====================
+The IMU is constructed of a navigational platform gimbaled by a three axis system.
+The following mapping is valid after setting the IMU to zero degrees:
+
+X-Gimbal-Axis = Outer Gimbal  = X-LM-Axis = YAW
+Y-Gimbal-Axis = Inner Gimbal  = Y-LM-Axis = PITCH
+Z-Gimbal-Axis = Middle Gimbal = Z-LM-Axis = Roll (Gimbal Lock Warning +/-70 Degrees)
+
+
+1.1 IMU Start:
+--------------
+- AGC Crew Inputs: Set "ISS TURN ON REQUESTED" to ON
+- Wait for about 90 sec until the DSKY "NO ATT" signal goes off 
+
+
+1.2 IMU Pre-flight Checkout:
+----------------------------
+Pre-flight check-out of the FDAI display interface -> DSKY: V43E
+All values should be set to +00000.
+
+
+1.3 IMU Coarse Align:
+---------------------
+- Type the following sequence into the DSKY: V41N20E
+  V = Verb; N = Noun; E = Enter
+- Now the AGC asks for the angles in the format 000.00 Deg
+  The sequence is X, Y, Z. Don't forget the "+" or "-" sign!
+- The AGC drives the IMU to the absolute position given
+- Use the "FDAI/IMU" window to control the angle changes 
+
+
+1.4 IMU Fine Align:
+-------------------
+After IMU Coarse Align the "NO ATT" light indicates that the platform
+is not completely aligned.
+To finalize the alignment the following procedure is needed:
+- DSKY: V42E
+- Give the relative angles in format 00.000 Deg (e.g. three times +00000)
+
+
+1.5 Zero IMU:
+-------------
+Here are three possible scenarios to reset the IMU to zero degrees:
+1.) AGC Crew Inputs => Activate: "IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0"
+2.) DSKY: V40N20E (AGC sends ZERO CAGE COMMAND)
+3.) DSKY: V36E (AGC RESET which automatically resets the IMU)
+
+
+1.6 Monitor Gimbal Angles:
+--------------------------
+DSKY: V16N20E
+
+
+1.7 Monitor PIPA Counter Values:
+--------------------------------
+DSKY: V16N21E
+
+
+2.0 DAP (Digital Autopilot) Data Initialization:
+================================================
+The DAP needs some initialization values to work correctly (e.g. LM Weight etc.).
+
+- Start Spezial Software Routine R03 => DSKY: V48E
+- The Register R1 (F06 46) shows the following value 21122 = ABCDE
+
+Spacecraft Configuration:
+A = 1  Ascent Stage Only
+A = 2  Ascent and Descent Stage
+A = 3  Ascent and Descent Stages docked with CSM
+
+RCS Configuration:
+B = 0  2 Jet Translation RCS System A
+B = 1  2 Jet Translation RCS System B
+B = 2  4 Jet Translation RCS System A
+B = 3  4 Jet Translation RCS System B
+
+ACA Scaling:
+C = 0  Fine Scaling ACA (4 Deg/Sec)
+C = 1  Normal Scaling ACA (20 Deg/Sec)
+
+Deadband Configuration:
+D = 0  ATT Deadband 0.3 Degrees
+D = 1  ATT Deadband 1.0 Degrees
+D = 2  ATT Deadband 5.0 Degrees
+
+KALCMANU RATE:
+E = 0  0.2 Deg/Sec
+E = 1  0.5 Deg/Sec
+E = 2    2 Deg/Sec
+E = 3   10 Deg/Sec
+
+- To change the value type V21E
+- Press "PRO" on the DSKY to start the entry of (F06 47) LM & CSM Weight
+- Use V21E or V22E to change the individual values
+- V24E allows to change both values sequencially (don't forget the leading + sign)
+- Press "PRO" to proceed
+- F06 48 allows the entry of the Engine Gimbal Angles.
+
+
+2.1 DAP Activation and Modes:
+-----------------------------
+DAP Activation:
+- AGC Crew Inputs => "ATTITUDE HOLD MODE ON" or "AUTO STABILIZATION OF ATTITUDE ON"
+
+DAP Modes:
+- DSKY: V76E Minimun Impulse Command Mode (each RHC deflection fires the thrusters for 14ms)
+- DSKY: V77E Rate Command and Attitude Hold Mode
+
+
+2.2 DAP - V49 Crew Defined Maneuver:
+------------------------------------
+0.) Crew Inputs -> Dap Switch to "AUTO STABILIZATION OF ATTITUDE ON"
+1.) V37E 00E
+2.) V62E (Display Angular Difference to N22 on Error Needles)
+3.) V49E
+4.) F 06 22  New ICDU Angles (e.g. V24E to load the Sequence ICDUX, ICDUY and ICDUZ)
+5.) PRO
+6.) F 50 18  New FDAI Angles in the Sequence Roll, Pitch and Yaw
+7.) PRO
+8.) The DAP steers the LM to the new orientation
+
+
+2.3 DAP - FDAI Error Needle Modes:
+----------------------------------
+1.) DSKY: V61E -> DISPLAY DAP FOLLOWING ATTITUDE ERRORS
+This is the standard mode. The needles show how far the DAP is away from the wished
+axes positions.
+
+2.) DSKY: V62E -> DISPLAY TOTAL ATTITUDE ERRORS WITH RESPECT TO NOUN 22
+Here the needles display the absolute difference between the entry shown by V16N22E
+and V16N20E. Normally used for automatic positioning (please see V49 Crew Defined
+Maneuver).
+
+3.) DSKY: V60E -> DISPLAY VEHICLE ATTITUDE RATES ON FDAI ERROR NEEDLES.
+These outputs should provide the same information as the FDAI rate indicators do.
+The Roll, Yaw and Pitch rate shown by the FDAI bases on a separate Rate Gyro
+Assembly fixed mounted to the LM body, whereas the Information on the needles shown
+by V60E is derived from the AGC measurement of the angular changes. This is also a
+backup mode in case of a Rate Gyro Assembly fault.
+
+
+3.0 Display Alarm Codes and Data:
+=================================
+- Alarm Codes => DSKY: V05N09E
+- Alarm Data  => DSKY: V05N08E
+
+
+4.0 Useful Verbs & Nouns:
+=========================
+DSKY:      Function:
+-----------------------------------------------------------------------------
+V35E       Lamp Test
+V36E       AGC Reset
+V34E       Terminate an ongoing function like IMU Angle Monitoring (V16N20E)
+V16N36E    Monitor the AGC time (R1=Hours; R2=Minutes; R3=100ths of a Second)
+V37E       Changes the AGC Program (e.g. V37E00E = Idling Program)
+

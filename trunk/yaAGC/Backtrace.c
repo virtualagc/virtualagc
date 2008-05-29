@@ -1,0 +1,230 @@
+/*
+  Copyright 2004-2005 Ronald S. Burkey <info@sandroid.org>
+  
+  This file is part of yaAGC.
+
+  yaAGC is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  yaAGC is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with yaAGC; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+  In addition, as a special exception, Ronald S. Burkey gives permission to
+  link the code of this program with the Orbiter SDK library (or with 
+  modified versions of the Orbiter SDK library that use the same license as 
+  the Orbiter SDK library), and distribute linked combinations including 
+  the two. You must obey the GNU General Public License in all respects for 
+  all of the code used other than the Orbiter SDK library. If you modify 
+  this file, you may extend this exception to your version of the file, 
+  but you are not obligated to do so. If you do not wish to do so, delete 
+  this exception statement from your version. 
+ 
+  Filename:	Backtrace.c
+  Purpose:	Stuff for yaAGC backtrace.
+  Contact:	Ron Burkey <info@sandroid.org>
+  Reference:	http://www.ibiblio.org/apollo/index.html
+  Mods:		05/12/04 RSB.	Began.
+  		05/14/04 RSB.	Added interrupt-request stuff.
+				Fixed how superbanks are displayed.
+		05/15/04 RSB	Unroll the backtrace table when a RESUME
+				is encountered to get rid of all the
+				entries for the ISR.
+		05/30/04 RSB	Added a header file or two.
+		05/31/04 RSB	Corrected for pre-incrementing of Z register
+				during instructions.
+		07/12/04 RSB	Q is now 16 bits.
+		08/01/04 RSB	Backtraces, as originally intended, are no
+				longer created unless yaAGC was started in
+				--debug mode.
+		08/12/04 RSB	Added OutputChannel10[].
+		02/27/05 RSB	Added the license exception, as required by
+				the GPL, for linking to Orbiter SDK libraries.
+		05/14/05 RSB	Corrected website references.
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "agc_engine.h"
+
+// This function adds a new backtrace point to the circular buffer.  The 
+// oldest entries are transparently overwritten.  The Cause parameter is
+// used as follows:
+//	0	The backtrace point is in normal code.
+//	1-10	The backtrace point is an interrupt vector.
+//	255	The backtrace point is a RESUME after interrupt.
+// When Cause==255 is encountered, all backtrace points back to (and including)
+// the vector to the interrupt are removed.  The reason for this is that
+// otherwise the array will quickly become completely full of interrupt 
+// code, and all backtrace points to foreground code will be completely lost.
+
+void
+BacktraceAdd (agc_t *State, int Cause)
+{
+  BacktracePoint_t *Bp;
+  if (SingleStepCounter == -2)
+    return;
+  if (BacktraceInitialized == -1)
+    return;
+  if (BacktraceInitialized == 0)
+    {
+      BacktracePoints = (BacktracePoint_t *) 
+      			malloc (MAX_BACKTRACE_POINTS * sizeof (BacktracePoint_t));
+      if (BacktracePoints == NULL)
+        {
+	  BacktraceInitialized = -1;
+	  return;
+	}
+      BacktraceInitialized = 1;
+    }
+  if (Cause == 255)
+    {
+      while (BacktraceCount > 0)
+        {
+	  BacktraceNextAdd--;
+	  if (BacktraceNextAdd < 0)
+	    BacktraceNextAdd = MAX_BACKTRACE_POINTS - 1;
+	  BacktraceCount--;
+	  if (BacktracePoints[BacktraceNextAdd].DueToInterrupt)
+	    break;
+	}
+      return;
+    }
+  Bp = &BacktracePoints[BacktraceNextAdd++];
+  if (BacktraceNextAdd >= MAX_BACKTRACE_POINTS)
+    BacktraceNextAdd = 0;
+  if (BacktraceCount < MAX_BACKTRACE_POINTS)
+    BacktraceCount++;
+  // I just happen to know that State->CycleCounter has been pre-incremented.  
+  Bp->CycleCounter = State->CycleCounter - 1;
+  memcpy (Bp->Erasable, State->Erasable, sizeof (State->Erasable));
+  memcpy (Bp->InputChannel, State->InputChannel, sizeof (State->InputChannel));
+  memcpy (Bp->InterruptRequests, State->InterruptRequests, 
+  	  sizeof (State->InterruptRequests));
+  Bp->OutputChannel7 = State->OutputChannel7;
+  memcpy (Bp->OutputChannel10, State->OutputChannel10, sizeof (State->OutputChannel10));
+  Bp->IndexValue = State->IndexValue;
+  Bp->ExtraCode = State->ExtraCode;
+  Bp->AllowInterrupt = State->AllowInterrupt;
+  //Bp->RegA16 = State->RegA16;
+  //Bp->RegQ16 = State->RegQ16;
+  Bp->InIsr = State->InIsr;
+  Bp->SubstituteInstruction = State->SubstituteInstruction;
+  Bp->DueToInterrupt = Cause;
+  Bp->Erasable[0][RegZ]--;	// Recall that Z is pre-incremented.
+} 
+
+// Restores the state of the system from an entry in the backtrace buffer.
+// Returns 0 on success or non-zero on error.
+
+int
+BacktraceRestore (agc_t *State, int n)
+{
+  BacktracePoint_t *Bp;
+  int k;
+  if (SingleStepCounter == -2)
+    return (1);
+  if (BacktraceInitialized == -1)
+    return (2);
+  if (n < 0)
+    return (3);
+  if (n >= BacktraceCount)
+    return (4);
+  k = BacktraceNextAdd - n - 1;
+  if (k < 0)
+    k += BacktraceCount;
+  Bp = &BacktracePoints[k];
+  State->CycleCounter = Bp->CycleCounter;
+  memcpy (State->Erasable, Bp->Erasable, sizeof (State->Erasable));
+  memcpy (State->InputChannel, Bp->InputChannel, sizeof (State->InputChannel));
+  memcpy (State->InterruptRequests, Bp->InterruptRequests, 
+  	  sizeof (State->InterruptRequests));
+  State->OutputChannel7 = Bp->OutputChannel7;
+  memcpy (State->OutputChannel10, Bp->OutputChannel10, sizeof (State->OutputChannel10));
+  State->IndexValue = Bp->IndexValue;
+  State->ExtraCode = Bp->ExtraCode;
+  State->AllowInterrupt = Bp->AllowInterrupt;
+  //State->RegA16 = Bp->RegA16;
+  //State->RegQ16 = Bp->RegQ16;
+  State->InIsr = Bp->InIsr;
+  State->SubstituteInstruction = Bp->SubstituteInstruction;
+  return (0);
+} 
+
+// Displays the backtrace buffer.
+
+void
+BacktraceDisplay (agc_t *State)
+{
+  int i, j, k, CurrentZ, Value, Bank;
+  BacktracePoint_t *Bp;
+  if (BacktraceInitialized == -1)
+    {
+      printf ("Not enough memory for backtrace buffer.\n");
+      return;
+    }
+  if (BacktraceCount == 0)
+    {
+      printf ("The backtrace table is empty.\n");
+      return;
+    }
+  for (i = j = 0; i < BacktraceCount; i++)
+    {
+      k = BacktraceNextAdd - i - 1;
+      if (k < 0)
+        k += BacktraceCount;
+      Bp = &BacktracePoints[k];
+      printf ("%2d: ", i);
+      CurrentZ = Bp->Erasable[0][RegZ] & 07777;
+      // Print the address.
+      if (CurrentZ < 01400)
+	{
+	  printf ("Era%04o", CurrentZ);
+	  Bank = CurrentZ / 0400;
+	  Value = Bp->Erasable[Bank][CurrentZ & 0377];
+	}
+      else if (CurrentZ >= 04000)
+	{
+	  printf ("Fix%04o", CurrentZ);
+	  Bank = 2 + (CurrentZ - 04000) / 02000;
+	  Value = State->Fixed[Bank][CurrentZ & 01777];
+	}
+      else if (CurrentZ < 02000)
+	{
+	  Bank = 7 & Bp->Erasable[0][RegBB];
+	  printf ("E%o,%04o", Bank, 01400 + (CurrentZ & 0377));
+	  Value = Bp->Erasable[Bank][CurrentZ & 0377];
+	}
+      else
+	{
+	  Bank = 037 & Bp->Erasable[0][RegBB] >> 10;
+	  if (Bank >= 030 && (Bp->OutputChannel7 & 0100))
+	    Bank += 010;
+	  printf ("%02o,%04o", Bank, 02000 + (CurrentZ & 01777));
+	  Value = State->Fixed[Bank][CurrentZ & 01777];
+	}
+      if (Bp->DueToInterrupt)
+        printf (" Int%02o   ", Bp->DueToInterrupt);
+      else
+        printf (" %05o   ", Value & 077777);
+      // Next ...
+      j++;
+      if (j >= BACKTRACES_PER_LINE)
+        {
+	  j = 0;
+	  printf ("\n");
+	}
+    }
+  if (j != 0)
+    printf ("\n");	
+}
+
+

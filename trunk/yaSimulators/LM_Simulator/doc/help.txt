@@ -1,0 +1,109 @@
+LM-Simulator Help
+=================
+
+The program "LM_Simulator" simulates the Lunar Module of the NASA Apollo Moon landing project.
+It is an add-on to Ron Burkey's "yaAGC" which is a complete emulation of the original Apollo Guidance Computer
+running the real AGC Software developed by the MIT.
+In simple words, you have the computing capacity of the Apollo Program at your fingertips which enables you to
+simulate real world Lunar Module flight states by typing in the same AGC commands as the Apollo Astronauts did.
+
+Please refer to Ron Burkey's web page (http://www.ibiblio.org/apollo/) to get an extensive description of the
+Apollo Guidance Computer itself as well as to download the whole source code package ready for Linux, MS Windows
+and MAC or just the Windows binaries for the stand-alone version of the LM-Simulator.
+
+
+
+The following Systems are part of the Simulation:
+=================================================
+- yaAGC as Apollo Guidance Computer Emulator
+- The whole Lunar Module Apollo Guidance Software
+- IMU (Inertial Measurement Unit)
+- FDAI (Flight Director Attitude Indicator) inluding:
+     + Yaw, Pitch and Roll Rate Indicators
+     + Error Needles to display data under the subsequent modes:
+         1.) DSKY: V61E -> DISPLAY DAP FOLLOWING ATTITUDE ERRORS
+         2.) DSKY: V62E -> DISPLAY TOTAL ATTITUDE ERRORS WITH RESPECT TO NOUN 22
+         3.) DSKY: V60E -> DISPLAY VEHICLE ATTITUDE RATES ON FDAI ERROR NEEDLES
+- All Crew Switches connected to the AGC
+- The Rotational (RHC) and Translational (THC) Hand Controller
+- All binary AGC system inputs by providing check-buttons to change their status (e.g. Overtemperature)
+- All binary AGC outputs by interpreting the different BIT combinations and presenting the status in a readable form
+- A physical model to simulate the LM behavior in space.
+     + The Calculation of the Moment of Inertia bases on the same hyperbola equation as used by the AGC state estimator
+- The four quad RCS thruster system in conjunction with the above mentioned physical model
+- Descent and Ascent Engine (Veryfied by Tsiolkovsky's Rocket Equation)
+- Stage Separation
+- A Bit-Monitor to trace the AGC inputs and outputs
+
+
+
+Architecture Overview:
+======================
+LM-Simulator connects via TCP/IP directly to "yaAGC". To use a joystick (RHC/ACA), which is strongly 
+recommended, Ron Burkey's program "yaACA" has to be started (not available for the stand-alone version).
+
+-----------------              ---------------              -----------
+|               |    TCP/IP    |             |    TCP/IP    |         |
+| LM Simulator  | <----------> |    yaAGC    | <----------> |  yaACA  |
+|               |              |             |              |         |
+-----------------              ---------------              -----------
+
+
+
+Configuration:
+==============
+If you start LM-Simulator without any parameter (wish lm_simulator.tcl) then it assumes a config file 
+within the same directory called "lm_simulator.ini". If that config file is not available then 
+LM-Simulator starts with internally defined standard values based on the LM-7 mission.
+
+
+Command Line Configuration:
+---------------------------
+--port=PortNum          Changes the port number (by default, 19801) used to connect to yaAGC.  
+                        This can also be changed in the configuration file.
+
+--cfg=IniFilename       This option changes the name or directory of the configuration-file used.
+                        By default, the file is "lm_simulator.ini", located in the installation directory.
+
+
+
+Program-Menu Structure:
+=======================
+The program is divided into several sub-windows which can be called through the "Systems" menu:
+
+Menu:                                Function:
+-----------------------------------------------------------------------------------------------
+Edit -> Clear Message Window         Clears the Log Window
+Edit -> Exit                         Leaves the Program
+
+Systems -> DSKY Lite                 Display/Keyboard interface to the AGC
+Systems -> AGC Outputs               Monitoring and Correlating of the AGC Binary Outputs     
+Systems -> AGC LM System Input       Simulation of all binary AGC input values
+Systems -> AGC Crew Inputs           Crew switches, buttons, RHC/ACA, THC connected to the AGC
+Systems -> FDAI / IMU                Flight Director Attitude Indicator which shows the
+                                     LM attitude in relation to the Inertial Measurement Unit
+Systems -> Simulation Monitor &      Monitor simulation parameter like thrust and amount of
+           Control                   propellant and control the Descent- and Ascent-Engine 
+                                     as well as the stage separation.
+
+Info -> Help                         The on-hand document
+Info -> Tutorial                     Explanation of some procedures like IMU initialization
+Info -> Verbs & Nouns                A list of the available verbs & nouns to use the AGC
+Info -> Alarm Codes                  An overview of AGC alarm codes
+Info -> About                        Author, Version etc.
+Info -> License                      The license model of LM-Simulator
+
+
+
+How to run LM Simulator in a Linux and Windows environment?
+===========================================================
+In a LINUX environment you need to have TCL/TK installed because LM Simulator has been written by using that
+interpreter language.
+Just do the following to start the application:
+- Start the Apollo Guidance Computer Emulator: yaAGC
+- As an option start the Rotational Hand Controller Interface for PC Joysticks: yaACA
+- Finally start the LM-Simulator itself: wish lm_simulator.tcl
+If you want to use the application within an MS Windows operating system then you can download a stand-alone
+version which can be executed by a simple double click on lm_simulator.exe
+
+

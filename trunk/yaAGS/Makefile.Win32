@@ -1,0 +1,46 @@
+# Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+# 
+# This file is part of yaAGC.
+#
+# yaAGC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# yaAGC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with yaAGC; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# Filename:	Makefile.Win32
+# Purpose:	Makefile for the AGS (AEA) simulation,
+# Contact:	Ron Burkey <info@sandroid.org>
+# Reference:	http://www.ibiblio.org/apollo/yaAGS.html
+# Mods:		2005-02-13 RSB	Adapted from yaAGC Win32 Makefile
+#		2005-04-30 RSB	Added CFLAGS
+#		2005-06-18 RSB	Got working.
+#		2006-08-06 RSB	Added regex.o.
+#		2005-08-14 RSB	Compensated for funky naming rules now in the
+#				pthreads library.
+
+yaAGS.exe:	mainAGS.o ../yaAGC/nbfgets.o ../yaAGC/symbol_table.o \
+		../yaAGC/regex.o libyaAGS.a
+	gcc ${CFLAGS} -o $@ $^ -L. -L../yaAGC -lpthreadAGC -lkernel32 -lyaAGC -lyaAGS -lwsock32
+
+libyaAGS.a: aea_engine_init.o aea_engine.o DebuggerHookAGS.o SocketAPI_AGS.o
+	ar -rc $@ $^
+	ranlib $@
+
+clean:
+	-rm yaAGS.exe libyaAGS.a *.o
+
+install:	yaAGS.exe
+	cp -a yaAGS.exe /mingw/bin/yaAGS.exe
+
+%.o:	%.c aea_engine.h
+	gcc ${CFLAGS} "-DNVER=${NVER}" -g -O0 -c -I../yaAGC -o $@ $<
+	
