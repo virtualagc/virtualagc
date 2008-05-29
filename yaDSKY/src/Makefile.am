@@ -14,7 +14,8 @@ yadsky_SOURCES = \
 	support.c support.h \
 	interface.c interface.h \
 	callbacks.c callbacks.h \
-	hCreateMainWindow.c
+	hCreateMainWindow.c \
+	../../yaAGS/Backtrace.c
 
 yadsky_LDADD = @PACKAGE_LIBS@ -L../../yaAGC -lyaAGC
 
