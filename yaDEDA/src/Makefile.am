@@ -14,7 +14,8 @@ yaDEDA_SOURCES = \
 	support.c support.h \
 	interface.c interface.h \
 	callbacks.c callbacks.h \
-	hCreateMainWindow.c
+	hCreateMainWindow.c \
+	../../yaAGS/Backtrace.c
 
 yaDEDA_LDADD = @PACKAGE_LIBS@ $(INTLLIBS) -L../../yaAGC -lyaAGC
 
