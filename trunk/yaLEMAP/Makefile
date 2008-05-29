@@ -37,20 +37,20 @@ endif	# MSYSTEM
 
 .PHONY:	default
 default: binLEMAP${SUFFIX} SampleCodeAGS.lst \
-	../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab \
-	../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab
+	../yaCode/FP8/FP8.lst ../yaCode/FP8/FP8.bin ../yaCode/FP8/FP8.symtab \
+	../yaCode/FP6/FP6.lst ../yaCode/FP6/FP6.bin ../yaCode/FP6/FP6.symtab
 
-../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab: yaLEMAP${SUFFIX} ../FP8/FP8.s
-	./yaLEMAP ../FP8/FP8.s
-	mv yaLEMAP.bin ../FP8/FP8.bin
-	mv yaLEMAP.symtab ../FP8/FP8.symtab
-	mv yaLEMAP.lst ../FP8/FP8.lst
+../yaCode/FP8/FP8.lst ../yaCode/FP8/FP8.bin ../yaCode/FP8/FP8.symtab: yaLEMAP${SUFFIX} ../yaCode/FP8/FP8.s
+	./yaLEMAP ../yaCode/FP8/FP8.s
+	mv yaLEMAP.bin ../yaCode/FP8/FP8.bin
+	mv yaLEMAP.symtab ../yaCode/FP8/FP8.symtab
+	mv yaLEMAP.lst ../yaCode/FP8/FP8.lst
 
-../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP${SUFFIX} ../FP6/FP6.s
-	./yaLEMAP ../FP6/FP6.s
-	mv yaLEMAP.bin ../FP6/FP6.bin
-	mv yaLEMAP.symtab ../FP6/FP6.symtab
-	mv yaLEMAP.lst ../FP6/FP6.lst
+../yaCode/FP6/FP6.lst ../yaCode/FP6/FP6.bin ../yaCode/FP6/FP6.symtab: yaLEMAP${SUFFIX} ../yaCode/FP6/FP6.s
+	./yaLEMAP ../yaCode/FP6/FP6.s
+	mv yaLEMAP.bin ../yaCode/FP6/FP6.bin
+	mv yaLEMAP.symtab ../yaCode/FP6/FP6.symtab
+	mv yaLEMAP.lst ../yaCode/FP6/FP6.lst
 
 SampleCodeAGS.lst: yaLEMAP${SUFFIX} SampleCodeAGS.s
 	@echo \*\*\* The following operation should result in 13 errors and 3 warnings. \*\*\*
@@ -69,15 +69,15 @@ yaLEMAP${SUFFIX}: yaLEMAP.c ../yaYUL/SymbolTable.o
 clean:
 	-rm binLEMAP${SUFFIX} yaLEMAP${SUFFIX} *.o *~ yaLEMAP.binsource \
 		binLEMAP.bin SampleCodeAGS.bin SampleCodeAGS.lst \
-		../FP8/FP8.bin ../FP8/FP8.lst ../FP8/*.symtab \
-		../FP6/FP6.bin ../FP6/FP6.lst ../FP6/*.symtab
+		../yaCode/FP8/FP8.bin ../yaCode/FP8/FP8.lst ../yaCode/FP8/*.symtab \
+		../yaCode/FP6/FP6.bin ../yaCode/FP6/FP6.lst ../yaCode/FP6/*.symtab
 
 .PHONY:	install
 install: default
 	cp  binLEMAP${SUFFIX} yaLEMAP${SUFFIX} ${PREFIX}/bin
 	-chmod ugo+x ${PREFIX}/bin/binLEMAP${SUFFIX} ${PREFIX}/bin/yaLEMAP${SUFFIX}
-	mv ../FP6/FP6.bin ../FP6/FP6.symtab ${PREFIX}/bin
-	mv ../FP8/FP8.bin ../FP8/FP8.symtab ${PREFIX}/bin
+	mv ../yaCode/FP6/FP6.bin ../yaCode/FP6/FP6.symtab ${PREFIX}/bin
+	mv ../yaCode/FP8/FP8.bin ../yaCode/FP8/FP8.symtab ${PREFIX}/bin
 	
 
 %.o:	%.c ../yaYUL/yaYUL.h
