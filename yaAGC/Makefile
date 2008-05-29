@@ -74,7 +74,7 @@ install:	yaAGC
 	cp yaAGC ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
-CheckDec.o: ../Luminary131/CheckDec.c
+CheckDec.o: ../yaCode/Luminary131/CheckDec.c
 	gcc ${CFLAGS} -ggdb -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
@@ -97,7 +97,7 @@ GREPPED:=$(shell ${ECC} -print-search-dirs | grep install)
 LIBDIR:=$(subst install:,,$(GREPPED))m5200
 
 EmbeddedAGC68.elf: crt.o68 EmbeddedDemo.o68 NullAPI.o68 random.o68 agc_engine.o68 
-	${EOBJCOPY} --add-section .CoreRope=../Luminary131/Luminary131.bin \
+	${EOBJCOPY} --add-section .CoreRope=../yaCode/Luminary131/Luminary131.bin \
 		--set-section-flags .CoreRope=contents,alloc,load,data \
 		agc_engine.o68					
 	${ELD} -T EmbeddedLinker.script -o $@ $^ -L${LIBDIR} -lgcc
