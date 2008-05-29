@@ -37,7 +37,7 @@
 #				exiting from an interrupt-service routine.
 
 # 2007-03-05 RSB
-CFLAGS += -DALLOW_BSUB -DGDBMI
+CFLAGS +=-DALLOW_BSUB
 
 default:	WinAGC yaAGC.exe
 
@@ -56,5 +56,5 @@ install:	yaAGC.exe WinAGC.exe
 	cp -a yaAGC.exe WinAGC.exe /mingw/bin
 
 %.o:	%.c agc_engine.h
-	gcc ${CFLAGS} "-DNVER=${NVER}" -g -O0 -c -o $@ $<
+	gcc ${CFLAGS} "-DNVER=${NVER}" -DGDBMI -g -O0 -c -o $@ $<
 	
