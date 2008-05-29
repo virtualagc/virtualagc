@@ -57,10 +57,10 @@ LIBS += -L/sw/lib -lreadline
 LIBS += -L/usr/lib/curses -lcurses
 endif	# NOREADLINE
 
-yaAGC:	main.o libyaAGC.a CheckDec.o nbfgets.o symbol_table.o
+yaAGC:	main.o libyaAGC.a CheckDec.o nbfgets.o symbol_table.o agc_gdbmi.o agc_help.o
 	gcc ${CFLAGS} -o yaAGC $^ -L. ${LIBS} -lpthread -lyaAGC -lm
 
-libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o agc_gdbmi.o agc_help.o \
+libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o \
 	rfopen.o Backtrace.o SocketAPI.o DecodeDigitalDownlink.o
 	ar -rc $@ $^
 	ranlib $@
