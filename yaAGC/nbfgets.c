@@ -85,6 +85,7 @@ static int rl_gets_initialized = 0;
 
 // The current prompt for readline
 char nbPrompt[16];
+extern char agcPrompt[16];
 
 // Read a string, and return a pointer to it using the GNU
 // readline facility. Returns NULL on EOF. Taken from the
@@ -100,7 +101,13 @@ rl_gets (void)
     {
       rl_readline_name = "yaAGC";
       rl_completion_entry_function = source_generator;
+#ifdef GDBMI
+      strcpy (nbPrompt, "(agc) ");
+      strcpy (agcPrompt, nbPrompt);
+#else
       strcpy (nbPrompt, "> ");
+#endif
+
       rl_gets_initialized = 1;
     }
 
@@ -217,7 +224,7 @@ nbfgets (char *Buffer, int Length)
     }
   // Has the other thread managed to fetch a string yet?
   if (!nbfgetsReady || Length < 1)
-    return (NULL);		// No string ready yet.
+    return (NULL);// No string ready yet.
   Length--;
   strncpy (Buffer, nbfgetsBuffer, Length);
   Buffer[Length] = 0;		// Make sure nul-terminated.

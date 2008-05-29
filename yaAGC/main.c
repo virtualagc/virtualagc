@@ -157,14 +157,20 @@
 				fast, the CPU utilization shot up to the maximum,
 				and LM_Simulator failed.  The 20060110 dev snapshot
 				worked properly, for reasons I fail to understand.
+		02/03/08 OH	Start adding GDB/MI interface
 */
 
 //#define VERSION(x) #x
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 #include "yaAGC.h"
 #include "agc_engine.h"
+#ifdef GDBMI
+#include "agc_gdbmi.h"
+#include "agc_help.h"
+#endif
 #include <string.h>
 #include <unistd.h>
 #ifdef WIN32
@@ -223,6 +229,15 @@ void nbfsgets_ready (const char *prompt);
 // Some buffers for strings.
 char s[129], sraw[129], s1[129], s2[129], s3[129], s4[129], s5[129];
 
+/* Prompt String
+ * Allow the prompt to be changed in gdb/mi mode
+ */
+#ifdef GDBMI
+char agcPrompt[16]="(agc) ";
+#else
+char* agcPrompt="> ";
+#endif
+
 // Time between checks for --debug keystrokes.
 #define KEYSTROKE_CHECK (sysconf (_SC_CLK_TCK) / 4)
 
@@ -231,6 +246,8 @@ agc_t State;
 #define MAX_BREAKPOINTS 256
 #define PATTERN_SIZE 017777777
 #define PAT "%08o"
+
+#ifndef GDBMI
 typedef struct
 {
   int Address12;		// A 12-bit address.
@@ -255,8 +272,15 @@ typedef struct
   SymbolLine_t *Line;
 }
 Breakpoint_t;
+#endif
+
+#ifndef GDBMI
 static Breakpoint_t Breakpoints[MAX_BREAKPOINTS];
 static int NumBreakpoints = 0;
+#else
+Breakpoint_t Breakpoints[MAX_BREAKPOINTS];
+int NumBreakpoints = 0;
+#endif
 
 // JMS: Variables pertaining to the symbol table loaded
 int HaveSymbols = 0;                        // 1 if we have a symbol table
@@ -264,6 +288,11 @@ char SymbolFile[MAX_FILE_LENGTH + 1];       // The name of the symbol table file
 
 // Holds whether we are in debug mode
 int DebugMode = 0;
+#ifdef GDBMI
+int FullNameMode = 0;
+int QuietMode = 0;
+int RunState = 1;
+#endif
 
 //-----------------------------------------------------------------------------------
 #ifdef WIN32
@@ -449,7 +478,7 @@ ShowAddressContents (agc_t *State)
 //-----------------------------------------------------------------------------------
 // Displays a disassembly of the current address.
 
-static void
+void
 Disassemble (agc_t * State)
 {
   // Note that the following also sets all of the global variables like
@@ -667,7 +696,7 @@ Disassemble (agc_t * State)
 //      DUMP %o                 1 word of unswitched erasable or fixed-fixed.
 //      DUMP C%o                1 word from i/o channels.
 //      DUMP                    Repeats last dump.
-
+#ifndef GDBMI
 static void
 DumpMemory (agc_t * State, char *s)
 {
@@ -907,10 +936,12 @@ DumpMemory (agc_t * State, char *s)
       printf ("\tI123\t\tI/O channel, 000-777.\n");
     }
 }
+#endif /* Not GDBMI DumpMemory*/
 
 //-----------------------------------------------------------------------------------
 // Add a breakpoint.
 
+#ifndef GDBMI
 static void
 AddBreakpoint (agc_t * State, char *s)
 {
@@ -1074,10 +1105,11 @@ AddBreakpoint (agc_t * State, char *s)
   else
     printf ("The maximum number of breakpoints is already defined.\n");
 }
+#endif /* END NOT GDBMI */ 
 
 //-----------------------------------------------------------------------------------
 // Add a watchpoint.
-
+#ifndef GDBMI
 static char AW_s[257];
 
 static void
@@ -1269,11 +1301,14 @@ AddWatchpoint (agc_t * State, char *s)
   else
     printf ("The maximum number of watchpoints is already defined.\n");
 }
+#endif /* END NOT GDBMI */
 
 //----------------------------------------------------------------------------------------------
 // Delete a breakpoint
 
-static void
+#ifndef GDBMI
+static 
+void
 DeleteBreakpoint (agc_t * State, char *s)
 {
   int j, k, i, vRegBB;
@@ -1421,10 +1456,12 @@ DeleteBreakpoint (agc_t * State, char *s)
 	i--;
       }
 }
-
+#endif /* END NOT GDBMI BUILD */
 //----------------------------------------------------------------------------------------------
 // Change the value stored at a memory location or i/o channel.
 
+
+#ifndef GDBMI /* Replaced by GDBMI SET VARIABLE */ 
 static void
 EditMemory (agc_t * State, char *s)
 {
@@ -1531,6 +1568,7 @@ EditMemory (agc_t * State, char *s)
       printf ("\tI123\t\tI/O channel 000-777 octal.\n");
     }
 }
+#endif
 
 //-----------------------------------------------------------------------------------
 // My substitute for fgets, for use when stdin is unblocked.
@@ -1596,7 +1634,12 @@ rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
 }
 
 //-----------------------------------------------------------------------------------
-
+#ifdef GDBMI
+static void catch_sigint(int sig);
+int BreakPending = 0;
+char FuncName[10];
+#endif
+  
 int
 main (int argc, char *argv[])
 {
@@ -1625,9 +1668,14 @@ main (int argc, char *argv[])
   NextKeycheck = times (&DummyTime);
   DumpInterval = 10 * sysconf (_SC_CLK_TCK);
 
+#ifndef GDBMI
   printf ("Apollo Guidance Computer simulation, ver. " NVER ", built "
-	  __DATE__ " " __TIME__ "\n" "(c)2003-2005,2007 Ronald S. Burkey.\n");
+	  __DATE__ " " __TIME__ "\n" "Copyright (C) 2003-2005,2007 Ronald S. Burkey.\n"
+	  "yaAGC is free software, covered by the GNU General Public License, and you are\n"
+	  "welcome to change it and/or distribute copies of it under certain conditions.\n"
+);
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for additional information.\n");
+#endif
 
   // Parse the command-line parameters.
   for (i = 1; i < argc; i++)
@@ -1662,10 +1710,23 @@ main (int argc, char *argv[])
 	      break;
 	    }
 	}
+#ifdef GDBMI
+      else if (!strcmp (argv[i], "--fullname"))
+        {
+           FullNameMode = 1; /* Must use for Emacs debugger and KDbg */
+        }
+      else if (!strcmp (argv[i], "--quiet"))
+        {
+           QuietMode = 1; /* Must use for Codeblocks */
+        }
+#endif
       else if (!strcmp (argv[i], "--debug"))
 	{
 	  DebugMode = 1;
 	  SingleStepCounter = 0;
+#ifdef GDBMI
+          RunState = 0;
+#endif
 	}
       else if (!strncmp (argv[i], "--symtab=", 9))
 	{
@@ -1698,11 +1759,16 @@ main (int argc, char *argv[])
 	      "              configuration files is used only for --debug-dsky\n"
 	      "              mode.  It would typically be the same configuration\n"
 	      "              file as used for yaDSKY.\n"
+#ifdef GDBMI
+	      "--debug       Use the GDB/MI debug interface to enable regular\n"
+	      "              gdb cli interaction as well as gdb-front-ends.\n"
+#else
 	      "--debug       Halt before executing first instruction and enter\n"
 	      "              Debugging mode.  The debugging mode is very primitive,\n"
 	      "              but does allow you to set breakpoints in the AGC code,\n"
 	      "              single-step AGC programs, examine or modify memory,\n"
 	      "              and so forth.\n"
+#endif
 	      "--symtab=file The name of the symbol table file generated by yaYUL.\n"
 	      "              If supplied, various debugging commands can take a\n"
 	      "              symbol name as its argument.\n"
@@ -1750,6 +1816,24 @@ main (int argc, char *argv[])
 	      "\n", SocketInterlaceReload, SocketInterlaceReload);
       return (1);
     }
+
+#ifdef GDBMI
+    if (!QuietMode) gdbmiHandleShowVersion();
+
+    /* Register the SIGINT to be handled by AGC Debugger */
+    signal(SIGINT, catch_sigint);
+
+    /* Debugging without symbols is strange */
+    if (DebugMode == 1 && HaveSymbols != 1)
+    {
+       char* p;
+       strcpy(SymbolFile,RomImage);
+       p = SymbolFile + strlen(RomImage)-3;
+       strcpy(p,"symtab");
+       /* Needs a file exists check */
+       HaveSymbols = 1;
+    }
+#endif
 
   // Initialize the simulation.
   if (!DebugDsky)
@@ -1894,7 +1978,9 @@ main (int argc, char *argv[])
 	      if (SingleStepCounter == 0)
 		{
 		  Break = 1;
+#ifndef GDBMI
 		  printf ("Stepped.\n");
+#endif
 		}
 	      else
 		{
@@ -1911,7 +1997,11 @@ main (int argc, char *argv[])
 		      if (SingleStepCounter > 0)
 			SingleStepCounter--;
 		      for (Break = i = 0; i < NumBreakpoints; i++)
-			if (Breakpoints[i].WatchBreak == 2)
+			if (Breakpoints[i].WatchBreak == 2
+#ifdef GDBMI
+                            && gdbmiCheckBreakpoint(&State,&Breakpoints[i])
+#endif
+                           )
 			  {
 			    // Pattern!
 			    if (Breakpoints[i].Address12 ==
@@ -1920,11 +2010,18 @@ main (int argc, char *argv[])
 				printf ("Hit pattern, Value=" PAT " Mask=" PAT
 					".\n", Breakpoints[i].Address12,
 					Breakpoints[i].vRegBB);
-				Break = 1;
+#ifdef GDBMI
+                                gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
+#endif				
+                                Break = 1;
 				break;
 			      }
 			  }
-			else if (Breakpoints[i].WatchBreak == 0)
+			else if (Breakpoints[i].WatchBreak == 0
+#ifdef GDBMI
+                                 && gdbmiCheckBreakpoint(&State,&Breakpoints[i])
+#endif
+                                )
 			  {
 			    int Address12, vRegBB;
 			    int CurrentFB, vCurrentFB;
@@ -1934,21 +2031,37 @@ main (int argc, char *argv[])
 
 			    if (Address12 < 01400)
 			      {
+#ifndef GDBMI
 				if (Breakpoints[i].Symbol != NULL)
 				  printf ("Hit breakpoint %s at %05o.\n",
 					  Breakpoints[i].Symbol->Name, Address12);
 				else
 				  printf ("Hit breakpoint at %05o.\n", Address12);
-				Break = 1;
+#else
+              printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
+              			  gdbmiConstructFuncName(&Breakpoints[i].Line->CodeAddress,FuncName),
+                       Breakpoints[i].Line->FileName,
+                       Breakpoints[i].Line->LineNumber);
+              gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
+#endif
+                                Break = 1;
 				break;
 			      }
 			    if (Address12 >= 04000)
 			      {
+#ifndef GDBMI
 				if (Breakpoints[i].Symbol != NULL)
 				  printf ("Hit breakpoint %s at %05o.\n",
 					  Breakpoints[i].Symbol->Name, Address12);
 				else
 				  printf ("Hit breakpoint at %05o.\n", Address12);
+#else
+              printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
+              			  gdbmiConstructFuncName(&Breakpoints[i].Line->CodeAddress,FuncName),
+                       Breakpoints[i].Line->FileName,
+                       Breakpoints[i].Line->LineNumber);
+              gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
+#endif
 				Break = 1;
 				break;
 			      }
@@ -1967,7 +2080,9 @@ main (int argc, char *argv[])
 				  printf ("Hit breakpoint at E%o,%05o.\n",
 					  CurrentBB & 7, Address12);
 
-
+#ifdef GDBMI
+                                gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
+#endif
 				Break = 1;
 				break;
 			      }
@@ -1991,12 +2106,17 @@ main (int argc, char *argv[])
 				else
 				  printf ("Hit breakpoint at %02o,%05o.\n",
 					  Bank, Address12);
-
+#ifdef GDBMI
+                                gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
+#endif
 				Break = 1;
 				break;
 			      }
 			  }
 			else if ((Breakpoints[i].WatchBreak == 1 &&
+#ifdef GDBMI
+                                  gdbmiCheckBreakpoint(&State,&Breakpoints[i]) &&
+#endif
 				  Breakpoints[i].WatchValue != GetWatch (&State,
 									 &Breakpoints
 									 [i])) ||
@@ -2021,7 +2141,10 @@ main (int argc, char *argv[])
 				if (Breakpoints[i].WatchBreak == 1)
 				  Breakpoints[i].WatchValue =
 				    GetWatch (&State, &Breakpoints[i]);
-				Break = 1;
+#ifdef GDBMI
+                                gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
+#endif
+                                Break = 1;
 				break;
 			      }
 			    vRegBB = Breakpoints[i].vRegBB;
@@ -2041,12 +2164,18 @@ main (int argc, char *argv[])
 				if (Breakpoints[i].WatchBreak == 1)
 				  Breakpoints[i].WatchValue =
 				    GetWatch (&State, &Breakpoints[i]);
-				Break = 1;
+#ifdef GDBMI
+                                gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
+#endif				
+                                Break = 1;
 				break;
 			      }
 			 }
 			else if ((Breakpoints[i].WatchBreak == 4 &&
-				  Breakpoints[i].WatchValue != GetWatch (&State,
+#ifdef GDBMI
+                                  gdbmiCheckBreakpoint(&State,&Breakpoints[i]) &&
+#endif
+                                  Breakpoints[i].WatchValue != GetWatch (&State,
 									 &Breakpoints
 									 [i])))
 			  {
@@ -2088,6 +2217,13 @@ main (int argc, char *argv[])
 		      State.Fixed[iChangeFixed][jChangeFixed]);
 	    }
 #endif
+#ifdef GDBMI
+          if (BreakPending)
+          {
+             BreakPending = 0;
+             Break = 1;
+          }
+#endif
 	  if (DebugMode && !Break)
 	    {
 	      if (RealTime >= NextKeycheck)
@@ -2105,6 +2241,7 @@ main (int argc, char *argv[])
 	      extern int DebuggerInterruptMasks[11];
 	      char *ss, OverflowChar, OverflowCharQ;
 	      SingleStepCounter = -1;
+#ifndef GDBMI
 	      for (i = j = 0; i < NumServers; i++)
 		if (Clients[i].Socket != -1)
 		  j++;
@@ -2182,6 +2319,7 @@ main (int argc, char *argv[])
 		 RealTime - RealTimeOffset, sysconf (_SC_CLK_TCK));
 #endif
 	      printf ("\n");
+#endif /* End GDBMI */
 
 	      // JMS: 07.28
 	      // If we have the symbol table, then print out the actual source,
@@ -2200,13 +2338,29 @@ main (int argc, char *argv[])
 		  // There are several ways this can fail, and if either does we
 		  // just want to disasemble: if we didn't find the line in the
 		  // table or if ListSource() fails.
+#ifndef GDBMI
 		  if (Line == NULL || ListSourceLine (Line->FileName, Line->LineNumber,
 						      ShowAddressContents (&State)))
+
 		    Disassemble (&State);
+#else
+                  if (Line)
+                  {
+                     LoadSourceLine(Line->FileName, Line->LineNumber);
+                     //if (RunState)
+                     {
+                        if (FullNameMode) gdbmiPrintFullNameContents(Line);
+                        else Disassemble (&State);
+                     }
+                        
+                     //printf("  %s:%d:%d:beg:0x%04x\n",
+                       //  Line->FileName, Line->LineNumber,Line->LineNumber,
+                        // gdbmiLinearFixedAddr(CurrentZ,FB,SBB));
+                  }
+#endif
 		}
 	      else
 		  Disassemble (&State);
-
 	      while (1)
 		{
 		  if (DebugMode && NumFromFiles == 1)
@@ -2214,10 +2368,11 @@ main (int argc, char *argv[])
 		      // JMS: Tell the thread which is actually reading the input from
 		      // stdin to actually go ahead and read. At this point, we know that
 		      // the last debugging command has been processed.
-		      nbfgets_ready("> ");
+		      nbfgets_ready(agcPrompt);
 #ifndef USE_READLINE
-		      printf ("> ");
+		      printf ("%s",agcPrompt);
 #endif  // USE_READLINE
+	              fflush(stdout);
 		    }
 		  s[sizeof (s) - 1] = 0;
 		  rfgets (&State, s, sizeof (s) - 1, FromFiles[NumFromFiles - 1]);
@@ -2251,6 +2406,9 @@ main (int argc, char *argv[])
 		  //for (ss = sraw; *ss; ss++)
 		  //  if (*ss == '\n')
 		  //    *ss = 0;
+#ifdef GDBMI
+		  if (gdbmiHelp(s) > 0) continue;
+#else
 		  if (!strcmp (s, "HELP"))
 		    {
 		      printf ("\n"
@@ -2295,6 +2453,7 @@ main (int argc, char *argv[])
 			      "\thelp whatis" "\n");
 		      continue;
 		    }
+#endif /* GDBMI HELP */
 		  else if (!strcmp (s, "HELP BACKTRACE"))
 		    {
 		      printf ("\n"
@@ -2667,6 +2826,9 @@ main (int argc, char *argv[])
 		  else if (!strcmp (s, "STEP") || !strcmp (s, "NEXT") ||
 			   !strcmp (s, "S") || !strcmp (s, "N"))
 		    {
+#ifdef GDBMI
+                      RunState = 1;
+#endif
 		      SingleStepCounter = 0;
 		      break;
 		    }
@@ -2679,11 +2841,13 @@ main (int argc, char *argv[])
 		      extern void CheckDec (char *s);
 		      CheckDec (&s[6]);
 		    }
+#ifndef GDBMI
 		  else if (!strncmp (s, "DUMP", 4))
 		    DumpMemory (&State, s);
-		  else if (!strncmp (s, "BREAK ", 6))
+		  else if (!strncmp (s, "BREAK ", 6)) /* gdbmi: BREAK */
 		    AddBreakpoint (&State, s);
-		  else if (1 == sscanf (s, "PRINT %s", SymbolName))
+
+		  else if (1 == sscanf (s, "PRINT %s", SymbolName)) /* gdbmi: PRINT */
 		    {
 		      // JMS: Attempt to resolve the symbol and pretend it is
 		      // a DUMP command
@@ -2697,6 +2861,7 @@ main (int argc, char *argv[])
 		      else
 			printf("Symbol not found.\n");
 		    }
+#endif
 		  // JMS: 07.28
 		  else if (1 == sscanf (s, "WHATIS %s", SymbolName))
 		    WhatIsSymbol (SymbolName, ARCH_AGC);
@@ -2751,12 +2916,14 @@ main (int argc, char *argv[])
 			    printf("Invalid symbol name.\n");
 			}
 		    }
-		  else if (!strcmp (s, "LIST"))
+#ifndef GDBMI
+		  else if (!strcmp (s, "LIST")) /* gdbmi: LIST */
 		    {
 		      // The case where we just want to list the next several
 		      // lines from the current position
 		      ListSource (NULL, -1);
 		    }
+#endif
 		  // JMS: 07.28 END
 		  else if (!strncmp (s, "SYMBOL-FILE", 11))
 		    {
@@ -2790,8 +2957,11 @@ main (int argc, char *argv[])
 		      else
 			printf ("No symbol table loaded.\n");
 		    }
-		  else if (!strncmp (s, "WATCH ", 6) || !strncmp (s, "VIEW ", 5))
+#ifndef GDBMI
+		  else if (!strncmp (s, "WATCH ", 6) || /* gdbmi: WATCH */
+		  			  !strncmp (s, "VIEW ", 5))
 		    AddWatchpoint (&State, s);
+#endif
 		  else if (2 == sscanf (s, "DELETE%o%o", &i, &j))
 		    {
 		      PatternValue = (i & PATTERN_SIZE);
@@ -2813,8 +2983,10 @@ main (int argc, char *argv[])
 		      if (i != -1)
 			printf ("Pattern not found.\n");
 		    }
-		  else if (!strncmp (s, "DELETE", 6))
+#ifndef GDBMI
+		  else if (!strncmp (s, "DELETE", 6)) /* gdbmi: DELETE */
 		    DeleteBreakpoint (&State, s);
+#endif
 		  else if (2 == sscanf (s, "PATTERN%o%o", &i, &j))
 		    {
 		      PatternValue = (i & PATTERN_SIZE);
@@ -2850,16 +3022,23 @@ main (int argc, char *argv[])
 			    }
 			}
 		    }
-		  else if (!strncmp (s, "EDIT ", 5))
+#ifndef GDBMI  
+		  else if (!strncmp (s, "EDIT ", 5)) /* gdbmi: SET VARIABLE */
 		    {
 		      State.PendFlag = SingleStepCounter = 0;
 		      Break = 1;
 		      EditMemory (&State, s);
 		      goto ShowDisassembly;
 		    }
-		  else if (!strcmp (s, "CONT"))
+#endif
+        else if (!strcmp (s, "CONT") || !strcmp (s, "RUN"))
 		    {
+#ifndef GDBMI
+                      /* GDBMI uses Ctrl-C to break from cont. or run */
 		      nbfgets_ready("");
+#else
+                      RunState = 1;
+#endif
 		      break;
 		    }
 		  else if (!strncmp (s, "COREDUMP ", 9))
@@ -2947,7 +3126,8 @@ main (int argc, char *argv[])
 		      CycleCount = sysconf (_SC_CLK_TCK) * State.CycleCounter;
 		      goto ShowDisassembly;
 		    }
-		  else if (!strcmp (s, "BREAKPOINTS"))
+#ifndef GDBMI
+		  else if (!strcmp (s, "BREAKPOINTS")) /* gdbmi: INFO BREAKPOINTS */
 		    {
 		      if (NumBreakpoints == 0)
 			printf ("No breakpoint(s) are currently set.\n");
@@ -3034,8 +3214,17 @@ main (int argc, char *argv[])
 			  printf ("\n");
 			}
 		    }
+#endif
+
+#ifdef GDBMI
+		  else if (gdbmiHandleCommand(&State, s , sraw ) == 0 ) 
+	            {
+	               //printf ("Undefined command: \"%s\". Try \"help\".\n", sraw );
+	            }
+#else
 		  else
 		    printf ("Illegal command.\n");
+#endif
 		}
 	    }
 	  if (LogFile != NULL)
@@ -3067,6 +3256,16 @@ main (int argc, char *argv[])
 
   return (0);
 }
+
+#ifdef GDBMI
+/* Catch the SIGINT Signal to stop running and return to debug mode */
+static void catch_sigint(int sig)
+{
+   BreakPending = 1; /* Make sure Break only happens when we want it */
+   nbfgets_ready(agcPrompt);
+}
+#endif
+
 
 #if 0
 //----------------------------------------------------------------------------------------------
