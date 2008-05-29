@@ -1,0 +1,60 @@
+# Copyright 2003-2007 Ronald S. Burkey <info@sandroid.org>
+# 
+# This file is part of yaAGC.
+#
+# yaAGC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# yaAGC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with yaAGC; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# Filename:	Makefile.Win32
+# Purpose:	Makefile for the AGC simulation,
+# Mods:		04/05/03 RSB.	Began.
+#		04/21/03 RSB.	Added libyaAGC.a.
+#		06/11/04 RSB	Added CheckDec.c, rfopen.o, backtrace.o
+#				random.o.
+#		07/19/04 RSB	Added the -lkernel32 switch for yaAGC.exe.
+#		08/10/04 RSB	Added threading for yaAGC.exe.
+#		08/18/04 RSB	Accounted for SocketAPI.
+#		04/30/05 RSB	Added CFLAGS
+#		07/12/05 RSB	Added WinAGC.exe
+#		07/28/05 RSB	Added symbol_table.c.  Note that in Win32,
+#				this necessitates also adding GNU regex.
+#		2005-08-14 RSB	Compensated for funky naming rules now in the
+#				pthreads library.
+#		2007-03-05 RSB	Changed the default compiler flags to include
+#				"-DALLOW_BSUB".  This allows yaAGC and friends
+#				to pass instructions in the BSUB register upon
+#				exiting from an interrupt-service routine.
+
+# 2007-03-05 RSB
+CFLAGS += -DALLOW_BSUB
+
+default:	WinAGC yaAGC.exe
+
+yaAGC.exe:	main.o nbfgets.o symbol_table.o regex.o ../Luminary131/CheckDec.c libyaAGC.a
+	gcc ${CFLAGS} -o $@ $^ -L. -lpthreadAGC -lkernel32 -lwsock32 -lyaAGC
+
+libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \
+		Backtrace.o SocketAPI.o DecodeDigitalDownlink.o random.o
+	ar -rc $@ $^
+	ranlib $@
+
+clean:
+	-rm yaAGC.exe libyaAGC.a *.o WinAGC.exe
+
+install:	yaAGC.exe WinAGC.exe
+	cp -a yaAGC.exe WinAGC.exe /mingw/bin
+
+%.o:	%.c agc_engine.h
+	gcc ${CFLAGS} "-DNVER=${NVER}" -g -O0 -c -o $@ $<
+	

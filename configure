@@ -1,0 +1,50 @@
+#!/bin/bash
+# Filename:	configure
+# Purpose:	Configures the system for compiling the Virtual AGC software
+#		suite, allowing optional selection of the installation directory.
+# Mod history:	05/14/04 RSB	Added --help and --prefix command-line options.
+#		05/08/04 RSB	Cleaned up some cache issues.
+#		05/28/05 RSB	Added yaDEDA.
+#		07/16/05 RSB	Oops!  Fixed the removal of cache files.
+#		08/06/05 RSB	Changed the default PREFIX used in MacOS X,
+#				to avoid having to use it as a command-line parameter.
+#
+# We really don't have a GNU configure (except for those programs we've built with
+# GLADE), but there are some things it's helpful to do or find out before running
+# 'make', so we do it with this special script.  Yes, I suppose we really could
+# use a GNU configure script, except that I've never figured out how to make
+# one work under Win32.  Of course, this script doesn't work under Win32, either,
+# so what kind of reasoning is that?  (It's called the "Chewbacca defense".)
+
+if [ "${OSTYPE}" == "darwin" ] 
+then
+  PREFIX=/sw
+else
+  PREFIX=/usr/local
+fi
+PTEMP=$1 
+
+# Check for the --help switch.
+if [ "${PTEMP}" == "--help" ] ; then
+  echo The only option recognized is --prefix=PREFIX, where PREFIX is the
+  echo installation directory.  Executables like yaAGC and yaDSKY will be
+  echo placed in PREFIX/bin, so you need to add PREFIX/bin to your PATH
+  echo variable.  By default, PREFIX is /usr/local.
+  exit
+fi
+
+# Check for the --prefix switch.
+if [ "${PTEMP:0:9}" == "--prefix=" ] ; then
+  PREFIX=${PTEMP:9};
+fi
+echo !!! Using the installation-directory prefix "${PREFIX}". !!!
+echo !!!   Please add ${PREFIX}/bin to your PATH variable.    !!!
+
+if which pkg-config > /dev/null ; then 
+  rm -rf yaDSKY/*cache* yaDSKY/aclocal.m4 ;
+  rm -rf yaDEDA/*cache* yaDEDA/aclocal.m4 ;
+  make autogen PREFIX=${PREFIX} ;
+else
+  echo !!!! You must install pkg-config or pkgconfig before proceeding. !!!! ;
+fi
+

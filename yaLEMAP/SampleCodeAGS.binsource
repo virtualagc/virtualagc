@@ -1,0 +1,198 @@
+# Copyright:	Public domain
+# Filename:	SampleCodeAGS.binsource
+# Purpose:	Used to create a binary of the sample AGS
+#		program found in Appendix A of the "Abort
+#		Electronic Assembly Programming Reference"
+#		by H. L. Stiverson, April 1966.  The file
+#		is ASCII, but can be processed by the utility
+#		program binLEMAP to create the binary.  The 
+#		resulting binary file may be directly used by
+#		the AGS CPU emulator, yaAGS.
+# Contact:	info@sandroid.org
+# Reference:	http://www.ibiblio.org/apollo
+# Mods:		2005-01-10 RSB.	Began.
+#
+# For convenience, the page numbers (within the scanned
+# assembly listing) are given in the comments. I've visually
+# checked this listing quite a few times.  Unfortunately, 
+# although the checksum is correct, that's not information of
+# much use, since the checksum only covers the address range
+# 4000-7776 (octal) and in this program most of the stuff
+# isn't in that range. 
+
+# Page A-26
+org 0
+010000
+001000
+777777
+000001
+777775
+000003
+252525
+525252
+652526
+000000
+
+org 72
+#
+000000
+50 1 0007
+
+# Page A-27
+20 1 0002
+22 0 0000
+10 1 0012
+42 1 0074
+50 1 0007
+20 1 0012
+46 0 0105
+42 1 0101
+40 0 0107
+14 1 0012
+12 0 0011
+20 0 0011
+#
+46 0 0000
+50 1 0007
+20 1 0002
+22 0 0001
+10 1 0012
+#
+42 1 0112
+20 0 0002
+22 0 0011
+10 0 0014
+20 0 0011
+#
+10 0 7776
+
+org 310
+50 1 0007
+20 1 0002
+06 0 0347
+46 0 0321
+42 1 0311
+20 0 0347
+
+# Page A-28
+22 0 0370
+10 0 0347
+40 0 0310
+10 0 0350
+#
+50 1 0012
+20 0 0005
+24 0 0006
+24 0 0012
+22 0 0014
+20 0 0200
+10 0 0002
+#
+20 0 0000
+56 0 0001
+10 0 0005
+20 0 0003
+10 0 0037
+#
+50 1 0007
+20 1 0002
+14 1 0012
+04 0 0376
+10 1 0022
+42 1 0337
+#
+00 0 0002
+66 0 0015
+
+# Page A-29
+40 0 7774
+000000
+000000
+700000
+700000
+700000
+700000
+100000
+000725
+700000
+446637
+115315
+#
+000000
+331141
+446637
+220626
+557152
+#
+000000
+072724
+231312
+776650
+014000
+656373
+700000
+446637
+115315
+662463
+000142
+001132
+001422
+
+# Page A-30
+#
+000000
+700000
+001105
+115315
+000142
+115315
+001132
+
+org 423
+000155
+777745
+001412
+614632
+115315
+115315
+115315
+700000
+446637
+700000
+446637
+115315
+700000
+446637
+115315
+
+org 3774
+012156
+765622
+002437
+775341
+200000
+600000
+200001
+577777
+235361
+542417
+
+# Page A-31
+064112
+713666
+000000
+000000
+000001
+777777
+774761
+003017
+252517
+525261
+
+org 7774
+50 1 0007
+20 1 0002
+24 0 0001
+617766
+
+

@@ -1,0 +1,150 @@
+# Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>
+#
+# This file is part of yaAGC.
+#
+# yaAGC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# yaAGC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with yaAGC; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# Filename:	Makefile.Win32
+# Purpose:	This makefile is used (recursively) to build all
+#		components of the Virtual AGC project, for a Win32 target.
+# Mods:		10/22/03 RSB	Wrote.
+#		06/11/04 RSB	Got working again (I hope).
+#		08/10/04 RSB	Added shell scripts to the installable files.
+#		08/12/04 RSB	Added NVER.  Also added the 'snapshot' 
+#				target, for making the distro zipfiles
+#				of binaries.
+#		2004-09-15 RSB	Added yaACA and yaUniverse.
+#		2005-01-10 RSB	Added binLEMAP
+#		2005-04-30 RSB	Added CFLAGS
+#		2005-05-14 RSB	The 'snapshot' target now automatically
+#				transfers the snapshot back to my main box.
+#		2005-06-18 RSB	Added yaAGS and yaDEDA.
+#		2005-07-12 RSB	Added Sim*.xeq to install.  These are files
+#				that serve as input to WinAGC.exe.
+#		2005-07-17 RSB	Added Artemis072.
+#		2005-07-28 RSB	Added symtabs.
+#		2005-08-14 RSB	Compensated for funky naming rules now in the
+#				pthreads library.
+#		01/09/06 RSB	Removed the prefix '-' from the lines that
+#				build Artemis072.
+
+all:	/mingw/lib/libpthreadAGC.a
+	$(MAKE) -C yaLEMAP SUFFIX=.exe NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaAGC -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE}
+	$(MAKE) -C yaAGS -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE}
+ifndef NOGUI
+	$(MAKE) -C yaDEDA/src -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaDSKY/src -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+endif
+	$(MAKE) -C yaYUL -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaUniverse NVER=${NVER} CFLAGS=${CFLAGS}
+	-$(MAKE) -C yaACA NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaCode/Luminary131 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaCode/Colossus249 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+	${MAKE} -C yaCode/Artemis072 PREFIX=${PREFIX} NVER=${NVER}
+	$(MAKE) -C yaCode/Validation -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+
+clean:
+	$(MAKE) -C yaLEMAP SUFFIX=.exe clean
+	$(MAKE) -C yaAGC -f Makefile.Win32 clean
+	$(MAKE) -C yaAGS -f Makefile.Win32 clean
+	$(MAKE) -C yaDEDA/src -f Makefile.Win32 clean
+	$(MAKE) -C yaDSKY/src -f Makefile.Win32 clean
+	$(MAKE) -C yaYUL -f Makefile.Win32 clean
+	$(MAKE) -C yaUniverse clean
+	-$(MAKE) -C yaACA clean
+	$(MAKE) -C yaCode/Luminary131 -f Makefile.Win32 clean
+	$(MAKE) -C yaCode/Colossus249 -f Makefile.Win32 clean
+	${MAKE} -C yaCode/Artemis072 clean
+	$(MAKE) -C yaCode/Validation -f Makefile.Win32 clean
+
+install: all
+	$(MAKE) -C yaLEMAP SUFFIX=.exe install NVER=${NVER}
+	$(MAKE) -C yaAGC -f Makefile.Win32 install NVER=${NVER}
+	$(MAKE) -C yaAGS -f Makefile.Win32 install NVER=${NVER}
+ifndef NOGUI
+	$(MAKE) -C yaDEDA/src -f Makefile.Win32 install NVER=${NVER}
+	$(MAKE) -C yaDSKY/src -f Makefile.Win32 install NVER=${NVER}
+endif
+	$(MAKE) -C yaYUL -f Makefile.Win32 install NVER=${NVER}
+	$(MAKE) -C yaUniverse install NVER=${NVER}
+	-$(MAKE) -C yaACA install NVER=${NVER}
+	$(MAKE) -C yaCode/Luminary131 -f Makefile.Win32 install NVER=${NVER}
+	$(MAKE) -C yaCode/Colossus249 -f Makefile.Win32 install NVER=${NVER}
+	${MAKE} -C yaCode/Artemis072 PREFIX=${PREFIX} install
+	$(MAKE) -C yaCode/Validation -f Makefile.Win32 install NVER=${NVER}
+	cp -a yaScripts/Sim*bat Sim*.xeq /mingw/bin
+	cp -a yaSimulators/LM_Simulator/*.tcl yaSimulators/LM_Simulator/*.ini /mingw/bin
+	cp -a yaSimulators/LM_Simulator/modules /mingw/bin
+	echo cd \\mingw\\bin >/mingw/bin/LM_Simulator.bat
+	echo wish lm_simulator.tcl %1 %2 >>/mingw/bin/LM_Simulator.bat
+	
+snapshot: install
+	-rm mingw -rf
+	mkdir mingw
+	mkdir mingw/bin
+	mkdir mingw/share
+	cp -a /mingw/bin/*LEMAP*.exe mingw/bin
+	cp -a /mingw/bin/ya*.exe mingw/bin
+	cp -a /mingw/bin/Oct2Bin.exe mingw/bin
+	cp -a /mingw/bin/webb2burkey-rope.exe mingw/bin
+	cp -a /mingw/bin/Luminary131.bin mingw/bin
+	cp -a /mingw/bin/Colossus249.bin mingw/bin
+	cp -a /mingw/bin/Artemis072.bin mingw/bin
+	cp -a /mingw/bin/Validation.bin mingw/bin
+	cp -a /mingw/bin/LM*.ini mingw/bin
+	cp -a /mingw/bin/CM*.ini mingw/bin
+	cp -a /mingw/bin/Sim*bat /mingw/bin/Sim*xeq /mingw/bin/WinAGC.exe mingw/bin
+	cp -a /mingw/bin/Ephemeris*txt mingw/bin
+	cp -a /mingw/share/yadsky mingw/share
+	cp -a /mingw/share/yaDEDA mingw/share
+	cp -a /mingw/bin/*_system_simulator.tcl mingw/bin
+	cp -a /mingw/bin/*_system_simulator.ini mingw/bin
+	cp -a /mingw/bin/modules /mingw/bin/LM_Simulator.bat mingw/bin
+	cp -a /mingw/bin/*.symtab mingw/bin
+	zip -r yaAGC-Win32-${DATE}.zip mingw
+	rm mingw -rf
+	scp -p yaAGC-Win32-${DATE}.zip \
+		rburkey@192.168.254.250:Projects/sandroid.org/public_html/apollo/Downloads
+
+# Unfortunately, the Win32 pthreads library has now adopted a naming convention wherein
+# I can't predict the name of the library.  It was libpthreadGC.a when I started using it,
+# but may now be libpthreadGC1.a, libpthreadGC2.a, or others.  Therefore, I 
+# make some rules for getting the name to always be the same.  It is a fortuitous 
+# coincidence that changing the name libpthreadGC.a -> libpthreadAGC.a is aesthetically
+# pleasing.
+
+%AGC.a:	%GC3.a
+	cp $^ $@
+
+%AGC.a:	%GC2.a
+	cp $^ $@
+
+%AGC.a:	%GC1.a
+	cp $^ $@
+
+%AGC.a:	%GC.a
+	cp $^ $@
+
+%AGC.a:	%GC3d.a
+	cp $^ $@
+
+%AGC.a:	%GC2d.a
+	cp $^ $@
+
+%AGC.a:	%GC1d.a
+	cp $^ $@
+
+

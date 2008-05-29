@@ -1,0 +1,376 @@
+<!-- File:     readme.html                        -->
+<!-- Function: LM Simulator Documentation         -->
+<!-- Author:   Stephan Hotto                      -->
+<!-- Date:     18.04.2007                         -->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN//">
+<html><head>
+
+<title>LM Simulator</title>
+ 
+<style type="text/css">
+  td { font-style:arial; font-size:12 }
+  code { font-style:arial; font-size:12 }
+</style></head><body bgcolor="#ffffff">
+
+ <font face="Arial" size="2">
+
+ <h1><a name="Index">LM Simulator Documentation</a></h1>
+ <br>
+ <!-- Documentation Index -->
+ <h2>Index</h2>
+ <a href="#About">1.0 About</a><br>
+ <a href="#Overview">2.0 Overview</a><br>
+ <a href="#Issues">3.0 Known Issues</a><br>
+ <a href="#Tutorial">4.0 LM Simulator Tutorial</a><br>
+ <a href="#License">5.0 Software License</a><br>
+ 
+ <br>
+ <br>
+ <!-- About -->
+ <h2><a name="About">1.0 About</a></h2>
+ Program:   LM Simulator<br>
+ Author:    Stephan Hotto (Germany/Wuppertal)<br>
+ Version:   v1.0 / 21.04.2007<br>
+ <br>
+The program "LM_Simulator" simulates the Lunar Module of the NASA Apollo Moon landing project.
+It is an add-on to Ron Burkey's "yaAGC" which is a complete emulation of the original Apollo Guidance Computer running the real AGC Software developed by the MIT.
+In simple words, you have the computing capacity of the Apollo Program at your fingertips which enables you to simulate real world Lunar Module flight states by typing in the same AGC commands as the Apollo Astronauts did.<br>
+ <br>
+ LM-Simulator has been developed by using TCL/TK which is an interpreter programming language developed by John K. Ousterhout.<br>
+ <br>
+ Please refer to Ron Burkey's web page (<a href="http://www.ibiblio.org/apollo/index.html" target=".">http://www.ibiblio.org/apollo/</a>) to get an extensive description of the Apollo Guidance Computer itself as well as to <a href="http://www.ibiblio.org/apollo/download.html" target="."><b>download</b></a> the whole source code package ready for Linux, MS Windows and MAC or just the Windows binaries for the stand-alone version of the LM-Simulator.<br>
+ <br>
+ <br>
+ <h3>Simulation of a Lunar Module in flight</h3>
+ <img src="data/lm_simulator.png" alt="LM Simulator" align="bottom" border="0"><br>
+ <br>
+ <br>
+ <h3>Apollo Guidance Computer - DSKY (Display Keyboard)</h3>
+ <img src="data/dsky.jpg" alt="DSKY" align="top" border="0"><br>
+ <br>
+ <br>
+ <h3>Apollo Guidance Computer - Logic Module</h3>
+ <img src="data/logic_module.jpg" alt="Logic Module" align="top" border="0"><br>
+ <br>
+ <br>
+ <a href="#Index">Back to the Index</a><br>
+ <br>
+ <br>
+ 
+ <!-- Overview -->
+ <h2><a name="Overview">2.0 Overview</a></h2>
+
+<u>The following Systems are part of the Simulation:</u>
+<ul>
+ <li>yaAGC as Apollo Guidance Computer Emulator</li>
+ <li>The whole Lunar Module Apollo Guidance Software</li>
+ <li>IMU (Inertial Measurement Unit)</li>
+ <li>FDAI (Flight Director Attitude Indicator) inluding:</li>
+  <ul>
+     <li>Yaw, Pitch and Roll Rate Indicators</li>
+     <li>Error Needles to display data under the subsequent modes:</li>
+       <ul>
+         <li>DSKY: V61E -&gt; DISPLAY DAP FOLLOWING ATTITUDE ERRORS</li>
+         <li>DSKY: V62E -&gt; DISPLAY TOTAL ATTITUDE ERRORS WITH RESPECT TO NOUN 22</li>
+         <li>DSKY: V60E -&gt; DISPLAY VEHICLE ATTITUDE RATES ON FDAI ERROR NEEDLES</li>
+       </ul>
+   </ul>
+ <li>All Crew Switches connected to the AGC</li>
+ <li>All binary AGC system inputs by providing check-buttons to change their status (e.g. Overtemperature)</li>
+ <li>All binary AGC outputs by interpreting the different BIT combinations and presenting the status in a readable form</li>
+ <li>A physical model to simulate the LM behavior in space</li>
+   <ul>     
+    <li>The Calculation of the Moment of Inertia bases on the same hyperbola equation as used by the AGC state estimator</li>
+   </ul>
+ <li>The four quad RCS thruster system in conjunction with the above mentioned physical model</li>
+ <li>Descent and Ascent Engine (Veryfied by Tsiolkovsky's Rocket Equation)</li>
+ <li>Stage Separation</li>
+ <li>A Bit-Monitor to trace the AGC inputs and outputs</li>
+</ul>
+<br>
+<br>
+<u>Architecture Overview:</u><br>
+LM-Simulator connects via TCP/IP directly to "yaAGC". To use
+a joystick (RHC/ACA), which is strongly recommended, Ron Burkey's
+program "yaACA" has to be started (not available for the stand-alone version).<br>
+<br>
+<code>
+-----------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;TCP/IP&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;TCP/IP&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;LM
+Simulator&nbsp;&nbsp;|&nbsp;&lt;----------&gt;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;yaAGC&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&lt;----------&gt;&nbsp;|&nbsp;&nbsp;yaACA&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+-----------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------<br>
+</code>
+<br>
+<br>
+<u>How to run LM-Simulator in a Linux and Windows environment?</u><br>
+In a LINUX environment you need to have TCL/TK installed because LM-Simulator has been written by using that interpreter language.<br>
+Just do the following to start the application:<br>
+- Start the Apollo Guidance Computer Emulator: <b>yaAGC</b><br>
+- As an option start the Rotational Hand Controller Interface for PC Joysticks: <b>yaACA</b><br>
+- Finally start the LM-Simulator itself: <b>wish lm_simulator.tcl</b><br><br>
+If you want to use the application within an MS Windows operating system then you can download (<a href="http://www.ibiblio.org/apollo/download.html" target=".">http://www.ibiblio.org/apollo/download.html</a>) a stand-alone version which can be executed by a simple double click on <b>lm_simulator.exe</b><br>
+<br>
+<br>
+<u>Configuration:</u><br>
+If you start LM-Simulator without any parameter (wish lm_simulator.tcl)
+then it assumes a config file within the same directory called
+"lm_simulator.ini". If that config file is not available then LM-Simulator starts with internally defined standard values based on the
+LM-7 mission.<br>
+<br>
+<br>
+<u>Command Line Configuration:</u><br>
+<table>
+ <tbody><tr><td>--port=PortNum</td>   <td>&nbsp;Changes the port number (by default, 19801) used to connect to yaAGC. This can also be changed in the configuration file.</td></tr><tr>
+ </tr><tr><td>--cfg=IniFilename</td>  <td>&nbsp;This
+option changes the name or directory of the configuration-file used. By
+default, the file is "lm_simulator.ini", located in the installation
+directory.</td></tr><tr>
+</tr></tbody></table>
+<br>
+<br>
+<u>Menu Structure:</u><br>
+The program is divided into several sub-windows which can be called through the "Systems" menu:<br>
+<br>
+<table border="1">
+ <tbody><tr><th>Menu</th>                                <th>Function</th></tr><tr>
+ </tr><tr><td>Edit -&gt; Clear Message Window</td>          <td>Clears the Log Window</td></tr><tr>
+ </tr><tr><td>Edit -&gt; Exit</td>                          <td>Leaves the Program</td></tr><tr>
+ </tr><tr><td>Systems -&gt; DSKY Lite</td>                  <td>Display/Keyboard interface</td></tr><tr>
+ </tr><tr><td>Systems -&gt; AGC Outputs</td>                <td>Monitoring and Correlating of the AGC Binary Outputs</td></tr><tr>
+ </tr><tr><td>Systems -&gt; AGC LM System Input</td>        <td>Simulation of all binary AGC input values</td></tr><tr>
+ </tr><tr><td>Systems -&gt; AGC Crew Inputs</td>            <td>Crew switches, buttons, RHC/ACA, THC connected to the AGC</td></tr><tr>
+ </tr><tr><td>Systems -&gt; FDAI / IMU</td>                 <td>Flight Director Attitude Indicator which shows the LM attitude in relation to the Inertial Measurement Unit</td></tr><tr>
+ </tr><tr><td>Systems -&gt; Simulation Monitor &amp; Control</td>      <td>Monitor
+simulation parameter like thrust and amount of propellant and control
+the Descent- and Ascent-Engine as well as the stage separation.</td></tr><tr>
+ </tr><tr><td>Info -&gt; Help</td>                          <td>An application overview</td></tr><tr>
+ </tr><tr><td>Info -&gt; Tutorial</td>                      <td>Explanation of some procedures like IMU initialization</td></tr><tr>
+ </tr><tr><td>Info -&gt; Verbs &amp; Nouns</td>             <td>A list of the available verbs &amp; nouns to use the AGC</td></tr><tr>
+ </tr><tr><td>Info -&gt; Alarm Codes</td>                   <td>An overview of AGC alarm codes</td></tr><tr>
+ </tr><tr><td>Info -&gt; About</td>                         <td>Author, Version etc.</td></tr><tr>
+ </tr><tr><td>Info -&gt; License</td>                       <td>The license model of LM-Simulator</td></tr><tr>
+</tr></tbody></table>
+<br>
+<br>
+<a href="#Index">Back to the Index</a><br>
+<br>
+<br>
+<!-- Known Issues -->
+<h2><a name="Issues">3.0 Known Issues</a></h2>
+<ul>
+  <li>Fast rotations around the LM axes can cause overload on the LM_Simulator communication towards yaAGC</li>
+  <li>In a windows environment TCL/TK (programming language of the LM_Simulator) behaves a bit strange. 
+  During moving of windows or opening of menus the application goes in a halt modus. 
+  If that status takes to long then the synchronization between yaAGC and LM_Simulator is in danger. 
+So, please do not drag windows or open menues for a too long period of time.</li>
+<li>LM Simulator has problems with personal firewalls. Please switch them off to allow a real time local TCP/IP connection between LM_Simulator and yaAGC.</li>
+</ul>
+<br>
+<a href="#Index">Back to the Index</a><br>
+<br>
+<br>
+
+
+<h2><a name="Tutorial">4.0 LM Simulator Tutorial</a></h2>
+
+<u><b>Index:</b></u>
+<table>
+<tbody>
+<tr><td>0.0</td> <td>Fast Start</td></tr>
+<tr><td>&nbsp;&nbsp;0.1</td> <td>AGC/LGC Initialization</td></tr>
+<tr><td>1.0</td> <td>IMU Introduction</td></tr>
+<tr><td>&nbsp;&nbsp;1.1</td> <td>IMU Start</td></tr>
+<tr><td>&nbsp;&nbsp;1.2</td> <td>IMU Pre-flight Checkout</td></tr>
+<tr><td>&nbsp;&nbsp;1.3</td> <td>IMU Coarse Align</td></tr>
+<tr><td>&nbsp;&nbsp;1.4</td> <td>IMU Fine Align</td></tr>
+<tr><td>&nbsp;&nbsp;1.5</td> <td>Zero IMU</td></tr>
+<tr><td>&nbsp;&nbsp;1.6</td> <td>Monitor Gimbal Angles</td></tr>
+<tr><td>&nbsp;&nbsp;1.7</td> <td>Monitor PIPA Counter Values</td></tr>
+<tr><td>2.0</td> <td>DAP (Digital Autopilot) Data Initialization</td></tr>
+<tr><td>&nbsp;&nbsp;2.1</td> <td>DAP Activation and Modes</td></tr>
+<tr><td>&nbsp;&nbsp;2.2</td> <td>DAP - V49 Crew Defined Maneuver</td></tr>
+<tr><td>&nbsp;&nbsp;2.3</td> <td>DAP - FDAI Error Needle Modes</td></tr>
+<tr><td>3.0</td> <td>Show Alarm Codes &amp; Data</td></tr>
+<tr><td>4.0</td> <td>Useful Verbs &amp; Nouns</td></tr>
+</tbody></table>
+<br>
+<br>
+
+<u>0.0 Fast Start:</u><br>
+If you want to do a real fast startup without doing 0.1 to 1.4 then you should execute the following steps:<br>
+- Switch the DAP to "ATTITUDE HOLD MODE ON" (AGC Crew Inputs)<br>
+- Wait until "DRIVE CDU Z to X" goes on (AGC Outputs)<br>
+- Type into the DSKY: V37E 00E (VERB 37 ENTR 00 ENTR) to send the AGC into the idle loop<br>
+- DSKY: V77E (Normal DAP Mode) or V76E (Minimum Impulse Mode)<br>
+- DSKY: V37E 00E to be sure that the AGC is in the idle mode<br>
+<br>
+Now the vessel can be controlled by the RHC (Rotational Hand Controller) which can be found within the AGC Crew Inputs window.<br>
+<br>
+
+<u>0.1 AGC/LGC Initialization:</u><br>
+After a fresh AGC start there is a need to do a reset by typing V36E. To go into the idle loop it is necessary to change the program by V37E 00E. Probably that has to be repeated a couple of times until "PROG" shows 00.<br>
+<br><br>
+
+<u>1.0 IMU Introduction:</u><br>
+The IMU is constructed of a navigational platform gimbaled by a three axis system.<br>
+The following mapping is valid after setting the IMU to zero degrees:<br>
+<br>
+X-Gimbal-Axis = Outer Gimbal  = X-LM-Axis = YAW<br>
+Y-Gimbal-Axis = Inner Gimbal  = Y-LM-Axis = PITCH<br>
+Z-Gimbal-Axis = Middle Gimbal = Z-LM-Axis = Roll (Gimbal Lock Warning +/-70 Degrees)<br>
+<br>
+<u>1.1 IMU Start:</u><br>
+After a fresh start of yaAGC and LM Simulator the AGC assumes an aligned IMU.<br>
+That means that the steps 1.1 to 1.4 are not urgently necessary if you want to do a fast start.<br>
+<br>
+- AGC Crew Inputs: Set "ISS TURN ON REQUESTED" to ON<br>
+- Wait for about 90 sec until the DSKY "NO ATT" signal goes off<br>
+<br>
+<u>1.2 IMU Pre-flight Checkout:</u><br>
+Pre-flight check-out of the FDAI display interface -&gt; DSKY: V43E<br>
+All values should be set to +00000.<br>
+<br>
+<u>1.3 IMU Coarse Align:</u><br>
+- Type the following sequence into the DSKY: V41N20E (V = VERB; N = NOUN; E = ENTR)<br>
+- Now the AGC asks for the angles in the format 000.00 Deg. The sequence is X, Y, Z. Don't forget the "+" or "-" sign!<br>
+- The AGC drives the IMU to the absolute position given<br>
+- Use the "FDAI/IMU" window to control the angle changes<br>
+<br>
+<u>1.4 IMU Fine Align:</u><br>
+After IMU Coarse Align the "NO ATT" light indicates that the platform is not completely aligned.<br>
+To finalize the alignment the following procedure is needed:<br>
+- DSKY: V42E<br>
+- Give the relative angles in format 00.000 Deg (e.g. three times +00000)<br>
+<br>
+<u>1.5 Zero IMU:</u><br>
+Here are three possible scenarios to reset the IMU to zero degrees:<br>
+1.) AGC Crew Inputs =&gt; Activate: "IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0"<br>
+2.) DSKY: V40N20E (AGC sends ZERO CAGE COMMAND)<br>
+3.) DSKY: V36E (AGC RESET which automatically resets the IMU)<br>
+<br>
+<u>1.6 Monitor Gimbal Angles:</u><br>
+DSKY: V16N20E<br>
+<br>
+<u>1.7 Monitor PIPA Counter Values:</u><br>
+DSKY: V16N21E<br>
+<br>
+<br>
+<u>2.0 DAP (Digital Autopilot) Data Initialization:</u><br>
+The DAP needs some initialization values to work correctly (e.g. LM Weight etc.).<br>
+<br>
+- Start Spezial Software Routine R03 =&gt; DSKY: V48E<br>
+- The Register R1 (F06 46) shows the following value 21122 = ABCDE<br>
+<br>
+Spacecraft Configuration:<br>
+<table border="1">
+ <tbody><tr><td>A = 1</td>  <td>Ascent Stage Only</td></tr>
+ <tr><td>A = 2</td>  <td>Ascent and Descent Stage</td></tr>
+ <tr><td>A = 3</td>  <td>Ascent and Descent Stages docked with CSM</td></tr>
+</tbody></table>
+<br>
+RCS Configuration:<br>
+<table border="1">
+ <tbody><tr><td>B = 0</td>  <td>2 Jet Translation RCS System A</td></tr>
+ <tr><td>B = 1</td>  <td>2 Jet Translation RCS System B</td></tr>
+ <tr><td>B = 2</td>  <td>4 Jet Translation RCS System A</td></tr>
+ <tr><td>B = 3</td>  <td>4 Jet Translation RCS System B</td></tr>
+</tbody></table>
+<br>
+ACA Scaling:<br>
+<table border="1">
+ <tbody><tr><td>C = 0</td>  <td>Fine Scaling ACA (4 Deg/Sec)</td></tr>
+ <tr><td>C = 1</td>  <td>Normal Scaling ACA (20 Deg/Sec)</td></tr>
+</tbody></table>
+<br>
+Deadband Configuration:<br>
+<table border="1">
+ <tbody><tr><td>D = 0</td>  <td>ATT Deadband 0.3 Degrees</td></tr>
+ <tr><td>D = 1</td>  <td>ATT Deadband 1.0 Degrees</td></tr>
+ <tr><td>D = 2</td>  <td>ATT Deadband 5.0 Degrees</td></tr>
+</tbody></table>
+<br>
+KALCMANU Rate:<br>
+<table border="1">
+ <tbody><tr><td>E = 0</td>  <td>0.2 Deg/Sec</td></tr>
+ <tr><td>E = 1</td>  <td>0.5 Deg/Sec</td></tr>
+ <tr><td>E = 2</td>    <td>2 Deg/Sec</td></tr>
+ <tr><td>E = 3</td>   <td>10 Deg/Sec</td></tr>
+</tbody></table>
+<br>
+- To change the value type V21E<br>
+- Press "PRO" on the DSKY to start the entry of (F06 47) LM &amp; CSM Weight<br>
+- Use V21E or V22E to change the individual values<br>
+- V24E allows to change both values sequencially (don't forget the leading + sign)<br>
+- Press "PRO" to proceed<br>
+- F06 48 allows the entry of the Engine Gimbal Angles.<br>
+<br>
+<u>2.1 DAP Activation and Modes:</u><br>
+DAP Activation:<br>
+- AGC Crew Inputs =&gt; "ATTITUDE HOLD MODE ON" or "AUTO STABILIZATION OF ATTITUDE ON"<br>
+<br>
+DAP Modes:<br>
+- DSKY: V76E Minimun Impulse Command Mode (each RHC deflection fires the thrusters for 14ms)<br>
+- DSKY: V77E Rate Command and Attitude Hold Mode<br>
+<br>
+<u>2.2 DAP - V49 Crew Defined Maneuver:</u><br>
+0.) Crew Inputs -&gt; Dap Switch to "AUTO STABILIZATION OF ATTITUDE ON"<br>
+1.) V37E 00E<br>
+2.) V62E (Display Angular Difference to N22 on Error Needles)<br>
+3.) V49E<br>
+4.) F 06 22  New ICDU Angles (e.g. V24E to load the Sequence ICDUX, ICDUY and ICDUZ)<br>
+5.) PRO<br>
+6.) F 50 18  New FDAI Angles in the Sequence Roll, Pitch and Yaw<br>
+7.) PRO<br>
+8.) The DAP steers the LM to the new orientation<br>
+<br>
+<u>2.3 DAP - FDAI Error Needle Modes:</u><br>
+1.) DSKY: V61E -&gt; DISPLAY DAP FOLLOWING ATTITUDE ERRORS<br>
+This is the standard mode. The needles show how far the DAP is away from the wished axes positions.<br>
+<br>
+2.) DSKY: V62E -&gt; DISPLAY TOTAL ATTITUDE ERRORS WITH RESPECT TO NOUN 22<br>
+Here the needles display the absolute difference between the entry shown by V16N22E and V16N20E.<br>
+Normally used for automatic positioning (please see V49 Crew Defined Maneuver).<br>
+<br>
+3.) DSKY: V60E -&gt; DISPLAY VEHICLE ATTITUDE RATES ON FDAI ERROR NEEDLES.<br>
+These outputs should provide the same information as the FDAI rate indicators do.<br>
+The Roll, Yaw and Pitch rate shown by the FDAI bases on a separate Rate
+Gyro Assembly fixed mounted to the LM body, whereas the Information on
+the needles shown by V60E is derived from the AGC measurement of the
+angular changes. This is also a backup mode in case of a Rate Gyro
+Assembly Fault.<br>
+<br>
+<br>
+<u>3.0 Display Alarm Codes and Data:</u><br>
+- Alarm Codes =&gt; DSKY: V05N09E<br>
+- Alarm Data  =&gt; DSKY: V05N08E<br>
+<br>
+<br>
+<u>4.0 Useful Verbs &amp; Nouns:</u><br>
+<br>
+<table border="1">
+ <tbody><tr><th>DSKY</th>      <th>Function</th></tr>
+ <tr><td>V35E       </td><td>Lamp Test</td></tr>
+ <tr><td>V36E       </td><td>AGC Reset</td></tr>
+ <tr><td>V34E       </td><td>Terminate an ongoing function like IMU Angle Monitoring (V16N20E)</td></tr>
+ <tr><td>V16N36E    </td><td>Monitor the AGC time (R1=Hours; R2=Minutes; R3=100ths of a Second)</td></tr>
+ <tr><td>V37E       </td><td>Changes the AGC Program (e.g. V37E00E = Idling Program)</td></tr>
+</tbody></table>
+<br>
+<a href="#Index">Back to the Index</a><br>
+<br><br>
+<h2><a name="License">5 Software License</a></h2>
+Copyright 2005-2007 Stephan Hotto <stephan.hotto@web.de><br>
+"LM_Simulator" is part of yaAGC.<br>
+yaAGC is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.<br>
+yaAGC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.<br>
+You should have received a copy of the GNU General Public License along with yaAGC; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA<br>
+<br>
+<a href="#Index">Back to the Index</a><br>
+<br><br>
+
+</font>
+</body>
+</html>

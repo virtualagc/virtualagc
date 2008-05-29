@@ -1,0 +1,28 @@
+# Filename:	Makefile.Win32
+# Purpose:	Provides a makefile suitable for building yaDSKY
+#		in Win32 using Msys/MinGW.
+# Mods:		10/20/03 RSB	Created.
+#		06/11/04 RSB	Added rfopen.c.
+#		08/12/04 RSB	Added NVER.
+#		05/15/05 RSB	Added -lyaAGC to take care of loading Portnum variable.
+
+CSOURCE := ../../yaAGC/agc_utilities.c ../../yaAGC/rfopen.c $(wildcard *.c)
+
+yadsky.exe:	$(wildcard *.h) ${CSOURCE}
+	gcc \
+		-g -o $@ -I../../yaAGC \
+		`pkg-config --cflags gtk+-win32-2.0` \
+		-mno-cygwin -mms-bitfields "-DNVER=${NVER}" \
+		-DPACKAGE_DATA_DIR="\"/mingw/share\""  \
+		-DPACKAGE="\"yaDSKY\"" \
+		${CSOURCE} -L../../yaAGC -lyaAGC -lwsock32 \
+		`pkg-config --libs gtk+-win32-2.0`
+		
+install:	yadsky.exe
+	cp -a yadsky.exe /mingw/bin
+	-mkdir /mingw/share/yaDSKY
+	cp -a ../pixmaps /mingw/share/yaDSKY
+	cp -a *.ini /mingw/bin
+       
+clean:
+	rm yadsky.exe

@@ -1,0 +1,70 @@
+Change Log:
+===========
+
+v0.93 -> v1.0 (21.04.2007):
+---------------------------
+- FDAI now fully functional!
+  The attitude looks a bit confusing around +/-90 degrees Yaw but that is for the reason that LM_Simulator does not uses a real 3-dimensional ball to show the attitude.
+  Please keep in mind that the LM-IMU has its Gimbal Lock Condition on the Roll-Axis and not on the Yaw-Axis like the Command Module has.
+- A Checkbutton in the FDAI window now allows to switch of the 8-Ball for computers with low performance
+- FDAI angles are additionally presented as numerical values
+- New lm_configuration.ini parameters:
+  + Operationg_System "Windows/Linux" - To allow one source code for both operating systems
+  + FDAI_Update_Rate "updates per second" - Choose a lower value if you experience performance problems
+- New HTML documentation as well as re-work of the existing documents
+
+
+
+v0.7 -> v0.93 (27.03.2007):
+---------------------------
+- Critical Bug Fixes!!!
+- LM's Digital Autopilot is now able to stabilize the vessel
+- CPU load now below 5% on an Intel Core Duo 2.13GHz processor
+- LM-Simulator does now have its own RHC/ACA (Rotational Hand Controller) and THC (Translational Hand Controller). Both
+are implemented as simple GUI-Elements (Sliders and Buttons).
+- Implementation of a precise RCS-Thruster simulation by using the U,V system with a transformation into the P,Q,R system
+- Complete rework of the IMU which had errors in the coordination transformation between pilot axes and stable member axes
+- FDAI angles show now the correct values which can be verified by using the "Crew Defined Maneuver Routine: V49"
+    + The currently used coordination transformation limits the valid FDAI angle ranges:
+       Yaw:   0Deg +/-90Deg
+       Pitch: 0Deg +/-90Deg
+       Roll:  Limited by the Gimbal Lock condition at 0Deg +/-85Deg
+    + It is planned that a future release of LM-Simulator covers the whole range of possible FDAI angles
+- Translational commands (THC inputs) do now have impact on the vessel's speed along the pilot axes that is measured by the PIPAs which are mounted on the stable member. Any change in speed due to RCS-Translational commands can be monitored by DSKY: V16 N21E
+- Monitoring Input/Output Bytes/Second 
+- Code cleaning and optimization
+
+
+
+v0.7 (18.10.2005):
+------------------
+- Fast/Slow Increment/Decrement of the IMU AGC counter to pass the KALMAN-Filter.
+- CPU load reduced to around 35%-55% (2.6GHz AMD XP) by using a dynamic CPU handling
+- Tutorial extended:
+     + "V49E Crew Defined Maneuver Routine"
+     + Description of the Error Needle Modes
+- Final Gimbal Lock of the FDAI now at >85 degrees
+- Moment of Inertia factor removed (ini-file and program)
+
+
+
+v0.5:
+-----
+- Revised documentation
+- Rotational Model Moment of Inertia Calculation bases now on the same hyperbola equation as used by the AGC state estimator
+- Roll, Pitch and Yaw Rate-Indicators added. In the real LM the data for these indicators came from the fixed mounted gyro rate assembly unit.
+- Error Needles added. The data shown by the error needles can be switched between 3 modes:
+1.) DSKY: V61E -> DISPLAY DAP FOLLOWING ATTITUDE ERRORS
+This is the standard mode. The needles show how far the DAP is away from the wished axes positions.
+
+2.) DSKY: V62E -> DISPLAY TOTAL ATTITUDE ERRORS WITH RESPECT TO NOUN 22
+Here the needles display the absolute difference between the entry shown by V16N22E and V16N20E. Normally used for automatic positioning.
+
+3.) DSKY: V60E -> DISPLAY VEHICLE ATTITUDE RATES ON FDAI ERROR NEEDLES.
+These outputs should provide the same information as the FDAI rate indicators do. 
+The Roll, Yaw and Pitch rate shown by the FDAI bases on a separate Rate Gyro Assembly fixed mounted to the LM body, whereas the Information on
+the needles shown by V60E is derived from the AGC measurement of the angular changes.
+This is also a backup mode in case of a Rate Gyro Assembly Fault.
+
+- Ball direction for the YAW-Axis inverted (Bug Fix)
+- Code clean up

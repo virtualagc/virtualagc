@@ -1,0 +1,24 @@
+# Filename:	Makefile.Win32
+# Purpose:	Provides a makefile suitable for building yaDEDA
+#		in Win32 using Msys/MinGW.
+# Mods:		06/18/05 RSB	Adapted from yaDSKY's similar Makefile.Win32
+
+CSOURCE := ../../yaAGC/agc_utilities.c ../../yaAGC/rfopen.c $(wildcard *.c)
+
+yaDEDA.exe:	$(wildcard *.h) ${CSOURCE}
+	gcc \
+		-g -o $@ -I../../yaAGC \
+		`pkg-config --cflags gtk+-win32-2.0` \
+		-mno-cygwin -mms-bitfields "-DNVER=${NVER}" \
+		-DPACKAGE_DATA_DIR="\"/mingw/share\""  \
+		-DPACKAGE="\"yaDEDA\"" \
+		${CSOURCE} -L../../yaAGC -lyaAGC -L../../yaAGS -lyaAGS -lwsock32 \
+		`pkg-config --libs gtk+-win32-2.0`
+		
+install:	yaDEDA.exe
+	cp -a yaDEDA.exe /mingw/bin
+	-mkdir /mingw/share/yaDEDA
+	cp -a ../pixmaps /mingw/share/yaDEDA
+       
+clean:
+	rm yaDEDA.exe
