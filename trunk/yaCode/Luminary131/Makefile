@@ -41,7 +41,7 @@ Luminary131.bin: Oct2Bin Luminary131.binsource
 	mv Oct2Bin.bin Luminary131.bin
 
 Luminary131.lst Luminary131.symtab: ${SOURCE} Luminary131.bin
-	../yaYUL/yaYUL MAIN.s >Luminary131.lst
+	../../yaYUL/yaYUL MAIN.s >Luminary131.lst
 	mv MAIN.s.symtab Luminary131.symtab
 	diff -s MAIN.s.bin Luminary131.bin
 	

@@ -38,7 +38,7 @@ install: default
 	@echo ====================================================
 	@echo Errors in the following are normal, since Artemis072
 	@echo is under development.
-	-../yaYUL/yaYUL MAIN.s >$@
+	-../../yaYUL/yaYUL MAIN.s >$@
 	-diff -s MAIN.s.bin $^
 		
 
