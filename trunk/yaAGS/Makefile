@@ -44,7 +44,7 @@ LIBS += -L/sw/lib -lreadline
 LIBS += -L/usr/lib/curses -lcurses
 endif	# NOREADLINE
 
-yaAGS:	mainAGS.o libyaAGS.a ../yaAGC/nbfgets.o ../yaAGC/symbol_table.o 
+yaAGS:	mainAGS.o libyaAGS.a symbol_table.o nbfgets.o Backtrace.o
 	gcc -o yaAGS $^ -L. -L../yaAGC -lpthread -lyaAGS -lyaAGC -lm ${LIBS}
 
 libyaAGS.a: aea_engine_init.o aea_engine.o DebuggerHookAGS.o SocketAPI_AGS.o
