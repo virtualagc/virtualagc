@@ -60,8 +60,8 @@ endif	# NOREADLINE
 yaAGC:	main.o libyaAGC.a CheckDec.o nbfgets.o symbol_table.o
 	gcc ${CFLAGS} -o yaAGC $^ -L. ${LIBS} -lpthread -lyaAGC -lm
 
-libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \
-	Backtrace.o SocketAPI.o DecodeDigitalDownlink.o
+libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o agc_gdbmi.o agc_help.o \
+	rfopen.o Backtrace.o SocketAPI.o DecodeDigitalDownlink.o
 	ar -rc $@ $^
 	ranlib $@
 	touch ../yaDSKY/src/main.c
@@ -75,10 +75,10 @@ install:	yaAGC
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
 CheckDec.o: ../Luminary131/CheckDec.c
-	gcc ${CFLAGS} -g -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	gcc ${CFLAGS} -ggdb -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
-	gcc -I/sw/include ${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	gcc -ggdb -I/sw/include ${CFLAGS} ${CFLAGS2} -DGDBMI -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 #----------------------------------------------------------------------------------
 # Embedded-firmware stuff for Coldfire is below this line.	

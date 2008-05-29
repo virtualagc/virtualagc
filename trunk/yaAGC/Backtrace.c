@@ -55,6 +55,44 @@
 #include <string.h>
 #include "agc_engine.h"
 
+#ifdef GDBMI
+static agc_t *PendingState;
+static int PendingCause;
+extern char* SourcePathName;
+
+/* Remove Last Added Backtracepoint should be used for TC Q or RETURN */
+void BacktraceRemove()
+{
+   if (BacktraceCount > 0)
+   {
+      BacktraceNextAdd--;
+      if (BacktraceNextAdd < 0)
+         BacktraceNextAdd = MAX_BACKTRACE_POINTS - 1;
+      BacktraceCount--;
+   }
+   return;
+}
+
+int BacktraceDuplicateCheck(agc_t *State, BacktracePoint_t* Prev)
+{
+   int isDuplicate = 0;
+   
+   int PrevZ = Prev->Erasable[0][RegZ] & 07777;
+   int PrevFB = 037 & (Prev->Erasable[0][RegBB] >> 10);
+   int PrevSBB = (Prev->OutputChannel7 & 0100) ? 1 : 0;
+   
+   int CurrZ = State->Erasable[0][RegZ] & 07777;
+   int CurrFB = 037 & (State->Erasable[0][RegBB] >> 10);
+   int CurrSBB = (State->OutputChannel7 & 0100) ? 1 : 0;
+   
+   if (PrevZ == --CurrZ && 
+       PrevFB == CurrFB && 
+       PrevSBB == CurrSBB) isDuplicate = 1;
+   
+   return isDuplicate;
+}
+#endif
+
 // This function adds a new backtrace point to the circular buffer.  The 
 // oldest entries are transparently overwritten.  The Cause parameter is
 // used as follows:
@@ -65,7 +103,6 @@
 // the vector to the interrupt are removed.  The reason for this is that
 // otherwise the array will quickly become completely full of interrupt 
 // code, and all backtrace points to foreground code will be completely lost.
-
 void
 BacktraceAdd (agc_t *State, int Cause)
 {
@@ -85,6 +122,21 @@ BacktraceAdd (agc_t *State, int Cause)
 	}
       BacktraceInitialized = 1;
     }
+
+#ifdef GDBMI
+    /* Check for Duplicate Consecutive Adds remove simple looping */
+    if (BacktraceNextAdd > 0 &&
+        BacktraceDuplicateCheck(State,&BacktracePoints[BacktraceNextAdd-1]))
+    {
+       return;
+    }
+    if (BacktraceNextAdd == 0 &&
+        BacktraceDuplicateCheck(State,&BacktracePoints[MAX_BACKTRACE_POINTS-1]))
+    {
+       return;
+    }
+#endif
+
   if (Cause == 255)
     {
       while (BacktraceCount > 0)
@@ -98,6 +150,7 @@ BacktraceAdd (agc_t *State, int Cause)
 	}
       return;
     }
+
   Bp = &BacktracePoints[BacktraceNextAdd++];
   if (BacktraceNextAdd >= MAX_BACKTRACE_POINTS)
     BacktraceNextAdd = 0;
@@ -171,17 +224,38 @@ BacktraceDisplay (agc_t *State)
       printf ("Not enough memory for backtrace buffer.\n");
       return;
     }
+#ifdef GDBMI
+    /* Always show the current location in the trace */    
+    {
+       char funcname[10];
+       SymbolLine_t *Line = NULL;
+       int CurrentZ = State->Erasable[0][RegZ] & 07777;
+       int FB = 037 & (State->Erasable[0][RegBB] >> 10);
+       int SBB = (State->OutputChannel7 & 0100) ? 1 : 0;
+       Line = ResolveLineAGC(CurrentZ, FB, SBB);
+
+       if (Line) printf("#0\t0x%04x in %s () at %s/%s:%d\n",
+                    gdbmiLinearAddr(&Line->CodeAddress),
+                    gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
+                    Line->FileName,Line->LineNumber);
+    }
+#endif
   if (BacktraceCount == 0)
     {
+#ifndef GDBMI
       printf ("The backtrace table is empty.\n");
+#endif
       return;
     }
-  for (i = j = 0; i < BacktraceCount; i++)
+
+
+    for (i = j = 0; i < BacktraceCount; i++)
     {
       k = BacktraceNextAdd - i - 1;
       if (k < 0)
         k += BacktraceCount;
       Bp = &BacktracePoints[k];
+#ifndef GDBMI
       printf ("%2d: ", i);
       CurrentZ = Bp->Erasable[0][RegZ] & 07777;
       // Print the address.
@@ -211,20 +285,47 @@ BacktraceDisplay (agc_t *State)
 	  printf ("%02o,%04o", Bank, 02000 + (CurrentZ & 01777));
 	  Value = State->Fixed[Bank][CurrentZ & 01777];
 	}
+
       if (Bp->DueToInterrupt)
         printf (" Int%02o   ", Bp->DueToInterrupt);
       else
         printf (" %05o   ", Value & 077777);
+      
+#else
+      {
+         char funcname[10];
+         SymbolLine_t *Line = NULL;
+         int CurrentZ = Bp->Erasable[0][RegZ] & 07777;
+         int FB = 037 & (Bp->Erasable[0][RegBB] >> 10);
+         int SBB = (Bp->OutputChannel7 & 0100) ? 1 : 0;
+         Line = ResolveLineAGC(CurrentZ, FB, SBB);
+
+         if (Line) printf("#%d\t0x%04x in %s () at %s/%s:%d\n",
+             i+1,
+             gdbmiLinearAddr(&Line->CodeAddress),
+                   gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
+                   Line->FileName,Line->LineNumber);
+         else
+            printf("#%d\t0x%04x in <%02o+%04o> ()\n",
+                   i+1,
+                   gdbmiLinearFixedAddr(CurrentZ,FB,SBB),
+                   FB+8*SBB,CurrentZ);
+      }
+#endif
       // Next ...
       j++;
       if (j >= BACKTRACES_PER_LINE)
         {
 	  j = 0;
+#ifndef GDBMI
 	  printf ("\n");
+#endif
 	}
     }
+#ifndef GDBMI  
   if (j != 0)
-    printf ("\n");	
+    printf ("\n");
+#endif
 }
 
 

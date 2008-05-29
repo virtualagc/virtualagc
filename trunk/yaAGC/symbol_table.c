@@ -617,6 +617,24 @@ ResolveLineNumber (int LineNumber)
   return NULL;
 }
 
+#ifdef GDBMI
+SymbolLine_t *
+ResolveFileLineNumber (char* FileName, int LineNumber)
+{
+  int i;
+
+  for (i = 0; i < LineTableSize; i++)
+    {
+      if (!strcmp(LineTable[i].FileName, FileName) &&
+          LineTable[i].LineNumber == LineNumber)
+        {
+          return &LineTable[i];
+        }
+    }
+  return NULL;
+}
+#endif
+
 //-------------------------------------------------------------------------
 // The following section contains routines pertaining to the reading of
 // source files and displaying them in the debugging window
@@ -783,7 +801,9 @@ ListSource (char *SourceFile, int LineNumber)
       // Debug Command: LIST
       // We want to display the next MAX_LIST_LENGTH line numbers from
       // the current position
+#ifndef GDBMI
       printf ("Source file = %s\n", CurrentSourcePath);
+#endif
       DisplaySource (MAX_LIST_LENGTH, NULL);
     }
   else
@@ -884,6 +904,30 @@ ListSourceLine (char *SourceFile, int LineNumber, char *Contents)
     }
   return 0;
 }
+
+#ifdef GDBMI
+int LoadSourceLine (char *SourceFile, int LineNumber)
+{
+   /* Try to Load the sources */
+   if (CurrentSourceFP == NULL || strcmp(CurrentSourceFile, SourceFile) ||
+       CurrentLineNumber > LineNumber)
+   {
+      // Go through the whole deal of loading in the proper file and
+      // positioning from the beginning
+      if (!OpenSourceFile (SourceFile))
+      {
+         CurrentLineNumber = LineNumber;
+         PositionFilePointer (CurrentLineNumber);
+      }
+      else
+      {
+         printf("Cannot find source file: %s\n", SourceFile);
+         return 1;
+      }
+   }
+   return 0;
+}
+#endif
 
 //-------------------------------------------------------------------------
 // The following section contains routines pertaining to the list of

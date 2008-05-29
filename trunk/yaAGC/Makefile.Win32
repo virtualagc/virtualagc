@@ -37,11 +37,11 @@
 #				exiting from an interrupt-service routine.
 
 # 2007-03-05 RSB
-CFLAGS += -DALLOW_BSUB
+CFLAGS += -DALLOW_BSUB -DGDBMI
 
 default:	WinAGC yaAGC.exe
 
-yaAGC.exe:	main.o nbfgets.o symbol_table.o regex.o ../Luminary131/CheckDec.c libyaAGC.a
+yaAGC.exe:	main.o agc_gdbmi.o agc_help.o nbfgets.o symbol_table.o regex.o ../Luminary131/CheckDec.c libyaAGC.a
 	gcc ${CFLAGS} -o $@ $^ -L. -lpthreadAGC -lkernel32 -lwsock32 -lyaAGC
 
 libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \
