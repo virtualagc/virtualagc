@@ -23,7 +23,7 @@ Colossus249.bin: Colossus249.binsource
 	mv Oct2Bin.bin Colossus249.bin
 
 Colossus249.lst Colossus249.symtab: ${SOURCE} Colossus249.bin
-	../yaYUL/yaYUL.exe MAIN.s >Colossus249.lst
+	../../yaYUL/yaYUL.exe MAIN.s >Colossus249.lst
 	mv MAIN.s.symtab Colossus249.symtab
 	diff -s MAIN.s.bin Colossus249.bin
 
