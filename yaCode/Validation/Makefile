@@ -25,7 +25,7 @@ Validation.txt: Validation.bin
 	../Luminary131/webb2burkey-rope Validation.bin Validation.txt
 
 Validation.bin:	${SSOURCE}
-	../yaYUL/yaYUL Validation.s >Validation.lst
+	../../yaYUL/yaYUL Validation.s >Validation.lst
 	mv Validation.s.bin Validation.bin
 
 clean:
