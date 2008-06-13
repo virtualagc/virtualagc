@@ -227,7 +227,7 @@ char *nbfgets (char *Buffer, int Length);
 void nbfsgets_ready (const char *prompt);
 
 // Some buffers for strings.
-char s[129], sraw[129], s1[129], s2[129], s3[129], s4[129], s5[129];
+char s[129], sraw[129], slast[129], s1[129], s2[129], s3[129], s4[129], s5[129];
 
 /* Prompt String
  * Allow the prompt to be changed in gdb/mi mode
@@ -1585,6 +1585,7 @@ rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
   char *s;
   //static int FirstTime = 1;
   MaxSize--;
+
   while (1)
     {
       // While waiting for character input, continue to look for client connects
@@ -1817,6 +1818,7 @@ main (int argc, char *argv[])
       return (1);
     }
 
+
 #ifdef GDBMI
     if (!QuietMode) gdbmiHandleShowVersion();
 
@@ -1909,6 +1911,7 @@ main (int argc, char *argv[])
   while (1)
     {
       int Break;
+      
       RealTime = times (&DummyTime);
       if (RealTime != LastRealTime)
 	{
@@ -2347,7 +2350,7 @@ main (int argc, char *argv[])
                   if (Line)
                   {
                      LoadSourceLine(Line->FileName, Line->LineNumber);
-                     //if (RunState)
+                     if (RunState)
                      {
                         if (FullNameMode) gdbmiPrintFullNameContents(Line);
                         else Disassemble (&State);
@@ -2359,23 +2362,36 @@ main (int argc, char *argv[])
                   }
 #endif
 		}
-	      else
-		  Disassemble (&State);
+	      else Disassemble (&State);
+
 	      while (1)
 		{
+			
+
 		  if (DebugMode && NumFromFiles == 1)
 		    {
 		      // JMS: Tell the thread which is actually reading the input from
 		      // stdin to actually go ahead and read. At this point, we know that
 		      // the last debugging command has been processed.
-		      nbfgets_ready(agcPrompt);
-#ifndef USE_READLINE
 		      printf ("%s",agcPrompt);
-#endif  // USE_READLINE
-	              fflush(stdout);
+		     	fflush(stdout);
+		     	
+		      nbfgets_ready(agcPrompt);
+
+//#ifndef USE_READLINE
+//		      printf ("%s",agcPrompt);
+//#endif  // USE_READLINE
+
 		    }
+		    
+		  strcpy(slast,sraw);  
+
 		  s[sizeof (s) - 1] = 0;
 		  rfgets (&State, s, sizeof (s) - 1, FromFiles[NumFromFiles - 1]);
+
+		  /* Use last command if just newline */
+		  if (strlen(s) == 0) strcpy(s,slast);
+		  
 		  // Normalize the strings by getting rid of leading, trailing
 		  // or duplicated spaces.
 		  i = sscanf (s, "%s%s%s%s%s", s1, s2, s3, s4, s5);
@@ -2862,9 +2878,13 @@ main (int argc, char *argv[])
 			printf("Symbol not found.\n");
 		    }
 #endif
+
+#ifndef GDBMI
 		  // JMS: 07.28
 		  else if (1 == sscanf (s, "WHATIS %s", SymbolName))
 		    WhatIsSymbol (SymbolName, ARCH_AGC);
+#endif
+
 
 		  // JMS: 07.28
 		  else if (!strcmp (s, "LIST -"))
@@ -3219,8 +3239,13 @@ main (int argc, char *argv[])
 #ifdef GDBMI
 		  else if (gdbmiHandleCommand(&State, s , sraw ) == 0 ) 
 	            {
-	               //printf ("Undefined command: \"%s\". Try \"help\".\n", sraw );
+	              // printf ("Undefined command: \"%s\". Try \"help\".\n", sraw );
 	            }
+	           else 
+	           {
+	           	fflush(stdout);
+
+	           }
 #else
 		  else
 		    printf ("Illegal command.\n");
@@ -3263,6 +3288,7 @@ static void catch_sigint(int sig)
 {
    BreakPending = 1; /* Make sure Break only happens when we want it */
    nbfgets_ready(agcPrompt);
+   signal(SIGINT, catch_sigint);
 }
 #endif
 

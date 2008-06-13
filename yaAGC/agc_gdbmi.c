@@ -18,6 +18,7 @@
 #include <ctype.h>
 
 extern char agcPrompt[16];
+extern char nbPrompt[16];
 extern int HaveSymbols;
 extern int FullNameMode;
 extern int Break;
@@ -36,6 +37,25 @@ static CustomCommand_t gdbmiCustomCmds[32];
 const char disp_keep[5] = "keep";
 const char disp_delete[4] = "del";
 
+static char * gdbmiBasename (const char *name)
+{
+  const char *base;
+
+#if defined (HAVE_DOS_BASED_FILE_SYSTEM)
+  /* Skip over the disk name in MSDOS pathnames. */
+  if (ISALPHA (name[0]) && name[1] == ':') 
+    name += 2;
+#endif
+
+  for (base = name; *name; name++)
+    {
+      if (*name == '/' || *name == '\\')
+	{
+	  base = name + 1;
+	}
+    }
+  return (char *) base;
+}
 
 void gdbmiDisassemble(agc_t *State,unsigned start_linear,unsigned end_linear)
 {
@@ -240,20 +260,7 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
    unsigned gdbmiAddress = 0;
    Address_t agc_addr;
    char* p;
-
-   /* Remove Double Quotes */
-   if (sraw[0] == '\"')
-   {
-      ++sraw;++s;
-      if (sraw[strlen(sraw)-1] == '\"')
-      {
-         sraw[strlen(sraw)-1] = 0;
-         s[strlen(s)-1]=0;
-      }
-   }
    
-   /* First replace ":" with space */
-   if (cli_char = strstr(sraw,":")) *cli_char = ' '; /* replace colon with space */
 
    if (strlen(s) > 0) /* Do we have an argument */
    {
@@ -273,12 +280,17 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
 
       /* If fullpath name is given remove that since symtab only stores that once
        * in the symbol file (i.e. SourcePathName) */
-      if (!strncmp(sraw,SourcePathName,strlen(SourcePathName)))
-      {
-         sraw+=strlen(SourcePathName)+1;
-         s+=strlen(SourcePathName)+1;
-      }
-      
+//      if (!strncmp(sraw,SourcePathName,strlen(SourcePathName)))
+//      {
+//         sraw+=strlen(SourcePathName)+1;
+//         s+=strlen(SourcePathName)+1;
+//      }
+			sraw = gdbmiBasename(sraw);
+			s=gdbmiBasename(s);
+
+   	/* First replace ":" with space */
+   	if (cli_char = strstr(sraw,":")) *cli_char = ' '; /* replace colon with space */
+     
       if (HaveSymbols && 
          (2 == sscanf (sraw, "%s %d", &FileName, &LineNumber)) &&
          (Line = (SymbolLine_t*) ResolveFileLineNumber(FileName, LineNumber)))
@@ -603,11 +615,20 @@ void gdbmiHandleInfoBreakpoints(agc_t *State , char* s, char* sraw)
 
 void gdbmiPrintFullNameContents(SymbolLine_t *Line)
 {
+   /* Need OS Seperator */
+#ifdef WIN32
+   printf("\032\032%s\\%s:%d:%d:beg:0x%04x\n",SourcePathName,
+          Line->FileName, Line->LineNumber,Line->LineNumber,
+          gdbmiLinearFixedAddr(Line->CodeAddress.SReg,
+                               Line->CodeAddress.FB,
+                               Line->CodeAddress.Super)); 
+#else
    printf("\032\032%s/%s:%d:%d:beg:0x%04x\n",SourcePathName,
           Line->FileName, Line->LineNumber,Line->LineNumber,
           gdbmiLinearFixedAddr(Line->CodeAddress.SReg,
                                Line->CodeAddress.FB,
                                Line->CodeAddress.Super));
+#endif
 }
 
 void gdbmiHandleInfoLine(agc_t *State , char* s, char* sraw)
@@ -775,6 +796,7 @@ void gdbmiHandleInfo(agc_t *State , char* s, char* sraw)
 void gdbmiHandleSetPrompt(agc_t *State , char* s, char* sraw)
 {
    strncpy(agcPrompt,sraw,15);
+   strncpy(nbPrompt,agcPrompt,15);
    ++gdbmi_status;
 }
 
@@ -837,6 +859,7 @@ void gdbmiHandleSet(agc_t *State , char* s, char* sraw)
    else if (!strncmp(s, "PRINT ",6)); /* Ignore for now */   
    else if (!strncmp(s, "UNWINDONSIGNAL ",15)); /* Ignore for now */   
    else if (!strncmp(s, "DISASSEMBLY-FLAVOR ",19)); /* Ignore for now */   
+   else if (!strncmp(s, "DEBUGEVENTS ",12)); /* Ignore for now */   
    else if (!strncmp(s, "VARIABLE ",9))
    	gdbmiHandleSetVariable(State,s+9,sraw+9);
    else 
@@ -1073,6 +1096,14 @@ void gdbmiHandleStart(agc_t *State , char* s, char* sraw)
 }
 
 
+void gdbmiHandleWhatIs(agc_t *State , char* s, char* sraw)
+{
+   /* All types will be considered unsigned */
+   printf("type = unsigned\n");
+   ++gdbmi_status;
+}
+
+
 void gdbmiHandlePrint(agc_t *State , char* s, char* sraw)
 {
    int AddrFlag = 0;
@@ -1248,6 +1279,7 @@ static void gdbmiHandleCommandLineInterface(agc_t *State , char* s, char* r)
    else if (!strncmp(s,"DEFINE ",7)) gdbmiHandleDefine(State,s+7,r+7);
    else if (!strncmp(s,"LIST ",4)) gdbmiHandleList(State,s+4,r+4);
    else if (!strncmp(s,"WHERE",5)) gdbmiHandleBacktrace(State,s+5,r+5);
+   else if (!strncmp(s,"WHATIS",6)) gdbmiHandleWhatIs(State,s+6,r+6);
    else if (!strncmp(s,"BT",2)) gdbmiHandleBacktrace(State,s+2,r+2);
    else if (!strncmp(s,"PRINT",5)) gdbmiHandlePrint(State,s+5,r+5);
    else if (!strncmp(s,"OUTPUT",6)) gdbmiHandleOutput(State,s+6,r+6);
