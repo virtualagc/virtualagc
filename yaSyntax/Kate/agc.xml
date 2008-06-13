@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<language name="AGC" version="1.0" kateversion="2.1" section="Assembler" extensions="*.s" mimetype="text/x-agc">
+        <highlighting>
+		<list name="instructions">
+			<item> ADS </item>
+			<item> AD </item>
+			<item> AUG </item>
+			<item> BZF </item>
+			<item> BZMF </item>
+			<item> CAE </item>
+			<item> CAF </item>
+			<item> CA </item>
+			<item> CCS </item>
+			<item> COM </item>
+			<item> CS </item>
+			<item> DAS </item>
+			<item> DCA </item>
+			<item> DCOM </item>
+			<item> DCS </item>
+			<item> DDOUBL </item>
+			<item> DIM </item>
+			<item> DOUBLE </item>
+			<item> DTCB </item>
+			<item> DTCF </item>
+			<item> DV </item>
+			<item> DXCH </item>
+			<item> EDRUPT </item>
+			<item> EXTEND </item>
+			<item> INCR </item>
+			<item> INDEX </item>
+			<item> NDX </item>
+			<item> INHINT </item>
+			<item> LXCH </item>
+			<item> MASK </item>
+			<item> MSK </item>
+			<item> MP </item>
+			<item> MSU </item>
+			<item> NOOP </item>
+			<item> OVSK </item>
+			<item> QXCH </item>
+			<item> RAND </item>
+			<item> READ </item>
+			<item> RELINT </item>
+			<item> RESUME </item>
+			<item> RETURN </item>
+			<item> ROR </item>
+			<item> RXOR </item>
+			<item> SQUARE </item>
+			<item> SU </item>
+			<item> TCR </item>
+			<item> TCAA </item>
+			<item> OVSK </item>
+			<item> TCF </item>
+			<item> TC </item>
+			<item> TS </item>
+			<item> WAND </item>
+			<item> WOR </item>
+			<item> WRITE </item>
+			<item> XCH </item>
+			<item> XLQ </item>
+			<item> XXALQ </item>
+			<item> ZL </item>
+			<item> ZQ </item>
+		</list>		
+		<list name="pseudos">
+			<item> 1DNADR </item>
+			<item> 2DEC </item>
+			<item> 2BCADR </item>
+			<item> 2CADR </item>
+			<item> 2OCT </item>
+			<item> 2DNADR </item>
+			<item> 3DNADR </item>
+			<item> 4DNADR </item>
+			<item> 5DNADR </item>
+			<item> 6DNADR </item>
+			<item> 2FCADR </item>
+			<item> ADRES </item>
+			<item> BBCON </item>
+			<item> BANK </item>
+			<item> BLOCK </item>
+			<item> BNKSUM </item>
+			<item> CADR </item>
+			<item> COUNT </item>
+			<item> COUNT\* </item>
+			<item> DEC </item>
+			<item> DEC\* </item>
+			<item> DNCHAN </item>
+			<item> DNPTR </item>
+			<item> EBANK </item>
+			<item> ECADR </item>
+			<item> EQUALS </item>
+			<item> ERASE </item>
+			<item> MEMORY </item>
+			<item> OCT </item>
+			<item> REMADR </item>
+			<item> SETLOC </item>
+			<item> SUBRO </item>
+		</list>
+                <contexts>
+                        <context name = "Base" attribute = "Normal Text" lineEndContext = "#stay">
+				<RegExpr attribute="Label" context="#stay" String="^[A-Za-z0-9_./$]+" firstNonSpace="true"/>
+				<DetectChar attribute="Comment" context="Commentar 1" char="#" />
+				<RegExpr String= "^\$[A-Za-z0-9_\.\-]*" attribute = "Preprocessor" context="#stay"/>
+				<keyword attribute="Keyword" context="#stay" String="instructions"/>
+				<keyword attribute="Preprocessor" context="#stay" String="pseudos"/>
+				<RangeDetect char = "&quot;" char1 = "&quot;" attribute = "String" context = "#stay"/>
+				<AnyChar String = "-+&lt;&gt;=;" attribute = "Operator" context = "#stay"/>
+				<RegExpr String= "[0-9]+D" attribute = "Decimal" context="#stay"/>
+				<Int attribute="Octal" context="#stay" />
+			</context>
+			<context attribute="Comment" lineEndContext="#pop" name="Commentar 1" />
+                </contexts>
+
+		<itemDatas>
+                        <itemData name = "Normal Text" defStyleNum = "dsNormal"/>
+			<itemData name="Label"        defStyleNum="dsFunction"   />
+                        <itemData name = "Keyword" defStyleNum = "dsKeyword"/>
+			<itemData name="Decimal" defStyleNum="dsDecVal"/>
+			<itemData name="Octal"        defStyleNum="dsBaseN"/>
+			<itemData name="Data Type"  defStyleNum="dsDataType"/>
+			<itemData name="Hex"  defStyleNum="dsBaseN"/>
+                        <itemData name = "String" defStyleNum = "dsString"/>
+                        <itemData name = "Comment" defStyleNum = "dsComment"/>
+                        <itemData name = "Substitution" defStyleNum = "dsOthers"/>
+ 			<itemData name="Preprocessor"  defStyleNum="dsOthers"/>
+			<itemData name = "Parameter" defStyleNum = "dsOthers"/>
+                        <itemData name = "Operator" defStyleNum = "dsOthers"/>
+                        <itemData name = "Command" defStyleNum = "dsNormal"/>
+                </itemDatas>
+        </highlighting>
+        <general>
+                <comments>
+                        <comment name="singleLine" start="#" />
+		</comments>
+                <keywords casesensitive="1"/>
+        </general>
+</language>
+
