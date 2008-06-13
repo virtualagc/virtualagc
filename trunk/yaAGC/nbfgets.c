@@ -78,7 +78,8 @@ char nbSourceFiles[MAX_NUM_FILES][MAX_FILE_LENGTH];
 #include <readline/readline.h>
 #include <readline/history.h>
 
-char *source_generator __P ((const char *, int));
+//char *source_generator __P ((const char *, int));
+
 
 // Use to initialize the readline mechanism
 static int rl_gets_initialized = 0;
@@ -86,44 +87,6 @@ static int rl_gets_initialized = 0;
 // The current prompt for readline
 char nbPrompt[16];
 extern char agcPrompt[16];
-
-// Read a string, and return a pointer to it using the GNU
-// readline facility. Returns NULL on EOF. Taken from the
-// GNU documentation.
-static char *
-rl_gets (void)
-{
-  char *line_read = NULL;
-
-  // If we have not yet initialize, do this by setting up
-  // the proper callback for file name completion.
-  if (!rl_gets_initialized)
-    {
-      rl_readline_name = "yaAGC";
-      rl_completion_entry_function = source_generator;
-#ifdef GDBMI
-      strcpy (nbPrompt, "(agc) ");
-      strcpy (agcPrompt, nbPrompt);
-#else
-      strcpy (nbPrompt, "> ");
-#endif
-
-      rl_gets_initialized = 1;
-    }
-
-  // Get a line from the user.
-  line_read = readline (nbPrompt);
-  strcpy(nbfgetsBuffer, line_read);
-
-  // If the line has any text in it,
-  // save it on the history.
-  if (line_read && *line_read)
-    add_history (line_read);
-
-  free (line_read);
-  return (nbfgetsBuffer);
-}
-#endif // USE_READLINE
 
 // Given a partial string return matches. Successive call to this
 // should return success partial matches until there are no more.
@@ -149,6 +112,50 @@ source_generator (const char *text, int state)
   
   return (char *)NULL;
 }
+
+
+// Read a string, and return a pointer to it using the GNU
+// readline facility. Returns NULL on EOF. Taken from the
+// GNU documentation.
+static char *
+rl_gets (void)
+{
+  char *line_read = NULL;
+
+  // If we have not yet initialize, do this by setting up
+  // the proper callback for file name completion.
+  if (!rl_gets_initialized)
+    {
+      rl_readline_name = "yaAGC";
+      rl_completion_entry_function = source_generator;
+#ifdef GDBMI
+      strcpy (nbPrompt, agcPrompt);
+#else
+      strcpy (nbPrompt, "> ");
+#endif
+
+      rl_gets_initialized = 1;
+    }
+
+  // Get a line from the user.
+// line_read = readline (nbPrompt);
+
+	do
+	{
+  	 line_read = readline (NULL);
+	}while (line_read[0] == EOF || line_read[0] == NULL);
+	 strcpy(nbfgetsBuffer, line_read);
+	 
+  // If the line has any text in it,
+  // save it on the history.
+  if (line_read && *line_read )
+    add_history (line_read);
+
+  free (line_read);
+  return (nbfgetsBuffer);
+}
+#endif // USE_READLINE
+
 
 // Adds a source file to the list, assume we do not exceed this
 // list. This facility is temporary anyhow.
@@ -181,18 +188,25 @@ nbfgetsThreadFunction (void *Arg)
 #endif
         {
 #ifdef WIN32	    
-	  Sleep (10);
+	  		  Sleep (10);
 #else
-	  struct timespec req, rem;
-	  req.tv_sec = 0;
-	  req.tv_nsec = 10000000;
-	  nanosleep (&req, &rem);
+			  struct timespec req, rem;
+			  req.tv_sec = 0;
+			  req.tv_nsec = 10000000;
+			  nanosleep (&req, &rem);
 #endif // WIN32
-          continue;
-	}
+           continue;
+		}
+		
       nbfgetsReady = 1;
+      
       // Go to sleep until the string has been processed.
-      pthread_cond_wait (&nbfgetsCond, &nbfgetsMutex);
+      pthread_mutex_lock(&nbfgetsMutex);
+      if (pthread_cond_wait (&nbfgetsCond, &nbfgetsMutex) != 0)
+      {
+      	fputs("pthread error\n",stderr);
+      }
+      pthread_mutex_unlock(&nbfgetsMutex);     
     }
 }
 
@@ -202,9 +216,11 @@ void
 nbfgets_ready (const char *prompt)
 {
 #ifdef USE_READLINE
-  strcpy (nbPrompt, prompt);
+  	strcpy (nbPrompt, prompt);
 #endif
-  pthread_cond_broadcast (&nbfgetsCond);
+		pthread_mutex_lock(&nbfgetsMutex);
+  		pthread_cond_broadcast (&nbfgetsCond);
+  		pthread_mutex_unlock(&nbfgetsMutex);
 }
 
 // Returns NULL until a string is ready.  The string is always fetched from
@@ -221,6 +237,9 @@ nbfgets (char *Buffer, int Length)
       nbfgetsReady = 0;
       pthread_create (&nbfgetsThread, NULL, nbfgetsThreadFunction, NULL);
       nbfgetsInitialized = 1;
+      
+      pthread_cond_init (&nbfgetsCond,NULL);
+      pthread_mutex_init (&nbfgetsMutex,NULL);
     }
   // Has the other thread managed to fetch a string yet?
   if (!nbfgetsReady || Length < 1)

@@ -234,10 +234,20 @@ BacktraceDisplay (agc_t *State)
        int SBB = (State->OutputChannel7 & 0100) ? 1 : 0;
        Line = ResolveLineAGC(CurrentZ, FB, SBB);
 
-       if (Line) printf("#0\t0x%04x in %s () at %s/%s:%d\n",
+       if (Line) 
+       {
+#ifdef WIN32
+       		printf("#0\t0x%04x in %s () at %s\\%s:%d\n",
                     gdbmiLinearAddr(&Line->CodeAddress),
                     gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
                     Line->FileName,Line->LineNumber);
+#else
+       		printf("#0\t0x%04x in %s () at %s/%s:%d\n",
+                    gdbmiLinearAddr(&Line->CodeAddress),
+                    gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
+                    Line->FileName,Line->LineNumber);	
+#endif
+       }
     }
 #endif
   if (BacktraceCount == 0)
@@ -300,11 +310,21 @@ BacktraceDisplay (agc_t *State)
          int SBB = (Bp->OutputChannel7 & 0100) ? 1 : 0;
          Line = ResolveLineAGC(CurrentZ, FB, SBB);
 
-         if (Line) printf("#%d\t0x%04x in %s () at %s/%s:%d\n",
-             i+1,
-             gdbmiLinearAddr(&Line->CodeAddress),
+         if (Line) 
+         {
+#ifdef WIN32
+         	printf("#%d\t0x%04x in %s () at %s\\%s:%d\n",i+1,
+             	   gdbmiLinearAddr(&Line->CodeAddress),
                    gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
                    Line->FileName,Line->LineNumber);
+#else
+         	printf("#%d\t0x%04x in %s () at %s/%s:%d\n",i+1,
+             	   gdbmiLinearAddr(&Line->CodeAddress),
+                   gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
+                   Line->FileName,Line->LineNumber);
+
+#endif
+         }
          else
             printf("#%d\t0x%04x in <%02o+%04o> ()\n",
                    i+1,
