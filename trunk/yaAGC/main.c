@@ -2390,7 +2390,8 @@ main (int argc, char *argv[])
 		  rfgets (&State, s, sizeof (s) - 1, FromFiles[NumFromFiles - 1]);
 
 		  /* Use last command if just newline */
-		  if (strlen(s) == 0) strcpy(s,slast);
+		  // if (strlen(s) == 0) strcpy(s,slast); Does not work on WIN32 due 
+		  // to CR LF in readline
 		  
 		  // Normalize the strings by getting rid of leading, trailing
 		  // or duplicated spaces.
