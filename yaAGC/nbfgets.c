@@ -143,7 +143,7 @@ rl_gets (void)
 	do
 	{
   	 line_read = readline (NULL);
-	}while (line_read[0] == EOF || line_read[0] == NULL);
+	}while (line_read[0] == EOF);
 	 strcpy(nbfgetsBuffer, line_read);
 	 
   // If the line has any text in it,
