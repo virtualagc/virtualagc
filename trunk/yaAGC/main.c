@@ -2366,23 +2366,15 @@ main (int argc, char *argv[])
 
 	      while (1)
 		{
-			
-
 		  if (DebugMode && NumFromFiles == 1)
-		    {
+		  {
 		      // JMS: Tell the thread which is actually reading the input from
 		      // stdin to actually go ahead and read. At this point, we know that
 		      // the last debugging command has been processed.
-		      printf ("%s",agcPrompt);
-		     	fflush(stdout);
-		     	
+		      printf("%s",agcPrompt);
+		      fflush(stdout);
 		      nbfgets_ready(agcPrompt);
-
-//#ifndef USE_READLINE
-//		      printf ("%s",agcPrompt);
-//#endif  // USE_READLINE
-
-		    }
+		  }
 		    
 		  strcpy(slast,sraw);  
 
@@ -2390,14 +2382,12 @@ main (int argc, char *argv[])
 		  rfgets (&State, s, sizeof (s) - 1, FromFiles[NumFromFiles - 1]);
 
 		  /* Use last command if just newline */
-		  // if (strlen(s) == 0) strcpy(s,slast); Does not work on WIN32 due 
-		  // to CR LF in readline
+		  if (strlen(s) == 0) strcpy(s,slast);
 		  
 		  // Normalize the strings by getting rid of leading, trailing
 		  // or duplicated spaces.
 		  i = sscanf (s, "%s%s%s%s%s", s1, s2, s3, s4, s5);
-		  if (i == 1)
-		    strcpy (s, s1);
+		  if (i == 1) strcpy (s, s1);
 		  else if (i == 2)
 		    sprintf (s, "%s %s", s1, s2);
 		  else if (i == 3)
@@ -2406,23 +2396,15 @@ main (int argc, char *argv[])
 		    sprintf (s, "%s %s %s %s", s1, s2, s3, s4);
 		  else if (i == 5)
 		    sprintf (s, "%s %s %s %s %s", s1, s2, s3, s4, s5);
-		  else 
-		    s[0] = 0;
-		  //printf ("Command is \"%s\"\n", s);  
-		  if (s[0] == '#')
-		    continue;
-		  if (s[0] == 0)
-		    continue;
+		  else s[0] = 0;
+
+		  if (s[0] == '#' || s[0] == 0) continue;
+
 		  strcpy (sraw, s);
 		  RealTimeOffset +=
 		    ((RealTime = times (&DummyTime)) - LastRealTime);
 		  LastRealTime = RealTime;
 		  for (ss = s; *ss; *ss = toupper (*ss), ss++);
-		    //if (*ss == '\n')
-		    //  *ss = 0;
-		  //for (ss = sraw; *ss; ss++)
-		  //  if (*ss == '\n')
-		  //    *ss = 0;
 #ifdef GDBMI
 		  if (gdbmiHelp(s) > 0) continue;
 #else

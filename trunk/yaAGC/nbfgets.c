@@ -43,6 +43,7 @@
 		                debug command, and source file name completion.
 		08/13/05 RSB	Added an initializer for nbfgetsCond, on the
 				advice of "grosman".
+		13/06/08 OH	Intercept rl_getc_function to ignore LF
 */
 
 #include <pthread.h>
@@ -90,113 +91,117 @@ extern char agcPrompt[16];
 
 // Given a partial string return matches. Successive call to this
 // should return success partial matches until there are no more.
-char *
-source_generator (const char *text, int state)
+char * source_generator (const char *text, int state)
 {
   static int list_index, len;
   char *name;
 
   if (!state)
-    {
+  {
       list_index = 0;
       len = strlen (text);
-    }
+  }
 
   while (list_index < nbNumberSourceFiles)
-    {
+  {
       name = nbSourceFiles[list_index];
       list_index++;
       if (strncmp (name, text, len) == 0)
 	return (strdup(name));
-    }
+  }
   
   return (char *)NULL;
 }
 
+/**
+ * Why sometimes the input stream returns huge numbers is beyond me
+ * Maybe a Code::Blocks stream issue
+ */
+int rl_getchar(FILE *stream)
+{
+   char c;
+   while ((c = (char)rl_getc(stream)) == 10); /* Ignore LF */
+   return ((int)c);
+}
 
 // Read a string, and return a pointer to it using the GNU
 // readline facility. Returns NULL on EOF. Taken from the
 // GNU documentation.
-static char *
-rl_gets (void)
+static char * rl_gets (void)
 {
-  char *line_read = NULL;
+   char *line_read = NULL;
 
-  // If we have not yet initialize, do this by setting up
-  // the proper callback for file name completion.
-  if (!rl_gets_initialized)
-    {
-      rl_readline_name = "yaAGC";
-      rl_completion_entry_function = source_generator;
+   // If we have not yet initialize, do this by setting up
+   // the proper callback for file name completion.
+   if (!rl_gets_initialized)
+   {
+     rl_readline_name = "yaAGC";
+     rl_completion_entry_function = source_generator;
 #ifdef GDBMI
-      strcpy (nbPrompt, agcPrompt);
+     strcpy (nbPrompt, agcPrompt);
 #else
-      strcpy (nbPrompt, "> ");
+     strcpy (nbPrompt, "> ");
 #endif
+     rl_gets_initialized = 1;
+   }
 
-      rl_gets_initialized = 1;
-    }
-
-  // Get a line from the user.
-// line_read = readline (nbPrompt);
-
-	do
-	{
-  	 line_read = readline (NULL);
-	}while (line_read[0] == EOF);
-	 strcpy(nbfgetsBuffer, line_read);
+   // Get a line from the user.
+   do
+   {
+      line_read = readline (NULL);
+   }while (line_read[0] == EOF);
+   strcpy(nbfgetsBuffer, line_read);
 	 
-  // If the line has any text in it,
-  // save it on the history.
-  if (line_read && *line_read )
-    add_history (line_read);
+   // If the line has any text in it,
+   // save it on the history.
+   if (line_read && *line_read ) add_history (line_read);
 
-  free (line_read);
-  return (nbfgetsBuffer);
+   free (line_read);
+   return (nbfgetsBuffer);
 }
 #endif // USE_READLINE
 
 
 // Adds a source file to the list, assume we do not exceed this
 // list. This facility is temporary anyhow.
-void
-nbadd_source_file (const char *file)
+void nbadd_source_file (const char *file)
 {
   strcpy (nbSourceFiles[nbNumberSourceFiles], file);
   nbNumberSourceFiles++;
 }
 
-// Resets the number of source files to zero. This is needed if
-// we reload the symbol table
-void
-nbclear_files (void)
+/** 
+ * Resets the number of source files to zero. This is needed if
+ * we reload the symbol table
+ */
+void nbclear_files (void)
 {
   nbNumberSourceFiles = 0;
 }
 
-static void *
-nbfgetsThreadFunction (void *Arg)
+static void * nbfgetsThreadFunction (void *Arg)
 {
   nbfgetsBuffer[MAX_NBFGETS - 1] = 0;
   while (1)
-    {
+  {
       // Wait for an input string, presumably sleeping.
 #ifdef USE_READLINE
       if (rl_gets() == NULL)
 #else
-      if (nbfgetsBuffer != fgets (nbfgetsBuffer, MAX_NBFGETS - 1, stdin))
+      //if (nbfgetsBuffer != fgets (nbfgetsBuffer, MAX_NBFGETS - 1, stdin))
 #endif
-        {
+
+      {
 #ifdef WIN32	    
-	  		  Sleep (10);
+	  Sleep (10);
 #else
-			  struct timespec req, rem;
-			  req.tv_sec = 0;
-			  req.tv_nsec = 10000000;
-			  nanosleep (&req, &rem);
+	  struct timespec req, rem;
+	  req.tv_sec = 0;
+	  req.tv_nsec = 10000000;
+	  nanosleep (&req, &rem);
 #endif // WIN32
            continue;
-		}
+       }
 		
       nbfgetsReady = 1;
       
@@ -212,15 +217,11 @@ nbfgetsThreadFunction (void *Arg)
 
 // Signals to the thread reading in the input from stdin to actually go
 // ahead and read.
-void
-nbfgets_ready (const char *prompt)
+void nbfgets_ready (const char *prompt)
 {
-#ifdef USE_READLINE
-  	strcpy (nbPrompt, prompt);
-#endif
-		pthread_mutex_lock(&nbfgetsMutex);
-  		pthread_cond_broadcast (&nbfgetsCond);
-  		pthread_mutex_unlock(&nbfgetsMutex);
+   pthread_mutex_lock(&nbfgetsMutex);
+   pthread_cond_broadcast (&nbfgetsCond);
+   pthread_mutex_unlock(&nbfgetsMutex);
 }
 
 // Returns NULL until a string is ready.  The string is always fetched from
@@ -228,22 +229,23 @@ nbfgets_ready (const char *prompt)
 // (In other words, making Length bigger than MAX_NBFGETS has the same effect
 // as making it equal to MAX_NBFGETS.)  Length also includes the nul-termination.
 
-char *
-nbfgets (char *Buffer, int Length)
+char * nbfgets (char *Buffer, int Length)
 {
   if (!nbfgetsInitialized)
-    {
+  {
+      rl_getc_function = rl_getchar;
+      
       // We haven't started the other thread yet.  Better do that.
       nbfgetsReady = 0;
-      pthread_create (&nbfgetsThread, NULL, nbfgetsThreadFunction, NULL);
-      nbfgetsInitialized = 1;
-      
       pthread_cond_init (&nbfgetsCond,NULL);
       pthread_mutex_init (&nbfgetsMutex,NULL);
-    }
+      pthread_create (&nbfgetsThread, NULL, nbfgetsThreadFunction, NULL);
+      nbfgetsInitialized = 1;
+  }
+
   // Has the other thread managed to fetch a string yet?
-  if (!nbfgetsReady || Length < 1)
-    return (NULL);// No string ready yet.
+  // if not return NULL
+  if (!nbfgetsReady || Length < 1) return (NULL);
   Length--;
   strncpy (Buffer, nbfgetsBuffer, Length);
   Buffer[Length] = 0;		// Make sure nul-terminated.
