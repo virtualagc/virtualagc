@@ -1,0 +1,14 @@
+#summary Visual Debugging the Virtual AGC
+
+http://virtualagc.googlecode.com/svn/trunk/Apollo32.png 
+= Visual Debugging the AGC and AGS =
+
+One of the goals of this project is to fully enable the emulator to exhibit the GDB/MI behavior. Initially the focus will be on making the AGC behave like a gdb in debug mode by supporting the basic command line interface of the gdb. This capability will enable running the AGC and AGS under Graphical front-ends that can interact with the gdb. So far three environments have been successfully used to visually debug the AGC:
+
+  * [http://www.codeblocks.org/ Code::Blocks] (Open Source IDE running on Linux, Windows and Mac OS)
+  * [http://www.kdbg.org/ KDbg] (A KDE Graphical debugger)
+  * [http://www.gnu.org/software/emacs/ Emacs] (GUB based debugging)
+
+Supporting documentation for each of these Front-ends can be found in the respective folder under yaScripts in the source distribution. Typically an approach is followed to first intercept the gdb command to identify the arguments before calling yaAGC with the proper arguments. For example in Code::Blocks the registered debugger will be _agc-gdb_ which is a script that calls yaAGC.
+
+Of course you don't need a debug front-end you can also just launch yaAGC in in debug mode and interact with the AGC using gdb command line options. Type help all for all supported commands and for detailed documentation refer to the [http://www.gnu.org/software/gdb/documentation/ GDB Documentation].
