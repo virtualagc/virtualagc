@@ -45,7 +45,7 @@ ${EXENAME}: $(CFILES:%.c=%.o)
 	gcc ${CFLAGS} -o $@ $^ -L../yaAGC -lyaAGC ${ALLEGRO}
 
 clean:
-	-rm ${EXENAME} *.o *~
+	-rm -f ${EXENAME} *.o *~
 
 install: ${EXENAME}
 	cp ${EXENAME} ${PREFIX}/bin

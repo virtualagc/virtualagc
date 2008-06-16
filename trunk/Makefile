@@ -79,7 +79,7 @@
 #				exiting from an interrupt-service routine.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20070305\\\"
+NVER:=\\\"20080615\\\"
 DATE:=`date +%Y%m%d`
 
 # Uncomment the following line (or do 'make NOREADLINE=yes') if the build 
@@ -184,7 +184,7 @@ endif
 # I used this only for creating a development snapshot.  It's no use to anybody
 # else, I expect.
 dev:	clean
-	-rm ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2
+	-rm -f ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2
 	tar -C .. --exclude=*CVS* --exclude=*snprj* --exclude="*.core" \
 		--exclude=yaAGC/yaDSKY/autom4te.cache/* \
 		--exclude=yaAGC/yaDSKY/configure \
@@ -225,16 +225,15 @@ clean:
 	$(MAKE) -C yaCode/Colossus249 clean
 	${MAKE} -C yaCode/Artemis072 clean
 	$(MAKE) -C yaCode/Validation clean
-	-rm yaSimulators/ControlPulseSim/ControlPulseSim
-	-rm `find . -name "core"`
+	-rm -f yaSimulators/ControlPulseSim/ControlPulseSim
+	-rm -f `find . -name "core"`
 
 install: all
-	-mkdir ${PREFIX}
-	-mkdir ${PREFIX}/bin
-	-rm ${PREFIX}/bin/VirtualAgcFileStart
+	-mkdir -p ${PREFIX}/bin/modules
+	-rm -f ${PREFIX}/bin/VirtualAgcFileStart
 	echo hello >${PREFIX}/bin/VirtualAgcFileStart
 	sleep 2
-	cp ControlPulseSim/ControlPulseSim ${PREFIX}/bin
+	cp yaSimulators/ControlPulseSim/ControlPulseSim ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/ControlPulseSim
 	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} install
 	$(MAKE) -C yaAGC PREFIX=${PREFIX} install NOREADLINE=${NOREADLINE} CURSES=${CURSES}
@@ -250,7 +249,7 @@ install: all
 	chmod ugo+r ${PREFIX}/bin/LM*.ini
 	chmod ugo+r ${PREFIX}/bin/CM*.ini
 ifndef NOGUI
-	-rm ${PREFIX}/bin/yaDSKY
+	-rm -f ${PREFIX}/bin/yaDSKY
 	$(MAKE) -C yaDSKY PREFIX=${PREFIX} install
 	-ln ${PREFIX}/bin/yadsky ${PREFIX}/bin/yaDSKY
 	$(MAKE) -C yaDEDA PREFIX=${PREFIX} install
@@ -258,12 +257,12 @@ endif
 	cp yaScripts/Sim* ${PREFIX}/bin
 	chmod ugo+rx ${PREFIX}/bin/Sim*
 	cp yaSimulators/LM_Simulator/*.tcl yaSimulators/LM_Simulator/*.ini ${PREFIX}/bin
-	cp -R yaSimulators/LM_Simulator/modules ${PREFIX}/bin
+	cp -R yaSimulators/LM_Simulator/modules/*.tcl ${PREFIX}/bin/modules
 	echo cd ${PREFIX}/bin >${PREFIX}/bin/LM_Simulator
 	echo wish lm_simulator.tcl '$$1' '$$2' '$$3' >>${PREFIX}/bin/LM_Simulator
 	chmod ugo+x ${PREFIX}/bin/LM_Simulator
-	-rm ${PREFIX}/bin/VirtualAgcFileList
-	-rm ${PREFIX}/bin/VirtualAgcUninstall
+	-rm -f ${PREFIX}/bin/VirtualAgcFileList
+	-rm -f ${PREFIX}/bin/VirtualAgcUninstall
 	find ${PREFIX}/bin -cnewer ${PREFIX}/bin/VirtualAgcFileStart >${PREFIX}/bin/VirtualAgcFileList
 	echo rm `cat ${PREFIX}/bin/VirtualAgcFileList` >>${PREFIX}/bin/VirtualAgcUninstall
 	echo rm -rf ${PREFIX}/share/yaDEDA >>${PREFIX}/bin/VirtualAgcUninstall

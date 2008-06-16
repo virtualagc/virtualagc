@@ -46,14 +46,14 @@ Luminary131.lst Luminary131.symtab: ${SOURCE} Luminary131.bin
 	diff -s MAIN.s.bin Luminary131.bin
 	
 clean:
-	-rm $(TARGETXEQ) *.lst *~ MAIN.s.bin Luminary131.bin *.symtab
+	-rm -f $(TARGETXEQ) *.lst *~ MAIN.s.bin Luminary131.bin *.symtab
 	
 install:	default
 	cp ${TARGETS} Luminary131.symtab ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/webb2burkey-rope ${PREFIX}/bin/Oct2Bin \
 		${PREFIX}/bin/CheckDec ${PREFIX}/bin/bdiffhead
 	chmod ugo+r ${PREFIX}/bin/Luminary131.bin
-	rm *.symtab *.lst
+	rm -f *.symtab *.lst
 	
 	
 	

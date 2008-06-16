@@ -22,7 +22,7 @@ TARGETS=${PROJECT}.bin ${PROJECT}.lst
 default: $(TARGETS)
 
 clean:
-	-rm *.lst *~ *.bin
+	-rm -f *.lst *~ *.bin
 	
 install: default
 	cp ${PROJECT}.bin ${PREFIX}/bin

@@ -29,7 +29,7 @@ Validation.bin:	${SSOURCE}
 	mv Validation.s.bin Validation.bin
 
 clean:
-	-rm Validation.bin Validation.lst Validation.s.bin Validation.txt *~ *.symtab
+	-rm -f Validation.bin Validation.lst Validation.s.bin Validation.txt *~ *.symtab
 	
 install:	default
 	cp Validation.bin ${PREFIX}/bin
