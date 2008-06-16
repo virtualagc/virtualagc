@@ -1,0 +1,55 @@
+# This shell script stops all of the processes on a given list
+# (environment variable PIDS) whenever any of them stops.
+
+# What the "trap" does is to keep the scanning process from exiting if 
+# ctrl-C is hit or the parent process is stopped.  However, because this will
+# have been accompanied by stopping apps we're scanning for, we will 
+# terminate anyway, but we'll do it after terminating apps rather than before.
+trap "" 0 1 2 9 15 17 19 23
+sleep 5
+
+# Now we have a big loop that just keeps checking that all of the processes
+# are running.  If not, we stop all of them and exit.
+echo Scanning for program status of processes ${PIDS}
+i=1
+while [ $i -eq 1 ]
+do
+  sleep 1
+  for n in ${PIDS}
+  do
+    # Note that on failure we do the check multiple times to be sure.  This
+    # shouldn't be necessary, but I found after migrating from SuSE 9.0 to 9.1
+    # that the following test sometimes says that the process has terminated
+    # when it really hasn't.
+    if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+    then
+      if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+      then
+	if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	then
+	  if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	  then
+	    if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	    then
+	      if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	      then
+		if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+		then
+		  echo Process ${n} has terminated.
+		  i=0
+		fi
+	      fi
+	    fi
+	  fi
+	fi
+      fi
+    fi
+  done
+done
+echo Bye! Shutting down the simulation.
+for n in ${PIDS}
+do
+  kill ${n} >/dev/null
+done
+
+

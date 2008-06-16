@@ -1,0 +1,22 @@
+/*
+  Filename:	EmbeddedLinker.script
+  Purpose:	Linker script for EmbeddedAGC demo.
+  Mods:		08/18/04 RSB	Wrote.
+*/
+
+SECTIONS
+{
+  . = 0x200000;
+  /* Code section. */
+  __text_start = .;
+  .text : { *(.text) }
+  .data : { *(.data) }
+  __bss_start = .;
+  .bss : { *(.bss) }
+  __bss_end = .;
+  /* For the Core Rope.  */
+  CoreRope = .;
+  .CoreRope : {  }
+};
+
+

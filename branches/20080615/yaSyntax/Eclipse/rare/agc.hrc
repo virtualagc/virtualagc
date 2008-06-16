@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!DOCTYPE hrc PUBLIC "-//Cail Lomecb//DTD Colorer HRC take5//EN"
+  "http://colorer.sf.net/2003/hrc.dtd">
+
+<hrc version="take5" xmlns="http://colorer.sf.net/2003/hrc"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://colorer.sf.net/2003/hrc http://colorer.sf.net/2003/hrc.xsd">
+
+   <type name="agc">
+      <import type="def"/>
+      <region name="agcDirective" parent="Operator"/>
+      <region name="agcInclude"   parent="Operator"/>
+      <region name="agcLabel"     parent="Label"/>
+      <region name="agcMnemonic"  parent="Keyword"/>
+      <region name="agcComment"   parent="Comment"/>
+      <region name="agcSymbol"    parent="Symbol"/>
+      <region name="agcNumDec"    parent="NumberDec"/>
+      <region name="agcNumOct"    parent="NumberHex"/>
+
+      <scheme name="BaseYUL">
+         <regexp match="/\#.*$/" region="agcComment"/>
+         <keywords ignorecase="no" region="agcMnemonic">
+		<word name="ADS"/>
+		<word name="AD"/>
+		<word name="AUG"/>
+		<word name="BZF"/>
+		<word name="BZMF"/>
+		<word name="CAE"/>
+		<word name="CAF"/>
+		<word name="CA"/>
+		<word name="CCS"/>
+		<word name="COM"/>
+		<word name="CS"/>
+		<word name="DAS"/>
+		<word name="DCA"/>
+		<word name="DCOM"/>
+		<word name="DCS"/>
+		<word name="DDOUBL"/>
+		<word name="DIM"/>
+		<word name="DOUBLE"/>
+		<word name="DTCB"/>
+		<word name="DTCF"/>
+		<word name="DV"/>
+		<word name="DXCH"/>
+		<word name="EDRUPT"/>
+		<word name="EXTEND"/>
+		<word name="INCR"/>
+		<word name="INDEX"/>
+		<word name="NDX"/>
+		<word name="INHINT"/>
+		<word name="LXCH"/>
+		<word name="MASK"/>
+		<word name="MSK"/>
+		<word name="MP"/>
+		<word name="MSU"/>
+		<word name="NOOP"/>
+		<word name="OVSK"/>
+		<word name="QXCH"/>
+		<word name="RAND"/>
+		<word name="READ"/>
+		<word name="RELINT"/>
+		<word name="RESUME"/>
+		<word name="RETURN"/>
+		<word name="ROR"/>
+		<word name="RXOR"/>
+		<word name="SQUARE"/>
+		<word name="SU"/>
+		<word name="TCR"/>
+		<word name="TCAA"/>
+		<word name="OVSK"/>
+		<word name="TCF"/>
+		<word name="TC"/>
+		<word name="TS"/>
+		<word name="WAND"/>
+		<word name="WOR"/>
+		<word name="WRITE"/>
+		<word name="XCH"/>
+		<word name="XLQ"/>
+		<word name="XXALQ"/>
+		<word name="ZL"/>
+		<word name="ZQ"/>
+         </keywords>
+
+         <keywords ignorecase="no" region="agcDirective">
+		<word name="1DNADR"/>
+		<word name="2DEC"/>
+		<word name="2BCADR"/>
+		<word name="2CADR"/>
+		<word name="2OCT"/>
+		<word name="2DNADR"/>
+		<word name="3DNADR"/>
+		<word name="4DNADR"/>
+		<word name="5DNADR"/>
+		<word name="6DNADR"/>
+		<word name="2FCADR"/>
+		<word name="ADRES"/>
+		<word name="BBCON"/>
+		<word name="BANK"/>
+		<word name="BLOCK"/>
+		<word name="BNKSUM"/>
+		<word name="CADR"/>
+		<word name="COUNT"/>
+		<word name="COUNT\*"/>
+		<word name="DEC"/>
+		<word name="DEC\*"/>
+		<word name="DNCHAN"/>
+		<word name="DNPTR"/>
+		<word name="EBANK"/>
+		<word name="ECADR"/>
+		<word name="EQUALS"/>
+		<word name="ERASE"/>
+		<word name="MEMORY"/>
+		<word name="OCT"/>
+		<word name="REMADR"/>
+		<word name="SETLOC"/>
+		<word name="SUBRO"/>
+         </keywords>
+      </scheme>
+
+      <scheme name="BaseTyp">
+         <regexp match="/\b\d+\b/" region="agcNumOct"/>
+         <regexp match="/\b\d+D\b/" region="agcNumDec"/>
+         <keywords region="agcSymbol">
+            <symb name="="/>
+            <symb name="+"/>
+            <symb name="-"/>
+         </keywords>
+      </scheme>
+
+      <scheme name="agc">
+         <inherit scheme="BaseType"/>
+         <inherit scheme="BaseYUL"/>
+         <regexp match="/^\$\S+/" region="agcInclude"/>
+	 <regexp match="/^\S+/i" region="agcLabel"/>
+      </scheme>
+   </type>
+</hrc>
+<!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1/GPL 2.0/LGPL 2.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is the Colorer Library.
+   -
+   - The Initial Developer of the Original Code is
+   - Alex Smith <thims@inbox.ru>.
+   - Portions created by the Initial Developer are Copyright (C) 1999-2005
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   -
+   - Alternatively, the contents of this file may be used under the terms of
+   - either the GNU General Public License Version 2 or later (the "GPL"), or
+   - the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+   - in which case the provisions of the GPL or the LGPL are applicable instead
+   - of those above. If you wish to allow use of your version of this file only
+   - under the terms of either the GPL or the LGPL, and not to allow others to
+   - use your version of this file under the terms of the MPL, indicate your
+   - decision by deleting the provisions above and replace them with the notice
+   - and other provisions required by the LGPL or the GPL. If you do not delete
+   - the provisions above, a recipient may use your version of this file under
+   - the terms of any one of the MPL, the GPL or the LGPL.
+   -
+   - ***** END LICENSE BLOCK ***** -->
