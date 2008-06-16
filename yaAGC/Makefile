@@ -68,7 +68,7 @@ libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o \
 	touch ../yaDEDA/src/main.c
 
 clean:
-	-rm yaAGC libyaAGC.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel
+	-rm -f yaAGC libyaAGC.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel
 
 install:	yaAGC
 	cp yaAGC ${PREFIX}/bin

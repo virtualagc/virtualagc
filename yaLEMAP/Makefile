@@ -67,7 +67,7 @@ yaLEMAP${SUFFIX}: yaLEMAP.c ../yaYUL/SymbolTable.o
 
 .PHONY:	clean
 clean:
-	-rm binLEMAP${SUFFIX} yaLEMAP${SUFFIX} *.o *~ yaLEMAP.binsource \
+	-rm -f binLEMAP${SUFFIX} yaLEMAP${SUFFIX} *.o *~ yaLEMAP.binsource \
 		binLEMAP.bin SampleCodeAGS.bin SampleCodeAGS.lst \
 		../yaCode/FP8/FP8.bin ../yaCode/FP8/FP8.lst ../yaCode/FP8/*.symtab \
 		../yaCode/FP6/FP6.bin ../yaCode/FP6/FP6.lst ../yaCode/FP6/*.symtab
