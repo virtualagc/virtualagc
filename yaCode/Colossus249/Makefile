@@ -31,12 +31,12 @@ Colossus249.lst Colossus249.symtab: ${SOURCE} Colossus249.bin
 	diff -s MAIN.s.bin Colossus249.bin
 		
 clean:
-	-rm *.lst *~ MAIN.s.bin Colossus249.bin *.symtab
+	-rm -f *.lst *~ MAIN.s.bin Colossus249.bin *.symtab
 	
 install:	default
 	cp Colossus249.bin ${PREFIX}/bin
 	chmod ugo+r ${PREFIX}/bin/Colossus249.bin
 	cp *.symtab ${PREFIX}/bin
-	rm *.symtab *.lst
+	rm -f *.symtab *.lst
 	
 

@@ -33,7 +33,7 @@ yaYUL:	$(CFILES:%.c=%.o)
 	gcc ${CFLAGS} -o $@ $^ -lm
 
 clean:
-	-rm yaYUL *.o *~
+	-rm -f yaYUL *.o *~
 
 install: yaYUL
 	cp  yaYUL ${PREFIX}/bin
