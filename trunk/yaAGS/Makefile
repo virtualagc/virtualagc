@@ -53,7 +53,7 @@ libyaAGS.a: aea_engine_init.o aea_engine.o DebuggerHookAGS.o SocketAPI_AGS.o
 	touch ../yaDEDA/src/main.c
 
 clean:
-	-rm yaAGS libyaAGS.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel
+	-rm -f yaAGS libyaAGS.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel
 
 install:	yaAGS
 	cp yaAGS ${PREFIX}/bin
