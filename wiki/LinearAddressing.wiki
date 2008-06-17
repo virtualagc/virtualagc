@@ -1,0 +1,23 @@
+#summary Linear Virtual Addressing
+
+http://virtualagc.googlecode.com/svn/trunk/Apollo32.png 
+= Linear Virtual Addressing =
+
+Although the real AGC used banked memory for addressing its Erasable and Fixed memory most debug front-ends use linear addressing. To facilitate debugging in existing gdb front-ends a  virtual linear memory map was created based on the original Octal Pseudo Addressing devised by the people at MIT in the early sixties.
+
+= Memory Map =
+
+The following memory map shows how the linear virtual address maps to the actual banked memory in the AGC.
+|| *Pseudo Address* || *Memory Type* || *Eraseable Reg.* || *Fixed Reg.* || *Extension. Bit* || *S-Reg. (Octal)* ||
+|| 0x0000-0x02FF || Unswitched Eraseable || X || XX || X || 00000-01377 ||
+|| 0x0000-0x00FF || Registers            || 0 || XX || X || 01400-01777 ||
+|| 0x0100-0x01FF || Unswitched Eraseable || 1 || XX || X || 01400-01777 ||
+|| 0x0200-0x02FF || Unswitched Eraseable || 2 || XX || X || 01400-01777 ||
+|| 0x0300-0x03FF || Switched Eraseable   || 3 || XX || X || 01400-01777 ||
+|| 0x0400-0x04FF || Switched Eraseable   || 4 || XX || X || 01400-01777 ||
+|| 0x0500-0x05FF || Switched Eraseable   || 5 || XX || X || 01400-01777 ||
+|| 0x0600-0x06FF || Switched Eraseable   || 6 || XX || X || 01400-01777 ||
+|| 0x0700-0x07FF || Switched Eraseable   || 7 || XX || X || 01400-01777 ||
+|| 0x0800-0x0FFF || Fixed Fixed          || X || XX || X || 04000-07777 ||
+|| 0x1000-0x13FF || Common Fixed         || X || 00 || X || 02000-03777 ||
+|| 0x1400-0x17FF || Common Fixed         || X || 01 || X || 02000-03777 ||
