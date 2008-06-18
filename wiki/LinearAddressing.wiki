@@ -3,9 +3,12 @@
 http://virtualagc.googlecode.com/svn/trunk/Apollo32.png 
 = Linear Virtual Addressing =
 
-Although the real AGC used banked memory for addressing its Erasable and Fixed memory most debug front-ends use linear addressing. To facilitate debugging in existing gdb front-ends a  virtual linear memory map was created based on the original Octal Pseudo Addressing devised by the people at MIT in the early sixties.
+Although the real AGC used banked memory for addressing its Erasable and Fixed memory most debug front-ends use linear addressing. To facilitate debugging in existing gdb front-ends a  virtual linear memory map was created based on the original Octal Pseudo Addressing devised by the people at MIT in the early sixties (see Hugh Blair-Smith AGC4 Memo #9 1965 page 5). The original linear memory map had a gap from 0x1800-0x2000 but to keep the linear memory continuous I chose to fill this gap and allow Fixed-fixed even in the linear memory space to be addressed in two ways (see next section about memory overlaps). Note numbers with leading zero in this page are in Octal.
 
-= Memory Map =
+== Memory Overlaps ==
+Unswitched Eraseable memory with an S-Reg value of 0000-01377 overlaps with Unswitched Erasable memory bank 00,01 and 02 with an S-Reg value of 01400-01777. Fixed-fixed memory with S-Reg value of 04000-07777 overlaps with Fixed-fixed bank 02 and 03 with an S-Reg value of 02000-03777. This means that the same data can be accessed in two ways.
+
+== Memory Map ==
 
 The following memory map shows how the linear virtual address maps to the actual banked memory in the AGC. All numbers are Octal with the exception of the Pseudo Address. The Pseudo Address is given in Hex format. Sometimes a series of bank values is used. For example each Common fixed Bank size is 1K and so listing all banks explicitly would just create a long table. Don't care is marked with an "X".
 || *Pseudo Address* || *Memory Type* || *Erase Bank Reg.* || *Fixed Bank Reg.* || *Ext. Bit* || *S-Reg.* ||
