@@ -162,7 +162,7 @@ BacktraceRestore (agc_t *State, int n)
 // Displays the backtrace buffer.
 
 void
-BacktraceDisplay (agc_t *State)
+BacktraceDisplay (agc_t *State, int Num)
 {
   int i, j, k, CurrentZ, Value, Bank;
   BacktracePoint_t *Bp;

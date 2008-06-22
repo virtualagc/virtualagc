@@ -655,7 +655,7 @@ void UnblockSocket (int SocketNum);
 //FILE *rfopen (const char *Filename, const char *mode);
 void BacktraceAdd (agc_t *State, int Cause);
 int BacktraceRestore (agc_t *State, int n);
-void BacktraceDisplay (agc_t *State);
+void BacktraceDisplay (agc_t *State,int Num);
 int16_t OverflowCorrected (int Value);
 int SignExtend (int16_t Word);
 int AddSP16 (int Addend1, int Addend2);

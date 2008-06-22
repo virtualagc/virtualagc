@@ -1,3 +1,42 @@
+/*
+  Copyright 2008 Onno Hommes
+
+  This file is part of yaAGC.
+
+  yaAGC is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  yaAGC is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with yaAGC; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  
+  In addition, as a special exception, permission is granted to
+  link the code of this program with the Orbiter SDK library (or with 
+  modified versions of the Orbiter SDK library that use the same license as 
+  the Orbiter SDK library), and distribute linked combinations including 
+  the two. You must obey the GNU General Public License in all respects for 
+  all of the code used other than the Orbiter SDK library. If you modify 
+  this file, you may extend this exception to your version of the file, 
+  but you are not obligated to do so. If you do not wish to do so, delete 
+  this exception statement from your version. 
+ 
+  Filename:	agc_gdbmi.c
+  Purpose:	This is module covers the gdb/mi subsystem of yaAGC and enables
+  		yaAGC to be debugged in a Graphical Debugger front-end to gdb.
+  		
+  Compiler:	GNU gcc.
+  Contact:	Onno Hommes <info@sandroid.org>
+  Reference:	http://virtualagc.googlecode.com
+  Mods:		01/01/08 OH.	Began work.
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "yaAGC.h"
@@ -24,6 +63,8 @@ extern int FullNameMode;
 extern int Break;
 extern int RunState;
 
+extern SymbolLine_t* FindLastLineMain(void);
+
 static int gdbmi_break_id = 0;
 static int gdbmi_status;
 static int cli_argc;
@@ -31,6 +72,7 @@ static char* cli_arg;
 
 static char FileName[MAX_FILE_LENGTH+1];
 static char AW_s[257];
+static char FuncName[128];
 
 static CustomCommand_t gdbmiCustomCmds[32];
 
@@ -214,20 +256,33 @@ void gdbmiSetValueByAddress(agc_t *State,unsigned gdbmi_addr,unsigned short valu
    }	
 }
 
-char* gdbmiConstructFuncName(Address_t* agc_addr,char* s)
+char* gdbmiConstructFuncName(SymbolLine_t* Line,char* s,int size)
 {
-   if (agc_addr->Banked == 1)
-   { 
-       sprintf(s,"<%02o+%04o>",
-               agc_addr->FB+8*agc_addr->Super,
-               agc_addr->SReg);
-   }
-   else
+   int i;
+   if (Line)
    {
-     sprintf(s,"<XX+%04o>",agc_addr->SReg);
+      /* Copy File Name */
+      strncpy(s,Line->FileName,size);
+      
+      /* remove ".s" extension */
+      s[strlen(s)-2]=0;
+      
+      /* Str to lowercase */
+      for (i = 0; s[i] != '\0'; i++) s[i] = (char)tolower(s[i]);
    }
-   
    return s;
+}
+
+/**
+ * Return the symbol line of the head of the current stack
+ */
+SymbolLine_t* gdbmiResolveCurrentLine(agc_t *State)
+{
+   SymbolLine_t *Line = NULL;
+   int CurrentZ = State->Erasable[0][RegZ] & 07777;
+   int FB = 037 & (State->Erasable[0][RegBB] >> 10);
+   int SBB = (State->OutputChannel7 & 0100) ? 1 : 0;
+   return (ResolveLineAGC(CurrentZ, FB, SBB));
 }
 
 int gdbmiCheckBreakpoint(agc_t *State, Breakpoint_t* gdbmi_bp)
@@ -260,7 +315,7 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
    unsigned gdbmiAddress = 0;
    Address_t agc_addr;
    char* p;
-   
+
 
    if (strlen(s) > 0) /* Do we have an argument */
    {
@@ -276,20 +331,12 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
             s[strlen(s)-1]=0;
          }
       }
-      
 
-      /* If fullpath name is given remove that since symtab only stores that once
-       * in the symbol file (i.e. SourcePathName) */
-//      if (!strncmp(sraw,SourcePathName,strlen(SourcePathName)))
-//      {
-//         sraw+=strlen(SourcePathName)+1;
-//         s+=strlen(SourcePathName)+1;
-//      }
-			sraw = gdbmiBasename(sraw);
-			s=gdbmiBasename(s);
+      sraw = gdbmiBasename(sraw);
+      s=gdbmiBasename(s);
 
-   	/* First replace ":" with space */
-   	if (cli_char = strstr(sraw,":")) *cli_char = ' '; /* replace colon with space */
+      /* First replace ":" with space */
+      if (cli_char = strstr(sraw,":")) *cli_char = ' '; /* replace colon with space */
      
       if (HaveSymbols && 
          (2 == sscanf (sraw, "%s %d", &FileName, &LineNumber)) &&
@@ -636,6 +683,7 @@ void gdbmiHandleInfoLine(agc_t *State , char* s, char* sraw)
    int LineNumber;
    SymbolLine_t *Line = NULL;
    char *cli_char = NULL;
+   //char FuncName[128];
    
    if (*s == ' ')
    {
@@ -657,11 +705,11 @@ void gdbmiHandleInfoLine(agc_t *State , char* s, char* sraw)
    
    if (Line)
    {
-      printf("Line %d of \"%s\" starts at address 0x%04x <_%05o>\n",
-             Line->LineNumber,Line->FileName,
-             gdbmiLinearAddr(&Line->CodeAddress),Line->CodeAddress.SReg);
-      printf("   and ends at 0x%04x <_%05o>.\n",
-             gdbmiLinearAddr(&Line->CodeAddress),Line->CodeAddress.SReg);
+      printf("Line %d of \"%s\" starts at address 0x%04x <%s>\n",
+             Line->LineNumber,Line->FileName,  
+             gdbmiLinearAddr(&Line->CodeAddress),gdbmiConstructFuncName(Line,FuncName,127));
+      printf("   and ends at 0x%04x <%s>.\n",
+             gdbmiLinearAddr(&Line->CodeAddress),gdbmiConstructFuncName(Line,FuncName,127));
       if (FullNameMode) gdbmiPrintFullNameContents(Line);
    }
    ++gdbmi_status;
@@ -771,6 +819,108 @@ void gdbmiHandleInfoProgram(agc_t *State , char* s, char* sraw)
    printf("It stopped after being stepped.\n");
 }
 
+
+
+/** 
+ * Display the thread summaries of all currently known threads
+ * If no ISR is active only one thread the default execution
+ * thread will be shown. If an ISR is running (only one can run
+ * at a time then both the ISR as well as the default execution
+ * thread will be shown. With the ISR marked as the active thread
+ */
+void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
+{
+   SymbolLine_t* Line = NULL;
+   char threadName[10] = "main";
+   
+   /* Check if we are dealing with 2 threads (i.e. in an ISR) */
+   if (State->InIsr)
+   {
+      /* Determine the thread name to be verbose when showing info */
+      switch(State->InterruptRequests[0])
+      {
+         case 1: 
+            strcpy(threadName,"TIMER6");
+            break;
+         case 2: 
+            strcpy(threadName,"TIMER5");
+            break;
+         case 3: 
+            strcpy(threadName,"TIMER3");
+            break;
+         case 4: 
+            strcpy(threadName,"TIMER4");
+            break;
+         case 5: 
+            strcpy(threadName,"KEYBOARD1");
+            break;
+         case 6: 
+            strcpy(threadName,"KEYBOARD2");
+            break;
+         case 7: 
+            strcpy(threadName,"UPLINK");
+            break;
+         case 8: 
+            strcpy(threadName,"DOWNLINK");
+            break;
+         case 9: 
+            strcpy(threadName,"RADAR");
+            break;
+         case 10: 
+            strcpy(threadName,"JOYSTICK");
+            break;
+         default:
+            strcpy(threadName,"MAIN");
+            break;
+      }
+
+      /* Get  head of the stack of ISR thread */
+      Line = gdbmiResolveCurrentLine(State);
+      if (Line)
+      {
+
+         printf("* 2 thread %d (%s)\t0x%04x in %s ()\n",
+               State->InterruptRequests[0],
+               threadName,
+               gdbmiLinearAddr(&Line->CodeAddress),
+               gdbmiConstructFuncName(Line,FuncName,127)
+               );
+         printf("    at %s:%d\n",Line->FileName,Line->LineNumber);
+      }
+      
+      Line = FindLastLineMain();
+      if (Line)
+      {
+         printf("  1 thread 0 (MAIN)\t0x%04x in %s ()\n",
+               gdbmiLinearAddr(&Line->CodeAddress),
+               gdbmiConstructFuncName(Line,FuncName,127)
+               );
+      }
+   }
+   else
+   {
+      Line = gdbmiResolveCurrentLine(State);
+      if (Line)
+      {
+         printf("* 1 thread 0 (MAIN)\t0x%04x in %s ()\n",
+                gdbmiLinearAddr(&Line->CodeAddress),
+                gdbmiConstructFuncName(Line,FuncName,127)
+               );
+         printf("    at %s:%d\n",Line->FileName,Line->LineNumber);
+      }
+   }
+   gdbmi_status++;
+}
+
+void gdbmiHandleBacktrace(agc_t *State , char* s, char* sraw)
+{
+   int LimitList = MAX_BACKTRACE_POINTS;
+
+   sscanf (s, "%d", &LimitList);
+   BacktraceDisplay(State,LimitList);
+   ++gdbmi_status;
+}
+
 void gdbmiHandleInfo(agc_t *State , char* s, char* sraw)
 {
    if (!strncmp (s, "ALL-REGISTERS",13)) 
@@ -791,7 +941,12 @@ void gdbmiHandleInfo(agc_t *State , char* s, char* sraw)
       gdbmiHandleInfoIoRegisters(State,s+12,sraw+12);
    else if (!strncmp (s, "PROGRAM",7))
       gdbmiHandleInfoProgram(State,s+7,sraw+7);
+   else if (!strncmp (s, "STACK",5))
+      gdbmiHandleBacktrace(State,s+5,sraw+5);
+   else if (!strncmp (s, "THREADS",7))
+      gdbmiHandleInfoThreads(State,s+7,sraw+7);
 }
+
 
 void gdbmiHandleSetPrompt(agc_t *State , char* s, char* sraw)
 {
@@ -873,7 +1028,7 @@ void gdbmiHandleDisassemble(agc_t *State , char* s, char* sraw)
 {
    unsigned gdbmiFromAddr,gdbmiToAddr;
    Address_t agc_addr;
-   char funcname[10];
+   SymbolLine_t* Line = NULL;
     
    if (*sraw == ' ')
    {      
@@ -882,10 +1037,14 @@ void gdbmiHandleDisassemble(agc_t *State , char* s, char* sraw)
          while (gdbmiFromAddr <= gdbmiToAddr)
          {
             agc_addr = gdbmiNativeAddr(gdbmiFromAddr);
-            printf("0x%04x %s:\t0x%04x\n",
+            Line = ResolveLineAGC(agc_addr.SReg,agc_addr.FB,agc_addr.Super);
+            if (Line)
+            {
+               printf("0x%04x %s:\t0x%04x\n",
                     gdbmiFromAddr,
-                    gdbmiConstructFuncName(&agc_addr,funcname),
+                    gdbmiConstructFuncName(Line,(char*)FuncName,127),
                     gdbmiGetValueByAddress(State,gdbmiFromAddr));
+            }
             ++gdbmiFromAddr;
          }
       }
@@ -944,12 +1103,6 @@ void gdbmiHandleDefine(agc_t *State , char* s, char* sraw)
 void gdbmiHandleList(agc_t *State , char* s, char* sraw)
 {
    ListSource (NULL, -1);
-   ++gdbmi_status;
-}
-
-void gdbmiHandleBacktrace(agc_t *State , char* s, char* sraw)
-{
-   BacktraceDisplay(State);
    ++gdbmi_status;
 }
 

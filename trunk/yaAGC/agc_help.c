@@ -24,7 +24,9 @@ static void gdbmiPrintHelpInfo()
 		printf("info registers -- List of registers and contents\n");
 		printf("info all-registers -- List of all registers and contents\n");
 		printf("info channels -- List of channels and contents\n");	
-		printf("info io_registers -- List of I/O registers and contents\n");											
+		printf("info io_registers -- List of I/O registers and contents\n");
+                printf("info threads -- IDs of currently known threads\n");
+                printf("info stack -- Backtrace of the stack\n");
 }
 
 static void gdbmiPrintHelpShow()

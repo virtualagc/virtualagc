@@ -1638,7 +1638,7 @@ rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
 #ifdef GDBMI
 static void catch_sigint(int sig);
 int BreakPending = 0;
-char FuncName[10];
+char FuncName[128];
 #endif
   
 int
@@ -2042,7 +2042,7 @@ main (int argc, char *argv[])
 				  printf ("Hit breakpoint at %05o.\n", Address12);
 #else
               printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
-              			  gdbmiConstructFuncName(&Breakpoints[i].Line->CodeAddress,FuncName),
+                      gdbmiConstructFuncName(Breakpoints[i].Line,FuncName,127),
                        Breakpoints[i].Line->FileName,
                        Breakpoints[i].Line->LineNumber);
               gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
@@ -2060,7 +2060,7 @@ main (int argc, char *argv[])
 				  printf ("Hit breakpoint at %05o.\n", Address12);
 #else
               printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
-              			  gdbmiConstructFuncName(&Breakpoints[i].Line->CodeAddress,FuncName),
+                      gdbmiConstructFuncName(Breakpoints[i].Line,FuncName,127),
                        Breakpoints[i].Line->FileName,
                        Breakpoints[i].Line->LineNumber);
               gdbmiUpdateBreakpoint(&State,&Breakpoints[i]);
@@ -3040,6 +3040,9 @@ main (int argc, char *argv[])
                       /* GDBMI uses Ctrl-C to break from cont. or run */
 		      nbfgets_ready("");
 #else
+                      /* Only print the thread info if debugevents are on */
+                      printf("[New Thread 11]\n");
+                      printf("[Switching to Thread 11]\n");
                       RunState = 1;
 #endif
 		      break;
@@ -3109,7 +3112,7 @@ main (int argc, char *argv[])
 			DebuggerInterruptMasks[i] = 1;
 		    }
 		  else if (!strcmp (s, "BACKTRACES"))
-		    BacktraceDisplay (&State);
+                     BacktraceDisplay (&State, MAX_BACKTRACE_POINTS);
 		  else if (1 == sscanf (s, "BACKTRACE%d", &i))
 		    {
 		      int j;
