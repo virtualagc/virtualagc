@@ -12,3 +12,11 @@ One of the goals of this project is to fully enable the emulator to exhibit the 
 Supporting documentation for each of these Front-ends can be found in the respective folder under yaScripts in the source distribution. Typically an approach is followed to first intercept the gdb command to identify the arguments before calling yaAGC with the proper arguments. For example in Code::Blocks the registered debugger will be _agc-gdb_ which is a script that calls yaAGC.
 
 Of course you don't need a debug front-end you can also just launch yaAGC in in debug mode and interact with the AGC using gdb command line options. Type help all for all supported commands and for detailed documentation refer to the [http://www.gnu.org/software/gdb/documentation/ GDB Documentation].
+
+To actually debug the Luminary131 or Colossus249 code you must get a working copy of the source tree and build your own core-ropes image to load into the emulator. To verify you have correctly compiled the original AGC code you run the following from the command line:
+
+
+ _yaAGC --core=<your_path_to>/Colossus249.bin --debug --fullname_
+
+Below is an example of Colossus249 being debug in the IDE Code::Blocks. Notice that the interrupts are showing up as seperate threads in the debugger (with symbolic reference to the source of the interrupt in this case TIMER4). This example also shows the AGC syntax highlighting.
+ http://virtualagc.googlecode.com/svn/trunk/doc/images/CodeBlocks.png 
