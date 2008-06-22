@@ -79,7 +79,7 @@
 #				exiting from an interrupt-service routine.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20080615\\\"
+NVER:=\\\"20080621\\\"
 DATE:=`date +%Y%m%d`
 
 # Uncomment the following line (or do 'make NOREADLINE=yes') if the build 
@@ -271,6 +271,16 @@ endif
 	echo rm ${PREFIX}/bin/VirtualAgcFileStart >>${PREFIX}/bin/VirtualAgcUninstall
 	echo rm ${PREFIX}/bin/VirtualAgcUninstall >>${PREFIX}/bin/VirtualAgcUninstall
 	chmod ugo+x ${PREFIX}/bin/VirtualAgcUninstall
+
+strip:
+	strip yaAGC/yaAGC
+	strip yaAGS/yaAGS
+	strip yaYUL/yaYUL
+	strip yaLEMAP/yaLEMAP
+	strip yaLEMAP/binLEMAP
+	strip yaDEDA/src/yaDEDA
+	strip yaDSKY/src/yadsky
+	strip yaACA/yaACA
 	
 autogen:
 	echo PREFIX=${PREFIX} >Makefile.yaAGC
