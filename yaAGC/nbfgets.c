@@ -120,7 +120,11 @@ char * source_generator (const char *text, int state)
 int rl_getchar(FILE *stream)
 {
    char c;
+#ifdef WIN32
    while ((c = (char)rl_getc(stream)) == 10); /* Ignore LF */
+#else
+   c = (char)rl_getc(stream);
+#endif
    return ((int)c);
 }
 

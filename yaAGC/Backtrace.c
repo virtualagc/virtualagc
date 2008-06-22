@@ -91,6 +91,32 @@ int BacktraceDuplicateCheck(agc_t *State, BacktracePoint_t* Prev)
    
    return isDuplicate;
 }
+
+SymbolLine_t* FindLastLineMain(void)
+{
+   BacktracePoint_t *Bp;
+   SymbolLine_t *Line = NULL;
+   int CurrentZ,FB,SBB;
+   int BacktraceLocation = BacktraceNextAdd;
+   int Count = BacktraceCount;
+
+   while (Count > 0)
+   {
+      BacktraceLocation--;
+      if (BacktraceLocation < 0)
+         BacktraceLocation = MAX_BACKTRACE_POINTS - 1;
+      Count--;
+      if (BacktracePoints[BacktraceLocation].DueToInterrupt)
+      {
+         Bp = &BacktracePoints[BacktraceLocation];
+         CurrentZ = Bp->Erasable[0][RegZ] & 07777;
+         FB = 037 & (Bp->Erasable[0][RegBB] >> 10);
+         SBB = (Bp->OutputChannel7 & 0100) ? 1 : 0;
+         Line = ResolveLineAGC(CurrentZ, FB, SBB);
+      }
+   }
+   return Line;
+}
 #endif
 
 // This function adds a new backtrace point to the circular buffer.  The 
@@ -103,18 +129,15 @@ int BacktraceDuplicateCheck(agc_t *State, BacktracePoint_t* Prev)
 // the vector to the interrupt are removed.  The reason for this is that
 // otherwise the array will quickly become completely full of interrupt 
 // code, and all backtrace points to foreground code will be completely lost.
-void
-BacktraceAdd (agc_t *State, int Cause)
+void BacktraceAdd (agc_t *State, int Cause)
 {
   BacktracePoint_t *Bp;
-  if (SingleStepCounter == -2)
-    return;
-  if (BacktraceInitialized == -1)
-    return;
+  if (SingleStepCounter == -2 || BacktraceInitialized == -1) return;
+  
   if (BacktraceInitialized == 0)
     {
       BacktracePoints = (BacktracePoint_t *) 
-      			malloc (MAX_BACKTRACE_POINTS * sizeof (BacktracePoint_t));
+      		malloc (MAX_BACKTRACE_POINTS * sizeof (BacktracePoint_t));
       if (BacktracePoints == NULL)
         {
 	  BacktraceInitialized = -1;
@@ -214,8 +237,7 @@ BacktraceRestore (agc_t *State, int n)
 
 // Displays the backtrace buffer.
 
-void
-BacktraceDisplay (agc_t *State)
+void BacktraceDisplay (agc_t *State, int Num)
 {
   int i, j, k, CurrentZ, Value, Bank;
   BacktracePoint_t *Bp;
@@ -227,7 +249,7 @@ BacktraceDisplay (agc_t *State)
 #ifdef GDBMI
     /* Always show the current location in the trace */    
     {
-       char funcname[10];
+       char funcname[128];
        SymbolLine_t *Line = NULL;
        int CurrentZ = State->Erasable[0][RegZ] & 07777;
        int FB = 037 & (State->Erasable[0][RegBB] >> 10);
@@ -236,16 +258,17 @@ BacktraceDisplay (agc_t *State)
 
        if (Line) 
        {
+         Num--;
 #ifdef WIN32
-       		printf("#0\t0x%04x in %s () at %s\\%s:%d\n",
-                    gdbmiLinearAddr(&Line->CodeAddress),
-                    gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
-                    Line->FileName,Line->LineNumber);
+         printf("#0\t0x%04x in %s () at %s\\%s:%d\n",
+            gdbmiLinearAddr(&Line->CodeAddress),
+            gdbmiConstructFuncName(Line,funcname,127),SourcePathName,
+            Line->FileName,Line->LineNumber);
 #else
-       		printf("#0\t0x%04x in %s () at %s/%s:%d\n",
-                    gdbmiLinearAddr(&Line->CodeAddress),
-                    gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
-                    Line->FileName,Line->LineNumber);	
+         printf("#0\t0x%04x in %s () at %s/%s:%d\n",
+            gdbmiLinearAddr(&Line->CodeAddress),
+            gdbmiConstructFuncName(Line,funcname,127),SourcePathName,
+            Line->FileName,Line->LineNumber);	
 #endif
        }
     }
@@ -258,12 +281,11 @@ BacktraceDisplay (agc_t *State)
       return;
     }
 
-
     for (i = j = 0; i < BacktraceCount; i++)
     {
+      if (0 == Num--) break;
       k = BacktraceNextAdd - i - 1;
-      if (k < 0)
-        k += BacktraceCount;
+      if (k < 0) k += BacktraceCount;
       Bp = &BacktracePoints[k];
 #ifndef GDBMI
       printf ("%2d: ", i);
@@ -302,8 +324,12 @@ BacktraceDisplay (agc_t *State)
         printf (" %05o   ", Value & 077777);
       
 #else
+      /* Only Display the back trace of the current thread */
+      if (Bp->DueToInterrupt) break;
+      
+      /* Just a new Code Block */
       {
-         char funcname[10];
+         char funcname[128];
          SymbolLine_t *Line = NULL;
          int CurrentZ = Bp->Erasable[0][RegZ] & 07777;
          int FB = 037 & (Bp->Erasable[0][RegBB] >> 10);
@@ -315,21 +341,19 @@ BacktraceDisplay (agc_t *State)
 #ifdef WIN32
          	printf("#%d\t0x%04x in %s () at %s\\%s:%d\n",i+1,
              	   gdbmiLinearAddr(&Line->CodeAddress),
-                   gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
+                   gdbmiConstructFuncName(Line,funcname,127),SourcePathName,
                    Line->FileName,Line->LineNumber);
 #else
          	printf("#%d\t0x%04x in %s () at %s/%s:%d\n",i+1,
              	   gdbmiLinearAddr(&Line->CodeAddress),
-                   gdbmiConstructFuncName(&Line->CodeAddress,funcname),SourcePathName,
+                   gdbmiConstructFuncName(Line,funcname,127),SourcePathName,
                    Line->FileName,Line->LineNumber);
-
 #endif
          }
          else
-            printf("#%d\t0x%04x in <%02o+%04o> ()\n",
+            printf("#%d\t0x%04x in ?? ()\n",
                    i+1,
-                   gdbmiLinearFixedAddr(CurrentZ,FB,SBB),
-                   FB+8*SBB,CurrentZ);
+                   gdbmiLinearFixedAddr(CurrentZ,FB,SBB));
       }
 #endif
       // Next ...
