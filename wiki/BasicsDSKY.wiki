@@ -13,9 +13,16 @@ To display output in response to a request or when punching input in the DSKY th
 
 To show which program was running the right top 2 digits were used. Programs were applications that executed a specific task. For example program 64 (P64) was the high gate approach program where as P66 was the final landing phase program and P68 the post landing shutdown program to prevent inadvertent RCS firing. A program was typically started with the verb 37 followed by a noun equal to the program number. So to start program 66 one would enter: V37N66E
 
+When entering numbers it was assumed that octal numbers where used unless the user would use the sign +/- symbol; in that case decimal numbers were assumed. Also when using decimal numbers leading zeros must be entered this is not the case for octal numbers. When input is requested in R1 the row for R1 would clear and the user can provide its input. To correct the input press the CLR key before pressing Entr.
+
 == 1.2 Some Basic Commands ==
 The following is a list of some basic commands to demonstrate the interaction with the DSKY.
 
-|| *Verb Noun* || *Description*                         ||
-|| V35E        || Execute Lamp Test                     ||
-|| V16N36E     || Display current mission time i.e. GET ||
+|| *Verb Noun* || *Description*                                                     ||
+|| V35E        || Execute Lamp Test                                                 ||
+|| V36E        || Fresh restart                                                     ||
+|| V16N36E     || Display ground Elapsed Time (GET)                                 ||
+|| V25N36E     || Set GET. R1 for hours, R2 for minutes and R3 for 1/100 of seconds ||
+|| V01N02E     || Single shot peek at erasable memory address R3 in octal           ||
+|| V21N02E     || Poke value R2 into erasable memory address R3 in octal)                                                   ||
+|| V11N02E     || Continuous peek at erasable memory address (R3 in octal)          ||
