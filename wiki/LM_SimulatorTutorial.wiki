@@ -46,7 +46,8 @@ Now the vessel can be controlled by the RHC (Rotational Hand Controller) which c
 After a fresh AGC start there is a need to do a reset by typing V36E. To go into the idle loop it is necessary to change the program by V37E 00E. Probably that has to be repeated a couple of times until "PROG" shows 00.
  
 ==== 1.4.2.2 IMU Basics ====
-The IMU is constructed of a navigational platform gimbaled by a three axis system.
+The IMU is constructed of a navigational platform gimbaled by a three axis system and a stable platform mounted on the inner gimbal to measure changes in velocity along the three axis.
+
 The following mapping is valid after setting the IMU to zero degrees.
 || *Axis* || *Gimbal* || *Controls* ||
 || X      || Outer    || Yaw        ||
@@ -80,9 +81,9 @@ To finalize the alignment the following procedure is needed:
  
 ==== 1.4.2.7  Zero IMU ====
 Here are three possible scenarios to reset the IMU to zero degrees:
- 1.) AGC Crew Inputs => Activate: "IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0"
- 2.) DSKY: V40N20E (AGC sends ZERO CAGE COMMAND)
- 3.) DSKY: V36E (AGC RESET which automatically resets the IMU)
+   # AGC Crew Inputs => Activate: "IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0"
+   # DSKY: V40N20E (AGC sends ZERO CAGE COMMAND)
+   # DSKY: V36E (AGC RESET which automatically resets the IMU)
  
 ==== 1.4.2.8  Monitor IMU Values ====
 Monitor Gimbal Angles DSKY: V16N20E
