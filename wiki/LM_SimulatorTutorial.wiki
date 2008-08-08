@@ -1,0 +1,17 @@
+#summary LM Simulator Tutorial
+
+http://virtualagc.googlecode.com/svn/trunk/Apollo32.png 
+= 1. LM Simulator Tutorial =
+
+This tutorial is intended to get you started with the AGC running in LGC (Lunar Guidance Computer) mode in conjunction with the virtual static simulator (developed by Stephan Hotto). Running the AGC in LGC mode  means that the AGC is configured to operate for conditions suitable for the Lunar Module. To do this you must run the yaAGC emulator with the option --cfg=<your_path>/LM.ini
+The LM_Simulator itself is a so called "plant" model of the Apollo Lunar Module which simulates the hardware around the LGC.
+
+== 1.1 Requirements ==
+
+Since the LM Simulator is written in Tcl/Tk you must have both the tcl and tk packages installed for Linux and the free distribution of [http://www.activestate.com/Products/activetcl/index.mhtml ActiveTcl] package for Windows. The simulator has been tested with Tcl version 8.4.
+ 
+== 1.2 Starting the Simulation ==
+
+To start the simulation you must first launch the AGC emulator running the Luminary131 code from MIT. The emulator must be forced into the LGC mode as previously discussed to avoid getting the yaAGC debug terminal due to an opcode trap that avoids infinite loops. Use the proper configuration option to select the LM mode.
+
+Once the LGC is running
