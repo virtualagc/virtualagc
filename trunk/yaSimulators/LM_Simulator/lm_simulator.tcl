@@ -229,6 +229,7 @@ set Q2L 0; set Q3R 0; set Q4R 0; set Q1L 0
 proc create_gui {} {
  global font0 font11 font1 font2 font3 log_in_flag log_out_flag cdata wdata bmask colb colf
  global bytesReceived bytesSent Operating_System
+ global tcl_platform
 
  wm title    . "LM Simulator v1.0 by Stephan Hotto"
  wm geometry . +0+0
@@ -237,9 +238,15 @@ proc create_gui {} {
  } else {
    wm geometry . 450x470; wm minsize  . 450 470
  }
+
  wm iconname . "LM Simulator"
- wm iconbitmap . -default apollo.ico
- 
+ if { $tcl_platform(platform) == "unix" } {
+   wm iconbitmap . @apollo.xbm
+ } else {
+   wm iconbitmap . -default apollo.ico 
+ }
+
+
  . configure -background $colb
 
  create_menu
