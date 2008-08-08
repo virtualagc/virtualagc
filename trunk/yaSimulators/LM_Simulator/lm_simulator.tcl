@@ -238,6 +238,7 @@ proc create_gui {} {
    wm geometry . 450x470; wm minsize  . 450 470
  }
  wm iconname . "LM Simulator"
+ wm iconbitmap . -default apollo.ico
  
  . configure -background $colb
 
