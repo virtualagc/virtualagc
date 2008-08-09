@@ -46,7 +46,7 @@ Now the vessel can be controlled by the RHC (Rotational Hand Controller) which c
 After a fresh AGC start there is a need to do a reset by typing V36E. To go into the idle loop it is necessary to change the program by V37E 00E. Probably that has to be repeated a couple of times until "PROG" shows 00.
  
 ==== 1.4.2.2 IMU Basics ====
-The IMU is constructed of a gyro stabilized stable platform gimbaled by a three axis system to measure changes in attitude and velocity. The three axis provides the platform 3 degrees of freedom. However due to the construction of the gimbals gimbal-lock could occur when 2 gimbals align in the same plane.
+The IMU is constructed of a gyro stabilized stable platform gimbaled by a three axis system to measure changes in attitude and velocity. The three axis provides the platform 3 degrees of freedom. However due to the construction of the gimbals gimbal-lock could occur when 2 gimbals align in the same plane. The platform stabilization is done with IRIGs (Inertial Rate Integrated Gyro). To measure the changes in velocity 3 PIPAs (pulsed-integrating pendulous accelerometer) are also orthogonally mounted on the stable platform.
 
 The following mapping is valid after setting the IMU to zero degrees.
 || *Axis* || *Gimbal* || *Controls* ||
@@ -54,7 +54,7 @@ The following mapping is valid after setting the IMU to zero degrees.
 || Y      || Inner    || Pitch      ||
 || Z      || Middle   || Roll       ||
 
-A Gimbal-Lock Warning will be alerted when the Roll exceeds +/-70 Degrees
+A Gimbal-Lock Warning will be alerted when the Roll exceeds +/-70 Degrees. Usually the thrust vector of the spaceship is aligned with the X-axis of the IMU.
  
 ==== 1.4.2.3 IMU Start ====
 After a fresh start of yaAGC and LM Simulator the AGC assumes an aligned IMU.
