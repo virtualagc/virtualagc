@@ -97,19 +97,13 @@ Here are three possible scenarios to reset the IMU to zero degrees:
 DAP (Digital Autopilot) can maneuver and control the spacecraft. To operate correctly the DAP needs some initialization values to work correctly (e.g. LM Weight,Configuration,etc.).
 
 ==== 1.4.3.1 DAP Configuration ====
-To observe the current DAP configuration use V48E on the DSKY. This will start software routine R03 and will show the current configuration in R1 (F06 46) on the DSKY. Each number represents a specific configurations (e.g. 21122). To decode or encode a configuration use ABCDE for each digit displayed where each character in this sequence represent a configuration option:
-   * A is the spacecraft configuration
-   * B is the RCS configuration
-   * C is the ACA scaling
-   * D is the ATT dead-band configuration
-   * E is the KALCMANU Rate
+To observe the current DAP configuration use V48E on the DSKY. This will start software routine R03 and will show the current configuration in R1 (F06 46) on the DSKY. Each number represents a specific configurations (e.g. 21122). To decode or encode a configuration use ABCDE for each digit displayed where each character in this sequence represent a configuration option see the table below.
 
-Configuration Table Value Lookup
-|| *Value*  || *A: Vehicle Stack*            || *B: RCS Translation*    || *C: deg/sec * || *D: deg* || *E: deg/sec* ||
-|| 0 || N/A                          || 2 Jet RCS System A || 4            || 0.3    || 0.2      ||
-|| 1 || Ascent Stage                 || 2 Jet RCS System B || 20           || 1.0    || 0.5      ||
-|| 2 || Ascent & Descent Stage       || 4 Jet RCS System A || N/A          || 5.0    || 2.0      ||
-|| 3 || Ascent & Descent Stage & CSM || 4 Jet RCS System B || N/A          || N/A    || 10 .0       ||
+|| *Value*  || *A: LM Stages*  || *B: RCS Translation* || *C: ACA Scale* || *D: ATT Dead-band* || *E: KALCMANU* ||
+|| 0 || N/A                    || 2 Jet System A || 4°/sec   || 0.3°    ||  0.2°/sec  ||
+|| 1 || Ascent Only            || 2 Jet System B || 20°/sec  || 1.0°    ||  0.5°/sec  ||
+|| 2 || Ascent & Descent       || 4 Jet System A || N/A      || 5.0°    ||  2.0°/sec  ||
+|| 3 || Ascent & Descent & CSM || 4 Jet System B || N/A      || N/A     || 10.0°/sec  ||
 
 To manipulate these configuration settings try the following on the DSKY:
    * To change the value type V21E
