@@ -94,28 +94,24 @@ Here are three possible scenarios to reset the IMU to zero degrees:
    * Monitor PIPA Counter Values: DSKY: V16N21E
 
 === 1.4.3 DAP Operations ===
-DAP (Digital Autopilot) can maneuver and control the spacecraft. To operate correctly thee DAP needs some initialization values to work correctly (e.g. LM Weight,Configuration,etc.).
+DAP (Digital Autopilot) can maneuver and control the spacecraft. To operate correctly the DAP needs some initialization values to work correctly (e.g. LM Weight,Configuration,etc.).
 
 ==== 1.4.3.1 DAP Configuration ====
-The observe the current DAP configuration execute the following steps:
-   * Start special software routine R03 using the DSKY: V48E
-   * The Register R1 (F06 46) shows the value 21122 = ABCDE.
-
-Where:
- A is the spacecraft configuration
- B is the RCS configuration
- C is the ACA scaling
- D is the ATT dead-band configuration
- E is the KALCMANU Rate
+To observe the current DAP configuration use V48E on the DSKY. This will start software routine R03 and will show the current configuration in R1 (F06 46) on the DSKY. Each number represents a specific configurations (e.g. 21122). To decode or encode a configuration use ABCDE for each digit displayed where each character in this sequence represent a configuration option:
+   * A is the spacecraft configuration
+   * B is the RCS configuration
+   * C is the ACA scaling
+   * D is the ATT dead-band configuration
+   * E is the KALCMANU Rate
 
 Configuration Table Value Lookup
-||   || *A Vehicle Stack*            || *B Translation*    || *C deg/sec * || *D deg || *E deg/sec* ||
+|| *Value*  || *A: Vehicle Stack*            || *B: RCS Translation*    || *C: deg/sec * || *D: deg* || *E: deg/sec* ||
 || 0 || N/A                          || 2 Jet RCS System A || 4            || 0.3    || 0.2      ||
 || 1 || Ascent Stage                 || 2 Jet RCS System B || 20           || 1.0    || 0.5      ||
 || 2 || Ascent & Descent Stage       || 4 Jet RCS System A || N/A          || 5.0    || 2.0      ||
 || 3 || Ascent & Descent Stage & CSM || 4 Jet RCS System B || N/A          || N/A    || 10 .0       ||
 
-To manipulate these configuration settings try the following on the DSKY use V21E
+To manipulate these configuration settings try the following on the DSKY:
    * To change the value type V21E
    * Press "PRO" on the DSKY to start the entry of (F06 47) LM & CSM Weight
    * Use V21E or V22E to change the individual values
@@ -124,12 +120,14 @@ To manipulate these configuration settings try the following on the DSKY use V21
    * F06 48 allows the entry of the Engine Gimbal Angles.
  
 ==== 1.4.3.2 DAP Activation ====
-To activate the DAP select on the AGC Cre Inputs either "ATTITUDE HOLD MODE ON" or "AUTO STABILIZATION OF ATTITUDE ON".
+To activate the DAP select on the AGC Crew Inputs either:
+   * "ATTITUDE HOLD MODE ON" or 
+   * "AUTO STABILIZATION OF ATTITUDE ON".
 
 ==== 1.4.3.3 DAP Modes ====
-DAP Modes:
-   * DSKY: V76E Minimun Impulse Command Mode (each RHC deflection fires the thrusters for 14ms)
-   * DSKY: V77E Rate Command and Attitude Hold Mode
+With the DSKY you can set the following DAP Modes:
+   * V76E Minimun Impulse Command Mode (each RHC deflection fires the thrusters for 14ms)
+   * V77E Rate Command and Attitude Hold Mode
  
 ==== 1.4.3.4 DAP Crew Defined Maneuver ====
 The Crew defined maneuver allows the astronauts to place the spacecraft into a specific attitude. As an example follow the following steps:
