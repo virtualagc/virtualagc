@@ -17,7 +17,30 @@ To show which program was running the right top 2 digits were used. Programs wer
 
 When entering numbers it was assumed that octal numbers where used unless the user would use the sign +/- symbol; in that case decimal numbers were assumed. Also when using decimal numbers leading zeros must be entered this is not the case for octal numbers. When input is requested in R1 the row for R1 would clear and the user can provide its input. To correct the input press the CLR key before pressing Entr.
 
-== 1.2 Some Basic Commands ==
+== 1.2 Status Indicators ==
+Also part of the DSKY are the status indicator lights. These are illuminated to indicate warnings or caution. The following is a list of the indicator lights with an explanation of when the light is illuminated.
+   * UPLINK ACTY: Received a complete 16 but digital uplink message
+   * NO ATT: Inertial Subsystem is in coarse align
+   * STBY: When AGC is in standby mode to preserve power
+   * KEY REL: Crew pressing keys or Input requested (except PRO,RSET and ENTR)
+   * OPR ERR: Incorrect sequence of keys pressed
+   * TEMP: Inertial Subsystem temperature outside of nominal values
+   * GIMBAL LOCK: Middle gimbal exceed +/-70 degrees
+   * PROG: Computational difficulty detected
+   * RESTART: Temporary Hardware or Software failure detected (Reset)
+   * TRACKER: Issue with the OCDU or rendezvous radar
+
+== 1.3 Keyboard ==
+The keyboard exist of a set of numerical buttons,sign buttons and command buttons. The numerical buttons aren't further explained since their purpose is just to enter digits. The sign buttons although straight forward immediately flag the AGC that a decimal number is being entered. The remaining set of Keys is enumerated below with a brief explanation.
+   * VERB: Interpret the next 2 numerical as verb code
+   * NOUN: Interpret the next 2 numerical as noun code
+   * CLR: Clear the data display (1st the active, successive presses clears the other 2)
+   * PRO: Proceed with entered data or go standby if power down program is started
+   * KEY REL: Allow AGC to display data if you were entering data
+   * ENTR: Requested Data Entered and start Execution
+   * RSET: Extinguishes the illuminated caution indicators
+
+== 1.4 Some Basic Commands ==
 The following is a list of some basic commands to demonstrate the interaction with the DSKY.
 
 || *Verb Noun* || *Description*                                                     ||
@@ -25,6 +48,9 @@ The following is a list of some basic commands to demonstrate the interaction wi
 || V36E        || Fresh restart                                                     ||
 || V16N36E     || Display ground Elapsed Time (GET)                                 ||
 || V25N36E     || Set GET. R1 for hours, R2 for minutes and R3 for 1/100 of seconds ||
-|| V01N02E     || Single shot peek at erasable memory address R3 in octal           ||
-|| V21N02E     || Poke value R2 into erasable memory address R3 in octal                                                                       ||
-|| V11N02E     || Continuous peek at erasable memory address R3 in octal            ||
+|| V01N02E     || Single shot peek at erasable memory address R3 in octal ||
+|| V21N02E     || Poke value R2 into erasable memory address R3 in octal ||                                                                 
+|| V11N02E     || Continuous peek at erasable memory address R3 in octal ||
+|| V05N09E     || Display Alarm Code ||
+|| V05N08E     || Display Alarm Data ||
+|| V37E00E     || Enter Idle program mode ||
