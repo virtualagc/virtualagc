@@ -7,13 +7,13 @@ The DSKY is the "display/keyboard" used by the Apollo Guidance Computer (AGC).  
   http://virtualagc.googlecode.com/svn/trunk/doc/images/DSKY.png
 
 == 1.1 Interacting with DSKY ==
-The DSKY design used a pretty simple but smart interface to allow the user to interact with the AGC. A method of verbs and nouns were used to request an operation (i.e. the verb) and on what (i.e. noun) you wanted this operation to execute on. Each distinct verb was assigned a number and each noun was assigned a number. For example the verb "display" was assigned the number 16 and noun 36 was assigned to "ground elapsed time (GET)". So to display the current GET you would press "V" followed by the number 16 and then "N" followed by the numbers 36 thereafter executed when pressing Entr key. A shorthand notation in check lists was used to express the above sequence: V16N36E. In somecases just a simple verb was sufficient to execute a certain command.
+The DSKY design used a pretty simple but smart interface to allow the user to interact with the AGC. A method of verbs and nouns were used to request an operation (i.e. the verb) and on what (i.e. noun) you wanted this operation to execute on. Each distinct verb was assigned a number and each noun was assigned a number. For example the verb "display" was assigned the number 16 and noun 36 was assigned to "ground elapsed time (GET)". So to display the current GET you would press "V" followed by the number 16 and then "N" followed by the numbers 36 thereafter executed when pressing Entr key. A shorthand notation in check lists was used to express the above sequence: V16N36E. In some cases just a simple verb was sufficient to execute a certain command.
 
 Similarly if the AGC required the user to input certain values or ask to confirm (i.e the Pro(ceed) key ) it would display a flashing verb/noun combination to indicate that user input is requested.
 
 To display output in response to a request or when punching input in the DSKY the registers R1 (top row), R2 (middle row) and R3 (bottom row) were used.
 
-To show which program was running the right top 2 digits were used. Programs were applications that executed a specific task. For example program 64 (P64) was the high gate approach program where as P66 was the final landing phase program and P68 the post landing shutdown program to prevent inadvertent RCS firing. A program was typically started with the verb 37 followed by a noun equal to the program number. So to start program 66 one would enter: V37N66E
+To show which program was running the right top 2 digits were used. Programs were applications that executed a specific task. For example program 64 (P64) was the high gate approach program where as P66 was the final landing phase program and P68 the post landing shutdown program to prevent inadvertent RCS firing. A program was typically started with the verb 37 followed by the program number. To start program 66 one would enter: V37E66E Notice that after V37E the DSKY starts flashing the Code 37 to ask the crew for the program input.
 
 When entering numbers it was assumed that octal numbers where used unless the user would use the sign +/- symbol; in that case decimal numbers were assumed. Also when using decimal numbers leading zeros must be entered this is not the case for octal numbers. When input is requested in R1 the row for R1 would clear and the user can provide its input. To correct the input press the CLR key before pressing Entr.
 
@@ -25,7 +25,7 @@ Also part of the DSKY are the status indicator lights. These are illuminated to 
    * KEY REL: Crew pressing keys or Input requested (except PRO,RSET and ENTR)
    * OPR ERR: Incorrect sequence of keys pressed
    * TEMP: Inertial Subsystem temperature outside of nominal values
-   * GIMBAL LOCK: Middle gimbal exceed +/-70 degrees
+   * GIMBAL LOCK: Middle gimbal exceeds +/-70 degrees
    * PROG: Computational difficulty detected
    * RESTART: Temporary Hardware or Software failure detected (Reset)
    * TRACKER: Issue with the OCDU or rendezvous radar
