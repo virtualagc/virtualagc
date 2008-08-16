@@ -14,9 +14,9 @@ To determine orbit parameters of an object (e.g. spacecraft) one needs to unders
 
 The measure of how elliptical an orbit is is expressed with eccentricity _e_. If _e = 0_ we have a perfect circular orbit. For _e < 1_ we have an eliptical orbit and when _e = 1_ we have reached escape velocity and _e > 1_ means we are no longer in orbit; the spacecraft will never return. The eccentricity has the following relation with _r,,a,,_ and _r,,p,,_
 
-   _r,,a,,_ = _a_(1 - _e_ )
+   _r,,a,,_ = _a_( 1 - _e_ )
    
-   _r,,p,,_ = _a_(1 + _e_ )
+   _r,,p,,_ = _a_( 1 + _e_ )
 
 Now we have enough to calculate the velocity _v_ at perilune and apolune if we desire an orbit that has a a closest approach of 100km above the surface of the Moon and a fartest piont of 500km above the surface. Since the Moon has an average radius of 1738 km (i.e. 1738000 m) we can now determine _r,,a,,_ and _r,,p,,._ and _a_
 
@@ -24,7 +24,7 @@ Now we have enough to calculate the velocity _v_ at perilune and apolune if we d
   
   _r,,p,,_ = 1838000 m
   
-  _a_ = (_r,,a,,_ + _r,,p,,_) / 2 = (2238000 m + 1838000 m) / 2 = 2038000 m
+  _a_ = ( _r,,a,,_ + _r,,p,,_ ) / 2 = ( 2238000 m + 1838000 m ) / 2 = 2038000 m
 
 Now we can determine if this orbit is actually stable with regards to these parameters
 
@@ -38,15 +38,46 @@ Since the eccentricity is less than 1 the orbit is stable and achievable.
 
 To calculate the velocity in at either apolune or perilune we need the gravitational parameter _u_ for the body we are orbiting (i.e. 4.9*10^12^ m^3^/s^2^ ) and the following formula:
 
-   _v_ = *SQRT*( _u_ ( 2/_r,,x,,_ - 1 / _a_ ) ) 
+   _v_ = *SQRT*( _u_ ( 2 / _r,,x,,_ - 1 / _a_ ) ) 
 
    where _r,,x,,_ is is the distance to the center of the orbiting body.
    
 So the velocity at perilune (i.e. 100km above the lunar surface) is:
 
-   _v_ = *SQRT*(4.9*10^12^ m^3^/s^2^ (2/1838000 m - 1 / 2038000 m)) = 1711.013 m/s
+   _v_ = *SQRT*( 4.9*10^12^ m^3^/s^2^ ( 2 / 1838000 m - 1 / 2038000 m ) ) = 1711.013 m/s
 
 == 1.3 Changing Orbits ==
+To change orbits is quite easy as long as you know when to start a burn and how much change in velocity is required to end up in the new orbit. When you know your current orbit and the new desired orbit then all you have to do is wait untill both orbits intersect. Typically maneuvers are executed in either periapsis or apoapsis. Especially if you want to circularize your orbit. Lets assume for the following example that we are in lunar orbit once again but this time in a circular orbit at 100 km above the surface and we want to lower our orbit to a circular 50 km orbit. This will require 2 burns to accomplish. The first burn will change the orbit from a cirular to an eliptical orbit with its perilune at 50 km and its apolune at 100 km. The second burn would lower the apolune so that both apolune and perilune are 50 km. The previous section has shown how to calculate the velocity of the spacecraft in both apolune and perilune. We use the same methods in this section to determine the velocities of both perilune and apolune for all three orbits and from there we can derive the change in velocity commonly known as _Delta-V_.
 
+Since the first orbit is circular we know that _e_ = 0 and that that the velocity in both the perilune and apolune are equal: 
 
-== 1.4 Propellant and Burn time ==
+   _a_ = _r,,a,,_ = _r,,p,,_ = 100 km + 1738 km = 1838 km
+
+   _v_ = *SQRT* ( 4.9*10^12^ m^3^/s^2^ ( 2 / 1838000 m - 1 / 1838000 ) ) = 1632.771 m/s
+   
+This velocity is also the apolune of our intermediate orbit (i.e. 100 km by 50 km). Since it is the apolune of our new orbit it means that we have to reduce our velocity to a value that will have the apolune of 100 km and a perilune of 50 km. Since we are lowering our orbit we must fire against are path of travel (retrograde). To determine the change in velocity we just calculate the velocity for the apolune of this new orbit.
+
+   _r,,a,,_ = 1838000 m
+  
+   _r,,p,,_ = 1788000 m
+   
+   _a_ = (_r,,a,,_ + _r,,p,,_) / 2 = 1813000 m
+   
+   _v,,a,,_ = *SQRT* ( 4.9*10^12^ m^3^/s^2^ ( 2 / 1838000 m - 1 / 1813000 ) = 1621.475 m/s
+   
+   _v,,p,,_ = *SQRT* ( 4.9*10^12^ m^3^/s^2^ ( 2 / 1788000 m - 1 / 1813000 ) = 1666.818 m/s
+  
+   
+Now that we have the new velocities we determine _Delta-V,,a,,_:
+
+   _Delta-V,,a,,_ = 1621.475 m/s - 1632.771 m/s = -11.296 m/s
+   
+To accomplish this change in velocity we must ignite the engine at the right moment at burn for a certain amout of time (see next section) based on the performance of the rocket engine. Since we wanted to get into a lower circular orbit (50km above the surface) it is necessay to once again execute a burn but now at the new perilune. This burn must be again retrograde since we are lowering the orbit. Agains we use the same method to determine the velocities for the new orbit:
+
+   _a_ = _r,,a,,_ = _r,,p,,_ = 1788000 m (The orbit is circular)
+   
+   _v_ = *SQRT* ( 4.9*10^12^ m^3^/s^2^ ( 2 / 1788000 m - 1 / 1788000 ) = 1655.443 m/s
+   
+   _Delta-V,,p,,_ = 1655.443 m/s - 1666.818 m/s = -11.375 m/s
+
+== 1.4 Propellant and Burn time == 
