@@ -1,6 +1,6 @@
 /*
   Copyright 2004-2005 Ronald S. Burkey <info@sandroid.org>
-  
+
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -18,15 +18,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
   Filename:	Backtrace.c
   Purpose:	Stuff for yaAGC backtrace.
   Contact:	Ron Burkey <info@sandroid.org>
@@ -55,7 +55,7 @@
 #include <string.h>
 #include "agc_engine.h"
 
-// This function adds a new backtrace point to the circular buffer.  The 
+// This function adds a new backtrace point to the circular buffer.  The
 // oldest entries are transparently overwritten.  The Cause parameter is
 // used as follows:
 //	0	The backtrace point is in normal code.
@@ -63,7 +63,7 @@
 //	255	The backtrace point is a RESUME after interrupt.
 // When Cause==255 is encountered, all backtrace points back to (and including)
 // the vector to the interrupt are removed.  The reason for this is that
-// otherwise the array will quickly become completely full of interrupt 
+// otherwise the array will quickly become completely full of interrupt
 // code, and all backtrace points to foreground code will be completely lost.
 
 void
@@ -76,7 +76,7 @@ BacktraceAdd (agc_t *State, int Cause)
     return;
   if (BacktraceInitialized == 0)
     {
-      BacktracePoints = (BacktracePoint_t *) 
+      BacktracePoints = (BacktracePoint_t *)
       			malloc (MAX_BACKTRACE_POINTS * sizeof (BacktracePoint_t));
       if (BacktracePoints == NULL)
         {
@@ -103,11 +103,11 @@ BacktraceAdd (agc_t *State, int Cause)
     BacktraceNextAdd = 0;
   if (BacktraceCount < MAX_BACKTRACE_POINTS)
     BacktraceCount++;
-  // I just happen to know that State->CycleCounter has been pre-incremented.  
+  // I just happen to know that State->CycleCounter has been pre-incremented.
   Bp->CycleCounter = State->CycleCounter - 1;
   memcpy (Bp->Erasable, State->Erasable, sizeof (State->Erasable));
   memcpy (Bp->InputChannel, State->InputChannel, sizeof (State->InputChannel));
-  memcpy (Bp->InterruptRequests, State->InterruptRequests, 
+  memcpy (Bp->InterruptRequests, State->InterruptRequests,
   	  sizeof (State->InterruptRequests));
   Bp->OutputChannel7 = State->OutputChannel7;
   memcpy (Bp->OutputChannel10, State->OutputChannel10, sizeof (State->OutputChannel10));
@@ -120,7 +120,7 @@ BacktraceAdd (agc_t *State, int Cause)
   Bp->SubstituteInstruction = State->SubstituteInstruction;
   Bp->DueToInterrupt = Cause;
   Bp->Erasable[0][RegZ]--;	// Recall that Z is pre-incremented.
-} 
+}
 
 // Restores the state of the system from an entry in the backtrace buffer.
 // Returns 0 on success or non-zero on error.
@@ -145,7 +145,7 @@ BacktraceRestore (agc_t *State, int n)
   State->CycleCounter = Bp->CycleCounter;
   memcpy (State->Erasable, Bp->Erasable, sizeof (State->Erasable));
   memcpy (State->InputChannel, Bp->InputChannel, sizeof (State->InputChannel));
-  memcpy (State->InterruptRequests, Bp->InterruptRequests, 
+  memcpy (State->InterruptRequests, Bp->InterruptRequests,
   	  sizeof (State->InterruptRequests));
   State->OutputChannel7 = Bp->OutputChannel7;
   memcpy (State->OutputChannel10, Bp->OutputChannel10, sizeof (State->OutputChannel10));
@@ -157,12 +157,12 @@ BacktraceRestore (agc_t *State, int n)
   State->InIsr = Bp->InIsr;
   State->SubstituteInstruction = Bp->SubstituteInstruction;
   return (0);
-} 
+}
 
 // Displays the backtrace buffer.
 
 void
-BacktraceDisplay (agc_t *State)
+BacktraceDisplay (agc_t *State,int Num)
 {
   int i, j, k, CurrentZ, Value, Bank;
   BacktracePoint_t *Bp;
@@ -224,7 +224,7 @@ BacktraceDisplay (agc_t *State)
 	}
     }
   if (j != 0)
-    printf ("\n");	
+    printf ("\n");
 }
 
 

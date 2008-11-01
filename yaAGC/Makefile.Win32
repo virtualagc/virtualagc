@@ -36,6 +36,7 @@
 #				to pass instructions in the BSUB register upon
 #				exiting from an interrupt-service routine.
 #		2008-06-05 OH	Added files for GDB/MI demonstrator
+#		2008-08-31 OH	Reorganizing source content
 
 # 2007-03-05 RSB
 CFLAGS +=-DALLOW_BSUB
@@ -46,7 +47,7 @@ cleanDebug: clean
 
 default:	WinAGC yaAGC.exe
 
-yaAGC.exe:	main.o agc_gdbmi.o agc_help.o nbfgets.o symbol_table.o regex.o ../yaCode/Luminary131/CheckDec.c libyaAGC.a
+yaAGC.exe:	main.o agc_gdbmi.o agc_disassembler.o agc_help.o nbfgets.o symbol_table.o regex.o ../yaCode/Luminary131/CheckDec.c libyaAGC.a
 	gcc ${CFLAGS} -ggdb -o $@ $^ -L. -lpthreadAGC -lkernel32 -lwsock32 -lreadline -lyaAGC
 
 libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \

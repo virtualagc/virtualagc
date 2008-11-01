@@ -660,7 +660,11 @@ OpenSourceFile (char *FileName)
     }
 
   // Form the complete path of the source and try to open
+#ifdef WIN32   
+  sprintf(PathName, "%s\\%s", SourcePathName, FileName);
+#else
   sprintf(PathName, "%s/%s", SourcePathName, FileName);
+#endif
   if ((CurrentSourceFP = fopen (PathName, "r")) == NULL)
     {
       printf ("Cannot open source: %s\n", PathName);
@@ -774,8 +778,7 @@ DisplaySource (int NumberLines, char *AddressField)
 // console. The 5 lines before the line given and the 10 lines after the
 // line number given is displayed, subject to the file bounds. If the given
 // LineNumber is -1, then display the next MAX_LIST_LENGTH line numbers.
-void
-ListSource (char *SourceFile, int LineNumber)
+void ListSource (char *SourceFile, int LineNumber)
 {
   // Debug Command: LINENUM
   // If the requested source is the NULL, then we want to display
@@ -791,7 +794,7 @@ ListSource (char *SourceFile, int LineNumber)
       // Otherwise, if there is no source file and we do have one
       // currently open, then just display the source. List "around"
       // the given line number.
-      printf ("Source file = %s\n", CurrentSourcePath);
+      /* printf ("Source file = %s\n", CurrentSourcePath); */
       CurrentLineNumber = BackupLineNumber (LineNumber, 5);
       PositionFilePointer (CurrentLineNumber);
       DisplaySource (MAX_LIST_LENGTH, NULL);
@@ -812,7 +815,7 @@ ListSource (char *SourceFile, int LineNumber)
       // For the given file name, list "around" the given line number
       if (!OpenSourceFile (SourceFile))
 	{
-          printf ("Source file = %s\n", CurrentSourcePath);
+/*          printf ("Source file = %s\n", CurrentSourcePath); */
 	  CurrentLineNumber = BackupLineNumber (LineNumber, 5);
 	  PositionFilePointer (CurrentLineNumber);
 	  DisplaySource (MAX_LIST_LENGTH, NULL);
@@ -936,8 +939,7 @@ int LoadSourceLine (char *SourceFile, int LineNumber)
 
 //-------------------------------------------------------------------------
 // Dumps a list of source files given a regular expression pattern
-void
-DumpFiles (const char *Pattern)
+void DumpFiles (const char *Pattern)
 {
   int i, Count = 0;
   //char Address[16];

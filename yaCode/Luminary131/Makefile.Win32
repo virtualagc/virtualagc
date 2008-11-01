@@ -15,6 +15,7 @@
 SOURCE:=$(wildcard *.s)
 TARGETS=webb2burkey-rope.exe Oct2Bin.exe CheckDec.exe Luminary131.bin Luminary131.lst Luminary131.symtab
 
+Debug: 		$(TARGETS)
 default:	$(TARGETS)
 
 webb2burkey-rope.exe: webb2burkey-rope.c
@@ -34,7 +35,8 @@ Luminary131.lst Luminary131.symtab: ${SOURCE}
 	../../yaYUL/yaYUL.exe --force MAIN.s >Luminary131.lst
 	mv MAIN.s.symtab Luminary131.symtab
 	diff -s MAIN.s.bin Luminary131.bin
-	
+
+cleanDebug: clean
 clean:
 	-rm $(TARGETS)
 	
