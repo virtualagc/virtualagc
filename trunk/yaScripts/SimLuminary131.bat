@@ -9,7 +9,7 @@ if f==f%XPPRO% goto notxppro
   start /min "LMyaAGC" yaAGC --core=Luminary131.bin --port=19797 %2
   start /min "LMyaAGS" yaAGS --core=FP8.bin %4
   start "LMyaDEDA" yaDEDA %1
-  start "LMyaDSKY" yaDSKY %1 --cfg=LM.ini --port=19797 --test-downlink
+  start "LMyaDSKY" yaDSKY %1 --half-size --cfg=LM.ini --port=19797 --test-downlink
   start /min "LMyaACA" yaACA
   start "LMsimulator" LM_Simulator "--cfg=lm_simulator_nodsky.ini"
   SimStop LMyaAGC LMyaAGS LMyaDEDA LMyaDSKY LMyaACA LMsimulator

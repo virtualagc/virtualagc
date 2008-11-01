@@ -13,7 +13,7 @@ yadsky.exe:	$(wildcard *.h) ${CSOURCE}
 		-g -o $@ -I../../yaAGC \
 		`pkg-config --cflags gtk+-win32-2.0` \
 		-mno-cygwin -mms-bitfields "-DNVER=${NVER}" \
-		-DPACKAGE_DATA_DIR="\"/mingw/share\""  \
+		-DPACKAGE_DATA_DIR="\"c:/mingw/share/\""  \
 		-DPACKAGE="\"yaDSKY\"" \
 		${CSOURCE} -L../../yaAGC -lyaAGC -lwsock32 \
 		`pkg-config --libs gtk+-win32-2.0`
@@ -25,4 +25,4 @@ install:	yadsky.exe
 	cp -a *.ini /mingw/bin
        
 clean:
-	rm yadsky.exe
+	rm -f yadsky.exe
