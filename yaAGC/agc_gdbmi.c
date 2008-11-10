@@ -1299,6 +1299,14 @@ void gdbmiHandleEnable(agc_t *State , char* s, char* sraw)
    ++gdbmi_status;
 }
 
+GDBMI_FUNC(HandleRun)
+{
+    printf("[New Thread 11]\n");
+    printf("[Switching to Thread 11]\n");
+
+	return(gdbmiCmdRun);
+}
+
 void gdbmiHandleDumpMemory(agc_t *State , char* s, char* sraw)
 {
    unsigned start_addr,end_addr,gdbmi_addr;
@@ -1575,6 +1583,10 @@ GDBMI_FUNC(HandleCommandLineInterface)
    else if (!strncmp(s,"DELETE",6)) gdbmiHandleDelete(State,s+6,sraw+6);
    else if (!strncmp(s,"DISABLE ",8)) gdbmiHandleDisable(State,s+8,sraw+8);
    else if (!strncmp(s,"ENABLE ",7)) gdbmiHandleEnable(State,s+7,sraw+7);
+   else if (!strncmp(s,"QUIT",4)) gdbmi_status = gdbmiCmdQuit;
+   else if (!strncmp(s,"EXIT",4)) gdbmi_status = gdbmiCmdQuit;
+   else if (!strncmp(s,"CONT",4)) {GDBMI_CALL(HandleRun,4);}
+   else if (!strncmp(s,"RUN",3)) {GDBMI_CALL(HandleRun,3);}
    else if (!strncmp(s,"P",1)) gdbmiHandlePrint(State,s+1,sraw+1);
    else if (!strncmp(s,"B",1)) gdbmiHandleBreak(State,s+1,sraw+1,BP_KEEP);
    else if (!strncmp(s,"D",6)) gdbmiHandleDelete(State,s+1,sraw+1);
