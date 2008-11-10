@@ -20,10 +20,11 @@ typedef enum
 	gdbmiCmdUnhandled,
 	gdbmiCmdError,
 	gdbmiCmdDone,
+	gdbmiCmdNext,
 	gdbmiCmdStep,
 	gdbmiCmdContinue,
 	gdbmiCmdRun,
-	gdbmiCmdQuit,
+	gdbmiCmdQuit = 0xfe,
 } gdbmiResult;
 
 

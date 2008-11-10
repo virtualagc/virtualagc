@@ -476,7 +476,7 @@ void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
    }
 }
 
-static void catch_sigint(int sig);
+static void catch_sig(int sig);
 int BreakPending = 0;
 char FuncName[128];
 
@@ -625,7 +625,10 @@ int main (int argc, char *argv[])
     if (!QuietMode) gdbmiHandleShowVersion();
 
     /* Register the SIGINT to be handled by AGC Debugger */
-    signal(SIGINT, catch_sigint);
+    signal(SIGINT, catch_sig);
+    signal(SIGBREAK, catch_sig);
+    signal(SIGTERM, catch_sig);
+    signal(SIGABRT, catch_sig);
 
     /* Debugging without symbols is strange */
     if (DebugMode == 1 && HaveSymbols != 1)
@@ -1500,8 +1503,8 @@ int main (int argc, char *argv[])
 		      SingleStepCounter = 0;
 		      break;
 		    }
-		  else if (!strcmp (s, "QUIT") || !strcmp (s, "EXIT"))
-		    return (0);
+//		  else if (!strcmp (s, "QUIT") || !strcmp (s, "EXIT"))
+//		    return (0);
 		  else if (!strncmp (s, "SYMBOL-FILE", 11))
 		    {
 		      char Dummy[12];
@@ -1590,16 +1593,13 @@ int main (int argc, char *argv[])
 			    }
 			}
 		    }
-        else if (!strcmp (s, "CONT") || !strcmp (s, "RUN"))
-		    {
-                      /* Only print the thread info if debugevents are on */
-                      printf("[New Thread 11]\n");
-                      printf("[Switching to Thread 11]\n");
-                      RunState = 1;
-		      break;
-		    }
-		  else if (!strncmp (s, "COREDUMP ", 9))
-		    MakeCoreDump (&State, &sraw[9]);
+//        else if (!strcmp (s, "CONT") || !strcmp (s, "RUN"))
+//		    {
+//                      /* Only print the thread info if debugevents are on */
+//                      RunState = 1;
+//		      break;
+//		    }
+		  else if (!strncmp (s, "COREDUMP ", 9))MakeCoreDump (&State, &sraw[9]);
 //		  else if (!strcmp (s, "INTERRUPTS"))
 //		    {
 //		      if (!DebuggerInterruptMasks[0])
@@ -1684,17 +1684,49 @@ int main (int argc, char *argv[])
 		      goto ShowDisassembly;
 		    }
 
-		  else if (gdbmiHandleCommand(&State, s , sraw ) < gdbmiCmdDone )
-	            {
-	              // printf ("Undefined command: \"%s\". Try \"help\".\n", sraw );
-	            }
-	           else
-	           {
-	           	fflush(stdout);
+		  else
+		  {
+			  gdbmiResult result = gdbmiHandleCommand(&State, s , sraw );
+			  switch (result)
+			  {
+//				  case gdbmiCmdUnhandled:
+//					  break;
+//				  case gdbmiCmdError:
+//					  break;
+//				  case gdbmiCmdDone:
+//					  fflush(stdout);
+//					  break;
+////				  case gdbmiCmdNext:
+////				  case gdbmiCmdStep:
+////			          RunState = 1;
+////					  SingleStepCounter = 0;
+////					  break;
+//				  case gdbmiCmdContinue:
+				  case gdbmiCmdRun:
+                      RunState = 1;
+					  break;
+				  case gdbmiCmdQuit:
+					  return(0);
+				  default:
+					  fflush(stdout);
+					  break;
+			  }
 
-	           }
+			  if (result == gdbmiCmdRun) break;
+
+//			  if ( result < gdbmiCmdDone )
+//	            {
+//	              // printf ("Undefined command: \"%s\". Try \"help\".\n", sraw );
+//	            }
+//	           else
+//	           {
+//
+//
+//	           	fflush(stdout);
+//	           }
+		  }
 		}
-	    }
+	  }
 	  if (LogFile != NULL)
 	    {
 	      int Bank, Address, NewLast;
@@ -1725,9 +1757,11 @@ int main (int argc, char *argv[])
 }
 
 /* Catch the SIGINT Signal to stop running and return to debug mode */
-static void catch_sigint(int sig)
+static void catch_sig(int sig)
 {
    BreakPending = 1; /* Make sure Break only happens when we want it */
    nbfgets_ready(agcPrompt);
-   signal(SIGINT, catch_sigint);
+   signal(sig, catch_sig);
 }
+
+
