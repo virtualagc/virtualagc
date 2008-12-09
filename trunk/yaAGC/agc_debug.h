@@ -41,7 +41,7 @@ extern Breakpoint_t Breakpoints[MAX_BREAKPOINTS];
 extern int NumBreakpoints;
 
 extern int HaveSymbols;
-extern char SymbolFile[MAX_FILE_LENGTH + 1];
+extern char *SymbolFile;
 extern int DebugMode;
 extern int SingleStepCounter;
 

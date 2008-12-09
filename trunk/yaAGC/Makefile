@@ -57,7 +57,19 @@ LIBS += -L/sw/lib -lreadline
 LIBS += -L/usr/lib/curses -lcurses
 endif	# NOREADLINE
 
-yaAGC:	main.o libyaAGC.a CheckDec.o nbfgets.o symbol_table.o agc_gdbmi.o agc_disassembler.o agc_help.o
+OBJECTS := \
+	main.o \
+	agc_cli.o \
+	agc_simulator.o \
+	agc_debugger.o \
+	agc_gdbmi.o \
+	agc_disassembler.o \
+	agc_help.o \
+	nbfgets.o \
+	symbol_table.o \
+	regex.o
+
+yaAGC:	$(OBJECTS) CheckDec.o libyaAGC.a
 	gcc ${CFLAGS} -o yaAGC $^ -L. ${LIBS} -lpthread -lyaAGC -lm
 
 libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o \
