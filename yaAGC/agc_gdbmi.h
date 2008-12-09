@@ -38,7 +38,7 @@ extern void gdbmiHandleDelete(agc_t *State , char* s, char* r);
 #define GDBMI_CALL(f,i) if(gdbmi_status == gdbmiCmdUnhandled)gdbmi_status = gdbmi ## f (State,s+i,sraw+i)
 
 extern int gdbmi_sigint;
-extern char SymbolFile[];
+extern char* SymbolFile;
 extern char* SourcePathName;
 
 #endif
