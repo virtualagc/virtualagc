@@ -35,6 +35,7 @@
   Mods:		08/31/08 OH.	Began.
 */
 
+#include <stdio.h>
 #include "agc_engine.h"
 #include "agc_disassembler.h"
 

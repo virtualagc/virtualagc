@@ -139,10 +139,10 @@ endif
 #	CFLAGS=-Wall -Werror
 # to catch every possible problem before sending it out into the world.
 ifeq (${USER},rburkey)
-CFLAGS:="-Wall -Werror -g -DALLOW_BSUB"
+CFLAGS:="-Wall -Werror -g -DALLOW_BSUB -DSTDC_HEADERS"
 yaACA:=
 else 
-CFLAGS="-DALLOW_BSUB"
+CFLAGS="-DALLOW_BSUB -DSTDC_HEADERS"
 yaACA:=-
 endif
 

@@ -427,9 +427,6 @@ int main (int argc, char *argv[])
 
 	/* Register the SIGINT to be handled by AGC Debugger */
 	signal(SIGINT, catch_sig);
-	signal(SIGBREAK, catch_sig);
-	signal(SIGTERM, catch_sig);
-	signal(SIGABRT, catch_sig);
 
   /* Run the Simulation */
   while (1)
