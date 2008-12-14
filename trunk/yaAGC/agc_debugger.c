@@ -5,6 +5,7 @@
  *      Author: MZ211D
  */
 
+#include <stdio.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
 #include "agc_debugger.h"

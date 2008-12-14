@@ -6,6 +6,7 @@
  */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
 

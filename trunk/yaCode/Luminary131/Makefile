@@ -22,6 +22,7 @@ SOURCE:=$(wildcard *.s)
 TARGETXEQ=bdiffhead webb2burkey-rope Oct2Bin CheckDec
 TARGETS:=${TARGETXEQ} Luminary131.bin Luminary131.lst Luminary131.symtab
 
+Debug:		$(TARGETS)
 default:	$(TARGETS)
 
 webb2burkey-rope: webb2burkey-rope.c
@@ -44,7 +45,8 @@ Luminary131.lst Luminary131.symtab: ${SOURCE} Luminary131.bin
 	../../yaYUL/yaYUL MAIN.s >Luminary131.lst
 	mv MAIN.s.symtab Luminary131.symtab
 	diff -s MAIN.s.bin Luminary131.bin
-	
+
+cleanDebug: clean	
 clean:
 	-rm -f $(TARGETXEQ) *.lst *~ MAIN.s.bin Luminary131.bin *.symtab
 	
