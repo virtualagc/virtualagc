@@ -48,7 +48,7 @@ int RunState;
 static Frame_t* DbgInitFrameData(void)
 {
    int i;
-   unsigned LinearAddr; 
+   unsigned LinearAddr;
 
    if (Debugger.HaveSymbols)
    {
@@ -64,15 +64,15 @@ static Frame_t* DbgInitFrameData(void)
          /* Vecter Table Frames */
          Frames[0].Name   = "MAIN";
          Frames[4].Name   = "TIMER6";
-         Frames[8].Name   = "INT_TIMER5";
-         Frames[12].Name  = "INT_TIMER3";
-         Frames[16].Name  = "INT_TIMER4";
-         Frames[20].Name  = "INT_KEYBD1";
-         Frames[24].Name  = "INT_KEYBD2";
-         Frames[28].Name  = "INT_UPLINK";
-         Frames[32].Name  = "INT_DNLINK";
-         Frames[36].Name  = "INT_RADAR";
-         Frames[40].Name  = "INT_JOYSTK";
+         Frames[8].Name   = "TIMER5";
+         Frames[12].Name  = "TIMER3";
+         Frames[16].Name  = "TIMER4";
+         Frames[20].Name  = "KEYBD1";
+         Frames[24].Name  = "KEYBD2";
+         Frames[28].Name  = "UPLINK";
+         Frames[32].Name  = "DNLINK";
+         Frames[36].Name  = "RADAR";
+         Frames[40].Name  = "JOYSTK";
 
          /* First find all the Labels and Populate Frames */
          for (i=0;i<SymbolTableSize;i++)
@@ -101,7 +101,7 @@ char* DbgGetFrameNameByAddr(unsigned LinearAddr)
 {
    char* FrameName = NULL;
 
-   if (LinearAddr >= 2048 && LinearAddr < 40960) 
+   if (LinearAddr >= 2048 && LinearAddr < 40960)
       FrameName = Frames[LinearAddr - 2048].Name;
 
    return (FrameName);
