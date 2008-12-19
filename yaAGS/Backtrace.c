@@ -67,7 +67,7 @@
 // code, and all backtrace points to foreground code will be completely lost.
 
 void
-BacktraceAdd (agc_t *State, int Cause)
+BacktraceAdd (agc_t *State, int Cause, uint16_t NextZ)
 {
   BacktracePoint_t *Bp;
   if (SingleStepCounter == -2)

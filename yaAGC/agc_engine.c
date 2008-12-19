@@ -1845,7 +1845,7 @@ agc_engine (agc_t * State)
 		i = 1;
 	      if (State->InterruptRequests[i] && DebuggerInterruptMasks[i])
 		{
-		  BacktraceAdd (State, i);
+		  BacktraceAdd (State, i, 04000 + 4 * i);
 		  // Clear the interrupt request.
 		  State->InterruptRequests[i] = 0;
 		  State->InterruptRequests[0] = i;
@@ -1944,7 +1944,7 @@ agc_engine (agc_t * State)
 	}
       else
 	{
-	  BacktraceAdd (State, 0);
+	  BacktraceAdd (State, 0, Address12);
 	  if (ValueK != RegQ)	// If not a RETURN instruction ...
 	    c (RegQ) = 0177777 & NextZ;
 	  NextZ = Address12;
@@ -1994,7 +1994,7 @@ agc_engine (agc_t * State)
     case 015:
     case 016:
     case 017:
-      BacktraceAdd (State, 0);
+      BacktraceAdd (State, 0, Address12);
       // TCF instruction (1 MCT).
       NextZ = Address12;
       // THAT was easy ... too easy ...
@@ -2185,9 +2185,9 @@ agc_engine (agc_t * State)
 	{
 	Resume:
 	  if (State->InIsr)
-	    BacktraceAdd (State, 255);
+	    BacktraceAdd (State, 255, c (RegZRUPT));
 	  else
-	    BacktraceAdd (State, 0);
+	    BacktraceAdd (State, 0, c (RegZRUPT));
 	  NextZ = c (RegZRUPT);
 	  State->InIsr = 0;
 #ifdef ALLOW_BSUB
@@ -2400,7 +2400,7 @@ agc_engine (agc_t * State)
       //  State->InterruptRequests[State->InterruptRequests[0]] = 0;
       c (RegZRUPT) = c (RegZ);
       State->InIsr = 1;
-      BacktraceAdd (State, 0);
+      BacktraceAdd (State, 0, 0);
 #if 0
       if (State->InIsr)
         {
@@ -2505,7 +2505,7 @@ agc_engine (agc_t * State)
       //if (Operand16 == AGC_P0 || Operand16 == AGC_M0)
       if (Accumulator == 0 || Accumulator == 0177777)
 	{
-	  BacktraceAdd (State, 0);
+	  BacktraceAdd (State, 0,Address12);
 	  NextZ = Address12;
 	}
       break;
@@ -2698,7 +2698,7 @@ agc_engine (agc_t * State)
       //if (Operand16 == AGC_P0 || IsNegativeSP (Operand16))
       if (Accumulator == 0 || 0 != (Accumulator & 0100000))
 	{
-	  BacktraceAdd (State, 0);
+	  BacktraceAdd (State, 0, Address12);
 	  NextZ = Address12;
 	}
       break;

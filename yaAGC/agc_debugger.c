@@ -6,12 +6,19 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
 #include "agc_debugger.h"
 #include "agc_gdbmi.h"
 
+extern int SymbolTableSize;
+extern Symbol_t *SymbolTable;
+
 static Debugger_t Debugger;
+static Frame_t* Frames;
+
 static char FuncName[128];
 
 // JMS: Variables pertaining to the symbol table loaded
@@ -22,7 +29,85 @@ char* SymbolFile;       // The name of the symbol table file
 int DebugMode;
 int RunState;
 
-int InitializeDebugger(Options_t* Options,agc_t* State)
+#define INT_MAIN   0
+#define INT_TIMER6 1
+#define INT_TIMER5 2
+#define INT_TIMER3 3
+#define INT_TIMER4 4
+#define INT_KEYBD1 5
+#define INT_KEYBD2 6
+#define INT_UPLINK 7
+#define INT_DNLINK 8
+#define INT_RADAR  9
+#define INT_JOYSTK 10
+
+/**
+ * The Frames array is used to cache and look up the Frame Labels
+ * when trying to display the frame trace or current location
+ */
+static Frame_t* DbgInitFrameData(void)
+{
+   int i;
+   unsigned LinearAddr; 
+
+   if (Debugger.HaveSymbols)
+   {
+      char* FrameName = NULL;
+      Symbol_t* Symbol;
+      Frames = (Frame_t*)malloc(38912 * sizeof(Frame_t));
+
+      if (Frames)
+      {
+         /* First Clean Frames */
+         for (i=0;i<38912;i++)Frames[i].Name = NULL;
+
+         /* Vecter Table Frames */
+         Frames[0].Name   = "MAIN";
+         Frames[4].Name   = "TIMER6";
+         Frames[8].Name   = "INT_TIMER5";
+         Frames[12].Name  = "INT_TIMER3";
+         Frames[16].Name  = "INT_TIMER4";
+         Frames[20].Name  = "INT_KEYBD1";
+         Frames[24].Name  = "INT_KEYBD2";
+         Frames[28].Name  = "INT_UPLINK";
+         Frames[32].Name  = "INT_DNLINK";
+         Frames[36].Name  = "INT_RADAR";
+         Frames[40].Name  = "INT_JOYSTK";
+
+         /* First find all the Labels and Populate Frames */
+         for (i=0;i<SymbolTableSize;i++)
+         {
+            Symbol = &SymbolTable[i];
+            if (Symbol->Type == SYMBOL_LABEL)
+            {
+               LinearAddr = gdbmiLinearFixedAddr(Symbol->Value.SReg,
+                             Symbol->Value.FB,Symbol->Value.Super);
+               Frames[LinearAddr - 2048].Name = Symbol->Name;
+            }
+         }
+
+	 /* Next Fill all the remaining Empty Frames */
+         for (i=0;i<38912;i++)
+         {
+            if (Frames[i].Name != NULL) FrameName = Frames[i].Name;
+            else Frames[i].Name = FrameName;
+         }
+      }
+   }
+   return (Frames);
+}
+
+char* DbgGetFrameNameByAddr(unsigned LinearAddr)
+{
+   char* FrameName = NULL;
+
+   if (LinearAddr >= 2048 && LinearAddr < 40960) 
+      FrameName = Frames[LinearAddr - 2048].Name;
+
+   return (FrameName);
+}
+
+int DbgInitialize(Options_t* Options,agc_t* State)
 {
 	Debugger.Options = Options;
 	Debugger.RunState = 0;
@@ -46,12 +131,16 @@ int InitializeDebugger(Options_t* Options,agc_t* State)
 
 		/* In the future Have Symbols will only be used by the Debugger */
 		Debugger.HaveSymbols = HaveSymbols;
+
+		DbgInitFrameData();
 	}
+
+	BacktraceAdd (State, 0, 04000);
 
 	return 0;
 }
 
-int MonitorBreakpoints(void)
+int DbgMonitorBreakpoints(void)
 {
 	int Break;
 	int CurrentZ;
@@ -235,7 +324,7 @@ int MonitorBreakpoints(void)
 	return (Break);
 }
 
-void DisplayInnerStackFrame(void)
+void DbgDisplayInnerFrame(void)
 {
     // If we have the symbol table, then print out the actual source,
     // rather than just a disassembly

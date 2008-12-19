@@ -17,9 +17,14 @@ typedef struct
 	agc_t* State;
 } Debugger_t;
 
-extern int InitializeDebugger(Options_t* Options,agc_t* State);
-extern void ExecuteDebugger(void);
-extern void DisplayInnerStackFrame(void);
-extern int MonitorBreakpoints(void);
+typedef struct
+{
+	char* Name;
+}Frame_t;
+
+extern int DbgInitialize(Options_t* Options,agc_t* State);
+extern void DbgExecuteDebugger(void);
+extern void DbgDisplayInnerFrame(void);
+extern int DbgMonitorBreakpoints(void);
 
 #endif /* AGC_DEBUGGER_H_ */
