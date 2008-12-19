@@ -130,7 +130,7 @@ SymbolLine_t* FindLastLineMain ( void )
 // the vector to the interrupt are removed.  The reason for this is that
 // otherwise the array will quickly become completely full of interrupt
 // code, and all backtrace points to foreground code will be completely lost.
-void BacktraceAdd ( agc_t *State, int Cause, uint16_t NextZ )
+void BacktraceAdd ( agc_t *State, int Cause, unsigned NextZ )
 {
 	BacktracePoint_t *Bp;
 	if ( SingleStepCounter == -2 || BacktraceInitialized == -1 ) return;
@@ -360,7 +360,7 @@ void BacktraceDisplay ( agc_t *State, int Num )
 
 			unsigned Addr = gdbmiLinearFixedAddr(CurrentZ,FB,SBB);
 			FrameName = DbgGetFrameNameByAddr(Addr);
-	
+
 			if ( Line )
 			{
 #ifdef WIN32
