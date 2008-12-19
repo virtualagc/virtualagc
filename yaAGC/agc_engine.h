@@ -1,6 +1,6 @@
 /*
   Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>
-  
+
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -18,22 +18,22 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
   Filename:	agc_engine.h
   Purpose:	Header file for AGC emulator engine.
   Contact:	Ron Burkey <info@sandroid.org>
   Reference:	http://www.ibiblio.org/apollo
   Mods:		04/05/03 RSB.	Began.
 		10/20/03 RSB.	Corrected inclusion of sys/types.h to
-				stdint.h instead. 
+				stdint.h instead.
 		11/26/03 RSB.	Up to now, a pseudo-linear space was used to
 				model internal AGC memory.  This was simply too
 				tricky to work with, because it was too hard to
@@ -61,7 +61,7 @@
 		07/12/04 RSB	Q is now 16 bits.
 		07/15/04 RSB	Data alignment changed to bit 0 instead of 1.
 				Introduced REG16.
-		07/19/04 RSB	Added SocketInterlaceReload.  Max clients 
+		07/19/04 RSB	Added SocketInterlaceReload.  Max clients
 				increased from 5 to 10.
 		08/12/04 RSB	Added OutputChannel10[], for capturing
 				writes to the relay rows of channel 10.
@@ -78,17 +78,17 @@
 		06/28/05 RSB	Added digital downlink stuff.
 		07/05/05 RSB	Added AllOrErasable.
 		08/13/05 RSB	Added the extern "C" stuff, on the advice of
-				Mark Grant; similarly, added the 
+				Mark Grant; similarly, added the
 				agc_clientdata field to agc_t.
 		08/22/05 RSB	"unsigned long long" replaced by uint64_t.
 		02/26/06 RSB	Miscellaneous changes requested by Mark Grant
 				to make the Orbiter integration easier.
 				Shouldn't affect non-Orbiter builds.
-   
+
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
   http://hrst.mit.edu/hrs/apollo/public/archive/1704.pdf.
-  
+
 */
 
 #ifndef AGC_SOCKET_ENABLED
@@ -158,7 +158,7 @@ extern long random (void);
 // for overflow, with bad results.
 #define REG16 3
 
-// Handy names for the memory locations associated with special-purpose 
+// Handy names for the memory locations associated with special-purpose
 // registers, in octal.
 #define RegA 00
 #define RegL 01
@@ -227,7 +227,7 @@ extern long random (void);
 // Max number of 15-bit words in a downlink-telemetry list.
 #define MAX_DOWNLINK_LIST 260
 
-// Screen buffer for telemetry downlinks.  The terminal must be at least 
+// Screen buffer for telemetry downlinks.  The terminal must be at least
 // one bigger in each dimension than the actual amount of text used.
 #define DEFAULT_SWIDTH 79
 #define DEFAULT_SHEIGHT 42
@@ -283,7 +283,7 @@ typedef struct {
 typedef struct
 {
   // The following variable counts the total number of clock cycles since
-  // CPU-startup.  A 64-bit integer is used, because with a 32-bit integer 
+  // CPU-startup.  A 64-bit integer is used, because with a 32-bit integer
   // you'd get only about 14 hours before the counter wraps around.
   uint64_t /* unsigned long long */ CycleCounter;
   // All memory -- registers, RAM, and ROM -- is 16-bit, consisting of 15 bits
@@ -358,7 +358,7 @@ typedef struct {
   unsigned InIsr:1;		// Set when in an ISR, reset when in normal code.
   unsigned SubstituteInstruction:1;	// Use BBRUPT register.
   //unsigned RegQ16:1;		// Bit "16" of register Q.
-  uint16_t TargetZ;             // Target Z of the Execution Frame
+  unsigned TargetZ;             // Target Z of the Execution Frame
 } BacktracePoint_t;
 
 typedef struct
@@ -374,18 +374,18 @@ typedef struct
 #ifdef AGC_ENGINE_C
 int SingleStepCounter = -2;		// -2 when not in --debug mode.
 int BacktraceInitialized = 0;		// Becomes -1 on error.
-// We have a backtrace circular buffer, in which we place an entry every 
+// We have a backtrace circular buffer, in which we place an entry every
 // time an instruction is hit that may branch. The buffer is updated only
 // if we're in --debug mode.
 BacktracePoint_t *BacktracePoints = NULL;
 int BacktraceNextAdd = 0;
 int BacktraceCount = 0;
 // MAX_CLIENTS is the maximum number of hardware simulations which can be
-// attached.  The DSKY is always one, presumably.  The array is a list of 
-// the sockets used for the clients.  Thus stuff shown below is the 
+// attached.  The DSKY is always one, presumably.  The array is a list of
+// the sockets used for the clients.  Thus stuff shown below is the
 // DEFAULT setup.  The max number of clients can be change during runtime
 // initialization by setting MAX_CLIENTS to a different number, allocating
-// new arrays of clients and sockets corresponding to the new size, and 
+// new arrays of clients and sockets corresponding to the new size, and
 // then pointing the Clients and ServerSockets pointers at those arrays.
 int MAX_CLIENTS = DEFAULT_MAX_CLIENTS;
 static Client_t DefaultClients[DEFAULT_MAX_CLIENTS];
@@ -522,7 +522,7 @@ typedef struct {
 // Constants for the symbol type. A "register" is one of the basic
 // AGC registers such as A (accumulator) or Z (program counter) which
 // are found at the beginning of erasable memory. A "label" is a program
-// label to which control may be transfered (say, from a branch 
+// label to which control may be transfered (say, from a branch
 // instruction like BZF). A "variable" is a names memory address which
 // stores some data (from ERASE or DEC/2DEC or OCT for example). A
 // "constant" is a compiler constant defined by EQUALS or "=". These
@@ -658,7 +658,7 @@ void CpuWriteIO (agc_t * State, int Address, int Value);
 void MakeCoreDump (agc_t * State, const char *CoreDump);
 void UnblockSocket (int SocketNum);
 //FILE *rfopen (const char *Filename, const char *mode);
-void BacktraceAdd (agc_t *State, int Cause, uint16_t NextZ);
+void BacktraceAdd (agc_t *State, int Cause, unsigned NextZ);
 int BacktraceRestore (agc_t *State, int n);
 void BacktraceDisplay (agc_t *State,int Num);
 int16_t OverflowCorrected (int Value);
