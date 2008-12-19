@@ -101,7 +101,7 @@ char* GdbmiStringToUpper(char* str)
 }
 
 /**
-Adjust the command string pointer with the value given. 
+Adjust the command string pointer with the value given.
 */
 inline void GdbmiAdjustCmdPtr(int i)
 {
@@ -211,7 +211,7 @@ unsigned gdbmiLinearAddr(Address_t *agc_addr)
    {
       if (agc_addr->FB < 030)
          gdbmi_addr = 06000 + agc_addr->FB * 02000 + agc_addr->SReg;
-      else 
+      else
          gdbmi_addr = 06000 + (agc_addr->FB + agc_addr->Super*010) * 02000 + agc_addr->SReg;
    }
    else if (agc_addr->SReg < 07777) /* Must be fixed fixed */
@@ -690,7 +690,7 @@ GdbmiResult GdbmiHandleInfoBreakpoints(int j)
       else if (Breakpoints[i].Hits > 1)
          printf("\tbreakpoint already hit %d times\n",Breakpoints[i].Hits);
    }
-   ++gdbmi_status;
+   return(GdbmiCmdDone);
 }
 
 void gdbmiPrintFullNameContents(SymbolLine_t *Line)
@@ -887,22 +887,22 @@ void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
             strcpy(threadName,"TIMER4");
             break;
          case 5:
-            strcpy(threadName,"KEYBOARD1");
+            strcpy(threadName,"KEYBD1");
             break;
          case 6:
-            strcpy(threadName,"KEYBOARD2");
+            strcpy(threadName,"KEYBD2");
             break;
          case 7:
             strcpy(threadName,"UPLINK");
             break;
          case 8:
-            strcpy(threadName,"DOWNLINK");
+            strcpy(threadName,"DNLINK");
             break;
          case 9:
             strcpy(threadName,"RADAR");
             break;
          case 10:
-            strcpy(threadName,"JOYSTICK");
+            strcpy(threadName,"JOYSTK");
             break;
          default:
             strcpy(threadName,"MAIN");
@@ -1095,7 +1095,7 @@ GdbmiResult GdbmiHandleSetVariable(int i)
    operand2 = strstr(s,"=");
    *operand2 = (char)0;
    operand2++;
-	
+
    /* Set value using address */
    if (operand1[0] == '*')
    {
@@ -1108,7 +1108,7 @@ GdbmiResult GdbmiHandleSetVariable(int i)
 	Symbol = ResolveSymbol(operand1, SYMBOL_VARIABLE);
         if (Symbol != NULL &&
 		!Symbol->Value.Erasable) Symbol = NULL;
-	
+
 		if (Symbol != NULL)
 	{
 		/* Get linear address for display */
@@ -1122,20 +1122,20 @@ GdbmiResult GdbmiHandleSetVariable(int i)
 
 GdbmiResult GdbmiHandleSet(int i)
 {
-   GdbmiResult GdbmiStat;
+   GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
 
    /* Adjust the CmdPtr to point to the next token */
    GdbmiAdjustCmdPtr(i);
 
    if (!strncmp(s, "PROMPT ",7)) GdbmiStat = GdbmiHandleSetPrompt(7);
-   else if (!strncmp(s, "CONFIRM ",8)); /* Ignore for now */
-   else if (!strncmp(s, "WIDTH ",6)); /* Ignore for now */
-   else if (!strncmp(s, "HEIGHT ",7)); /* Ignore for now */
-   else if (!strncmp(s, "BREAKPOINT ",11)); /* Ignore for now */
-   else if (!strncmp(s, "PRINT ",6)); /* Ignore for now */
-   else if (!strncmp(s, "UNWINDONSIGNAL ",15)); /* Ignore for now */
-   else if (!strncmp(s, "DISASSEMBLY-FLAVOR ",19)); /* Ignore for now */
-   else if (!strncmp(s, "DEBUGEVENTS ",12)); /* Ignore for now */
+   else if (!strncmp(s, "CONFIRM ",8)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
+   else if (!strncmp(s, "WIDTH ",6)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
+   else if (!strncmp(s, "HEIGHT ",7)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
+   else if (!strncmp(s, "BREAKPOINT ",11)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
+   else if (!strncmp(s, "PRINT ",6)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
+   else if (!strncmp(s, "UNWINDONSIGNAL ",15)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
+   else if (!strncmp(s, "DISASSEMBLY-FLAVOR ",19)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
+   else if (!strncmp(s, "DEBUGEVENTS ",12)) GdbmiStat = GdbmiCmdDone; /* Ignore for now */
    else if (!strncmp(s, "VARIABLE ",9)) GdbmiStat = GdbmiHandleSetVariable(9);
    else	GdbmiStat = GdbmiHandleSetVariable(0);
 
@@ -1279,7 +1279,7 @@ GdbmiResult GdbmiHandleList(int i)
 		}
 	}
 
-   ++gdbmi_status;
+   return(GdbmiCmdRun);
 }
 
 void gdbmiHandleDelete(agc_t *State , char* s, char* sraw)
@@ -1697,7 +1697,7 @@ GdbmiResult GdbmiHandleCustom(int i)
    return(GdbmiCmdDone);
 }
 
-/** 
+/**
  * This function is the entry point for the high level GDBMI interaction
  * For now it is just a stub until the code will work with full GDB/MI
  */
@@ -1717,7 +1717,7 @@ GdbmiResult GdbmiHandleMachineInterface(int i)
 GdbmiResult GdbmiHandleCommand(agc_t *agc_state , char* dbg_s, char* dbg_sraw)
 {
    GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
-   
+
    /* Set the static GDBMI values and avoid passing around */
    State = agc_state;
    s     = dbg_s;
@@ -1725,12 +1725,16 @@ GdbmiResult GdbmiHandleCommand(agc_t *agc_state , char* dbg_s, char* dbg_sraw)
 
    /* Handle Basic GDB Command Line Options */
    GdbmiStat = GdbmiHandleCommandLineInterface(0);
+   gdbmi_status = 0;
 
    /* Use the new GDB/MI Capabilities */
    if (GdbmiStat == GdbmiCmdUnhandled) GdbmiStat = GdbmiHandleMachineInterface(0);
 
    /* Executed Custom defined Debug Commands */
    if (GdbmiStat == GdbmiCmdUnhandled) GdbmiStat = GdbmiHandleCustom(0);
+
+   if (GdbmiStat == GdbmiCmdUnhandled && gdbmi_status > 0)
+	   GdbmiStat = GdbmiCmdDone;
 
    return(GdbmiStat);
 }

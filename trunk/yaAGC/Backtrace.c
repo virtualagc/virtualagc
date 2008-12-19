@@ -254,6 +254,7 @@ void BacktraceDisplay ( agc_t *State, int Num )
 	int SBB;
 	Symbol_t* Symbol;
 	char* FrameName;
+	char* PrevFrameName = (char*)1;
 
 	if ( BacktraceInitialized == -1 )
 	{
@@ -361,7 +362,10 @@ void BacktraceDisplay ( agc_t *State, int Num )
 			unsigned Addr = gdbmiLinearFixedAddr(CurrentZ,FB,SBB);
 			FrameName = DbgGetFrameNameByAddr(Addr);
 
-			if ( Line )
+			/* Make sure we have a line and only display the head frame
+			 * and not the same frame name twice in a row
+			 */
+			if ( Line && (PrevFrameName != FrameName || BacktraceCount == 1))
 			{
 #ifdef WIN32
 				printf ( "#%d\t0x%04x in %s () at %s\\%s:%d\n",i,
@@ -374,6 +378,7 @@ void BacktraceDisplay ( agc_t *State, int Num )
 					FrameName,SourcePathName,
 					Line->FileName,Line->LineNumber );
 #endif
+				PrevFrameName = FrameName;
 			}
 //			else
 //				printf ( "#%d\t0x%04x in %s ()\n",
