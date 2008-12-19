@@ -426,6 +426,51 @@ ResolveSymbol (char *Name, int TypeMask)
   return NULL;
 }
 
+Symbol_t* ResolveSymbolAGC(int Address12, int FB, int SBB)
+{
+	int i;
+	Symbol_t* Symbol = NULL;
+
+	for (i=0;i<SymbolTableSize;i++)
+	{
+		Symbol = &SymbolTable[i];
+
+		if (Symbol->Type == SYMBOL_LABEL &&
+		     (Symbol->Value.SReg == Address12 && Symbol->Value.FB == FB ) ||
+		     (Address12 >= 04000 && Symbol->Value.SReg == Address12)) break;
+	}
+
+	if (i == SymbolTableSize) Symbol = NULL;
+	return (Symbol);
+}
+
+Symbol_t* ResolveLastLabel(SymbolLine_t *Line)
+{
+	int i;
+	int found = -1;
+	int dist = 100000;
+	Symbol_t* Symbol = NULL;
+
+//LineNumber
+
+	for (i=0;i<SymbolTableSize;i++)
+	{
+		Symbol = &SymbolTable[i];
+		if (Symbol->Type == SYMBOL_LABEL &&
+		    Symbol->LineNumber < Line->LineNumber &&
+		    (strcmp(Line->FileName,Symbol->FileName) == 0) &&
+		    ((Line->LineNumber - Symbol->LineNumber) < dist))
+		{
+			dist = Line->LineNumber - Symbol->LineNumber;
+			found = i;
+		} 
+	}
+
+	if (dist == 100000) Symbol = NULL;
+	else Symbol = &SymbolTable[found];
+
+	return (Symbol);		
+}
 //-------------------------------------------------------------------------
 // Returns information about a given symbol if found
 void

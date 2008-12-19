@@ -17,24 +17,24 @@ typedef struct
  */
 typedef enum
 {
-	gdbmiCmdUnhandled,
-	gdbmiCmdError,
-	gdbmiCmdDone,
-	gdbmiCmdNext,
-	gdbmiCmdStep,
-	gdbmiCmdContinue,
-	gdbmiCmdRun,
-	gdbmiCmdQuit = 0xfe,
-} gdbmiResult;
+	GdbmiCmdUnhandled,
+	GdbmiCmdError,
+	GdbmiCmdDone,
+	GdbmiCmdNext,
+	GdbmiCmdStep,
+	GdbmiCmdContinue,
+	GdbmiCmdRun,
+	GdbmiCmdQuit = 0xfe,
+} GdbmiResult;
 
 
-extern gdbmiResult gdbmiHandleCommand(agc_t* , char*, char* );
+extern GdbmiResult GdbmiHandleCommand(agc_t* , char*, char* );
 extern void gdbmiPrintFullNameContents(SymbolLine_t *Line);
 extern int gdbmiCheckBreakpoint(agc_t *State, Breakpoint_t* gdbmi_bp);
 extern void gdbmiUpdateBreakpoint(agc_t *State, Breakpoint_t* gdbmi_bp);
 extern void gdbmiHandleDelete(agc_t *State , char* s, char* r);
 
-#define GDBMI_FUNC(f) gdbmiResult gdbmi ## f(agc_t *State , char* s, char* sraw)
+#define GDBMI_FUNC(f) GdbmiResult gdbmi ## f(agc_t *State , char* s, char* sraw)
 #define GDBMI_CALL(f,i) if(gdbmi_status == gdbmiCmdUnhandled)gdbmi_status = gdbmi ## f (State,s+i,sraw+i)
 
 extern int gdbmi_sigint;

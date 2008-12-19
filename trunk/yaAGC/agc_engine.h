@@ -358,6 +358,7 @@ typedef struct {
   unsigned InIsr:1;		// Set when in an ISR, reset when in normal code.
   unsigned SubstituteInstruction:1;	// Use BBRUPT register.
   //unsigned RegQ16:1;		// Bit "16" of register Q.
+  uint16_t TargetZ;             // Target Z of the Execution Frame
 } BacktracePoint_t;
 
 typedef struct
@@ -600,6 +601,10 @@ void ListSourceRange (int LineNumberFrom, int LineNumberTo);
 // if the symbol is not found
 Symbol_t *ResolveSymbol (char *SymbolName, int TypeMask);
 
+Symbol_t* ResolveSymbolAGC(int Address12, int FB, int SBB);
+
+Symbol_t* ResolveLastLabel(SymbolLine_t *Line);
+
 //-------------------------------------------------------------------------
 // Resolves the given program counter into a SymbolFile_t structure for
 // the AGC address architecture. Returns NULL if the program line was not
@@ -653,7 +658,7 @@ void CpuWriteIO (agc_t * State, int Address, int Value);
 void MakeCoreDump (agc_t * State, const char *CoreDump);
 void UnblockSocket (int SocketNum);
 //FILE *rfopen (const char *Filename, const char *mode);
-void BacktraceAdd (agc_t *State, int Cause);
+void BacktraceAdd (agc_t *State, int Cause, uint16_t NextZ);
 int BacktraceRestore (agc_t *State, int n);
 void BacktraceDisplay (agc_t *State,int Num);
 int16_t OverflowCorrected (int Value);

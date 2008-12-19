@@ -116,7 +116,7 @@ int InitializeSimulator(Options_t* Options)
 	}
 
 	/* Initialize the Debugger if running with debug mode */
-	if(Options->debug) InitializeDebugger(Options,&State);
+	if(Options->debug) DbgInitialize(Options,&State);
 
 //	if (Options->cdu_log)
 //	{

@@ -475,7 +475,7 @@ ShowDisassembly:
 				  {
 					  if (SingleStepCounter > 0) SingleStepCounter--;
 
-					  Break = MonitorBreakpoints();
+					  Break = DbgMonitorBreakpoints();
 				  }
 			}
 		  }
@@ -502,7 +502,7 @@ ShowDisassembly:
 	      char *ss, OverflowChar, OverflowCharQ;
 	      SingleStepCounter = -1;
 
-	      DisplayInnerStackFrame();
+	      DbgDisplayInnerFrame();
 
 	      while (1)
 		{
@@ -787,7 +787,7 @@ ShowDisassembly:
 
 		  else
 		  {
-			  gdbmiResult result = gdbmiHandleCommand(&State, s , sraw );
+			  GdbmiResult result = GdbmiHandleCommand(&State, s , sraw );
 			  switch (result)
 			  {
 //				  case gdbmiCmdUnhandled:
@@ -803,17 +803,17 @@ ShowDisassembly:
 ////					  SingleStepCounter = 0;
 ////					  break;
 //				  case gdbmiCmdContinue:
-				  case gdbmiCmdRun:
+				  case GdbmiCmdRun:
                       RunState = 1;
 					  break;
-				  case gdbmiCmdQuit:
+				  case GdbmiCmdQuit:
 					  return(0);
 				  default:
 					  fflush(stdout);
 					  break;
 			  }
 
-			  if (result == gdbmiCmdRun) break;
+			  if (result == GdbmiCmdRun) break;
 
 //			  if ( result < gdbmiCmdDone )
 //	            {
