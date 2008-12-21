@@ -113,6 +113,7 @@
 
 #include <stdio.h>
 #include "aea_engine.h"
+#include "agc_symtab.h"
 #include "yaAEA.h"
 #include <string.h>
 #include <unistd.h>

@@ -38,6 +38,7 @@
 
 #include "yaAEA.h"
 #include "aea_engine.h"
+#include "agc_symtab.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

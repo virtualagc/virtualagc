@@ -41,6 +41,7 @@
 
 #include "yaAGC.h"
 #include "agc_engine.h"
+#include "agc_symtab.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

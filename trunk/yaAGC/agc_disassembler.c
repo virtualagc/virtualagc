@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>, 
+  Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>,
   				2008 Onno Hommes
 
   This file is part of yaAGC.
@@ -19,15 +19,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, permission is given to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
   Filename:	agc_disassembler.h
   Purpose:	Source file for AGC Disassembler.
   Contact:	Onno Hommes
@@ -37,9 +37,10 @@
 
 #include <stdio.h>
 #include "agc_engine.h"
+#include "agc_symtab.h"
 #include "agc_disassembler.h"
 
-/* 
+/*
  * Displays the current address and its contents.
  */
 static int sCurrentZ, sBank, sValue, sErasable, sFixed;
@@ -81,8 +82,8 @@ static char* ShowAddressContents (agc_t *State)
       sValue = State->Fixed[sBank][sCurrentZ & 01777];
     }
   sValue &= 077777;
-  
-  // Print the octal value stored at the address.  
+
+  // Print the octal value stored at the address.
   sprintf (&ShowAddressBuffer[9], "%05o  ", sValue);
   return (ShowAddressBuffer);
 }
@@ -94,7 +95,7 @@ void Disassemble (agc_t * State)
 {
   /* The following also sets all of the global variables like sValue, etc. */
   printf ("%s", ShowAddressContents (State));
-  
+
   /* Account for the index value. */
   if (State->SubstituteInstruction)
   {
@@ -109,7 +110,7 @@ void Disassemble (agc_t * State)
       else sValue -= (~State->IndexValue & 077777);
       printf ("w/i:\t");
   }
-    
+
   /* Disassemble the instruction at the address. */
   if (State->ExtraCode == 0)
   {
@@ -133,7 +134,7 @@ void Disassemble (agc_t * State)
       else if (sValue == 022007)	printf ("ZL\n");
       else switch (sValue & 0x7000)
 		{
-		  case 0x0000: 
+		  case 0x0000:
 		  		printf ("TC\t%04o\n", sValue & 0xFFF);
 		    	break;
 		  case 0x1000:

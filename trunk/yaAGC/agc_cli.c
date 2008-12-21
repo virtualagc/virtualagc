@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
+#include "agc_symtab.h"
 
 /* Some legacy vars for now */
 int FullNameMode = 0;

@@ -54,6 +54,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "agc_engine.h"
+#include "agc_symtab.h"
 
 // This function adds a new backtrace point to the circular buffer.  The 
 // oldest entries are transparently overwritten.  The Cause parameter is
@@ -67,7 +68,7 @@
 // code, and all backtrace points to foreground code will be completely lost.
 
 void
-BacktraceAdd (agc_t *State, int Cause)
+BacktraceAdd (agc_t *State, int Cause,unsigned NextZ)
 {
   BacktracePoint_t *Bp;
   if (SingleStepCounter == -2)
@@ -162,7 +163,7 @@ BacktraceRestore (agc_t *State, int n)
 // Displays the backtrace buffer.
 
 void
-BacktraceDisplay (agc_t *State)
+BacktraceDisplay (agc_t *State, int Num)
 {
   int i, j, k, CurrentZ, Value, Bank;
   BacktracePoint_t *Bp;

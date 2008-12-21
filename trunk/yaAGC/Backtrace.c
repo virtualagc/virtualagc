@@ -54,6 +54,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "agc_engine.h"
+#include "agc_symtab.h"
 
 #ifdef GDBMI
 static agc_t *PendingState;

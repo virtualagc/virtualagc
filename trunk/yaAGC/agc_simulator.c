@@ -23,6 +23,7 @@
 #include "yaAGC.h"
 #include "agc_cli.h"
 #include "agc_engine.h"
+#include "agc_symtab.h"
 #include "agc_simulator.h"
 
 

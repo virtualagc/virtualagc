@@ -65,6 +65,7 @@
 
 #include "yaAGC.h"
 #include "agc_engine.h"
+#include "agc_symtab.h"
 
 //-----------------------------------------------------------------------------------
 #ifdef WIN32
