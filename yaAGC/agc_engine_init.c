@@ -18,15 +18,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
   Filename:	agc_engine_init.c
   Purpose:	This is the function which initializes the AGC simulation,
   		from a file representing the binary image of core memory.
@@ -47,7 +47,7 @@
 		07/12/04 RSB	Q is now 16 bits.
 		07/15/04 RSB	AGC data now aligned at bit 0 rathern then 1.
 		07/17/04 RSB	I/O channels 030-033 now default to 077777
-				instead of 00000, since the signals are 
+				instead of 00000, since the signals are
 				supposed to be inverted.
 		02/27/05 RSB	Added the license exception, as required by
 				the GPL, for linking to Orbiter SDK libraries.
@@ -67,6 +67,7 @@
 
 #include <stdio.h>
 #include "agc_engine.h"
+#include "agc_symtab.h"
 FILE *rfopen (const char *Filename, const char *mode);
 
 //---------------------------------------------------------------------------
@@ -78,7 +79,7 @@ FILE *rfopen (const char *Filename, const char *mode);
 //      4 -- agc_t structure not allocated.
 //      5 -- File-read error.
 //      6 -- Core-dump file not found.
-// Normally, on input the CoreDump filename is NULL, in which case all of the 
+// Normally, on input the CoreDump filename is NULL, in which case all of the
 // i/o channels, erasable memory, etc., are cleared to their reset values.
 // When the CoreDump is loaded instead, it allows execution to continue precisely
 // from the point at which the CoreDump was created, if AllOrErasable != 0.
@@ -172,7 +173,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 
   if (RomImage)
 	  RetVal = agc_load_binfile(State, RomImage);
- 
+
   // Clear i/o channels.
   for (i = 0; i < NUM_CHANNELS; i++)
     State->InputChannel[i] = 0;
@@ -191,7 +192,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   RetVal = 0;
   State->CycleCounter = 0;
   State->ExtraCode = 0;
-  // I've seen no indication so far of a reset value for interrupt-enable. 
+  // I've seen no indication so far of a reset value for interrupt-enable.
   State->AllowInterrupt = 0;
   State->InterruptRequests[8] = 1;	// DOWNRUPT.
   //State->RegA16 = 0;
@@ -242,7 +243,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 	      if (1 != fscanf (cd, "%o", &i))
 		goto Done;
 	      State->ExtraCode = i;
-	      // I've seen no indication so far of a reset value for interrupt-enable. 
+	      // I've seen no indication so far of a reset value for interrupt-enable.
 	      if (1 != fscanf (cd, "%o", &i))
 		goto Done;
 	      State->AllowInterrupt = i;

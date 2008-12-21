@@ -10,6 +10,7 @@
 #include <string.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
+#include "agc_symtab.h"
 #include "agc_debugger.h"
 #include "agc_gdbmi.h"
 

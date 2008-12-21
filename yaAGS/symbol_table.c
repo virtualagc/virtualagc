@@ -59,6 +59,8 @@
 //#include <sys/uio.h>
 #include <unistd.h>
 #include "agc_engine.h"
+#include "agc_symtab.h"
+
 #ifdef WIN32
 // For some reason, mingw doesn't supply the regex module.  What I do to 
 // overcome this is simply to insert GNU regex's regex.c and regex.h.  

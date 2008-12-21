@@ -1,6 +1,6 @@
 /*
   Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
-  
+
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -16,20 +16,20 @@
   You should have received a copy of the GNU General Public License
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  
+
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
   Filename:	agc_engine.c
   Purpose:	This is the main engine for binary simulation of the Apollo AGC
-  		computer.  It is separate from the Display/Keyboard (DSKY) 
+  		computer.  It is separate from the Display/Keyboard (DSKY)
 		simulation and Apollo hardware simulation, though compatible
 		with them.  The executable binary may be created using the
 		yayul (Yet Another YUL) assembler.
@@ -53,27 +53,27 @@
 		05/01/04 RSB	Now makes sure that in --debug-dsky mode
 				doesn't execute any AGC code (since there
 				isn't any loaded anyhow).
-		05/03/04 RSB	Added a workaround for "TC Q".  It's not 
+		05/03/04 RSB	Added a workaround for "TC Q".  It's not
 				right, but it has to be more right than
 				what was there before.
 		05/04/04 RSB	Fixed a bug in CS, where the unused bit
-				could get set and thereforem mess up 
+				could get set and thereforem mess up
 				later comparisons.  Fixed an addressing bug
 				(was 10-bit but should have been 12-bit) in
-				the AD instruction.  DCA was completely 
+				the AD instruction.  DCA was completely
 				messed up (still don't know about overflow).
 		05/05/04 RSB	INDEX'ing was messed up because the pending
-				index was zeroed before being completely 
+				index was zeroed before being completely
 				used up.  Fixed the "CCS A" instruction.
 				Fixed CCS in the case of negative compare-
 				values.
 		05/06/04 RSB	Added rfopen.  The operation of "DXCH L"
-				(which is ambiguous in the docs but actually 
-				used --- at Luminary131 address 33,03514) --- 
-				has been redefined in accordance with the 
-				Luminary program's comments.  Adjusted 
+				(which is ambiguous in the docs but actually
+				used --- at Luminary131 address 33,03514) ---
+				has been redefined in accordance with the
+				Luminary program's comments.  Adjusted
 				"CS A" and "CA A", though I don't actually
-				think they work differently.  Fixed a 
+				think they work differently.  Fixed a
 				potential divide-by-0 in DV.
 		05/10/04 RSB	Fixed up i/o channel operations so that they
 				properly use AGC-formatted integers rather
@@ -99,7 +99,7 @@
 				Luminary131 source (p.59) claims that bits
 				5-7 are used.  I don't know what bits 5-6
 				are for, though.
-		05/19/04 RSB	I'm beginning to grasp now what to do for 
+		05/19/04 RSB	I'm beginning to grasp now what to do for
 				overflow.  The AD instruction (in which
 				overflow was messed up) and the TS instruction
 				(which was completely bollixed) have hopefully
@@ -109,13 +109,13 @@
 				up to v0.50 of the spec.
 		05/31/04 RSB	The instruction set has basically been completely
 				rewritten.
-		06/01/04 RSB	Corrected the indexing of instructions 
+		06/01/04 RSB	Corrected the indexing of instructions
 				for negative indices.  Oops!  The instruction
 				executed on RESUME was taken from BBRUPT
 				instead of BRUPT.
 		06/02/04 RSB	Found that I was using an unsigned datatype
 				for EB, FB, and BB, thus causing comparisons of
-				them to registers to fail.  Now autozero the 
+				them to registers to fail.  Now autozero the
 				unused bits of EB, FB, and BB.
 		06/04/04 RSB	Separated ServerStuff function from agc_engine
 				function.
@@ -132,12 +132,12 @@
 		07/05/04 RSB	Changed DXCH to do overflow-correction on the
 				accumulator.  Also, the special cases "DXCH A"
 				and "DXCH L" were being checked improperly
-				before, and therefore were not treated 
+				before, and therefore were not treated
 				properly.
 		07/07/04 RSB	Some cases of DP arithmetic with the MS word
 				or LS word being -0 were fixed.
 		07/08/04 RSB	CA and CS fixed to re-edit after doing their work.
-				Instead of using the overflow-corrected 
+				Instead of using the overflow-corrected
 				accumulator, BZF and BZMF now use the complete
 				accumulator.  Either positive or negative
 				overflow blocks BZF, while positive overflow
@@ -149,17 +149,17 @@
 				case of remainder==0 needed to be fixed up to
 				distinguish between +0 and -0.
 		07/10/04 RSB	Completely replaced MSU.  And ... whoops! ...
-				forgot to inhibit interrupts while the 
-				accumulator contains overflow.  The special 
+				forgot to inhibit interrupts while the
+				accumulator contains overflow.  The special
 				cases "DCA L" and "DCS L" have been addressed.
-				"CCS A" has been changed similarly to BZF and 
+				"CCS A" has been changed similarly to BZF and
 				BZMF w.r.t. overflow.
 		07/12/04 RSB	Q is now 16 bits.
-		07/15/04 RSB	Pretty massive rewrites:  Data alignment changed 
+		07/15/04 RSB	Pretty massive rewrites:  Data alignment changed
 				to bit 0 rather than 1.  All registers at
-				addresses less than REG16 are now 16 bits, 
+				addresses less than REG16 are now 16 bits,
 				rather than just A and Q.
-		07/17/04 RSB	The final contents of L with DXCH, DCA, and 
+		07/17/04 RSB	The final contents of L with DXCH, DCA, and
 				DCS are now overflow-corrected.
 		07/19/04 RSB	Added SocketInterlace/Reload.
 		08/12/04 RSB	Now account for output ports that are latched
@@ -168,14 +168,14 @@
 		08/13/04 RSB	The Win32 version of yaAGC now recognizes when
 				socket-disconnects have occurred, and allows
 				the port to be reused.
-		08/18/04 RSB	Split off all socket-related stuff into 
+		08/18/04 RSB	Split off all socket-related stuff into
 				SocketAPI.c, so that a cleaner API could be
 				available for integrators.
 		02/27/05 RSB	Added the license exception, as required by
 				the GPL, for linking to Orbiter SDK libraries.
 		05/14/05 RSB	Corrected website references.
 		05/15/05 RSB	Oops!  The unprogrammed counter increments were
-				hooked up to i/o space rather than to 
+				hooked up to i/o space rather than to
 				erasable.  So incoming counter commands were
 				ignored.
 		06/11/05 RSB	Implemented the fictitious output channel 0177
@@ -190,8 +190,8 @@
 		06/30/05 RSB	Hopefully fixed fine-alignment, by making
 				the gyro torquing depend on the GYROCTR
 				register as well as elapsed time.
-		07/01/05 RSB	Replaced the gyro-torquing code, to 
-				avoid simulating the timing of the 
+		07/01/05 RSB	Replaced the gyro-torquing code, to
+				avoid simulating the timing of the
 				3200 pps. pulses, which was conflicting
 				somehow with the timing Luminary wanted
 				to impose.
@@ -199,12 +199,12 @@
 		07/04/05 RSB	Fix for writes to channel 033.
 		08/17/05 RSB	Fixed an embarrassing bug in SpToDecent,
 				thanks to Christian Bucher.
-		08/20/05 RSB	I no longer allow interrupts when the 
+		08/20/05 RSB	I no longer allow interrupts when the
 				program counter is in the range 0-060.
 				I do this principally to guard against the
 				case Z=0,1,2, since I'm not sure that all of
 				the AGC code saves registers properly in this
-				case.  Now I inhibit interrupts prior to 
+				case.  Now I inhibit interrupts prior to
 				INHINT, RELINT, and EXTEND (as we're supposed
 				to), as well as RESUME (as we're not supposed
 				to).  The intent of the latter is to take
@@ -213,10 +213,10 @@
 				RELINT and RESUME after an EDRUPT, and this
 				messes up the return address in ZRUPT used by
 				the RESUME.)
-		08/21/05 RSB	Removed the interrupt inhibition from the 
+		08/21/05 RSB	Removed the interrupt inhibition from the
 				address range 0-060, because it prevented
 				recovery from certain conditions.
-		08/28/05 RSB	Oops!  Had been using PINC sequences on 
+		08/28/05 RSB	Oops!  Had been using PINC sequences on
 				TIME6 rather than DINC sequences.
 		10/05/05 RSB	FIFOs were introduced for PCDU or MCDU
 				commands on the registers CDUX, CDUY, CDUZ.
@@ -227,50 +227,50 @@
 				DAP, which is otherwise likely to reject
 				counts that change too quickly.
 		10/07/05 RSB	FIFOs changed from 800 cps to either 400 cps
-				("low rate") or 6400 cps ("high rate"), 
+				("low rate") or 6400 cps ("high rate"),
 				depending on the variable CduHighRate.
 				At the moment, CduHighRate is stuck at 0,
 				because we've worked out no way to plausibly
 				change it.
-		11/13/05 RSB	Took care of auto-adjust buffer timing for 
+		11/13/05 RSB	Took care of auto-adjust buffer timing for
 				high-rate and low-rate CDU counter updates.
 				PCDU/MCDU commands 1/3 are slow mode, and
 				PCDU/MCDU commands 021/023 are fast mode.
 		02/26/06 RSB	Oops!  This wouldn't build under Win32 because
 				of the lack of an int32_t datatype.  Fixed.
-  
+
   The technical documentation for the Apollo Guidance & Navigation (G&N) system,
-  or more particularly for the Apollo Guidance Computer (AGC) may be found at 
-  http://hrst.mit.edu/hrs/apollo/public.  That is, to the extent that the 
-  documentation exists online it may be found there.  I'm sure -- or rather 
-  HOPE -- that there's more documentation at NASA and MIT than has been made 
-  available yet.  I personally had no knowledge of the AGC, other than what 
-  I had seen in the movie "Apollo 13" and the HBO series "From the Earth to 
-  the Moon", before I conceived this project last night at midnight and 
+  or more particularly for the Apollo Guidance Computer (AGC) may be found at
+  http://hrst.mit.edu/hrs/apollo/public.  That is, to the extent that the
+  documentation exists online it may be found there.  I'm sure -- or rather
+  HOPE -- that there's more documentation at NASA and MIT than has been made
+  available yet.  I personally had no knowledge of the AGC, other than what
+  I had seen in the movie "Apollo 13" and the HBO series "From the Earth to
+  the Moon", before I conceived this project last night at midnight and
   started doing web searches.  So, bear with me; it's a learning experience!
-  
-  Also at hrst.mit.edu are the actual programs for the Command Module (CM) and 
-  Lunar Module (LM) AGCs.  Or rather, what's there are scans of 1700-page 
-  printouts of assembly-language listings of SOME versions of those programs.  
-  (Respectively, called "Colossus" and "Luminary".)  I'll worry about how to 
+
+  Also at hrst.mit.edu are the actual programs for the Command Module (CM) and
+  Lunar Module (LM) AGCs.  Or rather, what's there are scans of 1700-page
+  printouts of assembly-language listings of SOME versions of those programs.
+  (Respectively, called "Colossus" and "Luminary".)  I'll worry about how to
   get those into a usable version only after I get the CPU simulator working!
-  
+
   What THIS file contains is basicly a pure simulation of the CPU, without any
-  input and output as such.  (I/O, to the DSKY or to CM or LM hardware 
-  simulations occurs through the mechanism of sockets, and hence the DSKY 
-  front-end and hardware back-end simulations may be implemented as complete 
-  stand-alone programs and replaced at will.)  There is a single globally 
-  interesting function, called agc_engine, which is intended to be called once 
-  per AGC instruction cycle -- i.e., every 11.7 microseconds.  (Yes, that's 
+  input and output as such.  (I/O, to the DSKY or to CM or LM hardware
+  simulations occurs through the mechanism of sockets, and hence the DSKY
+  front-end and hardware back-end simulations may be implemented as complete
+  stand-alone programs and replaced at will.)  There is a single globally
+  interesting function, called agc_engine, which is intended to be called once
+  per AGC instruction cycle -- i.e., every 11.7 microseconds.  (Yes, that's
   right, the CPU clock speed was a little over 85 KILOhertz.  That's a factor
   that obviously makes the simulation much easier!)  The function may be called
-  more or less often than this, to speed up or slow down the apparent passage 
+  more or less often than this, to speed up or slow down the apparent passage
   of time.
 
-  This function is intended to be completely portable, so that it may be run in 
+  This function is intended to be completely portable, so that it may be run in
   a PC environment (Microsoft Windows) or in any *NIX environment, or indeed in
-  an embedded target if anybody should wish to create an actual physical 
-  replacement for an AGC.  Also, multiple copies of the simulation may be run 
+  an embedded target if anybody should wish to create an actual physical
+  replacement for an AGC.  Also, multiple copies of the simulation may be run
   on the same PC -- for example to simulation a CM and LM simultaneously.
 */
 
@@ -284,10 +284,11 @@ typedef int int32_t;
 #endif
 #include "yaAGC.h"
 #include "agc_engine.h"
+#include "agc_symtab.h"
 
-// If COARSE_SMOOTH is 1, then the timing of coarse-alignment (in terms of 
+// If COARSE_SMOOTH is 1, then the timing of coarse-alignment (in terms of
 // bursting and separation of bursts) is according to the Delco manual.
-// However, since the simulated IMU has no physical inertia, it adjusts 
+// However, since the simulated IMU has no physical inertia, it adjusts
 // instantly (and therefore jerkily).  The COARSE_SMOOTH constant creates
 // smaller bursts, and therefore smoother FDAI motion.  Normally, there are
 // 192 pulses in a burst.  In the simulation, there are 192/COARSE_SMOOTH
@@ -304,7 +305,7 @@ typedef int int32_t;
 #define IsZ(Address) ((Address) == RegZ)
 #define IsReg(Address,Reg) ((Address) == (Reg))
 
-// Some helpful constants in parsing the "address" field from an instruction 
+// Some helpful constants in parsing the "address" field from an instruction
 // or from the Z register.
 #define SIGNAL_00   000000
 #define SIGNAL_01   002000
@@ -315,17 +316,17 @@ typedef int int32_t;
 #define MASK10      001777
 #define MASK12      007777
 
-// Some numerical constant, in AGC format. 
+// Some numerical constant, in AGC format.
 #define AGC_P0 ((int16_t) 0)
 #define AGC_M0 ((int16_t) 077777)
 #define AGC_P1 ((int16_t) 1)
 #define AGC_M1 ((int16_t) 077776)
 
 // Here are arrays which tell (for each instruction, as determined by the
-// uppermost 5 bits of the instruction) how many extra machine cycles are 
+// uppermost 5 bits of the instruction) how many extra machine cycles are
 // needed to execute the instruction.  (In other words, the total number of
 // machine cycles for the instruction, minus 1.) The opcode and quartercode
-// are taken into account.  There are two arrays -- one for normal 
+// are taken into account.  There are two arrays -- one for normal
 // instructions and one for "extracode" instructions.
 static const int InstructionTiming[32] = {
   0, 0, 0, 0,			// Opcode = 00.
@@ -352,7 +353,7 @@ static const int ExtracodeTiming[32] = {
   2, 2, 2, 2			// Opcode = 017.
 };
 
-// A way, for debugging, to disable interrupts. The 0th entry disables 
+// A way, for debugging, to disable interrupts. The 0th entry disables
 // everything if 0.  Entries 1-10 disable individual interrupts.
 int DebuggerInterruptMasks[11] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
@@ -376,7 +377,7 @@ FILE *CduLog = NULL;
 // Functions for reading or writing from/to i/o channels.  The reason we have
 // to provide a function for this rather than accessing the i/o-channel buffer
 // directly is that the L and Q registers appear in both memory and i/o space,
-// at the same addresses. 
+// at the same addresses.
 
 int
 ReadIO (agc_t * State, int Address)
@@ -393,7 +394,7 @@ ReadIO (agc_t * State, int Address)
 void
 WriteIO (agc_t * State, int Address, int Value)
 {
-  // The value should be in AGC format. 
+  // The value should be in AGC format.
   Value &= 077777;
   if (Address < 0 || Address > 0777)
     return;
@@ -401,14 +402,14 @@ WriteIO (agc_t * State, int Address, int Value)
     IoWriteCounts[Address]++;
   if (Address == RegL || Address == RegQ)
     State->Erasable[0][Address] = Value;
-    
-  // 2005-07-04 RSB.  The necessity for this was pointed out by Mark 
+
+  // 2005-07-04 RSB.  The necessity for this was pointed out by Mark
   // Grant via Markus Joachim.  Although channel 033 is an input channel,
   // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
   // Apparently, these are latched inputs, and this resets the latches.
   if (Address == 033)
     Value = (State->InputChannel[Address] | 076000);
-  
+
   State->InputChannel[Address] = Value;
   if (Address == 010)
     {
@@ -442,10 +443,10 @@ CpuWriteIO (agc_t * State, int Address, int Value)
 }
 
 //-----------------------------------------------------------------------------
-// This function does all of the processing associated with converting a 
+// This function does all of the processing associated with converting a
 // 12-bit "address" as used within instructions or in the Z register, to a
 // pointer to the actual word in the simulated memory.  In other words, here
-// we take memory bank-selection into account.  
+// we take memory bank-selection into account.
 
 static int16_t *
 FindMemoryWord (agc_t * State, int Address12)
@@ -477,7 +478,7 @@ FindMemoryWord (agc_t * State, int Address12)
   else if (Address12 < 04000)	// Fixed-switchable.
     {
       AdjustmentFB = (037 & (c (RegFB) >> 10));
-      // Account for the superbank bit. 
+      // Account for the superbank bit.
       if (030 == (AdjustmentFB & 030) && (State->OutputChannel7 & 0100) != 0)
 	AdjustmentFB += 010;
       return (&State->Fixed[AdjustmentFB][Address12 & 01777]);
@@ -507,7 +508,7 @@ CollectCoverage (agc_t * State, int Address12, int Read, int Write, int Instruct
   if (Address12 < 00400)	// Unswitched-erasable.
     {
       AdjustmentEB = 0;
-      goto Erasable;  
+      goto Erasable;
     }
   else if (Address12 < 01000)	// Unswitched-erasable (continued).
     {
@@ -535,7 +536,7 @@ CollectCoverage (agc_t * State, int Address12, int Read, int Write, int Instruct
   else if (Address12 < 04000)	// Fixed-switchable.
     {
       AdjustmentFB = (037 & (c (RegFB) >> 10));
-      // Account for the superbank bit. 
+      // Account for the superbank bit.
       if (030 == (AdjustmentFB & 030) && (State->OutputChannel7 & 0100) != 0)
 	AdjustmentFB += 010;
     Fixed:
@@ -664,7 +665,7 @@ odabs (int Input)
 }
 
 //-----------------------------------------------------------------------------
-// Convert an AGC-formatted word to CPU-native format. 
+// Convert an AGC-formatted word to CPU-native format.
 
 static int
 agc2cpu (int Input)
@@ -689,7 +690,7 @@ cpu2agc (int Input)
 }
 
 //-----------------------------------------------------------------------------
-// Double-length versions of the same. 
+// Double-length versions of the same.
 
 static int
 agc2cpu2 (int Input)
@@ -841,7 +842,7 @@ SpToDecent (int16_t * LsbSP)
 	    }
 	  // We now have Msb positive non-zero and Lsb negative non-zero.
 	  // Subtracting 1 from Msb is equivalent to adding 2**14 (i.e.,
-	  // 0100000, accounting for the parity) to Lsb.  An additional 1 
+	  // 0100000, accounting for the parity) to Lsb.  An additional 1
 	  // must be added to account for the negative overflow.
 	  Msb--;
 	  Lsb = ((Lsb + 040000 + AGC_P1) & 077777);
@@ -854,7 +855,7 @@ SpToDecent (int16_t * LsbSP)
 	}
     }
   // We now have an Msb and Lsb of the same sign; therefore,
-  // we can simply juxtapose them, discarding the sign bit from the 
+  // we can simply juxtapose them, discarding the sign bit from the
   // Lsb.  (And recall that the 0-position is still the parity.)
   Value = (03777740000 & (Msb << 14)) | (037777 & Lsb);
   // Also, sign-extend for further arithmetic.
@@ -1035,7 +1036,7 @@ CounterDINC (agc_t *State, int CounterNum, int16_t * Counter)
           RetVal = -1;
 	  //if (IsTIME6)
 	  //  FlushTIME6 = 1;
-	}  
+	}
       //else if (IsTIME6)
       //  {
       //    CountTIME6--;
@@ -1103,7 +1104,7 @@ CounterSHANC (int16_t * Counter)
 }
 
 // Pinch hits for the above in setting interrupt requests with INCR,
-// AUG, and DIM instructins.  The docs aren't very forthcoming as to 
+// AUG, and DIM instructins.  The docs aren't very forthcoming as to
 // which counter registers are affected by this ... but still.
 
 static void
@@ -1125,16 +1126,16 @@ InterruptRequests (agc_t * State, int16_t Address10, int Sum)
 
 //-------------------------------------------------------------------------------
 // The case of PCDU or MCDU triggers being applied to the CDUX,Y,Z counters
-// presents a special problem.  The AGC expects these triggers to be 
+// presents a special problem.  The AGC expects these triggers to be
 // applied at a certain fixed rate.  The DAP portion of Luminary or Colossus
 // applies a digital filter to the counts, in order to eliminate electrical
 // noise, as well as noise caused by vibration of the spacecraft.  Therefore,
 // if the simulated IMU applies PCDU/MCDU triggers too fast, the digital
 // filter in the DAP will simply reject the count, and therefore the spacecraft's
-// orientation cannot be measured by the DAP.  Consequently, we have to 
+// orientation cannot be measured by the DAP.  Consequently, we have to
 // fake up a kind of FIFO on the triggers to the CDUX,Y,Z counters so that
 // we can increment or decrement the counters at no more than the fixed rate.
-// (Conversely, of course, the simulated IMU has to be able to supply the 
+// (Conversely, of course, the simulated IMU has to be able to supply the
 // triggers *at least* as fast as the fixed rate.)
 //
 // Actually, there are two different fixed rates for PCDU/MCDU:  400 counts
@@ -1223,7 +1224,7 @@ PushCduFifo (agc_t *State, int Counter, int IncType)
       // The sign is different, so we have to add a new entry to the
       // FIFO.
       if (CduFifo->Size >= MAX_CDU_FIFO_ENTRIES)
-        {  
+        {
 	  // No place to put it, so drop the data.
 	  return;
 	}
@@ -1243,7 +1244,7 @@ PushCduFifo (agc_t *State, int Counter, int IncType)
 
 // Here's an auxiliary function to perform the next available PCDU or MCDU
 // from a CDU FIFO, if it is time to do so.  We only check one of the CDUs
-// each time around (in order to preserve proper cycle counts), so this function 
+// each time around (in order to preserve proper cycle counts), so this function
 // must be called at at least an 6400*NUM_CDU_FIFO cps rate.  Returns 0 if no
 // counter was updated, non-zero if a counter was updated.
 static int
@@ -1257,7 +1258,7 @@ ServiceCduFifo (agc_t *State)
   CduFifo = &CduFifos[CduChecker];
 
   if (CduFifo->Size > 0 && State->CycleCounter >= CduFifo->NextUpdate)
-    {  
+    {
       // Update the counter.
       Ch = &State->Erasable[0][CduChecker + FIRST_CDU];
       Count = CduFifo->Counts[CduFifo->Ptr];
@@ -1302,8 +1303,8 @@ ServiceCduFifo (agc_t *State)
 	  else
 	    CduFifo->NextUpdate += 213;
 	  CduFifo->IntervalType++;
-	}  
-      else 
+	}
+      else
 	{
 	  if (HighRate)
 	    CduFifo->NextUpdate += 14;
@@ -1314,16 +1315,16 @@ ServiceCduFifo (agc_t *State)
       // Return an indication that a counter was updated.
       RetVal = 1;
     }
-    
+
   CduChecker++;
   if (CduChecker >= NUM_CDU_FIFOS)
-    CduChecker = 0;  
-    
+    CduChecker = 0;
+
   return (RetVal);
 }
 
 //----------------------------------------------------------------------------
-// This function is used to update the counter registers on the basis of 
+// This function is used to update the counter registers on the basis of
 // commands received from the outside world.
 
 void
@@ -1337,23 +1338,23 @@ UnprogrammedIncrement (agc_t *State, int Counter, int IncType)
     ErasableWriteCounts[0][Counter]++;
   switch (IncType)
     {
-    case 0:  
+    case 0:
       //TrapPIPA = (Counter >= 037 && Counter <= 041);
       Overflow = CounterPINC (Ch);
       break;
-    case 1: 
-    case 021: 
+    case 1:
+    case 021:
       // For the CDUX,Y,Z counters, push the command into a FIFO.
       if (Counter >= FIRST_CDU && Counter < FIRST_CDU + NUM_CDU_FIFOS)
         PushCduFifo (State, Counter, IncType);
       else
         Overflow = CounterPCDU (Ch);
       break;
-    case 2:  
+    case 2:
       //TrapPIPA = (Counter >= 037 && Counter <= 041);
       Overflow = CounterMINC (Ch);
       break;
-    case 3:  
+    case 3:
     case 023:
       // For the CDUX,Y,Z counters, push the command into a FIFO.
       if (Counter >= FIRST_CDU && Counter < FIRST_CDU + NUM_CDU_FIFOS)
@@ -1361,13 +1362,13 @@ UnprogrammedIncrement (agc_t *State, int Counter, int IncType)
       else
         Overflow = CounterMCDU (Ch);
       break;
-    case 4:  
+    case 4:
       Overflow = CounterDINC (State, Counter, Ch);
       break;
-    case 5:  
+    case 5:
       Overflow = CounterSHINC (Ch);
       break;
-    case 6:  
+    case 6:
       Overflow = CounterSHANC (Ch);
       break;
     default:
@@ -1377,15 +1378,15 @@ UnprogrammedIncrement (agc_t *State, int Counter, int IncType)
     {
       // On some counters, overflow is supposed to cause
       // an interrupt.  Take care of setting the interrupt request here.
-     
+
     }
   TrapPIPA = 0;
 }
 
 //----------------------------------------------------------------------------
-// Function handles the coarse-alignment output pulses for one IMU CDU drive axis.  
+// Function handles the coarse-alignment output pulses for one IMU CDU drive axis.
 // It returns non-0 if a non-zero count remains on the axis, 0 otherwise.
-            
+
 static int
 BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
 {
@@ -1430,7 +1431,7 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
     Delta = 192 / COARSE_SMOOTH;
   // If the count is non-zero, pulse it.
   if (Delta > 0)
-    {  
+    {
       ChannelOutput (State, Channel, Direction | Delta);
       DriveCountSaved -= Delta;
     }
@@ -1443,11 +1444,11 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
   else if (CounterRegister == RegCDUZCMD)
     CountCDUZ = DriveCountSaved;
   return (DriveCountSaved);
-}      
-      
+}
+
 //-----------------------------------------------------------------------------
-// Execute one machine-cycle of the simulation.  Use agc_engine_init prior to 
-// the first call of agc_engine, to initialize State, and then call agc_engine 
+// Execute one machine-cycle of the simulation.  Use agc_engine_init prior to
+// the first call of agc_engine, to initialize State, and then call agc_engine
 // thereafter every (simulated) 11.7 microseconds.
 //
 // Returns:
@@ -1455,7 +1456,7 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
 // I'm not sure if there are any circumstances under which this can fail ...
 
 // Note on addressing of bits within words:  The MIT docs refer to bits
-// 1 through 15, with 1 being the least-significant, and 15 the most 
+// 1 through 15, with 1 being the least-significant, and 15 the most
 // significant.  A 16th bit, the (odd) parity bit, would be bit 0 in this
 // scheme.  Now, we're probably not going to use the parity bit in our
 // simulation -- I haven't fully decided this at the time I'm writing
@@ -1477,7 +1478,7 @@ static unsigned GyroCount = 0;
 static unsigned OldChannel14 = 0, GyroTimer = 0;
 
 // Coarse-alignment.
-// The IMU CDU drive emits bursts every 600 ms.  Each cycle is 
+// The IMU CDU drive emits bursts every 600 ms.  Each cycle is
 // 12/1024000 seconds long.  This happens to mean that a burst is
 // emitted every 51200 CPU cycles, but we multiply it out below
 // to make it look pretty
@@ -1500,18 +1501,18 @@ agc_engine (agc_t * State)
   uint16_t ExtendedOpcode;
   int Overflow, Accumulator;
   //int OverflowQ, Qumulator;
-  
+
   sExtraCode = 0;
-  
+
   // For DOWNRUPT
   if (State->DownruptTimeValid && State->CycleCounter >= State->DownruptTime)
     {
       State->InterruptRequests[8] = 1;	// Request DOWNRUPT
       State->DownruptTimeValid = 0;
     }
-  
+
   State->CycleCounter++;
-  
+
   //----------------------------------------------------------------------
   // The following little thing is useful only for debugging yaDEDA with
   // the --debug-deda command-line switch.  It just outputs the contents
@@ -1543,13 +1544,13 @@ agc_engine (agc_t * State)
 
   // Handle server stuff for socket connections used for i/o channel
   // communications.  Stuff like listening for clients we only do
-  // every once and a while---nominally, every 100 ms.  Actually 
+  // every once and a while---nominally, every 100 ms.  Actually
   // processing input data is done every cycle.
   if (Count == 0)
     ChannelRoutine (State);
   Count = ((Count + 1) & 017777);
 
-  // Get data from input channels.  Return immediately if a unprogrammed 
+  // Get data from input channels.  Return immediately if a unprogrammed
   // counter-increment was performed.
   if (ChannelInput (State))
     return (0);
@@ -1559,7 +1560,7 @@ agc_engine (agc_t * State)
   if (DebugDsky)
     return (0);
 
-  //----------------------------------------------------------------------  
+  //----------------------------------------------------------------------
   // This stuff takes care of extra CPU cycles used by some instructions.
 
   // A little extra delay, needed sometimes after branch instructions that
@@ -1572,8 +1573,8 @@ agc_engine (agc_t * State)
 
   // If an instruction that takes more than one clock-cycle is in progress,
   // we simply return.  We don't do any of the actual computations for such
-  // an instruction until the last clock cycle for it is reached.  
-  // (Except for a few weird cases dealt with by ExtraDelay as above.) 
+  // an instruction until the last clock cycle for it is reached.
+  // (Except for a few weird cases dealt with by ExtraDelay as above.)
   if (State->PendFlag && State->PendDelay > 0)
     {
       State->PendDelay--;
@@ -1586,15 +1587,15 @@ agc_engine (agc_t * State)
   if (ServiceCduFifo (State))
     {
       // A CDU counter was serviced, so a cycle was used up, and we must
-      // return.  
+      // return.
       return (0);
     }
-  
+
   //----------------------------------------------------------------------
   // Here we take care of counter-timers.  There is a basic 1/1600 second
   // clock that is used to drive the timers.  1/1600 second happens to
   // be SCALER_OVERFLOW/SCALER_DIVIDER machine cycles, and the variable
-  // ScalerCounter has already been updated the correct number of 
+  // ScalerCounter has already been updated the correct number of
   // multiples of SCALER_DIVIDER.  Note that incrementing a timer register
   // takes 1 machine cycle.
 
@@ -1652,7 +1653,7 @@ agc_engine (agc_t * State)
     }
 
   //----------------------------------------------------------------------
-  // Same principle as for the counter-timers (above), but for handling 
+  // Same principle as for the counter-timers (above), but for handling
   // the 3200 pulse-per-second fictitious register 0177 I use to support
   // driving the gyro.
 
@@ -1662,7 +1663,7 @@ agc_engine (agc_t * State)
   while (GyroTimer >= GYRO_OVERFLOW)
     {
       GyroTimer -= GYRO_OVERFLOW;
-      // We get to this point 3200 times per second.  We increment the 
+      // We get to this point 3200 times per second.  We increment the
       // pulse count only if the GYRO ACTIVITY bit in channel 014 is set.
       if (0 != (State->InputChannel[014] & 01000) &&
           State->Erasable[0][RegGYROCTR] > 0)
@@ -1674,7 +1675,7 @@ agc_engine (agc_t * State)
 	}
     }
 
-  // If 1/4 second (nominal gyro pulse count of 800 decimal) or the gyro 
+  // If 1/4 second (nominal gyro pulse count of 800 decimal) or the gyro
   // bits in channel 014 have changed, output to channel 0177.
   i = (State->InputChannel[014] & 01740);  // Pick off the gyro bits.
   if (i != OldChannel14 || GyroCount >= 800)
@@ -1688,7 +1689,7 @@ agc_engine (agc_t * State)
 #define GYRO_BURST 800
 #define GYRO_BURST2 1024
   if (0 != (State->InputChannel[014] & 01000))
-    if (0 != State->Erasable[0][RegGYROCTR]) 
+    if (0 != State->Erasable[0][RegGYROCTR])
       {
         // If any torquing is still pending, do it all at once before
 	// setting up a new torque counter.
@@ -1723,10 +1724,10 @@ agc_engine (agc_t * State)
 #endif // GYRO_TIMING_SIMULATED
 
   //----------------------------------------------------------------------
-  // ... and somewhat similar principles for the IMU CDU drive for 
+  // ... and somewhat similar principles for the IMU CDU drive for
   // coarse alignment.
-  
-#if 0  
+
+#if 0
   i = (State->InputChannel[014] & 070000);	// Check IMU CDU drive bits.
   if (ImuChannel14 == 0 && i != 0)		// If suddenly active, start drive.
     ImuCduCount = IMUCDU_BURST_CYCLES;
@@ -1759,9 +1760,9 @@ agc_engine (agc_t * State)
   //----------------------------------------------------------------------
   // Finally, stuff for driving the optics shaft & trunnion CDUs.  Nothing
   // fancy like the fine-alignment and coarse-alignment stuff above.
-  // Just grab the data from the counter and dump it out the appropriate 
+  // Just grab the data from the counter and dump it out the appropriate
   // fictitious port as a giant lump.
-  
+
   if (State->Erasable[0][RegOPTX] && 0 != (State->InputChannel[014] & 02000))
     {
       ChannelOutput (State, 0172, State->Erasable[0][RegOPTX]);
@@ -1773,7 +1774,7 @@ agc_engine (agc_t * State)
       State->Erasable[0][RegOPTY] = 0;
     }
 
-  //----------------------------------------------------------------------  
+  //----------------------------------------------------------------------
   // Okay, here's the stuff that actually has to do with decoding instructions.
 
   // Store the current value of several registers.
@@ -1786,8 +1787,8 @@ agc_engine (agc_t * State)
   //Qumulator = GetQ (State);
   //OverflowQ = (ValueOverflowed (Qumulator) != AGC_P0);
 
-  // After each instruction is executed, the AGC's Z register is updated to 
-  // indicate the next instruction to be executed.  
+  // After each instruction is executed, the AGC's Z register is updated to
+  // indicate the next instruction to be executed.
   ProgramCounter = c (RegZ);
   // However, since the Z register contains only 12 bits, the address has to
   // be massaged to get a 16-bit address.
@@ -1805,7 +1806,7 @@ agc_engine (agc_t * State)
   else
     {
       // The index is sometimes positive and sometimes negative.  What to
-      // do if the result has overflow, I can't say.  I arbitrarily 
+      // do if the result has overflow, I can't say.  I arbitrarily
       // overflow-correct it.
       sExtraCode = State->ExtraCode;
       Instruction =
@@ -1819,19 +1820,19 @@ agc_engine (agc_t * State)
 	  State->IndexValue == 0 && !State->PendFlag && !Overflow &&
 	  ValueOverflowed (c (RegL)) == AGC_P0 &&
 	  ValueOverflowed (c (RegQ)) == AGC_P0 &&
-	  //ProgramCounter > 060 && 
+	  //ProgramCounter > 060 &&
 	  Instruction != 3 && Instruction != 4 && Instruction != 6)
 	{
 	  int i, j;
-	  // We use the InterruptRequests array slightly oddly.  Since the 
+	  // We use the InterruptRequests array slightly oddly.  Since the
 	  // interrupts are numbered 1 to 10 (NUM_INTERRUPT_TYPES), we begin
-	  // indexing the array at 1, so that entry 0 does not hold an 
-	  // interrupt request.  Instead, we use entry 0 to tell the last 
+	  // indexing the array at 1, so that entry 0 does not hold an
+	  // interrupt request.  Instead, we use entry 0 to tell the last
 	  // interrupt type that occurred.  In searches, we begin one up from
-	  // the last interrupt, and then wrap around.  This keeps the same 
-	  // interrupt from happening over and over to the exclusion of all 
+	  // the last interrupt, and then wrap around.  This keeps the same
+	  // interrupt from happening over and over to the exclusion of all
 	  // other interrupts.  (I have no clue as to whether the AGC actually
-	  // did this or not.)  Moreover, I assume interrupt vectoring takes 
+	  // did this or not.)  Moreover, I assume interrupt vectoring takes
 	  // one additional machine cycle.  Don't really know, however.
 	  // Search for the next interrupt request.
 	  i = State->InterruptRequests[0];	// Last interrupt serviced.
@@ -1869,7 +1870,7 @@ agc_engine (agc_t * State)
   Address10 = Instruction & MASK10;
   Address9 = Instruction & MASK9;
 
-  // Add delay for multi-MCT instructions.  Works for all instructions 
+  // Add delay for multi-MCT instructions.  Works for all instructions
   // except EDRUPT, BZF, and BZMF.  For those, an extra cycle is added
   // AFTER executing the instruction -- not because it's more logically
   // correct, just because it's easier.
@@ -1898,15 +1899,15 @@ agc_engine (agc_t * State)
 
   // Compute the next value of the instruction pointer.  I haven't found
   // any explanation so far as to what happens if the pointer is already at
-  // the end of a memory block, so I don't know if it's supposed to roll to 
+  // the end of a memory block, so I don't know if it's supposed to roll to
   // the next pseudo-address, or wrap to the beginning of the bank, or what.
   // My assumption is that the programmer (or assembler, perhaps) simply
-  // wasn't supposed to allow this to happen.  (In fixed memory, this is 
+  // wasn't supposed to allow this to happen.  (In fixed memory, this is
   // literally true, since the bank terminates with a bugger word rather than
   // with an instruction, so the issue is only what happens in erasable
-  // memory.)  As a first cut, therefore, I simply increment the thing without 
+  // memory.)  As a first cut, therefore, I simply increment the thing without
   // checking for a problem.  (The increment is by 2, since bit 0 is the
-  // parity and the address only starts at bit 1.) 
+  // parity and the address only starts at bit 1.)
   NextZ = 1 + c (RegZ);
   // I THINK that the Z register is updated before the instruction executes,
   // which is important if you have an instruction that directly accesses
@@ -1914,14 +1915,14 @@ agc_engine (agc_t * State)
   // which imply that the contents of Z is directly transferred into Q.)
   c (RegZ) = NextZ;
 
-  // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
+  // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy
   // picture of what follows.
   ExtendedOpcode = Instruction >> 9;	//2;
   if (sExtraCode)
     ExtendedOpcode |= 0100;
   switch (ExtendedOpcode)
     {
-    case 000:			// TC.  
+    case 000:			// TC.
     case 001:
     case 002:
     case 003:
@@ -1950,9 +1951,9 @@ agc_engine (agc_t * State)
 	  NextZ = Address12;
 	}
       break;
-    case 010:			// CCS. 
+    case 010:			// CCS.
     case 011:
-      // CCS instruction (2 MCT).  
+      // CCS instruction (2 MCT).
       // Figure out where the data is stored, and fetch it.
       if (Address10 < REG16)
 	{
@@ -1970,10 +1971,10 @@ agc_engine (agc_t * State)
       // Now perform the actual comparison and jump on the basis
       // of it.  There's no explanation I can find as to what
       // happens if we're already at the end of the memory bank,
-      // so I'll just pretend that that can't happen.  Note, 
+      // so I'll just pretend that that can't happen.  Note,
       // by the way, that if the Operand is > +0, then NextZ
       // is already correct, and in the other cases we need to
-      // increment it by 2 less because NextZ has already been 
+      // increment it by 2 less because NextZ has already been
       // incremented.
       if (Address10 < REG16
 	  && ValueOverflowed (0177777 & c (Address10)) == AGC_P1)
@@ -1988,7 +1989,7 @@ agc_engine (agc_t * State)
       else if (0 != (Operand16 & 040000))
 	NextZ += 2;
       break;
-    case 012:			// TCF. 
+    case 012:			// TCF.
     case 013:
     case 014:
     case 015:
@@ -2002,10 +2003,10 @@ agc_engine (agc_t * State)
     case 020:			// DAS.
     case 021:
       //DasInstruction:
-      // DAS instruction (3 MCT).  
+      // DAS instruction (3 MCT).
       {
 	// We add the less-significant words (as SP values), and thus
-	// the sign of the lower word of the output does not necessarily 
+	// the sign of the lower word of the output does not necessarily
 	// match the sign of the upper word.
 	int Msw, Lsw;
 	if (IsL (Address10))	// DDOUBL
@@ -2055,9 +2056,9 @@ agc_engine (agc_t * State)
 	  AssignFromPointer (State, WhereWord - 1, OverflowCorrected (Msw));
       }
       break;
-    case 022:			// LXCH. 
+    case 022:			// LXCH.
     case 023:
-      // "LXCH K" instruction (2 MCT). 
+      // "LXCH K" instruction (2 MCT).
       if (IsL (Address10))
 	break;
       if (IsReg (Address10, RegZERO))	// ZL
@@ -2083,7 +2084,7 @@ agc_engine (agc_t * State)
 	  c (RegL) = SignExtend (Operand16);
 	}
       break;
-    case 024:			// INCR.  
+    case 024:			// INCR.
     case 025:
       // INCR instruction (2 MCT).
       {
@@ -2405,9 +2406,9 @@ agc_engine (agc_t * State)
       if (State->InIsr)
         {
 	  static int Count = 0;
-	  printf ("EDRUPT w/ ISR %d\n", ++Count);  
+	  printf ("EDRUPT w/ ISR %d\n", ++Count);
 	}
-      else 
+      else
         {
 	  static int Count = 0;
 	  printf ("EDRUPT w/o ISR %d\n", ++Count);
@@ -2447,7 +2448,7 @@ agc_engine (agc_t * State)
 	    //printf ("Acc=%06o L=%06o\n", Accumulator, c(RegL));
 	    //printf ("A,K,L=%06o,%06o,%06o abs=%06o,%06o,%06o\n",
 	    //  AccPair[0],*WhereWord,AccPair[1],AbsA,AbsK,AbsL);
-	    // The divisor is smaller than the dividend.  In this case, 
+	    // The divisor is smaller than the dividend.  In this case,
 	    // we return "total nonsense".
 	    c (RegL) = (0777777 & random ());
 	    c (RegA) = (0177777 & random ());
@@ -2472,9 +2473,9 @@ agc_engine (agc_t * State)
 	    // The divisor is larger than the dividend.  Okay to actually divide!
 	    // Fortunately, the sign conventions agree with those of the normal
 	    // C operators / and %, so all we need to do is to convert the
-	    // 1's-complement values to native CPU format to do the division, 
-	    // and then convert back afterward.  Incidentally, we know we 
-	    // aren't dividing by zero, since we know that the divisor is 
+	    // 1's-complement values to native CPU format to do the division,
+	    // and then convert back afterward.  Incidentally, we know we
+	    // aren't dividing by zero, since we know that the divisor is
 	    // greater (in magnitude) than the dividend.
 	    Dividend = agc2cpu2 (Dividend);
 	    Divisor = agc2cpu (*WhereWord);
@@ -2712,7 +2713,7 @@ agc_engine (agc_t * State)
     case 0177:
       {
 	// For MP A (i.e., SQUARE) the accumulator is NOT supposed to
-	// be oveflow-corrected.  I do it anyway, since I don't know 
+	// be oveflow-corrected.  I do it anyway, since I don't know
 	// what it would mean to carry out the operation otherwise.
 	// Fix later if it causes a problem.
 	// FIX ME: Accumulator is overflow-corrected before SQUARE.

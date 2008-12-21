@@ -181,6 +181,7 @@
 
 #include "yaAGC.h"
 #include "agc_engine.h"
+#include "agc_symtab.h"
 #include "agc_gdbmi.h"
 #include "agc_help.h"
 #include "agc_cli.h"

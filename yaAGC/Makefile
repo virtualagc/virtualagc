@@ -66,7 +66,7 @@ OBJECTS := \
 	agc_disassembler.o \
 	agc_help.o \
 	nbfgets.o \
-	symbol_table.o \
+	agc_symtab.o \
 	regex.o
 
 yaAGC:	$(OBJECTS) CheckDec.o libyaAGC.a
