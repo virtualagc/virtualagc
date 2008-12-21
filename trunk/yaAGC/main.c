@@ -475,7 +475,8 @@ ShowDisassembly:
 				  {
 					  if (SingleStepCounter > 0) SingleStepCounter--;
 
-					  Break = DbgMonitorBreakpoints();
+					  if (DebugMode)
+						Break = DbgMonitorBreakpoints();
 				  }
 			}
 		  }
