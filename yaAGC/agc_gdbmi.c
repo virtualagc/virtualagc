@@ -1280,7 +1280,7 @@ GdbmiResult GdbmiHandleList(int i)
 		}
 	}
 
-   return(GdbmiCmdRun);
+   return(GdbmiCmdDone);
 }
 
 void gdbmiHandleDelete(agc_t *State , char* s, char* sraw)
