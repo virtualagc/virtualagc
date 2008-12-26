@@ -89,8 +89,13 @@ int InitializeSimulator(Options_t* Options)
 	{
 	      if (Options->resume == NULL)
 	      {
+	    	  if (Options->cfg)
+	    	  {
 		  		if (CmOrLm) result = agc_engine_init (Simulator.State, Options->core, "CM.core", 0);
 		  		else result = agc_engine_init (Simulator.State, Options->core, "LM.core", 0);
+	    	  }
+	    	  else
+	    		result = agc_engine_init (Simulator.State, Options->core,"core", 0);
 		   }
 	      else result = agc_engine_init (Simulator.State, Options->core, Options->resume, 1);
 
@@ -161,8 +166,12 @@ void ExecuteSimulator(void)
 	  /* Make a routine core dump */
 	  if (RealTime >= NextCoreDump)
 	  {
-		  if (CmOrLm) MakeCoreDump (&State, "CM.core");
-		  else MakeCoreDump (&State, "LM.core");
+		  if (Simulator.Options->cfg)
+		  {
+		     if (CmOrLm) MakeCoreDump (&State, "CM.core");
+			 else MakeCoreDump (&State, "LM.core");
+		  }
+		  else MakeCoreDump (&State, "core");
 
 		  NextCoreDump = RealTime + DumpInterval;
 	  }

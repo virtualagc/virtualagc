@@ -8,6 +8,8 @@
 #ifndef AGC_DEBUGGER_H_
 #define AGC_DEBUGGER_H_
 
+#define MAX_FROMFILES 11
+
 typedef struct
 {
 	int RunState;
@@ -21,6 +23,9 @@ typedef struct
 {
 	char* Name;
 }Frame_t;
+
+extern FILE *FromFiles[MAX_FROMFILES];
+extern int NumFromFiles;
 
 extern int DbgInitialize(Options_t* Options,agc_t* State);
 extern void DbgExecuteDebugger(void);
