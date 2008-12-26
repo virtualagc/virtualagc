@@ -186,6 +186,7 @@
 #include "agc_help.h"
 #include "agc_cli.h"
 #include "agc_simulator.h"
+#include "agc_debugger.h"
 
 FILE *rfopen (const char *Filename, const char *mode);
 
@@ -337,9 +338,9 @@ int GetFromZ (agc_t * State)
 /*
  * My substitute for fgets, for use when stdin is unblocked.
  */
-#define MAX_FROMFILES 11
-static FILE *FromFiles[MAX_FROMFILES];
-static int NumFromFiles = 1;
+//#define MAX_FROMFILES 11
+//static FILE *FromFiles[MAX_FROMFILES];
+//int NumFromFiles = 1;
 
 void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
 {
@@ -362,10 +363,10 @@ void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
 		  if (NumFromFiles > 1 && fp == FromFiles[NumFromFiles - 1])
 		  {
 		      NumFromFiles--;
-		      printf ("Keystroke source-file closed.\n");
+		      //printf ("Keystroke source-file closed.\n");
 		      if (NumFromFiles == 1)
 		      {
-		      	printf ("The keyboard has been reattached.\n> ");
+		      //	printf ("The keyboard has been reattached.\n> ");
 		      }
 		      fclose (fp);
 		      fp = FromFiles[NumFromFiles - 1];
@@ -425,6 +426,8 @@ int main (int argc, char *argv[])
 	* if the initialization fails or Options is NULL then the simulator will
 	* return a non zero value and subsequently bail and exit the program */
 	if (InitializeSimulator(Options)) return(1);
+
+	if (Options->version)return(0);
 
 	/* Register the SIGINT to be handled by AGC Debugger */
 	signal(SIGINT, catch_sig);
@@ -505,6 +508,7 @@ ShowDisassembly:
 	      SingleStepCounter = -1;
 
 	      DbgDisplayInnerFrame();
+
 
 	      while (1)
 		{

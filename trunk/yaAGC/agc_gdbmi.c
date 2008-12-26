@@ -348,8 +348,7 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
    char Garbage[81], SymbolName[MAX_LABEL_LENGTH + 1],*cli_char;
    unsigned gdbmiAddress = 0;
    Address_t agc_addr;
-   char* p;
-
+   char* p = (char*)0;
 
    if (strlen(s) > 0) /* Do we have an argument */
    {
@@ -369,7 +368,7 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
       sraw = gdbmiBasename(sraw);
       s=gdbmiBasename(s);
 
-      /* First replace ":" with space */
+      /* First replace ":" with space !!FIX to prevent DOS disk separator!! */
       if (cli_char = strstr(sraw,":")) *cli_char = ' '; /* replace colon with space */
 
       if (HaveSymbols &&
@@ -511,7 +510,7 @@ void gdbmiHandleWatch (agc_t * State, char *s, char* sraw)
 void gdbmiHandleShowVersion(void)
 {
    printf ("Apollo Guidance Computer simulation, ver. " NVER ", built "
-         __DATE__ " " __TIME__ "\n" "Copyright (C) 2003-2005,2007 Ronald S. Burkey.\n"
+         __DATE__ " " __TIME__ "\n" "Copyright (C) 2003-2008 Ronald S. Burkey, Onno Hommes.\n"
          "yaAGC is free software, covered by the GNU General Public License, and you are\n"
          "welcome to change it and/or distribute copies of it under certain conditions.\n"
           );

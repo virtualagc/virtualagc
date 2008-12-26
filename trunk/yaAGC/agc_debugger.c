@@ -30,6 +30,9 @@ char* SymbolFile;       // The name of the symbol table file
 int DebugMode;
 int RunState;
 
+FILE *FromFiles[MAX_FROMFILES];
+int NumFromFiles = 1;
+
 #define INT_MAIN   0
 #define INT_TIMER6 1
 #define INT_TIMER5 2
@@ -136,6 +139,19 @@ int DbgInitialize(Options_t* Options,agc_t* State)
 		DbgInitFrameData();
 	}
 
+	/* Allow a command file to be used with initial debugger commands */
+    if (Options->fromfile > 0)
+    {
+	    if (NumFromFiles < MAX_FROMFILES)
+		{
+		  FromFiles[NumFromFiles] = fopen (Options->fromfile, "r");
+		  if (FromFiles[NumFromFiles] == NULL);
+		  else
+			  NumFromFiles++;
+		}
+    }
+
+    /* Add the AGC starting point */
 	BacktraceAdd (State, 0, 04000);
 
 	return 0;

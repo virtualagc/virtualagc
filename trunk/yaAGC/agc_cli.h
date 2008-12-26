@@ -15,6 +15,7 @@ typedef struct
   char* cdu_log;
   char* symtab;
   char* cfg;
+  char* fromfile;
   int   port;
   int   dump_time;
   int   debug_dsky;
@@ -24,6 +25,7 @@ typedef struct
   int   debug;
   int   interlace;
   int	resumed;
+  int	version;
 } Options_t;
 
 extern Options_t* ParseCommandLineOptions(int argc, char *argv[]);
