@@ -25,11 +25,21 @@ typedef struct
 }Frame_t;
 
 extern FILE *FromFiles[MAX_FROMFILES];
+extern FILE *LogFile;
 extern int NumFromFiles;
+extern char agcPrompt[16];
+extern int LogCount;
 
+extern unsigned short DbgGetWatch (agc_t * State, Breakpoint_t * bp);
+extern int DbgGetFromZ (agc_t * State);
 extern int DbgInitialize(Options_t* Options,agc_t* State);
 extern void DbgExecuteDebugger(void);
 extern void DbgDisplayInnerFrame(void);
 extern int DbgMonitorBreakpoints(void);
+extern char* DbgNormalizeCmdString(char* s);
+extern int DbgHasBreakEvent(void);
+extern void DbgProcessLog(void);
+extern void DbgDisplayPrompt(void);
+char* DbgGetCmdString(void);
 
 #endif /* AGC_DEBUGGER_H_ */

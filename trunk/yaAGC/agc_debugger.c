@@ -8,9 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
+#include "agc_debug.h"
 #include "agc_debugger.h"
 #include "agc_gdbmi.h"
 
@@ -21,6 +23,9 @@ static Debugger_t Debugger;
 static Frame_t* Frames;
 
 static char FuncName[128];
+int LogCount = 0;
+static int LogLast = -1;
+
 
 // JMS: Variables pertaining to the symbol table loaded
 int HaveSymbols = 0;    // 1 if we have a symbol table
@@ -31,6 +36,8 @@ int DebugMode;
 int RunState;
 
 FILE *FromFiles[MAX_FROMFILES];
+FILE *LogFile = NULL;
+
 int NumFromFiles = 1;
 
 #define INT_MAIN   0
@@ -44,6 +51,170 @@ int NumFromFiles = 1;
 #define INT_DNLINK 8
 #define INT_RADAR  9
 #define INT_JOYSTK 10
+
+static char s1[129], s2[129], s3[129], s4[129], s5[129];
+static int BreakPending = 0;
+
+/* Prompt String
+ * Allow the prompt to be changed in gdb/mi mode
+ */
+char agcPrompt[16]="(agc) ";
+char s[129], sraw[129], slast[129];
+
+int DbgHasBreakEvent()
+{
+	int BreakFlag;
+
+	if (Debugger.State->PendFlag) BreakFlag = 0;
+	else
+	{
+		if (SingleStepCounter == 0)
+		{
+		  if(RunState) printf ("Stepped.\n");
+		  BreakFlag = 1;
+		}
+		else
+		{
+			  int Value;
+			  Value = DbgGetFromZ (Debugger.State);
+
+			  /* Detect certain types of impending infinite loops. */
+			  if (!(Value & 0177777) && !Debugger.State->Erasable[0][0])
+				{
+				  /* Infinite Loop break on next instruction */
+				  BreakFlag = DebugMode = 1;
+				}
+			  else
+			  {
+				  if (SingleStepCounter > 0) SingleStepCounter--;
+				  if (DebugMode) BreakFlag = DbgMonitorBreakpoints();
+			  }
+		}
+	}
+	if (BreakPending)
+	{
+	   BreakPending = 0;
+	   BreakFlag = 1;
+	}
+
+	return BreakFlag;
+}
+
+/* Normalize data in s and return sraw pointer */
+char* DbgNormalizeCmdString(char* s)
+{
+	int i;
+	char *ss;
+
+	/* Normalize the strings by getting rid of leading, trailing
+	   or duplicated spaces. */
+	i = sscanf (s, "%s%s%s%s%s", s1, s2, s3, s4, s5);
+	if (i == 1) strcpy (s, s1);
+	else if (i == 2)
+	sprintf (s, "%s %s", s1, s2);
+	else if (i == 3)
+	sprintf (s, "%s %s %s", s1, s2, s3);
+	else if (i == 4)
+	sprintf (s, "%s %s %s %s", s1, s2, s3, s4);
+	else if (i == 5)
+	sprintf (s, "%s %s %s %s %s", s1, s2, s3, s4, s5);
+	else s[0] = 0;
+
+	strcpy (sraw, s);
+	for (ss = s; *ss; *ss = toupper (*ss), ss++);
+
+	return sraw;
+}
+
+/*
+ * Get the value stored at an address, as specified by a Breakpoint_t.
+ */
+unsigned short DbgGetWatch (agc_t * State, Breakpoint_t * bp)
+{
+  int Address12, vRegBB;
+  Address12 = (bp->Address12 & 07777);
+  vRegBB = (bp->vRegBB & 07777);
+  int16_t Value = 0;
+
+  /* First check if it is fixed erasable */
+  if (Address12 <= 01377)
+  {
+  		Value = (State->Erasable[Address12 / 0400][Address12 & 0377]);
+  }
+  /* Check if it is Switched erasable */
+  else if (Address12 <= 01777)
+  {
+    Value = (State->Erasable[vRegBB & 07][Address12 & 0377]);
+  }
+
+  /* Return value of address or default 0 */
+  return (Value);
+}
+
+/*
+ * Gets the value at the instruction pointer.  The INDEX is automatically added,
+ * and the Extracode bit is used as the 16th bit.
+ */
+int DbgGetFromZ (agc_t * State)
+{
+  int CurrentZ, Bank, Value;
+  CurrentZ = (State->Erasable[0][RegZ] & 07777);
+
+  // Print the address.
+  if (CurrentZ < 01400)
+  {
+      Bank = CurrentZ / 0400;
+      Value = State->Erasable[Bank][CurrentZ & 0377];
+  }
+  else if (CurrentZ >= 04000)
+  {
+      Bank = 2 + (CurrentZ - 04000) / 02000;
+      Value = State->Fixed[Bank][CurrentZ & 01777];
+  }
+  else if (CurrentZ < 02000)
+  {
+      Bank = (7 & State->Erasable[0][RegBB]);
+      Value = State->Erasable[Bank][CurrentZ & 0377];
+  }
+  else
+  {
+      Bank = (31 & (State->Erasable[0][RegBB] >> 10));
+      if (0x18 == (Bank & 0x18) && (State->OutputChannel7 & 0100))
+      {
+			Bank += 0x08;
+      }
+      Value = State->Fixed[Bank][CurrentZ & 01777];
+  }
+  Value = OverflowCorrected(AddSP16
+		       (SignExtend (Value), SignExtend (State->IndexValue)));
+  Value = (Value & 077777);
+
+  /* Extracode? */
+  if (State->ExtraCode)  Value |= 0100000;
+
+  /* Indexed? */
+  if (State->IndexValue) Value |= 0200000;
+
+  /* Positive overflow? */
+  if (0040000 == (0140000 & State->Erasable[0][RegA])) Value |= 0400000;
+
+  /* Negative overflow? */
+  if (0100000 == (0140000 & State->Erasable[0][RegA])) Value |= 01000000;
+
+  /* Sign of Accumulator */
+  if (0 != (0100000 & State->Erasable[0][RegA])) Value |= 02000000;
+
+  /* Signs of Accumulator and L disagree. */
+  if (0 != (0100000 & (State->Erasable[0][RegL] ^ State->Erasable[0][RegA])))
+  {
+  		Value |= 04000000;
+  }
+
+  /* Inside of an ISR? */
+  if (State->InIsr) Value |= 010000000;
+
+  return (Value);
+}
 
 /**
  * The Frames array is used to cache and look up the Frame Labels
@@ -111,6 +282,14 @@ char* DbgGetFrameNameByAddr(unsigned LinearAddr)
    return (FrameName);
 }
 
+/* Catch the SIGINT Signal to stop running and return to debug mode */
+static void DbgCatchSignal(int sig)
+{
+   BreakPending = 1; /* Make sure Break only happens when we want it */
+   nbfgets_ready(agcPrompt);
+   signal(sig, DbgCatchSignal);
+}
+
 int DbgInitialize(Options_t* Options,agc_t* State)
 {
 	Debugger.Options = Options;
@@ -154,6 +333,9 @@ int DbgInitialize(Options_t* Options,agc_t* State)
     /* Add the AGC starting point */
 	BacktraceAdd (State, 0, 04000);
 
+	/* Register the SIGINT to be handled by AGC Debugger */
+	signal(SIGINT, DbgCatchSignal);
+
 	return 0;
 }
 
@@ -165,7 +347,7 @@ int DbgMonitorBreakpoints(void)
 	int i;
 	int Value;
 
-	Value = GetFromZ(Debugger.State);
+	Value = DbgGetFromZ(Debugger.State);
 	CurrentZ = Debugger.State->Erasable[0][RegZ];
 	CurrentBB = (Debugger.State->Erasable[0][RegBB] & 076007)|
 	            (Debugger.State->InputChannel[7] & 0100);
@@ -256,14 +438,14 @@ int DbgMonitorBreakpoints(void)
 		}
 		else if ((Breakpoints[i].WatchBreak == 1 &&
 				  gdbmiCheckBreakpoint(Debugger.State,&Breakpoints[i]) &&
-			      Breakpoints[i].WatchValue != GetWatch(Debugger.State,&Breakpoints[i])) ||
+			      Breakpoints[i].WatchValue != DbgGetWatch(Debugger.State,&Breakpoints[i])) ||
 			     (Breakpoints[i].WatchBreak == 3 &&
-			      Breakpoints[i].WatchValue == GetWatch (Debugger.State,&Breakpoints[i])))
+			      Breakpoints[i].WatchValue == DbgGetWatch (Debugger.State,&Breakpoints[i])))
 		  {
 			int Address12, vRegBB, Before, After;
 			Address12 = Breakpoints[i].Address12;
 			Before = (Breakpoints[i].WatchValue & 077777);
-			After = (GetWatch (Debugger.State, &Breakpoints[i]) & 077777);
+			After = (DbgGetWatch (Debugger.State, &Breakpoints[i]) & 077777);
 			if (Address12 < 01400)
 			{
 				if (Breakpoints[i].Symbol != NULL)
@@ -274,7 +456,7 @@ int DbgMonitorBreakpoints(void)
 					  Address12, Before, After);
 
 				if (Breakpoints[i].WatchBreak == 1)
-				    Breakpoints[i].WatchValue = GetWatch (Debugger.State, &Breakpoints[i]);
+				    Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State, &Breakpoints[i]);
 
 				gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
 				Break = 1;
@@ -297,7 +479,7 @@ int DbgMonitorBreakpoints(void)
 					 Address12, Before, After);
 
 				if (Breakpoints[i].WatchBreak == 1)
-				  Breakpoints[i].WatchValue = GetWatch (Debugger.State, &Breakpoints[i]);
+				  Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State, &Breakpoints[i]);
 
 				gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
 				Break = 1;
@@ -306,13 +488,13 @@ int DbgMonitorBreakpoints(void)
 		 }
 		else if ((Breakpoints[i].WatchBreak == 4 &&
 				  gdbmiCheckBreakpoint(Debugger.State,&Breakpoints[i]) &&
-				  Breakpoints[i].WatchValue != GetWatch (Debugger.State,&Breakpoints[i])))
+				  Breakpoints[i].WatchValue != DbgGetWatch (Debugger.State,&Breakpoints[i])))
 		{
 			int Address12, vRegBB, Before, After;
 
 			Address12 = Breakpoints[i].Address12;
 			Before = (Breakpoints[i].WatchValue & 077777);
-			After = (GetWatch (Debugger.State, &Breakpoints[i]) & 077777);
+			After = (DbgGetWatch (Debugger.State, &Breakpoints[i]) & 077777);
 
 			if (Address12 < 01400)
 			{
@@ -320,7 +502,7 @@ int DbgMonitorBreakpoints(void)
 				  printf ("%s=%06o\n", Breakpoints[i].Symbol->Name, After);
 				else
 				  printf ("(%05o)=%06o\n", Address12, After);
-				Breakpoints[i].WatchValue = GetWatch (Debugger.State, &Breakpoints[i]);
+				Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State, &Breakpoints[i]);
 			}
 			else
 			{
@@ -333,7 +515,7 @@ int DbgMonitorBreakpoints(void)
 					else
 						printf ("%s=%06o\n", Breakpoints[i].Symbol->Name, After);
 
-					Breakpoints[i].WatchValue = GetWatch (Debugger.State, &Breakpoints[i]);
+					Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State, &Breakpoints[i]);
 				}
 			}
 		}
@@ -374,3 +556,58 @@ void DbgDisplayInnerFrame(void)
 	}
     else Disassemble (Debugger.State);
 }
+
+void DbgDisplayPrompt(void)
+{
+	  if (NumFromFiles == 1)
+	  {
+	      // JMS: Tell the thread which is actually reading the input from
+	      // stdin to actually go ahead and read. At this point, we know that
+	      // the last debugging command has been processed.
+	      printf("%s",agcPrompt);
+	      fflush(stdout);
+	      nbfgets_ready(agcPrompt);
+	  }
+}
+
+extern void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp);
+
+char* DbgGetCmdString(void)
+{
+	  strcpy(slast,sraw);
+
+	  s[sizeof (s) - 1] = 0;
+	  rfgets (Debugger.State, s, sizeof (s) - 1, FromFiles[NumFromFiles - 1]);
+
+	  /* Use last command if just newline */
+	  if (strlen(s) == 0) strcpy(s,slast);
+
+	  return s;
+}
+void DbgProcessLog()
+{
+	if (LogFile != NULL)
+	{
+	  int Bank, Address, NewLast;
+
+	  Bank =
+	077777 &
+	(((Debugger.State->Erasable[0][RegBB]) | Debugger.State->OutputChannel7));
+	  Address = 077777 & (Debugger.State->Erasable[0][RegZ]);
+	  NewLast = (Bank << 15) | Address;
+	  if (NewLast != LogLast)
+	  {
+		  LogLast = NewLast;
+		  fprintf (LogFile, "%05o %05o\n", Bank, Address);
+		  LogCount--;
+		  if (LogCount <= 0)
+			{
+			  fclose (LogFile);
+			  LogFile = NULL;
+			  printf ("Logging completed.\n");
+			}
+	  }
+	}
+
+}
+
