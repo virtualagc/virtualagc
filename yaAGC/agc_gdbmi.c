@@ -494,7 +494,7 @@ void gdbmiHandleWatch (agc_t * State, char *s, char* sraw)
       Breakpoints[NumBreakpoints].Line = NULL;
       if (WatchType == 1)
          Breakpoints[NumBreakpoints].WatchValue =
-               GetWatch (State, &Breakpoints[NumBreakpoints]);
+               DbgGetWatch (State, &Breakpoints[NumBreakpoints]);
       else
          Breakpoints[NumBreakpoints].WatchValue = WatchValue;
       NumBreakpoints++;

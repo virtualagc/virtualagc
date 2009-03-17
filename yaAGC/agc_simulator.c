@@ -209,3 +209,9 @@ void ExecuteSimulator(void)
 	}
 }
 
+void SimExecuteEngine()
+{
+	  agc_engine (Simulator.State);
+}
+
+
