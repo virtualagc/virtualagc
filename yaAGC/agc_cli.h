@@ -28,6 +28,6 @@ typedef struct
   int	version;
 } Options_t;
 
-extern Options_t* ParseCommandLineOptions(int argc, char *argv[]);
+extern Options_t* CliParseOptions(int argc, char *argv[]);
 
 #endif /* AGC_CLI_H_ */

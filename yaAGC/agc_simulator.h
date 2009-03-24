@@ -8,6 +8,22 @@
 #ifndef AGC_SIMULATOR_H_
 #define AGC_SIMULATOR_H_
 
+#ifdef WIN32
+#include <windows.h>
+#include <sys/time.h>
+#define LB "\r\n"
+#else
+#include <time.h>
+#include <sys/times.h>
+#define LB ""
+#endif
+
+#include "yaAGC.h"
+#include "agc_engine.h"
+
+#define SIM_E_OK  0
+#define SIM_E_VERSION 6
+
 typedef struct
 {
 	agc_t* State;
@@ -17,9 +33,8 @@ typedef struct
 } Simulator_t;
 
 
-extern int InitializeSimulator(Options_t* Options);
-extern void ExecuteSimulator(void);
-extern void CycleSimulator(void);
+extern int SimInitialize(Options_t* Options);
+extern void SimExecute(void);
 
 extern clock_t NextCoreDump;
 extern clock_t DumpInterval;

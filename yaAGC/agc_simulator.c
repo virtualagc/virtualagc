@@ -10,21 +10,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#ifdef WIN32
-#include <windows.h>
-#include <sys/time.h>
-#define LB "\r\n"
-#else
-#include <time.h>
-#include <sys/times.h>
-#define LB ""
-#endif
-
 #include "yaAGC.h"
 #include "agc_cli.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
 #include "agc_simulator.h"
+
 
 
 agc_t State;
@@ -53,15 +44,18 @@ clock_t times (struct tms *p)
   return (GetTickCount ());
 }
 
-#define _SC_CLK_TCK (1000)
 #define sysconf(x) (x)
 #endif // WIN32
+
+// Holds whether we are in debug mode
+extern int DebugMode;
+extern int RunState;
 
 
 static Simulator_t Simulator;
 
 
-int InitializeSimulator(Options_t* Options)
+int SimInitialize(Options_t* Options)
 {
 	int result = 0;
 
@@ -91,8 +85,8 @@ int InitializeSimulator(Options_t* Options)
 	      {
 	    	  if (Options->cfg)
 	    	  {
-		  		if (CmOrLm) result = agc_engine_init (Simulator.State, Options->core, "CM.core", 0);
-		  		else result = agc_engine_init (Simulator.State, Options->core, "LM.core", 0);
+		  	if (CmOrLm) result = agc_engine_init (Simulator.State, Options->core, "CM.core", 0);
+		  	else result = agc_engine_init (Simulator.State, Options->core, "LM.core", 0);
 	    	  }
 	    	  else
 	    		result = agc_engine_init (Simulator.State, Options->core,"core", 0);
@@ -133,17 +127,18 @@ int InitializeSimulator(Options_t* Options)
 	/* Initialize realtime and cycle counters */
 	RealTimeOffset = times (&DummyTime);	// The starting time of the program.
 	NextCoreDump = RealTimeOffset + DumpInterval;
-	CycleCount = State.CycleCounter * sysconf (_SC_CLK_TCK);	// Number of AGC cycles so far.
+	CycleCount = State.CycleCounter * sysconf (_SC_CLK_TCK); // Num. of AGC cycles so far.
 	RealTimeOffset -= (CycleCount + AGC_PER_SECOND / 2) / AGC_PER_SECOND;
 	LastRealTime = ~0UL;
 
-	return (result);
+	return (result | Options->version);
 }
 
-void CycleSimulator(void)
+void SimExecuteEngine()
 {
-
+	agc_engine (Simulator.State);
 }
+
 
 /*
  * Execute the simulated CPU.  Expecting to ACCURATELY cycle the simulation every
@@ -158,7 +153,7 @@ void CycleSimulator(void)
  * a lot).  It's good enough for me, for NOW, but I'd be happy to take suggestions
  * for how to improve it in a reasonably portable way.
  */
-void ExecuteSimulator(void)
+void SimExecute(void)
 {
 	RealTime = times (&DummyTime);
 	if (RealTime != LastRealTime)
@@ -207,11 +202,16 @@ void ExecuteSimulator(void)
 	  nanosleep (&req, &rem);
 #endif
 	}
+
+	while (CycleCount < DesiredCycles)
+	{
+		if (DebugMode && DbgExecute()) continue;
+	
+		SimExecuteEngine();
+	
+		CycleCount += sysconf (_SC_CLK_TCK);
+	}
 }
 
-void SimExecuteEngine()
-{
-	  agc_engine (Simulator.State);
-}
 
 
