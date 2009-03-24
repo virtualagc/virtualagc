@@ -44,6 +44,9 @@ clock_t times (struct tms *p)
   return (GetTickCount ());
 }
 
+
+#define _SC_CLK_TCK (1000)
+
 #define sysconf(x) (x)
 #endif // WIN32
 
@@ -206,9 +209,9 @@ void SimExecute(void)
 	while (CycleCount < DesiredCycles)
 	{
 		if (DebugMode && DbgExecute()) continue;
-	
+
 		SimExecuteEngine();
-	
+
 		CycleCount += sysconf (_SC_CLK_TCK);
 	}
 }
