@@ -15,6 +15,11 @@
 #include "agc_debug.h"
 #include "agc_debugger.h"
 #include "agc_gdbmi.h"
+#include "agc_simulator.h"
+
+#ifdef WIN32
+#define _SC_CLK_TCK (1000)
+#endif
 
 extern int SymbolTableSize;
 extern Symbol_t *SymbolTable;
@@ -60,6 +65,69 @@ static int BreakPending = 0;
  */
 char agcPrompt[16]="(agc) ";
 char s[129], sraw[129], slast[129];
+
+Breakpoint_t Breakpoints[MAX_BREAKPOINTS];
+int NumBreakpoints = 0;
+
+/*
+ * My substitute for fgets, for use when stdin is unblocked.
+ */
+static void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
+{
+  int c, Count = 0;
+  char *s;
+
+  MaxSize--;
+
+  while (1)
+  {
+      /* While waiting for character input, continue to look for client connects
+       * and disconnects.
+       */
+      while ((fp != stdin && EOF == (c = fgetc (fp))) ||
+            (fp == stdin && Buffer != (s = nbfgets (Buffer, MaxSize))))
+		{
+		  /* If we have redirected console input, and the file of source data is
+		   * exhausted, then reattach the console.
+		   */
+		  if (NumFromFiles > 1 && fp == FromFiles[NumFromFiles - 1])
+		  {
+		      NumFromFiles--;
+		      //printf ("Keystroke source-file closed.\n");
+		      if (NumFromFiles == 1)
+		      {
+		      //	printf ("The keyboard has been reattached.\n> ");
+		      }
+		      fclose (fp);
+		      fp = FromFiles[NumFromFiles - 1];
+		  }
+		  else
+		  {
+#ifdef WIN32
+		      Sleep (10);
+#else
+		      struct timespec req, rem;
+		      req.tv_sec = 0;
+		      req.tv_nsec = 10000000;
+		      nanosleep (&req, &rem);
+#endif // WIN32
+		  }
+
+		  ChannelRoutine (State);
+	   }
+
+	   if (fp == stdin && s != NULL) return;
+
+	   Buffer[Count] = c;
+	   if (c == '\n' || Count >= MaxSize)
+	   {
+		  Buffer[Count] = 0;
+		  return;
+		}
+      Count++;
+   }
+}
+
 
 int DbgHasBreakEvent()
 {
@@ -318,17 +386,20 @@ int DbgInitialize(Options_t* Options,agc_t* State)
 		DbgInitFrameData();
 	}
 
+	/* setvbuf (stdout, OutBuf, _IOLBF, sizeof (OutBuf)); */
+	FromFiles[0] = stdin;
+
 	/* Allow a command file to be used with initial debugger commands */
-    if (Options->fromfile > 0)
-    {
-	    if (NumFromFiles < MAX_FROMFILES)
+	if (Options->fromfile > 0)
+	{
+		if (NumFromFiles < MAX_FROMFILES)
 		{
-		  FromFiles[NumFromFiles] = fopen (Options->fromfile, "r");
-		  if (FromFiles[NumFromFiles] == NULL);
-		  else
-			  NumFromFiles++;
+			FromFiles[NumFromFiles] = fopen (Options->fromfile, "r");
+			if (FromFiles[NumFromFiles] == NULL);
+			else
+				NumFromFiles++;
 		}
-    }
+	}
 
     /* Add the AGC starting point */
 	BacktraceAdd (State, 0, 04000);
@@ -570,8 +641,6 @@ void DbgDisplayPrompt(void)
 	  }
 }
 
-extern void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp);
-
 char* DbgGetCmdString(void)
 {
 	  strcpy(slast,sraw);
@@ -611,3 +680,333 @@ void DbgProcessLog()
 
 }
 
+extern int DebuggerInterruptMasks[11];
+
+int DbgExecute()
+{
+	char* s;
+	char* sraw;
+	int Break;
+	int PatternValue, PatternMask;
+	int i, j;
+	char FileName[MAX_FILE_LENGTH + 1];
+	int LineNumber, LineNumberTo;
+	char Dummy[MAX_FILE_LENGTH + 1];
+	char SymbolName[129];
+	Symbol_t *Symbol;
+
+	Break = DbgHasBreakEvent();
+
+	if (Break && !DebugDsky)
+	{
+	
+		// char OverflowChar, OverflowCharQ;
+		SingleStepCounter = -1;
+	
+		DbgDisplayInnerFrame();
+	
+		while (1)
+		{
+			/* Display the AGC prompt */
+			DbgDisplayPrompt();
+		
+			/* Read the Command String */
+			s = DbgGetCmdString();
+		
+			/* Get rid of leading,trailing or duplicated spaces but keep backup */
+			sraw = DbgNormalizeCmdString(s);
+	
+			RealTimeOffset +=((RealTime = times (&DummyTime)) - LastRealTime);
+			LastRealTime = RealTime;
+	
+			if (s[0] == '#' || s[0] == 0) continue;
+	
+			if (gdbmiHelp(s) > 0) continue;
+			else if (legacyHelp(s) > 0) continue;
+			else if (1 == sscanf (s, "LOG%d", &i))
+			{
+			if (LogFile != NULL)
+				printf ("Logging is already in progress.\n");
+			else
+				{
+				LogFile = fopen ("yaAGC.log", "w");
+				if (LogFile == NULL)
+				printf ("The log file cannot be created.\n");
+				else if (i < 1)
+				{
+				printf ("Log count out of range.\n");
+				fclose (LogFile);
+				LogFile = NULL;
+				}
+				else
+				LogCount = i;
+				}
+			}
+			else if (!strncmp (s, "FROMFILE ", 9))
+			{
+			if (NumFromFiles < MAX_FROMFILES)
+				{
+				FromFiles[NumFromFiles] = fopen (&sraw[9], "r");
+				if (FromFiles[NumFromFiles] == NULL)
+				printf ("Cannot open keystroke file \"%s\".\n",
+					&sraw[9]);
+				else
+				{
+				NumFromFiles++;
+				printf ("Now taking keystrokes from \"%s\".\n",
+					&sraw[9]);
+				}
+				}
+			else
+				printf
+				("Too many nested FROMFILE commands, discarding \"%s\".\n",
+				&sraw[9]);
+			}
+			else if (1 == sscanf (s, "STEP%o", &i)
+				|| 1 == sscanf (s, "NEXT%o", &i))
+			{
+				RunState=1;
+			if (i >= 1)
+				SingleStepCounter = i - 1;
+			else
+				printf ("The step-count must be 1 or greater.\n");
+			break;
+			}
+			else if (!strcmp (s, "STEP") || !strcmp (s, "NEXT") ||
+				!strcmp (s, "S") || !strcmp (s, "N"))
+			{
+			RunState = 1;
+			SingleStepCounter = 0;
+			break;
+			}
+	//		  else if (!strcmp (s, "QUIT") || !strcmp (s, "EXIT"))
+	//		    return (0);
+			else if (!strncmp (s, "SYMBOL-FILE", 11))
+			{
+			char Dummy[12];
+	
+			// JMS: We need to use the raw formatted string because
+			// we need to preserve case for the file name
+			if (2 == sscanf (sraw, "%s %s", Dummy, SymbolFile))
+				{
+				ResetSymbolTable ();
+				if (!ReadSymbolTable(SymbolFile))
+				HaveSymbols = 1;
+				else
+				HaveSymbols = 0;
+				}
+			}
+			else if (1 == sscanf (s, "SYM-DUMP%s", SymbolName))
+			{
+			// JMS: Dumps the symbols to the screen
+			if (HaveSymbols)
+				DumpSymbols (SymbolName, ARCH_AGC);
+			else
+				printf ("No symbol table loaded.\n");
+			}
+			else if (1 == sscanf (s, "FILES%s", FileName))
+			{
+			// JMS: 07.30
+			// Dumps the files to the screen
+			if (HaveSymbols)
+				DumpFiles (FileName);
+			else
+				printf ("No symbol table loaded.\n");
+			}
+			else if (2 == sscanf (s, "DELETE%o%o", &i, &j))
+			{
+			PatternValue = (i & PATTERN_SIZE);
+			PatternMask = (j & PATTERN_SIZE);
+			for (i = 0; i < NumBreakpoints; i++)
+				if (Breakpoints[i].WatchBreak == 2 &&
+				Breakpoints[i].Address12 == PatternValue &&
+				Breakpoints[i].vRegBB == PatternMask)
+				{
+				printf ("Pattern " PAT "," PAT
+					" has been deleted.\n", PatternValue,
+					PatternMask);
+				NumBreakpoints--;
+				for (; i < NumBreakpoints; i++)
+				Breakpoints[i] = Breakpoints[i + 1];
+				i = -1;
+				break;
+				}
+			if (i != -1)
+				printf ("Pattern not found.\n");
+			}
+			else if (2 == sscanf (s, "PATTERN%o%o", &i, &j))
+			{
+			PatternValue = (i & PATTERN_SIZE);
+			PatternMask = (j & PATTERN_SIZE);
+			// First, see if the pattern has already been defined.
+			for (i = 0; i < NumBreakpoints; i++)
+				if (Breakpoints[i].WatchBreak == 2 &&
+				Breakpoints[i].Address12 == PatternValue &&
+				Breakpoints[i].vRegBB == PatternMask)
+				{
+				printf
+				("This pattern has already been defined.\n");
+				break;
+				}
+			if (i == NumBreakpoints)
+				{
+				if (NumBreakpoints >= MAX_BREAKPOINTS)
+				printf
+				("The maximum number of breakpoints/watchpoints/"
+				"patterns has already been reached.\n");
+				else
+				{
+				printf ("Setting pattern " PAT "," PAT ".\n",
+					PatternValue, PatternMask);
+				Breakpoints[NumBreakpoints].WatchBreak = 2;
+				Breakpoints[NumBreakpoints].Address12 =
+					PatternValue;
+				Breakpoints[NumBreakpoints].Symbol = NULL;
+				Breakpoints[NumBreakpoints].Line = NULL;
+				Breakpoints[NumBreakpoints].vRegBB =
+					PatternMask;
+				NumBreakpoints++;
+				}
+				}
+			}
+	//        else if (!strcmp (s, "CONT") || !strcmp (s, "RUN"))
+	//		    {
+	//                      /* Only print the thread info if debugevents are on */
+	//                      RunState = 1;
+	//		      break;
+	//		    }
+			else if (!strncmp (s, "COREDUMP ", 9))MakeCoreDump (Debugger.State, &sraw[9]);
+	//		  else if (!strcmp (s, "INTERRUPTS"))
+	//		    {
+	//		      if (!DebuggerInterruptMasks[0])
+	//			printf ("The debugger is blocking all interrupts.\n");
+	//		      else
+	//			printf ("The debugger is allowing interrupts.\n");
+	//		      printf ("Debugger interrupt mask:");
+	//		      for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
+	//			printf (" %d", !DebuggerInterruptMasks[i]);
+	//		      printf ("\n");
+	//		      printf ("Interrupt-request flags:");
+	//		      for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
+	//			printf (" %d", State.InterruptRequests[i]);
+	//		      printf ("\n");
+	//		      if (State.InIsr)
+	//			printf ("In ISR #%d.\n", State.InterruptRequests[0]);
+	//		      else
+	//			printf ("Last ISR: #%d.\n",
+	//				State.InterruptRequests[0]);
+	//		    }
+			else if (1 == sscanf (s, "INTON%d", &i))
+			{
+			if (i < 1 || i > NUM_INTERRUPT_TYPES)
+				printf ("Only interrupt types 1 to %d are used.\n",
+					NUM_INTERRUPT_TYPES);
+			else if (Debugger.State->InterruptRequests[i])
+				printf ("Interrupt %d already requested.\n", i);
+			else
+				{
+				printf ("Interrupt %d request-flag set.\n", i);
+				Debugger.State->InterruptRequests[i] = 1;
+				}
+			}
+			else if (1 == sscanf (s, "INTOFF%d", &i))
+			{
+			if (i < 1 || i > NUM_INTERRUPT_TYPES)
+				printf ("Only interrupt types 1 to %d are used.\n",
+					NUM_INTERRUPT_TYPES);
+			else if (!Debugger.State->InterruptRequests[i])
+				printf ("Interrupt %d not requested.\n", i);
+			else
+				{
+				printf ("Interrupt %d request-flag cleared.\n", i);
+				Debugger.State->InterruptRequests[i] = 0;
+				}
+			}
+			else if (1 == sscanf (s, "MASKON%d", &i))
+			{
+			if (i < 0 || i > NUM_INTERRUPT_TYPES)
+				printf ("Only interrupt types 0 to %d are used.\n",
+					NUM_INTERRUPT_TYPES);
+			else
+				DebuggerInterruptMasks[i] = 0;
+			}
+			else if (1 == sscanf (s, "MASKOFF%d", &i))
+			{
+			if (i < 0 || i > NUM_INTERRUPT_TYPES)
+				printf ("Only interrupt types 0 to %d are used.\n",
+					NUM_INTERRUPT_TYPES);
+			else
+				DebuggerInterruptMasks[i] = 1;
+			}
+			else if (!strcmp (s, "BACKTRACES"))
+			BacktraceDisplay (Debugger.State, MAX_BACKTRACE_POINTS);
+			else if (1 == sscanf (s, "BACKTRACE%d", &i))
+			{
+			int j;
+			if (0 != (j = BacktraceRestore (Debugger.State, i)))
+				printf ("Error %d restoring backtrace point #%d.\n",
+					j, i);
+			else
+				{
+				printf ("Backtrace point #%d restored.\n", i);
+				for (j = 0; j < NumBreakpoints; j++)
+				if (Breakpoints[j].WatchBreak == 1 || Breakpoints[j].WatchBreak == 4)
+				Breakpoints[j].WatchValue =
+					DbgGetWatch (Debugger.State, &Breakpoints[j]);
+				}
+			Debugger.State->PendFlag = SingleStepCounter = 0;
+			Break = 1;
+			CycleCount = sysconf (_SC_CLK_TCK) * Debugger.State->CycleCounter;
+			//goto ShowDisassembly;
+			return (1);
+			}
+	
+			else
+			{
+				GdbmiResult result = GdbmiHandleCommand(Debugger.State, s , sraw );
+				switch (result)
+				{
+	//				  case gdbmiCmdUnhandled:
+	//					  break;
+	//				  case gdbmiCmdError:
+	//					  break;
+	//				  case gdbmiCmdDone:
+	//					  fflush(stdout);
+	//					  break;
+	////				  case gdbmiCmdNext:
+	////				  case gdbmiCmdStep:
+	////			          RunState = 1;
+	////					  SingleStepCounter = 0;
+	////					  break;
+	//				  case gdbmiCmdContinue:
+					case GdbmiCmdRun:
+						RunState = 1;
+						break;
+					case GdbmiCmdQuit:
+						// return(0);
+						exit(0);
+					default:
+						fflush(stdout);
+						break;
+				}
+	
+				if (result == GdbmiCmdRun) break;
+	
+	//			  if ( result < gdbmiCmdDone )
+	//	            {
+	//	              printf ("Undefined command: \"%s\". Try \"help\".\n", sraw );
+	//	            }
+	//	           else
+	//	           {
+	//
+	//
+	//	           	fflush(stdout);
+	//	           }
+			}
+		}
+
+		DbgProcessLog();
+	}
+
+	return (0);
+}

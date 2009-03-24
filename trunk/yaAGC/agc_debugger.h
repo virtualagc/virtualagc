@@ -10,6 +10,14 @@
 
 #define MAX_FROMFILES 11
 
+/* Time between checks for --debug keystrokes. */
+#define KEYSTROKE_CHECK (sysconf (_SC_CLK_TCK) / 4)
+
+#define MAX_BREAKPOINTS 256
+#define PATTERN_SIZE 017777777
+#define PAT "%08o"
+
+
 typedef struct
 {
 	int RunState;

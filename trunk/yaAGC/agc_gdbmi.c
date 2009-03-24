@@ -57,6 +57,9 @@
 #endif
 #include <ctype.h>
 
+
+//#define VERSION(x) #x
+
 extern char agcPrompt[16];
 extern char nbPrompt[16];
 extern int HaveSymbols;

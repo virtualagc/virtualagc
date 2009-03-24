@@ -71,47 +71,47 @@ extern FILE *rfopen (const char *Filename, const char *mode);
  */
 int ParseCfg (char *Filename)
 {
-  char s[129] = { 0 };
-  int KeyCode, Channel, Value, Result = 1;
-  char Logic;
-  FILE *fin;
+	char s[129] = { 0 };
+	int KeyCode, Channel, Value, Result = 1;
+	char Logic;
+	FILE *fin;
+	
+	fin = rfopen (Filename, "r");
+	if (fin)
+	{
+		Result = 0;
+	
+		while (NULL != fgets (s, sizeof (s) - 1, fin))
+		{
+			char *ss;
 
-  fin = rfopen (Filename, "r");
-  if (fin)
-  {
-     Result = 0;
-
-	  while (NULL != fgets (s, sizeof (s) - 1, fin))
-	  {
-	      char *ss;
-
-	      /* Find newline or form feed and replace with string termination */
-	      for (ss = s; *ss; ss++) if (*ss == '\n' || *ss == '\r') *ss = 0;
+			/* Find newline or form feed and replace with string termination */
+			for (ss = s; *ss; ss++) if (*ss == '\n' || *ss == '\r') *ss = 0;
 
 			/* Parse string */
-	      if (4 == sscanf(s,"DEBUG %d %o %c %x",&KeyCode,&Channel,&Logic,&Value))
+			if (4 == sscanf(s,"DEBUG %d %o %c %x",&KeyCode,&Channel,&Logic,&Value))
 			{
 				/* Ensure valid values are porvided */
-		  		if (Channel < 0 || Channel > 255) continue;
-		  		if (Logic != '=' && Logic != '&' &&
-		  		    Logic != '|' && Logic != '^') continue;
-		  		if (Value != (Value & 0x7FFF)) continue;
-		  		if (KeyCode < 0 || KeyCode > 31) continue;
-		  		if (NumDebugRules >= MAX_DEBUG_RULES) break;
+				if (Channel < 0 || Channel > 255) continue;
+				if (Logic != '=' && Logic != '&' &&
+					Logic != '|' && Logic != '^') continue;
+				if (Value != (Value & 0x7FFF)) continue;
+				if (KeyCode < 0 || KeyCode > 31) continue;
+				if (NumDebugRules >= MAX_DEBUG_RULES) break;
 
-		  		/* Set the Debug Rules */
-		  		DebugRules[NumDebugRules].KeyCode = KeyCode;
-		  		DebugRules[NumDebugRules].Channel = Channel;
-		  		DebugRules[NumDebugRules].Logic = Logic;
-		  		DebugRules[NumDebugRules].Value = Value;
-		  		NumDebugRules++;
+				/* Set the Debug Rules */
+				DebugRules[NumDebugRules].KeyCode = KeyCode;
+				DebugRules[NumDebugRules].Channel = Channel;
+				DebugRules[NumDebugRules].Logic = Logic;
+				DebugRules[NumDebugRules].Value = Value;
+				NumDebugRules++;
 			}
-	      else if (!strcmp (s, "LMSIM")) CmOrLm = 0;
-	      else if (!strcmp (s, "CMSIM")) CmOrLm = 1;
-	  }
-	  fclose (fin);
-  }
-  return (Result);
+			else if (!strcmp (s, "LMSIM")) CmOrLm = 0;
+			else if (!strcmp (s, "CMSIM")) CmOrLm = 1;
+		}
+		fclose (fin);
+	}
+	return (Result);
 }
 
 
@@ -162,7 +162,7 @@ static int ParseToken(char* token)
 	else if (!strcmp (token, "-quiet"))Options.quiet = 1;
 	else if (!strcmp (token, "-nodebug")) Options.debug = 0;
 	else if (!strcmp (token, "-debug")) Options.debug = 1;
-	else if (!strcmp (token, "-version")) Options.version = 1;
+	else if (!strcmp (token, "-version")) Options.version = 6;
 	else if (!strncmp (token, "-command=",9)) Options.fromfile = strdup(&token[9]);
 	else if (!strncmp (token, "-interpreter=",13)) /* Ignore for now */;
 	else if (!strncmp (token, "-symbols=", 9)) Options.symtab = strdup(&token[9]);
@@ -176,7 +176,7 @@ static int ParseToken(char* token)
 }
 
 
-Options_t* ParseCommandLineOptions(int argc, char *argv[])
+Options_t* CliParseOptions(int argc, char *argv[])
 {
 	Options_t* result = (Options_t*)0;
 	int i, j;
