@@ -19,6 +19,7 @@
 
 #ifdef WIN32
 #define _SC_CLK_TCK (1000)
+#define sysconf(x) (x)
 #endif
 
 extern int SymbolTableSize;
@@ -699,28 +700,28 @@ int DbgExecute()
 
 	if (Break && !DebugDsky)
 	{
-	
+
 		// char OverflowChar, OverflowCharQ;
 		SingleStepCounter = -1;
-	
+
 		DbgDisplayInnerFrame();
-	
+
 		while (1)
 		{
 			/* Display the AGC prompt */
 			DbgDisplayPrompt();
-		
+
 			/* Read the Command String */
 			s = DbgGetCmdString();
-		
+
 			/* Get rid of leading,trailing or duplicated spaces but keep backup */
 			sraw = DbgNormalizeCmdString(s);
-	
+
 			RealTimeOffset +=((RealTime = times (&DummyTime)) - LastRealTime);
 			LastRealTime = RealTime;
-	
+
 			if (s[0] == '#' || s[0] == 0) continue;
-	
+
 			if (gdbmiHelp(s) > 0) continue;
 			else if (legacyHelp(s) > 0) continue;
 			else if (1 == sscanf (s, "LOG%d", &i))
@@ -784,7 +785,7 @@ int DbgExecute()
 			else if (!strncmp (s, "SYMBOL-FILE", 11))
 			{
 			char Dummy[12];
-	
+
 			// JMS: We need to use the raw formatted string because
 			// we need to preserve case for the file name
 			if (2 == sscanf (sraw, "%s %s", Dummy, SymbolFile))
@@ -960,7 +961,7 @@ int DbgExecute()
 			//goto ShowDisassembly;
 			return (1);
 			}
-	
+
 			else
 			{
 				GdbmiResult result = GdbmiHandleCommand(Debugger.State, s , sraw );
@@ -989,9 +990,9 @@ int DbgExecute()
 						fflush(stdout);
 						break;
 				}
-	
+
 				if (result == GdbmiCmdRun) break;
-	
+
 	//			  if ( result < gdbmiCmdDone )
 	//	            {
 	//	              printf ("Undefined command: \"%s\". Try \"help\".\n", sraw );
