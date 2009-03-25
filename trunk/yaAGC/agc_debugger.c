@@ -17,11 +17,6 @@
 #include "agc_gdbmi.h"
 #include "agc_simulator.h"
 
-#ifdef WIN32
-#define _SC_CLK_TCK (1000)
-#define sysconf(x) (x)
-#endif
-
 extern int SymbolTableSize;
 extern Symbol_t *SymbolTable;
 
@@ -957,8 +952,8 @@ int DbgExecute()
 				}
 			Debugger.State->PendFlag = SingleStepCounter = 0;
 			Break = 1;
-			CycleCount = sysconf (_SC_CLK_TCK) * Debugger.State->CycleCounter;
-			//goto ShowDisassembly;
+			SimSetCycleCount(SIM_CYCLECOUNT_AGC);
+
 			return (1);
 			}
 
