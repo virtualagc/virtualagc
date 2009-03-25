@@ -16,8 +16,6 @@
 #include "agc_symtab.h"
 #include "agc_simulator.h"
 
-
-
 agc_t State;
 
 clock_t NextCoreDump;
@@ -27,8 +25,8 @@ clock_t RealTime;
 clock_t RealTimeOffset;
 clock_t LastRealTime;
 clock_t NextKeycheck;
-uint64_t CycleCount;
-uint64_t DesiredCycles;
+//uint64_t CycleCount;
+//uint64_t DesiredCycles;
 
 
 #ifdef WIN32
@@ -46,7 +44,6 @@ clock_t times (struct tms *p)
 
 
 #define _SC_CLK_TCK (1000)
-
 #define sysconf(x) (x)
 #endif // WIN32
 
@@ -57,7 +54,9 @@ extern int RunState;
 
 static Simulator_t Simulator;
 
-
+/**
+Initialize the AGC Simulator.
+*/
 int SimInitialize(Options_t* Options)
 {
 	int result = 0;
@@ -130,89 +129,139 @@ int SimInitialize(Options_t* Options)
 	/* Initialize realtime and cycle counters */
 	RealTimeOffset = times (&DummyTime);	// The starting time of the program.
 	NextCoreDump = RealTimeOffset + DumpInterval;
-	CycleCount = State.CycleCounter * sysconf (_SC_CLK_TCK); // Num. of AGC cycles so far.
-	RealTimeOffset -= (CycleCount + AGC_PER_SECOND / 2) / AGC_PER_SECOND;
+	SimSetCycleCount(SIM_CYCLECOUNT_AGC); // Num. of AGC cycles so far.
+	RealTimeOffset -= (Simulator.CycleCount + AGC_PER_SECOND / 2) / AGC_PER_SECOND;
 	LastRealTime = ~0UL;
 
 	return (result | Options->version);
 }
-
+/**
+This function executes one cycle of the AGC engine. This is
+a wrapper function to eliminate showing the passing of the
+current engine state. */
 void SimExecuteEngine()
 {
 	agc_engine (Simulator.State);
 }
+/**
+This function adjusts the Simulator Cycle Count. Either based on the number
+of AGC Cycles or incremented during Sim cycles. This functions uses a 
+mode switch to determine how to set or adjust the Cycle Counter
+*/
+void SimSetCycleCount(int Mode)
+{
+	switch(Mode)
+	{
+		case SIM_CYCLECOUNT_AGC:
+			Simulator.CycleCount = sysconf (_SC_CLK_TCK) * Simulator.State->CycleCounter;
+			break;
+		case SIM_CYCLECOUNT_INC:
+			Simulator.CycleCount += sysconf (_SC_CLK_TCK);
+			break;
+	}
+}
 
+/**
+This function puts the simulator in a sleep state to reduce
+CPU usage on the PC.
+*/
+static void SimSleep(void)
+{
+#ifdef WIN32
+	Sleep (10);
+#else
+	struct timespec req, rem;
+	req.tv_sec = 0;
+	req.tv_nsec = 10000000;
+	nanosleep (&req, &rem);
+#endif
+}
 
-/*
- * Execute the simulated CPU.  Expecting to ACCURATELY cycle the simulation every
- * 11.7 microseconds within Linux (or Win32) is a bit too much, I think.
- * (Not that it's really critical, as long as it looks right from the
- * user's standpoint.)  So I do a trick:  I just execute the simulation
- * often enough to keep up with real-time on the average.  AGC time is
- * measured as the number of machine cycles divided by AGC_PER_SECOND,
- * while real-time is measured using the times() function.  What this mains
- * is that AGC_PER_SECOND AGC cycles are executed every CLK_TCK clock ticks.
- * The timing is thus rather rough-and-ready (i.e., I'm sure it can be improved
- * a lot).  It's good enough for me, for NOW, but I'd be happy to take suggestions
- * for how to improve it in a reasonably portable way.
- */
-void SimExecute(void)
+/**
+This function manages the AGC periodic core dumping of the
+AGC state machine.
+*/
+static void SimManageCoreDump(void)
+{
+	/* Check to see if the next core dump should be made */
+	if (RealTime >= NextCoreDump)
+	{
+		if (Simulator.Options->cfg)
+		{
+			if (CmOrLm) MakeCoreDump (&State, "CM.core");
+			else MakeCoreDump (&State, "LM.core");
+		}
+		else MakeCoreDump (&State, "core");
+	
+		NextCoreDump = RealTime + DumpInterval;
+	}
+}
+
+/**
+This function manages the Simulator time to achieve the 
+average 11.7 microsecond per opcode execution
+*/
+static void SimManageTime(void)
 {
 	RealTime = times (&DummyTime);
 	if (RealTime != LastRealTime)
 	{
-	  /* Make a routine core dump */
-	  if (RealTime >= NextCoreDump)
-	  {
-		  if (Simulator.Options->cfg)
-		  {
-		     if (CmOrLm) MakeCoreDump (&State, "CM.core");
-			 else MakeCoreDump (&State, "LM.core");
-		  }
-		  else MakeCoreDump (&State, "core");
+		/* Make a routine core dump */
+		SimManageCoreDump();
 
-		  NextCoreDump = RealTime + DumpInterval;
-	  }
-
-	  // Need to recalculate the number of AGC cycles we're supposed to
-	  // have executed.  Notice the trick of multiplying both CycleCount
-	  // and DesiredCycles by CLK_TCK, to avoid a long long division by CLK_TCK.
-	  // This not only reduces overhead, but actually makes the calculation
-	  // more exact.  A bit tricky to understand at first glance, though.
-	  LastRealTime = RealTime;
-
-	  //DesiredCycles = ((RealTime - RealTimeOffset) * AGC_PER_SECOND) / CLK_TCK;
-	  //DesiredCycles = (RealTime - RealTimeOffset) * AGC_PER_SECOND;
-	  // The calculation is done in the following funky way because if done as in
-	  // the line above, the right-hand side will be done in 32-bit arithmetic
-	  // on a 32-bit CPU, while the left-hand side is 64-bit, and so the calculation
-	  // will overflow and fail after 4 minutes of operation.  Done the following
-	  // way, the calculation will always be 64-bit.  Making AGC_PER_SECOND a ULL
-	  // constant in agc_engine.h would fix it, but the Orbiter folk wouldn't
-	  // be able to compile it.
-	  DesiredCycles = RealTime;
-	  DesiredCycles -= RealTimeOffset;
-	  DesiredCycles *= AGC_PER_SECOND;
+		// Need to recalculate the number of AGC cycles we're supposed to
+		// have executed.  Notice the trick of multiplying both CycleCount
+		// and DesiredCycles by CLK_TCK, to avoid a long long division by CLK_TCK.
+		// This not only reduces overhead, but actually makes the calculation
+		// more exact.  A bit tricky to understand at first glance, though.
+		LastRealTime = RealTime;
+		
+		//DesiredCycles = ((RealTime - RealTimeOffset) * AGC_PER_SECOND) / CLK_TCK;
+		//DesiredCycles = (RealTime - RealTimeOffset) * AGC_PER_SECOND;
+		// The calculation is done in the following funky way because if done as in
+		// the line above, the right-hand side will be done in 32-bit arithmetic
+		// on a 32-bit CPU, while the left-hand side is 64-bit, and so the calculation
+		// will overflow and fail after 4 minutes of operation.  Done the following
+		// way, the calculation will always be 64-bit.  Making AGC_PER_SECOND a ULL
+		// constant in agc_engine.h would fix it, but the Orbiter folk wouldn't
+		// be able to compile it.
+		Simulator.DesiredCycles = RealTime;
+		Simulator.DesiredCycles -= RealTimeOffset;
+		Simulator.DesiredCycles *= AGC_PER_SECOND;
 	}
-	else
+	else SimSleep();
+}
+
+/**
+Execute the simulated CPU.  Expecting to ACCURATELY cycle the simulation every
+11.7 microseconds within Linux (or Win32) is a bit too much, I think.
+(Not that it's really critical, as long as it looks right from the
+user's standpoint.)  So I do a trick:  I just execute the simulation
+often enough to keep up with real-time on the average.  AGC time is
+measured as the number of machine cycles divided by AGC_PER_SECOND,
+while real-time is measured using the times() function.  What this mains
+is that AGC_PER_SECOND AGC cycles are executed every CLK_TCK clock ticks.
+The timing is thus rather rough-and-ready (i.e., I'm sure it can be improved
+a lot).  It's good enough for me, for NOW, but I'd be happy to take suggestions
+for how to improve it in a reasonably portable way.*/
+void SimExecute(void)
+{
+	while(1)
 	{
-#ifdef WIN32
-	  Sleep (10);
-#else
-	  struct timespec req, rem;
-	  req.tv_sec = 0;
-	  req.tv_nsec = 10000000;
-	  nanosleep (&req, &rem);
-#endif
-	}
-
-	while (CycleCount < DesiredCycles)
-	{
-		if (DebugMode && DbgExecute()) continue;
-
-		SimExecuteEngine();
-
-		CycleCount += sysconf (_SC_CLK_TCK);
+		/* Manage the Simulated Time */
+		SimManageTime();
+	
+		while (Simulator.CycleCount < Simulator.DesiredCycles)
+		{
+			/* If debugging is enabled run the debugger */
+			if (Simulator.Options->debug && DbgExecute()) continue;
+	
+			/* Execute a cyle of the AGC  engine */
+			SimExecuteEngine();
+			
+			/* Adjust the CycleCount */
+			SimSetCycleCount(SIM_CYCLECOUNT_INC);
+		}
 	}
 }
 

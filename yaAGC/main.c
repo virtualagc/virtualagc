@@ -32,7 +32,7 @@
   Purpose:	A top-level program for running the AGC simulation\
   		in a PC environment.
   Compiler:	GNU gcc.
-  Contact:	Onno Hommes <info@sandroid.org>
+  Contact:	Onno Hommes <virtualagc@googlegroups.com>
   Reference:	http://www.ibiblio.org/apollo/index.html
   Mods:
 		04/05/03 RSB	Began the AGC project
@@ -45,8 +45,10 @@
 #include "agc_cli.h"
 #include "agc_simulator.h"
 
-/* The AGC main function from here the Command Line is parsed, the
- * Simulator is initialized and subsequently executed */
+/**
+The AGC main function from here the Command Line is parsed, the
+Simulator is initialized and subsequently executed.
+*/
 int main (int argc, char *argv[])
 {
 	/* Delclare Options and parse the command line */
@@ -55,11 +57,7 @@ int main (int argc, char *argv[])
 	/* Initialize the Simulator and debugger if enabled
 	 * if the initialization fails or Options is NULL then the simulator will
 	 * return a non zero value and subsequently bail and exit the program */
-	if (SimInitialize(Options) == SIM_E_OK)
-	{
-		/* Run the Simulation */
-		while (1) SimExecute();
-	}
+	if (SimInitialize(Options) == SIM_E_OK) SimExecute();
 
 	return (0);
 }

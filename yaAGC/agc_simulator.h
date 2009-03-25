@@ -24,15 +24,21 @@
 #define SIM_E_OK  0
 #define SIM_E_VERSION 6
 
+#define SIM_CYCLECOUNT_INC 	1
+#define SIM_CYCLECOUNT_AGC	2
+
 typedef struct
 {
 	agc_t* State;
 	Options_t* Options;
 	DebugRule_t* DebugRules;
 	clock_t DumpInterval;
+	uint64_t DesiredCycles;
+	uint64_t CycleCount;
 } Simulator_t;
 
 
+extern void SimSetCycleCount(int Mode);
 extern int SimInitialize(Options_t* Options);
 extern void SimExecute(void);
 
@@ -43,7 +49,7 @@ extern clock_t RealTime;
 extern clock_t RealTimeOffset;
 extern clock_t LastRealTime;
 extern clock_t NextKeycheck;
-extern uint64_t CycleCount;
-extern uint64_t DesiredCycles;
+//extern uint64_t CycleCount;
+//extern uint64_t DesiredCycles;
 
 #endif /* AGC_SIMULATOR_H_ */

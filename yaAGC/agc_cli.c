@@ -19,13 +19,13 @@ static char CduLog[] = "yaAGC.cdulog";
 
 static Options_t Options;
 
-/* The command line options try to stay compatible with the early versions of
- * yaAGC for some time to enable a transition period but will not list them
- * in the usage for the command help to discourage its usage. Hence the option
- * --core is somewhat confusing because in the old builds it represents the
- * executable core-ropes image file but normally gdb uses this for the core
- * file.
- */
+/**
+The command line options try to stay compatible with the early versions of
+yaAGC for some time to enable a transition period but will not list them
+in the usage for the command help to discourage its usage. Hence the option
+--core is somewhat confusing because in the old builds it represents the
+executable core-ropes image file but normally gdb uses this for the 
+core file. */
 static void ShowUsage(void)
 {
 	printf ("Usage:\n"
@@ -65,11 +65,12 @@ static void ShowUsage(void)
 extern FILE *rfopen (const char *Filename, const char *mode);
 
 
-/*
- * We don't do a lot of checking here.  Too bad!  Maybe one day ....
- * Even so, returns 0 on "success" and 1 on known error.
- */
-int ParseCfg (char *Filename)
+/**
+This function parses the specified configuration file.
+It loads its contents not a lot of checking is done here.
+It returns 0 on "success" and 1 on known error.
+*/
+int CliParseCfg (char *Filename)
 {
 	char s[129] = { 0 };
 	int KeyCode, Channel, Value, Result = 1;
@@ -94,7 +95,7 @@ int ParseCfg (char *Filename)
 				/* Ensure valid values are porvided */
 				if (Channel < 0 || Channel > 255) continue;
 				if (Logic != '=' && Logic != '&' &&
-					Logic != '|' && Logic != '^') continue;
+				    Logic != '|' && Logic != '^') continue;
 				if (Value != (Value & 0x7FFF)) continue;
 				if (KeyCode < 0 || KeyCode > 31) continue;
 				if (NumDebugRules >= MAX_DEBUG_RULES) break;
@@ -114,8 +115,12 @@ int ParseCfg (char *Filename)
 	return (Result);
 }
 
-
-static void InitializeOptions(void)
+/**
+This is a private function of the Cli module. It sets the
+internal Options structure members to their default value.
+The Option structure handle will be returned through the
+commandline parse function. */
+static void CliInitializeOptions(void)
 {
 	  Options.core = (char*)0;
 	  Options.resume = (char*)0;
@@ -134,10 +139,17 @@ static void InitializeOptions(void)
 	  Options.interlace = 50;
 	  Options.version = 0;
 }
-
-static int ParseToken(char* token)
+/**
+This function takes a character string and checks the string for
+known command line options. To support both single and double dash
+options this function will normalize the double dash to s single dash just
+by skipping the first dash. If the token is recognized the function
+will return CLI_E_OK else it will return CLI_E_UNKOWNTOKEN.
+\param *token The character string
+\return The success of failure indication. */
+static int CliParseToken(char* token)
 {
-	int result = 0;
+	int result = CLI_E_OK;
 	int j;
 	char* p;
 
@@ -170,21 +182,28 @@ static int ParseToken(char* token)
 	else if (1 == sscanf (token,"-interlace=%d", &j)) Options.interlace = j;
 	else if (Options.core == (char*)0) Options.core = strdup(token);
 	else if (Options.resume == (char*)0) Options.resume = strdup(token);
-	else result = 1;
+	else result = CLI_E_UNKOWNTOKEN;
 
 	return (result);
 }
 
-
+/** 
+This function takes the command line argument count and argument array
+as inputs and returns an Option structure if all parses correctly.
+When errors are encountered the parser will return a NULL reference
+\param argc The argument count
+\param *argv The pointer to the argument array.
+\return A handle to an Option structure. */
 Options_t* CliParseOptions(int argc, char *argv[])
 {
 	Options_t* result = (Options_t*)0;
 	int i, j;
 
-	InitializeOptions();
+	/* Set all the defaults in the option structure */
+	CliInitializeOptions();
 
 	/* Parse the command-line tokens */
-	for (i = 1; i < argc; i++) if (ParseToken(argv[i])) break;
+	for (i = 1; i < argc; i++) if (CliParseToken(argv[i])) break;
 
 	/* If there is an issue with the provided command line interface
 	 * display the usage message. Otherwise proceed with the automatic
@@ -221,7 +240,7 @@ Options_t* CliParseOptions(int argc, char *argv[])
 		/* If a configuration file is specified load its contents */
 		if (Options.cfg)
 		{
-			if (ParseCfg (Options.cfg))
+			if (CliParseCfg (Options.cfg))
 			{
 			  result = (Options_t*)0;
 			  printf("\n*** Unknown configurstion file. ***\n\n");

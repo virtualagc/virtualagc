@@ -8,6 +8,9 @@
 #ifndef AGC_CLI_H_
 #define AGC_CLI_H_
 
+#define CLI_E_OK 0
+#define CLI_E_UNKOWNTOKEN 1
+
 typedef struct
 {
   char* core;
