@@ -46,7 +46,6 @@ extern void DbgDisplayInnerFrame(void);
 extern int DbgMonitorBreakpoints(void);
 extern char* DbgNormalizeCmdString(char* s);
 extern int DbgHasBreakEvent(void);
-extern void DbgProcessLog(void);
 extern void DbgDisplayPrompt(void);
 char* DbgGetCmdString(void);
 

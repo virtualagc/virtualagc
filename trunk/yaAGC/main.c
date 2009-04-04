@@ -52,7 +52,7 @@ Simulator is initialized and subsequently executed.
 int main (int argc, char *argv[])
 {
 	/* Delclare Options and parse the command line */
-	Options_t *Options = CliParseOptions(argc, argv);
+	Options_t *Options = CliParseArguments(argc, argv);
 
 	/* Initialize the Simulator and debugger if enabled
 	 * if the initialization fails or Options is NULL then the simulator will
