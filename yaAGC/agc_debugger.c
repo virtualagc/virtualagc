@@ -649,7 +649,8 @@ char* DbgGetCmdString(void)
 
 	  return s;
 }
-void DbgProcessLog()
+
+static void DbgProcessLog()
 {
 	if (LogFile != NULL)
 	{

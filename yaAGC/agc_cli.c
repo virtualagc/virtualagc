@@ -26,7 +26,7 @@ in the usage for the command help to discourage its usage. Hence the option
 --core is somewhat confusing because in the old builds it represents the
 executable core-ropes image file but normally gdb uses this for the 
 core file. */
-static void ShowUsage(void)
+static void CliShowUsage(void)
 {
 	printf ("Usage:\n"
 "\tyaAGC [options] exec-ropes-file [core-resume-file]\n\n"
@@ -147,7 +147,7 @@ by skipping the first dash. If the token is recognized the function
 will return CLI_E_OK else it will return CLI_E_UNKOWNTOKEN.
 \param *token The character string
 \return The success of failure indication. */
-static int CliParseToken(char* token)
+static int CliProcessArgument(char* token)
 {
 	int result = CLI_E_OK;
 	int j;
@@ -160,9 +160,15 @@ static int CliParseToken(char* token)
 	if (!strcmp (token, "-help") || !strcmp (token, "/?"))	result = 1;
 	else if (!strncmp (token, "-nx", 3)) /* Ignore for now */;
 	else if (!strncmp (token, "-args", 5)) /* Ignore for now */;
-	else if (!strncmp (token, "-core=", 6))Options.core = strdup(&token[6]);
-	else if (!strncmp (token, "-exec=", 6)) Options.core = strdup(&token[6]);
-	else if (!strncmp (token, "-core=", 6))Options.core = strdup(&token[6]);
+	else if (!strncmp (token, "-core=", 6))
+	{
+		/* If --core is used assume classic behavior is expected */
+		Options.core = strdup(&token[6]);
+
+		/* with classi behavior default is nodebug */
+		Options.debug = 0;
+	}
+	else if (!strncmp (token, "-exec=", 6))Options.core = strdup(&token[6]);
 	else if (!strncmp (token, "-resume=", 8))Options.resume = strdup(&token[8]);
 	else if (1 == sscanf (token, "-port=%d", &j)) Options.port = j;
 	else if (1 == sscanf (token, "-dump-time=%d", &j)) Options.dump_time = j;
@@ -194,7 +200,7 @@ When errors are encountered the parser will return a NULL reference
 \param argc The argument count
 \param *argv The pointer to the argument array.
 \return A handle to an Option structure. */
-Options_t* CliParseOptions(int argc, char *argv[])
+Options_t* CliParseArguments(int argc, char *argv[])
 {
 	Options_t* result = (Options_t*)0;
 	int i, j;
@@ -203,7 +209,7 @@ Options_t* CliParseOptions(int argc, char *argv[])
 	CliInitializeOptions();
 
 	/* Parse the command-line tokens */
-	for (i = 1; i < argc; i++) if (CliParseToken(argv[i])) break;
+	for (i = 1; i < argc; i++) if (CliProcessArgument(argv[i])) break;
 
 	/* If there is an issue with the provided command line interface
 	 * display the usage message. Otherwise proceed with the automatic
@@ -214,7 +220,7 @@ Options_t* CliParseOptions(int argc, char *argv[])
 		/* Check if only version info is requested */
 		if (Options.version) result = &Options;
 		else /* Show the usage message */
-			ShowUsage();
+			CliShowUsage();
 	}
 	else
 	{
