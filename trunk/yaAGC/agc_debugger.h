@@ -8,6 +8,9 @@
 #ifndef AGC_DEBUGGER_H_
 #define AGC_DEBUGGER_H_
 
+#include "agc_cli.h"
+#include "agc_debug.h"
+
 #define MAX_FROMFILES 11
 
 /* Time between checks for --debug keystrokes. */
@@ -38,15 +41,25 @@ extern int NumFromFiles;
 extern char agcPrompt[16];
 extern int LogCount;
 
-extern unsigned short DbgGetWatch (agc_t * State, Breakpoint_t * bp);
+extern unsigned short DbgGetWatch (agc_t* State, Breakpoint_t * bp);
 extern int DbgGetFromZ (agc_t * State);
 extern int DbgInitialize(Options_t* Options,agc_t* State);
-extern void DbgExecuteDebugger(void);
 extern void DbgDisplayInnerFrame(void);
 extern int DbgMonitorBreakpoints(void);
 extern char* DbgNormalizeCmdString(char* s);
 extern int DbgHasBreakEvent(void);
 extern void DbgDisplayPrompt(void);
-char* DbgGetCmdString(void);
+extern void DbgDisplayVersion(void);
+extern int DbgExecute(void);
+extern char* DbgGetCmdString(void);
+extern Address_t DbgNativeAddr(unsigned linear_addr);
+extern unsigned DbgLinearAddr(Address_t *agc_addr);
+extern unsigned DbgLinearFixedAddr(unsigned agc_sreg,unsigned agc_fb,unsigned agc_super);
+extern unsigned short DbgGetValueByAddress(unsigned gdbmi_addr);
+extern void DbgSetValueByAddress(unsigned gdbmi_addr,unsigned short value);
+
+
+
+
 
 #endif /* AGC_DEBUGGER_H_ */

@@ -145,7 +145,7 @@ static void gdbmiHandleHelpStack(char* s)
 	printf("\n");
 	gdbmi_status++;
 }
-
+/*
 static void gdbmiHandleHelpObscure(char* s)
 {
 	printf("List of commands:\n\n");
@@ -153,7 +153,7 @@ static void gdbmiHandleHelpObscure(char* s)
 	printf("\n");
 	gdbmi_status++;
 }
-
+*/
 
 /**
  * This function prints a summary of all commands supported with a short
@@ -197,7 +197,7 @@ void gdbmiHandleHelpBreak(char* s)
 /** This function handles the basic help command and parses for arguments of
  * help. If no arguments are found the default help information is printed.
  */
-int gdbmiHandleHelp(char* s)
+void gdbmiHandleHelp(char* s)
 {
 	if (!strncmp(s," ALL",4)) gdbmiHandleHelpAll(s+4);
 	else if (!strncmp(s," INFO",5)) gdbmiHandleHelpInfo(s+5);
@@ -225,12 +225,13 @@ Type \"help\" followed by command name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n\
 ");
 	}
+	gdbmi_status++;
 }
 /**
  * This is the main entry function to handle help related commands. Only the
  * case insensitive command string is passed for parsing.
  */
-int gdbmiHelp(char* s)
+int GdbmiHelp(char* s)
 {
 	gdbmi_status = 0;
 

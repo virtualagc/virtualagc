@@ -7,13 +7,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <signal.h>
 #include "agc_cli.h"
+#include "agc_help.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
 #include "agc_debug.h"
 #include "agc_debugger.h"
+#include "agc_disassembler.h"
 #include "agc_gdbmi.h"
 #include "agc_simulator.h"
 
@@ -122,6 +125,33 @@ static void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
 		}
       Count++;
    }
+}
+
+char* DbgConstructFuncName(SymbolLine_t* Line,char* s,int size)
+{
+   int i;
+   if (Line)
+   {
+      /* Copy File Name */
+      strncpy(s,Line->FileName,size);
+
+      /* remove ".s" extension */
+      s[strlen(s)-2]=0;
+
+      /* Str to lowercase */
+      for (i = 0; s[i] != '\0'; i++) s[i] = (char)tolower(s[i]);
+   }
+   return s;
+}
+
+void DbgDisplayVersion(void)
+{
+   printf ("Apollo Guidance Computer simulation, ver. " NVER ", built "
+         __DATE__ " " __TIME__ "\n" "Copyright (C) 2003-2008 Ronald S. Burkey, Onno Hommes.\n"
+         "yaAGC is free software, covered by the GNU General Public License, and you are\n"
+         "welcome to change it and/or distribute copies of it under certain conditions.\n"
+          );
+   printf ("Refer to http://www.ibiblio.org/apollo/index.html for additional information.\n");
 }
 
 
@@ -319,7 +349,7 @@ static Frame_t* DbgInitFrameData(void)
             Symbol = &SymbolTable[i];
             if (Symbol->Type == SYMBOL_LABEL)
             {
-               LinearAddr = gdbmiLinearFixedAddr(Symbol->Value.SReg,
+               LinearAddr = DbgLinearFixedAddr(Symbol->Value.SReg,
                              Symbol->Value.FB,Symbol->Value.Super);
                Frames[LinearAddr - 2048].Name = Symbol->Name;
             }
@@ -445,7 +475,7 @@ int DbgMonitorBreakpoints(void)
 			if (Address12 < 01400)
 			{
 				printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
-				 gdbmiConstructFuncName(Breakpoints[i].Line,FuncName,127),
+				 DbgConstructFuncName(Breakpoints[i].Line,FuncName,127),
 				 Breakpoints[i].Line->FileName,Breakpoints[i].Line->LineNumber);
 				gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
 				Break = 1;
@@ -454,7 +484,7 @@ int DbgMonitorBreakpoints(void)
 			if (Address12 >= 04000)
 			{
 				printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
-				 gdbmiConstructFuncName(Breakpoints[i].Line,FuncName,127),
+				 DbgConstructFuncName(Breakpoints[i].Line,FuncName,127),
 				 Breakpoints[i].Line->FileName,
 				 Breakpoints[i].Line->LineNumber);
 				gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
@@ -624,6 +654,162 @@ void DbgDisplayInnerFrame(void)
     else Disassemble (Debugger.State);
 }
 
+Address_t DbgNativeAddr(unsigned linear_addr)
+{
+   Address_t agc_addr;
+
+   if (linear_addr > 0117777)
+   {
+      agc_addr.Invalid = 1;
+      agc_addr.Address = 0;
+   }
+   else if (linear_addr > 07777) /* Must be Common Fixed */
+   {
+      agc_addr.Banked = 1;
+      agc_addr.Unbanked = 0;
+      agc_addr.Address = 1;
+      agc_addr.Invalid = 0;
+      agc_addr.Fixed = 1;
+      agc_addr.Erasable = 0;
+      agc_addr.FB = (linear_addr - 010000)/02000;
+      agc_addr.SReg = (linear_addr - agc_addr.FB * 02000) - 06000;
+      if ( agc_addr.FB > 037) /* Do we need to set the Extension Bit */
+      {
+        agc_addr.FB = agc_addr.FB - 010;
+        agc_addr.Super = 01;
+      }
+      else agc_addr.Super = 0;
+   }
+   else if (linear_addr > 03777) /* Must be Fixed Fixed */
+   {
+      agc_addr.Banked = 0;
+      agc_addr.Unbanked = 1;
+      agc_addr.Address = 1;
+      agc_addr.Invalid = 0;
+      agc_addr.Fixed = 1;
+      agc_addr.Erasable = 0;
+      agc_addr.FB = linear_addr/02000; /* Allows for faster Value access later */
+      agc_addr.Super = 0;
+      agc_addr.SReg = linear_addr;
+   }
+   else /* Map to Eraseable memory */
+   {
+      agc_addr.Banked = 1;
+      agc_addr.Unbanked = 0;
+      agc_addr.Address = 1;
+      agc_addr.Invalid = 0;
+      agc_addr.Fixed = 0;
+      agc_addr.Erasable = 1;
+      agc_addr.EB = linear_addr/0400; /* Allows for faster Value access later */
+      agc_addr.SReg = linear_addr - agc_addr.EB * 0400 + 01400;
+   }
+   return agc_addr;
+}
+
+
+/**
+ * Return the Virtual Linear Pseudo address. According to
+ * AGC Memo #9 page 5. with the exception of Fixed banked
+ * 02 and 03; I kept linear address 014000-017777 this
+ * whay you can still notice you were dealing with a banked
+ * address. However the value for address 04000 and 14000
+ * will give you the same result.
+ */
+unsigned DbgLinearAddr(Address_t *agc_addr)
+{
+   unsigned gdbmi_addr = 0;
+
+   if (agc_addr->SReg < 01400) /* Must be Unbanked Eraseable */
+   {
+      gdbmi_addr = agc_addr->SReg;
+   }
+   else if (agc_addr->SReg < 02000) /* Must be  Banked Eraseable */
+   {
+      gdbmi_addr = agc_addr->EB*0400 + agc_addr->SReg - 01400;
+   }
+   else if (agc_addr->SReg < 04000) /* Must be Banked fixed memory */
+   {
+      if (agc_addr->FB < 030)
+         gdbmi_addr = 06000 + agc_addr->FB * 02000 + agc_addr->SReg;
+      else
+         gdbmi_addr = 06000 + (agc_addr->FB + agc_addr->Super*010) * 02000 + agc_addr->SReg;
+   }
+   else if (agc_addr->SReg < 07777) /* Must be fixed fixed */
+   {
+      gdbmi_addr = agc_addr->SReg;
+   }
+   else /* Invalid Address */
+   {
+      gdbmi_addr = 0xffff;
+   }
+
+   return gdbmi_addr;
+}
+
+unsigned DbgLinearFixedAddr(unsigned agc_sreg,unsigned agc_fb,unsigned agc_super)
+{
+   Address_t agc_addr;
+
+   agc_addr.Fixed = 1;
+   agc_addr.Unbanked = 1;
+   agc_addr.SReg = agc_sreg;
+   agc_addr.FB = agc_fb;
+   agc_addr.Super = agc_super;
+
+   return DbgLinearAddr(&agc_addr);
+}
+
+unsigned short DbgGetValueByAddress(unsigned gdbmi_addr)
+{
+   Address_t agc_addr;
+   unsigned short Value = 0;
+
+   /* if in Eraseable use Eraseable value */
+   agc_addr = DbgNativeAddr(gdbmi_addr);
+   if (agc_addr.Erasable == 1)
+   {
+      Value = Debugger.State->Erasable[agc_addr.EB][agc_addr.SReg - 01400];
+   }
+   else /* Must be fixed memory */
+   {
+      if (agc_addr.Unbanked == 1) /* Check for Fixed Fixed */
+      {
+         /* remember the FB should already be fine (see gdbmiNativeAddr */
+         Value = Debugger.State->Fixed[agc_addr.FB][agc_addr.SReg - 04000];
+      }
+      else /* This is Common Fixed */
+      {
+         Value = Debugger.State->Fixed[agc_addr.FB + agc_addr.Super*010][agc_addr.SReg - 02000];
+      }
+   }
+
+   return Value;
+}
+
+void DbgSetValueByAddress(unsigned gdbmi_addr,unsigned short value)
+{
+	Address_t agc_addr;
+	agc_addr = DbgNativeAddr(gdbmi_addr);
+
+   if (agc_addr.Erasable == 1)
+   {
+	   Debugger.State->Erasable[agc_addr.EB][agc_addr.SReg - 01400] = value;
+   }
+   else /* Must be fixed memory */
+   {
+      if (agc_addr.Unbanked == 1) /* Check for Fixed Fixed */
+      {
+         /* remember the FB should already be fine (see gdbmiNativeAddr */
+    	  Debugger.State->Fixed[agc_addr.FB][agc_addr.SReg - 04000] = value;
+      }
+      else /* This is Common Fixed */
+      {
+    	  Debugger.State->Fixed[agc_addr.FB+agc_addr.Super*010][agc_addr.SReg-02000]=value;
+      }
+   }
+}
+
+
 void DbgDisplayPrompt(void)
 {
 	  if (NumFromFiles == 1)
@@ -687,10 +873,10 @@ int DbgExecute()
 	int PatternValue, PatternMask;
 	int i, j;
 	char FileName[MAX_FILE_LENGTH + 1];
-	int LineNumber, LineNumberTo;
-	char Dummy[MAX_FILE_LENGTH + 1];
+//	int LineNumber, LineNumberTo;
+//	char Dummy[MAX_FILE_LENGTH + 1];
 	char SymbolName[129];
-	Symbol_t *Symbol;
+//	Symbol_t *Symbol;
 
 	Break = DbgHasBreakEvent();
 
@@ -713,12 +899,12 @@ int DbgExecute()
 			/* Get rid of leading,trailing or duplicated spaces but keep backup */
 			sraw = DbgNormalizeCmdString(s);
 
-			RealTimeOffset +=((RealTime = times (&DummyTime)) - LastRealTime);
-			LastRealTime = RealTime;
+			/* Update Simulator Time */
+			SimUpdateTime();
 
 			if (s[0] == '#' || s[0] == 0) continue;
 
-			if (gdbmiHelp(s) > 0) continue;
+			if (GdbmiHelp(s) > 0) continue;
 			else if (legacyHelp(s) > 0) continue;
 			else if (1 == sscanf (s, "LOG%d", &i))
 			{

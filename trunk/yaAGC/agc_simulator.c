@@ -14,6 +14,8 @@
 #include "agc_cli.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
+#include "agc_debug.h"
+#include "agc_debugger.h"
 #include "agc_simulator.h"
 
 agc_t State;
@@ -51,7 +53,6 @@ clock_t times (struct tms *p)
 extern int DebugMode;
 extern int RunState;
 
-
 static Simulator_t Simulator;
 
 /**
@@ -78,7 +79,7 @@ int SimInitialize(Options_t* Options)
 	SocketInterlaceReload = Options->interlace;
 
 	/* If we are not in quiet mode display the version info */
-	if (!Options->quiet) gdbmiHandleShowVersion();
+	if (!Options->quiet) DbgDisplayVersion();
 
 	/* Initialize the simulation */
 	if (!Options->debug_dsky)
@@ -145,7 +146,7 @@ void SimExecuteEngine()
 }
 /**
 This function adjusts the Simulator Cycle Count. Either based on the number
-of AGC Cycles or incremented during Sim cycles. This functions uses a 
+of AGC Cycles or incremented during Sim cycles. This functions uses a
 mode switch to determine how to set or adjust the Cycle Counter
 */
 void SimSetCycleCount(int Mode)
@@ -192,13 +193,23 @@ static void SimManageCoreDump(void)
 			else MakeCoreDump (&State, "LM.core");
 		}
 		else MakeCoreDump (&State, "core");
-	
+
 		NextCoreDump = RealTime + DumpInterval;
 	}
 }
 
 /**
-This function manages the Simulator time to achieve the 
+ * This function is a helper to allow the debugger to update the realtime
+ */
+void SimUpdateTime(void)
+{
+	RealTimeOffset +=((RealTime = times (&DummyTime)) - LastRealTime);
+	LastRealTime = RealTime;
+}
+
+
+/**
+This function manages the Simulator time to achieve the
 average 11.7 microsecond per opcode execution
 */
 static void SimManageTime(void)
@@ -215,7 +226,7 @@ static void SimManageTime(void)
 		// This not only reduces overhead, but actually makes the calculation
 		// more exact.  A bit tricky to understand at first glance, though.
 		LastRealTime = RealTime;
-		
+
 		//DesiredCycles = ((RealTime - RealTimeOffset) * AGC_PER_SECOND) / CLK_TCK;
 		//DesiredCycles = (RealTime - RealTimeOffset) * AGC_PER_SECOND;
 		// The calculation is done in the following funky way because if done as in
@@ -250,15 +261,15 @@ void SimExecute(void)
 	{
 		/* Manage the Simulated Time */
 		SimManageTime();
-	
+
 		while (Simulator.CycleCount < Simulator.DesiredCycles)
 		{
 			/* If debugging is enabled run the debugger */
 			if (Simulator.Options->debug && DbgExecute()) continue;
-	
+
 			/* Execute a cyle of the AGC  engine */
 			SimExecuteEngine();
-			
+
 			/* Adjust the CycleCount */
 			SimSetCycleCount(SIM_CYCLECOUNT_INC);
 		}

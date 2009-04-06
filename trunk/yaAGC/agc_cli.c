@@ -24,7 +24,7 @@ The command line options try to stay compatible with the early versions of
 yaAGC for some time to enable a transition period but will not list them
 in the usage for the command help to discourage its usage. Hence the option
 --core is somewhat confusing because in the old builds it represents the
-executable core-ropes image file but normally gdb uses this for the 
+executable core-ropes image file but normally gdb uses this for the
 core file. */
 static void CliShowUsage(void)
 {
@@ -76,12 +76,12 @@ int CliParseCfg (char *Filename)
 	int KeyCode, Channel, Value, Result = 1;
 	char Logic;
 	FILE *fin;
-	
+
 	fin = rfopen (Filename, "r");
 	if (fin)
 	{
 		Result = 0;
-	
+
 		while (NULL != fgets (s, sizeof (s) - 1, fin))
 		{
 			char *ss;
@@ -151,7 +151,6 @@ static int CliProcessArgument(char* token)
 {
 	int result = CLI_E_OK;
 	int j;
-	char* p;
 
 	/* Transform -- to just - for compatibility */
 	if (!strncmp(token,"--",2)) token++;
@@ -193,7 +192,7 @@ static int CliProcessArgument(char* token)
 	return (result);
 }
 
-/** 
+/**
 This function takes the command line argument count and argument array
 as inputs and returns an Option structure if all parses correctly.
 When errors are encountered the parser will return a NULL reference
@@ -203,7 +202,7 @@ When errors are encountered the parser will return a NULL reference
 Options_t* CliParseArguments(int argc, char *argv[])
 {
 	Options_t* result = (Options_t*)0;
-	int i, j;
+	int i;
 
 	/* Set all the defaults in the option structure */
 	CliInitializeOptions();

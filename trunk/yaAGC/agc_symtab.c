@@ -436,9 +436,9 @@ Symbol_t* ResolveSymbolAGC(int Address12, int FB, int SBB)
 	{
 		Symbol = &SymbolTable[i];
 
-		if (Symbol->Type == SYMBOL_LABEL &&
-		     (Symbol->Value.SReg == Address12 && Symbol->Value.FB == FB ) ||
-		     (Address12 >= 04000 && Symbol->Value.SReg == Address12)) break;
+		if (((Symbol->Type == SYMBOL_LABEL) &&
+		     ((Symbol->Value.SReg == Address12) && (Symbol->Value.FB == FB) )) ||
+		     ((Address12 >= 04000) && (Symbol->Value.SReg == Address12))) break;
 	}
 
 	if (i == SymbolTableSize) Symbol = NULL;
@@ -954,7 +954,6 @@ ListSourceLine (char *SourceFile, int LineNumber, char *Contents)
   return 0;
 }
 
-#ifdef GDBMI
 int LoadSourceLine (char *SourceFile, int LineNumber)
 {
    /* Try to Load the sources */
@@ -976,7 +975,6 @@ int LoadSourceLine (char *SourceFile, int LineNumber)
    }
    return 0;
 }
-#endif
 
 //-------------------------------------------------------------------------
 // The following section contains routines pertaining to the list of

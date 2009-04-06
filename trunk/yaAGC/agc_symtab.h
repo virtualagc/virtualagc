@@ -176,6 +176,8 @@ Symbol_t* ResolveSymbolAGC(int Address12, int FB, int SBB);
 
 Symbol_t* ResolveLastLabel(SymbolLine_t *Line);
 
+SymbolLine_t* ResolveFileLineNumber (char* FileName, int LineNumber);
+
 //-------------------------------------------------------------------------
 // Resolves the given program counter into a SymbolFile_t structure for
 // the AGC address architecture. Returns NULL if the program line was not
@@ -209,6 +211,9 @@ SymbolLine_t *ResolveLineNumber (int LineNumber);
 //-------------------------------------------------------------------------
 // Dumps a list of source files given a regular expression pattern
 void DumpFiles (const char *Pattern);
+
+// Load a source line
+int LoadSourceLine (char *SourceFile, int LineNumber);
 
 //--------------------------------------------------------------------------
 // JMS: End section of code dealing with the symbol table

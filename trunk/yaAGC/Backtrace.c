@@ -55,10 +55,11 @@
 #include <string.h>
 #include "agc_engine.h"
 #include "agc_symtab.h"
+#include "agc_debugger.h"
 
 #ifdef GDBMI
-static agc_t *PendingState;
-static int PendingCause;
+//static agc_t *PendingState;
+//static int PendingCause;
 extern char* SourcePathName;
 extern char* DbgGetFrameNameByAddr(unsigned LinearAddress);
 
@@ -246,14 +247,12 @@ BacktraceRestore ( agc_t *State, int n )
 
 void BacktraceDisplay ( agc_t *State, int Num )
 {
-	int i, j, k, Value, Bank;
+	int i, j, k;
 	BacktracePoint_t *Bp;
-	char funcname[128];
 	SymbolLine_t *Line = NULL;
 	int CurrentZ;
 	int FB;
 	int SBB;
-	Symbol_t* Symbol;
 	char* FrameName;
 	char* PrevFrameName = (char*)1;
 
@@ -360,7 +359,7 @@ void BacktraceDisplay ( agc_t *State, int Num )
 //			SBB = ( Bp->OutputChannel7 & 0100 ) ? 1 : 0;
 //			Line = ResolveLineAGC ( CurrentZ, FB, SBB );
 
-			unsigned Addr = gdbmiLinearFixedAddr(CurrentZ,FB,SBB);
+			unsigned Addr = DbgLinearFixedAddr(CurrentZ,FB,SBB);
 			FrameName = DbgGetFrameNameByAddr(Addr);
 
 			/* Make sure we have a line and only display the head frame
