@@ -41,6 +41,7 @@ typedef struct
 extern void SimSetCycleCount(int Mode);
 extern int SimInitialize(Options_t* Options);
 extern void SimExecute(void);
+extern void SimUpdateTime(void);
 
 extern clock_t NextCoreDump;
 extern clock_t DumpInterval;

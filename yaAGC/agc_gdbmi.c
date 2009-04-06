@@ -39,10 +39,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "yaAGC.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
 #include "agc_debug.h"
+#include "agc_debugger.h"
 #include "agc_gdbmi.h"
 #include <string.h>
 #include <unistd.h>
@@ -55,7 +57,6 @@
 #include <sys/times.h>
 #define LB ""
 #endif
-#include <ctype.h>
 
 
 //#define VERSION(x) #x
@@ -82,7 +83,6 @@ static int cli_argc;
 static char* cli_arg;
 
 static char FileName[MAX_FILE_LENGTH+1];
-static char AW_s[257];
 static char FuncName[128];
 
 static agc_t* State;
@@ -138,161 +138,6 @@ void gdbmiDisassemble(agc_t *State,unsigned start_linear,unsigned end_linear)
 
 }
 
-Address_t gdbmiNativeAddr(unsigned linear_addr)
-{
-   Address_t agc_addr;
-
-   if (linear_addr > 0117777)
-   {
-      agc_addr.Invalid = 1;
-      agc_addr.Address = 0;
-   }
-   else if (linear_addr > 07777) /* Must be Common Fixed */
-   {
-      agc_addr.Banked = 1;
-      agc_addr.Unbanked = 0;
-      agc_addr.Address = 1;
-      agc_addr.Invalid = 0;
-      agc_addr.Fixed = 1;
-      agc_addr.Erasable = 0;
-      agc_addr.FB = (linear_addr - 010000)/02000;
-      agc_addr.SReg = (linear_addr - agc_addr.FB * 02000) - 06000;
-      if ( agc_addr.FB > 037) /* Do we need to set the Extension Bit */
-      {
-        agc_addr.FB = agc_addr.FB - 010;
-        agc_addr.Super = 01;
-      }
-      else agc_addr.Super = 0;
-   }
-   else if (linear_addr > 03777) /* Must be Fixed Fixed */
-   {
-      agc_addr.Banked = 0;
-      agc_addr.Unbanked = 1;
-      agc_addr.Address = 1;
-      agc_addr.Invalid = 0;
-      agc_addr.Fixed = 1;
-      agc_addr.Erasable = 0;
-      agc_addr.FB = linear_addr/02000; /* Allows for faster Value access later */
-      agc_addr.Super = 0;
-      agc_addr.SReg = linear_addr;
-   }
-   else /* Map to Eraseable memory */
-   {
-      agc_addr.Banked = 1;
-      agc_addr.Unbanked = 0;
-      agc_addr.Address = 1;
-      agc_addr.Invalid = 0;
-      agc_addr.Fixed = 0;
-      agc_addr.Erasable = 1;
-      agc_addr.EB = linear_addr/0400; /* Allows for faster Value access later */
-      agc_addr.SReg = linear_addr - agc_addr.EB * 0400 + 01400;
-   }
-   return agc_addr;
-}
-
-
-/**
- * Return the Virtual Linear Pseudo address. According to
- * AGC Memo #9 page 5. with the exception of Fixed banked
- * 02 and 03; I kept linear address 014000-017777 this
- * whay you can still notice you were dealing with a banked
- * address. However the value for address 04000 and 14000
- * will give you the same result.
- */
-unsigned gdbmiLinearAddr(Address_t *agc_addr)
-{
-   unsigned gdbmi_addr = 0;
-
-   if (agc_addr->SReg < 01400) /* Must be Unbanked Eraseable */
-   {
-      gdbmi_addr = agc_addr->SReg;
-   }
-   else if (agc_addr->SReg < 02000) /* Must be  Banked Eraseable */
-   {
-      gdbmi_addr = agc_addr->EB*0400 + agc_addr->SReg - 01400;
-   }
-   else if (agc_addr->SReg < 04000) /* Must be Banked fixed memory */
-   {
-      if (agc_addr->FB < 030)
-         gdbmi_addr = 06000 + agc_addr->FB * 02000 + agc_addr->SReg;
-      else
-         gdbmi_addr = 06000 + (agc_addr->FB + agc_addr->Super*010) * 02000 + agc_addr->SReg;
-   }
-   else if (agc_addr->SReg < 07777) /* Must be fixed fixed */
-   {
-      gdbmi_addr = agc_addr->SReg;
-   }
-   else /* Invalid Address */
-   {
-      gdbmi_addr = 0xffff;
-   }
-
-   return gdbmi_addr;
-}
-
-unsigned gdbmiLinearFixedAddr(unsigned agc_sreg,unsigned agc_fb,unsigned agc_super)
-{
-   Address_t agc_addr;
-
-   agc_addr.Fixed = 1;
-   agc_addr.Unbanked = 1;
-   agc_addr.SReg = agc_sreg;
-   agc_addr.FB = agc_fb;
-   agc_addr.Super = agc_super;
-
-   return gdbmiLinearAddr(&agc_addr);
-}
-
-unsigned short gdbmiGetValueByAddress(agc_t *State, unsigned gdbmi_addr)
-{
-   Address_t agc_addr;
-   unsigned short Value = 0;
-
-   /* if in Eraseable use Eraseable value */
-   agc_addr=gdbmiNativeAddr(gdbmi_addr);
-   if (agc_addr.Erasable == 1)
-   {
-      Value = State->Erasable[agc_addr.EB][agc_addr.SReg - 01400];
-   }
-   else /* Must be fixed memory */
-   {
-      if (agc_addr.Unbanked == 1) /* Check for Fixed Fixed */
-      {
-         /* remember the FB should already be fine (see gdbmiNativeAddr */
-         Value = State->Fixed[agc_addr.FB][agc_addr.SReg - 04000];
-      }
-      else /* This is Common Fixed */
-      {
-         Value = State->Fixed[agc_addr.FB + agc_addr.Super*010][agc_addr.SReg - 02000];
-      }
-   }
-
-   return Value;
-}
-
-void gdbmiSetValueByAddress(agc_t *State,unsigned gdbmi_addr,unsigned short value)
-{
-	Address_t agc_addr;
-	agc_addr = gdbmiNativeAddr(gdbmi_addr);
-
-   if (agc_addr.Erasable == 1)
-   {
-      State->Erasable[agc_addr.EB][agc_addr.SReg - 01400] = value;
-   }
-   else /* Must be fixed memory */
-   {
-      if (agc_addr.Unbanked == 1) /* Check for Fixed Fixed */
-      {
-         /* remember the FB should already be fine (see gdbmiNativeAddr */
-        State->Fixed[agc_addr.FB][agc_addr.SReg - 04000] = value;
-      }
-      else /* This is Common Fixed */
-      {
-        State->Fixed[agc_addr.FB+agc_addr.Super*010][agc_addr.SReg-02000]=value;
-      }
-   }
-}
-
 char* gdbmiConstructFuncName(SymbolLine_t* Line,char* s,int size)
 {
    int i;
@@ -315,7 +160,6 @@ char* gdbmiConstructFuncName(SymbolLine_t* Line,char* s,int size)
  */
 SymbolLine_t* gdbmiResolveCurrentLine(agc_t *State)
 {
-   SymbolLine_t *Line = NULL;
    int CurrentZ = State->Erasable[0][RegZ] & 07777;
    int FB = 037 & (State->Erasable[0][RegBB] >> 10);
    int SBB = (State->OutputChannel7 & 0100) ? 1 : 0;
@@ -345,13 +189,12 @@ void gdbmiUpdateBreakpoint(agc_t *State, Breakpoint_t* gdbmi_bp)
 /* Hanlde the break GDB/CLI command */
 void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
 {
-   int j, k, i, vRegBB, LineNumber;
+   int i, vRegBB, LineNumber;
    Symbol_t *Symbol = NULL;
    SymbolLine_t *Line = NULL;
-   char Garbage[81], SymbolName[MAX_LABEL_LENGTH + 1],*cli_char;
+   char SymbolName[MAX_LABEL_LENGTH + 1],*cli_char;
    unsigned gdbmiAddress = 0;
    Address_t agc_addr;
-   char* p = (char*)0;
 
    if (strlen(s) > 0) /* Do we have an argument */
    {
@@ -372,25 +215,26 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
       s=gdbmiBasename(s);
 
       /* First replace ":" with space !!FIX to prevent DOS disk separator!! */
-      if (cli_char = strstr(sraw,":")) *cli_char = ' '; /* replace colon with space */
+      cli_char = strstr(sraw,":");
+      if (cli_char) *cli_char = ' '; /* replace colon with space */
 
       if (HaveSymbols &&
-         (2 == sscanf (sraw, "%s %d", &FileName, &LineNumber)) &&
+         (2 == sscanf (sraw, "%s %d", FileName, &LineNumber)) &&
          (Line = (SymbolLine_t*) ResolveFileLineNumber(FileName, LineNumber)))
       {
-         gdbmiAddress = gdbmiLinearAddr(&Line->CodeAddress);
+         gdbmiAddress = DbgLinearAddr(&Line->CodeAddress);
 
       }
       else if (HaveSymbols && (1 == sscanf (s, "%d", &LineNumber)) &&
              (Line = ResolveLineNumber (LineNumber)))
       {
-          gdbmiAddress = gdbmiLinearAddr(&Line->CodeAddress);
+          gdbmiAddress = DbgLinearAddr(&Line->CodeAddress);
 
       }
       else if (HaveSymbols && (1 == sscanf (s, "%s", SymbolName)) &&
              (Symbol = ResolveSymbol (SymbolName, SYMBOL_LABEL)))
       {
-         gdbmiAddress = gdbmiLinearAddr(&Symbol->Value);
+         gdbmiAddress = DbgLinearAddr(&Symbol->Value);
       }
       else if (1 == sscanf (s, "*0X%x", &gdbmiAddress));
       else
@@ -402,7 +246,7 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
    }
    else /* Default Break point is current address */
    {
-      gdbmiAddress = gdbmiLinearFixedAddr(
+      gdbmiAddress = DbgLinearFixedAddr(
              State->Erasable[0][RegZ] & 07777,
              037 & (State->Erasable[0][RegBB] >> 10),
              (State->OutputChannel7 & 0100) ? 1 : 0);
@@ -414,7 +258,7 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
       return;
    }
 
-   agc_addr = gdbmiNativeAddr(gdbmiAddress);
+   agc_addr = DbgNativeAddr(gdbmiAddress);
    vRegBB = ((agc_addr.FB << 10) | (agc_addr.Super << 7));
 
    if (Line == NULL)
@@ -452,9 +296,8 @@ void gdbmiHandleBreak(agc_t *State , char* s, char* sraw,char disp)
 
 void gdbmiHandleWatch (agc_t * State, char *s, char* sraw)
 {
-   int j, k, i, vRegBB, WatchType, WatchValue = 0777777;
+   int k, i, vRegBB, WatchType, WatchValue = 0777777;
    Symbol_t *Symbol = NULL;
-   char *ss;
    unsigned gdbmi_address;
    Address_t agc_addr;
 
@@ -465,10 +308,10 @@ void gdbmiHandleWatch (agc_t * State, char *s, char* sraw)
    if (Symbol != NULL)
    {
       /* Get linear address for display */
-      gdbmi_address = gdbmiLinearAddr(&Symbol->Value);
+      gdbmi_address = DbgLinearAddr(&Symbol->Value);
 
       /* Watch Type 3 = for value, Watch type 1 for any change */
-      agc_addr = gdbmiNativeAddr(gdbmi_address);
+      agc_addr = DbgNativeAddr(gdbmi_address);
 
       WatchType = 1;
       vRegBB = agc_addr.EB;
@@ -510,14 +353,9 @@ void gdbmiHandleWatch (agc_t * State, char *s, char* sraw)
    ++gdbmi_status;
 }
 
-void gdbmiHandleShowVersion(void)
+void GdbmiHandleShowVersion(void)
 {
-   printf ("Apollo Guidance Computer simulation, ver. " NVER ", built "
-         __DATE__ " " __TIME__ "\n" "Copyright (C) 2003-2008 Ronald S. Burkey, Onno Hommes.\n"
-         "yaAGC is free software, covered by the GNU General Public License, and you are\n"
-         "welcome to change it and/or distribute copies of it under certain conditions.\n"
-          );
-   printf ("Refer to http://www.ibiblio.org/apollo/index.html for additional information.\n");
+	DbgDisplayVersion();
 }
 
 
@@ -627,7 +465,6 @@ void gdbmiHandleInfoRegisters(agc_t *State , char* s, char* sraw)
 GdbmiResult GdbmiHandleInfoBreakpoints(int j)
 {
    int i;
-   unsigned gdbmiAddress=0;
    char* disposition;
 
    /* No CmdPtr adjust ment necessary so ignore input */
@@ -666,13 +503,13 @@ GdbmiResult GdbmiHandleInfoBreakpoints(int j)
          Address12 = Breakpoints[i].Address12;
          vRegBB = Breakpoints[i].vRegBB;
          if (Address12 < 01400 || Address12 >= 04000)
-            printf ("0x%04x", gdbmiLinearFixedAddr(Address12,0,0));
+            printf ("0x%04x", DbgLinearFixedAddr(Address12,0,0));
          else if (Address12 >= 02000 && Address12 < 04000)
          {
             int Bank;
             Bank = (vRegBB >> 10) & 037;
             if (0 != (vRegBB & 0100) && Bank >= 030) Bank += 010;
-            printf ("0x%04x", gdbmiLinearFixedAddr(Address12,Bank,0));
+            printf ("0x%04x", DbgLinearFixedAddr(Address12,Bank,0));
          }
 
          // Print out the file,line if set for the breakpoint
@@ -702,13 +539,13 @@ void gdbmiPrintFullNameContents(SymbolLine_t *Line)
 #ifdef WIN32
    printf("\032\032%s\\%s:%d:%d:beg:0x%04x\n",SourcePathName,
           Line->FileName, Line->LineNumber,Line->LineNumber,
-          gdbmiLinearFixedAddr(Line->CodeAddress.SReg,
+          DbgLinearFixedAddr(Line->CodeAddress.SReg,
                                Line->CodeAddress.FB,
                                Line->CodeAddress.Super));
 #else
    printf("\032\032%s/%s:%d:%d:beg:0x%04x\n",SourcePathName,
           Line->FileName, Line->LineNumber,Line->LineNumber,
-          gdbmiLinearFixedAddr(Line->CodeAddress.SReg,
+          DbgLinearFixedAddr(Line->CodeAddress.SReg,
                                Line->CodeAddress.FB,
                                Line->CodeAddress.Super));
 #endif
@@ -719,14 +556,13 @@ void gdbmiHandleInfoLine(agc_t *State , char* s, char* sraw)
    int LineNumber;
    SymbolLine_t *Line = NULL;
    char *cli_char = NULL;
-   //char FuncName[128];
 
    if (*s == ' ')
    {
       cli_char = strstr(sraw,":");
       *cli_char = ' ';
 
-      if (2 == sscanf (sraw+1, "%s %d", &FileName, &LineNumber))
+      if (2 == sscanf (sraw+1, "%s %d", FileName, &LineNumber))
       {
          Line = (SymbolLine_t*)ResolveFileLineNumber(FileName,LineNumber);
       }
@@ -741,7 +577,7 @@ void gdbmiHandleInfoLine(agc_t *State , char* s, char* sraw)
 
    if (Line)
    {
-      unsigned Addr = gdbmiLinearAddr(&Line->CodeAddress);
+      unsigned Addr = DbgLinearAddr(&Line->CodeAddress);
       char* FrameName = DbgGetFrameNameByAddr(Addr);
       printf("Line %d of \"%s\" starts at address 0x%04x <%s>\n",
              Line->LineNumber,Line->FileName,
@@ -850,7 +686,7 @@ void gdbmiHandleInfoAllRegisters(agc_t *State , char* s, char* sraw)
 void gdbmiHandleInfoProgram(agc_t *State , char* s, char* sraw)
 {
    printf("\tUsing the running image of child process 0.\n");
-   printf("Program stopped at 0x%04x.\n",gdbmiLinearFixedAddr(
+   printf("Program stopped at 0x%04x.\n",DbgLinearFixedAddr(
           State->Erasable[0][RegZ] & 07777,
           037 & (State->Erasable[0][RegBB] >> 10),
                  (State->OutputChannel7 & 0100) ? 1 : 0));
@@ -920,7 +756,7 @@ void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
          printf("* 2 thread %d (%s)\t0x%04x in %s ()\n",
                State->InterruptRequests[0],
                threadName,
-               gdbmiLinearAddr(&Line->CodeAddress),
+               DbgLinearAddr(&Line->CodeAddress),
                gdbmiConstructFuncName(Line,FuncName,127)
                );
          printf("    at %s:%d\n",Line->FileName,Line->LineNumber);
@@ -930,7 +766,7 @@ void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
       if (Line)
       {
          printf("  1 thread 0 (MAIN)\t0x%04x in %s ()\n",
-               gdbmiLinearAddr(&Line->CodeAddress),
+               DbgLinearAddr(&Line->CodeAddress),
                gdbmiConstructFuncName(Line,FuncName,127)
                );
       }
@@ -941,7 +777,7 @@ void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
       if (Line)
       {
          printf("* 1 thread 0 (MAIN)\t0x%04x in %s ()\n",
-                gdbmiLinearAddr(&Line->CodeAddress),
+                DbgLinearAddr(&Line->CodeAddress),
                 gdbmiConstructFuncName(Line,FuncName,127)
                );
          printf("    at %s:%d\n",Line->FileName,Line->LineNumber);
@@ -1104,7 +940,7 @@ GdbmiResult GdbmiHandleSetVariable(int i)
    {
    	if (gdbmiString2Num(++operand1,&gdbmi_addr) == 0)
 		if (gdbmiString2Num(operand2,&gdbmi_val) == 0)
-				gdbmiSetValueByAddress(State,gdbmi_addr,(unsigned short)gdbmi_val);
+				DbgSetValueByAddress(gdbmi_addr,(unsigned short)gdbmi_val);
    }
    else /* Must be a symbol */
    {
@@ -1115,9 +951,9 @@ GdbmiResult GdbmiHandleSetVariable(int i)
 		if (Symbol != NULL)
 	{
 		/* Get linear address for display */
-		gdbmi_addr = gdbmiLinearAddr(&Symbol->Value);
+		gdbmi_addr = DbgLinearAddr(&Symbol->Value);
 			if (gdbmiString2Num(operand2,&gdbmi_val) == 0)
-				gdbmiSetValueByAddress(State,gdbmi_addr,(unsigned short)gdbmi_val);
+				DbgSetValueByAddress(gdbmi_addr,(unsigned short)gdbmi_val);
 	}
    }
    return (GdbmiCmdDone);
@@ -1158,14 +994,14 @@ void gdbmiHandleDisassemble(agc_t *State , char* s, char* sraw)
       {
          while (gdbmiFromAddr <= gdbmiToAddr)
          {
-            agc_addr = gdbmiNativeAddr(gdbmiFromAddr);
+            agc_addr = DbgNativeAddr(gdbmiFromAddr);
             Line = ResolveLineAGC(agc_addr.SReg,agc_addr.FB,agc_addr.Super);
             if (Line)
             {
                printf("0x%04x %s:\t0x%04x\n",
                     gdbmiFromAddr,
                     gdbmiConstructFuncName(Line,(char*)FuncName,127),
-                    gdbmiGetValueByAddress(State,gdbmiFromAddr));
+                    DbgGetValueByAddress(gdbmiFromAddr));
             }
             ++gdbmiFromAddr;
          }
@@ -1173,7 +1009,7 @@ void gdbmiHandleDisassemble(agc_t *State , char* s, char* sraw)
    }
 }
 
-GDBMI_FUNC(HandleDefine)
+void gdbmiHandleDefine(agc_t *State , char* s, char* sraw)
 {
    char* gdbmi_custom;
    char gdbmi_element[256];
@@ -1317,7 +1153,7 @@ void gdbmiHandleDelete(agc_t *State , char* s, char* sraw)
 void gdbmiHandleDisable(agc_t *State , char* s, char* sraw)
 {
    int gdbmi_breakpoint = 0;
-   int i,j;
+   int i;
 
    if (strlen(s) > 0) /* There must be an argument */
    {
@@ -1337,7 +1173,7 @@ void gdbmiHandleDisable(agc_t *State , char* s, char* sraw)
 void gdbmiHandleEnable(agc_t *State , char* s, char* sraw)
 {
    int gdbmi_breakpoint = 0;
-   int i,j;
+   int i;
 
    if (strlen(s) > 0) /* There must be an argument */
    {
@@ -1369,7 +1205,7 @@ void gdbmiHandleDumpMemory(agc_t *State , char* s, char* sraw)
    char filename[256];
    FILE* target;
 
-   if (3 == sscanf (sraw, "%s 0x%x 0x%x", &filename,&start_addr,&end_addr))
+   if (3 == sscanf (sraw, "%s 0x%x 0x%x", filename,&start_addr,&end_addr))
    {
       if (end_addr >= start_addr && start_addr >= 0 && end_addr < 0114000)
       {
@@ -1378,7 +1214,7 @@ void gdbmiHandleDumpMemory(agc_t *State , char* s, char* sraw)
          {
             for (gdbmi_addr=start_addr;gdbmi_addr<=end_addr;gdbmi_addr++)
             {
-               value = gdbmiGetValueByAddress(State,gdbmi_addr);
+               value = DbgGetValueByAddress(gdbmi_addr);
                fwrite(&value,2,1,target);
             }
             fclose(target);
@@ -1396,7 +1232,7 @@ void gdbmiHandleRestoreMemory(agc_t *State , char* s, char* sraw)
    FILE* source;
 
    end_addr = 0114000;
-   if (3 >= sscanf (sraw, "%s 0x%x 0x%x", &filename,&start_addr,&end_addr))
+   if (3 >= sscanf (sraw, "%s 0x%x 0x%x", filename,&start_addr,&end_addr))
    {
       if (start_addr >= 0 && start_addr < 0114000)
       {
@@ -1407,7 +1243,7 @@ void gdbmiHandleRestoreMemory(agc_t *State , char* s, char* sraw)
             while(fread(&value,2,1,source) &&
                   gdbmi_addr < end_addr )
             {
-               gdbmiSetValueByAddress(State,gdbmi_addr++,value);
+               DbgSetValueByAddress(gdbmi_addr++,value);
             }
             fclose(source);
          }
@@ -1428,7 +1264,7 @@ GdbmiResult GdbmiHandleShow(int i)
    /* Adjust the CmdPtr to point to the next token */
    GdbmiAdjustCmdPtr(i);
 
-   if (!strncmp(s," VERSION",8)) gdbmiHandleShowVersion();
+   if (!strncmp(s," VERSION",8)) GdbmiHandleShowVersion();
 
    return(GdbmiCmdDone);
 }
@@ -1468,15 +1304,16 @@ void gdbmiHandlePrint(agc_t *State , char* s, char* sraw)
 
       /* I like to also see values of constants eventhough the default
          agc implementation did not do  this */
-      if (Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT))
+      Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
+      if (Symbol)
       {
          agc_addr = &Symbol->Value;
-         gdbmi_addr = gdbmiLinearAddr(agc_addr);
+         gdbmi_addr = DbgLinearAddr(agc_addr);
 
          if (AddrFlag)
          	printf("$1 = 0x%x\n",gdbmi_addr);
          else
-         	printf("$1 = %d\n",gdbmiGetValueByAddress(State,gdbmi_addr));
+         	printf("$1 = %d\n",DbgGetValueByAddress(gdbmi_addr));
       }
    }
    ++gdbmi_status;
@@ -1502,15 +1339,16 @@ void gdbmiHandleOutput(agc_t *State , char* s, char* sraw)
 
       /* I like to also see values of constants eventhough the default
       agc implementation did not do  this */
-      if (Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT))
+      Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
+      if (Symbol)
       {
          agc_addr = &Symbol->Value;
-         gdbmi_addr = gdbmiLinearAddr(agc_addr);
+         gdbmi_addr = DbgLinearAddr(agc_addr);
 
          if (AddrFlag)
             printf("0x%x",gdbmi_addr);
          else
-            printf("%d",gdbmiGetValueByAddress(State,gdbmi_addr));
+            printf("%d",DbgGetValueByAddress(gdbmi_addr));
       }
    }
    ++gdbmi_status;
@@ -1525,17 +1363,16 @@ void gdbmiHandleExamine(agc_t *State , char* s, char* sraw)
    char gdbmi_format = 'x';
    char gdbmi_size = 'w';
    char* gdbmi_space = NULL;
-   char* gdbmi_addr_str = NULL;
+   char* invalid_char = NULL;
    int gdbmi_apl = 4; /* default 8 addresses per line */
-   Address_t agc_addr;
 
    /* Do we see arguments */
-   if (strlen(s) > 1)
+   if (s && (strlen(s) > 1))
    {
       /* Is there a format Specifier */
-      if (s = strstr(s,"/"))
+      if ((s = strstr(s,"/")))
       {
-         gdbmi_count = (int)strtol(++s,&s,0);
+         gdbmi_count = (int)strtol(++s,&invalid_char,0);
       }
 
       /* We already skipped the first space if it existed
@@ -1568,11 +1405,11 @@ void gdbmiHandleExamine(agc_t *State , char* s, char* sraw)
          for(i=1;i<=gdbmi_count;i++)
          {
             //agc_addr = gdbmiNativeAddr(gdbmi_addr);
-            gdbmi_value = gdbmiGetValueByAddress(State,gdbmi_addr);
+            gdbmi_value = DbgGetValueByAddress(gdbmi_addr);
             if (gdbmi_size == 'w')
             {
             	gdbmi_value = (gdbmi_value << 16) |
-            			gdbmiGetValueByAddress(State,++gdbmi_addr);
+            			DbgGetValueByAddress(++gdbmi_addr);
             }
 
             switch (gdbmi_size)
@@ -1613,7 +1450,6 @@ GdbmiResult GdbmiHandleCommandLineInterface(int i)
 {
    cli_argc = 0;
    cli_arg = NULL;
-   char *ss;
    GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
 
    /* Adjust the CmdPtr to point to the next token */
@@ -1666,7 +1502,7 @@ GdbmiResult GdbmiHandleCommandLineInterface(int i)
 
 GdbmiResult GdbmiHandleCustom(int i)
 {
-   char *arg_s,*arg_sraw,*ss;
+   char *arg_s,*arg_sraw;
    unsigned cmd_idx;
    unsigned arg_idx;
 
