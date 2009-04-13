@@ -69,7 +69,7 @@ extern int Break;
 extern int DebuggerInterruptMasks[11];
 extern char* CurrentSourceFile;
 
-extern char SourceFiles[];
+extern char SourceFiles[MAX_NUM_FILES][MAX_FILE_LENGTH];
 extern int NumberFiles;
 extern SymbolLine_t* FindLastLineMain(void);
 
@@ -907,7 +907,7 @@ GdbmiResult GdbmiHandleSetPrompt(int i)
    return(GdbmiCmdDone);
 }
 
-int gdbmiString2Num(char* s, int* Num)
+int gdbmiString2Num(char* s, unsigned* Num)
 {
 	int Result = -1;
 

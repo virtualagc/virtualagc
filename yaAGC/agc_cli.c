@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
