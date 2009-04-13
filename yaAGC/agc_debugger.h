@@ -57,7 +57,8 @@ extern unsigned DbgLinearAddr(Address_t *agc_addr);
 extern unsigned DbgLinearFixedAddr(unsigned agc_sreg,unsigned agc_fb,unsigned agc_super);
 extern unsigned short DbgGetValueByAddress(unsigned gdbmi_addr);
 extern void DbgSetValueByAddress(unsigned gdbmi_addr,unsigned short value);
-
+extern void DbgSetRunState(void);
+extern unsigned DbgLinearAddrFromAddrStr(char* addr_str);
 
 
 

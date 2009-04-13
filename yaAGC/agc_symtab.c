@@ -259,7 +259,9 @@ ReadSymbolTable (char *fname)
 
   // Read in the SymbolFile_t structure as the header
   read (fd, &symfile, sizeof(SymbolFile_t));
-  SourcePathName = strdup (symfile.SourcePath);
+
+  /* Set the source path is not overridden by command-line option */
+  if (SourcePathName == (char*)0) SourcePathName = strdup (symfile.SourcePath);
 
   // Allocate the symbol table
   SymbolTableSize = symfile.NumberSymbols;

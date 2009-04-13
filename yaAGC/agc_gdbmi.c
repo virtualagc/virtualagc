@@ -66,7 +66,6 @@ extern char nbPrompt[16];
 extern int HaveSymbols;
 extern int FullNameMode;
 extern int Break;
-extern int RunState;
 extern int DebuggerInterruptMasks[11];
 extern char* CurrentSourceFile;
 
@@ -923,7 +922,7 @@ int gdbmiString2Num(char* s, int* Num)
  */
 GdbmiResult GdbmiHandleSetVariable(int i)
 {
-   int gdbmi_addr,gdbmi_val;
+   unsigned gdbmi_addr,gdbmi_val;
    char *operand1,*operand2;
    Symbol_t *Symbol = NULL;
 
@@ -932,15 +931,14 @@ GdbmiResult GdbmiHandleSetVariable(int i)
 
    operand1 = s;
    operand2 = strstr(s,"=");
-   *operand2 = (char)0;
-   operand2++;
+   *operand2++ = (char)0;
 
    /* Set value using address */
    if (operand1[0] == '*')
    {
-   	if (gdbmiString2Num(++operand1,&gdbmi_addr) == 0)
-		if (gdbmiString2Num(operand2,&gdbmi_val) == 0)
-				DbgSetValueByAddress(gdbmi_addr,(unsigned short)gdbmi_val);
+	   gdbmi_addr = DbgLinearAddrFromAddrStr(++operand1);
+	   if ((gdbmi_addr != ~0) && (gdbmiString2Num(operand2,&gdbmi_val) == 0))
+			DbgSetValueByAddress(gdbmi_addr,(unsigned short)gdbmi_val);
    }
    else /* Must be a symbol */
    {
@@ -1271,8 +1269,8 @@ GdbmiResult GdbmiHandleShow(int i)
 
 GdbmiResult GdbmiHandleStart(int i)
 {
-   RunState = 1;
-   return(GdbmiCmdDone);
+	DbgSetRunState();
+	return(GdbmiCmdDone);
 }
 
 
@@ -1287,7 +1285,7 @@ void gdbmiHandleWhatIs(agc_t *State , char* s, char* sraw)
 void gdbmiHandlePrint(agc_t *State , char* s, char* sraw)
 {
    int AddrFlag = 0;
-   char* SymbolName;
+   char* AddrStr;
    Symbol_t *Symbol = NULL;
    Address_t *agc_addr;
    unsigned gdbmi_addr;
@@ -1295,16 +1293,16 @@ void gdbmiHandlePrint(agc_t *State , char* s, char* sraw)
    if (strlen(s) > 1)
    {
       /* we have an expression */
-      SymbolName = ++sraw;
-      if (*SymbolName == '&')
+	   AddrStr = ++sraw;
+      if (*AddrStr == '&')
       {
       	 AddrFlag++;
-      	 SymbolName++;
+      	 AddrStr++;
       }
 
       /* I like to also see values of constants eventhough the default
          agc implementation did not do  this */
-      Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
+      Symbol = ResolveSymbol(AddrStr, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
       if (Symbol)
       {
          agc_addr = &Symbol->Value;
@@ -1315,6 +1313,15 @@ void gdbmiHandlePrint(agc_t *State , char* s, char* sraw)
          else
          	printf("$1 = %d\n",DbgGetValueByAddress(gdbmi_addr));
       }
+      else
+      {
+    	  if (*AddrStr == '*')
+    	  {
+    		  gdbmi_addr = DbgLinearAddrFromAddrStr(++AddrStr);
+    		  printf("$1 = %d\n",DbgGetValueByAddress(gdbmi_addr));
+    	  }
+    	  else printf("$1 = %s\n",sraw);
+      }
    }
    ++gdbmi_status;
 }
@@ -1322,7 +1329,7 @@ void gdbmiHandlePrint(agc_t *State , char* s, char* sraw)
 void gdbmiHandleOutput(agc_t *State , char* s, char* sraw)
 {
    int AddrFlag = 0;
-   char* SymbolName;
+   char* AddrStr;
    Symbol_t *Symbol = NULL;
    Address_t *agc_addr;
    unsigned gdbmi_addr;
@@ -1330,16 +1337,16 @@ void gdbmiHandleOutput(agc_t *State , char* s, char* sraw)
    if (strlen(s) > 1)
    {
       /* we have an expression */
-      SymbolName = ++sraw;
-      if (*SymbolName == '&')
+	   AddrStr = ++sraw;
+      if (*AddrStr == '&')
       {
          AddrFlag++;
-         SymbolName++;
+         AddrStr++;
       }
 
       /* I like to also see values of constants eventhough the default
       agc implementation did not do  this */
-      Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
+      Symbol = ResolveSymbol(AddrStr, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
       if (Symbol)
       {
          agc_addr = &Symbol->Value;
@@ -1350,6 +1357,15 @@ void gdbmiHandleOutput(agc_t *State , char* s, char* sraw)
          else
             printf("%d",DbgGetValueByAddress(gdbmi_addr));
       }
+      else
+      {
+    	  if (*AddrStr == '*')
+    	  {
+    		  gdbmi_addr = DbgLinearAddrFromAddrStr(++AddrStr);
+    		  printf("%d",DbgGetValueByAddress(gdbmi_addr));
+    	  }
+    	  else printf("%s",sraw);
+      }
    }
    ++gdbmi_status;
 }
@@ -1358,7 +1374,7 @@ void gdbmiHandleExamine(agc_t *State , char* s, char* sraw)
 {
    int i;
    int gdbmi_count = 1; /* Default 1 count */
-   int gdbmi_addr = 0;
+   unsigned gdbmi_addr = 0;
    int gdbmi_value = 0;
    char gdbmi_format = 'x';
    char gdbmi_size = 'w';
@@ -1395,11 +1411,11 @@ void gdbmiHandleExamine(agc_t *State , char* s, char* sraw)
       }
 
       /* Get linear address */
-		gdbmi_addr = strtol(gdbmi_space+1,0,0);
+      gdbmi_addr = DbgLinearAddrFromAddrStr(++gdbmi_space);
 
-		if (gdbmi_count)
+      if ((gdbmi_count > 0) && (gdbmi_addr != ~0))
       {
-         /* Print first lead in addess */
+         /* Print first lead in address */
          printf("0x%07x:",gdbmi_addr);
 
          for(i=1;i<=gdbmi_count;i++)
@@ -1435,6 +1451,7 @@ void gdbmiHandleExamine(agc_t *State , char* s, char* sraw)
          }
          printf("\n");
       }
+      else printf("Invalid number \"%s\"\n",gdbmi_space);
    }
    ++gdbmi_status;
 }
@@ -1446,7 +1463,7 @@ GdbmiResult GdbmiHandleGetOct(int i)
 }
 
 
-GdbmiResult GdbmiHandleCommandLineInterface(int i)
+GdbmiResult GdbmiConsoleInterpreter(int i)
 {
    cli_argc = 0;
    cli_arg = NULL;
@@ -1524,7 +1541,7 @@ GdbmiResult GdbmiHandleCustom(int i)
 
                if (arg_s)
                {
-                  GdbmiHandleCommand(State,arg_s,arg_sraw);
+            	   GdbmiInterpreter(State,arg_s,arg_sraw);
                   free(arg_s);
                }
             }
@@ -1553,7 +1570,7 @@ GdbmiResult GdbmiHandleMachineInterface(int i)
  * \param the command string
  * \param the raw command string
  */
-GdbmiResult GdbmiHandleCommand(agc_t *agc_state , char* dbg_s, char* dbg_sraw)
+GdbmiResult GdbmiInterpreter(agc_t *agc_state , char* dbg_s, char* dbg_sraw)
 {
    GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
 
@@ -1563,7 +1580,7 @@ GdbmiResult GdbmiHandleCommand(agc_t *agc_state , char* dbg_s, char* dbg_sraw)
    sraw  = dbg_sraw;
 
    /* Handle Basic GDB Command Line Options */
-   GdbmiStat = GdbmiHandleCommandLineInterface(0);
+   GdbmiStat = GdbmiConsoleInterpreter(0);
    gdbmi_status = 0;
 
    /* Use the new GDB/MI Capabilities */

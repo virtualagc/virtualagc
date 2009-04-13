@@ -18,85 +18,45 @@
 #include "agc_debugger.h"
 #include "agc_simulator.h"
 
-agc_t State;
-
-clock_t NextCoreDump;
-clock_t DumpInterval;
-struct tms DummyTime;
-clock_t RealTime;
-clock_t RealTimeOffset;
-clock_t LastRealTime;
-clock_t NextKeycheck;
-//uint64_t CycleCount;
-//uint64_t DesiredCycles;
-
-
-#ifdef WIN32
-struct tms {
-  clock_t tms_utime;  /* user time */
-  clock_t tms_stime;  /* system time */
-  clock_t tms_cutime; /* user time of children */
-  clock_t tms_cstime; /* system time of children */
-};
-
-clock_t times (struct tms *p)
-{
-  return (GetTickCount ());
-}
-
-
-#define _SC_CLK_TCK (1000)
-#define sysconf(x) (x)
-#endif // WIN32
-
-// Holds whether we are in debug mode
-extern int DebugMode;
-extern int RunState;
-
+/** Declare the singleton Simulator object instance */
 static Simulator_t Simulator;
 
-/**
-Initialize the AGC Simulator.
-*/
-int SimInitialize(Options_t* Options)
+static int SimInitializeEngine(void)
 {
 	int result = 0;
 
-	/* Without Options we can't Run */
-	if (!Options) return(6);
-
-	/* Set the basic simulator variables */
-	Simulator.DebugRules = DebugRules;
-	Simulator.Options = Options;
-	Simulator.State = &State;
-	Simulator.DumpInterval = Options->dump_time * sysconf (_SC_CLK_TCK);
-
-	/* Set legacy Option variables */
-	Portnum = Options->port;
-	DebugDsky = Options->debug_dsky;
-	DebugDeda = Options->debug_deda;
-	DumpInterval = Simulator.DumpInterval;
-	SocketInterlaceReload = Options->interlace;
-
-	/* If we are not in quiet mode display the version info */
-	if (!Options->quiet) DbgDisplayVersion();
-
 	/* Initialize the simulation */
-	if (!Options->debug_dsky)
+	if (!Simulator.Options->debug_dsky)
 	{
-	      if (Options->resume == NULL)
-	      {
-	    	  if (Options->cfg)
-	    	  {
-		  	if (CmOrLm) result = agc_engine_init (Simulator.State, Options->core, "CM.core", 0);
-		  	else result = agc_engine_init (Simulator.State, Options->core, "LM.core", 0);
-	    	  }
-	    	  else
-	    		result = agc_engine_init (Simulator.State, Options->core,"core", 0);
-		   }
-	      else result = agc_engine_init (Simulator.State, Options->core, Options->resume, 1);
+		if (Simulator.Options->resume == NULL)
+	    {
+			if (Simulator.Options->cfg)
+	    	{
+				if (CmOrLm)
+				{
+					result = agc_engine_init (&Simulator.State,
+							Simulator.Options->core, "CM.core", 0);
+				}
+				else
+				{
+					result = agc_engine_init (&Simulator.State,
+							Simulator.Options->core, "LM.core", 0);
+				}
+			}
+	    	else
+	    	{
+	    		result = agc_engine_init (&Simulator.State,
+	    				Simulator.Options->core,"core", 0);
+	    	}
+	    }
+	    else
+	    {
+	    	result = agc_engine_init (&Simulator.State,
+	    			Simulator.Options->core, Simulator.Options->resume, 1);
+	    }
 
-	  switch (result)
+		/* Check AGC Engine Init Result and display proper message */
+		switch (result)
 		{
 		    case 0:
 		    	break; /* All is OK */
@@ -118,8 +78,50 @@ int SimInitialize(Options_t* Options)
 		}
 	}
 
+	return (result);
+}
+
+/**
+This function executes one cycle of the AGC engine. This is
+a wrapper function to eliminate showing the passing of the
+current engine state. */
+static void SimExecuteEngine()
+{
+	agc_engine (&Simulator.State);
+}
+
+
+/**
+Initialize the AGC Simulator; this means setting up the debugger, AGC
+engine and initializing the simulator time parameters.
+*/
+int SimInitialize(Options_t* Options)
+{
+	int result = 0;
+
+	/* Without Options we can't Run */
+	if (!Options) return(6);
+
+	/* Set the basic simulator variables */
+	Simulator.Options = Options;
+	Simulator.DebugRules = DebugRules;
+	Simulator.DumpInterval = Options->dump_time * sysconf (_SC_CLK_TCK);
+
+	/* Set legacy Option variables */
+	Portnum = Options->port;
+	DebugDsky = Options->debug_dsky;
+	DebugDeda = Options->debug_deda;
+	Simulator.DumpInterval = Simulator.DumpInterval;
+	SocketInterlaceReload = Options->interlace;
+
+	/* If we are not in quiet mode display the version info */
+	if (!Options->quiet) DbgDisplayVersion();
+
+	/* Initialize the AGC Engine */
+	result = SimInitializeEngine();
+
 	/* Initialize the Debugger if running with debug mode */
-	if(Options->debug) DbgInitialize(Options,&State);
+	if(Options->debug) DbgInitialize(Options,&(Simulator.State));
 
 //	if (Options->cdu_log)
 //	{
@@ -128,22 +130,15 @@ int SimInitialize(Options_t* Options)
 //	}
 
 	/* Initialize realtime and cycle counters */
-	RealTimeOffset = times (&DummyTime);	// The starting time of the program.
-	NextCoreDump = RealTimeOffset + DumpInterval;
+	Simulator.RealTimeOffset = times (&Simulator.DummyTime);	// The starting time of the program.
+	Simulator.NextCoreDump = Simulator.RealTimeOffset + Simulator.DumpInterval;
 	SimSetCycleCount(SIM_CYCLECOUNT_AGC); // Num. of AGC cycles so far.
-	RealTimeOffset -= (Simulator.CycleCount + AGC_PER_SECOND / 2) / AGC_PER_SECOND;
-	LastRealTime = ~0UL;
+	Simulator.RealTimeOffset -= (Simulator.CycleCount + AGC_PER_SECOND / 2) / AGC_PER_SECOND;
+	Simulator.LastRealTime = ~0UL;
 
 	return (result | Options->version);
 }
-/**
-This function executes one cycle of the AGC engine. This is
-a wrapper function to eliminate showing the passing of the
-current engine state. */
-void SimExecuteEngine()
-{
-	agc_engine (Simulator.State);
-}
+
 /**
 This function adjusts the Simulator Cycle Count. Either based on the number
 of AGC Cycles or incremented during Sim cycles. This functions uses a
@@ -154,7 +149,7 @@ void SimSetCycleCount(int Mode)
 	switch(Mode)
 	{
 		case SIM_CYCLECOUNT_AGC:
-			Simulator.CycleCount = sysconf (_SC_CLK_TCK) * Simulator.State->CycleCounter;
+			Simulator.CycleCount = sysconf (_SC_CLK_TCK) * Simulator.State.CycleCounter;
 			break;
 		case SIM_CYCLECOUNT_INC:
 			Simulator.CycleCount += sysconf (_SC_CLK_TCK);
@@ -185,16 +180,18 @@ AGC state machine.
 static void SimManageCoreDump(void)
 {
 	/* Check to see if the next core dump should be made */
-	if (RealTime >= NextCoreDump)
+	if (Simulator.RealTime >= Simulator.NextCoreDump)
 	{
+		/* Use either specific core dump name (from cfg) or generic */
 		if (Simulator.Options->cfg)
 		{
-			if (CmOrLm) MakeCoreDump (&State, "CM.core");
-			else MakeCoreDump (&State, "LM.core");
+			if (CmOrLm) MakeCoreDump (&Simulator.State, "CM.core");
+			else MakeCoreDump (&Simulator.State, "LM.core");
 		}
-		else MakeCoreDump (&State, "core");
+		else MakeCoreDump (&Simulator.State, "core");
 
-		NextCoreDump = RealTime + DumpInterval;
+		/* Set the next CoreDump Time based on DumpInterval time */
+		Simulator.NextCoreDump = Simulator.RealTime + Simulator.DumpInterval;
 	}
 }
 
@@ -203,10 +200,10 @@ static void SimManageCoreDump(void)
  */
 void SimUpdateTime(void)
 {
-	RealTimeOffset +=((RealTime = times (&DummyTime)) - LastRealTime);
-	LastRealTime = RealTime;
+	Simulator.RealTimeOffset +=
+		((Simulator.RealTime = times (&Simulator.DummyTime)) - Simulator.LastRealTime);
+	Simulator.LastRealTime = Simulator.RealTime;
 }
-
 
 /**
 This function manages the Simulator time to achieve the
@@ -214,8 +211,8 @@ average 11.7 microsecond per opcode execution
 */
 static void SimManageTime(void)
 {
-	RealTime = times (&DummyTime);
-	if (RealTime != LastRealTime)
+	Simulator.RealTime = times (&Simulator.DummyTime);
+	if (Simulator.RealTime != Simulator.LastRealTime)
 	{
 		/* Make a routine core dump */
 		SimManageCoreDump();
@@ -225,7 +222,7 @@ static void SimManageTime(void)
 		// and DesiredCycles by CLK_TCK, to avoid a long long division by CLK_TCK.
 		// This not only reduces overhead, but actually makes the calculation
 		// more exact.  A bit tricky to understand at first glance, though.
-		LastRealTime = RealTime;
+		Simulator.LastRealTime = Simulator.RealTime;
 
 		//DesiredCycles = ((RealTime - RealTimeOffset) * AGC_PER_SECOND) / CLK_TCK;
 		//DesiredCycles = (RealTime - RealTimeOffset) * AGC_PER_SECOND;
@@ -236,8 +233,8 @@ static void SimManageTime(void)
 		// way, the calculation will always be 64-bit.  Making AGC_PER_SECOND a ULL
 		// constant in agc_engine.h would fix it, but the Orbiter folk wouldn't
 		// be able to compile it.
-		Simulator.DesiredCycles = RealTime;
-		Simulator.DesiredCycles -= RealTimeOffset;
+		Simulator.DesiredCycles = Simulator.RealTime;
+		Simulator.DesiredCycles -= Simulator.RealTimeOffset;
 		Simulator.DesiredCycles *= AGC_PER_SECOND;
 	}
 	else SimSleep();
