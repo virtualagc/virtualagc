@@ -90,7 +90,7 @@ Parse2DEC (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Fatal = 1;
       OutRecord->IndexValid = 0;
     }
-  if (InRecord->Operand == "")
+  if (InRecord->Operand[0] == 0)
     {
       strcpy (OutRecord->ErrorMessage, "Operand is missing.");
       OutRecord->Fatal = 1;
@@ -174,7 +174,7 @@ ParseDEC (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Fatal = 1;
       OutRecord->IndexValid = 0;
     }
-  if (InRecord->Operand == "")
+  if (InRecord->Operand[0] == 0)
     {
       strcpy (OutRecord->ErrorMessage, "Operand is missing.");
       OutRecord->Fatal = 1;
@@ -244,7 +244,7 @@ ParseVN (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Fatal = 1;
       OutRecord->IndexValid = 0;
     }
-  if (InRecord->Operand == "")
+  if (InRecord->Operand[0] == 0)
     {
       strcpy (OutRecord->ErrorMessage, "Operand is missing.");
       OutRecord->Fatal = 1;
