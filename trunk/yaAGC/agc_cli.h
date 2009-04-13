@@ -17,6 +17,8 @@ typedef struct
   char* resume;
   char* cdu_log;
   char* symtab;
+  char* directory;
+  char* cd;
   char* cfg;
   char* fromfile;
   int   port;

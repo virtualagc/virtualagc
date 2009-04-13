@@ -22,6 +22,7 @@
 
 extern int SymbolTableSize;
 extern Symbol_t *SymbolTable;
+extern char* SourcePathName; /* Owned by agc_symtab */
 
 static Debugger_t Debugger;
 static Frame_t* Frames;
@@ -36,8 +37,7 @@ int HaveSymbols = 0;    // 1 if we have a symbol table
 char* SymbolFile;       // The name of the symbol table file
 
 /* These globals will be deprecated when debugger is mature */
-int DebugMode;
-int RunState;
+static int DebugMode;
 
 FILE *FromFiles[MAX_FROMFILES];
 FILE *LogFile = NULL;
@@ -127,6 +127,14 @@ static void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
    }
 }
 
+/**
+ * Put the Debugger into the Run state.
+ */
+void DbgSetRunState(void)
+{
+	Debugger.RunState = 1;
+}
+
 char* DbgConstructFuncName(SymbolLine_t* Line,char* s,int size)
 {
    int i;
@@ -164,7 +172,7 @@ int DbgHasBreakEvent()
 	{
 		if (SingleStepCounter == 0)
 		{
-		  if(RunState) printf ("Stepped.\n");
+		  if(Debugger.RunState) printf ("Stepped.\n");
 		  BreakFlag = 1;
 		}
 		else
@@ -393,7 +401,6 @@ int DbgInitialize(Options_t* Options,agc_t* State)
 	/* Will remove these variables when debugger is mature */
 	SingleStepCounter = 0;
 	DebugMode = 1;
-	RunState = Debugger.RunState;
 
 	/* if the symbolfile is provided load the symbol table */
 	if (Options->symtab)
@@ -421,11 +428,14 @@ int DbgInitialize(Options_t* Options,agc_t* State)
 		if (NumFromFiles < MAX_FROMFILES)
 		{
 			FromFiles[NumFromFiles] = fopen (Options->fromfile, "r");
-			if (FromFiles[NumFromFiles] == NULL);
-			else
-				NumFromFiles++;
+			if (FromFiles[NumFromFiles] != NULL) NumFromFiles++;
 		}
 	}
+
+	/* If a new source path is given then apply this to prevent the
+	 * default source path from the symbol table to be used.
+	 */
+	if (Options->directory > 0) SourcePathName = Options->directory;
 
     /* Add the AGC starting point */
 	BacktraceAdd (State, 0, 04000);
@@ -644,7 +654,7 @@ void DbgDisplayInnerFrame(void)
 		{
 			/* Load the actual Source Line */
 			LoadSourceLine(Line->FileName, Line->LineNumber);
-			if (RunState)
+			if (Debugger.RunState)
 			{
 			  if (Debugger.Options->fullname) gdbmiPrintFullNameContents(Line);
 			  else Disassemble (Debugger.State);
@@ -711,39 +721,35 @@ Address_t DbgNativeAddr(unsigned linear_addr)
  * Return the Virtual Linear Pseudo address. According to
  * AGC Memo #9 page 5. with the exception of Fixed banked
  * 02 and 03; I kept linear address 014000-017777 this
- * whay you can still notice you were dealing with a banked
+ * way you can still notice you were dealing with a banked
  * address. However the value for address 04000 and 14000
  * will give you the same result.
  */
 unsigned DbgLinearAddr(Address_t *agc_addr)
 {
-   unsigned gdbmi_addr = 0;
+   unsigned LinearAddress = ~0; /* Default invalid Address */
 
    if (agc_addr->SReg < 01400) /* Must be Unbanked Eraseable */
    {
-      gdbmi_addr = agc_addr->SReg;
+      LinearAddress = agc_addr->SReg;
    }
    else if (agc_addr->SReg < 02000) /* Must be  Banked Eraseable */
    {
-      gdbmi_addr = agc_addr->EB*0400 + agc_addr->SReg - 01400;
+      LinearAddress = agc_addr->EB*0400 + agc_addr->SReg - 01400;
    }
    else if (agc_addr->SReg < 04000) /* Must be Banked fixed memory */
    {
       if (agc_addr->FB < 030)
-         gdbmi_addr = 06000 + agc_addr->FB * 02000 + agc_addr->SReg;
+         LinearAddress = 06000 + agc_addr->FB * 02000 + agc_addr->SReg;
       else
-         gdbmi_addr = 06000 + (agc_addr->FB + agc_addr->Super*010) * 02000 + agc_addr->SReg;
+         LinearAddress = 06000 + (agc_addr->FB + agc_addr->Super*010) * 02000 + agc_addr->SReg;
    }
    else if (agc_addr->SReg < 07777) /* Must be fixed fixed */
    {
-      gdbmi_addr = agc_addr->SReg;
-   }
-   else /* Invalid Address */
-   {
-      gdbmi_addr = 0xffff;
+      LinearAddress = agc_addr->SReg;
    }
 
-   return gdbmi_addr;
+   return LinearAddress;
 }
 
 unsigned DbgLinearFixedAddr(unsigned agc_sreg,unsigned agc_fb,unsigned agc_super)
@@ -751,10 +757,22 @@ unsigned DbgLinearFixedAddr(unsigned agc_sreg,unsigned agc_fb,unsigned agc_super
    Address_t agc_addr;
 
    agc_addr.Fixed = 1;
-   agc_addr.Unbanked = 1;
+   agc_addr.Banked = 1;
    agc_addr.SReg = agc_sreg;
    agc_addr.FB = agc_fb;
    agc_addr.Super = agc_super;
+
+   return DbgLinearAddr(&agc_addr);
+}
+
+unsigned DbgLinearEraseableAddr(unsigned agc_sreg,unsigned agc_eb)
+{
+   Address_t agc_addr;
+
+   agc_addr.Erasable = 1;
+   agc_addr.Banked = 1;
+   agc_addr.SReg = agc_sreg;
+   agc_addr.EB = agc_eb;
 
    return DbgLinearAddr(&agc_addr);
 }
@@ -784,6 +802,49 @@ unsigned short DbgGetValueByAddress(unsigned gdbmi_addr)
    }
 
    return Value;
+}
+/**
+ * This function returns the linear pseudo address based on an address string
+ * The address string could be the string representation of a linear address
+ * or be the original AGC see bank address string.
+ *
+ * Examples:
+ * 	  0x800 is a hex linear address
+ *    04000 is an octal linear address
+ *     2048 is a decimal linear address
+ *  12,2345 is a banked fixed address
+ *  E4,1456 is a banked switched address
+ *
+ *  Notice that for the original AGC addressing you can't use the notation for
+ *  unswitched or common fixed memory. However these locations are also
+ *  accessible in the switched region. The term pseudo address from from
+ *  the original AGC memo.
+ */
+unsigned DbgLinearAddrFromAddrStr(char* addr_str)
+{
+	unsigned Address = ~0;
+	unsigned Bank,SReg;
+
+	/* First determine if this address is a pseudo address or a banked
+	 * address by checking the existence of a comma (i.e. banked address )
+	 */
+	if (strstr(addr_str,",") > 0)
+	{
+		/* Try Eraseable translation first then fixed */
+		if (2 == sscanf (addr_str, "E%o,%o", &Bank, &SReg))
+		{
+			/* Validate Bank and SReg for Eraseable Memory */
+			if (Bank < 8) Address = DbgLinearEraseableAddr(SReg,Bank);
+		}
+		else if (2 == sscanf (addr_str, "%o,%o", &Bank, &SReg))
+		{
+			/* Validate Bank and SReg for Fixed Memory */
+			if ( Bank < 044 ) Address = DbgLinearFixedAddr(SReg,Bank,0);
+		}
+	}
+	else Address = strtol(addr_str,0,0); /* It is a pseudo address */
+
+	return Address;
 }
 
 void DbgSetValueByAddress(unsigned gdbmi_addr,unsigned short value)
@@ -873,10 +934,7 @@ int DbgExecute()
 	int PatternValue, PatternMask;
 	int i, j;
 	char FileName[MAX_FILE_LENGTH + 1];
-//	int LineNumber, LineNumberTo;
-//	char Dummy[MAX_FILE_LENGTH + 1];
 	char SymbolName[129];
-//	Symbol_t *Symbol;
 
 	Break = DbgHasBreakEvent();
 
@@ -948,7 +1006,7 @@ int DbgExecute()
 			else if (1 == sscanf (s, "STEP%o", &i)
 				|| 1 == sscanf (s, "NEXT%o", &i))
 			{
-				RunState=1;
+				Debugger.RunState=1;
 			if (i >= 1)
 				SingleStepCounter = i - 1;
 			else
@@ -958,7 +1016,7 @@ int DbgExecute()
 			else if (!strcmp (s, "STEP") || !strcmp (s, "NEXT") ||
 				!strcmp (s, "S") || !strcmp (s, "N"))
 			{
-			RunState = 1;
+			Debugger.RunState = 1;
 			SingleStepCounter = 0;
 			break;
 			}
@@ -1055,7 +1113,7 @@ int DbgExecute()
 	//        else if (!strcmp (s, "CONT") || !strcmp (s, "RUN"))
 	//		    {
 	//                      /* Only print the thread info if debugevents are on */
-	//                      RunState = 1;
+	//                      Debugger.RunState = 1;
 	//		      break;
 	//		    }
 			else if (!strncmp (s, "COREDUMP ", 9))MakeCoreDump (Debugger.State, &sraw[9]);
@@ -1146,7 +1204,7 @@ int DbgExecute()
 
 			else
 			{
-				GdbmiResult result = GdbmiHandleCommand(Debugger.State, s , sraw );
+				GdbmiResult result = GdbmiInterpreter(Debugger.State, s , sraw );
 				switch (result)
 				{
 	//				  case gdbmiCmdUnhandled:
@@ -1158,12 +1216,12 @@ int DbgExecute()
 	//					  break;
 	////				  case gdbmiCmdNext:
 	////				  case gdbmiCmdStep:
-	////			          RunState = 1;
+	////			          Debugger.RunState = 1;
 	////					  SingleStepCounter = 0;
 	////					  break;
 	//				  case gdbmiCmdContinue:
 					case GdbmiCmdRun:
-						RunState = 1;
+						Debugger.RunState = 1;
 						break;
 					case GdbmiCmdQuit:
 						// return(0);
