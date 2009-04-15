@@ -40,7 +40,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "regex.h"
 #include "yaAGC.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
@@ -52,10 +51,12 @@
 #ifdef WIN32
 #include <windows.h>
 #include <sys/time.h>
+#include "regex.h"
 #define LB "\r\n"
 #else
 #include <time.h>
 #include <sys/times.h>
+#include <regex.h>
 #define LB ""
 #endif
 
