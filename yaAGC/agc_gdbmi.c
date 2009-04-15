@@ -40,7 +40,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <regex.h>
+#include "regex.h"
 #include "yaAGC.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
@@ -832,7 +832,7 @@ GdbmiResult GdbmiHandleInfoSources(int i)
    GdbmiAdjustCmdPtr(i);
 
    /* Check if a pattern search is used */
-   if (strlen(s) > 0) 
+   if (strlen(s) > 0)
    {
 	GdbmiAdjustCmdPtr(1);
 
