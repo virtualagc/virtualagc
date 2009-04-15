@@ -155,7 +155,7 @@ char* DbgConstructFuncName(SymbolLine_t* Line,char* s,int size)
 void DbgDisplayVersion(void)
 {
    printf ("Apollo Guidance Computer simulation, ver. " NVER ", built "
-         __DATE__ " " __TIME__ "\n" "Copyright (C) 2003-2008 Ronald S. Burkey, Onno Hommes.\n"
+         __DATE__ " " __TIME__ "\n" "Copyright (C) 2003-2009 Ronald S. Burkey, Onno Hommes.\n"
          "yaAGC is free software, covered by the GNU General Public License, and you are\n"
          "welcome to change it and/or distribute copies of it under certain conditions.\n"
           );
@@ -933,7 +933,7 @@ int DbgExecute()
 	int Break;
 	int PatternValue, PatternMask;
 	int i, j;
-	char FileName[MAX_FILE_LENGTH + 1];
+	//char FileName[MAX_FILE_LENGTH + 1];
 	char SymbolName[129];
 
 	Break = DbgHasBreakEvent();
@@ -1045,15 +1045,15 @@ int DbgExecute()
 			else
 				printf ("No symbol table loaded.\n");
 			}
-			else if (1 == sscanf (s, "FILES%s", FileName))
-			{
-			// JMS: 07.30
-			// Dumps the files to the screen
-			if (HaveSymbols)
-				DumpFiles (FileName);
-			else
-				printf ("No symbol table loaded.\n");
-			}
+//			else if (1 == sscanf (s, "FILES%s", FileName))
+//			{
+//			// JMS: 07.30
+//			// Dumps the files to the screen
+//			if (HaveSymbols)
+//				DumpFiles (FileName);
+//			else
+//				printf ("No symbol table loaded.\n");
+//			}
 			else if (2 == sscanf (s, "DELETE%o%o", &i, &j))
 			{
 			PatternValue = (i & PATTERN_SIZE);
