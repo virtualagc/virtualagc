@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <regex.h>
 #include "yaAGC.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
@@ -814,22 +815,71 @@ void gdbmiHandleInfoSource(agc_t *State , char* s, char* sraw)
    ++gdbmi_status;
 }
 
-void gdbmiHandleInfoSources(agc_t *State , char* s, char* sraw)
+/**
+Display the list of source files for which symbols are loaded.
+Since the list can be quite long the command allows for a pattern
+to be passed to reduce the output list in console mode.
+*/
+GdbmiResult GdbmiHandleInfoSources(int i)
 {
-	int i;
+   int j;
+   regex_t preg;
+   int UsePattern = 0;
+   int Match = 0;
+   GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
 
-	printf("Source files for which symbols have been read in:\n\n");
-	for (i = 0; i < NumberFiles; i++)
-	{
+   /* Adjust the CmdPtr to point to the next token */
+   GdbmiAdjustCmdPtr(i);
+
+   /* Check if a pattern search is used */
+   if (strlen(s) > 0) 
+   {
+	GdbmiAdjustCmdPtr(1);
+
+	j = regcomp (&preg, sraw, REG_ICASE | REG_NOSUB | REG_EXTENDED);
+        if (j)
+        {
+           printf ("Illegal regular-expression.\n");
+           regfree (&preg);
+           GdbmiStat = GdbmiCmdError;
+        }
+	else UsePattern = 1;
+   }
+
+   if (GdbmiStat != GdbmiCmdError)
+   {
+      printf("Source files for which symbols have been read in:\n\n");
+
+      /* Loop through and print out the file names */
+      for (j = 0; j < NumberFiles; j++)
+      {
+         Match = 0;
+
+         if (UsePattern)
+         {
+            if (0 == regexec (&preg, SourceFiles[j], 0, NULL, 0))
+            {
+               Match = 1;
+            }
+         }
+         else Match = 1;
+
+         if (Match)
+         {
 #ifdef WIN32
-		printf("%s\n",SourcePathName);
+	    printf("%s\\%s\n", SourcePathName, SourceFiles[j]);
 #else
-		printf("%s\n",SourceFiles[i]);
+	    printf("%s/%s\n", SourcePathName, SourceFiles[j]);
 #endif
-		  fflush (stdout);
-	}
+         }
+      }
+      fflush (stdout);
+      if (UsePattern) regfree (&preg);
 
-   ++gdbmi_status;
+      GdbmiStat = GdbmiCmdUnhandled;
+   }
+
+   return GdbmiStat;
 }
 
 void gdbmiHandleInfoInterrupts(agc_t *State , char* s, char* sraw)
@@ -885,7 +935,7 @@ GdbmiResult GdbmiHandleInfo(int i)
    else if (!strncmp(s,"INTERRUPTS",10))
    	gdbmiHandleInfoInterrupts(State,s+10,sraw+10);
    else if (!strncmp(s,"SOURCES",7))
-   	gdbmiHandleInfoSources(State,s+7,sraw+7);
+   	GdbmiStat = GdbmiHandleInfoSources(7);
    else if (!strncmp(s,"SOURCE",6))
    	gdbmiHandleInfoSource(State,s+6,sraw+6);
 

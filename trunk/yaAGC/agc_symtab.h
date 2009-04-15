@@ -210,7 +210,7 @@ SymbolLine_t *ResolveLineNumber (int LineNumber);
 
 //-------------------------------------------------------------------------
 // Dumps a list of source files given a regular expression pattern
-void DumpFiles (const char *Pattern);
+/*void DumpFiles (const char *Pattern); */
 
 // Load a source line
 int LoadSourceLine (char *SourceFile, int LineNumber);

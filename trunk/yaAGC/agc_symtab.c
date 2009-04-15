@@ -985,7 +985,7 @@ int LoadSourceLine (char *SourceFile, int LineNumber)
 
 //-------------------------------------------------------------------------
 // Dumps a list of source files given a regular expression pattern
-void DumpFiles (const char *Pattern)
+/*void DumpFiles (const char *Pattern)
 {
   int i, Count = 0;
   //char Address[16];
@@ -1015,7 +1015,7 @@ void DumpFiles (const char *Pattern)
 
   fflush (stdout);
   regfree (&preg);
-}
+}*/
 
 //-------------------------------------------------------------------------
 // Compare two source file for comparison purposes.
