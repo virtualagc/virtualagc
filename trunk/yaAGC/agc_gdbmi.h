@@ -27,7 +27,7 @@ typedef enum
 	GdbmiCmdQuit = 0xfe,
 } GdbmiResult;
 
-
+extern void GdbmiDisplayBreakpointForLine(SymbolLine_t* Line,int BreakpointId );
 extern GdbmiResult GdbmiInterpreter(agc_t* , char*, char* );
 extern void gdbmiPrintFullNameContents(SymbolLine_t *Line);
 extern int gdbmiCheckBreakpoint(agc_t *State, Breakpoint_t* gdbmi_bp);
