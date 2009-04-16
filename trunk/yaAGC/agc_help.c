@@ -18,18 +18,21 @@ static int gdbmi_status;
 static void gdbmiPrintHelpInfo()
 {
 	printf("info breakpoints -- Status of user-settable breakpoints\n");
+	printf("info constants -- All constants or those matching REGEXP\n");
 	printf("info line -- Core addresses of the code for a source line\n");
 	printf("info target -- Display target information\n");
 	printf("info files -- Like \"info target\"\n");
+	printf("info functions -- All functions or those matching REGEXP\n");
 	printf("info registers -- List of registers and contents\n");
 	printf("info all-registers -- List of all registers and contents\n");
 	printf("info channels -- List of channels and contents\n");
 	printf("info io_registers -- List of I/O registers and contents\n");
 	printf("info threads -- IDs of currently known threads\n");
-	printf("info stack -- Backtrace of the stack\n");
 	printf("info interrupts -- Show active interrupt\n");
 	printf("info source -- Information about the current source file\n");
-	printf("info sources -- Source files in the program\n");
+	printf("info sources -- All source files or those matching REGEXP\n");
+	printf("info stack -- Backtrace of the stack\n");
+	printf("info variables -- All variables or those matching REGEXP\n");
 }
 
 static void gdbmiPrintHelpShow()
