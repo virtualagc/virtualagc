@@ -70,6 +70,8 @@ extern int FullNameMode;
 extern int Break;
 extern int DebuggerInterruptMasks[11];
 extern char* CurrentSourceFile;
+extern int SymbolTableSize;
+extern Symbol_t *SymbolTable;
 
 extern char SourceFiles[MAX_NUM_FILES][MAX_FILE_LENGTH];
 extern int NumberFiles;
@@ -912,6 +914,114 @@ void gdbmiHandleInfoInterrupts(agc_t *State , char* s, char* sraw)
 	++gdbmi_status;
 }
 
+GdbmiResult GdbmiHandleInfoSymbols(int i,int type)
+{
+   int j;
+   regex_t preg;
+   int UsePattern = 0;
+   int Match = 0;
+   char* LastFileName = (char*)0;
+
+   GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
+
+   GdbmiAdjustCmdPtr(i);
+
+   /* Check if a pattern search is used */
+   if (strlen(s) > 0)
+   {
+	GdbmiAdjustCmdPtr(1);
+
+	j = regcomp (&preg, sraw, REG_ICASE | REG_NOSUB | REG_EXTENDED);
+        if (j)
+        {
+           printf ("Illegal regular-expression.\n");
+           regfree (&preg);
+           GdbmiStat = GdbmiCmdError;
+        }
+	else UsePattern = 1;
+   }
+
+   if (GdbmiStat != GdbmiCmdError)
+   {
+      if (UsePattern) 
+      {
+         if (type == SYMBOL_VARIABLE)
+            printf("All variables matching regular expression \"%s\":\n",sraw);
+         else if (type == SYMBOL_CONSTANT)
+            printf("All constants matching regular expression \"%s\":\n",sraw);
+         else if (type == SYMBOL_LABEL)
+            printf("All functions matching regular expression \"%s\":\n",sraw);
+      }
+      else 
+      {
+         if (type == SYMBOL_VARIABLE)
+            printf("All defined variables:\n");
+         else if (type == SYMBOL_CONSTANT)
+            printf("All defined constants:\n");
+         else if (type == SYMBOL_LABEL)
+            printf("All defined functions:\n");
+      }
+
+      LastFileName = SymbolTable[0].FileName;
+
+      // Loop through and print out the entire symbol table
+      for (j = 0; j < SymbolTableSize; j++)
+      {
+         Match = 0;
+
+         if (UsePattern)
+         {
+            if (0 == regexec (&preg, SymbolTable[j].Name, 0, NULL, 0))
+            {
+               Match = 1;
+            }
+         }
+         else Match = 1;
+
+         if (Match)
+         {
+              if (SymbolTable[j].Type == type)
+              {
+
+                 if (strcmp(LastFileName,SymbolTable[j].FileName))
+                 {
+                     LastFileName = SymbolTable[j].FileName;
+                     printf("\nFile %s:\n",LastFileName);
+                 }
+
+                 if (type == SYMBOL_VARIABLE)
+                     printf ("var %s;\n",SymbolTable[j].Name);
+                 else if (type == SYMBOL_CONSTANT)
+                     printf ("const %s;\n",SymbolTable[j].Name);
+                 else if (type == SYMBOL_LABEL)
+                     printf ("func %s();\n",SymbolTable[j].Name);
+              }
+         }
+         fflush (stdout);
+       }
+       if (UsePattern) regfree (&preg);
+       printf("\n");
+   }
+
+   return GdbmiStat;
+}
+
+GdbmiResult GdbmiHandleInfoVariables(int i)
+{
+    return GdbmiHandleInfoSymbols(i,SYMBOL_VARIABLE);
+}
+
+GdbmiResult GdbmiHandleInfoConstants(int i)
+{
+    return GdbmiHandleInfoSymbols(i,SYMBOL_CONSTANT);
+}
+
+GdbmiResult GdbmiHandleInfoFunctions(int i)
+{
+    return GdbmiHandleInfoSymbols(i,SYMBOL_LABEL);
+}
+
+
 GdbmiResult GdbmiHandleInfo(int i)
 {
    GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
@@ -945,6 +1055,12 @@ GdbmiResult GdbmiHandleInfo(int i)
    	gdbmiHandleInfoInterrupts(State,s+10,sraw+10);
    else if (!strncmp(s,"SOURCES",7))
    	GdbmiStat = GdbmiHandleInfoSources(7);
+   else if (!strncmp(s,"VARIABLES",9))
+   	GdbmiStat = GdbmiHandleInfoVariables(9);
+   else if (!strncmp(s,"FUNCTIONS",9))
+   	GdbmiStat = GdbmiHandleInfoFunctions(9);
+   else if (!strncmp(s,"CONSTANTS",9))
+   	GdbmiStat = GdbmiHandleInfoConstants(9);
    else if (!strncmp(s,"SOURCE",6))
    	gdbmiHandleInfoSource(State,s+6,sraw+6);
 
