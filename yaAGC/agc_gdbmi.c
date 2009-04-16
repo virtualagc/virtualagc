@@ -139,6 +139,15 @@ void gdbmiDisassemble(agc_t *State,unsigned start_linear,unsigned end_linear)
 
 }
 
+void GdbmiDisplayBreakpointForLine(SymbolLine_t* Line,int BreakpointId)
+{
+   unsigned LinearAddress = DbgLinearAddr(&Line->CodeAddress);
+
+   printf ("Breakpoint %d, %s () at %s:%d\n",BreakpointId,
+	 DbgGetFrameNameByAddr(LinearAddress),
+	 Line->FileName,Line->LineNumber);
+}
+
 char* gdbmiConstructFuncName(SymbolLine_t* Line,char* s,int size)
 {
    int i;
@@ -707,6 +716,7 @@ void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
 {
    SymbolLine_t* Line = NULL;
    char threadName[10] = "main";
+   unsigned LinearAddress;
 
    /* Check if we are dealing with 2 threads (i.e. in an ISR) */
    if (State->InIsr)
@@ -766,10 +776,9 @@ void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
       Line = FindLastLineMain();
       if (Line)
       {
+         LinearAddress = DbgLinearAddr(&Line->CodeAddress);
          printf("  1 thread 0 (MAIN)\t0x%04x in %s ()\n",
-               DbgLinearAddr(&Line->CodeAddress),
-               gdbmiConstructFuncName(Line,FuncName,127)
-               );
+               LinearAddress,DbgGetFrameNameByAddr(LinearAddress));
       }
    }
    else
@@ -777,10 +786,9 @@ void gdbmiHandleInfoThreads(agc_t *State , char* s, char* sraw)
       Line = gdbmiResolveCurrentLine(State);
       if (Line)
       {
+         LinearAddress = DbgLinearAddr(&Line->CodeAddress);
          printf("* 1 thread 0 (MAIN)\t0x%04x in %s ()\n",
-                DbgLinearAddr(&Line->CodeAddress),
-                gdbmiConstructFuncName(Line,FuncName,127)
-               );
+                LinearAddress,DbgGetFrameNameByAddr(LinearAddress));
          printf("    at %s:%d\n",Line->FileName,Line->LineNumber);
       }
    }

@@ -27,7 +27,6 @@ extern char* SourcePathName; /* Owned by agc_symtab */
 static Debugger_t Debugger;
 static Frame_t* Frames;
 
-static char FuncName[128];
 int LogCount = 0;
 static int LogLast = -1;
 
@@ -133,23 +132,6 @@ static void rfgets (agc_t *State, char *Buffer, int MaxSize, FILE * fp)
 void DbgSetRunState(void)
 {
 	Debugger.RunState = 1;
-}
-
-char* DbgConstructFuncName(SymbolLine_t* Line,char* s,int size)
-{
-   int i;
-   if (Line)
-   {
-      /* Copy File Name */
-      strncpy(s,Line->FileName,size);
-
-      /* remove ".s" extension */
-      s[strlen(s)-2]=0;
-
-      /* Str to lowercase */
-      for (i = 0; s[i] != '\0'; i++) s[i] = (char)tolower(s[i]);
-   }
-   return s;
 }
 
 void DbgDisplayVersion(void)
@@ -453,6 +435,7 @@ int DbgMonitorBreakpoints(void)
 	int CurrentBB;
 	int i;
 	int Value;
+        SymbolLine_t* Line;
 
 	Value = DbgGetFromZ(Debugger.State);
 	CurrentZ = Debugger.State->Erasable[0][RegZ];
@@ -460,6 +443,8 @@ int DbgMonitorBreakpoints(void)
 	            (Debugger.State->InputChannel[7] & 0100);
 
 	for (Break = i = 0; i < NumBreakpoints; i++)
+	{
+		Line = Breakpoints[i].Line;
 		if (Breakpoints[i].WatchBreak == 2 &&
 			gdbmiCheckBreakpoint(Debugger.State,&Breakpoints[i]))
 		{
@@ -484,19 +469,14 @@ int DbgMonitorBreakpoints(void)
 
 			if (Address12 < 01400)
 			{
-				printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
-				 DbgConstructFuncName(Breakpoints[i].Line,FuncName,127),
-				 Breakpoints[i].Line->FileName,Breakpoints[i].Line->LineNumber);
+				GdbmiDisplayBreakpointForLine(Line,i+1);
 				gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
 				Break = 1;
 				break;
 			}
 			if (Address12 >= 04000)
 			{
-				printf ("Breakpoint %d, %s () at %s:%d\n",i+1,
-				 DbgConstructFuncName(Breakpoints[i].Line,FuncName,127),
-				 Breakpoints[i].Line->FileName,
-				 Breakpoints[i].Line->LineNumber);
+				GdbmiDisplayBreakpointForLine(Line,i+1);
 				gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
 				Break = 1;
 				break;
@@ -532,13 +512,14 @@ int DbgMonitorBreakpoints(void)
 				Bank = (CurrentBB >> 10) & 037;
 				if (0 != (CurrentBB & 0100) && Bank >= 030) Bank += 010;
 
-				if (Breakpoints[i].Symbol != NULL)
-				  printf ("Hit breakpoint %s at %02o,%05o.\n",
-					  Breakpoints[i].Symbol->Name, Bank, Address12);
-				else
-				  printf ("Hit breakpoint at %02o,%05o.\n",
-					  Bank, Address12);
-				  gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
+//				if (Breakpoints[i].Symbol != NULL)
+//				  printf ("Hit breakpoint %s at %02o,%05o.\n",
+//					  Breakpoints[i].Symbol->Name, Bank, Address12);
+//				else
+//				  printf ("Hit breakpoint ot %02o,%05o.\n", Bank, Address12);
+
+				GdbmiDisplayBreakpointForLine(Line,i+1);
+				gdbmiUpdateBreakpoint(Debugger.State,&Breakpoints[i]);
 				Break = 1;
 				break;
 			}
@@ -626,6 +607,7 @@ int DbgMonitorBreakpoints(void)
 				}
 			}
 		}
+	}
 
 	return (Break);
 }
