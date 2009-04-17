@@ -1,5 +1,5 @@
 /*
-  Copyright 2004-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2004-2005,2009 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC.
 
@@ -41,6 +41,8 @@
 		02/27/05 RSB	Added the license exception, as required by
 				the GPL, for linking to Orbiter SDK libraries.
 		05/14/05 RSB	Corrected website references
+		03/12/09 RSB	Change of initializer for InstallationPath
+				to avoid a compiler warning.
 */
 
 #include <stdlib.h>
@@ -64,7 +66,8 @@
 #define INSTALLDIR "/usr/local/bin"
 #endif
 #endif
-char *InstallationPath = INSTALLDIR;
+static char DefaultInstallationPath[] = INSTALLDIR;
+char *InstallationPath = DefaultInstallationPath; 
 
 FILE *
 rfopen (const char *Filename, const char *mode)

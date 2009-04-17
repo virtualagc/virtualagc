@@ -52,6 +52,11 @@ static void CliShowUsage(void)
 "--debug-deda      This mode runs the core program as usual, but also\n"
 "                  responds to messages from yaDEDA and generates fake\n"
 "                  messages to yaDEDA for testing purposes.\n"
+"--deda-quiet      Used with --debug-deda to eliminate outputs from yaAGC\n"
+"                  to the DEDA.  In other words, lets yaAGC parse the\n"
+"                  messages being received from the DEDA, but never to\n"
+"                  send any.  That lets \"yaAGC --debug-deda --deda-quiet\"\n"
+"                  to be used alongside yaAGS without conflict.\n"
 "--cfg=file        The name of a configuration file.  Presently, the\n"
 "                  configuration files is used only for --debug-dsky\n"
 "                  mode.  It would typically be the same configuration\n"
@@ -137,6 +142,7 @@ static void CliInitializeOptions(void)
 	  Options.dump_time = 10;
 	  Options.debug_dsky = 0;
 	  Options.debug_deda = 0;
+	  Options.deda_quiet = 0;
 	  Options.quiet = 0;
 	  Options.fullname = 0;
 	  Options.debug = 1;
@@ -180,6 +186,7 @@ static int CliProcessArgument(char* token)
 	else if (1 == sscanf (token, "-dump-time=%d", &j)) Options.dump_time = j;
 	else if (!strcmp (token, "-debug-dsky")) Options.debug_dsky = 1;
 	else if (!strcmp (token, "-debug-deda")) Options.debug_deda = 1;
+	else if (!strcmp (token, "-deda-quiet")) Options.deda_quiet = 1;
 	else if (!strcmp (token, "-cdu-log")) Options.cdu_log = CduLog;
 	else if (!strncmp (token, "-cfg=", 5)) Options.cfg = strdup(&token[5]);
 	else if (!strcmp (token, "-fullname")) Options.fullname = 1;

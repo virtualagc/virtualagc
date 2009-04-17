@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -41,12 +41,16 @@
   Compiler:	GNU gcc.
   Contact:	Ron Burkey <info@sandroid.org>
   Reference:	http://www.ibiblio.org/apollo/index.html
-  Mods:		07/12/05 RSB.	Created.
-  
-  Note:  Right now (07/12/05), there's a problem with this program in that if
-  you run yaAGC under it, it essentially uses up all available CPU time.
-  (Whereas if you run yaAGC from a command line or a batch file, it takes
-  an immeasurably small amount of CPU time.)
+  Mods:		07/12/05 RSB	Created.  Note:  Right now, there's a
+  			        problem with this program in that if
+				you run yaAGC under it, it essentially 
+				uses up all available CPU time. (Whereas 
+				if you run yaAGC from a command line 
+				or a batch file, it takes an immeasurably 
+				small amount of CPU time.)
+  		03/08/09 RSB	Tried a workaround for the 100% CPU time
+				mentioned above. Increased the max command-line
+				length from 128 to 256.
 
   This program expects to receive a list of command-lines for processes,
   separated by \n and/or \r, on the standard input.  It ignores white lines
@@ -66,7 +70,7 @@
 #include <ctype.h>
 
 #define MAX_PROCESSES 20
-#define MAX_LENGTH 128
+#define MAX_LENGTH 256
 static char CommandLines[MAX_PROCESSES][MAX_LENGTH + 1];
 STARTUPINFO si[MAX_PROCESSES];
 PROCESS_INFORMATION pi[MAX_PROCESSES];
@@ -118,17 +122,20 @@ main (void)
     }
 
   // Wait for any one of them to exit.
-  Sleep (10000);
+  Sleep (30000);
   printf ("Scanning for process exits.\n"); 
   while (1)
-  for (i = 0; i < NumProcesses; i++)
     {
-      // Wait 10 ms. for process to end.
-      if (WAIT_TIMEOUT != WaitForSingleObject (pi[i].hProcess, 100))
-        {
-          printf ("Process #%d exited.\n", i); 
-          goto Done;           // Not timeout, so must be exit or error!
-        } 
+      for (i = 0; i < NumProcesses; i++)
+	{
+	  // Wait 10 ms. for process to end.
+	  if (WAIT_TIMEOUT != WaitForSingleObject (pi[i].hProcess, 100))
+	    {
+	      printf ("Process #%d exited.\n", i); 
+	      goto Done;           // Not timeout, so must be exit or error!
+	    } 
+	}
+      Sleep (500);
     }
 
   // Now terminate all of them!

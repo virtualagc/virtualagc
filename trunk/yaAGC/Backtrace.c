@@ -132,7 +132,7 @@ SymbolLine_t* FindLastLineMain ( void )
 // the vector to the interrupt are removed.  The reason for this is that
 // otherwise the array will quickly become completely full of interrupt
 // code, and all backtrace points to foreground code will be completely lost.
-void BacktraceAdd ( agc_t *State, int Cause, unsigned NextZ )
+void BacktraceAdd ( agc_t *State, int Cause )
 {
 	BacktracePoint_t *Bp;
 	if ( SingleStepCounter == -2 || BacktraceInitialized == -1 ) return;
@@ -198,8 +198,8 @@ void BacktraceAdd ( agc_t *State, int Cause, unsigned NextZ )
 	Bp->SubstituteInstruction = State->SubstituteInstruction;
 	Bp->DueToInterrupt = Cause;
 
-	if (NextZ < 5) Bp->TargetZ = Bp->Erasable[0][NextZ];
-	else Bp->TargetZ = NextZ;
+//	if (NextZ < 5) Bp->TargetZ = Bp->Erasable[0][NextZ];
+//	else Bp->TargetZ = NextZ;
 
 	// printf("\n*** %d ***\n",Bp->TargetZ);
 

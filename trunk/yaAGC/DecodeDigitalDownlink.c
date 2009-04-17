@@ -1,6 +1,6 @@
  /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
-
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
+  
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -16,17 +16,17 @@
   You should have received a copy of the GNU General Public License
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+  
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with
-  modified versions of the Orbiter SDK library that use the same license as
-  the Orbiter SDK library), and distribute linked combinations including
-  the two. You must obey the GNU General Public License in all respects for
-  all of the code used other than the Orbiter SDK library. If you modify
-  this file, you may extend this exception to your version of the file,
-  but you are not obligated to do so. If you do not wish to do so, delete
-  this exception statement from your version.
-
+  link the code of this program with the Orbiter SDK library (or with 
+  modified versions of the Orbiter SDK library that use the same license as 
+  the Orbiter SDK library), and distribute linked combinations including 
+  the two. You must obey the GNU General Public License in all respects for 
+  all of the code used other than the Orbiter SDK library. If you modify 
+  this file, you may extend this exception to your version of the file, 
+  but you are not obligated to do so. If you do not wish to do so, delete 
+  this exception statement from your version. 
+ 
   Filename:	DecodeDownlinkList.c
   Purpose:	The DecodeDigitalDownlink function can be used to print out
   		a downlink list.  Simply keep feeding it data from channel
@@ -35,7 +35,7 @@
   Contact:	Ron Burkey <info@sandroid.org>
   Reference:	http://www.ibiblio.org/apollo/index.html
   Mods:		06/27/05 RSB.	Began.
-  		06/28/05 RSB.	Rewrote a lot to base the printing on
+  		06/28/05 RSB.	Rewrote a lot to base the printing on 
 				arrays of specifications.
 		06/30/05 RSB	Now completely configurable at runtime.
 		07/01/05 RSB	Now *even more* completely configurable at
@@ -51,7 +51,12 @@
 				(Oops!)  Added CM Powered List..
 		07/27/05 RSB	Added CM Program 22 list.
 		07/28/05 RSB	Added remainder of CM downlink lists.
-
+		04/07/09 RSB	Added ProcessDownlinkList for overriding
+				PrintDownlinkList.  The idea is that its
+				default is NULL, in which case PrintDownlinkList
+				is used.  If non-NULL, then whateverit points
+				to is used in place of PrintDownlinkList.
+  
 */
 
 #define DECODE_DIGITAL_DOWNLINK_C
@@ -186,7 +191,7 @@ FormatEpoch (int IndexIntoList, int Scale, Format_t Format)
   return (DefaultFormatBuffer);
 }
 
-// LM AGS Initialization -- Adjust SP scaling depending on
+// LM AGS Initialization -- Adjust SP scaling depending on 
 // Earth vs. Moon.  Assumes that Scale is set for Earth-orbit,
 // and adjusts it downward for Moon-orbit.  This is the usual
 // situation where there is a difference in earth-moon scaling,
@@ -242,6 +247,7 @@ FormatGtc (int IndexIntoList, int Scale, Format_t Format)
 static char *
 FormatAdotsOrOga (int IndexIntoList, int Scale, Format_t Format)
 {
+  static char Unknown[] = "(unknown)";
   int Flagword6, Dapdatr1, Flagword9;
   double fScale, x;
   x = GetDP (&DownlinkListBuffer[IndexIntoList], 1);
@@ -259,7 +265,7 @@ FormatAdotsOrOga (int IndexIntoList, int Scale, Format_t Format)
 	  if (Dapdatr1 == 010000)
 	    fScale = 12.5;
 	  else if ((Dapdatr1 & 030000) != 020000)
-	    return ("(unknown)");
+	    return (Unknown);
 	  else if (Flagword9 == 0)
 	    fScale = 1.0;	// Scaling here relies on data we don't have.
 	  else
@@ -267,7 +273,7 @@ FormatAdotsOrOga (int IndexIntoList, int Scale, Format_t Format)
 	}
     }
   else				// No DAP
-    return ("(unknown)");
+    return (Unknown);
   sprintf (DefaultFormatBuffer, "%.10g", fScale * x);
   return (DefaultFormatBuffer);
 }
@@ -370,7 +376,7 @@ Sclear (void)
   LastCol = 0;
   for (i = 0; i < Sheight; i++)
     for (j = 0; j < Swidth; j++)
-      Sbuffer[i][j] = ' ';
+      Sbuffer[i][j] = ' ';  
 }
 
 //---------------------------------------------------------------------------
@@ -403,7 +409,7 @@ static DownlinkListSpec_t CmPoweredListSpec = {
     { -1 },
     { 26, "AK=", 180, FMT_SP },
     { 27, "AK1=", 180, FMT_SP },
-    { 28, "AK2=", 180, FMT_SP },
+    { 28, "AK2=", 180, FMT_SP }, 
     { 29, "RCSFLAGS=", B0, FMT_OCT },
     { 30, "THETADX=", 360, FMT_USP },
     { 31, "THETADY=", 360, FMT_USP },
@@ -503,7 +509,7 @@ static DownlinkListSpec_t CmPoweredListSpec = {
     { -1 },
     { 194, "DELVEET2=", B7, FMT_DP },
     { 196, "DELVEET2+2=", B7, FMT_DP },
-    { 198, "DELVEET2+4=", B7, FMT_DP }
+    { 198, "DELVEET2+4=", B7, FMT_DP }    
   }
 };
 
@@ -630,7 +636,7 @@ static DownlinkListSpec_t LmOrbitalManeuversSpec = {
     { 160, "IMODES30=", B0, FMT_OCT },
     { 161, "IMODES33=", B0, FMT_OCT },
     { -1 }, { -1 },
-    { 162, "TIG=", B28, FMT_DP },
+    { 162, "TIG=", B28, FMT_DP },    
     { 164, "OMEGAP=", 45, FMT_SP },
     { 165, "OMEGAQ=", 45, FMT_SP },
     { 166, "OMEGAR=", 45, FMT_SP },
@@ -675,7 +681,7 @@ static DownlinkListSpec_t CmCoastAlignSpec = {
     { -1 },
     { 26, "AK=", 180, FMT_SP },
     { 27, "AK1=", 180, FMT_SP },
-    { 28, "AK2=", 180, FMT_SP },
+    { 28, "AK2=", 180, FMT_SP }, 
     { 29, "RCSFLAGS=", B0, FMT_OCT },
     { 30, "THETADX=", 360, FMT_USP },
     { 31, "THETADY=", 360, FMT_USP },
@@ -880,7 +886,7 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
     { -1 },
     { 126, "RADMODES=", B0, FMT_OCT },
     { 127, "DAPBOOLS=", B0, FMT_OCT },
-    //
+    //  
     { -1 }, { -1 },
     { 128, "OGC=", 360, FMT_DP },
     { 130, "IGC=", 360, FMT_DP },
@@ -888,12 +894,12 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
     { -1 },
     { 134, "BESTI=", 6, FMT_DEC },
     { 135, "BESTJ=", 6, FMT_DEC },
-    { 136, "STARSAV1=", 2, FMT_DP },	// Fix later.
-    { 138, "STARSAV1+2=", 2, FMT_DP },	// Fix later.
-    { 140, "STARSAV1+4=", 2, FMT_DP },	// Fix later.
-    { 142, "STARSAV2=", 2, FMT_DP },	// Fix later.
-    { 144, "STARSAV2+2=", 2, FMT_DP },	// Fix later.
-    { 146, "STARSAV2+4=", 2, FMT_DP },	// Fix later.
+    { 136, "STARSAV1=", 2, FMT_DP },	// Fix later.  
+    { 138, "STARSAV1+2=", 2, FMT_DP },	// Fix later.  
+    { 140, "STARSAV1+4=", 2, FMT_DP },	// Fix later.  
+    { 142, "STARSAV2=", 2, FMT_DP },	// Fix later.  
+    { 144, "STARSAV2+2=", 2, FMT_DP },	// Fix later.  
+    { 146, "STARSAV2+4=", 2, FMT_DP },	// Fix later.  
     { 152, "CDUS=", 360, FMT_SP },
     { 153, "PIPAX=", B14, FMT_SP },
     { 154, "PIPAY=", B14, FMT_SP },
@@ -904,7 +910,7 @@ static DownlinkListSpec_t LmCoastAlignSpec = {
     { 159, "CSMMASS=", B16, FMT_SP },
     { 160, "IMODES30=", B0, FMT_OCT },
     { 161, "IMODES33=", B0, FMT_OCT },
-    { 162, "TIG=", B28, FMT_DP },
+    { 162, "TIG=", B28, FMT_DP },    
     { -1 },
     { 176, "ALPHAQ=", 90, FMT_SP },
     { 177, "ALPHAR=", 90, FMT_SP },
@@ -942,7 +948,7 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { -1 },
     { 26, "AK=", 180, FMT_SP },
     { 27, "AK1=", 180, FMT_SP },
-    { 28, "AK2=", 180, FMT_SP },
+    { 28, "AK2=", 180, FMT_SP }, 
     { 29, "RCSFLAGS=", B0, FMT_OCT },
     { 30, "THETADX=", 360, FMT_USP },
     { 31, "THETADY=", 360, FMT_USP },
@@ -1008,12 +1014,12 @@ static DownlinkListSpec_t CmRendezvousPrethrustSpec = {
     { 142, "CDUS=", 360, FMT_SP },
     { 143, "PIPAX=", B14, FMT_SP },
     { 144, "PIPAY=", B14, FMT_SP },
-    { 145, "PIPAZ=", B14, FMT_SP },
+    { 145, "PIPAZ=", B14, FMT_SP }, 
     { 146, "DIFFALT=", B0, FMT_2DEC },	// Don't yet know the scaling of this.
     { 148, "CENTANG=", 360, FMT_DP },
     { 152, "DELVEET3=", B7, FMT_DP },
     { 154, "DELVEET3+2=", B7, FMT_DP },
-    { 156, "DELVEET3+4=", B7, FMT_DP },
+    { 156, "DELVEET3+4=", B7, FMT_DP },    
     { 158, "OPTMODES=", B0, FMT_OCT },
     { 159, "HOLDFLAG=", B0, FMT_DEC },
     { 160, "LEMMASS=", B16, FMT_SP },
@@ -1079,9 +1085,9 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
     { 28, "RTARGX=", B29, FMT_DP },
     { 30, "RTARGY=", B29, FMT_DP },
     { 32, "RTARGZ=", B29, FMT_DP },
-    { 34, "DELVSLV=", B7, FMT_DP },
-    { 36, "DELVSLV+2=", B7, FMT_DP },
-    { 38, "DELVSLV+4=", B7, FMT_DP },
+    { 34, "DELVSLV=", B7, FMT_DP },   
+    { 36, "DELVSLV+2=", B7, FMT_DP },   
+    { 38, "DELVSLV+4=", B7, FMT_DP }, 
     { -1 },
     { 40, "TCSI=", B28, FMT_DP },
     { 42, "DELVEET1=", B7, FMT_DP },
@@ -1177,7 +1183,7 @@ static DownlinkListSpec_t LmRendezvousPrethrustSpec = {
     { 160, "IMODES30=", B0, FMT_OCT },
     { 161, "IMODES33=", B0, FMT_OCT },
     { -1 }, { -1 },
-    { 162, "TIG=", B28, FMT_DP },
+    { 162, "TIG=", B28, FMT_DP },    
     { 164, "OMEGAP=", 45, FMT_SP },
     { 165, "OMEGAQ=", 45, FMT_SP },
     { 166, "OMEGAR=", 45, FMT_SP },
@@ -1221,7 +1227,7 @@ static DownlinkListSpec_t CmProgram22Spec = {
     { -1 },
     { 26, "AK=", 180, FMT_SP },
     { 27, "AK1=", 180, FMT_SP },
-    { 28, "AK2=", 180, FMT_SP },
+    { 28, "AK2=", 180, FMT_SP }, 
     { 29, "RCSFLAGS=", B0, FMT_OCT },
     { 30, "THETADX=", 360, FMT_USP },
     { 31, "THETADY=", 360, FMT_USP },
@@ -1335,7 +1341,7 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 6, "VSELECT=", B0, FMT_DEC },
     { 8, "LRVTIMDL=", B28, FMT_DP },
     { 10, "VMEAS=", B28, FMT_DP },
-    { 12, "MKTIME=", B28, FMT_DP },
+    { 12, "MKTIME=", B28, FMT_DP }, 
     { 14, "HMEAS=", B28, FMT_DP, &FormatHMEAS },
     { 16, "RANGRDOT=", B0, FMT_2OCT },	// Look at this later.
     { -1 }, { -1 },
@@ -1347,14 +1353,14 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 23, "TANGNB+1=", 360, FMT_SP },
     { 26, "TEVENT=", B28, FMT_DP },
     { -1 },
-    { 28, "UNFC/2=", B0, FMT_DP },
-    { 30, "UNFC/2+2=", B0, FMT_DP },
-    { 32, "UNFC/2+4=", B0, FMT_DP },
-    { -1 },
-    { 34, "VGVECT=", B7, FMT_DP },
-    { 36, "VGVECT+2=", B0, FMT_DP },
-    { 38, "VGVECT+4=", B0, FMT_DP },
-    { -1 },
+    { 28, "UNFC/2=", B0, FMT_DP },    
+    { 30, "UNFC/2+2=", B0, FMT_DP },    
+    { 32, "UNFC/2+4=", B0, FMT_DP },  
+    { -1 },  
+    { 34, "VGVECT=", B7, FMT_DP },    
+    { 36, "VGVECT+2=", B0, FMT_DP },    
+    { 38, "VGVECT+4=", B0, FMT_DP },  
+    { -1 },  
     { 40, "TTF/8=", B17, FMT_DP },
     { 42, "DELTAH=", B24, FMT_DP },
     { -1 }, { -1 },
@@ -1452,7 +1458,7 @@ static DownlinkListSpec_t LmDescentAscentSpec = {
     { 160, "IMODES30=", B0, FMT_OCT },
     { 161, "IMODES33=", B0, FMT_OCT },
     { -1 }, { -1 },
-    { 162, "TIG=", B28, FMT_DP },
+    { 162, "TIG=", B28, FMT_DP },    
     { 164, "OMEGAP=", 45, FMT_SP },
     { 165, "OMEGAQ=", 45, FMT_SP },
     { 166, "OMEGAR=", 45, FMT_SP },
@@ -1579,12 +1585,12 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { -1 },
     { 134, "BESTI=", 6, FMT_DEC },
     { 135, "BESTJ=", 6, FMT_DEC },
-    { 136, "STARSAV1=", 2, FMT_DP },	// Fix later.
-    { 138, "STARSAV1+2=", 2, FMT_DP },	// Fix later.
-    { 140, "STARSAV1+4=", 2, FMT_DP },	// Fix later.
-    { 142, "STARSAV2=", 2, FMT_DP },	// Fix later.
-    { 144, "STARSAV2+2=", 2, FMT_DP },	// Fix later.
-    { 146, "STARSAV2+4=", 2, FMT_DP },	// Fix later.
+    { 136, "STARSAV1=", 2, FMT_DP },	// Fix later.  
+    { 138, "STARSAV1+2=", 2, FMT_DP },	// Fix later.  
+    { 140, "STARSAV1+4=", 2, FMT_DP },	// Fix later.  
+    { 142, "STARSAV2=", 2, FMT_DP },	// Fix later.  
+    { 144, "STARSAV2+2=", 2, FMT_DP },	// Fix later.  
+    { 146, "STARSAV2+4=", 2, FMT_DP },	// Fix later.  
     { 148, "GSAV=", 2, FMT_DP },
     { 150, "GSAV+2=", 2, FMT_DP },
     { 152, "GSAV+4=", 2, FMT_DP },
@@ -1593,7 +1599,7 @@ static DownlinkListSpec_t LmLunarSurfaceAlignSpec = {
     { 159, "CSMMASS=", B16, FMT_SP },
     { 160, "IMODES30=", B0, FMT_OCT },
     { 161, "IMODES33=", B0, FMT_OCT },
-    { 162, "TIG=", B28, FMT_DP },
+    { 162, "TIG=", B28, FMT_DP },    
     { 164, "OMEGAP=", 45, FMT_SP },
     { 165, "OMEGAQ=", 45, FMT_SP },
     { 166, "OMEGAR=", 45, FMT_SP },
@@ -1637,7 +1643,7 @@ static DownlinkListSpec_t CmEntryUpdateSpec = {
     { -1 },
     { 26, "AK=", 180, FMT_SP },
     { 27, "AK1=", 180, FMT_SP },
-    { 28, "AK2=", 180, FMT_SP },
+    { 28, "AK2=", 180, FMT_SP }, 
     { 29, "RCSFLAGS=", B0, FMT_OCT },
     { 30, "THETADX=", 360, FMT_USP },
     { 31, "THETADY=", 360, FMT_USP },
@@ -1773,7 +1779,7 @@ static DownlinkListSpec_t LmAgsInitializationUpdateSpec = {
     { 52, "UPBUF+14=", B0, FMT_2OCT },
     { 54, "UPBUF+16=", B0, FMT_2OCT },
     { 56, "UPBUF+18=", B0, FMT_2OCT },
-    { -1 },
+    { -1 }, 
     // Same as LM Orbital Maneuvers.
     { 58, "REDOCTR=", B0, FMT_DEC },
     { 59, "THETAD=", 360, FMT_SP },
@@ -1821,7 +1827,7 @@ static DownlinkListSpec_t LmAgsInitializationUpdateSpec = {
     { 117, "OMEGAQD=", 45, FMT_SP },
     { 118, "OMEGARD=", 45, FMT_SP },
     { -1 },
-    //
+    // 
     { 120, "CADRFLSH=", B0, FMT_OCT },
     { 121, "CADRFLSH+1=", B0, FMT_OCT },
     { 122, "CADRFLSH+2=", B0, FMT_OCT },
@@ -2012,7 +2018,7 @@ PrintField (const FieldSpec_t *FieldSpec)
 	case FMT_2DEC:
 	  sprintf (&Sbuffer[row][col], "%+d", 0100000 * Ptr[0] + Ptr[1]);
 	  break;
-	case FMT_USP:
+	case FMT_USP:		
 	  PrintUSP (Ptr, FieldSpec->Scale, row, col);
 	  break;
 	}
@@ -2020,19 +2026,32 @@ PrintField (const FieldSpec_t *FieldSpec)
 }
 
 // Print an entire downlink list.
-static void
+
+void
 PrintDownlinkList (const DownlinkListSpec_t *Spec)
 {
-  int i;
-  Sclear ();
-  sprintf (&Sbuffer[0][0], "%s", Spec->Title);
-  for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+  // This is a global pointer to a function which can override PrintDownlinkList().
+  // The idea is that PrintDownlinkList() is the default processor, and can be
+  // used for printing "raw" downlink data, but it can be overridden if the buffered
+  // downlink list needs to be processed differently, for example to be printed on 
+  // a simulated MSK CRT.
+  if (ProcessDownlinkList != NULL)
     {
-      if (i && !Spec->FieldSpecs[i].IndexIntoList)
-        break;		// End of field-list.
-      PrintField (&Spec->FieldSpecs[i]);
+      (*ProcessDownlinkList) (Spec);
     }
-  Swrite ();
+  else
+    {
+      int i;
+      Sclear ();
+      sprintf (&Sbuffer[0][0], "%s", Spec->Title);
+      for (i = 0; i < MAX_DOWNLINK_LIST; i++)
+	{
+	  if (i && !Spec->FieldSpecs[i].IndexIntoList)
+	    break;		// End of field-list.
+	  PrintField (&Spec->FieldSpecs[i]);
+	}
+      Swrite ();
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -2068,7 +2087,7 @@ DecodeErasableDump (char *Title)
 }
 
 //----------------------------------------------------------------------------
-// If you want to print digital downlinks to stdout, just keep feeding
+// If you want to print digital downlinks to stdout, just keep feeding 
 // DecodeDigitalDownlink the data read from output channels 013, 034, and 035
 // as it arrives.  (Actually, you can just feed it data for all AGC output
 // channels, if you like.)  The function takes care of buffering the data and
@@ -2078,7 +2097,7 @@ void
 DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
 {
   static int WordOrderBit = 0, Any = 0;
-
+  
   // Parse the incoming data.  Detect unexpected stuff and restart the packet
   // if found.
   if (Channel == 013)
@@ -2105,7 +2124,7 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
 	    }
 	  else if (Value == 01777)	// CM erasable dump.
 	    {
-	      DownlinkListExpected = 260;
+	      DownlinkListExpected = 260; 
 	      DownlinkListZero = -1;
 	    }
 	  else if (Value == 077774)	// LM orbital maneuvers, CM powered list.
@@ -2138,7 +2157,7 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
       if (0 == (DownlinkListCount & 1))
         goto AbortList;
       if (DownlinkListCount == 1)
-        {
+        { 
 	  if (Value != 077340)	// sync word
             goto AbortList;
 	  if (WordOrderBit)
@@ -2152,21 +2171,23 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
     }
   else
     return;
-
+  
   // Buffer the incoming data.
   if (DownlinkListCount < MAX_DOWNLINK_LIST)
     DownlinkListBuffer[DownlinkListCount++] = Value;
-
+    
   // End of the list!  Do something with the data.
   if (DownlinkListCount >= DownlinkListExpected)
     {
+      static char LMdump[] = "LM erasable dump downlinked.";
+      static char CMdump[] = "CM erasable dump downlinked.";
       switch (DownlinkListBuffer[0])
         {
 	case 01776:
-	  DecodeErasableDump ("LM erasable dump downlinked.");
+	  DecodeErasableDump (LMdump);
 	  break;
 	case 01777:
-	  DecodeErasableDump ("CM erasable dump downlinked.");
+	  DecodeErasableDump (CMdump);
 	  break;
 	case 077774:
 	  if (CmOrLm)
@@ -2210,13 +2231,13 @@ DecodeDigitalDownlink (int Channel, int Value, int CmOrLm)
       Any = 1;
       DownlinkListCount = 0;
     }
-
+    
   return;
 AbortList:
   if (Any && DownlinkListCount != 0)
     {
       Sclear ();
-      sprintf (&Sbuffer[0][0], "Downlink list of type 0%o aborted at word-count %d",
+      sprintf (&Sbuffer[0][0], "Downlink list of type 0%o aborted at word-count %d", 
               DownlinkListBuffer[0], DownlinkListCount);
       Swrite ();
       Any = 0;

@@ -1,6 +1,6 @@
 /*
-  Copyright 2005 Jordan M. Slott <jordanslott@yahoo.com>
-
+  Copyright 2005,2009 Jordan M. Slott <jordanslott@yahoo.com>
+  
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -18,15 +18,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with
-  modified versions of the Orbiter SDK library that use the same license as
-  the Orbiter SDK library), and distribute linked combinations including
-  the two. You must obey the GNU General Public License in all respects for
-  all of the code used other than the Orbiter SDK library. If you modify
-  this file, you may extend this exception to your version of the file,
-  but you are not obligated to do so. If you do not wish to do so, delete
-  this exception statement from your version.
-
+  link the code of this program with the Orbiter SDK library (or with 
+  modified versions of the Orbiter SDK library that use the same license as 
+  the Orbiter SDK library), and distribute linked combinations including 
+  the two. You must obey the GNU General Public License in all respects for 
+  all of the code used other than the Orbiter SDK library. If you modify 
+  this file, you may extend this exception to your version of the file, 
+  but you are not obligated to do so. If you do not wish to do so, delete 
+  this exception statement from your version. 
+ 
   Filename:	symbol_table.c
   Purpose:	Symbol table for debugging AGC source code
   Contact:	Jordan Slott <jordanslott@yahoo.com>
@@ -38,7 +38,7 @@
 				open the symbol table, in order to find
 				the "installed" table. Added regular expression
 				matching to the symbol dump.  Did a bunch of
-				stuff related to getting the symbol dump to
+				stuff related to getting the symbol dump to 
 				fit on the screen in Windows.
                 07/28/05 JMS    Added support for reading in SymbolLine_t
                                 table from symbol table and added the ability
@@ -49,6 +49,22 @@
 				address-contents are displayed.
 		07/31/05 JMS    Keep a sorted list of source files so they
                                 may be listed and for tab-completion.
+		03/17/09 RSB	Corrected the funky alignment of columns when
+				doing a sym-dump in the debugger.
+		03/18/09 RSB	Now overrides the path for source-files found 
+				in .symtab, and uses the path for the .symtab
+				file.  In other words, now assumes that source
+				files (*.s) are in the same directory as 
+				*.symtab.
+		03/20/09 RSB	Corrected symbol tables (as written
+				to files) to always use little-endian
+				representations of integers.  This
+				isn't important for someone compiling
+				their own AGC code, but is needed for
+				moving symbol tables from one CPU type
+				to another, such as for distributing
+				Virtual AGC binaries to PowerPC vs.
+				Intel CPUs. 
 */
 
 #include <stdio.h>
@@ -58,29 +74,30 @@
 #include <sys/types.h>
 //#include <sys/uio.h>
 #include <unistd.h>
+
 #include "agc_engine.h"
 #include "agc_symtab.h"
 #ifdef WIN32
-// For some reason, mingw doesn't supply the regex module.  What I do to
-// overcome this is simply to insert GNU regex's regex.c and regex.h.
-// Naturally, GNU regex is GPL'd, so I'm entitled to do this.  Unfortunately,
+// For some reason, mingw doesn't supply the regex module.  What I do to 
+// overcome this is simply to insert GNU regex's regex.c and regex.h.  
+// Naturally, GNU regex is GPL'd, so I'm entitled to do this.  Unfortunately, 
 // regex.c relies on bcopy, bcmp, and bzero, which mingw also does not provide.
 // Therefore, I fake up those functions from memcpy, memcmp, and memset.
 #include "regex.h"
-void
-bzero (void *s, size_t n)
-{
-  memset (s, 0, n);
+void 
+bzero (void *s, size_t n) 
+{ 
+  memset (s, 0, n); 
 }
 void
 bcopy (const void *src, void *dest, size_t n)
 {
   memcpy (dest, src, n);
 }
-int
-bcmp (const void *s1, const void *s2, size_t n)
-{
-  return (memcmp (s1, s2, n));
+int 
+bcmp (const void *s1, const void *s2, size_t n) 
+{ 
+  return (memcmp (s1, s2, n)); 
 }
 #define DUMP_FORMAT  "%4s %8s %9s%8s %s\n"
 #define DUMP_FORMAT2 "%4d %8s %9s%8s %s:%d\n"
@@ -135,11 +152,11 @@ int
 AddressPrintAGC (Address_t *Address, char *AddressStr)
 {
   if (Address->Invalid)
-    sprintf (AddressStr, "???????  ");
+    sprintf (AddressStr, "???????  "); 
   else if (Address->Constant)
     {
       sprintf (AddressStr, "%07o  ", Address->Value & 07777777);
-    }
+    }  
   else if (Address->Unbanked)
     sprintf (AddressStr, "   %04o  ", Address->SReg);
   else if (Address->Banked)
@@ -152,13 +169,13 @@ AddressPrintAGC (Address_t *Address, char *AddressStr)
 	{
 	  printf ("int-err  ");
 	  return (1);
-	}
+	}  
     }
   else
     {
       printf ("int-err  ");
-      return (1);
-    }
+      return (1);  
+    } 
   return (0);
 }
 
@@ -169,19 +186,19 @@ int
 AddressPrintAGS (Address_t *Address, char *AddressStr)
 {
   if (Address->Invalid)
-    sprintf (AddressStr, "????\t");
+    sprintf (AddressStr, "   ????  "); 
   else if (Address->Constant)
     {
-      sprintf (AddressStr, "%04o\t", Address->Value & 07777);
-    }
+      sprintf (AddressStr, "   %04o  ", Address->Value & 07777);
+    }  
   else if (Address->Address)
-    sprintf (AddressStr, "%04o\t", Address->SReg & 07777);
+    sprintf (AddressStr, "   %04o  ", Address->SReg & 07777);
   else
     {
-      sprintf (AddressStr, "int-err ");
-      return (1);
-    }
-  return (0);
+      sprintf (AddressStr, "int-err  ");
+      return (1);  
+    } 
+  return (0);   
 }
 
 //-------------------------------------------------------------------------
@@ -236,6 +253,74 @@ ResetSymbolTable (void)
 }
 
 //-------------------------------------------------------------------------
+// Here are functions for converting integers in-place between the CPU native
+// representation and little-endian format.  These functions are symmetric,
+// in the sense that they convert in either direction.  The functions do
+// not check in any way that the data being pointed to is 32-bit.  The 
+// case of an Address_t datatype as input is particularly interesting.
+// This datatype has 32-bit fields, and they must each be converted by a
+// separate call to LittleEndian32.  However, the datatype *begins* with a 
+// bunch of packed bitfields, so calling LittleEndian32 on an Address_t will
+// attempt to rearrange the packing of those bitfields.  Whether that's 
+// correct and perfectly portable thing to do, I'm not sure.
+
+#if !defined (BYTE_ORDER) && defined (__BYTE_ORDER)
+#define BYTE_ORDER __BYTE_ORDER
+#endif
+
+#if !defined (BYTE_ORDER) && defined (WIN32)
+#define BYTE_ORDER 1234
+#endif
+
+#ifndef BYTE_ORDER
+#define BYTE_ORDER 1234
+#endif
+
+#if BYTE_ORDER != 1234		// not little-endian
+static 
+void SwapBytes (void *Pointer, int Loc1, int Loc2)
+{
+  char c, *s1, *s2;
+  s1 = ((char *) Pointer) + Loc1;
+  s2 = ((char *) Pointer) + Loc2;
+  c = *s1;
+  *s1 = *s2;
+  *s2 = c;
+}
+#endif
+
+#if BYTE_ORDER == 1234		// little-endian
+
+void
+LittleEndian32 (void *Value)
+{
+}
+
+#elif BYTE_ORDER == 4321	// big-endian
+
+void
+LittleEndian32 (void *Value)
+{
+  SwapBytes (Value, 0, 3);
+  SwapBytes (Value, 1, 2);
+}
+
+#elif BYTE_ORDER == 3412	// PDP-endian
+
+void
+LittleEndian32 (void *Value)
+{
+  SwapBytes (Value, 0, 2);
+  SwapBytes (Value, 1, 3);
+}
+
+#else
+
+#error Sorry, not a supported endian type.
+
+#endif
+
+//-------------------------------------------------------------------------
 // Reads in the symbol table. The .symtab file is given as an argument. This
 // routine updates the global variables storing the symbol table. Returns
 // 0 upon success, 1 upon failure
@@ -248,6 +333,7 @@ ReadSymbolTable (char *fname)
   Symbol_t *symbol;
   SymbolLine_t *Line;
   SymbolFile_t symfile;
+  char *ss;
 
   // Open the symbol table file. If it does not exist, that is ok.
   if (NULL == (fp = rfopen (fname, "rb")))
@@ -258,10 +344,26 @@ ReadSymbolTable (char *fname)
   fd = fileno (fp);
 
   // Read in the SymbolFile_t structure as the header
+  //printf ("__BYTE_ORDER=%0x04X\n", BYTE_ORDER);
   read (fd, &symfile, sizeof(SymbolFile_t));
-
-  /* Set the source path is not overridden by command-line option */
-  if (SourcePathName == (char*)0) SourcePathName = strdup (symfile.SourcePath);
+  //printf ("NumberSymbols=0x%08X\n", symfile.NumberSymbols);
+  //printf ("NumberLines=0x%08X\n", symfile.NumberLines);
+  LittleEndian32 (&symfile.NumberSymbols);
+  LittleEndian32 (&symfile.NumberLines);
+  //printf ("NumberSymbols=0x%08X\n", symfile.NumberSymbols);
+  //printf ("NumberLines=0x%08X\n", symfile.NumberLines);
+  
+  // 20090318 RSB.  We override the source path found in the .symtab
+  // file, and instead assume that the source files are in the same directory
+  // as the .symtab file.  Otherwise, there would be no portability at all.
+  strcpy (symfile.SourcePath, fname);
+  for (ss = &symfile.SourcePath[strlen (symfile.SourcePath) - 1]; ss >= &symfile.SourcePath[0]; ss--)
+    if (*ss == '/' || *ss == '\\')
+      {
+        *ss = 0;
+	break;
+      }
+  SourcePathName = strdup (symfile.SourcePath);
 
   // Allocate the symbol table
   SymbolTableSize = symfile.NumberSymbols;
@@ -281,6 +383,10 @@ ReadSymbolTable (char *fname)
 
       // Read it in from the symbol table file
       read (fd, symbol, sizeof(Symbol_t));
+      LittleEndian32 (symbol);
+      LittleEndian32 (&symbol->Value.Value);
+      LittleEndian32 (&symbol->Type);
+      LittleEndian32 (&symbol->LineNumber);
       SymbolTable[i] = *symbol;
     }
 
@@ -302,6 +408,9 @@ ReadSymbolTable (char *fname)
 
       // Read it in from the symbol table file
       read (fd, Line, sizeof(SymbolLine_t));
+      LittleEndian32 (Line);
+      LittleEndian32 (&Line->CodeAddress.Value);
+      LittleEndian32 (&Line->LineNumber);
       LineTable[i] = *Line;
     }
 
@@ -324,7 +433,7 @@ ReadSymbolTable (char *fname)
     fclose(tmp);
   }
 #endif
-
+  
   fclose (fp);
   return 0;
 }
@@ -403,7 +512,7 @@ int CompareSymbolName (const void *Raw1, const void *Raw2)
 {
 #define Element1 ((Symbol_t *) Raw1)
 #define Element2 ((Symbol_t *) Raw2)
-  return (strcmp (Element1->Name, Element2->Name));
+  return (strcmp (Element1->Name, Element2->Name));    
 #undef Element1
 #undef Element2
 }
@@ -788,7 +897,7 @@ BackupLineNumber (int LineNumber, int Amount)
 // the file is opened and the file pointer is positions to the proper
 // location. The current file number is updated after this is done.
 // 20050730 RSB.  If address field is non-NULL, then the line-number (from
-// the source file) that would normally be printed is replaced by
+// the source file) that would normally be printed is replaced by 
 // AddressField.  For a one-line disassembly this allows an address and
 // address-contents to be displayed rather than a line number.  The AddressField,
 // if not NULL, is always a 16-character string with whitespace at the end.
@@ -826,7 +935,8 @@ DisplaySource (int NumberLines, char *AddressField)
 // console. The 5 lines before the line given and the 10 lines after the
 // line number given is displayed, subject to the file bounds. If the given
 // LineNumber is -1, then display the next MAX_LIST_LENGTH line numbers.
-void ListSource (char *SourceFile, int LineNumber)
+void
+ListSource (char *SourceFile, int LineNumber)
 {
   // Debug Command: LINENUM
   // If the requested source is the NULL, then we want to display
@@ -932,7 +1042,7 @@ ListSourceLine (char *SourceFile, int LineNumber, char *Contents)
     {
       SkipFilePointer (LineNumber - CurrentLineNumber);
       CurrentLineNumber = LineNumber;
-
+      
       printf ("Source file = %s:%d\n", CurrentSourcePath, CurrentLineNumber);
       DisplaySource (1, Contents);
     }
@@ -985,7 +1095,8 @@ int LoadSourceLine (char *SourceFile, int LineNumber)
 
 //-------------------------------------------------------------------------
 // Dumps a list of source files given a regular expression pattern
-/*void DumpFiles (const char *Pattern)
+void
+DumpFiles (const char *Pattern)
 {
   int i, Count = 0;
   //char Address[16];
@@ -1015,7 +1126,7 @@ int LoadSourceLine (char *SourceFile, int LineNumber)
 
   fflush (stdout);
   regfree (&preg);
-}*/
+}
 
 //-------------------------------------------------------------------------
 // Compare two source file for comparison purposes.
@@ -1024,7 +1135,7 @@ int CompareFileName (const void *Raw1, const void *Raw2)
 {
 #define Element1 ((char *) Raw1)
 #define Element2 ((char *) Raw2)
-  return (strcmp (Element1, Element2));
+  return (strcmp (Element1, Element2));    
 #undef Element1
 #undef Element2
 }
@@ -1059,7 +1170,7 @@ CreateFileList (void)
 	      printf ("Out of memory in source file list\n");
 	      break;
 	    }
-
+	  
 	  strcpy (SourceFiles[NumberFiles], LineTable[i].FileName);
 	  NumberFiles++;
 	}
