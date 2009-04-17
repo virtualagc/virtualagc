@@ -40,6 +40,7 @@
 		08/23/08 OH	Only support GDB/MI and not proprietary debugging
 		03/12/09 OH	Complete re-write of the main function
 		03/23/09 OH	Reduced main to bare minimum
+		04/16/09 OH Merge April changes from RSB
 */
 
 #include "agc_cli.h"
@@ -51,6 +52,11 @@ Simulator is initialized and subsequently executed.
 */
 int main (int argc, char *argv[])
 {
+#ifdef PTW32_STATIC_LIB
+    // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
+    pthread_win32_process_attach_np ();
+#endif
+
 	/* Delclare Options and parse the command line */
 	Options_t *Options = CliParseArguments(argc, argv);
 
@@ -58,6 +64,11 @@ int main (int argc, char *argv[])
 	 * if the initialization fails or Options is NULL then the simulator will
 	 * return a non zero value and subsequently bail and exit the program */
 	if (SimInitialize(Options) == SIM_E_OK) SimExecute();
+
+#ifdef PTW32_STATIC_LIB
+    // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
+    pthread_win32_process_detach_np ();
+#endif
 
 	return (0);
 }

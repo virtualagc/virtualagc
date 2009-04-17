@@ -42,7 +42,6 @@ extern int NumBreakpoints;
 
 extern int HaveSymbols;
 extern char *SymbolFile;
-//extern int DebugMode;
 extern int SingleStepCounter;
 
 #endif

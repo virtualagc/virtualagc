@@ -36,7 +36,7 @@ int HaveSymbols = 0;    // 1 if we have a symbol table
 char* SymbolFile;       // The name of the symbol table file
 
 /* These globals will be deprecated when debugger is mature */
-static int DebugMode;
+//int DebugMode;
 
 FILE *FromFiles[MAX_FROMFILES];
 FILE *LogFile = NULL;
@@ -420,7 +420,7 @@ int DbgInitialize(Options_t* Options,agc_t* State)
 	if (Options->directory > 0) SourcePathName = Options->directory;
 
     /* Add the AGC starting point */
-	BacktraceAdd (State, 0, 04000);
+	BacktraceAdd (State, 0);
 
 	/* Register the SIGINT to be handled by AGC Debugger */
 	signal(SIGINT, DbgCatchSignal);

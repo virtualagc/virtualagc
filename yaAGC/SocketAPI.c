@@ -1,6 +1,6 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
-  
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
+
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -18,19 +18,19 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
   Filename:	SocketAPI.c
-  Purpose:	This is an implementation of yaAGC-to-peripheral 
+  Purpose:	This is an implementation of yaAGC-to-peripheral
   		communications by means of a socket interface.  If some
-		other means of communications is desired, such as a 
+		other means of communications is desired, such as a
 		memory-mapped i/o-channel interface, just replace the
 		functions in this file with alternate functions.
   Compiler:	GNU gcc.
@@ -44,10 +44,10 @@
 				would endlessly recur.  SOCKET_API_C added
 				for agc_engine.h.
 		05/31/05 RSB	--debug-deda mode.
-		06/05/05 RSB	Corrected polarity of discretes in 
+		06/05/05 RSB	Corrected polarity of discretes in
 				--debug-deda mode.  Corrected positioning
 				of bits in the "input discretes".
-		06/07/05 RSB	Fixed bit positioning in DEDA shift 
+		06/07/05 RSB	Fixed bit positioning in DEDA shift
 				register.
 		06/26/05 RSB	Accounted for uplinked data.
 		07/09/05 RSB	Accounted for rotational hand controller (RHC)
@@ -55,6 +55,16 @@
 				to handle it, since it won't automatically
 				be handled in NullAPI.c.  I'll worry about
 				that later.
+		03/11/09 RSB	Added casts of various char types (unsigned
+				char, char, const char) to other char types
+				for function parameters.  Without these,
+				there were fatal compilation errors with
+				some versions of g++.
+		03/18/09 RSB	Removed printed messages about adding/removing
+				sockets when the DebugMode flag is set.
+				Added some robustness checking to the
+				data stream on the tcp port.
+		03/19/09 RSB	Added DedaQuiet.
 */
 
 #include <errno.h>
@@ -78,6 +88,7 @@ ChannelOutput (agc_t * State, int Channel, int Value)
   //int n;
   Client_t *Client;
   unsigned char Packet[4];
+  extern int DebugMode;
   // Some output channels have purposes within the CPU, so we have to
   // account for those separately.
   if (Channel == 7)
@@ -99,10 +110,11 @@ ChannelOutput (agc_t * State, int Channel, int Value)
   for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
     if (Clients[i].Socket != -1)
       {
-	j = send (Client->Socket, Packet, 4, MSG_NOSIGNAL);
+	j = send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
 	if (j == SOCKET_ERROR && SOCKET_BROKEN)
 	  {
-	    printf ("Removing socket %d\n", Clients[i].Socket);
+	    if (!DebugMode)
+	      printf ("Removing socket %d\n", Clients[i].Socket);
 #ifdef unix
 	    close (Clients[i].Socket);
 #else
@@ -114,18 +126,20 @@ ChannelOutput (agc_t * State, int Channel, int Value)
 }
 
 //----------------------------------------------------------------------
-// A function for handling reception of "input channel" data from 
+// A function for handling reception of "input channel" data from
 // any connected client.  At most one channel of input is handled per
 // call.  The function returns 0 if there is no input, or non-zero if
 // there is input.  If the input causes an interrupt (as, for example,
-// a keystroke from the DSKY), then the function should set the 
+// a keystroke from the DSKY), then the function should set the
 // appropriate request in State->InterruptRequests[].
-// 
+//
 // The function also handles unprogrammed counter increments caused
 // by inputs to the CPU.  The function returns 1 if a counter-increment
 // was performed, and returns zero otherwise.
 
 static int CurrentChannelValues[256] = { 0 };
+static const unsigned char Signatures[4] = { 0x00, 0x40, 0x80, 0xC0 };
+static const unsigned char SignaturesAgs[4] = { 0x00, 0xC0, 0x80, 0x40 };
 
 int
 ChannelInput (agc_t *State)
@@ -135,7 +149,7 @@ ChannelInput (agc_t *State)
   unsigned char c;
   Client_t *Client;
   int Channel, Value;
-  
+
   //We use SocketInterlace to slow down the number
   // of polls of the sockets.
   if (SocketInterlace > 0)
@@ -150,9 +164,25 @@ ChannelInput (agc_t *State)
 	    // packet per client per instruction cycle.
 	    for (j = Client->Size; j < 4; j++)
 	      {
-		k = recv (Client->Socket, &c, 1, 0);
+		k = recv (Client->Socket, (char *) &c, 1, 0);
 		if (k == 0 || k == -1)
 		  break;
+		// 20090318 RSB.  Added this filter for a little robustness,
+		// but it shouldn't be needed.
+		if (!(
+		      (Signatures[j] == (c & 0xC0)) ||
+		      (DebugDeda && (SignaturesAgs[j] == (c & 0xC0)))
+		    )
+		   )
+		  {
+		    Client->Size = 0;
+		    if (0 != (c & 0xC0))
+		      {
+		        j = -1;
+	                continue;
+		      }
+		    j = 0;
+		  }
 		Client->Packet[Client->Size++] = c;
 	      }
 	    // Process a received packet.
@@ -178,7 +208,7 @@ ChannelInput (agc_t *State)
 			UnprogrammedIncrement (State, Channel, Value);
 			Client->Size = 0;
 			return (1);
-		      }  
+		      }
 		    else
 		      {
 			Value &= Client->ChannelMasks[Channel];
@@ -204,17 +234,17 @@ ChannelInput (agc_t *State)
 			// enabled and the data requested (bits 8,9 of channel 13).
 			else if (Channel == 0166)
 			  {
-			    LastRhcPitch = Value;  
+			    LastRhcPitch = Value;
 			    ChannelOutput (State, Channel, Value);	// echo
 			  }
 			else if (Channel == 0167)
 			  {
-			    LastRhcYaw = Value;  
+			    LastRhcYaw = Value;
 			    ChannelOutput (State, Channel, Value);	// echo
 			  }
 			else if (Channel == 0170)
 			  {
-			    LastRhcRoll = Value;  
+			    LastRhcRoll = Value;
 			    ChannelOutput (State, Channel, Value);	// echo
 			  }
 			else if (Channel == 031)
@@ -290,7 +320,7 @@ ChannelInput (agc_t *State)
 		    // communications, and has no interesting purpose yaAGC-wise.
 		    static unsigned char Buffer[9];
 		    static int NumInBuffer = 0, NumWanted = 0, Collecting = 0;
-		    static unsigned char Packet[4]; 
+		    static unsigned char Packet[4];
 		    if (Type == 05 && (Data == 0777002 || Data == 0777004 ||
 		        Data == 0777010 || Data == 0777020))
 		      printf ("DEDA key release.\n");
@@ -298,7 +328,7 @@ ChannelInput (agc_t *State)
 		      {
 		        Buffer[NumInBuffer++] = Data >> 13;
 			if (NumInBuffer < NumWanted)
-			  send (Client->Socket, Packet, 4, 0);
+			  send (Client->Socket, (const char *) Packet, 4, 0);
 			else
 			  {
 			    int i;
@@ -309,7 +339,8 @@ ChannelInput (agc_t *State)
 			    printf ("\n");
 			    if (NumWanted == 3)
 			      {
-			        DedaMonitor = 1;
+			        if (!DedaQuiet)
+			          DedaMonitor = 1;
 				DedaAddress = Buffer[0] * 0100 + Buffer[1] * 010 + Buffer[2];
 				DedaWhen = State->CycleCounter;
 			      }
@@ -320,11 +351,17 @@ ChannelInput (agc_t *State)
 		        NumInBuffer = 0;
 			Collecting = 1;
 			if (Data == 0775002)
-			  NumWanted = 3;
+			  {
+		            printf ("Received DEDA READOUT.\n");
+			    NumWanted = 3;
+			  }
 			else
-			  NumWanted = 9;
+			  {
+		            printf ("Received DEDA ENTR.\n");
+			    NumWanted = 9;
+			  }
 			FormIoPacketAGS (040, ~010, Packet);
-			send (Client->Socket, Packet, 4, 0);
+			send (Client->Socket, (const char *) Packet, 4, 0);
 		      }
 		    else if (Type == 05 && Data == 0767010)
 		      {
@@ -360,6 +397,7 @@ ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t 
   static int TimeoutCount = 0;
   int i, j;
   Client_t *Client;
+  extern int DebugMode;
 
   // Initialize the server sockets, if needed.
   if (NumServers == 0)
@@ -379,9 +417,11 @@ ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t 
 	if (Client->Socket != -1)
 	  {
 	    int ii;
+	    extern int DebugMode;
 	    UnblockSocket (Client->Socket);
-	    printf ("Adding socket %d on port %d\n", Client->Socket,
-		    Portnum + i);
+	    if (!DebugMode)
+	      printf ("Adding socket %d on port %d\n", Client->Socket,
+		      Portnum + i);
 	    Client->Size = 0;
 	    for (ii = 0; ii < 256; ii++)
 	      Client->ChannelMasks[ii] = 077777;
@@ -401,10 +441,11 @@ ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t 
       for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
 	if (Clients[i].Socket != -1)
 	  {
-	    j = send (Client->Socket, &c, 1, MSG_NOSIGNAL);
+	    j = send (Client->Socket, (const char *) &c, 1, MSG_NOSIGNAL);
 	    if (j == SOCKET_ERROR && SOCKET_BROKEN)
 	      {
-		printf ("Removing socket %d\n", Clients[i].Socket);
+	        if (!DebugMode)
+		  printf ("Removing socket %d\n", Clients[i].Socket);
 #ifdef unix
 		close (Clients[i].Socket);
 #else
@@ -425,12 +466,12 @@ UpdateAgcPeripheralConnect (void *AgcState, Client_t *Client)
   for (i = 0; i < 16; i++)
     if (State->OutputChannel10[i] != 0) {
       FormIoPacket (010, State->OutputChannel10[i], Packet);
-      send (Client->Socket, Packet, 4, MSG_NOSIGNAL);
+      send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
     }
   for (i = 011; i < 0200; i++)
     if (State->InputChannel[i] != 0) {
       FormIoPacket (i, State->InputChannel[i], Packet);
-      send (Client->Socket, Packet, 4, MSG_NOSIGNAL);
+      send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
     }
 #undef State
 }
@@ -442,10 +483,10 @@ ChannelRoutine (agc_t *State)
 }
 
 //----------------------------------------------------------------------
-// This function is useful for debugging the yaDEDA socket interface.  It 
+// This function is useful for debugging the yaDEDA socket interface.  It
 // forms a packet for the DEDA shift register.
 
-void 
+void
 ShiftToDeda (agc_t *State, int Data)
 {
   unsigned char Packet[4];
@@ -453,7 +494,7 @@ ShiftToDeda (agc_t *State, int Data)
   Client_t *Client;
   FormIoPacketAGS (027, Data << 13, Packet);
   for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
-    send (Client->Socket, Packet, 4, MSG_NOSIGNAL);
+    send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
 }
 
 

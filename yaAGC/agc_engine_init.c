@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC.
 
@@ -18,15 +18,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with
-  modified versions of the Orbiter SDK library that use the same license as
-  the Orbiter SDK library), and distribute linked combinations including
-  the two. You must obey the GNU General Public License in all respects for
-  all of the code used other than the Orbiter SDK library. If you modify
-  this file, you may extend this exception to your version of the file,
-  but you are not obligated to do so. If you do not wish to do so, delete
-  this exception statement from your version.
-
+  link the code of this program with the Orbiter SDK library (or with 
+  modified versions of the Orbiter SDK library that use the same license as 
+  the Orbiter SDK library), and distribute linked combinations including 
+  the two. You must obey the GNU General Public License in all respects for 
+  all of the code used other than the Orbiter SDK library. If you modify 
+  this file, you may extend this exception to your version of the file, 
+  but you are not obligated to do so. If you do not wish to do so, delete 
+  this exception statement from your version. 
+ 
   Filename:	agc_engine_init.c
   Purpose:	This is the function which initializes the AGC simulation,
   		from a file representing the binary image of core memory.
@@ -47,7 +47,7 @@
 		07/12/04 RSB	Q is now 16 bits.
 		07/15/04 RSB	AGC data now aligned at bit 0 rathern then 1.
 		07/17/04 RSB	I/O channels 030-033 now default to 077777
-				instead of 00000, since the signals are
+				instead of 00000, since the signals are 
 				supposed to be inverted.
 		02/27/05 RSB	Added the license exception, as required by
 				the GPL, for linking to Orbiter SDK libraries.
@@ -60,14 +60,27 @@
 				The main change is the addition of an
 				agc_load_binfile function.  Shouldn't affect
 				non-orbiter builds.
+		02/28/09 RSB	Fixed some compiler warnings for 64-bit machines.
+		03/18/09 RSB	Eliminated periodic messages about 
+				core-dump creation when the DebugMode
+				flag is set.
+		03/27/09 RSB	I've noticed that about half the time, using
+				--resume causes the DSKY to become non-responsive.
+				I wonder if somehow not all the state variables
+				are being saved, and in particular not the 
+				state related to interrupt.  (I haven't checked
+				this!)  Anyhow, there are extra state variables
+				in the agc_t structure which aren't being 
+				saved or restored, so I'm adding all of these.
+		03/30/09 RSB	Added the Downlink variable to the core dumps.
 */
 
 // For Orbiter.
 #ifndef AGC_SOCKET_ENABLED
 
 #include <stdio.h>
+#include "yaAGC.h"
 #include "agc_engine.h"
-#include "agc_symtab.h"
 FILE *rfopen (const char *Filename, const char *mode);
 
 //---------------------------------------------------------------------------
@@ -79,7 +92,7 @@ FILE *rfopen (const char *Filename, const char *mode);
 //      4 -- agc_t structure not allocated.
 //      5 -- File-read error.
 //      6 -- Core-dump file not found.
-// Normally, on input the CoreDump filename is NULL, in which case all of the
+// Normally, on input the CoreDump filename is NULL, in which case all of the 
 // i/o channels, erasable memory, etc., are cleared to their reset values.
 // When the CoreDump is loaded instead, it allows execution to continue precisely
 // from the point at which the CoreDump was created, if AllOrErasable != 0.
@@ -162,6 +175,11 @@ int
 agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 		 int AllOrErasable)
 {
+#if defined (WIN32) || defined (__APPLE__)  
+  uint64_t lli;
+#else
+  unsigned long long lli;
+#endif  
   int RetVal = 0, i, j, Bank;
   FILE *cd = NULL;
 
@@ -173,7 +191,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 
   if (RomImage)
 	  RetVal = agc_load_binfile(State, RomImage);
-
+ 
   // Clear i/o channels.
   for (i = 0; i < NUM_CHANNELS; i++)
     State->InputChannel[i] = 0;
@@ -192,7 +210,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   RetVal = 0;
   State->CycleCounter = 0;
   State->ExtraCode = 0;
-  // I've seen no indication so far of a reset value for interrupt-enable.
+  // I've seen no indication so far of a reset value for interrupt-enable. 
   State->AllowInterrupt = 0;
   State->InterruptRequests[8] = 1;	// DOWNRUPT.
   //State->RegA16 = 0;
@@ -200,6 +218,18 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->PendDelay = 0;
   State->ExtraDelay = 0;
   //State->RegQ16 = 0;
+  
+  State->OutputChannel7 = 0;
+  for (j = 0; j < 16; j++)
+    State->OutputChannel10[j] = 0;
+  State->IndexValue = 0;
+  for (j = 0; j < 1 + NUM_INTERRUPT_TYPES; j++)
+    State->InterruptRequests[j] = 0;
+  State->InIsr = 0;
+  State->SubstituteInstruction = 0;
+  State->DownruptTimeValid = 1;
+  State->DownruptTime = 0;
+  State->Downlink = 0;
 
   if (CoreDump != NULL)
     {
@@ -243,7 +273,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 	      if (1 != fscanf (cd, "%o", &i))
 		goto Done;
 	      State->ExtraCode = i;
-	      // I've seen no indication so far of a reset value for interrupt-enable.
+	      // I've seen no indication so far of a reset value for interrupt-enable. 
 	      if (1 != fscanf (cd, "%o", &i))
 		goto Done;
 	      State->AllowInterrupt = i;
@@ -262,6 +292,41 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 	      //if (1 != fscanf (cd, "%o", &i))
 	      //  goto Done;
 	      //State->RegQ16 = i;
+	      if (1 != fscanf (cd, "%o", &i))
+		goto Done;
+	      State->OutputChannel7 = i;
+	      for (j = 0; j < 16; j++)
+	        {
+		  if (1 != fscanf (cd, "%o", &i))
+		    goto Done;
+		  State->OutputChannel10[j] = i;
+		}
+	      if (1 != fscanf (cd, "%o", &i))
+		goto Done;
+	      State->IndexValue = i;
+	      for (j = 0; j < 1 + NUM_INTERRUPT_TYPES; j++)
+	        {
+		  if (1 != fscanf (cd, "%o", &i))
+		    goto Done;
+		  State->InterruptRequests[j] = i;
+		}
+	      // Override the above and make DOWNRUPT always enabled at start.
+	      State->InterruptRequests[8] = 1;
+	      if (1 != fscanf (cd, "%o", &i))
+		goto Done;
+	      State->InIsr = i;
+	      if (1 != fscanf (cd, "%o", &i))
+		goto Done;
+	      State->SubstituteInstruction = i;
+	      if (1 != fscanf (cd, "%o", &i))
+		goto Done;
+	      State->DownruptTimeValid = i;
+	      if (1 != fscanf (cd, "%llo", &lli))
+		goto Done;
+	      State->DownruptTime = lli;
+	      if (1 != fscanf (cd, "%o", &i))
+		goto Done;
+	      State->Downlink = i;
 	    }
 
 	  RetVal = 0;
@@ -280,8 +345,14 @@ Done:
 void
 MakeCoreDump (agc_t * State, const char *CoreDump)
 {
+#if defined (WIN32) || defined (__APPLE__)  
+  uint64_t lli;
+#else
+  unsigned long long lli;
+#endif  
   FILE *cd = NULL;
   int i, j, Bank;
+  extern int DebugMode;
 
   cd = fopen (CoreDump, "w");
   if (cd == NULL)
@@ -300,7 +371,7 @@ MakeCoreDump (agc_t * State, const char *CoreDump)
       fprintf (cd, "%06o\n", State->Erasable[Bank][j]);
 
   // Write out CPU state variables that aren't part of normal memory.
-  fprintf (cd, "%llo\n", State->CycleCounter);
+  fprintf (cd, FORMAT_64O "\n", State->CycleCounter);
   fprintf (cd, "%o\n", State->ExtraCode);
   fprintf (cd, "%o\n", State->AllowInterrupt);
   //fprintf (cd, "%o\n", State->RegA16);
@@ -309,7 +380,23 @@ MakeCoreDump (agc_t * State, const char *CoreDump)
   fprintf (cd, "%o\n", State->ExtraDelay);
   //fprintf (cd, "%o\n", State->RegQ16);
 
-  printf ("Core-dump file \"%s\" created.\n", CoreDump);
+  // 03/27/09 RSB.  Extra agc_t fields that weren't being saved before
+  // now.  I've made no analysis to determine that all of these are 
+  // actually needed for anything.
+  fprintf (cd, "%o\n", State->OutputChannel7);
+  for (i = 0; i < 16; i++)
+    fprintf (cd, "%o\n", State->OutputChannel10[i]);
+  fprintf (cd, "%o\n", State->IndexValue);
+  for (i = 0; i < 1 + NUM_INTERRUPT_TYPES; i++)
+    fprintf (cd, "%o\n", State->InterruptRequests[i]);
+  fprintf (cd, "%o\n", State->InIsr);
+  fprintf (cd, "%o\n", State->SubstituteInstruction);
+  fprintf (cd, "%o\n", State->DownruptTimeValid);
+  fprintf (cd, "%llo\n", lli = State->DownruptTime);
+  fprintf (cd, "%o\n", State->Downlink);
+
+  if (!DebugMode)
+    printf ("Core-dump file \"%s\" created.\n", CoreDump);
   fclose (cd);
   return;
 

@@ -111,6 +111,8 @@ int SimInitialize(Options_t* Options)
 	Portnum = Options->port;
 	DebugDsky = Options->debug_dsky;
 	DebugDeda = Options->debug_deda;
+	DedaQuiet = Options->deda_quiet;
+
 	Simulator.DumpInterval = Simulator.DumpInterval;
 	SocketInterlaceReload = Options->interlace;
 

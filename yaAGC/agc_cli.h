@@ -25,6 +25,7 @@ typedef struct
   int   dump_time;
   int   debug_dsky;
   int   debug_deda;
+  int   deda_quiet;
   int   quiet;
   int   fullname;
   int   debug;

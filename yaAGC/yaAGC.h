@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -43,6 +43,8 @@
 		05/29/05 RSB	Added AGS equivalents for a couple of 
 				AGC packet functions.
 		08/13/05 RSB	Added the extern "C" stuff.
+		02/28/09 RSB	Added FORMAT_64U, FORMAT_64O for bypassing
+				some compiler warnings on 64-bit machines.
 */
 
 #ifdef __cplusplus
@@ -56,24 +58,48 @@ extern "C" {
 #define unix
 #endif
 
-// Figure out the right include-files for socket stuff..
+// Figure out the right include-files for socket stuff.
 #if defined(unix)
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <fcntl.h>
+#include <stdint.h>
+#ifndef __WORDSIZE
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#elif __WORDSIZE < 64
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#else
+#define FORMAT_64U "%lu"
+#define FORMAT_64O "%lo"
+#endif
+
 #elif defined(WIN32)
+
 #include <windows.h>
 #include <winsock2.h>
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+
 #elif defined(__embedded__)
+
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+
 #elif defined(SDCC)
+
 #else
+
 #error Sorry, cannot determine the target operating system.
 #endif
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
+
 #endif
 
 //--------------------------------------------------------------------------

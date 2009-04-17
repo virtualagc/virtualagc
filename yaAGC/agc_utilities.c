@@ -1,6 +1,6 @@
 /*
   Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
-
+  
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -18,15 +18,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with
-  modified versions of the Orbiter SDK library that use the same license as
-  the Orbiter SDK library), and distribute linked combinations including
-  the two. You must obey the GNU General Public License in all respects for
-  all of the code used other than the Orbiter SDK library. If you modify
-  this file, you may extend this exception to your version of the file,
-  but you are not obligated to do so. If you do not wish to do so, delete
-  this exception statement from your version.
-
+  link the code of this program with the Orbiter SDK library (or with 
+  modified versions of the Orbiter SDK library that use the same license as 
+  the Orbiter SDK library), and distribute linked combinations including 
+  the two. You must obey the GNU General Public License in all respects for 
+  all of the code used other than the Orbiter SDK library. If you modify 
+  this file, you may extend this exception to your version of the file, 
+  but you are not obligated to do so. If you do not wish to do so, delete 
+  this exception statement from your version. 
+ 
   Filename:	agc_utilities.c
   Purpose:	Miscellaneous functions, useful for agc_engine or for other
   		yaAGC-family functions.
@@ -37,7 +37,7 @@
   		08/20/03 RSB.	Added uBit to ParseIoPacket.
 		05/30/04 RSB	Various.
 		07/12/04 RSB	Q is now 16 bits.
-		01/31/05 RSB	Added the setsockopt call to
+		01/31/05 RSB	Added the setsockopt call to 
 				EstablishSocket.
 		02/27/05 RSB	Added the license exception, as required by
 				the GPL, for linking to Orbiter SDK libraries.
@@ -53,7 +53,6 @@
 #include "yaAGC.h"
 #include "agc_engine.h"
 
-
 // Used for socket-operation error codes.
 int ErrorCodes = 0;
 
@@ -63,8 +62,8 @@ int ErrorCodes = 0;
 //--------------------------------------------------------------------------------
 // This function can take an i/o channel number and a 15-bit value for it, and
 // constructs a 4-byte packet suitable for transmission to yaAGC via a socket.
-// Space for the packet must have been allocated by the calling program.
-// Refer to the Virtual AGC Technical Manual, "I/O Specifics" subheading of the
+// Space for the packet must have been allocated by the calling program.  
+// Refer to the Virtual AGC Technical Manual, "I/O Specifics" subheading of the 
 // "Developer Details" chapter.  Briefly, the 4 bytes are:
 //      00pppppp 01pppddd 10dddddd 11dddddd
 // where ppppppppp is the 9-bit channel number and ddddddddddddddd is the 15-bit
@@ -143,43 +142,44 @@ ParseIoPacketAGS (unsigned char *Packet, int *Type, int *Data)
     return (1);
   *Type = Packet[0];
   *Data = ((Packet[1] & 077) << 12) | ((Packet[2] & 077) << 6) | (Packet[3] & 077);
+  //printf ("Type=%011o Data=%011o\n", *Type, *Data);  
   return (0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// Portable functions (*NIX and Win32) for working with sockets.
+// Portable functions (*NIX and Win32) for working with sockets.  
 
 /*
   The usage is this:
-
-  1. Servers:  Create a socket, suitable for clients to connect to,
+  
+  1. Servers:  Create a socket, suitable for clients to connect to, 
      with EstablishSocket().  Call accept(,NULL,NULL) to listen for a new
      client; the function will return whether or not there is a new
      listener, with either -1 (no new client) or else the new socket
      number (>=0); the first parameter is the socket number created by
      EstablishSocket().   The socket should be unblocked with UnblockSocket().
-
+     
   2. Clients:  Connect to a server with CallSocket().  The function will
      return whether or not the connection succeeded, with either -1
      (failure) or else with the connection socket number.
-
+     
   3. Either the client or server can then proceed to perform i/o using
      send() or recv() to all connected servers or clients.
-
+  
   Server example:
-
+  
      int ServerBaseSocket;
      #define MAX_LISTENERS 5
      int ListeningSockets[MAX_LISTENERS], NumListeners = 0;
      int PortNum = ... something ...;
      int i, j;
-
+     
      ServerBaseSocket = EstablishSocket (PortNum, MAX_LISTENERS);
      if (ServerBaseSocket == -1)
        ... unrecoverable error ...
      // Main activity loop
      for (;;)
-       {
+       {  
 	 ...
 	 // Periodically do this:
 	 if (NumListeners < MAX_LISTENERS)
@@ -201,11 +201,11 @@ ParseIoPacketAGS (unsigned char *Packet, int *Type, int *Data)
 	   ... transmit data to listener i using send() ...
 	 ...
       }
-
+      
   Client Example:
-
+  
     int ConnectionSocket = -1;
-
+    
     // Main activity loop.
     for (;;)
       {
@@ -213,16 +213,16 @@ ParseIoPacketAGS (unsigned char *Packet, int *Type, int *Data)
 	// Try for a connection.
 	if (ConnectionSocket == -1)
 	  ConnectionSocket = CallSocket (Hostname, Portnum);
-	...
+	...  
 	// Perform i/o with send/recv:
 	if (ConnectionSocket != -1)
 	  ... send/recv ...
-	...
+	...  
       }
-
-  These examples don't illustrate what to do in case of broken
+      
+  These examples don't illustrate what to do in case of broken 
   connections.  (I don't actually KNOW what to do.)
-
+      
 */
 
 //----------------------------------------------------------------------
@@ -293,13 +293,13 @@ EstablishSocket (unsigned short portnum, int MaxClients)
       ErrorCodes = 0x102;
       return (-1);
     }
-
+    
   // Make sure to clean up after any previous disconnects of the
   // port.  Otherwise there would be a timeout until we could
   // reuse the port.
   i = 1;
   setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (const char *) &i, sizeof (int));
-
+    
   if (bind (s, (struct sockaddr *) &sa, sizeof (struct sockaddr_in)) < 0)
     {
 #ifdef unix

@@ -1,4 +1,4 @@
-# Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 #
@@ -40,10 +40,19 @@
 #				where libcurses.a can be found on some systems.
 #				(Sometimes it is in /usr/lib, sometimes in
 #				/usr/lib/curses, maybe other places as well.
+#		03/06/09 RSB	Added 'all-archs' target, and made other 
+#				adjustments related to building for multiple
+#				target architectures using IMCROSS.
+#		03/08/09 RSB	Added WinAGC.exe
+
+LIBS=${LIBS2}
 
 ifndef PREFIX
 PREFIX=/usr/local
 endif
+
+.PHONY: default
+default: yaAGC
 
 #---------------------------------------------------------------------------
 # The use of libreadline adds a command-history to yaAGC, but may have some
@@ -51,11 +60,16 @@ endif
 #	export NOREADLINE=yes
 #	make
 # instead of just 'make'.
+LIBS0:=${LIBS}
 ifndef NOREADLINE
 CFLAGS2 = -DUSE_READLINE
 LIBS += -L/sw/lib -lreadline
 LIBS += -L/usr/lib/curses -lcurses
 endif	# NOREADLINE
+
+ifeq "${USER}" "rburkey"
+STATIC:=-static
+endif
 
 OBJECTS := \
 	main.o \
@@ -70,10 +84,10 @@ OBJECTS := \
 	regex.o
 
 yaAGC:	$(OBJECTS) CheckDec.o libyaAGC.a
-	gcc ${CFLAGS} -o yaAGC $^ -L. ${LIBS} -lpthread -lyaAGC -lm
+	gcc ${CFLAGS} -o yaAGC $^ -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm
 
-libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o \
-	rfopen.o Backtrace.o SocketAPI.o DecodeDigitalDownlink.o
+libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \
+	Backtrace.o SocketAPI.o DecodeDigitalDownlink.o
 	ar -rc $@ $^
 	ranlib $@
 	touch ../yaDSKY/src/main.c
@@ -91,6 +105,33 @@ CheckDec.o: ../yaCode/Luminary131/CheckDec.c
 
 %.o:	%.c agc_engine.h
 	gcc -ggdb -I/sw/include ${CFLAGS} ${CFLAGS2} -DGDBMI -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+#----------------------------------------------------------------------------------
+# Building for multiple architectures, using IMCROSS.  Since IMCROSS presently
+# does not support readline, I eliminate readline-support from the cross-builds.
+# It would be added back by adding ${CFLAGS2} and changing ${LIBS0} to ${LIBS}.
+
+.PHONY: all-archs
+all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx
+
+CSOURCE:=main.c agc_engine_init.c agc_engine.c agc_utilities.c rfopen.c \
+	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Luminary131/CheckDec.c \
+	 nbfgets.c symbol_table.c
+
+yaAGC.exe: ${CSOURCE} random.c
+	i386-mingw32-gcc \
+		${CFLAGS} -DNVER=${NVER} \
+		 -DPTW32_STATIC_LIB -DPCRE_STATIC \
+		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --cflags-posix` \
+		-o $@ $^ -L. ${LIBS0} -lpthreadGC2-static -lm -lwsock32 \
+		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --libs-posix` \
+
+WinAGC.exe: WinAGC.c
+	i386-mingw32-gcc -o $@ $^
+
+yaAGC-macosx: ${CSOURCE}
+	powerpc-apple-darwin9-gcc -arch ppc -arch i386 \
+		${CFLAGS} -DNVER=${NVER} \
+		-o $@ $^ -L. ${LIBS0} -lpthread -lm
 
 #----------------------------------------------------------------------------------
 # Embedded-firmware stuff for Coldfire is below this line.	

@@ -1,6 +1,6 @@
 /*
-  Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>
-
+  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
+  
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -18,22 +18,22 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with
-  modified versions of the Orbiter SDK library that use the same license as
-  the Orbiter SDK library), and distribute linked combinations including
-  the two. You must obey the GNU General Public License in all respects for
-  all of the code used other than the Orbiter SDK library. If you modify
-  this file, you may extend this exception to your version of the file,
-  but you are not obligated to do so. If you do not wish to do so, delete
-  this exception statement from your version.
-
+  link the code of this program with the Orbiter SDK library (or with 
+  modified versions of the Orbiter SDK library that use the same license as 
+  the Orbiter SDK library), and distribute linked combinations including 
+  the two. You must obey the GNU General Public License in all respects for 
+  all of the code used other than the Orbiter SDK library. If you modify 
+  this file, you may extend this exception to your version of the file, 
+  but you are not obligated to do so. If you do not wish to do so, delete 
+  this exception statement from your version. 
+ 
   Filename:	agc_engine.h
   Purpose:	Header file for AGC emulator engine.
   Contact:	Ron Burkey <info@sandroid.org>
   Reference:	http://www.ibiblio.org/apollo
   Mods:		04/05/03 RSB.	Began.
 		10/20/03 RSB.	Corrected inclusion of sys/types.h to
-				stdint.h instead.
+				stdint.h instead. 
 		11/26/03 RSB.	Up to now, a pseudo-linear space was used to
 				model internal AGC memory.  This was simply too
 				tricky to work with, because it was too hard to
@@ -61,7 +61,7 @@
 		07/12/04 RSB	Q is now 16 bits.
 		07/15/04 RSB	Data alignment changed to bit 0 instead of 1.
 				Introduced REG16.
-		07/19/04 RSB	Added SocketInterlaceReload.  Max clients
+		07/19/04 RSB	Added SocketInterlaceReload.  Max clients 
 				increased from 5 to 10.
 		08/12/04 RSB	Added OutputChannel10[], for capturing
 				writes to the relay rows of channel 10.
@@ -78,17 +78,21 @@
 		06/28/05 RSB	Added digital downlink stuff.
 		07/05/05 RSB	Added AllOrErasable.
 		08/13/05 RSB	Added the extern "C" stuff, on the advice of
-				Mark Grant; similarly, added the
+				Mark Grant; similarly, added the 
 				agc_clientdata field to agc_t.
 		08/22/05 RSB	"unsigned long long" replaced by uint64_t.
 		02/26/06 RSB	Miscellaneous changes requested by Mark Grant
 				to make the Orbiter integration easier.
 				Shouldn't affect non-Orbiter builds.
-
+		03/19/09 RSB	Added DedaQuiet.
+		03/30/09 RSB	Moved Downlink from CpuWriteIO() local variable
+				to agc_t.
+		04/07/09 RSB	Added ProcessDownlinkList and ProcessDownlinkList_t.
+   
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
   http://hrst.mit.edu/hrs/apollo/public/archive/1704.pdf.
-
+  
 */
 
 #ifndef AGC_SOCKET_ENABLED
@@ -158,7 +162,7 @@ extern long random (void);
 // for overflow, with bad results.
 #define REG16 3
 
-// Handy names for the memory locations associated with special-purpose
+// Handy names for the memory locations associated with special-purpose 
 // registers, in octal.
 #define RegA 00
 #define RegL 01
@@ -227,7 +231,7 @@ extern long random (void);
 // Max number of 15-bit words in a downlink-telemetry list.
 #define MAX_DOWNLINK_LIST 260
 
-// Screen buffer for telemetry downlinks.  The terminal must be at least
+// Screen buffer for telemetry downlinks.  The terminal must be at least 
 // one bigger in each dimension than the actual amount of text used.
 #define DEFAULT_SWIDTH 79
 #define DEFAULT_SHEIGHT 42
@@ -275,6 +279,9 @@ typedef struct {
   FieldSpec_t FieldSpecs[MAX_DOWNLINK_LIST];
 } DownlinkListSpec_t;
 
+// A type of function for processing downlink lists.
+typedef void ProcessDownlinkList_t (const DownlinkListSpec_t *Spec);
+
 //--------------------------------------------------------------------------
 // Each instance of the AGC CPU simulation has a data structure of type agc_t
 // that contains the CPU's internal states, the complete memory space, and any
@@ -283,7 +290,7 @@ typedef struct {
 typedef struct
 {
   // The following variable counts the total number of clock cycles since
-  // CPU-startup.  A 64-bit integer is used, because with a 32-bit integer
+  // CPU-startup.  A 64-bit integer is used, because with a 32-bit integer 
   // you'd get only about 14 hours before the counter wraps around.
   uint64_t /* unsigned long long */ CycleCounter;
   // All memory -- registers, RAM, and ROM -- is 16-bit, consisting of 15 bits
@@ -315,6 +322,7 @@ typedef struct
   //unsigned RegQ16:1;		// Bit "16" of register Q.
   unsigned DownruptTimeValid:1;	// Set if the DownruptTime field is valid.
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
+  int Downlink;
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.
@@ -358,7 +366,6 @@ typedef struct {
   unsigned InIsr:1;		// Set when in an ISR, reset when in normal code.
   unsigned SubstituteInstruction:1;	// Use BBRUPT register.
   //unsigned RegQ16:1;		// Bit "16" of register Q.
-  unsigned TargetZ;             // Target Z of the Execution Frame
 } BacktracePoint_t;
 
 typedef struct
@@ -367,25 +374,31 @@ typedef struct
   unsigned char Packet[4];
   int Size;
   int ChannelMasks[256];
+  //int DedaBufferCount;
+  //int DedaBufferWanted;
+  //int DedaBufferReadout;
+  //int DedaBufferDefault;
+  //int DedaBuffer[9];
 } Client_t;
 
 #define DEFAULT_MAX_CLIENTS 10
 
 #ifdef AGC_ENGINE_C
+int DebugMode = 0;
 int SingleStepCounter = -2;		// -2 when not in --debug mode.
 int BacktraceInitialized = 0;		// Becomes -1 on error.
-// We have a backtrace circular buffer, in which we place an entry every
+// We have a backtrace circular buffer, in which we place an entry every 
 // time an instruction is hit that may branch. The buffer is updated only
 // if we're in --debug mode.
 BacktracePoint_t *BacktracePoints = NULL;
 int BacktraceNextAdd = 0;
 int BacktraceCount = 0;
 // MAX_CLIENTS is the maximum number of hardware simulations which can be
-// attached.  The DSKY is always one, presumably.  The array is a list of
-// the sockets used for the clients.  Thus stuff shown below is the
+// attached.  The DSKY is always one, presumably.  The array is a list of 
+// the sockets used for the clients.  Thus stuff shown below is the 
 // DEFAULT setup.  The max number of clients can be change during runtime
 // initialization by setting MAX_CLIENTS to a different number, allocating
-// new arrays of clients and sockets corresponding to the new size, and
+// new arrays of clients and sockets corresponding to the new size, and 
 // then pointing the Clients and ServerSockets pointers at those arrays.
 int MAX_CLIENTS = DEFAULT_MAX_CLIENTS;
 static Client_t DefaultClients[DEFAULT_MAX_CLIENTS];
@@ -394,17 +407,19 @@ Client_t *Clients = DefaultClients;
 int *ServerSockets = DefaultSockets;
 int NumServers = 0;
 int SocketInterlaceReload = 50;
-int DebugDeda = 0;
+int DebugDeda = 0, DedaQuiet = 0;
 int DedaMonitor = 0;
 int DedaAddress;
 uint64_t /* unsigned long long */ DedaWhen;
 int DownlinkListBuffer[MAX_DOWNLINK_LIST];
 int DownlinkListCount = 0, DownlinkListExpected = 0, DownlinkListZero = -1;
+ProcessDownlinkList_t *ProcessDownlinkList = NULL;
 int CmOrLm = 0;	// Default is 0 (LM); other choice is 1 (CM)
 char Sbuffer[SHEIGHT][SWIDTH + 1];
 int Sheight = DEFAULT_SHEIGHT, Swidth = DEFAULT_SWIDTH;
 int LastRhcPitch = 0, LastRhcYaw = 0, LastRhcRoll = 0;
 #else //AGC_ENGINE_C
+extern int DebugMode;
 extern int SingleStepCounter;
 extern int BacktraceInitialized;
 extern BacktracePoint_t *BacktracePoints;
@@ -415,12 +430,13 @@ extern Client_t *Clients;
 extern int *ServerSockets;
 extern int NumServers;
 extern int SocketInterlaceReload;
-extern int DebugDeda;
+extern int DebugDeda, DedaQuiet;
 extern int DedaMonitor;
 extern int DedaAddress;
 extern uint64_t /* unsigned long long */ DedaWhen;
 extern int DownlinkListBuffer[MAX_DOWNLINK_LIST];
 extern int DownlinkListCount, DownlinkListExpected, DownlinkListZero;
+extern ProcessDownlinkList_t *ProcessDownlinkList;
 extern int CmOrLm;
 extern char Sbuffer[SHEIGHT][SWIDTH + 1];
 extern int Sheight, Swidth;
@@ -453,7 +469,7 @@ void CpuWriteIO (agc_t * State, int Address, int Value);
 void MakeCoreDump (agc_t * State, const char *CoreDump);
 void UnblockSocket (int SocketNum);
 //FILE *rfopen (const char *Filename, const char *mode);
-void BacktraceAdd (agc_t *State, int Cause, unsigned NextZ);
+void BacktraceAdd (agc_t *State, int Cause);
 int BacktraceRestore (agc_t *State, int n);
 void BacktraceDisplay (agc_t *State,int Num);
 int16_t OverflowCorrected (int Value);
@@ -462,6 +478,7 @@ int AddSP16 (int Addend1, int Addend2);
 void UnprogrammedIncrement (agc_t *State, int Counter, int IncType);
 
 void DecodeDigitalDownlink (int Channel, int Value, int CmOrLm);
+ProcessDownlinkList_t PrintDownlinkList;
 void PrintDP (int *Ptr, int Scale, int row, int col);
 void PrintSP (int *Ptr, int Scale, int row, int col);
 void PrintUSP (int *Ptr, int Scale, int row, int col);
