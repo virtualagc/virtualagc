@@ -68,7 +68,7 @@ LIBS += -L/usr/lib/curses -lcurses
 endif	# NOREADLINE
 
 ifeq "${USER}" "rburkey"
-STATIC:=-static
+STATIC:=
 endif
 
 OBJECTS := \
