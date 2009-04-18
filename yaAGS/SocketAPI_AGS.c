@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -36,7 +36,10 @@
   Compiler:	GNU gcc.
   Contact:	Ron Burkey <info@sandroid.org>
   Reference:	http://www.ibiblio.org/apollo/index.html
-  Mods:		06/07/05 RSB.	Began.
+  Mods:		06/07/05 RSB	Began.
+  		03/18/09 RSB	Added some robustness filtering to 
+				the tcp interface.
+		03/19/09 RSB	Added stuff related to --debug-deda.
 */
 
 #include <errno.h>
@@ -58,8 +61,43 @@ typedef unsigned short uint16_t;
 // for the fact that the flight software assumes that the shift-register data
 // will be available 80 microseconds after requesting it.  We can't meet this
 // timing constraint without buffering the data.
+// The following stuff is now in the Client_t structure, to account for the possibility
+// in debugging that several DEDAs might be connected.
 int DedaBuffer[9], DedaBufferCount = 0, DedaBufferWanted = 0,
   DedaBufferReadout = 0, DedaBufferDefault = 0;
+
+//-----------------------------------------------------------------------------
+// Functions for sending "output channel" data to a single connected client.
+// This is principally useful for asking a specific DEDA for its keyboard
+// buffer.
+static
+void OneRawChannelOutputAGS (Client_t *Client, const unsigned char *Packet, int Type, int Data)
+{
+  if (Client->Socket != -1)
+    {
+      if (send (Client->Socket, Packet, 4, MSG_NOSIGNAL) == SOCKET_ERROR 
+          && SOCKET_BROKEN)
+	{
+	  if (!DebugMode)
+	    printf ("Removing socket %d\n", Client->Socket);
+#ifdef unix
+	  close (Client->Socket);
+#else
+	  closesocket (Client->Socket);
+#endif
+	  Client->Socket = -1;
+	}
+    }
+}
+
+static void
+OneChannelOutputAGS (Client_t *Client, int Type, int Data)
+{
+  unsigned char Packet[4];
+  if (FormIoPacketAGS (Type, Data, Packet))
+    return;
+  OneRawChannelOutputAGS (Client, Packet, Type, Data);
+}
 
 //-----------------------------------------------------------------------------
 // Function for broadcasting "output channel" data to all connected clients of
@@ -68,32 +106,20 @@ int DedaBuffer[9], DedaBufferCount = 0, DedaBufferWanted = 0,
 void
 ChannelOutputAGS (int Type, int Data)
 {
-  int i, j;
-  //int n;
+  int i;
   Client_t *Client;
   unsigned char Packet[4];
   if (FormIoPacketAGS (Type, Data, Packet))
     return;
   for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
-    if (Clients[i].Socket != -1)
-      {
-	j = send (Client->Socket, Packet, 4, MSG_NOSIGNAL);
-	if (j == SOCKET_ERROR && SOCKET_BROKEN)
-	  {
-	    printf ("Removing socket %d\n", Clients[i].Socket);
-#ifdef unix
-	    close (Clients[i].Socket);
-#else
-	    closesocket (Clients[i].Socket);
-#endif
-	    Clients[i].Socket = -1;
-	  }
-      }
+    OneRawChannelOutputAGS (Client, Packet, Type, Data);
 }
 
 //----------------------------------------------------------------------------
 // Function for fetching yaAGS input-channel data into the State structure's
 // input-channel buffer.
+
+static const unsigned char Signatures[4] = { 0x00, 0xc0, 0x80, 0x40 };
 
 int 
 ChannelInputAGS (ags_t * State)
@@ -121,6 +147,18 @@ ChannelInputAGS (ags_t * State)
 		k = recv (Client->Socket, &c, 1, 0);
 		if (k == 0 || k == -1)
 		  break;
+		// 20090318 RSB.  Added this filter for a little 
+		// robustness, but it shouldn't be needed.
+		if (Signatures[j] != (c & 0xC0))
+		  {
+		    Client->Size = 0;
+		    if (0 != (c & 0xC0))
+		      {
+		        j = -1;
+	                continue;
+		      }
+		    j = 0;
+		  }
 		Client->Packet[Client->Size++] = c;
 	      }
 	    // Process a received packet.
@@ -146,27 +184,60 @@ ChannelInputAGS (ags_t * State)
 			}
 		      break;
 		    case 005:		// discrete input word 2.
+		      if (DebugDeda && (0 != (Data & 036)))
+		        {
+			  if (0 != (Data & 020))
+			    {
+			      if (0 == (Data & 020000))
+			        printf ("DEDA #%d CLR pressed\n", i);
+			      else 
+			        printf ("DEDA #%d CLR released\n", i);
+			    }
+			  else if (0 != (Data & 010))
+			    {
+			      if (0 == (Data & 010000))
+			        printf ("DEDA #%d HOLD pressed\n", i);
+			      else 
+			        printf ("DEDA #%d HOLD released\n", i);
+			    }
+			  else if (0 != (Data & 04))
+			    {
+			      if (0 == (Data & 004000))
+			        printf ("DEDA #%d ENTR pressed\n", i);
+			      else 
+			        printf ("DEDA #%d ENTR released\n", i);
+			    }
+			  else if (0 != (Data & 02))
+			    {
+			      if (0 == (Data & 002000))
+			        printf ("DEDA #%d READOUT pressed\n", i);
+			      else 
+			        printf ("DEDA #%d READOUT released\n", i);
+			    }
+			}
 		      // If the READ OUT or ENTR keys are active,
 		      // we must intercept them and buffer the 
 		      // associated data before letting the CPU
 		      // know about it.
-		      k = ((Data & 0777) << 9);
-		      j = (Data & k) | ~k;
-		      if (0 == (j & 04000))		// ENTR?
+		      if (04 == (Data & 04004))		// ENTR?
 		        {
 			  DedaBufferCount = 0;	// Prepare to collect data.
 			  DedaBufferWanted = 9;
 			  Data |= 04000;	// Reset the ENTR key.
 			  // Request DEDA shift data.
-			  ChannelOutputAGS (040, State->OutputPorts[IO_ODISCRETES] & ~010);
+			  if (DebugDeda)
+			    printf ("Request DEDA #%d shift data\n", i);
+			  OneChannelOutputAGS (Client, 040, State->OutputPorts[IO_ODISCRETES] & ~010);
 			}
-		      else if (0 == (j & 02000))	// READ OUT?
+		      else if (02 == (Data & 02002))	// READ OUT?
 		        {
 			  DedaBufferCount = 0;	// Prepare to collect data.
 			  DedaBufferWanted = 3;
 			  Data |= 02000;	// Reset the READ OUT key.
 			  // Request DEDA shift data.
-			  ChannelOutputAGS (040, State->OutputPorts[IO_ODISCRETES] & ~010);
+			  if (DebugDeda)
+			    printf ("Request DEDA #%d shift data\n", i);
+			  OneChannelOutputAGS (Client, 040, State->OutputPorts[IO_ODISCRETES] & ~010);
 			}
 		      // Yes, it is supposed to fall through here.		
 		    case 004:		// Discrete input word 1.
@@ -185,15 +256,22 @@ ChannelInputAGS (ags_t * State)
 			      if (DedaBufferCount < DedaBufferWanted)
 			        {
 				  // Request more DEDA shift data.
-				  ChannelOutputAGS (040, State->OutputPorts[IO_ODISCRETES] & ~010);
+				  if (DebugDeda)
+				    printf ("Request DEDA #%d shift data\n", i);
+				  OneChannelOutputAGS (Client, 040, 
+				  		       State->OutputPorts[IO_ODISCRETES] & ~010);
 				}
 			      else
 				{
 				  // The data is all buffered.  We can tell the
 				  // CPU that the ENTR or READ OUT key was pressed.
-				  //printf ("Buffered from DEDA: CLR");
-				  //for (j = 0; j < DedaBufferWanted; j++)
-				  //  printf (" %02o", DedaBuffer[j] >> 13);
+				  if (DebugDeda)
+				    {
+				      printf ("DEDA #%d data", i);
+				      for (j = 0; j < DedaBufferWanted; j++)
+				        printf (" %02o", DedaBuffer[j] >> 13);
+				      printf ("\n");
+				    }
 				  DedaBufferReadout = -1;
 				  if (DedaBufferWanted == 3)
 				    {

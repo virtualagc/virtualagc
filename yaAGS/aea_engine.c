@@ -273,12 +273,12 @@ FetchDedaShift (ags_t *State)
     {
       DedaBufferDefault = DedaBuffer[DedaBufferReadout];
       if (DedaBufferReadout + 1 == DedaBufferWanted)
-        DedaBufferWanted = DedaBufferCount = DedaBufferReadout = 0;
-  // Tell the CPU that the ENTR or READ OUT key has been released.
-  if (DedaBufferWanted == 3)
-    State->InputPorts[IO_2040] |= 02000;
-  else if (DedaBufferWanted == 9)
-    State->InputPorts[IO_2040] |= 04000;
+	DedaBufferWanted = DedaBufferCount = DedaBufferReadout = 0;
+      // Tell the CPU that the ENTR or READ OUT key has been released.
+      if (DedaBufferWanted == 3)
+	State->InputPorts[IO_2040] |= 02000;
+      else if (DedaBufferWanted == 9)
+	State->InputPorts[IO_2040] |= 04000;
     }
   return (DedaBufferDefault);
 }
