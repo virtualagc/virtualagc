@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Jordan M. Slott <jordanslott@yahoo.com>
+  Copyright 2005,2009 Jordan M. Slott <jordanslott@yahoo.com>
   
   This file is part of yaAGC.
 
@@ -49,6 +49,22 @@
 				address-contents are displayed.
 		07/31/05 JMS    Keep a sorted list of source files so they
                                 may be listed and for tab-completion.
+		03/17/09 RSB	Corrected the funky alignment of columns when
+				doing a sym-dump in the debugger.
+		03/18/09 RSB	Now overrides the path for source-files found 
+				in .symtab, and uses the path for the .symtab
+				file.  In other words, now assumes that source
+				files (*.s) are in the same directory as 
+				*.symtab.
+		03/20/09 RSB	Corrected symbol tables (as written
+				to files) to always use little-endian
+				representations of integers.  This
+				isn't important for someone compiling
+				their own AGC code, but is needed for
+				moving symbol tables from one CPU type
+				to another, such as for distributing
+				Virtual AGC binaries to PowerPC vs.
+				Intel CPUs. 
 */
 
 #include <stdio.h>
@@ -58,6 +74,7 @@
 #include <sys/types.h>
 //#include <sys/uio.h>
 #include <unistd.h>
+
 #include "agc_engine.h"
 #include "agc_symtab.h"
 
@@ -170,16 +187,16 @@ int
 AddressPrintAGS (Address_t *Address, char *AddressStr)
 {
   if (Address->Invalid)
-    sprintf (AddressStr, "????\t"); 
+    sprintf (AddressStr, "   ????  "); 
   else if (Address->Constant)
     {
-      sprintf (AddressStr, "%04o\t", Address->Value & 07777);
+      sprintf (AddressStr, "   %04o  ", Address->Value & 07777);
     }  
   else if (Address->Address)
-    sprintf (AddressStr, "%04o\t", Address->SReg & 07777);
+    sprintf (AddressStr, "   %04o  ", Address->SReg & 07777);
   else
     {
-      sprintf (AddressStr, "int-err ");
+      sprintf (AddressStr, "int-err  ");
       return (1);  
     } 
   return (0);   
@@ -237,6 +254,74 @@ ResetSymbolTable (void)
 }
 
 //-------------------------------------------------------------------------
+// Here are functions for converting integers in-place between the CPU native
+// representation and little-endian format.  These functions are symmetric,
+// in the sense that they convert in either direction.  The functions do
+// not check in any way that the data being pointed to is 32-bit.  The 
+// case of an Address_t datatype as input is particularly interesting.
+// This datatype has 32-bit fields, and they must each be converted by a
+// separate call to LittleEndian32.  However, the datatype *begins* with a 
+// bunch of packed bitfields, so calling LittleEndian32 on an Address_t will
+// attempt to rearrange the packing of those bitfields.  Whether that's 
+// correct and perfectly portable thing to do, I'm not sure.
+
+#if !defined (BYTE_ORDER) && defined (__BYTE_ORDER)
+#define BYTE_ORDER __BYTE_ORDER
+#endif
+
+#if !defined (BYTE_ORDER) && defined (WIN32)
+#define BYTE_ORDER 1234
+#endif
+
+#ifndef BYTE_ORDER
+#define BYTE_ORDER 1234
+#endif
+
+#if BYTE_ORDER != 1234		// not little-endian
+static 
+void SwapBytes (void *Pointer, int Loc1, int Loc2)
+{
+  char c, *s1, *s2;
+  s1 = ((char *) Pointer) + Loc1;
+  s2 = ((char *) Pointer) + Loc2;
+  c = *s1;
+  *s1 = *s2;
+  *s2 = c;
+}
+#endif
+
+#if BYTE_ORDER == 1234		// little-endian
+
+void
+LittleEndian32 (void *Value)
+{
+}
+
+#elif BYTE_ORDER == 4321	// big-endian
+
+void
+LittleEndian32 (void *Value)
+{
+  SwapBytes (Value, 0, 3);
+  SwapBytes (Value, 1, 2);
+}
+
+#elif BYTE_ORDER == 3412	// PDP-endian
+
+void
+LittleEndian32 (void *Value)
+{
+  SwapBytes (Value, 0, 2);
+  SwapBytes (Value, 1, 3);
+}
+
+#else
+
+#error Sorry, not a supported endian type.
+
+#endif
+
+//-------------------------------------------------------------------------
 // Reads in the symbol table. The .symtab file is given as an argument. This
 // routine updates the global variables storing the symbol table. Returns
 // 0 upon success, 1 upon failure
@@ -249,6 +334,7 @@ ReadSymbolTable (char *fname)
   Symbol_t *symbol;
   SymbolLine_t *Line;
   SymbolFile_t symfile;
+  char *ss;
 
   // Open the symbol table file. If it does not exist, that is ok.
   if (NULL == (fp = rfopen (fname, "rb")))
@@ -259,7 +345,25 @@ ReadSymbolTable (char *fname)
   fd = fileno (fp);
 
   // Read in the SymbolFile_t structure as the header
+  //printf ("__BYTE_ORDER=%0x04X\n", BYTE_ORDER);
   read (fd, &symfile, sizeof(SymbolFile_t));
+  //printf ("NumberSymbols=0x%08X\n", symfile.NumberSymbols);
+  //printf ("NumberLines=0x%08X\n", symfile.NumberLines);
+  LittleEndian32 (&symfile.NumberSymbols);
+  LittleEndian32 (&symfile.NumberLines);
+  //printf ("NumberSymbols=0x%08X\n", symfile.NumberSymbols);
+  //printf ("NumberLines=0x%08X\n", symfile.NumberLines);
+  
+  // 20090318 RSB.  We override the source path found in the .symtab
+  // file, and instead assume that the source files are in the same directory
+  // as the .symtab file.  Otherwise, there would be no portability at all.
+  strcpy (symfile.SourcePath, fname);
+  for (ss = &symfile.SourcePath[strlen (symfile.SourcePath) - 1]; ss >= &symfile.SourcePath[0]; ss--)
+    if (*ss == '/' || *ss == '\\')
+      {
+        *ss = 0;
+	break;
+      }
   SourcePathName = strdup (symfile.SourcePath);
 
   // Allocate the symbol table
@@ -280,6 +384,10 @@ ReadSymbolTable (char *fname)
 
       // Read it in from the symbol table file
       read (fd, symbol, sizeof(Symbol_t));
+      LittleEndian32 (symbol);
+      LittleEndian32 (&symbol->Value.Value);
+      LittleEndian32 (&symbol->Type);
+      LittleEndian32 (&symbol->LineNumber);
       SymbolTable[i] = *symbol;
     }
 
@@ -301,6 +409,9 @@ ReadSymbolTable (char *fname)
 
       // Read it in from the symbol table file
       read (fd, Line, sizeof(SymbolLine_t));
+      LittleEndian32 (Line);
+      LittleEndian32 (&Line->CodeAddress.Value);
+      LittleEndian32 (&Line->LineNumber);
       LineTable[i] = *Line;
     }
 

@@ -217,7 +217,9 @@ nbfgets (char *Buffer, int Length)
     }
   // Has the other thread managed to fetch a string yet?
   if (!nbfgetsReady || Length < 1)
-    return (NULL);		// No string ready yet.
+    {
+      return (NULL);		// No string ready yet.
+    }
   Length--;
   strncpy (Buffer, nbfgetsBuffer, Length);
   Buffer[Length] = 0;		// Make sure nul-terminated.

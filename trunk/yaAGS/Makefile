@@ -27,10 +27,17 @@
 #				where libcurses.a can be found on some systems.
 #				(Sometimes it is in /usr/lib, sometimes in
 #				/usr/lib/curses, maybe other places as well.
+#		2009-03-06 RSB	Added the 'all-archs' target and adjusted
+#				'clean' appropriately.
+
+LIBS=${LIBS2}
 
 ifndef PREFIX
 PREFIX=/usr/local
 endif
+
+.PHONY: default
+default: yaAGS
 
 #---------------------------------------------------------------------------
 # The use of libreadline adds a command-history to yaAGC, but may have some
@@ -38,14 +45,19 @@ endif
 #	export NOREADLINE=yes
 #	make
 # instead of just 'make'.
+LIBS0:=${LIBS}
 ifndef NOREADLINE
 CFLAGS2 = -DUSE_READLINE
 LIBS += -L/sw/lib -lreadline
 LIBS += -L/usr/lib/curses -lcurses
 endif	# NOREADLINE
 
+ifeq "${USER}" "rburkey"
+STATIC:=
+endif
+
 yaAGS:	mainAGS.o libyaAGS.a symbol_table.o nbfgets.o Backtrace.o
-	gcc -o yaAGS $^ -L. -L../yaAGC -lpthread -lyaAGS -lyaAGC -lm ${LIBS}
+	gcc -o yaAGS $^ ${STATIC} -L. -L../yaAGC -lpthread -lyaAGS -lyaAGC -lm ${LIBS}
 
 libyaAGS.a: aea_engine_init.o aea_engine.o DebuggerHookAGS.o SocketAPI_AGS.o
 	ar -rc $@ $^
@@ -53,7 +65,7 @@ libyaAGS.a: aea_engine_init.o aea_engine.o DebuggerHookAGS.o SocketAPI_AGS.o
 	touch ../yaDEDA/src/main.c
 
 clean:
-	-rm -f yaAGS libyaAGS.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel
+	-rm -f yaAGS libyaAGS.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel *.exe *-macosx
 
 install:	yaAGS
 	cp yaAGS ${PREFIX}/bin
@@ -61,4 +73,28 @@ install:	yaAGS
 
 %.o:	%.c aea_engine.h
 	gcc -I/sw/include -g ${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -I../yaAGC -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
-	
+
+#----------------------------------------------------------------------------------
+# Building for multiple architectures, using IMCROSS.  Since IMCROSS presently
+# does not support readline, I eliminate readline-support from the cross-builds.
+# It would be added back by adding ${CFLAGS2} and changing ${LIBS0} to ${LIBS}.
+
+.PHONY: all-archs
+all-archs: default yaAGS.exe yaAGS-macosx
+
+CSOURCE:=mainAGS.c aea_engine_init.c aea_engine.c DebuggerHookAGS.c SocketAPI_AGS.c \
+	 ../yaAGC/nbfgets.c ../yaAGC/symbol_table.c \
+	 ../yaAGC/rfopen.c ../yaAGC/SocketAPI.c ../yaAGC/agc_utilities.c \
+	 ../yaAGC/agc_engine.c ../yaAGC/Backtrace.c
+
+yaAGS.exe: ${CSOURCE} ../yaAGC/regex.c ../yaAGC/random.c
+	i386-mingw32-gcc -DSTDC_HEADERS  -DPTW32_STATIC_LIB \
+		${CFLAGS} -DNVER=${NVER} -I../yaAGC \
+		-o $@ $^ -L. ${LIBS0} -lpthreadGC2-static -lkernel32 -lwsock32
+
+yaAGS-macosx: ${CSOURCE}
+	powerpc-apple-darwin9-gcc -arch ppc -arch i386 -DSTDC_HEADERS \
+		${CFLAGS} -DNVER=${NVER} -I ../yaAGC \
+		-o $@ $^ -L. ${LIBS0} -lpthread -lm
+
+

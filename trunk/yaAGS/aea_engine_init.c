@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC.
 
@@ -27,9 +27,15 @@
   				file.
 		2005-06-02 RSB	Added Accumulator, Index registers.
 		2005-06-04 RSB	Added 20 ms. timing signal.
+		2009-02-28 RSB	Eliminated some compiler warnings on 
+				64-bit machines.
+		2009-03-18 RSB	Eliminated periodic messages about 
+				core-dump creation when the DebugMode
+				flag is set.
 */
 
 #include <stdio.h>
+#include "yaAEA.h"
 #include "aea_engine.h"
 FILE *rfopen (const char *Filename, const char *mode);
 
@@ -217,14 +223,15 @@ MakeCoreDumpAGS (ags_t * State, const char *CoreDump)
     fprintf (cd, "%06o\n", State->Memory[i]);
 
   // Write out CPU state variables that aren't part of normal memory.
-  fprintf (cd, "%llo\n", State->CycleCounter);
+  fprintf (cd, FORMAT_64O "\n", State->CycleCounter);
   fprintf (cd, "%o\n", State->ProgramCounter);
   fprintf (cd, "%o\n", State->Accumulator);
   fprintf (cd, "%o\n", State->Quotient);
   fprintf (cd, "%o\n", State->Index);
   fprintf (cd, "%o\n", State->Overflow);
 
-  printf ("Core-dump file \"%s\" created.\n", CoreDump);
+  if (!DebugModeAGS)
+    printf ("Core-dump file \"%s\" created.\n", CoreDump);
   fclose (cd);
   return;
 

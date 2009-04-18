@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -107,6 +107,10 @@
 				in Win32.
 		08/02/05 JMS    Added symbolic debugging.
 		08/22/05 RSB	"unsigned long long" replaced by uint64_t.
+		03/17/09 RSB	Corrected the --help entry for loading the symtab.
+		03/18/09 RSB	Added some necessary goofiness to allow proper usage
+				when linking statically to the Win32 pthreads library.
+				Added --debug-deda.
 */
 
 //#define VERSION(x) #x
@@ -118,6 +122,7 @@
 #include <string.h>
 #include <unistd.h>
 #ifdef WIN32
+#include <pthread.h>
 #include <windows.h>
 #include <sys/time.h>
 #define LB "\r\n"
@@ -167,12 +172,17 @@ main (int argc, char *argv[])
   //int16_t *WordPtr;
   uint64_t /* unsigned long long */ CycleCount, DesiredCycles;
 
+#ifdef PTW32_STATIC_LIB
+  // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
+  pthread_win32_process_attach_np ();
+#endif  
+
   Portnum = 19897;
   //setvbuf (stdout, OutBuf, _IOLBF, sizeof (OutBuf));
   NextKeycheckAGS = times (&DummyTime);
 
   printf ("LM Abort Guidance System simulation, ver. " NVER ", built "
-	  __DATE__ " " __TIME__ "\n" "(c)2005 Ronald S. Burkey.\n");
+	  __DATE__ " " __TIME__ "\n" "(c)2005,2009 Ronald S. Burkey.\n");
   printf ("Refer to http://www.ibiblio.org/apollo for additional information.\n");
 
   // Parse the command-line parameters.
@@ -184,6 +194,8 @@ main (int argc, char *argv[])
 	RomImage = &argv[i][7];
       else if (!strcmp (argv[i], "--debug"))
         DebugModeAGS = 2;
+      else if (!strcmp (argv[i], "--debug-deda"))
+        DebugDeda = 1;
       else if (!strncmp (argv[i], "--symtab=", 9))
 	{
 	  strcpy(SymbolFileAGS, &argv[i][9]);
@@ -207,9 +219,12 @@ main (int argc, char *argv[])
 	      "OPTIONS:.\n"
 	      "--help                Shows this screen and exits.\n"
 	      "--debug               Enter debug mode.\n"
-	      "--symtab-filename     Load symbol table.\n");
+	      "--debug-deda          Print messages showing how input\n"
+	      "                      data from the DEDA is parsed.\n"
+	      "--symtab=filename     Load symbol table from file.\n");
       return (1);
     }
+  DebugMode = DebugModeAGS;
 
   //-----------------------------------------------------------------------
   // Initialization of the symbol table file if we have given a
@@ -294,6 +309,11 @@ main (int argc, char *argv[])
 	  CycleCount += aea_engine (&State) * sysconf (_SC_CLK_TCK);
 	}
     }
+
+#ifdef PTW32_STATIC_LIB
+  // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
+  pthread_win32_process_detach_np ();
+#endif  
 
   return (0);
 }

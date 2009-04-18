@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -34,6 +34,8 @@
 		2005-06-18 RSB	Windows-dependent stuff added.
 		2005-07-13 RSB	Fixed a possible issue of using too much CPU time
 				in Win32.
+		2009-02-28 RSB	Bypass some compiler warnings on 64-bit
+				machines.
 */
 
 #include "yaAEA.h"
@@ -632,7 +634,7 @@ Redraw:
   printf ("\n");
   printf ("Stopped because %s\n", BreakCause);
   // Print registers.
-  printf ("A=0%06o\tQ=0%06o\tOverflow=%d\tIndex=%03o\tHalted=%d\nIcount=%lu\tCycles=%Lu\n",
+  printf ("A=0%06o\tQ=0%06o\tOverflow=%d\tIndex=%03o\tHalted=%d\nIcount=%lu\tCycles=" FORMAT_64U "\n",
 	  State->Accumulator, State->Quotient, State->Overflow, State->Index,
 	  State->Halt, 
 	  InstructionCounts[077 & (State->Memory[State->ProgramCounter] >> 12)],
