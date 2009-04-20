@@ -251,6 +251,7 @@ void BacktraceDisplay ( agc_t *State, int Num )
 	BacktracePoint_t *Bp;
 	SymbolLine_t *Line = NULL;
 	int CurrentZ;
+	int Bank,Value;
 	int FB;
 	int SBB;
 	char* FrameName;
@@ -310,7 +311,7 @@ void BacktraceDisplay ( agc_t *State, int Num )
 		Bp = &BacktracePoints[k];
 
 		/* Find the Line for Current Frame Head */
-		Line = ResolveLineAGC ( CurrentZ, FB, SBB );
+//		Line = ResolveLineAGC ( CurrentZ, FB, SBB );
 
 #ifndef GDBMI
 		printf ( "%2d: ", i );
@@ -357,7 +358,7 @@ void BacktraceDisplay ( agc_t *State, int Num )
 //			CurrentZ = Bp->Erasable[0][RegZ] & 07777;
 //			FB = 037 & ( Bp->Erasable[0][RegBB] >> 10 );
 //			SBB = ( Bp->OutputChannel7 & 0100 ) ? 1 : 0;
-//			Line = ResolveLineAGC ( CurrentZ, FB, SBB );
+			Line = ResolveLineAGC ( CurrentZ, FB, SBB );
 
 			unsigned Addr = DbgLinearFixedAddr(CurrentZ,FB,SBB);
 			FrameName = DbgGetFrameNameByAddr(Addr);
