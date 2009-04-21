@@ -39,7 +39,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "SDL/SDL.h"
+#include "SDL.h"
 
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
