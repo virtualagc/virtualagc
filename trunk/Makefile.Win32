@@ -1,4 +1,4 @@
-# Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -39,9 +39,10 @@
 #				pthreads library.
 #		01/09/06 RSB	Removed the prefix '-' from the lines that
 #				build Artemis072.
+#		03/06/09 RSB	Removed SUFFIX=.exe from the yaLEMAP build rules.
 
 all:	/mingw/lib/libpthreadAGC.a
-	$(MAKE) -C yaLEMAP SUFFIX=.exe NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaLEMAP NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C yaAGC -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE}
 	$(MAKE) -C yaAGS -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE}
 ifndef NOGUI
@@ -49,7 +50,7 @@ ifndef NOGUI
 	$(MAKE) -C yaDSKY/src -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 endif
 	$(MAKE) -C yaYUL -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaUniverse NATIVE=WIN32 NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaUniverse NVER=${NVER} CFLAGS=${CFLAGS} NATIVE=WIN32
 	-$(MAKE) -C yaACA NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C Luminary131 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C Colossus249 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
@@ -57,7 +58,7 @@ endif
 	$(MAKE) -C Validation -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 
 clean:
-	$(MAKE) -C yaLEMAP SUFFIX=.exe clean
+	$(MAKE) -C yaLEMAP clean
 	$(MAKE) -C yaAGC -f Makefile.Win32 clean
 	$(MAKE) -C yaAGS -f Makefile.Win32 clean
 	$(MAKE) -C yaDEDA/src -f Makefile.Win32 clean
@@ -71,7 +72,7 @@ clean:
 	$(MAKE) -C Validation -f Makefile.Win32 clean
 
 install: all
-	$(MAKE) -C yaLEMAP SUFFIX=.exe install NVER=${NVER}
+	$(MAKE) -C yaLEMAP install NVER=${NVER}
 	$(MAKE) -C yaAGC -f Makefile.Win32 install NVER=${NVER}
 	$(MAKE) -C yaAGS -f Makefile.Win32 install NVER=${NVER}
 ifndef NOGUI
@@ -85,14 +86,14 @@ endif
 	$(MAKE) -C Colossus249 -f Makefile.Win32 install NVER=${NVER}
 	${MAKE} -C Artemis072 PREFIX=${PREFIX} install
 	$(MAKE) -C Validation -f Makefile.Win32 install NVER=${NVER}
-	cp -a yaScripts/Sim*bat Sim*.xeq /mingw/bin
-	cp -a yaSimulators/LM_Simulator/*.tcl yaSimulators/LM_Simulator/*.ini /mingw/bin
-	cp -a yaSimulators/LM_Simulator/modules /mingw/bin
+	cp -a Sim*bat Sim*.xeq /mingw/bin
+	cp -a Contributed/LM_Simulator/*.tcl Contributed/LM_Simulator/*.ini /mingw/bin
+	cp -a Contributed/LM_Simulator/modules /mingw/bin
 	echo cd \\mingw\\bin >/mingw/bin/LM_Simulator.bat
 	echo wish lm_simulator.tcl %1 %2 >>/mingw/bin/LM_Simulator.bat
 	
 snapshot: install
-	-rm mingw -rf
+	-rm -rf mingw
 	mkdir mingw
 	mkdir mingw/bin
 	mkdir mingw/share
@@ -115,7 +116,7 @@ snapshot: install
 	cp -a /mingw/bin/modules /mingw/bin/LM_Simulator.bat mingw/bin
 	cp -a /mingw/bin/*.symtab mingw/bin
 	zip -r yaAGC-Win32-${DATE}.zip mingw
-	rm mingw -rf
+	rm -rf mingw
 	scp -p yaAGC-Win32-${DATE}.zip \
 		rburkey@192.168.254.250:Projects/sandroid.org/public_html/apollo/Downloads
 

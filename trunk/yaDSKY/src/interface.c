@@ -172,267 +172,267 @@ create_MainWindow (void)
   gtk_widget_show (ObjectGrid);
   gtk_container_add (GTK_CONTAINER (MainWindow), ObjectGrid);
 
-  R3PlusMinus = create_pixmap (MainWindow, "PlusMinusOff.xpm");
+  R3PlusMinus = create_pixmap (MainWindow, "PlusMinusOff.jpg");
   gtk_widget_show (R3PlusMinus);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R3PlusMinus, 328, 320);
   gtk_widget_set_usize (R3PlusMinus, 32, 45);
 
-  R3D4Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R3D4Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R3D4Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R3D4Digit, 456, 320);
   gtk_widget_set_usize (R3D4Digit, 32, 45);
 
-  R3D5Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R3D5Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R3D5Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R3D5Digit, 488, 320);
   gtk_widget_set_usize (R3D5Digit, 32, 45);
 
-  R2D5Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R2D5Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R2D5Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R2D5Digit, 488, 256);
   gtk_widget_set_usize (R2D5Digit, 32, 45);
 
-  R2D4Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R2D4Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R2D4Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R2D4Digit, 456, 256);
   gtk_widget_set_usize (R2D4Digit, 32, 45);
 
-  R2D3Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R2D3Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R2D3Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R2D3Digit, 424, 256);
   gtk_widget_set_usize (R2D3Digit, 32, 45);
 
-  R2D2Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R2D2Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R2D2Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R2D2Digit, 392, 256);
   gtk_widget_set_usize (R2D2Digit, 32, 45);
 
-  R2D1Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R2D1Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R2D1Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R2D1Digit, 360, 256);
   gtk_widget_set_usize (R2D1Digit, 32, 45);
 
-  R2PlusMinus = create_pixmap (MainWindow, "PlusMinusOff.xpm");
+  R2PlusMinus = create_pixmap (MainWindow, "PlusMinusOff.jpg");
   gtk_widget_show (R2PlusMinus);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R2PlusMinus, 328, 256);
   gtk_widget_set_usize (R2PlusMinus, 32, 45);
 
-  R1D5Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R1D5Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R1D5Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R1D5Digit, 488, 192);
   gtk_widget_set_usize (R1D5Digit, 32, 45);
 
-  R1D4Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R1D4Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R1D4Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R1D4Digit, 456, 192);
   gtk_widget_set_usize (R1D4Digit, 32, 45);
 
-  R1D3Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R1D3Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R1D3Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R1D3Digit, 424, 192);
   gtk_widget_set_usize (R1D3Digit, 32, 45);
 
-  R1D2Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R1D2Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R1D2Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R1D2Digit, 392, 192);
   gtk_widget_set_usize (R1D2Digit, 32, 45);
 
-  R1D1Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R1D1Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R1D1Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R1D1Digit, 360, 192);
   gtk_widget_set_usize (R1D1Digit, 32, 45);
 
-  R1PlusMinus = create_pixmap (MainWindow, "PlusMinusOff.xpm");
+  R1PlusMinus = create_pixmap (MainWindow, "PlusMinusOff.jpg");
   gtk_widget_show (R1PlusMinus);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R1PlusMinus, 328, 192);
   gtk_widget_set_usize (R1PlusMinus, 32, 45);
 
-  ND2Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  ND2Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (ND2Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), ND2Digit, 488, 128);
   gtk_widget_set_usize (ND2Digit, 32, 45);
 
-  ND1Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  ND1Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (ND1Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), ND1Digit, 456, 128);
   gtk_widget_set_usize (ND1Digit, 32, 45);
 
-  VD2Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  VD2Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (VD2Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), VD2Digit, 360, 128);
   gtk_widget_set_usize (VD2Digit, 32, 45);
 
-  VD1Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  VD1Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (VD1Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), VD1Digit, 328, 128);
   gtk_widget_set_usize (VD1Digit, 32, 45);
 
-  image57 = create_pixmap (MainWindow, "ShortHorizontal.xpm");
+  image57 = create_pixmap (MainWindow, "ShortHorizontal.jpg");
   gtk_widget_show (image57);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image57, 328, 88);
   gtk_widget_set_usize (image57, 64, 19);
 
-  NounAnnunciator = create_pixmap (MainWindow, "NounOn.xpm");
+  NounAnnunciator = create_pixmap (MainWindow, "NounOn.jpg");
   gtk_widget_show (NounAnnunciator);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), NounAnnunciator, 456, 104);
   gtk_widget_set_usize (NounAnnunciator, 64, 24);
 
-  MD2Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  MD2Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (MD2Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), MD2Digit, 488, 48);
   gtk_widget_set_usize (MD2Digit, 32, 45);
 
-  MD1Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  MD1Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (MD1Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), MD1Digit, 456, 48);
   gtk_widget_set_usize (MD1Digit, 32, 45);
 
-  image58 = create_pixmap (MainWindow, "ShortHorizontal.xpm");
+  image58 = create_pixmap (MainWindow, "ShortHorizontal.jpg");
   gtk_widget_show (image58);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image58, 456, 93);
   gtk_widget_set_usize (image58, 64, 13);
 
-  image55 = create_pixmap (MainWindow, "SeparatorOn.xpm");
+  image55 = create_pixmap (MainWindow, "SeparatorOn.jpg");
   gtk_widget_show (image55);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image55, 328, 237);
   gtk_widget_set_usize (image55, 192, 19);
 
-  image56 = create_pixmap (MainWindow, "SeparatorOn.xpm");
+  image56 = create_pixmap (MainWindow, "SeparatorOn.jpg");
   gtk_widget_show (image56);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image56, 328, 173);
   gtk_widget_set_usize (image56, 192, 19);
 
-  image54 = create_pixmap (MainWindow, "SeparatorOn.xpm");
+  image54 = create_pixmap (MainWindow, "SeparatorOn.jpg");
   gtk_widget_show (image54);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image54, 328, 301);
   gtk_widget_set_usize (image54, 192, 19);
 
-  R3D1Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R3D1Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R3D1Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R3D1Digit, 360, 320);
   gtk_widget_set_usize (R3D1Digit, 32, 45);
 
-  R3D2Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R3D2Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R3D2Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R3D2Digit, 392, 320);
   gtk_widget_set_usize (R3D2Digit, 32, 45);
 
-  R3D3Digit = create_pixmap (MainWindow, "7SegOff.xpm");
+  R3D3Digit = create_pixmap (MainWindow, "7SegOff.jpg");
   gtk_widget_show (R3D3Digit);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), R3D3Digit, 424, 320);
   gtk_widget_set_usize (R3D3Digit, 32, 45);
 
-  CompActyAnnunciator = create_pixmap (MainWindow, "CompActyOff.xpm");
+  CompActyAnnunciator = create_pixmap (MainWindow, "CompActyOff.jpg");
   gtk_widget_show (CompActyAnnunciator);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), CompActyAnnunciator, 328, 24);
   gtk_widget_set_usize (CompActyAnnunciator, 64, 64);
 
-  image59 = create_pixmap (MainWindow, "CenterBlock.xpm");
+  image59 = create_pixmap (MainWindow, "CenterBlock.jpg");
   gtk_widget_show (image59);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image59, 392, 24);
   gtk_widget_set_usize (image59, 64, 151);
 
-  ModeAnnunciator = create_pixmap (MainWindow, "rProgOn.xpm");
+  ModeAnnunciator = create_pixmap (MainWindow, "rProgOn.jpg");
   gtk_widget_show (ModeAnnunciator);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), ModeAnnunciator, 456, 24);
   gtk_widget_set_usize (ModeAnnunciator, 64, 24);
 
-  image60 = create_pixmap (MainWindow, "FrameVertical.xpm");
+  image60 = create_pixmap (MainWindow, "FrameVertical.jpg");
   gtk_widget_show (image60);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image60, 520, 16);
   gtk_widget_set_usize (image60, 8, 357);
 
-  image64 = create_pixmap (MainWindow, "FrameHorizontal.xpm");
+  image64 = create_pixmap (MainWindow, "FrameHorizontal.jpg");
   gtk_widget_show (image64);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image64, 328, 16);
   gtk_widget_set_usize (image64, 192, 8);
 
-  image66 = create_pixmap (MainWindow, "FrameHorizontal.xpm");
+  image66 = create_pixmap (MainWindow, "FrameHorizontal.jpg");
   gtk_widget_show (image66);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image66, 56, 16);
   gtk_widget_set_usize (image66, 192, 8);
 
-  image65 = create_pixmap (MainWindow, "FrameHorizontal.xpm");
+  image65 = create_pixmap (MainWindow, "FrameHorizontal.jpg");
   gtk_widget_show (image65);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image65, 328, 365);
   gtk_widget_set_usize (image65, 192, 8);
 
-  image63 = create_pixmap (MainWindow, "FrameVertical.xpm");
+  image63 = create_pixmap (MainWindow, "FrameVertical.jpg");
   gtk_widget_show (image63);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image63, 320, 16);
   gtk_widget_set_usize (image63, 8, 357);
 
-  Annunciator12 = create_pixmap (MainWindow, "NoAttOff.xpm");
+  Annunciator12 = create_pixmap (MainWindow, "NoAttOff.jpg");
   gtk_widget_show (Annunciator12);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator12, 64, 80);
   gtk_widget_set_usize (Annunciator12, 84, 40);
 
-  Annunciator13 = create_pixmap (MainWindow, "StbyOff.xpm");
+  Annunciator13 = create_pixmap (MainWindow, "StbyOff.jpg");
   gtk_widget_show (Annunciator13);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator13, 64, 128);
   gtk_widget_set_usize (Annunciator13, 84, 40);
 
-  Annunciator14 = create_pixmap (MainWindow, "KeyRelOff.xpm");
+  Annunciator14 = create_pixmap (MainWindow, "KeyRelOff.jpg");
   gtk_widget_show (Annunciator14);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator14, 64, 176);
   gtk_widget_set_usize (Annunciator14, 84, 40);
 
-  Annunciator15 = create_pixmap (MainWindow, "OprErrOff.xpm");
+  Annunciator15 = create_pixmap (MainWindow, "OprErrOff.jpg");
   gtk_widget_show (Annunciator15);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator15, 64, 224);
   gtk_widget_set_usize (Annunciator15, 84, 40);
 
-  Annunciator16 = create_pixmap (MainWindow, "BlankOff.xpm");
+  Annunciator16 = create_pixmap (MainWindow, "BlankOff.jpg");
   gtk_widget_show (Annunciator16);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator16, 64, 272);
   gtk_widget_set_usize (Annunciator16, 84, 40);
 
-  Annunciator17 = create_pixmap (MainWindow, "BlankOff.xpm");
+  Annunciator17 = create_pixmap (MainWindow, "BlankOff.jpg");
   gtk_widget_show (Annunciator17);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator17, 64, 320);
   gtk_widget_set_usize (Annunciator17, 84, 40);
 
-  image67 = create_pixmap (MainWindow, "FrameHorizontal.xpm");
+  image67 = create_pixmap (MainWindow, "FrameHorizontal.jpg");
   gtk_widget_show (image67);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image67, 56, 368);
   gtk_widget_set_usize (image67, 192, 8);
 
-  image62 = create_pixmap (MainWindow, "FrameVertical.xpm");
+  image62 = create_pixmap (MainWindow, "FrameVertical.jpg");
   gtk_widget_show (image62);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image62, 48, 16);
   gtk_widget_set_usize (image62, 8, 360);
 
-  image61 = create_pixmap (MainWindow, "FrameVertical.xpm");
+  image61 = create_pixmap (MainWindow, "FrameVertical.jpg");
   gtk_widget_show (image61);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), image61, 248, 16);
   gtk_widget_set_usize (image61, 8, 360);
 
-  Annunciator27 = create_pixmap (MainWindow, "BlankOff.xpm");
+  Annunciator27 = create_pixmap (MainWindow, "BlankOff.jpg");
   gtk_widget_show (Annunciator27);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator27, 156, 320);
   gtk_widget_set_usize (Annunciator27, 84, 40);
 
-  Annunciator26 = create_pixmap (MainWindow, "BlankOff.xpm");
+  Annunciator26 = create_pixmap (MainWindow, "BlankOff.jpg");
   gtk_widget_show (Annunciator26);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator26, 156, 272);
   gtk_widget_set_usize (Annunciator26, 84, 40);
 
-  Annunciator25 = create_pixmap (MainWindow, "TrackerOff.xpm");
+  Annunciator25 = create_pixmap (MainWindow, "TrackerOff.jpg");
   gtk_widget_show (Annunciator25);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator25, 156, 224);
   gtk_widget_set_usize (Annunciator25, 84, 40);
 
-  Annunciator24 = create_pixmap (MainWindow, "RestartOff.xpm");
+  Annunciator24 = create_pixmap (MainWindow, "RestartOff.jpg");
   gtk_widget_show (Annunciator24);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator24, 156, 176);
   gtk_widget_set_usize (Annunciator24, 84, 40);
 
-  Annunciator23 = create_pixmap (MainWindow, "ProgOff.xpm");
+  Annunciator23 = create_pixmap (MainWindow, "ProgOff.jpg");
   gtk_widget_show (Annunciator23);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator23, 156, 128);
   gtk_widget_set_usize (Annunciator23, 84, 40);
 
-  Annunciator22 = create_pixmap (MainWindow, "GimbalLockOff.xpm");
+  Annunciator22 = create_pixmap (MainWindow, "GimbalLockOff.jpg");
   gtk_widget_show (Annunciator22);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator22, 156, 80);
   gtk_widget_set_usize (Annunciator22, 84, 40);
@@ -443,7 +443,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (PlusButton, 75, 75);
   gtk_widget_add_accelerator( PlusButton, "activate", AccelGroup, '+', 0, GTK_ACCEL_VISIBLE);
 
-  iPlusButton = create_pixmap (MainWindow, "PlusUp.xpm");
+  iPlusButton = create_pixmap (MainWindow, "PlusUp.jpg");
   gtk_widget_show (iPlusButton);
   gtk_container_add (GTK_CONTAINER (PlusButton), iPlusButton);
 
@@ -453,7 +453,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (SevenButton, 75, 75);
   gtk_widget_add_accelerator( SevenButton, "activate", AccelGroup, GDK_7, 0, GTK_ACCEL_VISIBLE);
 
-  iSevenButton = create_pixmap (MainWindow, "7Up.xpm");
+  iSevenButton = create_pixmap (MainWindow, "7Up.jpg");
   gtk_widget_show (iSevenButton);
   gtk_container_add (GTK_CONTAINER (SevenButton), iSevenButton);
 
@@ -463,7 +463,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (EightButton, 75, 75);
   gtk_widget_add_accelerator( EightButton, "activate", AccelGroup, GDK_8, 0, GTK_ACCEL_VISIBLE);
 
-  iEightButton = create_pixmap (MainWindow, "8Up.xpm");
+  iEightButton = create_pixmap (MainWindow, "8Up.jpg");
   gtk_widget_show (iEightButton);
   gtk_container_add (GTK_CONTAINER (EightButton), iEightButton);
 
@@ -473,7 +473,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (NineButton, 75, 75);
   gtk_widget_add_accelerator( NineButton, "activate", AccelGroup, GDK_9, 0, GTK_ACCEL_VISIBLE);
 
-  iNineButton = create_pixmap (MainWindow, "9Up.xpm");
+  iNineButton = create_pixmap (MainWindow, "9Up.jpg");
   gtk_widget_show (iNineButton);
   gtk_container_add (GTK_CONTAINER (NineButton), iNineButton);
 
@@ -482,7 +482,7 @@ create_MainWindow (void)
   gtk_fixed_put (GTK_FIXED (ObjectGrid), ClrButton, 408, 392);
   gtk_widget_set_usize (ClrButton, 75, 75);
 
-  iClrButton = create_pixmap (MainWindow, "ClrUp.xpm");
+  iClrButton = create_pixmap (MainWindow, "ClrUp.jpg");
   gtk_widget_show (iClrButton);
   gtk_container_add (GTK_CONTAINER (ClrButton), iClrButton);
 
@@ -492,7 +492,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (MinusButton, 75, 75);
   gtk_widget_add_accelerator( MinusButton, "activate", AccelGroup, '-', 0, GTK_ACCEL_VISIBLE);
 
-  iMinusButton = create_pixmap (MainWindow, "MinusUp.xpm");
+  iMinusButton = create_pixmap (MainWindow, "MinusUp.jpg");
   gtk_widget_show (iMinusButton);
   gtk_container_add (GTK_CONTAINER (MinusButton), iMinusButton);
 
@@ -502,7 +502,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (FourButton, 75, 75);
   gtk_widget_add_accelerator( FourButton, "activate", AccelGroup, GDK_4, 0, GTK_ACCEL_VISIBLE);
 
-  iFourButton = create_pixmap (MainWindow, "4Up.xpm");
+  iFourButton = create_pixmap (MainWindow, "4Up.jpg");
   gtk_widget_show (iFourButton);
   gtk_container_add (GTK_CONTAINER (FourButton), iFourButton);
 
@@ -512,7 +512,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (FiveButton, 75, 75);
   gtk_widget_add_accelerator( FiveButton, "activate", AccelGroup, GDK_5, 0, GTK_ACCEL_VISIBLE);
 
-  iFiveButton = create_pixmap (MainWindow, "5Up.xpm");
+  iFiveButton = create_pixmap (MainWindow, "5Up.jpg");
   gtk_widget_show (iFiveButton);
   gtk_container_add (GTK_CONTAINER (FiveButton), iFiveButton);
 
@@ -522,7 +522,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (SixButton, 75, 75);
   gtk_widget_add_accelerator( SixButton, "activate", AccelGroup, GDK_6, 0, GTK_ACCEL_VISIBLE);
 
-  iSixButton = create_pixmap (MainWindow, "6Up.xpm");
+  iSixButton = create_pixmap (MainWindow, "6Up.jpg");
   gtk_widget_show (iSixButton);
   gtk_container_add (GTK_CONTAINER (SixButton), iSixButton);
 
@@ -531,7 +531,7 @@ create_MainWindow (void)
   gtk_fixed_put (GTK_FIXED (ObjectGrid), ProButton, 408, 472);
   gtk_widget_set_usize (ProButton, 75, 75);
 
-  iLastButton = create_pixmap (MainWindow, "ProUp.xpm");
+  iLastButton = create_pixmap (MainWindow, "ProUp.jpg");
   gtk_widget_show (iLastButton);
   gtk_container_add (GTK_CONTAINER (ProButton), iLastButton);
 
@@ -541,7 +541,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (ZeroButton, 75, 75);
   gtk_widget_add_accelerator( ZeroButton, "activate", AccelGroup, GDK_0, 0, GTK_ACCEL_VISIBLE);
 
-  iZeroButton = create_pixmap (MainWindow, "0Up.xpm");
+  iZeroButton = create_pixmap (MainWindow, "0Up.jpg");
   gtk_widget_show (iZeroButton);
   gtk_container_add (GTK_CONTAINER (ZeroButton), iZeroButton);
 
@@ -551,7 +551,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (OneButton, 75, 75);
   gtk_widget_add_accelerator( OneButton, "activate", AccelGroup, GDK_1, 0, GTK_ACCEL_VISIBLE);
 
-  iOneButton = create_pixmap (MainWindow, "1Up.xpm");
+  iOneButton = create_pixmap (MainWindow, "1Up.jpg");
   gtk_widget_show (iOneButton);
   gtk_container_add (GTK_CONTAINER (OneButton), iOneButton);
 
@@ -561,7 +561,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (TwoButton, 75, 75);
   gtk_widget_add_accelerator( TwoButton, "activate", AccelGroup, GDK_2, 0, GTK_ACCEL_VISIBLE);
 
-  iTwoButton = create_pixmap (MainWindow, "2Up.xpm");
+  iTwoButton = create_pixmap (MainWindow, "2Up.jpg");
   gtk_widget_show (iTwoButton);
   gtk_container_add (GTK_CONTAINER (TwoButton), iTwoButton);
 
@@ -571,7 +571,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (ThreeButton, 75, 75);
   gtk_widget_add_accelerator( ThreeButton, "activate", AccelGroup, GDK_3, 0, GTK_ACCEL_VISIBLE);
 
-  iThreeButton = create_pixmap (MainWindow, "3Up.xpm");
+  iThreeButton = create_pixmap (MainWindow, "3Up.jpg");
   gtk_widget_show (iThreeButton);
   gtk_container_add (GTK_CONTAINER (ThreeButton), iThreeButton);
 
@@ -580,7 +580,7 @@ create_MainWindow (void)
   gtk_fixed_put (GTK_FIXED (ObjectGrid), KeyRelButton, 408, 552);
   gtk_widget_set_usize (KeyRelButton, 75, 75);
 
-  iKeyRelButton = create_pixmap (MainWindow, "KeyRelUp.xpm");
+  iKeyRelButton = create_pixmap (MainWindow, "KeyRelUp.jpg");
   gtk_widget_show (iKeyRelButton);
   gtk_container_add (GTK_CONTAINER (KeyRelButton), iKeyRelButton);
 
@@ -590,7 +590,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (EntrButton, 75, 75);
   gtk_widget_add_accelerator( EntrButton, "activate", AccelGroup, GDK_E, 0, GTK_ACCEL_VISIBLE);
 
-  iEntrButton = create_pixmap (MainWindow, "EntrUp.xpm");
+  iEntrButton = create_pixmap (MainWindow, "EntrUp.jpg");
   gtk_widget_show (iEntrButton);
   gtk_container_add (GTK_CONTAINER (EntrButton), iEntrButton);
 
@@ -599,7 +599,7 @@ create_MainWindow (void)
   gtk_fixed_put (GTK_FIXED (ObjectGrid), RsetButton, 488, 512);
   gtk_widget_set_usize (RsetButton, 75, 75);
 
-  iRsetButton = create_pixmap (MainWindow, "RsetUp.xpm");
+  iRsetButton = create_pixmap (MainWindow, "RsetUp.jpg");
   gtk_widget_show (iRsetButton);
   gtk_container_add (GTK_CONTAINER (RsetButton), iRsetButton);
 
@@ -609,7 +609,7 @@ create_MainWindow (void)
   gtk_widget_set_usize (VerbButton, 75, 75);
   gtk_widget_add_accelerator( VerbButton, "activate", AccelGroup, GDK_V, 0, GTK_ACCEL_VISIBLE);
 
-  iVerbButton = create_pixmap (MainWindow, "VerbUp.xpm");
+  iVerbButton = create_pixmap (MainWindow, "VerbUp.jpg");
   gtk_widget_show (iVerbButton);
   gtk_container_add (GTK_CONTAINER (VerbButton), iVerbButton);
 
@@ -619,21 +619,21 @@ create_MainWindow (void)
   gtk_widget_set_usize (NounButton, 75, 75);
   gtk_widget_add_accelerator( NounButton, "activate", AccelGroup, GDK_N, 0, GTK_ACCEL_VISIBLE);
 
-  iNounButton = create_pixmap (MainWindow, "NounUp.xpm");
+  iNounButton = create_pixmap (MainWindow, "NounUp.jpg");
   gtk_widget_show (iNounButton);
   gtk_container_add (GTK_CONTAINER (NounButton), iNounButton);
 
-  VerbAnnunciator = create_pixmap (MainWindow, "VerbOn.xpm");
+  VerbAnnunciator = create_pixmap (MainWindow, "VerbOn.jpg");
   gtk_widget_show (VerbAnnunciator);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), VerbAnnunciator, 328, 104);
   gtk_widget_set_usize (VerbAnnunciator, 64, 24);
 
-  Annunciator11 = create_pixmap (MainWindow, "UplinkActyOff.xpm");
+  Annunciator11 = create_pixmap (MainWindow, "UplinkActyOff.jpg");
   gtk_widget_show (Annunciator11);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator11, 64, 32);
   gtk_widget_set_usize (Annunciator11, 84, 40);
 
-  Annunciator21 = create_pixmap (MainWindow, "TempOff.xpm");
+  Annunciator21 = create_pixmap (MainWindow, "TempOff.jpg");
   gtk_widget_show (Annunciator21);
   gtk_fixed_put (GTK_FIXED (ObjectGrid), Annunciator21, 156, 32);
   gtk_widget_set_usize (Annunciator21, 84, 40);

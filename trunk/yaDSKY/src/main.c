@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -42,6 +42,21 @@
 		06/26/05 RSB	Added the --test-uplink switch.
 		06/28/05 RSB	Added --test-downlink, to separate that
 				functionality from --test-uplink.
+		03/05/09 RSB	Added --relative-pixmaps to allow having
+				a relative rather than an absolute path
+				to pixmaps, for the installation-directory
+				setup contemplated with the new VirtualAGC
+				program.
+		03/07/09 RSB	Replaced all .xpm graphics by .jpg graphics
+				in an attempt to see if I can fix some 
+				portability problems by doing so.  Auto-
+				convert .xpm settings found in --cfg files.
+				Also, correct some default setups which 
+				would cause a segfault if --cfg wasn't used.
+		03/08/09 RSB	Fixed that fact that Pulse() was continually
+				updating KeyRel and OprErr at the flash rate
+				even if the graphic being updated hadn't
+				actually changed.
 */
 
 /*
@@ -59,6 +74,7 @@
 
 #include "interface.h"
 #include "support.h"
+#include "callbacks.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -84,17 +100,19 @@ int DebugCounterMode = 0;
 // TestUplink is set when we want to test the digital uplink by emitting
 // keycodes on the digital uplink rather than on the DSKY channels.
 int TestUplink = 0, TestDownlink = 0;
+int RelativePixmaps = 0;
 
 //------------------------------------------------------------------------
 
-#define DEBUG(x) 
+#define DEBUG(x) //printf ("I am here: %d\n", x)
 
 int
 main (int argc, char *argv[])
 {
   GtkWidget *hCreateMainWindow (void);
   int i, j;
-
+  int UsedCfg = 0;
+  
 #ifdef ENABLE_NLS
   bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -105,15 +123,25 @@ main (int argc, char *argv[])
   gtk_init (&argc, &argv);
 
   printf ("yaDSKY Apollo DSKY simulation, ver " NVER ", built " __DATE__ " " __TIME__ "\n");
-  printf ("Copyright 2003-2005 by Ronald S. Burkey\n");
+  printf ("Copyright 2003-2005,2009 by Ronald S. Burkey\n");
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 	  
-  add_pixmap_directory (PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps");
+  //add_pixmap_directory (PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps");
+  printf ("Relative pixmaps\n");
+  RelativePixmaps = 1;
+  add_pixmap_directory ("pixmaps/yaDSKY");
   DEBUG (-1);
 
   for (i = 1; i < argc; i++)
     {
-      if (!strcmp (argv[i], "--test-uplink"))
+      printf ("Arg %d = \"%s\"\n", i, argv[i]);
+      if (!strcmp (argv[i], "--relative-pixmaps"))
+        {
+	  //printf ("Relative pixmaps\n");
+          //RelativePixmaps = 1;
+	  //add_pixmap_directory ("pixmaps/yaDSKY");
+	}
+      else if (!strcmp (argv[i], "--test-uplink"))
         TestUplink = 1;
       else if (!strcmp (argv[i], "--test-downlink"))
         TestDownlink = 1;
@@ -130,6 +158,7 @@ main (int argc, char *argv[])
 	}
       else if (!strncmp (argv[i], "--cfg=", 6))
         {
+	  UsedCfg = 1;
 	  if (window1 == NULL)
 	    window1 = create_MainWindow ();
 	  if (ParseCfg (window1, &argv[i][6]))
@@ -209,6 +238,11 @@ main (int argc, char *argv[])
 	  printf ("--test-downlink\n");
 	  printf ("\tIn this mode, messages will also be printed whenever a downlink list is\n");
 	  printf ("\tdetected. (Highly recommended.  Probably should be the default.)\n");
+	  printf ("--relative-pixmaps\n");
+	  printf ("\tUses ./pixmaps/yaDSKY/ as the directory in which to look for \n");
+	  printf ("\tpixmaps rather than the normal installation directory for them.\n");
+	  printf ("\tThis relates to the directory setup used when running yadsky under\n");
+	  printf ("\tthe VirtualAGC GUI front-end.  Must precede --cfg and --half-size.\n");
 	  return (0);
 	}	
     }
@@ -223,6 +257,30 @@ main (int argc, char *argv[])
   DEBUG (1);
   if (window1 == NULL)
     window1 = create_MainWindow ();
+    
+  // The following is sort of an abbreviated form of some stuff that 
+  // ParseCfg does, and is called in case --cfg didn't appear on the 
+  // command-line.
+  if (!UsedCfg)
+    {
+      extern void my_gtk_image_set_from_file (GtkImage *Image, const char *Filename);
+      extern Ind_t Inds[14];
+      Ind_t *Indptr;
+      extern GtkImage *KeyRelAnnunciator, *OprErrAnnunciator, *iLastButton;
+      extern const char *CurrentKeyRel, *CurrentOprErr;
+      extern const char *BlankKeyRel, *BlankOprErr;
+      // Update all of the indicator legends.  
+      for (Indptr = Inds, i = 0; i < 14; Indptr++, i++)
+	my_gtk_image_set_from_file (Indptr->Widget, Indptr->GraphicOff);
+      my_gtk_image_set_from_file (iLastButton, "ProUp.jpg");
+      KeyRelAnnunciator = Inds[3].Widget;
+      CurrentKeyRel = BlankKeyRel = Inds[3].GraphicOff;
+      my_gtk_image_set_from_file (KeyRelAnnunciator, CurrentKeyRel);
+      OprErrAnnunciator = Inds[4].Widget;
+      CurrentOprErr = BlankOprErr = Inds[4].GraphicOff;
+      my_gtk_image_set_from_file (OprErrAnnunciator, CurrentOprErr);
+    }
+    
   DEBUG (2);
   gtk_widget_show (window1);
   DEBUG (3);
@@ -243,6 +301,9 @@ int ServerSocket = -1;
 gint
 Pulse (gpointer data)
 {
+#ifdef gtk_image_set_from_file
+#undef gtk_image_set_from_file
+#endif
 #define gtk_image_set_from_file my_gtk_image_set_from_file
   extern void my_gtk_image_set_from_file (GtkImage *Image, const char *Filename);
   extern int VerbNounFlashing;
@@ -251,6 +312,8 @@ Pulse (gpointer data)
   static int FlashCounter = 1, FlashStatus = 0;
   int i;
   unsigned char c;
+  static const char *LastKeyRel = NULL, *LastOprErr = NULL;
+  
   if (StartupDelay > 0)
     {
       StartupDelay -= PULSE_INTERVAL;
@@ -259,7 +322,6 @@ Pulse (gpointer data)
   // If the noun/verb-flash flag is set, then flash them.
   if (!--FlashCounter)
     {
-#if 1
       extern GtkImage *VD1Digit, *VD2Digit, *ND1Digit, *ND2Digit,
 		      *OprErrAnnunciator, *KeyRelAnnunciator;
       extern const char *CurrentVD1, *CurrentVD2, *CurrentND1, 
@@ -281,8 +343,16 @@ Pulse (gpointer data)
 	      gtk_image_set_from_file (ND1Digit, CurrentND1);
 	      gtk_image_set_from_file (ND2Digit, CurrentND2);
 	    }
-	  gtk_image_set_from_file (KeyRelAnnunciator, CurrentKeyRel);
-	  gtk_image_set_from_file (OprErrAnnunciator, CurrentOprErr);
+	  if (LastKeyRel != CurrentKeyRel)
+	    {
+	      gtk_image_set_from_file (KeyRelAnnunciator, CurrentKeyRel);
+	      LastKeyRel = CurrentKeyRel;
+	    }
+	  if (LastOprErr != CurrentOprErr)
+	    {
+	      gtk_image_set_from_file (OprErrAnnunciator, CurrentOprErr);
+	      LastOprErr = CurrentOprErr;
+	    }
 	}
       else
 	{
@@ -293,31 +363,17 @@ Pulse (gpointer data)
 	      gtk_image_set_from_file (ND1Digit, CurrentBlank);
 	      gtk_image_set_from_file (ND2Digit, CurrentBlank);
 	    }
-	  gtk_image_set_from_file (KeyRelAnnunciator, BlankKeyRel);
-	  gtk_image_set_from_file (OprErrAnnunciator, BlankOprErr);
+	  if (LastKeyRel != BlankKeyRel)
+	    {
+	      gtk_image_set_from_file (KeyRelAnnunciator, BlankKeyRel);
+	      LastKeyRel = BlankKeyRel;
+	    }
+	  if (LastOprErr != BlankOprErr)
+	    {
+	      gtk_image_set_from_file (OprErrAnnunciator, BlankOprErr);
+	      LastOprErr = BlankOprErr;
+	    }
 	}
-#else // 1
-      extern GtkImage *VerbAnnunciator, *NounAnnunciator;
-      FlashCounter = 10;
-      if (FlashStatus)
-	{
-	  gtk_image_set_from_file (VerbAnnunciator,
-				   PACKAGE_DATA_DIR "/" PACKAGE 
-				   "/pixmaps/VerbOn.xpm");
-	  gtk_image_set_from_file (NounAnnunciator,
-				   PACKAGE_DATA_DIR "/" PACKAGE 
-				   "/pixmaps/NounOn.xpm");
-	}
-      else
-	{
-	  gtk_image_set_from_file (VerbAnnunciator,
-				   PACKAGE_DATA_DIR "/" PACKAGE 
-				   "/pixmaps/VerbOff.xpm");
-	  gtk_image_set_from_file (NounAnnunciator,
-				   PACKAGE_DATA_DIR "/" PACKAGE 
-				   "/pixmaps/NounOff.xpm");
-	}
-#endif // 1
       FlashStatus = !FlashStatus;
     }
   // Try to connect to the server (yaAGC) if not already connected.
@@ -349,26 +405,6 @@ Pulse (gpointer data)
 	    }
 	  if (i == 0)
 	    break;
-#if 0
-	  // This (older) code is based on the notion that the packet signature
-	  // is always 00 01 10 11.
-	  if ((PacketSize << 6) == (0xc0 & c))
-	    { 
-	      Packet[PacketSize++] = c;
-	      if (PacketSize >= 4)
-		{
-		  void ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet);
-		  ActOnIncomingIO (window1, Packet);
-		  PacketSize = 0;   
-		}  
-	    }
-	  else
-	    {
-	      PacketSize = 0;  
-	      if (0 == (0xc0 & c))
-	        Packet[PacketSize++] = c;
-	    }
-#else // 0
 	  // This (newer) code will accept any packet signature of the form
 	  // 00 XX XX XX.
 	  if (0 == (0xc0 & c))
@@ -383,7 +419,6 @@ Pulse (gpointer data)
 		  PacketSize = 0;   
 		}  
 	    }
-#endif // 0
 	}
     }
   return (TRUE);    

@@ -1,4 +1,4 @@
-# Copyright 2003-2007 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -77,10 +77,48 @@
 #				"-DALLOW_BSUB".  This allows yaAGC and friends
 #				to pass instructions in the BSUB register upon
 #				exiting from an interrupt-service routine.
+#		03/01/09 RSB	Updated the version code.
+#		03/05/09 RSB	Now builds VirtualAGC.
+#		03/06/09 RSB	There are new targets: 'default' is the same 
+#				as 'all'.  'all-archs' is like 'all', except 
+# 				that 'all' builds only for the native platform
+#				while 'all-archs' is used when running under
+#				Linux to create the Linux, Win32, and Mac
+#				stuff.
+#		03/11/09 RSB	yaTelemetry added.
+#		03/12/09 RSB	yaDSKY replaced by yaDSKY2, by default..
+#		03/13/09 RSB	Added provisions for replacing yaDEDA by yaDEDA2.
+#		03/16/09 RSB	"make clean" would fail if ./configure hadn't
+#				been performed due to the fact that it isn't
+#				needed when yaDSKY and yaDEDA aren't built.
+#		03/19/09 RSB	Will now *try* to build yaDSKY/yaDEDA even if
+#				yaDSKY2/yaDEDA2 are selected, and vice-versa.
+#				However, failure won't a fatal error.  If find
+#				it useful for both to be available for 
+#				debugging.
+#		03/28/09 RSB	Merged in yaACA3.
+#		04/14/09 RSB	Made some mods to help this build in Solaris.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20080621\\\"
+NVER:=\\\"20090414\\\"
 DATE:=`date +%Y%m%d`
+
+# Comment out the following line(s) to use yaDSKY rather than yaDSKY2 and/or 
+# yaDEDA by yaDEDA2.  yaDSKY/yaDEDA have been replaced by yaDSKY2/yaDEDA2 
+# principally because yaDSKY/yaDEDA are gtk+ based while yaDSKY2/yaDEDA2
+# are wxWidgets based.  At present, I consider wxWidgets superior to gtk+
+# (in this particular application) because: a) I can get it to work on a 
+# wider range of platforms; b) I can link statically to it rather than 
+# being forced to use shared libraries.  yaDSKY2/yaDEDA2 are drop-in 
+# identically-featured replacements for yaDSKY/yaDEDA, except that certain
+# options useful only in debugging or *only* for GTK+ aren't implemented.
+# These include the --test-downlink, --relative-pixmaps, and --show-packets
+# switches.  yaTelemetry has already been made available (and is the preferred
+# method) to provide the --test-downlink functionaly.  And, of course, the 
+# original versions of yaDSKY/yaDEDA are still available even though not 
+# compiled by default.
+YADSKY_SUFFIX=2
+YADEDA_SUFFIX=2
 
 # Uncomment the following line (or do 'make NOREADLINE=yes') if the build 
 # gives errors related to readline.
@@ -92,6 +130,19 @@ DATE:=`date +%Y%m%d`
 
 SNAP_PREFIX = /usr/local/yaAGC
 
+# Some adjustments for building in Solaris
+ifdef SOLARIS
+NOREADLINE=yes
+LIBS+=-lsocket -lnsl
+endif
+
+# Some adjustments for building in Mac OS X
+ifdef MACOSX
+NOREADLINE=yes
+ISMACOSX:=MACOSX=yes
+endif
+
+# This Mac stuff in the following conditional isn't used any longer.
 ifdef OldTargetSelection
   # This upper part of the ifdef should be completely obsolete now ....
   # The following should be non-zero on Mac OS X, and 0 if not, I hope.
@@ -139,10 +190,10 @@ endif
 #	CFLAGS=-Wall -Werror
 # to catch every possible problem before sending it out into the world.
 ifeq (${USER},rburkey)
-CFLAGS:="-Wall -Werror -g -DALLOW_BSUB -DSTDC_HEADERS"
+CFLAGS:="-Wall -Werror -DALLOW_BSUB"
 yaACA:=
 else 
-CFLAGS="-DALLOW_BSUB -DSTDC_HEADERS"
+CFLAGS="-DALLOW_BSUB"
 yaACA:=-
 endif
 
@@ -164,27 +215,64 @@ ifndef PREFIX
 PREFIX=/usr/local
 endif
 
-all:
-	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE} CURSES=${CURSES}
-	${MAKE} -C yaAGS PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE} CURSES=${CURSES}
+.PHONY: default
+default: all
+
+.PHONY: all all-archs
+all: ARCHS=default
+all-archs: ARCHS=all-archs
+all all-archs:
+	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
+	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE} CURSES=${CURSES} ${ARCHS} LIBS2="${LIBS}"
+	${MAKE} -C yaAGS PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE} CURSES=${CURSES} ${ARCHS} LIBS2="${LIBS}"
 ifndef NOGUI
-	$(MAKE) -C yaDEDA PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaDSKY PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
+ifeq "${YADEDA_SUFFIX}" ""
+	$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+else
+	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
 endif
-	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
+ifeq "${YADSKY_SUFFIX}" ""
+	$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
+	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+else
+	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
+	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+endif	
+endif
+	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
+	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	${yaACA}${MAKE} -C yaACA3 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
 	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
 	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER}
 	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaSimulators/ControlPulseSim ControlPulseSim NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
+	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	${MAKE} -C jWiz NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} ${ISMACOSX}
+	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX}
+
+# Here's a target for updating the website.
+.PHONY: snapshot
+snapshot: dev binaries
+
+.PHONY: binaries
+binaries: clean all-archs
+	cp -a VirtualAGC/VirtualAGC-installer ${WEBSITE}
+	cp -a VirtualAGC/VirtualAGC-setup.exe ${WEBSITE}
+	cp -a VirtualAGC/VirtualAGC.app.tar.gz ${WEBSITE}
+	ls -ltr ${WEBSITE}
 
 # I used this only for creating a development snapshot.  It's no use to anybody
 # else, I expect.
+.PHONY: dev
 dev:	clean
-	-rm -f ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2
+	-rm ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2
 	tar -C .. --exclude=*CVS* --exclude=*snprj* --exclude="*.core" \
 		--exclude=yaAGC/yaDSKY/autom4te.cache/* \
 		--exclude=yaAGC/yaDSKY/configure \
@@ -201,11 +289,9 @@ dev:	clean
 		--exclude=yaAGC/yaDEDA/Makefile.in \
 		--exclude=yaAGC/yaDEDA/Makefile \
 		--exclude=*~ --exclude=*.bak \
+		--exclude=*xvpics* \
 		--bzip2 -cvf ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2 yaAGC
-	ls -l ${WEBSITE}/
-ifeq (${USER},rburkey)
-	cp -a ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2 /raid/temp/yaAGC-dev-current.tar.bz2
-endif
+	ls -ltr ${WEBSITE}
 		
 snapshot-ephemeris:
 	cd .. ; tar --bzip2 -cvf ${WEBSITE}/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
@@ -216,24 +302,34 @@ clean:
 	$(MAKE) -C yaLEMAP clean
 	$(MAKE) -C yaAGC clean
 	$(MAKE) -C yaAGS clean
-	$(MAKE) -C yaDSKY clean
-	$(MAKE) -C yaDEDA clean
+	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs clean
+	-rm yaDSKY/src/yaDSKY
+	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs clean
 	$(MAKE) -C yaYUL clean
 	$(MAKE) -C yaUniverse clean
 	${yaACA}$(MAKE) -C yaACA clean
+	${yaACA}${MAKE} -C yaACA2 clean
+	${yaACA}$(MAKE) -C yaACA3 clean
 	$(MAKE) -C Luminary131 clean
 	$(MAKE) -C Colossus249 clean
 	${MAKE} -C Artemis072 clean
 	$(MAKE) -C Validation clean
-	-rm -f yaSimulators/ControlPulseSim/ControlPulseSim
-	-rm -f `find . -name "core"`
+	${MAKE} -C ControlPulseSim clean
+	${MAKE} -C VirtualAGC clean
+	${MAKE} -C yaTelemetry clean
+	${MAKE} -C jWiz clean
+	-${MAKE} -C yaDSKY2 clean
+	-${MAKE} -C yaDEDA2 clean
+	-${MAKE} -C yaACA2 clean
+	-rm `find . -name "core"`
 
 install: all
-	-mkdir -p ${PREFIX}/bin/modules
-	-rm -f ${PREFIX}/bin/VirtualAgcFileStart
+	-mkdir ${PREFIX}
+	-mkdir ${PREFIX}/bin
+	-rm ${PREFIX}/bin/VirtualAgcFileStart
 	echo hello >${PREFIX}/bin/VirtualAgcFileStart
 	sleep 2
-	cp yaSimulators/ControlPulseSim/ControlPulseSim ${PREFIX}/bin
+	cp ControlPulseSim/ControlPulseSim ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/ControlPulseSim
 	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} install
 	$(MAKE) -C yaAGC PREFIX=${PREFIX} install NOREADLINE=${NOREADLINE} CURSES=${CURSES}
@@ -249,20 +345,24 @@ install: all
 	chmod ugo+r ${PREFIX}/bin/LM*.ini
 	chmod ugo+r ${PREFIX}/bin/CM*.ini
 ifndef NOGUI
-	-rm -f ${PREFIX}/bin/yaDSKY
+ifeq "${YADSKY_SUFFIX}"	""
+	-rm ${PREFIX}/bin/yaDSKY
 	$(MAKE) -C yaDSKY PREFIX=${PREFIX} install
 	-ln ${PREFIX}/bin/yadsky ${PREFIX}/bin/yaDSKY
+endif	
+ifeq "${YADEDA_SUFFIX}"	""
 	$(MAKE) -C yaDEDA PREFIX=${PREFIX} install
+endif	
 endif
-	cp yaScripts/Sim* ${PREFIX}/bin
+	cp Sim* ${PREFIX}/bin
 	chmod ugo+rx ${PREFIX}/bin/Sim*
-	cp yaSimulators/LM_Simulator/*.tcl yaSimulators/LM_Simulator/*.ini ${PREFIX}/bin
-	cp -R yaSimulators/LM_Simulator/modules/*.tcl ${PREFIX}/bin/modules
+	cp Contributed/LM_Simulator/*.tcl Contributed/LM_Simulator/*.ini ${PREFIX}/bin
+	cp -R Contributed/LM_Simulator/modules ${PREFIX}/bin
 	echo cd ${PREFIX}/bin >${PREFIX}/bin/LM_Simulator
 	echo wish lm_simulator.tcl '$$1' '$$2' '$$3' >>${PREFIX}/bin/LM_Simulator
 	chmod ugo+x ${PREFIX}/bin/LM_Simulator
-	-rm -f ${PREFIX}/bin/VirtualAgcFileList
-	-rm -f ${PREFIX}/bin/VirtualAgcUninstall
+	-rm ${PREFIX}/bin/VirtualAgcFileList
+	-rm ${PREFIX}/bin/VirtualAgcUninstall
 	find ${PREFIX}/bin -cnewer ${PREFIX}/bin/VirtualAgcFileStart >${PREFIX}/bin/VirtualAgcFileList
 	echo rm `cat ${PREFIX}/bin/VirtualAgcFileList` >>${PREFIX}/bin/VirtualAgcUninstall
 	echo rm -rf ${PREFIX}/share/yaDEDA >>${PREFIX}/bin/VirtualAgcUninstall
@@ -271,16 +371,6 @@ endif
 	echo rm ${PREFIX}/bin/VirtualAgcFileStart >>${PREFIX}/bin/VirtualAgcUninstall
 	echo rm ${PREFIX}/bin/VirtualAgcUninstall >>${PREFIX}/bin/VirtualAgcUninstall
 	chmod ugo+x ${PREFIX}/bin/VirtualAgcUninstall
-
-strip:
-	strip yaAGC/yaAGC
-	strip yaAGS/yaAGS
-	strip yaYUL/yaYUL
-	strip yaLEMAP/yaLEMAP
-	strip yaLEMAP/binLEMAP
-	strip yaDEDA/src/yaDEDA
-	strip yaDSKY/src/yadsky
-	strip yaACA/yaACA
 	
 autogen:
 	echo PREFIX=${PREFIX} >Makefile.yaAGC
@@ -312,7 +402,7 @@ endif
 #	ls -l ${WEBSITE}/*.bz2 -t -r
 	
 # Build both types of snapshots.
-snapshot: os dev
+#snapshot: os dev
 	
 endif
 

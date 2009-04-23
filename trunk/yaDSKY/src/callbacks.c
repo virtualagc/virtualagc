@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -36,6 +36,9 @@
 				signed by yaAGC.
 		06/26/05 RSB	Added TestUplink.  Also, DecodeDigitalDownlink.
 		06/27/05 RSB	Added CmOrLm.
+		03/05/09 RSB	Adjusted for --relative-pixmaps.
+		03/07/09 RSB	Automatically change any *.xpm files found in
+				the cfg file to *.jpg.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -58,18 +61,37 @@ int Socket = -1;
 
 #include "../yaAGC/agc_engine.h"
 
-extern int DebugCounterMode, TestUplink, TestDownlink;
+extern int DebugCounterMode, TestUplink, TestDownlink, RelativePixmaps;
 static int DebugCounterReg = 032, DebugCounterInc = 1, DebugCounterWhich = 1;
 
 //----------------------------------------------------------------------------
 // This funky little business here is for the purpose of adding the prefix "h"
 // to the graphics filenames when the HalfSize option is activated.
 void
-my_gtk_image_set_from_file (GtkImage *Image, const char *Filename)
+my_gtk_image_set_from_file (GtkImage *Image, const char *Filename0)
 {
   extern int HalfSize;
+  static int Initialized = 0, PrefixLength;
+  static char Prefix[] = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/";
+  char *Filename;
+  
+  if (!Initialized)
+    {
+      Initialized = 1;
+      if (RelativePixmaps)
+	strcpy (Prefix, "pixmaps/yaDSKY/");
+      PrefixLength = strlen (Prefix);
+    }
+  Filename = malloc (1 + PrefixLength + strlen (Filename0));
+  strcpy (Filename, Prefix);
+  strcpy (&Filename[PrefixLength], Filename0);
+  //printf ("Looking for image \"%s\"\n", Filename);
+  
   if (!HalfSize)
-    gtk_image_set_from_file (Image, Filename);
+    {
+      //printf ("Trying to load \"%s\"\n", Filename);
+      gtk_image_set_from_file (Image, Filename);
+    }
   else
     {
       char *s, *ss;
@@ -77,7 +99,7 @@ my_gtk_image_set_from_file (GtkImage *Image, const char *Filename)
       if (s != NULL)
         {
 	  // I am aided in finding the start of the filename by the knowledge
-	  // that the filenames end in .xpm and that the names contain only
+	  // that the filenames end in .jpg and that the names contain only
 	  // alphanumerics and dashes.
 	  for (ss = (char *) Filename + strlen (Filename) - 1; ss >= Filename; ss--)
 	    if (!isalnum (*ss) && *ss != '.' && *ss != '-')
@@ -88,98 +110,90 @@ my_gtk_image_set_from_file (GtkImage *Image, const char *Filename)
 	  strcat (s, "h");
 	  strcat (s, ss);
 	  //printf ("*** %s ***\n", s);
+          //printf ("Trying to load \"%s\"\n", s);
           gtk_image_set_from_file (Image, s);
           free (s);
         }
     }
+  free (Filename);
 }
+#ifdef gtk_image_set_from_file
+#undef gtk_image_set_from_file
+#endif
 #define gtk_image_set_from_file(i,f) my_gtk_image_set_from_file (i, f)
 
 // Here are the defaults used for indicator lamps in the absence of a configuration file.
 // In cases where we don't know that channel/bit corresponds to the lamp, we use 
 // channel -1.
-typedef struct {
-  char *GraphicOn;		// Filename of graphic for "lit" condition.
-  char *GraphicOff;		// Filename of graphic for "dark" condition.
-  int Channel;			// CPU i/o channel.
-  int Bitmask;			// Mask selecting bitflag within i/o channel.
-  int Polarity;			// Mask for flipping the polarity. (Either 0 or Bitmask.)
-  int State;			// Whether currently on or off.  (Either 0 or Bitmask.)
-  GtkImage *Widget;		// The GTK widget corresponding to the lamp.
-  // Stuff mainly for indicators controlled by channel 10.
-  int Latched;			// Following stuff ignored if Latched==0.
-  int RowMask;
-  int Row;
-} Ind_t;
 Ind_t Inds[14] = {
   {				// 11
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/UplinkActyOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/UplinkActyOff.xpm",
+    "UplinkActyOn.jpg",
+    "UplinkActyOff.jpg",
     011, 4, 0, 0
   },
   {				// 12
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/NoAttOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/NoAttOff.xpm",
+    "NoAttOn.jpg",
+    "NoAttOff.jpg",
     010, 9, 0, 0
   },
   {				// 13
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/StbyOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/StbyOff.xpm",
+    "StbyOn.jpg",
+    "StbyOff.jpg",
     013, 11, 0, 0
   },
   {				// 14
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/KeyRelOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/KeyRelOff.xpm",
+    "KeyRelOn.jpg",
+    "KeyRelOff.jpg",
     011, 16, 0, 0
   },
   {				// 15
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/OprErrOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/OprErrOff.xpm",
+    "OprErrOn.jpg",
+    "OprErrOff.jpg",
     011, 64, 0, 0
   },
   {				// 16
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PrioDispOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PrioDispOff.xpm",
+    "PrioDispOn.jpg",
+    "PrioDispOff.jpg",
     99, 0, 0, 0
   },
   {				// 17
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/NoDapOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/NoDapOff.xpm",
+    "NoDapOn.jpg",
+    "NoDapOff.jpg",
     99, 0, 0, 0
   },
   {				// 21
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/TempOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/TempOff.xpm",
+    "TempOn.jpg",
+    "TempOff.jpg",
     011, 8, 0, 0
   },
   {				// 22
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/GimbalLockOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/GimbalLockOff.xpm",
+    "GimbalLockOn.jpg",
+    "GimbalLockOff.jpg",
     010, 6, 0, 0
   },
   {				// 23
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/ProgOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/ProgOff.xpm",
+    "ProgOn.jpg",
+    "ProgOff.jpg",
     010, 9, 0, 0
   },
   {				// 24
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/RestartOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/RestartOff.xpm",
+    "RestartOn.jpg",
+    "RestartOff.jpg",
     99, 0, 0, 0
   },
   {				// 25
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/TrackerOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/TrackerOff.xpm",
+    "TrackerOn.jpg",
+    "TrackerOff.jpg",
     010, 8, 0, 0
   },
   {				// 26
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/AltOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/AltOff.xpm",
+    "AltOn.jpg",
+    "AltOff.jpg",
     99, 0, 0, 0
   },
   {				// 27
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/VelOn.xpm",
-    PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/VelOff.xpm",
+    "VelOn.jpg",
+    "VelOff.jpg",
     99, 0, 0, 0
   }
 };
@@ -194,12 +208,13 @@ static GtkImage *R2PlusMinus, *R2D1Digit, *R2D2Digit, *R2D3Digit, *R2D4Digit, *R
 static GtkImage *R3PlusMinus, *R3D1Digit, *R3D2Digit, *R3D3Digit, *R3D4Digit, *R3D5Digit;
 static GtkImage *MD1Digit, *MD2Digit;
 GtkImage *VD1Digit, *VD2Digit, *ND1Digit, *ND2Digit;
-static GtkImage *ModeAnnunciator, *CompActyAnnunciator, *iLastButton;
+static GtkImage *ModeAnnunciator, *CompActyAnnunciator;
+GtkImage *iLastButton;
 GtkImage *VerbAnnunciator, *NounAnnunciator;
 GtkImage *KeyRelAnnunciator = NULL, *OprErrAnnunciator = NULL;
 const char *CurrentKeyRel, *CurrentOprErr,
-           *BlankKeyRel = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/KeyRelOff.xpm",
-	   *BlankOprErr = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/OprErrOff.xpm";
+           *BlankKeyRel = "KeyRelOff.jpg",
+	   *BlankOprErr = "OprErrOff.jpg";
 
 #if 0
 static GtkImage *Annunciator11, *Annunciator12, *Annunciator13, *Annunciator14;
@@ -268,33 +283,33 @@ LocateWidgets (GtkWidget *widget)
 
 // Matches image widget filenames to channel 010 CCCCC and DDDDD fields.
 static const char *SevenSegmentFilenames[32] = {
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-0.xpm",
+  "7Seg-0.jpg",
   NULL, NULL,
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-3.xpm",
+  "7Seg-3.jpg",
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-15.xpm",
+  "7Seg-15.jpg",
   NULL, NULL, NULL,
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-19.xpm",
+  "7Seg-19.jpg",
   NULL,
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-21.xpm",
+  "7Seg-21.jpg",
   NULL, NULL, NULL,
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-25.xpm",
+  "7Seg-25.jpg",
   NULL,
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-27.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-28.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-29.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-30.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-31.xpm"
+  "7Seg-27.jpg",
+  "7Seg-28.jpg",
+  "7Seg-29.jpg",
+  "7Seg-30.jpg",
+  "7Seg-31.jpg"
 };
 
 static int IoErrorCount = 0, Last11 = 0;
 int VerbNounFlashing = 0;
 static int R1Sign = 0, R2Sign = 0, R3Sign = 0;
-const char *CurrentBlank = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-0.xpm", 
-  *CurrentVD1 = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-0.xpm", 
-  *CurrentVD2 = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-0.xpm", 
-  *CurrentND1 = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-0.xpm", 
-  *CurrentND2 = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-0.xpm";
+const char *CurrentBlank = "7Seg-0.jpg", 
+  *CurrentVD1 = "7Seg-0.jpg", 
+  *CurrentVD2 = "7Seg-0.jpg", 
+  *CurrentND1 = "7Seg-0.jpg", 
+  *CurrentND2 = "7Seg-0.jpg";
 
 void
 ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
@@ -434,17 +449,11 @@ ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
       if (Sign != NULL)
         {
 	  if (0 != (RSign & 1))	
-	    gtk_image_set_from_file (Sign,
-				     PACKAGE_DATA_DIR "/" PACKAGE 
-				     "/pixmaps/MinusOn.xpm");
+	    gtk_image_set_from_file (Sign, "MinusOn.jpg");
 	  else if (0 != (RSign & 2))
-	    gtk_image_set_from_file (Sign,
-				     PACKAGE_DATA_DIR "/" PACKAGE 
-				     "/pixmaps/PlusOn.xpm");
+	    gtk_image_set_from_file (Sign, "PlusOn.jpg");
 	  else				 
-	    gtk_image_set_from_file (Sign,
-				     PACKAGE_DATA_DIR "/" PACKAGE 
-				     "/pixmaps/PlusMinusOff.xpm");
+	    gtk_image_set_from_file (Sign, "PlusMinusOff.jpg");
 	}
       // Write the left digit.
       if (Left != NULL)
@@ -481,13 +490,9 @@ ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
       if ((Value & 2) != (Last11 & 2))
         {
 	  if (0 == (Value & 2))
-	    gtk_image_set_from_file (CompActyAnnunciator,
-	                             PACKAGE_DATA_DIR "/" PACKAGE 
-				     "/pixmaps/CompActyOff.xpm");
+	    gtk_image_set_from_file (CompActyAnnunciator, "CompActyOff.jpg");
 	  else
-	    gtk_image_set_from_file (CompActyAnnunciator,
-	                             PACKAGE_DATA_DIR "/" PACKAGE 
-				     "/pixmaps/CompActyOn.xpm");
+	    gtk_image_set_from_file (CompActyAnnunciator, "CompActyOn.jpg");
 	}
       i = (0 != (Value & 32));
       if (VerbNounFlashing && !i)
@@ -502,12 +507,8 @@ ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
 	  if (KeyRelAnnunciator != NULL)
 	    gtk_image_set_from_file (KeyRelAnnunciator, CurrentKeyRel);
 #else // 1
-	  gtk_image_set_from_file (VerbAnnunciator,
-				   PACKAGE_DATA_DIR "/" PACKAGE 
-				   "/pixmaps/VerbOn.xpm");
-	  gtk_image_set_from_file (NounAnnunciator,
-				   PACKAGE_DATA_DIR "/" PACKAGE 
-				   "/pixmaps/NounOn.xpm");
+	  gtk_image_set_from_file (VerbAnnunciator, "VerbOn.jpg");
+	  gtk_image_set_from_file (NounAnnunciator, "NounOn.jpg");
 #endif // 1
 	}
       VerbNounFlashing = i;
@@ -523,6 +524,18 @@ Error:
 
 //--------------------------------------------------------------------------------
 // Parses the configuration file.
+
+void
+xpm2jpg (char *s)
+{
+  char *ss;
+  while (NULL != (ss = strstr (s, ".xpm")))
+    {
+      ss[1] = 'j';
+      ss[2] = 'p';
+      ss[3] = 'g';
+    }
+}
 
 int 
 ParseCfg (GtkWidget *Widget, char *Filename)
@@ -562,14 +575,17 @@ ParseCfg (GtkWidget *Widget, char *Filename)
 	}
       if (1 == sscanf (s, "PROKEY %s", s2))
         {
+	  xpm2jpg (s2);
 	  // Look up the widget for the PRO key, and change its graphic.
-	  sprintf (s1, "%s/%s",
-	  	   PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/", s2);
+	  sprintf (s1, "%s%s",
+	  	   "", s2);
           gtk_image_set_from_file (iLastButton, s1);
 	  continue;
 	}  
       if (3 == sscanf (s, "IND %o %s %s", &IndNum, s2, s3))
         {
+	  xpm2jpg (s2);
+	  xpm2jpg (s3);
 	  if (IndNum >= 011 && IndNum <= 017)
 	    IndNum -= 011;
 	  else if (IndNum >= 021 && IndNum <= 027)
@@ -581,7 +597,7 @@ ParseCfg (GtkWidget *Widget, char *Filename)
 	    }
 	  // Need a better way (or SOME way) to check here for string overflow.
 	  sprintf (s1, "%s%s",
-	  	   PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/", s2);
+	  	   "", s2);
 	  Inds[IndNum].GraphicOn = malloc (strlen (s1) + 1);
 	  if (Inds[IndNum].GraphicOn == NULL)
 	    {
@@ -590,7 +606,7 @@ ParseCfg (GtkWidget *Widget, char *Filename)
 	    }
 	  strcpy (Inds[IndNum].GraphicOn, s1);
 	  sprintf (s1, "%s%s",
-	  	   PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/", s3);
+	  	   "", s3);
 	  Inds[IndNum].GraphicOff = malloc (strlen (s1) + 1);
 	  if (Inds[IndNum].GraphicOff == NULL)
 	    {
@@ -888,7 +904,8 @@ on_ProButton_pressed                   (GtkButton       *button,
 	  j = send (ServerSocket, Packet, 4, MSG_NOSIGNAL);
 	  if (j == SOCKET_ERROR && SOCKET_BROKEN)
 	    {
-	      printf ("Removing socket %d\n", ServerSocket);
+	      if (!DebugMode)
+	        printf ("Removing socket %d\n", ServerSocket);
 #ifdef unix
 	      close (ServerSocket);
 #else
