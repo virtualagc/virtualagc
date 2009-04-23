@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -22,6 +22,9 @@
   Mods:		05/30/05 RSB	I think that all of the logic is in place for 
   				basic operations, except that data isn't yet
 				output to the AEA on demand.
+		03/05/09 RSB	Added the --relative-pixmaps switch to 
+				accommodate the installation-directory 
+				structure envisaged by the VirtualAGC program.
 */
 
 /*
@@ -41,7 +44,6 @@
 
 #include "yaAGC.h"
 #include "agc_engine.h"
-#include "agc_symtab.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,6 +60,8 @@ static int StartupDelay = 0;
 #endif
 extern int Portnum;
 int ShowPackets = 0;
+
+int RelativePixmaps = 0;
 
 // This doesn't normally do anything.
 #define DEBUG(x)
@@ -80,15 +84,19 @@ main (int argc, char *argv[])
   gtk_init (&argc, &argv);
 
   printf ("yaDEDA Apollo DEDA simulation, ver " NVER ", built " __DATE__ " " __TIME__ "\n");
-  printf ("Copyright 2005 by Ronald S. Burkey\n");
+  printf ("Copyright 2005,2009 by Ronald S. Burkey\n");
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 	  
   add_pixmap_directory (PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps");
-
   Portnum = 19897;
   for (i = 1; i < argc; i++)
     {
-      if (!strncmp (argv[i], "--ip=", 5))
+      if (!strcmp (argv[i], "--relative-pixmaps"))
+        {
+          RelativePixmaps = 1;
+	  add_pixmap_directory ("pixmaps/yaDEDA");
+	}
+      else if (!strncmp (argv[i], "--ip=", 5))
         Hostname = &argv[i][5];
       else if (!strncmp (argv[i], "--port=", 7))
         {
@@ -140,6 +148,11 @@ main (int argc, char *argv[])
 	  printf ("\tfixed correctly, this option will probably no longer be useful.\n");
 	  printf ("--show-packets\n");
 	  printf ("\tPrints messages about incoming packets from yaAGS, for debugging.\n");
+	  printf ("--relative-pixmaps\n");
+	  printf ("\tUses ./pixmaps/yaDEDA/ as the directory in which to look for \n");
+	  printf ("\tpixmaps rather than the normal installation directory for them.\n");
+	  printf ("\tThis relates to the directory setup used when running yaDEDA under\n");
+	  printf ("\tthe VirtualAGC GUI front-end. Must precede --half-size.\n");
 	  return (0);
 	}	
     }

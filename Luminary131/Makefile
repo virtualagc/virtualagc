@@ -14,29 +14,34 @@
 #		09/05/04 RSB	yaYUL no longer needs --force.
 #		04/30/05 RSB	Added CFLAGS.
 #		07/28/05 RSB	Added symtab.
+#		03/06/09 RSB	Added 'all-archs' and associated stuff.
 
 ifndef PREFIX
 PREFIX=/usr/local
 endif
 SOURCE:=$(wildcard *.s)
-TARGETXEQ=bdiffhead webb2burkey-rope Oct2Bin CheckDec
+TARGETXEQ:=bdiffhead webb2burkey-rope Oct2Bin CheckDec
+TARGETEXE:=$(patsubst %,%.exe,${TARGETXEQ})
+TARGETMAC:=$(patsubst %,%-macosx,${TARGETXEQ})
 TARGETS:=${TARGETXEQ} Luminary131.bin Luminary131.lst Luminary131.symtab
 
-Debug:		$(TARGETS)
 default:	$(TARGETS)
 
-webb2burkey-rope: webb2burkey-rope.c
-	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -o webb2burkey-rope webb2burkey-rope.c
-	
-bdiffhead:	bdiffhead.c
-	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -o $@ $^
-	
-Oct2Bin:	Oct2Bin.c
-	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -o Oct2Bin Oct2Bin.c
-	
-CheckDec:	CheckDec.c
-	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o CheckDec CheckDec.c -lm
-	
+all-archs:	default ${TARGETEXE} ${TARGETMAC}
+
+${TARGETXEQ} : % : %.c
+	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin \
+		-DMAIN_PROGRAM -o $@ $^ -lm
+
+${TARGETEXE} : %.exe : %.c
+	i386-mingw32-gcc ${CFLAGS} -DNVER=${NVER} \
+		-DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
+
+${TARGETMAC} : %-macosx : %.c
+	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} \
+		-DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin \
+		-DMAIN_PROGRAM -o $@ $^ -lm
+
 Luminary131.bin: Oct2Bin Luminary131.binsource
 	./Oct2Bin <Luminary131.binsource
 	mv Oct2Bin.bin Luminary131.bin
@@ -46,16 +51,20 @@ Luminary131.lst Luminary131.symtab: ${SOURCE} Luminary131.bin
 	mv MAIN.s.symtab Luminary131.symtab
 	diff -s MAIN.s.bin Luminary131.bin
 
-cleanDebug: clean	
+.PHONY: JustAssemble
+JustAssemble:
+	../yaYUL/yaYUL MAIN.s >Luminary131.lst
+	mv MAIN.s.symtab Luminary131.symtab
+
 clean:
-	-rm -f $(TARGETXEQ) *.lst *~ MAIN.s.bin Luminary131.bin *.symtab
-	
+	-rm $(TARGETXEQ) *.exe *-macosx *.lst *~ MAIN.s.bin Luminary131.bin *.symtab
+
 install:	default
 	cp ${TARGETS} Luminary131.symtab ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/webb2burkey-rope ${PREFIX}/bin/Oct2Bin \
 		${PREFIX}/bin/CheckDec ${PREFIX}/bin/bdiffhead
 	chmod ugo+r ${PREFIX}/bin/Luminary131.bin
-	rm -f *.symtab *.lst
-	
-	
-	
+	rm *.symtab *.lst
+
+
+

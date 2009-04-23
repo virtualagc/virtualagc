@@ -24,6 +24,19 @@
 
 #include <gtk/gtk.h>
 
+typedef struct {
+  char *GraphicOn;		// Filename of graphic for "lit" condition.
+  char *GraphicOff;		// Filename of graphic for "dark" condition.
+  int Channel;			// CPU i/o channel.
+  int Bitmask;			// Mask selecting bitflag within i/o channel.
+  int Polarity;			// Mask for flipping the polarity. (Either 0 or Bitmask.)
+  int State;			// Whether currently on or off.  (Either 0 or Bitmask.)
+  GtkImage *Widget;		// The GTK widget corresponding to the lamp.
+  // Stuff mainly for indicators controlled by channel 10.
+  int Latched;			// Following stuff ignored if Latched==0.
+  int RowMask;
+  int Row;
+} Ind_t;
 
 gboolean
 on_iNounButton_button_press_event      (GtkWidget       *widget,

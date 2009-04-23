@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -35,6 +35,12 @@
 				activity in terms of garbage data and
 				frozen-up DEDAs that might be due to 
 				timeouts.  Didn't work, though.)
+		03/05/09 RSB	Adjusted for --relative-pixmaps.
+		03/19/09 RSB	Fixed the intermittent freeze-up in DEDA-AEA
+				communications, I hope.  I think this was
+				a sequencing issue involving the READOUT or
+				ENTR key being released before all data was
+				shifted.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -65,7 +71,8 @@
 
 #include "yaAGC.h"
 #include "agc_engine.h"
-#include "agc_symtab.h"
+
+extern int RelativePixmaps;
 
 //-----------------------------------------------------------------------------------
 #ifdef WIN32
@@ -113,9 +120,24 @@ static int LastReadout = 0;		// 1 if previous operations were READOUT or HOLD.
 // This funky little business here is for the purpose of adding the prefix "h"
 // to the graphics filenames when the HalfSize option is activated.
 void
-my_gtk_image_set_from_file (GtkImage *Image, const char *Filename)
+my_gtk_image_set_from_file (GtkImage *Image, const char *Filename0)
 {
   extern int HalfSize;
+  static int Initialized = 0, PrefixLength;
+  static char Prefix[] = PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/";
+  char *Filename;
+  
+  if (!Initialized)
+    {
+      Initialized = 1;
+      if (RelativePixmaps)
+	strcpy (Prefix, "pixmaps/yaDEDA/");
+      PrefixLength = strlen (Prefix);
+    }
+  Filename = malloc (1 + PrefixLength + strlen (Filename0));
+  strcpy (Filename, Prefix);
+  strcpy (&Filename[PrefixLength], Filename0);
+  
   if (!HalfSize)
     gtk_image_set_from_file (Image, Filename);
   else
@@ -141,6 +163,9 @@ my_gtk_image_set_from_file (GtkImage *Image, const char *Filename)
         }
     }
 }
+#ifdef gtk_image_set_from_file
+#undef gtk_image_set_from_file
+#endif
 #define gtk_image_set_from_file(i,f) my_gtk_image_set_from_file (i, f)
 
 //--------------------------------------------------------------------------------
@@ -211,46 +236,46 @@ ReadyForShift (void)
 // something with it, like displaying digits.
 
 static const char *DigitFilenames[16] = {
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-0.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-1.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-2.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-3.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-4.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-5.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-6.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-7.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-8.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7Seg-9.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7SegOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7SegOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7SegOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7SegOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7SegOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/7SegOff.xpm"
+  "7Seg-0.xpm",
+  "7Seg-1.xpm",
+  "7Seg-2.xpm",
+  "7Seg-3.xpm",
+  "7Seg-4.xpm",
+  "7Seg-5.xpm",
+  "7Seg-6.xpm",
+  "7Seg-7.xpm",
+  "7Seg-8.xpm",
+  "7Seg-9.xpm",
+  "7SegOff.xpm",
+  "7SegOff.xpm",
+  "7SegOff.xpm",
+  "7SegOff.xpm",
+  "7SegOff.xpm",
+  "7SegOff.xpm"
 };
 
 static const char *SignFilenames[16] = {
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusOn.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/MinusOn.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/PlusMinusOff.xpm"
+  "PlusOn.xpm",
+  "MinusOn.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm",
+  "PlusMinusOff.xpm"
 };
 
 static const char *OprErrFilenames[2] = {
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/OprErrOff.xpm",
-  PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps/OprErrOn.xpm"
+  "OprErrOff.xpm",
+  "OprErrOn.xpm"
 };
 
 void
@@ -310,6 +335,22 @@ ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
 	}
       // Send the data.
       OutputData (07, Data);
+      // Key releases
+      if (ShiftingOut == 0)
+        {
+#ifdef WIN32
+	  Sleep (100);	    
+#else // WIN32
+	  struct timespec req, rem;
+	  req.tv_sec = 0;
+	  req.tv_nsec = 100000000;
+	  nanosleep (&req, &rem);
+#endif // WIN32
+	  if (LastReadout)
+	    OutputData (05, 0777002);	// Release READ OUT key.
+	  else
+	    OutputData (05, 0777004);	// Release ENTR key.
+	}
     }
   else if (Type == 027)				// Incoming DEDA shift register.
     {
@@ -441,9 +482,9 @@ void
 on_KeyEntr_released                    (GtkButton       *button,
                                         gpointer         user_data)
 {
-  if (OprErr)
-    return;
-  OutputData (05, 0777004);		// inactive 1
+  //if (OprErr)
+  //  return;
+  //OutputData (05, 0777004);		// inactive 1
 }
 
 
@@ -466,9 +507,9 @@ void
 on_KeyReadOut_released                 (GtkButton       *button,
                                         gpointer         user_data)
 {
-  if (OprErr)
+  //if (OprErr)
     return;
-  OutputData (05, 0777002);		// inactive 1
+  //OutputData (05, 0777002);		// inactive 1
 }
 
 
