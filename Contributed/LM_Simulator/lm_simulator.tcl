@@ -25,6 +25,12 @@
 # **** Date/Location: 21.04.2007/Germany                                                     ****
 # **** Version:       v1.0                                                                   ****
 # **** Author:        Stephan Hotto                                                          ****
+#
+# 03.01.2009 Ron Burkey	This version has been provisionally modified from v1.0 in order to 
+#			correct the invocation order of startup functions in order to 
+#			make the Colossus simulations work again.  This was broken at
+#			v0.91.
+#
 # ***********************************************************************************************
 
 # --------------------------- Global Variables --------------------------------------------------
@@ -104,6 +110,13 @@ set source2                       "${modulpath}AGC_System_Inputs.tcl"
 set source3                       "${modulpath}AGC_Crew_Inputs.tcl"
 set source4                       "${modulpath}AGC_IMU.tcl"
 set source5                       "${modulpath}AGC_Simulation_Monitor_Control.tcl"
+
+set startup_create_dsky           "off"
+set startup_create_lmsys	  "off"
+set startup_create_sysinp	  "off"
+set startup_create_crewinp	  "off"
+set startup_create_imugui	  "off"
+set startup_create_attitude_gui	  "off"
 
 # ---------------- Unprogrammed Sequences ----------------------------
 # ---- IN ----
@@ -229,7 +242,6 @@ set Q2L 0; set Q3R 0; set Q4R 0; set Q1L 0
 proc create_gui {} {
  global font0 font11 font1 font2 font3 log_in_flag log_out_flag cdata wdata bmask colb colf
  global bytesReceived bytesSent Operating_System
- global tcl_platform
 
  wm title    . "LM Simulator v1.0 by Stephan Hotto"
  wm geometry . +0+0
@@ -238,15 +250,8 @@ proc create_gui {} {
  } else {
    wm geometry . 450x470; wm minsize  . 450 470
  }
-
  wm iconname . "LM Simulator"
- if { $tcl_platform(platform) == "unix" } {
-   wm iconbitmap . @apollo.xbm
- } else {
-   wm iconbitmap . -default apollo.ico 
- }
-
-
+ 
  . configure -background $colb
 
  create_menu
@@ -503,7 +508,9 @@ proc read_config_file {} {
  global RCS_Specific_Impulse_MS RCS_Thrust_N RCS_Propellant_Mass_KG
  global Ascent_Propellant_Mass_KG Ascent_Thrust_N Ascent_Specific_Impulse_MS FDAI_Update_Rate
  global argv argc
-
+ global startup_create_dsky startup_create_lmsys startup_create_sysinp startup_create_crewinp
+ global startup_create_imugui startup_create_attitude_gui
+ 
  set serverSock_flag 0
 
  # ------------ Read Command Line Parameter --------------
@@ -537,12 +544,12 @@ proc read_config_file {} {
        # ---- Load Program Configuration Parameter ----
        if {$t1 == "serverip"} {set serverIP $t2}
        if {$t1 == "serversocket" && $serverSock_flag == 0} {set serverSock $t2}
-       if {$t1 == "dsky"} {if {$t2 == "on"} {create_dsky; update}}
-       if {$t1 == "output"} {if {$t2 == "on"} {create_lmsys; update}}
-       if {$t1 == "system"} {if {$t2 == "on"} {create_sysinp; update}}
-       if {$t1 == "crew"} {if {$t2 == "on"} {create_crewinp; update}}
-       if {$t1 == "imu"} {if {$t2 == "on"} {create_imugui; update}}
-       if {$t1 == "attitude"} {if {$t2 == "on"} {create_attitude_gui; update}}
+       if {$t1 == "dsky"} {if {$t2 == "on"} { set startup_create_dsky "on" }}
+       if {$t1 == "output"} {if {$t2 == "on"} { set startup_create_lmsys "on" }}
+       if {$t1 == "system"} {if {$t2 == "on"} { set startup_create_sysinp "on" }}
+       if {$t1 == "crew"} {if {$t2 == "on"} { set startup_create_crewinp "on" }}
+       if {$t1 == "imu"} {if {$t2 == "on"} { set startup_create_imugui "on" }}
+       if {$t1 == "attitude"} {if {$t2 == "on"} { set startup_create_attitude_gui "on" }}
        if {$t1 == "operating_system"} {set Operating_System $t2}
        if {$t1 == "fdai_update_rate"} {set FDAI_Update_Rate $t2}
    }
@@ -961,9 +968,16 @@ source $source5
 # **** Function: Main                                                                      ****
 # *********************************************************************************************
 #start_yaAGC
-open_socket
 set_ini_values
-write_ini_values
 read_config_file
+open_socket
+write_ini_values
 create_gui
+if {$startup_create_dsky == "on"} {create_dsky; update}
+if {$startup_create_lmsys == "on"} {create_lmsys; update}
+if {$startup_create_sysinp == "on"} {create_sysinp; update}
+if {$startup_create_crewinp == "on"} {create_crewinp; update}
+if {$startup_create_imugui == "on"} {create_imugui; update}
+if {$startup_create_attitude_gui == "on"} {create_attitude_gui; update}
 read_socket
+

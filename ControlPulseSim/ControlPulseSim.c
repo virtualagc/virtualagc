@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 
 // Registers of interest.
 #define MEMSIZE 64
