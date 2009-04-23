@@ -51,10 +51,10 @@ endif
 	$(MAKE) -C yaYUL -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C yaUniverse NATIVE=WIN32 NVER=${NVER} CFLAGS=${CFLAGS}
 	-$(MAKE) -C yaACA NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaCode/Luminary131 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaCode/Colossus249 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
-	${MAKE} -C yaCode/Artemis072 PREFIX=${PREFIX} NVER=${NVER}
-	$(MAKE) -C yaCode/Validation -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C Luminary131 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C Colossus249 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
+	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER}
+	$(MAKE) -C Validation -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 
 clean:
 	$(MAKE) -C yaLEMAP SUFFIX=.exe clean
@@ -65,10 +65,10 @@ clean:
 	$(MAKE) -C yaYUL -f Makefile.Win32 clean
 	$(MAKE) -C yaUniverse clean
 	-$(MAKE) -C yaACA clean
-	$(MAKE) -C yaCode/Luminary131 -f Makefile.Win32 clean
-	$(MAKE) -C yaCode/Colossus249 -f Makefile.Win32 clean
-	${MAKE} -C yaCode/Artemis072 clean
-	$(MAKE) -C yaCode/Validation -f Makefile.Win32 clean
+	$(MAKE) -C Luminary131 -f Makefile.Win32 clean
+	$(MAKE) -C Colossus249 -f Makefile.Win32 clean
+	${MAKE} -C Artemis072 clean
+	$(MAKE) -C Validation -f Makefile.Win32 clean
 
 install: all
 	$(MAKE) -C yaLEMAP SUFFIX=.exe install NVER=${NVER}
@@ -81,10 +81,10 @@ endif
 	$(MAKE) -C yaYUL -f Makefile.Win32 install NVER=${NVER}
 	$(MAKE) -C yaUniverse install NVER=${NVER}
 	-$(MAKE) -C yaACA install NVER=${NVER}
-	$(MAKE) -C yaCode/Luminary131 -f Makefile.Win32 install NVER=${NVER}
-	$(MAKE) -C yaCode/Colossus249 -f Makefile.Win32 install NVER=${NVER}
-	${MAKE} -C yaCode/Artemis072 PREFIX=${PREFIX} install
-	$(MAKE) -C yaCode/Validation -f Makefile.Win32 install NVER=${NVER}
+	$(MAKE) -C Luminary131 -f Makefile.Win32 install NVER=${NVER}
+	$(MAKE) -C Colossus249 -f Makefile.Win32 install NVER=${NVER}
+	${MAKE} -C Artemis072 PREFIX=${PREFIX} install
+	$(MAKE) -C Validation -f Makefile.Win32 install NVER=${NVER}
 	cp -a yaScripts/Sim*bat Sim*.xeq /mingw/bin
 	cp -a yaSimulators/LM_Simulator/*.tcl yaSimulators/LM_Simulator/*.ini /mingw/bin
 	cp -a yaSimulators/LM_Simulator/modules /mingw/bin

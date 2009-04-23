@@ -175,10 +175,10 @@ endif
 	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
 	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaCode/Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaCode/Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	${MAKE} -C yaCode/Artemis072 PREFIX=${PREFIX} NVER=${NVER}
-	$(MAKE) -C yaCode/Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
+	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER}
+	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C yaSimulators/ControlPulseSim ControlPulseSim NVER=${NVER} CFLAGS=${CFLAGS}
 
 # I used this only for creating a development snapshot.  It's no use to anybody
@@ -221,10 +221,10 @@ clean:
 	$(MAKE) -C yaYUL clean
 	$(MAKE) -C yaUniverse clean
 	${yaACA}$(MAKE) -C yaACA clean
-	$(MAKE) -C yaCode/Luminary131 clean
-	$(MAKE) -C yaCode/Colossus249 clean
-	${MAKE} -C yaCode/Artemis072 clean
-	$(MAKE) -C yaCode/Validation clean
+	$(MAKE) -C Luminary131 clean
+	$(MAKE) -C Colossus249 clean
+	${MAKE} -C Artemis072 clean
+	$(MAKE) -C Validation clean
 	-rm -f yaSimulators/ControlPulseSim/ControlPulseSim
 	-rm -f `find . -name "core"`
 
@@ -241,10 +241,10 @@ install: all
 	$(MAKE) -C yaYUL PREFIX=${PREFIX} install
 	$(MAKE) -C yaUniverse PREFIX=${PREFIX} install
 	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} install
-	$(MAKE) -C yaCode/Luminary131 PREFIX=${PREFIX} install
-	$(MAKE) -C yaCode/Colossus249 PREFIX=${PREFIX} install
-	${MAKE} -C yaCode/Artemis072 PREFIX=${PREFIX} install
-	$(MAKE) -C yaCode/Validation PREFIX=${PREFIX} install
+	$(MAKE) -C Luminary131 PREFIX=${PREFIX} install
+	$(MAKE) -C Colossus249 PREFIX=${PREFIX} install
+	${MAKE} -C Artemis072 PREFIX=${PREFIX} install
+	$(MAKE) -C Validation PREFIX=${PREFIX} install
 	cp yaDSKY/src/*.ini ${PREFIX}/bin
 	chmod ugo+r ${PREFIX}/bin/LM*.ini
 	chmod ugo+r ${PREFIX}/bin/CM*.ini
