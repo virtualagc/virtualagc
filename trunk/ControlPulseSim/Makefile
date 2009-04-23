@@ -20,5 +20,5 @@ ControlPulseSim-macosx: ControlPulseSim.c
 
 .PHONY: clean
 clean:
-	-rm ControlPulseSim *.exe *-macosx *.o *~ *.bak
+	-rm -f ControlPulseSim *.exe *-macosx *.o *~ *.bak
 

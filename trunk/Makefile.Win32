@@ -51,6 +51,8 @@ ifndef NOGUI
 endif
 	$(MAKE) -C yaYUL -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C yaUniverse NVER=${NVER} CFLAGS=${CFLAGS} NATIVE=WIN32
+	$(MAKE) -C yaTelemetry NVER=${NVER} CFLAGS=${CFLAGS} NATIVE=WIN32
+	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS=${CFLAGS}
 	-$(MAKE) -C yaACA NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C Luminary131 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C Colossus249 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
@@ -65,6 +67,8 @@ clean:
 	$(MAKE) -C yaDSKY/src -f Makefile.Win32 clean
 	$(MAKE) -C yaYUL -f Makefile.Win32 clean
 	$(MAKE) -C yaUniverse clean
+	$(MAKE) -C yaTelemetry clean
+	$(MAKE) -C ControlPulseSim clean
 	-$(MAKE) -C yaACA clean
 	$(MAKE) -C Luminary131 -f Makefile.Win32 clean
 	$(MAKE) -C Colossus249 -f Makefile.Win32 clean

@@ -13,7 +13,7 @@
 #		07/28/05 RSB	Added the symtab
 
 SOURCE:=$(wildcard *.s)
-TARGETS=webb2burkey-rope.exe Oct2Bin.exe CheckDec.exe Luminary131.bin Luminary131.lst Luminary131.symtab
+TARGETS=webb2burkey-rope.exe Oct2Bin.exe CheckDec.exe bdiffhead.exe Luminary131.bin Luminary131.lst Luminary131.symtab
 
 Debug: 		$(TARGETS)
 default:	$(TARGETS)
@@ -23,6 +23,9 @@ webb2burkey-rope.exe: webb2burkey-rope.c
 	
 Oct2Bin.exe:	Oct2Bin.c
 	gcc ${CFLAGS} "-DNVER=${NVER}" -o Oct2Bin.exe Oct2Bin.c
+	
+bdiffhead.exe:	bdiffhead.c
+	gcc ${CFLAGS} "-DNVER=${NVER}" -o bdiffhead.exe $^
 	
 CheckDec.exe:	CheckDec.c
 	gcc ${CFLAGS} "-DNVER=${NVER}" -DMAIN_PROGRAM -o CheckDec.exe CheckDec.c -lm

@@ -59,6 +59,13 @@ ifdef NATIVE
 PREFIX_WIN=
 BIN_WIN=
 
+ifeq ($(NATIVE), WIN32)
+	# Sorry must install jammer in your MSYS root it also doesn't like spaces
+	# Also don't forget to set the PLATFORM in the installjammer script
+	# as is documented.
+	JAMMER_DIR=/InstallJammer/
+endif
+
 else
 
 PREFIX_WIN=i386-mingw32-
@@ -67,7 +74,7 @@ BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin/
 BIN_MAC=${HOME}/IMCROSS/mac/bin/
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
-JAMMER_DIR=${HOME}/IMCROSS/installjammer
+JAMMER_DIR=${HOME}/IMCROSS/installjammer/
 
 endif
 
@@ -180,21 +187,31 @@ temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Content
 	mkdir $@/source/Colossus249
 	${CP} ../scenarios $@
 	${CP} ../Colossus249/*.binsource ../Colossus249/*.s $@/source/Colossus249
-	./lst2html.sh ../Colossus249/Colossus249.lst $@/source/Colossus249/Colossus249.html
+	echo  "<pre>" > $@/source/Colossus249/Colossus249.html
+	cat ../Colossus249/Colossus249.lst >> $@/source/Colossus249/Colossus249.html
+	echo  "</pre>" >> $@/source/Colossus249/Colossus249.html
 	mkdir $@/source/Luminary131
 	${CP} ../Luminary131/*.binsource ../Luminary131/*.s $@/source/Luminary131
-	./lst2html.sh ../Luminary131/Luminary131.lst $@/source/Luminary131/Luminary131.html
+	echo  "<pre>" > $@/source/Luminary131/Luminary131.html
+	cat ../Luminary131/Luminary131.lst >> $@/source/Luminary131/Luminary131.html
+	echo  "</pre>" >> $@/source/Luminary131/Luminary131.html
 	mkdir $@/source/Artemis072
 	${CP} ../Artemis072/*.binsource ../Artemis072/*.s $@/source/Artemis072
 	mkdir $@/source/Validation
 	${CP} ../Validation/*.s $@/source/Validation
-	./lst2html.sh ../Validation/Validation.lst $@/source/Validation/Validation.html
+	echo  "<pre>" > $@/source/Validation/Validation.html
+	cat ../Validation/Validation.lst >> $@/source/Validation/Validation.html
+	echo  "</pre>" >> $@/source/Validation/Validation.html
 	mkdir $@/source/FP6
 	${CP} ../FP6/*.s $@/source/FP6
-	./lst2html.sh ../FP6/FP6.lst $@/source/FP6/FP6.html
+	echo  "<pre>" >  $@/source/FP6/FP6.html
+	cat ../FP6/FP6.lst >> $@/source/FP6/FP6.html
+	echo  "</pre>" >>  $@/source/FP6/FP6.html
 	mkdir $@/source/FP8
 	${CP} ../FP8/*.s $@/source/FP8
-	./lst2html.sh ../FP8/FP8.lst $@/source/FP8/FP8.html
+	echo  "<pre>" > $@/source/FP8/FP8.html
+	cat ../FP8/FP8.lst >> $@/source/FP8/FP8.html
+	echo  "</pre>" >> $@/source/FP8/FP8.html
 	${CP} *.png $@
 	${CP} ../yaDSKY/src/*.ini $@
 ifeq "${YADSKY_SUFFIX}" ""	
@@ -274,7 +291,7 @@ temp/VirtualAGC : % : VirtualAGC.exe %/bin %/Resources
 	#-cp -a ../yaACA/yaACA.exe ../yaACA/yaACA-cfg.exe $@/bin
 	cp -a ../yaACA2/yaACA2.exe $@/bin
 	cp VirtualAGC-win32/ApolloPatch2.ico $@/bin
-	for n in $@/bin/* ; do i386-mingw32-strip $$n ; done
+	for n in $@/bin/* ; do $(PREFIX_WIN)strip $$n ; done
 ifeq "$YADSKY2" ""	
 	cp ${HOME}/IMCROSS/i386-mingw32/bin/*.dll $@/Resources
 endif
@@ -282,7 +299,11 @@ ifeq "$YADEDA2" ""
 	cp ${HOME}/IMCROSS/i386-mingw32/bin/*.dll $@/Resources
 endif
 	-mkdir $@/Resources/etc
+ifeq ($(NATIVE), WIN32)
+	cp -a /mingw/etc/gtk-2.0 $@/Resources/etc
+else
 	cp -a ${HOME}/IMCROSS/i386-mingw32/etc/gtk-2.0 $@/Resources/etc
+endif
 
 .PHONY: create-bundle
 create-bundle:
@@ -355,7 +376,7 @@ VirtualAGC.tar.bz2: temp/lVirtualAGC
 VirtualAGC-installer: temp/lVirtualAGC
 	sed "s/APPLICATION_VERSION/${NVER}/" VirtualAGC-linux/VirtualAGC-linux.mpi >VirtualAGC-linux/temp.mpi
 	cd VirtualAGC-linux && \
-	${JAMMER_DIR}/installjammer --build temp.mpi
+	${JAMMER_DIR}installjammer --build temp.mpi
 	cp -p VirtualAGC-linux/output/Virtual* $@
 	rm -rf VirtualAGC-linux/build VirtualAGC-linux/output
 
@@ -366,7 +387,7 @@ VirtualAGC.zip: temp/VirtualAGC
 VirtualAGC-setup.exe: temp/VirtualAGC
 	sed "s/APPLICATION_VERSION/${NVER}/" VirtualAGC-win32/VirtualAGC-win32.mpi >VirtualAGC-win32/temp.mpi
 	cd VirtualAGC-win32 && \
-	${JAMMER_DIR}/installjammer --build temp.mpi
+	${JAMMER_DIR}installjammer --build temp.mpi
 	cp -p VirtualAGC-win32/output/*-Setup.exe $@
 	rm -rf VirtualAGC-win32/build VirtualAGC-win32/output
 
