@@ -49,7 +49,7 @@ ifndef NOGUI
 	$(MAKE) -C yaDSKY/src -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 endif
 	$(MAKE) -C yaYUL -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C yaUniverse NVER=${NVER} CFLAGS=${CFLAGS}
+	$(MAKE) -C yaUniverse NATIVE=WIN32 NVER=${NVER} CFLAGS=${CFLAGS}
 	-$(MAKE) -C yaACA NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C yaCode/Luminary131 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}
 	$(MAKE) -C yaCode/Colossus249 -f Makefile.Win32 NVER=${NVER} CFLAGS=${CFLAGS}

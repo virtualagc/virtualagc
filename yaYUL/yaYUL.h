@@ -145,7 +145,7 @@ typedef struct {
   int  NumberLines;                     // # of SymbolLine_t structs
 } SymbolFile_t;
 
-// The Symbol_t sturcture represents a symbol within the symbol table
+// The Symbol_t structure represents a symbol within the symbol table
 // This structure has been added to for the purposes of debugging. Recent
 // modifications include adding a "type" to distinguish between symbols
 // which are labels in the code and symbols which are variable names, and

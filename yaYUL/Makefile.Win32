@@ -30,7 +30,7 @@ yaYUL.exe:  $(CFILES:%.c=%.o) yaYUL.h
 	gcc ${CFLAGS} -o $@ $(CFILES:%.c=%.o) -lm
 
 clean:
-	-rm yaYUL.exe *.o
+	-rm -f yaYUL.exe *.o
 
 install:	yaYUL.exe
 	cp -a yaYUL.exe /mingw/bin/yaYUL.exe

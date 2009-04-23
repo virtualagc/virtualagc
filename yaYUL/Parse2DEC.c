@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -23,6 +23,10 @@
   		07/23/04 RSB.	Added VN.
 		09/04/04 RSB	DEC and 2DEC weren't detecting -0 -- i.e.,
 				-0 was converted to +0.
+		02/28/09 RSB	Several incorrect string-compares 
+				(of the form string=="" rather than
+				string[0]==0) which had for some reason
+				previously been working were fixed.
 */
 
 #include "yaYUL.h"

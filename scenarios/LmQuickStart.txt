@@ -1,0 +1,45 @@
+L			# For LM
+# This just duplicates a few of the CM "Quick Start" steps from 
+# http://www.ibiblio.org/apollo/index.html.  I'm not certain 
+# exactly what has to be done to put the AGC in a state in which
+# it's receptive, but doing a V35E from the true DSKY seems to 
+# do it.  However, if the AGC isn't in a receptive state, all of
+# these commands will really be goofed up.
+
+# What the following line would do is to open up an X-window and
+# display a message.  (Of course, this wouldn't work in Microsoft
+# Windows, so that's why it's commented out.  Uncomment it if you
+# want to see it in action.) The same applies to the other lines 
+# below beginning with "#!". (You have to keep the ! when you remove
+# the #.)  A more typical thing to do here might be to play back an 
+# audio clip, but I didn't want to take the liberty of doing that!  
+# (Not to mention that I don't know what software is installed on 
+# your computer anyway.
+#!xmessage -timeout 3 -center "First, let's see any stored-up program alarms."
+
+V05N09E			# Show program alarms
+"          "		# Delay 5 seconds.  Each space is 0.5 seconds.
+			# The quotes are just to make it easy to see how
+			# many spaces there are, but aren't necessary in
+			# the syntax.  Everywhere else it looks like you
+			# see spaces, they're really tabs, and tabs don't
+			# trigger delays.
+			
+#!xmessage -timeout 10 -center "Now let's cycle through a few memory-bank checksums."
+V91E			# Commence showing memory-bank checksums.
+"          "		# Delay 5 seconds.
+V33E			# Show next memory bank
+"          "		# Delay 5 seconds.
+V33E			# Show next memory bank
+"          "		# Delay 5 seconds.
+V33E			# Show next memory bank
+"          "		# Delay 5 seconds.
+V33E			# Show next memory bank.  I figure that's enough,
+			# though there are really a lot more banks to go!
+"          "		# Delay 5 seconds.
+
+#!xmessage -timeout 5 -center "Finally, let's monitor the elapsed time since power-up."
+V16N36E			# Commence showing time.
+"          "
+
+
