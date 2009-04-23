@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -41,7 +41,8 @@
 		07/28/05 RSB	Made --g the default.  Still accepts the
 				--g switch, but it doesn't do anything.
 		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
-		                table file.		
+		                table file.
+		03/17/09 RSB	Make sure there's no .bin file produced on error.	
 */
 
 #define ORIGINAL_YAYUL_C
@@ -151,7 +152,7 @@ main (int argc, char *argv[])
 
   printf ("Apollo Guidance Computer (AGC) assembler, version " NVER 
   	  ", built " __DATE__ "\n");
-  printf ("(c)2003-2005 Ronald S. Burkey\n");
+  printf ("(c)2003-2005,2009 Ronald S. Burkey\n");
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
   
   // Parse the command-line options.
@@ -404,6 +405,8 @@ Done:
       //printf ("--g              Output the binary symbol table to the file\n"
       //        "                 InputFile.symtab\n");
     }   
+  if (RetVal || Fatals)
+    remove (OutputFilename);
   if (RetVal == 0)
     return (Fatals);
   else    

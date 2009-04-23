@@ -1,5 +1,5 @@
 /*
-  Copyright 2003 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -21,11 +21,24 @@
   Purpose:	Stuff for managing the assembler's symbol table.
   Mode:		04/11/03 RSB.	Began.
   		04/17/03 RSB.	Removed Namespaces.
-		07/27/05 JMS    Added support for writing the symbol table
-                                to a file for symbol debugging purposes.
-		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
-		                table file.
+		07/27/05 JMS    Added support for writing the symbol 
+				table to a file for symbol debugging 
+				purposes.
+		07/28/05 JMS    Added support for writing SymbolLines
+				to symbol table file.
 		08/03/05 JMS    Support for yaLEMAP
+		03/20/09 RSB	Corrected symbol tables (as written
+				to files) to always use little-endian
+				representations of integers.  This
+				isn't important for someone compiling
+				their own AGC code, but is needed for
+				moving symbol tables from one CPU type
+				to another, such as for distributing
+				Virtual AGC binaries to PowerPC vs.
+				Intel CPUs. Also, in the on-disk symbol
+				table we now pad filenames with 0
+				to make automated regression testing of
+				the symtabs easier.
 
   Concerning the concept of a symbol's namespace.  I had originally 
   intended to implement this, and so many functions had a namespace
@@ -51,6 +64,64 @@
 // On the second pass, true values are assigned to the symbols.
 Symbol_t *SymbolTable = NULL;
 int SymbolTableSize = 0, SymbolTableMax = 0;
+
+//-------------------------------------------------------------------------
+// Here are functions for converting integers in-place between the CPU native
+// representation and little-endian format.  These functions are symmetric,
+// in the sense that they convert in either direction.  The functions do
+// not check in any way that the data being pointed to is 32-bit.  The 
+// case of an Address_t datatype as input is particularly interesting.
+// This datatype has 32-bit fields, and they must each be converted by a
+// separate call to LittleEndian32.  However, the datatype *begins* with a 
+// bunch of packed bitfields, so calling LittleEndian32 on an Address_t will
+// attempt to rearrange the packing of those bitfields.  Whether that's 
+// correct and perfectly portable thing to do, I'm not sure.
+
+#if __BYTE_ORDER != __LITTLE_ENDIAN
+
+static 
+void SwapBytes (void *Pointer, int Loc1, int Loc2)
+{
+  char c, *s1, *s2;
+  s1 = ((char *) Pointer) + Loc1;
+  s2 = ((char *) Pointer) + Loc2;
+  c = *s1;
+  *s1 = *s2;
+  *s2 = c;
+}
+
+#endif
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+
+void
+LittleEndian32 (void *Value)
+{
+}
+
+#elif __BYTE_ORDER == __BIG_ENDIAN
+
+void
+LittleEndian32 (void *Value)
+{
+  SwapBytes (Value, 0, 3);
+  SwapBytes (Value, 1, 2);
+}
+
+#elif __BYTE_ORDER == __PDP_ENDIAN
+
+void
+LittleEndian32 (void *Value)
+{
+  SwapBytes (Value, 0, 2);
+  SwapBytes (Value, 1, 3);
+}
+
+#else
+
+#error Sorry, not a supported endian type.
+
+#endif
 
 //-------------------------------------------------------------------------
 // Delete the symbol table.
@@ -296,7 +367,9 @@ void
 WriteSymbolsToFile (char *fname)
 {
   int i, fd;
-  SymbolFile_t symfile;
+  SymbolFile_t symfile = { { 0 } };
+  Symbol_t symbol;
+  SymbolLine_t Line;
 
   // Open the symbol table file
   if ((fd = open (fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0) {
@@ -309,19 +382,30 @@ WriteSymbolsToFile (char *fname)
   getcwd (symfile.SourcePath, MAX_PATH_LENGTH);
   symfile.NumberSymbols = SymbolTableSize;
   symfile.NumberLines = LineTableSize; // JMS: 07.28
+  LittleEndian32 (&symfile.NumberSymbols);
+  LittleEndian32 (&symfile.NumberLines);
   write (fd, (void *)&symfile, sizeof(SymbolFile_t));
 
   // Loop and write the symbols to a file
   for (i = 0; i < SymbolTableSize; i++)
     {
-      write (fd, (void *)&SymbolTable[i], sizeof (Symbol_t));
+      memcpy (&symbol, (void *)&SymbolTable[i], sizeof (Symbol_t));
+      LittleEndian32 (&symbol);
+      LittleEndian32 (&symbol.Value.Value);
+      LittleEndian32 (&symbol.Type);
+      LittleEndian32 (&symbol.LineNumber);
+      write (fd, (void *) &symbol, sizeof (Symbol_t));
     }
 
   // JMS: 07.28
   // Loop and write the symbol lines to a file
   for (i = 0; i < LineTableSize; i++)
     {
-      write (fd, (void *)&LineTable[i], sizeof (SymbolLine_t));
+      memcpy (&Line, (void *)&LineTable[i], sizeof (SymbolLine_t));
+      LittleEndian32 (&Line);
+      LittleEndian32 (&Line.CodeAddress.Value);
+      LittleEndian32 (&Line.LineNumber);
+      write (fd, (void *) &Line, sizeof (SymbolLine_t));
     }
   close (fd);
 }

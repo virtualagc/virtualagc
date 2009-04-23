@@ -1,5 +1,5 @@
 /*
-  Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC.
 
@@ -45,6 +45,8 @@
 		2005-08-02 JMS  Write out the symbol table to a file.
 		                This format of the symbol table is the
 				same as yaYUL.
+		2009-03-17 RSB	Make sure that no .bin or .symtab file 
+				is produced when there is an error.
 				
   Note that we use yaYUL's symbol-table machinery for handling the
   symbol table.
@@ -961,7 +963,7 @@ main (int argc, char *argv[])
   FILE *fp;
   
   printf ("AGS cross-assembler yaLEMAP, " __DATE__ ", " __TIME__ "\n");
-  printf ("Copyright 2005 Ronald S. Burkey.\n");
+  printf ("Copyright 2005,2009 Ronald S. Burkey.\n");
   printf ("Licensed under the General Public License (GPL).\n");
   
   Lst = fopen ("yaLEMAP.lst", "w");
@@ -1157,6 +1159,11 @@ main (int argc, char *argv[])
       Msg (s);
       sprintf (s, "%d total warnings.", WarnCount);
       Msg (s);
+    }
+  if (RetVal)
+    {
+      remove ("yaLEMAP.bin");
+      remove ("yaLEMAP.symtab");
     }
   return (RetVal);
 
