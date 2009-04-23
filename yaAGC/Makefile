@@ -100,7 +100,7 @@ install:	yaAGC
 	cp yaAGC ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
-CheckDec.o: ../yaCode/Luminary131/CheckDec.c
+CheckDec.o: ../Luminary131/CheckDec.c
 	gcc ${CFLAGS} -ggdb -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h

@@ -60,7 +60,7 @@ cleanDebug: clean
 
 default:	WinAGC yaAGC.exe
 
-yaAGC.exe:	 $(OBJECTS) ../yaCode/Luminary131/CheckDec.c libyaAGC.a
+yaAGC.exe:	 $(OBJECTS) ../Luminary131/CheckDec.c libyaAGC.a
 	gcc ${CFLAGS} -ggdb -o $@ $^ -L. -lpthreadAGC -lkernel32 -lwsock32 -lreadline -lyaAGC
 
 libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \
