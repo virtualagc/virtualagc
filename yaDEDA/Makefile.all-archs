@@ -1,0 +1,57 @@
+# Filename:	Makefile.all-archs
+# Purpose:	Builds yaDEDA for all supported target architectures (Linux,
+#		Win32, Mac OS X) from a Linux workstation using IMCROSS.  
+# Mods:		03/06/2009 RSB	Adapted from Makefile.Win32
+
+CSOURCE := \
+	$(wildcard *.c) \
+	../../yaAGC/agc_utilities.c \
+	../../yaAGC/rfopen.c \
+	../../yaAGC/SocketAPI.c \
+	../../yaAGC/agc_engine.c \
+	../../yaAGC/Backtrace.c
+
+.PHONY: default
+default:	Native
+
+.PHONY: all-archs
+all-archs:	Native yaDEDA.exe yaDEDA-macosx
+
+.PHONY: Native
+Native:
+	${MAKE} -C ..
+
+# Note that the PACKAGE_DATA_DIR constants defined below should be completely
+# irrelevant, since the image directories are overridden at runtime.
+# The command-line switch for Mac OS X limits the target architecture to 
+# Intel simply because I presently don't have a version of GTK+ for Mac that
+# supports PowerPC.  When I do, I'll just add "-arch ppc" to the command line.
+
+yaDEDA.exe:	$(wildcard *.h) ${CSOURCE} ../../yaAGC/random.c
+	export PKG_CONFIG_PATH=${HOME}/IMCROSS/i386-mingw32/lib/pkgconfig ; \
+	export PKG_CONFIG_LIBDIR=${HOME}/IMCROSS/i386-mingw32/lib/pkgconfig ; \
+	i386-mingw32-gcc \
+		-o $@ -I../../yaAGC \
+		`pkg-config --cflags gtk+-win32-2.0` \
+		-mno-cygwin -mms-bitfields "-DNVER=${NVER}" \
+		-DPACKAGE_DATA_DIR="\"/mingw/share\""  \
+		-DPACKAGE="\"yaDEDA\"" \
+		${CSOURCE} ../../yaAGC/random.c -lwsock32 \
+		`pkg-config --libs gtk+-win32-2.0`
+
+yaDEDA-macosx:	$(wildcard *.h) ${CSOURCE}
+	export PKG_CONFIG_PATH=${HOME}/IMCROSS/mac/lib/pkgconfig ; \
+	export PKG_CONFIG_LIBDIR=${HOME}/IMCROSS/mac/lib/pkgconfig ; \
+	powerpc-apple-darwin9-gcc -arch i386 \
+		-o $@ -I../../yaAGC \
+		`pkg-config --cflags gtk+-2.0` \
+		"-DNVER=${NVER}" \
+		-DPACKAGE_DATA_DIR="\"/mingw/share\""  \
+		-DPACKAGE="\"yaDEDA\"" \
+		${CSOURCE} \
+		`pkg-config --libs gtk+-2.0`
+
+clean:
+	${MAKE} -C .. clean
+	-rm *.exe *-macosx
+
