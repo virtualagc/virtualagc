@@ -60,7 +60,7 @@ all-archs: default ${APP}.exe ${APP}-macosx
 
 .PHONY:	clean
 clean:
-	-rm ${APP} *.exe *-macosx* *.o *~ *.bak
+	-rm -f ${APP} *.exe *-macosx* *.o *~ *.bak
 
 SOURCES:=${APP}.cpp \
 	../yaAGC/agc_utilities.c \

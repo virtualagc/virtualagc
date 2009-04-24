@@ -321,7 +321,7 @@ clean:
 	-${MAKE} -C yaDSKY2 clean
 	-${MAKE} -C yaDEDA2 clean
 	-${MAKE} -C yaACA2 clean
-	-rm `find . -name "core"`
+	-rm -f `find . -name "core"`
 
 install: all
 	-mkdir ${PREFIX}
