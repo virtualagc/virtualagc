@@ -20,6 +20,9 @@
 # Purpose:	Makefile for the jWiz program.
 # Mods:		2009-04-08 RSB	Adapted from yaTelemetry makefile.
 #		2009-04-14 RSB	Added some stuff for building in Mac OS X.
+#		.......... OH	... something ...
+#		2009-04-25 RSB	Undid some stylistic cleanups that broke the 
+#				all-archs target.
 
 APP=jWiz
 
@@ -30,30 +33,24 @@ APP=jWiz
 # is in the PATH.  The following variables just reflect the default setup for
 # IMCROSS.
 
-# IMCROSS compilation is default but also allow native builds
-# To build native on a platform set the NATIVE environment variable
-# to either WIN32,MACOSX or LINUX
-
-ifdef NATIVE
-
-PREFIX_WIN=
-BIN_WIN=
-
-else
-
-PREFIX_WIN=i386-mingw32-
-PREFIX_MAC=powerpc-apple-darwin9-
-BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin/
+PREFIX_WIN=i386-mingw32
+PREFIX_MAC=powerpc-apple-darwin9
+BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin
 BIN_MAC=${HOME}/IMCROSS/mac/bin
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
-
-endif
 
 ifdef MACOSX
 # For native building in Mac OS X.
 MACFLAG=-DISMACOSX
 endif
+
+# This is just so that when I build it, it will be statically linked.  For
+# anybody else, it will just accept whatever your wxWidgets default library is.
+ifeq "${USER}" "rburkey"
+WXSTATIC=--static
+endif
+
 
 .PHONY:	default
 default: ${APP}
@@ -77,24 +74,26 @@ HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
 	g++ -DNVER=${NVER} ${MACFLAG} -Wall \
-		`wx-config --cxxflags` \
+		`wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config --libs`
+		`wx-config ${WXSTATIC} --libs` \
+		${LIBS2}
+	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}
-	${PREFIX_WIN}g++ \
-		`${BIN_WIN}wx-config --static --cxxflags` \
+	${PREFIX_WIN}-g++ \
+		`${BIN_WIN}/wx-config --static --cxxflags` \
 		-o $@ ${SOURCES} \
-		`${BIN_WIN}wx-config --static --libs`		
-	${PREFIX_WIN}strip $@
+		`${BIN_WIN}/wx-config --static --libs`		
+	${PREFIX_WIN}-strip $@
 
 ${APP}-macosx: ${SOURCES} ${HEADERS}
 	powerpc-apple-darwin9-g++ \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
-		`${BIN_MAC}wx-config --static --cxxflags` \
+		`${BIN_MAC}/wx-config --static --cxxflags` \
 		-o $@ ${SOURCES} \
-		`${BIN_MAC}wx-config --static --libs`
-	${PREFIX_MAC}strip $@
+		`${BIN_MAC}/wx-config --static --libs`
+	${PREFIX_MAC}-strip $@
 
 # Normally, the compiler can create a universal binary without having to
 # do separate compilations for the different architectures and combining
@@ -109,9 +108,9 @@ ignore-${APP}-macosx: ${SOURCES} ${HEADERS}
 		-arch ppc -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
-		`${BIN_MAC}wx-config --static --cxxflags` \
+		`${BIN_MAC}/wx-config --static --cxxflags` \
 		-o $@-ppc ${SOURCES} \
-		`${BIN_MAC}wx-config --static --libs`
+		`${BIN_MAC}/wx-config --static --libs`
 	powerpc-apple-darwin9-lipo \
 		$@-ppc \
 		-remove i386 \
@@ -120,19 +119,19 @@ ignore-${APP}-macosx: ${SOURCES} ${HEADERS}
 		-arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/i686-apple-darwin9 \
-		`${BIN_MAC}wx-config --static --cxxflags` \
+		`${BIN_MAC}/wx-config --static --cxxflags` \
 		-o $@-i386 ${SOURCES} \
-		`${BIN_MAC}wx-config --static --libs`
+		`${BIN_MAC}/wx-config --static --libs`
 	i686-apple-darwin9-lipo \
 		$@-i386 \
 		-remove ppc \
 		-output $@-i386-a		
-	${PREFIX_MAC}lipo \
+	${PREFIX_MAC}-lipo \
 		$@-ppc-a \
 		$@-i386-a \
 		-create \
 		-output $@		
-	${PREFIX_MAC}strip $@
+	${PREFIX_MAC}-strip $@
 
 
 	

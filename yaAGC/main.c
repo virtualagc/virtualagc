@@ -40,11 +40,15 @@
 		08/23/08 OH	Only support GDB/MI and not proprietary debugging
 		03/12/09 OH	Complete re-write of the main function
 		03/23/09 OH	Reduced main to bare minimum
-		04/16/09 OH Merge April changes from RSB
+		04/16/09 OH 	Merge April changes from RSB
+		04/24/09 RSB	Added #include for pthreads.h.
 */
 
 #include "agc_cli.h"
 #include "agc_simulator.h"
+#ifdef PTW32_STATIC_LIB
+#include <pthread.h>
+#endif
 
 /**
 The AGC main function from here the Command Line is parsed, the

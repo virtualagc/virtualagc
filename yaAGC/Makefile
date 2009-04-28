@@ -44,6 +44,12 @@
 #				adjustments related to building for multiple
 #				target architectures using IMCROSS.
 #		03/08/09 RSB	Added WinAGC.exe
+#		........ OH	... something ...
+#		04/24/09 RSB	Removed regex.o from OBJECTS.  Redefined
+#				CSOURCE, from OBJECTS.  Conditioned
+#				use of -lcurses.  Added READLINE back into
+#				Win32 and Mac targets.
+#		04/25/09 RSB	Fixed up native-Mac builds.
 
 LIBS=${LIBS2}
 
@@ -59,16 +65,26 @@ default: yaAGC
 # other side effects.  It it turns out to be a problem, do this:
 #	export NOREADLINE=yes
 #	make
-# instead of just 'make'.
+# instead of just 'make'.  However, readline has become so engrained, that 
+# I don't guarantee you can build it any longer without readline.
 LIBS0:=${LIBS}
 ifndef NOREADLINE
-CFLAGS2 = -DUSE_READLINE
-LIBS += -L/sw/lib -lreadline
-LIBS += -L/usr/lib/curses -lcurses
+CFLAGS2 = -DUSE_READLINE -DGDBMI
+ifdef MACOSX
+# This assumes that readline has been installed into the default (/usr/local)
+# directory with
+#	configure
+#	make
+#	sudo make install
+CFLAGS2 += -I/usr/local/include
+LIBS += /usr/local/lib/libreadline.a
+else
+LIBS += -lreadline
+endif
 endif	# NOREADLINE
 
 ifeq "${USER}" "rburkey"
-STATIC:=
+STATIC:=-static
 endif
 
 OBJECTS := \
@@ -80,14 +96,28 @@ OBJECTS := \
 	agc_disassembler.o \
 	agc_help.o \
 	nbfgets.o \
-	agc_symtab.o \
-	regex.o
+	agc_symtab.o
 
-yaAGC:	$(OBJECTS) CheckDec.o libyaAGC.a
-	gcc ${CFLAGS} -o yaAGC $^ -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm
+LIBOBJECTS := \
+	agc_engine_init.o \
+	agc_engine.o \
+	agc_utilities.o \
+	rfopen.o \
+	Backtrace.o \
+	SocketAPI.o \
+	DecodeDigitalDownlink.o
 
-libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \
-	Backtrace.o SocketAPI.o DecodeDigitalDownlink.o
+ifeq "${EXT}" ".exe"
+NATIVE_WINAGC=WinAGC.exe
+CC_WINAGC=gcc
+else
+CC_WINAGC=i386-mingw32-gcc
+endif
+
+yaAGC:	$(OBJECTS) CheckDec.o libyaAGC.a ${NATIVE_WINAGC}
+	gcc ${CFLAGS} ${CFLAGS2} -o yaAGC ${OBJECTS} CheckDec.o libyaAGC.a -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm ${CURSES}
+
+libyaAGC.a: ${LIBOBJECTS}
 	ar -rc $@ $^
 	ranlib $@
 	touch ../yaDSKY/src/main.c
@@ -101,10 +131,11 @@ install:	yaAGC
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
 CheckDec.o: ../Luminary131/CheckDec.c
-	gcc ${CFLAGS} -ggdb -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	gcc ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
-	gcc -ggdb -I/sw/include ${CFLAGS} ${CFLAGS2} -DGDBMI -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	gcc ${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+
 #----------------------------------------------------------------------------------
 # Building for multiple architectures, using IMCROSS.  Since IMCROSS presently
 # does not support readline, I eliminate readline-support from the cross-builds.
@@ -113,25 +144,28 @@ CheckDec.o: ../Luminary131/CheckDec.c
 .PHONY: all-archs
 all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx
 
-CSOURCE:=main.c agc_engine_init.c agc_engine.c agc_utilities.c rfopen.c \
-	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Luminary131/CheckDec.c \
-	 nbfgets.c symbol_table.c
+#CSOURCE:=main.c agc_engine_init.c agc_engine.c agc_utilities.c rfopen.c \
+#	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Luminary131/CheckDec.c \
+#	 nbfgets.c symbol_table.c
+CSOURCE:=$(patsubst %.o,%.c,${OBJECTS} ${LIBOBJECTS}) ../Luminary131/CheckDec.c
 
 yaAGC.exe: ${CSOURCE} random.c
 	i386-mingw32-gcc \
-		${CFLAGS} -DNVER=${NVER} \
+		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} \
 		 -DPTW32_STATIC_LIB -DPCRE_STATIC \
 		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --cflags-posix` \
-		-o $@ $^ -L. ${LIBS0} -lpthreadGC2-static -lm -lwsock32 \
+		-o $@ $^ -L. ${LIBS} -lpthreadGC2-static -lm -lwsock32 \
 		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --libs-posix` \
 
 WinAGC.exe: WinAGC.c
-	i386-mingw32-gcc -o $@ $^
+	${CC_WINAGC} ${CFLAGS} ${CFLAGS2} -o $@ $^
 
+MACDIR:=${HOME}/IMCROSS/mac
 yaAGC-macosx: ${CSOURCE}
 	powerpc-apple-darwin9-gcc -arch ppc -arch i386 \
-		${CFLAGS} -DNVER=${NVER} \
-		-o $@ $^ -L. ${LIBS0} -lpthread -lm
+		-I${MACDIR}/include \
+		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} \
+		-o $@ $^ ${MACDIR}/lib/libreadline.a -L. ${LIBS} -lpthread -lm -lcurses
 
 #----------------------------------------------------------------------------------
 # Embedded-firmware stuff for Coldfire is below this line.	

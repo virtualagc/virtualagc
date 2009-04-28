@@ -2310,6 +2310,7 @@ VirtualAGC::FormLmsIni (void)
 bool
 VirtualAGC::FormCommands (void)
 {
+  wxString CoreCmd = wxT ("--core=");
   CmSim = LmSim = AeaSim = false;
   
 #ifdef __APPLE__
@@ -2325,7 +2326,12 @@ VirtualAGC::FormCommands (void)
       {
         yaAGC = ExecutableDirectory + PathDelimiter + wxT ("yaAGC");
 	if (AgcDebugMonitorButton->GetValue ())
-	  yaAGC += wxT (" --debug");
+	  {
+#ifdef ONNO_STYLE
+	    CoreCmd = wxT ("--exec=");
+#endif	  
+	    yaAGC += wxT (" --debug");
+	  }
       }
     else
       yaAGC = wxT ("");
@@ -2493,7 +2499,7 @@ VirtualAGC::FormCommands (void)
       yaTelemetry += TelemetrySwitches;
     if (!yaAGC.IsSameAs (wxT ("")))
       {
-	yaAGC += wxT (" --core=\"") + CoreBin + wxT ("\" --port=") + Port + wxT (" --cfg=") + CMorLM + wxT (".ini");
+	yaAGC += wxT (" ") + CoreCmd + wxT ("\"") + CoreBin + wxT ("\" --port=") + Port + wxT (" --cfg=") + CMorLM + wxT (".ini");
 	if (StartupResumeButton->GetValue () && wxFileExists (CMorLM + wxT (".core")))
 	  yaAGC += wxT (" --resume=") + CMorLM + wxT (".core");
 	if (CustomResumeButton->GetValue () && wxFileExists (CoreFilename->GetValue ()))

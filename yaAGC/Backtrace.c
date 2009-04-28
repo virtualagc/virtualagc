@@ -1,5 +1,5 @@
 /*
-  Copyright 2004-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2004-2005,2009 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC.
 
@@ -48,6 +48,9 @@
 		02/27/05 RSB	Added the license exception, as required by
 				the GPL, for linking to Orbiter SDK libraries.
 		05/14/05 RSB	Corrected website references.
+		........ OH	... something ...
+		04/24/09 RSB	Made declarations of various variables in 
+				BacktraceDisplay conditional on GDBMI.
 */
 
 #include <stdlib.h>
@@ -247,15 +250,18 @@ BacktraceRestore ( agc_t *State, int n )
 
 void BacktraceDisplay ( agc_t *State, int Num )
 {
-	int i, j, k;
-	BacktracePoint_t *Bp;
+#ifndef GDBMI	
+	int Bank, Value;
+#else	
 	SymbolLine_t *Line = NULL;
-	int CurrentZ;
-	int Bank,Value;
-	int FB;
-	int SBB;
 	char* FrameName;
 	char* PrevFrameName = (char*)1;
+#endif
+	int i, j, k;
+	BacktracePoint_t *Bp;
+	int CurrentZ;
+	int FB;
+	int SBB;
 
 	if ( BacktraceInitialized == -1 )
 	{

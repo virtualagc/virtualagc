@@ -21,6 +21,7 @@
 # Mods:		2009-03-10 RSB	Created.
 #		2009-03-11 RSB	Working, on Linux and Windows XP.  Don't
 #				know yet about Mac OS X.
+#		2009-04-26 RSB	New build setup.
 
 APP=yaTelemetry
 
@@ -36,13 +37,6 @@ APP=yaTelemetry
 # To build native on a platform set the NATIVE environment variable
 # to either WIN32,MACOSX or LINUX
 
-ifdef NATIVE
-
-PREFIX_WIN=
-BIN_WIN=
-
-else
-
 PREFIX_WIN=i386-mingw32-
 PREFIX_MAC=powerpc-apple-darwin9-
 BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin/
@@ -50,7 +44,12 @@ BIN_MAC=${HOME}/IMCROSS/mac/bin/
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 
+# This is just so that when I build it, it will be statically linked.  For
+# anybody else, it will just accept whatever your wxWidgets default library is.
+ifeq "${USER}" "rburkey"
+WXSTATIC=--static
 endif
+
 
 .PHONY:	default
 default: ${APP}
@@ -74,9 +73,11 @@ HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
 	g++ -DNVER=${NVER} -Wall \
-		`wx-config --cxxflags` \
+		`wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config --libs`
+		`wx-config ${WXSTATIC} --libs` \
+		${LIBS2}
+	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}g++ \

@@ -51,6 +51,9 @@
   		03/08/09 RSB	Tried a workaround for the 100% CPU time
 				mentioned above. Increased the max command-line
 				length from 128 to 256.
+		04/25/09 RSB	Allow the startup delay to be changed from
+				the command line, and changed the default to
+				0 (was hard-coded at 30 seconds)
 
   This program expects to receive a list of command-lines for processes,
   separated by \n and/or \r, on the standard input.  It ignores white lines
@@ -68,6 +71,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 #define MAX_PROCESSES 20
 #define MAX_LENGTH 256
@@ -76,13 +80,20 @@ STARTUPINFO si[MAX_PROCESSES];
 PROCESS_INFORMATION pi[MAX_PROCESSES];
 static int NumProcesses;
 
+static int StartupDelay = 0;
+
 static char s[MAX_LENGTH + 1];
 
 int
-main (void)
+main (int argc, char *argv[])
 {
-  int i;
+  int i, j;
   char *ss;
+
+  // Read the command-line options.
+  for (i = 1; i < argc; i++)
+    if (1 == sscanf (argv[i], "--startup-delay=%d", &j))
+      StartupDelay = j;
 
   // Read the input file.
   for (NumProcesses = 0;
@@ -122,7 +133,8 @@ main (void)
     }
 
   // Wait for any one of them to exit.
-  Sleep (30000);
+  if (StartupDelay > 0)
+    Sleep (StartupDelay);
   printf ("Scanning for process exits.\n"); 
   while (1)
     {

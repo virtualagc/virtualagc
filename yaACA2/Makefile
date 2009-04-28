@@ -20,6 +20,7 @@
 # Purpose:	This makefile is used to build the yaACA program.
 # Mods:		2009-03-16 RSB	Adapted trivially from yaDEDA2's makefile.
 #		2009-04-08 RSB	Eliminated all Allegro and SDL stuff.
+#		2009-04-26 RSB	New build setup.
 
 APPNAME=yaACA2
 
@@ -30,25 +31,13 @@ APPNAME=yaACA2
 # is in the PATH.  The following variables just reflect the default setup for
 # IMCROSS.
 
-# IMCROSS compilation is default but also allow native builds
-# To build native on a platform set the NATIVE environment variable
-# to either WIN32,MACOSX or LINUX
-
-ifdef NATIVE
-
-PREFIX_WIN=
-BIN_WIN=
-
-else
-
-PREFIX_WIN=i386-mingw32-
-PREFIX_MAC=powerpc-apple-darwin9-
+PREFIX_WIN=i386-mingw32
+PREFIX_MAC=powerpc-apple-darwin9
 BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin/
 BIN_MAC=${HOME}/IMCROSS/mac/bin/
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 
-endif
 
 # This is just so that when I build it, it will be statically linked.  For
 # anybody else, it will just accept whatever your wxWidgets default library is.
@@ -89,15 +78,16 @@ ${APPNAME}: ${SOURCES} ${HEADERS}
 	g++ \
 		`wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config ${WXSTATIC} --libs`
-	strip $@
+		`wx-config ${WXSTATIC} --libs` \
+		${LIBS2}
+	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}-g++ \
 		`${BIN_WIN}wx-config --static --cxxflags` \
 		-o $@ ${SOURCES} \
 		`${BIN_WIN}wx-config --static --libs`
-	${PREFIX_WIN}strip $@
+	${PREFIX_WIN}-strip $@
 
 ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 	powerpc-apple-darwin9-g++ \
@@ -105,7 +95,7 @@ ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 		`${BIN_MAC}wx-config --static --cxxflags` \
 		-o $@ ${SOURCES} \
 		`${BIN_MAC}wx-config --static --libs`
-	${PREFIX_MAC}strip $@
+	${PREFIX_MAC}-strip $@
 
 ignore-${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 	powerpc-apple-darwin9-g++ \
@@ -130,11 +120,11 @@ ignore-${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 		$@-i386 \
 		-remove ppc \
 		-output $@-i386-a
-	${PREFIX_MAC}lipo \
+	${PREFIX_MAC}-lipo \
 		$@-ppc-a \
 		$@-i386-a \
 		-create \
 		-output $@		
-	${PREFIX_MAC}strip $@
+	${PREFIX_MAC}-strip $@
 
 

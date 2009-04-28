@@ -98,9 +98,21 @@
 #				debugging.
 #		03/28/09 RSB	Merged in yaACA3.
 #		04/14/09 RSB	Made some mods to help this build in Solaris.
+#		04/25/09 RSB	Fixed dev snapshots to exclude .svn directories.
+#		04/26/09 RSB	Backed out all of the stuff that relies on
+#				Makefile.Win32, and most stuff for OS 
+#				auto-detection.  Removed the "os" target.
+#				Removed the "install" target.
+#
+# The build box is always Linux for cross-compiles.  For native compiles:
+#	Use "make MACOSX=yes" for Mac OS X.
+#	Use "make SOLARIS=yes" for Solaris.
+#	Use "make WIN32=yes" for Windows.
+#	Use "gmake" for FreeBSD.
+#	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20090414\\\"
+NVER:=\\\"20090426\\\"
 DATE:=`date +%Y%m%d`
 
 # Comment out the following line(s) to use yaDSKY rather than yaDSKY2 and/or 
@@ -132,48 +144,15 @@ SNAP_PREFIX = /usr/local/yaAGC
 
 # Some adjustments for building in Solaris
 ifdef SOLARIS
-NOREADLINE=yes
+#NOREADLINE=yes
 LIBS+=-lsocket -lnsl
 endif
 
 # Some adjustments for building in Mac OS X
 ifdef MACOSX
-NOREADLINE=yes
+#NOREADLINE=yes
 ISMACOSX:=MACOSX=yes
 endif
-
-# This Mac stuff in the following conditional isn't used any longer.
-ifdef OldTargetSelection
-  # This upper part of the ifdef should be completely obsolete now ....
-  # The following should be non-zero on Mac OS X, and 0 if not, I hope.
-  # (Actually, it doesn't work in Mac OS X, for some reason, because make
-  # refuses to notice the 'version' environment variable.  But you can
-  # override from the command line with 'make MACVER=apple snapshot'.
-  MACVER := $(strip $(shell echo hello $$version))
-  MACOSTEST := $(shell echo ${MACVER} | grep -c apple)
-  ifeq (${MACOSTEST},0)
-    TARGETOS=linux
-    WEBSITE=../sandroid.org/public_html/apollo/Downloads
-  else
-    TARGETOS=macosx
-    WEBSITE=..
-  endif
-else # OldTargetSelection
-  # The following stuff should have replaced all the stuff above ....
-  # Detect MacOS-X build machine vs. non-MacOS-X.  Don't worry that the 
-  # non-MacOS-X settings are "linux", as they will work for Win32 (Msys or CygWin)
-  # also.  They're only used for the 'make snapshot' target anyhow.
-  ifeq (${OSTYPE},darwin)
-    TARGETOS=macosx
-    MACVER=apple
-    MACOSTEST=1
-    WEBSITE=..
-  else
-    TARGETOS=linux
-    MACOSTEST=0
-    WEBSITE=../sandroid.org/public_html/apollo/Downloads
-  endif
-endif # OldTargetSelection
 
 # GROUP is the main group to which the USER belongs.  This seems to be defined
 # as an environment variable in Mac OS X, but not in Linux.  You can override this
@@ -190,23 +169,28 @@ endif
 #	CFLAGS=-Wall -Werror
 # to catch every possible problem before sending it out into the world.
 ifeq (${USER},rburkey)
-CFLAGS:="-Wall -Werror -DALLOW_BSUB"
-yaACA:=
+WEBSITE=../sandroid.org/public_html/apollo/Downloads
+CFLAGS=-Wall -Werror -DALLOW_BSUB
+yaACA=
 else 
-CFLAGS="-DALLOW_BSUB"
-yaACA:=-
+WEBSITE=..
+CFLAGS=-DALLOW_BSUB
+yaACA=-
 endif
 
-ifeq (${OSTYPE},msys)
-
-# This is a feeble attempt to detect that the build is taking placing in an Msys
-# environment within Windows.  Previously, you'd be forced to use the command
-# "make -f Makefile.Win32" in Windows.
-
-PREFIX=c:/mingw
-include Makefile.Win32
-
+# Note:  The CURSES variable is misnamed.  It really is just any special libraries
+# for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
+ifdef WIN32
+EXT=.exe
+CFLAGS+=-I/usr/local/include
+LIBS+=-L/usr/local/lib
+LIBS+=-lkernel32
+LIBS+=-lwsock32
+CURSES=../yaAGC/random.c
+CURSES+=-lregex
 else
+CURSES=-lcurses
+endif
 
 # We assume a *nix build environment.
 
@@ -222,40 +206,42 @@ default: all
 all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs:
-	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
-	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE} CURSES=${CURSES} ${ARCHS} LIBS2="${LIBS}"
-	${MAKE} -C yaAGS PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} NOREADLINE=${NOREADLINE} CURSES=${CURSES} ${ARCHS} LIBS2="${LIBS}"
+	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
+	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" NOREADLINE=${NOREADLINE} CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C yaAGS PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" NOREADLINE=${NOREADLINE} CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 ifndef NOGUI
 ifeq "${YADEDA_SUFFIX}" ""
-	$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
-	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 else
-	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
-	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 endif
 ifeq "${YADSKY_SUFFIX}" ""
-	$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 	cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 else
-	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
+	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 endif	
 endif
-	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
-	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
-	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
-	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
-	${yaACA}${MAKE} -C yaACA3 NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
-	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
-	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER}
-	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS=${CFLAGS}
-	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS}
-	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} LIBS2="${LIBS}"
-	${MAKE} -C jWiz NVER=${NVER} CFLAGS=${CFLAGS} ${ARCHS} ${ISMACOSX}
-	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX}
+	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
+	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+ifndef WIN32
+	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+endif
+	${yaACA}${MAKE} -C yaACA3 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} CURSES="${CURSES}"
+	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
+	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
+	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
+	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
+	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
+	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT}
 
 # Here's a target for updating the website.
 .PHONY: snapshot
@@ -266,7 +252,7 @@ binaries: clean all-archs
 	cp -a VirtualAGC/VirtualAGC-installer ${WEBSITE}
 	cp -a VirtualAGC/VirtualAGC-setup.exe ${WEBSITE}
 	cp -a VirtualAGC/VirtualAGC.app.tar.gz ${WEBSITE}
-	ls -ltr ${WEBSITE}
+	ls -ltr ${WEBSITE} | tail -4
 
 # I used this only for creating a development snapshot.  It's no use to anybody
 # else, I expect.
@@ -289,6 +275,7 @@ dev:	clean
 		--exclude=yaAGC/yaDEDA/Makefile.in \
 		--exclude=yaAGC/yaDEDA/Makefile \
 		--exclude=*~ --exclude=*.bak \
+		--exclude=*.svn* \
 		--exclude=*xvpics* \
 		--bzip2 -cvf ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2 yaAGC
 	ls -ltr ${WEBSITE}
@@ -323,86 +310,10 @@ clean:
 	-${MAKE} -C yaACA2 clean
 	-rm -f `find . -name "core"`
 
-install: all
-	-mkdir ${PREFIX}
-	-mkdir ${PREFIX}/bin
-	-rm ${PREFIX}/bin/VirtualAgcFileStart
-	echo hello >${PREFIX}/bin/VirtualAgcFileStart
-	sleep 2
-	cp ControlPulseSim/ControlPulseSim ${PREFIX}/bin
-	chmod ugo+x ${PREFIX}/bin/ControlPulseSim
-	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} install
-	$(MAKE) -C yaAGC PREFIX=${PREFIX} install NOREADLINE=${NOREADLINE} CURSES=${CURSES}
-	$(MAKE) -C yaAGS PREFIX=${PREFIX} install NOREADLINE=${NOREADLINE} CURSES=${CURSES}
-	$(MAKE) -C yaYUL PREFIX=${PREFIX} install
-	$(MAKE) -C yaUniverse PREFIX=${PREFIX} install
-	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} install
-	$(MAKE) -C Luminary131 PREFIX=${PREFIX} install
-	$(MAKE) -C Colossus249 PREFIX=${PREFIX} install
-	${MAKE} -C Artemis072 PREFIX=${PREFIX} install
-	$(MAKE) -C Validation PREFIX=${PREFIX} install
-	cp yaDSKY/src/*.ini ${PREFIX}/bin
-	chmod ugo+r ${PREFIX}/bin/LM*.ini
-	chmod ugo+r ${PREFIX}/bin/CM*.ini
-ifndef NOGUI
-ifeq "${YADSKY_SUFFIX}"	""
-	-rm ${PREFIX}/bin/yaDSKY
-	$(MAKE) -C yaDSKY PREFIX=${PREFIX} install
-	-ln ${PREFIX}/bin/yadsky ${PREFIX}/bin/yaDSKY
-endif	
-ifeq "${YADEDA_SUFFIX}"	""
-	$(MAKE) -C yaDEDA PREFIX=${PREFIX} install
-endif	
-endif
-	cp Sim* ${PREFIX}/bin
-	chmod ugo+rx ${PREFIX}/bin/Sim*
-	cp Contributed/LM_Simulator/*.tcl Contributed/LM_Simulator/*.ini ${PREFIX}/bin
-	cp -R Contributed/LM_Simulator/modules ${PREFIX}/bin
-	echo cd ${PREFIX}/bin >${PREFIX}/bin/LM_Simulator
-	echo wish lm_simulator.tcl '$$1' '$$2' '$$3' >>${PREFIX}/bin/LM_Simulator
-	chmod ugo+x ${PREFIX}/bin/LM_Simulator
-	-rm ${PREFIX}/bin/VirtualAgcFileList
-	-rm ${PREFIX}/bin/VirtualAgcUninstall
-	find ${PREFIX}/bin -cnewer ${PREFIX}/bin/VirtualAgcFileStart >${PREFIX}/bin/VirtualAgcFileList
-	echo rm `cat ${PREFIX}/bin/VirtualAgcFileList` >>${PREFIX}/bin/VirtualAgcUninstall
-	echo rm -rf ${PREFIX}/share/yaDEDA >>${PREFIX}/bin/VirtualAgcUninstall
-	echo rm -rf ${PREFIX}/share/yadsky >>${PREFIX}/bin/VirtualAgcUninstall
-	echo rm -rf ${PREFIX}/bin/modules >>${PREFIX}/bin/VirtualAgcUninstall
-	echo rm ${PREFIX}/bin/VirtualAgcFileStart >>${PREFIX}/bin/VirtualAgcUninstall
-	echo rm ${PREFIX}/bin/VirtualAgcUninstall >>${PREFIX}/bin/VirtualAgcUninstall
-	chmod ugo+x ${PREFIX}/bin/VirtualAgcUninstall
-	
 autogen:
 	echo PREFIX=${PREFIX} >Makefile.yaAGC
 ifndef NOGUI
 	cd yaDSKY && ./autogen.sh --prefix=${PREFIX}
 	cd yaDEDA && ./autogen.sh --prefix=${PREFIX}
-endif
-
-# Build the yaAGC-os-DATECODE.tar.bz2 snapshot	
-os:
-	@echo Target OS is $(TARGETOS) \(${MACVER}\)
-	./configure --prefix=${SNAP_PREFIX}
-	make
-	sudo make install
-	sudo tar --directory=/ --bzip2 -cf ${WEBSITE}/yaAGC-${TARGETOS}-${DATE}.tar.bz2 ${SNAP_PREFIX}
-	sudo chown ${USER}:${GROUP} ${WEBSITE}/yaAGC-${TARGETOS}-${DATE}.tar.bz2
-	sudo rm -rf ${SNAP_PREFIX}
-ifeq (${MACOSTEST},0)	
-	ls -l ${WEBSITE}/*.bz2 -t -r
-else
-	scp -p ${WEBSITE}/yaAGC-${TARGETOS}-${DATE}.tar.bz2 \
-		rburkey@192.168.254.250:Projects/sandroid.org/public_html/apollo/Downloads
-endif	
-
-# Build the yaAGC-dev-DATECODE.tar.bz2 snapshot	
-#dev:
-#	make clean
-#	tar --directory=.. --exclude="*.core" --exclude="yaAGC/.snprj" --exclude="*/CVS" --bzip2 -cf ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2 yaAGC
-#	ls -l ${WEBSITE}/*.bz2 -t -r
-	
-# Build both types of snapshots.
-#snapshot: os dev
-	
 endif
 

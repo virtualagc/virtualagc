@@ -23,6 +23,9 @@
   		yaAGC.
   Reference:	http://www.ibiblio.org/apollo/index.html
   Mode:		2009-03-28 RSB	Adapted from yaACA and yaACA2.
+  		.......... OH	... something ...
+		2009-04-25 RSB	Fixed incorrect treatment of joysticks having
+				> 3 axes.
   
   This is like yaACA (rather than yaACA2) in that it has a text interface
   (rather than a wxWidgets GUI interface).  It differs from yaACA and yaACA2
@@ -551,7 +554,7 @@ UpdateJoystick (void)
 	  Pitch.LastRawReading = Axes[Pitch.Axis].CurrentRawReading;
 	  Translate (&Pitch);
 	}
-      if (NumAxes == 3 && Yaw.LastRawReading != Axes[Yaw.Axis].CurrentRawReading)
+      if (NumAxes >= 3 && Yaw.LastRawReading != Axes[Yaw.Axis].CurrentRawReading)
         {	
 	  Yaw.LastRawReading = Axes[Yaw.Axis].CurrentRawReading;
 	  Translate (&Yaw);
