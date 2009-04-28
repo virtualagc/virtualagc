@@ -39,7 +39,17 @@
 #		2009-04-11 RSB	Tweaking Mac OS X packages.  Added Terminator
 #				on Mac OS X.
 #		2009-04-14 RSB	Made some provisions for building in Mac OS X.
-#		2009-04-21 OH   Add NATIVE build capability.
+#               2009-04-21 OH   Add NATIVE build capability.
+#		2009-04-25 RSB	Reverted to prior version.  Added an adjustment
+#				via 'sed' to convert the directories used by
+#				InstallJammer from */VirtualAGC/temp/... to
+#				`pwd`/temp/....  I hadn't realized that the
+#				name of my home directory was embedded in the
+#				mpi files, and that would have prevented anyone
+#				else from creating InstallJammer based 
+#				installers.  The present change fixes that
+#				by dynamically fixing the mpi files at compile
+#				time.  Fixed up for Win32 readline.
 
 APP=VirtualAGC
 
@@ -49,34 +59,13 @@ APP=VirtualAGC
 # that the IMCROSS installation directory is ~/IMCROSS and that ~/IMCROSS/bin 
 # is in the PATH.  The following variables just reflect the default setup for
 # IMCROSS.
-
-# IMCROSS compilation is default but also allow native builds
-# To build native on a platform set the NATIVE environment variable
-# to either WIN32,MACOSX or LINUX
-
-ifdef NATIVE
-
-PREFIX_WIN=
-BIN_WIN=
-
-ifeq ($(NATIVE), WIN32)
-	# Sorry must install jammer in your MSYS root it also doesn't like spaces
-	# Also don't forget to set the PLATFORM in the installjammer script
-	# as is documented.
-	JAMMER_DIR=/InstallJammer/
-endif
-
-else
-
-PREFIX_WIN=i386-mingw32-
-PREFIX_MAC=powerpc-apple-darwin9-
-BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin/
-BIN_MAC=${HOME}/IMCROSS/mac/bin/
+PREFIX_WIN=i386-mingw32
+PREFIX_MAC=powerpc-apple-darwin9
+BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin
+BIN_MAC=${HOME}/IMCROSS/mac/bin
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
-JAMMER_DIR=${HOME}/IMCROSS/installjammer/
-
-endif
+JAMMER_DIR=${HOME}/IMCROSS/installjammer
 
 # cp and sed work slightly differently on Mac OS X than elsewhere.
 ifdef MACOSX
@@ -130,16 +119,16 @@ MacOsX: VirtualAGC.app.tar.gz
 .PHONY: clean
 clean:
 	-rm -rf temp
-	-rm -f *~ *.bak VirtualAGC *.exe *-macosx VirtualAGC-installer
-	-rm -f VirtualAGC.app.tar.gz VirtualAGC.tar.bz2 VirtualAGC.zip
+	-rm *~ *.bak VirtualAGC *.exe *-macosx VirtualAGC-installer
+	-rm VirtualAGC.app.tar.gz VirtualAGC.tar.bz2 VirtualAGC.zip
 	-rm -rf VirtualAGC-win32/output
 	-rm -rf VirtualAGC-win32/build
-	-rm -f VirtualAGC-win32/build.log
-	-rm -f VirtualAGC-win32/temp.mpi
+	-rm VirtualAGC-win32/build.log
+	-rm VirtualAGC-win32/temp.mpi
 	-rm -rf VirtualAGC-linux/output
 	-rm -rf VirtualAGC-linux/build
-	-rm -f VirtualAGC-linux/build.log
-	-rm -f VirtualAGC-linux/temp.mpi
+	-rm VirtualAGC-linux/build.log
+	-rm VirtualAGC-linux/temp.mpi
 
 SOURCES:=${APP}.cpp \
 	../yaAGC/agc_utilities.c \
@@ -152,29 +141,30 @@ SOURCES:=${APP}.cpp \
 HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
-	g++ \
+	g++ -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
 		`wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config ${WXSTATIC} --libs`
-	strip $@
+		`wx-config ${WXSTATIC} --libs` \
+		${LIBS2}
+	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}
-	${PREFIX_WIN}g++ \
+	${PREFIX_WIN}-g++ -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
-		`${BIN_WIN}wx-config --static --cxxflags` \
+		`${BIN_WIN}/wx-config --static --cxxflags` \
 		-o $@ ${SOURCES} \
-		`${BIN_WIN}wx-config --static --libs`
-	${PREFIX_WIN}strip $@
+		`${BIN_WIN}/wx-config --static --libs`
+	${PREFIX_WIN}-strip $@
 
 ${APP}-macosx: ${SOURCES} ${HEADERS}
-	${PREFIX_MAC}g++ \
+	${PREFIX_MAC}-g++ -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
-		`${BIN_MAC}wx-config --static --cxxflags` \
+		`${BIN_MAC}/wx-config --static --cxxflags` \
 		-o $@ ${SOURCES} \
-		`${BIN_MAC}wx-config --static --libs`
-	${PREFIX_MAC}strip $@
+		`${BIN_MAC}/wx-config --static --libs`
+	${PREFIX_MAC}-strip $@
 
 temp/lVirtualAGC/bin temp/VirtualAGC/bin temp/VirtualAGC.app/Contents/MacOS:
 	mkdir -p $@
@@ -187,31 +177,21 @@ temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Content
 	mkdir $@/source/Colossus249
 	${CP} ../scenarios $@
 	${CP} ../Colossus249/*.binsource ../Colossus249/*.s $@/source/Colossus249
-	echo  "<pre>" > $@/source/Colossus249/Colossus249.html
-	cat ../Colossus249/Colossus249.lst >> $@/source/Colossus249/Colossus249.html
-	echo  "</pre>" >> $@/source/Colossus249/Colossus249.html
+	sh ./lst2html.sh ../Colossus249/Colossus249.lst $@/source/Colossus249/Colossus249.html ${EXT}
 	mkdir $@/source/Luminary131
 	${CP} ../Luminary131/*.binsource ../Luminary131/*.s $@/source/Luminary131
-	echo  "<pre>" > $@/source/Luminary131/Luminary131.html
-	cat ../Luminary131/Luminary131.lst >> $@/source/Luminary131/Luminary131.html
-	echo  "</pre>" >> $@/source/Luminary131/Luminary131.html
+	sh ./lst2html.sh ../Luminary131/Luminary131.lst $@/source/Luminary131/Luminary131.html ${EXT}
 	mkdir $@/source/Artemis072
 	${CP} ../Artemis072/*.binsource ../Artemis072/*.s $@/source/Artemis072
 	mkdir $@/source/Validation
 	${CP} ../Validation/*.s $@/source/Validation
-	echo  "<pre>" > $@/source/Validation/Validation.html
-	cat ../Validation/Validation.lst >> $@/source/Validation/Validation.html
-	echo  "</pre>" >> $@/source/Validation/Validation.html
+	sh ./lst2html.sh ../Validation/Validation.lst $@/source/Validation/Validation.html ${EXT}
 	mkdir $@/source/FP6
 	${CP} ../FP6/*.s $@/source/FP6
-	echo  "<pre>" >  $@/source/FP6/FP6.html
-	cat ../FP6/FP6.lst >> $@/source/FP6/FP6.html
-	echo  "</pre>" >>  $@/source/FP6/FP6.html
+	sh ./lst2html.sh ../FP6/FP6.lst $@/source/FP6/FP6.html ${EXT}
 	mkdir $@/source/FP8
 	${CP} ../FP8/*.s $@/source/FP8
-	echo  "<pre>" > $@/source/FP8/FP8.html
-	cat ../FP8/FP8.lst >> $@/source/FP8/FP8.html
-	echo  "</pre>" >> $@/source/FP8/FP8.html
+	sh ./lst2html.sh ../FP8/FP8.lst $@/source/FP8/FP8.html ${EXT}
 	${CP} *.png $@
 	${CP} ../yaDSKY/src/*.ini $@
 ifeq "${YADSKY_SUFFIX}" ""	
@@ -246,6 +226,13 @@ endif
 	-rm -rf $@/LM_Simulator/doc/CVS
 	-rm -rf $@/LM_Simulator/Documentation/CVS
 	${CP} template.app/Contents/Resources/VirtualAGC.icns $@
+ifeq "${EXT}" ".exe"
+	for n in SDL.dll history*.dll pthread*.dll readline*.dll libgnurx*.dll ; \
+	do \
+		${CP} /usr/local/bin/$$n $@ ; \
+	done
+	${CP} /usr/local/lib/wx*dll $@
+endif
 
 # The targets below create a bin directory for the distribution
 # packages.  All of the contents of the bin directory vary by
@@ -277,10 +264,16 @@ EXECUTABLES+=../yaDEDA/src/yaDEDA
 else
 EXECUTABLES+=../yaDEDA2/yaDEDA2
 endif
+ifeq "${EXT}" ".exe"
+EXECUTABLES+=../yaAGC/WinAGC
+endif
 
 temp/lVirtualAGC : % : VirtualAGC %/bin %/Resources
-	cp -a ${EXECUTABLES} $@/bin
-	-cp -a ../yaACA/yaACA ../yaACA2/yaACA2 $@/bin
+	for n in ${EXECUTABLES} ; \
+	do \
+		cp -a $$n${EXT} $@/bin ; \
+	done
+	-cp -a ../yaACA/yaACA${EXT} ../yaACA2/yaACA2${EXT} $@/bin
 	cp ApolloPatch2-transparent.png $@/bin/ApolloPatch2.png
 	for n in $@/bin/* ; do strip $$n ; done
 	cp -a ../SimStop $@/bin
@@ -291,19 +284,16 @@ temp/VirtualAGC : % : VirtualAGC.exe %/bin %/Resources
 	#-cp -a ../yaACA/yaACA.exe ../yaACA/yaACA-cfg.exe $@/bin
 	cp -a ../yaACA2/yaACA2.exe $@/bin
 	cp VirtualAGC-win32/ApolloPatch2.ico $@/bin
-	for n in $@/bin/* ; do $(PREFIX_WIN)strip $$n ; done
+	for n in $@/bin/* ; do i386-mingw32-strip $$n ; done
 ifeq "$YADSKY2" ""	
 	cp ${HOME}/IMCROSS/i386-mingw32/bin/*.dll $@/Resources
 endif
 ifeq "$YADEDA2" ""	
 	cp ${HOME}/IMCROSS/i386-mingw32/bin/*.dll $@/Resources
 endif
+	cp ${HOME}/IMCROSS/i386-mingw32/bin/readline5.dll $@/Resources
 	-mkdir $@/Resources/etc
-ifeq ($(NATIVE), WIN32)
-	cp -a /mingw/etc/gtk-2.0 $@/Resources/etc
-else
 	cp -a ${HOME}/IMCROSS/i386-mingw32/etc/gtk-2.0 $@/Resources/etc
-endif
 
 .PHONY: create-bundle
 create-bundle:
@@ -373,10 +363,13 @@ endif # MACOSX
 VirtualAGC.tar.bz2: temp/lVirtualAGC
 	tar -C temp -cjf $@ lVirtualAGC
 
+CURDIR:=$(shell pwd)
 VirtualAGC-installer: temp/lVirtualAGC
-	sed "s/APPLICATION_VERSION/${NVER}/" VirtualAGC-linux/VirtualAGC-linux.mpi >VirtualAGC-linux/temp.mpi
+	sed "s/APPLICATION_VERSION/${NVER}/;s@/home/.*/VirtualAGC/temp/@${CURDIR}/temp/@" \
+		VirtualAGC-linux/VirtualAGC-linux.mpi \
+		>VirtualAGC-linux/temp.mpi
 	cd VirtualAGC-linux && \
-	${JAMMER_DIR}installjammer --build temp.mpi
+	${JAMMER_DIR}/installjammer --build temp.mpi
 	cp -p VirtualAGC-linux/output/Virtual* $@
 	rm -rf VirtualAGC-linux/build VirtualAGC-linux/output
 
@@ -385,9 +378,11 @@ VirtualAGC.zip: temp/VirtualAGC
 	cd temp && zip -r ../$@ VirtualAGC
 
 VirtualAGC-setup.exe: temp/VirtualAGC
-	sed "s/APPLICATION_VERSION/${NVER}/" VirtualAGC-win32/VirtualAGC-win32.mpi >VirtualAGC-win32/temp.mpi
+	sed "s/APPLICATION_VERSION/${NVER}/;s@/home/.*/VirtualAGC/temp/@${CURDIR}/temp/@" \
+		VirtualAGC-win32/VirtualAGC-win32.mpi \
+		>VirtualAGC-win32/temp.mpi
 	cd VirtualAGC-win32 && \
-	${JAMMER_DIR}installjammer --build temp.mpi
+	${JAMMER_DIR}/installjammer --build temp.mpi
 	cp -p VirtualAGC-win32/output/*-Setup.exe $@
 	rm -rf VirtualAGC-win32/build VirtualAGC-win32/output
 

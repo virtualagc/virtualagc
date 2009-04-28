@@ -29,6 +29,9 @@
 #				/usr/lib/curses, maybe other places as well.
 #		2009-03-06 RSB	Added the 'all-archs' target and adjusted
 #				'clean' appropriately.
+#		.......... OH	... something ...
+#		2009-04-25 RSB	Fixed up the all-archs target.  Fixed up the
+#				native-Mac build.
 
 LIBS=${LIBS2}
 
@@ -44,20 +47,25 @@ default: yaAGS
 # other side effects.  It it turns out to be a problem, do this:
 #	export NOREADLINE=yes
 #	make
-# instead of just 'make'.
+# instead of just 'make'.  However, I don't really recommend it, and don't
+# guarantee that it works any longer.
 LIBS0:=${LIBS}
 ifndef NOREADLINE
 CFLAGS2 = -DUSE_READLINE
-LIBS += -L/sw/lib -lreadline
-LIBS += -L/usr/lib/curses -lcurses
+ifdef MACOSX
+CFLAGS2 += -I/usr/local/include
+LIBS += /usr/local/lib/libreadline.a
+else
+LIBS += -lreadline
+endif
 endif	# NOREADLINE
 
 ifeq "${USER}" "rburkey"
-STATIC:=
+STATIC:=-static
 endif
 
 yaAGS:	mainAGS.o libyaAGS.a symbol_table.o nbfgets.o Backtrace.o
-	gcc -o yaAGS $^ ${STATIC} -L. -L../yaAGC -lpthread -lyaAGS -lyaAGC -lm ${LIBS}
+	gcc ${CFLAGS} ${CFLAGS2} -o yaAGS $^ ${STATIC} -L. -L../yaAGC -lpthread -lyaAGS -lyaAGC -lm ${LIBS} ${CURSES}
 
 libyaAGS.a: aea_engine_init.o aea_engine.o DebuggerHookAGS.o SocketAPI_AGS.o
 	ar -rc $@ $^
@@ -72,7 +80,7 @@ install:	yaAGS
 	chmod ugo+x ${PREFIX}/bin/yaAGS
 
 %.o:	%.c aea_engine.h
-	gcc -I/sw/include -g ${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -I../yaAGC -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	gcc -g ${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -I../yaAGC -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 #----------------------------------------------------------------------------------
 # Building for multiple architectures, using IMCROSS.  Since IMCROSS presently
@@ -83,18 +91,20 @@ install:	yaAGS
 all-archs: default yaAGS.exe yaAGS-macosx
 
 CSOURCE:=mainAGS.c aea_engine_init.c aea_engine.c DebuggerHookAGS.c SocketAPI_AGS.c \
-	 ../yaAGC/nbfgets.c ../yaAGC/symbol_table.c \
+	 ../yaAGC/nbfgets.c symbol_table.c \
 	 ../yaAGC/rfopen.c ../yaAGC/SocketAPI.c ../yaAGC/agc_utilities.c \
 	 ../yaAGC/agc_engine.c ../yaAGC/Backtrace.c
 
 yaAGS.exe: ${CSOURCE} ../yaAGC/regex.c ../yaAGC/random.c
 	i386-mingw32-gcc -DSTDC_HEADERS  -DPTW32_STATIC_LIB \
-		${CFLAGS} -DNVER=${NVER} -I../yaAGC \
-		-o $@ $^ -L. ${LIBS0} -lpthreadGC2-static -lkernel32 -lwsock32
+		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -I../yaAGC \
+		-o $@ $^ -L. ${LIBS0} -lreadline -lpthreadGC2-static -lkernel32 -lwsock32
 
+MACDIR:=${HOME}/IMCROSS/mac
 yaAGS-macosx: ${CSOURCE}
 	powerpc-apple-darwin9-gcc -arch ppc -arch i386 -DSTDC_HEADERS \
-		${CFLAGS} -DNVER=${NVER} -I ../yaAGC \
-		-o $@ $^ -L. ${LIBS0} -lpthread -lm
+		-I${MACDIR}/include -L${MACDIR}/lib \
+		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -I ../yaAGC \
+		-o $@ $^ ${MACDIR}/lib/libreadline.a -L. ${LIBS0} -lpthread -lm -lcurses
 
 

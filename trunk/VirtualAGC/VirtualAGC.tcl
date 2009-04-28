@@ -1,4 +1,4 @@
 cd LM_Simulator
-after 30000
+after 5000
 source lm_simulator.tcl
 

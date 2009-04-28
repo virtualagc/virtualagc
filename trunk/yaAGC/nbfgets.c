@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2008-2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -43,7 +43,8 @@
 		                debug command, and source file name completion.
 		08/13/05 RSB	Added an initializer for nbfgetsCond, on the
 				advice of "grosman".
-		13/06/08 OH	Intercept rl_getc_function to ignore LF
+		06/13/08 OH	Intercept rl_getc_function to ignore LF
+		04/24/09 RSB	Added some conditioning for some readline stuff.
 */
 
 #include <pthread.h>
@@ -75,11 +76,10 @@ static pthread_t nbfgetsThread;
 int nbNumberSourceFiles = 0;
 char nbSourceFiles[MAX_NUM_FILES][MAX_FILE_LENGTH];
 
-#ifdef USE_READLINE
+#ifdef USE_READLINE //--------------------------------------------
+
 #include <readline/readline.h>
 #include <readline/history.h>
-
-//char *source_generator __P ((const char *, int));
 
 
 // Use to initialize the readline mechanism
@@ -89,8 +89,7 @@ static int rl_gets_initialized = 0;
 char nbPrompt[16];
 extern char agcPrompt[16];
 
-// Given a partial string return matches. Successive call to this
-// should return success partial matches until there are no more.
+
 char * source_generator (const char *text, int state)
 {
   static int list_index, len;
@@ -107,10 +106,10 @@ char * source_generator (const char *text, int state)
       name = nbSourceFiles[list_index];
       list_index++;
       if (strncmp (name, text, len) == 0)
-	return (strdup(name));
+	return ((void *) strdup(name));
   }
   
-  return (char *)NULL;
+  return (void *)NULL;
 }
 
 /**
@@ -121,12 +120,13 @@ int rl_getchar(FILE *stream)
 {
    char c;
 #ifdef WIN32
-   while ((c = (char)rl_getc(stream)) == 10); /* Ignore LF */
+   while ((c = (char) rl_getc(stream) ) == 10); /* Ignore LF */
 #else
-   c = (char)rl_getc(stream);
+   c = /*(char)*/ rl_getc (stream);
 #endif
    return ((int)c);
 }
+
 
 // Read a string, and return a pointer to it using the GNU
 // readline facility. Returns NULL on EOF. Taken from the
@@ -163,7 +163,8 @@ static char * rl_gets (void)
    free (line_read);
    return (nbfgetsBuffer);
 }
-#endif // USE_READLINE
+
+#endif // USE_READLINE --------------------------------------------------
 
 
 // Adds a source file to the list, assume we do not exceed this
@@ -237,7 +238,9 @@ char * nbfgets (char *Buffer, int Length)
 {
   if (!nbfgetsInitialized)
   {
+#ifdef USE_READLINE
       rl_getc_function = rl_getchar;
+#endif      
       
       // We haven't started the other thread yet.  Better do that.
       nbfgetsReady = 0;

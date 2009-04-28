@@ -21,7 +21,7 @@
   Purpose:	A top-level program for running the AGS simulation
   		in a PC environment. 
   Compiler:	GNU gcc.
-  Mods:		04/05/03 RSB.	Began.
+  Mods:		04/05/03 RSB.	Began. 
 		10/20/03 RSB.	Added a fake times() function for WIN32.
 		11/26/03 RSB.	Added the actual machine-cycle timing.  
 				(Previously, it just ran as fast as it could.

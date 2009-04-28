@@ -88,7 +88,7 @@ ${APPNAME}: ${SOURCES}
 		`wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ $^ \
 		`wx-config ${WXSTATIC} --libs`
-	strip $@
+	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES}
 	${PREFIX_WIN}g++ \

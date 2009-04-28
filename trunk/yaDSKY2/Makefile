@@ -33,13 +33,6 @@ APPNAME=yaDSKY2
 # To build native on a platform set the NATIVE environment variable
 # to either WIN32,MACOSX or LINUX
 
-ifdef NATIVE
-
-PREFIX_WIN=
-BIN_WIN=
-
-else
-
 PREFIX_WIN=i386-mingw32-
 PREFIX_MAC=powerpc-apple-darwin9-
 BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin/
@@ -47,7 +40,6 @@ BIN_MAC=${HOME}/IMCROSS/mac/bin/
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 
-endif
 
 # This is just so that when I build it, it will be statically linked.  For
 # anybody else, it will just accept whatever your wxWidgets default library is.
@@ -90,8 +82,9 @@ ${APPNAME}: ${SOURCES} ${HEADERS}
 	g++ \
 		`wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config ${WXSTATIC} --libs`
-	strip $@
+		`wx-config ${WXSTATIC} --libs` \
+		${LIBS2}
+	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}g++ \

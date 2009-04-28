@@ -1005,7 +1005,7 @@ void SimpleFrameClass::do_layout()
 
 // Function and data structures to parse a buffered downlink list into 
 // meaningful data fields.
-
+#if 0
 typedef struct {
   int adot[3];
   int agsbuff[12];
@@ -1169,6 +1169,7 @@ typedef struct {
   int znbsav[3];
 } ParsedDownlinkList_t;
 static ParsedDownlinkList_t ParsedDownlinkList;
+#endif // 0
 
 void
 ParseDownlinkList (const DownlinkListSpec_t *Spec)

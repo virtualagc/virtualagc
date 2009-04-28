@@ -19,6 +19,13 @@
 # Filename:	Makefile
 # Purpose:	This makefile is used to build the yaACA3 program.
 # Mods:		2009-03-28 RSB	Adapted yaACA2.
+#		.......... OH	... something ...
+#		2009-04-25 RSB	Undid some stylistic changes that broke the 
+#				all-archs target.  Fixed NVER.  Undid the
+#				conditional stuff associated with the
+#				NATIVE flag, since it shouldn't be needed.
+#				Changed back some stuff for the .exe 
+#				sub-target of all-archs.
 
 APPNAME=yaACA3
 
@@ -28,8 +35,8 @@ APPNAME=yaACA3
 # that the IMCROSS installation directory is ~/IMCROSS and that ~/IMCROSS/bin 
 # is in the PATH.  The following variables just reflect the default setup for
 # IMCROSS.
-PREFIX_WIN=i386-mingw32-
-PREFIX_MAC=powerpc-apple-darwin9-
+PREFIX_WIN=i386-mingw32
+PREFIX_MAC=powerpc-apple-darwin9
 BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin
 BIN_MAC=${HOME}/IMCROSS/mac/bin
 INC_MAC=${HOME}/IMCROSS/mac/include
@@ -47,21 +54,14 @@ endif
 NATIVE_SDL_CFLAGS:=$(shell sdl-config --cflags)
 NATIVE_SDL_LIBS:= $(shell sdl-config ${SDLIBS})
 
-# IMCROSS compilation is default but also allow native builds
-# To build native on a platform set the NATIVE environment variable
-# to either WIN32,MACOSX or LINUX
-ifdef NATIVE
-
-PREFIX_WIN=
-WIN_SDL_CFLAGS:=$(shell sdl-config --cflags)
-WIN_SDL_LIBS:=$(shell sdl-config --libs)
-
-else
-
+ifeq "${EXT}" ".exe"
+WINFLAGS=-DNO_STDIO_REDIRECT
+WINFLAGS+=SDL_win32_main.c
+endif
 #WIN_SDL_CFLAGS:=$(shell ${BIN_WIN}/sdl-config --cflags)
-WIN_SDL_CFLAGS=$(shell ${BIN_WIN}/sdl-config --cflags)
+WIN_SDL_CFLAGS:=$(shell ${BIN_WIN}/sdl-config --cflags) -DNO_STDIO_REDIRECT SDL_win32_main.c
 #WIN_SDL_LIBS:=$(shell ${BIN_WIN}/sdl-config --static-libs)
-WIN_SDL_LIBS=\
+WIN_SDL_LIBS:=\
 	-L${HOME}/IMCROSS/i386-mingw32/lib -lmingw32 -lSDL \
 	-lkernel32 -luser32 -lgdi32 -lcomdlg32 \
 	-lole32 -ldinput -lddraw -ldxguid -lwinmm -ldsound
@@ -69,7 +69,6 @@ WIN_SDL_LIBS=\
 MAC_SDL_CFLAGS:=$(shell ${BIN_MAC}/sdl-config --cflags)
 MAC_SDL_LIBS:=$(shell ${BIN_MAC}/sdl-config --static-libs)
 
-endif
 
 .PHONY: default
 default: Linux
@@ -103,14 +102,17 @@ SOURCES:=${APPNAME}.c \
 ${APPNAME}: ${SOURCES} ${HEADERS}
 	gcc \
 		${NATIVE_SDL_CFLAGS} \
-		-o $@ ${SOURCES} \
-		${NATIVE_SDL_LIBS}
-	strip $@
+		-DNVER=${NVER} \
+		-o $@ ${SOURCES} ${WINFLAGS} \
+		${NATIVE_SDL_LIBS} \
+		${CURSES} ${LIBS2}
+	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES} ../yaAGC/random.c ${HEADERS}
-	${PREFIX_WIN}gcc \
-		${WIN_SDL_CFLAGS} -DNO_STDIO_REDIRECT \
-		-o $@ ${SOURCES} SDL_win32_main.c ../yaAGC/random.c -lwsock32 \
+	${PREFIX_WIN}-gcc \
+		${WIN_SDL_CFLAGS} \
+		-DNVER=${NVER} \
+		-o $@ ${SOURCES} ../yaAGC/random.c -lwsock32 \
 		${WIN_SDL_LIBS}
 	${PREFIX_WIN}-strip $@
 
@@ -120,9 +122,10 @@ ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
 		${MAC_SDL_CFLAGS} \
+		-DNVER=${NVER} \
 		-o $@ ${SOURCES} \
 		${MAC_SDL_LIBS}
-	${PREFIX_MAC}strip $@
+	${PREFIX_MAC}-strip $@
 
 temp:
 	powerpc-apple-darwin9-lipo \
@@ -140,7 +143,7 @@ temp:
 		$@-i386 \
 		-remove ppc \
 		-output $@-i386-a		
-	${PREFIX_MAC}lipo \
+	${PREFIX_MAC}-lipo \
 		$@-ppc-a \
 		$@-i386-a \
 		-create \

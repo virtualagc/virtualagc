@@ -78,7 +78,8 @@ char nbSourceFiles[MAX_NUM_FILES][MAX_FILE_LENGTH];
 #include <readline/readline.h>
 #include <readline/history.h>
 
-char *source_generator __P ((const char *, int));
+//char *source_generator __P ((const char *, int));
+char *source_generator (const char *, int);
 
 // Use to initialize the readline mechanism
 static int rl_gets_initialized = 0;

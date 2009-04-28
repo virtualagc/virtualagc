@@ -24,30 +24,19 @@
 #		2005-04-30 RSB	Added CFLAGS.
 #		2009-03-06 RSB	Adjusted for the 'all-archs' target,
 #				and relevant changes.
+#		2009-04-26 RSB	Adjusted for new build setup.
 
-ifdef MSYSTEM
-EXENAME:=yaUniverse.exe
-ifndef PREFIX
-PREFIX=/mingw
-endif
-else 	# MSYSTEM
 EXENAME:=yaUniverse
 ifndef PREFIX
 PREFIX=/usr/local
 endif
-endif 	# MSYSTEM
 
-ifdef NATIVE
-PREFIX_WIN=
-BIN_WIN=
-else
 PREFIX_WIN=i386-mingw32-
 PREFIX_MAC=powerpc-apple-darwin9-
 BIN_WIN=${HOME}/IMCROSS/i386-mingw32/bin/
 BIN_MAC=${HOME}/IMCROSS/mac/bin/
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
-endif
 
 
 .PHONY: default
