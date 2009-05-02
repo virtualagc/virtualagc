@@ -22,6 +22,7 @@
 #		.......... OH	... something ...
 #		2009-04-25 RSB	Undid some stylistic changes that broke the 
 #				all-archs target.
+#		2009-05-02 RSB	Added DEV_STATIC.
 
 APPNAME=yaDEDA2
 
@@ -43,10 +44,15 @@ BIN_MAC=${HOME}/IMCROSS/mac/bin/
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 
-# This is just so that when I build it, it will be statically linked.  For
-# anybody else, it will just accept whatever your wxWidgets default library is.
+# This is just so that when I build it, I can insure that it will be statically or
+# dynamically linked in the binary installers, according to my current whims.
+# For anybody else, it will just accept whatever your wxWidgets default library is.
 ifeq "${USER}" "rburkey"
+ifdef DEV_STATIC
 WXSTATIC=--static
+else
+EXTRA_WIN_LIBS=-lwsock32
+endif
 endif
 
 .PHONY: default
@@ -89,9 +95,10 @@ ${APPNAME}: ${SOURCES} ${HEADERS}
 
 ${APPNAME}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}-g++ \
-		`${BIN_WIN}wx-config --static --cxxflags` \
+		`${BIN_WIN}wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`${BIN_WIN}wx-config --static --libs`
+		`${BIN_WIN}wx-config ${WXSTATIC} --libs` \
+		${EXTRA_WIN_LIBS}
 	${PREFIX_WIN}-strip $@
 
 ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
@@ -99,9 +106,9 @@ ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 		-arch ppc -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
-		`${BIN_MAC}wx-config --static --cxxflags` \
+		`${BIN_MAC}wx-config ${WXSTATIC} --cxxflags` \
 		-o $@-ppc ${SOURCES} \
-		`${BIN_MAC}wx-config --static --libs`
+		`${BIN_MAC}wx-config ${WXSTATIC} --libs`
 	powerpc-apple-darwin9-lipo \
 		$@-ppc \
 		-remove i386 \
@@ -110,9 +117,9 @@ ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 		-arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/i686-apple-darwin9 \
-		`${BIN_MAC}wx-config --static --cxxflags` \
+		`${BIN_MAC}wx-config ${WXSTATIC} --cxxflags` \
 		-o $@-i386 ${SOURCES} \
-		`${BIN_MAC}wx-config --static --libs`
+		`${BIN_MAC}wx-config ${WXSTATIC} --libs`
 	i686-apple-darwin9-lipo \
 		$@-i386 \
 		-remove ppc \
