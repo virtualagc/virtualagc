@@ -50,6 +50,7 @@
 #				installers.  The present change fixes that
 #				by dynamically fixing the mpi files at compile
 #				time.  Fixed up for Win32 readline.
+#		2009-05-02 RSB	Added DEV_SNAP.
 
 APP=VirtualAGC
 
@@ -87,10 +88,15 @@ else
 YADEDA2=-DYADEDA2
 endif
 
-# This is just so that when I build it, it will be statically linked.  For
-# anybody else, it will just accept whatever your wxWidgets default library is.
+# This is just so that when I build it, I can insure that it will be statically or
+# dynamically linked in the binary installers, according to my current whims.
+# For anybody else, it will just accept whatever your wxWidgets default library is.
 ifeq "${USER}" "rburkey"
+ifdef DEV_STATIC
 WXSTATIC=--static
+else
+EXTRA_WIN_LIBS=-lwsock32
+endif
 endif
 
 .PHONY: default
@@ -152,18 +158,19 @@ ${APP}: ${SOURCES} ${HEADERS}
 ${APP}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}-g++ -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
-		`${BIN_WIN}/wx-config --static --cxxflags` \
+		`${BIN_WIN}/wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`${BIN_WIN}/wx-config --static --libs`
+		`${BIN_WIN}/wx-config ${WXSTATIC} --libs` \
+		${EXTRA_WIN_LIBS}
 	${PREFIX_WIN}-strip $@
 
 ${APP}-macosx: ${SOURCES} ${HEADERS}
 	${PREFIX_MAC}-g++ -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
-		`${BIN_MAC}/wx-config --static --cxxflags` \
+		`${BIN_MAC}/wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
-		`${BIN_MAC}/wx-config --static --libs`
+		`${BIN_MAC}/wx-config ${WXSTATIC} --libs`
 	${PREFIX_MAC}-strip $@
 
 temp/lVirtualAGC/bin temp/VirtualAGC/bin temp/VirtualAGC.app/Contents/MacOS:
@@ -387,5 +394,5 @@ VirtualAGC-setup.exe: temp/VirtualAGC
 	rm -rf VirtualAGC-win32/build VirtualAGC-win32/output
 
 VirtualAGC.app.tar.gz: temp/VirtualAGC.app
-	tar -C temp -czf $@ VirtualAGC.app
+	tar -C temp --exclude=*.svn* -czf $@ VirtualAGC.app
 

@@ -103,17 +103,36 @@
 #				Makefile.Win32, and most stuff for OS 
 #				auto-detection.  Removed the "os" target.
 #				Removed the "install" target.
+#		05/02/09 RSB	Added DEV_STATIC to change builds of binary
+#				installers so that the wxWidgets-based programs
+#				are dynamic-linked rather than static-linked.
+#				However, it doesn't appear to me as though it
+#				would change the size of the binary packages
+#				in any significant way to use the dynamic
+#				libraries, so I don't bother to do it.
+#				Updated to make work with FreeBSD (PC-BSD 7.1).
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
 #	Use "make SOLARIS=yes" for Solaris.
 #	Use "make WIN32=yes" for Windows.
-#	Use "gmake" for FreeBSD.
+#	Use "gmake FREEBSD=yes" for FreeBSD.
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20090426\\\"
+NVER:=\\\"20090502\\\"
 DATE:=`date +%Y%m%d`
+
+# DON'T CHANGE THE FOLLOWING SWITCH *********************************
+# This switch determines whether or not wxWidgets programs are build
+# statically linked or dynamically linked for the binary installers
+# associated with the development snapshots.  It has nothing whatever
+# to do with normal builds by normal users.  Uncommented, they're
+# static.  Commented, they're dynamic.  And yes, DEV_STATIC *should*
+# be repeated.  I haven't fully worked out yet how to get the dynamic
+# libraries into the installers, however, so don't use them!
+DEV_STATIC=DEV_STATIC=yes
+# *******************************************************************
 
 # Comment out the following line(s) to use yaDSKY rather than yaDSKY2 and/or 
 # yaDEDA by yaDEDA2.  yaDSKY/yaDEDA have been replaced by yaDSKY2/yaDEDA2 
@@ -152,6 +171,12 @@ endif
 ifdef MACOSX
 #NOREADLINE=yes
 ISMACOSX:=MACOSX=yes
+endif
+
+# Some adjustments for building in FreeBSD
+ifdef FREEBSD
+LIBS+=`pkg-config --libs gtk+-2.0`
+LIBS+=`pkg-config --libs glib`
 endif
 
 # GROUP is the main group to which the USER belongs.  This seems to be defined
@@ -212,24 +237,24 @@ all all-archs:
 ifndef NOGUI
 ifeq "${YADEDA_SUFFIX}" ""
 	$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 else
 	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 endif
 ifeq "${YADSKY_SUFFIX}" ""
 	$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 	cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 else
 	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 endif	
 endif
 	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
 	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 ifndef WIN32
 	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 endif
@@ -239,9 +264,9 @@ endif
 	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
 	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
 	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} LIBS2="${LIBS}" EXT=${EXT}
-	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT}
+	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT} ${DEV_STATIC}
 
 # Here's a target for updating the website.
 .PHONY: snapshot
