@@ -24,6 +24,7 @@
 #		2005-04-30 RSB	Added CFLAGS
 #		2009-03-06 RSB	Adapted for the 'all-archs' target.
 #		2009-04-08 RSB	Added yaACA-cfg.exe.
+#		2009-05-04 RSB	Made some SOLARIS-based fixes.
 
 .PHONY: default
 default: yaACA
@@ -47,6 +48,12 @@ PREFIX=/usr/local
 endif
 ALLEGRO:=`allegro-config --libs`
 endif	# MSYSTEM
+ifdef SOLARIS
+ALLEGRO:=`allegro-config --static --libs`
+ALLEGRO+=-L/usr/local/lib
+ALLEGRO+=-lsocket
+ALLEGRO+=-lnsl
+endif
 
 CFILES:=$(wildcard *.c)
 

@@ -50,6 +50,7 @@
 #				use of -lcurses.  Added READLINE back into
 #				Win32 and Mac targets.
 #		04/25/09 RSB	Fixed up native-Mac builds.
+#		05/03/09 RSB	Adjusted for SOLARIS.
 
 LIBS=${LIBS2}
 
@@ -78,13 +79,18 @@ ifdef MACOSX
 #	sudo make install
 CFLAGS2 += -I/usr/local/include
 LIBS += /usr/local/lib/libreadline.a
-else
+else # MACOSX
+#ifdef SOLARIS
+#LIBS += /usr/local/lib/libreadline.a
+#else # SOLARIS
+#LIBS += -lreadline
+#endif # SOLARIS
 LIBS += -lreadline
-endif
-endif	# NOREADLINE
+endif # MACOSX
+endif # NOREADLINE
 
 ifeq "${USER}" "rburkey"
-STATIC:=-static
+STATIC=-static
 endif
 
 OBJECTS := \

@@ -164,7 +164,7 @@ MainFrameClass::MainFrameClass(wxWindow* parent, int id, const wxString& title, 
     // I can't get yaACA to work right in Windows.
     Panel3->Disable ();
 #endif    
-#if defined (__APPLE__) || defined (__FreeBSD__) || defined (ISMACOSX)
+#if defined (__APPLE__) || defined (__FreeBSD__) || defined (ISMACOSX) || defined (sun)
     // I can't get yaACA2 to work right cross-compiled in Mac OS X 10.5.  (Haven't tried it in 10.4.)
     Panel2->Disable ();
 #endif  

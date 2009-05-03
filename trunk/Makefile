@@ -111,6 +111,7 @@
 #				in any significant way to use the dynamic
 #				libraries, so I don't bother to do it.
 #				Updated to make work with FreeBSD (PC-BSD 7.1).
+#				Adjusted for SOLARIS.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -120,7 +121,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20090502\\\"
+NVER:=\\\"20090503\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -164,7 +165,9 @@ SNAP_PREFIX = /usr/local/yaAGC
 # Some adjustments for building in Solaris
 ifdef SOLARIS
 #NOREADLINE=yes
-LIBS+=-lsocket -lnsl
+LIBS+=-L/usr/local/lib
+LIBS+=-lsocket
+LIBS+=-lnsl
 endif
 
 # Some adjustments for building in Mac OS X
@@ -268,9 +271,18 @@ endif
 	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT} ${DEV_STATIC}
 
-# Here's a target for updating the website.
+# Here are targets for building the development snapshot, 
+# creating the binary installers, and updating local directory
+# which sources the Virtual AGC website.  The "snapshot" target
+# does this locally, whilst the "buildbox" target does it on a
+# (remote) box with a controlled build environment.
+
 .PHONY: snapshot
 snapshot: dev binaries
+
+.PHONY: buildbox
+buildbox: dev
+	sh ./BuildBox.sh
 
 .PHONY: binaries
 binaries: clean all-archs
