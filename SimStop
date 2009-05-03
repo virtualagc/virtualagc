@@ -21,19 +21,19 @@ do
     # shouldn't be necessary, but I found after migrating from SuSE 9.0 to 9.1
     # that the following test sometimes says that the process has terminated
     # when it really hasn't.
-    if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+    if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
     then
-      if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+      if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
       then
-	if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
 	then
-	  if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	  if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
 	  then
-	    if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	    if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
 	    then
-	      if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+	      if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
 	      then
-		if [ 1 -ne `ps U ${USER} | grep -E -c "(^| )${n} "` ]
+		if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
 		then
 		  echo Process ${n} has terminated.
 		  i=0

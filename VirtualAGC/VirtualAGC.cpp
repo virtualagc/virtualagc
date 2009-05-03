@@ -258,14 +258,16 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title, const wx
     // in Mac OS X.  The commonality here is the relative relationship
     // of the executables to the data files such as png images.
     ExecutableDirectory = StandardPaths.GetExecutablePath().BeforeLast (PATH_DELIMITER);
-#ifdef __FreeBSD__    
+#ifndef WIN32
     // In FreeBSD, for some reason, the operation above sometimes or always
     // returns a relative path rather than an absolute one.  So we need to convert
     // it to an absolute path.
     if (ExecutableDirectory.GetChar (0) != '/')
       {
         wxString WorkingDir = wxGetCwd ();
-	ExecutableDirectory = WorkingDir + PATH_DELIMITER + ExecutableDirectory;
+	ExecutableDirectory = WorkingDir;
+	ExecutableDirectory += PATH_DELIMITER;
+	ExecutableDirectory += ExecutableDirectory;
       }
 #endif
     wxString TopDirectory = ExecutableDirectory.BeforeLast (PATH_DELIMITER);

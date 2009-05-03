@@ -32,6 +32,7 @@
 #		.......... OH	... something ...
 #		2009-04-25 RSB	Fixed up the all-archs target.  Fixed up the
 #				native-Mac build.
+#		2009-05-03 RSB	Adjusted for SOLARIS.
 
 LIBS=${LIBS2}
 
@@ -55,13 +56,18 @@ CFLAGS2 = -DUSE_READLINE
 ifdef MACOSX
 CFLAGS2 += -I/usr/local/include
 LIBS += /usr/local/lib/libreadline.a
-else
+else #MACOSX
+#ifdef SOLARIS
+#LIBS += /usr/local/lib/libreadline.a
+#else # SOLARIS
+#LIBS += -lreadline
+#endif # SOLARIS
 LIBS += -lreadline
-endif
+endif # MACOSX
 endif	# NOREADLINE
 
 ifeq "${USER}" "rburkey"
-STATIC:=-static
+STATIC=-static
 endif
 
 yaAGS:	mainAGS.o libyaAGS.a symbol_table.o nbfgets.o Backtrace.o
