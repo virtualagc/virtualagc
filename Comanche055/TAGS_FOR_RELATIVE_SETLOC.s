@@ -1,39 +1,30 @@
 # Copyright:	Public domain.
 # Filename:	TAGS_FOR_RELATIVE_SETLOC.s
-# Purpose:	Part of the source code for Colossus, build 249.
+# Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.
 #		It is part of the source code for the Command Module's (CM)
-#		Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.
+#		Apollo Guidance Computer (AGC), for Apollo 11.
 # Assembler:	yaYUL
-# Reference:	pp. 27-36 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.sandroid.org/Apollo.
-# Mod history:	08/02/04 RSB	Adapted from similar Luminary 131 file.
-#		05/06/09 RSB	Made a few comment corrections I noticed
-#				were needed when adapting for Comanche 055.
+# Website:	www.ibiblio.org/apollo.
+# Mod history:	2009-05-05 RSB	Adapted from the Colossus249/ file of the 
+#				same name, using Comanche055 page images.
 #
-# The contents of the "Colossus249" files, in general, are transcribed 
-# from a scanned document obtained from MIT's website,
-# http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
-# document read, in part:
+# This source code has been transcribed or otherwise adapted from digitized
+# images of a hardcopy from the MIT Museum.  The digitization was performed
+# by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+# thanks to both.  The images (with suitable reduction in storage size and
+# consequent reduction in image quality as well) are available online at
+# www.ibiblio.org/apollo.  If for some reason you find that the images are
+# illegible, contact me at info@sandroid.org about getting access to the 
+# (much) higher-quality images which Paul actually created.
 #
-#	Assemble revision 249 of AGC program Colossus by NASA
-#	2021111-041.  October 28, 1968.  
+# Notations on the hardcopy document read, in part:
+#
+#	Assemble revision 055 of AGC program Comanche by NASA
+#	2021113-051.  10:28 APR. 1, 1969  
 #
 #	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachussets Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors (relative to 1701.pdf) to info@sandroid.org.
-#
-# In some cases, where the source code for Luminary 131 overlaps that of 
-# Colossus 249, this code is instead copied from the corresponding Luminary 131
-# source file, and then is proofed to incorporate any changes.
+#			Colossus 2A
 
 # Page 27
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
@@ -53,11 +44,16 @@ FFTAG8		EQUALS
 FFTAG9		EQUALS
 FFTAG10		EQUALS
 FFTAG12		EQUALS
+P30SUBS		EQUALS
+STOPRAT		EQUALS
+P23S		EQUALS
 		BNKSUM	02
 		
 		BLOCK	03
 FFTAG5		EQUALS
 FFTAG6		EQUALS
+DAPS9		EQUALS
+FFTAG13		EQUALS
 		BNKSUM	03
 		
 		BANK	00
@@ -68,41 +64,45 @@ DLAYJOB		EQUALS
 RESTART		EQUALS
 		BNKSUM	01
 		
-		BANK	04
+		BANK	4
 VERB37		EQUALS
 CONICS1		EQUALS
 PINBALL4	EQUALS
-R36LM		EQUALS
+CSI/CDH1	EQUALS
 INTPRET2	EQUALS
 IMUCAL1		EQUALS
+
+# Page 28
+
 STBLEORB	EQUALS
 E/PROG		EQUALS
 MIDDGIM		EQUALS
 
 		BNKSUM	04
 		
-# Page 28
-		
-		BANK	05
+		BANK	5
 FRANDRES	EQUALS
 DOWNTELM	EQUALS
 DAPMASS		EQUALS
+CDHTAG		EQUALS
 		BNKSUM	05
 		
 # MODULE 2 CONTAINS BANKS 6 THROUGH 13
 
-		BANK	06
+		BANK	6
 IMUCOMP		EQUALS
 T4RUP		EQUALS
 IMUCAL2		EQUALS
+CSIPROG		EQUALS
 		BNKSUM	06
 	
-		BANK	07
+		BANK	7
 SXTMARKE	EQUALS
 R02		EQUALS
 MODESW		EQUALS
 XANG		EQUALS
 KEYRUPT		EQUALS
+CSIPROG6	EQUALS
 		BNKSUM	07
 		
 		BANK	10
@@ -112,18 +112,26 @@ COMGEOM2	EQUALS
 SXTMARK1	EQUALS
 P60S4		EQUALS
 OPTDRV		EQUALS
+CSIPROG8	EQUALS
 		BNKSUM	10
 		
 		BANK	11
 ORBITAL		EQUALS
 ORBITAL1	EQUALS			# CONSTANTS
+
+# Page 29
+
 INTVEL		EQUALS
 S52/2		EQUALS
+CSIPROG5	EQUALS
+INTINIT1	EQUALS
 		BNKSUM	11
 		
 		BANK	12
 CONICS		EQUALS
-# Page 29
+CSIPROG2	EQUALS
+CSI/CDH2	EQUALS
+MODCHG2		EQUALS
 		BNKSUM	12
 		
 		BANK	13
@@ -132,6 +140,9 @@ LATLONG		EQUALS
 INTINIT		EQUALS
 SR52/1		EQUALS
 ORBITAL2	EQUALS
+CDHTAGS		EQUALS
+E/PROG1		EQUALS
+MODCHG3		EQUALS
 		BNKSUM	13
 		
 # MODULE 3 CONTAINS BANKS 14 THROUGH 21
@@ -140,6 +151,8 @@ ORBITAL2	EQUALS
 STARTAB		EQUALS
 RT53		EQUALS
 P50S1		EQUALS
+MEASINC2	EQUALS
+CSI/CDH3	EQUALS
 		BNKSUM	14	
 
 		BANK	15
@@ -150,26 +163,35 @@ S52/3		EQUALS
 		
 		BANK	16
 P40S1		EQUALS
+
+# Page 30
+
 DAPROLL		EQUALS
 P50S2		EQUALS
+P23S1		EQUALS
+RTE2		EQUALS
 		BNKSUM	16
 		
 		BANK	17
 DAPS4		EQUALS
 DAPS5		EQUALS
 DAPS7		EQUALS
+P50S3		EQUALS
 		BNKSUM	17
 		
 		BANK	20
-# Page 30
 DAPS6		EQUALS
 DAPS1		EQUALS
 DAPS2		EQUALS
+MANUSTUF	EQUALS
+R36CM		EQUALS
+VAC5LOC		EQUALS
 		BNKSUM	20
 		
 		BANK	21
 DAPS3		EQUALS
 MYSUBS		EQUALS
+KALCMON3	EQUALS
 		BNKSUM	21
 
 # MODULE 4 CONTAINS BANKS 22 THROUGH 27
@@ -182,7 +204,10 @@ APOPERI		EQUALS
 P40S5		EQUALS
 KALCMON2	EQUALS
 KALCMON1	EQUALS
+CSIPROG3	EQUALS
 		BNKSUM	22
+
+# Page 31
 
 		BANK	23
 P20S2		EQUALS
@@ -194,20 +219,18 @@ RENDGUID	EQUALS
 POWFLIT2	EQUALS
 R30LOC		EQUALS
 P11FOUR		EQUALS
-P12A		EQUALS
-NORMLIZ		EQUALS
-ASENT7		EQUALS
-RODTRAP		EQUALS
+CSIPROG4	EQUALS
 		BNKSUM	23
 		
 		BANK	24
 LOADDAP		EQUALS
 P40S		EQUALS
+CSIPROG7	EQUALS
 		BNKSUM	24
 		
 		BANK	25
-# Page 31
 REENTRY		EQUALS
+CDHTAG1		EQUALS
 		BNKSUM	25
 		
 		BANK	26
@@ -217,7 +240,7 @@ P60S		EQUALS
 P60S1		EQUALS
 P60S2		EQUALS
 P60S3		EQUALS
-PLANTIN		EQUALS
+PLANTIN		EQUALS			# LUNAR ROT
 EPHEM		EQUALS
 P05P06		EQUALS
 26P50S		EQUALS
@@ -228,12 +251,15 @@ TOF-FF		EQUALS
 TOF-FF1		EQUALS
 MANUVER		EQUALS
 MANUVER1	EQUALS
+
+# Page 32
+
 VECPT		EQUALS
 UPDATE1		EQUALS
 UPDATE2		EQUALS
 R22S1		EQUALS
 P60S5		EQUALS
-RTE2		EQUALS
+P40S2		EQUALS
 		BNKSUM	27
 
 # MODULE 5 CONTAINS BANKS 30 THROUGH 35
@@ -241,7 +267,7 @@ RTE2		EQUALS
 		BANK	30
 IMUSUPER	EQUALS
 LOWSUPER	EQUALS
-FCSTART		EQUALS			# STANDARD LOCATION FOR THIS
+FCSTART		EQUALS			# STANDARD LOCATION FOR THIS. (FOR EXTV8)
 LOPC		EQUALS
 P20S1		EQUALS
 P20S6		EQUALS
@@ -249,12 +275,16 @@ P40S3		EQUALS
 R35A		EQUALS
 		BNKSUM	30
 		
-# Page 32
 		BANK	31
 R35		EQUALS
 RT23		EQUALS
 P30S1A		EQUALS
 R34		EQUALS
+CDHTAG2		EQUALS
+CSIPROG9	EQUALS
+R32		EQUALS
+P22S		EQUALS
+RTE3		EQUALS
 		BNKSUM	31
 		
 		BANK	32
@@ -266,6 +296,9 @@ IMUCAL3		EQUALS
 		
 		BANK	33
 TESTLEAD	EQUALS
+
+# Page 33
+
 IMUCAL		EQUALS
 		BNKSUM	33
 		
@@ -281,8 +314,9 @@ RTECON1		EQUALS
 CSI/CDH		EQUALS
 P30S1		EQUALS
 P30S		EQUALS
-R31		EQUALS
 P17S1		EQUALS
+MEASINC3	EQUALS
+INTINIT2	EQUALS
 		BNKSUM	35
 		
 # MODULE 6 CONTAINS BANKS 36 THROUGH 43
@@ -290,9 +324,9 @@ P17S1		EQUALS
 		BANK	36
 MEASINC		EQUALS
 MEASINC1	EQUALS
-# Page 33
 P17S		EQUALS
 RTE1		EQUALS
+S3435LOC	EQUALS
 		BNKSUM	36
 		
 		BANK	37
@@ -301,22 +335,29 @@ BODYATT		EQUALS
 RENDEZ		EQUALS
 SERVICES	EQUALS
 P11TWO		EQUALS
+CDHTAG3		EQUALS
 		BNKSUM	37
 		
 		BANK	40
 PINSUPER	EQUALS
+
+# Page 34
+
 SELFSUPR	EQUALS
 PINBALL1	EQUALS
+R36CM1		EQUALS
 		BNKSUM	40
 		
 		BANK	41
 PINBALL2	EQUALS
+R36LM		EQUALS
 		BNKSUM	41
 		
 		BANK	42
 SBAND		EQUALS	
 PINBALL3	EQUALS
 EXTVBS		EQUALS
+R36LM1		EQUALS
 		BNKSUM	42
 		
 		BANK	43
@@ -329,7 +370,6 @@ LO6ZEROS	EQUALS	ZEROVEC			# ZERO VECTOR ALWAYS IN LOW MEMORY
 HIDPHALF	EQUALS	UNITX
 LODPHALF	EQUALS	XUNIT
 HIDP1/4		EQUALS	DP1/4TH	
-# Page 34
 LODP1/4		EQUALS	D1/4			# 2DEC .25
 HIUNITX		EQUALS	UNITX
 HIUNITY		EQUALS	UNITY
@@ -347,6 +387,9 @@ OTHPREC		EQUALS	LEMPREC
 ATOPOTH		EQUALS	ATOPLEM
 ATOPTHIS	EQUALS	ATOPCSM
 MOONTHIS	EQUALS	CMOONFLG
+
+# Page 35
+
 MOONOTH		EQUALS	LMOONFLG
 MOVATHIS	EQUALS	MOVEACSM
 STATEST		EQUALS	V83CALL			# * TEMPORARY
@@ -359,7 +402,7 @@ DELAYNUM	EQUALS	THREE
 
 # THE FOLLOWING ECADRS ARE DEFINED TO FACILITATE EBANK SWITCHING.  THEY ALSO MAKE IT EASIER FOR
 # ERASABLE CONTROL TO REARRANGE ERASABLE MEMORY WITHOUT DISRUPTING THE PROGRAMS WHICH SET EBANKS.
-# PRIOR TO ROP RELEASE FIXED MEMORY CAN BE SAVED BY SETTING EACH EBXXXX =EBANKX (X=4,5,6,7).  EBANKX OF COURSE
+# PRIOR TO ROPE RELEASE FIXED MEMORY CAN BE SAVED BY SETTING EACH EBXXXX =EBANKX (X=4,5,6,7).  EBANKX OF COURSE
 # WILL BE THE BANK WHERE THE ERASABLES REFERENCED IN EBXXXX WILL BE STORED.
 
 		BANK	7
@@ -382,7 +425,6 @@ EBQPLACE	ECADR	QPLACES
 
 		BANK	37
 		EBANK=	RN1
-# Page 35
 EBRN1		ECADR	RN1
 
 #******************************************************************************************************
