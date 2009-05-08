@@ -9,6 +9,10 @@
 # Website:	www.sandroid.org/Apollo.
 # Mod history:	08/03/04 RSB.	Adapted from similar Luminary 131 file.
 #		08/05/04 RSB.	Finished up the draft (not proofed).
+#		05/08/09 RSB	On p. 99, "INTVEC = FILDELV +W" was corrected
+#				to "INTVEC = FILDELV +2".  The reason this
+#				was working is that INTVEC isn't used for 
+#				anything.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -2672,7 +2676,7 @@ DRIFTI		EQUALS	AINLA +40D
 VLAUN		EQUALS	AINLA +44D
 FILDELV		=	THETAN +6
 ACCWD		EQUALS	AINLA +46D
-INTVEC		=	FILDELV +W
+INTVEC		=	FILDELV +2
 POSNV		EQUALS	AINLA +52D
 DPIPAY		EQUALS	AINLA +54D
 DPIPAZ		EQUALS	AINLA +58D
