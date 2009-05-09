@@ -1,40 +1,34 @@
 # Copyright:	Public domain.
 # Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.s
-# Purpose:	Part of the source code for Colossus, build 249.
+# Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.
 #		It is part of the source code for the Command Module's (CM)
-#		Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.
+#		Apollo Guidance Computer (AGC), for Apollo 11.
 # Assembler:	yaYUL
-# Reference:	pp. 304-384 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.sandroid.org/Apollo.
-# Mod history:	08/09/04 RSB.	Began adapting from corresponding Luminary131
-#				source file.
+# Website:	www.ibiblio.org/apollo.
+# Pages:	307-389
+# Mod history:	2009-05-08 RSB	Started adapting from the Colossus249/ file 
+#				of the same name, using Comanche055 page 
+#				images.  Finished through page 329.
 #
-# The contents of the "Colossus249" files, in general, are transcribed 
-# from a scanned document obtained from MIT's website,
-# http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
-# document read, in part:
+# This source code has been transcribed or otherwise adapted from digitized
+# images of a hardcopy from the MIT Museum.  The digitization was performed
+# by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+# thanks to both.  The images (with suitable reduction in storage size and
+# consequent reduction in image quality as well) are available online at
+# www.ibiblio.org/apollo.  If for some reason you find that the images are
+# illegible, contact me at info@sandroid.org about getting access to the 
+# (much) higher-quality images which Paul actually created.
 #
-#	Assemble revision 249 of AGC program Colossus by NASA
-#	2021111-041.  October 28, 1968.  
+# Notations on the hardcopy document read, in part:
+#
+#	Assemble revision 055 of AGC program Comanche by NASA
+#	2021113-051.  10:28 APR. 1, 1969  
 #
 #	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachussets Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors (relative to 1701.pdf) to info@sandroid.org.
-#
-# In some cases, where the source code for Luminary 131 overlaps that of 
-# Colossus 249, this code is instead copied from the corresponding Luminary 131
-# source file, and then is proofed to incorporate any changes.
+#			Colossus 2A
 
-# Page 304
+# Page 307
 # PROGRAM NAME -- KEYBOARD AND DISPLAY PROGRAM
 # MOD NO -- 4		DATE -- 27 APRIL 1967		ASSEMBLY -- PINDISK REV 17
 # MOD BY -- FILENE
@@ -85,7 +79,7 @@
 #
 #	IF PINBALL WAS CALLED BY EXTERNAL ACTION, THERE ARE FOUR EXITS:
 #		1)	ALL BUT (2), (3), AND (4) EXIT DIRECTLY TO ENDOFJOB.
-# Page 305
+# Page 308
 #		2)	EXTENDED VERBS TO TO THE EXTENDED VERB FAN AS PART OF THE
 #			PINBALL EXECUTIVE JOB WITH PRIORITY 30000.  IT IS THE 
 #			RESPONSIBILITY OF THE EXTEDED VERB CALLED TO EVENTUALLY
@@ -133,7 +127,7 @@
 # REQRET, CLPASS, DSPLOCK, MONSAVE, MONSAVE1, VERBREG, NOUNREG, DSPLIST,
 # DSPCOUNT, NOUT.
 #
-# Page 306
+# Page 309
 # A COMPLETE LIST OF ALL THE ERASABLES (BOTH RESERVED AND TEMPORARIES) FOR
 # PINBALL IS GIVEN BELOW.
 #
@@ -183,7 +177,7 @@
 # THE FOLLOWING QUOTATION IS PROVIDED THROUGH THE COURTESY OF THE AUTHORS.
 #
 #	"IT WILL BE PROVED TO THY FACE THAT THOU HAST MEN ABOUT THEE THAT
-# Page 307
+# Page 310
 #	USUALLY TALK OF A NOUN AND A VERB, AND SUCH ABOMINABLE WORDS AS NO
 #	CHRISTIAN EAR CAN ENDURE TO HEAR."
 #					HENRY 6, ACT 2, SCENE 4
@@ -231,7 +225,7 @@
 # END OF ERASABLES RESERVED FOR PINBALL EXECUTIVE ACTION.
 #
 # TEMPORARIES FOR PINBALL EXECUTIVE ACTION
-# Page 308
+# Page 311
 #DSEXIT		=	INTB15+		# RETURN FOR DSPIN
 #EXITEM		=	INTB15+		# RETURN FOR SCALE FACTOR ROUTINE SELECT
 #BLANKRET	=	INTB15+		# RETURN FOR 2BLANK
@@ -251,29 +245,29 @@
 #NVTEMP		=	VBUF +1		# TEMP FOR NVSUB
 #SFTEMP1	=	VBUF +1		# STORAGE FOR SF CONST HI PART (=SFTEMP2-1)
 #HITEMIN	=	VBUF +1		# TEMP FOR LOAD OF HRS,MIN,SEC
-#					# MUST = LOTEMIN-1.
+#					# 	MUST = LOTEMIN-1.
 #CODE		=	VBUF +2		# FOR DSPIN
 #SFTEMP2	=	VBUF +2		# STORAGE FOR SF CONST LO PART (=SFTEMP1+1)
 #LOTEMIN	=	VBUF +2		# TEMP FOR LOAD OF HRS,MIN,SEC
-#					# MUST = HITEMIN+1
+#					# 	MUST = HITEMIN+1
 #MIXTEMP	=	VBUF +3		# FOR MIXNOUN DATA
 #SIGNRET	=	VBUF +3		# RETURN FOR +,- ON
 # ALSO MIXTEMP+1 = VBUF+4, MIXTEMP+2 = VBUF+5
 #ENTRET		=	DOTINC		# EXIT FROM ENTER
 #WDONT		=	DOTRET		# CHAR COUNTER FOR DSPWD
-#INREL		=	DOTRET		# INPUT BUFFER SELECTION
+#INREL		=	DOTRET		# INPUT BUFFER SELECTOR (X,Y,Z, REG )
 #DSPMMTEM	=	MATINC		# DSPCOUNT SAVE FOR DSPMM
 #MIXBR		=	MATINC		# INDICATOR FOR MIXED OR NORMAL NOUN
 #TEM1		ERASE			# EXEC TEMP
 #DSREL		=	TEM1		# REL ADDRESS FOR DSPIN
 #TEM2		ERASE			# EXEC TEMP
 #DSMAG		=	TEM2		# MAGNITUDE STORE FOR DSPIN
-#IDADDTEM	=	TEM2		# MIXNOUN INDIRECT ADDRESS (garbled)
+#IDADDTEM	=	TEM2		# MIXNOUN INDIRECT ADDRESS STORAGE
 #TEM3		ERASE			# EXEC TEMP
 #COUNT		=	TEM3		# FOR DSPIN
-# Page 309
+# Page 312
 #TEM4		ERASE			# EXEC TEMP
-#LSTPTR		=	TEM4		# LIST POINTER FOR GRABUST
+#LSTPTR		=	TEM4		# LIST POINTER FOR GRABUSY
 #RELRET		=	TEM4		# RETURN FOR RELDSP
 #FREERET	=	TEM4		# RETURN FOR FREEDSP
 #DSPWDRET	=	TEM4		# RETURN FOR DSPSIGN
@@ -319,7 +313,7 @@
 #
 # END OF TEMPORARIES FOR PINBALL INTERRUPT ACTION
 
-# Page 310
+# Page 313
 # THE INPUT CODES ASSUMED FOR THE KEYBOARD ARE,
 #	0		10000
 #	1		00001
@@ -365,11 +359,11 @@
 #
 #	DSPTAB		RELAYWD		BIT11		BITS 10-6	BITS 5-1
 #	RELADD
-#	10		1011				MD1 (25)	MD2 (24)
-#	9		1010				VD1 (23)	VD2 (22)
-#	8		1001				ND1 (21)	ND2 (20)
+#	10		1011				MD1 (25)	MD2  (24)
+#	9		1010				VD1 (23)	VD2  (22)
+#	8		1001				ND1 (21)	ND2  (20)
 #	7		1000						R1D1 (16)
-# Page 311
+# Page 314
 #	6		0111		+R1		R1D2 (15)	R1D3 (14)
 #	5		0110		-R1		R1D4 (13)	R1D5 (12)
 #	4		0101		+R2		R2D1 (11)	R2D2 (10)
@@ -399,7 +393,7 @@
 #	VERB/NOUN FLASH		--	BIT 6 OF CHANNEL 11
 #	OPERATOR ERROR LIGHT	--	BIT 7 OF CHANNEL 11
 
-# Page 312
+# Page 315
 # START OF EXECUTIVE SECTION OF PINBALL
 
 		BANK	40
@@ -449,7 +443,7 @@ CHARIN2		XCH	MPAC
 		TC	CHARALRM	#	27
 		TC	CHARALRM	#	30
 		TC	VBRELDSP	#	31		KEY RELEASE
-# Page 313
+# Page 316
 		TC	POSGN		#	32		+
 		TC	NEGSGN		#	33		-
 		TC	ENTERJMP	#	34		ENTER
@@ -498,7 +492,7 @@ NUM		CCS	DSPCOUNT
 		CA	DSPCOUNT
 		TS	COUNT
 		TC	DSPIN
-# Page 314
+# Page 317
 		CAF	THREE
 		MASK	DECBRNCH
 		CCS	A		# +0, OCTAL.  +1, + DEC.  +2, - DEC.
@@ -543,13 +537,13 @@ DECEND		CS	ONE
 		EXTEND
 		BZMF	ENDALL		# IF INREL=0,1 (VBREG,NNREG) LEAVE WHOLE
 		TC	DMP		# IF INREL=2,3,4 (R1,R2,R3), CONVERT TO FRAC
-					# MULT SUM X 2EXP-28 IN MPAC, MPAC+1
+					# MULT SUM X 2EXP-28 IN MPAC, MPAC+1 BY
 		ADRES	DECON		# 2EXP14/10EXP5, GIVES (SUM/10EXP5)X2EXP-14
 		CAF	THREE		# IN MPAC, +1, +2.
 		MASK	DECBRNCH
 		INDEX	A
 		TC	+0
-# Page 315
+# Page 318
 		TC	+DECSGN
 		EXTEND			# - CASE
 		DCS	MPAC +1
@@ -598,7 +592,7 @@ INRELTAB	OCT	4		# R3D5 (DSPCOUNT = 0)
 		OCT	2		# R1D1		 =(14D)
 		TC	CCSHOLE		# NO DISCOUNT NUMBER = 15D
 		OCT	1		# ND2		 =(16D)
-# Page 316
+# Page 319
 		OCT	1		# ND1		 =(17D)
 		OCT	0		# VD2		 =(18D)
 		OCT	0		# VD1		 =(19D)
@@ -647,7 +641,7 @@ POSGN		TC	SIGNTEST
 		TS	SGNON
 SGNCOM		CAF	ZERO
 		TS	CODE
-# Page 317
+# Page 320
 		XCH	SGNOFF
 		TC	11DSPIN
 		CAF	BIT11
@@ -696,7 +690,7 @@ SGNTST1		AD	DSPCOUNT
 # CLPASS	+0 PASS0, CAN BE BACKED UP
 #		+NZ HIPASS, CAN BE BACKED UP
 #		-NZ PASS0, CANNOT BE BACKED UP
-# Page 318
+# Page 321
 CLEAR		CCS	DSPCOUNT
 		AD	ONE
 		TC	+2
@@ -746,7 +740,7 @@ LEGALTST	AD	NEG2
 		CAF	ZERO
 		INDEX	INREL
 		TS	VERBREG		# ZERO X, Y, Z, REG.
-# Page 319
+# Page 322
 		INDEX	INREL
 		TS	XREGLP	-2
 		TS	CODE
@@ -760,14 +754,14 @@ LEGALTST	AD	NEG2
 		TS	COUNT
 		TC	DSPIN
 5BLANK1		INDEX	INREL
-		CAF	DOUBLK -2
+		CAF	DOUBLK	 -2
 		TS	DSPCOUNT
 		TC	2BLANK
 		CS	TWO
 		ADS	DSPCOUNT
 		TC	2BLANK
 		INDEX	INREL
-		CAF	R1D1 -2
+		CAF	R1D1	-2
 		TS	DSPCOUNT	# SET DSPCOUNT TO LEFT MOST DSP NUMBER
 		TC	L		# OF REG. JUST BLANKED
 		
@@ -796,7 +790,7 @@ BRNCHCON	OCT	77774
 		TC	Q
 BLANKCON	OCT	4000
 
-# Page 320
+# Page 323
 # ENTER PASS 0 IS THE EXECUTE FUNCTION.  HIGHER ORDER ENTERS ARE TO LOAD
 # DATA.  THE SIGN OF REQRET DETERMINES THE PASS, + FOR PASS 0, - FOR HIGHER
 # PASSES
@@ -846,7 +840,7 @@ ENTEXIT		=	ENTRET
 
 MMADREF		ADRES	MMCHANG +1	# ASSUMES TC REQMM AT MMCHANG.
 
-# Page 321
+# Page 324
 LOWVERB		DEC	28		# LOWER VERB THAT AVOIDS NOUN TEST.
 
 ENTPAS0		CAF	ZERO		# NOUN VERB SUB ENTERS HERE
@@ -897,7 +891,7 @@ USEADD		XCH	ZREG
 		TC	VERBFAN
 		
 		EBANK=	DSPCOUNT
-# Page 322
+# Page 325
 LODNNLOC	2CADR	LODNNTAB
 
 NEG5		OCT	77772
@@ -947,7 +941,7 @@ VERBTAB		CADR	GODSPALM	# VB00 ILLEGAL
 		CADR	MONITOR		# VB12 MONITOR OCT COMP 2 (R1)
 		CADR	MONITOR		# VB13 MONITOR OCT COMP 3 (R1)
 		CADR	MONITOR		# VB14 MONITOR OCT COMP 1,2 (R1,R2)
-# Page 323
+# Page 326
 		CADR	MONITOR		# VB15 MONITOR OCT COMP 1,2,3 (R1,R2,R3)
 		CADR	MONITOR		# VB16 MONITOR DECIMAL
 		CADR	MONITOR		# VB17 MONITOR DP DEC (R1,R2)
@@ -976,7 +970,7 @@ REQEXLQC	CADR	VBRQEXEC	# VB30 REQUEST EXECUTIVE
 		CADR	GODSPALM	# VB39 SPARE
 		
 # THE LIST2 VERBFAN IS LOCATED IN THE EXTENDED VERB BANK.
-# Page 324
+# Page 327
 # NNADTAB CONTAINS A RELATIVE ADDRESS, IDADDREL (IN LOW 10 BITS), REFERRING
 # TO WHERE 3 CONSECUTIVE ADDRESSES ARE STORED (IN IDADDTAB).
 # MIXNOUN GETS DATA AND STORES IN MIXTEMP,+1,+2.  IT SETS NOUNADD FOR
@@ -1006,7 +1000,7 @@ MIXNN1		TS	DECOUNT
 		TC	MIXNN2		# NO DP
 		INCR	NOUNTEM		# DP GET MINOR PART
 MIXNN2		CA	NOUNTEM
-		MASK	LOW11		# ESUBK (NO DP) OR (ESUBK)+1 (garbled) FOR DP.
+		MASK	LOW11		# ESUBK (NO DP) OR (ESUBK)+1  FOR DP.
 		TC	SETEBANK	# SET EBANK, LEAVE EADRES IN A.
 		INDEX	A		# PICK UP C(ESUBK) NOT DP.
 		CA	0		# OR C((ESUBK)+1) FOR DP MINOR PART
@@ -1026,18 +1020,19 @@ DPTEST		INDEX	A
 		TCF	+1
 		TC	Q		# OCTAL ONLY NO DP
 		TC	Q		# FRACT NO DP
-# Page 325
+# Page 328
 		TC	Q		# DEG NO DP
 		TC	Q		# ARITH NO DP
 		TCF	DPTEST1		# DP1OUT
 		TCF	DPTEST1		# DP2OUT
-		TC	Q		# LRPOSOUT NO DP (DATA IN CHANNEL 33)
+		TC	Q		# OPDEG NO DP
 		TCF	DPTEST1		# DP3OUT
 		TC	Q		# HMS NO DP
 		TC	Q		# M/S NO DP
 		TCF	DPTEST1		# DP4OUT
 		TC	Q		# ARITH1 NO DP
 		TC	Q		# 2INTOUT NO DP TO GET HI PART IN MPAC
+		TCF	DPTEST1		# DPFRACOT
 DPTEST1		INDEX	Q
 		TC	1		# RETURN TO L+2
 		
@@ -1058,7 +1053,7 @@ ENDRQDAT	TC	ENTEXIT
 UPDATNN		XCH	Q
 		TS	UPDATRET
 		EXTEND
-		DCA	LODNNLOC	# SWITCH BANKS TO NOUN (garbled)EADING
+		DCA	LODNNLOC	# SWITCH BANKS TO NOUN TABLE READING
 		DXCH	Z		# ROUTINE.
 		CCS	NNADTEM
 		AD	ONE		# NORMAL
@@ -1075,8 +1070,8 @@ PUTADD		TC	SETNCADR	# ECADR INTO NOUNCADR.  SETS EB, NOUNADD.
 UPDATVB		XCH	Q
 		TS	UPDATRET
 		CAF	VD1
+# Page 329
 		TS	DSPCOUNT
-# Page 326
 		CA	VERBREG
 UPDAT1		TC	POSTJUMP	# CAN'T USE SWCALL TO GO TC DSPDECVN, SINCE
 		CADR	GOVNUPDT	# UPDATVB CAN ITSELF BE CALLED BY SWCALL.
@@ -1087,7 +1082,7 @@ GOALMCYC	TC	ALMCYCLE	# NEEDED BECAUSE BANKJUMP CAN'T HANDLE F/F.
 GODSPALM	TC	POSTJUMP
 		CADR	DSPALARM
 		
-# Page 327
+# Page 330
 # NOUN TABLES
 #
 # NOUN CODE L/40, NORMAL NOUN CASE.  NOUN CODE G/E 40, MIXED NOUN CASE.
