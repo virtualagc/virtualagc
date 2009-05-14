@@ -1,5 +1,5 @@
 # Copyright:	Public domain.
-# Filename:	P32-035_P72-P72.s
+# Filename:	P32-P35_P72-P75.s
 # Purpose:	A section of Luminary 1C, revision 131.
 #		It is part of the source code for the Lunar Module's (LM)
 #		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
