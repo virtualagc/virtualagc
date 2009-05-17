@@ -7,7 +7,9 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Pages:	XXXX-XXXX
-# Mod history:	2009-05-06 RSB	Transcribed from page images.
+# Mod history:	2009-05-XX XXX	Adapted from the corresponding 
+#				Luminary131 file, using page 
+#				images from Luminary 1A.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
