@@ -9,6 +9,8 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	04/23/03 RSB.	Began.
 #		05/14/05 RSB	Corrected website reference above.
+#		05/17/09 RSB	Backported some Luminary 099 fixes pointed
+#				out by Onno Hommes.
 #
 # The contents of the "Luminary131" files, in general, are
 # transcribed from a scanned document obtained from MIT's website,
@@ -44,8 +46,8 @@
 # AORBTFLG	200		BIT 10 FLAG 13		AORBTRAN
 # CDESFLAG	180		BIT 15 FLAG 12		CDESBIT
 # CMOONFLG	123		BIT 12 FLAG 8		CMOONBIT
-# CCGAFLAG	131		BIT 4 FLAG 8		COGAFBIT
-# CSMDKFLG	197		BIT 13 FLAG 13		CSMOOCKD
+# COGAFLAG	131		BIT 4 FLAG 8		COGAFBIT
+# CSMDKFLG	197		BIT 13 FLAG 13		CSMDOCKD
 # CULTFLAG	053		BIT 7 FLAG 3		CULTBIT
 # DAPBOOLS			FLGWRD13
 # DBSELFLG	206		BIT 4 FLAG 13		DBSELECT

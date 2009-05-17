@@ -6,8 +6,9 @@
 # Assembler:	yaYUL
 # Contact:	Onno Hommes <ohommes@cmu.edu>.
 # Website:	www.ibiblio.org/apollo.
-# Pages:	0061-0088
+# Pages:	0061-0089
 # Mod history:	2009-05-15 OH	Transcribed from page images.
+#		2009-05-17 RSB	Extended to (blank) p. 89.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1264,4 +1265,5 @@ AUTRATE2	=	BIT2			# ASTRONAUT-CHOSEN KALCMANU MANEUVER RATES
 AUTR1FLG	=	209D			# (1,0)=		2.0 DEG/SEC
 AUTRATE1	=	BIT1			# (1,1)=	       10.0 DEG/SEC
 
+# Page 89 (nothing on this page)
 
