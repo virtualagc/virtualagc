@@ -8,6 +8,8 @@
 # Contact:      Onno Hommes <ohommes@cmu.edu>
 # Website:      http://www.ibiblio.org/apollo.
 # Mod history:  2009-05-10 OH	Batch 1 Assignment Comanche Transcription
+#		2009-05-20 RSB	Corrections: P00D00H -> P00DOOH, definition
+#				of 25DECML fixed.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -572,7 +574,7 @@ RIGHTGTS	CAF	FOUR		# SET UP NEXT WAITLIST-ALLOW SOME TIME
 		
 # STORE AND LOAD DATA SECTIONS FOR RESTART PROOFING
 
-25DECML		DEC	25
+25DECML		EQUALS	OCT31
 STOREDTA	CAF	25DECML
 		TS	MPAC
 		INDEX	MPAC
@@ -861,7 +863,7 @@ GTSCPSS		CA	FLAGWRD1	# CALLED BY V37
 # Page 443
 		EXTEND
 		BZF	GTSCPSSA
-		TC	P00D00
+		TC	P00DOO
 		OCT	1521		# NODO ALARM FOR P01 - P11 ALREADY DONE
 		
 GTSCPSSA	CAF	ONE

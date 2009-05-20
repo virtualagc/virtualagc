@@ -8,7 +8,8 @@
 # Contact:	Ron Burkey <info@sandroid.org>,
 #  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 # Website:	http://www.ibiblio.org/apollo.
-# Mod history:	16/05/09 FB	Transcription Batch 2 Assignment.
+# Mod history:	2009-05-16 FB	Transcription Batch 2 Assignment.
+#		2009-05-20 RSB	Removed an extraneous "TC STARTSUB".
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -297,8 +298,6 @@ GOPROG		INCR	REDOCTR		# ADVANCE RESTART COUNTER.
 		EXTEND			# STATE OF AGC WARNING BIT.
 		BZF	BUTTONS
 
-		TC	STARTSUB
-		
 		CA	BIT14		# IF AGC WARNING ON (BIT = 0), DO A 
 		EXTEND			# FRESH START ON THE ASSUMPTION THAT 
 		RAND	CHAN33		# WE ARE IN A RESTART LOOP.

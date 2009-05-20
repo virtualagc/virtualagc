@@ -10,6 +10,7 @@
 # Mod history:	2009-05-11 JVL	Adapted from the Colossus249/ file
 #				of the same name, using Comanche055 page
 #				images.
+#		2009-05-20 RSB	Added missing label V2T179.  Fixed POODOO -> P00DOO.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -912,14 +913,14 @@ PREC155		SL2	SQRT
 			X1
 		SR1	DDV		# BETA4=BETA2/(1-PHI2*SQRT(BETA3))
 		SL*	GOTO						B1
-			0-1,1
+			0	-1,1
 			PREC165
 PREC160		DLOAD	NORM
 			R/APRE
 			X1
 		BDDV	SL*						B1
 			1RTEB1
-			0-6,1
+			0	-6,1
 		GOTO
 			PREC165
 PREC162		DLOAD	NORM
@@ -1299,7 +1300,7 @@ V2T100		STQ	DLOAD
 		BMN
 			V2T101
 V2TERROR	EXIT			#	OR IF LAMBDA LESS THAN ONE
-		TC	POODOO		# NO SOLUTION IF LAMBDA LESS THAN 1
+		TC	P00DOO		# NO SOLUTION IF LAMBDA LESS THAN 1
 		OCT	00610
 V2T101		SETPD	CLEAR
 			0		#					PL00D
@@ -1511,7 +1512,7 @@ V2T175		SET	DLOAD
 V2T177		STODL	14D
 			12D
 		DCOMP
-		STCALL	16D		# DX(T1)
+V2T179		STCALL	16D		# DX(T1)
 			GAMDV10
 		DLOAD	BMN
 			NN1A
@@ -1862,10 +1863,10 @@ XT1LIM		STQ	DLOAD
 			R(T1)
 		BDSU	DDV
 		SL*	DMP
-			0-3,2
+			0	-3,2
 			28D
 		SL*	DSU		# BETA10=BETA5(MA-RT)/(MA-RC)-1	B11
-			0-6,1
+			0	-6,1
 			1RTEB25 +1	# 1.0				B-11
 		SL1	BOV
 			XT1LIM2

@@ -8,7 +8,9 @@
 # Contact:	Ron Burkey <info@sandroid.org>,
 #  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 # Website:	http://www.ibiblio.org/apollo.
-# Mod history:	16/05/09 FB	Transcription Batch 2 Assignment.
+# Mod history:	2009-05-16 FB	Transcription Batch 2 Assignment.
+#		2009-05-20 RSB	Added a missing comment mark.  Corrected mismarked
+#				Page 217 -> 220.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -459,7 +461,7 @@ SIZETAB		TC	1.2SPOT -12006
 		DEC	0
 		DEC	0
 		
-# Page 217
+# Page 220
 # PROGRAM DESCRIPTION: NEWPHASE						DATE:  11 NOV 1966
 # MOD: 1								ASSEMBLY:  SUNBURST REV
 # MOD BY: COPPS								LOG SECTION: PHASE TABLE MAINTENANCE
@@ -484,7 +486,7 @@ SIZETAB		TC	1.2SPOT -12006
 #		(L)	-PHASE1	(IF GROUP=1)
 #		(L+1)	PHASE1
 #		(L+2)	-PHASE2	(IF GROUP=2)
-		(L+3)	PHASE2
+#		(L+3)	PHASE2
 #		-----
 #		(L+7)	PHASE4
 #		(L+8)	-PHASE5	(IF GROUP=5)

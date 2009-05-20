@@ -9,6 +9,7 @@
 # Pages:	961-978
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrections:  Eliminated an extraneous EXTEND.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -424,7 +425,6 @@ YCOPY		INCR	TVCPHASE	# RESTART-PROTECT THE COPYCYCLE.	(3)
 		EXTEND
 		DCA	TMP6
 		DXCH	YTMP6
-		EXTEND
 		
 YMISC		EXTEND			# MISC....YAW-RATE-ERROR INTEGRATOR
 		DCA	ERRBTMP

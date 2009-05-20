@@ -9,6 +9,10 @@
 # Website:      http://www.ibiblio.org/apollo.
 # Mod history:  2009-05-12 RSB	Adapted from Colossus249 file of the same
 #				name and Comanche 055 page images.
+#		2009-05-20 RSB	Corrections:  V06N68 -> V06N74, added missing
+#				definition of V06N74, in several
+#				interpreter operands fixed stuff like
+#				N-M,1 to N -M,1
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -359,11 +363,13 @@ POSECADR	2CADR	CM/POSE
 		
 P64		TC	NEWMODEX		# ENTER VIA RTB WHEN .05G IS EXCEEDED.
 		MM	64
-		CA	V06N68			# ROLLC		VI		D
+		CA	V06N74			# ROLLC		VI		D
 						# XXX.XX DEG	XXXXX. FPS	XXX.XX G
 		TS	ENTRYVN			# DISPLAY VIA OVERNOUT.
 		
 		TC	DANZIG			# ... AND CONTINUE IN INITROLL ...
+
+V06N74		VN	0674
 
 # Page 798		
 # PROGRAM:	P65

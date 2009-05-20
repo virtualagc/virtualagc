@@ -8,7 +8,10 @@
 # Contact:	Ron Burkey <info@sandroid.org>,
 #  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 # Website:	http://www.ibiblio.org/apollo.
-# Mod history:	18/05/09 FB	Transcription Batch 3 Assignment.
+# Mod history:	2009-05-18 FB	Transcription Batch 3 Assignment.
+#		2009-05-20 RSB	Corrections:  POODOO -> P00DOO,
+#				GOTOPOOH -> GOTOP00H, added a couple of 
+#				missing instructions in Verb 96.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -471,7 +474,7 @@ SYSTEST		TC	CHKP00H
 		MASK	NOP01BIT
 		EXTEND
 		BZF	V92CONT		# IF IT'S NOT YET SET, CONTINUE
-		TC	POODOO		# IT'S ON. SEND NODO ALARM FOR P07
+		TC	P00DOO		# IT'S ON. SEND NODO ALARM FOR P07
 		OCT	1521
 V92CONT		TC	EXDAPOFF	# TURN DAP OFF IF IT'S ON
 		CAF	PRIO20
@@ -670,7 +673,7 @@ STABLISH	CAF	EBANK6		# V46 - SET EBANK TO E6
 #		4 FOR RESTART OF DISPLAY SEQUENCE.
 #		RESPONSES
 #		A.	TERMINATE
-#			1.	GOTOPOOH
+#			1.	GOTOP00H
 #		B.	PROCEED
 #			1.	SET 3AXISFLG TO INDICATE MANEUVER IS SPECIFIED BY 3 AXIS.
 #			2.	EXECUTE R60CSM (ATTITUDE MANEUVER).
@@ -1271,6 +1274,9 @@ V90PERF		TC	TESTXACT
 
 VERB96		TC	UPFLAG		# QUITFLAG WILL CAUSE INTEGRATION TO EXIT
 		ADRES	QUITFLAG	# 	AT NEXT TIMESTEP
+		
+		TC	UPFLAG
+		ADRES	V96ONFLG
 		CAF	ZERO
 		TC	POSTJUMP
 		CADR	V37		# GO TO P00

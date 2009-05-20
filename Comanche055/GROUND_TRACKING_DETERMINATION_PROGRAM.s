@@ -7,7 +7,8 @@
 # Reference:	pp. 456-459
 # Contact:	Onno Hommes <ohommes@cmu.edu>.
 # Website:	www.sandroid.org/Apollo.
-# Mod history:	05/07/09 OH	Transcription Batch 1 Assignment 
+# Mod history:	2009-05-07 OH	Transcription Batch 1 Assignment 
+#		2009-05-20 RSB	Corrected a couple of DIMOFLAG to DIM0FLAG.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -119,7 +120,7 @@ P21PROG1	CAF	V6N34		# LOAD DESIRED TIME OF LAT-LONG.
 			+2		# ZERO..THIS VEHICLE (CM)
 			VINTFLAG	# ONE...OTHER VEHICLE(LM)
 		CLEAR	CLEAR
-			DIMOFLAG
+			DIM0FLAG
 			INTYPFLG	# PRECISION
 		CALL
 			INTEGRV		# CALCULATE
@@ -134,7 +135,7 @@ P21CONT		VLOAD			# RECYCLE..INTEG FROM BASE VECTOR
 			P21TIME
 		STORE	TET		# ..TIME
 		CLEAR	CLEAR
-			DIMOFLAG
+			DIM0FLAG
 			MOONFLAG
 		SLOAD	BZE
 			P21ORIG
