@@ -10,6 +10,7 @@
 # Mod history:	2009-05-11 JVL	Adapted from the Colossus249/ file
 #				of the same name, using Comanche055 page
 #				images.
+#		2009-05-20 RSB	Corrections:  +80 -> +8D.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -174,7 +175,7 @@ ATTINIT		CAE	DAPDATR1	# ATTITUDE-ERROR INITIALIZATION LOGIC
 		EXTEND			#	ERRORY & ERRORZ (P40 AT DOTVCON)
 		MP	1/ATTLIM	# .007325(ERROR) = 0 IF ERROR < 1.5 DEG
 		EXTEND
-		BZF	+80		#	|ERROR| LESS THAN 1.5 DEG
+		BZF	+8D		#	|ERROR| LESS THAN 1.5 DEG
 		EXTEND
 # Page 940
 		BZMF	+3		#	|ERROR| > 1.5 DEG, AND NEG

@@ -8,6 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	2009-05-05 RSB	Adapted from the Colossus249/ file of the 
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrected R32 -> R31.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -282,7 +283,7 @@ P30S1A		EQUALS
 R34		EQUALS
 CDHTAG2		EQUALS
 CSIPROG9	EQUALS
-R32		EQUALS
+R31		EQUALS
 P22S		EQUALS
 RTE3		EQUALS
 		BNKSUM	31

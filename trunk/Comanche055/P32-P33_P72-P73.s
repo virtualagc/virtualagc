@@ -10,6 +10,10 @@
 # Mod history:	2009-05-09 RSB	Adapted from the Luminary131/ file
 #				P32-P35_P72-P75.s and Comanche055 page 
 #				images.
+#		2009-05-20 RSB	Corrected CSI/COM3 -> CSI/CDH3,
+#				CSI/CDHI -> CSI/CDH1, CDHTAB -> CDHTAG,
+#				changed a SETLOC from CSI/CDH to CSI/CDH1,
+#				a SETLOC CSI/CDH1 to CSIPROG.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -176,7 +180,7 @@
 #	VN1645
 
 		BANK	35
-		SETLOC	CSI/CDH
+		SETLOC	CSI/CDH1
 		BANK
 		EBANK=	SUBEXIT
 		COUNT	35/P3272
@@ -249,7 +253,7 @@ P32/P72C	BON	SET
 P32/P72D	DLOAD	GOTO
 			T1TOT2
 			P32/P72D
-		SETLOC	CSI/COM3
+		SETLOC	CSI/CDH3
 		BANK
 P32/P72E	STORE	T1TOT2
 		DSU	BPL
@@ -512,7 +516,7 @@ P33/P73D	DLOAD	DAD
 		DSU	GOTO
 			TCDH
 			P33/P73E
-		SETLOC	CSI/CDHI
+		SETLOC	CSI/CDH1
 		BANK
 		
 P33/P73E	DSU	BPL
@@ -600,7 +604,7 @@ V06N50		VN	0650
 #	ACTIVE
 
 		BANK	34
-		SETLOC	CSI/CDH1
+		SETLOC	CSIPROG
 		BANK
 		EBANK=	SUBEXIT
 		COUNT	34/CSI
@@ -1199,7 +1203,7 @@ ADVANCE		STQ	DLOAD
 # Page 676
 # ***** ROTATE *****
 
-		SETLOC	CDHTAB
+		SETLOC	CDHTAG
 		BANK
 
 ROTATE		PUSH	PUSH

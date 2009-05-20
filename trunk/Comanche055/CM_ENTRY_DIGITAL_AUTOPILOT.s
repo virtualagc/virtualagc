@@ -9,6 +9,8 @@
 # Pages:	1063-1092
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrections: Removed an extraneous label 
+#				EXDAPIN
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -512,7 +514,7 @@ ATTRATES	LXCH	BANKRUPT	# CONTINUE HERE VIA T5
 
 		CA	QREL
 		TC	2D/SDZ
-EXDAPIN	EXDAPIN	INDEX	A		# COME HERE FROM EX ATM DAP
+EXDAPIN		INDEX	A		# COME HERE FROM EX ATM DAP
 		CAF	P/RJCODE
 		ADS	JETEM		# COMBINE ALL NEW BITS.
 		

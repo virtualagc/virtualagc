@@ -9,6 +9,7 @@
 # Pages:	1107-1199
 # Mod history:	2009-05-08 RSB	Adapted from the Luminary131/ file of the
 #				same name, using Comanche055 page images. 
+#		2009-05-20 RSB	Corrections:  P00D00 -> P00DOO
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2529,7 +2530,7 @@ ZEROANS		CAF	ZERO		# FORCE ANSWER TO ZERO HERE.
 		TCF	SQRTABRT
 		TCF	FIXROOT
 
-SQRTABRT	TC	P00D00
+SQRTABRT	TC	P00DOO
 		OCT	1302
 
 # Page 1185

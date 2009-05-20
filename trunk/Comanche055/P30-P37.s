@@ -10,6 +10,7 @@
 # Mod history:	2009-05-10 RSB	Adapted from the Colossus249/ file 
 #				of the same name, using Comanche055 page 
 #				images.
+#		2009-05-20 RSB	Corrected BDV -> BOV.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -500,7 +501,7 @@ K1K2LOOP	DLOAD	DSU*
 			2
 			K2CALC
 		DSU	BDDV
-		PUSH	BDV
+		PUSH	BOV
 			MAXPHI
 		BMN	DSU
 			MAXPHI

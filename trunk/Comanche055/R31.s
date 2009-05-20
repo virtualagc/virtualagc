@@ -8,6 +8,7 @@
 # Contact:      Onno Hommes <ohommes@cmu.edu>
 # Website:      http://www.ibiblio.org/apollo.
 # Mod history:  2009-05-11 OH	Batch 2 Assignment Comanche Transcription
+#		2009-05-20 RSB	Corrected INSTALL -> INTSTALL
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -246,7 +247,7 @@ GETRVN5		CALL			# AV G ON
 			SURFFLAG
 			GETRVN6		# LM DOWN, LMPREC
 # Page 510
-			INSTALL
+			INTSTALL
 		CLEAR	GOTO
 			INTYPFLG
 			OTHINT

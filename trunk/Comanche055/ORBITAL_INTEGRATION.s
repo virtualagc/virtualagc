@@ -9,6 +9,8 @@
 # Pages:	1334-1354
 # Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrections:  DAT -> DAD in one place, 
+#				BWM -> BMN, DEFEQCNT -> DIFEQCNT.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -183,7 +185,7 @@ ACCOMP		LXA,1	LXA,2
 			1,2
 		VSU	XCHX,2
 			BETAV
-			DEFEQCNT
+			DIFEQCNT
 		STORE	VECTAB +6,2
 		XCHX,2
 			DIFEQCNT
@@ -426,7 +428,7 @@ QUALITY3	DSQ			# J22 TERM X R**4 IN 2D.  SCALED B61
 			5/8		# 5 SCALED B3
 		PDDL	SR2		# PUT 5 COSPHI**2, D5, IN 8D. GET
 					# COSPHI**2 D2 FROM 8D
-		DAT	BDSU		# END UP WITH (1-7 COSPHI**2), B5
+		DAD	BDSU		# END UP WITH (1-7 COSPHI**2), B5
 			8D		# ADDING COSPHI**2 B4 SAME AS COSPHI**2
 					# X 2 D5
 			D1/32		# 1 SCALED B5
@@ -495,7 +497,7 @@ TIMESTEP	BOF	CALL
 			MIDFLAG
 			RECTEST		# SKIP ORIGIN CHANGE LOGIC
 			CHKSWTCH
-		BWM
+		BMN
 			DOSWITCH
 			
 RECTEST		VLOAD	ABVAL		# RECTIFY IF

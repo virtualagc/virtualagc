@@ -9,6 +9,7 @@
 # Pages:	945-950
 # Mod history:	2009-05-12 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrections:  CAE -> CAF in one place.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -185,7 +186,10 @@ REPCHEK		CAE	REPFRAC		# CHECK FOR REPETITIVE UPDATES
 		
 		INCR	TVCEXPHS	#					(3)
 		
-TEMPSET		CAE	FCORFRAC	# 	SET UP CORRECTION FRACTION
+# RSB 2009.  The following instruction was previously "CAE FCORFRAC", but FCORFRAC
+# is not in erasable memory as implied by the use of CAE.  I've accordingly changed
+# it to CAF instead to indicate fixed memory.
+TEMPSET		CAF	FCORFRAC	# 	SET UP CORRECTION FRACTION
 		TS	TEMPDAP +1
 		
 		INCR	TVCEXPHS	# ENTRY FROM REPCHECK AT NEXT LOCATION	(4)

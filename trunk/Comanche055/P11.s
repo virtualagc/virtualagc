@@ -7,9 +7,11 @@
 # Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
 # Website:      www.ibiblio.org/apollo.
 # Pages:	533-550
-# Mod history:  2009-05-13 HG    Started adapting from the Colossus249/ file 
-#                of the same name, using Comanche055 page 
-#                images 0533.jpg - 0550.jpg. 
+# Mod history:  2009-05-13 HG   Started adapting from the Colossus249/ file 
+#                		of the same name, using Comanche055 page 
+#                		images 0533.jpg - 0550.jpg. 
+#		2009-05-20 RSB	Corrections: ERTHALT -> EARTHALT, 
+#				STATSW -> SATSW.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -694,7 +696,7 @@ ATRESET         CS      RCSFLAGS        # NO -- SET
                 CAF     REVCNT          # OCT 6
                 TC      BANKCALL        # DELAY JOB
                 CADR    DELAYJOB        # 60 MS --WAIT TILL IMUERRCNTR ZEROED
-                CCS     STATSW          # CHECK SW STATUS
+                CCS     SATSW          	# CHECK SW STATUS
                 TC      TAKEON          # POS   STEER INIT.
                 TC      +1              # 0     RETURN TO DISPLAY
                 CA      BIT1            # NEG   RETURN TO DISPLAY
@@ -723,7 +725,7 @@ S11.1		VLOAD	ABVAL
 		        EARTHALT
 		        RLS
 		ABVAL	SR2
-ERTHALT         BDSU
+EARTHALT         BDSU
 		        36D
 		STORE   ALTI
 		RVQ

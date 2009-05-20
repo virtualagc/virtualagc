@@ -11,6 +11,7 @@
 #				of the same name, using Comanche055 page 
 #				images.  Finished through page 329.
 #		2009-05-09 RSB	Finished first draft.
+#		2009-05-20 RSB	Corrected a CHKPOOH to CHKP00H.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1328,6 +1329,7 @@ SFOUTABR	CADR	PREDSPAL	# ALARM IF DEC DISP WITH OCTAL ONLY NOUN
 		CADR	DP2OUTSF
 		CADR	AROUT1SF
 		CADR	2INTOUT
+		CADR	DPFRACOT
 ENDRTOUT	EQUALS
 
 # THE FOLLOWING IS ATYPICAL SF ROUTINE.  IT USES MPAC.  LEAVES RESULTS
@@ -3603,7 +3605,7 @@ PINTEST		EQUALS	LST2FAN
 		COUNT	41/PIN
 		
 VBTSTLTS	TC	BANKCALL
-		CADR	CHKPOOH
+		CADR	CHKP00H
 		
 		INHINT
 		CS	BIT1		# SET BIT 1 OF IMODES33 SO IMUMON WON'T

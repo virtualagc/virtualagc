@@ -4,11 +4,12 @@
 #               is part of the source code for the Command Module's
 #               (CM) Apollo Guidance Computer (AGC), Apollo 11.
 # Assembler:    yaYUL
-# Reference:    pp. 1508-1515
+# Reference:    pp. 1508-1516
 # Contact:      Ron Burkey <info@sandroid.org>
 # Website:      http://www.ibiblio.org/apollo.
 # Mod history:  2009-05-07 RSB	Adapted from Colossus249/RT8_OP_CODES.s
 #				and page images. 
+#		2009-05-07 RSB	Oops! Left out the entire last page before.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -313,4 +314,36 @@ NOSHIFT		CAF	ZERO
 VECSGNAG	TC	BANKCALL
 		CADR	VECAGREE
 		TC	DANZIG
-		
+
+# Page 1516
+# MODULE CHANGE FOR NEW LUNAR GRAVITY MODEL
+		SETLOC	MODCHG3
+		BANK
+QUALITY1	BOF	DLOAD
+			MOONFLAG
+			NBRANCH
+			URPV
+		DSQ	GOTO
+			QUALITY2
+		SETLOC	MODCHG2
+		BANK
+QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
+			URPV	+2	# Y COMPONENT, B1
+		DSU
+		DMP	VXSC		# 5(Y**2-X**2)UR
+			5/8		# CONSTANT, 5B3
+			URPY		# VECTOR, RESULT MAXIMUM IS 5, SCALING
+					# HERE B6
+		VSL3	PDDL		# STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ
+			URPV		# X COMPONENT, B1
+		SR1	BDSU		# 2 X Y COMPONENT FOR B3 SCALING
+			4D		# SUBTRACT FROM VECTOR Y COMPONENT OF
+					# ANSWER, SAME AS MULTIPLYING BY UNITY.
+					# MAX IS 7.
+		STORE 	4D		# MULTIPLY COEFFICIENT TIMES VECTOR IN 2D
+			E3J22R2M
+		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
+			COSPHI/2	# SAME AS URPV +4, Z COMPONENT
+
+# *** END OF CHIEFTAN.028 ***
+
