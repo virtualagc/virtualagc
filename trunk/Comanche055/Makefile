@@ -15,15 +15,14 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 
 default:	$(TARGETS)
 
-${BASENAME}.bin:
-	echo hello >$@
-
-x${BASENAME}.bin: ${BASENAME}.binsource
-	../Luminary131/Oct2Bin <${BASENAME}.binsource
+${BASENAME}.bin: ${BASENAME}.binsource
+	-../Luminary131/Oct2Bin <${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	../yaYUL/yaYUL MAIN.s >${BASENAME}.lst
+	cp MAIN.s.bin Oct2Bin.bin
+	../Luminary131/Oct2Bin --invert --page=1598
 	mv MAIN.s.symtab ${BASENAME}.symtab
 	diff -s MAIN.s.bin ${BASENAME}.bin
 		
