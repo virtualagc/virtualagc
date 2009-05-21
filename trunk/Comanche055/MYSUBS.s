@@ -9,6 +9,7 @@
 # Pages:	999-1001
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrections: EBANK= changed from MPAC to KMPAC.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -32,7 +33,7 @@
 		SETLOC	MYSUBS
 		BANK
 		
-		EBANK=	MPAC
+		EBANK=	KMPAC
 SPCOS1		EQUALS	SPCOS
 SPSIN1		EQUALS	SPSIN
 SPCOS2		EQUALS	SPCOS

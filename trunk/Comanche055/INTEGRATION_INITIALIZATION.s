@@ -9,6 +9,8 @@
 # Pages:	1309-1333
 # Mod history:	2009-05-15 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrections:  fixed an interpreter instruction,
+#				fixed a SETLOC.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -288,7 +290,8 @@ STATINT1	TC	INTPRET
 			LOADTIME
 # Page 1314
 		STORE	TDEC1
-		CALL
+		CLEAR	CALL
+			V96ONFLG
 			INTSTALL
 		SET	CALL
 			NODOFLAG
@@ -883,7 +886,7 @@ INTBITAB	OCT	20100
 #
 # FINALLY TRKMKCNT IS ZEROED.
 
-		SETLOC	INTINIT
+		SETLOC	INTINIT2
 		BANK
 
 		COUNT*	$$/INTIN

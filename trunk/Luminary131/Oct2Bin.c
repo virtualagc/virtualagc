@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -46,6 +46,17 @@
 				This is done because I find it convenient
 				when entering data using Dragon 
 				NaturallySpeaking 8.
+		05/20/09 RSB	Added the --invert command-line switch.
+				With this switch, the program reverses the
+				normal process, taking a binary file and
+				turning it into a textual file.  Such a
+				file is helpful in proofing when converting
+				a set of page images to source-code files,
+				since when you assemble the source-code files
+				so-created the result usually won't be what
+				it's supposed to, and at some point you have
+				to compare the binary created by yaYUL against
+				the binary in the page images.
   
   The format of the file is simple.  Each line just consists of 8 fields,
   delimited by whitspace.  Each field consists of 5 octal digits.  Blank
@@ -64,6 +75,9 @@
   
   The input is on the standard input.  Status messages are on the standard
   output.  The binary is put into a file called Oct2Bin.bin.
+  
+  If the command-line switch --invert is used, then the input should be a binary
+  file called Oct2Bin.bin, and the output will be a text file named Oct2Bin.binsource.
 */
 
 //#define VERSION(x) #x
@@ -71,6 +85,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
 uint16_t Checksum = 0;
 int ErrorCount = 0;
 
@@ -136,19 +151,93 @@ BuggerCheck (int Line, int BuggerChecked, uint16_t Banknum, uint16_t Checksum)
     }	    
 }
 
+int 
+Bank (int Count)
+{
+  int Ret;
+  Ret = Count / 1024;
+  if (Ret < 2)
+    Ret += 2;
+  else if (Ret < 4)
+    Ret -= 2;
+  return (Ret);
+}
+
+// Decompile a binary file to text.  We don't bother to check the bugger codes.
+
 int
-main (void)
+Decompile (void)
+{
+  unsigned char b[2];
+  int Value, Count = 0;
+  FILE *fin, *fout;
+  
+#ifdef WIN32
+  fin = fopen ("Oct2Bin.bin", "rb");
+#else
+  fin = fopen ("Oct2Bin.bin", "r");
+#endif
+  if (fin == NULL)
+    {
+      printf ("Error: input file Oct2Bin.bin does not exist.\n");
+      return (1);
+    }
+  fout = fopen ("Oct2Bin.binsource", "w");
+  if (fout == NULL)
+    {
+      fclose (fin);
+      printf ("Error: cannot create output file Oct2Bin.binsource.\n");
+      return (1);
+    }
+  // Read and write.
+  while (1 == fread (b, 2, 1, fin))
+    {
+      Value = (b[0] << 7) | (b[1] >> 1);
+      if (0 == (Count % 8))
+        fprintf (fout, "\n");
+      if (0 == (Count % 32))
+        fprintf (fout, "\n");
+      if (0 == (Count % 256))
+        fprintf (fout, ";\n");
+      if (0 == (Count % 1024))
+        fprintf (fout, "BANK=%o\n\n", Bank (Count));
+      fprintf (fout, "%05o ", Value);
+      Count++;
+    }
+  
+  fclose (fin);
+  fclose (fout);
+  return (0);
+}
+
+int
+main (int argc, char *argv[])
 {
   FILE *OutFile;
   int Dummy, Data[8], Line, BuggerChecked = 1;
   uint16_t Dummy16, Banknum;
   int Count;
   char s[129], *ss;
-  int i, j;
+  int i, j, Invert = 0;
   
-  printf ("(c)2003-2005 Ronald S. Burkey, ver " NVER 
+  printf ("(c)2003-2005,2009 Ronald S. Burkey, ver " NVER 
           ", built " __DATE__ "\n");
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
+  
+  // Parse the command-line switches.
+  for (i = 1; i < argc; i++)
+    {
+      if (!strcmp (argv[i], "--invert"))
+        Invert = 1;
+      else
+        {
+	  printf ("Error: Unknown command-line switch \"%s\"\n", argv[i]);
+	  return (1);
+	}
+    }
+  
+  if (Invert)
+    return (Decompile ());
   
   OutFile = fopen ("Oct2Bin.bin", "wb");
   if (OutFile == NULL)

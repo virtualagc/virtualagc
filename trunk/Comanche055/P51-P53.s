@@ -12,7 +12,9 @@
 #		2009-05-20 RSB	Corrections: SETI/PDT -> SET1/PDT, 
 #				GOTOPOOH -> GOTOP00H, R33EXIT -> R53EXIT,
 #				V853 -> VB53, R56A -> R56A1 (some places
-#				only), added missing R56A1 label.
+#				only), added missing R56A1 label, added a
+#				missing CAF in COARSTYP, corrected a SETLOC
+#				from P50S to P50S3.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -250,7 +252,8 @@ P52I		TC	ALARM
 		TC	P52C		# RECYCLE:  VEHICLE HAS BEEN MANEUVERED			
 V06N34		VN	0634
 VB06N22		VN	00622
-COARSTYP	TC	BANKCALL
+COARSTYP	CAF	OCT13
+		TC	BANKCALL
 		CADR	GOPERF1
 		TCF	GOTOP00H	# V34
 		TCF	P52J	+3	#	NORMAL
@@ -2077,7 +2080,7 @@ S52.3		STQ
 #		VAC +6	CDUX
 
 		COUNT*	$$/R56
-		SETLOC	P50S
+		SETLOC	P50S3
 		BANK
 R56		STQ	EXIT
 			R53EXIT
