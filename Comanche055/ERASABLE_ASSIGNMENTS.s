@@ -16,6 +16,8 @@
 #				RETROFLG not defined correctly, changed the
 #				typing of labels 9X9LOC1 and 9X9LOC2, 
 #				R32FLBIT -> R31FLBIT.
+#		2009-05-21 RSB	Corrected definition of DELBRTMP, which 
+#				chained to quite a lot of off-by-one errors.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2967,7 +2969,7 @@ PACTTMP		EQUALS	IOGARATE +1	# B(2)
 YACTTMP		EQUALS	PACTTMP	+2	# B(2)
 CNTRTMP		EQUALS	YACTTMP	+2	# B(1)
 STRKTTMP	EQUALS	CNTRTMP	+1	# B(1)
-DELBRTMP	EQUALS	STRKTTMP +2	# B(2)
+DELBRTMP	EQUALS	STRKTTMP +1	# B(2)
 ERRBTMP		EQUALS	DELBRTMP +2	# B(2)
 CMDTMP		EQUALS	ERRBTMP	+2	# B(2)
 

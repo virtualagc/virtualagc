@@ -11,6 +11,8 @@
 #				same name, using Comanche055 page images. 
 #		2009-05-20 RSB	Corrections:  P00D00 -> P00DOO, fixed a 
 #				"Page N" reference.
+#		2009-05-21 RSB	Corrected definition of 5B10, which overflowed
+#				integer arithmetic.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2915,7 +2917,7 @@ TAGSUB		CA	FIXLOC
 
 RTB/BHIZ	CCS	CYR
 RTB		CA	POLISH
-		TC	SWCALL -1	# SO A "TC Q" FROM ROUTINE LEADS TO DANZIG
+		TC	SWCALL 	-1	# SO A "TC Q" FROM ROUTINE LEADS TO DANZIG
 
 BHIZ		CCS	MPAC
 		TCF	DANZIG
@@ -2941,7 +2943,8 @@ BZE/GOTO	CCS	CYR		# SEE WHICH OP-CODE IS DESIRED.
 
 BPL/BMN		CCS	CYR
 		TCF	BPL
-5B10		DEC	5 B+10		# SHIFTS OP CODE IN SWITCH INSTRUCTION ADR
+5B10		#DEC	5 	B+10	# SHIFTS OP CODE IN SWITCH INSTRUCTION ADR
+		DEC	5	B-4	# RSB 2009
 
 		TC	BRANCH		# DO BMN
 		TCF	DANZIG
