@@ -1,5 +1,5 @@
 # Copyright:	Public domain.
-# Filename:	CSM_GEOMETRY.s
+# Filename:	CONIC_SUBROUTINES.s
 # Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.
 #		It is part of the source code for the Command Module's (CM)
 #		Apollo Guidance Computer (AGC), for Apollo 11.
@@ -9,6 +9,8 @@
 # Pages:	1262-1308
 # Mod history:	2009-05-08 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	Corrected:  Fixed four interpreter 
+#				instructions.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -785,8 +787,7 @@ CMNTOVFL	DLOAD	SR1
 			X
 		STODL	X
 			TC
-		STORE	T
-		GOTO
+		STCALL	T
 			BRNCHCTR
 NEGTOVFL	STCALL	XMIN
 			CMNTOVFL
@@ -843,8 +844,7 @@ KEPCONVG	DLOAD	SR4R
 			T
 		STODL	TC
 			X
-		STORE	XPREV
-		GOTO
+		STCALL	XPREV
 			KEPRTN
 
 # Page 1283
@@ -1178,8 +1178,7 @@ PARAM		STQ	CLEAR		# MPAC=V1VEC, 0D=R1VEC		PL AT 6
 		DMP	SR*
 			36D
 			0 	-4,1
-		STORE	P		# P (+4)
-		GOTO
+		STCALL	P		# P (+4)
 			RTNPRM
 
 # Page 1291
@@ -1613,8 +1612,7 @@ INITV		DLOAD	NORM
 TARGETV		DLOAD	CALL
 			MAGVEC2
 			LAMENTER
-		STORE	VTARGET
-		GOTO
+		STCALL	VTARGET
 			RTNLAMB
 
 # Page 1301

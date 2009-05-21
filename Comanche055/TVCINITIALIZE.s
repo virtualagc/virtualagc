@@ -10,7 +10,10 @@
 # Mod history:	2009-05-11 JVL	Adapted from the Colossus249/ file
 #				of the same name, using Comanche055 page
 #				images.
-#		2009-05-20 RSB	Corrections:  +80 -> +8D.
+#		2009-05-20 RSB	Corrections:  +80 -> +8D, added 4 missing 
+#				lines in TVCINIT1, changed the capitalization
+#				of a couple of the "Page N" comments, 
+#				corrected a couple of lines in LOADCOEFF.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -109,6 +112,11 @@ TVCINIT1	LXCH	BANKRUPT
 		CAF	BIT1		# LEM-ON (BIT1)
 		TS	CNTR		# LEM-OFF (ZERO)
 		
+		INDEX	CNTR		# LOAD THE FILTER COEFFICIENTS
+		CAF	CSMCFADR
+		TS	COEFFADR
+		TC	LOADCOEF
+		
 		INDEX	CNTR		# PICK UP LM-OFF,-ON KTLX/I
 		CAE	EKTLX/I		# SCALED AT 1/(8 ASCREV) OF ACTUAL VALUE
 		TS	KTLX/I
@@ -126,7 +134,7 @@ TVCINIT2	CS	CNTR		# PICK LM-OFF,-ON VALUE FOR FILTER PERIOD
 		TS	T5TVCDT
 		
 		CS	BIT15		# RESET SWTOVER FLAG
-# PAGE 939		
+# Page 939		
 		MASK	FLAGWRD9
 		TS	FLAGWRD9
 		
@@ -320,13 +328,12 @@ LOADCOEF	EXTEND			# LOAD DAP FILTER COEFFICIENTS
 		DCA	12D
 		DXCH	N10 +12D
 
-		EXTEND
 		INDEX	COEFFADR
-		DCA	14D
+		CA	14D
 		DXCH	N10 +14D
 
 		TC	Q
-# PAGE 943
+# Page 943
 S40.15		CAE	IXX		# GAIN COMPUTATIONS (1/CONACC, VARK)
 		EXTEND			# ENTERED FROM TVCINITIALIZE AND TVCEXEC
 		MP	2PI/M		#	2PI/M SCALED 1/(B+8 N M)
@@ -375,7 +382,7 @@ LBN10		DEC	+.99999	N10	# LOW BANDWIDTH FILTER COEFFICIENTS
 
 CSMCFADR	GENADR	CSMN10		# CSM ONLY COEFFICIENTS ADDRESS
 HBCFADR		GENADR	HBN10		# HIGH BANDWIDTH COEFFICIENTS ADDRESS
-# PAGE 944
+# Page 944
 LBCFADR		GENADR	LBN10		# LOW BANDWIDTH COEFFICIENTS ADDRESS
 
 NZERO		DEC	51		# MUST BE ODD FOR MRCLEAN

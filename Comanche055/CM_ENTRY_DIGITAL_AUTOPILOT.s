@@ -10,7 +10,8 @@
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
 #		2009-05-20 RSB	Corrections: Removed an extraneous label 
-#				EXDAPIN
+#				EXDAPIN, added a missing instruction in 
+#				COMPAT.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -825,6 +826,7 @@ COMPAT		CA	LCX/360		# CORRECT FOR ASSUMED COORD TURN.
 		TC	+1		# G LESS THAN .05.  CA POS. CONTINUE
 		CA	LCX/360		# G GEQ .05.  CONTINUE IN CM/RCS
 		TS	LCX/360		# CMDAPMOD=-0.  DAMPING ONLY. SET LCX=0
+		TS	ERRORZ		# INITIAL ROLL ERROR (UNREFLECTED) FOR TM.
 		TS	PAXERR1		# SAVE LCX FOR FDAI AND EDIT.  (/360)
 # Page 1083
 		CA	-VT/180		# GET - 2 VT/180

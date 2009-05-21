@@ -9,7 +9,8 @@
 # Pages:	961-978
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
-#		2009-05-20 RSB	Corrections:  Eliminated an extraneous EXTEND.
+#		2009-05-20 RSB	Corrections:  Eliminated an extraneous EXTEND,
+#				added a missing instruction to PFORWARD.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -198,6 +199,7 @@ PFORWARD	EXTEND			# 	PREPARE THE FILTER STORAGE LOCATIONS
 		DXCH	TMP1
 		EXTEND
 		DCA	PTMP3
+		DXCH	TMP3
 		EXTEND
 		DCA	PTMP5
 		DXCH	TMP5

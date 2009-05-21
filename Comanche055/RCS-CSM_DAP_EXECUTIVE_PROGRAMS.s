@@ -9,6 +9,7 @@
 # Pages:	1037-1038
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-20 RSB	A "Page N" comment was corrected.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -27,7 +28,7 @@
 #	This AGC program shall also be referred to as
 #			Colossus 2A
 
-# Page 1012
+# Page 1037
 # CALCULATION OF  AMGB, AMBG  ONCE EVERY SECOND
 #
 #	AMGB =	1	SIN(PSI)		0

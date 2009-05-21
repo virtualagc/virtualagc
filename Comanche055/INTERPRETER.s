@@ -9,7 +9,8 @@
 # Pages:	1107-1199
 # Mod history:	2009-05-08 RSB	Adapted from the Luminary131/ file of the
 #				same name, using Comanche055 page images. 
-#		2009-05-20 RSB	Corrections:  P00D00 -> P00DOO
+#		2009-05-20 RSB	Corrections:  P00D00 -> P00DOO, fixed a 
+#				"Page N" reference.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -63,7 +64,7 @@ DLOAD		EXTEND
 SLOAD2		DXCH	MPAC
 		CAF	ZERO			# ZERO MPAC +2
 
-# Page 1107
+# Page 1108
 # AT THE END OF MOST INSTRUCTIONS, CONTROL IS GIVEN TO DANZIG TO DISPATCH THE NEXT OPERATION.
 
 		TS	MPAC +2			# AND DECLARE DP MODE
