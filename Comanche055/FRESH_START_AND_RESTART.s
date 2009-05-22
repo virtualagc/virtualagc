@@ -10,6 +10,8 @@
 # Website:	http://www.ibiblio.org/apollo.
 # Mod history:	2009-05-16 FB	Transcription Batch 2 Assignment.
 #		2009-05-20 RSB	Removed an extraneous "TC STARTSUB".
+#		2009-05-21 RSB	Changed a "TC BANKCALL" to "TC STOPRATE"
+#				in INITSUB.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -1091,7 +1093,7 @@ INITSUB		EXTEND
 		CAF	EBANK6			# SET E6 FOR DEADBAND CODING
 		TS	EBANK			# WILL BE RESET IN STARTSB2
 		INHINT
-		TC	BANKCALL
+		TC	STOPRATE
 		
 		CA	FLAGWRD9		# RESTORE DEADBAND
 		MASK	MAXDBBIT

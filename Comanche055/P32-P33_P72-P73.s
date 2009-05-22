@@ -14,6 +14,9 @@
 #				CSI/CDHI -> CSI/CDH1, CDHTAB -> CDHTAG,
 #				changed a SETLOC from CSI/CDH to CSI/CDH1,
 #				a SETLOC CSI/CDH1 to CSIPROG.
+#		2009-05-21 RSB	Changed a P32/P72D to P32/P72E in 
+#				P32/P72D.  DP1/4TH changed to DP1/4 in 
+#				CDHMVR.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -252,7 +255,7 @@ P32/P72C	BON	SET
 			UPDATFLG
 P32/P72D	DLOAD	GOTO
 			T1TOT2
-			P32/P72D
+			P32/P72E
 		SETLOC	CSI/CDH3
 		BANK
 P32/P72E	STORE	T1TOT2
@@ -1302,7 +1305,7 @@ CDHMVR		STQ	VLOAD
 		PUSH	SL1
 		STODL	CSTH
 		DSQ	PDDL
-			DP1/4TH
+			DP1/4
 		SR2	DSU
 		SQRT	SL1
 		PDVL	VCOMP

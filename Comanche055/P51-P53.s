@@ -15,6 +15,9 @@
 #				only), added missing R56A1 label, added a
 #				missing CAF in COARSTYP, corrected a SETLOC
 #				from P50S to P50S3.
+# 		2009-05-21 RSB	In COARFINE, a TC BANKCALL was corrected to
+#				TC PHASCHNG.  In R53C, a CADR GOFLASHR was
+#				corrected to CADR GOFLASH.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -1188,7 +1191,7 @@ CALOOP		DLOAD*	SR1
 			DEG359
 			CALOOP1
 COARFINE	EXIT
-		TC	BANKCALL
+		TC	PHASCHNG
 		OCT	04024
 		TC	BANKCALL
 		CADR	IMUCOARS	# PERFORM COARSE ALIGNMENT
@@ -1703,7 +1706,7 @@ R53C1		CAF	ZERO
 		CADR	CLEANDSP		
 R53C		CAF	V01N71
 		TC	BANKCALL
-		CADR	GOFLASHR
+		CADR	GOFLASH
 		TC	GOTOP00H	# TERM.
 		TCF	R53Z
 		TC	R53C		# RECYCLE

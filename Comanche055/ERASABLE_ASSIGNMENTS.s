@@ -18,6 +18,7 @@
 #				R32FLBIT -> R31FLBIT.
 #		2009-05-21 RSB	Corrected definition of DELBRTMP, which 
 #				chained to quite a lot of off-by-one errors.
+#				Changed a +8 to a +8D.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1141,7 +1142,7 @@ TFFSW		=	119D		# CALCULATE TPERIGEE	CALCULATE TFF
 
 TFFSWBIT	=	BIT1
 
-FLAGWRD8	=	STATE +8	# (120-134)
+FLAGWRD8	=	STATE +8D	# (120-134)
 					# (SET)			(RESET)
 					
 # BIT 15 FLAG 8

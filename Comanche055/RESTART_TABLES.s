@@ -11,6 +11,7 @@
 # Mod history:	2009-05-16 FB	Transcription Batch 2 Assignment.
 #		2009-05-20 RSB	Added a missing comment mark.  Corrected mismarked
 #				Page 217 -> 220.
+#		2009-05-21 RSB	Fixed value of 5.21SPOT.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -393,7 +394,7 @@ SIZETAB		TC	1.2SPOT -12006
 # Page 218
 		2CADR	GEOSTRT4
 		
-5.21SPOT	OCT	20000
+5.21SPOT	OCT	22000
 		EBANK=	XSM
 		2CADR	ALFLT1
 		

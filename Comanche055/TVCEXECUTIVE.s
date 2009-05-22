@@ -10,6 +10,8 @@
 # Mod history:	2009-05-12 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
 #		2009-05-20 RSB	Corrections:  CAE -> CAF in one place.
+#		2009-05-21 RSB	In 1SHOTCHK, a CAF SEVEN was corrected to 
+#				CAF SIX.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -165,7 +167,7 @@ EXECCOPY	INCR	TVCEXPHS	# RESTART-PROTECT TEH COPYCYCLE		(1)
 		TCF	1SHOTOK		#	NOW (ONE-SHOT ONLY, NO REPCORR)
 		
 	+4	TS	CNTRTMP		# COUNT DOWN
-		CAF	SEVEN		# SETUP TVCEXPHS FOR ENTRY AT CNTRCOPY
+		CAF	SIX		# SETUP TVCEXPHS FOR ENTRY AT CNTRCOPY
 		TS	TVCEXPHS
 		TCF	CNTRCOPY
 		

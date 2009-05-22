@@ -9,6 +9,7 @@
 # Pages:	297-306
 # Mod history:	2009-05-08 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images/
+#		2009-05-21 RSB	In IRIGZ, PRIO17 corrected to PRIO21.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -158,7 +159,7 @@ IRIGZ		EXTEND
 		TCF	+2		# YES	
 		TCF	IRIG1		# NO	
 		
-		CA	PRIO17		# HIGHER THAN SERVICER -- LESS THAN PRELAUNCH
+		CA	PRIO21		# HIGHER THAN SERVICER -- LESS THAN PRELAUNCH
 		TC	NOVAC	
 		EBANK=	NBDX
 		2CADR	1/GYRO
