@@ -10,6 +10,8 @@
 # Mod history:	2009-05-09 RSB	Adapted from the Colossus249/ file 
 #				of the same name, using Comanche055 page 
 #				images.
+#		2009-05-22 RSB	In NOGOM2, TC ZEROEROR corrected to 
+#				CADR ZEROEROR.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -617,7 +619,7 @@ VECOFANG	VDEF	RVQ
 
 NOGOM2		INHINT			# THIS LOCATION ACCESSED BY A BZMF NOGO -2
 		TC	BANKCALL
-		TC	ZEROERROR
+		CADR	ZEROERROR
 		
 NOGO		INHINT
 		TC	STOPRATE
