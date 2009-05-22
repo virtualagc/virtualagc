@@ -11,6 +11,9 @@
 #				same name, using Comanche055 page images.
 #		2009-05-20 RSB	Corrections:  Eliminated an extraneous EXTEND,
 #				added a missing instruction to PFORWARD.
+#		2000-05-21 RSB	Wrong opcode was used with DELBRTMP and 
+#				DELBRTMP +1 operands in 4 places.  Corrected
+#				an MP operation in 2CASFLTR.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -238,7 +241,7 @@ PPRECOMP	EXTEND			#	PREPARE THE FILTER STORAGE FOR PITCH
 DELBARP		CAE	DELPBAR +1
 		EXTEND
 		MP	E(-AT)
-		ADS	DELBRTMP +1
+		TS	DELBRTMP +1
 		CAE	DELPBAR
 		EXTEND
 		MP	E(-AT)
@@ -246,7 +249,7 @@ DELBARP		CAE	DELPBAR +1
 		CAE	CMDTMP
 		EXTEND
 		MP	1-E(-AT)
-		ADS	DELBRTMP
+		DAS	DELBRTMP
 		
 PCOPYCYC	TCR	PCOPY		# PITCH COPYCYCLE
 
@@ -386,7 +389,7 @@ YPRECOMP	EXTEND			#	PREPARE THE FILTER STORAGE FOR YAW
 DELBARY		CAE	DELYBAR +1	# UPDATE YAW OFFSET-TRACKER-FILTER
 		EXTEND
 		MP	E(-AT)
-		ADS	DELBRTMP +1
+		TS	DELBRTMP +1
 		CAE	DELYBAR
 		EXTEND
 		MP	E(-AT)
@@ -394,7 +397,7 @@ DELBARY		CAE	DELYBAR +1	# UPDATE YAW OFFSET-TRACKER-FILTER
 		CAE	CMDTMP
 		EXTEND
 		MP	1-E(-AT)
-		ADS	DELBRTMP
+		DAS	DELBRTMP
 		
 # Page 969
 YCOPYCYC	TCR	YCOPY		# YAW COPYCYCLE
@@ -644,7 +647,7 @@ PRECOMP		CAF	ZERO		# **** FIRST CASCADE FILTER **********
 		TS	TTMP1	+1
 		CA	DAP1
 		EXTEND
-		MP	N10	+1	#	N21/2
+		MP	N10	+6	#	N21/2
 # Page 975		
 		DAS	TTMP1
 		

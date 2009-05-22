@@ -10,6 +10,7 @@
 # Mod history:	2009-05-11 RSB	Adapted from the Colossus249/ file 
 #				of the same name, using Comanche055 page 
 #				images.  
+#		2009-05-20 RSB	In S20.1, a DMP DDV was corrected to DMPR DDV.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1218,7 +1219,7 @@ S40.1		SET	VLOAD
 		STORE	RINIT
 		VSQ	PDDL
 			36D
-		DMP	DDV
+		DMPR	DDV
 			THETACON
 		DMP	DMP
 			DELVSAB
