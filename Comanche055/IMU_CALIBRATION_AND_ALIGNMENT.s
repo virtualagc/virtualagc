@@ -10,6 +10,7 @@
 # Mod history:  2009-05-10 OH	Batch 1 Assignment Comanche Transcription
 #		2009-05-20 RSB	Corrections: P00D00H -> P00DOOH, definition
 #				of 25DECML fixed.
+#		2009-05-23 RSB	At SPECSTS, corrected to PRIO22.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -624,7 +625,7 @@ ALLOOP1		CAE	GEOSAVE1
 		CAF	19DECML		# 23 OCT
 		TC	NEWPHASE
 		OCT	00005
-SPECSTS		CAF	PRIO20
+SPECSTS		CAF	PRIO22
 		TC	FINDVAC
 		EBANK=	GEOSAVE1
 		2CADR	ALFLT		# START THE JOB

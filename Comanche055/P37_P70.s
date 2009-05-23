@@ -11,6 +11,8 @@
 #				of the same name, using Comanche055 page
 #				images.
 #		2009-05-20 RSB	Added missing label V2T179.  Fixed POODOO -> P00DOO.
+#		2009-05-23 RSB	In RTD18, corrected a STOVL DELVLVC to 
+#				STODL DELVLVC and a STODL 02D to STORE 02D.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -615,7 +617,7 @@ RTEDISP		STQ	VLOAD		# DISPLAY
 		DOT	VDEF
 			UH/
 		VSL1
-		STOVL	DELVLVC
+		STODL	DELVLVC
 			DELVLVC
 		BOFF	DCOMP
 			RETROFLG
@@ -645,7 +647,7 @@ RTD18		VLOAD	ABVAL
 		DAD	DAD
 			T12		# T23
 			T2
-		STODL	02D		# T(LS)=T2&T23&TE
+		STORE	02D		# T(LS)=T2&T23&TE
 		SLOAD	BZE
 			P37RANGE
 			RTD22

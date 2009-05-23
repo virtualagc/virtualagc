@@ -9,6 +9,8 @@
 # Pages:	844-882
 # Mod history:	2009-05-08 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2009-05-23 RSB	In a couple of 2OCT statements, removed the
+#				space between the first and second octal words.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1463,7 +1465,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 DEC15		=	LOW4
 #GAMMAL1	=	22D
 
-MAXRNG		2OCT	16631 06755	# DNRNGERR = 9999.9 IF GONEPAST=1
+MAXRNG		2OCT	1663106755	# DNRNGERR = 9999.9 IF GONEPAST=1
 
 		BANK	26
 		SETLOC	REENTRY1
@@ -1494,7 +1496,7 @@ DLEWD0		2DEC	-.05		# -.05
 GMAX/2		2DEC	.16		# 8 GS / 2
 
 3ZEROS		EQUALS	HI6ZEROS
-NEAR1/4		2OCT	07777 00000	# 1/4 LESS 1 BIT IN UPPER PART.
+NEAR1/4		2OCT	0777700000	# 1/4 LESS 1 BIT IN UPPER PART.
 
 C18		2DEC	.0097026346	# 500/2VS
 

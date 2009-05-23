@@ -13,6 +13,8 @@
 #		08/06/05 RSB	In the Validation.bin target, the dependency on
 #				../yaYUL/yaYUL was removed, since it's pointless
 #				and since it messes up CygWin.
+#		05/23/09 RSB	Changed the naming of the symtab file to conform
+#				to the new build procedure for VirtualAGC.
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -27,6 +29,7 @@ Validation.txt: Validation.bin
 Validation.bin:	${SSOURCE}
 	../yaYUL/yaYUL Validation.s >Validation.lst
 	mv Validation.s.bin Validation.bin
+	mv Validation.s.symtab Validation.symtab
 
 clean:
 	-rm -f Validation.bin Validation.lst Validation.s.bin Validation.txt *~ *.symtab
