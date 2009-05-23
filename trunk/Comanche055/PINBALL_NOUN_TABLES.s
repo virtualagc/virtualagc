@@ -8,7 +8,8 @@
 # Contact:	Ron Burkey <info@sandroid.org>,
 #  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 # Website:	http://www.ibiblio.org/apollo.
-# Mod history:	18/05/09 FB	Transcription Batch 3 Assignment.
+# Mod history:	2009-05-18 FB	Transcription Batch 3 Assignment.
+#		2009-05-23 RSB	In NNTYPTAB, corrected former 13 SPARE.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -384,7 +385,7 @@ NNTYPTAB	OCT	00000			# 00	NOT IN USE
 		OCT	00000			# 10	1COMP OCTAL ONLY
 		OCT	24400			# 11	3COMP HMS (DEC ONLY)
 		OCT	02000			# 12	2COMP OCTAL ONLY
-		OCT	00000			# 13	SPARE
+		OCT	24400			# 13	3COMP HMS (DEC ONLY)
 		OCT	0			# 14	SPARE
 		OCT	00000			# 15	1COMP OCTAL ONLY
 		OCT	24400			# 16	3COMP HMS (DEC ONLY)

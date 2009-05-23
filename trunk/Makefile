@@ -112,6 +112,7 @@
 #				libraries, so I don't bother to do it.
 #				Updated to make work with FreeBSD (PC-BSD 7.1).
 #				Adjusted for SOLARIS.
+#		05/23/09 RSB	Added Comanche055 to the normal build sequence.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -121,7 +122,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20090503\\\"
+NVER:=\\\"20090523\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -264,6 +265,7 @@ endif
 	${yaACA}${MAKE} -C yaACA3 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} CURSES="${CURSES}"
 	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
 	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
+	$(MAKE) -C Comanche055
 	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
 	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
 	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}

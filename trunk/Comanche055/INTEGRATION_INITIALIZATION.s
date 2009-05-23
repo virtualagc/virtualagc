@@ -11,6 +11,7 @@
 #				same name, using Comanche055 page images.
 #		2009-05-20 RSB	Corrections:  fixed an interpreter instruction,
 #				fixed a SETLOC.
+#		2009-05-23 RSB	In SETCOAST, corrected MOONTHIS to AMOONFLG.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -902,7 +903,7 @@ SETCOAST	AXT,2	CALL		# NOW MOVE PROPERLY SCALED RN,UN AS WELL AS
 			2		# PIPTIME TO INTEGRATION ERASABLES.
 			INTSTALL
 		BON	AXT,2
-			MOONTHIS
+			AMOONFLG
 			+2
 			0
 		VLOAD	VSR*

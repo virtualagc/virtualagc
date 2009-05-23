@@ -21,8 +21,8 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	../yaYUL/yaYUL MAIN.s >${BASENAME}.lst
-	cp MAIN.s.bin Oct2Bin.bin
-	../Luminary131/Oct2Bin --invert --page=1598
+	#cp MAIN.s.bin Oct2Bin.bin
+	#../Luminary131/Oct2Bin --invert --page=1598
 	mv MAIN.s.symtab ${BASENAME}.symtab
 	diff -s MAIN.s.bin ${BASENAME}.bin
 		

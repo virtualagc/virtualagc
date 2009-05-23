@@ -13,6 +13,8 @@
 #		2009-05-20 RSB	In S20.1, a DMP DDV was corrected to DMPR DDV.
 #		2009-05-22 RSB	In BESTTRIM, TC PACTOFF corrected to
 #				TS PACTOFF.
+#		2009-05-23 RSB	Prior to the 2CADR at T5IDLDAP, added an 
+#				SBANK.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2325,6 +2327,7 @@ NODAPUP		EXTEND			# T5 IDLE FOR NODAP (DON'T WORRY ABOUT T)
 		TS	HOLDFLAG
 ENDFIG		TC	POSTJUMP	# CAME IN VIA V46, GO OUT VIA GOPIN
 		CADR	GOPIN
+		SBANK=	PINSUPER	# Added by RSB 2009
 		EBANK=	PACTOFF
 T5IDLDAP	2CADR	T5IDLOC
 

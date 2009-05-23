@@ -51,6 +51,7 @@
 #				by dynamically fixing the mpi files at compile
 #				time.  Fixed up for Win32 readline.
 #		2009-05-02 RSB	Added DEV_SNAP.
+#		2009-05-23 RSB	Added Comanche055.
 
 APP=VirtualAGC
 
@@ -181,24 +182,11 @@ temp/lVirtualAGC/bin temp/VirtualAGC/bin temp/VirtualAGC.app/Contents/MacOS:
 # Resources directory vary by target.
 temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Contents/Resources:
 	mkdir -p $@/pixmaps $@/source $@
-	mkdir $@/source/Colossus249
 	${CP} ../scenarios $@
-	${CP} ../Colossus249/*.binsource ../Colossus249/*.s $@/source/Colossus249
-	sh ./lst2html.sh ../Colossus249/Colossus249.lst $@/source/Colossus249/Colossus249.html ${EXT}
-	mkdir $@/source/Luminary131
-	${CP} ../Luminary131/*.binsource ../Luminary131/*.s $@/source/Luminary131
-	sh ./lst2html.sh ../Luminary131/Luminary131.lst $@/source/Luminary131/Luminary131.html ${EXT}
-	mkdir $@/source/Artemis072
-	${CP} ../Artemis072/*.binsource ../Artemis072/*.s $@/source/Artemis072
-	mkdir $@/source/Validation
-	${CP} ../Validation/*.s $@/source/Validation
-	sh ./lst2html.sh ../Validation/Validation.lst $@/source/Validation/Validation.html ${EXT}
-	mkdir $@/source/FP6
-	${CP} ../FP6/*.s $@/source/FP6
-	sh ./lst2html.sh ../FP6/FP6.lst $@/source/FP6/FP6.html ${EXT}
-	mkdir $@/source/FP8
-	${CP} ../FP8/*.s $@/source/FP8
-	sh ./lst2html.sh ../FP8/FP8.lst $@/source/FP8/FP8.html ${EXT}
+	for n in Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 ; \
+	do \
+		sh ./CopyApolloSource.sh $@ $$n ${EXT} ;\
+	done
 	${CP} *.png $@
 	${CP} ../yaDSKY/src/*.ini $@
 ifeq "${YADSKY_SUFFIX}" ""	
@@ -215,17 +203,6 @@ endif
 	${CP} ../jWiz/*.jpg $@
 	-rm -rf $@/pixmaps/yaDEDA/CVS $@/pixmaps/yaDEDA/.xvpics
 	${CP} ../yaTelemetry/*.jpg $@
-	${CP} ../Artemis072/Artemis072.bin $@/source/Artemis072
-	${CP} ../Colossus249/Colossus249.bin $@/source/Colossus249
-	${CP} ../Colossus249/Colossus249.symtab $@/source/Colossus249/Colossus249.bin.symtab
-	${CP} ../Luminary131/Luminary131.bin $@/source/Luminary131
-	${CP} ../Luminary131/Luminary131.symtab $@/source/Luminary131/Luminary131.bin.symtab
-	${CP} ../Validation/Validation.bin $@/source/Validation
-	${CP} ../Validation/Validation.s.symtab $@/source/Validation/Validation.bin.symtab
-	${CP} ../FP6/FP6.bin $@/source/FP6
-	${CP} ../FP6/FP6.symtab $@/source/FP6/FP6.bin.symtab
-	${CP} ../FP8/FP8.bin $@/source/FP8
-	${CP} ../FP8/FP8.symtab $@/source/FP8/FP8.bin.symtab
 	${CP} ../Contributed/LM_Simulator $@
 	${CP} VirtualAGC.tcl $@
 	-rm -rf $@/LM_Simulator/CVS

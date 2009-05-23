@@ -8,6 +8,8 @@
 # Contact:      Onno Hommes <ohommes@cmu.edu>
 # Website:      http://www.ibiblio.org/apollo.
 # Mod history:  2009-05-10 OH	Batch 2 Assignment Comanche Transcription
+#		2009-05-23 RSB	In DISPLAYE, corrected a CADR GOFLASHR
+#				to CADR GOFLASH.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -938,7 +940,7 @@ DISPLAYE	EXTEND
 		QXCH	NORMEX
 		CAF	V06N55
 		TCR	BANKCALL
-		CADR	GOFLASHR
+		CADR	GOFLASH
 		TCF	GOTOP00H
 		TC	NORMEX
 		TCF	-5

@@ -12,6 +12,8 @@
 #                		images 0533.jpg - 0550.jpg. 
 #		2009-05-20 RSB	Corrections: ERTHALT -> EARTHALT, 
 #				STATSW -> SATSW.
+#		2009-05-23 RSB	At end of RESCALES, corrected TC 0 to TC Q.
+#				Added an SBANK= prior to a 2CADR.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -765,7 +767,7 @@ RESCALES        EXTEND                  # RESCALE AK S FOR
                 MP      SATSCALE        # NEW HARDWARE
                 DDOUBL                  # SCALING FOR
                 DDOUBL                  # STEERING
-                TC      0               # SATURN
+                TC      Q               # SATURN
 
 # SATURN TAKEOVER FUNCTION
 # ************************
@@ -855,6 +857,7 @@ SATSTKON	EXTEND
 		RELINT
 		TC	GOPIN		# EXIT THUS BECAUSE WE CAME VIA V46
 		
+		SBANK=	PINSUPER	# Added RSB 2009
 		EBANK=	BODY3
 2REDOSAT	2CADR	REDOSAT
 
