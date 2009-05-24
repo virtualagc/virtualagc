@@ -126,7 +126,7 @@ NVER:=\\\"20090523\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
-# This switch determines whether or not wxWidgets programs are build
+# This switch determines whether or not wxWidgets programs are built
 # statically linked or dynamically linked for the binary installers
 # associated with the development snapshots.  It has nothing whatever
 # to do with normal builds by normal users.  Uncommented, they're
@@ -338,6 +338,7 @@ clean:
 	${yaACA}$(MAKE) -C yaACA3 clean
 	$(MAKE) -C Luminary131 clean
 	$(MAKE) -C Colossus249 clean
+	${MAKE} -C Comanche055 clean
 	${MAKE} -C Artemis072 clean
 	$(MAKE) -C Validation clean
 	${MAKE} -C ControlPulseSim clean
