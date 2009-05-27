@@ -27,5 +27,5 @@ ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	diff -s MAIN.s.bin ${BASENAME}.bin
 		
 clean:
-	-rm -f *.lst *~ MAIN.s.bin ${BASENAME}.bin *.symtab
+	-rm -f *.lst *~ MAIN.s.bin ${BASENAME}.bin *.symtab Oct2Bin.bin*
 
