@@ -22,7 +22,7 @@ TARGETS=${PROJECT}.bin ${PROJECT}.lst
 default: $(TARGETS)
 
 clean:
-	-rm -f *.lst *~ *.bin
+	-rm -f *.lst *~ *.bin *.symtab
 	
 install: default
 	cp ${PROJECT}.bin ${PREFIX}/bin
