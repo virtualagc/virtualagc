@@ -1,0 +1,47 @@
+README
+------
+
+The prettify lexer extensions agc,aea and apollo can be used to add syntax highligthing to HTML pages with AGC/AEA assembly in them.
+
+
+USAGE
+-----
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+<title>AGC/AEA Assembly Listing</title></head>
+<link href="./prettify.css" type="text/css" rel="stylesheet" />
+<script src="./prettify.js" type="text/javascript" onerror="alert('Error: failed to load ' + this.src)"></script>
+<script src="./lang-apollo.js" type="text/javascript" onerror="alert('Error: failed to load ' + this.src)"></script>
+</head>
+<body  onload="prettyPrint()">
+<span style="font-family: monospace;">
+<pre class="prettyprint lang-apollo">
+	ASSEMBLY CODE HERE
+</pre></span></body></html>
+
+
+If you want to use the specific agc or aea language extensions replace the literal "apollo" with either agc or aea. The reason for having one lexer (i.e. lang-apollo) for both assembly languages is to have a common HTML lead in structure for the VirtualAGC HTML assembly listings and it allows potentially the .s files to be decorated if google accepts the lang-apollo extension so both the .s of AGC and AEA would be decorated using one single lexer extension.
+
+When using prettify make sure the doc paths to the .js and .css files are proper.
+
+For example:
+
+Assuming the directory structure:
+
+<path>/source/Artemis072
+<path>/source/Colossus249
+<path>/source/FP6
+<path>/source/FP8
+<path>/source/Luminary131
+<path>/source/Prettify
+
+Make sure the paths in the above template to the .css and .js files are like:
+../Prettify/prettify.css
+../Prettify/prettify.js
+../Prettify/lan-apollo.js
+
+NOTES
+-----
+
+Google Chrome seems to render these things extremely fast. 
+However Firefox and IE work fine they just are slower when dealing with 
+large HTML pages like the assembly listings. IE has the worst performance.

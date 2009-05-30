@@ -1,0 +1,647 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+<title>AGC/AEA Assembly Listing</title>
+<link href="./prettify.css" type="text/css" rel="stylesheet" />
+<script src="./prettify.js" type="text/javascript" onerror="alert('Error: failed to load ' + this.src)"></script>
+<script src="./lang-apollo.js" type="text/javascript" onerror="alert('Error: failed to load ' + this.src)"></script>
+</head>
+<body onload="prettyPrint()">
+<span style="font-family: monospace;">
+<pre class="prettyprint lang-apollo">
+Apollo Guidance Computer (AGC) assembler, version 20090503, built May  4 2009
+(c)2003-2005,2009 Ronald S. Burkey
+Refer to http://www.ibiblio.org/apollo/index.html for more information.
+Pass #1
+Pass #2
+Pass #3
+Pass #4
+000001,000001:                                                                                         	#  Copyright:	Public domain.
+000002,000002:                                                                                         	#  Filename:	MAIN.s
+000003,000003:                                                                                         	#  Purpose:	Part of the source code for Colossus, build 249.
+000004,000004:                                                                                         	# 		It is part of the source code for the Command Module's (CM)
+000005,000005:                                                                                         	# 		Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.
+000006,000006:                                                                                         	#  Assembler:	yaYUL
+000007,000007:                                                                                         	#  Contact:	Ron Burkey <info@sandroid.org>.
+000008,000008:                                                                                         	#  Website:	www.sandroid.org/Apollo
+000009,000009:                                                                                         	#  Mod history:	04/30/03 RSB.	Created using the Luminary131 file of the
+000010,000010:                                                                                         	# 				same name as a model.
+000011,000011:                                                                                         	# 		08/02/04 RSB	Resumed Colossus development.
+000012,000012:                                                                                         	# 		08/22/04 RSB	Filled in all of the page numbers for the
+000013,000013:                                                                                         	# 				individual include-files.
+000014,000014:
+000015,000015:                                                                                         	#  The contents of the "Colossus249" files, in general, are transcribed
+000016,000016:                                                                                         	#  from a scanned document obtained from MIT's website,
+000017,000017:                                                                                         	#  http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  I'd like to note
+000018,000018:                                                                                         	#  that the character-set of the line-printer used must not have completely
+000019,000019:                                                                                         	#  agreed with the one the developers had in mind, so I've interpreted various
+000020,000020:                                                                                         	#  wacky symbols appearing in the print as follows:
+000021,000021:
+                                                                                       	#  Page 27
+001104,000037:                                                                                         	#  TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
+001105,000038:
+001106,000039: ???????                        FIXED             MEMORY   120000     -          167777  	#
+001107,000040: ???????                                          COUNT    BANKSUM                       	#
+001108,000041:
+001109,000042:                                                                                         	#  MODULE 1 CONTAINS BANKS 0 THROUGH 5
+001110,000043:
+001111,000044:    4000                                          BLOCK    02                            	#
+001112,000045:    4000                        FFTAG1            EQUALS                                 	#
+001113,000046:    4000                        FFTAG2            EQUALS                                 	#
+001114,000047:    4000                        FFTAG3            EQUALS                                 	#
+001115,000048:    4000                        FFTAG4            EQUALS                                 	#
+001116,000049:    4000                        FFTAG7            EQUALS                                 	#
+001117,000050:    4000                        FFTAG8            EQUALS                                 	#
+001118,000051:    4000                        FFTAG9            EQUALS                                 	#
+001119,000052:    4000                        FFTAG10           EQUALS                                 	#
+001120,000053:    4000                        FFTAG12           EQUALS                                 	#
+001121,000054:    4000                                          BNKSUM   02                            	#
+001122,000055:
+001123,000056:    6000                                          BLOCK    03                            	#
+001124,000057:    6000                        FFTAG5            EQUALS                                 	#
+001125,000058:    6000                        FFTAG6            EQUALS                                 	#
+001126,000059:    6000                                          BNKSUM   03                            	#
+001127,000060:
+001128,000061: 00,2000                                          BANK     00                            	#
+001129,000062: 00,2000                        DLAYJOB           EQUALS                                 	#
+001130,000063: 00,2000                                          BNKSUM   00                            	#
+001131,000064:
+
+001832,000365:
+001833,000366:                                                                                         	#  Page 46
+001834,000367:
+001835,000368: 37,2001     0074               FLAGWRD0          =        STATE      +0                 	#  (000-014)
+001836,000369:                                                                                         	#  (SET)			(RESET)
+001837,000370:                                                                                         	#  BIT 15 FLAG 0
+001838,000371: 37,2001                        CPHIFLAG          =        000D                          	#  OUTPUT OF CALCGA IS	OUTPUT OF CALCGA IS
+001839,000372:                                                                                         	#  CPHIX			THETAD
+001840,000373: 37,2001     4674               CPHIBIT           =        BIT15                         	#
+001841,000374:
+001842,000375:                                                                                         	#  BIT 14 FLAG 0
+001843,000376: 37,2001                        JSWITCH           =        001D                          	#  INTEGRATION OF W	INTEGRATION OF STATE
+001844,000377:                                                                                         	#  MATRIX		VECTOR
+001845,000378: 37,2001     4675               JSWCHBIT          =        BIT14                         	#
+001846,000379:
+001847,000380:                                                                                         	#  BIT 13 FLAG 0
+001848,000381: 37,2001                        MIDFLAG           =        002D                          	#  INTEGRATION WITH	INTEGRATION WITHOUT
+001849,000382:                                                                                         	#  SOLAR PERTURBATIONS	SOLAR PERTURBATIONS
+001850,000383:
+001851,000384: 37,2001     4676               MIDFLBIT          =        BIT13                         	#
+001852,000385:
+001853,000386:                                                                                         	#  BIT 12 FLAG 0
+001854,000387: 37,2001                        MOONFLAG          =        003D                          	#  MOON IS SPHERE OF 	EARTH IS SPHERE OF
+001855,000388:                                                                                         	#  INFLUENCE		INFLUENCE
+001856,000389:
+001857,000390: 37,2001     4677               MOONBIT           =        BIT12                         	#
+001858,000391:
+001859,000392:                                                                                         	#  BIT 11 FLAG 0
+001860,000393: 37,2001                        NORFHOR           =        004D                          	#  FAR HORIZON		NEAR HORIZON
+001861,000394:
+001862,000395: 37,2001     4700               NORFBIT           =        BIT11                         	#
+001863,000396:
+001864,000397:                                                                                         	#  BIT 10 FLAG 0
+001865,000398: 37,2001                        ZMEASURE          =        005D                          	#  MEASUREMENT PLANET	MEASUREMENT PLANET
+001866,000399:                                                                                         	#  AND PRIMARY PLANET	AND PRIMARY PLANET
+001867,000400:                                                                                         	#  DIFFERENT		SAME
+001868,000401:
+005204,000087:
+005205,000088:
+005206,000089:                                                                                         	#  KOOLADE
+005207,000090: $INTERRUPT_LEAD_INS.s				# pp. 129-130
+005208,000001:                                                                                         	#  Copyright:	Public domain.
+005209,000002:                                                                                         	#  Filename:	INTERRUPT_LEAD_INS.s
+005210,000003:                                                                                         	#  Purpose:	Part of the source code for Colossus, build 249.
+005211,000004:                                                                                         	# 		It is part of the source code for the Command Module's (CM)
+005212,000005:                                                                                         	# 		Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.
+005213,000006:                                                                                         	#  Assembler:	yaYUL
+005214,000007:                                                                                         	#  Reference:	pp. 129-130 of 1701.pdf.
+005215,000008:                                                                                         	#  Contact:	Ron Burkey <info@sandroid.org>.
+005216,000009:                                                                                         	#  Website:	www.sandroid.org/Apollo.
+005217,000010:                                                                                         	#  Mod history:	08/06/04 RSB.	Adapted from similar Luminary 131 file.
+005218,000011:
+005219,000012:                                                                                         	#  The contents of the "Colossus249" files, in general, are transcribed
+005220,000013:                                                                                         	#  from a scanned document obtained from MIT's website,
+005221,000014:                                                                                         	#  http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+005222,000015:                                                                                         	#  document read, in part:
+005223,000016:
+005224,000017:                                                                                         	# 	Assemble revision 249 of AGC program Colossus by NASA
+005225,000018:                                                                                         	# 	2021111-041.  October 28, 1968.
+005226,000019:
+005227,000020:                                                                                         	# 	This AGC program shall also be referred to as
+005228,000021:                                                                                         	# 				Colossus 1A
+005229,000022:
+005230,000023:                                                                                         	# 	Prepared by
+005231,000024:                                                                                         	# 			Massachussets Institute of Technology
+005232,000025:                                                                                         	# 			75 Cambridge Parkway
+005233,000026:                                                                                         	# 			Cambridge, Massachusetts
+005234,000027:                                                                                         	# 	under NASA contract NAS 9-4065.
+005235,000028:
+005236,000029:                                                                                         	#  Refer directly to the online document mentioned above for further information.
+005237,000030:                                                                                         	#  Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+005238,000031:
+005239,000032:                                                                                         	#  In some cases, where the source code for Luminary 131 overlaps that of
+005240,000033:                                                                                         	#  Colossus 249, this code is instead copied from the corresponding Luminary 131
+005241,000034:                                                                                         	#  source file, and then is proofed to incorporate any changes.
+005242,000035:
+005243,000036:                                                                                         	#  Page 129
+005244,000037:    4000                                          SETLOC   4000                          	#
+005245,000038:
+005246,000039:    4000                                          COUNT    02/RUPTS                      	#
+005247,000040:
+005248,000041:    4000           00004                          INHINT                                 	#  GO
+005249,000042:    4001           34054                          CAF      GOBB                          	#
+005250,000043:    4002           56006                          XCH      BBANK                         	#
+005251,000044:    4003           12520                          TCF      GOPROG                        	#
+005252,000045:
+005253,000046:    4004           52011                          DXCH     ARUPT                         	#  T6RUPT
+005254,000047:    4005           00006                          EXTEND                                 	#
+005255,000048:    4006           31311                          DCA      T6LOC                         	#
+005256,000049:    4007           52006                          DTCB                                   	#
+005257,000050:
+005258,000051:    4010           52011                          DXCH     ARUPT                         	#  T5RUPT
+005259,000052:    4011           40030                          CS       TIME5                         	#
+005260,000053:    4012           64731                          AD       .5SEC                         	#
+005261,000054:    4013           14065                          TCF      T5RUPT                        	#
+005262,000055:
+005263,000056:    4014           52011                          DXCH     ARUPT                         	#  T3RUPT
+005264,000057:    4015           34055                          CAF      T3RPTBB                       	#
+005265,000058:    4016           56006                          XCH      BBANK                         	#
+005266,000059:    4017           13416                          TCF      T3RUPT                        	#
+005267,000060:
+005268,000061:    4020           52011                          DXCH     ARUPT                         	#  T4RUPT
+005269,000062:    4021           34063                          CAF      T4RPTBB                       	#
+005270,000063:    4022           56006                          XCH      BBANK                         	#
+005271,000064:    4023           12000                          TCF      T4RUPT                        	#
+005272,000065:
+005273,000066:    4024           52011                          DXCH     ARUPT                         	#  KEYRUPT1
+005274,000067:    4025           34056                          CAF      KEYRPTBB                      	#
+005275,000068:    4026           56006                          XCH      BBANK                         	#
+005276,000069:    4027           13613                          TCF      KEYRUPT1                      	#
+005277,000070:
+005278,000071:    4030           52011                          DXCH     ARUPT                         	#  KEYRUPT2
+005279,000072:    4031           34057                          CAF      MKRUPTBB                      	#
+005280,000073:    4032           56006                          XCH      BBANK                         	#
+005281,000074:    4033           12103                          TCF      MARKRUPT                      	#
+005282,000075:
+005283,000076:    4034           52011                          DXCH     ARUPT                         	#  UPRUPT
+005284,000077:    4035           34056                          CAF      UPRPTBB                       	#
+005285,000078:    4036           56006                          XCH      BBANK                         	#
+005286,000079:    4037           13636                          TCF      UPRUPT                        	#
+005287,000080:
+005288,000081:    4040           52011                          DXCH     ARUPT                         	#  DOWNRUPT
+005289,000082:    4041           34060                          CAF      DWNRPTBB                      	#
+005290,000083:    4042           56006                          XCH      BBANK                         	#
+005291,000084:    4043           13342                          TCF      DODOWNTM                      	#
+005292,000085:
+005293,000086:    4044           52011                          DXCH     ARUPT                         	#  RADAR RUPT
+005294,000087:                                                                                         	#  Page 130
+005295,000088:    4045           34061                          CAF      RDRPTBB                       	#
+005296,000089:    4046           56006                          XCH      BBANK                         	#
+005297,000090:    4047           12476                          TCF      VHFREAD                       	#
+005298,000091:
+005299,000092:    4050           52011                          DXCH     ARUPT                         	#  HAND CONTROL RUPT
+005300,000093:    4051           34062                          CA       HCRUPTBB                      	#
+005301,000094:    4052           56006                          XCH      BBANK                         	#
+005302,000095:    4053           15225                          TCF      RESUME     +3                 	#  NOT USED
+005303,000096:
+005304,000097:    4054  E3,1400                                 EBANK=   LST1                          	#  RESTART USES E0,E3
+005305,000098:    4054           12063        GOBB              BBCON    GOPROG                        	#
+005306,000099:
+005307,000100:    4055  E3,1400                                 EBANK=   LST1                          	#
+005308,000101:    4055           02063        T3RPTBB           BBCON    T3RUPT                        	#
+005309,000102:
+005310,000103:    4056     0073                                 EBANK=   KEYTEMP1                      	#
+005311,000104:    4056           16060        KEYRPTBB          BBCON    KEYRUPT1                      	#
+005312,000105:
+005313,000106:    4057  E7,1725                                 EBANK=   MRKBUF1                       	#
+005314,000107:    4057           16067        MKRUPTBB          BBCON    MARKRUPT                      	#
+005315,000108:
+005316,000109:    4060     4056               UPRPTBB           =        KEYRPTBB                      	#
+005317,000110:
+005318,000111:    4060     0340                                 EBANK=   DNTMBUFF                      	#
+005319,000112:    4060           12060        DWNRPTBB          BBCON    DODOWNTM                      	#
+005320,000113:
+005321,000114:    4061  E7,1603                                 EBANK=   DATATEST                      	#
+005322,000115:    4061           56067        RDRPTBB           BBCON    VHFREAD                       	#
+005323,000116:
+005324,000117:    4062     0025                                 EBANK=   TIME1                         	#
+005325,000118:    4062           04060        HCRUPTBB          BBCON    RESUME                        	#  NOT USA
+005326,000119:
+005327,000120:    4063     1302                                 EBANK=   DSRUPTSW                      	#
+005328,000121:    4063           14062        T4RPTBB           BBCON    T4RUPT                        	#
+005329,000122:
+005330,000123:    4064     0025                                 EBANK=   TIME1                         	#
+005331,000124:    4064           04060        T5RPTBB           BBCON    T5RUPT                        	#
+005332,000125:
+005333,000126:    4065           00006        T5RUPT            EXTEND                                 	#
+005334,000127:    4066           65226                          BZMF     NOQBRSM                       	#
+005335,000128:    4067           00006                          EXTEND                                 	#
+005336,000129:    4070           31313                          DCA      T5LOC                         	#
+005337,000130:    4071           52006                          DTCB                                   	#
+005338,000131:
+005339,000132:
+(End of include-file INTERRUPT_LEAD_INS.s, resuming MAIN.s)
+005339,000090:
+005340,000091: $T4RUPT_PROGRAM.s				# pp. 131-167
+005341,000001:                                                                                         	#  Copyright:	Public domain.
+005342,000002:                                                                                         	#  Filename:	T4RUPT_PROGRAM.s
+005343,000003:                                                                                         	#  Purpose:	Part of the source code for Colossus, build 249.
+005344,000004:                                                                                         	# 		It is part of the source code for the Command Module's (CM)
+005345,000005:                                                                                         	# 		Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.
+005346,000006:                                                                                         	#  Assembler:	yaYUL
+005347,000007:                                                                                         	#  Reference:	pp. 131-167 of 1701.pdf.
+005348,000008:                                                                                         	#  Contact:	Ron Burkey <info@sandroid.org>.
+005349,000009:                                                                                         	#  Website:	www.sandroid.org/Apollo.
+005350,000010:                                                                                         	#  Mod history:	08/06/04 RSB.	Adapted from similar Luminary 131 file.
+005351,000011:
+005352,000012:                                                                                         	#  The contents of the "Colossus249" files, in general, are transcribed
+005353,000013:                                                                                         	#  from a scanned document obtained from MIT's website,
+005354,000014:                                                                                         	#  http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+005355,000015:                                                                                         	#  document read, in part:
+005356,000016:
+005357,000017:                                                                                         	# 	Assemble revision 249 of AGC program Colossus by NASA
+005358,000018:                                                                                         	# 	2021111-041.  October 28, 1968.
+005359,000019:
+005360,000020:                                                                                         	# 	This AGC program shall also be referred to as
+005361,000021:                                                                                         	# 				Colossus 1A
+005362,000022:
+005363,000023:                                                                                         	# 	Prepared by
+005364,000024:                                                                                         	# 			Massachussets Institute of Technology
+005365,000025:                                                                                         	# 			75 Cambridge Parkway
+005366,000026:                                                                                         	# 			Cambridge, Massachusetts
+005367,000027:                                                                                         	# 	under NASA contract NAS 9-4065.
+005368,000028:
+005369,000029:                                                                                         	#  Refer directly to the online document mentioned above for further information.
+005370,000030:                                                                                         	#  Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+005371,000031:
+005372,000032:                                                                                         	#  In some cases, where the source code for Luminary 131 overlaps that of
+005373,000033:                                                                                         	#  Colossus 249, this code is instead copied from the corresponding Luminary 131
+005374,000034:                                                                                         	#  source file, and then is proofed to incorporate any changes.
+005375,000035:
+005376,000036:                                                                                         	#  Page 131
+005377,000037: 12,2000                                          BANK     12                            	#
+005378,000038: 06,2000                                          SETLOC   T4RUP                         	#
+005379,000039: 06,2000                                          BANK                                   	#
+005380,000040:
+005381,000041: 06,2000                                          COUNT    06/T4RPT                      	#
+005382,000042:
+005383,000043: 06,2000           54016        T4RUPT            TS       BANKRUPT                      	#
+005384,000044: 06,2001           00006                          EXTEND                                 	#
+005385,000045: 06,2002           22012                          QXCH     QRUPT                         	#
+005386,000046:
+005387,000047: 06,2003           11302                          CCS      DSRUPTSW                      	#  GOES 7(-1)0 AROUND AND AROUND
+005388,000048: 06,2004           12010                          TCF      NORMT4     +1                 	#
+005389,000049: 06,2005           12007                          TCF      NORMT4                        	#
+005390,000050:
+005391,000051: 06,2006           12136                          TCF      QUIKDSP                       	#
+005392,000052:
+005393,000053: 06,2007           34716        NORMT4            CAF      SEVEN                         	#
+005394,000054: 06,2010           54070                          TS       RUPTREG1                      	#
+005395,000055: 06,2011           55302                          TS       DSRUPTSW                      	#
+005396,000056:
+005397,000057: 06,2012                                          COUNT    02/T4RPT                      	#
+005398,000058:
+005399,000059: 06,2012     7711               74K               =        HIGH4                         	#
+005400,000060:
+005401,000061:                                                                                         	#  RELTAB IS A PACKED TABLE. RELAYWORD CODE IN UPPER 4 BITS, RELAY CODE
+005402,000062:                                                                                         	#  IN LOWER 5 BITS.
+005403,000063:
+005404,000064:    4072                                          BLOCK    02                            	#
+005405,000065:    4000                                          SETLOC   FFTAG12                       	#
+005406,000066:    4000                                          BANK                                   	#
+005407,000067:
+005408,000068:    4072           04025        RELTAB            OCT      04025                         	#
+005409,000069:    4073           10003                          OCT      10003                         	#
+005410,000070:    4074           14031                          OCT      14031                         	#
+005411,000071:    4075           20033                          OCT      20033                         	#
+005412,000072:    4076           24017                          OCT      24017                         	#
+005413,000073:    4077           30036                          OCT      30036                         	#
+005414,000074:    4100           34034                          OCT      34034                         	#
+005415,000075:    4101           40023                          OCT      40023                         	#
+005416,000076:    4102           44035                          OCT      44035                         	#
+005417,000077:    4103           50037                          OCT      50037                         	#
+005418,000078:    4104           54000                          OCT      54000                         	#
+005419,000079:    4105           60000        RELTAB11          OCT      60000                         	#
+005420,000080:
+005421,000081:                                                                                         	#  Page 132
+005422,000082:                                                                                         	#  SWITCHED-BANK PORTION
+005423,000083:
+005424,000084: 12,2000                                          BANK     12                            	#
+005425,000085: 06,2000                                          SETLOC   T4RUP                         	#
+005426,000086: 06,2000                                          BANK                                   	#
+005427,000087:
+005428,000088: 06,2012                                          COUNT    06/T4RPT                      	#
+005429,000089:
+005430,000090: 06,2012           11036        CDRVE             CCS      DSPTAB     +11D               	#
+005431,000091: 06,2013           02063                          TC       DSPOUT                        	#
+005432,000092: 06,2014           02063                          TC       DSPOUT                        	#
+005433,000093:
+005434,000094: 06,2015           57036                          XCH      DSPTAB     +11D               	#
+005435,000095: 06,2016           74372                          MASK     LOW11                         	#
+005436,000096: 06,2017           55036                          TS       DSPTAB     +11D               	#
+005437,000097: 06,2020           64105                          AD       RELTAB11                      	#
+005438,000098: 06,2021           00006                          EXTEND                                 	#
+005439,000099: 06,2022           01010                          WRITE    OUT0                          	#
+005440,000100: 06,2023           02071                          TC       HANG20                        	#
+005441,000101:
+005442,000102:                                                                                         	#  Page 133
+005443,000103:                                                                                         	#  DSPOUT PROGRAM, PUTS OUT DISPLAYS
+005444,000104:
+005445,000105: 06,2024           55016        DSPOUTSB          TS       NOUT                          	#
+005446,000106: 06,2025           44714                          CS       ZERO                          	#
+005447,000107: 06,2026           54073                          TS       DSRUPTEM                      	#  SET TO -0 FOR 1ST PASS THRU OSPTAB
+005448,000108: 06,2027           56776                          XCH      DSPCNT                        	#
+005449,000109: 06,2030           64713                          AD       NEG0                          	#  TO PREVENT +0
+005450,000110: 06,2031           54776                          TS       DSPCNT                        	#
+005451,000111: 06,2032           50776        DSPSCAN           INDEX    DSPCNT                        	#
+005452,000112: 06,2033           11023                          CCS      DSPTAB                        	#
+005453,000113: 06,2034           10776                          CCS      DSPCNT                        	#  IF DSPTAB ENTRY +, SKIP
+005454,000114: 06,2035           12030                          TCF      DSPSCAN    -2                 	#  IF DSPCNT +, TRY AGAIN
+005455,000115: 06,2036           12047                          TCF      DSPLAY                        	#  IF DSPTAB ENTRY -, DISPLAY
+005456,000116: 06,2037           00012        TABLNTH           OCT      12                            	#  DEC 10, LENGTH OF DSPTAB
+005457,000117: 06,2040           10073                          CCS      DSRUPTEM                      	#  IF DSRUPTEM=+0, 2ND PASS THRU DSPTAB
+005458,000118: 06,2041           37764        120MRUPT          DEC      16372      B-14               	#  (DSPCNT = 0).  +0 INTO NOUT.
+005459,000119: 06,2042           55016                          TS       NOUT                          	#
+005460,000120: 06,2043           00002                          TC       Q                             	#
+005461,000121: 06,2044           54073                          TS       DSRUPTEM                      	#  IF DSRUPTEM=-0, 1ST PASS THRU DSPTAB
+005462,000122: 06,2045           32037                          CAF      TABLNTH                       	#  (DSPCNT=0).+0 INTO DSRUPTEM. PASS AGAIN
+005463,000123: 06,2046           12031                          TCF      DSPSCAN    -1                 	#
+005464,000124:
+005465,000125: 06,2047           64712        DSPLAY            AD       ONE                           	#
+005466,000126: 06,2050           50776                          INDEX    DSPCNT                        	#
+005467,000127: 06,2051           55023                          TS       DSPTAB                        	#  REPLACE POSITIVELY
+005468,000128: 06,2052           74372                          MASK     LOW11                         	#  REMOVE BITS 12 TO 15
+005469,000129: 06,2053           54073                          TS       DSRUPTEM                      	#
+005470,000130: 06,2054           34364                          CAF      HI5                           	#
+005471,000131: 06,2055           50776                          INDEX    DSPCNT                        	#
+005472,000132: 06,2056           74072                          MASK     RELTAB                        	#  PICK UP BITS 12 TO 15 OF RELTAB ENTRY
+005473,000133: 06,2057           60073                          AD       DSRUPTEM                      	#
+005474,000134: 06,2060           00006                          EXTEND                                 	#
+005475,000135: 06,2061           01010                          WRITE    OUT0                          	#
+005476,000136:
+005477,000137: 06,2062           16706                          TCF      Q+1                           	#  *** NORMAL RETURN SKIPS ONE
+005478,000138:
+005479,000139: 06,2063           10101        DSPOUT            CCS      FLAGWRD5                      	#  DON'T DISPLAY UNLESS DSKY FLAG ON
+005480,000140: 06,2064           34714                          CAF      ZERO                          	#
+005481,000141: 06,2065           12132                          TCF      NODSPOUT                      	#
+005482,000142: 06,2066           11016                          CCS      NOUT                          	#
+005483,000143: 06,2067           02024                          TC       DSPOUTSB                      	#
+005484,000144: 06,2070           12132                          TCF      NODSPOUT                      	#  NO DISPLAY REQUESTS
+005485,000145:
+005486,000146: 06,2071           42173        HANG20            CS       11,14,9                       	#
+005487,000147: 06,2072           27302                          ADS      DSRUPTSW                      	#
+005488,000148:
+005489,000149: 06,2073           37700                          CAF      20MRUPT                       	#
+005490,000150:
+005491,000151: 06,2074           54027        SETTIME4          TS       TIME4                         	#
+005492,000152:
+005493,000153:                                                                                         	#  Page 134
+005494,000154:                                                                                         	#  THE STATUS OF THE PROCEED PUSHBUTTON IS MONITORED EVERY 120 MILLISECONDS VIA THE CHANNEL 32 BIT 14 INBIT.
+005495,000155:                                                                                         	#  THE STATE OF THIS INBIT IS COMPARED WITH ITS STATE DURING THE PREVIOUS T4RUPT AND IS PROCESSED AS FOLLOWS.
+005496,000156:                                                                                         	# 	IF PREV ON AND NOW ON	-- BYPASS.
+005497,000157:                                                                                         	# 	IF PREV ON AND NOW OFF	-- UPDATE IMODES33.
+005498,000158:                                                                                         	# 	IF PREV OFF AND NOW ON	-- UPDATE IMODES33 AND PROCESS VIA PINBALL.
+005499,000159:                                                                                         	# 	IF PREV OFF AND NOW OFF	-- BYPASS.
+005500,000160:                                                                                         	#  THE LOGIC EMPLOYED REQUIRES ONLY 9 MCT (APPROX. 108 MICROSECONDS) OF COMPUTER TIME WHEN NO CHANGES OCCUR.
+005501,000161:
+005502,000162: 06,2075           31321        PROCEEDE          CA       IMODES33                      	#  MONITOR FOR PROCEED BUTTON
+005503,000163: 06,2076           00006                          EXTEND                                 	#
+005504,000164: 06,2077           06032                          RXOR     CHAN32                        	#
+005505,000165: 06,2100           74675                          MASK     BIT14                         	#
+005506,000166: 06,2101           00006                          EXTEND                                 	#
+005507,000167: 06,2102           12116                          BZF      T4JUMP                        	#  NO CHANGE
+005508,000168:
+005509,000169: 06,2103           23321                          LXCH     IMODES33                      	#
+005510,000170: 06,2104           00006                          EXTEND                                 	#
+005511,000171: 06,2105           06001                          RXOR     LCHAN                         	#
+005512,000172: 06,2106           55321                          TS       IMODES33                      	#  UPDATE IMODES33
+005513,000173: 06,2107           74675                          MASK     BIT14                         	#
+005514,000174: 06,2110           10000                          CCS      A                             	#
+005515,000175: 06,2111           12116                          TCF      T4JUMP                        	#  WAS ON -- NOW OFF
+005516,000176:
+005517,000177: 06,2112           34371                          CAF      CHRPRIO                       	#  WAS OFF -- NOW ON
+005518,000178: 06,2113           05027                          TC       NOVAC                         	#
+005519,000179: 06,2114     0777                                 EBANK=   DSPCOUNT                      	#
+005520,000180: 06,2114           03353 60101                    2CADR    PROCKEY                       	#
+005521,000181:
+005522,000182:                                                                                         	#  Page 135
+005523,000183:                                                                                         	#  JUMP TO APPROPRIATE ONCE-PER SECOND (0.96 SEC ACTUALLY) ACTIVITY
+005524,000184:
+005525,000185: 06,2116           50070        T4JUMP            INDEX    RUPTREG1                      	#
+005526,000186: 06,2117           12120                          TCF      +1                            	#
+005527,000187:
+005528,000188: 06,2120           12130                          TCF      OPTTEST                       	#
+005529,000189: 06,2121           12765                          TCF      OPTMON                        	#
+005530,000190: 06,2122           12174                          TCF      IMUMON                        	#
+005531,000191: 06,2123           15222                          TCF      RESUME                        	#
+005532,000192: 06,2124           12130                          TCF      OPTTEST                       	#
+005533,000193: 06,2125           12765                          TCF      OPTMON                        	#
+005534,000194: 06,2126           12174                          TCF      IMUMON                        	#
+005535,000195: 06,2127           15222                          TCF      RESUME                        	#
+005536,000196:
+005537,000197: 06,2130           04633        OPTTEST           TC       IBNKCALL                      	#
+005538,000198: 06,2131           20000                          CADR     OPTDRIVE                      	#
+005539,000199:
+005540,000200: 06,2132     7700               20MRUPT           =        OCT37776                      	#  (DEC 16382)
+005541,000201:
+005542,000202: 06,2132           00006        NODSPOUT          EXTEND                                 	#
+005543,000203: 06,2133           01010                          WRITE    OUT0                          	#
+005544,000204:
+005545,000205: 06,2134           32041                          CAF      120MRUPT                      	# SET FOR NEXT CCRIVE
+005546,000206: 06,2135           12074                          TCF      SETTIME4                      	#
+005547,000207:
+005548,000208: 06,2136           34675        QUIKDSP           CAF      BIT14                         	#
+005549,000209: 06,2137           71302                          MASK     DSRUPTSW                      	#
+005550,000210: 06,2140           00006                          EXTEND                                 	#
+005551,000211: 06,2141           12167                          BZF      QUIKOFF                       	#  WROTE LAST TIME, NOW TURN OFF RELAYS
+005552,000212:
+005553,000213: 06,2142           11016                          CCS      NOUT                          	#
+005554,000214: 06,2143           02024                          TC       DSPOUTSB                      	#
+005555,000215: 06,2144           12154                          TCF      NODSPY                        	#  NOUT=0 OR BAD RETURN FROM DSPOUTSB
+005556,000216: 06,2145           44675                          CS       BIT14                         	#  GOOD RETURN (WE DISPLAYED SOMETHING)
+005557,000217: 06,2146           27302        QUIKRUPT          ADS      DSRUPTSW                      	#
+005558,000218:
+005559,000219: 06,2147           37700                          CAF      20MRUPT                       	#
+005560,000220: 06,2150           54027                          TS       TIME4                         	#
+005561,000221:
+005562,000222: 06,2151           34702                          CAF      BIT9                          	#
+005563,000223: 06,2152           27302                          ADS      DSRUPTSW                      	#
+005564,000224:
+005565,000225: 06,2153           05222                          TC       RESUME                        	#
+005566,000226:
+005567,000227: 06,2154           00006        NODSPY            EXTEND                                 	#
+005568,000228: 06,2155           01010                          WRITE    OUT0                          	#
+005569,000229:
+005570,000230: 06,2156           37700        SYNCT4            CAF      20MRUPT                       	#
+005571,000231: 06,2157           26027                          ADS      TIME4                         	#
+005572,000232:
+005573,000233: 06,2160           34702                          CAF      BIT9                          	#
+005574,000234:                                                                                         	#  Page 136
+005575,000235: 06,2161           27302                          ADS      DSRUPTSW                      	#
+005576,000236: 06,2162           11302                          CCS      DSRUPTSW                      	#
+005577,000237: 06,2163           05222                          TC       RESUME                        	#
+005578,000238: 06,2164           37737        OCT37737          OCT      37737                         	#
+005579,000239: 06,2165           02156                          TC       SYNCT4                        	#
+005580,000240: 06,2166           05222                          TC       RESUME                        	#
+005581,000241:
+005582,000242: 06,2167           00006        QUIKOFF           EXTEND                                 	#
+005583,000243: 06,2170           01010                          WRITE    OUT0                          	#
+005584,000244: 06,2171           34675                          CAF      BIT14                         	#  RESET DSRUPTSW TO SEND DISPLAY NEXT PASS
+005585,000245: 06,2172           12146                          TCF      QUIKRUPT                      	#
+005586,000246:
+005587,000247: 06,2173           22400        11,14,9           OCT      22400                         	#
+005588,000248:
+005589,000249:                                                                                         	#  Page 137
+005590,000250:                                                                                         	#  PROGRAM NAME:  IMUMON
+005591,000251:
+005592,000252:                                                                                         	#  FUNCTIONAL DESCRIPTION:  THIS PROGRAM IS ENTERED EVERY 480 MS.  IT DETECTS CHANGES OF THE IMU STATUS BITS IN
+005593,000253:                                                                                         	#  CHANNEL 30 AND CALLS THE APPROPRIATE SUBROUTINES.  THE BITS PROCESSED AND THEIR RELEVANT SUROUTINES ARE:
+005594,000254:
+005595,000255:                                                                                         	# 	FUNCTION		BIT	SUBROUTINE CALLED
+005596,000256:                                                                                         	# 	--------		---	-----------------
+005597,000257:                                                                                         	# 	TEMP IN LIMITS		 15	TLIM
+005598,000258:                                                                                         	# 	ISS TURN-ON REQUEST	 14	ITURNON
+005599,000259:                                                                                         	# 	IMU FAIL		 13	IMUFAIL (SETISSW)
+005600,000260:                                                                                         	# 	IMU CDU FAIL		 12	ICDUFAIL (SETISSW)
+005601,000261:                                                                                         	# 	IMU CAGE		 11	IMUCAGE
+005602,000262:                                                                                         	# 	IMU OPERATE		  9	IMUOP
+005603,000263:
+005604,000264:                                                                                         	#  THE LAST SAMPLED STATE OF THESE BITS IS LEFT IN IMODES30.  ALSO, EACH SUBROUTINE CALLED FINDS THE NEW
+005605,000265:                                                                                         	#  VALUE OF THE BIT IN A, WITH Q SET TO THE PROPER RETURN LOCATION NXTIFAIL.
+005606,000266:
+005607,000267:                                                                                         	#  CALLING SEQUENCE:  T4RUPT EVERY 480 MILLISECONDS.
+005608,000268:
+005609,000269:                                                                                         	#  JOBS OR TASKS INITIATED:  NONE.
+005610,000270:
+005611,000271:                                                                                         	#  SUBROUTINES CALLED:  TLIM, TURNON, SETISSW, IMUCAGE, IMUOP.
+005612,000272:
+005613,000273:                                                                                         	#  ERASABELE INITIALIZATION:
+005614,000274:                                                                                         	# 	FRESH START OR RESTART WITH NO GROUPS ACTIVE:  C((MODES30) = OCT 37411).
+005615,000275:                                                                                         	# 	RESTART WITH ACTIVE GROUPS:	C(IMODES30) = (B(IMODES30)AND(OCT 00035)) PLUS OCT 37400.
+005616,000276:                                                                                         	# 					THIS LEAVES IMU FAIL BITS INTACT.
+005617,000277:
+005618,000278:                                                                                         	#  ALARMS:  NONE.
+005619,000279:
+005620,000280:                                                                                         	#  EXIT:  TNONTEST.
+005621,000281:
+005622,000282:                                                                                         	#  OUTPUT:  UPDATED IMODES30 WITH CHANGES PROCESSED BY APPROPRIATE SUBROUTINE.
+005623,000283:
+005624,000284: 06,2174           31320        IMUMON            CA       IMODES30                      	#  SEE IF THERE HAS BEEN A CHANGE IN THE
+005625,000285: 06,2175           00006                          EXTEND                                 	#  RELEVANT BITS OF CHAN 30.
+005626,000286: 06,2176           06030                          RXOR     CHAN30                        	#  CHECK IF BITS 9,11-15 CHANGED
+005627,000287: 06,2177           72743                          MASK     30RDMSK                       	#
+005628,000288: 06,2200           00006                          EXTEND                                 	#
+005629,000289: 06,2201           12231                          BZF      TNONTEST                      	#  NO CHANGE IN STATUS
+005630,000290:
+005631,000291: 06,2202           54070                          TS       RUPTREG1                      	#  SAVE BITS WHICH HAVE CHANGED.
+005632,000292: 06,2203           23320                          LXCH     IMODES30                      	#  UPDATE IMODES30.
+005633,000293: 06,2204           00006                          EXTEND                                 	#
+005634,000294: 06,2205           06001                          RXOR     LCHAN                         	#
+005635,000295: 06,2206           55320                          TS       IMODES30                      	#
+005636,000296:
+005637,000297: 06,2207           44712                          CS       ONE                           	#
+005638,000298: 06,2210           56070                          XCH      RUPTREG1                      	#
+005639,000299: 06,2211           00006                          EXTEND                                 	#
+005640,000300:                                                                                         	#  Page 138
+005641,000301: 06,2212           62507                          BZMF     TLIM                          	#  CHANGE IN IMU TEMP.
+005642,000302: 06,2213           12215                          TCF      NXTIFBIT                      	#  BEGIN BIT SCAN.
+005643,000303:
+005644,000304: 06,2214           64712                 -1       AD       ONE                           	#  (RE-ENTERS HERE FROM NXTIFAIL.)
+005645,000305: 06,2215           24070        NXTIFBIT          INCR     RUPTREG1                      	#  ADVANCE BIT POSITION NUMBER.
+005646,000306: 06,2216           60000                 +1       DOUBLE                                 	#
+005647,000307: 06,2217           54000                          TS       A                             	#  SKIP IF OVERFLOW.
+005648,000308: 06,2220           12215                          TCF      NXTIFBIT                      	#  LOOK FOR BIT.
+005649,000309:
+005650,000310: 06,2221           56071                          XCH      RUPTREG2                      	#  SAVE OVERFLOW-CORRECTED DATA.
+005651,000311: 06,2222           50070                          INDEX    RUPTREG1                      	#  SELECT NEW VALUE OF THIS BIT.
+005652,000312: 06,2223           34675                          CAF      BIT14                         	#
+005653,000313: 06,2224           71320                          MASK     IMODES30                      	#
+005654,000314: 06,2225           50070                          INDEX    RUPTREG1                      	#
+005655,000315: 06,2226           02737                          TC       IFAILJMP                      	#
+005656,000316:
+005657,000317: 06,2227           10071        NXTIFAIL          CCS      RUPTREG2                      	#  PROCESS ANY ADDITIONAL CHANGES.
+005658,000318: 06,2230           12214                          TCF      NXTIFBIT   -1                 	#
+005659,000319:
+(End of include-file RT8_OP_CODES.s, resuming MAIN.s)
+064124,000177:
+064125,000178:
+064126,000179:                                                                                         	#  pp. 1506-1746: YUL-generated tables.
+064127,000180:
+064128,000181:
+064129,000182:
+064130,000183:
+064131,000184:
+
+
+Usage Table for Fixed-Memory Banks
+----------------------------------
+Bank 00:  1770/2OOO words used.
+Bank 01:  1770/2OOO words used.
+Bank 02:  1660/2OOO words used.
+Bank 03:  1752/2OOO words used.
+Bank 04:  1650/2OOO words used.
+Bank 05:  1617/2OOO words used.
+Bank 06:  1651/2OOO words used.
+Bank 07:  1717/2OOO words used.
+Bank 10:  1702/2OOO words used.
+Bank 11:  1721/2OOO words used.
+Bank 12:  1735/2OOO words used.
+Bank 13:  1771/2OOO words used.
+Bank 14:  1744/2OOO words used.
+Bank 15:  1774/2OOO words used.
+Bank 16:  1741/2OOO words used.
+Bank 17:  1764/2OOO words used.
+Bank 20:  1713/2OOO words used.
+Bank 21:  1751/2OOO words used.
+Bank 22:  1772/2OOO words used.
+Bank 23:  1725/2OOO words used.
+Bank 24:  1703/2OOO words used.
+Bank 25:  1766/2OOO words used.
+Bank 26:  1774/2OOO words used.
+Bank 27:  1754/2OOO words used.
+Bank 30:  1776/2OOO words used.
+Bank 31:  1766/2OOO words used.
+Bank 32:  1755/2OOO words used.
+Bank 33:  1772/2OOO words used.
+Bank 34:  1775/2OOO words used.
+Bank 35:  1773/2OOO words used.
+Bank 36:  1766/2OOO words used.
+Bank 37:  1760/2OOO words used.
+Bank 40:  1737/2OOO words used.
+Bank 41:  1715/2OOO words used.
+Bank 42:  1705/2OOO words used.
+Bank 43:  1762/2OOO words used.
+
+
+Symbol Table
+------------
+     1:   $17             0017  		     2:   $3              0003  		     3:   $4              0004  		     4:   $5              0005
+     5:   $6              0006  		     6:   $7              0007  		     7:   (?)          26,2340  		     8:   *NBSM*       23,3601
+     9:   *SMNB*       23,3577  		    10:   +2ACTDEG     20,2145  		    11:   +DECSGN      40,2204  		    12:   +DOWN        00,2610
+    13:   +LIMIT       42,3252  		    14:   +MGA         E7,1625  		    15:   +ON          40,2314  		    16:   +ROLL1          4715
+    17:   +ROLL2          4732  		    18:   +TORQUE      16,3652  		    19:   -1/12        13,3757  		    20:   -1/2+2       00,2444
+    21:   -1/8            7710  		    22:   -1/KB2       26,3211  		    23:   -15DEGS      06,2506  		    24:   -1CHK        43,3271
+    25:   -2SEC        10,3677  		    26:   -4ACTDEG     20,2144  		    27:   -50SC        04,3515  		    28:   -6.05DEG     26,3011
+    29:   -70DEGS      06,2505  		    30:   -AYO         E3,1713  		    31:   -BIT10       06,2763  		    32:   -BIT14          7705
+    33:   -CCSPR       01,3153  		    34:   -CDUT+1      20,3710  		    35:   -COMMAX      07,3544  		    36:   -COMMAX-     07,3545
+    37:   -COSB        E5,1673  		    38:   -DELAIG      E6,1676  		    39:   -DELAMG      E6,1677  		    40:   -DELAOG      E6,1675
+    41:   -ELR         05,3166  		    42:   -ENDERAS        7712  		    43:   -ENDVAC         6220  		    44:   -ERTHRAT     34,2277
+    45:   -FOURDT      17,2002  		    46:   -GYROMIN     07,3322  		    47:   -HSCALED     26,3313  		    48:   -KSCALE      26,3315
+    49:   -KVSCALE     37,3671  		    50:   -MAXADRS        4364  		    51:   -MAXDELV     37,3135  		    52:   -MUDT(E)     37,3355
+    53:   -MUDT(M)     37,3357  		    54:   -OCT10          6171  		    55:   -ON          40,2334  		    56:   -PHASE1         0752
+    57:   -PHASE2         0754  		    58:   -PHASE3         0756  		    59:   -PHASE4         0760  		    60:   -PHASE5         0762
+    61:   -PHASE6         0764  		    62:   -ROLL1          4377  		    63:   -ROLL2       16,3740  		    64:   -SLOPE       16,3730
+    65:   -T-3         15,3765  		    66:   -TORQUE      16,3673  		    67:   -TPER        E4,1745  		    68:   -UP          00,2620
+    69:   -VM/360K     15,3772  		    70:   -VMT/180     15,3772  		    71:   -VREL        E7,1525  		    72:   -VT/180      E6,1613
+
+Unresolved symbols:  0
+Fatal errors:  0
+Warnings:  0
+Removing the duplicated lines...
+
+Bugger word 50032 at 02,01662.
+Bugger word 60757 at 03,01754.
+Bugger word 63734 at 00,01772.
+Bugger word 74057 at 01,01772.
+Bugger word 77375 at 04,01652.
+Bugger word 43705 at 05,01621.
+</pre></span></body></html>

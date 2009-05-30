@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+<title>AGC/AEA Assembly Listing</title></head>
+<link href="./prettify.css" type="text/css" rel="stylesheet" />
+<script src="./prettify.js" type="text/javascript" onerror="alert('Error: failed to load ' + this.src)"></script>
+<script src="./lang-apollo.js" type="text/javascript" onerror="alert('Error: failed to load ' + this.src)"></script>
+</head>
+<body  onload="prettyPrint()">
+<span style="font-family: monospace;">
+<pre class="prettyprint lang-apollo">
+AGS cross-assembler yaLEMAP, May  4 2009, 17:47:33
+Copyright 2005 Ronald S. Burkey.
+Licensed under the General Public License (GPL).
+0001:                             	# COPYRIGHT:	PUBLIC DOMAIN.
+0002:                             	# FILENAME:	FP8.S
+0003:                             	# PURPOSE:	THIS IS THE APOLLO LUNAR MODULE'S FIRMWARE FOR THE
+0004:                             	# 		ABORT GUIDANCE SYSTEM (AGS).  THIS IS FLIGHT PROGRAM 8.
+0005:                             	# ASSEMBLER:	YALEMAP
+0006:                             	# CONTACT:	RON BURKEY <INFO@SANDROID.ORG>.
+0007:                             	# WEBSITE:	WWW.IBIBLIO.ORG/APOLLO/YAAGS.HTML
+0010:                             	# REFERENCE:	HTTP://WWW.IBIBLIO.ORG/APOLLO/PULTORAK_FILES/FP8LISTING.PDF.
+0011:                             	# MOD HISTORY:	2005-01-15 RSB	BEGAN.
+0012:                             	# 		2005-01-17 RSB	DATA ENTRY COMPLETE, BUT NOT DEBUGGED.
+0013:                             	# 		2005-01-18 RSB	AS OF YESTERDAY, THIS ASSEMBLED WITH
+0014:                             	# 				86 FATAL ERRORS.  THESE HAVE ALL BEEN
+0015:                             	# 				REPAIRED.  LOTS OF OTHER STUFF FIXED TOO.
+0016:                             	# 				I KNOW KNOW THAT THE ADDRESSES AND
+0017:                             	# 				OPCODES AT THE ENDS OF EACH PAGE ARE
+0020:                             	# 				CORRECT.  HOWEVER, THE CHECKSUMS ARE
+0021:                             	# 				STILL WRONG, SO THE NEXT STEP IS TO
+0022:                             	# 				PROCEED WITH A BINARY COMPARISON.
+0023:                             	# 		2005-01-18 RSB	FULLY DEBUGGED AND READY TO GO.
+0024:                             	# 				IT HAS BEEN COMPLETELY PROOFED AGAINST
+0025:                             	# 				THE BINARY IN THE SCANNED ASSEMBLY
+0026:                             	# 				LISTING, AND THE CHECKSUMS ARE CORRECT.
+0027:                             	# 				(OF COURSE, IT COULD ALWAYS USE MORE
+0030:                             	# 				PROOFING IF SOMEBODY WANTED TO DO IT.
+0031:                             	# 				PARTICULARLY THE PROGRAM COMMENTS.)
+0032:                             	# 		2005-05-14 RSB	CORRECTED WEBSITE REFERENCE ABOVE.
+0033:                             	# 		2005-06-12 RSB	FIXED COMMENTS ON P. 117.
+0034:
+0053:                             	# PAGE 1
+0054:                             	# FLIGHT PROGRAM 8 -- LM AGS FP8 S03 4039 -- 12/18/70
+0055:                             	#     LM ABORT ELECTRONICS ASSEMBLY
+0056:
+0057:                             	# 		SCRATCH PAD STORAGE
+0060: 0000                        	      	ORG     0000
+0061: 0000           000000       	TS0   	DEC     0
+0062: 0001           000000       	TS1   	DEC     0
+0063: 0002           000000       	TS2   	DEC     0
+0064: 0003           000000       	TS3   	DEC     0
+0065: 0004           000000       	TS4   	DEC     0
+0066: 0005           000000       	TS5   	DEC     0
+0067: 0006           000000       	TS6   	DEC     0
+0070: 0007           000000       	TS7   	DEC     0
+0071: 0010           000000       	TS10  	DEC     0
+0072: 0011           000000       	TS11  	DEC     0
+0073: 0012           000000       	TS12  	DEC     0
+0074: 0013           000000       	TS13  	DEC     0
+0075: 0014           000000       	TS14  	DEC     0
+0076: 0015           000000       	TS15  	DEC     0
+0077: 0016           000000       	TS16  	DEC     0
+0100: 0017           000000       	TS17  	DEC     0
+0101: 0020           000000       	SREX3 	DEC     0
+0102: 0021           000000       	SREX2 	DEC     0
+0103: 0022           000000       	SREX1 	DEC     0
+0104: 0023           000000       	SREX  	DEC     0
+0105: 0024           000000       	TVARBR	DEC     0               # TEMP STORE FOR CK SUM.
+0106: 0025 40 0 6246              	      	TRA     RETURN          # SERV ROUT, STARTUP
+0107:
+0110:                             	# 		TAPE LOAD STARTUP CHECKSUM
+0111:
+0112: 0026 66 0 6402              	SF    	OUT     6402            # DEDA INPUT SCALE FACTOR
+0113: 0027 64 0 2040              	OCTF  	INP     2040            # DEDA OCTAL INPUT
+0114:
+0115:                             	# 		THE NEXT 16 LOCATIONS ARE SHARED
+0116:                             	# 		WITH A RR FILTER TEMPORARY MATRIX
+0117:
+0120: 0030 56 0 0001              	U2X   	ALS     1               # B1	UNIT RADIAL VECTOR TO
+0121: 0031 46 0 0033              	U2Y   	TMI     *+2             # B1	TRIAL RENDEZ PT.
+0122: 0032 40 0 0027              	U2Z   	TRA     *-3             # B1
+0123:
+0124:                             	# PAGE 2
+0125:                         0030	D11   	EQU     U2X             # 	RADAR TEMP. MATRIX (16 LOC)
+0126:                         0030	VFX   	EQU     U2X             # 	BRAKING VEL VECTOR AT 13.
+0127: 0033 70 0 0034              	C2    	DLY     *+1             # B1	RENDEZ ANGLE SINE
+0130: 0034 66 0 7012              	V1X   	OUT     7012            # B1	HORIZ UNIT VECTOR
+0131: 0035 64 0 6200              	V1Y   	INP     6200
+0132: 0036 30 0 0137              	V1Z   	CLZ     SUM
+0133: 0037 20 0 0066              	DLSC  	CLA     V2Z             # 	DOWNLINK SHIFT COUNTER
+0134: 0040 10 0 0024              	W1X   	STO     TVARBR          # B1	U1 X V1
+0135:                         0040	D31   	EQU     W1X
+0136: 0041 30 0 0153              	W1Y   	CLZ     WRDCNT
+0137: 0042 72 0 0024              	W1Z   	TSQ     TVARBR
+0140: 0043 32 0 0137              	SI    	ADZ     SUM             # B0 	E(SIN(E0))
+0141: 0044 10 0 0137              	RD2DOT	STO     SUM             # B7	DESIRED RADIAL ACCEL
+0142: 0045 20 0 0024              	YD2DOT	CLA     TVARBR          # B7	DESIRED OUT-OF-PLANE ACCEL
+0143: 0046 24 0 4046              	TSEX  	SUB     CLAFR           # 	EXIT FROM NORTON
+0144: 0047 46 0 0060              	SIDELL	TMI     U1X             # B1	SIN DELTA L
+0145: 0050 30 0 0137              	V6X   	CLZ     SUM             # B13	TEMP STORAGE FOR TPI QUANT
+0146: 0051 46 0 0054              	V6Y   	TMI     *+3
+0147: 0052 24 0 4006              	V6Z   	SUB     1B17
+0150:                         0050	DQSX  	EQU     V6X             # 	ACCUM VEL IN XDV
+0151: 0053 46 0 1101              	CODELL	TMI     EXIT40          # B1	COS DELTA L
+0152: 0054 20 0 7512              	WCX   	CLA     10B4            # B1	UNIT VECTOR NORMAL
+0153: 0055 10 0 0412              	WCY   	STO     S12             # 	TO CSM ORBIT
+0154: 0056 66 0 6410              	WCZ   	OUT     6410
+0155: 0057 40 0 1052              	TMPBR 	TRA     SINITC          # 	TEMP BRANCH STORE
+0156: 0060 30 0 0153              	U1X   	CLZ     WRDCNT          # B1	LEM UNIT RAD VECTGOR
+0157: 0061 22 0 4006              	U1Y   	ADD     1B17
+0160: 0062 10 0 0153              	U1Z   	STO     WRDCNT
+0161: 0063 24 0 4014              	BRANCH	SUB     1B11            # 	GUIDANCE BRANCH
+0162: 0064 46 0 0042              	V2X   	TMI     W1Z             # B1	HORZ UNIT VECTOR AT
+0163: 0065 70 0 0041              	V2Y   	DLY     W1Y             # 	RENDEZ POINT
+0164: 0066 20 0 0206              	V2Z   	CLA     0206
+0165:                         0064	VGX   	EQU     V2X             # 	VEL TO GAIN VECTOR AT L3
+0166:
+0167:                             	# 	END OF TAPE LOAD CHECKSUM PROGRAM
+1243:                             	# PAGE 17
+1244:
+1245: 1000                        	      	ORG     1000
+1246: 1000           000000       	CLADD 	DEC     0               # PICKUP DEDA DATA
+1247: 1001 40 0 7215              	      	TRA     ROR
+1250: 1002 12 0 0023              	RND   	STQ     SREX            # DIRECTION COSINE ROUND
+1251: 1003 22 0 4013              	      	ADD     1B9
+1252: 1004 54 0 0011              	      	LRS     9
+1253: 1005 40 0 0023              	      	TRA     SREX
+1254: 1006 20 0 0324              	TMCLA 	CLA     0324            # CLA FOR TELEM
+1255: 1007 20 0 1005              	TCLTH 	CLA     1005
+1256: 1010 10 0 0237              	DLSTO 	STO     1J1-1
+1257: 1011 40 0 5070              	IC1BR 	TRA     IC1             # IC1 TRA.
+1260: 1012 40 0 1742              	BR1   	TRA     NAV1P
+1261: 1013 40 0 1277              	DEDABR	TRA     DEDAE           # DEDA BRANCH TRA.
+1262: 1014 40 0 3405              	BR50  	TRA     EXEC2           # BRANCH 50 TRA.
+1263:
+1264:                             	# 		HARDWIRE ESCAPE POINTS
+1265:
+1266: 1015 40 0 4073              	EXIT1 	TRA     EX1+1
+1267: 1016 40 0 1236              	EXIT2 	TRA     UBCOMP
+1270: 1017 40 0 1133              	EXIT3 	TRA     ADDMS
+1271: 1020 40 0 4222              	EXIT4 	TRA     EX4+1
+1272: 1021 40 0 7420              	EXIT5 	TRA     PGNSDE
+1273: 1022 40 0 7371              	EXIT6 	TRA     TME
+1274: 1023 40 0 7455              	EXIT7 	TRA     PGNSD1+5
+1275: 1024 40 0 4326              	EXIT8 	TRA     EX8+1
+1276: 1025 40 0 1426              	EXIT9 	TRA     TVTG
+1277: 1026 72 0 1456              	EXIT10	TSQ     SOFT1
+1300: 1027 72 0 1456              	EXIT11	TSQ     SOFT1           # ASCENT ENG ON
+1301: 1030 40 0 4450              	EXIT12	TRA     AHE1
+1302: 1031 40 0 4476              	EXIT13	TRA     EROUT+1
+1303: 1032 72 0 1623              	EXIT14	TSQ     SOFT2
+1304: 1033 40 0 1733              	EXIT15	TRA     LUNAL1          # GAIN CHANGE
+1305: 1034 40 0 4645              	EXIT16	TRA     EX16+1
+1306: 1035 40 0 3560              	EXIT17	TRA     FDAI1
+1307: 1036 40 0 4743              	EXIT18	TRA     NOC
+1310: 1037 40 0 4047              	EXIT19	TRA     DELAY
+1311:
+1312:                             	# PAGE 18
+1313: 1040 40 0 1405              	EXIT20	TRA     DLDC
+1314: 1041 40 0 6254              	EXIT21	TRA     TIMEA
+1315: 1042 40 0 3341              	EXIT22	TRA     IDLE-1
+1316: 1043           377747       	O25C  	OCT     377747          # TEST FOR TM RESET
+1317: 1044 30 0 0404              	EXIT23	CLZ     VD1X
+1320: 1045 30 0 0405              	      	CLZ     VD1Y
+1321: 1046 30 0 0406              	      	CLZ     VD1Z
+1322: 1047 40 0 5217              	      	TRA     NAV3
+1323: 1050 40 0 5205              	EXIT24	TRA     NAV2
+1324: 1051 40 0 5217              	EXIT25	TRA     NAV3
+1325: 1052 20 0 0473              	SINITC	CLA     4K27
+1326: 1053 10 0 0404              	      	STO     VD1X
+1327: 1054 10 0 0470              	      	STO     VDX
+1330: 1055 40 0 6367              	      	TRA     EXEC1+7
+1331: 1056 40 0 1750              	EXIT26	TRA     XDVS
+1332: 1057 40 0 5413              	EXIT27	TRA     EX27+1
+1333: 1060 40 0 5267              	EXIT28	TRA     EX28+1
+1334: 1061 30 0 0612              	STGCTR	CLZ     MU6             # STAGING DELAY COUNTER
+1335: 1062 22 0 4006              	      	ADD     1B17
+1336: 1063 10 0 0612              	      	STO     MU6
+1337: 1064 40 0 4437              	      	TRA     AHE
+1340: 1065 40 0 5305              	EXIT29	TRA     EX29+1
+1341: 1066 20 0 1176              	CLATAB	CLA     SFTAB-1         # CLA FOR DEDA SF TABLE
+1342: 1067 40 0 5332              	EXIT30	TRA     EX30+1
+1343: 1070 40 0 1762              	EXIT31	TRA     ALTUP
+1344: 1071 40 0 2456              	EXIT32	TRA     LMORB2
+1345: 1072 40 0 3612              	EXIT33	TRA     EX33P
+1346: 1073 40 0 1141              	EXIT34	TRA     EX34P
+1347: 1074 40 0 3622              	EXIT35	TRA     EX35
+1350: 1075 72 0 0730              	EXIT36	TSQ     EX36P
+1351: 1076 40 0 3623              	EXIT37	TRA     EX35+1
+1352: 1077 40 0 3063              	EXIT38	TRA     Q5
+1353: 1100 40 0 3411              	EXIT39	TRA     EXECM
+1354: 1101 30 0 0400              	EXIT40	CLZ     S0              # SOFT INITIALIZE
+1355: 1102 30 0 0575              	      	CLZ     DEL5
+1356: 1103 30 0 0572              	      	CLZ     FLAGT
+1357: 1104 50 1 0007              	      	AXT     7,1             # ZERO S SWITCHES
+1360:
+1361:                             	# PAGE 19
+1362: 1105 30 1 0410              	      	CLZ     S10,1
+1363: 1106 42 1 1105              	      	TIX     *-1,1
+1364: 1107 40 0 1052              	      	TRA     SINITC          # CONTINUE INITIALIZE
+1365: 1110 40 0 3356              	EXIT41	TRA     DSP1
+1366: 1111 40 0 3367              	EXIT42	TRA     DSP2CP
+1367: 1112 22 0 1043              	EXIT43	ADD     O25C            # CHECK FOR TM RESET
+1370: 1113 62 0 0000              	      	ABS
+1371: 1114 46 0 1167              	      	TMI     TMIE1           # -- RESET TM AT 25 CYCLE
+1372: 1115 40 0 6364              	      	TRA     EXEC1+4         # NOT 25TH CYCLE
+1373: 1116           077776       	IDAI  	OCT     077776          # AGS INITIALIZE DOWNLIST ID
+1374: 1117           077775       	IDRP  	OCT     077775          # REND./PRETHRUST DOWNLIST ID
+1375: 1120 40 0 6470              	EXIT44	TRA     EX44+1
+1376: 1121 40 0 6505              	EXIT45	TRA     EX45+1
+1377: 1122 40 0 7225              	EXIT46	TRA     EX46+1
+1400: 1123 40 0 1307              	EXIT47	TRA     DEXIT
+1401: 1124 40 0 1312              	EXIT48	TRA     CLEARM+1
+1402: 1125 40 0 1336              	EXIT49	TRA     SFTEST
+1403: 1126 40 0 7343              	EXIT50	TRA     EX50+1
+1404: 1127 72 0 1362              	EXIT51	TSQ     DIAT
+1405: 1130 40 0 6262              	EXIT52	TRA     EXEC+1
+1406: 1131 40 0 6262              	EXIT53	TRA     EXEC+1
+1407: 1132 10 0 0257              	DLWNLC	STO     1J1+15          # DLWNL PROTECTION
+1410: 1133 50 1 0002              	ADDMS 	AXT     2,1
+1411: 1134 20 1 0010              	      	CLA     TS10,1
+1412: 1135 62 0 0000              	      	ABS
+1413: 1136 22 0 4036              	      	ADD     MS
+1414: 1137 42 1 1134              	      	TIX     *-3,1
+1415: 1140 40 0 4143              	      	TRA     EX3+1
+1416: 1141 30 0 0147              	EX34P 	CLZ     DEL10
+1417: 1142 46 0 3631              	      	TMI     EX33PP+1
+1420: 1143 40 0 5615              	      	TRA     EX34+1
+1421: 1144 20 0 0347              	THEF  	CLA     RF
+1422: 1145 54 0 0001              	      	LRS     1               # B24
+1423: 1146 32 0 0003              	      	ADZ     TS3
+1424: 1147 14 0 0004              	      	LDQ     TS4
+1425: 1150 10 0 0004              	      	STO     TS4             # =RF+RX B24
+1426: 1151 12 0 0003              	      	STQ     TS3             # =RZ B24
+1427:
+5641:                             	# PAGE 76
+5642: 4763 50 1 0001              	      	AXT     1,1
+5643: 4764 20 0 4065              	      	CLA     1B2
+5644: 4765 34 1 0144              	      	SUZ     E1,1            # 1-E
+5645: 4766 56 0 0012              	      	ALS     10              # TO -9
+5646: 4767 10 1 0144              	      	STO     E1,1
+5647: 4770 42 1 4764              	      	TIX     *-4,1
+5650: 4771 40 0 1037              	      	TRA     EXIT19
+5651:
+5652:                             	# 	EULER ANGLE DIRECTION COSINES SUBROUTINE
+5653: 4772 12 0 0022              	EADICS	STQ     SREX1
+5654: 4773 20 0 0107              	      	CLA     THEP
+5655: 4774 26 0 4021              	      	MPR     2PIB3           # RADIANS AT 3
+5656: 4775 72 0 6767              	      	TSQ     SICOE
+5657: 4776 30 0 0001              	      	CLZ     TS1
+5660: 4777 10 0 0005              	      	STO     TS5
+5661: 5000 30 0 0000              	12B4  	CLZ     TS0             # VALUE USED AS CONSTANT
+5662: 5001 10 0 0006              	      	STO     TS6
+5663: 5002 20 0 0113              	      	CLA     PSIP
+5664: 5003 26 0 4021              	      	MPR     2PIB3
+5665: 5004 72 0 6767              	      	TSQ     SICOE
+5666: 5005 30 0 0001              	      	CLZ     TS1
+5667: 5006 10 0 0161              	      	STO     A12D            # 1
+5670: 5007 30 0 0000              	      	CLZ     TS0
+5671: 5010 10 0 0007              	      	STO     TS7
+5672: 5011 20 0 0117              	      	CLA     PHIP
+5673: 5012 26 0 4021              	      	MPR     2PIB3
+5674: 5013 72 0 6767              	      	TSQ     SICOE           # INPUTS COMPLETE
+5675: 5014 20 0 0007              	      	CLA     TS7
+5676: 5015 26 0 0006              	      	MPR     TS6
+5677: 5016 56 0 0001              	      	ALS     1
+5700: 5017 10 0 0160              	      	STO     A11D            # 1
+5701: 5020 20 0 0007              	      	CLA     TS7
+5702: 5021 26 0 0005              	      	MPR     TS5
+5703: 5022 56 0 0001              	      	ALS     1
+5704: 5023 60 0 0000              	      	COM
+5705: 5024 10 0 0162              	      	STO     A13D            # 1
+5706: 5025 20 0 0001              	      	CLA     TS1
+5707:
+5710:                             	# PAGE 77
+5711: 5026 26 0 0161              	      	MPR     A12D
+5712: 5027 56 0 0001              	      	ALS     1
+5713: 5030 10 0 0003              	      	STO     TS3
+5714: 5031 26 0 0006              	      	MPR     TS6
+5715: 5032 10 0 0004              	      	STO     TS4
+5716: 5033 20 0 0000              	1B1   	CLA     TS0             # COSINE PHI
+5717: 5034 26 0 0005              	      	MPR     TS5
+5720: 5035 32 0 0004              	      	ADZ     TS4
+5721: 5036 56 0 0001              	      	ALS     1
+5722: 5037 10 0 0164              	      	STO     A31D            # 1
+5723: 5040 30 0 0001              	      	CLZ     TS1
+5724: 5041 36 0 0007              	      	MPZ     TS7
+5725: 5042 56 0 0001              	      	ALS     1
+5726: 5043 60 0 0000              	      	COM
+5727: 5044 10 0 0165              	      	STO     A32D            # 1
+5730: 5045 30 0 0003              	      	CLZ     TS3
+5731: 5046 36 0 0005              	      	MPZ     TS5
+5732: 5047 10 0 0004              	      	STO     TS4
+5733: 5050 30 0 0000              	      	CLZ     TS0
+5734: 5051 36 0 0006              	      	MPZ     TS6
+5735: 5052 34 0 0004              	      	SUZ     TS4
+5736: 5053 56 0 0001              	      	ALS     1
+5737: 5054 10 0 0166              	      	STO     A33D            # DI-COS COMPLETE
+5740: 5055 40 0 0022              	      	TRA     SREX1           # EXIT
+5741:
+5742:                             	# 	IMU ALIGN COMPUTATIONS
+5743: 5056 30 0 0144              	ZNOC  	CLZ     E1
+5744: 5057 30 0 0145              	      	CLZ     E3
+5745: 5060 30 0 0146              	      	CLZ     E13
+5746: 5061 72 0 4772              	IMUDC 	TSQ     EADICS
+5747: 5062 50 1 0006              	      	AXT     6,1
+5750: 5063 20 1 0160              	      	CLA     A11D,1          # REPLACE DIR COSINES
+5751: 5064 10 1 0130              	      	STO     A11,1           # WITH IMU DIR COSINES.
+5752: 5065 30 1 0150              	      	CLZ     DA11,1          # ZERO REMAINDERS
+5753: 5066 42 1 5063              	      	TIX     *-3,1
+5754: 5067 40 0 4273              	      	TRA     COA21-2
+5755:
+5756:
+5757:                             	# PAGE 78
+5760:                             	# 		INITIALIZE BRANCHES.
+5761:
+5762: 5070 30 0 0414              	IC1   	CLZ     S14
+5763: 5071 24 0 4065              	      	SUB     2B3
+5764: 5072 46 0 1040              	      	TMI     EXIT20          # TO DL FORMATTIG
+5765: 5073 50 1 0002              	      	AXT     2,1             # LEM POS AND VEL DATA
+5766: 5074 30 1 0240              	      	CLZ     1J1,1           # LEM POS
+5767: 5075 10 1 0204              	      	STO     R0X,1
+5770: 5076 30 1 0260              	      	CLZ     1J4,1           # LEM VEL
+5771: 5077 10 1 0424              	      	STO     V0X,1
+5772: 5100 42 1 5074              	      	TIX     *-4,1
+5773: 5101 30 0 0254              	      	CLZ     1J7             # EPOCH TIME MS
+5774: 5102 10 0 0521              	      	STO     TL1
+5775: 5103 30 0 0255              	      	CLZ     1J7LS           # EPOCH TIME LS
+5776: 5104 10 0 0525              	      	STO     TL2
+5777: 5105 72 0 6444              	      	TSQ     ORBPM
+6000: 5106 30 0 0543              	      	CLZ     DSPSC           # CLEAR DISPLAY COUNTER
+6001: 5107 72 0 1041              	      	TSQ     EXIT21
+6002:
+6003: 5110 50 1 0001              	IC2   	AXT     1,1
+6004: 5111 72 0 6746              	      	TSQ     DPTSB           # COMPUTE DBL PREC TA - TL
+6005: 5112 20 0 0604              	      	CLA     DEL21
+6006: 5113 46 0 5124              	      	TMI     RVCOMP
+6007: 5114 72 0 6535              	      	TSQ     ELPRD           # TRNSFR TO ELLIPSE PRED
+6010: 5115 50 1 0002              	      	AXT     2,1
+6011: 5116 30 1 0220              	      	CLZ     RIX,1
+6012: 5117 10 1 0340              	      	STO     RX,1
+6013: 5120 30 1 0430              	      	CLZ     VIX,1
+6014: 5121 10 1 0360              	      	STO     VX,1
+6015: 5122 42 1 5116              	      	TIX     *-4,1
+6016: 5123 40 0 5134              	      	TRA     *+9
+6017: 5124 50 1 0002              	RVCOMP	AXT     2,1
+6020: 5125 30 1 0424              	      	CLZ     V0X,1
+6021: 5126 10 1 0360              	      	STO     VX,1
+6022: 5127 06 0 0442              	      	MPY     TI              # 13+13=26
+6023: 5130 52 0 0003              	      	LLS     3
+6024: 5131 32 1 0204              	      	ADZ     R0X,1
+6025:
+6026:                             	# PAGE 79
+6027: 5132 10 1 0340              	      	STO     RX,1            # AT 23
+6030: 5133 42 1 5125              	      	TIX     *-6,1
+6031: 5134 72 0 6261              	      	TSQ     EXEC            # IC3 NEXT
+6032:
+6033: 5135 72 0 5400              	IC3   	TSQ     GRAV            # TO GRAVITY
+6034: 5136 50 1 0002              	      	AXT     2,1
+6035: 5137 30 1 0120              	      	CLZ     DVSX,1
+6036: 5140 30 1 0104              	      	CLZ     DRX,1
+6037: 5141 20 1 0114              	      	CLA     GXDT,1
+6040: 5142 10 1 0110              	      	STO     DIGX,1
+6041: 5143 42 1 5137              	      	TIX     *-4,1
+6042: 5144 40 0 1042              	      	TRA     EXIT22
+6043:
+6044:                             	# 		CSM DL OR DEDA INPUTS TO EPOCH CELLS.
+6045: 5145 50 1 0002              	CSMPV 	AXT     2,1
+6046: 5146 30 1 0244              	      	CLZ     2J1,1           # CSM POS
+6047: 5147 10 1 0200              	      	STO     REX,1
+6050: 5150 30 1 0264              	      	CLZ     2J4,1           # CSM VEL
+6051: 5151 10 1 0420              	      	STO     VEX,1
+6052: 5152 42 1 5146              	      	TIX     *-4,1
+6053: 5153 30 0 0272              	      	CLZ     2J7             # CSM EPOCH MS
+6054: 5154 10 0 0520              	      	STO     TE1
+6055: 5155 30 0 0273              	      	CLZ     2J7LS           # CSM EPOCH LS
+6056: 5156 10 0 0524              	      	STO     TE2
+6057: 5157 30 0 0436              	      	CLZ     TB
+6060: 5160 40 0 6764              	      	TRA     EXIT
+6061:
+6062:                             	# 		NEXT 5 INSTRUCTIONS BYPASSED
+6063:
+6064: 5161 20 0 0604              	NAV   	CLA     DEL21
+6065: 5162 46 0 5175              	      	TMI     NAV1            # -- IS ON LUNAR SURFACE
+6066: 5163 20 0 0464              	      	CLA     0464
+6067: 5164 24 0 0470              	      	SUB     VDX
+6070: 5165 56 0 0006              	      	ALS     6
+6071:
+6072:                             	# 		HARDWIRED NAVIGATION
+6073:
+6074:
+6075:                             	# PAGE 80
+6076: 5166 10 0 0067              	      	STO     AT              # 1/2(VD1-VD) AT 7
+6077: 5167 24 0 0661              	      	SUB     4K35            # ULLAGE THRESHOLD
+6100: 5170 46 0 5203              	      	TMI     NAV2-2          # AT-4K35
+6101: 5171 30 0 0614              	      	CLZ     MU8             # INCR ULLAGE COUNTER.
+6102: 5172 22 0 4006              	      	ADD     1B17
+6103: 5173 10 0 0614              	      	STO     MU8
+6104: 5174 40 0 1050              	      	TRA     EXIT24
+6105: 5175 30 0 0110              	NAV1  	CLZ     DIGX            # LUNAR SURFACE NAV.
+6106: 5176 30 0 0111              	      	CLZ     DIGY
+6107: 5177 30 0 0112              	      	CLZ     DIGZ
+6110: 5200 20 0 0616              	      	CLA     1K9             # ULLAGE COUNT LIMIT
+6111: 5201 10 0 0614              	      	STO     MU8
+6112: 5202 40 0 1044              	      	TRA     EXIT23
+6113: 5203 30 0 0614              	      	CLZ     MU8             # RESET ULLAGE COUNTER.
+6114: 5204 40 0 1050              	      	TRA     EXIT24
+6115: 5205 30 0 0001              	NAV2  	CLZ     TS1             # ACCEL DRIFT TEST.
+6116: 5206 50 1 0002              	      	AXT     2,1
+6117: 5207 20 1 0120              	      	CLA     DVSX,1
+6120: 5210 62 0 0000              	      	ABS
+6121: 5211 32 0 0001              	      	ADZ     TS1
+6122: 5212 10 0 0001              	      	STO     TS1
+6123: 5213 42 1 5207              	      	TIX     *-4,1
+6124: 5214 24 0 0634              	      	SUB     1K35
+6125: 5215 46 0 1051              	      	TMI     EXIT25          # COAST PHASE
+6126: 5216 40 0 1056              	      	TRA     EXIT26
+6127: 5217 30 0 0120              	NAV3  	CLZ     DVSX
+6130: 5220 30 0 0121              	      	CLZ     DVSY
+6131: 5221 30 0 0122              	      	CLZ     DVSZ
+6132: 5222 40 0 1056              	      	TRA     EXIT26
+6133: 5223 50 1 0002              	NAV4  	AXT     2,1             # VEL AND POS UPDATE.
+6134: 5224 30 1 0120              	      	CLZ     DVSX,1          # SENSED VEL AT 7
+6135: 5225 32 1 0110              	      	ADZ     DIGX,1          # PREDICTED INTG GRAVITY.
+6136: 5226 10 1 0110              	      	STO     DIGX,1          # 7
+6137: 5227 22 0 4015              	      	ADD     1B12            # ROUND
+6140: 5230 54 0 0006              	      	LRS     6
+6141: 5231 10 0 0002              	      	STO     TS2             # DV AT 13
+6142: 5232 22 1 0360              	      	ADD     VX,1
+6143:
+11216: 7777                        	      	CHECKSUM RANGE 4000-7776
+11217:                         6200	DLREG 	DEFINE  6200
+11220:                         2020	DISC1I	DEFINE  2020            # DISCRETE INPUT WORD 1
+11221:                         2040	DISC2I	DEFINE  2040            # DISCRETE INPUT WORD 2
+11222:                         2200	DEDA  	DEFINE  2200
+11223:                         2001	SIALO 	DEFINE  2001            # DEFINE OUTPUT REGISTERS
+11224:                         2002	COALO 	DEFINE  2002            # FOR FDAI ANGLES
+11225:                         2004	SIBEO 	DEFINE  2004
+11226:                         2010	COBEO 	DEFINE  2010
+11227:                         2020	SIGAO 	DEFINE  2020
+11230:                         2040	COGAO 	DEFINE  2040
+11231:                         6001	EXO   	DEFINE  6001            # DEFINE THE ATT ERROR
+11232:                         6002	EYO   	DEFINE  6002            # OUTPUT REGISTERS
+11233:                         6004	EZO   	DEFINE  6004
+11234:                         6200	TMIDO 	DEFINE  6200
+11235:                         2600	SHOUT 	DEFINE  2600
+11236:                         2500	SHIN  	DEFINE  2500
+11237: 10000                        	      	END
+
+CHECKSUM at 0206 (0207-1004) = 505072
+CHECKSUM at 3777 (1005-3776) = 023521
+CHECKSUM at 7777 (4000-7776) = 225333
+
+Symbol Table
+------------
+     1: 1000D      0441		     2: 10B17      4041		     3: 10B4       7512		     4: 10J        0226
+     5: 11J        0673		     6: 12B4       5000		     7: 12J        0305		     8: 16J        0232
+     9: 17J        0503		    10: 18J        0316		    11: 1B1        5033		    12: 1B11       4014
+    13: 1B12       4015		    14: 1B13       4016		    15: 1B14       4017		    16: 1B17       4006
+    17: 1B2        4065		    18: 1B3        7701		    19: 1B4        4010		    20: 1B5        4011
+    21: 1B6        4012		    22: 1B9        4013		    23: 1J         0275		    24: 1J1        0240
+    25: 1J2        0241		    26: 1J3        0242		    27: 1J4        0260		    28: 1J5        0261
+    29: 1J6        0262		    30: 1J7        0254		    31: 1J7LS      0255		    32: 1K1        0544
+    33: 1K11       0546		    34: 1K13       0552		    35: 1K14       0537		    36: 1K18       0534
+    37: 1K19       0540		    38: 1K20       0535		    39: 1K21       0541		    40: 1K22       0536
+
+
+No duplicate symbols.
+Successful!
+</PRE></span></body></html>
