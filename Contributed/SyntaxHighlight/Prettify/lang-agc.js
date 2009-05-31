@@ -33,15 +33,13 @@ PR.registerLangHandler(
         [
 	 [PR.PR_KEYWORD, /^(?:ADS|AD|AUG|BZF|BZMF|CAE|CAF|CA|CCS|COM|CS|DAS|DCA|DCOM|DCS|DDOUBL|DIM|DOUBLE|DTCB|DTCF|DV|DXCH|EDRUPT|EXTEND|INCR|INDEX|NDX|INHINT|LXCH|MASK|MSK|MP|MSU|NOOP|OVSK|QXCH|RAND|READ|RELINT|RESUME|RETURN|ROR|RXOR|SQUARE|SU|TCR|TCAA|OVSK|TCF|TC|TS|WAND|WOR|WRITE|XCH|XLQ|XXALQ|ZL|ZQ)\b/,null],
 	 [PR.PR_TYPE, /^(?:1DNADR|2DEC|2BCADR|2CADR|2OCT|2DNADR|3DNADR|4DNADR|5DNADR|6DNADR|ADRES|BBCON|BANK|BLOCK|BNKSUM|CADR|COUNT|COUNT*|DEC|DEC*|DNCHAN|DNPTR|EBANK|ECADR|EQUALS|ERASE|MEMORY|OCT|REMADR|SETLOC|SUBRO)\b/,null],
-         [PR.PR_LITERAL,
-          /^[+\-]?(?:0x[0-9a-f]+|E[0-9]+|\d+\/\d+|(?:\.\d+|\d+(?:\.\d*)?)(?:[ed][+\-]?\d+)?)/i],
          // A single quote possibly followed by a word that optionally ends with
          // = ! or ?.
          [PR.PR_LITERAL,
           /^\'(?:-*(?:\w|\\[\x21-\x7e])(?:[\w-]*|\\[\x21-\x7e])[=!?]?)?/],
-         // A word that optionally ends with = ! or ?.
+         // Any word including labels that optionally ends with = ! or ?.
          [PR.PR_PLAIN,
-          /^-*(?:[a-z_]|\\[\x21-\x7e])(?:[\w-]*|\\[\x21-\x7e])[=!?]?/i],
+          /^-*(?:[!-z_]|\\[\x21-\x7e])(?:[\w-]*|\\[\x21-\x7e])[=!?]?/i],
          // A printable non-space non-special character
          [PR.PR_PUNCTUATION, /^[^\w\t\n\r \xA0()\"\\\';]+/]
         ]),
