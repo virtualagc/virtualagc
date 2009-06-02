@@ -54,7 +54,8 @@
 #		2009-05-23 RSB	Added Comanche055.
 #		2009-06-01 RSB	The wrong value was being passed to the 
 #				CopyApolloSource.sh script's third parameter.
-#				Thanks to Onno Hommes for noticing this.
+#				Thanks to Onno Hommes for noticing this.  Also
+#				added a 4th parameter for Windows vs. non-Windows.
 
 APP=VirtualAGC
 
@@ -189,7 +190,7 @@ temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Content
 	${CP} ../scenarios $@
 	for n in Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 ; \
 	do \
-		sh ./CopyApolloSource.sh $@ $$n ${EXTSW} ;\
+		sh ./CopyApolloSource.sh $@ $$n ${EXTSW} ${WIN32} ;\
 	done
 	${CP} *.png $@
 	${CP} ../yaDSKY/src/*.ini $@
