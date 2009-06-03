@@ -15,6 +15,8 @@ EXT=$3
 WIN=$4
 
 mkdir $DESTDIR
+cp ../Contributed/SyntaxHighlight/Prettify/*.js $DESTDIR
+cp ../Contributed/SyntaxHighlight/Prettify/*.css $DESTDIR
 cp $EXT $SOURCEDIR/*.binsource $SOURCEDIR/*.s $DESTDIR
 sh ./lst2html.sh $SOURCEDIR/$SOURCENAME.lst $DESTDIR/$SOURCENAME.html $WIN
 cp $EXT $SOURCEDIR/$SOURCENAME.bin $DESTDIR
