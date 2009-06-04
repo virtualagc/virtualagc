@@ -1,59 +1,64 @@
 #summary Detailed differences between block 1 and block 2 AGC
 
+http://virtualagc.googlecode.com/svn/trunk/Apollo32.png 
+= Block I versus Block II =
 || This page is very new and doesn't yet contain much useful content. ||
 
 
-<wiki:toc max_depth="1" />
+<wiki:toc max_depth="2" />
 
 
-= Introduction =
+== Introduction ==
 
 The "block 1" AGC used in unmanned Apollo missions, and which would have been used for the Apollo 1 mission, is very similar to the "block 2" AGC used in all of the manned missions.  But it also differs in a number of details that affect programs written for the block 1 computers, as well as the implementation of the assembler and CPU simulator.  The block 1 DSKY is also quite different in physical appearance from the block 2 DSKY.
 
 This wiki page is intended to described all of the differences in adequate detail to guide implementation changes in the Virtual AGC yaYUL, yaAGC, and yaDSKY(2) programs, as well as to provide guidance for a programmer familiar with block 2 systems to write block 1 programs.
 
 
-= Documentation for Consultation =
+== Documentation for Consultation ==
 
   * Block 1 machine language is defined in document [http://www.ibiblio.org/apollo/hrst/archive/1008.pdf R-393], while Block 2 machine language is defined in [http://www.ibiblio.org/apollo/hrst/archive/1689.pdf Memo #9], as supplemented by the [http://www.ibiblio.org/apollo/NARA-SW/E-2052.pdf AGC4 Basic Training Manual].
   * (More later)
 
 
-= Assembly-Language Opcodes Unique to Block 1 or Block 2 =
+== Assembly-Language Opcodes Unique to Block I or Block II ==
 
 (This section needs content.)
 
 
-= Differences in Assembly-Language Opcodes Common to Block 1 and Block 2 =
+== Differences in Assembly-Language Opcodes Common to Block I and Block II ==
 
 (This section needs content.)
 
 
-= Interpreter-Language Differences =
+== Interpreter-Language Differences ==
 
 (I don't know if block 1 has an interpreter language or not, but if so, the differences between it and block 2 interpreter language should be covered here.)
 
 
-= Register Differences =
+== Register Differences ==
 
 (Some registers are at different locations or have slightly different functions in block 1 vs. block 2, and should be described here.)
 
+== I/O Differences ==
 
-= Other Memory-Map Differences =
+(Block I used registers for I/O while Block II used channels;this should be described here.)
+
+== Other Memory-Map Differences ==
 
 (This section should describe things like differences between assumed starting locations of programs, vector interrupt tables, changes in conventions as to where certain code is expected to be located, etc.)
 
  
-= Uplink/Downlink Protocol Differences =
+== Uplink/Downlink Protocol Differences ==
 
 (If any.)
 
 
-= AGC/DSKY Interface Differences =
+== AGC/DSKY Interface Differences ==
 
 (If any.)
 
 
-= DSKY Appearance =
+== DSKY Appearance ==
 
 Please refer instead to the [http://www.ibiblio.org/apollo/yaDSKY.html Virtual AGC website].
