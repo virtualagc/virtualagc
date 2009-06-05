@@ -15,7 +15,9 @@ This wiki page is intended to described all of the differences in adequate detai
 
 == Documentation for Consultation ==
 
-  * Block 1 machine language is defined in document [http://www.ibiblio.org/apollo/hrst/archive/1008.pdf R-393], while Block 2 machine language is defined in [http://www.ibiblio.org/apollo/hrst/archive/1689.pdf Memo #9], as supplemented by the [http://www.ibiblio.org/apollo/NARA-SW/E-2052.pdf AGC4 Basic Training Manual].
+  * Language definition:
+    * Block 1 machine language is defined in document [http://www.ibiblio.org/apollo/hrst/archive/1008.pdf R-393].
+    * Block 2 machine language is defined in [http://www.ibiblio.org/apollo/hrst/archive/1689.pdf Memo #9], as supplemented by the [http://www.ibiblio.org/apollo/NARA-SW/E-2052.pdf AGC4 Basic Training Manual].
   * (More later)
 
 
@@ -36,15 +38,25 @@ This wiki page is intended to described all of the differences in adequate detai
 
 == Register Differences ==
 
-(Some registers are at different locations or have slightly different functions in block 1 vs. block 2, and should be described here.)
+  * Counter registers (according to John Pultorak):
+    * Block 1: begin either at address 30 or 34 octal (with document R-393 being ambiguous about this).
+    * Block 2: begin at address 34 (octal).
+
 
 == I/O Differences ==
 
-(Block I used registers for I/O while Block II used channels;this should be described here.)
+(Block I used registers for I/O while Block II used channels; this should be described here.)
+
 
 == Other Memory-Map Differences ==
 
-(This section should describe things like differences between assumed starting locations of programs, vector interrupt tables, changes in conventions as to where certain code is expected to be located, etc.)
+  * TIME1 and TIME2 variables (according to John Pultorak):
+    * Block 1:  TIME1 is at the lower address.
+    * Block 2:  TIME1 is at the higher address.
+
+  * Program start and interrupt-vector table (according to John Pultorak):
+    * Block 1:  Program start is address 2000 and remainder of interrupt vectors begin at 2004.
+    * Block 2:  Program start (GOPROG) is at address 4000 and the remainder of the interrupt vectors begin at 4004.
 
  
 == Uplink/Downlink Protocol Differences ==
