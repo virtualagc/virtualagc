@@ -42,7 +42,10 @@
 				--g switch, but it doesn't do anything.
 		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
 		                table file.
-		03/17/09 RSB	Make sure there's no .bin file produced on error.	
+		03/17/09 RSB	Make sure there's no .bin file produced on error.
+		06/06/09 RSB	Corrected the address offsets printed in the 
+				bugger word table.  (Was printing addresses like
+				33,1777 rather than 33,3777.)	
 */
 
 #define ORIGINAL_YAYUL_C
@@ -363,7 +366,7 @@ main (int argc, char *argv[])
 	      else
 	        GuessBugger = Add (077777 & ~Bank, 077777 & ~Bugger);
 	      ObjectCode[Bank][Value] = GuessBugger;
-	      printf ("Bugger word %05o at %02o,%05o.\n", GuessBugger, Bank, Value);
+	      printf ("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank, 02000 + Value);
 	    } 
 	  // Output the binary data.  
 	  for (Offset = 0; Offset < 02000; Offset++)

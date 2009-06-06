@@ -11,6 +11,8 @@
 #				from the Luminary131/ file of the same
 #				name, using Luminary099 page images.
 #		2009-06-05 RSB	Corrected 5 misprints.
+#		2009-06-06 RSB	Eliminated an extraneous 3-instruction block
+#				and added a missing instruction.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -209,12 +211,6 @@ DAPATTER	TC	DOWNFLAG
 # V62	VERB 62, DISPLAY TOTAL ATTITUDE ERRORS ON FDAI ATTITUDE ERROR NEEDLES.
 
 TOTATTER	TC	UPFLAG
-		ADRES	NEEDLFLG
-		TC	GOPIN
-		
-# V60	VERB 60, DISPLAY DAP ESTIMATED RATES ON FDAI ATTITUDE ERROR NEEDLES.
-
-RATEDISP	TC	UPFLAG
 		ADRES	NEEDLFLG
 		TC	GOPIN
 		
@@ -639,7 +635,7 @@ R04A		CAF	BIT3		# OPTION CODE FOR V04N12
 		CADR	GOMARKFR	#		00002	LANDING RADAR
 		TCF	R04END		# V34
 		TCF	+5		# V33
-		TCF	R04A +2		# R2
+		TCF	R04A 	+2	# R2
 		CAF	BIT3
 		TC	BLANKET
 		TC	ENDOFJOB
@@ -731,6 +727,7 @@ R04Y		CAF	ZERO		# TO TERMINATE SAMPLING.
 		TS	RTSTLOC
 		CAF	SIX
 		MASK	RTSTDEX
+		CCS	A
 		CS	ONE		# WAS LR
 		AD	TWO		# WAS RR
 # Page 279

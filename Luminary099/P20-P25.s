@@ -9,6 +9,8 @@
 # Pages:	0492-0613
 # Mod history:	2009-05-26 OH	Transcribed from page images.
 #		2009-06-05 RSB	Corrected a misprint.
+#		2009-06-06 RSB	Added a missing instruction, and a block
+#				of 3 missing instructions.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1207,7 +1209,8 @@ R24LEM3		TC	PHASCHNG
 		OCT	04022
 		TC	KILLTASK
 		CADR	CALLDGCH	# KILL WAITLIST FOR NEXT POINT IN PATTERN
-		TC	CLRADMOD	# CLEAR BITS 10 + 15 OF RADMODES
+		TC	CLRADMOD	# CLEAR BITS 10 + 15 OF RADMODES TO KILL
+		RELINT			# HALF SECOND DESIGNATE LOOP
 		CAF	.5SEC
 		TC	BANKCALL	# WAIT FOR DESIGNATE LOOP TO DIE
 		CADR	DELAYJOB
@@ -3010,6 +3013,10 @@ LRSCK		CCS	ITEMP3
 		MASK	SCABBIT
 		ADS	FLGWRD11
 		TCF	+4
+		
+		CS	SCABBIT
+		MASK	FLGWRD11
+		TS	FLGWRD11
 
 		EXTEND
 		DCA	ITEMP3

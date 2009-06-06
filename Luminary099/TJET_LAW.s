@@ -10,6 +10,8 @@
 # Mod history:	2009-05-27 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-06 RSB	Eliminated a stray instruction that had crept
+#				in somehow.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -148,7 +150,6 @@ SCALEDOT	LXCH	EDOT		# EDOT IS SCALED AT PI/32 RADIANS/SECOND.
 ERRTEST		CCS	E		# DOES BIG ERROR (THREE DEG BEYOND THE
 		AD	-3DEG		# DEADBAND) REQUIRE MAXIMUM JETS?
 		TCF	+2
-		TCF	+1
 		AD	-3DEG
 		EXTEND
 		INDEX	ADRSDIF1
