@@ -8,6 +8,9 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	1294-1302
 # Mod history:	2009-05-26 OH	Transcribed from page images.
+#		2009-06-05 RSB	A few lines at the bottom of page image
+#				1294 were truncated.  I've fixed the page
+#				image and added those missing lines here.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -71,6 +74,11 @@ SETUPDSP	INHINT
 		DXCH	Z		# RETURN
 
 DSPMMJOB	EQUALS	DSPMMJB
+
+		BLOCK	02
+		SETLOC	FFTAG1
+		BANK
+		
 # Page 1295
 # PHASCHNG IS THE MAIN WAY OF MAKING PHASE CHANGES FOR RESTARTS.  THERE ARE THREE FORMS OF PHASCHNG, KNOWN AS TYPE
 # A, TYPE B, AND TYPE C.  THEY ARE ALL CALLED AS FOLLOWS, WHERE OCT XXXXX CONTAINS THE PHASE INFORMATION,

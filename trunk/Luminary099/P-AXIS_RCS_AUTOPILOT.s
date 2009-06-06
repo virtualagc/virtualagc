@@ -10,6 +10,8 @@
 # Mod history:	2009-05-27 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-05 RSB	Corrected a relative jump from
+#				+8 to +8D.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -743,7 +745,7 @@ RATERROR	CA	CDUX		# FINDCDUW REQUIRES THAT CDUXD=CDUX DURING
 		TS	EDOTP
 		CCS	DAPTEMP1	# IF P COMMAND CHANGE EXCEEDS BREAKOUT
 		TCF	+3		# LEVEL, GO TO DIRECT RATE CONTROL.  IF NOT
-		TCF	+8		# CHECK FOR DIRECT RATE CONTROL LAST TIME.
+		TCF	+8D		# CHECK FOR DIRECT RATE CONTROL LAST TIME.
 		TCF	+1
 # Page 1435		
 		AD	-RATEDB

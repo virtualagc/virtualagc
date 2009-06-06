@@ -8,6 +8,8 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	0090-0152
 # Mod history:	2009-05-16 OH	Transcribed from page images.
+#		2009-06-05 RSB	Eliminated a variable that shouldn't have
+#				survived from Luminary 131.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -690,11 +692,6 @@ ZERLINA		EQUALS	DTHETASM	# B(1)	P64
 ELVIRA		EQUALS	ZERLINA +1	# B(1)	P64
 AZINCR1		EQUALS	ELVIRA  +1	# B(1)	P64
 ELINCR1		EQUALS	AZINCR1 +1	# B(1)	P64
-
-
-# RADARREAD STORAGE				(2D)
-
-TTOTIG		ERASE	+1		# B(2) LATEST ESTIMATE OF TIME TO IGNITION.
 
 # RCS FAILURE MONITOR STORAGE		(1)
 

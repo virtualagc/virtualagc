@@ -10,6 +10,8 @@
 # Mod history:	2009-05-17 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-05 RSB	Removed 4 lines of code that shouldn't
+#				have survived from Luminary 131.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -83,10 +85,6 @@ PARAM30		CAF	V06N42		# DISPLAY APOGEE,PERIGEE,DELTA V
 		SETGO
 			XDELVFLG	# FOR P40'S: EXTERNAL DELTA-V GUIDANCE.
 			REVN1645	# TRKMKCNT, T60, +MGA  DISPLAY
-REVN1645	CALL
-			VN1645
-		GOTO			# COMES HERE ON RECYCLE RESPONSE
-			REVN1645
 			
 V06N33		VN	0633
 V06N42		VN	0642

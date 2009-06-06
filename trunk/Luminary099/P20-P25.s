@@ -8,6 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	0492-0613
 # Mod history:	2009-05-26 OH	Transcribed from page images.
+#		2009-06-05 RSB	Corrected a misprint.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -958,7 +959,7 @@ R21LEM7		TS	REPOSCNT
 		DLOAD	GOTO
 			REPOSTM
 			R21LEM12 +2
-R21LEM8		DLOAD
+R21LEMB		DLOAD
 			REPOSTM
 		STCALL	TDEC1
 			UPPSV

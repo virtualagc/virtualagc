@@ -10,6 +10,7 @@
 # Mod history:	2009-05-19 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-05 RSB	Corrected a misprint.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1676,7 +1677,7 @@ R36		ZL
 		EXTEND
 		BZF	LREGCHK		# A-REG ZERO GOTO CHECK L-REG FOR ZERO
 ASTROTIM	DXCH	MPAC		# A-REG NON-ZERO, TIME = ASTRO INPUT TIME
-		TC	INTEPRET
+		TC	INTPRET
 		RTB
 			DPMODE
 R36INT		STCALL	TDEC1

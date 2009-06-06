@@ -9,6 +9,7 @@
 # Pages:	651-653
 # Mod history:	2009-05-18 RSB	Transcribed from Luminary 099
 #				page images.
+#		2009-06-05 RSB	Corrected 4 misprints.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -101,7 +102,7 @@
 		COUNT*	$$/P31
 P31		TC	P20FLGON
 		CAF	V06N33		# T16
-		TC	VNPOOH
+		TC	VNP00H
 		TC	INTPRET
 		CLEAR	DLOAD
 			UPDATFLG
@@ -136,7 +137,7 @@ P31		TC	P20FLGON
 			GET.LVC
 		VLOAD	PDVL
 			RTIG
-			V1PRIME
+			VIPRIME
 		CALL
 			PERIAPO1
 		CALL
@@ -152,9 +153,9 @@ P31		TC	P20FLGON
 		STORE	HAPO
 		EXIT
 		CAF	V06N81		# DELVLVC
-		TC	VNPOOH
+		TC	VNP00H
 		CAF	V06N42		# HAPO, HPER, VGDISP
-		TC	VNPOOH
+		TC	VNP00H
 		TC	INTPRET
 REVN1645	SET	CALL		# TRKMKCNT, TTOGO, +MGA
 			FINALFLG

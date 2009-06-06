@@ -8,6 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	843-856
 # Mod history:	2009-05-23 HG	Transcribed from page images.
+#		2009-06-05 RSB	Fixed a couple of misprints.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -567,7 +568,7 @@ V16N85C		VN	1685
 		BANK
 		COUNT* $$/ASENT
 		
-VCOMP		VLOAD	DOT
+YCOMP		VLOAD	DOT
 			UNIT/R/
 			QAXIS
 		SL2	DMP
@@ -576,7 +577,7 @@ VCOMP		VLOAD	DOT
 		RVQ
 		
 		BANK	30
-		SETLOG	ASENT
+		SETLOC	ASENT
 		BANK
 # Page 855
 100CS		EQUALS	2SEC(18)
