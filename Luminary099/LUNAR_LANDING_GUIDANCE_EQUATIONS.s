@@ -8,6 +8,10 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	798-828
 # Mod history:	2009-05-23 HG	Transcribed from page images.
+#		2009-06-05 RSB	Fixed a goofy thing that was apparently
+#				legal in GAP but not in yaYUL.  Eliminated
+#				a couple of lines of code that shouldn't 
+#				have survived from Luminary 131 to here.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -122,12 +126,13 @@ LUNLAND		TC	PHASCHNG
 
 		COUNT*	$$/R13
 
-# HERE IS TH PHILOSOPHY OF GUILDENSTERN:	ON EVERY APPEARANCE OR DISAPPEARANCE OF THE MANUAL THROTTLE
+# HERE IS THE PHILOSOPHY OF GUILDENSTERN:	ON EVERY APPEARANCE OR DISAPPEARANCE OF THE MANUAL THROTTLE
 # DISCRETE TO SELECT P67 OR P66 RESPECTIVELY:   ON EVERY APPEARANCE OF THE ATTITUDE-HOLD DISCRETE TO SELECT P66
 # UNLESS THE CURRENT PROGRAM IS P67 IN WHICH CASE THERE IS NO CHANGE
 
 GUILDEN		EXTEND			# IS UN-AUTO-THROTTLE DISCRETE PRESENT?
-  STERN		READ CHAN30
+# STERN					# RSB 2009: Not originally a comment.
+  		READ CHAN30
 		MASK	BIT6
   		CCS	A
   		TCF	STARTP67	# YES
@@ -906,9 +911,6 @@ P65VERT		TC	INTPRET
 			TAUVERT
 			AFCCALC1
 # Page 816
-		GOTO
-			P65VERTA
-
 # **********************************************************
 # GUIDANCE FOR P66
 # **********************************************************

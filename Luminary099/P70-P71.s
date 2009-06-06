@@ -8,6 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	829-837
 # Mod history:	2009-05-23 HG	Transcribed from page images.
+#		2009-06-05 RSB	Fixed a misprint.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -353,7 +354,7 @@ P71RET		TC	DOWNFLAG
 			P12INIT		# WILL EXIT P12INIT TO INJTARG
 OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
 			TGO
-		STORE	TGO1
+		STCALL	TGO1
 			P12INIT
 		EXIT
 		TC	PHASCHNG

@@ -10,6 +10,7 @@
 # Mod history:	2009-05-26 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-05 RSB	Fixed 3 misprints.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -364,12 +365,12 @@ COMTERM		STORE	UZ
 			3/64
 		PUSH	DMPR		# P3/32 TO PD2
 			COSPHI/2
-		DMP	SL14
+		DMP	SL1R
 			7/12
 		PDDL	DMPR
 			0
 			2/3
-		BSDU	PUSH		# P4/128 TO PD4
+		BDSU	PUSH		# P4/128 TO PD4
 		DMPR	DMPR
 			COSPHI/2	# BEGIN COMPUTING P5/1024
 			9/16
@@ -394,7 +395,7 @@ COMTERM		STORE	UZ
 			J4REQ/J3,2
 		DDV	DAD
 			ALPHAM
-		DMPR3*	SR3
+		DMPR*	SR3
 			2J3RE/J2,2
 		DDV	DAD
 			ALPHAM

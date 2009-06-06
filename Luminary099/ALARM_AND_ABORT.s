@@ -10,6 +10,7 @@
 # Mod history:  2009-05-10 SN   (Sergio Navarro).  Started adapting
 #				from the Luminary131/ file of the same
 #				name, using Luminary099 page images.
+#		2009-06-05 RSB	Fixed a misprint.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -72,7 +73,7 @@ CHKFAIL2	CCS	FAILREG +1
 		TCF	MULTEXIT
 
 FAIL3		CA	FAILREG +2
-		MASK	POSHAX
+		MASK	POSMAX
 		CCS	A
 		TCF	MULTFAIL
 		LXCH	FAILREG +2

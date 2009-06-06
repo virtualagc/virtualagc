@@ -10,6 +10,7 @@
 # Mod history:	2009-05-27 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-05 RSB	Corrected a memory-bank error misprint.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -75,8 +76,8 @@
 #	EBANK IS SET TO 6, BUT NOT RESTORED.
 # Page 1486
 
-		BANK	21
-		SETLOC	DAPS4
+		BANK	20
+		SETLOC	DAPS3
 		BANK
 
 		COUNT*	$$/DAPAO

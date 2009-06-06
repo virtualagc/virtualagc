@@ -126,7 +126,8 @@ IGNALOOP	DLOAD
 #                                                10
 #                                               2   (VGU - 16 VGU KIGNX/B4)
 #                                                       2        0
-# Page 787 new page is actually one line earlier but this would put the indices on a seperate line disconnected from thEir respective variables
+# Page 787 new page is actually one line earlier but this would put the indices on a seperate line 
+# disconnected from their respective variables
 # THE NUMERATOR IS SCALED IN METERS AT 2(28).  THE DENOMINATOR IS A VELOCITY IN UNITS OF 2(10) M/CS.
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
 # THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/B8 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.

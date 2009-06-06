@@ -8,6 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	1309-1337
 # Mod history:	2009-05-28 OH	Transcribed from page images.
+#		2009-06-05 RSB	Fixed a misprint.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -844,7 +845,7 @@ GOMANUR		CA	ATTCADR		# IS KALCMANU FREE
 		EXTEND
 		BZF	+3
 		
-		TC	P00D00		# NO
+		TC	P00DOO		# NO
 		OCT	1210		# 2 TRYING TO USE SAME DEVICE
 		
 	+3	EXTEND
