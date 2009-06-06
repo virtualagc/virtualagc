@@ -11,6 +11,7 @@
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
 #		2009-06-05 RSB	Fixed 3 misprints.
+#		2009-06-06 RSB	Page 1248 was missing entirely for some reason.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -954,4 +955,22 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 		DMP	VXSC		# 5(Y**2-X**2)UR
 			5/8		# CONSTANT, 5B3
 			URPV		# VECTOR.  RESULT MAXIMUM IS 5, SCALING
-
+# Page 1248
+					# HERE B6
+		VSL3	PDDL		# STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ
+			URPV		# X COMPONENT, B1
+		SR1	DAD		# 2 X X COMPONENT FOR B3 SCALING
+			2D		# ADD TO VECTOR X COMPONENT OF ANSWER,
+					# SAME AS MULTIPLYING BY UNITX.  MAX IS 7.
+		STODL	2D
+			URPV	+2	# Y COMPONENT, B1
+		SR1	BDSU		# 2 X Y COMPONENT FOR B3 SCALING
+			4D		# SUBTRACT FROM VECTOR Y COMPONENT OF
+					# ANSWER, SAME AS MULTIPLYING BY UNITY.
+					# MAX IS 7.
+		STORE	4D		# 2D HAS VECTOR, B3.
+		SLOAD	VXSC		# MULTIPLY COEFFICIENT TIMES VECTOR IN 2D
+			E3J22R2M
+		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
+			COSPHI/2	# SAME AS URPV +4  Z COMPONENT
+			
