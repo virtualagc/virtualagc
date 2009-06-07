@@ -37,10 +37,41 @@ This wiki page is intended to described all of the differences in adequate detai
 
 
 == Register Differences ==
+  * Central registers
+|| Address || Block I  || Block II ||
+|| 00000   || A        || A        ||
+|| 00001   || Q        || L        ||
+|| 00002   || Z        || Q        ||
+|| 00003   || LP       || EB       ||
+|| 00004   || IN0      || FB       ||
+|| 00005   || IN1      || Z        ||
+|| 00006   || IN2      || BB       ||
+|| 00007   || IN3      || -- (?)   ||
+|| 00010   || OUT0     || ARUPT    ||
+|| 00011   || OUT1     || LRUPT    ||
+|| 00012   || OUT2     || QRUPT    ||
+|| 00013   || OUT3     || (spare)  ||
+|| 00014   || OUT4     || (spare)  ||
+|| 00015   || BANK     || ZRUPT    ||
+|| 00016   || RELINT   || BBRUPT   ||
+|| 00017   || INHINT   || BRUPT    ||
+|| 00020   || CYR      || CYR      ||
+|| 00021   || SR       || SR       ||
+|| 00022   || CYL      || CYL      || 
+|| 00023   || SL       || EDOP     ||
+|| 00024   || ZRUPT    || Counter  ||
+|| 00025   || BRUPT    || Counter  ||
+|| 00026   || ARUPT    || Counter  ||
+|| 00027   || QRUPT    || Counter  ||
+|| 00030   || Counter  || Counter  ||
+||         ||          ||          ||
+|| 00056   || Counter  || Counter  ||
+|| 00057   || Erasable || Counter  || 
+|| 00060   || Erasable || Erasable ||
 
   * Counter registers (according to John Pultorak):
     * Block 1: begin either at address 30 or 34 octal (with document R-393 being ambiguous about this).
-    * Block 2: begin at address 34 (octal).
+    * Block 2: begin at address 24 (octal).
 
 
 == I/O Differences ==
