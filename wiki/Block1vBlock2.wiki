@@ -38,40 +38,62 @@ This wiki page is intended to described all of the differences in adequate detai
 
 == Register Differences ==
   * Central registers
-|| *Address* || *Type*    || *Block I*  || *Block II* || *Comment* ||
-|| 00000     || Flip-flop || A          || A          || ||
-|| 00001     || Flip-flop || Q          || L          || ||
-|| 00002     || Flip-flop || Z          || Q          || ||
-|| 00003     || Flip-flop || LP         || EB         || ||
-|| 00004     || Flip-flop || IN0        || FB         || IN registers replaced by i/p channels on Block II. ||
-|| 00005     || Flip-flop || IN1        || Z          || ||
-|| 00006     || Flip-flop || IN2        || BB         || ||
-|| 00007     || Flip-flop || IN3        || Zeros      || ||
-|| 00010     || Flip-flop || OUT0       || ARUPT      || OUT registers replaced by o/p channels on Block II. ||
-|| 00011     || Flip-flop || OUT1       || LRUPT      || ||
-|| 00012     || Flip-flop || OUT2       || QRUPT      || ||
-|| 00013     || Flip-flop || OUT3       || (spare)    || ||
-|| 00014     || Flip-flop || OUT4       || (spare)    || ||
-|| 00015     || Flip-flop || BANK       || ZRUPT      || ||
-|| 00016     || Flip-flop || RELINT     || BBRUPT     || No bits in Block I register. || 
-|| 00017     || Flip-flop || INHINT     || BRUPT      || No bits in Block I register. || 
-|| 00020     || Erasable  || CYR        || CYR        || ||
-|| 00021     || Erasable  || SR         || SR         || ||
-|| 00022     || Erasable  || CYL        || CYL        || ||
-|| 00023     || Erasable  || SL         || EDOP       || ||
-|| 00024     || Erasable  || ZRUPT      || Counter    || Supposed to be 20 counters, yet Memo#9 p4 lists range as 024-057 which is 33D? ||
-|| 00025     || Erasable  || BRUPT      || Counter    || ||
-|| 00026     || Erasable  || ARUPT      || Counter    || ||
-|| 00027     || Erasable  || QRUPT      || Counter    || ||
-|| 00030     || Erasable  || Counter    || Counter    || Supposed to be 20 counters, yet R-393 p3-2 lists range as 030-056 which is 22D? ||
-||   to      || Erasable  ||            ||            || ||
-|| 00056     || Erasable  || Counter    || Counter    || ||
-|| 00057     || Erasable  || Erasable   || Counter    || ||
-|| 00060     || Erasable  || Erasable   || Erasable   || ||
+    || *Address* || *Type*    || *Block I*  || *Block II* || *Comment* ||
+    || 00000     || Flip-flop || A          || A          || ||
+    || 00001     || Flip-flop || Q          || L          || ||
+    || 00002     || Flip-flop || Z          || Q          || ||
+    || 00003     || Flip-flop || LP         || EB         || ||
+    || 00004     || Flip-flop || IN0        || FB         || IN registers replaced by i/p channels on Block II. ||
+    || 00005     || Flip-flop || IN1        || Z          || ||
+    || 00006     || Flip-flop || IN2        || BB         || ||
+    || 00007     || Flip-flop || IN3        || Zeros      || ||
+    || 00010     || Flip-flop || OUT0       || ARUPT      || OUT registers replaced by o/p channels on Block II. ||
+    || 00011     || Flip-flop || OUT1       || LRUPT      || ||
+    || 00012     || Flip-flop || OUT2       || QRUPT      || ||
+    || 00013     || Flip-flop || OUT3       || (spare)    || ||
+    || 00014     || Flip-flop || OUT4       || (spare)    || ||
+    || 00015     || Flip-flop || BANK       || ZRUPT      || ||
+    || 00016     || Flip-flop || RELINT     || BBRUPT     || No bits in Block I register. || 
+    || 00017     || Flip-flop || INHINT     || BRUPT      || No bits in Block I register. || 
+    || 00020     || Erasable  || CYR        || CYR        || ||
+    || 00021     || Erasable  || SR         || SR         || ||
+    || 00022     || Erasable  || CYL        || CYL        || ||
+    || 00023     || Erasable  || SL         || EDOP       || ||
+    || 00024     || Erasable  || ZRUPT      || Counter    || Supposed to be 20 counters, yet Memo#9 p4 lists range as 024-057 which is 33D? ||
+    || 00025     || Erasable  || BRUPT      || Counter    || ||
+    || 00026     || Erasable  || ARUPT      || Counter    || ||
+    || 00027     || Erasable  || QRUPT      || Counter    || ||
+    || 00030     || Erasable  || Counter    || Counter    || Supposed to be 20 counters, yet R-393 p3-2 lists range as 030-056 which is 22D? ||
+    ||   to      ||           ||            ||            || ||
+    || 00056     || Erasable  || Counter    || Counter    || ||
+    || 00057     || Erasable  || Erasable   || Counter    || ||
+    || 00060     || Erasable  || Erasable   || Erasable   || ||
 
   * Counter registers (according to John Pultorak):
     * Block 1: begin either at address 30 or 34 octal (with document R-393 being ambiguous about this).
     * Block 2: begin at address 34 (octal).
+
+    || *Address* || *Block I*  || *Block II* || *Comment* ||
+    || 00034     || OVCTR      ||            || ||
+    || 00035     || TIME 1     ||            || ||
+    || 00036     || TIME 2     ||            || ||
+    || 00037     || TIME 3     ||            || ||
+    || 00040     || TIME 4     ||            || ||
+    || 00041     || UPLINK     ||            || ||
+    || 00042     || OUTCR I    ||            || ||
+    || 00043     || OUTCR II   ||            || ||
+    || 00044     || PIPA X     ||            || ||
+    || 00045     || PIPA Y     ||            || ||
+    || 00046     || PIPA Z     ||            || ||
+    || 00047     || CDU X      ||            || ||
+    || 00050     || CDU Y      ||            || ||
+    || 00051     || CDU Z      ||            || ||
+    || 00052     || OPT X      ||            || ||
+    || 00053     || OPT Y      ||            || ||
+    || 00054     || TRKR X     ||            || ||
+    || 00055     || TRKR Y     ||            || ||
+    || 00056     || TRKR R     ||            || ||
+
 
 
 == I/O Differences ==
