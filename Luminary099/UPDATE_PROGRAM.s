@@ -10,6 +10,8 @@
 # Mod history:  2009-05-10 SN   (Sergio Navarro).  Started adapting
 #				from the Luminary131/ file of the same
 #				name, using Luminary099 page images.
+#		2009-06-07 RSB	Added an SBANK= to account for incompatibilities
+#				between YUL and yaYUL.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -194,6 +196,7 @@ UPPART2		EQUALS			# UPDATE PROGRAM -- PART 2
 		TC	PHASCHNG	# SET RESTART GROUP 6 TO RESTORE OLD MODE
 		OCT	07026		# AND DOWNLIST AND EXIT IF RESTART OCCURS.
 		OCT	30000		# PRIORITY SAME AS CHRPRIO
+		SBANK=	PINSUPER	# RSB 2009
 		EBANK=	UPBUFF
 		2CADR	UPOUT +1
 

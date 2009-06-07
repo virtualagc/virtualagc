@@ -10,7 +10,8 @@
 # Mod history:	2009-05-27 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
-#		2009-06-05 RSB	Corrected a memory-bank error misprint.
+#		2009-06-05 RSB	Corrected a memory-bank error type.
+#		2009-06-07 RSB	Corrected a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -250,7 +251,7 @@ JACCUV		CS	COEFFQ
 		EXTEND
 		MP	BIT14		# SCALING CHANGED FROM PI/4 TO PI/2
 		TS	1JACCU
-		TS	1JACCU		# SCALED AT PI/2 RADIANS/SEC(2)
+		TS	1JACCV		# SCALED AT PI/2 RADIANS/SEC(2)
 		CCS	MPAC		# COMPUTE L,PVT-CG IF IN DESCENT
 		CAF	ZERO		# ZERO SWITCHES AND GO TO 1/ACCONT IN
 		TS	ALLOWGTS	#	ASCENT

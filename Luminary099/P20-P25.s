@@ -8,9 +8,13 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	0492-0613
 # Mod history:	2009-05-26 OH	Transcribed from page images.
-#		2009-06-05 RSB	Corrected a misprint.
+#		2009-06-05 RSB	Corrected a typos.
 #		2009-06-06 RSB	Added a missing instruction, and a block
 #				of 3 missing instructions.
+#		2009-06-07 RSB	Fixed a misprint.
+#		2009-06-07 RSB	Changed the construct "2DEC E-6 B12" 
+#				(which isn't legal in yaYUL) to
+#				"2DEC 1.0 E-6 B12".
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -109,7 +113,7 @@ ORBCHGO		TC	UPFLAG		# SET VEHUPFLG -- CSM STATE
 		TC	GOTOP00H	# TERMINATE
 		TC	ORBCHG1		# PROCEED VALUE OF ASSUMED OPTION OK
 		TC	-5		# R2 LOADED THRU DSKY
-ORBCHG1		CS	ONE
+ORBCHG1		CS	P22ONE
 		AD	OPTION2
 		EXTEND
 		BZF	PROG20A
@@ -3814,7 +3818,7 @@ MXMYMZ		CAF	AIGBANK
 			REFSMMAT
 SHAFTBQ		STCALL	MZ
 			RADARANG
-		SSP	VLOAD		# STORE SHAFT CODE (3) FOR R3 IN NOUN 49
+		SSP	CALL		# STORE SHAFT CODE (3) FOR R3 IN NOUN 49
 			WHCHREAD
 		DEC	3
 			GRP2PC
@@ -4149,7 +4153,7 @@ ASTOK		CALL
 			INCORP2
 		GOTO
 			LGRET
-IMUVAR		2DEC	E-6 B12		# RAD**2
+IMUVAR		2DEC	1.0 E-6 B12	# RAD**2
 
 WSIZE		DEC	161
 # Page 587

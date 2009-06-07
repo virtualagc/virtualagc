@@ -10,6 +10,7 @@
 # Mod history:	2009-05-16 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-07 RSB	Corrected a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -44,7 +45,7 @@
 		TCF	IRIG1		# RETURN
 		
 1/PIPA1		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
-		TS	BUF	 +2
+		TS	BUF	+2
 		
 		INDEX	BUF 	+2
 		CA	PIPASCF		# (P.P.M.) X 2(-9)
@@ -70,13 +71,13 @@
 		EXTEND
 		MP	1/PIPADT	# (CS) X 2(+8) NOW (PIPA PULSES) X 2(+5) *
 		EXTEND
-		MP	BIT6		# SCALE 2(+11) SHIFT RIGHT 11		 *
+		MP	BIT4		# SCALE 2(+11) SHIFT RIGHT 11		 *
 		INDEX	BUF 	+2
 		DAS	DELVX		# (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)
 		
 		CCS	BUF 	+2	# PIPAZ, PIPAY, PIPAX
 		AD	NEG1
-		TCF	1/PIPA1	 +1
+		TCF	1/PIPA1	+1
 # Page 327
 		NOOP			# LESS THAN ZERO IMPOSSIBLE
 

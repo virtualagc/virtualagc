@@ -10,6 +10,8 @@
 # Mod history:	2009-05-19 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-07 RSB	Removed a space between two components of
+#				a 2OCT that isn't legal in yaYUL.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -457,7 +459,7 @@ MAXCHK		DSU	BPL		# IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM.
  +3		DLOAD	RVQ		# (USED BY P30 -- P37 ALSO)
  			MAXNM
 
-MAXNM		2OCT	01065 05603
+MAXNM		2OCT	0106505603
 
 # Page 722 (empty page)
 

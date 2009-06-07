@@ -9,7 +9,7 @@
 #  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 # Website:	http://www.ibiblio.org/apollo.
 # Mod history:	2009-06-01 FB	Transcription Batch 4 Assignment.
-#		2009-06-05 RSB	Fixed a couple of misprinta, plus a goofy relative
+#		2009-06-05 RSB	Fixed a couple of typos, plus a goofy relative
 #				label reference from the original source.
 #
 # The contents of the "Luminary099" files, in general, are transcribed 

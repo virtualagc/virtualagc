@@ -56,6 +56,7 @@
 #				CopyApolloSource.sh script's third parameter.
 #				Thanks to Onno Hommes for noticing this.  Also
 #				added a 4th parameter for Windows vs. non-Windows.
+#		2009-06-07 RSB	Added Luminary099.
 
 APP=VirtualAGC
 
@@ -188,7 +189,7 @@ temp/lVirtualAGC/bin temp/VirtualAGC/bin temp/VirtualAGC.app/Contents/MacOS:
 temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Contents/Resources:
 	mkdir -p $@/pixmaps $@/source $@
 	${CP} ../scenarios $@
-	for n in Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 ; \
+	for n in Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 ; \
 	do \
 		sh ./CopyApolloSource.sh $@ $$n ${EXTSW} ${WIN32} ;\
 	done
