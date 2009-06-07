@@ -113,6 +113,7 @@
 #				Updated to make work with FreeBSD (PC-BSD 7.1).
 #				Adjusted for SOLARIS.
 #		05/23/09 RSB	Added Comanche055 to the normal build sequence.
+#		06/07/09 RSB	Added Luminary099 to the normal build sequence.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -122,7 +123,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20090601\\\"
+NVER:=\\\"20090607\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -266,6 +267,7 @@ endif
 	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
 	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
 	$(MAKE) -C Comanche055
+	$(MAKE) -C Luminary099
 	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
 	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
 	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
@@ -339,6 +341,7 @@ clean:
 	$(MAKE) -C Luminary131 clean
 	$(MAKE) -C Colossus249 clean
 	${MAKE} -C Comanche055 clean
+	${MAKE} -C Luminary099 clean
 	${MAKE} -C Artemis072 clean
 	$(MAKE) -C Validation clean
 	${MAKE} -C ControlPulseSim clean

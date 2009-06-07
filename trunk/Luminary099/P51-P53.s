@@ -8,6 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	926-983
 # Mod history:	2009-05-31 HG	Transcribed from page images.
+#		2009-06-07 RSB	Corrected a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -283,7 +284,7 @@ N89DISP		STQ
 			ALT
 		STODL	LANDALT
 			LAT
-		STORE	LANDLAT
+		STODL	LANDLAT
 		EXIT
 
 LSDISP		CAF	V06N89*		# DISPLAY LAT,LONG/2,ALT

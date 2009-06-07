@@ -8,7 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	829-837
 # Mod history:	2009-05-23 HG	Transcribed from page images.
-#		2009-06-05 RSB	Fixed a misprint.
+#		2009-06-05 RSB	Fixed a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization

@@ -11,6 +11,7 @@
 #				Colossus249 file (there being no corresponding
 #				Luminary131 source-code file), using page 
 #				images from Luminary 1A.
+#		2009-06-07 RSB	Eliminated an extraneous instruction.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -163,7 +164,6 @@ OPTN1		SET	CLEAR		# SOI
 			TIG
 			UPDATFLG
 		STORE	TINT		# TI = TIG + TF
-		STORE	DSPTEM1		# FOR DISPLAY
 		EXIT
 		CAF	V06N57SR	# DISPLAY DELTA R
 		TCR	BANKCALL

@@ -10,8 +10,9 @@
 # Mod history:	2009-05-26 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
-#		2009-06-05 RSB	Fixed 3 misprints.
+#		2009-06-05 RSB	Fixed 3 typos.
 #		2009-06-06 RSB	Page 1248 was missing entirely for some reason.
+#		2009-06-07 RSB	Corrected a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -295,7 +296,7 @@ GAMCOMP		VLOAD	VSR1
 		BOV			# CLEAR OVIND
 			+1
 		VSR*	XCHX,2
-			TCDANZIG
+			0	-1,2
 			S1
 		VAD
 			FV

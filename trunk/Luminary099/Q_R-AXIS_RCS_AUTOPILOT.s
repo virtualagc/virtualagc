@@ -10,6 +10,8 @@
 # Mod history:	2009-05-27 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-07 RSB	Corrected "DEC 96.0" to "DEC 96", since
+#				the former is not compatible with yaYUL.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -228,7 +230,7 @@ MIMRET		CA	DAPBOOLS
 # Page 1446
 		TCF	AFTERTJ
 
-60MS		DEC	96.0
+60MS		DEC	96		# RSB 2009 -- was 96.0.
 MINADR		GENADR	MINRTN
 OCT63		OCT	63
 14MS		=	+TJMINT6

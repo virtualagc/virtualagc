@@ -10,6 +10,7 @@
 # Mod history:  2009-05-10 SN   (Sergio Navarro).  Started adapting
 #				from the Luminary131/ file of the same
 #				name, using Luminary099 page images.
+#		2009-06-07 RSB	Corrected two typos.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -459,7 +460,7 @@ NNTYPTAB	OCT	00000			# 00	NOT IN USE
 						#		(DEC ONLY)
 		OCT	24512			# 59	3COMP	VEL3 FOR EACH
 						#		(DEC ONLY)
-		OCT	60521			# 60	3COMP	VEL3, VEL3, COMP ALT
+		OCT	60512			# 60	3COMP	VEL3, VEL3, COMP ALT
 						# 		(DEC ONLY)
 		OCT	54000			# 61	3COMP 	MIN/SEC, MIN/SEC, POS7
 						#		(NO LOAD, DEC ONLY)
@@ -712,7 +713,7 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	DVLOS +4		# 59	VEL3			DP3
 		ECADR	VHORIZ			# 60	VEL3			DP3
 		ECADR	HDOTDISP		# 60	VEL3			DP3
-		ECADR	HCALC1			# 60	COMP ALT		DP1
+		ECADR	HCALC			# 60	COMP ALT		DP1
 		ECADR	TTFDISP			# 61	MIN/SEC			M/S
 		ECADR	TTOGO			# 61	MIN/SEC			M/S
 		ECADR	OUTOFPLN		# 61	POS7			DP4

@@ -8,7 +8,8 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	843-856
 # Mod history:	2009-05-23 HG	Transcribed from page images.
-#		2009-06-05 RSB	Fixed a couple of misprints.
+#		2009-06-05 RSB	Fixed a couple of typos.
+#		2009-06-07 RSB	Corrected a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -204,7 +205,7 @@ T2TEST		DLOAD
 NORATES		DLOAD
 			HI6ZEROS
 		STORE	PRATE		# B = 0
-		STCALL	YRATE		# D = 0
+		STORE	YRATE		# D = 0
 		GOTO
 			CONST		# GO TO CONST
 RATES		DLOAD	DSU

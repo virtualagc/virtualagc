@@ -10,6 +10,7 @@
 # Mod history:	2009-05-17 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-07 RSB	Corrected a misprint.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -188,7 +189,7 @@ SBANDEX		EXIT
 		TC	BLANKET		# BLANK R3
 		CAF	PRIO4
 		TC	PRIOCHNG
-		TC	SBANDANT	# YES, CONTINUE DISPLAYING ANGLES.
+		TC	SBANDANT +2	# YES, CONTINUE DISPLAYING ANGLES.
 V06N51		VN	0651
 1OVSQRT2	2DEC	.7071067815	# 1/SQRT(2)
 

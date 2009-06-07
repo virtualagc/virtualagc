@@ -10,9 +10,11 @@
 # Mod history:  2009-05-10 SN   (Sergio Navarro).  Started adapting
 #				from the Luminary131/ file of the same
 #				name, using Luminary099 page images.
-#		2009-06-05 RSB	Corrected 5 misprints.
+#		2009-06-05 RSB	Corrected 5 typos.
 #		2009-06-06 RSB	Eliminated an extraneous 3-instruction block
 #				and added a missing instruction.
+#		2009-06-07 RSB	Added a couple of "SBANK=" for compatibility 
+#				with yaYUL. Corrected a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -515,6 +517,7 @@ GOLOADLV	TC	FLASHOFF
 V47TXACT	TC	TESTXACT	# NO OTHER EXTVERB.
 		CAF	PRIO4
 		TC	FINDVAC
+		SBANK=	LOWSUPER	# RSB 2009
 		EBANK=	AGSBUFF
 		2CADR	AGSINIT
 		
@@ -672,6 +675,7 @@ R04C		CAF	BIT14		# ENABLE RR AUTO TRACKER
 		TS	RTSTMAX		# FOR SEQUENTIAL STORAGE
 		
 		TC	WAITLIST
+		SBANK=	PINSUPER	# RSB 2009.
 		EBANK=	RSTACK
 		2CADR	RADSAMP
 		
@@ -793,7 +797,7 @@ RDRUSECK	CS	FLAGWRD3	# IS R29 ON?
 		MASK	V37FLBIT	# R12 USING THE LR?
 		CCS	A
 		TCF	CHECKRR		# NO
-		CA	FLGWRD11	# YES, IS R12 ON?
+		CS	FLGWRD11	# YES, IS R12 ON?
 		MASK	LRBYBIT
 		CCS	A
 		TC	ALM/END		# YES

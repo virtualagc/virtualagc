@@ -12,6 +12,7 @@
 #				legal in GAP but not in yaYUL.  Eliminated
 #				a couple of lines of code that shouldn't 
 #				have survived from Luminary 131 to here.
+#		2009-06-07 RSB	Fixed a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -133,7 +134,7 @@ LUNLAND		TC	PHASCHNG
 GUILDEN		EXTEND			# IS UN-AUTO-THROTTLE DISCRETE PRESENT?
 # STERN					# RSB 2009: Not originally a comment.
   		READ CHAN30
-		MASK	BIT6
+		MASK	BIT5
   		CCS	A
   		TCF	STARTP67	# YES
 P67NOW?		TC	CHECKMM		# NO:  ARE WE IN P67 NOW?

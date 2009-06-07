@@ -12,6 +12,7 @@
 #				images from Luminary 1A.
 #		2009-06-05 RSB	Corrected a relative jump from
 #				+8 to +8D.
+#		2009-06-07 RSB	Corrected a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -887,7 +888,7 @@ ALTSYST		CA	DAPBOOLS	# ALTERNATE P-AXIS JETS
 		CA	AORBSYST
 		EXTEND
 		RXOR	LCHAN
-		TS	FLAGWRD5
+		TS	DAPBOOLS
 		RELINT
 		TC	Q
 

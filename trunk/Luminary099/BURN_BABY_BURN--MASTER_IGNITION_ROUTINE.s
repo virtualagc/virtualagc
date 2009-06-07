@@ -7,9 +7,10 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Pages:	731-751
-# Mod history:	2009-05-XX XXX	Adapted from the corresponding 
+# Mod history:	2009-05-19 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2009-06-07 RSB	Corrected 3 typos.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -382,7 +383,7 @@ TIG-0		CS	FLAGWRD7	# SET IGNFLAG SINCE TIG HAS ARRIVED
 		CA	ZOOMTIME
 		TC	WAITLIST
 		EBANK=	DVCNTR
-		2CADR	ZOOM
+		2CADR	P63ZOOM
 
 		TC	2PHSCHNG
 		OCT	40033
@@ -425,7 +426,7 @@ IGNITION	CS	FLAGWRD5	# INSURE ENGONFLG IS SET.
 		TCF	13
 
 P63IGN		EXTEND			# (13)	INITIATE BURN DISPLAYS
-		DCA	LUNLANAD
+		DCA	DSP2CADR
 		DXCH	AVGEXIT
 
 		CA	Z		# ASSASSINATE CLOKTASK
@@ -461,7 +462,7 @@ P40IGN		CS	FLAGWRD5	# (13)
 		CA	ZOOMTIME
 		TC	WAITLIST
 		EBANK=	DVCNTR
-		2CADR	ZOOM
+		2CADR	P40ZOOM
 
 P63IGN1		TC	2PHSCHNG
 		OCT	40033		# 3.3SPOT FOR ZOOM RESTART.

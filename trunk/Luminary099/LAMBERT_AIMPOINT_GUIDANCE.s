@@ -9,7 +9,8 @@
 # Pages:	651-653
 # Mod history:	2009-05-18 RSB	Transcribed from Luminary 099
 #				page images.
-#		2009-06-05 RSB	Corrected 4 misprints.
+#		2009-06-05 RSB	Corrected 4 typos.
+#		2009-06-07 RSB	Fixed a typo.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -145,7 +146,7 @@ P31		TC	P20FLGON
 		CALL			# LIMIT DISPLAY TO 9999.9 N. MI.
 			MAXCHK
 		STODL	HPER
-			40
+			4D
 		CALL
 			SHIFTR1
 		CALL			# LIMIT DISPLAY TO 9999.9 N. MI.
