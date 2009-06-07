@@ -38,7 +38,7 @@ This wiki page is intended to described all of the differences in adequate detai
 
 == Register Differences ==
   * Central registers
-|| *Address* || *Block I*  || *Block II* ||
+|| *Address* || *Block I*  || *Block II* || *Comment* ||
 || 00000   || A        || A        ||
 || 00001   || Q        || L        ||
 || 00002   || Z        || Q        ||
@@ -46,24 +46,24 @@ This wiki page is intended to described all of the differences in adequate detai
 || 00004   || IN0      || FB       ||
 || 00005   || IN1      || Z        ||
 || 00006   || IN2      || BB       ||
-|| 00007   || IN3      || -- (?)   ||
+|| 00007   || IN3      || Zeros    ||
 || 00010   || OUT0     || ARUPT    ||
 || 00011   || OUT1     || LRUPT    ||
 || 00012   || OUT2     || QRUPT    ||
 || 00013   || OUT3     || (spare)  ||
 || 00014   || OUT4     || (spare)  ||
 || 00015   || BANK     || ZRUPT    ||
-|| 00016   || RELINT   || BBRUPT   ||
-|| 00017   || INHINT   || BRUPT    ||
+|| 00016   || RELINT   || BBRUPT   || No bits in Block I register. || 
+|| 00017   || INHINT   || BRUPT    || No bits in Block I register. || 
 || 00020   || CYR      || CYR      ||
 || 00021   || SR       || SR       ||
 || 00022   || CYL      || CYL      || 
 || 00023   || SL       || EDOP     ||
-|| 00024   || ZRUPT    || Counter  ||
+|| 00024   || ZRUPT    || Counter  || Supposed to be 20 counters, yet Memo#9 p4 lists range as 024-057 which is 33D? ||
 || 00025   || BRUPT    || Counter  ||
 || 00026   || ARUPT    || Counter  ||
 || 00027   || QRUPT    || Counter  ||
-|| 00030   || Counter  || Counter  ||
+|| 00030   || Counter  || Counter  || Supposed to be 20 counters, yet R-393 p3-2 lists range as 030-056 which is 22D? ||
 ||         ||          ||          ||
 || 00056   || Counter  || Counter  ||
 || 00057   || Erasable || Counter  || 
@@ -71,7 +71,7 @@ This wiki page is intended to described all of the differences in adequate detai
 
   * Counter registers (according to John Pultorak):
     * Block 1: begin either at address 30 or 34 octal (with document R-393 being ambiguous about this).
-    * Block 2: begin at address 24 (octal).
+    * Block 2: begin at address 34 (octal).
 
 
 == I/O Differences ==
