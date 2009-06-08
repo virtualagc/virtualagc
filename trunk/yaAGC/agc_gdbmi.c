@@ -34,7 +34,9 @@
   Compiler:	GNU gcc.
   Contact:	Onno Hommes <info@sandroid.org>
   Reference:	http://virtualagc.googlecode.com
-  Mods:		01/01/08 OH.	Began work.
+  Mods:		01/01/08 OH		Began work.
+			06/08/09 OH		Added info variables,functions and fixed
+							Showing source line when not using -fullname.
 */
 
 #include <stdlib.h>
@@ -545,7 +547,7 @@ GdbmiResult GdbmiHandleInfoBreakpoints(int j)
    return(GdbmiCmdDone);
 }
 
-void gdbmiPrintFullNameContents(SymbolLine_t *Line)
+void gdbmiPrintFullNameFrame(SymbolLine_t *Line)
 {
    /* Need OS Seperator */
 #ifdef WIN32
@@ -562,6 +564,24 @@ void gdbmiPrintFullNameContents(SymbolLine_t *Line)
                                Line->CodeAddress.Super));
 #endif
 }
+
+static char* CurrentFileName = 0;
+
+void gdbmiPrintSourceFrame(SymbolLine_t *Line)
+{
+	if (CurrentFileName == 0 || strcmp(CurrentFileName,Line->FileName))
+	{
+		/* Looks like a source file switch print the file info */
+		unsigned Address = DbgLinearAddr(&Line->CodeAddress);
+		printf("%s () at %s:%d\n",
+				DbgGetFrameNameByAddr(Address),
+				Line->FileName,
+				Line->LineNumber);
+		CurrentFileName = Line->FileName;
+	}
+	ListSourceLine(Line->FileName,Line->LineNumber,0);
+}
+
 
 void gdbmiHandleInfoLine(agc_t *State , char* s, char* sraw)
 {
@@ -596,7 +616,7 @@ void gdbmiHandleInfoLine(agc_t *State , char* s, char* sraw)
              Addr,FrameName);
       printf("   and ends at 0x%04x <%s>.\n",
              Addr,FrameName);
-      if (FullNameMode) gdbmiPrintFullNameContents(Line);
+      if (FullNameMode) gdbmiPrintFullNameFrame(Line);
    }
    ++gdbmi_status;
 }
@@ -943,7 +963,7 @@ GdbmiResult GdbmiHandleInfoSymbols(int i,int type)
 
    if (GdbmiStat != GdbmiCmdError)
    {
-      if (UsePattern) 
+      if (UsePattern)
       {
          if (type == SYMBOL_VARIABLE)
             printf("All variables matching regular expression \"%s\":\n",sraw);
@@ -952,7 +972,7 @@ GdbmiResult GdbmiHandleInfoSymbols(int i,int type)
          else if (type == SYMBOL_LABEL)
             printf("All functions matching regular expression \"%s\":\n",sraw);
       }
-      else 
+      else
       {
          if (type == SYMBOL_VARIABLE)
             printf("All defined variables:\n");

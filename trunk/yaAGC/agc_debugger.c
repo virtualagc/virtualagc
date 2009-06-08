@@ -154,7 +154,7 @@ int DbgHasBreakEvent()
 	{
 		if (SingleStepCounter == 0)
 		{
-		  if(Debugger.RunState) printf ("Stepped.\n");
+		  // if(Debugger.RunState) printf ("Stepped.\n");
 		  BreakFlag = 1;
 		}
 		else
@@ -638,8 +638,8 @@ void DbgDisplayInnerFrame(void)
 			LoadSourceLine(Line->FileName, Line->LineNumber);
 			if (Debugger.RunState)
 			{
-			  if (Debugger.Options->fullname) gdbmiPrintFullNameContents(Line);
-			  else Disassemble (Debugger.State);
+			  if (Debugger.Options->fullname) gdbmiPrintFullNameFrame(Line);
+			  else gdbmiPrintSourceFrame(Line,0);
 			}
 		}
 	}
