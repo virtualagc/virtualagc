@@ -33,8 +33,40 @@ This wiki page is intended to described all of the differences in adequate detai
 
 == Interpreter-Language Differences ==
 
-(I don't know if block 1 has an interpreter language or not, but if so, the differences between it and block 2 interpreter language should be covered here.)
+According to E-1077, MOD-3C (i.e. AGC3) had an interpreter facility, so it's probably safe to assume AGC4 did. The real question is if the pseudo-instruction set changed. The Block II interpreter instruction set is shown below (Colossus249, p1098). 
 
+|| *Name* || *Description*  ||
+|| VLOAD  || Load MPAC with a vector. ||
+|| TAD    || Triple-precision add to MPAC. ||
+|| SIGN   || Complement MPAC (V or SC) if X negative. ||
+|| VXSC   || Vector times scalar. || 
+|| CGOTO  || Computed goto. ||
+|| TLOAD  || Load MPAC with triple precision. ||
+|| DLOAD  || Load MPAC with a DP scalar. ||
+|| V/SC   || Vector divided by a scalar. ||
+|| SLOAD  || Load MPAC in single precision. ||
+|| SSP    || Set single precision into X. ||
+|| PDDL   || Push down MPAC and reload in DP. ||
+|| MXV    || Matrix post-multiplied by vector. ||
+|| PDVL   || Push down and VECTORLOAD. ||
+|| CCALL  || Computed call. ||
+|| VXM    || Matrix pre-multiplied by vector. ||
+|| TSLC   || Normalize MPAC (scalar only). ||
+|| DMPR   || DP multiply and round. ||
+|| DDV    || DP divide by. ||
+|| BDDV   || DP divide into. ||
+|| GSHIFT || General shift instruction. ||
+|| VAD    || Vector add. ||
+|| VSU    || Vector subtract. ||
+|| BVSU   || Vector subtract from. ||
+|| DOT    || Vector dot product. ||
+|| VXV    || Vector cross product. ||
+|| VPROJ  || Vector projection. ||
+|| DSU    || DP subtract. ||
+|| BDSU   || DP subtract from. ||
+|| DAD    || DP add. ||
+|| DMP1   || DP multiply. ||
+|| SETPD  || Set push down pointer (direct only). ||
 
 == Register Differences ==
   * Central registers
