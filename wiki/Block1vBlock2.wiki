@@ -59,7 +59,7 @@ This wiki page is intended to described all of the differences in adequate detai
 || 00021     || Erasable  || SR         || SR         || ||
 || 00022     || Erasable  || CYL        || CYL        || ||
 || 00023     || Erasable  || SL         || EDOP       || ||
-|| 00024     || Erasable  || ZRUPT      || Counter    || Supposed to be 20 counters, yet Memo#9 p4 lists range as 024-057 which is 33D? ||
+|| 00024     || Erasable  || ZRUPT      || Counter    || Supposed to be 20 counters, yet Memo#9 p4 lists range as 024-057 which is 33D? E-2052 lists 024-060 which is 34D. ||
 || 00025     || Erasable  || BRUPT      || Counter    || ||
 || 00026     || Erasable  || ARUPT      || Counter    || ||
 || 00027     || Erasable  || QRUPT      || Counter    || ||
@@ -67,32 +67,65 @@ This wiki page is intended to described all of the differences in adequate detai
 ||   to      ||           ||            ||            || ||
 || 00056     || Erasable  || Counter    || Counter    || ||
 || 00057     || Erasable  || Erasable   || Counter    || ||
-|| 00060     || Erasable  || Erasable   || Erasable   || ||
+|| 00060     || Erasable  || Erasable   || Erasable?  || Counter in Block II? ||
+|| 00061     || Erasable  || Erasable   || Erasable   || ||
 
   * Counter registers (according to John Pultorak):
     * Block 1: begin either at address 30 or 34 octal (with document R-393 being ambiguous about this).
-    * Block 2: begin at address 34 (octal).
 
-|| *Address* || *Block I*  || *Block II* || *Comment* ||
-|| 00034     || OVCTR      ||            || ||
-|| 00035     || TIME 1     ||            || ||
-|| 00036     || TIME 2     ||            || ||
-|| 00037     || TIME 3     ||            || ||
-|| 00040     || TIME 4     ||            || ||
-|| 00041     || UPLINK     ||            || ||
-|| 00042     || OUTCR I    ||            || ||
-|| 00043     || OUTCR II   ||            || ||
-|| 00044     || PIPA X     ||            || ||
-|| 00045     || PIPA Y     ||            || ||
-|| 00046     || PIPA Z     ||            || ||
-|| 00047     || CDU X      ||            || ||
-|| 00050     || CDU Y      ||            || ||
-|| 00051     || CDU Z      ||            || ||
-|| 00052     || OPT X      ||            || ||
-|| 00053     || OPT Y      ||            || ||
-|| 00054     || TRKR X     ||            || ||
-|| 00055     || TRKR Y     ||            || ||
-|| 00056     || TRKR R     ||            || ||
+|| *Address* || *Name*   || *Comment* || (Source: R-393) 
+|| 00034     || OVCTR    || ||
+|| 00035     || TIME 1   || ||
+|| 00036     || TIME 2   || ||
+|| 00037     || TIME 3   || ||
+|| 00040     || TIME 4   || ||
+|| 00041     || UPLINK   || ||
+|| 00042     || OUTCR I  || ||
+|| 00043     || OUTCR II || ||
+|| 00044     || PIPA X   || ||
+|| 00045     || PIPA Y   || ||
+|| 00046     || PIPA Z   || ||
+|| 00047     || CDU X    || ||
+|| 00050     || CDU Y    || ||
+|| 00051     || CDU Z    || ||
+|| 00052     || OPT X    || ||
+|| 00053     || OPT Y    || ||
+|| 00054     || TRKR X   || ||
+|| 00055     || TRKR Y   || ||
+|| 00056     || TRKR R   || ||
+
+    * Block 2: begin at address 24 (octal).
+
+|| *Address* || *Name*   || *Comment* || (Source: E-2052)
+|| 00024     || TIME 2   || Elapsed time. ||
+|| 00025     || TIME 1   || Elapsed time. ||
+|| 00026     || TIME 3   || Wait-list. ||
+|| 00027     || TIME 4   || T4RUPT. ||
+|| 00030     || TIME 5   || Digital Auto Pilot. ||
+|| 00031     || TIME 6   || Fine time for clocking. ||
+|| 00032     || CDU X    || Inner gimbal. ||
+|| 00033     || CDU Y    || Middle gimbal. ||
+|| 00034     || CDU Z    || Outer gimbal. ||
+|| 00035     || OPT Y    || Optics shaft (or radar). ||
+|| 00036     || OPT X    || Optics shaft (or radar). ||
+|| 00037     || PIPA X   || X stable member, change in velocity. ||
+|| 00040     || PIPA Y   || Y stable member, change in velocity. ||
+|| 00041     || PIPA Z   || Z stable member, change in velocity. ||
+|| 00042     || RHCP     || Spare in CSM. LM rotational hand controller pitch input. ||
+|| 00043     || RHCY     || Spare in CSM. LM rotational hand controller yaw input. ||
+|| 00044     || RHCR     || Spare in CSM. LM rotational hand controller roll input. ||
+|| 00045     || INLINK   || Uplink (up-telemetry). ||
+|| 00046     || RNRAD    || Rendezvous & landing radar data. Parallel to serial conversion. ||
+|| 00047     || Gyro CTR || Outcounter for Gyros. Drift Compensation and Fine Align. ||
+|| 00050     || CDUXCMD  || Outcounter for CDUs. Used for changing the DAC Error Counter in CDU. ||
+|| 00051     || CDUYCMD  || Outcounter for CDUs. Used for changing the DAC Error Counter in CDU. ||
+|| 00052     || CDUZCMD  || Outcounter for CDUs. Used for changing the DAC Error Counter in CDU. ||
+|| 00053     || OPTYCMD  || Outcounter for Optics (or Radar). ||
+|| 00054     || OPTXCMD  || Outcounter for Optics (or Radar). ||
+|| 00055     || Spare Outlink || Parallel to serial LEM and CSM telemetry. ||
+|| 00056     || Spare Outlink || Parallel to serial LEM and CSM telemetry. ||
+|| 00057     || Spare Outlink || Parallel to serial LEM and CSM telemetry. ||
+|| 00060     || (ALTM)   || Altitude meter, drives inertial data display for altitude on LEM. ||
 
 == I/O Differences ==
 
