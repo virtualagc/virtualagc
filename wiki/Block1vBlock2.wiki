@@ -36,37 +36,72 @@ This wiki page is intended to described all of the differences in adequate detai
 According to E-1077, MOD-3C (i.e. AGC3) had an interpreter facility, so it's probably safe to assume AGC4 did. The real question is if the pseudo-instruction set changed. The Block II interpreter instruction set is shown below (Colossus249, p1098). 
 
 || *Name* || *Description*  ||
-|| VLOAD  || Load MPAC with a vector. ||
-|| TAD    || Triple-precision add to MPAC. ||
-|| SIGN   || Complement MPAC (V or SC) if X negative. ||
-|| VXSC   || Vector times scalar. || 
-|| CGOTO  || Computed goto. ||
-|| TLOAD  || Load MPAC with triple precision. ||
-|| DLOAD  || Load MPAC with a DP scalar. ||
-|| V/SC   || Vector divided by a scalar. ||
-|| SLOAD  || Load MPAC in single precision. ||
-|| SSP    || Set single precision into X. ||
-|| PDDL   || Push down MPAC and reload in DP. ||
-|| MXV    || Matrix post-multiplied by vector. ||
-|| PDVL   || Push down and VECTORLOAD. ||
-|| CCALL  || Computed call. ||
-|| VXM    || Matrix pre-multiplied by vector. ||
-|| TSLC   || Normalize MPAC (scalar only). ||
-|| DMPR   || DP multiply and round. ||
-|| DDV    || DP divide by. ||
+|| ABVALABS || Length of vector or magnitude of scalar. ||
+|| ARCSIN || Arc sine. ||
+|| ARCCOS || Arc cosine. ||
+|| AXC    || Address to INDEX complemented. ||
+|| AXT    || Address to INDEX true. ||
 || BDDV   || DP divide into. ||
-|| GSHIFT || General shift instruction. ||
-|| VAD    || Vector add. ||
-|| VSU    || Vector subtract. ||
-|| BVSU   || Vector subtract from. ||
-|| DOT    || Vector dot product. ||
-|| VXV    || Vector cross product. ||
-|| VPROJ  || Vector projection. ||
-|| DSU    || DP subtract. ||
 || BDSU   || DP subtract from. ||
+|| BOV(B) || Branch on overflow to Basic or Interpreter. ||
+|| BVSU   || Vector subtract from. ||
+|| BZE/GOTO || Branch zero and goto. ||
+|| BPL/BMN  || Branch plus and branch minus. ||
+|| CALL/ITA || Call and store QPRET. ||
+|| CCALL  || Computed call. ||
+|| CGOTO  || Computed goto. ||
+|| COMP   || Complement vector or scalar. ||
+|| COSINE || Cosine. ||
 || DAD    || DP add. ||
+|| DDV    || DP divide by. ||
+|| DLOAD  || Load MPAC with a DP scalar. ||
 || DMP1   || DP multiply. ||
+|| DMPR   || DP multiply and round. ||
+|| DOT    || Vector dot product. ||
+|| DSQ    || DP square. ||
+|| DSU    || DP subtract. ||
+|| GSHIFT || General shift instruction. ||
+|| INCR   || Increment INDEX register. ||
+|| LXA    || Load INDEX from erasable. ||
+|| LXC    || Load INDEX from complement of erasable. ||
+|| MXV    || Matrix post-multiplied by vector. ||
+|| PDDL   || Push down MPAC and reload in DP. ||
+|| PDVL   || Push down and VECTORLOAD. ||
+|| PUSH   || Push MPAC down. ||
 || SETPD  || Set push down pointer (direct only). ||
+|| ROUND  || Round to DP. ||
+|| RTB/BHIZ || Return To Basic and Branch Hi Zero. ||
+|| RVQ    || Return via QPRET. ||
+|| SIGN   || Complement MPAC (V or SC) if X negative. ||
+|| SINE   || Sine. ||
+|| SLOAD  || Load MPAC in single precision. ||
+|| SQRT   || Square root. ||
+|| SSP    || Set single precision into X. ||
+|| STADR  || Push up on store code. ||
+|| STCALL || Store and do a call. || 
+|| STODL  || Store MPAC and reload it in DP with the next address. || 
+|| STOVL  || Store MPAC and reload a vector. || 
+|| STORE  || Store MPAC. || 
+|| SW/    || Switch instructions and available. ||
+|| SXA    || Store index in erasable. ||
+|| TAD    || Triple-precision add to MPAC. ||
+|| TIX    || Transfer on INDEX. ||
+|| TLOAD  || Load MPAC with triple precision. ||
+|| TSLC   || Normalize MPAC (scalar only). ||
+|| UNIT   || Unit vector. ||
+|| V/SC   || Vector divided by a scalar. ||
+|| VAD    || Vector add. ||
+|| VDEF   || Vector define. ||
+|| VLOAD  || Load MPAC with a vector. ||
+|| VPROJ  || Vector projection. ||
+|| VSQ    || Square of length of vector. ||
+|| VSU    || Vector subtract. ||
+|| VXM    || Matrix pre-multiplied by vector. ||
+|| VXSC   || Vector times scalar. || 
+|| VXV    || Vector cross product. ||
+|| XAD    || INDEX register add from erasable. ||
+|| XCHX   || Exchange INDEX with erasable. ||
+|| XSU    || INDEX subtract from erasable. ||
 
 == Register Differences ==
   * Central registers
