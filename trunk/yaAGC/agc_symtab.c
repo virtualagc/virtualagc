@@ -353,17 +353,8 @@ ReadSymbolTable (char *fname)
   //printf ("NumberSymbols=0x%08X\n", symfile.NumberSymbols);
   //printf ("NumberLines=0x%08X\n", symfile.NumberLines);
 
-  // 20090318 RSB.  We override the source path found in the .symtab
-  // file, and instead assume that the source files are in the same directory
-  // as the .symtab file.  Otherwise, there would be no portability at all.
-  strcpy (symfile.SourcePath, fname);
-  for (ss = &symfile.SourcePath[strlen (symfile.SourcePath) - 1]; ss >= &symfile.SourcePath[0]; ss--)
-    if (*ss == '/' || *ss == '\\')
-      {
-        *ss = 0;
-	break;
-      }
-  SourcePathName = strdup (symfile.SourcePath);
+  /* Set the source path if it is not overridden by command-line option */
+  if (SourcePathName == (char*)0) SourcePathName = strdup (symfile.SourcePath);
 
   // Allocate the symbol table
   SymbolTableSize = symfile.NumberSymbols;
