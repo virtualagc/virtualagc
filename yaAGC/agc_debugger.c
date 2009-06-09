@@ -616,7 +616,7 @@ void DbgDisplayInnerFrame(void)
 {
     // If we have the symbol table, then print out the actual source,
     // rather than just a disassembly
-    if (Debugger.Options->symtab)
+    if (Debugger.Options->symtab && Debugger.HaveSymbols)
 	{
 		// Resolve the current program counter into an entry into
 		// the program line table. We pass in the current value of
