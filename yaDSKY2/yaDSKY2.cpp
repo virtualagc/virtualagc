@@ -33,6 +33,10 @@
 				initializers for char *.
 		2009-03-27 RSB	Added hotkeys.  They don't work, but I
 				added them.
+		2009-06-13 RSB	Added stuff for mapping verb-noun patterns
+				to optional commands to be executed on the 
+				PC running the simulation.  This is all the
+				stuff with names like *MATCH* or *Match*.
   
   The yaDSKY2 program is intended to be a completely identical drop-in
   replacement for the yaDSKY program as it exists at 2009-03-06.  
@@ -56,6 +60,8 @@
 #include <iostream>
 
 using namespace std;
+
+#include "wx/textfile.h"
 
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
@@ -190,6 +196,27 @@ static Ind_t Inds[14] = {
 };
 
 #define DEBUG(x) 
+
+// The following stuff relates to a feature used for giving presentations, 
+// in which patterns of DSKY keystrokes can be used to trigger commands on 
+// the computer running the simulation.  All keystroke patterns begin with
+// VERB, and contain at most one VERB.  The array of possible mappings is
+// filled up at boot time from the file DSKY2.matches, if it exists, and is
+// empty otherwise.  The buffer of actual keystrokes is, of course, filled
+// at runtime.  The syntax in DSKY2.matches (which is an ASCII file) is that
+// there is a separate line for each mapping, of the form:
+//	pattern command
+// The pattern consists of any string of the characters VN+-0123456788EPCRK
+// followed by whitespace, followed by any string until the end-of-line is
+// reached. 
+#define MAX_MATCHES 100
+typedef struct {
+  wxString *Pattern;
+  wxString *Command;
+} Match_t;
+static wxString Match = wxT (" ");
+static Match_t Matches[MAX_MATCHES] = { NULL };
+static int NumMatches = 0;
 
 // begin wxGlade: ::extracode
 // end wxGlade
@@ -348,6 +375,11 @@ void MainFrame::on_VerbButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (17);
+  if (NumMatches)
+    {
+      Match = wxT ("V");
+      MatchCheck ();
+    }
 }
 
 
@@ -360,18 +392,33 @@ void MainFrame::on_NounButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (31);
+  if (NumMatches)
+    {
+      Match += wxT ("N");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_PlusButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (26);
+  if (NumMatches)
+    {
+      Match += wxT ("+");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_MinusButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (27);
+  if (NumMatches)
+    {
+      Match += wxT ("-");
+      MatchCheck ();
+    }
 }
 
 
@@ -386,6 +433,11 @@ void MainFrame::on_ZeroButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (16);
+  if (NumMatches)
+    {
+      Match += wxT ("0");
+      MatchCheck ();
+    }
 }
 
 
@@ -400,6 +452,11 @@ void MainFrame::on_SevenButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (7);
+  if (NumMatches)
+    {
+      Match += wxT ("7");
+      MatchCheck ();
+    }
 }
 
 
@@ -414,6 +471,11 @@ void MainFrame::on_FourButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (4);
+  if (NumMatches)
+    {
+      Match += wxT ("4");
+      MatchCheck ();
+    }
 }
 
 
@@ -428,12 +490,22 @@ void MainFrame::on_OneButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (1);
+  if (NumMatches)
+    {
+      Match += wxT ("1");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_EightButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (8);
+  if (NumMatches)
+    {
+      Match += wxT ("8");
+      MatchCheck ();
+    }
 }
 
 
@@ -448,6 +520,11 @@ void MainFrame::on_FiveButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (5);
+  if (NumMatches)
+    {
+      Match += wxT ("5");
+      MatchCheck ();
+    }
 }
 
 
@@ -462,6 +539,11 @@ void MainFrame::on_ThreeButton_pressed (wxCommandEvent &event)
     }
   else
     OutputKeycode (3);
+  if (NumMatches)
+    {
+      Match += wxT ("3");
+      MatchCheck ();
+    }
 }
 
 void MainFrame::on_TwoButton_pressed(wxCommandEvent &event)
@@ -475,12 +557,22 @@ void MainFrame::on_TwoButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (2);
+  if (NumMatches)
+    {
+      Match += wxT ("2");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_NineButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (9);
+  if (NumMatches)
+    {
+      Match += wxT ("9");
+      MatchCheck ();
+    }
 }
 
 
@@ -495,12 +587,22 @@ void MainFrame::on_SixButton_pressed(wxCommandEvent &event)
     }
   else
     OutputKeycode (6);
+  if (NumMatches)
+    {
+      Match += wxT ("6");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_ClrButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (30);
+  if (NumMatches)
+    {
+      Match += wxT ("C");
+      MatchCheck ();
+    }
 }
 
 
@@ -545,24 +647,44 @@ void MainFrame::on_ProButton_pressed(wxCommandEvent &event)
       // Release.
       OutputPro (1);
     }
+  if (NumMatches)
+    {
+      Match += wxT ("P");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_KeyRelButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (25);
+  if (NumMatches)
+    {
+      Match += wxT ("K");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_EntrButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (28);
+  if (NumMatches)
+    {
+      Match += wxT ("E");
+      MatchCheck ();
+    }
 }
 
 
 void MainFrame::on_RsetButton_pressed(wxCommandEvent &event)
 {
   OutputKeycode (18);
+  if (NumMatches)
+    {
+      Match += wxT ("R");
+      MatchCheck ();
+    }
 }
 
 
@@ -966,6 +1088,22 @@ bool yaDskyApp::OnInit()
       MainWindow->CurrentOprErr = MainWindow->BlankOprErr = wxString::FromAscii (Inds[4].GraphicOff);
       MainWindow->ImageSet (MainWindow->OprErrAnnunciator, MainWindow->CurrentOprErr);
     }
+    
+    // Read the optional DSKY2.matches file.
+    wxTextFile Fin;
+    if (Fin.Open (wxT ("DSKY2.matches")))
+      {
+	int i;
+	NumMatches = Fin.GetLineCount ();
+	for (i = 0; i < NumMatches; i++)
+	  {
+	    wxString Line;
+	    Line = Fin.GetLine (i);
+	    Matches[i].Pattern = new wxString (Line.BeforeFirst (' '));
+	    Matches[i].Command = new wxString (Line.AfterFirst (' '));
+	  }
+	Fin.Close ();
+      }
     
     MainWindow->Timer = new TimerClass ();
     MainWindow->Timer->Start (PULSE_INTERVAL);
@@ -1706,7 +1844,18 @@ MainFrame::HalveTheWindow (void)
     Fit ();
 }
 
-
+// this is for the "presentation" feature:  the function checks the buffer 
+// being accumulated from the keypad against the set of patterns read at 
+// power-up from the optional DSKY2.matches file.  If there is a match, then
+// the associated command (in the PC's native operating system) is performed.
+void
+MainFrame::MatchCheck (void)
+{
+  int i;
+  for (i = 0; i < NumMatches; i++)
+    if (Match.IsSameAs (*Matches[i].Pattern))
+      wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
+}
 
 
 

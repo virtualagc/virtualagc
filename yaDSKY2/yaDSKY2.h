@@ -23,6 +23,7 @@
   Reference:	http://www.ibiblio.org/apollo/index.html
   Mods:		2009-03-06 RSB	Began.
   		2009-03-12 RSB	First working version.
+		2009-06-13 RSB	Added MatchCheck().
 */
 
 #include <wx/wx.h>
@@ -120,6 +121,7 @@ private:
     wxTimer *PulseTimer;
     void OutputKeycode (int Keycode);
     void OutputPro (int OffOn);
+    void MatchCheck (void);
 
 //protected:
 public:
