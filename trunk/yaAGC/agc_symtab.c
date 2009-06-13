@@ -333,7 +333,7 @@ ReadSymbolTable (char *fname)
   Symbol_t *symbol;
   SymbolLine_t *Line;
   SymbolFile_t symfile;
-  char *ss;
+  // char *ss;
 
   // Open the symbol table file. If it does not exist, that is ok.
   if (NULL == (fp = rfopen (fname, "rb")))
