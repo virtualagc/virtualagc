@@ -37,6 +37,7 @@
 				to optional commands to be executed on the 
 				PC running the simulation.  This is all the
 				stuff with names like *MATCH* or *Match*.
+		2009-06-14 RSB	Added the "startup" pattern.
   
   The yaDSKY2 program is intended to be a completely identical drop-in
   replacement for the yaDSKY program as it exists at 2009-03-06.  
@@ -1101,6 +1102,8 @@ bool yaDskyApp::OnInit()
 	    Line = Fin.GetLine (i);
 	    Matches[i].Pattern = new wxString (Line.BeforeFirst (' '));
 	    Matches[i].Command = new wxString (Line.AfterFirst (' '));
+	    if (Matches[i].Pattern->IsSameAs ("startup"))
+              wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
 	  }
 	Fin.Close ();
       }
