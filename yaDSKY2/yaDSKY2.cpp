@@ -38,6 +38,11 @@
 				PC running the simulation.  This is all the
 				stuff with names like *MATCH* or *Match*.
 		2009-06-14 RSB	Added the "startup" pattern.
+		2009-06-17 RSB	On Windows XP, a pop-up box appears at 
+				startup when DSKY2.matches doesn't exist.
+				Silly me!  Why didn't I notice that?
+				A separate check of the file's existence
+				is now performed to eliminate that.
   
   The yaDSKY2 program is intended to be a completely identical drop-in
   replacement for the yaDSKY program as it exists at 2009-03-06.  
@@ -63,6 +68,7 @@
 using namespace std;
 
 #include "wx/textfile.h"
+#include "wx/filefn.h"
 
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
@@ -1092,20 +1098,23 @@ bool yaDskyApp::OnInit()
     
     // Read the optional DSKY2.matches file.
     wxTextFile Fin;
-    if (Fin.Open (wxT ("DSKY2.matches")))
+    if (wxFileExists (wxT ("DSKY2.matches")))
       {
-	int i;
-	NumMatches = Fin.GetLineCount ();
-	for (i = 0; i < NumMatches; i++)
+	if (Fin.Open (wxT ("DSKY2.matches")))
 	  {
-	    wxString Line;
-	    Line = Fin.GetLine (i);
-	    Matches[i].Pattern = new wxString (Line.BeforeFirst (' '));
-	    Matches[i].Command = new wxString (Line.AfterFirst (' '));
-	    if (Matches[i].Pattern->IsSameAs ("startup"))
-              wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
+	    int i;
+	    NumMatches = Fin.GetLineCount ();
+	    for (i = 0; i < NumMatches; i++)
+	      {
+		wxString Line;
+		Line = Fin.GetLine (i);
+		Matches[i].Pattern = new wxString (Line.BeforeFirst (' '));
+		Matches[i].Command = new wxString (Line.AfterFirst (' '));
+		if (Matches[i].Pattern->IsSameAs ("startup"))
+		  wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
+	      }
+	    Fin.Close ();
 	  }
-	Fin.Close ();
       }
     
     MainWindow->Timer = new TimerClass ();
