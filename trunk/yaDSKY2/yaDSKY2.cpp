@@ -1110,7 +1110,7 @@ bool yaDskyApp::OnInit()
 		Line = Fin.GetLine (i);
 		Matches[i].Pattern = new wxString (Line.BeforeFirst (' '));
 		Matches[i].Command = new wxString (Line.AfterFirst (' '));
-		if (Matches[i].Pattern->IsSameAs ("startup"))
+		if (Matches[i].Pattern->IsSameAs (wxT("startup")))
 		  wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
 	      }
 	    Fin.Close ();
