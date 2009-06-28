@@ -45,7 +45,10 @@
 		03/17/09 RSB	Make sure there's no .bin file produced on error.
 		06/06/09 RSB	Corrected the address offsets printed in the 
 				bugger word table.  (Was printing addresses like
-				33,1777 rather than 33,3777.)	
+				33,1777 rather than 33,3777.)
+		06/27/09 RSB	Added some stuff for HtmlOut.  Don't know yet if
+				it will actually go anywhere, or if I'm just
+				messing around.	
 */
 
 #define ORIGINAL_YAYUL_C
@@ -169,6 +172,8 @@ main (int argc, char *argv[])
         Force = 1;	
       else if (!strcmp (argv[i], "--g"))
         OutputSymbols = 1;
+      else if (!strcmp (argv[i], "--html"))
+        Html = 1;
       else if (*argv[i] == '-' || *argv[i] == '/')
         {
 	  printf ("Unknown switch \"%s\".\n", argv[i]);
@@ -206,6 +211,11 @@ main (int argc, char *argv[])
     }
   if (InputFilename == NULL || OutputFile == NULL)
     goto Done;  
+  if (Html)
+    {
+      if (HtmlCreate (InputFilename))
+	goto Done;
+    }
     
   // Perform a preliminary pass, whose sole purpose is to identfy
   // all symbols defined in the program.
@@ -308,6 +318,16 @@ main (int argc, char *argv[])
   printf ("\nUnresolved symbols:  %d\n", UnresolvedSymbols ());
   printf ("Fatal errors:  %d\n", Fatals);
   printf ("Warnings:  %d\n", Warnings); 
+  if (HtmlOut != NULL)
+    {
+      fprintf (HtmlOut, "<br>\n");
+      fprintf (HtmlOut, "<h1>Assembly Status</h1>\n");
+      fprintf (HtmlOut, "Unresolved symbols:  %d<br>\n", UnresolvedSymbols ());
+      fprintf (HtmlOut, "Fatal errors:  %d<br>\n", Fatals);
+      fprintf (HtmlOut, "Warnings:  %d<br>\n", Warnings); 
+      fprintf (HtmlOut, "<br>\n");
+      fprintf (HtmlOut, "<h1>Bugger Words</h1>\n");
+    }
 
   // JMS: 07.28
   // We sort the lines by increasing physical address so we can look them
@@ -367,6 +387,8 @@ main (int argc, char *argv[])
 	        GuessBugger = Add (077777 & ~Bank, 077777 & ~Bugger);
 	      ObjectCode[Bank][Value] = GuessBugger;
 	      printf ("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank, 02000 + Value);
+	      if (HtmlOut != NULL)
+	        fprintf (HtmlOut, "Bugger word %05o at %02o,%04o.<br>\n", GuessBugger, Bank, 02000 + Value);
 	    } 
 	  // Output the binary data.  
 	  for (Offset = 0; Offset < 02000; Offset++)
@@ -385,6 +407,7 @@ Done:
   //  fclose (InputFile);
   if (OutputFile != NULL)
     fclose (OutputFile); 
+  HtmlClose ();
   if (RetVal)
     {
       printf ("USAGE:\n"
@@ -399,7 +422,7 @@ Done:
 	      "messages appear on the standard output.\n\n"
 	      "OPTIONS:\n");
       printf ("--help or /?     Display this message.\n"); 
-      printf ("--max-passes=n.  By default, the assembler makes at most\n"
+      printf ("--max-passes=n   By default, the assembler makes at most\n"
               "                 %d passes trying to resolve addresses.\n"
 	      "                 This switch changes that value.\n", MaxPasses);
       printf ("--force          Force creation of core-rope image. (By\n"
@@ -407,6 +430,12 @@ Done:
 	      "                 there were fatal errors during assembly.\n"); 
       //printf ("--g              Output the binary symbol table to the file\n"
       //        "                 InputFile.symtab\n");
+      printf ("--html=F         (This is just experimental and may not do\n"
+      	      "                 anything useful yet.)  Causes an HTML file\n"
+	      "                 (F) to be created, which is the same as the\n"
+	      "                 output listing except that it has syntax\n"
+	      "                 highlighting and hyperlinks from where each\n"
+	      "                 symbol is used back to where it was defined.\n");
     }   
   if (RetVal || Fatals)
     remove (OutputFilename);

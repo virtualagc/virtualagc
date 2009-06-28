@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -41,6 +41,7 @@
 		                Symbol_t for symbol debugging
 		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
 		                table file.
+		06/27/09 RSB	Added HtmlOut.
 */
 
 #ifndef INCLUDED_YAYUL_H
@@ -319,6 +320,12 @@ void PrintSymbolsToFile (FILE *fp);
 int UnresolvedSymbols (void);
 double ScaleFactor (char *s);
 int GetOctOrDec (const char *s, int *Value);
+char *NormalizeFilename (char *SourceName);
+int HtmlCreate (char *Filename);
+void HtmlClose (void);
+char *NormalizeAnchor (char *Name);
+char *NormalizeString (char *Input);
+char *NormalizeStringN (char *Input, int PadTo);
 // From Parse2DEC.c.
 int FetchSymbolPlusOffset (Address_t *OldPc, char *Operand, char *Mod1, Address_t *NewPc);
 // From ParseERASE.c
@@ -354,6 +361,8 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseBANK, ParseEquate,
 
 
 #ifdef ORIGINAL_PASS_C
+int Html = 0;
+FILE *HtmlOut = NULL;
 // Data structure used to map opcode or pseudo-op names to function calls.
 // Basically, for each opcode or pseudo-op, there is an external
 // parser function which can be called.  Aliases such as RELINT, which 
@@ -682,6 +691,9 @@ int OpcodeOffset;
 int ArgType = 0;
   
 #else // ORIGINAL_PASS_C
+
+extern int Html;
+extern FILE *HtmlOut;
 
 extern int ObjectCode[044][02000];
 
