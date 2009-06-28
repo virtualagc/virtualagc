@@ -1,5 +1,5 @@
 /*
-  Copyright 2003 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -19,7 +19,8 @@
 
   Filename:	ParseBANK.c
   Purpose:	Assembles the BANK pseudo-op.
-  Mode:		04/26/03 RSB.	Began.
+  Mode:		04/26/03 RSB	Began.
+  		06/28/09 RSB	Added HTML output.
   
   I'm not actually certain what the BANK pseudo-op is supposed to do with 
   the banks in super-bank 1.  I allow those to be accepted, as bank 
@@ -68,8 +69,14 @@ PrintBankCounts (void)
   int i;
   printf ("Usage Table for Fixed-Memory Banks\n");
   printf ("----------------------------------\n");
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<h1>Usage Table for Fixed-Memory Banks</h1>\n");
   for (i = 0; i < NUM_FIXED_BANKS; i++)
-    printf ("Bank %02o:  %04o/2OOO words used.\n", i, UsedInBank[i]);
+    {
+      printf ("Bank %02o:  %04o/2OOO words used.\n", i, UsedInBank[i]);
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "Bank %02o:  %04o/2OOO words used.<br>\n", i, UsedInBank[i]);
+    }
 }
 
 //------------------------------------------------------------------------

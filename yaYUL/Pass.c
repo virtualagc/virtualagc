@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -38,6 +38,7 @@
 		07/27/05 JMS    Added support for symbolic debugging output.
 		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
 		                table file.
+		06/27/09 RSB	Began adding support for HtmlOut.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
@@ -68,6 +69,17 @@
 #include <ctype.h>
 
 //-------------------------------------------------------------------------
+// Colors for HTML.
+
+#define COLOR_BASIC	"<span style=\"color: rgb(153, 51, 0);\">"
+#define COLOR_DOWNLINK	"<span style=\"color: rgb(0, 153, 0);\">"
+#define COLOR_FATAL	"<span style=\"color: rgb(255, 0, 0);\">"
+#define COLOR_INTERPRET	"<span style=\"color: rgb(255, 102, 0);\">"
+#define COLOR_PSEUDO	"<span style=\"color: rgb(51, 102, 102);\">"
+#define COLOR_SYMBOL	"<span style=\"color: rgb(0, 0, 255);\">"
+#define COLOR_WARNING	"<span style=\"color: rgb(255, 153, 0);\">"
+
+//-------------------------------------------------------------------------
 // Some global data.
 
 Line_t CurrentFilename;
@@ -81,6 +93,7 @@ typedef struct {
   FILE *InputFile;
   Line_t InputFilename;
   int CurrentLineInFile;
+  FILE *HtmlOut;
 } StackedInclude_t;
 static StackedInclude_t StackedIncludes[MAX_STACKED_INCLUDES];
 
@@ -188,6 +201,23 @@ FindInterpreter (const char *Name)
           sizeof (InterpreterOpcodes[0]), CompareInterpreters));
 }
 
+//-------------------------------------------------------------------------
+// This function simply checks to see if a given string is the name of an 
+// interpreter instruction.  It is used only for colorizing HTML output.
+// Returns 1 if yes, 0 if no.
+static int
+IsInterpretive (char *s)
+{
+  if (NULL != FindInterpreter (s))
+    return (1);
+  if (!strcmp (s, "STORE") ||
+      !strcmp (s, "STCALL") ||
+      !strcmp (s, "STODL") ||
+      !strcmp (s, "STOVL"))
+    return (1);
+  return (0);
+}
+
 //------------------------------------------------------------------------
 // Print an Address_t record.  Returns 0 on success, non-zero on error.
 
@@ -195,28 +225,50 @@ int
 AddressPrint (Address_t *Address)
 {
   if (Address->Invalid)
-    printf ("???????  "); 
+    {
+      printf ("???????  "); 
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "???????&nbsp;&nbsp;");
+    }
   else if (Address->Constant)
     {
       printf ("%07o  ", Address->Value & 07777777);
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "%07o&nbsp;&nbsp;", Address->Value & 07777777);
     }  
   else if (Address->Unbanked)
-    printf ("   %04o  ", Address->SReg);
+    {
+      printf ("   %04o  ", Address->SReg);
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;%04o&nbsp;&nbsp;", Address->SReg);
+    }
   else if (Address->Banked)
     {
       if (Address->Erasable)
-	printf ("E%1o,%04o  ", Address->EB, Address->SReg);
+        {
+	  printf ("E%1o,%04o  ", Address->EB, Address->SReg);
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "E%1o,%04o&nbsp;&nbsp;", Address->EB, Address->SReg);
+	}
       else if (Address->Fixed)
-	printf ("%02o,%04o  ", Address->FB + 010 * Address->Super, Address->SReg);
+        {
+	  printf ("%02o,%04o  ", Address->FB + 010 * Address->Super, Address->SReg);
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "%02o,%04o&nbsp;&nbsp;", Address->FB + 010 * Address->Super, Address->SReg);
+	}
       else
 	{
 	  printf ("int-err  ");
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "int-err&nbsp;&nbsp;");
 	  return (1);
 	}  
     }
   else
     {
       printf ("int-err  ");
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "int-err&nbsp;&nbsp;");
       return (1);  
     } 
   return (0);   
@@ -284,8 +336,9 @@ int
 Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
       int *Fatals, int *Warnings)
 {
-  InterpreterMatch_t *iMatch;
+  int IncludeDirective;
   ParserMatch_t *Match;
+  InterpreterMatch_t *iMatch;
   int RetVal = 1, PinchHitting;
   Line_t s;
   FILE *InputFile;
@@ -328,6 +381,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
   };
   for (;;)
     {
+      IncludeDirective = 0;
       OpcodeOffset = 0;
       PinchHitting = 0;
       ArgType = 0;
@@ -341,7 +395,11 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
       ParseOutputRecord = DefaultParseOutput;
       ParseOutputRecord.Bank = ParseInputRecord.Bank;
       if (WriteOutput && ParseInputRecord.ProgramCounter.FB == 022 && ParseInputRecord.ProgramCounter.SReg == 02411)
-        printf ("Hello!\n");
+        {
+          printf ("Hello!\n");
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "Hello!<br>\n");
+	}
       // Get the next line from the file.
       ss = fgets (s, sizeof (s) - 1, InputFile);
       // At end of the file?
@@ -354,14 +412,27 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	      fclose (InputFile);
 	      NumStackedIncludes--;
 	      if (WriteOutput)
-	        printf ("(End of include-file %s, resuming %s)\n", 
-			CurrentFilename,
-			StackedIncludes[NumStackedIncludes].InputFilename);
+	        {
+		  printf ("(End of include-file %s, resuming %s)\n", 
+			  CurrentFilename,
+			  StackedIncludes[NumStackedIncludes].InputFilename);
+		  if (HtmlOut != NULL)
+		    {
+		      fprintf (HtmlOut, "<br>\nEnd of include-file %s.  Parent file is <a href=\"%s\">%s</a><br>\n", 
+			       CurrentFilename,
+			       NormalizeFilename (StackedIncludes[NumStackedIncludes].InputFilename),
+			       StackedIncludes[NumStackedIncludes].InputFilename);
+		      HtmlClose ();
+		      HtmlOut = NULL;
+		      IncludeDirective = 1;
+		    }
+		}
 	      strcpy (CurrentFilename, StackedIncludes[NumStackedIncludes].InputFilename);
 	      InputFile = StackedIncludes[NumStackedIncludes].InputFile;
 	      strcpy (CurrentFilename, 
 	              StackedIncludes[NumStackedIncludes].InputFilename);
-	      CurrentLineInFile = StackedIncludes[NumStackedIncludes].CurrentLineInFile; 
+	      CurrentLineInFile = StackedIncludes[NumStackedIncludes].CurrentLineInFile;
+	      HtmlOut = StackedIncludes[NumStackedIncludes].HtmlOut;
 	      s[0] = 0;
 	    }
 	  else
@@ -396,6 +467,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	  strcpy (StackedIncludes[NumStackedIncludes].InputFilename,
 	  	  CurrentFilename);
 	  StackedIncludes[NumStackedIncludes].CurrentLineInFile = CurrentLineInFile;
+	  StackedIncludes[NumStackedIncludes].HtmlOut = HtmlOut;
 	  NumStackedIncludes++;
 	  if (1 != sscanf (s, "$%s", CurrentFilename))
 	    {
@@ -403,6 +475,22 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	      fprintf (stderr, "%s:%d: Include-directive has no filename.\n", 
 	      	       CurrentFilename, CurrentLineInFile);
 	      goto Done;
+	    }
+	  if (WriteOutput && Html)
+	    {
+	      char *ss;
+	      for (ss = s; *ss; ss++)
+	        if (*ss == '\n')
+		  {
+		    *ss = 0;
+		    break;
+		  }
+	      if (HtmlOut != NULL)
+	        fprintf (HtmlOut, "%06d,%06d: <a href=\"%s\">%s</a><br>\n", 
+			CurrentLineAll, CurrentLineInFile, NormalizeFilename (CurrentFilename), s);
+	      HtmlCreate (CurrentFilename);
+	      if (HtmlOut == NULL)
+		goto Done;
 	    }
 	  InputFile = fopen (CurrentFilename, "r");
 	  if (InputFile == NULL)
@@ -746,9 +834,16 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	}
 
       // Write the output.	
-      if (WriteOutput)
+      if (WriteOutput && !IncludeDirective)
         {
 	  char *Suffix;
+	  
+	  // If doing HTML output, need to put an anchor here if the line has a label
+	  // or is a definition of a variable or constant.
+	  if (HtmlOut != NULL && *ParseInputRecord.Label != 0)
+	    fprintf (HtmlOut, "<a name=\"%s\"></a>", 
+	    	     NormalizeAnchor (ParseInputRecord.Label));
+
 	  if (*ParseInputRecord.Alias != 0)
 	    {
 	      ParseInputRecord.Operator = ParseInputRecord.Alias;
@@ -757,6 +852,10 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
  	  if (ParseOutputRecord.Fatal)
 	    {
 	      printf ("Fatal Error:  %s\n", ParseOutputRecord.ErrorMessage);
+	      if (HtmlOut != NULL)
+	        fprintf (HtmlOut,
+			 COLOR_FATAL "Fatal Error:  %s</span><br>\n", 
+			 ParseOutputRecord.ErrorMessage);
 	      fprintf (stderr, "%s:%d: Fatal: %s\n", 
 	      	       CurrentFilename, CurrentLineInFile, ParseOutputRecord.ErrorMessage);
 	      (*Fatals)++;
@@ -764,11 +863,17 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	  else if (ParseOutputRecord.Warning)  
 	    {
 	      printf ("Warning:  %s\n", ParseOutputRecord.ErrorMessage);
+	      if (HtmlOut != NULL)
+	        fprintf (HtmlOut,
+			 COLOR_WARNING "Warning:  %s</span><br>\n", 
+			 ParseOutputRecord.ErrorMessage);
 	      fprintf (stderr, "%s:%d: Warning: %s\n", 
 	      	       CurrentFilename, CurrentLineInFile, ParseOutputRecord.ErrorMessage);
 	      (*Warnings)++;
 	    }
 	  printf ("%06d,%06d: ", CurrentLineAll, CurrentLineInFile); 
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "%06d,%06d:&nbsp;", CurrentLineAll, CurrentLineInFile);
 	  if (*ParseInputRecord.Label != 0 ||
 	      *ParseInputRecord.FalseLabel != 0 ||
 	      *ParseInputRecord.Operator != 0 ||
@@ -783,21 +888,35 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  AddressPrint (&ParseInputRecord.ProgramCounter);
 		}
 	      else
-	        printf ("         ");	
+	        {
+	          printf ("         ");	
+		  if (HtmlOut != NULL)
+		    fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+		}
 	      if (ParseOutputRecord.LabelValueValid)
 		{
 		  AddressPrint (&ParseOutputRecord.LabelValue);
 		  //printf ("%06o  ", ParseOutputRecord.LabelValue);
 		}
 	      else
-		printf ("         ");  
+	        {
+		  printf ("         ");  
+		  if (HtmlOut != NULL)
+		    fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+		}
 	      if (ParseOutputRecord.NumWords > 0)
 		{
 		  if (ParseOutputRecord.Words[0] == ILLEGAL_SYMBOL_VALUE)
-		    printf ("????? ");
+		    {
+		      printf ("????? ");
+		      if (HtmlOut != NULL)
+		        fprintf (HtmlOut, "?????&nbsp;");
+		    }
 		  else	
 		    {
 		      printf ("%05o ", ParseOutputRecord.Words[0] & 077777);
+		      if (HtmlOut != NULL)
+		        fprintf (HtmlOut, "%05o&nbsp;", ParseOutputRecord.Words[0] & 077777);
 		      // Write the binary.
 		      if (!ParseInputRecord.ProgramCounter.Invalid &&
 		      	  ParseInputRecord.ProgramCounter.Address &&
@@ -829,16 +948,32 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		    }
 		}
 	      else
-		printf ("      ");  
+	        {
+		  printf ("      ");  
+		  if (HtmlOut != NULL)
+		    fprintf (HtmlOut, "%s", NormalizeStringN ("", 6));
+		}
 	      if (ParseOutputRecord.NumWords > 1)
 		{
 		  if (ParseOutputRecord.Words[1] == ILLEGAL_SYMBOL_VALUE)
-		    printf ("????? ");
+		    {
+		      printf ("????? ");
+		      if (HtmlOut != NULL)
+		        fprintf (HtmlOut, "?????&nbsp");
+		    }
 		  else	
-		    printf ("%05o ", ParseOutputRecord.Words[1] & 077777);
+		    {
+		      printf ("%05o ", ParseOutputRecord.Words[1] & 077777);
+		      if (HtmlOut != NULL)
+		        fprintf (HtmlOut, "%05o&nbsp;", ParseOutputRecord.Words[1] & 077777);
+		    }
 		}
 	      else
-		printf ("      ");  
+	        {
+		  printf ("      "); 
+		  if (HtmlOut != NULL)
+		    fprintf (HtmlOut, "%s", NormalizeStringN ("", 6)); 
+		}
 	      if (ArgType == 1)
 	        Suffix = ",1";
 	      else if (ArgType == 2)
@@ -860,8 +995,158 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		      ParseInputRecord.Mod1,
 		      ParseInputRecord.Mod2, 
 		      ParseInputRecord.Comment);
+	      if (HtmlOut != NULL)
+	        {
+		  Symbol_t *Symbol;
+		  int Comma = 0, Dollar = 0, n;
+		  if (*ParseInputRecord.Label == 0)
+		    fprintf (HtmlOut, "&nbsp;%s&nbsp;", NormalizeStringN (ParseInputRecord.Label, 8));
+		  else
+		    fprintf (HtmlOut, 
+			     "&nbsp;" COLOR_SYMBOL "%s</span>&nbsp;", 
+			     NormalizeStringN (ParseInputRecord.Label, 8));
+		  fprintf (HtmlOut, "%s&nbsp;", NormalizeStringN (ParseInputRecord.FalseLabel, 8));
+		  // The Operator could be an interpretive instruction, a basic opcode,
+		  // or a pseudo-op, and we want to colorize them differently in those
+		  // 3 cases.
+		  Match = NULL;
+		  j = IsInterpretive (ParseInputRecord.Operator);
+		  if (j)
+		    fprintf (HtmlOut, COLOR_INTERPRET);
+		  else
+		    {
+		      Match = FindParser (ParseInputRecord.Operator);
+		      if (Match != NULL)
+		        {
+			  // This point, it could still be either a basic opcode, a pseudo-op,
+			  // or a downlink code.
+			  if (!strcmp (ParseInputRecord.Operator, "1DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "2DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "3DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "4DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "5DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "6DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "DNCHAN") ||
+			      !strcmp (ParseInputRecord.Operator, "DNPTR") ||
+			      !strcmp (ParseInputRecord.Operator, "-1DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "-2DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "-3DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "-4DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "-5DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "-6DNADR") ||
+			      !strcmp (ParseInputRecord.Operator, "-DNCHAN") ||
+			      !strcmp (ParseInputRecord.Operator, "-DNPTR"))
+			    fprintf (HtmlOut, COLOR_DOWNLINK);
+			  else if (!strcmp (ParseInputRecord.Operator, "BANK") ||
+			      !strcmp (ParseInputRecord.Operator, "SETLOC") ||
+			      !strcmp (ParseInputRecord.Operator, "EBANK=") ||
+			      !strcmp (ParseInputRecord.Operator, "SBANK=") ||
+			      !strcmp (ParseInputRecord.Operator, "COUNT*") ||
+			      !strcmp (ParseInputRecord.Operator, "EQUALS") ||
+			      !strcmp (ParseInputRecord.Operator, "=") ||
+			      !strcmp (ParseInputRecord.Operator, "CADR") ||
+			      !strcmp (ParseInputRecord.Operator, "OCT") ||
+			      !strcmp (ParseInputRecord.Operator, "DEC") ||
+			      !strcmp (ParseInputRecord.Operator, "2CADR") ||
+			      !strcmp (ParseInputRecord.Operator, "2OCT") ||
+			      !strcmp (ParseInputRecord.Operator, "2DEC") ||
+			      !strcmp (ParseInputRecord.Operator, "GENADR") ||
+			      !strcmp (ParseInputRecord.Operator, "COUNT") ||
+			      !strcmp (ParseInputRecord.Operator, "BNKSUM") ||
+			      !strcmp (ParseInputRecord.Operator, "2DEC*") ||
+			      !strcmp (ParseInputRecord.Operator, "DEC*") ||
+			      !strcmp (ParseInputRecord.Operator, "ERASE") ||
+			      !strcmp (ParseInputRecord.Operator, "BBCON") ||
+			      !strcmp (ParseInputRecord.Operator, "OCTAL") ||
+			      !strcmp (ParseInputRecord.Operator, "-GENADR") ||
+			      !strcmp (ParseInputRecord.Operator, "ECADR") ||
+			      !strcmp (ParseInputRecord.Operator, "-2CADR") ||
+			      !strcmp (ParseInputRecord.Operator, "MM") ||
+			      !strcmp (ParseInputRecord.Operator, "VN") ||
+			      !strcmp (ParseInputRecord.Operator, "ADRES") ||
+			      !strcmp (ParseInputRecord.Operator, "BLOCK"))
+		            fprintf (HtmlOut, COLOR_PSEUDO);
+			  else
+		            fprintf (HtmlOut, COLOR_BASIC);
+			}
+		      else if (!strcmp (ParseInputRecord.Operator, "NOOP"))
+		        {
+			  Match = FindParser ("CAF");
+			  fprintf (HtmlOut, COLOR_BASIC);
+			}
+		    }
+		  fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Operator, 8));
+		  if (j || Match != NULL)
+		    fprintf (HtmlOut, "</span>");
+		  fprintf (HtmlOut, "&nbsp;");
+		  // Detecting a symbol here is a little tricky, since if used for
+		  // the interpreter there may be a suffixed ",1" or ",2" which we
+		  // have to detect and account for.  Or, for the COUNT* pseudo-op,
+		  // may have a prefixed "$$/".
+		  Symbol = GetSymbol (ParseInputRecord.Operand);
+		  n = strlen (ParseInputRecord.Operand);
+		  if (Symbol == NULL)
+		    {
+		      if (n > 2 && ParseInputRecord.Operand[n - 2] == ',' &&
+		          (ParseInputRecord.Operand[n - 1] == '1' || ParseInputRecord.Operand[n - 1] == '2'))
+		        {
+			  ParseInputRecord.Operand[n - 2] = 0;
+			  Symbol = GetSymbol (ParseInputRecord.Operand);
+			  ParseInputRecord.Operand[n - 2] = ',';
+			  if (Symbol != NULL)
+			    {
+			      Comma = 1;
+			      goto FoundComma;
+			    }
+			}
+		      if (!strncmp (ParseInputRecord.Operand, "$$/", 3))
+		        {
+			  Symbol = GetSymbol (&ParseInputRecord.Operand[3]);
+			  if (Symbol != NULL)
+			    {
+			      Dollar = 3;
+			      goto FoundComma;
+			    }
+			}
+		      // Well, it's not a variable or label match.  It could still be an 
+		      // interpreter opcode.
+		      j = IsInterpretive (ParseInputRecord.Operand);
+		      if (j)
+		        fprintf (HtmlOut, COLOR_INTERPRET);
+		      fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Operand, 10));
+		      if (j)
+		        fprintf (HtmlOut, "</span>");
+		      fprintf (HtmlOut, "&nbsp;");
+		    }
+		  else
+		    {
+		    FoundComma:
+		      if (Dollar)
+		        fprintf (HtmlOut, "$$/");
+		      fprintf (HtmlOut, "<a href=\"%s", NormalizeFilename (Symbol->FileName));
+		      if (Comma)
+		        ParseInputRecord.Operand[n - 2] = 0;
+		      fprintf (HtmlOut, "#%s\">", NormalizeAnchor (&ParseInputRecord.Operand[Dollar]));
+		      fprintf (HtmlOut, "%s</a>", NormalizeString (&ParseInputRecord.Operand[Dollar]));
+		      if (Comma)
+		        {
+		          ParseInputRecord.Operand[n - 2] = ',';
+			  fprintf (HtmlOut, "%s", &ParseInputRecord.Operand[n - 2]);
+			}
+		      fprintf (HtmlOut, "&nbsp;");
+		      for (i = n; i < 10; i++)
+		        fprintf (HtmlOut, "&nbsp;");
+		    }
+		  fprintf (HtmlOut, "%s&nbsp;", NormalizeStringN (ParseInputRecord.Mod1, 10));
+		  fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Mod2, 8));
+		  fprintf (HtmlOut, "%s", NormalizeStringN ("", 8));
+		  if (*ParseInputRecord.Comment)
+		    fprintf (HtmlOut, "<i># %s</i>", NormalizeString (ParseInputRecord.Comment));
+		};
 	    }
 	  printf ("\n");  
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "<br>\n");
           //printf ("Super=%o\n", ParseOutputRecord.Bank.CurrentSBank.Super);
 	}		
       		

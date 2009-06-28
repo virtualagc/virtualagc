@@ -47,6 +47,8 @@
 				same as yaYUL.
 		2009-03-17 RSB	Make sure that no .bin or .symtab file 
 				is produced when there is an error.
+		2009-06-28 RSB	Added HtmlOut ... just as an allocation,
+				not as anything functional yet.
 				
   Note that we use yaYUL's symbol-table machinery for handling the
   symbol table.
@@ -67,6 +69,7 @@ static char *Comment, Label[1000], Operator[1000], Variables[1000];
 static char *FileSelected = NULL;
 static int Lines;
 static FILE *Lst;
+FILE *HtmlOut = NULL;
 
 #define MAX_CHECKSUM_REGIONS 16
 typedef struct {
