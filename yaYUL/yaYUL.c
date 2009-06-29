@@ -430,12 +430,17 @@ Done:
 	      "                 there were fatal errors during assembly.\n"); 
       //printf ("--g              Output the binary symbol table to the file\n"
       //        "                 InputFile.symtab\n");
-      printf ("--html=F         (This is just experimental and may not do\n"
-      	      "                 anything useful yet.)  Causes an HTML file\n"
-	      "                 (F) to be created, which is the same as the\n"
-	      "                 output listing except that it has syntax\n"
+      printf ("--html           Causes an HTML file to be created, which is \n"
+      	      "                 the same as the output listing except that it\n"
+	      "                 if a lot more convenient to use. It has syntax\n"
 	      "                 highlighting and hyperlinks from where each\n"
-	      "                 symbol is used back to where it was defined.\n");
+	      "                 symbol is used back to where it was defined.\n"
+	      "                 The top-level HTML file produced is named the\n"
+	      "                 same as the input source file, except with .html\n"
+	      "                 replacing .s (if applicable).  Separate HTML\n"
+	      "                 files are produced for all source files included\n"
+	      "                 with the $ directive, and links between the files\n"
+	      "                 are provided.\n");
     }   
   if (RetVal || Fatals)
     remove (OutputFilename);

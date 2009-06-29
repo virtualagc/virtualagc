@@ -55,6 +55,15 @@
 
 enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 
+// Colors for HTML.
+#define COLOR_BASIC	"<span style=\"color: rgb(153, 51, 0);\">"
+#define COLOR_DOWNLINK	"<span style=\"color: rgb(0, 153, 0);\">"
+#define COLOR_FATAL	"<span style=\"color: rgb(255, 0, 0);\">"
+#define COLOR_INTERPRET	"<span style=\"color: rgb(255, 102, 0);\">"
+#define COLOR_PSEUDO	"<span style=\"color: rgb(51, 102, 102);\">"
+#define COLOR_SYMBOL	"<span style=\"color: rgb(0, 0, 255);\">"
+#define COLOR_WARNING	"<span style=\"color: rgb(255, 153, 0);\">"
+
 #define MAX_LABEL_LENGTH 10	// Max length of symbols (8 + optional ,1 or ,2).
 #define MAX_LINE_LENGTH 132
 #define COMMENT_SEPARATOR '#'

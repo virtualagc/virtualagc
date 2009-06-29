@@ -71,17 +71,6 @@
 #include <ctype.h>
 
 //-------------------------------------------------------------------------
-// Colors for HTML.
-
-#define COLOR_BASIC	"<span style=\"color: rgb(153, 51, 0);\">"
-#define COLOR_DOWNLINK	"<span style=\"color: rgb(0, 153, 0);\">"
-#define COLOR_FATAL	"<span style=\"color: rgb(255, 0, 0);\">"
-#define COLOR_INTERPRET	"<span style=\"color: rgb(255, 102, 0);\">"
-#define COLOR_PSEUDO	"<span style=\"color: rgb(51, 102, 102);\">"
-#define COLOR_SYMBOL	"<span style=\"color: rgb(0, 0, 255);\">"
-#define COLOR_WARNING	"<span style=\"color: rgb(255, 153, 0);\">"
-
-//-------------------------------------------------------------------------
 // Some global data.
 
 Line_t CurrentFilename;
