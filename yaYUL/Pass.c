@@ -39,6 +39,8 @@
 		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
 		                table file.
 		06/27/09 RSB	Began adding support for HtmlOut.
+		06/29/09 RSB	Added some fixes for BASIC vs. PSEUDO-OP in
+				HTML colorizing.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
@@ -208,12 +210,11 @@ FindInterpreter (const char *Name)
 static int
 IsInterpretive (char *s)
 {
+  ParserMatch_t *Match;
   if (NULL != FindInterpreter (s))
     return (1);
-  if (!strcmp (s, "STORE") ||
-      !strcmp (s, "STCALL") ||
-      !strcmp (s, "STODL") ||
-      !strcmp (s, "STOVL"))
+  Match = FindParser (s);
+  if (Match != NULL && Match->OpType == OP_INTERPRETER)
     return (1);
   return (0);
 }
@@ -1007,65 +1008,23 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 			     NormalizeStringN (ParseInputRecord.Label, 8));
 		  fprintf (HtmlOut, "%s&nbsp;", NormalizeStringN (ParseInputRecord.FalseLabel, 8));
 		  // The Operator could be an interpretive instruction, a basic opcode,
-		  // or a pseudo-op, and we want to colorize them differently in those
-		  // 3 cases.
+		  // a pseudo-op, or a downlink code, and we want to colorize them 
+		  // differently in those cases.
 		  Match = NULL;
-		  j = IsInterpretive (ParseInputRecord.Operator);
-		  if (j)
+		  iMatch = FindInterpreter (ParseInputRecord.Operator);
+		  if (iMatch != NULL)
 		    fprintf (HtmlOut, COLOR_INTERPRET);
 		  else
 		    {
 		      Match = FindParser (ParseInputRecord.Operator);
 		      if (Match != NULL)
 		        {
-			  // This point, it could still be either a basic opcode, a pseudo-op,
-			  // or a downlink code.
-			  if (!strcmp (ParseInputRecord.Operator, "1DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "2DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "3DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "4DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "5DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "6DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "DNCHAN") ||
-			      !strcmp (ParseInputRecord.Operator, "DNPTR") ||
-			      !strcmp (ParseInputRecord.Operator, "-1DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "-2DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "-3DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "-4DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "-5DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "-6DNADR") ||
-			      !strcmp (ParseInputRecord.Operator, "-DNCHAN") ||
-			      !strcmp (ParseInputRecord.Operator, "-DNPTR"))
+			  if (Match->OpType == OP_DOWNLINK)
 			    fprintf (HtmlOut, COLOR_DOWNLINK);
-			  else if (!strcmp (ParseInputRecord.Operator, "BANK") ||
-			      !strcmp (ParseInputRecord.Operator, "SETLOC") ||
-			      !strcmp (ParseInputRecord.Operator, "EBANK=") ||
-			      !strcmp (ParseInputRecord.Operator, "SBANK=") ||
-			      !strcmp (ParseInputRecord.Operator, "COUNT*") ||
-			      !strcmp (ParseInputRecord.Operator, "EQUALS") ||
-			      !strcmp (ParseInputRecord.Operator, "=") ||
-			      !strcmp (ParseInputRecord.Operator, "CADR") ||
-			      !strcmp (ParseInputRecord.Operator, "OCT") ||
-			      !strcmp (ParseInputRecord.Operator, "DEC") ||
-			      !strcmp (ParseInputRecord.Operator, "2CADR") ||
-			      !strcmp (ParseInputRecord.Operator, "2OCT") ||
-			      !strcmp (ParseInputRecord.Operator, "2DEC") ||
-			      !strcmp (ParseInputRecord.Operator, "GENADR") ||
-			      !strcmp (ParseInputRecord.Operator, "COUNT") ||
-			      !strcmp (ParseInputRecord.Operator, "BNKSUM") ||
-			      !strcmp (ParseInputRecord.Operator, "2DEC*") ||
-			      !strcmp (ParseInputRecord.Operator, "DEC*") ||
-			      !strcmp (ParseInputRecord.Operator, "ERASE") ||
-			      !strcmp (ParseInputRecord.Operator, "BBCON") ||
-			      !strcmp (ParseInputRecord.Operator, "OCTAL") ||
-			      !strcmp (ParseInputRecord.Operator, "-GENADR") ||
-			      !strcmp (ParseInputRecord.Operator, "ECADR") ||
-			      !strcmp (ParseInputRecord.Operator, "-2CADR") ||
-			      !strcmp (ParseInputRecord.Operator, "MM") ||
-			      !strcmp (ParseInputRecord.Operator, "VN") ||
-			      !strcmp (ParseInputRecord.Operator, "ADRES") ||
-			      !strcmp (ParseInputRecord.Operator, "BLOCK"))
+			  else if (Match->OpType == OP_PSEUDO)
 		            fprintf (HtmlOut, COLOR_PSEUDO);
+			  else if (Match->OpType == OP_INTERPRETER)
+		            fprintf (HtmlOut, COLOR_INTERPRET);
 			  else
 		            fprintf (HtmlOut, COLOR_BASIC);
 			}
@@ -1076,7 +1035,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 			}
 		    }
 		  fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Operator, 8));
-		  if (j || Match != NULL)
+		  if (iMatch != NULL || Match != NULL)
 		    fprintf (HtmlOut, "</span>");
 		  fprintf (HtmlOut, "&nbsp;");
 		  // Detecting a symbol here is a little tricky, since if used for
@@ -1141,7 +1100,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Mod2, 8));
 		  fprintf (HtmlOut, "%s", NormalizeStringN ("", 8));
 		  if (*ParseInputRecord.Comment)
-		    fprintf (HtmlOut, "<i># %s</i>", NormalizeString (ParseInputRecord.Comment));
+		    fprintf (HtmlOut, "<i>#&nbsp;%s</i>", NormalizeString (ParseInputRecord.Comment));
 		};
 	    }
 	  printf ("\n");  
