@@ -7,7 +7,6 @@
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
-
   yaAGC is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -49,6 +48,7 @@
 				is produced when there is an error.
 		2009-06-28 RSB	Added HtmlOut ... just as an allocation,
 				not as anything functional yet.
+		2009-06-29 RSB	HTML output now appears to be working.
 				
   Note that we use yaYUL's symbol-table machinery for handling the
   symbol table.
@@ -70,6 +70,7 @@ static char *FileSelected = NULL;
 static int Lines;
 static FILE *Lst;
 FILE *HtmlOut = NULL;
+int Html = 0;
 
 #define MAX_CHECKSUM_REGIONS 16
 typedef struct {
@@ -86,6 +87,8 @@ ErrorMsg (char *Msg)
   ErrCount++;
   fprintf (Lst, "*** Error *** %s\n", Msg);
   fprintf (stderr, "%s:%d: Error: %s\n", FileSelected, Lines, Msg);
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, COLOR_FATAL "*** Error *** %s</span><br>\n", NormalizeString (Msg));
 }
 
 static void
@@ -94,6 +97,8 @@ WarningMsg (char *Msg)
   WarnCount++;
   fprintf (Lst, "*** Warning *** %s\n", Msg);
   fprintf (stderr, "%s:%d: Warning: %s\n", FileSelected, Lines, Msg);
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, COLOR_WARNING "*** Warning *** %s</span><br>\n", NormalizeString (Msg));
 }
 
 static void
@@ -101,9 +106,9 @@ Msg (char *Msg)
 {
   fprintf (Lst, "%s\n", Msg);
   fprintf (stderr, "%s\n", Msg);
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "%s<br>\n", NormalizeString (Msg));
 }
-
-#if 0
 
 //------------------------------------------------------------------------
 // Is the character something that can appear in a label?  0 if no, 
@@ -118,8 +123,6 @@ IsLabelSym (char c)
   return (1);
 }
 
-#endif // 0
-
 //------------------------------------------------------------------------
 // Print an Address_t record.  Returns 0 on success, non-zero on error.
 
@@ -127,16 +130,28 @@ int
 AddressPrint (Address_t *Address)
 {
   if (Address->Invalid)
-    fprintf (Lst, "????\t"); 
+    {
+      fprintf (Lst, "????\t"); 
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "????&nbsp;&nbsp;&nbsp;&nbsp;");
+    }
   else if (Address->Constant)
     {
       fprintf (Lst, "%04o\t", Address->Value & 07777);
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "%04o&nbsp;&nbsp;&nbsp;&nbsp;", Address->Value & 07777);
     }  
   else if (Address->Address)
-    fprintf (Lst, "%04o\t", Address->SReg & 07777);
+    {
+      fprintf (Lst, "%04o\t", Address->SReg & 07777);
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "%04o&nbsp;&nbsp;&nbsp;&nbsp;", Address->SReg & 07777);
+    }
   else
     {
       fprintf (Lst, "int-err ");
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "int-err&nbsp;");
       return (1);  
     } 
   return (0);   
@@ -150,19 +165,35 @@ PrintSymbolsToFileL (FILE *fp)
 {
   extern Symbol_t *SymbolTable;
   extern int SymbolTableSize;
+  char s[137];
   int i;
   fprintf (fp, "Symbol Table\n"
           "------------\n");
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<h1>Symbol Table</h1>\n");
   for (i = 0; i < SymbolTableSize; i++)
     {
       if (!(i & 3) && i != 0)
-        fprintf (fp, "\n");
-      fprintf (fp, "%6d: %-*s ", i + 1, MAX_LABEL_LENGTH, SymbolTable[i].Name);
+        {
+          fprintf (fp, "\n");
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "<br>\n");
+	}
+      sprintf (s, "%6d: %-*s ", i + 1, MAX_LABEL_LENGTH, SymbolTable[i].Name);
+      fprintf (fp, "%s", s);
+      if (HtmlOut != NULL)
+        fprintf (HtmlOut, "%s", NormalizeString (s));
       AddressPrint (&SymbolTable[i].Value);
       if (3 != (i & 3))
-        fprintf (fp, "\t");
+        {
+          fprintf (fp, "\t");
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+	}
     }
   fprintf (fp, "\n");  
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<br>\n");
 }
 
 //------------------------------------------------------------------------
@@ -178,8 +209,27 @@ PrintComments (int i)
       else
 	i = 1;
       fprintf (Lst, "%*s# %s", i, "", Comment);
+      if (HtmlOut != NULL)
+        {
+	  for (; i > 0; i--)
+	    fprintf (HtmlOut, "&nbsp;");
+	  fprintf (HtmlOut, "&nbsp;&nbsp;<i>#&nbsp;%s</i>", NormalizeString (Comment));
+	}
     }
   fprintf (Lst, "\n");
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<br>\n");
+}
+
+static void
+HtmlChar (c)
+{
+  if (c == '<')
+    fprintf (HtmlOut, "&lt;");
+  else if (c == '&')
+    fprintf (HtmlOut, "&amp;");
+  else
+    fputc (c, HtmlOut);
 }
 
 static void
@@ -187,7 +237,65 @@ PrintVariablesAndComments (void)
 {
   int i;
   i = fprintf (Lst, "%s", Variables);
+  if (HtmlOut != NULL)
+    {
+      // This is tricky, because the operand field (Variables) often
+      // looks something like "DIAT+1,1", where just "DIAT" is an
+      // actual symbol and the other stuff represents operations on
+      // it.  So we actually have to parse the field using characters
+      // that are illegal for symbols as delimiters, and then check the
+      // individual parts to see if they are defined symbols.  Whew!
+      char *s;
+      // Eliminate gunk at beginning.
+      for (s = Variables; *s && !IsLabelSym (*s); s++)
+        HtmlChar (*s);
+      // Now loop on all the potential symbols remaining.
+      while (*s)
+        {
+	  char *ss, c;
+	  Symbol_t *Symbol;
+	  // Find the potential variable itself.
+	  for (ss = s; *ss && IsLabelSym (*ss); ss++);
+	  // Re-delimit it.
+	  c = *ss;
+	  *ss = 0;
+	  // Is it a real symbol?
+	  Symbol = GetSymbol (s);
+	  // Output it, with a hyperlink if appropriate.
+	  if (Symbol != NULL)
+	    fprintf (HtmlOut, "<a href=\"#%s\">", NormalizeAnchor (s));
+	  fprintf (HtmlOut, "%s", NormalizeString (s));
+	  if (Symbol != NULL)
+	    fprintf (HtmlOut, "</a>");
+	  // Fix the delimiting.
+	  *ss = c;
+	  // Take care of the non-symbol delimiting stuff.
+	  for (s = ss; *s && !IsLabelSym (*s); s++)
+	    HtmlChar (*s);
+	}
+    }
   PrintComments (i);
+}
+
+//------------------------------------------------------------------
+// Shortcuts for outputting various stuff to the HTML.
+
+static void
+HtmlLabel (char *Label)
+{
+  if (Label[0])
+    fprintf (HtmlOut, 
+             "<a name=\"%s\"></a>" COLOR_SYMBOL "%s</span>&nbsp;&nbsp;", 
+             NormalizeAnchor (Label),
+    	     NormalizeStringN (Label, 6));
+  else
+    fprintf (HtmlOut, "%s", NormalizeStringN (Label, 8));
+}
+
+static void
+HtmlOperator (char *Color, char *Operator)
+{
+  fprintf (HtmlOut, "%s%s</span>", Color, NormalizeStringN (Operator, 8));
 }
 
 //------------------------------------------------------------------
@@ -624,6 +732,12 @@ PassLemap (FILE *fp, int Action)
 	{
 	  fprintf (Lst, "%04o: %04o                        \t%-6s\tCHECKSUM RANGE %04o-%04o\n",
 		   Lines, Location, Label, i, j);
+	  if (HtmlOut != NULL)
+	    {
+	      fprintf (HtmlOut, "%04o:&nbsp;%04o%s", Lines, Location, NormalizeStringN ("", 32));
+	      HtmlLabel (Label);
+	      fprintf (HtmlOut, COLOR_PSEUDO "CHECKSUM&nbsp;RANGE</span>&nbsp;%04o-%04o<br>\n", i, j);
+	    }
 	  if (NumChecksumRegions < MAX_CHECKSUM_REGIONS)
 	    {
 	      ChecksumRegions[NumChecksumRegions].Start = i;
@@ -641,16 +755,31 @@ PassLemap (FILE *fp, int Action)
         {
 	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s",
 		   Lines, Location, Label, Operator);
+	  if (HtmlOut != NULL)
+	    {
+	      fprintf (HtmlOut, "%04o:&nbsp;%04o%s", Lines, Location, NormalizeStringN ("", 31));
+	      HtmlLabel (Label);
+	      HtmlOperator (COLOR_PSEUDO, Operator);
+	    }
 	  PrintComments (24);
 	  break;
 	}
       else if (Operator[0] == 0)
         {
 	  if (Comment == NULL || Comment[0] == 0)
-	    fprintf (Lst, "%04o:\n", Lines);	  
+	    {
+	      fprintf (Lst, "%04o:\n", Lines);
+	      if (HtmlOut != NULL)
+	        fprintf (HtmlOut, "%04o:<br>\n", Lines);	  
+	    }
 	  else
 	    {
 	      fprintf (Lst, "%04o:                             \t# %s\n", Lines, Comment);
+	      if (HtmlOut != NULL)
+	        {
+                  fprintf (HtmlOut, "%04o:%s", Lines, NormalizeStringN ("", 37));
+		  fprintf (HtmlOut, "<i>#&nbsp;%s</i><br>\n", NormalizeString (Comment));
+		}
 	      if (SingAlong != NULL && !strncmp (Comment, "PAGE ", 5))
 		fprintf (SingAlong, "\n# %s ---------------------\n", Comment);
 	    }
@@ -666,22 +795,48 @@ PassLemap (FILE *fp, int Action)
 	      ErrorMsg ("Label not found.");
 	      fprintf (Lst, "%04o:                             \t%-6s\t%-8s",
 		       Lines, Label, Operator);
+	      if (HtmlOut != NULL)
+	        {
+		  fprintf (HtmlOut, "%04o:%s", Lines, NormalizeStringN ("", 32));
+	          HtmlLabel (Label);
+		  HtmlOperator (COLOR_PSEUDO, Operator);
+		}
 	    }
 	  else if (Symbol->Value.Invalid)
 	    {
 	      ErrorMsg ("Label not resolved.");
-	      fprintf (Lst, "%04o:                             t%-6st%-8s",
+	      fprintf (Lst, "%04o:                             \t%-6s\t%-8s",
 		       Lines, Label, Operator);
+	      if (HtmlOut != NULL)
+	        {
+		  fprintf (HtmlOut, "%04o:%s", Lines, NormalizeStringN ("", 32));
+		  HtmlLabel (Label);
+		  HtmlOperator (COLOR_PSEUDO, Operator);
+		}
 	    }
 	  else if (Symbol->Value.Address)
 	    {
 	      fprintf (Lst, "%04o:                         %04o\t%-6s\t%-8s",
 		       Lines, Symbol->Value.SReg, Label, Operator);
+	      if (HtmlOut)
+	        {
+		  fprintf (HtmlOut, "%04o:%s", Lines, NormalizeStringN ("", 25));
+		  fprintf (HtmlOut, "%04o%s", Symbol->Value.SReg, NormalizeStringN ("", 8));
+		  HtmlLabel (Label);
+		  HtmlOperator (COLOR_PSEUDO, Operator);
+		}
 	    }
 	  else if (Symbol->Value.Constant)
 	    {
 	      fprintf (Lst, "%04o:                         %04o\t%-6s\t%-8s",
 		       Lines, Symbol->Value.Value, Label, Operator);
+	      if (HtmlOut)
+	        {
+		  fprintf (HtmlOut, "%04o:%s", Lines, NormalizeStringN ("", 25));
+		  fprintf (HtmlOut, "%04o%s", Symbol->Value.Value, NormalizeStringN ("", 8));
+		  HtmlLabel (Label);
+		  HtmlOperator (COLOR_PSEUDO, Operator);
+		}
 	    }
 	  else
 	    {
@@ -690,6 +845,13 @@ PassLemap (FILE *fp, int Action)
 		  WarningMsg ("Symbol value out of range.");
 		  fprintf (Lst, "%04o:                         %04o\t%-6s\t%-8s",
 			   Lines, 07777 & Symbol->Value.Value, Label, Operator);
+		  if (HtmlOut)
+		    {
+		      fprintf (HtmlOut, "%04o:%s", Lines, NormalizeStringN ("", 25));
+		      fprintf (HtmlOut, "%04o%s", 07777 & Symbol->Value.Value, NormalizeStringN ("", 8));
+		      HtmlLabel (Label);
+		      HtmlOperator (COLOR_PSEUDO, Operator);
+		    }
 		}
 	    }
 	  PrintVariablesAndComments ();
@@ -727,12 +889,24 @@ PassLemap (FILE *fp, int Action)
 	        {
 		  fprintf (Lst, "%04o: %04o           %06o       \t%-6s\t%-8s",
 			   Lines, Location, Memory[Location], Label, Operator);
+		  if (HtmlOut != NULL)
+		    {
+		      fprintf (HtmlOut, "%04o:&nbsp;%04o%s", Lines, Location, NormalizeStringN ("", 11));
+		      fprintf (HtmlOut, "%06o%s", Memory[Location], NormalizeStringN ("", 15));
+		      HtmlLabel (Label);
+		      HtmlOperator (COLOR_PSEUDO, Operator);
+		    }
 		  PrintVariablesAndComments ();
 		}
 	      else
 	        {
 		  fprintf (Lst, "%04o: %04o           %06o\n",
 			   Lines, Location, Memory[Location]);
+		  if (HtmlOut != NULL)
+		    {
+		      fprintf (HtmlOut, "%04o:&nbsp;%04o%s", Lines, Location, NormalizeStringN ("", 11));
+		      fprintf (HtmlOut, "%06o%s<br>\n", Memory[Location], NormalizeStringN ("", 15));
+		    }
 		}
 	      if (SingAlong != NULL)
 	        fprintf (SingAlong, "%op\n", Memory[Location]);
@@ -757,6 +931,13 @@ PassLemap (FILE *fp, int Action)
 	    }
 	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s",
 	           Lines, Location, Label, Operator);
+	  if (HtmlOut != NULL)
+	    {
+	      fprintf (HtmlOut, "%04o:&nbsp;%04o%s",
+		       Lines, Location, NormalizeStringN ("", 32));
+	      HtmlLabel (Label);
+	      HtmlOperator (COLOR_PSEUDO, Operator);
+	    }
 	  PrintVariablesAndComments ();
 	  if (SingAlong != NULL)
 	    fprintf (SingAlong, "org %op\n", Location);
@@ -785,12 +966,26 @@ PassLemap (FILE *fp, int Action)
 	    }
 	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s",
 	           Lines, Location, Label, Operator);
+	  if (HtmlOut != NULL)
+	    {
+	      fprintf (HtmlOut, "%04o:&nbsp;%04o%s",
+		       Lines, Location, NormalizeStringN ("", 31));
+	      HtmlLabel (Label);
+	      HtmlOperator (COLOR_PSEUDO, Operator);
+	    }
 	  PrintVariablesAndComments ();
 	}
       else if (!strcmp (Operator, "BSS"))
 	{
 	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s",
 	           Lines, Location, Label, Operator);
+	  if (HtmlOut != NULL)
+	    {
+	      fprintf (HtmlOut, "%04o:&nbsp;%04o%s",
+		       Lines, Location, NormalizeStringN ("", 31));
+	      HtmlLabel (Label);
+	      HtmlOperator (COLOR_PSEUDO, Operator);
+	    }
 	  PrintVariablesAndComments ();
 	  EvaluateExpression (Variables, &Address, Location, 0);
 	  i = Location;
@@ -929,6 +1124,13 @@ PassLemap (FILE *fp, int Action)
 	  Valid[Location] = 1;
 	  fprintf (Lst, "%04o: %04o %02o %01o %04o              \t%-6s\t%-8s",
 	           Lines, Location, Opcode, Tag, Addr, Label, Operator);
+	  if (HtmlOut != NULL)
+	    {
+	      fprintf (HtmlOut, "%04o:&nbsp;%04o&nbsp;%02o&nbsp;%01o&nbsp;%04o%s",
+		       Lines, Location, Opcode, Tag, Addr, NormalizeStringN ("", 22));
+	      HtmlLabel (Label);
+	      HtmlOperator (COLOR_BASIC, Operator);
+	    }
 	  PrintVariablesAndComments ();
 	  if (SingAlong != NULL)
 	    fprintf (SingAlong, "%02op %op %04op\n", Opcode, Tag, Addr);
@@ -985,6 +1187,8 @@ main (int argc, char *argv[])
     {
       if (!strncmp (argv[i], "--compare=", 10))
         Compare = &argv[i][10];
+      else if (!strcmp (argv[i], "--html"))
+        Html = 1;
       else if (!strcmp (argv[i], "--help"))
         {
 	  printf ("Usage:\n");
@@ -1000,6 +1204,14 @@ main (int argc, char *argv[])
 	  printf ("              fatal errors and warnings.  This allows (for\n");
 	  printf ("              example) for a file comparison to be the basis\n");
 	  printf ("              of a regression test run from a makefile.\n");
+	  printf ("--html        Causes an HTML file to be created, which is \n"
+		  "              the same as the output listing except that it\n"
+		  "              if a lot more convenient to use. It has syntax\n"
+		  "              highlighting and hyperlinks from where each\n"
+		  "              symbol is used back to where it was defined.\n"
+		  "              The top-level HTML file produced is named the\n"
+		  "              same as the input source file, except with .html\n"
+		  "              replacing .s (if applicable).\n");
 	  RetVal++;
 	}
       else if (argv[i][0] == '-' || FileSelected != NULL)
@@ -1017,6 +1229,14 @@ main (int argc, char *argv[])
     {
       fprintf (stderr, "The source file \"%s\" does not exist.\n", FileSelected);
       return (1);
+    }
+  if (Html)
+    {
+      if (HtmlCreate (FileSelected))
+        {
+	  fclose (fp);
+	  return (1);
+	}
     }
 
   // Process the input file.  Keep doing passes until all symbols
@@ -1046,6 +1266,9 @@ main (int argc, char *argv[])
   // Compute Checksum, and store at the last address in memory.
   // (Or compare it to the value that is already there.
   fprintf (Lst, "\n");
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<br>\n<h1>Checksums</h1>\n");
+    
   if (NumChecksumRegions == 0)
     {
       NumChecksumRegions = 1;
@@ -1075,6 +1298,12 @@ main (int argc, char *argv[])
       fprintf (Lst, "CHECKSUM at %04o (%04o-%04o) = %06o\n", 
                ChecksumRegions[j].Store, ChecksumRegions[j].Start,
 	       ChecksumRegions[j].Stop, ChecksumRegions[j].Sum);
+      if (HtmlOut != NULL)
+        {
+	  fprintf (HtmlOut, "CHECKSUM&nbsp;at&nbsp;%04o&nbsp;(%04o-%04o)&nbsp;=&nbsp;%06o<br>\n", 
+		   ChecksumRegions[j].Store, ChecksumRegions[j].Start,
+		   ChecksumRegions[j].Stop, ChecksumRegions[j].Sum);
+	}
     }    
 
   // Output the binary
@@ -1105,8 +1334,12 @@ main (int argc, char *argv[])
 
   // Print symbol table.
   fprintf (Lst, "\n");
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<br>\n");
   PrintSymbolsToFileL (Lst);
   fprintf (Lst, "\n");
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<br>\n");
   ClearSymbols ();
   if (DupSymbols)
     sprintf (s, "%d duplicate symbols.", DupSymbols);
@@ -1117,11 +1350,22 @@ main (int argc, char *argv[])
   // Do a file-comparison, if appropriate.
   if (Compare != NULL)
     {
+      if (HtmlOut != NULL)
+	fprintf (HtmlOut, "<br>\n<h1>Binary-File Comparison</h1>\n");
+    
       fprintf (Lst, "\n");
-      fprintf (Lst, "File comparison with \"%s\":\n", Compare); 
+      fprintf (Lst, "File comparison with \"%s\":\n", Compare);
+      if (HtmlOut != NULL)
+        {
+	  fprintf (HtmlOut, "File&nbsp;comparison&nbsp;with&nbsp;\"%s\":<br>\n", NormalizeString (Compare));
+	} 
       fp = fopen (Compare, "rb");
       if (fp == NULL)
-        fprintf (Lst, "\tCould not open file.\n");
+        {
+          fprintf (Lst, "\tCould not open file.\n");
+	  if (HtmlOut != NULL)
+	    fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;" COLOR_WARNING "Could not open file.</span><br>\n");
+	}
       else
         {
 	  int Location;
@@ -1133,18 +1377,28 @@ main (int argc, char *argv[])
 	      i += 0x10000 * fgetc (fp);
 	      i += 0x1000000 * fgetc (fp);
 	      if (i != Memory[Location])
-	        fprintf (Lst, "\t%04o:  %06o != %06o\n", 
-		         Location, i, Memory[Location]);
+	        {
+		  fprintf (Lst, "\t%04o:  %06o != %06o\n", 
+			   Location, i, Memory[Location]);
+		  if (HtmlOut != NULL)
+		    fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;%04o:&nbsp;&nbsp;%06o&nbsp;!=&nbsp;%06o<br>\n", 
+			   Location, i, Memory[Location]);
+		}
 	    }
 	  fclose (fp);
 	  if (RetVal == 0)
 	    {
 	      fprintf (Lst, "\tBinary file is correct!\n");
+	      if (HtmlOut != NULL)
+	        fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;Binary file is correct!<br>\n");
 	      printf ("Binary file is correct!\n");
 	    }
 	  else
 	    {
 	      fprintf (Lst, "\tBinary file comparison failed with %d mismatches.\n", RetVal);
+	      if (HtmlOut != NULL)
+	        fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;Binary&nbsp;file&nbsp;comparison"
+		                  "&nbsp;failed&nbsp;with&nbsp;%d&nbsp;mismatches.<br>\n", RetVal);
 	      printf ("Binary file comparison failed with %d mismatches.\n", RetVal);
 	    }
 	}
@@ -1154,6 +1408,9 @@ main (int argc, char *argv[])
     RetVal = ErrCount + WarnCount;
 
   // All done!
+  if (HtmlOut != NULL)
+    fprintf (HtmlOut, "<br>\n<h1>Assembly Status</h1>\n");
+    
   if (RetVal == 0  && ErrCount == 0 && WarnCount == 0)
     Msg ("Successful!");
   else
@@ -1168,6 +1425,7 @@ main (int argc, char *argv[])
       remove ("yaLEMAP.bin");
       remove ("yaLEMAP.symtab");
     }
+  HtmlClose ();
   return (RetVal);
 
 }
