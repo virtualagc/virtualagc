@@ -75,7 +75,7 @@ PrintBankCounts (void)
     {
       printf ("Bank %02o:  %04o/2OOO words used.\n", i, UsedInBank[i]);
       if (HtmlOut != NULL)
-        fprintf (HtmlOut, "Bank %02o:  %04o/2OOO words used.<br>\n", i, UsedInBank[i]);
+        fprintf (HtmlOut, "Bank %02o:  %04o/2OOO words used.\n", i, UsedInBank[i]);
     }
 }
 

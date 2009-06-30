@@ -218,19 +218,19 @@ AddressPrint (Address_t *Address)
     {
       printf ("???????  "); 
       if (HtmlOut != NULL)
-        fprintf (HtmlOut, "???????&nbsp;&nbsp;");
+        fprintf (HtmlOut, "???????  ");
     }
   else if (Address->Constant)
     {
       printf ("%07o  ", Address->Value & 07777777);
       if (HtmlOut != NULL)
-        fprintf (HtmlOut, "%07o&nbsp;&nbsp;", Address->Value & 07777777);
+        fprintf (HtmlOut, "%07o  ", Address->Value & 07777777);
     }  
   else if (Address->Unbanked)
     {
       printf ("   %04o  ", Address->SReg);
       if (HtmlOut != NULL)
-        fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;%04o&nbsp;&nbsp;", Address->SReg);
+        fprintf (HtmlOut, "   %04o  ", Address->SReg);
     }
   else if (Address->Banked)
     {
@@ -238,19 +238,19 @@ AddressPrint (Address_t *Address)
         {
 	  printf ("E%1o,%04o  ", Address->EB, Address->SReg);
 	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, "E%1o,%04o&nbsp;&nbsp;", Address->EB, Address->SReg);
+	    fprintf (HtmlOut, "E%1o,%04o  ", Address->EB, Address->SReg);
 	}
       else if (Address->Fixed)
         {
 	  printf ("%02o,%04o  ", Address->FB + 010 * Address->Super, Address->SReg);
 	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, "%02o,%04o&nbsp;&nbsp;", Address->FB + 010 * Address->Super, Address->SReg);
+	    fprintf (HtmlOut, "%02o,%04o  ", Address->FB + 010 * Address->Super, Address->SReg);
 	}
       else
 	{
 	  printf ("int-err  ");
 	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, "int-err&nbsp;&nbsp;");
+	    fprintf (HtmlOut, "int-err  ");
 	  return (1);
 	}  
     }
@@ -258,7 +258,7 @@ AddressPrint (Address_t *Address)
     {
       printf ("int-err  ");
       if (HtmlOut != NULL)
-        fprintf (HtmlOut, "int-err&nbsp;&nbsp;");
+        fprintf (HtmlOut, "int-err  ");
       return (1);  
     } 
   return (0);   
@@ -388,7 +388,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
         {
           printf ("Hello!\n");
 	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, "Hello!<br>\n");
+	    fprintf (HtmlOut, "Hello!\n");
 	}
       // Get the next line from the file.
       ss = fgets (s, sizeof (s) - 1, InputFile);
@@ -408,7 +408,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 			  StackedIncludes[NumStackedIncludes].InputFilename);
 		  if (HtmlOut != NULL)
 		    {
-		      fprintf (HtmlOut, "<br>\nEnd of include-file %s.  Parent file is <a href=\"%s\">%s</a><br>\n", 
+		      fprintf (HtmlOut, "\nEnd of include-file %s.  Parent file is <a href=\"%s\">%s</a>\n", 
 			       CurrentFilename,
 			       NormalizeFilename (StackedIncludes[NumStackedIncludes].InputFilename),
 			       StackedIncludes[NumStackedIncludes].InputFilename);
@@ -476,8 +476,8 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		    break;
 		  }
 	      if (HtmlOut != NULL)
-	        fprintf (HtmlOut, "%06d,%06d: <a href=\"%s\">%s</a><br>\n", 
-			CurrentLineAll, CurrentLineInFile, NormalizeFilename (CurrentFilename), s);
+	        fprintf (HtmlOut, "%06d,%06d: <a href=\"%s\">%s</a>\n", 
+			CurrentLineAll, CurrentLineInFile, NormalizeFilename (CurrentFilename), NormalizeString (s));
 	      HtmlCreate (CurrentFilename);
 	      if (HtmlOut == NULL)
 		goto Done;
@@ -844,7 +844,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	      printf ("Fatal Error:  %s\n", ParseOutputRecord.ErrorMessage);
 	      if (HtmlOut != NULL)
 	        fprintf (HtmlOut,
-			 COLOR_FATAL "Fatal Error:  %s</span><br>\n", 
+			 COLOR_FATAL "Fatal Error:  %s</span>\n", 
 			 ParseOutputRecord.ErrorMessage);
 	      fprintf (stderr, "%s:%d: Fatal: %s\n", 
 	      	       CurrentFilename, CurrentLineInFile, ParseOutputRecord.ErrorMessage);
@@ -855,7 +855,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	      printf ("Warning:  %s\n", ParseOutputRecord.ErrorMessage);
 	      if (HtmlOut != NULL)
 	        fprintf (HtmlOut,
-			 COLOR_WARNING "Warning:  %s</span><br>\n", 
+			 COLOR_WARNING "Warning:  %s</span>\n", 
 			 ParseOutputRecord.ErrorMessage);
 	      fprintf (stderr, "%s:%d: Warning: %s\n", 
 	      	       CurrentFilename, CurrentLineInFile, ParseOutputRecord.ErrorMessage);
@@ -863,7 +863,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	    }
 	  printf ("%06d,%06d: ", CurrentLineAll, CurrentLineInFile); 
 	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, "%06d,%06d:&nbsp;", CurrentLineAll, CurrentLineInFile);
+	    fprintf (HtmlOut, "%06d,%06d: ", CurrentLineAll, CurrentLineInFile);
 	  if (*ParseInputRecord.Label != 0 ||
 	      *ParseInputRecord.FalseLabel != 0 ||
 	      *ParseInputRecord.Operator != 0 ||
@@ -881,7 +881,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	        {
 	          printf ("         ");	
 		  if (HtmlOut != NULL)
-		    fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+		    fprintf (HtmlOut, "         ");
 		}
 	      if (ParseOutputRecord.LabelValueValid)
 		{
@@ -892,7 +892,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	        {
 		  printf ("         ");  
 		  if (HtmlOut != NULL)
-		    fprintf (HtmlOut, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+		    fprintf (HtmlOut, "         ");
 		}
 	      if (ParseOutputRecord.NumWords > 0)
 		{
@@ -900,13 +900,13 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		    {
 		      printf ("????? ");
 		      if (HtmlOut != NULL)
-		        fprintf (HtmlOut, "?????&nbsp;");
+		        fprintf (HtmlOut, "????? ");
 		    }
 		  else	
 		    {
 		      printf ("%05o ", ParseOutputRecord.Words[0] & 077777);
 		      if (HtmlOut != NULL)
-		        fprintf (HtmlOut, "%05o&nbsp;", ParseOutputRecord.Words[0] & 077777);
+		        fprintf (HtmlOut, "%05o ", ParseOutputRecord.Words[0] & 077777);
 		      // Write the binary.
 		      if (!ParseInputRecord.ProgramCounter.Invalid &&
 		      	  ParseInputRecord.ProgramCounter.Address &&
@@ -955,7 +955,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		    {
 		      printf ("%05o ", ParseOutputRecord.Words[1] & 077777);
 		      if (HtmlOut != NULL)
-		        fprintf (HtmlOut, "%05o&nbsp;", ParseOutputRecord.Words[1] & 077777);
+		        fprintf (HtmlOut, "%05o ", ParseOutputRecord.Words[1] & 077777);
 		    }
 		}
 	      else
@@ -990,12 +990,12 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  Symbol_t *Symbol;
 		  int Comma = 0, Dollar = 0, n;
 		  if (*ParseInputRecord.Label == 0)
-		    fprintf (HtmlOut, "&nbsp;%s&nbsp;", NormalizeStringN (ParseInputRecord.Label, 8));
+		    fprintf (HtmlOut, " %s ", NormalizeStringN (ParseInputRecord.Label, 8));
 		  else
 		    fprintf (HtmlOut, 
-			     "&nbsp;" COLOR_SYMBOL "%s</span>&nbsp;", 
+			     " " COLOR_SYMBOL "%s</span> ", 
 			     NormalizeStringN (ParseInputRecord.Label, 8));
-		  fprintf (HtmlOut, "%s&nbsp;", NormalizeStringN (ParseInputRecord.FalseLabel, 8));
+		  fprintf (HtmlOut, "%s ", NormalizeStringN (ParseInputRecord.FalseLabel, 8));
 		  // The Operator could be an interpretive instruction, a basic opcode,
 		  // a pseudo-op, or a downlink code, and we want to colorize them 
 		  // differently in those cases.
@@ -1026,7 +1026,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Operator, 8));
 		  if (iMatch != NULL || Match != NULL)
 		    fprintf (HtmlOut, "</span>");
-		  fprintf (HtmlOut, "&nbsp;");
+		  fprintf (HtmlOut, " ");
 		  // Detecting a symbol here is a little tricky, since if used for
 		  // the interpreter there may be a suffixed ",1" or ",2" which we
 		  // have to detect and account for.  Or, for the COUNT* pseudo-op,
@@ -1064,7 +1064,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		      fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Operand, 10));
 		      if (j)
 		        fprintf (HtmlOut, "</span>");
-		      fprintf (HtmlOut, "&nbsp;");
+		      fprintf (HtmlOut, " ");
 		    }
 		  else
 		    {
@@ -1081,20 +1081,20 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		          ParseInputRecord.Operand[n - 2] = ',';
 			  fprintf (HtmlOut, "%s", &ParseInputRecord.Operand[n - 2]);
 			}
-		      fprintf (HtmlOut, "&nbsp;");
+		      fprintf (HtmlOut, " ");
 		      for (i = n; i < 10; i++)
-		        fprintf (HtmlOut, "&nbsp;");
+		        fprintf (HtmlOut, " ");
 		    }
-		  fprintf (HtmlOut, "%s&nbsp;", NormalizeStringN (ParseInputRecord.Mod1, 10));
+		  fprintf (HtmlOut, "%s ", NormalizeStringN (ParseInputRecord.Mod1, 10));
 		  fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Mod2, 8));
 		  fprintf (HtmlOut, "%s", NormalizeStringN ("", 8));
 		  if (*ParseInputRecord.Comment)
-		    fprintf (HtmlOut, "<i>#&nbsp;%s</i>", NormalizeString (ParseInputRecord.Comment));
+		    fprintf (HtmlOut, "<i># %s</i>", NormalizeString (ParseInputRecord.Comment));
 		};
 	    }
 	  printf ("\n");  
 	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, "<br>\n");
+	    fprintf (HtmlOut, "\n");
           //printf ("Super=%o\n", ParseOutputRecord.Bank.CurrentSBank.Super);
 	}		
       		
