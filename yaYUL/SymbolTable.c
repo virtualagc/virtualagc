@@ -48,6 +48,7 @@
 				to a dimmer bluish color.
 		06/30/09 RSB	Added HtmlCheck for processing 
 				"<HTML>...</HTML>" stuff in source files.
+				Includes <HTMLn> and <HTML=f>.
 
   Concerning the concept of a symbol's namespace.  I had originally 
   intended to implement this, and so many functions had a namespace
@@ -203,17 +204,45 @@ HtmlClose (void)
 // turns the default HTML styling back on.
 // 
 // Also accepts "<HTMLn>...</HTML>", where n is a decimal number from
-// 1 to 100.  In this case, it embeds the HTML within a centered table 
+// 1 to 99.  In this case, it embeds the HTML within a centered table 
 // which is n% of the width of the display.
+//
+// Also accepts <HTML="filename"> (no closing tag needed), in which case
+// html will be imported from the indicated file (at the yaYUL or yaLEMAP
+// is run, not at browse-time) if the file exists.  If the file does not
+// exist, it is not treated as an error.  The purpose of this feature is
+// to allow a common notice to be added to a group of files, but to 
+// eliminate that notice easily by removing the file containing it.
 int
 HtmlCheck (int WriteOutput, FILE *InputFile, char *s, int sSize, 
 	   char *CurrentFilename, int *CurrentLineAll, int *CurrentLineInFile)
 {
   int Width;
   char c = 0;
+  if (!strncmp (s, "<HTML \"", 7))
+    {
+      FILE *Include;
+      char *ss;
+      if (!WriteOutput || !Html || HtmlOut == NULL)
+        return (1);
+      for (ss = &s[7]; *ss && *ss != '\"'; ss++);
+      if (*ss != '\"')
+        return (1);
+      *ss = 0;
+      Include = fopen (&s[7], "r");
+      *ss = '\"';
+      if (Include == NULL)
+        return (1);
+      fprintf (HtmlOut, "%s", HTML_STYLE_END);
+      while (NULL != fgets (s, sSize - 1, Include))
+        fprintf (HtmlOut, "%s", s);
+      fprintf (HtmlOut, "%s", HTML_STYLE_START);
+      fclose (Include);
+      return (1);
+    }
   if (!strncmp (s, "<HTML>", 6) || 
       (2 == sscanf (s, "<HTML%d%c", &Width, &c) && 
-       Width > 0 && Width <= 100 && c == '>'))
+       Width > 0 && Width <= 99 && c == '>'))
     {
       char *ss;
       // Turn off default HTML styling.
