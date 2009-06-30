@@ -63,13 +63,21 @@ enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 #define COLOR_PSEUDO	"<span style=\"color: rgb(51, 102, 102);\">"
 #define COLOR_SYMBOL	"<span style=\"color: rgb(0, 0, 255);\">"
 #define COLOR_WARNING	"<span style=\"color: rgb(255, 153, 0);\">"
-// Default HTML styling applied.
+// Default HTML styling applied.  These strings are intended to be output
+// as-is, except for HTML_TABLE_START, which is used as the format string
+// for a printf.
 #define HTML_STYLE_START \
 	"<p class=\"nobreak\">\n" \
 	"<span style=\"font-family: monospace;\">\n" \
 	"<pre>\n"
 #define HTML_STYLE_END "</pre>\n</span>\n</p>\n"
-
+#define HTML_TABLE_START \
+	"<table style=\"margin-left: auto; margin-right: auto; width: %d%%; text-align: left;\" " \
+		"border=\"1\" cellpadding=\"2\" cellspacing=\"2\">\n" \
+  	"<tbody>\n" \
+  	"<tr>\n" \
+	"<td style=\"vertical-align: top;\">\n"
+#define HTML_TABLE_END "</td>\n</tr>\n</tbody>\n</table>\n"
 
 #define MAX_LABEL_LENGTH 10	// Max length of symbols (8 + optional ,1 or ,2).
 #define MAX_LINE_LENGTH 132

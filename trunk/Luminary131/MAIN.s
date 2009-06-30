@@ -64,20 +64,14 @@
 # page numbers appearing within tables and the page numbers marked in this source
 # code.
 
-<HTML>
-  <!--This HTML is explanatory material added in 2009, and is not AGC source code.-->  
-  <table style="margin-left: auto; margin-right: auto; width: 60%; text-align: left;" border="1" cellpadding="2" cellspacing="2">
-  <tbody>
-  <tr>
-  <td style="vertical-align: top;"><b>Note:</b>
-  click on any of the include-directives ($) below to browse to one of
-  the individual source-file modules.&nbsp; Or, advance to the end of
-  this file to see the symbol table, memory-bank checksums, or other
-  by-products of assembling the source code.<br>
-  </td>
-  </tr>
-  </tbody>
-  </table>
+<HTML60>
+  <!--This HTML is explanatory material added in 2009, and
+      was not present in the original 1969 AGC source code.-->  
+  <b>Note:</b> click on any of the include-directives ($) below 
+  to browse to one of the individual source-file modules. 
+  Or, <a href="#outputs">click here</a> to see the symbol table, 
+  memory-bank checksums, or other by-products of assembling the 
+  source code.<br>
 </HTML>
 						# pp. 1-5 contain no code/comments.
 $ASSEMBLY_AND_OPERATION_INFORMATION.s		# pp. 6-32
@@ -187,7 +181,6 @@ $TRIM_GIMBAL_CNTROL_SYSTEM.s			# pp. 1469-1481
 $AOSTASK_AND_AOSJOB.s				# pp. 1482-1503
 $SPS_BACK-UP_RCS_CONTROL.s			# pp. 1504-1507
 						# pp. 1508-1742: YUL-generated tables.
-
-
-
-
+<HTML>
+  <a name="outputs"></a>
+</HTML>

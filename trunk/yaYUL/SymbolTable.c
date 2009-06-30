@@ -192,7 +192,7 @@ HtmlClose (void)
 }
 
 //-------------------------------------------------------------------------
-// For processing "<HTML>...</HTML> stuff in source files.
+// For processing "<HTML>...</HTML>" stuff in source files.
 // Checks to see if a string is "<HTML>", and if so fetches more lines
 // until "</HTML>" is encountered.  Updates the CurrentLineAll and 
 // CurrentLineInFile variables with each new line fetched.  Returns 0
@@ -201,16 +201,28 @@ HtmlClose (void)
 // encountered.  If output is being performed during this assembly pass,
 // turns off the default HTML styling, outputs the HTML unchanged, then
 // turns the default HTML styling back on.
+// 
+// Also accepts "<HTMLn>...</HTML>", where n is a decimal number from
+// 1 to 100.  In this case, it embeds the HTML within a centered table 
+// which is n% of the width of the display.
 int
 HtmlCheck (int WriteOutput, FILE *InputFile, char *s, int sSize, 
 	   char *CurrentFilename, int *CurrentLineAll, int *CurrentLineInFile)
 {
-  if (!strncmp (s, "<HTML>", 6))
+  int Width;
+  char c = 0;
+  if (!strncmp (s, "<HTML>", 6) || 
+      (2 == sscanf (s, "<HTML%d%c", &Width, &c) && 
+       Width > 0 && Width <= 100 && c == '>'))
     {
       char *ss;
       // Turn off default HTML styling.
       if (WriteOutput && Html && HtmlOut != NULL)
-	fprintf (HtmlOut, "%s", HTML_STYLE_END);
+        {
+	  fprintf (HtmlOut, "%s", HTML_STYLE_END);
+	  if (c == '>')
+	    fprintf (HtmlOut, HTML_TABLE_START, Width);
+	}
       // Loop on the lines of the insert.
       while (1)
 	{
@@ -230,7 +242,11 @@ HtmlCheck (int WriteOutput, FILE *InputFile, char *s, int sSize,
 	      // Turn default HTML styling back on and return
 	      // to normal source processing.
 	      if (WriteOutput && Html && HtmlOut != NULL)
-		fprintf (HtmlOut, "%s", HTML_STYLE_START);
+	        {
+		  if (c == '>')
+		    fprintf (HtmlOut, "%s", HTML_TABLE_END);
+		  fprintf (HtmlOut, "%s", HTML_STYLE_START);
+		}
 	      break;
 	    }
 	  if (WriteOutput && Html && HtmlOut != NULL)
