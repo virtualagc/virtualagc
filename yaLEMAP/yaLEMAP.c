@@ -49,6 +49,7 @@
 		2009-06-28 RSB	Added HtmlOut ... just as an allocation,
 				not as anything functional yet.
 		2009-06-29 RSB	HTML output now appears to be working.
+		2009-06-30 RSB	Added arbitrary HTML inserts.
 				
   Note that we use yaYUL's symbol-table machinery for handling the
   symbol table.
@@ -532,7 +533,7 @@ EvaluateExpression (char *Expression, Address_t *Address, int Location, int Forc
 static int
 PassLemap (FILE *fp, int Action)
 {
-  int Location = 0, i, j, Extra, Missing;
+  int Location = 0, i, j, Extra, Missing, Dummy = 0;
   char *ss;
   Address_t Address = { 0 }, LineAddress = { 0 };
   FILE *SingAlong;
@@ -549,6 +550,11 @@ PassLemap (FILE *fp, int Action)
     {
       Lines++;
 
+      // Is it an HTML insert?  If so, transparently process and discard.
+      if (HtmlCheck ((Action == 1), fp, s, sizeof (s), 
+      		     FileSelected, &Lines, &Dummy))
+        continue;
+      
       // Eliminate the newline.
       Comment = NULL;
       for (ss = s; *ss; ss++)

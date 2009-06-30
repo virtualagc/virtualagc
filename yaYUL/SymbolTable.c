@@ -46,6 +46,8 @@
 				the underlining for links, and to change
 				the color of a visited link from purple
 				to a dimmer bluish color.
+		06/30/09 RSB	Added HtmlCheck for processing 
+				"<HTML>...</HTML>" stuff in source files.
 
   Concerning the concept of a symbol's namespace.  I had originally 
   intended to implement this, and so many functions had a namespace
@@ -160,7 +162,7 @@ HtmlCreate (char *Filename)
       return (1);
     }
   // Write the HTML header.
-  fprintf (HtmlOut, 
+  fprintf (HtmlOut, "%s",
 	   "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
 	   "<html>\n"
 	   "<head>\n"
@@ -173,10 +175,8 @@ HtmlCreate (char *Filename)
 	   "</style>\n"
 	   "</head>\n"
 	   "<body>\n"
-	   "<p class=\"nobreak\">\n"
-	   "<span style=\"font-family: monospace;\">\n"
-	   "<h1>Source Code</h1>\n"
-	   "<pre>\n");
+	   HTML_STYLE_START
+	   "<h1>Source Code</h1>\n");
   return (0);
 }
 
@@ -187,10 +187,60 @@ HtmlClose (void)
 {
   if (HtmlOut == NULL)
     return;
-  fprintf (HtmlOut, "</pre>\n</span>\n</p>\n</body>\n</html>\n");
+  fprintf (HtmlOut, "%s", HTML_STYLE_END "</body>\n</html>\n");
   fclose (HtmlOut);
 }
 
+//-------------------------------------------------------------------------
+// For processing "<HTML>...</HTML> stuff in source files.
+// Checks to see if a string is "<HTML>", and if so fetches more lines
+// until "</HTML>" is encountered.  Updates the CurrentLineAll and 
+// CurrentLineInFile variables with each new line fetched.  Returns 0
+// if not HTML, 1 if HTML was processed.  The calling program must 
+// allocate the space for s, which may be overwritten if HTML is 
+// encountered.  If output is being performed during this assembly pass,
+// turns off the default HTML styling, outputs the HTML unchanged, then
+// turns the default HTML styling back on.
+int
+HtmlCheck (int WriteOutput, FILE *InputFile, char *s, int sSize, 
+	   char *CurrentFilename, int *CurrentLineAll, int *CurrentLineInFile)
+{
+  if (!strncmp (s, "<HTML>", 6))
+    {
+      char *ss;
+      // Turn off default HTML styling.
+      if (WriteOutput && Html && HtmlOut != NULL)
+	fprintf (HtmlOut, "%s", HTML_STYLE_END);
+      // Loop on the lines of the insert.
+      while (1)
+	{
+	  ss = fgets (s, sSize - 1, InputFile);
+	  if (ss == NULL)
+	    {
+	      printf ("Premature end-of-file.\n");
+	      fprintf (stderr, "%s:%d: Premature end-of-file.\n",
+		       CurrentFilename, *CurrentLineInFile);
+	      goto Done;
+	    }
+	  (*CurrentLineAll)++;
+	  (*CurrentLineInFile)++;  
+	  if (!strncmp (s, "</HTML>", 7))
+	    {
+	    Done:
+	      // Turn default HTML styling back on and return
+	      // to normal source processing.
+	      if (WriteOutput && Html && HtmlOut != NULL)
+		fprintf (HtmlOut, "%s", HTML_STYLE_START);
+	      break;
+	    }
+	  if (WriteOutput && Html && HtmlOut != NULL)
+	    fprintf (HtmlOut, "%s", s);
+	}
+      return (1);
+    }
+  return (0);
+}
+      
 //-------------------------------------------------------------------------
 // Normalize a variable, constant name, or line label to a form that can be
 // used as an html anchor point.  Since we know that all such names are 

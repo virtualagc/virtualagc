@@ -57,6 +57,21 @@
 # scanned version to match the line numbers in an assembly listing created
 # by processing this source file with the yaLEMAP cross-assembler.
 
+<HTML>
+  <!--This HTML is explanatory material added in 2009, and is not AGC source code.-->  
+  <table style="margin-left: auto; margin-right: auto; width: 60%; text-align: left;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+  <tr>
+  <td style="vertical-align: top;"><b>Note:</b>
+  You can obtain online documentation about the Abort
+  Guidance System, such as the assembly-language manual,
+  from the <a href="http://www.ibiblio.org/apollo/yaAGS.html#AGS_Documentation">
+  Virtual AGC website</a>.<br>
+  </td>
+  </tr>
+  </tbody>
+  </table>
+</HTML>
 # Page 1
 # FLIGHT PROGRAM X -- LMAGS FPX S03 0151 -- 02/14/69
 #     LM ABORT ELECTRONICS ASSEMBLY

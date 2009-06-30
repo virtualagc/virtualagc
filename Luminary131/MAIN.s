@@ -11,6 +11,7 @@
 #		05/11/03 RSB	Draft of this file completed.
 #		06/08/03 RSB	Drafts of all the included files completed.
 #		05/14/05 RSB	Corrected website reference above.
+#		06/30/09 RSB	Added an experimental HTML note.
 #
 # The contents of the "Luminary131" files, in general, are
 # transcribed from a scanned document obtained from MIT's website, namely
@@ -63,6 +64,21 @@
 # page numbers appearing within tables and the page numbers marked in this source
 # code.
 
+<HTML>
+  <!--This HTML is explanatory material added in 2009, and is not AGC source code.-->  
+  <table style="margin-left: auto; margin-right: auto; width: 60%; text-align: left;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+  <tr>
+  <td style="vertical-align: top;"><b>Note:</b>
+  click on any of the include-directives ($) below to browse to one of
+  the individual source-file modules.&nbsp; Or, advance to the end of
+  this file to see the symbol table, memory-bank checksums, or other
+  by-products of assembling the source code.<br>
+  </td>
+  </tr>
+  </tbody>
+  </table>
+</HTML>
 						# pp. 1-5 contain no code/comments.
 $ASSEMBLY_AND_OPERATION_INFORMATION.s		# pp. 6-32
 $TAGS_FOR_RELATIVE_SETLOC.s			# pp. 33-42

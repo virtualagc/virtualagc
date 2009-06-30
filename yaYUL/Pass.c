@@ -41,6 +41,8 @@
 		06/27/09 RSB	Began adding support for HtmlOut.
 		06/29/09 RSB	Added some fixes for BASIC vs. PSEUDO-OP in
 				HTML colorizing.
+		06/30/09 RSB	Added the feature of inserting arbitrary
+				HTML documentation.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
@@ -61,6 +63,13 @@
 	
   An exception is anything that looks like +%d or -%d in col. 2.  (These
   notations are just ignored.)
+  
+  Additionally, arbitrary HTML can be inserted.  This HTML vanishes as 
+  far as the assembly or the output assembly listing is concerned, but 
+  is inserted verbatim into output HTML (when the --html switch is used).
+  The insert begins with a line containing the tag <HTML> (and nothing 
+  more) and ends with a line containing the tag </HTML> (and nothing 
+  more).  There is no check to see that the HTML is legitimate.
 */
 
 #define ORIGINAL_PASS_C
@@ -438,7 +447,14 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	  CurrentLineInFile++;
 	}
 		
-      // Analyze the input line.  Is it an "include" directive?	
+      // Analyze the input line.  
+      
+      // Is it an HTML insert?  If so, transparently process and discard.
+      if (HtmlCheck (WriteOutput, InputFile, s, sizeof (s), 
+      		     CurrentFilename, &CurrentLineAll, &CurrentLineInFile))
+        continue;
+      
+      // Is it an "include" directive?	
       if (s[0] == '$')
         {
 	  ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
