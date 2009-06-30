@@ -114,6 +114,7 @@
 #				Adjusted for SOLARIS.
 #		05/23/09 RSB	Added Comanche055 to the normal build sequence.
 #		06/07/09 RSB	Added Luminary099 to the normal build sequence.
+#		06/29/09 RSB	Added the 'listings' target.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -199,7 +200,7 @@ endif
 #	CFLAGS=-Wall -Werror
 # to catch every possible problem before sending it out into the world.
 ifeq (${USER},rburkey)
-WEBSITE=../sandroid.org/public_html/apollo/Downloads
+WEBSITE=../sandroid.org/public_html/apollo
 CFLAGS=-Wall -Werror -DALLOW_BSUB
 yaACA=
 else 
@@ -275,6 +276,30 @@ endif
 	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT} ${DEV_STATIC}
 
+# This target is for making HTML assembly listings for the website.
+.PHONY: listings
+listings: \
+	listing-agc-Colossus249 \
+	listing-agc-Comanche055 \
+	listing-agc-Luminary099 \
+	listing-agc-Luminary131 \
+	listing-aea-FP6 \
+	listing-aea-FP8
+
+listing-agc-%:
+	-rm ${WEBSITE}/listings/$*/*.html
+	mkdir -p ${WEBSITE}/listings/$*
+	cd $* && \
+	../yaYUL/yaYUL --html MAIN.s >MAIN.lst
+	mv $*/*.html ${WEBSITE}/listings/$*
+
+listing-aea-%:
+	-rm ${WEBSITE}/listings/$*/*.html
+	mkdir -p ${WEBSITE}/listings/$*
+	cd $* && \
+	../yaLEMAP/yaLEMAP --html $*.s
+	mv $*/*.html ${WEBSITE}/listings/$*
+
 # Here are targets for building the development snapshot, 
 # creating the binary installers, and updating local directory
 # which sources the Virtual AGC website.  The "snapshot" target
@@ -290,16 +315,16 @@ buildbox: dev
 
 .PHONY: binaries
 binaries: clean all-archs
-	cp -a VirtualAGC/VirtualAGC-installer ${WEBSITE}
-	cp -a VirtualAGC/VirtualAGC-setup.exe ${WEBSITE}
-	cp -a VirtualAGC/VirtualAGC.app.tar.gz ${WEBSITE}
-	ls -ltr ${WEBSITE} | tail -4
+	cp -a VirtualAGC/VirtualAGC-installer ${WEBSITE}/Downloads
+	cp -a VirtualAGC/VirtualAGC-setup.exe ${WEBSITE}/Downloads
+	cp -a VirtualAGC/VirtualAGC.app.tar.gz ${WEBSITE}/Downloads
+	ls -ltr ${WEBSITE}/Downloads | tail -4
 
 # I used this only for creating a development snapshot.  It's no use to anybody
 # else, I expect.
 .PHONY: dev
 dev:	clean
-	-rm ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2
+	-rm ${WEBSITE}/Downloads/yaAGC-dev-${DATE}.tar.bz2
 	tar -C .. --exclude=*CVS* --exclude=*snprj* --exclude="*.core" \
 		--exclude=yaAGC/yaDSKY/autom4te.cache/* \
 		--exclude=yaAGC/yaDSKY/configure \
@@ -318,12 +343,12 @@ dev:	clean
 		--exclude=*~ --exclude=*.bak \
 		--exclude=*.svn* \
 		--exclude=*xvpics* \
-		--bzip2 -cvf ${WEBSITE}/yaAGC-dev-${DATE}.tar.bz2 yaAGC
-	ls -ltr ${WEBSITE}
+		--bzip2 -cvf ${WEBSITE}/Downloads/yaAGC-dev-${DATE}.tar.bz2 yaAGC
+	ls -ltr ${WEBSITE}/Downloads
 		
 snapshot-ephemeris:
-	cd .. ; tar --bzip2 -cvf ${WEBSITE}/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
-	ls -l ${WEBSITE}/
+	cd .. ; tar --bzip2 -cvf ${WEBSITE}/Downloads/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
+	ls -l ${WEBSITE}/Downloads
 
 clean:
 	#echo PREFIX=/usr/local >Makefile.yAGC

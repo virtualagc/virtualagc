@@ -320,13 +320,13 @@ main (int argc, char *argv[])
   printf ("Warnings:  %d\n", Warnings); 
   if (HtmlOut != NULL)
     {
-      fprintf (HtmlOut, "<br>\n");
-      fprintf (HtmlOut, "<h1>Assembly Status</h1>\n");
-      fprintf (HtmlOut, "Unresolved symbols:  %d<br>\n", UnresolvedSymbols ());
-      fprintf (HtmlOut, "Fatal errors:  %d<br>\n", Fatals);
-      fprintf (HtmlOut, "Warnings:  %d<br>\n", Warnings); 
-      fprintf (HtmlOut, "<br>\n");
-      fprintf (HtmlOut, "<h1>Bugger Words</h1>\n");
+      fprintf (HtmlOut, "\n");
+      fprintf (HtmlOut, "</pre>\n<h1>Assembly Status</h1>\n<pre>\n");
+      fprintf (HtmlOut, "Unresolved symbols:  %d\n", UnresolvedSymbols ());
+      fprintf (HtmlOut, "Fatal errors:  %d\n", Fatals);
+      fprintf (HtmlOut, "Warnings:  %d\n", Warnings); 
+      fprintf (HtmlOut, "\n");
+      fprintf (HtmlOut, "</pre>\n<h1>Bugger Words</h1>\n<pre>\n");
     }
 
   // JMS: 07.28
@@ -388,7 +388,7 @@ main (int argc, char *argv[])
 	      ObjectCode[Bank][Value] = GuessBugger;
 	      printf ("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank, 02000 + Value);
 	      if (HtmlOut != NULL)
-	        fprintf (HtmlOut, "Bugger word %05o at %02o,%04o.<br>\n", GuessBugger, Bank, 02000 + Value);
+	        fprintf (HtmlOut, "Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank, 02000 + Value);
 	    } 
 	  // Output the binary data.  
 	  for (Offset = 0; Offset < 02000; Offset++)
