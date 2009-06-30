@@ -63,6 +63,13 @@ enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 #define COLOR_PSEUDO	"<span style=\"color: rgb(51, 102, 102);\">"
 #define COLOR_SYMBOL	"<span style=\"color: rgb(0, 0, 255);\">"
 #define COLOR_WARNING	"<span style=\"color: rgb(255, 153, 0);\">"
+// Default HTML styling applied.
+#define HTML_STYLE_START \
+	"<p class=\"nobreak\">\n" \
+	"<span style=\"font-family: monospace;\">\n" \
+	"<pre>\n"
+#define HTML_STYLE_END "</pre>\n</span>\n</p>\n"
+
 
 #define MAX_LABEL_LENGTH 10	// Max length of symbols (8 + optional ,1 or ,2).
 #define MAX_LINE_LENGTH 132
@@ -336,6 +343,8 @@ int GetOctOrDec (const char *s, int *Value);
 char *NormalizeFilename (char *SourceName);
 int HtmlCreate (char *Filename);
 void HtmlClose (void);
+int HtmlCheck (int WriteOutput, FILE *InputFile, char *s, int sSize, 
+	       char *CurrentFilename, int *CurrentLineAll, int *CurrentLineInFile);
 char *NormalizeAnchor (char *Name);
 char *NormalizeString (char *Input);
 char *NormalizeStringN (char *Input, int PadTo);
