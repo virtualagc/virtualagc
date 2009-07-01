@@ -43,6 +43,9 @@
 				HTML colorizing.
 		06/30/09 RSB	Added the feature of inserting arbitrary
 				HTML documentation.
+		07/01/09 RSB	Altered style of comments in HTML.  Shortened
+				up symbol hyperlinks, where they're local to
+				the file.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
@@ -428,8 +431,6 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		}
 	      strcpy (CurrentFilename, StackedIncludes[NumStackedIncludes].InputFilename);
 	      InputFile = StackedIncludes[NumStackedIncludes].InputFile;
-	      strcpy (CurrentFilename, 
-	              StackedIncludes[NumStackedIncludes].InputFilename);
 	      CurrentLineInFile = StackedIncludes[NumStackedIncludes].CurrentLineInFile;
 	      HtmlOut = StackedIncludes[NumStackedIncludes].HtmlOut;
 	      s[0] = 0;
@@ -1087,7 +1088,10 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		    FoundComma:
 		      if (Dollar)
 		        fprintf (HtmlOut, "$$/");
-		      fprintf (HtmlOut, "<a href=\"%s", NormalizeFilename (Symbol->FileName));
+		      if (!strcmp (CurrentFilename, Symbol->FileName))
+		        fprintf (HtmlOut, "<a href=\"");
+		      else
+		        fprintf (HtmlOut, "<a href=\"%s", NormalizeFilename (Symbol->FileName));
 		      if (Comma)
 		        ParseInputRecord.Operand[n - 2] = 0;
 		      fprintf (HtmlOut, "#%s\">", NormalizeAnchor (&ParseInputRecord.Operand[Dollar]));
@@ -1105,7 +1109,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Mod2, 8));
 		  fprintf (HtmlOut, "%s", NormalizeStringN ("", 8));
 		  if (*ParseInputRecord.Comment)
-		    fprintf (HtmlOut, "<i># %s</i>", NormalizeString (ParseInputRecord.Comment));
+		    fprintf (HtmlOut, COLOR_COMMENT "# %s</span>", NormalizeString (ParseInputRecord.Comment));
 		};
 	    }
 	  printf ("\n");  
