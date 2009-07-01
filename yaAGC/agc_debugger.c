@@ -1,8 +1,40 @@
 /*
- * agc_debugger.c
- *
- *  Created on: Dec 5, 2008
- *      Author: MZ211D
+  Copyright 2008 Onno Hommes:1
+
+  This file is part of yaAGC.
+
+  yaAGC is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  yaAGC is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with yaAGC; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+  In addition, as a special exception, permission is granted to
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
+  Filename:	agc_debugger.c
+  Purpose:	This is module implements the debugger behavior.
+
+  Compiler:	GNU gcc.
+  Contact:	Onno Hommes
+  Reference:	http://virtualagc.googlecode.com
+  Mods:		 12/05/08 OH	Began work.
+			 07/01/09 OH	Allow Address request using symbol
  */
 
 #include <stdio.h>
@@ -192,6 +224,38 @@ DbgHasBreakEvent ()
 
   return BreakFlag;
 }
+/**
+ * Delete a breakpoint from the debugger based on the BreapointId
+ * \param	The breakpoint identifier
+ */
+void
+DbgDeleteBreakpoint(int bp)
+{
+	int i,j;
+
+    for (i = 0; i < NumBreakpoints; i++)
+       if (Breakpoints[i].Id == bp)
+       {
+             NumBreakpoints--;
+             for (j = i; j < NumBreakpoints; j++)
+             {
+                Breakpoints[j] = Breakpoints[j + 1];
+             }
+             break;
+       }
+}
+
+void
+DbgHitBreakpoint(Breakpoint_t* bp)
+{
+   bp->Hits++;
+
+   if (bp->Disposition == BP_DELETE)
+   {
+	   DbgDeleteBreakpoint(bp->Id);
+   }
+}
+
 
 /* Normalize data in s and return sraw pointer */
 char *
@@ -393,7 +457,68 @@ DbgGetFrameNameByAddr (unsigned LinearAddr)
   return (FrameName);
 }
 
-/* Catch the SIGINT Signal to stop running and return to debug mode */
+/**
+ * Return the symbol line of the head of the current stack
+ */
+SymbolLine_t *
+DbgResolveCurrentLine(void)
+{
+   int CurrentZ = Debugger.State->Erasable[0][RegZ] & 07777;
+   int FB = 037 & (Debugger.State->Erasable[0][RegBB] >> 10);
+   int SBB = (Debugger.State->OutputChannel7 & 0100) ? 1 : 0;
+   return (ResolveLineAGC(CurrentZ, FB, SBB));
+}
+
+/**
+ * This function returns the frame name offset which is the offset in words
+ * from the start of the function. In the case of the AGC assembly this
+ * means the offset counted in words since the last label definition. Since
+ * The label is used as the frame name this allows the disassembly command
+ * to build the <FrameName+Offset> string.  Examples
+ *   <DOFSTART+00> The frame is at the same address as the label definition.
+ *   <GOPROG+12>   The frame is 12 words passed the address of GOPROG
+ *
+ *   The Offset can only be calculated if the symbols were loaded. In all other
+ *   cases the Offset will be 0.
+ *
+ * \param[in] LinearAddr	A Pseudo linear address
+ * \retval					The offset of the frame name.
+ */
+int
+DbgGetFrameNameOffsetByAddr(unsigned LinearAddr)
+{
+   int Offset =0;
+   char *FrameName;
+
+   /* Get the Frame Name for the current address */
+   FrameName = DbgGetFrameNameByAddr(LinearAddr);
+
+   /* Start counting until the Frame Name changes which gives the offset */
+   while (FrameName == DbgGetFrameNameByAddr(--LinearAddr)) ++Offset;
+
+   /* Do the obvious and return the calculated offset */
+   return (Offset);
+}
+
+/**
+ * This function returns the current value of the program counter which is the
+ * address of next instruction to be executed.
+ *
+ * /retval		The current program counter (PC)
+ */
+unsigned
+DbgGetCurrentProgramCounter(void)
+{
+    int CurrentZ = Debugger.State->Erasable[0][RegZ] & 07777;
+    int FB = 037 & (Debugger.State->Erasable[0][RegBB] >> 10);
+    int SBB = (Debugger.State->OutputChannel7 & 0100) ? 1 : 0;
+
+	return (DbgLinearFixedAddr(CurrentZ,FB,SBB));
+}
+
+/**
+ *  Catch the SIGINT Signal to stop running and return to debug mode
+ */
 static void
 DbgCatchSignal (int sig)
 {
@@ -479,20 +604,20 @@ DbgMonitorBreakpoints (void)
     {
       Line = Breakpoints[i].Line;
       if (Breakpoints[i].WatchBreak == 2 &&
-	  gdbmiCheckBreakpoint (Debugger.State, &Breakpoints[i]))
+	  DbgCheckBreakpoint (&Breakpoints[i]))
 	{
 	  // Pattern!
 	  if (Breakpoints[i].Address12 == (Value & Breakpoints[i].vRegBB))
 	    {
 	      printf ("Hit pattern, Value=" PAT " Mask=" PAT
 		      ".\n", Breakpoints[i].Address12, Breakpoints[i].vRegBB);
-	      gdbmiUpdateBreakpoint (Debugger.State, &Breakpoints[i]);
+	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
 	}
       else if (Breakpoints[i].WatchBreak == 0 &&
-	       gdbmiCheckBreakpoint (Debugger.State, &Breakpoints[i]))
+	       DbgCheckBreakpoint (&Breakpoints[i]))
 	{
 	  int Address12, vRegBB;
 	  int CurrentFB, vCurrentFB;
@@ -503,14 +628,14 @@ DbgMonitorBreakpoints (void)
 	  if (Address12 < 01400)
 	    {
 	      GdbmiDisplayBreakpointForLine (Line, i + 1);
-	      gdbmiUpdateBreakpoint (Debugger.State, &Breakpoints[i]);
+	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
 	  if (Address12 >= 04000)
 	    {
 	      GdbmiDisplayBreakpointForLine (Line, i + 1);
-	      gdbmiUpdateBreakpoint (Debugger.State, &Breakpoints[i]);
+	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
@@ -529,7 +654,7 @@ DbgMonitorBreakpoints (void)
 		printf ("Hit breakpoint at E%o,%05o.\n", CurrentBB & 7,
 			Address12);
 
-	      gdbmiUpdateBreakpoint (Debugger.State, &Breakpoints[i]);
+	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
@@ -558,13 +683,13 @@ DbgMonitorBreakpoints (void)
 //                                printf ("Hit breakpoint ot %02o,%05o.\n", Bank, Address12);
 
 	      GdbmiDisplayBreakpointForLine (Line, i + 1);
-	      gdbmiUpdateBreakpoint (Debugger.State, &Breakpoints[i]);
+	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
 	}
       else if ((Breakpoints[i].WatchBreak == 1 &&
-		gdbmiCheckBreakpoint (Debugger.State, &Breakpoints[i]) &&
+		DbgCheckBreakpoint (&Breakpoints[i]) &&
 		Breakpoints[i].WatchValue != DbgGetWatch (Debugger.State,
 							  &Breakpoints[i]))
 	       || (Breakpoints[i].WatchBreak == 3
@@ -589,7 +714,7 @@ DbgMonitorBreakpoints (void)
 		Breakpoints[i].WatchValue =
 		  DbgGetWatch (Debugger.State, &Breakpoints[i]);
 
-	      gdbmiUpdateBreakpoint (Debugger.State, &Breakpoints[i]);
+	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
@@ -613,13 +738,13 @@ DbgMonitorBreakpoints (void)
 		Breakpoints[i].WatchValue =
 		  DbgGetWatch (Debugger.State, &Breakpoints[i]);
 
-	      gdbmiUpdateBreakpoint (Debugger.State, &Breakpoints[i]);
+	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
 	}
       else if ((Breakpoints[i].WatchBreak == 4 &&
-		gdbmiCheckBreakpoint (Debugger.State, &Breakpoints[i]) &&
+		DbgCheckBreakpoint (&Breakpoints[i]) &&
 		Breakpoints[i].WatchValue != DbgGetWatch (Debugger.State,
 							  &Breakpoints[i])))
 	{
@@ -660,6 +785,12 @@ DbgMonitorBreakpoints (void)
   return (Break);
 }
 
+int DbgCheckBreakpoint(Breakpoint_t* bp)
+{
+   return (bp->Enable == 'y');
+}
+
+
 void
 DbgDisplayInnerFrame (void)
 {
@@ -688,9 +819,9 @@ DbgDisplayInnerFrame (void)
 	  if (Debugger.RunState)
 	    {
 	      if (Debugger.Options->fullname)
-		gdbmiPrintFullNameFrame (Line);
+		GdbmiPrintFullNameFrame (Line);
 	      else
-		gdbmiPrintSourceFrame (Line /*, 0 */);
+		GdbmiPrintSourceFrame (Line);
 	    }
 	}
     }
@@ -871,28 +1002,42 @@ DbgLinearAddrFromAddrStr (char *addr_str)
 {
   unsigned Address = ~0;
   unsigned Bank, SReg;
+  Symbol_t *Symbol = NULL;
+  Address_t *agc_addr;
 
   /* First determine if this address is a pseudo address or a banked
    * address by checking the existence of a comma (i.e. banked address )
    */
   if (strstr (addr_str, ",") > 0)
     {
-      /* Try Eraseable translation first then fixed */
-      if (2 == sscanf (addr_str, "E%o,%o", &Bank, &SReg))
-	{
-	  /* Validate Bank and SReg for Eraseable Memory */
-	  if (Bank < 8)
-	    Address = DbgLinearEraseableAddr (SReg, Bank);
-	}
-      else if (2 == sscanf (addr_str, "%o,%o", &Bank, &SReg))
-	{
-	  /* Validate Bank and SReg for Fixed Memory */
-	  if (Bank < 044)
-	    Address = DbgLinearFixedAddr (SReg, Bank, 0);
-	}
+		  /* Try Eraseable translation first then fixed */
+		  if (2 == sscanf (addr_str, "E%o,%o", &Bank, &SReg))
+		{
+		  /* Validate Bank and SReg for Eraseable Memory */
+		  if (Bank < 8)
+			Address = DbgLinearEraseableAddr (SReg, Bank);
+		}
+		  else if (2 == sscanf (addr_str, "%o,%o", &Bank, &SReg))
+		{
+		  /* Validate Bank and SReg for Fixed Memory */
+		  if (Bank < 044)
+			Address = DbgLinearFixedAddr (SReg, Bank, 0);
+		}
     }
-  else
-    Address = strtol (addr_str, 0, 0);	/* It is a pseudo address */
+  else if (strstr (addr_str, "&") > 0)
+  {
+	  /* Looks like a symbol based address */
+	  addr_str++;
+	  Symbol = ResolveSymbol(addr_str,
+			  SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
+
+      if (Symbol)
+      {
+         agc_addr = &Symbol->Value;
+         Address = DbgLinearAddr(agc_addr);
+      }
+  }
+  else Address = strtol (addr_str, 0, 0);	/* It is a pseudo address */
 
   return Address;
 }

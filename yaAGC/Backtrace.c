@@ -49,7 +49,7 @@
 				the GPL, for linking to Orbiter SDK libraries.
 		05/14/05 RSB	Corrected website references.
 		........ OH	... something ...
-		04/24/09 RSB	Made declarations of various variables in 
+		04/24/09 RSB	Made declarations of various variables in
 				BacktraceDisplay conditional on GDBMI.
 */
 
@@ -250,9 +250,9 @@ BacktraceRestore ( agc_t *State, int n )
 
 void BacktraceDisplay ( agc_t *State, int Num )
 {
-#ifndef GDBMI	
+#ifndef GDBMI
 	int Bank, Value;
-#else	
+#else
 	SymbolLine_t *Line = NULL;
 	char* FrameName;
 	char* PrevFrameName = (char*)1;
@@ -269,31 +269,6 @@ void BacktraceDisplay ( agc_t *State, int Num )
 		return;
 	}
 
-#ifdef GDBMI
-	/* Always show the current location in the trace */
-//	{
-//		CurrentZ = State->Erasable[0][RegZ] & 07777;
-//		FB = 037 & ( State->Erasable[0][RegBB] >> 10 );
-//		SBB = ( State->OutputChannel7 & 0100 ) ? 1 : 0;
-//		Line = ResolveLineAGC ( CurrentZ, FB, SBB );
-
-//		if ( Line )
-//		{
-//			Num--;
-#ifdef WIN32
-//			printf ( "#0\t0x%04x in %s () at %s\\%s:%d\n",
-//			         gdbmiLinearAddr ( &Line->CodeAddress ),
-//			         gdbmiConstructFuncName ( Line,funcname,127 ),SourcePathName,
-//			         Line->FileName,Line->LineNumber );
-#else
-//			printf ( "#0\t0x%04x in %s () at %s/%s:%d\n",
-//			         gdbmiLinearAddr ( &Line->CodeAddress ),
-//			         gdbmiConstructFuncName ( Line,funcname,127 ),SourcePathName,
-//			         Line->FileName,Line->LineNumber );
-#endif
-//		}
-//	}
-#endif
 	if ( BacktraceCount == 0 )
 	{
 #ifndef GDBMI

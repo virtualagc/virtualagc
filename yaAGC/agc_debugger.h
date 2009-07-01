@@ -59,8 +59,12 @@ extern unsigned short DbgGetValueByAddress(unsigned gdbmi_addr);
 extern void DbgSetValueByAddress(unsigned gdbmi_addr,unsigned short value);
 extern void DbgSetRunState(void);
 extern unsigned DbgLinearAddrFromAddrStr(char* addr_str);
-
-
+extern int DbgGetFrameNameOffsetByAddr(unsigned LinearAddr);
+extern unsigned DbgGetCurrentProgramCounter(void);
+extern void DbgDeleteBreakpoint(int bp);
+extern void DbgUpdateBreakpoint(Breakpoint_t* bp);
+extern int DbgCheckBreakpoint(Breakpoint_t* bp);
+extern SymbolLine_t* DbgResolveCurrentLine(void);
 
 
 #endif /* AGC_DEBUGGER_H_ */
