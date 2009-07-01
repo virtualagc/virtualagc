@@ -50,6 +50,7 @@
 				not as anything functional yet.
 		2009-06-29 RSB	HTML output now appears to be working.
 		2009-06-30 RSB	Added arbitrary HTML inserts.
+		2009-07-01 RSB	Altered style of comments in HTML.
 				
   Note that we use yaYUL's symbol-table machinery for handling the
   symbol table.
@@ -214,7 +215,7 @@ PrintComments (int i)
         {
 	  for (; i > 0; i--)
 	    fprintf (HtmlOut, " ");
-	  fprintf (HtmlOut, "  <i># %s</i>", NormalizeString (Comment));
+	  fprintf (HtmlOut, "  " COLOR_COMMENT "# %s</span>", NormalizeString (Comment));
 	}
     }
   fprintf (Lst, "\n");
@@ -784,7 +785,7 @@ PassLemap (FILE *fp, int Action)
 	      if (HtmlOut != NULL)
 	        {
                   fprintf (HtmlOut, "%04o:%s", Lines, NormalizeStringN ("", 37));
-		  fprintf (HtmlOut, "<i># %s</i>\n", NormalizeString (Comment));
+		  fprintf (HtmlOut, COLOR_COMMENT "# %s</span>\n", NormalizeString (Comment));
 		}
 	      if (SingAlong != NULL && !strncmp (Comment, "PAGE ", 5))
 		fprintf (SingAlong, "\n# %s ---------------------\n", Comment);

@@ -43,6 +43,10 @@
 		                table file.
 		06/27/09 RSB	Added HtmlOut.
 		06/29/09 RSB	Added the InstOpcode field.
+		07/01/09 RSB	Altered the way the highlighting styles
+				(COLOR_XXX) work in order to make them
+				more flexible and to shorten up the HTML
+				files more.
 */
 
 #ifndef INCLUDED_YAYUL_H
@@ -56,6 +60,7 @@
 enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 
 // Colors for HTML.
+#if 0
 #define COLOR_BASIC	"<span style=\"color: rgb(153, 51, 0);\">"
 #define COLOR_DOWNLINK	"<span style=\"color: rgb(0, 153, 0);\">"
 #define COLOR_FATAL	"<span style=\"color: rgb(255, 0, 0);\">"
@@ -63,6 +68,16 @@ enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 #define COLOR_PSEUDO	"<span style=\"color: rgb(51, 102, 102);\">"
 #define COLOR_SYMBOL	"<span style=\"color: rgb(0, 0, 255);\">"
 #define COLOR_WARNING	"<span style=\"color: rgb(255, 153, 0);\">"
+#else
+#define COLOR_BASIC	"<span class=\"op\">"
+#define COLOR_DOWNLINK	"<span class=\"dn\">"
+#define COLOR_FATAL	"<span class=\"fe\">"
+#define COLOR_INTERPRET	"<span class=\"in\">"
+#define COLOR_PSEUDO	"<span class=\"ps\">"
+#define COLOR_SYMBOL	"<span class=\"sm\">"
+#define COLOR_WARNING	"<span class=\"wn\">"
+#define COLOR_COMMENT	"<span class=\"co\">"
+#endif
 // Default HTML styling applied.  These strings are intended to be output
 // as-is, except for HTML_TABLE_START, which is used as the format string
 // for a printf.
