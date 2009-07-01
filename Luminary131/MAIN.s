@@ -64,12 +64,6 @@
 # page numbers appearing within tables and the page numbers marked in this source
 # code.
 
-### STYLE=BOX 80%
-## <b>Note:</b> click on any of the include-directives ($) below 
-## to browse to one of the individual source-file modules. 
-## Or, <a href="#outputs">click here</a> to see the symbol table, 
-## memory-bank checksums, or other by-products of assembling the 
-## source code.
 						# pp. 1-5 contain no code/comments.
 $ASSEMBLY_AND_OPERATION_INFORMATION.s		# pp. 6-32
 $TAGS_FOR_RELATIVE_SETLOC.s			# pp. 33-42
@@ -178,5 +172,4 @@ $TRIM_GIMBAL_CNTROL_SYSTEM.s			# pp. 1469-1481
 $AOSTASK_AND_AOSJOB.s				# pp. 1482-1503
 $SPS_BACK-UP_RCS_CONTROL.s			# pp. 1504-1507
 						# pp. 1508-1742: YUL-generated tables.
-## <a name="outputs"></a>
 

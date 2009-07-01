@@ -101,6 +101,9 @@ SymbolPass (const char *InputFilename)
 	  CurrentLineAll++;
 	  CurrentLineInFile++;
 	}
+	
+      if (HtmlCheck (0, InputFile, s, sizeof (s), CurrentFilename, &CurrentLineAll, &CurrentLineInFile))
+        continue;
 		
       // Analyze the input line.  Is it an "include" directive?	
       if (s[0] == '$')

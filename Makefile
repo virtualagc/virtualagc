@@ -292,6 +292,7 @@ listing-agc-%:
 	cd $* && \
 	../yaYUL/yaYUL --html MAIN.s >MAIN.lst
 	mv $*/*.html ${WEBSITE}/listings/$*
+	cp Apollo32.png ${WEBSITE}/listings/$*
 
 listing-aea-%:
 	-rm ${WEBSITE}/listings/$*/*.html
@@ -299,6 +300,7 @@ listing-aea-%:
 	cd $* && \
 	../yaLEMAP/yaLEMAP --html $*.s
 	mv $*/*.html ${WEBSITE}/listings/$*
+	cp Apollo32.png ${WEBSITE}/listings/$*
 
 # Here are targets for building the development snapshot, 
 # creating the binary installers, and updating local directory

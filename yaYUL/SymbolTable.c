@@ -52,7 +52,8 @@
 		07/01/09 RSB	Altered the way the highlighting styles
 				(COLOR_XXX) work in order to make them
 				more flexible and to shorten up the HTML
-				files more.
+				files more.  Added "##" HTML-insert 
+				syntax, default style, etc.
 
   Concerning the concept of a symbol's namespace.  I had originally 
   intended to implement this, and so many functions had a namespace
@@ -154,7 +155,7 @@ NormalizeFilename (char *SourceName)
 }
 
 //-------------------------------------------------------------------------
-// Create an HTML output file.  Return 0 on success, 1 on failure.
+// Create an HTML output file.  Return 0 on success, 1 on failure.  
 int
 HtmlCreate (char *Filename)
 {
@@ -249,37 +250,47 @@ HtmlClose (void)
 }
 
 //-------------------------------------------------------------------------
-// For processing "<HTML>...</HTML>" stuff in source files.
-// Checks to see if a string is "<HTML>", and if so fetches more lines
-// until "</HTML>" is encountered.  Updates the CurrentLineAll and 
-// CurrentLineInFile variables with each new line fetched.  Returns 0
-// if (on exit) s contains a line that needs to be processed by the
-// calling program, or non-zero fi already processed.  The calling program 
-// must allocate the space for s, which may be overwritten if HTML is 
-// encountered.  If output is being performed during this assembly pass,
-// turns off the default HTML styling, outputs the HTML unchanged, then
-// turns the default HTML styling back on.
-// 
-// Also accepts "<HTMLn>...</HTML>", where n is a decimal number from
-// 1 to 99.  In this case, it embeds the HTML within a centered table 
-// which is n% of the width of the display.
-//
-// Also accepts <HTML="filename"> (no closing tag needed), in which case
-// html will be imported from the indicated file (at the yaYUL or yaLEMAP
-// is run, not at browse-time) if the file exists.  If the file does not
-// exist, it is not treated as an error.  The purpose of this feature is
-// to allow a common notice to be added to a group of files, but to 
-// eliminate that notice easily by removing the file containing it.
+// For processing HTML insertion --- i.e., putting HTML-related stuff into
+// the source files so that it can be eventually stuck into the HTML-
+// formatted assembly listing.  There are two basic variations: the "<HTML>"
+// style and the "##" style.  There is also a default style file which can
+// be used (at assembly-time).
+
+static int StyleInitialized = 0;
+int StyleOnly = 0;
+
 int
-HtmlCheck (int WriteOutput, FILE *InputFile, char *s, int sSize, 
+HtmlCheck (int WriteOutput, FILE *InputFile, char *s, int sSize,  
 	   char *CurrentFilename, int *CurrentLineAll, int *CurrentLineInFile)
 {
-  static int StyleBox = 0, StyleBoxWidth = 75;
+  static int StyleBox = 0, StyleBoxWidth = 75, StyleUser = 0;
+  static char StyleUserStart[2049] = "", StyleUserEnd[1025] = "";
   int Width, Pos = 0;
-  int i;
+  int i, j;
   char c = 0, *ss;
   
+  // Process default style file at startup.
+  if (!StyleInitialized)
+    {
+      FILE *Defaults;
+      StyleInitialized = 1;
+      Defaults = fopen ("Default.style", "r");
+      if (Defaults != NULL)
+        {
+	  Line_t s = { 0 };
+	  StyleOnly = 1;
+	  while (NULL != fgets (s, sizeof (s) - 1, Defaults))
+	    HtmlCheck (0, Defaults, s, sizeof (s), "", &i, &j);
+	  StyleOnly = 0;
+          fclose (Defaults);
+	}
+    }
+  
+  if (StyleOnly)
+    goto ProcessStyle;
 Retry:  
+  Pos = 0;
+  c = 0;
   
   // First, take care of directives to include HTML from a 
   // file.  There are two forms:
@@ -293,7 +304,6 @@ Retry:
   if (Pos)
     {
       FILE *Include;
-      char *ss;
       if (!WriteOutput || !Html || HtmlOut == NULL)
         return (1);
       for (ss = &s[Pos]; *ss && *ss != '\"'; ss++);
@@ -312,26 +322,81 @@ Retry:
       return (1);
     }
     
+  // Take care of the addition of destinations for hyperlinks.
+  if (!strncmp (s, "### ANCHOR=", 11))
+    {
+      if (!WriteOutput || !Html || HtmlOut == NULL)
+        return (1);
+      for (ss = s; *ss && *ss != '\n'; ss++);
+      *ss = 0;
+      fprintf (HtmlOut, "<a name=\"%s\">\n", &s[11]);
+      return (1);
+    }
+    
   // Now take care of style pragmas.  The allowed forms are
   //	### STYLE=NONE
   // or
   //	### STYLE=BOX n%
+  // or
+  //	### STYLE=START stuff
+  //	### STYLE=START+ stuff
+  //	### STYLE=END stuff
+  // or
+  //	### STYLE=USER
+  // The latter just re-enables STYLE=START/STYLE=END styles which
+  // may have been defined earlier but then disabled temporarily
+  // with STYLE=NONE or STYLE=BOX.  STYLE=START/STYLE=START+/STYLE=END 
+  // is a user-defined style, in which you can give
+  // both the HTML to initiate the style and the HTML to end 
+  // the style to allow returning to the default style.  In other
+  // words, when a block of comments in "## htmlstuff" format
+  // is encountered, the style-start stuff will be output,
+  // followed by all of the htmlstuff in the ## comments, followed
+  // by the style-end stuff.  STYLE=START gives the starting commands,
+  // but since such commands are sometimes gargantuan, they may not
+  // fit conveniently on a single line, so what STYLE=START+ does is
+  // to *add* stuff to the end of a previous STYLE=START or 
+  // STYLE=START+.
   if (!strncmp (s, "### STYLE=", 10))
     {
-      char *ss;
+      if (!WriteOutput || !Html || HtmlOut == NULL)
+        return (1);
+    ProcessStyle:
       ss = &s[10];
       if (!strncmp (ss, "NONE", 4))
         {
 	  StyleBox = 0;
-	  
+	  StyleUser = 0;
 	}
       else if (!strncmp (ss, "BOX ", 4) && 
-      	       2 == sscanf (ss+4, "%d%c", &i, &c) &&
+      	       2 == sscanf (ss + 4, "%d%c", &i, &c) &&
 	       i >= 1 && i <= 100 &&
 	       c == '%')
         {
 	  StyleBox = 1;
 	  StyleBoxWidth = i;
+	  StyleUser = 0;
+	}
+      else if (!strncmp (ss, "USER", 4))
+        {
+	  StyleBox = 0;
+	  StyleUser = 1;
+	}
+      else if (!strncmp (ss, "START ", 6))
+        {
+	  StyleBox = 0;
+	  StyleUser = 1;
+	  strcpy (StyleUserStart, &ss[6]);
+	}
+      else if (!strncmp (ss, "START+ ", 7))
+        {
+	  strcat (StyleUserStart, &ss[7]);
+	}
+      else if (!strncmp (ss, "END ", 4))
+        {
+	  StyleBox = 0;
+	  StyleUser = 1;
+	  strcpy (StyleUserEnd, &ss[4]);
 	}
 	
       return (1);
@@ -347,6 +412,8 @@ Retry:
 	  fprintf (HtmlOut, "%s", HTML_STYLE_END);
 	  if (StyleBox)
 	    fprintf (HtmlOut, HTML_TABLE_START, StyleBoxWidth);
+	  else if (StyleUser)
+	    fprintf (HtmlOut, "%s", StyleUserStart);
 	  fprintf (HtmlOut, "%s", &s[3]);
 	}
       // Loop on the lines of the insert.
@@ -367,6 +434,8 @@ Retry:
 	{
 	  if (StyleBox)
 	    fprintf (HtmlOut, "%s", HTML_TABLE_END);
+	  else if (StyleUser)
+	    fprintf (HtmlOut, "%s", StyleUserEnd);
 	  fprintf (HtmlOut, "%s", HTML_STYLE_START);
 	}
       if (ss == NULL)

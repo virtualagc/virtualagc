@@ -10,10 +10,9 @@
 # Reference:	pp. 661-664 of 1729.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	05/21/03 RSB.	Began transcribing.
+# Mod history:	05/21/03 RSB.	Began transcribing. 
 #		05/14/05 RSB	Corrected website reference above.
 
-### FILE="../AgcHtmlNotice.txt"
 # Page 661
 # GROUND TRACKING DETERMINATION PROGRAM -- P21
 #

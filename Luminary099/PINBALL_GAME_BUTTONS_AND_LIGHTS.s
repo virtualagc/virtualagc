@@ -3,13 +3,13 @@
 # Purpose:	Part of the source code for Luminary 1A build 099.
 #		It is part of the source code for the Lunar Module's (LM)
 #		Apollo Guidance Computer (AGC), for Apollo 11.
-#
 # Assembler:	yaYUL
 # Contact:	Jim Lawton <jim.lawton@gmail.com>
 # Website:	www.ibiblio.org/apollo.
 # Pages:	390-471
-# Mod history:	2009-05-16	JVL	Started updating from page images.
-# 		2009-05-25	JVL	Finished updating from page images.
+# Mod history:	2009-05-16 JVL	Started updating from page images.
+# 		2009-05-25 JVL	Finished updating from page images.
+#		2009-07-01 RSB	Began annotating.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -25,6 +25,9 @@
 #    Assemble revision 001 of AGC program LMY99 by NASA 2021112-061
 #    16:27 JULY 14, 1969
 
+## <b>Note:</b> Notations below resembling this note are 21st-century
+## annotations added by the <a href="http://www.ibiblio.org/apollo">
+## Virtual AGC project</a>, and are not original AGC source code.
 # Page 390
 # PROGRAM NAME -- KEYBOARD AND DISPLAY PROGRAM
 # MOD NO -- 4		DATE -- 27 APRIL 1967		ASSEMBLY -- PINDANCE REV 18
@@ -51,6 +54,41 @@
 #
 # A LIST OF VERBS AND NOUNS IS GIVEN IN LOG SECTION 'ASSEMBLY AND 
 # OPERATION INFORMATION'.
+#
+## Ram&oacute;n Alonso, one of the original AGC developers, provides a 
+## little more insight:  Apparently, nobody had yet arrived at any kind 
+## of software requirements for the AGC's user interface when the desire
+## arose within the Instrumentation Laboratory to set up a demo 
+## guidance-computer unit with which to impress visitors to the lab.  
+## Of course, this demo would have to <i>do</i> something, if it was going to be 
+## at all impressive, and to do something it would need some software. In 
+## short order, some of the coders threw together a demo program, 
+## inventing and using the verb/noun user-interface concept (in the 
+## whimsical fashion seen in much of this code), but without any idea 
+## that the verb/noun concept would somehow survive into the flight 
+## software.  As time passed, and more and more people became familiar 
+## with the demo, nobody got around to inventing an improvement for the 
+## user interface, so the coders simply built it into the flight software 
+## without any specific requirements to do so.<br>
+## <br>
+## However, that does not mean that the verb/noun interface was universally 
+## beloved.  Ram&oacute;n says that <i>many</i> objections were received from 
+## naysayers, such as "it's not scientific", "it's not dignified", or 
+## even "astronauts won't understand it".  Even though the coders of 
+## the demo hadn't seriously intended the verb/noun interface to be used 
+## in any permanent way, it became a kind of devilish game to counter 
+## these objections with (perhaps) sophistic arguments as to why the 
+## interface was really a good one.  In the end, the coders won.  I don't 
+## know whether they were elated or dismayed by this victory.<br>
+## <br>
+## The astronauts, of course, <i>could</i> understand the interface, 
+## but they did not like it.  Most of them really wanted an interface much 
+## more like that they had used in aircraft:  i.e., lots of dials and 
+## switches.  Dave Scott is the the only astronaut I'm aware of who had 
+## kind words for it (or for the AGC in general), though we are told that 
+## Jim McDivitt wasn't necessary completely hostile to it.<br>
+## <br>
+## <div style="text-align: right;"><small>&mdash;Ron Burkey, 07/2009</small></div>
 #
 # CALLING SEQUENCES --
 #
@@ -141,7 +179,7 @@
 #			AWAITING OPERATORS RESPONSE.
 #
 #	DSPMM		ROUTINE BY WHICH AN INTERNAL PROGRAM MAY DISPLAY A DECIMAL
-#			PROGRAM CODE (MAJOR MODE) IN THE PROGRAM (MAJOR MODE) LIGHTs.
+#			PROGRAM CODE (MAJOR MODE) IN THE PROGRAM (MAJOR MODE) LIGHTS.
 #			(DSPMM DOES NOT DISPLAY DIRECTLY BUT ENTERS EXEC REQUEST
 #			FOR DSPMMJB WITH PRIO 30000 AND RETURNS TO CALLER.)
 #
@@ -168,9 +206,12 @@
 # PROGRAM, SEE THE MISSION PLAN AND/OR MIT/IL E-2129
 # DESCRIBING KEYBOARD AND DISPLAY OPERATION FOR 278.
 
-# (Note that this doc by Green and Filene is/was available online at
-# http://hrst.mit.edu/hrs/apollo/public/archive/1706.pdf --- RSB 6/2004.)
-#
+## The document described above, "Keyboard and Display Program Operation"
+## by Alan I. Green and Robert J. Filene is 
+## <a href="http://www.ibiblio.org/apollo/hrst/archive/1706.pdf">
+## available online at the Virtual AGC website</a>.
+## <small>&mdash;Ron Burkey, 07/2009</small>
+
 # THE FOLLOWING QUOTATION IS PROVIDED THROUGH THE COURTESY OF THE AUTHORS.
 #
 # "IT WILL BE PROVED TO THY FACE THAT THOU HAST MEN ABOUT THEE THAT
@@ -178,6 +219,9 @@
 # Page 393
 # CHRISTIAN EAR CAN ENDURE TO HEAR."
 #					HENRY 6, ACT 2, SCENE 4
+
+## Actually, this quotation is from <i>Henry VI</i>, Part 2, Act IV, Scene VII.
+## <small>&mdash;Ron Burkey, 07/2009</small>
 
 # THE FOLLOWING ASSIGNMENTS FOR PINBALL ARE MADE ELSEWHERE
 #
@@ -404,6 +448,9 @@
 #	VERB/NOUN FLASH		-	BIT 6 OF CHANNEL 11
 #	OPERATOR ERROR LIGHT	-	BIT 7 OF CHANNEL 11
 
+## <b>Hint:</b> In the source code below, each of the blue operands to the 
+## right of the instruction opcodes is a hyperlink back to the definition
+## of the symbol.  This is particularly useful for tracing program flow.
 # Page 398
 # START OF EXECUTIVE SECTION OF PINBALL
 
