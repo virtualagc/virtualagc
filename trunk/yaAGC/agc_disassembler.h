@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>, 
+  Copyright 2003-2006 Ronald S. Burkey <info@sandroid.org>,
   				2008 Onno Hommes
 
   This file is part of yaAGC.
@@ -19,15 +19,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, permission is given to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
+
   Filename:	agc_disassemble.h
   Purpose:	Header file for AGC Disassembler
   Contact:	Onno Hommes
@@ -39,5 +39,6 @@
 #define AGC_DISASSEMBLE_H_
 
 extern void Disassemble (agc_t * State);
+extern void DasPrintInstructionAtAddr(unsigned short LinearAddress);
 
 #endif /*AGC_DISASSEMBLE_H_*/
