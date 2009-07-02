@@ -1095,7 +1095,17 @@ GdbmiHandleInfoFunctions(int i)
     return GdbmiHandleInfoSymbols(i,SYMBOL_LABEL);
 }
 
-GdbmiCommands_t GdbmiConsoleInfoCommands[18] =
+static GdbmiResult
+GdbmiHandleInfoFrame(int i)
+{
+	printf("Stack level 0, frame at 0x0801:\n");
+	printf(" pc = 0x0803 in MAIN (c:\\Code\\virtualagc\\Luminary131\\INTERRUPT_LEAD_INS.s:23); saved pc 0x0800\n");
+	printf(" source language AGC assembler.\n");
+	printf(" Testing CodeBlocks only not functional yet.\n");
+	return(GdbmiCmdDone);
+}
+
+GdbmiCommands_t GdbmiConsoleInfoCommands[19] =
 {
    {"ALL-REGISTERS", GdbmiHandleInfoAllRegisters},
    {"REGISTERS", GdbmiHandleInfoRegisters},
@@ -1114,6 +1124,7 @@ GdbmiCommands_t GdbmiConsoleInfoCommands[18] =
    {"FUNCTIONS", GdbmiHandleInfoFunctions},
    {"CONSTANTS", GdbmiHandleInfoConstants},
    {"SOURCE", GdbmiHandleInfoSource},
+   {"FRAME",GdbmiHandleInfoFrame},
    {0,0}
 };
 
@@ -1233,42 +1244,58 @@ GdbmiHandleSet(int i)
 static GdbmiResult
 GdbmiHandleDisassemble(int i)
 {
-   unsigned gdbmiFromAddr,gdbmiToAddr;
-   Address_t agc_addr;
-   SymbolLine_t* Line = NULL;
+//   unsigned gdbmiFromAddr,gdbmiToAddr;
+//   Address_t agc_addr;
+//   SymbolLine_t* Line = NULL;
    GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
+   unsigned LinearAddress;
+   unsigned DumpAddress,EndAddress;
+   int argc = 0;
 
    /* Adjust the CmdPtr to point to the next token */
    GdbmiAdjustCmdPtr(i);
 
-   /* Determine if the USER provided Address arguments */
+   /* Use address values if provided */
    if (*sraw == ' ')
    {
-      if (2 == sscanf (sraw+1, "0x%x 0x%x", &gdbmiFromAddr, &gdbmiToAddr))
-      {
-         while (gdbmiFromAddr <= gdbmiToAddr)
-         {
-            agc_addr = DbgNativeAddr(gdbmiFromAddr);
-            Line = ResolveLineAGC(agc_addr.SReg,agc_addr.FB,agc_addr.Super);
-            if (Line)
-            {
-               printf("0x%04x %s:\t0x%04x\n",
-                    gdbmiFromAddr,
-                    DbgGetFrameNameByAddr(gdbmiFromAddr),
-                    DbgGetValueByAddress(gdbmiFromAddr));
-            }
-         }
-         GdbmiStat = GdbmiCmdDone;
-      }
-      GdbmiStat = GdbmiCmdError;
+	   argc = sscanf(sraw+1, "0x%x 0x%x", &DumpAddress, &EndAddress);
+	   if (argc == 2)
+	   {
+		   LinearAddress = DumpAddress;
+	   }
+	   if (argc == 1)
+	   {
+		   LinearAddress = DumpAddress;
+		   EndAddress  = DumpAddress + 9;
+	   }
    }
-   else /* No arguments */
+   else
    {
-	   Disassemble(State);
-	   GdbmiStat = GdbmiCmdDone;
-
+	   LinearAddress = DbgGetCurrentProgramCounter();
+	   DumpAddress = LinearAddress - 4;
+	   EndAddress  = DumpAddress + 9;
    }
 
+   if (DumpAddress < 2048) DumpAddress = 2048;
+
+   printf("Dump of assembler code from 0x%04x to 0x%04x:\n",DumpAddress,EndAddress);
+
+   while (DumpAddress < EndAddress)
+   {
+	   /* This next line is only to check if the new method works */
+	   //if (CurrentAddress == LinearAddress ) Disassemble(State);
+
+	   printf("0x%04x",DumpAddress);
+	   printf(" <%s+%d>:\t",DbgGetFrameNameByAddr(DumpAddress),
+			   DbgGetFrameNameOffsetByAddr(DumpAddress));
+	   DasPrintInstructionAtAddr(DumpAddress);
+
+	   ++DumpAddress;
+   }
+
+   GdbmiStat = GdbmiCmdDone;
+
+   printf("End of assembler dump.\n");
    return (GdbmiStat);
 }
 
@@ -1700,7 +1727,7 @@ GdbmiHandleExamine(int j)
       gdbmi_space=strstr(s," ");
 
       /* Look for size and format specifiers */
-      while (s < gdbmi_space)
+      while (*s != 0)
       {
       	if (strstr(s,"W"))
       		{gdbmi_size = 'w';gdbmi_apl = 4;}
@@ -1715,7 +1742,8 @@ GdbmiHandleExamine(int j)
       }
 
       /* Get linear address */
-      gdbmi_addr = DbgLinearAddrFromAddrStr(++gdbmi_space);
+      if (gdbmi_space) gdbmi_addr = DbgLinearAddrFromAddrStr(++gdbmi_space);
+      else gdbmi_addr = DbgGetCurrentProgramCounter();
 
       if ((gdbmi_count > 0) && (gdbmi_addr != ~0))
       {
