@@ -57,6 +57,7 @@
 #				Thanks to Onno Hommes for noticing this.  Also
 #				added a 4th parameter for Windows vs. non-Windows.
 #		2009-06-07 RSB	Added Luminary099.
+#		2009-07-02 RSB	Added SyntaxHighlight stuff to the binary installers.
 
 APP=VirtualAGC
 
@@ -223,6 +224,8 @@ ifeq "${EXT}" ".exe"
 	done
 	${CP} /usr/local/lib/wx*dll $@
 endif
+	cp -a ../Contributed/SyntaxHighlight $@
+	rm -rf `find $@/SyntaxHighlight -name ".svn"`
 
 # The targets below create a bin directory for the distribution
 # packages.  All of the contents of the bin directory vary by
