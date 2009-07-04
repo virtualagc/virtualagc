@@ -7,6 +7,7 @@
 # Website:	http://www.ibiblio.org/apollo
 # Mod history:	2009-06-05 RSB	Adapted from similar Comanche 055
 #				Makefile.
+#		2009-07-04 RSB	Added --html switch.
 
 BASENAME=Luminary099
 
@@ -20,12 +21,12 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
-	../yaYUL/yaYUL MAIN.s >${BASENAME}.lst
+	../yaYUL/yaYUL --html MAIN.s >${BASENAME}.lst
 	cp MAIN.s.bin Oct2Bin.bin
 	../Luminary131/Oct2Bin --invert --page=1590
 	mv MAIN.s.symtab ${BASENAME}.symtab
 	diff -s MAIN.s.bin ${BASENAME}.bin
 		
 clean:
-	-rm -f *.lst *~ MAIN.s.bin ${BASENAME}.bin *.symtab Oct2Bin.bin*
+	-rm -f *.lst *~ MAIN.s.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 

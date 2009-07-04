@@ -12,6 +12,7 @@
 #		05/14/04 RSB	Added PREFIX
 #		09/05/04 RSB	Now runs yaYUL by default.
 #		07/28/05 RSB	Now account for symtabs.
+#		2009-07-04 RSB	Added --html switch.
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -26,12 +27,12 @@ Colossus249.bin: Colossus249.binsource
 	mv Oct2Bin.bin Colossus249.bin
 
 Colossus249.lst Colossus249.symtab: ${SOURCE} Colossus249.bin
-	../yaYUL/yaYUL MAIN.s >Colossus249.lst
+	../yaYUL/yaYUL --html MAIN.s >Colossus249.lst
 	mv MAIN.s.symtab Colossus249.symtab
 	diff -s MAIN.s.bin Colossus249.bin
 		
 clean:
-	-rm -f *.lst *~ MAIN.s.bin Colossus249.bin *.symtab
+	-rm -f *.lst *~ MAIN.s.bin Colossus249.bin *.symtab *.html
 	
 install:	default
 	cp Colossus249.bin ${PREFIX}/bin

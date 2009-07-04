@@ -15,6 +15,7 @@
 #		04/30/05 RSB	Added CFLAGS.
 #		07/28/05 RSB	Added symtab.
 #		03/06/09 RSB	Added 'all-archs' and associated stuff.
+#		2009-07-04 RSB	Added --html switch.
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -47,17 +48,17 @@ Luminary131.bin: Oct2Bin Luminary131.binsource
 	mv Oct2Bin.bin Luminary131.bin
 
 Luminary131.lst Luminary131.symtab: ${SOURCE} Luminary131.bin
-	../yaYUL/yaYUL MAIN.s >Luminary131.lst
+	../yaYUL/yaYUL --html MAIN.s >Luminary131.lst
 	mv MAIN.s.symtab Luminary131.symtab
 	diff -s MAIN.s.bin Luminary131.bin
 
 .PHONY: JustAssemble
 JustAssemble:
-	../yaYUL/yaYUL MAIN.s >Luminary131.lst
+	../yaYUL/yaYUL --html MAIN.s >Luminary131.lst
 	mv MAIN.s.symtab Luminary131.symtab
 
 clean:
-	-rm $(TARGETXEQ) *.exe *-macosx *.lst *~ MAIN.s.bin Luminary131.bin *.symtab
+	-rm $(TARGETXEQ) *.exe *-macosx *.lst *~ MAIN.s.bin Luminary131.bin *.symtab *.html
 
 install:	default
 	cp ${TARGETS} Luminary131.symtab ${PREFIX}/bin
