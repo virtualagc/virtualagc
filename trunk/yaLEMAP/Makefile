@@ -32,6 +32,7 @@
 #				The 'all-archs' target assumes that 
 #				IMCROSS (www.sandroid.org/imcross) is 
 #				installed.
+#		2009-07-04 RSB	Added --html switch.
 
 ifndef PREFIX
 ifdef MSYSTEM
@@ -51,13 +52,13 @@ default: binLEMAP SampleCodeAGS.lst \
 all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 
 ../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab: yaLEMAP ../FP8/FP8.s
-	./yaLEMAP ../FP8/FP8.s
+	./yaLEMAP --html ../FP8/FP8.s
 	mv yaLEMAP.bin ../FP8/FP8.bin
 	mv yaLEMAP.symtab ../FP8/FP8.symtab
 	mv yaLEMAP.lst ../FP8/FP8.lst
 
 ../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP ../FP6/FP6.s
-	./yaLEMAP ../FP6/FP6.s
+	./yaLEMAP --html ../FP6/FP6.s
 	mv yaLEMAP.bin ../FP6/FP6.bin
 	mv yaLEMAP.symtab ../FP6/FP6.symtab
 	mv yaLEMAP.lst ../FP6/FP6.lst

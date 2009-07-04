@@ -15,6 +15,7 @@
 #				and since it messes up CygWin.
 #		05/23/09 RSB	Changed the naming of the symtab file to conform
 #				to the new build procedure for VirtualAGC.
+#		2009-07-04 RSB	Added --html switch.
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -27,12 +28,12 @@ Validation.txt: Validation.bin
 	../Luminary131/webb2burkey-rope Validation.bin Validation.txt
 
 Validation.bin:	${SSOURCE}
-	../yaYUL/yaYUL Validation.s >Validation.lst
+	../yaYUL/yaYUL --html Validation.s >Validation.lst
 	mv Validation.s.bin Validation.bin
 	mv Validation.s.symtab Validation.symtab
 
 clean:
-	-rm -f Validation.bin Validation.lst Validation.s.bin Validation.txt *~ *.symtab
+	-rm -f Validation.bin Validation.lst Validation.s.bin Validation.txt *~ *.symtab *.html
 	
 install:	default
 	cp Validation.bin ${PREFIX}/bin
