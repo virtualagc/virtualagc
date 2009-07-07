@@ -589,7 +589,7 @@ proc modify_gimbal_angle {dx dy dz} {
      set PIMUZ [expr $PIMUZ + $ANGLE_INCR_SIGN]
      set ang_delta [expr $ang_delta - $ANGLE_INCR]
      # ---- LM Z-Axis/ROLL-Axis ----
-     if {$Omega_Pitch < 4.0} {
+     if {$Omega_Roll < 4.0} {
        if {$ANGLE_INCR_SIGN < 0} {write_socket "MCDU" 34} else {write_socket "PCDU" 34}
      } else {
        if {$ANGLE_INCR_SIGN < 0} {write_socket "MCDU_FAST" 34} else {write_socket "PCDU_FAST" 34}
