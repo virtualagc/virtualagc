@@ -478,7 +478,7 @@ void VirtualAGC::AgcFilenameBrowseEvent(wxCommandEvent &event)
     TEMPTRACE ("2");
     wxFileDialog *Dialog = new wxFileDialog (this, wxT ("Choose AGC executable-binary file"),
     					     AgcDirectory, wxT (""),
-					     wxT ("Source files (*.s)|*.s|Binary files (*.bin)|*.bin"),
+					     wxT ("Source files (*.agc)|*.agc|Binary files (*.bin)|*.bin"),
 					     wxFD_DEFAULT_STYLE |
 					     wxFD_FILE_MUST_EXIST |
 					     wxFD_CHANGE_DIR);
@@ -491,7 +491,7 @@ void VirtualAGC::AgcFilenameBrowseEvent(wxCommandEvent &event)
 	wxString Filename = Dialog->GetFilename ();
 	wxString Filebase = Filename.BeforeLast ('.');
 	wxString Directory = Dialog->GetDirectory ();
-	if (Extension.IsSameAs (wxT ("s")))  // Source code!
+	if (Extension.IsSameAs (wxT ("agc")))  // Source code!
 	  {
 	    if (Pathname.StartsWith (ResourceDirectory))
 	      {
@@ -623,7 +623,7 @@ void VirtualAGC::AeaFilenameBrowseEvent(wxCommandEvent &event)
     TEMPTRACE ("4");
     wxFileDialog *Dialog = new wxFileDialog (this, wxT ("Choose AEA/AGS executable-binary file"),
     					     AeaDirectory, wxT (""),
-					     wxT ("Source files (*.s)|*.s|Binary files (*.bin)|*.bin"),
+					     wxT ("Source files (*.aea)|*.aea|Binary files (*.bin)|*.bin"),
 					     wxFD_DEFAULT_STYLE |
 					     wxFD_FILE_MUST_EXIST |
 					     wxFD_CHANGE_DIR);
@@ -636,7 +636,7 @@ void VirtualAGC::AeaFilenameBrowseEvent(wxCommandEvent &event)
 	wxString Filename = Dialog->GetFilename ();
 	wxString Filebase = Filename.BeforeLast ('.');
 	wxString Directory = Dialog->GetDirectory ();
-	if (Extension.IsSameAs (wxT ("s")))  // Source code!
+	if (Extension.IsSameAs (wxT ("aea")))  // Source code!
 	  {
 	    if (Pathname.StartsWith (ResourceDirectory))
 	      {
@@ -1131,17 +1131,17 @@ void VirtualAGC::AgcSourceEvent(wxCommandEvent &event)
   Dummy += ResourceDirectory;
   Dummy += wxT ("/source/");
   if (Colossus249Button->GetValue ())
-    Dummy += wxT ("Colossus249/MAIN.html");
+    Dummy += wxT ("Colossus249/MAIN.agc.html");
   else if (Comanche55Button->GetValue ())
-    Dummy += wxT ("Comanche055/MAIN.html");
+    Dummy += wxT ("Comanche055/MAIN.agc.html");
   else if (Artemis72Button->GetValue ())
-    Dummy += wxT ("Artemis072/MAIN.html");
+    Dummy += wxT ("Artemis072/MAIN.agc.html");
   else if (Luminary99Button->GetValue ())
-    Dummy += wxT ("Luminary099/MAIN.html");
+    Dummy += wxT ("Luminary099/MAIN.agc.html");
   else if (Luminary131Button->GetValue ())
-    Dummy += wxT ("Luminary131/MAIN.html");
+    Dummy += wxT ("Luminary131/MAIN.agc.html");
   else if (ValidationButton->GetValue ())
-    Dummy += wxT ("Validation/Validation.html");
+    Dummy += wxT ("Validation/Validation.agc.html");
   wxLaunchDefaultBrowser (Dummy);
 }
 
@@ -1153,15 +1153,15 @@ void VirtualAGC::AeaSourceEvent(wxCommandEvent &event)
   Dummy += ResourceDirectory;
   Dummy += wxT ("/source/");
   if (FlightProgram4Button->GetValue ())
-    Dummy += wxT ("FP4/FP4.html");
+    Dummy += wxT ("FP4/FP4.aea.html");
   else if (FlightProgram5Button->GetValue ())
-    Dummy += wxT ("FP5/FP5.html");
+    Dummy += wxT ("FP5/FP5.aea.html");
   else if (FlightProgram6Button->GetValue ())
-    Dummy += wxT ("FP6/FP6.html");
+    Dummy += wxT ("FP6/FP6.aea.html");
   else if (FlightProgram7Button->GetValue ())
-    Dummy += wxT ("FP7/FP7.html");
+    Dummy += wxT ("FP7/FP7.aea.html");
   else if (FlightProgram8Button->GetValue ())
-    Dummy += wxT ("FP8/FP8.html");
+    Dummy += wxT ("FP8/FP8.aea.html");
   wxLaunchDefaultBrowser (Dummy);
 }
 

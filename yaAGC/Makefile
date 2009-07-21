@@ -195,8 +195,8 @@ EmbeddedAGC68.elf: crt.o68 EmbeddedDemo.o68 NullAPI.o68 random.o68 agc_engine.o6
 		agc_engine.o68					
 	${ELD} -T EmbeddedLinker.script -o $@ $^ -L${LIBDIR} -lgcc
 
-%.o68: %.s
-	${EAS} -m5206 -o $*.o68 $*.s 
+%.o68: %.agc
+	${EAS} -m5206 -o $*.o68 $*.agc
 
 %.o68: %.c
 	${ECC}  -c -m5200 -O2 -Wall -o $*.o68 $*.c	

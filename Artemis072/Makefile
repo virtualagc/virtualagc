@@ -17,7 +17,7 @@ ifndef PREFIX
 PREFIX=/usr/local
 endif
 
-SOURCE:=$(wildcard *.s)
+SOURCE:=$(wildcard *.agc)
 TARGETS=${PROJECT}.bin ${PROJECT}.lst
 
 default: $(TARGETS)
@@ -39,7 +39,7 @@ install: default
 	@echo ====================================================
 	@echo Errors in the following are normal, since Artemis072
 	@echo is under development.
-	-../yaYUL/yaYUL --html MAIN.s >$@
-	-diff -s MAIN.s.bin $^
+	-../yaYUL/yaYUL --html MAIN.agc >$@
+	-diff -s MAIN.agc.bin $^
 		
 

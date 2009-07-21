@@ -17,7 +17,7 @@
 ifndef PREFIX
 PREFIX=/usr/local
 endif
-SOURCE:=$(wildcard *.s)
+SOURCE:=$(wildcard *.agc)
 TARGETS=Colossus249.bin Colossus249.lst Colossus249.symtab
 
 default:	$(TARGETS)
@@ -27,12 +27,12 @@ Colossus249.bin: Colossus249.binsource
 	mv Oct2Bin.bin Colossus249.bin
 
 Colossus249.lst Colossus249.symtab: ${SOURCE} Colossus249.bin
-	../yaYUL/yaYUL --html MAIN.s >Colossus249.lst
-	mv MAIN.s.symtab Colossus249.symtab
-	diff -s MAIN.s.bin Colossus249.bin
+	../yaYUL/yaYUL --html MAIN.agc >Colossus249.lst
+	mv MAIN.agc.symtab Colossus249.symtab
+	diff -s MAIN.agc.bin Colossus249.bin
 		
 clean:
-	-rm -f *.lst *~ MAIN.s.bin Colossus249.bin *.symtab *.html
+	-rm -f *.lst *~ MAIN.agc.bin Colossus249.bin *.symtab *.html
 	
 install:	default
 	cp Colossus249.bin ${PREFIX}/bin

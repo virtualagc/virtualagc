@@ -290,7 +290,7 @@ listing-agc-%:
 	-rm ${WEBSITE}/listings/$*/*.html
 	mkdir -p ${WEBSITE}/listings/$*
 	cd $* && \
-	../yaYUL/yaYUL --html MAIN.s >MAIN.lst
+	../yaYUL/yaYUL --html MAIN.agc >MAIN.lst
 	mv $*/*.html ${WEBSITE}/listings/$*
 	cp Apollo32.png ${WEBSITE}/listings/$*
 
@@ -298,7 +298,7 @@ listing-aea-%:
 	-rm ${WEBSITE}/listings/$*/*.html
 	mkdir -p ${WEBSITE}/listings/$*
 	cd $* && \
-	../yaLEMAP/yaLEMAP --html $*.s
+	../yaLEMAP/yaLEMAP --html $*.aea
 	mv $*/*.html ${WEBSITE}/listings/$*
 	cp Apollo32.png ${WEBSITE}/listings/$*
 

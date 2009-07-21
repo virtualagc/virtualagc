@@ -51,21 +51,21 @@ default: binLEMAP SampleCodeAGS.lst \
 .PHONY: all-archs
 all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 
-../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab: yaLEMAP ../FP8/FP8.s
-	./yaLEMAP --html ../FP8/FP8.s
+../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab: yaLEMAP ../FP8/FP8.aea
+	./yaLEMAP --html ../FP8/FP8.aea
 	mv yaLEMAP.bin ../FP8/FP8.bin
 	mv yaLEMAP.symtab ../FP8/FP8.symtab
 	mv yaLEMAP.lst ../FP8/FP8.lst
 
-../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP ../FP6/FP6.s
-	./yaLEMAP --html ../FP6/FP6.s
+../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP ../FP6/FP6.aea
+	./yaLEMAP --html ../FP6/FP6.aea
 	mv yaLEMAP.bin ../FP6/FP6.bin
 	mv yaLEMAP.symtab ../FP6/FP6.symtab
 	mv yaLEMAP.lst ../FP6/FP6.lst
 
-SampleCodeAGS.lst: yaLEMAP SampleCodeAGS.s
+SampleCodeAGS.lst: yaLEMAP SampleCodeAGS.aea
 	@echo \*\*\* The following operation should result in 13 errors and 3 warnings. \*\*\*
-	./yaLEMAP --compare=binLEMAP.bin SampleCodeAGS.s
+	./yaLEMAP --compare=binLEMAP.bin SampleCodeAGS.aea
 	mv yaLEMAP.bin SampleCodeAGS.bin
 	mv yaLEMAP.lst SampleCodeAGS.lst
 
