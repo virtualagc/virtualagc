@@ -20,7 +20,7 @@
 ifndef PREFIX
 PREFIX=/usr/local
 endif
-SSOURCE:=$(wildcard *.s)
+SSOURCE:=$(wildcard *.agc)
 
 default:	Validation.bin Validation.txt
 
@@ -28,12 +28,12 @@ Validation.txt: Validation.bin
 	../Luminary131/webb2burkey-rope Validation.bin Validation.txt
 
 Validation.bin:	${SSOURCE}
-	../yaYUL/yaYUL --html Validation.s >Validation.lst
-	mv Validation.s.bin Validation.bin
-	mv Validation.s.symtab Validation.symtab
+	../yaYUL/yaYUL --html Validation.agc >Validation.lst
+	mv Validation.agc.bin Validation.bin
+	mv Validation.agc.symtab Validation.symtab
 
 clean:
-	-rm -f Validation.bin Validation.lst Validation.s.bin Validation.txt *~ *.symtab *.html
+	-rm -f Validation.bin Validation.lst Validation.agc.bin Validation.txt *~ *.symtab *.html
 	
 install:	default
 	cp Validation.bin ${PREFIX}/bin

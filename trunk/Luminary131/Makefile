@@ -20,7 +20,7 @@
 ifndef PREFIX
 PREFIX=/usr/local
 endif
-SOURCE:=$(wildcard *.s)
+SOURCE:=$(wildcard *.agc)
 TARGETXEQ:=bdiffhead webb2burkey-rope Oct2Bin CheckDec
 TARGETEXE:=$(patsubst %,%.exe,${TARGETXEQ})
 TARGETMAC:=$(patsubst %,%-macosx,${TARGETXEQ})
@@ -48,17 +48,17 @@ Luminary131.bin: Oct2Bin Luminary131.binsource
 	mv Oct2Bin.bin Luminary131.bin
 
 Luminary131.lst Luminary131.symtab: ${SOURCE} Luminary131.bin
-	../yaYUL/yaYUL --html MAIN.s >Luminary131.lst
-	mv MAIN.s.symtab Luminary131.symtab
-	diff -s MAIN.s.bin Luminary131.bin
+	../yaYUL/yaYUL --html MAIN.agc >Luminary131.lst
+	mv MAIN.agc.symtab Luminary131.symtab
+	diff -s MAIN.agc.bin Luminary131.bin
 
 .PHONY: JustAssemble
 JustAssemble:
-	../yaYUL/yaYUL --html MAIN.s >Luminary131.lst
-	mv MAIN.s.symtab Luminary131.symtab
+	../yaYUL/yaYUL --html MAIN.agc >Luminary131.lst
+	mv MAIN.agc.symtab Luminary131.symtab
 
 clean:
-	-rm $(TARGETXEQ) *.exe *-macosx *.lst *~ MAIN.s.bin Luminary131.bin *.symtab *.html
+	-rm $(TARGETXEQ) *.exe *-macosx *.lst *~ MAIN.agc.bin Luminary131.bin *.symtab *.html
 
 install:	default
 	cp ${TARGETS} Luminary131.symtab ${PREFIX}/bin

@@ -11,7 +11,7 @@
 
 BASENAME=Comanche055
 
-SOURCE:=$(wildcard *.s)
+SOURCE:=$(wildcard *.agc)
 TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 
 default:	$(TARGETS)
@@ -21,12 +21,12 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
-	../yaYUL/yaYUL --html MAIN.s >${BASENAME}.lst
-	#cp MAIN.s.bin Oct2Bin.bin
+	../yaYUL/yaYUL --html MAIN.agc >${BASENAME}.lst
+	#cp MAIN.agc.bin Oct2Bin.bin
 	#../Luminary131/Oct2Bin --invert --page=1598
-	mv MAIN.s.symtab ${BASENAME}.symtab
-	diff -s MAIN.s.bin ${BASENAME}.bin
+	mv MAIN.agc.symtab ${BASENAME}.symtab
+	diff -s MAIN.agc.bin ${BASENAME}.bin
 		
 clean:
-	-rm -f *.lst *~ MAIN.s.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
+	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 

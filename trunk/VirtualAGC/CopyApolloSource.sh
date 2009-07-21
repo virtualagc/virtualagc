@@ -17,7 +17,8 @@ WIN=$4
 mkdir $DESTDIR
 cp ../Contributed/SyntaxHighlight/Prettify/*.js $DESTDIR
 cp ../Contributed/SyntaxHighlight/Prettify/*.css $DESTDIR
-cp $EXT $SOURCEDIR/*.binsource $SOURCEDIR/*.s $DESTDIR
+cp $EXT $SOURCEDIR/*.binsource $SOURCEDIR/*.agc $DESTDIR
+cp $EXT $SOURCEDIR/*.binsource $SOURCEDIR/*.aea $DESTDIR
 #sh ./lst2html.sh $SOURCEDIR/$SOURCENAME.lst $DESTDIR/$SOURCENAME.html $WIN
 cp $SOURCEDIR/*.html $SOURCEDIR/Apollo32.png $DESTDIR
 cp $EXT $SOURCEDIR/$SOURCENAME.bin $DESTDIR
