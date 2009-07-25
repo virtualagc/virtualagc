@@ -51,6 +51,10 @@
 		2009-06-29 RSB	HTML output now appears to be working.
 		2009-06-30 RSB	Added arbitrary HTML inserts.
 		2009-07-01 RSB	Altered style of comments in HTML.
+		2009-07-24 RSB	No longer automatically converts comments
+				to upper case.  This doesn't matter a lot,
+				but does mess up URLs, so it has been
+				repaired.
 				
   Note that we use yaYUL's symbol-table machinery for handling the
   symbol table.
@@ -566,7 +570,7 @@ PassLemap (FILE *fp, int Action)
 	    *ss = 0;
 	    break;
 	  }
-	else
+	else if (Comment == NULL)
 	  *ss = toupper (*ss);
 
       // Eliminate comments.

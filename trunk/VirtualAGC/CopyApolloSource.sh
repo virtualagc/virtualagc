@@ -20,7 +20,7 @@ cp ../Contributed/SyntaxHighlight/Prettify/*.css $DESTDIR
 cp $EXT $SOURCEDIR/*.binsource $SOURCEDIR/*.agc $DESTDIR
 cp $EXT $SOURCEDIR/*.binsource $SOURCEDIR/*.aea $DESTDIR
 #sh ./lst2html.sh $SOURCEDIR/$SOURCENAME.lst $DESTDIR/$SOURCENAME.html $WIN
-cp $SOURCEDIR/*.html $SOURCEDIR/Apollo32.png $DESTDIR
+cp $SOURCEDIR/*.agc.html $SOURCEDIR/*.aea.html $SOURCEDIR/Apollo32.png $DESTDIR
 cp $EXT $SOURCEDIR/$SOURCENAME.bin $DESTDIR
 cp $EXT $SOURCEDIR/$SOURCENAME.symtab $DESTDIR/$SOURCENAME.bin.symtab
 

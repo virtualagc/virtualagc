@@ -291,7 +291,7 @@ listing-agc-%:
 	mkdir -p ${WEBSITE}/listings/$*
 	cd $* && \
 	../yaYUL/yaYUL --html MAIN.agc >MAIN.lst
-	mv $*/*.html ${WEBSITE}/listings/$*
+	mv $*/*.agc.html ${WEBSITE}/listings/$*
 	cp Apollo32.png ${WEBSITE}/listings/$*
 
 listing-aea-%:
@@ -299,7 +299,7 @@ listing-aea-%:
 	mkdir -p ${WEBSITE}/listings/$*
 	cd $* && \
 	../yaLEMAP/yaLEMAP --html $*.aea
-	mv $*/*.html ${WEBSITE}/listings/$*
+	mv $*/*.aea.html ${WEBSITE}/listings/$*
 	cp Apollo32.png ${WEBSITE}/listings/$*
 
 # Here are targets for building the development snapshot, 
