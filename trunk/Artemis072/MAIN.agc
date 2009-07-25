@@ -1,141 +1,127 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	MAIN.agc
 # Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  It is part of the source code for the
-#		Command Module's (CM) Apollo Guidance Computer (AGC),
-#		possibly for Apollo 15.
+#		build 072.  This is for the Command Module's (CM) 
+#		Apollo Guidance Computer (AGC), we believe for 
+#		Apollo 15-17.
 # Assembler:	yaYUL
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	12/21/04 RSB.	Created.
-#		05/14/05 RSB	Correctes website reference above.
-#
-# The contents of the "Artemis072" files, in general, are transcribed
-# from scanned page images contributed by D. Thrust.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 249 of AGC program Colossus by NASA
-#	2021111-041.  October 28, 1968.  
-#
-#	THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS
-#				COLOSSUS 3
-#	THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED
-#	IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER OSR
-#	PROJECT 55-23890, SPONSORED BY THE MANNED SPACECRAFT
-#	CENTER OF THE NATIONAL AERONAUTICS AND SPACE
-#	ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE
-#	CHARLES STARK DRAPER LABORATORY, MASSACHUSETTS INSTITUTE OF
-#	TECHNOLOGY, CAMBRIDGE, MASS.
-#
-# Please report any errors to info@sandroid.org.
-#
-# In some cases, where the source code for Luminary 131 or for
-# Colossus 249 overlaps that of Artemis 072, this code is instead copied
-# from the corresponding Luminary 131 or Colossus 249
-# source file, and then is proofed to incorporate any changes.
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	12/21/04 RSB	Created.
+#		05/14/05 RSB	Corrects website reference above.
+#		07/25/09 RSB	Fixups for this header so that it can
+#				be used for code conversions.
 
-# This file is a little different from the other Artemis072 files I'm 
-# providing, in that it doesn't represent anything that appears directly 
-# in the original source.  What I (RSB) have done for organizational 
-# purposes is to split the huge monolithic source code into smaller, 
-# more manageable chunks--i.e., into individual source files.  Those 
-# files are rejoined within this file as "includes".  It just makes
-# it a little easier to work with.  The code chunks correspond to 
-# natural divisions into sub-programs.  In fact, these divisions are 
-# more-or-less specified by the source code itself.  Refer to the 
-# "SUBROUTINE CALLS" at the very beginning of the file 
-# ASSEMBLY_AND_OPERATION_INFORMATION.agc.
+# MAIN.agc is a little different from the other Artemis072 files  
+# provided, in that it doesn't represent anything that appears 
+# directly in the original source.  What I (RSB) have done for 
+# organizational purposes is to split the huge monolithic source 
+# code into smaller, more manageable chunks--i.e., into individual
+# source files.  Those files are rejoined within this file as 
+#"includes".  It just makes it a little easier to work with.  The
+# code chunks correspond to natural divisions into sub-programs.  
+# The divisions are by the assembly listing itself.
 
-						# pp. ?-? contain no code/comments.
-						
+# Source-file Name			    	  Starting Page
+# ----------------				  -------------
+
+$ASSEMBLY_AND_OPERATION_INFORMATION.agc		# 1
+$TAGS_FOR_RELATIVE_SETLOC.agc			# 27
+$ABSOLUTE_LOCATIONS_FOR_UPDATES.agc		# 36
+$SUBROUTINE_CALLS.agc				# 37
+$ERASABLE_ASSIGNMENTS.agc			# 38
+
 # ERASTOTL
-$ASSEMBLY_AND_OPERATION_INFORMATION.agc		# pp. ?-??
-#$CHECK_EQUALS_LIST.agc				# pp. ??-??
+$CHECK_EQUALS_LIST.agc				# 135
 
 # DIOGENES
-#$INTERRUPT_LEAD_INS.agc			# pp. ???-???
-#$T4RUPT_PROGRAM.agc				# pp. ???-???
-#$DOWNLINK_LISTS.agc				# pp. ???-???
-#$FRESH_START_AND_RESTART.agc			# pp. ???-???
-#$RESTART_TABLES.agc				# pp. ???-???
-#$SXTMARK.agc 					# pp. ???-???
-#$EXTENDED_VERBS.agc				# pp. ???-???
-#$PINBALL_NOUN_TABLES.agc			# pp. ???-???
-#$CSM_GEOMETRY.agc				# pp. ???-???
-#$IMU_COMPENSATION_PACKAGE.agc			# pp. ???-???
-#$PINBALL_GAME_BUTTONS_AND_LIGHTS.agc		# pp. ???-???
-#$R60_62.agc					# pp. ???-???
-#$ANGLFIND.agc					# pp. ???-???
-#$GIMBAL_LOCK_AVOIDANCE.agc			# pp. ???-???
-#$KALCMANU_STEERING.agc				# pp. ???-???
-#$SYSTEM_TEST_STANDARD_LEAD_INS.agc		# pp. ???-???
-#$IMU_CALIBRATION_AND_ALIGNMENT.agc		# pp. ???-???
+$INTERRUPT_LEAD_INS.agc				# 139
+$T4RUPT_PROGRAM.agc				# 141
+$DOWNLINK_LISTS.agc				# 179
+$FRESH_START_AND_RESTART.agc			# 192
+$RESTART_TABLES.agc				# 229
+$SXTMARK.agc 					# 239
+$EXTENDED_VERBS.agc				# 249
+$PINBALL_NOUN_TABLES.agc			# 280
+$CSM_GEOMETRY.agc				# 297
+$IMU_COMPENSATION_PACKAGE.agc			# 308
+$PINBALL_GAME_BUTTONS_AND_LIGHTS.agc		# 318
+$R60_62.agc					# 394
+$ANGLFIND.agc					# 403
+$GIMBAL_LOCK_AVOIDANCE.agc			# 416
+$KALCMANU_STEERING.agc				# 418
+$SYSTEM_TEST_STANDARD_LEAD_INS.agc		# 424
+$IMU_CALIBRATION_AND_ALIGNMENT.agc		# 427
 
 # MEDUSA
-#$GROUND_TRACKING_DETERMINATION_PROGRAM.agc	# pp. ???-???
-#$P34-35_P74-75.agc				# pp. ???-???
-#$R31.agc					# pp. ???-???
-#$P76.agc					# pp. ???-???
-#$R30.agc					# pp. ???-???
+$GROUND_TRACKING_DETERMINATION_PROGRAM.agc	# 455
+$P34-35_P74-75.agc				# 463
+$R31.agc					# 507
+$P76.agc					# 513
+$R30.agc					# 516
 
 # MENELAUS
-#$P15.agc
-#$P11.agc					# pp. ???-???
-#$P20-P25.agc					# pp. ???-???
-#$P30-P31.agc					# pp. ???-???
-#$P32-P33_P72-P73				# pp. ???-???
-#$P40-P47.agc					# pp. ???-???
-#$P51-P53.agc					# pp. ???-???
-#$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc	# pp. ???-???
-#$P61-P67.agc					# pp. ???-???
-#$SERVICER207.agc				# pp. ???-???
-#$ENTRY_LEXICON.agc				# pp. ???-???
-#$REENTRY_CONTROL.agc				# pp. ???-???
-#$CM_BODY_ATTITUDE.agc				# pp. ???-???
-#$P37_P70.agc					# pp. ???-???
-#$S-BAND_ANTENNA_FOR_CM.agc			# pp. ???-???
+$P15.agc					# 527
+$P11.agc					# 534
+$P20-P25.agc					# 552
+$P30-P31.agc					# 643
+$P32-P33_P72-P73				# 658
+$P40-P47.agc					# 691
+$P51-P53.agc					# 742
+$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc	# 789
+$P61-P67.agc					# 792
+$SERVICER207.agc				# 823
+$ENTRY_LEXICON.agc				# 842
+$REENTRY_CONTROL.agc				# 852
+$CM_BODY_ATTITUDE.agc				# 890
+$P37_P70.agc					# 897
+$S-BAND_ANTENNA_FOR_CM.agc			# 940
 
 # ULYSSES
-#$TVCINITIALIZE.agc				# pp. ???-???
-#$TVCEXECUTIVE.agc				# pp. ???-???
-#$TVCMASSPROP.agc				# pp. ???-???
-#$TVCRESTARTS.agc				# pp. ???-???
-#$TVCDAPS.agc					# pp. ???-???
-#$TVCROLLDAP.agc				# pp. ???-???
-#$MYSUBS.agc					# pp. ???-???
-#$RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc		# pp. ????-????
-#$JET_SELECTION_LOGIC.agc			# pp. ????-????
-#$CM_ENTRY_DIGITAL_AUTOPILOT.agc		# pp. ????-????
+$TVCINITIALIZE.agc				# 943
+$TVCEXECUTIVE.agc				# 950
+$TVCMASSPROP.agc				# 954
+$TVCRESTARTS.agc				# 959
+$TVCDAPS.agc					# 964
+$TVCROLLDAP.agc					# 982
+$MYSUBS.agc					# 997
+$RCS-CSM_DIGITAL_AUTOPILOT.agc			# 1000
+$AUTOMATIC_MANEUVERS.agc			# 1024
+$RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc		# 1036
+$JET_SELECTION_LOGIC.agc			# 1038
+$CM_ENTRY_DIGITAL_AUTOPILOT.agc			# 1063
 
 # ZEUS
-#$DOWN-TELEMETRY_PROGRAM.agc			# pp. ????-????
-#$INTER-BANK_COMMUNICATION.agc			# pp. ????-????
-#$INTERPRETER.agc				# pp. ????-????
-#$FIXED_FIXED_CONSTANT_POOL.agc			# pp. ????-????
-#$INTERPRETIVE_CONSTANTS.agc			# pp. ????-????
-#$SINGLE_PRECISION_SUBROUTINES.agc		# p.  ????
-#$EXECUTIVE.agc					# pp. ????-????
-#$WAITLIST.agc					# pp. ????-????
-#$LATITUDE_LONGITUDE_SUBROUTINES.agc		# pp. ????-????
-#$PLANETARY_INERTIAL_ORIENTATION.agc		# pp. ????-????
-#$MEASUREMENT_INCORPORATION.agc			# pp. ????-????
-#$CONIC_SUBROUTINES.agc				# pp. ????-????
-#$INTEGRATION_INITIALIZATION.agc		# pp. ????-????
-#$ORBITAL_INTEGRATION.agc			# pp. ????-????
-#$INFLIGHT_ALIGNMENT_ROUTINES.agc		# pp. ????-????
-#$POWERED_FLIGHT_SUBROUTINES.agc		# pp. ????-????
-#$TIME_OF_FREE_FALL.agc				# pp. ????-????
-#$STAR_TABLES.agc				# pp. ????-????
-#$AGC_BLOCK_TWO_SELF-CHECK.agc			# pp. ????-????
-#$PHASE_TABLE_MAINTENANCE.agc			# pp. ????-????
-#$RESTARTS_ROUTINE.agc				# pp. ????-????
-#$IMU_MODE_SWITCHING_ROUTINES.agc		# pp. ????-????
-#$KEYRUPT_UPRUPT.agc				# pp. ????-????
-#$DISPLAY_INTERFACE_ROUTINES.agc		# pp. ????-????
-#$SERVICE_ROUTINES.agc				# pp. ????-????
-#$ALARM_AND_ABORT.agc				# pp. ????-????
-#$UPDATE_PROGRAM.agc				# pp. ????-????
-#$RT8_OP_CODES.agc				# pp. ????-????
+$DOWN-TELEMETRY_PROGRAM.agc			# 1093
+$INTER-BANK_COMMUNICATION.agc			# 1104
+$INTERPRETER.agc				# 1108
+$FIXED_FIXED_CONSTANT_POOL.agc			# 1200
+$INTERPRETIVE_CONSTANTS.agc			# 1205
+$SINGLE_PRECISION_SUBROUTINES.agc		# 1207
+$EXECUTIVE.agc					# 1208
+$WAITLIST.agc					# 1221
+$LATITUDE_LONGITUDE_SUBROUTINES.agc		# 1236
+$PLANETARY_INERTIAL_ORIENTATION.agc		# 1243
+$MEASUREMENT_INCORPORATION.agc			# 1252
+$CONIC_SUBROUTINES.agc				# 1262
+$INTEGRATION_INITIALIZATION.agc			# 1309
+$ORBITAL_INTEGRATION.agc			# 1333
+$INFLIGHT_ALIGNMENT_ROUTINES.agc		# 1354
+$POWERED_FLIGHT_SUBROUTINES.agc			# 1364
+$TIME_OF_FREE_FALL.agc				# 1371
+$STAR_TABLES.agc				# 1387
+$AGC_BLOCK_TWO_SELF-CHECK.agc			# 1392
+$PHASE_TABLE_MAINTENANCE.agc			# 1402
+$RESTARTS_ROUTINE.agc				# 1411
+$IMU_MODE_SWITCHING_ROUTINES.agc		# 1417
+$KEYRUPT_UPRUPT.agc				# 1445
+$DISPLAY_INTERFACE_ROUTINES.agc			# 1448
+$SERVICE_ROUTINES.agc				# 1478
+$ALARM_AND_ABORT.agc				# 1486
+$UPDATE_PROGRAM.agc				# 1490
+$RT8_OP_CODES.agc				# 1501
 
-						# pp. ????-????: YUL-generated tables.
+#Assembly-tables				# 1507
 

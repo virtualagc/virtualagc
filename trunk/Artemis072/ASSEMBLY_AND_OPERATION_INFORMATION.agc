@@ -1,40 +1,20 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	ASSEMBLY_AND_OPERATION_INFORMATION.agc
 # Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  It is part of the source code for the
-#		Command Module's (CM) Apollo Guidance Computer (AGC),
-#		possibly for Apollo 15.
+#		build 072.  This is for the Command Module's (CM) 
+#		Apollo Guidance Computer (AGC), we believe for 
+#		Apollo 15-17.
 # Assembler:	yaYUL
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	12/21/04 RSB.	Created.
-#		05/14/05 RSB	Corrected website reference above.
-#
-# The contents of the "Artemis072" files, in general, are transcribed
-# from scanned page images contributed by D. Thrust.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 249 of AGC program Colossus by NASA
-#	2021111-041.  October 28, 1968.  
-#
-#	THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS
-#				COLOSSUS 3
-#	THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED
-#	IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER OSR
-#	PROJECT 55-23890, SPONSORED BY THE MANNED SPACECRAFT
-#	CENTER OF THE NATIONAL AERONAUTICS AND SPACE
-#	ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE
-#	CHARLES STARK DRAPER LABORATORY, MASSACHUSETTS INSTITUTE OF
-#	TECHNOLOGY, CAMBRIDGE, MASS.
-#
-# Please report any errors to info@sandroid.org.
-#
-# In some cases, where the source code for Luminary 131 or for
-# Colossus 249 overlaps that of Artemis 072, this code is instead copied
-# from the corresponding Luminary 131 or Colossus 249
-# source file, and then is proofed to incorporate any changes.
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	12/21/04 RSB	Created.
+#		05/14/05 RSB	Corrects website reference above.
+#		07/25/09 RSB	Fixups for this header so that it can
+#				be used for code conversions.
 
-# Page 1
+## Page 1
 
  ########################################################################
  #									#
@@ -76,7 +56,7 @@
 #		R. R. RAGAN, DEPUTY DIRECTOR
 #		INSTRUMENTATION LABORATORY
 
-# Page 2
+## Page 2
 
 # ASSEMBLY AND OPERATIONS INFORMATION
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
@@ -127,7 +107,7 @@
 #		P37, P70
 #		S-BAND ANTENNA FOR CM
 #	ULYSSES
-# Page 3
+## Page 3
 #		TVCINITIALIZE
 #		TVCEXECUTIVE
 #		TVCMASSPROP
@@ -177,12 +157,12 @@
 # MEMORY TYPE & AVAILABILITY DISPLAY
 # COUNT TABLE
 # PARAGRAPHS GENERATED FOR THIS ASSEMBLY
-# Page 4
+## Page 4
 # OCTAL LISTING
 # OCCUPIED LOCATIONS TABLE
 # SUBROS CALLED & PROGRAM STATUS
 
-# Page 5
+## Page 5
 # VERB LIST FOR CSM
 
 # REGULAR VERBS
@@ -228,7 +208,7 @@
 # 38
 # 39
 
-# Page 37
+## Page 37
 # SUBROUTINE CALLS
 
 		SUBRO	ERASTOTL
