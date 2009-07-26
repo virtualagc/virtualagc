@@ -127,7 +127,7 @@ Block 1 and Block 2 interpreter languages are identical in syntax, but only part
 || SETGO || TBD || || Y ||
 || SETPD  || Set push down pointer (direct only). || || Y ||
 || SIGN and SIGN*  || Complement MPAC (V or SC) if X negative. || Y || Y ||
-|| SIN or SINE and SIN*  || Sine. ||
+|| SIN or SINE and SIN*  || Sine. || Y || Y ||
 || SL and SL* || TBD || || Y ||
 || SLOAD and SLOAD*  || Load MPAC in single precision. || || Y ||
 || SL1 SL1R SL2 SL2R SL3 SL3R SL4 SL4R || TBD || Y || ||
@@ -138,31 +138,46 @@ Block 1 and Block 2 interpreter languages are identical in syntax, but only part
 || SR1 SR1R SR2 SR2R SR3 SR3R SR4 SR4R || TBD || Y || ||
 || SRR and SRR* || TBD || Y || ||
 || SSP and SSP*  || Set single precision into X. || || Y ||
-|| STADR  || Push up on store code. ||
-|| STCALL || Store and do a call. || 
-|| STODL  || Store MPAC and reload it in DP with the next address. || 
-|| STOVL  || Store MPAC and reload a vector. || 
-|| STORE  || Store MPAC. || 
-|| SW/    || Switch instructions and available. ||
-|| SXA    || Store index in erasable. ||
-|| TAD    || Triple-precision add to MPAC. ||
-|| TIX    || Transfer on INDEX. ||
-|| TLOAD  || Load MPAC with triple precision. ||
-|| TSLC   || Normalize MPAC (scalar only). ||
-|| UNIT   || Unit vector. ||
-|| V/SC   || Vector divided by a scalar. ||
-|| VAD    || Vector add. ||
-|| VDEF   || Vector define. ||
-|| VLOAD  || Load MPAC with a vector. ||
-|| VPROJ  || Vector projection. ||
-|| VSQ    || Square of length of vector. ||
-|| VSU    || Vector subtract. ||
-|| VXM    || Matrix pre-multiplied by vector. ||
-|| VXSC   || Vector times scalar. || 
-|| VXV    || Vector cross product. ||
-|| XAD    || INDEX register add from erasable. ||
-|| XCHX   || Exchange INDEX with erasable. ||
-|| XSU    || INDEX subtract from erasable. ||
+|| STADR  || Push up on store code. || || Y ||
+|| STCALL || Store and do a call. || || Y ||
+|| STODL  || Store MPAC and reload it in DP with the next address. || || Y ||
+|| STOVL  || Store MPAC and reload a vector. || || Y ||
+|| STORE  || Store MPAC. || Y || Y ||
+|| STQ || TBD || || Y ||
+|| STZ || TBD || Y || ||
+|| SWITCH    || Switch instructions. || Y || ||
+|| SXA,1 and SXA,2    || Store index in erasable. || Y || Y ||
+|| TAD and TAD*  || Triple-precision add to MPAC. || Y || Y ||
+|| TEST || TBD || Y || ||
+|| TIX,1 and TIX,2    || Transfer on INDEX. || Y || Y ||
+|| TLOAD and TLOAD*  || Load MPAC with triple precision. || || Y ||
+|| TP || TBD || Y || ||
+|| TSLC   || Normalize MPAC (scalar only). || Y || ||
+|| TSLT and TSLT* || TBD || Y || ||
+|| TSRT and TSRT* || TBD || Y || ||
+|| TSU || TBD || Y || ||
+|| UNIT   || Unit vector. || Y || Y ||
+|| V/SC and V/SC*  || Vector divided by a scalar. || || Y ||
+|| VAD and VAD* || Vector add. || Y || Y ||
+|| VCOMP || TBD || || Y ||
+|| VDEF   || Vector define. || Y || Y ||
+|| VLOAD and VLOAD* || Load MPAC with a vector. || || Y ||
+|| VMOVE and VMOVE* || TBD || Y || ||
+|| VPROJ and VPROJ* || Vector projection. || Y || Y ||
+|| VSL and VSL* || TBD || Y || ||
+|| VSL1 VSL2 VSL3 VSL4 VSL5 VSL6 VSL7 VSL8 || TBD || Y || ||
+|| VSLT and VSLT* || TBD || Y || ||
+|| VSQ    || Square of length of vector. || Y || Y ||
+|| VSR and VSR* || TBD || Y || ||
+|| VSR1 VSR2 VSR3 VSR4 VSR5 VSR6 VSR7 VSR8 || TBD || Y || ||
+|| VSRT and VSRT* || TBD || Y || ||
+|| VSU and VSU*  || Vector subtract. || Y || Y ||
+|| VXM and VXM* || Matrix pre-multiplied by vector. || Y || Y ||
+|| VXSC and VSXC* || Vector times scalar. || Y || Y ||
+|| VXV and VXV*  || Vector cross product. || Y || Y ||
+|| XAD,1 and XAD,2    || INDEX register add from erasable. || Y || Y ||
+|| XCHX,1 and XCHX,2   || Exchange INDEX with erasable. || Y || Y ||
+|| XSU,1 and XSU,2    || INDEX subtract from erasable. || Y || Y ||
 
 Though there is a certain compatibility at the source-code level implied by the table above, at the binary level the interpreter source assembles to different code.  One difference in particular is that when two interpreter opcodes are packed into a single memory word, seven bits for each, the order of the packing is swapped.  These binary differences are generally irrelevant to the coder, since coders never hand-assemble interpreter code.
 
