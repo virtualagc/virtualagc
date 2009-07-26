@@ -16,6 +16,7 @@ This wiki page is intended to described all of the differences in adequate detai
 == Documentation for Consultation ==
 
   * Language definition:
+    * AGC3 language, which preceded the AGC4 computer used for Block 1 and Block 2, is defined in document [file:///home/rburkey/Projects/sandroid.org/public_html/apollo/NARA-SW/E-1077.pdf].
     * Block 1 machine language is defined in document [http://www.ibiblio.org/apollo/hrst/archive/1008.pdf R-393].
     * Block 2 machine language is defined in [http://www.ibiblio.org/apollo/hrst/archive/1689.pdf Memo #9], as supplemented by the [http://www.ibiblio.org/apollo/NARA-SW/E-2052.pdf AGC4 Basic Training Manual].
   * (More later)
@@ -70,50 +71,73 @@ The exception mentioned above is that Block 1 has a pseudo-op XCADR which does n
 
 == Interpreter-Language Differences ==
 
-According to E-1077, MOD-3C (i.e. AGC3) had an interpreter facility, so it's probably safe to assume AGC4 did. The real question is if the pseudo-instruction set changed. The Block II interpreter instruction set is shown below (Colossus249, p1098). 
+Block 1 and Block 2 interpreter languages are identical in syntax, but only partially overlap in terms of the opcodes they supply.  At present, there is no known documentation for the Block 1 interpreter language, so some of the information in the table below is based on inspection of the Block 1 Solarium 55 program, and on the definition of AGC3 interpreter language, which preceded and was obsoleted by Block 1. It is therefore possible that some instructions which are marked as unsupported are actually supported by the simulation; however, they are _not_ supported by the modern assembler.
 
-|| *Name* || *Description*  ||
-|| ABVALABS || Length of vector or magnitude of scalar. ||
-|| ARCSIN || Arc sine. ||
-|| ARCCOS || Arc cosine. ||
-|| AXC    || Address to INDEX complemented. ||
-|| AXT    || Address to INDEX true. ||
-|| BDDV   || DP divide into. ||
-|| BDSU   || DP subtract from. ||
-|| BOV(B) || Branch on overflow to Basic or Interpreter. ||
-|| BVSU   || Vector subtract from. ||
-|| BZE/GOTO || Branch zero and goto. ||
-|| BPL/BMN  || Branch plus and branch minus. ||
-|| CALL/ITA || Call and store QPRET. ||
-|| CCALL  || Computed call. ||
-|| CGOTO  || Computed goto. ||
-|| COMP   || Complement vector or scalar. ||
-|| COSINE || Cosine. ||
-|| DAD    || DP add. ||
-|| DDV    || DP divide by. ||
-|| DLOAD  || Load MPAC with a DP scalar. ||
-|| DMP1   || DP multiply. ||
-|| DMPR   || DP multiply and round. ||
-|| DOT    || Vector dot product. ||
-|| DSQ    || DP square. ||
-|| DSU    || DP subtract. ||
-|| GSHIFT || General shift instruction. ||
-|| INCR   || Increment INDEX register. ||
-|| LXA    || Load INDEX from erasable. ||
-|| LXC    || Load INDEX from complement of erasable. ||
-|| MXV    || Matrix post-multiplied by vector. ||
-|| PDDL   || Push down MPAC and load DP. ||
-|| PDVL   || Push down MPAC and load vector. ||
-|| PUSH   || Push down MPAC. ||
-|| SETPD  || Set push down pointer (direct only). ||
-|| ROUND  || Round to DP. ||
-|| RTB/BHIZ || Return To Basic and Branch Hi Zero. ||
-|| RVQ    || Return via QPRET. ||
-|| SIGN   || Complement MPAC (V or SC) if X negative. ||
-|| SINE   || Sine. ||
-|| SLOAD  || Load MPAC in single precision. ||
-|| SQRT   || Square root. ||
-|| SSP    || Set single precision into X. ||
+|| *Name* || *Description*  || *Block 1?* || *Block 2?* ||
+|| ABS or ABVAL || Length of vector or magnitude of scalar. || Y || Y ||
+|| ACOS or ARCCOS || Arc cosine. || Y || Y ||
+|| ASIN or ARCSIN || Arc sine. || Y || Y ||
+|| AST,1 and AST,2 || TBD || Y ||  ||
+|| AXC,1 and AXC,2 || Address to INDEX complemented. || Y || Y ||
+|| AXT,1 and AXC,2 || Address to INDEX true. || Y || Y ||
+|| BDDV and BDDV*  || DP divide into. || Y || Y ||
+|| BDSU and BDSU* || DP subtract from. || Y || Y ||
+|| BHIZ || Branch hi zero || Y || Y ||
+|| BPL and BMN  || Branch plus and branch minus. || Y || Y ||
+|| BOFCLR BOF BOFF BOFINV BOFSET BON BONCLR BONINV BONSET || Conditional branches || || Y ||
+|| BOV || Branch on overflow || Y || Y ||
+|| BOVB || Branch on overflow to Basic. || || Y ||
+|| BVSU and BVSU* || Vector subtract from. || || Y ||
+|| BZE || Branch on zero. || Y || Y ||
+|| CALL or CALRB || Call and store QPRET. || || Y ||
+|| CCALL and CCALL* || Computed call. || || Y ||
+|| CGOTO and CGOTO* || Computed goto. || || Y ||
+|| CLEAR or CLR or CLRGO || Clear. || || Y ||
+|| COMP   || Complement vector or scalar. || Y || ||
+|| COS or COSINE and COS* || Cosine. || Y || Y ||
+|| DAD and DAD*   || DP add. || Y || Y ||
+|| DCOMP || DP complement || || Y ||
+|| DDV and DDV*   || DP divide by. || Y || Y ||
+|| DLOAD and DLOAD* || Load MPAC with a DP scalar. || || Y ||
+|| DMOVE and DMOVE* || DP move. || Y || ||
+|| DMP and DMP* || DP multiply. || Y || Y ||
+|| DMPR and DMPR*   || DP multiply and round. || Y || Y ||
+|| DOT and DOT* || Vector dot product. || Y || Y ||
+|| DSQ    || DP square. || Y || Y ||
+|| DSU and DSU*   || DP subtract. || Y || Y ||
+|| EXIT || Exit from interpretive mode || Y || Y ||
+|| GOTO || Unconditional jump || || Y ||
+|| INCR,1 and INCR,2   || Increment INDEX register. || Y || Y ||
+|| INVERT or INVGO || Invert || || Y ||
+|| ITA || TBD || Y || Y ||
+|| ITC ITC* ITCI ITCQ || TBD || Y || ||
+|| LODON || TBD || Y || ||
+|| LXA,1 and LXA,2    || Load INDEX from erasable. || Y || Y ||
+|| LXC,1 and LXC,2    || Load INDEX from complement of erasable. || Y || Y ||
+|| MXV and MXV*    || Matrix post-multiplied by vector. || Y || Y ||
+|| NOLOD || TBD || Y || ||
+|| NORM and NORM* || TBD || || Y ||
+|| PDDL and PDDL*  || Push down MPAC and load DP. || || Y ||
+|| PDVL and PDVL*  || Push down MPAC and load vector. || || Y ||
+|| PUSH   || Push down MPAC. || || Y ||
+|| ROUND  || Round to DP. || Y || Y ||
+|| RTB || Return To Basic. || Y || Y ||
+|| RVQ    || Return via QPRET. || || Y ||
+|| SET || TBD || || Y ||
+|| SETGO || TBD || || Y ||
+|| SETPD  || Set push down pointer (direct only). || || Y ||
+|| SIGN and SIGN*  || Complement MPAC (V or SC) if X negative. || Y || Y ||
+|| SIN or SINE and SIN*  || Sine. ||
+|| SL and SL* || TBD || || Y ||
+|| SLOAD and SLOAD*  || Load MPAC in single precision. || || Y ||
+|| SL1 SL1R SL2 SL2R SL3 SL3R SL4 SL4R || TBD || Y || ||
+|| SLR and SLR* || TBD || Y || ||
+|| SMOVE and SMOVE* || TBD || Y || ||
+|| SQRT   || Square root. || || Y ||
+|| SR and SR* || TBD || Y || ||
+|| SR1 SR1R SR2 SR2R SR3 SR3R SR4 SR4R || TBD || Y || ||
+|| SRR and SRR* || TBD || Y || ||
+|| SSP and SSP*  || Set single precision into X. || || Y ||
 || STADR  || Push up on store code. ||
 || STCALL || Store and do a call. || 
 || STODL  || Store MPAC and reload it in DP with the next address. || 
@@ -139,6 +163,8 @@ According to E-1077, MOD-3C (i.e. AGC3) had an interpreter facility, so it's pro
 || XAD    || INDEX register add from erasable. ||
 || XCHX   || Exchange INDEX with erasable. ||
 || XSU    || INDEX subtract from erasable. ||
+
+Though there is a certain compatibility at the source-code level implied by the table above, at the binary level the interpreter source assembles to different code.  One difference in particular is that when two interpreter opcodes are packed into a single memory word, seven bits for each, the order of the packing is swapped.  These binary differences are generally irrelevant to the coder, since coders never hand-assemble interpreter code.
 
 == Register Differences ==
   * Central registers
