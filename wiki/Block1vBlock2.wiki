@@ -64,6 +64,10 @@ Though basically forward-compatible at the source-code level, various instructio
         CA      VARIABLE
 }}}
 
+As far as pseudo-ops are concerned, we can't really be sure what the complete set of supported pseudo-ops is for Block 1, since there is no document that defines them.  (Indeed, this is even partially true for Block 2, since a few pseudo-ops appearing in actual Block 2 source code are not defined in any known document.)  The only large example of Block 1 code which is presently accessible is the Apollo 4 program, Solarium 55.  In examining Solarium 55, we conclude that with one exception the Block 1 pseudo-ops are a compatible but greatly reduced subset of Block 2 pseudo-ops, as follows:  =, 2DEC, 2DEC`*`, 2OCT, ADRES, BANK, CADR, DEC, EQUALS, ERASE, OCT, OCTAL, SETLOC.  Note that the Block 1 memory space had no "super-banks" (fixed-memory banks 40, 41, 43, and 43), so there was no need for any pseudo-ops like SBANK whose essential purpose was to deal with super-banks.
+
+The exception mentioned above is that Block 1 has a pseudo-op XCADR which does not exist in Block 2.  The purpose of XCADR is TBD.
+
 == Interpreter-Language Differences ==
 
 According to E-1077, MOD-3C (i.e. AGC3) had an interpreter facility, so it's probably safe to assume AGC4 did. The real question is if the pseudo-instruction set changed. The Block II interpreter instruction set is shown below (Colossus249, p1098). 
