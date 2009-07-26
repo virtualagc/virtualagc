@@ -21,15 +21,48 @@ This wiki page is intended to described all of the differences in adequate detai
   * (More later)
 
 
-== Assembly-Language Opcodes Unique to Block I or Block II ==
+== Differences Between Block I and Block II Basic Assembly Language ==
 
-(This section needs content.)
+At the source level, the Block I basic language is essentially a subset of the Block II basic language, with a few exceptions.
 
+The common instructions (at the source-code level) between Block 1 and Block 2 are:  AD, CAF, CCS, COM, CS, DEC, DOUBLE, DV, EXTEND, INDEX, INHINT, MASK, MP, NDX, NOOP, OVIND, OVSK, RELINT, RESUME, RETURN, SQUARE, SU, TC, TCR, TCAA, TS, and XCH.  The entire set of i/o channel instructions from Block 2 (such as READ, WRITE, ROR, WOR, RAND, WAND, etc.) is missing from Block 1, since the Block 1 computer uses a memory-mapped i/o system rather than having a separate i/o address space.
 
-== Differences in Assembly-Language Opcodes Common to Block I and Block II ==
+Note, however, that some of the exceptional instructions which have been assigned special meanings or given special shorthand mnemonics are not quite the same between Block I and Block II, as follows:
 
-(This section needs content.)
+|| *Shorthand Mnemonic* || *In Block 1* || *In Block 2* || *Comment* ||
+|| BBCON              || (missing)  || OCT 66100   || ||
+|| COM                || CS A       || CS A        || ||
+|| DCOM               || (missing)  || DCS A       || ||
+|| DDOUBL             || (missing)  || DAS A       || ||
+|| DOUBLE             || AD A       || AD A        || ||
+|| DTCB               || (missing)  || DXCH Z      || ||
+|| DTCF               || (missing)  || DXCH 4      || ||
+|| EXTEND             || INDEX 5777 || TC 6        || Additionally, the programmer is expected to have preloaded address 5777 with the value 47777. ||
+|| INHINT             || INDEX 17   || TC 4        || ||
+|| NOOP               || XCH A      || (depends on memory region) || ||
+|| OVSK               || TS A       || TS A        || ||
+|| RELINT             || INDEX 16   || TC 3        || ||
+|| RESUME             || INDEX 25   || INDEX 17    || ||
+|| RETURN             || TC Q       || TC Q        || ||
+|| SQUARE             || MP A       || MP A        || ||
+|| TCAA               || TS Z       || TS Z        || ||
+|| XAQ                || TC A       || (missing)   || ||
+|| XLQ                || (missing)  || TC L        || ||
+|| XXALQ              || (missing)  || TC A        || ||
+|| ZL                 || (missing)  || LXCH 7      || ||
+|| ZQ                 || (missing)  || QXCH 7      || ||
 
+In general, the differences in the table above wouldn't be significant _if_ the shorthand mnemonics were always used, since the assembler would automatically substitute the correct equivalent.  In very old code, however, one sometimes sees forms like INDEX 17 used directly rather than the short-form INHINT (in Block 1) or RESUME (in Block 2), and in these cases Block 1 code would not run as expected on a Block 2 AGC, or vice-versa.
+
+Though basically forward-compatible at the source-code level, various instructions assemble to different binary machine-code in Block 1 than in Block 2.  We won't elaborate those differences here, since you can find them in the linked reference documents.  This is usually a matter of complete indifference, since the assembler will substitute the correct binary values.  _However_, there is one case in which it is important, and that is the case in which the coder has essentially hand-assembled the code and provides numerical values for the opcodes in place of the normal mnemonics.  This is sometimes seen in very old code, where you might see an instruction like
+
+{{{
+        3       VARIABLE
+        # In Block 1 this is the same as
+        XCH     VARIABLE
+        # In Block 2 this is the same as
+        CA      VARIABLE
+}}}
 
 == Interpreter-Language Differences ==
 
