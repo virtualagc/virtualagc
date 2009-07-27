@@ -9,6 +9,8 @@
 # Website:      http://www.ibiblio.org/apollo.
 # Mod history:  2009-05-12 RSB	Adapted from Colossus249 file of the same
 #				name and Comanche 055 page images.
+#		2009-07-26 RSB	Added annotations related to computation
+#				of the ephemeral(?) polynomials.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -37,10 +39,17 @@
 #	VECTORS OF THE SUN AND THE MOON RELATIVE TO THE EARTH AT THE
 #	SPECIFIED GROUND ELAPSED TIME INPUT BY THE USER.
 #
-#	THE POSITION OF THE MOON IS STORED IN THE COMPUTER IN TEH FORM OF
+#	THE POSITION OF THE MOON IS STORED IN THE COMPUTER IN THE FORM OF
 #	A NINTH DEGREE POLYNOMIAL APPROXIMATION WHICH IS VALID OVER A 15
 #	DAY INTERVAL BEGINNING SHORTLY BEFORE LAUNCH.  THEREFORE THE TIME
 #	INPUT BY THE USER SHOULD FALL WITHIN THIS 15 DAY INTERVAL.
+##	The 9th-degree polynomial spoken of here is a pad load, meaning
+##	that it is not actually hardcoded into the software.  Additional
+##	information about calculating the polynomial can be found on the 
+##	<a href="http://nassp.sourceforge.net/wiki/Lunar_Ephemeris_Polynomials">
+##	<b>Orbiter</b> NASSP wiki</a>, as well as information about calculation
+##	of the <a href="http://nassp.sourceforge.net/wiki/Solar_Ephemeris">
+##	solar ephemerides</a>.
 #
 #	LSPOS COMPUTES THE POSITION VECTORS OF THE SUN AND THE MOON.
 #

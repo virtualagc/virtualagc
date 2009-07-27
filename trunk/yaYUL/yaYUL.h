@@ -47,6 +47,8 @@
 				(COLOR_XXX) work in order to make them
 				more flexible and to shorten up the HTML
 				files more.
+		07/25/09 RSB	Added lots of stuff related to providing
+				separate binary codes for Block 1 vs. Block 2.
 */
 
 #ifndef INCLUDED_YAYUL_H
@@ -56,6 +58,12 @@
 
 //-------------------------------------------------------------------------
 // Constants.
+
+// The following constant should be commented out in production code.
+// It is defined only to allow yaYUL to continue to be buildable while
+// work on implementing block 1 (which would otherwise make a build 
+// fail) is in progress.
+#define TBD 0
 
 enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 
@@ -159,6 +167,7 @@ typedef struct {
 } Address_t;
 #define REG(n) ((const Address_t) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n })
 #define CONSTANT(n) ((const Address_t) { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n })
+#define FIXEDADD(n) ((const Address_t) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n })
 
 //----------------------------------------------------------------------------
 // JMS: Begin additions for output of symbol table to a file for symbolic
@@ -402,10 +411,12 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseBANK, ParseEquate,
 	 Parse2FCADR, ParseCAE, ParseCAF, ParseBBCON, Parse2CADR,
 	 ParseDNCHAN, ParseSTCALL, ParseSTODL, ParseSTORE, ParseSTOVL,
 	 ParseVN, Parse2OCT, ParseSBANK, ParseEDRUPT,
-	 ParseInterpretiveOperand, ParseEqMinus; 
+	 ParseInterpretiveOperand, ParseEqMinus,
+	 ParseXCADR; 
 
 
 #ifdef ORIGINAL_PASS_C
+int Block1 = 0;
 int Html = 0;
 FILE *HtmlOut = NULL;
 // Data structure used to map opcode or pseudo-op names to function calls.
@@ -422,7 +433,7 @@ FILE *HtmlOut = NULL;
 // silently discarded.  This is good for things like BNKSUM, which 
 // apparently were useful long ago, but are not useful in the present
 // context.
-static ParserMatch_t Parsers[] = {
+static ParserMatch_t ParsersBlock2[] = {
   { "-1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 077777 },
   { "-2CADR", OP_PSEUDO, Parse2CADR, "", "", 0, 077777, 0, 077777 },
   { "-2DNADR", OP_DOWNLINK, ParseECADR, "", "", 004000, 077777 },
@@ -545,10 +556,142 @@ static ParserMatch_t Parsers[] = {
   { "ZL", OP_BASIC, NULL, "LXCH", "$7" },
   { "ZQ", OP_BASIC, NULL, "QXCH", "$7" }
 };
-#define NUM_PARSERS (sizeof (Parsers) / sizeof (Parsers[0]))
+#define NUM_PARSERS_BLOCK2 (sizeof (ParsersBlock2) / sizeof (ParsersBlock2[0]))
+
+static ParserMatch_t ParsersBlock1[] = { 
+//  { "-1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 077777 },
+//  { "-2CADR", OP_PSEUDO, Parse2CADR, "", "", 0, 077777, 0, 077777 },
+//  { "-2DNADR", OP_DOWNLINK, ParseECADR, "", "", 004000, 077777 },
+//  { "-3DNADR", OP_DOWNLINK, ParseECADR, "", "", 010000, 077777 },
+//  { "-4DNADR", OP_DOWNLINK, ParseECADR, "", "", 014000, 077777 },
+//  { "-5DNADR", OP_DOWNLINK, ParseECADR, "", "", 020000, 077777 },
+//  { "-6DNADR", OP_DOWNLINK, ParseECADR, "", "", 024000, 077777 },
+//  { "-CCS", OP_BASIC, ParseCCS, "", "", 0, 077777 },
+//  { "-DNCHAN", OP_DOWNLINK, ParseDNCHAN, "", "", 0, 077777 },
+//  { "-DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 077777 },
+//  { "-GENADR", OP_PSEUDO, ParseGENADR, "", "", 0, 077777 },
+  { "=", OP_PSEUDO, ParseEquate },
+//  { "=MINUS", OP_PSEUDO, ParseEqMinus },
+//  { "1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 0 },
+//  { "2BCADR", OP_PSEUDO, Parse2CADR },
+//  { "2CADR", OP_PSEUDO, Parse2CADR },
+  { "2DEC", OP_PSEUDO, Parse2DEC }, 
+  { "2DEC*", OP_PSEUDO, Parse2DECstar },
+//  { "2DNADR", OP_DOWNLINK, ParseECADR, "", "", 004000, 0 },
+//  { "2FCADR", OP_PSEUDO, Parse2FCADR },
+  { "2OCT", OP_PSEUDO, Parse2OCT },
+//  { "3DNADR", OP_DOWNLINK, ParseECADR, "", "", 010000, 0 },
+//  { "4DNADR", OP_DOWNLINK, ParseECADR, "", "", 014000, 0 },
+//  { "5DNADR", OP_DOWNLINK, ParseECADR, "", "", 020000, 0 },
+//  { "6DNADR", OP_DOWNLINK, ParseECADR, "", "", 024000, 0 },
+  { "AD", OP_BASIC, ParseAD },
+  { "ADRES", OP_PSEUDO, ParseGENADR },
+//  { "ADS", OP_BASIC, ParseADS },
+//  { "AUG", OP_BASIC, ParseAUG },
+  { "BANK", OP_PSEUDO, ParseBANK },
+//  { "BLOCK", OP_PSEUDO, ParseBLOCK },
+//  { "BBCON", OP_PSEUDO, ParseBBCON },
+//  { "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" }, 
+//  { "BNKSUM", OP_PSEUDO, NULL, "", "" },
+//  { "BZF", OP_BASIC, ParseBZF },
+//  { "BZMF", OP_BASIC, ParseBZMF },
+//  { "CA", OP_BASIC, ParseCA }, 
+//  { "CAE", OP_BASIC, ParseCAE }, 
+  { "CAF", OP_BASIC, ParseXCH }, 
+  { "CADR", OP_PSEUDO, ParseCADR, "", "", 0, 0, 0, 0, 1 }, 
+  { "CCS", OP_BASIC, ParseCCS },
+  { "COM", OP_BASIC, NULL, "CS", "A" },
+//  { "COUNT", OP_PSEUDO, NULL, "", "" },
+//  { "COUNT*", OP_PSEUDO, NULL, "", "" },
+  { "CS", OP_BASIC, ParseCS },
+//  { "DAS", OP_BASIC, ParseDAS },
+//  { "DCA", OP_BASIC, ParseDCA },
+//  { "DCOM", OP_BASIC, NULL, "DCS", "A" },
+//  { "DCS", OP_BASIC, ParseDCS },
+//  { "DDOUBL", OP_BASIC, NULL, "DAS", "A" },
+  { "DEC", OP_PSEUDO, ParseDEC, "", "", 0, 0, 0, 0, 1 }, 
+//  { "DEC*", OP_PSEUDO, ParseDECstar },
+//  { "DIM", OP_BASIC, ParseDIM },
+//  { "DNCHAN", OP_DOWNLINK, ParseDNCHAN },
+//  { "DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 0 },
+  { "DOUBLE", OP_BASIC, NULL, "AD", "A" },
+//  { "DTCB", OP_BASIC, NULL, "DXCH", "Z" },
+//  { "DTCF", OP_BASIC, NULL, "DXCH", "$4" },
+  { "DV", OP_BASIC, ParseDV },
+//  { "DXCH", OP_BASIC, ParseDXCH },
+//  { "EBANK=", OP_PSEUDO, ParseEBANK },
+//  { "ECADR", OP_PSEUDO, ParseECADR, "", "", 0, 0, 0, 0, 1 },
+  // The following isn't a perfect equivalent for an actual EDRUPT parser
+  // within the assembler, since it doesn't allow the assembler to check 
+  // for the EXTEND bit as it does for other instructions.  However, as EDRUPT
+  // is used "for machine checkout only", I can't imagine that I even need
+  // it at all ... so I'm willing to dispense with a little cross-checking.
+//  { "EDRUPT", OP_BASIC, ParseEDRUPT },
+  { "EQUALS", OP_PSEUDO, ParseEQUALS }, 
+  { "ERASE", OP_PSEUDO, ParseERASE },
+  { "EXTEND", OP_BASIC, NULL, "INDEX", "$5777" },
+//  { "FCADR", OP_PSEUDO, ParseFCADR, "", "", 0, 0, 0, 0, 1 },
+//  { "GENADR", OP_PSEUDO, ParseGENADR },
+//  { "INCR", OP_BASIC, ParseINCR },
+  { "INDEX", OP_BASIC, ParseINDEX },
+  { "INHINT", OP_BASIC, NULL, "INDEX", "$17" },
+//  { "LXCH", OP_BASIC, ParseLXCH },
+  { "MASK", OP_BASIC, ParseMASK },
+//  { "MEMORY", OP_PSEUDO, NULL, "", "" },
+//  { "MM", OP_PSEUDO, ParseDEC }, 
+  { "MP", OP_BASIC, ParseMP },
+//  { "MSU", OP_BASIC, ParseMSU },
+  { "NDX", OP_BASIC, ParseINDEX },
+  { "NOOP", OP_BASIC, NULL, "XCH", "A" },
+//  { "NV", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
+  { "OCT", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
+  { "OCTAL", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
+  { "OVIND", OP_BASIC, ParseTS },
+  { "OVSK", OP_BASIC, NULL, "TS", "A" },
+//  { "QXCH", OP_BASIC, ParseQXCH },
+//  { "RAND", OP_BASIC, ParseRAND },
+//  { "READ", OP_BASIC, ParseREAD },
+  { "RELINT", OP_BASIC, NULL, "INDEX", "$16" },
+//  { "REMADR", OP_PSEUDO, ParseGENADR },
+  { "RESUME", OP_BASIC, NULL, "INDEX", "$25" },
+  { "RETURN", OP_BASIC, NULL, "TC", "Q" },
+//  { "ROR", OP_BASIC, ParseROR },
+//  { "RXOR", OP_BASIC, ParseRXOR },
+//  { "SBANK=", OP_PSEUDO, ParseSBANK },
+  { "SETLOC", OP_PSEUDO, ParseSETLOC },
+  { "SQUARE", OP_BASIC, NULL, "MP", "A" },
+//  { "STCALL", OP_INTERPRETER, ParseSTCALL },
+//  { "STODL", OP_INTERPRETER, ParseSTODL },
+//  { "STODL*", OP_INTERPRETER, ParseSTODL, "", "", 04000 },
+  { "STORE", OP_INTERPRETER, ParseSTORE },
+//  { "STOVL", OP_INTERPRETER, ParseSTOVL },
+//  { "STOVL*", OP_INTERPRETER, ParseSTOVL, "", "", 04000 },
+  { "SU", OP_BASIC, ParseSU },
+//  { "SUBRO", OP_PSEUDO, NULL, "" "" },
+  { "TC", OP_BASIC, ParseTC },
+  { "TCR", OP_BASIC, ParseTC },
+  { "TCAA", OP_BASIC, NULL, "TS", "Z" },
+//  { "TCF", OP_BASIC, ParseTCF },
+  { "TS", OP_BASIC, ParseTS },
+//  { "VN", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
+//  { "WAND", OP_BASIC, ParseWAND },
+//  { "WOR", OP_BASIC, ParseWOR },
+//  { "WRITE", OP_BASIC, ParseWRITE },
+  { "XAQ", OP_BASIC, NULL, "TC", "A" },
+  { "XCADR", OP_PSEUDO, ParseXCADR, "", "", 0, 0, 0, 0, 1 }, 
+  { "XCH", OP_BASIC, ParseXCH },
+//  { "XLQ", OP_BASIC, NULL, "TC", "L" },
+//  { "XXALQ", OP_BASIC, NULL, "TC", "A" },
+//  { "ZL", OP_BASIC, NULL, "LXCH", "$7" },
+//  { "ZQ", OP_BASIC, NULL, "QXCH", "$7" }
+};
+#define NUM_PARSERS_BLOCK1 (sizeof (ParsersBlock1) / sizeof (ParsersBlock1[0]))
+
+static ParserMatch_t *Parsers = ParsersBlock2;
+static int NUM_PARSERS = NUM_PARSERS_BLOCK2;
 
 // This table has been pre-sorted and should be kept that way.
-static InterpreterMatch_t InterpreterOpcodes[] = {
+static InterpreterMatch_t InterpreterOpcodesBlock2[] = {
   { "ABS",	0130, 0 },
   { "ABVAL",	0130, 0 },
   { "ARCCOS",	0050, 0 },
@@ -724,7 +867,219 @@ static InterpreterMatch_t InterpreterOpcodes[] = {
   { "XSU,1",	0116, 1 },
   { "XSU,2",	0112, 1 }
 };
-#define NUM_INTERPRETERS (sizeof (InterpreterOpcodes) / sizeof (InterpreterOpcodes[0]))
+#define NUM_INTERPRETERS_BLOCK2 (sizeof (InterpreterOpcodesBlock2) / sizeof (InterpreterOpcodesBlock2[0]))
+
+static InterpreterMatch_t InterpreterOpcodesBlock1[] = {
+  { "ABS",	0130, 0 },
+  { "ABVAL",	0130, 0 },
+  { "ARCCOS",	0050, 0 },
+  { "ACOS",	0050, 0 },
+  { "ARCSIN",	0040, 0 },
+  { "ASIN",	0040, 0 },
+  { "AST,1", TBD },
+  { "AST,2", TBD },
+  { "AXC,1",	0016, 1 },
+  { "AXC,2",	0012, 1 },
+  { "AXT,1",	0006, 1 },
+  { "AXT,2",	0002, 1 },
+  { "BDDV",	0111, 1, 0, 000000, { 1, 0 } },
+  { "BDDV*",	0113, 1, 0, 000000, { 1, 0 } },
+  { "BDSU",	0155, 1, 0, 000000, { 1, 0 } },
+  { "BDSU*",	0157, 1, 0, 000000, { 1, 0 } },
+  { "BHIZ",	0146, 1 },
+  { "BMN",	0136, 1 },
+//  { "BOFCLR",	0162, 2, 1, 000241 },
+//  { "BOF",	0162, 2, 1, 000341 },
+//  { "BOFF",	0162, 2, 1, 000341 },
+//  { "BOFINV",	0162, 2, 1, 000141 },
+//  { "BOFSET",	0162, 2, 1, 000041 },
+//  { "BON",	0162, 2, 1, 000301 },
+//  { "BONCLR",	0162, 2, 1, 000201 },
+//  { "BONINV",	0162, 2, 1, 000101 },
+//  { "BONSET",	0162, 2, 1, 000001 },
+  { "BOV",	0176, 1 },
+//  { "BOVB",	0172, 1 },
+  { "BPL",	0132, 1 },
+//  { "BVSU",	0131, 1, 0, 000000, { 1, 0 } },
+//  { "BVSU*",	0133, 1, 0, 000000, { 1, 0 } },
+  { "BZE",	0122, 1 },
+//  { "CALL",	0152, 1 },
+//  { "CALRB",	0152, 1 },
+//  { "CCALL",	0065, 2, 0, 000000, { 1, 0 } },
+//  { "CCALL*",	0067, 2, 0, 000000, { 1, 0 } },
+//  { "CGOTO",	0021, 2, 0, 000000, { 1, 0 } },
+//  { "CGOTO*",	0023, 2, 0, 000000, { 1, 0 } },
+//  { "CLEAR",	0162, 1, 1, 000261 },
+//  { "CLR",	0162, 1, 1, 000261 },
+//  { "CLRGO",	0162, 2, 1, 000221 },
+  { "COMP", TBD },
+  { "COS",	0030, 0 },
+  { "COS*", TBD },
+  { "COSINE",	0030, 0 },
+  { "DAD",	0161, 1, 0, 000000, { 1, 0 } },
+  { "DAD*",	0163, 1, 0, 000000, { 1, 0 } },
+//  { "DCOMP",	0100, 0 },
+  { "DDV",	0105, 1, 0, 000000, { 1, 0 } },
+  { "DDV*",	0107, 1, 0, 000000, { 1, 0 } },
+//  { "DLOAD",	0031, 1, 0, 000000, { 1, 0 } },
+//  { "DLOAD*",	0033, 1, 0, 000000, { 1, 0 } },
+  { "DMOVE", TBD },
+  { "DMOVE*", TBD },
+  { "DMP",	0171, 1, 0, 000000, { 1, 0 } },
+  { "DMP*",	0173, 1, 0, 000000, { 1, 0 } },
+  { "DMPR",	0101, 1, 0, 000000, { 1, 0 } },
+  { "DMPR*",	0103, 1, 0, 000000, { 1, 0 } },
+  { "DOT",	0135, 1, 0, 000000, { 1, 0 } },
+  { "DOT*",	0137, 1, 0, 000000, { 1, 0 } },
+  { "DSQ",	0060, 0 },
+  { "DSU",	0151, 1, 0, 000000, { 1, 0 } },
+  { "DSU*",	0153, 1, 0, 000000, { 1, 0 } },
+  { "EXIT",	0000, 0 },
+//  { "GOTO",	0126, 1 },
+  { "INCR,1",	0066, 1 },
+  { "INCR,2",	0062, 1 },
+//  { "INVERT",	0162, 1, 1, 000161 },
+//  { "INVGO",	0162, 2, 1, 000121 },
+  { "ITA",	0156, 1 },
+  { "ITC", TBD },
+  { "ITC*", TBD },
+  { "ITCI", TBD },
+  { "ITCQ", TBD },
+  { "LODON", TBD },
+  { "LXA,1",	0026, 1 },
+  { "LXA,2",	0022, 1 },
+  { "LXC,1",	0036, 1 },
+  { "LXC,2",	0032, 1 },
+  { "MXV",	0055, 1, 0, 000000, { 1, 0 } },
+//  { "MXV*",	0057, 1, 0, 000000, { 1, 0 } },
+  { "NOLOD", TBD },
+//  { "NORM",	0075, 1, 0, 000000, { 1, 0 } },
+//  { "NORM*",	0077, 1, 0, 000000, { 1, 0 } },
+//  { "PDDL",	0051, 1, 0, 000000, { 1, 0 } },
+//  { "PDDL*",	0053, 1, 0, 000000, { 1, 0 } },
+//  { "PDVL",	0061, 1, 0, 000000, { 1, 0 } },
+//  { "PDVL*",	0063, 1, 0, 000000, { 1, 0 } },
+//  { "PUSH",	0170, 0 },
+  { "ROUND",	0070, 0 },
+  { "RTB",	0142, 1 },
+//  { "RVQ",	0160, 0 },
+//  { "SET",	0162, 1, 1, 000061 },
+//  { "SETGO",	0162, 2, 1, 000021 },
+//  { "SETPD",	0175, 1, 0, 000000, { 1, 0 } },
+  { "SIGN",	0011, 1, 0, 000000, { 1, 0 } },
+  { "SIGN*",	0013, 1, 0, 000000, { 1, 0 } },
+  { "SIN",	0020, 0 },
+  { "SIN*", TBD },
+  { "SINE",	0020, 0 },
+//  { "SL",	0115, 1, 2, 020202, { 1, 0 } },
+//  { "SL*",	0117, 1, 2, 020202, { 1, 0 } },
+//  { "SLOAD",	0041, 1, 0, 000000, { 1, 0 } },
+//  { "SLOAD*",	0043, 1, 0, 000000, { 1, 0 } },
+//  { "SL1",	0024, 0, 0, 000000, { 1, 0 } },
+//  { "SL1R",	0004, 0, 0, 000000, { 1, 0 } },
+//  { "SL2",	0064, 0, 0, 000000, { 1, 0 } },
+//  { "SL2R",	0044, 0, 0, 000000, { 1, 0 } },
+//  { "SL3",	0124, 0, 0, 000000, { 1, 0 } },
+//  { "SL3R",	0104, 0, 0, 000000, { 1, 0 } },
+//  { "SL4",	0164, 0, 0, 000000, { 1, 0 } },
+//  { "SL4R",	0144, 0, 0, 000000, { 1, 0 } },
+//  { "SLR",	0115, 1, 2, 021202, { 1, 0 } },
+//  { "SLR*",	0117, 1, 2, 021202, { 1, 0 } },
+  { "SMOVE", TBD },
+  { "SMOVE*", TBD },
+//  { "SQRT",	0010, 0 },
+//  { "SR",	0115, 1, 2, 020602, { 1, 0 } },
+//  { "SR*",	0117, 1, 2, 020602, { 1, 0 } },
+//  { "SR1",	0034, 0, 0, 000000, { 1, 0 } },
+//  { "SR1R",	0014, 0, 0, 000000, { 1, 0 } },
+//  { "SR2",	0074, 0, 0, 000000, { 1, 0 } },
+//  { "SR2R",	0054, 0, 0, 000000, { 1, 0 } },
+//  { "SR3",	0134, 0, 0, 000000, { 1, 0 } },
+//  { "SR3R",	0114, 0, 0, 000000, { 1, 0 } },
+//  { "SR4",	0174, 0, 0, 000000, { 1, 0 } },
+//  { "SR4R",	0154, 0, 0, 000000, { 1, 0 } },
+//  { "SRR",	0115, 1, 2, 021602, { 1, 0 } },
+//  { "SRR*",	0117, 1, 2, 021602, { 1, 0 } },
+//  { "SSP",	0045, 2, 0, 000000, { 1, 0 } },
+//  { "SSP*",	0047, 1, 0, 000000, { 1, 0 } },
+//  { "STADR",	0150, 0 },
+  // Note that STCALL, STODL, STORE, and STOVL are implemented as regular instructions.
+//  { "STQ",	0156, 1 },
+  { "STZ", TBD },
+  { "SWITCH", TBD },
+  { "SXA,1",	0046, 1 },
+  { "SXA,2",	0042, 1 },
+  { "TAD",	0005, 1, 0, 000000, { 1, 0 } },
+  { "TAD*",	0007, 1, 0, 000000, { 1, 0 } },
+  { "TEST", TBD },
+  { "TIX,1",	0076, 1 },
+  { "TIX,2",	0072, 1 },
+//  { "TLOAD",	0025, 1, 0, 000000, { 1, 0 } },
+//  { "TLOAD*",	0027, 1, 0, 000000, { 1, 0 } },
+  { "TP", TBD },
+  { "TSLC", TBD },
+  { "TSLT", TBD },
+  { "TSLT*", TBD },
+  { "TSRT", TBD },
+  { "TSRT*", TBD },
+  { "TSU", TBD },
+  { "UNIT",	0120, 0 },
+//  { "V/SC",	0035, 1, 0, 000000, { 1, 0 } },
+//  { "V/SC*",	0037, 1, 0, 000000, { 1, 0 } },
+  { "VAD",	0121, 1, 0, 000000, { 1, 0 } },
+  { "VAD*",	0123, 1, 0, 000000, { 1, 0 } },
+//  { "VCOMP",	0100, 0 },
+  { "VDEF",	0110, 0 },
+//  { "VLOAD",	0001, 1, 0, 000000, { 1, 0 } },
+//  { "VLOAD*",	0003, 1, 0, 000000, { 1, 0 } },
+  { "VMOVE", TBD },
+  { "VMOVE*", TBD },
+  { "VPROJ",	0145, 1, 0, 000000, { 1, 0 } },
+  { "VPROJ*",	0147, 1, 0, 000000, { 1, 0 } },
+//  { "VSL",	0115, 1, 2, 020202, { 1, 0 } },
+//  { "VSL*",	0117, 1, 2, 020202, { 1, 0 } },
+//  { "VSL1",	0004, 0, 0, 000000, { 1, 0 } },
+//  { "VSL2",	0024, 0, 0, 000000, { 1, 0 } },
+//  { "VSL3",	0044, 0, 0, 000000, { 1, 0 } },
+//  { "VSL4",	0064, 0, 0, 000000, { 1, 0 } },
+//  { "VSL5",	0104, 0, 0, 000000, { 1, 0 } },
+//  { "VSL6",	0124, 0, 0, 000000, { 1, 0 } },
+//  { "VSL7",	0144, 0, 0, 000000, { 1, 0 } },
+//  { "VSL8",	0164, 0, 0, 000000, { 1, 0 } },
+  { "VSLT", TBD },
+  { "VSLT*", TBD },
+  { "VSQ",	0140, 0 },
+//  { "VSR",	0115, 1, 2, 020602, { 1, 0 } },
+//  { "VSR*",	0117, 1, 2, 020602, { 1, 0 } },
+//  { "VSR1",	0014, 0, 0, 000000, { 1, 0 } },
+//  { "VSR2",	0034, 0, 0, 000000, { 1, 0 } },
+//  { "VSR3",	0054, 0, 0, 000000, { 1, 0 } },
+//  { "VSR4",	0074, 0, 0, 000000, { 1, 0 } },
+//  { "VSR5",	0114, 0, 0, 000000, { 1, 0 } },
+//  { "VSR6",	0134, 0, 0, 000000, { 1, 0 } },
+//  { "VSR7",	0154, 0, 0, 000000, { 1, 0 } },
+//  { "VSR8",	0174, 0, 0, 000000, { 1, 0 } },
+  { "VSRT", TBD },
+  { "VSRT*", TBD },
+  { "VSU",	0125, 1, 0, 000000, { 1, 0 } },
+  { "VSU*",	0127, 1, 0, 000000, { 1, 0 } },
+  { "VXM",	0071, 1, 0, 000000, { 1, 0 } },
+  { "VXM*",	0073, 1, 0, 000000, { 1, 0 } },
+  { "VXSC",	0015, 1, 0, 000000, { 1, 0 } },
+  { "VXSC*",	0017, 1, 0, 000000, { 1, 0 } },
+  { "VXV",	0141, 1, 0, 000000, { 1, 0 } },
+  { "VXV*",	0143, 1, 0, 000000, { 1, 0 } },
+  { "XAD,1",	0106, 1 },
+  { "XAD,2",	0102, 1 },
+  { "XCHX,1",	0056, 1 },
+  { "XCHX,2",	0052, 1 },
+  { "XSU,1",	0116, 1 },
+  { "XSU,2",	0112, 1 }
+};
+#define NUM_INTERPRETERS_BLOCK1 (sizeof (InterpreterOpcodesBlock1) / sizeof (InterpreterOpcodesBlock1[0]))
+
+static InterpreterMatch_t *InterpreterOpcodes = InterpreterOpcodesBlock2;
+static int NUM_INTERPRETERS = NUM_INTERPRETERS_BLOCK2;
 
 // Buffer for binary data.
 int ObjectCode[044][02000]; 
@@ -737,6 +1092,7 @@ int ArgType = 0;
   
 #else // ORIGINAL_PASS_C
 
+extern int Block1;
 extern int Html;
 extern FILE *HtmlOut;
 

@@ -628,7 +628,7 @@ AddSymbol (const char *Name)
 
 //-------------------------------------------------------------------------
 // JMS: Assign a symbol a new value. Returns 0 on success. This is used for
-// backward compatability to avoid changing lots of exsiting code. Sets the
+// backward compatability to avoid changing lots of existing code. Sets the
 // new debugging parameters to their default values.
 int
 EditSymbol (const char *Name, Address_t *Value)

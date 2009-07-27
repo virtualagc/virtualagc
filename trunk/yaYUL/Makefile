@@ -68,7 +68,7 @@ yaYUL-macosx: ${CFILES}
 		-Wall -o $@ $^ -lm
 
 clean:
-	-rm -f yaYUL *.o *~ *.exe *-macosx
+	-rm -f yaYUL *.o *~ *.exe *-macosx Utilities/SplitInterp Utilities/*.exe
 
 install: yaYUL
 	cp  yaYUL ${PREFIX}/bin
