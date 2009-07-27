@@ -46,6 +46,9 @@
 		07/01/09 RSB	Altered style of comments in HTML.  Shortened
 				up symbol hyperlinks, where they're local to
 				the file.
+		07/26/08 RSB	Fixed, I hope, some of the wrong colorization
+				that occurs occasionally when two interpretive
+				opcodes appear on the same line.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
@@ -348,6 +351,19 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
   int i, j;				// dummies.
   char *ss;				// dummies.
   int StadrInvert = 0;
+  int BlockAssigned = 0;
+  
+  // Make sure of Block 1 vs. Block 2 settings.
+  if (!BlockAssigned && Block1)
+    {
+      Parsers = ParsersBlock1;
+      NUM_PARSERS = NUM_PARSERS_BLOCK1;
+      InterpreterOpcodes = InterpreterOpcodesBlock1;
+      NUM_INTERPRETERS = NUM_INTERPRETERS_BLOCK1;
+      // The default for these settings is Block2, so there's no
+      // need to make any assignments if !Block1.
+    }
+  BlockAssigned = 1;
   
   WriteOutputDebug = WriteOutput;
   
@@ -1048,20 +1064,33 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  // the interpreter there may be a suffixed ",1" or ",2" which we
 		  // have to detect and account for.  Or, for the COUNT* pseudo-op,
 		  // may have a prefixed "$$/".
+		  // ... For interpretive stuff it's even trickier than I thought,
+		  // since there are often symbols with the same name as 
+		  // interpretive instructions, or where there's a symbol like 
+		  // "AXT" and an interpreter instruction like "AXT,1".  *Sigh!*
+		  if (iMatch != NULL)
+		    {
+		      j = IsInterpretive (ParseInputRecord.Operand);
+		      if (j)
+			goto InterpreterOpcode;
+		    }
 		  Symbol = GetSymbol (ParseInputRecord.Operand);
 		  n = strlen (ParseInputRecord.Operand);
 		  if (Symbol == NULL)
 		    {
-		      if (n > 2 && ParseInputRecord.Operand[n - 2] == ',' &&
-		          (ParseInputRecord.Operand[n - 1] == '1' || ParseInputRecord.Operand[n - 1] == '2'))
+		      if (iMatch != NULL)
 		        {
-			  ParseInputRecord.Operand[n - 2] = 0;
-			  Symbol = GetSymbol (ParseInputRecord.Operand);
-			  ParseInputRecord.Operand[n - 2] = ',';
-			  if (Symbol != NULL)
+			  if (n > 2 && ParseInputRecord.Operand[n - 2] == ',' &&
+			      (ParseInputRecord.Operand[n - 1] == '1' || ParseInputRecord.Operand[n - 1] == '2'))
 			    {
-			      Comma = 1;
-			      goto FoundComma;
+			      ParseInputRecord.Operand[n - 2] = 0;
+			      Symbol = GetSymbol (ParseInputRecord.Operand);
+			      ParseInputRecord.Operand[n - 2] = ',';
+			      if (Symbol != NULL)
+				{
+				  Comma = 1;
+				  goto FoundComma;
+				}
 			    }
 			}
 		      if (!strncmp (ParseInputRecord.Operand, "$$/", 3))
@@ -1076,6 +1105,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		      // Well, it's not a variable or label match.  It could still be an 
 		      // interpreter opcode.
 		      j = IsInterpretive (ParseInputRecord.Operand);
+		    InterpreterOpcode:
 		      if (j)
 		        fprintf (HtmlOut, COLOR_INTERPRET);
 		      fprintf (HtmlOut, "%s", NormalizeStringN (ParseInputRecord.Operand, 10));

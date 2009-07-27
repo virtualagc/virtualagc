@@ -49,6 +49,13 @@
 		06/27/09 RSB	Added some stuff for HtmlOut.  Don't know yet if
 				it will actually go anywhere, or if I'm just
 				messing around.	
+		07/25/09 RSB	Began adding the --block1 feature.  Since there's
+				mostly source-level compatibility, the way 
+				I'm *trying* to do this is to just basically
+				do a normal assembly but to substitute different
+				binary codes at the final step and to limit
+				the memory size differently.  I'm sure I'll
+				have to add additional tweaks as I go along.
 */
 
 #define ORIGINAL_YAYUL_C
@@ -174,6 +181,8 @@ main (int argc, char *argv[])
         OutputSymbols = 1;
       else if (!strcmp (argv[i], "--html"))
         Html = 1;
+      else if (!strcmp (argv[i], "--block1"))
+        Block1 = 1;
       else if (*argv[i] == '-' || *argv[i] == '/')
         {
 	  printf ("Unknown switch \"%s\".\n", argv[i]);
@@ -223,25 +232,6 @@ main (int argc, char *argv[])
   // Also, define all register names.
   // ... Later:  It turns out that the Luminary or Colossus source code
   // defines any registers it needs, so this step isn't required.
-#if 0
-  AddSymbol ("A");
-  AddSymbol ("L");
-  AddSymbol ("Q");
-  AddSymbol ("EB");
-  AddSymbol ("FB");
-  AddSymbol ("Z");
-  AddSymbol ("BB");
-  AddSymbol ("ARUPT");
-  AddSymbol ("LRUPT");
-  AddSymbol ("QRUPT");
-  AddSymbol ("ZRUPT");
-  AddSymbol ("BBRUPT");
-  AddSymbol ("BRUPT");
-  AddSymbol ("CYR");
-  AddSymbol ("SR");
-  AddSymbol ("CYL");
-  AddSymbol ("EDOP");
-#endif  
   // I use the following symbols, which I don't allow the source to define.
   AddSymbol ("$3");
   AddSymbol ("$4");
@@ -249,37 +239,48 @@ main (int argc, char *argv[])
   AddSymbol ("$6");
   AddSymbol ("$7");
   AddSymbol ("$17");
+  if (Block1)
+    {
+      AddSymbol ("$16");
+      AddSymbol ("$25");
+      AddSymbol ("$5777");
+    }
 
   // Sort the symbol table, or else we won't be able to locate the 
   // symbols later.
   Fatals += SortSymbols ();  
 
   // Assign the registers their proper addresses.
-#if 0
-  EditSymbol ("A", &RegA);
-  EditSymbol ("L", &RegL);
-  EditSymbol ("Q", &RegQ);
-  EditSymbol ("EB", &RegEB);
-  EditSymbol ("FB", &RegFB);
-  EditSymbol ("Z", &RegZ);
-  EditSymbol ("BB", &RegBB);
-  EditSymbol ("ARUPT", &RegARUPT);
-  EditSymbol ("LRUPT", &RegLRUPT);
-  EditSymbol ("QRUPT", &RegQRUPT);
-  EditSymbol ("ZRUPT", &RegZRUPT);
-  EditSymbol ("BBRUPT", &RegBBRUPT);
-  EditSymbol ("BRUPT", &RegBRUPT);
-  EditSymbol ("CYR", &RegCYR);
-  EditSymbol ("SR", &RegSR);
-  EditSymbol ("CYL", &RegCYL);
-  EditSymbol ("EDOP", &RegEDOP);
-#endif  
-  EditSymbol ("$3", &RegEB);
-  EditSymbol ("$4", &RegFB);
-  EditSymbol ("$5", &RegZ);
-  EditSymbol ("$6", &RegBB);
-  EditSymbol ("$7", &RegZeroes);
-  EditSymbol ("$17", &RegBRUPT);
+  if (!Block1)
+    {
+      EditSymbol ("$3", &RegEB);
+      EditSymbol ("$4", &RegFB);
+      EditSymbol ("$5", &RegZ);
+      EditSymbol ("$6", &RegBB);
+      EditSymbol ("$7", &RegZeroes);
+      EditSymbol ("$17", &RegBRUPT);
+    }
+  else
+    {
+      Address_t Location3 = REG (03);
+      Address_t Location4 = REG (04);
+      Address_t Location5 = REG (05);
+      Address_t Location6 = REG (06);
+      Address_t Location7 = REG (07);
+      Address_t Location16 = REG (016);
+      Address_t Location17 = REG (017);
+      Address_t Location25 = REG (025);
+      Address_t Location5777 = FIXEDADD (05777);
+      EditSymbol ("$3", &Location3);
+      EditSymbol ("$4", &Location4);
+      EditSymbol ("$5", &Location5);
+      EditSymbol ("$6", &Location6);
+      EditSymbol ("$7", &Location7);
+      EditSymbol ("&16", &Location16);
+      EditSymbol ("$17", &Location17);
+      EditSymbol ("$25", &Location25);
+      EditSymbol ("$5777", &Location5777);
+    }
     
   // Perform all compiler passes. What happens is that we keep 
   // running passes until all defined symbols have known values.  
@@ -441,6 +442,7 @@ Done:
 	      "                 files are produced for all source files included\n"
 	      "                 with the $ directive, and links between the files\n"
 	      "                 are provided.\n");
+      printf ("--block1         Assembles Block 1 code.  The default is Block 2.\n");
     }   
   if (RetVal || Fatals)
     remove (OutputFilename);
