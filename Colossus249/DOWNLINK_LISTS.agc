@@ -9,13 +9,13 @@
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/07/04 RSB.	Adapted from similar Luminary 131 file.
 #
-# The contents of the "Colossus249" files, in general, are transcribed 
+# The contents of the "Colossus249" files, in general, are transcribed
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
 # document read, in part:
 #
 #	Assemble revision 249 of AGC program Colossus by NASA
-#	2021111-041.  October 28, 1968.  
+#	2021111-041.  October 28, 1968.
 #
 #	This AGC program shall also be referred to as
 #				Colossus 1A
@@ -29,7 +29,7 @@
 # Refer directly to the online document mentioned above for further information.
 # Please report any errors (relative to 1701.pdf) to info@sandroid.org.
 #
-# In some cases, where the source code for Luminary 131 overlaps that of 
+# In some cases, where the source code for Luminary 131 overlaps that of
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
@@ -37,9 +37,9 @@
 		BANK	22
 		SETLOC	DOWNTELM
 		BANK
-		
+
 		EBANK=	DNTMBUFF
-		
+
 # SPECIAL DOWNLINK OP CODES
 #	OP CODE		ADDRESS (EXAMPLE)	SENDS...		BIT 15		BITS 14-12	BITS 11-0
 #	-------		-----------------	--------		------		----------	---------
@@ -70,15 +70,15 @@
 ERASZERO	EQUALS	7
 SPARE		EQUALS	ERASZERO			# USE SPARE TO INDICATE AVAILABLE SPACE
 LOWIDCOD	OCT	77340				# LOW ID CODE
-NOMONLST	EQUALS	CMCSTADL			# FRESH START AND POST P27 DOWNLIST
+NOMDNLST	EQUALS	CMCSTADL			# FRESH START AND POST P27 DOWNLIST
 UPDNLIST	EQUALS	CMENTRDL			# UPDATE PROGRAM (P27) DOWNLIST
 
 # Page 169
-# CSM POWERED FLIGHT LIST
+# CSM POWERED FLIGHT DOWNLIST
 #
 # --------------------- CONTROL LIST -------------------------
 
-CMPOWEDL	EQUALS					
+CMPOWEDL	EQUALS
 		DNPTR	CMPOWE01			# COLLECT SNAPSHOT
 		6DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMPOWE02			# COLLECT SECOND SNAPSHOT
@@ -103,7 +103,7 @@ CMPOWEDL	EQUALS
 		6DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMPOWE02			# COLLECT SNAPSHOT
 		4DNADR	DNTMBUFF			# SEND SNAPSHOT
-		DNPTR	CMPOWE03			# 
+		DNPTR	CMPOWE03			#
 		DNPTR	CMPOWE06			# COMMON DATA
 		1DNADR	ELEV				# ELEV,+1
 		1DNADR	CENTANG				# CENTANG,+1
@@ -114,10 +114,10 @@ CMPOWEDL	EQUALS
 		1DNADR	OPTMODES			# OPTMODES,HOLDFLAG
 		DNPTR	CMPOWE07			# COMMON DATA
 		3DNADR	VGTIG				# VGTIG,+1,...,+4,+5
-		1DNADR	SPARE				
+		1DNADR	SPARE
 		1DNADR	SPARE
 		-1DNADR	SPARE
-		
+
 # --------------------- SUB LISTS ---------------------------
 
 CMPOWE01	-1DNADR	RN	+2			# RN +2,+3			SNAPSHOT DATA
@@ -128,19 +128,19 @@ CMPOWE01	-1DNADR	RN	+2			# RN +2,+3			SNAPSHOT DATA
 		1DNADR	VN	+4			# VN +4,+5
 		1DNADR	PIPTIME				# PIPTIME, +1
 		-1DNADR	RN				# RN, +1
-		
+
 CMPOWE02	-1DNADR	CDUZ				# CDUZ,CDUT			SNAPSHOT DATA
 		1DNADR	ADOT				# ADOT,+1/OGARATE,+1
 		1DNADR	ADOT	+2			# ADOT+2,+3/OMEGAB+2,+3
 		1DNADR	ADOT	+4			# ADOT+4,+5/OMEGAB+4,+5
 		-1DNADR	CDUX				# CDUX,CDUY
-		
+
 CMPOWE03	2DNADR	AK				# AK,AK1,AK2,RCSFLAGS		COMMON DATA
 		-2DNADR	THETADX				# THETADX,THETADY,THETADZ,GARBAGE
-		
+
 CMPOWE04	5DNADR	STATE				# FLAGWORD0 THRU FLAGWRD9	COMMON DATA
 		-6DNADR	DSPTAB				# DISPLAY TABLES
-		
+
 CMPOWE05	-1DNADR	R-OTHER	+2			# R-OTHER+2,+3			SNAPSHOT DATA
 		1DNADR	R-OTHER	+4			# R-OTHER+4,+5
 		1DNADR	V-OTHER				# V-OTHER,+1
@@ -148,11 +148,11 @@ CMPOWE05	-1DNADR	R-OTHER	+2			# R-OTHER+2,+3			SNAPSHOT DATA
 		1DNADR	V-OTHER	+4			# V-OTHER+4,+5
 		1DNADR	T-OTHER				# T-OTHER,+1
 		-1DNADR	R-OTHER				# R-OTHER,+1
-		
+
 CMPOWE06	1DNADR	RSBBQ				# RSBBQ,+1			COMMON DATA
 		3DNADR	CADRFLSH			# CADRFLSH,+1,+2,FAILREG,+1,+2
 		-2DNADR	CDUS				# CDUS,PIPAX,PIPAY,PIPAZ
-		
+
 CMPOWE07	1DNADR	LEMMASS				# LEMMASS,CSMMASS		COMMON DATA
 		1DNADR	DAPDATR1			# DAPDATR1,DAPDATR2
 		2DNADR	ERRORX				# ERRORX,ERRORY,ERRORZ,GARBAGE
@@ -163,8 +163,8 @@ CMPOWE07	1DNADR	LEMMASS				# LEMMASS,CSMMASS		COMMON DATA
 		DNCHAN	13				# CHANNELS 13,14
 		DNCHAN	30				# CHANNELS 30,31
 		-DNCHAN	32				# CHANNELS 32,33
-		
-# -----------------------------------------------------------		
+
+# -----------------------------------------------------------
 # Page 171
 # CSM COAST AND ALIGNMENT DOWNLIST
 
@@ -199,7 +199,7 @@ CMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	OPTMODES			# OPTMODES,HOLDFLAG
 		DNPTR	CMCSTA07			# COMMON DATA
 		-6DNADR	DSPTAB				# DISPLAY TABLES
-		
+
 # --------------------- SUB LISTS ---------------------------
 
 CMCSTA01	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
@@ -261,7 +261,7 @@ CMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		2DNADR	LAT(SPL)			# LAT(SPL),LNG(SPL),+1
 		2DNADR	VPRED				# VPRED,+1,GAMMABI,+1
 		-1DNADR	STATE	+10D			# FLAGWRDS 10 AND 11
-		
+
 # --------------------- SUB LISTS ----------------------------
 
 CMREND01	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
@@ -325,7 +325,7 @@ CMENTRDL	EQUALS					# SEND ID BY SPECIAL CODING
 		3DNADR	CADRFLSH			# CADRFLSH,+1,+2,FAILREG,+1,+2
 		1DNADR	STATE	+10D			# FLAGWRDS 10 AND 11
 		-1DNADR	GAMMAEI				# GAMMAEI,+1
-		
+
 # --------------------- SUB LISTS ----------------------------
 
 CMENTR01	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
@@ -390,7 +390,7 @@ CMPG22DL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	SPARE
 		1DNADR	SPARE
 		-1DNADR	SPARE
-		
+
 # --------------------- SUB LISTS --------------------------
 
 CMPG2201	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
@@ -416,7 +416,7 @@ DNTABLE		GENADR	CMCSTADL
 		GENADR	CMRENDDL
 		GENADR	CMPOWEDL
 		GENADR	CMPG22DL
-		
+
 # -----------------------------------------------------------
 
-		
+
