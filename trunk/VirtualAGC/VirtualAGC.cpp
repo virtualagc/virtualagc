@@ -2534,7 +2534,7 @@ VirtualAGC::FormCommands (void)
     else if (AgcCustomButton->GetValue ())
       {
         CoreBin = AgcCustomFilename->GetValue ();
-        if (DebugMode) DirCmd += CoreBin.BeforeLast (PATH_DELIMITER);
+        if (DebugMode) DirCmd += wxT ("\"") + CoreBin.BeforeLast (PATH_DELIMITER) + wxT ("\"");
 	CMorLM = wxT ("LM");
 	Port = wxT ("19797");
       }

@@ -228,7 +228,7 @@ ifeq "${EXT}" ".exe"
 	done
 	${CP} /usr/local/lib/wx*dll $@
 endif
-	cp -a ../Contributed/SyntaxHighlight $@
+	${CP} ../Contributed/SyntaxHighlight $@
 	rm -rf `find $@/SyntaxHighlight -name ".svn"`
 
 # The targets below create a bin directory for the distribution
@@ -268,18 +268,18 @@ endif
 temp/lVirtualAGC : % : VirtualAGC %/bin %/Resources
 	for n in ${EXECUTABLES} ; \
 	do \
-		cp -a $$n${EXT} $@/bin ; \
+		${CP} $$n${EXT} $@/bin ; \
 	done
-	-cp -a ../yaACA/yaACA${EXT} ../yaACA2/yaACA2${EXT} $@/bin
+	-${CP} ../yaACA/yaACA${EXT} ../yaACA2/yaACA2${EXT} $@/bin
 	cp ApolloPatch2-transparent.png $@/bin/ApolloPatch2.png
 	for n in $@/bin/* ; do strip $$n ; done
-	cp -a ../SimStop $@/bin
+	${CP} ../SimStop $@/bin
 	chmod +x $@/bin/SimStop
 
 temp/VirtualAGC : % : VirtualAGC.exe %/bin %/Resources
 	for n in ${EXECUTABLES} ../yaAGC/WinAGC ; do cp $$n.exe $@/bin ; done
-	#-cp -a ../yaACA/yaACA.exe ../yaACA/yaACA-cfg.exe $@/bin
-	cp -a ../yaACA2/yaACA2.exe $@/bin
+	#-${CP} ../yaACA/yaACA.exe ../yaACA/yaACA-cfg.exe $@/bin
+	${CP} ../yaACA2/yaACA2.exe $@/bin
 	cp VirtualAGC-win32/ApolloPatch2.ico $@/bin
 	for n in $@/bin/* ; do i386-mingw32-strip $$n ; done
 ifeq "$YADSKY2" ""	
@@ -290,7 +290,7 @@ ifeq "$YADEDA2" ""
 endif
 	-cp ${HOME}/IMCROSS/i386-mingw32/bin/readline5.dll $@/Resources
 	-mkdir $@/Resources/etc
-	cp -a ${HOME}/IMCROSS/i386-mingw32/etc/gtk-2.0 $@/Resources/etc
+	${CP} ${HOME}/IMCROSS/i386-mingw32/etc/gtk-2.0 $@/Resources/etc
 
 .PHONY: create-bundle
 create-bundle:
