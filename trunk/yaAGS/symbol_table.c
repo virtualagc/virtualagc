@@ -64,7 +64,8 @@
 				moving symbol tables from one CPU type
 				to another, such as for distributing
 				Virtual AGC binaries to PowerPC vs.
-				Intel CPUs. 
+				Intel CPUs.  
+		08/01/09 RSB	Adjusted to use NormalizeSourceName().
 */
 
 #include <stdio.h>
@@ -755,7 +756,7 @@ OpenSourceFile (char *FileName)
     }
 
   // Form the complete path of the source and try to open
-  sprintf(PathName, "%s/%s", SourcePathName, FileName);
+  sprintf(PathName, "%s", NormalizeSourceName (SourcePathName, FileName));
   if ((CurrentSourceFP = fopen (PathName, "r")) == NULL)
     {
       printf ("Cannot open source: %s\n", PathName);

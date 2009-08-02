@@ -30,25 +30,43 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 
 int
-main (void)
+main (int argc, char *argv[])
 {
-  int Code;
+  int i, Code, Reverse = 0;
+  
+  for (i = 1; i < argc; i++)
+    {
+      if (!strcmp (argv[i], "--reverse"))
+        Reverse = 1;
+    }
+  
   while (1)
     {
       printf ("Enter an octal code: ");
       if (1 == scanf ("%o", &Code))
 	{
 	  Code = ~Code;
-	  printf ("Index=%d CODE1=%03o CODE2=%03o\n",
-	          1 & (Code >> 14),
-		  (127 & (Code)) - 1,
-		  (127 & (Code >> 7)) - 1);
+	  if (Reverse)
+	    {
+	      printf ("Index=%d CODE1=%03o CODE2=%03o\n",
+		      1 & (Code >> 14),
+		      (127 & (Code >> 7)) - 1,
+		      (127 & (Code)) - 1);
+  	    }
+	  else
+	    {
+	      printf ("Index=%d CODE1=%03o CODE2=%03o\n",
+		      1 & (Code >> 14),
+		      (127 & (Code)) - 1,
+		      (127 & (Code >> 7)) - 1);
+	    }
 	  printf ("Index=%d CODE=%02o VALUE=%04o\n",
 	  	  1 & (Code >> 14),
 		  (15 & (Code >> 10)),
-		  (0x37 & Code) - 1);
+		  (0x3FF & Code) - 1);
 	}
     }
 }

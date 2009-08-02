@@ -115,6 +115,12 @@
 #		05/23/09 RSB	Added Comanche055 to the normal build sequence.
 #		06/07/09 RSB	Added Luminary099 to the normal build sequence.
 #		06/29/09 RSB	Added the 'listings' target.
+#		08/02/09 RSB	Now that I got rid of libreadline on the Win32
+#				productin build (yesterday), I'm beginning to
+#				experience readline-related problems (but 
+#				different ones) on Linux.  I'm completely
+#				disabling readline for all platforms for now,
+#				until these problems can be fixed.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -124,7 +130,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20090704\\\"
+NVER:=\\\"20090802\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -157,7 +163,12 @@ YADEDA_SUFFIX=2
 
 # Uncomment the following line (or do 'make NOREADLINE=yes') if the build 
 # gives errors related to readline.
-#NOREADLINE=yes
+NOREADLINE=yes
+
+# The following line, if uncommented, allows my production builds for Win32
+# to use libreadline.  If commented, they can't.  Native Win32 builds aren't
+# affected.
+#ReadlineForWin32=yes
 
 # Uncomment the following line (or do 'make CURSES=yes') if the build fails
 # with an indication that libcurses.a is needed.
@@ -237,44 +248,69 @@ default: all
 all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs:
-	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" NOREADLINE=${NOREADLINE} CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${MAKE} -C yaAGS PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" NOREADLINE=${NOREADLINE} CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		${ARCHS} EXT=${EXT}
+	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		NOREADLINE=${NOREADLINE} ReadlineForWin32=${ReadlineForWin32} \
+		CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C yaAGS PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		NOREADLINE=${NOREADLINE} ReadlineForWin32=${ReadlineForWin32} \
+		CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 ifndef NOGUI
 ifeq "${YADEDA_SUFFIX}" ""
-	$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} \
+		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 else
-	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} \
+		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 endif
 ifeq "${YADSKY_SUFFIX}" ""
-	$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
+		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 	cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 else
-	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
+		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 endif	
 endif
-	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		${ARCHS} EXT=${EXT}
+	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 ifndef WIN32
-	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
 endif
-	${yaACA}${MAKE} -C yaACA3 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} CURSES="${CURSES}"
-	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
+	${yaACA}${MAKE} -C yaACA3 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		LIBS2="${LIBS}" EXT=${EXT} CURSES="${CURSES}"
+	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		${ARCHS} EXT=${EXT}
+	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		EXT=${EXT}
 	$(MAKE) -C Comanche055
 	$(MAKE) -C Luminary099
 	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
-	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
-	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" "YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT} ${DEV_STATIC}
+	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+		EXT=${EXT}
+	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		EXT=${EXT}
+	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} \
+		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
+	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" \
+		"YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT} ${DEV_STATIC}
 
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings

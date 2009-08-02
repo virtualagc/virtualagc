@@ -33,6 +33,12 @@
 #		2009-04-25 RSB	Fixed up the all-archs target.  Fixed up the
 #				native-Mac build.
 #		2009-05-03 RSB	Adjusted for SOLARIS.
+#		2009-08-01 RSB	Added NormalizeSourceName.o.  Disabling
+#				readline for Win32 because of Vista problems.
+#				... Nope, doesn't work at all without readline
+#				any longer.  Reenabled.  Adjusted to link
+#				to libcurses, to try and use a newer version
+#				of libreadline.
 
 LIBS=${LIBS2}
 
@@ -52,6 +58,7 @@ default: yaAGS
 # guarantee that it works any longer.
 LIBS0:=${LIBS}
 ifndef NOREADLINE
+CURSESLIB=-lcurses
 CFLAGS2 = -DUSE_READLINE
 ifdef MACOSX
 CFLAGS2 += -I/usr/local/include
@@ -66,12 +73,26 @@ LIBS += -lreadline
 endif # MACOSX
 endif	# NOREADLINE
 
+# For now, disabling readline support for Win32, because it's messed up 
+# really badly in Vista. ... Nope, doesn't work at all without it.
+ifdef ReadlineForWin32
+CFLAGS2_WIN32=${CFLAGS2}
+else
+CFLAGS2_WIN32=
+endif
+
+ifdef WIN32
+CFLAGS2_NATIVE=${CFLAGS2_WIN32}
+else
+CFLAGS2_NATIVE=${CFLAGS2}
+endif
+
 ifeq "${USER}" "rburkey"
 STATIC=-static
 endif
 
-yaAGS:	mainAGS.o libyaAGS.a symbol_table.o nbfgets.o Backtrace.o
-	gcc ${CFLAGS} ${CFLAGS2} -o yaAGS $^ ${STATIC} -L. -L../yaAGC -lpthread -lyaAGS -lyaAGC -lm ${LIBS} ${CURSES}
+yaAGS:	mainAGS.o libyaAGS.a symbol_table.o nbfgets.o Backtrace.o ../yaAGC/NormalizeSourceName.o
+	gcc ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGS $^ ${STATIC} -L. -L../yaAGC -lpthread -lyaAGS -lyaAGC -lm ${LIBS} ${CURSES}
 
 libyaAGS.a: aea_engine_init.o aea_engine.o DebuggerHookAGS.o SocketAPI_AGS.o
 	ar -rc $@ $^
@@ -99,18 +120,20 @@ all-archs: default yaAGS.exe yaAGS-macosx
 CSOURCE:=mainAGS.c aea_engine_init.c aea_engine.c DebuggerHookAGS.c SocketAPI_AGS.c \
 	 ../yaAGC/nbfgets.c symbol_table.c \
 	 ../yaAGC/rfopen.c ../yaAGC/SocketAPI.c ../yaAGC/agc_utilities.c \
-	 ../yaAGC/agc_engine.c ../yaAGC/Backtrace.c
+	 ../yaAGC/agc_engine.c ../yaAGC/Backtrace.c ../yaAGC/NormalizeSourceName.c
 
 yaAGS.exe: ${CSOURCE} ../yaAGC/regex.c ../yaAGC/random.c
 	i386-mingw32-gcc -DSTDC_HEADERS  -DPTW32_STATIC_LIB \
-		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -I../yaAGC \
-		-o $@ $^ -L. ${LIBS0} -lreadline -lpthreadGC2-static -lkernel32 -lwsock32
+		${CFLAGS} ${CFLAGS2_WIN32} -DNVER=${NVER} -I../yaAGC \
+		-o $@ $^ -L. ${LIBS0} -lreadline ${CURSESLIB} \
+		-lpthreadGC2-static -lkernel32 -lwsock32
 
 MACDIR:=${HOME}/IMCROSS/mac
 yaAGS-macosx: ${CSOURCE}
 	powerpc-apple-darwin9-gcc -arch ppc -arch i386 -DSTDC_HEADERS \
 		-I${MACDIR}/include -L${MACDIR}/lib \
 		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -I ../yaAGC \
-		-o $@ $^ ${MACDIR}/lib/libreadline.a -L. ${LIBS0} -lpthread -lm -lcurses
+		-o $@ $^ ${MACDIR}/lib/libreadline.a -L. ${LIBS0} -lpthread -lm \
+		${CURSESLIB}
 
 

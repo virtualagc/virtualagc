@@ -34,12 +34,13 @@
   Compiler:	GNU gcc.
   Contact:	Onno Hommes
   Reference:	http://virtualagc.googlecode.com
-  Mods:		01/01/08 OH		Began work.
-			06/08/09 OH		Added info variables,functions and fixed
-							Showing source line when not using -fullname.
-			06/14/09 OH		Add the gdb style disassemble command
-			07/01/09 OH		Convert to command tables to prepare for machine
-							independence and change to GNU formating
+  Mods:		01/01/08 OH	Began work.
+		06/08/09 OH	Added info variables,functions and fixed
+				Showing source line when not using -fullname.
+		06/14/09 OH	Add the gdb style disassemble command
+		07/01/09 OH	Convert to command tables to prepare for machine
+				independence and change to GNU formating
+		08/01/09 RSB	Adjusted to use NormalizeSourceName().
 */
 
 #include <stdlib.h>
@@ -70,7 +71,6 @@
 //#define VERSION(x) #x
 
 extern char agcPrompt[16];
-extern char nbPrompt[16];
 extern int HaveSymbols;
 extern int FullNameMode;
 extern int Break;
@@ -558,20 +558,12 @@ GdbmiHandleInfoBreakpoints(int j)
 void
 GdbmiPrintFullNameFrame(SymbolLine_t *Line)
 {
-   /* Need OS Seperator */
-#ifdef WIN32
-   printf("\032\032%s\\%s:%d:%d:beg:0x%04x\n",SourcePathName,
-          Line->FileName, Line->LineNumber,Line->LineNumber,
+   printf("\032\032%s:%d:%d:beg:0x%04x\n",
+          NormalizeSourceName (SourcePathName, Line->FileName), 
+	  Line->LineNumber,Line->LineNumber,
           DbgLinearFixedAddr(Line->CodeAddress.SReg,
                                Line->CodeAddress.FB,
                                Line->CodeAddress.Super));
-#else
-   printf("\032\032%s/%s:%d:%d:beg:0x%04x\n",SourcePathName,
-          Line->FileName, Line->LineNumber,Line->LineNumber,
-          DbgLinearFixedAddr(Line->CodeAddress.SReg,
-                               Line->CodeAddress.FB,
-                               Line->CodeAddress.Super));
-#endif
 }
 
 static char* CurrentFileName = 0;
@@ -880,13 +872,9 @@ GdbmiHandleBacktrace(int i)
 static GdbmiResult
 GdbmiHandleInfoSource(int i)
 {
-	printf("Current source file is %s\n",CurrentSourceFile);
-	printf("Compilation directory is %s\n",SourcePathName);
-#ifdef WIN32
-	printf("Located in %s\\%s\n",SourcePathName,CurrentSourceFile);
-#else
-	printf("Located in %s/%s\n",SourcePathName,CurrentSourceFile);
-#endif
+	printf("Current source file is \"%s\"\n",CurrentSourceFile);
+	printf("Current source directory is \"%s\"\n", SourcePathName);
+	printf("Located in %s\n", NormalizeSourceName (SourcePathName, CurrentSourceFile));
 	printf("Source language is assembler.\n");
 	printf("Compiled with proprietary debugging format.\n");
 	return(GdbmiCmdDone);
@@ -944,11 +932,7 @@ GdbmiHandleInfoSources(int i)
 
          if (Match)
          {
-#ifdef WIN32
-	    printf("%s\\%s\n", SourcePathName, SourceFiles[j]);
-#else
-	    printf("%s/%s\n", SourcePathName, SourceFiles[j]);
-#endif
+	   printf("%s\n", NormalizeSourceName (SourcePathName, SourceFiles[j]));
          }
       }
       fflush (stdout);
@@ -1154,7 +1138,12 @@ GdbmiHandleSetPrompt(int i)
    GdbmiAdjustCmdPtr(i);
 
    strncpy(agcPrompt,sraw,15);
-   strncpy(nbPrompt,agcPrompt,15);
+#ifdef USE_READLINE   
+   {
+     extern char nbPrompt[16];
+     strncpy(nbPrompt,agcPrompt,15);
+   }
+#endif   
 
    return(GdbmiCmdDone);
 }

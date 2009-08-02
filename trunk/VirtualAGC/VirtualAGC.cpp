@@ -229,7 +229,6 @@ VirtualAGC::SetSize (void)
 VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     wxFrame(parent, id, title, pos, size, wxCAPTION|wxMINIMIZE_BOX|wxCLOSE_BOX|wxCLIP_CHILDREN|wxSYSTEM_MENU)
 {
-    wxStandardPaths StandardPaths;
 
     // We auto-adjust fonts and image sizes if the screen size is too small.
     wxFont Font = GetFont ();
@@ -266,7 +265,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title, const wx
     //   .../VirtualAGC.app/Contents/Resources
     // in Mac OS X.  The commonality here is the relative relationship
     // of the executables to the data files such as png images.
-    ExecutableDirectory = StandardPaths.GetExecutablePath().BeforeLast (PATH_DELIMITER);
+    ExecutableDirectory = wxStandardPaths::Get ().GetExecutablePath().BeforeLast (PATH_DELIMITER);
 #ifndef WIN32
     // In FreeBSD, for some reason, the operation above sometimes or always
     // returns a relative path rather than an absolute one.  So we need to convert
@@ -286,6 +285,11 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title, const wx
     //wxMessageBox (ResourceDirectory, wxT ("Resource path"));
     wxSetWorkingDirectory (ResourceDirectory);
     //wxMessageBox (wxGetCwd (), wxT ("Working directory"));
+    // The following contortions shouldn't be necessary, except that
+    // I find wxGetHomeDir() doesn't always work.
+    //wxString Dummy = wxT ("HOME");
+    //if (!wxGetEnv (Dummy, &HomeDirectory))
+    HomeDirectory = wxGetHomeDir ();
 
     // begin wxGlade: VirtualAGC::VirtualAGC
     sizer_1_copy_staticbox = new wxStaticBox(this, -1, wxT("Browse Source Code"));
@@ -488,7 +492,10 @@ void VirtualAGC::AgcFilenameBrowseEvent(wxCommandEvent &event)
 					     wxFD_DEFAULT_STYLE |
 					     wxFD_FILE_MUST_EXIST |
 					     wxFD_CHANGE_DIR);
-    Dialog->SetPath (AgcCustomFilename->GetValue ());
+    if (AgcCustomFilename->GetValue ().IsEmpty ())
+      Dialog->SetDirectory (HomeDirectory);
+    else
+      Dialog->SetPath (AgcCustomFilename->GetValue ());
     if (wxID_OK == Dialog->ShowModal ())
       {
 	wxString Pathname = Dialog->GetPath ();
@@ -620,6 +627,7 @@ void VirtualAGC::AgcFilenameBrowseEvent(wxCommandEvent &event)
       }
 Done:
     delete Dialog;
+    EnforceConsistency ();
     wxSetWorkingDirectory (ResourceDirectory);
 }
 
@@ -633,7 +641,10 @@ void VirtualAGC::AeaFilenameBrowseEvent(wxCommandEvent &event)
 					     wxFD_DEFAULT_STYLE |
 					     wxFD_FILE_MUST_EXIST |
 					     wxFD_CHANGE_DIR);
-    Dialog->SetPath (AeaCustomFilename->GetValue ());
+    if (AeaCustomFilename->GetValue ().IsEmpty ())
+      Dialog->SetDirectory (HomeDirectory);
+    else
+      Dialog->SetPath (AeaCustomFilename->GetValue ());
     if (wxID_OK == Dialog->ShowModal ())
       {
 	wxString Pathname = Dialog->GetPath ();
@@ -773,6 +784,7 @@ void VirtualAGC::AeaFilenameBrowseEvent(wxCommandEvent &event)
       }
 Done:
     delete Dialog;
+    EnforceConsistency ();
     wxSetWorkingDirectory (ResourceDirectory);
 }
 
@@ -821,14 +833,18 @@ void VirtualAGC::CoreSaveEvent(wxCommandEvent &event)
       }
     if (Response == wxNO)
       {
+        static wxString LastDirectory = wxT ("");
+	if (LastDirectory.IsEmpty ())
+	  LastDirectory = HomeDirectory;
 	wxFileDialog *DialogR = new wxFileDialog (this, wxT ("Choose core-dump file to save"),
-						 wxT ("") , wxT (""),
+						 LastDirectory , wxT (""),
 						 wxT ("Core-dump files (*.core)|*.core|All files (*)|*"),
 						 wxFD_DEFAULT_STYLE |
 						 wxFD_FILE_MUST_EXIST |
 						 wxFD_CHANGE_DIR);
 	if (wxID_OK == DialogR->ShowModal ())
 	  {
+	    LastDirectory = DialogR->GetDirectory ();
 	    wxString CoreFile = DialogR->GetPath ();
 	    delete DialogR;
 	  }
@@ -1148,6 +1164,8 @@ void VirtualAGC::AgcSourceEvent(wxCommandEvent &event)
     Dummy += wxT ("Luminary131/MAIN.agc.html");
   else if (ValidationButton->GetValue ())
     Dummy += wxT ("Validation/Validation.agc.html");
+  else if (AgcCustomButton->GetValue ())
+    Dummy = wxT ("file://") + AgcCustomFilename->GetValue ().BeforeLast ('.') + wxT (".agc.html"); 
   wxLaunchDefaultBrowser (Dummy);
 }
 
@@ -1168,6 +1186,8 @@ void VirtualAGC::AeaSourceEvent(wxCommandEvent &event)
     Dummy += wxT ("FP7/FP7.aea.html");
   else if (FlightProgram8Button->GetValue ())
     Dummy += wxT ("FP8/FP8.aea.html");
+  else if (AeaCustomButton->GetValue ())
+    Dummy = wxT ("file://") + AeaCustomFilename->GetValue ().BeforeLast ('.') + wxT (".aea.html"); 
   wxLaunchDefaultBrowser (Dummy);
 }
 
@@ -1905,9 +1925,11 @@ VirtualAGC::EnforceConsistency (void)
 			   Artemis72Button->GetValue () ||
   			   Luminary131Button->GetValue () ||
 			   Luminary99Button->GetValue () ||
-  			   ValidationButton->GetValue ());
+  			   ValidationButton->GetValue () ||
+			   (AgcCustomButton->GetValue () && !AgcCustomFilename->GetValue ().IsEmpty ()));
   AeaSourceButton->Enable ((FlightProgram6Button->IsEnabled () && FlightProgram6Button->GetValue ()) ||
-			   (FlightProgram8Button->IsEnabled () && FlightProgram8Button->GetValue ()));
+			   (FlightProgram8Button->IsEnabled () && FlightProgram8Button->GetValue ()) ||
+			   (AeaCustomButton->IsEnabled () && AeaCustomButton->GetValue () && !AeaCustomFilename->GetValue ().IsEmpty ()));
   CoreFilename->Enable (CustomResumeButton->GetValue ());
   CoreBrowse->Enable (CustomResumeButton->GetValue ());
 }
@@ -2512,6 +2534,7 @@ VirtualAGC::FormCommands (void)
     else if (AgcCustomButton->GetValue ())
       {
         CoreBin = AgcCustomFilename->GetValue ();
+        if (DebugMode) DirCmd += CoreBin.BeforeLast (PATH_DELIMITER);
 	CMorLM = wxT ("LM");
 	Port = wxT ("19797");
       }
@@ -2810,6 +2833,7 @@ void Simulation::LessEvent(wxCommandEvent &event)
 
 void Simulation::UploadEvent(wxCommandEvent &event)
 {
+    static wxString LastDirectory = wxT ("");
     if (Timer->IsRunning ())
       {
         Timer->Stop ();
@@ -2832,14 +2856,18 @@ void Simulation::UploadEvent(wxCommandEvent &event)
 	return;
       }
     wxString Dummy;
-    Dummy = MainFrame->ResourceDirectory;
-    Dummy += PATH_DELIMITER;
-    Dummy += wxT ("scenarios");
+    if (LastDirectory.IsEmpty ())
+      {
+	LastDirectory = MainFrame->ResourceDirectory;
+	LastDirectory += PATH_DELIMITER;
+	LastDirectory += wxT ("scenarios");
+      }
     wxFileDialog *Dialog = new wxFileDialog (this, wxT ("Choose script for digital upload to AGC or AEA"),
-    					     Dummy,  wxT (""), wxT ("Script files (*.txt)|*.txt"),
+    					     LastDirectory,  wxT (""), wxT ("Script files (*.txt)|*.txt"),
 					     wxFD_DEFAULT_STYLE | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
     if (wxID_OK == Dialog->ShowModal ())
       {
+        LastDirectory = Dialog->GetDirectory ();
 	wxString Pathname = Dialog->GetPath ();
 	Upload (Pathname);
       }

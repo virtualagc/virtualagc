@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -43,6 +43,9 @@
 		                debug command, and source file name completion.
 		08/13/05 RSB	Added an initializer for nbfgetsCond, on the
 				advice of "grosman".
+		... undocumented changes apparently occurred here ...
+		08/01/09 RSB	Changed incorrect usage of returned string 
+				from readline(), which could be NULL.
 */
 
 #include <pthread.h>
@@ -106,7 +109,9 @@ rl_gets (void)
     }
 
   // Get a line from the user.
-  line_read = readline (nbPrompt);
+  do
+    line_read = readline (nbPrompt);
+  while (line_read == NULL);
   strcpy(nbfgetsBuffer, line_read);
 
   // If the line has any text in it,
