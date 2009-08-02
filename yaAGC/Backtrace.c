@@ -51,6 +51,7 @@
 		........ OH	... something ...
 		04/24/09 RSB	Made declarations of various variables in
 				BacktraceDisplay conditional on GDBMI.
+		08/01/09 RSB	Adjusted to use NormalizeSourceName().
 */
 
 #include <stdlib.h>
@@ -58,7 +59,8 @@
 #include <string.h>
 #include "agc_engine.h"
 #include "agc_symtab.h"
-#include "agc_debugger.h"
+#include "agc_debugger.h" 
+
 
 #ifdef GDBMI
 //static agc_t *PendingState;
@@ -349,17 +351,10 @@ void BacktraceDisplay ( agc_t *State, int Num )
 			 */
 			if ( Line && (PrevFrameName != FrameName || BacktraceCount == 1))
 			{
-#ifdef WIN32
-				printf ( "#%d\t0x%04x in %s () at %s\\%s:%d\n",i,
-				         Addr,
-				         FrameName,SourcePathName,
-				         Line->FileName,Line->LineNumber );
-#else
-				printf ( "#%d\t0x%04x in %s () at %s/%s:%d\n",i,
+				printf ( "#%d\t0x%04x in %s () at %s:%d\n",i,
 					Addr,
-					FrameName,SourcePathName,
+					NormalizeSourceName (FrameName, SourcePathName),
 					Line->FileName,Line->LineNumber );
-#endif
 				PrevFrameName = FrameName;
 			}
 //			else

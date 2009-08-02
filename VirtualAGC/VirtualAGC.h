@@ -234,6 +234,7 @@ private:
     wxString ExecutableDirectory;	// Where the executables are stored.
     wxString RunDirectory;		// A directory in which to run the simulation.
     wxString PathDelimiter;
+    wxString HomeDirectory;
     // Command lines for other executables.
     wxString yaAGC, yaDSKY, yaACA, yaAGS, yaDEDA, LM_Simulator, yaTelemetry;
     

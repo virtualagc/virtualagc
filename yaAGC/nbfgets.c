@@ -45,6 +45,15 @@
 				advice of "grosman".
 		06/13/08 OH	Intercept rl_getc_function to ignore LF
 		04/24/09 RSB	Added some conditioning for some readline stuff.
+		08/01/09 RSB	I believe that the return value of readline()
+				was being treated incorrectly, in that EOF was
+				being checked for in the returned string when
+				actually the returned string would be NULL, 
+				thus causing a segfault.  Also, added WIN32-only
+				checking for goofiness in the return values of
+				readline() and rl_getc().
+		08/02/09 RSB	Tried to make it work again without readline
+				support.
 */
 
 #include <pthread.h>
@@ -75,6 +84,7 @@ static pthread_t nbfgetsThread;
 #define MAX_FILE_LENGTH (256)
 int nbNumberSourceFiles = 0;
 char nbSourceFiles[MAX_NUM_FILES][MAX_FILE_LENGTH];
+
 
 #ifdef USE_READLINE //--------------------------------------------
 
@@ -115,9 +125,18 @@ char * source_generator (const char *text, int state)
 /**
  * Why sometimes the input stream returns huge numbers is beyond me
  * Maybe a Code::Blocks stream issue
+ * ... [RSB] The readline documentation does not describe what the 
+ * legal return values of rl_getc() are.  There's no reason to suppose
+ * (without going through the rl_getc() source code) that they are 
+ * always 8-bit characters.  so we need to catch illegal characters
+ * and fix them somehow.  On Vista, all kinds of rotten garbage can be
+ * returned, so we go out of our way to reject and clear the input
+ * buffer in this case.
  */
 int rl_getchar(FILE *stream)
 {
+#if 0 // RSB
+
    char c;
 #ifdef WIN32
    while ((c = (char) rl_getc(stream) ) == 10); /* Ignore LF */
@@ -125,6 +144,24 @@ int rl_getchar(FILE *stream)
    c = /*(char)*/ rl_getc (stream);
 #endif
    return ((int)c);
+   
+#else // 0
+
+  int c;
+  while (1)
+    {
+      c = rl_getc (stream);
+#ifdef WIN32
+      if (c == '\n')
+        continue;
+#endif
+      if (c < 1 || c >= 0x7F)
+        continue;
+      break;
+    }
+  return (c);
+
+#endif // 0
 }
 
 
@@ -153,7 +190,25 @@ static char * rl_gets (void)
    do
    {
       line_read = readline (NULL);
-   }while (line_read[0] == EOF);
+#ifdef WIN32
+      // In Vista, there are circumstances where tremendous garbage is
+      // returned here.  So we try to recover.
+      // ... Sadly, these goggles do nothing!
+      if (line_read != NULL)
+	{
+	  char *s;
+	  for (s = line_read; *s; s++)
+	    {
+	      if (*s < ' ' || *s >= 0x7F)
+	        {
+		  free (line_read);
+		  line_read = NULL;
+		  break;
+		}
+	    }
+	}
+#endif   
+   } while (line_read == NULL);
    strcpy(nbfgetsBuffer, line_read);
 	 
    // If the line has any text in it,
@@ -193,7 +248,7 @@ static void * nbfgetsThreadFunction (void *Arg)
 #ifdef USE_READLINE
       if (rl_gets() == NULL)
 #else
-      //if (nbfgetsBuffer != fgets (nbfgetsBuffer, MAX_NBFGETS - 1, stdin))
+      if (nbfgetsBuffer != fgets (nbfgetsBuffer, MAX_NBFGETS - 1, stdin))
 #endif
 
       {
@@ -259,8 +314,10 @@ char * nbfgets (char *Buffer, int Length)
   strncpy (Buffer, nbfgetsBuffer, Length);
   Buffer[Length] = 0;		// Make sure nul-terminated.
   nbfgetsReady = 0;
+#ifndef USE_READLINE  
   // Tell the other thread to wake up and get another string.
-  //pthread_cond_broadcast (&nbfgetsCond);
+  pthread_cond_broadcast (&nbfgetsCond);
+#endif  
   return (Buffer);
 }
 

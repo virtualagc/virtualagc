@@ -58,6 +58,10 @@
 #				added a 4th parameter for Windows vs. non-Windows.
 #		2009-06-07 RSB	Added Luminary099.
 #		2009-07-02 RSB	Added SyntaxHighlight stuff to the binary installers.
+#		2009-08-01 RSB	Putting readline5.dll into the installation 
+#				directory is now non-fatal if the dll doesn't 
+#				exist, which it wouldn't if readline was built
+#				static-only.
 
 APP=VirtualAGC
 
@@ -284,7 +288,7 @@ endif
 ifeq "$YADEDA2" ""	
 	cp ${HOME}/IMCROSS/i386-mingw32/bin/*.dll $@/Resources
 endif
-	cp ${HOME}/IMCROSS/i386-mingw32/bin/readline5.dll $@/Resources
+	-cp ${HOME}/IMCROSS/i386-mingw32/bin/readline5.dll $@/Resources
 	-mkdir $@/Resources/etc
 	cp -a ${HOME}/IMCROSS/i386-mingw32/etc/gtk-2.0 $@/Resources/etc
 

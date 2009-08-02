@@ -215,6 +215,12 @@ void DumpFiles (const char *Pattern);
 // Load a source line
 int LoadSourceLine (char *SourceFile, int LineNumber);
 
+// Form the name of a source file from a directory and filename.
+// The function is actually in NormalizeSourcefile.c, but all of the 
+// source files that need it seem to include agc_symtab.h.
+char *NormalizeSourceName (char *Directory, char *Filename);
+
+
 //--------------------------------------------------------------------------
 // JMS: End section of code dealing with the symbol table
 //--------------------------------------------------------------------------

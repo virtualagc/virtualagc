@@ -65,6 +65,7 @@
 				to another, such as for distributing
 				Virtual AGC binaries to PowerPC vs.
 				Intel CPUs.
+		08/01/09 RSB	Adjusted to use NormalizeSourceName().
 */
 
 #include <stdio.h>
@@ -77,6 +78,8 @@
 
 #include "agc_engine.h"
 #include "agc_symtab.h"
+
+
 #ifdef WIN32
 // For some reason, mingw doesn't supply the regex module.  What I do to
 // overcome this is simply to insert GNU regex's regex.c and regex.h.
@@ -808,11 +811,7 @@ OpenSourceFile (char *FileName)
     }
 
   // Form the complete path of the source and try to open
-#ifdef WIN32
-  sprintf(PathName, "%s\\%s", SourcePathName, FileName);
-#else
-  sprintf(PathName, "%s/%s", SourcePathName, FileName);
-#endif
+  strcpy (PathName, NormalizeSourceName (SourcePathName, FileName));
   if ((CurrentSourceFP = fopen (PathName, "r")) == NULL)
     {
       printf ("Cannot open source: %s\n", PathName);

@@ -51,6 +51,13 @@
 #				Win32 and Mac targets.
 #		04/25/09 RSB	Fixed up native-Mac builds.
 #		05/03/09 RSB	Adjusted for SOLARIS.
+#		08/01/09 RSB	Added NormalizeSourceName.o.  Disabling
+#				readline support for Win32 because of 
+#				bad Vista problems.  ... No, couldn't
+#				get rid of it.  Adjusted to link
+#				to libcurses, to try and use a newer version
+#				of libreadline.
+#		08/02/09 RSB	Added Alberto Galdo's iPhone mods.
 
 LIBS=${LIBS2}
 
@@ -66,11 +73,17 @@ default: yaAGC
 # other side effects.  It it turns out to be a problem, do this:
 #	export NOREADLINE=yes
 #	make
-# instead of just 'make'.  However, readline has become so engrained, that 
-# I don't guarantee you can build it any longer without readline.
+# instead of just 'make'. 
+
+# Alberto Galdo's iPhone mod.
+ifdef IPHONE
+NOREADLINE = yes
+endif
+
 LIBS0:=${LIBS}
 ifndef NOREADLINE
-CFLAGS2 = -DUSE_READLINE -DGDBMI
+CURSESLIB=-lcurses
+CFLAGS2 = -DUSE_READLINE
 ifdef MACOSX
 # This assumes that readline has been installed into the default (/usr/local)
 # directory with
@@ -89,6 +102,35 @@ LIBS += -lreadline
 endif # MACOSX
 endif # NOREADLINE
 
+CFLAGS2 += -DGDBMI
+
+# Alberto Galdo's iPhone mod.
+ifdef IPHONE
+IPHONE_DEV=/Developer/Platforms/iPhoneOS.platform/Developer
+CFLAGS2 += -isysroot ${IPHONE_DEV}/SDKs/iPhoneOS2.0.sdk/
+CC=${IPHONE_DEV}/usr/bin/arm-apple-darwin9-gcc-4.0.1
+LIBS=
+endif # IPHONE
+
+ifndef CC
+CC=gcc
+endif
+
+# For now, disabling readline support for Win32, because it's messed up 
+# really badly in Vista.
+# ... Nope, can't do it.  It would destroy gdbmi.
+ifdef ReadlineForWin32
+CFLAGS2_WIN32=${CFLAGS2}
+else
+CFLAGS2_WIN32=-DGDBMI
+endif
+
+ifdef WIN32
+CFLAGS2_NATIVE=${CFLAGS2_WIN32}
+else
+CFLAGS2_NATIVE=${CFLAGS2}
+endif
+
 ifeq "${USER}" "rburkey"
 STATIC=-static
 endif
@@ -102,7 +144,8 @@ OBJECTS := \
 	agc_disassembler.o \
 	agc_help.o \
 	nbfgets.o \
-	agc_symtab.o
+	agc_symtab.o \
+	NormalizeSourceName.o
 
 LIBOBJECTS := \
 	agc_engine_init.o \
@@ -121,11 +164,17 @@ CC_WINAGC=i386-mingw32-gcc
 endif
 
 yaAGC:	$(OBJECTS) CheckDec.o libyaAGC.a ${NATIVE_WINAGC}
-	gcc ${CFLAGS} ${CFLAGS2} -o yaAGC ${OBJECTS} CheckDec.o libyaAGC.a -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm ${CURSES}
+	${CC} ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} CheckDec.o \
+	libyaAGC.a -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm ${CURSES}
 
 libyaAGC.a: ${LIBOBJECTS}
+ifdef IPHONE
+	${IPHONE_DEV}/usr/bin/ar -rc $@ $^
+	${IPHONE_DEV}/usr/bin/ranlib $@
+else
 	ar -rc $@ $^
 	ranlib $@
+endif	ar -rc $@ $^
 	touch ../yaDSKY/src/main.c
 	touch ../yaDEDA/src/main.c
 
@@ -137,15 +186,13 @@ install:	yaAGC
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
 CheckDec.o: ../Luminary131/CheckDec.c
-	gcc ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	${CC} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
-	gcc ${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	${CC} ${CFLAGS} ${CFLAGS2} -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 #----------------------------------------------------------------------------------
-# Building for multiple architectures, using IMCROSS.  Since IMCROSS presently
-# does not support readline, I eliminate readline-support from the cross-builds.
-# It would be added back by adding ${CFLAGS2} and changing ${LIBS0} to ${LIBS}.
+# Building for multiple architectures, using IMCROSS. 
 
 .PHONY: all-archs
 all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx
@@ -157,11 +204,11 @@ CSOURCE:=$(patsubst %.o,%.c,${OBJECTS} ${LIBOBJECTS}) ../Luminary131/CheckDec.c
 
 yaAGC.exe: ${CSOURCE} random.c
 	i386-mingw32-gcc \
-		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} \
+		${CFLAGS} ${CFLAGS2_WIN32} -DNVER=${NVER} \
 		 -DPTW32_STATIC_LIB -DPCRE_STATIC \
 		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --cflags-posix` \
-		-o $@ $^ -L. ${LIBS} -lpthreadGC2-static -lm -lwsock32 \
-		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --libs-posix` \
+		-o $@ $^ -L. ${LIBS} ${CURSESLIB} -lpthreadGC2-static -lm -lwsock32 \
+		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --libs-posix`
 
 WinAGC.exe: WinAGC.c
 	${CC_WINAGC} ${CFLAGS} ${CFLAGS2} -o $@ $^
@@ -171,7 +218,7 @@ yaAGC-macosx: ${CSOURCE}
 	powerpc-apple-darwin9-gcc -arch ppc -arch i386 \
 		-I${MACDIR}/include \
 		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} \
-		-o $@ $^ ${MACDIR}/lib/libreadline.a -L. ${LIBS} -lpthread -lm -lcurses
+		-o $@ $^ -L${MACDIR}/lib -L. ${LIBS} -lpthread -lm ${CURSESLIB}
 
 #----------------------------------------------------------------------------------
 # Embedded-firmware stuff for Coldfire is below this line.	
