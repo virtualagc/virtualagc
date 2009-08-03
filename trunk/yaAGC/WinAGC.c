@@ -54,6 +54,11 @@
 		04/25/09 RSB	Allow the startup delay to be changed from
 				the command line, and changed the default to
 				0 (was hard-coded at 30 seconds)
+		08/02/09 RSB	The arbitrary limit I placed on command-line
+				length was too arbitrary, and is easily 
+				exceeded when command-line debugging is performed.
+				Increased it from 256 to 2048, which should be
+				tremendous overkill.
 
   This program expects to receive a list of command-lines for processes,
   separated by \n and/or \r, on the standard input.  It ignores white lines
@@ -74,7 +79,7 @@
 #include <string.h>
 
 #define MAX_PROCESSES 20
-#define MAX_LENGTH 256
+#define MAX_LENGTH 2048
 static char CommandLines[MAX_PROCESSES][MAX_LENGTH + 1];
 STARTUPINFO si[MAX_PROCESSES];
 PROCESS_INFORMATION pi[MAX_PROCESSES];
