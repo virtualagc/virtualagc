@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme>
+	<keyword-classes>
+		<keyword-class name="aea.opcodes">
+			ADD ADZ SUB SUZ MPY MPR MPZ DVP COM ABS
+			CLA CLZ LDQ STO STQ ALS LLS LRS TRA TSQ
+			TMI TOV AXT TIX DLY INP OUT
+		</keyword-class>
+		<keyword-class name="aea.registers">
+			A Q INDEX
+		</keyword-class>
+		<keyword-class name="aea.directives">
+                        ORG BSS BES SYN EQU DEFINE DEC OCT END
+		</keyword-class>
+	</keyword-classes>
+	<language name="agc" title="AGS/AEA Assembly Language" folding="true" foldcomments="true" foldcompact="true" foldpreproc="true">
+		<lexer name="mmixal"/>
+		<use-keywords>
+			<keyword key="0" name="Op Codes" class="aea.opcodes"/>
+			<keyword key="1" name="Registers" class="aea.registers"/>
+			<keyword key="2" name="Directives" class="aea.directives"/>
+		</use-keywords>
+		<use-styles>
+			<style name="Default" key="32"/>
+			<style name="Whitespace" key="0"/>
+			<style name="Comment" key="1" class="comment"/>
+			<style name="Label" key="2" />
+			<style name="Opcode (not validated)" key="3" class="attribute"/>
+			<style name="Between Label and Opcode" key="4" />
+			<style name="Valid Opcode" key="5" class="tag"/>
+			<style name="Unknown Opcode" key="6" class="unknowntag"/>
+			<style name="Between Opcode and Operands" key="7"/>
+			<style name="Division of Operands" key="8"/>
+			<style name="Number" key="9" class="number"/>
+			<style name="Reference (to a Label)" key="10"/>
+			<style name="Character" key="11" class="character"/>
+			<style name="String" key="12" class="string"/>
+			<style name="Register" key="13" class="identifier"/>
+			<style name="Hex Number" key="14" class="number"/>
+			<style name="Operator" key="15" class="operator"/>
+			<style name="Symbol" key="16" class="keyword"/>
+			<style name="Preprocessor" key="17" class="preprocessor"/>
+		</use-styles>
+	</language>
+</Scheme>
