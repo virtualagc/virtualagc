@@ -7,7 +7,7 @@
                         DTCF DV DXCH EDRUPT EXTEND INCR INDEX NDX
                         INHINT LXCH MASK MSK MP MSU NOOP OVSK QXCH
                         RAND READ RELINT RESUME RETURN ROR RXOR SQUARE
-			SU TCR TCAA OVSK TCF TC TS WAND WOR WRITE
+			SU TC TCR TCAA TCF TS WAND WOR WRITE
 			XCH XLQ XXALQ ZL ZQ
 		</keyword-class>
 		<keyword-class name="agc.registers">
@@ -15,11 +15,34 @@
 			CYR SR CYL EDOP
 		</keyword-class>
 		<keyword-class name="agc.directives">
-			1DNADR 2DEC 2BCADR 2CADR 2OCT 2DNADR 3DNADR
-                        4DNADR 5DNADR 6DNADR ADRES BBCON BANK BLOCK
-                        BNKSUM CADR COUNT COUNT* DEC DEC* DNCHAN
-			DNPTR EBANK ECADR EQUALS ERASE MEMORY OCT
+			= 1DNADR -1DNADR 2DEC 2DEC* 2DNADR -2DNADR 2FCADR 
+			2BCADR 2CADR 2OCT 3DNADR -3DNADR 4DNADR -4DNADR 
+			5DNADR -5DNADR 6DNADR -6DNADR
+			ADRES BANK BBCON BLOCK BNKSUM CADR COUNT COUNT* 
+			DEC DEC* DNCHAN -DNCHAN DNPTR -DNPTR EBANK= 
+			ECADR EQUALS ERASE MEMORY OCT
                         REMADR SETLOC SUBRO
+		</keyword-class>
+		<keyword-class name="agc.interpreter">
+			STORE DLOAD TLOAD VLOAD SLOAD STODL STOVL STCALL STQ
+			GOTO CGOTO CALL CCALL RVQ RTB EXIT 
+			BPL BZE BMN BOV BOVB BHIZ 
+			SET SETGO BONSET BOFSET CLEAR CLRGO BONCLR BOFCLR 
+			INVERT INVGO BONINV BOFINV BON BOFF
+			AXT,1 AXT,2 AXC,1 AXC,2 LXA,1 LXA,2 LXC,1 LXC,2
+			SXA,1 SXA,2 XCHX,1 XCHX,2 INCR,1 INCR,2 XAD,1 XAD,2 
+			XSU,1 XSU,2 TIX,1 TIX,2 
+			PDDL PDVL SIGN SQRT DSQ VSQ ROUND DCOMP VCOMP ADS
+			ABVAL UNIT VDEF SIN SINE COS COSINE ASIN ARCSIN 
+			ACOS ARCCOS SL1 SL2 SL3 SL4 SR1 SR2 SR3 SR4 
+			SL1R SL2R SL3R SL4R SR1R SR2R SR3R SR4R VSL VSR 
+			SL SR SLR SRR 
+			VSL1 VSL2 VSL3 VSL4 VSL5 VSL6 VSL7 VSL8 
+			VSR1 VSR2 VSR3 VSR4 VSR5 VSR6 VSR7 VSR8 
+			NORM 
+			DAD TAD VAD DSU BDSU VSU BVSU 
+			DMP DMPR DOT VXSC DDV BDDV V/SC VXV VPROJ VXM MXV
+			PUSH SETPD SSP STADR 
 		</keyword-class>
 	</keyword-classes>
 	<language name="agc" title="AGC Assembly Language" folding="true" foldcomments="true" foldcompact="true" foldpreproc="true">
@@ -27,7 +50,8 @@
 		<use-keywords>
 			<keyword key="0" name="Opcodes" class="agc.opcodes"/>
 			<keyword key="1" name="Registers" class="agc.registers"/>
-			<keyword key="2" name="Symbols" class="agc.directives"/>
+			<keyword key="2" name="Directives" class="agc.directives"/>
+			<keyword key="3" name="Interpreter" class="agc.interpreter"/>
 		</use-keywords>
 		<use-styles>
 			<style name="Default" key="32"/>
