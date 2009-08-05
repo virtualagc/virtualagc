@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme>
+	<keyword-classes>
+		<keyword-class name="agc.opcodes">
+			AD ADS AUG BZF BZMF CAE CAF CA CCS COM CS
+                        DAS DCA DCOM DCS DDOUBL DIM DOUBLE DTCB
+                        DTCF DV DXCH EDRUPT EXTEND INCR INDEX NDX
+                        INHINT LXCH MASK MSK MP MSU NOOP OVSK QXCH
+                        RAND READ RELINT RESUME RETURN ROR RXOR SQUARE
+			SU TCR TCAA OVSK TCF TC TS WAND WOR WRITE
+			XCH XLQ XXALQ ZL ZQ
+		</keyword-class>
+		<keyword-class name="agc.registers">
+			A L Q EB FB Z BB ARUPT LRUPT QRUPT ZRUPT BBRUPT BRUPT
+			CYR SR CYL EDOP
+		</keyword-class>
+		<keyword-class name="agc.directives">
+			1DNADR 2DEC 2BCADR 2CADR 2OCT 2DNADR 3DNADR
+                        4DNADR 5DNADR 6DNADR ADRES BBCON BANK BLOCK
+                        BNKSUM CADR COUNT COUNT* DEC DEC* DNCHAN
+			DNPTR EBANK ECADR EQUALS ERASE MEMORY OCT
+                        REMADR SETLOC SUBRO
+		</keyword-class>
+	</keyword-classes>
+	<language name="agc" title="AGC Assembly Language" folding="true" foldcomments="true" foldcompact="true" foldpreproc="true">
+		<lexer name="mmixal"/>
+		<use-keywords>
+			<keyword key="0" name="Opcodes" class="agc.opcodes"/>
+			<keyword key="1" name="Registers" class="agc.registers"/>
+			<keyword key="2" name="Symbols" class="agc.directives"/>
+		</use-keywords>
+		<use-styles>
+			<style name="Default" key="32"/>
+			<style name="Whitespace" key="0"/>
+			<style name="Comment" key="1" class="comment"/>
+			<style name="Label" key="2" />
+			<style name="Opcode (not validated)" key="3" class="attribute"/>
+			<style name="Between Label and Opcode" key="4" />
+			<style name="Valid Opcode" key="5" class="tag"/>
+			<style name="Unknown Opcode" key="6" class="unknowntag"/>
+			<style name="Between Opcode and Operands" key="7"/>
+			<style name="Division of Operands" key="8"/>
+			<style name="Number" key="9" class="number"/>
+			<style name="Reference (to a Label)" key="10"/>
+			<style name="Character" key="11" class="character"/>
+			<style name="String" key="12" class="string"/>
+			<style name="Register" key="13" class="identifier"/>
+			<style name="Hex Number" key="14" class="number"/>
+			<style name="Operator" key="15" class="operator"/>
+			<style name="Symbol" key="16" class="keyword"/>
+			<style name="Preprocessor" key="17" class="preprocessor"/>
+		</use-styles>
+	</language>
+</Scheme>
