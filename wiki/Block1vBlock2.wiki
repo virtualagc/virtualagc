@@ -73,111 +73,128 @@ The exception mentioned above is that Block 1 has a pseudo-op XCADR which does n
 
 Block 1 and Block 2 interpreter languages are identical in syntax, but only partially overlap in terms of the opcodes they supply.  At present, there is no known documentation for the Block 1 interpreter language, so some of the information in the table below is based on inspection of the Block 1 Solarium 55 program, and on the definition of AGC3 interpreter language, which preceded and was obsoleted by Block 1. It is therefore possible that some instructions which are marked as unsupported are actually supported by the simulation; however, they are _not_ supported by the modern assembler.
 
-|| *Name* || *Description*  || *Block 1?* || *Block 2?* ||
-|| ABS or ABVAL || Length of vector or magnitude of scalar. || Y || Y ||
-|| ACOS or ARCCOS || Arc cosine. || Y || Y ||
-|| ASIN or ARCSIN || Arc sine. || Y || Y ||
-|| AST,1 and AST,2 || TBD || Y ||  ||
-|| AXC,1 and AXC,2 || Address to INDEX complemented. || Y || Y ||
-|| AXT,1 and AXC,2 || Address to INDEX true. || Y || Y ||
-|| BDDV and BDDV*  || DP divide into. || Y || Y ||
-|| BDSU and BDSU* || DP subtract from. || Y || Y ||
-|| BHIZ || Branch hi zero || Y || Y ||
-|| BPL and BMN  || Branch plus and branch minus. || Y || Y ||
-|| BOFCLR BOF BOFF BOFINV BOFSET BON BONCLR BONINV BONSET || Conditional branches || || Y ||
-|| BOV || Branch on overflow || Y || Y ||
-|| BOVB || Branch on overflow to Basic. || || Y ||
-|| BVSU and BVSU* || Vector subtract from. || || Y ||
-|| BZE || Branch on zero. || Y || Y ||
-|| CALL or CALRB || Call and store QPRET. || || Y ||
-|| CCALL and CCALL* || Computed call. || || Y ||
-|| CGOTO and CGOTO* || Computed goto. || || Y ||
-|| CLEAR or CLR or CLRGO || Clear. || || Y ||
-|| COMP   || Complement vector or scalar. || Y || ||
-|| COS or COSINE and COS* || Cosine. || Y || Y ||
-|| DAD and DAD*   || DP add. || Y || Y ||
-|| DCOMP || DP complement || || Y ||
-|| DDV and DDV*   || DP divide by. || Y || Y ||
-|| DLOAD and DLOAD* || Load MPAC with a DP scalar. || || Y ||
-|| DMOVE and DMOVE* || DP move. || Y || ||
-|| DMP and DMP* || DP multiply. || Y || Y ||
-|| DMPR and DMPR*   || DP multiply and round. || Y || Y ||
-|| DOT and DOT* || Vector dot product. || Y || Y ||
-|| DSQ    || DP square. || Y || Y ||
-|| DSU and DSU*   || DP subtract. || Y || Y ||
-|| EXIT || Exit from interpretive mode || Y || Y ||
-|| GOTO || Unconditional jump || || Y ||
-|| INCR,1 and INCR,2   || Increment INDEX register. || Y || Y ||
-|| INVERT or INVGO || Invert || || Y ||
-|| ITA || TBD || Y || Y ||
-|| ITC ITC* ITCI ITCQ || TBD || Y || ||
-|| LODON || TBD || Y || ||
-|| LXA,1 and LXA,2    || Load INDEX from erasable. || Y || Y ||
-|| LXC,1 and LXC,2    || Load INDEX from complement of erasable. || Y || Y ||
-|| MXV and MXV*    || Matrix post-multiplied by vector. || Y || Y ||
-|| NOLOD || TBD || Y || ||
-|| NORM and NORM* || TBD || || Y ||
-|| PDDL and PDDL*  || Push down MPAC and load DP. || || Y ||
-|| PDVL and PDVL*  || Push down MPAC and load vector. || || Y ||
-|| PUSH   || Push down MPAC. || || Y ||
-|| ROUND  || Round to DP. || Y || Y ||
-|| RTB || Return To Basic. || Y || Y ||
-|| RVQ    || Return via QPRET. || || Y ||
-|| SET || TBD || || Y ||
-|| SETGO || TBD || || Y ||
-|| SETPD  || Set push down pointer (direct only). || || Y ||
-|| SIGN and SIGN*  || Complement MPAC (V or SC) if X negative. || Y || Y ||
-|| SIN or SINE and SIN*  || Sine. || Y || Y ||
-|| SL and SL* || TBD || || Y ||
-|| SLOAD and SLOAD*  || Load MPAC in single precision. || || Y ||
-|| SL1 SL1R SL2 SL2R SL3 SL3R SL4 SL4R || TBD || Y || ||
-|| SLR and SLR* || TBD || Y || ||
-|| SMOVE and SMOVE* || TBD || Y || ||
-|| SQRT   || Square root. || || Y ||
-|| SR and SR* || TBD || Y || ||
-|| SR1 SR1R SR2 SR2R SR3 SR3R SR4 SR4R || TBD || Y || ||
-|| SRR and SRR* || TBD || Y || ||
-|| SSP and SSP*  || Set single precision into X. || || Y ||
-|| STADR  || Push up on store code. || || Y ||
-|| STCALL || Store and do a call. || || Y ||
-|| STODL  || Store MPAC and reload it in DP with the next address. || || Y ||
-|| STOVL  || Store MPAC and reload a vector. || || Y ||
-|| STORE  || Store MPAC. || Y || Y ||
-|| STQ || TBD || || Y ||
-|| STZ || TBD || Y || ||
-|| SWITCH    || Switch instructions. || Y || ||
-|| SXA,1 and SXA,2    || Store index in erasable. || Y || Y ||
-|| TAD and TAD*  || Triple-precision add to MPAC. || Y || Y ||
-|| TEST || TBD || Y || ||
-|| TIX,1 and TIX,2    || Transfer on INDEX. || Y || Y ||
-|| TLOAD and TLOAD*  || Load MPAC with triple precision. || || Y ||
-|| TP || TBD || Y || ||
-|| TSLC   || Normalize MPAC (scalar only). || Y || ||
-|| TSLT and TSLT* || TBD || Y || ||
-|| TSRT and TSRT* || TBD || Y || ||
-|| TSU || TBD || Y || ||
-|| UNIT   || Unit vector. || Y || Y ||
-|| V/SC and V/SC*  || Vector divided by a scalar. || || Y ||
-|| VAD and VAD* || Vector add. || Y || Y ||
-|| VCOMP || TBD || || Y ||
-|| VDEF   || Vector define. || Y || Y ||
-|| VLOAD and VLOAD* || Load MPAC with a vector. || || Y ||
-|| VMOVE and VMOVE* || TBD || Y || ||
-|| VPROJ and VPROJ* || Vector projection. || Y || Y ||
-|| VSL and VSL* || TBD || Y || ||
-|| VSL1 VSL2 VSL3 VSL4 VSL5 VSL6 VSL7 VSL8 || TBD || Y || ||
-|| VSLT and VSLT* || TBD || Y || ||
-|| VSQ    || Square of length of vector. || Y || Y ||
-|| VSR and VSR* || TBD || Y || ||
-|| VSR1 VSR2 VSR3 VSR4 VSR5 VSR6 VSR7 VSR8 || TBD || Y || ||
-|| VSRT and VSRT* || TBD || Y || ||
-|| VSU and VSU*  || Vector subtract. || Y || Y ||
-|| VXM and VXM* || Matrix pre-multiplied by vector. || Y || Y ||
-|| VXSC and VSXC* || Vector times scalar. || Y || Y ||
-|| VXV and VXV*  || Vector cross product. || Y || Y ||
-|| XAD,1 and XAD,2    || INDEX register add from erasable. || Y || Y ||
-|| XCHX,1 and XCHX,2   || Exchange INDEX with erasable. || Y || Y ||
-|| XSU,1 and XSU,2    || INDEX subtract from erasable. || Y || Y ||
+|| *Name* || *Description*  || *AGC3?* || *Block 1?* || *Block 2?* ||
+|| ABS or ABVAL || Length of vector or magnitude of scalar. ||   || Y || Y ||
+|| ACOS or ARCCOS || Arc cosine. ||   || Y || Y ||
+|| ASIN or ARCSIN || Arc sine. ||   || Y || Y ||
+|| AST,1 and AST,2 || TBD ||   || Y ||  ||
+|| AXC,1 and AXC,2 || Address to INDEX complemented. ||   || Y || Y ||
+|| AXT,1 and AXC,2 || Address to INDEX true. ||   || Y || Y ||
+|| BDDV and BDDV*  || DP divide into. ||   || Y || Y ||
+|| BDSU and BDSU* || DP subtract from. ||   || Y || Y ||
+|| BHIZ || Branch hi zero ||   || Y || Y ||
+|| BPL and BMN  || Branch plus and branch minus. ||   || Y || Y ||
+|| BOFCLR BOF BOFF BOFINV BOFSET BON BONCLR BONINV BONSET || Conditional branches ||   || || Y ||
+|| BOV || Branch on overflow ||   || Y || Y ||
+|| BOVB || Branch on overflow to Basic. ||   || || Y ||
+|| BVSU and BVSU* || Vector subtract from. ||   || || Y ||
+|| BZE || Branch on zero. ||   || Y || Y ||
+|| CALL or CALRB || Call and store QPRET. ||   || || Y ||
+|| CCALL and CCALL* || Computed call. ||   || || Y ||
+|| CGOTO and CGOTO* || Computed goto. ||   || || Y ||
+|| CLEAR or CLR or CLRGO || Clear. ||   || || Y ||
+|| COMP   || Complement vector or scalar. ||   || Y || ||
+|| COS or COSINE and COS* || Cosine. ||   || Y || Y ||
+|| CROSS || DP Vector Cross Product. || Y || || ||
+|| DAD and DAD* || DP add. || Y || Y || Y ||
+|| DCA || DP clear and add || Y || || ||
+|| DCOMP || DP complement ||   || || Y ||
+|| DCS || DP clear and subtract || Y || || ||
+|| DDV and DDV*   || DP divide by. || Y || Y || Y ||
+|| DLOAD and DLOAD* || Load MPAC with a DP scalar. ||   || || Y ||
+|| DMOVE and DMOVE* || DP move. ||   || Y || ||
+|| DMP and DMP* || DP multiply. || Y || Y || Y ||
+|| DMPR and DMPR*   || DP multiply and round. ||   || Y || Y ||
+|| DO || Do Single Instruction || Y ||  ||  ||
+|| DOT and DOT* || DP Vector Dot Product. || Y || Y || Y ||
+|| DSQ    || DP square. ||   || Y || Y ||
+|| DSU and DSU* || DP subtract. || Y || Y || Y ||
+|| DTS || DP transfer to storage. || Y || || ||
+|| DXCH || DP exchange. || Y || || ||
+|| EXIT || Exit from interpretive mode ||   || Y || Y ||
+|| GOTO || Unconditional jump ||   || || Y ||
+|| IBMN || Interpreted Branch Minus || Y ||  ||  ||
+|| INCR || Increment register. || Y ||  ||  ||
+|| INCR,1 and INCR,2   || Increment INDEX register. ||   || Y || Y ||
+|| INI || Interpreted index || Y ||  ||  ||
+|| INVERT or INVGO || Invert ||   || || Y ||
+|| ITA || Interpreted Transfer Address || Y || Y || Y ||
+|| ITC || TBD || Y || Y || ||
+|| ITC* ITCI ITCQ || TBD ||   || Y || ||
+|| LODON || TBD ||   || Y || ||
+|| LXA,1 and LXA,2    || Load INDEX from erasable. ||   || Y || Y ||
+|| LXC,1 and LXC,2    || Load INDEX from complement of erasable. ||   || Y || Y ||
+|| MXV and MXV* || DP Matrix post-multiplied by vector. || Y || Y || Y ||
+|| NOLOD || TBD ||   || Y || ||
+|| NORM and NORM* || TBD ||   || || Y ||
+|| PDDL and PDDL*  || Push down MPAC and load DP. ||   || || Y ||
+|| PDVL and PDVL*  || Push down MPAC and load vector. ||   || || Y ||
+|| PUSH   || Push down MPAC. ||   || || Y ||
+|| ROUND  || Round to DP. ||   || Y || Y ||
+|| RTB || Return To Basic. ||   || Y || Y ||
+|| RVQ    || Return via QPRET. ||   || || Y ||
+|| SET || TBD ||   || || Y ||
+|| SETGO || TBD ||   || || Y ||
+|| SETPD  || Set push down pointer (direct only). ||   || || Y ||
+|| SIGN and SIGN*  || Complement MPAC (V or SC) if X negative. ||   || Y || Y ||
+|| SIN or SINE and SIN*  || Sine. ||   || Y || Y ||
+|| SL and SL* || TBD ||   || || Y ||
+|| SLOAD and SLOAD*  || Load MPAC in single precision. ||   || || Y ||
+|| SL1 SL1R SL2 SL2R SL3 SL3R SL4 SL4R || TBD ||   || Y || ||
+|| SLR and SLR* || TBD ||   || Y || ||
+|| SMOVE and SMOVE* || TBD ||   || Y || ||
+|| SQRT   || Square root. ||   || || Y ||
+|| SR and SR* || TBD ||   || Y || ||
+|| SR1 SR1R SR2 SR2R SR3 SR3R SR4 SR4R || TBD ||   || Y || ||
+|| SRR and SRR* || TBD ||   || Y || ||
+|| SSP and SSP*  || Set single precision into X. || Y || || Y ||
+|| STADR  || Push up on store code. ||   || || Y ||
+|| STCALL || Store and do a call. ||   || || Y ||
+|| STODL  || Store MPAC and reload it in DP with the next address. ||   || || Y ||
+|| STOVL  || Store MPAC and reload a vector. ||   || || Y ||
+|| STORE  || Store MPAC. ||   || Y || Y ||
+|| STQ || TBD ||   || || Y ||
+|| STZ || TBD ||   || Y || ||
+|| SWITCH    || Switch instructions. ||   || Y || ||
+|| SXA,1 and SXA,2    || Store index in erasable. ||   || Y || Y ||
+|| TAD and TAD*  || TP Add to MPAC. || Y || Y || Y ||
+|| TCS || TP Clear and Subtract. || Y || || ||
+|| TEST || TBD ||   || Y || ||
+|| TIX,1 and TIX,2    || Transfer on INDEX. ||   || Y || Y ||
+|| TLOAD and TLOAD*  || Load MPAC with triple precision. ||   || || Y ||
+|| TP || TBD ||   || Y || ||
+|| TSLC   || Normalize MPAC (scalar only). ||   || Y || ||
+|| TSLT and TSLT* || Triple Shift Left || Y || Y || ||
+|| TSRT and TSRT* || Triple Shift Right || Y || Y || ||
+|| TSU || TBD ||   || Y || ||
+|| TTS || TP Transfer to Storage || Y || || ||
+|| UNIT   || Unit vector. ||   || Y || Y ||
+|| V/SC and V/SC*  || Vector divided by a scalar. ||   || || Y ||
+|| VAD and VAD* || DP Vector add. || Y || Y || Y ||
+|| VCA || DP Vector Clear and Add || Y || || ||
+|| VCOMP || TBD ||   || || Y ||
+|| VCS || DP Vector Clear and Subtract. || Y || || ||
+|| VDEF   || Vector define. ||   || Y || Y ||
+|| VLOAD and VLOAD* || Load MPAC with a vector. ||   || || Y ||
+|| VMOVE and VMOVE* || TBD ||   || Y || ||
+|| VPROJ and VPROJ* || Vector projection. ||   || Y || Y ||
+|| VSC || DP Vector Times Scalar. || Y || || ||
+|| VSL and VSL* || TBD ||   || Y || ||
+|| VSL1 VSL2 VSL3 VSL4 VSL5 VSL6 VSL7 VSL8 || TBD ||   || Y || ||
+|| VSLT and VSLT* || TBD ||   || Y || ||
+|| VSQ    || Square of length of vector. ||   || Y || Y ||
+|| VSR and VSR* || TBD ||   || Y || ||
+|| VSR1 VSR2 VSR3 VSR4 VSR5 VSR6 VSR7 VSR8 || TBD ||   || Y || ||
+|| VSRT and VSRT* || TBD ||   || Y || ||
+|| VSU and VSU*  || Vector subtract. ||   || Y || Y ||
+|| VTS || DP Vector Transfer to Storage. || Y || || ||
+|| VXCH || DP Vector Exchange. || Y || || ||
+|| VXM and VXM* || DP Matrix pre-multiplied by vector. || Y || Y || Y ||
+|| VXSC and VSXC* || Vector times scalar. ||   || Y || Y ||
+|| VXV and VXV*  || Vector cross product. ||   || Y || Y ||
+|| XAD,1 and XAD,2    || INDEX register add from erasable. ||   || Y || Y ||
+|| XCHX,1 and XCHX,2   || Exchange INDEX with erasable. ||   || Y || Y ||
+|| XSU,1 and XSU,2    || INDEX subtract from erasable. ||   || Y || Y ||
 
 Though there is a certain compatibility at the source-code level implied by the table above, at the binary level the interpreter source assembles to different code.  One difference in particular is that when two interpreter opcodes are packed into a single memory word, seven bits for each, the order of the packing is swapped.  These binary differences are generally irrelevant to the coder, since coders never hand-assemble interpreter code.
 
