@@ -81,17 +81,23 @@ Specify the compiler tool and which configuration to enable for your project:
   # Clear both the Output dir as well as the Objects dir field.
   # Press the Finish button.
 
-=== 1.3.2 Adding Sources to a Project ===
+=== 1.3.2 Configure file categories and extensions ===
+First configure the new assembly extension .agc and .aea before associating these extensions with the internal Code::Blocks editor.
+Right-click on your project (e.g. Luminary131) and navigate to the _Project Tree_ option. On the sub-menu select the option _'Edit file types and categories...'_. This brings up a category window. Select the _'ASM Sources'_ category and add the '.agc' and '.aea' extensions.
+
+Next configure which editor can open these new extensions: From the main menu select the _'Settings'_ menu and pick the _'Environment'_ option. In the dialog's left pane select the _'Files extension handling'_ section. Then add the '.agc' and '.aea' and specify that these extensions shall be opened with the Code::Blocks editor. Notice that you maybe required to add the star wildcard in front of the period of the extension.
+
+=== 1.3.3 Adding Sources to a Project ===
 Add the Sources:
   # In the Projects pane Right click on the Luminary131 project
   # Select the Add Files option from the Popup Menu
   # Specify for Files of type the AGC/AEA Assembly files
-  # Select all assembly files (i.e. .s)
+  # Select all assembly files (i.e. .agc)
   # Press the Open button.
   
 Now the appropriate sources are part of your project and can be opened in the editor by just double clicking the respective assembly file. If you try you will notice the syntax highlighting as well as the comment folding in the editor pane.
 
-=== 1.3.3 Project Properties ===
+=== 1.3.4 Project Properties ===
 
 To allow the IDE to compile and debug the code some of the Project Properties must be changed:
   # In the Projects pane Right click on the Luminary131 project
@@ -103,9 +109,9 @@ To allow the IDE to compile and debug the code some of the Project Properties mu
 The content of the Makefile (e.g. Makefile.Luminary) should look like the following:
 {{{
 Debug:
-	yaYUL MAIN.s > Luminary131.lst
-	mv MAIN.s.bin Luminary131.bin
-	mv MAIN.s.symtab Luminary131.symtab
+	yaYUL MAIN.agc > Luminary131.lst
+	mv MAIN.agc.bin Luminary131.bin
+	mv MAIN.agc.symtab Luminary131.symtab
 
 cleanDebug:
 	rm Luminary131.lst Luminary131.bin Luminary131.symtab
