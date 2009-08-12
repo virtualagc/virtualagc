@@ -121,7 +121,7 @@ $DISPLAY_INTERFACE_ROUTINES.agc			# 1448
 $SERVICE_ROUTINES.agc				# 1478
 $ALARM_AND_ABORT.agc				# 1486
 $UPDATE_PROGRAM.agc				# 1490
-$RT8_OP_CODES.agc				# 1501
+$RTB_OP_CODES.agc				# 1501
 
 #Assembly-tables				# 1507
 
