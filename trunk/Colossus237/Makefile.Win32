@@ -1,0 +1,46 @@
+#		+-----------------------------------------------+
+#		+						+
+#		+   This file is no longer used for anything.	+
+#		+   Don't be deceived into thinking it is used  +
+#		+   for Win32 builds of Virtual AGC.		+
+#		+						+
+#		+-----------------------------------------------+
+
+
+# Copyright:	Public domain.
+# Filename:	Makefile.Win32
+# Purpose:	Makefile for Colossus 249.
+#		(The source code for the Command Module's (CM) 
+#		Apollo Guidance Computer (AGC) for Apollo 8 (?). 
+# Assembler:	yaYUL
+# Contact:	Ron Burkey <info@sandroid.org>.
+# Mod history:	06/11/04 RSB	Adapted from Luminary131
+#		09/05/04 RSB	Now builds Colossus249.lst automatically.
+#		04/30/05 RSB	Added temporary workaround for yaYUL SBANK
+#				bug, by overwriting the binary that 
+#				yaYUL creates.
+#		07/17/05 RSB	Eliminated the workaround, now that yaYUL has been fixed.
+#		07/28/05 RSB	Accounted for the symtab.
+
+SOURCE:=$(wildcard *.s)
+TARGETS=Colossus249.bin Colossus249.lst Colossus249.symtab
+
+default:	$(TARGETS)
+
+Colossus249.bin: Colossus249.binsource
+	../Luminary131/Oct2Bin.exe <Colossus249.binsource
+	mv Oct2Bin.bin Colossus249.bin
+
+Colossus249.lst Colossus249.symtab: ${SOURCE} Colossus249.bin
+	../yaYUL/yaYUL.exe MAIN.s >Colossus249.lst
+	mv MAIN.s.symtab Colossus249.symtab
+	diff -s MAIN.s.bin Colossus249.bin
+
+clean:
+	-rm -f $(TARGETS)
+	
+install:	default
+	cp Colossus249.bin Colossus249.symtab /mingw/bin
+	rm *.symtab
+	
+	
