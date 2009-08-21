@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-20 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-08-21 JL	Added a note about a problem with the page scan on p.1386.
 
 ## Page 1371
 
@@ -681,10 +682,18 @@ TCDANZIG	=	ENDT(X)
 
 		COUNT*	$$/TFF
 #						# NOTE _  NOTE _ ADJUSTED MUE FOR NEAR EARTH TRAJ.
+
+## (JL,2009-08-21) The Artemis072 page scan for the following three lines is garbled
+## (lines 0660, 0661, 0662 in the original printout), due to what looks like overprinting 
+## in the original printout. I checked the generated octal (which is not overprinted) 
+## against the Comanche055 listing and they are both identical. 
+
 #MUE		=	3.990815471 E10		# M CUBE/CS SQ
 #RTMUE		=	1.997702549 E5 B-18*	# MODIFIED EARTH MU
 
 1/RTMU		2DEC*	.5005750271 E-5 B17*	# MODIFIED EARTH MU
+
+## (JL,2009-08-21) End of garbled section.
 
 #						# NOTE _  NOTE _ ADJUSTED MUE FOR NEAR EARTH TRAJ.
 #MUM		=	4.902778 E8		# M CUBE/CS SQ
