@@ -6,7 +6,7 @@
 #		Apollo Guidance Computer (AGC), we believe for
 #		Apollo 15-17.
 # Assembler:	yaYUL
-# Contact:	Jim Lawton <jim.lawton@gmail.com>
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-26 JL	Adapted from corresponding Comanche 055 file.
