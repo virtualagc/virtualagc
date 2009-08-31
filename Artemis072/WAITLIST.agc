@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 # Copyright:	Public domain.
-# Filename:	MAIN.agc
+# Filename:	WAITLIST.agc
 # Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
 #		build 072.  This is for the Command Module's (CM)
 #		Apollo Guidance Computer (AGC), we believe for
