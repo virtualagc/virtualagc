@@ -26,8 +26,9 @@ To install:
     - Select "Editing" section
     - For "Change settings for mode:", select "assembly-agc" from the dropdown. 
     - Unselect "Use default settings"
-    - Set tab width and indent width both to 7. I don't know why this is 
-      necessary, but setting tab width to 8 in jEdit does not display the 
+    - Set tab width and indent width both to 8 (Unix). 
+      On Windows, it seems these need to be set to 7. I don't know why 
+      this is necessary, but setting to 8 does not display the 
       source indentation correctly. 
     - Unselect "Soft (emulated with spaces) tabs"
     - Specify "File name glob" as "*.{agc}"
