@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-10 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
 
 ## Page 318
 
@@ -2010,8 +2011,6 @@ SGNTO1		CS	MPAC		# IF OF FORCE SIGN TO 1
 DEGCON1		2DEC	5.555555555 B-3
 
 DEGCON2		2DEC	2.222222222 B-2
-
-NEG.2		OCT	-06250		# = .197753906	I.E., THE BIAS SCALED
 
 ARTHINSF	TC	DMP		# SCALES MPAC, +1 BY SFTEMP1, SFTEMP2.
 		ADRES	SFTEMP1		# ASSUMES POINT BETWEEN HI AND LO PARTS
