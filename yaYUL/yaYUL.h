@@ -397,7 +397,7 @@ int ParseComma (ParseInput_t *Record);
 void FixSuperbankBits (ParseInput_t *InRecord, Address_t *Address, int *OutValue);
 
 // Various parsers.
-Parser_t ParseBLOCK, ParseEQUALS, ParseBANK, ParseEquate,
+Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK, ParseEquate,
 	 Parse2DEC, Parse2DECstar, ParseDEC, ParseDECstar,
 	 ParseSETLOC, ParseOCT, ParseTC, ParseCS, ParseAD,
 	 ParseMASK, ParseDCA, ParseDCS, ParseMP,
@@ -446,6 +446,7 @@ static ParserMatch_t ParsersBlock2[] = {
   { "-DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 077777 },
   { "-GENADR", OP_PSEUDO, ParseGENADR, "", "", 0, 077777 },
   { "=", OP_PSEUDO, ParseEquate },
+  { "=ECADR", OP_PSEUDO, ParseEqualsECADR }, 
   { "=MINUS", OP_PSEUDO, ParseEqMinus },
   { "1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 0 },
   { "2BCADR", OP_PSEUDO, Parse2CADR },
@@ -475,6 +476,7 @@ static ParserMatch_t ParsersBlock2[] = {
   { "CAF", OP_BASIC, ParseCAF }, 
   { "CADR", OP_PSEUDO, ParseCADR, "", "", 0, 0, 0, 0, 1 }, 
   { "CCS", OP_BASIC, ParseCCS },
+  { "CHECK=", OP_PSEUDO, ParseCHECKequals }, 
   { "COM", OP_BASIC, NULL, "CS", "A" },
   { "COUNT", OP_PSEUDO, NULL, "", "" },
   { "COUNT*", OP_PSEUDO, NULL, "", "" },
@@ -571,6 +573,7 @@ static ParserMatch_t ParsersBlock1[] = {
 //  { "-DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 077777 },
 //  { "-GENADR", OP_PSEUDO, ParseGENADR, "", "", 0, 077777 },
   { "=", OP_PSEUDO, ParseEquate },
+//  { "=ECADR", OP_PSEUDO, ParseEqualsECADR }, 
 //  { "=MINUS", OP_PSEUDO, ParseEqMinus },
 //  { "1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 0 },
 //  { "2BCADR", OP_PSEUDO, Parse2CADR },
@@ -600,6 +603,7 @@ static ParserMatch_t ParsersBlock1[] = {
   { "CAF", OP_BASIC, ParseXCH }, 
   { "CADR", OP_PSEUDO, ParseCADR, "", "", 0, 0, 0, 0, 1 }, 
   { "CCS", OP_BASIC, ParseCCS },
+//  { "CHECK=", OP_PSEUDO, ParseCHECKequals }, 
   { "COM", OP_BASIC, NULL, "CS", "A" },
 //  { "COUNT", OP_PSEUDO, NULL, "", "" },
 //  { "COUNT*", OP_PSEUDO, NULL, "", "" },
