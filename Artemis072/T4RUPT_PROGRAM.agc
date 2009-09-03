@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-03 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Remove duplicate 20DEGS symbol.
 
 ## Page 141
 
@@ -1268,7 +1269,6 @@ ECENAB1		CAF	BIT2
 		TC	TASKOVER
 OCT13		=	ELEVEN
 OCTHIRTY	EQUALS	BITS4&5
-20DEGS		DEC	7199
 OCT40		EQUALS	BIT6
 200MS		EQUALS	OCT24
 
