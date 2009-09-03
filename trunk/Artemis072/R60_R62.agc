@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fixed symbol names.
 
 ## Page 394
 		SETLOC	MANUVER
@@ -130,7 +131,7 @@ R61TEST		CA	MODREG		# ARE WE IN P00.  IF YES THIS MUST BE
 		CA	FLAGWRD4	# ARE WE IN R61 (P20)
 		MASK	PDSPFBIT
 		EXTEND
-		BZF	GOTOP00H	# NO
+		BZF	GOTOPOOH	# NO
 		TC	GOTOV56		# YES
 
 ## Page 397
