@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-17 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fix typo in symbol name.
 
 ## Page 852
 
