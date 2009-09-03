@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-14 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Comment out MINDB declaration, it's a comment line in the page scan.
 
 ## Page 691
 
@@ -1051,7 +1052,7 @@ OCT12		=	TEN
 P40CKLS2	OCT	204
 OCT27/24	=	VBSP3LD
 OCT02202	OCT	02202		# BITS 2,8,11 FOR CHANNEL 12 TVC/OPTICS
-MINDB		DEC	46
+#MINDB		DEC	46
 MAXDB		DEC	455
 SEC24.96	DEC	2496
 18SEC		DEC	1800
