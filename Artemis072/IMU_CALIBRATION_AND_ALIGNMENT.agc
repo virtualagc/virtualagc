@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fixed symbol names.
 
 ## Page 427
 
@@ -698,7 +699,7 @@ GTSCPSS		CA	FLAGWRD1	# CALLED BY V37
 		MASK	NOP01BIT
 		EXTEND
 		BZF	GTSCPSSA
-		TC	P00DOO
+		TC	POODOO
 		OCT	21521		# NO DO ALARM FOR P01 - P11 ALREADY DONE
 ## Page 444
 GTSCPSSA	CAF	PRIO20		# INITIAL PRIORITY ONLY 13
