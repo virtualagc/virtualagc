@@ -168,7 +168,7 @@ SymbolPass (const char *InputFilename)
 	    Mod2 = Fields[i++];
 	}
 	
-      if (*Label != 0 && strcmp (Operator, "MEMORY"))
+      if (*Label != 0 && strcmp(Operator, "MEMORY") && strcmp(Operator, "CHECK="))
         {
 	  //if (!strcmp (Label, "ATMAGAD"))
 	  //  printf ("***** %s, %d, %d, %s", CurrentFilename, CurrentLineAll, CurrentLineInFile, s);

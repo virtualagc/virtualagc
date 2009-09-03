@@ -835,7 +835,8 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
       // If there is a label, and if this isn't `=' or `EQUALS', then
       // the value of the label is the current address.
       if (*ParseInputRecord.Label != 0 && !ParseOutputRecord.Equals && 
-          strcmp (ParseInputRecord.Operator, "MEMORY")
+          strcmp (ParseInputRecord.Operator, "MEMORY") &&
+          strcmp (ParseInputRecord.Operator, "CHECK=")
           /* (ParseOutputRecord.NumWords > 0 || 
 	  !strcmp (ParseInputRecord.Operator, "ERASE")) */ )
 	{
