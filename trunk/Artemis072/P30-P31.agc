@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-11 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fixed symbol names.
 
 ## Page 643
 
@@ -35,7 +36,7 @@
 #
 # CALLING SEQUENCE VIA JOB FROM V37
 #
-# EXIT VIA V37 OR GOTOP00H
+# EXIT VIA V37 OR GOTOPOOH
 #
 # OUTPUT FOR POWERED FLIGHT
 #	VTIG	X
