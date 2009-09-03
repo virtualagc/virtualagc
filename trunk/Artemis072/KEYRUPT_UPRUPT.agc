@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fixed error in conversion.
 
 ## Page 1445
 
@@ -103,7 +104,7 @@ HI10		OCT	77740
 		TC	TMFAIL2
 		TC	Q
 
-ELRCODE		OCT	22
+ELRCODE		EQUALS	OCT22
 
 # 'UPLINK ACTIVITY LIGHT' IS TURNED OFF BY .....
 #	1.	VBRELDSP
