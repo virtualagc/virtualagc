@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-29 OH	New file created.
+#		2009-09-01 JL	Commented out =ECADR directives, see note below.
 
 ## Page 36
 # ABSOLUTE LOCATIONS FOR UPDATES
