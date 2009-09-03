@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Duplicate definition of VSQMIN, one line is a comment in page scan.
 
 ## Page 1063
 # SUBROUTINE TO READ GIMBAL ANGLES AND FORM DIFFERENCES.  GIMBAL ANGLES ARE SAVED IN 2'S COMPLEMENT, BUT THE
@@ -1228,7 +1229,7 @@ T5IDLER2	2CADR	T5IDLOC
 # XBUF = 4DEG
 
 -T-3		DEC	-203		# CS
-VSQMIN		DEC	.61050061 E-3	# VSQ MIN/4 A PI = 4/(4 (9.1) 180)
+#VSQMIN		DEC	.61050061 E-3	# VSQ MIN/4 A PI = 4/(4 (9.1) 180)
 VSQMIN		=	OCT12
 2T/TCDU		=	OCT50		# T/TCDU EXP-14	   TCDU = .1SEC
 180/8ATT	DEC	.61813187	# 180/(8 (9.1) 4)=(180/ATT)	EXP -3
