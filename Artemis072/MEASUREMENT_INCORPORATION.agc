@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed typos.
 
 ## Page 1252
 # INCORP1 -- PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITION
@@ -402,7 +403,7 @@ DOCSM1		RTB	CALL
 FAZA2		XCHX,2	LXC,2
 			S2
 			X2
-		AXD,2	VSL*
+		XAD,2	VSL*
 			NORMGAM
 			0,2
 		XCHX,2	RVQ

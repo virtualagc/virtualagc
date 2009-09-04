@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed typos.
 
 ## Page 1262
 # PROGRAM DESCRIPTION -- ENTIRE CONIC SUBROUTINE LOG SECTION	DATE -- 1 SEPTEMBER 1967
@@ -905,7 +906,7 @@ DELTIME		EXIT			# MPAC=XI (+6), 0D=XSQ (+34 OR +32 -N1)
 		RVQ
 
 ## Page 1285
-COMSETUP	SETP0	BOV
+COMSETUP	SETPD	BOV
 			0D
 			+1
 		SSP	VLOAD*
@@ -1731,7 +1732,7 @@ ABTCONIC	EXIT
 		OCT	00607			# NO SOLUTION FROM TIMETHET OR TIMERAD
 
 ## Page 1305
-PRAMSET		SETP0	BOV
+PRAMSET		SETPD	BOV
 			0D
 			+1
 		VLOAD	PDVL
