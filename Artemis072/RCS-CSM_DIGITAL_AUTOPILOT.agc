@@ -10,7 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
-# 		2009-09-04 JL	Fixed typos.
+# 		2009-09-04 JL	Fixed typos. Fixed page comment.
 
 ## Page 1000
 # T5 INTERRUPT PROGRAM FOR THE RCS-CSM AUTOPILOT
@@ -966,5 +966,5 @@ WRTN17		EXTEND			# GET SET TO COMPUTE TOTAL ASTRONAUT
 		CA	CPHIX
 		TCF	GETAKS
 		
-# Page 1023 (empty page)
+## Page 1023 (empty page)
  

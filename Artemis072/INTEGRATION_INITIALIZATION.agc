@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed page comment.
 
 ## Page 1309
 # 1.0 INTRODUCTION
@@ -910,7 +911,7 @@ INT/W		DLOAD	CALL
 		GOTO
 			SETCOAST
 
-# Page 1328
+## Page 1328
 # MIDTOAV1
 #
 # THIS ROUTINE INTEGRATES (PRECISION) TO THE TIME SPECIFIED IN TDEC1.
