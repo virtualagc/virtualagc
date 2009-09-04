@@ -11,6 +11,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-29 OH	Adapted from corresponding Comanche 055 file.
 # 		2009-09-04 JL	Fixed typo: COHTAGS should be CDHTAGS.
+# 		2009-09-04 JL	Added missing LATLONG1 declaration in bank 16.
 
 ## Page 27
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
@@ -158,6 +159,7 @@ P50S2		EQUALS
 INTVEL1		EQUALS
 RTE2		EQUALS
 CSIPROG5	EQUALS
+LATLONG1	EQUALS
 		BNKSUM	16
 		
 		BANK	17
