@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-12 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed a bunch of typos. Fixed page numbers.
 
 ## Page 658
 
@@ -267,8 +268,7 @@ PASS75		CALL
 			DISDVLVC	# ROTATE TO LV, DISP N90, ROTATE TO REF
 		VLOAD
 			RACT2
-		STCALL
-			RACT1
+		STCALL	RACT1
 ## Page 663
 			S32/33.X	# GET REF/LV MATRIX AT 0D
 		VLOAD	MXV
@@ -530,7 +530,7 @@ P33/P73B	DLOAD	CALL
 		SETLOC	CSI/CDH2
 		BANK
 
-		count*	$$/P3373
+		COUNT*	$$/P3373
 P33/P73C	BON	SET
 			FINALFLG
 			P33/P73D
@@ -1210,7 +1210,7 @@ SCNDSOL		BON	BOFF
 		STCALL	LOOPCT
 			CSI/B
 
-## Page 682
+## Page 683
 # ..... ADVANCE   .....
 #
 # SUBROUTINES USED
@@ -1245,7 +1245,7 @@ ADVANCE		STQ
 		STCALL	VACT1
 			SUBEXIT
 
-## Page 683
+## Page 684
 # ..... ROTATE    .....
 
 		SETLOC	CSIPROG6
@@ -1261,7 +1261,7 @@ ROTATE		PUSH	PUSH
 		ABVAL	VXSC
 		VSL1	RVQ
 
-## Page 684
+## Page 685
 # .... DISPN90 .....
 
 		SETLOC CSIPROG

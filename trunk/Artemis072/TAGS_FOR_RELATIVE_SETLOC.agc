@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-29 OH	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed typo: COHTAGS should be CDHTAGS.
 
 ## Page 27
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
@@ -145,7 +146,7 @@ P50S1		EQUALS
 		BANK	15
 STARTAB		EQUALS
 ETRYDAP		EQUALS
-COHTAGS		EQUALS
+CDHTAGS		EQUALS
 CONICS1		EQUALS
 		BNKSUM	15
 

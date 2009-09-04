@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed page number comment. Fixed bad octal number in NOGO. 
 
 ## Page 403
 		SETLOC	KALCMON1
@@ -580,7 +581,7 @@ SUHALFAP	DSU	GOTO
 OKPHI		DLOAD			# PUSH UP PHI
 VECOFANG	VDEF	RVQ
 
-# Page 415
+## Page 415
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 NOGOM3		EXIT
@@ -602,7 +603,7 @@ NOGO		INHINT
 		2CADR	R67
 		
 		TC	PHASCHNG
-		OCT	GO111
+		OCT	00111
 
 1P11SPT2	=	1.11SPOT
 		TC	ENDOFJOB

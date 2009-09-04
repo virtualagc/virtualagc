@@ -11,6 +11,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-01 SMC	Adapted from Comanche055 files.
 # 		2009-09-03 JL	Fixed symbol names, page metadata.
+# 		2009-09-04 JL	Fixed typo.
 
 ## Page 897
 
@@ -446,7 +447,7 @@ P37W		CLEAR	CLEAR
 			V(T1)/		#	
 		CAF	EBANK4		#
 		TS	EBANK		#
-		TG	INTPRET		#
+		TC	INTPRET		#
 		STORE	DELVSIN		#
 P37WW		CALL			#
 			VNI645		#
