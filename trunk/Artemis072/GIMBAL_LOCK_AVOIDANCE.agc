@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Minor changes.
 
 ## Page 416
 		
@@ -54,33 +55,19 @@ WCALC		LXC,1	DLOAD*
 			
 			
 ARATE		2DEC	.0022222222	# = .05 DEG/SEC
-
 		2DEC	.0088888889	# = .2 DEG/SEC
-		
 		2DEC	.0222222222	# = .5 DEG/SEC
-		
 		2DEC	.0888888889	# = 2 DEG/SEC                $22.5 DEG/SEC
-		
 ANGLTIME	2DEC	.000190735	# = 100B - 19
-
 					# MANEUVER ANGLE TO MANEUVER TIME
 ## Page 417
 QUADROT		2DEC	.1		# ROTATION MATRIX FROM S/C AXES TO CONTROL
-
 		2DEC	0		# AXES (X ROT = -7.25 DEG)
-		
 		2DEC	0
-		
 		2DEC	0
-		
 		2DEC	.099200		# =(.1)COS7.25
-		
 		2DEC	-.012620	# =-(.1)SIN7.25
-		
 		2DEC	0
-		
 		2DEC	.012620		# (.1)SIN7.25
-		
 		2DEC	.099200		# (.1)COS7.25
-		
 BIASCALE	2DEC	.0002543132	# = (450/180)(1/0.6)(1/16384)
