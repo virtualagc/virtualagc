@@ -11,6 +11,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-10 JL	Adapted from corresponding Comanche 055 file.
 # 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
+# 		2009-09-04 JL	Fixed page comment.
 
 ## Page 318
 
@@ -1738,7 +1739,7 @@ OCT21		=	ND1
 ABLOAD		CS	ONE
 		TC	COMPTEST
 		TC	NOUNTEST	# TEST IF NOUN CAN BE LOADED.
-# Page 355
+## Page 355
 		CAF	VBSP1LD
 		TC	UPDATVB -1
 		TC	REQDATX

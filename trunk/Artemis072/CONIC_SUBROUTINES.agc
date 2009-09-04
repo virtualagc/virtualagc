@@ -10,7 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
-# 		2009-09-04 JL	Fixed typos.
+# 		2009-09-04 JL	Fixed typos. Fixed page comment.
 
 ## Page 1262
 # PROGRAM DESCRIPTION -- ENTIRE CONIC SUBROUTINE LOG SECTION	DATE -- 1 SEPTEMBER 1967
@@ -1411,7 +1411,7 @@ LAMBERT		STQ	CALL
 			MAXCOGA		# OTHERWISE OK, SO GO TO MAXCOGA
 UPLIM		DLOAD
 			COGUPLIM	# COGUPLIM=.999511597 = MAX VALUE OF COGA
-# Page 1297
+## Page 1297
 		STORE	COGAMAX		#	NOT CAUSING OVFL IN R1A CALCULATION
 MAXCOGA		DLOAD	SR
 			CSTH

@@ -10,9 +10,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-01 SMC	Adapted from Comanche055 files.
-#
-#
-# Page 940
+# 		2009-09-04 JL	Fixed page comments.
+
+## Page 940
 # S-BAND ANTENNA FOR CM
 
 		SETLOC	SBAND
@@ -65,7 +65,7 @@ COVCNV		UNIT	BOV		# TEST OVERFLOW FOR INDICATION OF NULL
 			HIUNITX		# COMPUTE YAW ANGLE = ACOS (URP.UX)
 		SL1	ACOS		# REVOLUTIONS SCALED B0
 		PDVL	DOT		# 22D YAWANG
-# Page 941
+## Page 941
 			URP
 			HIUNITY		# COMPUTE FOLLOWING: URP.UY
 		SL1	BPL		# POSITIVE

@@ -11,7 +11,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
 # 		2009-09-03 JL	Fixed symbol names.
-# 		2009-09-04 JL	Fixed a bunch of typos.
+# 		2009-09-04 JL	Fixed a bunch of typos. Fixed page comments.
 
 ## Page 463
 # TRANSFER PHASE INITITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -302,7 +302,7 @@ P34/74E		SETPD	DLOAD
 130DEG		OCT	13434		# 13  DEG -- CENTANG
 		OCT	16163
 
-# Page 470
+## Page 470
 # RENDEZVOUS MID-COURSE MANEUVER PROGRAMS (P35 AND P75)
 # MOD NO -1			LOG SECTION -- P32-P35, P72-P75
 # MOD BY WHITE, P.		DATE:  1 JUNE 67
@@ -865,7 +865,7 @@ FLAGOFF		CALL
 FLAGEND		GOTO
 			SUBEXIT
 
-# Page 485
+## Page 485
 # ***** VN1645 *****
 #
 # SUBROUTINES USED
@@ -989,7 +989,7 @@ EPSFOUR		2DEC	.0416666666
 
 V06N59		VN	0659
 
-# Page 489
+## Page 489
 # ***** INITVEL *****
 # MOD NO -1			LOG SECTION -- P34-P35, P74-P75
 # MOD BY WHITE, P.		DATE:  21 NOV 67
