@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-16 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed typo, fixed error in conversion of some interpreter code.
 
 ## Page 742
 
@@ -1391,7 +1392,7 @@ CHKSD		DLOAD	DSU
 		TCF	GOTOPOOH
 		TC	CHKSDA		# PROCEED
 		TC	DOWNFLAG
-		ADRESS	FREEFLAG
+		ADRES	FREEFLAG
 CHKSDA		TC	INTPRET
 		GOTO
 			QMIN
@@ -1467,6 +1468,8 @@ CALCSMSC	DLOAD	DMP
 		DMP	DAD
 			26D
 		VDEF	VSL1
+		STORE	ZNB
+		VXV	VSL1
 			XNB
 		STORE	YNB
 		RVQ

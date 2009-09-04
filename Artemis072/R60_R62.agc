@@ -11,6 +11,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
 # 		2009-09-03 JL	Fixed symbol names.
+# 		2009-09-04 JL	Fixed typo in COUNT* directive.
 
 ## Page 394
 		SETLOC	MANUVER
@@ -324,7 +325,7 @@ PICKX		VLOAD	GOTO		# PICK THE XAXIS IN THIS CASE
 		SETLOC	MANUVER1
 		BANK
 		
-		COUNT=	$$/VECPT
+		COUNT*	$$/VECPT
 SINGIMLC	2DEC	.4285836003	# = SIN(59)				$2
 
 SINVEC1		2DEC	.3796356537	# = SIN(49.4)				$2

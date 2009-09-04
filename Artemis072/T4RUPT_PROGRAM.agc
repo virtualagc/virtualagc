@@ -10,7 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-03 JL	Adapted from corresponding Comanche 055 file.
-# 		2009-09-03 JL	Remove duplicate 20DEGS symbol.
+# 		2009-09-04 JL	OC40010 should be an EQUALS declaration.
 
 ## Page 141
 
@@ -1033,7 +1033,7 @@ LAMPTEST	CS	IMODES33		# BIT 1 OF IMODES33 = 1 IF LAMP TEST IN
 		MASK	LMPTSTBT		# PROGRESS.
 		TCF	INCRQCK
 33RDMSK		EQUALS	PRIO16
-OC40010		OCT	OT40010
+OC40010		EQUALS	OT40010
 OCT272		OCT	00272
 BITS7&8		OCT	300
 OCT1720		OCT	1720
