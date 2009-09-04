@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fix typos.
 
 ## Page 997
 
@@ -23,13 +24,13 @@ SPCOS2		EQUALS	SPCOS
 SPSIN2		EQUALS	SPSIN
 
 		COUNT*	$$/DAPMS
-		
+
 # ONE AND ONE HALF PRECISION MULTIPLICATION ROUTINE
 
 SMALLMP		TS	KMPTEMP		# A(X+Y)
 		EXTEND
-		MP	KMPAC 	+1
-		TS	KMPAC 	+1	# AY
+		MP	KMPAC +1
+		TS	KMPAC +1	# AY
 		CAF	ZERO
 		XCH	KMPAC
 		EXTEND
@@ -43,20 +44,20 @@ SMALLMP		TS	KMPTEMP		# A(X+Y)
 
 DPADD		DAS	KMPAC
 		EXTEND
-		BZF	TSK 	+1	# NO OVERFLOW
+		BZF	TSK +1		# NO OVERFLOW
 		CCS	KMPAC
 		TCF	DPADD+		# + OVERFLOW
 		TCF	+2
 		TCF	DPADD-		# - OVERFLOW
-		CCS	KMPAC 	+1
+		CCS	KMPAC +1
 		TCF	DPADD2+		# UPPER = 0, LOWER +
 		TCF	+2
 		COM			# UPPER = 0, LOWER -
-		AD	POSMAX		# LOWER = 0, A = 0
-		TS	KMPAC 	+1	# CAN NOT OVERFLOW
+		AD	POSMAX		# LOWER = 0, A=0
+		TS	KMPAC +1	# CAN NOT OVERFLOW
 		CA	POSMAX		# UPPER WAS = 0
 TSK		TS	KMPAC
-	+1	TC	Q
+ +1		TC	Q
 DPADD+		AD	NEGMAX		# KMPAC GREATER THAN 0
 		TCF	TSK
 
@@ -66,9 +67,8 @@ DPADD-		COM
 		TCF	TSK
 		
 DPADD2+		AD	NEGMAX		# CAN NOT OVERFLOW
-		TS	KMPAC 	+1
+		TS	KMPAC +1
 		CA	NEGMAX		# UPPER WAS = 0
 		TCF	TSK
 
 ## Page 999 (empty page)
-
