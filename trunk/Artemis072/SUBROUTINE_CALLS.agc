@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-29 OH	New file created.
+# 		2009-09-04 JL	Fix typo.
 
 ## Page 37
 # SUBROUTINE_CALLS
@@ -21,4 +22,4 @@
 		SUBRO	ULYSSES		029
 		SUBRO	ZEUS		046
 
-# *** END OF PROGRAM ***
+# *** END OF MAIN PROGRAM ***
