@@ -10,19 +10,20 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Minor fixes.
 
 ## Page 1036
-# CALCULATION OF  AMGB, AMBG  ONCE EVERY SECOND
+# CALCULATION OF  AMGB, AMBG     ONCE EVERY SECOND
 #
-#	AMGB =	1	SIN(PSI)		0
-#		0	COS(PSI)COS(PHI)	SIN(PHI)
-#		0	-COS(PSI)SIN(PHI)	COS(PHI)
+#  AMGB =  1	SIN(PSI)		0
+#	   0	COS(PSI)COS(PHI)	SIN(PHI)
+#	   0	-COS(PSI)SIN(PHI)	COS(PHI)
 #
-#	AMBG =	1	-TAN(PSI)COS(PHI)	TAN(PSI)SIN(PHI)
-#		0	COS(PHI)/COS(PSI)	-SIN(PHI)/COS(PSI)
-#		0	SIN(PHI)		COS(PHI)
+#  AMBG =  1	-TAN(PSI)COS(PHI)	TAN(PSI)SIN(PHI)
+#	   0	COS(PHI)/COS(PSI)	-SIN(PHI)/COS(PSI)
+#	   0	SIN(PHI)		COS(PHI)
 #
-# WHERE PHI AND PSI ARE CDU ANGLES
+#  WHERE PHI AND PSI ARE CDU ANGLES
 
 		SETLOC	DAPS8
 		BANK
@@ -69,4 +70,3 @@ AMBGUPDT	CA	FLAGWRD6	# CHECK FOR RCS AUTOPILOT
 
 		COUNT*	$$/DAPEX
 QUADANGL	DEC	660		# = 7.25 DEGREES
-
