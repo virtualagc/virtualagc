@@ -875,18 +875,18 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	    }
  	  if (ParseOutputRecord.Fatal)
 	    {
-	      printf ("Fatal Error:  %s\n", ParseOutputRecord.ErrorMessage);
+	        printf ("%s:%d: Fatal Error: %s\n", CurrentFilename, CurrentLineInFile, ParseOutputRecord.ErrorMessage);
 	      if (HtmlOut != NULL)
 	        fprintf (HtmlOut,
 			 COLOR_FATAL "Fatal Error:  %s</span>\n", 
 			 ParseOutputRecord.ErrorMessage);
-	      fprintf (stderr, "%s:%d: Fatal: %s\n", 
+	      fprintf (stderr, "%s:%d: Fatal Error: %s\n", 
 	      	       CurrentFilename, CurrentLineInFile, ParseOutputRecord.ErrorMessage);
 	      (*Fatals)++;
 	    }
 	  else if (ParseOutputRecord.Warning)  
 	    {
-	      printf ("Warning:  %s\n", ParseOutputRecord.ErrorMessage);
+	      printf ("%s:%d: Warning: %s\n", CurrentFilename, CurrentLineInFile, ParseOutputRecord.ErrorMessage);
 	      if (HtmlOut != NULL)
 	        fprintf (HtmlOut,
 			 COLOR_WARNING "Warning:  %s</span>\n", 
