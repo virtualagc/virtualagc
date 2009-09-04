@@ -9,11 +9,15 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-# Mod history:	12/21/04 RSB	Created.
-#		05/14/05 RSB	Corrects website reference above.
-#		07/25/09 RSB	Fixups for this header so that it can
+# Mod history:	2004-12-21 RSB	Created.
+#		2005-05-14 RSB	Corrects website reference above.
+#		2009-07-25 RSB	Fixups for this header so that it can
 #				be used for code conversions.
-
+#		2009-08-12 JL	Fix typo.
+#		2009-08-18 JL	Change some filenames to match log section names.
+#		2009-09-03 JL	Comment out some modules that are not available yet, to start checking build.
+#		2009-09-04 JL	Uncomment modules that are now available.
+#		
 # MAIN.agc is a little different from the other Artemis072 files  
 # provided, in that it doesn't represent anything that appears 
 # directly in the original source.  What I (RSB) have done for 
@@ -102,11 +106,11 @@ $INTERPRETIVE_CONSTANTS.agc			# 1205
 $SINGLE_PRECISION_SUBROUTINES.agc		# 1207
 $EXECUTIVE.agc					# 1208
 $WAITLIST.agc					# 1221
-#$LATITUDE_LONGITUDE_SUBROUTINES.agc		# 1236
-#$PLANETARY_INERTIAL_ORIENTATION.agc		# 1243
-#$MEASUREMENT_INCORPORATION.agc			# 1252
-#$CONIC_SUBROUTINES.agc				# 1262
-#$INTEGRATION_INITIALIZATION.agc			# 1309
+$LATITUDE_LONGITUDE_SUBROUTINES.agc		# 1236
+$PLANETARY_INERTIAL_ORIENTATION.agc		# 1243
+$MEASUREMENT_INCORPORATION.agc			# 1252
+$CONIC_SUBROUTINES.agc				# 1262
+$INTEGRATION_INITIALIZATION.agc			# 1309
 $ORBITAL_INTEGRATION.agc			# 1333
 $INFLIGHT_ALIGNMENT_ROUTINES.agc		# 1354
 $POWERED_FLIGHT_SUBROUTINES.agc			# 1364
