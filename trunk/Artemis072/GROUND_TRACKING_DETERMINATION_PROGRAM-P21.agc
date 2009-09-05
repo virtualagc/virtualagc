@@ -12,6 +12,7 @@
 # Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
 # 		2009-09-03 JL	Fixed symbol names.
 # 		2009-09-04 JL	Fixed a bunch of typos.
+# 		2009-09-05 JL	Fixed typos.
 
 ## Page 455
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -35,7 +36,7 @@
 # 	GOFLASH
 # 	THISPREC
 # 	OTHPREC
-# 	`LAT-LONG
+# 	LAT-LONG
 #
 # NORMAL EXIT MODES-
 #
