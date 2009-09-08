@@ -121,6 +121,7 @@
 #				different ones) on Linux.  I'm completely
 #				disabling readline for all platforms for now,
 #				until these problems can be fixed.
+#		09/08/09 JL		Commented out Artemis072 from main build. 
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -300,7 +301,7 @@ endif
 		EXT=${EXT}
 	$(MAKE) -C Comanche055
 	$(MAKE) -C Luminary099
-	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
+#	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
 	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
 		EXT=${EXT}
 	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
@@ -405,7 +406,7 @@ clean:
 	$(MAKE) -C Colossus249 clean
 	${MAKE} -C Comanche055 clean
 	${MAKE} -C Luminary099 clean
-	${MAKE} -C Artemis072 clean
+#	${MAKE} -C Artemis072 clean
 	$(MAKE) -C Validation clean
 	${MAKE} -C ControlPulseSim clean
 	${MAKE} -C VirtualAGC clean
