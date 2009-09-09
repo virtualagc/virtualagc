@@ -26,10 +26,11 @@ To install:
     - Select "Editing" section
     - For "Change settings for mode:", select "assembly-agc" from the dropdown. 
     - Unselect "Use default settings"
-    - Set tab width and indent width both to 8 (Unix). 
-      On Windows, it seems these need to be set to 7. I don't know why 
-      this is necessary, but setting to 8 does not display the 
-      source indentation correctly. 
+    - Set tab width and indent width both to 8. 
+    - Make sure that Fractional Font Metrics are disabled (this causes 
+      incorrect display of hard tabs). To do this go to 
+      Utilities -> Global Options -> Text Area, 
+      unselect Fractional font metrics, and press OK.
     - Unselect "Soft (emulated with spaces) tabs"
     - Specify "File name glob" as "*.{agc}"
     - Repeat for "assembly-ags", and exit the options panel.
