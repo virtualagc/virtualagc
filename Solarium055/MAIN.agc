@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-07-25 RSB	Adapted from corresponding Colossus 249 file.
+# 		2009-09-14 JL	Fixed page number.
 #
 # This file is a little different from the other Solarium055 files being provided, 
 # in that it doesn't represent anything that appears directly in the original source.  
@@ -38,7 +39,7 @@ $IMU_COMPENSATION_PACKAGE.agc			# 214
 $IRIG_PULSE-TORQUING_ROUTINES.agc		# 224
 $EXTENDED_VERBS_FOR_MODING.agc			# 235
 $AGC_SELF_CHECK.agc				# 265
-$INTER-BANK_COMMUNICATION.agc			# 291 
+$INTER-BANK_COMMUNICATION.agc			# 290 
 $ALARM_AND_DISPLAY_PROCEDURES.agc		# 293
 $ORBITAL_INTEGRATION_PROGRAM.agc		# 296
 $ORBITAL_INTEGRATION_FOR_501.agc		# 326
