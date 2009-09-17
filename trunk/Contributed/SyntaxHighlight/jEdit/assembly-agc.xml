@@ -16,6 +16,7 @@
 
         <SEQ_REGEXP HASH_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+-/*=()?" AT_LINE_START="TRUE" TYPE="LABEL">[0-9A-Z+-/*=()?]+</SEQ_REGEXP>
         <SEQ_REGEXP HASH_CHARS="+-" AT_WHITESPACE_END="TRUE" TYPE="COMMENT3">[0-9A-Z+-]+</SEQ_REGEXP>
+        <SEQ_REGEXP HASH_CHARS="0123456789" AT_WORD_START="TRUE" TYPE="DIGIT">[0-9D]+</SEQ_REGEXP>
 
         <!-- Binary Operators -->
         <SEQ TYPE="OPERATOR">+</SEQ>
@@ -125,6 +126,10 @@
             <FUNCTION>6DNADR</FUNCTION>
             <FUNCTION>DNCHAN</FUNCTION>
             <FUNCTION>DNPTR</FUNCTION>
+
+            <!-- Block I Opcodes -->
+            <KEYWORD1>XAQ</KEYWORD1>
+            <KEYWORD1>OVIND</KEYWORD1>
 
             <!-- Block II Opcodes -->
             <KEYWORD1>-CCS</KEYWORD1>
