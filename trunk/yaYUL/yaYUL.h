@@ -49,6 +49,7 @@
 				files more.
 		07/25/09 RSB	Added lots of stuff related to providing
 				separate binary codes for Block 1 vs. Block 2.
+        09/03/09 JL     Added CHECK= and =ECADR directives.
 */
 
 #ifndef INCLUDED_YAYUL_H

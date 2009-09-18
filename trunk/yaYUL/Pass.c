@@ -46,9 +46,11 @@
 		07/01/09 RSB	Altered style of comments in HTML.  Shortened
 				up symbol hyperlinks, where they're local to
 				the file.
-		07/26/08 RSB	Fixed, I hope, some of the wrong colorization
+		07/26/09 RSB	Fixed, I hope, some of the wrong colorization
 				that occurs occasionally when two interpretive
 				opcodes appear on the same line.
+        09/03/09 JL     Fixed an issue with CHECK= causing duplicate symbols. 
+                Treat CHECK= like MEMORY when parsing labels.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
