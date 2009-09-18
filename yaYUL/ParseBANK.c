@@ -21,6 +21,7 @@
   Purpose:	Assembles the BANK pseudo-op.
   Mode:		04/26/03 RSB	Began.
   		06/28/09 RSB	Added HTML output.
+  		09/07/09 JL	    Fixed typo in PrintBankCounts.
   
   I'm not actually certain what the BANK pseudo-op is supposed to do with 
   the banks in super-bank 1.  I allow those to be accepted, as bank 
@@ -73,9 +74,9 @@ PrintBankCounts (void)
     fprintf (HtmlOut, "<h1>Usage Table for Fixed-Memory Banks</h1>\n");
   for (i = 0; i < NUM_FIXED_BANKS; i++)
     {
-      printf ("Bank %02o:  %04o/2OOO words used.\n", i, UsedInBank[i]);
+      printf ("Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
       if (HtmlOut != NULL)
-        fprintf (HtmlOut, "Bank %02o:  %04o/2OOO words used.\n", i, UsedInBank[i]);
+        fprintf (HtmlOut, "Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
     }
 }
 
