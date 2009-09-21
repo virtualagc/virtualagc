@@ -62,8 +62,8 @@ $IMU_CALIBRATION_AND_ALIGNMENT.agc		# 427
 # MEDUSA
 $GROUND_TRACKING_DETERMINATION_PROGRAM-P21.agc	# 455
 $P34-P35_P74-P75.agc				# 463
-#$R31.agc					# 507
-#$P76.agc					# 513
+$R31.agc					# 507
+$P76.agc					# 513
 #$R30.agc					# 516
 
 # MENELAUS
