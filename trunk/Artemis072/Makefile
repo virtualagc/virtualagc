@@ -40,6 +40,6 @@ install: default
 	@echo Errors in the following are normal, since Artemis072
 	@echo is under development.
 	-../yaYUL/yaYUL --html MAIN.agc >$@
-	-diff -s MAIN.agc.bin $^
+	-diff -s MAIN.agc.bin $<
 		
 
