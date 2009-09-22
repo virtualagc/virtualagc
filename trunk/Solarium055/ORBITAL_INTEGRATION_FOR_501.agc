@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-22 JL	Created.
+#		2009-09-22 JL	Fixed typo.
 
 ## Page 326
 
@@ -99,7 +100,7 @@ TESTTET		EXIT	0		# FOR DUMP ONLY
 		STZ	0
 			OVFIND
 
-		DSJ	2
+		DSU	2
 		RTB	TSLT
 		DDV
 			TDEC
