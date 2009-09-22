@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-17 JL	Created.
+# 		2009-09-22 JL	Fixed typo.
 
 ## Page 70
 		SETLOC	6000
@@ -360,7 +361,7 @@ SLCANS		CS	TEM2		# STORE COMPLEMENT OF COUNT
 
 ## Page 78
 
-SWITCHEM	CS	POLISH		# SWITCH AND TEST INSTURCTIONS.
+SWITCHEM	CS	POLISH		# SWITCH AND TEST INSTRUCTIONS.
 		TS	ADDRWD		# DECOMPOSE ADDRESS INTO SWITCH WORD AND
 		MASK	SBITMASK	# BIT. MULTIPLES OF 16 ARE EXCLUDED.
 		XCH	ADDRWD
