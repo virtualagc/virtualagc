@@ -149,8 +149,8 @@
 # FOR FURTHER DETAILS ABOUT OPERATION OF THE KEYBOARD AND DISPLAY SYSTEM
 # PROGRAM, SEE THE MISSION PLAN AND/OR MIT/IL E-2129
 # DESCRIBING KEYBOARD AND DISPLAY OPERATION FOR 278.
-# (Note that this doc by Green and Filene is/was available online at
-# http://hrst.mit.edu/hrs/apollo/public/archive/1706.pdf --- RSB 6/2004.)
+## (Note that this doc by Green and Filene is/was available online at
+## http://hrst.mit.edu/hrs/apollo/public/archive/1706.pdf --- RSB 6/2004.)
 #
 # THE FOLLOWING QUOTATION IS PROVIDED THROUGH THE COURTESY OF THE AUTHORS.
 #
