@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 # Copyright:	Public domain.
-# Filename:	RT8_OP_CODES.agc
+# Filename:	RTB_OP_CODES.agc
 # Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
 #		build 072.  This is for the Command Module's (CM)
 #		Apollo Guidance Computer (AGC), we believe for
@@ -10,6 +10,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-17 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-29 JL	Fixed file name in header section.
 
 ## Page 1501
 
