@@ -11,12 +11,16 @@
     </PROPS>
 
     <RULES HIGHLIGHT_DIGITS="TRUE" IGNORE_CASE="TRUE">
+        <!-- Comments -->
         <EOL_SPAN TYPE="COMMENT2">##</EOL_SPAN>
         <EOL_SPAN TYPE="COMMENT1">#</EOL_SPAN>
 
-        <SEQ_REGEXP HASH_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+-/*=()?'&amp;" AT_LINE_START="TRUE" TYPE="LABEL">[0-9A-Z+-/*=()?'&amp;]+</SEQ_REGEXP>
+        <!-- Labels -->
+        <SEQ_REGEXP HASH_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+-/*=()?'.&amp;" AT_LINE_START="TRUE" TYPE="LABEL">[0-9A-Z+-/*=()?'.&amp;]+</SEQ_REGEXP>
+        <!-- +/- Pseudo-labels (comments really) -->
         <SEQ_REGEXP HASH_CHARS=" +-" AT_LINE_START="TRUE" TYPE="COMMENT3"> [0-9+-]+</SEQ_REGEXP>
 
+        <!-- Numbers, default is octal. Decimal specified by trailing D. -->
         <SEQ_REGEXP HASH_CHARS="0123456789" AT_WORD_START="TRUE" TYPE="DIGIT">[0-9]+D[ \t]</SEQ_REGEXP>
         <SEQ_REGEXP HASH_CHARS="0123456789" AT_WORD_START="TRUE" TYPE="DIGIT">[0-9]+D$</SEQ_REGEXP>
         <SEQ_REGEXP HASH_CHARS="0123456789" AT_WORD_START="TRUE" TYPE="DIGIT">[0-9]+D[,$]</SEQ_REGEXP>
