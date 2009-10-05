@@ -2,6 +2,7 @@ These files add syntax highlighting for AGC and AGS assembly languages to
 the jEdit programmers editor (http://www.jedit.org). 
 
 To install:
+
  1. Copy the xml files to the modes directory of your jEdit installation, 
     e.g. on Unix: /usr/local/share/jedit/modes, or 
     on Windows: C:\Program Files\jEdit\modes
@@ -36,3 +37,18 @@ To install:
     - Repeat for "assembly-ags", and exit the options panel.
 
 
+Other suggestions:
+    - When transcribing AGC source from page scans, it can be useful to 
+      have vertical line-guides at specific columns. This can be done by
+      installing the jEdit LineGuides plugin. It doesn't have a fantastic 
+      user interface (OK, it doesn't have any). You'll have to edit its
+      settings manually. Within jEdit go to 
+      Utilities -. Settings Directory -> More -> properties
+      Add a line like the following anywhere in the file (if it already exists, 
+      modify to suit):
+	lineguides.default-set=\#c0c0ff|8,\#8080ff|16,\#c0c0ff|24,\#c0c0ff|32,\#8080ff|40
+      This sets vertical rulers at columns 8 (end of label), 16 (start of opcode), 
+      24 (start of operand), 32 and 40 (start of comment). 
+
+      To turn on LineGuides, select Plugins -> H-O -> Line Guides
+      
