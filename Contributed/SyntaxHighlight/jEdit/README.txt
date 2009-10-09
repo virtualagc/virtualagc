@@ -1,6 +1,13 @@
+AGC support for the jEdit programmers editor
+--------------------------------------------
+Jim Lawton  <jim DOT lawton AT gmail DOT com>
+
 These files add syntax highlighting for AGC and AGS assembly languages, 
 and for the AGC binsource executable file format to the jEdit programmers 
 editor (http://www.jedit.org). 
+
+Note: AGC/AGS support is now included in the jEdit mainline, and from 
+the 4.3pre18 version on will be included by default.
 
 To install:
 
@@ -28,21 +35,26 @@ To install:
       Utilities -> Troubleshooting -> Reload Edit Modes
  
  4. Change your jEdit settings for these modes: 
+
     - Utilities -> Global Options
-    - Select "Editing" section
-    - For "Change settings for mode:", select "assembly-agc" from the dropdown. 
-    - Unselect "Use default settings"
-    - Set tab width and indent width both to 8. 
+
     - Make sure that Fractional Font Metrics are disabled (this causes 
       incorrect display of hard tabs). To do this go to 
       Utilities -> Global Options -> Text Area, 
       unselect Fractional font metrics, and press OK.
-    - Unselect "Soft (emulated with spaces) tabs"
-    - Specify "File name glob" as "*.{agc}"
-    - Repeat for "assembly-ags".
-    - Repeat for "binsource-agc", and exit the options panel.
+
+    - Select "Editing" section
+      - For "Change settings for mode:", select "assembly-agc" from the dropdown. 
+      - Unselect "Use default settings"
+      - Set tab width and indent width both to 8. 
+      - Unselect "Soft (emulated with spaces) tabs"
+      - Specify "File name glob" as "*.{agc}"
+      
+      - Repeat for "assembly-ags".
+      - Repeat for "binsource-agc", and exit the options panel.
 
 Other suggestions:
+
     - When transcribing AGC source from page scans, it can be useful to 
       have vertical line-guides at specific columns. This can be done by
       installing the jEdit LineGuides plugin. It doesn't have a fantastic 
