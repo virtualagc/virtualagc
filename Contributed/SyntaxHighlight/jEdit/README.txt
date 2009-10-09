@@ -1,5 +1,6 @@
-These files add syntax highlighting for AGC and AGS assembly languages to 
-the jEdit programmers editor (http://www.jedit.org). 
+These files add syntax highlighting for AGC and AGS assembly languages, 
+and for the AGC binsource executable file format to the jEdit programmers 
+editor (http://www.jedit.org). 
 
 To install:
 
@@ -11,11 +12,15 @@ To install:
     directory in the jEdit installation area as above:
 
 -----------------------------CUT HERE-----------------------------------
-<MODE NAME="assembly-agc"	FILE="assembly-agc.xml"
-				FILE_NAME_GLOB="*.agc" />
 
-<MODE NAME="assembly-ags"	FILE="assembly-ags.xml"
-				FILE_NAME_GLOB="*.aea" />
+<MODE NAME="assembly-agc"       FILE="assembly-agc.xml"
+                                FILE_NAME_GLOB="*.agc" />
+
+<MODE NAME="assembly-ags"       FILE="assembly-ags.xml"
+                                FILE_NAME_GLOB="*.aea" />
+
+<MODE NAME="binsource-agc"      FILE="binsource-agc.xml"
+                                FILE_NAME_GLOB="*.binsource" />
 
 -----------------------------CUT HERE-----------------------------------
 
