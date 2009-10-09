@@ -39,8 +39,8 @@ To install:
       unselect Fractional font metrics, and press OK.
     - Unselect "Soft (emulated with spaces) tabs"
     - Specify "File name glob" as "*.{agc}"
-    - Repeat for "assembly-ags", and exit the options panel.
-
+    - Repeat for "assembly-ags".
+    - Repeat for "binsource-agc", and exit the options panel.
 
 Other suggestions:
     - When transcribing AGC source from page scans, it can be useful to 
