@@ -113,8 +113,6 @@ def main():
     if infile:
         parse(infile)
     
-    ofile = open(outfile, 'w')
-
     pagedata = {}
 
     stop = False
@@ -234,6 +232,7 @@ def main():
                 block += 1
 
         print "Saving page..."
+        ofile = open(outfile, 'a')
         lines = []
         stop = False
         for row in range(32):
@@ -251,6 +250,7 @@ def main():
         ofile.write("; p. %d\n" % page)
         ofile.writelines(lines)
         ofile.write("\n")
+        ofile.close()
         
         response = prompt("Next page (y/n) [n]: ")
         if response == 'y':
@@ -258,8 +258,6 @@ def main():
             continue
         else:
             break
-
-    ofile.close()
     
     print "Done"
     
