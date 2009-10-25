@@ -36,6 +36,7 @@ def octPrompt(promptString="5 digit octal: "):
         response = raw_input(promptString)
         if len(response) == 0 or len(response) > 5:
             response = None
+            break
         else:
             try:
                 response = int(response, 8)
