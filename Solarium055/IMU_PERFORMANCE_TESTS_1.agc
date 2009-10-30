@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 # Copyright:	Public domain.
-# Filename:	???.agc
+# Filename:	IMU_PERFORMANCE_TESTS_1.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
 #		Computer (AGC), for Apollo 4.
@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-04 JL	Created.
+#		2009-10-30 JL	Fixed filename comment.
 
 ## Page 392
 
