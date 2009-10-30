@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 # Copyright:	Public domain.
-# Filename:	???.agc
+# Filename:	ORBITAL_INTEGRATION_FOR_501.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
 #		Computer (AGC), for Apollo 4.
@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-22 JL	Created.
 #		2009-09-22 JL	Fixed typo.
+#		2009-10-30 JL	Fixed filename comment.
 
 ## Page 326
 
