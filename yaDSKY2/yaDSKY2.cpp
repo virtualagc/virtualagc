@@ -43,6 +43,12 @@
 				Silly me!  Why didn't I notice that?
 				A separate check of the file's existence
 				is now performed to eliminate that.
+		2009-11-12 RSB	Changed the flashing duty cycle from 1:1
+				to 3:1 (high:low) to match what Christian
+				Bucher has found on the Apollo 11 TV
+				transmissions.  Increased the flashing
+				frequency as well, by about 20%.  It's
+				still not accurate.
   
   The yaDSKY2 program is intended to be a completely identical drop-in
   replacement for the yaDSKY program as it exists at 2009-03-06.  
@@ -1168,9 +1174,14 @@ TimerClass::Notify ()
 	  MainWindow->CurrentND2 == MainWindow->CurrentBlank &&
 	  MainWindow->CurrentKeyRel == MainWindow->BlankKeyRel && 
 	  MainWindow->CurrentOprErr == MainWindow->BlankOprErr)
-        FlashCounter = 1;
-      else
-        FlashCounter = 10;
+        {
+          FlashCounter = 1;
+	  FlashStatus = 1;
+	}
+      else if (FlashStatus)	// Flashing and about to light.
+        FlashCounter = 6;
+      else			// Flashing and about to blank.
+        FlashCounter = 2;
       if (FlashStatus)
 	{
 	  if (VerbNounFlashing)
