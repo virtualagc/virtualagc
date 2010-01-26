@@ -892,7 +892,7 @@ VEMSCON		2DEC	-.0389676 B-14	# = -HS D / 2 PI (-14)	M SQ / CS SQ
 
 					# _      _          _
 FISHCALC	PDVL	VXV		# URPR = UR CDELF + UHOR SDELF
-	 		URONE
+			URONE
 			UNI
 		VXSC	VSL1
 					# SIN(THETA) / 2 FROM PDL+0
