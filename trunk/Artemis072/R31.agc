@@ -1,4 +1,4 @@
-### FILE="R31.annotation"
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	R31.agc
 # Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
@@ -11,6 +11,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-20 HG	Adapted from corresponding Comanche 055 file.
 # 		2009-09-21 JL	Fixed minor typos. 
+#		2010-01-26 JL	Updated header comments.
 
 ## Page 507
 		SETLOC	R31
