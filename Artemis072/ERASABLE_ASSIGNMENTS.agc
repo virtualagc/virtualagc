@@ -11,7 +11,8 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-30 OH	Started from corresponding Comanche 055 file.
 #		2009-11-29 JL	Carried on from where Onno stopped on page 48.
-#		2010-01-25 jl	Finished conversion.
+#		2010-01-25 JL	Finished conversion.
+#		2010-01-26 JL	Updated header comments.
 
 ## Page 38
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
