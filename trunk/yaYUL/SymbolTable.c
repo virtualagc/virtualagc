@@ -404,7 +404,7 @@ Retry:
     
   // Now take care of HTML embedded with
   //	## stuff
-  if (!strncmp (s, "## ", 3))
+  if ((strncmp(s, "### ", 4) == 0) || (strncmp(s, "###\t", 4) == 0))
     {
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
@@ -424,7 +424,7 @@ Retry:
 	    break;
 	  (*CurrentLineAll)++;
 	  (*CurrentLineInFile)++;  
-	  if (strncmp (s, "## ", 3))
+      if (strncmp(s, "### ", 4) && strncmp(s, "###\t", 4))
 	    break;
 	  if (WriteOutput && Html && HtmlOut != NULL)
 	    fprintf (HtmlOut, "%s", &s[3]);
