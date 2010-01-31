@@ -1,17 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
-# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  This is for the Command Module's (CM)
-#		Apollo Guidance Computer (AGC), we believe for
-#		Apollo 15-17.
-# Assembler:	yaYUL
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-# Mod history:	2009-08-10 JL	Adapted from corresponding Comanche 055 file.
-# 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
-# 		2009-09-04 JL	Fixed page comment.
+## Copyright:	Public domain.
+## Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
+## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+##		build 072.  This is for the Command Module's (CM)
+##		Apollo Guidance Computer (AGC), we believe for
+##		Apollo 15-17.
+## Assembler:	yaYUL
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Mod history:	2009-08-10 JL	Adapted from corresponding Comanche 055 file.
+## 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
+## 		2009-09-04 JL	Fixed page comment.
 
 ## Page 318
 

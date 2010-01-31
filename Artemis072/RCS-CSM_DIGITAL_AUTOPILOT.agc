@@ -1,17 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	RCS-CSM_DIGITAL_AUTOPILOT.agc
-# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  This is for the Command Module's (CM) 
-#		Apollo Guidance Computer (AGC), we believe for 
-#		Apollo 15-17.
-# Assembler:	yaYUL
-# Contact:	Sergio Navarro <sergionavarrog@gmail.com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-# Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
-# 		2009-09-04 JL	Fixed typos. Fixed page comment.
-# 		2009-09-10 JL	Fixed typos.
+## Copyright:	Public domain.
+## Filename:	RCS-CSM_DIGITAL_AUTOPILOT.agc
+## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+##		build 072.  This is for the Command Module's (CM) 
+##		Apollo Guidance Computer (AGC), we believe for 
+##		Apollo 15-17.
+## Assembler:	yaYUL
+## Contact:	Sergio Navarro <sergionavarrog@gmail.com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
+## 		2009-09-04 JL	Fixed typos. Fixed page comment.
+## 		2009-09-10 JL	Fixed typos.
 
 ## Page 1000
 

@@ -1,41 +1,41 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	MAIN.agc
-# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  This is for the Command Module's (CM) 
-#		Apollo Guidance Computer (AGC), we believe for 
-#		Apollo 15-17.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-# Mod history:	2004-12-21 RSB	Created.
-#		2005-05-14 RSB	Corrects website reference above.
-#		2009-07-25 RSB	Fixups for this header so that it can
-#				be used for code conversions.
-#		2009-08-12 JL	Fix typo.
-#		2009-08-18 JL	Change some filenames to match log section names.
-#		2009-09-03 JL	Comment out some modules that are not available yet, to start checking build.
-#		2009-09-04 JL	Uncomment modules that are now available.
-#		
-# MAIN.agc is a little different from the other Artemis072 files  
-# provided, in that it doesn't represent anything that appears 
-# directly in the original source.  What I (RSB) have done for 
-# organizational purposes is to split the huge monolithic source 
-# code into smaller, more manageable chunks--i.e., into individual
-# source files.  Those files are rejoined within this file as 
-#"includes".  It just makes it a little easier to work with.  The
-# code chunks correspond to natural divisions into sub-programs.  
-# The divisions are by the assembly listing itself.
+## Copyright:	Public domain.
+## Filename:	MAIN.agc
+## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+##		build 072.  This is for the Command Module's (CM) 
+##		Apollo Guidance Computer (AGC), we believe for 
+##		Apollo 15-17.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Mod history:	2004-12-21 RSB	Created.
+##		2005-05-14 RSB	Corrects website reference above.
+##		2009-07-25 RSB	Fixups for this header so that it can
+##				be used for code conversions.
+##		2009-08-12 JL	Fix typo.
+##		2009-08-18 JL	Change some filenames to match log section names.
+##		2009-09-03 JL	Comment out some modules that are not available yet, to start checking build.
+##		2009-09-04 JL	Uncomment modules that are now available.
+##		
+## MAIN.agc is a little different from the other Artemis072 files  
+## provided, in that it doesn't represent anything that appears 
+## directly in the original source.  What I (RSB) have done for 
+## organizational purposes is to split the huge monolithic source 
+## code into smaller, more manageable chunks--i.e., into individual
+## source files.  Those files are rejoined within this file as 
+##"includes".  It just makes it a little easier to work with.  The
+## code chunks correspond to natural divisions into sub-programs.  
+## The divisions are by the assembly listing itself.
 
-# Source-file Name			    	  Starting Page
-# ----------------				  -------------
+## Source-file Name			    	  Starting Page
+## ----------------				  -------------
 
 $ASSEMBLY_AND_OPERATION_INFORMATION.agc		# 1
 $TAGS_FOR_RELATIVE_SETLOC.agc			# 27
 $ABSOLUTE_LOCATIONS_FOR_UPDATES.agc		# 36
 $SUBROUTINE_CALLS.agc				# 37
-#$ERASABLE_ASSIGNMENTS.agc			# 38
+$ERASABLE_ASSIGNMENTS.agc			# 38
 
 # ERASTOTL
 $CHECK_EQUALS_LIST.agc				# 135
@@ -67,9 +67,9 @@ $P76.agc					# 513
 #$R30.agc					# 516
 
 # MENELAUS
-#$P15.agc					# 527
-#$P11.agc					# 534
-#$P20-P25.agc					# 552
+$P15.agc					# 527
+$P11.agc					# 534
+$P20-P25.agc					# 552
 $P30-P31.agc					# 643
 $P32-P33_P72-P73.agc				# 658
 $P40-P47.agc					# 691
@@ -79,17 +79,17 @@ $P61-P67.agc					# 792
 $SERVICER207.agc				# 823
 $ENTRY_LEXICON.agc				# 842
 $REENTRY_CONTROL.agc				# 852
-#$CM_BODY_ATTITUDE.agc				# 890
+$CM_BODY_ATTITUDE.agc				# 890
 $P37_P70.agc					# 897
 $S-BAND_ANTENNA_FOR_CM.agc			# 940
 
 # ULYSSES
-#$TVCINITIALIZE.agc				# 943
-#$TVCEXECUTIVE.agc				# 950
-#$TVCMASSPROP.agc				# 954
-#$TVCRESTARTS.agc				# 959
-#$TVCDAPS.agc					# 964
-#$TVCROLLDAP.agc				# 982
+$TVCINITIALIZE.agc				# 943
+$TVCEXECUTIVE.agc				# 950
+$TVCMASSPROP.agc				# 954
+$TVCRESTARTS.agc				# 959
+$TVCDAPS.agc					# 964
+$TVCROLLDAP.agc					# 982
 $MYSUBS.agc					# 997
 $RCS-CSM_DIGITAL_AUTOPILOT.agc			# 1000
 $AUTOMATIC_MANEUVERS.agc			# 1024
