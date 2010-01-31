@@ -1,17 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	CM_BODY_ATTITUDE.agc
-# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  This is for the Command Module's (CM)
-#		Apollo Guidance Computer (AGC), we believe for
-#		Apollo 15-17.
-# Assembler:	yaYUL
-# Contact:	Steve Case <case.steve@gmail.com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-# Mod history:	2009-08-20 SMC	Adapted from Comanche055 files.
-# 		2009-09-14 JL	Fix typos. Fix page numbers. Remove change comments. 
-#				Remove RELINT. Restore hard tabs.
+## Copyright:	Public domain.
+## Filename:	CM_BODY_ATTITUDE.agc
+## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+##		build 072.  This is for the Command Module's (CM)
+##		Apollo Guidance Computer (AGC), we believe for
+##		Apollo 15-17.
+## Assembler:	yaYUL
+## Contact:	Steve Case <case.steve@gmail.com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Mod history:	2009-08-20 SMC	Adapted from Comanche055 files.
+## 		2009-09-14 JL	Fix typos. Fix page numbers. Remove change comments. 
+##				Remove RELINT. Restore hard tabs.
 
 ## Page 890
 		SETLOC BODYATT

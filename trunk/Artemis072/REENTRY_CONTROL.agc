@@ -1,16 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	REENTRY_CONTROL.agc
-# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  This is for the Command Module's (CM)
-#		Apollo Guidance Computer (AGC), we believe for
-#		Apollo 15-17.
-# Assembler:	yaYUL
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-# Mod history:	2009-08-17 JL	Adapted from corresponding Comanche 055 file.
-# 		2009-09-03 JL	Fix typo in symbol name.
+## Copyright:	Public domain.
+## Filename:	REENTRY_CONTROL.agc
+## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+##		build 072.  This is for the Command Module's (CM)
+##		Apollo Guidance Computer (AGC), we believe for
+##		Apollo 15-17.
+## Assembler:	yaYUL
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Mod history:	2009-08-17 JL	Adapted from corresponding Comanche 055 file.
+## 		2009-09-03 JL	Fix typo in symbol name.
 
 ## Page 852
 

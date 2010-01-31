@@ -1,18 +1,18 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	ERASABLE_ASSIGNMENTS.agc
-# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  This is for the Command Module's (CM) 
-#		Apollo Guidance Computer (AGC), we believe for 
-#		Apollo 15-17.
-# Assembler:	yaYUL
-# Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-# Mod history:	2009-07-30 OH	Started from corresponding Comanche 055 file.
-#		2009-11-29 JL	Carried on from where Onno stopped on page 48.
-#		2010-01-25 JL	Finished conversion.
-#		2010-01-26 JL	Updated header comments.
+## Copyright:	Public domain.
+## Filename:	ERASABLE_ASSIGNMENTS.agc
+## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+##		build 072.  This is for the Command Module's (CM) 
+##		Apollo Guidance Computer (AGC), we believe for 
+##		Apollo 15-17.
+## Assembler:	yaYUL
+## Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Mod history:	2009-07-30 OH	Started from corresponding Comanche 055 file.
+##		2009-11-29 JL	Carried on from where Onno stopped on page 48.
+##		2010-01-25 JL	Finished conversion.
+##		2010-01-26 JL	Updated header comments.
 
 ## Page 38
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
