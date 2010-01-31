@@ -12,6 +12,7 @@
 ## Mod history:	2009-09-20 HG	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-21 JL	Fixed minor typos. 
 ##		2010-01-26 JL	Updated header comments.
+##		2010-01-31 JL	Fixed page number.
 
 ## Page 507
 		SETLOC	R31
@@ -114,7 +115,7 @@ R34ANG		VLOAD	UNIT
 
 		CS	EXTVBACT
 		MASK	BIT12
-##Page 509
+## Page 509
 		ADS	EXTVBACT
 
 		TCF	V83
