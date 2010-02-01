@@ -12,6 +12,7 @@
 ## Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-04 JL	Fixed typos. Fixed page comment.
 ## 		2009-09-10 JL	Fixed typos.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 1000
 
@@ -66,7 +67,7 @@ RCSATT		LXCH	BANKRUPT	# SAVE BB
 ## Page 1001		
 		TCF	KMATRIX
 DELTATT		OCT	37770		# 80MS (TIME5)
-DELTATT2	=	0CT37776	# 20 MS (TIME5)
+DELTATT2	=	OCT37776	# 20 MS (TIME5)
 
 # CHECK PHASE OF T5 PROGRAM
 #

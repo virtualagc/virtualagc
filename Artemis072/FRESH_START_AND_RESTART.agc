@@ -12,6 +12,7 @@
 ## Mod history:	2009-07-28 JL	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-03 JL	Fixed symbol names.
 ## 		2010-01-31 JL	Fixed build errors.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 192
 
@@ -274,7 +275,7 @@ V37KLEAN	EXTEND
 ## Page 197
 		DCA	NEG0
 		DXCH	-PHASE5
-		EXTEND
+UPKLEAN		EXTEND
 		DCA	NEG0
 		DXCH	-PHASE6
 		TC	Q

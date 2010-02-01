@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-01-31 JL	Removed obsolete meta-comment.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 1448
 
@@ -1380,7 +1381,7 @@ LOWLOAD		EQUALS	VBSP2LD
 CADRMASK	EQUALS	OCT50
 PINMASK		EQUALS	13,14,15
 GOPLAY		EQUALS	NVDSP
-PRIOSAVE	EQUALS	R1SAVE
+#PRIOSAVE	EQUALS	R1SAVE
 COPMPAC		EQUALS	MPAC +3
 TEMPOR2		EQUALS	MPAC +4
 COPINDEX	EQUALS	LOC

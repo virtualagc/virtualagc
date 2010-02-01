@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-22 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 1200
 		SETLOC	FFTAG1
@@ -77,6 +78,7 @@ OCT22		OCT	22
 BITS4&5		OCT	30
 # OCT31		OCT	31		# SERVICE ROUTINES
 CALLCODE	OCT	00032
+OCT37		=	LOW5
 # LOW5		OCT	37		# PINBALL
 33DEC		DEC	33
 # 34DEC		DEC	34		# PINBALL		(OCTAL 42)
@@ -87,6 +89,7 @@ DEC45		DEC	45
 MINDB		DEC	46		# OCT 56
 SUPER011	OCT	60		# BITS FOR SUPERBNK SETTING 011.
 .5SEC		DEC	50
+OCT75		OCT	75
 # BIT7		OCT	00100
 
 SUPER100	=	BIT7		# BITS FOR SUPERBNK SETTING 100

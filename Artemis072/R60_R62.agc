@@ -14,6 +14,7 @@
 ## 		2009-09-04 JL	Fixed typo in COUNT* directive. Minor fixes.
 ##				Removed a spurious SETPD in interpretive code.
 ## 		2010-01-31 JL	Fixed build errors.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 394
 		SETLOC	MANUVER
@@ -82,7 +83,7 @@ ENDMANU1	CA	TEMPR60
 		TC	BANKJUMP
 		
 CHKLINUS	CS	FLAGWRD4
-		MASK	POSPFBIT	# IS PRIORITY DISPLAY FLAG SET
+		MASK	PDSPFBIT	# IS PRIORITY DISPLAY FLAG SET
 		CCS	A
 		TC	Q		# NO - EXIT
 		CA	Q

@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2010-01-26 JL	Started Artemis072 conversion based on Comanche055 module.
 ## 		2010-01-31 JL	Finished Artemis072 conversion. Fixed build errors.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 552
 
@@ -2291,7 +2292,7 @@ UTAREA1		DLOAD	CALL		# UT OPTION 1 PATH
 		UNIT	GOTO
 			SAVEVSUN		# VSUN = UNIT(RS)
 ## Page 602
-LTMNCNTR	VAD	UNIT		# MOON PATH
+UTMNCNTR	VAD	UNIT		# MOON PATH
 			SAVEPOS
 		VCOMP
 		STOVL	8D		# VEARTH = -UNIT(RM+RC)
