@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-04 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 239
 
@@ -343,7 +344,7 @@ VACSTOR		EXTEND
 		EXTEND
 		DCA	MKCDUZ
 		INDEX	P22DEX
-		DXCH	SVMKRDAT +4
+		DXCH	SVMRKDAT +4
 		CA	MKCDUX
 		INDEX	P22DEX
 		TS	SVMRKDAT +6

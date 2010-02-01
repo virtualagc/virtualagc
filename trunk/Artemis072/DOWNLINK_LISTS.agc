@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-07-27 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 179
 		SETLOC	DOWNTELM
@@ -168,7 +169,7 @@ DL111		=	AK2
 DL112		=	RCSFLAGS
 DL113		=	THETADY
 DL114		=	THETADZ
-DL115		=	OPTIONS2			# CMPOWE06
+DL115		=	OPTION2				# CMPOWE06
 DL116		=	THETADY
 DL117		=	THETADZ
 DL118		=	FAILREG				# CMPOWE08

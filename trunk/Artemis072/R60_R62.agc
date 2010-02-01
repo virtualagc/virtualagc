@@ -13,6 +13,7 @@
 ## 		2009-09-03 JL	Fixed symbol names.
 ## 		2009-09-04 JL	Fixed typo in COUNT* directive. Minor fixes.
 ##				Removed a spurious SETPD in interpretive code.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 394
 		SETLOC	MANUVER
@@ -118,7 +119,7 @@ RELINUS		CAF	TRACKBIT	# IS TRACK FLAG ON
 		TS	OPTIND		# OPTIND WAS SET TO -1 BY V379
 
 		TC	UPFLAG
-		ADRES	RZ1MARK		# ALLOW OPTICS MARKING DURING P2
+		ADRES	R21MARK		# ALLOW OPTICS MARKING DURING P2
 		
 RELINUSX	CAF	PRIO14		# RESTORE ORIGINAL PRIORITY
 		TC	PRIOCHNG

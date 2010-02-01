@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-04 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 249
 
@@ -771,7 +772,9 @@ V83PERF		TC	TESTXACT
 		ADRES	R31FLAG
   +3		CAF	PRIO5
 		TC	NOVAC
-		SBANK=	LOWSUPER	# Added by RSB 2009
+## Added by RSB 2009
+		SBANK=	LOWSUPER
+## End add
 		EBANK=	SUBEXIT
 		2CADR	R31CALL
 
@@ -972,8 +975,10 @@ V89PERF		TC	CHKPOOH		# DEMAND P00
 		TC	TESTXACT
 		CAF	PRIO10
 		TC	FINDVAC
-		SBANK=	LOWSUPER	# Added by RSB 2009.
-		EBANK=	P61CNTR
+## Added by RSB 2009
+		SBANK=	LOWSUPER
+## End add
+		EBANK=	R61CNTR
 		2CADR	V89CALL
 
 		TCF	ENDOFJOB
@@ -1243,7 +1248,7 @@ PARTRACK	CAF	BIT3		# OPTION 4 SPECIFY CONDITION OF FULTKFLG
 		TS	OPTIONX
 
 PRTRCK		CAF	FULTKBIT
-		MASK	FLAGWRD10
+		MASK	FLGWRD10
 		EXTEND
 		BZF	+2		# FULTKFLG NOT SET
 

@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-16 JL	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-04 JL	Fixed typo, fixed error in conversion of some interpreter code.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 742
 
@@ -289,7 +290,7 @@ P52D		CALL			# READ VEHICEL ATTITUDE AND
 		TC	GOTOPOOH
 		TC	COARSTYP
 		TC	P52J		# RECYCLE - VEHICLE HAS BEEN MANEUVERED
-COARSTYP	CS	FLAGWRD10
+COARSTYP	CS	FLGWRD10
 		MASK	AUTSQBIT
 		EXTEND
 		BZF	PERF20		# IF MINKEY

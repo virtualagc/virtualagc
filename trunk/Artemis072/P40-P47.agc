@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-14 JL	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-03 JL	Comment out MINDB declaration, it's a comment line in the page scan.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 691
 
@@ -545,9 +546,9 @@ IGNITION	CAE	CDUX		# SAVE FOR ROLL DAP REFERENCE OGAD
 SPSON		CAF	BIT13		# TURN ON SPS ENGINE
 		EXTEND
 		WOR	DSALMOUT
-		CS	FLAGWRD10	# SET BURNFLAG TO INDICATE
+		CS	FLGWRD10	# SET BURNFLAG TO INDICATE
 		MASK	BURNBIT		# THAT THEN CSM DID THE BURN
-		ADS	FLAGWRD10
+		ADS	FLGWRD10
 
 IMPULCHK	CAF	IMPULBIT	# CHECK FOR IMPULSIVE BURN
 		MASK	FLAGWRD2

@@ -12,6 +12,7 @@
 ## Mod history:	2009-08-10 JL	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
 ## 		2009-09-04 JL	Fixed page comment.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 318
 
@@ -3409,7 +3410,7 @@ TSTLTS3		CS	TSTCON3		# CALLED BY EXECUTIVE
 		MASK	IMODES30
 		TS	IMODES30
 		COM
-		MASK	IMUFLBT
+		MASK	IMUFLBIT
 		ADS	IMODES30
 		COM
 		MASK	ICDUFLBT
@@ -3469,7 +3470,7 @@ ERROR		XCH	21/22REG	# RESTORE ORIGINAL C(DSPLOCK). THUS ERROR
 		ADS	IMODES30
 
 		CS	OPTMODES
-		MASK	OCDUFLBT
+		MASK	OCDUFBIT
 		ADS	OPTMODES
 		TC	C13STALL
 		CS	BIT10		# TURN OFF 'TEST ALARM' OUTBIT.
