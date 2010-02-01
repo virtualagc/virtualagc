@@ -13,6 +13,7 @@
 ## 		2009-09-04 JL	Fix page number. VC/O should be an ECADR. 
 ##				Fix some ECADRs that should have been OCTs.
 ##		2009-09-26 JL	Move line comments to same column as all other modules.
+##		2010-01-31 JL	Fixed build errors.
 
 ## Page 280
 
@@ -724,9 +725,9 @@ IDADDTAB	ECADR	TTOGO		# 40	MIN/SEC			M/S
 		ECADR	DELVLVC		# 81	VEL3			DP3
 		ECADR	DELVLVC +2	# 81	VEL3			DP3
 		ECADR	DELVLVC +4	# 81	VEL3			DP3
-		ECADR	DELVLVOV	# 82	VEL3			DP3
-		ECADR	DELVLVOV +2	# 82	VEL3			DP3
-		ECADR	DELVLVOV +4	# 82 	VEL3			DP3
+		ECADR	DELVOV		# 82	VEL3			DP3
+		ECADR	DELVOV +2	# 82	VEL3			DP3
+		ECADR	DELVOV +4	# 82 	VEL3			DP3
 		ECADR	DELVIMU		# 83	VEL3			DP3
 		ECADR	DELVIMU +2	# 83	VEL3			DP3
 		ECADR	DELVIMU +4	# 83	VEL3			DP3

@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-07-26 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 229
 
@@ -323,7 +324,7 @@ SIZETAB		TC	1.2SPOT -12006
 
 5.4SPOT		OCT	20000
 ## Page 235
-		EBANK=	DVCNTR
+		EBANK=	DVTOTAL
 		2CADR	SERVICER
 
 		DEC	200

@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-01-31 JL	Removed obsolete meta-comment.
 
 ## Page 1448
 
@@ -596,7 +597,7 @@ COPYPACS	INDEX	COPINDEX
 		TS	GENMASK
 
 		INDEX	COPINDEX
-		CAF	EBANKSAV	# Was CAF --- RSB 2004.
+		CAF	EBANKSAV
 		TS	TEMPOR2		# ACTIVE EBANK AND FLAG
 
 		TS	EBANK

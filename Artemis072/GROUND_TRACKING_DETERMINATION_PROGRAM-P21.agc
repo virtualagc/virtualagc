@@ -13,6 +13,7 @@
 ## 		2009-09-03 JL	Fixed symbol names.
 ## 		2009-09-04 JL	Fixed a bunch of typos.
 ## 		2009-09-05 JL	Fixed typos.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 455
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -296,11 +297,11 @@ HOPALONG	BOFF	VSR2		# MUST BE B+29 FOR LAT-LONG
 			DPPOSMAX
 		BOFF	DSU		# FOR EARTH,DELTA>0
 			CMOONFLG	# FOR MOON, DELTA.0
-			H0P1
+			HOP1
 			DPPOSMAX
 		PDDL	GOTO		# PD=2D
 			FMOON		# 327.8/328.8, 8+1
-			H0P2
+			HOP2
 		SETLOC	P29TAG2
 		BANK
 

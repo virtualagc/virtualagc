@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-04 JL	Fix typos.
+## 		2010-01-31 JL	Fixed build errors.
 
 ## Page 418
 
@@ -267,7 +268,7 @@ STOPYZ		CAF	ZERO
 
 ## Page 423
 		COUNT*	$$/KALC
-ZEROERROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
+ZEROEROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
 		TS	CDUXD		# CDU DESIRED
 		CA	CDUY
 		TS	CDUYD

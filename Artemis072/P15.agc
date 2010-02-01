@@ -12,6 +12,7 @@
 ## Mod history:	2009-12-17 HG	Initial version
 ##		2010-01-26 JL	Updated header comments.
 ##		2010-01-26 JL	Minor updates.
+##		2010-01-31 JL	Fixed build errors.
 
 ## Page 527
 
@@ -218,7 +219,7 @@ KILLSIVB	EXIT
 		EXTEND
 		DCS	TIME2
 		DAS	MPAC
-		TVR	DPAGREE
+		TCR	DPAGREE
 		CAE	MPAC +1		# DT TO C/O = TIG - TIME2 (< 4 SECS TO GO)
 					#	      PIPTIME + TGO - TIME2	
 		EXTEND			# DT <= 0 ?
