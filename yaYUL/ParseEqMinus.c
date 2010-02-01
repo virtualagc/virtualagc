@@ -70,7 +70,7 @@ ParseEqMinus (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 			   InRecord->Mod1, &LabelValue);
   if (i)
     {
-      strcpy (OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
     }
   else

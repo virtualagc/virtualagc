@@ -102,7 +102,7 @@ ParseINDEX (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 				 InRecord->Mod1, &Offset);
       if (!i)
         goto DoIt;
-      strcpy (OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
       OutRecord->Words[0] = OPCODE;
     }

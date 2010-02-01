@@ -65,7 +65,7 @@ ParseSETLOC (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       Symbol = GetSymbol (InRecord->Operand);
       if (NULL == Symbol)
 	{
-	  strcpy (OutRecord->ErrorMessage, "Undefined Symbol");
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
 	  OutRecord->Fatal = 1;
 	  OutRecord->ProgramCounter.Invalid = 1;
 	}
