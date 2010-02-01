@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-02-01 JL	Fixed build error: missing code at end.
 
 ## Page 1478
 
@@ -231,7 +232,14 @@ INCRQCK		CCS	A
 		INCR	Q
 		TC	Q
 		COUNT*	$$/CFAIL
-C31BTCHK	MASK	L
+C31BTCHK	TS	L		# SAVE MASK
+		CA	C31FLWRD
+		MASK	FAILBIT
+		CCS	A
+		TCF	USEFLBTS
+		EXTEND
+		READ	CHAN31
+C31CMCHK	MASK	L
 		EXTEND
 		BZF	TCQ		# BITS SET
 		TCF	Q+1		# BITS NOT SET
@@ -240,3 +248,4 @@ USEFLBTS	CA	C31FLWRD
 		TCF	C31CMCHK
 
 FAILBIT		=	PRIO30
+

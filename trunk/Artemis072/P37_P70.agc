@@ -13,6 +13,7 @@
 ## 		2009-09-03 JL	Fixed symbol names, page metadata.
 ## 		2009-09-04 JL	Fixed typo.
 ## 		2009-09-08 JL	Fixed typos.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 897
 		SETLOC	RTE1
@@ -432,7 +433,7 @@ P37W		CLEAR	CLEAR
 		TC	INTPRET
 		STORE	DELVSIN
 P37WW		CALL
-			VNI645
+			VN1645
 		GOTO
 			P37W
 

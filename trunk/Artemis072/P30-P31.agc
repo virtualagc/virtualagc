@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-11 JL	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-03 JL	Fixed symbol names.
+## 		2010-02-01 JL	Fixed build errors.
 
 ## Page 643
 
@@ -138,7 +139,7 @@ DISP45		CAF	V16N45		# DISPLAY MARK CNT, TFI, +MGA
 		TCF	GOTOPOOH
 
 COMPTGO		EXTEND
-		QXCH	PHSPROT6
+		QXCH	PHSPRDT6
 
 		TC	UPFLAG		# SET TIMRFLAG
 		ADRES	TIMRFLAG
@@ -156,7 +157,7 @@ COMPTGO		EXTEND
 		OCT	13000
 
 6P3SPT1		=	6.3SPOT
-		TC	PHSPROT6
+		TC	PHSPRDT6
 
 NOTSET		DLOAD	DCOMP
 			MARSDP
@@ -487,7 +488,7 @@ P31ALMRT	CLEAR	CALL
 			CSISFLAG
 			INPUTDSP
 		BOFF	AXC,1
-			CMOONFLAG
+			CMOONFLG
 			COMPMU
 			10D
 COMPMU		VLOAD	ABVAL

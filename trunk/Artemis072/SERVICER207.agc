@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-12 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-02-01 JL	Fixed build error.
 
 ## Page 823
 
@@ -552,7 +553,7 @@ SERVEXIT	TC	PHASCHNG
 5P3SPT13	=	5.3SPOT
 		TCF	ENDOFJOB
 
-DTAVEND		TC	2PHSCHNG
+UTAVEND		TC	2PHSCHNG
 		OCT	111
 		OCT	2
 
