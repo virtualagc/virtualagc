@@ -77,7 +77,7 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 			       InRecord->Operand, "", &K);
   if (i || K.Invalid)
     {
-      strcpy (OutRecord->ErrorMessage, "Operand not resolved.");
+      sprintf(OutRecord->ErrorMessage, "Operand \"%s\" not resolved.", InRecord->Operand);
       OutRecord->Fatal = 1;
       return (0);
     }
@@ -92,7 +92,7 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	KMod.Value = Value;  
       else
 	{
-	  strcpy (OutRecord->ErrorMessage, "Modifier not resolved.");
+      sprintf(OutRecord->ErrorMessage, "Modifier \"%s\" not resolved.", InRecord->Mod1);
 	  OutRecord->Fatal = 1;
 	  return (0);
 	}

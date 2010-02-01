@@ -52,7 +52,7 @@ int ParseCHECKequals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       Symbol_t *labelSymbol = GetSymbol(InRecord->Label);
       if (labelSymbol == NULL)
         {
-          strcpy(OutRecord->ErrorMessage, "Symbol not defined, skipping...");
+          sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" not defined, skipping...", InRecord->Label);
           OutRecord->Warning = 1;
           return (0);
         }
@@ -80,7 +80,7 @@ int ParseCHECKequals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, InRecord->Mod1, &checkValue);
       if (i)
         {
-	      strcpy(OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+          sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
 	      OutRecord->Warning = 1;
           return (0);
         }

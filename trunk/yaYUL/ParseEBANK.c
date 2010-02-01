@@ -101,7 +101,7 @@ ParseEBANK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           IncPc (&Address, OpcodeOffset, &Address);
           goto DoIt;
 	}
-      strcpy (OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
     }
   //printf ("%o\n", OutRecord->Bank.CurrentSBank.Super);

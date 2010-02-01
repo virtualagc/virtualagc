@@ -158,7 +158,7 @@ ParseST (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 	    PseudoToStruct (K.Value, &K);
           goto DoIt;
 	}
-      strcpy (OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
     }
   OutRecord->Extend = 0;

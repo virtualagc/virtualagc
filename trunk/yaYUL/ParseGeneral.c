@@ -220,7 +220,7 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 				 InRecord->Mod1, &K);
       if (!i)
         goto DoIt;
-      strcpy (OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
     }
   // Handle the special case `TC 6' setting the Extend bit.
