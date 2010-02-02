@@ -4161,7 +4161,7 @@ V67XXX		DLOAD	DSU
 		BMN	DLOAD
 			+3
 			FT99999
-##  Page 642
+## Page 642
 		STORE	WWPOS
 		LXA,1	SXA,1
 			S2
