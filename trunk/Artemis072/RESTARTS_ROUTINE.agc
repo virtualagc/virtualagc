@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-02-02 JL	Fixed page numbers.
 
 ## Page 1411
 		SETLOC	RESTART
@@ -214,7 +215,7 @@ ITSLGCL1	LXCH	GOLOC +1	# OBTAIN THE CORRECT E BANK
 
 # ***** YOU MAY RETURN TO  SWITCHED FIXED *****
 
-## Page 1418
+## Page 1415
 		SETLOC	RESTART
 		BANK
 
