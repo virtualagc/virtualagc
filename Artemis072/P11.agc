@@ -9,8 +9,9 @@
 ## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:  2010-01-26 JL	Started Artemis072 conversion based on Comanche055 module.
+## Mod history:	2010-01-26 JL	Started Artemis072 conversion based on Comanche055 module.
 ##		2010-01-27 JL	Finished conversion.
+##		2010-02-02 JL	Removed extra line left over from Comanche055.
 
 ## Page 534
 
@@ -316,7 +317,6 @@ TRNVNREF	DLOAD	DSU
 
 		EBANK=	RCSFLAGS
 		TC	E6SETTER
-		TS	EBANK
 
 ## Page 540
 		INHINT
