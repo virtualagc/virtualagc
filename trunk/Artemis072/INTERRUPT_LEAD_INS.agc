@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-07-25 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-02-02 JL	Added missing RESUME.
 
 ## Page 139
 		SETLOC	4000
@@ -66,6 +67,8 @@
 ## Page 140
 		XCH	BBANK
 		TCF	VHFREAD
+
+		RESUME
 
 		EBANK=	LST1		# RESTART USES E0,E3
 GOBB		BBCON	GOPROG
