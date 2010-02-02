@@ -13,6 +13,7 @@
 ## 		2009-09-03 JL	Comment out MINDB declaration, it's a comment line in the page scan.
 ## 		2010-01-31 JL	Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
+## 		2010-02-02 JL	Fixed page number.
 
 ## Page 691
 
@@ -451,7 +452,7 @@ P40BLNKR	TC	BANKCALL
 		CADR	CLEANDSP	# REMOVE RESIDUE
 		TCF	ENDOFJOB
 
-## PAGE 700
+## Page 700
 TIGBLNK		CAF	5SEC		# CALL TIGAVEG IN FIVE SEC AT TIG - AVEGDT
 		TC	TWIDDLE
 		ADRES	TIGAVEG
