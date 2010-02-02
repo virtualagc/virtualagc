@@ -13,6 +13,7 @@
 ## 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
 ## 		2009-09-04 JL	Fixed page comment.
 ## 		2010-01-31 JL	Fixed build errors.
+## 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT).
 
 ## Page 318
 
@@ -3013,7 +3014,6 @@ JAMTERM		CAF	PINSUPBT
 		TS	REQRET		# LEAVE ENTER SET FOR ENTPASS0.
 		TS	VERBREG
 		TC	-VD1SET
-		TS	DSPCOUNT
 		TC	POSTJUMP
 		CADR	VBTERM
 
