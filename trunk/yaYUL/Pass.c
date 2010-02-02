@@ -551,7 +551,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	    ParseInputRecord.Label = Fields[i++];
 	  else if (IsFalseLabel (Fields[0]))
 	    {
-	      if (NumFields == 1 || (NULL == FindInterpreter (Fields[1]) && NULL == FindParser (Fields [1])))
+	      if (NumFields == 1)
 	        goto NotOffset;
 	      else	
 	        ParseInputRecord.FalseLabel = Fields[i++];
