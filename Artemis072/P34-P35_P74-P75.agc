@@ -977,11 +977,7 @@ CLUPDATE	TC	DOWNFLAG
 VN1645R		TC	INTPRET
 		CLEAR	GOTO
 			UPDATFLG
-## MOD START	JL, Feb 2 2010	yaYUL doesnt like the +x false label inside interpretive sections it seems...
-			QSAVED
-## MOD ORIG
  +3 			QSAVED
-## MOD END
 N45ENAJ		TC	PHASCHNG	# PROTECT MANEVFLG, WRENDPOS
 		OCT	04024
 		TC	INTPRET
