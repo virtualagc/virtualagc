@@ -13,6 +13,7 @@
 ## 		2009-09-04 JL	OC40010 should be an EQUALS declaration.
 ## 		2009-09-05 JL	Fixed typos.
 ## 		2010-01-31 JL	Fixed build errors.
+## 		2010-02-02 JL	Fixed page numbers.
 
 ## Page 141
 
@@ -206,7 +207,7 @@ SYNCT4		CAF	20MRUPT
 		TC	RESUME
 OCT37737	OCT	37737
 		TC	SYNCT4
-## Page 145
+## Page 146
 		TC	RESUME
 
 QUIKOFF		EXTEND

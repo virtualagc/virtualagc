@@ -13,7 +13,7 @@
 ## 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
 ## 		2009-09-04 JL	Fixed page comment.
 ## 		2010-01-31 JL	Fixed build errors.
-## 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT).
+## 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT). Fixed page numbers.
 
 ## Page 318
 
@@ -1641,7 +1641,7 @@ DSPDPDEC	INDEX	MIXBR
 		TC	DSP2DEC
 ENDDPDEC	TC	ENTEXIT
 
-## Page 343
+## Page 353
 # LOAD VERBS		IF ALARM CONDITION IS DETECTED DURING EXECUTE,
 # CHECK FAIL LIGHT IS TURNED ON AND ENDOFJOB. IF ALARM CONDITION IS
 # DETECTED DURING ENTER OF DATA, CHECK FAIL IS TURNED ON AND IT RECYCLES
@@ -3167,7 +3167,7 @@ LEFT5		TS	CYL
 		CS	CYL
 		CS	CYL
 		CS	CYL
-## Page 379
+## Page 385
 		XCH	CYL
 		TC	Q
 

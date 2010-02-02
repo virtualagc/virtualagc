@@ -14,6 +14,7 @@
 ##		2010-01-25 JL	Finished conversion.
 ##		2010-01-26 JL	Updated header comments.
 ##		2010-01-31 JL	Fixed build errors.
+##		2010-02-02 JL	Fixed page numbers.
 
 ## Page 38
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2005,7 +2006,7 @@ TEMPOR1		ERASE	+1		# B(2)TMP
 # 	WAITLIST REPEAT FLAG.						(1D)
 
 RUPTAGN		ERASE			# B(1)PRM
-## Page 80
+## Page 81
 KEYTEMP2	=	RUPTAGN
 
 
@@ -2057,7 +2058,7 @@ MMNUMBER	ERASE			# B(1)TMP  MAJOR MODE REQUESTED VIA V37
 
 # 	PINBALL INTERRUPT STORAGE.					(1D)
 
-## Page 81
+## Page 82
 DSPCNT		ERASE			# B(1)PRM DSPOUT COUNTER
 
 
