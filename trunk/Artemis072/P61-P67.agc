@@ -10,7 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-16 JL	Adapted from corresponding Comanche 055 file.
-## 		2010-02-01 JL	White-space fixes.
+## 		2010-02-01 JL	White-space fixes. Added missing line.
 
 ## Page 792
 
@@ -61,6 +61,7 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 		CA	V06N61		# LAT(SPL)	LNG(SPL)	HEADSUP
 					# XXX.XX DEG	XXX.XX DEG	XXXXX.
 		TC	VNFLASHR
+		TC	P61.4
 P61.3		TC	PHASCHNG
 ## Page 793
 		OCT	00014
