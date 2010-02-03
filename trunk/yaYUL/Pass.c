@@ -1013,7 +1013,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  else if (*ParseInputRecord.Operand)
 		    strcat (ParseInputRecord.Operand, Suffix);	
 		}
-	      printf (" %-8s %-8s %-8s %-10s %-10s %-8s\t# %s",
+	      printf (" %-8s %-8s %-8s %-10s %-10s %-8s\t#%s",
 		      ParseInputRecord.Label, 
 		      ParseInputRecord.FalseLabel, 
 		      ParseInputRecord.Operator, 
