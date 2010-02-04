@@ -56,9 +56,11 @@ typedef struct {
   unsigned Overflow:1;			// If 1, last inc. overflowed bank.
   // Last, but not least, the value itself.
   int Value;				// Constant or full pseudo-address.
+  // The syllable number ... just for Gemini OBC and Apollo LVDC.
+  int Syllable;
 } Address_t;
 
-#define FIXED() ((const Address_t) { 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 })
+#define FIXED() ((const Address_t) { 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 })
 
 // The SymbolFile_t structure represents the header to a symbol table
 // file. The symbol file has the following structure:

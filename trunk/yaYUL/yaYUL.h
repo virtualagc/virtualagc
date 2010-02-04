@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009-2010 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -49,7 +49,9 @@
 				files more.
 		07/25/09 RSB	Added lots of stuff related to providing
 				separate binary codes for Block 1 vs. Block 2.
-        09/03/09 JL     Added CHECK= and =ECADR directives.
+        	09/03/09 JL     Added CHECK= and =ECADR directives.
+		01/31/10 RSB	Added Syllable field to Address_t for 
+				Gemini OBC and Apollo LVDC.
 */
 
 #ifndef INCLUDED_YAYUL_H
@@ -165,10 +167,12 @@ typedef struct {
   unsigned Overflow:1;			// If 1, last inc. overflowed bank.
   // Last, but not least, the value itself.
   int Value;				// Constant or full pseudo-address.
+  // The syllable number ... just for Gemini OBC and Apollo LVDC.
+  int Syllable;
 } Address_t;
-#define REG(n) ((const Address_t) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n })
-#define CONSTANT(n) ((const Address_t) { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n })
-#define FIXEDADD(n) ((const Address_t) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n })
+#define REG(n) ((const Address_t) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 })
+#define CONSTANT(n) ((const Address_t) { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n, 0 })
+#define FIXEDADD(n) ((const Address_t) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 })
 
 //----------------------------------------------------------------------------
 // JMS: Begin additions for output of symbol table to a file for symbolic
@@ -236,10 +240,11 @@ typedef struct {
   unsigned int LineNumber;            // Line number in the source
 } SymbolLine_t;
 
-// The constants are used in SortLine to tell it which sorting memthod to
-// use, either SORT_YUL or SORT_LEMAP depending upon the copiler.
+// The constants are used in SortLine to tell it which sorting method to
+// use, either SORT_YUL, SORT_LEMAP, or SORT_ASM depending upon the compiler.
 #define SORT_YUL               (30)
 #define SORT_LEMAP             (31)
+#define SORT_ASM               (32)
 
 // Edit a symbol in the table, but include symbol debugging information
 // such as the symbol's type, and the source file/line number from which
