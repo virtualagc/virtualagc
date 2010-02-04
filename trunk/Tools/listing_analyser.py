@@ -45,6 +45,11 @@ class CoreBlock:
     def __cmp__(self, other):
         return (self.coreaddr - other.coreaddr)
 
+    def getInfo(self):
+        #return ("%6s   %s" % (self.pagenum, self.module))
+        return ("      " + self.__str__())
+
+
 def analyse(listing):
     """Analyse the supplied yaYUL listing file, and return an address map, ordered by core address. """
 
@@ -91,6 +96,22 @@ def analyse(listing):
     return(blocks)
 
 
+def findBlock(blocks, address):
+    """Find the block containing the supplied core address."""
+    for i in range(len(blocks)-1):
+        if blocks[i].coreaddr <= address < blocks[i+1].coreaddr:
+            return blocks[i]
+    return blocks[len(blocks)-1]
+
+
+def printBlocks(blocks):
+    """Print a set of core blocks."""
+
+    print "%8s  (%7s)  %4s  %6s   %6s   %s" % ("ROM Addr", "Address", "Bank", "Offset", "Page", "Module")
+    for block in blocks:
+        print block
+
+
 def main():
     
     lfiles = glob.glob('*.lst')
@@ -102,11 +123,8 @@ def main():
         print
         print "Build: %s" % (lfile.split('.')[0])
         print
-        print "%8s  (%7s)  %4s  %6s   %6s   %s" % ("ROM Addr", "Address", "Bank", "Offset", "Page", "Module")
         blocks = analyse(lfile)
-        for block in blocks:
-            print block
-
+        printBlocks(blocks)
 
 if __name__=="__main__":
     sys.exit(main())
