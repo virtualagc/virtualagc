@@ -27,18 +27,22 @@ import sys
 import glob
 from optparse import OptionParser
 import struct
+import listing_analyser
 
 def main():
 
     CORELEN = (2 * 044 * 02000)
 
     parser = OptionParser("usage: %prog [options] core1 core2")
-    parser.add_option("-N", "--no-super", action = "store_true", dest = "noSuper", default = False, 
-                      help = "Discard differences in which one word has 100 in bits 5,6,7 and the other has 011.")
-    parser.add_option("-S", "--only-super", action = "store_true", dest = "onlySuper", default = False, 
-                      help = "Show only differences involving 100 vs. 011 in bits 5,6,7.")
-    parser.add_option("-Z", "--no-zero", action = "store_true", dest = "noZero", default = False, 
-                      help = "Discard differences in which the word from the 2nd file is 00000.")
+    parser.add_option("-N", "--no-super", action="store_true", dest="noSuper", default=False, 
+                      help="Discard differences in which one word has 100 in bits 5,6,7 and the other has 011.")
+    parser.add_option("-S", "--only-super", action="store_true", dest="onlySuper", default=False, 
+                      help="Show only differences involving 100 vs. 011 in bits 5,6,7.")
+    parser.add_option("-Z", "--no-zero", action="store_true", dest="noZero", default=False, 
+                      help="Discard differences in which the word from the 2nd file is 00000.")
+    parser.add_option("-a", "--analyse", action="store_true", dest="analyse", default=False,
+                      help="Use a list file to indicate where core differences are.")
+
     (options, args) = parser.parse_args()
 
     if len(args) < 2:
@@ -46,7 +50,6 @@ def main():
         sys.exit(1)
 
     cores = []
-
     for arg in args:
         cores.append(arg)
         if not os.path.isfile(arg):
@@ -67,6 +70,30 @@ def main():
 
     f1 = open(cores[0], "rb")
     f2 = open(cores[1], "rb")
+
+    if options.analyse:
+        f1lst = os.path.join(os.path.abspath(os.path.dirname(cores[0])), "*.lst")
+        f2lst = os.path.join(os.path.abspath(os.path.dirname(cores[1])), "*.lst")
+        lfiles = glob.glob(f1lst)
+        lfiles.extend(glob.glob(f2lst))
+        # Remove duplicates.
+        ldict = {}
+        for x in lfiles:
+            ldict[x] = x
+        lfiles = ldict.values()
+
+        if len(lfiles) == 0:
+            print >>sys.stderr, "Error: no listing file for analyse option!"
+            sys.exit(1)
+
+        if len(lfiles) > 1:
+            print "Warning: multiple listing files!"
+    
+        print "Build: %s" % os.path.basename(os.path.dirname(lfiles[0]).split('.')[0])
+        print
+
+        blocks = listing_analyser.analyse(lfiles[0])
+        #listing_analyser.printBlocks(blocks)
 
     try:
         while True:
@@ -100,6 +127,10 @@ def main():
                 else:
                     line += "):         "
                 line += "%05o %05o" % (n1, n2)
+                if options.analyse:
+                    block = listing_analyser.findBlock(blocks, i)
+                    if block:
+                        line += " " + block.getInfo()
                 print line
     finally:
         f1.close()
