@@ -174,7 +174,7 @@ ifdef IPHONE
 else
 	ar -rc $@ $^
 	ranlib $@
-endif	ar -rc $@ $^
+endif	
 	touch ../yaDSKY/src/main.c
 	touch ../yaDEDA/src/main.c
 

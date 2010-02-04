@@ -1,4 +1,4 @@
-# Copyright 2003-2007,2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009-2010 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -121,7 +121,8 @@
 #				different ones) on Linux.  I'm completely
 #				disabling readline for all platforms for now,
 #				until these problems can be fixed.
-#		09/08/09 JL		Commented out Artemis072 from main build. 
+#		09/08/09 JL	Commented out Artemis072 from main build. 
+#		01/30/10 RSB	Added yaASM.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -131,7 +132,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20090802\\\"
+NVER:=\\\"20100131\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -251,6 +252,8 @@ all-archs: ARCHS=all-archs
 all all-archs:
 	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
 		${ARCHS} EXT=${EXT}
+	#$(MAKE) -C yaASM PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
+	#	${ARCHS} EXT=${EXT}
 	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
 		NOREADLINE=${NOREADLINE} ReadlineForWin32=${ReadlineForWin32} \
 		CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
@@ -392,6 +395,7 @@ snapshot-ephemeris:
 clean:
 	#echo PREFIX=/usr/local >Makefile.yAGC
 	$(MAKE) -C yaLEMAP clean
+	$(MAKE) -C yaASM clean
 	$(MAKE) -C yaAGC clean
 	$(MAKE) -C yaAGS clean
 	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs clean
@@ -406,7 +410,7 @@ clean:
 	$(MAKE) -C Colossus249 clean
 	${MAKE} -C Comanche055 clean
 	${MAKE} -C Luminary099 clean
-#	${MAKE} -C Artemis072 clean
+	# ${MAKE} -C Artemis072 clean
 	$(MAKE) -C Validation clean
 	${MAKE} -C ControlPulseSim clean
 	${MAKE} -C VirtualAGC clean

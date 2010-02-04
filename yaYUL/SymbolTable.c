@@ -995,6 +995,30 @@ CompareLineAGS (const void *Raw1, const void *Raw2)
 }
 
 //-------------------------------------------------------------------------
+// Compare function for the line table. We must sort the lines in increasing
+// order of physical address. This uses the yaASM way of addressing.
+static int
+CompareLineASM (const void *Raw1, const void *Raw2)
+{
+#define Address1 ((SymbolLine_t *) Raw1)->CodeAddress
+#define Address2 ((SymbolLine_t *) Raw2)->CodeAddress
+
+  if (Address1.SReg < Address2.SReg)
+    return -1;
+  else if (Address1.SReg > Address2.SReg)
+    return 1;
+  else if (Address1.Syllable < Address2.Syllable)
+    return -1;
+  else if (Address1.Syllable > Address2.Syllable)
+    return 1;
+  else
+    return 0;
+
+#undef Address1
+#undef Address2
+}
+
+//-------------------------------------------------------------------------
 // Sort the line table.
 void
 SortLines (int Type)
@@ -1007,6 +1031,8 @@ SortLines (int Type)
     Compare = CompareLineAGC;
   else if (Type == SORT_LEMAP)
     Compare = CompareLineAGS;
+  else if (Type == SORT_ASM)
+    Compare = CompareLineASM;
   else
     {
       printf ("Invalid architecture type given.\n");
