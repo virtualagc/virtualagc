@@ -75,7 +75,6 @@ def analyse(listing):
                             else:
                                 print >>sys.stderr,"%s: line %d, invalid page number \"%s\"" % (sfile, linenum, pagenum)
                     if len(elems) > 2:
-                        #if elems[2] == "BANK" or elems[2] == "SETLOC" or elems[2] == "BLOCK":
                         if elems[2] == "COUNT*":
                             address = elems[1]
                             if ',' in address:
