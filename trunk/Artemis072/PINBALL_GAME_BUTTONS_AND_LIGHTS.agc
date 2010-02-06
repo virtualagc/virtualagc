@@ -14,6 +14,7 @@
 ## 		2009-09-04 JL	Fixed page comment.
 ## 		2010-01-31 JL	Fixed build errors.
 ## 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT). Fixed page numbers.
+## 		2010-02-05 JL	Fixed code errors.
 
 ## Page 318
 
@@ -785,8 +786,8 @@ BLANKCON	EQUALS	BIT12
 		BANK
 
 		COUNT*	$$/PIN
-NVSUBB		TC	NVSUB1
-LOADLV1		TC	LOADLV
+NVSUBB		EQUALS	NVSUB1
+LOADLV1		EQUALS	LOADLV
 ENTER		CAF	ZERO
 		TS	CLPASS
 		CAF	ENDINST
