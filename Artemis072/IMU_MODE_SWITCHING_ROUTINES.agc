@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-19 JL	Adapted from corresponding Comanche 055 file.
+## 		2010-02-06 JL	Fixed a 2CADR that should have been ADRES on page 1418.
 
 ## Page 1417
 		SETLOC	FFTAG3
@@ -76,7 +77,7 @@ IMUZEROA	TC	CAGETSTJ
 		CAF	BIT6		# WAIT 320 MS TO GIVE AGS ADEQUATE TIME TO
 		TC	TWIDDLE		# RECEIVE ITS PULSE TRAIN.
 		EBANK=	CDUIND
-		2CADR	IMUZERO2
+		ADRES	IMUZERO2
 		CS	IMODES30	# SEE IF IMU OPERATING AND ALARM IF NOT.
 		MASK	IMUOPBIT
 ## Page 1419
