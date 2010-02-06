@@ -27,6 +27,7 @@ import sys
 import glob
 from optparse import OptionParser
 import struct
+import operator
 import listing_analyser
 
 def main():
@@ -40,10 +41,10 @@ def main():
                       help="Show only differences involving 100 vs. 011 in bits 5,6,7.")
     parser.add_option("-Z", "--no-zero", action="store_true", dest="noZero", default=False, 
                       help="Discard differences in which the word from the 2nd file is 00000.")
-    parser.add_option("-a", "--analyse", action="store_true", dest="analyse", default=False,
-                      help="Use a list file to indicate where core differences are.")
 
     (options, args) = parser.parse_args()
+
+    options.analyse = True
 
     if len(args) < 2:
         parser.error("Two core files must be supplied!")
@@ -71,29 +72,31 @@ def main():
     f1 = open(cores[0], "rb")
     f2 = open(cores[1], "rb")
 
+    f1lst = os.path.join(os.path.abspath(os.path.dirname(cores[0])), "*.lst")
+    f2lst = os.path.join(os.path.abspath(os.path.dirname(cores[1])), "*.lst")
+    lfiles = glob.glob(f1lst)
+    lfiles.extend(glob.glob(f2lst))
+    # Remove duplicates.
+    ldict = {}
+    for x in lfiles:
+        ldict[x] = x
+    lfiles = ldict.values()
+
+    if len(lfiles) == 0:
+        print >>sys.stderr, "Warning: no listing file for analysis!"
+        options.analyse = False
+
     if options.analyse:
-        f1lst = os.path.join(os.path.abspath(os.path.dirname(cores[0])), "*.lst")
-        f2lst = os.path.join(os.path.abspath(os.path.dirname(cores[1])), "*.lst")
-        lfiles = glob.glob(f1lst)
-        lfiles.extend(glob.glob(f2lst))
-        # Remove duplicates.
-        ldict = {}
-        for x in lfiles:
-            ldict[x] = x
-        lfiles = ldict.values()
-
-        if len(lfiles) == 0:
-            print >>sys.stderr, "Error: no listing file for analyse option!"
-            sys.exit(1)
-
         if len(lfiles) > 1:
             print "Warning: multiple listing files!"
-    
+        
         print "Build: %s" % os.path.basename(os.path.dirname(lfiles[0]).split('.')[0])
         print
 
         blocks = listing_analyser.analyse(lfiles[0])
-        #listing_analyser.printBlocks(blocks)
+
+    diffcount = {}
+    difftotal = 0
 
     try:
         while True:
@@ -131,10 +134,31 @@ def main():
                     block = listing_analyser.findBlock(blocks, i)
                     if block:
                         line += " " + block.getInfo()
+                        if block.module in diffcount:
+                            diffcount[block.module] += 1
+                        else:
+                            diffcount[block.module] = 1
+                difftotal += 1
                 print line
     finally:
         f1.close()
         f2.close()
+
+    if options.analyse:
+        counts = []
+        for module in diffcount:
+            counts.append((module, diffcount[module]))
+        counts.sort()
+    
+        print
+        print "Per-module differences:"
+        print "-" * 80
+        for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
+            print "%-48s %6d" % count
+        print "-" * 80
+
+    print "%-48s %6d" % ("Total differences:", difftotal)
+
 
 if __name__=="__main__":
     sys.exit(main())
