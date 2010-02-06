@@ -13,6 +13,7 @@
 ## 		2010-01-31 JL	Finished Artemis072 conversion. Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
 ## 		2010-02-02 JL	Fixed page numbers. Removed duplicated code section on page 611.
+## 		2010-02-06 JL	Added missing "DEC 18" instruction. Added missing code on page 618.
 
 ## Page 552
 
@@ -2778,6 +2779,7 @@ S22NXXA		VLOAD*	MXV
 			S22D		# B-29
 		DMP	AXT,1
 			RPVAR		# ***** METERS SQ
+		DEC	18
 		STORE	S22RHO		# TEMP (VARRP)(R0/D)
 S22NXXB		VLOAD*	VXSC
 			S22UMRL +18D,1	# (UM)(UM T) B-2
@@ -3087,6 +3089,10 @@ S22F2410	SETPD	VLOAD		# COMPUTE FORMULA 2.4.10
 			CSMPOS
 		STORE	X789
 		RVQ			# B-27 FOR EARTH OR B-29 FOR MOON
+		SETLOC	P22S
+		BANK
+
+		COUNT*	$$/P22
 S2231X13	STORE	S221X3		# MULT 3X1 BY 1X3,STORE RESULTING 3X3 IN
 		SSP	AXT,2		# S22UMRL- S22UMRL +17D
 			S2
