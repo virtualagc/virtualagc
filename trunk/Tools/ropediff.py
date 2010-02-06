@@ -98,6 +98,23 @@ def main():
     diffcount = {}
     difftotal = 0
 
+    modlist = [] 
+    srcfiles = glob.glob("*.agc")
+    srcfiles.remove("MAIN.agc")
+    srcfiles.remove("Template.agc")
+    for srcfile in srcfiles:
+        modlist.append(srcfile.split('.')[0])
+    for module in modlist:
+        diffcount[module] = 0
+
+    includelist = []
+    mainfile = open("MAIN.agc")
+    mainlines = mainfile.readlines()
+    for line in mainlines:
+        if line.startswith('$'):
+            module = line.split()[0].split('.')[0][1:]
+            includelist.append(module)
+
     try:
         while True:
             data1 = f1.read(2)
@@ -134,10 +151,7 @@ def main():
                     block = listing_analyser.findBlock(blocks, i)
                     if block:
                         line += " " + block.getInfo()
-                        if block.module in diffcount:
-                            diffcount[block.module] += 1
-                        else:
-                            diffcount[block.module] = 1
+                        diffcount[block.module] += 1
                 difftotal += 1
                 print line
     finally:
@@ -151,10 +165,24 @@ def main():
         counts.sort()
     
         print
-        print "Per-module differences:"
+        print "Per-module differences: (sorted by errors)"
         print "-" * 80
         for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
             print "%-48s %6d" % count
+        print "-" * 80
+
+        print
+        print "Per-module differences: (sorted by module)"
+        print "-" * 80
+        for count in counts:
+            print "%-48s %6d" % count
+        print "-" * 80
+
+        print
+        print "Per-module differences: (sorted by include order)"
+        print "-" * 80
+        for module in includelist:
+            print "%-48s %6d" % (module, diffcount[module])
         print "-" * 80
 
     print "%-48s %6d" % ("Total differences:", difftotal)
