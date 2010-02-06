@@ -13,7 +13,8 @@
 ## 		2010-01-31 JL	Finished Artemis072 conversion. Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
 ## 		2010-02-02 JL	Fixed page numbers. Removed duplicated code section on page 611.
-## 		2010-02-06 JL	Added missing "DEC 18" instruction. Added missing code on page 618.
+## 		2010-02-06 JL	Added missing "DEC 18" instruction. Added missing code on page 618. Added missing line 
+##				on page 601.
 
 ## Page 552
 
@@ -2270,6 +2271,7 @@ R63COM1		BON
 			UTPRFAX		# COMPUTE UNIT PREFERRED VECTOR
 		STCALL	SCAXIS
 			VECPOINT
+		STORE	THETAD		# DESIRED GIMBALS
 		GOTO
 			Q6111
 		
