@@ -40,14 +40,13 @@ class CoreBlock:
         self.module = module        # Source module.
 
     def __str__(self):
-        return ("%08o  (%7s)  %4o  %6o   %6s   %s" % (self.coreaddr, self.address, self.bank, self.offset, self.pagenum, self.module))
+        return ("%06o (%7s)   %4s   %s" % (self.coreaddr, self.address, self.pagenum, self.module))
 
     def __cmp__(self, other):
         return (self.coreaddr - other.coreaddr)
 
     def getInfo(self):
-        #return ("%6s   %s" % (self.pagenum, self.module))
-        return ("      " + self.__str__())
+        return (self.__str__())
 
 
 def analyse(listing):
