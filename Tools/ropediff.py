@@ -69,13 +69,18 @@ def main():
         parser.error("Core files are incorrect length, must be %d bytes!" % CORELEN)
         sys.exit(1)
 
-    f1 = open(cores[0], "rb")
-    f2 = open(cores[1], "rb")
+    print "yaAGC Core Rope Differencer"
+    print
+    print "Left core file:  ", cores[0]
+    print "Right core file: ", cores[1]
 
-    f1lst = os.path.join(os.path.abspath(os.path.dirname(cores[0])), "*.lst")
-    f2lst = os.path.join(os.path.abspath(os.path.dirname(cores[1])), "*.lst")
-    lfiles = glob.glob(f1lst)
-    lfiles.extend(glob.glob(f2lst))
+    left = open(cores[0], "rb")
+    right = open(cores[1], "rb")
+
+    leftlst = os.path.join(os.path.abspath(os.path.dirname(cores[0])), "*.lst")
+    rightlst = os.path.join(os.path.abspath(os.path.dirname(cores[1])), "*.lst")
+    lfiles = glob.glob(leftlst)
+    lfiles.extend(glob.glob(rightlst))
     # Remove duplicates.
     ldict = {}
     for x in lfiles:
@@ -89,9 +94,9 @@ def main():
     if options.analyse:
         if len(lfiles) > 1:
             print "Warning: multiple listing files!"
-        
+
+        print        
         print "Build: %s" % os.path.basename(os.path.dirname(lfiles[0]).split('.')[0])
-        print
 
         blocks = listing_analyser.analyse(lfiles[0])
 
@@ -108,55 +113,58 @@ def main():
         diffcount[module] = 0
 
     includelist = []
-    mainfile = open("MAIN.agc")
+    mainfile = open("MAIN.agc", "r")
     mainlines = mainfile.readlines()
     for line in mainlines:
         if line.startswith('$'):
             module = line.split()[0].split('.')[0][1:]
             includelist.append(module)
+    mainfile.close()
+
+    print
+    print "Core address       Left    Right   Block Start Addr   Page   Module"
+    print "----------------   -----   -----   ----------------   ----   ------------------------------------------------"
 
     try:
         while True:
-            data1 = f1.read(2)
-            data2 = f2.read(2)
-            if not data1 or not data2:
+            leftdata = left.read(2)
+            rightdata = right.read(2)
+            if not leftdata or not rightdata:
                 break
             # Read 16-bit word and unpack into 2 byte tuple, native endianness.
-            word1 = struct.unpack("BB", data1)
-            word2 = struct.unpack("BB", data2)
-            if word1[0] != word2[0] or word1[1] != word2[1]:
+            leftword = struct.unpack("BB", leftdata)
+            rightword = struct.unpack("BB", rightdata)
+            if leftword[0] != rightword[0] or leftword[1] != rightword[1]:
                 # Words differ. Check super bits.
-                n1 = (word1[0] << 7) | (word1[1] >> 1)
-                n2 = (word2[0] << 7) | (word2[1] >> 1)
-                if options.noZero and n2 == 0:
+                nleft = (leftword[0] << 7) | (leftword[1] >> 1)
+                nright = (rightword[0] << 7) | (rightword[1] >> 1)
+                if options.noZero and nright == 0:
                     continue
-                if ((n1 ^ n2) & 0160) == 0160 and ((n1 & 0160) == 0100 or (n1 & 0160) == 0060):
+                if ((nleft ^ nright) & 0160) == 0160 and ((nleft & 0160) == 0100 or (nleft & 0160) == 0060):
                     if options.noSuper:
                         continue
                 else:
                     if options.onlySuper:
                         continue
-                i = (f1.tell() - 2) / 2
+                i = (left.tell() - 2) / 2
                 offset = 02000 + (i % 02000)
                 bank = i / 02000
-                if bank < 4:
-                    bank ^= 2
-                line = "0%06o (%02o,%04o" % (i, bank, offset)
+                line = "%06o (" % i
                 if i < 04000:
-                    line += " or %04o): " % (i + 04000)
+                    line += "   %04o)   " % (i + 04000)
                 else:
-                    line += "):         "
-                line += "%05o %05o" % (n1, n2)
+                    line += "%02o,%04o)   " % (bank, offset)
+                line += "%05o   %05o" % (nleft, nright)
                 if options.analyse:
                     block = listing_analyser.findBlock(blocks, i)
                     if block:
-                        line += " " + block.getInfo()
+                        line += "   " + block.getInfo()
                         diffcount[block.module] += 1
                 difftotal += 1
                 print line
     finally:
-        f1.close()
-        f2.close()
+        left.close()
+        right.close()
 
     if options.analyse:
         counts = []
