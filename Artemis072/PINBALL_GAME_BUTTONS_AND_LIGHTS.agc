@@ -15,6 +15,7 @@
 ## 		2010-01-31 JL	Fixed build errors.
 ## 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT). Fixed page numbers.
 ## 		2010-02-05 JL	Fixed code errors.
+## 		2010-02-07 JL	Added missing BANK opcode on p369. Removed extra instruction on p383.
 
 ## Page 318
 
@@ -2363,6 +2364,7 @@ ENDSPF		TC	ENDOFJOB
 ## Page 368
 # WORD DISPLAY ROUTINES
 		SETLOC	PINBALL1
+		BANK
 		COUNT*	$$/PIN
 DSPSIGN		XCH	Q
 		TS	DSPWDRET
@@ -3106,7 +3108,6 @@ RECAL1		CAF	ZERO
 		XCH	CADRSTOR
 		INHINT
 		TC	JOBWAKE
-		CCS	LOADSTAT
 		CA	NOUNREG		# SAVE VERB IN MPAC, NOUN IN MPAC+1 AT
 		TS	L		# TIME OF RESPONSE TO ENDIDLE FOR
 		CA	VERBREG		# POSSIBLE LATER TESTING BY JOB THAT HAS

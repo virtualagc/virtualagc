@@ -14,7 +14,8 @@
 ## 		2010-02-01 JL	Fixed build errors.
 ## 		2010-02-02 JL	Fixed page numbers. Removed duplicated code section on page 611.
 ## 		2010-02-06 JL	Added missing "DEC 18" instruction. Added missing code on page 618. Added missing line 
-##				on page 601.
+##				on page 601. Fixed line 5 on p580, which is overprinted in the scan. Fixed an EQUALS on
+##				p589. Removed spurious PUSH on p598.
 
 ## Page 552
 
@@ -1220,6 +1221,7 @@ REND4		CALL
 			AUTOW		# AUTOMATIC W MATRIX REINITIALIZATION
 REND5B		BON
 			RENDWFLG
+			REND6
 REND5C		DLOAD
 			ZEROVECS
 		STODL	VHFCNT		# ZERO OUT VHFCNT AND TRKMKCNT
@@ -1706,7 +1708,7 @@ LIGHTON		CA	VHFRANGE
 		STORE	VHFTIME
 		GOTO
 			REND1
-OCT17		OCT	00017
+OCT17		EQUALS	LOW4
 		SETLOC	R22S1
 		BANK
 		
@@ -2113,7 +2115,6 @@ CRS61.2		VLOAD	VSU
 		VXV	VXSC		# (-UNITDV)CROSS(UNITLOS).
 			SAVEPOS
 			RVCS/RDS	# (UNITLOS B1)(UNITDV B1)(CONST B4)=CROSS.
-		PUSH			# HOLD CROSS IN PUSHLIST0.  SCALED B6.
 		PDDL	NORM
 			R63TIME		# R63TIME IS TEMP STORE FOR ABS(LOS)
 			X1

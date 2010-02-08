@@ -13,6 +13,7 @@
 ## 		2009-09-04 JL	Fixed typos. Fixed page comment.
 ## 		2009-09-05 JL	Fixed typos.
 ## 		2009-09-09 JL	Fixed typos.
+##		2010-02-08 JL	Fixed SETLOC on p1289.
 
 ## Page 1262
 
@@ -1217,7 +1218,7 @@ COMMNOUT	DLOAD	BON
 COGAOVFL	SETGO
 			COGAFLAG
 			ABTCONIC
-		SETLOC	CONICS1
+		SETLOC	CONICS2
 		BANK
 		COUNT*	$$/CONIC
 PARAM		STQ	CLEAR		# MPAC=V1VEC, 0D=R1VEC		PL AT 6

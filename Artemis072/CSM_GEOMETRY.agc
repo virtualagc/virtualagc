@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-08 JL	Adapted from corresponding Comanche 055 file.
+##		2010-02-08 JL	Fixed a line that should have been commented out on p305.
 
 ## Page 297
 
@@ -372,7 +373,7 @@ OVERADAY	DLOAD	SIGN
 		GOTO
 			EARROT2
 
-WIE		2DEC	.1901487997
+#WIE		2DEC	.1901487997
 1/WIE		2DEC	8616410
 
 NB2NB1		2DEC	+.8431756920 B-1
