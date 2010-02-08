@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-02-01 JL	Fixed build error: missing code at end.
+## 		2010-02-07 JL	Removed spurious NDX instruction on p1478.
 
 ## Page 1478
 
@@ -20,7 +21,6 @@
 UPENT2		TS	L
 		CS	FLAGWRD4
 		MASK	L
-		NDX	L
 		ADS	FLAGWRD4
 		TC	Q		# RETURN
 		
