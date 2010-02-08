@@ -125,6 +125,8 @@ def main():
     print "Core address       Left    Right   Block Start Addr   Page   Module"
     print "----------------   -----   -----   ----------------   ----   ------------------------------------------------"
 
+    diffs = []
+
     try:
         while True:
             leftdata = left.read(2)
@@ -147,6 +149,7 @@ def main():
                     if options.onlySuper:
                         continue
                 i = (left.tell() - 2) / 2
+                diffs.append(i)
                 offset = 02000 + (i % 02000)
                 bank = i / 02000
                 line = "%06o (" % i
@@ -167,6 +170,42 @@ def main():
         right.close()
 
     if options.analyse:
+
+        print
+        print "Difference blocks: (sorted by length, ignoring single isolated differences)"
+        print "-" * 80
+
+        diffblocks = []
+        index = 0
+        while index < len(diffs) - 1:
+            cur = index
+            end = index + 1
+            while diffs[end] == diffs[cur] + 1:
+                cur += 1
+                end += 1
+            length = end - index - 1
+            if length > 1:
+                diffblocks.append((diffs[index], length))
+            index = end
+
+        diffblocks.sort()
+
+        for diff in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
+            i = diff[0]
+            offset = 02000 + (i % 02000)
+            bank = i / 02000
+            line = "%06o (" % i
+            if i < 04000:
+                line += "   %04o)   " % (i + 04000)
+            else:
+                line += "%02o,%04o)   " % (bank, offset)
+            line += "%6d" % diff[1]
+            block = listing_analyser.findBlock(blocks, i)
+            if block:
+                line += "   " + block.getInfo()
+            print line
+        print "-" * 80
+
         counts = []
         for module in diffcount:
             counts.append((module, diffcount[module]))
