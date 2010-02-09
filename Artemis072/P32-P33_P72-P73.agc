@@ -12,6 +12,7 @@
 ## Mod history:	2009-08-12 JL	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-04 JL	Fixed a bunch of typos. Fixed page numbers.
 ##		2010-02-07 JL	Removed spurious STORE instruction on p682.
+##		2010-02-09 JL	Added missing code on p685.
 
 ## Page 658
 
@@ -1291,6 +1292,9 @@ DISPN90		STQ
 		COUNT*	$$/CSI
 OKN81		EXIT
 		CA	V06N90
+		TC	VNFLASH
+
+		CAF	V06N81
 		TC	VNFLASH
 
 		TC	INTPRET
