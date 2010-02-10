@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
+##		2010-02-10 JL	Fixed error on p1488.
 
 ## Page 1486
 
@@ -143,7 +144,7 @@ OCT77770	OCT	77770		# DONT MOVE
 		CCS	A
 		TC	WHIMPER -1	# YES.  DONT DO POODOO.  DO BAILOUT.
 
-		CA	BIT14		# DISREGARD ENTRY SETTING
+		CS	BIT14		# DISREGARD ENTRY SETTING
 		MASK	EXTVBACT	# EXTENDED VBS ACTIVITY?
 		CCS	A
 		TCF	WHIMPER -1	# YES.  DONT DO POODOO.  DO BAILOUT.

@@ -16,6 +16,7 @@
 ## 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT). Fixed page numbers.
 ## 		2010-02-05 JL	Fixed code errors.
 ## 		2010-02-07 JL	Added missing BANK opcode on p369. Removed extra instruction on p383.
+##		2010-02-10 JL	Fixed line on p381.
 
 ## Page 318
 
@@ -3039,7 +3040,7 @@ BLANKSUB	MASK 	SEVEN
 		TC	EMBDSPCK	# CHECK FOR DSP SYST AVAILABLE
 		CCS	NVTEMP
 		TCF	+2
-		TC	Q		# NOTHING TO BLANK. RET TO 2+ CALLING LOC
+		TC	L		# NOTHING TO BLANK. RET TO 2+ CALLING LOC
 		CAF	BLNKBBNK
 		XCH	BBANK
 		EXTEND
