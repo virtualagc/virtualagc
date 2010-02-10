@@ -173,10 +173,6 @@ def main():
 
     if options.analyse:
 
-        print
-        print "Difference blocks: (sorted by length, ignoring single isolated differences)"
-        print "-" * 80
-
         diffblocks = []
         index = 0
         while index < len(diffs) - 1:
@@ -192,23 +188,28 @@ def main():
 
         diffblocks.sort()
 
-        for diff in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
-            i = diff[0]
-            line = "%06o (" % i
-            offset = 02000 + (i % 02000)
-            bank = i / 02000
-            if bank < 4:
-                bank ^= 2
-            if i < 04000:
-                line += "   %04o)   " % (i + 04000)
-            else:
-                line += "%02o,%04o)   " % (bank, offset)
-            line += "%6d" % diff[1]
-            block = listing_analyser.findBlock(blocks, i)
-            if block:
-                line += "   " + block.getInfo()
-            print line
-        print "-" * 80
+        if len(diffblocks) > 0:
+            print
+            print "Difference blocks: (sorted by length, ignoring single isolated differences)"
+            print "-" * 80
+    
+            for diff in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
+                i = diff[0]
+                line = "%06o (" % i
+                offset = 02000 + (i % 02000)
+                bank = i / 02000
+                if bank < 4:
+                    bank ^= 2
+                if i < 04000:
+                    line += "   %04o)   " % (i + 04000)
+                else:
+                    line += "%02o,%04o)   " % (bank, offset)
+                line += "%6d" % diff[1]
+                block = listing_analyser.findBlock(blocks, i)
+                if block:
+                    line += "   " + block.getInfo()
+                print line
+            print "-" * 80
 
         counts = []
         for module in diffcount:
