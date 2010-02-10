@@ -40,7 +40,7 @@ class CoreBlock:
         self.module = module        # Source module.
 
     def __str__(self):
-        return ("%06o (%7s)   %4s   %s" % (self.coreaddr, self.address, self.pagenum, self.module))
+        return ("%06o (%02o,%04o)   %4s   %s" % (self.coreaddr, self.bank, self.offset, self.pagenum, self.module))
 
     def __cmp__(self, other):
         return (self.coreaddr - other.coreaddr)
@@ -84,10 +84,9 @@ def analyse(listing):
                                 offset = int(address, 8) - 02000
                                 if offset >= 04000:
                                     offset -= 02000
-                            if 0 <= bank <= 3:
-                                newbank = bank ^ 2
-                            else:
-                                newbank = bank
+                            newbank = bank
+                            if bank < 4:
+                                newbank = bank ^2
                             coreaddr = (newbank * 02000) + (offset - 02000)
                             blocks.append(CoreBlock(coreaddr, address, bank, offset, pagenum, module))
     blocks.sort()
@@ -105,7 +104,7 @@ def findBlock(blocks, address):
 def printBlocks(blocks):
     """Print a set of core blocks."""
 
-    print "%8s  (%7s)  %4s  %6s   %6s   %s" % ("ROM Addr", "Address", "Bank", "Offset", "Page", "Module")
+    print "ROM Address        Page   Module"
     for block in blocks:
         print block
 
