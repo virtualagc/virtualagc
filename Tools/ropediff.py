@@ -152,6 +152,8 @@ def main():
                 diffs.append(i)
                 offset = 02000 + (i % 02000)
                 bank = i / 02000
+                if bank < 4:
+                    bank ^= 2
                 line = "%06o (" % i
                 if i < 04000:
                     line += "   %04o)   " % (i + 04000)
@@ -192,9 +194,11 @@ def main():
 
         for diff in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
             i = diff[0]
+            line = "%06o (" % i
             offset = 02000 + (i % 02000)
             bank = i / 02000
-            line = "%06o (" % i
+            if bank < 4:
+                bank ^= 2
             if i < 04000:
                 line += "   %04o)   " % (i + 04000)
             else:
