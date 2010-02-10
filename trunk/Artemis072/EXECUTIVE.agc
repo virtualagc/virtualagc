@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-29 JL	Adapted from corresponding Comanche 055 file.
+##		2010-02-10 JL	Fixed error on p1218.
 
 ## Page 1208
 
@@ -380,7 +381,7 @@ ENDJOB1		INHINT
 EJSCAN		CCS	PRIORITY +12D
 		TC	EJ1
 		EBANK=	SELFRET
-SELFBANK	OCT	40210		# CANNOT GET HERE
+SELFBANK	BBCON	SELFCHK		# CANNOT GET HERE
 		TCF	+1
 
 		CCS	PRIORITY +24D	# EXAMINE EACH PRIORITY REGISTER TO FIND
