@@ -13,6 +13,7 @@
 ## 		2009-09-04 JL	Fixed a bunch of typos. Fixed page numbers.
 ##		2010-02-07 JL	Removed spurious STORE instruction on p682.
 ##		2010-02-09 JL	Added missing code on p685.
+##		2010-02-11 JL	Fixed error on p663.
 
 ## Page 658
 
@@ -289,7 +290,7 @@ PASS82		DLOAD
 		STCALL	TTPI0
 			VN1645
 		GOTO
-			P32/P72D
+			P32/P72B
 V06N82		VN	0682
 
 HIGH1		EQUALS	ONEBIT +1

@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-09 JL	Adapted from corresponding Comanche 055 file.
+##		2010-02-11 JL	Fixed error on p315.
 
 ## Page 308
 
@@ -270,7 +271,7 @@ NBDONLY		CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 		TCF	ENDOFJOB
 
 		INHINT
-		CCS	FLAGWRD2
+		CA	FLAGWRD2
 		MASK	DRFTBIT
 		EXTEND
 		BZF	ENDOFJOB

@@ -14,6 +14,7 @@
 ## 		2010-01-31 JL	Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
 ## 		2010-02-02 JL	Fixed build errors.
+##		2010-02-11 JL	Fixed error on p746.
 
 ## Page 742
 
@@ -275,7 +276,7 @@ S52.3		TC	INTPRET
 		STOVL	ZSMD
 			VATT
 		VXV	UNIT
-			ZSMD
+			RATT
 		STORE	YSMD
 		VXV	UNIT
 			ZSMD
