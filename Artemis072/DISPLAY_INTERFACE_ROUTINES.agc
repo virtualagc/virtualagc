@@ -12,6 +12,7 @@
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-01-31 JL	Removed obsolete meta-comment.
 ## 		2010-02-01 JL	Fixed build errors.
+##		2010-02-11 JL	Fixed error on p1465.
 
 ## Page 1448
 
@@ -825,7 +826,7 @@ GOPERF4		TS	OPTION1		# DESIRED OPTION CODE
 		CAF	V04N06
 		TS	PLAYTEM1
 
-		CAF	PERFMASK	# FLASH, PERFORM, AND BLANK R3
+		CAF	PERF4MSK	# FLASH, PERFORM, AND BLANK R3
 		TCF	GOFLASH2
 
 GOFLASHR	TS	PLAYTEM1

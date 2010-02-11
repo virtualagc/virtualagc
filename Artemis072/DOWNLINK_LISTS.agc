@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-07-27 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-01-31 JL	Fixed build errors.
+##		2010-02-11 JL	Fixed error on p190.
 
 ## Page 179
 		SETLOC	DOWNTELM
@@ -493,7 +494,7 @@ CMPG2207	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 MARK1/2		-1DNADR	SVMRKDAT +2			# SVMRKDAT+2,+3			SNAPSHOT DATA
 		1DNADR	SVMRKDAT +4			# SVMRKDAT+4,+5
 		1DNADR	SVMRKDAT +6			# SVMRKDAT+6,+7
-		1DNADR	SVMRKDAT +8			# SVMRKDAT+8,+9
+		1DNADR	SVMRKDAT +8D			# SVMRKDAT+8,+9
 		1DNADR	SVMRKDAT +10D			# SVMRKDAT+10,+11
 		1DNADR	SVMRKDAT +12D			# SVMRKDAT+12,+13
 		-1DNADR	SVMRKDAT			# SVMRKDAT,+1

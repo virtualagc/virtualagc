@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-04 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-01-31 JL	Fixed build errors.
+##		2010-02-11 JL	Fixed error on p242.
 
 ## Page 239
 
@@ -179,7 +180,7 @@ VB51		VN	5100
 TESTMARK	CAF	SIX
 		MASK	EXTVBACT
 		CCS	A
-		TC	MKABORT
+		TCF	MKABORT
 		CAF	BIT2
 		ADS	EXTVBACT
 		TC	Q
