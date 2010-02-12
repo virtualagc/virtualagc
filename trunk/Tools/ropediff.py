@@ -41,6 +41,8 @@ def main():
                       help="Show only differences involving 100 vs. 011 in bits 5,6,7.")
     parser.add_option("-Z", "--no-zero", action="store_true", dest="noZero", default=False, 
                       help="Discard differences in which the word from the 2nd file is 00000.")
+    parser.add_option("-s", "--stats", action="store_true", dest="stats", default=False, 
+                      help="Print statistics.")
 
     (options, args) = parser.parse_args()
 
@@ -121,11 +123,8 @@ def main():
             includelist.append(module)
     mainfile.close()
 
-    print
-    print "Core address       Left    Right   Block Start Addr   Page   Module"
-    print "----------------   -----   -----   ----------------   ----   ------------------------------------------------"
-
     diffs = []
+    lines = []
 
     try:
         while True:
@@ -166,10 +165,18 @@ def main():
                         line += "   " + block.getInfo()
                         diffcount[block.module] += 1
                 difftotal += 1
-                print line
+                lines.append(line)
     finally:
         left.close()
         right.close()
+
+    print
+    print "%s %d" % ("Total differences:", difftotal)
+    print
+    print "Core address       Left    Right   Block Start Addr   Page   Module"
+    print "----------------   -----   -----   ----------------   ----   ------------------------------------------------"
+    print
+    print '\n'.join(lines)
 
     if options.analyse:
 
@@ -215,29 +222,28 @@ def main():
         for module in diffcount:
             counts.append((module, diffcount[module]))
         counts.sort()
+
+        if options.stats:
+            print
+            print "Per-module differences: (sorted by errors)"
+            print "-" * 80
+            for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
+                print "%-48s %6d" % count
+            print "-" * 80
     
-        print
-        print "Per-module differences: (sorted by errors)"
-        print "-" * 80
-        for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
-            print "%-48s %6d" % count
-        print "-" * 80
-
-        print
-        print "Per-module differences: (sorted by module)"
-        print "-" * 80
-        for count in counts:
-            print "%-48s %6d" % count
-        print "-" * 80
-
-        print
-        print "Per-module differences: (sorted by include order)"
-        print "-" * 80
-        for module in includelist:
-            print "%-48s %6d" % (module, diffcount[module])
-        print "-" * 80
-
-    print "%-48s %6d" % ("Total differences:", difftotal)
+            print
+            print "Per-module differences: (sorted by module)"
+            print "-" * 80
+            for count in counts:
+                print "%-48s %6d" % count
+            print "-" * 80
+    
+            print
+            print "Per-module differences: (sorted by include order)"
+            print "-" * 80
+            for module in includelist:
+                print "%-48s %6d" % (module, diffcount[module])
+            print "-" * 80
 
 
 if __name__=="__main__":
