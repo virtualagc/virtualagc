@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-04 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-01-31 JL	Fixed build errors.
+##		2010-02-13 JL	Fixed errors on p260, p261.
 
 ## Page 249
 
@@ -471,7 +472,7 @@ IMUATTCK	TC	CHKPOOH
 		CADR	GOXDSPF
 		TCF	TRMATTCK
 		TC	+1
-		CAF	E6SETTER	# FOR NEEDLES.
+		TC	E6SETTER	# FOR NEEDLES.
 
 		EBANK=	AK
 
@@ -534,7 +535,7 @@ ENATMA		TC	UPFLAG		# SET FLAG TO ENABLE R60 MANEUVER
 #		FROM HIGH BW TO LOW BW
 
 
-STABLISH	TS	E6SETTER
+STABLISH	TC	E6SETTER
 
 		CS	FLAGWRD6	# TEST FOR TVC
 		MASK	DPCONFIG
