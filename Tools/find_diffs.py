@@ -99,6 +99,7 @@ def main():
 
     diffs = []
     for line in open(diff_file, "r"):
+        line = line[:-1]
         if line.startswith('0') or line.startswith('1') and len(line.split()) == 8:
             elems = line.split()
             coreaddr = int(elems[0], 8)
@@ -106,6 +107,9 @@ def main():
             lval = int(elems[2], 8)
             rval = int(elems[3], 8)
             diffs.append(CoreDiff(coreaddr, address, lval, rval))
+        else:
+            if not line.startswith("Core") and not line.startswith("----"):
+                print line
 
     lines = []
     buggers = []
