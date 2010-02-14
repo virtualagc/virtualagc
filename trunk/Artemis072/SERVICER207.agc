@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-12 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-02-01 JL	Fixed build error.
+##		2010-02-13 JL	Fixed error on p827.
 
 ## Page 823
 
@@ -235,7 +236,7 @@ PREREAD1	EXTEND
 		MASK	AVEGBIT
 		ADS	FLAGWRD1
 		
-		CA	DRFTBIT
+		CS	DRFTBIT
 		MASK	FLAGWRD2
 		TS	FLAGWRD2	# KNOCK DOWN DRIFT FLAG
 		

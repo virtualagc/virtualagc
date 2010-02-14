@@ -14,6 +14,7 @@
 ## 		2009-09-04 JL	Fixed typo.
 ## 		2009-09-08 JL	Fixed typos.
 ## 		2010-02-01 JL	Fixed build errors.
+##		2010-02-13 JL	Fixed error on p905.
 
 ## Page 897
 		SETLOC	RTE1
@@ -435,7 +436,7 @@ P37W		CLEAR	CLEAR
 P37WW		CALL
 			VN1645
 		GOTO
-			P37W
+			P37WW
 
 # SUBROUTINE TO GO TO GOFLASHR AND BLANK R1
 

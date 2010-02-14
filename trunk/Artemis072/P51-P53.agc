@@ -14,7 +14,8 @@
 ## 		2010-01-31 JL	Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
 ## 		2010-02-02 JL	Fixed build errors.
-##		2010-02-11 JL	Fixed error on p746.
+##		2010-02-11 JL	Fixed error on page 746.
+##		2010-02-14 JL	Fixed error on page 753.
 
 ## Page 742
 
@@ -607,7 +608,7 @@ CSS6640		2DEC	-.15602587	# (COS76 - COS30)/4
 
 CSS33		2DEC	.197002688	# (COS(1/2(76))/4
 
-V1		=	12D
+#V1		=	12D
 PICEND		BOF	EXIT
 			VFLAG
 			P52F
