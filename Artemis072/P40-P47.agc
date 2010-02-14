@@ -14,7 +14,8 @@
 ## 		2010-01-31 JL	Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
 ## 		2010-02-02 JL	Fixed page number.
-##		2010-02-13 JL	Fix errors on p699 and p711.
+##		2010-02-13 JL	Fix errors on pages 699 and 711.
+##		2010-02-14 JL	Fixed errors on pages 724 and 725.
 
 ## Page 691
 
@@ -1489,7 +1490,7 @@ CALCUT		VLOAD	CALL
 
 		COUNT*	$$/S40.2
 S40.2,3B	VLOAD
-			UNITX
+			XUNIT
 		STOVL	SCAXIS
 			UT
 		STORE	XSCREF
@@ -1540,7 +1541,7 @@ S40.2,3B	VLOAD
 S40.8		TC	INTPRET
 		SETPD	CALL
 			00D
-			UPDATFLG
+			UPDATEVG
 		DLOAD
 			CSMMASS		#				KG	B-16
 		STORE	MASSTMP
