@@ -150,6 +150,19 @@ def main():
                 if diff.address == baddr:
                     diff.setloc(0, "Bugger", bugger)
 
+    # Catch errors in 2nd word of 2-word quantities, yaYUL only outputs listing for the two combined.
+    for (module, pagenum, line) in lines:
+        for diff in diffs:
+            if diff.srcline == None:
+                bank = int(diff.address.split(',')[0], 8)
+                offset = int(diff.address.split(',')[1], 8)
+                offset -= 1
+                address = "%02o,%04o" % (bank, offset)
+                elems = line.split()
+                if len(elems) > 1:
+                    if address == elems[1] and elems[3] != "EBANK=":
+                        diff.setloc(pagenum, module, line)
+
     print "Core address       Left    Right   Page   Module                                             Source Line"
     print "----------------   -----   -----   ----   ------------------------------------------------   -----------"
     for diff in diffs:
