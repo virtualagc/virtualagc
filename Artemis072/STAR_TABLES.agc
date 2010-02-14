@@ -10,6 +10,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-19 JL	Adapted from corresponding Comanche 055 file.
+##		2010-02-13 JL	Fixed error on pages 1387 and 1388.
 
 ## Page 1387
 
@@ -31,7 +32,7 @@
 					    
 		2DEC	+.3205423120 B-1	# STAR 34	X
 		2DEC	-.4434583652 B-1	# STAR 34	Y
-		2DEC	-.8370169018 B-1	# STAR 34	Z
+		2DEC	-.8370169081 B-1	# STAR 34	Z
 					    
 		2DEC	+.5524232365 B-1	# STAR 33	X
 		2DEC	-.7930716636 B-1	# STAR 33 	Y
@@ -56,7 +57,7 @@
 					    
 		2DEC	-.1142900725 B-1	# STAR 28	X
 		2DEC	-.3400201762 B-1	# STAR 28 	Y
-		2DEC	-.9334475056 B-1	# STAR 28	Z
+		2DEC	-.9334474056 B-1	# STAR 28	Z
 					    
 		2DEC	-.3511952476 B-1	# STAR 27	X
 		2DEC	-.8242322268 B-1	# STAR 27	Y
