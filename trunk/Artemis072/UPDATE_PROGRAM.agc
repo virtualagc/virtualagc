@@ -11,6 +11,7 @@
 ## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-05 JL	Fixed typos.
+##		2010-02-16 JL	Added SBANK= directive on page 1493. 
 
 ## Page 1490
 
@@ -199,6 +200,9 @@ UPPART2		EQUALS			# UPDATE PROGRAM - PART 2
 		OCT	07026		# AND DOWNLIST AND EXIT IF RESTART OCCURS.
 		OCT	30000		# PRIORITY SAME AS CHRPRIO
 		EBANK=	UPBUFF
+## Added by JL, 2010-02-16
+		SBANK=	PINSUPER
+## End
 		2CADR	UPOUT +1
 
 		CAF	ONE
