@@ -123,6 +123,8 @@
 #				until these problems can be fixed.
 #		09/08/09 JL	Commented out Artemis072 from main build. 
 #		01/30/10 RSB	Added yaASM.
+#		02/16/10 RSB	Adjustments associated with getting
+#				Artemis072 into the installers.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -132,7 +134,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20100131\\\"
+NVER:=\\\"20100216\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -323,6 +325,7 @@ listings: \
 	listing-agc-Comanche055 \
 	listing-agc-Luminary099 \
 	listing-agc-Luminary131 \
+	listing-agc-Artemis072 \
 	listing-aea-FP6 \
 	listing-aea-FP8
 

@@ -12,26 +12,27 @@
 ## Mod history:	2009-07-29 OH	New file created.
 ##		2009-09-01 JL	Commented out =ECADR directives, see note below.
 ##		2009-09-03 JL	Uncommented =ECADR directives, after modifying yaYUL to skip them.
+##		2010-01-16 RSB	Commented them out again, to eliminate compile-time warnings.
 
 ## Page 36
 # ABSOLUTE LOCATIONS FOR UPDATES
 
 ## (JL 2009-09-01: The =ECADR directive doesn't seem to produce any binary, define any symbols, 
 ## or allocate any memory. It appears to be there to create a convenient reference table of 
-## certain addresses.)
+## certain addresses.) ... (RSB 2010-01-16: Therefore, I've commented them out.)
 
 # ECADR			MNEMONIC
 # -----			--------
-		=ECADR	UPSVFLAG	# CSM/LM STATE VECTOR UPDATE
+#		=ECADR	UPSVFLAG	# CSM/LM STATE VECTOR UPDATE
 		
-		=ECADR	XSMD		# DESIRED REFSMMAT UPDATE
+#		=ECADR	XSMD		# DESIRED REFSMMAT UPDATE
 
-		=ECADR	REFSMMAT	# REFSMMAT UPDATE
+#		=ECADR	REFSMMAT	# REFSMMAT UPDATE
 		
-		=ECADR	DELVSLV		# EXTERNAL DELTA-V UPDATE
+#		=ECADR	DELVSLV		# EXTERNAL DELTA-V UPDATE
 		
-		=ECADR	LAT(SPL)	# RETROFIRE EXT DELTA-V OR ENTRY UPDATE
+#		=ECADR	LAT(SPL)	# RETROFIRE EXT DELTA-V OR ENTRY UPDATE
 		
-		=ECADR	TIG		# LAMBERT TARGET UPDATE
+#		=ECADR	TIG		# LAMBERT TARGET UPDATE
 		
-		=ECADR	RLS		# LANDING SITE VECTOR UPDATE
+#		=ECADR	RLS		# LANDING SITE VECTOR UPDATE
