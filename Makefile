@@ -304,7 +304,7 @@ endif
 		EXT=${EXT}
 	$(MAKE) -C Comanche055
 	$(MAKE) -C Luminary099
-#	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
+	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
 	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
 		EXT=${EXT}
 	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
@@ -410,7 +410,7 @@ clean:
 	$(MAKE) -C Colossus249 clean
 	${MAKE} -C Comanche055 clean
 	${MAKE} -C Luminary099 clean
-	# ${MAKE} -C Artemis072 clean
+	${MAKE} -C Artemis072 clean
 	$(MAKE) -C Validation clean
 	${MAKE} -C ControlPulseSim clean
 	${MAKE} -C VirtualAGC clean
