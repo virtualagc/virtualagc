@@ -10,6 +10,35 @@
 #				now complete and proofed, so the
 #				warning isn't needed.)
 #		2009-07-04 RSB	Added --html switch.
+#		2010-01-16 RSB	Replaced body of this file by a
+#				slight variation of the Makefile
+#				for Comanche 055.  The original
+#				file was apparently created before
+#				the much-better Comanche 055 file
+#				was available.
+
+BASENAME=Artemis072
+
+SOURCE:=$(wildcard *.agc)
+TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
+
+default:	$(TARGETS)
+
+${BASENAME}.bin: ${BASENAME}.binsource
+	-../Luminary131/Oct2Bin <${BASENAME}.binsource
+	mv Oct2Bin.bin $@
+
+${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
+	../yaYUL/yaYUL --html MAIN.agc >${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
+	diff -s MAIN.agc.bin ${BASENAME}.bin
+		
+clean:
+	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
+
+
+#--------------------------------------------------------------------
+ifdef OBSOLETE
 
 PROJECT:=Artemis072
 
@@ -37,9 +66,8 @@ install: default
 
 %.lst: %.bin ${SOURCE}
 	@echo ====================================================
-	@echo Errors in the following are normal, since Artemis072
-	@echo is under development.
-	-../yaYUL/yaYUL --html MAIN.agc >$@
-	-diff -s MAIN.agc.bin $<
+	../yaYUL/yaYUL --html MAIN.agc >$@
+	diff -s MAIN.agc.bin $<
 		
+endif 
 
