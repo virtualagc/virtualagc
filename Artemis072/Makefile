@@ -61,13 +61,12 @@ install: default
 # Implicit rules.
 
 %.bin: %.binsource
-	../Luminary131/Oct2Bin <$^
-	mv Oct2Bin.bin $@
+	-../Luminary131/Oct2Bin <$^
+	-mv Oct2Bin.bin $@
 
 %.lst: %.bin ${SOURCE}
-	@echo ====================================================
-	../yaYUL/yaYUL --html MAIN.agc >$@
-	diff -s MAIN.agc.bin $<
-		
+	-../yaYUL/yaYUL --html MAIN.agc >$@
+	-mv MAIN.agc.symtab ${BASENAME}.symtab
+	-diff -s MAIN.agc.bin $<
 endif 
 
