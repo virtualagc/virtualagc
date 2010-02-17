@@ -54,6 +54,8 @@
 				more flexible and to shorten up the HTML
 				files more.  Added "##" HTML-insert 
 				syntax, default style, etc.
+		2010-02-17 JL	Don't try to process Page meta-comments. 
+
 
   Concerning the concept of a symbol's namespace.  I had originally 
   intended to implement this, and so many functions had a namespace
@@ -404,7 +406,8 @@ Retry:
     
   // Now take care of HTML embedded with
   //	## stuff
-  if ((strncmp(s, "### ", 4) == 0) || (strncmp(s, "###\t", 4) == 0))
+  // JL 2010-02-17 Don't try to process Page meta-comments. 
+  if ((strncmp(s, "## ", 3) == 0) && (strncmp(s+3, "Page", 4) != 0))
     {
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
@@ -424,7 +427,7 @@ Retry:
 	    break;
 	  (*CurrentLineAll)++;
 	  (*CurrentLineInFile)++;  
-      if (strncmp(s, "### ", 4) && strncmp(s, "###\t", 4))
+	  if (strncmp(s, "## ", 3))
 	    break;
 	  if (WriteOutput && Html && HtmlOut != NULL)
 	    fprintf (HtmlOut, "%s", &s[3]);
