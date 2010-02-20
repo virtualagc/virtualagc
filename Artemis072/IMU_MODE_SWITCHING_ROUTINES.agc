@@ -1,17 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	IMU_MODE_SWITCHING_ROUTINES.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), we believe for
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-08-19 JL	Adapted from corresponding Comanche 055 file.
-## 		2010-02-06 JL	Fixed a 2CADR that should have been ADRES on page 1418.
-##		2020-02-11 JL	Fixed errors on p1419, p1432.
+# Copyright:	Public domain.
+# Filename:	IMU_MODE_SWITCHING_ROUTINES.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-08-19 JL	Adapted from corresponding Comanche 055 file.
+# 		2010-02-06 JL	Fixed a 2CADR that should have been ADRES on page 1418.
+#		2020-02-11 JL	Fixed errors on p1419, p1432.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 1417
 		SETLOC	FFTAG3

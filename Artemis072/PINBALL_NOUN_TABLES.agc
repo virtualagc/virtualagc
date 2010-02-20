@@ -1,19 +1,20 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	PINBALL_NOUN_TABLES.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), we believe for
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-08-08 JL	Adapted from corresponding Comanche 055 file.
-## 		2009-09-04 JL	Fix page number. VC/O should be an ECADR. 
-##				Fix some ECADRs that should have been OCTs.
-##		2009-09-26 JL	Move line comments to same column as all other modules.
-##		2010-01-31 JL	Fixed build errors.
+# Copyright:	Public domain.
+# Filename:	PINBALL_NOUN_TABLES.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-08-08 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fix page number. VC/O should be an ECADR. 
+#				Fix some ECADRs that should have been OCTs.
+#		2009-09-26 JL	Move line comments to same column as all other modules.
+#		2010-01-31 JL	Fixed build errors.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 280
 

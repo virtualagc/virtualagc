@@ -1,18 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	EXTENDED_VERBS.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), we believe for
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-08-04 JL	Adapted from corresponding Comanche 055 file.
-## 		2010-01-31 JL	Fixed build errors.
-##		2010-02-13 JL	Fixed errors on p260, p261.
-##		2010-02-16 JL	Added some SBANK= directives on pages 258, 262, 271, 274 to fix rope image errors.
+# Copyright:	Public domain.
+# Filename:	EXTENDED_VERBS.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-08-04 JL	Adapted from corresponding Comanche 055 file.
+# 		2010-01-31 JL	Fixed build errors.
+#		2010-02-13 JL	Fixed errors on p260, p261.
+#		2010-02-16 JL	Added some SBANK= directives on pages 258, 262, 271, 274 to fix rope image errors.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 249
 

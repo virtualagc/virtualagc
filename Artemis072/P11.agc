@@ -1,17 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:     P11.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), we believe for
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2010-01-26 JL	Started Artemis072 conversion based on Comanche055 module.
-##		2010-01-27 JL	Finished conversion.
-##		2010-02-02 JL	Removed extra line left over from Comanche055.
+# Copyright:	Public domain.
+# Filename:     P11.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2010-01-26 JL	Started Artemis072 conversion based on Comanche055 module.
+#		2010-01-27 JL	Finished conversion.
+#		2010-02-02 JL	Removed extra line left over from Comanche055.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 534
 

@@ -1,17 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	R30.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM) 
-##		Apollo Guidance Computer (AGC), we believe for 
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Hartmuth Gutsche <hgutsche@xplornet.com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-10-03 HG	Adapted from corresponding Comanche 055 file.
-##		2009-11-18 JL	Minor fixes.
-##		2010-01-26 JL	Updated header comments.
+# Copyright:	Public domain.
+# Filename:	R30.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM) 
+#		Apollo Guidance Computer (AGC), we believe for 
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Hartmuth Gutsche <hgutsche@xplornet.com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-10-03 HG	Adapted from corresponding Comanche 055 file.
+#		2009-11-18 JL	Minor fixes.
+#		2010-01-26 JL	Updated header comments.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 516
 # SUBROUTINE NAME:  V82CALL
