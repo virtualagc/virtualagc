@@ -1,19 +1,20 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	P32-P33_P72-P73.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), we believe for
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-08-12 JL	Adapted from corresponding Comanche 055 file.
-## 		2009-09-04 JL	Fixed a bunch of typos. Fixed page numbers.
-##		2010-02-07 JL	Removed spurious STORE instruction on p682.
-##		2010-02-09 JL	Added missing code on p685.
-##		2010-02-11 JL	Fixed error on p663.
+# Copyright:	Public domain.
+# Filename:	P32-P33_P72-P73.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-08-12 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-04 JL	Fixed a bunch of typos. Fixed page numbers.
+#		2010-02-07 JL	Removed spurious STORE instruction on p682.
+#		2010-02-09 JL	Added missing code on p685.
+#		2010-02-11 JL	Fixed error on p663.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 658
 

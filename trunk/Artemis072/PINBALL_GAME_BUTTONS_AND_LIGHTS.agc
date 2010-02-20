@@ -1,23 +1,24 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), we believe for
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-08-10 JL	Adapted from corresponding Comanche 055 file.
-## 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
-## 		2009-09-04 JL	Fixed page comment.
-## 		2010-01-31 JL	Fixed build errors.
-## 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT). Fixed page numbers.
-## 		2010-02-05 JL	Fixed code errors.
-## 		2010-02-07 JL	Added missing BANK opcode on p369. Removed extra instruction on p383.
-##		2010-02-10 JL	Fixed line on p381.
-##		2010-02-13 JL	Fixed errors on pages 327, 354, 356, 362, 363, 368, 370, 374, 379, 380, 391, 392.
+# Copyright:	Public domain.
+# Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-08-10 JL	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fixed conversion error (duplicate declaration of NEG.2).
+# 		2009-09-04 JL	Fixed page comment.
+# 		2010-01-31 JL	Fixed build errors.
+# 		2010-02-02 JL	Removed extra instruction (TS DSPCOUNT). Fixed page numbers.
+# 		2010-02-05 JL	Fixed code errors.
+# 		2010-02-07 JL	Added missing BANK opcode on p369. Removed extra instruction on p383.
+#		2010-02-10 JL	Fixed line on p381.
+#		2010-02-13 JL	Fixed errors on pages 327, 354, 356, 362, 363, 368, 370, 374, 379, 380, 391, 392.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 318
 

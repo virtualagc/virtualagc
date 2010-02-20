@@ -1,17 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	TVCROLLDAP.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), we believe for
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Steve Case <case1780@adelphia.net>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-09-13 SMC	Adapted from Comanche055 files.
-## 		2009-09-15 JL	Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.
-##		2010-02-15 JL	Temporary workaround for an error on p996. 
+# Copyright:	Public domain.
+# Filename:	TVCROLLDAP.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Steve Case <case1780@adelphia.net>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-09-13 SMC	Adapted from Comanche055 files.
+# 		2009-09-15 JL	Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.
+#		2010-02-15 JL	Temporary workaround for an error on p996. 
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 982
 

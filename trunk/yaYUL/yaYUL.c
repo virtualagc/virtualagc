@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009-2010 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -56,6 +56,7 @@
 				binary codes at the final step and to limit
 				the memory size differently.  I'm sure I'll
 				have to add additional tweaks as I go along.
+		02/20/10 RSB	Added --unpound-page.
 */
 
 #define ORIGINAL_YAYUL_C
@@ -157,6 +158,7 @@ main (int argc, char *argv[])
 {
   int MaxPasses = 10;
   int RetVal = 1, i, j, k, LastUnresolved, Fatals, Warnings;
+  extern int UnpoundPage;
   
   // JMS: OutputSymbols = 1 to output a symbol table to SymbolFile.
   // RSB: Jordan made this an option, but I think it should be the default.
@@ -165,7 +167,7 @@ main (int argc, char *argv[])
 
   printf ("Apollo Guidance Computer (AGC) assembler, version " NVER 
   	  ", built " __DATE__ "\n");
-  printf ("(c)2003-2005,2009 Ronald S. Burkey\n");
+  printf ("(c)2003-2005,2009-2010 Ronald S. Burkey\n");
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
   
   // Parse the command-line options.
@@ -181,6 +183,8 @@ main (int argc, char *argv[])
         OutputSymbols = 1;
       else if (!strcmp (argv[i], "--html"))
         Html = 1;
+      else if (!strcmp (argv[i], "--unpound-page"))
+        UnpoundPage = 1;
       else if (!strcmp (argv[i], "--block1"))
         Block1 = 1;
       else if (*argv[i] == '-' || *argv[i] == '/')
@@ -442,6 +446,7 @@ Done:
 	      "                 files are produced for all source files included\n"
 	      "                 with the $ directive, and links between the files\n"
 	      "                 are provided.\n");
+      printf ("--unpound-page   Bypass --html processing for \"## Page\".\n");
       printf ("--block1         Assembles Block 1 code.  The default is Block 2.\n");
     }   
   if (RetVal || Fatals)

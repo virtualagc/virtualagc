@@ -1,19 +1,20 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	P34-35_P74-75.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM) 
-##		Apollo Guidance Computer (AGC), we believe for 
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Sergio Navarro <sergionavarrog@gmail.com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
-## 		2009-09-03 JL	Fixed symbol names.
-## 		2009-09-04 JL	Fixed a bunch of typos. Fixed page comments.
-## 		2009-09-07 JL	Fixed typos.
-## 		2010-01-31 JL	Fixed build errors.
+# Copyright:	Public domain.
+# Filename:	P34-35_P74-75.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM) 
+#		Apollo Guidance Computer (AGC), we believe for 
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Sergio Navarro <sergionavarrog@gmail.com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-08-19 SN	Adapted from corresponding Comanche 055 file.
+# 		2009-09-03 JL	Fixed symbol names.
+# 		2009-09-04 JL	Fixed a bunch of typos. Fixed page comments.
+# 		2009-09-07 JL	Fixed typos.
+# 		2010-01-31 JL	Fixed build errors.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 463
 # TRANSFER PHASE INITITIATION (TPI) PROGRAMS (P34 AND P74)

@@ -1,5 +1,5 @@
 /*
-  Copyright 2003,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2009-2010 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -54,7 +54,13 @@
 				more flexible and to shorten up the HTML
 				files more.  Added "##" HTML-insert 
 				syntax, default style, etc.
-		2010-02-17 JL	Don't try to process Page meta-comments. 
+		2010-02-17 JL	Don't try to process Page meta-comments.
+		2010-02-20 RSB	Somehow, processing of "##\t" got lost.
+				Hopefully, I've restored it.  Allow
+				Jim's Page stuff from the last change
+				only if UnpoundPage is non-zero --- i.e.,
+				only if --unpound-page command-line
+				switch was used. 
 
 
   Concerning the concept of a symbol's namespace.  I had originally 
@@ -81,6 +87,9 @@
 // On the second pass, true values are assigned to the symbols.
 Symbol_t *SymbolTable = NULL;
 int SymbolTableSize = 0, SymbolTableMax = 0;
+
+// Set this variable non-zero to treat "## Page" as "# Page".
+int UnpoundPage = 0;
 
 //-------------------------------------------------------------------------
 // Here are functions for converting integers in-place between the CPU native
@@ -406,8 +415,11 @@ Retry:
     
   // Now take care of HTML embedded with
   //	## stuff
-  // JL 2010-02-17 Don't try to process Page meta-comments. 
-  if ((strncmp(s, "## ", 3) == 0) && (strncmp(s+3, "Page", 4) != 0))
+  // JL 2010-02-17 Don't try to process Page meta-comments.
+  // RSB 2010-02-20 ... if --unpound-page is used.  Otherwise,
+  // process them normally. 
+  if ((!strncmp(s, "## ", 3) || !strncmp (s, "##\t", 3)) && 
+      (strncmp(s+3, "Page", 4) != 0 || !UnpoundPage))
     {
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
@@ -427,7 +439,7 @@ Retry:
 	    break;
 	  (*CurrentLineAll)++;
 	  (*CurrentLineInFile)++;  
-	  if (strncmp(s, "## ", 3))
+	  if (strncmp(s, "## ", 3) && strncmp (s, "##\t", 3))
 	    break;
 	  if (WriteOutput && Html && HtmlOut != NULL)
 	    fprintf (HtmlOut, "%s", &s[3]);

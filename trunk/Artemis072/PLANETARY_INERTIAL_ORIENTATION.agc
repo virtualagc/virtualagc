@@ -1,16 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	PLANETARY_INERTIAL_ORIENTATION.agc
-## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-##		build 072.  This is for the Command Module's (CM) 
-##		Apollo Guidance Computer (AGC), we believe for 
-##		Apollo 15-17.
-## Assembler:	yaYUL
-## Contact:	Sergio Navarro <sergionavarrog@gmail.com>
-## Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
-##		2009-09-05 JL	Fix typos. Remove code not in Artemis072.
+# Copyright:	Public domain.
+# Filename:	PLANETARY_INERTIAL_ORIENTATION.agc
+# Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
+#		build 072.  This is for the Command Module's (CM) 
+#		Apollo Guidance Computer (AGC), we believe for 
+#		Apollo 15-17.
+# Assembler:	yaYUL
+# Contact:	Sergio Navarro <sergionavarrog@gmail.com>
+# Website:	www.ibiblio.org/apollo/index.html
+# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
+#		2009-09-05 JL	Fix typos. Remove code not in Artemis072.
+#		2010-02-20 RSB	Un-##'d this header.
 
 ## Page 1243
 # PLANETARY INERTIAL ORIENTATION
