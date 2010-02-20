@@ -125,6 +125,7 @@
 #		01/30/10 RSB	Added yaASM.
 #		02/16/10 RSB	Adjustments associated with getting
 #				Artemis072 into the installers.
+#		02/20/10 RSB	Updated version to 20100220 for release.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -134,7 +135,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20100216\\\"
+NVER:=\\\"20100220\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
