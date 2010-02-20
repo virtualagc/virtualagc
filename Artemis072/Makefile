@@ -16,6 +16,8 @@
 #				file was apparently created before
 #				the much-better Comanche 055 file
 #				was available.
+#		2010-01-20 RSB	Removed the '-' in front of various
+#				commands.
 
 BASENAME=Artemis072
 
@@ -61,12 +63,12 @@ install: default
 # Implicit rules.
 
 %.bin: %.binsource
-	-../Luminary131/Oct2Bin <$^
-	-mv Oct2Bin.bin $@
+	../Luminary131/Oct2Bin <$^
+	mv Oct2Bin.bin $@
 
 %.lst: %.bin ${SOURCE}
-	-../yaYUL/yaYUL --html MAIN.agc >$@
-	-mv MAIN.agc.symtab ${BASENAME}.symtab
-	-diff -s MAIN.agc.bin $<
+	../yaYUL/yaYUL --html MAIN.agc >$@
+	mv MAIN.agc.symtab ${BASENAME}.symtab
+	diff -s MAIN.agc.bin $<
 endif 
 
