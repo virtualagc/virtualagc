@@ -1,0 +1,1491 @@
+<?xml version="1.0" standalone="no"?> <!--*- mode: xml -*-->
+<!DOCTYPE glade-interface SYSTEM "http://glade.gnome.org/glade-2.0.dtd">
+
+<glade-interface>
+
+<widget class="GtkWindow" id="MainWindow">
+  <property name="width_request">572</property>
+  <property name="height_request">640</property>
+  <property name="visible">True</property>
+  <property name="title" translatable="yes">yaDSKY / yaAGC --- Virtual Apollo Guidance Computer</property>
+  <property name="type">GTK_WINDOW_TOPLEVEL</property>
+  <property name="window_position">GTK_WIN_POS_CENTER</property>
+  <property name="modal">False</property>
+  <property name="resizable">False</property>
+  <property name="destroy_with_parent">True</property>
+  <signal name="destroy_event" handler="on_MainWindow_destroy_event" last_modification_time="Tue, 22 Apr 2003 23:54:51 GMT"/>
+  <signal name="delete_event" handler="on_MainWindow_delete_event" last_modification_time="Wed, 23 Apr 2003 00:01:13 GMT"/>
+
+  <child>
+    <widget class="GtkFixed" id="ObjectGrid">
+      <property name="visible">True</property>
+
+      <child>
+	<widget class="GtkImage" id="R3PlusMinus">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">PlusMinusOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R3D4Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R3D5Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">488</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R2D5Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">488</property>
+	  <property name="y">256</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R2D4Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">256</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R2D3Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">424</property>
+	  <property name="y">256</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R2D2Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">392</property>
+	  <property name="y">256</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R2D1Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">360</property>
+	  <property name="y">256</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R2PlusMinus">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">PlusMinusOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">256</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R1D5Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">488</property>
+	  <property name="y">192</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R1D4Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">192</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R1D3Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">424</property>
+	  <property name="y">192</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R1D2Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">392</property>
+	  <property name="y">192</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R1D1Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">360</property>
+	  <property name="y">192</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R1PlusMinus">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">PlusMinusOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">192</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="ND2Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">488</property>
+	  <property name="y">128</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="ND1Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">128</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="VD2Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">360</property>
+	  <property name="y">128</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="VD1Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">128</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image57">
+	  <property name="width_request">64</property>
+	  <property name="height_request">19</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">ShortHorizontal.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">88</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="NounAnnunciator">
+	  <property name="width_request">64</property>
+	  <property name="height_request">24</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">NounOn.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">104</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="MD2Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">488</property>
+	  <property name="y">48</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="MD1Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">48</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image58">
+	  <property name="width_request">64</property>
+	  <property name="height_request">13</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">ShortHorizontal.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">93</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image55">
+	  <property name="width_request">192</property>
+	  <property name="height_request">19</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">SeparatorOn.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">237</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image56">
+	  <property name="width_request">192</property>
+	  <property name="height_request">19</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">SeparatorOn.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">173</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image54">
+	  <property name="width_request">192</property>
+	  <property name="height_request">19</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">SeparatorOn.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">301</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R3D1Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">360</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R3D2Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">392</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="R3D3Digit">
+	  <property name="width_request">32</property>
+	  <property name="height_request">45</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">7SegOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">424</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="CompActyAnnunciator">
+	  <property name="width_request">64</property>
+	  <property name="height_request">64</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">CompActyOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">24</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image59">
+	  <property name="width_request">64</property>
+	  <property name="height_request">151</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">CenterBlock.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">392</property>
+	  <property name="y">24</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="ModeAnnunciator">
+	  <property name="width_request">64</property>
+	  <property name="height_request">24</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">rProgOn.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">456</property>
+	  <property name="y">24</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image60">
+	  <property name="width_request">8</property>
+	  <property name="height_request">357</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameVertical.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">520</property>
+	  <property name="y">16</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image64">
+	  <property name="width_request">192</property>
+	  <property name="height_request">8</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameHorizontal.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">16</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image66">
+	  <property name="width_request">192</property>
+	  <property name="height_request">8</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameHorizontal.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">56</property>
+	  <property name="y">16</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image65">
+	  <property name="width_request">192</property>
+	  <property name="height_request">8</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameHorizontal.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">365</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image63">
+	  <property name="width_request">8</property>
+	  <property name="height_request">357</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameVertical.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">320</property>
+	  <property name="y">16</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator12">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">NoAttOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">64</property>
+	  <property name="y">80</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator13">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">StbyOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">64</property>
+	  <property name="y">128</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator14">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">KeyRelOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">64</property>
+	  <property name="y">176</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator15">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">OprErrOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">64</property>
+	  <property name="y">224</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator16">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">BlankOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">64</property>
+	  <property name="y">272</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator17">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">BlankOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">64</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image67">
+	  <property name="width_request">192</property>
+	  <property name="height_request">8</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameHorizontal.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">56</property>
+	  <property name="y">368</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image62">
+	  <property name="width_request">8</property>
+	  <property name="height_request">360</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameVertical.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">48</property>
+	  <property name="y">16</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="image61">
+	  <property name="width_request">8</property>
+	  <property name="height_request">360</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">FrameVertical.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">248</property>
+	  <property name="y">16</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator27">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">BlankOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">156</property>
+	  <property name="y">320</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator26">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">BlankOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">156</property>
+	  <property name="y">272</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator25">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">TrackerOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">156</property>
+	  <property name="y">224</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator24">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">RestartOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">156</property>
+	  <property name="y">176</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator23">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">ProgOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">156</property>
+	  <property name="y">128</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator22">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">GimbalLockOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">156</property>
+	  <property name="y">80</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="PlusButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_PlusButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:11:17 GMT"/>
+	  <signal name="released" handler="on_PlusButton_released" last_modification_time="Mon, 21 Apr 2003 00:11:20 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iPlusButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">PlusUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">88</property>
+	  <property name="y">392</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="SevenButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_SevenButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:08:48 GMT"/>
+	  <signal name="released" handler="on_SevenButton_released" last_modification_time="Mon, 21 Apr 2003 00:08:54 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iSevenButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">7Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">168</property>
+	  <property name="y">392</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="EightButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_EightButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:09:00 GMT"/>
+	  <signal name="released" handler="on_EightButton_released" last_modification_time="Mon, 21 Apr 2003 00:09:04 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iEightButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">8Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">248</property>
+	  <property name="y">392</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="NineButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_NineButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:09:09 GMT"/>
+	  <signal name="released" handler="on_NineButton_released" last_modification_time="Mon, 21 Apr 2003 00:09:13 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iNineButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">9Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">392</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="ClrButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_ClrButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:09:18 GMT"/>
+	  <signal name="released" handler="on_ClrButton_released" last_modification_time="Mon, 21 Apr 2003 00:09:22 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iClrButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">ClrUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">408</property>
+	  <property name="y">392</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="MinusButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_MinusButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:10:28 GMT"/>
+	  <signal name="released" handler="on_MinusButton_released" last_modification_time="Mon, 21 Apr 2003 00:10:32 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iMinusButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">MinusUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">88</property>
+	  <property name="y">472</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="FourButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_FourButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:10:19 GMT"/>
+	  <signal name="released" handler="on_FourButton_released" last_modification_time="Mon, 21 Apr 2003 00:10:23 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iFourButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">4Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">168</property>
+	  <property name="y">472</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="FiveButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_FiveButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:10:09 GMT"/>
+	  <signal name="released" handler="on_FiveButton_released" last_modification_time="Mon, 21 Apr 2003 00:10:13 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iFiveButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">5Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">248</property>
+	  <property name="y">472</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="SixButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_SixButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:09:59 GMT"/>
+	  <signal name="released" handler="on_SixButton_released" last_modification_time="Mon, 21 Apr 2003 00:10:03 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iSixButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">6Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">472</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="ProButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_ProButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:09:39 GMT"/>
+	  <signal name="released" handler="on_ProButton_released" last_modification_time="Mon, 21 Apr 2003 00:09:43 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iLastButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">ProUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">408</property>
+	  <property name="y">472</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="ZeroButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_ZeroButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:10:37 GMT"/>
+	  <signal name="released" handler="on_ZeroButton_released" last_modification_time="Mon, 21 Apr 2003 00:10:42 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iZeroButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">0Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">88</property>
+	  <property name="y">552</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="OneButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_OneButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:10:48 GMT"/>
+	  <signal name="released" handler="on_OneButton_released" last_modification_time="Mon, 21 Apr 2003 00:10:51 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iOneButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">1Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">168</property>
+	  <property name="y">552</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="TwoButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_TwoButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:10:59 GMT"/>
+	  <signal name="released" handler="on_TwoButton_released" last_modification_time="Mon, 21 Apr 2003 00:11:02 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iTwoButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">2Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">248</property>
+	  <property name="y">552</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="ThreeButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_ThreeButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:11:08 GMT"/>
+	  <signal name="released" handler="on_ThreeButton_released" last_modification_time="Mon, 21 Apr 2003 00:11:11 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iThreeButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">3Up.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">552</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="KeyRelButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_KeyRelButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:09:30 GMT"/>
+	  <signal name="released" handler="on_KeyRelButton_released" last_modification_time="Mon, 21 Apr 2003 00:09:34 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iKeyRelButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">KeyRelUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">408</property>
+	  <property name="y">552</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="EntrButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_EntrButton_pressed" last_modification_time="Sun, 20 Apr 2003 23:38:44 GMT"/>
+	  <signal name="released" handler="on_EntrButton_released" last_modification_time="Sun, 20 Apr 2003 23:38:50 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iEntrButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">EntrUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">488</property>
+	  <property name="y">432</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="RsetButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_RsetButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:09:50 GMT"/>
+	  <signal name="released" handler="on_RsetButton_released" last_modification_time="Mon, 21 Apr 2003 00:09:54 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iRsetButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">RsetUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">488</property>
+	  <property name="y">512</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="VerbButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_VerbButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:11:26 GMT"/>
+	  <signal name="released" handler="on_VerbButton_released" last_modification_time="Mon, 21 Apr 2003 00:11:30 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iVerbButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">VerbUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">8</property>
+	  <property name="y">432</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkButton" id="NounButton">
+	  <property name="width_request">75</property>
+	  <property name="height_request">75</property>
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <signal name="pressed" handler="on_NounButton_pressed" last_modification_time="Mon, 21 Apr 2003 00:08:36 GMT"/>
+	  <signal name="released" handler="on_NounButton_released" last_modification_time="Mon, 21 Apr 2003 00:08:40 GMT"/>
+
+	  <child>
+	    <widget class="GtkImage" id="iNounButton">
+	      <property name="visible">True</property>
+	      <property name="pixbuf">NounUp.xpm</property>
+	      <property name="xalign">0.5</property>
+	      <property name="yalign">0.5</property>
+	      <property name="xpad">0</property>
+	      <property name="ypad">0</property>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="x">8</property>
+	  <property name="y">512</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="VerbAnnunciator">
+	  <property name="width_request">64</property>
+	  <property name="height_request">24</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">VerbOn.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">328</property>
+	  <property name="y">104</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator11">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">UplinkActyOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">64</property>
+	  <property name="y">32</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkImage" id="Annunciator21">
+	  <property name="width_request">84</property>
+	  <property name="height_request">40</property>
+	  <property name="visible">True</property>
+	  <property name="pixbuf">TempOff.xpm</property>
+	  <property name="xalign">0.5</property>
+	  <property name="yalign">0.5</property>
+	  <property name="xpad">0</property>
+	  <property name="ypad">0</property>
+	</widget>
+	<packing>
+	  <property name="x">156</property>
+	  <property name="y">32</property>
+	</packing>
+      </child>
+    </widget>
+  </child>
+</widget>
+
+</glade-interface>

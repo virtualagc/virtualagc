@@ -1,0 +1,14 @@
+# A comment line
+	STO	TS3		# B0
+	LRS	3		# TO B3
+	STO	Y		# SAVE FOR TPERG
+	CLA	CI
+	STO	TS4
+	TSQ	ARCTAE		# RTN W/ ACCU=E
+	COM
+	ADD	2PIB3
+	ADZ	Y		# 2*PI-E+SI AT B3, ZERO Y
+	MPY	1B1		# TO B4
+	DVP	NI		# AT B-9
+	STO	TPERG		# B13
+
