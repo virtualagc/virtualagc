@@ -54,12 +54,24 @@ def add(n1, n2):
         
     return sum
 
-def check(banknum, checksum):
-    if checksum == banknum or checksum == (077777 & ~banknum):
-        print "Checksum word for bank %02o matches (%05o,-%05o)." % (banknum, checksum, 077777 & ~checksum)
-    else:
-        print "Error: checksum word for bank %02o does not match (computed=%05o,-%05o)." \
-              % (banknum, checksum, 077777 & ~checksum)
+
+def getBugger(data):
+    """Return the bugger word in the supplied bank data. The bugger word is the last non-zero word."""
+    
+    index = 0
+    for i in range(len(data)-1, -1, -1):
+        if data[i] != 0:
+            index = i
+            if i == len(data)-1:
+                if data[i-1] == 0:
+                    # Search farther back for bugger word. 
+                    for j in range(len(data)-2, -1, -1):
+                        if data[j] != 0:
+                            index = j
+                            break
+            break
+    return data[index]
+    
 
 def main():
     parser = OptionParser("usage: %prog binsrc_file")
@@ -71,37 +83,73 @@ def main():
     bsfile = open(args[0], 'r')
     lines = bsfile.readlines()
     
+    print
     print "Parsing", args[0]
     
-    checksum = 0
-    bankcount = 0
+    banks = {}
     linenum = 0
+    bank = -1
+    banklines = 0
+    bankwords = 0
+    bankpages = {}
+    pages = []
+    
     for line in lines:
         linenum += 1
+        if line.startswith(' ') or len(line) <= 1:
+            continue
         if line.startswith(';'):
+            if line.startswith('; p.'):
+                pages.append(int(line.split('.')[1].split(',')[0]))
             continue
         if line.startswith("BANK="):
-            bankcount += 1
-            if bankcount > 1:
-                check(bank, checksum)
-                checksum = 0
-            try:
-                bank = int(line.split('=')[1], 8)
-            except:
-                # Try decimal if not octal.
-                bank = int(line.split('=')[1])
-            sum = 0
+            if bank != -1:
+                if bankwords != 1024:
+                    if bankwords % 256 != 0:
+                        print "Error: bank %02d (%03o) ending on line %d: invalid length, expected 1024, got %d." \
+                              % (bank, bank, linenum-2, bankwords)
+            bankpages[bank] = pages[:-1]
+            pages = [ pages[-1] ]
+            banklines = 0
+            bankwords = 0
+            # Assume bank number is always octal.
+            bank = int(line.split('=')[1], 8)
+            banks[bank] = []
             continue
+        banklines += 1
         for value in line.split():
-            if value.endswith(','):
-                value = value[:-1]
+            if ',' in value:
+                value = value[:value.index(',')]
             try:
                 octval = int(value, 8)
             except:
                 print "Error: invalid octal number on line", linenum
                 sys.exit(1)
-            checksum = add(octval, checksum)
-    check(bank, checksum)
+            banks[bank].append(octval)
+            bankwords += 1
+
+    bankpages[bank] = pages
+
+    if len(banks) == 36:
+        print "AGC Block II rope image detected"
+    elif len(banks) == 24:
+        print "AGC Block I rope image detected"
+    else:
+        print "Invalid rope image!"
+        sys.exit(1)
+    print
+    
+    for bank in banks:
+        checksum = 0
+        for word in banks[bank]:
+            checksum = add(word, checksum)
+        bugger = getBugger(banks[bank])
+        if checksum == bank or checksum == (077777 & ~bank):
+            print "Bank %02d (%03o): pages %d-%d, bugger %05o, checksum %05o (%05o,%05o) OK" \
+                  % (bank, bank, bankpages[bank][0], bankpages[bank][-1], bugger, checksum, bank, 077777 & ~bank)
+        else:
+            print "Bank %02d (%03o): pages %d-%d, bugger %05o, checksum %05o (%05o,%05o) ERROR" \
+                  % (bank, bank, bankpages[bank][0], bankpages[bank][-1], bugger, checksum, bank, 077777 & ~bank)
             
     bsfile.close()
     
