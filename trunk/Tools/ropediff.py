@@ -30,6 +30,41 @@ import struct
 import operator
 import listing_analyser
 
+
+class CoreDiff:
+    """Class defining information about a difference between 2 core files."""
+
+    def __init__(self, coreaddr, address, leftval, rightval):
+        self.coreaddr = coreaddr    # Starting address in the core file.
+        self.address = address      # Starting address in the listing.
+        self.leftval = leftval      # Left value.
+        self.rightval = rightval    # Right value.
+        self.pagenum = None
+        self.module = None
+        self.srcline = None
+
+    def setloc(self, pagenum, module, srcline):
+        self.pagenum = pagenum      # Listing page number.
+        self.module = module        # Source module.
+        self.srcline = srcline      # Source line.
+        self.srcline = srcline[:100]
+        if self.srcline.endswith('\n'):
+            self.srcline = self.srcline[:-1]
+
+    def __str__(self):
+        line = "%06o (%7s)   %05o   %05o   " % (self.coreaddr, self.address, self.leftval, self.rightval)
+        if self.pagenum:
+            line += "%4d   " % (self.pagenum)
+        else:
+            line += "       "
+        line += "%-48s   " % (self.module)
+        line += "%-100s" % self.srcline
+        return line
+
+    def __cmp__(self, other):
+        return (self.coreaddr - other.coreaddr)
+
+
 def main():
 
     CORELEN = (2 * 044 * 02000)
@@ -76,8 +111,8 @@ def main():
     print "Left core file:  ", cores[0]
     print "Right core file: ", cores[1]
 
-    left = open(cores[0], "rb")
-    right = open(cores[1], "rb")
+    leftcore = open(cores[0], "rb")
+    rightcore = open(cores[1], "rb")
 
     leftlst = os.path.join(os.path.abspath(os.path.dirname(cores[0])), "*.lst")
     rightlst = os.path.join(os.path.abspath(os.path.dirname(cores[1])), "*.lst")
@@ -93,14 +128,18 @@ def main():
         print >>sys.stderr, "Warning: no listing file for analysis!"
         options.analyse = False
 
+    listfile = None
     if options.analyse:
         if len(lfiles) > 1:
             print "Warning: multiple listing files!"
-
+        listfile = lfiles[0]
+        if not os.path.isfile(listfile):
+            parser.error("File \"%s\" does not exist" % listfile)
+            sys.exit(1)
         print        
-        print "Build: %s" % os.path.basename(os.path.dirname(lfiles[0]).split('.')[0])
+        print "Build: %s" % os.path.basename(os.path.dirname(listfile).split('.')[0])
 
-        blocks = listing_analyser.analyse(lfiles[0])
+        blocks = listing_analyser.analyse(listfile)
 
     diffcount = {}
     difftotal = 0
@@ -128,8 +167,8 @@ def main():
 
     try:
         while True:
-            leftdata = left.read(2)
-            rightdata = right.read(2)
+            leftdata = leftcore.read(2)
+            rightdata = rightcore.read(2)
             if not leftdata or not rightdata:
                 break
             # Read 16-bit word and unpack into 2 byte tuple, native endianness.
@@ -137,113 +176,170 @@ def main():
             rightword = struct.unpack("BB", rightdata)
             if leftword[0] != rightword[0] or leftword[1] != rightword[1]:
                 # Words differ. Check super bits.
-                nleft = (leftword[0] << 7) | (leftword[1] >> 1)
-                nright = (rightword[0] << 7) | (rightword[1] >> 1)
-                if options.noZero and nright == 0:
+                leftval = (leftword[0] << 7) | (leftword[1] >> 1)
+                rightval = (rightword[0] << 7) | (rightword[1] >> 1)
+                if options.noZero and rightval == 0:
                     continue
-                if ((nleft ^ nright) & 0160) == 0160 and ((nleft & 0160) == 0100 or (nleft & 0160) == 0060):
+                if ((leftval ^ rightval) & 0160) == 0160 and ((leftval & 0160) == 0100 or (leftval & 0160) == 0060):
                     if options.noSuper:
                         continue
                 else:
                     if options.onlySuper:
                         continue
-                i = (left.tell() - 2) / 2
-                diffs.append(i)
+                i = (leftcore.tell() - 2) / 2
                 offset = 02000 + (i % 02000)
                 bank = i / 02000
                 if bank < 4:
                     bank ^= 2
-                line = "%06o (" % i
+                line += "%06o (" % i
                 if i < 04000:
-                    line += "   %04o)   " % (i + 04000)
+                    address = "   %04o" % (i + 04000)
                 else:
-                    line += "%02o,%04o)   " % (bank, offset)
-                line += "%05o   %05o" % (nleft, nright)
+                    address = "%02o,%04o" % (bank, offset)
+                line += "%s)   " % address
+                line += "%05o   %05o" % (leftval, rightval)
                 if options.analyse:
                     block = listing_analyser.findBlock(blocks, i)
                     if block:
                         line += "   " + block.getInfo()
                         diffcount[block.module] += 1
+                diffs.append(CoreDiff(i, address, leftval, rightval))
                 difftotal += 1
                 lines.append(line)
     finally:
-        left.close()
-        right.close()
+        leftcore.close()
+        rightcore.close()
+
+    lines = []
+    buggers = []
+    module = None
+    pagenum = 0
+
+    for line in open(listfile, "r"):
+        elems = line.split()
+        if len(elems) > 0:
+            if not line.startswith(' '):
+                if "## Page" in line and "scans" not in line:
+                    pagenum = line.split()[3]
+                    if pagenum.isdigit():
+                        pagenum = int(pagenum)
+                if elems[0][0].isdigit():
+                    if len(elems) > 1:
+                        if elems[1].startswith('$'):
+                            module = elems[1][1:].split('.')[0]
+                if module:
+                    lines.append((module, pagenum, line))
+                if line.startswith("Bugger"):
+                    buggers.append(line)
+
+    for (module, pagenum, line) in lines:
+        for diff in diffs:
+            elems = line.split()
+            if len(elems) > 1:
+                if diff.address == elems[1]:
+                    diff.setloc(pagenum, module, line)
+
+    for diff in diffs:
+        if diff.srcline == None:
+            for bugger in buggers:
+                bval = bugger.split()[2]
+                baddr = bugger.split()[4]
+                if baddr.endswith('.'):
+                    baddr = baddr[:-1]
+                if diff.address == baddr:
+                    diff.setloc(0, "Bugger", bugger)
+
+    # Catch errors in 2nd word of 2-word quantities, yaYUL only outputs listing for the two combined.
+    for (module, pagenum, line) in lines:
+        for diff in diffs:
+            if diff.srcline == None:
+                bank = int(diff.address.split(',')[0], 8)
+                offset = int(diff.address.split(',')[1], 8)
+                offset -= 1
+                address = "%02o,%04o" % (bank, offset)
+                elems = line.split()
+                if len(elems) > 1:
+                    if address == elems[1] and elems[3] != "EBANK=":
+                        diff.setloc(pagenum, module, line)
+
 
     print
     print "%s %d" % ("Total differences:", difftotal)
     print
-    print "Core address       Left    Right   Block Start Addr   Page   Module"
-    print "----------------   -----   -----   ----------------   ----   ------------------------------------------------"
-    print
-    print '\n'.join(lines)
 
-    if options.analyse:
-
-        diffblocks = []
-        index = 0
-        while index < len(diffs) - 1:
-            cur = index
-            end = index + 1
-            while diffs[end] == diffs[cur] + 1:
-                cur += 1
-                end += 1
-            length = end - index - 1
-            if length > 1:
-                diffblocks.append((diffs[index], length))
-            index = end
-
-        diffblocks.sort()
-
-        if len(diffblocks) > 0:
-            print
-            print "Difference blocks: (sorted by length, ignoring single isolated differences)"
-            print "-" * 80
+    if difftotal > 0:
+        print "Core address       Left    Right   Block Start Addr   Page   Module"
+        print "----------------   -----   -----   ----------------   ----   ------------------------------------------------"
+        print
+        for diff in diffs:
+            print diff.__str__()
     
-            for diff in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
-                i = diff[0]
-                line = "%06o (" % i
-                offset = 02000 + (i % 02000)
-                bank = i / 02000
-                if bank < 4:
-                    bank ^= 2
-                if i < 04000:
-                    line += "   %04o)   " % (i + 04000)
-                else:
-                    line += "%02o,%04o)   " % (bank, offset)
-                line += "%6d" % diff[1]
-                block = listing_analyser.findBlock(blocks, i)
-                if block:
-                    line += "   " + block.getInfo()
-                print line
-            print "-" * 80
-
-        counts = []
-        for module in diffcount:
-            counts.append((module, diffcount[module]))
-        counts.sort()
-
-        if options.stats:
-            print
-            print "Per-module differences: (sorted by errors)"
-            print "-" * 80
-            for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
-                print "%-48s %6d" % count
-            print "-" * 80
+        if options.analyse:
     
-            print
-            print "Per-module differences: (sorted by module)"
-            print "-" * 80
-            for count in counts:
-                print "%-48s %6d" % count
-            print "-" * 80
+            diffblocks = []
+            index = 0
+            while index < len(diffs) - 1:
+                cur = index
+                end = index + 1
+                while diffs[end].coreaddr == diffs[cur].coreaddr + 1:
+                    cur += 1
+                    end += 1
+                length = end - index - 1
+                if length > 1:
+                    diffblocks.append((diffs[index], length))
+                index = end
     
-            print
-            print "Per-module differences: (sorted by include order)"
-            print "-" * 80
-            for module in includelist:
-                print "%-48s %6d" % (module, diffcount[module])
-            print "-" * 80
+            diffblocks.sort()
+    
+            if len(diffblocks) > 0:
+                print
+                print "Difference blocks: (sorted by length, ignoring single isolated differences)"
+                print "-" * 80
+        
+                for diff in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
+                    i = diff[0]
+                    line = "%06o (" % i
+                    offset = 02000 + (i % 02000)
+                    bank = i / 02000
+                    if bank < 4:
+                        bank ^= 2
+                    if i < 04000:
+                        line += "   %04o)   " % (i + 04000)
+                    else:
+                        line += "%02o,%04o)   " % (bank, offset)
+                    line += "%6d" % diff[1]
+                    block = listing_analyser.findBlock(blocks, i)
+                    if block:
+                        line += "   " + block.getInfo()
+                    print line
+                print "-" * 80
+    
+            counts = []
+            for module in diffcount:
+                counts.append((module, diffcount[module]))
+            counts.sort()
+    
+            if options.stats:
+                print
+                print "Per-module differences: (sorted by errors)"
+                print "-" * 80
+                for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
+                    print "%-48s %6d" % count
+                print "-" * 80
+        
+                print
+                print "Per-module differences: (sorted by module)"
+                print "-" * 80
+                for count in counts:
+                    print "%-48s %6d" % count
+                print "-" * 80
+        
+                print
+                print "Per-module differences: (sorted by include order)"
+                print "-" * 80
+                for module in includelist:
+                    print "%-48s %6d" % (module, diffcount[module])
+                print "-" * 80
 
 
 if __name__=="__main__":
