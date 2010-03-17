@@ -1,6 +1,6 @@
 #summary Operating System Services
+http://virtualagc.googlecode.com/svn/trunk/Apollo32.png
 <wiki:toc max_depth="4" />
-http://virtualagc.googlecode.com/svn/trunk/Apollo32.png 
 = 1 AGC Operating System Services =
 The Operating System (OS) designed for the Apollo Guidance Computer was (one of) the first of its kind using a pre-emptive scheduling approach in a real-time software environment. The architect behind the design was Hal Laning. The following sections describe the Operating Systems design in order to provide you with a good starting point to explore and understand the actual AGC code (e.g. Colossus249).  With  this knowledge you should be able to run the actual code with the Virtual AGC and use the Code::Blocks IDE to single step through sections of the OS and understand what is occurring.  It will also give you some insight into the famous program alarms which occurred during the Apollo 11 moon landing. The Apollo Guidance Computer Operating System will be referred to as the OS in the remainder of these sections. 
 
@@ -12,7 +12,7 @@ Jobs and tasks are the scheduling entities of the OS.  Each of these entities wi
 === 1.1.1 What is a Job ===
 A job is a collection of functions to accomplish a specific feature or activity.  Groups of related functions that must run sequentially would typically be allocated to the same job. A job has a priority and when a job is executing and a higher priority job gets activated then the OS would suspend the current Job, backup its registers and start executing the higher priority job. A maximum of 8 jobs could be active at any given moment and as such 8 backup locations for their registers needed to exists. These backup register locations are known as core sets and contained up to 12 register values. When a new Job needs to be activated it also requires a core set to be able to store its registers in case it would be suspended. If no core set can be found a 1202 program alarm would be flagged by calling the BAILOUT routine. The astronauts would be notified of this situation by illuminating the "Prog" lamp on the DSKY.  To determine the cause of the "Prog" light the astronaut would enter V05N09 on the DSKY to determine which program alarm was set. Besides the core sets for the registers, Jobs could use an additional set of 43 registers if they used the interpreter module. However only 5 of these large blocks of memory known as Vector Accumulators (VAC) were available. If more jobs were scheduled that needed these so called VAC's then a 1201 alarm would be flagged. Note different versions of the software for the Command Module (CM) or Lunar Module (LM) could use different numbers of available core sets (e.g. Colossus055 only had 7 core sets of 11 registers).
 
-|| *Job*  || *Priority* || *Type* || Function ||
+|| *Job*  || *Priority* || *Type* || *Function* ||
 ||SERVICER||20||VAC	||Navigation, guidance, throttle,DAP command and display||
 ||LRVJOB  ||32||NOVAC	||Read landing radar velocity||
 ||HIGATJOB||32||VAC	||Run once to position landing radar antenna at high gate||
