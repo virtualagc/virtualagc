@@ -12,6 +12,7 @@
 # Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
 # 		2010-02-02 JL	Fixed page numbers.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2010-04-04 JL	Added a missing # comment delimiter.
 
 ## Page 1411
 		SETLOC	RESTART
@@ -144,7 +145,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF ITS
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
 		XCH	GOLOC -1	# PICK UP PRIO
-		TC	GOLOC -1	AND GO
+		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,
 		XCH	GOLOC -1	# SET UP NOVAC CALL,
