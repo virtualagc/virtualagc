@@ -16,6 +16,7 @@
 # 		2010-02-01 JL	Fixed build errors.
 #		2010-02-13 JL	Fixed error on p905.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2010-04-11 JL	Add missing comment characters.
 
 ## Page 897
 		SETLOC	RTE1
@@ -522,7 +523,7 @@ TMRAD100	STQ	CLEAR
 		LXC,1	CALL
 			CONICX1
 			TIMERAD
-		STOVL	V(T2)/						    PL00D
+		STOVL	V(T2)/		#				    PL00D
 		STADR
 		STODL	R(T2)/
 			T
@@ -887,13 +888,13 @@ PREC155		SL2	SQRT
 		NORM	PDDL
 			X1
 		SR1	DDV		# BETA4=BETA2/(1-PHI2*SQRT(BETA3))
-		SL*	GOTO						 B1
+		SL*	GOTO		#				 B1
 			0 -1,1
 			PREC165
 PREC160		DLOAD	NORM
 			R/APRE
 			X1
-		BDDV	SL*						 B1
+		BDDV	SL*		#				 B1
 			1RTEB1
 			0 -6,1
 		GOTO
