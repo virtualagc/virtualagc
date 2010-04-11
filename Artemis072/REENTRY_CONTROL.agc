@@ -12,6 +12,7 @@
 # Mod history:	2009-08-17 JL	Adapted from corresponding Comanche 055 file.
 # 		2009-09-03 JL	Fix typo in symbol name.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2010-04-11 JL	Add missing comment character.
 
 ## Page 852
 
@@ -1225,7 +1226,7 @@ HAVDNRNG	STORE	DNRNGERR	# = (PREDANG - THETA) /360
 GONEGLAD	DLOAD			# SET L/D = -LAD
 			GONEGLAD	# (ANY NEGATIVE NUMBER WILL DO)
 
-GOMAXL/D	RTB	DMP		L/D = LAD SIGN(MPAC)
+GOMAXL/D	RTB	DMP		# L/D = LAD SIGN(MPAC)
 			SIGNMPAC
 			LAD
 		STORE	L/D		# AND FALL INTO GLIMITER SECTION
