@@ -12,6 +12,7 @@
 # Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
 # 		2009-09-04 JL	Fixed typos.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2020-04-13 JL	Fixed a typo (' instead of #).
 
 ## Page 1236
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -154,7 +155,7 @@ CALLRPRT	CALL
 # SUBROUTINE TO COMPUTE EARTH RADIUS
 #
 # INPUT
-'
+#
 #	1/2 SIN LAT IN ALPHAV +4
 #
 # OUTPUT
