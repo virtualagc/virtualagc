@@ -13,6 +13,7 @@
 # 		2010-02-06 JL	Fixed a 2CADR that should have been ADRES on page 1418.
 #		2020-02-11 JL	Fixed errors on p1419, p1432.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2010-07-15 JL	Fixed indentation.
 
 ## Page 1417
 		SETLOC	FFTAG3
@@ -512,7 +513,7 @@ NORESET		TCF	IMUFINED	# DO NOT RESET POWER SUPPLY
 
 ## Page 1430
 
-	-2	CS	FOUR		# SPECIAL ENTRY TO REGRESS LGYRO FOR X
+ -2		CS	FOUR		# SPECIAL ENTRY TO REGRESS LGYRO FOR X
 		ADS	LGYRO
 
 GSELECT		INDEX	Q		# SELECT GYRO.
