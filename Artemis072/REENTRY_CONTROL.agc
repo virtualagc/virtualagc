@@ -13,6 +13,7 @@
 # 		2009-09-03 JL	Fix typo in symbol name.
 #		2010-02-20 RSB	Un-##'d this header.
 #		2010-04-11 JL	Add missing comment character.
+#		2010-07-15 JL	Fixed indentation.
 
 ## Page 852
 
@@ -232,7 +233,7 @@ GETUNITV	UNIT	STQ
 DSTORE		STOVL	D		# ACCELERATION USED TO APPROX DRAG
 			VEL
 		VXV	UNIT		# UNI = UNIT(V*R)
-		UNITR
+			UNITR
 ## Page 857
 		STORE	UNI		# .5 UNI		REF COORDS.
 		
