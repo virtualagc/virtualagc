@@ -13,6 +13,7 @@
 # 		2009-09-05 JL	Fixed typos.
 #		2010-02-16 JL	Added SBANK= directive on page 1493. 
 #		2010-02-20 RSB	Un-##'d this header.
+#		2010-07-18 JL	Fixed indentation.
 
 ## Page 1490
 
@@ -373,7 +374,7 @@ TIMEDIDL	EXTEND
 		COM			# QUICK
 		DXCH	-PHASE6		# PHASCHNG
 
-6P5SPT1	=	6.5SPOT
+6P5SPT1		=	6.5SPOT
 TIMEDIDR	INHINT
 		CAF	ZERO
 		ZL			# PICK UP INCRMENTER (AND ZERO
