@@ -20,7 +20,7 @@
 #
 
 # Python script to check the page meta-comments in AGC source modules. 
-# Looks for all .agc files in the current direcotry, and searches them for '## Page'
+# Looks for all .agc files in the current directory, and searches them for '## Page'
 # directives. It checks the directives to verify that there are no incorrect page numbers
 # (missing, extra, duplicated, out of sequence). 
 #
