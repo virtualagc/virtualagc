@@ -2,8 +2,8 @@
 # Copyright:	Public domain.
 # Filename:	LATITUDE_LONGITUDE_SUBROUTINES.agc
 # Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
-#		build 072.  This is for the Command Module's (CM) 
-#		Apollo Guidance Computer (AGC), we believe for 
+#		build 072.  This is for the Command Module's (CM)
+#		Apollo Guidance Computer (AGC), we believe for
 #		Apollo 15-17.
 # Assembler:	yaYUL
 # Contact:	Sergio Navarro <sergionavarrog@gmail.com>
@@ -12,7 +12,8 @@
 # Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
 # 		2009-09-04 JL	Fixed typos.
 #		2010-02-20 RSB	Un-##'d this header.
-#		2020-04-13 JL	Fixed a typo (' instead of #).
+#		2010-04-13 JL	Fixed a typo (' instead of #).
+#		2010-08-15 JL	Fixed indentation.
 
 ## Page 1236
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -173,7 +174,7 @@ GETERAD		DLOAD	DSQ
 			B2XSC
 		SR4R
 		STORE	ERADM
-			RVQ
+		RVQ
 
 # THE FOLLOWING CONSTANTS WERE COMPUTED WITH A=6378166, B=6356784 METERS
 # B2XSC = B**2 SCALED B-51
