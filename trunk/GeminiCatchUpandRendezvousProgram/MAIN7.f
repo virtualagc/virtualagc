@@ -120,7 +120,7 @@ C       FROM PAGE 69 OF THE REPORT
         EQUIVALENCE    (A11 ,RKK(50)),(A12 ,RKK(49)),(A13 ,RKK(48)),
        1(A21 ,RKK(47)),(A22 ,RKK(46)),(A23 ,RKK(45)),(A31 ,RKK(44)),
        2(A32 ,RKK(43)),(A33 ,RKK(42)),(DA11,RKK(41)),(DA12,RKK(40)),
-       3(DA13,RKK(39)),(DA21,RKK(38)),(DA22,RKK(37)),(DA23,RRK(36)),
+       3(DA13,RKK(39)),(DA21,RKK(38)),(DA22,RKK(37)),(DA23,RKK(36)),
        4(DA31,RKK(35)),(DA32,RKK(34)),(DA33,RKK(33))
         ZZ1=CLOCKF(XX)
         CALL HDA7
@@ -131,7 +131,7 @@ C       FROM PAGE 70 OF THE REPORT
         KT2= 9
         KT3= 14
         CALL LDB6
-        READ INPUT TAPE KT1,1032,(REM(I),I1,165)
+        READ INPUT TAPE KT1,1032,(REM(I),I=1,165)
  330    ZZ2=CLOCKF(XX)
         DO 331  I=  1, 20
         DO 331  J= 1,50
@@ -144,9 +144,9 @@ C       FROM PAGE 70 OF THE REPORT
         DO 334 I= 1,331
  334    VLIST(I)=0.
         READ INPUT TAPE KT1,1010,NDATE1,NDATE2,NDATE3,NRUN1,NRUN2
-        READ INPUT TAPE KTI,1002,   EOP   ,STCT  ,CTZ   ,CTE   ,COINT ,
+        READ INPUT TAPE KT1,1002,   EOP   ,STCT  ,CTZ   ,CTE   ,COINT ,
        1DELAY ,ESPR  ,DT    ,BINT  ,CAPT  ,COMGT ,CSRT  ,XI    ,YI    ,
-       2ZI,   ,DXI   ,DYI   ,DZI   ,XTI   ,YTI   ,ZTI   ,DXTI  ,DYTI  ,
+       2ZI    ,DXI   ,DYI   ,DZI   ,XTI   ,YTI   ,ZTI   ,DXTI  ,DYTI  ,
        3DZTI  ,RJ    ,CATXBA,CATXFW,CATYB ,CATZB ,XKRDR ,CCAB  ,CCAS  ,
        4CCRB  ,CCRS  ,C0    ,C2    ,A11   ,A12   ,A13   ,A21   ,A22   ,
        5A23   ,A31   ,A32   ,A33   ,AKX1  ,AKX2  ,AKX3  ,AKX4  ,AKY1  ,
@@ -155,7 +155,7 @@ C       FROM PAGE 70 OF THE REPORT
         READ INPUT TAPE KT1,1001,(ITH(I),I=1,10) ,MACOP ,MACNTR,MACINT,
        1MODCR ,NPF   ,LOC   ,LMDI
         READ INPUT TAPE KT1,1012,          LFP   ,LGANG ,LRR   ,LSRA  ,
-       1LRM   ,LDB   ,LFDI, ,IEXIT
+       1LRM   ,LDB   ,LFDI  ,IEXIT
         READ INPUT TAPE KT1,1005,KEYSET
  57     CALL KEYCN (KOMBO)
         IF (KEYSET-KOMBO) 58,59,58
@@ -181,7 +181,7 @@ C       FROM PAGE 70 OF THE REPORT
  108    IPL=IPL+1
         IF(IPL-100) 116,116,109
  116    READ INPUT TAPE KT1,1050,SLIST(IPL),TLIST(IPL),DLIST(IPL),
-       1ILIST(IPL
+       1ILIST(IPL)
         IF(ILIST(IPL)) 108,109,108
  109    JK=IPL
 C
@@ -264,8 +264,8 @@ C       FROM PAGE 72 OF THE REPORT
         BIGA=2.E-8*SG*ZI-2.E-8*SH*YI
         BIGB=2.E-8*SH*XI-2.E-8*SF*ZI
         BIGC=2.E-8*SF*YI-2.E-8*SG*XI
-        DEL= BIGA*YI*(4.E-16*S) + BIGB*ZI*(4.E-16*P) + BIGC*XI*(4.E-16*Q)
-       1   - BIGC*YI*(4.E-16*P) + BIGB*XI*(4.E-16*S) - BIGA*ZI*(4.E-16*Q)
+        DEL=BIGA*YI*(4.E-16*S) + BIGB*ZI*(4.E-16*P) + BIGC*XI*(4.E-16*Q)
+       1   -BIGC*YI*(4.E-16*P) + BIGB*XI*(4.E-16*S) - BIGA*ZI*(4.E-16*Q)
         C11= YI*(4.E-16*S) - ZI*(4.E-16*Q)
         C21= BIGB*(2.E-8*S) - BIGC*(2.E-8*Q)
         C22= BIGA*(2.E-8*S) - BIGC*(2.E-8*P)
