@@ -1,0 +1,11 @@
+C     COPYRIGHT:        NONE, PUBLIC DOMAIN
+C     FILENAME:         ABSF.F
+C     PURPOSE:          PROVIDES A REPLACEMENT FOR A FORTRAN II
+C                       INTRINSIC FUNCTION
+C     HISTORY:          2010-08-17 RSB  CREATED.
+
+      FUNCTION ABSF (X)
+      ABSF = ABS(X)
+      RETURN
+      END
+      
