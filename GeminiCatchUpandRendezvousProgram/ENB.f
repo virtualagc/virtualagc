@@ -1,0 +1,10 @@
+C     COPYRIGHT:        NONE, PUBLIC DOMAIN
+C     FILENAME:         ENB.F
+C     PURPOSE:          PROVIDES A REPLACEMENT FOR AN IBM 7090/7094
+C                       ASSEMBLY-LANGUAGE FUNCTION.
+C     HISTORY:          2010-08-17 RSB  CREATED.
+
+      SUBROUTINE ENB (I)
+      RETURN
+      END
+      
