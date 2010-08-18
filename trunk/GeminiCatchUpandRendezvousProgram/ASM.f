@@ -1,0 +1,59 @@
+C     COPYRIGHT:        NONE, PUBLIC DOMAIN
+C     FILENAME:         ASM.F
+C     PURPOSE:          PROVIDES REPLACEMENT FOR THE IBM 7090/7094
+C                       ASSEMBLY-LANGUAGE FUNCTIONS OF THE GEMINI
+C                       CATCH-UP AND RENDEZVOUS SIMULATION PROGRAM,
+C                       FOR COMPILING WITH FORTRAN 66/77/90/95/ETC.
+C     HISTORY:          2010-08-17 RSB  CREATED.
+C
+      SUBROUTINE DSB
+      RETURN
+      END
+C
+      SUBROUTINE ENB (I)
+      RETURN
+      END
+C
+      SUBROUTINE HDA7
+      RETURN
+      END
+C
+      SUBROUTINE HDA9
+      RETURN
+      END
+C
+      SUBROUTINE LDB6
+      RETURN
+      END
+C
+      SUBROUTINE KEYCN (K)
+      RETURN
+      END
+C
+      SUBROUTINE KEYS (K,N)
+      RETURN
+      END
+C
+      SUBROUTINE CTRLI
+      RETURN
+      END
+C
+      SUBROUTINE MAR (I,X,Y,J,K,N)
+      RETURN
+      END
+C
+      SUBROUTINE PRT
+      RETURN
+      END
+C
+      SUBROUTINE DEV
+      RETURN
+      END
+C
+      SUBROUTINE SKPN (X,I,J)
+      RETURN
+      END
+C
+      SUBROUTINE SELFLD
+      RETURN
+      END

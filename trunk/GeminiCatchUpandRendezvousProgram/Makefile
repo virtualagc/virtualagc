@@ -11,26 +11,26 @@
 # IBM 7090/7094 which could be used for this purpose, so I'd like to keep
 # the source code unchanged, but still somehow compile it for running 
 # natively on more-standard computer systems, so I'd like to keep the 
-# original source unchanged.  Therefore, our approach is to:
+# original source unchanged.  Therefore, our approach for compiling
+# the FORTRAN II/assembly source is to:
 #
-#	1.	Try to dynamically transform the FORTRAN II source files
-#		at build time to a form compilable with FORTRAN 66
-#		(or more accurately, with the FORTRAN 66 setting in the
-#		GNU FORTRAN compiler).  The temporary files are named
-#		*.for, whereas the originals are *.f.
+#	1.	Dynamically transform the FORTRAN II source files
+#		at build time to a form compilable with FORTRAN 66/77/90/etc.
+#		The temporary files are named *.for, whereas the originals
+#		(unchanged by the process) are named *.f.
 #	2.	To replace all of the functions in the IBM 7090/7094 with
-#		FORTRAN work-alikes in a new source file (IBMasm.f).
+#		FORTRAN work-alikes in a new source file (ASM.f).  The original
+#		assembly source files (*.s) are simply ignored.
+#	3.	Provide function/subprogram workarounds for the SENSE LIGHT
+#		and SENSE SWITCH features (SENSE.f).
+#	4.	Provide replacements for the now-missing FORTRAN II
+#		intrinsic functions (INTRINSIC.f).
 
-# I have only tried compiling with GNU FORTRAN, so I have no idea what may
-# happen with other compilers such as Intel's.  The original GNU FORTRAN
-# compiler was "g77", which was replaced in gcc 4.x by "gfortran".  While
-# gfortran may be needed for compiling FORTRAN 90, FORTRAN 95, or later,
-# it is no substitute at all when compiling FORTRAN 66 code.  In other words,
-# it won't work.  It is consequently necessary to install g77, which may no 
-# longer be easily available in binary form.  Therefore, it may be necessary
-# to compile it yourself.  I would recommend using gcc-3.4.6.
-#COMPILER=gfortran -ffixed-form
-COMPILER=g77 -ff66
+# Either GNU FORTRAN compiler seems to work ... or at least to compile
+# without error.  The gfortran compiler returns a *lot* of warnings, and
+# that's why -Wall isn't used with it.
+COMPILER=gfortran -ffixed-form
+#COMPILER=g77 -ff66 -Wall
 
 default: MAIN7 BENCH7
 
@@ -42,17 +42,10 @@ MAIN7:	MAIN7.for \
 	STATE.for \
 	QUANT.for \
 	INSERT.for \
-	HDA7.for \
-	SELFLD.for \
-	LDB6.for \
-	HDA9.for \
-	KEYCN.for \
-	KEYS.for \
-	MAR.for \
-	PRT.for \
-	DEV.for \
-	STSNLT.for
-	${COMPILER} -Wall -o $@ $^
+	ASM.for \
+	SENSE.for \
+	INTRINSIC.for
+	${COMPILER} -o $@ $^
 
 BENCH7:	BENCH7.for \
 	QUANT.for \
@@ -70,18 +63,10 @@ BENCH7:	BENCH7.for \
 	ALIGNP.for \
 	TDPRED.for \
 	WAIT5.for \
-	ENB.for \
-	DSB.for \
-	SKPN.for \
-	HDA7.for \
-	SELFLD.for \
-	MAR.for \
-	PRT.for \
-	DEV.for \
-	GTSNSW.for \
-	STSNLT.for \
-	ABSF.for
-	${COMPILER} -Wall -o $@ $^
+	ASM.for \
+	SENSE.for \
+	INTRINSIC.for
+	${COMPILER} -o $@ $^
 
 # Creates temporary files from *.f named *.for to hold the dynamically
 # transformed FORTRAN code.  The transformations performed are as follows:
@@ -95,6 +80,10 @@ BENCH7:	BENCH7.for \
 #	IF(SENSE LIGHT %d)%d,%d -> IF(GTSNLT(%d))%d,%d,%d
 #	IF(SENSE SWITCH %d)%d,%d -> IF(GTSNSW(%d))%d,%d,%d
 #	SENSE LIGHT %d -> CALL STSNLT(%d)
+#	PAUSE etc -> WRITE (*,*) etc \n READ (*,'()')
+# I guess this approach could be continued to get a complete dynamic
+# translation of FORTRAN II, though I see little need to do so for my
+# own purposes.
 %.for: %.f
 	@sed \
 	  -e 's/END[[:space:]]*[(].*[)]/END/' \
@@ -107,4 +96,5 @@ BENCH7:	BENCH7.for \
 	  -e 's/IF[[:space:]]*(SENSE[[:space:]]*LIGHT[[:space:]]*\([[:digit:]]*\)[[:space:]]*)[[:space:]]*\([[:digit:]]*\)[[:space:]]*,[[:space:]]*\([[:digit:]]*\)/IF (GTSNLT(\1)) \3,\2,\3/' \
 	  -e 's/SENSE[[:space:]]*LIGHT[[:space:]]*\([[:digit:]]*\)/CALL STSNLT(\1)/' \
 	  -e 's/IF[[:space:]]*(SENSE[[:space:]]*SWITCH[[:space:]]*\([[:digit:]]*\)[[:space:]]*)[[:space:]]*\([[:digit:]]*\)[[:space:]]*,[[:space:]]*\([[:digit:]]*\)/IF (GTSNSW(\1)) \3,\2,\3/' \
+	  -e "s/PAUSE\(.*\)/WRITE (*,*) \1\n      READ (\*,'()')/" \
 	  $^ >$@
