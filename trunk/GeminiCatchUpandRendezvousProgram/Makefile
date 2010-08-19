@@ -26,11 +26,13 @@
 #	4.	Provide replacements for the now-missing FORTRAN II
 #		intrinsic functions (INTRINSIC.f).
 
-# Either GNU FORTRAN compiler seems to work ... or at least to compile
-# without error.  The gfortran compiler returns a *lot* of warnings, and
-# that's why -Wall isn't used with it.
-COMPILER=gfortran -ffixed-form
-#COMPILER=g77 -ff66 -Wall
+# Uncomment to put debugging stuff into the executables.
+DEBUG=-g -O0
+
+# If you use g77, then the CLOCKF function I've supplied in INTRINSIC.f
+# doesn't work ... for me, anyhow.
+COMPILER=gfortran -ffixed-form ${DEBUG}
+#COMPILER=g77 -ff66 -Wall ${DEBUG}
 
 default: MAIN7 BENCH7
 
@@ -71,12 +73,12 @@ BENCH7:	BENCH7.for \
 # Creates temporary files from *.f named *.for to hold the dynamically
 # transformed FORTRAN code.  The transformations performed are as follows:
 #	END(etc) -> END
-#	READ INPUT TAPE KT%d,%d,etc -> READ (%d,%d) etc
-#	WRITE OUTPUT TAPE KT%d,%d,etc -> WRITE (%d,%d) etc
-#	READ INPUT TAPE KT%d,%d -> READ (%d,%d)
-#	WRITE OUTPUT TAPE KT%d,%d -> WRITE (%d,%d)
-#	READ TAPE KT%d,etc -> READ (%d) etc
-#	WRITE TAPE KT%d,etc -> WRITE (%d) etc
+#	READ INPUT TAPE KT%d,%d,etc -> READ (KT%d,%d) etc
+#	WRITE OUTPUT TAPE KT%d,%d,etc -> WRITE (KT%d,%d) etc
+#	READ INPUT TAPE KT%d,%d -> READ (KT%d,%d)
+#	WRITE OUTPUT TAPE KT%d,%d -> WRITE (KT%d,%d)
+#	READ TAPE KT%d,etc -> READ (KT%d) etc
+#	WRITE TAPE KT%d,etc -> WRITE (KT%d) etc
 #	IF(SENSE LIGHT %d)%d,%d -> IF(GTSNLT(%d))%d,%d,%d
 #	IF(SENSE SWITCH %d)%d,%d -> IF(GTSNSW(%d))%d,%d,%d
 #	SENSE LIGHT %d -> CALL STSNLT(%d)
@@ -87,12 +89,12 @@ BENCH7:	BENCH7.for \
 %.for: %.f
 	@sed \
 	  -e 's/END[[:space:]]*[(].*[)]/END/' \
-	  -e 's/READ[[:space:]]*INPUT[[:space:]]*TAPE[[:space:]]*KT\([[:digit:]]\),\([[:digit:]]*\),/READ (\1,\2) /' \
-	  -e 's/WRITE[[:space:]]*OUTPUT[[:space:]]*TAPE[[:space:]]*KT\([[:digit:]]\),\([[:digit:]]*\),/WRITE (\1,\2) /' \
-	  -e 's/READ[[:space:]]*INPUT[[:space:]]*TAPE[[:space:]]*KT\([[:digit:]]\),\([[:digit:]]*\)[[:space:]]*/READ (\1,\2)/' \
-	  -e 's/WRITE[[:space:]]*OUTPUT[[:space:]]*TAPE[[:space:]]*KT\([[:digit:]]\),\([[:digit:]]*\)[[:space:]]*/WRITE (\1,\2)/' \
-	  -e 's/READ[[:space:]]*TAPE[[:space:]]*KT\([[:digit:]]\),/READ (\1) /' \
-	  -e 's/WRITE[[:space:]]*TAPE[[:space:]]*KT\([[:digit:]]\),/WRITE (\1) /' \
+	  -e 's/READ[[:space:]]*INPUT[[:space:]]*TAPE[[:space:]]*\(KT[[:digit:]]\),\([[:digit:]]*\),/READ (\1,\2) /' \
+	  -e 's/WRITE[[:space:]]*OUTPUT[[:space:]]*TAPE[[:space:]]*\(KT[[:digit:]]\),\([[:digit:]]*\),/WRITE (\1,\2) /' \
+	  -e 's/READ[[:space:]]*INPUT[[:space:]]*TAPE[[:space:]]*\(KT[[:digit:]]\),\([[:digit:]]*\)[[:space:]]*/READ (\1,\2)/' \
+	  -e 's/WRITE[[:space:]]*OUTPUT[[:space:]]*TAPE[[:space:]]*\(KT[[:digit:]]\),\([[:digit:]]*\)[[:space:]]*/WRITE (\1,\2)/' \
+	  -e 's/READ[[:space:]]*TAPE[[:space:]]*\(KT[[:digit:]]\),/READ (\1) /' \
+	  -e 's/WRITE[[:space:]]*TAPE[[:space:]]*\(KT[[:digit:]]\),/WRITE (\1) /' \
 	  -e 's/IF[[:space:]]*(SENSE[[:space:]]*LIGHT[[:space:]]*\([[:digit:]]*\)[[:space:]]*)[[:space:]]*\([[:digit:]]*\)[[:space:]]*,[[:space:]]*\([[:digit:]]*\)/IF (GTSNLT(\1)) \3,\2,\3/' \
 	  -e 's/SENSE[[:space:]]*LIGHT[[:space:]]*\([[:digit:]]*\)/CALL STSNLT(\1)/' \
 	  -e 's/IF[[:space:]]*(SENSE[[:space:]]*SWITCH[[:space:]]*\([[:digit:]]*\)[[:space:]]*)[[:space:]]*\([[:digit:]]*\)[[:space:]]*,[[:space:]]*\([[:digit:]]*\)/IF (GTSNSW(\1)) \3,\2,\3/' \

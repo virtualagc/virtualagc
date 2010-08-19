@@ -34,7 +34,7 @@ C
       RETURN
       END
 C
-      SUBROUTINE CTRLI
+      SUBROUTINE CTRL1
       RETURN
       END
 C
