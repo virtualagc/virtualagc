@@ -17,7 +17,7 @@
         ENTRY   CTRL1
 (TES)
 GEXEC
- CTRLI  SXA     IXB4,4
+ CTRL1  SXA     IXB4,4
         SXA     IXB2,2
         SXA     IXB4,1
         XEC*    $(TES)
