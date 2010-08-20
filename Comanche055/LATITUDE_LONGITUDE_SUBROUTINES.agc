@@ -9,6 +9,7 @@
 # Pages:	1236-1242
 # Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2010-08-20 JL	Fixed indentation of RVQ opcode on line 180.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -16,13 +17,13 @@
 # thanks to both.  The images (with suitable reduction in storage size and
 # consequent reduction in image quality as well) are available online at
 # www.ibiblio.org/apollo.  If for some reason you find that the images are
-# illegible, contact me at info@sandroid.org about getting access to the 
+# illegible, contact me at info@sandroid.org about getting access to the
 # (much) higher-quality images which Paul actually created.
 #
 # Notations on the hardcopy document read, in part:
 #
 #	Assemble revision 055 of AGC program Comanche by NASA
-#	2021113-051.  10:28 APR. 1, 1969  
+#	2021113-051.  10:28 APR. 1, 1969
 #
 #	This AGC program shall also be referred to as
 #			Colossus 2A
@@ -54,7 +55,7 @@
 		BANK
 
 		COUNT	13/LT-LG
-		
+
 		EBANK=	ALPHAV
 LAT-LONG	STQ	SETPD
 			INCORPEX
@@ -177,7 +178,7 @@ GETERAD		DLOAD	DSQ
 			B2XSC
 		SR4R
 		STORE	ERADM
-			RVQ
+		RVQ
 
 # THE FOLLOWING CONSTANTS WERE COMPUTED WITH A=6378166, B=6356784 METERS
 # B2XSC = B**2 SCALED B-51
