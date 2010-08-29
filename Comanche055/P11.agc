@@ -14,6 +14,7 @@
 #				STATSW -> SATSW.
 #		2009-05-23 RSB	At end of RESCALES, corrected TC 0 to TC Q.
 #				Added an SBANK= prior to a 2CADR.
+#		2010-08-24 JL	Fixed page numbers. Added missing comment character on p537.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -258,7 +259,7 @@ MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
                 ZL
                 CA      CDUZ
                 DXCH    MGC
-                TC      INTPRET                 _
+                TC      INTPRET         #       _
                 VLOAD   VSR1            # SCALE OGC B-1
                         OGC
                 STORE   OGC
@@ -383,7 +384,7 @@ REP11		INHINT
 ENDREP11	EXTEND
 		DCA	REP11SA
 		TCF	REP11A-1
-#Page 540
+# Page 540
 REP11S		2OCT	7776600011
 
 REP11SA		2OCT	7776400013
@@ -431,7 +432,7 @@ GETDOWN         STQ     SETPD
                         0D
                 DLOAD
                         HI6ZEROS
-#Page 541
+# Page 541
 		STODL   6D
 		        DPHALF
 		STCALL  8D
@@ -480,7 +481,7 @@ GETDOWN         STQ     SETPD
 #	COMPUTE ATTITUDE ERRORS, A, WHERE	A = TGSC*DELTACDU
 #
 #	 *     (1	      SIN(CDUZ)             0    )   THE GIMBAL ANGLES
-#Page 542
+# Page 542
 #	TGSC = (0	COS(CDUX)*COS(CDUZ)	SIN(CDUX)) = TO SPACECRAFT AXES
 #	       (0      -SIN(CDUX)*COS(CDUZ)	COS(CDUX))   CONVERSION MATRIX
 #			     _
@@ -529,7 +530,7 @@ ATTDISP		CS	RPSTART		# PITCH/ROLL START TIME
 		PUSH			# LET P(RAD) = 2*PI*PITCH(REV)
 		GOTO
 			ATTDISP1	# AROUND SETLOC
-#Page 543
+# Page 543
 #				     *
 #	CONSTRUCT SM TO S/C MATRIX, TSMV
 
@@ -727,7 +728,7 @@ S11.1		VLOAD	ABVAL
 		        EARTHALT
 		        RLS
 		ABVAL	SR2
-EARTHALT         BDSU
+EARTHALT	BDSU
 		        36D
 		STORE   ALTI
 		RVQ
@@ -784,7 +785,7 @@ RESCALES        EXTEND                  # RESCALE AK S FOR
 #	EXTENDED VERB 46 (BITS 13,14 OF DAPDATR1 SET ).
 #	THE CMC REGARDS RHC COMMANDS AS BODY-AXES RATE
 #	COMMANDS AND IT TRANSMITS THESE TO SATURN AS DC
-#Page 548
+# Page 548
 #	VOLTAGES.  THE VALUE OF THE CONSTANT RATE COMMAND
 #	IS 0.5 DEG/SEC.  AN ABSENCE OF RHC ACTIVITY RE-
 #	SULTS IN A ZERO RATE COMMAND.
@@ -835,7 +836,7 @@ RESCALES        EXTEND                  # RESCALE AK S FOR
 # DEBRIS
 #
 #	CENTRALS
-#Page 549
+# Page 549
 #	CDUXCMD, CDUYCMD, CDUZCMD
 
 		BANK	43
@@ -886,7 +887,7 @@ REDOSAT		LXCH	BANKRUPT	# ALSO COMES HERE FOR RESTARTS
 		TCF	RESUME		# END OF SATURN STICK INITIALIZATION
 		
 #	THIS SECTION IS EXECUTED EVERY 100 MSECS.
-#Page 550
+# Page 550
 SATSTICK	LXCH	BANKRUPT
 		EXTEND
 		QXCH	QRUPT

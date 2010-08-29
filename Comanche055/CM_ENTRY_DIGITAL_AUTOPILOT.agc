@@ -12,6 +12,7 @@
 #		2009-05-20 RSB	Corrections: Removed an extraneous label 
 #				EXDAPIN, added a missing instruction in 
 #				COMPAT.
+#		2010-08-28 JL	Fixed indentation.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -188,7 +189,7 @@ CM/DAPON	CA	EBAOG
 NOTYET		CA	.5SEC
 		TC	BANKCALL
 		CADR	DELAYJOB	# (DELAYJOB DOES INHINT)
-	+4	CA	BIT11		# GAMDIFSW = 94D BIT11, INITLY=0
+ +4		CA	BIT11		# GAMDIFSW = 94D BIT11, INITLY=0
 		MASK	CM/FLAGS	# IF ZERO, WAIT UNTIL CM/POSE UPDATE.
 		EXTEND
 		BZF	NOTYET

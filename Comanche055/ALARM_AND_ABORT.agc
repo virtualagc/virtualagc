@@ -12,6 +12,7 @@
 #				typos in the transcription of program 
 #				comments, and these should be back-ported  
 #				to Colossus249.
+#		2010-08-24 JL	Fixed page numbers and some indents.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -31,7 +32,7 @@
 # Refer directly to the online document mentioned above for further
 # information.  Please report any errors to info@sandroid.org.
 
-# Page 1483
+# Page 1493
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 #
@@ -59,7 +60,7 @@ ALARM2		TS	ALMCADR
 BORTENT		TS	L
 
 PRIOENT		CA	BBANK
-	+1	EXTEND
+ +1		EXTEND
 		ROR	SUPERBNK	# ADD SUPER BITS.
 		TS	ALMCADR +1
 
@@ -130,8 +131,8 @@ PRIOLARM	INHINT			# * * * KEEP IN DISPLAY ROUTINE'S BANK
 -2SEC		DEC	-200		# *** DON'T MOVE
 		CAF	V05N09
 		TCF	PRIODSPR
-		
-# Page 1495		
+
+# Page 1495
 
 		BLOCK	02
 		SETLOC	FFTAG13
@@ -210,9 +211,9 @@ OCT217		OCT	00217
 DOALARM		EQUALS	ENDOFJOB
 
 # CALLING SEQUENCE FOR VARALARM
+#
 #		CAF	(ALARM)
 #		TC	VARALARM
-# Page 1486
 
 # VARALARM TURNS ON PROGRAM ALARM LIGHT BUT DOES NOT DISPLAY
 

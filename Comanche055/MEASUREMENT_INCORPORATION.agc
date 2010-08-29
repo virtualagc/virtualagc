@@ -9,6 +9,7 @@
 # Pages:	1252-1261
 # Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2010-08-24 JL	Fixed some indentation.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -159,7 +160,7 @@ INCOR1C		TLOAD	ROUND
 		DDV	PUSH		# PD 0-1 = DELTAQ/A
 		GOTO
 			NEWZCOMP
-	-3	SSP
+ -3		SSP
 			S2
 			54D
 INCOR2		VLOAD	VXM*		# COMPUT OMEGA1,2,3
@@ -462,9 +463,9 @@ NEWZCOMP	VLOAD	ABVAL
 			
 		SETLOC	MEASINC3
 		BANK
-		
-# Page 1261		
-NEWZCMP1		DLOAD	SXA,1
+
+# Page 1261
+NEWZCMP1	DLOAD	SXA,1
 			NORMZI
 			NORMZI		# SAVE X1
 		NORM	INCR,1
@@ -497,7 +498,3 @@ NEWZCMP1		DLOAD	SXA,1
 		GOTO
 			INCOR2 -3
 NORMZI		=	36D
-
-
-
-

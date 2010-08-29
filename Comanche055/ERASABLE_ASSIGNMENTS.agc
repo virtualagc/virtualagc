@@ -19,6 +19,7 @@
 #		2009-05-21 RSB	Corrected definition of DELBRTMP, which 
 #				chained to quite a lot of off-by-one errors.
 #				Changed a +8 to a +8D.
+#		2010-08-24 JL	Fixed page numbers. Added missing comment character. Fixed page number comment.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2091,7 +2092,7 @@ DVTHRESH	ERASE			# I(1)PL DELTA VTHRESHOLD FOR LOW THRUST
 HORIZALT	ERASE	+1		# I(2)PL HORIZON ALTITUDE	     M B-29
 
 # P20	ALTERNATE LOS VARIANCE	PAD LOAD ****	(1D)
-									  -16
+#									  -16
 ALTVAR		ERASE			# I(2)PL MILLARD, SQUARED SCALED 2
 END-UE		EQUALS	SELFERAS +16D	# LAST USED UNSWITCHED ERASABLE
 
@@ -2143,7 +2144,7 @@ PIPASCFZ	ERASE
 NBDX		ERASE			# GYRO BIAS DRIFT
 GBIASX		=	NBDX
 NBDY		ERASE
-# Page 84
+# Page 85
 NBDZ		ERASE
 
 ADIAX		ERASE			# ACCELERATION SENSITIVE DRIFT ALONG THE
@@ -2808,7 +2809,7 @@ HBD22		ERASE			# B(1)
 HBN30		ERASE			# B(1)
 HBN31/2		ERASE			# B(1)
 HBN32		ERASE			# B(1)
-#Page 103
+# Page 103
 HBD31/2		ERASE			# B(1)
 HBD32		ERASE			# B(1)
 

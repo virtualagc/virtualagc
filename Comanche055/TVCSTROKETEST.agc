@@ -9,6 +9,7 @@
 # Pages:	979-983
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2010-08-24 JL	Fixed page 983 number. Fixed some indentation.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -218,7 +219,7 @@ HACKWLST	CAF	TCTSKOVR	# ENTRY FROM WAITLIST
 		EXTEND
 		WOR	CHAN14
 		INCR	CADDY		# COUNT DOWN THE NO. BURSTS, THIS SLOPE
-# Page 982
+# Page 983
 		CS	CADDY
 		EXTEND
 		BZMF	+2
@@ -249,8 +250,8 @@ REVUP		TS	REVS		# ALL REVERSALS EXCEPT LAST OF SET
 		CA	N
 		DOUBLE			# 2 x 1/2AMP
 		TCF	+4
-		
-	+4	CS	ONE		# FINAL REVERSAL, THIS SET
+
+ +4		CS	ONE		# FINAL REVERSAL, THIS SET
 		TS	REVS		# PREPARE TO BRANCH TO NEW BURST
 		CA	N		# JUST RETURN TO ZERO, FINAL SLOPE OF SET
 		TS	CADDY		# CADUP

@@ -12,6 +12,7 @@
 #				typos in the transcription of program 
 #				comments, and these should be back-ported  
 #				to Colossus249.
+#		2010-08-28 JL	Added missing comment character.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -168,7 +169,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF IT'S
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
 		XCH	GOLOC -1	# PICK UP PRIO
-		TC	GOLOC -1	AND GO
+		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,
 		XCH	GOLOC -1	# SET UP NOVAC CALL,

@@ -7,9 +7,10 @@
 # Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
 # Website:      www.ibiblio.org/apollo.
 # Pages:	525-532
-# Mod history:  2009-05-10 HG    Started adapting from the Colossus249/ file 
-#                of the same name, using Comanche055 page 
-#                images 0525.jpg - 0532.jpg. 
+# Mod history:  2009-05-10 HG   Started adapting from the Colossus249/ file
+#                		of the same name, using Comanche055 page
+#                		images 0525.jpg - 0532.jpg.
+#		2010-08-20 JL	Fixed page number comment (p531).
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -336,7 +337,7 @@ P39/P79B	RTB	DAD
 			LOADTIME
 			KT
 		STORE	TIG		# TIG = T (PRESENT) + PREPARATION TIME
-# Page531
+# Page 531
 		STCALL	TDEC1		# PRECISION UPDATE ACTIVE AND PASSIVE
 			PRECSET		# 	VEHICLES TO TIG
 		CALL

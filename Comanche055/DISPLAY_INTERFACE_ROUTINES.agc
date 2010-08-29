@@ -12,6 +12,7 @@
 #				typos in the transcription of program 
 #				comments, and these should be back-ported  
 #				to Colossus249.
+#		2010-08-29 JL	Fixed indentation, whitespace.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -1314,7 +1315,7 @@ UNSETR1		INDEX	COPINDEX	# RESET REPEAT AND RETURN REQUEST
 		TC	SUPERSW		# SUPERBANK 0
 # Page 1481
 
-	-1	CAF	THREE		# RETURN TO USER'S IMMEDIATE RETURN LOC
+ -1		CAF	THREE		# RETURN TO USER'S IMMEDIATE RETURN LOC
 IMMEDRET	INDEX	COPINDEX
 		AD	CADRFLSH
 		TCF	BANKJUMP
@@ -1481,5 +1482,3 @@ OCT10200	OCT	10200
 V97N00		VN	09700		# PASTE FOR V97 OR V99
 OCT20100	OCT	20100
 CLOCKCON	OCT	24030
-
-

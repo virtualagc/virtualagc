@@ -11,6 +11,7 @@
 #				same name, using Comanche055 page images.
 #		2009-05-23 RSB	In a couple of 2OCT statements, removed the
 #				space between the first and second octal words.
+#		2010-08-28 JL	Added missing comment character. Fixed indentation. 
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -249,7 +250,7 @@ DSTORE		STOVL	D		# ACCELERATION USED TO APPROX DRAG
 			VEL
 		VXV	UNIT		# UNI = UNIT(V*R)
 # Page 849
-		UNITR
+			UNITR
 		STORE	UNI		# .5 UNI		REF COORDS.
 		
 		BOFF	DLOAD
@@ -1106,7 +1107,7 @@ KEP2		DLOAD	DSU		# IF Q7F+KDMIN -D NEG, GO TO FINAL PHASE.
 			.05GSW		# IF D < .06G, SET ROLL COMMAND = 0.
 			+2
 			3ZEROS		# SET ROLLC & ROLLHOLD =0.
-	+2	STCALL	ROLLC		# (SP ROLLHOLD FOLLOWS DP ROLLC)
+ +2		STCALL	ROLLC		# (SP ROLLHOLD FOLLOWS DP ROLLC)
 			P62.3		# CALC DESIRED GIMBAL ANGLES AT PRESENT
 					# RN, VN TO YIELD TRIM ATTITUDE.
 					# AVAILABLE IN CPHI'S FOR N22.
@@ -1230,7 +1231,7 @@ HAVDNRNG	STORE	DNRNGERR	# = (PREDANG - THETA) /360
 GONEGLAD	DLOAD			# SET L/D = -LAD
 			GONEGLAD	# (ANY NEGATIVE NUMBER WILL DO)
 			
-GOMAXL/D	RTB	DMP		L/D = LAD SIGN(MPAC)
+GOMAXL/D	RTB	DMP		# L/D = LAD SIGN(MPAC)
 			SIGNMPAC
 			LAD
 		STORE	L/D		# AND FALL INTO GLIMITER SECTION
