@@ -11,6 +11,7 @@
 #				of the same name, using Comanche055 page 
 #				images.
 #		2009-05-20 RSB	Corrected BDV -> BOV.
+#		2010-08-24 JL	Fixed page numbers, some whitespace.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -531,65 +532,41 @@ MAXPHIC		2DEC	.09259298	# 2000 NM FOR MAXIMUM PHI ENTRY
 # Page 646
 
 		COUNT*	$$/P30
-		
-					# 		BELOW
-					# **** TABLE IS INDEXED. KEEP IN ORDER ***
-# Page 641
+
+						# 		BELOW
+						# <<<< TABLE IS INDEXED. KEEP IN ORDER >>>
+
 		2DEC	7.07304526 E-4		# 5500
-		
 		2DEC	3.08641975 E-4		# 2400
-		
 		2DEC	3.08641975 E-4		# 2400
-		
 		2DEC	-8.8888888 E-3		# -3.2
-		
 		2DEC	2.7777777 E-3		# 1
-		
 CK1K2		2DEC	6.6666666 E-3		# 2.4
-
 		2DEC	0			# 0
-		
 		2DEC*	-1.86909989 E-5 B7* 	# -.443
-		
 		2DEC	0
-		
 		2DEC*	1.11639691 E-3 B7*	# .001225
-		
 		2DEC*	9.56911636 E-4 B7*	# .00105
-		
 YK1K2		2DEC*	2.59733157 E-4 B7*	# .000285
-
 V(400)		2DEC	1.2192 B-7
-
 V(28K)		2DEC	85.344 B-7
-
 V(3K)		2DEC	9.144 B-7
-
 V(24K)		2DEC	73.152 B-7
-
 		2DEC	85.344 B-7
-		
 V(32K)		2DEC	97.536 B-7
-
 V(4K)		2DEC	12.192 B-7
-
 V(21K)		2DEC	64.000 B-7
-
 TLESS26		2DEC*	5.70146688 E7 B-35*	# 8660PHI/V
-
 TGR26CON	2DEC	7.2 E5 B-28		# PHI/3
-
 V(26K)		2DEC	79.248 B-7		# 26000
 
 # Page 647
 
 X1CON		DEC	10
-
 		DEC	8
-		
 		DEC	6
-					# **** TABLE IS INDEXED.  KEEP IN ORDER ***
-					#		ABOVE
+						# <<<< TABLE IS INDEXED. KEEP IN ORDER >>>
+						#		     ABOVE
 # Page 648
 # ***** AVFLAG/P *****
 #

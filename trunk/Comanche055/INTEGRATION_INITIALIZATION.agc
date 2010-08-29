@@ -12,6 +12,7 @@
 #		2009-05-20 RSB	Corrections:  fixed an interpreter instruction,
 #				fixed a SETLOC.
 #		2009-05-23 RSB	In SETCOAST, corrected MOONTHIS to AMOONFLG.
+#		2010-08-29 JL	Fixed indentation.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -709,7 +710,7 @@ TESTLOOP	BOF	CLRGO
 			+3
 			STATEFLG
 			INTEXIT		# STOP INTEGRATION
-	+3	SETPD	LXA,2
+ +3		SETPD	LXA,2
 			10D
 			PBODY
 		VLOAD	ABVAL

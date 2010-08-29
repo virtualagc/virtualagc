@@ -10,6 +10,7 @@
 # Mod history:  2009-05-10 SN   (Sergio Navarro).  Started adapting
 #                               from the Colossus249/ file of the same
 #                               name, using Comanche055 page images.
+#		2010-08-29 JL	Fixed indentation.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -128,7 +129,7 @@ QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
 		EXTEND
 		QXCH	ITEMP1
 		CAF	FOUR
-	+4	MASK	SIX
+ +4		MASK	SIX
 		TS	ITEMP2
 		INDEX	ITEMP2
 		CA	CDUSPOT

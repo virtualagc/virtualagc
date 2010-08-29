@@ -9,6 +9,7 @@
 # Pages:	1221-1235
 # Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
+#		2010-08-29 JL	Fixed indentation.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -134,7 +135,7 @@ WAITLIST	INHINT
 		EXTEND
 		INDEX	WAITEXIT	# IF TWIDDLING, THE TS SKIPS TO HERE
 		DCA	0		# PICK UP 2CADR OF TASK.
-	-1	TS	WAITADR		# BBCON WILL REMAIN IN L
+ -1		TS	WAITADR		# BBCON WILL REMAIN IN L
 DLY2		CAF	WAITBB		# ENTRY FROM FIXDELAY AND VARDELAY.
 		XCH	BBANK
 		TCF	WAIT2
@@ -189,7 +190,7 @@ SVCT3		CCS	FLAGWRD2	# DRIFT FLAG
 		TCF	+3
 		TCF	SVCT3X
 		TCF	SVCT3X
-	+3	CAF	PRIO35		# COMPENSATE FOR NBD COEFFICIENTS ONLY.
+ +3		CAF	PRIO35		# COMPENSATE FOR NBD COEFFICIENTS ONLY.
 		TC	NOVAC		#	ENABLE EVERY 81.93 SECONDS
 		EBANK=	NBDX
 		2CADR	NBDONLY
@@ -283,35 +284,35 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 		TC	WTLST2
 		OCT	1
 
-	+4	CCS	A		# TEST TD - T3 + 1
+ +4		CCS	A		# TEST TD - T3 + 1
 		AD	LST1 +2
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	2
 
-	+4	CCS	A		# TEST TD - T4 + 1
+ +4		CCS	A		# TEST TD - T4 + 1
 		AD	LST1 +3
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	3
 
-	+4	CCS	A		# TEST TD - T5 + 1
+ +4		CCS	A		# TEST TD - T5 + 1
 		AD	LST1 +4
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	4
 
-	+4	CCS	A		# TEST TD - T6 + 1
+ +4		CCS	A		# TEST TD - T6 + 1
 		AD	LST1 +5
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	5
 
-	+4	CCS	A		# TEST TD - T7 + 1
+ +4		CCS	A		# TEST TD - T7 + 1
 		AD	LST1 +6
 		TCF	+4
 		AD	ONE
@@ -319,14 +320,14 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 		OCT	6
 
 # Page 1229
-	+4	CCS	A	
+ +4		CCS	A	
 		AD	LST1 +7
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	7
 
-	+4	CCS	A
+ +4		CCS	A
 WTABORT		TC	BAILOUT		# NO ROOM IN THE INN
 		OCT	1203
 		

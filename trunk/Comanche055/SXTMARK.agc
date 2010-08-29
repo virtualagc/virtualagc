@@ -9,6 +9,7 @@
 #  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 # Website:	http://www.ibiblio.org/apollo.
 # Mod history:	16/05/09 FB	Transcription Batch 2 Assignment.
+#		2010-08-28 JL	Fixed indentation.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -269,7 +270,7 @@ KEYCALL		CAF	OCT37			# NOT MARK OR MKREJECT, SEE IF KEYCODE
 		TC	POSTJUMP
 		CADR	KEYCOM			# IT'S A KEY CODE, NOT A MARK.
 		
-	+3	TC	ALARM			# ALARM IF NO INBITS
+ +3		TC	ALARM			# ALARM IF NO INBITS
 		OCT	113
 		TC	RESUME
 		

@@ -17,6 +17,7 @@
 #				statements prior to 2CADRs.  One day I'll
 #				have to figure out what yaYUL is doing 
 #				wrong with those ....
+#		2010-08-29 JL	Fixed +3 and +8 pseudo-labels which were accidentally symbols.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -661,9 +662,9 @@ STABLISH	CAF	EBANK6		# V46 - SET EBANK TO E6
 		TC	POSTJUMP	# CSM/LM, SO PERFORM HB TO LB SWITCH-OVER
 		CADR	PRESWTCH
 
-+3		TC	ALM/END
+ +3		TC	ALM/END
 
-+8		TC	POSTJUMP	# SET UP RCS, ENTRY, OR SATURN-STICK DAP
+ +8		TC	POSTJUMP	# SET UP RCS, ENTRY, OR SATURN-STICK DAP
 		CADR	DAPFIG
 # Page 252
 # CREMANU	VERB 49		DESCRIPTION

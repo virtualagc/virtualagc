@@ -11,6 +11,7 @@
 #		2009-05-20 RSB	Corrections: P00D00H -> P00DOOH, definition
 #				of 25DECML fixed.
 #		2009-05-23 RSB	At SPECSTS, corrected to PRIO22.
+#		2010-08-28 JL	Fixed indentation.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -410,7 +411,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 		EXTEND
 		READ	LOSCALAR
 		TS	L
-	+4	CS	POSMAX
+ +4		CS	POSMAX
 		AD	L
 		EXTEND
 		BZF	FINETIME +1

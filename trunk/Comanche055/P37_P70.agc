@@ -13,6 +13,7 @@
 #		2009-05-20 RSB	Added missing label V2T179.  Fixed POODOO -> P00DOO.
 #		2009-05-23 RSB	In RTD18, corrected a STOVL DELVLVC to 
 #				STODL DELVLVC and a STODL 02D to STORE 02D.
+#		2010-08-28 JL	Added missing comment characters.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -543,7 +544,7 @@ TMRAD100	STQ	CLEAR
 		LXC,1	CALL
 			CONICX1
 			TIMERAD
-		STOVL	V(T2)/							PL00D
+		STOVL	V(T2)/		#					PL00D
 		STADR
 		STODL	R(T2)/
 			T
@@ -896,7 +897,7 @@ PREC132		SLOAD	GOTO		# TOO MANY ITERATIONS
 PREC140		DLOAD	BZE
 			NN1A
 			PREC162
-PREC150		DLOAD	SL2						B2
+PREC150		DLOAD	SL2		#				B2
 			P/RPRE
 		DMP	SL1		# BETA2=BETA1*P/R		B2	PL02
 			BETA1
@@ -914,13 +915,13 @@ PREC155		SL2	SQRT
 		NORM	PDDL
 			X1
 		SR1	DDV		# BETA4=BETA2/(1-PHI2*SQRT(BETA3))
-		SL*	GOTO						B1
+		SL*	GOTO		#				B1
 			0	-1,1
 			PREC165
 PREC160		DLOAD	NORM
 			R/APRE
 			X1
-		BDDV	SL*						B1
+		BDDV	SL*		#				B1
 			1RTEB1
 			0	-6,1
 		GOTO

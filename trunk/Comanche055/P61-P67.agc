@@ -13,6 +13,7 @@
 #				definition of V06N74, in several
 #				interpreter operands fixed stuff like
 #				N-M,1 to N -M,1
+#		2010-08-28 JL	Fixed some indentation.
 #
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
@@ -205,7 +206,7 @@ P62.2		EXTEND
 		TC	-5			# ENTER
 		TC	P61.3			# FOR PHASCHNG AND ENDOFJOB
 		
-	+3	TC	POSTJUMP
+ +3		TC	POSTJUMP
 		CADR	CM/DAPON		# DISABLE RCS DAP, ENABLE ENTRY DAP AND
 						# DO ATTITUDE HOLD.
 						
@@ -631,7 +632,7 @@ RETRN3		TC	ALARM
 RETRN2		TC	ALARM
 		OCT	01427		# IMU REVERSED
 		
-	+2	CAF	V05N09
+ +2		CAF	V05N09
 		TC	BANKCALL
 		CADR	GODSPR		# DO DISPLAY
 		CA	10SECS

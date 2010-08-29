@@ -11,6 +11,7 @@
 #				same name, using Comanche055 page images.
 #		2009-05-20 RSB	Corrections:  DAT -> DAD in one place, 
 #				BWM -> BMN, DEFEQCNT -> DIFEQCNT.
+#		2010-08-27 JL	Fixed some indentation, whitespace.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -466,7 +467,7 @@ QUALITY3	DSQ			# J22 TERM X R**4 IN 2D.  SCALED B61
 					# FOR RESULT.
 		PDDL	PDDL
 			TET
-				5/8	# ANY NON-ZERO CONSTANT
+			5/8		# ANY NON-ZERO CONSTANT
 		LXA,2	CALL		# POSITION IN 0D, TIME IN 6D. X2 LEFT
 					# ALONE.
 			PBODY
@@ -854,32 +855,20 @@ DOW..1		VLOAD	VSR4
 		BANK
 
 3/5		2DEC	.6 B-2
-
 THREE/8		2DEC	.375
-
 .3D		2DEC	.3 B-2
-
 3/64		2DEC	3 B-6
-
 DP1/4		2DEC	.25
-
 DQUARTER	EQUALS	DP1/4
 POS1/4		EQUALS	DP1/4
 3/32		2DEC	3 B-5
-
 15/16		2DEC	15. B-4
-
 3/4		2DEC	3.0 B-2
-
 7/12		2DEC	.5833333333
-
 9/16		2DEC	9 B-4
-
 5/128		2DEC	5 B-7
-
 DPZERO		EQUALS	ZEROVEC
 DP2/3		2DEC	.6666666667
-
 2/3		EQUALS	DP2/3
 OCT27		OCT	27
 
@@ -901,38 +890,22 @@ ASCALE		DEC	-7
 		DEC	-6
 # Page 1354
 		2DEC*	1.32715445 E16 B-54*	# S
-		
 		2DEC*	4.9027780 E8 B-30*	# M
-		
 MUEARTH		2DEC*	3.986032 E10 B-36*
-
 		2DEC	0
-		
 J4REQ/J3	2DEC*	.4991607391 E7 B-26*
-
 		2DEC	-176236.02 B-25
-		
 2J3RE/J2	2DEC*	-.1355426363 E5 B-27*
-
 		2DEC*	.3067493316 E18 B-60*
-		
 J2REQSQ		2DEC*	1.75501139 E21 B-72*
-
-3J22R2MU	2DEC*	9.20479048 E16 B-58*		
-		
+3J22R2MU	2DEC*	9.20479048 E16 B-58*
 5/8		2DEC	5 B-3
-
 -1/12		2DEC	-.1
-
 MUM		=	MUEARTH -2
 RECRATIO	2DEC	.01
-
 RSPHERE		2DEC	64373.76 E3 B-29
-
 RDM		2DEC	16093.44 E3 B-27
-
 RDE		2DEC	80467.20 E3 B-29
-
 RATT		EQUALS 	00
 VATT		EQUALS	6D
 TAT		EQUALS	12D

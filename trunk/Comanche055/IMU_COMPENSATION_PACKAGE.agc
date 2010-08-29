@@ -10,6 +10,7 @@
 # Mod history:	2009-05-08 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images/
 #		2009-05-21 RSB	In IRIGZ, PRIO17 corrected to PRIO21.
+#		2010-08-24 JL	Fixed page 306 number.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -334,7 +335,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		TCF	1/GYRO		# YES
 		TCF	ENDOFJOB	# NO
 
-# Page 303
+# Page 306
 FBIASSUB	XCH	Q
 		TS	BUF +1
 		
