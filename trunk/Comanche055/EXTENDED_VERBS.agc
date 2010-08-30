@@ -652,7 +652,9 @@ STABLISH	CAF	EBANK6		# V46 - SET EBANK TO E6
 		CS	FLAGWRD6	# TEST FOR TVC
 		MASK	OCT60000	
 		EXTEND
-		BZMF	+8
+## 2010-08-30 (jiml): yaYUL expects either an octal or explicit decimal offset.
+## Original source was 'BZMF +8'. Added 'D' to explicitly specify decimal offset.
+		BZMF	+8D
 
 		CAE	DAPDATR1	# TET FOR CSM/LM
 		MASK	BIT14
