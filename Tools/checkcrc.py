@@ -23,7 +23,6 @@
 
 
 import sys
-import os
 from optparse import OptionParser
 
 def convertToNative(n):
