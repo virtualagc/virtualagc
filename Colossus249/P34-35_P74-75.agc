@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/11/04 RSB.	Began adapting from corresponding Luminary131
 #				source file.
+#		2010-08-29 JL	Added missing comment characters. 
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -749,7 +750,7 @@ NOVRWRT		VLOAD	PUSH
 # Page 472
 # ***** S34/35.4 *****
 
-S34/35.4	STQ	SETPD		NO ASTRONAUT OVERWRITE
+S34/35.4	STQ	SETPD		# NO ASTRONAUT OVERWRITE
 			NORMEX
 			0D
 		GOTO
@@ -1104,13 +1105,13 @@ INITVEL2	BPL	SET
 
 # ROTATE RC INTO YC PLANE -- SET UNIT NORMAL TO YC
 
-		VLOAD	PUSH				(PL 6D)
+		VLOAD	PUSH		#		(PL 6D)
 			R2VEC		# RC TO 6D (+29)
 		ABVAL	PDVL		# RC TO MPAC, ABVAL(RC) (+29) TO OD(PL 2D)
-		PUSH	VPROJ				(PL 8D)
+		PUSH	VPROJ		#		(PL 8D)
 			UN
 		VSL2	BVSU
-		UNIT	VXSC				(PL 0D)
+		UNIT	VXSC		#		(PL 0D)
 		VSL1
 		STORE	R2VEC
 		TLOAD	SLOAD
@@ -1120,7 +1121,7 @@ INITVEL2	BPL	SET
 			INITVEL3
 			R2VEC
 		STORE	RTARG1
-INITVEL3	DLOAD	PDVL						(PL 2D)
+INITVEL3	DLOAD	PDVL		#				(PL 2D)
 			MUEARTH		# POSITIVE VALUE
 			R2VEC
 		UNIT	PDVL		# 2D = UNIT(R2VEC)		(PL 8D)

@@ -13,6 +13,7 @@
 #				to "INTVEC = FILDELV +2".  The reason this
 #				was working is that INTVEC isn't used for 
 #				anything.
+#		2010-08-30 JL	Added missing comment character. 
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -2069,7 +2070,7 @@ DVTHRESH	ERASE			# I(1)PL DELTA VTHRESHOLD FOR LOW THRUST
 HORIZALT	ERASE	+1		# I(2)PL HORIZON ALTITUDE	     M B-29
 
 # P20	ALTERNATE LOS VARIANCE	PAD LOAD ****	(1D)
-									  -16
+					#				  -16
 ALTVAR		ERASE			# I(2)PL MILLARD, SQUARED SCALED 2
 END-UE		EQUALS	SELFERAS +16D	# LAST USED UNSWITCHED ERASABLE
 
