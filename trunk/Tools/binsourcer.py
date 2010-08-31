@@ -16,9 +16,7 @@
 # the BANK keyword specifies the bank number (e.g. "BANK=2"). 
 
 import sys
-import os
 import glob
-import time
 import datetime
 
 def prompt(promptString, default=""):
