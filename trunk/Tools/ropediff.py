@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 # Copyright 2010 Jim lawton <jim dot lawton at gmail dot com>
-# 
-# This file is part of yaAGC. 
+#
+# This file is part of yaAGC.
 #
 # yaAGC is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,36 +52,55 @@ class CoreDiff:
             self.srcline = self.srcline[:-1]
 
     def __str__(self):
-        line = "%06o (%7s)   %05o   %05o   " % (self.coreaddr, self.address, self.leftval, self.rightval)
+        line = "%06o (%7s) %05o %05o " % (self.coreaddr, self.address, self.leftval, self.rightval)
         if self.pagenum:
-            line += "%4d   " % (self.pagenum)
+            line += "%4d " % (self.pagenum)
         else:
-            line += "       "
-        line += "%-48s   " % (self.module)
+            line += "     "
+        line += "%-48s " % (self.module)
         line += "%-100s" % self.srcline
         return line
 
     def __cmp__(self, other):
         return (self.coreaddr - other.coreaddr)
 
+def log(text, verbose=False, newline=True):
+    if verbose == False or (verbose == True and options.verbose == True):
+        if options.outfile:
+            print >>options.outfile, text,
+            if newline:
+                print >>options.outfile
+        if verbose == True:
+            print text,
+            if newline:
+                print
 
 def main():
 
     CORELEN = (2 * 044 * 02000)
 
+    global options
+
     parser = OptionParser("usage: %prog [options] core1 core2")
-    parser.add_option("-N", "--no-super", action="store_true", dest="noSuper", default=False, 
+    parser.add_option("-N", "--no-super", action="store_true", dest="noSuper", default=False,
                       help="Discard differences in which one word has 100 in bits 5,6,7 and the other has 011.")
-    parser.add_option("-S", "--only-super", action="store_true", dest="onlySuper", default=False, 
+    parser.add_option("-S", "--only-super", action="store_true", dest="onlySuper", default=False,
                       help="Show only differences involving 100 vs. 011 in bits 5,6,7.")
-    parser.add_option("-Z", "--no-zero", action="store_true", dest="noZero", default=False, 
+    parser.add_option("-Z", "--no-zero", action="store_true", dest="noZero", default=False,
                       help="Discard differences in which the word from the 2nd file is 00000.")
-    parser.add_option("-s", "--stats", action="store_true", dest="stats", default=False, 
+    parser.add_option("-s", "--stats", action="store_true", dest="stats", default=False,
                       help="Print statistics.")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print extra information.")
+    parser.add_option("-o", "--output", dest="outfilename", help="Write output to file.", metavar="FILE")
 
     (options, args) = parser.parse_args()
 
     options.analyse = True
+
+    options.outfile = None
+    if options.outfilename:
+        options.outfile = open(options.outfilename, "w")
 
     if len(args) < 2:
         parser.error("Two core files must be supplied!")
@@ -106,10 +125,10 @@ def main():
         parser.error("Core files are incorrect length, must be %d bytes!" % CORELEN)
         sys.exit(1)
 
-    print "yaAGC Core Rope Differencer"
-    print
-    print "Left core file:  ", cores[0]
-    print "Right core file: ", cores[1]
+    log("yaAGC Core Rope Differencer")
+    log("")
+    log("Left core file:  %s" % cores[0])
+    log("Right core file: %s" % cores[1])
 
     leftcore = open(cores[0], "rb")
     rightcore = open(cores[1], "rb")
@@ -131,28 +150,37 @@ def main():
     listfile = None
     if options.analyse:
         if len(lfiles) > 1:
-            print "Warning: multiple listing files!"
+            for l in lfiles:
+                if l.endswith("MAIN.lst"):
+                    lfiles.remove(l)
+            if len(lfiles) > 1:
+                print lfiles
+                print "Warning: multiple listing files, using %s!" % (lfiles[0])
         listfile = lfiles[0]
         if not os.path.isfile(listfile):
             parser.error("File \"%s\" does not exist" % listfile)
             sys.exit(1)
-        print        
-        print "Build: %s" % os.path.basename(os.path.dirname(listfile).split('.')[0])
+        log("")
+        log("Listing: %s" % listfile)
+        log("Build: %s" % os.path.basename(os.path.dirname(listfile).split('.')[0]))
 
+        log("Analysing listing file... ", verbose=True)
         blocks = listing_analyser.analyse(listfile)
 
     diffcount = {}
     difftotal = 0
 
-    modlist = [] 
+    modlist = []
     srcfiles = glob.glob("*.agc")
     srcfiles.remove("MAIN.agc")
-    srcfiles.remove("Template.agc")
+    if "Templates.agc" in srcfiles:
+        srcfiles.remove("Template.agc")
     for srcfile in srcfiles:
         modlist.append(srcfile.split('.')[0])
     for module in modlist:
         diffcount[module] = 0
 
+    log("Reading MAIN.agc... ", verbose=True)
     includelist = []
     mainfile = open("MAIN.agc", "r")
     mainlines = mainfile.readlines()
@@ -165,6 +193,7 @@ def main():
     diffs = []
     lines = []
 
+    log("Comparing core image files... ", verbose=True)
     try:
         while True:
             leftdata = leftcore.read(2)
@@ -191,7 +220,7 @@ def main():
                 bank = i / 02000
                 if bank < 4:
                     bank ^= 2
-                line += "%06o (" % i
+                line = "%06o (" % i
                 if i < 04000:
                     address = "   %04o" % (i + 04000)
                 else:
@@ -210,16 +239,20 @@ def main():
         leftcore.close()
         rightcore.close()
 
-    lines = []
+    log("%d core image differences" % (difftotal), verbose=True)
+
+    lines = {}
     buggers = []
     module = None
     pagenum = 0
+    address = 0
 
+    log("Building module/page/line list... ", verbose=True)
     for line in open(listfile, "r"):
         elems = line.split()
         if len(elems) > 0:
             if not line.startswith(' '):
-                if "## Page" in line and "scans" not in line:
+                if "# Page " in line and "scans" not in line:
                     pagenum = line.split()[3]
                     if pagenum.isdigit():
                         pagenum = int(pagenum)
@@ -227,55 +260,63 @@ def main():
                     if len(elems) > 1:
                         if elems[1].startswith('$'):
                             module = elems[1][1:].split('.')[0]
-                if module:
-                    lines.append((module, pagenum, line))
+                        else:
+                            if len(elems) > 2:
+                                if elems[1][0].isdigit() and elems[2][0].isdigit() and len(elems[2]) == 5:
+                                    address = elems[1]
+                                    lines[address] = (module, pagenum, line)
+                                    if len(elems) > 3:
+                                        # Handle 2-word quantities, yaYUL outputs listing for the two combined at the address of the first.
+                                        if elems[3][0].isdigit() and len(elems[3]) == 5:
+                                            if "," in address:
+                                                bank = int(address.split(',')[0], 8)
+                                                offset = int(address.split(',')[1], 8)
+                                                offset += 1
+                                                address = "%02o,%04o" % (bank, offset)
+                                            else:
+                                                offset = int(address, 8)
+                                                offset += 1
+                                                address = "%04o" % offset
+                                            lines[address] = (module, pagenum, line)
                 if line.startswith("Bugger"):
                     buggers.append(line)
 
-    for (module, pagenum, line) in lines:
-        for diff in diffs:
-            elems = line.split()
-            if len(elems) > 1:
-                if diff.address == elems[1]:
-                    diff.setloc(pagenum, module, line)
-
+    log("Setting diff locations... ", verbose=True)
     for diff in diffs:
-        if diff.srcline == None:
+        address = diff.address.strip()
+        if address in lines.keys():
+            (module, pagenum, line) = lines[address]
+            diff.setloc(pagenum, module, line)
+        elif diff.srcline == None:
+            foundBugger = False
             for bugger in buggers:
                 bval = bugger.split()[2]
                 baddr = bugger.split()[4]
                 if baddr.endswith('.'):
                     baddr = baddr[:-1]
-                if diff.address == baddr:
-                    diff.setloc(0, "Bugger", bugger)
+                if address == baddr:
+                    diff.setloc(0, "Bugger", "%s%s%s%s" % (15 * ' ', baddr, 11 * ' ', bval))
+                    #log("found bugger at address %s" % address)
+                    foundBugger = True
+                    break
+            if not foundBugger:
+                print >>sys.stderr, "Error: address %s not found in listing file" % (address)
+        else:
+            print >>sys.stderr, "Error: address %s not found in listing file" % (address)
 
-    # Catch errors in 2nd word of 2-word quantities, yaYUL only outputs listing for the two combined.
-    for (module, pagenum, line) in lines:
-        for diff in diffs:
-            if diff.srcline == None:
-                bank = int(diff.address.split(',')[0], 8)
-                offset = int(diff.address.split(',')[1], 8)
-                offset -= 1
-                address = "%02o,%04o" % (bank, offset)
-                elems = line.split()
-                if len(elems) > 1:
-                    if address == elems[1] and elems[3] != "EBANK=":
-                        diff.setloc(pagenum, module, line)
-
-
-    print
-    print "%s %d" % ("Total differences:", difftotal)
-    print
+    log("")
+    log("%s %d" % ("Total differences:", difftotal))
+    log("")
 
     if difftotal > 0:
-        print "Core address       Left    Right   Block Start Addr   Page   Module"
-        print "----------------   -----   -----   ----------------   ----   ------------------------------------------------"
-        print
+        log("Core address     Left  Right Page Module                                           Line Number    Address           Source")
+        log("---------------- ----- ----- ---- ------------------------------------------------ -------------- -------           -------------------------------------------------------------------------------------------------------")
+        log("")
         for diff in diffs:
-            print diff.__str__()
-    
+            log(diff.__str__())
+
         if options.analyse:
-    
+
             diffblocks = []
             index = 0
             while index < len(diffs) - 1:
@@ -288,16 +329,22 @@ def main():
                 if length > 1:
                     diffblocks.append((diffs[index], length))
                 index = end
-    
+
             diffblocks.sort()
-    
+
             if len(diffblocks) > 0:
-                print
-                print "Difference blocks: (sorted by length, ignoring single isolated differences)"
-                print "-" * 80
-        
-                for diff in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
-                    i = diff[0]
+                log("")
+                log("Difference blocks: (sorted by length, ignoring single isolated differences)")
+                log("-" * 80)
+
+                for (diff, length) in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
+                    address = diff.address
+                    if "," in address:
+                        bank = int(address.split(',')[0], 8)
+                        offset = int(address.split(',')[1], 8)
+                        i = 010000 + bank * 02000 + offset
+                    else:
+                        i = int(address, 8)
                     line = "%06o (" % i
                     offset = 02000 + (i % 02000)
                     bank = i / 02000
@@ -307,40 +354,44 @@ def main():
                         line += "   %04o)   " % (i + 04000)
                     else:
                         line += "%02o,%04o)   " % (bank, offset)
-                    line += "%6d" % diff[1]
+                    line += "%6d" % length
                     block = listing_analyser.findBlock(blocks, i)
                     if block:
                         line += "   " + block.getInfo()
-                    print line
-                print "-" * 80
-    
+                    log(line)
+                log("-" * 80)
+
             counts = []
             for module in diffcount:
                 counts.append((module, diffcount[module]))
             counts.sort()
-    
-            if options.stats:
-                print
-                print "Per-module differences: (sorted by errors)"
-                print "-" * 80
-                for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
-                    print "%-48s %6d" % count
-                print "-" * 80
-        
-                print
-                print "Per-module differences: (sorted by module)"
-                print "-" * 80
-                for count in counts:
-                    print "%-48s %6d" % count
-                print "-" * 80
-        
-                print
-                print "Per-module differences: (sorted by include order)"
-                print "-" * 80
-                for module in includelist:
-                    print "%-48s %6d" % (module, diffcount[module])
-                print "-" * 80
 
+            if options.stats:
+                log("")
+                log("Per-module differences: (sorted by errors)")
+                log("-" * 80)
+                for count in sorted(counts, key=operator.itemgetter(1), reverse=True):
+                    log("%-48s %6d" % count)
+                log("-" * 80)
+
+                log("")
+                log("Per-module differences: (sorted by module)")
+                log("-" * 80)
+                for count in counts:
+                    log("%-48s %6d" % count)
+                log("-" * 80)
+
+                log("")
+                log("Per-module differences: (sorted by include order)")
+                log("-" * 80)
+                for module in includelist:
+                    log("%-48s %6d" % (module, diffcount[module]))
+                log("-" * 80)
+
+    log("Done", verbose=True)
+
+    if options.outfile:
+        options.outfile.close()
 
 if __name__=="__main__":
     sys.exit(main())
