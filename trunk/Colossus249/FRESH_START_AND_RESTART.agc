@@ -10,6 +10,7 @@
 # Mod history:	08/07/04 RSB.	Adapted from similar Luminary 131 file.
 #				Oddly, the 2 pages of introductory comments
 #				aren't present in Luminary.
+#		2010-08-29 JL	Added missing comment character. 
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -925,7 +926,7 @@ P00H		TC	RELDSP			# RELEASE DISPLAY SYSTEM
 		
 		CS	BIT7-8			# RESET IMUSE + KILL P20 BY TURNING OFF
 		MASK	FLAGWRD0
-		TS	FLAGWRD0					 REMDFLG
+		TS	FLAGWRD0		#			 REMDFLG
 		
 		CAF	DNLADP00
 
