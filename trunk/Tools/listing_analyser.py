@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 # Copyright 2010 Jim lawton <jim dot lawton at gmail dot com>
-# 
-# This file is part of yaAGC. 
+#
+# This file is part of yaAGC.
 #
 # yaAGC is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-# Python script to analyse the yaYUL listing file produced upon building an 
-# AGC system image. This script finds each change of address in the AGC 
-# sources (from the listing) and forms a list of code blocks ordered by 
-# resulting core (ROM) address. This allows differences between core files 
-# to be more easily traced to the relevant sectionsof the AGC sources. 
- 
+# Python script to analyse the yaYUL listing file produced upon building an
+# AGC system image. This script finds each change of address in the AGC
+# sources (from the listing) and forms a list of code blocks ordered by
+# resulting core (ROM) address. This allows differences between core files
+# to be more easily traced to the relevant sections of the AGC sources.
+
 import sys
 import glob
 
@@ -35,7 +35,7 @@ class CoreBlock:
         self.coreaddr = coreaddr    # Starting address in the core file.
         self.address = address      # Starting address in the listing.
         self.bank = bank            # Bank.
-        self.offset = offset        # Offset. 
+        self.offset = offset        # Offset.
         self.pagenum = pagenum      # Listing page number.
         self.module = module        # Source module.
 
@@ -52,9 +52,7 @@ class CoreBlock:
 def analyse(listing):
     """Analyse the supplied yaYUL listing file, and return an address map, ordered by core address. """
 
-    page = 0
     linenum = 0
-    start = True
     pagenum = 0
     blocks = []
 
@@ -67,12 +65,16 @@ def analyse(listing):
                     if len(elems) > 1:
                         if elems[1].startswith('$'):
                             module = elems[1][1:].split('.')[0]
-                        if "## Page" in line and "scans" not in line:
-                            pagenum = line.split()[3]
+                        if "# Page" in line and "scans" not in line and "Pages" not in line:
+                            try:
+                                pagenum = line.split()[3]
+                            except:
+                                print line
+                                raise
                             if pagenum.isdigit():
                                 pagenum = int(pagenum)
                             else:
-                                print >>sys.stderr,"%s: line %d, invalid page number \"%s\"" % (sfile, linenum, pagenum)
+                                print >>sys.stderr,"%s: line %d, invalid page number \"%s\"" % (listing, linenum, pagenum)
                     if len(elems) > 2:
                         if elems[2] == "COUNT*":
                             address = elems[1]
@@ -110,8 +112,12 @@ def printBlocks(blocks):
 
 
 def main():
-    
+
     lfiles = glob.glob('*.lst')
+
+    if len(lfiles) == 0:
+        print "Error: no listing file!"
+        sys.exit()
 
     if len(lfiles) > 1:
         print "Warning: multiple listing files!"
