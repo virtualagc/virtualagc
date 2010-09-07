@@ -111,6 +111,7 @@
  D1     PZE     ,,1
  D2     PZE     ,,2
  COUNT  PZE
+ IND	PZE
  TWO    DEC     2.
  TEMP   PZE
         END
