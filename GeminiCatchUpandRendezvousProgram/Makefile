@@ -26,27 +26,30 @@
 #	4.	Provide replacements for the now-missing FORTRAN II
 #		intrinsic functions (INTRINSIC.f).
 
-# Uncomment to put debugging stuff into the executables.
+# Uncomment as appropriate.
 DEBUG=-g -O0
+#DEBUG=-O2
 
 # If you use g77, then the CLOCKF function I've supplied in INTRINSIC.f
 # doesn't work ... for me, anyhow.
-COMPILER=gfortran -ffixed-form ${DEBUG}
-#COMPILER=g77 -ff66 -Wall ${DEBUG}
+COMPILER=gfortran -ffixed-form -fno-automatic ${DEBUG}
+#COMPILER=g77 -ff66 -Wall -fno-automatic ${DEBUG}
 
 default: MAIN7 BENCH7
 
 .PHONY: clean
 clean:
-	-rm MAIN7 BENCH7 *.for
+	-rm MAIN7 BENCH7 *.for *.o
 
 MAIN7:	MAIN7.for \
 	STATE.for \
 	QUANT.for \
 	INSERT.for \
-	ASM.for \
-	SENSE.for \
-	INTRINSIC.for
+	INTRINSIC.f \
+	ASM.o \
+	SENSE.o \
+	TCTRL.o \
+	MEDP3.o
 	${COMPILER} -o $@ $^
 
 BENCH7:	BENCH7.for \
@@ -65,10 +68,14 @@ BENCH7:	BENCH7.for \
 	ALIGNP.for \
 	TDPRED.for \
 	WAIT5.for \
-	ASM.for \
-	SENSE.for \
-	INTRINSIC.for
+	INTRINSIC.f \
+	ASM.o \
+	SENSE.o
 	${COMPILER} -o $@ $^
+
+# Compiles any C-language functions I needed to port assembly code.
+%.o:	%.c
+	gcc ${DEBUG} -Wall -c -o $@ $^
 
 # Creates temporary files from *.f named *.for to hold the dynamically
 # transformed FORTRAN code.  The transformations performed are as follows:
