@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	04/13/03 RSB.	Began.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-08-24 JL	Added missing page number.
 #
 # The contents of the "Luminary131" files, in general, are
 # transcribed from a scanned document obtained from MIT's website,
@@ -181,7 +182,7 @@ VXSCAL		2DEC	-.4020043770		# SCALES -.644 FT/SEC/BIT TO 2(18) M/CS.
 KPIP		DEC	.0512			# SCALES DELV TO UNITS OF 2(5) M/CS.
 KPIP1		2DEC	.0128			# SCALES DELV TO UNITS OF 2(7) M/CS.
 KPIP2		2DEC	.0064			# SCALES DELV TO UNITS OF 2(8) M/CS.
-
+# Page 47
 ALTCONV		2DEC	1.399078846 B-4		# CONVERTS M*2(-24) TO BIT UNITS *2(-28).
 ARCONV1		2DEC	656.167979 B-10		# CONV. ALTRATE COMP. TO BIT UNITS
 

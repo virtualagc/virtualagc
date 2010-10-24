@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/08/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-08-24 JL	Fixed page 1502 number.
 
 # Page 1482
 # PROGRAM NAME:		1/ACCS
@@ -962,7 +963,7 @@ NETNEG		CS	-.03R/S2	# ANET LESS THAN AMIN -- SET EQUAL TO AMIN
 		TS	ANET
 		TCF	1/NETMIN +1	# CONTINUE AS IF NOTHING HAPPENED.
 
-# Page 1503
+# Page 1502
 FIXMIN		CCS	SIGNAOS
 		CA	TWO		# IF AOS NEG, ACCSW = +1
 		AD	NEGONE		# IF AOS POS, ACCSW = -1

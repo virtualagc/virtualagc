@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/07/03 RSB.	Began transcribing.
 # 		05/14/05 RSB.	Corrected website reference above.
+#		2010-08-24 JL	Fixed page 264 number.
 
 # Page 250
 		BANK	12
@@ -546,7 +547,7 @@ SURFREJ		CCS	MARKCNTR	# IF MARK DECREMENT COUNTER
 		TS	MARKCNTR
 		TC	RESUME
 
-# Page 265
+# Page 264
 # MARKTYPE TESTS TO SEE IF LEM ON LUNAR SURFACE.  IF IT IS RETURN TO LOC+1
 
 MARKTYPE	CS	FLAGWRD8	# SURFFLAG ******** TEMPORARY ******

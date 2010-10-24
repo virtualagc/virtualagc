@@ -10,6 +10,7 @@
 # Mod history:	04/23/03 RSB.	Began.
 #		05/04/03 RSB.	Draft finished.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-08-24 JL	Added missing page number.
 #
 # The contents of the "Luminary131" files, in general, are
 # transcribed from a scanned document obtained from MIT's website,
@@ -2439,6 +2440,8 @@ P21TIME		EQUALS	RANGRDOT +2	# I(2)TMP
 
 SCAXIS		EQUALS	P21TIME +2	# I(6)
 POINTVSM	EQUALS	SCAXIS +6	# I(6)
+
+# Page 154
 
 # ******* OVERLAY NUMBER 3 IN EBANK 7 *******
 

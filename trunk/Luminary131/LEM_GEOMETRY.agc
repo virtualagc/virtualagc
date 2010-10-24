@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/10/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-08-24 JL	Fixed page 330 number.
 
 # Page 327
 		BANK	23
@@ -113,7 +114,7 @@ RRANGLES	STORE	32D
 		SR1
 		STCALL	COSTH
 			ARCTRIG
-# Page 331
+# Page 330
 		PUSH	DAD		# MODE 1 SHAFT TO 2.
 			LODPHALF
 		STOVL	6

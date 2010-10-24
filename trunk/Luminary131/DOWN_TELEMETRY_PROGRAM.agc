@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/29/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-08-24 JL	Fixed page 995 number.
 
 # Page 987
 # PROGRAM NAME -- DOWN TELEMETRY PROGRAM
@@ -334,7 +335,7 @@ SUBLIST		EQUALS 	DNQ
 
 # MOD BY -- DENSMORE -- JUNE 1969 -- ELIMINATE ERASABLE DUMP COUNT
 
-# Page 996
+# Page 995
 # SUBROUTINE NAME -- DNDUMP
 #
 # FUNCTIONAL DESCRIPTION -- TO SEND (DUMP) ALL 8 BANKS OF ERASABLE STORAGE TWICE.  BANKS ARE SENT ONE AT A TIME

@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/27/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website references above.
+#		2010-08-24 JL	Fixed page numbers.
 
 # Page 857
 		BANK	37
@@ -1011,7 +1012,7 @@ BITS4-7		OCT	110
 1-30KFT		2DEC	16768072 B-24	# DPPOSMAX-30KFT
 6KFT/SEC	DEC	18.288 B-7	# 6000 FT/SEC AT 2(7) M/CS
 
-# Page 882.
+# Page 882
 UPDATCHK	CAF	NOLRRBIT	# SEE IF LR UPDATE INHIBITED.
 		MASK	FLGWRD11
 		CCS	A
@@ -1372,7 +1373,7 @@ NOLITE		CA	LRMCTR		# SET S = M
 		ADRES	VXINH		# COMPONENT, AS ERROR MAY BE DUE TO CROSS
 		TCF	ENDVDAT		# LOBE LOCK UP NOT DETECTED ON X AXIS.
 
-# Page 891
+# Page 890
 # ********************************************************************************
 # LRVJOB IS SET WHEN THE LEM IS BELOW 15000 FT DURING THE LANDING PHASE
 # THIS JOB INITIALIZES THE LANDING RADAR READ ROUTINE FOR 5 VELOCITY
