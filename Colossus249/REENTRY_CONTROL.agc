@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/21/04 RSB.	Began transcribing.
+#		2010-10-24 JL	Indentation fixes. Added missing # in comment.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -252,7 +253,7 @@ DSTORE		STOVL	D		# ACCELERATION USED TO APPROX DRAG
 			VEL
 		VXV	UNIT		# UNI = UNIT(V*R)
 # Page 807
-		UNITR
+			UNITR
 		STORE	UNI		# .5 UNI		REF COORDS.
 		
 		BOFF	DLOAD
@@ -1101,7 +1102,7 @@ KEP2		DLOAD	DSU		# IF Q7F+KDMIN -D NEG, GO TO FINAL PHASE.
 			.05GSW		# IF D < .06G, SET ROLL COMMAND = 0.
 			+2
 			3ZEROS		# SET ROLLC & ROLLHOLD =0.
-	+2	STCALL	ROLLC		# (SP ROLLHOLD FOLLOWS DP ROLLC)
+ +2		STCALL	ROLLC		# (SP ROLLHOLD FOLLOWS DP ROLLC)
 			P62.3		# CALC DESIRED GIMBAL ANGLES AT PRESENT
 					# RN, VN TO YIELD TRIM ATTITUDE.
 					# AVAILABLE IN CPHI'S FOR N22.
@@ -1224,7 +1225,7 @@ HAVDNRNG	STORE	DNRNGERR	# = (PREDANG - THETA) /360
 GONEGLAD	DLOAD			# SET L/D = -LAD
 			GONEGLAD	# (ANY NEGATIVE NUMBER WILL DO)
 			
-GOMAXL/D	RTB	DMP		L/D = LAD SIGN(MPAC)
+GOMAXL/D	RTB	DMP		# L/D = LAD SIGN(MPAC)
 			SIGNMPAC
 			LAD
 		STORE	L/D		# AND FALL INTO GLIMITER SECTION

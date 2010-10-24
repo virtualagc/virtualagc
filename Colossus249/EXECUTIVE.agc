@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/28/04 RSB.	Adapted from correspoinding Luminary131 file.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -87,7 +88,7 @@ CHANG2		CS	LOC		# NEGATIVE LOC SHOWS JOB = INTERPRETIVE.
 # ITRACE (4) REFERS TO "CHANG2"
 # Page 1191
 		TS	L
-	+2	CAF	EXECBANK
+ +2		CAF	EXECBANK
  		TS	BBANK
 		TCF	CHANJOB -1
 
@@ -213,13 +214,13 @@ NEXTCORE	CAF	COREINC
 # Page 1195
 # THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.
 
-	-2	LXCH	LOC
-	-1	CAE	BANKSET		# BANKSET, NOT BBANK, HAS RIGHT CONTENTS.
+ -2		LXCH	LOC
+ -1		CAE	BANKSET		# BANKSET, NOT BBANK, HAS RIGHT CONTENTS.
 CHANJOB		INHINT
 		EXTEND
 		ROR	SUPERBNK	# PICK UP CURRENT SBANK FOR BBCON
 		XCH	L		# LOC IN A AND BBCON IN L.
-	+4	INDEX	NEWJOB
+ +4		INDEX	NEWJOB
 		DXCH	LOC
 		DXCH	LOC
 
@@ -493,12 +494,9 @@ NUDIRECT	EXTEND			# TURN THE GREEN LIGHT BACK ON.
 #		TCF	SUPDXCHZ	# WITH 2CADR OF DESIRED LOCATION IN A + l.
 
 SUPDXCHZ	XCH	L		# BASIC.
-	+1	EXTEND
+ +1		EXTEND
 		WRITE	SUPERBNK
 		TS	BBANK
 		TC	L
 
 NEG100		OCT	77677
-
-
-

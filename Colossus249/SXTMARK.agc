@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/07/04 RSB.	Began data entry.
+#		2010-10-24 JL	Pseudo-label indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -273,7 +274,7 @@ KEYCALL		CAF	OCT37			# NOT MARK OR MKREJECT, SEE IF KEYCODE
 		TC	POSTJUMP
 		CADR	KEYCOM			# IT'S A KEY CODE, NOT A MARK.
 		
-	+3	TC	ALARM			# ALARM IF NO INBITS
+ +3		TC	ALARM			# ALARM IF NO INBITS
 		OCT	113
 		TC	RESUME
 		

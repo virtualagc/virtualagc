@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/28/04 RSB.	Adapted from corresponding Luminary 131 file.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -214,7 +215,7 @@ NEXTINCL	INDEX	CTLIST
 		XCH	CTLIST		# SET CTLIST TO NEGATIVE AND PLACE(CODING)
 		COM			# UNCOMPLEMENTED DNADR INTO A.    (FOR LA)
 		XCH	CTLIST		#                                 (ST IN )
-	+4	INCR	A		#                                 (CTLIST)
+ +4		INCR	A		#                                 (CTLIST)
  		TS	DNECADR		# SAVE DNADR
 		AD	MINTIME2	# TEST FOR TIME2 (NEG. OF ECADR)
 		CCS	A
@@ -222,8 +223,8 @@ NEXTINCL	INDEX	CTLIST
 MINB1314	OCT	47777		# MINUS BIT 13 AND 14 (CAN'T GET HERE)
 		TCF	SETWO +1	# DON'T SET WORD ORDER CODE
 SETWO		TC	WOZERO		# GO SET WORD ORDER CODE TO ZERO.
- 	+1	CA	DNECADR		# RELOAD A WITH THE DNADR.
- 	+2	AD	MINB1314	# IS THIS A REGULAR DNADR?
+ +1		CA	DNECADR		# RELOAD A WITH THE DNADR.
+ +2		AD	MINB1314	# IS THIS A REGULAR DNADR?
  		EXTEND
 		BZMF	FETCH2WD	# YES.  (A MUST NEVER BE ZERO)
 		AD	MINB12		# NO.  IS IT A POINTER (DNPTR) OR A
@@ -320,7 +321,7 @@ NEXTINSL	INDEX	SUBLIST
 		TS	SUBLIST		# SAVE A.
 		CA	NEGONE		# SET SUBLIST TO MINUS
 		XCH	SUBLIST		# RETRIEVE A.
-	+4	INCR	A
+ +4		INCR	A
  		TS	DNECADR		# SAVE DNADR
 		TCF	SETWO +2	# GO USE COMMON CODING (PROLEMS WOULD
 					# OCCUR IF THE PROGRAM ENCOUNTERED A
@@ -402,7 +403,7 @@ SUBLIST		EQUALS 	DNQ
 # Page 1083
 DNDUMPI		CA	ZERO		# INITIALIZE DOWNLINK
 		TS	DUMPLOC		# ERASABLE DUMP
-	+2	TC	SENDID		# GO SEND ID AND SYNCH BITS
+ +2		TC	SENDID		# GO SEND ID AND SYNCH BITS
 		CA	LDNDUMP1	# SET DNTMGOTO
 		TS	DNTMGOTO	# TO LOCATION FOR NEXT PASS
 		CA	TIME1		# PLACE TIME1
@@ -454,6 +455,3 @@ SENDID		EXTEND			# ** ENTRANCE USED BY ERASABLE DUMP PROG. **
 		CAF	LOWIDCOD	# PLACE SPECIAL ID CODE INTO L
 		XCH	L		# AND ID BACK INTO A
 		TCF	DNTMEXIT	# SEND DOWNLIST ID CODE(S).
-
-
-

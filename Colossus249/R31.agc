@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/11/04 RSB.	Began adapting from corresponding Luminary131
 #				source file.
+#		2010-10-24 JL	Fixed indentation of last line (interpretive operand).
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -260,6 +261,5 @@ R34LOS		EXIT
 		CALL	
 			SXTNB
 		STCALL	12D
-		R34ANG
-				
-
+			R34ANG
+	

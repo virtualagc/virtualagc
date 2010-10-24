@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/30/04 RSB.	Began adapting from corresponding Luminary131 file.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -217,7 +218,7 @@ TFFCONMU	VLOAD	UNIT		# COME HERE WITH TFFRTMU LOADED.
 		BZE	BDDV		# SET 1/ALFA =0, TO SHOW SMALL ALFA
 			+2
 			TFF1/4
-	+2	STORE	TFF1/ALF	# 1/ALFA  E:(-22-2NA) M:(-20-2NA)
+ +2		STORE	TFF1/ALF	# 1/ALFA  E:(-22-2NA) M:(-20-2NA)
 DUMPCNIC	RVQ
 					#			39 W
 # Page 1368
@@ -302,7 +303,7 @@ TFFRP/RA	DLOAD	DMP
 			+3
 MAXRA		DLOAD			# RAPO CALC IS NOT VALID.  SET RAPO =
 			NEARONE		# POSMAX AS A TAG.
-	+3	STORE	RAPO		# APOGEE RADIUS  M  E:(-29) M:(-27)
+ +3		STORE	RAPO		# APOGEE RADIUS  M  E:(-29) M:(-27)
 DUMPRPRA	RVQ
 					#			30 W
 # Page 1370
@@ -407,7 +408,7 @@ CALCTPER	SETGO			# ENTER WITH RPER IN MPAC
 			+3
 CALCTFF		CLEAR			# ENTER WITH RTERM IN MPAC
 			TFFSW
-	+3	STORE	RTERM		# E:(-29) M:(-27)
+ +3		STORE	RTERM		# E:(-29) M:(-27)
 		SL*
 			0,1		# X1=-NR
 		STORE	NRTERM		# RTERM  E:(-29+NR) M:(-27+NR)
@@ -429,7 +430,7 @@ CALCTFF		CLEAR			# ENTER WITH RTERM IN MPAC
 			TFFSW
 			+2		# IF TFF, CONTINUE
 			TFFZEROS	# IF TPER, SET Q2 = 0
-	+2	BMN	SQRT		# E:(-16) M:(-15)
+ +2		BMN	SQRT		# E:(-16) M:(-15)
 			MAXTFF1		# NO FREE FALL CONIC TO RTERM FROM HERE
 					# RESET PDL, SET TFF=POSMAX, AND EXIT.
 

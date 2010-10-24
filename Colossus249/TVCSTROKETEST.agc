@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	08/23/04 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -258,7 +259,7 @@ REVUP		TS	REVS		# ALL REVERSALS EXCEPT LAST OF SET
 		DOUBLE			# 2 x 1/2AMP
 		TCF	+4
 		
-	+4	CS	ONE		# FINAL REVERSAL, THIS SET
+ +4		CS	ONE		# FINAL REVERSAL, THIS SET
 		TS	REVS		# PREPARE TO BRANCH TO NEW BURST
 		CA	N		# JUST RETURN TO ZERO, FINAL SLOPE OF SET
 		TS	CADDY		# CADUP
@@ -266,4 +267,3 @@ REVUP		TS	REVS		# ALL REVERSALS EXCEPT LAST OF SET
 		CS	STROKER		# CHANGE SIGN OF SLOPE
 		TS	STROKER
 		TC	BUNKER		# EXIT AT A REVERSAL (SLOPE CHANGE)
-		

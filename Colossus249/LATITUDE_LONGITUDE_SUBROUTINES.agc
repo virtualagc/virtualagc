@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/28/04 RSB.	Adapted from corresponding Luminary131 file.
+#		2010-10-25 JL	Indentation fix.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -183,7 +184,7 @@ GETERAD		DLOAD	DSQ
 			B2XSC
 		SR4R
 		STORE	ERADM
-			RVQ
+		RVQ
 
 # THE FOLLOWING CONSTANTS WERE COMPUTED WITH A=6378166, B=6356784 METERS
 # B2XSC = B**2 SCALED B-51

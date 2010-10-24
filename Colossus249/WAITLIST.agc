@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	08/28/04 RSB.	Began adapting from similar Luminary131 file.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -139,7 +140,7 @@ WAITLIST	INHINT
 		EXTEND
 		INDEX	WAITEXIT	# IF TWIDDLING, THE TS SKIPS TO HERE
 		DCA	0		# PICK UP 2CADR OF TASK.
-	-1	TS	WAITADR		# BBCON WILL REMAIN IN L
+ -1		TS	WAITADR		# BBCON WILL REMAIN IN L
 DLY2		CAF	WAITBB		# ENTRY FROM FIXDELAY AND VARDELAY.
 		XCH	BBANK
 		TCF	WAIT2
@@ -192,7 +193,7 @@ SVCT3		CCS	FLAGWRD2	# DRIFT FLAG
 		TCF	TASKOVER
 		TCF	TASKOVER
 
-	+3	CAF	PRIO35		# COMPENSATE FOR NBD COEFFICIENTS ONLY.
+ +3		CAF	PRIO35		# COMPENSATE FOR NBD COEFFICIENTS ONLY.
 		TC	NOVAC		#	ENABLE EVERY 81.93 SECONDS
 		EBANK=	NBDX
 		2CADR	NBDONLY
@@ -279,35 +280,35 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 		TC	WTLST2
 		OCT	1
 
-	+4	CCS	A		# TEST TD - T3 + 1
+ +4		CCS	A		# TEST TD - T3 + 1
 		AD	LST1 +2
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	2
 
-	+4	CCS	A		# TEST TD - T4 + 1
+ +4		CCS	A		# TEST TD - T4 + 1
 		AD	LST1 +3
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	3
 
-	+4	CCS	A		# TEST TD - T5 + 1
+ +4		CCS	A		# TEST TD - T5 + 1
 		AD	LST1 +4
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	4
 
-	+4	CCS	A		# TEST TD - T6 + 1
+ +4		CCS	A		# TEST TD - T6 + 1
 		AD	LST1 +5
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	5
 
-	+4	CCS	A		# TEST TD - T7 + 1
+ +4		CCS	A		# TEST TD - T7 + 1
 		AD	LST1 +6
 		TCF	+4
 		AD	ONE
@@ -315,14 +316,14 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 		OCT	6
 
 # Page 1211
-	+4	CCS	A	
+ +4		CCS	A	
 		AD	LST1 +7
 		TCF	+4
 		AD	ONE
 		TC	WTLST2
 		OCT	7
 
-	+4	CCS	A
+ +4		CCS	A
 WTABORT		TC	BAILOUT		# NO ROOM IN THE INN
 		OCT	1203
 		
@@ -547,5 +548,3 @@ GETCADR		DXCH	LONGCADR	# GET THE LONGCALL THAT WE WISHED TO START
 		DTCB			# AND TRANSFER CONTROL TO IT
 
 TSKOVCDR	GENADR	TASKOVER
-
-

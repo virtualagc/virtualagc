@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -61,7 +62,7 @@ ALARM2		TS	ALMCADR
 BORTENT		TS	L
 
 PRIOENT		CA	BBANK
-	+1	EXTEND
+ +1		EXTEND
 		ROR	SUPERBNK	# ADD SUPER BITS.
 		TS	ALMCADR +1
 

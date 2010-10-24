@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/11/04 RSB.	Began transcribing.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -417,7 +418,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 		EXTEND
 		READ	LOSCALAR
 		TS	L
-	+4	CS	POSMAX
+ +4		CS	POSMAX
 		AD	L
 		EXTEND
 		BZF	FINETIME +1
@@ -433,7 +434,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 #
 # FUNCTIONAL DESCRIPTION
 #
-# THIS SECTON CONSISTS OF PRELAUNCH ALIGNMENT AND GYRO DRIFT TESTS
+# THIS SECTION CONSISTS OF PRELAUNCH ALIGNMENT AND GYRO DRIFT TESTS
 # INTEGRATED TOGETHER TO SAVE WORDS.  COMPASS IS COMPLETELY RESTART
 # PROOFED EXCEPT FOR THE FIRST 30 SECONDS OR SO.  PERFORMANCE TESTS OF
 # THE IRIGS IS RESTART PROOFED ENOUGH TO GIVE 75 PERCENT CONFIDENCE THAT

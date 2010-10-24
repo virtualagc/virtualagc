@@ -11,6 +11,7 @@
 #				Oddly, the 2 pages of introductory comments
 #				aren't present in Luminary.
 #		2010-08-29 JL	Added missing comment character. 
+#		2010-10-24 JL	Pseudo-label indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -24,7 +25,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -1004,7 +1005,7 @@ NOUVEAU		CAF	BIT7
 		TCF	+3		
 		TC	DOWNFLAG		# NO, RESET IMUINUSE FLAG
 		ADRES	IMUSE			# BIT 8 FLAG 0
-	+3	INDEX	MINDEX
+ +3		INDEX	MINDEX
 		CAF	DNLADMM1		# OBTAIN APPROPRIATE DOWNLIST ADDRESS
 
 		INHINT
@@ -1072,7 +1073,7 @@ SETMAXER	TC	BANKCALL
 		CADR	SETMAXDB
 		
 RAKE		CAF	ELEVEN			# THIS PART CLEARS FLAGWORD BITS.
-	+1	TS	MPAC			# LOOP COMES HERE
+ +1		TS	MPAC			# LOOP COMES HERE
 		INDEX	MPAC
 		CS	FLAGTABL
 		INDEX	MPAC

@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/25/04 RSB.	Began transcribing.
+#		2010-10-25 JL	Fixed page number.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -384,7 +385,7 @@ FDAIDSP1	ADS	RCSFLAGS
 		TC	NEEDLER
 KRESUME1	TCF	RESUME		# END PHASE 1
 
-# Page 986
+# Page 985
 # FDAI ATTITUDE ERROR DISPLAY SUBROUTINE
 #
 # PROGRAM DESCRIPTION:	D. KEENE  5/24/67

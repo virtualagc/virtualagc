@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/21/04 RSB.	Began transcribing.
+#		2010-10-24 JL	Indentation fixes. Added missing # in comment.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -530,7 +531,7 @@ TMRAD100	STQ	CLEAR
 		LXC,1	CALL
 			CONICX1
 			TIMERAD
-		STOVL	V(T2)/					PL00D
+		STOVL	V(T2)/		#			PL00D
 		STADR
 		STODL	R(T2)/
 			T
@@ -1564,7 +1565,7 @@ GAMDV10		STQ
 		BOV
 			GAMDV20
 		PUSH	DSU		# X(T1)MAX-X(T1)MIN=BETA8	B5 PL20D
-		EPC9RTE
+			EPC9RTE
 		BMN	DLOAD
 			GAMDVX		# BOUNDS CLOSE TOGETHER
 			18D

@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	08/22/04 RSB.	Transcribed.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -84,7 +85,7 @@ TVCDAPON	LXCH	BANKRUPT	# T5 RUPT ARRIVAL (CALL BY DOTVCON - P40)
 		QXCH	QRUPT		#	TVCINIT4 ARE ENTRIES)
 MRCLEAN		CAF	NZERO		# NUMBER TO ZERO, LESS ONE  (MUST BE ODD)
 					#	TVC RESTARTS ENTER HERE  (NEW BANK)
-	+1	CCS	A
+ +1		CCS	A
 		TS	CNTR
 		CAF	ZERO
 		TS	L
@@ -206,7 +207,7 @@ TVCINIT4	CAF	ZERO		# SET TVCPHASE TO INDICATE TVCDAPON-THRU-
 		CAE	MASSTMP		# COPYCYCLE
 		TS	CSMMASS
 		
-	+3	CAF	.5SEC		# CALL TVCEXECUTIVE (ROLLDAP CALL, ETC)
+ +3		CAF	.5SEC		# CALL TVCEXECUTIVE (ROLLDAP CALL, ETC)
 		TC	WAITLIST
 		EBANK=	BZERO
 		2CADR	TVCEXEC

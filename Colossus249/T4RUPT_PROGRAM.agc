@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/06/04 RSB.	Adapted from similar Luminary 131 file.
 #		2010-08-29 JL	Fixed indentation.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -302,9 +303,9 @@ IMUMON		CA	IMODES30	# SEE IF THERE HAS BEEN A CHANGE IN THE
 		BZMF	TLIM		# CHANGE IN IMU TEMP.
 		TCF	NXTIFBIT	# BEGIN BIT SCAN.
 
- 	-1	AD	ONE		# (RE-ENTERS HERE FROM NXTIFAIL.)
+ -1		AD	ONE		# (RE-ENTERS HERE FROM NXTIFAIL.)
 NXTIFBIT	INCR	RUPTREG1	# ADVANCE BIT POSITION NUMBER.
- 	+1	DOUBLE
+ +1		DOUBLE
  		TS	A		# SKIP IF OVERFLOW.
 		TCF	NXTIFBIT	# LOOK FOR BIT.
 
@@ -400,7 +401,7 @@ PROCTNON	CS	BITS7&8
 		TC	ALARM		# ALARM IF NOT
 		OCT	213
 
-  +3		TC	CAGESUB
+ +3		TC	CAGESUB
  		CAF	90SECS
 		TC	WAITLIST
 		EBANK=	CDUIND
@@ -548,9 +549,9 @@ C33TEST		CA	IMODES33		# SEE IF RELEVANT CHAN33 BITS HAVE
 # Page 144
 		TCF	NXTIBT +1		# SCAN FOR BIT CHANGES.
 
- 	-1	AD	ONE
+ -1		AD	ONE
 NXTIBT		INCR	RUPTREG1
- 	+1	DOUBLE
+ +1		DOUBLE
  		TS	A			# (CODING IDENTICAL TO CHAN 30).
 		TCF	NXTIBT
 
