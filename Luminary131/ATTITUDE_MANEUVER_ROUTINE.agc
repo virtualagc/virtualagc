@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/10/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-08-24 JL	Added missing page number comments.
 
 # Page 349
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE -- KALCMANU
@@ -304,6 +305,7 @@
 #				[ -U		 U		 0  ]
 #				[   Y 		  X		    ]
 #
+# Page 355
 #	_
 #	U	=	UNIT ROTATION VECTOR RESOLVED INTO S/C AXES.
 #	A	=	ROTATION ANGLE
@@ -348,6 +350,7 @@
 #	1)	FIXED MEMORY		1059 WORDS
 #	2)	ERASABLE MEMORY		  98
 #	3)	STATE SWITCHES		   3
+# Page 356
 #	4)	FLAGS			   1
 #
 # JOB PRIORITIES
