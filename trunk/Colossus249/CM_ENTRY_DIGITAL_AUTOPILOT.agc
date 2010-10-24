@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/27/04 RSB.	Began transcribing.
+#		2010-10-24 JL	Indentation fixes.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -191,7 +192,7 @@ CM/DAPON	CA	EBAOG
 NOTYET		CA	.5SEC
 		TC	BANKCALL
 		CADR	DELAYJOB	# (DELAYJOB DOES INHINT)
-	+4	CA	BIT11		# GAMDIFSW = 94D BIT11, INITLY=0
+ +4		CA	BIT11		# GAMDIFSW = 94D BIT11, INITLY=0
 		MASK	CM/FLAGS	# IF ZERO, WAIT UNTIL CM/POSE UPDATE.
 		EXTEND
 		BZF	NOTYET
@@ -422,7 +423,7 @@ STBYDUMP	BZF	TASKOVER	# DAP NOT ARMED.
 		EBANK=	AOG
 ATDOTCAD	2CADR	ATTRATES
 
-# Page Page 1048
+# Page 1048
 # CALCULATE BODY ATTITUDE RATES AND INTEGRATE TO OBTAIN ATTITUDE ANGLES.
 #
 #	CB PHIDOT TCDU/180 = (CA PREL + SA RREL) TCDU/180
@@ -1278,4 +1279,3 @@ BUFLIM		=	XS/360		#	   4/(2 360)
 KTRCS		=	HALF		# 	   KT = (.25) 2 = .5
 
 # *** END OF DAPCSM  .95 ***
-

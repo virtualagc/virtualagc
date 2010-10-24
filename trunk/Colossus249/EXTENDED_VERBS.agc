@@ -22,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -613,10 +613,10 @@ ENATMA		TC	DOWNFLAG	# RESET STIKFLAG
 # Page 247
 
 		EBANK=	T5TVCDT
-STROKON		OCT	40102		# Missing line in 1701.pdf --- RSB 2004
+STROKON		CS	FLAGWRD6	# Missing line in 1701.pdf --- RSB 2004
 		MASK	OCT60000
 		EXTEND
-		OCT	62120		# Missing line in 1701.pdf --- RSB 2004
+		BZMF	ALM/END		# Missing line in 1701.pdf --- RSB 2004
 		CAF	PRIO30		# JOB REQUEST TO SET UP STROKE TEST,
 		TC	NOVAC		#	INCLUDING INITIALIZATIONS
 		SBANK=	PINSUPER	# RSB 2004

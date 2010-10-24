@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	08/24/04 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Fixed page numbers.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -439,7 +440,7 @@ ROLLSET		TS	TEMREG		# STORE DESIRED OGARATE (SCALED B-4)
 		EXTEND
 		MP	T6SCALE		# T6SCALE = 8/10.24
 		EXTEND
-# Page 960
+# Page 959
 		MP	1/CONACC	# SCALED AT 2(+9) SECSQ/REV
 		DDOUBL
 		DDOUBL
@@ -494,7 +495,7 @@ MAXTST		BZF	NOMXFIRE	# IF LESS THAN TMAXFIRE
 		CS	TMAXFIRE	# USE MAXIMUM
 		TS	TEMREG
 
-# Page 961
+# Page 960
 # SET UP SIGN OF REQUIRED TORQUE
 
 NOMXFIRE	CCS	TEMREG		# FOR TORQUE SIGN
@@ -548,7 +549,7 @@ SAMEJETS	BZF	TASKOVER	# IF JETS ON KEEP SAME JETS.  EXIT ROLL DAP
 		EXTEND
 		BZF	NO.9-11		# NOT 9-11, SO USE IT THIS TIME
 
-# Page 962
+# Page 961
 NO.13-15	CS	BIT1
 		MASK	ROLLWORD
 		TS	ROLLWORD	# CHANGE BIT 1 TO ZERO
@@ -588,7 +589,7 @@ T6ENABL		CAF	BIT15
 		WOR	CHAN13
 RDAPEND		TCF	TASKOVER	# EXIT ROLL DAP
 
-# Page 963
+# Page 962
 # THIS T6 TASK SHUTS OFF ALL ROLL JETS
 
 NOROLL1		LXCH	BANKRUPT	# SHUT OFF ALL (ROLL) JETS, (A T6 TASK
@@ -598,7 +599,7 @@ NOROLL1		LXCH	BANKRUPT	# SHUT OFF ALL (ROLL) JETS, (A T6 TASK
 KILLJETS	WRITE	CHAN6
 		TCF	NOQRSM
 
-# Page 964
+# Page 963
 # CONSTANTS FOR ROLL AUTOPILOT
 
 		EBANK=	BZERO

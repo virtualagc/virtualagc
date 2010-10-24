@@ -10,6 +10,7 @@
 # Mod history:	08/07/04 RSB.	Adapted from similar Luminary 131 file.
 #				Oddly, the 2 pages of introductory comments
 #				aren't present in Luminary.
+#		2010-10-25 JL	Fixed page number.
 #
 # The contents of the "Colossus249" files, in general, are transcribed
 # from a scanned document obtained from MIT's website,
@@ -23,7 +24,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -465,7 +466,7 @@ SIZETAB		TC	1.2SPOT -12006
 		DEC	0
 		DEC	0
 
-# Page 217
+# Page 216
 # PROGRAM DESCRIPTION: NEWPHASE						DATE:  11 NOV 1966
 # MOD: 1								ASSEMBLY:  SUNBURST REV
 # MOD BY: COPPS								LOG SECTION: PHASE TABLE MAINTENANCE

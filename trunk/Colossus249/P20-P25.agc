@@ -10,6 +10,7 @@
 # Mod history:	08/14/04 RSB.	Began transcribing.  (While there is a somewhat-
 #				similar source file for Luminary131, there is 
 #				almost useful overlap between the two.)
+#		2010-10-24 JL	Fixed page number.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -23,7 +24,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -602,7 +603,7 @@ R21END		TC	BANKCALL
 V53		VN	5300
 V0694		VN	0694
 
-# Page 569
+# Page 568
 # PREFERRED TRACKING ATTITUDE ROUTINE R61CSM
 #
 # PROGRAM DESCRIPTION

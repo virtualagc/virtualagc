@@ -8,6 +8,9 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/17/04 RSB.	Began transcribing.
+#		2010-10-24 JL	Indentation fixes.
+#		2010-10-24 JL	Fixed a pseudo-label on p751.
+#		2010-10-25 JL	Fixed page number.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +24,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -206,7 +209,7 @@ P62.2		EXTEND
 		TC	-5			# ENTER
 		TC	P61.3			# FOR PHASCHNG AND ENDOFJOB
 		
-(?)		TC	POSTJUMP
+ +3		TC	POSTJUMP
 		CADR	CM/DAPON		# DISABLE RCS DAP, ENABLE ENTRY DAP AND
 						# DO ATTITUDE HOLD.
 						
@@ -627,7 +630,7 @@ RETRN3		TC	ALARM
 RETRN2		TC	ALARM
 		OCT	01427		# IMU REVERSED
 		
-	+2	CAF	V05N09
+ +2		CAF	V05N09
 		TC	BANKCALL
 		CADR	GODSPR		# DO DISPLAY
 		CA	10SECS
@@ -1153,7 +1156,7 @@ VRCALC		VLOAD	DOT
 		BANK	10
 		SETLOC	P60S4
 		BANK
-# Page 776
+# Page 775
 		COUNT*	$$/S62.3
 		
 S62.3		SETPD	SLOAD

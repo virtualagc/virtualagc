@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/09/04 RSB.	Began adapting from corresponding Luminary131
 #				source file.
+#		2010-10-24 JL	Fixed page numbers.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -86,12 +87,12 @@
 		DAS	DELVX		# (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)
 		
 		CCS	BUF +2		# PIPAZ, PIPAY, PIPAX
-# Page 295
+# Page 296
 		AD	NEG1
 		TCF	1/PIPA1 +1
 		NOOP			# LESS THAN ZERO IMPOSSIBLE
 		RELINT
-# Page 296
+# Page 297
 
 IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
 		TS	BUF		# INDEX COUNTER.  IRIGX, IRIGY, IRIGZ.
@@ -142,7 +143,7 @@ IRIGZ		EXTEND
 		DCS	DELVY		# (PIPA PULSES) X 2(-14)
 		DXCH	MPAC
 		CA	ADSRAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
-# Page 297
+# Page 298
 		TC	GCOMPSUB	# -(ADSRAZ)(PIPAY)	(GYRO PULSES) X 2(+14)
 		
 		EXTEND
@@ -160,7 +161,7 @@ IRIGZ		EXTEND
 		CA	NBDZ		#	(GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	#	+(NBDZ)(DELTAT)	(GYRO PULSES) X 2(+14)
 
-# Page 298
+# Page 299
 		CCS	GCOMPSW		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
 		TCF	+2		# YES	
 		TCF	IRIG1		# NO	
@@ -203,7 +204,7 @@ GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 
 		TC	Q
 
-# Page 299
+# Page 300
 DRIFTSUB	EXTEND
 		QXCH	BUF +1
 
@@ -236,7 +237,7 @@ DRFTSUB2	CAF	TWO		# PIPAX, PIPAY, PIPAZ
 		TS	GCOMPSW		# YES -- SET GCOMPSW POSITIVE
 		TC	BUF +1		# NO
 		
-# Page 300
+# Page 301
 1/GYRO		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 		TS	BUF
 		
@@ -284,7 +285,7 @@ GCOMP1		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 V06N30S		VN	0630
 		TCF	ENDOFJOB
 
-# Page 301		
+# Page 302		
 NBDONLY		CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 		TCF	+3
 		TCF	+2
@@ -335,12 +336,12 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
 		CS	NBDZ		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# +(NBDZ)(DELTAT)	(GYRO PULSES) X 2(+14)
-# Page 302		
+# Page 303		
 		CCS	GCOMPSW		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
 		TCF	1/GYRO		# YES
 		TCF	ENDOFJOB	# NO
 
-# Page 303
+# Page 304
 FBIASSUB	XCH	Q
 		TS	BUF +1
 		

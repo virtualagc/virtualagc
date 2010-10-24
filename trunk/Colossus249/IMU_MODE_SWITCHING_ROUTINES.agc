@@ -8,6 +8,8 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+#		2010-10-24 JL	Indentation fixes.
+#		2010-10-24 JL	Fixed page number.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -182,7 +184,7 @@ COARS1		TS	CDUIND
 COARS2		TC	CAGETEST	# DON'T CONTINUE IF CAGED.
 		TS	ITEMP1		# SET TO +0.
 		CAF	TWO		# SET CDU INDICATOR.
-	+3	TS	CDUIND
+ +3		TS	CDUIND
 
 		INDEX	CDUIND
 		CCS	COMMAND		# NUMBER OF PULSES REQUIRED
@@ -524,7 +526,7 @@ STRTGYR2	CA	LGYRO		# JUMP ON PHASE COUNTER IN BITS 13-14.
 
 NORESET		TCF	IMUFINED	# DO NOT RESET POWER SUPPLY.
 # Page 1423
-	-2	CS	FOUR		# SPECIAL ENTRY TO REGRESS LGYRO FOR X.
+ -2		CS	FOUR		# SPECIAL ENTRY TO REGRESS LGYRO FOR X.
 		ADS	LGYRO
 
 GSELECT		INDEX	Q		# SELECT GYRO.
@@ -598,7 +600,7 @@ GMERGE		EXTEND			# IN MINOR PART.  THE MAJOR PART WILL BE
 		ADS	ITEMP2
 		CAF	ZERO
 
-	+4	INDEX	ITEMP1
+ +4		INDEX	ITEMP1
 		DXCH	1400
 # Page 1425
 		CA	ITEMP2		# ENTIRE COMMAND.
@@ -851,7 +853,7 @@ GOMANUR		CA	ATTCADR		# IS KALCMANU FREE
 		TC	P00DOO		# NO
 		OCT	1210		# 2 TRYING TO USE SAME DEVICE
 		
-	+3	EXTEND
+ +3		EXTEND
 		DCA	BUF2
 		DXCH	ATTCADR		# SAVE FINAL RETURN FOR KALCMAN3
 
@@ -996,7 +998,7 @@ PRESTAND	INHINT
 OCT62		EQUALS	.5SEC		# DEC 50 = OCT 62
 
 # THE LOW 5 BITS OF THE SCALER READS 10000 FOR THE FIRST INTERVAL AFTER A
-# Page 1437.
+# Page 1437
 # T1 INCREMENT.  IF SCALPREP DETECTS THIS INTERVAL THE T1,T2 AND SCALER
 # DATA ARE NOT COMPATIBLE AND RETURN IS TO L+1 FOR ANOTHER READING OF THE
 # DATA.  OTHERWISE, THE RETURN IS TO L+2 TO PROCEED.  ROUTINE ALSO PREPARES

@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/15/04 RSB.	Began transcribing.  (A little comes from the
 #				corresponding Luminary131 file.)
+#		2010-10-24 JL	Fixed page numbers.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -300,7 +301,7 @@ S30.1		STQ	DLOAD
 		STCALL	HAPO		# APOGEE ALT B+29
 			QTEMP
 
-# Page 637
+# Page 636
 # S31.1 PROGRAM DESCRIPTION		26DEC67
 # MOD.1 BY S.ZELDIN
 #
@@ -371,7 +372,7 @@ S31.1		STQ	DLOAD
 		STCALL	TPASS4		# FOR S40.1
 			QTEMP
 
-# Page 639
+# Page 638
 # SUBROUTINE NAME:	DELRSPL		(CONTINUATION OF V 62 IN CSM IF P11 ACTIVE)
 # TRANSFERRED COMPLETELY FROM SUNDISK, P30S REV 33.  9 SEPT 67.
 # MOD NO: 0	MOD BY: ZELDIN		DATE:

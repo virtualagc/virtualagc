@@ -14,6 +14,7 @@
 #				was working is that INTVEC isn't used for 
 #				anything.
 #		2010-08-30 JL	Added missing comment character. 
+#		2010-10-24 JL	Fixed page number.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -27,7 +28,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -2122,7 +2123,7 @@ PIPASCFZ	ERASE
 NBDX		ERASE			# GYRO BIAS DRIFT
 GBIASX		=	NBDX
 NBDY		ERASE
-# Page 84
+# Page 85
 NBDZ		ERASE
 
 ADIAX		ERASE			# ACCELERATION SENSITIVE DRIFT ALONG THE

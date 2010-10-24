@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/02/04 RSB.	Created.
+#		2010-10-24 JL	Fixed page number.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -21,7 +22,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -773,7 +774,7 @@
 # VELOCITY 3		XXXX.X FT/SEC		DP	BIT 1 OF HIGH REGISTER =
 #							 -7
 #							2   METERS/CENTI-SEC
-# Page 20
+# Page 21
 # -T-								  -2
 # G			XXX.XX G		SP	BIT 1 = 10   G
 #			(MAX 163.83)

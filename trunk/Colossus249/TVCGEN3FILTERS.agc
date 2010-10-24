@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	08/24/04 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website references above.
+#		2010-10-25 JL	Fixed page numbers.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -22,7 +23,7 @@
 #				Colossus 1A
 #
 #	Prepared by
-#			Massachussets Institute of Technology
+#			Massachusetts Institute of Technology
 #			75 Cambridge Parkway
 #			Cambridge, Massachusetts
 #	under NASA contract NAS 9-4065.
@@ -165,7 +166,7 @@
 		EBANK=	EP
 		COUNT*	$$/GEN3
 		
-# Page 968
+# Page 967
 # PITCH GEN3DAP FILTER.....
 
 NP0NODE		EXTEND			# FORM NODE NP0....COLLECT (PAST NP1)
@@ -212,7 +213,7 @@ BP1(NP0)	CS	NP0		# DPXDP MULTIPLY FOR DENOMINATOR COMPONENT
 		TS	L
 		TCF	+2
 		ADS	NP1TMP
-# Page 969
+# Page 968
 		CS	NP0
 		EXTEND
 		MP	BP1 +1
@@ -263,7 +264,7 @@ AP2(EP)		CAE	EP		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		EXTEND
 		MP	AP2 +1
 		ADS	NP2TMP +1
-# Page 970
+# Page 969
 		TS	L
 		TCF	+2
 		ADS	NP2TMP		# COMPLETED NODE NP2
@@ -303,7 +304,7 @@ AP3(EP)		CAE	EP		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		CADR	DELBARP		#	OFFSET-TRACKER-FILTER COMPUTATIONS,
 					# 	AND PITCH DAP COPYCYCLE.
 					
-# Page 971
+# Page 970
 # YAW GEN3DAP FILTER
 
 NY0NODE		EXTEND			# FORM NODE NY0....COLLECT (PAST NY1)
@@ -350,7 +351,7 @@ BY1(NY0)	CS	NY0		# DPXDP MULTIPLY FOR DENOMINATOR COMPONENT
 		TS	L
 		TCF	+2
 		ADS	NY1TMP
-# Page 972
+# Page 971
 		CS	NY0
 		EXTEND
 		MP	BY1 +1
@@ -401,7 +402,7 @@ AY2(EY)		CAE	EY		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		CAE	EY
 		EXTEND
 		MP	AY2 +1
-# Page 973
+# Page 972
 		ADS	NY2TMP +1
 		TS	L
 		TCF	+2
