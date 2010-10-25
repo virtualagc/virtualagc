@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/08/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1469
 		BANK	21
@@ -358,7 +359,7 @@ SETNEGU		EXTEND
 		TCF	POSALPH +2
 POSALPH		TS	ITEMP2			# STORE -ABS(.4*AOS) SCALED AT PI/8.
 		CA	BIT1
-	+2	INDEX	QRNDXER			# SGN(AOS) INTO NEGU
+ +2		INDEX	QRNDXER			# SGN(AOS) INTO NEGU
 		TS	NEGUQ			# STORE SGN(ALPHA) AS NEGU
 
 		CA	NZACCDOT

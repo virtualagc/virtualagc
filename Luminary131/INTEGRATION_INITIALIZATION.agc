@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/02/03 RSB.	Began transcribing.
 #		05/14/05 RSB.	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1203
 # 1.0 INTRODUCTION
@@ -676,7 +677,7 @@ TESTLOOP	BOF	CLRGO
 			+3
 			STATEFLG
 			INTEXIT		# STOP INTEGRATION
-	+3	SETPD	LXA,2
+ +3		SETPD	LXA,2
 			10D
 			PBODY
 		VLOAD	ABVAL

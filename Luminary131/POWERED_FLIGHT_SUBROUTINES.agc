@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/03/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1256
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
@@ -112,7 +113,7 @@ QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
 		EXTEND
 		QXCH	ITEMP1
 		CAF	FOUR
-	+4	MASK	SIX
+ +4		MASK	SIX
 		TS	ITEMP2
 		INDEX	ITEMP2
 		CA	CDUSPOT
@@ -300,7 +301,7 @@ CALCSMSC	EXIT
 
 XNBECADR	ECADR	XNB
 
-	-1	CAF	XNBECADR
+ -1		CAF	XNBECADR
 
 FLESHPOT	TS	TEM2
 		XCH	EBANK

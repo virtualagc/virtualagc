@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/07/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1439
 		BANK	17
@@ -514,7 +515,7 @@ TJLAW		CA	TJLAWADR
 		TCF	+3
 		TC	TJETLAW
 		TCF	AFTERTJ
-	+3	CS	DAPBOOLS	# DOCKED.  IF GIMBAL USABLE DO GTS CONTROL
+ +3		CS	DAPBOOLS	# DOCKED.  IF GIMBAL USABLE DO GTS CONTROL
 		MASK	USEQRJTS	#	ON THE NEXT PASS.
 		CCS	A		# USEQRJTS BIT MUST NOT BE BIT 15.
 		TS	COTROLER	# GIMBAL USABLE.  STORE POSITIVE VALUE.

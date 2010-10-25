@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/07/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1378
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -41,7 +42,7 @@ ALARM2		TS	ALMCADR
 BORTENT		TS	L
 
 PRIOENT		CA	BBANK
-	+1	EXTEND
+ +1		EXTEND
 		ROR	SUPERBNK	# ADD SUPER BITS.
 		TS	ALMCADR +1
 

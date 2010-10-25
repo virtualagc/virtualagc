@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/26/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Added missing # in comments.
 
 # Page 841
 		BANK	34
@@ -619,8 +620,8 @@ THETCOMP	VLOAD	UNIT
 			0D
 		DOT
 			WM
-		STOVL	30D						(6)
-		DOT	SL1						(0)
+		STOVL	30D		#				(6)
+		DOT	SL1		#				(0)
 		ARCCOS	SIGN
 			30D
 		RVQ

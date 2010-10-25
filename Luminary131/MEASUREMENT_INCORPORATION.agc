@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/01/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1148
 # INCORP1 -- PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITION
@@ -145,7 +146,7 @@ INCOR1C		TLOAD	ROUND
 		DDV	PUSH		# PD 0-1 = DELTAQ/A
 		GOTO
 			NEWZCOMP
-	-3	SSP
+ -3		SSP
 			S2
 			54D
 INCOR2		VLOAD	VXM*		# COMPUT OMEGA1,2,3

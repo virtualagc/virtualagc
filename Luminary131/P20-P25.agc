@@ -15,6 +15,7 @@
 #				the bottom of p. 595 using a replacement scan
 #				provided by Gary Neff.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Fixed p583 page number.
 
 # Page 501
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -3515,7 +3516,7 @@ THREEDEG	2DEC	.008333333	# THREE DEGREES, SCALED REVS, B0
 
 RRLOSVEC	EQUALS	RRTARGET
 
-# Page 584
+# Page 583
 # PROGRAM NAME -- LRS22.2 (DATA READ SUBROUTINE 2)
 # MOD. NO.: 1		BY: P. VOLANTE  SDC		DATE: 4-11-67
 #
