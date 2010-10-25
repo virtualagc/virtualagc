@@ -13,6 +13,7 @@
 # Mod history:	05/11/03 RSB.	Began transcribing.
 #		05/14/03 RSB.	First draft completed.
 #		06/06/03 RSB.	Fixed a bunch of typos in the comments.
+#		2010-10-25 JL	Fixed directive (COUNT# -> COUNT* on p446).
 
 # Page 397
 # PROGRAM NAME -- KEYBOARD AND DISPLAY PROGRAM
@@ -2323,7 +2324,7 @@ ENDHMSS		EQUALS
 
 		SETLOC	ENDRUTIN
 		
-		COUNT#	$$/PIN
+		COUNT*	$$/PIN
 MONITOR		CS	BIT15/14
 		MASK	NOUNCADR
 MONIT1		TS	MPAC +1		# TEMP STORAGE

@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/08/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1504
 # PROGRAM NAME:		SPSRCS
@@ -168,7 +169,7 @@ SPSSTART	CA	EDOT		# OUTER RATE LIMIT TEST
 		BZMF	TJZERO
 NEGTHRST	CS	HALF
 		TCF	POSTHRST +1
-	+7	CS	RATELIM2
+ +7		CS	RATELIM2
 		AD	EDOT
 		EXTEND
 		BZMF	POSTHRST
@@ -179,5 +180,3 @@ RATELIM1	=	CALLCODE	# = 00032, CORRESPONDING TO 1.73 DEG/SEC
 RATEDB1		=	TBUILDFX	# = 00045, CORRESPONDS TO 0.101 DEG/SEC
 
 # *** END OF LM DAP  .025 ***
-
-

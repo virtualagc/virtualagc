@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/08/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Added missin # in comment.
 
 # Page 268
 		BANK	7
@@ -1152,7 +1153,7 @@ TRMTRAK1	TC	DOWNFLAG
 		
 		INHINT
 		TC	IBNKCALL	# ZERO THE COMMANDED RATES TO STOP
-		CADR	STOPRATE	MANEUVER
+		CADR	STOPRATE	# MANEUVER
 		
 		TC	IBNKCALL
 		CADR	RESTORDB

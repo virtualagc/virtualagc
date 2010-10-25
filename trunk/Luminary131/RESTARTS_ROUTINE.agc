@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	06/05/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website references above.
+#		2010-10-25 JL	Added missing # in comment.
 
 # Page 1300
 		BANK	01
@@ -147,7 +148,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF IT'S
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
 		XCH	GOLOC -1	# PICK UP PRIO
-		TC	GOLOC -1	AND GO
+		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,
 		XCH	GOLOC -1	# SET UP NOVAC CALL,

@@ -13,6 +13,7 @@
 # Mod history:	06/08/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
 #		2010-08-24 JL	Fixed page 1502 number.
+#		2010-10-25 JL	Indentation fixes.
 
 # Page 1482
 # PROGRAM NAME:		1/ACCS
@@ -571,7 +572,7 @@ EPSILON		EQUALS	MPAC +1
 
 		COUNT*	$$/DAPAO
 
-	-1	TS	INGTS		# ZERO INGTS IN ASCENT
+ -1		TS	INGTS		# ZERO INGTS IN ASCENT
 1/ACCONT	CA	DB		# INITIALIZE DBVAL1,2,3
 		EXTEND
 		MP	BIT13

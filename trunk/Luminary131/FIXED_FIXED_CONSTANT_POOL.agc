@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	04/23/03 RSB.	Began.
 #		05/14/05 RSB	Corrected website reference above.
+#		2010-10-25 JL	Indentation fixes.
 #
 # The contents of the "Luminary131" files, in general, are
 # transcribed from a scanned document obtained from MIT's website,
@@ -193,7 +194,7 @@ OCT37776	OCT	37776
 DLOADCOD	OCT	40014
 DLOAD*		OCT	40015
 #		OCT	40023		# T4RUPT	RELTAB +7D
-BIT15+6	OCT	40040
+BIT15+6		OCT	40040
 OCT40200	OCT	40200
 #		OCT	44035		# T4RUPT	RELTAB +8D
 #		OCT	50037		# T4RUPT	RELTAB +9D
