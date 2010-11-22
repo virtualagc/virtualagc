@@ -1,5 +1,5 @@
  /*
-  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009-2010 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -56,6 +56,8 @@
 				default is NULL, in which case PrintDownlinkList
 				is used.  If non-NULL, then whateverit points
 				to is used in place of PrintDownlinkList.
+		11/22/10 RSB    Eliminated a compiler warning I suddenly
+                                encountered in Ubuntu 10.04.
   
 */
 
@@ -2062,7 +2064,7 @@ DecodeErasableDump (char *Title)
 {
   int i, j, row, col;
   Sclear ();
-  sprintf (&Sbuffer[0][0], Title);
+  sprintf (&Sbuffer[0][0], "%s", Title);
   sprintf (&Sbuffer[1][0], "ID=%05o  SYNC=%05o  PASS=%o  EBANK=%o  TIME1=%05o",
            DownlinkListBuffer[0], DownlinkListBuffer[1],
 	   (DownlinkListBuffer[2] >> 11) & 1,
