@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005,2008-2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2008-2010 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -54,6 +54,8 @@
 				readline() and rl_getc().
 		08/02/09 RSB	Tried to make it work again without readline
 				support.
+		11/22/10 RSB    Eliminated a compiler warning I encountered
+                                in Ubuntu 10.04.
 */
 
 #include <pthread.h>
@@ -273,6 +275,10 @@ static void * nbfgetsThreadFunction (void *Arg)
       }
       pthread_mutex_unlock(&nbfgetsMutex);     
     }
+  // This function doesn't actually return, but I've
+  // put in the following line to avoid a compiler
+  // warning in some compiler versions.
+  return (NULL);
 }
 
 // Signals to the thread reading in the input from stdin to actually go

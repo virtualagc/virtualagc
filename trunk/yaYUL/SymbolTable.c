@@ -745,7 +745,7 @@ PrintSymbolsToFile (FILE *fp)
         {
           fprintf (fp, "\t\t");
 	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, NormalizeString ("\t"));
+	    fprintf (HtmlOut, "%s", NormalizeString ("\t"));
 	}
     }
   fprintf (fp, "\n");  

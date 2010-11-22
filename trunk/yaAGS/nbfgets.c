@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009-2010 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -46,6 +46,8 @@
 		... undocumented changes apparently occurred here ...
 		08/01/09 RSB	Changed incorrect usage of returned string 
 				from readline(), which could be NULL.
+                11/22/10 RSB    Eliminated a compiler warning I encountered
+                                in Ubuntu 10.04.
 */
 
 #include <pthread.h>
@@ -193,6 +195,10 @@ nbfgetsThreadFunction (void *Arg)
       // Go to sleep until the string has been processed.
       pthread_cond_wait (&nbfgetsCond, &nbfgetsMutex);
     }
+  // This function doesn't actually return, but I've
+  // put in the following line to avoid a compiler
+  // warning in some compiler versions.
+  return (NULL);
 }
 
 // Signals to the thread reading in the input from stdin to actually go
