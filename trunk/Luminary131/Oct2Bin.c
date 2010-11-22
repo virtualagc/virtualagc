@@ -58,9 +58,27 @@
 				to compare the binary created by yaYUL against
 				the binary in the page images.  Also added
 				the --page switch.
+		11/22/10 RSB    Added the CHECKWORDS=Count variable to
+                                supplement the existing BANK=BankNumber
+                                variable.  CHECKWORDS is the number of words
+                                participating in the checksum, including the
+                                bugger word.  It defaults to 02000, which is
+                                the number of words in a bank.  This is
+                                normally okay, since any unuused words
+                                following the bugger word are zero.  But with
+                                Solarium 055, some banks have data stored
+                                *after* the bugger word, and shouldn't
+                                participate in the checksum.  The CHECKWORDS
+                                variable is used when necessary to compensate
+                                for that funky fact.  It must *follow* the
+                                BANK variable when it's used.  Also, I added the
+                                NUMBANKS variable, which should precede any
+                                bank and give the total number of banks.
+                                Defaults to 044.  Both of the new variables
+                                are in octal.
   
   The format of the file is simple.  Each line just consists of 8 fields,
-  delimited by whitspace.  Each field consists of 5 octal digits.  Blank
+  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
   lines and lines beginning with ';' are ignored.
   
   The checksum of any given bank is equal to the sum of all of the words
@@ -92,6 +110,7 @@
 #include <string.h>
 uint16_t Checksum = 0;
 int ErrorCount = 0;
+int NumBanks = 044;
 
 // Convert an AGC-format signed integer to native format.
 int
@@ -240,11 +259,11 @@ main (int argc, char *argv[])
   FILE *OutFile;
   int Dummy, Data[8], Line, BuggerChecked = 1;
   uint16_t Dummy16, Banknum;
-  int Count;
+  int Count, CheckWords = 0;
   char s[129], *ss;
   int i, j, Invert = 0, Page = 0;
   
-  printf ("(c)2003-2005,2009 Ronald S. Burkey, ver " NVER 
+  printf ("(c)2003-2005,2010 Ronald S. Burkey, ver " NVER
           ", built " __DATE__ "\n");
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
   
@@ -279,6 +298,11 @@ main (int argc, char *argv[])
       Line++;
       if (s[0] == ';' || s[0] == '\n')
         continue;
+      if (1 == sscanf (s, "NUMBANKS=%o", &Dummy))
+        {
+          NumBanks = Dummy;
+          continue;
+        }
       if (1 == sscanf (s, "BANK=%o", &Dummy))
         {
 	  BuggerCheck (Line, BuggerChecked, Banknum, Checksum);
@@ -290,8 +314,16 @@ main (int argc, char *argv[])
 	      printf ("Error: Line %d: Bank %o is not aligned properly.\n", Line, Banknum);
 	    }
 	  BuggerChecked = 0;  
+	  CheckWords = 02000;
 	  continue;
 	} 
+      if (1 == sscanf (s, "CHECKWORDS=%o", &Dummy))
+        {
+          CheckWords = Dummy;
+          if (CheckWords == 0)
+            Checksum = Banknum;
+          continue;
+        }
       if (1 == sscanf (s, "BUGGER=%o", &Dummy))
         {
 	  Dummy16 = Dummy;
@@ -341,15 +373,23 @@ main (int argc, char *argv[])
 	  Dummy16 = Data[Dummy];
 	  putc (Dummy16 >> 7, OutFile);
 	  putc ((Dummy16 << 1) & 255, OutFile);
-	  Checksum = Add (Checksum, Dummy16);
+	  if (CheckWords > 0)
+	    {
+	      // Normally, CheckWords will always be >=0, unless
+	      // CHECKWORDS=something variable assignment was made for
+	      // the bank.
+	      Checksum = Add (Checksum, Dummy16);
+	      CheckWords--;
+	    }
 	}	 
     }
     
   BuggerCheck (Line, BuggerChecked, Banknum, Checksum);
-  if (ftell (OutFile) != 73728)
+  if (ftell (OutFile) != 2 * NumBanks * 02000)
     {
       ErrorCount++;
-      printf ("Error: The core-rope image is not 44 (octal) banks (36864 words, 73728 bytes) long.\n");
+      printf ("Error: The core-rope image is not %o (octal) banks "
+              "(2 * 02000 * 0%o bytes) long.\n", NumBanks, NumBanks);
     }
   fclose (OutFile);
   if (!ErrorCount)
