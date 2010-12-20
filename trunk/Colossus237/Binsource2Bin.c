@@ -34,6 +34,8 @@
  Contact:      Ron Burkey <info@sandroid.org>
  Website:      http://www.ibiblio.org/apollo/index.html
  Mods:         2010-12-11 RSB    Began.
+               2010-12-19 RSB    Added the synonyms :.& for
+                                 the commands c, p, and a.
 
  For Binsource2Bin.c, the octal codes are provided in an input file
  created by moving through the assembly-language portion of the
@@ -43,14 +45,27 @@
  containing octal codes are lines of one of the following forms:
  pN          (N being a 1-4 digit page number from the assembly listing)
  aNNNN       (NNNN being a 4-digit octal number indicating the
- CPU location counter for the next section of octal codes)
+             CPU location counter for the next section of octal codes)
  aNN,NNNN    (Same, but with banked address NN,NNNN instead)
  cNNNN       (The address of the preceding octal code)
  cNN,NNNN    (Same, but with a banked address NN,NNNN instead)
- The pN, cNNNN, and cNN,NNNN codes are not strictly necessary *if*
+ The following synonyms are also accepted:
+   :    in place of     c
+   .    in place of     p
+   &    in place of     a
+ These synonyms can be remembered easily since "colon", "period"
+ (or "point"), and "and" (or "ampersand") begin with the same
+ letter as the commands they're replacing.  The synonyms are
+ very convenient when dictating the octal listing using
+ Dragon NaturallySpeaking in "numbers" mode, since with these
+ synonyms (and the words "comma" and "newline") *all* of the
+ data-entry can be dictated without needing to use the keyboard
+ for anything other than corrections.
+
+ The pN, cNNNN, and cNN,NNNN codes would not be necessary *if*
  data entry is perfectly accurate, but are pragmatically necessary
  for debugging data entry because they allow Binsource2Bin to
- determine that the currect number of octal codes have been entered
+ determine that the correct number of octal codes have been entered
  for any given address range, and all warning messages to be printed
  that localize such mismatches to the page.  It does not allow any
  determination that the octal codes are *correct*, of course.
@@ -151,6 +166,14 @@ main(void)
         ;
       InputLength = ss - InputLine;
       *ss = 0;
+
+      // Translate some command synonyms:
+      switch (InputLine[0])
+      {
+      case ':': InputLine[0] = 'c'; break;
+      case '.': InputLine[0] = 'p'; break;
+      case '&': InputLine[0] = 'a'; break;
+      }
 
       // Now that the input lines have been completely normalized,
       // we can begin parsing them.
