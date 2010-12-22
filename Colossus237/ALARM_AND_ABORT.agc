@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	ALARM_AND_ABORT.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 1457
+## Page 1457
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 #
@@ -79,7 +61,7 @@ FAIL3		CA	FAILREG +2
 		CCS	A
 		TCF	MULTFAIL
 		LXCH	FAILREG +2
-# Page 1458
+## Page 1458
 		TCF	MULTEXIT
 		
 PROGLARM	CS	DSPTAB +11D	# TURN ON PROGRAM ALARM IF OFF
@@ -128,7 +110,7 @@ PRIOLARM	INHINT			# * * * KEEP IN DISPLAY ROUTINE'S BANK
 		SETLOC	FFTAG7
 		BANK
 
-# Page 1459
+## Page 1459
 		COUNT	02/ALARM
 		
 BAILOUT		INHINT
@@ -179,7 +161,7 @@ DOALARM		EQUALS	ENDOFJOB
 
 # CALLING SEQUENCE FOR VARALARM
 #		CAF	(ALARM)
-# Page 1460
+## Page 1460
 #		TC	VARALARM
 
 # VARALARM TURNS ON PROGRAM ALARM LIGHT BUT DOES NOT DISPLAY

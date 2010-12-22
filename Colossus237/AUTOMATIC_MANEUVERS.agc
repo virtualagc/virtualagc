@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	AUTOMATIC_MANEUVERS.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-06-01 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 993
+## Page 993
 		BANK	21
 		SETLOC	DAPS3
 		BANK
@@ -79,7 +61,7 @@ FREECONT	CAF	ONE
 		TS	TAU1
 		INDEX	YMANNDX
 		CA	MINTAU
-# Page 994
+## Page 994
 		TS	TAU2
 		TCF	T6PROGM
 
@@ -88,7 +70,7 @@ MINTAU		DEC	0
 		DEC	-23		# = -14MS
 		DEC	0
 		
-# Page 995
+## Page 995
 # CALCULATION OF ATTITUDE ERRORS:
 #	_    *     _      _          _
 #	AK = AMGB (CDUX - THETADX) + BIAS
@@ -136,7 +118,7 @@ ATTHOLD		CA	CDUX
 		ADS	ERRORZ
 		CS	HOLDFLAG
 		EXTEND
-# Page 996
+## Page 996
 		BZMF	JETS
 		CA	BIAS		# AD BIASES ONLY IF PERFORMING AUTOMATIC
 		ADS	ERRORX
@@ -179,7 +161,7 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 		TS	THETADZ
 		TCF	ATTHOLD
 
-# Page 997
+## Page 997
 # JET SWITCHING LOGIC AND CALCULATION OF REQUIRED ROTATION COMMANDS
 #
 # DETERMINE THE LOCATION OF THE RATE ERROR AND THE ATTITUDE ERROR RELATIVE TO THE SWITCHING LOGIC IN THE PHASE
@@ -226,7 +208,7 @@ WLH		2DEC	.0011111111	# = WL+H = 0.5 DED/SEC		S450
 WLMH		2DEC	.0006666666	# = WL-H = 0.3 DEG/SEC		S450
 WL		2DEC	.0008888888	# = WL   = 0.4 DEG/SEC		S450
 
-# Page 998
+## Page 998
 SLOPE2		DEC	.32		# = 0.8 DEG/SEC/DEG		S450/180
 JETS		CA	ADB
 		AD	FOUR		# AF = FLAT REGION = .044 DEG
@@ -277,7 +259,7 @@ NEGVEL		EXTEND
 		TS	AERRVEL
 		
 J6.		EXTEND
-# Page 999
+## Page 999
 		SU	ADB
 		AD	WLH/SLOP
 		EXTEND
@@ -328,7 +310,7 @@ NJ22		EXTEND
 		DV	SLOPE
 		AD	T5TEMP		# (ADB+AF)
 		AD	AERRVEL
-# Page 1000
+## Page 1000
 		CCS	A
 		TCF	J23
 		TCF	J23
@@ -379,7 +361,7 @@ J21		CCS	EDOT
 		TCF	SIGNCK4
 		TCF	JN
 SIGNCK4		CCS	EDOT +1
-# Page 1001
+## Page 1001
 		TCF	JP
 		TCF	JP
 		TCF	JN
@@ -430,11 +412,11 @@ J24		CS	AERR
 		MP	SLOPE2		# (HYSTERESIS SLOPE)
 		DXCH	KMPAC
 		EXTEND
-# Page 1002
+## Page 1002
 		DCS	EDOT
 		DAS	KMPAC
 		
-# Page 1003
+## Page 1003
 # COMPUTE THE JET ON TIME NECESSARY TO ACCOMPLISH THE DESIRED CHANGE IN RATE, I.E.,
 #
 #	     T  = J/M(DELTA W)
@@ -484,7 +466,7 @@ DOJET		INDEX	SPNDX
 		TCF	JLOOP
 		TCF	T6PROG
 		
-# Page 1004
+## Page 1004
 ZEROCMDS	CAF	ZERO
 		TS	TAU
 		TS	TAU1

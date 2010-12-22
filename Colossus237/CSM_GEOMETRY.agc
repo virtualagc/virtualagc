@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	CSM_GEOMETRY.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 278
+## Page 278
 		BANK	22
 		SETLOC	COMGEOM1
 		BANK
@@ -78,7 +60,7 @@ SXTLOGIC	CAF	10DEGS-		# CORRECT FOR 19.775 DEGREE OFFSET
 		TC	SHORTMP
 		TC	DANZIG
 
-# Page 279
+## Page 279
 # CALCSXA COMPUTES THE SEXTANT SHAFT AND TRUNNION ANGLES REQUIRED TO POSITION THE OPTICS SUCH THAT A STAR LINE-
 # OF-SIGHT LIES ALONG THE STAR VECTOR.  THE ROUTINE TAKES THE GIVEN STAR VECTOR AND EXPRESSES IT AS A VECTOR REF-
 # ERENECED TO THE OPTICS COORDINATE SYSTEM.  IN ADDITION IT SETS UP THREE UNIT VECTORS DEFINING THE X, Y, AND Z AXES
@@ -107,7 +89,7 @@ CALCSXA		ITA	VLOAD		# PUSHDOWN 00-26D, 28D, 30D, 32D-36D
 		STCALL	ZNB1
 			SXTANG1
 
-# Page 280
+## Page 280
 # SXTANG COMPUTES THE SEXTANT SHAFT AND TRUNNION ANGLES REQUIRED TO POSITION THE OPTICS SUCH THAT A STAR LINE-OF-
 # SIGHT LIES ALONG THE STAR VECTOR.
 #
@@ -157,7 +139,7 @@ SXTANG1		VLOAD	VXV
 			YNB1
 		STCALL	COSTH		# COS(SA) = PDA . YNB
 			ARCTRIG
-# Page 281
+## Page 281
 		RTB
 			1STO2S
 		STOVL	SAC
@@ -190,7 +172,7 @@ ZNB=S1		DLOAD
 			CULTFLAG
 			28D
 
-# Page 282
+## Page 282
 # THESE TWO ROUTINES COMPUTE THE ACTUAL STATE VECTOR FOR LM, CSM BY ADDING
 # THE CONIC R,V AND THE DEVIATIONS R,V.  THE STATE VECTORS ARE CONVERTED TO
 # METERS B-29 AND METERS/CSEC B-7 AND STORED APPROPIRATELY IN RN,VN OR
@@ -239,7 +221,7 @@ SVDWN2		VLOAD	VSL*
 			0	-7,2
 		VAD	VSL*
 			RCV
-# Page 283
+## Page 283
 			0,2
 		STOVL	R-OTHER
 			TNUV
@@ -251,7 +233,7 @@ SVDWN2		VLOAD	VSL*
 		STORE	V-OTHER
 		RVQ
 
-# Page 284
+## Page 284
 # SUBROUTINE TO COMPUTE THE NATURAL LOG OF C(MPAC, MPAC +1).
 #
 #	ENTRY:	CALL
@@ -296,10 +278,10 @@ LOG		NORM	BDSU		# GENERATES LOG BY SHIFTING ARG
 		
 NEARLY1		2DEC	.999999999
 
-# Page 285
+## Page 285
 CLOG2/32	2DEC	.0216608494
 
-# Page 286
+## Page 286
 # SUBROUTINE NAME:  EARTH ROTATOR	(EARROT1 OR EARROT2)		DATE:  15 FEB 67
 # MOD NO:  N +1								LOG SECTION:  POWERED FLIGHT SUBROS
 # MOD BY:  ENTRY GROUP (BAIRNSFATHER)
@@ -346,7 +328,7 @@ CLOG2/32	2DEC	.0216608494
 #		DTEAROT	(-28) CS	TIME OF FLIGHT				LEFT BY CALLER
 #
 # DEBRIS:  QPRET, PDL+0 ... PDL+5
-# Page 287
+## Page 287
 		EBANK=	RTINIT
 		
 EARROT1		VLOAD	VXV
@@ -392,7 +374,7 @@ OVERADAY	DLOAD	SIGN
 NB2NB1		2DEC	+.8431756920 B-1
 		2DEC	0
 		2DEC	-.5376381241 B-1
-# Page 288
+## Page 288
 ZERINFLT	2DEC	0
 HALFNFLT	2DEC	.5
 		2DEC	0
@@ -408,7 +390,7 @@ NB1NB2		2DEC	+.8431756920 B-1
 		2DEC	-.5376381241 B-1
 		2DEC	0
 		2DEC	+.8431756920 B-1
-# Page 289
+## Page 289
 10DEGS-		DEC	3600
 270DEG		OCT	60000		# SHAFT 270 DEGREES	2S COMP.
 		OCT	00000

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	STABLE_ORBIT.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-06-03 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 514
+## Page 514
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
 #
 # MOD NO -1		LOG SECTION -- STABLE ORBIT -- P38-P39
@@ -80,7 +62,7 @@
 #	(1)  TRKMKCNT	NUMBER OF MARKS
 #	(2)  TTOGO	TIME TO GO
 #	(3)  +MGA	MIDDLE GIMBAL ANGLE
-# Page 515
+## Page 515
 #	(4)  DSPTEM1	TIME OF INTERCEPT OF PASSIVE VEHICLE ORBIT
 #			(FOR SOI ONLY)
 #	(5)  POSTTPI	PERIGEE ALTITUDE OF ACTIVE VEHICLE ORBIT AFTER
@@ -131,7 +113,7 @@ P78		TC	BANKCALL
 		TCR	BLANKET
 		TCF	ENDOFJOB
 		CAF	FIVE
-# Page 516
+## Page 516
 		TS	OPTION1
 		CAF	ONE
 		TS	OPTION2		# OPTION CODE IS SET TO 1
@@ -182,7 +164,7 @@ RECYCLE		CALL
 		BOFF	DLOAD
 			OPTNSW
 			OPTN2
-# Page 517
+## Page 517
 			TINT
 		STCALL	TDEC1		# PRECISION UPDATE PASSIVE VEHICLE TO
 			INTRPVP		#    INTERCEPT TIME
@@ -235,7 +217,7 @@ TEST3979	BOFF	BON
 			P39/79SW
 			MAINRTN1
 			FINALFLG
-# Page 518
+## Page 518
 			P39P79
 		SET
 			UPDATFLG
@@ -286,7 +268,7 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 #	CONDITIONS REQUIRED BY THE AGC TO MAKE A MIDCOURSE CORRECTION
 #	MANEUVER AFTER COMPLETING THE SOI MANEUVER BUT BEFORE MAKING
 #	THE SOR MANEUVER.
-# Page 519
+## Page 519
 #
 # CALLING SEQUENCE
 #
@@ -338,7 +320,7 @@ P39/P79B	RTB	DAD
 			LOADTIME
 			KT
 		STORE	TIG		# TIG = T (PRESENT) + PREPARATION TIME
-# Page 520
+## Page 520
 		STCALL	TDEC1		# PRECISION UPDATE ACTIVE AND PASSIVE
 			PRECSET		# 	VEHICLES TO TIG
 		CALL
@@ -393,7 +375,7 @@ INTRPVP		STQ	BOFF		# PRECISION UPDATE PASSIVE VEHICLE TO
 			AVFLAG
 			OTHERV
 		CALL
-# Page 521
+## Page 521
 			CSMPREC
 		GOTO
 			RTRN
