@@ -17,7 +17,7 @@
 # organizational purposes is to split the huge monolithic source 
 # code into smaller, more manageable chunks--i.e., into individual
 # source files.  Those files are rejoined within this file as 
-#"includes".  It just makes it a little easier to work with.  The
+# "includes".  It just makes it a little easier to work with.  The
 # code chunks correspond to natural divisions into sub-programs.  
 # The divisions are by the assembly listing itself.
 

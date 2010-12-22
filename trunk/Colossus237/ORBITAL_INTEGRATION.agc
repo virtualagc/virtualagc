@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	ORBITAL_INTEGRATION.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-05-22 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 1298
+## Page 1298
 # ORBITAL INTEGRATION
 
 # DELETE
@@ -83,7 +65,7 @@ KEPPREP		LXA,2	SETPD
 			0D
 			4D
 		SL*	SL*
-# Page 1299
+## Page 1299
 			8D,1
 			0,1		# S(-FS(1-2FS)-1/6...) (+17 OR +16)
 		DAD	PDDL		#					PL 6D
@@ -105,7 +87,7 @@ KEPPREP		LXA,2	SETPD
 		GOTO
 			KEPLERN
 
-# Page 1300
+## Page 1300
 FBR3		LXA,1	SSP
 			DIFEQCNT
 			S1
@@ -123,7 +105,7 @@ FBR3		LXA,1	SSP
 		STCALL	TET
 			KEPPREP
 
-# Page 1301
+## Page 1301
 # AGC ROUTINE TO COMPUTE ACCELERATION COMPONENTS.
 
 ACCOMP		LXA,1	LXA,2
@@ -173,7 +155,7 @@ ACCOMP		LXA,1	LXA,2
 			0
 		STORE	BETAV
 		STOVL	RPQV
-# Page 1302
+## Page 1302
 			2D
 		STORE	RPSV
 		SLOAD	DSU
@@ -224,7 +206,7 @@ GAMCOMP		VLOAD	VSR1
 		NORM	ROUND
 			31D
 		PDDL	NORM		# NORMED B SQUARED TO PD LIST
-# Page 1303
+## Page 1303
 			ALPHAM		# NORMALIZE (LESS ONE) LENGTH OF ALPHA
 			32D		# SAVING NORM SCALE FACTOR IN X1
 		SR1	PDVL
@@ -275,7 +257,7 @@ GAMCOMP		VLOAD	VSR1
 			6
 			BETAV
 		PDVL	VSR3		# (G/2)(C(PD+4))B/2 TO PD+16D
-# Page 1304
+## Page 1304
 			ALPHAV
 		VAD	PUSH		# A12 + C(PD+16D) TO PD+16D
 		DLOAD	DMP
@@ -319,7 +301,7 @@ GOBAQUE		DLOAD	SR
 			RPQFLAG
 			TESTLOOP
 
-# Page 1305
+## Page 1305
 # THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO OBLATENESS.  IT USES THE UNIT OF THE VEHICLE
 # POSITION VECTOR FOUND IN ALPHAV AND THE DISTANCE TO THE CENTER IN ALPHAM.  THIS IS ADDED TO THE SUM OF THE
 # DISTURBING ACCELERATIONS IN FV AND THE PROPER DIFEQ STAGE IS CALLED VIA X1.
@@ -371,7 +353,7 @@ COMTERM		STORE	UZ
 		PDDL	DMPR
 			2
 			5/128
-# Page 1306
+## Page 1306
 		BDSU
 		DMP*
 			J4REQ/J3,2
@@ -422,7 +404,7 @@ COMTERM		STORE	UZ
 		DAD	PDDL		# Y  +X  B-2 TO 2D
 			2D
 		SL1	DSU
-# Page 1307
+## Page 1307
 			2D
 		PDDL	PUSH		# X -Y B-2 TO 4D  COSPHI 2 TO 6D
 			COSPHI/2
@@ -475,7 +457,7 @@ COSPHIE		DLOAD
 			ALPHAV +4
 		STOVL	COSPHI/2
 			ZUNIT
-# Page 1308
+## Page 1308
 		GOTO
 			COMTERM
 DIFEQTAB	CADR	DIFEQ+0
@@ -526,7 +508,7 @@ RECTEST		VLOAD	ABVAL		# RECTIFY IF
 			3/4
 		BOV
 			CALLRECT
-# Page 1309
+## Page 1309
 		BMN
 			INTGRATE
 CALLRECT	CALL
@@ -577,7 +559,7 @@ ORIGCHNG	STQ	CALL
 			0,2
 		VSU	VSL*
 			RPQV
-# Page 1310
+## Page 1310
 			2,2
 		STORE	RRECT
 		STODL	RCV
@@ -602,7 +584,7 @@ ORIGCHNG	STQ	CALL
 			MOONFLAG
 			CLRMOON
 			SETMOON
-# Page 1311
+## Page 1311
 # THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCIASIONALLY BY THE MEASUREMENT INCORPORATION
 # ROUTINES TO ESTABLISH A NEW CONIC.
 
@@ -628,7 +610,7 @@ MINIRECT	STORE	VRECT
 		STORE	XKEP
 		RVQ
 
-# Page 1312
+## Page 1312
 # THE THREE DIFEQ ROUTINES -- DIFEQ+0, DIFEQ+12, DIFEQ+24 -- ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
 # BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY.  THE UPDATING IS DONE BY THE NYSTROM METHOD.
 
@@ -680,7 +662,7 @@ DIFEQ+2		DLOAD	DMPR
 
 		CALL
 			GRP2PC
-# Page 1313
+## Page 1313
 		LXA,2	SSP
 			COLREG
 			S2
@@ -731,7 +713,7 @@ ENDSTATE	BOV	VLOAD
 			AMOVED
 		BON	GOTO
 			VINTFLAG
-# Page 1314
+## Page 1314
 			ATOPCSM
 			ATOPLEM
 AMOVED		SET	SSP
@@ -780,11 +762,11 @@ WMATEND		CLEAR	CLEAR
 		TC	ALARM
 		OCT	421
 		TC	INTPRET
-# Page 1315
+## Page 1315
 		GOTO
 			TESTLOOP	# FINISH INTEGRATING STATE VECTOR
 
-# Page 1316
+## Page 1316
 # ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX.  IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
 # VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS.  THE PROGRAM
 # USES A TABLE OF VEHICL POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLE'S POSITION AND VELOCITY.
@@ -836,7 +818,7 @@ DOW..1		VLOAD	VSR4
 			S2
 			34D
 		VSL*	RVQ
-# Page 1317
+## Page 1317
 			0 -8D,2	
 
 		SETLOC	ORBITAL1
@@ -876,7 +858,7 @@ OCT27		OCT	27
 		DEC	-4
 ASCALE		DEC	-7
 		DEC	-6
-# Page 1318
+## Page 1318
 		2DEC*	1.32715445 E16 B-54*	# S
 		2DEC*	4.9027780 E8 B-30*	# M
 MUEARTH		2DEC*	3.986032 E10 B-36*

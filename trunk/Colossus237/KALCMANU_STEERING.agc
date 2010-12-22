@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	KALCMANU_STEERING.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-06-01 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 405
+## Page 405
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
 #
 # NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER
@@ -79,7 +61,7 @@ INCRDCDU	TS	KSPNDX
 		MP	DT/TAU
 		INDEX	KDPNDX
 		DXCH	DELCDUX		# ANGEL INCREMENTS TO BE ADDED TO
-# Page 406
+## Page 406
 		INDEX	KSPNDX		# DCDU EVERY TENTH SEC
 		CA	NCDU		# BY LEM DAP
 		INDEX	KSPNDX
@@ -131,7 +113,7 @@ MANUSTAT	EXIT			# INITIALIZATION ROUTINE
 		DCA	TIME2
 		DAS	TM		# TM+TO		MANEUVER COMPLETION TIME
 		EXTEND
-# Page 407
+## Page 407
 		DCS	ONESEC
 		DAS	TM		# (TM+TO)-1
 		INHINT
@@ -181,7 +163,7 @@ MANUCALL	TC	WAITLIST
 		CAF	ONESEC +1	# INCREMENT TIME FOR NEXT UPDATE
 		ADS	NEXTIME
 		TCF	ENDOFJOB
-# Page 408
+## Page 408
 		
 UPDTCALL	CAF	PRIO26		# CALL FOR UPDATE
 		TC	FINDVAC		# OF STEERING COMMANDS
@@ -190,7 +172,7 @@ UPDTCALL	CAF	PRIO26		# CALL FOR UPDATE
 
 		TC	TASKOVER
 		
-# Page 409
+## Page 409
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 MANUSTOP	TC	STOPYZ
@@ -241,7 +223,7 @@ ZEROERROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
 		TS	CDUZD
 		TC	Q
 
-# Page 410
+## Page 410
 LOADCDUD	CA	CPHI		# STORE TERMINAL ANGLES INTO
 		TS	CDUXD		# COMMAND ANGLES
 LOADYZ		CA	CTHETA

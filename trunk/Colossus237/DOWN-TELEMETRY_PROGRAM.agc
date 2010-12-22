@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	DOWN_TELEMETRY_PROGRAM.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-05-22 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 1060
+## Page 1060
 # PROGRAM NAME -- DOWN TELEMETRY PROGRAM
 # MOD NO. -- 0		TO COMPLETELY REWRITE THE DOWN TELEMETRY PROGRAM AND DOWNLINK ERASABLE DUMP PROGRAM FOR THE
 #			PURPOSE OF SAVING APPROXIMATELY 150 WORDS OF CORE STORAGE.
@@ -93,10 +75,10 @@
 #
 # DEBRIS (ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM) --
 #	LDATALST, DNTMBUFF TO DNTMBUFF +21D, TMINDEX, DNQ.
-# Page 1061
+## Page 1061
 # (No source on this page of the original assembly listing.)
 
-# Page 1062
+## Page 1062
 # DODOWNTM IS ENTERED EVERY 20 MS BY AN INTERRUPT TRIGGERED BY THE
 # RECEIPT OF AN ENDPULSE FROM THE SPACECRAFT TELEMETRY PROGRAMMER.
 #
@@ -143,7 +125,7 @@
 #	EQUIVALENT OF THE FOLLOWING ECADRS (I.E., IDNADRS): 377, 777, 1377, 1777, 2377, 2777, 3377, 3777.
 # 	(NOTE: THE TERM `EQUIVALENT' MEANT THAT THE IDNADR TO 6DNADR WILL BE PROCESSED LIKE 1 TO 6 ECADRS)
 # 3.	CONTROL LISTS AND SUBLISTS CANNOT HAVE ENTRIES = OCTAL 00000 OR OCTAL 77777
-# Page 1063
+## Page 1063
 # 4.	THE `1DNADR TIME2' WHICH WILL CAUSE THE DOWNLINT PROGRAM TO SET THE WORDER CODE TO 3 MUST APPEAR IN THE
 #	CONTROL SECTION OF THE DOWNLIST.
 # 5.	`DNCHAN 0' CANNOT BE USED.
@@ -189,7 +171,7 @@ MINTIME2	-1DNADR	TIME2		# NEGATIVE OF TIME2 1DNADR
 		TCF	+1		# (ECADR OF 3776 + 74001 = 77777)
 
 		CCS	SUBLIST		# IS THE SUBLIST IN CONTROL
-# Page 1064
+## Page 1064
 		TCF	NEXTINSL	# YES
 DNADRDCR	OCT	74001		# DNADR COUNT AND ECADR DECREMENTER
 
@@ -240,7 +222,7 @@ DODNCHAN	TC	6		# (EXECUTED AS EXTEND)  IT'S A CHANNEL
 
 WOZERO		CS	BIT7
 		EXTEND
-# Page 1065
+## Page 1065
 		WAND	CHAN13		# SET WORD ORDER CODE TO ZERO
 		TC	Q		# RETURN TO CALLER
 
@@ -289,7 +271,7 @@ LDNPHAS2	GENADR	DNPHASE2
 		EXTEND
 		INDEX	A
 		EBANK=	1401
-# Page 1066
+## Page 1066
 		DCA	1401		# PICK UP FIRST 2 WORDS OF SNAPSHOT.
 		EBANK=	DNTMBUFF
 SNAPEND		TCF	DNTMEXIT	# NOW TO SEND THEM.
@@ -334,7 +316,7 @@ DNECADR		EQUALS	TMINDEX
 CTLIST		EQUALS	LDATALST
 SUBLIST		EQUALS 	DNQ
 
-# Page 1067
+## Page 1067
 # SUBROUTINE NAME -- DNDUMP
 #
 # FUNCTIONAL DESCRIPTION -- TO SEND (DUMP) ALL 8 BANKS OF ERASABLE STORAGE TWICE.  BANKS ARE SENT ONE AT A TIME
@@ -395,7 +377,7 @@ SUBLIST		EQUALS 	DNQ
 #					      EEE = EBANK BITS
 #					 RRRRRRRR = RELATIVE ADDRESS WITHIN AN EBANK
 
-# Page 1068
+## Page 1068
 DNDUMPI		CA	ZERO		# INITIALIZE DOWNLINK
 		TS	DUMPLOC		# ERASABLE DUMP
 	+2	TC	SENDID		# GO SEND ID AND SYNCH BITS
@@ -445,7 +427,7 @@ SENDID		EXTEND			# ** ENTRANCE USED BY ERASABLE DUMP PROG. **
 		CAF	ERASID		# TO LOCATION FOLLOWING `TC SENDID'
 
 		TS	L		# ** ENTRANCE USED BY REGULAR DOWNLINK PG **
-# Page 1069
+## Page 1069
 		TC	WOZERO		# GO SET WORD ORDER CODE TO ZERO
 		CAF	LOWIDCOD	# PLACE SPECIAL ID CODE INTO L
 		XCH	L		# AND ID BACK INTO A

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	WAITLIST.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-06-02 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 1188
+## Page 1188
 # PROGRAM DESCRIPTION						DATE -- 10 OCTOBER 1966
 # MOD NO -- 2							LOG SECTION -- WAITLIST
 # MOD BY -- MILLER	(DTMAX INCREASED TO 162.5 SEC)		ASSEMBLY -- SUNBURST REV 5
@@ -72,7 +54,7 @@
 # TWIDDLE --
 #	TWIDDLE IS FOR USE WHEN THE TASK BEING SET UP IS IN THE SAME EBANK AND FBANK AS THE USER.  IN
 #	SUCH CASES, IT IMPROVES UPON WAITLIST BY ELIMINATING THE NEED FOR THE BBCON HALF OF THE 2CADR,
-# Page 1189
+## Page 1189
 #	SAVING A WORD.  TWIDDLE IS LIKE WAITLIST IN EVERY RESPECT EXCEPT CALLING SEQUENCE, TO WIT,
 #		L-1	CA	DELTAT
 #		L	TC	TWIDDLE
@@ -114,7 +96,7 @@
 #	OF OTHER TASKS INHIBITING THE INTERRUPT.
 
 		BLOCK	02
-# Page 1190
+## Page 1190
 		EBANK=	LST1		# TASK LISTS IN SWITCHED E BANK.
 
 		COUNT	02/WAIT
@@ -167,10 +149,10 @@ VARDELAY	XCH	Q		# DT TO Q.  TASK ADRES TO WAITADR.
 		TS	WAITEXIT	# GO TO TASKOVER AFTER TASK ENTRY.
 		TCF	DLY2
 
-# Page 1191
+## Page 1191
 DELAYEX		TCF	TASKOVER -2	# RETURNS TO TASKOVER.
 
-# Page 1192
+## Page 1192
 # ENDTASK MUST ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
 
 		EBANK=	LST1
@@ -194,7 +176,7 @@ SVCT3		CCS	FLAGWRD2	# DRIFT FLAG
 
 		TCF	TASKOVER
 
-# Page 1193
+## Page 1193
 # BEGIN TASK INSERTION.
 
 		BANK	01
@@ -237,7 +219,7 @@ WAIT2		TS	WAITBANK	# BBANK OF CALLING PROGRAM.
 		EXTEND			# ZERO INDEX Q.
 		QXCH	7		# (ZQ)
 
-# Page 1194
+## Page 1194
 WTLST4		XCH	LST1
 		XCH	LST1 +1
 		XCH	LST1 +2
@@ -266,7 +248,7 @@ WTLST4		XCH	LST1
 		BZF	LVWTLIST	# FIXED SO ITS ADRES ALONE DISTINGUISHES
 		TCF	WTABORT		# IT.
 
-# Page 1195
+## Page 1195
 WTLST5		CCS	A		# TEST TD - T2 + 1
 		AD	LST1 +1
 		TCF	+4
@@ -309,7 +291,7 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 		TC	WTLST2
 		OCT	6
 
-# Page 1196
+## Page 1196
 	+4	CCS	A	
 		AD	LST1 +7
 		TCF	+4
@@ -327,7 +309,7 @@ WTABORT		TC	BAILOUT		# NO ROOM IN THE INN
 		
 OCT40201	OCT	40201
 		
-# Page 1197
+## Page 1197
 # THE ENTRY TC WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
@@ -367,7 +349,7 @@ WTLST2		TS	WAITTEMP	# C(A) = -(TD - T + 1)
 #	C(LST2+8)	=	2CADR TASK5
 #	C(LST2+10)	=	2CADR TASK6
 
-# Page 1198
+## Page 1198
 # ENTERS HERE ON T3 RUPT TO DISPATCH WAITLISTED TASK.
 
 T3RUPT		EXTEND
@@ -409,7 +391,7 @@ T3RUPT2		CAF	NEG1/2		# DISPATCH WAITLIST TASK.
 		XCH	L		# RESTORE TO L FOR DXCH Z.
 		DTCB
 
-# Page 1199
+## Page 1199
 # RETURN, AFTER EXECUTION OF T3 OVERFLOW TASK:
 
 		BLOCK	02
@@ -432,7 +414,7 @@ NOQBRSM		DXCH	ARUPT
 		RELINT
 		RESUME
 
-# Page 1200
+## Page 1200
 # LONGCALL
 # PROGRAM DESCRIPTION				DATE -- 17 MARCH 1967
 # PROGRAM WRITTEN BY W.H.VANDEVER		LOG SECTION WAITLIST
@@ -475,7 +457,7 @@ NOQBRSM		DXCH	ARUPT
 LONGCALL	DXCH	LONGTIME	# OBTAIN THE DELTA TIME
 
 		EXTEND			# OBTAIN THE 2CADR
-# Page 1201
+## Page 1201
 		NDX	Q
 		DCA	0
 		DXCH	LONGCADR
@@ -525,7 +507,7 @@ LASTTIME	CA	BIT14		# GET BACK THE CORRECT DELTA TFOR WAITLIST
 		2CADR	GETCADR		# THE ENTRY TO OUR LONGCADR
 
 LONGRTRN	CA	TSKOVCDR	# SET IT UP SO THAT ONLY THE FIRST EXIT IS
-# Page 1202
+## Page 1202
 		DXCH	LONGEXIT	# TO THE CALLER OF LONGCALL
 		DTCB			# THE REST ARE TO TASKOVER
 

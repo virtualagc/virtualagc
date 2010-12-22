@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	AGC_BLOCK_TWO_SELF-CHECK.agc
 # Purpose:	Part of the source code for Colossus build 237.  
@@ -8,28 +9,10 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
-#
-# The contents of the "Colossus237" files, in general, are transcribed 
-# from a scanned document obtained from Fred Martin.  Notations on this
-# document read, in part:
-#
-#	Assemble revision 237 of AGC program Colossus by NASA
-#	2021111-031.  August 24, 1968.  
-#
-#	This AGC program shall also be referred to as
-#				Colossus 1A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors to info@sandroid.org.
-#
+#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 
-# Page 1358
+## Page 1358
+
 # PROGRAM DESCRIPTION				DATE:  20 DECEMBER 1967
 # PROGRAM NAME -- SELF-CHECK			LOG SECTION:  AGC BLOCK TWO SELF-CHECK
 # MOD NO -- 1					ASSEMBLY SUBROUTINE UTILITYM REV 25
@@ -76,7 +59,7 @@
 #	SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E).  THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP.
 #
 # OUTPUT
-# Page 1359
+## Page 1359
 #	SELF-CHECK UPON DETECTING AN ERROR LOADS THE SELF-CHECK ALARM CONSTANT (01102) INTO THE FAILREG SET AND
 #	TURNS ON THE ALARM LIGHT.  THE OPERATOR MAY THEN DISPLAY THE THREE FAILREGS BY KEYING IN V 05 N 09 E.  FOR FURTHER
 # 	INFORMATION HE MAY KEY IN V 05 N 08 E, THE DSKY DISPLAY IN R1 WILL BE ADDRESS+1 OF WHERE THE ERROR WAS DETECTED,
@@ -123,7 +106,7 @@ S+2		EQUALS	BIT2
 S+3		EQUALS	THREE
 S+4		EQUALS	FOUR
 S+5		EQUALS	FIVE
-# Page 1360
+## Page 1360
 S+6		EQUALS	SIX
 S+7		EQUALS	SEVEN
 S8BITS		EQUALS	LOW8		# 00377
@@ -174,7 +157,7 @@ TCALARM2	TC	ALARM2
 		OCT	01102		# SELF-CHECK MALFUNCTION INDICATOR
 		CCS	SMODE
 SIDLOOP		CA	S+ZERO
-# Page 1361
+## Page 1361
 		TS	SMODE
 		TC	SELFCHK		# GO TO IDLE LOOP
 		TC	SFAIL		# CONTINUE WITH SELF-CHECK
@@ -225,7 +208,7 @@ SELFCHK		TC	SMODECHK	# ** CHARLEY, COME IN HERE
 # SKEEP6 HOLDS B(X+1).
 # SKEEP5 HOLDS B(X).
 # SKEEP4 HOLDS C(EBANK) DURING ERASLOOP AND CHECKNJ
-# Page 1362
+## Page 1362
 # SKEEP3 HOLDS LAST ADDRESS BEING CHECKED (HIGHEST ADDRESS).
 # SKEEP2 CONTROLS CHECKING OF NON-SWITCHABLE ERASABLE MEMORY WITH BANK NUMBERS IN EB.
 #
@@ -278,7 +261,7 @@ ERASLOOP	INHINT
 		AD	0000		# AD X
 		TC	-1CHK
 		CA	ERESTORE	# HAS ERASABLE BEEN RESTORED
-# Page 1363
+## Page 1363
 		EXTEND
 		BZF	ELOOPFIN	# YES, EXIT ERASLOOP.
 		EXTEND
@@ -331,7 +314,7 @@ CNTRCHK		CA	CNTRCON		# 00050
 CNTRLOOP	TS	SKEEP2
 		AD	SBIT4		# +10 OCTAL
 		INDEX	A
-# Page 1364
+## Page 1364
 		CS	0000
 		CCS	SKEEP2
 		TC	CNTRLOOP
@@ -384,7 +367,7 @@ COMMFX		TS	SKEEP7
 		TS	SKEEP5		# COUNTS DOWN 2 TC SELF WORDS
 COMADRS		CA	SKEEP4
 		TS	L		# TO SET SUPER BANK
-# Page 1365
+## Page 1365
 		MASK	HI5
 		AD	SKEEP3
 		TC	SUPDACAL	# SUPER DATA CALL
@@ -435,7 +418,7 @@ ADRSCHK		LXCH	A
 		TC	CONTINU
 		CCS	SKEEP5
 		TC	CONTINU +1
-# Page 1366
+## Page 1366
 		CA	S-1
 		TC	CONTINU +1	# AD IN THE BUGGER WORD
 CONTINU		CA	S+1		# MAKE SURE TWO CONSECUTIVE TC SELF WORDS
@@ -486,7 +469,7 @@ GONXTBNK	CCS	SKEEP7
 SOPTION		CA	SKEEP4
 		MASK	HI5		# = BANK BITS
 		TC	LEFT5
-# Page 1367
+## Page 1367
 		TS	L		# BANK NUMBER BEFORE SUPER BANK
 		CA	SKEEP4
 		MASK	S8BITS		# = SUPER BANK BITS
@@ -514,6 +497,4 @@ BNKCHK		CS	L		# = - BANK NUMBER
 
 		EBANK=	NEWJOB
 LSTBNKCH	BBCON*			# * CONSTANT, LAST BANK.
-
-
 
