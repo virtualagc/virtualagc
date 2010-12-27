@@ -38,6 +38,11 @@
                                  the commands c, p, and a.
                2010-12-23 RSB    Now allow comments, prefixed
                                  with #.
+               2010-12-25 RSB    Allow '+' in place of 'a' or
+                                 '&', because Dragon
+                                 NaturallySpeaking 11 no longer
+                                 allows me to use '&' the way
+                                 DNS 8 did.  Sigh ....
 
  For Binsource2Bin.c, the octal codes are provided in an input file
  created by moving through the assembly-language portion of the
@@ -55,9 +60,10 @@
    :    in place of     c
    .    in place of     p
    &    in place of     a
+   +    in place of     a
  These synonyms can be remembered easily since "colon", "period"
- (or "point"), and "and" (or "ampersand") begin with the same
- letter as the commands they're replacing.  The synonyms are
+ (or "point"), or "and" or "add" (or "ampersand")  begin with the
+ same letter as the commands they're replacing.  The synonyms are
  very convenient when dictating the octal listing using
  Dragon NaturallySpeaking in "numbers" mode, since with these
  synonyms (and the words "comma" and "newline") *all* of the
@@ -175,6 +181,7 @@ main(void)
       case ':': InputLine[0] = 'c'; break;
       case '.': InputLine[0] = 'p'; break;
       case '&': InputLine[0] = 'a'; break;
+      case '+': InputLine[0] = 'a'; break;
       }
 
       // Now that the input lines have been completely normalized,
