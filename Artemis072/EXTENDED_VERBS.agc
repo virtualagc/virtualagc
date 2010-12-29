@@ -14,6 +14,7 @@
 #		2010-02-13 JL	Fixed errors on p260, p261.
 #		2010-02-16 JL	Added some SBANK= directives on pages 258, 262, 271, 274 to fix rope image errors.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2010-12-29 JL	Fixed indentation.
 
 ## Page 249
 
@@ -779,7 +780,7 @@ V82PERF		TC	TESTXACT
 V83PERF		TC	TESTXACT
 		TC	UPFLAG
 		ADRES	R31FLAG
-  +3		CAF	PRIO5
+ +3		CAF	PRIO5
 		TC	NOVAC
 ## Added by RSB 2009
 		SBANK=	LOWSUPER
