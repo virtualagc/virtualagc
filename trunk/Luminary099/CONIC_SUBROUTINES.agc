@@ -5,11 +5,12 @@
 #		Apollo Guidance Computer (AGC), for Apollo 11.
 #
 # Assembler:	yaYUL
-# Contact:	Jim Lawton <jim.lawton@gmail.com>
+# Contact:	Jim Lawton <jim DOT lawton AT gmail.com>
 # Website:	www.ibiblio.org/apollo.
 # Pages:	1159-1204
-# Mod history:	2009-05-28	JVL	Started updating from page images.
-#		2009-06-02	JVL	Finished updating from page images.
+# Mod history:	2009-05-28 JL	Started updating from page images.
+#		2009-06-02 JL	Finished updating from page images.
+#		2010-12-31 JL	Fixed page number comments.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -155,7 +156,8 @@
 # PARAMETERS OF NO USE -
 #	DP PARAMETERS - EPSILONT, DELX, DELT, RCNORM, XMODULO, PLUS PUSHLIST REGISTERS 0 THROUGH 39D.
 
-# Page 1164
+# Page 1163
+
 # PROGRAM DESCRIPTION - LAMBERT SUBROUTINE			DATE - 1 SEPTEMBER 1967
 # MOD NO. - 0							LOG SECTION - CONIC SUBROUTINES
 # MOD BY KRAUSE							ASSEMBLY - COLOSSUS REVISION 88
@@ -1059,7 +1061,7 @@ LAMENTER	NORM
 			VVEC
 		VSL8	RVQ
 
-# Page 1184
+# Page 1185
 		SETLOC	CONICS1
 		BANK
 

@@ -15,6 +15,7 @@
 #				and added a missing instruction.
 #		2009-06-07 RSB	Added a couple of "SBANK=" for compatibility 
 #				with yaYUL. Corrected a typo.
+#		2010-12-31 JL	Fixed page number comments.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1136,7 +1137,7 @@ TRMTRAK1	TC	DOWNFLAG
 		TC	INTPRET
 		CALL	
 			INTSTALL	# DON'T INTERRUPT INTEGRATION
-# Page 289
+# Page 288
 		EXIT
 		
 		TC	PHASCHNG
@@ -1584,14 +1585,14 @@ OUTSNUFF	TC	DOWNFLAG
 #
 # AZIMUTH IS THE ANGLE BETWEEN THE LOS AND THE X-Z NB PLANE, 0-90 DEG IN THE +Y HEMISPHERE,
 # 360-270 DEG IN THE -Y HEMISPHERE.
-# Page 300
+# Page 299
 # 
 # ELEVATION IS THE ANGLE BETWEEN +ZNB AND THE PROJECTION OF THE LOS INTO THE X-Z PLANE, 0-360 ABOUT +Y.
 
 		EBANK=	RR-AZ
 VERB85		TC	TESTXACT
 
-# Page 299
+# Page 300
 
 		TC	POSTJUMP
 		CADR	DSPRRLOS
@@ -1644,7 +1645,7 @@ RRLOSDSP	EXTEND
 			+2
 			DPPOSMAX	# INTRODUCES AND ERROR OF B-28 REVS.
 
-# Page 300
+# Page 301
 
 		STOVL	RR-ELEV
 			0D

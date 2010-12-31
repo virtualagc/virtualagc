@@ -10,6 +10,7 @@
 # Mod history:	2009-05-16 JVL	Started updating from page images.
 # 		2009-05-25 JVL	Finished updating from page images.
 #		2009-07-01 RSB	Began annotating.
+#		2010-12-31 JL	Fixed page number comment.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2272,7 +2273,7 @@ MPACTST		CCS	MPAC		# ALARM IF MPAC NON ZERO
 		
 SIZETST		TS	MPAC +2		# CALLED WITH - CON IN A
 		CCS	MPAC +1		# GET MAG OF MPAC+1
-#Page 436
+# Page 436
 		AD	ONE
 		TCF	+2
 		AD	ONE

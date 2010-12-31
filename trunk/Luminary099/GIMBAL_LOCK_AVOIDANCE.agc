@@ -6,10 +6,11 @@
 # Assembler:	yaYUL
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Page:		364
+# Pages:	364
 # Mod history:	2009-05-17 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2010-12-31 JL	Fixed page number comment.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
