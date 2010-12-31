@@ -10,6 +10,7 @@
 # Mod history:	2009-05-16 OH	Transcribed from page images.
 #		2009-06-05 RSB	Eliminated a variable that shouldn't have
 #				survived from Luminary 131.
+#		2010-12-31 JL	Fixed page number comment.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1888,7 +1889,8 @@ HH		EQUALS	DAPTREG3	# DOUBLE PRECISION.
 # HH +1		EQUALS	DAPTREG4
 E		EQUALS	DAPTREG6	# TIME SHARE WITH VERROR
 EDOT		EQUALS	OMEGAV
-#Page 134
+
+# Page 134
 # INPUT TO TJET LAW (PERMANENT ERASABLES).	(48D)
 
 TJETU		=	TJU		# EQUATE NAMES.  INDEXED BY -1, 0, +1.

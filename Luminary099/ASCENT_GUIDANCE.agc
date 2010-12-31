@@ -10,6 +10,7 @@
 # Mod history:	2009-05-23 HG	Transcribed from page images.
 #		2009-06-05 RSB	Fixed a couple of typos.
 #		2009-06-07 RSB	Corrected a typo.
+#		2010-12-31 JL	Fixed page number comment.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -230,7 +231,7 @@ RATES		DLOAD	DSU
 		STORE	PRATE		# B * 2(8)
 		BMN	DLOAD		# B>0 NOT PERMITTED
 			CHKBMAG
-#Page 848
+# Page 848
 			HI6ZEROS
 		STCALL	PRATE
 			PROK

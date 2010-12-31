@@ -8,6 +8,7 @@
 # Website:      www.ibiblio.org/apollo.
 # Pages:        155-189
 # Mod history:  2009-05-19 HG   Transcribed from page images.
+#		2010-12-31 JL	Fixed page number comment.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1125,7 +1126,7 @@ RRAUTCHK	CA	RADMODES			# SEE IF CHANGE IN RR AUTO MODE BIT.
 		CA	OCT10001			# SET RRCDUZRO AND TURNON BITS.
 		ADS	RADMODES
 
-#Page 183		
+# Page 183		
 		CAF	ONE
 		TC	WAITLIST
 		EBANK=	LOSCOUNT

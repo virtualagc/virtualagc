@@ -8,6 +8,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	793-797
 # Mod history:	2009-05-20 HG	Transcribed from page images.
+#		2010-12-31 JL	Fixed page number comments.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -66,7 +67,7 @@ AFDUMP		TC	MASSMULT
 
 WHERETO		CA	EBANK5		# INITIALIZE L*WCR*T AND H*GHCR*T FROM
 		TS	EBANK		# 	PAD LOADED ERASABLES IN W-MATRIX
-#Page 794
+# Page 794
 		EBANK=	LOWCRIT
 		EXTEND
 		DCA	LOWCRIT
@@ -117,7 +118,7 @@ DOPIF		TC	FASTCHNG
 		TS	FCOLD
 		DXCH	PIF
 		EXTEND
-#Page 795
+# Page 795
 		DCS	FP
 		DAS	PIF		# PIF = FC - FP, NEVER EQUALS +0
 
@@ -167,7 +168,7 @@ FWCOMP		CAF	2SECS
 		MASK	LOW8		# MAKE SURE SMALL AND POSITIVE
 		ZL
 		EXTEND
-#Page 796
+# Page 796
 		DV	Q
 		EXTEND
 		MP	PIF
@@ -214,7 +215,7 @@ MASSMULT	EXTEND
 		TC	BUF
 		DXCH	MPAC +1
 		TC	BUF
-#Page 797
+# Page 797
 # CONSTANTS --
 
 FEXTRA		=	BIT13		# FEXT +5.13309020 E+4

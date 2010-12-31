@@ -9,6 +9,7 @@
 # Pages:	0061-0089
 # Mod history:	2009-05-15 OH	Transcribed from page images.
 #		2009-05-17 RSB	Extended to (blank) p. 89.
+#		2010-12-31 JL	Fixed page number comment.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -122,7 +123,7 @@
 # LRINH		172		BIT  8 FLAG 11		LRINHBIT
 # LRPOSFLG	189		BIT  6 FLAG 12		LRPOSBIT
 # LRVELFLG	187		BIT  8 FLAG 12		LRVELBIT
-# Page63
+# Page 63
 # LUNAFLAG	048		BIT 12 FLAG  3		LUNABIT
 # MANUFLAG	106		BIT 14 FLAG  7		MANUFBIT
 # MGLVFLAG	088		BIT  2 FLAG  5		MGLVFBIT
