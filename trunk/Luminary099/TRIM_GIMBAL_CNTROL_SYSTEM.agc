@@ -10,6 +10,7 @@
 # Mod history:	2009-05-27 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -379,7 +380,7 @@ SETNEGU		EXTEND
 		TCF	POSALPH +2
 POSALPH		TS	ITEMP2			# STORE -ABS(.4*AOS) SCALED AT PI/8.
 		CA	BIT1
-	+2	INDEX	QRNDXER			# SGN(AOS) INTO NEGU
+ +2		INDEX	QRNDXER			# SGN(AOS) INTO NEGU
 		TS	NEGUQ			# STORE SGN(ALPHA) AS NEGU
 
 		CA	NZACCDOT

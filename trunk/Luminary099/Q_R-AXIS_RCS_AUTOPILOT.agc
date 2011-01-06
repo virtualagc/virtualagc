@@ -12,6 +12,7 @@
 #				images from Luminary 1A.
 #		2009-06-07 RSB	Corrected "DEC 96.0" to "DEC 96", since
 #				the former is not compatible with yaYUL.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -529,7 +530,7 @@ TJLAW		CA	TJLAWADR
 		TCF	+3
 		TC	TJETLAW
 		TCF	AFTERTJ
-	+3	CS	DAPBOOLS	# DOCKED.  IF GIMBAL USABLE DO GTS CONTROL
+ +3		CS	DAPBOOLS	# DOCKED.  IF GIMBAL USABLE DO GTS CONTROL
 		MASK	USEQRJTS	#	ON THE NEXT PASS.
 		CCS	A		# USEQRJTS BIT MUST NOT BE BIT 15.
 		TS	COTROLER	# GIMBAL USABLE.  STORE POSITIVE VALUE.

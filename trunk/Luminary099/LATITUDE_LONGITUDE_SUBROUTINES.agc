@@ -5,10 +5,11 @@
 #		Apollo Guidance Computer (AGC), for Apollo 11.
 #
 # Assembler:	yaYUL
-# Contact:	Jim Lawton <jim.lawton@gmail.com>
+# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo.
 # Pages:	1133-1139
-# Mod history:	2009-05-28	JVL	Updated from page images.
+# Mod history:	2009-05-28 JL	Updated from page images.
+#		2011-01-06 JL	Fixed interpretive indentation.
 #
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -173,7 +174,7 @@ GETERAD		DLOAD	DSQ
 			B2XSC
 		SR4R
 		STORE	ERADM
-			RVQ
+		RVQ
 
 # THE FOLLOWING CONSTANTS WERE COMPUTED WITH A=6378166, B=6356784 METERS
 # B2XSC = B**2 SCALED B-51

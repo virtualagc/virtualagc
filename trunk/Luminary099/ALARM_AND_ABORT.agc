@@ -11,6 +11,7 @@
 #				from the Luminary131/ file of the same
 #				name, using Luminary099 page images.
 #		2009-06-05 RSB	Fixed a type.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -55,7 +56,7 @@ ALARM2		TS	ALMCADR
 BORTENT		TS	L
 
 PRIOENT		CA	BBANK
-	+1	EXTEND
+ +1		EXTEND
 		ROR	SUPERBNK	# ADD SUPER BITS.
 		TS	ALMCADR +1
 

@@ -16,6 +16,7 @@
 #		2009-06-07 RSB	Added a couple of "SBANK=" for compatibility 
 #				with yaYUL. Corrected a typo.
 #		2010-12-31 JL	Fixed page number comments.
+#		2011-01-06 JL	Added missing comment characters.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1145,7 +1146,7 @@ TRMTRAK1	TC	DOWNFLAG
 		
 		INHINT
 		TC	IBNKCALL	# ZERO THE COMMANDED RATES TO STOP
-		CADR	STOPRATE	MANEUVER
+		CADR	STOPRATE	# MANEUVER
 		
 		TC	IBNKCALL
 		CADR	RESTORDB

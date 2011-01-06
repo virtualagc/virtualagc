@@ -10,6 +10,7 @@
 # Mod history:	2009-05-19 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2011-01-06 JL	Fixed interpretive indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -728,7 +729,7 @@ CALCTHET	SETPD	VLOAD
 			VGTIG
 			36D
 		VSL2 	VAD
-			STADR
+		STADR
 # Page 766
 		STORE	VGTIG		# VG IGNITION SCALED AT 2(+7) M/CS
 

@@ -13,6 +13,8 @@
 #		2009-06-05 RSB	Corrected a relative jump from
 #				+8 to +8D.
 #		2009-06-07 RSB	Corrected a typo.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
+#		2011-01-06 JL	Added missing comment characters.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -106,7 +108,7 @@ SUBDIVDE	EXTEND			# OVERFLOW PROTECTION ROUTINE TO GIVE
 		MP	DAPTEMP3	# POSMAX OR NEGMAX IF THE DIVIDE WOULD
 		DAS	OMEGAU		# OVERFLOW
 
-	+3	EXTEND
+ +3		EXTEND
 		DCA	OMEGAU
 		DXCH	DAPTEMP5
 		CCS	OMEGAU
@@ -259,7 +261,7 @@ LMONLY		EXTEND			# UNDOCKED
 		DCA	LMOMEGAN
 		DXCH	DAPTREG4
 		CA	LMTRAP
-	+5	TS	DAPTREG6
+ +5		TS	DAPTREG6
 		CCS	TRAPEDP
 		TCF	+2
 		TCF	SMALPDIF
@@ -274,7 +276,7 @@ LMONLY		EXTEND			# UNDOCKED
 		ADS	OMEGAP
 		TC	OVERSUB
 		TS	OMEGAP
-		CA	DAPTREG4	ABOUT 10 OR 0 FOR DOCKED OR UNDOCKED
+		CA	DAPTREG4	# ABOUT 10 OR 0 FOR DOCKED OR UNDOCKED
 		TS	NPTRAPS
 SMALPDIF	INCR	NPTRAPS
 P-RATE		CA	JETRATE
@@ -990,7 +992,7 @@ SELECTP		CA	SIX
 		TCF	JETSOFF		# ********** TCF ALARMJET **********
 SELECTYZ	TS	NUMBERT
 		TCF	SELECTP	+1
-	-1	TCF	ABORTYZ +2
+ -1		TCF	ABORTYZ +2
 JETSALL		OCT	00252
 		OCT	00125		# +P
 		OCT	00140		# -Y

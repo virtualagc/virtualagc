@@ -9,6 +9,8 @@
 # Pages:	211-237
 # Mod history:	2009-05-19 HG	Transcribed from page images.
 #		2010-12-31 JL	Fixed page number comments.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
+#		2011-01-06 JL	Added missing comment characters.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -101,7 +103,7 @@ DOFSTRT1	CAF	FOUR
 		CA	BITS4&6
 		EXTEND			# THE IMU WAS IN COARSE ALIGN IN GIMBAL
 		WOR	CHAN12		# LOCK, SO PUT IT BACK INTO COARSE ALIGN.
-	+4	TC	MR.KLEAN
+ +4		TC	MR.KLEAN
 
 		CS	ZERO
 		TS	MODREG
@@ -271,7 +273,7 @@ SETINFL		CS	INTFLBIT
 		EXTEND
 		WOR	DSALMOUT	# TURN ENGINE ON
 		TCF	GOPROG3
-	+5	CAF	BIT14
+ +5		CAF	BIT14
 		EXTEND
 		WOR	DSALMOUT	# TURN ENGINE OFF
 		TCF	GOPROG3
@@ -377,7 +379,7 @@ NONAVKEY	TC	Q
 
 		TC	STARTSUB
 		TCF	DOFSTART
-	+3	TC	STARTSUB
+ +3		TC	STARTSUB
 		TCF	DOFSTRT1	# DO FRESH START BUT DON'T TOUCH ENGINE
 
 # Page 219
@@ -863,7 +865,7 @@ P00H		TC	RELDSP			# RELEASE DISPLAY SYSTEM
 		
 		CS	OCT700			# TURN OFF P20, P25, IMU IN USE FLAG
 		MASK	FLAGWRD0
-		TS	FLAGWRD0					 REMDFLG
+		TS	FLAGWRD0		#			 REMDFLG
 		
 		CAF	DNLADP00
  

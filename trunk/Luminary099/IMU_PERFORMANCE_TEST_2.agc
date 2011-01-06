@@ -10,6 +10,7 @@
 # Mod history:	2009-05-17 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -411,7 +412,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 		EXTEND
 		READ	LOSCALAR
 		TS	L
-	+4	CS	POSMAX
+ +4		CS	POSMAX
 		AD	L
 		EXTEND
 		BZF	FINETIME +1

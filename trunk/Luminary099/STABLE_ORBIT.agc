@@ -12,6 +12,7 @@
 #				Luminary131 source-code file), using page 
 #				images from Luminary 1A.
 #		2009-06-07 RSB	Eliminated an extraneous instruction.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -174,7 +175,7 @@ OPTN1		SET	CLEAR		# SOI
 		CAF	SIX		# IMMEDIATE RETURN -- BLANK R2, R3
 		TCR	BLANKET
 		TCF	ENDOFJOB
-	+5	EXTEND
+ +5		EXTEND
 		DCA	TINT
 		DXCH	DSPTEM1		# FOR DISPLAY
 		CAF	V06N34SR	# DISPLAY TIME OF INTERCEPT
