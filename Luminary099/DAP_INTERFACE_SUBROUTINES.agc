@@ -10,6 +10,7 @@
 # Mod history:  2009-05-10 SN   (Sergio Navarro).  Started adapting
 #				from the Luminary131/ file of the same
 #				name, using Luminary099 page images.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -85,7 +86,7 @@ RESTORDB	CAE	DAPBOOLS	# DETERMINE CREW-SELECTED DEADBAND.
 		BZF	SETMINDB
 
 SETMAXDB	CAF	WIDEDB		# SET 5 DEGREE DEADBAND.
-	+1	TS	DB
+ +1		TS	DB
 
 		EXTEND			# SET UP JOB TO RE-POSITION SWITCH CURVES.
 		QXCH	RUPTREG1
@@ -124,7 +125,7 @@ ZATTEROR	CAF	EBANK6
 STOPRATE	CAF	EBANK6
 		XCH	EBANK
 		TS	L		# SAVE CALLERS EBANK IN L.
-	+3	CAF	ZERO
+ +3		CAF	ZERO
 		TS	OMEGAPD
 		TS	OMEGAQD
 		TS	OMEGARD

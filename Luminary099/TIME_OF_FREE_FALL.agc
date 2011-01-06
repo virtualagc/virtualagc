@@ -10,6 +10,7 @@
 # Mod history:	2009-05-26 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -210,7 +211,7 @@ TFFCONMU	VLOAD	UNIT		# COME HERE WITH TFFRTMU LOADED.
 		BZE	BDDV		# SET 1/ALFA =0, TO SHOW SMALL ALFA
 			+2
 			TFF1/4
-	+2	STORE	TFF1/ALF	# 1/ALFA  E:(-22-2NA) M:(-20-2NA)
+ +2		STORE	TFF1/ALF	# 1/ALFA  E:(-22-2NA) M:(-20-2NA)
 DUMPCNIC	RVQ
 
 #							      39 W
@@ -296,7 +297,7 @@ TFFRP/RA	DLOAD	DMP
 			+3
 MAXRA		DLOAD			# RAPO CALC IS NOT VALID.  SET RAPO =
 			NEARONE		# POSMAX AS A TAG.
-	+3	STORE	RAPO		# APOGEE RADIUS  M  E:(-29) M:(-27)
+ +3		STORE	RAPO		# APOGEE RADIUS  M  E:(-29) M:(-27)
 DUMPRPRA	RVQ
 
 #								30 W
@@ -402,7 +403,7 @@ CALCTPER	SETGO			# ENTER WITH RPER IN MPAC
 			+3
 CALCTFF		CLEAR			# ENTER WITH RTERM IN MPAC
 			TFFSW
-	+3	STORE	RTERM		# E:(-29) M:(-27)
+ +3		STORE	RTERM		# E:(-29) M:(-27)
 		SL*
 			0,1		# X1=-NR
 		STORE	NRTERM		# RTERM  E:(-29+NR) M:(-27+NR)
@@ -424,7 +425,7 @@ CALCTFF		CLEAR			# ENTER WITH RTERM IN MPAC
 			TFFSW
 			+2		# IF TFF, CONTINUE
 			TFFZEROS	# IF TPER, SET Q2 = 0
-	+2	BMN	SQRT		# E:(-16) M:(-15)
+ +2		BMN	SQRT		# E:(-16) M:(-15)
 	
 			MAXTFF1		# NO FREE FALL CONIC TO RTERM FROM HERE
 					# RESET PDL, SET TFF=POSMAX, AND EXIT.

@@ -10,6 +10,7 @@
 # Mod history:	2009-05-27 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -181,7 +182,7 @@ SPSSTART	CA	EDOT		# OUTER RATE LIMIT TEST
 		BZMF	TJZERO
 NEGTHRST	CS	HALF
 		TCF	POSTHRST +1
-	+7	CS	RATELIM2
+ +7		CS	RATELIM2
 		AD	EDOT
 		EXTEND
 		BZMF	POSTHRST

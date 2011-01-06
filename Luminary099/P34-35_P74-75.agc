@@ -11,6 +11,8 @@
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
 #		2009-06-05 RSB	Corrected a typo.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
+#		2011-01-06 JL	Added missing comment characters.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -792,7 +794,7 @@ NOVRWRT		VLOAD	PUSH
 # Page 676
 # ***** S34/35.4 *****
 
-S34/35.4	STQ	SETPD		NO ASTRONAUT OVERWRITE
+S34/35.4	STQ	SETPD		# NO ASTRONAUT OVERWRITE
 			NORMEX
 			0D
 		GOTO
@@ -867,13 +869,13 @@ FLAGON		CLEAR	VLOAD
 			DELVLVC
 		STORE	GDT/2
 		EXIT
- 	+5	CAF	V06N81
+ +5		CAF	V06N81
  		TC	BANKCALL
 		CADR	GOFLASH
 		TC	GOTOP00H
 		TC	+2		# PRO
 		TC	FLAGON 	+5	# LOAD
- 	+2	CA	EBANK7
+ +2		CA	EBANK7
  		TS	EBANK		# TO BE SURE
 
 		ZL
@@ -1178,13 +1180,13 @@ INITVEL2	BPL	SET
 
 # ROTATE RC INTO YC PLANE -- SET UNIT NORMAL TO YC
 
-		VLOAD	PUSH						    (PL 6D)
+		VLOAD	PUSH		#				    (PL 6D)
 			R2VEC		# RC TO 6D (+29)
 		ABVAL	PDVL		# RC TO MPAC, ABVAL(RC) (+29) TO OD (PL 2D)
-		PUSH	VPROJ						    (PL 8D)
+		PUSH	VPROJ		#				    (PL 8D)
 			UN
 		VSL2	BVSU
-		UNIT	VXSC						    (PL 0D)
+		UNIT	VXSC		#				    (PL 0D)
 		VSL1
 		STORE	R2VEC
 		TLOAD	SLOAD
@@ -1194,7 +1196,7 @@ INITVEL2	BPL	SET
 			INITVEL3
 			R2VEC
 		STORE	RTARG1
-INITVEL3	DLOAD	PDVL						    (PL 2D)
+INITVEL3	DLOAD	PDVL		#				    (PL 2D)
 			MUEARTH		# POSITIVE VALUE
 			R2VEC
 		UNIT	PDVL		# 2D = UNIT(R2VEC)		    (PL 8D)
@@ -1398,7 +1400,7 @@ INITVELX	LXA,1	DLOAD*
 
 		COUNT*	$$/MIDG
 
-HALFREV		2DEC	1 	B-1
+HALFREV		2DEC	1 B-1
 
 GET+MGA		VLOAD	UNIT		# (PL 0D) V (+7) TO MPAC UNITIZE UV (+1)
 		UNIT

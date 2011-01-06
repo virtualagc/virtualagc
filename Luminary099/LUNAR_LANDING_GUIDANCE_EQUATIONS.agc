@@ -13,6 +13,7 @@
 #				a couple of lines of code that shouldn't 
 #				have survived from Luminary 131 to here.
 #		2009-06-07 RSB	Fixed a typo.
+#		2011-01-06 JL	Fixed pseudo-labels which were incorrectly real labels.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -844,7 +845,7 @@ DISPEXIT	EXTEND			# KILL GROUP 3:  DISPLAYS WILL BE
 		INDEX	WCHPHOLD
 		TCF	WHATDISP
 		
--2		TC	PHASCHNG	# KILL GROUP 5
+ -2		TC	PHASCHNG	# KILL GROUP 5
 		OCT	00035
 
 P63DISPS	CAF	V06N63

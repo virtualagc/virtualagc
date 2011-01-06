@@ -10,6 +10,7 @@
 # Mod history:	2009-05-17 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
+#		2011-01-06 JL	Added missing comment characters.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -158,7 +159,7 @@ RATEBIAS	TS	KSPNDX
 		INDEX	KSPNDX
 		DV	1JACC		# = AJX		$ 90 DEG/SEC-SEC
 		INDEX	KSPNDX
-		TS	DELPEROR			$ 180 DEG
+		TS	DELPEROR	#		$ 180 DEG
 		CCS	KSPNDX
 		TCF	RATEBIAS
 		

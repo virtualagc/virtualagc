@@ -12,6 +12,7 @@
 #				images from Luminary 1A.
 #		2009-06-05 RSB	Corrected a memory-bank error type.
 #		2009-06-07 RSB	Corrected a typo.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -589,7 +590,7 @@ EPSILON		EQUALS	MPAC 	+1
 
 		COUNT*	$$/DAPAO
 
-	-1	TS	INGTS		# ZERO INGTS IN ASCENT
+ -1		TS	INGTS		# ZERO INGTS IN ASCENT
 1/ACCONT	CA	DB		# INITIALIZE DBVAL1,2,3
 		EXTEND
 		MP	BIT13

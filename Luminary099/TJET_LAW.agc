@@ -12,6 +12,7 @@
 #				images from Luminary 1A.
 #		2009-06-06 RSB	Eliminated a stray instruction that had crept
 #				in somehow.
+#		2011-01-06 JL	Fixed pseudo-label indentation.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -235,7 +236,7 @@ ZONE5		TS	L		# TEMPORARILY STORE FUNCTION IN L.
 # Page 1464		
 		ADS	ADRSDIF2
 
-	+4	CAE	L
+ +4		CAE	L
 		EXTEND
 		INDEX	ADRSDIF2	# TTOAXIS AND HH ARE THE PARAMETERS UPON
 		MP	ACCFCTZ5	#	WHICH THE APPROXIMATIONS TO TJET ARE
@@ -489,7 +490,7 @@ RUFLAW3		TC	RUFSETUP	# EXECUTE COMMON RUFLAW SUBROUTINE.
 
 RUFSETUP	CS	ROTSENSE	# REVERSE ROTSENSE WHEN ENTER HERE.
 		TS	ROTSENSE
-	+2	CAF	FOUR		# REQUIRE MAXIMUM (2) JETS IN U,V-AXES.
+ +2		CAF	FOUR		# REQUIRE MAXIMUM (2) JETS IN U,V-AXES.
 		TS	NUMBERT
 		CAF	NEGMAX		# SUGGEST MAXIMUM (4) JETS IN P-AXIS.
 		TS	FIREFCT

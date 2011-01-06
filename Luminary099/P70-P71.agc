@@ -9,6 +9,7 @@
 # Pages:	829-837
 # Mod history:	2009-05-23 HG	Transcribed from page images.
 #		2009-06-05 RSB	Fixed a typo.
+#		2011-01-06 JL	Fixed pseudo-labels which were incorrectly real labels.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -323,7 +324,7 @@ UPTHROT		SET	EXIT
 		TC	PHASCHNG
 		OCT	04024
 
--3		TC	BANKCALL	# VERIFY THAT THE PANEL SWITCHES 
+ -3		TC	BANKCALL	# VERIFY THAT THE PANEL SWITCHES 
 		CADR	P40AUTO		# ARE PROPERLY SET.
 		
 		TC	THROTUP
