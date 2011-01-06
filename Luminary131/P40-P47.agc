@@ -11,6 +11,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo
 # Mod history:	05/24/03 RSB.	Began transcribing.
+#		2010-01-05 JL	Fixed indentation of STADR instruction.
 
 # Page 752
 # PROGRAM DESCRIPTION: F40BOTH		DECEMBER 22, 1966
@@ -710,7 +711,7 @@ CALCTHET	SETPD	VLOAD
 			VGTIG
 			36D
 		VSL2 	VAD
-			STADR
+		STADR
 # Page 766
 		STORE	VGTIG		# VG IGNITION SCALED AT 2(+7) M/CS
 
