@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/31/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2011-01-05 JL	Fixed indentation of RVQ instruction.
 
 # Page 1132
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -162,7 +163,7 @@ GETERAD		DLOAD	DSQ
 			B2XSC
 		SR4R
 		STORE	ERADM
-			RVQ
+		RVQ
 
 # THE FOLLOWING CONSTANTS WERE COMPUTED WITH A=6378166, B=6356784 METERS
 # B2XSC = B**2 SCALED B-51
