@@ -12,6 +12,7 @@
 # Mod history:	2009-08-12 JL	Created.
 #		2011-01-17 JL	Fixed module name, indentation.
 #		2011-01-23 JL	Fixed module name. 
+#		2011-01-27 JL	Fixed module name.
 
 # MAIN.agc is a little different from the other files  
 # provided, in that it doesn't represent anything that appears 
@@ -44,7 +45,7 @@ $PINBALL_NOUN_TABLES.agc				# 261
 $CSM_GEOMETRY.agc					# 278
 $IMU_COMPENSATION_PACKAGE.agc				# 290
 $PINBALL_GAME__BUTTONS_AND_LIGHTS.agc			# 300
-$R60_R62.agc						# 381
+$R60,R62.agc						# 381
 $ANGLFIND.agc						# 390
 $GIMBAL_LOCK_AVOIDANCE.agc				# 403
 $KALCMANU_STEERING.agc					# 405
