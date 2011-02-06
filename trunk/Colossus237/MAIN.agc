@@ -13,6 +13,7 @@
 #		2011-01-17 JL	Fixed module name, indentation.
 #		2011-01-23 JL	Fixed module name. 
 #		2011-01-27 JL	Fixed module name.
+#		2011-02-05 JL	Fixed module name.
 
 # MAIN.agc is a little different from the other files  
 # provided, in that it doesn't represent anything that appears 
@@ -58,7 +59,7 @@ $P34-P35,_P74-P75.agc					# 450
 $R31.agc						# 494
 $P76.agc						# 500
 $R30.agc						# 503
-$STABLE_ORBIT_P38-P39.agc				# 514
+$STABLE_ORBIT_-_P38-P39.agc				# 514
 
 # PANDORA.072
 $P11.agc						# 522
