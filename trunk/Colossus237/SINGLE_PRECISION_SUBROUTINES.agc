@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-06-03 OH	Adapted from corresponding Colossus 249 file.
 #		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
+#		2011-02-08 JL	Minor fixes.
 
 ## Page 1174
 		BLOCK	02
@@ -17,7 +18,6 @@
 # SINGLE PRECISION SINE AND COSINE
 
 		COUNT	02/INTER
-		
 SPCOS		AD	HALF		# ARGUMENTS SCALED AT PI
 SPSIN		TS	TEMK
 		TCF	SPT
@@ -49,10 +49,5 @@ POLLEY		EXTEND
 		TC	Q
 ARG90		INDEX	A
 		CS	LIMITS
-		TC	Q		# RESULT SCALED AT 1.
-		
-# SPROOT WAS DELETED IN REV 51 OF MASTER. ASS. CONT. HAS CARDS.
-
-
-
-
+		TC	Q		# RESULT SCALED AT 1
+# 	   SPROOT WAS DELETED IN REV 51 OF MASTER. ASS. CONT. HAS CARDS.
