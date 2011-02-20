@@ -65,7 +65,7 @@ $STABLE_ORBIT_-_P38-P39.agc				# 514
 $P11.agc						# 522
 $TPI_SEARCH.agc						# 539
 $P20-P25.agc						# 550
-$P30-P37.agc						# 624
+$P30,P37.agc						# 624
 $P40-P47.agc						# 637
 $P51-P53.agc						# 690
 $LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc		# 736
