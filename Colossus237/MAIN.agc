@@ -14,6 +14,7 @@
 #		2011-01-23 JL	Fixed module name. 
 #		2011-01-27 JL	Fixed module name.
 #		2011-02-05 JL	Fixed module name.
+#		2011-03-05 JL	Fixed module name.
 
 # MAIN.agc is a little different from the other files  
 # provided, in that it doesn't represent anything that appears 
@@ -74,7 +75,7 @@ $SERVICER207.agc					# 770
 $ENTRY_LEXICON.agc					# 788
 $REENTRY_CONTROL.agc					# 795
 $CM_BODY_ATTITUDE.agc					# 833
-$P37_P70.agc						# 840
+$P37,P70.agc						# 840
 $S-BAND_ANTENNA_FOR_CM.agc				# 884
 $LUNAR_LANDMARK_SELECTION_FOR_CM.agc			# 886
 
