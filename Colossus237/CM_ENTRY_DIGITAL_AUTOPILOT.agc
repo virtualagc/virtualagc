@@ -8,7 +8,7 @@
 # Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-04-06 JL	Adapted from corresponding Colossus 249 file.
+# Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
 
 ## Page 1031
 # SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.   GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
