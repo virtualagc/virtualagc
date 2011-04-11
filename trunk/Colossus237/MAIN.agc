@@ -15,6 +15,7 @@
 #		2011-01-27 JL	Fixed module name.
 #		2011-02-05 JL	Fixed module name.
 #		2011-03-05 JL	Fixed module name.
+#		2011-04-11 JL	Fixed module name.
 
 # MAIN.agc is a little different from the other files  
 # provided, in that it doesn't represent anything that appears 
@@ -99,7 +100,7 @@ $CM_ENTRY_DIGITAL_AUTOPILOT.agc				# 1031
 $DOWN-TELEMETRY_PROGRAM.agc				# 1060
 $INTER-BANK_COMMUNICATION.agc				# 1070
 $INTERPRETER.agc					# 1074
-$FIXED_FIXED_CONSTANT_POOL.agc				# 1167
+$FIXED-FIXED_CONSTANT_POOL.agc				# 1167
 $INTERPRETIVE_CONSTANTS.agc				# 1172
 $SINGLE_PRECISION_SUBROUTINES.agc			# 1174
 $EXECUTIVE.agc						# 1175
