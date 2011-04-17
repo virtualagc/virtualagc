@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-17 JL	Removed temporary line.
 
 ## Page 886
 		BANK	31
@@ -277,7 +278,6 @@ URR		EQUALS	6D
 UZZ		EQUALS	0D
 
 ## Page 892
-# SEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS BY NASA 2021111-031       1:17 AUG. 24,1968  SATRAP  .072  PAGE 1188
 #          **** TEMPORARY VALUES FOR LANDMARK TABLES-LEVINE/SAPONARO****
 
 #               LATTAB HAS LATITUDES THAT GO FROM +8 TO -8 DEGREES

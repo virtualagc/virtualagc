@@ -9,9 +9,9 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-17 JL	Removed temporary line.
 
 ## Page 896
-# SEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS BY NASA 2021111-031       1:17 AUG. 24,1968  SATRAP  .072  PAGE  896
 # NAME     TVCDAPON (TVC DAP INITIALIZATION AND STARTUP CALL)
 # MOD NO 3                        DATE  8 JUNE,1967
 # MOD BY ENGEL                    LOG SECTION P40-P47

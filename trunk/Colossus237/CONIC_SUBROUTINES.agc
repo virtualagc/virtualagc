@@ -9,9 +9,9 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-17 JL	Removed temporary line.
 
 ## Page 1228
-# SEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS BY NASA 2021111-031       1:17 AUG. 24,1968  SATRAP  .004  PAGE 1223
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION                       DATE - 1 SEPTEMBER 1967
 # MOD NO. - 0                                                                     LOG SECTION - CONIC SUBROUTINES
 # MOD BY KRAUSE                                                                   ASSEMBLY - COLOSSUS REVISION 88

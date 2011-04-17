@@ -9,9 +9,9 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-02-23 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-17 JL	Removed temporary line.
 
 ## Page 690
-# SEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS BY NASA 2021111-031       1:17 AUG. 24,1968  SATRAP  .072  PAGE 1188
 # PROGRAM NAME- PROG52                                                                   DATE- NOV 30, 1966
 # MOD NO- 2                                                                              LOG SECTION- P51-P53
 # MODIFICATION BY- LONSKE                                                                ASSEMBLY- SUNDISK REV 30
