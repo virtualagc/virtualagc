@@ -11,9 +11,9 @@
 # Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
 #		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 #		2011-02-12 JL	Minor fixes.
+#		2011-04-17 JL	Removed temporary line.
 
 ## Page 1358
-# SEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS BY NASA 2021111-031       1:17 AUG. 24,1968  SATRAP  .072  PAGE 1188
 # PROGRAM DESCRIPTION                                                         DATE  20 DECEMBER 1967
 # PROGRAM NAME -  SELF-CHECK                                                  LOG SECTION AGC BLOCK TWO SELF-CHECK
 # MOD NO -  1                                                                 ASSEMBLY SUBROUTINE UTILITYM REV 25

@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-17 JL	Removed temporary line.
 
 ## Page 1031
 # SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.   GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
@@ -539,7 +540,6 @@ DZNOCOM		TS	JETEM +1	# GENERATE TAG, SET C(A)= -+1 OUTSIDE DZ
 		TC	Q
 
 ## Page 1044
-# SEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS BY NASA 2021111-031       1:17 AUG. 24,1968  SATRAP  .072  PAGE  896
 #          EXTRA ATMOSPHERIC DIGITAL AUTOPILOT
 
 #          1.    IF ABS(CALF) -C(45) POS, USE                             IF CALFA POS, CMDAPMOD= +0
