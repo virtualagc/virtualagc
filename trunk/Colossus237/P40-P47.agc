@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-02-20 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-24 JL	Fixed incorrect indentation of label.
 
 ## Page 637
 # PROGRAM DESCRIPTION **P40CSM**
@@ -2269,7 +2270,7 @@ CONTTWO		2DEC	.00118
 POS-2.5		OCT	37405
 		EBANK=	DAPDATR1
 RCSCADR		2CADR	RCSUP
- 6SECT5		OCT	37704
+6SECT5		OCT	37704
 		COUNT	21/RCSUP
 
 		BANK	20
