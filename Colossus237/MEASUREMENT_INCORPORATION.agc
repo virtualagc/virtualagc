@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-27 JL	Removed 2 lines.
 
 ## Page 1219
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -139,8 +140,6 @@ INCOR1C		TLOAD	ROUND
 		XSU,1	SR1
 			S1
 		DDV	PUSH		# PD 0-1 = DELTAQ/A
-		GOTO
-			NEWZCOMP
 		SSP
 			S2
 			54D
