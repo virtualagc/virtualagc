@@ -159,18 +159,22 @@ Add (uint16_t n1, uint16_t n2)
 void
 BuggerCheck (int Line, int BuggerChecked, uint16_t Banknum, uint16_t Checksum)
 {
-  if (!BuggerChecked)
+    if (!BuggerChecked) 
     {
-      if (Checksum == Banknum)
-	printf ("FYI: Bugger word for bank %o is a match (positive).\n", Banknum);
-      else if (Checksum == (077777 & ~Banknum))
-	printf ("FYI: Bugger word for bank %o is a match (negative).\n", Banknum);
-      else
+        if (Checksum == Banknum) 
         {
-	  ErrorCount++;
-	  printf ("Error: Line %d: Bugger word for bank %o does not match (computed=%05o,%05o).\n", 
-		  Line, Banknum, Checksum, 077777 & ~Checksum);
-	}
+            //printf("FYI: Bugger word for bank %o is a match (positive).\n", Banknum);
+        } 
+        else if (Checksum == (077777 & ~Banknum)) 
+        {
+            //printf("FYI: Bugger word for bank %o is a match (negative).\n", Banknum);
+        } 
+        else 
+        {
+            ErrorCount++;
+            printf("Error: Line %d: Bugger word for bank %o does not match (computed=%05o,%05o).\n", 
+                   Line, Banknum, Checksum, 077777 & ~Checksum);
+        }
     }	    
 }
 
