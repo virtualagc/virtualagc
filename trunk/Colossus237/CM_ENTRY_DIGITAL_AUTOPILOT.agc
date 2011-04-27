@@ -10,6 +10,7 @@
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
 #		2011-04-17 JL	Removed temporary line.
+#		2011-04-27 JL	Fixed symbol name.
 
 ## Page 1031
 # SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.   GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
@@ -893,7 +894,7 @@ MAXVTEST	CS	JNDX
 		TC	GETON1		# INSURE THAT Q IS POS AS TAG.
 MAXVTIM1	EXTEND
 		ZQ			# SET +0 AS TAG
-		CA	-VMT/180
+		CA	VMT/180
 GETON1		TS	VDT/180		# VDT/180 OR VMT/180.
 		AD	-VT/180
 		DOUBLE

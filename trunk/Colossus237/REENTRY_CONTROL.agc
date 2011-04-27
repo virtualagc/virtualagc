@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-03-03 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-27 JL	Fixed symbol name.
 
 ## Page 795
 # ENTRY INITIALIZATION ROUTINE
@@ -785,7 +786,7 @@ NEGAMA		DMP	DMP		# ENTER WITH GAMMAL IN MPAC
 			1/3RD
 		PDDL	DAD		# PUSH LEWD/3
 			AHOOKDV
-			1/24TH
+			1/12TH
 		DMP	DMP		# DEL VL =(GAMMAL VL/3)/(LEWD/3-DVL
 			DVL		# (2/3 + AHOOKDV)(CH1 GS/DHOOK VL))
 			CH1
