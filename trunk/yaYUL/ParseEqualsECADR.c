@@ -32,8 +32,8 @@ extern int CurrentLineInFile;
 
 int ParseEqualsECADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  strcpy(OutRecord->ErrorMessage, "Skipping =ECADR directive");
-  OutRecord->Warning = 1;
+  //strcpy(OutRecord->ErrorMessage, "Skipping =ECADR directive");
+  //OutRecord->Warning = 1;
   return (0);  
 }
 
