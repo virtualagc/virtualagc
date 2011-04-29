@@ -428,6 +428,11 @@ ParseTC (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 int 
 ParseTCF (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
+  if (*InRecord->Operand == 0)
+  {
+    /* Handle a TCF with no operand, which translates to TCF +0, i.e. NOOP. */
+    InRecord->Operand = "+0";
+  }
   return (ParseGeneral (InRecord, OutRecord, 010000, QCNOT0 | ENUMBER));
 }
 
@@ -460,8 +465,4 @@ ParseXCH (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral (InRecord, OutRecord, 050000, QC3 | ENUMBER));
 }
-
-
-
-
 
