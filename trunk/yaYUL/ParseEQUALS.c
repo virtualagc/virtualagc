@@ -110,11 +110,7 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   // that the current program counter is the value.  
   if (*InRecord->Operand == 0 && *InRecord->Mod1 == 0)
     {
-      // JMS: Even though it is assigned the program counter as the current
-      // value, it is still just a constant
-      //EditSymbol (InRecord->Label, &InRecord->ProgramCounter);
-      EditSymbolNew (InRecord->Label, &InRecord->ProgramCounter, SYMBOL_CONSTANT,
-		     CurrentFilename, CurrentLineInFile);
+      EditSymbolNew (InRecord->Label, &InRecord->ProgramCounter, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
       OutRecord->LabelValue = InRecord->ProgramCounter;
       return (0);
     }  
@@ -151,10 +147,7 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	    IncPc (&LabelValue, OpcodeOffset, &LabelValue);
         }
 
-      // JMS: This is just a constant to add to the symbol table
-      //EditSymbol (InRecord->Label, &LabelValue);
-      EditSymbolNew (InRecord->Label, &LabelValue, SYMBOL_CONSTANT,
-		     CurrentFilename, CurrentLineInFile);
+      EditSymbolNew (InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
       OutRecord->LabelValueValid = 1;
     }
   else
@@ -175,16 +168,10 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	      else if (Value > 32767)
 		Value = 32767;  
 	    }
-	  LabelValue.Invalid = 0;
-	  LabelValue.Constant = 1;
-	  LabelValue.Value = Value;
-	  PseudoToSegmented (Value, &TempOutput);
+	  PseudoToSegmented (Value, &LabelValue);
 	}
 
-      // JMS: This is just a constant to add to the symbol table
-      //EditSymbol (InRecord->Label, &LabelValue /*&TempOutput.ProgramCounter*/);
-      EditSymbolNew (InRecord->Label, &LabelValue, SYMBOL_CONSTANT,
-		     CurrentFilename, CurrentLineInFile);
+      EditSymbolNew (InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
     }  
   OutRecord->LabelValue = LabelValue;  
   return (0);  
