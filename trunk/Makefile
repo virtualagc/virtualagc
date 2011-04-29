@@ -126,6 +126,7 @@
 #		02/16/10 RSB	Adjustments associated with getting
 #				Artemis072 into the installers.
 #		02/20/10 RSB	Updated version to 20100220 for release.
+#		2011-04-27 JL	Added Colossus237.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -308,6 +309,7 @@ endif
 	$(MAKE) -C Comanche055
 	$(MAKE) -C Luminary099
 	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
+	${MAKE} -C Colossus237 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
 	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
 		EXT=${EXT}
 	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
@@ -327,6 +329,7 @@ listings: \
 	listing-agc-Luminary099 \
 	listing-agc-Luminary131 \
 	listing-agc-Artemis072 \
+	listing-agc-Colossus237 \
 	listing-aea-FP6 \
 	listing-aea-FP8
 
@@ -415,6 +418,7 @@ clean:
 	${MAKE} -C Comanche055 clean
 	${MAKE} -C Luminary099 clean
 	${MAKE} -C Artemis072 clean
+	${MAKE} -C Colossus237 clean
 	$(MAKE) -C Validation clean
 	${MAKE} -C ControlPulseSim clean
 	${MAKE} -C VirtualAGC clean
