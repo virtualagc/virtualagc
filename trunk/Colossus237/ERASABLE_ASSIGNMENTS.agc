@@ -4144,12 +4144,7 @@ RETLOCN		EQUALS	XR1HOLD	+1
 #
 
 
-## *-JL-* Original:
-#WHOCARES	=	3777		# A DUMMY FOR E-BANK INSENSITIVE 2CADRS.
-## *-JL-* Replacement:
-		SETLOC	3777
-WHOCARES	EQUALS			# A DUMMY FOR E-BANK INSENSITIVE 2CADRS.                                                                                                                                                             
-## *-JL-* End
+WHOCARES	=	3777		# A DUMMY FOR E-BANK INSENSITIVE 2CADRS.
 
 
 END-E7		EQUALS	WHOCARES	# ****** LAST LOCATION IN E7
