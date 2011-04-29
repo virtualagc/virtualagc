@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-02-19 JL	Adapted from corresponding Colossus 249 file.
+#		2011-04-29 JL	Added missing line at the bottom of page 632.
 
 ## Page 624
 		BANK	32
@@ -392,6 +393,7 @@ GETARG		STOVL	THETA(1)
 		STODL	LAT
 			HI6ZEROS
 		STODL	ALT		# ALT=0  = LAT +4
+		DSU	DAD
 ## Page 633
 			8D
 			PIPTIME
