@@ -98,6 +98,7 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   OutRecord->LabelValue.Invalid = 1;
   OutRecord->NumWords = 0;
   OutRecord->Equals = 1;
+
   // As a special case, it sometimes happens that the label is empty.
   // I *believe* that this is done only for documentation purposes, and
   // has no other effect.
@@ -114,29 +115,46 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->LabelValue = InRecord->ProgramCounter;
       return (0);
     }  
-  // Next, it may be that the operand is simply a number.  If so, then
-  // we're talking about a simple constant.  
   i = GetOctOrDec (InRecord->Operand, &Value);
   if (i)
     {
       // The operand is NOT a number.  Presumably, it's a symbol.
-      i = FetchSymbolPlusOffset (&InRecord->ProgramCounter, 
-                                 InRecord->Operand, 
-				 InRecord->Mod1, &LabelValue);
+
+      if (!strcmp(InRecord->Mod1, "+") || !strcmp(InRecord->Mod1, "-"))
+      {
+          // Handle the case of whitespace between +/- and the actual offset. 
+          if (*InRecord->Mod2 != 0)
+          {
+              char mod[1 + MAX_LINE_LENGTH];
+
+              strcpy(mod, InRecord->Mod1);
+              strcat(mod, InRecord->Mod2);
+              i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, 
+                                        InRecord->Operand, 
+                                        mod, 
+                                        &LabelValue);
+          }
+          else
+          {
+              sprintf(OutRecord->ErrorMessage, "Syntax error, invalid offset specified");
+              OutRecord->Fatal = 1;
+              return(0);
+          }
+      }
+      else
+      {
+          i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, 
+                                    InRecord->Operand, 
+				    InRecord->Mod1, 
+                                    &LabelValue);
+      }
       if (i)
-        {
-      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
-	  OutRecord->Fatal = 1;
-          return (0);
-	}
-#if 0	
-      if (!i)
-        {
-	  LabelValue = CONSTANT (0);
-	  LabelValue.Value = Value;
-          EditSymbol (InRecord->Label, &LabelValue);
-	}
-#endif
+      {
+          sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
+          OutRecord->Fatal = 1;
+          return(0);
+      }
+
       if (OpcodeOffset)
         {
 	  if (LabelValue.Constant)
@@ -152,7 +170,9 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
   else
     {
-      ParseOutput_t TempOutput;
+      // Next, it may be that the operand is simply a number.  If so, then
+      // we're talking about a simple constant.  
+
       if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
         {
 	  IncPc (&InRecord->ProgramCounter, Value, &LabelValue);
@@ -176,5 +196,4 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   OutRecord->LabelValue = LabelValue;  
   return (0);  
 }
-
 
