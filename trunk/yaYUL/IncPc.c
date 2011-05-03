@@ -33,14 +33,13 @@
 #include <string.h>
 
 //-------------------------------------------------------------------------
-// Increment program counter by a certain amount.  Returns 0 on success,
-// 1 on bank overflow, -1 for not-yet-assigned.  Also, sets the Overflow
-// flag in the Address_t structure.
+// Increment program counter by a certain amount. 
+// Sets the Overflow flag in the Address_t structure.
 
-void
-IncPc (Address_t *OldPc, int Increment, Address_t *NewPc)
+void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
 {
   int i, j, Max, Min, BankIncrement;
+
   // I have no theoretical basis for how to treat the case of Increment
   // being very large (larger than a bank size), but there is a place
   // in the Luminary source code where decrements of about 12000 (octal)
@@ -57,22 +56,26 @@ IncPc (Address_t *OldPc, int Increment, Address_t *NewPc)
       BankIncrement = -(7 & (Increment >> 12));
       Increment = -(07777 & Increment);
     }
+
   // Get a good starting point for the calculation.
   *NewPc = *OldPc;
+
   // If the value is invalid---not yet assigned---then adding to it makes
   // no sense. 
   if (NewPc->Invalid)
     return;
+
   // Okay, add to the existing Value.  This is something that ALWAYS works.
   // (Only overflowing 32-bit arithmetic could make it fail, but since
   // all possible starting values and increments are 15-bit or less, 
   // overflowing 32-bit arithmetic would be a real feat!
   //NewPc->Value += Increment;
+
   // Convert constants (which are presumably pseudo-addresses) to real
   // addresses.
   if (NewPc->Constant)
     {
-      // ... exept we do want to check that the constant is in range.
+      // ... except we do want to check that the constant is in range.
       //if (NewPc->Value < -16383 || NewPc->Value > 32767)
       //  NewPc->Overflow = 1;
       if (NewPc->Value < 0)
@@ -93,19 +96,20 @@ IncPc (Address_t *OldPc, int Increment, Address_t *NewPc)
       else
         return;
     }
+
   // Okey-smokey, the "address" is really an address. If it has previously
   // overflowed, there's no particular reason to continue.
   if (NewPc->Overflow)
     return;
+
   // Compute the new S-register value (in the absence overflow.
   i = (j = NewPc->SReg) + Increment;
-  //if ((i & 040000) & !(j & 040000))
-  //  i--;
   NewPc->SReg = i;
   if (NewPc->Erasable && NewPc->Banked)
     NewPc->EB += BankIncrement;
   else if (NewPc->Fixed && NewPc->Banked)
     NewPc->FB += BankIncrement;
+
   // Okay, here's some workaround code for the weird construct
   //	TC FixedMemoryLabel -LargeOffset
   // taking a location in fixed memory down to a location in erasable.
@@ -122,6 +126,7 @@ IncPc (Address_t *OldPc, int Increment, Address_t *NewPc)
       NewPc->FB = 0;
       NewPc->Super = 0;
     }  
+
   // Determine the apppropriate SReg ranges for this memory region.
   // The address will be either banked or unbanked, and either in fixed
   // memory or erasable memory.  So, there are four possible combos.
@@ -159,6 +164,7 @@ IncPc (Address_t *OldPc, int Increment, Address_t *NewPc)
     }
   else
     goto ImplementationError;
+
   // Did the new S-register value go out of range for the memory region?  
   if (i < Min)
     {
@@ -170,6 +176,7 @@ IncPc (Address_t *OldPc, int Increment, Address_t *NewPc)
       NewPc->Overflow = 1;
       NewPc->SReg = Max;
     }  
+
   // Back-convert to get a pseudo-address.
   if (NewPc->Unbanked)
     NewPc->Value = NewPc->SReg;
@@ -184,6 +191,7 @@ IncPc (Address_t *OldPc, int Increment, Address_t *NewPc)
   else
     goto ImplementationError;  
   return;     
+
 ImplementationError:
   // Can't occur, but I give it a good pinch if it does!    
   NewPc->Invalid = 1;
