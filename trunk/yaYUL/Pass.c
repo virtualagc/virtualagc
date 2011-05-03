@@ -414,12 +414,6 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
       ParseInputRecord.Extend = ParseOutputRecord.Extend;
       ParseOutputRecord = DefaultParseOutput;
       ParseOutputRecord.Bank = ParseInputRecord.Bank;
-      if (WriteOutput && ParseInputRecord.ProgramCounter.FB == 022 && ParseInputRecord.ProgramCounter.SReg == 02411)
-        {
-          printf ("Hello!\n");
-	  if (HtmlOut != NULL)
-	    fprintf (HtmlOut, "Hello!\n");
-	}
       // Get the next line from the file.
       ss = fgets (s, sizeof (s) - 1, InputFile);
       // At end of the file?
