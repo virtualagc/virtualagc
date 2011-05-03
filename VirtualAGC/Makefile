@@ -136,17 +136,17 @@ MacOsX: VirtualAGC.app.tar.gz
 
 .PHONY: clean
 clean:
-	-rm -rf temp
-	-rm *~ *.bak VirtualAGC *.exe *-macosx VirtualAGC-installer
-	-rm VirtualAGC.app.tar.gz VirtualAGC.tar.bz2 VirtualAGC.zip
-	-rm -rf VirtualAGC-win32/output
-	-rm -rf VirtualAGC-win32/build
-	-rm VirtualAGC-win32/build.log
-	-rm VirtualAGC-win32/temp.mpi
-	-rm -rf VirtualAGC-linux/output
-	-rm -rf VirtualAGC-linux/build
-	-rm VirtualAGC-linux/build.log
-	-rm VirtualAGC-linux/temp.mpi
+	rm -rf temp
+	rm -f *~ *.bak VirtualAGC *.exe *-macosx VirtualAGC-installer
+	rm -f VirtualAGC.app.tar.gz VirtualAGC.tar.bz2 VirtualAGC.zip
+	rm -rf VirtualAGC-win32/output
+	rm -rf VirtualAGC-win32/build
+	rm -f VirtualAGC-win32/build.log
+	rm -f VirtualAGC-win32/temp.mpi
+	rm -rf VirtualAGC-linux/output
+	rm -rf VirtualAGC-linux/build
+	rm -f VirtualAGC-linux/build.log
+	rm -f VirtualAGC-linux/temp.mpi
 
 SOURCES:=${APP}.cpp \
 	../yaAGC/agc_utilities.c \

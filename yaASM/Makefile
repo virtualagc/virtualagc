@@ -55,7 +55,7 @@ yaASM-macosx: yaASM.c ../yaYUL/SymbolTable.c
 
 .PHONY:	clean
 clean:
-	-rm binASM yaASM *.exe *-macosx \
+	rm -f binASM yaASM *.exe *-macosx \
 		*.o *~ \
 		SampleCodeASM.bin SampleCodeASM.lst
 

@@ -286,7 +286,7 @@ ifeq "${YADSKY_SUFFIX}" ""
 else
 	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
 		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
+	cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
 	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
 		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 endif	
@@ -401,7 +401,6 @@ snapshot-ephemeris:
 	ls -l ${WEBSITE}/Downloads
 
 clean:
-	#echo PREFIX=/usr/local >Makefile.yAGC
 	$(MAKE) -C yaLEMAP clean
 	$(MAKE) -C yaASM clean
 	$(MAKE) -C yaAGC clean

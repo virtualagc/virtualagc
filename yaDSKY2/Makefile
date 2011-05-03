@@ -71,8 +71,8 @@ MacOsX: ${APPNAME}-macosx
 
 .PHONY: clean
 clean:
-	-rm -rf temp
-	-rm -f *~ *.bak ${APPNAME} *.exe *-macosx*
+	rm -rf temp
+	rm -f *~ *.bak ${APPNAME} *.exe *-macosx*
 
 SOURCES:=${APPNAME}.cpp \
 	../yaAGC/agc_utilities.c \
