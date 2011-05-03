@@ -18,57 +18,27 @@
 #				was available.
 #		2010-01-20 RSB	Removed the '-' in front of various
 #				commands.
+#		2011-05-03 JL	Fixed so an error will always cause 
+#				a rebuild the next time make is run.
+#				Remove obsolete stuff.
 
 BASENAME=Artemis072
 
 SOURCE:=$(wildcard *.agc)
 TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 
-default:	$(TARGETS)
+default: $(TARGETS)
 
 ${BASENAME}.bin: ${BASENAME}.binsource
 	-../Luminary131/Oct2Bin <${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
-	../yaYUL/yaYUL --html MAIN.agc >${BASENAME}.lst
-	mv MAIN.agc.symtab ${BASENAME}.symtab
+	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
 	diff -s MAIN.agc.bin ${BASENAME}.bin
+	mv MAIN.agc.lst ${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
 		
 clean:
 	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
-
-
-#--------------------------------------------------------------------
-ifdef OBSOLETE
-
-PROJECT:=Artemis072
-
-ifndef PREFIX
-PREFIX=/usr/local
-endif
-
-SOURCE:=$(wildcard *.agc)
-TARGETS=${PROJECT}.bin ${PROJECT}.lst
-
-default: $(TARGETS)
-
-clean:
-	-rm -f *.lst *~ *.bin *.symtab *.html
-	
-install: default
-	cp ${PROJECT}.bin ${PREFIX}/bin
-	chmod ugo+r ${PREFIX}/bin/${PROJECT}.bin
-	
-# Implicit rules.
-
-%.bin: %.binsource
-	../Luminary131/Oct2Bin <$^
-	mv Oct2Bin.bin $@
-
-%.lst: %.bin ${SOURCE}
-	../yaYUL/yaYUL --html MAIN.agc >$@
-	mv MAIN.agc.symtab ${BASENAME}.symtab
-	diff -s MAIN.agc.bin $<
-endif 
 
