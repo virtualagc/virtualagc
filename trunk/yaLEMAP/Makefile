@@ -90,7 +90,7 @@ yaLEMAP-macosx: yaLEMAP.c ../yaYUL/SymbolTable.c
 
 .PHONY:	clean
 clean:
-	-rm binLEMAP yaLEMAP *.exe *-macosx \
+	rm -f binLEMAP yaLEMAP *.exe *-macosx \
 		*.o *~ yaLEMAP.binsource \
 		binLEMAP.bin SampleCodeAGS.bin SampleCodeAGS.lst \
 		../FP8/FP8.bin ../FP8/FP8.lst ../FP8/*.symtab \

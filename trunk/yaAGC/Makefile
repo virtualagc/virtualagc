@@ -179,7 +179,7 @@ endif
 	touch ../yaDEDA/src/main.c
 
 clean:
-	-rm -f yaAGC libyaAGC.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel *.exe *-macosx
+	rm -f yaAGC libyaAGC.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel *.exe *-macosx
 
 install:	yaAGC
 	cp yaAGC ${PREFIX}/bin
