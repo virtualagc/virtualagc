@@ -13,31 +13,26 @@
 #		09/05/04 RSB	Now runs yaYUL by default.
 #		07/28/05 RSB	Now account for symtabs.
 #		2009-07-04 RSB	Added --html switch.
+#		2011-05-03 JL	Fixed so an error will always cause 
+#				a rebuild the next time make is run.
+#				Remove obsolete stuff. Point to moved Oct2Bin.
 
-ifndef PREFIX
-PREFIX=/usr/local
-endif
+BASENAME=Colossus249
+
 SOURCE:=$(wildcard *.agc)
-TARGETS=Colossus249.bin Colossus249.lst Colossus249.symtab
+TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 
-default:	$(TARGETS)
+default: $(TARGETS)
 
-Colossus249.bin: Colossus249.binsource
-	../Luminary131/Oct2Bin <Colossus249.binsource
-	mv Oct2Bin.bin Colossus249.bin
+${BASENAME}.bin: ${BASENAME}.binsource
+	../Tools/Oct2Bin <${BASENAME}.binsource
+	mv Oct2Bin.bin $@
 
-Colossus249.lst Colossus249.symtab: ${SOURCE} Colossus249.bin
-	../yaYUL/yaYUL --html MAIN.agc >Colossus249.lst
-	mv MAIN.agc.symtab Colossus249.symtab
-	diff -s MAIN.agc.bin Colossus249.bin
+${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
+	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
+	diff -s MAIN.agc.bin ${BASENAME}.bin
+	mv MAIN.agc.lst ${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
 		
 clean:
-	-rm -f *.lst *~ MAIN.agc.bin Colossus249.bin *.symtab *.html
-	
-install:	default
-	cp Colossus249.bin ${PREFIX}/bin
-	chmod ugo+r ${PREFIX}/bin/Colossus249.bin
-	cp *.symtab ${PREFIX}/bin
-	rm -f *.symtab *.lst
-	
-
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html

@@ -20,7 +20,7 @@
 #				commands.
 #		2011-05-03 JL	Fixed so an error will always cause 
 #				a rebuild the next time make is run.
-#				Remove obsolete stuff.
+#				Remove obsolete stuff. Point to moved Oct2Bin.
 
 BASENAME=Artemis072
 
@@ -30,7 +30,7 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default: $(TARGETS)
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	-../Luminary131/Oct2Bin <${BASENAME}.binsource
+	../Tools/Oct2Bin <${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
@@ -40,5 +40,5 @@ ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 		
 clean:
-	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 

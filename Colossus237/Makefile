@@ -7,6 +7,7 @@
 # Mod history:	2010-12-12 RSB	Adapted from the corresponding
 #				Colossus 249 file.
 #		2011-05-03 JL	Replaced with newer version from Artemis072.
+#				Point to moved Oct2Bin.
 
 BASENAME=Colossus237
 
@@ -17,7 +18,7 @@ TARGETS=${BASENAME}.lst ${BASENAME}.symtab
 default: $(TARGETS)
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	-../Luminary131/Oct2Bin <${BASENAME}.binsource
+	../Tools/Oct2Bin <${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 #${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
@@ -28,5 +29,5 @@ ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE}
 	#mv MAIN.agc.symtab ${BASENAME}.symtab
 
 clean:
-	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 

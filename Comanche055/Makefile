@@ -17,16 +17,15 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default:	$(TARGETS)
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	-../Luminary131/Oct2Bin <${BASENAME}.binsource
+	../Tools/Oct2Bin <${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	../yaYUL/yaYUL --html MAIN.agc >${BASENAME}.lst
-	#cp MAIN.agc.bin Oct2Bin.bin
-	#../Luminary131/Oct2Bin --invert --page=1598
-	mv MAIN.agc.symtab ${BASENAME}.symtab
-	diff -s MAIN.agc.bin ${BASENAME}.bin
-		
+	diff -s MAIN.agc.bin ${BASENAME}.bin                                                                                                                                                                                                     
+	mv MAIN.agc.lst ${BASENAME}.lst                                                                                                                                                                                                          
+	mv MAIN.agc.symtab ${BASENAME}.symtab                                                                                                                                                                                                    
+
 clean:
 	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 

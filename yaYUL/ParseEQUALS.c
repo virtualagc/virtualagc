@@ -93,6 +93,7 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   Address_t LabelValue = { 1 };
   int Value, i;
+
   OutRecord->ProgramCounter = InRecord->ProgramCounter;
   OutRecord->Bank = InRecord->Bank;
   OutRecord->LabelValue.Invalid = 1;
@@ -111,11 +112,12 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   // that the current program counter is the value.  
   if (*InRecord->Operand == 0 && *InRecord->Mod1 == 0)
     {
-      EditSymbolNew (InRecord->Label, &InRecord->ProgramCounter, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
+      EditSymbolNew(InRecord->Label, &InRecord->ProgramCounter, SYMBOL_CONSTANT,
+		    CurrentFilename, CurrentLineInFile);
       OutRecord->LabelValue = InRecord->ProgramCounter;
       return (0);
     }  
-  i = GetOctOrDec (InRecord->Operand, &Value);
+  i = GetOctOrDec(InRecord->Operand, &Value);
   if (i)
     {
       // The operand is NOT a number.  Presumably, it's a symbol.
@@ -162,10 +164,10 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	      LabelValue.Value += OpcodeOffset;
 	    }
           else
-	    IncPc (&LabelValue, OpcodeOffset, &LabelValue);
+	    IncPc(&LabelValue, OpcodeOffset, &LabelValue);
         }
 
-      EditSymbolNew (InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
+      EditSymbolNew(InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
       OutRecord->LabelValueValid = 1;
     }
   else
@@ -173,25 +175,30 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       // Next, it may be that the operand is simply a number.  If so, then
       // we're talking about a simple constant.  
 
+      ParseOutput_t TempOutput;
+
       if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
         {
-	  IncPc (&InRecord->ProgramCounter, Value, &LabelValue);
+	  IncPc(&InRecord->ProgramCounter, Value, &LabelValue);
 	}
       else
         {
 	  if (Value < -16383 || Value > 32767)
 	    {
-	      strcpy (OutRecord->ErrorMessage, "Value out of range---truncating");
+	      strcpy(OutRecord->ErrorMessage, "Value out of range---truncating");
 	      OutRecord->Warning = 1;
 	      if (Value < -16383)
 		Value = -16383;
 	      else if (Value > 32767)
 		Value = 32767;  
 	    }
-	  PseudoToSegmented (Value, &LabelValue);
+	  LabelValue.Invalid = 0;
+	  LabelValue.Constant = 1;
+	  LabelValue.Value = Value;
+	  PseudoToSegmented(Value, &TempOutput);
 	}
 
-      EditSymbolNew (InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
+      EditSymbolNew(InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
     }  
   OutRecord->LabelValue = LabelValue;  
   return (0);  

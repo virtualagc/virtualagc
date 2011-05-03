@@ -4,42 +4,27 @@
 #		(The source code for the Command Module's (CM)
 #		Apollo Guidance Computer (AGC), for Apollo 15-17
 # Contact:	Ron Burkey <info@sandroid.org>.
-# Mod history:	2005-07-06 RSB 	Began.
-#		2006-01-09 RSB  Removed the comment to ignore 
-#				errors.  (Artemis072.binsource is 
-#				now complete and proofed, so the
-#				warning isn't needed.)
-#		2009-07-04 RSB	Added --html switch.
+# Mod history:	
+#		2009-07-25 RSB	Created, based on Artemis072 version.
+#		2011-05-03 JL	Updated.
 
-PROJECT:=Artemis072
-
-ifndef PREFIX
-PREFIX=/usr/local
-endif
+BASENAME=Solarium055
 
 SOURCE:=$(wildcard *.agc)
-TARGETS=${PROJECT}.bin ${PROJECT}.lst
+TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 
 default: $(TARGETS)
 
-clean:
-	-rm -f *.lst *~ *.bin *.symtab *.html
-	
-install: default
-	cp ${PROJECT}.bin ${PREFIX}/bin
-	chmod ugo+r ${PREFIX}/bin/${PROJECT}.bin
-	
-# Implicit rules.
-
-%.bin: %.binsource
-	../Luminary131/Oct2Bin <$^
+${BASENAME}.bin: ${BASENAME}.binsource
+	../Tools/Oct2Bin <${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
-%.lst: %.bin ${SOURCE}
-	@echo ====================================================
-	@echo Errors in the following are normal, since Artemis072
-	@echo is under development.
-	-../yaYUL/yaYUL --html MAIN.agc >$@
-	-diff -s MAIN.agc.bin $^
+${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
+	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
+	diff -s MAIN.agc.bin ${BASENAME}.bin
+	mv MAIN.agc.lst ${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
 		
+clean:
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 

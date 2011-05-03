@@ -185,7 +185,7 @@ install:	yaAGC
 	cp yaAGC ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
-CheckDec.o: ../Luminary131/CheckDec.c
+CheckDec.o: ../Tools/CheckDec.c
 	${CC} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
@@ -198,9 +198,9 @@ CheckDec.o: ../Luminary131/CheckDec.c
 all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx
 
 #CSOURCE:=main.c agc_engine_init.c agc_engine.c agc_utilities.c rfopen.c \
-#	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Luminary131/CheckDec.c \
+#	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Tools/CheckDec.c \
 #	 nbfgets.c symbol_table.c
-CSOURCE:=$(patsubst %.o,%.c,${OBJECTS} ${LIBOBJECTS}) ../Luminary131/CheckDec.c
+CSOURCE:=$(patsubst %.o,%.c,${OBJECTS} ${LIBOBJECTS}) ../Tools/CheckDec.c
 
 yaAGC.exe: ${CSOURCE} random.c
 	i386-mingw32-gcc \

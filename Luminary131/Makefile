@@ -16,56 +16,26 @@
 #		07/28/05 RSB	Added symtab.
 #		03/06/09 RSB	Added 'all-archs' and associated stuff.
 #		2009-07-04 RSB	Added --html switch.
+#		2011-05-03 JL	Moved Oct2Bin, CheckDec, bdiffhead, webb2burkey-rope to Tools directory. 
+#				Changed to simpler Makefile based on Artemis072.
 
-ifndef PREFIX
-PREFIX=/usr/local
-endif
+BASENAME=Luminary131
+
 SOURCE:=$(wildcard *.agc)
-TARGETXEQ:=bdiffhead webb2burkey-rope Oct2Bin CheckDec
-TARGETEXE:=$(patsubst %,%.exe,${TARGETXEQ})
-TARGETMAC:=$(patsubst %,%-macosx,${TARGETXEQ})
-TARGETS:=${TARGETXEQ} Luminary131.bin Luminary131.lst Luminary131.symtab
+TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 
-default:	$(TARGETS)
+default: $(TARGETS)
 
-all-archs:	default ${TARGETEXE} ${TARGETMAC}
+${BASENAME}.bin: ${BASENAME}.binsource
+	../Tools/Oct2Bin <${BASENAME}.binsource
+	mv Oct2Bin.bin $@
 
-${TARGETXEQ} : % : %.c
-	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin \
-		-DMAIN_PROGRAM -o $@ $^ -lm
-
-${TARGETEXE} : %.exe : %.c
-	i386-mingw32-gcc ${CFLAGS} -DNVER=${NVER} \
-		-DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
-
-${TARGETMAC} : %-macosx : %.c
-	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} \
-		-DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin \
-		-DMAIN_PROGRAM -o $@ $^ -lm
-
-Luminary131.bin: Oct2Bin Luminary131.binsource
-	./Oct2Bin <Luminary131.binsource
-	mv Oct2Bin.bin Luminary131.bin
-
-Luminary131.lst Luminary131.symtab: ${SOURCE} Luminary131.bin
-	../yaYUL/yaYUL --html MAIN.agc >Luminary131.lst
-	mv MAIN.agc.symtab Luminary131.symtab
-	diff -s MAIN.agc.bin Luminary131.bin
-
-.PHONY: JustAssemble
-JustAssemble:
-	../yaYUL/yaYUL --html MAIN.agc >Luminary131.lst
-	mv MAIN.agc.symtab Luminary131.symtab
-
+${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
+	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
+	diff -s MAIN.agc.bin ${BASENAME}.bin
+	mv MAIN.agc.lst ${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
+		
 clean:
-	-rm $(TARGETXEQ) *.exe *-macosx *.lst *~ MAIN.agc.bin Luminary131.bin *.symtab *.html
-
-install:	default
-	cp ${TARGETS} Luminary131.symtab ${PREFIX}/bin
-	chmod ugo+x ${PREFIX}/bin/webb2burkey-rope ${PREFIX}/bin/Oct2Bin \
-		${PREFIX}/bin/CheckDec ${PREFIX}/bin/bdiffhead
-	chmod ugo+r ${PREFIX}/bin/Luminary131.bin
-	rm *.symtab *.lst
-
-
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 

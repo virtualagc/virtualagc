@@ -8,6 +8,8 @@
 # Mod history:	2009-06-05 RSB	Adapted from similar Comanche 055
 #				Makefile.
 #		2009-07-04 RSB	Added --html switch.
+#		2011-05-03 JL	Fixed so that errors will cause rebuild next
+#				time make is run. Point to moved Oct2Bin.
 
 BASENAME=Luminary099
 
@@ -17,16 +19,15 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default:	$(TARGETS)
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	-../Luminary131/Oct2Bin <${BASENAME}.binsource
+	../Tools/Oct2Bin <${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
-	../yaYUL/yaYUL --html MAIN.agc >${BASENAME}.lst
-	cp MAIN.agc.bin Oct2Bin.bin
-	../Luminary131/Oct2Bin --invert --page=1590
-	mv MAIN.agc.symtab ${BASENAME}.symtab
+	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
 	diff -s MAIN.agc.bin ${BASENAME}.bin
+	mv MAIN.agc.lst ${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
 		
 clean:
-	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
 
