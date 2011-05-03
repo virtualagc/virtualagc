@@ -8,6 +8,8 @@
 # Mod history:	2009-05-20 RSB	Adapted from similar Colossus 249
 #				Makefile.
 #		2009-07-04 RSB	Added --html switch.
+#		2011-05-03 JL	Replaced with newer version from Artemis072.
+#				Point to moved Oct2Bin.
 
 BASENAME=Comanche055
 
@@ -21,10 +23,10 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 	mv Oct2Bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
-	../yaYUL/yaYUL --html MAIN.agc >${BASENAME}.lst
-	diff -s MAIN.agc.bin ${BASENAME}.bin                                                                                                                                                                                                     
-	mv MAIN.agc.lst ${BASENAME}.lst                                                                                                                                                                                                          
-	mv MAIN.agc.symtab ${BASENAME}.symtab                                                                                                                                                                                                    
+	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
+	diff -s MAIN.agc.bin ${BASENAME}.bin
+	mv MAIN.agc.lst ${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
 
 clean:
 	-rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
