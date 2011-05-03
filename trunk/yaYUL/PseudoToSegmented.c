@@ -37,16 +37,18 @@
 // whenever possible.
 
 void 
-PseudoToEBanked (int Value, ParseOutput_t *OutRecord)
+PseudoToEBanked(int Value, ParseOutput_t *OutRecord)
 {
-  OutRecord->ProgramCounter = ((const Address_t) { 0 } );
+  OutRecord->ProgramCounter = (const Address_t) { 0 };
+
   if (Value < 0 || Value > 0117777)
     {
-      strcpy (OutRecord->ErrorMessage, "Addresses must be between 0 and 0117777.");
+      strcpy(OutRecord->ErrorMessage, "Addresses must be between 0 and 0117777.");
       OutRecord->Fatal = 1;
       OutRecord->ProgramCounter.Invalid = 1;
       return;
     }
+
   if (Value <= 03777)
     {
       OutRecord->ProgramCounter.Address = 1;
@@ -68,6 +70,7 @@ PseudoToEBanked (int Value, ParseOutput_t *OutRecord)
       OutRecord->ProgramCounter.Fixed = 1;
       OutRecord->ProgramCounter.Banked = 1;
       OutRecord->ProgramCounter.SReg = 02000 + (Value & 01777);
+
       if (Value >= 04000 && Value <= 05777)
 	OutRecord->ProgramCounter.FB = 2;
       else if (Value >= 06000 && Value <= 07777)
@@ -78,32 +81,35 @@ PseudoToEBanked (int Value, ParseOutput_t *OutRecord)
 	{
 	  OutRecord->ProgramCounter.Super = 1;
 	  OutRecord->ProgramCounter.FB = (Value - 030000) / 02000;
-	}      
-    }				
+	} 
+    }
+
   OutRecord->ProgramCounter.Value = Value;
 }
 
 //------------------------------------------------------------------------
 
 void 
-PseudoToSegmented (int Value, ParseOutput_t *OutRecord)
+PseudoToSegmented(int Value, ParseOutput_t *OutRecord)
 {
-  if (PseudoToStruct (Value, &OutRecord->ProgramCounter))
+  if (PseudoToStruct(Value, &OutRecord->ProgramCounter))
     {
-      strcpy (OutRecord->ErrorMessage, "Addresses must be between 0 and 0117777.");
+      strcpy(OutRecord->ErrorMessage, "Addresses must be between 0 and 0117777.");
       OutRecord->Fatal = 1;
     }
 }
 
 int
-PseudoToStruct (int Value, Address_t *Address)
+PseudoToStruct(int Value, Address_t *Address)
 {
   *Address = VALID_ADDRESS;
+
   if (Value < 0 || Value > 0117777)
     {
       Address->Invalid = 1;
       return (1);
     }
+
   if (Value <= 01377)
     {
       Address->Address = 1;
@@ -132,6 +138,7 @@ PseudoToStruct (int Value, Address_t *Address)
       Address->Fixed = 1;
       Address->Banked = 1;
       Address->SReg = 02000 + (Value & 01777);
+
       if (Value >= 04000 && Value <= 05777)
 	Address->FB = 2;
       else if (Value >= 06000 && Value <= 07777)
@@ -144,7 +151,9 @@ PseudoToStruct (int Value, Address_t *Address)
 	  Address->FB = (Value - 030000) / 02000;
 	}      
     }				
+
   Address->Value = Value;
+
   return (0);
 }
 

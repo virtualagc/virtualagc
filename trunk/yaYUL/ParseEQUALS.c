@@ -108,6 +108,7 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->LabelValueValid = 0;
       return (0);
     }
+
   // As another special case, there is sometimes no operand.  *That* means
   // that the current program counter is the value.  
   if (*InRecord->Operand == 0 && *InRecord->Mod1 == 0)
@@ -116,7 +117,8 @@ ParseEQUALS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 		    CurrentFilename, CurrentLineInFile);
       OutRecord->LabelValue = InRecord->ProgramCounter;
       return (0);
-    }  
+    }
+
   i = GetOctOrDec(InRecord->Operand, &Value);
   if (i)
     {
