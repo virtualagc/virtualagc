@@ -178,7 +178,7 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 	      else if ((Flags & ERASABLE) && !K.Erasable)
 		{
 		  i &= ~07600;  
-		  strcpy (OutRecord->ErrorMessage, "The Address is not in erasable memory.");
+		  strcpy (OutRecord->ErrorMessage, "The address is not in erasable memory.");
 		  OutRecord->Fatal = 1;
 		}
 	      if (Flags & (PC0 | PC1 | PC2 | PC3 | PC4 | PC5 | PC6 | PC7))
