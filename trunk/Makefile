@@ -254,6 +254,7 @@ default: all
 all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs:
+	$(MAKE) -C Tools PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
 	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
 		${ARCHS} EXT=${EXT}
 	#$(MAKE) -C yaASM PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
@@ -334,7 +335,7 @@ listings: \
 	listing-aea-FP8
 
 listing-agc-%:
-	-rm ${WEBSITE}/listings/$*/*.html
+	rm -f ${WEBSITE}/listings/$*/*.html
 	mkdir -p ${WEBSITE}/listings/$*
 	cd $* && \
 	../yaYUL/yaYUL --html MAIN.agc >MAIN.lst
@@ -342,7 +343,7 @@ listing-agc-%:
 	cp Apollo32.png ${WEBSITE}/listings/$*
 
 listing-aea-%:
-	-rm ${WEBSITE}/listings/$*/*.html
+	rm -f ${WEBSITE}/listings/$*/*.html
 	mkdir -p ${WEBSITE}/listings/$*
 	cd $* && \
 	../yaLEMAP/yaLEMAP --html $*.aea
@@ -373,7 +374,7 @@ binaries: clean all-archs
 # else, I expect.
 .PHONY: dev
 dev:	clean
-	-rm ${WEBSITE}/Downloads/yaAGC-dev-${DATE}.tar.bz2
+	rm -f ${WEBSITE}/Downloads/yaAGC-dev-${DATE}.tar.bz2
 	tar -C .. --exclude=*CVS* --exclude=*snprj* --exclude="*.core" \
 		--exclude=yaAGC/yaDSKY/autom4te.cache/* \
 		--exclude=yaAGC/yaDSKY/configure \
@@ -405,9 +406,9 @@ clean:
 	$(MAKE) -C yaASM clean
 	$(MAKE) -C yaAGC clean
 	$(MAKE) -C yaAGS clean
-	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs clean
-	-rm yaDSKY/src/yaDSKY
-	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs clean
+	$(MAKE) -C yaDSKY/src -f Makefile.all-archs clean
+	rm -f yaDSKY/src/yaDSKY
+	$(MAKE) -C yaDEDA/src -f Makefile.all-archs clean
 	$(MAKE) -C yaYUL clean
 	$(MAKE) -C yaUniverse clean
 	${yaACA}$(MAKE) -C yaACA clean
@@ -424,10 +425,10 @@ clean:
 	${MAKE} -C VirtualAGC clean
 	${MAKE} -C yaTelemetry clean
 	${MAKE} -C jWiz clean
-	-${MAKE} -C yaDSKY2 clean
-	-${MAKE} -C yaDEDA2 clean
-	-${MAKE} -C yaACA2 clean
-	-rm -f `find . -name "core"`
+	${MAKE} -C yaDSKY2 clean
+	${MAKE} -C yaDEDA2 clean
+	${MAKE} -C yaACA2 clean
+	rm -f `find . -name "core"`
 
 autogen:
 	echo PREFIX=${PREFIX} >Makefile.yaAGC

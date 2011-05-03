@@ -25,7 +25,7 @@ SSOURCE:=$(wildcard *.agc)
 default:	Validation.bin Validation.txt
 
 Validation.txt: Validation.bin
-	../Luminary131/webb2burkey-rope Validation.bin Validation.txt
+	../Tools/webb2burkey-rope Validation.bin Validation.txt
 
 Validation.bin:	${SSOURCE}
 	../yaYUL/yaYUL --html Validation.agc >Validation.lst

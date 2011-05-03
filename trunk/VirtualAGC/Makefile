@@ -241,10 +241,10 @@ EXECUTABLES:=\
 	../yaAGS/yaAGS \
 	../yaACA3/yaACA3 \
 	../yaYUL/yaYUL \
-	../Luminary131/bdiffhead \
-	../Luminary131/CheckDec \
-	../Luminary131/Oct2Bin \
-	../Luminary131/webb2burkey-rope \
+	../Tools/Oct2Bin \
+	../Tools/bdiffhead \
+	../Tools/CheckDec \
+	../Tools/webb2burkey-rope \
 	../yaLEMAP/yaLEMAP \
 	../yaLEMAP/binLEMAP \
 	../yaUniverse/yaUniverse \

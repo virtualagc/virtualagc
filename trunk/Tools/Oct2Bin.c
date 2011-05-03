@@ -265,17 +265,15 @@ main (int argc, char *argv[])
   uint16_t Dummy16, Banknum;
   int Count, CheckWords = 0;
   char s[129], *ss;
-  int i, j, Invert = 0, Page = 0;
-  
-  printf ("(c)2003-2005,2010 Ronald S. Burkey, ver " NVER
-          ", built " __DATE__ "\n");
-  printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
+  int i, j, Invert = 0, Page = 0, Verbose = 0;
   
   // Parse the command-line switches.
   for (i = 1; i < argc; i++)
     {
       if (!strcmp (argv[i], "--invert"))
         Invert = 1;
+      if (!strcmp (argv[i], "--verbose"))
+        Verbose = 1;
       else if (1 == sscanf (argv[i], "--page=%d", &j))
         Page = j;
       else
@@ -284,7 +282,13 @@ main (int argc, char *argv[])
 	  return (1);
 	}
     }
-  
+ 
+  if (Verbose)
+    { 
+      printf ("(c)2003-2005,2010 Ronald S. Burkey, ver " NVER ", built " __DATE__ "\n");
+      printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
+    }
+
   if (Invert)
     return (Decompile (Page));
   
@@ -397,7 +401,10 @@ main (int argc, char *argv[])
     }
   fclose (OutFile);
   if (!ErrorCount)
-    printf ("No errors were detected.\n");
+    {
+      if (Verbose)
+        printf ("No errors were detected.\n");
+    }
   else
     printf ("There were errors.\n");  
   return (ErrorCount);    
