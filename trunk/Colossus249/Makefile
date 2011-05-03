@@ -13,9 +13,8 @@
 #		09/05/04 RSB	Now runs yaYUL by default.
 #		07/28/05 RSB	Now account for symtabs.
 #		2009-07-04 RSB	Added --html switch.
-#		2011-05-03 JL	Fixed so an error will always cause 
-#				a rebuild the next time make is run.
-#				Remove obsolete stuff. Point to moved Oct2Bin.
+#		2011-05-03 JL	Replaced with newer version from Artemis072.
+#				Point to moved Oct2Bin.
 
 BASENAME=Colossus249
 

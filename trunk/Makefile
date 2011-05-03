@@ -278,15 +278,15 @@ else
 		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 endif
 ifeq "${YADSKY_SUFFIX}" ""
-	$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
+	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
 		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	-${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
+	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
+	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
 		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 else
 	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
 		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
+	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
 	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
 		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
 endif	
