@@ -11,6 +11,8 @@
 
 BASENAME=Colossus237
 
+.PHONY: ${BASENAME}.lst ${BASENAME}.symtab
+
 SOURCE:=$(wildcard *.agc)
 #TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 TARGETS=${BASENAME}.lst ${BASENAME}.symtab
