@@ -31,24 +31,24 @@
 // Return non-zero on unrecoverable error.
 
 int 
-ParseSETLOC (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   int Value, i;
+
   Symbol_t *Symbol;
   OutRecord->ProgramCounter = InRecord->ProgramCounter;
-  if (InRecord->Extend && !InRecord->IndexValid)
-    {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
-      OutRecord->Fatal = 1;
-      OutRecord->Extend = 0;
-    }
+
+  // Pass EXTEND through.
+  OutRecord->Extend = InRecord->Extend;
+
   if (InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
       OutRecord->Fatal = 1;
       OutRecord->IndexValid = 0;
     }
-  i = GetOctOrDec (InRecord->Operand, &Value);
+
+  i = GetOctOrDec(InRecord->Operand, &Value);
   if (!i)
     {
       // What we've found here is that a constant, like 04000, is the
@@ -58,31 +58,35 @@ ParseSETLOC (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       // are others.)  I'm going to ASSUME that the operand is a
       // full 16-bit pseudo-address, and I'm going to choose the best
       // memory type based on that assumption.
-      PseudoToSegmented (Value, OutRecord);
+      PseudoToSegmented(Value, OutRecord);
     }  
   else 
     {  
-      Symbol = GetSymbol (InRecord->Operand);
+      Symbol = GetSymbol(InRecord->Operand);
       if (NULL == Symbol)
-	{
-      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
-	  OutRecord->Fatal = 1;
-	  OutRecord->ProgramCounter.Invalid = 1;
-	}
+        {
+          sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
+          OutRecord->Fatal = 1;
+          OutRecord->ProgramCounter.Invalid = 1;
+        }
       else
-	OutRecord->ProgramCounter = Symbol->Value;
+        OutRecord->ProgramCounter = Symbol->Value;
     }
+
   i = GetOctOrDec (InRecord->Mod1, &Value);
   if (!i)
     IncPc (&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter);
+
   InRecord->ProgramCounter = OutRecord->ProgramCounter;
   //InRecord->Bank = OutRecord->Bank;  
+
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Erasable)
     {
       OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
       OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
       OutRecord->Bank.OneshotPending = 0;
     }
+
   return (0);  
 }
 
