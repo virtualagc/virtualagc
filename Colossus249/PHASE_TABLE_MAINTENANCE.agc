@@ -8,7 +8,9 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
 # Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
-#
+# 		2011-05-07 JL	Flagged SBANK= workarounds for future removal. 
+# 				Removed workaround.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -42,8 +44,7 @@
 		BANK
 
 NEWMODEX	INDEX	Q		# UPDATE MODREG.  ENTRY FOR MODE IN FIXED.
-		# Was CAF --- RSB 2004.
-		CA	0
+		CAF	0
 		INCR	Q
 
 NEWMODEA	TS	MODREG		# ENTRY FOR MODE IN A.
@@ -201,7 +202,9 @@ DSPMMJOB	EQUALS	DSPMMJB
 #	AD+3	OCT	18000		# TO BE LOCATION AD+4, WITH A PRIORITY 18,
 #	AD+4				# FOR GROUP 5 PHASE INFORMATION.
 
-		SBANK=	PINSUPER	# RSB 2004.
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		COUNT	02/PHASE
 		
 2PHSCHNG	INHINT			# THE ENTRY FOR A DOUBLE PHASE CHANGE

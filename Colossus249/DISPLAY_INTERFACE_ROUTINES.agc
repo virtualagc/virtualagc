@@ -7,8 +7,9 @@
 # Reference:	Starts on p. 1442 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+# Mod history:	08/30/04   RSB	Adapted from corresponding Luminary131 file.
 #		2010-10-24 JL	Indentation fixes.
+#               2011-05-07 JL   Removed workarounds.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -605,7 +606,7 @@ COPYPACS	INDEX	COPINDEX
 		TS	GENMASK
 
 		INDEX	COPINDEX
-		CA	EBANKSAV	# Was CAF --- RSB 2004.
+		CAF	EBANKSAV
 		TS	TEMPOR2		# ACTIVE EBANK AND FLAG
 
 		TS	EBANK

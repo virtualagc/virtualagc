@@ -7,11 +7,12 @@
 # Reference:	pp. 556-629 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/14/04 RSB.	Began transcribing.  (While there is a somewhat-
+# Mod history:	08/14/04   RSB	Began transcribing.  (While there is a somewhat-
 #				similar source file for Luminary131, there is 
 #				almost useful overlap between the two.)
 #		2010-10-24 JL	Fixed page number.
-#
+#		2011-05-07 JL	Flag SBANK= workarounds for future removal.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -141,7 +142,9 @@ P20.3		CALL
 		EXIT
 		CAF	PRIO26
 		TC	FINDVAC
-		SBANK=	LOWSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	LOWSUPER
+## [WORKAROUND]
 		EBANK=	MRKBUF2
 		2CADR	R22
 		
@@ -1138,7 +1141,9 @@ RENDISP		EXIT
 		OCT	04022
 		CAF	PRIO27		# SET UP DISPLAY JOB WITH HIGHER PRIORITY
 		TC	NOVAC
-		SBANK=	LOWSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	LOWSUPER
+## [WORKAROUND]
 		EBANK=	MRKBUF1		# THAN PRESENT JOB
 		2CADR	RENDISP2
 		

@@ -7,9 +7,10 @@
 # Reference:	Starts on p. 1190 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/28/04 RSB.	Adapted from correspoinding Luminary131 file.
+# Mod history:	08/28/04   RSB	Adapted from correspoinding Luminary131 file.
 #		2010-10-24 JL	Indentation fixes.
-#
+#               2011-05-07 JL   Removed workarounds.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -434,8 +435,7 @@ EJSCAN		CCS	PRIORITY +12D
 		TCF	ENDPRCHG -1
 
 		INDEX	A		# OTHERWISE, SE NEWJOB TO THE RELATIVE
-		# Was CAF --- RSB 2004
-		CA	0 -1		# ADDRESS OF THE NEW JOB'S CORE SET.
+		CAF	0 -1		# ADDRESS OF THE NEW JOB'S CORE SET.
 		AD	-CCSPR
 		TS	NEWJOB
 		TCF	CHANJOB -2

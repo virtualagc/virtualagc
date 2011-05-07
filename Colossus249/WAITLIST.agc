@@ -7,10 +7,11 @@
 # Reference:	Begins on p. 1203 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	08/28/04 RSB.	Began adapting from similar Luminary131 file.
-#		05/14/05 RSB	Corrected website reference above.
+# Mod history:	08/28/04   RSB	Began adapting from similar Luminary131 file.
+#		05/14/05   RSB	Corrected website reference above.
 #		2010-10-24 JL	Indentation fixes.
-#
+#		2011-05-07 JL	Remove workarounds.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -157,8 +158,7 @@ WAITBB		BBCON	WAIT2
 # RETURN TO CALLER +2 AFTER WAITING DT SPECIFIED AT CALLER +1.
 
 FIXDELAY	INDEX	Q		# BOTH ROUTINES MUST BE CALLED UNDER
-		# Was CAF --- RSB 2004.
-		CA	0		# WAITLIST CONTROL AND TERMINATE THE TASK
+		CAF	0		# WAITLIST CONTROL AND TERMINATE THE TASK
 		INCR	Q		# IN WHICH THEY WERE CALLED.
 
 # RETURN TO CALLER +1 AFTER WAITING THE DT AS ARRIVING IN A.
@@ -345,8 +345,7 @@ OCT40201	OCT	40201
 
 WTLST2		TS	WAITTEMP	# C(A) = -(TD - T + 1)
 		INDEX	Q
-		# Was CAF --- RSB 2004.
-		CA	0
+		CAF	0
 		TS	Q		# INDEX VALUE INTO Q.
 
 		CAF	ONE
