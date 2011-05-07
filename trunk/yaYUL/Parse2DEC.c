@@ -71,13 +71,15 @@ int
 Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   double x;
+  double tmpval;
+  char *tmpmod1 = NULL, *tmpmod2 = NULL;
   int Sign, Value, i;
 
   IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
 
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
 
@@ -107,12 +109,26 @@ Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       return (0);
     }  
 
+  // Handle numbers where only scale factor(s) are supplied. 
+  if (*InRecord->Operand == 'E' || *InRecord->Operand == 'B')
+    {
+      tmpval = 1.0;
+      tmpmod1 = InRecord->Operand;
+      tmpmod2 = InRecord->Mod1;
+    }
+  else
+    {
+      tmpval = strtod(InRecord->Operand, NULL);
+      tmpmod1 = InRecord->Mod1;
+      tmpmod2 = InRecord->Mod2;
+    }
+
   // Under some circumstances, add a default scale factor.
   if (strstr(InRecord->Operand, ".") == NULL && *InRecord->Mod1 == 0 && *InRecord->Mod2 == 0)
     InRecord->Mod1 = "B-28";
 
   // Compute the constant as a floating-point number.  
-  x = strtod(InRecord->Operand, NULL) * ScaleFactor(InRecord->Mod1) * ScaleFactor(InRecord->Mod2);
+  x = tmpval * ScaleFactor(tmpmod1) * ScaleFactor(tmpmod2);
 
   // Convert to 1's complement format.
   Sign = 0;
@@ -179,6 +195,8 @@ int
 ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   double x;
+  double tmpval;
+  char *tmpmod1 = NULL, *tmpmod2 = NULL;
   int Sign, Value, i;
 
   IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
@@ -214,12 +232,26 @@ ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       return (0);
     }
 
+  // Handle numbers where only scale factor(s) are supplied. 
+  if (*InRecord->Operand == 'E' || *InRecord->Operand == 'B')
+    {
+      tmpval = 1.0;
+      tmpmod1 = InRecord->Operand;
+      tmpmod2 = InRecord->Mod1;
+    }
+  else
+    {
+      tmpval = strtod(InRecord->Operand, NULL);
+      tmpmod1 = InRecord->Mod1;
+      tmpmod2 = InRecord->Mod2;
+    }
+
   // Under some circumstances, add a default scale factor.
   if (strstr(InRecord->Operand, ".") == NULL && *InRecord->Mod1 == 0 && *InRecord->Mod2 == 0)
     InRecord->Mod1 = "B-14";
 
   // Compute the constant as a floating-point number.  
-  x = strtod(InRecord->Operand, NULL) * ScaleFactor(InRecord->Mod1) * ScaleFactor(InRecord->Mod2);
+  x = tmpval * ScaleFactor(tmpmod1) * ScaleFactor(tmpmod2);
 
   // Convert to 1's complement format.
   Sign = 0;
