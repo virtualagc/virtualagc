@@ -41,37 +41,39 @@ static int UsedInBank[NUM_FIXED_BANKS] = { 0 };
 
 //------------------------------------------------------------------------
 // A function for clearing the UsedInBank array at the start of a pass.
-
 void
-StartBankCounts (void)
+StartBankCounts(void)
 {
   int i;
+
   for (i = 0; i < NUM_FIXED_BANKS; i++)
     UsedInBank[i] = 0;
 }
 
 //------------------------------------------------------------------------
 // Check bank count.
-
 int
-GetBankCount (int Bank)
+GetBankCount(int Bank)
 {
   if (Bank < 0 || Bank >= NUM_FIXED_BANKS)
     return (0);
+
   return (UsedInBank[Bank]);   
 }
 
 //------------------------------------------------------------------------
 // Prints out a table showing how much of each bank is used.
-
 void
-PrintBankCounts (void)
+PrintBankCounts(void)
 {
   int i;
+
   printf ("Usage Table for Fixed-Memory Banks\n");
   printf ("----------------------------------\n");
+
   if (HtmlOut != NULL)
     fprintf (HtmlOut, "<h1>Usage Table for Fixed-Memory Banks</h1>\n");
+
   for (i = 0; i < NUM_FIXED_BANKS; i++)
     {
       printf ("Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
@@ -84,13 +86,14 @@ PrintBankCounts (void)
 // A function which can be used to update the UsedInBank array after
 // assembling an instruction.  Basically, it's safe to call after any
 // source line.
-
 void
-UpdateBankCounts (Address_t *pc)
+UpdateBankCounts(Address_t *pc)
 {
   int Count, Bank;
+
   if (pc->Invalid || !pc->Address || !pc->Fixed || pc->Overflow)
     return;
+
   if (pc->Banked)
     {  
       Count = pc->SReg - 02000;
@@ -111,6 +114,7 @@ UpdateBankCounts (Address_t *pc)
       else
         return;	
     }  
+
   // We know from the tests performed above that Count is in the range
   // 0-01777.
   if (Count > UsedInBank[Bank])
@@ -121,38 +125,38 @@ UpdateBankCounts (Address_t *pc)
 // Return non-zero on unrecoverable error.
 
 int 
-ParseBANK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   int Value, i;
   
-  // Sanity checks.
-  if (InRecord->Extend && !InRecord->IndexValid)
-    {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
-      OutRecord->Fatal = 1;
-      OutRecord->Extend = 0;
-    }
+  // Pass EXTEND through.
+  OutRecord->Extend = InRecord->Extend;
+
   if (InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
       OutRecord->Fatal = 1;
       OutRecord->Index = 0;
     }
+
   // The case of no Operand has a special meaning.  It means simply to 
   // advance the program counter by however many words have already
   // been used in the current bank.  It would be used after a SETLOC.
   if (0 == *InRecord->Operand)
     {
       OutRecord->ProgramCounter = InRecord->ProgramCounter;
+
       if (OutRecord->ProgramCounter.Invalid)
         return (0);
+
       if (!OutRecord->ProgramCounter.Address || 
           !OutRecord->ProgramCounter.Fixed)
         {
-	  strcpy (OutRecord->ErrorMessage, "Works only for fixed-memory.");
+	  strcpy(OutRecord->ErrorMessage, "Works only for fixed-memory.");
 	  OutRecord->Fatal = 1;
 	  return (0);
 	}
+
       if (OutRecord->ProgramCounter.Banked)
         {	
 	  i = OutRecord->ProgramCounter.FB + 010 * OutRecord->ProgramCounter.Super;
@@ -171,10 +175,12 @@ ParseBANK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	  OutRecord->ProgramCounter.SReg = 06000 + UsedInBank[3];
 	  OutRecord->ProgramCounter.Value = OutRecord->ProgramCounter.SReg;
 	}
+
       return (0);
     }
+
   // Here's where we assume that an Operand field exists.  
-  i = GetOctOrDec (InRecord->Operand, &Value);
+  i = GetOctOrDec(InRecord->Operand, &Value);
   if (!i)
     {
       if (Value >= 0 && Value <= 043)
@@ -184,6 +190,7 @@ ParseBANK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	  OutRecord->ProgramCounter.SReg = 02000;
 	  OutRecord->ProgramCounter.Fixed = 1;  
 	  OutRecord->ProgramCounter.Banked = 1;
+
 	  if (Value >= 040)
 	    {
 	      OutRecord->ProgramCounter.Super = 1;
@@ -191,16 +198,18 @@ ParseBANK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	    }
 	  else
 	    OutRecord->ProgramCounter.FB = Value;  
+
 	  if (Value == 2 || Value == 3)
 	    OutRecord->ProgramCounter.Value = Value * 02000;
 	  else
 	    OutRecord->ProgramCounter.Value = 010000 + Value * 02000;
+
 	  OutRecord->ProgramCounter.Value += UsedInBank[Value];
 	  OutRecord->ProgramCounter.SReg += UsedInBank[Value];
 	}
       else
         {
-          strcpy (OutRecord->ErrorMessage, "BANK operand range is 00 to 43.");
+          strcpy(OutRecord->ErrorMessage, "BANK operand range is 00 to 43.");
 	  OutRecord->Fatal = 1;
 	  OutRecord->ProgramCounter = (const Address_t) { 0 };
 	  OutRecord->ProgramCounter.Invalid = 1;
@@ -208,13 +217,15 @@ ParseBANK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }  
   else 
     {  
-      strcpy (OutRecord->ErrorMessage, "BANK pseudo-op has in invalid operand.");
+      strcpy(OutRecord->ErrorMessage, "BANK pseudo-op has in invalid operand.");
       OutRecord->Fatal = 1;
       OutRecord->ProgramCounter = (const Address_t) { 0 };
       OutRecord->ProgramCounter.Invalid = 1;
     }
+
   // Make sure this prints properly in the output listing.  
   InRecord->ProgramCounter = OutRecord->ProgramCounter;
+
   return (0);  
 }
 

@@ -47,21 +47,25 @@
 int KeepExtend = 0;
 
 int
-ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
-	      int Flags)
+ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
 {
   ParseOutput_t dummy;
   int Value, i;
   Address_t K;
-  IncPc (&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
+
   OutRecord->Bank = InRecord->Bank;
+
   // Set the default binary word.
   OutRecord->NumWords = 1;
+
   if (Flags & PC1)
     Opcode |= 01000;   
   else if (Flags & PC2)
@@ -82,56 +86,66 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
     Opcode |= 04000;
   else if (Flags & QC3)
     Opcode |= 06000;
+
   OutRecord->Words[0] = Opcode;
+
   if (Flags & QCNOT0)
     OutRecord->Words[0] |= 06000;
+
   // Do some sanity checking.
   if (InRecord->Extend && !(Flags & EXTENDED) && !InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
   else if (!InRecord->Extend && (Flags & EXTENDED))
     {
-      strcpy (OutRecord->ErrorMessage, "Required EXTEND is missing.");
+      strcpy(OutRecord->ErrorMessage, "Required EXTEND is missing.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
+
   if (InRecord->IndexValid)
     {
       OutRecord->IndexValid = 0;
     }
-  i = GetOctOrDec (InRecord->Operand, &Value);
+
+  i = GetOctOrDec(InRecord->Operand, &Value);
   if (!i && (Flags & ENUMBER) && *InRecord->Operand != '+' && *InRecord->Operand != '-')
     {
       int Offset;
-      PseudoToStruct (Value, &K);
-      if (!GetOctOrDec (InRecord->Mod1, &Offset))
+
+      PseudoToStruct(Value, &K);
+
+      if (!GetOctOrDec(InRecord->Mod1, &Offset))
 	OpcodeOffset = Offset;      
+
       goto DoIt;
     }
+
   if (!i)
     {
       if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
-        IncPc (&InRecord->ProgramCounter, Value, &K);
+        IncPc(&InRecord->ProgramCounter, Value, &K);
       else
-        PseudoToStruct (Value, &K);	
+        PseudoToStruct(Value, &K);	
+
       if (*InRecord->Mod1 != 0)
         {
-	  i = GetOctOrDec (InRecord->Mod1, &Value);
+	  i = GetOctOrDec(InRecord->Mod1, &Value);
 	  if (!i)
 	    OpcodeOffset = Value;
 	}
     DoIt:  
       if (K.Invalid)
         {
-	  strcpy (OutRecord->ErrorMessage, "Destination address not resolved.");
+	  strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
 	  OutRecord->Fatal = 1;
 	}
       else if (K.Overflow)
         {
-	  strcpy (OutRecord->ErrorMessage, "Destination address out of range.");
+	  strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
 	  OutRecord->Fatal = 1;
 	}
       else if (!K.Address)
@@ -142,7 +156,7 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 	  // may be converted straightforwardly to unswitched erasable.
 	  if (K.Constant)
 	    goto AddressFound;  
-	  strcpy (OutRecord->ErrorMessage, "Destination not an address.");
+	  strcpy(OutRecord->ErrorMessage, "Destination not an address.");
 	  OutRecord->Fatal = 1;
 	}
       else 
@@ -158,11 +172,13 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 	  // some constants need to be translated to erasable.
 	  if (K.Constant)
 	    {
-	      PseudoToSegmented (K.Value, &dummy);
+	      PseudoToSegmented(K.Value, &dummy);
 	      K = dummy.ProgramCounter;
 	    }
+
 	  if (Flags & KPLUS1)
-	    IncPc (&K, 1, &K);
+	    IncPc(&K, 1, &K);
+
 	  i = K.SReg;
 	  if (!InRecord->IndexValid)
 	    {
@@ -172,13 +188,13 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 	      if ((Flags & FIXED) && !K.Fixed)
 		{
 		  i &= ~07000;  
-		  strcpy (OutRecord->ErrorMessage, "The address is not in fixed memory.");
+		  strcpy(OutRecord->ErrorMessage, "The address is not in fixed memory.");
 		  OutRecord->Fatal = 1;
 		}
 	      else if ((Flags & ERASABLE) && !K.Erasable)
 		{
 		  i &= ~07600;  
-		  strcpy (OutRecord->ErrorMessage, "The address is not in erasable memory.");
+		  strcpy(OutRecord->ErrorMessage, "The address is not in erasable memory.");
 		  OutRecord->Fatal = 1;
 		}
 	      if (Flags & (PC0 | PC1 | PC2 | PC3 | PC4 | PC5 | PC6 | PC7))
@@ -186,7 +202,7 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 		  if ((i & 07000) != 0 && (i & 07000) != (Opcode & 07000))
 		    {
 		      i &= ~07000;  
-		      strcpy (OutRecord->ErrorMessage, "Operand out of range.");
+		      strcpy(OutRecord->ErrorMessage, "Operand out of range.");
 		      OutRecord->Fatal = 1;
 		    }
 		}
@@ -195,7 +211,7 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 		  if ((i & 06000) != 0 && (i & 06000) != (Opcode & 06000))
 		    {
 		      i &= ~06000;  
-		      sprintf (OutRecord->ErrorMessage, "Operand (0%o) out of range.", i);
+		      sprintf(OutRecord->ErrorMessage, "Operand (0%o) out of range.", i);
 		      OutRecord->Fatal = 1;
 		    }
 		}
@@ -204,25 +220,26 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 		  if (0 == (K.SReg & 06000))
 		    {
 		      i |= 06000;  
-		      strcpy (OutRecord->ErrorMessage, "Operand out of range.");
+		      strcpy(OutRecord->ErrorMessage, "Operand out of range.");
 		      OutRecord->Fatal = 1;
 		    }
 		}
 	    }
+
           OutRecord->Words[0] = Opcode | i;
 	}
     }
   else
     {
       // The operand is NOT a number.  Presumably, it's a symbol.
-      i = FetchSymbolPlusOffset (&InRecord->ProgramCounter, 
-                                 InRecord->Operand, 
-				 InRecord->Mod1, &K);
+      i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, InRecord->Mod1, &K);
       if (!i)
         goto DoIt;
+
       sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
     }
+
   // Handle the special case `TC 6' setting the Extend bit.
   if (KeepExtend)
     {
@@ -246,223 +263,223 @@ ParseGeneral (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
 // Various little parsers based on ParseGeneral.
 
 int 
-ParseAD (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseAD(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 060000, ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 060000, ENUMBER));
 }
 
 int 
-ParseADS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseADS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, QC3));
+  return (ParseGeneral(InRecord, OutRecord, 020000, QC3));
 }
 
 int 
-ParseAUG (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseAUG(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, EXTENDED | QC2));
+  return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC2));
 }
 
 int 
-ParseBZMF (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseBZMF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 060000, EXTENDED | QCNOT0));
+  return (ParseGeneral(InRecord, OutRecord, 060000, EXTENDED | QCNOT0));
 }
 
 int 
-ParseBZF (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseBZF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 010000, EXTENDED | QCNOT0));
+  return (ParseGeneral(InRecord, OutRecord, 010000, EXTENDED | QCNOT0));
 }
 
 int 
-ParseCA (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseCA(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 030000, ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 030000, ENUMBER));
 }
 
 int 
-ParseCAE (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseCAE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 030000, ERASABLE | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 030000, ERASABLE | ENUMBER));
 }
 
 int 
-ParseCAF (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseCAF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 030000, FIXED | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 030000, FIXED | ENUMBER));
 }
 
 int 
-ParseCCS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseCCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 010000, QC0 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 010000, QC0 | ENUMBER));
 }
 
 int 
-ParseCS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 040000, ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 040000, ENUMBER));
 }
 
 int 
-ParseDAS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseDAS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, QC0 | KPLUS1));
+  return (ParseGeneral(InRecord, OutRecord, 020000, QC0 | KPLUS1));
 }
 
 int 
-ParseDCA (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseDCA(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 030000, EXTENDED | KPLUS1 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 030000, EXTENDED | KPLUS1 | ENUMBER));
 }
 
 int 
-ParseDCS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseDCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 040000, EXTENDED | KPLUS1 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 040000, EXTENDED | KPLUS1 | ENUMBER));
 }
 
 int 
-ParseDIM (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseDIM(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, EXTENDED | QC3));
+  return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC3));
 }
 
 int
-ParseDNCHAN (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseDNCHAN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 034000, PC0 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 034000, PC0 | ENUMBER));
 }
 
 int 
-ParseDV (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseDV(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 010000, EXTENDED | QC0));
+  return (ParseGeneral(InRecord, OutRecord, 010000, EXTENDED | QC0));
 }
 
 int 
-ParseDXCH (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseDXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 050000, QC1 | KPLUS1 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 050000, QC1 | KPLUS1 | ENUMBER));
 }
 
 int 
-ParseEDRUPT (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseEDRUPT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC7));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC7));
 }
 
 int 
-ParseLXCH (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseLXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, QC1 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 020000, QC1 | ENUMBER));
 }
 
 int 
-ParseINCR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseINCR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, QC2));
+  return (ParseGeneral(InRecord, OutRecord, 020000, QC2));
 }
 
 int 
-ParseMASK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseMASK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 070000, 0));
+  return (ParseGeneral(InRecord, OutRecord, 070000, 0));
 }
 
 int 
-ParseMP (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseMP(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 070000, EXTENDED));
+  return (ParseGeneral(InRecord, OutRecord, 070000, EXTENDED));
 }
 
 int 
-ParseMSU (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseMSU(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, EXTENDED | QC0 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC0 | ENUMBER));
 }
 
 int 
-ParseQXCH (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseQXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 020000, EXTENDED | QC1 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC1 | ENUMBER));
 }
 
 int 
-ParseRAND (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseRAND(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC2 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC2 | ENUMBER));
 }
 
 int 
-ParseREAD (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseREAD(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC0 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC0 | ENUMBER));
 }
 
 int 
-ParseROR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseROR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC4 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC4 | ENUMBER));
 }
 
 int 
-ParseRXOR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseRXOR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC6 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC6 | ENUMBER));
 }
 
 int 
-ParseSU (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseSU(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 060000, EXTENDED | QC0 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 060000, EXTENDED | QC0 | ENUMBER));
 }
 
 int 
-ParseTC (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseTC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, ENUMBER));
 }
 
 int 
-ParseTCF (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseTCF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   if (*InRecord->Operand == 0)
   {
     /* Handle a TCF with no operand, which translates to TCF +0, i.e. NOOP. */
     InRecord->Operand = "+0";
   }
-  return (ParseGeneral (InRecord, OutRecord, 010000, QCNOT0 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 010000, QCNOT0 | ENUMBER));
 }
 
 int 
-ParseTS (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseTS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 050000, QC2 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 050000, QC2 | ENUMBER));
 }
 
 int 
-ParseWAND (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseWAND(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC3 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC3 | ENUMBER));
 }
 
 int 
-ParseWOR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseWOR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC5 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC5 | ENUMBER));
 }
 
 int 
-ParseWRITE (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseWRITE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 000000, EXTENDED | PC1 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC1 | ENUMBER));
 }
 
 int 
-ParseXCH (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  return (ParseGeneral (InRecord, OutRecord, 050000, QC3 | ENUMBER));
+  return (ParseGeneral(InRecord, OutRecord, 050000, QC3 | ENUMBER));
 }
 
