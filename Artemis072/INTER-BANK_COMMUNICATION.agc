@@ -12,6 +12,7 @@
 # Mod history:	2009-08-22 JL	Adapted from corresponding Comanche 055 file.
 # 		2009-08-29 JL	Merged changes from Sergio Navarro.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2011-05-07 JL	Removed workaround.
 
 ## Page 1104
 
@@ -92,9 +93,7 @@ SUPDACAL	TS	MPTEMP
 
 IBNKCALL	DXCH	RUPTREG3	# USES RUPTREG3,4 FOR DP RETURN ADDRESS.
 		INDEX	Q
-## Was CAF --- RSB 2009
-## (JL 2009-08-22) Artemis072 has CAF also.
-		CA	0
+		CAF	0
 		INCR	Q
 
 ISWCALL		TS	L

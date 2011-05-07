@@ -13,6 +13,7 @@
 # 		2009-09-15 JL	Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.
 #		2010-02-15 JL	Temporary workaround for an error on p996. 
 #		2010-02-20 RSB	Un-##'d this header.
+#		2011-05-07 JL	Removed workaround.
 
 ## Page 982
 
@@ -595,10 +596,7 @@ MAXLIM		DEC	.01388889 B+4	# RATELIM,MAX (5DEG/SEC), SC.AT B-4 REV/SC
 #TMINFIRE	DEC	1.5 B+4		# 15 MS  (14MIN), SC.AT 16 BITS/CS
 TMINFIRE	=	BITS4&5
 
-## JL 2010-02-15 Replaced the following line, forcing the value to 4000 decimal (07640 octal), until I figure out 
-## yaYUL didn't like the original format. 
-##TMAXFIRE	DEC	250 B+4		# 2.5 SEC, SC.AT 16 BITS/CS
-TMAXFIRE	DEC	4000		# 2.5 SEC, SC.AT 16 BITS/CS
+TMAXFIRE	DEC	250 B+4		# 2.5 SEC, SC.AT 16 BITS/CS
 ## End mod
 
 1/TMXFIR	=	BIT3		# RECIPROCAL THEREOF, SHIFTED 14 RIGHT,
