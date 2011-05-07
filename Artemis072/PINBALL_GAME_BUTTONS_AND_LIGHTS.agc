@@ -19,6 +19,7 @@
 #		2010-02-10 JL	Fixed line on p381.
 #		2010-02-13 JL	Fixed errors on pages 327, 354, 356, 362, 363, 368, 370, 374, 379, 380, 391, 392.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2011-05-07 JL	Removed obsolete link.
 
 ## Page 318
 
@@ -156,8 +157,6 @@
 # FOR FURTHER DETAILS ABOUT OPERATION OF THE KEYBOARD AND DISPLAY SYSTEM
 # PROGRAM, SEE THE MISSION PLAN AND/OR MIT/IL E-2129
 # DESCRIBING KEYBOARD AND DISPLAY OPERATION FOR 278.
-## (Note that this doc by Green and Filene is/was available online at
-## http://hrst.mit.edu/hrs/apollo/public/archive/1706.pdf --- RSB 6/2004.)
 #
 # THE FOLLOWING QUOTATION IS PROVIDED THROUGH THE COURTESY OF THE AUTHORS.
 #

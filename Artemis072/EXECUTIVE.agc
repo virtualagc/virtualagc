@@ -12,6 +12,7 @@
 # Mod history:	2009-08-29 JL	Adapted from corresponding Comanche 055 file.
 #		2010-02-10 JL	Fixed error on p1218.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2011-05-07 JL	Removed workaround.
 
 ## Page 1208
 
@@ -424,8 +425,7 @@ GETCADR		DXCH	LONGCADR	# CANNOT GET HERE
 		TCF	ENDPRCHG -1
 
 		INDEX	A		# OTHERWISE, SET NEWJOB TO THE RELATIVE
-## Was CAF --- RSB 2004
-		CA	0 -1		# ADDRESS OF THE NEW JOB'S CORE SET.
+		CAF	0 -1		# ADDRESS OF THE NEW JOB'S CORE SET.
 		AD	-CCSPR
 		TS	NEWJOB
 		TCF	CHANJOB -2
