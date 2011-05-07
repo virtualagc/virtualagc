@@ -13,6 +13,7 @@
 # Mod history:	06/06/03 RSB.	Began transcribing.
 #		05/14/05 RSB.	Corrected website reference above.
 #		2010-10-25 JL	Indentation fixes.
+#		2011-05-07 JL	Removed workaround.
 
 # Page 1338
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES --
@@ -571,7 +572,7 @@ COPYPACS	INDEX	COPINDEX
 		TS	GENMASK
 
 		INDEX	COPINDEX
-		CA	EBANKSAV	# Was CAF --- RSB 2004.
+		CAF	EBANKSAV
 		TS	TEMPOR2		# ACTIVE EBANK AND FLAG
 
 		TS	EBANK

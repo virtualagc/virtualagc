@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/30/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2011-05-07 JL	Removed workaround.
 
 # Page 997
 # THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -87,8 +88,7 @@ SUPDACAL	TS	MPTEMP
 
 IBNKCALL	DXCH	RUPTREG3	# USES RUPTREG3,4 FOR DP RETURN ADDRESS.
 		INDEX	Q
-		# Was CAF --- RSB 2004
-		CA	0
+		CAF	0
 		INCR	Q
 
 ISWCALLL	TS	L

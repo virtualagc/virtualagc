@@ -13,6 +13,7 @@
 # Mod history:	05/08/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
 #		2010-10-25 JL	Added missin # in comment.
+#		2011-05-07 JL	Flagged SBANK= workarounds for future removal.
 
 # Page 268
 		BANK	7
@@ -530,8 +531,9 @@ IMUFINEV	VN	4200
 #		SAME RECALL AS A COMPLETED LOAD.
 #	2.	THE EXECUTION OF A VERB 33 (PROCEED WITHOUT DATA) INDICATES THE REQUESTED ACTION IS NOT DESIRED.
 
-		# Moved to below the 2CADR a few lines below here --- RSB 2004.
-		#SBANK=	PINSUPER	# FOR LOADLV1 AND SHOWSUM CADR'S
+## [WORKAROUND] Moved to below the 2CADR a few lines below here --- RSB 2004.
+##		SBANK=	PINSUPER	# FOR LOADLV1 AND SHOWSUM CADR'S
+## [WORKAROUND]
 		
 GOLOADLV	TC	FLASHOFF
 
@@ -568,8 +570,9 @@ CKMODCAD	CA 	MODECADR
 #	4.	ADD DELTA TIME, RECEIVED FROM INPUT REGISTER, TO THE COMPUTER TIME.
 #	5.	RELEASE EXT VERB DISPLAY SYSTEM.
 
-		# Moved from the top of VERB 50 a few lines above here --- RSB 2004.
+## [WORKAROUND] Moved from the top of VERB 50 a few lines above here --- RSB 2004.
 		SBANK=	PINSUPER	# FOR LOADLV1 AND SHOWSUM CADR'S
+## [WORKAROUND]
 		
 ALINTIME	TC	TESTXACT
 		TC	POSTJUMP	# NO ROOM IN 43

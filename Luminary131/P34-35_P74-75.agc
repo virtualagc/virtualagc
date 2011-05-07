@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo
 # Mod history:	05/22/03 RSB.	Began transcribing.
 #		2010-10-25 JL	Added missing # in comments.
+#		2011-05-07 JL	Removed workaround.
 
 # Page 665
 # TRANSFER PHASE INITITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -982,7 +983,7 @@ V06N59		VN	0659
 V06N81		VN	0681
 V16N45		VN	1645
 TWOPI		2DEC	6.283185307 B-4
-MAX250		2DEC	25 E3 B-28	# I added the B-28 --- RSB 2004.
+MAX250		2DEC	25 E3
 THIRD		2DEC	.333333333
 ELEPS		2DEC	.27777777 E-3
 DP-.01		OCT	77777		# CONSTANTS

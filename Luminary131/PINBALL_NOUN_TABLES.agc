@@ -11,6 +11,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo
 # Mod history:	05/09/03 RSB.	Began transcribing.
+# 		2011-05-07 JL	Fixed comment line.
 
 # Page 308
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -719,7 +720,7 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	SAMPTIME		# 65	HMS			HMS
 		ECADR	SAMPTIME		# 65	HMS			HMS
 		ECADR	RSTACK +6		# 66	LANDING RADAR ALT	DP1
-		OCT	0			# 66	SPARE COMPONENT (RSB 2003: Actually read: "LR POSITION" "LRPOS")
+		OCT	0			# 66	LR POSITION            LRPOS
 		OCT	0			# 66	SPARE COMPONENT
 		ECADR	RSTACK			# 67	LANDING RADAR VELX	DP1
 		ECADR	RSTACK +2		# 67	LANDING RADAR VELY	DP1
