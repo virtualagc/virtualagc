@@ -13,6 +13,7 @@
 # Mod history:	06/07/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
 #		2010-10-25 JL	Indentation fixes.
+#		2011-05-07 JL	Flagged SBANK= workaround for future removal.
 
 # Page 1383
 # PROGRAM NAME:		P27
@@ -120,7 +121,9 @@
 #		XXXXXEXXXXXE	ROW 3 COLUMN 3					2(-1)
 #		V33E		VERB 33 TO SIGNAL THAT REFSMMAT IS READY TO BE STORED
 
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 
 		BANK	07
 		SETLOC	EXTVERBS

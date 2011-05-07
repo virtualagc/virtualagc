@@ -11,6 +11,8 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo
 # Mod history:	06/05/03 RSB.	Began transcribing.
+# 		2011-05-07 JL	Removed workaround. Flagged SBANK= workaround 
+# 				for future removal.
 
 # Page 1291
 # SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -21,8 +23,7 @@
 		BANK
 
 NEWMODEX	INDEX	Q		# UPDATE MODREG.  ENTRY FOR MODE IN FIXED.
-		# Was CAF --- RSB 2004.
-		CA	0
+		CAF	0
 		INCR	Q
 
 NEWMODEA	TS	MODREG		# ENTRY FOR MODE IN A.
@@ -177,7 +178,9 @@ DSPMMJOB	EQUALS	DSPMMJB
 #	AD+3	OCT	18000		# TO BE LOCATION AD+4, WITH A PRIORITY 18,
 #	AD+4				# FOR GROUP 5 PHASE INFORMATION.
 
-		SBANK=	PINSUPER	# RSB 2004.
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 
 		COUNT*	$$/PHASE
 2PHSCHNG	INHINT			# THE ENTRY FOR A DOUBLE PHASE CHANGE

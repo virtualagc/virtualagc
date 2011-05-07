@@ -13,6 +13,7 @@
 # Mod history:	05/31/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
 #		2010-10-25 JL	Indentation fixes.
+#		2011-05-07 JL	Removed workaround.
 
 # Page 1102
 		BLOCK	02
@@ -421,8 +422,7 @@ EJSCAN		CCS	PRIORITY +12D
 		TCF	ENDPRCHG -1
 
 		INDEX	A		# OTHERWISE, SE NEWJOB TO THE RELATIVE
-		# Was CAF --- RSB 2004
-		CA	0 -1		# ADDRESS OF THE NEW JOB'S CORE SET.
+		CAF	0 -1		# ADDRESS OF THE NEW JOB'S CORE SET.
 		AD	-CCSPR
 		TS	NEWJOB
 		TCF	CHANJOB -2

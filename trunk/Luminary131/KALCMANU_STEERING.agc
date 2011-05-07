@@ -10,8 +10,9 @@
 # Reference:	pp. 372-376 of 1729.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	05/11/03 RSB.	Began transcribing.
-#		05/14/05 RSB.	Corrected website reference above.
+# Mod history:	05/11/03 RSB	Began transcribing.
+#		05/14/05 RSB	Corrected website reference above.
+#		2011-05-07 JL	Removed workarounds.
 
 # Page 372
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -53,11 +54,9 @@ INCRDCDU	TS	SPNDX
 		INDEX	SPNDX
 		MSU	NCDU
 		EXTEND
-		
-		# The following 2 lines seem to have no purpose at all --- RSB 2004.
-		#SETLOC	KALCMON1
-		#BANK
-		
+		SETLOC	KALCMON1
+		BANK
+
 		MP	DT/TAU
 		CCS	A		# CONVERT TO 2'S COMPLEMENT
 		AD	ONE
