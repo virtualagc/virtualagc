@@ -79,7 +79,7 @@ ParseGENADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           return (0);
         }
 
-      if (Address.Constant && !Address.Address) 
+      if (Address.Constant)
           PseudoToStruct(Address.Value, &Address);
 
       if (!Address.Address)
