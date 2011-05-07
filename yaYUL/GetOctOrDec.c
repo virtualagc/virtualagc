@@ -30,23 +30,25 @@
 
 //-------------------------------------------------------------------------
 // Reads an octal or decimal constant from a string.  Returns 0 on success.
-
 int
-GetOctOrDec (const char *s, int *Value)
+GetOctOrDec(const char *s, int *Value)
 {
   const char *ss;
 
   // Well, let's see if this is an octal number.
   ss = s;
+
   if (*ss == '+' || *ss == '-')
     ss++;
+
   for (; *ss; ss++)
     if (*ss < '0' || *ss > '7')
       break;
+
   if (!*ss && ss != s)
     {
       // It is, it is!
-      sscanf (s, "%o", Value);
+      sscanf(s, "%o", Value);
       return (0);
     }  
   
@@ -54,17 +56,19 @@ GetOctOrDec (const char *s, int *Value)
   ss = s;
   if (*ss == '+' || *ss == '-')
     ss++;
+
   for (; *ss; ss++)
     if (*ss < '0' || *ss > '9')
       break;
+
   if (*ss == 'D' && ss[1] == 0 && ss != s)
     {
       // It is, it is!
-      sscanf (s, "%d", Value);
+      sscanf(s, "%d", Value);
       return (0);
     }  
     
   // It wasn't either octal or decimal.  :-(      
   return (1);    
 }
- 
+
