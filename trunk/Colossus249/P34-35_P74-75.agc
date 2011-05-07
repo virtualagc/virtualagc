@@ -10,7 +10,8 @@
 # Mod history:	08/11/04 RSB.	Began adapting from corresponding Luminary131
 #				source file.
 #		2010-08-29 JL	Added missing comment characters. 
-#
+#		2011-05-07 JL	Removed workaround.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -978,7 +979,7 @@ V06N59		VN	0659
 V06N81		VN	0681
 V16N45		VN	1645
 TWOPI		2DEC	6.283185307 B-4
-MAX250		2DEC	25 E3 B-28	# I added the B-28 --- RSB 2004.
+MAX250		2DEC	25 E3
 THIRD		2DEC	.333333333
 ELEPS		2DEC	.27777777 E-3
 DECTWO		OCT	2

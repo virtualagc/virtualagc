@@ -7,10 +7,11 @@
 # Reference:	Starts at p. 952 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	08/24/04 RSB.	Began transcribing.
-#		05/14/05 RSB	Corrected website reference above.
+# Mod history:	08/24/04   RSB	Began transcribing.
+#		05/14/05   RSB	Corrected website reference above.
 #		2010-10-25 JL	Fixed page numbers.
-#
+#		2011-05-07 JL	Removed workarounds.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -614,9 +615,8 @@ INTERCEP	DEC	.0025 B+3	# DB(-SLOPE) - LMCRATE, SC.AT B-3 REV/SC
 MINLIM		DEC	.00277778 B+4	# RATELIM,MIN (1DEG/SEC), SC.AT B-4 REV/SC
 1/MINLIM	DEC	360 B-18	# RECIPROCAL THEREOF, SHIFTED 14 RIGHT
 MAXLIM		DEC	.01388889 B+4	# RATELIM,MAX (5DEG/SEC), SC.AT B-4 REV/SC
-# The following two were B+4.---RSB 2004.
-TMINFIRE	DEC	1.5 B-10	# 15 MS. (14MIN), SC.AT 16 BITS/CS
-TMAXFIRE	DEC	250 B-10	# 2.5 SEC, SC.AT 16 BITS/CS
+TMINFIRE	DEC	1.5 B+4		# 15 MS. (14MIN), SC.AT 16 BITS/CS
+TMAXFIRE	DEC	250 B+4		# 2.5 SEC, SC.AT 16 BITS/CS
 
 1/TMXFIR	=	BIT3		# RECIPROCAL THEREOF, SHIFTED 14 RIGHT,
 					#	ROUNDS TO OCT00004, SO ALLOWS 2.56

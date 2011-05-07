@@ -11,7 +11,9 @@
 #		2010-10-24 JL	Indentation fixes.
 #		2010-10-24 JL	Fixed a pseudo-label on p751.
 #		2010-10-25 JL	Fixed page number.
-#
+#		2011-05-07 JL	Flagged SBANK= workarounds for future removal. 
+#				Fixed garbled lines.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -189,10 +191,10 @@ P62		TC	S61.1			# CHECK STATE VECTOR AND IMU ORIENTATION.
 		SSP	RTB
 			POSEXIT
 			P62.3			# CALCULATE DESIRED .05G GIMBAL ANGLES.
-						# (Garbled --- RSB 2004).
+						# WITHOUT DISPLAY.
 			CM/DAPIC		# START CM/POSE AND BODY RATE CALC
 			
-						# (Garbled --- RSB 2004).
+				     # DOES 2PHSCHNG, OCT 40116, OCT 05024, OCT 13000.
 						# CM/DAPIC SETS EBANK = EBAOG
 						# AND RETURNS IN BASIC TO P62.2.				
 P62.2		EXTEND
@@ -447,7 +449,7 @@ P66		TC	NEWMODEX		# ENTER VIA RTB WHEN D < Q7 FPSS
 # MOD BY:	R. HIRSCHKOP
 # FUNCTION:	TO TERMINATE STEERING WHEN THE CM VELOCITY WRT EARTH = 1000 FT/SEC
 # CALLING SEQUENCE:  (Nothing here, sorry. --- RSB 2004)
-# EXIT:		TO P00H
+# EXIT:		TO POOH
 # SUBROUTINE CALLS:  GOFLASH
 
 # THIS DISPLAY IS CALLED EACH PASS THROUGH STEERING.  RESTART PROTECTION IS VIA STEERING.

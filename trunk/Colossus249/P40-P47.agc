@@ -11,7 +11,9 @@
 #				there's a corresponding Luminary131 file,
 #				there's not too much overlap with it.
 #		2010-10-24 JL	Indentation fixes.
-#
+#		2011-05-07 JL	Flag SBANK= workarounds for future removal. 
+#				Fix garbled section on page 671.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -1241,18 +1243,13 @@ S40.1		SET	VLOAD
 			QTEMP
 S40.1B		DLOAD	DSU		# LAMBERT
 			TIG
-		# The 1701.pdf scan here is actually missing chunks of code.
-		# For now I've just put in the octal, but I'll replace it when
-		# I have a better scanned page.  It's hard to decompile manually, 
-		# because it's interpretive code.---RSB 2004
-		OCT	36001 
-		OCT	14041 
-		OCT	03656
-		OCT	77625		# DSU
-		OCT	00041 
-		OCT	37423 
-		OCT	61663		# 	AGAIN
-		# End of hopelessly garbled area.
+			TWODT
+		STODL	TDEC1
+			TPASS4
+		DSU
+			TDEC1
+		STCALL	DELLT4
+			AGAIN
 		VLOAD
 			VIPRIME
 		STODL	UT
@@ -2289,7 +2286,9 @@ NODAPUP		EXTEND			# T5 IDLE FOR NODAP (DON'T WORRY ABOUT T)
 		TS	HOLDFLAG
 ENDFIG		TC	POSTJUMP	# CAME IN VIA V46, GO OUT VIA GOPIN
 		CADR	GOPIN
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	PACTOFF
 T5IDLDAP	2CADR	T5IDLOC
 
@@ -2340,7 +2339,9 @@ CONTTWO		2DEC	.00118
 		BANK
 		
 POS-2.5		OCT	37405
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	DAPDATR1
 RCSCADR		2CADR	RCSUP
 

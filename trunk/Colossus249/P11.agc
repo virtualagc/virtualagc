@@ -7,7 +7,8 @@
 # Reference:	pp. 528-544 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/13/04 RSB.	Began transcribing.
+# Mod history:	08/13/04   RSB	Began transcribing.
+# 		2011-05-07 JL	Flag SBANK= workarounds for future removal.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -795,7 +796,9 @@ SATSTKON	EXTEND
 		RELINT
 		TC	GOPIN		# EXIT THUS BECAUSE WE CAME VIA V46
 		
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	BODY3
 2REDOSAT	2CADR	REDOSAT
 
@@ -859,7 +862,9 @@ SATRATE		DEC	0		# IN DETENT -- ZERO RATE
 		
 STIKBITS	OCT	00077
 100MST5		DEC	16374
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	BODY3
 2SATSTCK	2CADR	SATSTICK
 

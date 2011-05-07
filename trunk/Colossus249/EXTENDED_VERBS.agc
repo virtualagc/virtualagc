@@ -7,9 +7,11 @@
 # Reference:	pp. 232-264 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/07/04 RSB.	Began adapting from corresponding Luminary
+# Mod history:	08/07/04   RSB	Began adapting from corresponding Luminary
 #				131 file.
-#
+#               2011-05-07 JL   Removed workarounds. Flag SBANK= workarounds 
+#				for future removal.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -613,13 +615,15 @@ ENATMA		TC	DOWNFLAG	# RESET STIKFLAG
 # Page 247
 
 		EBANK=	T5TVCDT
-STROKON		CS	FLAGWRD6	# Missing line in 1701.pdf --- RSB 2004
+STROKON		CS	FLAGWRD6
 		MASK	OCT60000
 		EXTEND
-		BZMF	ALM/END		# Missing line in 1701.pdf --- RSB 2004
+		BZMF	ALM/END
 		CAF	PRIO30		# JOB REQUEST TO SET UP STROKE TEST,
 		TC	NOVAC		#	INCLUDING INITIALIZATIONS
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	STROKER
 		2CADR	STRKTSTI
 		
@@ -825,7 +829,9 @@ V83PERF		TC	TESTXACT
 		ADS	FLAGWRD9
 		CAF	PRIO5
 		TC	NOVAC
-		SBANK=	LOWSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	LOWSUPER
+## [WORKAROUND]
 		EBANK=	SUBEXIT
 		2CADR	R31CALL
 		
@@ -1010,7 +1016,9 @@ EXDAPOFF	EXTEND
 		TS	FLAGWRD6
 		TC	Q
 		
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	PACTOFF
 IDLECADR	2CADR	T5IDLOC
 
@@ -1057,7 +1065,9 @@ V89PERF		TC	CHKP00H		# DEMAND P00
 		INHINT
 		CAF	PRIO10
 		TC	FINDVAC
-		SBANK=	LOWSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	LOWSUPER
+## [WORKAROUND]
 		EBANK=	P21TIME
 		2CADR	V89CALL
 		
@@ -1257,7 +1267,9 @@ VERB94		CAF	BIT11
 V90PERF		TC	TESTXACT
 		CAF	PRIO7		# R36,V90
 		TC	FINDVAC
-		SBANK=	PINSUPER	# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	RPASS36
 		2CADR	R36
 		

@@ -7,10 +7,11 @@
 # Reference:	Starts on p. 1410 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+# Mod history:	08/30/04   RSB	Adapted from corresponding Luminary131 file.
 #		2010-10-24 JL	Indentation fixes.
 #		2010-10-24 JL	Fixed page number.
-#
+#		2011-05-07 JL	Removed workaround.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -530,8 +531,7 @@ NORESET		TCF	IMUFINED	# DO NOT RESET POWER SUPPLY.
 		ADS	LGYRO
 
 GSELECT		INDEX	Q		# SELECT GYRO.
-		# Was CAF --- RSB 2004
-		CA	0		# PACKED WORD CONTAINS GYRO SELECT BITS
+		CAF	0		# PACKED WORD CONTAINS GYRO SELECT BITS
 		TS	ITEMP4		# AND INCREMENT TO LGYRO.
 		MASK	SEVEN
 		AD	BIT13

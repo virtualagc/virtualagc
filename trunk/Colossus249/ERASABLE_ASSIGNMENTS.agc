@@ -7,15 +7,16 @@
 # Reference:	pp. 37-128 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/03/04 RSB.	Adapted from similar Luminary 131 file.
-#		08/05/04 RSB.	Finished up the draft (not proofed).
-#		05/08/09 RSB	On p. 99, "INTVEC = FILDELV +W" was corrected
+# Mod history:	08/03/04   RSB	Adapted from similar Luminary 131 file.
+#		08/05/04   RSB	Finished up the draft (not proofed).
+#		05/08/09   RSB	On p. 99, "INTVEC = FILDELV +W" was corrected
 #				to "INTVEC = FILDELV +2".  The reason this
 #				was working is that INTVEC isn't used for 
 #				anything.
 #		2010-08-30 JL	Added missing comment character. 
 #		2010-10-24 JL	Fixed page number.
-#
+#               2011-05-07 JL   Removed workarounds.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -2426,8 +2427,7 @@ END-E4		EQUALS	INTVAR		# LAST USED ERASABLE IN E4.
 
 # W-MATRIX STORAGE.				(162D)
 
-# The following was "EQUALS 2400".---RSB 2004
-W		EQUALS			# B(162)
+W		EQUALS	2400		# B(162)
 EMATRIX		=	W	+120D	# B(42E USED TO CONVERT W TO 6X6
 END-W		EQUALS	W 	+162D	# **NEXT AVAILABLE LOC AFTER W MATRIX**
 
@@ -3734,9 +3734,7 @@ UH/		EQUALS	UV1/		# I(2)TMP UNIT HORIZONTAL VECTOR.	B1
 SPRTETIG	EQUALS	TIG		# I(2)IN TIME OF IGNITION		CS B28
 RETLOCN		EQUALS	XR1HOLD	+1	
 
-# The following two statements had been just "WHOCARES = 3777".---RSB 2004
-		SETLOC	3777
-WHOCARES	EQUALS			# A DUMMY FOR E-BANK INSENSITIVE 2CADRS.
+WHOCARES	EQUALS	3777		# A DUMMY FOR E-BANK INSENSITIVE 2CADRS.
 END-E7		EQUALS	WHOCARES	# ***** LAST LOCATION IN E7
 
 # *** END OF KILERASE.080 ***

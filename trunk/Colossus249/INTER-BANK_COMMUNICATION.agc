@@ -7,8 +7,9 @@
 # Reference:	Starts on p. 1085 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/28/04 RSB.	Adapted from corresponding Luminary 131 file.
-#
+# Mod history:	08/28/04   RSB	Adapted from corresponding Luminary 131 file.
+# 		2011-05-07 JL	Removed workaround.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -108,8 +109,7 @@ SUPDACAL	TS	MPTEMP
 
 IBNKCALL	DXCH	RUPTREG3	# USES RUPTREG3,4 FOR DP RETURN ADDRESS.
 		INDEX	Q
-		# Was CAF --- RSB 2004
-		CA	0
+		CAF	0
 		INCR	Q
 
 ISWCALL		TS	L

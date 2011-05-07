@@ -7,9 +7,10 @@
 # Reference:	Starts on p. 1089 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/28/04 RSB.	Adapted from corresponding Luminary 131 file.
+# Mod history:	08/28/04   RSB	Adapted from corresponding Luminary 131 file.
 #		2010-10-24 JL	Indentation fixes.
-#
+#		2011-05-07 JL	Removed workarounds.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -659,8 +660,7 @@ STORE1		INDEX	ADDRWD		# SOME INDEX AND MISCELLANEOUS OPS END
 
 CCALL		INCR	LOC		# MAINTAIN LOC FOR QPRET COMPUTATION
 		INDEX	LOC
-		# Was CAF --- RSB 2004.
-		CA	0		# GET BASE ADDRESS OF CADR LIST.
+		CAF	0		# GET BASE ADDRESS OF CADR LIST.
 		INDEX	ADDRWD
 		AD	0		# ADD INCREMENT.
 		TS	FBANK		# SELECT DESIRED CADR.
@@ -903,8 +903,7 @@ TAD		EXTEND
 #			COEFFICIENTS IMMEDIATELY FOLLOW THE TC POLY INSTRUCTION (SEE ROUTINE FOR DETAILS).
 
 DMP		INDEX	Q		# BASIC SUBROUTINE FOR USE BY PINBALL, ETC
-		# Was CAF --- RSB 2004.
-		CA	0		# ADRES OF ARGUMENT FOLLOWS  TC DMP .
+		CAF	0		# ADRES OF ARGUMENT FOLLOWS  TC DMP .
 		INCR	Q
  -1		TS	ADDRWD		# (PROLOGUE FOR SETTING ADDRWD.)
 
@@ -1031,8 +1030,7 @@ POWRSERS	EXTEND
 		TCF	POLYCOM		# SKIP SET UP BY POLY
 
 POLY		INDEX	Q
-		# Was CAF --- RSB 2004.
-		CA	0
+		CAF	0
 		TS	POLYCNT		# N-1 TO COUNTER
 		DOUBLE
 		AD	Q
@@ -2948,8 +2946,7 @@ BZE/GOTO	CCS	CYR		# SEE WHICH OP-CODE IS DESIRED.
 
 BPL/BMN		CCS	CYR
 		TCF	BPL
-5B10		#DEC	5 B+10		# SHIFTS OP CODE IN SWITCH INSTRUCTION ADR
-		DEC	5 B-4		# RSB 2004.
+5B10		DEC	5 B+10		# SHIFTS OP CODE IN SWITCH INSTRUCTION ADR
 
 		TC	BRANCH		# DO BMN
 		TCF	DANZIG

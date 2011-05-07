@@ -7,9 +7,10 @@
 # Reference:	pp. 418-450 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/11/04 RSB.	Began transcribing.
+# Mod history:	08/11/04   RSB	Began transcribing.
 #		2010-10-24 JL	Indentation fixes.
-#
+#		2011-05-07 JL	Flag SBANK= workarounds for future removal.
+
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
@@ -127,7 +128,9 @@ NBPOSPL		CA	DEC17
 		EXTEND
 		DCA	PERFDLAY
 		TC	LONGCALL
-		SBANK=	LOWSUPER		# RSB 2004
+## [WORKAROUND] RSB 2004
+		SBANK=	LOWSUPER
+## [WORKAROUND]
 		EBANK=	POSITON
 		2CADR	GOESTIMS
 		

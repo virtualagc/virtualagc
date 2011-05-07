@@ -7,8 +7,9 @@
 # Reference:	Starts on p. 1483 of 1701.pdf.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo.
-# Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+# Mod history:	08/30/04   RSB	Adapted from corresponding Luminary131 file.
 #		2010-10-24 JL	Indentation fixes.
+#               2011-05-07 JL   Removed workarounds.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,
@@ -141,7 +142,7 @@ BAILOUT		INHINT
 		TS	ALMCADR
 
 		INDEX	Q
-		CA	0		# Was CAF --- RSB 2004
+		CAF	0
 		TC	BORTENT
 OCT40400	OCT	40400
 
@@ -156,7 +157,7 @@ P00DOO		INHINT
 		CA	Q
 ABORT2		TS	ALMCADR
 		INDEX	Q
-		CA	0		# Was CAF --- RSB 2004
+		CAF	0
 		TC	BORTENT
 OCT77770	OCT	77770		# DON'T MOVE
 		CA	V37FLBIT	# IS AVERAGE G ON
