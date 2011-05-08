@@ -9,7 +9,8 @@
 # Pages:	984-998
 # Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
-#
+#		2011-05-08 JL	Removed workarounds.
+
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
 # by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -600,10 +601,9 @@ MINLIM		DEC	.00277778 B+4	# RATELIM,MIN (1DEG/SEC), SC.AT B-4 REV/SC
 
 MAXLIM		DEC	.01388889 B+4	# RATELIM,MAX (5DEG/SEC), SC.AT B-4 REV/SC
 
-# The following two were B+4.---RSB 2009.
-TMINFIRE	DEC	1.5 B-10	# 15 MS. (14MIN), SC.AT 16 BITS/CS
+TMINFIRE	DEC	1.5 B+4		# 15 MS. (14MIN), SC.AT 16 BITS/CS
 
-TMAXFIRE	DEC	250 B-10	# 2.5 SEC, SC.AT 16 BITS/CS
+TMAXFIRE	DEC	250 B+4		# 2.5 SEC, SC.AT 16 BITS/CS
 
 1/TMXFIR	=	BIT3		# RECIPROCAL THEREOF, SHIFTED 14 RIGHT,
 					#	ROUNDS TO OCT00004, SO ALLOWS 2.56

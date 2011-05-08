@@ -12,7 +12,8 @@
 #				of 25DECML fixed.
 #		2009-05-23 RSB	At SPECSTS, corrected to PRIO22.
 #		2010-08-28 JL	Fixed indentation.
-#
+#		2011-05-08 JL	Flagged SBANK= workaround for future removal.
+
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
 #
@@ -123,7 +124,9 @@ NBPOSPL		CA	DEC17
 		EXTEND
 		DCA	PERFDLAY
 		TC	LONGCALL
-		SBANK=	LOWSUPER		# RSB 2004, OH 2009: Ask Ron 
+## [WORKAROUND] OH 2009
+		SBANK=	LOWSUPER
+## [WORKAROUND]
 		EBANK=	POSITON
 		2CADR	GOESTIMS
 		

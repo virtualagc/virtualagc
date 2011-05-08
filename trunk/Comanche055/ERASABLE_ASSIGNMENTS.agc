@@ -20,7 +20,8 @@
 #				chained to quite a lot of off-by-one errors.
 #				Changed a +8 to a +8D.
 #		2010-08-24 JL	Fixed page numbers. Added missing comment character. Fixed page number comment.
-#
+#		2011-05-08 JL	Removed workarounds.
+
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
 # by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -2416,10 +2417,7 @@ NOMTPI		EQUALS	KT		# I(2)TMP NOMINAL TPI TIME FOR RECYCLE.
 # THE FOLLOWING ARE ERASABLES USED BY THE SYSTEM TESTS.  205 USES TRANSM1.  G'S ARE NOT USED IN 205 NOR ARE THEY
 # WHILE 504 USES TRANSM1 AND ALFDK.
 # Page 92
-# RSB 2009.  The definition of TRANSM1 was previously just "TRANSM1 EQUALS 2000", 
-# this messes up the label typing system in yaYUL.
-		SETLOC	2000
-TRANSM1		EQUALS			# (18) INITIALIZATION FOR IMU TESTS
+TRANSM1		EQUALS	2000		# (18) INITIALIZATION FOR IMU TESTS
 ALFDK		=	TRANSM1 +18D	# (144) ERASABLE LOAD IN 504
 
 # END OF PERF. TEST ERASABLE IN BANK 4
@@ -2444,12 +2442,9 @@ END-E4		EQUALS	INTVAR		# LAST USED ERASABLE IN E4.
 
 # W-MATRIX STORAGE.			(162D)
 
-# RSB 2009.  The following 3 lines have been replaced to be consistent with yaYUL's
-# label-typing system.  They *were* "W EQUALS 2400", "9X9LOC1 EQUALS 2444", 
-# "9X9LOC2 EQUALS 2532".
-W		EQUALS			# B(162)
-9X9LOC1		EQUALS	W	+44
-9X9LOC2		EQUALS	9X9LOC1	+66
+W		EQUALS	2400		# B(162)
+9X9LOC1		EQUALS	2444
+9X9LOC2		EQUALS	2532
 
 EMATRIX		=	W	+120D	# B(42) USED TO CONVERT W TO 6X6
 END-W		EQUALS	W 	+162D	# **NEXT AVAILABLE LOC AFTER W MATRIX**
@@ -3777,9 +3772,7 @@ P21ALT		EQUALS	P21BASEV +6	# I(2) NOUN 73 R1 ALTITUDE
 P21VEL		EQUALS	P21ALT	+2	# I(2) NOUN 73 R2 VELOCITY
 P21GAM		EQUALS	P21VEL	+2	# I(2) NOUN 73 R3 FLIGHT PATH ANGLE
 
-# The following two statements had been just "WHOCARES = 3777".---RSB 2009
-		SETLOC	3777
-WHOCARES	EQUALS			# A DUMMY FOR E-BANK INSENSITIVE 2CADRS.
+WHOCARES	EQUALS	3777		# A DUMMY FOR E-BANK INSENSITIVE 2CADRS.
 END-E7		EQUALS	WHOCARES	# ***** LAST LOCATION IN E7
 
 # Page 130 ... is empty.

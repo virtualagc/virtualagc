@@ -13,7 +13,8 @@
 #		2009-05-21 RSB	In 1SHOTCHK, a CAF SEVEN was corrected to 
 #				CAF SIX.
 #		2010-08-28 JL	Fixed indentation.
-#
+#		2011-05-08 JL	Flagged workaround.
+
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
 # by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -189,10 +190,11 @@ REPCHEK		CAE	REPFRAC		# CHECK FOR REPETITIVE UPDATES
 		
 		INCR	TVCEXPHS	#					(3)
 		
-# RSB 2009.  The following instruction was previously "CAE FCORFRAC", but FCORFRAC
-# is not in erasable memory as implied by the use of CAE.  I've accordingly changed
-# it to CAF instead to indicate fixed memory.
+## [WORKAROUND] RSB 2009.  The following instruction was previously "CAE FCORFRAC", but FCORFRAC
+## is not in erasable memory as implied by the use of CAE.  I've accordingly changed
+## it to CAF instead to indicate fixed memory.
 TEMPSET		CAF	FCORFRAC	# 	SET UP CORRECTION FRACTION
+## [WORKAROUND]
 		TS	TEMPDAP +1
 		
 		INCR	TVCEXPHS	# ENTRY FROM REPCHECK AT NEXT LOCATION	(4)

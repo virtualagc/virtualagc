@@ -15,7 +15,8 @@
 #		2009-05-23 RSB	At end of RESCALES, corrected TC 0 to TC Q.
 #				Added an SBANK= prior to a 2CADR.
 #		2010-08-24 JL	Fixed page numbers. Added missing comment character on p537.
-#
+#		2011-05-08 JL	Flagged SBANK= workaround for future removal.
+
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
 # by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -857,8 +858,10 @@ SATSTKON	EXTEND
 		CADR	ZEROJET		# LEAVE THE T6 CLOCK DISABLED
 		RELINT
 		TC	GOPIN		# EXIT THUS BECAUSE WE CAME VIA V46
-		
-		SBANK=	PINSUPER	# Added RSB 2009
+
+## [WORKAROUND] RSB 2009
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	BODY3
 2REDOSAT	2CADR	REDOSAT
 

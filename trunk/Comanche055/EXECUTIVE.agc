@@ -10,7 +10,8 @@
 # Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
 #		2010-08-29 JL	Fixed indentation.
-#
+#		2011-05-08 JL	Removed workaround.
+
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
 # by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -427,8 +428,7 @@ EJSCAN		CCS	PRIORITY +12D
 		TCF	ENDPRCHG -1
 
 		INDEX	A		# OTHERWISE, SET NEWJOB TO THE RELATIVE
-		# Was CAF --- RSB 2004
-		CA	0 	-1	# ADDRESS OF THE NEW JOB'S CORE SET.
+		CAF	0 	-1	# ADDRESS OF THE NEW JOB'S CORE SET.
 		AD	-CCSPR
 		TS	NEWJOB
 		TCF	CHANJOB -2

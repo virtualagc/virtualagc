@@ -14,7 +14,8 @@
 #		2009-05-21 RSB	Corrected definition of 5B10, which overflowed
 #				integer arithmetic.
 #		2010-08-28 JL	Fixed indentation.
-#
+#		2011-05-08 JL	Removed workarounds.
+
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
 # by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -654,8 +655,7 @@ STORE1		INDEX	ADDRWD		# SOME INDEX AND MISCELLANEOUS OPS END
 
 CCALL		INCR	LOC		# MAINTAIN LOC FOR QPRET COMPUTATION
 		INDEX	LOC
-		# Was CAF --- RSB 2009.
-		CA	0		# GET BASE ADDRESS OF CADR LIST.
+		CAF	0		# GET BASE ADDRESS OF CADR LIST.
 		INDEX	ADDRWD
 		AD	0		# ADD INCREMENT.
 		TS	FBANK		# SELECT DESIRED CADR.
@@ -899,8 +899,7 @@ TAD		EXTEND
 #			COEFFICIENTS IMMEDIATELY FOLLOW THE TC POLY INSTRUCTION (SEE ROUTINE FOR DETAILS).
 
 DMP		INDEX	Q		# BASIC SUBROUTINE FOR USE BY PINBALL, ETC
-		# Was CAF --- RSB 2009.
-		CA	0
+		CAF	0
 		INCR	Q
  -1		TS	ADDRWD		# (PROLOGUE FOR SETTING ADDRWD.)
 
@@ -1027,8 +1026,7 @@ POWRSERS	EXTEND
 		TCF	POLYCOM		# SKIP SET UP BY POLY
 
 POLY		INDEX	Q
-		# Was CAF --- RSB 2009.
-		CA	0
+		CAF	0
 		TS	POLYCNT		# N-1 TO COUNTER
 		DOUBLE
 		AD	Q
@@ -2944,8 +2942,7 @@ BZE/GOTO	CCS	CYR		# SEE WHICH OP-CODE IS DESIRED.
 
 BPL/BMN		CCS	CYR
 		TCF	BPL
-5B10		#DEC	5 	B+10	# SHIFTS OP CODE IN SWITCH INSTRUCTION ADR
-		DEC	5	B-4	# RSB 2009
+5B10		DEC	5 B+10		# SHIFTS OP CODE IN SWITCH INSTRUCTION ADR
 
 		TC	BRANCH		# DO BMN
 		TCF	DANZIG
