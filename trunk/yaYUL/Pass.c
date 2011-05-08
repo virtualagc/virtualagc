@@ -536,22 +536,27 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
         }
 	
       // Suck in all other fields.
-      NumFields = sscanf (s, "%s%s%s%s%s%s", Fields[0], Fields[1],
-      			  Fields[2], Fields[3], Fields[4], Fields[5]);	
+      NumFields = sscanf(s, "%s%s%s%s%s%s", Fields[0], Fields[1], Fields[2], Fields[3], Fields[4], Fields[5]);	
       if (NumFields >= 1)
         {			  
 	  i = 0;
-	  if (*s && !isspace (*s))
+	  if (*s && !isspace(*s))
 	    ParseInputRecord.Label = Fields[i++];
-	  else if (IsFalseLabel (Fields[0]))
+	  else if (IsFalseLabel(Fields[0]))
 	    {
 	      if (NumFields == 1)
 	        goto NotOffset;
 	      else	
 	        ParseInputRecord.FalseLabel = Fields[i++];
 	    }
-	  iMatch = FindInterpreter (Fields[i]);
-	  Match = FindParser (Fields[i]);
+          else if (*s == ' ' && *(s+1) == ' ')
+            {
+              // Ignore any other fake label.
+              i++;
+            }
+
+	  iMatch = FindInterpreter(Fields[i]);
+	  Match = FindParser(Fields[i]);
 	  if (NumInterpretiveOperands && iMatch == NULL && Match == NULL)
 	    ParseInputRecord.Operator = "";
 	  else
