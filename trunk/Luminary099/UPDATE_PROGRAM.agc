@@ -13,7 +13,8 @@
 #		2009-06-07 RSB	Added an SBANK= to account for incompatibilities
 #				between YUL and yaYUL.
 #		2011-01-06 JL	Fixed pseudo-label indentation.
-#
+#		2011-05-07 JL	Flag SBANK= workaround.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -197,7 +198,9 @@ UPPART2		EQUALS			# UPDATE PROGRAM -- PART 2
 		TC	PHASCHNG	# SET RESTART GROUP 6 TO RESTORE OLD MODE
 		OCT	07026		# AND DOWNLIST AND EXIT IF RESTART OCCURS.
 		OCT	30000		# PRIORITY SAME AS CHRPRIO
-		SBANK=	PINSUPER	# RSB 2009
+## [WORKAROUND] RSB 2009
+		SBANK=	PINSUPER
+## [WORKAROUND]
 		EBANK=	UPBUFF
 		2CADR	UPOUT +1
 

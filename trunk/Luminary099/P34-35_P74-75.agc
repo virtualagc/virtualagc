@@ -13,7 +13,8 @@
 #		2009-06-05 RSB	Corrected a typo.
 #		2011-01-06 JL	Fixed pseudo-label indentation.
 #		2011-01-06 JL	Added missing comment characters.
-#
+#		2011-05-07 JL	Removed workaround.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -870,13 +871,13 @@ FLAGON		CLEAR	VLOAD
 		STORE	GDT/2
 		EXIT
  +5		CAF	V06N81
- 		TC	BANKCALL
+		TC	BANKCALL
 		CADR	GOFLASH
 		TC	GOTOP00H
 		TC	+2		# PRO
 		TC	FLAGON 	+5	# LOAD
  +2		CA	EBANK7
- 		TS	EBANK		# TO BE SURE
+		TS	EBANK		# TO BE SURE
 
 		ZL
 		CA	FIVE
@@ -1039,7 +1040,7 @@ V06N81		VN	0681
 V16N45		VN	1645
 TWOPI		2DEC	6.283185307 B-4
 
-MAX250		2DEC	25 E3 B-28	# I added the B-28 --- RSB 2009.
+MAX250		2DEC	25 E3
 
 THIRD		2DEC	.333333333
 

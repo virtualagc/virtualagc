@@ -11,7 +11,7 @@
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
 #		2011-01-06 JL	Fixed pseudo-label indentation.
-#
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -72,11 +72,11 @@ GTSGO+DN	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
 GOQTRIMG	CAF	ZERO		# SET INDEXER FOR Q-AXIS CALCULATIONS
 		TS	QRCNTR
 # Page 1473
-# RSB 2009 ---------------------------------------------------------------------
-# Everything between this line and the similar line below was simply filled-in
-# as-is from Luminary 131, and then verified to assemble to the proper binary
-# values.  This area is blank on the Luminary 099 print-out, as if the
-# printer ribbon had run out.
+## [WORKAROUND] RSB 2009 ------------------------------------------------------
+## Everything between this line and the similar line below was simply filled-in
+## as-is from Luminary 131, and then verified to assemble to the proper binary
+## values.  This area is blank on the Luminary 099 print-out, as if the
+## printer ribbon had run out.
 		INDEX	QRCNTR		# AOS SCALED AT PI/2
 		CA	AOSQ
 		EXTEND
@@ -125,7 +125,7 @@ ALGORTHM	EXTEND			# Q(R)DIFF IS THETA (ERROR) SCALED AT PI.
 		EXTEND
 		DCS	A		# ALPHA(2)/2 - K
 		AD	KCENTRAL
-# RSB 2009 ---------------------------------------------------------------------
+## [WORKAROUND] RSB 2009 ------------------------------------------------------
 		EXTEND
 		DV	KCENTRAL	# HIGH ORDER OF QUOTIENT.
 		XCH	A2CNTRAL
