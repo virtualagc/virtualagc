@@ -154,9 +154,9 @@ V06N84		NV	0684
 		NV	0633
 P76SUB1		CLEAR   SLOAD
 			MOONFLAG        
-                        X2
-                BHIZ    SET             # X2=0...CLEAR MOONFLAG
-                        +2              #   =2.....SET MOONFLAG
-                        MOONFLAG
-                RVQ 
-                
+			X2
+		BHIZ    SET             # X2=0...CLEAR MOONFLAG
+			+2              #   =2.....SET MOONFLAG
+			MOONFLAG
+		RVQ 
+
