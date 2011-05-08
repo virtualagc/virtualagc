@@ -11,7 +11,8 @@
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
 #		2011-01-06 JL	Fixed pseudo-label indentation.
-#
+#		2011-05-08 JL	Removed workaround.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -434,8 +435,7 @@ EJSCAN		CCS	PRIORITY +12D
 		TCF	ENDPRCHG -1
 
 		INDEX	A		# OTHERWISE, SET NEWJOB TO THE RELATIVE
-		# Was CAF --- RSB 2009
-		CA	0 	-1	# ADDRESS OF THE NEW JOB'S CORE SET.
+		CAF	0 	-1	# ADDRESS OF THE NEW JOB'S CORE SET.
 		AD	-CCSPR
 		TS	NEWJOB
 		TCF	CHANJOB -2
