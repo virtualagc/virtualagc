@@ -12,6 +12,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	05/24/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
+#		2011-05-07 JL	Remove workaround.
 
 # Page 798
 		EBANK=	E2DPS
@@ -123,9 +124,8 @@ LUNLAND		TC	PHASCHNG
 # AUTOMATIC LANDING WILL CONTINUE.
 
 GUILDEN		CS	MODREG		# ARE WE IN P66?  (EVEN THOUGH WE ARE IN AUTO
-# STERN
-  		AD	DEC66		# DAP)
-  		EXTEND
+  STERN		AD	DEC66		# DAP)
+		EXTEND
 		BZF	RESTART?	# YES:  GO SEE IF THERE HAS BEEN A RESTART
 
 		CAF	BIT13		# NO:  IS UN-ATTITUDE-HOLD DISCRETE HERE?
