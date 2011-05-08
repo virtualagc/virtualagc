@@ -14,7 +14,8 @@
 #				have survived from Luminary 131 to here.
 #		2009-06-07 RSB	Fixed a typo.
 #		2011-01-06 JL	Fixed pseudo-labels which were incorrectly real labels.
-#
+#		2011-05-07 JL	Removed workaround.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -133,11 +134,10 @@ LUNLAND		TC	PHASCHNG
 # UNLESS THE CURRENT PROGRAM IS P67 IN WHICH CASE THERE IS NO CHANGE
 
 GUILDEN		EXTEND			# IS UN-AUTO-THROTTLE DISCRETE PRESENT?
-# STERN					# RSB 2009: Not originally a comment.
-  		READ CHAN30
+  STERN		READ CHAN30
 		MASK	BIT5
-  		CCS	A
-  		TCF	STARTP67	# YES
+		CCS	A
+		TCF	STARTP67	# YES
 P67NOW?		TC	CHECKMM		# NO:  ARE WE IN P67 NOW?
 		DEC	67
 		TCF	STABL?		# NO
@@ -227,7 +227,7 @@ GUILDRET	CAF	ZERO
 		
 # Page 802
  +2		EXTEND
- 		DCA	TPIP
+		DCA	TPIP
 		DXCH	TPIPOLD
 
 		TC	FASTCHNG
@@ -737,7 +737,7 @@ EXGSUB		TC	INTPRET		# COMPUTE TRIM VELOCITY CORRECTION TERM.
 		OCT	01412
 
  +3		TC	POSTJUMP
- 		CADR	DDUMCALC
+		CADR	DDUMCALC
 
 EXBRAK		TC	INTPRET
 		VLOAD
@@ -838,7 +838,7 @@ DISPEXIT	EXTEND			# KILL GROUP 3:  DISPLAYS WILL BE
 		DXCH	-PHASE3
 
  +3		CS	FLAGWRD8	# IF FLUNDISP IS SET, NO DISPLAY THIS PASS
- 		MASK	FLUNDBIT
+		MASK	FLUNDBIT
 		EXTEND
 		BZF	ENDLLJOB	# TO PICK UP THE TAG
 

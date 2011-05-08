@@ -11,7 +11,9 @@
 #		2009-06-05 RSB	A few lines at the bottom of page image
 #				1294 were truncated.  I've fixed the page
 #				image and added those missing lines here.
-#
+#		2011-05-07 JL	Flagged SBANK= workaround for future 
+#				removal.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -36,8 +38,7 @@
 		BANK
 
 NEWMODEX	INDEX	Q		# UPDATE MODREG.  ENTRY FOR MODE IN FIXED.
-		# Was CAF --- RSB 2004. Still CAF in LMY99 OH 2009
-		CA	0
+		CAF	0
 		INCR	Q
 
 NEWMODEA	TS	MODREG		# ENTRY FOR MODE IN A.
@@ -193,7 +194,9 @@ DSPMMJOB	EQUALS	DSPMMJB
 #	AD+3	OCT	18000		# TO BE LOCATION AD+4, WITH A PRIORITY 18,
 #	AD+4				# FOR GROUP 5 PHASE INFORMATION.
 
-		SBANK=	PINSUPER	# RSB 2004. OH 2009 Not in LMY99
+## [WORKAROUND] RSB 2004
+		SBANK=	PINSUPER
+## [WORKAROUND]
 
 		COUNT*	$$/PHASE
 2PHSCHNG	INHINT			# THE ENTRY FOR A DOUBLE PHASE CHANGE

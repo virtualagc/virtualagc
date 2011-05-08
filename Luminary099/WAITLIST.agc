@@ -11,6 +11,7 @@
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
 #		2011-01-06 JL	Fixed pseudo-label indentation.
+#		2011-05-07 JL	Removed workarounds.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -148,8 +149,7 @@ WAITBB		BBCON	WAIT2
 # RETURN TO CALLER +2 AFTER WAITING DT SPECIFIED AT CALLER +1.
 
 FIXDELAY	INDEX	Q		# BOTH ROUTINES MUST BE CALLED UNDER
-		# Was CAF --- RSB 2009.
-		CA	0		# WAITLIST CONTROL AND TERMINATE THE TASK
+		CAF	0		# WAITLIST CONTROL AND TERMINATE THE TASK
 		INCR	Q		# IN WHICH THEY WERE CALLED.
 
 # RETURN TO CALLER +1 AFTER WAITING THE DT AS ARRIVING IN A.
@@ -347,8 +347,7 @@ FILLED		DXCH	WAITEXIT
 
 WTLST2		TS	WAITTEMP	# C(A) = -(TD - T + 1)
 		INDEX	Q
-		# Was CAF --- RSB 2009.
-		CA	0
+		CAF	0
 		TS	Q		# INDEX VALUE INTO Q.
 
 		CAF	ONE
