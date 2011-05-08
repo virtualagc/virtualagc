@@ -10,7 +10,9 @@
 # Mod history:	2009-05-28 OH	Transcribed from page images.
 #		2009-06-05 RSB	Fixed a typo.
 #		2011-01-06 JL	Fixed pseudo-label indentation.
-#
+#		2011-05-08 JL	Removed workaround. Flagged SBANK= 
+#				workaround for future removal.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -518,8 +520,7 @@ NORESET		TCF	IMUFINED	# DO NOT RESET POWER SUPPLY.
 		ADS	LGYRO
 
 GSELECT		INDEX	Q		# SELECT GYRO.
-		# Was CAF --- RSB 2004, Also CAF in LMY99 OH 2009
-		CA	0		# PACKED WORD CONTAINS GYRO SELECT BITS
+		CAF	0		# PACKED WORD CONTAINS GYRO SELECT BITS
 		TS	ITEMP4		# AND INCREMENT TO LGYRO.
 		MASK	SEVEN
 		AD	BIT13
@@ -791,7 +792,9 @@ ENDMODE		CA	RUPTREG3	# -0 INDICATES OPERATION COMPLETE BUT
 # DEBRIS --
 #	RUPTREG2 AND CALLING ROUTINE MODECADR.
 
-		SBANK=	LOWSUPER	# RSB 2004, Also not in LMY99 OH 2009
+## [WORKAROUND] OH 2009
+		SBANK=	LOWSUPER
+## [WORKAROUND] 
 
 AOTSTALL	CAF	ONE		# AOT.
 		TC	STALL

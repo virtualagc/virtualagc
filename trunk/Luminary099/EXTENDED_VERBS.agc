@@ -17,7 +17,8 @@
 #				with yaYUL. Corrected a typo.
 #		2010-12-31 JL	Fixed page number comments.
 #		2011-01-06 JL	Added missing comment characters.
-#
+#		2011-05-08 JL	Flagged SBANK= workarounds for future removal.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -519,7 +520,9 @@ GOLOADLV	TC	FLASHOFF
 V47TXACT	TC	TESTXACT	# NO OTHER EXTVERB.
 		CAF	PRIO4
 		TC	FINDVAC
-		SBANK=	LOWSUPER	# RSB 2009
+## [WORKAROUND] RSB 2009
+		SBANK=	LOWSUPER
+## [WORKAROUND] 
 		EBANK=	AGSBUFF
 		2CADR	AGSINIT
 		
@@ -677,7 +680,9 @@ R04C		CAF	BIT14		# ENABLE RR AUTO TRACKER
 		TS	RTSTMAX		# FOR SEQUENTIAL STORAGE
 		
 		TC	WAITLIST
-		SBANK=	PINSUPER	# RSB 2009.
+## [WORKAROUND] RSB 2009
+		SBANK=	PINSUPER
+## [WORKAROUND] 
 		EBANK=	RSTACK
 		2CADR	RADSAMP
 		

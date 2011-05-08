@@ -10,7 +10,8 @@
 # Mod history:	2009-05-24 RSB	Adapted from the corresponding 
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
-#
+#		2011-05-08 JL	Removed workaround.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -100,8 +101,7 @@ SUPDACAL	TS	MPTEMP
 
 IBNKCALL	DXCH	RUPTREG3	# USES RUPTREG3,4 FOR DP RETURN ADDRESS.
 		INDEX	Q
-		# Was CAF --- RSB 2009
-		CA	0
+		CAF	0
 		INCR	Q
 
 ISWCALLL	TS	L

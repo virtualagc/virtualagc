@@ -11,7 +11,8 @@
 #				Luminary131 file, using page 
 #				images from Luminary 1A.
 #		2011-01-06 JL	Fixed pseudo-label indentation.
-#
+#		2011-05-08 JL	Removed workaround.
+
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
 # was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -590,7 +591,7 @@ COPYPACS	INDEX	COPINDEX
 		TS	GENMASK
 
 		INDEX	COPINDEX
-		CA	EBANKSAV	# Was CAF --- RSB 2009.
+		CAF	EBANKSAV
 		TS	TEMPOR2		# ACTIVE EBANK AND FLAG
 
 		TS	EBANK
