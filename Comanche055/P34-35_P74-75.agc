@@ -11,7 +11,8 @@
 #		2009-05-23 RSB	In DISPLAYE, corrected a CADR GOFLASHR
 #				to CADR GOFLASH.
 #		2010-08-28 JL	Added missing comment character on p478.
-#
+#		2011-05-08 JL	Removed workaround.
+
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
 #
@@ -997,7 +998,7 @@ V16N45		VN	1645
 		BANK
 		
 TWOPI		2DEC	6.283185307 B-4
-MAX250		2DEC	25 E3 B-28	# RSB 2004 added the B-28. OH 2009 leave?
+MAX250		2DEC	25 E3
 THIRD		2DEC	.333333333
 ELEPS		2DEC	.27777777 E-3
 DECTWO		OCT	2

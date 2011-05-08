@@ -10,7 +10,8 @@
 # Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 #				same name, using Comanche055 page images.
 #		2010-08-29 JL	Fixed indentation.
-#
+#		2011-05-08 JL	Removed workarounds.
+
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
 # by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -155,8 +156,7 @@ WAITBB		BBCON	WAIT2
 # RETURN TO CALLER +2 AFTER WAITING DT SPECIFIED AT CALLER +1.
 
 FIXDELAY	INDEX	Q		# BOTH ROUTINES MUST BE CALLED UNDER
-		# Was CAF --- RSB 2004.
-		CA	0		# WAITLIST CONTROL AND TERMINATE THE TASK
+		CAF	0		# WAITLIST CONTROL AND TERMINATE THE TASK
 		INCR	Q		# IN WHICH THEY WERE CALLED.
 
 # RETURN TO CALLER +1 AFTER WAITING THE DT AS ARRIVING IN A.
@@ -352,8 +352,7 @@ OCT40201	OCT	40201
 
 WTLST2		TS	WAITTEMP	# C(A) = -(TD - T + 1)
 		INDEX	Q
-		# Was CAF --- RSB 2004.
-		CA	0
+		CAF	0
 		TS	Q		# INDEX VALUE INTO Q.
 
 		CAF	ONE

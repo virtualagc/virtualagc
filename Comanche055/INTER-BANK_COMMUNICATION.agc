@@ -12,7 +12,8 @@
 #				in the transcription of program comments,
 #				and these should be back-ported to 
 #				Colossus249.
-#
+#		2011-05-08 JL	Removed workaround.
+
 # The contents of the "Comanche055" files, in general, are transcribed 
 # from scanned documents. 
 #
@@ -106,8 +107,7 @@ SUPDACAL	TS	MPTEMP
 
 IBNKCALL	DXCH	RUPTREG3	# USES RUPTREG3,4 FOR DP RETURN ADDRESS.
 		INDEX	Q
-		# Was CAF --- RSB 2009
-		CA	0
+		CAF	0
 		INCR	Q
 
 ISWCALL		TS	L
