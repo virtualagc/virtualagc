@@ -17,14 +17,13 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:	IncPc.c
-  Purpose:	Increments (or decrements) an Address_t structure, with 
-  		detection of out-of range.  This is a more complicated
-		thing than it seems, because of the variety of different
-		types of memory bank.  (Also, since the Address_t 
-		structure can represent a constant rather than an address.)
-  Mode:		04/15/03 RSB.	Began.
-  		
+  Filename:     IncPc.c
+  Purpose:      Increments (or decrements) an Address_t structure, with 
+                detection of out-of range.  This is a more complicated
+                thing than it seems, because of the variety of different
+                types of memory bank.  (Also, since the Address_t 
+                structure can represent a constant rather than an address.)
+  Mod History:  04/15/03 RSB.  Began.
 */
 
 #include "yaYUL.h"
@@ -82,17 +81,17 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
         return;
       else if (NewPc->Value < 01400)
         {
-	  NewPc->Constant = 0;
-	  NewPc->Address = 1;
-	  NewPc->Erasable = 1;
-	  NewPc->Fixed = 0;
-	  NewPc->Banked = 0;
-	  NewPc->Unbanked = 1;
-	  NewPc->EB = 0;
-	  NewPc->FB = 0;
-	  NewPc->Super = 0;
-	  NewPc->SReg = NewPc->Value;
-	}
+          NewPc->Constant = 0;
+          NewPc->Address = 1;
+          NewPc->Erasable = 1;
+          NewPc->Fixed = 0;
+          NewPc->Banked = 0;
+          NewPc->Unbanked = 1;
+          NewPc->EB = 0;
+          NewPc->FB = 0;
+          NewPc->Super = 0;
+          NewPc->SReg = NewPc->Value;
+        }
       else
         return;
     }
@@ -111,7 +110,7 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
     NewPc->FB += BankIncrement;
 
   // Okay, here's some workaround code for the weird construct
-  //	TC FixedMemoryLabel -LargeOffset
+  // TC FixedMemoryLabel -LargeOffset
   // taking a location in fixed memory down to a location in erasable.
   // Don't blame me!
   if (NewPc->Fixed && BankIncrement != 0 && NewPc->FB == 0)
@@ -134,33 +133,33 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
     {
       if (NewPc->Unbanked)
         {
-	  Min = 0;
-	  Max = 01377;
-	}
+          Min = 0;
+          Max = 01377;
+        }
       else if (NewPc->Banked)
         {
-	  Min = 01400;
-	  Max = 01777;
-	  NewPc->EB += BankIncrement;
-	}
+          Min = 01400;
+          Max = 01777;
+          NewPc->EB += BankIncrement;
+        }
       else
-        goto ImplementationError;	
+        goto ImplementationError;
     }
   else if (NewPc->Fixed)
     {
       if (NewPc->Banked)
         {
-	  Min = 02000;
-	  Max = 03777;
-	  NewPc->FB += BankIncrement;
-	}
+          Min = 02000;
+          Max = 03777;
+          NewPc->FB += BankIncrement;
+        }
       else if (NewPc->Unbanked)
         {
-	  Min = 04000;
-	  Max = 07777;
-	}
+          Min = 04000;
+          Max = 07777;
+        }
       else
-        goto ImplementationError;	
+        goto ImplementationError;
     }
   else
     goto ImplementationError;

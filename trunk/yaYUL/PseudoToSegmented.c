@@ -17,13 +17,13 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:	PseudoToSegmented.c
-  Purpose:	Converts a pseudo-address (i.e., a number in the linear
-  		range 0-0117777) to a fully parsed address with
-		bank numbers, S-register contents, etc.
-  Mode:		04/17/03 RSB.	Began.
-  		04/27/03 RSB.	Split off from ParseSETLOC.c
-		06/22/03 RSB.	Added PseudoToEBanked.
+  Filename:     PseudoToSegmented.c
+  Purpose:      Converts a pseudo-address (i.e., a number in the linear
+                range 0-0117777) to a fully parsed address with
+                bank numbers, S-register contents, etc.
+  Mod History:  04/17/03 RSB.   Began.
+                04/27/03 RSB.   Split off from ParseSETLOC.c
+                06/22/03 RSB.   Added PseudoToEBanked.
 */
 
 #include "yaYUL.h"
@@ -72,16 +72,16 @@ PseudoToEBanked(int Value, ParseOutput_t *OutRecord)
       OutRecord->ProgramCounter.SReg = 02000 + (Value & 01777);
 
       if (Value >= 04000 && Value <= 05777)
-	OutRecord->ProgramCounter.FB = 2;
+        OutRecord->ProgramCounter.FB = 2;
       else if (Value >= 06000 && Value <= 07777)
-	OutRecord->ProgramCounter.FB = 3;
+        OutRecord->ProgramCounter.FB = 3;
       else if (Value < 0110000)
-	OutRecord->ProgramCounter.FB = (Value - 010000) / 02000;
+        OutRecord->ProgramCounter.FB = (Value - 010000) / 02000;
       else 
-	{
-	  OutRecord->ProgramCounter.Super = 1;
-	  OutRecord->ProgramCounter.FB = (Value - 030000) / 02000;
-	} 
+        {
+          OutRecord->ProgramCounter.Super = 1;
+          OutRecord->ProgramCounter.FB = (Value - 030000) / 02000;
+        } 
     }
 
   OutRecord->ProgramCounter.Value = Value;
@@ -140,17 +140,17 @@ PseudoToStruct(int Value, Address_t *Address)
       Address->SReg = 02000 + (Value & 01777);
 
       if (Value >= 04000 && Value <= 05777)
-	Address->FB = 2;
+          Address->FB = 2;
       else if (Value >= 06000 && Value <= 07777)
-	Address->FB = 3;
+          Address->FB = 3;
       else if (Value < 0110000)
-	Address->FB = (Value - 010000) / 02000;
+          Address->FB = (Value - 010000) / 02000;
       else 
-	{
-	  Address->Super = 1;
-	  Address->FB = (Value - 030000) / 02000;
-	}      
-    }				
+        {
+          Address->Super = 1;
+          Address->FB = (Value - 030000) / 02000;
+        }      
+    }
 
   Address->Value = Value;
 
