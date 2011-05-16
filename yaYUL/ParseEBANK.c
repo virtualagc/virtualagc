@@ -17,10 +17,10 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:	ParseEBANK.c
-  Purpose:	Assembles the EBANK= pseudo-op.
-  Mode:		04/29/03 RSB.	Began.
-  		07/23/04 RSB.	Added SBANK.
+  Filename:     ParseEBANK.c
+  Purpose:     Assembles the EBANK= pseudo-op.
+  Mode:        04/29/03 RSB.   Began.
+               07/23/04 RSB.   Added SBANK.
 */
 
 #include "yaYUL.h"
@@ -61,30 +61,30 @@ ParseEBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     DoIt:  
       if (Address.Invalid)
         {
-	  strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
-	  OutRecord->Fatal = 1; 
-	  return (0);
-	}
+          strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
+          OutRecord->Fatal = 1; 
+          return (0);
+        }
 
       if (!Address.Erasable)
         {
-	  strcpy(OutRecord->ErrorMessage, "Destination not erasable.");
-	  OutRecord->Fatal = 1;
-	  return (0);
-	}
+          strcpy(OutRecord->ErrorMessage, "Destination not erasable.");
+          OutRecord->Fatal = 1;
+          return (0);
+        }
 
       if (Address.SReg < 0 || Address.SReg > 01777)
         {
-	  strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
-	  OutRecord->Fatal = 1;
-	  return (0);
-	}
+          strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
+          OutRecord->Fatal = 1;
+          return (0);
+        }
 
       OutRecord->Bank.LastEBank = OutRecord->Bank.CurrentEBank;
       OutRecord->Bank.CurrentEBank = Address;
       OutRecord->Bank.OneshotPending = 1;
       OutRecord->LabelValue = Address;
-      OutRecord->LabelValueValid = 1;	
+      OutRecord->LabelValueValid = 1;
     }
   else
     {
@@ -94,7 +94,7 @@ ParseEBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         {
           IncPc(&Address, OpcodeOffset, &Address);
           goto DoIt;
-	}
+        }
 
       sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
@@ -149,42 +149,40 @@ ParseSBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     DoIt:  
       if (Address.Invalid)
         {
-	  strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
-	  OutRecord->Fatal = 1;
-	  return (0);
-	}
+          strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
+          OutRecord->Fatal = 1;
+          return (0);
+        }
 
       if (!Address.Fixed)
         {
-	  strcpy(OutRecord->ErrorMessage, "Destination not in fixed memory.");
-	  OutRecord->Fatal = 1;
-	  return (0);
-	}	
+          strcpy(OutRecord->ErrorMessage, "Destination not in fixed memory.");
+          OutRecord->Fatal = 1;
+          return (0);
+        }
 
       if (Address.SReg < 02000 || Address.SReg > 03777)
         {
-	  strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
-	  OutRecord->Fatal = 1;
-	  return (0);
-	}	
+          strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
+          OutRecord->Fatal = 1;
+          return (0);
+        }
 
       OutRecord->Bank.CurrentSBank = Address;
       OutRecord->LabelValue = Address;
-      OutRecord->LabelValueValid = 1;	
+      OutRecord->LabelValueValid = 1;
     }
   else
     {
       // The operand is NOT a number.  Presumably, it's a symbol.
-      i = FetchSymbolPlusOffset (&InRecord->ProgramCounter, 
-                                 InRecord->Operand, 
-				 "", &Address);
+      i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, "", &Address);
       if (!i)
         {
-          IncPc (&Address, OpcodeOffset, &Address);
+          IncPc(&Address, OpcodeOffset, &Address);
           goto DoIt;
-	}
+        }
 
-      strcpy (OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+      strcpy(OutRecord->ErrorMessage, "Symbol undefined or offset bad");
       OutRecord->Fatal = 1;
     }
 

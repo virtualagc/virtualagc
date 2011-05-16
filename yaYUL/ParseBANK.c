@@ -142,7 +142,7 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   // The case of no Operand has a special meaning.  It means simply to 
   // advance the program counter by however many words have already
   // been used in the current bank.  It would be used after a SETLOC.
-  if (0 == *InRecord->Operand)
+  if (!*InRecord->Operand)
     {
       OutRecord->ProgramCounter = InRecord->ProgramCounter;
 
