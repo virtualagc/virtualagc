@@ -44,7 +44,7 @@ clean:
 install:	yaYUL.exe
 	cp -a yaYUL.exe /mingw/bin/yaYUL.exe
 
-%.o:    %.c yaYUL.h
-	gcc ${CFLAGS} -DORIGINAL_SBANK_SURMISE "-DNVER=${NVER}" -g -O0 -Wall -c -o $@ $<
+%.o: %.c yaYUL.h
+	gcc ${CFLAGS} "-DNVER=${NVER}" -g -O0 -Wall -c -o $@ $<
 
 

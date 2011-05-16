@@ -59,13 +59,11 @@ yaYUL:	$(CFILES:%.c=%.o)
 	gcc ${CFLAGS} -o $@ $^ -lm
 
 yaYUL.exe: ${CFILES}
-	$(PREFIX_WIN)gcc ${CFLAGS} -DORIGINAL_SBANK_SURMISE -DNVER=${NVER} \
+	$(PREFIX_WIN)gcc ${CFLAGS} -DNVER=${NVER} \
 		-Wall -o $@ $^ -lm
 
 yaYUL-macosx: ${CFILES}
-	$(PREFIX_MAC)gcc -arch ppc -arch i386 \
-		${CFLAGS} -DORIGINAL_SBANK_SURMISE -DNVER=${NVER} \
-		-Wall -o $@ $^ -lm
+	$(PREFIX_MAC)gcc -arch ppc -arch i386 ${CFLAGS} -DNVER=${NVER} -Wall -o $@ $^ -lm
 
 clean:
 	-rm -f yaYUL *.o *~ *.exe *-macosx Utilities/SplitInterp Utilities/*.exe
@@ -74,7 +72,7 @@ install: yaYUL
 	cp  yaYUL ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/yaYUL
 
-%.o:	%.c yaYUL.h
-	gcc ${CFLAGS} -DORIGINAL_SBANK_SURMISE -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -o $@ $<
+%.o: %.c yaYUL.h
+	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -o $@ $<
 	
 
