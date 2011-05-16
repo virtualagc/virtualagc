@@ -29,10 +29,6 @@
 
 //-------------------------------------------------------------------------
 // Adjust superbank bits in terms of SBANK= and so on.
-
-#ifdef ORIGINAL_SBANK_SURMISE
-// From the best rule I was able to devise.
-
 void
 FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
 {
@@ -43,27 +39,6 @@ FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
   else
       *OutValue |= 0060;
 }
-
-#else
-// From Julian Webb's surmise.
-
-void
-FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
-{
-  if (Address->Fixed && Address->Banked && Address->FB < 030)
-    {
-      if (InRecord->Bank.CurrentSBank.Super)
-          *OutValue |= 0100;
-      else
-          *OutValue |= 0060;
-    }
-  else if (Address->Fixed && Address->Banked && Address->FB >= 030 && Address->FB <= 033 && Address->Super)
-      *OutValue |= 0100;
-  else
-      *OutValue |= 0060;
-}
-
-#endif
 
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error.
