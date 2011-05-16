@@ -17,10 +17,10 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:	ParseSETLOC.c
-  Purpose:	Assembles the SETLOC pseudo-op.
-  Mode:		04/17/03 RSB.	Began.
-  		07/24/04 RSB.	Now allow offsets.
+  Filename:     ParseSETLOC.c
+  Purpose:      Assembles the SETLOC pseudo-op.
+  Mode:         04/17/03 RSB.   Began.
+                07/24/04 RSB.   Now allow offsets.
 */
 
 #include "yaYUL.h"
@@ -73,9 +73,9 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         OutRecord->ProgramCounter = Symbol->Value;
     }
 
-  i = GetOctOrDec (InRecord->Mod1, &Value);
+  i = GetOctOrDec(InRecord->Mod1, &Value);
   if (!i)
-    IncPc (&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter);
+      IncPc(&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter);
 
   InRecord->ProgramCounter = OutRecord->ProgramCounter;
   //InRecord->Bank = OutRecord->Bank;  
