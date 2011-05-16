@@ -17,11 +17,11 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:	ParseBANK.c
-  Purpose:	Assembles the BANK pseudo-op.
-  Mode:		04/26/03 RSB	Began.
-  		06/28/09 RSB	Added HTML output.
-  		09/07/09 JL	    Fixed typo in PrintBankCounts.
+  Filename:     ParseBANK.c
+  Purpose:      Assembles the BANK pseudo-op.
+  Mode:         04/26/03 RSB    Began.
+                06/28/09 RSB    Added HTML output.
+                09/07/09 JL     Fixed typo in PrintBankCounts.
   
   I'm not actually certain what the BANK pseudo-op is supposed to do with 
   the banks in super-bank 1.  I allow those to be accepted, as bank 
@@ -47,7 +47,7 @@ StartBankCounts(void)
   int i;
 
   for (i = 0; i < NUM_FIXED_BANKS; i++)
-    UsedInBank[i] = 0;
+      UsedInBank[i] = 0;
 }
 
 //------------------------------------------------------------------------
@@ -56,7 +56,7 @@ int
 GetBankCount(int Bank)
 {
   if (Bank < 0 || Bank >= NUM_FIXED_BANKS)
-    return (0);
+      return (0);
 
   return (UsedInBank[Bank]);   
 }
@@ -68,17 +68,17 @@ PrintBankCounts(void)
 {
   int i;
 
-  printf ("Usage Table for Fixed-Memory Banks\n");
-  printf ("----------------------------------\n");
+  printf("Usage Table for Fixed-Memory Banks\n");
+  printf("----------------------------------\n");
 
   if (HtmlOut != NULL)
-    fprintf (HtmlOut, "<h1>Usage Table for Fixed-Memory Banks</h1>\n");
+      fprintf (HtmlOut, "<h1>Usage Table for Fixed-Memory Banks</h1>\n");
 
   for (i = 0; i < NUM_FIXED_BANKS; i++)
     {
-      printf ("Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
+      printf("Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
       if (HtmlOut != NULL)
-        fprintf (HtmlOut, "Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
+          fprintf(HtmlOut, "Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
     }
 }
 
@@ -92,7 +92,7 @@ UpdateBankCounts(Address_t *pc)
   int Count, Bank;
 
   if (pc->Invalid || !pc->Address || !pc->Fixed || pc->Overflow)
-    return;
+      return;
 
   if (pc->Banked)
     {  
@@ -103,22 +103,22 @@ UpdateBankCounts(Address_t *pc)
     {
       if (pc->SReg >= 04000 && pc->SReg < 06000)
         {
-	  Count = pc->SReg - 04000;
-	  Bank = 2;
-	}
+          Count = pc->SReg - 04000;
+          Bank = 2;
+        }
       else if (pc->SReg >= 06000 && pc->SReg < 010000)
         {
-	  Count = pc->SReg - 06000;
-	  Bank = 3;
-	}	
+          Count = pc->SReg - 06000;
+          Bank = 3;
+        }
       else
-        return;	
+          return;
     }  
 
   // We know from the tests performed above that Count is in the range
   // 0-01777.
   if (Count > UsedInBank[Bank])
-    UsedInBank[Bank] = Count;
+      UsedInBank[Bank] = Count;
 }
 
 //------------------------------------------------------------------------
@@ -152,29 +152,29 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       if (!OutRecord->ProgramCounter.Address || 
           !OutRecord->ProgramCounter.Fixed)
         {
-	  strcpy(OutRecord->ErrorMessage, "Works only for fixed-memory.");
-	  OutRecord->Fatal = 1;
-	  return (0);
-	}
+          strcpy(OutRecord->ErrorMessage, "Works only for fixed-memory.");
+          OutRecord->Fatal = 1;
+          return (0);
+        }
 
       if (OutRecord->ProgramCounter.Banked)
-        {	
-	  i = OutRecord->ProgramCounter.FB + 010 * OutRecord->ProgramCounter.Super;
-	  OutRecord->ProgramCounter.SReg = 02000 + UsedInBank[i];
-	  OutRecord->ProgramCounter.Value = 010000 + i * 02000 + UsedInBank[i];
-	}
+        {
+          i = OutRecord->ProgramCounter.FB + 010 * OutRecord->ProgramCounter.Super;
+          OutRecord->ProgramCounter.SReg = 02000 + UsedInBank[i];
+          OutRecord->ProgramCounter.Value = 010000 + i * 02000 + UsedInBank[i];
+        }
       else if (OutRecord->ProgramCounter.Value >= 04000 &&
                OutRecord->ProgramCounter.Value <= 05777)
-        {	       
-	  OutRecord->ProgramCounter.SReg = 04000 + UsedInBank[2];      
-	  OutRecord->ProgramCounter.Value = OutRecord->ProgramCounter.SReg;      
-	}
+        {
+          OutRecord->ProgramCounter.SReg = 04000 + UsedInBank[2];      
+          OutRecord->ProgramCounter.Value = OutRecord->ProgramCounter.SReg;      
+        }
       else if (OutRecord->ProgramCounter.Value >= 06000 &&
                OutRecord->ProgramCounter.Value <= 07777)
-	{	       
-	  OutRecord->ProgramCounter.SReg = 06000 + UsedInBank[3];
-	  OutRecord->ProgramCounter.Value = OutRecord->ProgramCounter.SReg;
-	}
+        {
+          OutRecord->ProgramCounter.SReg = 06000 + UsedInBank[3];
+          OutRecord->ProgramCounter.Value = OutRecord->ProgramCounter.SReg;
+        }
 
       return (0);
     }
@@ -185,35 +185,35 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     {
       if (Value >= 0 && Value <= 043)
         {
-	  OutRecord->ProgramCounter = (const Address_t) { 0 };
-	  OutRecord->ProgramCounter.Address = 1;
-	  OutRecord->ProgramCounter.SReg = 02000;
-	  OutRecord->ProgramCounter.Fixed = 1;  
-	  OutRecord->ProgramCounter.Banked = 1;
+          OutRecord->ProgramCounter = (const Address_t) { 0 };
+          OutRecord->ProgramCounter.Address = 1;
+          OutRecord->ProgramCounter.SReg = 02000;
+          OutRecord->ProgramCounter.Fixed = 1;  
+          OutRecord->ProgramCounter.Banked = 1;
 
-	  if (Value >= 040)
-	    {
-	      OutRecord->ProgramCounter.Super = 1;
-	      OutRecord->ProgramCounter.FB = Value - 010;
-	    }
-	  else
-	    OutRecord->ProgramCounter.FB = Value;  
+          if (Value >= 040)
+            {
+              OutRecord->ProgramCounter.Super = 1;
+              OutRecord->ProgramCounter.FB = Value - 010;
+            }
+          else
+              OutRecord->ProgramCounter.FB = Value;  
 
-	  if (Value == 2 || Value == 3)
-	    OutRecord->ProgramCounter.Value = Value * 02000;
-	  else
-	    OutRecord->ProgramCounter.Value = 010000 + Value * 02000;
+          if (Value == 2 || Value == 3)
+              OutRecord->ProgramCounter.Value = Value * 02000;
+          else
+              OutRecord->ProgramCounter.Value = 010000 + Value * 02000;
 
-	  OutRecord->ProgramCounter.Value += UsedInBank[Value];
-	  OutRecord->ProgramCounter.SReg += UsedInBank[Value];
-	}
+          OutRecord->ProgramCounter.Value += UsedInBank[Value];
+          OutRecord->ProgramCounter.SReg += UsedInBank[Value];
+        }
       else
         {
           strcpy(OutRecord->ErrorMessage, "BANK operand range is 00 to 43.");
-	  OutRecord->Fatal = 1;
-	  OutRecord->ProgramCounter = (const Address_t) { 0 };
-	  OutRecord->ProgramCounter.Invalid = 1;
-	}	 
+          OutRecord->Fatal = 1;
+          OutRecord->ProgramCounter = (const Address_t) { 0 };
+          OutRecord->ProgramCounter.Invalid = 1;
+        }
     }  
   else 
     {  
