@@ -87,13 +87,6 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
           OutRecord->Bank.OneshotPending = 0;
         }
-      else if (OutRecord->ProgramCounter.Fixed)
-        {
-          if (OutRecord->ProgramCounter.FB
-          OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
-          OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
-          OutRecord->Bank.OneshotPending = 0;
-        }
     }
 
   return (0);  
