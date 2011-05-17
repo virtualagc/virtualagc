@@ -29,22 +29,34 @@
 
 //-------------------------------------------------------------------------
 // Adjust superbank bits in terms of SBANK= and so on.
-void
-FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
+void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
 {
-  if (Address->Fixed && Address->Banked && Address->FB >= 030 && Address->FB <= 033 && Address->Super)
-      *OutValue |= 0100;
-  else if (InRecord->Bank.CurrentSBank.Super)
-      *OutValue |= 0100;
+  if (Address->Fixed && Address->Banked)
+    {
+      if (Address->FB < 030 || (Address->FB > 033 && Address->FB <= 037))
+        {
+          if (InRecord->Bank.CurrentSBank.Super)
+              *OutValue |= 0100;
+          else
+              *OutValue |= 0060;
+        }
+      else if (Address->FB >= 030 && Address->FB <= 033)
+        {
+          if (Address->Super)
+              *OutValue |= 0100;
+          else
+              *OutValue |= 0060;
+        }
+      else
+          *OutValue |= 0060;
+    }
   else
       *OutValue |= 0060;
 }
 
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error.
-
-int
-Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   Address_t Address;
   int i;
@@ -75,9 +87,7 @@ Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->IndexValid = 0;
     }
     
-  i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, 
-                            InRecord->Operand, 
-                            InRecord->Mod1, &Address);
+  i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, InRecord->Mod1, &Address);
   if (i)
     {
       sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
