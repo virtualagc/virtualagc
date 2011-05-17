@@ -29,23 +29,25 @@
 
 //------------------------------------------------------------------------
 
-static int
-ParseST (ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
-	      int Flags)
+static int ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
 {
   int Value, i;
   Address_t K;
   
   Opcode += 04000 * ArgType;
-  IncPc (&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
-  OutRecord->Bank = InRecord->Bank;
+
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
+
   // Set the default binary word.
   OutRecord->NumWords = 1;
+
   if (Flags & PC1)
     Opcode |= 01000;   
   else if (Flags & PC2)

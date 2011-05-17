@@ -357,6 +357,7 @@ main (int argc, char *argv[])
     {
       int BankRaw, Bank, Offset, Value;
       uint16_t Bugger, GuessBugger;
+
       printf ("\n");
       for (BankRaw = 0; BankRaw < 044; BankRaw++)
         {

@@ -35,31 +35,35 @@ Parse2FCADR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   Address_t Address;
   int i;
-  IncPc (&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
+
+  IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->NumWords = 2;
   OutRecord->Words[0] = 0;
+
   if (InRecord->Extend && !InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
+
   if (InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
       OutRecord->Fatal = 1;
       OutRecord->IndexValid = 0;
     }
     
-  i = FetchSymbolPlusOffset (&InRecord->ProgramCounter, 
-			     InRecord->Operand, 
-			     InRecord->Mod1, &Address);
+  i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, 
+			    InRecord->Operand, 
+			    InRecord->Mod1, &Address);
   if (i)
     {
       sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
@@ -69,22 +73,25 @@ Parse2FCADR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     {
       if (Address.Invalid)
 	{
-	  strcpy (OutRecord->ErrorMessage, "Destination address not resolved.");
+	  strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
 	  OutRecord->Fatal = 1;
 	  return (0);
 	}
+
       if (!Address.Address)
 	{
-	  strcpy (OutRecord->ErrorMessage, "Destination is not a memory address.");
+	  strcpy(OutRecord->ErrorMessage, "Destination is not a memory address.");
 	  OutRecord->Fatal = 1;
 	  return (0);
 	}
+
       if (!Address.Fixed /*|| !Address.Banked */)
 	{
-	  strcpy (OutRecord->ErrorMessage, "Destination not in fixed memory.");
+	  strcpy(OutRecord->ErrorMessage, "Destination not in fixed memory.");
 	  OutRecord->Fatal = 1;
 	  return (0);
-	}	
+	}
+
       //OutRecord->Words[0] = Address.Value - 010000;	
       if (Address.SReg >= 02000 && Address.SReg <= 03777)
         {
@@ -98,7 +105,7 @@ Parse2FCADR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	}
       else
         {
-	  strcpy (OutRecord->ErrorMessage, "Internal error implementing 2FCADR.");
+	  strcpy(OutRecord->ErrorMessage, "Internal error implementing 2FCADR.");
 	  OutRecord->Fatal = 1;
 	  return (0);
 	}

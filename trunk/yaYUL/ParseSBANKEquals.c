@@ -29,15 +29,16 @@
 #include <math.h>
 #include <string.h>
 
-// This is a barely-modified form of ParseEBANKEquals, in which CurrentSBank is 
-// used instead of CurrentEBank and fixed-memory is needed rather than erasable.
+// This is a barely-modified form of ParseEBANKEquals and fixed-memory 
+// is needed rather than erasable.
 int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   ParseOutput_t Dummy;
   Address_t Address;
   int Value, i;
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->NumWords = 0;
   OutRecord->ProgramCounter = InRecord->ProgramCounter;
 
@@ -89,9 +90,10 @@ int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           return (0);
         }
 
-      OutRecord->Bank.CurrentSBank = Address;
+      OutRecord->SBank.current = Address;
       OutRecord->LabelValue = Address;
       OutRecord->LabelValueValid = 1;
+      OutRecord->SBank.oneshotPending = 1;
     }
   else
     {

@@ -83,20 +83,21 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     {
       if (OutRecord->ProgramCounter.Erasable)
         {
-          OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
-          OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
-          OutRecord->Bank.OneshotPending = 0;
+          OutRecord->EBank.current = OutRecord->ProgramCounter;
+          OutRecord->EBank.last = OutRecord->ProgramCounter;
+          OutRecord->EBank.oneshotPending = 0;
         }
       if (OutRecord->ProgramCounter.Fixed)
         {
           if (OutRecord->ProgramCounter.Value >= 0110000)
             {
-              OutRecord->Bank.CurrentSBank = OutRecord->ProgramCounter;
+              OutRecord->SBank.current = OutRecord->ProgramCounter;
+              OutRecord->SBank.last = OutRecord->ProgramCounter;
+              OutRecord->SBank.oneshotPending = 0;
             }
         }
     }
 
   return (0);  
 }
-
 

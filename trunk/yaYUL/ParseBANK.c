@@ -41,8 +41,7 @@ static int UsedInBank[NUM_FIXED_BANKS] = { 0 };
 
 //------------------------------------------------------------------------
 // A function for clearing the UsedInBank array at the start of a pass.
-void
-StartBankCounts(void)
+void StartBankCounts(void)
 {
   int i;
 
@@ -52,19 +51,17 @@ StartBankCounts(void)
 
 //------------------------------------------------------------------------
 // Check bank count.
-int
-GetBankCount(int Bank)
+int GetBankCount(int bank)
 {
-  if (Bank < 0 || Bank >= NUM_FIXED_BANKS)
+  if (bank < 0 || bank >= NUM_FIXED_BANKS)
       return (0);
 
-  return (UsedInBank[Bank]);   
+  return (UsedInBank[bank]);   
 }
 
 //------------------------------------------------------------------------
 // Prints out a table showing how much of each bank is used.
-void
-PrintBankCounts(void)
+void PrintBankCounts(void)
 {
   int i;
 
@@ -86,10 +83,9 @@ PrintBankCounts(void)
 // A function which can be used to update the UsedInBank array after
 // assembling an instruction.  Basically, it's safe to call after any
 // source line.
-void
-UpdateBankCounts(Address_t *pc)
+void UpdateBankCounts(Address_t *pc)
 {
-  int Count, Bank;
+  int Count, bank;
 
   if (pc->Invalid || !pc->Address || !pc->Fixed || pc->Overflow)
       return;
@@ -97,19 +93,19 @@ UpdateBankCounts(Address_t *pc)
   if (pc->Banked)
     {  
       Count = pc->SReg - 02000;
-      Bank = pc->FB + 010 * pc->Super;
+      bank = pc->FB + 010 * pc->Super;
     }  
   else if (pc->Unbanked)
     {
       if (pc->SReg >= 04000 && pc->SReg < 06000)
         {
           Count = pc->SReg - 04000;
-          Bank = 2;
+          bank = 2;
         }
       else if (pc->SReg >= 06000 && pc->SReg < 010000)
         {
           Count = pc->SReg - 06000;
-          Bank = 3;
+          bank = 3;
         }
       else
           return;
@@ -117,8 +113,8 @@ UpdateBankCounts(Address_t *pc)
 
   // We know from the tests performed above that Count is in the range
   // 0-01777.
-  if (Count > UsedInBank[Bank])
-      UsedInBank[Bank] = Count;
+  if (Count > UsedInBank[bank])
+      UsedInBank[bank] = Count;
 }
 
 //------------------------------------------------------------------------

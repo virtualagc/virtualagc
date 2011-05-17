@@ -36,8 +36,7 @@
 
 //-------------------------------------------------------------------------
 // Converts a string like "E+-n" or "B+-n" to a scale factor.
-double
-ScaleFactor(char *s)
+double ScaleFactor(char *s)
 {
   int n;
 
@@ -61,14 +60,12 @@ ScaleFactor(char *s)
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error  We don't do a heckuva lot of 
 // error-checking in this version.
-int
-Parse2DECstar(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int Parse2DECstar(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (Parse2DEC(InRecord, OutRecord));
 }
 
-int
-Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   double x;
   double tmpval;
@@ -83,7 +80,8 @@ Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->Words[0] = ILLEGAL_SYMBOL_VALUE;
   OutRecord->Words[1] = ILLEGAL_SYMBOL_VALUE;
   OutRecord->NumWords = 2;
@@ -184,15 +182,12 @@ Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error  We don't do a heckuva lot of 
 // error-checking in this version.
- 
-int
-ParseDECstar(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDECstar(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseDEC(InRecord, OutRecord));
 }
 
-int
-ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   double x;
   double tmpval;
@@ -207,7 +202,8 @@ ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->Words[0] = ILLEGAL_SYMBOL_VALUE;
   OutRecord->NumWords = 1;
 
@@ -299,8 +295,7 @@ ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 //----------------------------------------------------------------------------
 // VN is a slightly-changed knockoff of DEC, designed to pack verb/noun
 // specs into a single word of memory.
-int
-ParseVN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseVN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   char c;
   unsigned Value;
@@ -313,7 +308,8 @@ ParseVN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->Words[0] = ILLEGAL_SYMBOL_VALUE;
   OutRecord->NumWords = 1;
 

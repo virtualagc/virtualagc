@@ -33,7 +33,7 @@
 int
 ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  Address_t Address, EBank;
+  Address_t Address, ebank;
   int Value, i;
 
   IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
@@ -43,7 +43,8 @@ ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->NumWords = 1;
   OutRecord->Words[0] = 0;
 
@@ -64,7 +65,7 @@ ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   if (!strcmp(InRecord->Operator, "BBCON*"))
     {
       OutRecord->Words[0] = 066100;
-      OutRecord->Bank.CurrentSBank.Super = 1;
+      OutRecord->SBank.current.Super = 1;
       return (0);
     }
 
@@ -101,22 +102,17 @@ ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           return (0);
         }
 
-      //printf ("PC=%o EB=%o,%o FB=%o SReg=%o Super=%o,%o ", 
-      //        InRecord->ProgramCounter.SReg, Address.EB, InRecord->Bank.CurrentEBank.EB,
-      //      Address.FB, Address.SReg,
-      //      Address.Super, InRecord->Bank.CurrentSBank.Super);
-
       if (!Address.Banked)
         Address.Value = Address.SReg / 02000;
       else 
         Address.Value = Address.FB;
 
-      EBank = InRecord->Bank.CurrentEBank;
+      ebank = InRecord->EBank.current;
 
-      if (EBank.SReg >= 0 && EBank.SReg < 01400)
-        EBank.EB = EBank.SReg / 0400;
+      if (ebank.SReg >= 0 && ebank.SReg < 01400)
+        ebank.EB = ebank.SReg / 0400;
 
-      Address.Value = (Address.Value << 10) | EBank.EB;
+      Address.Value = (Address.Value << 10) | ebank.EB;
 
       // Superbank processing.
       FixSuperbankBits(InRecord, &Address, &Address.Value);
