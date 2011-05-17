@@ -422,7 +422,7 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
          ParseAUG, ParseDIM, ParseBZMF, ParseSU, ParseRAND, 
          ParseREAD, ParseROR, ParseRXOR, ParseWAND, ParseWOR, 
          ParseWRITE, ParseERASE, ParseGENADR, ParseINDEX,
-         ParseCADR, ParseFCADR, ParseECADR, ParseEBANK, 
+         ParseCADR, ParseFCADR, ParseECADR, ParseEBANKEquals, 
          Parse2FCADR, ParseCAE, ParseCAF, ParseBBCON, Parse2CADR,
          ParseDNCHAN, ParseSTCALL, ParseSTODL, ParseSTORE, ParseSTOVL,
          ParseVN, Parse2OCT, ParseSBANKEquals, ParseEDRUPT,
@@ -511,7 +511,7 @@ static ParserMatch_t ParsersBlock2[] = {
   { "DTCF", OP_BASIC, NULL, "DXCH", "$4" },
   { "DV", OP_BASIC, ParseDV },
   { "DXCH", OP_BASIC, ParseDXCH },
-  { "EBANK=", OP_PSEUDO, ParseEBANK },
+  { "EBANK=", OP_PSEUDO, ParseEBANKEquals },
   { "ECADR", OP_PSEUDO, ParseECADR, "", "", 0, 0, 0, 0, 1 },
   // The following isn't a perfect equivalent for an actual EDRUPT parser
   // within the assembler, since it doesn't allow the assembler to check 
@@ -638,7 +638,7 @@ static ParserMatch_t ParsersBlock1[] = {
 //  { "DTCF", OP_BASIC, NULL, "DXCH", "$4" },
   { "DV", OP_BASIC, ParseDV },
 //  { "DXCH", OP_BASIC, ParseDXCH },
-//  { "EBANK=", OP_PSEUDO, ParseEBANK },
+//  { "EBANK=", OP_PSEUDO, ParseEBANKEquals },
 //  { "ECADR", OP_PSEUDO, ParseECADR, "", "", 0, 0, 0, 0, 1 },
   // The following isn't a perfect equivalent for an actual EDRUPT parser
   // within the assembler, since it doesn't allow the assembler to check 

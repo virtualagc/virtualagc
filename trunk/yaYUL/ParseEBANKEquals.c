@@ -17,10 +17,11 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:     ParseEBANK.c
+  Filename:    ParseEBANKEquals.c
   Purpose:     Assembles the EBANK= pseudo-op.
-  Mode:        04/29/03 RSB.   Began.
-               07/23/04 RSB.   Added SBANK.
+  Mod history: 04/29/03 RSB   Began.
+               07/23/04 RSB   Added SBANK.
+               2011-05-17 JL  Split EBANK= and SBANK= parsers, and renamed.
 */
 
 #include "yaYUL.h"
@@ -30,7 +31,7 @@
 
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error.
-int ParseEBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseEBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   ParseOutput_t Dummy;
   Address_t Address;
