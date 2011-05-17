@@ -854,8 +854,8 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	      Type = SYMBOL_VARIABLE;
 	    }
 	  
-	  EditSymbolNew (ParseInputRecord.Label, &ParseInputRecord.ProgramCounter,
-			 Type, CurrentFilename, CurrentLineInFile);
+	  EditSymbolNew(ParseInputRecord.Label, &ParseInputRecord.ProgramCounter,
+                        Type, CurrentFilename, CurrentLineInFile);
 	}
 
       // Write the output.	
