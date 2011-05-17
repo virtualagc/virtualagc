@@ -17,9 +17,9 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:	ParseBLOCK.c
-  Purpose:	Assembles the BLOCK pseudo-op.
-  Mode:		04/25/03 RSB.	Began.
+  Filename:     ParseBLOCK.c
+  Purpose:      Assembles the BLOCK pseudo-op.
+  Mode:         04/25/03 RSB.  Began.
 */
 
 #include "yaYUL.h"
@@ -30,59 +30,64 @@
 // Return non-zero on unrecoverable error.
 
 int 
-ParseBLOCK (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseBLOCK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   int Value, i;
   
   if (InRecord->Extend && !InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
+
   if (InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
       OutRecord->Fatal = 1;
       OutRecord->Index = 0;
     }
-  i = GetOctOrDec (InRecord->Operand, &Value);
+
+  i = GetOctOrDec(InRecord->Operand, &Value);
   if (!i)
     {
       if (Value == 0 || Value == 2 || Value == 3)
         {
-	  //if (Value == 2)
-	  //  OutRecord->Bank.CurrentSBank = 
-	  //    (const Address_t) { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 070000 };
-	  Value = GetBankCount (Value) + Value * 02000;
-	  OutRecord->ProgramCounter = (const Address_t) { 0 };
-	  OutRecord->ProgramCounter.Address = 1;
-	  OutRecord->ProgramCounter.SReg = Value;
-	  if (Value == 0)
-	    OutRecord->ProgramCounter.Erasable = 1;
-	  else
-	    OutRecord->ProgramCounter.Fixed = 1;  
-	  OutRecord->ProgramCounter.Unbanked = 1;
-	  OutRecord->ProgramCounter.Value = Value;
-	  if (Value == 0)
-	    OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
-	}
+          //if (Value == 2)
+          //  OutRecord->Bank.CurrentSBank = 
+          //    (const Address_t) { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 070000 };
+          Value = GetBankCount(Value) + Value * 02000;
+          OutRecord->ProgramCounter = (const Address_t) { 0 };
+          OutRecord->ProgramCounter.Address = 1;
+          OutRecord->ProgramCounter.SReg = Value;
+
+          if (Value == 0)
+              OutRecord->ProgramCounter.Erasable = 1;
+          else
+              OutRecord->ProgramCounter.Fixed = 1;  
+
+          OutRecord->ProgramCounter.Unbanked = 1;
+          OutRecord->ProgramCounter.Value = Value;
+
+          if (Value == 0)
+              OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
+        }
       else
         {
-          strcpy (OutRecord->ErrorMessage, "BLOCK operand must be 0, 2, or 3.");
-	  OutRecord->ProgramCounter = (const Address_t) { 0 };
-	  OutRecord->ProgramCounter.Invalid = 1;
-	}	 
-    }  
+          strcpy(OutRecord->ErrorMessage, "BLOCK operand must be 0, 2, or 3.");
+          OutRecord->ProgramCounter = (const Address_t) { 0 };
+          OutRecord->ProgramCounter.Invalid = 1;
+        }
+    } 
   else 
     {  
-      strcpy (OutRecord->ErrorMessage, "BLOCK pseudo-op has no operand.");
+      strcpy(OutRecord->ErrorMessage, "BLOCK pseudo-op has no operand.");
       OutRecord->ProgramCounter = (const Address_t) { 0 };
       OutRecord->ProgramCounter.Invalid = 1;
     }
+
   // Make sure this prints properly in the output listing.  
   InRecord->ProgramCounter = OutRecord->ProgramCounter;
   return (0);  
 }
-
 
