@@ -15,6 +15,7 @@
 #		2010-02-20 RSB	Un-##'d this header.
 #		2010-07-18 JL	Fixed indentation.
 #		2011-05-07 JL	Flagged SBANK= workarounds for future removal.
+#		2011-05-17 JL	Removed all SBANK= workarounds.
 
 ## Page 1490
 
@@ -203,9 +204,6 @@ UPPART2		EQUALS			# UPDATE PROGRAM - PART 2
 		OCT	07026		# AND DOWNLIST AND EXIT IF RESTART OCCURS.
 		OCT	30000		# PRIORITY SAME AS CHRPRIO
 		EBANK=	UPBUFF
-## [WORKAROUND] Added by JL, 2010-02-16
-		SBANK=	PINSUPER
-## [WORKAROUND] End
 		2CADR	UPOUT +1
 
 		CAF	ONE
