@@ -69,7 +69,7 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           OutRecord->Fatal = 1;
           OutRecord->ProgramCounter.Invalid = 1;
         }
-      else
+      else 
           OutRecord->ProgramCounter = Symbol->Value;
     }
 
@@ -86,6 +86,13 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
           OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
           OutRecord->Bank.OneshotPending = 0;
+        }
+      if (OutRecord->ProgramCounter.Fixed)
+        {
+          if (OutRecord->ProgramCounter.Value >= 0110000)
+            {
+              OutRecord->Bank.CurrentSBank = OutRecord->ProgramCounter;
+            }
         }
     }
 
