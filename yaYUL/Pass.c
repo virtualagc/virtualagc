@@ -817,7 +817,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		      ParseOutputRecord.Bank.CurrentEBank = ParseInputRecord.Bank.LastEBank;
 		    }
 		  */
-		  if (Match->Parser != &ParseEBANK)
+		  if (Match->Parser != &ParseEBANKEquals)
 		    ParseOutputRecord.Bank.OneshotPending = 0;
 		  //UpdateBankCounts (&ParseOutputRecord.ProgramCounter);
 		}
