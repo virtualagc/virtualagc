@@ -16,6 +16,7 @@
 #				Added an SBANK= prior to a 2CADR.
 #		2010-08-24 JL	Fixed page numbers. Added missing comment character on p537.
 #		2011-05-08 JL	Flagged SBANK= workaround for future removal.
+#		2011-05-17 JL	Removed all SBANK= workarounds.
 
 # This source code has been transcribed or otherwise adapted from digitized
 # images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -859,9 +860,6 @@ SATSTKON	EXTEND
 		RELINT
 		TC	GOPIN		# EXIT THUS BECAUSE WE CAME VIA V46
 
-## [WORKAROUND] RSB 2009
-		SBANK=	PINSUPER
-## [WORKAROUND]
 		EBANK=	BODY3
 2REDOSAT	2CADR	REDOSAT
 
