@@ -63,14 +63,14 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   else 
     {  
       Symbol = GetSymbol(InRecord->Operand);
-      if (NULL == Symbol)
+      if (!Symbol)
         {
           sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
           OutRecord->Fatal = 1;
           OutRecord->ProgramCounter.Invalid = 1;
         }
       else
-        OutRecord->ProgramCounter = Symbol->Value;
+          OutRecord->ProgramCounter = Symbol->Value;
     }
 
   i = GetOctOrDec(InRecord->Mod1, &Value);
@@ -78,13 +78,22 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       IncPc(&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter);
 
   InRecord->ProgramCounter = OutRecord->ProgramCounter;
-  //InRecord->Bank = OutRecord->Bank;  
 
-  if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Erasable)
+  if (!OutRecord->ProgramCounter.Invalid)
     {
-      OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
-      OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
-      OutRecord->Bank.OneshotPending = 0;
+      if (OutRecord->ProgramCounter.Erasable)
+        {
+          OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
+          OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
+          OutRecord->Bank.OneshotPending = 0;
+        }
+      else if (OutRecord->ProgramCounter.Fixed)
+        {
+          if (OutRecord->ProgramCounter.FB
+          OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
+          OutRecord->Bank.LastEBank = OutRecord->ProgramCounter;
+          OutRecord->Bank.OneshotPending = 0;
+        }
     }
 
   return (0);  
