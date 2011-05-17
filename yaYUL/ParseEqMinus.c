@@ -44,7 +44,8 @@ ParseEqMinus (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   Address_t LabelValue = INVALID_ADDRESS;
   int i;
   OutRecord->ProgramCounter = InRecord->ProgramCounter;
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->LabelValue.Invalid = 1;
   OutRecord->NumWords = 0;
   OutRecord->Equals = 1;

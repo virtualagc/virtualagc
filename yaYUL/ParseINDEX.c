@@ -34,9 +34,7 @@
 
 //------------------------------------------------------------------------
 // Return non-zero on unrecoverable error.
-
-int 
-ParseINDEX (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseINDEX(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   Address_t Offset;
   int Value, i;
@@ -44,34 +42,29 @@ ParseINDEX (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   
   //KeepExtend = 1;
   OutRecord->Extend = InRecord->Extend;
-  IncPc (&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
-  OutRecord->Bank = InRecord->Bank;
+
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->NumWords = 1;
   OutRecord->IndexValid = 1;
-  //if (InRecord->IndexValid)
-  //  {
-  //    strcpy (OutRecord->ErrorMessage, "Two consecutive INDEX operations.");
-  //    OutRecord->Warning = 1;
-  //  }
-  i = GetOctOrDec (InRecord->Operand, &Value);
+
+  i = GetOctOrDec(InRecord->Operand, &Value);
   if (!i)
     {
       if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
-        {
-	  IncPc (&InRecord->ProgramCounter, Value, &Offset);
-	  //IncPc (&InRecord->ProgramCounter, 1, &Offset);
-        }
+	  IncPc(&InRecord->ProgramCounter, Value, &Offset);
       else
-        PseudoToStruct (Value, &Offset);
+          PseudoToStruct(Value, &Offset);
 	
        if (*InRecord->Mod1 != 0)
          {
-	   i = GetOctOrDec (InRecord->Mod1, &Value);
+	   i = GetOctOrDec(InRecord->Mod1, &Value);
 	   if (!i)
 	     OpcodeOffset = Value;
 	 }
@@ -79,16 +72,18 @@ ParseINDEX (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     DoIt:  
       if (!Offset.Address && !Offset.Constant)
         {
-	  strcpy (OutRecord->ErrorMessage, "Index is not an address.");
+	  strcpy(OutRecord->ErrorMessage, "Index is not an address.");
 	  Offset.SReg = 0;
 	  OutRecord->Fatal = 1;
 	}
+
       if ((InRecord->Extend && (Offset.SReg & ~07777)) || (!InRecord->Extend && (Offset.SReg & ~01777)))
         {
-	  strcpy (OutRecord->ErrorMessage, "Index is out of range.");
+	  strcpy(OutRecord->ErrorMessage, "Index is out of range.");
 	  Offset.SReg = 0;
 	  OutRecord->Fatal = 1;
 	}
+
       if (Offset.Constant)
         OutRecord->Words[0] = OPCODE + Offset.Value;
       else
@@ -97,18 +92,17 @@ ParseINDEX (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   else
     {
       // The operand is NOT a number.  Presumably, it's a symbol.
-      i = FetchSymbolPlusOffset (&InRecord->ProgramCounter, 
-                                 InRecord->Operand, 
-				 InRecord->Mod1, &Offset);
+      i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, InRecord->Mod1, &Offset);
       if (!i)
         goto DoIt;
       sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
       OutRecord->Words[0] = OPCODE;
     }
+
   if (OutRecord->Words[0] == 050017)
     OutRecord->IndexValid = 0;
+
   return (0);  
 }
-
 

@@ -81,21 +81,19 @@ FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1,
 
 //------------------------------------------------------------------------
 // Return 0 on success.
-
-int
-ParseEquate(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseEquate(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseEQUALS(InRecord, OutRecord));
 }
 
-int 
-ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   Address_t LabelValue = { 1 };
   int Value, i;
 
   OutRecord->ProgramCounter = InRecord->ProgramCounter;
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->LabelValue.Invalid = 1;
   OutRecord->NumWords = 0;
   OutRecord->Equals = 1;

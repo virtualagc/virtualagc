@@ -332,11 +332,11 @@ static Address_t DefaultAddress = INVALID_ADDRESS;
 static ParseInput_t ParseInputRecord;
 static ParseInput_t DefaultParseInput = { 
   INVALID_ADDRESS, 0, "", "", "", "", "", "", "", "", "",
-  0, 0, 0, INVALID_EBANK 
+  0, 0, 0, INVALID_BANK, INVALID_BANK
 };
 static ParseOutput_t ParseOutputRecord, DefaultParseOutput = { 
   INVALID_ADDRESS, 0, { 0, 0 }, 0, "", INVALID_ADDRESS,
-  0, 0, 0, 0, 0, 0, INVALID_EBANK, 0
+  0, 0, 0, 0, 0, 0, INVALID_BANK, INVALID_BANK, 0
 };
   
 int 
@@ -391,14 +391,23 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
   //		The purpose is simply to create a list of all symbols and
   //		their namespaces, and their values.
   //	Pass 2.	Output is written.
+
   s[sizeof (s) - 1] = 0;
+
   ParseOutputRecord.ProgramCounter = DefaultAddress;
-  ParseOutputRecord.Bank = (const EBank_t) { 
-    { 1 }, 
-    { 1 }, 
-    0,
-    { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 070000 }
+
+  ParseOutputRecord.EBank = (const Bank_t) { 
+    0,     // oneshotPending
+    { 1 }, // current
+    { 1 }  // last
   };
+
+  ParseOutputRecord.SBank = (const Bank_t) { 
+    0,     // oneshotPending
+    { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 070000 }, // current
+    { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 070000 }  // last
+  };
+
   for (;;)
     {
       IncludeDirective = 0;
@@ -408,14 +417,16 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
       // Set up the default info for this line.
       ParseInputRecord = DefaultParseInput;
       ParseInputRecord.ProgramCounter = ParseOutputRecord.ProgramCounter;
-      ParseInputRecord.Bank = ParseOutputRecord.Bank;
+      ParseInputRecord.EBank = ParseOutputRecord.EBank;
+      ParseInputRecord.SBank = ParseOutputRecord.SBank;
       ParseInputRecord.Index = ParseOutputRecord.Index;
       ParseInputRecord.IndexValid = ParseOutputRecord.IndexValid;
       ParseInputRecord.Extend = ParseOutputRecord.Extend;
       ParseOutputRecord = DefaultParseOutput;
-      ParseOutputRecord.Bank = ParseInputRecord.Bank;
+      ParseOutputRecord.EBank = ParseInputRecord.EBank;
+      ParseOutputRecord.SBank = ParseInputRecord.SBank;
       // Get the next line from the file.
-      ss = fgets (s, sizeof (s) - 1, InputFile);
+      ss = fgets(s, sizeof(s) - 1, InputFile);
       // At end of the file?
       if (NULL == ss)
         {
@@ -471,7 +482,8 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
       if (s[0] == '$')
         {
 	  ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
-	  ParseOutputRecord.Bank = ParseInputRecord.Bank;
+	  ParseOutputRecord.EBank = ParseInputRecord.EBank;
+	  ParseOutputRecord.SBank = ParseInputRecord.SBank;
 	  // This is a directive to include another file.
 	  if (WriteOutput)
 	    printf ("%06d,%06d: %s", CurrentLineAll, CurrentLineInFile, s);
@@ -608,9 +620,9 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
       if (*ParseInputRecord.Operator == 0 && !NumInterpretiveOperands)
         {
 	  ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
-	  ParseOutputRecord.Bank = ParseInputRecord.Bank;
 	  ParseOutputRecord.Extend = ParseInputRecord.Extend;
-	  ParseOutputRecord.Bank = ParseInputRecord.Bank;
+	  ParseOutputRecord.EBank = ParseInputRecord.EBank;
+	  ParseOutputRecord.SBank = ParseInputRecord.SBank;
 	  ParseOutputRecord.Index = ParseInputRecord.Index;
 	  ParseOutputRecord.IndexValid = ParseInputRecord.IndexValid;
 	}
@@ -702,9 +714,10 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	      if (NULL != iMatch2)
 		ParseOutputRecord.Words[0] |= (037600 & ((iMatch2->Code + 1) << 7));
 	      ParseOutputRecord.Words[0] = (077777 & ~ParseOutputRecord.Words[0]);
-	      IncPc (&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, 
-		     &ParseOutputRecord.ProgramCounter);
-	      ParseOutputRecord.Bank = ParseInputRecord.Bank;
+	      IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, 
+		    &ParseOutputRecord.ProgramCounter);
+	      ParseOutputRecord.EBank = ParseInputRecord.EBank;
+	      ParseOutputRecord.SBank = ParseInputRecord.SBank;
 	      //UpdateBankCounts (&ParseOutputRecord.ProgramCounter);
 	      goto WriteDoIt; 
 	    }
@@ -718,7 +731,8 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	        {
 		  ParseOutputRecord.Words[0] = 0;
 		  ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
-		  ParseOutputRecord.Bank = ParseInputRecord.Bank;
+		  ParseOutputRecord.EBank = ParseInputRecord.EBank;
+		  ParseOutputRecord.SBank = ParseInputRecord.SBank;
 		  goto WriteDoIt;
 		}
 	      else if (*ParseInputRecord.Operator == 0 && *ParseInputRecord.Operand != 0)
@@ -729,7 +743,8 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  NumInterpretiveOperands--;
 		  IncPc (&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, 
 			 &ParseOutputRecord.ProgramCounter);
-		  ParseOutputRecord.Bank = ParseInputRecord.Bank;
+		  ParseOutputRecord.EBank = ParseInputRecord.EBank;
+		  ParseOutputRecord.SBank = ParseInputRecord.SBank;
 		  //UpdateBankCounts (&ParseOutputRecord.ProgramCounter);
 		  goto WriteDoIt;
 		}
@@ -743,7 +758,8 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  NumInterpretiveOperands = 0;
 		  IncPc (&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, 
 			 &ParseOutputRecord.ProgramCounter);
-		  ParseOutputRecord.Bank = ParseInputRecord.Bank;
+		  ParseOutputRecord.EBank = ParseInputRecord.EBank;
+		  ParseOutputRecord.SBank = ParseInputRecord.SBank;
 		  //UpdateBankCounts (&ParseOutputRecord.ProgramCounter);
 		  goto WriteDoIt;
 		}
@@ -755,25 +771,25 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	      int NumOperator;
 	      // Check for the special case of a number simply being used in place 
 	      // of the operator.
-	      if (!GetOctOrDec (ParseInputRecord.Operator, &NumOperator))
+	      if (!GetOctOrDec(ParseInputRecord.Operator, &NumOperator))
 	        {
 		  extern int ParseGeneral (ParseInput_t *, ParseOutput_t *, int, int);
 		  ParseGeneral (&ParseInputRecord, &ParseOutputRecord, NumOperator << 12, 0);
 		  ParseOutputRecord.Words[0] = AddAgc (ParseOutputRecord.Words[0], OpcodeOffset);
-		  ParseOutputRecord.Bank.OneshotPending = 0;
+		  ParseOutputRecord.EBank.oneshotPending = 0;
+		  ParseOutputRecord.SBank.oneshotPending = 0;
 		  goto WriteDoIt;
 		}
 	      // Okay, nothing works.
 	      ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
-	      ParseOutputRecord.Bank = ParseInputRecord.Bank;
-	      sprintf (ParseOutputRecord.ErrorMessage,
-	               "Unrecognized opcode/pseudo-op \"%s\".",
-		       ParseInputRecord.Operator);
+	      ParseOutputRecord.EBank = ParseInputRecord.EBank;
+	      ParseOutputRecord.SBank = ParseInputRecord.SBank;
+	      sprintf(ParseOutputRecord.ErrorMessage, "Unrecognized opcode/pseudo-op \"%s\".", ParseInputRecord.Operator);
 	      ParseOutputRecord.Fatal = 1;	   
 	      // The following is just an approximation.  Since almost every
 	      // operator produces a single word of output, it is more accurate
 	      // to ASSUME this rather than not to advance the program counter.    
-              IncPc (&ParseInputRecord.ProgramCounter, 1, &ParseOutputRecord.ProgramCounter);
+              IncPc(&ParseInputRecord.ProgramCounter, 1, &ParseOutputRecord.ProgramCounter);
 	    }
 	  else
 	    {
@@ -809,17 +825,20 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		  			        Match->Adder) ^ Match->XMask;
 		  ParseOutputRecord.Words[1] = (ParseOutputRecord.Words[1] +
 		  			        Match->Adder2) ^ Match->XMask2;
-		  /*
-		  if (ParseInputRecord.Bank.OneshotPending &&
-		      (Match->Parser == ParseBBCON ||
-		       Match->Parser == Parse2CADR))
-		    {
-		      ParseOutputRecord.Bank.CurrentEBank = ParseInputRecord.Bank.LastEBank;
-		    }
-		  */
+
+                  if (ParseInputRecord.EBank.oneshotPending && (Match->Parser == ParseBBCON || Match->Parser == Parse2CADR))
+                      ParseOutputRecord.EBank.current = ParseInputRecord.EBank.last;
+
+                  if (ParseInputRecord.SBank.oneshotPending && (Match->Parser == ParseBBCON || Match->Parser == Parse2CADR))
+                      ParseOutputRecord.SBank.current = ParseInputRecord.SBank.last;
+
 		  if (Match->Parser != &ParseEBANKEquals)
-		    ParseOutputRecord.Bank.OneshotPending = 0;
-		  //UpdateBankCounts (&ParseOutputRecord.ProgramCounter);
+		      ParseOutputRecord.EBank.oneshotPending = 0;
+
+		  if (Match->Parser != &ParseSBANKEquals)
+		      ParseOutputRecord.SBank.oneshotPending = 0;
+
+		  //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
 		}
 	    }  
 	}
@@ -831,7 +850,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	  StadrInvert--;
 	}
         
-      UpdateBankCounts (&ParseOutputRecord.ProgramCounter);
+      UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
 
       // If there is a label, and if this isn't `=' or `EQUALS', then
       // the value of the label is the current address.
@@ -947,18 +966,19 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 		      	  ParseInputRecord.ProgramCounter.Address &&
 			  ParseInputRecord.ProgramCounter.Fixed)
 		        {
-			  int Bank;
+			  int bank;
+
 			  if (ParseInputRecord.ProgramCounter.Banked)
 			    {
-			      Bank = ParseInputRecord.ProgramCounter.FB;
-			      if (Bank >= 020 && ParseInputRecord.ProgramCounter.Super)
-			        Bank += 010;
+			      bank = ParseInputRecord.ProgramCounter.FB;
+			      if (bank >= 020 && ParseInputRecord.ProgramCounter.Super)
+			        bank += 010;
 			    }
 			  else
-			    Bank = ParseInputRecord.ProgramCounter.SReg / 02000;
+			      bank = ParseInputRecord.ProgramCounter.SReg / 02000;
 			  for (i = 0; i < ParseOutputRecord.NumWords; i++)
 			    {  
-			      ObjectCode[Bank][(ParseInputRecord.ProgramCounter.SReg + i) & 01777] = 
+			      ObjectCode[bank][(ParseInputRecord.ProgramCounter.SReg + i) & 01777] = 
 				ParseOutputRecord.Words[i] & 077777;
 			    }
 
@@ -966,9 +986,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 			  // When we place the object code in the buffer, we'll add it to the
 			  // line table. We assume there are no duplicates here nor do we
 			  // check. We will remove duplicates when sorting at the end.
-			  AddLine (&ParseInputRecord.ProgramCounter, CurrentFilename,
-				   CurrentLineInFile);
-
+			  AddLine(&ParseInputRecord.ProgramCounter, CurrentFilename, CurrentLineInFile);
 			}
 		    }
 		}
@@ -1147,7 +1165,6 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile,
 	  printf ("\n");  
 	  if (HtmlOut != NULL)
 	    fprintf (HtmlOut, "\n");
-          //printf ("Super=%o\n", ParseOutputRecord.Bank.CurrentSBank.Super);
 	}		
       		
     }

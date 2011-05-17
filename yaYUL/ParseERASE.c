@@ -43,8 +43,7 @@
 //              ...
 //       7      Bank 7   (03400-03777)
 
-int
-GetErasableBank (int LinearAddress)
+int GetErasableBank(int LinearAddress)
 {
   if (LinearAddress < 0 || LinearAddress > 03777)
     return (-2);
@@ -56,9 +55,7 @@ GetErasableBank (int LinearAddress)
 
 //------------------------------------------------------------------------
 // Return non-zero on unrecoverable error.
-
-int 
-ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   int Value, i;
 
@@ -70,7 +67,8 @@ ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
 
   if (InRecord->Extend && !InRecord->IndexValid)
     {

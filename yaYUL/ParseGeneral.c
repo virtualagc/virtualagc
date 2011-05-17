@@ -61,7 +61,8 @@ ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int F
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
 
   // Set the default binary word.
   OutRecord->NumWords = 1;

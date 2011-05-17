@@ -31,39 +31,44 @@
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error  We don't do a heckuva lot of 
 // error-checking in this version.
- 
-int
-ParseOCT (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseOCT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   char *s;
   int Value;
-  IncPc (&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
-  OutRecord->Bank = InRecord->Bank;
+
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->Words[0] = ILLEGAL_SYMBOL_VALUE;
   OutRecord->NumWords = 1;
+
   s = InRecord->Operand;
   if (*s == '+' || *s == '-')
     s++;
   for (; *s; s++)
     if (*s < '0' || *s > '7')
       break;
+
   if (!*s && s != InRecord->Operand)    
     {  
       int Minus;
+
       Minus = 0;
       if (InRecord->Operand[0] == '-')
         Minus = 1;
-      if (1 == sscanf (&InRecord->Operand[Minus], "%o", &Value))
+
+      if (1 == sscanf(&InRecord->Operand[Minus], "%o", &Value))
 	{
 	  if (0 != (Value & ~077777))
 	    {
 	      Value &= 077777;
-	      strcpy (OutRecord->ErrorMessage, "Value out of range.");
+	      strcpy(OutRecord->ErrorMessage, "Value out of range.");
 	      OutRecord->Warning = 1;
 	    }
 	  if (Minus)
@@ -80,38 +85,44 @@ ParseOCT (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 }
 
 
-int
-Parse2OCT (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int Parse2OCT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   char *s;
   int Value;
-  IncPc (&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
+
+  IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
-  OutRecord->Bank = InRecord->Bank;
+
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->Words[0] = ILLEGAL_SYMBOL_VALUE;
   OutRecord->NumWords = 2;
+
   s = InRecord->Operand;
   if (*s == '+' || *s == '-')
     s++;
   for (; *s; s++)
     if (*s < '0' || *s > '7')
       break;
+
   if (!*s && s != InRecord->Operand)    
     {  
       int Minus;
+
       Minus = 0;
       if (InRecord->Operand[0] == '-')
         Minus = 1;
-      if (1 == sscanf (&InRecord->Operand[Minus], "%o", &Value))
+
+      if (1 == sscanf(&InRecord->Operand[Minus], "%o", &Value))
 	{
 	  if (0 != (Value & ~07777777777))
 	    {
 	      Value &= 07777777777;
-	      strcpy (OutRecord->ErrorMessage, "Value out of range.");
+	      strcpy(OutRecord->ErrorMessage, "Value out of range.");
 	      OutRecord->Warning = 1;
 	    }
 	  if (Minus)
@@ -122,7 +133,7 @@ Parse2OCT (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }  
   else
     {
-      strcpy (OutRecord->ErrorMessage, "Not an octal number.");
+      strcpy(OutRecord->ErrorMessage, "Not an octal number.");
       OutRecord->Fatal = 1;
     }    
   return (0);

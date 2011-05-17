@@ -53,9 +53,6 @@ ParseBLOCK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     {
       if (Value == 0 || Value == 2 || Value == 3)
         {
-          //if (Value == 2)
-          //  OutRecord->Bank.CurrentSBank = 
-          //    (const Address_t) { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 070000 };
           Value = GetBankCount(Value) + Value * 02000;
           OutRecord->ProgramCounter = (const Address_t) { 0 };
           OutRecord->ProgramCounter.Address = 1;
@@ -70,7 +67,7 @@ ParseBLOCK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           OutRecord->ProgramCounter.Value = Value;
 
           if (Value == 0)
-              OutRecord->Bank.CurrentEBank = OutRecord->ProgramCounter;
+              OutRecord->EBank.current = OutRecord->ProgramCounter;
         }
       else
         {

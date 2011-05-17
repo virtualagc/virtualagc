@@ -39,7 +39,8 @@ int ParseEBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
   OutRecord->Extend = InRecord->Extend;
   OutRecord->IndexValid = InRecord->IndexValid;
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->NumWords = 0;
   OutRecord->ProgramCounter = InRecord->ProgramCounter;
 
@@ -77,9 +78,9 @@ int ParseEBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           return (0);
         }
 
-      OutRecord->Bank.LastEBank = OutRecord->Bank.CurrentEBank;
-      OutRecord->Bank.CurrentEBank = Address;
-      OutRecord->Bank.OneshotPending = 1;
+      OutRecord->EBank.last = OutRecord->EBank.current;
+      OutRecord->EBank.current = Address;
+      OutRecord->EBank.oneshotPending = 1;
       OutRecord->LabelValue = Address;
       OutRecord->LabelValueValid = 1;
     }
@@ -96,8 +97,6 @@ int ParseEBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
       OutRecord->Fatal = 1;
     }
-
-  //printf ("%o\n", OutRecord->Bank.CurrentSBank.Super);
 
   return (0);  
 }

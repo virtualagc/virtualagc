@@ -44,7 +44,8 @@ ParseECADR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->NumWords = 1;
   OutRecord->Words[0] = 0;
 

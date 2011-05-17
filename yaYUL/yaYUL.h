@@ -136,7 +136,7 @@ enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 
 #define VALID_ADDRESS ((const Address_t) { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } )
 #define INVALID_ADDRESS { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-#define INVALID_EBANK { INVALID_ADDRESS, INVALID_ADDRESS, 0, INVALID_ADDRESS }
+#define INVALID_BANK { 0, INVALID_ADDRESS, INVALID_ADDRESS }
 
 //-------------------------------------------------------------------------
 // Data types.
@@ -277,13 +277,12 @@ void SortLines(int Type);
 // JMS: End additions for output of symbol table
 //----------------------------------------------------------------------------
 
-// For 'EBANK=' manipulations.
+// For EBANK= and SBANK= manipulations.
 typedef struct {
-  Address_t CurrentEBank;               // Current setting.
-  Address_t LastEBank;                  // Backup used durint 1-shot.
-  int OneshotPending;                   // Set while a one-shot is possible.
-  Address_t CurrentSBank;
-} EBank_t;
+  int oneshotPending;              // Set while a one-shot is possible.
+  Address_t current;               // Current setting.
+  Address_t last;                  // Backup used during 1-shot.
+} Bank_t;
 
 // A string type guaranteed to contain in input line.
 typedef char Line_t[1 + MAX_LINE_LENGTH];
@@ -292,13 +291,12 @@ typedef char Line_t[1 + MAX_LINE_LENGTH];
 typedef struct {
   Address_t ProgramCounter;             // Before the operation.
   int Reserved;                         // Unused.
-  char *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2, *Comment,
-       *Extra, *Alias;
+  char *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2, *Comment, *Extra, *Alias;
   int Index;     
   unsigned Extend:1;
   unsigned IndexValid:1;     
-  // For EBANK= manipulations.
-  EBank_t Bank;
+  Bank_t EBank;
+  Bank_t SBank;
 } ParseInput_t;
 
 typedef struct {
@@ -314,7 +312,8 @@ typedef struct {
   unsigned LabelValueValid:1;           // Non-zero if LabelValue valid. 
   unsigned Extend:1;
   unsigned IndexValid:1;     
-  EBank_t Bank;                         // For EBANK=, SBANK= manipulations.
+  Bank_t EBank;                         // For EBANK= manipulations.
+  Bank_t SBank;                         // For SBANK= manipulations.
   int Equals;                           // Non-zero if = or EQUALS.
 } ParseOutput_t;
 

@@ -35,7 +35,7 @@ void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
     {
       if (Address->FB < 030)
         {
-          if (InRecord->Bank.CurrentSBank.Super)
+          if (InRecord->SBank.current.Super)
               *OutValue |= 0100;
           else
               *OutValue |= 0060;
@@ -65,6 +65,9 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   Address_t Address;
   int i;
 
+  printf("--- 2CADR: i/p PC=%o FB=%o S=%d SB=%d\n", 
+         InRecord->ProgramCounter.Value, InRecord->ProgramCounter.FB, InRecord->ProgramCounter.Super, InRecord->SBank.current.Super);
+
   IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
@@ -72,7 +75,8 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       OutRecord->Warning = 1;
     }
 
-  OutRecord->Bank = InRecord->Bank;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
   OutRecord->NumWords = 2;
   OutRecord->Words[0] = 0;
   OutRecord->Words[1] = 0;
@@ -113,12 +117,14 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           return (0);
         }
 
+      printf("--- 2CADR: symbol=%o (%o,%o) S=%d\n", Address.Value, Address.FB, Address.SReg, Address.Super);
+
       OutRecord->Words[0] = Address.SReg;
 
-      if (InRecord->Bank.CurrentEBank.SReg >= 0 && InRecord->Bank.CurrentEBank.SReg < 01400)
-        OutRecord->Words[1] = InRecord->Bank.CurrentEBank.SReg / 0400;
+      if (InRecord->EBank.current.SReg >= 0 && InRecord->EBank.current.SReg < 01400)
+        OutRecord->Words[1] = InRecord->EBank.current.SReg / 0400;
       else
-        OutRecord->Words[1] = InRecord->Bank.CurrentEBank.EB;
+        OutRecord->Words[1] = InRecord->EBank.current.EB;
 
       if (Address.SReg < 02000)
         ;
@@ -138,8 +144,9 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           OutRecord->Fatal = 1;
           return (0);
         }
-
+      printf("--- 2CADR: o/p PC=%o FB=%o S=%d\n", OutRecord->ProgramCounter.Value, OutRecord->ProgramCounter.FB, OutRecord->ProgramCounter.Super);
     }
+
   return (0);  
 }
 
