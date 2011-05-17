@@ -17,10 +17,10 @@
   along with yaAGC; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Filename:	GetOctOrDec.c
-  Purpose:	Interprets a field as a decimal or octal number.
-  Mode:		04/25/03 RSB.	Split off from Parse2DEC.c.  Added a 
-  				bunch of checking to it.
+  Filename:     GetOctOrDec.c
+  Purpose:      Interprets a field as a decimal or octal number.
+  Mod History:  04/25/03 RSB   Split off from Parse2DEC.c.  Added a 
+                               bunch of checking to it.
 */
 
 #include "yaYUL.h"
