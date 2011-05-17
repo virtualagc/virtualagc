@@ -33,7 +33,7 @@ void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
 {
   if (Address->Fixed && Address->Banked)
     {
-      if (Address->FB < 030 || (Address->FB > 033 && Address->FB <= 037))
+      if (Address->FB < 030)
         {
           if (InRecord->Bank.CurrentSBank.Super)
               *OutValue |= 0100;
@@ -46,6 +46,10 @@ void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
               *OutValue |= 0100;
           else
               *OutValue |= 0060;
+        }
+      else if (Address->FB > 033 && Address->FB <= 037)
+        {
+          *OutValue |= 0060;
         }
       else
           *OutValue |= 0060;
@@ -134,6 +138,7 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           OutRecord->Fatal = 1;
           return (0);
         }
+
     }
   return (0);  
 }
