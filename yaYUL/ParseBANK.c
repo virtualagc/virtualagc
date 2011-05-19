@@ -193,7 +193,10 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
               OutRecord->ProgramCounter.FB = Value - 010;
             }
           else
+            {
+              OutRecord->ProgramCounter.Super = 0;
               OutRecord->ProgramCounter.FB = Value;  
+            }
 
           if (Value == 2 || Value == 3)
               OutRecord->ProgramCounter.Value = Value * 02000;
@@ -213,7 +216,7 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }  
   else 
     {  
-      strcpy(OutRecord->ErrorMessage, "BANK pseudo-op has in invalid operand.");
+      strcpy(OutRecord->ErrorMessage, "BANK pseudo-op has an invalid operand.");
       OutRecord->Fatal = 1;
       OutRecord->ProgramCounter = (const Address_t) { 0 };
       OutRecord->ProgramCounter.Invalid = 1;
