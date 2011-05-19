@@ -31,13 +31,11 @@
 #include <string.h>
 
 //------------------------------------------------------------------------
-// The difference between PseudoToEbanked and PseudoToSegmented is simply
+// The difference between PseudoToEBanked and PseudoToSegmented is simply
 // that in the case of the former E-banks are used in preference to 
 // unbanked erasable, whereas for the latter unbanked erasable is used 
 // whenever possible.
-
-void 
-PseudoToEBanked(int Value, ParseOutput_t *OutRecord)
+void PseudoToEBanked(int Value, ParseOutput_t *OutRecord)
 {
   OutRecord->ProgramCounter = (const Address_t) { 0 };
 
@@ -89,8 +87,7 @@ PseudoToEBanked(int Value, ParseOutput_t *OutRecord)
 
 //------------------------------------------------------------------------
 
-void 
-PseudoToSegmented(int Value, ParseOutput_t *OutRecord)
+void PseudoToSegmented(int Value, ParseOutput_t *OutRecord)
 {
   if (PseudoToStruct(Value, &OutRecord->ProgramCounter))
     {
@@ -99,8 +96,7 @@ PseudoToSegmented(int Value, ParseOutput_t *OutRecord)
     }
 }
 
-int
-PseudoToStruct(int Value, Address_t *Address)
+int PseudoToStruct(int Value, Address_t *Address)
 {
   *Address = VALID_ADDRESS;
 
@@ -156,5 +152,4 @@ PseudoToStruct(int Value, Address_t *Address)
 
   return (0);
 }
-
 
