@@ -89,12 +89,9 @@ ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         }
       if (OutRecord->ProgramCounter.Fixed)
         {
-          if (OutRecord->ProgramCounter.Value >= 0110000)
-            {
-              OutRecord->SBank.current = OutRecord->ProgramCounter;
-              OutRecord->SBank.last = OutRecord->ProgramCounter;
-              OutRecord->SBank.oneshotPending = 0;
-            }
+          OutRecord->SBank.current = OutRecord->ProgramCounter;
+          OutRecord->SBank.last = OutRecord->ProgramCounter;
+          OutRecord->SBank.oneshotPending = 0;
         }
     }
 
