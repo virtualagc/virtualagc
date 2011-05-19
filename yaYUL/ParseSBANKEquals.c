@@ -90,10 +90,11 @@ int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           return (0);
         }
 
+      OutRecord->SBank.last = OutRecord->SBank.current;
       OutRecord->SBank.current = Address;
+      OutRecord->SBank.oneshotPending = 1;
       OutRecord->LabelValue = Address;
       OutRecord->LabelValueValid = 1;
-      OutRecord->SBank.oneshotPending = 1;
     }
   else
     {
