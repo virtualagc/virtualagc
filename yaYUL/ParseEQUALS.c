@@ -46,10 +46,7 @@ extern int CurrentLineInFile;
 // offsets --- such as converting one operand type to another.  Therefore,
 // I now simply put the offset into a global variable, where it is 
 // eventually added to the already-processed opcode+operand.  
-
-int
-FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1,
-                      Address_t *Value)
+int FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1, Address_t *Value)
 {
   Symbol_t *Symbol;
   int i, Offset;

@@ -37,17 +37,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+int KeepExtend = 0;
+
 //------------------------------------------------------------------------
 // A sort of  generalize  parser that works for most instruction types.
 // "Normally", Flags==0.  However, various fancier alternatives can be
 // set by ORring together various of the constants defined above.
 // The Opcode is always something of the form 0n0000 (in octal), where
 // n=0,1,...,7.
-
-int KeepExtend = 0;
-
-int
-ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
+int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
 {
   ParseOutput_t dummy;
   int Value, i;
@@ -263,188 +261,157 @@ ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int F
 //------------------------------------------------------------------------
 // Various little parsers based on ParseGeneral.
 
-int 
-ParseAD(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseAD(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 060000, ENUMBER));
 }
 
-int 
-ParseADS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseADS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, QC3));
 }
 
-int 
-ParseAUG(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseAUG(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC2));
 }
 
-int 
-ParseBZMF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseBZMF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 060000, EXTENDED | QCNOT0));
 }
 
-int 
-ParseBZF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseBZF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 010000, EXTENDED | QCNOT0));
 }
 
-int 
-ParseCA(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseCA(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 030000, ENUMBER));
 }
 
-int 
-ParseCAE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseCAE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 030000, ERASABLE | ENUMBER));
 }
 
-int 
-ParseCAF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseCAF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 030000, FIXED | ENUMBER));
 }
 
-int 
-ParseCCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseCCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 010000, QC0 | ENUMBER));
 }
 
-int 
-ParseCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 040000, ENUMBER));
 }
 
-int 
-ParseDAS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDAS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, QC0 | KPLUS1));
 }
 
-int 
-ParseDCA(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDCA(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 030000, EXTENDED | KPLUS1 | ENUMBER));
 }
 
-int 
-ParseDCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDCS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 040000, EXTENDED | KPLUS1 | ENUMBER));
 }
 
-int 
-ParseDIM(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDIM(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC3));
 }
 
-int
-ParseDNCHAN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDNCHAN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 034000, PC0 | ENUMBER));
 }
 
-int 
-ParseDV(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDV(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 010000, EXTENDED | QC0));
 }
 
-int 
-ParseDXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseDXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 050000, QC1 | KPLUS1 | ENUMBER));
 }
 
-int 
-ParseEDRUPT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseEDRUPT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC7));
 }
 
-int 
-ParseLXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseLXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, QC1 | ENUMBER));
 }
 
-int 
-ParseINCR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseINCR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, QC2));
 }
 
-int 
-ParseMASK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseMASK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 070000, 0));
 }
 
-int 
-ParseMP(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseMP(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 070000, EXTENDED));
 }
 
-int 
-ParseMSU(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseMSU(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC0 | ENUMBER));
 }
 
-int 
-ParseQXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseQXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 020000, EXTENDED | QC1 | ENUMBER));
 }
 
-int 
-ParseRAND(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseRAND(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC2 | ENUMBER));
 }
 
-int 
-ParseREAD(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseREAD(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC0 | ENUMBER));
 }
 
-int 
-ParseROR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseROR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC4 | ENUMBER));
 }
 
-int 
-ParseRXOR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseRXOR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC6 | ENUMBER));
 }
 
-int 
-ParseSU(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseSU(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 060000, EXTENDED | QC0 | ENUMBER));
 }
 
-int 
-ParseTC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseTC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, ENUMBER));
 }
 
-int 
-ParseTCF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseTCF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   if (*InRecord->Operand == 0)
   {
@@ -454,32 +421,27 @@ ParseTCF(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   return (ParseGeneral(InRecord, OutRecord, 010000, QCNOT0 | ENUMBER));
 }
 
-int 
-ParseTS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseTS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 050000, QC2 | ENUMBER));
 }
 
-int 
-ParseWAND(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseWAND(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC3 | ENUMBER));
 }
 
-int 
-ParseWOR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseWOR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC5 | ENUMBER));
 }
 
-int 
-ParseWRITE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseWRITE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC1 | ENUMBER));
 }
 
-int 
-ParseXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int ParseXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseGeneral(InRecord, OutRecord, 050000, QC3 | ENUMBER));
 }
