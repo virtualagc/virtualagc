@@ -127,6 +127,10 @@
 #				Artemis072 into the installers.
 #		02/20/10 RSB	Updated version to 20100220 for release.
 #		2011-04-27 JL	Added Colossus237.
+#		2011-05-26 JL	Cleanup and rearrange. Add a 'missions' target to
+#				build all mission versions. Make use of
+#				parens/braces consistent. Add some shortcut 
+#				variables for use in sub-make actions.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -216,7 +220,7 @@ endif
 # But I personally want to build with 
 #	CFLAGS=-Wall -Werror
 # to catch every possible problem before sending it out into the world.
-ifeq (${USER},rburkey)
+ifeq ($(USER),rburkey)
 WEBSITE=../sandroid.org/public_html/apollo
 CFLAGS=-Wall -Werror -DALLOW_BSUB
 yaACA=
@@ -247,103 +251,95 @@ ifndef PREFIX
 PREFIX=/usr/local
 endif
 
+BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSES)" LIBS2="$(LIBS)" NOREADLINE=$(NOREADLINE) ReadlineForWin32=$(ReadlineForWin32) $(ARCHS) EXT=$(EXT)
+
+# List of mission software directories to be built.
+MISSIONS = Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237 # Solarium055
+
+SUBDIRS = Tools yaLEMAP yaAGC yaAGS
+ifndef NOGUI
+ifeq "$(YADEDA_SUFFIX)" ""
+SUBDIRS += yaDEDA/src
+else
+SUBDIRS += yaDEDA2
+endif
+ifeq "$(YADSKY_SUFFIX)" ""
+SUBDIRS += yaDSKY/src
+else
+SUBDIRS += yaDSKY2
+endif
+endif
+SUBDIRS += yaYUL yaUniverse yaACA2
+ifndef WIN32
+SUBDIRS += yaACA
+endif
+SUBDIRS += yaACA3
+SUBDIRS += $(MISSIONS)
+SUBDIRS += Validation ControlPulseSim yaTelemetry jWiz VirtualAGC
+.PHONY: $(SUBDIRS)
+
 .PHONY: default
 default: all
 
 .PHONY: all all-archs
+
+.PHONY: missions $(MISSIONS)
+missions: $(MISSIONS)
+
+$(MISSIONS): yaYUL
+	-$(BUILD) -C $@
+
 all: ARCHS=default
 all-archs: ARCHS=all-archs
-all all-archs:
-	$(MAKE) -C Tools PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	$(MAKE) -C yaLEMAP PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
-		${ARCHS} EXT=${EXT}
-	#$(MAKE) -C yaASM PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
-	#	${ARCHS} EXT=${EXT}
-	$(MAKE) -C yaAGC PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
-		NOREADLINE=${NOREADLINE} ReadlineForWin32=${ReadlineForWin32} \
-		CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${MAKE} -C yaAGS PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
-		NOREADLINE=${NOREADLINE} ReadlineForWin32=${ReadlineForWin32} \
-		CURSES="${CURSES}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-ifndef NOGUI
-ifeq "${YADEDA_SUFFIX}" ""
-	$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} \
-		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	-${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
-		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-else
-	-$(MAKE) -C yaDEDA/src -f Makefile.all-archs PREFIX=${PREFIX} \
-		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${MAKE} -C yaDEDA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
-		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-endif
-ifeq "${YADSKY_SUFFIX}" ""
-	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
-		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+all all-archs: $(SUBDIRS)
+
+Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim:
+	$(BUILD) -C $@ 
+
+yaDEDA:
+	$(BUILD) -C yaDEDA/src -f Makefile.all-archs 
+	-$(BUILD) -C yaDEDA2 $(DEV_STATIC)
+
+yaDEDA2:
+	-$(BUILD) -C yaDEDA/src -f Makefile.all-archs 
+	$(BUILD) -C $@ $(DEV_STATIC)
+
+yaDSKY:
+	-$(BUILD) -C yaDSKY/src -f Makefile.all-archs 
 	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
-		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-else
-	-$(MAKE) -C yaDSKY/src -f Makefile.all-archs PREFIX=${PREFIX} \
-		NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
+	$(BUILD) -C yaDSKY2 $(DEV_STATIC)
+
+yaDSKY2:
+	-$(BUILD) -C yaDSKY/src -f Makefile.all-archs 
 	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
-	${MAKE} -C yaDSKY2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
-		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-endif	
-endif
-	$(MAKE) -C yaYUL PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	$(MAKE) -C yaUniverse PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
-		${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-	${yaACA}${MAKE} -C yaACA2 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
-		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-ifndef WIN32
-	${yaACA}$(MAKE) -C yaACA PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" \
-		${ARCHS} LIBS2="${LIBS}" EXT=${EXT}
-endif
-	${yaACA}${MAKE} -C yaACA3 NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
-		LIBS2="${LIBS}" EXT=${EXT} CURSES="${CURSES}"
-	$(MAKE) -C Luminary131 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	$(MAKE) -C Colossus249 PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
-	$(MAKE) -C Comanche055
-	$(MAKE) -C Luminary099
-	${MAKE} -C Artemis072 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
-	${MAKE} -C Colossus237 PREFIX=${PREFIX} NVER=${NVER} EXT=${EXT}
-	$(MAKE) -C Validation PREFIX=${PREFIX} NVER=${NVER} CFLAGS="${CFLAGS}" EXT=${EXT}
-	$(MAKE) -C ControlPulseSim NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} EXT=${EXT}
-	${MAKE} -C yaTelemetry NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} \
-		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-	${MAKE} -C jWiz NVER=${NVER} CFLAGS="${CFLAGS}" ${ARCHS} ${ISMACOSX} \
-		LIBS2="${LIBS}" EXT=${EXT} ${DEV_STATIC}
-	${MAKE} -C VirtualAGC NVER=${NVER} "YADSKY_SUFFIX=${YADSKY_SUFFIX}" \
-		"YADEDA_SUFFIX=${YADEDA_SUFFIX}" clean ${ARCHS} LIBS2="${LIBS}" ${ISMACOSX} EXT=${EXT} ${DEV_STATIC}
+	$(BUILD) -C $@ $(DEV_STATIC)
+
+yaTelemetry:
+	$(BUILD) -C $@ $(DEV_STATIC)
+
+jWiz:
+	$(BUILD) -C $@ $(ISMACOSX) $(DEV_STATIC)
+
+VirtualAGC:
+	$(BUILD) -C $@ "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC)
 
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
-listings: \
-	listing-agc-Colossus249 \
-	listing-agc-Comanche055 \
-	listing-agc-Luminary099 \
-	listing-agc-Luminary131 \
-	listing-agc-Artemis072 \
-	listing-agc-Colossus237 \
-	listing-aea-FP6 \
-	listing-aea-FP8
+listings: listing-agc-Colossus249 listing-agc-Comanche055 listing-agc-Luminary099 listing-agc-Luminary131 listing-agc-Artemis072 listing-agc-Colossus237 listing-aea-FP6 listing-aea-FP8
 
 listing-agc-%:
-	rm -f ${WEBSITE}/listings/$*/*.html
-	mkdir -p ${WEBSITE}/listings/$*
-	cd $* && \
-	../yaYUL/yaYUL --html MAIN.agc >MAIN.lst
-	mv $*/*.agc.html ${WEBSITE}/listings/$*
-	cp Apollo32.png ${WEBSITE}/listings/$*
+	rm -f $(WEBSITE)/listings/$*/*.html
+	mkdir -p $(WEBSITE)/listings/$*
+	cd $* && ../yaYUL/yaYUL --html MAIN.agc >MAIN.lst
+	mv $*/*.agc.html $(WEBSITE)/listings/$*
+	cp Apollo32.png $(WEBSITE)/listings/$*
 
 listing-aea-%:
-	rm -f ${WEBSITE}/listings/$*/*.html
-	mkdir -p ${WEBSITE}/listings/$*
-	cd $* && \
-	../yaLEMAP/yaLEMAP --html $*.aea
-	mv $*/*.aea.html ${WEBSITE}/listings/$*
-	cp Apollo32.png ${WEBSITE}/listings/$*
+	rm -f $(WEBSITE)/listings/$*/*.html
+	mkdir -p $(WEBSITE)/listings/$*
+	cd $* && ../yaLEMAP/yaLEMAP --html $*.aea
+	mv $*/*.aea.html $(WEBSITE)/listings/$*
+	cp Apollo32.png $(WEBSITE)/listings/$*
 
 # Here are targets for building the development snapshot, 
 # creating the binary installers, and updating local directory
@@ -360,16 +356,16 @@ buildbox: dev
 
 .PHONY: binaries
 binaries: clean all-archs
-	cp -a VirtualAGC/VirtualAGC-installer ${WEBSITE}/Downloads
-	cp -a VirtualAGC/VirtualAGC-setup.exe ${WEBSITE}/Downloads
-	cp -a VirtualAGC/VirtualAGC.app.tar.gz ${WEBSITE}/Downloads
-	ls -ltr ${WEBSITE}/Downloads | tail -4
+	cp -a VirtualAGC/VirtualAGC-installer $(WEBSITE)/Downloads
+	cp -a VirtualAGC/VirtualAGC-setup.exe $(WEBSITE)/Downloads
+	cp -a VirtualAGC/VirtualAGC.app.tar.gz $(WEBSITE)/Downloads
+	ls -ltr $(WEBSITE)/Downloads | tail -4
 
 # I used this only for creating a development snapshot.  It's no use to anybody
 # else, I expect.
 .PHONY: dev
 dev:	clean
-	rm -f ${WEBSITE}/Downloads/yaAGC-dev-${DATE}.tar.bz2
+	rm -f $(WEBSITE)/Downloads/yaAGC-dev-$(DATE).tar.bz2
 	tar -C .. --exclude=*CVS* --exclude=*snprj* --exclude="*.core" \
 		--exclude=yaAGC/yaDSKY/autom4te.cache/* \
 		--exclude=yaAGC/yaDSKY/configure \
@@ -388,12 +384,12 @@ dev:	clean
 		--exclude=*~ --exclude=*.bak \
 		--exclude=*.svn* \
 		--exclude=*xvpics* \
-		--bzip2 -cvf ${WEBSITE}/Downloads/yaAGC-dev-${DATE}.tar.bz2 yaAGC
-	ls -ltr ${WEBSITE}/Downloads
+		--bzip2 -cvf $(WEBSITE)/Downloads/yaAGC-dev-$(DATE).tar.bz2 yaAGC
+	ls -ltr $(WEBSITE)/Downloads
 		
 snapshot-ephemeris:
-	cd .. ; tar --bzip2 -cvf ${WEBSITE}/Downloads/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
-	ls -l ${WEBSITE}/Downloads
+	cd .. ; tar --bzip2 -cvf $(WEBSITE)/Downloads/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
+	ls -l $(WEBSITE)/Downloads
 
 clean:
 	$(MAKE) -C yaLEMAP clean
@@ -405,29 +401,29 @@ clean:
 	$(MAKE) -C yaDEDA/src -f Makefile.all-archs clean
 	$(MAKE) -C yaYUL clean
 	$(MAKE) -C yaUniverse clean
-	${yaACA}$(MAKE) -C yaACA clean
-	${yaACA}${MAKE} -C yaACA2 clean
-	${yaACA}$(MAKE) -C yaACA3 clean
+	$(yaACA)$(MAKE) -C yaACA clean
+	$(yaACA)$(MAKE) -C yaACA2 clean
+	$(yaACA)$(MAKE) -C yaACA3 clean
 	$(MAKE) -C Luminary131 clean
 	$(MAKE) -C Colossus249 clean
-	${MAKE} -C Comanche055 clean
-	${MAKE} -C Luminary099 clean
-	${MAKE} -C Artemis072 clean
-	${MAKE} -C Colossus237 clean
+	$(MAKE) -C Comanche055 clean
+	$(MAKE) -C Luminary099 clean
+	$(MAKE) -C Artemis072 clean
+	$(MAKE) -C Colossus237 clean
 	$(MAKE) -C Validation clean
-	${MAKE} -C ControlPulseSim clean
-	${MAKE} -C VirtualAGC clean
-	${MAKE} -C yaTelemetry clean
-	${MAKE} -C jWiz clean
-	${MAKE} -C yaDSKY2 clean
-	${MAKE} -C yaDEDA2 clean
-	${MAKE} -C yaACA2 clean
+	$(MAKE) -C ControlPulseSim clean
+	$(MAKE) -C VirtualAGC clean
+	$(MAKE) -C yaTelemetry clean
+	$(MAKE) -C jWiz clean
+	$(MAKE) -C yaDSKY2 clean
+	$(MAKE) -C yaDEDA2 clean
+	$(MAKE) -C yaACA2 clean
 	rm -f `find . -name "core"`
 
 autogen:
-	echo PREFIX=${PREFIX} >Makefile.yaAGC
+	echo PREFIX=$(PREFIX) >Makefile.yaAGC
 ifndef NOGUI
-	cd yaDSKY && ./autogen.sh --prefix=${PREFIX}
-	cd yaDEDA && ./autogen.sh --prefix=${PREFIX}
+	cd yaDSKY && ./autogen.sh --prefix=$(PREFIX)
+	cd yaDEDA && ./autogen.sh --prefix=$(PREFIX)
 endif
 
