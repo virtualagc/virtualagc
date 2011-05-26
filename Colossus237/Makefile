@@ -27,8 +27,8 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} 
 	../yaYUL/yaYUL --unpound-page --html MAIN.agc >MAIN.agc.lst
 	#diff -s MAIN.agc.bin ${BASENAME}.bin
-	#mv MAIN.agc.lst ${BASENAME}.lst
-	#mv MAIN.agc.symtab ${BASENAME}.symtab
+	mv MAIN.agc.lst ${BASENAME}.lst
+	mv MAIN.agc.symtab ${BASENAME}.symtab
 
 clean:
 	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
