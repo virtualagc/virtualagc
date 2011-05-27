@@ -325,7 +325,8 @@ VirtualAGC:
 
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
-listings: listing-agc-Colossus249 listing-agc-Comanche055 listing-agc-Luminary099 listing-agc-Luminary131 listing-agc-Artemis072 listing-agc-Colossus237 listing-aea-FP6 listing-aea-FP8
+AGC_LISTINGS = $(addprefix listing-agc-, $(MISSIONS))
+listings: $(AGC_LISTINGS) listing-aea-FP6 listing-aea-FP8
 
 listing-agc-%:
 	rm -f $(WEBSITE)/listings/$*/*.html
