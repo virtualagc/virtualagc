@@ -65,12 +65,14 @@ def analyse(listing):
                     if len(elems) > 1:
                         if elems[1].startswith('$'):
                             module = elems[1][1:].split('.')[0]
-                        if "# Page" in line and "scans" not in line and "Pages" not in line:
-                            try:
-                                pagenum = line.split()[3]
-                            except:
-                                print line
-                                raise
+                        if "# Page" in line and "scans" not in line and "Pages" not in line and "Page:" not in line:
+                            pagestr = line[line.index("# Page")+6:][:-1].split()[0]
+                            if pagestr[0] == ' ':
+                                pagenum = pagestr.strip()
+                            else:
+                                pagenum = pagestr
+                            if pagenum.endswith(','):
+                                pagenum = pagenum[:-1]
                             if pagenum.isdigit():
                                 pagenum = int(pagenum)
                             else:
