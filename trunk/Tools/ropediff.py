@@ -43,9 +43,10 @@ class CoreDiff:
         self.module = None
         self.srcline = None
 
-    def setloc(self, pagenum, module, srcline):
+    def setloc(self, pagenum, module, linenum, srcline):
         self.pagenum = pagenum      # Listing page number.
         self.module = module        # Source module.
+        self.linenum = linenum      # Listing line number.
         self.srcline = srcline      # Source line.
         self.srcline = srcline[:100]
         if self.srcline.endswith('\n'):
@@ -58,7 +59,10 @@ class CoreDiff:
         else:
             line += "     "
         line += "%-48s " % (self.module)
-        line += "%-100s" % self.srcline
+        srcline = self.srcline
+        if self.srcline:
+            srcline = self.srcline.rstrip()
+        line += "%s" % (srcline)
         return line
 
     def __cmp__(self, other):
@@ -82,6 +86,8 @@ def main():
     global options
 
     parser = OptionParser("usage: %prog [options] core1 core2")
+    parser.add_option("-c", "--no-checksums", action="store_false", dest="checksums", default=True,
+                      help="Discard differences in checksums.")
     parser.add_option("-N", "--no-super", action="store_true", dest="noSuper", default=False,
                       help="Discard differences in which one word has 100 in bits 5,6,7 and the other has 011.")
     parser.add_option("-S", "--only-super", action="store_true", dest="onlySuper", default=False,
@@ -93,6 +99,8 @@ def main():
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                       help="Print extra information.")
     parser.add_option("-o", "--output", dest="outfilename", help="Write output to file.", metavar="FILE")
+    parser.add_option("-a", "--annotate", action="store_true", dest="annotate", default=False,
+                      help="Output a modified listing annotated with core differences.")
 
     (options, args) = parser.parse_args()
 
@@ -101,6 +109,8 @@ def main():
     options.outfile = None
     if options.outfilename:
         options.outfile = open(options.outfilename, "w")
+    else:
+        options.outfile = sys.stdout
 
     if len(args) < 2:
         parser.error("Two core files must be supplied!")
@@ -133,8 +143,10 @@ def main():
     leftcore = open(cores[0], "rb")
     rightcore = open(cores[1], "rb")
 
-    leftlst = os.path.join(os.path.abspath(os.path.dirname(cores[0])), "*.lst")
-    rightlst = os.path.join(os.path.abspath(os.path.dirname(cores[1])), "*.lst")
+    leftdir = os.path.abspath(os.path.dirname(cores[0]))
+    leftlst = os.path.join(leftdir, "*.lst")
+    rightdir = os.path.abspath(os.path.dirname(cores[1]))
+    rightlst = os.path.join(rightdir, "*.lst")
     lfiles = glob.glob(leftlst)
     lfiles.extend(glob.glob(rightlst))
     # Remove duplicates.
@@ -154,8 +166,7 @@ def main():
                 if l.endswith("MAIN.lst"):
                     lfiles.remove(l)
             if len(lfiles) > 1:
-                print lfiles
-                print "Warning: multiple listing files, using %s!" % (lfiles[0])
+                print >>sys.stderr, "Warning: multiple listing files, using %s!" % (lfiles[0])
         listfile = lfiles[0]
         if not os.path.isfile(listfile):
             parser.error("File \"%s\" does not exist" % listfile)
@@ -167,22 +178,28 @@ def main():
         log("Analysing listing file... ", verbose=True)
         blocks = listing_analyser.analyse(listfile)
 
+    options.annofile = None
+    if options.annotate:
+        if listfile == None:
+            sys.exit("Annotate option specified, but no input listing file found")
+        options.annofile = open(listfile + ".anno", 'w')
+
     diffcount = {}
     difftotal = 0
 
     modlist = []
-    srcfiles = glob.glob("*.agc")
-    srcfiles.remove("MAIN.agc")
+    srcfiles = glob.glob(os.path.join(leftdir, "*.agc"))
+    srcfiles.remove(os.path.join(leftdir, "MAIN.agc"))
     if "Templates.agc" in srcfiles:
-        srcfiles.remove("Template.agc")
+        srcfiles.remove(os.path.join(leftdir, "Template.agc"))
     for srcfile in srcfiles:
-        modlist.append(srcfile.split('.')[0])
+        modlist.append(os.path.basename(srcfile).split('.')[0])
     for module in modlist:
         diffcount[module] = 0
 
     log("Reading MAIN.agc... ", verbose=True)
     includelist = []
-    mainfile = open("MAIN.agc", "r")
+    mainfile = open(os.path.join(leftdir, "MAIN.agc"), "r")
     mainlines = mainfile.readlines()
     for line in mainlines:
         if line.startswith('$'):
@@ -246,9 +263,12 @@ def main():
     module = None
     pagenum = 0
     address = 0
+    checkdiffs = 0
+    linenum = 0
 
     log("Building module/page/line list... ", verbose=True)
     for line in open(listfile, "r"):
+        linenum += 1
         elems = line.split()
         if len(elems) > 0:
             if not line.startswith(' '):
@@ -264,7 +284,7 @@ def main():
                             if len(elems) > 2:
                                 if elems[1][0].isdigit() and elems[2][0].isdigit() and len(elems[2]) == 5:
                                     address = elems[1]
-                                    lines[address] = (module, pagenum, line)
+                                    lines[address] = (module, pagenum, linenum, line)
                                     if len(elems) > 3:
                                         # Handle 2-word quantities, yaYUL outputs listing for the two combined at the address of the first.
                                         if elems[3][0].isdigit() and len(elems[3]) == 5:
@@ -277,7 +297,7 @@ def main():
                                                 offset = int(address, 8)
                                                 offset += 1
                                                 address = "%04o" % offset
-                                            lines[address] = (module, pagenum, line)
+                                            lines[address] = (module, pagenum, linenum, line)
                 if line.startswith("Bugger"):
                     buggers.append(line)
 
@@ -285,8 +305,8 @@ def main():
     for diff in diffs:
         address = diff.address.strip()
         if address in lines.keys():
-            (module, pagenum, line) = lines[address]
-            diff.setloc(pagenum, module, line)
+            (module, pagenum, linenum, line) = lines[address]
+            diff.setloc(pagenum, module, linenum, line)
         elif diff.srcline == None:
             foundBugger = False
             for bugger in buggers:
@@ -295,8 +315,8 @@ def main():
                 if baddr.endswith('.'):
                     baddr = baddr[:-1]
                 if address == baddr:
-                    diff.setloc(0, "Bugger", "%s%s%s%s" % (15 * ' ', baddr, 11 * ' ', bval))
-                    #log("found bugger at address %s" % address)
+                    diff.setloc(0, "Checksum", 0, "%s%s%s%s" % (15 * ' ', baddr, 11 * ' ', bval))
+                    checkdiffs += 1
                     foundBugger = True
                     break
             if not foundBugger:
@@ -305,17 +325,26 @@ def main():
             print >>sys.stderr, "Error: address %s not found in listing file" % (address)
 
     log("")
-    log("%s %d" % ("Total differences:", difftotal))
+    if options.checksums:
+        log("%s %d" % ("Total differences:", difftotal))
+    else:
+        log("%s %d" % ("Total differences:", difftotal - checkdiffs))
     log("")
 
     if difftotal > 0:
         log("Core address     Left  Right Page Module                                           Line Number    Address           Source")
-        log("---------------- ----- ----- ---- ------------------------------------------------ -------------- -------           -------------------------------------------------------------------------------------------------------")
+        log("---------------- ----- ----- ---- ------------------------------------------------ -------------- -------           ------------------------------------------------")
         log("")
         for diff in diffs:
-            log(diff.__str__())
+            if options.checksums == True or (options.checksums == False and diff.module != "Checksum"):
+                log(diff.__str__())
 
-        if options.analyse:
+        if options.annofile:
+            linenum = 0
+            # TODO
+            pass
+
+        if options.stats:
 
             diffblocks = []
             index = 0
@@ -334,8 +363,12 @@ def main():
 
             if len(diffblocks) > 0:
                 log("")
+                log("")
                 log("Difference blocks: (sorted by length, ignoring single isolated differences)")
-                log("-" * 80)
+                #log("-" * 80)
+                log("")
+                log("Core address        Diffs   Module                                               ")
+                log("----------------    -----   ---------------------------------------------------- ")
 
                 for (diff, length) in sorted(diffblocks, key=operator.itemgetter(1), reverse=True):
                     address = diff.address
@@ -389,6 +422,9 @@ def main():
                 log("-" * 80)
 
     log("Done", verbose=True)
+
+    if options.annofile:
+        options.annofile.close()
 
     if options.outfile:
         options.outfile.close()
