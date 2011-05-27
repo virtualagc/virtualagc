@@ -17,10 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with yaAGC; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
 
 # Python script to find the differences between two supplied AGC rope binaries.
-# This is just a Python version of ../Luminary131/bdiffhead.c that Ron wrote.
 
 import os
 import sys
@@ -42,6 +40,7 @@ class CoreDiff:
         self.pagenum = None
         self.module = None
         self.srcline = None
+        self.linenum = None
 
     def setloc(self, pagenum, module, linenum, srcline):
         self.pagenum = pagenum      # Listing page number.
@@ -182,7 +181,9 @@ def main():
     if options.annotate:
         if listfile == None:
             sys.exit("Annotate option specified, but no input listing file found")
-        options.annofile = open(listfile + ".anno", 'w')
+        afilename = listfile
+        afilename = afilename.replace(".lst", ".anno.txt")
+        options.annofile = open(afilename, 'w')
 
     diffcount = {}
     difftotal = 0
@@ -340,9 +341,23 @@ def main():
                 log(diff.__str__())
 
         if options.annofile:
+            linenums = []
+            diffsbyline = {}
+            for diff in diffs:
+                if diff.linenum != None and diff.linenum != 0:
+                    linenums.append(diff.linenum)
+                    diffsbyline[diff.linenum] = diff
+            linenums.sort()
+            diffindex = 0
             linenum = 0
-            # TODO
-            pass
+            for line in open(listfile, "r"):
+                linenum += 1
+                if diffindex < len(linenums) and linenum == linenums[diffindex]:
+                    diff = diffsbyline[linenum]
+                    print >>options.annofile
+                    print >>options.annofile, ">>> Core error %d of %d at %s: expected %05o, got %05o" % (diffindex + 1, len(linenums), diff.address, diff.leftval, diff.rightval)
+                    diffindex += 1
+                print >>options.annofile, line,
 
         if options.stats:
 
