@@ -62,7 +62,15 @@ def main():
                 fields = sline[2:]
             else:
                 continue
-            pagenum = fields.split()[1]
+            try:
+                if fields[4] == ' ':
+                    pagenum = fields.split()[1]
+                else:
+                    pagenum = fields[4:]
+                    print >>sys.stderr, "%s, line %d: invalid page number \"%s\"" % (sfile, linenum, sline)
+            except:
+                print "Error processing line: \"%s\"" % (sline)
+                raise
             if pagenum.isdigit():
                 pagenum = int(pagenum)
                 if start:
