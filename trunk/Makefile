@@ -289,6 +289,10 @@ missions: $(MISSIONS)
 $(MISSIONS): yaYUL
 	-$(BUILD) -C $@
 
+.PHONY: corediffs
+corediffs: 
+	for subdir in $(MISSIONS) ; do make -C $$subdir corediff.txt ; done
+
 all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(SUBDIRS)
