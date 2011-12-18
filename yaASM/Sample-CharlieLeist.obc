@@ -1,0 +1,293 @@
+# The contents of this file have been placed into the Public Domain and may
+# be reused in any way whatever.
+#
+# Filename:	Sample-CharlieLeist.obc
+# Purpose:	This is sample Gemini OBC code, written by 
+#		original OBC programmer Charlie Leist in 2011 "in
+#		"the style of the original code", for the use of
+#		the Gemini subset of the Virtual AGC project.  It 
+#		is intendend to partially fill the gap created by
+#		the situation that although we have documentation
+#		of the OBC instruction set, architecture, 
+#		peripherals, etc., that (at least in 2011) there
+#		is no known surviving OBC source code contemporary
+#		to the Gemini Project.  also, it serves as test
+#		code for the Virtual AGC project's recreation of
+#		the Gemini OBC assembler, yaASM.
+# Website:	http://www.ibiblo.org/apollo/Gemini.html
+# Mod history:	2011-09-28 AWM	Charlies's code created, and edited
+#				subsequently by Gene Mertz.
+#		2011-12-13 RSB	Adapted for use with yaASM and
+#				added to Virtual AGC code base.
+#
+# Below this point, all comments are Charlie's except where explicitly
+# noted with notations like [RSB: this is an editor's comment].
+
+# GEMINI COMPUTER VARIABLES ALLOCATED TO SECTOR 03
+# [RSB: The variables are allocated simply by having the line-labels
+# (what the OBC programmers called "left-hand symbols") without any
+# instruction code or pseudo-op. The bracketed numerical values that
+# follow the variable names are simply comments, and are ignored by
+# the assembler.  They give the word-addresses within memory sector
+# 03 at which the variables are referenced.] 
+
+# OBC Time determined by Clock Subroutine (DTC, T, TDAS)
+TIME	[001, 004, 007, 010, 013, 016, 019, 022, 025, 028, 031, 034, 037]
+VRRI	[041, 051, 070, 097, 04,111,114, 119, 122]
+VRPRI	[043, 053, 072, 099, 116]
+VSINAPI	[045, 055, 063, 074, 084, 089, 106, 125]
+VSINRPI	[048, 057, 065, 076, 086, 091, 108, 127]
+VRLO	[061,068]
+VDELTAZT [079, 082, 01]
+VWRTPR	[095]
+VPB	[129]
+VTB	[131]
+VTBC	[132]
+VYB	[134]
+VYBC	[135]
+VDPSC	[130]
+VDTSC	[133]
+VDYSC	[136]
+
+# GEMINI PROGRAM CONSTANTS IN MEMORY FOR SECTOR 03
+# [RSB: Since these are constants, I think they would normally
+# have values assigned at assembly-time, via pseudo-ops like
+# OCT or DEC.  In this case, Charlie hasn't assigned any 
+# initial values, so the "constants" are really just the
+# same as "variables".
+
+KZERO	[067]
+K350	[002]
+K050	[Not referenced]
+K650	[005]
+K706	[008]
+K800	[011]
+K1200	[014]
+K1550	[017]
+K1600	[020]
+K2410	[023]
+K2490	[026]
+K2600	[029]
+K3100	[032]
+K3600	[035]
+K4100	[038]
+KR1	[050]
+KRP1	[052]
+MK9999	[060]
+K0P25	[078]
+K150	[094]
+KRCL	[103]
+K1P0	[081], [100]
+KR3	[110], [096]
+KR4	[121], [113]
+KRP4	[126], [115]
+KRL	[118]
+KR5	[040]
+KRP5	[042]
+KAP1	[054]
+KRP1	[056], [052]
+KAPL	[062], [083]
+KRPL	[064]
+KR2	[069]
+KRP2	[071], [075]
+KAPL	[083]
+KRP2	[085]
+KAP2	[088], [073]
+KRPL	[090]
+KAP3	[105]
+KRP3	[107]
+KAP4	[124]
+KRP4	[126]
+KAP5	[044]
+KRP5A	[047]
+
+# 39 BIT GEMINI WORD FORMAT
+# Bits 01 through 13	Syllable 2
+# Bits 14 through 26	Syllable 1
+# Bits 27 through 39	Syllable 0
+# Bits 01 through 09	Memory Address (A1 through A9 - A9 has a special meaning)
+# Bits 10 through 13	Op Code (OP1 to OP4)
+# Bit   14		S
+# Bits 15 through 39	Data Word (25 bits)
+#
+# The following Binary Data represents the first three Program Instructions below
+# [RSB: Instructions in syllable 2 only! Syllables 0,1 are for data words]:
+#
+# 0 0 0 0 0 0 0 0 0|1 1 1 1  1|1 1 1 1 1 2 2 2 2 2 2 2  2 2 2 3 3 3 3 3 3 3 3 3 3
+# 1 2 3 4 5 6 7 8 9|0 1 2 3  4|5 6 7 8 9 0 1 2 3 4 5 6  7 8 9 0 1 2 3 4 5 6 7 8 9
+#         Syllable2                  Syllable1                  Syllable0
+# -------------------------  -------------------------  -------------------------
+# 0 0 0 0 0 0 0 1 0|0 1 1 0  0|0 0 0 0 0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0 0 0 0 0 0
+# 0 0 0 0 0 0 1 0 0|0 1 0 1  0|0 0 0 0 0 0 0 0 0 0 0 0  0 0 0 0 1 0 1 0 1 1 1 1 0
+# 0 0 0 0 0 0 1 1 0|1 0 1 1  0|0 0 0 0 0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 1 1 0 0 1 0
+#   Memory Address | OpCode  S|M25 <-------------   Through   ---------------> M1
+#                            <-------------------- Data Word ------------------->
+# The programmers, for ease of determining decimal values, interpreted these 26 bits as:
+# S,M25,M24,M23,M22,M21,M20,M19,M18,M17,M16,M15,M14,M13,M12,M11,M10,M9,M8,M7,M6,M5,M4,M3,M2,M1
+# Where:
+#   M1 decimal 1 (2 to zero power), M2 decimal 2 (2 to 1 power), ,etc., to M25 (2 to power 25)
+ 
+# [RSB: The numerical expressions at the ends of the lines are just comments, and
+# are ignored completely by the assembler.  In this sample code, they happen to 
+# be line numbers, along with additional comments Charlie added in some cases.]
+
+CURZ1	CLA	TIME		001
+	SUB	K350		002
+	TMI	CURZ2		003
+	CLA	TIME		004
+	SUB	K650		005 (650 sec)
+	TMI	CURZ3		006
+	CLA	TIME		007
+	SUB	K706		008 (706 sec)
+	TMI	CURZ4		009
+	CLA	TIME		010
+	SUB	K800		011(800 sec)
+	TMI	CURZ5		012
+	CLA	TIME		013
+	SUB	K1200		014 (1200 sec)
+	TMI	CURZ6		015
+	CLA	TIME		016
+	SUB	K1550		017 (1550 sec)
+	TMI	CURZ7		018
+	CLA	TIME		019
+	SUB	K1600		020 (1600 sec)
+	TMI	CURZ8		021
+	CLA	TIME		022
+	SUB	K2410		023 (2410 sec)
+	TMI	CURZ9		024
+	CLA	TIME		025
+	SUB	K2490		026 (2490 sec)
+	TMI	CURZ10		027
+	CLA	TIME		028
+	SUB	K2600		029 (2600 sec)
+	TMI	CURZ11		030
+	CLA	TIME		031
+	SUB	K3100		032 (3100 sec)
+	TMI	CURZ12		033
+	CLA	TIME		034
+	SUB	3600		035 (3600 sec)
+	TMI	CURZ13		036
+	CLA	TIME		037
+	SUB	K4100		038 (4100 sec)
+	TMI	CURZ14		039
+	CLA	KR5		040
+	STO	VRRI		041
+	CLA	KRP5		042
+	STO	VRPRI		043
+	CLA	KAP5		044
+	STO	VSINAPI		045
+	CLA	KRP5A		047
+	STO	VSINRPI		048
+	TRA	CURZ18		049
+CURZ2	CLA	KR1		050
+	STO	VRRI		051
+	CLA	KRP1		052
+	STO	VRPRI		053
+	CLA	KAP1		054
+	STO	VSINAPI		055
+	CLA	KRP1		056
+	STO	VSINRPI		057
+	TRA	CURZ18		058
+CURZ3	CLA	MK9999	060
+	STO	VRLO		061
+	CLA	KAPL		062
+	STO	VSINAPI		063
+	CLA	KRPL		064
+	STO	VSINRPI		065
+	TRA	CURZ18		066
+CURZ4	CLA	KZERO		067
+	STO	VRLO		068
+	CLA	KR2		069
+	STO	VRRI		070
+	CLA	KRP2		071
+	STO	VRPRI		072
+	CLA	KAP2		073
+	STO	VSINAPI		074
+	CLA	KRP2		075
+	STO	VSINRPI		076
+	TRA	CURZ18		077
+CURZ5	CLA	K0P25		078
+	STO	VDELTAZT	079
+	TRA	CURZ4		080
+CURZ6	CLA	K1P0		081
+	STO	VDELTAZT	082
+	CLA	KAPL		083
+	STO	VSINAPI		084
+	CLA	KRP2		085
+	STO	VSINRPI		086
+	TRA	CURZ18		087
+CURZ7	CLA	KAP2		088
+	STO	VSINAPI		089
+	CLA	KRPL		090
+	STO	VSINRPI		091
+	TRA	CURZ18		092
+CURZ8	TRA	CURZ5		093
+CURZ9	CLA	K150		094
+	STO	VWRTPR	095
+	CLA	KR3		096
+	STO	VRRI		097
+	CLA	KRP3		098
+	STO	VPRPRI		099
+	CLA	K1P0		100
+	STO	VDELTAZT	101
+	TRA	CURZ10A	102
+CURZ10	CLA	KRCL		103
+	STO	VRRI		104
+CURZ10A	CLA	KAP3		105
+	STO	VSINAPI		106
+	CLA	KRP3		107
+	STO	VSINRPI		108
+	TRA	CURZ18		109
+CURZ11	CLA	KR3		110
+	STO	VRRI		111
+	TRA	CURZ10A	112
+CURZ12	CLA	KR4		113
+	STO	VRRI		114
+	CLA	KRP4		115
+	STO	VRPRI		116
+	TRA	CURZ13A	117
+CURZ13	CLA	KRL		118
+	STO	VRRI		119
+	TRA	CURZ13A	120
+CURZ14	CLA	KR4		121
+	STO	VRRI		122
+	TRA	CURZ13A	123
+CURZ13A	CLA	KAP4		124
+	STO	VSINAPI		125
+	CLA	KRP4		126
+	STO	VSINRPI		127
+	TRA	CURZ18		128
+CURZ18	CLA	VPB		129
+	STO	VDPSC		130
+	CLA	VTB		131
+	SUB	VTBC		132
+	STO	VDTSC		133
+	CLA	VYB		134
+	SUB	VYBC		135
+	STO	VDYSC		136
+	HOP	I/O		137
+	TRA	RZ126		138
+
+# LEFT HAND SYMBOLS USED IN THE PROGRAM AND MEMORY ADDRESSES
+# [RSB: The following is just a helpful cross-reference added
+# by Charlie.  I *assume* that the assembler itself would have
+# produced such a table, and that this is not input data for
+# the assembler.  At any rate, the recreation of the assembler
+# doesn't need it, so I have commented it all out.]
+#CURZ1		[001]
+#CURZ2		[050]
+#CURZ3		[060]
+#CURZ4		[067]
+#CURZ5		[078]
+#CURZ6		[081]
+#CURZ7		[088]
+#CURZ8		[093]
+#CURZ9		[094]
+#CURZ10		[103]
+#CURZ10A	[105]
+#CURZ11		[110]
+#CURZ12		[113]
+#CURZ13		[118]
+#CURZ13A	[124]
+#CURZ14		[121]
+#CURZ18		[129]

@@ -30,32 +30,33 @@ PREFIX=/usr/local
 endif	# MSYSTEM
 
 ifeq "${USER}" "rburkey"
-CFLAGS+=-Wall -Werror
+CFLAGS+=-Wall -Werror -O3
 endif
 
 .PHONY:	default
-default: SampleCodeASM.lst
+#default: SampleCodeASM.lst
+default: all-archs
 
 .PHONY: all-archs
-all-archs: default yaASM.exe yaASM-macosx
+all-archs: yaASM yaASM.exe yaASM-macosx
 
-SampleCodeASM.lst: yaASM SampleCodeASM.asm
-	./yaASM SampleCodeASM.asm
+SampleCodeASM.lst: yaASM SampleCodeASM.obc
+	./yaASM SampleCodeASM.obc
 	mv yaASM.bin SampleCodeASM.bin
 	mv yaASM.lst SampleCodeASM.lst
 
-yaASM: yaASM.c ../yaYUL/SymbolTable.c
-	gcc ${CFLAGS} -o $@ $^ -lm
+yaASM: yaASM.c Makefile
+	gcc ${CFLAGS} -m32 -o $@ $< -lm
 
-yaASM.exe: yaASM.c ../yaYUL/SymbolTable.c
-	i386-mingw32-gcc ${CFLAGS} -o $@ $^ -lm
+yaASM.exe: yaASM.c Makefile
+	i386-mingw32-gcc ${CFLAGS} -o $@ $< -lm
 
-yaASM-macosx: yaASM.c ../yaYUL/SymbolTable.c
-	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} -o $@ $^ -lm
+yaASM-macosx: yaASM.c Makefile
+	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} -o $@ $< -lm
 
 .PHONY:	clean
 clean:
-	rm -f binASM yaASM *.exe *-macosx \
+	-rm binASM yaASM *.exe *-macosx \
 		*.o *~ \
 		SampleCodeASM.bin SampleCodeASM.lst
 

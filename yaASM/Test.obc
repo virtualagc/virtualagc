@@ -1,0 +1,186 @@
+# The contents of this file have been placed into the Public Domain by its
+# author and may be reused in any way whatever.
+#
+# Filename:	Test.obc
+# Purpose:	This is Gemini OBC code created solely for the purpose
+#		of testing the OBC assembler, yaASM.  I don't claim
+#		that the program implemented by this source code has
+#		any interesting functionality beyond that.
+# Website:	http://www.ibiblo.org/apollo/Gemini.html
+# Mod history:	2011-12-15 RSB	Created.
+#
+# This code doesn't account for any of the physical constraints of the
+# OBC such as the need to avoid certain instructions sequences to prevent
+# overheating or the need to periodically refresh delay lines.  It's simply
+# a logical test of the assembler, and nothing more than that.  
+#
+# What the code actually does is to loop endlessly, calling EVENFN on even
+# iterations and ODDFN on odd iterations.  The functions EVENFN or ODDFN
+# do something (or nothing, depending on my whim), and then return to the
+# main loop.  Just for fun, I put the main loop, EVENFN, and ODDFUN in
+# different memory sectors.  I've thrown in various random comments and 
+# variables/constants that aren't used, as well, just to exercise the 
+# assembler and see if the output listing is reasonably aesthetically
+# pleasing.
+
+#        	******** IMPORTANT NOTE ********
+# DATA and CODE are operators I invented for the new OBC assembler, yaASM,
+# and which don't exist in the original OBC assembler as far as I can
+# ascertain.  DATA sets the current pointer for assembling variables 
+# and constants, while CODE sets the current pointer for assembling 
+# instructions.  The operand is of the form SECTOR-SYLLABLE-WORD for OBC
+# (or MODULE-SECTOR-SYLLABLE-WORD for LVDC).  Multiple DATA or CODE
+# operators can appear in the file, in order to assemble different
+# blocks of source code into different regions of memory. DATA and CODE
+# use whatever mode (half-word or normal) that happens to be in effect
+# at the moment.  The newly-invented directives HALF and NORM
+# can be used to change that mode at any time.
+		NORM
+		DATA	00-0-000
+		CODE	00-2-000
+
+# In real OBC code, I think that the first variable in sector 0000 would 
+# always be named KZERO and have the value 0 ... so, here it is:
+KZERO		OCT	0
+
+# VARIABLES.  Any left-hand symbol without an operator allocates
+# an uninitialized variable at the current data address.  So if we
+# happened to be at 00-0-001 right now (which we are, since we defined
+# the constant KZERO above), they'd be at 00-0-001, 00-0-002, and so on.
+                                        # COMMENT 0
+LOOPCNT
+VAR2 					# COMMENT 1
+MDIUKEY
+
+# CONSTANTS ... or more constants, anyway.
+K53		OCT	53
+K1		OCT	1		# COMMENT 2
+CONST3		DEC	129
+CONST4		DEC	-129
+CONST5		DEC	3.14159
+CONST6		DEC	32.5
+CONST7		DEC	-153.6
+CONST8		DEC	.12
+CONST9		DEC	.00012
+CONST10		DEC	52		# COMMENT 3
+CONST13		OCT	00757
+# The following are supposed to be HOP constants.  The bit ordering I'm
+# using is actually the exact opposite of what I *think* the documentation
+# says it's supposed to be, but basically I don't believe what the 
+# documentation says.  HEVENFN, HODDFN, and HLOOP are supposed to point to
+# the left-hand symbols EVENFN, ODDFN, and LOOP, respectively, which 
+# appear later in the code.  There's a newly-invented directive, HOPC,
+# to do this, so as to avoid having manually figure out the addresses of
+# the targets and form OCT constants instead.  But I do show what OCT
+# constants I think should have been formed.
+HEVENFN		HOPC	EVENFN		# OCT 000105123
+HODDFN		HOPC	ODDFN		# OCT 000107010
+HLOOP		HOPC	LOOP		# OCT 000100002
+
+# Let's put some more variables and constants in sectors 05 and 07, since
+# that's where I'm going to put the code for EVENFN and ODDFN.  These 
+# variables and constants aren't currently referenced by the code, however.
+		DATA	05-0-000
+VAR3
+VAR4
+CONST11		OCT	1234	
+		DATA	07-0-000
+VAR5
+VAR6
+CONST12		DEC	22
+
+# Here are some examples of SYN and EQU, though I don't think that they're
+# all examples that would be usable in practice.
+SVAR2		SYN	VAR2
+SCONST3		SYN	CONST3
+SVAR3		SYN	VAR3
+SCONST12	SYN	CONST12
+SHLOOP		SYN	HLOOP
+ECONST12	EQU	CONST12
+ECONST3		EQU	CONST3
+SLOOP		SYN	LOOP
+
+# Test out a bunch of weird forward references.
+SYN1		SYN	SYN2	# forward
+SYN2		SYN	SYN3	# forward
+SYN3		SYN	SYN4	# forward
+SYN4		EQU	EQU5	# forward
+EQU5		EQU	HLOOP	# finally, a backward reference.
+
+###########################################################################
+# CODE
+
+# Recall that we're at address 00-2-0000 here (because of the CODE directive
+# we used earlier), so this is where the program would start executing if we 
+# actually ran it.  The left-hand symbol START isn't referenced, but the
+# code looks prettier if it's there.
+START		CLA	KZERO		# Get 0 into accumulator
+		STO	LOOPCNT		# Save it ... it's our loop counter.
+# What our loop is going to do is to HOP using HOP constant
+# HEVENFN on even loop counts and HODDFN on odd loop counts.  (The code
+# pointed to by HCONST1 and HCONST2 will always end up coming back to LOOP
+# so that we can perform the next iteration.)
+LOOP		CLA	LOOPCNT		# Get the loop counter.
+		SUB	K1		# Decrement it.
+		STO	LOOPCNT		# Save it back to memory.
+		AND	K1		# Test the least significant bit.
+		TNZ	*+2		# On even iterations do one thing.
+		HOP	HODDFN		# On odd iterations do different thing.
+		HOP	HEVENFN
+
+# The routines pointed to by HCONST1 and HCONST2 are in memory sectors 05 and
+# 07 rather than sector 00 like the code above, so we have to use the CODE 
+# directive to change the assembler's instruction pointer to those sectors.  
+# The left-hand symbols EVENFN and ODDFN aren't actually referenced elsewhere, 
+# but we add them just to look pretty. 
+
+# This one just does nothing. 
+		CODE	05-2-123
+EVENFN		HOP	HLOOP		# Just HOP back to LOOP.
+
+# This one sort of minimally exercises the entire instruction set.
+		CODE 	07-2-010
+BACKWARD	HOP	HLOOP		# Just HOP back to LOOP.
+ODDFN		CLA	CONST3		# Divide 129 decimal by 53 octal
+		DIV	K53		# and wait a while.
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		SPQ			# Fetch the result.
+		MPY	CONST10		# Multiply by decimal 52
+		NOP			# and wait a while.
+		NOP
+		NOP
+		SHF	30		# Shift left by 1 position.
+		SHF	21		# Shift it back.
+		SHF	40		# Shift left by 2 positions.
+		SHF	20		# Shift it back.
+		SHL	1		# Same thing as above but
+		SHR	1		# using the SHL and SHR 
+		SHL	2		# synonyms for the SHF
+		SHR	2		# insruction instead!
+		SUB	K1		# Subtract 1.
+		ADD	K1		# Add it back.
+		RSU	KZERO		# Negate it ... i.e., 0-ACC.
+		TMI	MINUS		# Test sign.
+		NOP			# Shouldn't ever be able to get here!
+MINUS		RSU	KZERO		# Negate it back.  Should be 156 decimal.
+		TMI	MINUS2		# Shouldn't ever take this branch.
+HOME		AND	CONST13		# Should be decimal 140 now.
+		STO	VAR2		# Save it.
+		CLD	01		# Check if MDIU has a keystroke ready.
+		TMI	FETCHKEY	# Branch if it does.
+		NOP			# If we got here, there was no key pressed.
+ENDFETCH	TRA	BACKWARD	# All done!
+		
+FETCHKEY	PRO	43		# Fetch keystroke from MDIU
+		STO	MDIUKEY		# Save it for later.
+		CLA	KZERO		# Reset MDIU buffer.
+		PRO	40
+		TRA	ENDFETCH		
+		
+MINUS2		NOP			# Shouldn't ever be able to get here!
+		TRA	HOME
