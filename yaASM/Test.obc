@@ -8,6 +8,7 @@
 #		any interesting functionality beyond that.
 # Website:	http://www.ibiblo.org/apollo/Gemini.html
 # Mod history:	2011-12-15 RSB	Created.
+#		2011-12-20 RSB	Fixed SPQ operand.
 #
 # This code doesn't account for any of the physical constraints of the
 # OBC such as the need to avoid certain instructions sequences to prevent
@@ -147,13 +148,13 @@ ODDFN		CLA	CONST3		# Divide 129 decimal by 53 octal
 		NOP
 		NOP
 		NOP
-		NOP
-		NOP
-		SPQ			# Fetch the result.
+		SPQ	VAR5		# Save the result.
+		CLA	VAR5
 		MPY	CONST10		# Multiply by decimal 52
 		NOP			# and wait a while.
 		NOP
-		NOP
+		SPQ	VAR6		# Save the result.
+		CLA	VAR6
 		SHF	30		# Shift left by 1 position.
 		SHF	21		# Shift it back.
 		SHF	40		# Shift left by 2 positions.
