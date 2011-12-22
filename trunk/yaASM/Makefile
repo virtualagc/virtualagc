@@ -19,6 +19,10 @@
 # Filename:	Makefile
 # Purpose:	Makefile for the yaASM assembler.
 # Mods:		2010-01-30 RSB	Adapted from yaLEMAP Makefile.
+#
+# The default is to build using the native gcc. To cross build from 
+# Linux to get Win32 and Mac OS X executables as well (make all-archs), 
+# you need to have IMCROSS (http://www/sandroid.org/imcross) installed.
 
 ifndef PREFIX
 ifdef MSYSTEM
@@ -31,14 +35,19 @@ endif	# MSYSTEM
 
 ifeq "${USER}" "rburkey"
 CFLAGS+=-Wall -Werror -O3
+WEB=${HOME}/Projects/sandroid.org/public_html/apollo/Downloads
+SAVE=cp yaASM yaASM.exe yaASM-macosx ${WEB}
+else
+SAVE=echo "All done!"
 endif
 
 .PHONY:	default
 #default: SampleCodeASM.lst
-default: all-archs
+default: yaASM
 
 .PHONY: all-archs
 all-archs: yaASM yaASM.exe yaASM-macosx
+	${SAVE}
 
 SampleCodeASM.lst: yaASM SampleCodeASM.obc
 	./yaASM SampleCodeASM.obc

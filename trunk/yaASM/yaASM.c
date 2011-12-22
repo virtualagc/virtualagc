@@ -40,6 +40,10 @@
  *                              new features that I think needed to be
  *                              added to the original ... though not
  *                              necessarily completely debugged.
+ *              2011-12-20 RSB  Corrected the SPQ instruction, which
+ *                              for some reason I thought stored the
+ *                              result in the accumulator rather than
+ *                              in memory.
  */
 
 #include <stdlib.h>
@@ -209,7 +213,7 @@ static const ParseType_t ParseTypes[OP_OPCODES] =
         { 012, OT_YX }, // SHF
         { 013, OT_ADDRESS, AT_CODE }, // TMI
         { 014, OT_ADDRESS, AT_DATA }, //STO
-        { 015, OT_NONE }, // SPQ
+        { 015, OT_ADDRESS, AT_DATA }, // SPQ
         { 016, OT_YX }, // CLD
         { 017, OT_ADDRESS, AT_CODE }, // TNZ
         { 011, OT_NOP }, // NOP
@@ -368,8 +372,7 @@ main(int argc, char *argv[])
           fprintf(stderr, "                assembles for Gemini OBC.\n");
           fprintf(stderr,
               "--hwm           (Gemini OBC only.) Start assembly in\n");
-          fprintf(stderr,
-              "                \"half-word mode\". (HALF or NORM\n");
+          fprintf(stderr, "                \"half-word mode\". (HALF or NORM\n");
           fprintf(stderr,
               "                directives within the source code itself\n");
           fprintf(stderr, "                can change the mode.)\n");
@@ -1142,12 +1145,11 @@ Pass(enum PassType_t PassType)
       if (Operatored)
         {
           CurrentField++; // Move on to operand field, if any.
-          // Except for NOP and SPQ, every operator has a single operand,
+          // Except for NOP, every operator has a single operand,
           // so we can check at this point for non-existence (though
           // not correctness) of operands, as well as get any
           // remaining comment.
-          if (SymbolType == ST_CODE && (Operator == OP_NOP || Operator
-              == OP_SPQ))
+          if (SymbolType == ST_CODE && Operator == OP_NOP)
             /* CurrentField-- */;
           else
             {
@@ -1438,7 +1440,8 @@ Pass(enum PassType_t PassType)
                 > '7' || Fields[CurrentField][1] < '0'
                 || Fields[CurrentField][1] > '7')
               Bad = 1;
-            else if (Length == 3 && Fields[CurrentField][2] != '4')
+            else if (Length == 3 && Fields[CurrentField][2] != '0'
+                && Fields[CurrentField][2] != '4')
               Bad = 1;
             if (Bad)
               {
