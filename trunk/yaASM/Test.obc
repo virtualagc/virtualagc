@@ -26,6 +26,32 @@
 # variables/constants that aren't used, as well, just to exercise the 
 # assembler and see if the output listing is reasonably aesthetically
 # pleasing.
+#
+# Memory allocation for Program Module 0:
+#	Sector 00:	Just enough code and data to jump to sector 17
+#			(the residual sector), where the main program
+#			resides.
+#	Sector 05:	Some code that does nothing much, which the
+#			main program HOPs to from time to time, and
+#			which is supposed to HOP back to the main
+#			program immediately.
+#	Sector 07:	Some code that the main program HOPs to 
+#			occasionally, which is intended to exercise
+#			the entire instruction set of the CPU and
+#			then HOP back to the main program.
+#	Sector 17:	(The residual sector.)  This is where the
+#			main program is stored.  It's just an 
+#			endless loop that alternately runs the
+#			code in sector 05 and 07.
+# Memory allocation for Program Module 1:
+#	Sector 07:	A mutated form of the code from sector 07
+#			of program module 0, which is functionally
+#			identical but word-for-word different. It
+#			can be loaded into main memory by the 
+#			debugger's ATM command, and is intended to
+#			test the ability of the assembler, 
+#			emulator, and debugger to deal with loadable
+#			program modules.
 
 #        	******** IMPORTANT NOTE ********
 # DATA and CODE are operators I invented for the new OBC assembler, yaASM,
@@ -43,20 +69,25 @@
 		DATA	0-00-0-000
 		CODE	0-00-2-000
 
-# In real OBC code, I think that the first variable in sector 0000 would 
-# always be named KZERO and have the value 0 ... so, here it is:
-KZERO		OCT	0
+# I'm going to put the main program in the residual sector, so let's
+# just start out by jumping up there.
+HSTART		HOPC	START
+		HOP	HSTART
+		
+		DATA	0-17-0-000
+		CODE	0-17-2-000
 
 # VARIABLES.  Any left-hand symbol without an operator allocates
 # an uninitialized variable at the current data address.  So if we
-# happened to be at 00-0-001 right now (which we are, since we defined
-# the constant KZERO above), they'd be at 00-0-001, 00-0-002, and so on.
+# happened to be at 0-17-0-000 right now (which we are),
+# they'd be at 0-17-0-000, 0-17-0-001, and so on.
                                         # COMMENT 0
 LOOPCNT
 VAR2 					# COMMENT 1
 MDIUKEY
 
-# CONSTANTS ... or more constants, anyway.
+# CONSTANTS
+KZERO		OCT	0
 K53		OCT	53
 K1		OCT	1		# COMMENT 2
 CONST3		DEC	129
@@ -114,7 +145,7 @@ EQU5		EQU	HLOOP	# finally, a backward reference.
 ###########################################################################
 # CODE
 
-# Recall that we're at address 00-2-0000 here (because of the CODE directive
+# Recall that we're at address 0-17-2-0000 here (because of the CODE directive
 # we used earlier), so this is where the program would start executing if we 
 # actually ran it.  The left-hand symbol START isn't referenced, but the
 # code looks prettier if it's there.

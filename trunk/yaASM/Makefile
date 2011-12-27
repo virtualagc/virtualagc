@@ -36,7 +36,7 @@ endif	# MSYSTEM
 ifeq "${USER}" "rburkey"
 CFLAGS+=-Wall -Werror -O3
 WEB=${HOME}/Projects/sandroid.org/public_html/apollo/Downloads
-SAVE=cp yaASM yaASM.exe yaASM-macosx ${WEB}
+SAVE=cp yaASM yaASM.exe yaASM-macosx Test.obc ${WEB}
 else
 SAVE=echo "All done!"
 endif
