@@ -96,6 +96,8 @@ ParseLocation(char *Location, uint32_t **Mem32, uint16_t **Mem16M,
     uint16_t **Mem16L, Address_t **MemAddress);
 int
 ParseValue(char *ValueString, int *Value);
+void
+SleepMilliseconds (unsigned Milliseconds);
 
 typedef int
 HalOutputFunction_t(int xy, int32_t Value);
@@ -383,6 +385,11 @@ main(int argc, char *argv[])
   int i, RetVal = 1;
   int NeedDebuggerPrompt = 1;
 
+#ifdef PTW32_STATIC_LIB
+  // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
+  pthread_win32_process_attach_np();
+#endif
+
   printf("yaOBC emulator for Gemini OBC and Apollo LVDC computers.\n");
   printf("Built " __DATE__ ", " __TIME__ "\n");
 
@@ -410,7 +417,7 @@ main(int argc, char *argv[])
         }
       printf("Warning: Could not read %s, zeroing PRO/CLD MEM driver.\n",
           IoFile);
-      for (i = 0; i <= 077; i++)
+      for (i = 0; i < MAX_YX; i++)
         {
           ProCategories[i].Value = 0;
           CldCategories[i].Value = 0;
@@ -486,6 +493,7 @@ main(int argc, char *argv[])
         {
           Run = 0;
           DebuggerPause = 0;
+          EmulatorPause = 0;
           NeedDebuggerPrompt = 1;
         }
       if (DebuggerRun)
@@ -500,10 +508,11 @@ main(int argc, char *argv[])
         {
           CyclesNeeded = StepN;
           StepN = 0;
+          NeedDebuggerPrompt = 0;
         }
       else if (Run)
         CyclesNeeded = ComputeNeededCycles();
-      if (!Run || NeedDebuggerPrompt)
+      if ((!Run && !CyclesNeeded) || NeedDebuggerPrompt)
         {
           DisplayCurrentDebuggingLocation();
           NeedDebuggerPrompt = 0;
@@ -517,20 +526,17 @@ main(int argc, char *argv[])
 
       // Sleep for a little to avoid hogging 100% CPU time.  The amount
       // we choose doesn't really matter.
-        {
-#ifdef WIN32
-          Sleep (10);
-#else
-          struct timespec Req, Rem;
-          Req.tv_sec = 0;
-          Req.tv_nsec = 10 * 1000 * 1000; // 10 milliseconds.
-          nanosleep(&Req, &Rem);
-#endif
-        }
+      SleepMilliseconds (10);
     }
 
   RetVal = 0;
   Done: ;
+
+#ifdef PTW32_STATIC_LIB
+  // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
+  pthread_win32_process_detach_np();
+#endif
+
   return (RetVal);
 }
 
@@ -1059,9 +1065,8 @@ DisplayCurrentDebuggingLocation(void)
   if (Lvdc)
     Value = ILLEGAL_VALUE;
   else
-    Value
-        = Binary[0][(HopRegister.Word & 0400) ? 0 : HopRegister.Page][HopRegister.Syllable][HopRegister.Word
-            & 0377];
+    Value = Binary[0][(HopRegister.Word & 0400) ? RESIDUAL_SECTOR
+        : HopRegister.Page][HopRegister.Syllable][HopRegister.Word & 0377];
   BuildObcHopRegisterFromAddress(&HopRegister, &RawHopRegister);
   printf("\n");
   printf("HOP=%09o (", RawHopRegister);
@@ -1075,7 +1080,8 @@ DisplayCurrentDebuggingLocation(void)
       PrintAddress(&HopRegister);
       printf(" HWM=%d VAL=%05o", HopRegister.HalfWordMode, Value & BITS13);
     }
-  printf(")  ACC=%09o  PQ=%09o (TMR:%d)\n", Accumulator & BITS26, (PqRegister
+  printf(")\n");
+  printf("ACC=%09o PQ=%09o (TMR:%d)\n", Accumulator & BITS26, (PqRegister
       & BITS26), ((PqRegister >> 28) & 0x07));
 
   // Display timing info.
@@ -1105,7 +1111,7 @@ DisplayCurrentDebuggingLocation(void)
           memcpy(&Key.Address, &HopRegister, sizeof(Address_t));
           if (Key.Address.Word & 0400)
             {
-              Key.Address.Page = 0;
+              Key.Address.Page = RESIDUAL_SECTOR;
               Key.Address.Word &= 0377;
             }
           for (i = 0; i < MAX_MODULES; i++)
@@ -1115,6 +1121,14 @@ DisplayCurrentDebuggingLocation(void)
                   sizeof(SourceLine_t), CompareSourceByAddresses);
               if (Result == NULL)
                 continue;
+              // If there are multiple lines associated with the same
+              // address, this might not be the first one.  Need to
+              // search backward linearly to be sure.
+              for (; Result > SourceLines && !CompareSourceByAddresses(&Key,
+                  Result - 1); Result--)
+                ;
+              // Now iterate to try to fine a match with respect
+              // to the contents of the memory location.
               Retry: ;
               if (Result->Value == (Value & BITS13))
                 {
@@ -1246,7 +1260,7 @@ int32_t CldMem[64] =
 int
 ProOutputFunctionMem(int xy, int32_t Value)
 {
-  if (xy < 0 || xy > 077)
+  if (xy < 0 || xy >= MAX_YX)
     return (1);
   ProCategories[xy].Value = Value & BITS26;
   return (0);
@@ -1255,7 +1269,7 @@ ProOutputFunctionMem(int xy, int32_t Value)
 int
 ProInputFunctionMem(int xy, int32_t *Value)
 {
-  if (xy < 0 || xy > 077)
+  if (xy < 0 || xy >= MAX_YX)
     return (1);
   *Value = (ProCategories[xy].Value & BITS26);
   return (0);
@@ -1264,7 +1278,7 @@ ProInputFunctionMem(int xy, int32_t *Value)
 int
 CldOutputFunctionMem(int xy, int32_t Value)
 {
-  if (xy < 0 || xy > 077)
+  if (xy < 0 || xy >= MAX_YX)
     return (1);
   CldCategories[xy].Value = (Value != 0);
   return (0);
@@ -1273,7 +1287,7 @@ CldOutputFunctionMem(int xy, int32_t Value)
 int
 CldInputFunctionMem(int xy, int32_t *Value)
 {
-  if (xy < 0 || xy > 077)
+  if (xy < 0 || xy >= MAX_YX)
     return (1);
   *Value = (CldCategories[xy].Value != 0);
   return (0);
@@ -1298,13 +1312,13 @@ ReadIoFile(void)
       goto Done;
     }
 
-  for (i = 0; i <= 077; i++)
+  for (i = 0; i < MAX_YX; i++)
     {
       if (2 != fscanf(fp, "PRO %o %o\n", &k, &j) || k != i)
         goto Done;
       ProCategories[i].Value = j & BITS26;
     }
-  for (i = 0; i <= 077; i++)
+  for (i = 0; i < MAX_YX; i++)
     {
       if (2 != fscanf(fp, "CLD %o %o\n", &k, &j) || k != i)
         goto Done;
@@ -1333,13 +1347,13 @@ WriteIoFile(char *IoFile)
   if (fp == NULL)
     goto Done;
 
-  for (i = 0; i <= 077; i++)
+  for (i = 0; i < MAX_YX; i++)
     {
       if (fprintf(fp, "PRO %02o %09o\n", i, ProCategories[i].Value & BITS26)
           <= 0)
         goto Done;
     }
-  for (i = 0; i <= 077; i++)
+  for (i = 0; i < MAX_YX; i++)
     {
       if (fprintf(fp, "CLD %02o %o\n", i, CldCategories[i].Value != 0) <= 0)
         goto Done;
@@ -1420,9 +1434,8 @@ RunOneMachineCycle(void)
   else
     {
       hwm = HopRegister.HalfWordMode;
-      Value
-          = Binary[0][(HopRegister.Word & 0400) ? 0 : HopRegister.Page][HopRegister.Syllable][HopRegister.Word
-              & 0377];
+      Value = Binary[0][(HopRegister.Word & 0400) ? RESIDUAL_SECTOR
+          : HopRegister.Page][HopRegister.Syllable][HopRegister.Word & 0377];
     }
 
   // Get the instruction we want to decode.
@@ -1442,12 +1455,14 @@ RunOneMachineCycle(void)
     }
   Value &= 0777;
   // pMem points to the operand memory location as if it contains code.
-  pMem = (Value & 0400) ? (&Binary[0][0][HopRegister.Syllable][Value & 0377])
-      : (&Binary[0][HopRegister.Page][HopRegister.Syllable][Value & 0377]);
+  pMem
+      = (Value & 0400) ? (&Binary[0][RESIDUAL_SECTOR][HopRegister.Syllable][Value
+          & 0377])
+          : (&Binary[0][HopRegister.Page][HopRegister.Syllable][Value & 0377]);
   // dMem0 and dMem1 point to the operand memory location as if it contains data.
   if (hwm)
     {
-      dMem0 = (Value & 0400) ? (&Binary[0][0][2][Value & 0377])
+      dMem0 = (Value & 0400) ? (&Binary[0][RESIDUAL_SECTOR][2][Value & 0377])
           : (&Binary[0][HopRegister.Page][2][Value & 0377]);
       dMem1 = NULL;
       Data = *dMem0 & BITS13;
@@ -1456,9 +1471,9 @@ RunOneMachineCycle(void)
     }
   else
     {
-      dMem0 = (Value & 0400) ? (&Binary[0][0][0][Value & 0377])
+      dMem0 = (Value & 0400) ? (&Binary[0][RESIDUAL_SECTOR][0][Value & 0377])
           : (&Binary[0][HopRegister.Page][0][Value & 0377]);
-      dMem1 = (Value & 0400) ? (&Binary[0][0][1][Value & 0377])
+      dMem1 = (Value & 0400) ? (&Binary[0][RESIDUAL_SECTOR][1][Value & 0377])
           : (&Binary[0][HopRegister.Page][1][Value & 0377]);
       Data = (*dMem0 & BITS13) | ((*dMem1 & BITS13) << 13);
       if (Data & BIT26)
@@ -1608,7 +1623,7 @@ RunOneMachineCycle(void)
     Jump: ;
     memcpy(&JumpHOP, &HopRegister, sizeof(Address_t));
     if (Value & 0400)
-      JumpHOP.Page = 0;
+      JumpHOP.Page = RESIDUAL_SECTOR;
     JumpHOP.Word = Value & 0377;
     WasJump = 1;
     break;
@@ -1745,6 +1760,7 @@ void *
 DebuggerThreadFunction(void *Data)
 {
 #define MAX_FIELDS 64
+  int LastWasNext = 0;
 
   // Loop forever.
   pthread_mutex_lock(&DebuggerMutex);
@@ -1762,7 +1778,14 @@ DebuggerThreadFunction(void *Data)
       pthread_mutex_lock(&DebuggerMutex);
       if (NULL == s)
         continue;
-      DebuggerPause = 1;
+      if (Run)
+        {
+          DebuggerPause = 1;
+          pthread_mutex_unlock(&DebuggerMutex);
+          while (DebuggerPause)
+            SleepMilliseconds (10);
+          pthread_mutex_lock(&DebuggerMutex);
+        }
 
       // Normalize the input string somewhat by trimming off leading spaces
       // and trailing CR or LF.
@@ -1792,15 +1815,19 @@ DebuggerThreadFunction(void *Data)
             for (s = ss + 1; isspace (*s); s++)
               ;
         }
-      if (NumFields < 1)
-        continue;
 
       // Convert the first field, which contains the command, to upper case.
-      for (s = Fields[0]; *s; s++)
-        *s = toupper(*s);
+      if (NumFields >= 1)
+        for (s = Fields[0]; *s; s++)
+          *s = toupper(*s);
 
       // Interpret the command entered by the user.
-      if (!strcmp(Fields[0], "EXIT") || !strcmp(Fields[0], "QUIT"))
+      if (NumFields < 1)
+        {
+          if (LastWasNext)
+            goto Step;
+        }
+      else if (LastWasNext = 0, (!strcmp(Fields[0], "EXIT") || !strcmp(Fields[0], "QUIT")))
         {
           WriteBinaryFile("yaOBC.bin");
           WriteIoFile("yaOBC.io");
@@ -1818,6 +1845,8 @@ DebuggerThreadFunction(void *Data)
       else if (!strcmp(Fields[0], "STEP") || !strcmp(Fields[0], "NEXT")
           || !strcmp(Fields[0], "S") || !strcmp(Fields[0], "N"))
         {
+          Step:;
+          LastWasNext = 1;
           if (NumFields < 2)
             StepN = 1;
           else
@@ -1871,19 +1900,19 @@ DebuggerThreadFunction(void *Data)
       else if (!strcmp(Fields[0], "BREAKPOINTS"))
         {
           int yx, m, p, s, w;
-          for (m = 0; m <= 7; m++)
-            for (p = 0; p <= 017; p++)
-              for (s = 0; s <= 2; s++)
-                for (w = 0; w <= 0377; w++)
+          for (m = 0; m < MAX_MODULES; m++)
+            for (p = 0; p < MAX_SECTORS; p++)
+              for (s = 0; s < MAX_SYLLABLES; s++)
+                for (w = 0; w < MAX_WORDS; w++)
                   if (Binary[m][p][s][w] != ILLEGAL_VALUE
                       && (Binary[m][p][s][w] & BREAK13) != 0)
                     printf("Breakpoint at %o-%02o-%o-%03o.\n", m, p, s, w);
-          for (yx = 0; yx <= 077; yx++)
+          for (yx = 0; yx < MAX_YX; yx++)
             {
               if (0 != (ProCategories[yx].Value & BREAK26))
                 printf("Breakpoint at PRO%02o.\n", yx);
             }
-          for (yx = 0; yx <= 077; yx++)
+          for (yx = 0; yx < MAX_YX; yx++)
             {
               if (0 != (CldCategories[yx].Value & BREAK26))
                 printf("Breakpoint at CLD%02o.\n", yx);
@@ -1903,7 +1932,7 @@ DebuggerThreadFunction(void *Data)
               for (i = 0; i < 8 * 16 * 3 * 256; i++, Mem++)
                 if (*Mem != ILLEGAL_VALUE)
                   *Mem &= ~BREAK13;
-              for (i = 0; i <= 077; i++)
+              for (i = 0; i < MAX_YX; i++)
                 {
                   ProCategories[i].Value &= ~BREAK26;
                   CldCategories[i].Value &= ~BREAK26;
@@ -2030,7 +2059,8 @@ DebuggerThreadFunction(void *Data)
       else
         printf("Unknown debugger command: %s\n", Fields[0]);
 
-      DisplayDebuggerPrompt();
+      if (!StepN)
+        DisplayDebuggerPrompt();
     }
 
   pthread_mutex_unlock(&DebuggerMutex);
@@ -2075,28 +2105,29 @@ ParseLocation(char *Location, uint32_t **Mem32, uint16_t **Mem16M,
       *Mem32 = &PqRegister;
       return (0);
     }
-  if (4 == sscanf(Location, "%o-%o-%o-%o", &m, &p, &s, &w) && m >= 0 && m <= 7
-      && p >= 0 && p <= 15 && s >= 0 && s <= 2 && w >= 0 && w <= 255)
+  if (4 == sscanf(Location, "%o-%o-%o-%o", &m, &p, &s, &w) && m >= 0 && m
+      < MAX_MODULES && p >= 0 && p < MAX_SECTORS && s >= 0 && s < MAX_SYLLABLES
+      && w >= 0 && w < MAX_WORDS)
     {
       *Mem16L = &Binary[m][p][s][w];
       return (0);
     }
   if (!strncasecmp(Location, "D-", 2) && 4 == sscanf(Location + 2,
-      "%o-%o-%o-%o", &m, &p, &s, &w) && m >= 0 && m <= 7 && p >= 0 && p <= 15
-      && s == 0 && w >= 0 && w <= 255)
+      "%o-%o-%o-%o", &m, &p, &s, &w) && m >= 0 && m < MAX_MODULES && p >= 0
+      && p < MAX_SECTORS && s == 0 && w >= 0 && w < MAX_WORDS)
     {
       *Mem16M = &Binary[m][p][1][w];
       *Mem16L = &Binary[m][p][0][w];
       return (0);
     }
   if (!strncasecmp(Location, "PRO", 3) && 1 == sscanf(Location + 3, "%o", &yx)
-      && yx >= 0 && yx <= 077)
+      && yx >= 0 && yx < MAX_YX)
     {
       *Mem32 = (uint32_t*) &ProCategories[yx].Value;
       return (0);
     }
   if (!strncasecmp(Location, "CLD", 3) && 1 == sscanf(Location + 3, "%o", &yx)
-      && yx >= 0 && yx <= 077)
+      && yx >= 0 && yx < MAX_YX)
     {
       *Mem32 = (uint32_t*) &CldCategories[yx].Value;
       return (0);
@@ -2189,8 +2220,9 @@ ParseValue(char *ValueString, int *Value)
     }
   if (((!strncasecmp(ValueString, "H-", 2) && 4 == sscanf(ValueString + 2,
       "%o-%o-%o-%o", &m, &p, &s, &w)) || 4 == sscanf(ValueString,
-      "%o-%o-%o-%o", &m, &p, &s, &w)) && m >= 0 && m <= 7 && p >= 0 && p <= 017
-      && s >= 0 && s <= 2 && w >= 0 && w <= 0377)
+      "%o-%o-%o-%o", &m, &p, &s, &w)) && m >= 0 && m < MAX_MODULES && p >= 0
+      && p < MAX_SECTORS && s >= 0 && s < MAX_SYLLABLES && w >= 0 && w
+      < MAX_WORDS)
     {
       uint32_t Value32;
       Address_t Address;
@@ -2256,4 +2288,21 @@ ParseValue(char *ValueString, int *Value)
         }
     }
   return (1);
+}
+
+//==========================================================================
+
+void
+SleepMilliseconds (unsigned Milliseconds)
+{
+  if (Milliseconds == 0)
+    return;
+#ifdef WIN32
+  Sleep (Milliseconds);
+#else
+  struct timespec Req, Rem;
+  Req.tv_sec = Milliseconds / 1000;
+  Req.tv_nsec = (Milliseconds % 1000) * 1000 * 1000; // 10 milliseconds.
+  nanosleep(&Req, &Rem);
+#endif
 }

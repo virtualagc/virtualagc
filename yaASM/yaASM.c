@@ -391,25 +391,25 @@ main(int argc, char *argv[])
           //    fprintf(stderr, "For OBC, module number must be 0.\n");
           //    goto Help;
           //  }
-          if ((m < 0 || m > 7) /*&& Lvdc*/)
+          if ((m < 0 || m >= MAX_MODULES) /*&& Lvdc*/)
             {
-              fprintf(stderr, "Module number must be 0-7.\n");
+              fprintf(stderr, "Module number out of range.\n");
               goto Help;
             }
-          if (p < 0 || p > 15)
+          if (p < 0 || p >= MAX_SECTORS)
             {
-              fprintf(stderr, "Page is limited to 0-17 octal\n");
+              fprintf(stderr, "Sector number out of range.\n");
               goto Help;
             }
-          if (s < 0 || s > 2 || (s > 1 && Lvdc))
+          if (s < 0 || s >= MAX_SYLLABLES || (s > 1 && Lvdc))
             {
               fprintf(stderr,
-                  "Syllable is limited to 0,1,2 for OBC or 0,1 for LVDC.\n");
+                  "Syllable number out of range.\n");
               goto Help;
             }
-          if (w < 0 || w > 255)
+          if (w < 0 || w >= MAX_WORDS)
             {
-              fprintf(stderr, "Word-number is limited to 0-377 octal.\n");
+              fprintf(stderr, "Word-number out of range.\n");
               goto Help;
             }
         }
@@ -545,7 +545,7 @@ main(int argc, char *argv[])
                   OperandValue |= 0400000;
                 OperandValue |= (RefSymbol->Address.Syllable & 3) << 14;
                 OperandValue |= (RefSymbol->Address.Page & 0x0F) << 9;
-                if (RefSymbol->Address.Page == 0)
+                if (RefSymbol->Address.Page == RESIDUAL_SECTOR)
                   OperandValue |= 0400;
                 Symbols[i].Value = OperandValue;
                 if (WriteBinary(ST_CONSTANT, &Symbols[i].Address,
@@ -1560,7 +1560,7 @@ Pass(enum PassType_t PassType)
                     }
                 }
               OperandValue = Result->Address.Word;
-              if (Result->Address.Page == 0)
+              if (Result->Address.Page == RESIDUAL_SECTOR)
                 OperandValue |= 0400; // Set residual sector.
 
               else if (Result->Address.Page != Address->Page)
