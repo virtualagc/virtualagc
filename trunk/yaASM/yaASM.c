@@ -44,6 +44,12 @@
  *                              for some reason I thought stored the
  *                              result in the accumulator rather than
  *                              in memory.
+ *              2011-12-23 RSB  Implemented program modules for OBC ...
+ *                              turns out to be implemented exactly
+ *                              the same way as memory modules for LVDC!
+ *                              Also changed the binary output slightly
+ *                              in order to incorporate a starting
+ *                              HOP constant.
  */
 
 #include <stdlib.h>
@@ -53,34 +59,13 @@
 #include <math.h>
 #include <stdint.h>
 #include <time.h>
-
-// The following junk is to insure that if running on Linux or Mac that
-// it produces a result that Windows can read.
-#ifdef WIN32
-#define NL "\n"
-#else
-#define NL "\r\n"
-#endif
-
-typedef struct
-{
-  int Module;
-  int Page;
-  // OBC: Note that for instructions, Syllable can be any
-  // of 0, 1, 2.  For data, if 0 it implies that normal
-  // mode is used and the 26-bit word fills up syllables
-  // 0 *and* 1; if 2 it implies half-word mode and 13-bit
-  // data is in syllable 2; a value of 1 isn't allowed for
-  // for data.
-  int Syllable;
-  int Word;
-  int HalfWordMode;
-} Address_t;
+#include "./yaASM.h"
 
 // Command-line options.
 static int Lvdc = 0; // If 0, then OBC.
 static int HalfWordMode = 0; // Can change during assembly.
 static Address_t InstructionPointer, StartingInstructionPointer =
+  { 0, 0, 2, 0 }, ObcEntry =
   { 0, 0, 2, 0 };
 static Address_t DataPointer, StartingDataPointer =
   { 0, 0, 0, 0 };
@@ -92,38 +77,14 @@ enum PassType_t
 static int
 Pass(enum PassType_t PassType);
 
-// Line- and field-buffers.  The line-length was originally limited to
-// 80 characters by the characteristics of punch-cards.  We extend that
-// to 132 characters, but the buffers must additionally have room for
-// '\n' and a terminating nul.  Finally, we leave an additional space
-// as a trick for detecting that the input line was too long for the
-// buffer.
-#define LINESIZE 135
-typedef char Line_t[LINESIZE];
+// Line- and field-buffers.
 #define MAX_FIELDS 4
 static Line_t InputLine, Comment, Fields[MAX_FIELDS];
 static char *FieldStarts[MAX_FIELDS];
 static int NumFields;
 
 // Symbol table.
-enum SymbolType_t
-{
-  ST_NONE = 0, ST_CODE, ST_VARIABLE, ST_CONSTANT, ST_HOPC, ST_EQU, ST_SYN
-};
-typedef struct
-{
-  enum SymbolType_t Type, RefType;
-  Address_t Address;
-  int Value;
-  char Name[9];
-  char RefName[9]; // For EQU or SYN.
-  int Line; // Source-code line at which the symbol is defined.
-} Symbol_t;
-// I could save some memory here by making the symbol list dynamically
-// expandable, but what would be the point? The number was chosen
-// semi-arbitrarily.
-#define MAXSYMBOLS 4096
-static Symbol_t Symbols[MAXSYMBOLS];
+static SymbolList_t Symbols;
 static int NumSymbols = 0;
 
 // Variables for tracking files and lines.
@@ -144,8 +105,7 @@ static int CurrentFileDepth = 0;
 // with the illegal value 0xFFFF, and we use that later
 // to detect uninitialized memory or else memory that
 // has been overwritten (at assembly time).
-static uint16_t Binary[8][16][3][256];
-#define ILLEGAL_VALUE 0xFFFF
+static BinaryImage_t Binary;
 
 // List of opcodes and pseudo-ops.
 static const char *Operators[] =
@@ -218,14 +178,14 @@ static const ParseType_t ParseTypes[OP_OPCODES] =
         { 017, OT_ADDRESS, AT_CODE }, // TNZ
         { 011, OT_NOP }, // NOP
         { 012, OT_SHR }, // SHR
-        { 013, OT_SHL } };
+        { 012, OT_SHL } };
 
 /////////////////////////////////////////////////////////////////////////
 // Various helper functions.
 
 // Write the value of a symbol to binary.
 static int
-WriteBinary(enum SymbolType_t Type, Address_t *Address, uint16_t Value)
+WriteBinary(enum SymbolType_t Type, Address_t *Address, uint32_t Value)
 {
   int i, Count = 0, RetVal = 0;
   uint16_t *Destination;
@@ -242,8 +202,8 @@ WriteBinary(enum SymbolType_t Type, Address_t *Address, uint16_t Value)
         {
           RetVal++;
           fprintf(stderr, "Trying to overwrite binary at address ");
-          if (Lvdc)
-            fprintf(stderr, "%02o-", Address->Module);
+          //if (Lvdc)
+          fprintf(stderr, "%o-", Address->Module);
           fprintf(stderr, "%02o-%o-%03o\n", Address->Page, Address->Syllable,
               Address->Word);
         }
@@ -352,7 +312,7 @@ main(int argc, char *argv[])
   FILE *OutFile;
 
   // Initialize the binary as completely unused.
-  for (i = 0, u = &Binary[0][0][0][0]; i < 8 * 16 * 256 * 3; i++, u++)
+  for (i = 0, u = &Binary[0][0][0][0]; i < MAX_ADDRESSES; i++, u++)
     *u = ILLEGAL_VALUE;
 
   // Parse the command-line options.
@@ -379,9 +339,7 @@ main(int argc, char *argv[])
           fprintf(stderr,
               "--code=M-P-S-W  Starting address for instructions.\n");
           fprintf(stderr,
-              "                M is the module number in octal (0-17\n");
-          fprintf(stderr,
-              "                for LVDC but always 0 for OBC). P is\n");
+              "                M is the module number (0-7). P is\n");
           fprintf(stderr,
               "                the page number in octal (0-17). S is\n");
           fprintf(stderr,
@@ -428,14 +386,14 @@ main(int argc, char *argv[])
           StartingDataPointer.Syllable = s;
           StartingDataPointer.Word = w;
           ParseAddressForError: ;
-          if (m != 0 && !Lvdc)
+          //if (m != 0 && !Lvdc)
+          //  {
+          //    fprintf(stderr, "For OBC, module number must be 0.\n");
+          //    goto Help;
+          //  }
+          if ((m < 0 || m > 7) /*&& Lvdc*/)
             {
-              fprintf(stderr, "For OBC, module number must be 0.\n");
-              goto Help;
-            }
-          if ((m < 0 || m > 15) && Lvdc)
-            {
-              fprintf(stderr, "For LVDC, module number must be 0-17 octal.\n");
+              fprintf(stderr, "Module number must be 0-7.\n");
               goto Help;
             }
           if (p < 0 || p > 15)
@@ -625,8 +583,8 @@ main(int argc, char *argv[])
   for (i = 0; i < NumSymbols; i++)
     {
       printf("%-8s at address ", Symbols[i].Name);
-      if (Lvdc)
-        printf("%02o-", Symbols[i].Address.Module);
+      //if (Lvdc)
+      printf("%o-", Symbols[i].Address.Module);
       printf("%02o-%o-%03o: ", Symbols[i].Address.Page,
           Symbols[i].Address.Syllable, Symbols[i].Address.Word);
       switch (Symbols[i].Type)
@@ -634,6 +592,8 @@ main(int argc, char *argv[])
       case ST_CODE:
         printf("Left-hand symbol");
         PrintRef(&Symbols[i]);
+        if (!strcmp(Symbols[i].Name, "OBCENTRY"))
+          memcpy(&ObcEntry, &Symbols[i].Address, sizeof(Address_t));
         break;
       case ST_VARIABLE:
         printf("Uninitialized variable");
@@ -663,8 +623,8 @@ main(int argc, char *argv[])
   printf("------------------------" NL);
   for (i = 0; i < NumSymbols; i++)
     {
-      if (Lvdc)
-        printf("%02o-", Symbols[i].Address.Module);
+      //if (Lvdc)
+      printf("%o-", Symbols[i].Address.Module);
       printf("%02o-%o-%03o, ", Symbols[i].Address.Page,
           Symbols[i].Address.Syllable, Symbols[i].Address.Word);
       printf("%-8s: ", Symbols[i].Name);
@@ -702,15 +662,15 @@ main(int argc, char *argv[])
   // In this loop, j is a state variable that we use to
   // avoid printing chunks of uninitialized memory.
   j = 0;
-  for (m = 0; m < (Lvdc ? 8 : 1); m++)
-    for (p = 0; p < 16; p++)
-      for (w = 0; w < 256; w++)
+  for (m = 0; m < MAX_MODULES; m++)
+    for (p = 0; p < MAX_SECTORS; p++)
+      for (w = 0; w < MAX_WORDS; w++)
         {
           // We'll print 4 words per line.
           if (0 == (w & 3))
             {
               // Is the entire block uninitialized?
-              for (s = 0; s < (Lvdc ? 2 : 3); s++)
+              for (s = 0; s < MAX_SYLLABLES; s++)
                 for (k = 0; k < 4; k++)
                   if (Binary[m][p][s][w + k] != ILLEGAL_VALUE)
                     {
@@ -728,8 +688,8 @@ main(int argc, char *argv[])
                     }
                   j = 1;
                 }
-              if (Lvdc)
-                printf("%02o-", m);
+              //if (Lvdc)
+              printf("%o-", m);
               printf("%02o-N-%03o:", p, w);
               if (j)
                 {
@@ -758,7 +718,7 @@ main(int argc, char *argv[])
             printf(NL);
         }
 
-  // Output the binary for use by the simulator if/when it's created.
+  // Output the binary for use by the emulator if/when it's created.
   OutFile = fopen("yaASM.bin", "wb");
   if (OutFile == NULL)
     {
@@ -767,7 +727,15 @@ main(int argc, char *argv[])
     }
   else
     {
-      if (sizeof(Binary) != fwrite(Binary, 1, sizeof(Binary), OutFile))
+      uint32_t HopRegister = 0, Accumulator = 0, PqRegister = 0;
+      HopRegister = ObcEntry.Word & 0777;
+      HopRegister |= (ObcEntry.Page & 017) << 9;
+      HopRegister |= (ObcEntry.Syllable & 03) << 14;
+      HopRegister |= (ObcEntry.HalfWordMode & 01) << 17;
+      if (1 != fwrite(Binary, sizeof(Binary), 1, OutFile) || 1 != fwrite(
+          &HopRegister, sizeof(HopRegister), 1, OutFile) || 1 != fwrite(
+          &Accumulator, sizeof(Accumulator), 1, OutFile) || 1 != fwrite(
+          &PqRegister, sizeof(PqRegister), 1, OutFile))
         {
           fclose(OutFile);
           fprintf(stderr, "Error: Write-error on output file yaASM.bin.\n");
@@ -865,8 +833,8 @@ Pass(enum PassType_t PassType)
             {
               if (Commented)
                 {
-                  if (Lvdc)
-                    printf("   ");
+                  //if (Lvdc)
+                  printf("   ");
                   if (FirstChar == '#')
                     printf("                   \t#%s", Comment);
                   else
@@ -940,8 +908,8 @@ Pass(enum PassType_t PassType)
           InstructionPointer.HalfWordMode = HalfWordMode;
           if (PassType == PT_CODE)
             {
-              if (Lvdc)
-                printf("   ");
+              //if (Lvdc)
+              printf("   ");
               printf("                   \t         %s" NL, Fields[0]);
             }
           continue;
@@ -952,8 +920,8 @@ Pass(enum PassType_t PassType)
           InstructionPointer.HalfWordMode = HalfWordMode;
           if (PassType == PT_CODE)
             {
-              if (Lvdc)
-                printf("   ");
+              //if (Lvdc)
+              printf("   ");
               printf("                   \t         %s" NL, Fields[0]);
             }
           continue;
@@ -975,7 +943,7 @@ Pass(enum PassType_t PassType)
                   Input, LineInFile);
               goto Done;
             }
-          if (Lvdc)
+          //if (Lvdc)
             {
               if (4 != sscanf(Fields[1], "%o-%o-%o-%o", &m, &p, &s, &w))
                 {
@@ -985,19 +953,21 @@ Pass(enum PassType_t PassType)
                   goto Done;
                 }
             }
-          else
-            {
-              m = 0;
-              if (3 != sscanf(Fields[1], "%o-%o-%o", &p, &s, &w))
-                {
-                  fprintf(stderr,
-                      "%s:%d: error: Operand for DATA/CODE needs 3 fields.\n",
-                      Input, LineInFile);
-                  goto Done;
-                }
-            }
-          if (m < 0 || m > 7 || p < 0 || p > 15 || s < 0 || s > (Lvdc ? 2 : 3)
-              || w < 0 || w > 255)
+          /*
+           else
+           {
+           m = 0;
+           if (3 != sscanf(Fields[1], "%o-%o-%o", &p, &s, &w))
+           {
+           fprintf(stderr,
+           "%s:%d: error: Operand for DATA/CODE needs 3 fields.\n",
+           Input, LineInFile);
+           goto Done;
+           }
+           }
+           */
+          if (m < 0 || m >= MAX_MODULES || p < 0 || p >= MAX_SECTORS || s < 0
+              || s > (Lvdc ? 2 : 3) || w < 0 || w > MAX_WORDS)
             {
               if (4 != sscanf(Fields[1], "%o-%o-%o-%o", &m, &p, &s, &w))
                 {
@@ -1034,11 +1004,11 @@ Pass(enum PassType_t PassType)
             }
           if (PassType == PT_CODE)
             {
-              if (Lvdc)
-                printf("   ");
+              //if (Lvdc)
+              printf("   ");
               printf("                   \t         %s ", Fields[0]);
-              if (Lvdc)
-                printf("%02o-", m);
+              //if (Lvdc)
+              printf("%o-", m);
               printf("%02o-%o-%03o" NL, p, s, w);
             }
           continue;
@@ -1191,10 +1161,10 @@ Pass(enum PassType_t PassType)
         if (PassType == PT_CODE)
           {
             // Write to the listing.
-            if (Lvdc)
-              printf("%02o-", DataPointer.Module);
-            else
-              printf("   ");
+            //if (Lvdc)
+            printf("%o-", DataPointer.Module);
+            //else
+            //  printf("   ");
             printf("%02o-%o-%03o ", DataPointer.Page, DataPointer.Syllable,
                 DataPointer.Word);
             printf("          ");
@@ -1234,10 +1204,10 @@ Pass(enum PassType_t PassType)
                 sizeof(Symbol_t), CompareSymbols);
             // Print to listing.  The binary was written in between
             // the PT_SYMBOLS and PT_CODE.
-            if (Lvdc)
-              printf("%02o-", OurLeftHandSymbol->Address.Module);
-            else
-              printf("   ");
+            //if (Lvdc)
+            printf("%o-", OurLeftHandSymbol->Address.Module);
+            //else
+            //  printf("   ");
             printf("%02o-%o-%03o ", OurLeftHandSymbol->Address.Page,
                 OurLeftHandSymbol->Address.Syllable,
                 OurLeftHandSymbol->Address.Word);
@@ -1369,10 +1339,10 @@ Pass(enum PassType_t PassType)
                 goto Done;
               }
             // Write to the listing.
-            if (Lvdc)
-              printf("%02o-", DataPointer.Module);
-            else
-              printf("   ");
+            //if (Lvdc)
+            printf("%o-", DataPointer.Module);
+            //else
+            //  printf("   ");
             printf("%02o-%o-%03o ", DataPointer.Page, DataPointer.Syllable,
                 DataPointer.Word);
             if (DataPointer.Syllable == 2)
@@ -1616,10 +1586,10 @@ Pass(enum PassType_t PassType)
             fprintf(stderr, "%s:%d: error: Aborting.\n", Input, LineInFile);
             goto Done;
           }
-        if (Lvdc)
-          printf("%02o-", InstructionPointer.Module);
-        else
-          printf("   ");
+        //if (Lvdc)
+        printf("%o-", InstructionPointer.Module);
+        //else
+        //  printf("   ");
         printf("%02o-%o-%03o ", InstructionPointer.Page,
             InstructionPointer.Syllable, InstructionPointer.Word);
         printf("    %05o ", OperandValue);
