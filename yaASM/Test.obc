@@ -9,6 +9,9 @@
 # Website:	http://www.ibiblo.org/apollo/Gemini.html
 # Mod history:	2011-12-15 RSB	Created.
 #		2011-12-20 RSB	Fixed SPQ operand.
+#		2011-12-23 RSB	Added module numbers to CODE and DATA.
+#				Also, added some junk to program 
+#				module II.
 #
 # This code doesn't account for any of the physical constraints of the
 # OBC such as the need to avoid certain instructions sequences to prevent
@@ -37,8 +40,8 @@
 # at the moment.  The newly-invented directives HALF and NORM
 # can be used to change that mode at any time.
 		NORM
-		DATA	00-0-000
-		CODE	00-2-000
+		DATA	0-00-0-000
+		CODE	0-00-2-000
 
 # In real OBC code, I think that the first variable in sector 0000 would 
 # always be named KZERO and have the value 0 ... so, here it is:
@@ -81,11 +84,11 @@ HLOOP		HOPC	LOOP		# OCT 000100002
 # Let's put some more variables and constants in sectors 05 and 07, since
 # that's where I'm going to put the code for EVENFN and ODDFN.  These 
 # variables and constants aren't currently referenced by the code, however.
-		DATA	05-0-000
+		DATA	0-05-0-000
 VAR3
 VAR4
 CONST11		OCT	1234	
-		DATA	07-0-000
+		DATA	0-07-0-000
 VAR5
 VAR6
 CONST12		DEC	22
@@ -122,7 +125,7 @@ START		CLA	KZERO		# Get 0 into accumulator
 # pointed to by HCONST1 and HCONST2 will always end up coming back to LOOP
 # so that we can perform the next iteration.)
 LOOP		CLA	LOOPCNT		# Get the loop counter.
-		SUB	K1		# Decrement it.
+		ADD	K1		# Increment it.
 		STO	LOOPCNT		# Save it back to memory.
 		AND	K1		# Test the least significant bit.
 		TNZ	*+2		# On even iterations do one thing.
@@ -136,11 +139,11 @@ LOOP		CLA	LOOPCNT		# Get the loop counter.
 # but we add them just to look pretty. 
 
 # This one just does nothing. 
-		CODE	05-2-123
+		CODE	0-05-2-123
 EVENFN		HOP	HLOOP		# Just HOP back to LOOP.
 
 # This one sort of minimally exercises the entire instruction set.
-		CODE 	07-2-010
+		CODE 	0-07-2-010
 BACKWARD	HOP	HLOOP		# Just HOP back to LOOP.
 ODDFN		CLA	CONST3		# Divide 129 decimal by 53 octal
 		DIV	K53		# and wait a while.
@@ -170,7 +173,7 @@ ODDFN		CLA	CONST3		# Divide 129 decimal by 53 octal
 		NOP			# Shouldn't ever be able to get here!
 MINUS		RSU	KZERO		# Negate it back.  Should be 156 decimal.
 		TMI	MINUS2		# Shouldn't ever take this branch.
-HOME		AND	CONST13		# Should be decimal 140 now.
+HOME		AND	CONST13		# Should be decimal 140 after this.
 		STO	VAR2		# Save it.
 		CLD	01		# Check if MDIU has a keystroke ready.
 		TMI	FETCHKEY	# Branch if it does.
@@ -185,3 +188,67 @@ FETCHKEY	PRO	43		# Fetch keystroke from MDIU
 		
 MINUS2		NOP			# Shouldn't ever be able to get here!
 		TRA	HOME
+
+###########################################################################
+# Though this test file has code in it for overlaying memory using the ATM,
+# here are a few doo-dads for other program modules in the ATM at addresses
+# that overlap some of those above.  It's really just a duplicate of what's
+# already in sector 07, but with the names changed ... and using syllable
+# 0 for code rather than syllable 2, since syllable 2 can't be modified at
+# runtime.
+		CODE	1-07-2-011
+# When module 1 is loaded from ATM, the following instruction
+# will overlay the previously-existing ODDFN.		
+		HOP	HODDFNA
+		
+		DATA	1-07-0-000
+VAR5A
+VAR6A
+CONST12A	DEC	23
+HODDFNA		HOPC	ODDFNA
+		CODE 	1-07-0-010
+BACKWARA	HOP	HLOOP		# Just HOP back to LOOP.
+ODDFNA		CLA	CONST3		# Divide 129 decimal by 53 octal
+		DIV	K53		# and wait a while.
+		NOP
+		NOP
+		NOP
+		NOP
+		SPQ	VAR5A		# Save the result.
+		CLA	VAR5A
+		MPY	CONST10		# Multiply by decimal 52
+		NOP			# and wait a while.
+		NOP
+		SPQ	VAR6A		# Save the result.
+		CLA	VAR6A
+		SHF	30		# Shift left by 1 position.
+		SHF	21		# Shift it back.
+		SHF	40		# Shift left by 2 positions.
+		SHF	20		# Shift it back.
+		SHL	1		# Same thing as above but
+		SHR	1		# using the SHL and SHR 
+		SHL	2		# synonyms for the SHF
+		SHR	2		# insruction instead!
+		SUB	K1		# Subtract 1.
+		ADD	K1		# Add it back.
+		RSU	KZERO		# Negate it ... i.e., 0-ACC.
+		TMI	MINUSA		# Test sign.
+		NOP			# Shouldn't ever be able to get here!
+MINUSA		RSU	KZERO		# Negate it back.  Should be 156 decimal.
+		TMI	MINUS2A		# Shouldn't ever take this branch.
+HOMEA		AND	CONST13		# Should be decimal 140 now.
+		STO	VAR2		# Save it.
+		CLD	01		# Check if MDIU has a keystroke ready.
+		TMI	FETCHKEA	# Branch if it does.
+		NOP			# If we got here, there was no key pressed.
+ENDFETCA	TRA	BACKWARA	# All done!
+		
+FETCHKEA	PRO	43		# Fetch keystroke from MDIU
+		STO	MDIUKEY		# Save it for later.
+		CLA	KZERO		# Reset MDIU buffer.
+		PRO	40
+		TRA	ENDFETCA		
+		
+MINUS2A		NOP			# Shouldn't ever be able to get here!
+		TRA	HOMEA
+		

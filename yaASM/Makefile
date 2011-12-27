@@ -54,20 +54,19 @@ SampleCodeASM.lst: yaASM SampleCodeASM.obc
 	mv yaASM.bin SampleCodeASM.bin
 	mv yaASM.lst SampleCodeASM.lst
 
-yaASM: yaASM.c Makefile
+yaASM: yaASM.c yaASM.h Makefile
 	gcc ${CFLAGS} -m32 -o $@ $< -lm
 
-yaASM.exe: yaASM.c Makefile
+yaASM.exe: yaASM.c yaASM.h Makefile
 	i386-mingw32-gcc ${CFLAGS} -o $@ $< -lm
 
-yaASM-macosx: yaASM.c Makefile
+yaASM-macosx: yaASM.c yaASM.h Makefile
 	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} -o $@ $< -lm
 
 .PHONY:	clean
 clean:
 	-rm binASM yaASM *.exe *-macosx \
-		*.o *~ \
-		SampleCodeASM.bin SampleCodeASM.lst
+		*.o *.bin *.lst *.io *~
 
 %.o:	%.c ../yaYUL/yaYUL.h
 	gcc ${CFLAGS} -DNVER=${NVER} -c -o $@ $<
