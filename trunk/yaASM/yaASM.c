@@ -50,6 +50,7 @@
  *                              Also changed the binary output slightly
  *                              in order to incorporate a starting
  *                              HOP constant.
+ *              2011-12-27 RSB  Was using wrong sector as residual.
  */
 
 #include <stdlib.h>
