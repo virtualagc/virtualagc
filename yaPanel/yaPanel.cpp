@@ -56,6 +56,8 @@
 
 #include <wx/wx.h>
 #include <wx/sizer.h>
+#include <wx/timer.h>
+#include "time.h"
 
 // Just for testing output widgets.  Comment out to get normal functionality.
 #define DEBUG_WIDGETS
@@ -528,6 +530,10 @@ Graphic_t Graphics[] =
     { "trs-disp-digit-8.png" },
     { "trs-disp-digit-9.png" }, };
 int NumGraphics = (sizeof(Graphics) / sizeof(Graphics[0]));
+#define MAX_CLOCK_ANGLES 120
+Graphic_t HandsHours[MAX_CLOCK_ANGLES], HandsMinutes[MAX_CLOCK_ANGLES],
+    HandsSeconds[MAX_CLOCK_ANGLES];
+
 /////////////////////////////////////////////////////////////////////
 
 class wxImagePanel : public wxPanel
@@ -536,6 +542,7 @@ class wxImagePanel : public wxPanel
   wxBitmap resized, widget;
   int w, h;
   int xLeftDown, yLeftDown, WidgetIndex;
+  wxTimer *Timer;
 
 public:
   wxImagePanel(wxFrame* parent, wxString file, wxBitmapType format);
@@ -564,6 +571,8 @@ public:
   leftUp(wxMouseEvent& event);
   void
   rightClick(wxMouseEvent& event);
+  void
+  TimerEvent(wxTimerEvent& event);
   /*
    void mouseMoved(wxMouseEvent& event);
    void mouseDown(wxMouseEvent& event);
@@ -590,11 +599,13 @@ EVT_RIGHT_DOWN(wxImagePanel::rightClick)
  EVT_MOUSEWHEEL(wxImagePanel::mouseWheelMoved)
  */
 
+EVT_TIMER(12345, wxImagePanel::TimerEvent)
+
 // catch paint events
 EVT_PAINT(wxImagePanel::paintEvent)
 //Size event
 EVT_SIZE(wxImagePanel::OnSize)
-END_EVENT_TABLE()
+END_EVENT_TABLE();
 
 // some useful events
 /*
@@ -608,50 +619,85 @@ END_EVENT_TABLE()
  void wxImagePanel::keyReleased(wxKeyEvent& event) {}
  */
 
-wxImagePanel::wxImagePanel(wxFrame* parent, wxString file, wxBitmapType format) :
-wxPanel(parent)
-  {
-    // load the file... ideally add a check to see if loading was successful
-    image.LoadFile(file, format);
-    w = -1;
-    h = -1;
-    // Load all widget images.
-    int i;
-    for (i = 1; i < NumGraphics; i++)
-      {
-        wxString Filename = wxString((char *) Graphics[i].Name, wxConvUTF8);
-        Graphics[i].UnscaledImage = new wxImage (Filename, wxBITMAP_TYPE_PNG);
-        Graphics[i].ScaledImage = new wxImage (100, 100);
-      }
-    // Default settings for the various outputs that need them
-    // here.  Things like momentary pushbuttons don't need defaults,
-    // but stateful widgets like toggles and rotaries do.
-    Fields[mdr_power].State = toggle_down;
-    Fields[ivi_rotary1].State = ivi_rotary_middle;
-    Fields[ivi_rotary2].State = ivi_rotary_middle;
-    Fields[ivi_rotary3].State = ivi_rotary_middle;
-    Fields[ivi_indicator1_aft].State = ivi_indicator1_aft_off;
-    Fields[ivi_indicator1_fwd].State = ivi_indicator1_fwd_off;
-    Fields[ivi_indicator2_l].State = ivi_indicator2_l_off;
-    Fields[ivi_indicator2_r].State = ivi_indicator2_r_off;
-    Fields[ivi_indicator3_up].State = ivi_indicator3_up_off;
-    Fields[ivi_indicator3_dn].State = ivi_indicator3_dn_off;
-    Fields[pcdp_power].State = toggle_down;
-    Fields[pcdp_rotary].State = pcdp_rotary_5;
-    Fields[pcdp_indicator_comp].State = pcdp_indicator_comp_off;
-    Fields[pcdp_indicator_malf].State = pcdp_indicator_malf_off;
-    Fields[trs_et_toggle1].State = toggle_middle;
-    Fields[trs_et_toggle2].State = toggle_middle;
-    Fields[trs_et_rotary].State = trs_et_rotary_middle;
-    Fields[trs_metdc_toggle].State = toggle_middle;
-    Fields[trs_metdc_rotary].State = trs_metdc_rotary_middle;
+void
+wxImagePanel::TimerEvent(wxTimerEvent& event)
+{
+  wxPaintDC dc(this);
+  render(dc);
+}
 
-    // Produce all of the necessary rotations of the clock hands.
-    for (i = 0; i < 60; i++)
-      {
-        // TBD.
-      }
-  }
+wxImagePanel::wxImagePanel(wxFrame* parent, wxString file, wxBitmapType format) :
+  wxPanel(parent)
+{
+  // load the file... ideally add a check to see if loading was successful
+  image.LoadFile(file, format);
+  w = -1;
+  h = -1;
+  // Load all widget images.
+  int i;
+  for (i = 1; i < NumGraphics; i++)
+    {
+      wxString Filename = wxString((char *) Graphics[i].Name, wxConvUTF8);
+      Graphics[i].UnscaledImage = new wxImage(Filename, wxBITMAP_TYPE_PNG);
+      Graphics[i].ScaledImage = new wxImage(100, 100);
+    }
+  // Default settings for the various outputs that need them
+  // here.  Things like momentary pushbuttons don't need defaults,
+  // but stateful widgets like toggles and rotaries do.
+  Fields[mdr_power].State = toggle_down;
+  Fields[ivi_rotary1].State = ivi_rotary_middle;
+  Fields[ivi_rotary2].State = ivi_rotary_middle;
+  Fields[ivi_rotary3].State = ivi_rotary_middle;
+  Fields[ivi_indicator1_aft].State = ivi_indicator1_aft_off;
+  Fields[ivi_indicator1_fwd].State = ivi_indicator1_fwd_off;
+  Fields[ivi_indicator2_l].State = ivi_indicator2_l_off;
+  Fields[ivi_indicator2_r].State = ivi_indicator2_r_off;
+  Fields[ivi_indicator3_up].State = ivi_indicator3_up_off;
+  Fields[ivi_indicator3_dn].State = ivi_indicator3_dn_off;
+  Fields[pcdp_power].State = toggle_down;
+  Fields[pcdp_rotary].State = pcdp_rotary_5;
+  Fields[pcdp_indicator_comp].State = pcdp_indicator_comp_off;
+  Fields[pcdp_indicator_malf].State = pcdp_indicator_malf_off;
+  Fields[trs_et_toggle1].State = toggle_middle;
+  Fields[trs_et_toggle2].State = toggle_middle;
+  Fields[trs_et_rotary].State = trs_et_rotary_middle;
+  Fields[trs_metdc_toggle].State = toggle_middle;
+  Fields[trs_metdc_rotary].State = trs_metdc_rotary_middle;
+
+  // Produce all of the necessary rotations of the clock hands.
+  for (i = 0; i < MAX_CLOCK_ANGLES; i++)
+    {
+      double Angle = -i * 2 * 3.1415926535 / MAX_CLOCK_ANGLES;
+      wxPoint Center;
+      wxImage *Source, **Dest;
+      Source = Graphics[trs_ac_hands_hours].UnscaledImage;
+      HandsHours[i].ScaledImage = new wxImage(64, 64);
+      Dest = &HandsHours[i].UnscaledImage;
+      *Dest = new wxImage(64, 64);
+      Center.x = (Source->GetWidth() + 1) / 2;
+      Center.y = (Source->GetHeight() + 1) / 2;
+      **Dest = Source->Rotate(Angle, Center);
+
+      Source = Graphics[trs_ac_hands_minutes].UnscaledImage;
+      HandsMinutes[i].ScaledImage = new wxImage(64, 64);
+      Dest = &HandsMinutes[i].UnscaledImage;
+      *Dest = new wxImage(64, 64);
+      Center.x = (Source->GetWidth() + 1) / 2;
+      Center.y = (Source->GetHeight() + 1) / 2;
+      **Dest = Source->Rotate(Angle, Center);
+
+      Source = Graphics[trs_ac_hands_seconds].UnscaledImage;
+      HandsSeconds[i].ScaledImage = new wxImage(64, 64);
+      Dest = &HandsSeconds[i].UnscaledImage;
+      *Dest = new wxImage(64, 64);
+      Center.x = (Source->GetWidth() + 1) / 2;
+      Center.y = (Source->GetHeight() + 1) / 2;
+      **Dest = Source->Rotate(Angle, Center);
+    }
+
+  Timer = new wxTimer(this, 12345);
+  Timer->Start(1000);
+}
 
 // Mouse events.
 
@@ -1162,7 +1208,12 @@ wxImagePanel::render(wxDC& dc)
       int i;
       for (i = 1; i < NumGraphics; i++) // Skip initial dummy entry.
         Rescale(Graphics[i].UnscaledImage, Graphics[i].ScaledImage);
-      // Show clock hands ... TBD
+      for (i = 0; i < MAX_CLOCK_ANGLES; i++)
+        {
+          Rescale(HandsHours[i].UnscaledImage, HandsHours[i].ScaledImage);
+          Rescale(HandsMinutes[i].UnscaledImage, HandsMinutes[i].ScaledImage);
+          Rescale(HandsSeconds[i].UnscaledImage, HandsSeconds[i].ScaledImage);
+        }
     }
   wxMemoryDC wdc(resized);
   wxBitmap Buffer(resized.GetWidth(), resized.GetHeight());
@@ -1173,6 +1224,23 @@ wxImagePanel::render(wxDC& dc)
     if (Fields[i].Type == FT_OUT && Fields[i].State != gi_none)
       BufferedComposite(&bdc, Graphics[Fields[i].State].ScaledImage,
           Fields[i].x, Fields[i].y);
+  // Do the accutron clock hands.
+  time_t t;
+  struct tm *tm_struct;
+  time(&t);
+  tm_struct = gmtime(&t);
+  printf("%d %d %d %d %d %p %p %p\n", Fields[trs_ac_hands].x,
+      Fields[trs_ac_hands].y, tm_struct->tm_hour * 5, tm_struct->tm_min * 2,
+      tm_struct->tm_sec * 2, HandsHours[tm_struct->tm_hour * 5].ScaledImage,
+      HandsMinutes[tm_struct->tm_min * 2].ScaledImage,
+      HandsSeconds[tm_struct->tm_sec * 2].ScaledImage);
+  BufferedComposite(&bdc, HandsHours[tm_struct->tm_hour * 5].ScaledImage,
+      Fields[trs_ac_hands].x, Fields[trs_ac_hands].y);
+  BufferedComposite(&bdc, HandsMinutes[tm_struct->tm_min * 2].ScaledImage,
+      Fields[trs_ac_hands].x, Fields[trs_ac_hands].y);
+  BufferedComposite(&bdc, HandsSeconds[tm_struct->tm_sec * 2].ScaledImage,
+      Fields[trs_ac_hands].x, Fields[trs_ac_hands].y);
+  // Now actually write the buffer to the screen.
   dc.DrawBitmap(Buffer, 0, 0, false);
 }
 

@@ -1631,6 +1631,7 @@ RunOneMachineCycle(void)
     ACC_WRITE_BREAK()
     ;
     ValueToStore = Accumulator & BITS26;
+    // Sign-extend bit 26 to all 32 bits of the variable.
     if (ValueToStore & BIT26)
       ValueToStore |= ~BITS26;
     switch (Value)
@@ -1662,7 +1663,9 @@ RunOneMachineCycle(void)
       ValueToStore = ValueToStore << 2;
       break;
     default:
-      EmulatorUnimplementedXY = 1;
+      // This behavior is actually specified: Illegal XY
+      // clears the accumulator.
+      ValueToStore = 0;
       break;
       }
     Accumulator = (Accumulator & ~BITS26) | (ValueToStore & BITS26);
