@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2011,2012 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -51,6 +51,10 @@
  *                              in order to incorporate a starting
  *                              HOP constant.
  *              2011-12-27 RSB  Was using wrong sector as residual.
+ *              2012-01-07 RSB  Added HOP extensions for HOP, CLA,
+ *                              and STO instructions.
+ *              2012-01-08 RSB  Fixed to not abort instantly on
+ *                              error detection.
  */
 
 #include <stdlib.h>
@@ -89,6 +93,7 @@ static SymbolList_t Symbols;
 static int NumSymbols = 0;
 
 // Variables for tracking files and lines.
+static int ErrorCount = 0;
 static char *Input = NULL;
 static FILE *fin = NULL;
 static int LineTotal = 0, LineInFile = 0;
@@ -290,15 +295,20 @@ static void
 PrintRef(Symbol_t *Symbol)
 {
   if (Symbol->RefType == ST_NONE)
-    return;
-  printf(", created via \"");
-  if (Symbol->RefType == ST_SYN)
-    printf("SYN");
-  else if (Symbol->RefType == ST_EQU)
-    printf("EQU");
-  else if (Symbol->RefType == ST_HOPC)
-    printf("HOPC");
-  printf(" %s\"", Symbol->RefName);
+    ;
+  else if (Symbol->RefType == ST_HOPLHS)
+    printf(", created indirectly via LHS operand in HOP/CLS/STO");
+  else
+    {
+      printf(", created via \"");
+      if (Symbol->RefType == ST_SYN)
+        printf("SYN");
+      else if (Symbol->RefType == ST_EQU)
+        printf("EQU");
+      else if (Symbol->RefType == ST_HOPC)
+        printf("HOPC");
+      printf(" %s\"", Symbol->RefName);
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -404,8 +414,7 @@ main(int argc, char *argv[])
             }
           if (s < 0 || s >= MAX_SYLLABLES || (s > 1 && Lvdc))
             {
-              fprintf(stderr,
-                  "Syllable number out of range.\n");
+              fprintf(stderr, "Syllable number out of range.\n");
               goto Help;
             }
           if (w < 0 || w >= MAX_WORDS)
@@ -461,10 +470,10 @@ main(int argc, char *argv[])
     if (!strcmp(Symbols[i - 1].Name, Symbols[i].Name))
       {
         j++;
-        fprintf(
-            stderr,
-            "The symbol %s had multiple definitions, at line %d and line %d.\n",
+        printf(
+            "The symbol %s had multiple definitions, at line %d and line %d.\r\n",
             Symbols[i].Name, Symbols[i - 1].Line, Symbols[i].Line);
+        ErrorCount++;
       }
   if (j)
     goto Done;
@@ -745,10 +754,12 @@ main(int argc, char *argv[])
       fclose(OutFile);
     }
 
-  RetVal = 0;
+  if (ErrorCount == 0)
+    RetVal = 0;
   Done: ;
   if (fin != NULL)
     fclose(fin);
+  printf("\r\n%d error(s) detected.\r\n", ErrorCount);
   return (RetVal);
 }
 
@@ -783,6 +794,7 @@ Pass(enum PassType_t PassType)
       int Commented = 0, LeftHandSymboled = 0, Operatored = 0, CurrentField = 0;
       enum SymbolType_t SymbolType = ST_NONE;
       char FirstChar;
+      char OperandBuffer[MAX_SYMSIZE + 1], *OperandField;
 
       InputLine[LINESIZE - 1] = 255;
       if (NULL == fgets(InputLine, sizeof(Line_t), fin)) // Done with this file?
@@ -803,8 +815,10 @@ Pass(enum PassType_t PassType)
       LineInFile++;
       if (InputLine[LINESIZE - 1] == 0)
         {
-          fprintf(stderr, "%s:%d: error: Line too long.\n", Input, LineInFile);
-          goto Done;
+          //fprintf(stderr, "%s:%d: error: Line too long.\n", Input, LineInFile);
+          //goto Done;
+          printf("%s:%d: error: Line too long.\r\n", Input, LineInFile);
+          ErrorCount++;
         }
       FirstChar = InputLine[0];
 
@@ -854,13 +868,19 @@ Pass(enum PassType_t PassType)
         {
           if (strlen(Fields[CurrentField]) == 1)
             {
-              fprintf(stderr, "%s:%d: error: No include-file specified.\n",
-                  Input, LineInFile);
-              goto Done;
+              //fprintf(stderr, "%s:%d: error: No include-file specified.\n",
+              //    Input, LineInFile);
+              //goto Done;
+              printf("%s:%d: error: No include-file specified.\r\n", Input,
+                  LineInFile);
+              ErrorCount++;
             }
           // Push current file and open the include-file instead.
           if (CurrentFileDepth >= MAXFILEDEPTH)
             {
+              printf("%s:%d: error: Too many nested include-files.\r\n", Input,
+                  LineInFile);
+              ErrorCount++;
               fprintf(stderr, "%s:%d: error: Too many nested include-files.\n",
                   Input, LineInFile);
               goto Done;
@@ -893,6 +913,10 @@ Pass(enum PassType_t PassType)
           LineInFile = 0;
           if (fin == NULL)
             {
+              printf(
+                  "%s:%d: error: Include-file %s not found or too many files open.\r\n",
+                  Input, LineInFile, Input);
+              ErrorCount++;
               fprintf(
                   stderr,
                   "%s:%d: error: Include-file %s not found or too many files open.\n",
@@ -932,51 +956,50 @@ Pass(enum PassType_t PassType)
           int m, p, s, w;
           if (NumFields < 2)
             {
-              fprintf(stderr,
-                  "%s:%d: error: DATA or CODE require an operand.\n", Input,
-                  LineInFile);
-              goto Done;
+              //fprintf(stderr,
+              //    "%s:%d: error: DATA or CODE require an operand.\n", Input,
+              //    LineInFile);
+              //goto Done;
+              printf("%s:%d: error: DATA or CODE require an operand.\r\n",
+                  Input, LineInFile);
+              ErrorCount++;
+              strcpy(Fields[1], "0-00-0-000");
+              NumFields++;
             }
           if (NumFields > 2)
             {
-              fprintf(stderr,
-                  "%s:%d: error: Garbage following operand for DATA/CODE.\n",
+              //fprintf(stderr,
+              //    "%s:%d: error: Garbage following operand for DATA/CODE.\n",
+              //    Input, LineInFile);
+              //goto Done;
+              printf(
+                  "%s:%d: error: Garbage following operand for DATA/CODE.\r\n",
                   Input, LineInFile);
-              goto Done;
+              ErrorCount++;
+              NumFields = 2;
             }
-          //if (Lvdc)
+          if (4 != sscanf(Fields[1], "%o-%o-%o-%o", &m, &p, &s, &w))
             {
-              if (4 != sscanf(Fields[1], "%o-%o-%o-%o", &m, &p, &s, &w))
-                {
-                  fprintf(stderr,
-                      "%s:%d: error: Operand for DATA/CODE needs 4 fields.\n",
-                      Input, LineInFile);
-                  goto Done;
-                }
+              //fprintf(stderr,
+              //    "%s:%d: error: Operand for DATA/CODE needs 4 fields.\n",
+              //    Input, LineInFile);
+              //goto Done;
+              printf("%s:%d: error: Operand for DATA/CODE needs 4 fields.\r\n",
+                  Input, LineInFile);
+              ErrorCount++;
+              m = p = s = w = 0;
             }
-          /*
-           else
-           {
-           m = 0;
-           if (3 != sscanf(Fields[1], "%o-%o-%o", &p, &s, &w))
-           {
-           fprintf(stderr,
-           "%s:%d: error: Operand for DATA/CODE needs 3 fields.\n",
-           Input, LineInFile);
-           goto Done;
-           }
-           }
-           */
           if (m < 0 || m >= MAX_MODULES || p < 0 || p >= MAX_SECTORS || s < 0
               || s > (Lvdc ? 2 : 3) || w < 0 || w > MAX_WORDS)
             {
-              if (4 != sscanf(Fields[1], "%o-%o-%o-%o", &m, &p, &s, &w))
-                {
-                  fprintf(stderr,
-                      "%s:%d: error: Operand for DATA/CODE out of range.\n",
-                      Input, LineInFile);
-                  goto Done;
-                }
+              //fprintf(stderr,
+              //    "%s:%d: error: Operand for DATA/CODE out of range.\n",
+              //    Input, LineInFile);
+              //goto Done;
+              printf("%s:%d: error: Operand for DATA/CODE out of range.\r\n",
+                  Input, LineInFile);
+              ErrorCount++;
+              m = p = s = w = 0;
             }
           if (!strcmp(Fields[0], "CODE"))
             {
@@ -990,10 +1013,15 @@ Pass(enum PassType_t PassType)
             {
               if (!Lvdc && s == 1)
                 {
-                  fprintf(stderr,
-                      "%s:%d: error: Data syllable for OBC must be 0 or 2.\n",
+                  //fprintf(stderr,
+                  //    "%s:%d: error: Data syllable for OBC must be 0 or 2.\n",
+                  //    Input, LineInFile);
+                  //goto Done;
+                  printf(
+                      "%s:%d: error: Data syllable for OBC must be 0 or 2.\r\n",
                       Input, LineInFile);
-                  goto Done;
+                  ErrorCount++;
+                  s = 0;
                 }
               DataPointer.Module = m;
               DataPointer.Page = p;
@@ -1029,16 +1057,24 @@ Pass(enum PassType_t PassType)
               // Could be a duplicate symbol, but I'll do a separate check
               // for that later.  For now, just go ahead and add it to
               // the symbol list.
-              if (strlen(Fields[CurrentField]) > 8)
+              if (strlen(Fields[CurrentField]) > MAX_SYMSIZE)
                 {
-                  fprintf(
-                      stderr,
-                      "%s:%d: error: Left-hand symbol %s has too many characters.\n",
+                  //fprintf(
+                  //    stderr,
+                  //    "%s:%d: error: Left-hand symbol %s has too many characters.\n",
+                  //    Input, LineInFile, Fields[CurrentField]);
+                  //goto Done;
+                  printf(
+                      "%s:%d: error: Left-hand symbol %s has too many characters.\r\n",
                       Input, LineInFile, Fields[CurrentField]);
-                  goto Done;
+                  ErrorCount++;
+                  Fields[CurrentField][MAX_SYMSIZE] = 0;
                 }
               if (NumSymbols >= MAXSYMBOLS)
                 {
+                  printf("%s:%d: error: Max symbol-table size exceeded.\r\n",
+                      Input, LineInFile);
+                  ErrorCount++;
                   fprintf(stderr,
                       "%s:%d: error: Max symbol-table size exceeded.\n", Input,
                       LineInFile);
@@ -1094,9 +1130,14 @@ Pass(enum PassType_t PassType)
             }
           else
             {
-              fprintf(stderr, "%s:%d: error: Unrecognized operator %s.\n",
-                  Input, LineInFile, Fields[CurrentField]);
-              goto Done;
+              //fprintf(stderr, "%s:%d: error: Unrecognized operator %s.\n",
+              //    Input, LineInFile, Fields[CurrentField]);
+              //goto Done;
+              printf("%s:%d: error: Unrecognized operator %s.\r\n", Input,
+                  LineInFile, Fields[CurrentField]);
+              ErrorCount++;
+              SymbolType = ST_CODE;
+              Operator = OP_NOP;
             }
         }
 
@@ -1126,9 +1167,14 @@ Pass(enum PassType_t PassType)
             {
               if (CurrentField >= NumFields)
                 {
-                  fprintf(stderr, "%s:%d: error: Missing operand for %s.\n",
-                      Input, LineInFile, Fields[CurrentField - 1]);
-                  goto Done;
+                  //fprintf(stderr, "%s:%d: error: Missing operand for %s.\n",
+                  //    Input, LineInFile, Fields[CurrentField - 1]);
+                  //goto Done;
+                  printf("%s:%d: error: Missing operand for %s.\r\n", Input,
+                      LineInFile, Fields[CurrentField - 1]);
+                  ErrorCount++;
+                  SymbolType = ST_CODE;
+                  Operator = OP_NOP;
                 }
             }
           if (CurrentField + 1 < NumFields) // Comment?
@@ -1136,9 +1182,13 @@ Pass(enum PassType_t PassType)
             {
               if (Commented)
                 {
-                  fprintf(stderr, "%s:%d: error: Garbage after operand: %s.\n",
-                      Input, LineInFile, FieldStarts[CurrentField + 1]);
-                  goto Done;
+                  //fprintf(stderr, "%s:%d: error: Garbage after operand: %s.\n",
+                  //    Input, LineInFile, FieldStarts[CurrentField + 1]);
+                  //goto Done;
+                  printf("%s:%d: error: Garbage after operand: %s.\r\n", Input,
+                      LineInFile, FieldStarts[CurrentField + 1]);
+                  ErrorCount++;
+                  NumFields = CurrentField + 1;
                 }
               strcpy(Comment, FieldStarts[CurrentField + 1]);
               Commented = 1;
@@ -1154,10 +1204,14 @@ Pass(enum PassType_t PassType)
         // the location pointer.
         if (DataPointer.Word > 255)
           {
-            fprintf(stderr,
-                "%s:%d: error: Variable allocation past end of page.\n", Input,
-                LineInFile);
-            goto Done;
+            //fprintf(stderr,
+            //    "%s:%d: error: Variable allocation past end of page.\n", Input,
+            //    LineInFile);
+            //goto Done;
+            printf("%s:%d: error: Variable allocation past end of page.\r\n",
+                Input, LineInFile);
+            ErrorCount++;
+            DataPointer.Word = 255;
           }
         if (PassType == PT_CODE)
           {
@@ -1182,11 +1236,16 @@ Pass(enum PassType_t PassType)
       case ST_HOPC:
         if (!LeftHandSymboled)
           {
-            fprintf(
-                stderr,
-                "%s:%d: error: SYN, EQU, or SYN meaningful only with left-hand symbol.\n",
+            //fprintf(
+            //    stderr,
+            //    "%s:%d: error: SYN, EQU, or SYN meaningful only with left-hand symbol.\n",
+            //    Input, LineInFile);
+            //goto Done;
+            printf(
+                "%s:%d: error: SYN, EQU, or SYN meaningful only with left-hand symbol.\r\n",
                 Input, LineInFile);
-            goto Done;
+            ErrorCount++;
+            break;
           }
         // The operand is the name of another symbol.  We can't resolve
         // that just yet, since we don't have a complete symbol table
@@ -1241,10 +1300,14 @@ Pass(enum PassType_t PassType)
         // In this case, we either have a DEC or OCT pseudo-op.
         if (DataPointer.Word > 255)
           {
-            fprintf(stderr,
-                "%s:%d: error: Constant allocation past end of page.\n", Input,
-                LineInFile);
-            goto Done;
+            //fprintf(stderr,
+            //    "%s:%d: error: Constant allocation past end of page.\n", Input,
+            //    LineInFile);
+            //goto Done;
+            printf("%s:%d: error: Constant allocation past end of page.\r\n",
+                Input, LineInFile);
+            ErrorCount++;
+            DataPointer.Word = 255;
           }
         switch (Operator)
           {
@@ -1255,17 +1318,26 @@ Pass(enum PassType_t PassType)
             ;
           if (*sss)
             {
-              fprintf(stderr, "%s:%d: error: Not an octal number: %s.\n",
-                  Input, LineInFile, Fields[CurrentField]);
-              goto Done;
+              //fprintf(stderr, "%s:%d: error: Not an octal number: %s.\n",
+              //    Input, LineInFile, Fields[CurrentField]);
+              //goto Done;
+              printf("%s:%d: error: Not an octal number: %s.\r\n", Input,
+                  LineInFile, Fields[CurrentField]);
+              ErrorCount++;
+              OperandValue = 0;
             }
-          sscanf(Fields[CurrentField], "%o", &OperandValue);
+          else
+            sscanf(Fields[CurrentField], "%o", &OperandValue);
           if (OperandValue >= (2 << 26))
             {
-              fprintf(stderr,
-                  "%s:%d: error: Octal constant out-of-range: %s.\n", Input,
-                  LineInFile, Fields[CurrentField]);
-              goto Done;
+              //fprintf(stderr,
+              //    "%s:%d: error: Octal constant out-of-range: %s.\n", Input,
+              //    LineInFile, Fields[CurrentField]);
+              //goto Done;
+              printf("%s:%d: error: Octal constant out-of-range: %s.\r\n",
+                  Input, LineInFile, Fields[CurrentField]);
+              ErrorCount++;
+              OperandValue = 0;
             }
           break;
         case OP_DEC:
@@ -1286,9 +1358,13 @@ Pass(enum PassType_t PassType)
                 ;
               if (*sss)
                 {
-                  fprintf(stderr, "%s:%d: error: Not a decimal number: %s.\n",
-                      Input, LineInFile, Fields[CurrentField]);
-                  goto Done;
+                  //fprintf(stderr, "%s:%d: error: Not a decimal number: %s.\n",
+                  //    Input, LineInFile, Fields[CurrentField]);
+                  //goto Done;
+                  printf("%s:%d: error: Not a decimal number: %s.\r\n", Input,
+                      LineInFile, Fields[CurrentField]);
+                  ErrorCount++;
+                  strcpy(Fields[CurrentField], "0");
                 }
             }
           if (HalfWordMode)
@@ -1300,11 +1376,16 @@ Pass(enum PassType_t PassType)
               sscanf(Fields[CurrentField], "%d", &OperandValue);
               if (OperandValue >= (2 << i) || (OperandValue < -(2 << i)))
                 {
-                  fprintf(
-                      stderr,
-                      "%s:%d: error: Integer decimal constant out-of-range: %s.\n",
+                  //fprintf(
+                  //    stderr,
+                  //    "%s:%d: error: Integer decimal constant out-of-range: %s.\n",
+                  //    Input, LineInFile, Fields[CurrentField]);
+                  //goto Done;
+                  printf(
+                      "%s:%d: error: Integer decimal constant out-of-range: %s.\r\n",
                       Input, LineInFile, Fields[CurrentField]);
-                  goto Done;
+                  ErrorCount++;
+                  strcpy(Fields[CurrentField], "0");
                 }
             }
           else
@@ -1321,10 +1402,14 @@ Pass(enum PassType_t PassType)
             }
           break;
         default: // Shouldn't be able to get here.
-          fprintf(stderr,
-              "%s:%d: error: Implementation error, unparsed constant.\n",
+          //fprintf(stderr,
+          //    "%s:%d: error: Implementation error, unparsed constant.\n",
+          //    Input, LineInFile);
+          //goto Done;
+          printf("%s:%d: error: Implementation error, unparsed constant.\r\n",
               Input, LineInFile);
-          goto Done;
+          ErrorCount++;
+          OperandValue = 0;
           }
         // Having gotten to here, OperandValue contains a 2's-complement
         // value.
@@ -1336,8 +1421,11 @@ Pass(enum PassType_t PassType)
             // Write to the binary.
             if (WriteBinary(ST_CONSTANT, &DataPointer, OperandValue))
               {
-                fprintf(stderr, "%s:%d: error: Aborting.\n", Input, LineInFile);
-                goto Done;
+                //fprintf(stderr, "%s:%d: error: Aborting.\n", Input, LineInFile);
+                //goto Done;
+                printf("%s:%d: error: Binary-write error.\r\n", Input,
+                    LineInFile);
+                ErrorCount++;
               }
             // Write to the listing.
             //if (Lvdc)
@@ -1374,9 +1462,13 @@ Pass(enum PassType_t PassType)
         // of OperandValue.
         if (InstructionPointer.Word > 255)
           {
-            fprintf(stderr, "%s:%d: error: Code past end of page.\n", Input,
+            //fprintf(stderr, "%s:%d: error: Code past end of page.\n", Input,
+            //    LineInFile);
+            //goto Done;
+            printf("%s:%d: error: Code past end of page.\r\n", Input,
                 LineInFile);
-            goto Done;
+            ErrorCount++;
+            InstructionPointer.Word = 255;
           }
         switch (ParseTypes[Operator].OperandType)
           {
@@ -1389,9 +1481,13 @@ Pass(enum PassType_t PassType)
               || Fields[CurrentField][1] < '0' || Fields[CurrentField][1] > '7'
               || Fields[CurrentField][2] != 0)
             {
-              fprintf(stderr, "%s:%d: error: Not a legal YX operand.\n", Input,
+              //fprintf(stderr, "%s:%d: error: Not a legal YX operand.\n", Input,
+              //    LineInFile);
+              //goto Done;
+              printf("%s:%d: error: Not a legal YX operand.\r\n", Input,
                   LineInFile);
-              goto Done;
+              ErrorCount++;
+              strcpy(Fields[CurrentField], "00");
             }
           sscanf(Fields[CurrentField], "%o", &OperandValue);
           break;
@@ -1416,11 +1512,16 @@ Pass(enum PassType_t PassType)
               Bad = 1;
             if (Bad)
               {
-                fprintf(stderr, "%s:%d: error: Not a legal operand.\n", Input,
+                //fprintf(stderr, "%s:%d: error: Not a legal operand.\n", Input,
+                //    LineInFile);
+                //goto Done;
+                printf("%s:%d: error: Not a legal operand.\r\n", Input,
                     LineInFile);
-                goto Done;
+                ErrorCount++;
+                OperandValue = 0;
               }
-            sscanf(Fields[CurrentField], "%o", &OperandValue);
+            else
+              sscanf(Fields[CurrentField], "%o", &OperandValue);
           }
           break;
         case OT_NONE:
@@ -1433,9 +1534,13 @@ Pass(enum PassType_t PassType)
             OperandValue = 020;
           else
             {
-              fprintf(stderr, "%s:%d: error: SHR operand must be 1 or 2.\n",
-                  Input, LineInFile);
-              goto Done;
+              //fprintf(stderr, "%s:%d: error: SHR operand must be 1 or 2.\n",
+              //    Input, LineInFile);
+              //goto Done;
+              printf("%s:%d: error: SHR operand must be 1 or 2.\r\n", Input,
+                  LineInFile);
+              ErrorCount++;
+              OperandValue = 021;
             }
           break;
         case OT_SHL:
@@ -1445,15 +1550,171 @@ Pass(enum PassType_t PassType)
             OperandValue = 040;
           else
             {
-              fprintf(stderr, "%s:%d: error: SHL operand must be 1 or 2.\n",
-                  Input, LineInFile);
-              goto Done;
+              //fprintf(stderr, "%s:%d: error: SHL operand must be 1 or 2.\n",
+              //    Input, LineInFile);
+              //goto Done;
+              printf("%s:%d: error: SHL operand must be 1 or 2.\r\n", Input,
+                  LineInFile);
+              ErrorCount++;
+              OperandValue = 030;
             }
           break;
         case OT_NOP:
           OperandValue = InstructionPointer.Word + 1;
           break;
         case OT_ADDRESS:
+          OperandField = Fields[CurrentField];
+          // The HOP, CLA, and STO instructions present special difficulties,
+          // for which we have to perform some pre-processing.  Even though
+          // the operand for HOP is theoretically only a HOP constant, we
+          // allow it to be a left-hand symbol as well, in which case we
+          // allocate a HOP constant pointing to that left-hand symbol,
+          // and of the same name (but enclosed in parentheses) and then
+          // we substitute that newly-allocated HOP constant for the
+          // original operand.  Similarly, CLA and STO require var/const
+          // names, but we allow left-hand symbols there as well, allocating
+          // the HOP-constants as just described.
+          if (OperandField[0] != '*' && (ParseTypes[Operator].NumericalOpCode
+              == OP_HOP || ParseTypes[Operator].NumericalOpCode == OP_CLA
+              || ParseTypes[Operator].NumericalOpCode == OP_STO))
+            {
+              Symbol_t *Result, Key;
+              char *ss;
+              // Search for the symbol in the symbol table.
+              strcpy(Key.Name, OperandField);
+              Result = bsearch(&Key, Symbols, NumSymbols, sizeof(Symbol_t),
+                  CompareSymbols);
+              // The next block is to handle the special case in which
+              // "STO (LHS)" or "CLA (LHS)" has been used prior
+              // to a "HOP LHS" allocating the constant named
+              // "(LHS)".
+              if (Result == NULL && OperandField[0] == '(' && NULL != (ss
+                  = strstr(OperandField, ")")) && ss > &OperandField[1])
+                {
+                  Symbol_t *Result2, Key2;
+                  strncpy(Key2.Name, &OperandField[1], ss - &OperandField[1]);
+                  Result2 = bsearch(&Key2, Symbols, NumSymbols,
+                      sizeof(Symbol_t), CompareSymbols);
+                  if (Result2 != NULL && Result2->Type == ST_CODE)
+                    {
+                      // So, if we've gotten to this point, the operand was
+                      // "(something)", where "(something)" isn't already
+                      // in the symbol table, but "something" is, and
+                      // furthermore, that "something" is a left-hand symbol.
+                      // If we simply replace the operand by "something",
+                      // we should be able to fall through and let
+                      // the next steps do the work of allocating "(something)".
+                      strcpy(OperandField, Key2.Name);
+                      Result = Result2;
+                      memcpy(&Key, &Key2, sizeof(Key));
+                    }
+                }
+              // The next block is the workhorse, executed when the
+              // operand has been found and is a left-hand symbol
+              // rather than data as would normally be required for
+              // HOP, CLA, or STO.  What it has to do is to
+              // allocate "(operand)" (if it does not already exist)
+              // and doctor the instruction to use "(operand)" in
+              // place of "operand".  The main processing can then
+              // take it from there.
+              if (Result != NULL && Result->Type == ST_CODE)
+                {
+                  Symbol_t *Result2, Key2;
+                  if (strlen(OperandField) > MAX_SYMSIZE - 2)
+                    {
+                      //fprintf(
+                      //    stderr,
+                      //    "%s:%d: error: In this usage, the LHS length must be %d or less.\n",
+                      //    Input, LineInFile, MAX_SYMSIZE - 2);
+                      //goto Done;
+                      printf(
+                          "%s:%d: error: In this usage, the LHS length must be %d or less.\r\n",
+                          Input, LineInFile, MAX_SYMSIZE - 2);
+                      ErrorCount++;
+                      OperandField[MAX_SYMSIZE - 2] = 0;
+                    }
+                  // It's possible that "(operand)" already
+                  // exists, from some prior HOP/STO/CLA.
+                  sprintf(Key2.Name, "(%s)", OperandField);
+                  Result2 = bsearch(&Key2, Symbols, NumSymbols,
+                      sizeof(Symbol_t), CompareSymbols);
+                  if (Result2 == NULL) // Nope, not found.
+                    {
+                      int i, MaxWord = -1, OperandValue;
+                      if (NumSymbols >= MAXSYMBOLS)
+                        {
+                          printf(
+                              "%s:%d: error: Out of symbol space for HOP constant.\r\n",
+                              Input, LineInFile);
+                          ErrorCount++;
+                          fprintf(
+                              stderr,
+                              "%s:%d: error: Out of symbol space for HOP constant.\n",
+                              Input, LineInFile);
+                          goto Done;
+                        }
+                      // Now we have a bit of a chore finding an unused
+                      // address.  We basically have to search the entire
+                      // symbol table to find the lowest unused data address
+                      // in the current code sector, and then use that one.
+                      // That guarantees that no variables or constants are
+                      // already stored there, but it doesn't guarantee that
+                      // there won't be a conflict with code that wants to
+                      // go there.  Too bad!
+                      for (i = 0; i < NumSymbols; i++)
+                        if (Symbols[i].Address.Page == 017
+                            && Symbols[i].Address.Syllable == 0)
+                          if (Symbols[i].Address.Word > MaxWord)
+                            MaxWord = Symbols[i].Address.Word;
+                      MaxWord++;
+                      if (MaxWord >= MAX_WORDS)
+                        {
+                          //fprintf(
+                          //    stderr,
+                          //    "%s:%d: error: Out of space in sector for HOP constant.\n",
+                          //    Input, LineInFile);
+                          //goto Done;
+                          printf(
+                              "%s:%d: error: Out of space in sector for HOP constant.\r\n",
+                              Input, LineInFile);
+                          ErrorCount++;
+                          MaxWord--;
+                        }
+                      sprintf(Symbols[NumSymbols].Name, "(%s)", Key.Name);
+                      Symbols[NumSymbols].Address.HalfWordMode = 0;
+                      Symbols[NumSymbols].Address.Module = 0;
+                      Symbols[NumSymbols].Address.Page = 017;
+                      Symbols[NumSymbols].Address.Syllable = 0;
+                      Symbols[NumSymbols].Address.Word = MaxWord;
+                      Symbols[NumSymbols].Line = LineTotal;
+                      strcpy(Symbols[NumSymbols].RefName, Key.Name);
+                      Symbols[NumSymbols].Type = ST_CONSTANT;
+                      Symbols[NumSymbols].RefType = ST_HOPLHS;
+                      OperandValue = Result->Address.Word & 0377;
+                      if (Result->Address.HalfWordMode)
+                        OperandValue |= 0400000;
+                      OperandValue |= (Result->Address.Syllable & 3) << 14;
+                      OperandValue |= (Result->Address.Page & 0x0F) << 9;
+                      if (Result->Address.Page == RESIDUAL_SECTOR)
+                        OperandValue |= 0400;
+                      Symbols[NumSymbols].Value = OperandValue;
+                      if (WriteBinary(ST_CONSTANT,
+                          &Symbols[NumSymbols].Address,
+                          Symbols[NumSymbols].Value))
+                        {
+                          fprintf(stderr,
+                              "Aborting resolution of \"%s HOPC %s\".\n",
+                              Symbols[i].Name, Symbols[i].RefName);
+                          goto Done;
+                        }
+                      NumSymbols++;
+                      qsort(Symbols, NumSymbols, sizeof(Symbol_t),
+                          CompareSymbols);
+                    }
+                  sprintf(OperandBuffer, "(%s)", OperandField);
+                  OperandField = OperandBuffer;
+                }
+            }
           // We accept two cases here:  Either the operand is of the form
           // *+LiteralOctalConstant or *-LiteralOctalConstant, or else it
           // is the name of an existing symbol.  The former is actually
@@ -1468,51 +1729,69 @@ Pass(enum PassType_t PassType)
             Address = &InstructionPointer;
           else
             {
-              fprintf(stderr, "%s:%d: error: Implementation error.\n", Input,
+              //fprintf(stderr, "%s:%d: error: Implementation error.\n", Input,
+              //    LineInFile);
+              //goto Done;
+              printf("%s:%d: error: Implementation error.\r\n", Input,
                   LineInFile);
-              goto Done;
+              ErrorCount++;
+              Address = &DataPointer;
             }
-          if (Fields[CurrentField][0] == '*'
-              && ParseTypes[Operator].AddressType == AT_CODE)
+          if (OperandField[0] == '*' && ParseTypes[Operator].AddressType
+              == AT_CODE)
             {
               // Could do some checking here for garbage at the end, but
               // am too lazy.
-              if (Fields[CurrentField][1] == 0)
+              if (OperandField[1] == 0)
                 OperandValue = Address->Word;
-              else if (Fields[CurrentField][1] == '+' && 1 == sscanf(
-                  &Fields[CurrentField][2], "%o", &OperandValue))
+              else if (OperandField[1] == '+' && 1 == sscanf(&OperandField[2],
+                  "%o", &OperandValue))
                 OperandValue = Address->Word + OperandValue;
-              else if (Fields[CurrentField][1] == '-' && 1 == sscanf(
-                  &Fields[CurrentField][2], "%o", &OperandValue))
+              else if (OperandField[1] == '-' && 1 == sscanf(&OperandField[2],
+                  "%o", &OperandValue))
                 OperandValue = Address->Word - OperandValue;
               else
                 {
-                  fprintf(stderr,
-                      "%s:%d: error: Illegal relative addressing.\n", Input,
-                      LineInFile);
-                  goto Done;
+                  //fprintf(stderr,
+                  //    "%s:%d: error: Illegal relative addressing.\n", Input,
+                  //    LineInFile);
+                  //goto Done;
+                  printf("%s:%d: error: Illegal relative addressing.\r\n",
+                      Input, LineInFile);
+                  ErrorCount++;
+                  OperandValue = Address->Word;
                 }
               if (OperandValue < 0 || OperandValue > 255)
                 {
-                  fprintf(stderr,
-                      "%s:%d: error: Relative addressing past end of page.\n",
+                  //fprintf(stderr,
+                  //    "%s:%d: error: Relative addressing past end of page.\n",
+                  //    Input, LineInFile);
+                  //goto Done;
+                  printf(
+                      "%s:%d: error: Relative addressing past end of page.\r\n",
                       Input, LineInFile);
-                  goto Done;
+                  ErrorCount++;
+                  OperandValue = (OperandValue < 0) ? 0 : 255;
                 }
             }
           else
             {
-              Symbol_t *Result, Key;
+              Symbol_t *Result, Key, Dummy =
+                { 0 };
               // Search for the symbol in the symbol table.
-              strcpy(Key.Name, Fields[CurrentField]);
+              strcpy(Key.Name, OperandField);
               Result = bsearch(&Key, Symbols, NumSymbols, sizeof(Symbol_t),
                   CompareSymbols);
               if (Result == NULL)
                 {
-                  fprintf(stderr,
-                      "%s:%d: error: Symbol used as operand not found.\n",
+                  //fprintf(stderr,
+                  //    "%s:%d: error: Symbol used as operand not found.\n",
+                  //    Input, LineInFile);
+                  //goto Done;
+                  printf("%s:%d: error: Symbol used as operand not found.\r\n",
                       Input, LineInFile);
-                  goto Done;
+                  ErrorCount++;
+                  Result = &Dummy;
                 }
               if ((ParseTypes[Operator].AddressType == AT_CODE && Result->Type
                   != ST_CODE)
@@ -1520,19 +1799,27 @@ Pass(enum PassType_t PassType)
                       && Result->Type != ST_VARIABLE && Result->Type
                       != ST_CONSTANT))
                 {
-                  fprintf(
-                      stderr,
-                      "%s:%d: error: Operand symbol is wrong type (code vs. data).\n",
+                  //fprintf(
+                  //    stderr,
+                  //    "%s:%d: error: Operand symbol is wrong type (code vs. data).\n",
+                  //    Input, LineInFile);
+                  //goto Done;
+                  printf(
+                      "%s:%d: error: Operand symbol is wrong type (code vs. data).\r\n",
                       Input, LineInFile);
-                  goto Done;
+                  ErrorCount++;
                 }
               // For LVDC, need to do some module checking here.
               // TBD
               // Need to do some checking on syllable matches.
               if (HalfWordMode)
                 {
-                  fprintf(stderr, "Half-word mode not implemented yet.\n");
-                  goto Done;
+                  //fprintf(stderr, "%s:%d: error: Half-word mode not implemented yet.\n", Input, LineInFile);
+                  //goto Done;
+                  printf(
+                      "%s:%d: error: Half-word mode not implemented yet.\r\n",
+                      Input, LineInFile);
+                  ErrorCount++;
                 }
               else
                 {
@@ -1541,22 +1828,30 @@ Pass(enum PassType_t PassType)
                     {
                       if (Result->Address.Syllable != 0)
                         {
-                          fprintf(
-                              stderr,
-                              "%s:%d: error: Not in half-word mode, cannot access syllable 2 data.\n",
+                          //fprintf(
+                          //    stderr,
+                          //    "%s:%d: error: Not in half-word mode, cannot access syllable 2 data.\n",
+                          //    Input, LineInFile);
+                          //goto Done;
+                          printf(
+                              "%s:%d: error: Not in half-word mode, cannot access syllable 2 data.\r\n",
                               Input, LineInFile);
-                          goto Done;
+                          ErrorCount++;
                         }
                     }
                   else
                     {
                       if (Result->Address.Syllable != Address->Syllable)
                         {
-                          fprintf(
-                              stderr,
-                              "%s:%d: error: Cannot TRA, TMI, or TNZ to code in different syllable.\n",
+                          //fprintf(
+                          //    stderr,
+                          //    "%s:%d: error: Cannot TRA, TMI, or TNZ to code in different syllable.\n",
+                          //    Input, LineInFile);
+                          //goto Done;
+                          printf(
+                              "%s:%d: error: Cannot TRA, TMI, or TNZ to code in different syllable.\r\n",
                               Input, LineInFile);
-                          goto Done;
+                          ErrorCount++;
                         }
                     }
                 }
@@ -1566,26 +1861,35 @@ Pass(enum PassType_t PassType)
 
               else if (Result->Address.Page != Address->Page)
                 {
-                  fprintf(
-                      stderr,
-                      "%s:%d: error: Operand symbol is in an inaccessible page.\n",
+                  //fprintf(
+                  //    stderr,
+                  //    "%s:%d: error: Operand symbol is in an inaccessible page.\n",
+                  //    Input, LineInFile);
+                  //goto Done;
+                  printf(
+                      "%s:%d: error: Operand symbol is in an inaccessible page.\r\n",
                       Input, LineInFile);
-                  goto Done;
+                  ErrorCount++;
                 }
             }
           break;
         default:
-          fprintf(stderr, "%s:%d: error: Implementation error.\n", Input,
-              LineInFile);
-          goto Done;
+          //fprintf(stderr, "%s:%d: error: Implementation error.\n", Input,
+          //    LineInFile);
+          //goto Done;
+          printf("%s:%d: error: Implementation error.\r\n", Input, LineInFile);
+          ErrorCount++;
+          OperandValue = 0;
           }
         // Okay, OperandValue should now hold the A1-A9 field, so let's fill in the
         // opcode field.
         OperandValue |= (ParseTypes[Operator].NumericalOpCode << 9);
         if (WriteBinary(ST_CODE, &InstructionPointer, OperandValue))
           {
-            fprintf(stderr, "%s:%d: error: Aborting.\n", Input, LineInFile);
-            goto Done;
+            //fprintf(stderr, "%s:%d: error: Aborting.\n", Input, LineInFile);
+            //goto Done;
+            printf("%s:%d: error: Write-binary error.\r\n", Input, LineInFile);
+            ErrorCount++;
           }
         //if (Lvdc)
         printf("%o-", InstructionPointer.Module);
@@ -1606,9 +1910,12 @@ Pass(enum PassType_t PassType)
         InstructionPointer.Word++;
         break;
       default: // I don't think this can happen.
-        fprintf(stderr, "%s:%d: error: Implementation error, unparsed line.\n",
-            Input, LineInFile);
-        goto Done;
+        //fprintf(stderr, "%s:%d: error: Implementation error, unparsed line.\n",
+        //    Input, LineInFile);
+        //goto Done;
+        printf("%s:%d: error: Implementation error, unparsed line.\r\n", Input,
+            LineInFile);
+        ErrorCount++;
         }
     }
 

@@ -108,9 +108,9 @@ CONST13		OCT	00757
 # to do this, so as to avoid having manually figure out the addresses of
 # the targets and form OCT constants instead.  But I do show what OCT
 # constants I think should have been formed.
-HEVENFN		HOPC	EVENFN		# OCT 000105123
-HODDFN		HOPC	ODDFN		# OCT 000107010
-HLOOP		HOPC	LOOP		# OCT 000100002
+#HEVEN		HOPC	EVEN		# OCT 000105123
+#HODD		HOPC	ODD		# OCT 000107010
+#HLOOP		HOPC	LOOP		# OCT 000100002
 
 # Let's put some more variables and constants in sectors 05 and 07, since
 # that's where I'm going to put the code for EVENFN and ODDFN.  These 
@@ -130,7 +130,7 @@ SVAR2		SYN	VAR2
 SCONST3		SYN	CONST3
 SVAR3		SYN	VAR3
 SCONST12	SYN	CONST12
-SHLOOP		SYN	HLOOP
+SHLOOP		SYN	CONST10
 ECONST12	EQU	CONST12
 ECONST3		EQU	CONST3
 SLOOP		SYN	LOOP
@@ -140,7 +140,7 @@ SYN1		SYN	SYN2	# forward
 SYN2		SYN	SYN3	# forward
 SYN3		SYN	SYN4	# forward
 SYN4		EQU	EQU5	# forward
-EQU5		EQU	HLOOP	# finally, a backward reference.
+EQU5		EQU	ECONST3	# finally, a backward reference.
 
 ###########################################################################
 # CODE
@@ -160,8 +160,8 @@ LOOP		CLA	LOOPCNT		# Get the loop counter.
 		STO	LOOPCNT		# Save it back to memory.
 		AND	K1		# Test the least significant bit.
 		TNZ	*+2		# On even iterations do one thing.
-		HOP	HODDFN		# On odd iterations do different thing.
-		HOP	HEVENFN
+		HOP	ODD		# On odd iterations do different thing.
+		HOP	EVEN
 
 # The routines pointed to by HCONST1 and HCONST2 are in memory sectors 05 and
 # 07 rather than sector 00 like the code above, so we have to use the CODE 
@@ -171,12 +171,12 @@ LOOP		CLA	LOOPCNT		# Get the loop counter.
 
 # This one just does nothing. 
 		CODE	0-05-2-123
-EVENFN		HOP	HLOOP		# Just HOP back to LOOP.
+EVEN		HOP	LOOP		# Just HOP back to LOOP.
 
 # This one sort of minimally exercises the entire instruction set.
 		CODE 	0-07-2-010
-BACKWARD	HOP	HLOOP		# Just HOP back to LOOP.
-ODDFN		CLA	CONST3		# Divide 129 decimal by 53 octal
+BACKWARD	HOP	LOOP		# Just HOP back to LOOP.
+ODD		CLA	CONST3		# Divide 129 decimal by 53 octal
 		DIV	K53		# and wait a while.
 		NOP
 		NOP
@@ -238,7 +238,7 @@ VAR6A
 CONST12A	DEC	23
 HODDFNA		HOPC	ODDFNA
 		CODE 	1-07-0-010
-BACKWARA	HOP	HLOOP		# Just HOP back to LOOP.
+BACKWARA	HOP	LOOP		# Just HOP back to LOOP.
 ODDFNA		CLA	CONST3		# Divide 129 decimal by 53 octal
 		DIV	K53		# and wait a while.
 		NOP
