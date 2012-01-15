@@ -1,0 +1,146 @@
+# GEMINI EXECUTOR CODE
+L000	CLA	KZERO
+STO	LC4A		# All operational modes =+ for first pass initialization –Standby mode
+STO	LC4B		# Ascent mode
+STO 	LC4C		# Catch-up mode
+STO	LC4D		# Rendezvous mode
+EXECIN  CLA	KZERO	# Enter here from initialization in all modes
+	STO	CP135
+	STO	CP136
+	STO 	CP137
+	CLA	KZERO 
+	STO	DO62	# Start computations off
+	STO	D005	# Computer off
+	STO	DO64	# SECO off
+	STO	DO61	# Gain change off
+EXECR	CLA 	LC4B	
+	TMI	E7831	# Ascent fast loop (I/O A)
+E7832	CLA 	E7832A
+	HOP	I/O	# All routines except Ascent
+E7832A  CLA	E7834
+	HOP 	GONGO 	# Basic check of arith + control logic
+E7834	CLA 	E7835
+	HOP	CLOCK	# Clock subroutine
+E7835	CLA 	E7836
+	HOP	AGE	# AGE subroutine
+	TMI 	EXECTR	# If AGE request
+E7836	CLA	LC4B
+	TMI	E7837
+E7838	CLA 	E7839
+	HOP	I/O	
+E7839	CLA 	DI11	# Mode control
+E7834	TMI	E786
+E785	CLA 	DI10
+	TMI 	E787	
+E788	TRA 	E789	# Standby mode (93.1)
+E787	CLA 	DI13	# Mode control
+	TMI	E7810	# Catch-up mode (1.2)
+E7836	CLA	DI13	# Mode control
+	TMI     E7812	# Re-entry mode (35.1)
+	TRA 	E7811	# Rendezvous mode (1.1)
+E7831	CLA	E7832A
+	HOP	I/OA	# Ascent fast loop
+E7837	CLA	E7839
+	HOPA		# Ascent fast loop	
+
+# RE -ENTRY CODE 
+R35P1	CLA	LC4E
+	TMI	R35P2
+R35P2A	CLA	KZERO
+	STO 	LC4A
+	STO	LC4B
+	STO	LC4C
+	STO	LC4D
+	STO	LC10
+	STO	LC14
+	CLA	KMINUS
+	STO	LC4E
+CLA	KZERO
+STO	TRBIMI
+	STO 	DDT
+	STO	T	 	
+	STO	BE	# Bank angle error
+	STO	DYBO	# Attitude command change
+	STO	DTBO	# Attitude command change
+	STO	DPBO	# Attitude command change
+	STO	XDEI	# Velocity change due to gravity
+	STO	YDEI	# Inertially fixed orthogonal axis
+	STO	ZDEI	# Referenced to center of earth: ZE = north, XE through celestial reference frame in equatorial plane
+	STO 	CP78
+	STO	CP78
+	STO	CP80
+	CLA	EXECIN	# COL 78.2
+	HOP		# EXECIN 78.2
+R35P2A	CLA	R35P3
+	HOP	ACLMTR 	# Accelerometer subroutine
+R35P3	CLA	LC10
+	TMI	R35P5
+	CLA	FX	# Update components of retro thrust
+	MPY	K32	# 32 decimal = 2 to the 6 power
+	NOP
+	SPQ	TEMP01
+	ADD 	DXDE
+	STO	DXDE
+	CLA 	FY
+	MPY	K32
+	NOP
+	SPQ	TEMP02
+	ADD	DYDE
+	STO	DYDE
+	CLA	FZ
+	MPY	K32
+	NOP
+	SPQ	TEMP03
+	ADD 	DZDE
+	STO 	DZDE
+	CLA	R94P4
+	HOP 	I/O
+R9494	CLA 	KZERO
+	STO	DO21	# TRS Enter
+	CLA	KMINUS
+	STO 	DO65	# TR Gate
+R94P4B	CLA	KP196	# KP196 = 33B25
+	SUB	KONE	# KONE = +1
+	TNZ	R94P4C	
+	CLA 	KZERO
+R94P1	STO	DO14	# Reset transfer gate
+R94P1C	CLA	R35P2A
+	HOP 	TRS	# TRSENT subroutine
+R35P2A	STO	TRE	# Time to Retrograde in sec
+	RSU	KP369	# Time to Retro less than 300 B22 sec
+	TMI	K35P2E
+R35P2B 	CLA	KMINUS 	# By Pass DCS
+	STO	LC30
+	TRA	R35P2C
+R35P2F  CLA	KZERO
+	STO	DXDE
+	STO	DYDE
+	STO 	DZDE
+	TRA	R35P3
+R35P2E	CLA 	KZERO
+	STO	LC30	
+	TRA	K35P2C
+R35P2C 	CLA	TRE
+	SUB	KP109	# 2B22 sec
+	TMI	R35P2B
+R35P2B	CLA	DXDE
+	SUB	KP110	# KP110 = 5B9 FT/SEC
+	TMI	R35P2G
+R35P2H	CLA	T	# Zero at start of Retro instructions - negative time
+	ADD	KP111	# KP119 = 180 bit/sec
+	STO	TW	# Time to begin initial calculations
+	TRA	R36P3	# To Col 36.1 EXECUTOR
+R35P3	CLA	EXECIN 	# Executor (COL 78.3)
+	HOP		# GO TO EXECUTOR
+R35P2G	CLA	T
+	SUB 	TW	
+	TMI	R35P3
+	TRA 	R36P1	# RETRO THRUST SEQUENCE COMPLETE – (continue with Re-entry)
+
+
+	
+	
+	
+
+
+																																																												

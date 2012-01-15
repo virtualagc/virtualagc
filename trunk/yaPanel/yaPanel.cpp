@@ -77,6 +77,9 @@ int DebugDspn = 0;
 int BackgroundWidth;
 int BackgroundHeight;
 
+#define PORT 19653
+int Port = PORT;
+
 /////////////////////////////////////////////////////////////////////
 // This section is devoted to defining input fields or output widgets
 // for the UI.  A new field is implemented as follows:

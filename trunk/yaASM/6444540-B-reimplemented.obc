@@ -1,0 +1,322 @@
+# The authors of this file declare that it has been placed into the
+# Public Domain and may be used for any purpose whatever.
+#
+# Filename:	6444540-B-reimplemented.obc
+# Purpose:	This file contains assembly-language source code for 
+#		the Gemini On-Board Computer (OBC) implementing (in the 
+#		absence of actual source code from the Project Gemini
+#		era) a portion of the software design described by 
+#		the surviving Detailed Math Flow known as MF-3,
+#		program #6444540 rev. B.
+# References:	General OBC: http://www.ibiblio.org/apollo/Gemini.html
+#		MF-3: http://www.ibiblio.org/apollo/Documents/GeminiMinnickMathFlow.pdf
+# Developers:	Developers who have touched this code are referenced by 
+#		their initials, as in the following table:
+#		CAL	Charlie Leist, one of the original OBC programmers.
+#		AWM	Alden Minnick, one of the original OBC programmers.
+#		RSB	Ron Burkey, editor for the Virtual AGC project.
+# History:	2011-12-30 CAL	Initial code submitted, via docx format.
+#				This contains only the Executor program,
+#				and a small part of the Re-entry program.
+#		2012-01-08 RSB	Adapted for assembly by the yaASM assembler,
+#				mainly by adding unallocated variables and
+#				constants, and minimal left-hand symbols for
+#				code that is referenced but not implemented.
+#		2012-01-13 AWM	Reviewed changes (mods submitted by CAL).
+#		2012-01-14 RSB	Merged the review changes.  Also, moved
+#				the Executor from sector 17 (where I had
+#				mistakenly put it) to sector 00.  Also, 
+#				moved all stubbed left-hand symbols for
+#				Ascent, Catch-up, Rendezvous, and Standby
+#				to their appropriate memory sector/syllable/word,
+#				even though they do nothing as of yet. I've
+#				marked the review changes (and all side-effects
+#				of the review changes) with the notation
+#				[AWM1 ...], though some of the changes probably
+#				aren't directly due to Al.		
+
+# [RSB: added this huge block ------------------------------------------]
+
+# For now, at least, store all variables referenced by the Executor and
+# all general-purpose subroutines in the residual sector.  They probably 
+# shouldn't all go there in reality, but that will have to be figured out
+# later. Right now, they have to go somewhere in order to make the
+# the assembly go through without errors, and this is as good a place as any.
+	CODE	0-17-2-000
+	DATA	0-17-0-000
+	
+# Variables
+RETADR			# For storing return addresses.
+LC4A
+LC4B
+LC4C
+LC4D
+LC4E
+LC10
+LC14
+LC30
+CP78
+CP80
+CP135
+CP136
+CP137
+DI10
+DI11
+DI13
+DO05
+DO14
+DO21
+DO61
+DO62
+DO64
+DO65
+BE
+DDT
+DPBO
+DTBO
+DYBO
+DXDE
+DYDE
+DZDE
+DXDG			# [AWM1]
+DYDG			# [AWM1]
+DZDG			# [AWM1]
+FX
+FY
+FZ
+T
+TEMP01
+TEMP02
+TEMP03
+TRBIMI
+TRE
+TW
+XDEI
+YDEI
+ZDEI
+
+# Constants	
+KZERO	OCT	0
+KONE	OCT	1
+KMINUS	DEC	-1
+K32	DEC	32
+KP196	DEC	33
+KP369	DEC	0.369
+KP109	OCT	20000000
+KP110	OCT	5000
+KP111	DEC	180
+
+# Routines that were referenced but that haven't been implemented as of yet.
+I/O	STO	RETADR
+	HOP	RETADR
+AGE	STO	RETADR
+	HOP	RETADR
+GONGO	STO	RETADR
+	HOP	RETADR
+CLOCK	STO	RETADR
+	HOP	RETADR
+ACLMTR	STO	RETADR
+	HOP	RETADR
+TRS	STO	RETADR
+	HOP	RETADR
+	
+# Flip to sector 00 syllable 1 for Standby code.
+	CODE	0-00-1-023
+S93P1	HOP	EXECTR	# Entry point for Standby.
+
+# Flip to sector 01 syllable 2 for Catch-up & Rendezvous code.
+	CODE	0-01-2-007
+RE1P1	HOP	EXECTR	# Entry point for Rendezvous.
+	CODE	0-01-2-105
+C1P2	HOP	EXECTR  # Entry point for Catch-up.
+
+# Flip to sector 13 for Ascent code.
+	CODE	0-13-2-002
+A591	HOP	EXECTR	# [AWM1: Entry point for Ascent.]
+I/OA	STO	RETADR	# Fast ascent loop, I think.
+	HOP	RETADR	
+
+# Flip to sector 00 syllable 0 for the actual Executor code.
+	CODE	0-00-0-000
+
+# [RSB: end of added block. --------------------------------------------]
+
+# GEMINI EXECUTOR CODE
+L000	CLA	KONE	# [AWM1: Was KZERO. "Although zero is a positive number, I suggest
+			#  that you use KONE because sometimes there are tests for zero,
+			#  plus, and minus results."]
+	STO	LC4A	# All operational modes =+ for first pass initialization –Standby mode
+	STO	LC4B	# Ascent mode
+	STO 	LC4C	# Catch-up mode
+	STO	LC4D	# Rendezvous mode
+	STO	LC4E	# [AWM1]
+EXECIN  CLA	KZERO	# Enter here from initialization in all modes
+	STO	CP135
+	STO	CP136
+	STO 	CP137
+	CLA	KONE	# [AWM1: Was KZERO.] 
+	STO	DO62	# Start computations off
+	STO	DO05	# Computer off  [RSB: Changed from "D005"]
+	STO	DO64	# SECO off
+	STO	DO61	# Gain change off
+EXECTR	CLA 	LC4B	# [RSB: changed from "EXECR".]
+	TMI	E7831	# Ascent fast loop (I/O A)
+E7832	CLA 	E7832A
+	HOP	I/O	# All routines except Ascent
+E7832A  CLA	E7834
+	HOP 	GONGO 	# Basic check of arith + control logic
+E7834	CLA 	E7835
+	HOP	CLOCK	# Clock subroutine
+E7835	CLA 	E7836
+	HOP	AGE	# AGE subroutine
+	TMI 	EXECTR	# If AGE request
+E7836	CLA	LC4B
+	TMI	E7837
+E7838	CLA 	E7839
+	HOP	I/O	
+E7839	CLA 	DI11	# Mode control
+	TMI	E786	# [RSB: removed left-hand symbol "E7834"]
+E785	CLA 	DI10
+	TMI 	E787	
+E788	HOP 	S93P1	# Standby mode (93.1) [RSB: changed from "E788 TRA 789"]
+E787	CLA 	DI13	# Mode control
+	TMI	E7810	# Catch-up mode (1.2)
+	HOP	A591	# [AWM1: Ascent Mode (59.1).]
+E786	CLA	DI13	# Mode control [RSB: changed left-hand symbol from "E7836"]
+	TMI     E7812	# Re-entry mode (35.1)
+	TRA 	E7811	# Rendezvous mode (1.1)
+E7831	CLA	E7832A
+	HOP	I/OA	# Ascent fast loop
+E7837	CLA	E7839
+	HOP	I/OA	# Ascent fast loop [RSB: was "HOPA"]	
+
+# [RSB: Added this block]
+
+E7810	HOP	C1P2
+E7811	HOP	RE1P1
+E7812	HOP	R35P1
+
+# Flip to sector 06 for the Re-entry code.
+	CODE	0-06-2-000
+	DATA	0-06-0-000
+	
+# [RSB: End of added block]
+
+# RE-ENTRY CODE 
+R35P1	CLA	LC4E
+	TMI	R35P2
+	CLA	KONE	# [RSB: Removed left-hand symbol "R35P2A"]
+			# [AWM1: Was KZERO.]
+	STO 	LC4A
+	STO	LC4B
+	STO	LC4C
+	STO	LC4D
+	STO	LC10
+	STO	LC14
+	CLA	KMINUS
+	STO	LC4E
+CLA	KZERO
+STO	TRBIMI
+	STO 	DDT
+	STO	T	 	
+	STO	BE	# Bank angle error
+	STO	DYBO	# Attitude command change
+	STO	DTBO	# Attitude command change
+	STO	DPBO	# Attitude command change
+	STO	XDEI	# Velocity change due to gravity
+	STO	YDEI	# Inertially fixed orthogonal axis
+	STO	ZDEI	# Referenced to center of earth: ZE = north, XE through 
+			# celestial reference frame in equatorial plane
+	STO	DXDG	# [AWM1]
+	STO	DYDG	# [AWM1]
+	STO	DZDG	# [AWM1]
+	STO 	CP78
+	STO	CP78
+	STO	CP80
+	CLA	EXECIN	# COL 78.2  [RSB: This has no effect since EXECIN doesn't
+			# return, but I didn't change it.]
+	HOP	EXECIN	# EXECIN 78.2 [RSB: was just "HOP"]
+R35P2	CLA	R35P3	# [RSB: changed left-hand symbol from "R35P2A"]
+	HOP	ACLMTR 	# Accelerometer subroutine
+R35P3	CLA	LC10
+	TMI	R39P1   # [RSB: was "R35P5"]
+	CLA	FX	# Update components of retro thrust
+	MPY	K32	# 32 decimal = 2 to the 6 power
+	NOP
+	SPQ	TEMP01
+	ADD 	DXDE
+	STO	DXDE
+	CLA 	FY
+	MPY	K32
+	NOP
+	SPQ	TEMP02
+	ADD	DYDE
+	STO	DYDE
+	CLA	FZ
+	MPY	K32
+	NOP
+	SPQ	TEMP03
+	ADD 	DZDE
+	STO 	DZDE
+	CLA	R94P4
+	HOP 	I/O
+R94P4	CLA 	KZERO	# [RSB: Changed from "R9494"]
+	STO	DO21	# TRS Enter
+	CLA	KMINUS
+	STO 	DO65	# TR Gate
+R94P4B	CLA	KP196	# KP196 = 33B25
+R94P4C	SUB	KONE	# KONE = +1 [RSB: Added the left-hand symbol "R94P4C"]
+	TNZ	R94P4C	
+	CLA 	KZERO
+R94P1	STO	DO14	# Reset transfer gate
+R94P1C	CLA	R35P2A
+	HOP 	TRS	# TRSENT subroutine
+R35P2A	STO	TRE	# Time to Retrograde in sec
+	RSU	KP369	# Time to Retro less than 300 B22 sec
+	TMI	R35P2E	# [RSB: was "K35P2E"]
+R35P2B 	CLA	KMINUS 	# By Pass DCS
+	STO	LC30
+	TRA	R35P2C
+R35P2F  CLA	KZERO
+	STO	DXDE
+	STO	DYDE
+	STO 	DZDE
+	TRA	R35P3
+R35P2E	CLA 	KZERO
+	STO	LC30	
+#	TRA	K35P2C	[RSB: Commented out this entire line]
+R35P2C 	CLA	TRE
+	SUB	KP109	# 2B22 sec
+	TMI	R35P2BB # [RSB: changed from "R35P2B"]
+# [RSB: added all the stuff between here and the next bracketed comment]
+	CLA	KZERO
+	STO	DXDE
+	STO	DYDE
+	STO	DZDE
+	TRA	R35P3A
+# [RSB: end of added block]	
+R35P2BB	CLA	DXDE	# [RSB: changed left-hand symbol from "R35P2B", 
+			# which was already used above.]
+	SUB	KP110	# KP110 = 5B9 FT/SEC
+	TMI	R35P2G
+R35P2H	CLA	T	# Zero at start of Retro instructions - negative time
+	ADD	KP111	# KP119 = 180 bit/sec
+	STO	TW	# Time to begin initial calculations
+	TRA	R36P3	# To Col 36.1 EXECUTOR
+R35P3A	CLA	EXECIN 	# Executor (COL 78.3)  [RSB: The CLA has no effect, 
+			# didn't change. "R35P3" already used, changed to "R35P3A".]
+	HOP	EXECTR	# GO TO EXECUTOR   [RSB: Was just "HOP".]
+R35P2G	CLA	T
+	SUB 	TW	
+	TMI	R35P3A	# [RSB: changed from "R35P3"]
+	TRA 	R36P1	# RETRO THRUST SEQUENCE COMPLETE – (continue with Re-entry)
+
+# [RSB: Added this block]
+
+# Code referenced but not implemented yet.
+R35P5	HOP	EXECTR
+R36P1	HOP	EXECTR
+R36P3	HOP	EXECTR
+R39P1	HOP	EXECTR
+
+# [RSB: End of added block]
