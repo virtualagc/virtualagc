@@ -37,6 +37,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <pthread.h>
+#include "enet/enet.h"
 #ifdef WIN32
 #include <windows.h>
 struct tms
@@ -79,6 +80,8 @@ void
 RunOneMachineCycle(void);
 void *
 DebuggerThreadFunction(void *Data);
+void *
+HalSockThreadFunction(void *Data);
 void
 DisplayCurrentDebuggingLocation(void);
 void
@@ -97,14 +100,20 @@ ParseLocation(char *Location, uint32_t **Mem32, uint16_t **Mem16M,
 int
 ParseValue(char *ValueString, int *Value);
 void
-SleepMilliseconds (unsigned Milliseconds);
+SleepMilliseconds(unsigned Milliseconds);
 
 typedef int
-HalOutputFunction_t(int xy, int32_t Value);
+HalOutputFunction_t(int yx, int32_t Value);
 typedef int
-HalInputFunction_t(int xy, int32_t *Value);
-HalOutputFunction_t ProOutputFunctionMem, CldOutputFunctionMem;
-HalInputFunction_t ProInputFunctionMem, CldInputFunctionMem;
+HalInputFunction_t(int yx, int32_t *Value);
+HalOutputFunction_t ProOutputFunctionMem, CldOutputFunctionMem,
+    ProOutputFunctionSock, CldOutputFunctionSock;
+HalInputFunction_t ProInputFunctionMem, CldInputFunctionMem,
+    ProInputFunctionSock, CldInputFunctionSock;
+int
+HalSockInitialize(void);
+void
+HalSockBroadcastString(char *String, int Length);
 
 //==========================================================================
 // Constants, type definitions, global variables ....
@@ -120,7 +129,8 @@ HalInputFunction_t ProInputFunctionMem, CldInputFunctionMem;
 static Line_t LineBuffer;
 
 // Command-line arguments.
-int Lvdc = 0, Run = 0, Port1 = 19653, PortN = 19661, Verbosity = 0;
+#define PORT 19653
+int Lvdc = 0, Run = 0, Port = PORT, Verbosity = 0;
 char *BinaryFile = "yaOBC.bin";
 char *SymbolFile = NULL;
 char *IoFile = "yaOBC.io";
@@ -168,18 +178,49 @@ long CurrentStartCycles = 0, CurrentCycles = 0;
 clock_t CurrentStartTicks = 0, CurrentTicks = 0;
 struct tms TmsStruct;
 
+// For the socket interface.
+pthread_t HalSockThread;
+pthread_mutex_t HalSockMutex =
+PTHREAD_MUTEX_INITIALIZER;
+typedef struct
+{
+  int Type; // 0 for PRO, 1 for CLD
+  int yx;
+  unsigned long Data;
+  unsigned long Count;
+  unsigned long Order;
+} HalSockEvent_t;
+#define MAX_HALSOCK_EVENTS 2048
+HalSockEvent_t HalSockEvents[MAX_HALSOCK_EVENTS];
+int NumHalSockEvents = 0;
+
+int
+HalSockEventCmp(const void *e1, const void *e2)
+{
+#define EVENT1 ((HalSockEvent_t *) e1)
+#define EVENT2 ((HalSockEvent_t *) e2)
+  int i;
+  i = EVENT1->Count - EVENT2->Count;
+  if (i == 0)
+    i = EVENT1->Order - EVENT2->Order;
+  return (i);
+#undef EVENT1
+#undef EVENT2
+}
+
 // For the debugger thread.
 pthread_t DebuggerThread;
 pthread_mutex_t DebuggerMutex =
 PTHREAD_MUTEX_INITIALIZER;
 Line_t DebuggerUserInput;
+volatile int NeedDebuggerPrompt = 1;
 int DebuggerPause = 0; // The debugger sets this to get emulation to stop.
 int DebuggerQuit = 0; // The debugger sets this to request a shutdown.
 int DebuggerRun = 0; // The debugger sets this to request the emulation to start.
 int EmulatorEndOfSector = 0; // The emulator sets this after reaching end-of-sector.
 int EmulatorPause = 0; // The emulator sets this to pause emulation.
 int EmulatorTimeout = 0; // Emulator sets this if PRO/CLD instruction times out.
-int EmulatorUnimplementedXY = 0; // Unimplemented XY for PRO/CLD/SHF.
+int EmulatorUnimplementedYX = 0; // Unimplemented YX for PRO/CLD/SHF.
 int EmulatorBreakpoint = 0;
 int EmulatorWatchpoint = 0;
 int IgnoreBreakpoint = 0;
@@ -382,8 +423,7 @@ CldCategory_t CldCategories[64] =
 int
 main(int argc, char *argv[])
 {
-  int i, RetVal = 1;
-  int NeedDebuggerPrompt = 1;
+  int i, RetVal = 1, WasRunning = 0;
 
 #ifdef PTW32_STATIC_LIB
   // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
@@ -396,10 +436,10 @@ main(int argc, char *argv[])
   // Various setups.
   for (i = 0; i < 64; i++)
     {
-      ProCategories[i].Input = ProInputFunctionMem;
-      CldCategories[i].Input = CldInputFunctionMem;
-      ProCategories[i].Output = ProOutputFunctionMem;
-      CldCategories[i].Output = CldOutputFunctionMem;
+      ProCategories[i].Input = ProInputFunctionSock;
+      CldCategories[i].Input = CldInputFunctionSock;
+      ProCategories[i].Output = ProOutputFunctionSock;
+      CldCategories[i].Output = CldOutputFunctionSock;
     }
   if (ParseCommandLine(argc, argv))
     goto Done; // Error!
@@ -432,6 +472,11 @@ main(int argc, char *argv[])
       printf("Could not create debugger thread (error %d).\n", i);
       goto Done;
     }
+  if (HalSockInitialize())
+    {
+      printf("Could not start the socket system.\n");
+      goto Done;
+    }
 
   // Emulate.
   while (1)
@@ -441,6 +486,42 @@ main(int argc, char *argv[])
       // execution.  The debugger itself will be stuck waiting for
       // user input, and won't know to print a new prompt.
       long CyclesNeeded = 0;
+
+      if (WasRunning && Run == 0)
+        {
+          char Input[41] = "R 0.0";
+          HalSockBroadcastString(Input, strlen(Input));
+          sprintf(Input, "S %lu", TotalCycles);
+          HalSockBroadcastString(Input, strlen(Input));
+        }
+      WasRunning = Run;
+
+      // Take care of any queued PRO/CLD related events from peripheral
+      // emulations.  If any queued incoming events are ready to fire,
+      // timewise, we write their values to the PRO/CLD memory arrays
+      // and remove the events from the queue.  The removal is an inefficient
+      // operation that could doubtless be made much better by some
+      // mechanism such as trees in place of the qsort/memmove I'm actually
+      // using right now.
+      if (NumHalSockEvents > 0 && HalSockEvents[0].Count <= TotalCycles)
+        {
+          pthread_mutex_lock(&HalSockMutex);
+          for (i = 0; i < NumHalSockEvents && HalSockEvents[i].Count
+              <= TotalCycles; i++)
+            {
+              if (HalSockEvents[i].Type == 0)
+                ProCategories[HalSockEvents[i].yx].Value
+                    = HalSockEvents[i].Data;
+              else
+                CldCategories[HalSockEvents[i].yx].Value
+                    = HalSockEvents[i].Data ? BITS26 : 0;
+            }
+          if (i < NumHalSockEvents)
+            memmove(&HalSockEvents[0], &HalSockEvents[i],
+                (NumHalSockEvents - i) * sizeof(HalSockEvent_t));
+          NumHalSockEvents -= i;
+          pthread_mutex_unlock(&HalSockMutex);
+        }
 
       CurrentTicks = times(&TmsStruct); // Get current real time in ticks.
 
@@ -480,10 +561,10 @@ main(int argc, char *argv[])
           Run = 0;
           NeedDebuggerPrompt = 1;
         }
-      if (EmulatorUnimplementedXY)
+      if (EmulatorUnimplementedYX)
         {
-          printf("\nPRO/CLD/SHF instruction used unimplemented XY.\n");
-          EmulatorUnimplementedXY = 0;
+          printf("\nPRO/CLD/SHF instruction used unimplemented YX.\n");
+          EmulatorUnimplementedYX = 0;
           Run = 0;
           NeedDebuggerPrompt = 1;
         }
@@ -498,6 +579,9 @@ main(int argc, char *argv[])
         }
       if (DebuggerRun)
         {
+          char Input[41];
+          sprintf(Input, "R %lf", Speedup);
+          HalSockBroadcastString(Input, strlen(Input));
           CurrentStartCycles = CurrentCycles = 0;
           CurrentStartTicks = CurrentTicks;
           Run = 1;
@@ -526,7 +610,7 @@ main(int argc, char *argv[])
 
       // Sleep for a little to avoid hogging 100% CPU time.  The amount
       // we choose doesn't really matter.
-      SleepMilliseconds (10);
+      SleepMilliseconds(10);
     }
 
   RetVal = 0;
@@ -547,7 +631,7 @@ main(int argc, char *argv[])
 int
 ParseCommandLine(int argc, char *argv[])
 {
-  int i, j, k, RetVal = 1;
+  int i, j, RetVal = 1;
 
   // Parse the command-line arguments.
   for (i = 1; i < argc; i++)
@@ -574,30 +658,27 @@ ParseCommandLine(int argc, char *argv[])
             "              time.  The default is to start in paused mode,\n"
             "              immediately prior to running the first \n"
             "              instruction.\n"
-            "--ports=P1-PN Specifies the range of TCP/IP ports on which\n"
-            "              to listen for peripheral-emulating programs\n"
-            "              like yaPanel.  Defaults to 19653-19661.\n"
+            "--port=P      Specifies the TCP/IP port on which to listen\n"
+            "              for connections to peripheral-emulating programs\n"
+            "              like yaPanel.  Defaults to 19653.\n"
             "-v            Increase verbosity level of messages.\n"
             "--method=P,T  This switch relates to the method by which\n"
             "              emulated or physical peripheral devices\n"
             "              connect to the emulated CPU. In essence, it\n"
             "              allows different types of device drivers to\n"
-            "              be used for different XY ranges for the PRO\n"
+            "              be used for different YX ranges for the PRO\n"
             "              and CLD instructions of the CPU.  The P field\n"
-            "              selects the XY range by the designator of a\n"
+            "              selects the YX range by the designator of a\n"
             "              specific peripheral device.  The choices for P\n"
             "              are ALL (meaning, all peripherals), DCS,\n"
             "              RR, TRS, MDIU, IVI, IMU, FDI, ACME, AGE,\n"
             "              IS, ATM, PCDP.  The T field specifies the\n"
-            "              the data-transport method for the XY ranges\n"
+            "              the data-transport method for the YX ranges\n"
             "              associated with peripheral P, and the choices\n"
-            "              for it are: MEM (the default, meaning that \n"
-            "              there is no emulated or physical peripheral of\n"
-            "              type P, and so PRO/CLD are simply supposed to\n"
-            "              read/write to a special memory buffer maintained\n"
-            "              by yaOBC), TCPIP, COM1, COM2, ..., CUSTOM.  The \n"
-            "              MEM choice would typically be used when merely\n"
-            "              debugging OBC software.  The TCPIP choice would \n"
+            "              for it are: MEM, SOCK (the default), COM1,\n"
+            "              COM2, ..., CUSTOM.  The MEM choice would typically\n"
+            "              be used when merely debugging the OBC software\n"
+            "              without peripherals.  The SOCK choice would \n"
             "              be used for emulated peripherals provided directly\n"
             "              by the Virtual AGC project.  The COMn choice\n"
             "              could be used for building a physical peripheral\n"
@@ -606,9 +687,9 @@ ParseCommandLine(int argc, char *argv[])
             "              such as a driver for the Orbiter spacecraft-\n"
             "              simulation system.\n"
             "--io=F        Specifies a file containing initial PRO/CLD\n"
-            "              values for the MEM driver of the --method switch.\n"
-            "              The default is --io=yaOBC.io, or simply all zeros\n"
-            "              if that file does not exist.\n"
+            "              values for the MEM/SOCK driver of the --method\n"
+            "              switch. The default is --io=yaOBC.io, or simply\n"
+            "              all zeroes if that file does not exist.\n"
             "--com1=P      Used only with --method type RS232.  P is the\n"
             "--com2=P      name of the desired comport, such as COM1 or\n"
             "etc.          /dev/ttyS0.\n");
@@ -620,13 +701,12 @@ ParseCommandLine(int argc, char *argv[])
         Lvdc = 1;
       else if (!strcmp(argv[i], "--run"))
         Run = 1;
-      else if (2 == sscanf(argv[i], "--ports=%d-%d", &j, &k))
+      else if (1 == sscanf(argv[i], "--port=%d", &j))
         {
-          Port1 = j;
-          PortN = k;
-          if (Port1 < 0 || PortN < Port1 || PortN > 0xFFFF)
+          Port = j;
+          if (Port < 0 || Port > 0xFFFF)
             {
-              printf("Illegal TCP/IP port range.\n");
+              printf("Illegal TCP/IP port.\n");
               goto Done;
             }
         }
@@ -665,7 +745,7 @@ ParseCommandLine(int argc, char *argv[])
         printf("No symbol table.\n");
       else
         printf("Symbol-table file: %s\n", SymbolFile);
-      printf("TCP/IP port range: %d-%d\n", Port1, PortN);
+      printf("TCP/IP port: %d\n", Port);
       printf("\n");
     }
 
@@ -1247,49 +1327,46 @@ CompareSymbols(const void *s1, const void *s2)
 // Hardware-abstraction: method types for the --method command-line switch.
 // All functions return:
 //      0 on success
-//      1 on errors such as bad XY
+//      1 on errors such as bad YX
 //      2 on timeout
 // Note that while the CPU doesn't support anything for discrete outputs,
 // we nevertheless provide a function for it, for use by the debugger.
 
 // These particular HAL functions are for type=MEM.
 
-int32_t CldMem[64] =
-  { 0 };
-
 int
-ProOutputFunctionMem(int xy, int32_t Value)
+ProOutputFunctionMem(int yx, int32_t Value)
 {
-  if (xy < 0 || xy >= MAX_YX)
+  if (yx < 0 || yx >= MAX_YX)
     return (1);
-  ProCategories[xy].Value = Value & BITS26;
+  ProCategories[yx].Value = Value & BITS26;
   return (0);
 }
 
 int
-ProInputFunctionMem(int xy, int32_t *Value)
+ProInputFunctionMem(int yx, int32_t *Value)
 {
-  if (xy < 0 || xy >= MAX_YX)
+  if (yx < 0 || yx >= MAX_YX)
     return (1);
-  *Value = (ProCategories[xy].Value & BITS26);
+  *Value = (ProCategories[yx].Value & BITS26);
   return (0);
 }
 
 int
-CldOutputFunctionMem(int xy, int32_t Value)
+CldOutputFunctionMem(int yx, int32_t Value)
 {
-  if (xy < 0 || xy >= MAX_YX)
+  if (yx < 0 || yx >= MAX_YX)
     return (1);
-  CldCategories[xy].Value = (Value != 0);
+  CldCategories[yx].Value = (Value != 0);
   return (0);
 }
 
 int
-CldInputFunctionMem(int xy, int32_t *Value)
+CldInputFunctionMem(int yx, int32_t *Value)
 {
-  if (xy < 0 || xy >= MAX_YX)
+  if (yx < 0 || yx >= MAX_YX)
     return (1);
-  *Value = (CldCategories[xy].Value != 0);
+  *Value = (CldCategories[yx].Value != 0);
   return (0);
 }
 
@@ -1514,10 +1591,10 @@ RunOneMachineCycle(void)
       switch (ProCategories[yx].Direction)
         {
       case PRO_ILLEGAL:
-        EmulatorUnimplementedXY = 1;
+        EmulatorUnimplementedYX = 1;
         break;
       case PRO_TBD:
-        EmulatorUnimplementedXY = 1;
+        EmulatorUnimplementedYX = 1;
         break;
       case PRO_OUTPUT:
         ACC_ANY_BREAK()
@@ -1541,10 +1618,10 @@ RunOneMachineCycle(void)
         Accumulator |= InputValue;
         break;
       case PRO_TRS_PULSES:
-        EmulatorUnimplementedXY = 1;
+        EmulatorUnimplementedYX = 1;
         break;
       case PRO_REENT_ATM:
-        EmulatorUnimplementedXY = 1;
+        EmulatorUnimplementedYX = 1;
         break;
         }
     }
@@ -1663,7 +1740,7 @@ RunOneMachineCycle(void)
       ValueToStore = ValueToStore << 2;
       break;
     default:
-      // This behavior is actually specified: Illegal XY
+      // This behavior is actually specified: Illegal YX
       // clears the accumulator.
       ValueToStore = 0;
       break;
@@ -1740,6 +1817,13 @@ RunOneMachineCycle(void)
   IgnoreBreakpoint = 0;
   CurrentCycles++;
   TotalCycles++;
+  if (Run == 0)
+    {
+      char Input[41] = "R 0.0";
+      HalSockBroadcastString(Input, strlen(Input));
+      sprintf(Input, "S %lu", TotalCycles);
+      HalSockBroadcastString(Input, strlen(Input));
+    }
   if (WasJump)
     memcpy(&HopRegister, &JumpHOP, sizeof(Address_t));
   else
@@ -1786,7 +1870,7 @@ DebuggerThreadFunction(void *Data)
           DebuggerPause = 1;
           pthread_mutex_unlock(&DebuggerMutex);
           while (DebuggerPause)
-            SleepMilliseconds (10);
+            SleepMilliseconds(10);
           pthread_mutex_lock(&DebuggerMutex);
         }
 
@@ -1830,7 +1914,8 @@ DebuggerThreadFunction(void *Data)
           if (LastWasNext)
             goto Step;
         }
-      else if (LastWasNext = 0, (!strcmp(Fields[0], "EXIT") || !strcmp(Fields[0], "QUIT")))
+      else if (LastWasNext = 0, (!strcmp(Fields[0], "EXIT") || !strcmp(
+          Fields[0], "QUIT")))
         {
           WriteBinaryFile("yaOBC.bin");
           WriteIoFile("yaOBC.io");
@@ -1840,6 +1925,9 @@ DebuggerThreadFunction(void *Data)
       else if (!strcmp(Fields[0], "RUN") || !strcmp(Fields[0], "CONT")
           || !strcmp(Fields[0], "R"))
         {
+          char Input[41];
+          sprintf(Input, "R %lf", Speedup);
+          HalSockBroadcastString(Input, strlen(Input));
           DebuggerRun = 1;
           IgnoreBreakpoint = 1;
           LastDebuggedHopRegister.Word ^= 0377;
@@ -1848,7 +1936,7 @@ DebuggerThreadFunction(void *Data)
       else if (!strcmp(Fields[0], "STEP") || !strcmp(Fields[0], "NEXT")
           || !strcmp(Fields[0], "S") || !strcmp(Fields[0], "N"))
         {
-          Step:;
+          Step: ;
           LastWasNext = 1;
           if (NumFields < 2)
             StepN = 1;
@@ -2030,6 +2118,10 @@ DebuggerThreadFunction(void *Data)
                   *Dest = *Source;
             }
         }
+      else if (!strcmp(Fields[0], "SPEED"))
+        {
+          Speedup = atof(Fields[1]);
+        }
       else if (!strcmp(Fields[0], "HELP") || !strcmp(Fields[0], "MENU")
           || !strcmp(Fields[0], "?"))
         {
@@ -2046,6 +2138,7 @@ DebuggerThreadFunction(void *Data)
             "\tEDIT Location Value -- Modify contents of Location.\n"
             "\tCOREDUMP File [IoFile] -- Save system snapshot files.\n"
             "\tATM Module -- Load program Module from ATM into main memory.\n"
+            "\tSPEED X -- Emulate at X times real time. (1.0 is normal.)\n"
             "Location formats:\n"
             "\tLeft-hand symbol, constant name, variable name\n"
             "\t[D-]Module-Sector-Syllable-Word\n"
@@ -2296,7 +2389,7 @@ ParseValue(char *ValueString, int *Value)
 //==========================================================================
 
 void
-SleepMilliseconds (unsigned Milliseconds)
+SleepMilliseconds(unsigned Milliseconds)
 {
   if (Milliseconds == 0)
     return;
@@ -2309,3 +2402,223 @@ SleepMilliseconds (unsigned Milliseconds)
   nanosleep(&Req, &Rem);
 #endif
 }
+
+//==========================================================================
+
+// Hardware-abstraction: method types for the --method command-line switch.
+// All functions return:
+//      0 on success
+//      1 on errors such as bad YX
+//      2 on timeout
+// Note that while the CPU doesn't support anything for discrete outputs,
+// we nevertheless provide a function for it, for use by the debugger.
+
+// These particular HAL functions are for type=SOCK.
+
+static ENetHost *host = NULL;
+
+// The thread function that services the enet server.
+void *
+HalSockThreadFunction(void *Data)
+{
+  double f;
+  int yx, b;
+  unsigned long c, d, Order = 0;
+  HalSockEvent_t Event;
+
+  while (1)
+    {
+      ENetEvent event;
+      int EventFound = 0;
+      char Input[41];
+
+      // Service the host for incoming packets, connects, disconnects.
+      enet_host_service(host, &event, 1000);
+      switch (event.type)
+        {
+      case ENET_EVENT_TYPE_CONNECT:
+        if (Verbosity)
+          {
+            printf("A new client connected from 0x%08X:%u.\n",
+                event.peer -> address.host, event.peer -> address.port);
+            NeedDebuggerPrompt = 1;
+          }
+        sprintf(Input, "S %lu", TotalCycles);
+        HalSockBroadcastString(Input, strlen(Input));
+        if (Run)
+          sprintf(Input, "R %lf", Speedup);
+        else
+          sprintf(Input, "R 0.0");
+        HalSockBroadcastString(Input, strlen(Input));
+        break;
+
+      case ENET_EVENT_TYPE_RECEIVE:
+        if (Verbosity > 5)
+          {
+            printf("%u 0x%08X:%u \"%s\"\n", event.packet -> dataLength,
+                event.peer -> address.host, event.peer -> address.port,
+                event.packet -> data);
+            NeedDebuggerPrompt = 1;
+          }
+        // Interpret the incoming packet.
+        if (1 == sscanf((char *) event.packet->data, "R %lf", &f))
+          SetCyclesPerTick(f);
+        else if (3 == sscanf((char *) event.packet->data, "D%02o%1o %lu", &yx,
+            &b, &c) && yx <= 077 && b <= 1)
+          {
+            EventFound = 1;
+            Event.Type = 1;
+            Event.Data = b;
+          }
+        else if (3 == sscanf((char *) event.packet->data, "P%02o %lu %lu", &yx,
+            &d, &c) && yx <= 077 && d <= 0377777777)
+          {
+            EventFound = 1;
+            Event.Type = 0;
+            Event.Data = d;
+          }
+        if (EventFound)
+          {
+            Event.yx = yx;
+            Event.Count = c;
+            Event.Order = Order++;
+            pthread_mutex_lock(&HalSockMutex);
+            if (NumHalSockEvents < MAX_HALSOCK_EVENTS)
+              {
+                memcpy(&HalSockEvents[NumHalSockEvents++], &Event,
+                    sizeof(Event));
+                qsort(HalSockEvents, NumHalSockEvents, sizeof(HalSockEvent_t),
+                    HalSockEventCmp);
+              }
+            else if (Verbosity)
+              {
+                printf("Event queue full, dropping \"%s\".\n",
+                    event.packet->data);
+                NeedDebuggerPrompt = 1;
+              }
+            pthread_mutex_unlock(&HalSockMutex);
+          }
+
+        /* Clean up the packet now that we're done using it. */
+        enet_packet_destroy(event.packet);
+        break;
+
+      case ENET_EVENT_TYPE_DISCONNECT:
+        if (Verbosity)
+          {
+            printf("\r0x%08X:%u disconnected.\n", event.peer -> address.host,
+                event.peer -> address.port);
+            NeedDebuggerPrompt = 1;
+          }
+        break;
+
+      default:
+        //printf ("No events.\n");
+        break;
+        }
+    }
+}
+
+// This function initializes the enet system, sets up the
+// enet server, and creates a thread to service it.
+int
+HalSockInitialize(void)
+{
+  int i, RetVal = 1;
+  static int HalSockInitialized = 0;
+  ENetAddress address;
+
+  if (HalSockInitialized)
+    return (0);
+  pthread_mutex_lock(&HalSockMutex);
+
+  // Initialize the socket library.
+  if (enet_initialize() != 0)
+    {
+      printf("An error occurred while initializing ENet.\n");
+      goto Error;
+    }
+  atexit(enet_deinitialize);
+
+  if (Verbosity)
+    {
+      printf("Starting up enet server.\n");
+      NeedDebuggerPrompt = 1;
+    }
+
+  /* Bind the server to the default localhost.     */
+  /* A specific host address can be specified by   */
+  /* enet_address_set_host (& address, "x.x.x.x"); */
+  address.host = ENET_HOST_ANY;
+  /* Bind the server to port. */
+  address.port = Port;
+  host = enet_host_create(&address, 32, 1, 0, 0);
+  if (host == NULL)
+    {
+      printf("An error occurred while trying to create an ENet server host.\n");
+      goto Error;
+    }
+
+  // Set up a thread to service the server.
+  if (0 != (i = pthread_create(&HalSockThread, NULL, HalSockThreadFunction,
+      NULL)))
+    {
+      printf("Could not create socket-driver thread (error %d).\n", i);
+      goto Error;
+    }
+
+  HalSockInitialized = 1;
+  RetVal = 0;
+  Error: pthread_mutex_unlock(&HalSockMutex);
+  return (RetVal);
+}
+
+void
+HalSockBroadcastString(char *String, int Length)
+{
+  ENetPacket *packet;
+  packet = enet_packet_create(String, Length + 1, ENET_PACKET_FLAG_RELIABLE);
+  enet_host_broadcast(host, 0, packet);
+  enet_host_flush(host);
+}
+
+int
+ProOutputFunctionSock(int yx, int32_t Value)
+{
+  int i;
+  char Input[41];
+
+  if (ProOutputFunctionMem(yx, Value))
+    return (1);
+
+  i = sprintf(Input, "P%02o %09o %lu", yx, (unsigned) Value, TotalCycles);
+  HalSockBroadcastString(Input, i);
+  return (0);
+}
+
+int
+ProInputFunctionSock(int yx, int32_t *Value)
+{
+  return (ProInputFunctionMem(yx, Value));
+}
+
+int
+CldOutputFunctionSock(int yx, int32_t Value)
+{
+  int i;
+  char Input[41];
+
+  if (CldOutputFunctionMem(yx, Value))
+    return (1);
+
+  i = sprintf(Input, "D%02o%c %lu", yx, (Value ? '1' : '0'), TotalCycles);
+  HalSockBroadcastString(Input, i);
+  return (0);
+}
+
+int
+CldInputFunctionSock(int yx, int32_t *Value)
+{
+  return (CldInputFunctionMem(yx, Value));
+}
+

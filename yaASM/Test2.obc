@@ -1,0 +1,63 @@
+# The contents of this file have been placed into the Public Domain by its
+# author and may be reused in any way whatever.
+#
+# Filename:	Test2.obc
+# Purpose:	This is Gemini OBC code created solely for the purpose
+#		of demonstrating subroutine linkages for HOP.
+# Website:	http://www.ibiblo.org/apollo/Gemini.html
+# Mod history:	2012-01-07 RSB	Created.
+#
+# The structure of this code is very simple:
+#
+#	At the power-up entry point (00-0-000), there's a HOP to
+#	a program I call EXEC in the residual sector (17-2-000).
+#
+#	EXEC loops endlessly, simply calling a couple of subroutines
+#	in other memory sectors, each of which does nothing but returns. 
+
+# Tell the assembler to assume normal (rather than half-word mode) 
+# memory-access mode, in memory sector 00.
+		NORM
+		DATA	0-00-0-000
+		CODE	0-00-0-000
+
+# Here's the execution starting point. Note that if there's a left-hand 
+# symbol named "OBCENTRY" (as there is here), it's treated slightly
+# specially by the assembler: extra data is embedded in the output file
+# that tells the CPU emulator program to use OBCENTRY as the starting 
+# address rather than using the defaults (00-0-000 or 00-2-000). In this
+# example, it happens to be 00-0-000 anyway, so it doesn't really matter.
+OBCENTRY	HOP	EXEC	# Jump right to the EXE program.
+	
+# The EXEC program is in sector 17 (the "residual" sector).	
+		DATA	0-17-0-000
+		CODE	0-17-2-000
+
+# Loop endlessly.
+EXEC		CLA	EXEC1	# Set up return address for subroutine SUB1.
+		HOP	SUB1	# Call subroutine SUB1.
+EXEC1		NOP		# Returns to here. (Doesn't have to be NOP!)
+		CLA	EXEC2	# And repeat for subroutine SUB2.
+		HOP	SUB2
+EXEC2		NOP
+		TRA	EXEC	# Loop again ...	
+
+# Subroutine SUB1 is in sector 05
+		DATA	0-05-0-000
+		CODE	0-05-2-000
+		
+RSUB1				# Variable to store the return address.		
+SUB1		STO	RSUB1	# Store the return address.
+		NOP		# Execute some instructions ...
+		HOP	RSUB1	# Return from the subroutine.
+		
+# Subroutine SUB2 is in sector 07.  This subroutine is the 
+# same as SUB1.
+		DATA	0-07-0-000
+		CODE	0-07-2-000
+		
+RSUB2				# Variable to store the return address.		
+SUB2		STO	RSUB2	# Store the return address.
+		NOP		# Execute some instructions.
+		HOP	RSUB2	# Return from the subroutine.
+		

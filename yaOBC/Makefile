@@ -25,6 +25,7 @@
 # you need to have IMCROSS (http://www/sandroid.org/imcross) installed.
 
 TARGET=yaOBC
+TARGET2=enetHost
 
 ifndef PREFIX
 ifdef MSYSTEM
@@ -38,32 +39,36 @@ endif	# MSYSTEM
 ifeq "${USER}" "rburkey"
 CFLAGS+=-Wall -Werror -O3
 WEB=${HOME}/Projects/sandroid.org/public_html/apollo/Downloads
-SAVE=cp ${TARGET} ${TARGET}.exe ${TARGET}-macosx ${WEB}
+SAVE=cp ${TARGET} ${TARGET2} *.exe *-macosx ${WEB}
 else
 SAVE=echo "All done!"
 endif
 
 .PHONY:	default
-default: ${TARGET}
+default: ${TARGET} ${TARGET2}
 
 .PHONY: all-archs
-all-archs: ${TARGET} ${TARGET}.exe ${TARGET}-macosx
+all-archs: \
+	${TARGET} ${TARGET}.exe ${TARGET}-macosx \
+	${TARGET2} ${TARGET2}.exe ${TARGET2}-macosx
 	${SAVE}
 
-${TARGET}: ${TARGET}.c ../yaASM/yaASM.h Makefile
-	gcc ${CFLAGS} -m32 -o $@ $< -lpthread -lm
+${TARGET} ${TARGET2}: % : %.c ../yaASM/yaASM.h Makefile
+	gcc ${CFLAGS} -m32 -o $@ -I../enet/include \
+		$< ../enet/*.c -lpthread -lm
 
-${TARGET}.exe: ${TARGET}.c ../yaASM/yaASM.h Makefile
-	i386-mingw32-gcc -DPTW32_STATIC_LIB ${CFLAGS} -o $@ $< \
-		-lpthreadGC2-static -lm -lwsock32
+${TARGET}.exe ${TARGET2}.exe: %.exe : %.c ../yaASM/yaASM.h Makefile
+	i386-mingw32-gcc -DPTW32_STATIC_LIB -O3 -o $@ \
+		-I../enet/include $< ../enet/*.c \
+		-lpthreadGC2-static -lm -lwsock32 -lws2_32 -lwinmm
 
-${TARGET}-macosx: ${TARGET}.c ../yaASM/yaASM.h Makefile
-	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} \
-		-o $@ $< -lpthread -lm
+${TARGET}-macosx ${TARGET2}-macosx: %-macosx : %.c ../yaASM/yaASM.h Makefile
+	powerpc-apple-darwin9-gcc -arch i386 -arch ppc -O3 \
+		-o $@ -I../enet/include $< ../enet/*.c -lpthread -lm
 
 .PHONY:	clean
 clean:
-	-rm ${TARGET} *.exe *-macosx \
+	-rm ${TARGET} ${TARGET2} *.exe *-macosx \
 		*.o *.bin *.lst *.io *~
 
 %.o:	%.c ../yaYUL/yaYUL.h
