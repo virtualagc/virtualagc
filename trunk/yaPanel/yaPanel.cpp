@@ -57,15 +57,18 @@
 #include <wx/wx.h>
 #include <wx/sizer.h>
 #include <wx/timer.h>
+#include <enet/enet.h>
 #include "time.h"
 
+int Verbosity = 0;
+
 // Just for testing output widgets.  Comment out to get normal functionality.
-#define DEBUG_WIDGETS
+//#define DEBUG_WIDGETS
 #ifdef DEBUG_WIDGETS
 int DebugPosn = 0;
 int DebugDspn = 0;
-#define DEBUG_POSN(n) DebugPosn = n;
-#define DEBUG_DSPN(n) DebugDspn = n;
+#define DEBUG_POSN(n) DebugPosn = (n);
+#define DEBUG_DSPN(n) DebugDspn = (n);
 #else
 #define DEBUG_POSN(n)
 #define DEBUG_DSPN(n)
@@ -77,8 +80,12 @@ int DebugDspn = 0;
 int BackgroundWidth;
 int BackgroundHeight;
 
+#define HOST "localhost"
 #define PORT 19653
+wxString Host = wxT(HOST);
 int Port = PORT;
+volatile ENetPeer *peer = NULL;
+ENetHost *host = NULL;
 
 /////////////////////////////////////////////////////////////////////
 // This section is devoted to defining input fields or output widgets
@@ -537,6 +544,14 @@ int NumGraphics = (sizeof(Graphics) / sizeof(Graphics[0]));
 Graphic_t HandsHours[MAX_CLOCK_ANGLES], HandsMinutes[MAX_CLOCK_ANGLES],
     HandsSeconds[MAX_CLOCK_ANGLES];
 
+// Variables related to the state of the emulator and the emulated peripherals.
+unsigned long InstructionCount = 0; // Current estimated emulated time in CPU cycles.
+int MdrPower = 0;
+int MdkKeyBuffer = -1; // -1 if nothing buffered, 0-9 otherwise.
+int MdrDisplayDrive = 0;
+int MdrSelect1 = 0, MdrSelect2 = 0, MdrSelect4 = 0;
+int MdrMagnitude1 = 0, MdrMagnitude2 = 0, MdrMagnitude4 = 0, MdrMagnitude8 = 0;
+
 /////////////////////////////////////////////////////////////////////
 
 class wxImagePanel : public wxPanel
@@ -622,11 +637,196 @@ END_EVENT_TABLE();
  void wxImagePanel::keyReleased(wxKeyEvent& event) {}
  */
 
+// Functions for sending packets of various types over the socket to yaOBC.
 void
-wxImagePanel::TimerEvent(wxTimerEvent& event)
+SendPacket(char *PacketBuffer)
 {
-  wxPaintDC dc(this);
-  render(dc);
+  int i;
+  ENetPacket *packet;
+  packet = enet_packet_create(PacketBuffer, strlen(PacketBuffer) + 1,
+      ENET_PACKET_FLAG_RELIABLE);
+  i = enet_peer_send((ENetPeer *) peer, 0, packet);
+  if (i && Verbosity)
+    fprintf(stderr, "Sending packet \"%s\" failed.\n", PacketBuffer);
+}
+void
+SendR(double x)
+{
+  char PacketBuffer[41];
+  sprintf(PacketBuffer, "R %lf", x);
+  SendPacket(PacketBuffer);
+}
+void
+SendD(int yx, int b)
+{
+  char PacketBuffer[41];
+  sprintf(PacketBuffer, "D%02o%1o %lu", yx, b, InstructionCount);
+  SendPacket(PacketBuffer);
+}
+void
+SendP(int yx, int d)
+{
+  char PacketBuffer[41];
+  sprintf(PacketBuffer, "P%02o %09o %lu", yx, d, InstructionCount);
+  SendPacket(PacketBuffer);
+}
+
+void
+wxImagePanel::TimerEvent(wxTimerEvent& tevent)
+{
+  int EventsFound = 1;
+  wxLongLong CurrentTime = wxGetLocalTimeMillis();
+  ENetEvent eevent;
+  ENetAddress address;
+
+  // First, handle repainting the screen, if necessary.  We do this
+  // routinely once per second to update the accutron clock.
+  static wxLongLong NextRepaintTime = wxGetLocalTimeMillis();
+  if (CurrentTime >= NextRepaintTime)
+    {
+      NextRepaintTime += 1000;
+      wxPaintDC dc(this);
+      render(dc);
+    }
+
+  // Next, handle socket stuff for communicating with yaOBC.
+  // Connect to the server, if necessary.
+  if (peer == NULL)
+    {
+      enet_address_set_host(&address, "localhost");
+      address.port = Port;
+      peer = enet_host_connect(host, &address, 2, 0);
+      if (peer == NULL)
+        {
+          // Failed, but don't really have any way to recover from
+          // it, so just ignore it and try again later.
+        }
+    }
+  // Service the host for incoming packets, connects, disconnects.
+  while (EventsFound)
+    {
+      int ReRender = 0;
+      double x;
+      unsigned long c;
+      int yx, d;
+
+      enet_host_service(host, &eevent, 0);
+      switch (eevent.type)
+        {
+      case ENET_EVENT_TYPE_NONE:
+        EventsFound = 0;
+        break;
+      case ENET_EVENT_TYPE_CONNECT:
+        if (Verbosity)
+          fprintf(stderr, "Connection from server 0x%08X:%u.\n",
+              eevent.peer -> address.host, eevent.peer -> address.port);
+        // Better update the server with our current status.
+
+        enet_host_flush(host);
+
+        break;
+      case ENET_EVENT_TYPE_RECEIVE:
+        if (Verbosity)
+          fprintf(stderr, "%lu 0x%08X:%u \"%s\"\n",
+              eevent.packet -> dataLength, eevent.peer -> address.host,
+              eevent.peer -> address.port, eevent.packet -> data);
+        if (1 == sscanf((const char *) eevent.packet->data, "R %lf", &x))
+          {
+
+          }
+        else if (1 == sscanf((const char *) eevent.packet->data, "S %lu", &c))
+          {
+
+          }
+        else if (3 == sscanf((const char *) eevent.packet->data,
+            "P%02o %d %lu", &yx, &d, &c))
+          {
+            if (MdrPower)
+              {
+                if (yx == 040)
+                  {
+                    MdkKeyBuffer = -1;
+                    SendD(001, 0); // MDIU key-buffer status.
+                    SendD(002, 0); // MDIU ENTER-key latch.
+                    SendD(003, 0); // MDIU READOUT-key latch.
+                    SendD(004, 0); // MDIU CLEAR-key latch.
+                  }
+                else if (yx == 041)
+                  {
+                    MdrDisplayDrive = d;
+                    goto MdrDisplayDigit;
+                  }
+                else if (yx == 050)
+                  MdrSelect1 = d ? 1 : 0;
+                else if (yx == 051)
+                  MdrSelect2 = d ? 2 : 0;
+                else if (yx == 052)
+                  MdrSelect4 = d ? 4 : 0;
+                else if (yx == 030)
+                  {
+                    MdrMagnitude1 = d ? 1 : 0;
+                    MdrDisplayDigit: ;
+                    int Select, Magnitude;
+                    Select = MdrSelect1 | MdrSelect2 | MdrSelect4;
+                    if (Select < 7)
+                      {
+                        if (MdrDisplayDrive)
+                          {
+                            Magnitude = MdrMagnitude1 | MdrMagnitude2
+                                | MdrMagnitude4 | MdrMagnitude8;
+                            if (Magnitude > 9)
+                              Magnitude = -1;
+                            ReRender = 1;
+                            Fields[mdr_digit_1 + Select].State
+                                = (enum GraphicIndex_t) (mdr_disp_digit_0
+                                    + Magnitude);
+                            if (Verbosity)
+                              fprintf(stderr, "Display %d -> %d\n", Select,
+                                  Magnitude);
+                          }
+                        else if (Verbosity)
+                          fprintf(stderr, "Display drive is off.\n");
+                      }
+                    else if (Verbosity)
+                      fprintf(stderr, "Select/Magnitude out of range %d/%d.\n",
+                          Select, Magnitude);
+                  }
+                else if (yx == 031)
+                  {
+                    MdrMagnitude2 = d ? 2 : 0;
+                    goto MdrDisplayDigit;
+                  }
+                else if (yx == 032)
+                  {
+                    MdrMagnitude4 = d ? 4 : 0;
+                    goto MdrDisplayDigit;
+                  }
+                else if (yx == 033)
+                  {
+                    MdrMagnitude8 = d ? 8 : 0;
+                    goto MdrDisplayDigit;
+                  }
+              }
+          }
+        enet_packet_destroy(eevent.packet);
+        break;
+      case ENET_EVENT_TYPE_DISCONNECT:
+        if (Verbosity)
+          fprintf(stderr, "Server 0x%08X:%u disconnected.\n",
+              eevent.peer -> address.host, eevent.peer -> address.port);
+        peer = NULL;
+        break;
+      default:
+        // Not an event type we're supporting, but might still be other
+        // events ready in the queue, so we can't simply quit checking yet.
+        break;
+        }
+      if (ReRender)
+        {
+          wxPaintDC dc(this);
+          render(dc);
+        }
+    }
 }
 
 wxImagePanel::wxImagePanel(wxFrame* parent, wxString file, wxBitmapType format) :
@@ -699,7 +899,21 @@ wxImagePanel::wxImagePanel(wxFrame* parent, wxString file, wxBitmapType format) 
     }
 
   Timer = new wxTimer(this, 12345);
-  Timer->Start(1000);
+  Timer->Start(25);
+}
+
+void
+ClearMdrDisplay(void)
+{
+  MdrSelect1 = MdrSelect2 = MdrSelect4 = 0;
+  MdrMagnitude1 = MdrMagnitude2 = MdrMagnitude4 = MdrMagnitude8 = 0;
+  Fields[mdr_digit_1].State = mdr_disp_digit_blank;
+  Fields[mdr_digit_2].State = mdr_disp_digit_blank;
+  Fields[mdr_digit_3].State = mdr_disp_digit_blank;
+  Fields[mdr_digit_4].State = mdr_disp_digit_blank;
+  Fields[mdr_digit_5].State = mdr_disp_digit_blank;
+  Fields[mdr_digit_6].State = mdr_disp_digit_blank;
+  Fields[mdr_digit_7].State = mdr_disp_digit_blank;
 }
 
 // Mouse events.
@@ -737,77 +951,69 @@ wxImagePanel::leftDown(wxMouseEvent& event)
       switch (WidgetIndex)
         {
       case mdk_digit_zero:
-        ButtonIsPressed(mdk_digit_zero_pressed);
-        DEBUG_POSN(0)
 #ifdef DEBUG_WIDGETS
         // Clear all debug-displays.
         // MDR digits.
         for (i = 0; i < 7; i++)
-          Fields[mdr_digit_1 + i].State = mdr_disp_digit_blank;
+        Fields[mdr_digit_1 + i].State = mdr_disp_digit_blank;
         // IVI digits.
         for (i = 0; i < 9; i++)
-          Fields[ivi_digits1_1 + i].State = ivi_disp_digit_blank;
+        Fields[ivi_digits1_1 + i].State = ivi_disp_digit_blank;
         // TRS digits.
         for (i = 0; i < 4; i++)
-          Fields[trs_et_digit_1 + i].State = trs_disp_digit_blank;
+        Fields[trs_et_digit_1 + i].State = trs_disp_digit_blank;
         for (i = 0; i < 7; i++)
-          Fields[trs_metdc_digit_1 + i].State = trs_disp_digit_blank;
+        Fields[trs_metdc_digit_1 + i].State = trs_disp_digit_blank;
 #endif
-        ;
-        break;
+        DEBUG_POSN(0);
+        // Fall through of mdk_digit_zero is intentional here.
       case mdk_digit_1:
-        ButtonIsPressed(mdk_digit_1_pressed);
-        DEBUG_POSN(0)
-        ;
-        break;
       case mdk_digit_2:
-        ButtonIsPressed(mdk_digit_2_pressed);
-        DEBUG_POSN(1)
-        ;
-        break;
       case mdk_digit_3:
-        ButtonIsPressed(mdk_digit_3_pressed);
-        DEBUG_POSN(2)
-        ;
-        break;
       case mdk_digit_4:
-        ButtonIsPressed(mdk_digit_4_pressed);
-        DEBUG_POSN(3)
-        ;
-        break;
       case mdk_digit_5:
-        ButtonIsPressed(mdk_digit_5_pressed);
-        DEBUG_POSN(4)
-        ;
-        break;
       case mdk_digit_6:
-        ButtonIsPressed(mdk_digit_6_pressed);
-        DEBUG_POSN(5)
-        ;
-        break;
       case mdk_digit_7:
-        ButtonIsPressed(mdk_digit_7_pressed);
-        DEBUG_POSN(6)
-        ;
-        break;
       case mdk_digit_8:
-        ButtonIsPressed(mdk_digit_8_pressed);
-        DEBUG_POSN(7)
-        ;
-        break;
       case mdk_digit_9:
-        ButtonIsPressed(mdk_digit_9_pressed);
-        DEBUG_POSN(8)
-        ;
+        if (MdrPower)
+          {
+            ButtonIsPressed((enum GraphicIndex_t) (mdk_digit_zero_pressed
+                + (int) (WidgetIndex - mdk_digit_zero)));
+            if (WidgetIndex != mdk_digit_zero)
+              {
+                DEBUG_POSN (WidgetIndex - mdk_digit_1);
+              }
+            if (MdkKeyBuffer == -1)
+              {
+                MdkKeyBuffer = WidgetIndex - mdk_digit_zero;
+                SendP(043, MdkKeyBuffer);
+                SendD(001, 1);
+              }
+          }
         break;
       case mdr_readout:
-        ButtonIsPressed(mdr_readout_pressed);
+        if (MdrPower)
+          {
+            ButtonIsPressed(mdr_readout_pressed);
+            SendD(003, 1);
+          }
         break;
       case mdr_clear:
-        ButtonIsPressed(mdr_clear_pressed);
+        if (MdrPower)
+          {
+            ButtonIsPressed(mdr_clear_pressed);
+            SendD(004, 1);
+            ClearMdrDisplay();
+            ReRender = 1;
+          }
         break;
       case mdr_enter:
-        ButtonIsPressed(mdr_enter_pressed);
+        if (MdrPower)
+          {
+            ButtonIsPressed(mdr_enter_pressed);
+            SendD(002, 1);
+          }
         break;
       case pcdp_start:
         ButtonIsPressed(pcdp_start_pressed);
@@ -821,10 +1027,18 @@ wxImagePanel::leftDown(wxMouseEvent& event)
       case mdr_power_on:
         ReRender = 1;
         Fields[mdr_power].State = toggle_up;
+        MdrPower = 1;
         break;
       case mdr_power_off:
         ReRender = 1;
         Fields[mdr_power].State = toggle_down;
+        ClearMdrDisplay();
+        MdrPower = 0;
+        MdkKeyBuffer = -1;
+        SendD(001, 0);
+        SendD(002, 0);
+        SendD(003, 0);
+        SendD(004, 0);
         break;
       case pcdp_power_on:
         ReRender = 1;
@@ -851,102 +1065,102 @@ wxImagePanel::leftDown(wxMouseEvent& event)
         enum GraphicIndex_t *State;
         switch (DebugDspn)
           {
-        case 1: // MDR
-          if (DebugPosn < 7)
-            {
-              State = &Fields[mdr_digit_1 + DebugPosn].State;
-              if (*State == gi_none)
+            case 1: // MDR
+            if (DebugPosn < 7)
+              {
+                State = &Fields[mdr_digit_1 + DebugPosn].State;
+                if (*State == gi_none)
                 *State = mdr_disp_digit_0;
-              else
+                else
                 *State = (GraphicIndex_t) (*State + 1);
-              if (*State > mdr_disp_digit_9)
+                if (*State > mdr_disp_digit_9)
                 *State = mdr_disp_digit_0;
-            }
-          break;
-        case 2: // MDR
-          if (DebugPosn < 9)
-            {
-              State = &Fields[ivi_digits1_1 + DebugPosn].State;
-              if (*State == gi_none)
+              }
+            break;
+            case 2: // MDR
+            if (DebugPosn < 9)
+              {
+                State = &Fields[ivi_digits1_1 + DebugPosn].State;
+                if (*State == gi_none)
                 *State = ivi_disp_digit_0;
-              else
+                else
                 *State = (GraphicIndex_t) (*State + 1);
-              if (*State > ivi_disp_digit_9)
+                if (*State > ivi_disp_digit_9)
                 *State = ivi_disp_digit_0;
-            }
-          break;
-        case 3: // TRS E.T.
-          if (DebugPosn < 4)
-            {
-              State = &Fields[trs_et_digit_1 + DebugPosn].State;
-              TrsDebugDigits: ;
-              if (*State == gi_none)
+              }
+            break;
+            case 3: // TRS E.T.
+            if (DebugPosn < 4)
+              {
+                State = &Fields[trs_et_digit_1 + DebugPosn].State;
+                TrsDebugDigits:;
+                if (*State == gi_none)
                 *State = trs_disp_digit_0;
-              else
+                else
                 *State = (GraphicIndex_t) (*State + 1);
-              if (*State > trs_disp_digit_9)
+                if (*State > trs_disp_digit_9)
                 *State = trs_disp_digit_0;
-            }
-          break;
-        case 4: // TRS M.E.T.D.C.
-          if (DebugPosn < 7)
-            {
-              State = &Fields[trs_metdc_digit_1 + DebugPosn].State;
-              goto TrsDebugDigits;
-            }
-          break;
-        case 5: // PCDP indicators.
-          State = &Fields[pcdp_indicator_comp + DebugPosn].State;
-          switch (DebugPosn)
-            {
-          case 0:
-            *State
+              }
+            break;
+            case 4: // TRS M.E.T.D.C.
+            if (DebugPosn < 7)
+              {
+                State = &Fields[trs_metdc_digit_1 + DebugPosn].State;
+                goto TrsDebugDigits;
+              }
+            break;
+            case 5: // PCDP indicators.
+            State = &Fields[pcdp_indicator_comp + DebugPosn].State;
+            switch (DebugPosn)
+              {
+                case 0:
+                *State
                 = (*State == pcdp_indicator_comp_on) ? pcdp_indicator_comp_off
-                    : pcdp_indicator_comp_on;
-            break;
-          case 1:
-            *State
+                : pcdp_indicator_comp_on;
+                break;
+                case 1:
+                *State
                 = (*State == pcdp_indicator_malf_on) ? pcdp_indicator_malf_off
-                    : pcdp_indicator_malf_on;
+                : pcdp_indicator_malf_on;
+                break;
+                default:
+                break;
+              }
             break;
-          default:
-            break;
-            }
-          break;
-        case 6: // IVI indicators.
-          State = &Fields[ivi_indicator1_fwd + DebugPosn].State;
-          switch (DebugPosn)
-            {
-          case 0:
-            *State = (*State == ivi_indicator1_fwd_on) ? ivi_indicator1_fwd_off
+            case 6: // IVI indicators.
+            State = &Fields[ivi_indicator1_fwd + DebugPosn].State;
+            switch (DebugPosn)
+              {
+                case 0:
+                *State = (*State == ivi_indicator1_fwd_on) ? ivi_indicator1_fwd_off
                 : ivi_indicator1_fwd_on;
-            break;
-          case 1:
-            *State = (*State == ivi_indicator1_aft_on) ? ivi_indicator1_aft_off
+                break;
+                case 1:
+                *State = (*State == ivi_indicator1_aft_on) ? ivi_indicator1_aft_off
                 : ivi_indicator1_aft_on;
-            break;
-          case 2:
-            *State = (*State == ivi_indicator2_l_on) ? ivi_indicator2_l_off
+                break;
+                case 2:
+                *State = (*State == ivi_indicator2_l_on) ? ivi_indicator2_l_off
                 : ivi_indicator2_l_on;
-            break;
-          case 3:
-            *State = (*State == ivi_indicator2_r_on) ? ivi_indicator2_r_off
+                break;
+                case 3:
+                *State = (*State == ivi_indicator2_r_on) ? ivi_indicator2_r_off
                 : ivi_indicator2_r_on;
-            break;
-          case 4:
-            *State = (*State == ivi_indicator3_up_on) ? ivi_indicator3_up_off
+                break;
+                case 4:
+                *State = (*State == ivi_indicator3_up_on) ? ivi_indicator3_up_off
                 : ivi_indicator3_up_on;
-            break;
-          case 5:
-            *State = (*State == ivi_indicator3_dn_on) ? ivi_indicator3_dn_off
+                break;
+                case 5:
+                *State = (*State == ivi_indicator3_dn_on) ? ivi_indicator3_dn_off
                 : ivi_indicator3_dn_on;
+                break;
+                default:
+                break;
+              }
             break;
-          default:
+            default:
             break;
-            }
-          break;
-        default:
-          break;
           }
 #endif
         break;
@@ -1232,11 +1446,13 @@ wxImagePanel::render(wxDC& dc)
   struct tm *tm_struct;
   time(&t);
   tm_struct = gmtime(&t);
-  printf("%d %d %d %d %d %p %p %p\n", Fields[trs_ac_hands].x,
-      Fields[trs_ac_hands].y, tm_struct->tm_hour * 5, tm_struct->tm_min * 2,
-      tm_struct->tm_sec * 2, HandsHours[tm_struct->tm_hour * 5].ScaledImage,
-      HandsMinutes[tm_struct->tm_min * 2].ScaledImage,
-      HandsSeconds[tm_struct->tm_sec * 2].ScaledImage);
+  /*
+   printf("%d %d %d %d %d %p %p %p\n", Fields[trs_ac_hands].x,
+   Fields[trs_ac_hands].y, tm_struct->tm_hour * 5, tm_struct->tm_min * 2,
+   tm_struct->tm_sec * 2, HandsHours[tm_struct->tm_hour * 5].ScaledImage,
+   HandsMinutes[tm_struct->tm_min * 2].ScaledImage,
+   HandsSeconds[tm_struct->tm_sec * 2].ScaledImage);
+   */
   BufferedComposite(&bdc, HandsHours[tm_struct->tm_hour * 5].ScaledImage,
       Fields[trs_ac_hands].x, Fields[trs_ac_hands].y);
   BufferedComposite(&bdc, HandsMinutes[tm_struct->tm_min * 2].ScaledImage,
@@ -1270,11 +1486,82 @@ public:
   bool
   OnInit()
   {
-    // make sure to call this first
+    int i, RetVal = 1;
+    long uj;
+    //#define FLEXGRID
+#ifndef FLEXGRID
+    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+#else
+    wxFlexGridSizer* sizer = new wxFlexGridSizer (3, 3, 0, 0);
+    sizer->AddGrowableRow (1, 1);
+    sizer->AddGrowableCol (1, 1);
+#endif
+
+    // Parse command-line arguments.
+    for (i = 1; i < argc; i++)
+      {
+        wxString Argv = argv[i];
+        if (Argv.BeforeFirst('=') == wxT("--port"))
+          {
+            if (Argv.AfterFirst('=').ToLong(&uj))
+              Port = uj;
+            else
+              {
+                fprintf(stderr, "Illegal value in --port switch.\n");
+                goto Help;
+              }
+          }
+        else if (Argv.BeforeFirst('=') == wxT("--host"))
+          {
+            Host = Argv.AfterFirst('=');
+          }
+        else if (Argv == wxT("--verbose") || Argv == wxT("-v"))
+          Verbosity++;
+        else if (Argv == wxT("--help"))
+          {
+            RetVal = 0;
+            Help: ;
+            fprintf(stderr, "USAGE:\n");
+            fprintf(stderr, "     yaPanel [OPTIONS]\n");
+            fprintf(stderr, "The allowed OPTIONS are:\n");
+            fprintf(stderr, "--help    Display this help-info.\n");
+            fprintf(
+                stderr,
+                "--host=H  Host IP address or name of yaOBC server. Default \"%s\".\n",
+                HOST);
+            fprintf(stderr, "--port=P  Defaults to --port=%d.\n", PORT);
+            fprintf(stderr, "--verbose Increase message verbosity.\n");
+            goto Done;
+          }
+        else
+          {
+            fprintf(stderr, "Unrecognized switch.\n");
+            goto Help;
+          }
+      }
+
+    // Initialize the socket library.
+    if (enet_initialize() != 0)
+      {
+        fprintf(stderr, "An error occurred while initializing ENet.\n");
+        goto Done;
+      }
+    atexit(enet_deinitialize);
+    if (Verbosity)
+      fprintf(stderr, "Starting up enet client.\n");
+    host = enet_host_create(NULL, 1, 2, 0, 0);
+    if (host == NULL)
+      {
+        fprintf(stderr,
+            "An error occurred while trying to create an ENet client.\n");
+        goto Done;
+      }
+
     wxInitAllImageHandlers();
 
     // Read in the file that lists all of the positions of the input-
     // and output fields in the background PNG.
+
       {
         FILE *fp;
         char s[129], Name[MAX_NAME_SIZE];
@@ -1288,7 +1575,7 @@ public:
           {
             wxMessageBox(wxT("Could not open yaPanel.coordinates"), wxT(
                 "Fatal error"), wxOK | wxICON_ERROR);
-            return (false);
+            goto Done;
           }
         while (NULL != fgets(s, sizeof(s), fp))
           {
@@ -1358,17 +1645,9 @@ public:
       {
         wxMessageBox(wxT("Size-fields not found in yaPanel.coordinates"), wxT(
             "Fatal error"), wxOK | wxICON_ERROR);
-        return (false);
+        goto Done;
       }
 
-    //#define FLEXGRID
-#ifndef FLEXGRID
-    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-#else
-    wxFlexGridSizer* sizer = new wxFlexGridSizer (3, 3, 0, 0);
-    sizer->AddGrowableRow (1, 1);
-    sizer->AddGrowableCol (1, 1);
-#endif
     frame = new wxFrame(NULL, wxID_ANY, wxT("Test yaPanel"), wxPoint(50, 50),
         wxSize(BackgroundWidth, BackgroundHeight));
 
@@ -1393,6 +1672,11 @@ public:
 
     frame->Show();
     return true;
+    // Error exit here.
+    Done: ;
+    if (host != NULL)
+      enet_host_destroy(host);
+    return false;
   }
 
 };

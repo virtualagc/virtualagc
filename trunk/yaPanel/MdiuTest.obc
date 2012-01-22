@@ -1,0 +1,77 @@
+# I (Ron Burkey), the author of this file, declare that it is the Public Domain
+# and may be used, altered, or redistributed for any purpose that anybody sees fit.
+# Filename:	yaAGC/yaPanel/MdiuTest.obc
+# Purpose:	This is a Gemini on-board computer (OBC) assembly-language file
+#		which demonstrates/tests OBC access of the MDIU peripheral device.
+# Reference:	http://www.ibiblio.org/apollo/Gemini.html
+# History:	2012-01-22 RSB	Wrote.
+
+# Usage instructions (if, for example, an emulated OBC is provided by the yaOBC program
+# and an emulated MDIU is provided by the yaPanel program, if both of the programs
+# are running, with MdiuTest having already been loaded into yaOBC, and if the MDR
+# power switch is in the ON position):
+#
+#   1.	To see a count (in octal) displayed that increments once per second, press 
+#	the MDR key labeled READ OUT.
+#   2.  To set a different count value:
+#	a.  Press MDR CLEAR key to stop the counting and start the data-entry procedure.
+#	b.  Enter a 7-digit octal count at on the MDK keypad.
+#	c.  Press the MDR ENTER key to finalize the data-entry procedure and start counting.
+
+		CODE	0-00-2-000
+		DATA	0-00-0-000
+
+# Variables.  I'm initializing them with zeroes, but they're not constants.
+COUNTER		OCT	0		# The current value of the counter
+COUNTING	OCT	0		# 1 when counting and 0 when just waiting for input.
+KONE		OCT	1		# This *is* a constant.
+KZERO		OCT	0		# Another actual constant.
+KEYVALUE				# For storing a fetched keystroke
+ENTRY		OCT	0		# 0 if in process of entering a number, 1 if not.
+	
+# This is the program's main loop.  
+OBCENTRY	SYN	MAINLOOP	# Mark this as the program-entry point as well.
+MAINLOOP	CLD	01		# Numeric keypad key pressed?
+		TNZ	NUMBER
+		CLD	02		# ENTER key pressed?
+		TNZ	ENTER
+		CLD	03		# READ OUT key pressed?
+		TNZ	READOUT
+		CLD	04		# CLEAR key pressed?
+		TNZ	CLEAR
+		TRA	MAINLOOP
+
+# Number-key pressed.
+NUMBER		PRO	443		# Fetch the keystroke, clearing accumulator first.
+		STO	KEYVALUE	# Temporarily save the keycode.
+		CLA	KONE
+		PRO	40		# Reset the MDIU's buffers.
+		CLA	ENTRY		# In process of data entry?
+		TNZ	MAINLOOP	# No, go back to main loop.
+		
+		TRA 	MAINLOOP
+		
+# ENTER key pressed.
+ENTER		PRO	40		# Reset the MDIU's buffers.
+		CLA	ENTRY		# In process of data entry?
+		TNZ	MAINLOOP	# No, go back to main loop.
+		
+		TRA 	MAINLOOP
+
+# READ OUT key pressed.
+READOUT		PRO	40		# Reset the MDIU's buffers.
+		CLA	KONE
+		STO	COUNTING	# Start counting, if not already counting.
+		CLS	KZERO		# And stop data-entry if it's in process.
+		STO	ENTRY
+		TRA	MAINLOOP
+
+# CLEAR key pressed.
+CLEAR		PRO	40		# Reset the MDIU's buffers.
+		CLA	KZERO
+		STO	COUNTING	# Stops counting, if it's in process.
+		CLA	KONE
+		STO	ENTRY		# And start data entry process.
+		
+		TRA	MAINLOOP
+		
