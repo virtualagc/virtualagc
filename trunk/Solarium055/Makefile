@@ -7,6 +7,7 @@
 # Mod history:	
 #		2009-07-25 RSB	Created, based on Artemis072 version.
 #		2011-05-03 JL	Updated.
+#		2012-09-16 JL	Updated to match tools dir changes.
 
 BASENAME=Solarium055
 
@@ -16,8 +17,8 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default: $(TARGETS)
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	../Tools/Oct2Bin <${BASENAME}.binsource
-	mv Oct2Bin.bin $@
+	../Tools/oct2bin <${BASENAME}.binsource
+	mv oct2bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
@@ -26,5 +27,5 @@ ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 		
 clean:
-	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html
 
