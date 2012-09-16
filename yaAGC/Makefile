@@ -58,6 +58,7 @@
 #				to libcurses, to try and use a newer version
 #				of libreadline.
 #		08/02/09 RSB	Added Alberto Galdo's iPhone mods.
+#		2012-09-16 JL	Updated to match tools directory changes.
 
 LIBS=${LIBS2}
 
@@ -163,8 +164,8 @@ else
 CC_WINAGC=i386-mingw32-gcc
 endif
 
-yaAGC:	$(OBJECTS) CheckDec.o libyaAGC.a ${NATIVE_WINAGC}
-	${CC} ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} CheckDec.o \
+yaAGC:	$(OBJECTS) checkdec.o libyaAGC.a ${NATIVE_WINAGC}
+	${CC} ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} checkdec.o \
 	libyaAGC.a -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm ${CURSES}
 
 libyaAGC.a: ${LIBOBJECTS}
@@ -185,7 +186,7 @@ install:	yaAGC
 	cp yaAGC ${PREFIX}/bin
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
-CheckDec.o: ../Tools/CheckDec.c
+checkdec.o: ../Tools/checkdec.c
 	${CC} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
@@ -198,9 +199,9 @@ CheckDec.o: ../Tools/CheckDec.c
 all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx
 
 #CSOURCE:=main.c agc_engine_init.c agc_engine.c agc_utilities.c rfopen.c \
-#	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Tools/CheckDec.c \
+#	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Tools/checkdec.c \
 #	 nbfgets.c symbol_table.c
-CSOURCE:=$(patsubst %.o,%.c,${OBJECTS} ${LIBOBJECTS}) ../Tools/CheckDec.c
+CSOURCE:=$(patsubst %.o,%.c,${OBJECTS} ${LIBOBJECTS}) ../Tools/checkdec.c
 
 yaAGC.exe: ${CSOURCE} random.c
 	i386-mingw32-gcc \

@@ -20,27 +20,28 @@
 #		08/18/04 RSB	... and fixed it.
 #		04/30/05 RSB	Added CFLAGS
 #		07/28/05 RSB	Added the symtab
+#		2012-09-16 JL	Updated to match tools dir changes.
 
 SOURCE:=$(wildcard *.s)
-TARGETS=webb2burkey-rope.exe Oct2Bin.exe CheckDec.exe bdiffhead.exe Luminary131.bin Luminary131.lst Luminary131.symtab
+TARGETS=webb2burkey-rope.exe binsource2bin.exe oct2bin.exe checkdec.exe bdiffhead.exe Luminary131.bin Luminary131.lst Luminary131.symtab
 
-Debug: 		$(TARGETS)
-default:	$(TARGETS)
+Debug: $(TARGETS)
+default: $(TARGETS)
 
 webb2burkey-rope.exe: webb2burkey-rope.c
 	gcc ${CFLAGS} "-DNVER=${NVER}" -o webb2burkey-rope.exe webb2burkey-rope.c
 	
-Oct2Bin.exe:	Oct2Bin.c
-	gcc ${CFLAGS} "-DNVER=${NVER}" -o Oct2Bin.exe Oct2Bin.c
+oct2bin.exe: oct2bin.c
+	gcc ${CFLAGS} "-DNVER=${NVER}" -o oct2bin.exe oct2bin.c
 	
-bdiffhead.exe:	bdiffhead.c
+bdiffhead.exe: bdiffhead.c
 	gcc ${CFLAGS} "-DNVER=${NVER}" -o bdiffhead.exe $^
 	
-CheckDec.exe:	CheckDec.c
-	gcc ${CFLAGS} "-DNVER=${NVER}" -DMAIN_PROGRAM -o CheckDec.exe CheckDec.c -lm
+checkdec.exe: checkdec.c
+	gcc ${CFLAGS} "-DNVER=${NVER}" -DMAIN_PROGRAM -o checkdec.exe checkdec.c -lm
 	
-Luminary131.bin: Oct2Bin.exe Luminary131.binsource
-	./Oct2Bin.exe <Luminary131.binsource
+Luminary131.bin: ../Tools/oct2bin.exe Luminary131.binsource
+	./Tools/oct2bin.exe <Luminary131.binsource
 	mv Oct2Bin.bin Luminary131.bin
 
 Luminary131.lst Luminary131.symtab: ${SOURCE}
@@ -52,8 +53,8 @@ cleanDebug: clean
 clean:
 	-rm -f $(TARGETS)
 	
-install:	default
-	cp Luminary131.bin Luminary131.symtab Oct2Bin.exe CheckDec.exe webb2burkey-rope.exe /mingw/bin
+install: default
+	cp Luminary131.bin Luminary131.symtab binsource2bin.exe oct2bin.exe checkdec.exe webb2burkey-rope.exe /mingw/bin
 	rm *.symtab
 	
 	

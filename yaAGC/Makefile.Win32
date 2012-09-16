@@ -47,6 +47,7 @@
 #		2008-06-05 OH	Added files for GDB/MI demonstrator
 #		2008-08-31 OH	Reorganizing source content
 #		2008-12-05 OH   Added OBJECTS definition.
+#		2012-09-16 JL	Updated to match tools dir changes.
 
 # 2007-03-05 RSB
 CFLAGS +=-DALLOW_BSUB
@@ -69,7 +70,7 @@ cleanDebug: clean
 
 default:	WinAGC yaAGC.exe
 
-yaAGC.exe:	 $(OBJECTS) ../Luminary131/CheckDec.c libyaAGC.a
+yaAGC.exe:	 $(OBJECTS) ../Tools/checkdec.c libyaAGC.a
 	gcc ${CFLAGS} -ggdb -o $@ $^ -L. -lpthreadAGC -lkernel32 -lwsock32 -lreadline -lyaAGC
 
 libyaAGC.a: agc_engine_init.o agc_engine.o agc_utilities.o rfopen.o \

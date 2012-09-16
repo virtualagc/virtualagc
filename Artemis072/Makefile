@@ -21,6 +21,7 @@
 #		2011-05-03 JL	Fixed so an error will always cause 
 #				a rebuild the next time make is run.
 #				Remove obsolete stuff. Point to moved Oct2Bin.
+#		2012-09-16 JL	Updated to match tools dir changes.
 
 BASENAME=Artemis072
 
@@ -32,8 +33,8 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default: $(TARGETS)
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	../Tools/Oct2Bin <${BASENAME}.binsource
-	mv Oct2Bin.bin $@
+	../Tools/oct2bin <${BASENAME}.binsource
+	mv oct2bin.bin $@
 
 ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
@@ -45,5 +46,5 @@ corediff.txt: ${BASENAME}.bin MAIN.agc.bin
 	python ../Tools/ropediff.py -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
 
 clean:
-	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab Oct2Bin.bin* *.html
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html
 

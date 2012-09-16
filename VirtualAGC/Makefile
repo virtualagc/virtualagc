@@ -62,6 +62,7 @@
 #				directory is now non-fatal if the dll doesn't 
 #				exist, which it wouldn't if readline was built
 #				static-only.
+#		2012-09-16 JL	Updated to match tools dir changes.
 
 APP=VirtualAGC
 
@@ -241,9 +242,10 @@ EXECUTABLES:=\
 	../yaAGS/yaAGS \
 	../yaACA3/yaACA3 \
 	../yaYUL/yaYUL \
-	../Tools/Oct2Bin \
+	../Tools/binsource2bin \
+	../Tools/oct2bin \
 	../Tools/bdiffhead \
-	../Tools/CheckDec \
+	../Tools/checkdec \
 	../Tools/webb2burkey-rope \
 	../yaLEMAP/yaLEMAP \
 	../yaLEMAP/binLEMAP \
