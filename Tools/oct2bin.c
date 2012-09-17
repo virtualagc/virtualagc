@@ -172,7 +172,7 @@ BuggerCheck (int Line, int BuggerChecked, uint16_t Banknum, uint16_t Checksum)
         else 
         {
             ErrorCount++;
-            printf("Error: Line %d: Bugger word for bank %o does not match (computed=%05o,%05o).\n", 
+            printf("Error: Line %5d: Bugger word for bank %02o does not match (computed=%05o,%05o).\n", 
                    Line, Banknum, Checksum, 077777 & ~Checksum);
         }
     }	    
