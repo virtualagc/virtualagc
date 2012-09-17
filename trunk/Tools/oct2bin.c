@@ -1,106 +1,110 @@
 /*
-  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC. 
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:	oct2bin.c
-  Purpose:	For the purpose of validating yaYUL, Luminary131, and 
-  		Colossus249 the binary from the Luminary131 and Colussus249
-		source-code listings is checked against the yaYUL-produced
-		binary produced from the source-code in those listings.
-		This checking is most-easily done by the computer, which
-		implies that the Luminary/Colossus source AND the
-		Luminary/Colossus binary must separately be entered into
-		the computer.  (Of course, once the binaries are entered
-		they can also be used directly with yaAGC, whether or not
-		yaYUL or the Luminary/Colossus sources are correct.)
-		But entering binary data directly into the computer is not
-		very convenient (particularly when it is originally listed
-		in octal 15-bit format), so an intermediate ASCII format
-		is used.  Then, a program (namely this one, oct2bin) is used
-		to convert the intermediate file to binary.
-  Contact:	Ron Burkey <info@sandroid.org>
-  Website:	http://www.ibiblio.org/apollo/index.html
-  Mode:		08/24/03 RSB	Began.
-  		08/31/03 RSB	Added some additional checks for the kind of
-				garbage produced by OCR.
-		09/07/03 RSB	Made error messages a little cleaner.
-		08/12/04 RSB	Added NVER.
-		04/30/05 RSB	Unused variable removed.
-		05/14/05 RSB	Corrected website references
-		01/02/06 RSB	Now allow commas to appear as delimiters.
-				This is done because I find it convenient
-				when entering data using Dragon 
-				NaturallySpeaking 8.
-		05/20/09 RSB	Added the --invert command-line switch.
-				With this switch, the program reverses the
-				normal process, taking a binary file and
-				turning it into a textual file.  Such a
-				file is helpful in proofing when converting
-				a set of page images to source-code files,
-				since when you assemble the source-code files
-				so-created the result usually won't be what
-				it's supposed to, and at some point you have
-				to compare the binary created by yaYUL against
-				the binary in the page images.  Also added
-				the --page switch.
-		11/22/10 RSB    Added the CHECKWORDS=Count variable to
-                                supplement the existing BANK=BankNumber
-                                variable.  CHECKWORDS is the number of words
-                                participating in the checksum, including the
-                                bugger word.  It defaults to 02000, which is
-                                the number of words in a bank.  This is
-                                normally okay, since any unuused words
-                                following the bugger word are zero.  But with
-                                Solarium 055, some banks have data stored
-                                *after* the bugger word, and shouldn't
-                                participate in the checksum.  The CHECKWORDS
-                                variable is used when necessary to compensate
-                                for that funky fact.  It must *follow* the
-                                BANK variable when it's used.  Also, I added the
-                                NUMBANKS variable, which should precede any
-                                bank and give the total number of banks.
-                                Defaults to 044.  Both of the new variables
-                                are in octal.
-  
-  The format of the file is simple.  Each line just consists of 8 fields,
-  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
-  lines and lines beginning with ';' are ignored.
-  
-  The checksum of any given bank is equal to the sum of all of the words
-  in the bank, including the so-called "bugger" word, which follows all of the
-  valid data.  The sum is supposed to be equal to the bank number.  Filler
-  words of 0 should be added after the bugger word, so that the banks never
-  end prematurely
-  
-  Oct2Bin internally attempts to compute the checksum, thus providing an
-  additional check on the data.  To account for this, the data for each bank 
-  should be followed immediately by a line that reads
-  	BANK=BankNumber
-  
-  The input is on the standard input.  Status messages are on the standard
-  output.  The binary is put into a file called oct2bin.bin.
-  
-  If the command-line switch --invert is used, then the input should be a binary
-  file called oct2bin.bin, and the output will be a text file named oct2bin.binsource.
-  When --invert is used, the switch --page=N can be used to select a starting page
-  number for the binary listing, so as to create something that corresponds to the
-  set of page images.
-*/
+ *  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
+ *
+ *  This file is part of yaAGC.
+ *
+ *  yaAGC is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  yaAGC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with yaAGC; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  Filename:	oct2bin.c
+ *
+ *  Purpose:	For the purpose of validating yaYUL, Luminary131, and
+ *  		Colossus249 the binary from the Luminary131 and Colussus249
+ *		source-code listings is checked against the yaYUL-produced
+ *		binary produced from the source-code in those listings.
+ *		This checking is most-easily done by the computer, which
+ *		implies that the Luminary/Colossus source AND the
+ *		Luminary/Colossus binary must separately be entered into
+ *		the computer.  (Of course, once the binaries are entered
+ *		they can also be used directly with yaAGC, whether or not
+ *		yaYUL or the Luminary/Colossus sources are correct.)
+ *		But entering binary data directly into the computer is not
+ *		very convenient (particularly when it is originally listed
+ *		in octal 15-bit format), so an intermediate ASCII format
+ *		is used.  Then, a program (namely this one, oct2bin) is used
+ *		to convert the intermediate file to binary.
+ *
+ *  Contact:	Ron Burkey <info@sandroid.org>
+ *
+ *  Website:	http://www.ibiblio.org/apollo/index.html
+ *
+ *  Mode:	08/24/03 RSB	Began.
+ *  		08/31/03 RSB	Added some additional checks for the kind of
+ *				garbage produced by OCR.
+ *		09/07/03 RSB	Made error messages a little cleaner.
+ *		08/12/04 RSB	Added NVER.
+ *		04/30/05 RSB	Unused variable removed.
+ *		05/14/05 RSB	Corrected website references
+ *		01/02/06 RSB	Now allow commas to appear as delimiters.
+ *				This is done because I find it convenient
+ *				when entering data using Dragon
+ *				NaturallySpeaking 8.
+ *		05/20/09 RSB	Added the --invert command-line switch.
+ *				With this switch, the program reverses the
+ *				normal process, taking a binary file and
+ *				turning it into a textual file.  Such a
+ *				file is helpful in proofing when converting
+ *				a set of page images to source-code files,
+ *				since when you assemble the source-code files
+ *				so-created the result usually won't be what
+ *				it's supposed to, and at some point you have
+ *				to compare the binary created by yaYUL against
+ *				the binary in the page images.  Also added
+ *				the --page switch.
+ *		11/22/10 RSB    Added the CHECKWORDS=Count variable to
+ *                              supplement the existing BANK=BankNumber
+ *                              variable.  CHECKWORDS is the number of words
+ *                              participating in the checksum, including the
+ *                              bugger word.  It defaults to 02000, which is
+ *                              the number of words in a bank.  This is
+ *                              normally okay, since any unuused words
+ *                              following the bugger word are zero.  But with
+ *                              Solarium 055, some banks have data stored
+ *                              *after* the bugger word, and shouldn't
+ *                              participate in the checksum.  The CHECKWORDS
+ *                              variable is used when necessary to compensate
+ *                              for that funky fact.  It must *follow* the
+ *                              BANK variable when it's used.  Also, I added the
+ *                              NUMBANKS variable, which should precede any
+ *                              bank and give the total number of banks.
+ *                              Defaults to 044.  Both of the new variables
+ *                              are in octal.
+ *
+ *  The format of the file is simple.  Each line just consists of 8 fields,
+ *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
+ *  lines and lines beginning with ';' are ignored.
+ *
+ *  The checksum of any given bank is equal to the sum of all of the words
+ *  in the bank, including the so-called "bugger" word, which follows all of the
+ *  valid data.  The sum is supposed to be equal to the bank number.  Filler
+ *  words of 0 should be added after the bugger word, so that the banks never
+ *  end prematurely
+ *
+ *  Oct2Bin internally attempts to compute the checksum, thus providing an
+ *  additional check on the data.  To account for this, the data for each bank
+ *  should be followed immediately by a line that reads
+ *  	BANK=BankNumber
+ *
+ *  The input is on the standard input.  Status messages are on the standard
+ *  output.  The binary is put into a file called oct2bin.bin.
+ *
+ *  If the command-line switch --invert is used, then the input should be a binary
+ *  file called oct2bin.bin, and the output will be a text file named oct2bin.binsource.
+ *  When --invert is used, the switch --page=N can be used to select a starting page
+ *  number for the binary listing, so as to create something that corresponds to the
+ *  set of page images.
+ */
 
 //#define VERSION(x) #x
 
