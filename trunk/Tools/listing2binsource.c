@@ -23,12 +23,12 @@
  * Purpose:      This program assists in creating an executable
  *               binary from AGC programs like Luminary or Colossus.
  *               Unlike yaYUL (which processes the assembly language
- *               to product an executable) or Oct2Bin (which processes
+ *               to product an executable) or oct2bin (which processes
  *               an octal listing to produce an executable),
  *               listing2binsource processes octal codes from the columns
- *               in an assembly listing which are parallel to the
- *               assembly language.  This is helpful for a listing
- *               like the Colossus 237 assembly listing obtained
+ *               in an assembly listing (which are parallel to the
+ *               assembly language). This is helpful for a listing
+ *               like the Colossus237 assembly listing obtained
  *               from Fred Martin in which the octal-listing section
  *               is missing completely, and yet we still need an
  *               executable obtained separately from yaYUL in order
@@ -48,7 +48,9 @@
  *                                 NaturallySpeaking 11 no longer
  *                                 allows me to use '&' the way
  *                                 DNS 8 did.  Sigh ....
- *               2012-09-17 JL     Tidy up.
+ *               2012-09-17 JL     Tidy up. Handle pages with just
+ *                                 an address line. Handle lines
+ *                                 with whitespace at the end.
  *
  * For listing2binsource.c, the octal codes are provided in an input file
  * created by moving through the assembly-language portion of the
@@ -208,9 +210,9 @@ int main(void)
             s = strstr(inputLine, ",");
             if ((s == &inputLine[inputLength - 1]) && (sscanf(inputLine, "p%d%c", &i, &c) == 2) && (c == ',')) {
                 if (i != currentPage + 1)
-                    retval = printError(currentPage, line, "Page-number out of sequence.");
+                    retval = printError(currentPage, line, "Page number out of sequence.");
                 if (lastLineType != 'c' && lastLineType != 'p' && lastLineType != 'a')
-                    retval = printError(currentPage, line, "Missing address-check.");
+                    retval = printError(currentPage, line, "Missing address-check line.");
                 currentPage = i;
             } else
                 retval = printError(currentPage, line, "Ill-formed page line.");
@@ -228,16 +230,19 @@ ProcessAorC:
                 j -= BANK_OFFSET;
                 if (inputLine[0] == 'a') {
                     if (lastLineType != 'c' && lastLineType != 'p')
-                        retval = printError(currentPage, line, "Missing address-check.");
+                        retval = printError(currentPage, line, "Missing address-check line.");
                     bank = i;
                     offset = j;
                 } else {
                     // inputLine[0] == 'c'
-                    if (bank != i || offset != j + 1)
-                        retval = printError(currentPage, line, "Address-check mismatch.");
+                    if (bank != i || offset != j + 1) {
+                        char msgStr[128];
+
+                        sprintf(msgStr, "Address-check mismatch, expecting (%o,%o), got (%o,%o).", bank, offset, i, j + 1);
+                        retval = printError(currentPage, line, msgStr);
+                    }
                 }
-            }
-            else if ((s == &inputLine[inputLength - 1]) && (sscanf(&inputLine[1], "%o%c", &j, &c) == 2) && (c == ',')) {
+            } else if ((s == &inputLine[inputLength - 1]) && (sscanf(&inputLine[1], "%o%c", &j, &c) == 2) && (c == ',')) {
                 if (j >= 04000 && j <= 05777) {
                     i = 0;
                     j -= 02000;
@@ -259,22 +264,28 @@ ProcessAorC:
 
             // Parse each field on the line.  Recall that the line ends with
             // a comma, so we can just search until there are no more commas.
+            // This also handles the case of one word per line, which is an easier format
+            // to enter if using the keyboard.
             for (s = inputLine; (ss = strstr(s, ",")) != NULL && ss < &inputLine[inputLength]; s = ss + 1) {
-                if (ss - s != 5) {
-                    i = CORRUPTED;
-                    retval = printError(currentPage, line, "Non 5-digit octal field.");
-                } else if (sscanf(s, "%o%c", &i, &c) != 2 || (c != ',' && c != ' ' && c != '\t')) {
+
+                if (sscanf(s, "%o%c", &i, &c) != 2 || (c != ',' && c != ' ' && c != '\t')) {
                     i = CORRUPTED;
                     retval = printError(currentPage, line, "Junk characters in octal field.");
                 }
 
-                if (rope[bank][offset] >= 00000 && rope[bank][offset <= 077777]) {
+                if (retval == 0 && (i < 0 || i > 077777)) {
+                    i = CORRUPTED;
+                    retval = printError(currentPage, line, "Non 5-digit octal field.");
+                }
+
+                if (retval == 0 && (rope[bank][offset] >= 00000 && rope[bank][offset <= 077777])) {
                     i = OVERWRITTEN;
                     retval = printError(currentPage, line, "Memory overwrite.");
                 }
 
                 if (retval == 0)
                     rope[bank][offset] = i;
+
                 offset++;
             }
         }
