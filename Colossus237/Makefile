@@ -20,7 +20,7 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default: $(TARGETS)
 
 ${BASENAME}.binsource: ${BASENAME}.binsource2.txt
-	cat $^ | ../Tools/listing2binsource 
+	../Tools/listing2binsource $^ $@
 
 ${BASENAME}.bin: ${BASENAME}.binsource
 	../Tools/oct2bin <${BASENAME}.binsource
