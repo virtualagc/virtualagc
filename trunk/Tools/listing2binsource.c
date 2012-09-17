@@ -237,8 +237,7 @@ ProcessAorC:
                     // inputLine[0] == 'c'
                     if (bank != i || offset != j + 1) {
                         char msgStr[128];
-
-                        sprintf(msgStr, "Address-check mismatch, expecting (%o,%o), got (%o,%o).", bank, offset, i, j + 1);
+                        sprintf(msgStr, "Address-check mismatch, expecting (%02o,%04o), got (%02o,%04o).", bank, offset+02000, i, j + 1 + 02000);
                         retval = printError(currentPage, line, msgStr);
                     }
                 }
@@ -249,8 +248,7 @@ ProcessAorC:
                 } else if (j >= 06000 && j <= 07777) {
                     i = 1;
                     j -= 04000;
-                }
-                else
+                } else
                     i = -1;
                 goto ProcessAorC;
             }
@@ -270,17 +268,19 @@ ProcessAorC:
 
                 if (sscanf(s, "%o%c", &i, &c) != 2 || (c != ',' && c != ' ' && c != '\t')) {
                     i = CORRUPTED;
-                    retval = printError(currentPage, line, "Junk characters in octal field.");
+                    retval = printError(currentPage, line, "Illegal characters in octal field.");
                 }
 
                 if (retval == 0 && (i < 0 || i > 077777)) {
                     i = CORRUPTED;
-                    retval = printError(currentPage, line, "Non 5-digit octal field.");
+                    retval = printError(currentPage, line, "Bad octal field, greater than 5 digits.");
                 }
 
                 if (retval == 0 && (rope[bank][offset] >= 00000 && rope[bank][offset <= 077777])) {
                     i = OVERWRITTEN;
-                    retval = printError(currentPage, line, "Memory overwrite.");
+                    char msgStr[128];
+                    sprintf(msgStr, "Memory overwrite at (%02o,%04o), existing contents: %05o.", bank, offset, rope[bank][offset]);
+                    retval = printError(currentPage, line, msgStr);
                 }
 
                 if (retval == 0)
