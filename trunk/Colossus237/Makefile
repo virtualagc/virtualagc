@@ -15,10 +15,12 @@ BASENAME=Colossus237
 .PHONY: ${BASENAME}.lst
 
 SOURCE:=$(wildcard *.agc)
-#TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
-TARGETS=${BASENAME}.lst ${BASENAME}.symtab
+TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 
 default: $(TARGETS)
+
+${BASENAME}.binsource: ${BASENAME}.binsource2.txt
+	cat $^ | ../Tools/listing2binsource 
 
 ${BASENAME}.bin: ${BASENAME}.binsource
 	../Tools/oct2bin <${BASENAME}.binsource
@@ -36,5 +38,5 @@ corediff.txt:
 #	python ../Tools/ropediff.py -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
 
 clean:
-	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html ${BASENAME}.binsource
 

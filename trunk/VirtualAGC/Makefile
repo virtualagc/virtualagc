@@ -242,7 +242,7 @@ EXECUTABLES:=\
 	../yaAGS/yaAGS \
 	../yaACA3/yaACA3 \
 	../yaYUL/yaYUL \
-	../Tools/binsource2bin \
+	../Tools/listing2binsource \
 	../Tools/oct2bin \
 	../Tools/bdiffhead \
 	../Tools/checkdec \
