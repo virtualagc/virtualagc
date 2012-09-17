@@ -51,6 +51,8 @@
  *               2012-09-17 JL     Tidy up. Handle pages with just
  *                                 an address line. Handle lines
  *                                 with whitespace at the end.
+ *                                 Fix handling of fixed-fixed 
+ *                                 addresses.
  *
  * For listing2binsource.c, the octal codes are provided in an input file
  * created by moving through the assembly-language portion of the
@@ -237,16 +239,17 @@ ProcessAorC:
                     // inputLine[0] == 'c'
                     if (bank != i || offset != j + 1) {
                         char msgStr[128];
-                        sprintf(msgStr, "Address-check mismatch, expecting (%02o,%04o), got (%02o,%04o).", bank, offset+02000, i, j + 1 + 02000);
+                        sprintf(msgStr, "Address-check mismatch, expecting (%02o,%04o), got (%02o,%04o).",
+                                bank, offset + BANK_OFFSET, i, j + 1 + BANK_OFFSET);
                         retval = printError(currentPage, line, msgStr);
                     }
                 }
             } else if ((s == &inputLine[inputLength - 1]) && (sscanf(&inputLine[1], "%o%c", &j, &c) == 2) && (c == ',')) {
                 if (j >= 04000 && j <= 05777) {
-                    i = 0;
+                    i = 2;
                     j -= 02000;
                 } else if (j >= 06000 && j <= 07777) {
-                    i = 1;
+                    i = 3;
                     j -= 04000;
                 } else
                     i = -1;
