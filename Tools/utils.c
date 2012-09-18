@@ -124,21 +124,25 @@ void check(int verbose, int line, int checked, uint16_t banknum, uint16_t checks
 // Returns the generated bugger word.
 uint16_t generateBuggerWord(int verbose, int bank, int length, int16_t *code)
 {
-    uint16_t bugger = 0, guess = 0;
+    uint16_t checksum = 0, bugger = 0;
     int i = 0;
 
     // Iterate over the bank and calculate the bugger word.
     for (i = 0; i < length; i++) {
-        int value = code[i];
-        bugger = addAgc(bugger, value);
+        checksum = addAgc(checksum, code[i]);
     }
 
-    if ((bugger & 040000) == 0)
-        guess = addAgc(bank, 077777 & ~bugger);
-    else
-        guess = addAgc(077777 & ~bank, 077777 & ~bugger);
+    if ((checksum & 040000) == 0) {
+        bugger = addAgc(bank, 077777 & ~checksum);
+        if (verbose)
+            printf("Checksum for bank %02o is %05o, MSB=0, bugger word is %05o.\n", bank, checksum, bugger);
+    } else {
+        bugger = addAgc(077777 & ~bank, 077777 & ~checksum);
+        if (verbose)
+            printf("Checksum for bank %02o is %05o, MSB=1, bugger word is %05o.\n", bank, checksum, bugger);
+    }
 
-    return (guess);
+    return (bugger);
 }
 
 // Get the bank number for a specified offset.
