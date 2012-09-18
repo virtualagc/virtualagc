@@ -91,10 +91,10 @@ void checkBuggerWord(int verbose, int line, int checked, uint16_t banknum, uint1
     if (!checked) {
         if (checksum == banknum)  {
             if (verbose)
-                printf("Bugger word for bank %02o matches (positive).\n", banknum);
+                printf("Bugger word for bank %02o matches (positive, %05o).\n", banknum, banknum);
         } else if (checksum == (077777 & ~banknum)) {
             if (verbose)
-                printf("Bugger word for bank %02o matches (negative).\n", banknum);
+                printf("Bugger word for bank %02o matches (negative, %05o).\n", banknum, 077777 & ~banknum);
         } else {
             errorCount++;
             fprintf(stderr, "Error: line %5d, bugger word (%05o) for bank %02o does not match expected (%05o or %05o).\n",
