@@ -80,6 +80,7 @@
  *                              bank and give the total number of banks.
  *                              Defaults to 044.  Both of the new variables
  *                              are in octal.
+ *              2012-09-18 JL   Tidy up for Colossus237.
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -112,306 +113,297 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <string.h>
-uint16_t Checksum = 0;
-int ErrorCount = 0;
-int NumBanks = 044;
+
+uint16_t checksum = 0;
+int errorCount = 0;
+int numBanks = 044;
 
 // Convert an AGC-format signed integer to native format.
-int
-AgcToNative (uint16_t n)
+int convertAgcToNative(uint16_t n)
 {
-  int i;
-  i = n;
-  if (0 != (n & 040000))
-    i = -(077777 & ~i);
-  return (i);
+    int i;
+
+    i = n;
+    if ((n & 040000) != 0)
+        i = -(077777 & ~i);
+
+    return (i);
 }
 
 // This function takes two signed integers in AGC format, adds them, and returns
 // the sum (also in AGC format).  If there's overflow or underflow, the 
 // carry is added in also.  This is done because that's the goofy way the
 // AGC checksum is created.
-uint16_t
-Add (uint16_t n1, uint16_t n2)
+uint16_t addAgc(uint16_t n1, uint16_t n2)
 {
-  int i1, i2, Sum;
-  // Convert from AGC 1's-complement format to the native integer format of this CPU.
-  i1 = AgcToNative (n1);
-  i2 = AgcToNative (n2);
-  // Add 'em up.
-  Sum = i1 + i2;
-  // Account for carry or underflow.
-  if (Sum > 16383)
-    {
-      Sum -= 16384;
-      Sum++;
+    int i1, i2, sum;
+
+    // Convert from AGC 1's-complement format to the native integer format of this CPU.
+    i1 = convertAgcToNative(n1);
+    i2 = convertAgcToNative(n2);
+
+    // Add 'em up.
+    sum = i1 + i2;
+
+    // Account for carry or underflow.
+    if (sum > 16383) {
+        sum -= 16384;
+        sum++;
+    } else if (sum < -16383) {
+        sum += 16384;
+        sum--;
     }
-  else if (Sum < -16383)
-    {
-      Sum += 16384;
-      Sum--;
-    }  
-  // The following condition can't occur, but I'll check for it anyway.
-  if (Sum > 16383 || Sum < -16383)
-    printf ("Arithmetic overflow.\n");
-  // Convert back to 1's-complement and return.
-  if (Sum >= 0)
-    return (Sum);
-  return (077777 & ~(-Sum)); 
+
+    // The following condition can't occur, but I'll check for it anyway.
+    if (sum > 16383 || sum < -16383)
+        fprintf(stderr, "Error: arithmetic overflow.\n");
+
+    // Convert back to 1's-complement and return.
+    if (sum >= 0)
+        return (sum);
+
+    return (077777 & ~(-sum));
 }
 
-void
-BuggerCheck (int Line, int BuggerChecked, uint16_t Banknum, uint16_t Checksum)
+void checkBuggerWord(int line, int checked, uint16_t banknum, uint16_t checksum)
 {
-    if (!BuggerChecked) 
-    {
-        if (Checksum == Banknum) 
-        {
-            //printf("FYI: Bugger word for bank %o is a match (positive).\n", Banknum);
-        } 
-        else if (Checksum == (077777 & ~Banknum)) 
-        {
-            //printf("FYI: Bugger word for bank %o is a match (negative).\n", Banknum);
-        } 
-        else 
-        {
-            ErrorCount++;
-            printf("Error: Line %5d: Bugger word for bank %02o does not match (computed=%05o,%05o).\n", 
-                   Line, Banknum, Checksum, 077777 & ~Checksum);
+    if (!checked) {
+        if (checksum == banknum)  {
+            //printf("FYI: Bugger word for bank %02o is a match (positive).\n", banknum);
+        } else if (checksum == (077777 & ~banknum)) {
+            //printf("FYI: Bugger word for bank %02o is a match (negative).\n", banknum);
+        } else {
+            errorCount++;
+            fprintf(stderr, "Error: line %5d, bugger word (%05o) for bank %02o does not match expected (%05o or %05o).\n",
+                    line, checksum, banknum, banknum, 077777 & ~banknum);
         }
     }	    
 }
 
-int 
-Bank (int Count)
+int getBank(int count)
 {
-  int Ret;
-  Ret = Count / 1024;
-  if (Ret < 2)
-    Ret += 2;
-  else if (Ret < 4)
-    Ret -= 2;
-  return (Ret);
+    int retval = count / 1024;
+
+    if (retval < 2)
+        retval += 2;
+    else if (retval < 4)
+        retval -= 2;
+
+    return (retval);
 }
 
 // Decompile a binary file to text.  We don't bother to check the bugger codes.
-
-int
-Decompile (int Page)
+int decompile(int page)
 {
-  unsigned char b[2];
-  int Value, Count = 0;
-  FILE *fin, *fout;
-  
+    unsigned char b[2];
+    int value, count = 0;
+    FILE *fin, *fout;
+
 #ifdef WIN32
-  fin = fopen ("oct2Bin.bin", "rb");
+    fin = fopen("oct2Bin.bin", "rb");
 #else
-  fin = fopen ("oct2bin.bin", "r");
+    fin = fopen("oct2bin.bin", "r");
 #endif
-  if (fin == NULL)
-    {
-      printf ("Error: input file oct2bin.bin does not exist.\n");
-      return (1);
+    if (fin == NULL) {
+        printf("Error: input file oct2bin.bin does not exist.\n");
+        return (1);
     }
-  fout = fopen ("oct2bin.binsource", "w");
-  if (fout == NULL)
-    {
-      fclose (fin);
-      printf ("Error: cannot create output file oct2bin.binsource.\n");
-      return (1);
+
+    fout = fopen("oct2bin.binsource", "w");
+    if (fout == NULL) {
+        fclose(fin);
+        printf("Error: cannot create output file oct2bin.binsource.\n");
+        return (1);
     }
-    
-  // Write a template file header that can be manually edited later.
-  fprintf (fout, "; Copyright:\tPublic domain\n");
-  fprintf (fout, "; Filename:\tXXXX.binsource\n");
-  fprintf (fout, "; Purpose:\tXXXX\n");
-  fprintf (fout, "; Contact:\tinfo@sandroid.org\n");
-  fprintf (fout, "; Mods:\t\tXXXX-XX-XX XXX\tAuto-generated by oct2bin.\n");
-  fprintf (fout, ";\t\tXXXX-XX-XX XXX\tXXXX\n");
-    
-  // Read and write data.
-  while (1 == fread (b, 2, 1, fin))
-    {
-      Value = (b[0] << 7) | (b[1] >> 1);
-      if (0 == (Count % 8))
-        fprintf (fout, "\n");
-      if (0 == (Count % 32))
-        fprintf (fout, "\n");
-      if (0 == (Count % 256))
-        {
-	  char PageString[33], BankString[33];
-	  if (Page <= 0)
-	    PageString[0] = 0;
-	  else
-	    sprintf (PageString, " p. %d,", Page++);
-	  if (Count < 2048)
-	    sprintf (BankString, " %o", 04000 + Count);
-	  else 
-	    sprintf (BankString, " %02o,%04o", Bank (Count), 02000 + (Count % 1024));
-          fprintf (fout, ";%s%s\n\n", PageString, BankString);
-	}
-      if (0 == (Count % 1024))
-        fprintf (fout, "BANK=%o\n\n", Bank (Count));
-      fprintf (fout, "%05o ", Value);
-      Count++;
+
+    // Write a template file header that can be manually edited later.
+    fprintf(fout, "; Copyright: Public domain\n");
+    fprintf(fout, "; Filename:  XXXX.binsource\n");
+    fprintf(fout, "; Purpose:   XXXX\n");
+    fprintf(fout, "; Contact:   info@sandroid.org\n");
+    fprintf(fout, "; Mods:      XXXX-XX-XX XXX    Auto-generated by oct2bin.\n");
+    fprintf(fout, ";            XXXX-XX-XX XXX    XXXX\n");
+
+    // Read and write data.
+    while (fread(b, 2, 1, fin) == 1) {
+        value = (b[0] << 7) | (b[1] >> 1);
+
+        if ((count % 8) == 0)
+            fprintf(fout, "\n");
+
+        if ((count % 32) == 0)
+            fprintf(fout, "\n");
+
+        if ((count % 256) == 0) {
+            char pageString[33], bankString[33];
+
+            if (page <= 0)
+                pageString[0] = 0;
+            else
+                sprintf(pageString, " p. %d,", page++);
+
+            if (count < 2048)
+                sprintf(bankString, " %o", 04000 + count);
+            else
+                sprintf(bankString, " %02o,%04o", getBank(count), 02000 + (count % 1024));
+
+            fprintf(fout, ";%s%s\n\n", pageString, bankString);
+        }
+
+        if ((count % 1024) == 0)
+            fprintf(fout, "BANK=%o\n\n", getBank(count));
+
+        fprintf(fout, "%05o ", value);
+        count++;
     }
-  
-  fclose (fin);
-  fclose (fout);
-  return (0);
+
+    fclose(fin);
+    fclose(fout);
+
+    return (0);
 }
 
-int
-main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-  FILE *OutFile;
-  int Dummy, Data[8], Line, BuggerChecked = 1;
-  uint16_t Dummy16, Banknum;
-  int Count, CheckWords = 0;
-  char s[129], *ss;
-  int i, j, Invert = 0, Page = 0, Verbose = 0;
-  
-  // Parse the command-line switches.
-  for (i = 1; i < argc; i++)
-    {
-      if (!strcmp (argv[i], "--invert"))
-        Invert = 1;
-      if (!strcmp (argv[i], "--verbose"))
-        Verbose = 1;
-      else if (1 == sscanf (argv[i], "--page=%d", &j))
-        Page = j;
-      else
-        {
-	  printf ("Error: Unknown command-line switch \"%s\"\n", argv[i]);
-	  return (1);
-	}
-    }
- 
-  if (Verbose)
-    { 
-      printf ("(c)2003-2005,2010 Ronald S. Burkey, ver " NVER ", built " __DATE__ "\n");
-      printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
+    FILE *outfile;
+    int dummy, data[8], line, checked = 1;
+    uint16_t dummy16, banknum;
+    int count, checkWords = 0;
+    char s[129], *ss;
+    int i, j, invert = 0, page = 0, verbose = 0;
+
+    // Parse the command-line switches.
+    for (i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "--invert"))
+            invert = 1;
+        if (!strcmp(argv[i], "--verbose"))
+            verbose = 1;
+        else if (sscanf(argv[i], "--page=%d", &j) == 1)
+            page = j;
+        else {
+            fprintf(stderr, "Error: Unknown command-line switch \"%s\"\n", argv[i]);
+            return (1);
+        }
     }
 
-  if (Invert)
-    return (Decompile (Page));
-  
-  OutFile = fopen ("oct2bin.bin", "wb");
-  if (OutFile == NULL)
-    {
-      ErrorCount++;
-      printf ("Error: Cannot create the output file oct2bin.bin.\n");
-      return (1);
+    if (verbose) {
+        printf("(c)2003-2005,2010 Ronald S. Burkey, ver " NVER ", built " __DATE__ "\n");
+        printf("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
     }
-  s[sizeof (s) - 1] = 0;
-  Line = 0;
-  while (NULL != fgets (s, sizeof (s) - 1, stdin))
-    {
-      Line++;
-      if (s[0] == ';' || s[0] == '\n')
-        continue;
-      if (1 == sscanf (s, "NUMBANKS=%o", &Dummy))
-        {
-          NumBanks = Dummy;
-          continue;
+
+    if (invert)
+        return (decompile(page));
+
+    outfile = fopen("oct2bin.bin", "wb");
+    if (outfile == NULL) {
+        errorCount++;
+        fprintf(stderr, "Error: Cannot create the output file oct2bin.bin.\n");
+        return (1);
+    }
+
+    s[sizeof(s) - 1] = 0;
+    line = 0;
+
+    while (fgets(s, sizeof(s) - 1, stdin) != NULL) {
+        line++;
+        if (s[0] == ';' || s[0] == '\n')
+            continue;
+        if (sscanf(s, "NUMBANKS=%o", &dummy) == 1) {
+            numBanks = dummy;
+            continue;
         }
-      if (1 == sscanf (s, "BANK=%o", &Dummy))
-        {
-	  BuggerCheck (Line, BuggerChecked, Banknum, Checksum);
-	  Banknum = Dummy;
-	  Checksum = 0;
-	  if (0 != (03777 & ftell (OutFile)))
-	    {
-	      ErrorCount++;
-	      printf ("Error: Line %d: Bank %o is not aligned properly.\n", Line, Banknum);
-	    }
-	  BuggerChecked = 0;  
-	  CheckWords = 02000;
-	  continue;
-	} 
-      if (1 == sscanf (s, "CHECKWORDS=%o", &Dummy))
-        {
-          CheckWords = Dummy;
-          if (CheckWords == 0)
-            Checksum = Banknum;
-          continue;
+
+        if (sscanf(s, "BANK=%o", &dummy) == 1) {
+            checkBuggerWord(line, checked, banknum, checksum);
+            banknum = dummy;
+            checksum = 0;
+            if ((ftell(outfile) & 03777) != 0) {
+                errorCount++;
+                fprintf(stderr, "Error: line %d, bank %02o is not aligned properly.\n", line, banknum);
+            }
+            checked = 0;
+            checkWords = 02000;
+            continue;
         }
-      if (1 == sscanf (s, "BUGGER=%o", &Dummy))
-        {
-	  Dummy16 = Dummy;
-	  putc (Dummy16 >> 8, OutFile);
-	  putc (Dummy16 & 255, OutFile);
-	  Checksum = Add (Checksum, Dummy16);
-	  BuggerCheck (Line, BuggerChecked, Banknum, Checksum);
-	  BuggerChecked = 1;
-	  continue;
-	} 
-	
-      // Check for certain garbage conditions.
-      for (ss = s; *ss; ss++)
-        if (*ss == ',')		// 01/02/06 RSB.  Remove comma delimiters.
-	  *ss = ' ';
-        else if (!isspace (*ss) && (*ss < '0' || *ss > '7'))
-	  {
-	    ErrorCount++;
-	    printf ("Error: Line %d: Illegal digit \'%c\'.\n", Line, *ss);	  
-	  }
-      for (ss = s, i = 0; ; i++)	  
-        {
-	  for (; isspace (*ss); ss++);
-	  if (*ss == 0)
-	    break;
-	  for (j = 0; *ss && !isspace (*ss); ss++, j++);
-	  if (j != 5)
-	    {
-	      ErrorCount++;
-	      printf ("Error: Line %d:  Field is not 5-characters wide.\n", Line);
-	    }
-	}
-      if (i > 8)
-        {
-	  ErrorCount++;
-          printf ("Error: Line %d:  Too many fields.\n", Line);	
-	}
-	  
-      // Now, parse like the wind!
-      Count = sscanf (s, "%o%o%o%o%o%o%o%o", &Data[0], &Data[1], &Data[2],
-      		      &Data[3], &Data[4], &Data[5], &Data[6], &Data[7]);
-      for (Dummy = 0; Dummy < Count; Dummy++)
-        {
-	  // Note that the data is 15-bits which has been input right-aligned
-	  // (aligned at bit 0) but must be output left-aligned (aligned at
-	  // bit 1).
-	  Dummy16 = Data[Dummy];
-	  putc (Dummy16 >> 7, OutFile);
-	  putc ((Dummy16 << 1) & 255, OutFile);
-	  if (CheckWords > 0)
-	    {
-	      // Normally, CheckWords will always be >=0, unless
-	      // CHECKWORDS=something variable assignment was made for
-	      // the bank.
-	      Checksum = Add (Checksum, Dummy16);
-	      CheckWords--;
-	    }
-	}	 
+
+        if (sscanf(s, "CHECKWORDS=%o", &dummy) == 1) {
+            checkWords = dummy;
+            if (checkWords == 0)
+                checksum = banknum;
+            continue;
+        }
+
+        if (sscanf(s, "BUGGER=%o", &dummy) == 1) {
+            dummy16 = dummy;
+            putc(dummy16 >> 8, outfile);
+            putc(dummy16 & 255, outfile);
+            checksum = addAgc(checksum, dummy16);
+            checkBuggerWord(line, checked, banknum, checksum);
+            checked = 1;
+            continue;
+        }
+
+        // Check for certain garbage conditions.
+        for (ss = s; *ss; ss++) {
+            if (*ss == ',')		// 01/02/06 RSB.  Remove comma delimiters.
+                *ss = ' ';
+            else if (!isspace(*ss) && (*ss < '0' || *ss > '7')) {
+                errorCount++;
+                fprintf(stderr, "Error: line %d, illegal digit \'%c\'.\n", line, *ss);
+            }
+        }
+
+        for (ss = s, i = 0; ; i++) {
+            for (; isspace(*ss); ss++)
+                ;
+            if (*ss == 0)
+                break;
+            for (j = 0; *ss && !isspace(*ss); ss++, j++)
+                ;
+            if (j != 5) {
+                errorCount++;
+                fprintf(stderr, "Error: line %d, field is not 5 characters wide.\n", line);
+            }
+        }
+
+        if (i > 8) {
+            errorCount++;
+            fprintf(stderr, "Error: line %d, too many fields.\n", line);
+        }
+
+        // Now, parse like the wind!
+        count = sscanf(s, "%o%o%o%o%o%o%o%o", &data[0], &data[1], &data[2], &data[3], &data[4], &data[5], &data[6], &data[7]);
+        for (dummy = 0; dummy < count; dummy++) {
+            // Note that the data is 15-bits which has been input right-aligned
+            // (aligned at bit 0) but must be output left-aligned (aligned at
+            // bit 1).
+            dummy16 = data[dummy];
+            putc(dummy16 >> 7, outfile);
+            putc((dummy16 << 1) & 255, outfile);
+            if (checkWords > 0) {
+                // Normally, checkWords will always be >=0, unless
+                // CHECKWORDS=something variable assignment was made for
+                // the bank.
+                checksum = addAgc(checksum, dummy16);
+                checkWords--;
+            }
+        }
     }
-    
-  BuggerCheck (Line, BuggerChecked, Banknum, Checksum);
-  if (ftell (OutFile) != 2 * NumBanks * 02000)
-    {
-      ErrorCount++;
-      printf ("Error: The core-rope image is not %o (octal) banks "
-              "(2 * 02000 * 0%o bytes) long.\n", NumBanks, NumBanks);
+
+    checkBuggerWord(line, checked, banknum, checksum);
+    if (ftell(outfile) != (2 * numBanks * 02000)) {
+        errorCount++;
+        fprintf(stderr, "Error: The core-rope image is not %o (octal) banks (2 * 02000 * 0%o bytes) long.\n", numBanks, numBanks);
     }
-  fclose (OutFile);
-  if (!ErrorCount)
-    {
-      if (Verbose)
-        printf ("No errors were detected.\n");
+
+    fclose(outfile);
+
+    if (!errorCount) {
+        if (verbose)
+            printf("No errors were detected.\n");
+    } else {
+        fprintf(stderr, "Errors were detected.\n");
     }
-  else
-    printf ("There were errors.\n");  
-  return (ErrorCount);    
+
+    return (errorCount);
 }
-
-
