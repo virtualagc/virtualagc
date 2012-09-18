@@ -80,7 +80,8 @@
  *                              bank and give the total number of banks.
  *                              Defaults to 044.  Both of the new variables
  *                              are in octal.
- *              2012-09-18 JL   Tidy up for Colossus237.
+ *              2012-09-18 JL   Tidy up for Colossus237. Split common code
+ *                              out to a separate utilities module.
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -113,84 +114,11 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <string.h>
+#include "utils.h"
 
 uint16_t checksum = 0;
 int errorCount = 0;
 int numBanks = 044;
-
-// Convert an AGC-format signed integer to native format.
-int convertAgcToNative(uint16_t n)
-{
-    int i;
-
-    i = n;
-    if ((n & 040000) != 0)
-        i = -(077777 & ~i);
-
-    return (i);
-}
-
-// This function takes two signed integers in AGC format, adds them, and returns
-// the sum (also in AGC format).  If there's overflow or underflow, the 
-// carry is added in also.  This is done because that's the goofy way the
-// AGC checksum is created.
-uint16_t addAgc(uint16_t n1, uint16_t n2)
-{
-    int i1, i2, sum;
-
-    // Convert from AGC 1's-complement format to the native integer format of this CPU.
-    i1 = convertAgcToNative(n1);
-    i2 = convertAgcToNative(n2);
-
-    // Add 'em up.
-    sum = i1 + i2;
-
-    // Account for carry or underflow.
-    if (sum > 16383) {
-        sum -= 16384;
-        sum++;
-    } else if (sum < -16383) {
-        sum += 16384;
-        sum--;
-    }
-
-    // The following condition can't occur, but I'll check for it anyway.
-    if (sum > 16383 || sum < -16383)
-        fprintf(stderr, "Error: arithmetic overflow.\n");
-
-    // Convert back to 1's-complement and return.
-    if (sum >= 0)
-        return (sum);
-
-    return (077777 & ~(-sum));
-}
-
-void checkBuggerWord(int line, int checked, uint16_t banknum, uint16_t checksum)
-{
-    if (!checked) {
-        if (checksum == banknum)  {
-            //printf("FYI: Bugger word for bank %02o is a match (positive).\n", banknum);
-        } else if (checksum == (077777 & ~banknum)) {
-            //printf("FYI: Bugger word for bank %02o is a match (negative).\n", banknum);
-        } else {
-            errorCount++;
-            fprintf(stderr, "Error: line %5d, bugger word (%05o) for bank %02o does not match expected (%05o or %05o).\n",
-                    line, checksum, banknum, banknum, 077777 & ~banknum);
-        }
-    }	    
-}
-
-int getBank(int count)
-{
-    int retval = count / 1024;
-
-    if (retval < 2)
-        retval += 2;
-    else if (retval < 4)
-        retval -= 2;
-
-    return (retval);
-}
 
 // Decompile a binary file to text.  We don't bother to check the bugger codes.
 int decompile(int page)
@@ -398,11 +326,11 @@ int main(int argc, char *argv[])
 
     fclose(outfile);
 
-    if (!errorCount) {
+    if (errorCount == 0) {
         if (verbose)
             printf("No errors were detected.\n");
     } else {
-        fprintf(stderr, "Errors were detected.\n");
+        fprintf(stderr, "%d error%s detected.\n", errorCount, errorCount==1 ? " was" : "s were");
     }
 
     return (errorCount);

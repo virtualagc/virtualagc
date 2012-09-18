@@ -17,7 +17,7 @@ default: ${TARGETS}
 listing2binsource: listing2binsource.c
 	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
 
-oct2bin: oct2bin.c
+oct2bin: oct2bin.c utils.c
 	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
 
 checkdec: checkdec.c
