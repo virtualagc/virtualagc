@@ -34,14 +34,24 @@
 // Convert an AGC-format signed integer to native format.
 int convertAgcToNative(uint16_t n);
 
-// This function takes two signed integers in AGC format, adds them, and returns
-// the sum (also in AGC format).  If there's overflow or underflow, the 
-// carry is added in also.  This is done because that's the goofy way the
-// AGC checksum is created.
+// Convert a native format integer to AGC-format 15-bit 1's-complement signed integer.
+uint16_t convertNativeToAgc(int n);
+
+// This function takes two signed integers in AGC format (15-bit, 1's complement,
+// signed), adds them, and returns the sum (also in AGC format).  If there is
+// overflow or underflow, the carry is added in also. This is done because that's
+// the way the AGC checksum is created.
 uint16_t addAgc(uint16_t n1, uint16_t n2);
 
 // Check the supplied checksum.
 void check(int verbose, int line, int checked, uint16_t banknum, uint16_t checksum);
+
+// Generate the bugger word for the supplied bank code. Try to compute
+// a positive bugger word if possible, otherwise compute a negative one
+// (due to the limitations of 1's complement arithmetic).
+//
+// Returns the generated bugger word.
+uint16_t generateBuggerWord(int verbose, int bank, int length, int16_t *code);
 
 // Get the bank number for a specified offset.
 int getBank(int count);

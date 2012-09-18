@@ -38,7 +38,7 @@
 
 extern int errorCount;
 
-// Convert an AGC-format signed integer to native format.
+// Convert an AGC-format 15-bit 1's-complement signed integer to native format.
 int convertAgcToNative(uint16_t n)
 {
     int i;
@@ -50,10 +50,24 @@ int convertAgcToNative(uint16_t n)
     return (i);
 }
 
-// This function takes two signed integers in AGC format, adds them, and returns
-// the sum (also in AGC format).  If there's overflow or underflow, the 
-// carry is added in also.  This is done because that's the goofy way the
-// AGC checksum is created.
+// Convert a native format integer to AGC-format 15-bit 1's-complement signed integer.
+uint16_t convertNativeToAgc(int n)
+{
+    uint16_t i;
+    int tmp = n;
+
+    i = (uint16_t)(abs(n) & 077777);
+
+    if (n < 0)
+        i |= 040000;
+
+    return (i);
+}
+
+// This function takes two signed integers in AGC format (15-bit, 1's complement,
+// signed), adds them, and returns the sum (also in AGC format).  If there is
+// overflow or underflow, the carry is added in also. This is done because that's
+// the way the AGC checksum is created.
 uint16_t addAgc(uint16_t n1, uint16_t n2)
 {
     int i1, i2, sum;
@@ -101,6 +115,30 @@ void check(int verbose, int line, int checked, uint16_t banknum, uint16_t checks
                     line, checksum, banknum, banknum, 077777 & ~banknum);
         }
     }	    
+}
+
+// Generate the bugger word for a supplied bank code. Try to compute
+// a positive bugger word if possible, otherwise compute a negative one
+// (due to the limitations of 1's complement arithmetic).
+//
+// Returns the generated bugger word.
+uint16_t generateBuggerWord(int verbose, int bank, int length, int16_t *code)
+{
+    uint16_t bugger = 0, guess = 0;
+    int i = 0;
+
+    // Iterate over the bank and calculate the bugger word.
+    for (i = 0; i < length; i++) {
+        int value = code[i];
+        bugger = addAgc(bugger, value);
+    }
+
+    if ((bugger & 040000) == 0)
+        guess = addAgc(bank, 077777 & ~bugger);
+    else
+        guess = addAgc(077777 & ~bank, 077777 & ~bugger);
+
+    return (guess);
 }
 
 // Get the bank number for a specified offset.

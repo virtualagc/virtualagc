@@ -318,19 +318,6 @@ ProcessAorC:
         lastLineType = inputLine[0];
     }
 
-    // Calculate the bugger words.
-    if (retval == 0) {
-        for (i = 0; i < NUM_BANKS; i++) {
-            for (j = 0; j < WORDS_PER_BANK; j++) {
-                int value;
-                value = rope[(i < 4) ? (i ^ 2) : i][j];
-
-                if (value > 077777 || value < 0)
-                    value = 0;
-            }
-        }
-    }
-
     // Write the output.  This code was swiped and slightly altered from oct2bin.
     if (retval == 0) {
         fprintf(outfile, "; Copyright: Public domain\n");
@@ -341,11 +328,25 @@ ProcessAorC:
         fprintf(outfile, ";            XXXX-XX-XX XXX    XXXX\n");
         fprintf(outfile, ";\n");
 
+        count = 0;
+
         // Read and write data.
         for (i = 0; i < NUM_BANKS; i++) {
+            int bank = (i < 4) ? (i ^ 2) : i;
+            int checksummed = 0;        // This bank has had its bugger word written.
+            char bankString[33];
             for (j = 0; j < WORDS_PER_BANK; j++) {
-                int value;
-                value = rope[(i < 4) ? (i ^ 2) : i][j];
+                int value = rope[bank][j];
+
+                // When we hit the first unassigned word, write the bugger word.
+                // Subsequent unassigned words in the same bank will be set to zero.
+                if (value == UNASSIGNED && !checksummed) {
+                    printf("Last used word in bank %02o at %04o.\n", bank, BANK_OFFSET + ((count - 1) % 1024));
+                    int16_t bugger = generateBuggerWord(1, bank, j, &rope[bank][0]);
+                    printf("Bugger word %05o at (%02o,%04o).\n", bugger, bank, BANK_OFFSET + (count % 1024));
+                    value = bugger;
+                    checksummed = 1;
+                }
 
                 if (value > 077777 || value < 0)
                     value = 0;
@@ -357,16 +358,15 @@ ProcessAorC:
                     fprintf(outfile, "\n");
 
                 if ((count % 256) == 0) {
-                    char bankString[33];
                     if (count < 2048)
                         sprintf(bankString, " %05o", 04000 + count);
                     else
-                        sprintf(bankString, " %02o,%04o", ((i < 4) ? (i ^ 2) : i), BANK_OFFSET + (count % 1024));
+                        sprintf(bankString, " %02o,%04o", bank, BANK_OFFSET + (count % 1024));
                     fprintf(outfile, "; %s\n", bankString);
                 }
 
                 if ((count % 1024) == 0)
-                    fprintf(outfile, "BANK=%o\n", ((i < 4) ? (i ^ 2) : i));
+                    fprintf(outfile, "BANK=%o\n", bank);
 
                 fprintf(outfile, "%05o ", value);
                 count++;
