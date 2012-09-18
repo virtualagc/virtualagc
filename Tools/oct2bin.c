@@ -203,9 +203,9 @@ int main(int argc, char *argv[])
 
     // Parse the command-line switches.
     for (i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "--invert"))
+        if (!strcmp(argv[i], "--invert") || !strcmp(argv[i], "-i"))
             invert = 1;
-        if (!strcmp(argv[i], "--verbose"))
+        if (!strcmp(argv[i], "--verbose") || !strcmp(argv[i], "-v"))
             verbose = 1;
         else if (sscanf(argv[i], "--page=%d", &j) == 1)
             page = j;
