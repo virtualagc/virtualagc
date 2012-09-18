@@ -20,10 +20,10 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default: $(TARGETS)
 
 ${BASENAME}.binsource: ${BASENAME}.binsource2.txt
-	../Tools/listing2binsource $^ $@
+	../Tools/listing2binsource -v $^ $@
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	../Tools/oct2bin <${BASENAME}.binsource
+	../Tools/oct2bin -v <${BASENAME}.binsource
 	mv oct2bin.bin $@
 
 #${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
