@@ -123,11 +123,9 @@
 #include <string.h>
 #include "utils.h"
 
-enum {
-    UNASSIGNED = 0x8000,
-    CORRUPTED,
-    OVERWRITTEN
-};
+#define UNASSIGNED  0100000
+#define CORRUPTED   0100001
+#define OVERWRITTEN 0100002
 
 #define NUM_BANKS 044
 #define WORDS_PER_BANK 02000
@@ -184,7 +182,7 @@ int main(int argc, char *argv[])
     // a given word hasn't been assigned a value.
     for (i = 0; i < NUM_BANKS; i++)
         for (j = 0; j < WORDS_PER_BANK; j++)
-            rope[i][j] = UNASSIGNED;
+            rope[i][j] = (int16_t)UNASSIGNED;
 
     // Now read the input file.
     while (fgets(inputLine, sizeof(inputLine), infile) != NULL) {
@@ -336,14 +334,16 @@ ProcessAorC:
             int checksummed = 0;        // This bank has had its bugger word written.
             char bankString[33];
             for (j = 0; j < WORDS_PER_BANK; j++) {
-                int value = rope[bank][j];
+                int16_t value = rope[bank][j];
 
                 // When we hit the first unassigned word, write the bugger word.
                 // Subsequent unassigned words in the same bank will be set to zero.
-                if (value == UNASSIGNED && !checksummed) {
-                    printf("Last used word in bank %02o at %04o.\n", bank, BANK_OFFSET + ((count - 1) % 1024));
+
+                //printf("(%02o,%04o) %05o\n", bank, BANK_OFFSET + ((count - 1) % 1024), value);
+                if (value == (int16_t)UNASSIGNED && !checksummed) {
+                    //printf("Last used word in bank %02o at %04o.\n", bank, BANK_OFFSET + j - 2);
                     int16_t bugger = generateBuggerWord(1, bank, j, &rope[bank][0]);
-                    printf("Bugger word %05o at (%02o,%04o).\n", bugger, bank, BANK_OFFSET + (count % 1024));
+                    //printf("Bugger word %05o at (%02o,%04o).\n", bugger, bank, BANK_OFFSET + j - 1);
                     value = bugger;
                     checksummed = 1;
                 }
