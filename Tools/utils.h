@@ -40,8 +40,8 @@ int convertAgcToNative(uint16_t n);
 // AGC checksum is created.
 uint16_t addAgc(uint16_t n1, uint16_t n2);
 
-// Check the supplied bugger word (checksum).
-void checkBuggerWord(int verbose, int line, int checked, uint16_t banknum, uint16_t checksum);
+// Check the supplied checksum.
+void check(int verbose, int line, int checked, uint16_t banknum, uint16_t checksum);
 
 // Get the bank number for a specified offset.
 int getBank(int count);
