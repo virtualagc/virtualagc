@@ -86,13 +86,15 @@ uint16_t addAgc(uint16_t n1, uint16_t n2)
 }
 
 // Check the supplied bugger word (checksum).
-void checkBuggerWord(int line, int checked, uint16_t banknum, uint16_t checksum)
+void checkBuggerWord(int verbose, int line, int checked, uint16_t banknum, uint16_t checksum)
 {
     if (!checked) {
         if (checksum == banknum)  {
-            //printf("FYI: Bugger word for bank %02o is a match (positive).\n", banknum);
+            if (verbose)
+                printf("Bugger word for bank %02o matches (positive).\n", banknum);
         } else if (checksum == (077777 & ~banknum)) {
-            //printf("FYI: Bugger word for bank %02o is a match (negative).\n", banknum);
+            if (verbose)
+                printf("Bugger word for bank %02o matches (negative).\n", banknum);
         } else {
             errorCount++;
             fprintf(stderr, "Error: line %5d, bugger word (%05o) for bank %02o does not match expected (%05o or %05o).\n",
