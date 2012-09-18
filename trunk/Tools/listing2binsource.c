@@ -54,6 +54,8 @@
  *                                 Fix handling of fixed-fixed 
  *                                 addresses. Take input and output
  *                                 filenames as arguments.
+ *               2012-09-18 JL     Add bugger word generation. Add
+ *                                 verbose option. Add debug prints.
  *
  * For listing2binsource.c, the octal codes are provided in an input file
  * created by moving through the assembly-language portion of the
@@ -123,13 +125,13 @@
 #include <string.h>
 #include "utils.h"
 
-#define UNASSIGNED  0100000
-#define CORRUPTED   0100001
-#define OVERWRITTEN 0100002
+#define UNASSIGNED  (0100000)
+#define CORRUPTED   (0100001)
+#define OVERWRITTEN (0100002)
 
-#define NUM_BANKS 044
-#define WORDS_PER_BANK 02000
-#define BANK_OFFSET 02000
+#define NUM_BANKS      (044)
+#define WORDS_PER_BANK (02000)
+#define BANK_OFFSET    (02000)
 
 int errorCount = 0;
 
@@ -144,6 +146,7 @@ static int printError(int page, int line, char *message)
 
 int main(int argc, char *argv[])
 {
+    int verbose = 0;
     int i, j;
     char c;
     int retval = 0;
@@ -157,17 +160,29 @@ int main(int argc, char *argv[])
     FILE *infile, *outfile;
 
     if (argc < 3) {
-        fprintf(stderr, "Usage: listing2binsource infile outfile\n");
+        fprintf(stderr, "Usage: listing2binsource [-v] infile outfile\n");
         return (1);
     }
 
-    infile = fopen(argv[1], "r");
+    // Parse the command-line switches.
+    if (!strcmp(argv[1], "--verbose") || !strcmp(argv[1], "-v")) {
+        if (argc < 4) {
+            fprintf(stderr, "Usage: listing2binsource [-v] infile outfile\n");
+            return (1);
+        }
+        verbose = 1;
+        i = 2;
+    } else {
+        i = 1;
+    }
+
+    infile = fopen(argv[i++], "r");
     if (infile == NULL) {
         fprintf(stderr, "Error, could not open file \"%s\".\n", argv[1]);
         return (1);
     }
 
-    outfile = fopen(argv[2], "w");
+    outfile = fopen(argv[i++], "w");
     if (outfile == NULL) {
         fprintf(stderr, "Error, could not open file \"%s\".\n", argv[2]);
         if (infile)
@@ -339,11 +354,15 @@ ProcessAorC:
                 // When we hit the first unassigned word, write the bugger word.
                 // Subsequent unassigned words in the same bank will be set to zero.
 
-                //printf("(%02o,%04o) %05o\n", bank, BANK_OFFSET + ((count - 1) % 1024), value);
+                //if (verbose)
+                //    printf("(%02o,%04o) %05o\n", bank, BANK_OFFSET + ((count - 1) % 1024), value);
+
                 if (value == (int16_t)UNASSIGNED && !checksummed) {
-                    //printf("Last used word in bank %02o at %04o.\n", bank, BANK_OFFSET + j - 2);
-                    int16_t bugger = generateBuggerWord(1, bank, j, &rope[bank][0]);
-                    //printf("Bugger word %05o at (%02o,%04o).\n", bugger, bank, BANK_OFFSET + j - 1);
+                    //if (verbose)
+                    //    printf("Last used word in bank %02o at %04o.\n", bank, BANK_OFFSET + j - 2);
+                    int16_t bugger = generateBuggerWord(verbose, bank, j, &rope[bank][0]);
+                    //if (verbose)
+                    //    printf("Bugger word %05o at (%02o,%04o).\n", bugger, bank, BANK_OFFSET + j - 1);
                     value = bugger;
                     checksummed = 1;
                 }
