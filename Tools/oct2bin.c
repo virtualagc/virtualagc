@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
         }
 
         if (sscanf(s, "BANK=%o", &dummy) == 1) {
-            checkBuggerWord(line, checked, banknum, checksum);
+            checkBuggerWord(verbose, line, checked, banknum, checksum);
             banknum = dummy;
             checksum = 0;
             if ((ftell(outfile) & 03777) != 0) {
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
             putc(dummy16 >> 8, outfile);
             putc(dummy16 & 255, outfile);
             checksum = addAgc(checksum, dummy16);
-            checkBuggerWord(line, checked, banknum, checksum);
+            checkBuggerWord(verbose, line, checked, banknum, checksum);
             checked = 1;
             continue;
         }
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    checkBuggerWord(line, checked, banknum, checksum);
+    checkBuggerWord(verbose, line, checked, banknum, checksum);
     if (ftell(outfile) != (2 * numBanks * 02000)) {
         errorCount++;
         fprintf(stderr, "Error: The core-rope image is not %o (octal) banks (2 * 02000 * 0%o bytes) long.\n", numBanks, numBanks);
