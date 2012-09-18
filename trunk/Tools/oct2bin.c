@@ -116,9 +116,10 @@
 #include <string.h>
 #include "utils.h"
 
-uint16_t checksum = 0;
 int errorCount = 0;
-int numBanks = 044;
+
+static uint16_t checksum = 0;
+static int numBanks = 044;
 
 // Decompile a binary file to text.  We don't bother to check the bugger codes.
 int decompile(int page)

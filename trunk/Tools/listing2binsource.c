@@ -121,6 +121,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
+#include "utils.h"
 
 enum {
     UNASSIGNED = 0x8000,
@@ -131,6 +132,8 @@ enum {
 #define NUM_BANKS 044
 #define WORDS_PER_BANK 02000
 #define BANK_OFFSET 02000
+
+int errorCount = 0;
 
 static char inputLine[16384];
 static int16_t rope[NUM_BANKS][WORDS_PER_BANK];
