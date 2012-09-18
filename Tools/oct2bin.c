@@ -95,11 +95,11 @@
  *
  *  Oct2Bin internally attempts to compute the checksum, thus providing an
  *  additional check on the data.  To account for this, the data for each bank
- *  should be followed immediately by a line that reads
+ *  should be preceded by a line that reads
  *  	BANK=BankNumber
  *
- *  The input is on the standard input.  Status messages are on the standard
- *  output.  The binary is put into a file called oct2bin.bin.
+ *  The input is on stdin. Status messages are on stdout. The binary is written
+ *  to a file called oct2bin.bin.
  *
  *  If the command-line switch --invert is used, then the input should be a binary
  *  file called oct2bin.bin, and the output will be a text file named oct2bin.binsource.
