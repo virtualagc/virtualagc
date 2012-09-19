@@ -35,6 +35,7 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <string.h>
+#include "utils.h"
 
 extern int errorCount;
 
@@ -129,7 +130,13 @@ uint16_t generateBuggerWord(int verbose, int bank, int length, int16_t *code)
 
     // Iterate over the bank and calculate the bugger word.
     for (i = 0; i < length; i++) {
-        checksum = addAgc(checksum, code[i]);
+        int16_t value = code[i];
+
+        if (value > 077777 || value < 0) {
+            fprintf(stderr, "Warning: zeroing unassigned word at (%02o,%04o).\n", bank, BANK_OFFSET + i);
+            value = 0;
+        }
+        checksum = addAgc(checksum, value);
     }
 
     if ((checksum & 040000) == 0) {
