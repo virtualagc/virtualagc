@@ -12,6 +12,8 @@
 
 BASENAME=Colossus237
 
+#VERBOSE=-v
+
 .PHONY: ${BASENAME}.lst
 
 SOURCE:=$(wildcard *.agc)
@@ -20,10 +22,10 @@ TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
 default: $(TARGETS)
 
 ${BASENAME}.binsource: ${BASENAME}.binsource2.txt
-	../Tools/listing2binsource -v $^ $@
+	../Tools/listing2binsource ${VERBOSE} $^ $@
 
 ${BASENAME}.bin: ${BASENAME}.binsource
-	../Tools/oct2bin -v <${BASENAME}.binsource
+	../Tools/oct2bin ${VERBOSE} <${BASENAME}.binsource
 	mv oct2bin.bin $@
 
 #${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
