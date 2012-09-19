@@ -80,19 +80,23 @@ def analyse(listing):
                     if len(elems) > 2:
                         if elems[2] == "COUNT*":
                             address = elems[1]
-                            if ',' in address:
-                                bank = int(address.split(',')[0], 8)
-                                offset = int(address.split(',')[1], 8)
+                            try:
+                                if ',' in address:
+                                    bank = int(address.split(',')[0], 8)
+                                    offset = int(address.split(',')[1], 8)
+                                else:
+                                    bank = int(address, 8) / 02000
+                                    offset = int(address, 8) - 02000
+                                    if offset >= 04000:
+                                        offset -= 02000
+                            except ValueError:
+                                print >>sys.stderr,"%s: line %d, invalid address \"%s\"" % (listing, linenum, address)
                             else:
-                                bank = int(address, 8) / 02000
-                                offset = int(address, 8) - 02000
-                                if offset >= 04000:
-                                    offset -= 02000
-                            newbank = bank
-                            if bank < 4:
-                                newbank = bank ^2
-                            coreaddr = (newbank * 02000) + (offset - 02000)
-                            blocks.append(CoreBlock(coreaddr, address, bank, offset, pagenum, module))
+                                newbank = bank
+                                if bank < 4:
+                                    newbank = bank ^2
+                                coreaddr = (newbank * 02000) + (offset - 02000)
+                                blocks.append(CoreBlock(coreaddr, address, bank, offset, pagenum, module))
     blocks.sort()
     return(blocks)
 
