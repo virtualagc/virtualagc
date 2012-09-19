@@ -31,6 +31,15 @@
 
 #include <stdint.h>
 
+// Special markers in the rope image.
+#define UNASSIGNED  (0100000)   // The location has not yet been assigned.
+#define CORRUPTED   (0100001)   // The value in the source is invalid.
+#define OVERWRITTEN (0100002)   // The location has been assignemd multiple times.
+
+#define NUM_BANKS      (044)    // The number of fixed memory banks.
+#define WORDS_PER_BANK (02000)  // The number of words per fixed memory bank.
+#define BANK_OFFSET    (02000)  // The starting address of each bank.
+
 // Convert an AGC-format signed integer to native format.
 int convertAgcToNative(uint16_t n);
 

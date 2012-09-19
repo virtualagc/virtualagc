@@ -125,14 +125,6 @@
 #include <string.h>
 #include "utils.h"
 
-#define UNASSIGNED  (0100000)
-#define CORRUPTED   (0100001)
-#define OVERWRITTEN (0100002)
-
-#define NUM_BANKS      (044)
-#define WORDS_PER_BANK (02000)
-#define BANK_OFFSET    (02000)
-
 int errorCount = 0;
 
 static char inputLine[16384];
@@ -331,6 +323,30 @@ ProcessAorC:
         lastLineType = inputLine[0];
     }
 
+    // Look for the first unassigned word at the end of the bank. Note that it is
+    // possible for there to be unassigned words in the middle of a bank if some
+    // words are unused (might be a transcription error?). Colossus237 banks 4 and
+    // 23 illustrate this phenomenon.
+    if (retval == 0) {
+        for (i = 0; i < NUM_BANKS; i++) {
+            int bank = (i < 4) ? (i ^ 2) : i;
+            for (j = WORDS_PER_BANK; j > 0; j--) {
+                int16_t value = rope[bank][j-1];
+
+                if (value != (int16_t)UNASSIGNED) {
+                    if (verbose)
+                        printf("Last used word in bank %02o is at offset %04o.\n", bank, BANK_OFFSET + j - 1);
+
+                    int16_t bugger = generateBuggerWord(verbose, bank, j, &rope[bank][0]);
+                    if (verbose)
+                        printf("Bugger word %05o at (%02o,%04o).\n", bugger, bank, BANK_OFFSET + j);
+                    rope[bank][j] = bugger;
+                    break;
+                }
+            }
+        }
+    }
+
     // Write the output.  This code was swiped and slightly altered from oct2bin.
     if (retval == 0) {
         fprintf(outfile, "; Copyright: Public domain\n");
@@ -346,29 +362,16 @@ ProcessAorC:
         // Read and write data.
         for (i = 0; i < NUM_BANKS; i++) {
             int bank = (i < 4) ? (i ^ 2) : i;
-            int checksummed = 0;        // This bank has had its bugger word written.
             char bankString[33];
             for (j = 0; j < WORDS_PER_BANK; j++) {
                 int16_t value = rope[bank][j];
 
-                // When we hit the first unassigned word, write the bugger word.
                 // Subsequent unassigned words in the same bank will be set to zero.
-
-                //if (verbose)
-                //    printf("(%02o,%04o) %05o\n", bank, BANK_OFFSET + ((count - 1) % 1024), value);
-
-                if (value == (int16_t)UNASSIGNED && !checksummed) {
+                if (value > 077777 || value < 0) {
                     //if (verbose)
-                    //    printf("Last used word in bank %02o at %04o.\n", bank, BANK_OFFSET + j - 2);
-                    int16_t bugger = generateBuggerWord(verbose, bank, j, &rope[bank][0]);
-                    //if (verbose)
-                    //    printf("Bugger word %05o at (%02o,%04o).\n", bugger, bank, BANK_OFFSET + j - 1);
-                    value = bugger;
-                    checksummed = 1;
-                }
-
-                if (value > 077777 || value < 0)
+                    //    printf("Zeroing unassigned word at (%02o,%04o).\n", bank, BANK_OFFSET + j);
                     value = 0;
+                }
 
                 if ((count % 8) == 0)
                     fprintf(outfile, "\n");
