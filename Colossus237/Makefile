@@ -14,7 +14,7 @@ BASENAME=Colossus237
 
 #VERBOSE=-v
 
-.PHONY: ${BASENAME}.lst
+.PHONY: ${BASENAME}.lst corediff.txt
 
 SOURCE:=$(wildcard *.agc)
 TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
