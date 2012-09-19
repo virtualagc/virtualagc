@@ -322,8 +322,10 @@ def main():
                     break
             if not foundBugger:
                 print >>sys.stderr, "Error: address %s not found in listing file" % (address)
+                log("Error: address %s not found in listing file" % (address))
         else:
             print >>sys.stderr, "Error: address %s not found in listing file" % (address)
+            log("Error: address %s not found in listing file" % (address))
 
     log("")
     if options.checksums:
