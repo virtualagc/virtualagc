@@ -328,7 +328,6 @@ def main():
         log("%s %d" % ("Total differences:", difftotal - checkdiffs))
     log("")
 
-    print "%d differences" % len(diffs)
     # Sort by page/line.
     if options.bypage == True:
         newdiffs = []
@@ -338,7 +337,6 @@ def main():
             if diff.pagenum is None:
                 diffIndex[0].append(diff)
                 continue
-            print "Processing difference, page %d, line %d" % (diff.pagenum, diff.linenum)
             if diff.pagenum not in diffIndex.keys():
                 diffIndex[diff.pagenum] = {}
             diffIndex[diff.pagenum][diff.linenum] = diff
@@ -347,10 +345,8 @@ def main():
         for diff in diffIndex[0]:
             newdiffs.append(diff)
         for page in pages[1:]:
-            print "Processing page", page
             lines = diffIndex[page].keys()
             lines.sort()
-            print lines
             for line in lines:
                 newdiffs.append(diffIndex[page][line])
         diffs = newdiffs
@@ -465,6 +461,7 @@ def main():
         options.annofile.close()
 
     if options.outfile:
+        print "Differences are in", options.outfilename
         options.outfile.close()
 
 if __name__=="__main__":
