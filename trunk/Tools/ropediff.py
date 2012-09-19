@@ -85,21 +85,15 @@ def main():
     global options
 
     parser = OptionParser("usage: %prog [options] core1 core2")
-    parser.add_option("-c", "--no-checksums", action="store_false", dest="checksums", default=True,
-                      help="Discard differences in checksums.")
-    parser.add_option("-N", "--no-super", action="store_true", dest="noSuper", default=False,
-                      help="Discard differences in which one word has 100 in bits 5,6,7 and the other has 011.")
-    parser.add_option("-S", "--only-super", action="store_true", dest="onlySuper", default=False,
-                      help="Show only differences involving 100 vs. 011 in bits 5,6,7.")
-    parser.add_option("-Z", "--no-zero", action="store_true", dest="noZero", default=False,
-                      help="Discard differences in which the word from the 2nd file is 00000.")
-    parser.add_option("-s", "--stats", action="store_true", dest="stats", default=False,
-                      help="Print statistics.")
-    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
-                      help="Print extra information.")
-    parser.add_option("-o", "--output", dest="outfilename", help="Write output to file.", metavar="FILE")
-    parser.add_option("-a", "--annotate", action="store_true", dest="annotate", default=False,
-                      help="Output a modified listing annotated with core differences.")
+    parser.add_option("-p", "--by-page",      action="store_true",  dest="bypage",      default=False,                 help="Sort differences by page number.")
+    parser.add_option("-c", "--no-checksums", action="store_false", dest="checksums",   default=True,                  help="Discard differences in checksums.")
+    parser.add_option("-N", "--no-super",     action="store_true",  dest="noSuper",     default=False,                 help="Discard differences in which one word has 100 in bits 5,6,7 and the other has 011.")
+    parser.add_option("-S", "--only-super",   action="store_true",  dest="onlySuper",   default=False,                 help="Show only differences involving 100 vs. 011 in bits 5,6,7.")
+    parser.add_option("-Z", "--no-zero",      action="store_true",  dest="noZero",      default=False,                 help="Discard differences in which the word from the 2nd file is 00000.")
+    parser.add_option("-s", "--stats",        action="store_true",  dest="stats",       default=False,                 help="Print statistics.")
+    parser.add_option("-v", "--verbose",      action="store_true",  dest="verbose",     default=False,                 help="Print extra information.")
+    parser.add_option("-o", "--output",                             dest="outfilename",                metavar="FILE", help="Write output to file.")
+    parser.add_option("-a", "--annotate",     action="store_true",  dest="annotate",    default=False,                 help="Output a modified listing annotated with core differences.")
 
     (options, args) = parser.parse_args()
 
@@ -334,6 +328,33 @@ def main():
         log("%s %d" % ("Total differences:", difftotal - checkdiffs))
     log("")
 
+    print "%d differences" % len(diffs)
+    # Sort by page/line.
+    if options.bypage == True:
+        newdiffs = []
+        diffIndex = {}
+        diffIndex[0] = []
+        for diff in diffs:
+            if diff.pagenum is None:
+                diffIndex[0].append(diff)
+                continue
+            print "Processing difference, page %d, line %d" % (diff.pagenum, diff.linenum)
+            if diff.pagenum not in diffIndex.keys():
+                diffIndex[diff.pagenum] = {}
+            diffIndex[diff.pagenum][diff.linenum] = diff
+        pages = diffIndex.keys()
+        pages.sort()
+        for diff in diffIndex[0]:
+            newdiffs.append(diff)
+        for page in pages[1:]:
+            print "Processing page", page
+            lines = diffIndex[page].keys()
+            lines.sort()
+            print lines
+            for line in lines:
+                newdiffs.append(diffIndex[page][line])
+        diffs = newdiffs
+        
     if difftotal > 0:
         log("Core address     Left  Right Page Module                                           Line Number    Address           Source")
         log("---------------- ----- ----- ---- ------------------------------------------------ -------------- -------           ------------------------------------------------")
