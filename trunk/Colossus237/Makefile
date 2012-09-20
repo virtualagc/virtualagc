@@ -36,8 +36,7 @@ ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE}
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 
 corediff.txt: ${BASENAME}.bin MAIN.agc.bin
-	#python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
-	python ../Tools/ropediff.py -p -o $@ ${BASENAME}.bin MAIN.agc.bin
+	python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
 
 clean:
 	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html ${BASENAME}.binsource
