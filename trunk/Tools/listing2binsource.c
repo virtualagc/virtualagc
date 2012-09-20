@@ -168,15 +168,21 @@ int main(int argc, char *argv[])
         i = 1;
     }
 
-    infile = fopen(argv[i++], "r");
+    if (verbose)
+        printf("Opening input file %s...\n", argv[i]);
+    infile = fopen(argv[i], "r");
     if (infile == NULL) {
-        fprintf(stderr, "Error, could not open file \"%s\".\n", argv[1]);
+        fprintf(stderr, "Error, could not open file \"%s\".\n", argv[i]);
         return (1);
     }
 
-    outfile = fopen(argv[i++], "w");
+    i++;
+
+    if (verbose)
+        printf("Opening output file %s...\n", argv[i]);
+    outfile = fopen(argv[i], "w");
     if (outfile == NULL) {
-        fprintf(stderr, "Error, could not open file \"%s\".\n", argv[2]);
+        fprintf(stderr, "Error, could not open file \"%s\".\n", argv[i]);
         if (infile)
             fclose(infile);
         return (1);
@@ -187,10 +193,14 @@ int main(int argc, char *argv[])
     // automatically converted to 00000 when the rope is saved
     // later, but will be a good internal marker for us that
     // a given word hasn't been assigned a value.
+    if (verbose)
+        printf("Initializing rope image...\n");
     for (i = 0; i < NUM_BANKS; i++)
         for (j = 0; j < WORDS_PER_BANK; j++)
             rope[i][j] = (int16_t)UNASSIGNED;
 
+    if (verbose)
+        printf("Processing input file...\n");
     // Now read the input file.
     while (fgets(inputLine, sizeof(inputLine), infile) != NULL) {
         line++;
@@ -330,6 +340,8 @@ ProcessAorC:
     if (retval == 0) {
         for (i = 0; i < NUM_BANKS; i++) {
             int bank = (i < 4) ? (i ^ 2) : i;
+            if (verbose)
+                printf("Generating bugger word for bank %02...\n", bank);
             for (j = WORDS_PER_BANK; j > 0; j--) {
                 int16_t value = rope[bank][j-1];
 
@@ -349,6 +361,8 @@ ProcessAorC:
 
     // Write the output.  This code was swiped and slightly altered from oct2bin.
     if (retval == 0) {
+        if (verbose)
+            printf("Writing output...\n");
         fprintf(outfile, "; Copyright: Public domain\n");
         fprintf(outfile, "; Filename:  XXXX.binsource\n");
         fprintf(outfile, "; Purpose:   XXXX\n");
