@@ -341,7 +341,7 @@ ProcessAorC:
         for (i = 0; i < NUM_BANKS; i++) {
             int bank = (i < 4) ? (i ^ 2) : i;
             if (verbose)
-                printf("Generating bugger word for bank %02...\n", bank);
+                printf("Generating bugger word for bank %02o...\n", bank);
             for (j = WORDS_PER_BANK; j > 0; j--) {
                 int16_t value = rope[bank][j-1];
 
