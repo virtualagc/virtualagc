@@ -28,14 +28,16 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 	../Tools/oct2bin ${VERBOSE} <${BASENAME}.binsource
 	mv oct2bin.bin $@
 
-${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
+MAIN.agc.bin MAIN.agc.list: ${SOURCE}
 	#../yaYUL/yaYUL --unpound-page --html MAIN.agc >MAIN.agc.lst
 	../yaYUL/yaYUL --unpound-page MAIN.agc >MAIN.agc.lst
+
+${BASENAME}.lst ${BASENAME}.symtab: MAIN.agc.bin ${BASENAME}.bin
 	diff -s MAIN.agc.bin ${BASENAME}.bin
 	mv MAIN.agc.lst ${BASENAME}.lst
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 
-corediff.txt: ${BASENAME}.bin MAIN.agc.bin ${BASENAME}.lst ${BASENAME}.symtab
+corediff.txt: ${BASENAME}.bin MAIN.agc.bin MAIN.agc.lst
 	python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
 
 clean:
