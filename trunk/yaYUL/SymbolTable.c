@@ -564,10 +564,8 @@ char *NormalizeAnchor(char *Name)
 char *NormalizeStringN(char *Input, int PadTo)
 {
   static char Output[2000], *EndPoint = &Output[sizeof (Output) - 1 - 6];
-  char *s, *Start;
+  char *s;
   int Pos = 0;
-
-  Start = Input;
 
   for (s = Output, *s = 0; *Input != 0 && s < EndPoint; Input++)
     {

@@ -53,7 +53,6 @@ static int NumFields = 0;
 void 
 SymbolPass (const char *InputFilename)
 {
-  int RetVal = 1;
   Line_t CurrentFilename;
   Line_t s;
   char *Comment, *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2;
@@ -181,7 +180,6 @@ SymbolPass (const char *InputFilename)
     }
 
   // Done with this pass.
-  RetVal = 0;
 Done:  
   if (InputFile != NULL)
     fclose (InputFile);
