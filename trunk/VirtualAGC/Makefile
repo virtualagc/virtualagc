@@ -275,7 +275,7 @@ temp/lVirtualAGC : % : VirtualAGC %/bin %/Resources
 	-${CP} ../yaACA/yaACA${EXT} ../yaACA2/yaACA2${EXT} $@/bin
 	cp ApolloPatch2-transparent.png $@/bin/ApolloPatch2.png
 	for n in $@/bin/* ; do strip $$n ; done
-	${CP} ../SimStop $@/bin
+	${CP} ../scripts/SimStop $@/bin
 	chmod +x $@/bin/SimStop
 
 temp/VirtualAGC : % : VirtualAGC.exe %/bin %/Resources
@@ -325,7 +325,7 @@ temp/VirtualAGC.app : % : VirtualAGC-macosx create-bundle %/Contents/MacOS %/Con
 	  sed ${INPLACE} "s/VirtualAGC/$$n/" $@/Contents/MacOS/$$n.app/Contents/Info.plist ; \
 	  mv $@/Contents/MacOS/$$n $@/Contents/MacOS/$$n.app/Contents/MacOS ; \
 	done
-	${CP} ../SimStop $@/Contents/MacOS
+	${CP} ../scripts/SimStop $@/Contents/MacOS
 	chmod +x $@/Contents/MacOS/SimStop
 ifeq "$YADSKY2" ""	
 	-${CP} ${HOME}/IMCROSS/mac/lib/*.dylib $@/Contents/MacOS
@@ -347,7 +347,7 @@ temp/VirtualAGC.app : % : VirtualAGC create-bundle %/Contents/MacOS %/Contents/R
 	  sed ${INPLACE} "s/VirtualAGC/$$n/" $@/Contents/MacOS/$$n.app/Contents/Info.plist ; \
 	  mv $@/Contents/MacOS/$$n $@/Contents/MacOS/$$n.app/Contents/MacOS ; \
 	done
-	${CP} ../SimStop $@/Contents/MacOS
+	${CP} ../scripts/SimStop $@/Contents/MacOS
 	chmod +x $@/Contents/MacOS/SimStop
 ifeq "$YADSKY2" ""	
 	-${CP} ${HOME}/IMCROSS/mac/lib/*.dylib $@/Contents/MacOS
