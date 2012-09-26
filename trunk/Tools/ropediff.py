@@ -322,11 +322,7 @@ def main():
             log("Error: address %s not found in listing file" % (address))
 
     log("")
-    if options.checksums:
-        log("%s %d" % ("Total differences:", difftotal))
-    else:
-        log("%s %d" % ("Total differences:", difftotal - checkdiffs))
-    log("")
+    log("%s" % ("Total core differences: %d (checksums=%d)" % (difftotal, checkdiffs)))
 
     # Sort by page/line.
     if options.bypage == True:
@@ -350,7 +346,10 @@ def main():
             for line in lines:
                 newdiffs.append(diffIndex[page][line])
         diffs = newdiffs
-        
+        log("%s" % ("Source difference lines: %d" % len(diffs)))
+
+    log("")
+
     if difftotal > 0:
         log("Core address     Left  Right Page Module                                           Line Number    Address           Source")
         log("---------------- ----- ----- ---- ------------------------------------------------ -------------- -------           ------------------------------------------------")
@@ -460,7 +459,7 @@ def main():
     if options.annofile:
         options.annofile.close()
 
-    if options.outfile:
+    if options.outfilename:
         print "Differences are in", options.outfilename
         options.outfile.close()
 
