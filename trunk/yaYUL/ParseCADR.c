@@ -102,11 +102,11 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
         args[0] = '\0';
 
-        if (InRecord->Mod1)
+        if (*InRecord->Mod1)
             strcpy(args, InRecord->Mod1);
 
         // Handle arguments like "DUMMYJOB + 2", i.e. Mod1=+, Mod2=2.
-        if (InRecord->Mod2)
+        if (*InRecord->Mod2)
             strcat(args, InRecord->Mod2);
 
         // The operand is NOT a number.  Presumably, it's a symbol.
