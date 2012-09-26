@@ -59,7 +59,6 @@
 		02/20/10 RSB	Added --unpound-page.
 */
 
-#define ORIGINAL_YAYUL_C
 #include "yaYUL.h"
 #include <stdio.h>
 #include <string.h>
