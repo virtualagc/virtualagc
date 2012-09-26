@@ -27,6 +27,11 @@
                                (of the form string=="" rather than
                                string[0]==0) which had for some reason
                                previously been working were fixed.
+                2012-09-26 JL  Add support for a variety of number formats as
+                               seen in Colossus237 sources, e.g.
+                                - E and B fields appended to operand.
+                                - "B - 1" types where characters are spread between Operand, Mod1, Mod2.
+                               There are still a number of pathological cases left.
  */
 
 #include "yaYUL.h"
@@ -68,8 +73,14 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     double x;
     double tmpval;
-    char *tmpmod1 = NULL, *tmpmod2 = NULL;
     int Sign, Value, i;
+    char tmpoperand[32];
+    char tmpmod1[32];
+    char tmpmod2[32];
+    char *ptmpmod1 = NULL, *ptmpmod2 = NULL;
+
+    //fprintf(stderr, "\n");
+    //fprintf(stderr, "Parse2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2);
 
     IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
 
@@ -105,20 +116,66 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     // Handle numbers where only scale factor(s) are supplied.
     if (*InRecord->Operand == 'E' || *InRecord->Operand == 'B') {
         tmpval = 1.0;
-        tmpmod1 = InRecord->Operand;
-        tmpmod2 = InRecord->Mod1;
+        ptmpmod1 = InRecord->Operand;
+        ptmpmod2 = InRecord->Mod1;
     } else {
-        tmpval = strtod(InRecord->Operand, NULL);
-        tmpmod1 = InRecord->Mod1;
-        tmpmod2 = InRecord->Mod2;
+        char *estr = strchr(InRecord->Operand, 'E');
+        char *bstr = strchr(InRecord->Operand, 'B');
+
+        memset(tmpoperand, 0, 32);
+        memset(tmpmod1, 0, 32);
+        memset(tmpmod2, 0, 32);
+
+        // Handle the case where the whole string is in Operand. Split out the modifiers.
+        if (estr || bstr) {
+            if (estr && bstr) {
+                if (estr < bstr) {
+                    // NNNNENN[BNN]
+                    strcpy(tmpmod2, bstr);
+                    *bstr = '\0';
+                    strcpy(tmpmod1, estr);
+                } else {
+                    // NNNNBNN[ENN] - does this ever occur? Catch it anyway, just in case.
+                    strcpy(tmpmod1, estr);
+                    *estr = '\0';
+                    strcpy(tmpmod2, bstr);
+                }
+            } else {
+                if (estr) {
+                    strcpy(tmpmod1, estr);
+                    *estr = '\0';
+                } else {
+                    strcpy(tmpmod1, bstr);
+                    *bstr = '\0';
+                }
+            }
+            strcpy(tmpoperand, InRecord->Operand);
+            tmpval = strtod(tmpoperand, NULL);
+            ptmpmod1 = tmpmod1;
+            ptmpmod2 = tmpmod2;
+        } else {
+            // Handle the case where the Enn or Bnn is split between Mod1 and Mod2.
+            if (strcmp(InRecord->Mod1, "E") == 0 || strcmp(InRecord->Mod1, "B") == 0) {
+                strcpy(tmpmod1, InRecord->Mod1);
+                strcat(tmpmod1, InRecord->Mod2);
+                ptmpmod1 = tmpmod1;
+                ptmpmod2 = tmpmod2;
+            } else {
+                ptmpmod1 = InRecord->Mod1;
+                ptmpmod2 = InRecord->Mod2;
+            }
+            tmpval = strtod(InRecord->Operand, NULL);
+        }
     }
+
+    //fprintf(stderr, "Parse2DEC: (modified) operand=\"%f\" mod1=\"%s\" mod2=\"%s\"\n", tmpval, ptmpmod1, ptmpmod2);
 
     // Under some circumstances, add a default scale factor.
     if (strstr(InRecord->Operand, ".") == NULL && *InRecord->Mod1 == 0 && *InRecord->Mod2 == 0)
         InRecord->Mod1 = "B-28";
 
     // Compute the constant as a floating-point number.
-    x = tmpval * ScaleFactor(tmpmod1) * ScaleFactor(tmpmod2);
+    x = tmpval * ScaleFactor(ptmpmod1) * ScaleFactor(ptmpmod2);
 
     // Convert to 1's complement format.
     Sign = 0;
