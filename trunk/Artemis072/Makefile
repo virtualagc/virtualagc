@@ -36,8 +36,10 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 	../Tools/oct2bin <${BASENAME}.binsource
 	mv oct2bin.bin $@
 
-${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
-	../yaYUL/yaYUL --html MAIN.agc >MAIN.agc.lst
+MAIN.agc.bin MAIN.agc.lst: ${SOURCE}
+	../yaYUL/yaYUL --unpound-page --html MAIN.agc >MAIN.agc.lst
+
+${BASENAME}.lst ${BASENAME}.symtab: MAIN.agc.bin ${BASENAME}.bin
 	diff -s MAIN.agc.bin ${BASENAME}.bin
 	mv MAIN.agc.lst ${BASENAME}.lst
 	mv MAIN.agc.symtab ${BASENAME}.symtab
