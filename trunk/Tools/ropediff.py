@@ -459,9 +459,16 @@ def main():
     if options.annofile:
         options.annofile.close()
 
-    if options.outfilename and difftotal > 0:
-        print "Differences are in", options.outfilename
+    if options.outfile:
         options.outfile.close()
+
+    if difftotal > 0:
+        if options.outfilename:
+            print "Core differences are in", options.outfilename
+        else:
+            print "Core differences found"
+    else:
+        print "No core differences found"
 
 if __name__=="__main__":
     sys.exit(main())
