@@ -293,7 +293,7 @@ clean-missions:
 	for subdir in $(MISSIONS) ; do make -C $$subdir clean ; done
 
 .PHONY: corediffs
-corediffs: 
+corediffs: yaYUL Tools
 	for subdir in $(MISSIONS) ; do make -C $$subdir corediff.txt ; done
 
 all: ARCHS=default
