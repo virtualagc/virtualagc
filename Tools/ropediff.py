@@ -459,7 +459,7 @@ def main():
     if options.annofile:
         options.annofile.close()
 
-    if options.outfilename:
+    if options.outfilename and difftotal > 0:
         print "Differences are in", options.outfilename
         options.outfile.close()
 
