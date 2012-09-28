@@ -65,6 +65,7 @@
 #		2012-09-16 JL	Updated to match tools dir changes.
 
 APP=VirtualAGC
+MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 Colossus237 # Solarium055
 
 # For cross-platform building --- i.e., for building Win32 and Mac OS X versions
 # of VirtualAGC on a Linux platform --- it is assumed that the IMCROSS
@@ -195,8 +196,7 @@ temp/lVirtualAGC/bin temp/VirtualAGC/bin temp/VirtualAGC.app/Contents/MacOS:
 temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Contents/Resources:
 	mkdir -p $@/pixmaps $@/source $@
 	${CP} ../scenarios $@
-	for n in Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 ; \
-	do \
+	for n in ${MISSIONS}; do \
 		sh ./CopyApolloSource.sh $@ $$n ${EXTSW} ${WIN32} ;\
 	done
 	${CP} *.png $@
