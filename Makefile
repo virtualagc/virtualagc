@@ -283,11 +283,14 @@ default: all
 
 .PHONY: all all-archs
 
-.PHONY: missions $(MISSIONS)
+.PHONY: missions $(MISSIONS) clean-missions
 missions: $(MISSIONS)
 
 $(MISSIONS): yaYUL
-	-$(BUILD) -C $@
+	$(BUILD) -C $@
+
+clean-missions:
+	for subdir in $(MISSIONS) ; do make -C $$subdir clean ; done
 
 .PHONY: corediffs
 corediffs: 
@@ -396,7 +399,7 @@ snapshot-ephemeris:
 	cd .. ; tar --bzip2 -cvf $(WEBSITE)/Downloads/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
 	ls -l $(WEBSITE)/Downloads
 
-clean:
+clean: clean-missions
 	$(MAKE) -C yaLEMAP clean
 	$(MAKE) -C yaASM clean
 	$(MAKE) -C yaAGC clean
