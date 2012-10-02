@@ -826,14 +826,21 @@ int Pass(int WriteOutput,
                   if (ParseInputRecord.EBank.oneshotPending && (Match->Parser == ParseBBCON || Match->Parser == Parse2CADR))
                       ParseOutputRecord.EBank.current = ParseInputRecord.EBank.last;
 
-                  if (ParseInputRecord.SBank.oneshotPending && (Match->Parser == ParseBBCON || Match->Parser == Parse2CADR))
+                  if (ParseInputRecord.SBank.oneshotPending && (Match->Parser == ParseBBCON || Match->Parser == Parse2CADR)) {
+                      //printf("%s (\"%s\",\"%s\",\"%s\") - one-shot, resetting SBank...\n",
+                      //       ParseInputRecord.Operator, ParseInputRecord.Operand, ParseInputRecord.Mod1, ParseInputRecord.Mod2);
                       ParseOutputRecord.SBank.current = ParseInputRecord.SBank.last;
+                  }
 
-                  if (Match->Parser != &ParseEBANKEquals)
+                  if (Match->Parser != &ParseEBANKEquals) {
                       ParseOutputRecord.EBank.oneshotPending = 0;
+                  }
 
-                  if (Match->Parser != &ParseSBANKEquals)
+                  if (Match->Parser != &ParseSBANKEquals) {
+                      //printf("%s (\"%s\",\"%s\",\"%s\") - disabling one-shot-pending\n",
+                      //       ParseInputRecord.Operator, ParseInputRecord.Operand, ParseInputRecord.Mod1, ParseInputRecord.Mod2);
                       ParseOutputRecord.SBank.oneshotPending = 0;
+                  }
 
                   //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
                 }

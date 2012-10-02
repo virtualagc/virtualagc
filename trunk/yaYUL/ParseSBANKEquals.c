@@ -1,6 +1,6 @@
 /*
   Copyright 2003,2004 Ronald S. Burkey <info@sandroid.org>
-  
+
   This file is part of yaAGC. 
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -22,94 +22,95 @@
   Mod history: 04/29/03 RSB   Began.
                07/23/04 RSB   Added SBANK.
                2011-05-17 JL  Split EBANK= and SBANK= parsers, and renamed.
-*/
+ */
 
 #include "yaYUL.h"
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
-// This is a barely-modified form of ParseEBANKEquals and fixed-memory 
-// is needed rather than erasable.
 int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  ParseOutput_t Dummy;
-  Address_t Address;
-  int Value, i;
+    ParseOutput_t Dummy;
+    Address_t Address;
+    int Value, i;
 
-  OutRecord->EBank = InRecord->EBank;
-  OutRecord->SBank = InRecord->SBank;
-  OutRecord->NumWords = 0;
-  OutRecord->ProgramCounter = InRecord->ProgramCounter;
+    printf("--- SBANK= %s i/p PC=%o FB=%o S=%d SB=%d\n",
+           InRecord->Operand,
+           InRecord->ProgramCounter.Value,
+           InRecord->ProgramCounter.FB,
+           InRecord->ProgramCounter.Super,
+           InRecord->SBank.current.Super);
 
-  if (*InRecord->Mod1)
-    {
-      strcpy(OutRecord->ErrorMessage, "Extra fields.");
-      OutRecord->Warning = 1;
+    OutRecord->EBank = InRecord->EBank;
+    OutRecord->SBank = InRecord->SBank;
+    OutRecord->NumWords = 0;
+    OutRecord->ProgramCounter = InRecord->ProgramCounter;
+
+    if (*InRecord->Mod1) {
+        strcpy(OutRecord->ErrorMessage, "Extra fields.");
+        OutRecord->Warning = 1;
     }
 
-  if (InRecord->Extend && !InRecord->IndexValid)
-    {
-      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
-      OutRecord->Fatal = 1;
-      OutRecord->Extend = 0;
+    if (InRecord->Extend && !InRecord->IndexValid) {
+        strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+        OutRecord->Fatal = 1;
+        OutRecord->Extend = 0;
     }
 
-  if (InRecord->IndexValid)
-    {
-      strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
-      OutRecord->Fatal = 1;
-      OutRecord->IndexValid = 0;
+    if (InRecord->IndexValid) {
+        strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
+        OutRecord->Fatal = 1;
+        OutRecord->IndexValid = 0;
     }
 
-  i = GetOctOrDec(InRecord->Operand, &Value);
-  if (!i)
-    {
-      PseudoToSegmented(Value, &Dummy);
-      Address = Dummy.ProgramCounter;
+    i = GetOctOrDec(InRecord->Operand, &Value);
+    if (!i) {
+        PseudoToSegmented(Value, &Dummy);
+        Address = Dummy.ProgramCounter;
 
-    DoIt:  
-      if (Address.Invalid)
-        {
-          strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
-          OutRecord->Fatal = 1;
-          return (0);
+        DoIt:
+        if (Address.Invalid) {
+            strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
+            OutRecord->Fatal = 1;
+            return (0);
         }
 
-      if (!Address.Fixed)
-        {
-          strcpy(OutRecord->ErrorMessage, "Destination not in fixed memory.");
-          OutRecord->Fatal = 1;
-          return (0);
+        if (!Address.Fixed) {
+            strcpy(OutRecord->ErrorMessage, "Destination not in fixed memory.");
+            OutRecord->Fatal = 1;
+            return (0);
         }
 
-      if (Address.SReg < 02000 || Address.SReg > 03777)
-        {
-          strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
-          OutRecord->Fatal = 1;
-          return (0);
+        if (Address.SReg < 02000 || Address.SReg > 03777) {
+            strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
+            OutRecord->Fatal = 1;
+            return (0);
         }
 
-      OutRecord->SBank.last = OutRecord->SBank.current;
-      OutRecord->SBank.current = Address;
-      OutRecord->SBank.oneshotPending = 1;
-      OutRecord->LabelValue = Address;
-      OutRecord->LabelValueValid = 1;
-    }
-  else
-    {
-      // The operand is NOT a number.  Presumably, it's a symbol.
-      i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, "", &Address);
-      if (!i)
-        {
-          IncPc(&Address, OpcodeOffset, &Address);
-          goto DoIt;
+        OutRecord->SBank.last = OutRecord->SBank.current;
+        OutRecord->SBank.current = Address;
+        OutRecord->SBank.oneshotPending = 1;
+        OutRecord->LabelValue = Address;
+        OutRecord->LabelValueValid = 1;
+    } else {
+        // The operand is NOT a number.  Presumably, it's a symbol.
+        i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, "", &Address);
+        if (!i) {
+            IncPc(&Address, OpcodeOffset, &Address);
+            goto DoIt;
         }
 
-      strcpy(OutRecord->ErrorMessage, "Symbol undefined or offset bad");
-      OutRecord->Fatal = 1;
+        strcpy(OutRecord->ErrorMessage, "Symbol undefined or offset bad");
+        OutRecord->Fatal = 1;
     }
 
-  return (0);  
+    printf("--- SBANK= %s o/p PC=%o FB=%o S=%d SB=%d\n",
+           InRecord->Operand,
+           OutRecord->ProgramCounter.Value,
+           OutRecord->ProgramCounter.FB,
+           OutRecord->ProgramCounter.Super,
+           OutRecord->SBank.current.Super);
+
+    return (0);
 }
-

@@ -66,8 +66,12 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     Address_t Address;
     int i;
 
-    //printf("--- 2CADR: i/p PC=%o FB=%o S=%d SB=%d\n",
-    //       InRecord->ProgramCounter.Value, InRecord->ProgramCounter.FB, InRecord->ProgramCounter.Super, InRecord->SBank.current.Super);
+    printf("--- 2CADR %s: i/p PC=%o FB=%o S=%d SB=%d\n",
+           InRecord->Operand,
+           InRecord->ProgramCounter.Value,
+           InRecord->ProgramCounter.FB,
+           InRecord->ProgramCounter.Super,
+           InRecord->SBank.current.Super);
 
     IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
@@ -110,8 +114,6 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             return (0);
         }
 
-        //printf("--- 2CADR: symbol=%o (%o,%o) S=%d\n", Address.Value, Address.FB, Address.SReg, Address.Super);
-
         OutRecord->Words[0] = Address.SReg;
 
         if (InRecord->EBank.current.SReg >= 0 && InRecord->EBank.current.SReg < 01400)
@@ -134,7 +136,12 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             OutRecord->Fatal = 1;
             return (0);
         }
-        //printf("--- 2CADR: o/p PC=%o FB=%o S=%d\n", OutRecord->ProgramCounter.Value, OutRecord->ProgramCounter.FB, OutRecord->ProgramCounter.Super);
+        printf("--- 2CADR %s: o/p PC=%o FB=%o S=%d SB=%d\n",
+               InRecord->Operand,
+               OutRecord->ProgramCounter.Value,
+               OutRecord->ProgramCounter.FB,
+               OutRecord->ProgramCounter.Super,
+               OutRecord->SBank.current.Super);
     }
 
     return (0);
