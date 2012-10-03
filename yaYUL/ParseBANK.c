@@ -117,6 +117,14 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     int Value, i;
 
+#ifdef YAYUL_TRACE
+    printf("--- BANK i/p PC=%o FB=%o S=%d SB=%d\n",
+           InRecord->ProgramCounter.Value,
+           InRecord->ProgramCounter.FB,
+           InRecord->ProgramCounter.Super,
+           InRecord->SBank.current.Super);
+#endif
+
     // Pass EXTEND through.
     OutRecord->Extend = InRecord->Extend;
 
@@ -202,6 +210,14 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
     // Make sure this prints properly in the output listing (?).
     InRecord->ProgramCounter = OutRecord->ProgramCounter;
+
+#ifdef YAYUL_TRACE
+    printf("--- BANK o/p PC=%o FB=%o S=%d SB=%d\n",
+           OutRecord->ProgramCounter.Value,
+           OutRecord->ProgramCounter.FB,
+           OutRecord->ProgramCounter.Super,
+           OutRecord->SBank.current.Super);
+#endif
 
     return (0);
 }
