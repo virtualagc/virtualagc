@@ -33,8 +33,16 @@
 int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     int Value, i;
-
     Symbol_t *Symbol;
+
+#ifdef YAYUL_TRACE
+    printf("--- SETLOC i/p PC=%o FB=%o S=%d SB=%d\n",
+           InRecord->ProgramCounter.Value,
+           InRecord->ProgramCounter.FB,
+           InRecord->ProgramCounter.Super,
+           InRecord->SBank.current.Super);
+#endif
+
     OutRecord->ProgramCounter = InRecord->ProgramCounter;
 
     // Pass EXTEND through.
@@ -82,10 +90,19 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
         if (OutRecord->ProgramCounter.Fixed) {
             OutRecord->SBank.current = OutRecord->ProgramCounter;
+            OutRecord->SBank.current.Super = InRecord->SBank.current.Super;
             OutRecord->SBank.last = OutRecord->ProgramCounter;
             OutRecord->SBank.oneshotPending = 0;
         }
     }
+
+#ifdef YAYUL_TRACE
+    printf("--- SETLOC o/p PC=%o FB=%o S=%d SB=%d\n",
+           OutRecord->ProgramCounter.Value,
+           OutRecord->ProgramCounter.FB,
+           OutRecord->ProgramCounter.Super,
+           OutRecord->SBank.current.Super);
+#endif
 
     return (0);
 }
