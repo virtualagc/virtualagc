@@ -38,6 +38,17 @@
 // Adjust superbank bits in terms of SBANK= and so on.
 void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
 {
+#ifdef YAYUL_TRACE
+    printf("--- %s: i/p addr.Fixed=%d addr.Banked=%d addr.FB=%03o addr.Super=%d SB=%d value=%05o\n",
+           __FUNCTION__,
+           Address->Fixed,
+           Address->Banked,
+           Address->FB,
+           Address->Super,
+           InRecord->SBank.current.Super,
+           *OutValue);
+#endif
+
     if (Address->Fixed && Address->Banked) {
         if (Address->FB < 030) {
             if (InRecord->SBank.current.Super)
@@ -57,6 +68,12 @@ void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
     } else {
         *OutValue |= 0060;
     }
+
+#ifdef YAYUL_TRACE
+    printf("--- %s: o/p value=%05o\n",
+           __FUNCTION__,
+           *OutValue);
+#endif
 }
 
 //-------------------------------------------------------------------------
