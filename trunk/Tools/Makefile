@@ -10,7 +10,7 @@ ifndef PREFIX
 PREFIX=/usr/local
 endif
 
-TARGETS=listing2binsource oct2bin bdiffhead checkdec webb2burkey-rope
+TARGETS=listing2binsource oct2bin bdiffhead checkdec webb2burkey-rope split-interp
 
 default: ${TARGETS}
 
@@ -27,6 +27,9 @@ bdiffhead: bdiffhead.c
 	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
 
 webb2burkey-rope: webb2burkey-rope.c
+	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
+
+split-interp: split-interp.c
 	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
 
 clean:

@@ -1,6 +1,6 @@
 /*
   Copyright 2009 Ronald S. Burkey <info@sandroid.org>
-  
+
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@
   Contact:	Ron Burkey <info@sandroid.org>
   Website:	www.ibiblio.org/apollo
   Mode:		2009-07-26 RSB	Began.
-*/
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -35,39 +35,33 @@
 int
 main (int argc, char *argv[])
 {
-  int i, Code, Reverse = 0;
-  
-  for (i = 1; i < argc; i++)
-    {
-      if (!strcmp (argv[i], "--reverse"))
-        Reverse = 1;
+    int i, Code, Reverse = 0;
+
+    for (i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "--reverse"))
+            Reverse = 1;
     }
-  
-  while (1)
-    {
-      printf ("Enter an octal code: ");
-      if (1 == scanf ("%o", &Code))
-	{
-	  Code = ~Code;
-	  if (Reverse)
-	    {
-	      printf ("Index=%d CODE1=%03o CODE2=%03o\n",
-		      1 & (Code >> 14),
-		      (127 & (Code >> 7)) - 1,
-		      (127 & (Code)) - 1);
-  	    }
-	  else
-	    {
-	      printf ("Index=%d CODE1=%03o CODE2=%03o\n",
-		      1 & (Code >> 14),
-		      (127 & (Code)) - 1,
-		      (127 & (Code >> 7)) - 1);
-	    }
-	  printf ("Index=%d CODE=%02o VALUE=%04o\n",
-	  	  1 & (Code >> 14),
-		  (15 & (Code >> 10)),
-		  (0x3FF & Code) - 1);
-	}
+
+    while (1) {
+        printf("Enter an octal code: ");
+        if (scanf("%o", &Code) == 1) {
+            Code = ~Code;
+            if (Reverse) {
+                printf("Index=%d CODE1=%03o CODE2=%03o\n",
+                       1 & (Code >> 14),
+                       (127 & (Code >> 7)) - 1,
+                       (127 & (Code)) - 1);
+            } else {
+                printf("Index=%d CODE1=%03o CODE2=%03o\n",
+                       1 & (Code >> 14),
+                       (127 & (Code)) - 1,
+                       (127 & (Code >> 7)) - 1);
+            }
+            printf("Index=%d CODE=%02o VALUE=%04o\n",
+                   1 & (Code >> 14),
+                   (15 & (Code >> 10)),
+                   (0x3FF & Code) - 1);
+        }
     }
 }
 
