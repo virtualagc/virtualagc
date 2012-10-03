@@ -24,6 +24,8 @@
 #		04/30/05 RSB	Added CFLAGS
 #		03/06/09 RSB	Added the 'all-archs' target and made 
 #				various relevant adjustments.
+#		2012-10-03 JL	Add YAYUL_TRACE define to turn on debug
+#				messages.
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -46,6 +48,8 @@ ifeq ($(NATIVE),WIN32)
 else
    EXENAME=yaYUL
 endif
+
+CFLAGS += -DYAYUL_TRACE
 
 .PHONY: default
 default: $(EXENAME)

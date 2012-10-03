@@ -30,8 +30,10 @@
                 2012-09-26 JL  Add support for a variety of number formats as
                                seen in Colossus237 sources, e.g.
                                 - E and B fields appended to operand.
-                                - "B - 1" types where characters are spread between Operand, Mod1, Mod2.
-                               There are still a number of pathological cases left.
+                                - "B - 1" types where characters are spread
+                               between Operand, Mod1, Mod2.
+                               There are still a number of pathological
+                               cases left.
  */
 
 #include "yaYUL.h"
@@ -79,8 +81,10 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     char tmpmod2[32];
     char *ptmpmod1 = NULL, *ptmpmod2 = NULL;
 
-    //fprintf(stderr, "\n");
-    //fprintf(stderr, "Parse2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2);
+#ifdef YAYUL_TRACE
+    printf("\n");
+    printf("--- 2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2);
+#endif
 
     IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
 
@@ -168,7 +172,9 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         }
     }
 
-    //fprintf(stderr, "Parse2DEC: (modified) operand=\"%f\" mod1=\"%s\" mod2=\"%s\"\n", tmpval, ptmpmod1, ptmpmod2);
+#ifdef YAYUL_TRACE
+    printf("--- 2DEC: (modified) operand=\"%f\" mod1=\"%s\" mod2=\"%s\"\n", tmpval, ptmpmod1, ptmpmod2);
+#endif
 
     // Under some circumstances, add a default scale factor.
     if (strstr(InRecord->Operand, ".") == NULL && *InRecord->Mod1 == 0 && *InRecord->Mod2 == 0)

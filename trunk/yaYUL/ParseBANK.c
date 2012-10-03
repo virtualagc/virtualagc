@@ -167,11 +167,15 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             OutRecord->ProgramCounter.Banked = 1;
 
             if (Value >= 040) {
+#ifdef YAYUL_TRACE
                 printf("--- BANK: setting superbank bit\n");
+#endif
                 OutRecord->ProgramCounter.Super = 1;
                 OutRecord->ProgramCounter.FB = Value - 010;
             } else {
+#ifdef YAYUL_TRACE
                 printf("--- BANK: clearing superbank bit\n");
+#endif
                 OutRecord->ProgramCounter.Super = 0;
                 OutRecord->ProgramCounter.FB = Value;
             }

@@ -84,6 +84,9 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
             NewPc->Unbanked = 1;
             NewPc->EB = 0;
             NewPc->FB = 0;
+#ifdef YAYUL_TRACE
+            printf("*** IncPc (%d): clearing superbank...\n", __LINE__);
+#endif
             NewPc->Super = 0;
             NewPc->SReg = NewPc->Value;
         } else
@@ -116,6 +119,9 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
         NewPc->Unbanked = 1;
         NewPc->EB = 0;
         NewPc->FB = 0;
+#ifdef YAYUL_TRACE
+        printf("*** IncPc (%d): clearing superbank...\n", __LINE__);
+#endif
         NewPc->Super = 0;
     }  
 
