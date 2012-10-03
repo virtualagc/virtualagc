@@ -426,6 +426,7 @@ clean: clean-missions
 	$(MAKE) -C yaDSKY2 clean
 	$(MAKE) -C yaDEDA2 clean
 	$(MAKE) -C yaACA2 clean
+	$(MAKE) -C Tools clean
 	rm -f `find . -name "core"`
 
 autogen:
