@@ -29,19 +29,10 @@
 
 //------------------------------------------------------------------------
 // Return non-zero on unrecoverable error.
-
 int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     int Value, i;
     Symbol_t *Symbol;
-
-#ifdef YAYUL_TRACE
-    printf("--- SETLOC i/p PC=%o FB=%o S=%d SB=%d\n",
-           InRecord->ProgramCounter.Value,
-           InRecord->ProgramCounter.FB,
-           InRecord->ProgramCounter.Super,
-           InRecord->SBank.current.Super);
-#endif
 
     OutRecord->ProgramCounter = InRecord->ProgramCounter;
 
@@ -97,11 +88,11 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
 
 #ifdef YAYUL_TRACE
-    printf("--- SETLOC o/p PC=%o FB=%o S=%d SB=%d\n",
-           OutRecord->ProgramCounter.Value,
-           OutRecord->ProgramCounter.FB,
-           OutRecord->ProgramCounter.Super,
-           OutRecord->SBank.current.Super);
+    printf("--- SETLOC %s: in=(", InRecord->Operand);
+    PrintInputRecord(InRecord);
+    printf(") out=(");
+    PrintOutputRecord(OutRecord);
+    printf("\n");
 #endif
 
     return (0);

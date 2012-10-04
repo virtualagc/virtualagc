@@ -115,6 +115,15 @@ int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
         OutRecord->Fatal = 1;
     }
+
+#ifdef YAYUL_TRACE
+    printf("--- BBCON %s: in=(", InRecord->Operand);
+    PrintInputRecord(InRecord);
+    printf(") out=(");
+    PrintOutputRecord(OutRecord);
+    printf("\n");
+#endif
+
     return (0);
 }
 
