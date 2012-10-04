@@ -409,8 +409,13 @@ int GetBankCount(int Bank);
 // From ParseST.c
 int ParseComma(ParseInput_t *Record);
 
-// From Parse2CADR.c.
+// From Utilities.c.
 void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue);
+void PrintAddress(const Address_t *address);
+void PrintBank(const Bank_t *bank);
+void PrintAddress(const Address_t *address);
+void PrintInputRecord(const ParseInput_t *record);
+void PrintOutputRecord(const ParseOutput_t *record);
 
 // Various parsers.
 Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK, ParseEquate,

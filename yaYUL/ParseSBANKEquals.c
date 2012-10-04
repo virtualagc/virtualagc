@@ -35,15 +35,6 @@ int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     Address_t Address;
     int Value, i;
 
-#ifdef YAYUL_TRACE
-    printf("--- SBANK= %s i/p PC=%o FB=%o S=%d SB=%d\n",
-           InRecord->Operand,
-           InRecord->ProgramCounter.Value,
-           InRecord->ProgramCounter.FB,
-           InRecord->ProgramCounter.Super,
-           InRecord->SBank.current.Super);
-#endif
-
     OutRecord->EBank = InRecord->EBank;
     OutRecord->SBank = InRecord->SBank;
     OutRecord->NumWords = 0;
@@ -108,12 +99,11 @@ int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
 
 #ifdef YAYUL_TRACE
-    printf("--- SBANK= %s o/p PC=%o FB=%o S=%d SB=%d\n",
-           InRecord->Operand,
-           OutRecord->ProgramCounter.Value,
-           OutRecord->ProgramCounter.FB,
-           OutRecord->ProgramCounter.Super,
-           OutRecord->SBank.current.Super);
+    printf("--- SBANK= %s: in=(", InRecord->Operand);
+    PrintInputRecord(InRecord);
+    printf(") out=(");
+    PrintOutputRecord(OutRecord);
+    printf("\n");
 #endif
 
     return (0);
