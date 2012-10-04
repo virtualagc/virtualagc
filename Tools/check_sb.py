@@ -63,9 +63,13 @@ def main():
             if expected.endswith(','):
                 expected = expected[:-1]
             actual = line.split(':')[1].split()[3]
+            if len(records) == 0:
+                print "Error: Core error before any traces, exiting!"
+                sys.exit(1)
             record = records[-1]
             del records[-1]
             if record["output"]["value"] == actual:
+                print "Correcting core error:", line.split(':')[1]
                 record["output"]["value"] = expected
                 record["output"]["fix"] = "%04o" % (int(expected, 8) & 0160)
                 records.append(record)
