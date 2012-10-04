@@ -74,10 +74,19 @@ def main():
             
     lstfile.close()
 
-    print "FBANK    Super    SB       Bank     Super    Fix"
-    print "-------- -------- -------- -------- -------- --------"
+    print
+    print " FBANK  Super  SB     Bank   Super  Fix"
+    print " ------ ------ ------ ------ ------ ------"
+    
+    outlines = []
     for record in records:
-        print "%05s    %s        %s        %05s    %s        %04s" % (record["input"]["FB"], record["input"]["super"], record["input"]["SB"], record["address"]["bank"], record["address"]["super"], record["output"]["fix"])
+        outlines.append(" %03s    %s      %s    %05s    %s      %04s" % (record["input"]["FB"], record["input"]["super"], record["input"]["SB"], record["address"]["bank"], record["address"]["super"], record["output"]["fix"]))
+    
+    outlines = list(set(outlines))
+    outlines.sort()
+    
+    for line in outlines:
+        print line
 
 if __name__ == "__main__":
     main()
