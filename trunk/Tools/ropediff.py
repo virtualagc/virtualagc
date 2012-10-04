@@ -330,7 +330,7 @@ def main():
         diffIndex = {}
         diffIndex[0] = []
         for diff in diffs:
-            if diff.pagenum is None:
+            if diff.pagenum is None or diff.pagenum == 0:
                 diffIndex[0].append(diff)
                 continue
             if diff.pagenum not in diffIndex.keys():
