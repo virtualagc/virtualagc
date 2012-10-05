@@ -55,8 +55,12 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 #endif
 
     if (address->Fixed && address->Banked) {
-        if (address->Super || record->SBank.current.Super || record->ProgramCounter.Super)
+        if (address->Super) {
             sbfix = 0100;
+        } else {
+            if (record->SBank.current.Super || record->ProgramCounter.Super)
+                sbfix = 0100;
+        }
     }
 
     *outValue |= sbfix;
@@ -78,27 +82,35 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 // Print an Address_t.
 void PrintAddress(const Address_t *address)
 {
-    printf("INV=%d,CON=%d,ADR=%d,SREG=%04o,ERA=%d,FIX=%d,UNB=%d,BNK=%d,EB=%o,FB=%02o,S=%d,OVF=%d,Value=%o",
-           address->Invalid,
-           address->Constant,
-           address->Address,
-           address->SReg,
-           address->Erasable,
-           address->Fixed,
-           address->Unbanked,
-           address->Banked,
-           address->EB,
-           address->FB,
-           address->Super,
-           address->Overflow,
-           address->Value);
+    if (address->Invalid)
+        printf("INV|");
+    if (address->Constant)
+        printf("CON|");
+    if (address->Address)
+        printf("ADR|");
+    if (address->Erasable)
+        printf("ERA|");
+    if (address->Fixed)
+        printf("FIX|");
+    if (address->Invalid)
+        printf("BNK|");
+    if (address->Super)
+        printf("SUP|");
+    if (address->Overflow)
+        printf("OVF|");
+    printf("SREG=%04o|", address->SReg);
+    if (address->Erasable)
+        printf("EB=%02o|", address->EB);
+    if (address->Fixed)
+        printf("FB=%03o|", address->FB);
+    printf("Value=%o", address->Value);
 }
 
 //-------------------------------------------------------------------------
 // Print a Bank_t.
 void PrintBank(const Bank_t *bank)
 {
-    printf("oneshot=%d,current=(", bank->oneshotPending);
+    printf("oneshot=%d, current=(", bank->oneshotPending);
     PrintAddress(&bank->current);
     printf("), last=(");
     PrintAddress(&bank->last);
@@ -111,9 +123,9 @@ void PrintInputRecord(const ParseInput_t *record)
 {
     printf("PC=(");
     PrintAddress(&record->ProgramCounter);
-    printf("),EB=(");
+    printf("), EB=(");
     PrintBank(&record->EBank);
-    printf("),SB=(");
+    printf("), SB=(");
     PrintBank(&record->SBank);
     printf(")");
 }
@@ -124,9 +136,9 @@ void PrintOutputRecord(const ParseOutput_t *record)
 {
     printf("PC=(");
     PrintAddress(&record->ProgramCounter);
-    printf("),EB=(");
+    printf("), EB=(");
     PrintBank(&record->EBank);
-    printf("),SB=(");
+    printf("), SB=(");
     PrintBank(&record->SBank);
     printf(")");
 }
