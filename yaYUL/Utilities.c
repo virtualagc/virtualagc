@@ -28,22 +28,23 @@
 
 //-------------------------------------------------------------------------
 // Adjust superbank bits in terms of SBANK= and so on.
-void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
+void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
-    int sbfix = 0;
+    int sbfix = 0060;
 
-    if (Address->Fixed && Address->Banked) {
-        if (Address->FB < 030) {
-            if (InRecord->SBank.current.Super)
+#if 0
+    if (address->Fixed && address->Banked) {
+        if (address->FB < 030) {
+            if (record->SBank.current.Super)
                 sbfix = 0100;
             else
                 sbfix = 0060;
-        } else if (Address->FB >= 030 && Address->FB <= 033) {
-            if (Address->Super)
+        } else if (address->FB >= 030 && address->FB <= 033) {
+            if (address->Super)
                 sbfix = 0100;
             else
                 sbfix = 0060;
-        } else if (Address->FB > 033 && Address->FB <= 037) {
+        } else if (address->FB > 033 && address->FB <= 037) {
             sbfix = 0060;
         } else {
             sbfix = 0060;
@@ -51,19 +52,25 @@ void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue)
     } else {
         sbfix = 0060;
     }
+#endif
 
-    *OutValue |= sbfix;
+    if (address->Fixed && address->Banked) {
+        if (address->Super || record->SBank.current.Super || record->ProgramCounter.Super)
+            sbfix = 0100;
+    }
+
+    *outValue |= sbfix;
 
 #ifdef YAYUL_TRACE
     printf("--- %s: FB=%03o,super=%d,SB=%d bank=%03o,super=%d fix=%04o value=%05o\n",
            __FUNCTION__,
-           InRecord->ProgramCounter.FB,
-           InRecord->ProgramCounter.Super,
-           InRecord->SBank.current.Super,
-           Address->FB,
-           Address->Super,
+           record->ProgramCounter.FB,
+           record->ProgramCounter.Super,
+           record->SBank.current.Super,
+           address->FB,
+           address->Super,
            sbfix,
-           *OutValue);
+           *outValue);
 #endif
 }
 
