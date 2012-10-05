@@ -28,14 +28,23 @@ def main():
    
     outlines = []
 
+    gotStart = False
+    
     for line in lines:
         line.strip()
         if '#' in line:
             line = line[:line.index('#')].strip()
+        if gotStart and line.startswith("---"):
+            print line,
+            continue
+        if gotStart and line.startswith(">>>"):
+            print line,
+            continue
         elems = line.split()
         if len(elems) > 0:
             if not line.startswith(' '):
                 if elems[0][0].isdigit():
+                    gotStart = True
                     if len(elems) > 1:
                         if elems[1].startswith('$'):
                             module = elems[1][1:].split('.')[0]
