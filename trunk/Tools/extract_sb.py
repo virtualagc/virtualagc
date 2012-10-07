@@ -63,12 +63,15 @@ def main():
                     if len(elems) >= 3:
                         if elems[2] == "BANK" or elems[2] == "SETLOC":
                             print line
+                            print
                     if len(elems) >= 4:
                         if elems[3] == "BBCON" or elems[3] == "BBCON*" or elems[3] == "EBANK=" or elems[3] == "SBANK" or elems[3] == "2CADR":
                             print line
+                            print
                     if len(elems) >= 5:
                         if elems[4] == "BBCON" or elems[4] == "BBCON*" or elems[4] == "2CADR":
                             print line
+                            print
 
     lstfile.close()
 
