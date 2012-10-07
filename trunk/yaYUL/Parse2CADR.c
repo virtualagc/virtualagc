@@ -108,11 +108,7 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
 
 #ifdef YAYUL_TRACE
-    printf("--- 2CADR %s: in=(", InRecord->Operand);
-    PrintInputRecord(InRecord);
-    printf(") out=(");
-    PrintOutputRecord(OutRecord);
-    printf("\n");
+    PrintTrace(InRecord, OutRecord);
 #endif
 
     return (0);

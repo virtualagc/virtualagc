@@ -204,11 +204,7 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     InRecord->ProgramCounter = OutRecord->ProgramCounter;
 
 #ifdef YAYUL_TRACE
-    printf("--- BANK %s: in=(", InRecord->Operand);
-    PrintInputRecord(InRecord);
-    printf(") out=(");
-    PrintOutputRecord(OutRecord);
-    printf("\n");
+    PrintTrace(InRecord, OutRecord);
 #endif
 
     return (0);

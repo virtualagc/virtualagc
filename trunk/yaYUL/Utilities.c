@@ -32,7 +32,7 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
     int sbfix = 0060;
 
-#if 0
+#if 1
     if (address->Fixed && address->Banked) {
         if (address->FB < 030) {
             if (record->SBank.current.Super)
@@ -52,8 +52,7 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
     } else {
         sbfix = 0060;
     }
-#endif
-
+#else
     if (address->Fixed && address->Banked) {
         if (address->Super) {
             sbfix = 0100;
@@ -62,6 +61,7 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
                 sbfix = 0100;
         }
     }
+#endif
 
     *outValue |= sbfix;
 
@@ -103,14 +103,14 @@ void PrintAddress(const Address_t *address)
         printf("EB=%02o|", address->EB);
     if (address->Fixed)
         printf("FB=%03o|", address->FB);
-    printf("Value=%o", address->Value);
+    printf("Value=%05o", address->Value);
 }
 
 //-------------------------------------------------------------------------
 // Print a Bank_t.
 void PrintBank(const Bank_t *bank)
 {
-    printf("oneshot=%d, current=(", bank->oneshotPending);
+    printf("1shot=%d, curr=(", bank->oneshotPending);
     PrintAddress(&bank->current);
     printf("), last=(");
     PrintAddress(&bank->last);
@@ -143,3 +143,15 @@ void PrintOutputRecord(const ParseOutput_t *record)
     printf(")");
 }
 
+//-------------------------------------------------------------------------
+// Print a trace record.
+void PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord)
+{
+    printf("--- \n");
+    printf("--- in  (", inRecord->Operator, inRecord->Operand);
+    PrintInputRecord(inRecord);
+    printf(")\n");
+    printf("--- out (", inRecord->Operator, inRecord->Operand);
+    PrintOutputRecord(outRecord);
+    printf(")\n");
+}

@@ -117,11 +117,7 @@ int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
 
 #ifdef YAYUL_TRACE
-    printf("--- BBCON %s: in=(", InRecord->Operand);
-    PrintInputRecord(InRecord);
-    printf(") out=(");
-    PrintOutputRecord(OutRecord);
-    printf("\n");
+    PrintTrace(InRecord, OutRecord);
 #endif
 
     return (0);

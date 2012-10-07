@@ -416,6 +416,7 @@ void PrintBank(const Bank_t *bank);
 void PrintAddress(const Address_t *address);
 void PrintInputRecord(const ParseInput_t *record);
 void PrintOutputRecord(const ParseOutput_t *record);
+void PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord);
 
 // Various parsers.
 Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK, ParseEquate,
