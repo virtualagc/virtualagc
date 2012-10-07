@@ -31,6 +31,7 @@
 void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
     int sbfix = 0060;
+    int tmpval = *outValue;
 
 #if 0
     if (address->Fixed && address->Banked) {
@@ -66,13 +67,14 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
     *outValue |= sbfix;
 
 #ifdef YAYUL_TRACE
-    printf("--- %s: FB=%03o,super=%d,SB=%d bank=%03o,super=%d fix=%04o value=%05o\n",
+    printf("--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o) fix=%05o value=%06o\n",
            __FUNCTION__,
            record->ProgramCounter.FB,
            record->ProgramCounter.Super,
            record->SBank.current.Super,
            address->FB,
            address->Super,
+           tmpval,
            sbfix,
            *outValue);
 #endif
