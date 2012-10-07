@@ -32,7 +32,7 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
     int sbfix = 0060;
 
-#if 1
+#if 0
     if (address->Fixed && address->Banked) {
         if (address->FB < 030) {
             if (record->SBank.current.Super)
@@ -54,7 +54,7 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
     }
 #else
     if (address->Fixed && address->Banked) {
-        if (address->Super) {
+        if (address->Super && !record->ProgramCounter.Super) {
             sbfix = 0100;
         } else {
             if (record->SBank.current.Super || record->ProgramCounter.Super)
@@ -83,26 +83,34 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 void PrintAddress(const Address_t *address)
 {
     if (address->Invalid)
-        printf("I|");
+        printf("I");
+    else
+        printf(" ");
     if (address->Constant)
-        printf("C|");
+        printf("C");
+    else
+        printf(" ");
     if (address->Address)
-        printf("A|");
+        printf("A");
+    else
+        printf(" ");
     if (address->Erasable)
-        printf("E|");
+        printf("E");
     if (address->Fixed)
-        printf("F|");
+        printf("F");
     if (address->Invalid)
-        printf("B|");
+        printf("B");
+    else
+        printf(" ");
     if (address->Super)
-        printf("S|");
+        printf("S");
     else
-        printf("_|");
+        printf(" ");
     if (address->Overflow)
-        printf("O|");
+        printf("O");
     else
-        printf("_|");
-    printf("SREG=%04o|", address->SReg);
+        printf(" ");
+    printf("|SREG=%04o|", address->SReg);
     if (address->Erasable)
         printf("EB=%03o|", address->EB);
     if (address->Fixed)
