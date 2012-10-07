@@ -34,10 +34,10 @@ def main():
         line.strip()
         if '#' in line:
             line = line[:line.index('#')].strip()
-        if gotStart and line.startswith("---"):
+        if gotStart and line.startswith("--- "):
             print line,
             continue
-        if gotStart and line.startswith(">>>"):
+        if gotStart and line.startswith(">>> "):
             print line,
             continue
         elems = line.split()
@@ -61,23 +61,13 @@ def main():
                             else:
                                 print >>sys.stderr,"%s: line %d, invalid page number \"%s\"" % (listing, linenum, pagenum)
                     if len(elems) >= 3:
-                        if elems[2] == "BANK":
-                            print line
-                        elif elems[2] == "SETLOC":
+                        if elems[2] == "BANK" or elems[2] == "SETLOC":
                             print line
                     if len(elems) >= 4:
-                        if elems[3] == "BBCON" or elems[3] == "BBCON*":
-                            print line
-                        elif elems[3] == "EBANK=":
-                            print line
-                        elif elems[3] == "SBANK=":
-                            print line
-                        elif elems[3] == "2CADR":
+                        if elems[3] == "BBCON" or elems[3] == "BBCON*" or elems[3] == "EBANK=" or elems[3] == "SBANK" or elems[3] == "2CADR":
                             print line
                     if len(elems) >= 5:
-                        if elems[4] == "BBCON" or elems[4] == "BBCON*":
-                            print line
-                        elif elems[4] == "2CADR":
+                        if elems[4] == "BBCON" or elems[4] == "BBCON*" or elems[4] == "2CADR":
                             print line
 
     lstfile.close()
