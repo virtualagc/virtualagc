@@ -12,6 +12,7 @@
 # Mod history:	2009-08-22 JL	Adapted from corresponding Comanche 055 file.
 # 		2010-02-01 JL	Fixed build errors.
 #		2010-02-20 RSB	Un-##'d this header.
+#		2012-10-07 JL	Fixed typo in comment on p1201.
 
 ## Page 1200
 		SETLOC	FFTAG1
@@ -100,7 +101,7 @@ SUPER101	OCT	120		# BITS FOR SUPERBNK SETTING 101
 # OCT121	OCT	121		# SERVICE ROUTINES
 					# (FIRST 8K OF ACM)
 SUPER110	OCT	140		# BITS FOR SUPERBNK SETTING 110.
-					# (LAST BK OF ACM)
+					# (LAST 8K OF ACM)
 1SEC		DEC	100
 # LOW7		OCT	177		# INTERPRETER
 # BIT8		OCT	00200
