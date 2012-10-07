@@ -55,10 +55,15 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
     }
 #else
     if (address->Fixed && address->Banked) {
-        if (address->Super && !record->ProgramCounter.Super) {
-            sbfix = 0100;
+        if (record->SBank.current.Super) {
+            // Superbank set.
+            // Banks 0-27 and 40-43 are accessible, banks 30-37 are not.
+            if ((address->FB >= 030 && address->FB <= 033 && !address->Super) || (address->FB > 033 && address->FB <= 037))
+                sbfix = 0100;
         } else {
-            if (record->SBank.current.Super || record->ProgramCounter.Super)
+            // Superbank clear.
+            // Banks 0-37 are accessible, banks 40-43 are not.
+            if (address->FB >= 030 && address->FB <= 033 && address->Super)
                 sbfix = 0100;
         }
     }
