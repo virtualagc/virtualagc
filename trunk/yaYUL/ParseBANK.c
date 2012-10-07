@@ -153,6 +153,10 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             OutRecord->ProgramCounter.Value = OutRecord->ProgramCounter.SReg;
         }
 
+#ifdef YAYUL_TRACE
+        PrintTrace(InRecord, OutRecord);
+#endif
+
         return (0);
     }
 
