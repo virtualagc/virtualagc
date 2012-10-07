@@ -65,7 +65,7 @@ def main():
                             print line
                             print
                     if len(elems) >= 4:
-                        if elems[3] == "BBCON" or elems[3] == "BBCON*" or elems[3] == "EBANK=" or elems[3] == "SBANK" or elems[3] == "2CADR":
+                        if elems[3] == "BBCON" or elems[3] == "BBCON*" or elems[3] == "EBANK=" or elems[3] == "SBANK=" or elems[3] == "2CADR" or elems[3] == "2BCADR" or elems[3] == "2FCADR":
                             print line
                             print
                     if len(elems) >= 5:
