@@ -14,10 +14,8 @@
 
 BASENAME=Comanche055
 
-.PHONY: ${BASENAME}.lst corediff.txt
-
 SOURCE:=$(wildcard *.agc)
-TARGETS=${BASENAME}.bin ${BASENAME}.lst ${BASENAME}.symtab
+TARGETS=${BASENAME}.bin ${BASENAME}.lst 
 
 default: $(TARGETS)
 
@@ -25,17 +23,16 @@ ${BASENAME}.bin: ${BASENAME}.binsource
 	../Tools/oct2bin <${BASENAME}.binsource
 	mv oct2bin.bin $@
 
-MAIN.agc.bin: ${SOURCE}
+MAIN.agc.bin MAIN.agc.lst: ${SOURCE}
 	../yaYUL/yaYUL --unpound-page --html MAIN.agc >MAIN.agc.lst
 
-${BASENAME}.lst ${BASENAME}.symtab: MAIN.agc.bin ${BASENAME}.bin
+${BASENAME}.lst: MAIN.agc.bin ${BASENAME}.bin
 	diff -s MAIN.agc.bin ${BASENAME}.bin
 	mv MAIN.agc.lst ${BASENAME}.lst
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 
-corediff.txt: ${BASENAME}.bin MAIN.agc.bin 
+corediff.txt: ${BASENAME}.bin MAIN.agc.bin
 	python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
 
 clean:
-	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html 
-
+	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html
