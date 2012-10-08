@@ -65,11 +65,15 @@ def main():
                             print line
                             print
                     if len(elems) >= 4:
-                        if elems[3] == "BBCON" or elems[3] == "BBCON*" or elems[3] == "EBANK=" or elems[3] == "SBANK=" or elems[3] == "2CADR" or elems[3] == "2BCADR" or elems[3] == "2FCADR":
+                        if elems[3] == "BBCON" or elems[3] == "BBCON*" or elems[3] == "EBANK=" or elems[3] == "SBANK=" or elems[3] == "2CADR" or elems[3] == "2BCADR" or elems[3] == "2FCADR" or elems[3] == "-2CADR":
                             print line
                             print
                     if len(elems) >= 5:
-                        if elems[4] == "BBCON" or elems[4] == "BBCON*" or elems[4] == "2CADR":
+                        if elems[4] == "BBCON" or elems[4] == "BBCON*" or elems[4] == "2CADR" or elems[4] == "2BCADR" or elems[4] == "2FCADR" or elems[4] == "-2CADR":
+                            print line
+                            print
+                    if len(elems) >= 6:
+                        if elems[5] == "BBCON" or elems[5] == "BBCON*" or elems[5] == "2CADR" or elems[5] == "2BCADR" or elems[5] == "2FCADR" or elems[5] == "-2CADR":
                             print line
                             print
 
