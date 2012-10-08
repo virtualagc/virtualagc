@@ -34,7 +34,6 @@
 //-------------------------------------------------------------------------
 // Increment program counter by a certain amount. 
 // Sets the Overflow flag in the Address_t structure.
-
 void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
 {
     int i, j, Max, Min, BankIncrement;
@@ -98,7 +97,7 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
     if (NewPc->Overflow)
         return;
 
-    // Compute the new S-register value (in the absence overflow.
+    // Compute the new S-register value (in the absence of overflow).
     i = (j = NewPc->SReg) + Increment;
     NewPc->SReg = i;
     if (NewPc->Erasable && NewPc->Banked)
@@ -120,7 +119,7 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
         NewPc->EB = 0;
         NewPc->FB = 0;
 #ifdef YAYUL_TRACE
-        printf("*** IncPc (%d): clearing superbank...\n", __LINE__);
+        //printf("--- IncPc (%d): clearing superbank...\n", __LINE__);
 #endif
         NewPc->Super = 0;
     }  
@@ -177,4 +176,3 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
     // Can't occur, but I give it a good pinch if it does!
     NewPc->Invalid = 1;
 }
-
