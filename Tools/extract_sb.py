@@ -29,16 +29,23 @@ def main():
     outlines = []
 
     gotStart = False
-    
+
+    printNext = False
+        
     for line in lines:
         line.strip()
         if '#' in line:
             line = line[:line.index('#')].strip()
+        if printNext:
+            print line
+            printNext = False
+            continue
         if gotStart and line.startswith("--- "):
             print line,
             continue
         if gotStart and line.startswith(">>> "):
             print line,
+            printNext = True
             continue
         elems = line.split()
         if len(elems) > 0:
