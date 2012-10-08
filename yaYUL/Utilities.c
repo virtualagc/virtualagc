@@ -35,17 +35,24 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
     int tmpval = *outValue;
 #endif
 
-    if (address->Fixed && address->Banked) {
-        if (record->ProgramCounter.FB >= 030 && record->ProgramCounter.FB <= 033 && record->ProgramCounter.Super) {
-            // Banks 0-27 and 40-43 are accessible, banks 30-37 are not.
-            if ((address->FB >= 030 && address->FB <= 033 && !address->Super) || (address->FB > 033 && address->FB <= 037))
-                sbfix = 0060;
-            else
-                sbfix = 0100;
+    if (address->Fixed) {
+        if (address->Banked) {
+            if (record->ProgramCounter.FB >= 030 && record->ProgramCounter.FB <= 033 && record->ProgramCounter.Super) {
+                // Banks 0-27 and 40-43 are accessible, banks 30-37 are not.
+                if ((address->FB >= 030 && address->FB <= 033 && !address->Super) || (address->FB > 033 && address->FB <= 037))
+                    sbfix = 0060;
+                else
+                    sbfix = 0100;
+            } else {
+                // Banks 0-37 are accessible, banks 40-43 are not.
+                // Don't know why it matters for low banks if the SB bit is set or not, but it does...
+                if ((address->FB >= 030 && address->FB <= 033 && address->Super) || (address->FB < 030 && record->SBank.current.Super))
+                    sbfix = 0100;
+            }
         } else {
             // Banks 0-37 are accessible, banks 40-43 are not.
             // Don't know why it matters for low banks if the SB bit is set or not, but it does...
-            if ((address->FB >= 030 && address->FB <= 033 && address->Super) || (address->FB < 030 && record->SBank.current.Super))
+            if (address->FB < 030 && record->SBank.current.Super)
                 sbfix = 0100;
         }
     }
