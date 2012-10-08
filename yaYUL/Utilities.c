@@ -77,6 +77,7 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 // Print an Address_t.
 void PrintAddress(const Address_t *address)
 {
+    printf("|");
     if (address->Invalid)
         printf("I");
     else
@@ -116,16 +117,15 @@ void PrintAddress(const Address_t *address)
     } else {
         printf("      |");
     }
-    printf("%06o", address->Value);
+    printf("%06o|", address->Value);
 }
 
 //-------------------------------------------------------------------------
 // Print a Bank_t.
 void PrintBank(const Bank_t *bank)
 {
-    printf(" %d ", bank->oneshotPending);
+    printf("|%d", bank->oneshotPending);
     PrintAddress(&bank->current);
-    printf(" ");
     PrintAddress(&bank->last);
 }
 
@@ -155,11 +155,11 @@ void PrintOutputRecord(const ParseOutput_t *record)
 // Print a trace record.
 void PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord)
 {
-    printf("---     --------------PC--------------- 1S ---------------curr----------EBANK------------last------------- 1S --------------curr-----------SBANK-----------last--------------\n");
-    printf("--- in  ");
+    printf("---    +--------------PC---------------+ +1S-------------curr-------------EBANK-------------last------------+ +1S-------------curr-------------SBANK-------------last------------+\n");
+    printf("--- in ");
     PrintInputRecord(inRecord);
     printf("\n");
-    printf("--- out ");
+    printf("--- out");
     PrintOutputRecord(outRecord);
     printf("\n");
 }
