@@ -103,9 +103,11 @@ void PrintAddress(const Address_t *address)
         printf(" ");
     if (address->Erasable)
         printf("E");
-    if (address->Fixed)
+    else if (address->Fixed)
         printf("F");
-    if (address->Invalid)
+    else
+        printf(" ");
+    if (address->Banked)
         printf("B");
     else
         printf(" ");
@@ -118,10 +120,14 @@ void PrintAddress(const Address_t *address)
     else
         printf(" ");
     printf("|SREG=%04o|", address->SReg);
-    if (address->Erasable)
-        printf("EB=%03o|", address->EB);
-    if (address->Fixed)
-        printf("FB=%03o|", address->FB);
+    if (!address->Invalid) {
+        if (address->Erasable)
+            printf("EB=%03o|", address->EB);
+        if (address->Fixed)
+            printf("FB=%03o|", address->FB);
+    } else {
+        printf("      |");
+    }
     printf("%06o", address->Value);
 }
 
@@ -161,12 +167,11 @@ void PrintOutputRecord(const ParseOutput_t *record)
 // Print a trace record.
 void PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord)
 {
-    printf("---                                     -------------------------------EBANK------------------------------ -------------------------------SBANK------------------------------\n");
-    printf("---     --------------PC--------------- 1S ---------------curr------------ --------------last------------- 1S --------------curr------------- -------------last--------------\n");
-    printf("--- in  ", inRecord->Operator, inRecord->Operand);
+    printf("---     --------------PC--------------- 1S ---------------curr----------EBANK------------last------------- 1S --------------curr-----------SBANK-----------last--------------\n");
+    printf("--- in  ");
     PrintInputRecord(inRecord);
     printf("\n");
-    printf("--- out ", inRecord->Operator, inRecord->Operand);
+    printf("--- out ");
     PrintOutputRecord(outRecord);
     printf("\n");
 }
