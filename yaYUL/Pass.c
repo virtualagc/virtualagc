@@ -320,13 +320,42 @@ int WriteOutputDebug;
 // behavior, so I made them global.
 static Address_t DefaultAddress = INVALID_ADDRESS;
 static ParseInput_t ParseInputRecord;
+
 static ParseInput_t DefaultParseInput = { 
-  INVALID_ADDRESS, 0, "", "", "", "", "", "", "", "", "",
-  0, 0, 0, INVALID_BANK, INVALID_BANK
+    INVALID_ADDRESS,    // ProgramCounter
+    0,                  // Reserved
+    "",                 // Label
+    "",                 // FalseLabel
+    "",                 // Operator
+    "",                 // Operand
+    "",                 // Mod1
+    "",                 // Mod2
+    "",                 // Comment
+    "",                 // Extra
+    "",                 // Alias
+    0,                  // Index
+    0,                  // Extend
+    0,                  // IndexValid
+    INVALID_BANK,       // EBank
+    INVALID_BANK        // SBank
 };
+
 static ParseOutput_t ParseOutputRecord, DefaultParseOutput = { 
-  INVALID_ADDRESS, 0, { 0, 0 }, 0, "", INVALID_ADDRESS,
-  0, 0, 0, 0, 0, 0, INVALID_BANK, INVALID_BANK, 0
+    INVALID_ADDRESS,    // ProgramCounter
+    0,                  // Reserved
+    { 0, 0 },           // Words [0:1]
+    0,                  // NumWords
+    "",                 // ErrorMessage
+    INVALID_ADDRESS,    // LabelValue
+    0,                  // Index
+    0,                  // Warning
+    0,                  // Fatal
+    0,                  // LabelValueValid
+    0,                  // Extend
+    0,                  // IndexValid
+    INVALID_BANK,       // EBank
+    INVALID_BANK,       // SBank
+    0                   // Equals
 };
   
 int Pass(int WriteOutput, 
@@ -397,9 +426,9 @@ int Pass(int WriteOutput,
 
   ParseOutputRecord.SBank = (const Bank_t) { 
     0,     // oneshotPending
-    // Invalid, Constant, Address, SReg, Erasable, Fixed, Unbanked, Banked, EB, FB, Super, Overflow, Value, Syllable.
-    { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 0, 0, 0, 0 }, // current
-    { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 0, 0, 0, 0 }  // last
+    // Invalid, Constant, Address, SReg, Erasable, Fixed, Unbanked, Banked, EB, FB,  Super, Overflow, Value, Syllable.
+    {  0,       0,        1,       0,    0,        1,     0,        1,      0,  030, 1,     0,        0,     0 }, // current
+    {  0,       0,        1,       0,    0,        1,     0,        1,      0,  030, 1,     0,        0,     0 }  // last
   };
 
   for (;;)
