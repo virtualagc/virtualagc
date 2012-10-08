@@ -41,18 +41,21 @@ def main():
         record["address"] = {}
         record["output"] = {}
         if line.startswith('--- FixSuperbankBits:'):
+            # PC=(FB=027,super=0) SB.super=0 addr=(bank=027,super=0,value=056003) fix=00060 value=056063
             fields = line.split()[2:]
-            subfields = fields[0].split(',')
+            subfields = fields[0][4:-1].split(',')
             for subfield in subfields:
                 [ name, value ] = subfield.split('=')
                 record["input"][name] = value
-            subfields = fields[1].split(',')
+            [ name, value ] = fields[1].split('=')
+            record["input"][name] = value
+            subfields = fields[2][6:-1].split(',')
             for subfield in subfields:
                 [ name, value ] = subfield.split('=')
                 record["address"][name] = value
-            [ name, value ] = fields[2].split('=')
-            record["output"][name] = value
             [ name, value ] = fields[3].split('=')
+            record["output"][name] = value
+            [ name, value ] = fields[4].split('=')
             record["output"][name] = value
             records.append(record)
 
@@ -81,10 +84,10 @@ def main():
     print
     print " FBANK  Super  SB     Bank   Super  Fix"
     print " ------ ------ ------ ------ ------ ------"
-    
+ 
     outlines = []
     for record in records:
-        outlines.append(" %03s    %s      %s    %05s    %s      %04s" % (record["input"]["FB"], record["input"]["super"], record["input"]["SB"], record["address"]["bank"], record["address"]["super"], record["output"]["fix"]))
+        outlines.append(" %03s    %s      %s    %05s    %s      %04s" % (record["input"]["FB"], record["input"]["super"], record["input"]["SB.super"], record["address"]["bank"], record["address"]["super"], record["output"]["fix"]))
     
     outlines = list(set(outlines))
     outlines.sort()
