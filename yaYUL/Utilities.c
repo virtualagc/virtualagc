@@ -31,43 +31,24 @@
 void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
     int sbfix = 0060;
+#ifdef YAYUL_TRACE
     int tmpval = *outValue;
+#endif
 
-#if 0
     if (address->Fixed && address->Banked) {
-        if (address->FB < 030) {
-            if (record->SBank.current.Super)
-                sbfix = 0100;
-            else
-                sbfix = 0060;
-        } else if (address->FB >= 030 && address->FB <= 033) {
-            if (address->Super)
-                sbfix = 0100;
-            else
-                sbfix = 0060;
-        } else if (address->FB > 033 && address->FB <= 037) {
-            sbfix = 0060;
-        } else {
-            sbfix = 0060;
-        }
-    } else {
-        sbfix = 0060;
-    }
-#else
-    if (address->Fixed && address->Banked) {
-        if (record->SBank.current.Super) {
-            // Superbank set.
+        if (record->ProgramCounter.FB >= 030 && record->ProgramCounter.FB <= 033 && record->ProgramCounter.Super) {
             // Banks 0-27 and 40-43 are accessible, banks 30-37 are not.
             if ((address->FB >= 030 && address->FB <= 033 && !address->Super) || (address->FB > 033 && address->FB <= 037))
+                sbfix = 0060;
+            else
                 sbfix = 0100;
         } else {
-            // Superbank clear.
             // Banks 0-37 are accessible, banks 40-43 are not.
-            if (address->FB >= 030 && address->FB <= 033 && address->Super)
+            // Don't know why it matters for low banks if the SB bit is set or not, but it does...
+            if ((address->FB >= 030 && address->FB <= 033 && address->Super) || (address->FB < 030 && record->SBank.current.Super))
                 sbfix = 0100;
         }
     }
-#endif
 
     *outValue |= sbfix;
 
