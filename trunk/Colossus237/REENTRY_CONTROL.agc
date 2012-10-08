@@ -10,6 +10,7 @@
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-03-03 JL	Adapted from corresponding Colossus 249 file.
 #		2011-04-27 JL	Fixed symbol name.
+#		2012-10-08 JL	Fixed incorrect value on p808.
 
 ## Page 795
 # ENTRY INITIALIZATION ROUTINE
@@ -594,7 +595,7 @@ GETDHOOK	DLOAD	CALL		# DHOOK=((1-VS1/FACT1) SQ -ALP)/FACT2
 		STORE	DHOOK		# DHOOK /25G
 
 		SR	DDV
-			6		# CHOOK
+			5		# CHOOK
 			Q7
 		DSU	
 			CHOOK		# 1  (-5)  = .25 /8
