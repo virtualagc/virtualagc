@@ -10,6 +10,7 @@
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-02-20 JL	Adapted from corresponding Colossus 249 file.
 #		2011-04-24 JL	Fixed incorrect indentation of label.
+#		2012-10-08 JL	Fixed incorrect opcode on p682.
 
 ## Page 637
 # PROGRAM DESCRIPTION **P40CSM**
@@ -1971,7 +1972,7 @@ MDOTLO		2DEC	.289391932 B-3	# 63.8 LB/SEC, SC.AT B+3 KG/CS   (=MDOTHI)
 		EBANK=	CNTR
 		COUNT	20/S40.6
 
-PRE40.6		CS	FLAGWRD6	# RESTART ENTRY TO S40.6.  CHECK T5 BITS.
+PRE40.6		CAE	FLAGWRD6	# RESTART ENTRY TO S40.6.  CHECK T5 BITS.
 		MASK	OCT60000
 		EXTEND
 		BZMF	TASKOVER	# NOT RCS  (BITS NOT 01),  DONT DO S40.6
