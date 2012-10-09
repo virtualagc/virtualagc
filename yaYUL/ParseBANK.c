@@ -191,11 +191,6 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             OutRecord->ProgramCounter = (const Address_t) { 0 };
             OutRecord->ProgramCounter.Invalid = 1;
         }
-        if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Fixed) {
-            OutRecord->SBank.last = OutRecord->SBank.current;
-            OutRecord->SBank.current = OutRecord->ProgramCounter;
-            OutRecord->SBank.oneshotPending = 0;
-        }
     } else {
         strcpy(OutRecord->ErrorMessage, "BANK pseudo-op has an invalid operand.");
         OutRecord->Fatal = 1;
