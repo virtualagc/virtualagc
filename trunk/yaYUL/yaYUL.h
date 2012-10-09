@@ -391,6 +391,9 @@ char *NormalizeAnchor(char *Name);
 char *NormalizeString(char *Input);
 char *NormalizeStringN(char *Input, int PadTo);
 
+// From ParseGeneral.c.
+int ParseGeneral(ParseInput_t *, ParseOutput_t *, int, int);
+
 // From Parse2DEC.c.
 int FetchSymbolPlusOffset(Address_t *OldPc, char *Operand, char *Mod1, Address_t *NewPc);
 
