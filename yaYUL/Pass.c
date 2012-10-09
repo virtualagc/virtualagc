@@ -751,10 +751,10 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                         ParseOutputRecord.EBank.current = ParseInputRecord.EBank.last;
 
                     if (ParseInputRecord.SBank.oneshotPending && (Match->Parser == ParseBBCON || Match->Parser == Parse2CADR)) {
-#ifdef YAYUL_TRACE
-                        printf("--- %s (\"%s\",\"%s\",\"%s\") - one-shot, resetting SBank...\n",
-                               ParseInputRecord.Operator, ParseInputRecord.Operand, ParseInputRecord.Mod1, ParseInputRecord.Mod2);
-#endif
+//#ifdef YAYUL_TRACE
+//                        printf("--- %s (\"%s\",\"%s\",\"%s\") - one-shot, resetting SBank...\n",
+//                               ParseInputRecord.Operator, ParseInputRecord.Operand, ParseInputRecord.Mod1, ParseInputRecord.Mod2);
+//#endif
                         ParseOutputRecord.SBank.current = ParseInputRecord.SBank.last;
                     }
 
@@ -763,10 +763,10 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                     }
 
                     if (Match->Parser != &ParseSBANKEquals) {
-#ifdef YAYUL_TRACE
-                        printf("--- %s (\"%s\",\"%s\",\"%s\") - disabling one-shot-pending\n",
-                               ParseInputRecord.Operator, ParseInputRecord.Operand, ParseInputRecord.Mod1, ParseInputRecord.Mod2);
-#endif
+//#ifdef YAYUL_TRACE
+//                        printf("--- %s (\"%s\",\"%s\",\"%s\") - disabling one-shot-pending\n",
+//                               ParseInputRecord.Operator, ParseInputRecord.Operand, ParseInputRecord.Mod1, ParseInputRecord.Mod2);
+//#endif
                         ParseOutputRecord.SBank.oneshotPending = 0;
                     }
                 }
