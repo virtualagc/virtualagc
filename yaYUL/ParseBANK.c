@@ -171,15 +171,9 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             OutRecord->ProgramCounter.Banked = 1;
 
             if (Value >= 040) {
-#ifdef YAYUL_TRACE
-                printf("--- BANK: setting superbank bit\n");
-#endif
                 OutRecord->ProgramCounter.Super = 1;
                 OutRecord->ProgramCounter.FB = Value - 010;
             } else {
-#ifdef YAYUL_TRACE
-                printf("--- BANK: clearing superbank bit\n");
-#endif
                 OutRecord->ProgramCounter.Super = 0;
                 OutRecord->ProgramCounter.FB = Value;
             }
@@ -196,6 +190,11 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             OutRecord->Fatal = 1;
             OutRecord->ProgramCounter = (const Address_t) { 0 };
             OutRecord->ProgramCounter.Invalid = 1;
+        }
+        if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Fixed) {
+            OutRecord->SBank.last = OutRecord->SBank.current;
+            OutRecord->SBank.current = OutRecord->ProgramCounter;
+            OutRecord->SBank.oneshotPending = 0;
         }
     } else {
         strcpy(OutRecord->ErrorMessage, "BANK pseudo-op has an invalid operand.");
