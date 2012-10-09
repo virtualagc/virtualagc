@@ -36,7 +36,7 @@ ${BASENAME}.lst: MAIN.agc.bin ${BASENAME}.bin
 	mv MAIN.agc.lst ${BASENAME}.lst
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 
-corediff.txt: ${BASENAME}.bin MAIN.agc.bin ${BASENAME}.lst
+corediff.txt: ${BASENAME}.bin MAIN.agc.bin MAIN.agc.lst
 	python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
 
 clean:
