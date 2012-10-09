@@ -34,6 +34,8 @@
                                between Operand, Mod1, Mod2.
                                There are still a number of pathological
                                cases left.
+                2012-10-09 JL  Handle the case (e.g. 2DEC*) where the number
+                               spills over into the Extra field.
  */
 
 #include "yaYUL.h"
@@ -83,7 +85,7 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
 #ifdef YAYUL_TRACE
     printf("\n");
-    printf("--- 2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2);
+    printf("--- 2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\" extra=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2, InRecord->Extra);
 #endif
 
     IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
@@ -158,15 +160,29 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             ptmpmod1 = tmpmod1;
             ptmpmod2 = tmpmod2;
         } else {
-            // Handle the case where the Enn or Bnn is split between Mod1 and Mod2.
-            if (strcmp(InRecord->Mod1, "E") == 0 || strcmp(InRecord->Mod1, "B") == 0) {
-                strcpy(tmpmod1, InRecord->Mod1);
-                strcat(tmpmod1, InRecord->Mod2);
-                ptmpmod1 = tmpmod1;
-                ptmpmod2 = tmpmod2;
+            // Handle the case where the Enn or Bnn is split between Mod1, Mod2, and Extra.
+            if (InRecord->Extra) {
+                if (strcmp(InRecord->Mod1, "E") == 0 || strcmp(InRecord->Mod1, "B") == 0) {
+                    strcpy(tmpmod1, InRecord->Mod1);
+                    strcat(tmpmod1, InRecord->Mod2);
+                    ptmpmod1 = tmpmod1;
+                    ptmpmod2 = InRecord->Extra;
+                } else {
+                    strcpy(tmpmod2, InRecord->Mod2);
+                    strcat(tmpmod2, InRecord->Extra);
+                    ptmpmod1 = InRecord->Mod1;
+                    ptmpmod2 = tmpmod2;
+                }
             } else {
-                ptmpmod1 = InRecord->Mod1;
-                ptmpmod2 = InRecord->Mod2;
+                if (strcmp(InRecord->Mod1, "E") == 0 || strcmp(InRecord->Mod1, "B") == 0) {
+                    strcpy(tmpmod1, InRecord->Mod1);
+                    strcat(tmpmod1, InRecord->Mod2);
+                    ptmpmod1 = tmpmod1;
+                    ptmpmod2 = tmpmod2;
+                } else {
+                    ptmpmod1 = InRecord->Mod1;
+                    ptmpmod2 = InRecord->Mod2;
+                }
             }
             tmpval = strtod(InRecord->Operand, NULL);
         }
