@@ -81,10 +81,10 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     char tmpmod2[32];
     char *ptmpmod1 = NULL, *ptmpmod2 = NULL;
 
-//#ifdef YAYUL_TRACE
-//    printf("\n");
-//    printf("--- 2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2);
-//#endif
+#ifdef YAYUL_TRACE
+    printf("\n");
+    printf("--- 2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2);
+#endif
 
     IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
 
@@ -172,9 +172,9 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         }
     }
 
-//#ifdef YAYUL_TRACE
-//    printf("--- 2DEC: (modified) operand=\"%f\" mod1=\"%s\" mod2=\"%s\"\n", tmpval, ptmpmod1, ptmpmod2);
-//#endif
+#ifdef YAYUL_TRACE
+    printf("--- 2DEC: (modified) operand=\"%f\" mod1=\"%s\" mod2=\"%s\"\n", tmpval, ptmpmod1, ptmpmod2);
+#endif
 
     // Under some circumstances, add a default scale factor.
     if (strstr(InRecord->Operand, ".") == NULL && *InRecord->Mod1 == 0 && *InRecord->Mod2 == 0)
