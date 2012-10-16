@@ -12,6 +12,14 @@ import re
 import ConfigParser
 import optparse
 
+# Default input file name. Can be overridden on the command line.
+DEFAULT_INPUT_FILENAME = "agc_signals.txt"
+
+# Output file names.
+XREF_FILENAME = "agc_wirelist_xref.txt"
+ERROR_FILENAME = "agc_wirelist_errors.txt"
+PAGECOUNT_FILENAME = "agc_wirelist_pagecounts.txt"
+DICTIONARY_FILENAME = "agc_wirelist_dictionary.txt"
 
 class Signal:
     """Class to hold a signal."""
@@ -130,7 +138,10 @@ def getOpts():
     (options, args) = parser.parse_args()
 
     if len(args) < 1:
-        parser.error("signal filename required!")
+        if os.path.exists(DEFAULT_INPUT_FILENAME):
+            options.filename = DEFAULT_INPUT_FILENAME
+        else:
+            parser.error("signal filename required, or default file (%s) must exist!" % DEFAULT_INPUT_FILENAME)
     else:
         options.filename = args[0]
 
@@ -332,8 +343,8 @@ def main():
         if num_sinks == 0:
             no_sink_list.append(wire)
 
-    print "Writing wire list..."
-    wlistfile = open('agc_wirelist.txt', 'w')
+    print "Writing cross-reference..."
+    wlistfile = open(XREF_FILENAME, 'w')
     print >>wlistfile, "%-12s%-32s%-64s" % ("Signal", "Source(s)", "Sink(s)")
     print >>wlistfile, "%-12s%-32s%-64s" % ("=" * 8, "=" * 28, "=" * 60)
     for wire in wires:
@@ -341,7 +352,7 @@ def main():
     wlistfile.close()
 
     print "Writing signal error file..."
-    errfile = open('agc_wirelist_errors.txt', 'w')
+    errfile = open(ERROR_FILENAME, 'w')
     if len(no_src_list) > 0:
         print "%d signals with no source" % (len(no_src_list))
         print >>errfile, "Signals with no source:"
@@ -369,14 +380,14 @@ def main():
     errfile.close()
     
     print "Writing signal page counts..."
-    countfile = open('agc_signal_pagecounts.txt', 'w')
+    countfile = open(PAGECOUNT_FILENAME, 'w')
     print >>countfile, "%-12s%-64s" % ("Signal", "Page(Count)...")
     print >>countfile, "%-12s%-64s" % ("=" * 8, "=" * 60)
     for wire in wires:
-        print >>countfile, wirelist[wire].getPageCounts()
+        print >>countfile, "%-12s%s" % (wirelist[wire].getName(), wirelist[wire].getPageCounts())
     countfile.close()
 
-    dictfilename = 'agc_signal_dictionary.txt'
+    dictfilename = DICTIONARY_FILENAME
     if os.path.isfile(dictfilename):
         print "Reading signal dictionary..."
         config = ConfigParser.RawConfigParser()
