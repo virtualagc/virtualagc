@@ -1,8 +1,9 @@
-# Virtual Apollo Guidance Computer 
+Virtual Apollo Guidance Computer
+================================
 
-To build run:
+To build:
 
-    cd yaAGC;
-    make;
+    $ cd yaAGC
+    $ make
     
-More information on http://www.ibiblio.org/apollo/download.html#Build
+More information at http://www.ibiblio.org/apollo/download.html#Build
