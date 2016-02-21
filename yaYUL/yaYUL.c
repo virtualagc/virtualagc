@@ -74,6 +74,7 @@ int Force = 0;
 char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
 FILE *OutputFile = NULL;
+static int Hardware  = 0;
 
 #if 0
 static Address_t RegA = REG(00);
@@ -186,6 +187,8 @@ main (int argc, char *argv[])
         UnpoundPage = 1;
       else if (!strcmp (argv[i], "--block1"))
         Block1 = 1;
+      else if (!strcmp (argv[i], "--hardware"))
+        Hardware = 1;
       else if (*argv[i] == '-' || *argv[i] == '/')
         {
 	  printf ("Unknown switch \"%s\".\n", argv[i]);
@@ -362,7 +365,7 @@ main (int argc, char *argv[])
         {
 	  // Compute the actual bank number.
 	  Bank = BankRaw;
-	  if (Bank < 4)			// flip-flop 0,1 with 2,3.
+	  if (Bank < 4 && !Hardware)	// flip-flop 0,1 with 2,3 when not building for hardware targets
 	    Bank ^= 2;
 	  // Add bugger info to the bank.
 	  if (Bank == 2)
@@ -399,6 +402,22 @@ main (int argc, char *argv[])
 	  for (Offset = 0; Offset < 02000; Offset++)
 	    {
 	      Value = (ObjectCode[Bank][Offset] << 1); 
+
+	      if (Hardware)
+	        {
+	          // Calculate the odd parity of the word using Brian Kernigan's bit-counting method
+	          uint16_t p = 1;
+	          uint16_t n = Value;
+
+	          while (n)
+	            {
+	              n &= (n-1);
+	              p = !p;
+	            }
+
+	          Value |= p;
+	        }
+
 	      fputc (Value >> 8, OutputFile);
 	      fputc (Value, OutputFile);
 	    }  
@@ -448,6 +467,9 @@ Done:
 	      "                 are provided.\n");
       printf ("--unpound-page   Bypass --html processing for \"## Page\".\n");
       printf ("--block1         Assembles Block 1 code.  The default is Block 2.\n");
+      printf ("--hardware       Emit binary with hardware bank order, and\n"
+              "                 enable parity bit calculation\n");
+
     }   
   if (RetVal || Fatals)
     remove (OutputFilename);
