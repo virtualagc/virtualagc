@@ -32,7 +32,7 @@ Perhaps the most important part of the guidance system was the Inertial Measurem
 
 # What this project is for
 
-The Virtual AGC project provides a virtual machine which simulates the AGC, the DSKY, and some other portions of the guidance system.  In other words, if the virtual machine—which we call yaAGC—is given the same software which was originally run by the real AGCs, and is fed the same input signals encountered by the real AGCs during Apollo missions, then it will responds in the same way as the real AGCs did.  The Virtual AGC software is open source code so that it can be studied or modified.
+The Virtual AGC project provides a virtual machine which simulates the AGC, the DSKY, and some other portions of the guidance system.  In other words, if the virtual machine—which we call yaAGC—is given the same software which was originally run by the real AGCs, and is fed the same input signals encountered by the real AGCs during Apollo missions, then it will respond in the same way as the real AGCs did.  The Virtual AGC software is open source code so that it can be studied or modified.
 
 Virtual AGC is a computer model of the AGC.  It does not try to mimic the superficial behavioral characteristics of the AGC, but rather to model the AGC's inner workings.  The result is a computer model of the AGC which is itself capable of executing the original Apollo software on (for example) a desktop PC.  In computer terms, Virtual AGC is an emulator.  Virtual AGC also provides an emulated AGS and (in the planning stages) an emulated LVDC.  "Virtual AGC" is a catch-all term that comprises all of these.
 
