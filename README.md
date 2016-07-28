@@ -9,7 +9,11 @@ The Apollo spacecraft used for lunar missions in the late 1960's and early 1970'
 
 Each of the spacecraft needed to be able to navigate through space, with or without the assistance of the astronauts, and therefore needed to have a "guidance system".  The guidance system was developed by MIT's Instrumentation Lab, now an independent company known as the Charles Stark Draper Laboratory.
 
+指引系统其中一個重要的部分是阿波羅指引計算機 - 或簡稱"AGC". 在每一次阿波羅計畫所給出的任務中, 都會有那麼兩台 AGC, 一台用於駕駛艙, 而另一台則用於登月艙. 雖然, 兩台 AGC 完全相同且可互換. 但是, 它們會因為艙體所執行的任務不同, 而運行不同的軟體. 再且, 隨著時間的遷移, 運行在 AGC 的軟體也會隨之升級, 以致於橡後來阿波羅17號上所運行的 AGC 軟體會不同於阿波羅8號上的.
+
 An important part of the guidance system was the Apollo Guidance Computer—or just "AGC" for short.  On any given Apollo mission, there were two AGCs, one for the Command Module, and one for the Lunar Module.  The two AGCs were identical and interchangeable, but they ran different software because the tasks the spacecraft had to perform were different.  Moreover, the software run by the AGC evolved over time, so that the AGC software used in later missions like Apollo 17 differed somewhat from that of earlier missions like Apollo 8.
+
+如果只把 AGC 當作是一台計算機的話, 它在現在的標準來說, 是完全不能滿足性能上的要求.
 
 Considered just as a computer, the AGC was severely underpowered by modern standards.  
 
