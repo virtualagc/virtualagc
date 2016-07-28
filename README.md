@@ -1,7 +1,7 @@
-Virtual Apollo Guidance Computer
+Virtual Apollo Guidance Computer 虛擬阿波羅號指引計算機
 ================================
 
-The Apollo spacecraft used for lunar missions in the late 1960's and early 1970's was really two different spacecraft, the Command Module (CM) and the Lunar Module (LM).  The CM was used to get the three astronauts to the moon, and back again.  The LM was used to land two of the astronauts on the moon while the third astronaut remained in the CM, in orbit around the moon. 
+The Apollo spacecraft used for lunar missions in the late 1960's and early 1970's was really two different spacecraft, the Command Module (CM) and the Lunar Module (LM).  The CM was used to get the three astronauts to the moon, and back again.  The LM was used to land two of the astronauts on the moon while the third astronaut remained in the CM, in orbit around the moon.
 
 Each of the spacecraft needed to be able to navigate through space, with or without the assistance of the astronauts, and therefore needed to have a "guidance system".  The guidance system was developed by MIT's Instrumentation Lab, now an independent company known as the Charles Stark Draper Laboratory.
 
@@ -45,7 +45,7 @@ http://www.ibiblio.org/apollo/index.html
 
 Virtual AGC is not a flight simulator, nor a lunar-lander simulator, nor even a behavioral simulation of the Apollo Lunar Module (LM) or Command-Module (CM) control panels.  (In other words, if you expect a realistic LM control panel to suddenly appear on your computer screen, you'll be disappointed.)  Virtual AGC could be used, however, as a component of such a simulation, and developers of such software are encouraged to do so.  Indeed, some developers already have! See the FAQ for more information:
 http://www.ibiblio.org/apollo/faq.html
-    
+
 #  Requirements
 
 * Tcl/Tk is required for all platforms.
@@ -69,7 +69,7 @@ http://www.ibiblio.org/apollo/faq.html
 
 ## Mac OS X:
 
-* Requires 10.4 and later for Intel or PowerPC 
+* Requires 10.4 and later for Intel or PowerPC
 * 10.2 or prior are known not to work.
 
 ## FreeBSD:
@@ -85,7 +85,7 @@ http://www.ibiblio.org/apollo/faq.html
 * The code is only confirmed to partially work on this platform.
 * You will need SUNWgnome-common-devel, SUNWGtk, SUNWxorg-headers, FSWxorg-headers, SUNWncurses, SUNWtcl, SUNWtk and SUNWlibsdl
 * You will also need GNU readline 6.0, wxWidgets 2.8.9 (with "configure --disable-shared"), Allegro 4.2.2 (with "configure --enable-shared=no --enable-static=yes") and to put /usr/local/bin and/or /usr/local/bin/wx-config linked into your PATH.
-    
+
 More information at http://www.ibiblio.org/apollo/download.html#Build
 
 # Building the Virtual AGC software
@@ -106,7 +106,7 @@ After unpacking there will be a new directory called "yaAGC". To build the progr
 
 Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails.
 
-You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/. 
+You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/.
 
 To match the default setup of the installer program execute the following:
 
@@ -137,11 +137,11 @@ Install a regular-expression library.  The MinGW project has a "contributed" reg
 
 If all of this was done correctly you can build the Virtual AGC as follows:
 
-Unpack the development tarball in your home directory: 
+Unpack the development tarball in your home directory:
 
     tar -xjvf yaAGC-dev-YYYYMMDD.tar.bz2
-    
-Build it: 
+
+Build it:
 
     make -C yaAGC WIN32=yes
 
@@ -154,7 +154,7 @@ This will create a directory yaAGC/VirtualAGC/temp/lVirtualAGC/ which is the "in
 From the command line unpack the development-snapshot tarball as follows:
 
     tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
-    
+
 Get the Terminator application's dmg file:
 https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jessies/terminator-26.159.6816.zip
 
@@ -169,8 +169,8 @@ Once you have the tarball, you can delete the Terminator app and its dmg file.
 From the working directory (not from within the yaAGC/ directory) build Virtual AGC:
 
     make -C yaAGC MACOSX=yes
-    
-    
+
+
 In the  folder yaAGC/VirtualAGC/temp/ you will now find the VirtualAGC application.
 
 Drag the VirtualAGC application from yaAGC/VirtualAGC/temp/ to the desktop.
@@ -179,11 +179,11 @@ Drag the VirtualAGC application from yaAGC/VirtualAGC/temp/ to the desktop.
 
 From the command line unpack the development-snapshot tarball as follows:
     tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
-    
+
 After unpacking there will be a new directory called "yaAGC". To build the program:
 
     gmake FREEBSD=yes
-    
+
 Do not "configure" and do not "gmake install".
 
 You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/.  
@@ -202,15 +202,15 @@ http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_wi
 Unpack the Virtual AGC snapshot tarball:
 
     tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
-    
+
 Open the yaAGC/ directory and build:
 
     make SOLARIS=yes
-    
+
 Do not "configure" and do not "gmake install".
 
-You'll find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/. 
- 
+You'll find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/.
+
 To match the default setup of the installer program execute the following:
 
     mv yaAGC/VirtualAGC/temp/lVirtualAGC ~/VirtualAGC
