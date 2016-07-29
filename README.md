@@ -95,10 +95,10 @@ http://www.ibiblio.org/apollo/faq.html
 
 ## Linux
 
-* 要求是 Fedora 內核4或以上版本.
-* 要求是 Ubuntu 7.04或以上版本.
-* 要求是 SuSE 10.1或以上版本.
-* 32和64位系統已成功經過測試.
+* 需要 Fedora 內核4或以上版本.
+* 需要 Ubuntu 7.04或以上版本.
+* 需要 SuSE 10.1或以上版本.
+* 32和64位系統已成功通過測試.
 * 在 X-Window 系統上, 必須安裝有 xterm 和 gtk+ 庫.
 * 你需要一個普通的 gcc C/C++ 編譯鏈, 以及用於 wxWidgets 和 SDL 的開發者工具包 ("dev"或"devel"版本)
 
@@ -110,6 +110,12 @@ http://www.ibiblio.org/apollo/faq.html
 * You will need the normal gcc C/C++ compiler toolchain, as well as developer packages ("dev" or "devel") for wxWidgets and SDL.
 
 ## Windows
+
+* 需要 XP 或以上版本系統. 32位系統已成功通過測試.
+* Vista 及 Windows 7 需要進行一些措施. 例如, 在 Windows 平臺上, 我們期待 Tcl/Tk 的安裝程序會產生一個叫 wish.exe 的文件, 然而在 Vista 版本上, 該文件名字被命名為 wish85.exe. 以致於 Virtual AGC 的部分特性無法正常工作. 因此, 我們需要複製該文件 c:\tcl\bin\wish85.exe 到 c:\tcl\bin\wish.exe 並調用.
+* Windows 98 或更舊版本無法使用. Windows 2000 並沒有進行測試.
+* 如果選中加載 g++ 編譯器以及編譯選項 - 如果有提供的話 - 你需要一個 MinGW 編譯器.
+* 你還需要 Msys 環境, wxWidgets 2.8.9或更高版本, Windows 專用的 POSIX Threads, Windows 專用的 GNU readline 以及源自 MinGW 的正則表達式庫. 該庫名為 libgnurx.
 
 * Requires XP or later. 32-bit systems have been tested successfully.
 * Vista and Windows 7 may need workarounds. For example, on the Windows platform it is expected that the Tcl/Tk installation program will create a file called wish.exe but on Windows Vista the installation program creates a file called wish85.exe. This prevents certain features of Virtual AGC from working. The workaround is to duplicate the file c:\tcl\bin\wish85.exe and call the duplicate c:\tcl\bin\wish.exe.
