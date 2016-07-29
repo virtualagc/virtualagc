@@ -182,22 +182,34 @@ More information at http://www.ibiblio.org/apollo/download.html#Build
 
 ## Linux
 
+在命令行通過下面的指令去解壓 development-snapshot 包:
+
 From the command line unpack the development-snapshot tarball as follows:
 
     tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
+
+解壓後可以看到有一個新的文件夾叫 "yaAGC". 然後, 構建該程序:
 
 After unpacking there will be a new directory called "yaAGC". To build the program:
 
     $ cd yaAGC
     $ make
 
+不要進行"configure"和"make install". 在裏面你可以看到有一段'configure'腳本, 它是用於配置和構建一些現在已然廢除的程序. 因此, 不管你運行與否且是否成功, 都不會產生任何的影響.
+
 Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails.
 
+當你構建完後, 你會發現創建有一個文件夾 yaAGC/VirtualAGC/temp/lVirtualAGC/.
+
 You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/.
+
+為了匹配安裝程序的默認配置, 你需要執行下面的指令:
 
 To match the default setup of the installer program execute the following:
 
     mv yaAGC/VirtualAGC/temp/lVirtualAGC ~/VirtualAGC
+
+當然, 你還可以創建一個命名為"Virtual AGC"的桌面圖標, 用於指向 *~/VirtualAGC/bin/VirtualAGC*.
 
 You can make a desktop icon called "Virtual AGC" that links to *~/VirtualAGC/bin/VirtualAGC*. The image normally used for the desktop icon is found at *~/VirtualAGC/bin/ApolloPatch2.png*.
 
