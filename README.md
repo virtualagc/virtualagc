@@ -39,7 +39,7 @@ Considered just as a computer, the AGC was severely underpowered by modern stand
 
 It is occasionally quipped—with perhaps greater wit than insight—that the AGC was more like a calculator than a computer.  But to say this is to grossly underestimate the AGC's sophistication. For example, the AGC was multi-tasking, so that it could seemingly run multiple programs simultaneously.
 
-該指引系統的另一重要部分是其顯示屏 / 鍵盤單元 - 或簡稱"DSKY". 倘若 AGC 沒有為宇航員提供內置操作方式的話, 它自身就是一台連接有電源的盒子而已. 因此, DSKY 為宇航員提供了訪問 AGC 的接口.
+該指引系統的另一重要部分是其顯示屏/鍵盤單元 (Display/Keyboard Unit) - 或簡稱"DSKY". 倘若 AGC 沒有為宇航員提供內置操作方式的話, 它自身就是一台連接有電源的盒子而已. 因此, DSKY 為宇航員提供了訪問 AGC 的接口.
 
 Another important part of the guidance system was the Display/Keyboard unit—or just "DSKY" for short.  The AGC by itself was simply a box with electrical connections, without any built-in way for the astronaut to access it.  The DSKY provided the astronaut with an interface by which to access the AGC.
 
@@ -55,29 +55,52 @@ The Lunar Module had a single DSKY, positioned between the two astronauts where 
 * Dimensions:  8"×8"×7"
 * Weight:  17.5 pounds.
 
+也許, 指引系統最為重要的部分是慣性力測量單元 (Inertial Measurement Unit) - 或簡稱"IMU". IMU 會持續地去檢測艙體的加速度以及行駛角度, 並把這些信息回饋給 AGC. 通過算數處理這些數據, AGC 可以知道艙體的實時方向與位置.
+
 Perhaps the most important part of the guidance system was the Inertial Measurement Unit—or just "IMU" for short.  The IMU continuously kept track of the acceleration and rotation of the spacecraft, and reported this information back to the AGC.  By mathematically processing this data, the AGC could know on a moment-by-moment basis the orientation and position of the spacecraft.
 
-# What this project is for
+# What this project is for | 項目目標
+
+該虛擬 AGC 項目為我們提供了一個虛擬機, 用於仿真 AGC, DSKY 單元及其他部分的指引系統. 換句話說, 如果該虛擬機 - 我們稱作 yaAGC - 能運行上真實 AGC 上的軟體, 並提供阿波羅任務期間相同的輸入信號, 那麼它就會如同真實 AGC 一樣, 以相同的方式去應答你的輸入. 此外, 該虛擬 AGC 軟體是一個開源的源代碼, 以供我們學習和修改.
 
 The Virtual AGC project provides a virtual machine which simulates the AGC, the DSKY, and some other portions of the guidance system.  In other words, if the virtual machine—which we call yaAGC—is given the same software which was originally run by the real AGCs, and is fed the same input signals encountered by the real AGCs during Apollo missions, then it will responds in the same way as the real AGCs did.  The Virtual AGC software is open source code so that it can be studied or modified.
 
+另外, Virtual AGC 是真實 AGC 的一種電腦模式. 因為, 它並不會去嘗試模仿真正 AGC 其膚淺的行為特徵. 相反, 它會去複製真正 AGC 的內部工作機制. 因此, 舉個例子來說, Virtual AGC 可以使得你在一台桌面 PC 上運行原來 AGC 上所運行的軟體. 在計算機領域的說法就是, Virtual AGC 實際上就是一台模擬器. 它為您提供了一個模擬化的 AGS 以及一個模擬化的 LVDC (正在計畫階段). 所以, 總的來說, "Virtual AGC" 也可稱作是涵蓋所有功能的外掛程序.
+
 Virtual AGC is a computer model of the AGC.  It does not try to mimic the superficial behavioral characteristics of the AGC, but rather to model the AGC's inner workings.  The result is a computer model of the AGC which is itself capable of executing the original Apollo software on (for example) a desktop PC.  In computer terms, Virtual AGC is an emulator.  Virtual AGC also provides an emulated AGS and (in the planning stages) an emulated LVDC.  "Virtual AGC" is a catch-all term that comprises all of these.
 
+Virtual AGC 軟體目前版本已然可以工作在 Linux, Windows XP/Vista/7 以及 Mac OS X 10.3 及其以上 (最好是10.5版本以上) 的系統環境下. 此外, 它至少還可以裝載在 FreeBSD 的部分版本中運行. 然而, 歸因於平常我個人是在 Linux 環境下工作的, 因此, 我會對在 Linux 版本上運行 Virtual AGC 更有信心.
+
 The current version of the Virtual AGC software has been designed to work in Linux, in Windows XP/Vista/7, and in Mac OS X 10.3 or later (but 10.5 or later is best).  It also works in at least some versions of FreeBSD.  However, since I personally work in Linux, I have the most confidence in the Linux version.
+
+在此, 你可以閱讀關於該項目的更多細節:
+http://www.ibiblio.org/apollo/index.html
 
 You can read about this project in more detail here:
 http://www.ibiblio.org/apollo/index.html
 
-# What this project is not for
+# What this project is not for | 非項目目標
+
+Virtual AGC 既不是一個飛行模擬器, 也不是一個登月模擬器, 甚至也不是一個阿波羅登月艙的行為模擬器或駕駛艙控制面板. (換句話說, 如果你希望你的電腦屏幕能突然地出現一個真正的 LM 控制面板, 那麼你將會為此失望.) 因為, Virtual AGC 僅僅是作為一個模擬的組件而使用. 所以, 我僅提議相關軟件的開發人員去使用它. 當然, 實際上, 部分的開發人員也已經接觸上該項目! 更多信息請觀看 FAQ:
+http://www.ibiblio.org/apollo/faq.html
 
 Virtual AGC is not a flight simulator, nor a lunar-lander simulator, nor even a behavioral simulation of the Apollo Lunar Module (LM) or Command-Module (CM) control panels.  (In other words, if you expect a realistic LM control panel to suddenly appear on your computer screen, you'll be disappointed.)  Virtual AGC could be used, however, as a component of such a simulation, and developers of such software are encouraged to do so.  Indeed, some developers already have! See the FAQ for more information:
 http://www.ibiblio.org/apollo/faq.html
 
-#  Requirements
+#  Requirements | 要求
+
+* 所有平臺都要求有 Tcl/Tk.
 
 * Tcl/Tk is required for all platforms.
 
 ## Linux
+
+* 要求是 Fedora 內核4或以上版本.
+* 要求是 Ubuntu 7.04或以上版本.
+* 要求是 SuSE 10.1或以上版本.
+* 32和64位系統已成功經過測試.
+* 在 X-Window 系統上, 必須安裝有 xterm 和 gtk+ 庫.
+* 你需要一個普通的 gcc C/C++ 編譯鏈, 以及用於 wxWidgets 和 SDL 的開發者工具包 ("dev"或"devel"版本)
 
 * Requires Fedora Core 4 or later.
 * Requires Ubuntu 7.04 or later.
