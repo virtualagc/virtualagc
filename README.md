@@ -135,10 +135,22 @@ http://www.ibiblio.org/apollo/faq.html
 
 ## Mac OS X:
 
+* 需要能用於 Intel 或 PowerPC 的10.4或更高版本.
+* 10.2或更舊版本無法使用.
+
+<br />
+
 * Requires 10.4 and later for Intel or PowerPC
 * 10.2 or prior are known not to work.
 
 ## FreeBSD:
+
+* 需要 FreeBSD 7.2或更高版本.
+* 需要 PC-BSD 7.1或更高版本.
+* 你需要安裝 wxWidgets 2.8.9 和 GNU readline 6.0 到 /usr/local 目錄下.
+* 必須安裝有 libSDL.
+
+<br />
 
 * Requires FreeBSD 7.2 or later.
 * Requires PC-BSD 7.1 or later.
@@ -147,6 +159,15 @@ http://www.ibiblio.org/apollo/faq.html
 
 ## OpenSolaris
 
+* 需要 OpenSolaris 0811版本.
+* 該代碼僅確認可在該平臺上運行.
+* 需要安裝 SUNWgnome-common-devel, SUNWGtk, SUNWxorg-headers, FSWxorg-headers, SUNWncurses, SUNWtcl, SUNWtk 和 SUNWlibsdl.
+* 需要安裝 GNU readline 6.0, wxWidgets 2.8.9 (使用命令"configure --disable-shared"進行編譯) 和 Allegro 4.2.2 (使用命令"configure --enable-shared=no --enable-static=yes"進行編譯) , 並把它們放置在 /usr/local/bin 或為 /usr/local/bin/wx-config 建立快捷方式.
+
+更多信息在 http://www.ibiblio.org/apollo/download.html#Build
+
+<br />
+
 * Requires OpenSolaris 0811.
 * The code is only confirmed to partially work on this platform.
 * You will need SUNWgnome-common-devel, SUNWGtk, SUNWxorg-headers, FSWxorg-headers, SUNWncurses, SUNWtcl, SUNWtk and SUNWlibsdl
@@ -154,7 +175,7 @@ http://www.ibiblio.org/apollo/faq.html
 
 More information at http://www.ibiblio.org/apollo/download.html#Build
 
-# Building the Virtual AGC software
+# Building the Virtual AGC software | 構建該虛擬 AGC 軟體
 
     $ cd yaAGC
     $ make
