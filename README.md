@@ -1,4 +1,4 @@
-Virtual Apollo Guidance Computer 虛擬阿波羅號指引計算機
+Virtual Apollo Guidance Computer | 虛擬阿波羅號指引計算機
 ================================
 
 在上世紀60年代末期到70年代初期, 用於登月計畫的阿波羅載人航天飛船, 實際上是由兩艘不同的艙體所組成. 分別是駕駛艙 (CM) 和登月艙 (LM). 駕駛艙用於載送三位宇航員往返月球, 而登月艙則是用於其中兩位宇航員的登月過程. 另外的一位則會呆在月球軌道上的駕駛艙中.
@@ -17,7 +17,16 @@ An important part of the guidance system was the Apollo Guidance Computer—or j
 
 Considered just as a computer, the AGC was severely underpowered by modern standards.  
 
-# AGC Specifications
+# AGC Specifications | AGC 規格說明
+
+* 2048個字的 RAM. 由於每一個"字"佔有15比特位的數據 - 也就是小於兩字節 (16比特位) - 所以整個 RAM 的大小只有3840字節.
+* 36,864個字的只讀內存, 相當於69,120字節.
+* 每秒最大程度可執行約85,000條CPU指令.
+* 尺寸: 24"x12.5"x6".
+* 重量: 70.1磅
+* 電源供應: 28伏特直流電下通過2.5安電流
+* 真正的指引計算機顯示屏及鍵盤
+
 * 2048 words of RAM.  A "word" was 15 bits of data—therefore just under 2 bytes (16 bits) of data—and so the total RAM was just 3840 bytes.
 * 36,864 words of read-only memory, equivalent to 69,120 bytes.
 * Maximum of about 85,000 CPU instructions executed per second.
@@ -26,13 +35,23 @@ Considered just as a computer, the AGC was severely underpowered by modern stand
 * Power supply:  2.5A of current at 28V DC
 * Real DSKY.
 
+有時候, AGC 會裝備有比自身內部跟好的頭腦, 以致於它比起計算機來說更像是一個計算器. 然而這樣的說辭, 是極度地低估了 AGC 的精密. 舉個例子來說, AGC 說多任務處理型的一台機器, 因此表面上來看, 它可以同時運行多個程序.
+
 It is occasionally quipped—with perhaps greater wit than insight—that the AGC was more like a calculator than a computer.  But to say this is to grossly underestimate the AGC's sophistication. For example, the AGC was multi-tasking, so that it could seemingly run multiple programs simultaneously.
+
+該指引系統的另一重要部分是其顯示屏 / 鍵盤單元 - 或簡稱"DSKY". 倘若 AGC 沒有為宇航員提供內置操作方式的話, 它自身就是一台連接有電源的盒子而已. 因此, DSKY 為宇航員提供了訪問 AGC 的接口.
 
 Another important part of the guidance system was the Display/Keyboard unit—or just "DSKY" for short.  The AGC by itself was simply a box with electrical connections, without any built-in way for the astronaut to access it.  The DSKY provided the astronaut with an interface by which to access the AGC.
 
+登月艙有著一個單一的 DSKY, 並且放置在兩位宇航員之間, 以供他們其中一個去操作. 而駕駛艙實際上會有兩個 DSKY 單元. 其中一個只是顯示主控制面板, 而另一個則放置在光學設備旁邊. 該光學設備可用於標記星體的位置或其他航標.
+
 The Lunar Module had a single DSKY, positioned between the two astronauts where it could be operated by either of them.  The Command Module actually had two DSKYs.  One of the CM's DSKYs was only the main control panel, while the other was positioned near the optical equipment used to mark the positions of stars or other landmarks.
 
-# DSKY Specifications
+# DSKY Specifications DSKY | 規格說明
+
+* 尺寸: 8"x8"x7"
+* 重量: 17.5磅
+
 * Dimensions:  8"×8"×7"
 * Weight:  17.5 pounds.
 
