@@ -27,6 +27,8 @@ Considered just as a computer, the AGC was severely underpowered by modern stand
 * 電源供應: 28伏特直流電下通過2.5安電流
 * 真正的指引計算機顯示屏及鍵盤
 
+<br />
+
 * 2048 words of RAM.  A "word" was 15 bits of data—therefore just under 2 bytes (16 bits) of data—and so the total RAM was just 3840 bytes.
 * 36,864 words of read-only memory, equivalent to 69,120 bytes.
 * Maximum of about 85,000 CPU instructions executed per second.
@@ -51,6 +53,8 @@ The Lunar Module had a single DSKY, positioned between the two astronauts where 
 
 * 尺寸: 8"x8"x7"
 * 重量: 17.5磅
+
+<br />
 
 * Dimensions:  8"×8"×7"
 * Weight:  17.5 pounds.
@@ -91,6 +95,8 @@ http://www.ibiblio.org/apollo/faq.html
 
 * 所有平臺都要求有 Tcl/Tk.
 
+<br />
+
 * Tcl/Tk is required for all platforms.
 
 ## Linux
@@ -101,6 +107,8 @@ http://www.ibiblio.org/apollo/faq.html
 * 32和64位系統已成功通過測試.
 * 在 X-Window 系統上, 必須安裝有 xterm 和 gtk+ 庫.
 * 你需要一個普通的 gcc C/C++ 編譯鏈, 以及用於 wxWidgets 和 SDL 的開發者工具包 ("dev"或"devel"版本)
+
+<br />
 
 * Requires Fedora Core 4 or later.
 * Requires Ubuntu 7.04 or later.
@@ -116,6 +124,8 @@ http://www.ibiblio.org/apollo/faq.html
 * Windows 98 或更舊版本無法使用. Windows 2000 並沒有進行測試.
 * 如果選中加載 g++ 編譯器以及編譯選項 - 如果有提供的話 - 你需要一個 MinGW 編譯器.
 * 你還需要 Msys 環境, wxWidgets 2.8.9或更高版本, Windows 專用的 POSIX Threads, Windows 專用的 GNU readline 以及源自 MinGW 的正則表達式庫. 該庫名為 libgnurx.
+
+<br />
 
 * Requires XP or later. 32-bit systems have been tested successfully.
 * Vista and Windows 7 may need workarounds. For example, on the Windows platform it is expected that the Tcl/Tk installation program will create a file called wish.exe but on Windows Vista the installation program creates a file called wish85.exe. This prevents certain features of Virtual AGC from working. The workaround is to duplicate the file c:\tcl\bin\wish85.exe and call the duplicate c:\tcl\bin\wish.exe.
