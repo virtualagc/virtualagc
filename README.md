@@ -209,9 +209,12 @@ To match the default setup of the installer program execute the following:
 
     mv yaAGC/VirtualAGC/temp/lVirtualAGC ~/VirtualAGC
 
-當然, 你還可以創建一個命名為"Virtual AGC"的桌面圖標, 用於指向 *~/VirtualAGC/bin/VirtualAGC*.
+當然, 你還可以創建一個命名為"Virtual AGC"的桌面圖標, 用於指向 *~/VirtualAGC/bin/VirtualAGC*. 該圖片一般會尋找 *~/VirtualAGC/bin/ApolloPatch2.png* 作為其圖像.
 
 You can make a desktop icon called "Virtual AGC" that links to *~/VirtualAGC/bin/VirtualAGC*. The image normally used for the desktop icon is found at *~/VirtualAGC/bin/ApolloPatch2.png*.
+
+如果你嘗試使用 ACA 模擬器 (操縱杆) 的過程中, 它並不能工作起來的話, 你可以在這裡找到配置的一些相關信息:
+http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_with_the
 
 If you try to use the ACA simulation (joystick) and it doesn't work you can find some information on configuring it here:
 http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_with_the
