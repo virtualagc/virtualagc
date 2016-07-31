@@ -131,7 +131,7 @@ At present, Virtual AGC binary packages are always built with wxWidgets 2.8.9, s
 
 Install POSIX Threads for Windows ("pthreads").  You can do this by unpacking the source tarball, 'cd' into the directory it creates, then run the command "make clean GC-inlined".  This creates various files that you should copy into /usr/local as follows:  copy \*.dll into /usr/local/bin; copy \*.h into /usr/local/include; copy the single libpthread\*.a file created into /usr/local/lib and rename it libpthread.a.
 
-Install GNU readline for Windows. You should find zipfiles of both "binaries" and "developer files" are available for download.  They should both be downloaded and unpacked into /usr/local.  (I.e., each zipfile contains directories like bin/, include/, lib/, and so on, and we want these to be merged into /usr/local/bin/, usr/local/include/, etc.)
+Install GNU readline for Windows. You should find zipfiles of both "binaries" and "developer files" are available for download.  They should both be downloaded and unpacked into /usr/local.  (I.e., each zipfile contains directories like bin/, include/, lib/, and so on, and we want these to be merged into /usr/local/bin/, /usr/local/include/, etc.)
 
 Install a regular-expression library.  The MinGW project has a "contributed" regex library ("libgnurx") that you can use.  Download both the "bin" and "dev" tarballs and unpack them into /usr/local.
 
