@@ -221,7 +221,7 @@ http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_wi
 
 ## Windows
 
-運行 Msys 來執行一行 shell 命令, 並進入到你的根目錄.
+通過運行 Msys 來執行一條 shell 命令, 並進入到你的根目錄.
 
 Run Msys to bring up a command shell and enter your home directory.
 
