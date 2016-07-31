@@ -241,7 +241,7 @@ At present, Virtual AGC binary packages are always built with wxWidgets 2.8.9, s
 
 安裝 Windows 專用的 POSIX Threads ("pthreads"). 你可以通過解壓源軟體包, 'cd'進入所創建的文件夾, 並運行命令"make clean GC-inlined"來進行安裝. 安裝期間所建立的不同文件, 你需要像以下這樣, 把它們拷貝到 /usr/local: 拷貝 \*.dll 到 /usr/local/bin; 拷貝 \*.h into /usr/local/include; 拷貝那個獨立的 libpthread\*.a 文件 複製到 /usr/local/lib 並重新命名為 libpthread.a.
 
-Install POSIX Threads for Windows ("pthreads").  You can do this by unpacking the source tarball, 'cd' into the directory it creates, then run the command "make clean GC-inlined".  This creates various files that you should copy into /usr/local as follows:  copy *.dll into /usr/local/bin; copy *.h into /usr/local/include; copy the single libpthread*.a file created into /usr/local/lib and rename it libpthread.a.
+Install POSIX Threads for Windows ("pthreads").  You can do this by unpacking the source tarball, 'cd' into the directory it creates, then run the command "make clean GC-inlined".  This creates various files that you should copy into /usr/local as follows:  copy \*.dll into /usr/local/bin; copy \*.h into /usr/local/include; copy the single libpthread\*.a file created into /usr/local/lib and rename it libpthread.a.
 
 Install GNU readline for Windows. You should find zipfiles of both "binaries" and "developer files" are available for download.  They should both be downloaded and unpacked into /usr/local.  (I.e., each zipfile contains directories like bin/, include/, lib/, and so on, and we want these to be merged into /usr/local/bin/, usr/local/include/, etc.)
 
