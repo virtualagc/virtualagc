@@ -221,15 +221,25 @@ http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_wi
 
 ## Windows
 
+運行 Msys 來執行一行 shell 命令, 並進入到你的根目錄.
+
 Run Msys to bring up a command shell and enter your home directory.
+
+使用該命令安裝相關的 SDL 庫.
 
 Install the SDL library with this command:
 
     make install-sdl prefix=/usr/local
 
+所有 Virtual AGC 需要構建的軟體都會被安裝在 /usr/local 下, 因此, 最終我們會習慣有這些子文件, 如 /usr/local/bin, /usr/local/include, /usr/local/lib 等. Virtual AGC 的 makefile 文件都採用硬編碼的方式, 因為, 它們都以這作為其安裝路徑. 注意的是, 通過 Vitual AGC , 你所創建的二進制文件並不是安裝在 /usr/local 下.
+
 All software needed to build Virtual AGC will be installed under /usr/local, so eventually it will be populated with sub-directories such as /usr/local/bin, /usr/local/include, /usr/local/lib, and so on.  The Virtual AGC makefiles are hard-coded to assume these installation locations.  Note, the Virtual AGC binaries you are going to create are not installed under /usr/local.
 
+因為, 目前 Virtual AGC 的二進制包通常是使用 wxWidgets 2.8.9 進行構建, 因此, 版本 2.8.9 是一個較為安全的選擇. 首先, 你需要把包解壓至根目錄, 然後輸入'cd'進入所創建的文件夾, 並按步執行"./configure", "make" 以及 "make install"命令. "configure"這一步需要接收不同的命令行參數, 如選擇 unicode 還是 ansi, static linking 還是 dynamic linking 等. 可是, 我們会发现, 默認的參數運行起來貌似也沒有問題.
+
 At present, Virtual AGC binary packages are always built with wxWidgets 2.8.9, so 2.8.9 is a safe choice.  Unpack the tarball in your home directory, 'cd' into the directory this creates, and then do "./configure", "make", and "make install".  The "configure" step will accept various command-line options that select unicode vs. ansi, static linking vs. dynamic linking, etc., but the default options seem to work fine.
+
+安裝 Windows 專用的 POSIX Threads ("pthreads"). 你可以通過解壓源軟體包, 'cd'進入所創建的文件夾, 並運行命令"make clean GC-inlined"來進行安裝. 安裝期間所建立的不同文件, 你需要像以下這樣, 把它們拷貝到 /usr/local: 拷貝 \*.dll 到 /usr/local/bin; 拷貝 \*.h into /usr/local/include; 拷貝那個獨立的 libpthread\*.a 文件 複製到 /usr/local/lib 並重新命名為 libpthread.a.
 
 Install POSIX Threads for Windows ("pthreads").  You can do this by unpacking the source tarball, 'cd' into the directory it creates, then run the command "make clean GC-inlined".  This creates various files that you should copy into /usr/local as follows:  copy *.dll into /usr/local/bin; copy *.h into /usr/local/include; copy the single libpthread*.a file created into /usr/local/lib and rename it libpthread.a.
 
