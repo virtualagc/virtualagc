@@ -57,7 +57,9 @@ http://www.ibiblio.org/apollo/faq.html
 * Requires SuSE 10.1 or later.
 * 32 and 64-bit systems have been tested successfully.
 * The X-Window system, xterm, and gtk+ libraries must be installed.
-* You will need the normal gcc C/C++ compiler toolchain, as well as developer packages ("dev" or "devel") for wxWidgets and SDL.
+* You will need the normal gcc C/C++ compiler toolchain, as well as developer packages ("dev" or "devel") for wxWidgets, ncurses and SDL.
+
+On Fedora 22 or later you may encounter that the wxWidgets doesn't have the wx-config but the wx-config-3.0 utility as well as the wxrc-3.0 versus wxrc. Just create a symbolic link for wx-config and wxrc respectively
 
 ## Windows
 
@@ -104,7 +106,7 @@ After unpacking there will be a new directory called "yaAGC". To build the progr
     $ cd yaAGC
     $ make
 
-Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails.
+Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the bin files then you can rebuild with "make -k" to keep going. This however might mask other issues.
 
 You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/. 
 
