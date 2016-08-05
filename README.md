@@ -1,7 +1,7 @@
 Virtual Apollo Guidance Computer
 ================================
 
-The Apollo spacecraft used for lunar missions in the late 1960's and early 1970's was really two different spacecraft, the Command Module (CM) and the Lunar Module (LM).  The CM was used to get the three astronauts to the moon, and back again.  The LM was used to land two of the astronauts on the moon while the third astronaut remained in the CM, in orbit around the moon. 
+The Apollo spacecraft used for lunar missions in the late 1960's and early 1970's was really two different spacecraft, the Command Module (CM) and the Lunar Module (LM).  The CM was used to get the three astronauts to the moon, and back again.  The LM was used to land two of the astronauts on the moon while the third astronaut remained in the CM, in orbit around the moon.
 
 Each of the spacecraft needed to be able to navigate through space, with or without the assistance of the astronauts, and therefore needed to have a "guidance system".  The guidance system was developed by MIT's Instrumentation Lab, now an independent company known as the Charles Stark Draper Laboratory.
 
@@ -45,7 +45,7 @@ http://www.ibiblio.org/apollo/index.html
 
 Virtual AGC is not a flight simulator, nor a lunar-lander simulator, nor even a behavioral simulation of the Apollo Lunar Module (LM) or Command-Module (CM) control panels.  (In other words, if you expect a realistic LM control panel to suddenly appear on your computer screen, you'll be disappointed.)  Virtual AGC could be used, however, as a component of such a simulation, and developers of such software are encouraged to do so.  Indeed, some developers already have! See the FAQ for more information:
 http://www.ibiblio.org/apollo/faq.html
-    
+
 #  Requirements
 
 * Tcl/Tk is required for all platforms.
@@ -71,7 +71,7 @@ On Fedora 22 or later you may encounter that the wxWidgets doesn't have the wx-c
 
 ## Mac OS X:
 
-* Requires 10.4 and later for Intel or PowerPC 
+* Requires 10.4 and later for Intel or PowerPC
 * 10.2 or prior are known not to work.
 
 ## FreeBSD:
@@ -87,7 +87,7 @@ On Fedora 22 or later you may encounter that the wxWidgets doesn't have the wx-c
 * The code is only confirmed to partially work on this platform.
 * You will need SUNWgnome-common-devel, SUNWGtk, SUNWxorg-headers, FSWxorg-headers, SUNWncurses, SUNWtcl, SUNWtk and SUNWlibsdl
 * You will also need GNU readline 6.0, wxWidgets 2.8.9 (with "configure --disable-shared"), Allegro 4.2.2 (with "configure --enable-shared=no --enable-static=yes") and to put /usr/local/bin and/or /usr/local/bin/wx-config linked into your PATH.
-    
+
 More information at http://www.ibiblio.org/apollo/download.html#Build
 
 # Building the Virtual AGC software
@@ -108,7 +108,7 @@ After unpacking there will be a new directory called "yaAGC". To build the progr
 
 Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the bin files then you can rebuild with "make -k" to keep going. This however might mask other issues.
 
-You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/. 
+You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/.
 
 To match the default setup of the installer program execute the following:
 
@@ -131,19 +131,19 @@ All software needed to build Virtual AGC will be installed under /usr/local, so 
 
 At present, Virtual AGC binary packages are always built with wxWidgets 2.8.9, so 2.8.9 is a safe choice.  Unpack the tarball in your home directory, 'cd' into the directory this creates, and then do "./configure", "make", and "make install".  The "configure" step will accept various command-line options that select unicode vs. ansi, static linking vs. dynamic linking, etc., but the default options seem to work fine.
 
-Install POSIX Threads for Windows ("pthreads").  You can do this by unpacking the source tarball, 'cd' into the directory it creates, then run the command "make clean GC-inlined".  This creates various files that you should copy into /usr/local as follows:  copy *.dll into /usr/local/bin; copy *.h into /usr/local/include; copy the single libpthread*.a file created into /usr/local/lib and rename it libpthread.a.
+Install POSIX Threads for Windows ("pthreads").  You can do this by unpacking the source tarball, 'cd' into the directory it creates, then run the command "make clean GC-inlined".  This creates various files that you should copy into /usr/local as follows:  copy \*.dll into /usr/local/bin; copy \*.h into /usr/local/include; copy the single libpthread\*.a file created into /usr/local/lib and rename it libpthread.a.
 
-Install GNU readline for Windows. You should find zipfiles of both "binaries" and "developer files" are available for download.  They should both be downloaded and unpacked into /usr/local.  (I.e., each zipfile contains directories like bin/, include/, lib/, and so on, and we want these to be merged into /usr/local/bin/, usr/local/include/, etc.)
+Install GNU readline for Windows. You should find zipfiles of both "binaries" and "developer files" are available for download.  They should both be downloaded and unpacked into /usr/local.  (I.e., each zipfile contains directories like bin/, include/, lib/, and so on, and we want these to be merged into /usr/local/bin/, /usr/local/include/, etc.)
 
 Install a regular-expression library.  The MinGW project has a "contributed" regex library ("libgnurx") that you can use.  Download both the "bin" and "dev" tarballs and unpack them into /usr/local.
 
 If all of this was done correctly you can build the Virtual AGC as follows:
 
-Unpack the development tarball in your home directory: 
+Unpack the development tarball in your home directory:
 
     tar -xjvf yaAGC-dev-YYYYMMDD.tar.bz2
-    
-Build it: 
+
+Build it:
 
     make -C yaAGC WIN32=yes
 
@@ -156,7 +156,7 @@ This will create a directory yaAGC/VirtualAGC/temp/lVirtualAGC/ which is the "in
 From the command line unpack the development-snapshot tarball as follows:
 
     tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
-    
+
 Get the Terminator application's dmg file:
 https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jessies/terminator-26.159.6816.zip
 
@@ -171,8 +171,8 @@ Once you have the tarball, you can delete the Terminator app and its dmg file.
 From the working directory (not from within the yaAGC/ directory) build Virtual AGC:
 
     make -C yaAGC MACOSX=yes
-    
-    
+
+
 In the  folder yaAGC/VirtualAGC/temp/ you will now find the VirtualAGC application.
 
 Drag the VirtualAGC application from yaAGC/VirtualAGC/temp/ to the desktop.
@@ -181,11 +181,11 @@ Drag the VirtualAGC application from yaAGC/VirtualAGC/temp/ to the desktop.
 
 From the command line unpack the development-snapshot tarball as follows:
     tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
-    
+
 After unpacking there will be a new directory called "yaAGC". To build the program:
 
     gmake FREEBSD=yes
-    
+
 Do not "configure" and do not "gmake install".
 
 You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/.  
@@ -204,15 +204,15 @@ http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_wi
 Unpack the Virtual AGC snapshot tarball:
 
     tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
-    
+
 Open the yaAGC/ directory and build:
 
     make SOLARIS=yes
-    
+
 Do not "configure" and do not "gmake install".
 
-You'll find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/. 
- 
+You'll find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/.
+
 To match the default setup of the installer program execute the following:
 
     mv yaAGC/VirtualAGC/temp/lVirtualAGC ~/VirtualAGC
