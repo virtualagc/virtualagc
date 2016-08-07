@@ -1,40 +1,45 @@
 /*
-  Copyright 2008 Onno Hommes:1
+ Copyright 2008,2016 Onno Hommes:1
 
-  This file is part of yaAGC.
+ This file is part of yaAGC.
 
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
+ yaAGC is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
 
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+ yaAGC is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ You should have received a copy of the GNU General Public License
+ along with yaAGC; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  In addition, as a special exception, permission is granted to
-  link the code of this program with the Orbiter SDK library (or with
-  modified versions of the Orbiter SDK library that use the same license as
-  the Orbiter SDK library), and distribute linked combinations including
-  the two. You must obey the GNU General Public License in all respects for
-  all of the code used other than the Orbiter SDK library. If you modify
-  this file, you may extend this exception to your version of the file,
-  but you are not obligated to do so. If you do not wish to do so, delete
-  this exception statement from your version.
+ In addition, as a special exception, permission is granted to
+ link the code of this program with the Orbiter SDK library (or with
+ modified versions of the Orbiter SDK library that use the same license as
+ the Orbiter SDK library), and distribute linked combinations including
+ the two. You must obey the GNU General Public License in all respects for
+ all of the code used other than the Orbiter SDK library. If you modify
+ this file, you may extend this exception to your version of the file,
+ but you are not obligated to do so. If you do not wish to do so, delete
+ this exception statement from your version.
 
-  Filename:	agc_debugger.c
-  Purpose:	This is module implements the debugger behavior.
+ Filename:	agc_debugger.c
+ Purpose:	This is module implements the debugger behavior.
 
-  Compiler:	GNU gcc.
-  Contact:	Onno Hommes
-  Reference:	http://virtualagc.googlecode.com
-  Mods:		 12/05/08 OH	Began work.
-			 07/01/09 OH	Allow Address request using symbol
+ Compiler:	GNU gcc.
+ Contact:	Onno Hommes
+ Reference:	http://virtualagc.googlecode.com
+ Mods:		12/05/08 OH	Began work.
+		07/01/09 OH	Allow Address request using symbol
+		07/17/16 RSB	A usage of the symbol 'Before'
+				was commented out since it wasn't
+				being used and was generating
+				compiler warnings.
+	        08/01/16 RSB    Initialized an uninitialized variable.
  */
 
 #include <stdio.h>
@@ -54,7 +59,7 @@
 
 extern int SymbolTableSize;
 extern Symbol_t *SymbolTable;
-extern char *SourcePathName;	/* Owned by agc_symtab */
+extern char *SourcePathName; /* Owned by agc_symtab */
 
 static Debugger_t Debugger;
 static Frame_t *Frames;
@@ -62,14 +67,12 @@ static Frame_t *Frames;
 int LogCount = 0;
 static int LogLast = -1;
 
-
 // JMS: Variables pertaining to the symbol table loaded
 int HaveSymbols = 0;		// 1 if we have a symbol table
 char *SymbolFile;		// The name of the symbol table file
 
 /* These globals will be deprecated when debugger is mature */
 //int DebugMode;
-
 FILE *FromFiles[MAX_FROMFILES];
 FILE *LogFile = NULL;
 
@@ -105,7 +108,7 @@ int NumBreakpoints = 0;
 static void
 rfgets (agc_t * State, char *Buffer, int MaxSize, FILE * fp)
 {
-  int c, Count = 0;
+  int c = 0, Count = 0;
   char *s;
 
   MaxSize--;
@@ -115,8 +118,8 @@ rfgets (agc_t * State, char *Buffer, int MaxSize, FILE * fp)
       /* While waiting for character input, continue to look for client connects
        * and disconnects.
        */
-      while ((fp != stdin && EOF == (c = fgetc (fp))) ||
-	     (fp == stdin && Buffer != (s = nbfgets (Buffer, MaxSize))))
+      while ((fp != stdin && EOF == (c = fgetc (fp)))
+	  || (fp == stdin && Buffer != (s = nbfgets (Buffer, MaxSize))))
 	{
 	  /* If we have redirected console input, and the file of source data is
 	   * exhausted, then reattach the console.
@@ -173,19 +176,18 @@ void
 DbgDisplayVersion (void)
 {
   printf ("Apollo Guidance Computer simulation, ver. " NVER ", built "
-	  __DATE__ " " __TIME__ "\n"
-	  "Copyright (C) 2003-2009 Ronald S. Burkey, Onno Hommes.\n"
-	  "yaAGC is free software, covered by the GNU General Public License, and you are\n"
-	  "welcome to change it and/or distribute copies of it under certain conditions.\n");
-  printf
-    ("Refer to http://www.ibiblio.org/apollo/index.html for additional information.\n");
+      __DATE__ " " __TIME__ "\n"
+      "Copyright (C) 2003-2009 Ronald S. Burkey, Onno Hommes.\n"
+      "yaAGC is free software, covered by the GNU General Public License, and you are\n"
+      "welcome to change it and/or distribute copies of it under certain conditions.\n");
+  printf (
+      "Refer to http://www.ibiblio.org/apollo/index.html for additional information.\n");
 }
-
 
 int
 DbgHasBreakEvent ()
 {
-  int BreakFlag;
+  int BreakFlag = 0;
 
   if (Debugger.State->PendFlag)
     BreakFlag = 0;
@@ -229,33 +231,32 @@ DbgHasBreakEvent ()
  * \param	The breakpoint identifier
  */
 void
-DbgDeleteBreakpoint(int bp)
+DbgDeleteBreakpoint (int bp)
 {
-	int i,j;
+  int i, j;
 
-    for (i = 0; i < NumBreakpoints; i++)
-       if (Breakpoints[i].Id == bp)
-       {
-             NumBreakpoints--;
-             for (j = i; j < NumBreakpoints; j++)
-             {
-                Breakpoints[j] = Breakpoints[j + 1];
-             }
-             break;
-       }
+  for (i = 0; i < NumBreakpoints; i++)
+    if (Breakpoints[i].Id == bp)
+      {
+	NumBreakpoints--;
+	for (j = i; j < NumBreakpoints; j++)
+	  {
+	    Breakpoints[j] = Breakpoints[j + 1];
+	  }
+	break;
+      }
 }
 
 void
-DbgHitBreakpoint(Breakpoint_t* bp)
+DbgHitBreakpoint (Breakpoint_t* bp)
 {
-   bp->Hits++;
+  bp->Hits++;
 
-   if (bp->Disposition == BP_DELETE)
-   {
-	   DbgDeleteBreakpoint(bp->Id);
-   }
+  if (bp->Disposition == BP_DELETE)
+    {
+      DbgDeleteBreakpoint (bp->Id);
+    }
 }
-
 
 /* Normalize data in s and return sraw pointer */
 char *
@@ -265,7 +266,7 @@ DbgNormalizeCmdString (char *s)
   char *ss;
 
   /* Normalize the strings by getting rid of leading, trailing
-     or duplicated spaces. */
+   or duplicated spaces. */
   i = sscanf (s, "%s%s%s%s%s", s1, s2, s3, s4, s5);
   if (i == 1)
     strcpy (s, s1);
@@ -281,7 +282,8 @@ DbgNormalizeCmdString (char *s)
     s[0] = 0;
 
   strcpy (sraw, s);
-  for (ss = s; *ss; *ss = toupper (*ss), ss++);
+  for (ss = s; *ss; *ss = toupper (*ss), ss++)
+    ;
 
   return sraw;
 }
@@ -347,9 +349,8 @@ DbgGetFromZ (agc_t * State)
 	}
       Value = State->Fixed[Bank][CurrentZ & 01777];
     }
-  Value = OverflowCorrected (AddSP16
-			     (SignExtend (Value),
-			      SignExtend (State->IndexValue)));
+  Value = OverflowCorrected (
+      AddSP16 (SignExtend (Value), SignExtend (State->IndexValue)));
   Value = (Value & 077777);
 
   /* Extracode? */
@@ -399,7 +400,7 @@ DbgInitFrameData (void)
     {
       char *FrameName = NULL;
       Symbol_t *Symbol;
-      Frames = (Frame_t *) malloc (38912 * sizeof (Frame_t));
+      Frames = (Frame_t *) malloc (38912 * sizeof(Frame_t));
 
       if (Frames)
 	{
@@ -461,12 +462,12 @@ DbgGetFrameNameByAddr (unsigned LinearAddr)
  * Return the symbol line of the head of the current stack
  */
 SymbolLine_t *
-DbgResolveCurrentLine(void)
+DbgResolveCurrentLine (void)
 {
-   int CurrentZ = Debugger.State->Erasable[0][RegZ] & 07777;
-   int FB = 037 & (Debugger.State->Erasable[0][RegBB] >> 10);
-   int SBB = (Debugger.State->OutputChannel7 & 0100) ? 1 : 0;
-   return (ResolveLineAGC(CurrentZ, FB, SBB));
+  int CurrentZ = Debugger.State->Erasable[0][RegZ] & 07777;
+  int FB = 037 & (Debugger.State->Erasable[0][RegBB] >> 10);
+  int SBB = (Debugger.State->OutputChannel7 & 0100) ? 1 : 0;
+  return (ResolveLineAGC (CurrentZ, FB, SBB));
 }
 
 /**
@@ -485,19 +486,20 @@ DbgResolveCurrentLine(void)
  * \retval					The offset of the frame name.
  */
 int
-DbgGetFrameNameOffsetByAddr(unsigned LinearAddr)
+DbgGetFrameNameOffsetByAddr (unsigned LinearAddr)
 {
-   int Offset =0;
-   char *FrameName;
+  int Offset = 0;
+  char *FrameName;
 
-   /* Get the Frame Name for the current address */
-   FrameName = DbgGetFrameNameByAddr(LinearAddr);
+  /* Get the Frame Name for the current address */
+  FrameName = DbgGetFrameNameByAddr (LinearAddr);
 
-   /* Start counting until the Frame Name changes which gives the offset */
-   while (FrameName == DbgGetFrameNameByAddr(--LinearAddr)) ++Offset;
+  /* Start counting until the Frame Name changes which gives the offset */
+  while (FrameName == DbgGetFrameNameByAddr (--LinearAddr))
+    ++Offset;
 
-   /* Do the obvious and return the calculated offset */
-   return (Offset);
+  /* Do the obvious and return the calculated offset */
+  return (Offset);
 }
 
 /**
@@ -507,13 +509,13 @@ DbgGetFrameNameOffsetByAddr(unsigned LinearAddr)
  * /retval		The current program counter (PC)
  */
 unsigned
-DbgGetCurrentProgramCounter(void)
+DbgGetCurrentProgramCounter (void)
 {
-    int CurrentZ = Debugger.State->Erasable[0][RegZ] & 07777;
-    int FB = 037 & (Debugger.State->Erasable[0][RegBB] >> 10);
-    int SBB = (Debugger.State->OutputChannel7 & 0100) ? 1 : 0;
+  int CurrentZ = Debugger.State->Erasable[0][RegZ] & 07777;
+  int FB = 037 & (Debugger.State->Erasable[0][RegBB] >> 10);
+  int SBB = (Debugger.State->OutputChannel7 & 0100) ? 1 : 0;
 
-	return (DbgLinearFixedAddr(CurrentZ,FB,SBB));
+  return (DbgLinearFixedAddr (CurrentZ, FB, SBB));
 }
 
 /**
@@ -522,7 +524,7 @@ DbgGetCurrentProgramCounter(void)
 static void
 DbgCatchSignal (int sig)
 {
-  BreakPending = 1;		/* Make sure Break only happens when we want it */
+  BreakPending = 1; /* Make sure Break only happens when we want it */
   nbfgets_ready (agcPrompt);
   signal (sig, DbgCatchSignal);
 }
@@ -548,7 +550,7 @@ DbgInitialize (Options_t * Options, agc_t * State)
       /* Reset and attempt to load the symbol table */
       ResetSymbolTable ();
       if (ReadSymbolTable (Options->symtab))
-	HaveSymbols = 0;	/* Default is 0 */
+	HaveSymbols = 0; /* Default is 0 */
 
       /* In the future Have Symbols will only be used by the Debugger */
       Debugger.HaveSymbols = HaveSymbols;
@@ -597,27 +599,28 @@ DbgMonitorBreakpoints (void)
 
   Value = DbgGetFromZ (Debugger.State);
   CurrentZ = Debugger.State->Erasable[0][RegZ];
-  CurrentBB = (Debugger.State->Erasable[0][RegBB] & 076007) |
-    (Debugger.State->InputChannel[7] & 0100);
+  CurrentBB = (Debugger.State->Erasable[0][RegBB] & 076007)
+      | (Debugger.State->InputChannel[7] & 0100);
 
   for (Break = i = 0; i < NumBreakpoints; i++)
     {
       Line = Breakpoints[i].Line;
-      if (Breakpoints[i].WatchBreak == 2 &&
-	  DbgCheckBreakpoint (&Breakpoints[i]))
+      if (Breakpoints[i].WatchBreak == 2
+	  && DbgCheckBreakpoint (&Breakpoints[i]))
 	{
 	  // Pattern!
 	  if (Breakpoints[i].Address12 == (Value & Breakpoints[i].vRegBB))
 	    {
 	      printf ("Hit pattern, Value=" PAT " Mask=" PAT
-		      ".\n", Breakpoints[i].Address12, Breakpoints[i].vRegBB);
+	      ".\n",
+		      Breakpoints[i].Address12, Breakpoints[i].vRegBB);
 	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
 	}
-      else if (Breakpoints[i].WatchBreak == 0 &&
-	       DbgCheckBreakpoint (&Breakpoints[i]))
+      else if (Breakpoints[i].WatchBreak == 0
+	  && DbgCheckBreakpoint (&Breakpoints[i]))
 	{
 	  int Address12, vRegBB;
 	  int CurrentFB, vCurrentFB;
@@ -641,15 +644,14 @@ DbgMonitorBreakpoints (void)
 	    }
 
 	  vRegBB = Breakpoints[i].vRegBB;
-	  if (Address12 >= 01400 && Address12 < 02000 &&
-	      (vRegBB & 7) == (CurrentBB & 7))
+	  if (Address12 >= 01400 && Address12 < 02000
+	      && (vRegBB & 7) == (CurrentBB & 7))
 	    {
 	      // JMS: I'm not convinced yet that we can have a
 	      // breakpoint in erasable memory that has a symbol
 	      if (Breakpoints[i].Symbol != NULL)
 		printf ("Hit breakpoint %s at E%o,%05o.\n",
-			Breakpoints[i].Symbol->Name, CurrentBB & 7,
-			Address12);
+			Breakpoints[i].Symbol->Name, CurrentBB & 7, Address12);
 	      else
 		printf ("Hit breakpoint at E%o,%05o.\n", CurrentBB & 7,
 			Address12);
@@ -667,8 +669,8 @@ DbgMonitorBreakpoints (void)
 	  if (vCurrentFB >= 030 && (vRegBB & 0100))
 	    vCurrentFB += 010;
 
-	  if (Address12 >= 02000 && Address12 < 04000 &&
-	      CurrentFB == vCurrentFB)
+	  if (Address12 >= 02000 && Address12 < 04000
+	      && CurrentFB == vCurrentFB)
 	    {
 	      int Bank;
 
@@ -688,13 +690,13 @@ DbgMonitorBreakpoints (void)
 	      break;
 	    }
 	}
-      else if ((Breakpoints[i].WatchBreak == 1 &&
-		DbgCheckBreakpoint (&Breakpoints[i]) &&
-		Breakpoints[i].WatchValue != DbgGetWatch (Debugger.State,
-							  &Breakpoints[i]))
-	       || (Breakpoints[i].WatchBreak == 3
-		   && Breakpoints[i].WatchValue ==
-		   DbgGetWatch (Debugger.State, &Breakpoints[i])))
+      else if ((Breakpoints[i].WatchBreak == 1
+	  && DbgCheckBreakpoint (&Breakpoints[i])
+	  && Breakpoints[i].WatchValue
+	      != DbgGetWatch (Debugger.State, &Breakpoints[i]))
+	  || (Breakpoints[i].WatchBreak == 3
+	      && Breakpoints[i].WatchValue
+		  == DbgGetWatch (Debugger.State, &Breakpoints[i])))
 	{
 	  int Address12, vRegBB, Before, After;
 	  Address12 = Breakpoints[i].Address12;
@@ -704,15 +706,14 @@ DbgMonitorBreakpoints (void)
 	    {
 	      if (Breakpoints[i].Symbol != NULL)
 		printf ("Hit watchpoint %s at %05o, %06o -> %06o.\n",
-			Breakpoints[i].Symbol->Name, Address12, Before,
-			After);
+			Breakpoints[i].Symbol->Name, Address12, Before, After);
 	      else
-		printf ("Hit watchpoint at %05o, %06o -> %06o.\n",
-			Address12, Before, After);
+		printf ("Hit watchpoint at %05o, %06o -> %06o.\n", Address12,
+			Before, After);
 
 	      if (Breakpoints[i].WatchBreak == 1)
-		Breakpoints[i].WatchValue =
-		  DbgGetWatch (Debugger.State, &Breakpoints[i]);
+		Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State,
+							 &Breakpoints[i]);
 
 	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
@@ -721,37 +722,35 @@ DbgMonitorBreakpoints (void)
 
 	  vRegBB = Breakpoints[i].vRegBB;
 
-	  if (Address12 >= 01400 && Address12 < 02000 &&
-	      (vRegBB & 7) == (CurrentBB & 7))
+	  if (Address12 >= 01400 && Address12 < 02000
+	      && (vRegBB & 7) == (CurrentBB & 7))
 	    {
 	      if (Breakpoints[i].Symbol == NULL)
-		printf
-		  ("Hit watchpoint at E%o,%05o, %06o -> %06o.\n",
-		   CurrentBB & 7, Address12, Before, After);
+		printf ("Hit watchpoint at E%o,%05o, %06o -> %06o.\n",
+			CurrentBB & 7, Address12, Before, After);
 	      else
-		printf
-		  ("Hit watchpoint %s at E%o,%05o, %06o -> %06o.\n",
-		   Breakpoints[i].Symbol->Name, CurrentBB & 7,
-		   Address12, Before, After);
+		printf ("Hit watchpoint %s at E%o,%05o, %06o -> %06o.\n",
+			Breakpoints[i].Symbol->Name, CurrentBB & 7, Address12,
+			Before, After);
 
 	      if (Breakpoints[i].WatchBreak == 1)
-		Breakpoints[i].WatchValue =
-		  DbgGetWatch (Debugger.State, &Breakpoints[i]);
+		Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State,
+							 &Breakpoints[i]);
 
 	      DbgHitBreakpoint (&Breakpoints[i]);
 	      Break = 1;
 	      break;
 	    }
 	}
-      else if ((Breakpoints[i].WatchBreak == 4 &&
-		DbgCheckBreakpoint (&Breakpoints[i]) &&
-		Breakpoints[i].WatchValue != DbgGetWatch (Debugger.State,
-							  &Breakpoints[i])))
+      else if ((Breakpoints[i].WatchBreak == 4
+	  && DbgCheckBreakpoint (&Breakpoints[i])
+	  && Breakpoints[i].WatchValue
+	      != DbgGetWatch (Debugger.State, &Breakpoints[i])))
 	{
-	  int Address12, vRegBB, Before, After;
+	  int Address12, vRegBB, /*Before,*/After;
 
 	  Address12 = Breakpoints[i].Address12;
-	  Before = (Breakpoints[i].WatchValue & 077777);
+	  //Before = (Breakpoints[i].WatchValue & 077777);
 	  After = (DbgGetWatch (Debugger.State, &Breakpoints[i]) & 077777);
 
 	  if (Address12 < 01400)
@@ -760,14 +759,14 @@ DbgMonitorBreakpoints (void)
 		printf ("%s=%06o\n", Breakpoints[i].Symbol->Name, After);
 	      else
 		printf ("(%05o)=%06o\n", Address12, After);
-	      Breakpoints[i].WatchValue =
-		DbgGetWatch (Debugger.State, &Breakpoints[i]);
+	      Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State,
+						       &Breakpoints[i]);
 	    }
 	  else
 	    {
 	      vRegBB = Breakpoints[i].vRegBB;
-	      if (Address12 >= 01400 && Address12 < 02000 &&
-		  (vRegBB & 7) == (CurrentBB & 7))
+	      if (Address12 >= 01400 && Address12 < 02000
+		  && (vRegBB & 7) == (CurrentBB & 7))
 		{
 		  if (Breakpoints[i].Symbol == NULL)
 		    printf ("(E%o,%05o)=%06o\n", CurrentBB & 7, Address12,
@@ -775,8 +774,8 @@ DbgMonitorBreakpoints (void)
 		  else
 		    printf ("%s=%06o\n", Breakpoints[i].Symbol->Name, After);
 
-		  Breakpoints[i].WatchValue =
-		    DbgGetWatch (Debugger.State, &Breakpoints[i]);
+		  Breakpoints[i].WatchValue = DbgGetWatch (Debugger.State,
+							   &Breakpoints[i]);
 		}
 	    }
 	}
@@ -785,11 +784,11 @@ DbgMonitorBreakpoints (void)
   return (Break);
 }
 
-int DbgCheckBreakpoint(Breakpoint_t* bp)
+int
+DbgCheckBreakpoint (Breakpoint_t* bp)
 {
-   return (bp->Enable == 'y');
+  return (bp->Enable == 'y');
 }
-
 
 void
 DbgDisplayInnerFrame (void)
@@ -839,7 +838,7 @@ DbgNativeAddr (unsigned linear_addr)
       agc_addr.Invalid = 1;
       agc_addr.Address = 0;
     }
-  else if (linear_addr > 07777)	/* Must be Common Fixed */
+  else if (linear_addr > 07777) /* Must be Common Fixed */
     {
       agc_addr.Banked = 1;
       agc_addr.Unbanked = 0;
@@ -849,7 +848,7 @@ DbgNativeAddr (unsigned linear_addr)
       agc_addr.Erasable = 0;
       agc_addr.FB = (linear_addr - 010000) / 02000;
       agc_addr.SReg = (linear_addr - agc_addr.FB * 02000) - 06000;
-      if (agc_addr.FB > 037)	/* Do we need to set the Extension Bit */
+      if (agc_addr.FB > 037) /* Do we need to set the Extension Bit */
 	{
 	  agc_addr.FB = agc_addr.FB - 010;
 	  agc_addr.Super = 01;
@@ -857,7 +856,7 @@ DbgNativeAddr (unsigned linear_addr)
       else
 	agc_addr.Super = 0;
     }
-  else if (linear_addr > 03777)	/* Must be Fixed Fixed */
+  else if (linear_addr > 03777) /* Must be Fixed Fixed */
     {
       agc_addr.Banked = 0;
       agc_addr.Unbanked = 1;
@@ -865,11 +864,11 @@ DbgNativeAddr (unsigned linear_addr)
       agc_addr.Invalid = 0;
       agc_addr.Fixed = 1;
       agc_addr.Erasable = 0;
-      agc_addr.FB = linear_addr / 02000;	/* Allows for faster Value access later */
+      agc_addr.FB = linear_addr / 02000; /* Allows for faster Value access later */
       agc_addr.Super = 0;
       agc_addr.SReg = linear_addr;
     }
-  else				/* Map to Eraseable memory */
+  else /* Map to Eraseable memory */
     {
       agc_addr.Banked = 1;
       agc_addr.Unbanked = 0;
@@ -877,12 +876,11 @@ DbgNativeAddr (unsigned linear_addr)
       agc_addr.Invalid = 0;
       agc_addr.Fixed = 0;
       agc_addr.Erasable = 1;
-      agc_addr.EB = linear_addr / 0400;	/* Allows for faster Value access later */
+      agc_addr.EB = linear_addr / 0400; /* Allows for faster Value access later */
       agc_addr.SReg = linear_addr - agc_addr.EB * 0400 + 01400;
     }
   return agc_addr;
 }
-
 
 /**
  * Return the Virtual Linear Pseudo address. According to
@@ -895,26 +893,25 @@ DbgNativeAddr (unsigned linear_addr)
 unsigned
 DbgLinearAddr (Address_t * agc_addr)
 {
-  unsigned LinearAddress = ~0;	/* Default invalid Address */
+  unsigned LinearAddress = ~0; /* Default invalid Address */
 
-  if (agc_addr->SReg < 01400)	/* Must be Unbanked Eraseable */
+  if (agc_addr->SReg < 01400) /* Must be Unbanked Eraseable */
     {
       LinearAddress = agc_addr->SReg;
     }
-  else if (agc_addr->SReg < 02000)	/* Must be  Banked Eraseable */
+  else if (agc_addr->SReg < 02000) /* Must be  Banked Eraseable */
     {
       LinearAddress = agc_addr->EB * 0400 + agc_addr->SReg - 01400;
     }
-  else if (agc_addr->SReg < 04000)	/* Must be Banked fixed memory */
+  else if (agc_addr->SReg < 04000) /* Must be Banked fixed memory */
     {
       if (agc_addr->FB < 030)
 	LinearAddress = 06000 + agc_addr->FB * 02000 + agc_addr->SReg;
       else
-	LinearAddress =
-	  06000 + (agc_addr->FB + agc_addr->Super * 010) * 02000 +
-	  agc_addr->SReg;
+	LinearAddress = 06000 + (agc_addr->FB + agc_addr->Super * 010) * 02000
+	    + agc_addr->SReg;
     }
-  else if (agc_addr->SReg < 07777)	/* Must be fixed fixed */
+  else if (agc_addr->SReg < 07777) /* Must be fixed fixed */
     {
       LinearAddress = agc_addr->SReg;
     }
@@ -961,19 +958,18 @@ DbgGetValueByAddress (unsigned gdbmi_addr)
     {
       Value = Debugger.State->Erasable[agc_addr.EB][agc_addr.SReg - 01400];
     }
-  else				/* Must be fixed memory */
+  else /* Must be fixed memory */
     {
-      if (agc_addr.Unbanked == 1)	/* Check for Fixed Fixed */
+      if (agc_addr.Unbanked == 1) /* Check for Fixed Fixed */
 	{
 	  /* remember the FB should already be fine (see gdbmiNativeAddr */
 	  Value = Debugger.State->Fixed[agc_addr.FB][agc_addr.SReg - 04000];
 	}
-      else			/* This is Common Fixed */
+      else /* This is Common Fixed */
 	{
 	  Value =
-	    Debugger.State->Fixed[agc_addr.FB +
-				  agc_addr.Super * 010][agc_addr.SReg -
-							02000];
+	      Debugger.State->Fixed[agc_addr.FB + agc_addr.Super * 010][agc_addr.SReg
+		  - 02000];
 	}
     }
 
@@ -1010,34 +1006,35 @@ DbgLinearAddrFromAddrStr (char *addr_str)
    */
   if (strstr (addr_str, ",") > 0)
     {
-		  /* Try Eraseable translation first then fixed */
-		  if (2 == sscanf (addr_str, "E%o,%o", &Bank, &SReg))
-		{
-		  /* Validate Bank and SReg for Eraseable Memory */
-		  if (Bank < 8)
-			Address = DbgLinearEraseableAddr (SReg, Bank);
-		}
-		  else if (2 == sscanf (addr_str, "%o,%o", &Bank, &SReg))
-		{
-		  /* Validate Bank and SReg for Fixed Memory */
-		  if (Bank < 044)
-			Address = DbgLinearFixedAddr (SReg, Bank, 0);
-		}
+      /* Try Eraseable translation first then fixed */
+      if (2 == sscanf (addr_str, "E%o,%o", &Bank, &SReg))
+	{
+	  /* Validate Bank and SReg for Eraseable Memory */
+	  if (Bank < 8)
+	    Address = DbgLinearEraseableAddr (SReg, Bank);
+	}
+      else if (2 == sscanf (addr_str, "%o,%o", &Bank, &SReg))
+	{
+	  /* Validate Bank and SReg for Fixed Memory */
+	  if (Bank < 044)
+	    Address = DbgLinearFixedAddr (SReg, Bank, 0);
+	}
     }
   else if (strstr (addr_str, "&") > 0)
-  {
-	  /* Looks like a symbol based address */
-	  addr_str++;
-	  Symbol = ResolveSymbol(addr_str,
-			  SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
+    {
+      /* Looks like a symbol based address */
+      addr_str++;
+      Symbol = ResolveSymbol (addr_str,
+      SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
 
       if (Symbol)
-      {
-         agc_addr = &Symbol->Value;
-         Address = DbgLinearAddr(agc_addr);
-      }
-  }
-  else Address = strtol (addr_str, 0, 0);	/* It is a pseudo address */
+	{
+	  agc_addr = &Symbol->Value;
+	  Address = DbgLinearAddr (agc_addr);
+	}
+    }
+  else
+    Address = strtol (addr_str, 0, 0); /* It is a pseudo address */
 
   return Address;
 }
@@ -1052,22 +1049,20 @@ DbgSetValueByAddress (unsigned gdbmi_addr, unsigned short value)
     {
       Debugger.State->Erasable[agc_addr.EB][agc_addr.SReg - 01400] = value;
     }
-  else				/* Must be fixed memory */
+  else /* Must be fixed memory */
     {
-      if (agc_addr.Unbanked == 1)	/* Check for Fixed Fixed */
+      if (agc_addr.Unbanked == 1) /* Check for Fixed Fixed */
 	{
 	  /* remember the FB should already be fine (see gdbmiNativeAddr */
 	  Debugger.State->Fixed[agc_addr.FB][agc_addr.SReg - 04000] = value;
 	}
-      else			/* This is Common Fixed */
+      else /* This is Common Fixed */
 	{
-	  Debugger.State->Fixed[agc_addr.FB +
-				agc_addr.Super * 010][agc_addr.SReg - 02000] =
-	    value;
+	  Debugger.State->Fixed[agc_addr.FB + agc_addr.Super * 010][agc_addr.SReg
+	      - 02000] = value;
 	}
     }
 }
-
 
 void
 DbgDisplayPrompt (void)
@@ -1088,8 +1083,8 @@ DbgGetCmdString (void)
 {
   strcpy (slast, sraw);
 
-  s[sizeof (s) - 1] = 0;
-  rfgets (Debugger.State, s, sizeof (s) - 1, FromFiles[NumFromFiles - 1]);
+  s[sizeof(s) - 1] = 0;
+  rfgets (Debugger.State, s, sizeof(s) - 1, FromFiles[NumFromFiles - 1]);
 
   /* Use last command if just newline */
   if (strlen (s) == 0)
@@ -1105,10 +1100,9 @@ DbgProcessLog ()
     {
       int Bank, Address, NewLast;
 
-      Bank =
-	077777 &
-	(((Debugger.State->Erasable[0][RegBB]) | Debugger.State->
-	  OutputChannel7));
+      Bank = 077777
+	  & (((Debugger.State->Erasable[0][RegBB])
+	      | Debugger.State->OutputChannel7));
       Address = 077777 & (Debugger.State->Erasable[0][RegZ]);
       NewLast = (Bank << 15) | Address;
       if (NewLast != LogLast)
@@ -1200,17 +1194,16 @@ DbgExecute ()
 		  else
 		    {
 		      NumFromFiles++;
-		      printf ("Now taking keystrokes from \"%s\".\n",
-			      &sraw[9]);
+		      printf ("Now taking keystrokes from \"%s\".\n", &sraw[9]);
 		    }
 		}
 	      else
-		printf
-		  ("Too many nested FROMFILE commands, discarding \"%s\".\n",
-		   &sraw[9]);
+		printf (
+		    "Too many nested FROMFILE commands, discarding \"%s\".\n",
+		    &sraw[9]);
 	    }
 	  else if (1 == sscanf (s, "STEP%o", &i)
-		   || 1 == sscanf (s, "NEXT%o", &i))
+	      || 1 == sscanf (s, "NEXT%o", &i))
 	    {
 	      Debugger.RunState = 1;
 	      if (i >= 1)
@@ -1219,8 +1212,8 @@ DbgExecute ()
 		printf ("The step-count must be 1 or greater.\n");
 	      break;
 	    }
-	  else if (!strcmp (s, "STEP") || !strcmp (s, "NEXT") ||
-		   !strcmp (s, "S") || !strcmp (s, "N"))
+	  else if (!strcmp (s, "STEP") || !strcmp (s, "NEXT")
+	      || !strcmp (s, "S") || !strcmp (s, "N"))
 	    {
 	      Debugger.RunState = 1;
 	      SingleStepCounter = 0;
@@ -1265,13 +1258,13 @@ DbgExecute ()
 	      PatternValue = (i & PATTERN_SIZE);
 	      PatternMask = (j & PATTERN_SIZE);
 	      for (i = 0; i < NumBreakpoints; i++)
-		if (Breakpoints[i].WatchBreak == 2 &&
-		    Breakpoints[i].Address12 == PatternValue &&
-		    Breakpoints[i].vRegBB == PatternMask)
+		if (Breakpoints[i].WatchBreak == 2
+		    && Breakpoints[i].Address12 == PatternValue
+		    && Breakpoints[i].vRegBB == PatternMask)
 		  {
 		    printf ("Pattern " PAT "," PAT
-			    " has been deleted.\n", PatternValue,
-			    PatternMask);
+		    " has been deleted.\n",
+			    PatternValue, PatternMask);
 		    NumBreakpoints--;
 		    for (; i < NumBreakpoints; i++)
 		      Breakpoints[i] = Breakpoints[i + 1];
@@ -1287,9 +1280,9 @@ DbgExecute ()
 	      PatternMask = (j & PATTERN_SIZE);
 	      // First, see if the pattern has already been defined.
 	      for (i = 0; i < NumBreakpoints; i++)
-		if (Breakpoints[i].WatchBreak == 2 &&
-		    Breakpoints[i].Address12 == PatternValue &&
-		    Breakpoints[i].vRegBB == PatternMask)
+		if (Breakpoints[i].WatchBreak == 2
+		    && Breakpoints[i].Address12 == PatternValue
+		    && Breakpoints[i].vRegBB == PatternMask)
 		  {
 		    printf ("This pattern has already been defined.\n");
 		    break;
@@ -1297,9 +1290,8 @@ DbgExecute ()
 	      if (i == NumBreakpoints)
 		{
 		  if (NumBreakpoints >= MAX_BREAKPOINTS)
-		    printf
-		      ("The maximum number of breakpoints/watchpoints/"
-		       "patterns has already been reached.\n");
+		    printf ("The maximum number of breakpoints/watchpoints/"
+			    "patterns has already been reached.\n");
 		  else
 		    {
 		      printf ("Setting pattern " PAT "," PAT ".\n",
@@ -1345,7 +1337,7 @@ DbgExecute ()
 	    {
 	      if (i < 1 || i > NUM_INTERRUPT_TYPES)
 		printf ("Only interrupt types 1 to %d are used.\n",
-			NUM_INTERRUPT_TYPES);
+		NUM_INTERRUPT_TYPES);
 	      else if (Debugger.State->InterruptRequests[i])
 		printf ("Interrupt %d already requested.\n", i);
 	      else
@@ -1358,7 +1350,7 @@ DbgExecute ()
 	    {
 	      if (i < 1 || i > NUM_INTERRUPT_TYPES)
 		printf ("Only interrupt types 1 to %d are used.\n",
-			NUM_INTERRUPT_TYPES);
+		NUM_INTERRUPT_TYPES);
 	      else if (!Debugger.State->InterruptRequests[i])
 		printf ("Interrupt %d not requested.\n", i);
 	      else
@@ -1371,7 +1363,7 @@ DbgExecute ()
 	    {
 	      if (i < 0 || i > NUM_INTERRUPT_TYPES)
 		printf ("Only interrupt types 0 to %d are used.\n",
-			NUM_INTERRUPT_TYPES);
+		NUM_INTERRUPT_TYPES);
 	      else
 		DebuggerInterruptMasks[i] = 0;
 	    }
@@ -1379,7 +1371,7 @@ DbgExecute ()
 	    {
 	      if (i < 0 || i > NUM_INTERRUPT_TYPES)
 		printf ("Only interrupt types 0 to %d are used.\n",
-			NUM_INTERRUPT_TYPES);
+		NUM_INTERRUPT_TYPES);
 	      else
 		DebuggerInterruptMasks[i] = 1;
 	    }
@@ -1396,8 +1388,8 @@ DbgExecute ()
 		  for (j = 0; j < NumBreakpoints; j++)
 		    if (Breakpoints[j].WatchBreak == 1
 			|| Breakpoints[j].WatchBreak == 4)
-		      Breakpoints[j].WatchValue =
-			DbgGetWatch (Debugger.State, &Breakpoints[j]);
+		      Breakpoints[j].WatchValue = DbgGetWatch (Debugger.State,
+							       &Breakpoints[j]);
 		}
 	      Debugger.State->PendFlag = SingleStepCounter = 0;
 	      Break = 1;
@@ -1411,19 +1403,19 @@ DbgExecute ()
 	      GdbmiResult result = GdbmiInterpreter (Debugger.State, s, sraw);
 	      switch (result)
 		{
-		  //                                case gdbmiCmdUnhandled:
-		  //                                        break;
-		  //                                case gdbmiCmdError:
-		  //                                        break;
-		  //                                case gdbmiCmdDone:
-		  //                                        fflush(stdout);
-		  //                                        break;
-		  ////                              case gdbmiCmdNext:
-		  ////                              case gdbmiCmdStep:
-		  ////                              Debugger.RunState = 1;
-		  ////                                      SingleStepCounter = 0;
-		  ////                                      break;
-		  //                                case gdbmiCmdContinue:
+		//                                case gdbmiCmdUnhandled:
+		//                                        break;
+		//                                case gdbmiCmdError:
+		//                                        break;
+		//                                case gdbmiCmdDone:
+		//                                        fflush(stdout);
+		//                                        break;
+		////                              case gdbmiCmdNext:
+		////                              case gdbmiCmdStep:
+		////                              Debugger.RunState = 1;
+		////                                      SingleStepCounter = 0;
+		////                                      break;
+		//                                case gdbmiCmdContinue:
 		case GdbmiCmdRun:
 		  Debugger.RunState = 1;
 		  break;

@@ -1,4 +1,4 @@
-# Copyright 2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -20,6 +20,19 @@
 # Purpose:	This makefile is used to build the sterm program.
 # Mods:		2009-03-19 RSB	Adapted trivially from yaDEDA2's makefile.
 #		2009-05-02 RSB	Added DEV_SNAP.
+#		2016-08-06 RSB  This had been set to build sterm statically-linked
+#				for USERNAME=rburkey (me!) and dynamically-linked
+#				for everyone else.  That's because I would often
+#				build it for the purpose of making an installer,
+#				and it was easier if the executables were statically
+#				linked to the extent possible.  But it turns out 
+#				that the standard library function gethostbyname()
+#				used by agc_utilities.c no longer works (at least on
+#		                some Linux distributions) if statically 
+#		                linked.   I made this change because I made a 
+#				similar fix for yaAGC, and not because I noticed any
+#				problems with with this app ... but they must have 
+#				been there!
 
 APPNAME=sterm
 
@@ -89,9 +102,9 @@ SOURCES:=${APPNAME}.cpp \
 
 ${APPNAME}: ${SOURCES}
 	g++ \
-		`wx-config ${WXSTATIC} --cxxflags` \
+		`wx-config --cxxflags` \
 		-o $@ $^ \
-		`wx-config ${WXSTATIC} --libs`
+		`wx-config --libs`
 	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES}

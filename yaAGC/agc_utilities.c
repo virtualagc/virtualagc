@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2016 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -45,11 +45,21 @@
 		05/14/05 RSB	Corrected website references.
 		05/29/05 RSB	Added a couple of AGS equivalents for packet
 				function.
+		08/06/16 RSB    Added several error messages to help track
+		                down why this is failing.  It turns out that
+		                gethostbyname() no longer works (at least on
+		                some Linux distributions) if statically
+		                linked.  Therefore, the problem I was seeing
+		                (namely, that yaAGC no longer listened on the
+		                specified port on 64-bit Linux Mint and Ubuntu)
+		                has actually been fixed in the makefile.
 */
 
 // ... and the project's includes.
 #include <stdio.h>
 #include <string.h>
+#include <netdb.h>
+extern int h_errno;
 #include "yaAGC.h"
 #include "agc_engine.h"
 
@@ -283,6 +293,19 @@ EstablishSocket (unsigned short portnum, int MaxClients)
   hp = gethostbyname (myname);	/* get our address info */
   if (hp == NULL)		/* we don't exist !? */
     {
+      char s[32];
+      switch (h_errno)
+      {
+      case HOST_NOT_FOUND: strcpy(s, "Host not found"); break;
+      case NO_ADDRESS: strcpy(s, "No address"); break;
+      //case NO_DATA: strcpy(s, "No data"); break;
+      case NO_RECOVERY: strcpy(s, "No recovery"); break;
+      case TRY_AGAIN: strcpy(s, "Try again"); break;
+      default:
+        sprintf(s, "Error %d", h_errno);
+        break;
+      }
+      fprintf(stderr, "gethostbyname (\"%s\" %d) reports %s\n", myname, portnum, s);
       ErrorCodes = 0x101;
       return (-1);
     }

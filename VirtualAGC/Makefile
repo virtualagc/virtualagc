@@ -1,4 +1,4 @@
-# Copyright 2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -63,9 +63,25 @@
 #				exist, which it wouldn't if readline was built
 #				static-only.
 #		2012-09-16 JL	Updated to match tools dir changes.
+#		2016-07-17 RSB	Added -lX11 to the VirtualAGC target.
+#		2016-08-01 RSB	At least for now, building the installers has been
+#				commented out.  Perhaps I'll restore it later.
+#		2016-08-06 RSB  A number of programs have previously been set
+#				This had been set to build statically-linked
+#				for USERNAME=rburkey (me!) and dynamically-linked
+#				for everyone else, for the purpose of making it 
+#				easier to create installers.  I am in the process
+#				of changing all such Linux executables that use
+#				agc_utilities.c to be always dynamically-linked,
+#				because with newer system libraries, some portions
+#				of agc_utilities.c doesn't work when statically 
+#				linked.  These changes affect nobody else's builds
+#				except mine, and only affect the Linux versions of
+#				the executables.
+#		2016-08-07 RSB	The Validation "mission" was missing.
 
 APP=VirtualAGC
-MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 Colossus237 # Solarium055
+MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 Colossus237 Validation # Solarium055
 
 # For cross-platform building --- i.e., for building Win32 and Mac OS X versions
 # of VirtualAGC on a Linux platform --- it is assumed that the IMCROSS
@@ -163,10 +179,10 @@ HEADERS:=${APP}.h
 ${APP}: ${SOURCES} ${HEADERS}
 	g++ -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
-		`wx-config ${WXSTATIC} --cxxflags` \
+		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config ${WXSTATIC} --libs` \
-		${LIBS2}
+		`wx-config --libs` \
+		${LIBS2} -lX11
 	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}

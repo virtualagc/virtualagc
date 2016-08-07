@@ -1,89 +1,91 @@
 /*
-  Copyright 2004,2005,2009 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC. 
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:	yaACA.c
-  Purpose:	Apollo LM rotational hand-controller emulation module for 
-  		yaAGC.
-  Reference:	http://www.ibiblio.org/apollo/index.html
-  Mode:		09/15/04 RSB.	Began.
-  		05/14/05 RSB	Corrected website references.
-		07/09/05 RSB	Completed, I hope.  The joystick stuff was
-				all in place.  Now it connects to the 
-				server (yaAGC) and scales and communicates
-				the data to the server.
-		07/10/05 RSB	Modify a lot more bits of channel 031.
-		07/13/05 RSB	Fixed a possible issue of using too much
-				CPU time in Win32.
-		07/14/05 RSB	Modified yaw default for Mac OS X.
-		07/16/05 RSB	Bumped the update interval from 7 ms.
-				up to 73 ms. on MacOS X, since yaACA seems 
-				to want to use all available CPU time.
-		07/19/05 RSB	Fixed a bug in variable declarations
-				that causes the program not to compile
-				with gcc 2.x.
-		09/14/05 RSB	Default sign of yaw has been reversed, 
-				on Stephan's advice.
-		10/29/05 RSB	Renamed local static Portnum to sPortnum
-				to avoid compiler warnings in SuSE 10.0.
-		03/28/09 RSB	Now displays the pitch/roll/yaw in AGC-scaled
-				values as well as the joystick-driver values.
-				I never noticed it before, but on Windows,
-				yaACA has no console window at all.  I presume
-				that this is because Allegro somehow takes over
-				the stdin and stdout, and something has to be
-				done to prevent that, as I saw a similar effect
-				in SDL and only fixed it with great difficulty.
-				However, since yaACA3 is obsoleting yaACA even
-				as I write this, it seems pointless to waste
-				further effort fixing it.
-		04/06/09 RSB	Added auto-saving to command-line parameters
-				to a configuration file for automatic reload
-				on subsequent runs.
-		04/08/09 RSB	Okay, I now have the stdout in Windows.  There
-				was a gcc command-line switch that was getting
-				rid of it.  However, before that I changed
-				all the printf statements in this program to 
-				fprintf in the hopes of capturing the output
-				some other way.  Added the fix for the weird
-				Windows errno==9 after recv.
-  		
-  We use the Allegro cross-platform gaming library, since it supports 
-  joysticks and since it works on Linux/FreeBSD/Win32/MacOS-X.  I don't use
-  any featurs of Allegro other than the joystick function.  Using Allegro
-  is really more of an experiment than anything else, and I apologize
-  (in retrospect) for forcing you to install yet another library.
-		
-   The physical ACA in the LM is as follows:
-  	Forward			pitch down
-  	Back			pitch up
-  	Right			roll right
-  	Left			roll left
-  	Clockwise		yaw right
-  	Counter-clockwise	yaw left
-
-  These are related to joystick axes as follows:
-  	Axis 0		Roll (+ right, - left).
-   	Axis 1		Pitch (+ up, - down).
-  	Axis 2		Yaw (- right, + left).
-  I took these off of my Logitech Extreme 3D Pro.  Others may be different, in which case
-  we will figure out some way to change them with command-line options.   
-*/
+ * Copyright 2004,2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Filename:	yaACA.c
+ * Purpose:	Apollo LM rotational hand-controller emulation module for
+ * 		yaAGC.
+ * Reference:	http://www.ibiblio.org/apollo/index.html
+ * Mode:		09/15/04 RSB.	Began.
+ * 		05/14/05 RSB	Corrected website references.
+ *		07/09/05 RSB	Completed, I hope.  The joystick stuff was
+ *				all in place.  Now it connects to the
+ *				server (yaAGC) and scales and communicates
+ *				the data to the server.
+ *		07/10/05 RSB	Modify a lot more bits of channel 031.
+ *		07/13/05 RSB	Fixed a possible issue of using too much
+ *				CPU time in Win32.
+ *		07/14/05 RSB	Modified yaw default for Mac OS X.
+ *		07/16/05 RSB	Bumped the update interval from 7 ms.
+ *				up to 73 ms. on MacOS X, since yaACA seems
+ *				to want to use all available CPU time.
+ *		07/19/05 RSB	Fixed a bug in variable declarations
+ *				that causes the program not to compile
+ *				with gcc 2.x.
+ *		09/14/05 RSB	Default sign of yaw has been reversed,
+ *				on Stephan's advice.
+ *		10/29/05 RSB	Renamed local static Portnum to sPortnum
+ *				to avoid compiler warnings in SuSE 10.0.
+ *		03/28/09 RSB	Now displays the pitch/roll/yaw in AGC-scaled
+ *				values as well as the joystick-driver values.
+ *				I never noticed it before, but on Windows,
+ *				yaACA has no console window at all.  I presume
+ *				that this is because Allegro somehow takes over
+ *				the stdin and stdout, and something has to be
+ *				done to prevent that, as I saw a similar effect
+ *				in SDL and only fixed it with great difficulty.
+ *				However, since yaACA3 is obsoleting yaACA even
+ *				as I write this, it seems pointless to waste
+ *				further effort fixing it.
+ *		04/06/09 RSB	Added auto-saving to command-line parameters
+ *				to a configuration file for automatic reload
+ *				on subsequent runs.
+ *		04/08/09 RSB	Okay, I now have the stdout in Windows.  There
+ *				was a gcc command-line switch that was getting
+ *				rid of it.  However, before that I changed
+ *				all the printf statements in this program to
+ *				fprintf in the hopes of capturing the output
+ *				some other way.  Added the fix for the weird
+ *				Windows errno==9 after recv.
+ *		07/17/16 RSB	An unused variable which was causing compiler
+ *				warnings was commented out.
+ *
+ * We use the Allegro cross-platform gaming library, since it supports
+ * joysticks and since it works on Linux/FreeBSD/Win32/MacOS-X.  I don't use
+ * any featurs of Allegro other than the joystick function.  Using Allegro
+ * is really more of an experiment than anything else, and I apologize
+ * (in retrospect) for forcing you to install yet another library.
+ *
+ * The physical ACA in the LM is as follows:
+ * 	Forward			pitch down
+ * 	Back			pitch up
+ * 	Right			roll right
+ * 	Left			roll left
+ * 	Clockwise		yaw right
+ * 	Counter-clockwise	yaw left
+ *
+ * These are related to joystick axes as follows:
+ * 	Axis 0		Roll (+ right, - left).
+ *  	Axis 1		Pitch (+ up, - down).
+ * 	Axis 2		Yaw (- right, + left).
+ * I took these off of my Logitech Extreme 3D Pro.  Others may be different, in which case
+ * we will figure out some way to change them with command-line options.
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -411,7 +413,7 @@ PulseACA (void)
       
   if (ServerSocket != -1)
     {
-      static unsigned char Packet[4];
+      //static unsigned char Packet[4];
       static int PacketSize = 0;
       int i;
       unsigned char c;
@@ -439,7 +441,7 @@ PulseACA (void)
 	    PacketSize = 0;
 	  if (PacketSize != 0 || (0xc0 & c) == 0)	      
 	    { 
-	      Packet[PacketSize++] = c;
+	      //Packet[PacketSize++] = c;
 	      if (PacketSize >= 4)
 		{
 		  PacketSize = 0;   

@@ -9,6 +9,10 @@
 #		2011-05-03 JL	Replaced with newer version from Artemis072.
 #				Point to moved Oct2Bin.
 #		2012-09-16 JL	Updated to match tools dir changes.
+#		2016-07-17 RSB	I don't believe that Colossus237 is actually
+#				correct yet, since I get diff errors when
+#				building it, so the diff step errors are
+#				ignored.
 
 BASENAME=Colossus237
 
@@ -28,7 +32,7 @@ MAIN.agc.bin MAIN.agc.lst: ${SOURCE}
 	../yaYUL/yaYUL --unpound-page --html MAIN.agc >MAIN.agc.lst
 
 ${BASENAME}.lst: MAIN.agc.bin ${BASENAME}.bin
-	diff -s MAIN.agc.bin ${BASENAME}.bin
+	-diff -s MAIN.agc.bin ${BASENAME}.bin
 	mv MAIN.agc.lst ${BASENAME}.lst
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 

@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
     int currentPage = 0;
     int bank = -1, offset = -1;
     char lastLineType = 'c';
-    int count = 0, page = 2000;
+    int count = 0 /*, page = 2000 */;
     FILE *infile, *outfile;
 
     if (argc < 3) {

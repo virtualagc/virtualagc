@@ -1,5 +1,5 @@
 /*
-  Copyright 2003,2009-2010 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -61,6 +61,8 @@
                                 only if UnpoundPage is non-zero --- i.e.,
                                 only if --unpound-page command-line
                                 switch was used. 
+                2016-08-01 RSB  Various checks for return errors of library
+                                functions.
 
 
   Concerning the concept of a symbol's namespace.  I had originally 
@@ -894,12 +896,14 @@ void WriteSymbolsToFile(char *fname)
 
   // Write the SymbolFile_t header to the symbol file, filling its
   // members first.
-  getcwd(symfile.SourcePath, MAX_PATH_LENGTH);
+  if (NULL == getcwd(symfile.SourcePath, MAX_PATH_LENGTH))
+    goto error;
   symfile.NumberSymbols = SymbolTableSize;
   symfile.NumberLines = LineTableSize; // JMS: 07.28
   LittleEndian32(&symfile.NumberSymbols);
   LittleEndian32(&symfile.NumberLines);
-  write(fd, (void *)&symfile, sizeof(SymbolFile_t));
+  if (write(fd, (void *)&symfile, sizeof(SymbolFile_t)) < 0)
+    goto error;
 
   // Loop and write the symbols to a file
   for (i = 0; i < SymbolTableSize; i++)
@@ -909,7 +913,8 @@ void WriteSymbolsToFile(char *fname)
       LittleEndian32(&symbol.Value.Value);
       LittleEndian32(&symbol.Type);
       LittleEndian32(&symbol.LineNumber);
-      write(fd, (void *) &symbol, sizeof(Symbol_t));
+      if (write(fd, (void *) &symbol, sizeof(Symbol_t)) < 0)
+        goto error;
     }
 
   // JMS: 07.28
@@ -920,7 +925,13 @@ void WriteSymbolsToFile(char *fname)
       LittleEndian32(&Line);
       LittleEndian32(&Line.CodeAddress.Value);
       LittleEndian32(&Line.LineNumber);
-      write(fd, (void *) &Line, sizeof(SymbolLine_t));
+      if (write(fd, (void *) &Line, sizeof(SymbolLine_t)))
+        goto error;
+    }
+  if (0)
+    {
+      error:;
+      printf("\nFile error.\n");
     }
   close (fd);
 }

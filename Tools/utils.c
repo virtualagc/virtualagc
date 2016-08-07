@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2006,2009,2016 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -26,11 +26,13 @@
  *  Website:	http://www.ibiblio.org/apollo/index.html
  *
  *  History:	2012-09-18 JL   Created.
+ *  		2016-07017 RSB	Added stdlib.h and commented out some
+ *  				unused variables to avoid compiler warnings.
  *
  */
 
 //#define VERSION(x) #x
-
+#include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
@@ -40,82 +42,99 @@
 extern int errorCount;
 
 // Convert an AGC-format 15-bit 1's-complement signed integer to native format.
-int convertAgcToNative(uint16_t n)
+int
+convertAgcToNative (uint16_t n)
 {
-    int i;
+  int i;
 
-    i = n;
-    if ((n & 040000) != 0)
-        i = -(077777 & ~i);
+  i = n;
+  if ((n & 040000) != 0)
+    i = -(077777 & ~i);
 
-    return (i);
+  return (i);
 }
 
 // Convert a native format integer to AGC-format 15-bit 1's-complement signed integer.
-uint16_t convertNativeToAgc(int n)
+uint16_t
+convertNativeToAgc (int n)
 {
-    uint16_t i;
-    int tmp = n;
+  uint16_t i;
+  /*int tmp = n;*/
 
-    i = (uint16_t)(abs(n) & 077777);
+  i = (uint16_t) (abs (n) & 077777);
 
-    if (n < 0)
-        i |= 040000;
+  if (n < 0)
+    i |= 040000;
 
-    return (i);
+  return (i);
 }
 
 // This function takes two signed integers in AGC format (15-bit, 1's complement,
 // signed), adds them, and returns the sum (also in AGC format).  If there is
 // overflow or underflow, the carry is added in also. This is done because that's
 // the way the AGC checksum is created.
-uint16_t addAgc(uint16_t n1, uint16_t n2)
+uint16_t
+addAgc (uint16_t n1, uint16_t n2)
 {
-    int i1, i2, sum;
+  int i1, i2, sum;
 
-    // Convert from AGC 1's-complement format to the native integer format of this CPU.
-    i1 = convertAgcToNative(n1);
-    i2 = convertAgcToNative(n2);
+  // Convert from AGC 1's-complement format to the native integer format of this CPU.
+  i1 = convertAgcToNative (n1);
+  i2 = convertAgcToNative (n2);
 
-    // Add 'em up.
-    sum = i1 + i2;
+  // Add 'em up.
+  sum = i1 + i2;
 
-    // Account for carry or underflow.
-    if (sum > 16383) {
-        sum -= 16384;
-        sum++;
-    } else if (sum < -16383) {
-        sum += 16384;
-        sum--;
+  // Account for carry or underflow.
+  if (sum > 16383)
+    {
+      sum -= 16384;
+      sum++;
+    }
+  else if (sum < -16383)
+    {
+      sum += 16384;
+      sum--;
     }
 
-    // The following condition can't occur, but I'll check for it anyway.
-    if (sum > 16383 || sum < -16383)
-        fprintf(stderr, "Error: arithmetic overflow.\n");
+  // The following condition can't occur, but I'll check for it anyway.
+  if (sum > 16383 || sum < -16383)
+    fprintf (stderr, "Error: arithmetic overflow.\n");
 
-    // Convert back to 1's-complement and return.
-    if (sum >= 0)
-        return (sum);
+  // Convert back to 1's-complement and return.
+  if (sum >= 0)
+    return (sum);
 
-    return (077777 & ~(-sum));
+  return (077777 & ~(-sum));
 }
 
 // Check the supplied checksum.
-void check(int verbose, int line, int checked, uint16_t banknum, uint16_t checksum)
+void
+check (int verbose, int line, int checked, uint16_t banknum, uint16_t checksum)
 {
-    if (!checked) {
-        if (checksum == banknum)  {
-            if (verbose)
-                printf("Checksum for bank %02o matches (positive, %05o).\n", banknum, banknum);
-        } else if (checksum == (077777 & ~banknum)) {
-            if (verbose)
-                printf("Checksum for bank %02o matches (negative, %05o).\n", banknum, 077777 & ~banknum);
-        } else {
-            errorCount++;
-            fprintf(stderr, "Error: line %5d, checksum (%05o) for bank %02o does not match expected (%05o or %05o).\n",
-                    line, checksum, banknum, banknum, 077777 & ~banknum);
-        }
-    }	    
+  if (!checked)
+    {
+      if (checksum == banknum)
+	{
+	  if (verbose)
+	    printf ("Checksum for bank %02o matches (positive, %05o).\n",
+		    banknum, banknum);
+	}
+      else if (checksum == (077777 & ~banknum))
+	{
+	  if (verbose)
+	    printf ("Checksum for bank %02o matches (negative, %05o).\n",
+		    banknum, 077777 & ~banknum);
+	}
+      else
+	{
+	  errorCount++;
+	  fprintf (
+	      stderr,
+	      "Error: line %5d, checksum (%05o) for bank %02o does not match expected (%05o or %05o).\n",
+	      line, checksum, banknum, banknum, 077777 & ~banknum);
+	}
+    }
 }
 
 // Generate the bugger word for a supplied bank code. Try to compute
@@ -123,45 +142,55 @@ void check(int verbose, int line, int checked, uint16_t banknum, uint16_t checks
 // (due to the limitations of 1's complement arithmetic).
 //
 // Returns the generated bugger word.
-uint16_t generateBuggerWord(int verbose, int bank, int length, int16_t *code)
+uint16_t
+generateBuggerWord (int verbose, int bank, int length, int16_t *code)
 {
-    uint16_t checksum = 0, bugger = 0;
-    int i = 0;
+  uint16_t checksum = 0, bugger = 0;
+  int i = 0;
 
-    // Iterate over the bank and calculate the bugger word.
-    for (i = 0; i < length; i++) {
-        int16_t value = code[i];
+  // Iterate over the bank and calculate the bugger word.
+  for (i = 0; i < length; i++)
+    {
+      int16_t value = code[i];
 
-        if (value > 077777 || value < 0) {
-            fprintf(stderr, "Warning: zeroing unassigned word at (%02o,%04o).\n", bank, BANK_OFFSET + i);
-            value = 0;
-        }
-        checksum = addAgc(checksum, value);
+      if (value > 077777 || value < 0)
+	{
+	  fprintf (stderr, "Warning: zeroing unassigned word at (%02o,%04o).\n",
+		   bank, BANK_OFFSET + i);
+	  value = 0;
+	}
+      checksum = addAgc (checksum, value);
     }
 
-    if ((checksum & 040000) == 0) {
-        bugger = addAgc(bank, 077777 & ~checksum);
-        if (verbose)
-            printf("Checksum for bank %02o is %05o, MSB=0, bugger word is %05o.\n", bank, checksum, bugger);
-    } else {
-        bugger = addAgc(077777 & ~bank, 077777 & ~checksum);
-        if (verbose)
-            printf("Checksum for bank %02o is %05o, MSB=1, bugger word is %05o.\n", bank, checksum, bugger);
+  if ((checksum & 040000) == 0)
+    {
+      bugger = addAgc (bank, 077777 & ~checksum);
+      if (verbose)
+	printf ("Checksum for bank %02o is %05o, MSB=0, bugger word is %05o.\n",
+		bank, checksum, bugger);
+    }
+  else
+    {
+      bugger = addAgc (077777 & ~bank, 077777 & ~checksum);
+      if (verbose)
+	printf ("Checksum for bank %02o is %05o, MSB=1, bugger word is %05o.\n",
+		bank, checksum, bugger);
     }
 
-    return (bugger);
+  return (bugger);
 }
 
 // Get the bank number for a specified offset.
-int getBank(int count)
+int
+getBank (int count)
 {
-    int retval = count / 1024;
+  int retval = count / 1024;
 
-    if (retval < 2)
-        retval += 2;
-    else if (retval < 4)
-        retval -= 2;
+  if (retval < 2)
+    retval += 2;
+  else if (retval < 4)
+    retval -= 2;
 
-    return (retval);
+  return (retval);
 }
 
