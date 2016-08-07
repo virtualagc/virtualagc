@@ -97,24 +97,30 @@ More information at http://www.ibiblio.org/apollo/download.html#Build
 
 ## Linux
 
-From the command line unpack the development-snapshot tarball as follows:
+These instructions relate specifically to building from source as of 2016-08-07 on 64-bit Linux Mint 17.3.  I'm sorry to have to make them so specific, but hopefully they are easily adapted to other Linux environments.
 
-    tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
+You will probably have to install a variety of packages which aren't normally installed.  I found that I had to install the following, which were all available from the standard software repositories (in Linux Mint, anyway):
 
-After unpacking there will be a new directory called "yaAGC". To build the program:
+* libsdl1.2-dev
+* libncurses5-dev
+* liballegro4.4-dev or liballegro4-dev
+* g++
+* libgtk2.0-dev
+* libwxgtk2.8-dev
+ 
+To build, simply 'cd' into the directory containing the source and do
 
-    $ cd yaAGC
-    $ make
+ make
 
-Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the bin files then you can rebuild with "make -k" to keep going. This however might mask other issues.
+Note: Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the bin files then you can rebuild with "make -k" to keep going. This however might mask other issues.
 
-You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/. 
+You will find that this has created a directory VirtualAGC/temp/lVirtualAGC/. 
 
 To match the default setup of the installer program execute the following:
 
     mv yaAGC/VirtualAGC/temp/lVirtualAGC ~/VirtualAGC
 
-You can make a desktop icon called "Virtual AGC" that links to *~/VirtualAGC/bin/VirtualAGC*. The image normally used for the desktop icon is found at *~/VirtualAGC/bin/ApolloPatch2.png*.
+You can make a desktop icon called "Virtual AGC" that links to VirtualAGC/bin/VirtualAGC. The image normally used for the desktop icon is found at VirtualAGC/bin/ApolloPatch2.png.
 
 If you try to use the ACA simulation (joystick) and it doesn't work you can find some information on configuring it here:
 http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_with_the
