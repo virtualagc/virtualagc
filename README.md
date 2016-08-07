@@ -110,7 +110,7 @@ You will probably have to install a variety of packages which aren't normally in
  
 To build, simply 'cd' into the directory containing the source and do
 
- make
+    make
 
 Note: Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the bin files then you can rebuild with "make -k" to keep going. This however might mask other issues.
 
