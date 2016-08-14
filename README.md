@@ -55,6 +55,8 @@ http://www.ibiblio.org/apollo/faq.html
 * Requires Fedora Core 4 or later.
 * Requires Ubuntu 7.04 or later.
 * Requires SuSE 10.1 or later.
+* Known to work on Raspbian (Raspberry Pi) 2016-05-27.
+* et, presumably, cetera.
 * 32 and 64-bit systems have been tested successfully.
 * The X-Window system, xterm, and gtk+ libraries must be installed.
 * You will need the normal gcc C/C++ compiler toolchain, as well as developer packages ("dev" or "devel") for wxWidgets, ncurses and SDL.
@@ -97,7 +99,7 @@ More information at http://www.ibiblio.org/apollo/download.html#Build
 
 ## Linux
 
-These instructions relate specifically to building from source as of 2016-08-07 on 64-bit Linux Mint 17.3.  I'm sorry to have to make them so specific, but hopefully they are easily adapted to other Linux environments.
+These instructions relate specifically to building from source as of 2016-08-07 on 64-bit Linux Mint 17.3.  I'm sorry to have to make them so specific, but hopefully they are easily adapted to other Linux environments.  Alternate build instructions (for example, for Raspberry Pi) may be found at http://www.ibiblio.org/apollo/download.html.
 
 You will probably have to install a variety of packages which aren't normally installed.  I found that I had to install the following, which were all available from the standard software repositories (in Linux Mint, anyway):
 
