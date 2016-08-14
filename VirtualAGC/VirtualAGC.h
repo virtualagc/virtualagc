@@ -90,6 +90,7 @@ enum {
   ID_APOLLO1CMBUTTON,
   ID_APOLLO4CMBUTTON,
   ID_APOLLO5LMBUTTON,
+  ID_APOLLO6CMBUTTON,
   ID_APOLLO7CMBUTTON,
   ID_APOLLO8CMBUTTON,
   ID_APOLLO9CMBUTTON,
@@ -277,6 +278,7 @@ protected:
     wxRadioButton* Apollo1CmButton;
     wxRadioButton* Apollo4CmButton;
     wxRadioButton* Apollo5LmButton;
+    wxRadioButton* Apollo6CmButton;
     wxRadioButton* Apollo7CmButton;
     wxRadioButton* Apollo8CmButton;
     wxRadioButton* Apollo9CmButton;
@@ -403,6 +405,7 @@ public:
     virtual void StartupPreserveEvent(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void Apollo4CmEvent(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void Apollo5LmEvent(wxCommandEvent &event); // wxGlade: <event_handler>
+    virtual void Apollo6CmEvent(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void Apollo7CmEvent(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void Apollo9CmEvent(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void Apollo9LmEvent(wxCommandEvent &event); // wxGlade: <event_handler>
