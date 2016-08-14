@@ -13,6 +13,15 @@
 #				correct yet, since I get diff errors when
 #				building it, so the diff step errors are
 #				ignored.
+#		2016-08-14 RSB	All of the afore-mentioned diff errors were
+#				SBANK discrepancies (i.e., a well-known 
+#				problem in which yaYUL's assumptions about
+#				superbank settings don't always agree 100%
+#				with those of YUL or GAP, and thus have to
+#				be fixed manually in the AGC source code).
+#				They have now all been fixed in the source,
+#				and therefore diff errors are no longer 
+#				ignored.
 
 BASENAME=Colossus237
 
@@ -32,7 +41,7 @@ MAIN.agc.bin MAIN.agc.lst: ${SOURCE}
 	../yaYUL/yaYUL --unpound-page --html MAIN.agc >MAIN.agc.lst
 
 ${BASENAME}.lst: MAIN.agc.bin ${BASENAME}.bin
-	-diff -s MAIN.agc.bin ${BASENAME}.bin
+	diff -s MAIN.agc.bin ${BASENAME}.bin
 	mv MAIN.agc.lst ${BASENAME}.lst
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 

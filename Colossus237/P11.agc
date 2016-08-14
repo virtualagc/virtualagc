@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-02-06 JL   Adapted from corresponding Colossus 249 file.
+#		2016-08-14 RSB	Added SBANKs for addressing discrepancies.
 
 ## Page 522
 # EARTH ORBIT INSERTION MONITOR PROGRAM
@@ -839,5 +840,8 @@ SATRATE		DEC	0		# IN DETENT - ZERO RATE
 
 STIKBITS	OCT	00077
 100MST5		DEC	16374
+		SBANK=	PINSUPER
 		EBANK=	BODY3
 2SATSTCK	2CADR	SATSTICK
+		SBANK=	LOWSUPER
+		

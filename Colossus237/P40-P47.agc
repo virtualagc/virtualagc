@@ -11,6 +11,7 @@
 # Mod history:  2011-02-20 JL	Adapted from corresponding Colossus 249 file.
 #		2011-04-24 JL	Fixed incorrect indentation of label.
 #		2012-10-08 JL	Fixed incorrect opcode on p682.
+#		2016-08-14 RSB	Added SBANKs for addressing discrepancies.
 
 ## Page 637
 # PROGRAM DESCRIPTION **P40CSM**
@@ -2269,6 +2270,7 @@ CONTTWO		2DEC	.00118
 		BANK
 
 POS-2.5		OCT	37405
+		SBANK=	PINSUPER
 		EBANK=	DAPDATR1
 RCSCADR		2CADR	RCSUP
 6SECT5		OCT	37704
@@ -2288,6 +2290,7 @@ RCSUP		LXCH	BANKRUPT
 
 		TCF	RESUME
 
+		SBANK=	PINSUPER
 		EBANK=	DAPDATR1
 RCSADDR		2CADR	RCSATT
 
