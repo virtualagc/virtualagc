@@ -106,39 +106,46 @@ agc_load_binfile(agc_t *State, const char *RomImage)
   FILE *fp = NULL;
   int Bank;
   int m, n, i, j;
+  int RetVal = 0;
 
   // The following sequence of steps loads the ROM image into the simulated
   // core memory, in what I think is a pretty obvious way.
 
-  int RetVal = 1;
-  fp = rfopen (RomImage, "rb");
-  if (fp == NULL)
-    goto Done;
 
-  RetVal = 3;
+  fp = rfopen (RomImage, "rb");
+  if (fp == NULL){
+    RetVal = 1;
+    goto Done;
+  }
+
   fseek (fp, 0, SEEK_END);
   n = ftell (fp);
-  if (0 != (n & 1))		// Must be an integral number of words.
+  if (0 != (n & 1)){		// Must be an integral number of words.
+    RetVal = 3;
     goto Done;
-
-  RetVal = 2;
+  }
+  
   n /= 2;			// Convert byte-count to word-count.
-  if (n > 36 * 02000)
+  if (n > 36 * 02000){
+    RetVal = 2;
     goto Done;
-
-  RetVal = 4;
+  }
+ 
   fseek (fp, 0, SEEK_SET);
-  if (State == NULL)
+  if (State == NULL){
+    RetVal = 4;
     goto Done;
+  }
 
-  RetVal = 5;
   Bank = 2;
   for (Bank = 2, j = 0, i = 0; i < n; i++)
     {
       unsigned char In[2];
       m = fread (In, 1, 2, fp);
-      if (m != 2)
+      if (m != 2){
+	RetVal = 5;
 	goto Done;
+      }
       // Within the input file, the fixed-memory banks are arranged in the order
       // 2, 3, 0, 1, 4, 5, 6, 7, ..., 35.  Therefore, we have to take a little care
       // reordering the banks.
@@ -166,8 +173,7 @@ agc_load_binfile(agc_t *State, const char *RomImage)
     }
 
 Done:
-  if (fp != NULL)
-    fclose (fp);
+  if (fp != NULL) fclose (fp);
   return (RetVal);
 }
 
@@ -189,8 +195,11 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   UnblockSocket (fileno (stdin));
 #endif
 
-  if (RomImage)
+  // Fix for Issue #29 Return the values as the API documents
+  if (RomImage){
 	  RetVal = agc_load_binfile(State, RomImage);
+	  if (RetVal > 0) goto Done;
+  }
  
   // Clear i/o channels.
   for (i = 0; i < NUM_CHANNELS; i++)
