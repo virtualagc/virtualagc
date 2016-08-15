@@ -1,4 +1,4 @@
-# Copyright 2003-2007,2009-2010 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -131,6 +131,8 @@
 #				build all mission versions. Make use of
 #				parens/braces consistent. Add some shortcut 
 #				variables for use in sub-make actions.
+#		2016-08-07 RSB	Wasn't building the Validation "mission", needed
+#				for the VirtualAGC installers.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -140,7 +142,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"20100220\\\"
+NVER:=\\\"2016-08-14-working\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -222,7 +224,7 @@ endif
 # to catch every possible problem before sending it out into the world.
 ifeq ($(USER),rburkey)
 WEBSITE=../sandroid.org/public_html/apollo
-CFLAGS=-Wall -Werror -DALLOW_BSUB
+CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
 yaACA=
 else 
 WEBSITE=..
@@ -254,7 +256,7 @@ endif
 BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSES)" LIBS2="$(LIBS)" NOREADLINE=$(NOREADLINE) ReadlineForWin32=$(ReadlineForWin32) $(ARCHS) EXT=$(EXT)
 
 # List of mission software directories to be built.
-MISSIONS = Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237 # Solarium055
+MISSIONS = Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237  Validation # Solarium055
 
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS
 ifndef NOGUI
@@ -427,7 +429,7 @@ clean: clean-missions
 	$(MAKE) -C yaDEDA2 clean
 	$(MAKE) -C yaACA2 clean
 	$(MAKE) -C Tools clean
-	rm -f `find . -name "core"`
+	-rm -f `find . -name "core"` FP6/*.aea.html FP8/*.aea.html
 
 autogen:
 	echo PREFIX=$(PREFIX) >Makefile.yaAGC

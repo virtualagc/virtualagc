@@ -146,7 +146,7 @@ int SimInitialize(Options_t* Options)
 	DebugDeda = Options->debug_deda;
 	DedaQuiet = Options->deda_quiet;
 
-	Simulator.DumpInterval = Simulator.DumpInterval;
+	//Simulator.DumpInterval = Simulator.DumpInterval;
 	SocketInterlaceReload = Options->interlace;
 
 	/* If we are not in quiet mode display the version info */

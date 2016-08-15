@@ -1,4 +1,4 @@
-# Copyright 2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 #
@@ -24,6 +24,24 @@
 #		2009-04-25 RSB	Undid some stylistic cleanups that broke the 
 #				all-archs target.
 #		2009-05-02 RSB	Added DEV_STATIC.
+#		2016-07-17 RSB	Added -lX11 to the jWiz target.
+#		2016-08-06 RSB  This had been set to build jWiz statically-linked
+#				for USERNAME=rburkey (me!) and dynamically-linked
+#				for everyone else.  That's because I would often
+#				build it for the purpose of making an installer,
+#				and it was easier if the executables were statically
+#				linked to the extent possible.  But it turns out 
+#				that the standard library function gethostbyname()
+#				used by agc_utilities.c no longer works (at least on
+#		                some Linux distributions) if statically 
+#		                linked.  Therefore, I need to make this change
+#				to fix the symptoms I was seeing (namely, that 
+#				yaAGC no longer listened on the specified port
+#				on 64-bit Linux Mint and Ubuntu).  Neither the
+#				problem nor the fix presumably affects anybody 
+#				else's builds. 
+#				Also:  Eliminated some compiler warnings solely
+#				related internally to wxWidgets 2.8.12.
 
 APP=jWiz
 
@@ -80,10 +98,11 @@ HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
 	g++ -DNVER=${NVER} ${MACFLAG} -Wall \
-		`wx-config ${WXSTATIC} --cxxflags` \
+		-Wno-unused-local-typedefs -Wno-unused-but-set-variable \
+		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config ${WXSTATIC} --libs` \
-		${LIBS2}
+		`wx-config --libs` \
+		${LIBS2} -lX11
 	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}

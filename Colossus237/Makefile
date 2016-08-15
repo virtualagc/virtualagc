@@ -9,6 +9,19 @@
 #		2011-05-03 JL	Replaced with newer version from Artemis072.
 #				Point to moved Oct2Bin.
 #		2012-09-16 JL	Updated to match tools dir changes.
+#		2016-07-17 RSB	I don't believe that Colossus237 is actually
+#				correct yet, since I get diff errors when
+#				building it, so the diff step errors are
+#				ignored.
+#		2016-08-14 RSB	All of the afore-mentioned diff errors were
+#				SBANK discrepancies (i.e., a well-known 
+#				problem in which yaYUL's assumptions about
+#				superbank settings don't always agree 100%
+#				with those of YUL or GAP, and thus have to
+#				be fixed manually in the AGC source code).
+#				They have now all been fixed in the source,
+#				and therefore diff errors are no longer 
+#				ignored.
 
 BASENAME=Colossus237
 

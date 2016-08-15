@@ -1,4 +1,4 @@
-# Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 #
@@ -59,6 +59,21 @@
 #				of libreadline.
 #		08/02/09 RSB	Added Alberto Galdo's iPhone mods.
 #		2012-09-16 JL	Updated to match tools directory changes.
+#		2016-08-06 RSB  This had been set to build yaAGC statically-linked
+#				for USERNAME=rburkey (me!) and dynamically-linked
+#				for everyone else.  That's because I would often
+#				build it for the purpose of making an installer,
+#				and it was easier if the executables were statically
+#				linked to the extent possible.  But it turns out 
+#				that the standard library function gethostbyname()
+#				used by agc_utilities.c no longer works (at least on
+#		                some Linux distributions) if statically 
+#		                linked.  Therefore, I need to make this change
+#				to fix the symptoms I was seeing (namely, that 
+#				yaAGC no longer listened on the specified port
+#				on 64-bit Linux Mint and Ubuntu).  Neither the
+#				problem nor the fix presumably affects anybody 
+#				else's builds.
 
 LIBS=${LIBS2}
 
@@ -133,7 +148,7 @@ CFLAGS2_NATIVE=${CFLAGS2}
 endif
 
 ifeq "${USER}" "rburkey"
-STATIC=-static
+#STATIC=-static
 endif
 
 OBJECTS := \

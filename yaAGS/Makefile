@@ -1,4 +1,4 @@
-# Copyright 2005 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2005,2016 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 #
@@ -39,6 +39,18 @@
 #				any longer.  Reenabled.  Adjusted to link
 #				to libcurses, to try and use a newer version
 #				of libreadline.
+#		2016-08-06 RSB  This had been set to build yaAGS statically-linked
+#				for USERNAME=rburkey (me!) and dynamically-linked
+#				for everyone else.  That's because I would often
+#				build it for the purpose of making an installer,
+#				and it was easier if the executables were statically
+#				linked to the extent possible.  But it turns out 
+#				that the standard library function gethostbyname()
+#				used by agc_utilities.c no longer works (at least on
+#		                some Linux distributions) if statically 
+#		                linked.  I made this change because I made a 
+#				similar fix for yaAGC, and not because I noticed any
+#				problems with yaAGS ... but they must have been there!
 
 LIBS=${LIBS2}
 
@@ -88,7 +100,7 @@ CFLAGS2_NATIVE=${CFLAGS2}
 endif
 
 ifeq "${USER}" "rburkey"
-STATIC=-static
+#STATIC=-static
 endif
 
 yaAGS:	mainAGS.o libyaAGS.a symbol_table.o nbfgets.o Backtrace.o ../yaAGC/NormalizeSourceName.o

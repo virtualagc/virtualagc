@@ -200,8 +200,8 @@ static int CliProcessArgument(char* token)
 
 	/* Parse the token */
 	if (!strcmp (token, "-help") || !strcmp (token, "/?"))	result = 1;
-	else if (!strncmp (token, "-nx", 3)) /* Ignore for now */;
-	else if (!strncmp (token, "-args", 5)) /* Ignore for now */;
+	else if (!strncmp (token, "-nx", 3)) { /* Ignore for now */ }
+	else if (!strncmp (token, "-args", 5)) { /* Ignore for now */ }
 	else if (!strncmp (token, "-core=", 6))
 	{
 		/* If --core is used assume classic behavior is expected */
@@ -271,7 +271,14 @@ Options_t* CliParseArguments(int argc, char *argv[])
 	{
 		/* If a new working directory is specified then change to it
 		 * immediately */
-		if (Options.cd > 0) chdir(Options.cd);
+		if (Options.cd > 0)
+		  {
+		    if (chdir(Options.cd) < 0)
+		      {
+		        printf("\n*** Cannot change directories. ***\n]n");
+		        return (NULL);
+		      }
+		  }
 
 		/* Options are properly Parsed */
 		result = &Options;
@@ -298,7 +305,7 @@ Options_t* CliParseArguments(int argc, char *argv[])
 			if (CliParseCfg (Options.cfg))
 			{
 			  result = (Options_t*)0;
-			  printf("\n*** Unknown configurstion file. ***\n\n");
+			  printf("\n*** Unknown configuration file. ***\n\n");
 			}
 		}
 	}

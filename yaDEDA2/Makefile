@@ -1,4 +1,4 @@
-# Copyright 2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -23,6 +23,19 @@
 #		2009-04-25 RSB	Undid some stylistic changes that broke the 
 #				all-archs target.
 #		2009-05-02 RSB	Added DEV_STATIC.
+#		2016-07-17 RSB	Added a -lX11 to some build targets.
+#		2016-08-06 RSB  A number of programs have previously been set
+#				This had been set to build statically-linked
+#				for USERNAME=rburkey (me!) and dynamically-linked
+#				for everyone else, for the purpose of making it 
+#				easier to create installers.  I am in the process
+#				of changing all such Linux executables that use
+#				agc_utilities.c to be always dynamically-linked,
+#				because with newer system libraries, some portions
+#				of agc_utilities.c doesn't work when statically 
+#				linked.  These changes affect nobody else's builds
+#				except mine, and only affect the Linux versions of
+#				the executables.
 
 APPNAME=yaDEDA2
 
@@ -87,10 +100,10 @@ HEADERS:=${APPNAME}.h
 
 ${APPNAME}: ${SOURCES} ${HEADERS}
 	g++ \
-		`wx-config ${WXSTATIC} --cxxflags` \
+		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config ${WXSTATIC} --libs` \
-		${LIBS2}
+		`wx-config --libs` \
+		${LIBS2} -lX11
 	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES} ${HEADERS}

@@ -64,8 +64,10 @@ all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 	mv yaLEMAP.lst ../FP6/FP6.lst
 
 SampleCodeAGS.lst: yaLEMAP SampleCodeAGS.aea
+	@echo "=============================================================================="
 	@echo \*\*\* The following operation should result in 13 errors and 3 warnings. \*\*\*
 	./yaLEMAP --compare=binLEMAP.bin SampleCodeAGS.aea
+	@echo "=============================================================================="
 	mv yaLEMAP.bin SampleCodeAGS.bin
 	mv yaLEMAP.lst SampleCodeAGS.lst
 

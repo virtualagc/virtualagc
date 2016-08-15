@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2006,2009,2016 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -82,6 +82,8 @@
  *                              are in octal.
  *              2012-09-18 JL   Tidy up for Colossus237. Split common code
  *                              out to a separate utilities module.
+ *              2016-08-01 RSB  Now initialize banknum to 0.  I don't know
+ *                              if it's right --- probably unnecessary.
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -196,7 +198,7 @@ int main(int argc, char *argv[])
 {
     FILE *outfile;
     int dummy, data[8], line, checked = 1;
-    uint16_t dummy16, banknum;
+    uint16_t dummy16, banknum = 0;
     int count, checkWords = 0;
     char s[129], *ss;
     int i, j, invert = 0, page = 0, verbose = 0;

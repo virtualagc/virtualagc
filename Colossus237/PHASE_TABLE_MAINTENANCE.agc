@@ -9,6 +9,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+#		2016-08-14 RSB	Added SBANK to handle addressing discrepancies.
 
 ## Page 1368
 #          SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -233,6 +234,7 @@ PHASCHNG	INHINT
 		DCA	ADRPCHN2	# OFF TO SWITCHED BANK
 		DTCB
 
+		SBANK=	PINSUPER	
 		EBANK=	LST1
 ADRPCHN2	2CADR	PHSCHNG2
 

@@ -1,4 +1,4 @@
-# Copyright 2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 #
@@ -23,6 +23,22 @@
 #				know yet about Mac OS X.
 #		2009-04-26 RSB	New build setup.
 #		2009-05-02 RSB	Added DEV_STATIC.
+#		2016-07-17 RSB	Added an -lX11 to the yaTelemetry target.
+#		2016-08-06 RSB  Eliminated certain compiler warnings which are
+#				entirely internal to wxWidgets, and nothing we
+#				can do anything about.  Also:
+#				A number of programs have previously been set
+#				This had been set to build statically-linked
+#				for USERNAME=rburkey (me!) and dynamically-linked
+#				for everyone else, for the purpose of making it 
+#				easier to create installers.  I am in the process
+#				of changing all such Linux executables that use
+#				agc_utilities.c to be always dynamically-linked,
+#				because with newer system libraries, some portions
+#				of agc_utilities.c doesn't work when statically 
+#				linked.  These changes affect nobody else's builds
+#				except mine, and only affect the Linux versions of
+#				the executables.
 
 APP=yaTelemetry
 
@@ -79,10 +95,11 @@ HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
 	g++ -DNVER=${NVER} -Wall \
-		`wx-config ${WXSTATIC} --cxxflags` \
+		-Wno-unused-local-typedefs -Wno-unused-but-set-variable \
+		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
-		`wx-config ${WXSTATIC} --libs` \
-		${LIBS2}
+		`wx-config --libs` \
+		${LIBS2} -lX11
 	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}

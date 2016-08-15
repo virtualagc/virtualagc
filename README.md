@@ -32,7 +32,7 @@ Perhaps the most important part of the guidance system was the Inertial Measurem
 
 # What this project is for
 
-The Virtual AGC project provides a virtual machine which simulates the AGC, the DSKY, and some other portions of the guidance system.  In other words, if the virtual machine—which we call yaAGC—is given the same software which was originally run by the real AGCs, and is fed the same input signals encountered by the real AGCs during Apollo missions, then it will respond in the same way as the real AGCs did.  The Virtual AGC software is open source code so that it can be studied or modified.
+The Virtual AGC project provides a virtual machine which simulates the AGC, the DSKY, and some other portions of the guidance system.  In other words, if the virtual machine—which we call yaAGC—is given the same software which was originally run by the real AGCs, and is fed the same input signals encountered by the real AGCs during Apollo missions, then it will responds in the same way as the real AGCs did.  The Virtual AGC software is open source code so that it can be studied or modified.
 
 Virtual AGC is a computer model of the AGC.  It does not try to mimic the superficial behavioral characteristics of the AGC, but rather to model the AGC's inner workings.  The result is a computer model of the AGC which is itself capable of executing the original Apollo software on (for example) a desktop PC.  In computer terms, Virtual AGC is an emulator.  Virtual AGC also provides an emulated AGS and (in the planning stages) an emulated LVDC.  "Virtual AGC" is a catch-all term that comprises all of these.
 
@@ -55,6 +55,8 @@ http://www.ibiblio.org/apollo/faq.html
 * Requires Fedora Core 4 or later.
 * Requires Ubuntu 7.04 or later.
 * Requires SuSE 10.1 or later.
+* Known to work on Raspbian (Raspberry Pi) 2016-05-27.
+* et, presumably, cetera.
 * 32 and 64-bit systems have been tested successfully.
 * The X-Window system, xterm, and gtk+ libraries must be installed.
 * You will need the normal gcc C/C++ compiler toolchain, as well as developer packages ("dev" or "devel") for wxWidgets, ncurses and SDL.
@@ -97,24 +99,30 @@ More information at http://www.ibiblio.org/apollo/download.html#Build
 
 ## Linux
 
-From the command line unpack the development-snapshot tarball as follows:
+These instructions relate specifically to building from source as of 2016-08-07 on 64-bit Linux Mint 17.3.  I'm sorry to have to make them so specific, but hopefully they are easily adapted to other Linux environments.  Alternate build instructions (for example, for Raspberry Pi) may be found at http://www.ibiblio.org/apollo/download.html.
 
-    tar --bzip2 -xf yaAGC-dev-YYYYMMDD.tar.bz2
+You will probably have to install a variety of packages which aren't normally installed.  I found that I had to install the following, which were all available from the standard software repositories (in Linux Mint, anyway):
 
-After unpacking there will be a new directory called "yaAGC". To build the program:
+* libsdl1.2-dev
+* libncurses5-dev
+* liballegro4.4-dev or liballegro4-dev
+* g++
+* libgtk2.0-dev
+* libwxgtk2.8-dev
+ 
+To build, simply 'cd' into the directory containing the source and do
 
-    $ cd yaAGC
-    $ make
+    make
 
-Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the bin files then you can rebuild with "make -k" to keep going. This however might mask other issues.
+Note: Do not "configure" and do not "make install". While there is a 'configure' script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the bin files then you can rebuild with "make -k" to keep going. This however might mask other issues.
 
-You will find that this has created a directory yaAGC/VirtualAGC/temp/lVirtualAGC/. 
+You will find that this has created a directory VirtualAGC/temp/lVirtualAGC/. 
 
 To match the default setup of the installer program execute the following:
 
     mv yaAGC/VirtualAGC/temp/lVirtualAGC ~/VirtualAGC
 
-You can make a desktop icon called "Virtual AGC" that links to *~/VirtualAGC/bin/VirtualAGC*. The image normally used for the desktop icon is found at *~/VirtualAGC/bin/ApolloPatch2.png*.
+You can make a desktop icon called "Virtual AGC" that links to VirtualAGC/bin/VirtualAGC. The image normally used for the desktop icon is found at VirtualAGC/bin/ApolloPatch2.png.
 
 If you try to use the ACA simulation (joystick) and it doesn't work you can find some information on configuring it here:
 http://www.ibiblio.org/apollo/yaTelemetry.html#Joystick_configuration_for_use_with_the

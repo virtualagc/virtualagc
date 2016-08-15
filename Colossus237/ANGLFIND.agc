@@ -12,6 +12,7 @@
 #		2010-12-04 JL	Remove Colossus 249 header comments. Change 
 #				to double-hash page numbers.
 #		2011-01-27 JL	Minor fixes.
+#		2016-08-14 RSB	Added SBANK for addressing discrepancies.
 
 ## Page 390
 		BANK	15
@@ -605,5 +606,6 @@ NOGO		INHINT
 		CAF	TWO		# NOTE - ALL RETURNS ARE NOW MADE VIA
 		TC	WAITLIST	# GOODEND
 		EBANK=	BCDU
+		SBANK=	PINSUPER
 		2CADR	ENDMANU
 		TCF	ENDOFJOB
