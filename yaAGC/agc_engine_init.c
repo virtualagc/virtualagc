@@ -73,6 +73,7 @@
 				in the agc_t structure which aren't being 
 				saved or restored, so I'm adding all of these.
 		03/30/09 RSB	Added the Downlink variable to the core dumps.
+		08/14/16 OH	Issue #29 fix return value of agc_engine_init.
 */
 
 // For Orbiter.
@@ -216,7 +217,6 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->Erasable[0][RegZ] = 04000;	// Initial program counter.
 
   // Set up the CPU state variables that aren't part of normal memory.
-  RetVal = 0;
   State->CycleCounter = 0;
   State->ExtraCode = 0;
   // I've seen no indication so far of a reset value for interrupt-enable. 
