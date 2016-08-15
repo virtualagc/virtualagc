@@ -236,6 +236,7 @@ yaAGC-macosx: ${CSOURCE}
 		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} \
 		-o $@ $^ -L${MACDIR}/lib -L. ${LIBS} -lpthread -lm ${CURSESLIB}
 
+ifdef COLDFIRE
 #----------------------------------------------------------------------------------
 # Embedded-firmware stuff for Coldfire is below this line.	
 	
@@ -263,7 +264,9 @@ EmbeddedAGC68.elf: crt.o68 EmbeddedDemo.o68 NullAPI.o68 random.o68 agc_engine.o6
 
 %.o68: %.c
 	${ECC}  -c -m5200 -O2 -Wall -o $*.o68 $*.c	
+endif
 
+ifdef 8051
 #----------------------------------------------------------------------------------
 # Embedded-firmware stuff for 8051 is below this line.	
 	
@@ -274,5 +277,5 @@ EmbeddedAGC.ihx: EmbeddedDemo.rel agc_engine.rel random.rel NullAPI.rel
 
 %.rel: %.c
 	${CC8}  -c --model-large -o $@ $<	
-
+endif
 
