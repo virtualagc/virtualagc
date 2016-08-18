@@ -302,33 +302,41 @@ all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(SUBDIRS)
 
+.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim
 Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim:
 	$(BUILD) -C $@ 
 
+.PHONY: yaDEDA
 yaDEDA:
 	$(BUILD) -C yaDEDA/src -f Makefile.all-archs 
 	-$(BUILD) -C yaDEDA2 $(DEV_STATIC)
 
+.PHONY: yaDEDA2
 yaDEDA2:
 	-$(BUILD) -C yaDEDA/src -f Makefile.all-archs 
 	$(BUILD) -C $@ $(DEV_STATIC)
 
+.PHONY: yaDSKY
 yaDSKY:
 	-$(BUILD) -C yaDSKY/src -f Makefile.all-archs 
 	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
 	$(BUILD) -C yaDSKY2 $(DEV_STATIC)
 
+.PHONY: yaDSKY2
 yaDSKY2:
 	-$(BUILD) -C yaDSKY/src -f Makefile.all-archs 
 	-cp yaDSKY/src/yadsky yaDSKY/src/yaDSKY
 	$(BUILD) -C $@ $(DEV_STATIC)
 
+.PHONY: yaTelemetry
 yaTelemetry:
 	$(BUILD) -C $@ $(DEV_STATIC)
 
+.PHONY: jWiz
 jWiz:
 	$(BUILD) -C $@ $(ISMACOSX) $(DEV_STATIC)
 
+.PHONY: VirtualAgc
 VirtualAGC:
 	$(BUILD) -C $@ "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC)
 
