@@ -414,13 +414,6 @@ clean: clean-missions
 	$(yaACA)$(MAKE) -C yaACA clean
 	$(yaACA)$(MAKE) -C yaACA2 clean
 	$(yaACA)$(MAKE) -C yaACA3 clean
-	$(MAKE) -C Luminary131 clean
-	$(MAKE) -C Colossus249 clean
-	$(MAKE) -C Comanche055 clean
-	$(MAKE) -C Luminary099 clean
-	$(MAKE) -C Artemis072 clean
-	$(MAKE) -C Colossus237 clean
-	$(MAKE) -C Validation clean
 	$(MAKE) -C ControlPulseSim clean
 	$(MAKE) -C VirtualAGC clean
 	$(MAKE) -C yaTelemetry clean
