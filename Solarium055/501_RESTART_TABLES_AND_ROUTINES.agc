@@ -3,12 +3,13 @@
 # Filename:	501_RESTART_TABLES_AND_ROUTINES.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 4.
+#		Computer (AGC), for Apollo 6.
 # Assembler:	yaYUL --block1
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-02 JL	Created.
+#		2016-08-18 RSB	Corrected typo
 
 ## Page 125
 #  RESTART  TABLES
@@ -664,7 +665,7 @@ NULONGDT	TC	READTIME +1	# GET TIME.  (ALREADY INHIBITED.)
 		CCS	LONGTIME	# TEST FOR POSITIVE DT.
 		TC	ISWRETRN	# (DONT HAVE TO USE ICALLS IF SAME BANK.)
 ## Page 139
-		TC	-2
+		TC	+2
 		TC	BADLONG
 		CCS	LONGTIME +1
 		TC	ISWRETRN

@@ -1,5 +1,5 @@
 /*
-  Copyright 2003 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -24,6 +24,7 @@
   Mod History:  04/17/03 RSB.   Began.
                 04/27/03 RSB.   Split off from ParseSETLOC.c
                 06/22/03 RSB.   Added PseudoToEBanked.
+                08/18/16 RSB.   Tweaks related to --block1.
  */
 
 #include "yaYUL.h"
@@ -97,18 +98,18 @@ int PseudoToStruct(int Value, Address_t *Address)
         return (1);
     }
 
-    if (Value <= 01377) {
+    if ((!Block1 && Value <= 01377) || (Block1 && Value <= 01777)) {
         Address->Address = 1;
         Address->Erasable = 1;
         Address->Unbanked = 1;
         Address->SReg = Value;
-    } else if (Value <= 03777) {
+    } else if (!Block1 && Value <= 03777) {
         Address->Address = 1;
         Address->Erasable = 1;
         Address->Banked = 1;
         Address->SReg = 01400 + (Value & 0377);
         Address->EB = Value / 0400;
-    } else if (Value <= 07777) {
+    } else if ((!Block1 && Value <= 07777) || (Block1 && Value <= 05777)) {
         Address->Address = 1;
         Address->Fixed = 1;
         Address->Unbanked = 1;
@@ -117,9 +118,11 @@ int PseudoToStruct(int Value, Address_t *Address)
         Address->Address = 1;
         Address->Fixed = 1;
         Address->Banked = 1;
-        Address->SReg = 02000 + (Value & 01777);
+        Address->SReg = Block1 ? (06000 + (Value & 01777)) : (02000 + (Value & 01777));
 
-        if (Value >= 04000 && Value <= 05777)
+        if (Block1)
+            Address->FB = 3 + (Value - 06000) / 02000;
+        else if (Value >= 04000 && Value <= 05777)
             Address->FB = 2;
         else if (Value >= 06000 && Value <= 07777)
             Address->FB = 3;
@@ -128,7 +131,7 @@ int PseudoToStruct(int Value, Address_t *Address)
         else {
             Address->Super = 1;
             Address->FB = (Value - 030000) / 02000;
-        }      
+        }
     }
 
     Address->Value = Value;

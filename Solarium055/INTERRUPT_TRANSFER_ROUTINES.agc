@@ -3,12 +3,13 @@
 # Filename:	INTERRUPT_TRANSFER_ROUTINES.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 4.
+#		Computer (AGC), for Apollo 6.
 # Assembler:	yaYUL --block1
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-14 JL	Created.
+#		2016-08-18 RSB	Some corrections.
 
 ## Page 35
 		SETLOC	2000
@@ -55,6 +56,10 @@ ERRUPT		TC	ALARM		# ***NO ERRUPTS IN SYSTEM 5***
 		TC	NBRESUME
 
 UPRUPT		CAF	UPBANK		# CALL IN BANK WITH UPRUPT PROGRAM.
+		XCH	BANKREG
+		TC	UPRUPTB
+
+KEYRUPT		CAF	MODEBANK
 		XCH	BANKREG
 		TC	KEYRUPTA
 

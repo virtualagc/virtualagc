@@ -3,12 +3,13 @@
 # Filename:	FIXED-FIXED_INTERPRETER_SECTION.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 4.
+#		Computer (AGC), for Apollo 6.
 # Assembler:	yaYUL --block1
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-16 JL	Created.
+#		2016-08-18 RSB	Some corrections.
 
 ## Page 37
 
@@ -197,6 +198,7 @@ ADDRESS		INDEX	ADRLOC		# INDEXABLE ADDRESS ROUTINE
 		CS	1		# PICK UP WHAT SHOULD BE THE NEXT ADDRESS
 		CCS	A
 		TC	PUSHUP		# NO ADDRESS MEANS TAKE OFF TOP OF STACK
+		TC	PUSHUP2		# INACTIVE ADDRESS MEANS JUST PUSHUP
 		XCH	ADRLOC		# SAVE ADDRESS WHILE WE INCREMENT ADRLOC
 		AD	ONE
 		XCH	ADRLOC		# NOW BRING IT BACK
@@ -643,6 +645,12 @@ DPSET		CS	ONE		# SET UP DP MODE AND LOAD IF NECESSARY
 		TC	LOAD
 		TC	Q
 
+VECSET		CS	ZERO		# SIMILARLY FOR VECTORS
+		TS	MODE
+		CCS	NEWEQIND
+		TC	LOAD
+		TC	Q
+
 TPSET		CS	TWO		# AND FOR TP
 		TS	MODE
 		CCS	NEWEQIND
@@ -929,6 +937,7 @@ MXV2		CAF	K2		# USES VBUF
 		CAF	K2 +1
 		TC	STORDAC
 		XCH	TEM10
+		AD	TEM9
 		TS	ADDRWD
 		TC	DOT2 +2
 ## Page 62
@@ -994,6 +1003,7 @@ INCRT2		XCH	TEM2
 SHORTMP		XCH	MPAC +2		# MULTIPLY THE CONTENTS OF MPAC,MPAC+1, 
 		EXTEND			# MPAC+2 BY THE SINGLE PRECISION NUMBER
 		MP	MPAC +2		# ARRIVING IN A.
+		XCH	MPAC +2
 
 SHORTMP2	XCH	MPAC +1		# FASTER BUT SLOPPIER VERSION FOR DP
 		EXTEND

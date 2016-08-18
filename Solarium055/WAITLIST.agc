@@ -3,14 +3,15 @@
 # Filename:	WAITLIST.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 4.
+#		Computer (AGC), for Apollo 6.
 # Assembler:	yaYUL --block1
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-21 JL	Created.
+#		2016-08-18 RSB	Some fixes.
 
-## Page 112
+## Page 111
 
 # CHECK-OUT STATUS - UNIT VERIFICATION COMPLETE MAY, 1965		EXCEPT LONGCALL SECTION.
 #

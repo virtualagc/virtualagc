@@ -26,6 +26,13 @@
 #				various relevant adjustments.
 #		2012-10-03 JL	Add YAYUL_TRACE define to turn on debug
 #				messages.
+#		2016-08-18 RSB	Changed the way YAYUL_TRACE works, since
+#				(at least for the moment) I don't want to
+#				use it, so I don't want it hard-coded into
+#				CFLAGS.  It can still be used, though, just
+#				invoke the make as
+#					YAYUL_TRACE=-DYAYUL_TRACE make
+#				(from Linux, anyway).
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -49,7 +56,7 @@ else
    EXENAME=yaYUL
 endif
 
-CFLAGS += -DYAYUL_TRACE
+CFLAGS = ${CFLAGS} ${YAYUL_TRACE}
 
 .PHONY: default
 default: $(EXENAME)

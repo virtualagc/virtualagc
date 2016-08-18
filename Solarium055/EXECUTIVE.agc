@@ -3,12 +3,13 @@
 # Filename:	EXECUTIVE.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 4.
+#		Computer (AGC), for Apollo 6.
 # Assembler:	yaYUL --block1
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-19 JL	Created.
+#		2016-08-18 RSB	Some fixes.
 
 ## Page 98
 
@@ -227,6 +228,46 @@ CHANG2		CCS	NEWEQIND	# INTERPRETIVE INTERRUPTS START HERE,
 		TC	CHANJOB		# WITH C(A) PNZ, SHOWING WE WERE IN INTERP
 					# RETER
 ## Page 104
+		SETLOC	NOWAKE +2
+CHANJOB		INDEX	NEWJOB		# TO BEGIN SWAP OF CORE REGISTERS
+		XCH	LOC
+		TS	LOC		# SAVE PROPER 12 BIT ADDRESS
+		
+		XCH	PRIORITY
+		INDEX	NEWJOB
+		XCH	PRIORITY
+		TS	PRIORITY
+		MASK	LOW9		# TO GET FIXLOC
+		TS	FIXLOC
+		AD	BIT6		# SET UP VACLOC ( = FIXLOC + 32d )
+		TS	VACLOC
+		
+		CS	BANKSET		# SAVE BANK
+		AD	PUSHLOC		# AND PUSHLOC IN SAME WORD
+		INDEX	NEWJOB
+		XCH	PUSHLOC
+		TS	PUSHLOC
+		MASK	LOW10
+		XCH	PUSHLOC
+		COM
+		AD	PUSHLOC		# WE NOW HAVE COMPLEMENT OF BANK BITS
+		TS	BANKSET
+		
+		CS	ADRLOC		# SAVE MODE AND COMPLEMENT OF ADRLOC IN
+		DOUBLE			# SAME WORD. ADRLOC MUST BE SHIFTED 2
+		DOUBLE			# PLACES TO MAKE ROOM FOR MODE
+		AD	MODE		# -0, -1, OR -2
+		INDEX	NEWJOB
+		XCH	ADRLOC
+		TS	SR
+		MASK	THREE		# SAVE LOW 2 BITS
+		AD	NEG3		# THIS RESULTS IN EITHER -0, -1, OR -2
+		TS	MODE
+		CS	SR
+		CS	SR
+		TS	ADRLOC
+
+## Page 105
 		CCS	OVFIND		# SAVE C(ORDER) POSITIVE IF C(OVFIND) = 0
 		TC	+2		# AND NEGATIVE OTHERWISE
 		TC	+3
