@@ -3,13 +3,16 @@
 # Filename:	MAIN.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 4.
+#		Computer (AGC), for Apollo 6.
 # Assembler:	yaYUL --block1
 # Contact:	Ron Burkey <info@sandroid.org>
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-07-25 RSB	Adapted from corresponding Colossus 249 file.
 # 		2009-09-14 JL	Fixed page number.
+#		2016-08-17 RSB	Corrected names of AGC_SELF-CHECK.agc,  
+#				DUMMY_501_INITIALIZATION.agc, and
+#				REENTRY_CONTROL.agc.
 #
 # This file is a little different from the other Solarium055 files being provided, 
 # in that it doesn't represent anything that appears directly in the original source.  
@@ -38,7 +41,7 @@ $MODE_SWITCHING_AND_MARK_ROUTINES.agc		# 190
 $IMU_COMPENSATION_PACKAGE.agc			# 214
 $IRIG_PULSE-TORQUING_ROUTINES.agc		# 224
 $EXTENDED_VERBS_FOR_MODING.agc			# 235
-$AGC_SELF_CHECK.agc				# 265
+$AGC_SELF-CHECK.agc				# 265
 $INTER-BANK_COMMUNICATION.agc			# 290 
 $ALARM_AND_DISPLAY_PROCEDURES.agc		# 293
 $ORBITAL_INTEGRATION_PROGRAM.agc		# 296
@@ -54,8 +57,8 @@ $PINBALL_GAME_BUTTONS_AND_LIGHTS.agc		# 481
 $501_MISSION_CONTROL_PROGRAM.agc		# 553
 $POWERED_FLIGHT_SUBROUTINES.agc			# 628
 $TIME_OF_FREE-FALL_CALCULATIONS.agc		# 682
-$DUMMY_501_INITIALISATION.agc			# 697
-$RE-ENTRY_CONTROL.agc				# 698
+$DUMMY_501_INITIALIZATION.agc			# 697
+$REENTRY_CONTROL.agc				# 698
 $AVERAGE_G_INTEGRATOR.agc			# 746
 $VERIFICATION_ASSISTANCE_PROGRAMS.agc		# 754
 $SUM-CHECK_END_OF_RECORD_MARKS.agc		# 759
