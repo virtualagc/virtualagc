@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-02 JL	Created.
+#		2016-08-18 RSB	Corrected typo
 
 ## Page 125
 #  RESTART  TABLES
@@ -664,7 +665,7 @@ NULONGDT	TC	READTIME +1	# GET TIME.  (ALREADY INHIBITED.)
 		CCS	LONGTIME	# TEST FOR POSITIVE DT.
 		TC	ISWRETRN	# (DONT HAVE TO USE ICALLS IF SAME BANK.)
 ## Page 139
-		TC	-2
+		TC	+2
 		TC	BADLONG
 		CCS	LONGTIME +1
 		TC	ISWRETRN

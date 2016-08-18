@@ -9,8 +9,9 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-21 JL	Created.
+#		2016-08-18 RSB	Some fixes.
 
-## Page 112
+## Page 111
 
 # CHECK-OUT STATUS - UNIT VERIFICATION COMPLETE MAY, 1965		EXCEPT LONGCALL SECTION.
 #

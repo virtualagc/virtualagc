@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-29 JL	Created.
+#		2016-08-18 RSB	Typos.
 
 ## Page 214
 
@@ -173,6 +174,7 @@ BIASCOMP	INDEX	BUF		# BIAS COMPENSATION ENTERS HERE.
 
 DRIFTSUB	XCH	Q
 		TS	BUF +1
+		XCH	Q
 		EXTEND
 		MP	1/PIPADT
 		EXTEND			# RESULT WAS IN GYRO PULSES X 2(+2).

@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005,2009-2010 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -57,6 +57,7 @@
 				the memory size differently.  I'm sure I'll
 				have to add additional tweaks as I go along.
 		02/20/10 RSB	Added --unpound-page.
+		08/18/16 RSB    Various stuff related to --block1.
 */
 
 #include "yaYUL.h"
@@ -166,7 +167,7 @@ main (int argc, char *argv[])
 
   printf ("Apollo Guidance Computer (AGC) assembler, version " NVER 
   	  ", built " __DATE__ "\n");
-  printf ("(c)2003-2005,2009-2010 Ronald S. Burkey\n");
+  printf ("(c)2003-2005,2009-2010,2016 Ronald S. Burkey\n");
   printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
   
   // Parse the command-line options.
@@ -229,7 +230,7 @@ main (int argc, char *argv[])
 	goto Done;
     }
     
-  // Perform a preliminary pass, whose sole purpose is to identfy
+  // Perform a preliminary pass, whose sole purpose is to identify
   // all symbols defined in the program.
   SymbolPass (InputFilename);
   // Also, define all register names.
@@ -279,7 +280,7 @@ main (int argc, char *argv[])
       EditSymbol ("$5", &Location5);
       EditSymbol ("$6", &Location6);
       EditSymbol ("$7", &Location7);
-      EditSymbol ("&16", &Location16);
+      EditSymbol ("$16", &Location16);
       EditSymbol ("$17", &Location17);
       EditSymbol ("$25", &Location25);
       EditSymbol ("$5777", &Location5777);

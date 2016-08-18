@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-02 JL	Created.
+#		2016-08-18 RSB	Typo.
 
 ## Page 159
 
@@ -133,7 +134,7 @@ DOIMUCDU	CAF	TWO		# SET CDUIND BACK TO 2.
 		TC	CDURSM
 		TC	NEGCOM2
 		TC	CDURSM
-##  Page 163
+## Page 163
 
 NEGCOM2		TS	ITEMP1		# SAVE CCS OF COMMAND.
 		CS	CDUIND		# USE NEGATIVE TO SELECT OUT2 PATTERN.

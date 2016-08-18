@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-06 JL	Created.
+#		2016-08-18 RSB	Typo.
 
 ## Page 190
 
@@ -728,7 +729,7 @@ READLOOP	TS	RUPTREG2
 		CADR	MKVB50
 		TC	RESUME		# DONE.
 		
-## PagE 209
+## Page 209
 
 MKREJECT	CCS	MARKSTAT	# SEE IF MARKS BEING ACCEPTED.
 		TC	REJECT2

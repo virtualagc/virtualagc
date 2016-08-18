@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -33,6 +33,7 @@
 				ParseST.c.
 		2012-09-25 JL   Handle arguments like "DUMMYJOB + 2", i.e.
 		                Mod1=+, Mod2=2.
+                2016-08-18 RSB  Tweaks related to Block1.
  */
 
 #include "yaYUL.h"
@@ -75,6 +76,9 @@ int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, i
 
     // Set the default binary word.
     OutRecord->NumWords = 1;
+
+    if (Block1)
+      Flags = Flags & !(PC1|PC2|PC3|PC4|PC5|PC6|PC7|QC1|QC2|QC3|QCNOT0);
 
     if (Flags & PC1)
         Opcode |= 01000;
@@ -315,7 +319,7 @@ int ParseDNCHAN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
 int ParseDV(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-    return (ParseGeneral(InRecord, OutRecord, 010000, EXTENDED | QC0));
+    return (ParseGeneral(InRecord, OutRecord, (Block1 ? 050000 : 010000), EXTENDED | QC0));
 }
 
 int ParseDXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
@@ -345,7 +349,7 @@ int ParseMASK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
 int ParseMP(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-    return (ParseGeneral(InRecord, OutRecord, 070000, EXTENDED));
+    return (ParseGeneral(InRecord, OutRecord, (Block1 ? 040000 : 070000), EXTENDED));
 }
 
 int ParseMSU(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
@@ -419,6 +423,6 @@ int ParseWRITE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
 int ParseXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-    return (ParseGeneral(InRecord, OutRecord, 050000, QC3 | ENUMBER));
+    return (ParseGeneral(InRecord, OutRecord, (Block1 ? 030000 : 050000), QC3 | ENUMBER));
 }
 

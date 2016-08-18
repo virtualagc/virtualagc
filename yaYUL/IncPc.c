@@ -1,5 +1,5 @@
 /*
-  Copyright 2003 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -23,7 +23,9 @@
                 thing than it seems, because of the variety of different
                 types of memory bank.  (Also, since the Address_t 
                 structure can represent a constant rather than an address.)
-  History:      04/15/03 RSB.  Began.
+  History:      04/15/03 RSB    Began.
+                08/18/16 RSB    Some cross-my-finger-and-hope tweaks for
+                                --block1.
  */
 
 #include "yaYUL.h"
@@ -124,14 +126,14 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
         NewPc->Super = 0;
     }  
 
-    // Determine the apppropriate SReg ranges for this memory region.
+    // Determine the appropriate SReg ranges for this memory region.
     // The address will be either banked or unbanked, and either in fixed
     // memory or erasable memory.  So, there are four possible combos.
     if (NewPc->Erasable) {
         if (NewPc->Unbanked) {
             Min = 0;
-            Max = 01377;
-        } else if (NewPc->Banked) {
+            Max = Block1 ? 01777 : 01377;
+        } else if (!Block1 && NewPc->Banked) {
             Min = 01400;
             Max = 01777;
             NewPc->EB += BankIncrement;
@@ -139,11 +141,11 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
             goto ImplementationError;
     } else if (NewPc->Fixed) {
         if (NewPc->Banked) {
-            Min = 02000;
-            Max = 03777;
+            Min = Block1 ? 06000 : 02000;
+            Max = Block1 ? 07777 : 03777;
             NewPc->FB += BankIncrement;
         } else if (NewPc->Unbanked) {
-            Min = 04000;
+            Min = Block1 ? 02000 : 04000;
             Max = 07777;
         } else
             goto ImplementationError;
@@ -162,8 +164,9 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
     // Back-convert to get a pseudo-address.
     if (NewPc->Unbanked)
         NewPc->Value = NewPc->SReg;
-    else if (NewPc->Erasable)
+    else if (NewPc->Erasable) {
         NewPc->Value = (NewPc->SReg - 01400) + 0400 * NewPc->EB;
+    }
     else if (NewPc->Fixed) {
         NewPc->Value = 010000 + (NewPc->SReg - 02000) + 02000 * NewPc->FB;
         if (NewPc->Super && NewPc->FB >= 030)

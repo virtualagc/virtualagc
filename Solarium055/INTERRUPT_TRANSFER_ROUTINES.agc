@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-14 JL	Created.
+#		2016-08-18 RSB	Some corrections.
 
 ## Page 35
 		SETLOC	2000
@@ -55,6 +56,10 @@ ERRUPT		TC	ALARM		# ***NO ERRUPTS IN SYSTEM 5***
 		TC	NBRESUME
 
 UPRUPT		CAF	UPBANK		# CALL IN BANK WITH UPRUPT PROGRAM.
+		XCH	BANKREG
+		TC	UPRUPTB
+
+KEYRUPT		CAF	MODEBANK
 		XCH	BANKREG
 		TC	KEYRUPTA
 

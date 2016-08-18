@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define OPCODE 050000
+#define OPCODE (Block1 ? 020000 : 050000)
 
 //------------------------------------------------------------------------
 // Return non-zero on unrecoverable error.
@@ -77,7 +77,7 @@ int ParseINDEX(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	  OutRecord->Fatal = 1;
 	}
 
-      if ((InRecord->Extend && (Offset.SReg & ~07777)) || (!InRecord->Extend && (Offset.SReg & ~01777)))
+      if ((InRecord->Extend && (Offset.SReg > 07777)) || (!InRecord->Extend && (Offset.SReg > (Block1 ? 05777 : 01777))))
         {
 	  strcpy(OutRecord->ErrorMessage, "Index is out of range.");
 	  Offset.SReg = 0;

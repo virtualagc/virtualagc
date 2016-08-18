@@ -90,17 +90,25 @@ void UpdateBankCounts(Address_t *pc)
         return;
 
     if (pc->Banked) {
-        Count = pc->SReg - 02000;
+        Count = pc->SReg - (Block1 ? 06000 : 02000);
         bank = pc->FB + 010 * pc->Super;
     } else if (pc->Unbanked) {
-        if (pc->SReg >= 04000 && pc->SReg < 06000) {
-            Count = pc->SReg - 04000;
-            bank = 2;
-        } else if (pc->SReg >= 06000 && pc->SReg < 010000) {
-            Count = pc->SReg - 06000;
-            bank = 3;
-        } else
-            return;
+        if (Block1) {
+            if (pc->SReg >= 02000 && pc->SReg < 04000) {
+                Count = pc->SReg - 02000;
+                bank = 1;
+            } else
+                return;
+        } else {
+          if (pc->SReg >= 04000 && pc->SReg < 06000) {
+              Count = pc->SReg - 04000;
+              bank = 2;
+          } else if (pc->SReg >= 06000 && pc->SReg < 010000) {
+              Count = pc->SReg - 06000;
+              bank = 3;
+          } else
+              return;
+        }
     }  
 
     // We know from the tests performed above that Count is in the range
@@ -178,7 +186,18 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                 OutRecord->ProgramCounter.FB = Value;
             }
 
-            if (Value == 2 || Value == 3)
+            if (Block1 && Value == 1)
+              {
+                OutRecord->ProgramCounter.Value = 02000;
+                OutRecord->ProgramCounter.Banked = 0;
+                OutRecord->ProgramCounter.Unbanked = 1;
+              }
+            else if (Block1)
+              {
+                OutRecord->ProgramCounter.Value = 06000;
+                OutRecord->ProgramCounter.SReg = 06000;
+              }
+            else if (Value == 2 || Value == 3)
                 OutRecord->ProgramCounter.Value = Value * 02000;
             else
                 OutRecord->ProgramCounter.Value = 010000 + Value * 02000;
