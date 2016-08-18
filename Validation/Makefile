@@ -32,6 +32,9 @@ Validation.bin:	${SSOURCE}
 	mv Validation.agc.bin Validation.bin
 	mv Validation.agc.symtab Validation.symtab
 
+corediff.txt: Validation.bin
+	@echo "No corediff for Validation!" 
+
 clean:
 	-rm -f Validation.bin Validation.lst Validation.agc.bin Validation.txt *~ *.symtab *.html
 	
