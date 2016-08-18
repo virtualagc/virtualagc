@@ -288,7 +288,7 @@ default: all
 .PHONY: missions $(MISSIONS) clean-missions
 missions: $(MISSIONS)
 
-$(MISSIONS): yaYUL
+$(MISSIONS): yaYUL Tools
 	$(BUILD) -C $@
 
 clean-missions:
