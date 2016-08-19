@@ -197,6 +197,10 @@ LIBS+=-lnsl
 endif
 
 # Some adjustments for building in Mac OS X
+ifeq ($(OS),Darwin)
+MACOSX = "yes"
+endif
+
 ifdef MACOSX
 #NOREADLINE=yes
 ISMACOSX:=MACOSX=yes
