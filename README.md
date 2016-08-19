@@ -4,7 +4,7 @@ Virtual Apollo Guidance Computer
 
 ### Build status
 
-| Travis CI (Linux / OS X) |
+| Travis CI (Linux) |
 |--------------------------|
 | [![travis-image][]][travis-site] |
 
