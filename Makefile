@@ -340,7 +340,7 @@ yaTelemetry:
 jWiz:
 	$(BUILD) -C $@ $(ISMACOSX) $(DEV_STATIC)
 
-.PHONY: VirtualAgc
+.PHONY: VirtualAGC
 VirtualAGC:
 	$(BUILD) -C $@ "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC)
 
