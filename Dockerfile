@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 MAINTAINER Jim Lawton
 
 RUN apt-get -y update
-RUN apt-get -y upgrade
+#RUN apt-get -y upgrade
 
 RUN apt-get -y install git
 RUN apt-get -y install build-essential
