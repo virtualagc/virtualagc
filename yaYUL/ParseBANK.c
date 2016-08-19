@@ -97,6 +97,15 @@ void UpdateBankCounts(Address_t *pc)
             if (pc->SReg >= 02000 && pc->SReg < 04000) {
                 Count = pc->SReg - 02000;
                 bank = 1;
+            } else if (pc->SReg >= 04000 && pc->SReg < 05777) {
+                // Note:  05777 is used instead of 06000 for a reason.
+                // It's a kludge, but address 05777 is used out of order
+                // (it's the "standard locations for extending bits"
+                // in the fixed-fixed interpreter section), and it
+                // would fool us into thinking the bank is full, when
+                // it really isn't.
+                Count = pc->SReg - 04000;
+                bank = 2;
             } else
                 return;
         } else {
@@ -186,9 +195,10 @@ ParseBANK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                 OutRecord->ProgramCounter.FB = Value;
             }
 
-            if (Block1 && Value == 1)
+            if (Block1 && Value >= 0 && Value <= 2)
               {
-                OutRecord->ProgramCounter.Value = 02000;
+                OutRecord->ProgramCounter.Value = 02000 * Value;
+                OutRecord->ProgramCounter.SReg = 02000 * Value;
                 OutRecord->ProgramCounter.Banked = 0;
                 OutRecord->ProgramCounter.Unbanked = 1;
               }
