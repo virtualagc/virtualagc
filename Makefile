@@ -198,7 +198,7 @@ endif
 
 # Some adjustments for building in Mac OS X
 ifeq ($(OS),Darwin)
-MACOSX = "yes"
+MACOSX=yes
 endif
 
 ifdef MACOSX
