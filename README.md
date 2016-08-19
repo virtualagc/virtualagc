@@ -1,6 +1,16 @@
 Virtual Apollo Guidance Computer
 ================================
 
+
+### Build status
+
+| Travis CI (Linux / OS X) |
+|--------------------------|
+| [![travis-image][]][travis-site] |
+
+[travis-image]: https://travis-ci.org/rburkey2005/virtualagc.svg?branch=master
+[travis-site]: https://travis-ci.org/rburkey2005/virtualagc/branches
+
 The Apollo spacecraft used for lunar missions in the late 1960's and early 1970's was really two different spacecraft, the Command Module (CM) and the Lunar Module (LM).  The CM was used to get the three astronauts to the moon, and back again.  The LM was used to land two of the astronauts on the moon while the third astronaut remained in the CM, in orbit around the moon. 
 
 Each of the spacecraft needed to be able to navigate through space, with or without the assistance of the astronauts, and therefore needed to have a "guidance system".  The guidance system was developed by MIT's Instrumentation Lab, now an independent company known as the Charles Stark Draper Laboratory.
