@@ -197,6 +197,10 @@ LIBS+=-lnsl
 endif
 
 # Some adjustments for building in Mac OS X
+ifeq ($(OS),Darwin)
+MACOSX=yes
+endif
+
 ifdef MACOSX
 #NOREADLINE=yes
 ISMACOSX:=MACOSX=yes
@@ -256,9 +260,11 @@ endif
 BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSES)" LIBS2="$(LIBS)" NOREADLINE=$(NOREADLINE) ReadlineForWin32=$(ReadlineForWin32) $(ARCHS) EXT=$(EXT)
 
 # List of mission software directories to be built.
-MISSIONS = Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237  Validation # Solarium055
+MISSIONS = Validation Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237 # Solarium055
 
-SUBDIRS = Tools yaLEMAP yaAGC yaAGS
+# The base set of targets to be built always.
+SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
+
 ifndef NOGUI
 ifeq "$(YADEDA_SUFFIX)" ""
 SUBDIRS += yaDEDA/src
@@ -270,20 +276,22 @@ SUBDIRS += yaDSKY/src
 else
 SUBDIRS += yaDSKY2
 endif
-endif
-SUBDIRS += yaYUL yaUniverse yaACA2
 ifndef WIN32
 SUBDIRS += yaACA
 endif
+SUBDIRS += yaACA2
 SUBDIRS += yaACA3
+SUBDIRS += yaTelemetry 
+SUBDIRS += jWiz
+SUBDIRS += VirtualAGC
+endif # NOGUI
+
 SUBDIRS += $(MISSIONS)
-SUBDIRS += Validation ControlPulseSim yaTelemetry jWiz VirtualAGC
+
 .PHONY: $(SUBDIRS)
 
 .PHONY: default
 default: all
-
-.PHONY: all all-archs
 
 .PHONY: missions $(MISSIONS) clean-missions
 missions: $(MISSIONS)
@@ -298,6 +306,7 @@ clean-missions:
 corediffs: yaYUL Tools
 	for subdir in $(MISSIONS) ; do make -C $$subdir corediff.txt ; done
 
+.PHONY: all all-archs
 all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(SUBDIRS)
@@ -336,7 +345,7 @@ yaTelemetry:
 jWiz:
 	$(BUILD) -C $@ $(ISMACOSX) $(DEV_STATIC)
 
-.PHONY: VirtualAgc
+.PHONY: VirtualAGC
 VirtualAGC:
 	$(BUILD) -C $@ "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC)
 
