@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-01 JL	Created.
+#		2016-08-19 RSB	Added temporary "BANK 30" workaround.
 
 ## Page 746
 
@@ -29,6 +30,10 @@
 
 
 #	CONTINUE ON IN BANK 30.
+# [ RSB - The original source code did not have the following BANK pseudo-op,
+# but for some reason I haven't tracked down yet, yaYUL can't resolve the addresses
+# without it.  Perhaps a bug in yaYUL.]
+		BANK	30
 
 NORMLISE	ABVAL	3		# COUNT NUMBER OF LEADING ZEROS IN
 		TSLC	INCR,1		# ABVAL (RN) AND STORE -N(=2-M) IN NSHIFT

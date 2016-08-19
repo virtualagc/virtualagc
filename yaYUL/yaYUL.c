@@ -248,7 +248,7 @@ main (int argc, char *argv[])
       AddSymbol ("$16");
       AddSymbol ("$25");
       AddSymbol ("$5777");
-    }
+  }
 
   // Sort the symbol table, or else we won't be able to locate the 
   // symbols later.

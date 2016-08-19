@@ -304,6 +304,13 @@ typedef struct {
   unsigned IndexValid:1;     
   Bank_t EBank;
   Bank_t SBank;
+  // This isn't really column 8, but rather the column preceding the operator,
+  // which in our syntax really forms the first character of the operator,
+  // but needs to be removed before the operator is processed.  The only way
+  // I'm aware of in which this occurs is in Block 1, in which that character
+  // may be a '-'.  At any rate, if one of these funky extra characters appears,
+  // it is deposited in the following field.
+  char Column8;
 } ParseInput_t;
 
 typedef struct {

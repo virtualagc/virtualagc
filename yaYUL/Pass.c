@@ -57,6 +57,9 @@
                                 constant, directly into this file.  It's just too
                                 difficult to work with them through the Eclipse IDE
                                 otherwise, since the IDE can't resolve any of them.
+                2016-08-19 RSB  Various Block 1 changes.  Perhaps more importantly,
+                                no longer dependent on whether tabs vs. spaces
+                                were used in the source files.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
@@ -91,6 +94,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+// The following should be uncommented to enable Block 1 fixes for parsing
+// interpreter code.  But those fixes aren't working yet, so leave commented
+// for now!
+//#define BLOCK1_FIXES
 
 //-------------------------------------------------------------------------
 // Some global data.
@@ -579,8 +587,8 @@ static InterpreterMatch_t InterpreterOpcodesBlock1[] = {
   { "ACOS",     0050, 0 },
   { "ARCSIN",   0040, 0 },
   { "ASIN",     0040, 0 },
-  { "AST,1",    TBD },
-  { "AST,2",    TBD },
+  { "AST,1",    0, 1 },
+  { "AST,2",    0, 1 },
   { "AXC,1",    0016, 1 },
   { "AXC,2",    0012, 1 },
   { "AXT,1",    0006, 1 },
@@ -591,43 +599,20 @@ static InterpreterMatch_t InterpreterOpcodesBlock1[] = {
   { "BDSU*",    0157, 1, 0, 000000, { 1, 0 } },
   { "BHIZ",     0146, 1 },
   { "BMN",      0136, 1 },
-//  { "BOFCLR", 0162, 2, 1, 000241 },
-//  { "BOF",    0162, 2, 1, 000341 },
-//  { "BOFF",   0162, 2, 1, 000341 },
-//  { "BOFINV", 0162, 2, 1, 000141 },
-//  { "BOFSET", 0162, 2, 1, 000041 },
-//  { "BON",    0162, 2, 1, 000301 },
-//  { "BONCLR", 0162, 2, 1, 000201 },
-//  { "BONINV", 0162, 2, 1, 000101 },
-//  { "BONSET", 0162, 2, 1, 000001 },
   { "BOV",      0176, 1 },
-//  { "BOVB",   0172, 1 },
   { "BPL",      0132, 1 },
-//  { "BVSU",   0131, 1, 0, 000000, { 1, 0 } },
-//  { "BVSU*",  0133, 1, 0, 000000, { 1, 0 } },
+  { "BVSU",   0131, 1, 0, 000000, { 1, 0 } },
   { "BZE",      0122, 1 },
-//  { "CALL",   0152, 1 },
-//  { "CALRB",  0152, 1 },
-//  { "CCALL",  0065, 2, 0, 000000, { 1, 0 } },
-//  { "CCALL*", 0067, 2, 0, 000000, { 1, 0 } },
-//  { "CGOTO",  0021, 2, 0, 000000, { 1, 0 } },
-//  { "CGOTO*", 0023, 2, 0, 000000, { 1, 0 } },
-//  { "CLEAR",  0162, 1, 1, 000261 },
-//  { "CLR",    0162, 1, 1, 000261 },
-//  { "CLRGO",  0162, 2, 1, 000221 },
-  { "COMP",     TBD },
+  { "COMP",     0, 0 },
   { "COS",      0030, 0 },
-  { "COS*",     TBD },
+  { "COS*",     0, 0 },
   { "COSINE",   0030, 0 },
   { "DAD",      0161, 1, 0, 000000, { 1, 0 } },
   { "DAD*",     0163, 1, 0, 000000, { 1, 0 } },
-//  { "DCOMP",  0100, 0 },
   { "DDV",      0105, 1, 0, 000000, { 1, 0 } },
   { "DDV*",     0107, 1, 0, 000000, { 1, 0 } },
-//  { "DLOAD",  0031, 1, 0, 000000, { 1, 0 } },
-//  { "DLOAD*", 0033, 1, 0, 000000, { 1, 0 } },
-  { "DMOVE",    TBD },
-  { "DMOVE*",   TBD },
+  { "DMOVE",    0, 0 },
+  { "DMOVE*",   0, 0 },
   { "DMP",      0171, 1, 0, 000000, { 1, 0 } },
   { "DMP*",     0173, 1, 0, 000000, { 1, 0 } },
   { "DMPR",     0101, 1, 0, 000000, { 1, 0 } },
@@ -638,78 +623,34 @@ static InterpreterMatch_t InterpreterOpcodesBlock1[] = {
   { "DSU",      0151, 1, 0, 000000, { 1, 0 } },
   { "DSU*",     0153, 1, 0, 000000, { 1, 0 } },
   { "EXIT",     0000, 0 },
-//  { "GOTO",   0126, 1 },
   { "INCR,1",   0066, 1 },
   { "INCR,2",   0062, 1 },
-//  { "INVERT", 0162, 1, 1, 000161 },
-//  { "INVGO",  0162, 2, 1, 000121 },
   { "ITA",      0156, 1 },
-  { "ITC",      TBD },
-  { "ITC*",     TBD },
-  { "ITCI",     TBD },
-  { "ITCQ",     TBD },
-  { "LODON",    TBD },
+  { "ITC",      0, 1 },
+  { "ITC*",     0, 1 },
+  { "ITCI",     0, 1 },
+  { "ITCQ",     0, 1 },
+  { "LODON",    0, 0 },
   { "LXA,1",    0026, 1 },
   { "LXA,2",    0022, 1 },
   { "LXC,1",    0036, 1 },
   { "LXC,2",    0032, 1 },
   { "MXV",      0055, 1, 0, 000000, { 1, 0 } },
-//  { "MXV*",   0057, 1, 0, 000000, { 1, 0 } },
-  { "NOLOD",    TBD },
-//  { "NORM",   0075, 1, 0, 000000, { 1, 0 } },
-//  { "NORM*",  0077, 1, 0, 000000, { 1, 0 } },
-//  { "PDDL",   0051, 1, 0, 000000, { 1, 0 } },
-//  { "PDDL*",  0053, 1, 0, 000000, { 1, 0 } },
-//  { "PDVL",   0061, 1, 0, 000000, { 1, 0 } },
-//  { "PDVL*",  0063, 1, 0, 000000, { 1, 0 } },
-//  { "PUSH",   0170, 0 },
+  { "NOLOD",    0, 0 },
+  { "RDDV", 0, 1 },
   { "ROUND",    0070, 0 },
   { "RTB",      0142, 1 },
-//  { "RVQ",    0160, 0 },
-//  { "SET",    0162, 1, 1, 000061 },
-//  { "SETGO",  0162, 2, 1, 000021 },
-//  { "SETPD",  0175, 1, 0, 000000, { 1, 0 } },
+  { "SGN",      0011, 1, 0, 000000, { 1, 0 } },
   { "SIGN",     0011, 1, 0, 000000, { 1, 0 } },
   { "SIGN*",    0013, 1, 0, 000000, { 1, 0 } },
   { "SIN",      0020, 0 },
-  { "SIN*",     TBD },
+  { "SIN*",     0, 0 },
   { "SINE",     0020, 0 },
-//  { "SL",     0115, 1, 2, 020202, { 1, 0 } },
-//  { "SL*",    0117, 1, 2, 020202, { 1, 0 } },
-//  { "SLOAD",  0041, 1, 0, 000000, { 1, 0 } },
-//  { "SLOAD*", 0043, 1, 0, 000000, { 1, 0 } },
-//  { "SL1",    0024, 0, 0, 000000, { 1, 0 } },
-//  { "SL1R",   0004, 0, 0, 000000, { 1, 0 } },
-//  { "SL2",    0064, 0, 0, 000000, { 1, 0 } },
-//  { "SL2R",   0044, 0, 0, 000000, { 1, 0 } },
-//  { "SL3",    0124, 0, 0, 000000, { 1, 0 } },
-//  { "SL3R",   0104, 0, 0, 000000, { 1, 0 } },
-//  { "SL4",    0164, 0, 0, 000000, { 1, 0 } },
-//  { "SL4R",   0144, 0, 0, 000000, { 1, 0 } },
-//  { "SLR",    0115, 1, 2, 021202, { 1, 0 } },
-//  { "SLR*",   0117, 1, 2, 021202, { 1, 0 } },
-  { "SMOVE",    TBD },
-  { "SMOVE*",   TBD },
-//  { "SQRT",   0010, 0 },
-//  { "SR",     0115, 1, 2, 020602, { 1, 0 } },
-//  { "SR*",    0117, 1, 2, 020602, { 1, 0 } },
-//  { "SR1",    0034, 0, 0, 000000, { 1, 0 } },
-//  { "SR1R",   0014, 0, 0, 000000, { 1, 0 } },
-//  { "SR2",    0074, 0, 0, 000000, { 1, 0 } },
-//  { "SR2R",   0054, 0, 0, 000000, { 1, 0 } },
-//  { "SR3",    0134, 0, 0, 000000, { 1, 0 } },
-//  { "SR3R",   0114, 0, 0, 000000, { 1, 0 } },
-//  { "SR4",    0174, 0, 0, 000000, { 1, 0 } },
-//  { "SR4R",   0154, 0, 0, 000000, { 1, 0 } },
-//  { "SRR",    0115, 1, 2, 021602, { 1, 0 } },
-//  { "SRR*",   0117, 1, 2, 021602, { 1, 0 } },
-//  { "SSP",    0045, 2, 0, 000000, { 1, 0 } },
-//  { "SSP*",   0047, 1, 0, 000000, { 1, 0 } },
-//  { "STADR",  0150, 0 },
-  // Note that STCALL, STODL, STORE, and STOVL are implemented as regular instructions.
-//  { "STQ",    0156, 1 },
-  { "STZ",      TBD },
-  { "SWITCH",   TBD },
+  { "SMOVE",    0, 0 },
+  { "SMOVE*",   0, 1 },
+  { "SQRT",   0010, 0 },
+  { "STZ",      0, 0 },
+  { "SWITCH",   0, 1 },
   { "SXA,1",    0046, 1 },
   { "SXA,2",    0042, 1 },
   { "TAD",      0005, 1, 0, 000000, { 1, 0 } },
@@ -717,53 +658,27 @@ static InterpreterMatch_t InterpreterOpcodesBlock1[] = {
   { "TEST",     TBD },
   { "TIX,1",    0076, 1 },
   { "TIX,2",    0072, 1 },
-//  { "TLOAD",  0025, 1, 0, 000000, { 1, 0 } },
-//  { "TLOAD*", 0027, 1, 0, 000000, { 1, 0 } },
-  { "TP",       TBD },
-  { "TSLC",     TBD },
-  { "TSLT",     TBD },
-  { "TSLT*",    TBD },
-  { "TSRT",     TBD },
-  { "TSRT*",    TBD },
-  { "TSU",      TBD },
+  { "TMOVE",    0, 0 },
+  { "TP",       0, 0 },
+  { "TSLC",     0, 1 },
+  { "TSLT",     0, 1 },
+  { "TSLT*",    0, 1 },
+  { "TSRT",     0, 1 },
+  { "TSRT*",    0, 1 },
+  { "TSU",      0, 1 },
   { "UNIT",     0120, 0 },
-//  { "V/SC",   0035, 1, 0, 000000, { 1, 0 } },
-//  { "V/SC*",  0037, 1, 0, 000000, { 1, 0 } },
   { "VAD",      0121, 1, 0, 000000, { 1, 0 } },
   { "VAD*",     0123, 1, 0, 000000, { 1, 0 } },
-//  { "VCOMP",  0100, 0 },
   { "VDEF",     0110, 0 },
-//  { "VLOAD",  0001, 1, 0, 000000, { 1, 0 } },
-//  { "VLOAD*", 0003, 1, 0, 000000, { 1, 0 } },
-  { "VMOVE",    TBD },
-  { "VMOVE*",   TBD },
+  { "VMOVE",    0, 1 },
+  { "VMOVE*",   0, 1 },
   { "VPROJ",    0145, 1, 0, 000000, { 1, 0 } },
   { "VPROJ*",   0147, 1, 0, 000000, { 1, 0 } },
-//  { "VSL",    0115, 1, 2, 020202, { 1, 0 } },
-//  { "VSL*",   0117, 1, 2, 020202, { 1, 0 } },
-//  { "VSL1",   0004, 0, 0, 000000, { 1, 0 } },
-//  { "VSL2",   0024, 0, 0, 000000, { 1, 0 } },
-//  { "VSL3",   0044, 0, 0, 000000, { 1, 0 } },
-//  { "VSL4",   0064, 0, 0, 000000, { 1, 0 } },
-//  { "VSL5",   0104, 0, 0, 000000, { 1, 0 } },
-//  { "VSL6",   0124, 0, 0, 000000, { 1, 0 } },
-//  { "VSL7",   0144, 0, 0, 000000, { 1, 0 } },
-//  { "VSL8",   0164, 0, 0, 000000, { 1, 0 } },
-  { "VSLT",     TBD },
-  { "VSLT*",    TBD },
+  { "VSLT",     0, 1 },
+  { "VSLT*",    0, 1 },
   { "VSQ",      0140, 0 },
-//  { "VSR",    0115, 1, 2, 020602, { 1, 0 } },
-//  { "VSR*",   0117, 1, 2, 020602, { 1, 0 } },
-//  { "VSR1",   0014, 0, 0, 000000, { 1, 0 } },
-//  { "VSR2",   0034, 0, 0, 000000, { 1, 0 } },
-//  { "VSR3",   0054, 0, 0, 000000, { 1, 0 } },
-//  { "VSR4",   0074, 0, 0, 000000, { 1, 0 } },
-//  { "VSR5",   0114, 0, 0, 000000, { 1, 0 } },
-//  { "VSR6",   0134, 0, 0, 000000, { 1, 0 } },
-//  { "VSR7",   0154, 0, 0, 000000, { 1, 0 } },
-//  { "VSR8",   0174, 0, 0, 000000, { 1, 0 } },
-  { "VSRT",     TBD },
-  { "VSRT*",    TBD },
+  { "VSRT",     0, 1 },
+  { "VSRT*",    0, 1 },
   { "VSU",      0125, 1, 0, 000000, { 1, 0 } },
   { "VSU*",     0127, 1, 0, 000000, { 1, 0 } },
   { "VXM",      0071, 1, 0, 000000, { 1, 0 } },
@@ -1006,6 +921,10 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
     char *ss;    // dummies.
     int StadrInvert = 0;
     int BlockAssigned = 0;
+#ifdef BLOCK1_FIXES
+    int expectedNumInterpreterOperatorLines = 0, currentNumInterpreterOperatorLines = 0,
+        operandIsCount = 0, operandIsLabel = 0, interpretiveOperators = 0;
+#endif
 
     // Make sure of Block 1 vs. Block 2 settings.
     if (!BlockAssigned && Block1) {
@@ -1204,36 +1123,89 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                     goto NotOffset;
                 else
                     ParseInputRecord.FalseLabel = Fields[i++];
-            } else if (*s == ' ' && *(s+1) == ' ') {
-                // Ignore any other fake label.
-                i++;
+            } else if (*s == ' ') {
+                int j;
+                for (j = 1; j < 8 && s[j] != 0; j++)
+                  if (s[j] == '\t')
+                    break;
+                  else if (s[j] != ' ') {
+                      i++;
+                      break;
+                  }
+            }
+
+            // Take care of the '-' that sometimes appears in the column preceding
+            // the operator in Block1.
+            ParseInputRecord.Column8 = ' ';
+            if (Block1 && '-' == Fields[i][0]) {
+                ParseInputRecord.Column8 = Fields[i][0];
+                memmove(&Fields[i][0], &Fields[i][1], strlen(Fields[i]));
             }
 
             iMatch = FindInterpreter(Fields[i]);
             Match = FindParser(Fields[i]);
-            if (NumInterpretiveOperands && !iMatch && !Match) {
-                ParseInputRecord.Operator = "";
-            } else {
-                if (Match && NumInterpretiveOperands && i + 1 >= NumFields) {
-                    // This is to catch the annoying case where normal opcodes like
-                    // TC and and pseudo-ops like VN are actually data labels as well,
-                    // and are used as interpretive operands. We figure that if the
-                    // operator has no operand, then it must be a label instead.
-                    Match = NULL;
-                    ParseInputRecord.Operator = "";
-                } else if (Match && Match->PinchHit && NumInterpretiveOperands) {
-                    //if (i + 1 < NumFields && Fields[i + 1][0])
-                    {
-                        NumInterpretiveOperands--;
-                        PinchHitting = 1;
-                        if (i < NumFields)
-                            ParseInputRecord.Operator = Fields[i++];
+#ifdef BLOCK1_FIXES
+            // The way the interpreter stuff is done for Block 1 is quite different
+            // for Block 2, to the extent that (at least temporarily) I feel like
+            // splitting it out completely rather than trying to use the same code
+            // for both.
+            operandIsCount = 0;
+            operandIsLabel = 0;
+            interpretiveOperators = 0;
+            if (Block1) {
+                if (currentNumInterpreterOperatorLines < expectedNumInterpreterOperatorLines) {
+                    InterpreterMatch_t *iMatch2;
+                    iMatch2 = FindInterpreter(Fields[i+1]);
+                    // This line must be a line off interpretive operators.
+                    interpretiveOperators = 1;
+                    currentNumInterpreterOperatorLines++;
+                    NumInterpretiveOperands += iMatch->NumOperands;
+                    if (iMatch2 != NULL)
+                      NumInterpretiveOperands += iMatch2->NumOperands;
+                } else if (NumInterpretiveOperands > 0) {
+                    // This line must be an interpretive operand.
+                    operandIsLabel = 1;
+                    NumInterpretiveOperands--;
+                } else if (iMatch) {
+                    int j;
+                    // This must be the first line of a string of interpretive operators.
+                    // I don't know that 7 is the maximum, but 7 is the most I've observed.
+                    j = atoi(Fields[i+1]);
+                    if (isdigit(Fields[i+1]) && strlen(Fields[i+1]) == 1 && j >= 0 && j <= 7) {
+                        // The operand is actually a count of the number of lines of operators
+                        // that follow.
+                        expectedNumInterpreterOperatorLines = j;
+                        operandIsCount = 1;
+                    } else {
+                        expectedNumInterpreterOperatorLines = 0;
+                        operandIsLabel = 1;
                     }
-                } else {
-                    NumInterpretiveOperands = 0;
-                    if (i < NumFields)
-                        ParseInputRecord.Operator = Fields[i++];
+                    currentNumInterpreterOperatorLines = 0;
+                    NumInterpretiveOperands = iMatch->NumOperands;
                 }
+            }
+            else
+#endif // BLOCK1_FIXES
+            {
+              if (NumInterpretiveOperands && !iMatch && !Match) {
+                  ParseInputRecord.Operator = "";
+              } else if (Match && NumInterpretiveOperands && i + 1 >= NumFields) {
+                  // This is to catch the annoying case where normal opcodes like
+                  // TC and and pseudo-ops like VN are actually data labels as well,
+                  // and are used as interpretive operands. We figure that if the
+                  // operator has no operand, then it must be a label instead.
+                  Match = NULL;
+                  ParseInputRecord.Operator = "";
+              } else if (Match && Match->PinchHit && NumInterpretiveOperands) {
+                  NumInterpretiveOperands--;
+                  PinchHitting = 1;
+                  if (i < NumFields)
+                      ParseInputRecord.Operator = Fields[i++];
+              } else {
+                  NumInterpretiveOperands = 0;
+                  if (i < NumFields)
+                      ParseInputRecord.Operator = Fields[i++];
+              }
             }
             NotOffset:
             if (i < NumFields)
@@ -1244,6 +1216,15 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                 ParseInputRecord.Mod2 = Fields[i++];
             if (i < NumFields)
                 ParseInputRecord.Extra = Fields[i];
+        }
+
+        // Take care of the silly Block 1 construct where some operators which are
+        // intended to operate at their own address are not followed by an operand.
+        // I'm not sure how many different operators are affected by this, so I'm
+        // just hard-coding the ones I've seen.
+        if (Block1 && (NULL == ParseInputRecord.Operand || 0 == ParseInputRecord.Operand[0])) {
+            if (!strcmp(ParseInputRecord.Operator, "TC") || !strcmp(ParseInputRecord.Operator, "CADR"))
+          ParseInputRecord.Operand = "-0";
         }
 
         // At this point, the input line has been completely parsed into
@@ -1266,12 +1247,17 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                     ParseOutputRecord.Warning = 1;
                 }
 
-                if (ParseInputRecord.ProgramCounter.Erasable) {
-                    ParseInputRecord.Operator = "CA";
+                if (Block1) {
+                    ParseInputRecord.Operator = "XCH";
                     ParseInputRecord.Operand = "A";
                 } else {
-                    ParseInputRecord.Operator = "TCF";
-                    ParseInputRecord.Operand = "+1";
+                  if (ParseInputRecord.ProgramCounter.Erasable) {
+                      ParseInputRecord.Operator = "CA";
+                      ParseInputRecord.Operand = "A";
+                  } else {
+                      ParseInputRecord.Operator = "TCF";
+                      ParseInputRecord.Operand = "+1";
+                  }
                 }
 
                 ParseInputRecord.Alias = "NOOP";
@@ -1289,7 +1275,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                 // We check to see if the opcode is an interpretive opcode.
                 // If not, then we can fall through and process regular opcodes.
                 // If it is, there are two possibilities:  Either there is a
-                // single intepretive opcode, or else there are two (with the
+                // single interpretive opcode, or else there are two (with the
                 // second being in the operand field).  We must also observe the
                 // number of operands required by the instructions, and then to
                 // increase NumInterpretive Operands by this amount.

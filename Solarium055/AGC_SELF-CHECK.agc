@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-03 JL	Created.
+#		2016-08-19 RSB	Typos.
 
 ## Page 265
 
@@ -279,7 +280,7 @@ TS+-CHK		CAF	SCON1
 		TS	OVCTR
 		CS	A		# C(A) = 77774
 		INDEX	5777
-		6	SCONT5		# C(A) =  -0 WITH UNDERFLOW
+		6	SCONTS		# C(A) =  -0 WITH UNDERFLOW
 		TS	SKEEP1
 		TC	ERRORS
 		AD	SKEEP1		# C(A) = -1
@@ -482,7 +483,7 @@ CYCLSHFT	CAF	CONC+S1
 		TS	SL		# C(SL) = 12524
 		AD	CYR
 		AD	CYL
-		AS	SR
+		AD	SR
 		AD	SL
 		AD	CONC+S2		# C(A) = -1
 		TC	-ONECHK
@@ -920,7 +921,7 @@ DV4--		CS	DVCON1
 		TC	DUMEXIT
 		CCS	SKEEP7
 		TC	+2
-		TC	SOPTIONS -3
+		TC	SOPTION3 -3
 		TS	SKEEP7
 		TC	DV1++		# BACK TO DEVIDE LOOP
 		
