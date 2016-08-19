@@ -282,7 +282,7 @@ SUBDIRS += yaACA
 endif
 SUBDIRS += yaACA3
 SUBDIRS += $(MISSIONS)
-SUBDIRS += Validation ControlPulseSim yaTelemetry jWiz VirtualAGC
+SUBDIRS += ControlPulseSim yaTelemetry jWiz VirtualAGC
 .PHONY: $(SUBDIRS)
 
 .PHONY: default
