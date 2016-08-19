@@ -260,9 +260,10 @@ endif
 BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSES)" LIBS2="$(LIBS)" NOREADLINE=$(NOREADLINE) ReadlineForWin32=$(ReadlineForWin32) $(ARCHS) EXT=$(EXT)
 
 # List of mission software directories to be built.
-MISSIONS = Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237  Validation # Solarium055
+MISSIONS = Validation Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237 # Solarium055
 
-SUBDIRS = Tools yaLEMAP yaAGC yaAGS
+SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL
+
 ifndef NOGUI
 ifeq "$(YADEDA_SUFFIX)" ""
 SUBDIRS += yaDEDA/src
