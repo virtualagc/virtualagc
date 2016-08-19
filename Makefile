@@ -262,7 +262,8 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 # List of mission software directories to be built.
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237 # Solarium055
 
-SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL
+# The base set of targets to be built always.
+SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
 
 ifndef NOGUI
 ifeq "$(YADEDA_SUFFIX)" ""
@@ -275,14 +276,18 @@ SUBDIRS += yaDSKY/src
 else
 SUBDIRS += yaDSKY2
 endif
-endif
-SUBDIRS += yaYUL yaUniverse yaACA2
 ifndef WIN32
 SUBDIRS += yaACA
 endif
+SUBDIRS += yaACA2
 SUBDIRS += yaACA3
+SUBDIRS += yaTelemetry 
+SUBDIRS += jWiz
+SUBDIRS += VirtualAGC
+endif # NOGUI
+
 SUBDIRS += $(MISSIONS)
-SUBDIRS += ControlPulseSim yaTelemetry jWiz VirtualAGC
+
 .PHONY: $(SUBDIRS)
 
 .PHONY: default
