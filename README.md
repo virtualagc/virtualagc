@@ -2,7 +2,7 @@ Virtual Apollo Guidance Computer
 ================================
 
 
-### Build status of master branche
+### Build status
 
 | Travis CI (Linux / OS X) |
 |--------------------------|
