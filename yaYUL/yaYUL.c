@@ -157,7 +157,7 @@ int
 main (int argc, char *argv[])
 {
   int MaxPasses = 10;
-  int RetVal = 1, i, j, k, LastUnresolved, Fatals, Warnings;
+  int RetVal = 1, i, j, k, LastUnresolved, Fatals = 0, Warnings = 0;
   extern int UnpoundPage;
   
   // JMS: OutputSymbols = 1 to output a symbol table to SymbolFile.

@@ -84,7 +84,7 @@ void PrintBankCounts(void)
 // source line.
 void UpdateBankCounts(Address_t *pc)
 {
-    int Count, bank;
+    int Count = 0, bank = 0;
 
     if (pc->Invalid || !pc->Address || !pc->Fixed || pc->Overflow)
         return;
