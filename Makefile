@@ -288,8 +288,6 @@ SUBDIRS += ControlPulseSim yaTelemetry jWiz VirtualAGC
 .PHONY: default
 default: all
 
-.PHONY: all all-archs
-
 .PHONY: missions $(MISSIONS) clean-missions
 missions: $(MISSIONS)
 
@@ -303,6 +301,7 @@ clean-missions:
 corediffs: yaYUL Tools
 	for subdir in $(MISSIONS) ; do make -C $$subdir corediff.txt ; done
 
+.PHONY: all all-archs
 all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(SUBDIRS)
