@@ -98,7 +98,7 @@
 // The following should be uncommented to enable Block 1 fixes for parsing
 // interpreter code.  But those fixes aren't working yet, so leave commented
 // for now!
-#define BLOCK1_FIXES
+//#define BLOCK1_FIXES
 
 //-------------------------------------------------------------------------
 // Some global data.
@@ -765,7 +765,8 @@ static InterpreterMatch_t *FindInterpreter(const char *Name)
 {
     InterpreterMatch_t Key;
 
-    strcpy(Key.Name, Name);
+    strncpy(Key.Name, Name, MAX_LABEL_LENGTH);
+    Key.Name[MAX_LABEL_LENGTH] = 0;
 
     return (bsearch(&Key, InterpreterOpcodes, NUM_INTERPRETERS, sizeof(InterpreterOpcodes[0]), CompareInterpreters));
 }
