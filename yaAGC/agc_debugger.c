@@ -1161,10 +1161,7 @@ DbgExecute ()
 	  if (s[0] == '#' || s[0] == 0)
 	    continue;
 
-	  if (GdbmiHelp (s) > 0)
-	    continue;
-	  else if (legacyHelp (s) > 0)
-	    continue;
+	  if (GdbmiHelp (s) > 0) continue;
 	  else if (1 == sscanf (s, "LOG%d", &i))
 	    {
 	      if (LogFile != NULL)
