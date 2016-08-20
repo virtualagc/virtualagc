@@ -234,6 +234,9 @@ else
 ifdef DEV_BUILD
 CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
 yaACA=
+else if defined(DEBUG_BUILD)
+CFLAGS=-DALLOW_BSUB -g -O0
+yaACA=-
 else
 CFLAGS=-DALLOW_BSUB
 yaACA=-
