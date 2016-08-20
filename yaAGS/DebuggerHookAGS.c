@@ -1,5 +1,5 @@
 /*
-  Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -36,6 +36,8 @@
 				in Win32.
 		2009-02-28 RSB	Bypass some compiler warnings on 64-bit
 				machines.
+		2016-08-20 RSB  Replaced a couple of bogus uses of strcpy with
+		                memmove.
 */
 
 #include "yaAEA.h"
@@ -676,14 +678,14 @@ Redraw:
       rfgetsAGS (State, s, sizeof (s) - 1, stdin);
       RealTimeOffsetAGS += times (&TimeStruct) - StoppedAt;
       while (isspace (s[0]))	// Get rid of leading spaces.
-        strcpy (&s[0], &s[1]); 
+        memmove (&s[0], &s[1], strlen(s));
       strcpy (sraw, s);
       for (ss = s; *ss; ss++)
         {
 	  // Turn to upper case, get rid of multiple spaces and
 	  // end-of-line linefeed.
 	  while (isspace (*ss) && isspace (ss[1]))
-	    strcpy (ss, ss + 1);
+	    memmove (ss, ss + 1, strlen(ss));
 	  *ss = toupper (*ss);
 	  if (*ss == '\n')
 	    *ss = 0;
