@@ -924,10 +924,10 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
     int StadrInvert = 0;
     int BlockAssigned = 0;
 #ifdef BLOCK1_FIXES
-    int expectedNumInterpreterOperatorLines = 0, currentNumInterpreterOperatorLines = 0,
-        operandIsCount = 0, operandIsLabel = 0, interpretiveOperators = 0,
-        interpretiveOperands = 0;
+    int expectedNumInterpreterOperatorLines = 0, currentNumInterpreterOperatorLines = 0;
 #endif
+    int interpretiveOperators = 0, interpretiveOperands = 0,
+        operandIsCount = 0, operandIsLabel = 0;
 
     // Make sure of Block 1 vs. Block 2 settings.
     if (!BlockAssigned && Block1) {
