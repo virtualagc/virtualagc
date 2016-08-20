@@ -98,7 +98,7 @@
 // The following should be uncommented to enable Block 1 fixes for parsing
 // interpreter code.  But those fixes aren't working yet, so leave commented
 // for now!
-//#define BLOCK1_FIXES
+#define BLOCK1_FIXES
 
 //-------------------------------------------------------------------------
 // Some global data.
@@ -737,7 +737,8 @@ void SortParsers(void)
 static ParserMatch_t *FindParser(const char *Name)
 {
     ParserMatch_t Key;
-    strcpy(Key.Name, Name);
+    strncpy(Key.Name, Name, MAX_LABEL_LENGTH);
+    Key.Name[MAX_LABEL_LENGTH] = 0;
     return (bsearch(&Key, Parsers, NUM_PARSERS, sizeof(Parsers[0]), CompareParsers));
 }
 
@@ -923,7 +924,8 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
     int BlockAssigned = 0;
 #ifdef BLOCK1_FIXES
     int expectedNumInterpreterOperatorLines = 0, currentNumInterpreterOperatorLines = 0,
-        operandIsCount = 0, operandIsLabel = 0, interpretiveOperators = 0;
+        operandIsCount = 0, operandIsLabel = 0, interpretiveOperators = 0,
+        interpretiveOperands = 0;
 #endif
 
     // Make sure of Block 1 vs. Block 2 settings.
@@ -1152,32 +1154,51 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
             operandIsCount = 0;
             operandIsLabel = 0;
             interpretiveOperators = 0;
+            interpretiveOperands = 0;
             if (Block1) {
+                static char lastLines[10][sizeof(s)] = { "", "", "", "", "", "", "", "", "", "" };
+                int k;
+                char *ss;
+                ss = strstr(s, "\n");
+                if (ss != NULL)
+                  *ss = 0;
+                if (!strcmp(s, "\t\tNOLOD\t2"))
+                  {
+                    fprintf(stderr, "Here!  %s, %d\n", CurrentFilename, CurrentLineInFile);
+                  }
+                for (k = 9; k > 0; k--)
+                  strcpy(lastLines[k], lastLines[k-1]);
+                strcpy (lastLines[0], s);
                 if (currentNumInterpreterOperatorLines < expectedNumInterpreterOperatorLines) {
                     InterpreterMatch_t *iMatch2;
-                    iMatch2 = FindInterpreter(Fields[i+1]);
-                    // This line must be a line off interpretive operators.
                     interpretiveOperators = 1;
+                    ParseInputRecord.Operator = Fields[i++];
+                    iMatch2 = FindInterpreter(Fields[i]);
+                    // This line must be a line off interpretive operators.
                     currentNumInterpreterOperatorLines++;
                     NumInterpretiveOperands += iMatch->NumOperands;
                     if (iMatch2 != NULL)
                       NumInterpretiveOperands += iMatch2->NumOperands;
-                } else if (NumInterpretiveOperands > 0) {
+                } else if (NumInterpretiveOperands > 0 || (NumInterpretiveOperands == 0 && !iMatch && !Match)) {
                     // This line must be an interpretive operand.
+                    ParseInputRecord.Operator = "";
+                    interpretiveOperands = 1;
                     operandIsLabel = 1;
                     NumInterpretiveOperands--;
                 } else if (iMatch) {
                     int j;
                     // This must be the first line of a string of interpretive operators.
                     // I don't know that 7 is the maximum, but 7 is the most I've observed.
-                    j = atoi(Fields[i+1]);
-                    if (isdigit(Fields[i+1]) && strlen(Fields[i+1]) == 1 && j >= 0 && j <= 7) {
+                    interpretiveOperators = 1;
+                    ParseInputRecord.Operator = Fields[i++];
+                    expectedNumInterpreterOperatorLines = 0;
+                    j = atoi(Fields[i]);
+                    if (isdigit(Fields[i][0]) && strlen(Fields[i]) == 1 && j >= 0 && j <= 7) {
                         // The operand is actually a count of the number of lines of operators
                         // that follow.
                         expectedNumInterpreterOperatorLines = j;
                         operandIsCount = 1;
                     } else {
-                        expectedNumInterpreterOperatorLines = 0;
                         operandIsLabel = 1;
                     }
                     currentNumInterpreterOperatorLines = 0;
@@ -1263,103 +1284,123 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                 ParseInputRecord.Alias = "NOOP";
             }
 
+            //-------------------------------------------------------------------------------------------------------
             AliasRetry:
-            // We treat the interpretive opcodes first (except for STCALL, STODL,
-            // STORE, and STOVL) separately, because they are more regular and
-            // don't follow the pattern of the other opcodes.
-            iMatch = FindInterpreter(ParseInputRecord.Operator);
-            if (iMatch) {
-                InterpreterMatch_t *iMatch2;
-                if (!strcmp(ParseInputRecord.Operator, "STADR") || !strcmp(ParseInputRecord.Operand, "STADR"))
-                    StadrInvert = 2;
-                // We check to see if the opcode is an interpretive opcode.
-                // If not, then we can fall through and process regular opcodes.
-                // If it is, there are two possibilities:  Either there is a
-                // single interpretive opcode, or else there are two (with the
-                // second being in the operand field).  We must also observe the
-                // number of operands required by the instructions, and then to
-                // increase NumInterpretive Operands by this amount.
-                NumInterpretiveOperands = 0;
-                // Look for a second one.
-                iMatch2 = NULL;
-                if (ParseInputRecord.Operand[0]) {
-                    iMatch2 = FindInterpreter(ParseInputRecord.Operand);
-                    if (!iMatch2) {
-                        sprintf(ParseOutputRecord.ErrorMessage,
-                                "Unrecognized interpretive opcode \"%s\".",
-                                ParseInputRecord.Operand);
-                        ParseOutputRecord.Fatal = 1;
+            if (Block1)
+              {
+                if  (interpretiveOperators || interpretiveOperands)
+                  {
+                    // Temporarily, just too nothing except write out a word of 0 and advance to the next address.
+                    operandIsCount++;
+                    operandIsLabel++;
+                    ParseOutputRecord.Words[0] = 0;
+                    IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, &ParseOutputRecord.ProgramCounter);
+                    ParseOutputRecord.EBank = ParseInputRecord.EBank;
+                    ParseOutputRecord.SBank = ParseInputRecord.SBank;
+                    goto WriteDoIt;
+                  }
+              }
+            else // Block 2
+              {
+                // We treat the interpretive opcodes first (except for STCALL, STODL,
+                // STORE, and STOVL) separately, because they are more regular and
+                // don't follow the pattern of the other opcodes.
+                iMatch = FindInterpreter(ParseInputRecord.Operator);
+                if (iMatch) {
+                    InterpreterMatch_t *iMatch2;
+                    if (!strcmp(ParseInputRecord.Operator, "STADR") || !strcmp(ParseInputRecord.Operand, "STADR"))
+                        StadrInvert = 2;
+                    // We check to see if the opcode is an interpretive opcode.
+                    // If not, then we can fall through and process regular opcodes.
+                    // If it is, there are two possibilities:  Either there is a
+                    // single interpretive opcode, or else there are two (with the
+                    // second being in the operand field).  We must also observe the
+                    // number of operands required by the instructions, and then to
+                    // increase NumInterpretive Operands by this amount.
+                    NumInterpretiveOperands = 0;
+                    // Look for a second one.
+                    iMatch2 = NULL;
+                    if (ParseInputRecord.Operand[0]) {
+                        iMatch2 = FindInterpreter(ParseInputRecord.Operand);
+                        if (!iMatch2) {
+                            sprintf(ParseOutputRecord.ErrorMessage,
+                                    "Unrecognized interpretive opcode \"%s\".",
+                                    ParseInputRecord.Operand);
+                            ParseOutputRecord.Fatal = 1;
+                        }
                     }
-                }
-                // At this point, iMatch should point to an interpretive
-                // opcode's type record, and iMatch2 will either be NULL
-                // or else point to one also.
-                NumInterpretiveOperands = 0;
-                if (iMatch->NumOperands) {
-                    SwitchIncrement[NumInterpretiveOperands] = iMatch->ArgTypes[0];
-                    nnnnFields[NumInterpretiveOperands++] = iMatch->nnnn0000;
-                    if (iMatch->NumOperands > 1) {
-                        SwitchIncrement[NumInterpretiveOperands] = iMatch->ArgTypes[1];
-                        nnnnFields[NumInterpretiveOperands++] = 0;
-                    }
-                }
-                if (iMatch2) {
-                    if (iMatch2->NumOperands) {
-                        SwitchIncrement[NumInterpretiveOperands] = iMatch2->ArgTypes[0];
-                        nnnnFields[NumInterpretiveOperands++] = iMatch2->nnnn0000;
-                        if (iMatch2->NumOperands > 1) {
-                            SwitchIncrement[NumInterpretiveOperands] = iMatch2->ArgTypes[1];
+                    // At this point, iMatch should point to an interpretive
+                    // opcode's type record, and iMatch2 will either be NULL
+                    // or else point to one also.
+                    NumInterpretiveOperands = 0;
+                    if (iMatch->NumOperands) {
+                        SwitchIncrement[NumInterpretiveOperands] = iMatch->ArgTypes[0];
+                        nnnnFields[NumInterpretiveOperands++] = iMatch->nnnn0000;
+                        if (iMatch->NumOperands > 1) {
+                            SwitchIncrement[NumInterpretiveOperands] = iMatch->ArgTypes[1];
                             nnnnFields[NumInterpretiveOperands++] = 0;
                         }
                     }
-                }  
-                RawNumInterpretiveOperands = NumInterpretiveOperands;
-                ParseOutputRecord.NumWords = 1;
-                ParseOutputRecord.Words[0] = (0177 & (iMatch->Code + 1));
-                if (iMatch2)
-                    ParseOutputRecord.Words[0] |= (037600 & ((iMatch2->Code + 1) << 7));
-                ParseOutputRecord.Words[0] = (077777 & ~ParseOutputRecord.Words[0]);
-                IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords,
-                      &ParseOutputRecord.ProgramCounter);
-                ParseOutputRecord.EBank = ParseInputRecord.EBank;
-                ParseOutputRecord.SBank = ParseInputRecord.SBank;
-                //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
-                goto WriteDoIt;
-            } else if (NumInterpretiveOperands && !PinchHitting) {
-                // In this case, we need to find an operand for an interpretive
-                // opcode.  This will be either a label, or else a label with an
-                // offset.  Having found such an argument, we need to decrement
-                // NumInterpretiveOperands.
-                if (*ParseInputRecord.Operator == 0 && *ParseInputRecord.Operand == 0) {
-                    ParseOutputRecord.Words[0] = 0;
-                    ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
-                    ParseOutputRecord.EBank = ParseInputRecord.EBank;
-                    ParseOutputRecord.SBank = ParseInputRecord.SBank;
-                    goto WriteDoIt;
-                } else if (*ParseInputRecord.Operator == 0 && *ParseInputRecord.Operand != 0) {
+                    if (iMatch2) {
+                        if (iMatch2->NumOperands) {
+                            SwitchIncrement[NumInterpretiveOperands] = iMatch2->ArgTypes[0];
+                            nnnnFields[NumInterpretiveOperands++] = iMatch2->nnnn0000;
+                            if (iMatch2->NumOperands > 1) {
+                                SwitchIncrement[NumInterpretiveOperands] = iMatch2->ArgTypes[1];
+                                nnnnFields[NumInterpretiveOperands++] = 0;
+                            }
+                        }
+                    }
+                    RawNumInterpretiveOperands = NumInterpretiveOperands;
                     ParseOutputRecord.NumWords = 1;
-                    ParseInterpretiveOperand(&ParseInputRecord, &ParseOutputRecord);
-                    //ParseOutputRecord.Words[0] = AddAgc(ParseOutputRecord.Words[0], OpcodeOffset);
-                    NumInterpretiveOperands--;
-                    IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, &ParseOutputRecord.ProgramCounter);
+                    ParseOutputRecord.Words[0] = (0177 & (iMatch->Code + 1));
+                    if (iMatch2)
+                        ParseOutputRecord.Words[0] |= (037600 & ((iMatch2->Code + 1) << 7));
+                    ParseOutputRecord.Words[0] = (077777 & ~ParseOutputRecord.Words[0]);
+                    IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords,
+                          &ParseOutputRecord.ProgramCounter);
                     ParseOutputRecord.EBank = ParseInputRecord.EBank;
                     ParseOutputRecord.SBank = ParseInputRecord.SBank;
                     //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
                     goto WriteDoIt;
-                } else {
-                    sprintf(ParseOutputRecord.ErrorMessage, "Missing interpretive operands.");
-                    ParseOutputRecord.Fatal = 1;
-                    ParseOutputRecord.NumWords = 1;
-                    ParseOutputRecord.Words[0] = 0;
-                    NumInterpretiveOperands = 0;
-                    IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, &ParseOutputRecord.ProgramCounter);
-                    ParseOutputRecord.EBank = ParseInputRecord.EBank;
-                    ParseOutputRecord.SBank = ParseInputRecord.SBank;
-                    //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
-                    goto WriteDoIt;
+                } else if (NumInterpretiveOperands && !PinchHitting) {
+                    // In this case, we need to find an operand for an interpretive
+                    // opcode.  This will be either a label, or else a label with an
+                    // offset.  Having found such an argument, we need to decrement
+                    // NumInterpretiveOperands.
+                    if (*ParseInputRecord.Operator == 0 && *ParseInputRecord.Operand == 0) {
+                        ParseOutputRecord.Words[0] = 0;
+                        ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
+                        ParseOutputRecord.EBank = ParseInputRecord.EBank;
+                        ParseOutputRecord.SBank = ParseInputRecord.SBank;
+                        goto WriteDoIt;
+                    } else if (*ParseInputRecord.Operator == 0 && *ParseInputRecord.Operand != 0) {
+                        ParseOutputRecord.NumWords = 1;
+                        ParseInterpretiveOperand(&ParseInputRecord, &ParseOutputRecord);
+                        //ParseOutputRecord.Words[0] = AddAgc(ParseOutputRecord.Words[0], OpcodeOffset);
+                        NumInterpretiveOperands--;
+                        IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, &ParseOutputRecord.ProgramCounter);
+                        ParseOutputRecord.EBank = ParseInputRecord.EBank;
+                        ParseOutputRecord.SBank = ParseInputRecord.SBank;
+                        //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
+                        goto WriteDoIt;
+                    } else {
+                        sprintf(ParseOutputRecord.ErrorMessage, "Missing interpretive operands.");
+                        ParseOutputRecord.Fatal = 1;
+                        ParseOutputRecord.NumWords = 1;
+                        ParseOutputRecord.Words[0] = 0;
+                        NumInterpretiveOperands = 0;
+                        IncPc(&ParseInputRecord.ProgramCounter, ParseOutputRecord.NumWords, &ParseOutputRecord.ProgramCounter);
+                        ParseOutputRecord.EBank = ParseInputRecord.EBank;
+                        ParseOutputRecord.SBank = ParseInputRecord.SBank;
+                        //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
+                        goto WriteDoIt;
+                    }
                 }
-            }  
-            // Now try regular opcodes.
+              }
+
+            //-------------------------------------------------------------------------------------------------------
+            // Now try regular, non-interpretive opcodes.
             Match = FindParser(ParseInputRecord.Operator);
             if (!Match) {
                 int NumOperator;
