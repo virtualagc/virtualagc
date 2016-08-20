@@ -79,24 +79,31 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             return (0);
         }
 
-        if (!Address.Fixed || !Address.Banked) {
-            strcpy(OutRecord->ErrorMessage, "Destination not in an F-bank.");
-            OutRecord->Fatal = 1;
-            return (0);
-        }
+        if (Block1)
+          {
+            OutRecord->Words[0] = 000000 + Address.Value;
+          }
+        else
+          {
+            if (!Address.Fixed || !Address.Banked) {
+                strcpy(OutRecord->ErrorMessage, "Destination not in an F-bank.");
+                OutRecord->Fatal = 1;
+                return (0);
+            }
 
-        // If this is a superbank, we massage a little more to get into the 15-bit
-        // address range.
-        if (Address.Super && Address.FB >= 030)
-            Address.Value -= 010 * 02000;
+            // If this is a superbank, we massage a little more to get into the 15-bit
+            // address range.
+            if (Address.Super && Address.FB >= 030)
+                Address.Value -= 010 * 02000;
 
-        if (Address.Value < 010000 || Address.Value > 0107777) {
-            strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
-            OutRecord->Fatal = 1;
-            return (0);
-        }
+            if (Address.Value < 010000 || Address.Value > 0107777) {
+                strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
+                OutRecord->Fatal = 1;
+                return (0);
+            }
 
-        OutRecord->Words[0] = Address.Value - (Block1 ? 0 : 010000);
+            OutRecord->Words[0] = Address.Value - (Block1 ? 0 : 010000);
+          }
     } else {
         char args[32];
 

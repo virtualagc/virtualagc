@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-08 JL	Created.
+#		2009-08-19 RSB	Typos.
 
 ## Page 235
 
@@ -141,7 +142,7 @@ NNICDU		OCT	20
 NNOCDU		OCT	55
 		TC	ALM/END		# NN L/ 55
 		INDEX	WDRET		# NN = 55
-		YC	1
+		TC	1
 		
 ## Page 239
 
@@ -664,7 +665,7 @@ POSTBY1		XCH	IN1		# A CHANGE IN IN1 IS DETECTED.
 		COM			# STANDBY MINUS C(IN1) TAKEN BEFORE
 		AD	IN1LOTEM	# STANDBY. THIS DIFF IS IN THE BITS
 		TS	IN1LODIF	# CORRESPONDING TO TIME1, TIME2.
-		CAG	ZERO
+		CAF	ZERO
 		AD	IN1HITEM
 		EXTEND
 		SU	IN1HISAV
@@ -784,7 +785,7 @@ EXTRAI/O	TC	GRABDSP
 		TC	75RELOAD
 		TC	75RELOAD
 		
- +4		MASH	75HI12
+ +4		MASK	75HI12
 		CCS	A
 		TC	75RELOAD
 		

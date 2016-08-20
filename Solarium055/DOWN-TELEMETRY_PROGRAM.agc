@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-29 JL	Created.
+#		2016-08-19 RSB	Typo.
 
 ## Page 151
 
@@ -75,7 +76,7 @@ DNPHASE3	CCS	TMMARKER	# SEE IF ANY MARKERS TO BE SENT.
 		TC	DOMARKER
 		
 		CCS	TMINDEX		# SEND DOWN PART. LIST A ENTRY IF ANY.
-		TC	PHASE38A	# (COMMON TO PHASES 3 AND 6.)
+		TC	PHASE36A	# (COMMON TO PHASES 3 AND 6.)
 		
 		CAF	LPHASE4		# END OF PHASE 3, START PHASE 4.
 		TS	DNTMGOTO

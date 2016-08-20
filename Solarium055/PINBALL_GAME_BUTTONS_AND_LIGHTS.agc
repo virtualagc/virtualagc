@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-23 JL	Created.
+#		2016-08-19 RSB	Typos.
 
 ## Page 481
 
@@ -1999,7 +2000,7 @@ DSPBANK		CAF	R1D1
 
 
 
-		SETLOC	TSTOFUF +4
+		SETLOC	TESTOFUF +4
 
 #  DSPDECWD CONVERTS C(MPAC) AND C(MPAC+1) INTO A SIGN AND 5 CHAR DECIMAL
 # STARTING IN LOC SPECIFIED IN DSPCOUNT.
@@ -2498,7 +2499,7 @@ NVSUBEND	XCH	NVSBCADR
 
 
 
-		SETLOC	ENDRQWAIT +1
+		SETLOC	ENDRQWT +1
 NVSUB1		CAF	ENTSET		# IN BANK
 		TS	ENTRET		# SET RETURN TO NVSUBEND
 		CAF	LOW6

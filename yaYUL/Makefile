@@ -33,6 +33,7 @@
 #				invoke the make as
 #					YAYUL_TRACE=-DYAYUL_TRACE make
 #				(from Linux, anyway).
+#		2016-08-19 RSB	Didn't do that quite right.
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -56,7 +57,7 @@ else
    EXENAME=yaYUL
 endif
 
-CFLAGS = ${CFLAGS} ${YAYUL_TRACE}
+CFLAGS += ${YAYUL_TRACE}
 
 .PHONY: default
 default: $(EXENAME)

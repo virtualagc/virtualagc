@@ -77,12 +77,14 @@ int ParseINDEX(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	  OutRecord->Fatal = 1;
 	}
 
-      if ((InRecord->Extend && (Offset.SReg > 07777)) || (!InRecord->Extend && (Offset.SReg > (Block1 ? 05777 : 01777))))
+      if (!Block1) {
+      if ((InRecord->Extend && (Offset.SReg > 07777)) || (!InRecord->Extend && (Offset.SReg > 01777)))
         {
 	  strcpy(OutRecord->ErrorMessage, "Index is out of range.");
 	  Offset.SReg = 0;
 	  OutRecord->Fatal = 1;
 	}
+      }
 
       if (Offset.Constant)
         OutRecord->Words[0] = OPCODE + Offset.Value;
