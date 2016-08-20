@@ -822,7 +822,8 @@ void SortParsers(void)
 static ParserMatch_t *FindParser(const char *Name)
 {
     ParserMatch_t Key;
-    strcpy(Key.Name, Name);
+    strncpy(Key.Name, Name, MAX_LABEL_LENGTH);
+    Key.Name[MAX_LABEL_LENGTH] - 0;
     return (bsearch(&Key, Parsers, NUM_PARSERS, sizeof(Parsers[0]), CompareParsers));
 }
 
@@ -849,7 +850,8 @@ static InterpreterMatch_t *FindInterpreter(const char *Name)
 {
     InterpreterMatch_t Key;
 
-    strcpy(Key.Name, Name);
+    strncpy(Key.Name, Name, MAX_LABEL_LENGTH);
+    Key.Name[MAX_LABEL_LENGTH] = 0;
 
     return (bsearch(&Key, InterpreterOpcodes, NUM_INTERPRETERS, sizeof(InterpreterOpcodes[0]), CompareInterpreters));
 }
