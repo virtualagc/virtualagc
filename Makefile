@@ -231,9 +231,14 @@ WEBSITE=../sandroid.org/public_html/apollo
 CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
 yaACA=
 else 
-WEBSITE=..
+ifdef DEV_BUILD
+CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
+yaACA=
+else
 CFLAGS=-DALLOW_BSUB
 yaACA=-
+endif
+WEBSITE=..
 endif
 
 # Note:  The CURSES variable is misnamed.  It really is just any special libraries
