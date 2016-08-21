@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-22 JL	Created.
+#		2016-08-20 RSB	Typos.
 
 ## Page 296
 
@@ -107,7 +108,7 @@ KEPLER2		UNIT	1
 		AXT,2	DOT
 			RCV
 			10D		# SET MAXIMUM ITERATION COUNT TO 10.
-			VCV		IR/2 . VC IN 14
+			VCV		# IR/2 . VC IN 14
 
 		TSLT	0
 			30D
@@ -717,7 +718,7 @@ DENSITY		TSRT	2		# IF THE ALTITUDE IS GREATER THAN THE
 			RSCALE -14D
 			ALPHAM
 			DENSITY1
-			NRBANCH
+			NBRANCH
 
 DENSITY1	TSRT	2		# NORMALIZE ALTITUDE FOR AIR DENSITY
 		BDSU	TSLT		# 	FUNCTION SO THAT IT RANGES FROM

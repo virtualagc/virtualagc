@@ -63,7 +63,12 @@
                                 switch was used. 
                 2016-08-01 RSB  Various checks for return errors of library
                                 functions.
-
+                2016-08-20 RSB  Added some error messages to the symbol-table
+                                writer.  It turns out that writing the
+                                line-data to the symbol table was always
+                                failing at the first write, due to bad
+                                interpretation of a return code.  How
+                                could they have ever worked in the debugger?
 
   Concerning the concept of a symbol's namespace.  I had originally 
   intended to implement this, and so many functions had a namespace
@@ -78,6 +83,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 //-------------------------------------------------------------------------
 // Some global data.
@@ -883,29 +889,31 @@ int EditSymbolNew(const char *Name,
 
 void WriteSymbolsToFile(char *fname)
 {
-  int i, fd;
+  int i, fd, step;
   SymbolFile_t symfile = { { 0 } };
   Symbol_t symbol;
   SymbolLine_t Line;
 
   // Open the symbol table file
-  if ((fd = open (fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0) {
-    printf("\nFailed to open symbol table file: %s\n", fname);
-    return;
-  }
+  step = 1;
+  if ((fd = open (fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
+    goto error;
 
   // Write the SymbolFile_t header to the symbol file, filling its
   // members first.
+  step = 2;
   if (NULL == getcwd(symfile.SourcePath, MAX_PATH_LENGTH))
     goto error;
   symfile.NumberSymbols = SymbolTableSize;
   symfile.NumberLines = LineTableSize; // JMS: 07.28
   LittleEndian32(&symfile.NumberSymbols);
   LittleEndian32(&symfile.NumberLines);
+  step = 3;
   if (write(fd, (void *)&symfile, sizeof(SymbolFile_t)) < 0)
     goto error;
 
   // Loop and write the symbols to a file
+  step = 4;
   for (i = 0; i < SymbolTableSize; i++)
     {
       memcpy(&symbol, (void *)&SymbolTable[i], sizeof(Symbol_t));
@@ -919,20 +927,25 @@ void WriteSymbolsToFile(char *fname)
 
   // JMS: 07.28
   // Loop and write the symbol lines to a file
+  step = 5;
   for (i = 0; i < LineTableSize; i++)
     {
       memcpy(&Line, (void *)&LineTable[i], sizeof(SymbolLine_t));
       LittleEndian32(&Line);
       LittleEndian32(&Line.CodeAddress.Value);
       LittleEndian32(&Line.LineNumber);
-      if (write(fd, (void *) &Line, sizeof(SymbolLine_t)))
+      if (write(fd, (void *) &Line, sizeof(SymbolLine_t)) < 0)
         goto error;
     }
   if (0)
     {
+      char *s;
       error:;
-      printf("\nFile error.\n");
+      s = strerror(errno);
+      printf("\nFile error (symbol-table write, step %d): %s.\n", step, s);
     }
+  else
+    printf("\nSymbol-table file written.\n");
   close (fd);
 }
 

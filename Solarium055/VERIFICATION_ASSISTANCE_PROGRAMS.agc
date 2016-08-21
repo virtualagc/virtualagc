@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-21 JL	Created.
+#		2016-08-20 RSB	Typo.
 
 ## Page 754
 
@@ -74,7 +75,7 @@ WLTEST		XCH	IN2
 		CADR	QTSK4
 		CAF	TWO
 		TC	WAITLIST
-		CADR	TCTSKOVER	# TASK IN FIXED-FIXED.
+		CADR	TCTSKOVR	# TASK IN FIXED-FIXED.
 
 		TC	OUTCR1WT	# WAIT FOR 40 +31/32 +16, CALLING FOR
 		DEC	19		# RESET TO 50 +18/32.

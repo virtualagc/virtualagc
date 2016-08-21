@@ -2122,7 +2122,8 @@ agc_engine (agc_t * State)
 	  Accumulator = AddSP16 (Accumulator, SignExtend (*WhereWord));
 	  c (RegA) = Accumulator;
 	  if (IsA (Address10))
-	  ;
+	    {
+	    }
 	  else if (Address10 < REG16)
 	  c (Address10) = Accumulator;
 	  else
