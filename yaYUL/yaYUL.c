@@ -58,6 +58,7 @@
 				have to add additional tweaks as I go along.
 		02/20/10 RSB	Added --unpound-page.
 		08/18/16 RSB    Various stuff related to --block1.
+		08/21/16 RSB    Now outputs the correct number of banks for --block1.
 */
 
 #include "yaYUL.h"
@@ -166,11 +167,6 @@ main (int argc, char *argv[])
   int OutputSymbols = 1;	// 0;
   char *SymbolFile = NULL;
 
-  printf ("Apollo Guidance Computer (AGC) assembler, version " NVER 
-  	  ", built " __DATE__ "\n");
-  printf ("(c)2003-2005,2009-2010,2016 Ronald S. Burkey\n");
-  printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
-  
   // Parse the command-line options.
   for (i = 1; i < argc; i++)
     {
@@ -225,6 +221,12 @@ main (int argc, char *argv[])
 	  goto Done;
 	}	
     }
+
+  printf ("Apollo Guidance Computer (AGC) assembler, version " NVER
+          ", built " __DATE__ ", Block %d\n", (Block1 ? 1 : 2));
+  printf ("(c)2003-2005,2009-2010,2016 Ronald S. Burkey\n");
+  printf ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
+
   if (InputFilename == NULL || OutputFile == NULL)
     goto Done;  
   if (Html)
@@ -362,19 +364,31 @@ main (int argc, char *argv[])
       uint16_t Bugger, GuessBugger;
 
       printf ("\n");
-      for (BankRaw = 0; BankRaw < 044; BankRaw++)
+      for (BankRaw = (Block1 ? 1 : 0); BankRaw < (Block1 ? 035 : 044); BankRaw++)
         {
 	  // Compute the actual bank number.
 	  Bank = BankRaw;
-	  if (Bank < 4 && !Hardware)	// flip-flop 0,1 with 2,3 when not building for hardware targets
+	  if (Bank < 4 && !Hardware && !Block1)	// flip-flop 0,1 with 2,3 when not building for hardware targets
 	    Bank ^= 2;
 	  // Add bugger info to the bank.
-	  if (Bank == 2)
-	    Offset = 04000;
-	  else if (Bank == 3)
-	    Offset = 06000;
+	  if (Block1)
+	    {
+	      if (Bank == 0)
+	        Offset = 02000;
+	      else if (Bank == 1)
+	        Offset = 04000;
+	      else
+	        Offset = 06000;
+	    }
 	  else
-	    Offset = 02000;
+	    {
+              if (Bank == 2)
+                Offset = 04000;
+              else if (Bank == 3)
+                Offset = 06000;
+              else
+                Offset = 02000;
+	    }
 	  Value = GetBankCount (Bank);
 	  if (Value < 01776)
 	    {

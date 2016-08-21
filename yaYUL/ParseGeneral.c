@@ -78,7 +78,7 @@ int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, i
     OutRecord->NumWords = 1;
 
     if (Block1)
-      Flags = Flags & !(PC1|PC2|PC3|PC4|PC5|PC6|PC7|QC1|QC2|QC3|QCNOT0);
+      Flags = Flags & ~(PC1|PC2|PC3|PC4|PC5|PC6|PC7|QC1|QC2|QC3|QCNOT0);
 
     if (Flags & PC1)
         Opcode |= 01000;
@@ -107,14 +107,16 @@ int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, i
         OutRecord->Words[0] |= 06000;
 
     // Do some sanity checking.
-    if (InRecord->Extend && !(Flags & EXTENDED) && !InRecord->IndexValid) {
-        strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
-        OutRecord->Fatal = 1;
-        OutRecord->Extend = 0;
-    } else if (!InRecord->Extend && (Flags & EXTENDED)) {
-        strcpy(OutRecord->ErrorMessage, "Required EXTEND is missing.");
-        OutRecord->Fatal = 1;
-        OutRecord->Extend = 0;
+    if (!Block1) {
+      if (InRecord->Extend && !(Flags & EXTENDED) && !InRecord->IndexValid) {
+          strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+          OutRecord->Fatal = 1;
+          OutRecord->Extend = 0;
+      } else if (!InRecord->Extend && (Flags & EXTENDED)) {
+          strcpy(OutRecord->ErrorMessage, "Required EXTEND is missing.");
+          OutRecord->Fatal = 1;
+          OutRecord->Extend = 0;
+      }
     }
 
     if (InRecord->IndexValid) {

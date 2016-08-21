@@ -1,5 +1,5 @@
 /*
-  Copyright 2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2004,2016 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -30,6 +30,7 @@
 		I want, more or less, but I don't want to fire up Win32 just
 		for this purpose.)
   Mode:		07/26/04 RSB	Wrote.
+                08/21/16 RSB    Adapted for Block 1.
 
   The idea is simple.  We just do a word-by-word compare until we run out of
   data, and print messages where the words differ.  Originally I intended to
@@ -44,13 +45,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#define CORE_LENGTH (2 * 044 * 02000)
+#define CORE_LENGTH_BLOCK2 (2 * 044 * 02000)
+#define CORE_LENGTH_BLOCK1 (2 * 034 * 02000)
 
 int
 main (int argc, char *argv[])
 {
   FILE *f1, *f2;
-  int n1, n2, i, NoSuper = 0, NoZero = 0, OnlySuper = 0;
+  int n1, n2, i, NoSuper = 0, NoZero = 0, OnlySuper = 0, Block1 = 0;
   unsigned char d1[2], d2[2];
   
   // Parse command-line arguments.
@@ -106,8 +108,30 @@ main (int argc, char *argv[])
   n2 = ftell (f2);
   rewind (f1);
   rewind (f2);
-  if (n1 != CORE_LENGTH || n2 != CORE_LENGTH)
-    printf ("Improper file(s):  size of core-rope files should be %d.\n", CORE_LENGTH);
+  if (n1 == CORE_LENGTH_BLOCK1)
+    {
+      Block1 = 1;
+      printf ("File %s is Block 1.\n", argv[1]);
+    }
+  else if (n1 == CORE_LENGTH_BLOCK2)
+    printf ("File %s is Block 2.\n", argv[1]);
+  else
+    printf ("File %s is neither Block 1 nor Block 2.\n", argv[1]);
+  if (n2 == CORE_LENGTH_BLOCK1)
+    {
+      Block1 = 1;
+      printf ("File %s is Block 1.\n", argv[2]);
+    }
+  else if (n2 == CORE_LENGTH_BLOCK2)
+    printf ("File %s is Block 2.\n", argv[2]);
+  else
+    printf ("File %s is neither Block 1 nor Block 2.\n", argv[2]);
+  if (n1 != n2)
+    printf ("Files %s and %s are not the same length.\n", argv[1], argv[2]);
+  if (n1 < n2)
+    n2 = n1;
+  else if (n2 < n1)
+    n1 = n2;
     
   // Now compare!
   while (1 == fread (d1, 2, 1, f1) && 1 == fread (d2, 2, 1, f2))
@@ -118,27 +142,39 @@ main (int argc, char *argv[])
 	n2 = (d2[0] << 7) | (d2[1] >> 1);
 	if (NoZero && n2 == 0)
 	  continue;
-	if (0160 == (0160 & (n1 ^ n2)) &&
-	    (0100 == (0160 & n1) || 0060 == (0160 & n1)) )
-	  {
-	    if (NoSuper)
-	      continue;
-	  }
-	else
-	  {
-	    if (OnlySuper)
-	      continue;
-	  }
         i = (ftell (f1) - 2) / 2;
-	Offset = 02000 + (i % 02000);
-	Bank = i / 02000;
-	if (Bank < 4)
-	  Bank ^= 2;			// Swap banks 0,1 and 2,3.
-	printf ("0%06o (%02o,%04o", i, Bank, Offset);
-	if (i < 04000)
-	  printf (" or %04o): ", i + 04000);
+	if (Block1)
+	  {
+	    if (i < 06000)
+	      Offset = i;
+	    else
+	      Offset = 06000 + (i % 02000);
+	    Bank = 1 + i / 02000;
+
+	  }
 	else
-	  printf ("):         ");  
+	  {
+            if (0160 == (0160 & (n1 ^ n2)) &&
+                (0100 == (0160 & n1) || 0060 == (0160 & n1)) )
+              {
+                if (NoSuper)
+                  continue;
+              }
+            else
+              {
+                if (OnlySuper)
+                  continue;
+              }
+            Offset = 02000 + (i % 02000);
+            Bank = i / 02000;
+            if (Bank < 4)
+              Bank ^= 2;                    // Swap banks 0,1 and 2,3.
+	  }
+        printf ("0%06o (%02o,%04o", i, Bank, Offset);
+        if (i < 04000)
+          printf (" or %04o): ", i + (Block1 ? 02000 : 04000));
+        else
+          printf ("):         ");
 	printf ("%05o %05o\n", n1, n2);
       }
     

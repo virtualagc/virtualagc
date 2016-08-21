@@ -922,7 +922,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
     int StadrInvert = 0;
     int BlockAssigned = 0;
     int expectedNumInterpreterOperatorLines = 0, currentNumInterpreterOperatorLines = 0 ;
-    int noOperator = 1, foundInterpreterOperandCount, firstInterpreterColumn;
+    int noOperator = 1, foundInterpreterOperandCount /*, firstInterpreterColumn*/;
     static char lastLines[10][sizeof(s)] = { "", "", "", "", "", "", "", "", "", "" };
 
     // Make sure of Block 1 vs. Block 2 settings.
@@ -1100,56 +1100,85 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
             continue;
         } 
 
+        // Frankly, tabs and newlines will cause me a lot of problems further down, since
+        // there are actually a couple of things we need to use column alignment to check
+        // out.  So let's just start by expanding all tabs to spaces.
+        ss = strstr(s, "\n");
+        if (ss != NULL)
+          *ss = 0;
+        s[sizeof(s)-1] = 0;
+        for (ss = s; *ss;)
+          {
+            if (*ss == '\t')
+              {
+                int pos, tabStop, len;
+                pos = ss - s;
+                tabStop = ((pos + 8) & ~7);
+                len = strlen(ss + 1);
+                if (tabStop + len >= sizeof(s))
+                  len = sizeof(s) - tabStop - 1;
+                if (len > 0)
+                  memmove(&s[tabStop], &s[pos+1], len + 1);
+                else
+                  s[tabStop] = 0;
+                for (; pos < tabStop && pos < sizeof(s); pos++)
+                  s[pos] = ' ';
+                ss = &s[tabStop];
+              }
+            else
+              ss++;
+          }
+        *ss = 0;
+
         // Find and remove the comment field, if any.
         for (ParseInputRecord.Comment = s; *ParseInputRecord.Comment && *ParseInputRecord.Comment != COMMENT_SEPARATOR; ParseInputRecord.Comment++)
             ;
         if (*ParseInputRecord.Comment == COMMENT_SEPARATOR) {
             *ParseInputRecord.Comment++ = 0;
             // Trim the newline at the end:
-            for (ss = ParseInputRecord.Comment; *ss; ss++)
-                if (*ss == '\n')
-                    *ss = 0;
+            //for (ss = ParseInputRecord.Comment; *ss; ss++)
+            //    if (*ss == '\n')
+            //        *ss = 0;
         }
 
-        // Suck in all other fields.
+        // Suck in all other fields. Below, i is going to be the index of the next input field to be processed.
         NumFields = sscanf(s, "%s%s%s%s%s%s", Fields[0], Fields[1], Fields[2], Fields[3], Fields[4], Fields[5]);
         if (NumFields >= 1) {
+            int whichColumn;
+            // Column at which Field[0] starts.
+            whichColumn = strstr(s, Fields[0]) - s;
             i = 0;
-            if (*s && !isspace(*s)) {
+            if (whichColumn == 0) {
                 ParseInputRecord.Label = Fields[i++];
-            } else if (IsFalseLabel(Fields[0])) {
+            } else if (IsFalseLabel(Fields[0]) && whichColumn < 8) {
                 if (NumFields == 1)
                     goto NotOffset;
                 else
                     ParseInputRecord.FalseLabel = Fields[i++];
-            } else if (*s == ' ') {
-                int j;
-                for (j = 1; j < 8 && s[j] != 0; j++)
-                  if (s[j] == '\t')
-                    break;
-                  else if (s[j] != ' ') {
-                      i++;
-                      break;
-                  }
-            }
+            } else if (whichColumn < 8)
+              i++;
+            /*
+            // Column at which Fields[1] starts.
+            firstInterpreterColumn = whichColumn;
+            if (i > 0 && i < NumFields)
+              firstInterpreterColumn = strstr (&s[whichColumn + strlen(Fields[0])], Fields[i]) - s;
+            */
 
-            // Find the column position at which Fields[i] appears.  We treat tabs
-            // as going to the next column that's a multiple of 8, and any other
-            // character as being  a single column.  It is assumed by convention that
-            // the first operand appears at column 16, therefore if Fields[i] doesn't
-            // appear at column 16, it can't be an operator.  This is used only for
-            // Block 1 interpreter code, and only to determine that the line contains
-            // an address rather than an operator.
-            ss = strstr(s, "\n");
-            if (ss != NULL)
-              *ss = 0;
-            if (!strncmp(s, "FBR3\t", 4))
-              {
-                //fprintf(stderr, "Here!  %s, %d, %d\n", CurrentFilename, CurrentLineInFile, noOperator);
-              }
+            //if (!strcmp(ParseInputRecord.Label, "CHANJOB")) {
+            //    j++;
+            //}
+
             for (k = 9; k > 0; k--)
               strcpy(lastLines[k], lastLines[k-1]);
             strcpy (lastLines[0], s);
+
+            // It is assumed by convention that
+            // the first operand appears at column 16, therefore if Fields[i] doesn't
+            // appear at column 16, it can't be an operator.  This is used only for
+            // Block 1 interpreter code, and only to determine that the line contains
+            // an address rather than an operator.  Moreover, anything appearing in
+            // column 15 is *not* part of the operator.
+#if 0
             firstInterpreterColumn = 0;
             // Also take care of the '-' that sometimes appears in the column preceding
             // the operator in Block1.
@@ -1168,6 +1197,17 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                   firstInterpreterColumn++;
               }
             noOperator = strncmp(ss, Fields[i], strlen(Fields[i]));
+#endif
+            ParseInputRecord.Column8 = ' ';
+            noOperator = Block1;
+            if (strlen(s) >= 16)
+              {
+                ParseInputRecord.Column8 = s[15];
+                if (Block1 && ParseInputRecord.Column8 == '-')
+                   memmove(&Fields[i][0], &Fields[i][1], strlen(Fields[i]));
+                if (!strncmp(&s[16], Fields[i], strlen(Fields[i])))
+                  noOperator = 0;
+              }
 
             iMatch = FindInterpreter(Fields[i]);
             Match = FindParser(Fields[i]);
@@ -1261,6 +1301,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
         // At this point, the input line has been completely parsed into
         // the fields Label, FalseLabel, Operator, Operand, Increment,
         // and Comment.  Proceed with the analysis.
+        ParseOutputRecord.Column8 = ParseInputRecord.Column8;
         if (*ParseInputRecord.Operator == 0 && !NumInterpretiveOperands) {
             ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
             ParseOutputRecord.Extend = ParseInputRecord.Extend;

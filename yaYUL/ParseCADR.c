@@ -1,5 +1,5 @@
 /*
-  Copyright 2003 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -21,6 +21,7 @@
   Purpose:	Assembles the CADR and FCADR pseudo-ops.
   Mods:		04/27/03 RSB.	Began.
                 2012-09-25 JL   Handle arguments like "DUMMYJOB + 2", i.e. Mod1=+, Mod2=2.
+                2016-08-21 RSB  Adjusted for --block1.
  */
 
 #include "yaYUL.h"
@@ -81,7 +82,18 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
         if (Block1)
           {
-            OutRecord->Words[0] = 000000 + Address.Value;
+            int address;
+            unsigned offset;
+            if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
+              {
+                //address = (01777 & Address.SReg) + ((offset & ~03777) - 04000) + (offset & 077);
+                address = Address.SReg;
+              }
+            else
+              address = (Address.SReg & 01777) | (Address.FB << 10);
+            OutRecord->Words[0] = 077777 & address;
+            if (OutRecord->Column8 == '-')
+              OutRecord->Words[0] = 077777 & ~address;
           }
         else
           {

@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-30 JL	Created.
 #		2016-08-20 RSB	Typos.
+#		2016-08-21 RSB	More typos.
 
 ## Page 698
 
@@ -171,7 +172,7 @@ GETUNI		VXV	1		# UNI = UNIT(V*R)
 			PIPTIME
 		STORE	DTEAROT
 
-##  Page 702
+## Page 702
 
 UPDATERT	ITC	0		# UPDATE PREDICTED TARGET VECTOR RT
 			EARROT2

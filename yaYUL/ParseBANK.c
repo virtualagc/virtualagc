@@ -1,5 +1,5 @@
 /*
-  Copyright 2003,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2009,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -22,6 +22,7 @@
   History:      04/26/03 RSB    Began.
                 06/28/09 RSB    Added HTML output.
                 09/07/09 JL     Fixed typo in PrintBankCounts.
+                08/21/16 RSB    Adapted for --block1.
 
   I'm not actually certain what the BANK pseudo-op is supposed to do with 
   the banks in super-bank 1.  I allow those to be accepted, as bank 
@@ -71,7 +72,7 @@ void PrintBankCounts(void)
     if (HtmlOut != NULL)
         fprintf (HtmlOut, "<h1>Usage Table for Fixed-Memory Banks</h1>\n");
 
-    for (i = 0; i < NUM_FIXED_BANKS; i++) {
+    for (i = (Block1 ? 1 : 0); i < (Block1 ? 035 : NUM_FIXED_BANKS); i++) {
         printf("Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);
         if (HtmlOut != NULL)
             fprintf(HtmlOut, "Bank %02o:  %04o/2000 words used.\n", i, UsedInBank[i]);

@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-27 JL	Created.
 #		2016-08-20 RSB	Typos.
+#		2016-08-21 RSB	More typos.
 
 ## Page 628
 # THIS ROUTINE ENTERED AT CDUTRIG READS PRESENT CDU REGISTERS AND STORES THEM SCALED AT ONE REVOLUTION AS A DP
@@ -1906,6 +1907,12 @@ FINISHUP	SMOVE	1
 
 30MANU		DSU	1
 		BMN
+			2
+			0
+			35MANU
+
+		DSU	1
+		BMN		
 			6
 			4
 			GETPTCH
