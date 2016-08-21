@@ -1145,7 +1145,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
               *ss = 0;
             if (!strncmp(s, "FBR3\t", 4))
               {
-                fprintf(stderr, "Here!  %s, %d, %d\n", CurrentFilename, CurrentLineInFile, noOperator);
+                //fprintf(stderr, "Here!  %s, %d, %d\n", CurrentFilename, CurrentLineInFile, noOperator);
               }
             for (k = 9; k > 0; k--)
               strcpy(lastLines[k], lastLines[k-1]);
