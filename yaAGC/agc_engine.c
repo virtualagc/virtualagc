@@ -2529,16 +2529,21 @@ agc_engine (agc_t * State)
 	  if (Address10 < REG16)
 	    {
 	      ui = 0177777 & Accumulator;
-	      uj = 0177777 & c (Address10);
+	      uj = 0177777 & ~c (Address10);
 	    }
 	  else
 	    {
 	      ui = (077777 & OverflowCorrected (Accumulator));
-	      uj = (077777 & *WhereWord);
+	      uj = (077777 & ~*WhereWord);
 	    }
-	  diff = ui - uj;
-	  if (diff < 0)
-	  diff--;
+	  diff = ui + uj + 1; // Two's complement subtraction -- add the complement plus one
+	  // The AGC sign-extends the result from A15 to A16, then checks A16 to see if
+	  // one needs to be subtracted. We'll go in the opposite order, which also works
+	  if (diff & 040000)
+	    {
+	      diff |= 0100000; // Sign-extend A15 into A16
+	      diff--; // Subtract one from the result
+	    }
 	  if (IsQ (Address10))
 	  c (RegA) = 0177777 & diff;
 	  else
