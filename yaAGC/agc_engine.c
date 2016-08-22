@@ -2796,6 +2796,9 @@ agc_engine (agc_t * State)
       c (RegEB) &= 03400;
       c (RegFB) &= 076000;
       c (RegBB) &= 076007;
+      // Correct overflow in the L register (this is done on read in the original,
+      // but is much easier here)
+      c(RegL) = SignExtend (OverflowCorrected (c(RegL)));
     }
   return (0);
 }

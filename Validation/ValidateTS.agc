@@ -53,7 +53,7 @@ TS1
 		INCR	ERRSUB		# 3
 		CA	MAXP
 		AD	TEN
-		TS	L		# Should be 9.
+		TS	Q		# Should be 9.
 		TCF	VTSERROR	# No overflow.
 		INCR	ERRSUB		# 4
 		AD	NEGONE		# A should have been +1.
@@ -63,10 +63,10 @@ TS1
 TS2		INCR	ERRSUB		# 5
 		CA	NINE
 		EXTEND
-		SU	L
+		SU	Q
 		EXTEND
-		BZF	VTSERROR	# L contains overflow.
-		CA	L
+		BZF	VTSERROR	# Q contains overflow.
+		CA	Q
 		TS	TEMPI
 		NOOP
 		CA	NINE
@@ -81,11 +81,11 @@ TS3
 		# -Overflow
 		INCR	ERRSUB		# 6
 		CA	TEN
-		TS	L
+		TS	Q
 		CA	MAXN
 		EXTEND
-		SU	L
-		TS	L		# Should be -9.
+		SU	Q
+		TS	Q		# Should be -9.
 		TCF	VTSERROR	# No overflow.
 		INCR	ERRSUB		# 7
 		AD	ONE		# A should have been -1.
@@ -94,10 +94,10 @@ TS3
 		TCF	VTSERROR
 TS4A		INCR	ERRSUB		# 10 octal
 		CA	NINE
-		AD	L
+		AD	Q
 		EXTEND
-		BZF	VTSERROR	# L contains overflow.
-		CA	L
+		BZF	VTSERROR	# Q contains overflow.
+		CA	Q
 		TS	TEMPI
 		NOOP
 		CA	NINE
