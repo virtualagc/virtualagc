@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-21 JL	Created.
+#		2016-08-22 RSB	Typos.
 
 ## Page 120
 
@@ -47,7 +48,7 @@ NEWPHASE	INHINT
 		CAF	0
 		TS	PHASDATA
 
-		CS	0
+		CS	Q
 PHASCH2		INDEX	PHASDATA
 		TS	-PHASE1 -1	# PHASE1 IS FOR PROG NUM 1.
 		COM

@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-01 JL	Created.
 #		2016-08-19 RSB	Added temporary "BANK 30" workaround.
+#		2016-08-20 RSB	Typos.
 
 ## Page 746
 
@@ -74,6 +75,7 @@ CALCRVG		VXSC	0
 		
 		NOLOD	3
 		VSRT	VAD
+		VXSC	VSLT*
 		VAD	ITA
 			4
 			VN
@@ -272,7 +274,7 @@ REDO5.24	TC	FLAG1DWN	# INCORPORATED. ALSO, INDICATE THIS TO THE
 		
 		CS	501AVEX		# SET UP FOR AVERAGE G TO RETURN TO USUAL
 		TC	POSTJUMP	# POINT IN SERVICER
-		CADR	CALCGRV2
+		CADR	CALCRVG2
 
 BADUPTIM	EXIT	0		# COME HERE IF UPTIME REPRESENTS PAST TIME
 ## Page 752

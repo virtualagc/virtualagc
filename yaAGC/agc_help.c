@@ -11,6 +11,7 @@
 #include <sys/times.h>
 #define LB ""
 #endif
+#include "agc_help.h"
 
 static int gdbmi_status;
 
@@ -212,8 +213,19 @@ void gdbmiHandleHelp(char* s)
 	else if (!strncmp(s," FILES",6)) gdbmiHandleHelpFiles(s+6);
 	else if (!strncmp(s," STACK",6)) gdbmiHandleHelpStack(s+6);
 	else if (!strncmp(s," DEFINE",7)) gdbmiHandleHelpDefine(s+7);
-	else
-	{
+}
+/**
+ * This is the main entry function to handle help related commands. Only the
+ * case insensitive command string is passed for parsing.
+ */
+int GdbmiHelp(char* s)
+{
+	gdbmi_status = 0;
+
+	if (!strncmp(s,"HELP",4)) {
+	  gdbmiHandleHelp(s+4);
+	  if (gdbmi_status == 0) legacyHelp(s);
+	  if (gdbmi_status == 0) {
 printf("\
 List of classes of commands:\n\n\
 all -- List all commands\n\
@@ -227,24 +239,15 @@ Type \"help\" followed by a class name for a list of commands in that class.\n\
 Type \"help\" followed by command name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n\
 ");
+	  gdbmi_status++;
+	  }
 	}
-	gdbmi_status++;
-}
-/**
- * This is the main entry function to handle help related commands. Only the
- * case insensitive command string is passed for parsing.
- */
-int GdbmiHelp(char* s)
-{
-	gdbmi_status = 0;
-
-	if (!strncmp(s,"HELP",4)) gdbmiHandleHelp(s+4);
 	return gdbmi_status;
 }
 
 int legacyHelp(char* s)
 {
-	gdbmi_status = 0;
+	//gdbmi_status = 0;
 
 	if (!strcmp (s, "HELP BACKTRACE"))
 	{

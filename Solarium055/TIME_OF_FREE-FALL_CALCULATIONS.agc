@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-04 JL	Created.
+#		2016-08-20 RSB	Typos.
 
 ## Page 682
 ## (empty page)
@@ -573,7 +574,7 @@ HIECC		DMOVE	1
 		BMN	DMP
 			18D
 			14D
-			TFFQ		# (1+DEL/4)(TANTH1/2)-TAN(TH/2))
+			TFF0		# (1+DEL/4)(TANTH1/2)-TAN(TH/2))
 		
 		DSQ	1
 		DMP
@@ -610,7 +611,7 @@ HIECC		DMOVE	1
 		
 		ITCQ	0
 		
-TFF0		RMOVE	1
+TFF0		DMOVE	1
 		RTB
 			ZERODP
 			FRESHPD

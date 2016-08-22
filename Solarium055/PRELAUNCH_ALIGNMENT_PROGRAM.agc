@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-05 JL	Created.
 #		2009-10-30 JL	Fixed filename comment.
+#		2016-08-20 RSB	Resolved Jim's uncertainty about TP.
 
 ## Page 332
 
@@ -115,7 +116,7 @@ TOP33		VMOVE*	1
 			CALCGA
 ## Page 334
 		NOLOD	1
-			TP		## (jiml) TODO: Figure out if this an opcode or a reference in the wrong col.
+		TP
 		STORE	PRELXGA
 		
 		EXIT	0
@@ -389,7 +390,7 @@ ENDOFPR		DMOVE	0
 		
 PTORQUE		CAF	ZERO		# INITIALIZE TORQUING REGISTERS AND RESET
 		XCH	THETAX
-		AD	INFLAG +1
+		AD	INFLANG +1
 		TS	GYROANG +1
 		CAF	ZERO
 		AD	INFLANG
@@ -451,7 +452,7 @@ SPITGYRO	CAF	LGYROANG
 		TC	BANKCALL
 		CADR	IMUSTALL
 		TC	ENDOFJOB
-		TC	ENDFOJOB
+		TC	ENDOFJOB
 		
 ## Page 343
 
@@ -903,7 +904,7 @@ ROTXY		AXT,1	1		# ROTATE PROJECTION OF LOCAL VERTICAL ON
 		EXIT	0
 		
 		CAF	PRIO31		# GUESS WHAT WE'RE DOING
-		TS	I/PIPADT	# GIVE UP  WOULD YOU BELEIVE 2 SECONDS
+		TS	1/PIPADT	# GIVE UP  WOULD YOU BELEIVE 2 SECONDS
 		
 		TC	ENDJ3OUT	# TERMINATE PRELAUNCH. (PHASE = INACTIVE.)
 

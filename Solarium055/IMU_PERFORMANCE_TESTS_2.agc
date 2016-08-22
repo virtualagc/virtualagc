@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-04 JL	Created.
 #		2009-10-30 JL	Fixed filename comment.
+#		2016-08-20 RSB	Typos.
 
 ## Page 426
 
@@ -129,7 +130,7 @@ EEEE		TS	NDXCTR
 		CS	NDXCTR
 		AD	63DEC
 		AD	RUN
-		AD	NEG63
+		AD	NEG3
 		CCS	A
 		CAF	SIX
 		AD	NDXCTR
@@ -220,7 +221,7 @@ FINDNAVB	TC	MAKECADR
 		TC	NVSUB
 		TC	PRENVBSY
 		CAF	ONE
-		TC	BANCALL
+		TC	BANKCALL
 		CADR	SXTMARK
 		CCS	COAROFIN	# COARSE ALIGN OR FINE ALIGN MARKS
 		TC	CLGNMARK
@@ -766,7 +767,7 @@ SFCALC		CS	DATAPL +4
 			DC585
 			0
 			SGNAGREE
-		STORE	DPSTEM2
+		STORE	DSPTEM2
 		EXIT	0
 		TC	GRABDSP
 		TC	PREGBSY

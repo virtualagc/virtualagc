@@ -329,6 +329,7 @@ typedef struct {
   Bank_t EBank;                         // For EBANK= manipulations.
   Bank_t SBank;                         // For SBANK= manipulations.
   int Equals;                           // Non-zero if = or EQUALS.
+  char Column8;                         // Used only for Block1.
 } ParseOutput_t;
 
 typedef int Parser_t(ParseInput_t *ParseIn, ParseOutput_t *ParseOut);
