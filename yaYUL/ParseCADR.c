@@ -20,8 +20,12 @@
   Filename:	ParseCADR.c
   Purpose:	Assembles the CADR and FCADR pseudo-ops.
   Mods:		04/27/03 RSB.	Began.
-                2012-09-25 JL   Handle arguments like "DUMMYJOB + 2", i.e. Mod1=+, Mod2=2.
+                2012-09-25 JL   Handle arguments like "DUMMYJOB + 2",
+                		i.e. Mod1=+, Mod2=2.
                 2016-08-21 RSB  Adjusted for --block1.
+                2016-08-22 RSB	Removed the block 1 pre-operation '-'
+                		adjustment and put it in Pass.c
+                		instead.
  */
 
 #include "yaYUL.h"
@@ -82,18 +86,28 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
         if (Block1)
           {
-            int address;
+            int address, isLiteralNumber = 0;
+            char *s;
             unsigned offset;
+            if (!strcmp(InRecord->Label, "WCADRTAB")) {
+                fprintf (stderr, "Here!\n");
+            }
             if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
-              {
-                //address = (01777 & Address.SReg) + ((offset & ~03777) - 04000) + (offset & 077);
-                address = Address.SReg;
-              }
-            else
+              OpcodeOffset = offset;
+            isLiteralNumber = 1;
+            for (s = InRecord->Operand; *s; s++)
+              if (*s > '9' || *s < '0')
+                {
+                  isLiteralNumber = 0;
+                  break;
+                }
+            if (isLiteralNumber)
+              address = atoi(InRecord->Operand);
+            else if (Address.Fixed)
               address = (Address.SReg & 01777) | (Address.FB << 10);
+            else
+              address = Address.Value;
             OutRecord->Words[0] = 077777 & address;
-            if (OutRecord->Column8 == '-')
-              OutRecord->Words[0] = 077777 & ~address;
           }
         else
           {

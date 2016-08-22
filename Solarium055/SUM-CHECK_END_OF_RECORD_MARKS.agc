@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-15 JL	Created.
+#		2016-08-23 RSB	Typos.
 
 ## Page 759
 
@@ -64,7 +65,6 @@
 
 		TC
 ## Page 760
-		TC
 		TC
 
 		BANK	13

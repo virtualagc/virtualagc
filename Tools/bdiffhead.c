@@ -142,13 +142,10 @@ main (int argc, char *argv[])
 	n2 = (d2[0] << 7) | (d2[1] >> 1);
 	if (NoZero && n2 == 0)
 	  continue;
-        i = (ftell (f1) - 2) / 2;
+    i = (ftell (f1) - 2) / 2;
 	if (Block1)
 	  {
-	    if (i < 06000)
-	      Offset = i;
-	    else
-	      Offset = 06000 + (i % 02000);
+	    Offset = 06000 + (i % 02000);
 	    Bank = 1 + i / 02000;
 
 	  }

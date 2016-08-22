@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-16 JL	Created.
 #		2016-08-18 RSB	Some corrections.
+#		2016-08-23 RSB	More of the same.
 
 ## Page 37
 
@@ -253,7 +254,7 @@ NONINDEX	CS	POLISH		# GET 14 BIT ADDRESS
 SWADDR		TS	BANKREG
 		TS	POLISH
 		MASK	LOW10
-		AD	60K
+		AD	6K
 		TS	ADDRWD
 		TC	JUMP
 
