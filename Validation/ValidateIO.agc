@@ -23,13 +23,16 @@
 		
 # There is no good way to test the i/o channel functions solely within the 
 # CPU, as both peripheral devices and user interaction are really required.
-# We compromise (knowing that the CPU is virtual), and use the i/o channels
-# 20-27 (octal), which are not used either in Colossus or Luminary.		
+# We use CH11 and CH12 briefly, since both are 15 bits wide and both readable
+# and writeable.
+# CH11 controls status lights on the DSKY, so we back it up first. It also
+# contains the Engine On and Engine Off bits, so care should be taken to NOT
+# run Validation when an engine is attached.
 		
 		INCR	ERRNUM
 
 		# First check that L is channel 1 and Q is channel 2.
-		# Also, perform normal READs and WRITEs on channel 27.
+		# Also, perform normal READs and WRITEs on channel 11.
 		INCR	ERRSUB		# 1
 		CA	TEN
 		EXTEND
@@ -37,9 +40,12 @@
 		CA	FIVE
 		EXTEND
 		WRITE	Q
+		EXTEND
+		READ	CH11   # Back up CH11 so we don't permanently
+		TS	SKEEP3 # screw up the DSKY display
 		CA	NINE
 		EXTEND
-		WRITE	CH27
+		WRITE	CH11
 		CA	L
 		COM
 		AD	TEN
@@ -71,7 +77,7 @@ IO3		INCR	ERRSUB		# 4
 		TCF	IOERROR
 IO4		INCR	ERRSUB		# 5
 		EXTEND
-		READ	CH27
+		READ	CH11
 		COM
 		AD	NINE
 		EXTEND
@@ -89,10 +95,10 @@ IO5
 		WRITE	Q
 		CA	MASKR1
 		EXTEND
-		WRITE	CH26
+		WRITE	CH12
 		CA	MASKR1
 		EXTEND
-		WRITE	CH27
+		WRITE	CH11
 		CA	MASKL2
 		EXTEND
 		RAND	L
@@ -113,7 +119,7 @@ IO6A		INCR	ERRSUB		# 7
 IO7A		INCR	ERRSUB		# 10 octal
 		CA	MASKL2
 		EXTEND
-		RAND	CH26
+		RAND	CH12
 		COM
 		AD	ANDR1L2
 		EXTEND
@@ -122,7 +128,7 @@ IO7A		INCR	ERRSUB		# 10 octal
 IO8A		INCR	ERRSUB		# 11
 		CA	MASKR2
 		EXTEND
-		RAND	CH27
+		RAND	CH11
 		COM
 		AD	ANDR1R2
 		EXTEND
@@ -140,10 +146,10 @@ IO9A
 		WRITE	Q
 		CA	MASKR1
 		EXTEND
-		WRITE	CH26
+		WRITE	CH12
 		CA	MASKR1
 		EXTEND
-		WRITE	CH27
+		WRITE	CH11
 		CA	MASKL2
 		EXTEND
 		ROR	L
@@ -164,7 +170,7 @@ IO6O		INCR	ERRSUB		# 13
 IO7O		INCR	ERRSUB		# 14
 		CA	MASKL2
 		EXTEND
-		ROR	CH26
+		ROR	CH12
 		COM
 		AD	ORR1L2
 		EXTEND
@@ -173,7 +179,7 @@ IO7O		INCR	ERRSUB		# 14
 IO8O		INCR	ERRSUB		# 15
 		CA	MASKR2
 		EXTEND
-		ROR	CH27
+		ROR	CH11
 		COM
 		AD	ORR1R2
 		EXTEND
@@ -191,10 +197,10 @@ IO9O
 		WRITE	Q
 		CA	MASKR1
 		EXTEND
-		WRITE	CH26
+		WRITE	CH12
 		CA	MASKR1
 		EXTEND
-		WRITE	CH27
+		WRITE	CH11
 		CA	MASKL2
 		EXTEND
 		RXOR	L
@@ -215,7 +221,7 @@ IO6X		INCR	ERRSUB		# 17
 IO7X		INCR	ERRSUB		# 20 octal
 		CA	MASKL2
 		EXTEND
-		RXOR	CH26
+		RXOR	CH12
 		COM
 		AD	XORR1L2
 		EXTEND
@@ -224,7 +230,7 @@ IO7X		INCR	ERRSUB		# 20 octal
 IO8X		INCR	ERRSUB		# 21
 		CA	MASKR2
 		EXTEND
-		RXOR	CH27
+		RXOR	CH11
 		COM
 		AD	XORR1R2
 		EXTEND
@@ -242,10 +248,10 @@ IO9X
 		WRITE	Q
 		CA	MASKR1
 		EXTEND
-		WRITE	CH26
+		WRITE	CH12
 		CA	MASKR1
 		EXTEND
-		WRITE	CH27
+		WRITE	CH11
 		CA	MASKL2
 		EXTEND
 		WAND	L
@@ -280,7 +286,7 @@ IO12A		INCR	ERRSUB		# 25
 IO13A		INCR	ERRSUB		# 26
 		CA	MASKL2
 		EXTEND
-		WAND	CH26
+		WAND	CH12
 		COM
 		AD	ANDR1L2
 		EXTEND
@@ -288,7 +294,7 @@ IO13A		INCR	ERRSUB		# 26
 		TCF	IOERROR
 IO14A		INCR	ERRSUB		# 27
 		EXTEND
-		READ	CH26
+		READ	CH12
 		COM
 		AD	ANDR1L2
 		EXTEND
@@ -297,7 +303,7 @@ IO14A		INCR	ERRSUB		# 27
 IO15A		INCR	ERRSUB		# 30 octal
 		CA	MASKR2
 		EXTEND
-		WAND	CH27
+		WAND	CH11
 		COM
 		AD	ANDR1R2
 		EXTEND
@@ -305,7 +311,7 @@ IO15A		INCR	ERRSUB		# 30 octal
 		TCF	IOERROR
 IO16A		INCR	ERRSUB		# 31
 		EXTEND
-		READ	CH27
+		READ	CH11
 		COM
 		AD	ANDR1R2
 		EXTEND
@@ -323,10 +329,10 @@ IO17A
 		WRITE	Q
 		CA	MASKR1
 		EXTEND
-		WRITE	CH26
+		WRITE	CH12
 		CA	MASKR1
 		EXTEND
-		WRITE	CH27
+		WRITE	CH11
 		CA	MASKL2
 		EXTEND
 		WOR	L
@@ -361,7 +367,7 @@ IO12O		INCR	ERRSUB		# 35
 IO13O		INCR	ERRSUB		# 36
 		CA	MASKL2
 		EXTEND
-		WOR	CH26
+		WOR	CH12
 		COM
 		AD	ORR1L2
 		EXTEND
@@ -369,7 +375,7 @@ IO13O		INCR	ERRSUB		# 36
 		TCF	IOERROR
 IO14O		INCR	ERRSUB		# 37
 		EXTEND
-		READ	CH26
+		READ	CH12
 		COM
 		AD	ORR1L2
 		EXTEND
@@ -378,7 +384,7 @@ IO14O		INCR	ERRSUB		# 37
 IO15O		INCR	ERRSUB		# 40 octal
 		CA	MASKR2
 		EXTEND
-		WOR	CH27
+		WOR	CH11
 		COM
 		AD	ORR1R2
 		EXTEND
@@ -386,7 +392,7 @@ IO15O		INCR	ERRSUB		# 40 octal
 		TCF	IOERROR
 IO16O		INCR	ERRSUB		# 41
 		EXTEND
-		READ	CH27
+		READ	CH11
 		COM
 		AD	ORR1R2
 		EXTEND
@@ -399,8 +405,14 @@ IO17O
 
 		# All done!
 		TCF	IODONE
-IOERROR		TC	ERRORDSP
+IOERROR		CA	SKEEP3 # Fix CH11 before showing the error
+		EXTEND
+		WRITE	CH11
+		TC	ERRORDSP
 IODONE		CA	ZEROES
 		TS	ERRSUB
+		CA	SKEEP3 # Fix CH11 before moving on
+		EXTEND
+		WRITE	CH11
 		
 
