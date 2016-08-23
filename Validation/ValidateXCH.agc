@@ -79,14 +79,14 @@ XCH4
 		TCF	VXCERROR
 XCH5		INCR	ERRSUB		# 7
 		INCR	A
-		TS	L
+		TS	Q
 		NOOP
-		CA	L
+		CA	Q
 		COM
 		AD	TEN
 		EXTEND
-		BZF	VXCERROR	# L contains overflow.
-		CA	L
+		BZF	VXCERROR	# Q contains overflow.
+		CA	Q
 		TS	TEMPI
 		NOOP
 		CA	TEN

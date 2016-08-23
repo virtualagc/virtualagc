@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-03 JL	Created.
 #		2016-08-19 RSB	Typos.
+#		2016-08-23 RSB	More of the same.
 
 ## Page 265
 
@@ -244,9 +245,9 @@ DV+-		CS	Q		# +1/4
 		INDEX	5777
 		5	SCON-3/8	# C(A) = 52525
 		AD	SKEEP1		# C(A) = -0
-		TS	SKEEP1		# SHOULD BE -0
+		TS	SKEEP5		# SHOULD BE -0
 		XCH	LP
-		TS	SKEEP4
+		TS	SKEEP3
 DV--		XCH	Q		# -1/4
 		INDEX	5777
 		5	SCON-3/8	# C(A) = 25252
@@ -1017,7 +1018,7 @@ CCHK1		CAF	LCCHK2
 		TC	TASKOVER
 		
 CCHK2		XCH	IN3
-		XCH	IN3
+		CCS	IN3
 		TC	CCHKALM
 		TC	CCHKALM
 		TC	+2
@@ -1086,7 +1087,7 @@ DC9		TS	MPAC
 		MASK	MPAC +1
 		COM
 		TS	DSPTAB +7
-		CS	BIT1
+		CS	BIT11
 		MASK	MPAC +1
 		COM
 		TS	DSPTAB

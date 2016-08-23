@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-08 JL	Created.
 #		2009-08-19 RSB	Typos.
+#		2016-08-23 RSB	More of the same.
 
 ## Page 235
 
@@ -394,7 +395,7 @@ OPTCOARK	TC	GRABDSP		# SNATCH THEM DISPLAYS
 		TC	TERMEXTV
 		TC	+1		# PROCEED
 		
-		CADR	OPTCOARV	# RE-DISPLAY OUR OWN VERB
+		CAF	OPTCOARV	# RE-DISPLAY OUR OWN VERB
 		TC	NVSUB
 		TC	PRENVBSY
 		TC	FREEDSP		# LET IT GO
