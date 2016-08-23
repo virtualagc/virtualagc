@@ -59,6 +59,8 @@
  * 				and 'Missing' variables, since they weren't
  * 				being used for anything and were generating
  * 				compiler warnings.
+ * 		2016-08-23 RSB  An allocation of Block1, simply to avoid
+ * 		                a linker error for the updated SymbolTable.c.
  *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
@@ -89,6 +91,9 @@ typedef struct
 } ChecksumRegion_t;
 static ChecksumRegion_t ChecksumRegions[MAX_CHECKSUM_REGIONS];
 static int NumChecksumRegions = 0;
+
+// Just to avoid a linker error.  This variable is not used by the program.
+int Block1 = 0;
 
 //------------------------------------------------------------------------
 

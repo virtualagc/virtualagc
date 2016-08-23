@@ -59,6 +59,13 @@
 		02/20/10 RSB	Added --unpound-page.
 		08/18/16 RSB    Various stuff related to --block1.
 		08/21/16 RSB    Now outputs the correct number of banks for --block1.
+		08/23/16 RSB	Corrected the address offsets used for block 1 in the
+		                bugger-word table at the end of the listing.  Also,
+		                for block 2, yaYUL automatically adds the two
+		                extra pre-bugger-word address indicators, but in
+		                block 1 these appear explicitly in the code, so
+		                if yaYUL were to do it they would appear twice,
+		                and the bugger words would be wrong as well.
 */
 
 #include "yaYUL.h"
@@ -390,17 +397,19 @@ main (int argc, char *argv[])
                 Offset = 02000;
 	    }
 	  Value = GetBankCount (Bank);
-	  if (Value < 01776)
-	    {
-	      ObjectCode[Bank][Value] = Value + Offset;
-	      Value++;
-	    }
-	  if (Value < 01777)
-	    {
-	      ObjectCode[Bank][Value] = Value + Offset;
-	      Value++;
-	    }
-	  if (Value < 02000)
+	  if (!Block1) {
+            if (Value < 01776)
+              {
+                ObjectCode[Bank][Value] = Value + Offset;
+                Value++;
+              }
+            if (Value < 01777)
+              {
+                ObjectCode[Bank][Value] = Value + Offset;
+                Value++;
+              }
+	  }
+	  if (Value < 02000 && Value != 0)
 	    {
 	      for (Bugger = Offset = 0; Offset < Value; Offset++)
 		Bugger = Add (Bugger, ObjectCode[Bank][Offset]);
@@ -409,9 +418,11 @@ main (int argc, char *argv[])
 	      else
 	        GuessBugger = Add (077777 & ~Bank, 077777 & ~Bugger);
 	      ObjectCode[Bank][Value] = GuessBugger;
-	      printf ("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank, 02000 + Value);
+	      printf ("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
+	    		  (Block1 ? 06000 : 02000) + Value);
 	      if (HtmlOut != NULL)
-	        fprintf (HtmlOut, "Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank, 02000 + Value);
+	        fprintf (HtmlOut, "Bugger word %05o at %02o,%04o.\n", GuessBugger,
+	        		Bank, (Block1 ? 06000 : 02000) + Value);
 	    } 
 	  // Output the binary data.  
 	  for (Offset = 0; Offset < 02000; Offset++)

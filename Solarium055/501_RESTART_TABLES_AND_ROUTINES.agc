@@ -10,6 +10,7 @@
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-10-02 JL	Created.
 #		2016-08-18 RSB	Corrected typos
+#		2016-08-23 RSB	More of the same.
 
 ## Page 125
 #  RESTART  TABLES
@@ -41,7 +42,7 @@ CADRTAB		CADR	0		# CADR OF CURRENT JOB.
 2.3SPOT		OCT	0		# 2.3 RESTART
 		OCT	0
 		OCT	12000
-		CADR	ATTIJOB -1
+		CADR	ATTIJOB1 -1
 
 2.4SPOT		OCT	0		# RESTART 2.4
 		OCT	0

@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-28 JL	Created.
+#		2016-08-23 RSB	Typos.
 
 ## Page 140
 
@@ -138,7 +139,7 @@ GOPROG2		CAF	DVMONMSK	# SHOULD BE SYS FLAG FOR ENGINE ON.
 		AD	HUNGCODE	# HOPEFULLY PREVENT OR STOP RECURRING GOS.
 		CCS	A
 		TC	PHASECHK -1	# RESTART
-HUNGCODE	OCT	37775		# COMPLEMENT OF IN0 HUNG SETTING.
+HUNGCODE	OCT	37755		# COMPLEMENT OF IN0 HUNG SETTING.
 		TC	PHASECHK -1	# RESTART
 		TC	NOGO
 		

@@ -69,6 +69,13 @@
                                 failing at the first write, due to bad
                                 interpretation of a return code.  How
                                 could they have ever worked in the debugger?
+                2016-08-23 RSB  For Block 1 only, added an indicator to the
+                                symbol table, as to whether a given symbol
+                                is invalid (I), constant (C), erasable (E),
+                                or fixed (F) ... or unknown (?).  This is
+                                mainly for debugging, since I seem to have
+                                some invalid symbols, but there's no reason
+                                to remove it now that it's there.
 
   Concerning the concept of a symbol's namespace.  I had originally 
   intended to implement this, and so many functions had a namespace
@@ -764,11 +771,19 @@ Symbol_t *GetSymbol(const char *Name)
 void PrintSymbolsToFile(FILE *fp)
 {
   int i;
+  char *status = "";
 
   fprintf(fp, "Symbol Table\n------------\n");
+  if (Block1) {
+      fprintf(fp, "(Legend:  I=Invalid, C=Constant, E=Erasable, F=Fixed, ?=Error)\n\n");
+  }
 
-  if (HtmlOut != NULL)
+  if (HtmlOut != NULL) {
     fprintf(HtmlOut, "</pre>\n\n<h1>SymbolTable</h1>\n<pre>\n");
+    if (Block1) {
+        fprintf(fp, "<i>(Legend:  I=Invalid, C=Constant, E=Erasable, F=Fixed, ?=Error)</i><br><br>\n");
+    }
+  }
 
   for (i = 0; i < SymbolTableSize; i++)
     {
@@ -779,12 +794,25 @@ void PrintSymbolsToFile(FILE *fp)
               fprintf(HtmlOut, "\n");
         }
 
-      fprintf(fp, "%6d:   %-*s   ", i + 1, MAX_LABEL_LENGTH, SymbolTable[i].Name);
+      if (Block1) {
+        if (SymbolTable[i].Value.Invalid)
+          status = ",I";
+        else if (SymbolTable[i].Value.Constant)
+          status = ",C";
+        else if (SymbolTable[i].Value.Erasable)
+          status = ",E";
+        else if (SymbolTable[i].Value.Fixed)
+          status = ",F";
+        else
+          status = ",?";
+      }
+      fprintf(fp, "%6d%s:   %-*s   ", i + 1, status,
+          MAX_LABEL_LENGTH, SymbolTable[i].Name);
       if (HtmlOut)
         {
           static char s[257];
 
-          sprintf(s, "%06d:   %-*s   ", i + 1, MAX_LABEL_LENGTH, SymbolTable[i].Name);
+          sprintf(s, "%06d%s:   %-*s   ", i + 1, status, MAX_LABEL_LENGTH, SymbolTable[i].Name);
           fprintf(HtmlOut, "%s", NormalizeString (s));
         }
 
@@ -845,6 +873,10 @@ int EditSymbolNew(const char *Name,
 {
   char Namespace = 0;
   Symbol_t *Symbol;
+
+  //if (!strcmp(Name, "DECON")) {
+  //    fprintf(stderr, "Here!\n");
+  //}
 
   // Find out where the symbol is located in the symbol table.
   Symbol = GetSymbol(Name);

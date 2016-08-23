@@ -38,6 +38,10 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   Address_t Address;
   int Value, i;
 
+  //if (InRecord->ProgramCounter.Fixed && InRecord->ProgramCounter.FB == 6 && (InRecord->ProgramCounter.SReg & 01777) == 0176) {
+  //    fprintf(stderr, "Here!\n");
+  //}
+
   IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
@@ -85,7 +89,12 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
       if (Block1)
         {
-          OutRecord->Words[0] = 050000 + Address.Value;
+          if (Address.Erasable)
+            OutRecord->Words[0] = 050000 + Address.Value - 1;
+          else if (Address.Fixed)
+            OutRecord->Words[0] = 050000 + (Address.FB << 9) + (Address.Value & 1777) - 1;
+          else
+            OutRecord->Words[0] = 050000 + Address.Value;
         }
       else
         {
