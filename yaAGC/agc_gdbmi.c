@@ -1699,117 +1699,120 @@ GdbmiHandleOutput (int i)
   return (GdbmiCmdDone);
 }
 
+static GdbmiExamCfg_t GdbmiExamCfg = {1,'u','h',0,4};
+
 static GdbmiResult
 GdbmiHandleExamine (int j)
 {
-  int i;
-  int gdbmi_count = 1; /* Default 1 count */
-  unsigned gdbmi_addr = 0;
-  int gdbmi_value = 0;
-  //char gdbmi_format = 'x';
-  char gdbmi_size = 'w';
-  char* gdbmi_space = NULL;
-  char* invalid_char = NULL;
-  int gdbmi_apl = 4; /* default 8 addresses per line */
+  int i =  0;
+  unsigned gdbmi_addr  = 0;
+  int      gdbmi_value = 0;
+  char*    gdbmi_ptr   = NULL;
+ 
   GdbmiResult GdbmiStat = GdbmiCmdUnhandled;
 
   /* Adjust the CmdPtr to point to the next token */
   GdbmiAdjustCmdPtr (j);
 
   /* Do we see arguments */
-  if (s && (strlen (s) > 1))
+  if (s)
     {
       /* Is there a format Specifier */
-      if ((s = strstr (s, "/")))
+      if (*s++ == '/')
 	{
-	  gdbmi_count = (int) strtol (++s, &invalid_char, 0);
-	}
-
-      /* We already skipped the first space if it existed
-       * So look for the space in front of the address */
-      gdbmi_space = strstr (s, " ");
-
-      /* Look for size and format specifiers */
-      while (*s != 0)
-	{
-	  if (strstr (s, "W"))
+	  /* Looks like some specifies a format string... lets parse it */
+	  GdbmiExamCfg.count = (int) strtol (s, &gdbmi_ptr, 0);
+	  if (GdbmiExamCfg.count == 0 ) GdbmiExamCfg.count = 1;
+	  s = gdbmi_ptr;
+	  
+	  /* Look for size and format specifiers */
+	  while (*s != 0 && *s != ' ')
 	    {
-	      gdbmi_size = 'w';
-	      gdbmi_apl = 4;
-	    }
-	  else if (strstr (s, "B"))
-	    {
-	      gdbmi_size = 'b';
-	      gdbmi_apl = 4;
-	    } /* do 2 bytes at a time */
-	  else if (strstr (s, "H"))
-	    {
-	      gdbmi_size = 'h';
-	      gdbmi_apl = 8;
-	    }
-	  else if (strstr (s, "X"))
-	    {
-	      //gdbmi_format = 'x';
-	    }
-	  else if (strstr (s, "O"))
-	    {
-	      //gdbmi_format = 'o';
-	    }
-	  else if (strstr (s, "D"))
-	    {
-	      //gdbmi_format = 'd';
-	    }
-	  ++s;
-	}
+	      switch(*s++){
+		case 'B':  
+		  GdbmiExamCfg.unit = 'b';
+		  GdbmiExamCfg.apl = 4;
+		  break;
+		case 'H':
+		  GdbmiExamCfg.unit = 'h';
+		  GdbmiExamCfg.apl = 8;
+		  break;
+		case 'W':
+		  GdbmiExamCfg.unit = 'w';
+		  GdbmiExamCfg.apl  = 4;
+		  break;
+		case 'X':
+		  GdbmiExamCfg.fmt = 'x';
+		  break;
+		case 'O':
+		  GdbmiExamCfg.fmt = 'o';
+		  break;
+		case 'D':
+		  GdbmiExamCfg.fmt = 'd';
+		  break;
+		default:
+		  /* Unsupported Character */
+		  GdbmiStat = GdbmiCmdError;
+		  break;
+		} /* End Switch */
+	    } /* End While */
+	    if (*s == ' ') ++s;
+	} /* End Format Parsing */
 
       /* Get linear address */
-      if (gdbmi_space)
-	gdbmi_addr = DbgLinearAddrFromAddrStr (++gdbmi_space);
-      else
-	gdbmi_addr = DbgGetCurrentProgramCounter ();
+      if (strlen(s) > 0)
+      { 
+	 GdbmiExamCfg.addr = DbgLinearAddrFromAddrStr (s);
+      }
 
-      if ((gdbmi_count > 0) && (gdbmi_addr != ~0))
+      /* Use new or last Set Base Address */
+      gdbmi_addr = GdbmiExamCfg.addr;
+      
+      if ((GdbmiExamCfg.count > 0) && (gdbmi_addr != ~0) && GdbmiStat != GdbmiCmdError)
 	{
 	  /* Print first lead in address */
 	  printf ("0x%07x:", gdbmi_addr);
 
-	  for (i = 1; i <= gdbmi_count; i++)
+	  for (i = 1; i <= GdbmiExamCfg.count; i++)
 	    {
 	      //agc_addr = gdbmiNativeAddr(gdbmi_addr);
-	      gdbmi_value = DbgGetValueByAddress (gdbmi_addr);
-	      if (gdbmi_size == 'w')
+	      gdbmi_value = DbgGetValueByAddress (gdbmi_addr++);
+	      if (GdbmiExamCfg.unit == 'w')
 		{
-		  gdbmi_value = (gdbmi_value << 16)
-		      | DbgGetValueByAddress (++gdbmi_addr);
+		  /* Word Size so fetch next address too */
+		  gdbmi_value = (gdbmi_value << 16) | DbgGetValueByAddress (gdbmi_addr++);
 		}
 
-	      switch (gdbmi_size)
+	      switch (GdbmiExamCfg.unit)
 		{
 		case 'h':
 		  printf ("\t0x%04x", (unsigned short) gdbmi_value);
-		  ++gdbmi_addr;
 		  break;
 		case 'b':
 		  printf ("\t0x%02x\t0x%02x",
 			  (unsigned char) ((gdbmi_value >> 8) & 0xff),
-			  (unsigned char) (gdbmi_value & 0xff));
-		  ++gdbmi_addr;
+			  (unsigned char)  (gdbmi_value & 0xff));
 		  break;
 		default:
 		  printf ("\t0x%08x", (unsigned) gdbmi_value);
-		  ++gdbmi_addr;
 		  break;
 		}
 
 	      /* Do we need an address lead inprinted */
-	      if ((i % gdbmi_apl) == 0 && i < gdbmi_count)
+	      if ((i % GdbmiExamCfg.apl) == 0 && i < GdbmiExamCfg.count)
 		printf ("\n0x%07x:", gdbmi_addr);
 	    }
 	  printf ("\n");
+	  GdbmiStat = GdbmiCmdDone;
 	}
-      else
-	printf ("Invalid number \"%s\"\n", gdbmi_space);
+      else {
+	GdbmiStat = GdbmiCmdError;
+      }
     }
+    
+  if (GdbmiStat == GdbmiCmdError) 
+     printf ("Invalid address or FMT\n");
+  
   return (GdbmiStat);
 }
 

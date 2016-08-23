@@ -33,6 +33,15 @@ typedef struct
 	GdbmiResult (*Handler)(int);
 } GdbmiCommands_t;
 
+typedef struct
+{
+  int       count; /* Repeat: default is 1 */
+  char      fmt;   /* Format: x,d,u,o,t,a,c,f,s default is u */
+  char      unit;  /* Unit: (b)ytes (h)alfword (w)word (g)iant words */
+  unsigned  addr;  /* The last memory starting address */
+  int       apl;   /* Addresses per line */
+} GdbmiExamCfg_t;
+
 extern void GdbmiDisplayBreakpointForLine(SymbolLine_t* Line,int BreakpointId );
 extern GdbmiResult GdbmiInterpreter(agc_t* , char*, char* );
 extern void GdbmiPrintFullNameContents(SymbolLine_t *Line);
