@@ -1,5 +1,5 @@
 /*
-  Copyright 2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -21,6 +21,7 @@
   Purpose:	Assembles the XCADR pseudo-op.  This is a pseudo-op
   		unique to Block 1.
   Mode:		2009-07-25 RSB	Copied from ParseCADR.c.
+                2016-08-24 RSB  Fixed for Block 1.
   
   At the moment I don't know how or if XCADR differs from CADR, so I've
   just copied ParseCADR().
@@ -38,9 +39,9 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   Address_t Address;
   int Value, i;
 
-  //if (InRecord->ProgramCounter.Fixed && InRecord->ProgramCounter.FB == 6 && (InRecord->ProgramCounter.SReg & 01777) == 0176) {
-  //    fprintf(stderr, "Here!\n");
-  //}
+  if (!strcmp(InRecord->Operand, "DECON")) {
+      i = 0;
+  }
 
   IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
@@ -89,10 +90,24 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
       if (Block1)
         {
-          if (Address.Erasable)
+          int isLiteralNumber = 0;
+          char *s;
+          unsigned offset;
+          if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
+            OpcodeOffset = offset;
+          isLiteralNumber = 1;
+          for (s = InRecord->Operand; *s; s++)
+            if (*s > '9' || *s < '0')
+              {
+                isLiteralNumber = 0;
+                break;
+              }
+          if (isLiteralNumber)
+            OutRecord->Words[0] = 050000 + atoi(InRecord->Operand) - 1;
+          else if (Address.Erasable)
             OutRecord->Words[0] = 050000 + Address.Value - 1;
           else if (Address.Fixed)
-            OutRecord->Words[0] = 050000 + (Address.FB << 9) + (Address.Value & 1777) - 1;
+            OutRecord->Words[0] = 050000 + (Address.FB << 9) + (Address.Value & 01777) - 1;
           else
             OutRecord->Words[0] = 050000 + Address.Value;
         }

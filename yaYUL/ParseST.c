@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -21,6 +21,7 @@
   Purpose:	Assembles STCALL, STODL, STORE, and STOVAL interpretive
   		opcodes.
   Mode:		07/27/04 RSB	Forked from ParseGeneral.c.
+                08/24/16 RSB    Updated for --block1.
 */
 
 #include "yaYUL.h"
@@ -29,12 +30,21 @@
 
 //------------------------------------------------------------------------
 
-static int ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
+static int
+ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
 {
   int Value, i;
   Address_t K;
-  
-  Opcode += 04000 * ArgType;
+
+  if (!strcmp(InRecord->Operand, "XNB"))
+    {
+      i = 12;
+    }
+
+  if (!Block1)
+    {
+      Opcode += 04000 * ArgType;
+    }
   IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
@@ -49,21 +59,21 @@ static int ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
   OutRecord->NumWords = 1;
 
   if (Flags & PC1)
-    Opcode |= 01000;   
+    Opcode |= 01000;
   else if (Flags & PC2)
     Opcode |= 02000;
   else if (Flags & PC3)
     Opcode |= 03000;
   else if (Flags & PC4)
-    Opcode |= 04000;  
+    Opcode |= 04000;
   else if (Flags & PC5)
-    Opcode |= 05000;  
+    Opcode |= 05000;
   else if (Flags & PC6)
-    Opcode |= 06000;  
+    Opcode |= 06000;
   else if (Flags & PC7)
-    Opcode |= 07000;  
+    Opcode |= 07000;
   else if (Flags & QC1)
-    Opcode |= 02000;   
+    Opcode |= 02000;
   else if (Flags & QC2)
     Opcode |= 04000;
   else if (Flags & QC3)
@@ -74,13 +84,13 @@ static int ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
   // Do some sanity checking.
   if (InRecord->Extend && !(Flags & EXTENDED) && !InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
   else if (!InRecord->Extend && (Flags & EXTENDED))
     {
-      strcpy (OutRecord->ErrorMessage, "Required EXTEND is missing.");
+      strcpy(OutRecord->ErrorMessage, "Required EXTEND is missing.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
@@ -88,79 +98,88 @@ static int ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
     {
       OutRecord->IndexValid = 0;
     }
-  i = GetOctOrDec (InRecord->Operand, &Value);
-  if (!i && (Flags & ENUMBER) && *InRecord->Operand != '+' && *InRecord->Operand != '-')
+  i = GetOctOrDec(InRecord->Operand, &Value);
+  if (!i && (Flags & ENUMBER) && *InRecord->Operand != '+'
+      && *InRecord->Operand != '-')
     {
       int Offset;
-      PseudoToStruct (Value, &K);
-      if (!GetOctOrDec (InRecord->Mod1, &Offset))
-	OpcodeOffset = Offset;      
+      PseudoToStruct(Value, &K);
+      if (!GetOctOrDec(InRecord->Mod1, &Offset))
+        OpcodeOffset = Offset;
       goto DoIt;
     }
   if (!i && *InRecord->Mod1 == 0)
     {
-      IncPc (&InRecord->ProgramCounter, Value, &K);
-    DoIt:  
-      if (K.Invalid)
+      IncPc(&InRecord->ProgramCounter, Value, &K);
+      DoIt: if (K.Invalid)
         {
-	  strcpy (OutRecord->ErrorMessage, "Destination address not resolved.");
-	  OutRecord->Fatal = 1;
-	}
+          strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
+          OutRecord->Fatal = 1;
+        }
       else if (K.Overflow)
         {
-	  strcpy (OutRecord->ErrorMessage, "Destination address out of range.");
-	  OutRecord->Fatal = 1;
-	}
+          strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
+          OutRecord->Fatal = 1;
+        }
       else if (!K.Address)
         {
-	  strcpy (OutRecord->ErrorMessage, "Destination not an address.");
-	  OutRecord->Fatal = 1;
-	}
-      else 
+          strcpy(OutRecord->ErrorMessage, "Destination not an address.");
+          OutRecord->Fatal = 1;
+        }
+      else
         {
-	//AddressFound:
-	  // Here I had originally intended to add a check that the bank
-	  // numbers were compatible.  This turns out not to be generally
-	  // possible at assembly time, unless a bunch of analysis is 
-	  // added to understand program flow.  However, certain checks,
-	  // particularly having to do with quarter-codes, can be done.
-	  // ... Later:  Not true for erasable banks, since the EBANK=
-	  // pseudo-op tells the assembler what bank is expected.  Also,
-	  // some constants need to be translated to erasable.
-	  if (K.Constant)
-	    PseudoToStruct (K.Value, &K);
-	  if (Flags & KPLUS1)
-	    IncPc (&K, 1, &K);
-	  i = K.SReg;
-	  if (!K.Erasable)
-	    {
-	      i = 0;  
-	      strcpy (OutRecord->ErrorMessage, "The Address is not in erasable memory.");
-	      OutRecord->Fatal = 1;
-	    }
-	  else
-	    {
-	      if (!K.Banked)
-	        i = K.SReg;
-	      else
-	        i = 0400 * K.EB + (K.SReg - 01400);
-	    }  
-          OutRecord->Words[0] = Opcode | i;
-	}
+          //AddressFound:
+          // Here I had originally intended to add a check that the bank
+          // numbers were compatible.  This turns out not to be generally
+          // possible at assembly time, unless a bunch of analysis is
+          // added to understand program flow.  However, certain checks,
+          // particularly having to do with quarter-codes, can be done.
+          // ... Later:  Not true for erasable banks, since the EBANK=
+          // pseudo-op tells the assembler what bank is expected.  Also,
+          // some constants need to be translated to erasable.
+          if (K.Constant)
+            PseudoToStruct(K.Value, &K);
+          if (Flags & KPLUS1)
+            IncPc(&K, 1, &K);
+          i = K.SReg;
+          if (!K.Erasable)
+            {
+              i = 0;
+              strcpy(OutRecord->ErrorMessage,
+                  "The Address is not in erasable memory.");
+              OutRecord->Fatal = 1;
+            }
+          else
+            {
+              if (!K.Banked)
+                i = K.SReg;
+              else
+                i = 0400 * K.EB + (K.SReg - 01400);
+            }
+          if (Block1 && ArgType != 0)
+            {
+              i += OpcodeOffset;
+              OutRecord->Words[0] = 034000 + 2 * i + 2 - ArgType;
+            }
+          else
+            {
+              OutRecord->Words[0] = Opcode | i;
+            }
+        }
     }
   else
     {
       // The operand is NOT a number.  Presumably, it's a symbol.
-      i = FetchSymbolPlusOffset (&InRecord->ProgramCounter, 
-                                 InRecord->Operand, 
-				 InRecord->Mod1, &K);
+      i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand,
+          InRecord->Mod1, &K);
       if (!i)
         {
-	  if (K.Constant)
-	    PseudoToStruct (K.Value, &K);
+          if (K.Constant)
+            PseudoToStruct(K.Value, &K);
           goto DoIt;
-	}
-      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
+        }
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad",
+          InRecord->Operand);
       OutRecord->Fatal = 1;
     }
   OutRecord->Extend = 0;
@@ -168,57 +187,57 @@ static int ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode,
   //    (K.Constant || (K.Erasable && K.Unbanked)) && K.SReg == 06)
   //  OutRecord->Extend = 1;
   //else
-  OutRecord->Extend = 0;  
-  OutRecord->IndexValid = 0;  
-  return (0);  
+  OutRecord->Extend = 0;
+  OutRecord->IndexValid = 0;
+  return (0);
 }
 
 //------------------------------------------------------------------------
 // Various little parsers based on ParseST.
 
-int 
-ParseSTCALL (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseSTCALL(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  ArgType = ParseComma (InRecord);
+  ArgType = ParseComma(InRecord);
   SwitchIncrement[0] = 0;
   SwitchInvert[0] = 0;
   nnnnFields[0] = 0;
   RawNumInterpretiveOperands = NumInterpretiveOperands = 1;
-  return (ParseST (InRecord, OutRecord, 034000, 
-          ERASABLE | ENUMBER | KPLUS1));
+  return (ParseST(InRecord, OutRecord, 034000,
+  ERASABLE | ENUMBER | KPLUS1));
 }
 
-int 
-ParseSTODL (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseSTODL(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  ArgType = ParseComma (InRecord);
+  ArgType = ParseComma(InRecord);
   SwitchIncrement[0] = 1;
   SwitchInvert[0] = 0;
   nnnnFields[0] = 0;
   RawNumInterpretiveOperands = NumInterpretiveOperands = 1;
-  return (ParseST (InRecord, OutRecord, 014000, 
-          ERASABLE | ENUMBER | KPLUS1));
+  return (ParseST(InRecord, OutRecord, 014000,
+  ERASABLE | ENUMBER | KPLUS1));
 }
 
-int 
-ParseSTORE (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseSTORE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  ArgType = ParseComma (InRecord);
+  ArgType = ParseComma(InRecord);
   NumInterpretiveOperands = 0;
-  return (ParseST (InRecord, OutRecord, 000000, 
-          ERASABLE | ENUMBER | KPLUS1));
+  return (ParseST(InRecord, OutRecord, (Block1 ? 032000 : 000000),
+  ERASABLE | ENUMBER | KPLUS1));
 }
 
-int 
-ParseSTOVL (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseSTOVL(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  ArgType = ParseComma (InRecord);
+  ArgType = ParseComma(InRecord);
   SwitchIncrement[0] = 1;
   SwitchInvert[0] = 0;
   nnnnFields[0] = 0;
   RawNumInterpretiveOperands = NumInterpretiveOperands = 1;
-  return (ParseST (InRecord, OutRecord, 024000, 
-          ERASABLE | ENUMBER | KPLUS1));
+  return (ParseST(InRecord, OutRecord, 024000,
+  ERASABLE | ENUMBER | KPLUS1));
 }
 
 //-------------------------------------------------------------------------
@@ -230,19 +249,19 @@ ParseSTOVL (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
 // Do it for just a single string.
 static int
-ParseCommaString (char *s)
+ParseCommaString(char *s)
 {
   int Len;
-  Len = strlen (s);
+  Len = strlen(s);
   if (Len < 3)
     return (0);
   s += Len - 2;
-  if (!strcmp (",1", s))
+  if (!strcmp(",1", s))
     {
       *s = 0;
       return (1);
     }
-  if (!strcmp (",2", s))
+  if (!strcmp(",2", s))
     {
       *s = 0;
       return (2);
@@ -251,17 +270,17 @@ ParseCommaString (char *s)
 }
 
 int
-ParseComma (ParseInput_t *Record)
+ParseComma(ParseInput_t *Record)
 {
   // If there is a Mod1 field, then the comma-suffix (if any) will appear
   // on the Mod1 field.
   if (*Record->Mod1)
-    return (ParseCommaString (Record->Mod1));
+    return (ParseCommaString(Record->Mod1));
   // If there is NOT a Mod1 field, then the comma-suffix may appear on the
   // Operand field.
   if (*Record->Operand)
-    return (ParseCommaString (Record->Operand));
+    return (ParseCommaString(Record->Operand));
   // Guess there was neither one!
-  return (0);  
+  return (0);
 }
 

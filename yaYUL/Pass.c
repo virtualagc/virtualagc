@@ -577,123 +577,112 @@ static InterpreterMatch_t InterpreterOpcodesBlock2[] = {
 };
 #define NUM_INTERPRETERS_BLOCK2 (sizeof(InterpreterOpcodesBlock2) / sizeof(InterpreterOpcodesBlock2[0]))
 
-static InterpreterMatch_t InterpreterOpcodesBlock1[] = {
-  { "ABS",      0130, 0 },
-  { "ABS*",      0130, 0 },
-  { "ABVAL",    0130, 0 },
-  { "ARCCOS",   0050, 0 },
-  { "ACOS",     0050, 0 },
-  { "ARCSIN",   0040, 0 },
-  { "ASIN",     0040, 0 },
-  { "AST,1",    0, 1 },
-  { "AST,2",    0, 1 },
-  { "AXC,1",            0127, 1 },
-  { "AXC,2",            0125, 1 },
-  { "AXT,1",    0006, 1 },
-  { "AXT,2",            0171, 1 },
-  { "BDDV",     0111, 1, 0, 000000, { 1, 0 } },
-  { "BDDV*",    0113, 1, 0, 000000, { 1, 0 } },
-  { "BDSU",             0153, 1, 0, 000000, { 1, 0 } },
-  { "BDSU*",    0157, 1, 0, 000000, { 1, 0 } },
-  { "BHIZ",     0146, 1 },
-  { "BMN",      0136, 1 },
-  { "BOV",      0176, 1 },
-  { "BPL",      0132, 1 },
-  { "BVSU",   0131, 1, 0, 000000, { 1, 0 } },
-  { "BZE",      0122, 1 },
-  { "COMP",             0116, 0 },
-  { "COMP*",     0, 0 },
-  { "COS",              0132, 0 },
-  { "COS*",     0, 0 },
-  { "COSINE",   0030, 0 },
-  { "DAD",              0161, 1, 0, 000000, { 1, 0 } },
-  { "DAD*",             0160, 1, 0, 000000, { 1, 0 } },
-  { "DDV",              0145, 1, 0, 000000, { 1, 0 } },
-  { "DDV*",     0107, 1, 0, 000000, { 1, 0 } },
-  { "DMOVE",            0112, 0 },
-  { "DMOVE*",   0, 0 },
-  { "DMP",              0151, 1, 0, 000000, { 1, 0 } },
-  { "DMP*",             0150, 1, 0, 000000, { 1, 0 } },
-  { "DMPR",             0133, 1, 0, 000000, { 1, 0 } },
-  { "DMPR*",    0103, 1, 0, 000000, { 1, 0 } },
-  { "DOT",              0105, 1, 0, 000000, { 1, 0 } },
-  { "DOT*",     0137, 1, 0, 000000, { 1, 0 } },
-  { "DSQ",      0060, 0 },
-  { "DSU",              0155, 1, 0, 000000, { 1, 0 } },
-  { "DSU*",     0153, 1, 0, 000000, { 1, 0 } },
-  { "EXIT",             0177, 0 },
-  { "INCR,1",           0147, 1 },
-  { "INCR,2",   0062, 1 },
-  { "ITA",              0113, 1 },
-  { "ITC",              0175, 1 },
-  { "ITC*",     0, 1 },
-  { "ITCI",             0111, 1 },
-  { "ITCQ",             0101, 1 },
-  { "LODON",    0, 0 },
-  { "LXA,1",            0167, 1 },
-  { "LXA,2",    0022, 1 },
-  { "LXC,1",            0163, 1 },
-  { "LXC,2",    0032, 1 },
-  { "MXV",              0125, 1, 0, 000000, { 1, 0 } },
-  { "NOLOD",            0117, 0 },
-  { "RDDV", 0, 1 },
-  { "ROUND",            0115, 0 },
-  { "RTB",              0175, 1 },
-  { "SGN",      0011, 1, 0, 000000, { 1, 0 } },
-  { "SIGN",     0011, 1, 0, 000000, { 1, 0 } },
-  { "SIGN*",    0013, 1, 0, 000000, { 1, 0 } },
-  { "SIN",              0136, 0 },
-  { "SIN*",     0, 0 },
-  { "SINE",     0020, 0 },
-  { "SMOVE",            0106, 0 },
-  { "SMOVE*",           0104, 1 },
-  { "SQRT",   0010, 0 },
-  { "STZ",      0, 0 },
-  { "SWITCH",           0105, 1 },
-  { "SXA,1",            0157, 1 },
-  { "SXA,2",            0155, 1 },
-  { "TAD",      0005, 1, 0, 000000, { 1, 0 } },
-  { "TAD*",     0007, 1, 0, 000000, { 1, 0 } },
-  { "TEST",             0107 },
-  { "TIX,1",            0123, 1 },
-  { "TIX,2",            0121, 1 },
-  { "TMOVE",    0, 0 },
-  { "TP",               0176, 0 },
-  { "TSLC",     0, 1 },
-  { "TSLT",             0147, 1 },
-  { "TSLT*",    0, 1 },
-  { "TSRT",             0135, 1 },
-  { "TSRT*",    0, 1 },
-  { "TSU",      0, 1 },
-  { "UNIT",             0116, 0 },
-  { "UNIT*",     0120, 0 },
-  { "VAD",      0121, 1, 0, 000000, { 1, 0 } },
-  { "VAD*",     0123, 1, 0, 000000, { 1, 0 } },
-  { "VDEF",             0102, 0 },
-  { "VMOVE",            0172, 1 },
-  { "VMOVE*",           0170, 1 },
-  { "VPROJ",    0145, 1, 0, 000000, { 1, 0 } },
-  { "VPROJ*",   0147, 1, 0, 000000, { 1, 0 } },
-  { "VSLT",             0111, 1 },
-  { "VSLT*",    0, 1 },
-  { "VSQ",      0140, 0 },
-  { "VSRT",             0113, 1 },
-  { "VSRT*",    0, 1 },
-  { "VSU",      0125, 1, 0, 000000, { 1, 0 } },
-  { "VSU*",     0127, 1, 0, 000000, { 1, 0 } },
-  { "VXM",              0123, 1, 0, 000000, { 1, 0 } },
-  { "VXM*",     0073, 1, 0, 000000, { 1, 0 } },
-  { "VXSC",             0173, 1, 0, 000000, { 1, 0 } },
-  { "VXSC*",    0017, 1, 0, 000000, { 1, 0 } },
-  { "VXV",              0103, 1, 0, 000000, { 1, 0 } },
-  { "VXV*",     0143, 1, 0, 000000, { 1, 0 } },
-  { "XAD,1",    0106, 1 },
-  { "XAD,2",    0102, 1 },
-  { "XCHX,1",   0056, 1 },
-  { "XCHX,2",   0052, 1 },
-  { "XSU,1",    0116, 1 },
-  { "XSU,2",            0135, 1 }
-};
+static InterpreterMatch_t InterpreterOpcodesBlock1[] =
+  {
+    { "ABS", 0124 },
+    { "ABS*", 0120 },
+    { "ABVAL", 0144 },
+    { "ARCCOS", 0104 },
+    { "ACOS", 0104 },
+    { "ARCSIN", 0114 },
+    { "ASIN", 0114 },
+    { "AST,1", 0066 },
+    { "AST,2", 0062 },
+    { "AXC,1", 0056 },
+    { "AXC,2", 0052 },
+    { "AXT,1", 0166 },
+    { "AXT,2", 0162 },
+    { "BDDV", 0107 },
+    { "BDSU", 0127 },
+    { "BDSU*", 0125 },
+    { "BHIZ", 0137 },
+    { "BMN", 0157 },
+    { "BOV", 0147 },
+    { "BPL", 0017 },
+    { "BVSU", 0033 },
+    { "BZE", 0037 },
+    { "COMP", 0034 },
+    { "COMP*", 0030 },
+    { "COS", 0064 },
+    { "COS*", 0060 },
+    { "COSINE", 0064 },
+    { "DAD", 0143 },
+    { "DAD*", 0141 },
+    { "DDV", 0113 },
+    { "DDV*", 0111 },
+    { "DMOVE", 0024 },
+    { "DMOVE*", 0020 },
+    { "DMP", 0123 },
+    { "DMP*", 0121 },
+    { "DMPR", 0067 },
+    { "DOT", 0013 },
+    { "DSQ", 0044 },
+    { "DSU", 0133 },
+    { "DSU*", 0131 },
+    { "EXIT", 0176 },
+    { "INCR,1", 0116 },
+    { "INCR,2", 0112 },
+    { "ITA", 0026 },
+    { "ITC", 0173 },
+    { "ITC*", 0171 },
+    { "ITCI", 0022 },
+    { "ITCQ", 0002 },
+    { "LODON", 0006 },
+    { "LXA,1", 0156 },
+    { "LXA,2", 0152 },
+    { "LXC,1", 0146 },
+    { "LXC,2", 0142 },
+    { "MXV", 0053 },
+    { "NOLOD", 0036 },
+    { "ROUND", 0032 },
+    { "RTB", 0172 },
+    { "SIGN", 0057 },
+    { "SIN", 0074 },
+    { "SINE", 0074 },
+    { "SMOVE", 0014 },
+    { "SMOVE*", 0010 },
+    { "SQRT", 0054 },
+    { "STZ", 0153 },
+    { "SWITCH", 0012 },
+    { "SXA,1", 0136 },
+    { "SXA,2", 0132 },
+    { "TAD",0103 },
+    { "TEST", 0016 },
+    { "TIX,1", 0046 },
+    { "TIX,2", 0042 },
+    { "TMOVE", 0174 },
+    { "TP", 0174 },
+    { "TSLC", 0077 },
+    { "TSLT", 0117 },
+    { "TSLT*", 0115 },
+    { "TSRT", 0073 },
+    { "TSRT*", 0071 },
+    { "TSU", 0063 },
+    { "UNIT", 0154 },
+    { "UNIT*", 0150 },
+    { "VAD", 0043 },
+    { "VAD*", 0041 },
+    { "VDEF", 0004 },
+    { "VMOVE", 0164 },
+    { "VMOVE*", 0160 },
+    { "VPROJ", 0003 },
+    { "VSLT", 0023 },
+    { "VSLT*", 0021 },
+    { "VSQ", 0134 },
+    { "VSRT", 0027 },
+    { "VSRT*", 0025 },
+    { "VSU", 0163 },
+    { "VXM", 0047 },
+    { "VXSC", 0167 },
+    { "VXSC*", 0165 },
+    { "VXV", 0007 },
+    { "VXV*", 0005 },
+    { "XAD,1", 0106 },
+    { "XAD,2", 0102 },
+    { "XCHX,1", 0126 },
+    { "XCHX,2", 0122 },
+    { "XSU,1", 0076 },
+    { "XSU,2", 0072 } };
 #define NUM_INTERPRETERS_BLOCK1 (sizeof (InterpreterOpcodesBlock1) / sizeof (InterpreterOpcodesBlock1[0]))
 
 static InterpreterMatch_t *InterpreterOpcodes = InterpreterOpcodesBlock2;
@@ -1105,6 +1094,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
         // Frankly, tabs and newlines will cause me a lot of problems further down, since
         // there are actually a couple of things we need to use column alignment to check
         // out.  So let's just start by expanding all tabs to spaces.
+        ParseInputRecord.Column8 = ' ';
         ss = strstr(s, "\n");
         if (ss != NULL)
           *ss = 0;
@@ -1143,6 +1133,12 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
             //        *ss = 0;
         }
 
+        if (Block1 && strlen(s) >= 16)
+          {
+            ParseInputRecord.Column8 = s[15];
+            s[15] = ' ';
+          }
+
         // Suck in all other fields. Below, i is going to be the index of the next input field to be processed.
         NumFields = sscanf(s, "%s%s%s%s%s%s", Fields[0], Fields[1], Fields[2], Fields[3], Fields[4], Fields[5]);
         if (NumFields >= 1) {
@@ -1174,13 +1170,9 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
             // Block 1 interpreter code, and only to determine that the line contains
             // an address rather than an operator.  Moreover, anything appearing in
             // column 15 is *not* part of the operator.
-            ParseInputRecord.Column8 = ' ';
             noOperator = Block1;
             if (strlen(s) >= 16)
               {
-                ParseInputRecord.Column8 = s[15];
-                if (Block1 && ParseInputRecord.Column8 == '-')
-                   memmove(&Fields[i][0], &Fields[i][1], strlen(Fields[i]));
                 if (!strncmp(&s[16], Fields[i], strlen(Fields[i])))
                   noOperator = 0;
               }
@@ -1351,17 +1343,14 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                 NumInterpretiveOperands = 0;
                 ParseOutputRecord.NumWords = 1;
                 if (Block1) {
-                    ParseOutputRecord.Words[0] = (iMatch->Code << 8);
+                    ParseOutputRecord.Words[0] = 040000 | (iMatch->Code << 7);
                     if (foundInterpreterOperandCount)
-                      ParseOutputRecord.Words[0] += + 0176 - expectedNumInterpreterOperatorLines;
+                      ParseOutputRecord.Words[0] += 0177 - expectedNumInterpreterOperatorLines;
                     else if (*ParseInputRecord.Operand == 0)
-                      ParseOutputRecord.Words[0] += (iMatch->Code << 8) + 0176;
-                    else if (iMatch2) {
-                      ParseOutputRecord.Words[0] += (iMatch2->Code << 1);
-                      if (expectedNumInterpreterOperatorLines > 0 && currentNumInterpreterOperatorLines > 1) {
-                        ParseOutputRecord.Words[0] -= 0200;
-                      }
-                    }
+                      ParseOutputRecord.Words[0] += 0177;
+                    else if (iMatch2)
+                      ParseOutputRecord.Words[0] += iMatch2->Code;
+                    ParseOutputRecord.Words[0]--;
                 } else {
                   if (iMatch->NumOperands) {
                       SwitchIncrement[NumInterpretiveOperands] = iMatch->ArgTypes[0];
@@ -1656,9 +1645,10 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                         strcat(ParseInputRecord.Operand, Suffix);
                 }
 
-                printf(" %-8s %-8s %-8s %-10s %-10s %-8s\t#%s",
+                printf(" %-8s %-8s %c%-8s %-10s %-10s %-8s\t#%s",
                        ParseInputRecord.Label,
                        ParseInputRecord.FalseLabel,
+                       ParseOutputRecord.Column8,
                        ParseInputRecord.Operator,
                        ParseInputRecord.Operand,
                        ParseInputRecord.Mod1,
@@ -1678,6 +1668,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                     // The Operator could be an interpretive instruction, a basic opcode,
                     // a pseudo-op, or a downlink code, and we want to colorize them
                     // differently in those cases.
+                    fprintf(HtmlOut, "%c", ParseOutputRecord.Column8);
                     Match = NULL;
                     iMatch = FindInterpreter(ParseInputRecord.Operator);
                     if (iMatch) {

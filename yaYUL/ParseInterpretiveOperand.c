@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -21,6 +21,7 @@
   Purpose:      Assembles stand-alone operands for interpretive opcodes.
   Mod History:  07/28/04 RSB    Forked from ParseGeneral.c.
                 2012-09-25 JL   Handle arguments like "X + 2", i.e. Mod1=+, Mod2=2.
+                2016-08-24 RSB  Updates related to --block1.
  */
 
 #include "yaYUL.h"
@@ -34,6 +35,10 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     int Value, i;
     Address_t K, KMod;
+
+    if (InRecord->ProgramCounter.FB == 021 && (InRecord->ProgramCounter.SReg & 01777) == 0062) {
+        i = 12;
+    }
 
     ArgType = ParseComma(InRecord);
     IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
@@ -64,17 +69,23 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
 
     // Parse the operand field.
-    i = GetOctOrDec(InRecord->Operand, &Value);
-    if (!i) {
-        if (*InRecord->Operand == '+' || *InRecord->Operand == '-') {
-            IncPc(&InRecord->ProgramCounter, Value, &K);
-        } else {
-            K = (const Address_t) { 0 };
-            K.Constant = 1;
-            K.Value = Value;
-        }
+    if (Block1 && !strcmp(InRecord->Operand, "-")) {
+        OutRecord->Words[0] = 077777;
+        OutRecord->NumWords = 1;
+        return (0);
     } else {
-        i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, "", &K);
+      i = GetOctOrDec(InRecord->Operand, &Value);
+      if (!i) {
+          if (*InRecord->Operand == '+' || *InRecord->Operand == '-') {
+              IncPc(&InRecord->ProgramCounter, Value, &K);
+          } else {
+              K = (const Address_t) { 0 };
+              K.Constant = 1;
+              K.Value = Value;
+          }
+      } else {
+          i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, "", &K);
+      }
     }
 
     if (i || K.Invalid) {
@@ -95,8 +106,9 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         strcpy(args, InRecord->Mod1);
 
         // Handle arguments like "DUMMYJOB + 2", i.e. Mod1=+, Mod2=2.
-        if (*InRecord->Mod2)
+        if (*InRecord->Mod2) {
             strcat(args, InRecord->Mod2);
+        }
 
         i = GetOctOrDec(args, &Value);
         if (!i) {
@@ -148,15 +160,28 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             }
         }
     } else if (K.Address && K.Erasable) {
-        if (!K.Banked)
+        if (Block1)
+            OutRecord->Words[0] = K.SReg + 1;
+        else if (!K.Banked)
             OutRecord->Words[0] = K.SReg;
         else
             OutRecord->Words[0] = 0400 * K.EB + (K.SReg - 01400);
     } else if (K.Address && K.Fixed) {
-        if (!K.Banked)
-            OutRecord->Words[0] = K.SReg;
-        else
-            OutRecord->Words[0] = 02000 * K.FB + (K.SReg - 02000);
+        if (Block1) {
+            if (K.FB >= 021) {
+                OutRecord->Words[0] = 02000 + (K.FB - 021) * 02000 + (K.SReg & 01777) + 1;
+            } else {
+              OutRecord->Words[0] = 0;
+              sprintf(OutRecord->ErrorMessage, "Interpretive operand out of range.");
+              OutRecord->Fatal = 1;
+              return (0);
+            }
+        } else {
+          if (!K.Banked)
+              OutRecord->Words[0] = K.SReg;
+          else
+              OutRecord->Words[0] = 02000 * K.FB + (K.SReg - 02000);
+        }
     } else {
         BadOp:
         strcpy (OutRecord->ErrorMessage, "Incorrect operand type.");
@@ -164,14 +189,22 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     } 
 
     OutRecord->Words[0] = OutRecord->Words[0] + OpcodeOffset;
-    OpcodeOffset = 0;
-
-    if (SwitchIncrement[RawNumInterpretiveOperands - NumInterpretiveOperands]) {
-        OutRecord->Words[0]++;
-        OutRecord->Words[0] &= 037777;
-        if (ArgType == 2)
-            OutRecord->Words[0] = 077777 & ~OutRecord->Words[0];
-    }
+    if (Block1)
+      {
+        if (ArgType != 0)
+          OutRecord->Words[0] += OutRecord->Words[0] + ArgType - 2;
+        OpcodeOffset = 0;
+      }
+    else
+      {
+        if (SwitchIncrement[RawNumInterpretiveOperands - NumInterpretiveOperands])
+          {
+            OutRecord->Words[0]++;
+            OutRecord->Words[0] &= 037777;
+            if (ArgType == 2)
+              OutRecord->Words[0] = 077777 & ~OutRecord->Words[0];
+          }
+      }
 
     return (0);
 }

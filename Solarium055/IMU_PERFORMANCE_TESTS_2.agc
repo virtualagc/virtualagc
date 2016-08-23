@@ -11,6 +11,7 @@
 # Mod history:	2009-10-04 JL	Created.
 #		2009-10-30 JL	Fixed filename comment.
 #		2016-08-20 RSB	Typos.
+#		2016-08-23 RSB	More of the same.
 
 ## Page 426
 
@@ -72,7 +73,7 @@ DDDD		TS	NDXCTR
 		STORE	GENPL +72D,1
 		NOLOD	1
 		TSLT	DAD
-			1
+			2
 			OGC
 		STORE	OGC
 		DMOVE*	2
@@ -843,7 +844,7 @@ PIPCALC		TC	INTPRET
 		DMOVE	0
 			GENPL +7
 		STORE	GENPL +25D
-		SMOVE	0
+		DMOVE	0
 			GENPL +12D
 ## Page 451
 		STORE	GENPL +31D

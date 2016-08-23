@@ -11,6 +11,7 @@
 # Mod history:	2009-10-05 JL	Created.
 #		2009-10-30 JL	Fixed filename comment.
 #		2016-08-20 RSB	Resolved Jim's uncertainty about TP.
+#		2016-08-23 RSB	Typos.
 
 ## Page 332
 
@@ -158,11 +159,11 @@ ZEROS2		XCH	THETAY
 
 		CS	PRELXGA		# LOAD DESIRED CDU ANGLES.
 		COM
-		TS	THETA
+		TS	THETAD
 		CS	PRELYGA
 		COM
 		TS	THETAD +1
-		CS	PRELXGA
+		CS	PRELZGA
 		COM
 		TS	THETAD +2
 ## Page 335
@@ -591,7 +592,7 @@ GYROCOM		ITA	1
 
 		DMP	1		# SIN(AZ).DELTA-V(Z)
 		TSLT
-			DELVX
+			DELVZ
 			SINAZ
 			1
 

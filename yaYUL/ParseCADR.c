@@ -90,7 +90,7 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             char *s;
             unsigned offset;
             if (!strcmp(InRecord->Label, "WCADRTAB")) {
-                fprintf (stderr, "Here!\n");
+                //fprintf (stderr, "Here!\n");
             }
             if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
               OpcodeOffset = offset;
