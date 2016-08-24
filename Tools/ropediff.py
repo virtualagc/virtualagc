@@ -126,7 +126,7 @@ def main():
         sys.exit(1)
 
     if sizes[0] != CORELEN2 and sizes[0] != CORELEN1:
-        parser.error("Core files are incorrect length, must be %d (Block II) or %d (Block I) bytes!" % (CORELEN2, CORELEN1)
+        parser.error("Core files are incorrect length, must be %d (Block II) or %d (Block I) bytes!" % (CORELEN2, CORELEN1))
         sys.exit(1)
 
     log("yaAGC Core Rope Differencer")
