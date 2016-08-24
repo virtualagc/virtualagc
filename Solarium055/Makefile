@@ -9,6 +9,7 @@
 #		2011-05-03 JL	Updated.
 #		2012-09-16 JL	Updated to match tools dir changes.
 #		2016-08-24 RSB	Added --block1 switch to yaYUL command line.
+#		2016-08-24 RSB	Added target for corediff.txt.
 
 BASENAME=Solarium055
 
@@ -27,6 +28,9 @@ ${BASENAME}.lst ${BASENAME}.symtab: ${SOURCE} ${BASENAME}.bin
 	mv MAIN.agc.lst ${BASENAME}.lst
 	mv MAIN.agc.symtab ${BASENAME}.symtab
 		
+corediff.txt: ${BASENAME}.bin MAIN.agc.bin MAIN.agc.lst
+	python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
+
 clean:
 	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html
 
