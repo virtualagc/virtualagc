@@ -36,10 +36,11 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
   int Value, i;
   Address_t K;
 
-  if (!strcmp(InRecord->Operand, "XNB"))
-    {
-      i = 12;
-    }
+  // A debugging statement.
+  //if (!strcmp(InRecord->Operand, "XNB"))
+  //  {
+  //    i = 12;
+  //  }
 
   if (!Block1)
     {
@@ -156,15 +157,11 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
               else
                 i = 0400 * K.EB + (K.SReg - 01400);
             }
-          if (Block1 && ArgType != 0)
-            {
-              i += OpcodeOffset;
-              OutRecord->Words[0] = 034000 + 2 * i + 2 - ArgType;
-            }
-          else
-            {
-              OutRecord->Words[0] = Opcode | i;
-            }
+          if (Block1 && ArgType != 0) {
+            OpcodeOffset *= 2;
+            OutRecord->Words[0] = 034000 + 2 * i + ArgType;
+          } else
+            OutRecord->Words[0] = Opcode | i;
         }
     }
   else
@@ -225,7 +222,7 @@ ParseSTORE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   ArgType = ParseComma(InRecord);
   NumInterpretiveOperands = 0;
   return (ParseST(InRecord, OutRecord, (Block1 ? 032000 : 000000),
-  ERASABLE | ENUMBER | KPLUS1));
+  ERASABLE | ENUMBER | ((Block1 && ArgType) ? 0 : KPLUS1)));
 }
 
 int

@@ -311,6 +311,7 @@ typedef struct {
   // may be a '-'.  At any rate, if one of these funky extra characters appears,
   // it is deposited in the following field.
   char Column8;
+  int InversionPending;
 } ParseInput_t;
 
 typedef struct {

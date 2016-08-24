@@ -265,133 +265,48 @@ static ParserMatch_t ParsersBlock2[] = {
 #define NUM_PARSERS_BLOCK2 (sizeof (ParsersBlock2) / sizeof (ParsersBlock2[0]))
 
 static ParserMatch_t ParsersBlock1[] = {
-//  { "-1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 077777 },
-//  { "-2CADR", OP_PSEUDO, Parse2CADR, "", "", 0, 077777, 0, 077777 },
-//  { "-2DNADR", OP_DOWNLINK, ParseECADR, "", "", 004000, 077777 },
-//  { "-3DNADR", OP_DOWNLINK, ParseECADR, "", "", 010000, 077777 },
-//  { "-4DNADR", OP_DOWNLINK, ParseECADR, "", "", 014000, 077777 },
-//  { "-5DNADR", OP_DOWNLINK, ParseECADR, "", "", 020000, 077777 },
-//  { "-6DNADR", OP_DOWNLINK, ParseECADR, "", "", 024000, 077777 },
-//  { "-CCS", OP_BASIC, ParseCCS, "", "", 0, 077777 },
-//  { "-DNCHAN", OP_DOWNLINK, ParseDNCHAN, "", "", 0, 077777 },
-//  { "-DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 077777 },
-//  { "-GENADR", OP_PSEUDO, ParseGENADR, "", "", 0, 077777 },
   { "=", OP_PSEUDO, ParseEquate },
-//  { "=ECADR", OP_PSEUDO, ParseEqualsECADR },
-//  { "=MINUS", OP_PSEUDO, ParseEqMinus },
-//  { "1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 0 },
-//  { "2BCADR", OP_PSEUDO, Parse2CADR },
-//  { "2CADR", OP_PSEUDO, Parse2CADR },
   { "2DEC", OP_PSEUDO, Parse2DEC },
   { "2DEC*", OP_PSEUDO, Parse2DECstar },
-//  { "2DNADR", OP_DOWNLINK, ParseECADR, "", "", 004000, 0 },
-//  { "2FCADR", OP_PSEUDO, Parse2FCADR },
   { "2OCT", OP_PSEUDO, Parse2OCT },
-//  { "3DNADR", OP_DOWNLINK, ParseECADR, "", "", 010000, 0 },
-//  { "4DNADR", OP_DOWNLINK, ParseECADR, "", "", 014000, 0 },
-//  { "5DNADR", OP_DOWNLINK, ParseECADR, "", "", 020000, 0 },
-//  { "6DNADR", OP_DOWNLINK, ParseECADR, "", "", 024000, 0 },
   { "AD", OP_BASIC, ParseAD },
   { "ADRES", OP_PSEUDO, ParseGENADR },
-//  { "ADS", OP_BASIC, ParseADS },
-//  { "AUG", OP_BASIC, ParseAUG },
   { "BANK", OP_PSEUDO, ParseBANK },
-//  { "BLOCK", OP_PSEUDO, ParseBLOCK },
-//  { "BBCON", OP_PSEUDO, ParseBBCON },
-//  { "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },
-//  { "BNKSUM", OP_PSEUDO, NULL, "", "" },
-//  { "BZF", OP_BASIC, ParseBZF },
-//  { "BZMF", OP_BASIC, ParseBZMF },
-//  { "CA", OP_BASIC, ParseCA },
-//  { "CAE", OP_BASIC, ParseCAE },
   { "CAF", OP_BASIC, ParseXCH },
   { "CADR", OP_PSEUDO, ParseCADR, "", "", 0, 0, 0, 0, 1 },
   { "CCS", OP_BASIC, ParseCCS },
-//  { "CHECK=", OP_PSEUDO, ParseCHECKequals },
   { "COM", OP_BASIC, NULL, "CS", "A" },
-//  { "COUNT", OP_PSEUDO, NULL, "", "" },
-//  { "COUNT*", OP_PSEUDO, NULL, "", "" },
   { "CS", OP_BASIC, ParseCS },
-//  { "DAS", OP_BASIC, ParseDAS },
-//  { "DCA", OP_BASIC, ParseDCA },
-//  { "DCOM", OP_BASIC, NULL, "DCS", "A" },
-//  { "DCS", OP_BASIC, ParseDCS },
-//  { "DDOUBL", OP_BASIC, NULL, "DAS", "A" },
   { "DEC", OP_PSEUDO, ParseDEC, "", "", 0, 0, 0, 0, 1 },
-//  { "DEC*", OP_PSEUDO, ParseDECstar },
-//  { "DIM", OP_BASIC, ParseDIM },
-//  { "DNCHAN", OP_DOWNLINK, ParseDNCHAN },
-//  { "DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 0 },
   { "DOUBLE", OP_BASIC, NULL, "AD", "A" },
-//  { "DTCB", OP_BASIC, NULL, "DXCH", "Z" },
-//  { "DTCF", OP_BASIC, NULL, "DXCH", "$4" },
   { "DV", OP_BASIC, ParseDV },
-//  { "DXCH", OP_BASIC, ParseDXCH },
-//  { "EBANK=", OP_PSEUDO, ParseEBANKEquals },
-//  { "ECADR", OP_PSEUDO, ParseECADR, "", "", 0, 0, 0, 0, 1 },
-  // The following isn't a perfect equivalent for an actual EDRUPT parser
-  // within the assembler, since it doesn't allow the assembler to check
-  // for the EXTEND bit as it does for other instructions.  However, as EDRUPT
-  // is used "for machine checkout only", I can't imagine that I even need
-  // it at all ... so I'm willing to dispense with a little cross-checking.
-//  { "EDRUPT", OP_BASIC, ParseEDRUPT },
   { "EQUALS", OP_PSEUDO, ParseEQUALS },
   { "ERASE", OP_PSEUDO, ParseERASE },
   { "EXTEND", OP_BASIC, NULL, "INDEX", "$5777" },
-//  { "FCADR", OP_PSEUDO, ParseFCADR, "", "", 0, 0, 0, 0, 1 },
-//  { "GENADR", OP_PSEUDO, ParseGENADR },
-//  { "INCR", OP_BASIC, ParseINCR },
   { "INDEX", OP_BASIC, ParseINDEX },
   { "INHINT", OP_BASIC, NULL, "INDEX", "$17" },
-//  { "LXCH", OP_BASIC, ParseLXCH },
   { "MASK", OP_BASIC, ParseMASK },
-//  { "MEMORY", OP_PSEUDO, NULL, "", "" },
-//  { "MM", OP_PSEUDO, ParseDEC },
   { "MP", OP_BASIC, ParseMP },
-//  { "MSU", OP_BASIC, ParseMSU },
   { "NDX", OP_BASIC, ParseINDEX },
   { "NOOP", OP_BASIC, NULL, "XCH", "A" },
-//  { "NV", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
   { "OCT", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
   { "OCTAL", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
   { "OVIND", OP_BASIC, ParseTS },
   { "OVSK", OP_BASIC, NULL, "TS", "A" },
-//  { "QXCH", OP_BASIC, ParseQXCH },
-//  { "RAND", OP_BASIC, ParseRAND },
-//  { "READ", OP_BASIC, ParseREAD },
   { "RELINT", OP_BASIC, NULL, "INDEX", "$16" },
-//  { "REMADR", OP_PSEUDO, ParseGENADR },
   { "RESUME", OP_BASIC, NULL, "INDEX", "$25" },
   { "RETURN", OP_BASIC, NULL, "TC", "Q" },
-//  { "ROR", OP_BASIC, ParseROR },
-//  { "RXOR", OP_BASIC, ParseRXOR },
-//  { "SBANK=", OP_PSEUDO, ParseSBANKEquals },
   { "SETLOC", OP_PSEUDO, ParseSETLOC },
   { "SQUARE", OP_BASIC, NULL, "MP", "A" },
-//  { "STCALL", OP_INTERPRETER, ParseSTCALL },
-//  { "STODL", OP_INTERPRETER, ParseSTODL },
-//  { "STODL*", OP_INTERPRETER, ParseSTODL, "", "", 04000 },
   { "STORE", OP_INTERPRETER, ParseSTORE },
-//  { "STOVL", OP_INTERPRETER, ParseSTOVL },
-//  { "STOVL*", OP_INTERPRETER, ParseSTOVL, "", "", 04000 },
   { "SU", OP_BASIC, ParseSU },
-//  { "SUBRO", OP_PSEUDO, NULL, "" "" },
   { "TC", OP_BASIC, ParseTC },
   { "TCR", OP_BASIC, ParseTC },
   { "TCAA", OP_BASIC, NULL, "TS", "Z" },
-//  { "TCF", OP_BASIC, ParseTCF },
   { "TS", OP_BASIC, ParseTS },
-//  { "VN", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
-//  { "WAND", OP_BASIC, ParseWAND },
-//  { "WOR", OP_BASIC, ParseWOR },
-//  { "WRITE", OP_BASIC, ParseWRITE },
   { "XAQ", OP_BASIC, NULL, "TC", "A" },
   { "XCADR", OP_PSEUDO, ParseXCADR, "", "", 0, 0, 0, 0, 1 },
-  { "XCH", OP_BASIC, ParseXCH },
-//  { "XLQ", OP_BASIC, NULL, "TC", "L" },
-//  { "XXALQ", OP_BASIC, NULL, "TC", "A" },
-//  { "ZL", OP_BASIC, NULL, "LXCH", "$7" },
-//  { "ZQ", OP_BASIC, NULL, "QXCH", "$7" }
+  { "XCH", OP_BASIC, ParseXCH }
 };
 #define NUM_PARSERS_BLOCK1 (sizeof (ParsersBlock1) / sizeof (ParsersBlock1[0]))
 
@@ -1095,6 +1010,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
         // there are actually a couple of things we need to use column alignment to check
         // out.  So let's just start by expanding all tabs to spaces.
         ParseInputRecord.Column8 = ' ';
+        ParseInputRecord.InversionPending = 0;
         ss = strstr(s, "\n");
         if (ss != NULL)
           *ss = 0;
@@ -1137,6 +1053,7 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
           {
             ParseInputRecord.Column8 = s[15];
             s[15] = ' ';
+            ParseInputRecord.InversionPending = (ParseInputRecord.Column8 == '-');
           }
 
         // Suck in all other fields. Below, i is going to be the index of the next input field to be processed.
@@ -1499,11 +1416,11 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
                     }
                 }
             }  
-            if (Block1 && ParseOutputRecord.Column8 == '-')
-              ParseOutputRecord.Words[0] = 077777 & ~ParseOutputRecord.Words[0];
 
         }
         WriteDoIt:
+        if (Block1 && ParseInputRecord.InversionPending)
+          ParseOutputRecord.Words[0] = 077777 & ~ParseOutputRecord.Words[0];
         if (StadrInvert && ParseOutputRecord.NumWords > 0) {
             if (StadrInvert == 1)
                 ParseOutputRecord.Words[0] = 077777 & ~ParseOutputRecord.Words[0];

@@ -36,9 +36,10 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     int Value, i;
     Address_t K, KMod;
 
-    if (InRecord->ProgramCounter.FB == 021 && (InRecord->ProgramCounter.SReg & 01777) == 0062) {
-        i = 12;
-    }
+    // A debugging statement.
+    //if (InRecord->ProgramCounter.FB==026 && (01777 & InRecord->ProgramCounter.SReg) == 00323) {
+    //    i = 12;
+    //}
 
     ArgType = ParseComma(InRecord);
     IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
@@ -76,7 +77,7 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     } else {
       i = GetOctOrDec(InRecord->Operand, &Value);
       if (!i) {
-          if (*InRecord->Operand == '+' || *InRecord->Operand == '-') {
+          if (*InRecord->Operand == '+' || (!Block1 && *InRecord->Operand == '-')) {
               IncPc(&InRecord->ProgramCounter, Value, &K);
           } else {
               K = (const Address_t) { 0 };
@@ -145,8 +146,13 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         } else {
             // Not a switch or shift instruction.
             i = K.Value + OpcodeOffset;
-            if (i < 0)
+            if (i < 0) {
                 i--;
+                if (Block1 && K.Value >= 0)
+                  InRecord->InversionPending = 1;
+            } else if (Block1 && InRecord->InversionPending) {
+                i -= 2;
+            }
             i &= 077777;
             OpcodeOffset = 0;
 
@@ -194,6 +200,12 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         if (ArgType != 0)
           OutRecord->Words[0] += OutRecord->Words[0] + ArgType - 2;
         OpcodeOffset = 0;
+        if (K.Constant) {
+            if (InRecord->InversionPending) {
+                OutRecord->Words[0] = 077777 & (~OutRecord->Words[0] + 1);
+                InRecord->InversionPending = 0;
+            } else OutRecord->Words[0]++;
+        }
       }
     else
       {
