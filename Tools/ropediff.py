@@ -125,7 +125,7 @@ def main():
         parser.error("Core files are not the same size!")
         sys.exit(1)
 
-    if sizes[0] != CORELEN2 && sizes[0] != CORELEN1:
+    if sizes[0] != CORELEN2 and sizes[0] != CORELEN1:
         parser.error("Core files are incorrect length, must be %d (Block 2) or 57344 (Block 1) bytes!" % CORELEN2)
         sys.exit(1)
 
