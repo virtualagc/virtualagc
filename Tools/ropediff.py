@@ -80,7 +80,8 @@ def log(text, verbose=False, newline=True):
 
 def main():
 
-    CORELEN = (2 * 044 * 02000)
+    CORELEN2 = (2 * 044 * 02000)
+    CORELEN1 = (2 * 034 * 02000)
 
     global options
 
@@ -124,8 +125,8 @@ def main():
         parser.error("Core files are not the same size!")
         sys.exit(1)
 
-    if sizes[0] != CORELEN:
-        parser.error("Core files are incorrect length, must be %d bytes!" % CORELEN)
+    if sizes[0] != CORELEN2 && sizes[0] != CORELEN1:
+        parser.error("Core files are incorrect length, must be %d (Block 2) or 57344 (Block 1) bytes!" % CORELEN2)
         sys.exit(1)
 
     log("yaAGC Core Rope Differencer")
