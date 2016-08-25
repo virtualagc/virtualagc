@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2006,2009,2016 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -26,7 +26,7 @@
  *  Website:	http://www.ibiblio.org/apollo/index.html
  *
  *  History:	2012-09-18 JL   Created.
- *
+ *              2016-08-25 RSB  Added Block1.
  */
 
 #include <stdint.h>
@@ -39,6 +39,8 @@
 #define NUM_BANKS      (044)    // The number of fixed memory banks.
 #define WORDS_PER_BANK (02000)  // The number of words per fixed memory bank.
 #define BANK_OFFSET    (02000)  // The starting address of each bank.
+
+extern int Block1;
 
 // Convert an AGC-format signed integer to native format.
 int convertAgcToNative(uint16_t n);

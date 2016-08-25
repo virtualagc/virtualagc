@@ -26,8 +26,10 @@
  *  Website:	http://www.ibiblio.org/apollo/index.html
  *
  *  History:	2012-09-18 JL   Created.
- *  		2016-07017 RSB	Added stdlib.h and commented out some
+ *  		2016-07-17 RSB	Added stdlib.h and commented out some
  *  				unused variables to avoid compiler warnings.
+ *  		2016-08-25 RSB  Accounted for the bank numbers used by
+ *  		                block 1.
  *
  */
 
@@ -181,12 +183,15 @@ generateBuggerWord (int verbose, int bank, int length, int16_t *code)
 }
 
 // Get the bank number for a specified offset.
+int Block1 = 0;
 int
 getBank (int count)
 {
   int retval = count / 1024;
 
-  if (retval < 2)
+  if (Block1)
+    retval++;
+  else if (retval < 2)
     retval += 2;
   else if (retval < 4)
     retval -= 2;
