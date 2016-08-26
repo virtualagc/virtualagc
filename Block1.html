@@ -1,0 +1,715 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;
+      charset=windows-1252">
+    <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
+      2.4.16 ppc) [Netscape]">
+    <meta name="Author" content="Ronald Burkey">
+    <title>Virtual AGC Assembly-Language Manual</title>
+    <meta name="author" content="Ronald S. Burkey">
+    <script>
+  (function() {
+    var cx = '005579885767466475821:oqt5wpxqlt8';
+    var gcse = document.createElement('script');
+    gcse.type = 'text/javascript';
+    gcse.async = true;
+    gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(gcse, s);
+  })();
+</script>
+    <meta name="Generator" content="htp 1.16">
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <table nosave="" width="100%" border="1" cellpadding="10px">
+      <tbody>
+        <tr nosave="">
+          <td nosave="" align="center" valign="middle">
+            <div align="center"> </div>
+            <center>
+              <div align="center"> </div>
+              <table nosave="" width="100%">
+                <tbody>
+                  <tr nosave="">
+                    <td nosave="" align="center" valign="middle">
+                      <div align="center"> </div>
+                      <table nosave="">
+                        <tbody>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><a
+                                href="index.html"><small>Home</small></a><br>
+                            </td>
+                          </tr>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><span
+                                style="text-decoration: underline;"><font
+                                  size="-1"><a href="yaAGS.html">AGS<br>
+                                  </a></font></span></td>
+                          </tr>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><a
+                                href="LVDC.html"><small>LVDC</small></a><br>
+                            </td>
+                          </tr>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><a
+                                href="Gemini.html"><small>Gemini</small></a><br>
+                            </td>
+                          </tr>
+                          <tr align="center">
+                            <td> <font size="-1"><a
+                                  href="download.html">Download</a></font>
+                            </td>
+                          </tr>
+                          <tr align="center">
+                            <td> <font size="-1"><a href="links.html">Document
+
+
+
+
+
+
+
+
+
+                                  library</a></font> </td>
+                          </tr>
+                          <tr align="center">
+                            <td> <font color="#000000"><font size="-1"><a
+                                    href="changes.html">Change log</a></font></font>
+                            </td>
+                          </tr>
+                          <tr align="center">
+                            <td> <font size="-1"><a href="buglist.html">Bug
+
+
+
+
+
+
+
+
+
+                                  and issues</a></font> </td>
+                          </tr>
+                          <tr nosave="" align="center">
+                            <td nosave=""> <font color="#000000"><font
+                                  size="-1"><a href="developer.html">Developer
+
+
+
+
+
+
+
+
+
+                                    info</a></font></font> </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div align="center"> </div>
+                    </td>
+                    <td nosave="" align="center" valign="top">
+                      <center><b><font color="#999900"><font size="+3">Virtual
+
+
+
+
+
+
+
+
+
+                              AGC — AGS — LVDC — Gemini</font></font></b></center>
+                      <br>
+                      <b><font color="#000000"><font size="+3">Programmer's
+
+
+
+
+
+
+
+
+
+                            Manual<br>
+                            <small>Block 1 AGC Assembly Language</small><br>
+                            <br>
+                          </font></font></b></td>
+                    <td nosave="" align="center" valign="middle">
+                      <div align="center"> </div>
+                      <table nosave="">
+                        <tbody>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><font
+                                size="-1"><a href="faq.html">FAQ</a></font></td>
+                          </tr>
+                          <tr align="center">
+                            <td><font color="#000000"><font size="-1"><a
+                                    href="yaAGC.html">yaAGC</a></font></font></td>
+                          </tr>
+                          <tr nosave="" align="center">
+                            <td nosave=""><font size="-1"><a
+                                  href="yaYUL.html">yaYUL</a></font></td>
+                          </tr>
+                          <tr align="center">
+                            <td><font size="-1"><a href="yaDSKY.html">yaDSKY</a></font></td>
+                          </tr>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><small><a
+                                  href="yaTelemetry.html">yaOtherStuff</a></small><br>
+                            </td>
+                          </tr>
+                          <tr align="center">
+                            <td><font color="#000000"><font size="-1"><a
+                                    href="Luminary.html">Luminary</a></font></font></td>
+                          </tr>
+                          <tr align="center">
+                            <td><font size="-1"><a href="Colossus.html">Colossus<br>
+                                </a></font></td>
+                          </tr>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><small><a
+                                  href="assembly_language_manual.html">Language
+
+
+
+
+
+
+
+
+
+                                  Manual</a></small><br>
+                            </td>
+                          </tr>
+                          <tr align="center">
+                            <td style="vertical-align: top;"><font
+                                size="-1"><a href="Pultorak.html">Physical
+
+
+
+
+
+
+
+
+
+                                  Implementations<br>
+                                </a></font></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div align="center"> </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div align="center"> </div>
+            </center>
+            <center>
+              <div align="left"> </div>
+            </center>
+            <div align="left"> </div>
+          </td>
+          <td nosave="" align="center" height="200" valign="middle"
+            width="200">
+            <center><img src="ApolloPatch2.png" alt="" align="middle"
+                height="200" hspace="0" vspace="0" width="200"
+                border="0"> </center>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" rowspan="1"><gcse:search></gcse:search><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <br>
+    <div align="center"><big><big><i><b>This page is currently under
+              construction</b></i></big></big><br>
+    </div>
+    <br>
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#Blocks_for_All_Occasions">Blocks for All Occasions</a></li>
+      <li><a href="#Intro">Introduction</a><br>
+      </li>
+      <li><a href="#The_Interpreter_vs._the_CPU">The Interpreter vs. the
+          CPU</a><br>
+      </li>
+      <li><a href="#Formatting">General Formatting Information</a></li>
+      <li><a href="#Data_Representation">Data Representation</a></li>
+      <li><a href="#CPU_Architecture_Registers">CPU Architecture
+          (Registers)</a></li>
+      <li><a href="#Memory_Map">Memory Map</a></li>
+      <li><a href="#Interrupt_Processing">Interrupt Processing</a></li>
+      <li><a href="#Instruction_Representation">Instruction
+          Representation</a></li>
+      <li><a href="#AGC4_Instruction_Set">AGC4_Instruction_Set</a></li>
+      <li><a href="#Pseudo-Operations">Pseudo-Operations</a></li>
+      <li><a href="#Interpreter_Instruction_Set">Interpreter Instruction
+          Set</a></li>
+      <li><a href="#io_channels">I/O Channels</a><br>
+      </li>
+      <li><a href="#Instruction-Set_Summary_Tables">Instruction-Set
+          Summary Tables</a></li>
+      <li><a href="#UnprogrammedSequences">Unprogrammed Sequences</a><br>
+      </li>
+    </ul>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Blocks_for_All_Occasions"></a>Blocks for All Occasions</h2>
+    <p>The design of the AGC went through several stages, which for the
+      sake of this discussion we'll call "blocks".&nbsp; However, the
+      different block designs, while similar in many ways, were quite
+      different in others.&nbsp; Rather than try to cover all of them on
+      this one page, the different blocks are covered in separate pages:<br>
+    </p>
+    <ul>
+      <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block
+
+          0"</a> — Earliest preliminary design of the AGC for which I
+        have any documentation, not used in any missions, and with no
+        known existing code.&nbsp; There's a single document (that I
+        know of) describing it, so the link is simply to that document,
+        rather than to a separate page.</li>
+      <li>"Block 1" — Used for the earlier designs of the Command
+        Module, which were also referred to a Block 1 spacecraft.&nbsp;
+        Used for the unmanned Apollo 4 and Apollo 6 unmanned missions.</li>
+      <li><a href="assembly_language_manual.html">"Block 2"</a> — Used
+        for the later designs of the Command Module, which were also
+        referred to a Block 2 spacecraft.&nbsp; Used for the (unmanned)
+        Apollo 5 mission's Lunar Module, and for all manned missions.</li>
+      <li><a href="BlockIII.html">"Block 3"</a> — There was no such
+        thing in the Apollo program, but Hugh Blair-Smith has given us
+        some ideas about what it might have looked like if there were.</li>
+    </ul>
+    <p>However, <i>this</i> page confines itself just to the Block 1
+      design.<br>
+    </p>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Intro"></a>Introduction</h2>
+    This manual covers Block 1 assembly-language, as accepted by the <a
+      href="yaYUL.html"><span style="font-weight: bold;">yaYUL</span></a>
+    assembler program.&nbsp; Additionally, Block 1 interpreter-language
+    is covered.<br>
+    <br>
+    Unfortunately, while additional Block 1 programming-related
+    documentation does apparently exist, or did at one time, very little
+    of it is available to us at present.&nbsp; The following are the
+    materials on which I've based the descriptive material on this page:<br>
+    <ol>
+      <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1721.pdf"
+          title="Click to view document" target="_blank">R-467:&nbsp;
+          The Compleat Sunrise being a description of Program Sunrise
+          (Sunrise 33 - NASA DWG# 1021102)</a>, by R. Battin, R. Crisp,
+        A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
+        September 1964.</li>
+      <li>Solarium 055 <a
+          href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108.jpg">assembly</a>
+        listing, December 4, 1966.</li>
+      <li>Personal communications by Hugh Blair-Smith.<br>
+      </li>
+    </ol>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="The_Interpreter_vs._the_CPU"></a>The Interpreter vs.
+      the CPU<br>
+    </h2>
+    As mentioned above, the Block 1 AGC design did not end up being used
+    in any moon missions, nor even in any manned missions, but if it <i>had</i>
+    been used, the required software could not have been fit into the
+    memory provided by the Block 1 unit if simply written in the AGC
+    CPU's native assembly language.&nbsp; (Nor even in the Block 2
+    computer, <a
+      href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+      described here</a>.)&nbsp; Consequently, as with the Block 2
+    design, both the native low-level assembly language (referred to as
+    "basic") and a higher-level language (referred to as "interpreter")
+    were supported by the system, and a Block 1 program is an
+    intermixture of both of these two programming languages.<br>
+    <br>
+    Because each of the interpreter's instructions represented many AGC
+    assembly-language instructions, a larger amount of functionality
+    could be fitted into the same amount of core memory, even accounting
+    for the fact that software was needed to implement the interpreter.
+    The drawback was that implementing any particular functionality in
+    interpretive language required far more execution time than
+    implementing the same functionality directly in AGC assembly
+    language. But as long as the program ran "fast enough", that didn't
+    matter very much.&nbsp; Between an assembly-language block of code
+    and an interpretive block of code, there will be a call (in assembly
+    language) to the interpreter subroutine.&nbsp; In other words, the
+    interpreter subroutine expects to find the code it is going to
+    interpret following the assembly language instruction which called
+    it.&nbsp; Similarly, a block of interpretive code ends with a
+    specific interpreter instruction meaning "stop interpreting and jump
+    to the next location in memory".<br>
+    <br>
+    Because of this intermixing, this manual describes both assembly
+    language and interpretive language.<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Formatting"></a>General Formatting Information<br>
+    </h2>
+    The format of source code accepted by <span style="font-weight:
+      bold;">yaYUL</span> differs slightly from that accepted by <span
+      style="font-weight: bold;">YUL</span>. This is partly because
+    without documentation for <span style="font-weight: bold;">YUL</span>,
+    determining the exact format required by it requires more effort
+    than I care for; but also, formatting restrictions based on strict
+    column alignment—which make a lot of sense with punch-cards—make
+    little sense now that punch-cards have gone to their final resting
+    place.&nbsp; Thus, <b>yaYUL</b> accepts a format for the Block 1
+    source code which is <i>almost</i> independent of column structure.<br>
+    <br>
+    Here are the principles used in formatting Block 1 <span
+      style="font-weight: bold;">yaYUL</span> source files, along with
+    my stylistic preferences:<br>
+    <ul>
+      <li>A source-code file is an ASCII (text) file, consisting of a
+        series of lines.<br>
+      </li>
+      <li>Blank lines are ignored.</li>
+      <li>The character '#' is used to begin comments. Everything on a
+        source line following the '#' symbol is discarded. (In the
+        original <span style="font-weight: bold;">YUL</span>, the
+        source code was on punch cards, with one line of code per card.
+        I believe that the entire card was a comment if a certain
+        non-blank character appeared in column 1. I'm not certain how
+        comments at the end of a line of source code were recognized;
+        they were either column-dependent, or else the parser simply
+        gave up after all valid fields had been parsed. In any case, <span
+          style="font-weight: bold;">yaYUL</span> does not support any
+        of the original <span style="font-weight: bold;">YUL</span>'s
+        specific commenting methods.)</li>
+      <li>If the character '$' is encountered in column 1 of a line,
+        then the line contains the name of a source file which is to be
+        inserted at that point. For example, if
+        "$INTERRUPT_LEAD_INS.agc" is encountered in column 1, then <span
+          style="font-weight: bold;">yaYUL</span> will process all of
+        the file INTERRUPT_LEAD_INS.agc before proceeding to process the
+        remainder of the original source file. (The original <span
+          style="font-weight: bold;">YUL</span> had no such source-code
+        directive, since it did not process "files".)<br>
+      </li>
+      <li>Programmer-defined names (such as program labels and constants
+        being defined) begin in column 1. They are 8 characters or less
+        in size, and may contain any character except '#', and may not
+        begin with the character '$'. (For example, "-1/(D)+A" would be
+        a <span style="font-style: italic;">legal</span> constant name
+        or program label.)</li>
+      <li>A typical arrangement of items on a line of assembly-code
+        would be this: optional program label, followed by an AGC opcode
+        or interpreter instruction, followed by an operand for the
+        opcode, followed by an optional comment. In some cases,
+        additional option fields may appear between the operand and the
+        comment. All fields are separated by whitespace, except that no
+        space needs to precede the '#' delimiter for a comment.&nbsp;
+        Stylistically, my preference is for the opcode or interpreter
+        instruction to begin at the second tab stop, the operand (if
+        any) at the third tab stop, options to the operand are separated
+        by spaces, and the comment (if any) to begin at the fifth tab
+        stop, assuming that tab stops are 8 characters apart.<br>
+      </li>
+      <li>In some cases, a line may have no program label but may have a
+        field such as "-1", "+1", "+110", etc., preceding the opcode.
+        These notations appear to serve merely as comments, and are
+        simply ignored by <span style="font-weight: bold;">yaYUL</span>.
+        These notations cannot begin in column 1, or else they would be
+        taken for program labels.&nbsp; Stylistically, I prefer that
+        these notations begin at the first tab stop.</li>
+      <li><i>There is two column-based dependences, which must be
+          observed</i>:&nbsp; <br>
+      </li>
+      <ol>
+        <li>The assembly language operator or pseudo-op, or the first
+          interpreter command on a line, <i>must</i> begin at the 17th
+          column, and will not be recognized as a an operator,
+          pseudo-op, or command otherwise.&nbsp; Tab stops are assumed
+          by the assembler to advance by multiples of 8 columns, so the
+          17th column is the one after 16 non-tab characters, or two tab
+          characters, or any of the usual combinations of non-tab
+          characters and tab characters you would expect.</li>
+        <li>Sometimes, a '-' character appears in the 16th column, i.e.,
+          the character preceding the assembly-language operator if
+          there is one.&nbsp; The is a directive to <i>logically-complement</i>
+          the output binary at that location, and is not recognized at
+          any other column position.<br>
+        </li>
+      </ol>
+    </ul>
+    These principles are perhaps best understood by viewing actual
+    source-code listings from Solarium 055.<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Data_Representation"></a>Data Representation</h2>
+    <p>Numerical formats are identical to those for the Block 2 AGC, and
+      I advise you to read <a
+        href="assembly_language_manual.html#Data_Representation">the
+        description of them that appears in the Block 2 discussion</a>.<br>
+    </p>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="CPU_Architecture_Registers"></a>CPU Architecture
+      (Registers)</h2>
+    TBD<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Memory_Map"></a>Memory Map</h2>
+    The Block 1 AGC memory map is far simpler than that of the Block 2
+    AGC.<br>
+    <br>
+    Memory is divided into 1024 words (15 bits each) of "erasable"
+    memory — i.e., memory which can both be read from and written to —
+    and 28 banks, each with 1024 words of read-only or "fixed" memory.<br>
+    <br>
+    Conventionally, AGC programming uses octal notation, as opposed to
+    decimal or hexadecimal notation, for most purposes, and I'll do that
+    below, but I'll always prefix an extra 0 to the front of an octal
+    number to make it easy to recognize as being octal.&nbsp; For
+    example, if you see 15, you'll know that it's 15 decimal because
+    there's no leading zero, whereas of you see 015, you'll know that
+    it's octal (=13 decimal).&nbsp; That's only a convention on this
+    page, and in program listings, expect to see everything in octal
+    with no leading zeroes.<br>
+    <br>
+    Memory is laid out as follows:<br>
+    <ul>
+      <li>Addresses 00000-01777 — erasable memory.</li>
+      <li>Addresses 02000-03777 (or theoretically, 01,06000-01,07777) —
+        Bank 1 of fixed memory.</li>
+      <li>Addresses 04000-05777 (or theoretically, 02,06000-02,07777) —
+        Bank 2 of fixed memory.</li>
+      <li>Addresses 03,06000-03,07777 — Bank 3 of fixed memory.</li>
+      <li>...</li>
+      <li>Addresses 034,06000-034,07777 — Bank 34 of fixed memory.<br>
+      </li>
+    </ul>
+    Thus, fixed memory locations can always be referred to as<br>
+    <blockquote><i>BB,AAAA</i><br>
+    </blockquote>
+    where <i>BB</i> is an octal bank number from 01 to 034, and AAAA is
+    an octal offset into that bank from 06000 to 07777.&nbsp; Only banks
+    01 and 02 have the special short addresses 02000 through 05777, and
+    they are invariably referred to in that way rather than in the <i>BB,AAAA</i>
+    form.<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Interrupt_Processing"></a>Interrupt Processing</h2>
+    TBD<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Instruction_Representation"></a>Instruction
+      Representation</h2>
+    <h3>Assembly-Language Instructions</h3>
+    The instruction set is far smaller, and therefore far simpler, than
+    in Block 2.&nbsp; Every assembly-language instruction occupies
+    precisely one word of memory (including operand), and consists of 15
+    bits as follows:<br>
+    <br>
+    <div style="margin-left: 40px;"><span style="font-family:
+        monospace;">CCC AAA AAA AAA AAA<br>
+      </span></div>
+    <br>
+    The 3-bit field <span style="font-family: monospace;">CCC</span>
+    represents the instruction type (the "code"), while the 12-bits <span
+      style="font-family: monospace;">AAAAAAAAAAAA</span> represent a
+    memory address.&nbsp; With this simple scheme, there are at most 8
+    instruction types, each of which can operate on any memory location
+    within a 4096-word area of memory. <br>
+    <br>
+    TBD<br>
+    <h3>Interpretive Instructions</h3>
+    TBD<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="AGC4_Instruction_Set"></a>AGC4 Instruction Set</h2>
+    TBD<br>
+    <h3> </h3>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Pseudo-Operations"></a>Pseudo-Operations</h2>
+    <p>The pseudo-ops are a subset of those in Block 2.&nbsp; Actually,
+      <b>yaYUL</b> supports the identical pseudo-ops for Block 1 as it
+      does for Block 2, but some of those pseudo-ops simply make no
+      sense for Block 1 and therefore will never appear in actual
+      code.&nbsp; <a
+        href="assembly_language_manual.html#Pseudo-Operations">See the
+        Block 2 description</a>.<br>
+    </p>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Interpreter_Instruction_Set"></a>Interpreter
+      Instruction Set</h2>
+    Block 1 interpreter language is superficially similar to Block 2
+    interpreter language, but is actually structured quite
+    differently.&nbsp; Moreover, it partakes of certain coding
+    conventions not present in Block 2.&nbsp; It is also missing a
+    number of interpreter commands that are present in Block 2, while it
+    has a number of commands that are not present in Block 2.<br>
+    <h3>Source Code and Encoding<br>
+    </h3>
+    Interpreter source code is structured as a series of what are
+    referred to as "equations", though they are not.&nbsp; Each
+    "equation" consists of a group of commands of variable length,
+    followed by a group of operands of a variable length.<br>
+    <br>
+    There are several different forms an equation can take, and rather
+    than trying to give you a rule for them, I'll just illustrate the 4
+    possible forms they can take:<br>
+    <br>
+    <blockquote><tt><i># Pattern 1:<br>
+          OPERATOR<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+            <br>
+          </sub></i></tt><tt><i><tt><i># Pattern 2:<br>
+            </i></tt>OPERATOR</i></tt><tt><i><sub>A</sub> &nbsp;
+          OPERATOR<sub>B</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+            <br>
+          </sub></i></tt><tt><i><tt><i># Pattern 3:<br>
+            </i></tt>OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M <sub></sub><br>
+        </i></tt><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
+
+
+              OPERATOR<sub>1B<br>
+              </sub></i></tt></i></tt><tt><i>.<br>
+          .<br>
+          . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
+        </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>MA</sub>&nbsp;
+
+
+                      OPERATOR<sub>MB<br>
+                      </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+          </sub></i></tt><br>
+      <tt><i><sub><br>
+          </sub></i></tt><tt><i><tt><i># Pattern 4:<br>
+            </i></tt>OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M <br>
+        </i></tt><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
+
+
+              OPERATOR<sub>1B<br>
+              </sub></i></tt></i></tt><tt><i>.<br>
+          .<br>
+          . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
+        </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
+                      <sub><br>
+                      </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+          </sub></i></tt> </blockquote>
+    Now, each operator employs a certain number of operands, either 0 or
+    1, and you would superficially expect the number of operands in the
+    equation to add up to the number of operands required by the
+    operators.&nbsp; However, this is seldom true, and there can be
+    either more or less operands than you would expect.<br>
+    <br>
+    TBD<br>
+    <br>
+    <h3>STORE</h3>
+    <table style="text-align: left; width: 100%;" border="0"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;"><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">STORE&nbsp; X<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;"><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;"><br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span><br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="io_channels"></a>I/O Channels</h2>
+    TBD<br>
+    <br>
+    <br>
+    <hr style="width: 100%; height: 2px;"><br>
+    <h2><a name="Instruction-Set_Summary_Tables"></a>Instruction-Set
+      Summary Tables</h2>
+    <span style="font-style: italic;"></span>TBD<br>
+    <h2><a name="UnprogrammedSequences"></a>Unprogrammed Sequences</h2>
+    TBD<br>
+    <br>
+    <hr style="width: 100%; height: 2px;"><br>
+    <center><i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2016-08-26.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>

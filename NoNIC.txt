@@ -1,0 +1,32 @@
+Subject:
+AGC problem resolved
+From:
+Joe Durnavich <joejd@earthlink.net>
+Date:
+Sun, 5 Sep 2004 12:37:08 -0700
+To:
+info@sandroid.org
+
+Ron,
+
+This probably belongs in the "Duh" category, but it may save someone else some 
+trouble.  The software compiled fine for me and the yaDSKY and yaAGC programs 
+seemed to start OK from the SimValidation script, but they never seemed to do 
+anything.
+
+ I am running Suse Linux 9.1 on a machine that does not have an Ethernet card 
+or other NIC.  It has only a dialup connection.  The default hostname Suse 
+assigns is "linux", but with my setup it did not add an entry for it to 
+the /etc/hosts file.   Thus, the gethostbyname function returns null, causing 
+the EstablishSocket() function to fail on error 0x101 agc_utilities.c.  
+
+It looks like the yaAGC module uses the hostname  returned by gethostname, but 
+yaDSKY uses "localhost".  As a workaround, I just added my hostname "linux" 
+to the localhost line in /etc/hosts.  SimValidation now works.
+
+Thanks for all your hard work on this project.  It is really impressive!
+
+--
+Joe Durnavich
+
+
