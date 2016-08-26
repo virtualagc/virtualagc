@@ -2,12 +2,11 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;
-      charset=windows-1252">
-    <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
-      2.4.16 ppc) [Netscape]">
-    <meta name="Author" content="Ronald Burkey">
+      charset=utf-8">
+    <meta name="generator" content="Bluefish 2.2.4" >
+    <meta name="author" content="Ron Burkey" >
     <title>Virtual AGC Assembly-Language Manual</title>
-    <meta name="author" content="Ronald S. Burkey">
+    <meta name="author" content="Ron Burkey" >
     <script>
   (function() {
     var cx = '005579885767466475821:oqt5wpxqlt8';
@@ -19,7 +18,7 @@
     s.parentNode.insertBefore(gcse, s);
   })();
 </script>
-    <meta name="Generator" content="htp 1.16">
+    <meta name="generator" content="Bluefish 2.2.4" >
   </head>
   <body style="background-image: url(gray3.jpg);">
     <table nosave="" width="100%" border="1" cellpadding="10px">
@@ -1556,7 +1555,7 @@ components
               which can mask counting of TIME6 on or off.&nbsp;&nbsp; By
               writing 1 to bit 15 of i/o channel 13 (octal), TIME6
               counting is enabled; conversely, by writing 0 to that bit,
-              the TIME6 counting is disabled.&nbsp; Upon reaching �0,
+              the TIME6 counting is disabled.&nbsp; Upon reaching &plusmn;0,
               the counter requests an interrupt (T6RUPT), which results
               in vectoring to the interrupt service routine at address
               4004 (octal), and then turns off the T6RUPT counter-enable
@@ -1765,10 +1764,10 @@ stands
             the count is supposed to be zero.&nbsp; When outside of the
             deadband, the counter is supposed to continually update to
             correspond to the angular displacement.&nbsp; The count
-            begins to be non-zero after the angle has reached about 2�,
-            is calibrated to a count of 42 at 10� (which is the nominal
+            begins to be non-zero after the angle has reached about 2&deg;,
+            is calibrated to a count of 42 at 10&deg; (which is the nominal
             full-scale position), and increases until reaching a
-            mechanical stop at 13�.&nbsp; The counts are supposed to
+            mechanical stop at 13&deg;.&nbsp; The counts are supposed to
             update only if the RHC counts are enabled (bit 8 of output
             channel 013 set) and when the count is requested (bit 9 of
             output channel 013 set).&nbsp; In other words, the flight
@@ -1871,13 +1870,13 @@ stands
           <td style="vertical-align: top;">These registers are used
             during IMU fine alignment to torque the gyro to the the
             precise alignment expected by the AGS.&nbsp; (The tolerance
-            of fine alignment is approximately �80" of arc.)&nbsp;&nbsp;
+            of fine alignment is approximately &plusmn;80" of arc.)&nbsp;&nbsp;
             This register is written by the flight software with counts
             (in AGC 1's-complement format) that represent the desired
             drive on the currently selected axis.&nbsp; Only one axis
             can be selected at any given time&mdash;namely, +X, -X, +Y, -Y,
             +Z, or -Z&mdash;using bits 7-9 of output channel 014.&nbsp; Each
-            count represents �0.617981" of arc.&nbsp; Actual torquing of
+            count represents &plusmn;0.617981" of arc.&nbsp; Actual torquing of
             the gyro does not begin until bit 10 of output channel 014
             is set.&nbsp; (For completeness, note also that bit 6 of
             channel 014 is supposed to be set at least 20 ms. prior to
@@ -1919,11 +1918,11 @@ stands
             registers are used during IMU coarse alignment to drive the
             IMU stable platform to approximately the orientation
             expected by the AGC.&nbsp; (The tolerance of coarse
-            alignment is approximately �1.5�.)&nbsp; These registers are
+            alignment is approximately &plusmn;1.5&deg;.)&nbsp; These registers are
             written by the flight software with counts (in AGC
             1's-complement format) that represent the desired drive in
-            each axis.&nbsp; Each count represents �0.04375�.&nbsp; (192
-            counts represent �8.4 degrees.)&nbsp; The drive sequence
+            each axis.&nbsp; Each count represents &plusmn;0.04375&deg;.&nbsp; (192
+            counts represent &plusmn;8.4 degrees.)&nbsp; The drive sequence
             does not actually commence until the corresponding
             drive-enable bit is set in output channel 14 (octal).&nbsp;
             Bit 15 (the most significant bit) of channel 14 must be set
@@ -2644,7 +2643,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -2751,7 +2750,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -2858,7 +2857,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -2965,9 +2964,9 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎) if the
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s) if the
             accumulator is plus zero or minus zero, or 2 MCT (about 23.4
-            탎) if the accumulator is non-zero.</td>
+            &mu;s) if the accumulator is non-zero.</td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -3069,8 +3068,8 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎) if the
-            accumulator is zero or negative, or 2 MCT (about 23.4 탎) if
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s) if the
+            accumulator is zero or negative, or 2 MCT (about 23.4 &mu;s) if
             the accumulator is positive non-zero.</td>
         </tr>
         <tr>
@@ -3188,7 +3187,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -3296,7 +3295,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -3469,7 +3468,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎). </td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -3556,7 +3555,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -3668,7 +3667,7 @@ received
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎)<br>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -3811,7 +3810,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎)<br>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -3941,7 +3940,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎). </td>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -4029,7 +4028,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎)<br>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -4166,7 +4165,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎). </td>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -4261,7 +4260,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -4376,7 +4375,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 35.4 탎). </td>
+          <td style="vertical-align: top;">2 MCT (about 35.4 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -4464,7 +4463,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎). </td>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -4561,7 +4560,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎). </td>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -4655,7 +4654,7 @@ Refer
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">6 MCT (about 70.2 탎)<br>
+          <td style="vertical-align: top;">6 MCT (about 70.2 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -4738,13 +4737,13 @@ Refer
             dividend.&nbsp; <br>
             <br>
             Note that the sign of the dividend is the sign of the A
-            register prior to the division, unless A is �0; in that
+            register prior to the division, unless A is &plusmn;0; in that
             case, the sign of the dividend is the sign of the L
             register.&nbsp; For example, suppose that A contains +0 and
             L contains -0; then the overall sign of the dividend is -0.<br>
             <br>
             If the divisor is equal to the dividend in magnitude, then
-            the A register will be stored with �37777, while the L
+            the A register will be stored with &plusmn;37777, while the L
             register will be stored with the divisor.<br>
             <br>
             If the divisor is less than the dividend in magnitude,
@@ -5564,7 +5563,7 @@ as
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎)<br>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -5689,7 +5688,7 @@ as
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎)<br>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -5810,7 +5809,7 @@ as
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)<br>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -5935,7 +5934,7 @@ as
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -6054,7 +6053,7 @@ as
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -6276,7 +6275,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)<br>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -6392,7 +6391,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -6483,7 +6482,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -6576,7 +6575,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎)<br>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -6624,7 +6623,7 @@ TC&nbsp;
             rules:<br>
             <ol>
               <li>The result is +0, unless</li>
-              <li>The factor in the accumulator had been �0 and the
+              <li>The factor in the accumulator had been &plusmn;0 and the
                 factor in <span style="font-family: monospace;">K</span>
                 had been non-zero of the opposite sign, in which case
                 the result is -0.<br>
@@ -6718,7 +6717,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -6820,8 +6819,8 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎) if
-            executed from erasable memory, 1 MCT (about 11.7 탎) if
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s) if
+            executed from erasable memory, 1 MCT (about 11.7 &mu;s) if
             executed from fixed memory. </td>
         </tr>
         <tr>
@@ -6924,7 +6923,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎). </td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -7011,7 +7010,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7102,7 +7101,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7194,7 +7193,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7275,7 +7274,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)<br>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7387,7 +7386,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7588,7 +7587,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7699,7 +7698,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7794,7 +7793,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -7885,7 +7884,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">3 MCT (about 35.1 탎). </td>
+          <td style="vertical-align: top;">3 MCT (about 35.1 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -7975,7 +7974,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8077,7 +8076,7 @@ TC&nbsp;
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)<br>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8264,7 +8263,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎). </td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -8353,7 +8352,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)<br>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8449,7 +8448,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8556,7 +8555,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8661,7 +8660,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8769,7 +8768,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8858,7 +8857,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)<br>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -8946,7 +8945,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)<br>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -9064,7 +9063,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)<br>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)<br>
           </td>
         </tr>
         <tr>
@@ -9195,7 +9194,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎). </td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -9276,7 +9275,7 @@ For
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎). </td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s). </td>
         </tr>
         <tr>
           <td style="vertical-align: top; width: 20%; font-weight:
@@ -12207,7 +12206,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">PINC<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU<br>
           </td>
           <td style="vertical-align: top;">TIME1-TIME5<br>
@@ -12222,7 +12221,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">PCDU<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">CDUX, CDUY, CDUZ, OPTX, OPTY<span
               style="color: rgb(0, 153, 0);"></span><br>
@@ -12233,7 +12232,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">MINC<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;"><br>
           </td>
@@ -12244,7 +12243,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">MCDU<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">CDUX, CDUY, CDUZ, OPTX, OPTY<span
               style="color: rgb(0, 153, 0);"></span></td>
@@ -12254,7 +12253,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">DINC<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">TIME6<br>
           </td>
@@ -12262,7 +12261,7 @@ case
             counts, but also emits a signal to peripheral hardware, as
             follows:<br>
             <ol>
-              <li>If the counter is already at �0, then do not increment
+              <li>If the counter is already at &plusmn;0, then do not increment
                 or decrement.&nbsp; Output the signals ZOUT <span
                   style="color: rgb(0, 153, 0);">and <span
                     style="font-family: monospace;">DINC</span>-request</span>.<br>
@@ -12284,7 +12283,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">SHINC<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;"><span style="color: rgb(0,
               153, 0);">INLINK, RNRAD, OUTLINK</span><br>
@@ -12302,7 +12301,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">SHANC<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;"><span style="color: rgb(0,
               153, 0);">INLINK, RNRAD, OUTLINK</span> </td>
@@ -12318,7 +12317,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">INOTRD<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">None<br>
           </td>
@@ -12328,7 +12327,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">INOTLD<br>
           </td>
-          <td style="vertical-align: top;">1 MCT (about 11.7 탎)</td>
+          <td style="vertical-align: top;">1 MCT (about 11.7 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">None<br>
           </td>
@@ -12338,7 +12337,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">FETCH<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)</td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">None<br>
           </td>
@@ -12348,7 +12347,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">STORE<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)</td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">None<br>
           </td>
@@ -12358,7 +12357,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">GOJ<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)</td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">None<br>
           </td>
@@ -12375,7 +12374,7 @@ case
         <tr>
           <td style="vertical-align: top; font-family: monospace;">TCSAJ<br>
           </td>
-          <td style="vertical-align: top;">2 MCT (about 23.4 탎)</td>
+          <td style="vertical-align: top;">2 MCT (about 23.4 &mu;s)</td>
           <td style="vertical-align: top;">Input to CPU</td>
           <td style="vertical-align: top;">None<br>
           </td>
