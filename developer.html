@@ -91,7 +91,7 @@
                       <center><b><font color="#999900"><font size="+3">Virtual
 AGC
 
-                              — AGS — LVDC — Gemini</font></font></b></center>
+                              &mdash; AGS &mdash; LVDC &mdash; Gemini</font></font></b></center>
                       <br>
                       <b><font color="#000000"><font size="+3">Developer
                             Info<br>
@@ -282,9 +282,9 @@ Changes
       style="font-weight: bold;">yaDSKY</span> being separate standalone
     programs running on the same computer or (theoretically) on
     different computers. This promotes the possibility of changing or
-    even completely replacing <span style="font-weight: bold;">yaDSKY</span>—or
+    even completely replacing <span style="font-weight: bold;">yaDSKY</span>&mdash;or
     of introducing new stand-alone programs for simulating other Apollo
-    hardware—without changing <span style="font-weight: bold;">yaAGC</span>
+    hardware&mdash;without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
     alternative implementations as <span style="font-weight: bold;">yaDSKY</span>
     and <span style="font-weight: bold;">yaDSKY2</span>.&nbsp; &nbsp;
@@ -307,7 +307,7 @@ Changes
     program representing a hardware simulation is to be able to connect
     to the corrrect port on the server, and to communicate input or
     output data in an acceptable format.&nbsp; (But the socket interface
-    could be replaced with relatively little effort—say, to a
+    could be replaced with relatively little effort&mdash;say, to a
     shared-memory interface.&nbsp; <a
       href="#AGC_CPU-to-Peripheral_Interconnections">See below</a>.)<br>
     <br>
@@ -421,7 +421,7 @@ Changes
     allow <span style="font-weight: bold;">yaAGS</span> to use <span
       style="font-weight: bold;">yaAGC</span> protocol.&nbsp; A similar
     situation may arise where the AGC and AGS use the same peripheral
-    device—for example, receiving the same gimbal-angle
+    device&mdash;for example, receiving the same gimbal-angle
     increment/decrement pulses.&nbsp; Rather than forcing the peripheral
     device to output the same data in two different protocols, it is
     more reasonable for <span style="font-weight: bold;">yaAGS</span>
@@ -433,8 +433,8 @@ Changes
       Embedded Software</h3>
     This is quite simple, in principle. If your embedded system is
     running a POSIX-compliant operating system, you can just go ahead
-    and run <span style="font-weight: bold;">yaAGC</span>. If not—if,
-    for example, you have no operating system—here's what you need to
+    and run <span style="font-weight: bold;">yaAGC</span>. If not&mdash;if,
+    for example, you have no operating system&mdash;here's what you need to
     do:<br>
     <br>
     Provide replacements for the <span style="font-family: monospace;">send</span>
@@ -1832,7 +1832,7 @@ Architecture
     channel <span style="font-family: monospace;">ppppppp</span> to <span
       style="font-family: monospace;">ddddddddddddddd</span>. The
     bitmask is specific to the hardware simulation transmitting it only,
-    and stays in effect forever—or at least until another message with <span
+    and stays in effect forever&mdash;or at least until another message with <span
       style="font-family: monospace;">u</span>=1 is received for that
     channel. So typically, the hardware simulation would want to
     transmit the bitmasks just once, immediately upon connecting to <span
@@ -2903,7 +2903,7 @@ Lights
       <br>
       The gyro activity in IMU fine-alignment presents a special problem
       for the recommended socket interface between the CPU and
-      peripherals—and, I suppose, any other reasonable interface—in that
+      peripherals&mdash;and, I suppose, any other reasonable interface&mdash;in that
       the method the CPU uses to drive the gyros is to output a 3200
       pulse-per-second signal when the Gyro Activity output bit is
       active, with the assumption that the gyros will know how many of
@@ -3230,8 +3230,8 @@ Lights
     recompilation of <span style="font-weight: bold;">yaAGC</span>.)<br>
     <br>
     <span style="font-weight: bold;">yaAGC</span> does not distinguish
-    between the ports, so any type of hardware simulation—if there ever
-    is more than one—can connect on any port. Or, multiple simulations
+    between the ports, so any type of hardware simulation&mdash;if there ever
+    is more than one&mdash;can connect on any port. Or, multiple simulations
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture"></a>Software Architecture</h3>
@@ -3253,14 +3253,14 @@ Lights
     For portability and reliability purposes, the design choice has been
     made additionally to have a function (called <span
       style="font-family: monospace;">Pulse</span>, in main.c) which is
-    executed at regular intervals—nominally, every 50 milliseconds. This
+    executed at regular intervals&mdash;nominally, every 50 milliseconds. This
     function handles establishing a connection from the server, or
     disconnecting from it. Also, it polls for new incoming socket data.<br>
     <br>
     Some functions which are used in common with the <span
-      style="font-weight: bold;">yaAGC</span> program—namely, some
+      style="font-weight: bold;">yaAGC</span> program&mdash;namely, some
     socket-manipulation functions and some functions for creating or
-    parsing the data packets passed through the sockets—appear in the <span
+    parsing the data packets passed through the sockets&mdash;appear in the <span
       style="font-weight: bold;">yaAGC</span> source code rather than in
     the <span style="font-weight: bold;">yaDSKY</span> source code. In
     building <span style="font-weight: bold;">yaAGC</span>, both a
@@ -3327,7 +3327,7 @@ Lights
     a CM simulation, or possibly the differences between different
     Apollo missions.<br>
     <br>
-    There are two graphics files for each indicator—one lit and one
+    There are two graphics files for each indicator&mdash;one lit and one
     dark. Therefore, each set of legends consists of 28 graphics
     files.&nbsp; These graphic files, along with the graphic file for
     the PRO key (i.e., the keypad key between CLR and KEY REL) and the
@@ -3747,14 +3747,14 @@ New
     i/o channels, etc., are initialized to some safe values.&nbsp; <br>
     <br>
     Returns:<br>
-    <div style="margin-left: 40px;">0 — Success.<br>
-      1 — Core-rope image file not found.<br>
-      2 — Core-rope image file larger than core memory.<br>
-      3 — Core-rope image file size is odd.<br>
-      4 — <span style="font-family: monospace;">agc_t</span> structure
+    <div style="margin-left: 40px;">0 &mdash; Success.<br>
+      1 &mdash; Core-rope image file not found.<br>
+      2 &mdash; Core-rope image file larger than core memory.<br>
+      3 &mdash; Core-rope image file size is odd.<br>
+      4 &mdash; <span style="font-family: monospace;">agc_t</span> structure
       pointer is <span style="font-family: monospace;">NULL</span>.<br>
-      5 — File-read error.<br>
-      6 — Core-dump file not found.<br>
+      5 &mdash; File-read error.<br>
+      6 &mdash; Core-dump file not found.<br>
     </div>
     <br>
     <span style="font-weight: bold;">Note:</span>&nbsp; The true AGC's
@@ -4385,22 +4385,22 @@ the
         banks 2,3 are swapped with banks 0,1.)&nbsp; This is the same
         ordering as in assembly listings produced by the original <span
           style="font-weight: bold;">YUL</span> program.&nbsp; It has
-        presumably been done this way because banks 2 and 3—while
-        addressable as banked memory—are <span style="font-style:
+        presumably been done this way because banks 2 and 3&mdash;while
+        addressable as banked memory&mdash;are <span style="font-style:
           italic;">also</span> addressable as unbanked ("fixed-fixed")
         memory.&nbsp; In some sense, therefore, banks 2 and 3 are a more
         fundamental type of memory than the other banks.&nbsp; They are
         the "prime real-estate".</li>
     </ul>
-    For those with access to Julian Webb's AGC simulator—a very small
-    number of people at this writing—I've provided a utility called <span
+    For those with access to Julian Webb's AGC simulator&mdash;a very small
+    number of people at this writing&mdash;I've provided a utility called <span
       style="font-weight: bold;">webb2burkey-rope</span> that can
     convert the <span style="font-weight: bold;">yaAGC</span> core-rope
     format to Julian's format, and vice-versa.<br>
     <br>
     It's also important if you intend to create your own binary-image
-    files—and I don't suppose that you <span style="font-style:
-      italic;">will</span>—to know that each memory bank is checked (as
+    files&mdash;and I don't suppose that you <span style="font-style:
+      italic;">will</span>&mdash;to know that each memory bank is checked (as
     part of the built-in self test) for an appropriate checksum.&nbsp;
     The bank checksums are governed by the following rules:<br>
     <ul>
@@ -4414,7 +4414,7 @@ the
         produced is a 15-bit 1's-complement signed integer.&nbsp; (In
         case it is not obvious, these rules do <span style="font-style:
           italic;">not</span> correspond to arithmetic performed by most
-        modern CPU's—as of this writing, anyhow—and therefore require
+        modern CPU's&mdash;as of this writing, anyhow&mdash;and therefore require
         special coding to be handled properly.)<br>
       </li>
       <li>The checksum of any given memory bank is equal to the number
@@ -4436,7 +4436,7 @@ the
         rather than being discarded.)</li>
       <li>The "bugger word" is a special word appearing after all of the
         code and constants in the bank, added for the sole purpose of
-        making the checksum come out right—in other words, to the
+        making the checksum come out right&mdash;in other words, to the
         positive or negative of the bank number. For a bank that is
         completely full (contains 1023 words), the bugger word is simply
         placed in the last&nbsp; physical word of the bank.&nbsp; <br>
@@ -4448,14 +4448,14 @@ the
         bank.&nbsp; Words after the bugger word are not included in the
         bank checksum, so special markers must be added in order to tell
         the build-in-self-test software when to stop computing the
-        checksum—i.e., to tell it where the bugger word is.&nbsp; This
+        checksum&mdash;i.e., to tell it where the bugger word is.&nbsp; This
         is done by preceding the bugger word by two machine-code
         instructions (or only one if there is not room for two) that are
         basically "loop forever" codes.&nbsp; In assembly language,
         these instructions would be "TC <span style="font-style:
           italic;">self</span>"; numerically, such an instruction
         happens to assemble to the value of the memory address of the
-        instruction—4000-5777 octal for bank 2, 6000-7777 octal for bank
+        instruction&mdash;4000-5777 octal for bank 2, 6000-7777 octal for bank
         3, and 2000-3777 for all other banks.</li>
       <li>Words within a bank but after the bugger word are
         undefined.&nbsp; In practice, <span style="font-weight: bold;">yaYUL</span>

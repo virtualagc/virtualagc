@@ -91,7 +91,7 @@
                       <center><b><font color="#999900"><font size="+3">Virtual
 AGC
 
-                              — AGS — LVDC — Gemini</font></font></b></center>
+                              &mdash; AGS &mdash; LVDC &mdash; Gemini</font></font></b></center>
                       <br>
                       <b><font color="#000000"><font size="+3">Abort
                             Guidance System (AGS)<br>
@@ -276,10 +276,10 @@ Flight
     to the AEA rather than the AGS.&nbsp;&nbsp; Various components in
     the AGS include:<br>
     <ul>
-      <li>The AEA—the computer itself.</li>
-      <li>The Abort Sensor Assembly—a simple inertial measuring system,
+      <li>The AEA&mdash;the computer itself.</li>
+      <li>The Abort Sensor Assembly&mdash;a simple inertial measuring system,
         strapdown rather than gimballed.</li>
-      <li>The Data Entry and Display Assembly (DEDA)—similar to the
+      <li>The Data Entry and Display Assembly (DEDA)&mdash;similar to the
         AGC's DSKY.<br>
       </li>
     </ul>
@@ -638,7 +638,7 @@ in
       <li>Data words were 2's complement.&nbsp; In the case of many
         calculations, a fixed-point discipline was used, so that
         fractional values could be used.&nbsp; This method is similar
-        using a slide rule—a paradigm naturally quite familiar to the
+        using a slide rule&mdash;a paradigm naturally quite familiar to the
         programmers of that time.&nbsp; (A slide rule represents only
         numbers in the range 0 to 1 and the user is supposed to mentally
         track the position of the decimal point for each successive
@@ -711,9 +711,9 @@ in
       </div>
     </div>
     <dl>
-      <dt><font face="Geneva">Much more detail</font>—<font
+      <dt><font face="Geneva">Much more detail</font>&mdash;<font
           face="Geneva">and indeed, almost everything you'd want to know
-          architecturally</font>—<font face="Geneva">may be found by
+          architecturally</font>&mdash;<font face="Geneva">may be found by
           consulting the <a
             href="http://www.ibiblio.org/apollo/Pultorak_files/AEAProgrammingReference.pdf">Abort
             Electronic Assembly Programming Reference</a>.<br>
@@ -1227,9 +1227,9 @@ Presumably,
     Obviously, it's a matter of opinion how many times the&nbsp;
     proofing process described above needs to be repeated.&nbsp; I have
     repeated it only until the embedded checksums are correct.&nbsp; If
-    anyone wants to volunteer to perform additional proofing—for
+    anyone wants to volunteer to perform additional proofing&mdash;for
     example, of the program comments, which are not checked by the
-    process I used—feel free to do so and to report the results to me.<br>
+    process I used&mdash;feel free to do so and to report the results to me.<br>
     <h3><a name="Special_Problems_of_Flight_Program_6_"></a>Special
       Problems of Flight Program 6<br>
     </h3>
@@ -1421,40 +1421,40 @@ Presumably,
     The user-commands which are currently recognized by the debugger
     are:<br>
     <ul>
-      <li>#<span style="font-style: italic;">Anything</span>—(i.e., any
+      <li>#<span style="font-style: italic;">Anything</span>&mdash;(i.e., any
         string beginning with the character '#' in the first column) is
         a comment, which is discarded without a warning message.&nbsp;
         This is principally useful for writing scripts (which has not
         yet been implemented).<br>
       </li>
-      <li>BREAK <span style="font-style: italic;">A</span>—defines a
+      <li>BREAK <span style="font-style: italic;">A</span>&mdash;defines a
         new breakpoint at memory-address <span style="font-style:
           italic;">A</span>.&nbsp; The program will halt upon
         encountering an instruction at the address of the breakpoint. <br>
       </li>
-      <li>BREAKPOINTS—displays all currently-defined breakpoints and
+      <li>BREAKPOINTS&mdash;displays all currently-defined breakpoints and
         watchpoints.</li>
-      <li>CONT—begin running the program.&nbsp; The program will simply
+      <li>CONT&mdash;begin running the program.&nbsp; The program will simply
         run until encountering a breakpoint. <br>
       </li>
-      <li>CONT-TIL-NEW—same, but also stop if an instruction-type not
+      <li>CONT-TIL-NEW&mdash;same, but also stop if an instruction-type not
         previously encountered in this session is hit.&nbsp; (Only good,
         obviously, for debugging the simulation.)<br>
       </li>
-      <li>DELETE—without an address, DELETE simply deletes all existing
+      <li>DELETE&mdash;without an address, DELETE simply deletes all existing
         breakpoints and watchpoints.</li>
-      <li>DELETE <span style="font-style: italic;">A</span>—deletes the
+      <li>DELETE <span style="font-style: italic;">A</span>&mdash;deletes the
         breakpoint or watchpoint (if any) currently defined at address <span
           style="font-style: italic;">A</span>.&nbsp; The address should
         be prefixed with 'I' or 'O' for i/o channel addresses.<span
           style="font-weight: bold;"></span></li>
-      <li>DUMP—without arguments (i.e, no <span style="font-style:
+      <li>DUMP&mdash;without arguments (i.e, no <span style="font-style:
           italic;">N</span> and no <span style="font-style: italic;">A</span>),
         a dump is performed using the last <span style="font-style:
           italic;">N</span> and <span style="font-style: italic;">A</span>
         previously used.</li>
       <li>DUMP [<span style="font-style: italic;">N</span>] <span
-          style="font-style: italic;">A</span>—displays the current
+          style="font-style: italic;">A</span>&mdash;displays the current
         contents of <span style="font-style: italic;">N</span>
         successive memory locations or i/o channels, starting at address
         <span style="font-style: italic;">A</span>.&nbsp; The formats
@@ -1465,15 +1465,15 @@ Presumably,
         to 1.&nbsp; Since no i/o channels are at consecutive addresses,
         no <span style="font-style: italic;">N </span>option
         is allowed for i/o-channel addresses. </li>
-      <li>QUIT or EXIT—exits <span style="font-weight: bold;">yaAGS</span>.</li>
+      <li>QUIT or EXIT&mdash;exits <span style="font-weight: bold;">yaAGS</span>.</li>
       <li>STEP [<span style="font-style: italic;">N</span>] or NEXT [<span
-          style="font-style: italic;">N</span>]—executes the next <span
+          style="font-style: italic;">N</span>]&mdash;executes the next <span
           style="font-style: italic;">N</span> assembly-language
         instructions.&nbsp; If <span style="font-style: italic;">N</span>
         is omitted, then it defaults to 1.&nbsp; Notes that this command
         can be abbreviated as 'S' or as 'N'.<br>
       </li>
-      <li>WATCH <span style="font-style: italic;">A</span>—defines a
+      <li>WATCH <span style="font-style: italic;">A</span>&mdash;defines a
         new watchpoint at erasable-memory address <span
           style="font-style: italic;">A</span> (using one of the address
         formats described above).&nbsp; The program will halt <span
@@ -1481,7 +1481,7 @@ Presumably,
         instruction that changes the value stored at the address of the
         watchpoint. <br>
       </li>
-      <li>EDIT <span style="font-style: italic;">A V</span>—stores the
+      <li>EDIT <span style="font-style: italic;">A V</span>&mdash;stores the
         octal value <span style="font-style: italic;">V</span> at the
         adress <span style="font-style: italic;">A</span>.&nbsp; The
         formats allowed in <span style="font-style: italic;">A</span>
@@ -1506,26 +1506,26 @@ Presumably,
       HALT<br>
       <div style="text-align: left;">
         <ul>
-          <li>BACKTRACES—displays the most recent (50) backtrace points
+          <li>BACKTRACES&mdash;displays the most recent (50) backtrace points
             (i.e., points at which the program branched).</li>
-          <li>BACKTRACE <span style="font-style: italic;">N</span>—restores
+          <li>BACKTRACE <span style="font-style: italic;">N</span>&mdash;restores
 the
 
             state of the system (CPU, memory, i/o channels) to backtrace
             point #<span style="font-style: italic;">N</span> (from the
             list displayed by the BACKTRACES command).</li>
           <li>DISASSEMBLE [[<span style="font-style: italic;">N</span>]
-            <span style="font-style: italic;">A</span>]—disassembles N
+            <span style="font-style: italic;">A</span>]&mdash;disassembles N
             instructions starting at address <span style="font-style:
               italic;">A</span>.&nbsp;
             By default <span style="font-style: italic;">A</span> is
             the current address of the program counter and <span
               style="font-style: italic;">N</span> is its prior value
             (starting at 24 when the program starts).</li>
-          <li>COUNTS—displays a list of the number of times each type of
+          <li>COUNTS&mdash;displays a list of the number of times each type of
             AEA instruction has been executed.&nbsp; The numbers are in
             decimal.</li>
-          <li>PATTERN <span style="font-style: italic;">V M</span>—sets
+          <li>PATTERN <span style="font-style: italic;">V M</span>&mdash;sets
             a "pattern" with value <span style="font-style: italic;">V</span>
             and mask <span style="font-style: italic;">M</span>.&nbsp;
             A pattern is similar to a breakpoint, except that it uses

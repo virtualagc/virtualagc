@@ -122,7 +122,7 @@
 
 
 
-                              AGC — AGS — LVDC — Gemini</font></font></b></center>
+                              AGC &mdash; AGS &mdash; LVDC &mdash; Gemini</font></font></b></center>
                       <br>
                       <b><font color="#000000"><font size="+3">Programmer's
 
@@ -262,21 +262,21 @@
       this one page, the different blocks are covered in separate pages:<br>
     </p>
     <ul>
-      <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block 0"</a> — Earliest
+      <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block 0"</a> &mdash; Earliest
         preliminary design of the AGC for which I have any
         documentation, not used in any missions, and with no known
         existing code.&nbsp; There's a single document (that I know of)
         describing it, so the link is simply to that document, rather
         than to a separate page.</li>
-      <li><a href="Block1.html">"Block 1"</a> — Used for the earlier
+      <li><a href="Block1.html">"Block 1"</a> &mdash; Used for the earlier
         designs of the Command Module, which were also referred to a
         Block 1 spacecraft.&nbsp; Used for the unmanned Apollo 4 and
         Apollo 6 unmanned missions.</li>
-      <li>"Block 2" — Used for the later designs of the Command Module,
+      <li>"Block 2" &mdash; Used for the later designs of the Command Module,
         which were also referred to a Block 2 spacecraft.&nbsp; Used for
         the (unmanned) Apollo 5 mission's Lunar Module, and for all
         manned missions.</li>
-      <li><a href="BlockIII.html">"Block 3"</a> — There was no such
+      <li><a href="BlockIII.html">"Block 3"</a> &mdash; There was no such
         thing in the Apollo program, but Hugh Blair-Smith has given us
         some ideas about what it might have looked like if there were.</li>
     </ul>
@@ -376,7 +376,7 @@ II
     </h2>
     If all of the software-provided functionality required for the moon
     missions had been written straightforwardly in AGC assembly
-    language—i.e., in the native language of the AGC's CPU—more memory
+    language&mdash;i.e., in the native language of the AGC's CPU&mdash;more memory
     would have been needed for program storage than was actually
     physically provided within the AGC.&nbsp; It is important to realize
     that the AGC had no capability of loading programs into memory at
@@ -389,7 +389,7 @@ II
     <br>
     To solve this problem, the designers of the AGC chose to use part of
     the precious core memory to implement a virtual
-    computer-within-the-computer—in much the same way as <span
+    computer-within-the-computer&mdash;in much the same way as <span
       style="font-weight: bold;">yaAGC</span> is a virtual computer
     within another computer. This virtual computer, the "interpreter",
     was a subprogram (within the larger <span style="font-weight:
@@ -449,7 +449,7 @@ II
     without documentation for <span style="font-weight: bold;">YUL</span>,
     determining the exact format required by it requires more effort
     than I care for; but also, formatting restrictions based on strict
-    column alignment—which make a lot of sense with punch-cards—make
+    column alignment&mdash;which make a lot of sense with punch-cards&mdash;make
     little sense now that punch-cards have gone to their final resting
     place.&nbsp; (But see the <a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">MOD 3C
       Programmer's Manual</a>, which though covering an earlier,
@@ -522,8 +522,8 @@ II
       but not supported by <b>yaYUL</b> are provisions for formatting
       the output assembly listing.&nbsp; (By the way, notice that I said
       <b>Yul</b> rather than <b>YUL</b> in the preceding
-      sentence.&nbsp; That's because "Yul" is an abbreviation—of
-      "Yuletide—and not an acronym like "GAP", and so it really isn't
+      sentence.&nbsp; That's because "Yul" is an abbreviation&mdash;of
+      "Yuletide&mdash;and not an acronym like "GAP", and so it really isn't
       appropriate to put it in all-caps, and I don't think the original
       developers did so.&nbsp; But I've only thought of this belatedly,
       and am too lazy to go back and change it everywhere.&nbsp; So
@@ -608,7 +608,7 @@ II
           <br>
           "You can see evidence of the above in the fact that in the
           normal flow of card numbers, the one after such a spacing is
-          generally 1 more than that of the card before</small><small>—no
+          generally 1 more than that of the card before</small><small>&mdash;no
 
 
 
@@ -624,7 +624,7 @@ II
           columns 9-48 were printed in print positions 81-120 of the
           previous line. That feature was called 'right print'."<br>
         </small></p>
-      <div align="right"><small>— <i>Hugh Blair-Smith</i></small><br>
+      <div align="right"><small>&mdash; <i>Hugh Blair-Smith</i></small><br>
       </div>
       <p><br>
       </p>
@@ -632,7 +632,7 @@ II
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Data_Representation"></a>Data Representation</h2>
     <h3>Bit Numbering</h3>
-    AGC memory "words" are 15 bits in size—or rather 15 data bits, plus
+    AGC memory "words" are 15 bits in size&mdash;or rather 15 data bits, plus
     an odd-parity bit used only by the hardware for error-detection
     purposes, and not accessible to software. The original AGC
     documentation referenced the individual bits within a word as<br>
@@ -669,7 +669,7 @@ II
     within the word in accordance with the appropriate scaling.<br>
     <br>
     Notice that from this definition, zero has two different
-    representations—as "+0" and as "-0".<br>
+    representations&mdash;as "+0" and as "-0".<br>
     <br>
     Some examples:<br>
     <ul>
@@ -681,8 +681,8 @@ II
       <li>3/4 has the binary representation 011000000000000.</li>
     </ul>
     To represent an SP number within the assembly-language source code,
-    the constant—i.e., a constant representing a <span
-      style="font-style: italic;">real</span> number—has an optional +/-
+    the constant&mdash;i.e., a constant representing a <span
+      style="font-style: italic;">real</span> number&mdash;has an optional +/-
     sign, 0 or more decimal digits, an optional decimal point, and more
     decimal digits. <br>
     <br>
@@ -1875,8 +1875,8 @@ stands
             This register is written by the flight software with counts
             (in AGC 1's-complement format) that represent the desired
             drive on the currently selected axis.&nbsp; Only one axis
-            can be selected at any given time—namely, +X, -X, +Y, -Y,
-            +Z, or -Z—using bits 7-9 of output channel 014.&nbsp; Each
+            can be selected at any given time&mdash;namely, +X, -X, +Y, -Y,
+            +Z, or -Z&mdash;using bits 7-9 of output channel 014.&nbsp; Each
             count represents ±0.617981" of arc.&nbsp; Actual torquing of
             the gyro does not begin until bit 10 of output channel 014
             is set.&nbsp; (For completeness, note also that bit 6 of
@@ -2156,7 +2156,7 @@ stands
         the switched-erasable addressed E0,1 and E0,2.&nbsp; <span
           style="color: rgb(0, 153, 0);">I believe I have seen
           references stating that i/o channel 0 is also duplicated with
-          unswitched-erasable address 0 — i.e., with the
+          unswitched-erasable address 0 &mdash; i.e., with the
           accumulator.&nbsp; However, Blair-Smith and notes in the
           Luminary131 and Colossus249 source code all seem to agree that
           only i/o channels 1 and 2 are duplicated.&nbsp; Since there
@@ -2443,7 +2443,7 @@ received
     conditions which defer processing of interrupts include:<br>
     <ul>
       <li>The Extracode flag is set (<a
-          href="#Instruction_Representation">see below</a>) — i.e., if a
+          href="#Instruction_Representation">see below</a>) &mdash; i.e., if a
         two-word instruction has been found, but only the first word of
         it has been read from memory so far.<br>
       </li>
@@ -4134,7 +4134,7 @@ Refer
             20%;">Description:<br>
           </td>
           <td style="vertical-align: top;">The "Double Precision Double"
-            instruction — and yes, that's really what it's called — adds
+            instruction &mdash; and yes, that's really what it's called &mdash; adds
             the double-precision (DP) value in the A,L register pair to
             itself.<br>
           </td>
@@ -9340,7 +9340,7 @@ For
     131 attempts to describe the difference between the two. Its says
     that "=" is used to assign an alternate name to data ("logical
     equivalence"), whereas <span style="font-family: monospace;">EQUALS</span>
-    implies sharing of resources—such as reuse of the same memory
+    implies sharing of resources&mdash;such as reuse of the same memory
     location for two different variables. While interesting from the
     standpoint of maintainers of the code, there is no actual behavioral
     difference between the two pseudo-operations, as far as I can
@@ -9928,7 +9928,7 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     131 attempts to describe the difference between the two. Its says
     that "=" is used to assign an alternate name to data ("logical
     equivalence"), whereas <span style="font-family: monospace;">EQUALS</span>
-    implies sharing of resources—such as reuse of the same memory
+    implies sharing of resources&mdash;such as reuse of the same memory
     location for two different variables.<br>
     <br>
     An optional field after <span style="font-style: italic;">Value</span>
@@ -10023,8 +10023,8 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     The <span style="font-style: italic;">Address</span> field is
     either an octal constant, or else a symbol which the assembler can
     resolve as an address. If the <span style="font-style: italic;">Address</span>
-    is numeric, it will be treated as a pseudo-address—i.e., it must be
-    in the range 0-117777 (octal)—and the assembler will determine
+    is numeric, it will be treated as a pseudo-address&mdash;i.e., it must be
+    in the range 0-117777 (octal)&mdash;and the assembler will determine
     automatically what memory space to place it in. In most cases this
     determination is unambiguous, but in some cases there are two
     possible choices. For example, address 4000 (octal)&nbsp; is in both

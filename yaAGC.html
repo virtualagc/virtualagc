@@ -98,7 +98,7 @@
 
 
 
-                              AGC — AGS — LVDC — Gemini</font></font></b></center>
+                              AGC &mdash; AGS &mdash; LVDC &mdash; Gemini</font></font></b></center>
                       <br>
                       <b><font color="#000000"><font size="+3">yaAGC<br>
                             <small>The AGC Simulation Software</small><br>
@@ -200,7 +200,7 @@
     <br>
     Similarly, as a "computer", <span style="font-weight: bold;">yaAGC</span>
     by itself provided little or no functionality.&nbsp; To be useful,
-    it needs to be "loaded" with appropriate flight software—in other
+    it needs to be "loaded" with appropriate flight software&mdash;in other
     words, with the Command Module (CM) or Lunar Module (LM)
     flight-software written for the original Apollo
     missions.&nbsp;&nbsp; The CM and LM software are called <span
@@ -248,11 +248,11 @@
         errors). The parity bit is not simulated by <span
           style="font-weight: bold;">yaAGC</span>. <br>
       </li>
-      <li>Fixed memory—i.e., memory which cannot be modified at runtime,
+      <li>Fixed memory&mdash;i.e., memory which cannot be modified at runtime,
         for program code, constants, and so forth. There are 38912
         15-bit words of ROM at addresses 4000-117777 (octal). This ROM
         was implemented not in integrated circuits, but in "core"
-        memory—consisting of many small ferromagnetic doughnuts threaded
+        memory&mdash;consisting of many small ferromagnetic doughnuts threaded
         into a braid of extremely fine wires. This made the cost of
         program changes very high, since changes could only be
         incorporated by having Raytheon Corp. rebuild the core-memory
@@ -261,7 +261,7 @@
         core, so that even though over 600,000 bits needed to be coded,
         less than 10,000 cores were used.&nbsp; A small portion of the
         core rope is seen below.</li>
-      <li>Erasable memory—i.e., memory which can be modified at runtime.
+      <li>Erasable memory&mdash;i.e., memory which can be modified at runtime.
         There are 2048&nbsp; 15-bit words of erasable memory at
         addresses 0-3777 (octal). Locations 0-17 (octal)&nbsp;
         correspond to what might be thought of as CPU registers, while
@@ -316,8 +316,8 @@
                 swiss cheese; the electrical components, such a
                 resistors, slide into these holes, and their leads
                 protrude from either side of the module.&nbsp; Wires are
-                welded</span>—<span style="font-style: italic;">not
-                soldered</span>—<span style="font-style: italic;">onto
+                welded</span>&mdash;<span style="font-style: italic;">not
+                soldered</span>&mdash;<span style="font-style: italic;">onto
                 the leads to interconnect the components.&nbsp; (Photo
                 by Stephan Hotto, taken at the Computer Historic Museum
                 in Palo Alto, California.)</span></div>
@@ -878,19 +878,19 @@ BZF&nbsp;&nbsp;&nbsp;&nbsp;
     The user-commands which are currently recognized by the debugger
     are:<br>
     <ul>
-      <li>#<span style="font-style: italic;">Anything</span> — (i.e.,
+      <li>#<span style="font-style: italic;">Anything</span> &mdash; (i.e.,
         any string beginning with the character '#' in the first column)
         a comment, which is discarded without a warning message.&nbsp;
         This is principally useful for writing scripts for the FROMFILE
         command.<br>
       </li>
-      <li>BACKTRACES — displays the most recent (100) backtrace points
+      <li>BACKTRACES &mdash; displays the most recent (100) backtrace points
         (i.e., points at which the program branched).</li>
-      <li>BACKTRACE <span style="font-style: italic;">N</span> —
+      <li>BACKTRACE <span style="font-style: italic;">N</span> &mdash;
         restores the state of the system (CPU, erasable memory, i/o
         channels) to backtrace point #<span style="font-style: italic;">N</span>
         (from the list displayed by the BACKTRACES command).</li>
-      <li>BREAK <span style="font-style: italic;">*A</span> — (<span
+      <li>BREAK <span style="font-style: italic;">*A</span> &mdash; (<span
           style="font-weight: bold;">Changed</span> in versions
         2005-07-31 and later!&nbsp; Previously, did not have the
         asterisk.)&nbsp; Defines a new breakpoint at address <span
@@ -922,14 +922,14 @@ The
         line number within the current source file, or else a program
         label.<br>
       </li>
-      <li>BREAKPOINTS — displays all currently-defined breakpoints,
+      <li>BREAKPOINTS &mdash; displays all currently-defined breakpoints,
         watchpoints, and patterns.&nbsp; For versions 2005-07-28 and
         after, if you have loaded a symbol table via "--symtab" or
         SYMBOL-FILE, the printout will include symbolic names for
         program labels and variables in addition to absolute numerical
         addresses.<br>
       </li>
-      <li>CONT — begin running the program.&nbsp; The program will
+      <li>CONT &mdash; begin running the program.&nbsp; The program will
         simply run until encountering a breakpoint.&nbsp; Alternately,
         in Linux, you can halt the program after it's running by hitting
         the carriage-return key on the keyboard.&nbsp; (I don't know if
@@ -940,7 +940,7 @@ The
         that the program is actually going to hit a breakpoint
         eventually when using the CONT command.)<br>
       </li>
-      <li>COREDUMP <span style="font-style: italic;">F</span> — creates
+      <li>COREDUMP <span style="font-style: italic;">F</span> &mdash; creates
         a "core-dump" file of the AGC program on disk, using filename <span
           style="font-style: italic;">F</span>.&nbsp; (Note that in
         pre-07/01/04 versions, <span style="font-style: italic;">F</span>
@@ -955,9 +955,9 @@ The
         have used EDIT to modify values in fixed memory.&nbsp; These
         changes won't be stored in the core-dump file, and therefore
         will be lost.)</li>
-      <li>DELETE — without an address, DELETE simply deletes all
+      <li>DELETE &mdash; without an address, DELETE simply deletes all
         existing breakpoints and watchpoints.</li>
-      <li>DELETE <span style="font-style: italic;">A</span> — deletes
+      <li>DELETE <span style="font-style: italic;">A</span> &mdash; deletes
         the breakpoint or watchpoint (if any) currently defined at
         address <span style="font-style: italic;">A</span>.&nbsp; <span
           style="font-weight: bold;">Note</span>:&nbsp; The same
@@ -971,13 +971,13 @@ The
         2005-07-28 and after, if you have loaded a symbol table via
         "--symtab" or SYMBOL-FILE, you can also use the symbolic program
         labels rather than addresses.</li>
-      <li>DELETE <span style="font-style: italic;">V M</span> — deletes
+      <li>DELETE <span style="font-style: italic;">V M</span> &mdash; deletes
         the pattern (if any) corresponding to value <span
           style="font-style: italic;">V</span> and mask <span
           style="font-style: italic;">M</span>.&nbsp; (See also the
         PATTERN command.)<br>
       </li>
-      <li>DUMP — without arguments (i.e, no <span style="font-style:
+      <li>DUMP &mdash; without arguments (i.e, no <span style="font-style:
           italic;">N</span> and no <span style="font-style: italic;">A</span>),
 
 
@@ -986,7 +986,7 @@ The
           italic;">N</span> and <span style="font-style: italic;">A</span>
         previously used.</li>
       <li>DUMP [<span style="font-style: italic;">N</span>] <span
-          style="font-style: italic;">A</span> — displays the current
+          style="font-style: italic;">A</span> &mdash; displays the current
         contents of <span style="font-style: italic;">N</span>
         successive memory locations or i/o channels, starting at address
         <span style="font-style: italic;">A</span>.&nbsp; The formats
@@ -1004,12 +1004,12 @@ The
         register, and so forth.<br>
       </li>
       <li>EDIT <span style="font-style: italic;">A</span> <span
-          style="font-style: italic;">V</span> — sets the current value
+          style="font-style: italic;">V</span> &mdash; sets the current value
         of memory location or i/o channel <span style="font-style:
           italic;">A</span> to the octal value <span style="font-style:
           italic;">V</span>.&nbsp; The allowed formats for <span
           style="font-style: italic;">A</span> are as described earlier.</li>
-      <li>FROMFILE <span style="font-style: italic;">Filename</span> —
+      <li>FROMFILE <span style="font-style: italic;">Filename</span> &mdash;
         (06/30/04 and later) begins accepting input from a file rather
         than the keyboard.&nbsp; When the file is exhausted, keyboard
         input is accepted again.&nbsp; (Hitting the return key does have
@@ -1039,23 +1039,23 @@ The
         which can be used to delete the patterns associated with the
         instruction.<br>
       </li>
-      <li>GETOCT <span style="font-style: italic;">Expression</span> —
+      <li>GETOCT <span style="font-style: italic;">Expression</span> &mdash;
         converts hexadecimal or decimal (including floating point)
         numbers to the AGC CPU's native octal format, or converts from
         the AGC CPU's native octal format to a decimal number.&nbsp;
         This is available only for versions 05/09/2004 or later.&nbsp;
         The HELP command gives more detail about the supported <span
           style="font-style: italic;">Expression</span> formats.</li>
-      <li>HELP — shows a list of the available debugger commands.</li>
-      <li>INTERRUPTS — displays the current interrupt-request flags, and
+      <li>HELP &mdash; shows a list of the available debugger commands.</li>
+      <li>INTERRUPTS &mdash; displays the current interrupt-request flags, and
         the masks the debugger is applying to them (see below).&nbsp;
         There are 10 flags, and their meanings are listed on the <a
           href="developer.html">developer</a> page.</li>
-      <li>INTOFF <span style="font-style: italic;">N </span>— clears
+      <li>INTOFF <span style="font-style: italic;">N </span>&mdash; clears
         the CPU's interrupt-request flag #N.</li>
-      <li>INTON <span style="font-style: italic;">N</span> — sets the
+      <li>INTON <span style="font-style: italic;">N</span> &mdash; sets the
         CPU's interrupt-request flag #<span style="font-style: italic;">N</span>.</li>
-      <li>LOG <span style="font-style: italic;">N</span> — creates a
+      <li>LOG <span style="font-style: italic;">N</span> &mdash; creates a
         file called yaAGC.log, and logs the next <span
           style="font-style: italic;">N</span> (decimal) instructions
         executed to the file.&nbsp; The log is a simple ASCII file, in
@@ -1071,15 +1071,15 @@ The
         hopefully, the debugger can determine the exact reasons for the
         differences.<br>
       </li>
-      <li>MASKOFF <span style="font-style: italic;">N </span>— the
+      <li>MASKOFF <span style="font-style: italic;">N </span>&mdash; the
         debugger stops blocking interrupt type <span style="font-style:
           italic;">N</span>.</li>
-      <li>MASKON <span style="font-style: italic;">N </span>— the
+      <li>MASKON <span style="font-style: italic;">N </span>&mdash; the
         debugger (independently of the CPU) will block interrupt type <span
           style="font-style: italic;">N </span>from occurring.&nbsp; If
         <span style="font-style: italic;">N</span>=0, then <span
           style="font-style: italic;">all</span> interrupts are blocked.</li>
-      <li>PATTERN <span style="font-style: italic;">V M</span> —
+      <li>PATTERN <span style="font-style: italic;">V M</span> &mdash;
         (06/30/04 and later) sets a "pattern" with value <span
           style="font-style: italic;">V</span> and mask <span
           style="font-style: italic;">M</span>.&nbsp; A pattern is
@@ -1213,15 +1213,15 @@ The
       instruction.<br>
     </div>
     <ul>
-      <li>QUIT or EXIT — exits <span style="font-weight: bold;">yaAGC</span>.</li>
+      <li>QUIT or EXIT &mdash; exits <span style="font-weight: bold;">yaAGC</span>.</li>
       <li>STEP [<span style="font-style: italic;">N</span>] or NEXT [<span
-          style="font-style: italic;">N</span>] — executes the next <span
+          style="font-style: italic;">N</span>] &mdash; executes the next <span
           style="font-style: italic;">N</span> assembly-language
         instructions.&nbsp; If <span style="font-style: italic;">N</span>
         is omitted, then it defaults to 1.&nbsp; Note that this command
         can be abbreviated as 'S' or as 'N'.<br>
       </li>
-      <li>WATCH <span style="font-style: italic;">A</span> —
+      <li>WATCH <span style="font-style: italic;">A</span> &mdash;
         (06/08/2004 and after) defines a new watchpoint at
         erasable-memory address <span style="font-style: italic;">A</span>
         (using one of the memory-location formats described
@@ -1243,12 +1243,12 @@ The
         2005-10-17 and after, if you have loaded a symbol table via
         "--symtab" or SYMBOL-FILE, you can also use the symbolic program
         labels rather than addresses.</li>
-      <li>WATCH <span style="font-style: italic;">A V</span> —
+      <li>WATCH <span style="font-style: italic;">A V</span> &mdash;
         (2005-08-23 and later) is similar to "WATCH <span
           style="font-style: italic;">A</span>", except that it breaks
         upon finding a <span style="font-style: italic;">specific</span>
         octal value <span style="font-style: italic;">V</span>.</li>
-      <li>VIEW <span style="font-style: italic;">A</span> — (2005-10-17
+      <li>VIEW <span style="font-style: italic;">A</span> &mdash; (2005-10-17
         and later) is similar to "WATCH <span style="font-style:
           italic;">A</span>", except that it displays the value stored
         in the variable or numerical address in real time rather than
@@ -1257,14 +1257,14 @@ The
         values stored in fixed memory do not change.<br>
       </li>
       <li>SYMBOL-FILE <span style="font-style: italic;">Filename</span>
-        — (2005-07-28 and after.)&nbsp; To use the symbol table
+        &mdash; (2005-07-28 and after.)&nbsp; To use the symbol table
         generated by <span style="font-weight: bold;">yaYUL</span>,
         there are two equivalent methods.&nbsp; One is to specify the
         symbol table (such as Luminary131.symtab or Colossus249.symtab)
         via the "--symtab" command-line switch.&nbsp; The other is to
         specify it via the SYMBOL-FILE command.<br>
       </li>
-      <li>PRINT <span style="font-style: italic;">Variable</span> —
+      <li>PRINT <span style="font-style: italic;">Variable</span> &mdash;
         (2005-07-28 and after.) If a symbol table has been loaded (via
         "--symtab" or the SYMBOL-FILE command), prints the octal value
         stored in <span style="font-style: italic;">Variable</span>.&nbsp;
@@ -1276,7 +1276,7 @@ The
         address.&nbsp; For example, in <span style="font-weight: bold;">Luminary131</span>,
         the variable NOTBIT12 is at address 40,3736.&nbsp; The command
         "PRINT NOTBIT12" gives the same result as "DUMP 40,3736".</li>
-      <li>WHATIS <span style="font-style: italic;">Symbol</span> —
+      <li>WHATIS <span style="font-style: italic;">Symbol</span> &mdash;
         (2005-07-28 and after.) If a symbol table has been loaded (via
         "--symtab" or the SYMBOL-FILE command), displays info about the
         <span style="font-style: italic;">Symbol</span>.&nbsp; The info
@@ -1285,7 +1285,7 @@ The
         (label, variable, constant, etc.), and the source-code file and
         line-number at which it is defined.</li>
       <li>SYM-DUMP <span style="font-style: italic;">RegularExpression</span>
-        — (2005-07-28 and after.) If a symbol table has been loaded (via
+        &mdash; (2005-07-28 and after.) If a symbol table has been loaded (via
         "--symtab" or the SYMBOL-FILE command), displays info about all
         of the symbols whose names match the <span style="font-style:
           italic;">RegularExpression</span>.&nbsp; The printout is
@@ -1380,7 +1380,7 @@ The
       </table>
     </div>
     <ul>
-      <li><a name="LIST"></a>LIST — (2005-07-30 and after.)&nbsp;
+      <li><a name="LIST"></a>LIST &mdash; (2005-07-30 and after.)&nbsp;
         Provides a symbolic disassembly of the code, if a symbol table
         has been loaded (via "--symtab" or the SYMBOL-FILE command), and
         if the source-code files are present.&nbsp; The source files
@@ -1453,7 +1453,7 @@ The
     </div>
     <ul>
       <li>FILES <span style="font-style: italic;">RegularExpression</span>
-        — (2005-07-31 and later.)&nbsp; Lists the names of the AGC
+        &mdash; (2005-07-31 and later.)&nbsp; Lists the names of the AGC
         source-code files.&nbsp; A regular expression is used to
         determine which filenames are listed, just as described above in
         the SYM-DUMP command.<br>
