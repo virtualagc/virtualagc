@@ -79,9 +79,10 @@
 #				except mine, and only affect the Linux versions of
 #				the executables.
 #		2016-08-07 RSB	The Validation "mission" was missing.
+#		2016-08-28 RSB	Activated Solarium055 mission.
 
 APP=VirtualAGC
-MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 Colossus237 Validation # Solarium055
+MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 Colossus237 Validation Solarium055
 
 # For cross-platform building --- i.e., for building Win32 and Mac OS X versions
 # of VirtualAGC on a Linux platform --- it is assumed that the IMCROSS

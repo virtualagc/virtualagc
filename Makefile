@@ -134,6 +134,10 @@
 #		2016-08-07 RSB	Wasn't building the Validation "mission", needed
 #				for the VirtualAGC installers.
 #		2016-08-24 RSB	Solarium055 added to mission list.
+#		2016-08-28 RSB	Somehow, the missions weren't being built before
+#				the VirtualAGC installer, so neither the mission
+#				binaries nor syntax-highlighted assembly listings
+#				were included in the installer.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -275,6 +279,7 @@ MISSIONS = Validation Luminary131 Colossus249 Comanche055 Luminary099 Artemis072
 
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
+SUBDIRS += $(MISSIONS)
 
 ifndef NOGUI
 ifeq "$(YADEDA_SUFFIX)" ""
@@ -296,8 +301,6 @@ SUBDIRS += yaTelemetry
 SUBDIRS += jWiz
 SUBDIRS += VirtualAGC
 endif # NOGUI
-
-SUBDIRS += $(MISSIONS)
 
 .PHONY: $(SUBDIRS)
 
