@@ -53,7 +53,12 @@
  *  follows the addresses implied by those jumps.  It also has to track the
  *  INDEX instruction and the assignments to the BANKREG register (address 015)
  *  to know which banks are being referenced.  I don't know what the power-up
- *  value of BANKREG is (I hope it doesn't matter!) so I arbitrarily set it at 0.
+ *  value of BANKREG is (I hope it doesn't matter!) so I arbitrarily set it at 0
+ *
+ *  I think it's the INDEX register that's the real fly in the ointment here,
+ *  because it can jump almost any place, on the of a dynamical choice rather
+ *  than something known deducible from the binary, so I'll have to work out
+ *  some way to handle that.
  *
  *  To a certain extent, this program can also *help* to map out data areas,
  *  since it could in principle track all addresses which are loaded from
@@ -64,6 +69,22 @@
  *  complex.  However, there is no prospect I'm aware of for obtaining Block 2
  *  programs solely from a rope, so I have no intention of addressing Block 2
  *  in this utility.
+ *
+ *  In this program, all C variables associated with an address assume a flat
+ *  address space from 0 to 02000*035-1, where
+ *
+ *      0-1777 is erasable.
+ *      2000-3777 is fixed 2000-3777 or 01,6000-01,7777
+ *      4000-5777 is fixed 4000-5777 or 02,6000-02,7777
+ *      6000-7777 is fixed 03,6000-03,7777
+ *      10000-11777 is fixed 04,6000-04,7777
+ *      .
+ *      .
+ *      .
+ *      70000-71777 is fixed 34,6000-34,7777
+ *
+ * Conversion from the flat space to the erasable/fixed/banked representation is
+ * done on an as-needed basis.
  */
 
 #include <stdio.h>
@@ -78,6 +99,91 @@ int rope[MEMORY_SIZE] = { 0 };
 int basicMap[MEMORY_SIZE] = { 0 };
 int dataMap[MEMORY_SIZE] = { 0 };
 int BANKREG = 0;
+int EXTENDED = 0;
+int INDEX = -1;
+int PC = 02000;
+
+int
+initializeBasic (int address)
+{
+  if (address < 0 || address >= MEMORY_SIZE)
+    {
+      fprintf (stderr, "Address overflow.\n");
+      return (1);
+    }
+  EXTENDED = 0;
+  INDEX = -1;
+  PC = address;
+  return (0);
+}
+
+// A function to decode a single basic instruction.  If elaborated enough, I suppose
+// it could eventually become the basis for a Block 1 CPU simulator, though
+// I only need the bare beginnings of that right now.  Returns
+//
+//       0      Success
+//      1       Address not in memory space
+int
+decodeBasic (void)
+{
+  int instruction, keepExtended = 0, keepIndex = 0, retVal = 1;
+  // Sanity check.
+  if (PC < 0 || PC >= MEMORY_SIZE)
+    {
+      fprintf (stderr, "Address overflow.\n");
+      goto done;
+    }
+  instruction = rope[PC++];
+  if (PC != 04000 && PC % 02000 == 0)
+    {
+      fprintf (stderr, "End of bank %02o reached.\n", (PC - 1) / 02000);
+    }
+  if (instruction == 047777)
+    {
+      keepExtended = 1;
+      EXTENDED = 1;
+      goto done;
+    }
+  switch (instruction & 070000)
+  {
+  case 000000: // TC instruction.
+    break;
+  case 010000: // CCS instruction.
+    break;
+  case 020000: // INDEX instruction.
+    keepExtended = 1;
+    keepIndex = 1;
+
+    break;
+  case 030000: // XCH, CAF instruction.
+    // XCH and CAF have the same opcode bits, but it's XCH if the operand is erasable
+    // memory and it's CAF if the operand is fixed memory.
+    break;
+  case 040000: // CS, MP instructions.
+    // I believe it's an MP if the preceding instruction is EXTEND (or EXTEND / INDEX something)
+    // and CS otherwise.   EXTEND = INDEX OPOVF = 047777.
+    // But I also see it a few times preceded by INDEX TEM4, and no EXTEND preceding that.
+    // I have no idea what that means, unless it's a typo.
+    break;
+  case 050000: // TS, DV instruction.
+    // I believe it's an DV if the preceding instruction is EXTEND (or EXTEND / INDEX something)
+    // and TS otherwise.   EXTEND = INDEX OPOVF = 047777.
+  case 060000: // AD, SU instruction.
+    // I believe it's an SU if the preceding instruction is EXTEND (or EXTEND / INDEX something)
+    // and AD otherwise.   EXTEND = INDEX OPOVF = 047777.
+    break;
+  case 070000: // MASK instruction.
+    break;
+  }
+
+  retVal = 0;
+  done:;
+  if (!keepExtended)
+    EXTENDED = 0;
+  if (!keepIndex)
+    INDEX = -1;
+  return (retVal);
+}
 
 // A recursive function to map an area starting from an address.
 int
