@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
 # Purpose:	A section of Luminary 1C, revision 131.

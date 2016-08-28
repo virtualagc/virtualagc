@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	INFLIGHT_ALIGNMENT_ROUTINES.agc
 # Purpose:	Part of the source code for Colossus, build 249.

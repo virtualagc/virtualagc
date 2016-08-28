@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	TIME_OF_FREE_FALL.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

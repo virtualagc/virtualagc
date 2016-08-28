@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc
 # Purpose:	Part of the source code for Colossus, build 249.

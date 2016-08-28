@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	AGC_BLOCK_TWO_SELF_CHECK.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

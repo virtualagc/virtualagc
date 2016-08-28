@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	EXTENDED_VERBS.agc
 # Purpose:	Part of the source code for Comanche, build 055. It

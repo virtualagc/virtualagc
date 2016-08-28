@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	P32-P35_P72-P75.agc
 # Purpose:	A section of Luminary 1C, revision 131.

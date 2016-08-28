@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	IMU_MODE_SWITCHING_ROUTINES.agc
 # Purpose:	A section of Luminary 1C, revision 131.

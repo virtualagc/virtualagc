@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc
 # Purpose:	The main source file for Luminary 1C, revision 131.

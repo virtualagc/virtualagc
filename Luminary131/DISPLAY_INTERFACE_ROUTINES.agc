@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	DISPLAY_INTERFACE_ROUTINES.agc
 # Purpose:	A section of Luminary 1C, revision 131.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	PLANETARY_INERTIAL_ORIENTATION.agc
 # Purpose:	A section of Luminary 1C, revision 131.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	TRIM_GIMBAL_CNTROL_SYSTEM.agc
 # Purpose:	A section of Luminary 1C, revision 131.

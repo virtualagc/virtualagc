@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	MAIN.agc
 # Purpose:	The main source file for Luminary 1A, revision 099.

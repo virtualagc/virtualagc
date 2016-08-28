@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	CONTROLLED_CONSTANTS.agc
 # Purpose:	The main source file for Luminary 1C, revision 131.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	CONTRACT_AND_APPROVALS.agc
 # Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.

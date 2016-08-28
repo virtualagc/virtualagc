@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	RESTARTS_ROUTINE.agc
 # Purpose:	Part of the source code for Colossus, build 249.

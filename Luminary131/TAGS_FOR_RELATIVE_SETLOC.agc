@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	TAGS_FOR_RELATIVE_SETLOC.agc
 # Purpose:	Header information for Luminary 1C, revision 131.

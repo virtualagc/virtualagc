@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	REENTRY_CONTROL.agc
 # Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	FIXED_FIXED_CONSTANT_POOL.agc
 # Purpose:	The main source file for Luminary 1C, revision 131.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	SPS_BACK-UP_RCS_CONTROL.agc
 # Purpose:	A section of Luminary 1C, revision 131.

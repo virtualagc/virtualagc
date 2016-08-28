@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	S-BAND_ANTENNA_FOR_LM.agc
 # Purpose:	A section of Luminary 1C, revision 131.

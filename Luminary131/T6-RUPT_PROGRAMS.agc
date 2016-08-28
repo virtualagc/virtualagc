@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	T6-RUPT_PROGRAMS.agc
 # Purpose:	A section of Luminary 1C, revision 131.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	RCS_FAILURE_MONITOR.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

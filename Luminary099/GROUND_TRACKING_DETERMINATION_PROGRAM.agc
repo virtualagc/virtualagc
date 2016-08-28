@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	GROUND_TRACKING_DETERMINATION_PROGRAM.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

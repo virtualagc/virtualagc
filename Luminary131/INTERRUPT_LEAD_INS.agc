@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	INTERRUT_LEAD_INS.agc
 # Purpose:	This is the interrupt table for Luminary 1C, revision 131.

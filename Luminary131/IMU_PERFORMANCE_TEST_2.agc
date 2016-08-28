@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	IMU_PERFORMANCE_TEST_2.agc
 # Purpose:	A section of Luminary 1C, revision 131.

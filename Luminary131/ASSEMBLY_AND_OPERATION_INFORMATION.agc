@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	ASSEMBLY_AND_OPERATION_INFORMATION.agc
 # Purpose:	Header information for Luminary 1C, revision 131.

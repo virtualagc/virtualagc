@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	POWERED_FLIGHT_SUBROUTINES.agc
 # Purpose:	A section of Luminary 1C, revision 131.

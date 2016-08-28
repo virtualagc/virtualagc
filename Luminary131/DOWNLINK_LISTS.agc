@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	DOWNLINK_LISTS.agc
 # Purpose:	The DOWNLINK LISTS code for for Luminary 1C, revision 131.

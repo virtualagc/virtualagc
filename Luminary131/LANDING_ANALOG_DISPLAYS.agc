@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	LANDING_ANALOG_DISPLAYS.agc
 # Purpose:	A section of Luminary 1C, revision 131.

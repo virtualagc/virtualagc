@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	FRESH_START_AND_RESTART.agc
 # Purpose:	Part of the source code for Comanche, build 055. It

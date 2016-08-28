@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	LUNAR_LANDMARK_SELECTION_FOR_CM.agc
 # Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	R60_R62.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

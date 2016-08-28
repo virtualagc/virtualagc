@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	INFLIGHT_ALIGNMENT_ROUTINES.agc
 # Purpose:	A section of Luminary 1C, revision 131.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	IMU_CALIBRATION_AND_ALIGNMENT.agc
 # Purpose:      Part of the source code for Comanche, build 055. It

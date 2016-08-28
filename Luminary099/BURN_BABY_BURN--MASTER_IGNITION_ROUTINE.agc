@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	BURN_BABY_BURN--MASTER_IGNITION_ROUTINE.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

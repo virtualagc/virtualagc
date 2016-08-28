@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	INTERRUPT_LEAD_INS.agc
 # Purpose:	Part of the source code for Colossus, build 249.

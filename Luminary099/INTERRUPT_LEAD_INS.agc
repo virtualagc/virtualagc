@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	INTERRUT_LEAD_INS.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	P40-P47.agc
 # Purpose:	A section of Luminary 1C, revision 131.

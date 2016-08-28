@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	P70-P71.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

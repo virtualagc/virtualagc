@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	P32-P33_P72-P73.agc
 # Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.

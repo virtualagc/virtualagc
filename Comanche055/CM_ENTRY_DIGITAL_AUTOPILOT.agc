@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	CM_ENTRY_DIGITAL_AUTOPILOT.agc
 # Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.
