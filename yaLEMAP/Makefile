@@ -1,4 +1,4 @@
-# Copyright 2005,2009 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 #
@@ -33,6 +33,9 @@
 #				IMCROSS (www.sandroid.org/imcross) is 
 #				installed.
 #		2009-07-04 RSB	Added --html switch.
+#		2016-08-28 RSB	For the targets that build the html
+#				listings, the annotation files weren't
+#				accessible.
 
 ifndef PREFIX
 ifdef MSYSTEM
@@ -52,12 +55,14 @@ default: binLEMAP SampleCodeAGS.lst \
 all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 
 ../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab: yaLEMAP ../FP8/FP8.aea
+	cp ../FP8/Apollo32.png ../FP8/Main.annotation .
 	./yaLEMAP --html ../FP8/FP8.aea
 	mv yaLEMAP.bin ../FP8/FP8.bin
 	mv yaLEMAP.symtab ../FP8/FP8.symtab
 	mv yaLEMAP.lst ../FP8/FP8.lst
 
 ../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP ../FP6/FP6.aea
+	cp ../FP6/Apollo32.png ../FP6/Main.annotation .
 	./yaLEMAP --html ../FP6/FP6.aea
 	mv yaLEMAP.bin ../FP6/FP6.bin
 	mv yaLEMAP.symtab ../FP6/FP6.symtab
@@ -96,7 +101,8 @@ clean:
 		*.o *~ yaLEMAP.binsource \
 		binLEMAP.bin SampleCodeAGS.bin SampleCodeAGS.lst \
 		../FP8/FP8.bin ../FP8/FP8.lst ../FP8/*.symtab \
-		../FP6/FP6.bin ../FP6/FP6.lst ../FP6/*.symtab
+		../FP6/FP6.bin ../FP6/FP6.lst ../FP6/*.symtab \
+		Apollo32.png Main.annotation
 
 .PHONY:	install
 install: default
