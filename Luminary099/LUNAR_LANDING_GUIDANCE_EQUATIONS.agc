@@ -1,3 +1,4 @@
+### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	LUNAR_LANDING_GUIDANCE_EQUATIONS.agc
 # Purpose: 	Part of the source code for Luminary 1A build 099.

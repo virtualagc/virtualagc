@@ -62,6 +62,8 @@
                                 were used in the source files.
                 2016-08-22 RSB	Implemented the pre-operator '-' across the board for
                 		block 1.
+                2016-08-29 RSB  Implemented Mike Stewart's fix for bug
+                                https://github.com/rburkey2005/virtualagc/issues/45.
 
   I don't really try to duplicate the formatting used by the original
   assembly-language code, since that format was appropriate for 
@@ -948,7 +950,14 @@ int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fata
 
         // Is it an HTML insert?  If so, transparently process and discard.
         if (HtmlCheck(WriteOutput, InputFile, s, sizeof(s), CurrentFilename, &CurrentLineAll, &CurrentLineInFile))
+          {
+            // The following 3 lines are a fix for the following bug:
+            // https://github.com/rburkey2005/virtualagc/issues/45.
+            ParseOutputRecord.ProgramCounter = ParseInputRecord.ProgramCounter;
+            ParseOutputRecord.EBank = ParseInputRecord.EBank;
+            ParseOutputRecord.SBank = ParseInputRecord.SBank;
             continue;
+          }
 
         // Is it an "include" directive?
         if (s[0] == '$') {
