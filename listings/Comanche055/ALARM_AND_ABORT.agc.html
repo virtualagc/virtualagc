@@ -56,237 +56,270 @@ color: #993399;
 <span style="font-family: monospace;">
 <pre>
 <h1>Source Code</h1>
-064513,000001:                                                                                                 <span class="co">#  Copyright:    Public domain.</span>
-064514,000002:                                                                                                 <span class="co">#  Filename:     ALARM_AND_ABORT.agc</span>
-064515,000003:                                                                                                 <span class="co">#  Purpose:      Part of the source code for Comanche, build 055. It</span>
-064516,000004:                                                                                                 <span class="co">#                is part of the source code for the Command Module's</span>
-064517,000005:                                                                                                 <span class="co">#                (CM) Apollo Guidance Computer (AGC), Apollo 11.</span>
-064518,000006:                                                                                                 <span class="co">#  Assembler:    yaYUL</span>
-064519,000007:                                                                                                 <span class="co">#  Reference:    pp. 1493-1496</span>
-064520,000008:                                                                                                 <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org></span>
-064521,000009:                                                                                                 <span class="co">#  Website:      http://www.ibiblio.org/apollo.</span>
-064522,000010:                                                                                                 <span class="co">#  Mod history:  2009-05-07 RSB   Adapted from Colossus249 file of the same</span>
-064523,000011:                                                                                                 <span class="co">#                                 name, and page images. Corrected various </span>
-064524,000012:                                                                                                 <span class="co">#                                 typos in the transcription of program </span>
-064525,000013:                                                                                                 <span class="co">#                                 comments, and these should be back-ported  </span>
-064526,000014:                                                                                                 <span class="co">#                                 to Colossus249.</span>
-064527,000015: 
-064528,000016:                                                                                                 <span class="co">#  The contents of the "Comanche055" files, in general, are transcribed </span>
-064529,000017:                                                                                                 <span class="co">#  from scanned documents. </span>
-064530,000018: 
-064531,000019:                                                                                                 <span class="co">#        Assemble revision 055 of AGC program Comanche by NASA</span>
-064532,000020:                                                                                                 <span class="co">#        2021113-051.  April 1, 1969.  </span>
-064533,000021: 
-064534,000022:                                                                                                 <span class="co">#        This AGC program shall also be referred to as Colossus 2A</span>
-064535,000023: 
-064536,000024:                                                                                                 <span class="co">#        Prepared by</span>
-064537,000025:                                                                                                 <span class="co">#                        Massachussets Institute of Technology</span>
-064538,000026:                                                                                                 <span class="co">#                        75 Cambridge Parkway</span>
-064539,000027:                                                                                                 <span class="co">#                        Cambridge, Massachusetts</span>
-064540,000028: 
-064541,000029:                                                                                                 <span class="co">#        under NASA contract NAS 9-4065.</span>
-064542,000030: 
-064543,000031:                                                                                                 <span class="co">#  Refer directly to the online document mentioned above for further</span>
-064544,000032:                                                                                                 <span class="co">#  information.  Please report any errors to info@sandroid.org.</span>
-064545,000033: 
-064546,000034:                                                                                                 <span class="co">#  Page 1483</span>
-064547,000035:                                                                                                 <span class="co">#  THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED</span>
-064548,000036:                                                                                                 <span class="co">#  EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.</span>
-064549,000037: 
-064550,000038:                                                                                                 <span class="co">#  THE CALLING SEQUENCE IS AS FOLLOWS:</span>
-064551,000039:                                                                                                 <span class="co">#                 TC      ALARM</span>
-064552,000040:                                                                                                 <span class="co">#                 OCT     NNNNN</span>
-064553,000041:                                                                                                 <span class="co">#                                         # (RETURNS HERE)</span>
-064554,000042: 
-064555,000043:    5650                                          <span class="ps">BLOCK   </span> 02                                    
-064556,000044:    4000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#464654414737">FFTAG7</a>                                
-064557,000045:    4000                                          <span class="ps">BANK    </span>                                       
-064558,000046: 
-064559,000047:    5650     0375                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
-064560,000048: 
-064561,000049:    5650                                          <span class="ps">COUNT   </span> 02/ALARM                              
-064562,000050: 
-064563,000051:                                                                                                 <span class="co">#  ALARM TURNS ON THE PROGRAM ALARM LIGHT, BUT DOES NOT DISPLAY.</span>
-064564,000052: 
-<a name="414C41524D"></a>064565,000053:    5650           00004        <span class="sm">ALARM   </span>          <span class="op">INHINT  </span>                                       
-064566,000054: 
-064567,000055:    5651           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="414C41524D32"></a>064568,000056:    5652           55363        <span class="sm">ALARM2  </span>          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064569,000057:    5653           50002                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-064570,000058:    5654           30000                          <span class="op">CA      </span> 0                                     
-<a name="424F5254454E54"></a>064571,000059:    5655           54001        <span class="sm">BORTENT </span>          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-064572,000060: 
-<a name="5052494F454E54"></a>064573,000061:    5656           30006        <span class="sm">PRIOENT </span>          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-064574,000062:    5657           00006                 +1       <span class="op">EXTEND  </span>                                       
-064575,000063:    5660           04007                          <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  ADD SUPER BITS.</span>
-064576,000064:    5661           55364                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>    +1                         
-064577,000065: 
-<a name="4C41524D454E54"></a>064578,000066:    5662           30002        <span class="sm">LARMENT </span>          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  STORE RETURN FOR ALARM</span>
-064579,000067:    5663           54061                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-064580,000068: 
-064581,000069:    5664           30164                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-064582,000070:    5665           54057                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43414C41524D">LOCALARM</a>                              
-064583,000071:    5666           30165                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
-064584,000072:    5667           54060                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B414C524D">BANKALRM</a>                              
-064585,000073: 
-<a name="43484B4641494C31"></a>064586,000074:    5670           10375        <span class="sm">CHKFAIL1</span>          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               <span class="co">#  IS ANYTHING IN FAILREG</span>
-064587,000075:    5671           15674                          <span class="op">TCF     </span> <a href="#43484B4641494C32">CHKFAIL2</a>                              <span class="co">#  YES TRY NEXT REG</span>
-064588,000076:    5672           22375                          <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
-064589,000077:    5673           15706                          <span class="op">TCF     </span> <a href="#50524F474C41524D">PROGLARM</a>                              <span class="co">#  TURN ALARM LIGHT ON FOR FIRST ALARM</span>
-064590,000078: 
-<a name="43484B4641494C32"></a>064591,000079:    5674           10376        <span class="sm">CHKFAIL2</span>          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +1                         
-064592,000080:    5675           15700                          <span class="op">TCF     </span> <a href="#4641494C33">FAIL3</a>                                 
-064593,000081:    5676           22376                          <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +1                         
-064594,000082:    5677           15711                          <span class="op">TCF     </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
-064595,000083: 
-<a name="4641494C33"></a>064596,000084:    5700           30377        <span class="sm">FAIL3   </span>          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +2                         
-064597,000085:                                                                                                 <span class="co">#  Page 1494</span>
-064598,000086:    5701           74777                          <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
-064599,000087:    5702           10000                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-064600,000088:    5703           15715                          <span class="op">TCF     </span> <a href="#4D554C544641494C">MULTFAIL</a>                              
-064601,000089:    5704           22377                          <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +2                         
-064602,000090:    5705           15711                          <span class="op">TCF     </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
-064603,000091: 
-<a name="50524F474C41524D"></a>064604,000092:    5706           41036        <span class="sm">PROGLARM</span>          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-064605,000093:    5707           77765                          <span class="op">MASK    </span> <a href="#4F43543430343030">OCT40400</a>                              
-064606,000094:    5710           27036                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-064607,000095: 
-<a name="4D554C5445584954"></a>064608,000096:    5711           56061        <span class="sm">MULTEXIT</span>          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  OBTAIN RETURN ADDRESS IN A</span>
-064609,000097:    5712           00003                          <span class="op">RELINT  </span>                                       
-064610,000098:    5713           50000                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-064611,000099:    5714           00001                          <span class="op">TC      </span> 1                                     
-064612,000100: 
-<a name="4D554C544641494C"></a>064613,000101:    5715           30001        <span class="sm">MULTFAIL</span>          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-064614,000102:    5716           65001                          <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
-064615,000103:    5717           54377                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +2                         
-064616,000104: 
-064617,000105:    5720           15711                          <span class="op">TCF     </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
-064618,000106: 
-064619,000107:                                                                                                 <span class="co">#  PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND</span>
-064620,000108:                                                                                                 <span class="co">#  AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,</span>
-064621,000109:                                                                                                 <span class="co">#                 CAF     OCTXX           # ALARM CODE</span>
-064622,000110:                                                                                                 <span class="co">#                 TC      BANKCALL</span>
-064623,000111:                                                                                                 <span class="co">#                 CADR    PRIOLARM</span>
-064624,000112:                                                                                                 <span class="co">#                 ...     ...</span>
-064625,000113:                                                                                                 <span class="co">#                 ...     ...</span>
-064626,000114:                                                                                                 <span class="co">#                 ...     ...             # ASTRONAUT RETURN</span>
-064627,000115:                                                                                                 <span class="co">#                 TC      PHASCHNG        # IMMEDIATE RETURN TO USER.  RESTART</span>
-064628,000116:                                                                                                 <span class="co">#                 OCT     X.1             # PHASE CHANGE FOR PRIO DISPLAY</span>
-064629,000117: 
-064630,000118: 10,3766                                          <span class="ps">BANK    </span> 10                                    
-064631,000119: 10,2000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#444953504C415953">DISPLAYS</a>                              
-064632,000120: 10,2000                                          <span class="ps">BANK    </span>                                       
-064633,000121: 
-064634,000122: 10,3766                                          <span class="ps">COUNT   </span> 10/DSPLA                              
-<a name="5052494F4C41524D"></a>064635,000123: 10,3766           00004        <span class="sm">PRIOLARM</span>          <span class="op">INHINT  </span>                                       <span class="co">#  * * * KEEP IN DISPLAY ROUTINE'S BANK</span>
-064636,000124: 10,3767           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE ALARM CODE</span>
-064637,000125: 
-064638,000126: 10,3770           30133                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  2 CADR OF PRIOLARM USER</span>
-064639,000127: 10,3771           55363                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064640,000128: 10,3772           30134                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         
-064641,000129: 10,3773           05657                          <span class="op">TC      </span> <a href="#5052494F454E54">PRIOENT</a>    +1                         <span class="co">#  * LEAVE L ALONE</span>
-<a name="2D32534543"></a>064642,000130: 10,3774           77467        <span class="sm">-2SEC   </span>          <span class="ps">DEC     </span> -200       B-14                       <span class="co">#  *** DON'T MOVE</span>
-064643,000131: 10,3775           35050                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5630354E3039">V05N09</a>                                
-064644,000132: 10,3776           12726                          <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#5052494F44535052">PRIODSPR</a>                              
-064645,000133: 
-064646,000134:                                                                                                 <span class="co">#  Page 1495              </span>
-064647,000135: 
-064648,000136:    5721                                          <span class="ps">BLOCK   </span> 02                                    
-064649,000137:    6000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#46465441473133">FFTAG13</a>                               
-064650,000138:    6000                                          <span class="ps">BANK    </span>                                       
-064651,000139: 
-064652,000140:    7755                                          <span class="ps">COUNT   </span> 02/ALARM                              
-064653,000141: 
-<a name="4241494C4F5554"></a>064654,000142:    7755           00004        <span class="sm">BAILOUT </span>          <span class="op">INHINT  </span>                                       
-064655,000143:    7756           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-064656,000144:    7757           55363                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064657,000145: 
-064658,000146:    7760           04662                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-064659,000147:    7761           40000                          <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#5641433553544F52">VAC5STOR</a>                              
-064660,000148: 
-064661,000149:    7762           51363                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064662,000150:    7763           30000                          <span class="op">CAF     </span> 0                                     
-064663,000151:    7764           05655                          <span class="op">TC      </span> <a href="#424F5254454E54">BORTENT</a>                               
-<a name="4F43543430343030"></a>064664,000152:    7765           40400        <span class="sm">OCT40400</span>          <span class="ps">OCT     </span> 40400                                 
-064665,000153: 
-064666,000154:    7766           00004                          <span class="op">INHINT  </span>                                       
-<a name="5748494D504552"></a>064667,000155:    7767           35016        <span class="sm">WHIMPER </span>          <span class="op">CA      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-064668,000156:    7770           60005                          <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
-064669,000157:    7771           54017                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252555054">BRUPT</a>                                 
-064670,000158:    7772           50017                          <span class="op">RESUME  </span>                                       
-064671,000159:    7773           04701                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RESUME SENDS CONTROL HERE</span>
-064672,000160:    7774           12651                          <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#454E454D41">ENEMA</a>                                 
-064673,000161: 
-064674,000162:    4000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#464654414737">FFTAG7</a>                                
-064675,000163:    4000                                          <span class="ps">BANK    </span>                                       
-064676,000164: 
-<a name="503030444F4F"></a>064677,000165:    5721           00004        <span class="sm">P00DOO  </span>          <span class="op">INHINT  </span>                                       
-064678,000166:    5722           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-064679,000167:    5723           55363                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064680,000168: 
-064681,000169:    5724           04662                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-064682,000170:    5725           40000                          <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#5641433553544F52">VAC5STOR</a>                              <span class="co">#  STORE ERASABLES FOR DEBUGGING PURPOSES.</span>
-064683,000171: 
-064684,000172:    5726           51363                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064685,000173:    5727           30000                          <span class="op">CAF     </span> 0                                     
-<a name="41424F525432"></a>064686,000174:    5730           05655        <span class="sm">ABORT2  </span>          <span class="op">TC      </span> <a href="#424F5254454E54">BORTENT</a>                               
-<a name="4F43543737373730"></a>064687,000175:    5731           77770        <span class="sm">OCT77770</span>          <span class="ps">OCT     </span> 77770                                 <span class="co">#  DON'T MOVE</span>
-064688,000176:    5732           35012                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563337464C424954">V37FLBIT</a>                              <span class="co">#  IS AVERAGE G ON</span>
-064689,000177:    5733           70103                          <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
-064690,000178:    5734           10000                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-064691,000179:    5735           07766                          <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>    -1                         <span class="co">#  YES.  DON'T DO POODOO.  DO BAILOUT.</span>
-064692,000180: 
-064693,000181:    5736           05560                          <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-064694,000182:    5737           00067                          <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445464C47">STATEFLG</a>                              
-064695,000183: 
-064696,000184:    5740           05560                          <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-064697,000185: 
-064698,000186:                                                                                                 <span class="co">#  Page 1496</span>
-064699,000187:    5741           00236                          <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245494E54464C47">REINTFLG</a>                              
-064700,000188: 
-064701,000189:    5742           05560                          <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-064702,000190:    5743           00054                          <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F444F464C4147">NODOFLAG</a>                              
-064703,000191: 
-064704,000192:    5744           04662                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-064705,000193:    5745           12501                          <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#4D522E4B4C45414E">MR.KLEAN</a>                              
-064706,000194:    5746           07767                          <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>                               
-064707,000195: 
-<a name="434353484F4C45"></a>064708,000196:    5747           00004        <span class="sm">CCSHOLE </span>          <span class="op">INHINT  </span>                                       
-064709,000197:    5750           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-064710,000198:    5751           55363                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064711,000199:    5752           04662                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-064712,000200:    5753           40000                          <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#5641433553544F52">VAC5STOR</a>                              
-064713,000201:    5754           35756                          <span class="op">CA      </span> <a href="#4F435431313033">OCT1103</a>                               
-064714,000202:    5755           05730                          <span class="op">TC      </span> <a href="#41424F525432">ABORT2</a>                                
-<a name="4F435431313033"></a>064715,000203:    5756           01103        <span class="sm">OCT1103 </span>          <span class="ps">OCT     </span> 1103                                  
-<a name="4355525441494E53"></a>064716,000204:    5757           00004        <span class="sm">CURTAINS</span>          <span class="op">INHINT  </span>                                       
-064717,000205:    5760           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-064718,000206:    5761           05652                          <span class="op">TC      </span> <a href="#414C41524D32">ALARM2</a>                                
-<a name="4F4354323137"></a>064719,000207:    5762           00217        <span class="sm">OCT217  </span>          <span class="ps">OCT     </span> 00217                                 
-064720,000208:    5763           01363                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               <span class="co">#  RETURN TO USER</span>
-064721,000209: 
-<a name="444F414C41524D"></a>064722,000210:    5764     5217               <span class="sm">DOALARM </span>          <span class="ps">EQUALS  </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-064723,000211: 
-064724,000212:                                                                                                 <span class="co">#  CALLING SEQUENCE FOR VARALARM</span>
-064725,000213:                                                                                                 <span class="co">#                 CAF     (ALARM)</span>
-064726,000214:                                                                                                 <span class="co">#                 TC      VARALARM</span>
-064727,000215:                                                                                                 <span class="co">#  Page 1486</span>
-064728,000216: 
-064729,000217:                                                                                                 <span class="co">#  VARALARM TURNS ON PROGRAM ALARM LIGHT BUT DOES NOT DISPLAY</span>
-064730,000218: 
-<a name="564152414C41524D"></a>064731,000219:    5764           00004        <span class="sm">VARALARM</span>          <span class="op">INHINT  </span>                                       
-064732,000220: 
-064733,000221:    5765           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE USER'S ALARM CODE</span>
-064734,000222: 
-064735,000223:    5766           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE USER'S Q</span>
-064736,000224:    5767           55363                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
-064737,000225: 
-064738,000226:    5770           05656                          <span class="op">TC      </span> <a href="#5052494F454E54">PRIOENT</a>                               
-<a name="4F43543134"></a>064739,000227:    5771           00014        <span class="sm">OCT14   </span>          <span class="ps">OCT     </span> 14                                    <span class="co">#  DON'T MOVE</span>
-064740,000228: 
-064741,000229:    5772           01363                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               <span class="co">#  RETURN TO USER</span>
-064742,000230: 
-<a name="41424F5254"></a>064743,000231:    5773     7755               <span class="sm">ABORT   </span>          <span class="ps">EQUALS  </span> <a href="#4241494C4F5554">BAILOUT</a>                               <span class="co">#  *** TEMPORARY UNTIL ABORT CALLS OUT</span>
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+These source-code files were from the printout at the MIT Museum, with many thanks
+to Deborah Douglas, the Museum's Curator of Science and Technology, for releasing
+it to us.  The printout was digitally photographed by Paul Fjeld.  A team of 
+volunteers transcribed the source code manually from these images or, where
+appropriate, modified already-transcribed but similar source Colossus 249 (Apollo 9)
+source code to agree with the images from the printout.  Note that the page images 
+<a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/">
+presented online</a> are of reduced quality, and that higher-quality images 
+are available.  Report any conversion errors or legibility 
+problems in page images to info@sandroid.org. 
+Notations on the program listing read, in part:<br>
+<br>
+<pre>
+	GAP:  ASSEMBLE REVISION 055 OF AGC PROGRAM COMANCHE BY NASA 2021113-051
+	10:28 APR.  1,1969
+</pre>
+Note that the date is the date of the printout, not the date of the program revision.
+</td></tr></tbody></table>
+
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+064521,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+064522,000003:                                                                                                  <span class="co">#  Filename:     ALARM_AND_ABORT.agc</span>
+064523,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Comanche, build 055. It</span>
+064524,000005:                                                                                                  <span class="co">#                is part of the source code for the Command Module's</span>
+064525,000006:                                                                                                  <span class="co">#                (CM) Apollo Guidance Computer (AGC), Apollo 11.</span>
+064526,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+064527,000008:                                                                                                  <span class="co">#  Reference:    pp. 1493-1496</span>
+064528,000009:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org></span>
+064529,000010:                                                                                                  <span class="co">#  Website:      http://www.ibiblio.org/apollo.</span>
+064530,000011:                                                                                                  <span class="co">#  Mod history:  2009-05-07 RSB  Adapted from Colossus249 file of the same</span>
+064531,000012:                                                                                                  <span class="co">#                                name, and page images. Corrected various </span>
+064532,000013:                                                                                                  <span class="co">#                                typos in the transcription of program </span>
+064533,000014:                                                                                                  <span class="co">#                                comments, and these should be back-ported  </span>
+064534,000015:                                                                                                  <span class="co">#                                to Colossus249.</span>
+064535,000016:                                                                                                  <span class="co">#                2010-08-24 JL   Fixed page numbers and some indents.</span>
+064536,000017: 
+064537,000018:                                                                                                  <span class="co">#  The contents of the "Comanche055" files, in general, are transcribed </span>
+064538,000019:                                                                                                  <span class="co">#  from scanned documents. </span>
+064539,000020: 
+064540,000021:                                                                                                  <span class="co">#        Assemble revision 055 of AGC program Comanche by NASA</span>
+064541,000022:                                                                                                  <span class="co">#        2021113-051.  April 1, 1969.  </span>
+064542,000023: 
+064543,000024:                                                                                                  <span class="co">#        This AGC program shall also be referred to as Colossus 2A</span>
+064544,000025: 
+064545,000026:                                                                                                  <span class="co">#        Prepared by</span>
+064546,000027:                                                                                                  <span class="co">#                        Massachusetts Institute of Technology</span>
+064547,000028:                                                                                                  <span class="co">#                        75 Cambridge Parkway</span>
+064548,000029:                                                                                                  <span class="co">#                        Cambridge, Massachusetts</span>
+064549,000030: 
+064550,000031:                                                                                                  <span class="co">#        under NASA contract NAS 9-4065.</span>
+064551,000032: 
+064552,000033:                                                                                                  <span class="co">#  Refer directly to the online document mentioned above for further</span>
+064553,000034:                                                                                                  <span class="co">#  information.  Please report any errors to info@sandroid.org.</span>
+064554,000035: 
+064555,000036:                                                                                                  <span class="co">#  Page 1493</span>
+064556,000037:                                                                                                  <span class="co">#  THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED</span>
+064557,000038:                                                                                                  <span class="co">#  EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.</span>
+064558,000039: 
+064559,000040:                                                                                                  <span class="co">#  THE CALLING SEQUENCE IS AS FOLLOWS:</span>
+064560,000041:                                                                                                  <span class="co">#                TC      ALARM</span>
+064561,000042:                                                                                                  <span class="co">#                OCT     NNNNN</span>
+064562,000043:                                                                                                  <span class="co">#                                        # (RETURNS HERE)</span>
+064563,000044: 
+064564,000045:    5650                                           <span class="ps">BLOCK   </span> 02                                    
+064565,000046:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#464654414737">FFTAG7</a>                                
+064566,000047:    4000                                           <span class="ps">BANK    </span>                                       
+064567,000048: 
+064568,000049:    5650     0375                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
+064569,000050: 
+064570,000051:    5650                                           <span class="ps">COUNT   </span> 02/ALARM                              
+064571,000052: 
+064572,000053:                                                                                                  <span class="co">#  ALARM TURNS ON THE PROGRAM ALARM LIGHT, BUT DOES NOT DISPLAY.</span>
+064573,000054: 
+<a name="414C41524D"></a>064574,000055:    5650           00004        <span class="sm">ALARM   </span>           <span class="op">INHINT  </span>                                       
+064575,000056: 
+064576,000057:    5651           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="414C41524D32"></a>064577,000058:    5652           55363        <span class="sm">ALARM2  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064578,000059:    5653           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+064579,000060:    5654           30000                           <span class="op">CA      </span> 0                                     
+<a name="424F5254454E54"></a>064580,000061:    5655           54001        <span class="sm">BORTENT </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+064581,000062: 
+<a name="5052494F454E54"></a>064582,000063:    5656           30006        <span class="sm">PRIOENT </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+064583,000064:    5657           00006                 +1        <span class="op">EXTEND  </span>                                       
+064584,000065:    5660           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  ADD SUPER BITS.</span>
+064585,000066:    5661           55364                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>    +1                         
+064586,000067: 
+<a name="4C41524D454E54"></a>064587,000068:    5662           30002        <span class="sm">LARMENT </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  STORE RETURN FOR ALARM</span>
+064588,000069:    5663           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+064589,000070: 
+064590,000071:    5664           30164                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+064591,000072:    5665           54057                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43414C41524D">LOCALARM</a>                              
+064592,000073:    5666           30165                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
+064593,000074:    5667           54060                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B414C524D">BANKALRM</a>                              
+064594,000075: 
+<a name="43484B4641494C31"></a>064595,000076:    5670           10375        <span class="sm">CHKFAIL1</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               <span class="co">#  IS ANYTHING IN FAILREG</span>
+064596,000077:    5671           15674                           <span class="op">TCF     </span> <a href="#43484B4641494C32">CHKFAIL2</a>                              <span class="co">#  YES TRY NEXT REG</span>
+064597,000078:    5672           22375                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
+064598,000079:    5673           15706                           <span class="op">TCF     </span> <a href="#50524F474C41524D">PROGLARM</a>                              <span class="co">#  TURN ALARM LIGHT ON FOR FIRST ALARM</span>
+064599,000080: 
+<a name="43484B4641494C32"></a>064600,000081:    5674           10376        <span class="sm">CHKFAIL2</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +1                         
+064601,000082:    5675           15700                           <span class="op">TCF     </span> <a href="#4641494C33">FAIL3</a>                                 
+064602,000083:    5676           22376                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +1                         
+064603,000084:    5677           15711                           <span class="op">TCF     </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
+064604,000085: 
+<a name="4641494C33"></a>064605,000086:    5700           30377        <span class="sm">FAIL3   </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +2                         
+064606,000087:                                                                                                  <span class="co">#  Page 1494</span>
+064607,000088:    5701           74777                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
+064608,000089:    5702           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+064609,000090:    5703           15715                           <span class="op">TCF     </span> <a href="#4D554C544641494C">MULTFAIL</a>                              
+064610,000091:    5704           22377                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +2                         
+064611,000092:    5705           15711                           <span class="op">TCF     </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
+064612,000093: 
+<a name="50524F474C41524D"></a>064613,000094:    5706           41036        <span class="sm">PROGLARM</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+064614,000095:    5707           77765                           <span class="op">MASK    </span> <a href="#4F43543430343030">OCT40400</a>                              
+064615,000096:    5710           27036                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+064616,000097: 
+<a name="4D554C5445584954"></a>064617,000098:    5711           56061        <span class="sm">MULTEXIT</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  OBTAIN RETURN ADDRESS IN A</span>
+064618,000099:    5712           00003                           <span class="op">RELINT  </span>                                       
+064619,000100:    5713           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+064620,000101:    5714           00001                           <span class="op">TC      </span> 1                                     
+064621,000102: 
+<a name="4D554C544641494C"></a>064622,000103:    5715           30001        <span class="sm">MULTFAIL</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+064623,000104:    5716           65001                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
+064624,000105:    5717           54377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>    +2                         
+064625,000106: 
+064626,000107:    5720           15711                           <span class="op">TCF     </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
+064627,000108: 
+064628,000109:                                                                                                  <span class="co">#  PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND</span>
+064629,000110:                                                                                                  <span class="co">#  AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,</span>
+064630,000111:                                                                                                  <span class="co">#                CAF     OCTXX           # ALARM CODE</span>
+064631,000112:                                                                                                  <span class="co">#                TC      BANKCALL</span>
+064632,000113:                                                                                                  <span class="co">#                CADR    PRIOLARM</span>
+064633,000114:                                                                                                  <span class="co">#                ...     ...</span>
+064634,000115:                                                                                                  <span class="co">#                ...     ...</span>
+064635,000116:                                                                                                  <span class="co">#                ...     ...             # ASTRONAUT RETURN</span>
+064636,000117:                                                                                                  <span class="co">#                TC      PHASCHNG        # IMMEDIATE RETURN TO USER.  RESTART</span>
+064637,000118:                                                                                                  <span class="co">#                OCT     X.1             # PHASE CHANGE FOR PRIO DISPLAY</span>
+064638,000119: 
+064639,000120: 10,3766                                           <span class="ps">BANK    </span> 10                                    
+064640,000121: 10,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#444953504C415953">DISPLAYS</a>                              
+064641,000122: 10,2000                                           <span class="ps">BANK    </span>                                       
+064642,000123: 
+064643,000124: 10,3766                                           <span class="ps">COUNT   </span> 10/DSPLA                              
+<a name="5052494F4C41524D"></a>064644,000125: 10,3766           00004        <span class="sm">PRIOLARM</span>           <span class="op">INHINT  </span>                                       <span class="co">#  * * * KEEP IN DISPLAY ROUTINE'S BANK</span>
+064645,000126: 10,3767           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE ALARM CODE</span>
+064646,000127: 
+064647,000128: 10,3770           30133                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  2 CADR OF PRIOLARM USER</span>
+064648,000129: 10,3771           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064649,000130: 10,3772           30134                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         
+064650,000131: 10,3773           05657                           <span class="op">TC      </span> <a href="#5052494F454E54">PRIOENT</a>    +1                         <span class="co">#  * LEAVE L ALONE</span>
+<a name="2D32534543"></a>064651,000132: 10,3774           77467        <span class="sm">-2SEC   </span>           <span class="ps">DEC     </span> -200       B-14                       <span class="co">#  *** DON'T MOVE</span>
+064652,000133: 10,3775           35050                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5630354E3039">V05N09</a>                                
+064653,000134: 10,3776           12726                           <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#5052494F44535052">PRIODSPR</a>                              
+064654,000135: 
+064655,000136:                                                                                                  <span class="co">#  Page 1495</span>
+064656,000137: 
+064657,000138:    5721                                           <span class="ps">BLOCK   </span> 02                                    
+064658,000139:    6000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#46465441473133">FFTAG13</a>                               
+064659,000140:    6000                                           <span class="ps">BANK    </span>                                       
+064660,000141: 
+064661,000142:    7755                                           <span class="ps">COUNT   </span> 02/ALARM                              
+064662,000143: 
+<a name="4241494C4F5554"></a>064663,000144:    7755           00004        <span class="sm">BAILOUT </span>           <span class="op">INHINT  </span>                                       
+064664,000145:    7756           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+064665,000146:    7757           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064666,000147: 
+064667,000148:    7760           04662                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+064668,000149:    7761           40000                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#5641433553544F52">VAC5STOR</a>                              
+064669,000150: 
+064670,000151:    7762           51363                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064671,000152:    7763           30000                           <span class="op">CAF     </span> 0                                     
+064672,000153:    7764           05655                           <span class="op">TC      </span> <a href="#424F5254454E54">BORTENT</a>                               
+<a name="4F43543430343030"></a>064673,000154:    7765           40400        <span class="sm">OCT40400</span>           <span class="ps">OCT     </span> 40400                                 
+064674,000155: 
+064675,000156:    7766           00004                           <span class="op">INHINT  </span>                                       
+<a name="5748494D504552"></a>064676,000157:    7767           35016        <span class="sm">WHIMPER </span>           <span class="op">CA      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+064677,000158:    7770           60005                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
+064678,000159:    7771           54017                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252555054">BRUPT</a>                                 
+064679,000160:    7772           50017                           <span class="op">RESUME  </span>                                       
+064680,000161:    7773           04701                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RESUME SENDS CONTROL HERE</span>
+064681,000162:    7774           12651                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#454E454D41">ENEMA</a>                                 
+064682,000163: 
+064683,000164:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#464654414737">FFTAG7</a>                                
+064684,000165:    4000                                           <span class="ps">BANK    </span>                                       
+064685,000166: 
+<a name="503030444F4F"></a>064686,000167:    5721           00004        <span class="sm">P00DOO  </span>           <span class="op">INHINT  </span>                                       
+064687,000168:    5722           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+064688,000169:    5723           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064689,000170: 
+064690,000171:    5724           04662                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+064691,000172:    5725           40000                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#5641433553544F52">VAC5STOR</a>                              <span class="co">#  STORE ERASABLES FOR DEBUGGING PURPOSES.</span>
+064692,000173: 
+064693,000174:    5726           51363                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064694,000175:    5727           30000                           <span class="op">CAF     </span> 0                                     
+<a name="41424F525432"></a>064695,000176:    5730           05655        <span class="sm">ABORT2  </span>           <span class="op">TC      </span> <a href="#424F5254454E54">BORTENT</a>                               
+<a name="4F43543737373730"></a>064696,000177:    5731           77770        <span class="sm">OCT77770</span>           <span class="ps">OCT     </span> 77770                                 <span class="co">#  DON'T MOVE</span>
+064697,000178:    5732           35012                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563337464C424954">V37FLBIT</a>                              <span class="co">#  IS AVERAGE G ON</span>
+064698,000179:    5733           70103                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
+064699,000180:    5734           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+064700,000181:    5735           07766                           <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>    -1                         <span class="co">#  YES.  DON'T DO POODOO.  DO BAILOUT.</span>
+064701,000182: 
+064702,000183:    5736           05560                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+064703,000184:    5737           00067                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445464C47">STATEFLG</a>                              
+064704,000185: 
+064705,000186:    5740           05560                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+064706,000187: 
+064707,000188:                                                                                                  <span class="co">#  Page 1496</span>
+064708,000189:    5741           00236                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245494E54464C47">REINTFLG</a>                              
+064709,000190: 
+064710,000191:    5742           05560                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+064711,000192:    5743           00054                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F444F464C4147">NODOFLAG</a>                              
+064712,000193: 
+064713,000194:    5744           04662                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+064714,000195:    5745           12501                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#4D522E4B4C45414E">MR.KLEAN</a>                              
+064715,000196:    5746           07767                           <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>                               
+064716,000197: 
+<a name="434353484F4C45"></a>064717,000198:    5747           00004        <span class="sm">CCSHOLE </span>           <span class="op">INHINT  </span>                                       
+064718,000199:    5750           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+064719,000200:    5751           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064720,000201:    5752           04662                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+064721,000202:    5753           40000                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#5641433553544F52">VAC5STOR</a>                              
+064722,000203:    5754           35756                           <span class="op">CA      </span> <a href="#4F435431313033">OCT1103</a>                               
+064723,000204:    5755           05730                           <span class="op">TC      </span> <a href="#41424F525432">ABORT2</a>                                
+<a name="4F435431313033"></a>064724,000205:    5756           01103        <span class="sm">OCT1103 </span>           <span class="ps">OCT     </span> 1103                                  
+<a name="4355525441494E53"></a>064725,000206:    5757           00004        <span class="sm">CURTAINS</span>           <span class="op">INHINT  </span>                                       
+064726,000207:    5760           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+064727,000208:    5761           05652                           <span class="op">TC      </span> <a href="#414C41524D32">ALARM2</a>                                
+<a name="4F4354323137"></a>064728,000209:    5762           00217        <span class="sm">OCT217  </span>           <span class="ps">OCT     </span> 00217                                 
+064729,000210:    5763           01363                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               <span class="co">#  RETURN TO USER</span>
+064730,000211: 
+<a name="444F414C41524D"></a>064731,000212:    5764     5217               <span class="sm">DOALARM </span>           <span class="ps">EQUALS  </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+064732,000213: 
+064733,000214:                                                                                                  <span class="co">#  CALLING SEQUENCE FOR VARALARM</span>
+064734,000215: 
+064735,000216:                                                                                                  <span class="co">#                CAF     (ALARM)</span>
+064736,000217:                                                                                                  <span class="co">#                TC      VARALARM</span>
+064737,000218: 
+064738,000219:                                                                                                  <span class="co">#  VARALARM TURNS ON PROGRAM ALARM LIGHT BUT DOES NOT DISPLAY</span>
+064739,000220: 
+<a name="564152414C41524D"></a>064740,000221:    5764           00004        <span class="sm">VARALARM</span>           <span class="op">INHINT  </span>                                       
+064741,000222: 
+064742,000223:    5765           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE USER'S ALARM CODE</span>
+064743,000224: 
+064744,000225:    5766           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE USER'S Q</span>
+064745,000226:    5767           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               
+064746,000227: 
+064747,000228:    5770           05656                           <span class="op">TC      </span> <a href="#5052494F454E54">PRIOENT</a>                               
+<a name="4F43543134"></a>064748,000229:    5771           00014        <span class="sm">OCT14   </span>           <span class="ps">OCT     </span> 14                                    <span class="co">#  DON'T MOVE</span>
+064749,000230: 
+064750,000231:    5772           01363                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               <span class="co">#  RETURN TO USER</span>
+064751,000232: 
+<a name="41424F5254"></a>064752,000233:    5773     7755               <span class="sm">ABORT   </span>           <span class="ps">EQUALS  </span> <a href="#4241494C4F5554">BAILOUT</a>                               <span class="co">#  *** TEMPORARY UNTIL ABORT CALLS OUT</span>
 
 End of include-file ALARM_AND_ABORT.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

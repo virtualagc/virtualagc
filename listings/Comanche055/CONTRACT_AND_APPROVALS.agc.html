@@ -56,79 +56,111 @@ color: #993399;
 <span style="font-family: monospace;">
 <pre>
 <h1>Source Code</h1>
-000066,000001:                                                                                                 <span class="co">#  Copyright:     Public domain.</span>
-000067,000002:                                                                                                 <span class="co">#  Filename:      CONTRACT_AND_APPROVALS.agc</span>
-000068,000003:                                                                                                 <span class="co">#  Purpose:       Part of the source code for Colossus 2A, AKA Comanche 055.</span>
-000069,000004:                                                                                                 <span class="co">#                 It is part of the source code for the Command Module's (CM)</span>
-000070,000005:                                                                                                 <span class="co">#                 Apollo Guidance Computer (AGC), for Apollo 11.</span>
-000071,000006:                                                                                                 <span class="co">#  Assembler:     yaYUL</span>
-000072,000007:                                                                                                 <span class="co">#  Contact:       Ron Burkey &lt;info@sandroid.org>.</span>
-000073,000008:                                                                                                 <span class="co">#  Website:       www.ibiblio.org/apollo.</span>
-000074,000009:                                                                                                 <span class="co">#  Mod history:   2009-05-06 RSB  Transcribed from page images.</span>
-000075,000010: 
-000076,000011:                                                                                                 <span class="co">#  This source code has been transcribed or otherwise adapted from digitized</span>
-000077,000012:                                                                                                 <span class="co">#  images of a hardcopy from the MIT Museum.  The digitization was performed</span>
-000078,000013:                                                                                                 <span class="co">#  by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many</span>
-000079,000014:                                                                                                 <span class="co">#  thanks to both.  The images (with suitable reduction in storage size and</span>
-000080,000015:                                                                                                 <span class="co">#  consequent reduction in image quality as well) are available online at</span>
-000081,000016:                                                                                                 <span class="co">#  www.ibiblio.org/apollo.  If for some reason you find that the images are</span>
-000082,000017:                                                                                                 <span class="co">#  illegible, contact me at info@sandroid.org about getting access to the </span>
-000083,000018:                                                                                                 <span class="co">#  (much) higher-quality images which Paul actually created.</span>
-000084,000019: 
-000085,000020:                                                                                                 <span class="co">#  Notations on the hardcopy document read, in part:</span>
-000086,000021: 
-000087,000022:                                                                                                 <span class="co">#         Assemble revision 055 of AGC program Comanche by NASA</span>
-000088,000023:                                                                                                 <span class="co">#         2021113-051.  10:28 APR. 1, 1969  </span>
-000089,000024: 
-000090,000025:                                                                                                 <span class="co">#  Page 1</span>
-000091,000026: 
-000092,000027:                                                                                                 <span class="co"># ************************************************************************</span>
-000093,000028:                                                                                                 <span class="co">#                                                                         *</span>
-000094,000029:                                                                                                 <span class="co">#                 THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS:          *</span>
-000095,000030:                                                                                                 <span class="co">#                                                                         *</span>
-000096,000031:                                                                                                 <span class="co">#                                                                         *</span>
-000097,000032:                                                                                                 <span class="co">#                                 COLOSSUS 2A                             *</span>
-000098,000033:                                                                                                 <span class="co">#                                                                         *</span>
-000099,000034:                                                                                                 <span class="co">#                                                                         *</span>
-000100,000035:                                                                                                 <span class="co">#         THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED         *</span>
-000101,000036:                                                                                                 <span class="co">#         IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER DSR           *</span>
-000102,000037:                                                                                                 <span class="co">#         PROJECT 55-23870, SPONSORED BY THE MANNED SPACECRAFT            *</span>
-000103,000038:                                                                                                 <span class="co">#         CENTER OF THE NATIONAL AERONAUTICS AND SPACE                    *</span>
-000104,000039:                                                                                                 <span class="co">#         ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE             *</span>
-000105,000040:                                                                                                 <span class="co">#         INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF          *</span>
-000106,000041:                                                                                                 <span class="co">#         TECHNOLOGY, CAMBRIDGE, MASS.                                    *</span>
-000107,000042:                                                                                                 <span class="co">#                                                                         *</span>
-000108,000043:                                                                                                 <span class="co"># ************************************************************************</span>
-000109,000044: 
-000110,000045: 
-000111,000046:                                                                                                 <span class="co">#         SUBMITTED:      MARGARET H. HAMILTON            DATE:   28 MAR 69</span>
-000112,000047:                                                                                                 <span class="co">#                 M.H.HAMILTON, COLOSSUS PROGRAMMING LEADER</span>
-000113,000048:                                                                                                 <span class="co">#                 APOLLO GUIDANCE AND NAVIGATION</span>
-000114,000049: 
-000115,000050:                                                                                                 <span class="co">#         APPROVED:       DANIEL J. LICKLY                DATE:   28 MAR 69</span>
-000116,000051:                                                                                                 <span class="co">#                 D.J.LICKLY, DIRECTOR, MISSION PROGRAM DEVELOPMENT</span>
-000117,000052:                                                                                                 <span class="co">#                 APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000118,000053: 
-000119,000054:                                                                                                 <span class="co">#         APPROVED:       FRED H. MARTIN                  DATE:   28 MAR 69</span>
-000120,000055:                                                                                                 <span class="co">#                 FRED H. MARTIN, COLOSSUS PROJECT MANAGER</span>
-000121,000056:                                                                                                 <span class="co">#                 APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000122,000057: 
-000123,000058:                                                                                                 <span class="co">#         APPROVED:       NORMAN E. SEARS                 DATE:   28 MAR 69</span>
-000124,000059:                                                                                                 <span class="co">#                 N.E. SEARS, DIRECTOR, MISSION DEVELOPMENT</span>
-000125,000060:                                                                                                 <span class="co">#                 APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000126,000061: 
-000127,000062:                                                                                                 <span class="co">#         APPROVED:       RICHARD H. BATTIN               DATE:   28 MAR 69</span>
-000128,000063:                                                                                                 <span class="co">#                 R.H. BATTIN, DIRECTOR, MISSION DEVELOPMENT</span>
-000129,000064:                                                                                                 <span class="co">#                 APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000130,000065: 
-000131,000066:                                                                                                 <span class="co">#         APPROVED:       DAVID G. HOAG                   DATE:   28 MAR 69</span>
-000132,000067:                                                                                                 <span class="co">#                 D.G. HOAG, DIRECTOR</span>
-000133,000068:                                                                                                 <span class="co">#                 APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000134,000069: 
-000135,000070:                                                                                                 <span class="co">#         APPROVED:       RALPH R. RAGAN                  DATE:   28 MAR 69</span>
-000136,000071:                                                                                                 <span class="co">#                 R.R. RAGAN, DEPUTY DIRECTOR</span>
-000137,000072:                                                                                                 <span class="co">#                 INSTRUMENTATION LABORATORY</span>
-000138,000073: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+These source-code files were from the printout at the MIT Museum, with many thanks
+to Deborah Douglas, the Museum's Curator of Science and Technology, for releasing
+it to us.  The printout was digitally photographed by Paul Fjeld.  A team of 
+volunteers transcribed the source code manually from these images or, where
+appropriate, modified already-transcribed but similar source Colossus 249 (Apollo 9)
+source code to agree with the images from the printout.  Note that the page images 
+<a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/">
+presented online</a> are of reduced quality, and that higher-quality images 
+are available.  Report any conversion errors or legibility 
+problems in page images to info@sandroid.org. 
+Notations on the program listing read, in part:<br>
+<br>
+<pre>
+	GAP:  ASSEMBLE REVISION 055 OF AGC PROGRAM COMANCHE BY NASA 2021113-051
+	10:28 APR.  1,1969
+</pre>
+Note that the date is the date of the printout, not the date of the program revision.
+</td></tr></tbody></table>
+
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+000068,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+000069,000003:                                                                                                  <span class="co">#  Filename:     CONTRACT_AND_APPROVALS.agc</span>
+000070,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.</span>
+000071,000005:                                                                                                  <span class="co">#                It is part of the source code for the Command Module's (CM)</span>
+000072,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), for Apollo 11.</span>
+000073,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+000074,000008:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+000075,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
+000076,000010:                                                                                                  <span class="co">#  Mod history:  2009-05-06 RSB  Transcribed from page images.</span>
+000077,000011: 
+000078,000012:                                                                                                  <span class="co">#  This source code has been transcribed or otherwise adapted from digitized</span>
+000079,000013:                                                                                                  <span class="co">#  images of a hardcopy from the MIT Museum.  The digitization was performed</span>
+000080,000014:                                                                                                  <span class="co">#  by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many</span>
+000081,000015:                                                                                                  <span class="co">#  thanks to both.  The images (with suitable reduction in storage size and</span>
+000082,000016:                                                                                                  <span class="co">#  consequent reduction in image quality as well) are available online at</span>
+000083,000017:                                                                                                  <span class="co">#  www.ibiblio.org/apollo.  If for some reason you find that the images are</span>
+000084,000018:                                                                                                  <span class="co">#  illegible, contact me at info@sandroid.org about getting access to the </span>
+000085,000019:                                                                                                  <span class="co">#  (much) higher-quality images which Paul actually created.</span>
+000086,000020: 
+000087,000021:                                                                                                  <span class="co">#  Notations on the hardcopy document read, in part:</span>
+000088,000022: 
+000089,000023:                                                                                                  <span class="co">#        Assemble revision 055 of AGC program Comanche by NASA</span>
+000090,000024:                                                                                                  <span class="co">#        2021113-051.  10:28 APR. 1, 1969  </span>
+000091,000025: 
+000092,000026:                                                                                                  <span class="co">#  Page 1</span>
+000093,000027: 
+000094,000028:                                                                                                  <span class="co"># ************************************************************************</span>
+000095,000029:                                                                                                  <span class="co">#                                                                        *</span>
+000096,000030:                                                                                                  <span class="co">#                THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS:          *</span>
+000097,000031:                                                                                                  <span class="co">#                                                                        *</span>
+000098,000032:                                                                                                  <span class="co">#                                                                        *</span>
+000099,000033:                                                                                                  <span class="co">#                                COLOSSUS 2A                             *</span>
+000100,000034:                                                                                                  <span class="co">#                                                                        *</span>
+000101,000035:                                                                                                  <span class="co">#                                                                        *</span>
+000102,000036:                                                                                                  <span class="co">#        THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED         *</span>
+000103,000037:                                                                                                  <span class="co">#        IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER DSR           *</span>
+000104,000038:                                                                                                  <span class="co">#        PROJECT 55-23870, SPONSORED BY THE MANNED SPACECRAFT            *</span>
+000105,000039:                                                                                                  <span class="co">#        CENTER OF THE NATIONAL AERONAUTICS AND SPACE                    *</span>
+000106,000040:                                                                                                  <span class="co">#        ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE             *</span>
+000107,000041:                                                                                                  <span class="co">#        INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF          *</span>
+000108,000042:                                                                                                  <span class="co">#        TECHNOLOGY, CAMBRIDGE, MASS.                                    *</span>
+000109,000043:                                                                                                  <span class="co">#                                                                        *</span>
+000110,000044:                                                                                                  <span class="co"># ************************************************************************</span>
+000111,000045: 
+000112,000046: 
+000113,000047:                                                                                                  <span class="co">#        SUBMITTED:      MARGARET H. HAMILTON            DATE:   28 MAR 69</span>
+000114,000048:                                                                                                  <span class="co">#                M.H.HAMILTON, COLOSSUS PROGRAMMING LEADER</span>
+000115,000049:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION</span>
+000116,000050: 
+000117,000051:                                                                                                  <span class="co">#        APPROVED:       DANIEL J. LICKLY                DATE:   28 MAR 69</span>
+000118,000052:                                                                                                  <span class="co">#                D.J.LICKLY, DIRECTOR, MISSION PROGRAM DEVELOPMENT</span>
+000119,000053:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000120,000054: 
+000121,000055:                                                                                                  <span class="co">#        APPROVED:       FRED H. MARTIN                  DATE:   28 MAR 69</span>
+000122,000056:                                                                                                  <span class="co">#                FRED H. MARTIN, COLOSSUS PROJECT MANAGER</span>
+000123,000057:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000124,000058: 
+000125,000059:                                                                                                  <span class="co">#        APPROVED:       NORMAN E. SEARS                 DATE:   28 MAR 69</span>
+000126,000060:                                                                                                  <span class="co">#                N.E. SEARS, DIRECTOR, MISSION DEVELOPMENT</span>
+000127,000061:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000128,000062: 
+000129,000063:                                                                                                  <span class="co">#        APPROVED:       RICHARD H. BATTIN               DATE:   28 MAR 69</span>
+000130,000064:                                                                                                  <span class="co">#                R.H. BATTIN, DIRECTOR, MISSION DEVELOPMENT</span>
+000131,000065:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000132,000066: 
+000133,000067:                                                                                                  <span class="co">#        APPROVED:       DAVID G. HOAG                   DATE:   28 MAR 69</span>
+000134,000068:                                                                                                  <span class="co">#                D.G. HOAG, DIRECTOR</span>
+000135,000069:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000136,000070: 
+000137,000071:                                                                                                  <span class="co">#        APPROVED:       RALPH R. RAGAN                  DATE:   28 MAR 69</span>
+000138,000072:                                                                                                  <span class="co">#                R.R. RAGAN, DEPUTY DIRECTOR</span>
+000139,000073:                                                                                                  <span class="co">#                INSTRUMENTATION LABORATORY</span>
+000140,000074: 
 
 End of include-file CONTRACT_AND_APPROVALS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

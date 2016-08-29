@@ -66,11 +66,12 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files were obtained by digitally photographing the
+These source-code files were derived from scans of the
 Colossus 237 program listing from the private collection of original
-AGC developer Fred Martin, and then modifying pre-existing Colossus 249
-(Apollo 9) source files to incorporate changes. Note that the page images 
-<a href="http://www.ibiblio.org/apollo/ScansForConversion/Colossus237/">
+AGC developer Fred Martin. Scanning was by Ron Burkey.  Pre-existing Colossus 249
+(Apollo 9) source files were used as a template, and changes between Colossus 249
+and Colossus 237 were manually transcribed by a team of volunteers. Note 
+that the page images <a href="http://www.ibiblio.org/apollo/ScansForConversion/Colossus237/">
 presented online</a> are of reduced quality, and that additional images 
 are available.  Report any conversion errors or legibility 
 problems in page images to info@sandroid.org. 
@@ -80,262 +81,263 @@ Notations on the program listing read, in part:<br>
 	GAP: ASSEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS 
 	BY NASA 2021111-031  1:17 AUG. 24, 1968
 </pre>
+Note that the date is the date of the printout, not the date of the program revision.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040725,000002:                                                                                                 <span class="co">#  Copyright:    Public domain.</span>
-040726,000003:                                                                                                 <span class="co">#  Filename:      TVCSTROKETEST.agc</span>
-040727,000004:                                                                                                 <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-040728,000005:                                                                                                 <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-040729,000006:                                                                                                 <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-040730,000007:                                                                                                 <span class="co">#  Assembler:    yaYUL</span>
-040731,000008:                                                                                                 <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-040732,000009:                                                                                                 <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-040733,000010:                                                                                                 <span class="co">#  Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-040734,000011:                                                                                                 <span class="co">#  Mod history:  2011-03-12 JL    Adapted from corresponding Colossus 249 file.</span>
-040735,000012: 
-040736,000013:                                                                                                 <span class="co"># # Page 940</span>
-040737,000014:                                                                                                 <span class="co">#  NAME     STROKE TEST PACKAGE   (INCLUDING INITIALIZATION PACKAGE)</span>
-040738,000015:                                                                                                 <span class="co">#  ORIGINAL CODING BY OLSSON       LOG SECTION....STROKE TEST PACKAGE</span>
-040739,000016:                                                                                                 <span class="co">#  MOD BY ENGEL                    DATE....21 MARCH, 1967</span>
-040740,000017: 
-040741,000018:                                                                                                 <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
-040742,000019:                                                                                                 <span class="co">#       STROKE TEST PACKAGE GENERATES A WAVEFORM DESIGNED TO EXCITE BENDING</span>
-040743,000020:                                                                                                 <span class="co">#       STRKTSTI (STROKE TEST INITIALIZATION) IS CALLED AS A JOB BY VB68.</span>
-040744,000021:                                                                                                 <span class="co">#                IT INITIALIZES ALL ERASABLES REQD FOR A STROKE TEST, AND</span>
-040745,000022:                                                                                                 <span class="co">#                 THEN TESTS FOR AN 80MS DAP. IF 80MS IT SETS STROKER = ESTROKER</span>
-040746,000023:                                                                                                 <span class="co">#                 FOR AN IMMEDIATE STROKE TEST, OTEHRWISE IT MERELY ENABLES</span>
-040747,000024:                                                                                                 <span class="co">#                 A STROKE TEST BY SETTING STROKER TO -0. THE STROKE TEST</span>
-040748,000025:                                                                                                 <span class="co">#                 THEN AWAITS SWITCHOVER TO THE 80MS DAP WHEREUPON IT IS</span>
-040749,000026:                                                                                                 <span class="co">#                 ENABLED AFTER AN ADDITIONAL 4 SECOND DELAY TO AVOID</span>
-040750,000027:                                                                                                 <span class="co">#                 THE SWITCHOVER TRANSIENTS (SEE STRKCALL, STRKUP IN</span>
-040751,000028:                                                                                                 <span class="co">#                 TVCEXECUTIVE)</span>
-040752,000029:                                                                                                 <span class="co">#       HACK (STROKE TEST) GENERATES THE WAVEFORM BY DUMPING PULSE BURSTS</span>
-040753,000030:                                                                                                 <span class="co">#                 OF PROPER SIGN AND IN PROPER SEQUENCE DIRECTLY INTO</span>
-040754,000031:                                                                                                 <span class="co">#                 TVCPITCH, WORKING IN CONJUNCITON WITH BOTH PITCH AND YAW</span>
-040755,000032:                                                                                                 <span class="co">#                 TVC DAPS, WITH INTERMEDIAT WAITLIST CALLS. NOTE, HOWEVER</span>
-040756,000033:                                                                                                 <span class="co">#                 THAT THE STROKE TEST IS PERFORMED ONLY IN THE PITCH AXIS.</span>
-040757,000034:                                                                                                 <span class="co">#                 AN EXAMPLE WAVEFORM IS GIVEN BELOW, TO DEMONSTRATE STROKE-</span>
-040758,000035:                                                                                                 <span class="co">#                 TEST PARAMETER SELECTION</span>
-040759,000036:                                                                                                 <span class="co">#       RESTARTS CAUSE TEST TO BE TERMINATED. ANOTHER V68 REQD IF TEST</span>
-040760,000037:                                                                                                 <span class="co">#                 IS TO BE RE-RUN.</span>
-040761,000038:                                                                                                 <span class="co">#       PULSE BURST SIZE IS PAD-LOADED (ESTROKER) SO THAT AMPLITUDE OF</span>
-040762,000039:                                                                                                 <span class="co">#                 WAVEFORM CAN BE CHANGED.  THERE ARE TEN PULSE BURSTS IN</span>
-040763,000040:                                                                                                 <span class="co">#                 THE HALF-AMPLITUDE OF THE FIRST FREQUENCY SET IN THE</span>
-040764,000041:                                                                                                 <span class="co">#                 STANDARD WAVEFORM.  AMPLITUDE IS 10(ESTROKER)(1/42.15),</span>
-040765,000042:                                                                                                 <span class="co">#                 NOMINALLY 50/42.15  =  1.185 DEG</span>
-040766,000043:                                                                                                 <span class="co">#  CALLING SEQUENCE....</span>
-040767,000044:                                                                                                 <span class="co">#       EXTENDED VERB 68 SETS UP STRKTSTI JOB</span>
-040768,000045:                                                                                                 <span class="co">#       PITCH AND YAW TVCDAPS, FINDING STROKER NON-ZERO, DO A  ..TC HACK..</span>
-040769,000046:                                                                                                 <span class="co">#       AN INTERNALLY-GENERATED WAITLIST CALL ENTERS AT  ..HACKWLST..</span>
-040770,000047:                                                                                                 <span class="co">#  NORMAL EXIT MODES....</span>
-040771,000048:                                                                                                 <span class="co">#       TC BUNKER  (..Q.. IF ENTRY FROM DAP, ..TCTSKOVR.. IF FROM WAITLIST)LIST</span>
-040772,000049:                                                                                                 <span class="co">#  SUBROUTINES CALLED....</span>
-040773,000050:                                                                                                 <span class="co">#       WAITLIST</span>
-040774,000051:                                                                                                 <span class="co">#  ALARM OR ABORT EXIT MODES....</span>
-040775,000052:                                                                                                 <span class="co">#       NONE</span>
-040776,000053:                                                                                                 <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
-040777,000054:                                                                                                 <span class="co">#       ESTROKER (PAD-LOAD)</span>
-040778,000055:                                                                                                 <span class="co">#       STROKER,  CADDY,  REVS,  CARD,  N</span>
-040779,000056:                                                                                                 <span class="co">#  OUTPUT....</span>
-040780,000057:                                                                                                 <span class="co">#       STRKTSTI...INITIALIZATION FOR STROKE TEST</span>
-040781,000058:                                                                                                 <span class="co">#       HACK, HACKWLST...PULSE BURSTS INTO TVCPITCH VIA..ADS..</span>
-040782,000059:                                                                                                 <span class="co">#                        RESETS STROKER = +0 WHEN TEST COMPLETED</span>
-040783,000060:                                                                                                 <span class="co">#  DEBRIS....</span>
-040784,000061:                                                                                                 <span class="co">#         N = CADDY = +0, CARD = -0, REVS = -1</span>
-040785,000062:                                                                                                 <span class="co">#         BUNKER</span>
-040786,000063: 
-040787,000064:                                                                                                 <span class="co"># # Page 941</span>
-040788,000065:                                                                                                 <span class="co">#  EXAMPLE STROKE TEST WAVE FORM, DEMONSTRATING PARAMETER SELECTION</span>
-040789,000066: 
-040790,000067: 
-040791,000068:                                                                                                 <span class="co">#  NOTE....THIS IS NOT THE OFFICIAL WAVEFORM....</span>
-040792,000069: 
-040793,000070: 
-040794,000071:                                                                                                 <span class="co">#             **              **</span>
-040795,000072:                                                                                                 <span class="co">#             **              **</span>
-040796,000073:                                                                                                 <span class="co">#             **              **           EXAMPLE WAVEFORM (EACH * REPRESENTS</span>
-040797,000074:                                                                                                 <span class="co">#            *  *            *  *               85.41 ARCSEC OF ACTUATOR CMND)</span>
-040798,000075:                                                                                                 <span class="co">#            *  *            *  *</span>
-040799,000076:                                                                                                 <span class="co">#            *  *            *  *</span>
-040800,000077:                                                                                                 <span class="co">#           *    *          *    *          **      **      **      **      **</span>
-040801,000078:                                                                                                 <span class="co">#           *    *          *    *          **      **      **      **      **</span>
-040802,000079:                                                                                                 <span class="co">#           *    *          *    *          **      **      **      **      **</span>
-040803,000080:                                                                                                 <span class="co">#          *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **</span>
-040804,000081:                                                                                                 <span class="co">#          *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **</span>
-040805,000082:                                                                                                 <span class="co">#          *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **</span>
-040806,000083:                                                                                                 <span class="co">#      -----------------------------------------------------------------------------------------------------</span>
-040807,000084:                                                                                                 <span class="co">#                  *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **</span>
-040808,000085:                                                                                                 <span class="co">#                  *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **</span>
-040809,000086:                                                                                                 <span class="co">#                  *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **</span>
-040810,000087:                                                                                                 <span class="co">#                   *    *          *    *      **      **      **      **      **</span>
-040811,000088:                                                                                                 <span class="co">#                   *    *          *    *      **      **      **      **      **</span>
-040812,000089:                                                                                                 <span class="co">#                   *    *          *    *      **      **      **      **      **</span>
-040813,000090:                                                                                                 <span class="co">#                    *  *            *  *</span>
-040814,000091:                                                                                                 <span class="co">#                    *  *            *  *</span>
-040815,000092:                                                                                                 <span class="co">#                    *  *            *  *</span>
-040816,000093:                                                                                                 <span class="co">#                     **              **</span>
-040817,000094:                                                                                                 <span class="co">#                     **              **</span>
-040818,000095:                                                                                                 <span class="co">#                     **              **</span>
-040819,000096: 
-040820,000097: 
-040821,000098:                                                                                                 <span class="co">#  FOR THIS (UNOFFICIAL, EXAMPLE) WAVEFORM, THE REQUIRED PARAMETERS ARE AS FOLLOWS....</span>
-040822,000099: 
-040823,000100:                                                                                                 <span class="co">#       FCARD    = +3    (NUMBER OF SETS)</span>
-040824,000101:                                                                                                 <span class="co">#       ESTROKER = +3    (PULSE BURST SIZE, SC.AT 85.41 ARCSEC/BIT)</span>
-040825,000102: 
-040826,000103:                                                                                                 <span class="co">#       SET1..</span>
-040827,000104:                                                                                                 <span class="co">#            FREVS  = +3  (NUMBER REVERSALS MINUS 1)</span>
-040828,000105:                                                                                                 <span class="co">#            FCADDY = +4  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)</span>
-040829,000106:                                                                                                 <span class="co">#       SET2..</span>
-040830,000107:                                                                                                 <span class="co">#            FCARD1 = +9  (NUMBER REVERSALS MINUS 1)</span>
-040831,000108:                                                                                                 <span class="co">#            FCARD4 = +2  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)</span>
-040832,000109:                                                                                                 <span class="co">#       SET3..</span>
-040833,000110:                                                                                                 <span class="co">#            FCARD2 = +9  (NUMBER REVERSALS MINUS 1)</span>
-040834,000111:                                                                                                 <span class="co">#            FCARD5 = +1  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)</span>
-040835,000112:                                                                                                 <span class="co">#       SET4..</span>
-040836,000113:                                                                                                 <span class="co">#            FCARD3 = +0  (NUMBER OF REVERSALS MINUS 1)</span>
-040837,000114:                                                                                                 <span class="co">#            FCARD6 = +0  (NUMBER OF PULSE BURSTS IN 1/2 AMPLUTUDE)</span>
-040838,000115: 
-040839,000116:                                                                                                 <span class="co"># # Page 942</span>
-040840,000117:                                                                                                 <span class="co">#  STROKE TEST INITIALIZATION PACKAGE  (AS A JOB, FROM VERB 68)</span>
-040841,000118: 
-040842,000119: 17,2215                                          <span class="ps">BANK    </span> 17                                    
-040843,000120: 20,2000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505332">DAPS2</a>                                 
-040844,000121: 20,2000                                          <span class="ps">BANK    </span>                                       
-040845,000122: 
-040846,000123: 20,3431                                          <span class="ps">COUNT*  </span> $$/STRK                               
-040847,000124: 20,3431  E6,1665                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
-040848,000125: 
-<a name="5354524B54535449"></a>040849,000126: 20,3431           03450        <span class="sm">STRKTSTI</span>          <span class="op">TCR     </span> <a href="#545354494E4954">TSTINIT</a>                               <span class="co">#  STROKE TEST INITIALIZATION PKG  (CALLED</span>
-040850,000127:                                                                                                 <span class="co">#                                                AS A JOB BY VERB68)</span>
-040851,000128: 
-<a name="545643445443484B"></a>040852,000129: 20,3432           00004        <span class="sm">TVCDTCHK</span>          <span class="op">INHINT  </span>                                       <span class="co">#  STROKE TEST PERMITTED ONLY WITH 80MS DAP</span>
-040853,000130: 20,3433           31635                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54355456434454">T5TVCDT</a>                               <span class="co">#       CHECK CURRENT TIMING</span>
-040854,000131: 20,3434           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040855,000132: 20,3435           37677                          <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373734">OCT37774</a>                              <span class="co">#       LOOK FOR 80MS (T5)</span>
-040856,000133: 20,3436           00006                          <span class="op">EXTEND  </span>                                       
-040857,000134: 20,3437           06001                          <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 <span class="co">#  +0 IF 80MS</span>
-040858,000135: 20,3440           10000                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-040859,000136: 20,3441           13445                          <span class="op">TCF     </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    <span class="co">#       NOT 80MS</span>
-040860,000137: 
-040861,000138: 20,3442           31412                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455354524F4B4552">ESTROKER</a>                              <span class="co">#       80MS. OK, SET STROKER FOR TEST</span>
-040862,000139: 20,3443           55614                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               
-040863,000140: 20,3444           13447                          <span class="op">TCF     </span> <a href="P61-P67.agc.html#2B33">+3</a>                                    
-040864,000141: 
-040865,000142: 20,3445           44714                          <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#       ENABLE, BUT DO NOT ACTIVATE STROKE</span>
-040866,000143: 20,3446           55614                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#            TEST, AWAITING SWITCHOVER</span>
-040867,000144:                                                                                                 <span class="co">#                                                     TO MOD0R (MOD80)</span>
-040868,000145: 20,3447           15112                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-040869,000146: 
-040870,000147: 
-<a name="545354494E4954"></a>040871,000148: 20,3450           43460        <span class="sm">TSTINIT </span>          <span class="op">CS      </span> <a href="#464341444459">FCADDY</a>                                <span class="co">#  NORMAL ENTRY FROM STRKTSTI</span>
-040872,000149: 20,3451           55665                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
-040873,000150: 20,3452           55666                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     <span class="co">#       NOTE SGN CHNG FCADDY(+) TO CADDY(-)</span>
-040874,000151: 
-040875,000152: 20,3453           33461                          <span class="op">CAF     </span> <a href="#4652455653">FREVS</a>                                 
-040876,000153: 20,3454           55670                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  
-040877,000154: 
-040878,000155: 20,3455           43462                          <span class="op">CS      </span> <a href="#4643415244">FCARD</a>                                 <span class="co">#       NOTE SGN CHNG FCARD(+) TO CARD(-)</span>
-040879,000156: 20,3456           55671                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  
-040880,000157: 
-040881,000158: 20,3457           00002                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN TO STRKTSTI+1  (OR CHKSTRK+2OR+4)</span>
-040882,000159: 
-040883,000160:                                                                                                 <span class="co"># # Page 943</span>
-040884,000161:                                                                                                 <span class="co">#  THE OFFICIAL STROKE TEST WAVEFORM (3 JAN, 1967) CONSISTS OF FOUR STROKE SETS, AS FOLLOWS....</span>
-040885,000162: 
-040886,000163:                                                                                                 <span class="co">#       SET 1...10 BURSTS IN 1/2 AMP,   4 REVERSALS</span>
-040887,000164:                                                                                                 <span class="co">#       SET 2... 6 BURSTS IN 1/2 AMP,   6 REVERSALS</span>
-040888,000165:                                                                                                 <span class="co">#       SET 3... 5 BURSTS IN 1/2 AMP,  10 REVERSALS</span>
-040889,000166:                                                                                                 <span class="co">#       SET 4... 4 BURSTS IN 1/2 AMP,  14 REVERSALS</span>
-040890,000167:                                                                                                 <span class="co">#  THE PULSE BURST SIZE (ESTROKER) IS PAD-LOADED (5 BITS AS OF 3JAN,1967)</span>
-040891,000168:                                                                                                 <span class="co">#  THE REMAINING WAVEFORM-GENERATING PARAMETERS ARE AS FOLLOWS....</span>
-040892,000169: 
-<a name="464341444459"></a>040893,000170: 20,3460           00012        <span class="sm">FCADDY  </span>          <span class="ps">DEC     </span> 10         B-14                       <span class="co">#  NO. PULSE BURSTS IN 1/2 AMP, SET1..(+10)</span>
-<a name="4652455653"></a>040894,000171: 20,3461           00003        <span class="sm">FREVS   </span>          <span class="ps">DEC     </span> 3          B-14                       <span class="co">#  NO. REVERSALS MINUS 1, SET1........(  3)</span>
-040895,000172: 
-<a name="4643415244"></a>040896,000173: 20,3462           00004        <span class="sm">FCARD   </span>          <span class="ps">DEC     </span> 4          B-14                       <span class="co">#  NO. STROKE SETS....................(+ 4)</span>
-040897,000174: 
-<a name="464341524431"></a>040898,000175: 20,3463           00005        <span class="sm">FCARD1  </span>          <span class="ps">DEC     </span> 5          B-14                       <span class="co">#  NO. REVERSALS MINUS 1, SET2........(  5)</span>
-040899,000176: 
-<a name="464341524432"></a>040900,000177: 20,3464           00011        <span class="sm">FCARD2  </span>          <span class="ps">DEC     </span> 9          B-14                       <span class="co">#                             3........(  9)</span>
-<a name="464341524433"></a>040901,000178: 20,3465           00015        <span class="sm">FCARD3  </span>          <span class="ps">DEC     </span> 13         B-14                       <span class="co">#                            4........( 13)</span>
-040902,000179: 
-<a name="464341524434"></a>040903,000180: 20,3466           00006        <span class="sm">FCARD4  </span>          <span class="ps">DEC     </span> 6          B-14                       <span class="co">#  NO. PULSE BURSTS IN 1/2 AMP, SET2..(+ 6)</span>
-<a name="464341524435"></a>040904,000181: 20,3467           00005        <span class="sm">FCARD5  </span>          <span class="ps">DEC     </span> 5          B-14                       <span class="co">#                               SET3..(+ 5)</span>
-<a name="464341524436"></a>040905,000182: 20,3470           00004        <span class="sm">FCARD6  </span>          <span class="ps">DEC     </span> 4          B-14                       <span class="co">#                               SET4..(+ 4)</span>
-040906,000183: 
-<a name="32304D53"></a>040907,000184: 20,3471     4711               <span class="sm">20MS    </span>          <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-040908,000185: 
-040909,000186: 
-040910,000187:                                                                                                 <span class="co">#  STROKE TEST PACKAGE PROPER....</span>
-040911,000188: 
-040912,000189: 20,3471  E6,1667                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                
-040913,000190: 
-<a name="4841434B"></a>040914,000191: 20,3471           00006        <span class="sm">HACK    </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  ENTRY (IN T5 RUPT) FROM TVCDAPS</span>
-040915,000192: 20,3472           23667                          <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  SAVE Q FOR DAP RETURN</span>
-040916,000193: 
-040917,000194: 20,3473           34711                          <span class="op">CAF     </span> <a href="#32304D53">20MS</a>                                  <span class="co">#  2DAPSx2(PASSES/DAP)x2(CS/PASS)=8CS=TVCDT</span>
-040918,000195: 20,3474           05140                          <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-040919,000196: 20,3475  E6,1667                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                
-040920,000197: 20,3475           03500 40066                    <span class="ps">2CADR   </span> <a href="#4841434B574C5354">HACKWLST</a>                              
-040921,000198: 20,3477           13502                          <span class="op">TCF     </span> <a href="P61-P67.agc.html#2B33">+3</a>                                    
-040922,000199: 
-<a name="4841434B574C5354"></a>040923,000200: 20,3500           34367        <span class="sm">HACKWLST</span>          <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#544354534B4F5652">TCTSKOVR</a>                              <span class="co">#  ENTRY FROM WAITLIST</span>
-040924,000201: 20,3501           55667                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  BUNKER IS TC TASKOVER</span>
-040925,000202: 
-040926,000203: 20,3502           31614                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#  STROKE</span>
-040927,000204: 20,3503           26054                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435049544348">TVCPITCH</a>                              
-040928,000205: 
-040929,000206: 20,3504           34700                          <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  RELEASE THE ERROR COUNTERS</span>
-040930,000207: 20,3505           00006                          <span class="op">EXTEND  </span>                                       
-040931,000208: 20,3506           05014                          <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
-040932,000209: 20,3507           25665                          <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 <span class="co">#  COUNT DOWN THE NO. BURSTS, THIS SLOPE</span>
-040933,000210:                                                                                                 <span class="co"># # Page 944</span>
-040934,000211: 20,3510           41665                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
-040935,000212: 20,3511           00006                          <span class="op">EXTEND  </span>                                       
-040936,000213: 20,3512           63514                          <span class="op">BZMF    </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-040937,000214: 20,3513           01667                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT, WHILE ON A SLOPE</span>
-040938,000215: 
-040939,000216: 
-040940,000217: 20,3514           11670                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  
-040941,000218: 20,3515           13535                          <span class="op">TCF     </span> <a href="#5245565550">REVUP</a>                                 <span class="co">#  POSITIVE REVS</span>
-040942,000219: 20,3516           13541                          <span class="op">TCF     </span> <a href="#5245565550">REVUP</a>      +4                         <span class="co">#  FINAL REVERSAL, THE SET</span>
-040943,000220: 
-040944,000221: 20,3517           25671                          <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  <span class="co">#  NEGATIVE REVS SET LAST PASS, READY FOR</span>
-040945,000222: 20,3520           41671                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  <span class="co">#       THE NEXT SET. CHECK IF NO MORE SETS</span>
-040946,000223: 20,3521           00006                          <span class="op">EXTEND  </span>                                       
-040947,000224: 20,3522           13533                          <span class="op">BZF     </span> <a href="#5354524F4B494C4C">STROKILL</a>                              <span class="co">#  ALL SETS COMPLETED</span>
-040948,000225: 
-040949,000226: 20,3523           51671                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  
-040950,000227: 20,3524           33466                          <span class="op">CAF     </span> <a href="#4643415244">FCARD</a>      +4                         <span class="co">#  PICK UP NO. REVERSALS (-), NEXT SET</span>
-040951,000228: 20,3525           55670                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  <span class="co">#  REINITIALIZE</span>
-040952,000229: 20,3526           51671                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  
-040953,000230: 20,3527           43471                          <span class="op">CS      </span> <a href="#4643415244">FCARD</a>      +7                         <span class="co">#  PICK UP NO. BURSTS IN 1/2AMP, NEXT SET</span>
-040954,000231: 20,3530           55666                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     <span class="co">#  REINITIALIZE</span>
-040955,000232: 20,3531           55665                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
-040956,000233: 20,3532           01667                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT, AT END OF SET</span>
-040957,000234: 
-040958,000235: 
-<a name="5354524F4B494C4C"></a>040959,000236: 20,3533           55614        <span class="sm">STROKILL</span>          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#  RESET (TO +0) TO END TEST</span>
-040960,000237: 20,3534           01667                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT, STROKE TEST FINIS</span>
-040961,000238: 
-040962,000239: 
-<a name="5245565550"></a>040963,000240: 20,3535           55670        <span class="sm">REVUP   </span>          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  <span class="co">#  ALL REVERSALS EXCEPT LAST OF SET</span>
-040964,000241: 20,3536           31666                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     
-040965,000242: 20,3537           60000                          <span class="op">DOUBLE  </span>                                       <span class="co">#  2 x 1/2AMP</span>
-040966,000243: 20,3540           13544                          <span class="op">TCF     </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    
-040967,000244: 
-040968,000245: 20,3541           44712                 +4       <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FINAL REVERSAL, THIS SET</span>
-040969,000246: 20,3542           55670                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  <span class="co">#  PREPARE TO BRANCH TO NEW BURST</span>
-040970,000247: 20,3543           31666                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     <span class="co">#  JUST RETURN TO ZERO, FINAL SLOPE OF SET</span>
-040971,000248: 20,3544           55665                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 <span class="co">#  CADUP</span>
-040972,000249: 
-040973,000250: 20,3545           41614                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#  CHANGE SIGN OF SLOPE</span>
-040974,000251: 20,3546           55614                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               
-040975,000252: 20,3547           01667                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT AT A REVERSAL (SLOPE CHANGE)</span>
+040734,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+040735,000003:                                                                                                  <span class="co">#  Filename:     TVCSTROKETEST.agc</span>
+040736,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
+040737,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
+040738,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
+040739,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+040740,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+040741,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
+040742,000010:                                                                                                  <span class="co">#  Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+040743,000011:                                                                                                  <span class="co">#  Mod history:  2011-03-12 JL   Adapted from corresponding Colossus 249 file.</span>
+040744,000012: 
+040745,000013:                                                                                                  <span class="co"># # Page 940</span>
+040746,000014:                                                                                                  <span class="co">#  NAME     STROKE TEST PACKAGE   (INCLUDING INITIALIZATION PACKAGE)</span>
+040747,000015:                                                                                                  <span class="co">#  ORIGINAL CODING BY OLSSON       LOG SECTION....STROKE TEST PACKAGE</span>
+040748,000016:                                                                                                  <span class="co">#  MOD BY ENGEL                    DATE....21 MARCH, 1967</span>
+040749,000017: 
+040750,000018:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
+040751,000019:                                                                                                  <span class="co">#       STROKE TEST PACKAGE GENERATES A WAVEFORM DESIGNED TO EXCITE BENDING</span>
+040752,000020:                                                                                                  <span class="co">#       STRKTSTI (STROKE TEST INITIALIZATION) IS CALLED AS A JOB BY VB68.</span>
+040753,000021:                                                                                                  <span class="co">#                IT INITIALIZES ALL ERASABLES REQD FOR A STROKE TEST, AND</span>
+040754,000022:                                                                                                  <span class="co">#                THEN TESTS FOR AN 80MS DAP. IF 80MS IT SETS STROKER = ESTROKER</span>
+040755,000023:                                                                                                  <span class="co">#                FOR AN IMMEDIATE STROKE TEST, OTEHRWISE IT MERELY ENABLES</span>
+040756,000024:                                                                                                  <span class="co">#                A STROKE TEST BY SETTING STROKER TO -0. THE STROKE TEST</span>
+040757,000025:                                                                                                  <span class="co">#                THEN AWAITS SWITCHOVER TO THE 80MS DAP WHEREUPON IT IS</span>
+040758,000026:                                                                                                  <span class="co">#                ENABLED AFTER AN ADDITIONAL 4 SECOND DELAY TO AVOID</span>
+040759,000027:                                                                                                  <span class="co">#                THE SWITCHOVER TRANSIENTS (SEE STRKCALL, STRKUP IN</span>
+040760,000028:                                                                                                  <span class="co">#                TVCEXECUTIVE)</span>
+040761,000029:                                                                                                  <span class="co">#       HACK (STROKE TEST) GENERATES THE WAVEFORM BY DUMPING PULSE BURSTS</span>
+040762,000030:                                                                                                  <span class="co">#                OF PROPER SIGN AND IN PROPER SEQUENCE DIRECTLY INTO</span>
+040763,000031:                                                                                                  <span class="co">#                TVCPITCH, WORKING IN CONJUNCITON WITH BOTH PITCH AND YAW</span>
+040764,000032:                                                                                                  <span class="co">#                TVC DAPS, WITH INTERMEDIAT WAITLIST CALLS. NOTE, HOWEVER</span>
+040765,000033:                                                                                                  <span class="co">#                THAT THE STROKE TEST IS PERFORMED ONLY IN THE PITCH AXIS.</span>
+040766,000034:                                                                                                  <span class="co">#                AN EXAMPLE WAVEFORM IS GIVEN BELOW, TO DEMONSTRATE STROKE-</span>
+040767,000035:                                                                                                  <span class="co">#                TEST PARAMETER SELECTION</span>
+040768,000036:                                                                                                  <span class="co">#       RESTARTS CAUSE TEST TO BE TERMINATED. ANOTHER V68 REQD IF TEST</span>
+040769,000037:                                                                                                  <span class="co">#                IS TO BE RE-RUN.</span>
+040770,000038:                                                                                                  <span class="co">#       PULSE BURST SIZE IS PAD-LOADED (ESTROKER) SO THAT AMPLITUDE OF</span>
+040771,000039:                                                                                                  <span class="co">#                WAVEFORM CAN BE CHANGED.  THERE ARE TEN PULSE BURSTS IN</span>
+040772,000040:                                                                                                  <span class="co">#                THE HALF-AMPLITUDE OF THE FIRST FREQUENCY SET IN THE</span>
+040773,000041:                                                                                                  <span class="co">#                STANDARD WAVEFORM.  AMPLITUDE IS 10(ESTROKER)(1/42.15),</span>
+040774,000042:                                                                                                  <span class="co">#                NOMINALLY 50/42.15  =  1.185 DEG</span>
+040775,000043:                                                                                                  <span class="co">#  CALLING SEQUENCE....</span>
+040776,000044:                                                                                                  <span class="co">#       EXTENDED VERB 68 SETS UP STRKTSTI JOB</span>
+040777,000045:                                                                                                  <span class="co">#       PITCH AND YAW TVCDAPS, FINDING STROKER NON-ZERO, DO A  ..TC HACK..</span>
+040778,000046:                                                                                                  <span class="co">#       AN INTERNALLY-GENERATED WAITLIST CALL ENTERS AT  ..HACKWLST..</span>
+040779,000047:                                                                                                  <span class="co">#  NORMAL EXIT MODES....</span>
+040780,000048:                                                                                                  <span class="co">#       TC BUNKER  (..Q.. IF ENTRY FROM DAP, ..TCTSKOVR.. IF FROM WAITLIST)LIST</span>
+040781,000049:                                                                                                  <span class="co">#  SUBROUTINES CALLED....</span>
+040782,000050:                                                                                                  <span class="co">#       WAITLIST</span>
+040783,000051:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES....</span>
+040784,000052:                                                                                                  <span class="co">#       NONE</span>
+040785,000053:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
+040786,000054:                                                                                                  <span class="co">#       ESTROKER (PAD-LOAD)</span>
+040787,000055:                                                                                                  <span class="co">#       STROKER,  CADDY,  REVS,  CARD,  N</span>
+040788,000056:                                                                                                  <span class="co">#  OUTPUT....</span>
+040789,000057:                                                                                                  <span class="co">#       STRKTSTI...INITIALIZATION FOR STROKE TEST</span>
+040790,000058:                                                                                                  <span class="co">#       HACK, HACKWLST...PULSE BURSTS INTO TVCPITCH VIA..ADS..</span>
+040791,000059:                                                                                                  <span class="co">#                        RESETS STROKER = +0 WHEN TEST COMPLETED</span>
+040792,000060:                                                                                                  <span class="co">#  DEBRIS....</span>
+040793,000061:                                                                                                  <span class="co">#        N = CADDY = +0, CARD = -0, REVS = -1</span>
+040794,000062:                                                                                                  <span class="co">#        BUNKER</span>
+040795,000063: 
+040796,000064:                                                                                                  <span class="co"># # Page 941</span>
+040797,000065:                                                                                                  <span class="co">#  EXAMPLE STROKE TEST WAVE FORM, DEMONSTRATING PARAMETER SELECTION</span>
+040798,000066: 
+040799,000067: 
+040800,000068:                                                                                                  <span class="co">#  NOTE....THIS IS NOT THE OFFICIAL WAVEFORM....</span>
+040801,000069: 
+040802,000070: 
+040803,000071:                                                                                                  <span class="co">#             **              **</span>
+040804,000072:                                                                                                  <span class="co">#             **              **</span>
+040805,000073:                                                                                                  <span class="co">#             **              **           EXAMPLE WAVEFORM (EACH * REPRESENTS</span>
+040806,000074:                                                                                                  <span class="co">#            *  *            *  *               85.41 ARCSEC OF ACTUATOR CMND)</span>
+040807,000075:                                                                                                  <span class="co">#            *  *            *  *</span>
+040808,000076:                                                                                                  <span class="co">#            *  *            *  *</span>
+040809,000077:                                                                                                  <span class="co">#           *    *          *    *          **      **      **      **      **</span>
+040810,000078:                                                                                                  <span class="co">#           *    *          *    *          **      **      **      **      **</span>
+040811,000079:                                                                                                  <span class="co">#           *    *          *    *          **      **      **      **      **</span>
+040812,000080:                                                                                                  <span class="co">#          *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **</span>
+040813,000081:                                                                                                  <span class="co">#          *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **</span>
+040814,000082:                                                                                                  <span class="co">#          *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **</span>
+040815,000083:                                                                                                  <span class="co">#      -----------------------------------------------------------------------------------------------------</span>
+040816,000084:                                                                                                  <span class="co">#                  *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **</span>
+040817,000085:                                                                                                  <span class="co">#                  *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **</span>
+040818,000086:                                                                                                  <span class="co">#                  *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **</span>
+040819,000087:                                                                                                  <span class="co">#                   *    *          *    *      **      **      **      **      **</span>
+040820,000088:                                                                                                  <span class="co">#                   *    *          *    *      **      **      **      **      **</span>
+040821,000089:                                                                                                  <span class="co">#                   *    *          *    *      **      **      **      **      **</span>
+040822,000090:                                                                                                  <span class="co">#                    *  *            *  *</span>
+040823,000091:                                                                                                  <span class="co">#                    *  *            *  *</span>
+040824,000092:                                                                                                  <span class="co">#                    *  *            *  *</span>
+040825,000093:                                                                                                  <span class="co">#                     **              **</span>
+040826,000094:                                                                                                  <span class="co">#                     **              **</span>
+040827,000095:                                                                                                  <span class="co">#                     **              **</span>
+040828,000096: 
+040829,000097: 
+040830,000098:                                                                                                  <span class="co">#  FOR THIS (UNOFFICIAL, EXAMPLE) WAVEFORM, THE REQUIRED PARAMETERS ARE AS FOLLOWS....</span>
+040831,000099: 
+040832,000100:                                                                                                  <span class="co">#       FCARD    = +3    (NUMBER OF SETS)</span>
+040833,000101:                                                                                                  <span class="co">#       ESTROKER = +3    (PULSE BURST SIZE, SC.AT 85.41 ARCSEC/BIT)</span>
+040834,000102: 
+040835,000103:                                                                                                  <span class="co">#       SET1..</span>
+040836,000104:                                                                                                  <span class="co">#           FREVS  = +3  (NUMBER REVERSALS MINUS 1)</span>
+040837,000105:                                                                                                  <span class="co">#           FCADDY = +4  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)</span>
+040838,000106:                                                                                                  <span class="co">#       SET2..</span>
+040839,000107:                                                                                                  <span class="co">#           FCARD1 = +9  (NUMBER REVERSALS MINUS 1)</span>
+040840,000108:                                                                                                  <span class="co">#           FCARD4 = +2  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)</span>
+040841,000109:                                                                                                  <span class="co">#       SET3..</span>
+040842,000110:                                                                                                  <span class="co">#           FCARD2 = +9  (NUMBER REVERSALS MINUS 1)</span>
+040843,000111:                                                                                                  <span class="co">#           FCARD5 = +1  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)</span>
+040844,000112:                                                                                                  <span class="co">#       SET4..</span>
+040845,000113:                                                                                                  <span class="co">#           FCARD3 = +0  (NUMBER OF REVERSALS MINUS 1)</span>
+040846,000114:                                                                                                  <span class="co">#           FCARD6 = +0  (NUMBER OF PULSE BURSTS IN 1/2 AMPLUTUDE)</span>
+040847,000115: 
+040848,000116:                                                                                                  <span class="co"># # Page 942</span>
+040849,000117:                                                                                                  <span class="co">#  STROKE TEST INITIALIZATION PACKAGE  (AS A JOB, FROM VERB 68)</span>
+040850,000118: 
+040851,000119: 17,2215                                           <span class="ps">BANK    </span> 17                                    
+040852,000120: 20,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505332">DAPS2</a>                                 
+040853,000121: 20,2000                                           <span class="ps">BANK    </span>                                       
+040854,000122: 
+040855,000123: 20,3431                                           <span class="ps">COUNT*  </span> $$/STRK                               
+040856,000124: 20,3431  E6,1665                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
+040857,000125: 
+<a name="5354524B54535449"></a>040858,000126: 20,3431           03450        <span class="sm">STRKTSTI</span>           <span class="op">TCR     </span> <a href="#545354494E4954">TSTINIT</a>                               <span class="co">#  STROKE TEST INITIALIZATION PKG  (CALLED</span>
+040859,000127:                                                                                                  <span class="co">#                                               AS A JOB BY VERB68)</span>
+040860,000128: 
+<a name="545643445443484B"></a>040861,000129: 20,3432           00004        <span class="sm">TVCDTCHK</span>           <span class="op">INHINT  </span>                                       <span class="co">#  STROKE TEST PERMITTED ONLY WITH 80MS DAP</span>
+040862,000130: 20,3433           31635                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54355456434454">T5TVCDT</a>                               <span class="co">#       CHECK CURRENT TIMING</span>
+040863,000131: 20,3434           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040864,000132: 20,3435           37677                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373734">OCT37774</a>                              <span class="co">#       LOOK FOR 80MS (T5)</span>
+040865,000133: 20,3436           00006                           <span class="op">EXTEND  </span>                                       
+040866,000134: 20,3437           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 <span class="co">#  +0 IF 80MS</span>
+040867,000135: 20,3440           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+040868,000136: 20,3441           13445                           <span class="op">TCF     </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    <span class="co">#       NOT 80MS</span>
+040869,000137: 
+040870,000138: 20,3442           31412                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455354524F4B4552">ESTROKER</a>                              <span class="co">#       80MS. OK, SET STROKER FOR TEST</span>
+040871,000139: 20,3443           55614                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               
+040872,000140: 20,3444           13447                           <span class="op">TCF     </span> <a href="P61-P67.agc.html#2B33">+3</a>                                    
+040873,000141: 
+040874,000142: 20,3445           44714                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#       ENABLE, BUT DO NOT ACTIVATE STROKE</span>
+040875,000143: 20,3446           55614                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#            TEST, AWAITING SWITCHOVER</span>
+040876,000144:                                                                                                  <span class="co">#                                                    TO MOD0R (MOD80)</span>
+040877,000145: 20,3447           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+040878,000146: 
+040879,000147: 
+<a name="545354494E4954"></a>040880,000148: 20,3450           43460        <span class="sm">TSTINIT </span>           <span class="op">CS      </span> <a href="#464341444459">FCADDY</a>                                <span class="co">#  NORMAL ENTRY FROM STRKTSTI</span>
+040881,000149: 20,3451           55665                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
+040882,000150: 20,3452           55666                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     <span class="co">#       NOTE SGN CHNG FCADDY(+) TO CADDY(-)</span>
+040883,000151: 
+040884,000152: 20,3453           33461                           <span class="op">CAF     </span> <a href="#4652455653">FREVS</a>                                 
+040885,000153: 20,3454           55670                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  
+040886,000154: 
+040887,000155: 20,3455           43462                           <span class="op">CS      </span> <a href="#4643415244">FCARD</a>                                 <span class="co">#       NOTE SGN CHNG FCARD(+) TO CARD(-)</span>
+040888,000156: 20,3456           55671                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  
+040889,000157: 
+040890,000158: 20,3457           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN TO STRKTSTI+1  (OR CHKSTRK+2OR+4)</span>
+040891,000159: 
+040892,000160:                                                                                                  <span class="co"># # Page 943</span>
+040893,000161:                                                                                                  <span class="co">#  THE OFFICIAL STROKE TEST WAVEFORM (3 JAN, 1967) CONSISTS OF FOUR STROKE SETS, AS FOLLOWS....</span>
+040894,000162: 
+040895,000163:                                                                                                  <span class="co">#       SET 1...10 BURSTS IN 1/2 AMP,   4 REVERSALS</span>
+040896,000164:                                                                                                  <span class="co">#       SET 2... 6 BURSTS IN 1/2 AMP,   6 REVERSALS</span>
+040897,000165:                                                                                                  <span class="co">#       SET 3... 5 BURSTS IN 1/2 AMP,  10 REVERSALS</span>
+040898,000166:                                                                                                  <span class="co">#       SET 4... 4 BURSTS IN 1/2 AMP,  14 REVERSALS</span>
+040899,000167:                                                                                                  <span class="co">#  THE PULSE BURST SIZE (ESTROKER) IS PAD-LOADED (5 BITS AS OF 3JAN,1967)</span>
+040900,000168:                                                                                                  <span class="co">#  THE REMAINING WAVEFORM-GENERATING PARAMETERS ARE AS FOLLOWS....</span>
+040901,000169: 
+<a name="464341444459"></a>040902,000170: 20,3460           00012        <span class="sm">FCADDY  </span>           <span class="ps">DEC     </span> 10         B-14                       <span class="co">#  NO. PULSE BURSTS IN 1/2 AMP, SET1..(+10)</span>
+<a name="4652455653"></a>040903,000171: 20,3461           00003        <span class="sm">FREVS   </span>           <span class="ps">DEC     </span> 3          B-14                       <span class="co">#  NO. REVERSALS MINUS 1, SET1........(  3)</span>
+040904,000172: 
+<a name="4643415244"></a>040905,000173: 20,3462           00004        <span class="sm">FCARD   </span>           <span class="ps">DEC     </span> 4          B-14                       <span class="co">#  NO. STROKE SETS....................(+ 4)</span>
+040906,000174: 
+<a name="464341524431"></a>040907,000175: 20,3463           00005        <span class="sm">FCARD1  </span>           <span class="ps">DEC     </span> 5          B-14                       <span class="co">#  NO. REVERSALS MINUS 1, SET2........(  5)</span>
+040908,000176: 
+<a name="464341524432"></a>040909,000177: 20,3464           00011        <span class="sm">FCARD2  </span>           <span class="ps">DEC     </span> 9          B-14                       <span class="co">#                            3........(  9)</span>
+<a name="464341524433"></a>040910,000178: 20,3465           00015        <span class="sm">FCARD3  </span>           <span class="ps">DEC     </span> 13         B-14                       <span class="co">#                            4........( 13)</span>
+040911,000179: 
+<a name="464341524434"></a>040912,000180: 20,3466           00006        <span class="sm">FCARD4  </span>           <span class="ps">DEC     </span> 6          B-14                       <span class="co">#  NO. PULSE BURSTS IN 1/2 AMP, SET2..(+ 6)</span>
+<a name="464341524435"></a>040913,000181: 20,3467           00005        <span class="sm">FCARD5  </span>           <span class="ps">DEC     </span> 5          B-14                       <span class="co">#                               SET3..(+ 5)</span>
+<a name="464341524436"></a>040914,000182: 20,3470           00004        <span class="sm">FCARD6  </span>           <span class="ps">DEC     </span> 4          B-14                       <span class="co">#                               SET4..(+ 4)</span>
+040915,000183: 
+<a name="32304D53"></a>040916,000184: 20,3471     4711               <span class="sm">20MS    </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+040917,000185: 
+040918,000186: 
+040919,000187:                                                                                                  <span class="co">#  STROKE TEST PACKAGE PROPER....</span>
+040920,000188: 
+040921,000189: 20,3471  E6,1667                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                
+040922,000190: 
+<a name="4841434B"></a>040923,000191: 20,3471           00006        <span class="sm">HACK    </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  ENTRY (IN T5 RUPT) FROM TVCDAPS</span>
+040924,000192: 20,3472           23667                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  SAVE Q FOR DAP RETURN</span>
+040925,000193: 
+040926,000194: 20,3473           34711                           <span class="op">CAF     </span> <a href="#32304D53">20MS</a>                                  <span class="co">#  2DAPSx2(PASSES/DAP)x2(CS/PASS)=8CS=TVCDT</span>
+040927,000195: 20,3474           05140                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+040928,000196: 20,3475  E6,1667                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                
+040929,000197: 20,3475           03500 40066                     <span class="ps">2CADR   </span> <a href="#4841434B574C5354">HACKWLST</a>                              
+040930,000198: 20,3477           13502                           <span class="op">TCF     </span> <a href="P61-P67.agc.html#2B33">+3</a>                                    
+040931,000199: 
+<a name="4841434B574C5354"></a>040932,000200: 20,3500           34367        <span class="sm">HACKWLST</span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#544354534B4F5652">TCTSKOVR</a>                              <span class="co">#  ENTRY FROM WAITLIST</span>
+040933,000201: 20,3501           55667                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  BUNKER IS TC TASKOVER</span>
+040934,000202: 
+040935,000203: 20,3502           31614                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#  STROKE</span>
+040936,000204: 20,3503           26054                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435049544348">TVCPITCH</a>                              
+040937,000205: 
+040938,000206: 20,3504           34700                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  RELEASE THE ERROR COUNTERS</span>
+040939,000207: 20,3505           00006                           <span class="op">EXTEND  </span>                                       
+040940,000208: 20,3506           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
+040941,000209: 20,3507           25665                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 <span class="co">#  COUNT DOWN THE NO. BURSTS, THIS SLOPE</span>
+040942,000210:                                                                                                  <span class="co"># # Page 944</span>
+040943,000211: 20,3510           41665                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
+040944,000212: 20,3511           00006                           <span class="op">EXTEND  </span>                                       
+040945,000213: 20,3512           63514                           <span class="op">BZMF    </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+040946,000214: 20,3513           01667                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT, WHILE ON A SLOPE</span>
+040947,000215: 
+040948,000216: 
+040949,000217: 20,3514           11670                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  
+040950,000218: 20,3515           13535                           <span class="op">TCF     </span> <a href="#5245565550">REVUP</a>                                 <span class="co">#  POSITIVE REVS</span>
+040951,000219: 20,3516           13541                           <span class="op">TCF     </span> <a href="#5245565550">REVUP</a>      +4                         <span class="co">#  FINAL REVERSAL, THE SET</span>
+040952,000220: 
+040953,000221: 20,3517           25671                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  <span class="co">#  NEGATIVE REVS SET LAST PASS, READY FOR</span>
+040954,000222: 20,3520           41671                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  <span class="co">#       THE NEXT SET. CHECK IF NO MORE SETS</span>
+040955,000223: 20,3521           00006                           <span class="op">EXTEND  </span>                                       
+040956,000224: 20,3522           13533                           <span class="op">BZF     </span> <a href="#5354524F4B494C4C">STROKILL</a>                              <span class="co">#  ALL SETS COMPLETED</span>
+040957,000225: 
+040958,000226: 20,3523           51671                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  
+040959,000227: 20,3524           33466                           <span class="op">CAF     </span> <a href="#4643415244">FCARD</a>      +4                         <span class="co">#  PICK UP NO. REVERSALS (-), NEXT SET</span>
+040960,000228: 20,3525           55670                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  <span class="co">#  REINITIALIZE</span>
+040961,000229: 20,3526           51671                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43415244">CARD</a>                                  
+040962,000230: 20,3527           43471                           <span class="op">CS      </span> <a href="#4643415244">FCARD</a>      +7                         <span class="co">#  PICK UP NO. BURSTS IN 1/2AMP, NEXT SET</span>
+040963,000231: 20,3530           55666                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     <span class="co">#  REINITIALIZE</span>
+040964,000232: 20,3531           55665                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 
+040965,000233: 20,3532           01667                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT, AT END OF SET</span>
+040966,000234: 
+040967,000235: 
+<a name="5354524F4B494C4C"></a>040968,000236: 20,3533           55614        <span class="sm">STROKILL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#  RESET (TO +0) TO END TEST</span>
+040969,000237: 20,3534           01667                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT, STROKE TEST FINIS</span>
+040970,000238: 
+040971,000239: 
+<a name="5245565550"></a>040972,000240: 20,3535           55670        <span class="sm">REVUP   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  <span class="co">#  ALL REVERSALS EXCEPT LAST OF SET</span>
+040973,000241: 20,3536           31666                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     
+040974,000242: 20,3537           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  2 x 1/2AMP</span>
+040975,000243: 20,3540           13544                           <span class="op">TCF     </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    
+040976,000244: 
+040977,000245: 20,3541           44712                 +4        <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FINAL REVERSAL, THIS SET</span>
+040978,000246: 20,3542           55670                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455653">REVS</a>                                  <span class="co">#  PREPARE TO BRANCH TO NEW BURST</span>
+040979,000247: 20,3543           31666                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E">N</a>                                     <span class="co">#  JUST RETURN TO ZERO, FINAL SLOPE OF SET</span>
+040980,000248: 20,3544           55665                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341444459">CADDY</a>                                 <span class="co">#  CADUP</span>
+040981,000249: 
+040982,000250: 20,3545           41614                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               <span class="co">#  CHANGE SIGN OF SLOPE</span>
+040983,000251: 20,3546           55614                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354524F4B4552">STROKER</a>                               
+040984,000252: 20,3547           01667                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554E4B4552">BUNKER</a>                                <span class="co">#  EXIT AT A REVERSAL (SLOPE CHANGE)</span>
 
 End of include-file TVCSTROKETEST.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

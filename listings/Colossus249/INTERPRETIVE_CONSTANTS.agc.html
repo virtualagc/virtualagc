@@ -56,86 +56,121 @@ color: #993399;
 <span style="font-family: monospace;">
 <pre>
 <h1>Source Code</h1>
-050802,000001:                                                                                                 <span class="co">#  Copyright:     Public domain.</span>
-050803,000002:                                                                                                 <span class="co">#  Filename:      INTERPRETATIVE_CONSTANTS.agc</span>
-050804,000003:                                                                                                 <span class="co">#  Purpose:       Part of the source code for Colossus, build 249.</span>
-050805,000004:                                                                                                 <span class="co">#                 It is part of the source code for the Command Module's (CM)</span>
-050806,000005:                                                                                                 <span class="co">#                 Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.</span>
-050807,000006:                                                                                                 <span class="co">#  Assembler:     yaYUL</span>
-050808,000007:                                                                                                 <span class="co">#  Reference:     pp. 1187-1188 1701.pdf.</span>
-050809,000008:                                                                                                 <span class="co">#  Contact:       Ron Burkey &lt;info@sandroid.org>.</span>
-050810,000009:                                                                                                 <span class="co">#  Website:       www.ibiblio.org/apollo.</span>
-050811,000010:                                                                                                 <span class="co">#  Mod history:   08/29/04 RSB.   Adapted from corresponding Luminary 131 file.</span>
-050812,000011: 
-050813,000012:                                                                                                 <span class="co">#  The contents of the "Colossus249" files, in general, are transcribed </span>
-050814,000013:                                                                                                 <span class="co">#  from a scanned document obtained from MIT's website,</span>
-050815,000014:                                                                                                 <span class="co">#  http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this</span>
-050816,000015:                                                                                                 <span class="co">#  document read, in part:</span>
-050817,000016: 
-050818,000017:                                                                                                 <span class="co">#         Assemble revision 249 of AGC program Colossus by NASA</span>
-050819,000018:                                                                                                 <span class="co">#         2021111-041.  October 28, 1968.  </span>
-050820,000019: 
-050821,000020:                                                                                                 <span class="co">#         This AGC program shall also be referred to as</span>
-050822,000021:                                                                                                 <span class="co">#                                 Colossus 1A</span>
-050823,000022: 
-050824,000023:                                                                                                 <span class="co">#         Prepared by</span>
-050825,000024:                                                                                                 <span class="co">#                         Massachussets Institute of Technology</span>
-050826,000025:                                                                                                 <span class="co">#                         75 Cambridge Parkway</span>
-050827,000026:                                                                                                 <span class="co">#                         Cambridge, Massachusetts</span>
-050828,000027:                                                                                                 <span class="co">#         under NASA contract NAS 9-4065.</span>
-050829,000028: 
-050830,000029:                                                                                                 <span class="co">#  Refer directly to the online document mentioned above for further information.</span>
-050831,000030:                                                                                                 <span class="co">#  Please report any errors (relative to 1701.pdf) to info@sandroid.org.</span>
-050832,000031: 
-050833,000032:                                                                                                 <span class="co">#  In some cases, where the source code for Luminary 131 overlaps that of </span>
-050834,000033:                                                                                                 <span class="co">#  Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
-050835,000034:                                                                                                 <span class="co">#  source file, and then is proofed to incorporate any changes.</span>
-050836,000035: 
-050837,000036:                                                                                                 <span class="co">#  Page 1187</span>
-050838,000037: 26,2000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494E545052455431">INTPRET1</a>                              
-050839,000038: 26,2000                                          <span class="ps">BANK    </span>                                       
-050840,000039: 
-050841,000040: 26,3321                                          <span class="ps">COUNT   </span> 23/ICONS                              
-050842,000041: 
-<a name="4450312F345448"></a>050843,000042: 26,3321           10000 00000  <span class="sm">DP1/4TH </span>          <span class="ps">2DEC    </span> .25                                   
-<a name="554E49545A"></a>050844,000043: 26,3323           00000 00000  <span class="sm">UNITZ   </span>          <span class="ps">2DEC    </span> 0          B-28                       
-<a name="554E495459"></a>050845,000044: 26,3325           00000 00000  <span class="sm">UNITY   </span>          <span class="ps">2DEC    </span> 0          B-28                       
-<a name="554E495458"></a>050846,000045: 26,3327           20000 00000  <span class="sm">UNITX   </span>          <span class="ps">2DEC    </span> .5                                    
-<a name="5A45524F56454353"></a>050847,000046: 26,3331           00000 00000  <span class="sm">ZEROVECS</span>          <span class="ps">2DEC    </span> 0          B-28                       
-050848,000047: 26,3333           00000 00000                    <span class="ps">2DEC    </span> 0          B-28                       
-050849,000048: 26,3335           00000 00000                    <span class="ps">2DEC    </span> 0          B-28                       
-050850,000049: 
-<a name="445048414C46"></a>050851,000050: 26,3337  26,3327               <span class="sm">DPHALF  </span>          <span class="ps">=       </span> <a href="#554E495458">UNITX</a>                                 
-<a name="4450504F534D4158"></a>050852,000051: 26,3337           37777        <span class="sm">DPPOSMAX</span>          <span class="ps">OCT     </span> 37777                                 
-050853,000052: 26,3340           37777                          <span class="ps">OCT     </span> 37777                                 
-050854,000053: 
-050855,000054:                                                                                                 <span class="co">#  Page 1188</span>
-050856,000055:                                                                                                 <span class="co">#  INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY</span>
-050857,000056: 
-050858,000057: 04,2000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494E545052455432">INTPRET2</a>                              
-050859,000058: 04,2000                                          <span class="ps">BANK    </span>                                       
-050860,000059: 
-050861,000060: 04,3447                                          <span class="ps">COUNT   </span> 14/ICONS                              
-050862,000061: 
-<a name="5A554E4954"></a>050863,000062: 04,3447           00000 00000  <span class="sm">ZUNIT   </span>          <span class="ps">2DEC    </span> 0          B-28                       
-<a name="59554E4954"></a>050864,000063: 04,3451           00000 00000  <span class="sm">YUNIT   </span>          <span class="ps">2DEC    </span> 0          B-28                       
-<a name="58554E4954"></a>050865,000064: 04,3453           20000 00000  <span class="sm">XUNIT   </span>          <span class="ps">2DEC    </span> .5                                    
-<a name="5A45524F564543"></a>050866,000065: 04,3455           00000 00000  <span class="sm">ZEROVEC </span>          <span class="ps">2DEC    </span> 0          B-28                       
-050867,000066: 04,3457           00000 00000                    <span class="ps">2DEC    </span> 0          B-28                       
-050868,000067: 04,3461           00000 00000                    <span class="ps">2DEC    </span> 0          B-28                       
-050869,000068: 
-050870,000069: 04,3463           77777                          <span class="ps">OCT     </span> 77777                                 <span class="co">#  -0, -6, -12 MUST REMAIN IN THIS ORDER</span>
-<a name="4446432D36"></a>050871,000070: 04,3464           77771        <span class="sm">DFC-6   </span>          <span class="ps">DEC     </span> -6         B-14                       
-<a name="4446432D3132"></a>050872,000071: 04,3465           77763        <span class="sm">DFC-12  </span>          <span class="ps">DEC     </span> -12        B-14                       
-<a name="4C4F44504D4158"></a>050873,000072: 04,3466           37777 37777  <span class="sm">LODPMAX </span>          <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  THESE TWO CONSTANTS MUS REMAIN</span>
-<a name="4C4F44504D415831"></a>050874,000073: 04,3470           37777 37777  <span class="sm">LODPMAX1</span>          <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  ADJACENT AND THE SAME FOR INTEGRATION</span>
-050875,000074: 
-<a name="5A45524F4450"></a>050876,000075: 04,3472  04,3455               <span class="sm">ZERODP  </span>          <span class="ps">=       </span> <a href="#5A45524F564543">ZEROVEC</a>                               
-<a name="48414C464450"></a>050877,000076: 04,3472  04,3453               <span class="sm">HALFDP  </span>          <span class="ps">=       </span> <a href="#58554E4954">XUNIT</a>                                 
-050878,000077: 
-050879,000078: 
-050880,000079: 
-050881,000080: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+These source-code files were derived originally from the scan from MIT's Dibner Institute's 
+now-discontinued website titled "History of Recent Science and Technology", which
+in turn was originally created by Gary Neff, though his high-quality scans were
+unfortunately reduced in legibility when presented online.
+The markings on the front of the
+printout imply that it was the original AGC developer Norm Brodeur's copy.  
+A scan by Ron Burkey has superceded it, made from a more-legible copy from the collection of original
+AGC developer Fred Martin.  The source code was transcribed from
+those images by Ron Burkey.  Note that the page images 
+<a href="http://www.ibiblio.org/apollo/ScansForConversion/Colossus249-Martin/">
+presented online</a> are of reduced quality, and that higher-quality images 
+are available.  Report any conversion errors or legibility 
+problems in page images to info@sandroid.org. 
+Notations on the program listing read, in part:<br>
+<br>
+<pre>
+	ASSEMBLE REVISION 249 OF AGC PROGRAM COLOSSUS BY NASA 2021111-041
+	20'35 OCT. 28,1968
+</pre>
+Note that the date is the date of the printout, not the date of the program revision.
+</td></tr></tbody></table>
+
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+050908,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+050909,000003:                                                                                                  <span class="co">#  Filename:     INTERPRETATIVE_CONSTANTS.agc</span>
+050910,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus, build 249.</span>
+050911,000005:                                                                                                  <span class="co">#                It is part of the source code for the Command Module's (CM)</span>
+050912,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.</span>
+050913,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+050914,000008:                                                                                                  <span class="co">#  Reference:    pp. 1187-1188 1701.pdf.</span>
+050915,000009:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+050916,000010:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
+050917,000011:                                                                                                  <span class="co">#  Mod history:  08/29/04 RSB.   Adapted from corresponding Luminary 131 file.</span>
+050918,000012: 
+050919,000013:                                                                                                  <span class="co">#  The contents of the "Colossus249" files, in general, are transcribed </span>
+050920,000014:                                                                                                  <span class="co">#  from a scanned document obtained from MIT's website,</span>
+050921,000015:                                                                                                  <span class="co">#  http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this</span>
+050922,000016:                                                                                                  <span class="co">#  document read, in part:</span>
+050923,000017: 
+050924,000018:                                                                                                  <span class="co">#        Assemble revision 249 of AGC program Colossus by NASA</span>
+050925,000019:                                                                                                  <span class="co">#        2021111-041.  October 28, 1968.  </span>
+050926,000020: 
+050927,000021:                                                                                                  <span class="co">#        This AGC program shall also be referred to as</span>
+050928,000022:                                                                                                  <span class="co">#                                Colossus 1A</span>
+050929,000023: 
+050930,000024:                                                                                                  <span class="co">#        Prepared by</span>
+050931,000025:                                                                                                  <span class="co">#                        Massachusetts Institute of Technology</span>
+050932,000026:                                                                                                  <span class="co">#                        75 Cambridge Parkway</span>
+050933,000027:                                                                                                  <span class="co">#                        Cambridge, Massachusetts</span>
+050934,000028:                                                                                                  <span class="co">#        under NASA contract NAS 9-4065.</span>
+050935,000029: 
+050936,000030:                                                                                                  <span class="co">#  Refer directly to the online document mentioned above for further information.</span>
+050937,000031:                                                                                                  <span class="co">#  Please report any errors (relative to 1701.pdf) to info@sandroid.org.</span>
+050938,000032: 
+050939,000033:                                                                                                  <span class="co">#  In some cases, where the source code for Luminary 131 overlaps that of </span>
+050940,000034:                                                                                                  <span class="co">#  Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
+050941,000035:                                                                                                  <span class="co">#  source file, and then is proofed to incorporate any changes.</span>
+050942,000036: 
+050943,000037:                                                                                                  <span class="co">#  Page 1187</span>
+050944,000038: 26,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494E545052455431">INTPRET1</a>                              
+050945,000039: 26,2000                                           <span class="ps">BANK    </span>                                       
+050946,000040: 
+050947,000041: 26,3321                                           <span class="ps">COUNT   </span> 23/ICONS                              
+050948,000042: 
+<a name="4450312F345448"></a>050949,000043: 26,3321           10000 00000  <span class="sm">DP1/4TH </span>           <span class="ps">2DEC    </span> .25                                   
+<a name="554E49545A"></a>050950,000044: 26,3323           00000 00000  <span class="sm">UNITZ   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+<a name="554E495459"></a>050951,000045: 26,3325           00000 00000  <span class="sm">UNITY   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+<a name="554E495458"></a>050952,000046: 26,3327           20000 00000  <span class="sm">UNITX   </span>           <span class="ps">2DEC    </span> .5                                    
+<a name="5A45524F56454353"></a>050953,000047: 26,3331           00000 00000  <span class="sm">ZEROVECS</span>           <span class="ps">2DEC    </span> 0          B-28                       
+050954,000048: 26,3333           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+050955,000049: 26,3335           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+050956,000050: 
+<a name="445048414C46"></a>050957,000051: 26,3337  26,3327               <span class="sm">DPHALF  </span>           <span class="ps">=       </span> <a href="#554E495458">UNITX</a>                                 
+<a name="4450504F534D4158"></a>050958,000052: 26,3337           37777        <span class="sm">DPPOSMAX</span>           <span class="ps">OCT     </span> 37777                                 
+050959,000053: 26,3340           37777                           <span class="ps">OCT     </span> 37777                                 
+050960,000054: 
+050961,000055:                                                                                                  <span class="co">#  Page 1188</span>
+050962,000056:                                                                                                  <span class="co">#  INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY</span>
+050963,000057: 
+050964,000058: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494E545052455432">INTPRET2</a>                              
+050965,000059: 04,2000                                           <span class="ps">BANK    </span>                                       
+050966,000060: 
+050967,000061: 04,3447                                           <span class="ps">COUNT   </span> 14/ICONS                              
+050968,000062: 
+<a name="5A554E4954"></a>050969,000063: 04,3447           00000 00000  <span class="sm">ZUNIT   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+<a name="59554E4954"></a>050970,000064: 04,3451           00000 00000  <span class="sm">YUNIT   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+<a name="58554E4954"></a>050971,000065: 04,3453           20000 00000  <span class="sm">XUNIT   </span>           <span class="ps">2DEC    </span> .5                                    
+<a name="5A45524F564543"></a>050972,000066: 04,3455           00000 00000  <span class="sm">ZEROVEC </span>           <span class="ps">2DEC    </span> 0          B-28                       
+050973,000067: 04,3457           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+050974,000068: 04,3461           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+050975,000069: 
+050976,000070: 04,3463           77777                           <span class="ps">OCT     </span> 77777                                 <span class="co">#  -0, -6, -12 MUST REMAIN IN THIS ORDER</span>
+<a name="4446432D36"></a>050977,000071: 04,3464           77771        <span class="sm">DFC-6   </span>           <span class="ps">DEC     </span> -6         B-14                       
+<a name="4446432D3132"></a>050978,000072: 04,3465           77763        <span class="sm">DFC-12  </span>           <span class="ps">DEC     </span> -12        B-14                       
+<a name="4C4F44504D4158"></a>050979,000073: 04,3466           37777 37777  <span class="sm">LODPMAX </span>           <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  THESE TWO CONSTANTS MUS REMAIN</span>
+<a name="4C4F44504D415831"></a>050980,000074: 04,3470           37777 37777  <span class="sm">LODPMAX1</span>           <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  ADJACENT AND THE SAME FOR INTEGRATION</span>
+050981,000075: 
+<a name="5A45524F4450"></a>050982,000076: 04,3472  04,3455               <span class="sm">ZERODP  </span>           <span class="ps">=       </span> <a href="#5A45524F564543">ZEROVEC</a>                               
+<a name="48414C464450"></a>050983,000077: 04,3472  04,3453               <span class="sm">HALFDP  </span>           <span class="ps">=       </span> <a href="#58554E4954">XUNIT</a>                                 
+050984,000078: 
+050985,000079: 
+050986,000080: 
+050987,000081: 
 
 End of include-file INTERPRETIVE_CONSTANTS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

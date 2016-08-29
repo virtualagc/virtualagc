@@ -56,123 +56,155 @@ color: #993399;
 <span style="font-family: monospace;">
 <pre>
 <h1>Source Code</h1>
-006221,000001:                                                                                                 <span class="co">#  Copyright:     Public domain.</span>
-006222,000002:                                                                                                 <span class="co">#  Filename:      INTERRUT_LEAD_INS.agc</span>
-006223,000003:                                                                                                 <span class="co">#  Purpose:       Part of the source code for Luminary 1A build 099.</span>
-006224,000004:                                                                                                 <span class="co">#                 It is part of the source code for the Lunar Module's (LM)</span>
-006225,000005:                                                                                                 <span class="co">#                 Apollo Guidance Computer (AGC), for Apollo 11.</span>
-006226,000006:                                                                                                 <span class="co">#  Assembler:     yaYUL</span>
-006227,000007:                                                                                                 <span class="co">#  Contact:       Onno Hommes &lt;ohommes@cmu.edu>.</span>
-006228,000008:                                                                                                 <span class="co">#  Website:       www.ibiblio.org/apollo.</span>
-006229,000009:                                                                                                 <span class="co">#  Pages: 0153-0154</span>
-006230,000010:                                                                                                 <span class="co">#  Mod history:   2009-05-14 OH   Transcribed from page images.</span>
-006231,000011: 
-006232,000012:                                                                                                 <span class="co">#  This source code has been transcribed or otherwise adapted from</span>
-006233,000013:                                                                                                 <span class="co">#  digitized images of a hardcopy from the MIT Museum.  The digitization</span>
-006234,000014:                                                                                                 <span class="co">#  was performed by Paul Fjeld, and arranged for by Deborah Douglas of</span>
-006235,000015:                                                                                                 <span class="co">#  the Museum.  Many thanks to both.  The images (with suitable reduction</span>
-006236,000016:                                                                                                 <span class="co">#  in storage size and consequent reduction in image quality as well) are</span>
-006237,000017:                                                                                                 <span class="co">#  available online at www.ibiblio.org/apollo.  If for some reason you</span>
-006238,000018:                                                                                                 <span class="co">#  find that the images are illegible, contact me at info@sandroid.org</span>
-006239,000019:                                                                                                 <span class="co">#  about getting access to the (much) higher-quality images which Paul</span>
-006240,000020:                                                                                                 <span class="co">#  actually created.</span>
-006241,000021: 
-006242,000022:                                                                                                 <span class="co">#  Notations on the hardcopy document read, in part:</span>
-006243,000023: 
-006244,000024:                                                                                                 <span class="co">#         Assemble revision 001 of AGC program LMY99 by NASA 2021112-61</span>
-006245,000025:                                                                                                 <span class="co">#         16:27 JULY 14, 1969 </span>
-006246,000026: 
-006247,000027: 
-006248,000028:                                                                                                 <span class="co">#  Page 153</span>
-006249,000029:    4000                                          <span class="ps">SETLOC  </span> 4000                                  
-006250,000030: 
-006251,000031:    4000                                          <span class="ps">COUNT*  </span> $$/RUPTS                              <span class="co">#  FIX-FIX LEAD INS</span>
-006252,000032:    4000           00004                          <span class="op">INHINT  </span>                                       <span class="co">#  GO</span>
-006253,000033:    4001           34054                          <span class="op">CAF     </span> <a href="#474F4242">GOBB</a>                                  
-006254,000034:    4002           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006255,000035:    4003           12667                          <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
-006256,000036: 
-006257,000037:    4004           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T6RUPT</span>
-006258,000038:    4005           00006                          <span class="op">EXTEND  </span>                                       
-006259,000039:    4006           34056                          <span class="op">DCA     </span> <a href="#5436414452">T6ADR</a>                                 
-006260,000040:    4007           52006                          <span class="op">DTCB    </span>                                       
-006261,000041: 
-006262,000042:    4010           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T5RUPT -- AUTOPILOT</span>
-006263,000043:    4011           00006                          <span class="op">EXTEND  </span>                                       
-006264,000044:    4012           31275                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
-006265,000045:    4013           52006                          <span class="op">DTCB    </span>                                       
-006266,000046: 
-006267,000047:    4014           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T3RUPT</span>
-006268,000048:    4015           34057                          <span class="op">CAF     </span> <a href="#54335250544242">T3RPTBB</a>                               
-006269,000049:    4016           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006270,000050:    4017           13407                          <span class="op">TCF     </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
-006271,000051: 
-006272,000052:    4020           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T4RUPT</span>
-006273,000053:    4021           34064                          <span class="op">CAF     </span> <a href="#54345250544242">T4RPTBB</a>                               
-006274,000054:    4022           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006275,000055:    4023           12000                          <span class="op">TCF     </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
-006276,000056: 
-006277,000057:    4024           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT1</span>
-006278,000058:    4025           34060                          <span class="op">CAF     </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
-006279,000059:    4026           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006280,000060:    4027           13274                          <span class="op">TCF     </span> <a href="KEYRUPT_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
-006281,000061: 
-006282,000062:    4030           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT2</span>
-006283,000063:    4031           34061                          <span class="op">CAF     </span> <a href="#4D4B525550544242">MKRUPTBB</a>                              
-006284,000064:    4032           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006285,000065:    4033           12332                          <span class="op">TCF     </span> <a href="AOTMARK.agc.html#4D41524B52555054">MARKRUPT</a>                              
-006286,000066: 
-006287,000067:    4034           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  UPRUPT</span>
-006288,000068:    4035           34060                          <span class="op">CAF     </span> <a href="#55505250544242">UPRPTBB</a>                               
-006289,000069:    4036           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006290,000070:    4037           13317                          <span class="op">TCF     </span> <a href="KEYRUPT_UPRUPT.agc.html#555052555054">UPRUPT</a>                                
-006291,000071: 
-006292,000072:    4040           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  DOWNRUPT</span>
-006293,000073:    4041           34062                          <span class="op">CAF     </span> <a href="#44574E5250544242">DWNRPTBB</a>                              
-006294,000074:    4042           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006295,000075:    4043           13506                          <span class="op">TCF     </span> <a href="DOWN_TELEMETRY_PROGRAM.agc.html#444F444F574E544D">DODOWNTM</a>                              
-006296,000076: 
-006297,000077:    4044           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  RADAR RUPT</span>
-006298,000078:    4045           34063                          <span class="op">CAF     </span> <a href="#52445250544242">RDRPTBB</a>                               
-006299,000079:                                                                                                 <span class="co">#  Page 154</span>
-006300,000080:    4046           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006301,000081:    4047           13150                          <span class="op">TCF     </span> <a href="P20-P25.agc.html#5241444152454144">RADAREAD</a>                              
-006302,000082: 
-006303,000083:    4050           52011                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  RUPT10 IS USED ONLY BY LANDING GUIDANCE</span>
-006304,000084:    4051           34065                          <span class="op">CA      </span> <a href="#5255505431304242">RUPT10BB</a>                              
-006305,000085:    4052           56006                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-006306,000086:    4053           12275                          <span class="op">TCF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#50495446414C4C">PITFALL</a>                               
-006307,000087: 
-006308,000088: 
-006309,000089:    4054  E3,1400                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  RESTART USES E0, E3</span>
-<a name="474F4242"></a>006310,000090:    4054           12103        <span class="sm">GOBB    </span>          <span class="ps">BBCON   </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
-006311,000091: 
-006312,000092:    4055  E6,1464                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504552524F52">PERROR</a>                                
-<a name="5436414452"></a>006313,000093:    4055           02065 36106  <span class="sm">T6ADR   </span>          <span class="ps">2CADR   </span> <a href="T6-RUPT_PROGRAMS.agc.html#444F543652555054">DOT6RUPT</a>                              
-006314,000094: 
-006315,000095:    4057  E3,1400                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="54335250544242"></a>006316,000096:    4057           02103        <span class="sm">T3RPTBB </span>          <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
-006317,000097: 
-006318,000098:    4060     0073                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
-<a name="4B45595250544242"></a>006319,000099:    4060           10100        <span class="sm">KEYRPTBB</span>          <span class="ps">BBCON   </span> <a href="KEYRUPT_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
-006320,000100: 
-006321,000101:    4061  E7,1404                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F54415A">AOTAZ</a>                                 
-<a name="4D4B525550544242"></a>006322,000102:    4061           16107        <span class="sm">MKRUPTBB</span>          <span class="ps">BBCON   </span> <a href="AOTMARK.agc.html#4D41524B52555054">MARKRUPT</a>                              
-006323,000103: 
-<a name="55505250544242"></a>006324,000104:    4062     4060               <span class="sm">UPRPTBB </span>          <span class="ps">=       </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
-006325,000105: 
-006326,000106:    4062     0340                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-<a name="44574E5250544242"></a>006327,000107:    4062           12100        <span class="sm">DWNRPTBB</span>          <span class="ps">BBCON   </span> <a href="DOWN_TELEMETRY_PROGRAM.agc.html#444F444F574E544D">DODOWNTM</a>                              
-006328,000108: 
-006329,000109:    4063     0110                                 <span class="ps">EBANK=  </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5241444D4F444553">RADMODES</a>                              
-<a name="52445250544242"></a>006330,000110:    4063           52100        <span class="sm">RDRPTBB </span>          <span class="ps">BBCON   </span> <a href="P20-P25.agc.html#5241444152454144">RADAREAD</a>                              
-006331,000111: 
-006332,000112:    4064  E6,1414                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3131">M11</a>                                   
-<a name="54345250544242"></a>006333,000113:    4064           14106        <span class="sm">T4RPTBB </span>          <span class="ps">BBCON   </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
-006334,000114: 
-006335,000115:    4065     1265                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454C56495241">ELVIRA</a>                                
-<a name="5255505431304242"></a>006336,000116:    4065           22102        <span class="sm">RUPT10BB</span>          <span class="ps">BBCON   </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#50495446414C4C">PITFALL</a>                               
-006337,000117: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+These source-code files were from the printout at the MIT Museum, with many thanks
+to Deborah Douglas, the Museum's Curator of Science and Technology, for releasing
+it to us.  The printout was digitally photographed by Paul Fjeld.  A team of 
+volunteers transcribed the source code manually from these images or, where
+appropriate, modified already-transcribed but similar source Luminary 131 (Apollo 13)
+source code to agree with the images from the printout.  Note that the page images 
+<a href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary131/">
+presented online</a> are of reduced quality, and that higher-quality images 
+are available.  Report any conversion errors or legibility 
+problems in page images to info@sandroid.org. 
+Notations on the program listing read, in part:<br>
+<br>
+<pre>
+	GAP:  ASSEMBLE REVISION 001 OF AGC PROGRAM LMY99 BY NASA 2021112-061
+	20'35 OCT. 28,1968
+</pre>
+Note that the date is the date of the printout, not the date of the program revision.
+</td></tr></tbody></table>
+
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+006233,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+006234,000003:                                                                                                  <span class="co">#  Filename:     INTERRUT_LEAD_INS.agc</span>
+006235,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Luminary 1A build 099.</span>
+006236,000005:                                                                                                  <span class="co">#                It is part of the source code for the Lunar Module's (LM)</span>
+006237,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), for Apollo 11.</span>
+006238,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+006239,000008:                                                                                                  <span class="co">#  Contact:      Onno Hommes &lt;ohommes@cmu.edu>.</span>
+006240,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
+006241,000010:                                                                                                  <span class="co">#  Pages:        0153-0154</span>
+006242,000011:                                                                                                  <span class="co">#  Mod history:  2009-05-14 OH   Transcribed from page images.</span>
+006243,000012: 
+006244,000013:                                                                                                  <span class="co">#  This source code has been transcribed or otherwise adapted from</span>
+006245,000014:                                                                                                  <span class="co">#  digitized images of a hardcopy from the MIT Museum.  The digitization</span>
+006246,000015:                                                                                                  <span class="co">#  was performed by Paul Fjeld, and arranged for by Deborah Douglas of</span>
+006247,000016:                                                                                                  <span class="co">#  the Museum.  Many thanks to both.  The images (with suitable reduction</span>
+006248,000017:                                                                                                  <span class="co">#  in storage size and consequent reduction in image quality as well) are</span>
+006249,000018:                                                                                                  <span class="co">#  available online at www.ibiblio.org/apollo.  If for some reason you</span>
+006250,000019:                                                                                                  <span class="co">#  find that the images are illegible, contact me at info@sandroid.org</span>
+006251,000020:                                                                                                  <span class="co">#  about getting access to the (much) higher-quality images which Paul</span>
+006252,000021:                                                                                                  <span class="co">#  actually created.</span>
+006253,000022: 
+006254,000023:                                                                                                  <span class="co">#  Notations on the hardcopy document read, in part:</span>
+006255,000024: 
+006256,000025:                                                                                                  <span class="co">#        Assemble revision 001 of AGC program LMY99 by NASA 2021112-61</span>
+006257,000026:                                                                                                  <span class="co">#        16:27 JULY 14, 1969 </span>
+006258,000027: 
+006259,000028: 
+006260,000029:                                                                                                  <span class="co">#  Page 153</span>
+006261,000030:    4000                                           <span class="ps">SETLOC  </span> 4000                                  
+006262,000031: 
+006263,000032:    4000                                           <span class="ps">COUNT*  </span> $$/RUPTS                              <span class="co">#  FIX-FIX LEAD INS</span>
+006264,000033:    4000           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  GO</span>
+006265,000034:    4001           34054                           <span class="op">CAF     </span> <a href="#474F4242">GOBB</a>                                  
+006266,000035:    4002           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006267,000036:    4003           12667                           <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
+006268,000037: 
+006269,000038:    4004           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T6RUPT</span>
+006270,000039:    4005           00006                           <span class="op">EXTEND  </span>                                       
+006271,000040:    4006           34056                           <span class="op">DCA     </span> <a href="#5436414452">T6ADR</a>                                 
+006272,000041:    4007           52006                           <span class="op">DTCB    </span>                                       
+006273,000042: 
+006274,000043:    4010           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T5RUPT -- AUTOPILOT</span>
+006275,000044:    4011           00006                           <span class="op">EXTEND  </span>                                       
+006276,000045:    4012           31275                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
+006277,000046:    4013           52006                           <span class="op">DTCB    </span>                                       
+006278,000047: 
+006279,000048:    4014           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T3RUPT</span>
+006280,000049:    4015           34057                           <span class="op">CAF     </span> <a href="#54335250544242">T3RPTBB</a>                               
+006281,000050:    4016           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006282,000051:    4017           13407                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
+006283,000052: 
+006284,000053:    4020           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T4RUPT</span>
+006285,000054:    4021           34064                           <span class="op">CAF     </span> <a href="#54345250544242">T4RPTBB</a>                               
+006286,000055:    4022           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006287,000056:    4023           12000                           <span class="op">TCF     </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
+006288,000057: 
+006289,000058:    4024           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT1</span>
+006290,000059:    4025           34060                           <span class="op">CAF     </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
+006291,000060:    4026           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006292,000061:    4027           13274                           <span class="op">TCF     </span> <a href="KEYRUPT_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
+006293,000062: 
+006294,000063:    4030           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT2</span>
+006295,000064:    4031           34061                           <span class="op">CAF     </span> <a href="#4D4B525550544242">MKRUPTBB</a>                              
+006296,000065:    4032           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006297,000066:    4033           12332                           <span class="op">TCF     </span> <a href="AOTMARK.agc.html#4D41524B52555054">MARKRUPT</a>                              
+006298,000067: 
+006299,000068:    4034           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  UPRUPT</span>
+006300,000069:    4035           34060                           <span class="op">CAF     </span> <a href="#55505250544242">UPRPTBB</a>                               
+006301,000070:    4036           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006302,000071:    4037           13317                           <span class="op">TCF     </span> <a href="KEYRUPT_UPRUPT.agc.html#555052555054">UPRUPT</a>                                
+006303,000072: 
+006304,000073:    4040           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  DOWNRUPT</span>
+006305,000074:    4041           34062                           <span class="op">CAF     </span> <a href="#44574E5250544242">DWNRPTBB</a>                              
+006306,000075:    4042           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006307,000076:    4043           13506                           <span class="op">TCF     </span> <a href="DOWN_TELEMETRY_PROGRAM.agc.html#444F444F574E544D">DODOWNTM</a>                              
+006308,000077: 
+006309,000078:    4044           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  RADAR RUPT</span>
+006310,000079:    4045           34063                           <span class="op">CAF     </span> <a href="#52445250544242">RDRPTBB</a>                               
+006311,000080:                                                                                                  <span class="co">#  Page 154</span>
+006312,000081:    4046           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006313,000082:    4047           13150                           <span class="op">TCF     </span> <a href="P20-P25.agc.html#5241444152454144">RADAREAD</a>                              
+006314,000083: 
+006315,000084:    4050           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  RUPT10 IS USED ONLY BY LANDING GUIDANCE</span>
+006316,000085:    4051           34065                           <span class="op">CA      </span> <a href="#5255505431304242">RUPT10BB</a>                              
+006317,000086:    4052           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+006318,000087:    4053           12275                           <span class="op">TCF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#50495446414C4C">PITFALL</a>                               
+006319,000088: 
+006320,000089: 
+006321,000090:    4054  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  RESTART USES E0, E3</span>
+<a name="474F4242"></a>006322,000091:    4054           12103        <span class="sm">GOBB    </span>           <span class="ps">BBCON   </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
+006323,000092: 
+006324,000093:    4055  E6,1464                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504552524F52">PERROR</a>                                
+<a name="5436414452"></a>006325,000094:    4055           02065 36106  <span class="sm">T6ADR   </span>           <span class="ps">2CADR   </span> <a href="T6-RUPT_PROGRAMS.agc.html#444F543652555054">DOT6RUPT</a>                              
+006326,000095: 
+006327,000096:    4057  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="54335250544242"></a>006328,000097:    4057           02103        <span class="sm">T3RPTBB </span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
+006329,000098: 
+006330,000099:    4060     0073                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
+<a name="4B45595250544242"></a>006331,000100:    4060           10100        <span class="sm">KEYRPTBB</span>           <span class="ps">BBCON   </span> <a href="KEYRUPT_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
+006332,000101: 
+006333,000102:    4061  E7,1404                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F54415A">AOTAZ</a>                                 
+<a name="4D4B525550544242"></a>006334,000103:    4061           16107        <span class="sm">MKRUPTBB</span>           <span class="ps">BBCON   </span> <a href="AOTMARK.agc.html#4D41524B52555054">MARKRUPT</a>                              
+006335,000104: 
+<a name="55505250544242"></a>006336,000105:    4062     4060               <span class="sm">UPRPTBB </span>           <span class="ps">=       </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
+006337,000106: 
+006338,000107:    4062     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+<a name="44574E5250544242"></a>006339,000108:    4062           12100        <span class="sm">DWNRPTBB</span>           <span class="ps">BBCON   </span> <a href="DOWN_TELEMETRY_PROGRAM.agc.html#444F444F574E544D">DODOWNTM</a>                              
+006340,000109: 
+006341,000110:    4063     0110                                  <span class="ps">EBANK=  </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5241444D4F444553">RADMODES</a>                              
+<a name="52445250544242"></a>006342,000111:    4063           52100        <span class="sm">RDRPTBB </span>           <span class="ps">BBCON   </span> <a href="P20-P25.agc.html#5241444152454144">RADAREAD</a>                              
+006343,000112: 
+006344,000113:    4064  E6,1414                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3131">M11</a>                                   
+<a name="54345250544242"></a>006345,000114:    4064           14106        <span class="sm">T4RPTBB </span>           <span class="ps">BBCON   </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
+006346,000115: 
+006347,000116:    4065     1265                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454C56495241">ELVIRA</a>                                
+<a name="5255505431304242"></a>006348,000117:    4065           22102        <span class="sm">RUPT10BB</span>           <span class="ps">BBCON   </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#50495446414C4C">PITFALL</a>                               
+006349,000118: 
 
 End of include-file INTERRUPT_LEAD_INS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

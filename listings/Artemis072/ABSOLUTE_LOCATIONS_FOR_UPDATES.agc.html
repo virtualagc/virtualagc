@@ -69,7 +69,8 @@ color: #993399;
 These source-code files were obtained by digitally photographing
 an Artemis 72 program listing from a private collection and then 
 modifying pre-existing Comanche 55 (Apollo 11) source files to 
-incorporate changes. Note that the page images 
+incorporate changes. Photography was by Ron Burkey, and transcription
+was performed by a team of volunteers.  Note that the page images 
 <a href="http://www.ibiblio.org/apollo/ScansForConversion/Artemis072/">
 presented online</a> are of reduced quality, and that additional images 
 may be available.  Report any conversion errors or legibility 
@@ -79,88 +80,48 @@ Notations on the program listing read, in part:<br>
 <pre>
 	GAP: ASSEMBLE REVISION 072 OF AGC PROGRAM ARTEMIS 
 	BY NASA 2021114-011 11:40 FEB. 26, 1971
-
-	THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS
-				COLOSSUS 3
-	THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED
-	IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER OSR
-	PROJECT 55-23890, SPONSORED BY THE MANNED SPACECRAFT
-	CENTER OF THE NATIONAL AERONAUTICS AND SPACE
-	ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE
-	CHARLES STARK DRAPER LABORATORY, MASSACHUSETTS INSTITUTE OF
-	TECHNOLOGY, CAMBRIDGE, MASS.
 </pre>
+Note that the date is the date of the printout, not the date of the program revision.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001477,000002:                                                                                                 <span class="co">#  Copyright:     Public domain.</span>
-001478,000003:                                                                                                 <span class="co">#  Filename:      ABSOLUTE_LOCATIONS_FOR_UPDATES.agc</span>
-001479,000004:                                                                                                 <span class="co">#  Purpose:       Part of the source code for Artemis (i.e., Colossus 3),</span>
-001480,000005:                                                                                                 <span class="co">#                 build 072.  This is for the Command Module's (CM) </span>
-001481,000006:                                                                                                 <span class="co">#                 Apollo Guidance Computer (AGC), we believe for </span>
-001482,000007:                                                                                                 <span class="co">#                 Apollo 15-17.</span>
-001483,000008:                                                                                                 <span class="co">#  Assembler:     yaYUL</span>
-001484,000009:                                                                                                 <span class="co">#  Contact:       Onno Hommes &lt;ohommes@alumni.cmu.edu></span>
-001485,000010:                                                                                                 <span class="co">#  Website:       www.ibiblio.org/apollo/index.html</span>
-001486,000011:                                                                                                 <span class="co">#  Page scans:    www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
-001487,000012:                                                                                                 <span class="co">#  Mod history:   2009-07-29 OH   New file created.</span>
-001488,000013:                                                                                                 <span class="co">#                 2009-09-01 JL   Commented out =ECADR directives, see note below.</span>
-001489,000014:                                                                                                 <span class="co">#                 2009-09-03 JL   Uncommented =ECADR directives, after modifying yaYUL to skip them.</span>
-001490,000015:                                                                                                 <span class="co">#                 2010-01-16 RSB  Commented them out again, to eliminate compile-time warnings.</span>
-001491,000016:                                                                                                 <span class="co">#                 2010-02-20 RSB  Un-##'d this header.</span>
-001492,000017: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 36
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-001494,000019:                                                                                                 <span class="co">#  ABSOLUTE LOCATIONS FOR UPDATES</span>
-001495,000020: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-(JL 2009-09-01: The =ECADR directive doesn't seem to produce any binary, define any symbols, 
-or allocate any memory. It appears to be there to create a convenient reference table of 
-certain addresses.) ... (RSB 2010-01-16: Therefore, I've commented them out.)
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-001499,000024: 
-001500,000025:                                                                                                 <span class="co">#  ECADR                  MNEMONIC</span>
-001501,000026:                                                                                                 <span class="co">#  -----                  --------</span>
-001502,000027:                                                                                                 <span class="co">#                 =ECADR  UPSVFLAG        # CSM/LM STATE VECTOR UPDATE</span>
-001503,000028: 
-001504,000029:                                                                                                 <span class="co">#                 =ECADR  XSMD            # DESIRED REFSMMAT UPDATE</span>
-001505,000030: 
-001506,000031:                                                                                                 <span class="co">#                 =ECADR  REFSMMAT        # REFSMMAT UPDATE</span>
-001507,000032: 
-001508,000033:                                                                                                 <span class="co">#                 =ECADR  DELVSLV         # EXTERNAL DELTA-V UPDATE</span>
-001509,000034: 
-001510,000035:                                                                                                 <span class="co">#                 =ECADR  LAT(SPL)        # RETROFIRE EXT DELTA-V OR ENTRY UPDATE</span>
-001511,000036: 
-001512,000037:                                                                                                 <span class="co">#                 =ECADR  TIG             # LAMBERT TARGET UPDATE</span>
-001513,000038: 
-001514,000039:                                                                                                 <span class="co">#                 =ECADR  RLS             # LANDING SITE VECTOR UPDATE</span>
+001477,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+001478,000003:                                                                                                  <span class="co">#  Filename:     ABSOLUTE_LOCATIONS_FOR_UPDATES.agc</span>
+001479,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Artemis (i.e., Colossus 3),</span>
+001480,000005:                                                                                                  <span class="co">#                build 072.  This is for the Command Module's (CM) </span>
+001481,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), we believe for </span>
+001482,000007:                                                                                                  <span class="co">#                Apollo 15-17.</span>
+001483,000008:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+001484,000009:                                                                                                  <span class="co">#  Contact:      Onno Hommes &lt;ohommes@alumni.cmu.edu></span>
+001485,000010:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
+001486,000011:                                                                                                  <span class="co">#  Page scans:   www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
+001487,000012:                                                                                                  <span class="co">#  Mod history:  2009-07-29 OH   New file created.</span>
+001488,000013:                                                                                                  <span class="co">#                2009-09-01 JL   Commented out =ECADR directives, see note below.</span>
+001489,000014:                                                                                                  <span class="co">#                2009-09-03 JL   Uncommented =ECADR directives, after modifying yaYUL to skip them.</span>
+001490,000015:                                                                                                  <span class="co">#                2010-01-16 RSB  Commented them out again, to eliminate compile-time warnings.</span>
+001491,000016:                                                                                                  <span class="co">#                2010-02-20 RSB  Un-##'d this header.</span>
+001492,000017:                                                                                                  <span class="co">#                2011-05-07 JL   Removed comment.</span>
+001493,000018: 
+001494,000019:                                                                                                  <span class="co"># # Page 36</span>
+001495,000020:                                                                                                  <span class="co">#  ABSOLUTE LOCATIONS FOR UPDATES</span>
+001496,000021: 
+001497,000022:                                                                                                  <span class="co">#  ECADR                 MNEMONIC</span>
+001498,000023:                                                                                                  <span class="co">#  -----                 --------</span>
+001499,000024: ???????                                           <span class="ps">=ECADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55505356464C4147">UPSVFLAG</a>                              <span class="co">#  CSM/LM STATE VECTOR UPDATE</span>
+001500,000025: 
+001501,000026: ???????                                           <span class="ps">=ECADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D44">XSMD</a>                                  <span class="co">#  DESIRED REFSMMAT UPDATE</span>
+001502,000027: 
+001503,000028: ???????                                           <span class="ps">=ECADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFSMMAT UPDATE</span>
+001504,000029: 
+001505,000030: ???????                                           <span class="ps">=ECADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534C56">DELVSLV</a>                               <span class="co">#  EXTERNAL DELTA-V UPDATE</span>
+001506,000031: 
+001507,000032: ???????                                           <span class="ps">=ECADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41542853504C29">LAT(SPL)</a>                              <span class="co">#  RETROFIRE EXT DELTA-V OR ENTRY UPDATE</span>
+001508,000033: 
+001509,000034: ???????                                           <span class="ps">=ECADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  LAMBERT TARGET UPDATE</span>
+001510,000035: 
+001511,000036: ???????                                           <span class="ps">=ECADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   <span class="co">#  LANDING SITE VECTOR UPDATE</span>
 
 End of include-file ABSOLUTE_LOCATIONS_FOR_UPDATES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

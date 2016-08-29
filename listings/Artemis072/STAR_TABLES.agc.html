@@ -69,7 +69,8 @@ color: #993399;
 These source-code files were obtained by digitally photographing
 an Artemis 72 program listing from a private collection and then 
 modifying pre-existing Comanche 55 (Apollo 11) source files to 
-incorporate changes. Note that the page images 
+incorporate changes. Photography was by Ron Burkey, and transcription
+was performed by a team of volunteers.  Note that the page images 
 <a href="http://www.ibiblio.org/apollo/ScansForConversion/Artemis072/">
 presented online</a> are of reduced quality, and that additional images 
 may be available.  Report any conversion errors or legibility 
@@ -79,264 +80,185 @@ Notations on the program listing read, in part:<br>
 <pre>
 	GAP: ASSEMBLE REVISION 072 OF AGC PROGRAM ARTEMIS 
 	BY NASA 2021114-011 11:40 FEB. 26, 1971
-
-	THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS
-				COLOSSUS 3
-	THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED
-	IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER OSR
-	PROJECT 55-23890, SPONSORED BY THE MANNED SPACECRAFT
-	CENTER OF THE NATIONAL AERONAUTICS AND SPACE
-	ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE
-	CHARLES STARK DRAPER LABORATORY, MASSACHUSETTS INSTITUTE OF
-	TECHNOLOGY, CAMBRIDGE, MASS.
 </pre>
+Note that the date is the date of the printout, not the date of the program revision.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-059263,000002:                                                                                                 <span class="co">#  Copyright:     Public domain.</span>
-059264,000003:                                                                                                 <span class="co">#  Filename:      STAR_TABLES.agc</span>
-059265,000004:                                                                                                 <span class="co">#  Purpose:       Part of the source code for Artemis (i.e., Colossus 3),</span>
-059266,000005:                                                                                                 <span class="co">#                 build 072.  This is for the Command Module's (CM)</span>
-059267,000006:                                                                                                 <span class="co">#                 Apollo Guidance Computer (AGC), we believe for</span>
-059268,000007:                                                                                                 <span class="co">#                 Apollo 15-17.</span>
-059269,000008:                                                                                                 <span class="co">#  Assembler:     yaYUL</span>
-059270,000009:                                                                                                 <span class="co">#  Contact:       Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-059271,000010:                                                                                                 <span class="co">#  Website:       www.ibiblio.org/apollo/index.html</span>
-059272,000011:                                                                                                 <span class="co">#  Page scans:    www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
-059273,000012:                                                                                                 <span class="co">#  Mod history:   2009-08-19 JL   Adapted from corresponding Comanche 055 file.</span>
-059274,000013:                                                                                                 <span class="co">#                 2010-02-13 JL   Fixed error on pages 1387 and 1388.</span>
-059275,000014:                                                                                                 <span class="co">#                 2010-02-20 RSB  Un-##'d this header.</span>
-059276,000015: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 1387
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-059278,000017: 
-059279,000018: 15,2000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#53544152544142">STARTAB</a>                               
-059280,000019: 15,2000                                          <span class="ps">BANK    </span>                                       
-059281,000020: 
-059282,000021: 15,3437                                          <span class="ps">COUNT*  </span> $$/STARS                              
-059283,000022: 15,3437           15264 07253                    <span class="ps">2DEC    </span> +.8345006310 B-1                        <span class="co">#  STAR 37        X</span>
-059284,000023: 15,3441           74133 45130                    <span class="ps">2DEC    </span> -.2388718657 B-1                        <span class="co">#  STAR 37        Y</span>
-059285,000024: 15,3443           70034 53644                    <span class="ps">2DEC    </span> -.4965369357 B-1                        <span class="co">#  STAR 37        Z</span>
-059286,000025: 
-059287,000026: 15,3445           15015 35262                    <span class="ps">2DEC    </span> +.8141988673 B-1                        <span class="co">#  STAR 36        X</span>
-059288,000027: 15,3447           67072 57521                    <span class="ps">2DEC    </span> -.5553601830 B-1                        <span class="co">#  STAR 36        Y</span>
-059289,000028: 15,3451           02552 27310                    <span class="ps">2DEC    </span> +.1692786800 B-1                        <span class="co">#  STAR 36        Z</span>
-059290,000029: 
-059291,000030: 15,3453           07210 34714                    <span class="ps">2DEC    </span> +.4542117996 B-1                        <span class="co">#  STAR 35        X</span>
-059292,000031: 15,3455           67300 47414                    <span class="ps">2DEC    </span> -.5390337930 B-1                        <span class="co">#  STAR 35        Y</span>
-059293,000032: 15,3457           13262 27671                    <span class="ps">2DEC    </span> +.7093195408 B-1                        <span class="co">#  STAR 35        Z</span>
-059294,000033: 
-059295,000034: 15,3461           05101 34175                    <span class="ps">2DEC    </span> +.3205423120 B-1                        <span class="co">#  STAR 34        X</span>
-059296,000035: 15,3463           70717 46031                    <span class="ps">2DEC    </span> -.4434583652 B-1                        <span class="co">#  STAR 34        Y</span>
-059297,000036: 15,3465           62467 45023                    <span class="ps">2DEC    </span> -.8370169081 B-1                        <span class="co">#  STAR 34        Z</span>
-059298,000037: 
-059299,000038: 15,3467           10655 16340                    <span class="ps">2DEC    </span> +.5524232365 B-1                        <span class="co">#  STAR 33        X</span>
-059300,000039: 15,3471           63237 45012                    <span class="ps">2DEC    </span> -.7930716636 B-1                        <span class="co">#  STAR 33        Y</span>
-059301,000040: 15,3473           73711 62337                    <span class="ps">2DEC    </span> -.2566435348 B-1                        <span class="co">#  STAR 33        Z</span>
-059302,000041: 
-059303,000042: 15,3475           07207 34100                    <span class="ps">2DEC    </span> +.4540867784 B-1                        <span class="co">#  STAR 32        X</span>
-059304,000043: 15,3477           61751 60311                    <span class="ps">2DEC    </span> -.8777450759 B-1                        <span class="co">#  STAR 32        Y</span>
-059305,000044: 15,3501           02344 11437                    <span class="ps">2DEC    </span> +.1528685033 B-1                        <span class="co">#  STAR 32        Z</span>
-059306,000045: 
-059307,000046: 15,3503           03243 10132                    <span class="ps">2DEC    </span> +.2074286490 B-1                        <span class="co">#  STAR 31        X</span>
-059308,000047: 15,3505           62031 55616                    <span class="ps">2DEC    </span> -.8718956797 B-1                        <span class="co">#  STAR 31        Y</span>
-059309,000048: 15,3507           70716 43617                    <span class="ps">2DEC    </span> -.4435890882 B-1                        <span class="co">#  STAR 31        Z</span>
-059310,000049: 
-059311,000050: 15,3511           01747 01335                    <span class="ps">2DEC    </span> +.1219537054 B-1                        <span class="co">#  STAR 30        X</span>
-059312,000051: 15,3513           63532 54217                    <span class="ps">2DEC    </span> -.7702168243 B-1                        <span class="co">#  STAR 30        Y</span>
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 1388
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-059314,000053: 15,3515           12010 11614                    <span class="ps">2DEC    </span> +.6260138474 B-1                        <span class="co">#  STAR 30        Z</span>
-059315,000054: 
-059316,000055: 15,3517           76152 45651                    <span class="ps">2DEC    </span> -.1120382967 B-1                        <span class="co">#  STAR 29        X</span>
-059317,000056: 15,3521           60371 57632                    <span class="ps">2DEC    </span> -.9695442116 B-1                        <span class="co">#  STAR 29        Y</span>
-059318,000057: 15,3523           03370 03556                    <span class="ps">2DEC    </span> +.2177876068 B-1                        <span class="co">#  STAR 29        Z</span>
-059319,000058: 
-059320,000059: 15,3525           76127 67425                    <span class="ps">2DEC    </span> -.1142900725 B-1                        <span class="co">#  STAR 28        X</span>
-059321,000060: 15,3527           72436 61577                    <span class="ps">2DEC    </span> -.3400201762 B-1                        <span class="co">#  STAR 28        Y</span>
-059322,000061: 15,3531           61041 46271                    <span class="ps">2DEC    </span> -.9334474056 B-1                        <span class="co">#  STAR 28        Z</span>
-059323,000062: 
-059324,000063: 15,3533           72303 40213                    <span class="ps">2DEC    </span> -.3511952476 B-1                        <span class="co">#  STAR 27        X</span>
-059325,000064: 15,3535           62637 74356                    <span class="ps">2DEC    </span> -.8242322268 B-1                        <span class="co">#  STAR 27        Y</span>
-059326,000065: 15,3537           70711 46567                    <span class="ps">2DEC    </span> -.4441881743 B-1                        <span class="co">#  STAR 27        Z</span>
-059327,000066: 
-059328,000067: 15,3541           67366 44175                    <span class="ps">2DEC    </span> -.5324545035 B-1                        <span class="co">#  STAR 26        X</span>
-059329,000068: 15,3543           64424 41241                    <span class="ps">2DEC    </span> -.7163035719 B-1                        <span class="co">#  STAR 26        Y</span>
-059330,000069: 15,3545           07156 23036                    <span class="ps">2DEC    </span> +.4510004372 B-1                        <span class="co">#  STAR 26        Z</span>
-059331,000070: 
-059332,000071: 15,3547           63330 75735                    <span class="ps">2DEC    </span> -.7860186221 B-1                        <span class="co">#  STAR 25        X</span>
-059333,000072: 15,3551           67512 62476                    <span class="ps">2DEC    </span> -.5221457573 B-1                        <span class="co">#  STAR 25        Y</span>
-059334,000073: 15,3553           05227 10611                    <span class="ps">2DEC    </span> +.3309660611 B-1                        <span class="co">#  STAR 25        Z</span>
-059335,000074: 
-059336,000075: 15,3555           64757 51701                    <span class="ps">2DEC    </span> -.6895375091 B-1                        <span class="co">#  STAR 24        X</span>
-059337,000076: 15,3557           71233 53334                    <span class="ps">2DEC    </span> -.4185354938 B-1                        <span class="co">#  STAR 24        Y</span>
-059338,000077: 15,3561           66425 76017                    <span class="ps">2DEC    </span> -.5910719617 B-1                        <span class="co">#  STAR 24        Z</span>
-059339,000078: 
-059340,000079: 15,3563           66546 64151                    <span class="ps">2DEC    </span> -.5812217481 B-1                        <span class="co">#  STAR 23        X</span>
-059341,000080: 15,3565           73256 65757                    <span class="ps">2DEC    </span> -.2911759648 B-1                        <span class="co">#  STAR 23        Y</span>
-059342,000081: 15,3567           14120 32444                    <span class="ps">2DEC    </span> +.7598669864 B-1                        <span class="co">#  STAR 23        Z</span>
-059343,000082: 
-059344,000083: 15,3571           61251 56124                    <span class="ps">2DEC    </span> -.9168160791 B-1                        <span class="co">#  STAR 22        X</span>
-059345,000084: 15,3573           72307 65764                    <span class="ps">2DEC    </span> -.3506241694 B-1                        <span class="co">#  STAR 22        Y</span>
-059346,000085: 15,3575           74742 65735                    <span class="ps">2DEC    </span> -.1910784362 B-1                        <span class="co">#  STAR 22        Z</span>
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 1389
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-059348,000087: 15,3577           70607 77742                    <span class="ps">2DEC    </span> -.4521486548 B-1                        <span class="co">#  STAR 21        X</span>
-059349,000088: 15,3601           77151 74615                    <span class="ps">2DEC    </span> -.0495728431 B-1                        <span class="co">#  STAR 21        Y</span>
-059350,000089: 15,3603           61600 60003                    <span class="ps">2DEC    </span> -.8905639377 B-1                        <span class="co">#  STAR 21        Z</span>
-059351,000090: 
-059352,000091: 15,3605           60605 64345                    <span class="ps">2DEC    </span> -.9524366380 B-1                        <span class="co">#  STAR 20        X</span>
-059353,000092: 15,3607           77026 54200                    <span class="ps">2DEC    </span> -.0597677121 B-1                        <span class="co">#  STAR 20        Y</span>
-059354,000093: 15,3611           73160 42475                    <span class="ps">2DEC    </span> -.2988181236 B-1                        <span class="co">#  STAR 20        Z</span>
-059355,000094: 
-059356,000095: 15,3613           60430 66614                    <span class="ps">2DEC    </span> -.9657334280 B-1                        <span class="co">#  STAR 19        X</span>
-059357,000096: 15,3615           00653 13072                    <span class="ps">2DEC    </span> +.0521664164 B-1                        <span class="co">#  STAR 19        Y</span>
-059358,000097: 15,3617           04042 27232                    <span class="ps">2DEC    </span> +.2542392790 B-1                        <span class="co">#  STAR 19        Z</span>
-059359,000098: 
-059360,000099: 15,3621           62162 44274                    <span class="ps">2DEC    </span> -.8610673209 B-1                        <span class="co">#  STAR 18        X</span>
-059361,000100: 15,3623           07322 33165                    <span class="ps">2DEC    </span> +.4632386329 B-1                        <span class="co">#  STAR 18        Y</span>
-059362,000101: 15,3625           03265 32741                    <span class="ps">2DEC    </span> +.2096974909 B-1                        <span class="co">#  STAR 18        Z</span>
-059363,000102: 
-059364,000103: 15,3627           63467 50064                    <span class="ps">2DEC    </span> -.7745052221 B-1                        <span class="co">#  STAR 17        X</span>
-059365,000104: 15,3631           11655 11373                    <span class="ps">2DEC    </span> +.6149043688 B-1                        <span class="co">#  STAR 17        Y</span>
-059366,000105: 15,3633           75477 77366                    <span class="ps">2DEC    </span> -.1484394758 B-1                        <span class="co">#  STAR 17        Z</span>
-059367,000106: 
-059368,000107: 15,3635           70425 51217                    <span class="ps">2DEC    </span> -.4661511162 B-1                        <span class="co">#  STAR 16        X</span>
-059369,000108: 15,3637           07505 32504                    <span class="ps">2DEC    </span> +.4772744503 B-1                        <span class="co">#  STAR 16        Y</span>
-059370,000109: 15,3641           13726 15341                    <span class="ps">2DEC    </span> +.7449243154 B-1                        <span class="co">#  STAR 16        Z</span>
-059371,000110: 
-059372,000111: 15,3643           72157 66255                    <span class="ps">2DEC    </span> -.3613649782 B-1                        <span class="co">#  STAR 15        X</span>
-059373,000112: 15,3645           11142 32737                    <span class="ps">2DEC    </span> +.5745656444 B-1                        <span class="co">#  STAR 15        Y</span>
-059374,000113: 15,3647           64200 43016                    <span class="ps">2DEC    </span> -.7343634472 B-1                        <span class="co">#  STAR 15        Z</span>
-059375,000114: 
-059376,000115: 15,3651           71316 64201                    <span class="ps">2DEC    </span> -.4122762536 B-1                        <span class="co">#  STAR 14        X</span>
-059377,000116: 15,3653           16400 36737                    <span class="ps">2DEC    </span> +.9063680102 B-1                        <span class="co">#  STAR 14        Y</span>
-059378,000117: 15,3655           01364 14350                    <span class="ps">2DEC    </span> +.0923326629 B-1                        <span class="co">#  STAR 14        Z</span>
-059379,000118: 
-059380,000119: 15,3657           75051 60001                    <span class="ps">2DEC    </span> -.1824340636 B-1                        <span class="co">#  STAR 13        X</span>
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 1390
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-059382,000121: 15,3661           17027 31661                    <span class="ps">2DEC    </span> +.9404062129 B-1                        <span class="co">#  STAR 13        Y</span>
-059383,000122: 15,3663           73321 43422                    <span class="ps">2DEC    </span> -.2869738089 B-1                        <span class="co">#  STAR 13        Z</span>
-059384,000123: 
-059385,000124: 15,3665           77007 51442                    <span class="ps">2DEC    </span> -.0616090080 B-1                        <span class="co">#  STAR 12        X</span>
-059386,000125: 15,3667           11514 32502                    <span class="ps">2DEC    </span> +.6031289258 B-1                        <span class="co">#  STAR 12        Y</span>
-059387,000126: 15,3671           63215 47106                    <span class="ps">2DEC    </span> -.7952608559 B-1                        <span class="co">#  STAR 12        Z</span>
-059388,000127: 
-059389,000128: 15,3673           02140 02335                    <span class="ps">2DEC    </span> +.1367280274 B-1                        <span class="co">#  STAR 11        X</span>
-059390,000129: 15,3675           12716 12356                    <span class="ps">2DEC    </span> +.6814364033 B-1                        <span class="co">#  STAR 11        Y</span>
-059391,000130: 15,3677           13401 37404                    <span class="ps">2DEC    </span> +.7189922632 B-1                        <span class="co">#  STAR 11        Z</span>
-059392,000131: 
-059393,000132: 15,3701           03154 15267                    <span class="ps">2DEC    </span> +.2007345455 B-1                        <span class="co">#  STAR 10        X</span>
-059394,000133: 15,3703           17403 01743                    <span class="ps">2DEC    </span> +.9691236271 B-1                        <span class="co">#  STAR 10        Y</span>
-059395,000134: 15,3705           75552 76050                    <span class="ps">2DEC    </span> -.1431958012 B-1                        <span class="co">#  STAR 10        Z</span>
-059396,000135: 
-059397,000136: 15,3707           05465 17001                    <span class="ps">2DEC    </span> +.3502769546 B-1                        <span class="co">#  STAR 9 X</span>
-059398,000137: 15,3711           16221 27572                    <span class="ps">2DEC    </span> +.8927907521 B-1                        <span class="co">#  STAR 9 Y</span>
-059399,000138: 15,3713           04420 14273                    <span class="ps">2DEC    </span> +.2832502918 B-1                        <span class="co">#  STAR 9 Z</span>
-059400,000139: 
-059401,000140: 15,3715           06440 11323                    <span class="ps">2DEC    </span> +.4101921571 B-1                        <span class="co">#  STAR 8 X</span>
-059402,000141: 15,3717           07767 30366                    <span class="ps">2DEC    </span> +.4989947555 B-1                        <span class="co">#  STAR 8 Y</span>
-059403,000142: 15,3721           14155 23047                    <span class="ps">2DEC    </span> +.7633784305 B-1                        <span class="co">#  STAR 8 Z</span>
-059404,000143: 
-059405,000144: 15,3723           13176 03307                    <span class="ps">2DEC    </span> +.7028937840 B-1                        <span class="co">#  STAR 7 X</span>
-059406,000145: 15,3725           13247 03342                    <span class="ps">2DEC    </span> +.7078988678 B-1                        <span class="co">#  STAR 7 Y</span>
-059407,000146: 15,3727           01070 26607                    <span class="ps">2DEC    </span> +.0694227718 B-1                        <span class="co">#  STAR 7 Z</span>
-059408,000147: 
-059409,000148: 15,3731           10557 32115                    <span class="ps">2DEC    </span> +.5448995598 B-1                        <span class="co">#  STAR 6 X</span>
-059410,000149: 15,3733           10404 00124                    <span class="ps">2DEC    </span> +.5317389073 B-1                        <span class="co">#  STAR 6 Y</span>
-059411,000150: 15,3735           65500 72703                    <span class="ps">2DEC    </span> -.6483349473 B-1                        <span class="co">#  STAR 6 Z</span>
-059412,000151: 
-059413,000152: 15,3737           00151 25431                    <span class="ps">2DEC    </span> +.0128995818 B-1                        <span class="co">#  STAR 5 X</span>
-059414,000153: 15,3741           00077 37176                    <span class="ps">2DEC    </span> +.0078096205 B-1                        <span class="co">#  STAR 5 Y</span>
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 1391
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-059416,000155: 15,3743           17777 02143                    <span class="ps">2DEC    </span> +.9998862988 B-1                        <span class="co">#  STAR 5 Z</span>
-059417,000156: 
-059418,000157: 15,3745           07675 02702                    <span class="ps">2DEC    </span> +.4918322686 B-1                        <span class="co">#  STAR 4 X</span>
-059419,000158: 15,3747           03420 01470                    <span class="ps">2DEC    </span> +.2207092653 B-1                        <span class="co">#  STAR 4 Y</span>
-059420,000159: 15,3751           62414 50541                    <span class="ps">2DEC    </span> -.8422520048 B-1                        <span class="co">#  STAR 4         Z</span>
-059421,000160: 
-059422,000161: 15,3753           07506 14361                    <span class="ps">2DEC    </span> +.4773424940 B-1                        <span class="co">#  STAR 3 X</span>
-059423,000162: 15,3755           01674 36075                    <span class="ps">2DEC    </span> +.1168141178 B-1                        <span class="co">#  STAR 3 Y</span>
-059424,000163: 15,3757           15736 21775                    <span class="ps">2DEC    </span> +.8709182540 B-1                        <span class="co">#  STAR 3         Z</span>
-059425,000164: 
-059426,000165: 15,3761           16745 13112                    <span class="ps">2DEC    </span> +.9342466124 B-1                        <span class="co">#  STAR 2 X</span>
-059427,000166: 15,3763           02620 31757                    <span class="ps">2DEC    </span> +.1739271769 B-1                        <span class="co">#  STAR 2 Y</span>
-059428,000167: 15,3765           73011 60052                    <span class="ps">2DEC    </span> -.3113400137 B-1                        <span class="co">#  STAR 2 Z</span>
-059429,000168: 
-059430,000169: 15,3767           15776 01237                    <span class="ps">2DEC    </span> +.8747608555 B-1                        <span class="co">#  STAR 1 X</span>
-059431,000170: 15,3771           00330 35521                    <span class="ps">2DEC    </span> +.0264803244 B-1                        <span class="co">#  STAR 1 Y</span>
-059432,000171: 15,3773           07573 21256                    <span class="ps">2DEC    </span> +.4838307948 B-1                        <span class="co">#  STAR 1 Z</span>
-059433,000172: 
-<a name="4341544C4F47"></a>059434,000173: 15,3775           16004        <span class="sm">CATLOG  </span>          <span class="ps">DEC     </span> 7172       B-14                       
+059234,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+059235,000003:                                                                                                  <span class="co">#  Filename:     STAR_TABLES.agc</span>
+059236,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Artemis (i.e., Colossus 3),</span>
+059237,000005:                                                                                                  <span class="co">#                build 072.  This is for the Command Module's (CM)</span>
+059238,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), we believe for</span>
+059239,000007:                                                                                                  <span class="co">#                Apollo 15-17.</span>
+059240,000008:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+059241,000009:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+059242,000010:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
+059243,000011:                                                                                                  <span class="co">#  Page scans:   www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
+059244,000012:                                                                                                  <span class="co">#  Mod history:  2009-08-19 JL   Adapted from corresponding Comanche 055 file.</span>
+059245,000013:                                                                                                  <span class="co">#                2010-02-13 JL   Fixed error on pages 1387 and 1388.</span>
+059246,000014:                                                                                                  <span class="co">#                2010-02-20 RSB  Un-##'d this header.</span>
+059247,000015: 
+059248,000016:                                                                                                  <span class="co"># # Page 1387</span>
+059249,000017: 
+059250,000018: 15,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#53544152544142">STARTAB</a>                               
+059251,000019: 15,2000                                           <span class="ps">BANK    </span>                                       
+059252,000020: 
+059253,000021: 15,3437                                           <span class="ps">COUNT*  </span> $$/STARS                              
+059254,000022: 15,3437           15264 07253                     <span class="ps">2DEC    </span> +.8345006310 B-1                        <span class="co">#  STAR 37       X</span>
+059255,000023: 15,3441           74133 45130                     <span class="ps">2DEC    </span> -.2388718657 B-1                        <span class="co">#  STAR 37       Y</span>
+059256,000024: 15,3443           70034 53644                     <span class="ps">2DEC    </span> -.4965369357 B-1                        <span class="co">#  STAR 37       Z</span>
+059257,000025: 
+059258,000026: 15,3445           15015 35262                     <span class="ps">2DEC    </span> +.8141988673 B-1                        <span class="co">#  STAR 36       X</span>
+059259,000027: 15,3447           67072 57521                     <span class="ps">2DEC    </span> -.5553601830 B-1                        <span class="co">#  STAR 36       Y</span>
+059260,000028: 15,3451           02552 27310                     <span class="ps">2DEC    </span> +.1692786800 B-1                        <span class="co">#  STAR 36       Z</span>
+059261,000029: 
+059262,000030: 15,3453           07210 34714                     <span class="ps">2DEC    </span> +.4542117996 B-1                        <span class="co">#  STAR 35       X</span>
+059263,000031: 15,3455           67300 47414                     <span class="ps">2DEC    </span> -.5390337930 B-1                        <span class="co">#  STAR 35       Y</span>
+059264,000032: 15,3457           13262 27671                     <span class="ps">2DEC    </span> +.7093195408 B-1                        <span class="co">#  STAR 35       Z</span>
+059265,000033: 
+059266,000034: 15,3461           05101 34175                     <span class="ps">2DEC    </span> +.3205423120 B-1                        <span class="co">#  STAR 34       X</span>
+059267,000035: 15,3463           70717 46031                     <span class="ps">2DEC    </span> -.4434583652 B-1                        <span class="co">#  STAR 34       Y</span>
+059268,000036: 15,3465           62467 45023                     <span class="ps">2DEC    </span> -.8370169081 B-1                        <span class="co">#  STAR 34       Z</span>
+059269,000037: 
+059270,000038: 15,3467           10655 16340                     <span class="ps">2DEC    </span> +.5524232365 B-1                        <span class="co">#  STAR 33       X</span>
+059271,000039: 15,3471           63237 45012                     <span class="ps">2DEC    </span> -.7930716636 B-1                        <span class="co">#  STAR 33       Y</span>
+059272,000040: 15,3473           73711 62337                     <span class="ps">2DEC    </span> -.2566435348 B-1                        <span class="co">#  STAR 33       Z</span>
+059273,000041: 
+059274,000042: 15,3475           07207 34100                     <span class="ps">2DEC    </span> +.4540867784 B-1                        <span class="co">#  STAR 32       X</span>
+059275,000043: 15,3477           61751 60311                     <span class="ps">2DEC    </span> -.8777450759 B-1                        <span class="co">#  STAR 32       Y</span>
+059276,000044: 15,3501           02344 11437                     <span class="ps">2DEC    </span> +.1528685033 B-1                        <span class="co">#  STAR 32       Z</span>
+059277,000045: 
+059278,000046: 15,3503           03243 10132                     <span class="ps">2DEC    </span> +.2074286490 B-1                        <span class="co">#  STAR 31       X</span>
+059279,000047: 15,3505           62031 55616                     <span class="ps">2DEC    </span> -.8718956797 B-1                        <span class="co">#  STAR 31       Y</span>
+059280,000048: 15,3507           70716 43617                     <span class="ps">2DEC    </span> -.4435890882 B-1                        <span class="co">#  STAR 31       Z</span>
+059281,000049: 
+059282,000050: 15,3511           01747 01335                     <span class="ps">2DEC    </span> +.1219537054 B-1                        <span class="co">#  STAR 30       X</span>
+059283,000051: 15,3513           63532 54217                     <span class="ps">2DEC    </span> -.7702168243 B-1                        <span class="co">#  STAR 30       Y</span>
+059284,000052:                                                                                                  <span class="co"># # Page 1388</span>
+059285,000053: 15,3515           12010 11614                     <span class="ps">2DEC    </span> +.6260138474 B-1                        <span class="co">#  STAR 30       Z</span>
+059286,000054: 
+059287,000055: 15,3517           76152 45651                     <span class="ps">2DEC    </span> -.1120382967 B-1                        <span class="co">#  STAR 29       X</span>
+059288,000056: 15,3521           60371 57632                     <span class="ps">2DEC    </span> -.9695442116 B-1                        <span class="co">#  STAR 29       Y</span>
+059289,000057: 15,3523           03370 03556                     <span class="ps">2DEC    </span> +.2177876068 B-1                        <span class="co">#  STAR 29       Z</span>
+059290,000058: 
+059291,000059: 15,3525           76127 67425                     <span class="ps">2DEC    </span> -.1142900725 B-1                        <span class="co">#  STAR 28       X</span>
+059292,000060: 15,3527           72436 61577                     <span class="ps">2DEC    </span> -.3400201762 B-1                        <span class="co">#  STAR 28       Y</span>
+059293,000061: 15,3531           61041 46271                     <span class="ps">2DEC    </span> -.9334474056 B-1                        <span class="co">#  STAR 28       Z</span>
+059294,000062: 
+059295,000063: 15,3533           72303 40213                     <span class="ps">2DEC    </span> -.3511952476 B-1                        <span class="co">#  STAR 27       X</span>
+059296,000064: 15,3535           62637 74356                     <span class="ps">2DEC    </span> -.8242322268 B-1                        <span class="co">#  STAR 27       Y</span>
+059297,000065: 15,3537           70711 46567                     <span class="ps">2DEC    </span> -.4441881743 B-1                        <span class="co">#  STAR 27       Z</span>
+059298,000066: 
+059299,000067: 15,3541           67366 44175                     <span class="ps">2DEC    </span> -.5324545035 B-1                        <span class="co">#  STAR 26       X</span>
+059300,000068: 15,3543           64424 41241                     <span class="ps">2DEC    </span> -.7163035719 B-1                        <span class="co">#  STAR 26       Y</span>
+059301,000069: 15,3545           07156 23036                     <span class="ps">2DEC    </span> +.4510004372 B-1                        <span class="co">#  STAR 26       Z</span>
+059302,000070: 
+059303,000071: 15,3547           63330 75735                     <span class="ps">2DEC    </span> -.7860186221 B-1                        <span class="co">#  STAR 25       X</span>
+059304,000072: 15,3551           67512 62476                     <span class="ps">2DEC    </span> -.5221457573 B-1                        <span class="co">#  STAR 25       Y</span>
+059305,000073: 15,3553           05227 10611                     <span class="ps">2DEC    </span> +.3309660611 B-1                        <span class="co">#  STAR 25       Z</span>
+059306,000074: 
+059307,000075: 15,3555           64757 51701                     <span class="ps">2DEC    </span> -.6895375091 B-1                        <span class="co">#  STAR 24       X</span>
+059308,000076: 15,3557           71233 53334                     <span class="ps">2DEC    </span> -.4185354938 B-1                        <span class="co">#  STAR 24       Y</span>
+059309,000077: 15,3561           66425 76017                     <span class="ps">2DEC    </span> -.5910719617 B-1                        <span class="co">#  STAR 24       Z</span>
+059310,000078: 
+059311,000079: 15,3563           66546 64151                     <span class="ps">2DEC    </span> -.5812217481 B-1                        <span class="co">#  STAR 23       X</span>
+059312,000080: 15,3565           73256 65757                     <span class="ps">2DEC    </span> -.2911759648 B-1                        <span class="co">#  STAR 23       Y</span>
+059313,000081: 15,3567           14120 32444                     <span class="ps">2DEC    </span> +.7598669864 B-1                        <span class="co">#  STAR 23       Z</span>
+059314,000082: 
+059315,000083: 15,3571           61251 56124                     <span class="ps">2DEC    </span> -.9168160791 B-1                        <span class="co">#  STAR 22       X</span>
+059316,000084: 15,3573           72307 65764                     <span class="ps">2DEC    </span> -.3506241694 B-1                        <span class="co">#  STAR 22       Y</span>
+059317,000085: 15,3575           74742 65735                     <span class="ps">2DEC    </span> -.1910784362 B-1                        <span class="co">#  STAR 22       Z</span>
+059318,000086:                                                                                                  <span class="co"># # Page 1389</span>
+059319,000087: 15,3577           70607 77742                     <span class="ps">2DEC    </span> -.4521486548 B-1                        <span class="co">#  STAR 21       X</span>
+059320,000088: 15,3601           77151 74615                     <span class="ps">2DEC    </span> -.0495728431 B-1                        <span class="co">#  STAR 21       Y</span>
+059321,000089: 15,3603           61600 60003                     <span class="ps">2DEC    </span> -.8905639377 B-1                        <span class="co">#  STAR 21       Z</span>
+059322,000090: 
+059323,000091: 15,3605           60605 64345                     <span class="ps">2DEC    </span> -.9524366380 B-1                        <span class="co">#  STAR 20       X</span>
+059324,000092: 15,3607           77026 54200                     <span class="ps">2DEC    </span> -.0597677121 B-1                        <span class="co">#  STAR 20       Y</span>
+059325,000093: 15,3611           73160 42475                     <span class="ps">2DEC    </span> -.2988181236 B-1                        <span class="co">#  STAR 20       Z</span>
+059326,000094: 
+059327,000095: 15,3613           60430 66614                     <span class="ps">2DEC    </span> -.9657334280 B-1                        <span class="co">#  STAR 19       X</span>
+059328,000096: 15,3615           00653 13072                     <span class="ps">2DEC    </span> +.0521664164 B-1                        <span class="co">#  STAR 19       Y</span>
+059329,000097: 15,3617           04042 27232                     <span class="ps">2DEC    </span> +.2542392790 B-1                        <span class="co">#  STAR 19       Z</span>
+059330,000098: 
+059331,000099: 15,3621           62162 44274                     <span class="ps">2DEC    </span> -.8610673209 B-1                        <span class="co">#  STAR 18       X</span>
+059332,000100: 15,3623           07322 33165                     <span class="ps">2DEC    </span> +.4632386329 B-1                        <span class="co">#  STAR 18       Y</span>
+059333,000101: 15,3625           03265 32741                     <span class="ps">2DEC    </span> +.2096974909 B-1                        <span class="co">#  STAR 18       Z</span>
+059334,000102: 
+059335,000103: 15,3627           63467 50064                     <span class="ps">2DEC    </span> -.7745052221 B-1                        <span class="co">#  STAR 17       X</span>
+059336,000104: 15,3631           11655 11373                     <span class="ps">2DEC    </span> +.6149043688 B-1                        <span class="co">#  STAR 17       Y</span>
+059337,000105: 15,3633           75477 77366                     <span class="ps">2DEC    </span> -.1484394758 B-1                        <span class="co">#  STAR 17       Z</span>
+059338,000106: 
+059339,000107: 15,3635           70425 51217                     <span class="ps">2DEC    </span> -.4661511162 B-1                        <span class="co">#  STAR 16       X</span>
+059340,000108: 15,3637           07505 32504                     <span class="ps">2DEC    </span> +.4772744503 B-1                        <span class="co">#  STAR 16       Y</span>
+059341,000109: 15,3641           13726 15341                     <span class="ps">2DEC    </span> +.7449243154 B-1                        <span class="co">#  STAR 16       Z</span>
+059342,000110: 
+059343,000111: 15,3643           72157 66255                     <span class="ps">2DEC    </span> -.3613649782 B-1                        <span class="co">#  STAR 15       X</span>
+059344,000112: 15,3645           11142 32737                     <span class="ps">2DEC    </span> +.5745656444 B-1                        <span class="co">#  STAR 15       Y</span>
+059345,000113: 15,3647           64200 43016                     <span class="ps">2DEC    </span> -.7343634472 B-1                        <span class="co">#  STAR 15       Z</span>
+059346,000114: 
+059347,000115: 15,3651           71316 64201                     <span class="ps">2DEC    </span> -.4122762536 B-1                        <span class="co">#  STAR 14       X</span>
+059348,000116: 15,3653           16400 36737                     <span class="ps">2DEC    </span> +.9063680102 B-1                        <span class="co">#  STAR 14       Y</span>
+059349,000117: 15,3655           01364 14350                     <span class="ps">2DEC    </span> +.0923326629 B-1                        <span class="co">#  STAR 14       Z</span>
+059350,000118: 
+059351,000119: 15,3657           75051 60001                     <span class="ps">2DEC    </span> -.1824340636 B-1                        <span class="co">#  STAR 13       X</span>
+059352,000120:                                                                                                  <span class="co"># # Page 1390</span>
+059353,000121: 15,3661           17027 31661                     <span class="ps">2DEC    </span> +.9404062129 B-1                        <span class="co">#  STAR 13       Y</span>
+059354,000122: 15,3663           73321 43422                     <span class="ps">2DEC    </span> -.2869738089 B-1                        <span class="co">#  STAR 13       Z</span>
+059355,000123: 
+059356,000124: 15,3665           77007 51442                     <span class="ps">2DEC    </span> -.0616090080 B-1                        <span class="co">#  STAR 12       X</span>
+059357,000125: 15,3667           11514 32502                     <span class="ps">2DEC    </span> +.6031289258 B-1                        <span class="co">#  STAR 12       Y</span>
+059358,000126: 15,3671           63215 47106                     <span class="ps">2DEC    </span> -.7952608559 B-1                        <span class="co">#  STAR 12       Z</span>
+059359,000127: 
+059360,000128: 15,3673           02140 02335                     <span class="ps">2DEC    </span> +.1367280274 B-1                        <span class="co">#  STAR 11       X</span>
+059361,000129: 15,3675           12716 12356                     <span class="ps">2DEC    </span> +.6814364033 B-1                        <span class="co">#  STAR 11       Y</span>
+059362,000130: 15,3677           13401 37404                     <span class="ps">2DEC    </span> +.7189922632 B-1                        <span class="co">#  STAR 11       Z</span>
+059363,000131: 
+059364,000132: 15,3701           03154 15267                     <span class="ps">2DEC    </span> +.2007345455 B-1                        <span class="co">#  STAR 10       X</span>
+059365,000133: 15,3703           17403 01743                     <span class="ps">2DEC    </span> +.9691236271 B-1                        <span class="co">#  STAR 10       Y</span>
+059366,000134: 15,3705           75552 76050                     <span class="ps">2DEC    </span> -.1431958012 B-1                        <span class="co">#  STAR 10       Z</span>
+059367,000135: 
+059368,000136: 15,3707           05465 17001                     <span class="ps">2DEC    </span> +.3502769546 B-1                        <span class="co">#  STAR 9        X</span>
+059369,000137: 15,3711           16221 27572                     <span class="ps">2DEC    </span> +.8927907521 B-1                        <span class="co">#  STAR 9        Y</span>
+059370,000138: 15,3713           04420 14273                     <span class="ps">2DEC    </span> +.2832502918 B-1                        <span class="co">#  STAR 9        Z</span>
+059371,000139: 
+059372,000140: 15,3715           06440 11323                     <span class="ps">2DEC    </span> +.4101921571 B-1                        <span class="co">#  STAR 8        X</span>
+059373,000141: 15,3717           07767 30366                     <span class="ps">2DEC    </span> +.4989947555 B-1                        <span class="co">#  STAR 8        Y</span>
+059374,000142: 15,3721           14155 23047                     <span class="ps">2DEC    </span> +.7633784305 B-1                        <span class="co">#  STAR 8        Z</span>
+059375,000143: 
+059376,000144: 15,3723           13176 03307                     <span class="ps">2DEC    </span> +.7028937840 B-1                        <span class="co">#  STAR 7        X</span>
+059377,000145: 15,3725           13247 03342                     <span class="ps">2DEC    </span> +.7078988678 B-1                        <span class="co">#  STAR 7        Y</span>
+059378,000146: 15,3727           01070 26607                     <span class="ps">2DEC    </span> +.0694227718 B-1                        <span class="co">#  STAR 7        Z</span>
+059379,000147: 
+059380,000148: 15,3731           10557 32115                     <span class="ps">2DEC    </span> +.5448995598 B-1                        <span class="co">#  STAR 6        X</span>
+059381,000149: 15,3733           10404 00124                     <span class="ps">2DEC    </span> +.5317389073 B-1                        <span class="co">#  STAR 6        Y</span>
+059382,000150: 15,3735           65500 72703                     <span class="ps">2DEC    </span> -.6483349473 B-1                        <span class="co">#  STAR 6        Z</span>
+059383,000151: 
+059384,000152: 15,3737           00151 25431                     <span class="ps">2DEC    </span> +.0128995818 B-1                        <span class="co">#  STAR 5        X</span>
+059385,000153: 15,3741           00077 37176                     <span class="ps">2DEC    </span> +.0078096205 B-1                        <span class="co">#  STAR 5        Y</span>
+059386,000154:                                                                                                  <span class="co"># # Page 1391</span>
+059387,000155: 15,3743           17777 02143                     <span class="ps">2DEC    </span> +.9998862988 B-1                        <span class="co">#  STAR 5        Z</span>
+059388,000156: 
+059389,000157: 15,3745           07675 02702                     <span class="ps">2DEC    </span> +.4918322686 B-1                        <span class="co">#  STAR 4        X</span>
+059390,000158: 15,3747           03420 01470                     <span class="ps">2DEC    </span> +.2207092653 B-1                        <span class="co">#  STAR 4        Y</span>
+059391,000159: 15,3751           62414 50541                     <span class="ps">2DEC    </span> -.8422520048 B-1                        <span class="co">#  STAR 4        Z</span>
+059392,000160: 
+059393,000161: 15,3753           07506 14361                     <span class="ps">2DEC    </span> +.4773424940 B-1                        <span class="co">#  STAR 3        X</span>
+059394,000162: 15,3755           01674 36075                     <span class="ps">2DEC    </span> +.1168141178 B-1                        <span class="co">#  STAR 3        Y</span>
+059395,000163: 15,3757           15736 21775                     <span class="ps">2DEC    </span> +.8709182540 B-1                        <span class="co">#  STAR 3        Z</span>
+059396,000164: 
+059397,000165: 15,3761           16745 13112                     <span class="ps">2DEC    </span> +.9342466124 B-1                        <span class="co">#  STAR 2        X</span>
+059398,000166: 15,3763           02620 31757                     <span class="ps">2DEC    </span> +.1739271769 B-1                        <span class="co">#  STAR 2        Y</span>
+059399,000167: 15,3765           73011 60052                     <span class="ps">2DEC    </span> -.3113400137 B-1                        <span class="co">#  STAR 2        Z</span>
+059400,000168: 
+059401,000169: 15,3767           15776 01237                     <span class="ps">2DEC    </span> +.8747608555 B-1                        <span class="co">#  STAR 1        X</span>
+059402,000170: 15,3771           00330 35521                     <span class="ps">2DEC    </span> +.0264803244 B-1                        <span class="co">#  STAR 1        Y</span>
+059403,000171: 15,3773           07573 21256                     <span class="ps">2DEC    </span> +.4838307948 B-1                        <span class="co">#  STAR 1        Z</span>
+059404,000172: 
+<a name="4341544C4F47"></a>059405,000173: 15,3775           16004        <span class="sm">CATLOG  </span>           <span class="ps">DEC     </span> 7172       B-14                       
 
 End of include-file STAR_TABLES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

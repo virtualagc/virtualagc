@@ -66,11 +66,12 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files were obtained by digitally photographing the
+These source-code files were derived from scans of the
 Colossus 237 program listing from the private collection of original
-AGC developer Fred Martin, and then modifying pre-existing Colossus 249
-(Apollo 9) source files to incorporate changes. Note that the page images 
-<a href="http://www.ibiblio.org/apollo/ScansForConversion/Colossus237/">
+AGC developer Fred Martin. Scanning was by Ron Burkey.  Pre-existing Colossus 249
+(Apollo 9) source files were used as a template, and changes between Colossus 249
+and Colossus 237 were manually transcribed by a team of volunteers. Note 
+that the page images <a href="http://www.ibiblio.org/apollo/ScansForConversion/Colossus237/">
 presented online</a> are of reduced quality, and that additional images 
 are available.  Report any conversion errors or legibility 
 problems in page images to info@sandroid.org. 
@@ -80,447 +81,448 @@ Notations on the program listing read, in part:<br>
 	GAP: ASSEMBLE REVISION 237 OF AGC PROGRAM COLOSSUS 
 	BY NASA 2021111-031  1:17 AUG. 24, 1968
 </pre>
+Note that the date is the date of the printout, not the date of the program revision.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041553,000002:                                                                                                 <span class="co">#  Copyright:    Public domain.</span>
-041554,000003:                                                                                                 <span class="co">#  Filename:      TVCGEN3FILTERS.agc</span>
-041555,000004:                                                                                                 <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-041556,000005:                                                                                                 <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-041557,000006:                                                                                                 <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-041558,000007:                                                                                                 <span class="co">#  Assembler:    yaYUL</span>
-041559,000008:                                                                                                 <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-041560,000009:                                                                                                 <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-041561,000010:                                                                                                 <span class="co">#  Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-041562,000011:                                                                                                 <span class="co">#  Mod history:  2011-03-12 JL    Adapted from corresponding Colossus 249 file.</span>
-041563,000012: 
-041564,000013:                                                                                                 <span class="co"># # Page 958</span>
-041565,000014:                                                                                                 <span class="co">#  PROGRAM NAME.... GEN3DAP FILTERS, CONSISTING OF NP0NODE, NP1NODE, NY0NODE, NY1NODE, ETC.</span>
-041566,000015:                                                                                                 <span class="co">#  LOG SECTION.... GEN3DAP FILTERS   SUBROUTINE....DAPCSM</span>
-041567,000016:                                                                                                 <span class="co">#  MOD BY ENGEL                      20 OCT, 1967</span>
-041568,000017: 
-041569,000018:                                                                                                 <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
-041570,000019: 
-041571,000020:                                                                                                 <span class="co">#       THE GEN3DAP FILTER PACKAGE IS DESIGNED TO PROVIDE FLEXIBLE, LAST-MINUTE CHANGEABLE DIGITAL AUTOPILOT</span>
-041572,000021:                                                                                                 <span class="co">#  FILTERS FOR LEM-OFF FLIGHT.  GROUNDRULES FOR THE DESIGN AND USE OF THE PACKAGE ARE AS FOLLOWS.....</span>
-041573,000022: 
-041574,000023:                                                                                                 <span class="co">#       1. FILTER COEFFICIENTS AND GAINS IN ERASABLE MEMORY</span>
-041575,000024:                                                                                                 <span class="co">#       2. UP TO THIRD-ORDER NUMERATOR OR DENOMINATOR</span>
-041576,000025:                                                                                                 <span class="co">#       3. OPERATIONAL FIT WITHIN THE STRUCTURE OF TEH REGULAR LEM-ON DAP CODING</span>
-041577,000026:                                                                                                 <span class="co">#       4. DENOMINATOR POLES INSIDE THE Z-PLANE UNIT CIRCLE</span>
-041578,000027:                                                                                                 <span class="co">#       5. NUMERATOR ZEROES INSIDE THE Z-PLANE DOUBLE-UNIT CIRCLE</span>
-041579,000028:                                                                                                 <span class="co">#       6. HIGH FREQUENCY (BODE) GAIN LESS THAN 8ASCREVS, OR 8.6380088 DEG/DEG</span>
-041580,000029: 
-041581,000030:                                                                                                 <span class="co">#  THE FILTERS ARE SHOWN IN THE FOLLOWING DIAGRAMS.....</span>
-041582,000031: 
-041583,000032: 
-041584,000033:                                                                                                 <span class="co">#  PITCH GEN3DAP FILTER..</span>
-041585,000034: 
-041586,000035:                                                                                                 <span class="co">#                                                                   KPGEN3</span>
-041587,000036:                                                                                                 <span class="co">#                                                                  ********</span>
-041588,000037:                                                                                                 <span class="co">#                     *****************************************           *</span>
-041589,000038:                                                                                                 <span class="co">#                     *                                       *           *</span>
-041590,000039:                                                                                                 <span class="co">#                     *              -1        -2        -3   *           *</span>
-041591,000040:                                                                                                 <span class="co">#        EP = ERRBTMP *    AP0 + AP1 Z   + AP2 Z   + AP3 Z     *   NP0          NPD = CMDTMP  **</span>
-041592,000041:                                                                                                 <span class="co">#       ***************  -----------------------------------  **********( X )*********************</span>
-041593,000042:                                                                                                 <span class="co">#                     *              -1        -2        -3   *                               **</span>
-041594,000043:                                                                                                 <span class="co">#                     *    1  + BP1 Z   + BP2 Z   + BP3 Z     *</span>
-041595,000044:                                                                                                 <span class="co">#                     *                                       *</span>
-041596,000045:                                                                                                 <span class="co">#                     *****************************************</span>
-041597,000046: 
-041598,000047: 
-041599,000048:                                                                                                 <span class="co">#  YAW GEN3DAP FILTER..</span>
-041600,000049: 
-041601,000050:                                                                                                 <span class="co">#                                                                 KYGEN3</span>
-041602,000051:                                                                                                 <span class="co">#                                                                ********</span>
-041603,000052:                                                                                                 <span class="co">#                    *****************************************           *</span>
-041604,000053:                                                                                                 <span class="co">#                    *                                       *           *</span>
-041605,000054:                                                                                                 <span class="co">#                    *              -1        -2        -3   *           *</span>
-041606,000055:                                                                                                 <span class="co">#       EY = ERRBTMP *    AY0 + AY1 Z   + AY2 Z   + AY3 Z     *   NY0          NYP = CMDTMP  **</span>
-041607,000056:                                                                                                 <span class="co">#      ***************  -----------------------------------  **********( X )*********************</span>
-041608,000057:                                                                                                 <span class="co">#                    *              -1        -2        -3   *                               **</span>
-041609,000058:                                                                                                 <span class="co">#                    *    1  + BY1 Z   + BY2 Z   + BY3 Z     *</span>
-041610,000059:                                                                                                 <span class="co">#                    *                                       *</span>
-041611,000060:                                                                                                 <span class="co">#                    *****************************************</span>
-041612,000061: 
-041613,000062:                                                                                                 <span class="co"># # Page 959</span>
-041614,000063:                                                                                                 <span class="co">#  THE IMPLEMENTING EQUATIONS FOR THESE FILTERS ARE AS FOLLOWS.....</span>
-041615,000064: 
-041616,000065:                                                                                                 <span class="co">#       PITCH GEN3DAP....                                 YAW GEN3DAP....</span>
-041617,000066:                                                                                                 <span class="co">#           NPD = (B+4) KPGEN3 NP0                            NYD = (B+4) KYGEN3 NY0</span>
-041618,000067:                                                                                                 <span class="co">#           NP0 = AP0 EP            +4(Z-1) NP1                NY0 = AY0 EY           +4(Z-1) NY1</span>
-041619,000068:                                                                                                 <span class="co">#           NP1 = AP1 EP - BP1 NP0 + (Z-1) NP2                NY1 = AY1 EY - BY1 NY0 + (Z-1) NY2</span>
-041620,000069:                                                                                                 <span class="co">#           NP2 = AP3 EP - BP2 NP0 + (Z-1) NP3                NY2 = AY2 EY - BY2 NY0 + (Z-1) NY3</span>
-041621,000070:                                                                                                 <span class="co">#           NP3 = AP3 EP - BP3 NP0                            NY3 = AY3 EY - BY3 NY0</span>
-041622,000071: 
-041623,000072: 
-041624,000073:                                                                                                 <span class="co">#       FILTER INPUTS EP AND EY ARE PICKED UP FROM REGULAR LEM-ON CODING AT ERRBTMP  (UPPER WORD ONLY),  THUS ARE</span>
-041625,000074:                                                                                                 <span class="co">#  SINGLE PRECISION QUANTITIES SCALED AT B-1 REVS. FILTER OUTPUTS NPD AND NYD ARE LEFT IN DOUBLE PRECISION AT</span>
-041626,000075:                                                                                                 <span class="co">#  CMDTMP, SCALED AT 1 ASCREV, READY FOR OUTPUT PROCESSING VIA REGULAR LEM-ON CODING AT ..P,YOFFSET..</span>
-041627,000076:                                                                                                 <span class="co">#  FOLLOWING OUTPUT PROCESSING, RETURN TO THE GEN3DAP FILTERS IS MADE FOR CALCULATION OF THE REMAINING NODES</span>
-041628,000077:                                                                                                 <span class="co">#  NP1 TO NP3, OR NY1 TO NY3.  GEN3DAP FILTERS THEN RETURN TO THE LEM-ON CODING AT  ..DELBARP,Y..   FOR RESPECTIVE</span>
-041629,000078:                                                                                                 <span class="co">#  OFFSET-TRACKER-FILTER COMPUTATIONS AND COPYCYCLES. NOTE THE EQUIVALENCES...NP1TMP=J5TMP, NP1=J5,</span>
-041630,000079:                                                                                                 <span class="co">#  NP2TMP=NSUMTMP, NP2=PNSUM, NP3TMP=DSUMTMP, NP3=PDSUM, WITH CORRESPONDING RELATIONS FOR YAW.  THUS THE COPY-</span>
-041631,000080:                                                                                                 <span class="co">#  CYCLE  PCOPY, FROM THE GEN3DAP STANDPOINT, IS EFFECTIVE FROM PMISC-3 TO ITS END AT TC Q.  YCOPY FROM YMISC-3.</span>
-041632,000081: 
-041633,000082: 
-041634,000083:                                                                                                 <span class="co">#  SCALING OF THE FILTER NODES, COEFFICIENTS, AND GAINS WITHIN THE AGC IS AS FOLLOWS.....</span>
-041635,000084: 
-041636,000085:                                                                                                 <span class="co">#           QUANTITY   QUANTITY      PHYS.UNITS     MAX.VALUE      SCALE AT (FOR)</span>
-041637,000086: 
-041638,000087:                                                                                                 <span class="co">#           EP         EY            REVS              1/8           B-1 REV           (CDU SCALING)</span>
-041639,000088: 
-041640,000089:                                                                                                 <span class="co">#           NP0        NY0           REVS             (B+1)          B+1 REV</span>
-041641,000090:                                                                                                 <span class="co">#           NP1        NY1           REVS             (B+3)          B+3 REV</span>
-041642,000091:                                                                                                 <span class="co">#           NP2        NY2           REVS             (B+3)          B+3 REV</span>
-041643,000092:                                                                                                 <span class="co">#           NP3        NY3           REVS             (B+3)          B+3 REV</span>
-041644,000093: 
-041645,000094:                                                                                                 <span class="co">#           NPD        NYD         ASC REVS            (1)           1 ASCREV          (ACTUATOR CDU SCALING)</span>
-041646,000095: 
-041647,000096:                                                                                                 <span class="co">#           KPGEN3     KYGEN3     ASCREV/REV           (8)         B+3 ASCREV/REV</span>
-041648,000097: 
-041649,000098:                                                                                                 <span class="co">#           AP0        AY0         DIMLESS.             1              B+2</span>
-041650,000099:                                                                                                 <span class="co">#           AP1        AY1         DIMLESS.             6              B+4</span>
-041651,000100:                                                                                                 <span class="co">#           AP2        AY2         DIMLESS.             12             B+4</span>
-041652,000101:                                                                                                 <span class="co">#           AP3        AY3         DIMLESS.             8              B+4</span>
-041653,000102: 
-041654,000103:                                                                                                 <span class="co">#           BP1        BY1         DIMLESS.             3              B+2</span>
-041655,000104:                                                                                                 <span class="co">#           BP2        BY2         DIMLESS.             3              B+2</span>
-041656,000105:                                                                                                 <span class="co">#           BP3        BY3         DIMLESS.             1              B+2</span>
-041657,000106: 
-041658,000107:                                                                                                 <span class="co">#  FILTER COEFFICIENTS, GAINS, AND NODES ARE HELD IN DOUBLE PRECISION (ERASABLE) TO PERMIT CONSERVATIVE</span>
-041659,000108:                                                                                                 <span class="co">#  SCALING AND YET OFFSET TRUNCATION LOSSES.  THIS APPEARS NECESSARY IF FILTER FLEXIBILITY IS TO BE MAINTAINED.</span>
-041660,000109:                                                                                                 <span class="co">#  COMPUTATION TIME IS NOT CRITICAL.</span>
-041661,000110: 
-041662,000111:                                                                                                 <span class="co"># # Page 960</span>
-041663,000112:                                                                                                 <span class="co">#  CALLING SEQUENCE....</span>
-041664,000113: 
-041665,000114:                                                                                                 <span class="co">#      *TC POSTJUMP....</span>
-041666,000115:                                                                                                 <span class="co">#       CADR NP0NODE, NP1, NY0, NY1.  SPECIFICALLY, FROM PITCHDAP OR YAWDAP</span>
-041667,000116:                                                                                                 <span class="co">#       (TVCDAP),AT P1FILJMP, P2FILJMP, Y1FILJMP, Y2FILJMP</span>
-041668,000117: 
-041669,000118:                                                                                                 <span class="co">#  NORMAL EXIT MODE....</span>
-041670,000119: 
-041671,000120:                                                                                                 <span class="co">#      *TC POSTJUMP....</span>
-041672,000121:                                                                                                 <span class="co">#       CADR  (POFFSET, DELBARP), (YOFFSET, DELBARY).     IE, RETURNS TO</span>
-041673,000122:                                                                                                 <span class="co">#       PITCHDAP OR YAWDAP AT APPROPRIATE ENTRY POINT</span>
-041674,000123: 
-041675,000124:                                                                                                 <span class="co">#  ALARM OR ABORT EXIT MODES....NONE</span>
-041676,000125: 
-041677,000126:                                                                                                 <span class="co">#  SUBROUTINES CALLED.... NONE</span>
-041678,000127: 
-041679,000128:                                                                                                 <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
-041680,000129: 
-041681,000130:                                                                                                 <span class="co">#      *AP0(SP),AP1(DP),...AP3(DP), (PITCH AND YAW) NUMERATOR COEFFICIENTS</span>
-041682,000131:                                                                                                 <span class="co">#       (PAD LOADS)</span>
-041683,000132:                                                                                                 <span class="co">#      *BP1(DP),...BP3(DP), (PITCH AND YAW) DENOMINATOR COEFFICIENTS</span>
-041684,000133:                                                                                                 <span class="co">#       (PAD LOADS)</span>
-041685,000134:                                                                                                 <span class="co">#      *KPGEN3 (S40.15 OF R03)</span>
-041686,000135: 
-041687,000136:                                                                                                 <span class="co">#  OUTPUT....</span>
-041688,000137: 
-041689,000138:                                                                                                 <span class="co">#      *CMDTMP (NPD, NYD) FOR OUTPUT PROCESSING BY PITCHDAP OR YAWDAP</span>
-041690,000139:                                                                                                 <span class="co">#      *OTHER FILTER NODES</span>
-041691,000140: 
-041692,000141:                                                                                                 <span class="co">#  DEBRIS....TVC TEMPORARIES, SHAREABLE WITH RCS/ENTRY IN EBANK6 ONLY</span>
-041693,000142: 
-041694,000143: 
-041695,000144: 21,2026                                          <span class="ps">BANK    </span> 21                                    
-041696,000145: 17,2000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505334">DAPS4</a>                                 
-041697,000146: 17,2000                                          <span class="ps">BANK    </span>                                       
-041698,000147: 17,2215  E6,1742                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
-041699,000148: 17,2215                                          <span class="ps">COUNT*  </span> $$/GEN3                               
-041700,000149: 
-041701,000150:                                                                                                 <span class="co"># # Page 961</span>
-041702,000151:                                                                                                 <span class="co">#  PITCH GEN3DAP FILTER.....</span>
-041703,000152: 
-<a name="4E50304E4F4445"></a>041704,000153: 17,2215           00006        <span class="sm">NP0NODE </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NP0....COLLECT  (PAST NP1)</span>
-041705,000154: 17,2216           31564                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031">NP1</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
-041706,000155: 17,2217           20001                          <span class="op">DDOUBL  </span>                                       
-041707,000156: 17,2220           20001                          <span class="op">DDOUBL  </span>                                       
-041708,000157: 17,2221           53562                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
-041709,000158: 
-<a name="41503028455029"></a>041710,000159: 17,2222           31742        <span class="sm">AP0(EP) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  SPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041711,000160: 17,2223           00006                          <span class="op">EXTEND  </span>                                       <span class="co">#       EP = ERRBTMP,  SP, SC.AT B-1 REVS</span>
-041712,000161: 17,2224           71427                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415030">AP0</a>                                   
-041713,000162: 17,2225           21562                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  COMPLETED NODE NP0, SC.AT B+1 REVS</span>
-041714,000163: 
-041715,000164: 
-<a name="4E50444E4F4445"></a>041716,000165: 17,2226           31561        <span class="sm">NPDNODE </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  FORM NODE NPD....SPXDP MULTIPLY BY GAIN</span>
-041717,000166: 17,2227           00006                          <span class="op">EXTEND  </span>                                       
-041718,000167: 17,2230           71651                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5047454E33">KPGEN3</a>                                
-041719,000168: 17,2231           53745                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   
-041720,000169: 17,2232           31562                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
-041721,000170: 17,2233           00006                          <span class="op">EXTEND  </span>                                       
-041722,000171: 17,2234           71651                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5047454E33">KPGEN3</a>                                
-041723,000172: 17,2235           22007                          <span class="op">ZL      </span>                                       
-041724,000173: 17,2236           22000                          <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041725,000174: 17,2237           21745                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   <span class="co">#  SC.AT B+4 ASCREV SINCE KPGEN3 AT B+3</span>
-041726,000175: 
-041727,000176: 17,2240           53745                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   <span class="co">#  FIX UP SCALING</span>
-041728,000177: 17,2241           20001                          <span class="op">DDOUBL  </span>                                       
-041729,000178: 17,2242           20001                          <span class="op">DDOUBL  </span>                                       
-041730,000179: 17,2243           20001                          <span class="op">DDOUBL  </span>                                       
-041731,000180: 17,2244           20001                          <span class="op">DDOUBL  </span>                                       
-041732,000181: 17,2245           53745                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   <span class="co">#  COMPLETED NODE NPD, SC.AT 1ASCREV</span>
-041733,000182: 
-041734,000183: 
-041735,000184: 17,2246           04574                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  TRANSFER BACK TO REGULAR DAP CODING FOR</span>
-041736,000185: 17,2247           40436                          <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#504F4646534554">POFFSET</a>                               <span class="co">#       OUTPUT  (NPD = CMDTMP, DP)</span>
-<a name="4E50314E4F4445"></a>041737,000186: 17,2250           00006        <span class="sm">NP1NODE </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NP1....COLLECT  (PAST NP2)</span>
-041738,000187: 17,2251           31542                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032">NP2</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
-041739,000188: 17,2252           53737                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
-041740,000189: 
-<a name="425031284E503029"></a>041741,000190: 17,2253           41561        <span class="sm">BP1(NP0)</span>          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
-041742,000191: 17,2254           00006                          <span class="op">EXTEND  </span>                                       
-041743,000192: 17,2255           71436                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425031">BP1</a>                                   
-041744,000193: 17,2256           21737                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
-041745,000194: 17,2257           41562                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
-041746,000195: 17,2260           00006                          <span class="op">EXTEND  </span>                                       
-041747,000196: 17,2261           71436                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425031">BP1</a>                                   
-041748,000197: 17,2262           27737                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>     +1                         
-041749,000198: 17,2263           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041750,000199: 17,2264           12266                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041751,000200: 17,2265           27736                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
-041752,000201:                                                                                                 <span class="co"># # Page 962</span>
-041753,000202: 17,2266           41561                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
-041754,000203: 17,2267           00006                          <span class="op">EXTEND  </span>                                       
-041755,000204: 17,2270           71437                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425031">BP1</a>        +1                         
-041756,000205: 17,2271           27737                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>     +1                         
-041757,000206: 17,2272           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041758,000207: 17,2273           12275                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041759,000208: 17,2274           27736                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
-041760,000209: 
-<a name="41503128455029"></a>041761,000210: 17,2275           31742        <span class="sm">AP1(EP) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041762,000211: 17,2276           00006                          <span class="op">EXTEND  </span>                                       
-041763,000212: 17,2277           71430                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415031">AP1</a>                                   
-041764,000213: 17,2300           21737                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
-041765,000214: 17,2301           31742                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
-041766,000215: 17,2302           00006                          <span class="op">EXTEND  </span>                                       
-041767,000216: 17,2303           71431                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415031">AP1</a>        +1                         
-041768,000217: 17,2304           27737                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>     +1                         
-041769,000218: 17,2305           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041770,000219: 17,2306           12310                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041771,000220: 17,2307           27736                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                <span class="co">#  COMPLETED NODE NP1</span>
-041772,000221: 
-<a name="4E50324E4F4445"></a>041773,000222: 17,2310           00006        <span class="sm">NP2NODE </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NP2....COLLECT (PAST NP3)</span>
-041774,000223: 17,2311           31544                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033">NP3</a>                                   
-041775,000224: 17,2312           53712                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
-<a name="425032284E503029"></a>041776,000225: 17,2313           41561        <span class="sm">BP2(NP0)</span>          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
-041777,000226: 17,2314           00006                          <span class="op">EXTEND  </span>                                       
-041778,000227: 17,2315           71440                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425032">BP2</a>                                   
-041779,000228: 17,2316           21712                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
-041780,000229: 17,2317           41562                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
-041781,000230: 17,2320           00006                          <span class="op">EXTEND  </span>                                       
-041782,000231: 17,2321           71440                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425032">BP2</a>                                   
-041783,000232: 17,2322           27712                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>     +1                         
-041784,000233: 17,2323           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041785,000234: 17,2324           12326                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041786,000235: 17,2325           27711                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
-041787,000236: 17,2326           41561                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
-041788,000237: 17,2327           00006                          <span class="op">EXTEND  </span>                                       
-041789,000238: 17,2330           71441                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425032">BP2</a>        +1                         
-041790,000239: 17,2331           27712                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>     +1                         
-041791,000240: 17,2332           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041792,000241: 17,2333           12335                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041793,000242: 17,2334           27711                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
-041794,000243: 
-<a name="41503228455029"></a>041795,000244: 17,2335           31742        <span class="sm">AP2(EP) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041796,000245: 17,2336           00006                          <span class="op">EXTEND  </span>                                       
-041797,000246: 17,2337           71432                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415032">AP2</a>                                   
-041798,000247: 17,2340           21712                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
-041799,000248: 17,2341           31742                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
-041800,000249: 17,2342           00006                          <span class="op">EXTEND  </span>                                       
-041801,000250: 17,2343           71433                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415032">AP2</a>        +1                         
-041802,000251: 17,2344           27712                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>     +1                         
-041803,000252:                                                                                                 <span class="co"># # Page 963</span>
-041804,000253: 17,2345           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041805,000254: 17,2346           12350                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041806,000255: 17,2347           27711                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                <span class="co">#  COMPLETED NODE NP2</span>
-041807,000256: 
-<a name="4E50334E4F4445"></a>041808,000257: 17,2350           41561        <span class="sm">NP3NODE </span>          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  FORM NODE NP3....NO PAST NODES, DIRECT</span>
-041809,000258: 17,2351           00006                          <span class="op">EXTEND  </span>                                       <span class="co">#       DPXDP MULTIPLY FOR DENOMINATOR</span>
-041810,000259: 17,2352           71442                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425033">BP3</a>                                   <span class="co">#       COMPONENT</span>
-041811,000260: 17,2353           53714                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
-041812,000261: 17,2354           41562                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
-041813,000262: 17,2355           00006                          <span class="op">EXTEND  </span>                                       
-041814,000263: 17,2356           71442                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425033">BP3</a>                                   
-041815,000264: 17,2357           27714                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>     +1                         
-041816,000265: 17,2360           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041817,000266: 17,2361           12363                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041818,000267: 17,2362           27713                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
-041819,000268: 17,2363           41561                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
-041820,000269: 17,2364           00006                          <span class="op">EXTEND  </span>                                       
-041821,000270: 17,2365           71443                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425033">BP3</a>        +1                         
-041822,000271: 17,2366           27714                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>     +1                         
-041823,000272: 17,2367           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041824,000273: 17,2370           12372                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041825,000274: 17,2371           27713                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
-041826,000275: 
-<a name="41503328455029"></a>041827,000276: 17,2372           31742        <span class="sm">AP3(EP) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041828,000277: 17,2373           00006                          <span class="op">EXTEND  </span>                                       
-041829,000278: 17,2374           71434                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415033">AP3</a>                                   
-041830,000279: 17,2375           21714                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
-041831,000280: 17,2376           31742                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
-041832,000281: 17,2377           00006                          <span class="op">EXTEND  </span>                                       
-041833,000282: 17,2400           71435                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415033">AP3</a>        +1                         
-041834,000283: 17,2401           27714                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>     +1                         
-041835,000284: 17,2402           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041836,000285: 17,2403           12405                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041837,000286: 17,2404           27713                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                <span class="co">#  COMPLETED NODE NP3, AND PITCH GEN3DAP</span>
-041838,000287:                                                                                                 <span class="co">#                                                FILTER COMPUTATIONS</span>
-041839,000288: 
-041840,000289: 
-041841,000290: 17,2405           04574                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RETURN TO CSMDAP CODING FOR PITCH</span>
-041842,000291: 17,2406           40523                          <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#44454C42415250">DELBARP</a>                               <span class="co">#       OFFSET-TRACKER-FILTER COMPUTATIONS,</span>
-041843,000292:                                                                                                 <span class="co">#                                                AND PITCH DAP COPYCYCLE.</span>
-041844,000293: 
-041845,000294:                                                                                                 <span class="co"># # Page 964</span>
-041846,000295:                                                                                                 <span class="co">#  YAW GEN3DAP FILTER....</span>
-041847,000296: 
-<a name="4E59304E4F4445"></a>041848,000297: 17,2407           00006        <span class="sm">NY0NODE </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NY0....COLLECT (PAST NY1)</span>
-041849,000298: 17,2410           31610                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931">NY1</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
-041850,000299: 17,2411           20001                          <span class="op">DDOUBL  </span>                                       
-041851,000300: 17,2412           20001                          <span class="op">DDOUBL  </span>                                       
-041852,000301: 17,2413           53606                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
-041853,000302: 
-<a name="41593028455929"></a>041854,000303: 17,2414           31742        <span class="sm">AY0(EY) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  SPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041855,000304: 17,2415           00006                          <span class="op">EXTEND  </span>                                       <span class="co">#       EY = ERRBTMP,  SP, SC.AT B-1 REVS</span>
-041856,000305: 17,2416           71427                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415930">AY0</a>                                   
-041857,000306: 17,2417           21606                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  COMPLETED NODE NY0, SC.AT B+1 REVS</span>
-041858,000307: 
-041859,000308: 
-<a name="4E59444E4F4445"></a>041860,000309: 17,2420           31605        <span class="sm">NYDNODE </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  FORM NODE NYD....SPXDP MULTIPLY BY GAIN</span>
-041861,000310: 17,2421           00006                          <span class="op">EXTEND  </span>                                       
-041862,000311: 17,2422           71651                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5947454E33">KYGEN3</a>                                
-041863,000312: 17,2423           53745                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   
-041864,000313: 17,2424           31606                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
-041865,000314: 17,2425           00006                          <span class="op">EXTEND  </span>                                       
-041866,000315: 17,2426           71651                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5947454E33">KYGEN3</a>                                
-041867,000316: 17,2427           22007                          <span class="op">ZL      </span>                                       
-041868,000317: 17,2430           22000                          <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041869,000318: 17,2431           21745                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   <span class="co">#  SC.AT B+4 ASCREV SINCE KYGEN3 AT B+1</span>
-041870,000319: 
-041871,000320: 17,2432           53745                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   <span class="co">#  FIX UP SCALING</span>
-041872,000321: 17,2433           20001                          <span class="op">DDOUBL  </span>                                       
-041873,000322: 17,2434           20001                          <span class="op">DDOUBL  </span>                                       
-041874,000323: 17,2435           20001                          <span class="op">DDOUBL  </span>                                       
-041875,000324: 17,2436           20001                          <span class="op">DDOUBL  </span>                                       
-041876,000325: 17,2437           53745                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   <span class="co">#  COMPLETED NODE NYD, SC.AT 1ASCREV</span>
-041877,000326: 
-041878,000327: 
-041879,000328: 17,2440           04574                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  TRANSFER BACK TO REGULAR DAP CODING FOR</span>
-041880,000329: 17,2441           40714                          <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#594F4646534554">YOFFSET</a>                               <span class="co">#       OUTPUT  (NYD = CMDTMP, DP)</span>
-<a name="4E59314E4F4445"></a>041881,000330: 17,2442           00006        <span class="sm">NY1NODE </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NY1....COLLECT  (PAST NY2)</span>
-041882,000331: 17,2443           31566                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932">NY2</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
-041883,000332: 17,2444           53737                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
-041884,000333: 
-<a name="425931284E593029"></a>041885,000334: 17,2445           41605        <span class="sm">BY1(NY0)</span>          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
-041886,000335: 17,2446           00006                          <span class="op">EXTEND  </span>                                       
-041887,000336: 17,2447           71436                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425931">BY1</a>                                   
-041888,000337: 17,2450           21737                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
-041889,000338: 17,2451           41606                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
-041890,000339: 17,2452           00006                          <span class="op">EXTEND  </span>                                       
-041891,000340: 17,2453           71436                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425931">BY1</a>                                   
-041892,000341: 17,2454           27737                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>     +1                         
-041893,000342: 17,2455           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041894,000343: 17,2456           12460                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041895,000344: 17,2457           27736                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
-041896,000345:                                                                                                 <span class="co"># # Page 965</span>
-041897,000346: 17,2460           41605                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
-041898,000347: 17,2461           00006                          <span class="op">EXTEND  </span>                                       
-041899,000348: 17,2462           71437                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425931">BY1</a>        +1                         
-041900,000349: 17,2463           27737                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>     +1                         
-041901,000350: 17,2464           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041902,000351: 17,2465           12467                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041903,000352: 17,2466           27736                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
-041904,000353: 
-<a name="41593128455929"></a>041905,000354: 17,2467           31742        <span class="sm">AY1(EY) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041906,000355: 17,2470           00006                          <span class="op">EXTEND  </span>                                       
-041907,000356: 17,2471           71430                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415931">AY1</a>                                   
-041908,000357: 17,2472           21737                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
-041909,000358: 17,2473           31742                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    
-041910,000359: 17,2474           00006                          <span class="op">EXTEND  </span>                                       
-041911,000360: 17,2475           71431                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415931">AY1</a>        +1                         
-041912,000361: 17,2476           27737                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>     +1                         
-041913,000362: 17,2477           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041914,000363: 17,2500           12502                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041915,000364: 17,2501           27736                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                <span class="co">#  COMPLETED NODE NY1</span>
-041916,000365: 
-<a name="4E59324E4F4445"></a>041917,000366: 17,2502           00006        <span class="sm">NY2NODE </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  DORM NODE NY2....COLLECT (PAST NY3)</span>
-041918,000367: 17,2503           31570                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933">NY3</a>                                   
-041919,000368: 17,2504           53712                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
-041920,000369: 
-<a name="425932284E593029"></a>041921,000370: 17,2505           41605        <span class="sm">BY2(NY0)</span>          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
-041922,000371: 17,2506           00006                          <span class="op">EXTEND  </span>                                       
-041923,000372: 17,2507           71440                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425932">BY2</a>                                   
-041924,000373: 17,2510           21712                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
-041925,000374: 17,2511           41606                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
-041926,000375: 17,2512           00006                          <span class="op">EXTEND  </span>                                       
-041927,000376: 17,2513           71440                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425932">BY2</a>                                   
-041928,000377: 17,2514           27712                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>     +1                         
-041929,000378: 17,2515           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041930,000379: 17,2516           12520                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041931,000380: 17,2517           27711                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
-041932,000381: 17,2520           41605                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
-041933,000382: 17,2521           00006                          <span class="op">EXTEND  </span>                                       
-041934,000383: 17,2522           71441                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425932">BY2</a>        +1                         
-041935,000384: 17,2523           27712                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>     +1                         
-041936,000385: 17,2524           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041937,000386: 17,2525           12527                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041938,000387: 17,2526           27711                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
-041939,000388: 
-<a name="41593228455929"></a>041940,000389: 17,2527           31742        <span class="sm">AY2(EY) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041941,000390: 17,2530           00006                          <span class="op">EXTEND  </span>                                       
-041942,000391: 17,2531           71432                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415932">AY2</a>                                   
-041943,000392: 17,2532           21712                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
-041944,000393: 17,2533           31742                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    
-041945,000394: 17,2534           00006                          <span class="op">EXTEND  </span>                                       
-041946,000395: 17,2535           71433                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415932">AY2</a>        +1                         
-041947,000396:                                                                                                 <span class="co"># # Page 966</span>
-041948,000397: 17,2536           27712                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>     +1                         
-041949,000398: 17,2537           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041950,000399: 17,2540           12542                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041951,000400: 17,2541           27711                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                <span class="co">#  COMPLETED NODE NY2</span>
-041952,000401: 
-<a name="4E59334E4F4445"></a>041953,000402: 17,2542           41605        <span class="sm">NY3NODE </span>          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  FORM NODE NY3....NO PAST NODES, DIRECT</span>
-041954,000403: 17,2543           00006                          <span class="op">EXTEND  </span>                                       <span class="co">#       TO DPXDP MULTIPLY FOR DENOMINATOR</span>
-041955,000404: 17,2544           71442                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425933">BY3</a>                                   <span class="co">#       COMPONENT</span>
-041956,000405: 17,2545           53714                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
-041957,000406: 17,2546           41606                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
-041958,000407: 17,2547           00006                          <span class="op">EXTEND  </span>                                       
-041959,000408: 17,2550           71442                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425933">BY3</a>                                   
-041960,000409: 17,2551           27714                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>     +1                         
-041961,000410: 17,2552           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041962,000411: 17,2553           12555                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041963,000412: 17,2554           27713                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
-041964,000413: 17,2555           41605                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
-041965,000414: 17,2556           00006                          <span class="op">EXTEND  </span>                                       
-041966,000415: 17,2557           71443                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425933">BY3</a>        +1                         
-041967,000416: 17,2560           27714                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>     +1                         
-041968,000417: 17,2561           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041969,000418: 17,2562           12564                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041970,000419: 17,2563           27713                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
-041971,000420: 
-<a name="41593328455929"></a>041972,000421: 17,2564           31742        <span class="sm">AY3(EY) </span>          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
-041973,000422: 17,2565           00006                          <span class="op">EXTEND  </span>                                       
-041974,000423: 17,2566           71434                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415933">AY3</a>                                   
-041975,000424: 17,2567           21714                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
-041976,000425: 17,2570           31742                          <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    
-041977,000426: 17,2571           00006                          <span class="op">EXTEND  </span>                                       
-041978,000427: 17,2572           71435                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415933">AY3</a>        +1                         
-041979,000428: 17,2573           27714                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>     +1                         
-041980,000429: 17,2574           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041981,000430: 17,2575           12577                          <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-041982,000431: 17,2576           27713                          <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                <span class="co">#  COMPLETED NODE NY3, AND YAW GEN3DAP</span>
-041983,000432:                                                                                                 <span class="co">#                                                FILTER COMPUTATIONS</span>
-041984,000433: 
-041985,000434: 
-041986,000435: 17,2577           04574                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RETURN TO CSMDAP CODING FOR YAW</span>
-041987,000436: 17,2600           41001                          <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#44454C42415259">DELBARY</a>                               <span class="co">#       OFFSET-TRACKER-FILTER COMPUTATIONS,</span>
-041988,000437:                                                                                                 <span class="co">#                                                AND YAW DAP COPYCYCLE.</span>
+041562,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+041563,000003:                                                                                                  <span class="co">#  Filename:     TVCGEN3FILTERS.agc</span>
+041564,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
+041565,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
+041566,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
+041567,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+041568,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+041569,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
+041570,000010:                                                                                                  <span class="co">#  Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+041571,000011:                                                                                                  <span class="co">#  Mod history:  2011-03-12 JL   Adapted from corresponding Colossus 249 file.</span>
+041572,000012: 
+041573,000013:                                                                                                  <span class="co"># # Page 958</span>
+041574,000014:                                                                                                  <span class="co">#  PROGRAM NAME.... GEN3DAP FILTERS, CONSISTING OF NP0NODE, NP1NODE, NY0NODE, NY1NODE, ETC.</span>
+041575,000015:                                                                                                  <span class="co">#  LOG SECTION.... GEN3DAP FILTERS   SUBROUTINE....DAPCSM</span>
+041576,000016:                                                                                                  <span class="co">#  MOD BY ENGEL                      20 OCT, 1967</span>
+041577,000017: 
+041578,000018:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
+041579,000019: 
+041580,000020:                                                                                                  <span class="co">#       THE GEN3DAP FILTER PACKAGE IS DESIGNED TO PROVIDE FLEXIBLE, LAST-MINUTE CHANGEABLE DIGITAL AUTOPILOT</span>
+041581,000021:                                                                                                  <span class="co">#  FILTERS FOR LEM-OFF FLIGHT.  GROUNDRULES FOR THE DESIGN AND USE OF THE PACKAGE ARE AS FOLLOWS.....</span>
+041582,000022: 
+041583,000023:                                                                                                  <span class="co">#       1. FILTER COEFFICIENTS AND GAINS IN ERASABLE MEMORY</span>
+041584,000024:                                                                                                  <span class="co">#       2. UP TO THIRD-ORDER NUMERATOR OR DENOMINATOR</span>
+041585,000025:                                                                                                  <span class="co">#       3. OPERATIONAL FIT WITHIN THE STRUCTURE OF TEH REGULAR LEM-ON DAP CODING</span>
+041586,000026:                                                                                                  <span class="co">#       4. DENOMINATOR POLES INSIDE THE Z-PLANE UNIT CIRCLE</span>
+041587,000027:                                                                                                  <span class="co">#       5. NUMERATOR ZEROES INSIDE THE Z-PLANE DOUBLE-UNIT CIRCLE</span>
+041588,000028:                                                                                                  <span class="co">#       6. HIGH FREQUENCY (BODE) GAIN LESS THAN 8ASCREVS, OR 8.6380088 DEG/DEG</span>
+041589,000029: 
+041590,000030:                                                                                                  <span class="co">#  THE FILTERS ARE SHOWN IN THE FOLLOWING DIAGRAMS.....</span>
+041591,000031: 
+041592,000032: 
+041593,000033:                                                                                                  <span class="co">#  PITCH GEN3DAP FILTER..</span>
+041594,000034: 
+041595,000035:                                                                                                  <span class="co">#                                                                   KPGEN3</span>
+041596,000036:                                                                                                  <span class="co">#                                                                  ********</span>
+041597,000037:                                                                                                  <span class="co">#                     *****************************************           *</span>
+041598,000038:                                                                                                  <span class="co">#                     *                                       *           *</span>
+041599,000039:                                                                                                  <span class="co">#                     *              -1        -2        -3   *           *</span>
+041600,000040:                                                                                                  <span class="co">#        EP = ERRBTMP *    AP0 + AP1 Z   + AP2 Z   + AP3 Z     *   NP0          NPD = CMDTMP  **</span>
+041601,000041:                                                                                                  <span class="co">#       ***************  -----------------------------------  **********( X )*********************</span>
+041602,000042:                                                                                                  <span class="co">#                     *              -1        -2        -3   *                               **</span>
+041603,000043:                                                                                                  <span class="co">#                     *    1  + BP1 Z   + BP2 Z   + BP3 Z     *</span>
+041604,000044:                                                                                                  <span class="co">#                     *                                       *</span>
+041605,000045:                                                                                                  <span class="co">#                     *****************************************</span>
+041606,000046: 
+041607,000047: 
+041608,000048:                                                                                                  <span class="co">#  YAW GEN3DAP FILTER..</span>
+041609,000049: 
+041610,000050:                                                                                                  <span class="co">#                                                                 KYGEN3</span>
+041611,000051:                                                                                                  <span class="co">#                                                                ********</span>
+041612,000052:                                                                                                  <span class="co">#                    *****************************************           *</span>
+041613,000053:                                                                                                  <span class="co">#                    *                                       *           *</span>
+041614,000054:                                                                                                  <span class="co">#                    *              -1        -2        -3   *           *</span>
+041615,000055:                                                                                                  <span class="co">#       EY = ERRBTMP *    AY0 + AY1 Z   + AY2 Z   + AY3 Z     *   NY0          NYP = CMDTMP  **</span>
+041616,000056:                                                                                                  <span class="co">#      ***************  -----------------------------------  **********( X )*********************</span>
+041617,000057:                                                                                                  <span class="co">#                    *              -1        -2        -3   *                               **</span>
+041618,000058:                                                                                                  <span class="co">#                    *    1  + BY1 Z   + BY2 Z   + BY3 Z     *</span>
+041619,000059:                                                                                                  <span class="co">#                    *                                       *</span>
+041620,000060:                                                                                                  <span class="co">#                    *****************************************</span>
+041621,000061: 
+041622,000062:                                                                                                  <span class="co"># # Page 959</span>
+041623,000063:                                                                                                  <span class="co">#  THE IMPLEMENTING EQUATIONS FOR THESE FILTERS ARE AS FOLLOWS.....</span>
+041624,000064: 
+041625,000065:                                                                                                  <span class="co">#       PITCH GEN3DAP....                                 YAW GEN3DAP....</span>
+041626,000066:                                                                                                  <span class="co">#           NPD = (B+4) KPGEN3 NP0                            NYD = (B+4) KYGEN3 NY0</span>
+041627,000067:                                                                                                  <span class="co">#           NP0 = AP0 EP           +4(Z-1) NP1                NY0 = AY0 EY           +4(Z-1) NY1</span>
+041628,000068:                                                                                                  <span class="co">#           NP1 = AP1 EP - BP1 NP0 + (Z-1) NP2                NY1 = AY1 EY - BY1 NY0 + (Z-1) NY2</span>
+041629,000069:                                                                                                  <span class="co">#           NP2 = AP3 EP - BP2 NP0 + (Z-1) NP3                NY2 = AY2 EY - BY2 NY0 + (Z-1) NY3</span>
+041630,000070:                                                                                                  <span class="co">#           NP3 = AP3 EP - BP3 NP0                            NY3 = AY3 EY - BY3 NY0</span>
+041631,000071: 
+041632,000072: 
+041633,000073:                                                                                                  <span class="co">#       FILTER INPUTS EP AND EY ARE PICKED UP FROM REGULAR LEM-ON CODING AT ERRBTMP  (UPPER WORD ONLY),  THUS ARE</span>
+041634,000074:                                                                                                  <span class="co">#  SINGLE PRECISION QUANTITIES SCALED AT B-1 REVS. FILTER OUTPUTS NPD AND NYD ARE LEFT IN DOUBLE PRECISION AT</span>
+041635,000075:                                                                                                  <span class="co">#  CMDTMP, SCALED AT 1 ASCREV, READY FOR OUTPUT PROCESSING VIA REGULAR LEM-ON CODING AT ..P,YOFFSET..</span>
+041636,000076:                                                                                                  <span class="co">#  FOLLOWING OUTPUT PROCESSING, RETURN TO THE GEN3DAP FILTERS IS MADE FOR CALCULATION OF THE REMAINING NODES</span>
+041637,000077:                                                                                                  <span class="co">#  NP1 TO NP3, OR NY1 TO NY3.  GEN3DAP FILTERS THEN RETURN TO THE LEM-ON CODING AT  ..DELBARP,Y..   FOR RESPECTIVE</span>
+041638,000078:                                                                                                  <span class="co">#  OFFSET-TRACKER-FILTER COMPUTATIONS AND COPYCYCLES. NOTE THE EQUIVALENCES...NP1TMP=J5TMP, NP1=J5,</span>
+041639,000079:                                                                                                  <span class="co">#  NP2TMP=NSUMTMP, NP2=PNSUM, NP3TMP=DSUMTMP, NP3=PDSUM, WITH CORRESPONDING RELATIONS FOR YAW.  THUS THE COPY-</span>
+041640,000080:                                                                                                  <span class="co">#  CYCLE  PCOPY, FROM THE GEN3DAP STANDPOINT, IS EFFECTIVE FROM PMISC-3 TO ITS END AT TC Q.  YCOPY FROM YMISC-3.</span>
+041641,000081: 
+041642,000082: 
+041643,000083:                                                                                                  <span class="co">#  SCALING OF THE FILTER NODES, COEFFICIENTS, AND GAINS WITHIN THE AGC IS AS FOLLOWS.....</span>
+041644,000084: 
+041645,000085:                                                                                                  <span class="co">#           QUANTITY   QUANTITY      PHYS.UNITS     MAX.VALUE      SCALE AT (FOR)</span>
+041646,000086: 
+041647,000087:                                                                                                  <span class="co">#           EP         EY            REVS              1/8           B-1 REV           (CDU SCALING)</span>
+041648,000088: 
+041649,000089:                                                                                                  <span class="co">#           NP0        NY0           REVS             (B+1)          B+1 REV</span>
+041650,000090:                                                                                                  <span class="co">#           NP1        NY1           REVS             (B+3)          B+3 REV</span>
+041651,000091:                                                                                                  <span class="co">#           NP2        NY2           REVS             (B+3)          B+3 REV</span>
+041652,000092:                                                                                                  <span class="co">#           NP3        NY3           REVS             (B+3)          B+3 REV</span>
+041653,000093: 
+041654,000094:                                                                                                  <span class="co">#           NPD        NYD         ASC REVS            (1)           1 ASCREV          (ACTUATOR CDU SCALING)</span>
+041655,000095: 
+041656,000096:                                                                                                  <span class="co">#           KPGEN3     KYGEN3     ASCREV/REV           (8)         B+3 ASCREV/REV</span>
+041657,000097: 
+041658,000098:                                                                                                  <span class="co">#           AP0        AY0         DIMLESS.             1              B+2</span>
+041659,000099:                                                                                                  <span class="co">#           AP1        AY1         DIMLESS.             6              B+4</span>
+041660,000100:                                                                                                  <span class="co">#           AP2        AY2         DIMLESS.             12             B+4</span>
+041661,000101:                                                                                                  <span class="co">#           AP3        AY3         DIMLESS.             8              B+4</span>
+041662,000102: 
+041663,000103:                                                                                                  <span class="co">#           BP1        BY1         DIMLESS.             3              B+2</span>
+041664,000104:                                                                                                  <span class="co">#           BP2        BY2         DIMLESS.             3              B+2</span>
+041665,000105:                                                                                                  <span class="co">#           BP3        BY3         DIMLESS.             1              B+2</span>
+041666,000106: 
+041667,000107:                                                                                                  <span class="co">#  FILTER COEFFICIENTS, GAINS, AND NODES ARE HELD IN DOUBLE PRECISION (ERASABLE) TO PERMIT CONSERVATIVE</span>
+041668,000108:                                                                                                  <span class="co">#  SCALING AND YET OFFSET TRUNCATION LOSSES.  THIS APPEARS NECESSARY IF FILTER FLEXIBILITY IS TO BE MAINTAINED.</span>
+041669,000109:                                                                                                  <span class="co">#  COMPUTATION TIME IS NOT CRITICAL.</span>
+041670,000110: 
+041671,000111:                                                                                                  <span class="co"># # Page 960</span>
+041672,000112:                                                                                                  <span class="co">#  CALLING SEQUENCE....</span>
+041673,000113: 
+041674,000114:                                                                                                  <span class="co">#      *TC POSTJUMP....</span>
+041675,000115:                                                                                                  <span class="co">#       CADR NP0NODE, NP1, NY0, NY1.  SPECIFICALLY, FROM PITCHDAP OR YAWDAP</span>
+041676,000116:                                                                                                  <span class="co">#       (TVCDAP),AT P1FILJMP, P2FILJMP, Y1FILJMP, Y2FILJMP</span>
+041677,000117: 
+041678,000118:                                                                                                  <span class="co">#  NORMAL EXIT MODE....</span>
+041679,000119: 
+041680,000120:                                                                                                  <span class="co">#      *TC POSTJUMP....</span>
+041681,000121:                                                                                                  <span class="co">#       CADR  (POFFSET, DELBARP), (YOFFSET, DELBARY).     IE, RETURNS TO</span>
+041682,000122:                                                                                                  <span class="co">#       PITCHDAP OR YAWDAP AT APPROPRIATE ENTRY POINT</span>
+041683,000123: 
+041684,000124:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES....NONE</span>
+041685,000125: 
+041686,000126:                                                                                                  <span class="co">#  SUBROUTINES CALLED.... NONE</span>
+041687,000127: 
+041688,000128:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
+041689,000129: 
+041690,000130:                                                                                                  <span class="co">#      *AP0(SP),AP1(DP),...AP3(DP), (PITCH AND YAW) NUMERATOR COEFFICIENTS</span>
+041691,000131:                                                                                                  <span class="co">#       (PAD LOADS)</span>
+041692,000132:                                                                                                  <span class="co">#      *BP1(DP),...BP3(DP), (PITCH AND YAW) DENOMINATOR COEFFICIENTS</span>
+041693,000133:                                                                                                  <span class="co">#       (PAD LOADS)</span>
+041694,000134:                                                                                                  <span class="co">#      *KPGEN3 (S40.15 OF R03)</span>
+041695,000135: 
+041696,000136:                                                                                                  <span class="co">#  OUTPUT....</span>
+041697,000137: 
+041698,000138:                                                                                                  <span class="co">#      *CMDTMP (NPD, NYD) FOR OUTPUT PROCESSING BY PITCHDAP OR YAWDAP</span>
+041699,000139:                                                                                                  <span class="co">#      *OTHER FILTER NODES</span>
+041700,000140: 
+041701,000141:                                                                                                  <span class="co">#  DEBRIS....TVC TEMPORARIES, SHAREABLE WITH RCS/ENTRY IN EBANK6 ONLY</span>
+041702,000142: 
+041703,000143: 
+041704,000144: 21,2026                                           <span class="ps">BANK    </span> 21                                    
+041705,000145: 17,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505334">DAPS4</a>                                 
+041706,000146: 17,2000                                           <span class="ps">BANK    </span>                                       
+041707,000147: 17,2215  E6,1742                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
+041708,000148: 17,2215                                           <span class="ps">COUNT*  </span> $$/GEN3                               
+041709,000149: 
+041710,000150:                                                                                                  <span class="co"># # Page 961</span>
+041711,000151:                                                                                                  <span class="co">#  PITCH GEN3DAP FILTER.....</span>
+041712,000152: 
+<a name="4E50304E4F4445"></a>041713,000153: 17,2215           00006        <span class="sm">NP0NODE </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NP0....COLLECT  (PAST NP1)</span>
+041714,000154: 17,2216           31564                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031">NP1</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
+041715,000155: 17,2217           20001                           <span class="op">DDOUBL  </span>                                       
+041716,000156: 17,2220           20001                           <span class="op">DDOUBL  </span>                                       
+041717,000157: 17,2221           53562                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
+041718,000158: 
+<a name="41503028455029"></a>041719,000159: 17,2222           31742        <span class="sm">AP0(EP) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  SPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041720,000160: 17,2223           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#       EP = ERRBTMP,  SP, SC.AT B-1 REVS</span>
+041721,000161: 17,2224           71427                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415030">AP0</a>                                   
+041722,000162: 17,2225           21562                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  COMPLETED NODE NP0, SC.AT B+1 REVS</span>
+041723,000163: 
+041724,000164: 
+<a name="4E50444E4F4445"></a>041725,000165: 17,2226           31561        <span class="sm">NPDNODE </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  FORM NODE NPD....SPXDP MULTIPLY BY GAIN</span>
+041726,000166: 17,2227           00006                           <span class="op">EXTEND  </span>                                       
+041727,000167: 17,2230           71651                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5047454E33">KPGEN3</a>                                
+041728,000168: 17,2231           53745                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   
+041729,000169: 17,2232           31562                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
+041730,000170: 17,2233           00006                           <span class="op">EXTEND  </span>                                       
+041731,000171: 17,2234           71651                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5047454E33">KPGEN3</a>                                
+041732,000172: 17,2235           22007                           <span class="op">ZL      </span>                                       
+041733,000173: 17,2236           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041734,000174: 17,2237           21745                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   <span class="co">#  SC.AT B+4 ASCREV SINCE KPGEN3 AT B+3</span>
+041735,000175: 
+041736,000176: 17,2240           53745                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   <span class="co">#  FIX UP SCALING</span>
+041737,000177: 17,2241           20001                           <span class="op">DDOUBL  </span>                                       
+041738,000178: 17,2242           20001                           <span class="op">DDOUBL  </span>                                       
+041739,000179: 17,2243           20001                           <span class="op">DDOUBL  </span>                                       
+041740,000180: 17,2244           20001                           <span class="op">DDOUBL  </span>                                       
+041741,000181: 17,2245           53745                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5044">NPD</a>                                   <span class="co">#  COMPLETED NODE NPD, SC.AT 1ASCREV</span>
+041742,000182: 
+041743,000183: 
+041744,000184: 17,2246           04574                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  TRANSFER BACK TO REGULAR DAP CODING FOR</span>
+041745,000185: 17,2247           40436                           <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#504F4646534554">POFFSET</a>                               <span class="co">#       OUTPUT  (NPD = CMDTMP, DP)</span>
+<a name="4E50314E4F4445"></a>041746,000186: 17,2250           00006        <span class="sm">NP1NODE </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NP1....COLLECT  (PAST NP2)</span>
+041747,000187: 17,2251           31542                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032">NP2</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
+041748,000188: 17,2252           53737                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
+041749,000189: 
+<a name="425031284E503029"></a>041750,000190: 17,2253           41561        <span class="sm">BP1(NP0)</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
+041751,000191: 17,2254           00006                           <span class="op">EXTEND  </span>                                       
+041752,000192: 17,2255           71436                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425031">BP1</a>                                   
+041753,000193: 17,2256           21737                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
+041754,000194: 17,2257           41562                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
+041755,000195: 17,2260           00006                           <span class="op">EXTEND  </span>                                       
+041756,000196: 17,2261           71436                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425031">BP1</a>                                   
+041757,000197: 17,2262           27737                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>     +1                         
+041758,000198: 17,2263           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041759,000199: 17,2264           12266                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041760,000200: 17,2265           27736                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
+041761,000201:                                                                                                  <span class="co"># # Page 962</span>
+041762,000202: 17,2266           41561                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
+041763,000203: 17,2267           00006                           <span class="op">EXTEND  </span>                                       
+041764,000204: 17,2270           71437                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425031">BP1</a>        +1                         
+041765,000205: 17,2271           27737                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>     +1                         
+041766,000206: 17,2272           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041767,000207: 17,2273           12275                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041768,000208: 17,2274           27736                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
+041769,000209: 
+<a name="41503128455029"></a>041770,000210: 17,2275           31742        <span class="sm">AP1(EP) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041771,000211: 17,2276           00006                           <span class="op">EXTEND  </span>                                       
+041772,000212: 17,2277           71430                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415031">AP1</a>                                   
+041773,000213: 17,2300           21737                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                
+041774,000214: 17,2301           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
+041775,000215: 17,2302           00006                           <span class="op">EXTEND  </span>                                       
+041776,000216: 17,2303           71431                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415031">AP1</a>        +1                         
+041777,000217: 17,2304           27737                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>     +1                         
+041778,000218: 17,2305           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041779,000219: 17,2306           12310                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041780,000220: 17,2307           27736                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5031544D50">NP1TMP</a>                                <span class="co">#  COMPLETED NODE NP1</span>
+041781,000221: 
+<a name="4E50324E4F4445"></a>041782,000222: 17,2310           00006        <span class="sm">NP2NODE </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NP2....COLLECT (PAST NP3)</span>
+041783,000223: 17,2311           31544                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033">NP3</a>                                   
+041784,000224: 17,2312           53712                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
+<a name="425032284E503029"></a>041785,000225: 17,2313           41561        <span class="sm">BP2(NP0)</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
+041786,000226: 17,2314           00006                           <span class="op">EXTEND  </span>                                       
+041787,000227: 17,2315           71440                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425032">BP2</a>                                   
+041788,000228: 17,2316           21712                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
+041789,000229: 17,2317           41562                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
+041790,000230: 17,2320           00006                           <span class="op">EXTEND  </span>                                       
+041791,000231: 17,2321           71440                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425032">BP2</a>                                   
+041792,000232: 17,2322           27712                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>     +1                         
+041793,000233: 17,2323           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041794,000234: 17,2324           12326                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041795,000235: 17,2325           27711                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
+041796,000236: 17,2326           41561                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
+041797,000237: 17,2327           00006                           <span class="op">EXTEND  </span>                                       
+041798,000238: 17,2330           71441                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425032">BP2</a>        +1                         
+041799,000239: 17,2331           27712                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>     +1                         
+041800,000240: 17,2332           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041801,000241: 17,2333           12335                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041802,000242: 17,2334           27711                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
+041803,000243: 
+<a name="41503228455029"></a>041804,000244: 17,2335           31742        <span class="sm">AP2(EP) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041805,000245: 17,2336           00006                           <span class="op">EXTEND  </span>                                       
+041806,000246: 17,2337           71432                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415032">AP2</a>                                   
+041807,000247: 17,2340           21712                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                
+041808,000248: 17,2341           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
+041809,000249: 17,2342           00006                           <span class="op">EXTEND  </span>                                       
+041810,000250: 17,2343           71433                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415032">AP2</a>        +1                         
+041811,000251: 17,2344           27712                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>     +1                         
+041812,000252:                                                                                                  <span class="co"># # Page 963</span>
+041813,000253: 17,2345           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041814,000254: 17,2346           12350                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041815,000255: 17,2347           27711                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5032544D50">NP2TMP</a>                                <span class="co">#  COMPLETED NODE NP2</span>
+041816,000256: 
+<a name="4E50334E4F4445"></a>041817,000257: 17,2350           41561        <span class="sm">NP3NODE </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   <span class="co">#  FORM NODE NP3....NO PAST NODES, DIRECT</span>
+041818,000258: 17,2351           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#       DPXDP MULTIPLY FOR DENOMINATOR</span>
+041819,000259: 17,2352           71442                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425033">BP3</a>                                   <span class="co">#       COMPONENT</span>
+041820,000260: 17,2353           53714                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
+041821,000261: 17,2354           41562                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>        +1                         
+041822,000262: 17,2355           00006                           <span class="op">EXTEND  </span>                                       
+041823,000263: 17,2356           71442                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425033">BP3</a>                                   
+041824,000264: 17,2357           27714                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>     +1                         
+041825,000265: 17,2360           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041826,000266: 17,2361           12363                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041827,000267: 17,2362           27713                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
+041828,000268: 17,2363           41561                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5030">NP0</a>                                   
+041829,000269: 17,2364           00006                           <span class="op">EXTEND  </span>                                       
+041830,000270: 17,2365           71443                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425033">BP3</a>        +1                         
+041831,000271: 17,2366           27714                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>     +1                         
+041832,000272: 17,2367           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041833,000273: 17,2370           12372                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041834,000274: 17,2371           27713                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
+041835,000275: 
+<a name="41503328455029"></a>041836,000276: 17,2372           31742        <span class="sm">AP3(EP) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041837,000277: 17,2373           00006                           <span class="op">EXTEND  </span>                                       
+041838,000278: 17,2374           71434                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415033">AP3</a>                                   
+041839,000279: 17,2375           21714                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                
+041840,000280: 17,2376           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4550">EP</a>                                    
+041841,000281: 17,2377           00006                           <span class="op">EXTEND  </span>                                       
+041842,000282: 17,2400           71435                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415033">AP3</a>        +1                         
+041843,000283: 17,2401           27714                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>     +1                         
+041844,000284: 17,2402           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041845,000285: 17,2403           12405                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041846,000286: 17,2404           27713                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5033544D50">NP3TMP</a>                                <span class="co">#  COMPLETED NODE NP3, AND PITCH GEN3DAP</span>
+041847,000287:                                                                                                  <span class="co">#                                               FILTER COMPUTATIONS</span>
+041848,000288: 
+041849,000289: 
+041850,000290: 17,2405           04574                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RETURN TO CSMDAP CODING FOR PITCH</span>
+041851,000291: 17,2406           40523                           <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#44454C42415250">DELBARP</a>                               <span class="co">#       OFFSET-TRACKER-FILTER COMPUTATIONS,</span>
+041852,000292:                                                                                                  <span class="co">#                                               AND PITCH DAP COPYCYCLE.</span>
+041853,000293: 
+041854,000294:                                                                                                  <span class="co"># # Page 964</span>
+041855,000295:                                                                                                  <span class="co">#  YAW GEN3DAP FILTER....</span>
+041856,000296: 
+<a name="4E59304E4F4445"></a>041857,000297: 17,2407           00006        <span class="sm">NY0NODE </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NY0....COLLECT (PAST NY1)</span>
+041858,000298: 17,2410           31610                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931">NY1</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
+041859,000299: 17,2411           20001                           <span class="op">DDOUBL  </span>                                       
+041860,000300: 17,2412           20001                           <span class="op">DDOUBL  </span>                                       
+041861,000301: 17,2413           53606                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
+041862,000302: 
+<a name="41593028455929"></a>041863,000303: 17,2414           31742        <span class="sm">AY0(EY) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  SPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041864,000304: 17,2415           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#       EY = ERRBTMP,  SP, SC.AT B-1 REVS</span>
+041865,000305: 17,2416           71427                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415930">AY0</a>                                   
+041866,000306: 17,2417           21606                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  COMPLETED NODE NY0, SC.AT B+1 REVS</span>
+041867,000307: 
+041868,000308: 
+<a name="4E59444E4F4445"></a>041869,000309: 17,2420           31605        <span class="sm">NYDNODE </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  FORM NODE NYD....SPXDP MULTIPLY BY GAIN</span>
+041870,000310: 17,2421           00006                           <span class="op">EXTEND  </span>                                       
+041871,000311: 17,2422           71651                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5947454E33">KYGEN3</a>                                
+041872,000312: 17,2423           53745                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   
+041873,000313: 17,2424           31606                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
+041874,000314: 17,2425           00006                           <span class="op">EXTEND  </span>                                       
+041875,000315: 17,2426           71651                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5947454E33">KYGEN3</a>                                
+041876,000316: 17,2427           22007                           <span class="op">ZL      </span>                                       
+041877,000317: 17,2430           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041878,000318: 17,2431           21745                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   <span class="co">#  SC.AT B+4 ASCREV SINCE KYGEN3 AT B+1</span>
+041879,000319: 
+041880,000320: 17,2432           53745                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   <span class="co">#  FIX UP SCALING</span>
+041881,000321: 17,2433           20001                           <span class="op">DDOUBL  </span>                                       
+041882,000322: 17,2434           20001                           <span class="op">DDOUBL  </span>                                       
+041883,000323: 17,2435           20001                           <span class="op">DDOUBL  </span>                                       
+041884,000324: 17,2436           20001                           <span class="op">DDOUBL  </span>                                       
+041885,000325: 17,2437           53745                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5944">NYD</a>                                   <span class="co">#  COMPLETED NODE NYD, SC.AT 1ASCREV</span>
+041886,000326: 
+041887,000327: 
+041888,000328: 17,2440           04574                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  TRANSFER BACK TO REGULAR DAP CODING FOR</span>
+041889,000329: 17,2441           40714                           <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#594F4646534554">YOFFSET</a>                               <span class="co">#       OUTPUT  (NYD = CMDTMP, DP)</span>
+<a name="4E59314E4F4445"></a>041890,000330: 17,2442           00006        <span class="sm">NY1NODE </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  FORM NODE NY1....COLLECT  (PAST NY2)</span>
+041891,000331: 17,2443           31566                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932">NY2</a>                                   <span class="co">#       (COMES HERE FROM REG. DAP CODING)</span>
+041892,000332: 17,2444           53737                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
+041893,000333: 
+<a name="425931284E593029"></a>041894,000334: 17,2445           41605        <span class="sm">BY1(NY0)</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
+041895,000335: 17,2446           00006                           <span class="op">EXTEND  </span>                                       
+041896,000336: 17,2447           71436                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425931">BY1</a>                                   
+041897,000337: 17,2450           21737                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
+041898,000338: 17,2451           41606                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
+041899,000339: 17,2452           00006                           <span class="op">EXTEND  </span>                                       
+041900,000340: 17,2453           71436                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425931">BY1</a>                                   
+041901,000341: 17,2454           27737                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>     +1                         
+041902,000342: 17,2455           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041903,000343: 17,2456           12460                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041904,000344: 17,2457           27736                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
+041905,000345:                                                                                                  <span class="co"># # Page 965</span>
+041906,000346: 17,2460           41605                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
+041907,000347: 17,2461           00006                           <span class="op">EXTEND  </span>                                       
+041908,000348: 17,2462           71437                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425931">BY1</a>        +1                         
+041909,000349: 17,2463           27737                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>     +1                         
+041910,000350: 17,2464           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041911,000351: 17,2465           12467                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041912,000352: 17,2466           27736                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
+041913,000353: 
+<a name="41593128455929"></a>041914,000354: 17,2467           31742        <span class="sm">AY1(EY) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041915,000355: 17,2470           00006                           <span class="op">EXTEND  </span>                                       
+041916,000356: 17,2471           71430                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415931">AY1</a>                                   
+041917,000357: 17,2472           21737                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                
+041918,000358: 17,2473           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    
+041919,000359: 17,2474           00006                           <span class="op">EXTEND  </span>                                       
+041920,000360: 17,2475           71431                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415931">AY1</a>        +1                         
+041921,000361: 17,2476           27737                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>     +1                         
+041922,000362: 17,2477           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041923,000363: 17,2500           12502                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041924,000364: 17,2501           27736                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5931544D50">NY1TMP</a>                                <span class="co">#  COMPLETED NODE NY1</span>
+041925,000365: 
+<a name="4E59324E4F4445"></a>041926,000366: 17,2502           00006        <span class="sm">NY2NODE </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DORM NODE NY2....COLLECT (PAST NY3)</span>
+041927,000367: 17,2503           31570                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933">NY3</a>                                   
+041928,000368: 17,2504           53712                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
+041929,000369: 
+<a name="425932284E593029"></a>041930,000370: 17,2505           41605        <span class="sm">BY2(NY0)</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  DPXDP MULTIPLY FOR DENOMINATOR COMPONENT</span>
+041931,000371: 17,2506           00006                           <span class="op">EXTEND  </span>                                       
+041932,000372: 17,2507           71440                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425932">BY2</a>                                   
+041933,000373: 17,2510           21712                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
+041934,000374: 17,2511           41606                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
+041935,000375: 17,2512           00006                           <span class="op">EXTEND  </span>                                       
+041936,000376: 17,2513           71440                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425932">BY2</a>                                   
+041937,000377: 17,2514           27712                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>     +1                         
+041938,000378: 17,2515           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041939,000379: 17,2516           12520                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041940,000380: 17,2517           27711                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
+041941,000381: 17,2520           41605                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
+041942,000382: 17,2521           00006                           <span class="op">EXTEND  </span>                                       
+041943,000383: 17,2522           71441                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425932">BY2</a>        +1                         
+041944,000384: 17,2523           27712                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>     +1                         
+041945,000385: 17,2524           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041946,000386: 17,2525           12527                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041947,000387: 17,2526           27711                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
+041948,000388: 
+<a name="41593228455929"></a>041949,000389: 17,2527           31742        <span class="sm">AY2(EY) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041950,000390: 17,2530           00006                           <span class="op">EXTEND  </span>                                       
+041951,000391: 17,2531           71432                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415932">AY2</a>                                   
+041952,000392: 17,2532           21712                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                
+041953,000393: 17,2533           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    
+041954,000394: 17,2534           00006                           <span class="op">EXTEND  </span>                                       
+041955,000395: 17,2535           71433                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415932">AY2</a>        +1                         
+041956,000396:                                                                                                  <span class="co"># # Page 966</span>
+041957,000397: 17,2536           27712                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>     +1                         
+041958,000398: 17,2537           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041959,000399: 17,2540           12542                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041960,000400: 17,2541           27711                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5932544D50">NY2TMP</a>                                <span class="co">#  COMPLETED NODE NY2</span>
+041961,000401: 
+<a name="4E59334E4F4445"></a>041962,000402: 17,2542           41605        <span class="sm">NY3NODE </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   <span class="co">#  FORM NODE NY3....NO PAST NODES, DIRECT</span>
+041963,000403: 17,2543           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#       TO DPXDP MULTIPLY FOR DENOMINATOR</span>
+041964,000404: 17,2544           71442                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425933">BY3</a>                                   <span class="co">#       COMPONENT</span>
+041965,000405: 17,2545           53714                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
+041966,000406: 17,2546           41606                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>        +1                         
+041967,000407: 17,2547           00006                           <span class="op">EXTEND  </span>                                       
+041968,000408: 17,2550           71442                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425933">BY3</a>                                   
+041969,000409: 17,2551           27714                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>     +1                         
+041970,000410: 17,2552           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041971,000411: 17,2553           12555                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041972,000412: 17,2554           27713                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
+041973,000413: 17,2555           41605                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5930">NY0</a>                                   
+041974,000414: 17,2556           00006                           <span class="op">EXTEND  </span>                                       
+041975,000415: 17,2557           71443                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425933">BY3</a>        +1                         
+041976,000416: 17,2560           27714                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>     +1                         
+041977,000417: 17,2561           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041978,000418: 17,2562           12564                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041979,000419: 17,2563           27713                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
+041980,000420: 
+<a name="41593328455929"></a>041981,000421: 17,2564           31742        <span class="sm">AY3(EY) </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    <span class="co">#  DPXSP MULTIPLY FOR NUMERATOR COMPONENT</span>
+041982,000422: 17,2565           00006                           <span class="op">EXTEND  </span>                                       
+041983,000423: 17,2566           71434                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415933">AY3</a>                                   
+041984,000424: 17,2567           21714                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                
+041985,000425: 17,2570           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4559">EY</a>                                    
+041986,000426: 17,2571           00006                           <span class="op">EXTEND  </span>                                       
+041987,000427: 17,2572           71435                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415933">AY3</a>        +1                         
+041988,000428: 17,2573           27714                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>     +1                         
+041989,000429: 17,2574           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041990,000430: 17,2575           12577                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
+041991,000431: 17,2576           27713                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5933544D50">NY3TMP</a>                                <span class="co">#  COMPLETED NODE NY3, AND YAW GEN3DAP</span>
+041992,000432:                                                                                                  <span class="co">#                                               FILTER COMPUTATIONS</span>
+041993,000433: 
+041994,000434: 
+041995,000435: 17,2577           04574                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RETURN TO CSMDAP CODING FOR YAW</span>
+041996,000436: 17,2600           41001                           <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#44454C42415259">DELBARY</a>                               <span class="co">#       OFFSET-TRACKER-FILTER COMPUTATIONS,</span>
+041997,000437:                                                                                                  <span class="co">#                                               AND YAW DAP COPYCYCLE.</span>
 
 End of include-file TVCGEN3FILTERS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

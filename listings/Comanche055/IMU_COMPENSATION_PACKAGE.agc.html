@@ -56,376 +56,409 @@ color: #993399;
 <span style="font-family: monospace;">
 <pre>
 <h1>Source Code</h1>
-012778,000001:                                                                                                 <span class="co">#  Copyright:     Public domain.</span>
-012779,000002:                                                                                                 <span class="co">#  Filename:      IMU_COMPENSATION_PACKAGE.agc</span>
-012780,000003:                                                                                                 <span class="co">#  Purpose:       Part of the source code for Colossus 2A, AKA Comanche 055.</span>
-012781,000004:                                                                                                 <span class="co">#                 It is part of the source code for the Command Module's (CM)</span>
-012782,000005:                                                                                                 <span class="co">#                 Apollo Guidance Computer (AGC), for Apollo 11.</span>
-012783,000006:                                                                                                 <span class="co">#  Assembler:     yaYUL</span>
-012784,000007:                                                                                                 <span class="co">#  Contact:       Ron Burkey &lt;info@sandroid.org>.</span>
-012785,000008:                                                                                                 <span class="co">#  Website:       www.ibiblio.org/apollo.</span>
-012786,000009:                                                                                                 <span class="co">#  Pages: 297-306</span>
-012787,000010:                                                                                                 <span class="co">#  Mod history:   2009-05-08 RSB  Adapted from the Colossus249/ file of the</span>
-012788,000011:                                                                                                 <span class="co">#                                 same name, using Comanche055 page images/</span>
-012789,000012:                                                                                                 <span class="co">#                 2009-05-21 RSB  In IRIGZ, PRIO17 corrected to PRIO21.</span>
-012790,000013: 
-012791,000014:                                                                                                 <span class="co">#  This source code has been transcribed or otherwise adapted from digitized</span>
-012792,000015:                                                                                                 <span class="co">#  images of a hardcopy from the MIT Museum.  The digitization was performed</span>
-012793,000016:                                                                                                 <span class="co">#  by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many</span>
-012794,000017:                                                                                                 <span class="co">#  thanks to both.  The images (with suitable reduction in storage size and</span>
-012795,000018:                                                                                                 <span class="co">#  consequent reduction in image quality as well) are available online at</span>
-012796,000019:                                                                                                 <span class="co">#  www.ibiblio.org/apollo.  If for some reason you find that the images are</span>
-012797,000020:                                                                                                 <span class="co">#  illegible, contact me at info@sandroid.org about getting access to the </span>
-012798,000021:                                                                                                 <span class="co">#  (much) higher-quality images which Paul actually created.</span>
-012799,000022: 
-012800,000023:                                                                                                 <span class="co">#  Notations on the hardcopy document read, in part:</span>
-012801,000024: 
-012802,000025:                                                                                                 <span class="co">#         Assemble revision 055 of AGC program Comanche by NASA</span>
-012803,000026:                                                                                                 <span class="co">#         2021113-051.  10:28 APR. 1, 1969  </span>
-012804,000027: 
-012805,000028:                                                                                                 <span class="co">#         This AGC program shall also be referred to as</span>
-012806,000029:                                                                                                 <span class="co">#                         Colossus 2A</span>
-012807,000030: 
-012808,000031:                                                                                                 <span class="co">#  Page 297</span>
-012809,000032: 07,2441                                          <span class="ps">BANK    </span> 7                                     
-012810,000033: 06,2000                                          <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494D55434F4D50">IMUCOMP</a>                               
-012811,000034: 06,2000                                          <span class="ps">BANK    </span>                                       
-012812,000035: 06,3262  E3,1460                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  
-012813,000036: 
-012814,000037: 06,3262                                          <span class="ps">COUNT   </span> 06/ICOMP                              
-012815,000038: 
-<a name="312F50495041"></a>012816,000039: 06,3262           33516        <span class="sm">1/PIPA  </span>          <span class="op">CAF     </span> <a href="#4C47434F4D50">LGCOMP</a>                                <span class="co">#  SAVE EBANK OF CALLING PROGRAM</span>
-012817,000040: 06,3263           56003                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-012818,000041: 06,3264           54163                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  
-012819,000042: 
-012820,000043: 06,3265           11477                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
-012821,000044: 06,3266           13271                          <span class="op">TCF     </span> <a href="EXTENDED_VERBS.agc.html#2B33">+3</a>                                    
-012822,000045: 06,3267           13271                          <span class="op">TCF     </span> +2                                    
-012823,000046: 06,3270           13407                          <span class="op">TCF     </span> <a href="#4952494731">IRIG1</a>                                 <span class="co">#  RETURN</span>
-012824,000047: 
-012825,000048: 06,3271           00004                          <span class="op">INHINT  </span>                                       <span class="co">#  ASSURE COMPLETE COMPENSATION OF DELV'S</span>
-012826,000049:                                                                                                 <span class="co">#  FOR DOWNLINK.</span>
-012827,000050: 
-<a name="312F5049504131"></a>012828,000051: 06,3272           35015        <span class="sm">1/PIPA1 </span>          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
-012829,000052: 06,3273           54132                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-012830,000053: 
-012831,000054: 06,3274           50132                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-012832,000055: 06,3275           31453                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495041534346">PIPASCF</a>                               <span class="co">#  (P.P.M.) X 2(-9)</span>
-012833,000056: 06,3276           00006                          <span class="op">EXTEND  </span>                                       
-012834,000057: 06,3277           50132                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-012835,000058: 06,3300           71162                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PP) X 2(+14) NOW (PIPA PULSES) X 2(+5)</span>
-012836,000059: 06,3301           54002                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE MAJOR PART</span>
-012837,000060: 
-012838,000061: 06,3302           30001                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  MINOR PART</span>
-012839,000062: 06,3303           00006                          <span class="op">EXTEND  </span>                                       
-012840,000063: 06,3304           75012                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  SCALE 2(+9)    SHIFT RIGHT 9   </span>
-012841,000064: 06,3305           50132                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-012842,000065: 06,3306           55163                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>      +1                         <span class="co">#  FRACTIONAL PIPA PULSES SCALED 2(+14)</span>
-012843,000066: 
-012844,000067: 06,3307           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  MAJOR PART</span>
-012845,000068: 06,3310           00006                          <span class="op">EXTEND  </span>                                       
-012846,000069: 06,3311           75012                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  SCALE 2(+9)    SHIFT RIGHT 9</span>
-012847,000070: 06,3312           50132                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-012848,000071: 06,3313           21163                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PIPAI) + (PIPAI)(SF)</span>
-012849,000072: 
-012850,000073: 06,3314           50132                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-012851,000074: 06,3315           41452                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504142494153">PIPABIAS</a>                              <span class="co">#  (PIPA PULSES)/(CS) X 2(-8)                     *</span>
-012852,000075: 06,3316           00006                          <span class="op">EXTEND  </span>                                       
-012853,000076: 06,3317           71074                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              <span class="co">#  (CS) X 2(+8) NOW (PIPA PULSES) X 2(+0) *</span>
-012854,000077: 06,3320           00006                          <span class="op">EXTEND  </span>                                       
-012855,000078: 06,3321           75017                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  SCALE 2(+14) SHIFT RIGHT 14                    *</span>
-012856,000079: 06,3322           50132                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-012857,000080: 06,3323           21163                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)</span>
-012858,000081: 
-012859,000082: 06,3324           10132                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
-012860,000083:                                                                                                 <span class="co">#  Page 298</span>
-012861,000084: 06,3325           67716                          <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454731">NEG1</a>                                  
-012862,000085: 06,3326           13273                          <span class="op">TCF     </span> <a href="#312F5049504131">1/PIPA1</a>    +1                         
-012863,000086: 06,3327           13330                          <span class="op">NOOP    </span>                                       <span class="co">#  LESS THAN ZERO IMPOSSIBLE</span>
-012864,000087: 06,3330           00003                          <span class="op">RELINT  </span>                                       
-012865,000088:                                                                                                 <span class="co">#  Page 299</span>
-012866,000089: 
-<a name="49524947434F4D50"></a>012867,000090: 06,3331           55477        <span class="sm">IRIGCOMP</span>          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  INDICATE COMMANDS 2 PULSES OR LESS.</span>
-012868,000091: 06,3332           54130                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  INDEX COUNTER.  IRIGX, IRIGY, IRIGZ.</span>
-012869,000092: 
-<a name="4952494758"></a>012870,000093: 06,3333           00006        <span class="sm">IRIGX   </span>          <span class="op">EXTEND  </span>                                       
-012871,000094: 06,3334           41163                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
-012872,000095: 06,3335           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012873,000096: 06,3336           31463                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144494158">ADIAX</a>                                 <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)             *</span>
-012874,000097: 06,3337           03412                          <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADIAX)(PIPAX)        (GYRO PULSES) X 2(+14)</span>
-012875,000098: 
-012876,000099: 06,3340           00006                          <span class="op">EXTEND  </span>                                       <span class="co">#  </span>
-012877,000100: 06,3341           41165                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 <span class="co">#         (PIPA PULSES) X 2(+14)</span>
-012878,000101: 06,3342           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  </span>
-012879,000102: 06,3343           41466                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414453524158">ADSRAX</a>                                <span class="co">#         (GYRO PULSES)/(PIPA PULSE) X 2(-3)      *</span>
-012880,000103: 06,3344           03412                          <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#         -(ADSRAX)(PIPAY)        (GYRO PULSES) X 2(+14)</span>
-012881,000104: 
-012882,000105:                                                                                                 <span class="co">#                 EXTEND                  # ***</span>
-012883,000106:                                                                                                 <span class="co">#                 DCS     DELVY           # ***   (PIPA PULSES) X 2(+14)</span>
-012884,000107:                                                                                                 <span class="co">#                 DXCH    MPAC            # ***</span>
-012885,000108:                                                                                                 <span class="co">#                 CA      ADOAX           # ***   (GYRO PULSES)/(PIPA PULSE) X 2(-3)      *</span>
-012886,000109:                                                                                                 <span class="co">#                 TC      GCOMPSUB        # ***   -(ADOAX)(PIPAZ)         (GYRO PULSES) X 2(+14)</span>
-012887,000110: 
-012888,000111: 06,3345           41460                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  <span class="co">#         (GYRO PULSES)/(CS) X 2(-3)</span>
-012889,000112: 06,3346           03441                          <span class="op">TC      </span> <a href="#4452494654535542">DRIFTSUB</a>                              <span class="co">#         -(NBDX)(DELTAT) (GYRO PULSES) X 2(+14)</span>
-012890,000113: 
-<a name="4952494759"></a>012891,000114: 06,3347           00006        <span class="sm">IRIGY   </span>          <span class="op">EXTEND  </span>                                       
-012892,000115: 06,3350           41165                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
-012893,000116: 06,3351           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012894,000117: 06,3352           31464                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144494159">ADIAY</a>                                 <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)             *</span>
-012895,000118: 06,3353           03412                          <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADIAY)(PIPAY)        (GYRO PULSES) X 2(+14)</span>
-012896,000119: 
-012897,000120: 06,3354           00006                          <span class="op">EXTEND  </span>                                       
-012898,000121: 06,3355           41167                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
-012899,000122: 06,3356           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012900,000123: 06,3357           41467                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414453524159">ADSRAY</a>                                <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)             *</span>
-012901,000124: 06,3360           03412                          <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  +(ADSRAY)(PIPAZ)       (GYRO PULSES) X 2(+14)</span>
-012902,000125: 
-012903,000126:                                                                                                 <span class="co">#                 EXTEND                  # ***</span>
-012904,000127:                                                                                                 <span class="co">#                 DCS     DELVX           # ***   (PIPA PULSES) X 2(+14)</span>
-012905,000128:                                                                                                 <span class="co">#                 DXCH    MPAC            # ***</span>
-012906,000129:                                                                                                 <span class="co">#                 CA      ADOAY           # ***   (GYRO PULSES)/(PIPA PULS) X 2(-3)       *</span>
-012907,000130:                                                                                                 <span class="co">#                 TC      GCOMPSUB        # ***   -(ADOAY)(/PIPAX)        (GYRO PULSES) X 2(+14)</span>
-012908,000131: 
-012909,000132: 06,3361           41461                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424459">NBDY</a>                                  <span class="co">#         (GYRO PULSES)/(CS) X 2(-5)</span>
-012910,000133: 06,3362           03441                          <span class="op">TC      </span> <a href="#4452494654535542">DRIFTSUB</a>                              <span class="co">#         -(NBDY)(DELTAT) (GYRO PULSES) X 2(+14)</span>
-012911,000134: 
-<a name="495249475A"></a>012912,000135: 06,3363           00006        <span class="sm">IRIGZ   </span>          <span class="op">EXTEND  </span>                                       
-012913,000136: 06,3364           41165                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 <span class="co">#  (PIPA PULSES) X 2(-14)</span>
-012914,000137: 06,3365           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012915,000138: 06,3366           31470                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41445352415A">ADSRAZ</a>                                <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)             *</span>
-012916,000139:                                                                                                 <span class="co">#  Page 300</span>
-012917,000140: 06,3367           03412                          <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADSRAZ)(PIPAY)       (GYRO PULSES) X 2(+14)</span>
-012918,000141: 
-012919,000142: 06,3370           00006                          <span class="op">EXTEND  </span>                                       
-012920,000143: 06,3371           41167                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
-012921,000144: 06,3372           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012922,000145: 06,3373           31465                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414449415A">ADIAZ</a>                                 <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)             *</span>
-012923,000146: 06,3374           03412                          <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADIAZ)(PIPAZ)        (GYRO PULSES) X 2(+14)</span>
-012924,000147: 
-012925,000148:                                                                                                 <span class="co">#                 EXTEND                  # ***</span>
-012926,000149:                                                                                                 <span class="co">#                 DCS     DELVX           # ***   (PIPA PULSE) X 2(+14)</span>
-012927,000150:                                                                                                 <span class="co">#                 DXCH    MPAC            # ***</span>
-012928,000151:                                                                                                 <span class="co">#                 CS      ADOAZ           # ***   (GYRO PULSES)/(PIPA PULSE) X 2(-3)      *</span>
-012929,000152:                                                                                                 <span class="co">#                 TC      GCOMPSUB        # ***   +(ADOAZ)(PIPAX) (GYRO PULSES) X 2(+14)</span>
-012930,000153: 
-012931,000154: 06,3375           31462                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42445A">NBDZ</a>                                  <span class="co">#         (GYRO PULSES)/(CS) X 2(-5)</span>
-012932,000155: 06,3376           03441                          <span class="op">TC      </span> <a href="#4452494654535542">DRIFTSUB</a>                              <span class="co">#         +(NBDZ)(DELTAT) (GYRO PULSES) X 2(+14)</span>
-012933,000156: 
-012934,000157:                                                                                                 <span class="co">#  Page 301</span>
-012935,000158: 06,3377           11477                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  ARE GYRO COMMANDS GREATER THAN 2 PULSES</span>
-012936,000159: 06,3400           13402                          <span class="op">TCF     </span> +2                                    <span class="co">#  YES    </span>
-012937,000160: 06,3401           13407                          <span class="op">TCF     </span> <a href="#4952494731">IRIG1</a>                                 <span class="co">#  NO     </span>
-012938,000161: 
-012939,000162: 06,3402           35073                          <span class="op">CA      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5052494F3231">PRIO21</a>                                <span class="co">#  HIGHER THAN SERVICER -- LESS THAN PRELAUNCH</span>
-012940,000163: 06,3403           05134                          <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-012941,000164: 06,3404  E3,1460                                 <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  
-012942,000165: 06,3404           03474 14063                    <span class="ps">2CADR   </span> <a href="#312F4759524F">1/GYRO</a>                                
-012943,000166: 
-012944,000167: 06,3406           00003                          <span class="op">RELINT  </span>                                       
-<a name="4952494731"></a>012945,000168: 06,3407           30163        <span class="sm">IRIG1   </span>          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  <span class="co">#  SET EBANK FOR RETURN</span>
-012946,000169: 06,3410           54003                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-012947,000170: 06,3411           14675                          <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535752455455524E">SWRETURN</a>                              
-012948,000171: 
-<a name="47434F4D50535542"></a>012949,000172: 06,3412           56154        <span class="sm">GCOMPSUB</span>          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADIA OR ADSRA COEFFICIENT ARRIVES IN A</span>
-012950,000173: 06,3413           00006                          <span class="op">EXTEND  </span>                                       <span class="co">#  C(MPAC) = (PIPA PULSES) X 2(+14)</span>
-012951,000174: 06,3414           70154                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)             *</span>
-012952,000175: 06,3415           52123                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  <span class="co">#  NOW = (GYRO PULSES) X 2(+11)                   *</span>
-012953,000176: 
-012954,000177: 06,3416           30155                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  MINOR PART OF PIPA PULSES</span>
-012955,000178: 06,3417           00006                          <span class="op">EXTEND  </span>                                       
-012956,000179: 06,3420           70154                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADIA OR ADSRA</span>
-012957,000180: 06,3421           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-012958,000181: 06,3422           35021                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-012959,000182: 06,3423           20123                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  <span class="co">#  NOW = (GYRO PULSES) X 2(+11)                   *</span>
-012960,000183: 
-012961,000184: 06,3424           30122                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  <span class="co">#  PARTIAL RESULT -- MAJOR</span>
-012962,000185: 06,3425           00006                          <span class="op">EXTEND  </span>                                       
-012963,000186: 06,3426           75004                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  SCALE 2(+3)    SHIFT RIGHT 3                   *</span>
-012964,000187: 06,3427           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  RESULT = (GYRO PULSES) X 2(+14)</span>
-012965,000188: 06,3430           21472                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)</span>
-012966,000189: 
-012967,000190: 06,3431           30123                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>       +1                         <span class="co">#  PARTIAL RESULT -- MINOR</span>
-012968,000191: 06,3432           00006                          <span class="op">EXTEND  </span>                                       
-012969,000192: 06,3433           75004                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  SCALE 2(+3)    SHIFT RIGHT 3                   *</span>
-012970,000193: 06,3434           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-012971,000194: 06,3435           35021                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-012972,000195: 06,3436           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  RESULT = (GYRO PULSES) X 2(+14)</span>
-012973,000196: 06,3437           21472                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  (ADIA)(PIPAI) OR (ADSRA)(PIPAI)</span>
-012974,000197: 
-012975,000198: 06,3440           00002                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-012976,000199: 
-012977,000200:                                                                                                 <span class="co">#  Page 302</span>
-<a name="4452494654535542"></a>012978,000201: 06,3441           00006        <span class="sm">DRIFTSUB</span>          <span class="op">EXTEND  </span>                                       
-012979,000202: 06,3442           22131                          <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-012980,000203: 
-012981,000204: 06,3443           00006                          <span class="op">EXTEND  </span>                                       <span class="co">#  C(A) = NBD     (GYRO PULSES)/(CS) X 2(-5)</span>
-012982,000205: 06,3444           71074                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              <span class="co">#  (CS) X 2(+8)   NO (GYRO PULSES) X 2(+3)</span>
-012983,000206: 06,3445           22155                          <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  SAVE FOR FRACTIONAL COMPENSATION</span>
-012984,000207: 06,3446           00006                          <span class="op">EXTEND  </span>                                       
-012985,000208: 06,3447           75014                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SCALE 2(+11)   SHIFT RIGHT 11</span>
-012986,000209: 06,3450           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-012987,000210: 06,3451           21472                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  HI(NBD)(DELTAT)        (GYRO PULSES) X 2(+14)</span>
-012988,000211: 
-012989,000212: 06,3452           30155                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  NOW MINOR PART</span>
-012990,000213: 06,3453           00006                          <span class="op">EXTEND  </span>                                       
-012991,000214: 06,3454           75014                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SCALE 2(+11)           SHIFT RIGHT 11</span>
-012992,000215: 06,3455           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-012993,000216: 06,3456           35021                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-012994,000217: 06,3457           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  ADD IN FRACTIONAL COMPENSATION</span>
-012995,000218: 06,3460           21472                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  (NBD)(DELTAT)          (GYRO PULSES) X 2(+14)</span>
-012996,000219: 
-<a name="4452465453554232"></a>012997,000220: 06,3461           35016        <span class="sm">DRFTSUB2</span>          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  PIPAX, PIPAY, PIPAZ</span>
-012998,000221: 06,3462           60130                          <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-012999,000222: 06,3463           56130                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013000,000223: 06,3464           50000                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-013001,000224: 06,3465           11471                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  ARE GYRO COMMANDS 1 PULSE OR GREATER</span>
-013002,000225: 06,3466           13470                          <span class="op">TCF     </span> +2                                    <span class="co">#  YES</span>
-013003,000226: 06,3467           00131                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  NO</span>
-013004,000227: 
-013005,000228: 06,3470           77716                          <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
-013006,000229: 06,3471           10000                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ARE GYRO COMMANDS GREATER THAN 2 PULSES</span>
-013007,000230: 06,3472           55477                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  YES -- SET GCOMPSW POSITIVE</span>
-013008,000231: 06,3473           00131                          <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  NO</span>
-013009,000232: 
-013010,000233:                                                                                                 <span class="co">#  Page 303</span>
-<a name="312F4759524F"></a>013011,000234: 06,3474           35015        <span class="sm">1/GYRO  </span>          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
-013012,000235: 06,3475           54130                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013013,000236: 
-013014,000237: 06,3476           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  SCALE GYRO COMMANDS FOR IMUPULSE</span>
-013015,000238: 06,3477           31472                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         <span class="co">#  FRACTIONAL PULSES</span>
-013016,000239: 06,3500           00006                          <span class="op">EXTEND  </span>                                       
-013017,000240: 06,3501           75010                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SHIFT RIGHT 7</span>
-013018,000241: 06,3502           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013019,000242: 06,3503           55472                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         <span class="co">#  FRACTIONAL PULSES SCALED</span>
-013020,000243: 
-013021,000244: 06,3504           35021                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET GCOMP = 0 FOR DAS INSTRUCTION</span>
-013022,000245: 06,3505           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013023,000246: 06,3506           57471                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  GYRO PULSES</span>
-013024,000247: 06,3507           00006                          <span class="op">EXTEND  </span>                                       
-013025,000248: 06,3510           75010                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SHIFT RIGHT 7</span>
-013026,000249: 06,3511           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013027,000250: 06,3512           21472                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  ADD THESE TO FRACTIONAL PULSES ABOVE</span>
-013028,000251: 
-013029,000252: 06,3513           10130                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
-013030,000253: 06,3514           67716                          <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454731">NEG1</a>                                  
-013031,000254: 06,3515           13475                          <span class="op">TCF     </span> <a href="#312F4759524F">1/GYRO</a>     +1                         
-<a name="4C47434F4D50"></a>013032,000255: 06,3516           01471        <span class="sm">LGCOMP  </span>          <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  LESS THAN ZERO IMPOSSIBLE</span>
-013033,000256: 
-013034,000257: 06,3517           33516                          <span class="op">CAF     </span> <a href="#4C47434F4D50">LGCOMP</a>                                
-013035,000258: 06,3520           04662                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-013036,000259: 06,3521           17206                          <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D5550554C5345">IMUPULSE</a>                              <span class="co">#  CALL GYRO TORQUING ROUTINE</span>
-013037,000260: 06,3522           04662                          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-013038,000261: 06,3523           17577                          <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D555354414C4C">IMUSTALL</a>                              <span class="co">#  WAIT FOR PULSES TO GET OUT</span>
-013039,000262: 06,3524           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  TEMPORARY</span>
-013040,000263: 
-<a name="47434F4D5031"></a>013041,000264: 06,3525           35015        <span class="sm">GCOMP1  </span>          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
-013042,000265: 06,3526           54130                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013043,000266: 
-013044,000267: 06,3527           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  RESCALE</span>
-013045,000268: 06,3530           31472                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         
-013046,000269: 06,3531           00006                          <span class="op">EXTEND  </span>                                       
-013047,000270: 06,3532           75010                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SHIFT MINOR PART LEFT 7 -- MAJOR PART = 0</span>
-013048,000271: 06,3533           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013049,000272: 06,3534           23472                          <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         <span class="co">#  BITS 8-14 OF MINOR PART WERE = 0</span>
-013050,000273: 
-013051,000274: 06,3535           10130                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
-013052,000275: 06,3536           67716                          <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454731">NEG1</a>                                  
-013053,000276: 06,3537           13526                          <span class="op">TCF     </span> <a href="#47434F4D5031">GCOMP1</a>     +1                         
-013054,000277: 
-<a name="5630364E333053"></a>013055,000278: 06,3540           01436        <span class="sm">V06N30S </span>          <span class="ps">VN      </span> 0630                                  
-013056,000279: 06,3541           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-013057,000280: 
-013058,000281:                                                                                                 <span class="co">#  Page 304               </span>
-<a name="4E42444F4E4C59"></a>013059,000282: 06,3542           11477        <span class="sm">NBDONLY </span>          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
-013060,000283: 06,3543           13546                          <span class="op">TCF     </span> <a href="EXTENDED_VERBS.agc.html#2B33">+3</a>                                    
-013061,000284: 06,3544           13546                          <span class="op">TCF     </span> +2                                    
-013062,000285: 06,3545           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-013063,000286: 
-013064,000287: 06,3546           00004                          <span class="op">INHINT  </span>                                       
-013065,000288: 06,3547           10076                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  PREREAD T3RUPT MAY COINCIDE</span>
-013066,000289: 06,3550           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-013067,000290: 06,3551           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-013068,000291: 06,3552           13553                          <span class="op">TCF     </span> +1                                    
-013069,000292: 
-013070,000293: 06,3553           30025                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  (CS) X 2(+14)</span>
-013071,000294: 06,3554           57074                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              <span class="co">#  PREVIOUS TIME</span>
-013072,000295: 06,3555           00003                          <span class="op">RELINT  </span>                                       
-013073,000296: 06,3556           40000                          <span class="op">COM     </span>                                       
-013074,000297: 06,3557           61074                          <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              
-<a name="4E424432"></a>013075,000298: 06,3560           10000        <span class="sm">NBD2    </span>          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  CALCULATE ELAPSED TIME.</span>
-013076,000299: 06,3561           65017                          <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  NO TIME1 OVERFLOW</span>
-013077,000300: 06,3562           13567                          <span class="op">TCF     </span> <a href="#4E424433">NBD3</a>                                  <span class="co">#  RESTORE TIME DIFFERENCE AND JUMP</span>
-013078,000301: 06,3563           13565                          <span class="op">TCF     </span> +2                                    <span class="co">#  TIME1 OVERFLOW</span>
-013079,000302: 06,3564           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  IF ELAPSED TIME = 0 (DIFFERENCE = -0)</span>
-013080,000303: 
-013081,000304: 06,3565           40000                          <span class="op">COM     </span>                                       <span class="co">#  CALCULATE ABSOLUTE DIFFERENCE</span>
-013082,000305: 06,3566           64777                          <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
-013083,000306: 
-<a name="4E424433"></a>013084,000307: 06,3567           00006        <span class="sm">NBD3    </span>          <span class="op">EXTEND  </span>                                       <span class="co">#  C(A) = DELTAT          (CS) X 2(+14)</span>
-013085,000308: 06,3570           75006                          <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  SHIFT RIGHT 5</span>
-013086,000309: 06,3571           52123                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-013087,000310: 06,3572           00006                          <span class="op">EXTEND  </span>                                       
-013088,000311: 06,3573           30123                          <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-013089,000312: 06,3574           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT NOW SCALED (CS) X 2(+19)</span>
-013090,000313: 
-013091,000314: 06,3575           35021                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-013092,000315: 06,3576           55477                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  INDICATE COMMANDS 2 PULSES OR LESS.</span>
-013093,000316: 06,3577           54130                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  INDEX X, Y, Z.</span>
-013094,000317: 
-013095,000318: 06,3600           41460                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  <span class="co">#  (GYRO PULSES)/(CS) X 2(-5)</span>
-013096,000319: 06,3601           03617                          <span class="op">TC      </span> <a href="#4642494153535542">FBIASSUB</a>                              <span class="co">#  -(NBOX)(DELTAT)        (GYRO PULSES) X 2(+14)</span>
-013097,000320: 
-013098,000321: 06,3602           00006                          <span class="op">EXTEND  </span>                                       
-013099,000322: 06,3603           40123                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-013100,000323: 06,3604           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT SCALED (CS) X 2(+19)</span>
-013101,000324: 06,3605           31461                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424459">NBDY</a>                                  <span class="co">#  (GYRO PULSES)/(CS) X 2(-5)</span>
-013102,000325: 06,3606           03617                          <span class="op">TC      </span> <a href="#4642494153535542">FBIASSUB</a>                              <span class="co">#  -(NBDY)(DELTAT)        (GYRO PULSES) X 2(+14)</span>
-013103,000326: 
-013104,000327: 06,3607           00006                          <span class="op">EXTEND  </span>                                       
-013105,000328: 06,3610           40123                          <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-013106,000329: 06,3611           52155                          <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT SCALED (CS) X 2(+19)</span>
-013107,000330: 06,3612           41462                          <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42445A">NBDZ</a>                                  <span class="co">#  (GYRO PULSES)/(CS) X 2(-5)</span>
-013108,000331: 06,3613           03617                          <span class="op">TC      </span> <a href="#4642494153535542">FBIASSUB</a>                              <span class="co">#  +(NBDZ)(DELTAT)        (GYRO PULSES) X 2(+14)</span>
-013109,000332:                                                                                                 <span class="co">#  Page 305               </span>
-013110,000333: 06,3614           11477                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  ARE GYRO COMMANDS GREATER THAN 2 PULSES</span>
-013111,000334: 06,3615           13474                          <span class="op">TCF     </span> <a href="#312F4759524F">1/GYRO</a>                                <span class="co">#  YES</span>
-013112,000335: 06,3616           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  NO</span>
-013113,000336: 
-013114,000337:                                                                                                 <span class="co">#  Page 303</span>
-<a name="4642494153535542"></a>013115,000338: 06,3617           56002        <span class="sm">FBIASSUB</span>          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-013116,000339: 06,3620           54131                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-013117,000340: 
-013118,000341: 06,3621           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NBD SCALED (GYRO PULSES)/(CS) X 2(-5)</span>
-013119,000342: 06,3622           00006                          <span class="op">EXTEND  </span>                                       
-013120,000343: 06,3623           70154                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT SCALED (CS) X 2(+19)</span>
-013121,000344: 06,3624           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013122,000345: 06,3625           21472                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  HI(NBD)(DELTAT)        (GYRO PULSES) X 2(+14)</span>
-013123,000346: 
-013124,000347: 06,3626           30002                          <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NO FRACTIONAL PART</span>
-013125,000348: 06,3627           00006                          <span class="op">EXTEND  </span>                                       
-013126,000349: 06,3630           70155                          <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-013127,000350: 06,3631           54001                          <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-013128,000351: 06,3632           35021                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-013129,000352: 06,3633           50130                          <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-013130,000353: 06,3634           21472                          <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  (NBD)(DELTAT)          (GYRO PULSES) X 2(+14)</span>
-013131,000354: 
-013132,000355: 06,3635           13461                          <span class="op">TCF     </span> <a href="#4452465453554232">DRFTSUB2</a>                              <span class="co">#  CHECK MAGNITUDE OF COMPENSATION</span>
-013133,000356: 
-<a name="4C41535442494153"></a>013134,000357: 06,3636           04662        <span class="sm">LASTBIAS</span>          <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-013135,000358: 06,3637           17156                          <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#504950555345">PIPUSE</a>                                
-013136,000359: 
-013137,000360: 06,3640           11477                          <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
-013138,000361: 06,3641           13644                          <span class="op">TCF     </span> <a href="EXTENDED_VERBS.agc.html#2B33">+3</a>                                    
-013139,000362: 06,3642           13644                          <span class="op">TCF     </span> +2                                    
-013140,000363: 06,3643           15217                          <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-013141,000364: 
-013142,000365: 06,3644           37665                          <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5052494F3331">PRIO31</a>                                <span class="co">#  2 SECONDS SCALED (CS) X 2(+8)</span>
-013143,000366: 06,3645           57074                          <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              
-013144,000367: 06,3646           40000                          <span class="op">COM     </span>                                       
-013145,000368: 06,3647           61246                          <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>   +1                         <span class="co">#  TIME AT PIPA1 =0</span>
-013146,000369: 06,3650           13560                          <span class="op">TCF     </span> <a href="#4E424432">NBD2</a>                                  
-013147,000370: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+These source-code files were from the printout at the MIT Museum, with many thanks
+to Deborah Douglas, the Museum's Curator of Science and Technology, for releasing
+it to us.  The printout was digitally photographed by Paul Fjeld.  A team of 
+volunteers transcribed the source code manually from these images or, where
+appropriate, modified already-transcribed but similar source Colossus 249 (Apollo 9)
+source code to agree with the images from the printout.  Note that the page images 
+<a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/">
+presented online</a> are of reduced quality, and that higher-quality images 
+are available.  Report any conversion errors or legibility 
+problems in page images to info@sandroid.org. 
+Notations on the program listing read, in part:<br>
+<br>
+<pre>
+	GAP:  ASSEMBLE REVISION 055 OF AGC PROGRAM COMANCHE BY NASA 2021113-051
+	10:28 APR.  1,1969
+</pre>
+Note that the date is the date of the printout, not the date of the program revision.
+</td></tr></tbody></table>
+
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+012790,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+012791,000003:                                                                                                  <span class="co">#  Filename:     IMU_COMPENSATION_PACKAGE.agc</span>
+012792,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.</span>
+012793,000005:                                                                                                  <span class="co">#                It is part of the source code for the Command Module's (CM)</span>
+012794,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), for Apollo 11.</span>
+012795,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+012796,000008:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+012797,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
+012798,000010:                                                                                                  <span class="co">#  Pages:        297-306</span>
+012799,000011:                                                                                                  <span class="co">#  Mod history:  2009-05-08 RSB  Adapted from the Colossus249/ file of the</span>
+012800,000012:                                                                                                  <span class="co">#                                same name, using Comanche055 page images/</span>
+012801,000013:                                                                                                  <span class="co">#                2009-05-21 RSB  In IRIGZ, PRIO17 corrected to PRIO21.</span>
+012802,000014:                                                                                                  <span class="co">#                2010-08-24 JL   Fixed page 306 number.</span>
+012803,000015: 
+012804,000016:                                                                                                  <span class="co">#  This source code has been transcribed or otherwise adapted from digitized</span>
+012805,000017:                                                                                                  <span class="co">#  images of a hardcopy from the MIT Museum.  The digitization was performed</span>
+012806,000018:                                                                                                  <span class="co">#  by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many</span>
+012807,000019:                                                                                                  <span class="co">#  thanks to both.  The images (with suitable reduction in storage size and</span>
+012808,000020:                                                                                                  <span class="co">#  consequent reduction in image quality as well) are available online at</span>
+012809,000021:                                                                                                  <span class="co">#  www.ibiblio.org/apollo.  If for some reason you find that the images are</span>
+012810,000022:                                                                                                  <span class="co">#  illegible, contact me at info@sandroid.org about getting access to the </span>
+012811,000023:                                                                                                  <span class="co">#  (much) higher-quality images which Paul actually created.</span>
+012812,000024: 
+012813,000025:                                                                                                  <span class="co">#  Notations on the hardcopy document read, in part:</span>
+012814,000026: 
+012815,000027:                                                                                                  <span class="co">#        Assemble revision 055 of AGC program Comanche by NASA</span>
+012816,000028:                                                                                                  <span class="co">#        2021113-051.  10:28 APR. 1, 1969  </span>
+012817,000029: 
+012818,000030:                                                                                                  <span class="co">#        This AGC program shall also be referred to as</span>
+012819,000031:                                                                                                  <span class="co">#                        Colossus 2A</span>
+012820,000032: 
+012821,000033:                                                                                                  <span class="co">#  Page 297</span>
+012822,000034: 07,2441                                           <span class="ps">BANK    </span> 7                                     
+012823,000035: 06,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494D55434F4D50">IMUCOMP</a>                               
+012824,000036: 06,2000                                           <span class="ps">BANK    </span>                                       
+012825,000037: 06,3262  E3,1460                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  
+012826,000038: 
+012827,000039: 06,3262                                           <span class="ps">COUNT   </span> 06/ICOMP                              
+012828,000040: 
+<a name="312F50495041"></a>012829,000041: 06,3262           33516        <span class="sm">1/PIPA  </span>           <span class="op">CAF     </span> <a href="#4C47434F4D50">LGCOMP</a>                                <span class="co">#  SAVE EBANK OF CALLING PROGRAM</span>
+012830,000042: 06,3263           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+012831,000043: 06,3264           54163                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  
+012832,000044: 
+012833,000045: 06,3265           11477                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
+012834,000046: 06,3266           13271                           <span class="op">TCF     </span> +3                                    
+012835,000047: 06,3267           13271                           <span class="op">TCF     </span> +2                                    
+012836,000048: 06,3270           13407                           <span class="op">TCF     </span> <a href="#4952494731">IRIG1</a>                                 <span class="co">#  RETURN</span>
+012837,000049: 
+012838,000050: 06,3271           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  ASSURE COMPLETE COMPENSATION OF DELV'S</span>
+012839,000051:                                                                                                  <span class="co">#  FOR DOWNLINK.</span>
+012840,000052: 
+<a name="312F5049504131"></a>012841,000053: 06,3272           35015        <span class="sm">1/PIPA1 </span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
+012842,000054: 06,3273           54132                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+012843,000055: 
+012844,000056: 06,3274           50132                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+012845,000057: 06,3275           31453                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495041534346">PIPASCF</a>                               <span class="co">#  (P.P.M.) X 2(-9)</span>
+012846,000058: 06,3276           00006                           <span class="op">EXTEND  </span>                                       
+012847,000059: 06,3277           50132                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+012848,000060: 06,3300           71162                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PP) X 2(+14) NOW (PIPA PULSES) X 2(+5)</span>
+012849,000061: 06,3301           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE MAJOR PART</span>
+012850,000062: 
+012851,000063: 06,3302           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  MINOR PART</span>
+012852,000064: 06,3303           00006                           <span class="op">EXTEND  </span>                                       
+012853,000065: 06,3304           75012                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  SCALE 2(+9)   SHIFT RIGHT 9   </span>
+012854,000066: 06,3305           50132                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+012855,000067: 06,3306           55163                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>      +1                         <span class="co">#  FRACTIONAL PIPA PULSES SCALED 2(+14)</span>
+012856,000068: 
+012857,000069: 06,3307           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  MAJOR PART</span>
+012858,000070: 06,3310           00006                           <span class="op">EXTEND  </span>                                       
+012859,000071: 06,3311           75012                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  SCALE 2(+9)   SHIFT RIGHT 9</span>
+012860,000072: 06,3312           50132                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+012861,000073: 06,3313           21163                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PIPAI) + (PIPAI)(SF)</span>
+012862,000074: 
+012863,000075: 06,3314           50132                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+012864,000076: 06,3315           41452                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504142494153">PIPABIAS</a>                              <span class="co">#  (PIPA PULSES)/(CS) X 2(-8)                    *</span>
+012865,000077: 06,3316           00006                           <span class="op">EXTEND  </span>                                       
+012866,000078: 06,3317           71074                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              <span class="co">#  (CS) X 2(+8) NOW (PIPA PULSES) X 2(+0)        *</span>
+012867,000079: 06,3320           00006                           <span class="op">EXTEND  </span>                                       
+012868,000080: 06,3321           75017                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  SCALE 2(+14) SHIFT RIGHT 14                   *</span>
+012869,000081: 06,3322           50132                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+012870,000082: 06,3323           21163                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)</span>
+012871,000083: 
+012872,000084: 06,3324           10132                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
+012873,000085:                                                                                                  <span class="co">#  Page 298</span>
+012874,000086: 06,3325           67716                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454731">NEG1</a>                                  
+012875,000087: 06,3326           13273                           <span class="op">TCF     </span> <a href="#312F5049504131">1/PIPA1</a>    +1                         
+012876,000088: 06,3327           13330                           <span class="op">NOOP    </span>                                       <span class="co">#  LESS THAN ZERO IMPOSSIBLE</span>
+012877,000089: 06,3330           00003                           <span class="op">RELINT  </span>                                       
+012878,000090:                                                                                                  <span class="co">#  Page 299</span>
+012879,000091: 
+<a name="49524947434F4D50"></a>012880,000092: 06,3331           55477        <span class="sm">IRIGCOMP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  INDICATE COMMANDS 2 PULSES OR LESS.</span>
+012881,000093: 06,3332           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  INDEX COUNTER.  IRIGX, IRIGY, IRIGZ.</span>
+012882,000094: 
+<a name="4952494758"></a>012883,000095: 06,3333           00006        <span class="sm">IRIGX   </span>           <span class="op">EXTEND  </span>                                       
+012884,000096: 06,3334           41163                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
+012885,000097: 06,3335           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012886,000098: 06,3336           31463                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144494158">ADIAX</a>                                 <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)            *</span>
+012887,000099: 06,3337           03412                           <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADIAX)(PIPAX)       (GYRO PULSES) X 2(+14)</span>
+012888,000100: 
+012889,000101: 06,3340           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  </span>
+012890,000102: 06,3341           41165                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 <span class="co">#        (PIPA PULSES) X 2(+14)</span>
+012891,000103: 06,3342           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  </span>
+012892,000104: 06,3343           41466                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414453524158">ADSRAX</a>                                <span class="co">#        (GYRO PULSES)/(PIPA PULSE) X 2(-3)      *</span>
+012893,000105: 06,3344           03412                           <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#        -(ADSRAX)(PIPAY)        (GYRO PULSES) X 2(+14)</span>
+012894,000106: 
+012895,000107:                                                                                                  <span class="co">#                EXTEND                  # ***</span>
+012896,000108:                                                                                                  <span class="co">#                DCS     DELVY           # ***   (PIPA PULSES) X 2(+14)</span>
+012897,000109:                                                                                                  <span class="co">#                DXCH    MPAC            # ***</span>
+012898,000110:                                                                                                  <span class="co">#                CA      ADOAX           # ***   (GYRO PULSES)/(PIPA PULSE) X 2(-3)      *</span>
+012899,000111:                                                                                                  <span class="co">#                TC      GCOMPSUB        # ***   -(ADOAX)(PIPAZ)         (GYRO PULSES) X 2(+14)</span>
+012900,000112: 
+012901,000113: 06,3345           41460                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  <span class="co">#        (GYRO PULSES)/(CS) X 2(-3)</span>
+012902,000114: 06,3346           03441                           <span class="op">TC      </span> <a href="#4452494654535542">DRIFTSUB</a>                              <span class="co">#        -(NBDX)(DELTAT) (GYRO PULSES) X 2(+14)</span>
+012903,000115: 
+<a name="4952494759"></a>012904,000116: 06,3347           00006        <span class="sm">IRIGY   </span>           <span class="op">EXTEND  </span>                                       
+012905,000117: 06,3350           41165                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
+012906,000118: 06,3351           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012907,000119: 06,3352           31464                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144494159">ADIAY</a>                                 <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)            *</span>
+012908,000120: 06,3353           03412                           <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADIAY)(PIPAY)       (GYRO PULSES) X 2(+14)</span>
+012909,000121: 
+012910,000122: 06,3354           00006                           <span class="op">EXTEND  </span>                                       
+012911,000123: 06,3355           41167                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
+012912,000124: 06,3356           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012913,000125: 06,3357           41467                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414453524159">ADSRAY</a>                                <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)            *</span>
+012914,000126: 06,3360           03412                           <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  +(ADSRAY)(PIPAZ)      (GYRO PULSES) X 2(+14)</span>
+012915,000127: 
+012916,000128:                                                                                                  <span class="co">#                EXTEND                  # ***</span>
+012917,000129:                                                                                                  <span class="co">#                DCS     DELVX           # ***   (PIPA PULSES) X 2(+14)</span>
+012918,000130:                                                                                                  <span class="co">#                DXCH    MPAC            # ***</span>
+012919,000131:                                                                                                  <span class="co">#                CA      ADOAY           # ***   (GYRO PULSES)/(PIPA PULS) X 2(-3)       *</span>
+012920,000132:                                                                                                  <span class="co">#                TC      GCOMPSUB        # ***   -(ADOAY)(/PIPAX)        (GYRO PULSES) X 2(+14)</span>
+012921,000133: 
+012922,000134: 06,3361           41461                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424459">NBDY</a>                                  <span class="co">#        (GYRO PULSES)/(CS) X 2(-5)</span>
+012923,000135: 06,3362           03441                           <span class="op">TC      </span> <a href="#4452494654535542">DRIFTSUB</a>                              <span class="co">#        -(NBDY)(DELTAT) (GYRO PULSES) X 2(+14)</span>
+012924,000136: 
+<a name="495249475A"></a>012925,000137: 06,3363           00006        <span class="sm">IRIGZ   </span>           <span class="op">EXTEND  </span>                                       
+012926,000138: 06,3364           41165                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 <span class="co">#  (PIPA PULSES) X 2(-14)</span>
+012927,000139: 06,3365           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012928,000140: 06,3366           31470                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41445352415A">ADSRAZ</a>                                <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)            *</span>
+012929,000141:                                                                                                  <span class="co">#  Page 300</span>
+012930,000142: 06,3367           03412                           <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADSRAZ)(PIPAY)      (GYRO PULSES) X 2(+14)</span>
+012931,000143: 
+012932,000144: 06,3370           00006                           <span class="op">EXTEND  </span>                                       
+012933,000145: 06,3371           41167                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  (PIPA PULSES) X 2(+14)</span>
+012934,000146: 06,3372           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012935,000147: 06,3373           31465                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414449415A">ADIAZ</a>                                 <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)            *</span>
+012936,000148: 06,3374           03412                           <span class="op">TC      </span> <a href="#47434F4D50535542">GCOMPSUB</a>                              <span class="co">#  -(ADIAZ)(PIPAZ)       (GYRO PULSES) X 2(+14)</span>
+012937,000149: 
+012938,000150:                                                                                                  <span class="co">#                EXTEND                  # ***</span>
+012939,000151:                                                                                                  <span class="co">#                DCS     DELVX           # ***   (PIPA PULSE) X 2(+14)</span>
+012940,000152:                                                                                                  <span class="co">#                DXCH    MPAC            # ***</span>
+012941,000153:                                                                                                  <span class="co">#                CS      ADOAZ           # ***   (GYRO PULSES)/(PIPA PULSE) X 2(-3)      *</span>
+012942,000154:                                                                                                  <span class="co">#                TC      GCOMPSUB        # ***   +(ADOAZ)(PIPAX) (GYRO PULSES) X 2(+14)</span>
+012943,000155: 
+012944,000156: 06,3375           31462                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42445A">NBDZ</a>                                  <span class="co">#        (GYRO PULSES)/(CS) X 2(-5)</span>
+012945,000157: 06,3376           03441                           <span class="op">TC      </span> <a href="#4452494654535542">DRIFTSUB</a>                              <span class="co">#        +(NBDZ)(DELTAT) (GYRO PULSES) X 2(+14)</span>
+012946,000158: 
+012947,000159:                                                                                                  <span class="co">#  Page 301</span>
+012948,000160: 06,3377           11477                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  ARE GYRO COMMANDS GREATER THAN 2 PULSES</span>
+012949,000161: 06,3400           13402                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES   </span>
+012950,000162: 06,3401           13407                           <span class="op">TCF     </span> <a href="#4952494731">IRIG1</a>                                 <span class="co">#  NO    </span>
+012951,000163: 
+012952,000164: 06,3402           35073                           <span class="op">CA      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5052494F3231">PRIO21</a>                                <span class="co">#  HIGHER THAN SERVICER -- LESS THAN PRELAUNCH</span>
+012953,000165: 06,3403           05134                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+012954,000166: 06,3404  E3,1460                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  
+012955,000167: 06,3404           03474 14063                     <span class="ps">2CADR   </span> <a href="#312F4759524F">1/GYRO</a>                                
+012956,000168: 
+012957,000169: 06,3406           00003                           <span class="op">RELINT  </span>                                       
+<a name="4952494731"></a>012958,000170: 06,3407           30163        <span class="sm">IRIG1   </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  <span class="co">#  SET EBANK FOR RETURN</span>
+012959,000171: 06,3410           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+012960,000172: 06,3411           14675                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535752455455524E">SWRETURN</a>                              
+012961,000173: 
+<a name="47434F4D50535542"></a>012962,000174: 06,3412           56154        <span class="sm">GCOMPSUB</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADIA OR ADSRA COEFFICIENT ARRIVES IN A</span>
+012963,000175: 06,3413           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  C(MPAC) = (PIPA PULSES) X 2(+14)</span>
+012964,000176: 06,3414           70154                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  (GYRO PULSES)/(PIPA PULSE) X 2(-3)            *</span>
+012965,000177: 06,3415           52123                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  <span class="co">#  NOW = (GYRO PULSES) X 2(+11)                  *</span>
+012966,000178: 
+012967,000179: 06,3416           30155                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  MINOR PART OF PIPA PULSES</span>
+012968,000180: 06,3417           00006                           <span class="op">EXTEND  </span>                                       
+012969,000181: 06,3420           70154                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADIA OR ADSRA</span>
+012970,000182: 06,3421           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+012971,000183: 06,3422           35021                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+012972,000184: 06,3423           20123                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  <span class="co">#  NOW = (GYRO PULSES) X 2(+11)                  *</span>
+012973,000185: 
+012974,000186: 06,3424           30122                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  <span class="co">#  PARTIAL RESULT -- MAJOR</span>
+012975,000187: 06,3425           00006                           <span class="op">EXTEND  </span>                                       
+012976,000188: 06,3426           75004                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  SCALE 2(+3)   SHIFT RIGHT 3                   *</span>
+012977,000189: 06,3427           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  RESULT = (GYRO PULSES) X 2(+14)</span>
+012978,000190: 06,3430           21472                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)</span>
+012979,000191: 
+012980,000192: 06,3431           30123                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>       +1                         <span class="co">#  PARTIAL RESULT -- MINOR</span>
+012981,000193: 06,3432           00006                           <span class="op">EXTEND  </span>                                       
+012982,000194: 06,3433           75004                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  SCALE 2(+3)   SHIFT RIGHT 3                   *</span>
+012983,000195: 06,3434           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+012984,000196: 06,3435           35021                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+012985,000197: 06,3436           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  RESULT = (GYRO PULSES) X 2(+14)</span>
+012986,000198: 06,3437           21472                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  (ADIA)(PIPAI) OR (ADSRA)(PIPAI)</span>
+012987,000199: 
+012988,000200: 06,3440           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+012989,000201: 
+012990,000202:                                                                                                  <span class="co">#  Page 302</span>
+<a name="4452494654535542"></a>012991,000203: 06,3441           00006        <span class="sm">DRIFTSUB</span>           <span class="op">EXTEND  </span>                                       
+012992,000204: 06,3442           22131                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+012993,000205: 
+012994,000206: 06,3443           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  C(A) = NBD    (GYRO PULSES)/(CS) X 2(-5)</span>
+012995,000207: 06,3444           71074                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              <span class="co">#  (CS) X 2(+8)  NO (GYRO PULSES) X 2(+3)</span>
+012996,000208: 06,3445           22155                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  SAVE FOR FRACTIONAL COMPENSATION</span>
+012997,000209: 06,3446           00006                           <span class="op">EXTEND  </span>                                       
+012998,000210: 06,3447           75014                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SCALE 2(+11)  SHIFT RIGHT 11</span>
+012999,000211: 06,3450           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013000,000212: 06,3451           21472                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  HI(NBD)(DELTAT)       (GYRO PULSES) X 2(+14)</span>
+013001,000213: 
+013002,000214: 06,3452           30155                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  NOW MINOR PART</span>
+013003,000215: 06,3453           00006                           <span class="op">EXTEND  </span>                                       
+013004,000216: 06,3454           75014                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SCALE 2(+11)          SHIFT RIGHT 11</span>
+013005,000217: 06,3455           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+013006,000218: 06,3456           35021                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+013007,000219: 06,3457           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  ADD IN FRACTIONAL COMPENSATION</span>
+013008,000220: 06,3460           21472                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  (NBD)(DELTAT)         (GYRO PULSES) X 2(+14)</span>
+013009,000221: 
+<a name="4452465453554232"></a>013010,000222: 06,3461           35016        <span class="sm">DRFTSUB2</span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  PIPAX, PIPAY, PIPAZ</span>
+013011,000223: 06,3462           60130                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013012,000224: 06,3463           56130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013013,000225: 06,3464           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+013014,000226: 06,3465           11471                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  ARE GYRO COMMANDS 1 PULSE OR GREATER</span>
+013015,000227: 06,3466           13470                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES</span>
+013016,000228: 06,3467           00131                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  NO</span>
+013017,000229: 
+013018,000230: 06,3470           77716                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
+013019,000231: 06,3471           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ARE GYRO COMMANDS GREATER THAN 2 PULSES</span>
+013020,000232: 06,3472           55477                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  YES -- SET GCOMPSW POSITIVE</span>
+013021,000233: 06,3473           00131                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  NO</span>
+013022,000234: 
+013023,000235:                                                                                                  <span class="co">#  Page 303</span>
+<a name="312F4759524F"></a>013024,000236: 06,3474           35015        <span class="sm">1/GYRO  </span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
+013025,000237: 06,3475           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013026,000238: 
+013027,000239: 06,3476           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  SCALE GYRO COMMANDS FOR IMUPULSE</span>
+013028,000240: 06,3477           31472                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         <span class="co">#  FRACTIONAL PULSES</span>
+013029,000241: 06,3500           00006                           <span class="op">EXTEND  </span>                                       
+013030,000242: 06,3501           75010                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SHIFT RIGHT 7</span>
+013031,000243: 06,3502           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013032,000244: 06,3503           55472                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         <span class="co">#  FRACTIONAL PULSES SCALED</span>
+013033,000245: 
+013034,000246: 06,3504           35021                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET GCOMP = 0 FOR DAS INSTRUCTION</span>
+013035,000247: 06,3505           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013036,000248: 06,3506           57471                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  GYRO PULSES</span>
+013037,000249: 06,3507           00006                           <span class="op">EXTEND  </span>                                       
+013038,000250: 06,3510           75010                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SHIFT RIGHT 7</span>
+013039,000251: 06,3511           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013040,000252: 06,3512           21472                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  ADD THESE TO FRACTIONAL PULSES ABOVE</span>
+013041,000253: 
+013042,000254: 06,3513           10130                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
+013043,000255: 06,3514           67716                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454731">NEG1</a>                                  
+013044,000256: 06,3515           13475                           <span class="op">TCF     </span> <a href="#312F4759524F">1/GYRO</a>     +1                         
+<a name="4C47434F4D50"></a>013045,000257: 06,3516           01471        <span class="sm">LGCOMP  </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  LESS THAN ZERO IMPOSSIBLE</span>
+013046,000258: 
+013047,000259: 06,3517           33516                           <span class="op">CAF     </span> <a href="#4C47434F4D50">LGCOMP</a>                                
+013048,000260: 06,3520           04662                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+013049,000261: 06,3521           17206                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D5550554C5345">IMUPULSE</a>                              <span class="co">#  CALL GYRO TORQUING ROUTINE</span>
+013050,000262: 06,3522           04662                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+013051,000263: 06,3523           17577                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D555354414C4C">IMUSTALL</a>                              <span class="co">#  WAIT FOR PULSES TO GET OUT</span>
+013052,000264: 06,3524           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  TEMPORARY</span>
+013053,000265: 
+<a name="47434F4D5031"></a>013054,000266: 06,3525           35015        <span class="sm">GCOMP1  </span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
+013055,000267: 06,3526           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013056,000268: 
+013057,000269: 06,3527           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  RESCALE</span>
+013058,000270: 06,3530           31472                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         
+013059,000271: 06,3531           00006                           <span class="op">EXTEND  </span>                                       
+013060,000272: 06,3532           75010                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SHIFT MINOR PART LEFT 7 -- MAJOR PART = 0</span>
+013061,000273: 06,3533           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013062,000274: 06,3534           23472                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>      +1                         <span class="co">#  BITS 8-14 OF MINOR PART WERE = 0</span>
+013063,000275: 
+013064,000276: 06,3535           10130                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PIPAZ, PIPAY, PIPAX</span>
+013065,000277: 06,3536           67716                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454731">NEG1</a>                                  
+013066,000278: 06,3537           13526                           <span class="op">TCF     </span> <a href="#47434F4D5031">GCOMP1</a>     +1                         
+013067,000279: 
+<a name="5630364E333053"></a>013068,000280: 06,3540           01436        <span class="sm">V06N30S </span>           <span class="ps">VN      </span> 0630                                  
+013069,000281: 06,3541           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+013070,000282: 
+013071,000283:                                                                                                  <span class="co">#  Page 304              </span>
+<a name="4E42444F4E4C59"></a>013072,000284: 06,3542           11477        <span class="sm">NBDONLY </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
+013073,000285: 06,3543           13546                           <span class="op">TCF     </span> +3                                    
+013074,000286: 06,3544           13546                           <span class="op">TCF     </span> +2                                    
+013075,000287: 06,3545           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+013076,000288: 
+013077,000289: 06,3546           00004                           <span class="op">INHINT  </span>                                       
+013078,000290: 06,3547           10076                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  PREREAD T3RUPT MAY COINCIDE</span>
+013079,000291: 06,3550           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+013080,000292: 06,3551           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+013081,000293: 06,3552           13553                           <span class="op">TCF     </span> +1                                    
+013082,000294: 
+013083,000295: 06,3553           30025                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  (CS) X 2(+14)</span>
+013084,000296: 06,3554           57074                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              <span class="co">#  PREVIOUS TIME</span>
+013085,000297: 06,3555           00003                           <span class="op">RELINT  </span>                                       
+013086,000298: 06,3556           40000                           <span class="op">COM     </span>                                       
+013087,000299: 06,3557           61074                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              
+<a name="4E424432"></a>013088,000300: 06,3560           10000        <span class="sm">NBD2    </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  CALCULATE ELAPSED TIME.</span>
+013089,000301: 06,3561           65017                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  NO TIME1 OVERFLOW</span>
+013090,000302: 06,3562           13567                           <span class="op">TCF     </span> <a href="#4E424433">NBD3</a>                                  <span class="co">#  RESTORE TIME DIFFERENCE AND JUMP</span>
+013091,000303: 06,3563           13565                           <span class="op">TCF     </span> +2                                    <span class="co">#  TIME1 OVERFLOW</span>
+013092,000304: 06,3564           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  IF ELAPSED TIME = 0 (DIFFERENCE = -0)</span>
+013093,000305: 
+013094,000306: 06,3565           40000                           <span class="op">COM     </span>                                       <span class="co">#  CALCULATE ABSOLUTE DIFFERENCE</span>
+013095,000307: 06,3566           64777                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
+013096,000308: 
+<a name="4E424433"></a>013097,000309: 06,3567           00006        <span class="sm">NBD3    </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  C(A) = DELTAT         (CS) X 2(+14)</span>
+013098,000310: 06,3570           75006                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  SHIFT RIGHT 5</span>
+013099,000311: 06,3571           52123                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+013100,000312: 06,3572           00006                           <span class="op">EXTEND  </span>                                       
+013101,000313: 06,3573           30123                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+013102,000314: 06,3574           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT NOW SCALED (CS) X 2(+19)</span>
+013103,000315: 
+013104,000316: 06,3575           35021                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+013105,000317: 06,3576           55477                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  INDICATE COMMANDS 2 PULSES OR LESS.</span>
+013106,000318: 06,3577           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  INDEX X, Y, Z.</span>
+013107,000319: 
+013108,000320: 06,3600           41460                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  <span class="co">#  (GYRO PULSES)/(CS) X 2(-5)</span>
+013109,000321: 06,3601           03617                           <span class="op">TC      </span> <a href="#4642494153535542">FBIASSUB</a>                              <span class="co">#  -(NBOX)(DELTAT)       (GYRO PULSES) X 2(+14)</span>
+013110,000322: 
+013111,000323: 06,3602           00006                           <span class="op">EXTEND  </span>                                       
+013112,000324: 06,3603           40123                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+013113,000325: 06,3604           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT SCALED (CS) X 2(+19)</span>
+013114,000326: 06,3605           31461                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424459">NBDY</a>                                  <span class="co">#  (GYRO PULSES)/(CS) X 2(-5)</span>
+013115,000327: 06,3606           03617                           <span class="op">TC      </span> <a href="#4642494153535542">FBIASSUB</a>                              <span class="co">#  -(NBDY)(DELTAT)       (GYRO PULSES) X 2(+14)</span>
+013116,000328: 
+013117,000329: 06,3607           00006                           <span class="op">EXTEND  </span>                                       
+013118,000330: 06,3610           40123                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+013119,000331: 06,3611           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT SCALED (CS) X 2(+19)</span>
+013120,000332: 06,3612           41462                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42445A">NBDZ</a>                                  <span class="co">#  (GYRO PULSES)/(CS) X 2(-5)</span>
+013121,000333: 06,3613           03617                           <span class="op">TC      </span> <a href="#4642494153535542">FBIASSUB</a>                              <span class="co">#  +(NBDZ)(DELTAT)       (GYRO PULSES) X 2(+14)</span>
+013122,000334:                                                                                                  <span class="co">#  Page 305              </span>
+013123,000335: 06,3614           11477                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  ARE GYRO COMMANDS GREATER THAN 2 PULSES</span>
+013124,000336: 06,3615           13474                           <span class="op">TCF     </span> <a href="#312F4759524F">1/GYRO</a>                                <span class="co">#  YES</span>
+013125,000337: 06,3616           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  NO</span>
+013126,000338: 
+013127,000339:                                                                                                  <span class="co">#  Page 306</span>
+<a name="4642494153535542"></a>013128,000340: 06,3617           56002        <span class="sm">FBIASSUB</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+013129,000341: 06,3620           54131                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+013130,000342: 
+013131,000343: 06,3621           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NBD SCALED (GYRO PULSES)/(CS) X 2(-5)</span>
+013132,000344: 06,3622           00006                           <span class="op">EXTEND  </span>                                       
+013133,000345: 06,3623           70154                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DELTAT SCALED (CS) X 2(+19)</span>
+013134,000346: 06,3624           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013135,000347: 06,3625           21472                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  HI(NBD)(DELTAT)       (GYRO PULSES) X 2(+14)</span>
+013136,000348: 
+013137,000349: 06,3626           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NO FRACTIONAL PART</span>
+013138,000350: 06,3627           00006                           <span class="op">EXTEND  </span>                                       
+013139,000351: 06,3630           70155                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+013140,000352: 06,3631           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+013141,000353: 06,3632           35021                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+013142,000354: 06,3633           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+013143,000355: 06,3634           21472                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  (NBD)(DELTAT)         (GYRO PULSES) X 2(+14)</span>
+013144,000356: 
+013145,000357: 06,3635           13461                           <span class="op">TCF     </span> <a href="#4452465453554232">DRFTSUB2</a>                              <span class="co">#  CHECK MAGNITUDE OF COMPENSATION</span>
+013146,000358: 
+<a name="4C41535442494153"></a>013147,000359: 06,3636           04662        <span class="sm">LASTBIAS</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+013148,000360: 06,3637           17156                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#504950555345">PIPUSE</a>                                
+013149,000361: 
+013150,000362: 06,3640           11477                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
+013151,000363: 06,3641           13644                           <span class="op">TCF     </span> +3                                    
+013152,000364: 06,3642           13644                           <span class="op">TCF     </span> +2                                    
+013153,000365: 06,3643           15217                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+013154,000366: 
+013155,000367: 06,3644           37665                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5052494F3331">PRIO31</a>                                <span class="co">#  2 SECONDS SCALED (CS) X 2(+8)</span>
+013156,000368: 06,3645           57074                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              
+013157,000369: 06,3646           40000                           <span class="op">COM     </span>                                       
+013158,000370: 06,3647           61246                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>   +1                         <span class="co">#  TIME AT PIPA1 =0</span>
+013159,000371: 06,3650           13560                           <span class="op">TCF     </span> <a href="#4E424432">NBD2</a>                                  
+013160,000372: 
 
 End of include-file IMU_COMPENSATION_PACKAGE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
