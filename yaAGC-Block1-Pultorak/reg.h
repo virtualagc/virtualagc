@@ -1,4 +1,3 @@
-
 #ifndef reg_H
 #define reg_H
 
@@ -6,56 +5,62 @@
 #include <string.h>
 #include <stdio.h>
 
+using namespace std;
+
 class reg
-{
-public:
-	virtual unsigned read() { return mask & slaveVal; }
-	virtual void write(unsigned v) { load = true; masterVal = mask & v; }
+  {
+  public:
+    virtual unsigned read()
+      { return mask & slaveVal;}
+    virtual void write(unsigned v)
+      { load = true; masterVal = mask & v;}
+    virtual ~reg()
+      {};
 
-	// asynchronous clear
-	void clear() { slaveVal = 0; }
+    // asynchronous clear
+    void clear()
+      { slaveVal = 0;}
 
-	// load is set when a register is written into.
-	void clk() { if(load) slaveVal = masterVal; load = false; }
+    // load is set when a register is written into.
+    void clk()
+      { if(load) slaveVal = masterVal; load = false;}
 
+    // THIS DOESN'T WORK, BUT IT SHOULD!
+    //void clk() { if(load) slaveVal = masterVal; load = false; masterVal = -1;}
 
-	// THIS DOESN'T WORK, BUT IT SHOULD!
-	//void clk() { if(load) slaveVal = masterVal; load = false; masterVal = -1;}
+    unsigned readField(unsigned msb, unsigned lsb);// bitfield numbered n - 1
+    void writeField(unsigned msb, unsigned lsb, unsigned v);// bitfield numbered n - 1
 
+    // Write a 16-bit word (in) into the register. Transpose the bits according to
+    // the specification (ib).
+    void writeShift(unsigned in, unsigned* ib);
 
-	unsigned readField(unsigned msb, unsigned lsb); // bitfield numbered n - 1
-	void writeField(unsigned msb, unsigned lsb, unsigned v); // bitfield numbered n - 1
+    // Return a shifted 16-bit word. Transpose the 'in' bits according to
+    // the specification 'ib'. 'Or' the result to out and return the value.
+    unsigned shiftData(unsigned out, unsigned in, unsigned* ib);
 
-	// Write a 16-bit word (in) into the register. Transpose the bits according to
-	// the specification (ib).
-	void writeShift(unsigned in, unsigned* ib);
+    unsigned outmask()
+      { return mask;}
 
-	// Return a shifted 16-bit word. Transpose the 'in' bits according to
-	// the specification 'ib'. 'Or' the result to out and return the value.
-	unsigned shiftData(unsigned out, unsigned in, unsigned* ib);
+  protected:
+    reg(unsigned s, const char* fs)
+    : size(s), mask(0), masterVal(0), slaveVal(0), fmtString(fs), load(false)
+      { mask = buildMask(size);}
 
-	unsigned outmask() { return mask; }
+    static unsigned buildMask(unsigned s);
 
-protected:
-	reg(unsigned s, char* fs) 
-		: size(s), mask(0), masterVal(0), slaveVal(0), fmtString(fs), load(false)
-		{ mask = buildMask(size);}
+    friend ostream& operator << (ostream& os, const reg& r)
+      { char buf[32]; sprintf(buf, r.fmtString, r.slaveVal); os << buf; return os;}
 
-	static unsigned buildMask(unsigned s);
+  private:
+    unsigned size; // bits
+    unsigned masterVal;
+    unsigned slaveVal;
+    unsigned mask;
+    const char* fmtString;
+    bool load;
 
-	friend ostream& operator << (ostream& os, const reg& r)
-		{ char buf[32]; sprintf(buf, r.fmtString, r.slaveVal); os << buf; return os; }
-
-
-private:
-	unsigned	size; // bits
-	unsigned	masterVal;
-	unsigned	slaveVal;
-	unsigned	mask;
-	char*		fmtString;
-	bool		load;
-
-	reg(); // prevent instantiation of default constructor
-};
+    reg();// prevent instantiation of default constructor
+  };
 
 #endif

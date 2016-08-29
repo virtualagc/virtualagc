@@ -14,14 +14,14 @@
 unsigned BUS::glbl_READ_BUS = 0;
 unsigned BUS::glbl_WRITE_BUS = 0;
 
-
-ovfState BUS::testOverflow(unsigned bus)
+ovfState
+BUS::testOverflow(unsigned bus)
 {
-	if((bus & 0100000) && !(bus & 0040000))
-		return NEG_OVF; // negative overflow
-	else if(!(bus & 0100000) && (bus & 0040000))
-		return POS_OVF; // positive overflow
-	else
-		return NO_OVF;
+  if ((bus & 0100000) && !(bus & 0040000))
+    return NEG_OVF; // negative overflow
+  else if (!(bus & 0100000) && (bus & 0040000))
+    return POS_OVF; // positive overflow
+  else
+    return NO_OVF;
 }
 

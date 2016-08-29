@@ -27,43 +27,43 @@
 
 // Start/Stop Logic and Time Pulse Generator Subsystem
 
-enum tpType {
-	STBY		=0,
-	PWRON		=1,
+enum tpType
+{
+  STBY = 0, PWRON = 1,
 
-	TP1			=2,		// TIME PULSE 1: start of memory cycle time (MCT)
-	TP2			=3,
-	TP3			=4,
-	TP4			=5,
-	TP5			=6,
-	TP6			=7,		// EMEM is available in G register by TP6
-	TP7			=8,		// FMEM is available in G register by TP7
-	TP8			=9,
-	TP9			=10,
-	TP10		=11,	// G register written to memory beginning at TP10
-	TP11		=12,	// TIME PULSE 11: end of memory cycle time (MCT)
-	TP12		=13,	// select new subsequence/select new instruction
+  TP1 = 2,		// TIME PULSE 1: start of memory cycle time (MCT)
+  TP2 = 3,
+  TP3 = 4,
+  TP4 = 5,
+  TP5 = 6,
+  TP6 = 7,		// EMEM is available in G register by TP6
+  TP7 = 8,		// FMEM is available in G register by TP7
+  TP8 = 9,
+  TP9 = 10,
+  TP10 = 11,	// G register written to memory beginning at TP10
+  TP11 = 12,	// TIME PULSE 11: end of memory cycle time (MCT)
+  TP12 = 13,	// select new subsequence/select new instruction
 
-	SRLSE		=14,	// step switch release
-	WAIT		=15
+  SRLSE = 14,	// step switch release
+  WAIT = 15
 };
 
-class regSG : public reg 
-{ 
-public: regSG() : reg(4, "%02o") { }
-
-};
-
+class regSG : public reg
+  {
+  public: regSG() : reg(4, "%02o")
+      {}
+    virtual ~regSG()
+      {}
+  };
 
 class TPG
-{
-public:
-	static void doexecWP_TPG();
+  {
+  public:
+    static void doexecWP_TPG();
 
+    static regSG register_SG;
 
-	static regSG register_SG;
-
-	static char* tpTypestring[];
-};
+    static const char* tpTypestring[];
+  };
 
 #endif

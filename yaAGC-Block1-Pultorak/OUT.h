@@ -24,47 +24,56 @@
 
 #include "reg.h"
 
+class regOut1 : public reg
+  {
+  public: regOut1() : reg(16, "%06o")
+      {}
+    virtual ~regOut1()
+      {};
+  };
 
-class regOut1 : public reg 
-{ 
-public: regOut1() : reg(16, "%06o") { }
-};
+class regOut2 : public reg
+  {
+  public: regOut2() : reg(16, "%06o")
+      {}
+    virtual ~regOut2()
+      {};
+  };
 
-class regOut2 : public reg 
-{ 
-public: regOut2() : reg(16, "%06o") { }
+class regOut3 : public reg
+  {
+  public: regOut3() : reg(16, "%06o")
+      {}
+    virtual ~regOut3()
+      {};
+  };
 
-};
-
-class regOut3 : public reg 
-{ 
-public: regOut3() : reg(16, "%06o") { }
-};
-
-class regOut4 : public reg 
-{ 
-public: regOut4() : reg(16, "%06o") { }
-};
+class regOut4 : public reg
+  {
+  public: regOut4() : reg(16, "%06o")
+      {}
+    virtual ~regOut4()
+      {};
+  };
 
 class OUT
-{
-public:
-	static void execWP_GENRST();
-	static void execWP_WA10();
-	static void execRP_RA11();
-	static void execWP_WA11();
-	static void execRP_RA12();
-	static void execWP_WA12();
-	static void execRP_RA13();
-	static void execWP_WA13();
-	static void execRP_RA14();
-	static void execWP_WA14();
+  {
+  public:
+    static void execWP_GENRST();
+    static void execWP_WA10();
+    static void execRP_RA11();
+    static void execWP_WA11();
+    static void execRP_RA12();
+    static void execWP_WA12();
+    static void execRP_RA13();
+    static void execWP_WA13();
+    static void execRP_RA14();
+    static void execWP_WA14();
 
-
-	static regOut1 register_OUT1;	// output register 1
-	static regOut2 register_OUT2;	// output register 2
-	static regOut3 register_OUT3;	// output register 3
-	static regOut4 register_OUT4;	// output register 4
-};
+    static regOut1 register_OUT1;	// output register 1
+    static regOut2 register_OUT2;// output register 2
+    static regOut3 register_OUT3;// output register 3
+    static regOut4 register_OUT4;// output register 4
+  };
 
 #endif

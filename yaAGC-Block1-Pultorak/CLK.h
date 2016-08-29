@@ -24,25 +24,22 @@
 
 #include "reg.h"
 
-
-	// define pointer-to-function type
-typedef void (*EXECTYPE)();
-
-
+// define pointer-to-function type
+typedef void
+(*EXECTYPE)();
 
 class CLK
-{
-public:
-	static void doexecR(int pulse);
-	static void doexecR_ALU(int pulse);
-	static void doexecR_ALU_OR(int pulse);
-	static void doexecW(int pulse);
+  {
+  public:
+    static void doexecR(int pulse);
+    static void doexecR_ALU(int pulse);
+    static void doexecR_ALU_OR(int pulse);
+    static void doexecW(int pulse);
 
-	static void clkAGC();
+    static void clkAGC();
 
+    static reg* registerList[];
 
-	static reg* registerList[];
-
-};
+  };
 
 #endif

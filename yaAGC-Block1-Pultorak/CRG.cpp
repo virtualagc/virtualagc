@@ -27,130 +27,124 @@ regA CRG::register_A; // accumulator
 // the parameter identifies the bus line assigned to that register bit. 'BX'
 // means 'don't care'; i.e.: leave that register bit alone.
 
-
-
 unsigned CRG::conv_WALP_LP[] =
-{	BX, BX, B1, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX };
+  { BX, BX, B1, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX };
 
 unsigned CRG::conv_WALP_A[] =
-{	SG, SG, US, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
+  { SG, SG, US, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
 
 unsigned CRG::conv_WLP[] =
-{	B1, B1, D0, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
+  { B1, B1, D0, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
 
-
-
-void CRG::execWP_GENRST()
+void
+CRG::execWP_GENRST()
 {
-	register_Q.write(0);
-	register_Z.write(0);
-	register_LP.write(0);
-	register_A.write(0);
+  register_Q.write(0);
+  register_Z.write(0);
+  register_LP.write(0);
+  register_A.write(0);
 }
 
-
-
-void CRG::execRP_RQ()
+void
+CRG::execRP_RQ()
 {
-	BUS::glbl_READ_BUS = register_Q.read();
+  BUS::glbl_READ_BUS = register_Q.read();
 }
 
-void CRG::execRP_RA1()
+void
+CRG::execRP_RA1()
 {
-	BUS::glbl_READ_BUS = register_Q.read();
+  BUS::glbl_READ_BUS = register_Q.read();
 }
 
-
-
-
-
-void CRG::execWP_WQ()
+void
+CRG::execWP_WQ()
 {
-	register_Q.write(BUS::glbl_WRITE_BUS);
+  register_Q.write(BUS::glbl_WRITE_BUS);
 }
 
-void CRG::execWP_WA1()
+void
+CRG::execWP_WA1()
 {
-	register_Q.write(BUS::glbl_WRITE_BUS);
+  register_Q.write(BUS::glbl_WRITE_BUS);
 }
 
-
-
-
-void CRG::execRP_RZ()
+void
+CRG::execRP_RZ()
 {
-	BUS::glbl_READ_BUS = register_Z.read();
+  BUS::glbl_READ_BUS = register_Z.read();
 }
 
-void CRG::execRP_RA2()
+void
+CRG::execRP_RA2()
 {
-	BUS::glbl_READ_BUS = register_Z.read();
+  BUS::glbl_READ_BUS = register_Z.read();
 }
 
-
-
-void CRG::execWP_WZ()
+void
+CRG::execWP_WZ()
 {
-	register_Z.write(BUS::glbl_WRITE_BUS);
+  register_Z.write(BUS::glbl_WRITE_BUS);
 }
 
-void CRG::execWP_WA2()
+void
+CRG::execWP_WA2()
 {
-	register_Z.write(BUS::glbl_WRITE_BUS);
+  register_Z.write(BUS::glbl_WRITE_BUS);
 }
 
-
-void CRG::execRP_RLP()
+void
+CRG::execRP_RLP()
 {
-	BUS::glbl_READ_BUS = register_LP.read();
+  BUS::glbl_READ_BUS = register_LP.read();
 }
 
-void CRG::execRP_RA3()
+void
+CRG::execRP_RA3()
 {
-	BUS::glbl_READ_BUS = register_LP.read();
+  BUS::glbl_READ_BUS = register_LP.read();
 }
 
-
-void CRG::execWP_WALP()
+void
+CRG::execWP_WALP()
 {
-	register_LP.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WALP_LP);
-	register_A.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WALP_A);
+  register_LP.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WALP_LP);
+  register_A.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WALP_A);
 }
 
-void CRG::execWP_WLP()
+void
+CRG::execWP_WLP()
 {
-	register_LP.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WLP);
+  register_LP.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WLP);
 }
 
-void CRG::execWP_WA3()
+void
+CRG::execWP_WA3()
 {
-	register_LP.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WLP);
+  register_LP.writeShift(BUS::glbl_WRITE_BUS, CRG::conv_WLP);
 }
 
-
-
-void CRG::execRP_RA()
+void
+CRG::execRP_RA()
 {
-	BUS::glbl_READ_BUS = register_A.read();
+  BUS::glbl_READ_BUS = register_A.read();
 }
 
-void CRG::execRP_RA0()
+void
+CRG::execRP_RA0()
 {
-	BUS::glbl_READ_BUS = register_A.read();
+  BUS::glbl_READ_BUS = register_A.read();
 }
 
-
-
-void CRG::execWP_WA()
+void
+CRG::execWP_WA()
 {
-	register_A.write(BUS::glbl_WRITE_BUS);
+  register_A.write(BUS::glbl_WRITE_BUS);
 }
 
-void CRG::execWP_WA0()
+void
+CRG::execWP_WA0()
 {
-	register_A.write(BUS::glbl_WRITE_BUS);
+  register_A.write(BUS::glbl_WRITE_BUS);
 }
-
-
-
 

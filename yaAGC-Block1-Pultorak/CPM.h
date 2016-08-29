@@ -25,33 +25,31 @@
 #include "TPG.h"
 #include "SEQ.h"
 
-
-
 class CPM
-{
-public:
+  {
+  public:
 
-	static subseq instructionSubsequenceDecoder(int CTR_field, int SQ_field, int STB_field);
+    static subseq instructionSubsequenceDecoder(int CTR_field, int SQ_field, int STB_field);
 
-	static char* subseqString[];
+    static const char* subseqString[];
 
-	static void controlPulseMatrix();
+    static void controlPulseMatrix();
 
-private:
-		// Clear the list of currently asserted control pulses.
-	static void clearControlPulses();
+  private:
+    // Clear the list of currently asserted control pulses.
+    static void clearControlPulses();
 
-	// Assert the set of control pulses by adding them to the list of currently
-	// active control signals.
-	static void assert(cpType* pulse);
+    // Assert the set of control pulses by adding them to the list of currently
+    // active control signals.
+    static void assert(cpType* pulse);
 
-	// Assert a control pulse by adding it to the list of currently asserted
-	// control pulses.
-	static void assert(cpType pulse);
+    // Assert a control pulse by adding it to the list of currently asserted
+    // control pulses.
+    static void assert(cpType pulse);
 
-	static void get_CPM_A(
-		int BR2_field, int BR1_field, int TPG_field, int STB_field, int SQ_field, int CTR_field, bool LOOP6_field);
+    static void get_CPM_A(
+        int BR2_field, int BR1_field, int TPG_field, int STB_field, int SQ_field, int CTR_field, bool LOOP6_field);
 
-};
+  };
 
 #endif

@@ -28,16 +28,14 @@
 
 // INSTRUCTION SUBSEQUENCE DECODER
 
-
-
 #ifdef NOTDEF
 class ISD
-{
-public:
-	static subseq instructionSubsequenceDecoder();
+  {
+  public:
+    static subseq instructionSubsequenceDecoder();
 
-	static char* ISD::subseqString[];
-};
+    static char* ISD::subseqString[];
+  };
 #endif
 
 #endif

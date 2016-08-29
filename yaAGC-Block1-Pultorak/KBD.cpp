@@ -12,14 +12,14 @@
 #include "KBD.h"
 #include "INT.h"
 
-
 // DSKY keyboard
-keyInType KBD::kbd=KEYIN_NONE;	// latches the last key entry from the DSKY
+keyInType KBD::kbd = KEYIN_NONE;	// latches the last key entry from the DSKY
 
-void KBD::keypress(keyInType c)
+void
+KBD::keypress(keyInType c)
 {
-		// latch the keycode
-	kbd = c;
-		// generate KEYRUPT interrupt
-	INT::rupt[KEYRUPT] = 1;
+  // latch the keycode
+  kbd = c;
+  // generate KEYRUPT interrupt
+  INT::rupt[KEYRUPT] = 1;
 }

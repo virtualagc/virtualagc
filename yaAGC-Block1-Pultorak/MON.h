@@ -22,23 +22,22 @@
 #ifndef MON_H
 #define MON_H
 
-
 class MON
-{
-public:
-	static void displayAGC();
+  {
+  public:
+    static void displayAGC();
 
-	static char* MON::clkTypestring[];
+    static char* /*MON::*/clkTypestring[];
 
-	static unsigned	PURST;	// power up reset
-	static unsigned	RUN;	// run/halt switch
-	static unsigned	STEP;	// single step switch
-	static unsigned	INST;	// instruction/sequence step select switch
-	static unsigned FCLK;	// clock mode (0=single (manual) clock, 1=continuous clock)
+    static unsigned PURST;	// power up reset
+    static unsigned RUN;// run/halt switch
+    static unsigned STEP;// single step switch
+    static unsigned INST;// instruction/sequence step select switch
+    static unsigned FCLK;// clock mode (0=single (manual) clock, 1=continuous clock)
 
-	static unsigned	SA;		// "standby allowed" SW; 0=NO (full power), 1=YES (low power)
+    static unsigned SA;// "standby allowed" SW; 0=NO (full power), 1=YES (low power)
 
-	static unsigned	SCL_ENAB;	// "scaler enabled" SW; 0=NO (scaler halted), 1=YES (scaler running)
-};
+    static unsigned SCL_ENAB;// "scaler enabled" SW; 0=NO (scaler halted), 1=YES (scaler running)
+  };
 
 #endif

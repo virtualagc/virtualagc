@@ -22,81 +22,68 @@ regOut2 OUT::register_OUT2;	// output register 2
 regOut3 OUT::register_OUT3;	// output register 3
 regOut4 OUT::register_OUT4;	// output register 4
 
-
 // Writing to OUT0 loads the selected DSKY display register.
 
-
-
-
-
-void OUT::execWP_GENRST()
+void
+OUT::execWP_GENRST()
 {
-	DSP::clearOut0();
+  DSP::clearOut0();
 
-	register_OUT1.write(0);
-	register_OUT2.write(0);
+  register_OUT1.write(0);
+  register_OUT2.write(0);
 }
 
-void OUT::execWP_WA10()
+void
+OUT::execWP_WA10()
 {
-	DSP::decodeRelayWord(BUS::glbl_WRITE_BUS); 
+  DSP::decodeRelayWord(BUS::glbl_WRITE_BUS);
 }
 
-
-
-void OUT::execRP_RA11()
+void
+OUT::execRP_RA11()
 {
-	BUS::glbl_READ_BUS = register_OUT1.read();
+  BUS::glbl_READ_BUS = register_OUT1.read();
 }
 
-
-
-void OUT::execWP_WA11()
+void
+OUT::execWP_WA11()
 {
-	register_OUT1.write(BUS::glbl_WRITE_BUS);
+  register_OUT1.write(BUS::glbl_WRITE_BUS);
 }
 
-
-
-void OUT::execRP_RA12()
+void
+OUT::execRP_RA12()
 {
-	BUS::glbl_READ_BUS = register_OUT2.read();
+  BUS::glbl_READ_BUS = register_OUT2.read();
 }
 
-
-
-void OUT::execWP_WA12()
+void
+OUT::execWP_WA12()
 {
-	register_OUT2.write(BUS::glbl_WRITE_BUS);
+  register_OUT2.write(BUS::glbl_WRITE_BUS);
 }
 
-
-
-void OUT::execRP_RA13()
+void
+OUT::execRP_RA13()
 {
-	BUS::glbl_READ_BUS = register_OUT3.read();
+  BUS::glbl_READ_BUS = register_OUT3.read();
 }
 
-
-
-void OUT::execWP_WA13()
+void
+OUT::execWP_WA13()
 {
-	register_OUT3.write(BUS::glbl_WRITE_BUS);	
+  register_OUT3.write(BUS::glbl_WRITE_BUS);
 }
 
-
-
-void OUT::execRP_RA14()
+void
+OUT::execRP_RA14()
 {
-	BUS::glbl_READ_BUS = register_OUT4.read();
+  BUS::glbl_READ_BUS = register_OUT4.read();
 }
 
-
-
-void OUT::execWP_WA14()
+void
+OUT::execWP_WA14()
 {
-	register_OUT4.write(BUS::glbl_WRITE_BUS);
+  register_OUT4.write(BUS::glbl_WRITE_BUS);
 }
-
-
 
