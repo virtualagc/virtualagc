@@ -1,1 +1,0 @@
-PREFIX=/usr/local
