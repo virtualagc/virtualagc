@@ -138,6 +138,8 @@
 #				the VirtualAGC installer, so neither the mission
 #				binaries nor syntax-highlighted assembly listings
 #				were included in the installer.
+#		2016-08-29 RSB	Mods related to my personal-build situation, which
+#				shouldn't affect anyone else.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -325,9 +327,13 @@ all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(SUBDIRS)
 
-.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim
+.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA ControlPulseSim
 Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim:
 	$(BUILD) -C $@ 
+
+.PHONY: yaACA3
+yaACA3:
+	${yaACA}$(BUILD) -C $@ 
 
 .PHONY: yaDEDA
 yaDEDA:
