@@ -25,60 +25,87 @@
 #include "reg.h"
 
 class regF17 : public reg
+{
+public:
+  regF17() :
+      reg(2, "%01o")
   {
-  public:
-    regF17() : reg(2, "%01o")
-      {}
-    virtual ~regF17()
-      {};
-  };
+  }
+  virtual
+  ~regF17()
+  {
+  }
+  ;
+};
 
 class regF13 : public reg
+{
+public:
+  regF13() :
+      reg(2, "%01o")
   {
-  public:
-    regF13() : reg(2, "%01o")
-      {}
-    virtual ~regF13()
-      {};
-  };
+  }
+  virtual
+  ~regF13()
+  {
+  }
+  ;
+};
 
 class regF10 : public reg
+{
+public:
+  regF10() :
+      reg(2, "%01o")
   {
-  public:
-    regF10() : reg(2, "%01o")
-      {}
-    virtual ~regF10()
-      {};
-  };
+  }
+  virtual
+  ~regF10()
+  {
+  }
+  ;
+};
 
 class regSCL : public reg
+{
+public:
+  regSCL() :
+      reg(17, "%06o")
   {
-  public:
-    regSCL() : reg(17, "%06o")
-      {}
-    virtual ~regSCL()
-      {};
-  };
+  }
+  virtual
+  ~regSCL()
+  {
+  }
+  ;
+};
 
 class SCL
-  {
-  public:
-    static void doexecWP_SCL();
-    static void doexecWP_F17();
-    static void doexecWP_F13();
-    static void doexecWP_F10();
+{
+public:
+  static void
+  doexecWP_SCL();
+  static void
+  doexecWP_F17();
+  static void
+  doexecWP_F13();
+  static void
+  doexecWP_F10();
 
-    static regSCL register_SCL;
+  static regSCL register_SCL;
 
-    // Normally outputs '0'; outputs '1' for one
-    // clock pulse at the indicated frequency.
-    static unsigned F17x();// 0.78125 Hz scaler output
-    static unsigned F13x();// 12.5 Hz  scaler output
-    static unsigned F10x();// 100 Hz scaler output
+  // Normally outputs '0'; outputs '1' for one
+  // clock pulse at the indicated frequency.
+  static unsigned
+  F17x();    // 0.78125 Hz scaler output
+  static unsigned
+  F13x();    // 12.5 Hz  scaler output
+  static unsigned
+  F10x();    // 100 Hz scaler output
 
-    static regF17 register_F17;
-    static regF13 register_F13;
-    static regF10 register_F10;
-  };
+  static regF17 register_F17;
+  static regF13 register_F13;
+  static regF10 register_F10;
+};
 
 #endif

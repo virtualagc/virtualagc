@@ -45,60 +45,87 @@ enum ruptNumber
 };
 
 class regRPCELL : public reg
+{
+public:
+  regRPCELL() :
+      reg(5, "%02o")
   {
-  public:
-    regRPCELL() : reg(5, "%02o")
-      {}
-    virtual ~regRPCELL()
-      {};
-  };
+  }
+  virtual
+  ~regRPCELL()
+  {
+  }
+  ;
+};
 // also inhibits additional interrupts while an interrupt is being processed
 
 class regINHINT1 : public reg
+{
+public:
+  regINHINT1() :
+      reg(1, "%01o")
   {
-  public:
-    regINHINT1() : reg(1, "%01o")
-      {}
-    virtual ~regINHINT1()
-      {};
-  };
+  }
+  virtual
+  ~regINHINT1()
+  {
+  }
+  ;
+};
 
 class regINHINT : public reg
+{
+public:
+  regINHINT() :
+      reg(1, "%01o")
   {
-  public:
-    regINHINT() : reg(1, "%01o")
-      {}
-    virtual ~regINHINT()
-      {};
-  };
+  }
+  virtual
+  ~regINHINT()
+  {
+  }
+  ;
+};
 
 class INT
-  {
-  public:
-    friend class CLK;
-    friend class MON;
+{
+public:
+  friend class CLK;
+  friend class MON;
 
-    static void execRP_RRPA();
-    static void execWP_GENRST();
-    static void execWP_RPT();
-    static void execWP_KRPT();
-    static void execWP_CLRP();
-    static void execWP_WOVI();
-    static void execWP_CLINH1();
-    static void execWP_INH();
-    static void execWP_CLINH();
+  static void
+  execRP_RRPA();
+  static void
+  execWP_GENRST();
+  static void
+  execWP_RPT();
+  static void
+  execWP_KRPT();
+  static void
+  execWP_CLRP();
+  static void
+  execWP_WOVI();
+  static void
+  execWP_CLINH1();
+  static void
+  execWP_INH();
+  static void
+  execWP_CLINH();
 
-    static bool IRQ(); // returns true if an interrupt is requested
+  static bool
+  IRQ(); // returns true if an interrupt is requested
 
-    static unsigned rupt[];
+  static unsigned rupt[];
 
-  private:
-    static void resetAllRupt();
-    static unsigned getPriorityRupt();
+private:
+  static void
+  resetAllRupt();
+  static unsigned
+  getPriorityRupt();
 
-    static regRPCELL register_RPCELL;// latches the selected priority interrupt vector (1-5)
-    static regINHINT1 register_INHINT1;// inhibits interrupts for 1 instruction (on WOVI)
-    static regINHINT register_INHINT;// inhibits interrupts on INHINT, reenables on RELINT
-  };
+  static regRPCELL register_RPCELL; // latches the selected priority interrupt vector (1-5)
+  static regINHINT1 register_INHINT1; // inhibits interrupts for 1 instruction (on WOVI)
+  static regINHINT register_INHINT; // inhibits interrupts on INHINT, reenables on RELINT
+};
 
 #endif

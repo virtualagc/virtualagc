@@ -60,16 +60,17 @@ enum ovfState
 };
 
 class BUS
-  {
-  public:
-    static unsigned glbl_READ_BUS; // read/write bus for xfer between central regs
-    static unsigned glbl_WRITE_BUS;// read/write bus for xfer between central regs
+{
+public:
+  static unsigned glbl_READ_BUS; // read/write bus for xfer between central regs
+  static unsigned glbl_WRITE_BUS; // read/write bus for xfer between central regs
 
-    friend class INT;
-    friend class CTR;
+  friend class INT;
+  friend class CTR;
 
-  private:
-    static ovfState testOverflow(unsigned bus);
-  };
+private:
+  static ovfState
+  testOverflow(unsigned bus);
+};
 
 #endif

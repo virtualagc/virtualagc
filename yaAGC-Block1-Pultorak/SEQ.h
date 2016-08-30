@@ -25,8 +25,8 @@
 #include "reg.h"
 
 #define MAXPULSES 15
-#define MAX_IPULSES 5 // no more than 5 instruction-generated pulses active at any time
-enum cpType {
+#define MAX_IPULSES 5 // no more than 5 instruction-generated pulses active at any timeenum cpType
+{
   // **inferred; not defined in original R393 AGC4 spec.
   NO_PULSE = 0,
 
@@ -227,110 +227,165 @@ enum brType
 const int GOPROG = 02000;	// bottom address of fixed memory
 
 class regSQ : public reg
+{
+public:
+  regSQ() :
+      reg(4, "%02o")
   {
-  public:
-    regSQ() : reg(4, "%02o")
-      {}
-    virtual ~regSQ()
-      {};
-  };
+  }
+  virtual
+  ~regSQ()
+  {
+  }
+  ;
+};
 
 class regSTA : public reg
+{
+public:
+  regSTA() :
+      reg(2, "%01o")
   {
-  public:
-    regSTA() : reg(2, "%01o")
-      {}
-    virtual ~regSTA()
-      {};
-  };
+  }
+  virtual
+  ~regSTA()
+  {
+  }
+  ;
+};
 
 class regSTB : public reg
+{
+public:
+  regSTB() :
+      reg(2, "%01o")
   {
-  public:
-    regSTB() : reg(2, "%01o")
-      {}
-    virtual ~regSTB()
-      {};
-  };
+  }
+  virtual
+  ~regSTB()
+  {
+  }
+  ;
+};
 
 class regBR1 : public reg
+{
+public:
+  regBR1() :
+      reg(1, "%01o")
   {
-  public:
-    regBR1() : reg(1, "%01o")
-      {}
-    virtual ~regBR1()
-      {};
-  };
+  }
+  virtual
+  ~regBR1()
+  {
+  }
+  ;
+};
 
 class regBR2 : public reg
+{
+public:
+  regBR2() :
+      reg(1, "%01o")
   {
-  public:
-    regBR2() : reg(1, "%01o")
-      {}
-    virtual ~regBR2()
-      {};
-  };
+  }
+  virtual
+  ~regBR2()
+  {
+  }
+  ;
+};
 
 class regCTR : public reg
+{
+public:
+  regCTR() :
+      reg(3, "%01o")
   {
-  public:
-    regCTR() : reg(3, "%01o")
-      {}
-    virtual ~regCTR()
-      {};
-  };
+  }
+  virtual
+  ~regCTR()
+  {
+  }
+  ;
+};
 
 class regSNI : public reg
+{
+public:
+  regSNI() :
+      reg(1, "%01o")
   {
-  public: regSNI() : reg(1, "%01o")
-      {}
-    virtual ~regSNI()
-      {};
-  };
+  }
+  virtual
+  ~regSNI()
+  {
+  }
+  ;
+};
 
 class SEQ
-  {
-  public:
-    static void execWP_GENRST();
-    static void execWP_WSQ();
-    static void execWP_NISQ();
-    static void execWP_CLISQ();
-    static void execWP_ST1();
-    static void execWP_ST2();
-    static void execWP_TRSM();
-    static void execWP_CLSTA();
-    static void execWP_WSTB();
-    static void execWP_CLSTB();
-    static void execWP_SETSTB();
-    static void execWP_TSGN();
-    static void execWP_TOV();
-    static void execWP_TMZ();
-    static void execWP_TSGN2();
-    static void execWP_CTR();
-    static void execWP_CLCTR();
+{
+public:
+  static void
+  execWP_GENRST();
+  static void
+  execWP_WSQ();
+  static void
+  execWP_NISQ();
+  static void
+  execWP_CLISQ();
+  static void
+  execWP_ST1();
+  static void
+  execWP_ST2();
+  static void
+  execWP_TRSM();
+  static void
+  execWP_CLSTA();
+  static void
+  execWP_WSTB();
+  static void
+  execWP_CLSTB();
+  static void
+  execWP_SETSTB();
+  static void
+  execWP_TSGN();
+  static void
+  execWP_TOV();
+  static void
+  execWP_TMZ();
+  static void
+  execWP_TSGN2();
+  static void
+  execWP_CTR();
+  static void
+  execWP_CLCTR();
 
-    static regSNI register_SNI;	// select next intruction flag
-    static cpType glbl_cp[MAXPULSES];// current set of asserted control pulses (MAXPULSES)
+  static regSNI register_SNI;	// select next intruction flag
+  static cpType glbl_cp[MAXPULSES];	// current set of asserted control pulses (MAXPULSES)
 
-    static const char* cpTypeString[];
+  static const char* cpTypeString[];
 
-    // Test the currently asserted control pulses; return true if the specified
-    // control pulse is active.
-    static bool isAsserted(cpType pulse);
+  // Test the currently asserted control pulses; return true if the specified
+  // control pulse is active.
+  static bool
+  isAsserted(cpType pulse);
 
-    // Return a string containing the names of all asserted control pulses.
-    static char* getControlPulses();
+  // Return a string containing the names of all asserted control pulses.
+  static char*
+  getControlPulses();
 
-    static subseq glbl_subseq;// currently decoded instruction subsequence
+  static subseq glbl_subseq;    // currently decoded instruction subsequence
 
-    static regSQ register_SQ;// instruction register
-    static regSTA register_STA;// stage counter A
-    static regSTB register_STB;// stage counter B
-    static regBR1 register_BR1;// branch register1
-    static regBR2 register_BR2;// branch register2
-    static regCTR register_LOOPCTR;// loop counter
+  static regSQ register_SQ;    // instruction register
+  static regSTA register_STA;    // stage counter A
+  static regSTB register_STB;    // stage counter B
+  static regBR1 register_BR1;    // branch register1
+  static regBR2 register_BR2;    // branch register2
+  static regCTR register_LOOPCTR;    // loop counter
 
-    static const char* instructionString[];
-  };
+  static const char* instructionString[];
+};
 
 #endif

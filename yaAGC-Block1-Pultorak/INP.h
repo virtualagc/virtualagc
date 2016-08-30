@@ -25,53 +25,77 @@
 #include "reg.h"
 
 class regIn0 : public reg
+{
+public:
+  regIn0() :
+      reg(16, "%06o")
   {
-  public:
-    regIn0() : reg(16, "%06o")
-      {}
-    virtual ~regIn0()
-      {};
-  };
+  }
+  virtual
+  ~regIn0()
+  {
+  }
+  ;
+};
 
 class regIn1 : public reg
+{
+public:
+  regIn1() :
+      reg(16, "%06o")
   {
-  public:
-    regIn1() : reg(16, "%06o")
-      {}
-    virtual ~regIn1()
-      {};
-  };
+  }
+  virtual
+  ~regIn1()
+  {
+  }
+  ;
+};
 
 class regIn2 : public reg
+{
+public:
+  regIn2() :
+      reg(16, "%06o")
   {
-  public:
-    regIn2() : reg(16, "%06o")
-      {}
-    virtual ~regIn2()
-      {};
-  };
+  }
+  virtual
+  ~regIn2()
+  {
+  }
+  ;
+};
 
 class regIn3 : public reg
+{
+public:
+  regIn3() :
+      reg(16, "%06o")
   {
-  public:
-    regIn3() : reg(16, "%06o")
-      {}
-    virtual ~regIn3()
-      {};
-  };
+  }
+  virtual
+  ~regIn3()
+  {
+  }
+  ;
+};
 
 class INP
-  {
-  public:
-    static void execRP_RA4();
-    static void execRP_RA5();
-    static void execRP_RA6();
-    static void execRP_RA7();
+{
+public:
+  static void
+  execRP_RA4();
+  static void
+  execRP_RA5();
+  static void
+  execRP_RA6();
+  static void
+  execRP_RA7();
 
-    static regIn0 register_IN0; // input register 0
-    static regIn1 register_IN1;// input register 1
-    static regIn2 register_IN2;// input register 2
-    static regIn3 register_IN3;// input register 3
-  };
+  static regIn0 register_IN0; // input register 0
+  static regIn1 register_IN1; // input register 1
+  static regIn2 register_IN2; // input register 2
+  static regIn3 register_IN3; // input register 3
+};
 
 #endif

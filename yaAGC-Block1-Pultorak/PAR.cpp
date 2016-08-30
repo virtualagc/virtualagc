@@ -49,7 +49,7 @@ PAR::execWP_WP()
   register_P.writeShift(BUS::glbl_WRITE_BUS, PAR::conv_WP);
   // now set parity bit; in the actual AGC, this is
   // a single operation.
-  if (SEQ::isAsserted (RG))
+  if (SEQ::isAsserted(RG))
     register_P.writeField(16, 16, register_G15.read());
   else
     register_P.writeField(16, 16, 0); // clear parity bit
@@ -62,7 +62,7 @@ PAR::execWP_WPx()
   register_P.writeShift(BUS::glbl_WRITE_BUS, PAR::conv_WP);
   // now set parity bit; in the actual AGC, this is
   // a single operation.
-  if (SEQ::isAsserted (RG))
+  if (SEQ::isAsserted(RG))
     register_P.writeField(16, 16, register_G15.read());
   else
     register_P.writeField(16, 16, 0); // clear parity bit

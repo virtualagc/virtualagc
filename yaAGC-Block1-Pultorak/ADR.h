@@ -56,53 +56,74 @@ enum specialRegister
 };
 
 class regS : public reg
+{
+public:
+  regS() :
+      reg(12, "%04o")
   {
-  public:
-    regS() : reg(12, "%04o")
-      {}
-    virtual ~regS()
-      {};
-  };
+  }
+  virtual
+  ~regS()
+  {
+  }
+  ;
+};
 
 class regBNK : public reg
+{
+public:
+  regBNK() :
+      reg(4, "%02o")
   {
-  public:
-    regBNK() : reg(4, "%02o")
-      {}
-    virtual ~regBNK()
-      {};
-  };
+  }
+  virtual
+  ~regBNK()
+  {
+  }
+  ;
+};
 
 class ADR
-  {
-    friend class MON;
+{
+  friend class MON;
 
-    friend class MEM;
+  friend class MEM;
 
-    friend class CLK;
-    friend class CPM;
+  friend class CLK;
+  friend class CPM;
 
-  public:
-    static void execWP_WS();
-    static void execRP_RBK();
-    static void execWP_WBK();
+public:
+  static void
+  execWP_WS();
+  static void
+  execRP_RBK();
+  static void
+  execWP_WBK();
 
-    static bool GTR_17();   // for MBF, CPM
-    static bool GTR_27();// for PAR
-    static bool EQU_16();// for CPM
-    static bool EQU_17();// for CPM
-    static bool EQU_25();// for SEQ
-    static bool GTR_1777();// for CPM
+  static bool
+  GTR_17();   // for MBF, CPM
+  static bool
+  GTR_27();   // for PAR
+  static bool
+  EQU_16();   // for CPM
+  static bool
+  EQU_17();   // for CPM
+  static bool
+  EQU_25();   // for SEQ
+  static bool
+  GTR_1777();   // for CPM
 
-    static unsigned getEffectiveAddress();
+  static unsigned
+  getEffectiveAddress();
 
-  private:
-    static regS register_S;// address register
-    static regBNK register_BNK;// bank register
+private:
+  static regS register_S;   // address register
+  static regBNK register_BNK;   // bank register
 
-    static unsigned bankDecoder();
+  static unsigned
+  bankDecoder();
 
-    static unsigned conv_WBK[];
-  };
+  static unsigned conv_WBK[];
+};
 
 #endif

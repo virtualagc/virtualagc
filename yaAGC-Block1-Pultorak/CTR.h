@@ -64,44 +64,61 @@ enum pCntrType
 };
 
 class regUpCELL : public reg
+{
+public:
+  // Bit synchronize the counter inputs.
+  regUpCELL() :
+      reg(8, "%03o")
   {
-  public:
-    // Bit synchronize the counter inputs.
-    regUpCELL() : reg(8, "%03o")
-      {}
-    virtual ~regUpCELL()
-      {};
-  };
+  }
+  virtual
+  ~regUpCELL()
+  {
+  }
+  ;
+};
 
 class regDnCELL : public reg
+{
+public:
+  // Bit synchronize the counter inputs.
+  regDnCELL() :
+      reg(8, "%03o")
   {
-  public:
-    // Bit synchronize the counter inputs.
-    regDnCELL() : reg(8, "%03o")
-      {}
-    virtual ~regDnCELL()
-      {};
-  };
+  }
+  virtual
+  ~regDnCELL()
+  {
+  }
+  ;
+};
 
 class CTR
-  {
-  public:
-    static void execWP_GENRST();
-    static void execWP_WPCTR();
-    static void execRP_RSCT();
-    static void execWP_WOVR();
-    static void execWP_WOVC();
+{
+public:
+  static void
+  execWP_GENRST();
+  static void
+  execWP_WPCTR();
+  static void
+  execRP_RSCT();
+  static void
+  execWP_WOVR();
+  static void
+  execWP_WOVC();
 
-    static unsigned getSubseq();
+  static unsigned
+  getSubseq();
 
-    static unsigned pcUp[];
-    static unsigned pcDn[];
+  static unsigned pcUp[];
+  static unsigned pcDn[];
 
-    static regUpCELL register_UpCELL; // latches the selected priority counter cell (0-7)
-    static regDnCELL register_DnCELL;// latches the selected priority counter cell (0-7)
+  static regUpCELL register_UpCELL; // latches the selected priority counter cell (0-7)
+  static regDnCELL register_DnCELL; // latches the selected priority counter cell (0-7)
 
-  private:
-    static void resetAllpc();
-  };
+private:
+  static void
+  resetAllpc();
+};
 
 #endif

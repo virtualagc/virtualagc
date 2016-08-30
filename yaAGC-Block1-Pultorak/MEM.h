@@ -26,47 +26,71 @@
 #include "reg.h"
 
 class regEMEM : public reg
+{
+public:
+  regEMEM() :
+      reg(16, "%06o")
   {
-  public:
-    regEMEM() : reg(16, "%06o")
-      {}
-    virtual ~regEMEM()
-      {};
-    regEMEM& operator= (const unsigned& r)
-      { write(r); return *this;}
-  };
+  }
+  virtual
+  ~regEMEM()
+  {
+  }
+  ;
+  regEMEM&
+  operator=(const unsigned& r)
+  {
+    write(r);
+    return *this;
+  }
+};
 
 class regFMEM : public reg
+{
+public:
+  regFMEM() :
+      reg(16, "%06o")
   {
-  public:
-    regFMEM() : reg(16, "%06o")
-      {}
-    virtual ~regFMEM()
-      {};
-    regFMEM& operator= (const unsigned& r)
-      { write(r); return *this;}
-  };
+  }
+  virtual
+  ~regFMEM()
+  {
+  }
+  ;
+  regFMEM&
+  operator=(const unsigned& r)
+  {
+    write(r);
+    return *this;
+  }
+};
 
 class MEM
-  {
-  public:
-    static void execWP_WE();
-    static void execRP_SBWG();
+{
+public:
+  static void
+  execWP_WE();
+  static void
+  execRP_SBWG();
 
-    static regEMEM register_EMEM[]; // erasable memory
-    static regFMEM register_FMEM[];// fixed memory
+  static regEMEM register_EMEM[]; // erasable memory
+  static regFMEM register_FMEM[]; // fixed memory
 
-    static unsigned MEM_DATA_BUS;// data lines: memory bits 15-1
-    static unsigned MEM_PARITY_BUS;// parity line: memory bit 16
+  static unsigned MEM_DATA_BUS; // data lines: memory bits 15-1
+  static unsigned MEM_PARITY_BUS; // parity line: memory bit 16
 
-    static unsigned readMemory();
-    static void writeMemory(unsigned data);
+  static unsigned
+  readMemory();
+  static void
+  writeMemory(unsigned data);
 
-    // The following functions are used in the simulator,
-    // but are implemented in the AGC design.
-    static unsigned readMemory(unsigned address);
-    static void writeMemory(unsigned address, unsigned data);
+  // The following functions are used in the simulator,
+  // but are implemented in the AGC design.
+  static unsigned
+  readMemory(unsigned address);
+  static void
+  writeMemory(unsigned address, unsigned data);
 
-  };
+};
 
 #endif

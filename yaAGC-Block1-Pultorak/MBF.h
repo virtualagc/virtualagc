@@ -25,45 +25,60 @@
 #include "reg.h"
 
 class regG : public reg
+{
+public:
+  // all memory bits except bit 15 (parity)
+  // bit 15 is not used, so ignore it.
+  regG() :
+      reg(16, "%06o")
   {
-  public:
-    // all memory bits except bit 15 (parity)
-    // bit 15 is not used, so ignore it.
-    regG() : reg(16, "%06o")
-      {}
-    virtual ~regG()
-      {};
-  };
+  }
+  virtual
+  ~regG()
+  {
+  }
+  ;
+};
 
 class MBF
-  {
-  public:
-    static void execWP_GENRST();
+{
+public:
+  static void
+  execWP_GENRST();
 
-    static void execRP_RG();
-    static void execRP_WE();
+  static void
+  execRP_RG();
+  static void
+  execRP_WE();
 
-    static void execWP_WGn();
-    static void execWP_WGx();
-    static void execWP_W20();
-    static void execWP_W21();
-    static void execWP_W22();
-    static void execWP_W23();
-    static void execWP_SBWG();
+  static void
+  execWP_WGn();
+  static void
+  execWP_WGx();
+  static void
+  execWP_W20();
+  static void
+  execWP_W21();
+  static void
+  execWP_W22();
+  static void
+  execWP_W23();
+  static void
+  execWP_SBWG();
 
-    // Bit 15 (parity) is kept in a separate register in PAR
-    // because it is independently loaded.
-    static regG register_G;// memory buffer register (except for bit 15)
+  // Bit 15 (parity) is kept in a separate register in PAR
+  // because it is independently loaded.
+  static regG register_G;    // memory buffer register (except for bit 15)
 
-    static unsigned conv_RG[];
-    static unsigned conv_WGn[];
-    static unsigned conv_W20[];
-    static unsigned conv_W21[];
-    static unsigned conv_W22[];
-    static unsigned conv_W23[];
-    static unsigned conv_SBWG[];
-    static unsigned conv_WE[];
+  static unsigned conv_RG[];
+  static unsigned conv_WGn[];
+  static unsigned conv_W20[];
+  static unsigned conv_W21[];
+  static unsigned conv_W22[];
+  static unsigned conv_W23[];
+  static unsigned conv_SBWG[];
+  static unsigned conv_WE[];
 
-  };
+};
 
 #endif

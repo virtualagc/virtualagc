@@ -49,21 +49,27 @@ enum tpType
 };
 
 class regSG : public reg
+{
+public:
+  regSG() :
+      reg(4, "%02o")
   {
-  public: regSG() : reg(4, "%02o")
-      {}
-    virtual ~regSG()
-      {}
-  };
+  }
+  virtual
+  ~regSG()
+  {
+  }
+};
 
 class TPG
-  {
-  public:
-    static void doexecWP_TPG();
+{
+public:
+  static void
+  doexecWP_TPG();
 
-    static regSG register_SG;
+  static regSG register_SG;
 
-    static const char* tpTypestring[];
-  };
+  static const char* tpTypestring[];
+};
 
 #endif

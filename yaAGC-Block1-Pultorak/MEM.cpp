@@ -101,7 +101,7 @@ MEM::writeMemory(unsigned address, unsigned data)
     {
       if (lowAddress > 1024)
         {
-    	  printw("Error: Eraseable address=%0o\n",  lowAddress);
+          printw("Error: Eraseable address=%0o\n", lowAddress);
           endwin();
           exit(0);
         }
@@ -113,7 +113,7 @@ MEM::writeMemory(unsigned address, unsigned data)
       unsigned highAddress = bank << 10;
       if ((highAddress | lowAddress) > 1024 * 12)
         {
-    	  printw("Error: Fixed address=%0o\n", (highAddress | lowAddress));
+          printw("Error: Fixed address=%0o\n", (highAddress | lowAddress));
           endwin();
           exit(0);
         }

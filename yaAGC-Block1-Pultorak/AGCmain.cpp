@@ -257,13 +257,13 @@ getCommand(const char* prompt)
     {
       if (isprint(key))
         {
-    	  printw("%c", key);
+          printw("%c", key);
           *sp = key;
           sp++;
         }
       else if (key == 8 && sp != s)
         {
-    	  printw("%c %c", key, key);
+          printw("%c %c", key, key);
           sp--;
         }
     }
@@ -287,7 +287,7 @@ toggleBreakpoint()
     }
   else
     {
-	  printw("%s", "Clearing breakpoint.\n");
+      printw("%s", "Clearing breakpoint.\n");
       breakpointEnab = false;
     }
 }
@@ -366,7 +366,8 @@ loadMemory()
   if (!fp)
     {
       perror("fopen failed:");
-      printw("*** ERROR: Can't load memory for file: %s\n", fname);;
+      printw("*** ERROR: Can't load memory for file: %s\n", fname);
+      ;
       return;
     }
   unsigned addr;
@@ -509,7 +510,8 @@ showMenu()
   printw("BLOCK 1 EMULATOR MENU:\n");
   printw(" 'a' = STANDBY ALLOWED\n");
   printw(" 'b' = TOGGLE BREAKPOINT\n");
-  printw(" 'c' = TOGGLE SCALER: when the scaler is off, F13 and F17 are not automatically generated\n");
+  printw(
+      " 'c' = TOGGLE SCALER: when the scaler is off, F13 and F17 are not automatically generated\n");
   printw(" 'd' = DISPLAY: refreshes current register display.\n");
   printw(" 'e' = EXAMINE: examine contents of memory.\n");
   printw(" 'f' = DEBUG: displays current line of code.\n");
@@ -517,7 +519,8 @@ showMenu()
   printw(" 'i' = INTERRUPT: generates an AGC interrupt, 1-5.\n");
   printw(" 'l' = LOAD:  load rope contents into memory\n");
   printw(" 'm' = MENU:  show this menu of commands.\n");
-  printw(" 'n' = INST:  toggle whether to step by instruction or pulse-sequence\n");
+  printw(
+      " 'n' = INST:  toggle whether to step by instruction or pulse-sequence\n");
   printw(" 'p' = POWER UP RESET\n");
   printw(" 'q' = QUIT:  quit the program.\n");
   printw(" 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position.\n");
@@ -536,7 +539,7 @@ showMenu()
   printw("    '+' = PLUS KEY.\n");
   printw("    '-' = MINUS KEY.\n");
   printw("    '.' = CLEAR KEY.\n");
-  printw( "    '*' = NOUN KEY.\n");
+  printw("    '*' = NOUN KEY.\n");
   printw("    '/' = VERB KEY.\n");
   printw("    'g' = KEY RELEASE.\n");
   printw("    'j' = ENTER KEY.\n");
@@ -660,7 +663,7 @@ main(int argc, char* argv[])
       // substitute some other non-blocking function to access the keyboard
       // if you're porting this to a different platform.
 
-	  printw("%s", "> ");
+      printw("%s", "> ");
 
       while (!_kbhit())
         {

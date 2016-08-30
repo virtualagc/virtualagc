@@ -26,72 +26,110 @@
 #include "reg.h"
 
 class regQ : public reg
+{
+public:
+  regQ() :
+      reg(16, "%06o")
   {
-  public:
-    regQ() : reg(16, "%06o")
-      {}
-    virtual ~regQ()
-      {};
-  };
+  }
+  virtual
+  ~regQ()
+  {
+  }
+  ;
+};
 
 class regZ : public reg
+{
+public:
+  regZ() :
+      reg(16, "%06o")
   {
-  public:
-    regZ() : reg(16, "%06o")
-      {}
-    virtual ~regZ()
-      {};
-  };
+  }
+  virtual
+  ~regZ()
+  {
+  }
+  ;
+};
 
 class regLP : public reg
+{
+public:
+  regLP() :
+      reg(16, "%06o")
   {
-  public:
-    regLP() : reg(16, "%06o")
-      {}
-    virtual ~regLP()
-      {};
-  };
+  }
+  virtual
+  ~regLP()
+  {
+  }
+  ;
+};
 
 class regA : public reg
+{
+public:
+  regA() :
+      reg(16, "%06o")
   {
-  public:
-    regA() : reg(16, "%06o")
-      {}
-    virtual ~regA()
-      {};
-  };
+  }
+  virtual
+  ~regA()
+  {
+  }
+  ;
+};
 
 class CRG
-  {
-  public:
-    static void execWP_GENRST();
+{
+public:
+  static void
+  execWP_GENRST();
 
-    static void execRP_RQ();
-    static void execRP_RA1();
-    static void execWP_WQ();
-    static void execWP_WA1();
-    static void execRP_RZ();
-    static void execRP_RA2();
-    static void execWP_WZ();
-    static void execWP_WA2();
-    static void execRP_RLP();
-    static void execRP_RA3();
-    static void execRP_RA();
-    static void execRP_RA0();
-    static void execWP_WA();
-    static void execWP_WA0();
-    static void execWP_WALP();
-    static void execWP_WLP();
-    static void execWP_WA3();
+  static void
+  execRP_RQ();
+  static void
+  execRP_RA1();
+  static void
+  execWP_WQ();
+  static void
+  execWP_WA1();
+  static void
+  execRP_RZ();
+  static void
+  execRP_RA2();
+  static void
+  execWP_WZ();
+  static void
+  execWP_WA2();
+  static void
+  execRP_RLP();
+  static void
+  execRP_RA3();
+  static void
+  execRP_RA();
+  static void
+  execRP_RA0();
+  static void
+  execWP_WA();
+  static void
+  execWP_WA0();
+  static void
+  execWP_WALP();
+  static void
+  execWP_WLP();
+  static void
+  execWP_WA3();
 
-    static regQ register_Q; // return address
-    static regZ register_Z;// program counter
-    static regLP register_LP;// lower accumulator
-    static regA register_A;// accumulator
+  static regQ register_Q; // return address
+  static regZ register_Z; // program counter
+  static regLP register_LP; // lower accumulator
+  static regA register_A; // accumulator
 
-    static unsigned conv_WALP_LP[];
-    static unsigned conv_WALP_A[];
-    static unsigned conv_WLP[];
-  };
+  static unsigned conv_WALP_LP[];
+  static unsigned conv_WALP_A[];
+  static unsigned conv_WLP[];
+};
 
 #endif

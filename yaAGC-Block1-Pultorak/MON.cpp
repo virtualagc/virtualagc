@@ -104,14 +104,11 @@ MON::displayAGC()
       "00    A:%06o   15   BANK:%02o       36  TIME1:%06o   53   OPT Y:%06o\n",
       CRG::register_A.read(), ADR::register_BNK.read(), MEM::readMemory(036),
       MEM::readMemory(053));
-  printw(
-      "01    Q:%06o   16 RELINT:%6s   37  TIME3:%06o   54  TRKR X:%06o\n",
+  printw("01    Q:%06o   16 RELINT:%6s   37  TIME3:%06o   54  TRKR X:%06o\n",
       CRG::register_Q.read(), "", MEM::readMemory(037), MEM::readMemory(054));
-  printw(
-      "02    Z:%06o   17 INHINT:%6s   40  TIME4:%06o   55  TRKR Y:%06o\n",
+  printw("02    Z:%06o   17 INHINT:%6s   40  TIME4:%06o   55  TRKR Y:%06o\n",
       CRG::register_Z.read(), "", MEM::readMemory(040), MEM::readMemory(055));
-  printw(
-      "03   LP:%06o   20    CYR:%06o   41 UPLINK:%06o   56  TRKR Z:%06o\n",
+  printw("03   LP:%06o   20    CYR:%06o   41 UPLINK:%06o   56  TRKR Z:%06o\n",
       CRG::register_LP.read(), MEM::readMemory(020), MEM::readMemory(041),
       MEM::readMemory(056));
 

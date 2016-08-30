@@ -49,10 +49,11 @@ enum keyInType
 };
 
 class KBD
-  {
-  public:
-    static keyInType kbd;	// latches the last key entry from the DSKY
-    static void keypress(keyInType c);
-  };
+{
+public:
+  static keyInType kbd;	// latches the last key entry from the DSKY
+  static void
+  keypress(keyInType c);
+};
 
 #endif
