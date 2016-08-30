@@ -114,6 +114,11 @@
  *                              been reformatted to GNU stylistic conventions.
  *                              However, I've not so far documented all the
  *                              rather trivial changes in those extra files.
+ *           	2016-08-30 RSB	Adapted for use with ncurses rather than cout,
+ *           					because it was the only way I could get
+ *           					character-by-character input without blocking.
+ *           					Completed John's menu command, which was just a
+ *           					skeleton before.
  */
 
 //#include <conio.h>
@@ -121,12 +126,9 @@
 #include <unistd.h>
 
 #include <iostream>
-//#include <chrono>
-//#include <thread>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <conio.h>
 #include <stdio.h>
 #include <time.h>
 #include <ctype.h>
@@ -248,23 +250,20 @@ getCommand(const char* prompt)
   static char s[80];
   char* sp = s;
 
-  cout << prompt;
-  cout.flush();
+  printw("%s", prompt);
 
   char key;
-  while ((key = _getch()) != 13)
+  while ((key = _getch()) != '\n')
     {
       if (isprint(key))
         {
-          cout << key;
-          cout.flush();
+    	  printw("%c", key);
           *sp = key;
           sp++;
         }
       else if (key == 8 && sp != s)
         {
-          cout << key << " " << key;
-          cout.flush();
+    	  printw("%c %c", key, key);
           sp--;
         }
     }
@@ -281,14 +280,14 @@ toggleBreakpoint()
     {
       char b[80];
       strcpy(b, getCommand("Set breakpoint: -- enter 14-bit CADR (octal): "));
-      cout << endl;
+      printw("%s", "\n");
 
       breakpoint = strtol(b, 0, 8);
       breakpointEnab = true;
     }
   else
     {
-      cout << "Clearing breakpoint." << endl;
+	  printw("%s", "Clearing breakpoint.\n");
       breakpointEnab = false;
     }
 }
@@ -303,19 +302,17 @@ toggleWatch()
     {
       char b[80];
       strcpy(b, getCommand("Set watch: -- enter 14-bit CADR (octal): "));
-      cout << endl;
+      printw("%s\n", b);
 
       watchAddr = strtol(b, 0, 8);
       watchEnab = true;
       oldWatchValue = MEM::readMemory(watchAddr);
 
-      char buf[100];
-      sprintf(buf, "%06o:  %06o", watchAddr, oldWatchValue);
-      cout << buf << endl;
+      printw("%06o:  %06o\n", watchAddr, oldWatchValue);
     }
   else
     {
-      cout << "Clearing watch." << endl;
+      printw("%s", "Clearing watch.\n");
       watchEnab = false;
     }
 }
@@ -325,7 +322,7 @@ incrCntr()
 {
   char cntrname[80];
   strcpy(cntrname, getCommand("Increment counter: -- enter pcell (0-19): "));
-  cout << endl;
+  printw("%s", "\n");
 
   int pc = atoi(cntrname);
   CTR::pcUp[pc] = 1;
@@ -336,7 +333,7 @@ decrCntr()
 {
   char cntrname[80];
   strcpy(cntrname, getCommand("Decrement counter: -- enter pcell (0-19): "));
-  cout << endl;
+  printw("%s", "\n");
 
   int pc = atoi(cntrname);
   CTR::pcDn[pc] = 1;
@@ -347,7 +344,7 @@ interrupt()
 {
   char iname[80];
   strcpy(iname, getCommand("Interrupt: -- enter priority (1-5): "));
-  cout << endl;
+  printw("%s", "\n");
 
   int i = atoi(iname) - 1;
   INT::rupt[i] = 1;
@@ -358,7 +355,7 @@ void
 loadMemory()
 {
   strcpy(filename, getCommand("Load Memory -- enter filename: "));
-  cout << endl;
+  printw("%s", "\n");
 
   // Add the .obj extension.
   char fname[80];
@@ -369,7 +366,7 @@ loadMemory()
   if (!fp)
     {
       perror("fopen failed:");
-      cout << "*** ERROR: Can't load memory for file: " << fname << endl;
+      printw("*** ERROR: Can't load memory for file: %s\n", fname);;
       return;
     }
   unsigned addr;
@@ -379,7 +376,7 @@ loadMemory()
       MEM::writeMemory(addr, data);
     }
   fclose(fp);
-  cout << "Memory loaded." << endl;
+  printw("%s", "Memory loaded.\n");
 }
 
 // Write the entire contents of fixed and
@@ -408,15 +405,13 @@ examineMemory()
 {
   char theAddress[20];
   strcpy(theAddress, getCommand("Examine Memory -- enter address (octal): "));
-  cout << endl;
+  printw("%s", "\n");
 
   unsigned address = strtol(theAddress, 0, 8);
 
-  char buf[100];
   for (unsigned i = address; i < address + 23; i++)
     {
-      sprintf(buf, "%06o:  %06o", i, MEM::readMemory(i));
-      cout << buf << endl;
+      printw("%06o:  %06o\n", i, MEM::readMemory(i));
     }
 }
 
@@ -508,114 +503,43 @@ updateAGCDisplay()
     MON::displayAGC(); // When the clock is manual or slow, always update.
 }
 
-/*
-      case 'd':
-        genAGCStates();
-        MON::displayAGC();
-        break; // update display
-
-      case 'l':
-        loadMemory();
-        break;
-      case 'e':
-        examineMemory();
-        break;
-
-      case 'f':
-        showSourceCode();
-        break;
-
-      case ']':
-        incrCntr();
-        //genAGCStates();
-        //displayAGC(EVERY_CYCLE);
-        break;
-
-      case '[':
-        decrCntr();
-        //genAGCStates();
-        //displayAGC(EVERY_CYCLE);
-        break;
-
-      case 'i':
-        interrupt();
-        //genAGCStates();
-        //displayAGC(EVERY_CYCLE);
-        break;
-
-      case 'z':
-        //SCL::F17 = (SCL::F17 + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-
-      case 'x':
-        //SCL::F13 = (SCL::F13 + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-
-      case 'c':
-        MON::SCL_ENAB = (MON::SCL_ENAB + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-
-      case 'r':
-        MON::RUN = (MON::RUN + 1) % 2;
-        genAGCStates();
-        if (!MON::FCLK)
-          MON::displayAGC();
-        break;
-
-      case 's':
-        MON::STEP = (MON::STEP + 1) % 2;
-        genAGCStates();
-        if (!MON::FCLK)
-          MON::displayAGC();
-        break;
-
-      case 'a':
-        MON::SA = (MON::SA + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-
-      case 'n':
-        MON::INST = (MON::INST + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-
-      case 'p':
-        MON::PURST = (MON::PURST + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
- */
 void
 showMenu()
 {
-  cout << "AGC4 EMULATOR MENU:" << endl;
-  cout << " 'b' = TOGGLE BREAKPOINT" << endl;
-  cout << " 'y' = TOGGLE WATCHPOINT" << endl;
-  cout << " ';' = CLEAR ALARM INDICATORS." << endl;
-  cout << " DSKY:" << endl;
-  cout << "    '0-9' = NUMBERS." << endl;
-  cout << "    '+' = PLUS KEY." << endl;
-  cout << "    '-' = MINUS KEY." << endl;
-  cout << "    '.' = CLEAR KEY." << endl;
-  cout << "    '*' = NOUN KEY." << endl;
-  cout << "    '/' = VERB KEY." << endl;
-  cout << "    'g' = KEY RELEASE." << endl;
-  cout << "    'h' = ERROR RESET." << endl;
-  cout << "    'j' = ENTER KEY." << endl;
-  cout << " 'm' = MENU:  show this menu of commands." << endl;
-  cout << " 'q' = QUIT:  quit the program." << endl;
-  cout << " 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position." << endl;
-  cout << " 'F1' = SINGLE CLOCK." << endl;
-  cout << " 'F2' = MANUAL CLOCK." << endl;
-  cout << " 'F4' = FAST CLOCK." << endl;
+  printw("BLOCK 1 EMULATOR MENU:\n");
+  printw(" 'a' = STANDBY ALLOWED\n");
+  printw(" 'b' = TOGGLE BREAKPOINT\n");
+  printw(" 'c' = TOGGLE SCALER: when the scaler is off, F13 and F17 are not automatically generated\n");
+  printw(" 'd' = DISPLAY: refreshes current register display.\n");
+  printw(" 'e' = EXAMINE: examine contents of memory.\n");
+  printw(" 'f' = DEBUG: displays current line of code.\n");
+  printw(" 'h' = RESET.\n");
+  printw(" 'i' = INTERRUPT: generates an AGC interrupt, 1-5.\n");
+  printw(" 'l' = LOAD:  load rope contents into memory\n");
+  printw(" 'm' = MENU:  show this menu of commands.\n");
+  printw(" 'n' = INST:  toggle whether to step by instruction or pulse-sequence\n");
+  printw(" 'p' = POWER UP RESET\n");
+  printw(" 'q' = QUIT:  quit the program.\n");
+  printw(" 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position.\n");
+  printw(" 's' = STEP\n");
+  printw(" 'x' = F13: manually generate F13 scaler pulse.\n");
+  printw(" 'y' = TOGGLE WATCHPOINT\n");
+  printw(" 'z' = F17: manually generate F17 scaler pulse.\n");
+  printw(" 'F1' = SINGLE CLOCK.\n");
+  printw(" 'F2' = MANUAL CLOCK.\n");
+  printw(" 'F4' = FAST CLOCK.\n");
+  printw(" ']' = +CNTR: give a plus input to a priority counter cell.\n");
+  printw(" '[' = -CNTR: give a minus input to a priority counter cell.\n");
+  printw(" ';' = CLEAR PARITY ALARM.\n");
+  printw(" DSKY:\n");
+  printw("    '0-9' = NUMBERS.\n");
+  printw("    '+' = PLUS KEY.\n");
+  printw("    '-' = MINUS KEY.\n");
+  printw("    '.' = CLEAR KEY.\n");
+  printw( "    '*' = NOUN KEY.\n");
+  printw("    '/' = VERB KEY.\n");
+  printw("    'g' = KEY RELEASE.\n");
+  printw("    'j' = ENTER KEY.\n");
 }
 
 const int startCol = 0;	// columns are numbered 0-n
@@ -639,10 +563,10 @@ showSourceCode()
   if (!fp)
     {
       perror("fopen failed:");
-      cout << "*** ERROR: Can't load source list file: " << fname << endl;
+      printw("*** ERROR: Can't load source list file: %s\n", fname);
       return;
     }
-  cout << endl;
+  printw("%s", "\n");
 
   // Get the address of the source code line to display.
   // The address we want is the current effective address is the
@@ -681,14 +605,14 @@ showSourceCode()
           if (foundit)
             {
               if (strcmp(valString, CADR) == 0)
-                cout << ">";
+                printw("%s", ">");
               else
-                cout << " ";
+                printw("%s", " ");
 
               // truncate line so it fits in 80 col display
               strncpy(out, s, maxLineLen);
               out[maxLineLen] = '\0';
-              cout << out;
+              printw("%s", out);
 
               lineCount++;
               if (lineCount >= maxLines)
@@ -712,26 +636,13 @@ showSourceCode()
 int
 main(int argc, char* argv[])
 {
-  //MBF::register_G.write(0177777);
-  //MBF::register_G.clk();
-
-  //unsigned testval = 0100000;
-  //cout << "testval=" << oct << testval << endl;
-  //cout << "gen1_15=" << PAR::gen1_15Parity(testval) << endl;
-  //cout << "genP_15=" << PAR::genP_15Parity(testval) << endl;
-
-  //cout << R2000 << endl;
-  //exit(0);
-  //******************************************************************************
 
   // Make ncurses getch() non-blocking.
-  cout.sync_with_stdio(true);
-  cin.sync_with_stdio(true);
   initscr();
-  //cbreak();
-  //noecho();
+  cbreak();
+  noecho();
   nodelay(stdscr, TRUE);
-  //scrollok(stdscr, TRUE);
+  scrollok(stdscr, TRUE);
   setvbuf(stdout, NULL, _IONBF, 0);
 
   bool singleClock = false;
@@ -749,8 +660,7 @@ main(int argc, char* argv[])
       // substitute some other non-blocking function to access the keyboard
       // if you're porting this to a different platform.
 
-      cout << "> ";
-      cout.flush();  // display prompt
+	  printw("%s", "> ");
 
       while (!_kbhit())
         {
@@ -809,7 +719,7 @@ main(int argc, char* argv[])
       // simulator controls
 
       case 'q':
-        cout << "QUIT..." << endl;
+        printw("%s", "QUIT...\n");
         endwin();
         exit(0);
       case 'm':
@@ -988,14 +898,15 @@ main(int argc, char* argv[])
           MON::displayAGC();
           break;
         default:
-          cout << "function key: " << key << "=" << hex << (int) key << dec
-              << endl;
+          //cout << "function key: " << key << "=" << hex << (int) key << dec
+          //    << endl;
+          printw("function key: %c=%0X\n", key, key);
           }
         break;
 
-        //default: cout << "??" << endl;
       default:
-        cout << key << "=" << hex << (int) key << dec << endl;
+        //cout << key << "=" << hex << (int) key << dec << endl;
+        printw("%c=%0X\n", key, key);
         }
     }
   return (0);

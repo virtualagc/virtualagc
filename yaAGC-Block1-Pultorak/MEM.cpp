@@ -9,14 +9,18 @@
  *    
  *****************************************************************************
  */
+
+/*
+ * Mod history:	2016-08-30 RSB	Adapted for use with ncurses rather than cout.
+ */
+
 #include "MEM.h"
 #include "ADR.h"
 #include "stdlib.h"
 
+#include <ncurses.h>
 #include <iostream>
 using namespace std;
-
-#define endl "\n\r"
 
 regEMEM MEM::register_EMEM[1024];		// erasable memory
 regFMEM MEM::register_FMEM[1024 * 13];// fixed memory (lowest 1024 bytes not used)
@@ -97,7 +101,8 @@ MEM::writeMemory(unsigned address, unsigned data)
     {
       if (lowAddress > 1024)
         {
-          cout << "Error: Eraseable address=" << lowAddress << endl;
+    	  printw("Error: Eraseable address=%0o\n",  lowAddress);
+          endwin();
           exit(0);
         }
       MEM::register_EMEM[lowAddress].write(data);
@@ -108,7 +113,8 @@ MEM::writeMemory(unsigned address, unsigned data)
       unsigned highAddress = bank << 10;
       if ((highAddress | lowAddress) > 1024 * 12)
         {
-          cout << "Error: Fixed address=" << (highAddress | lowAddress) << endl;
+    	  printw("Error: Fixed address=%0o\n", (highAddress | lowAddress));
+          endwin();
           exit(0);
         }
 
