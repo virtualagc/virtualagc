@@ -96,11 +96,33 @@
  *****************************************************************************
  */
 
+/*
+ * Versions through 1.15 represent John Pultorak's development, at which point
+ * is contributions were frozen.  The following represents changes at the
+ * Virtual AGC project from that point onward.
+ *
+ * Ref:         http://www.ibiblio.org/apollo
+ *              https://github.com/rburkey2005/virtualagc [block1 branch].
+ * Mod history: 2016-08-29 RSB  Began adapting from John's v1.15, with the
+ *                              objective of converting his Visual C++ 6
+ *                              program to one which compiles errorlessly and
+ *                              warninglessly with GNU g++.
+ *                              All of his files have begun to be modified to
+ *                              this end (not just this one).  The files have
+ *                              all been put into github as well, starting with
+ *                              v1.15, and starting with the next version, have
+ *                              been reformatted to GNU stylistic conventions.
+ *                              However, I've not so far documented all the
+ *                              rather trivial changes in those extra files.
+ */
+
 //#include <conio.h>
-#include <curses.h>
+#include <ncurses.h>
+#include <unistd.h>
 
 #include <iostream>
-//#include <fstream>
+//#include <chrono>
+//#include <thread>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -132,15 +154,21 @@
 #include "ISD.h"
 #include "CLK.h"
 
-static int
-_getch()
-{
-  return (cin.get());
-}
+using namespace std;
+
+#define endl "\n\r"
+#define _getch getch
 static int
 _kbhit()
 {
-  return (cin.rdbuf()->in_avail() > 0);
+  int c;
+  c = getch();
+  if (c != EOF)
+    {
+      ungetch(c);
+      return (1);
+    }
+  return (0);
 }
 
 extern bool dskyChanged;
@@ -480,12 +508,114 @@ updateAGCDisplay()
     MON::displayAGC(); // When the clock is manual or slow, always update.
 }
 
+/*
+      case 'd':
+        genAGCStates();
+        MON::displayAGC();
+        break; // update display
+
+      case 'l':
+        loadMemory();
+        break;
+      case 'e':
+        examineMemory();
+        break;
+
+      case 'f':
+        showSourceCode();
+        break;
+
+      case ']':
+        incrCntr();
+        //genAGCStates();
+        //displayAGC(EVERY_CYCLE);
+        break;
+
+      case '[':
+        decrCntr();
+        //genAGCStates();
+        //displayAGC(EVERY_CYCLE);
+        break;
+
+      case 'i':
+        interrupt();
+        //genAGCStates();
+        //displayAGC(EVERY_CYCLE);
+        break;
+
+      case 'z':
+        //SCL::F17 = (SCL::F17 + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+
+      case 'x':
+        //SCL::F13 = (SCL::F13 + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+
+      case 'c':
+        MON::SCL_ENAB = (MON::SCL_ENAB + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+
+      case 'r':
+        MON::RUN = (MON::RUN + 1) % 2;
+        genAGCStates();
+        if (!MON::FCLK)
+          MON::displayAGC();
+        break;
+
+      case 's':
+        MON::STEP = (MON::STEP + 1) % 2;
+        genAGCStates();
+        if (!MON::FCLK)
+          MON::displayAGC();
+        break;
+
+      case 'a':
+        MON::SA = (MON::SA + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+
+      case 'n':
+        MON::INST = (MON::INST + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+
+      case 'p':
+        MON::PURST = (MON::PURST + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+ */
 void
 showMenu()
 {
   cout << "AGC4 EMULATOR MENU:" << endl;
-  cout << " 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position."
-      << endl;
+  cout << " 'b' = TOGGLE BREAKPOINT" << endl;
+  cout << " 'y' = TOGGLE WATCHPOINT" << endl;
+  cout << " ';' = CLEAR ALARM INDICATORS." << endl;
+  cout << " DSKY:" << endl;
+  cout << "    '0-9' = NUMBERS." << endl;
+  cout << "    '+' = PLUS KEY." << endl;
+  cout << "    '-' = MINUS KEY." << endl;
+  cout << "    '.' = CLEAR KEY." << endl;
+  cout << "    '*' = NOUN KEY." << endl;
+  cout << "    '/' = VERB KEY." << endl;
+  cout << "    'g' = KEY RELEASE." << endl;
+  cout << "    'h' = ERROR RESET." << endl;
+  cout << "    'j' = ENTER KEY." << endl;
+  cout << " 'm' = MENU:  show this menu of commands." << endl;
+  cout << " 'q' = QUIT:  quit the program." << endl;
+  cout << " 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position." << endl;
+  cout << " 'F1' = SINGLE CLOCK." << endl;
+  cout << " 'F2' = MANUAL CLOCK." << endl;
+  cout << " 'F4' = FAST CLOCK." << endl;
 }
 
 const int startCol = 0;	// columns are numbered 0-n
@@ -594,6 +724,16 @@ main(int argc, char* argv[])
   //exit(0);
   //******************************************************************************
 
+  // Make ncurses getch() non-blocking.
+  cout.sync_with_stdio(true);
+  cin.sync_with_stdio(true);
+  initscr();
+  //cbreak();
+  //noecho();
+  nodelay(stdscr, TRUE);
+  //scrollok(stdscr, TRUE);
+  setvbuf(stdout, NULL, _IONBF, 0);
+
   bool singleClock = false;
 
   genAGCStates();
@@ -670,6 +810,7 @@ main(int argc, char* argv[])
 
       case 'q':
         cout << "QUIT..." << endl;
+        endwin();
         exit(0);
       case 'm':
         showMenu();

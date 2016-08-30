@@ -16,6 +16,8 @@
 #include <iostream>
 using namespace std;
 
+#define endl "\n\r"
+
 regEMEM MEM::register_EMEM[1024];		// erasable memory
 regFMEM MEM::register_FMEM[1024 * 13];// fixed memory (lowest 1024 bytes not used)
 

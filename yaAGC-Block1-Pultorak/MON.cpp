@@ -34,6 +34,7 @@
 
 #include <iostream>
 using namespace std;
+#define endl "\n\r"
 
 unsigned MON::PURST = 1;	// power up reset; initially high at startup
 unsigned MON::RUN = 0;	// run/halt switch
@@ -189,4 +190,5 @@ MON::displayAGC()
   sprintf(buf, "14 OUT4:%06o   35  TIME2:%06o   52  OPT X:%06o",
       OUT::register_OUT4.read(), MEM::readMemory(035), MEM::readMemory(052));
   cout << buf << endl;
+  cout.flush();
 }
