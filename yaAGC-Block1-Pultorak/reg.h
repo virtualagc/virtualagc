@@ -1,7 +1,7 @@
 #ifndef reg_H
 #define reg_H
-
 #include <iostream>
+#include <ostream>
 #include <string.h>
 #include <stdio.h>
 
@@ -21,20 +21,13 @@ public:
     load = true;
     masterVal = mask & v;
   }
-  virtual
-  ~reg()
-  {
-  }
-  ;
-
-  // asynchronous clear
+// asynchronous clear
   void
   clear()
   {
     slaveVal = 0;
   }
-
-  // load is set when a register is written into.
+// load is set when a register is written into.
   void
   clk()
   {
@@ -42,41 +35,35 @@ public:
       slaveVal = masterVal;
     load = false;
   }
-
-  // THIS DOESN'T WORK, BUT IT SHOULD!
-  //void clk() { if(load) slaveVal = masterVal; load = false; masterVal = -1;}
-
   unsigned
-  readField(unsigned msb, unsigned lsb);   // bitfield numbered n - 1
+  readField(unsigned msb, unsigned lsb); // bitfield numbered n - 1
   void
   writeField(unsigned msb, unsigned lsb, unsigned v); // bitfield numbered n - 1
-
-  // Write a 16-bit word (in) into the register. Transpose the bits according to
-  // the specification (ib).
+// Write a 16-bit word (in) into the register. Transpose the bits according to
+// the specification (ib).
   void
   writeShift(unsigned in, unsigned* ib);
-
-  // Return a shifted 16-bit word. Transpose the 'in' bits according to
-  // the specification 'ib'. 'Or' the result to out and return the value.
+// Return a shifted 16-bit word. Transpose the 'in' bits according to
+// the specification 'ib'. 'Or' the result to out and return the value.
   unsigned
   shiftData(unsigned out, unsigned in, unsigned* ib);
-
   unsigned
   outmask()
   {
     return mask;
   }
-
 protected:
+  virtual
+  ~reg()
+  {
+  }
   reg(unsigned s, const char* fs) :
       size(s), mask(0), masterVal(0), slaveVal(0), fmtString(fs), load(false)
   {
     mask = buildMask(size);
   }
-
   static unsigned
   buildMask(unsigned s);
-
   friend ostream&
   operator <<(ostream& os, const reg& r)
   {
@@ -85,7 +72,6 @@ protected:
     os << buf;
     return os;
   }
-
 private:
   unsigned size; // bits
   unsigned masterVal;
@@ -93,8 +79,7 @@ private:
   unsigned mask;
   const char* fmtString;
   bool load;
-
   reg(); // prevent instantiation of default constructor
 };
-
 #endif
+

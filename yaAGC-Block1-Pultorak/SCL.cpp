@@ -1,29 +1,26 @@
 /****************************************************************************
- *  SCL - SCALER subsystem
+ * SCL - SCALER subsystem
  *
- *  AUTHOR:     John Pultorak
- *  DATE:       9/22/01
- *  FILE:       SCL.cpp
+ * AUTHOR: John Pultorak
+ * DATE: 9/22/01
+ * FILE: SCL.cpp
  *
- *  NOTES: see header file.
- *    
+ * NOTES: see header file.
+ *
  *****************************************************************************
  */
 #include "SCL.h"
 #include "CTR.h"
 #include "MON.h"
-
 regSCL SCL::register_SCL;
 regF17 SCL::register_F17;
 regF13 SCL::register_F13;
 regF10 SCL::register_F10;
-
 enum oneShotType
 { // **inferred; not defined in orignal R393 AGC4 spec.
-  WAIT_FOR_TRIGGER = 0, OUTPUT_PULSE = 1,	// LSB (bit 1) is the output bit for the one-shot
+  WAIT_FOR_TRIGGER = 0, OUTPUT_PULSE = 1, // LSB (bit 1) is the output bit for the one-shot
   WAIT_FOR_RESET = 2
 };
-
 void
 SCL::doexecWP_F17()
 {
@@ -45,7 +42,6 @@ SCL::doexecWP_F17()
     ;
     }
 }
-
 void
 SCL::doexecWP_F13()
 {
@@ -67,7 +63,6 @@ SCL::doexecWP_F13()
     ;
     }
 }
-
 void
 SCL::doexecWP_F10()
 {
@@ -92,31 +87,28 @@ SCL::doexecWP_F10()
     ;
     }
 }
-
 unsigned
 SCL::F17x()
 {
   return register_F17.readField(1, 1);
 }
-
 unsigned
 SCL::F13x()
 {
   return register_F13.readField(1, 1);
 }
-
 unsigned
 SCL::F10x()
 {
   return register_F10.readField(1, 1);
 }
-
 void
 SCL::doexecWP_SCL()
 {
   if (MON::SCL_ENAB) // if the scaler is enabled
     {
-      //write((read() + 1) % outmask());
+//write((read() + 1) % outmask());
       register_SCL.write((register_SCL.read() + 1));
     }
 }
+

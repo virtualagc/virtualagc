@@ -7,7 +7,7 @@
 
 TARGETS:=yaAGC-Block1
 SOURCE:=$(wildcard *.cpp)
-HEADERS:=$(wildecard *.h)
+HEADERS:=$(wildcard *.h)
 
 .PHONY: all
 .PHONY: clean

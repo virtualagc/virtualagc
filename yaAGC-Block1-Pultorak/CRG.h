@@ -1,30 +1,28 @@
 /****************************************************************************
- *  CRG - ADDRESSABLE CENTRAL REGISTER subsystem
+ * CRG - ADDRESSABLE CENTRAL REGISTER subsystem
  *
- *  AUTHOR:     John Pultorak
- *  DATE:       9/22/01
- *  FILE:       CRG.h
+ * AUTHOR: John Pultorak
+ * DATE: 9/22/01
+ * FILE: CRG.h
  *
- *  VERSIONS:
- * 
- *  DESCRIPTION:
- *    Addressable Central Registers for the Block 1 Apollo Guidance Computer 
- *    prototype (AGC4).
+ * VERSIONS:
  *
- *  SOURCES:
- *    Mostly based on information from "Logical Description for the Apollo 
- *    Guidance Computer (AGC4)", Albert Hopkins, Ramon Alonso, and Hugh 
- *    Blair-Smith, R-393, MIT Instrumentation Laboratory, 1963.
+ * DESCRIPTION:
+ * Addressable Central Registers for the Block 1 Apollo Guidance Computer
+ * prototype (AGC4).
  *
- *  NOTES: 
- *    
+ * SOURCES:
+ * Mostly based on information from "Logical Description for the Apollo
+ * Guidance Computer (AGC4)", Albert Hopkins, Ramon Alonso, and Hugh
+ * Blair-Smith, R-393, MIT Instrumentation Laboratory, 1963.
+ *
+ * NOTES:
+ *
  *****************************************************************************
  */
 #ifndef CRG_H
 #define CRG_H
-
 #include "reg.h"
-
 class regQ : public reg
 {
 public:
@@ -36,9 +34,7 @@ public:
   ~regQ()
   {
   }
-  ;
 };
-
 class regZ : public reg
 {
 public:
@@ -50,9 +46,7 @@ public:
   ~regZ()
   {
   }
-  ;
 };
-
 class regLP : public reg
 {
 public:
@@ -64,9 +58,7 @@ public:
   ~regLP()
   {
   }
-  ;
 };
-
 class regA : public reg
 {
 public:
@@ -78,15 +70,12 @@ public:
   ~regA()
   {
   }
-  ;
 };
-
 class CRG
 {
 public:
   static void
   execWP_GENRST();
-
   static void
   execRP_RQ();
   static void
@@ -121,15 +110,12 @@ public:
   execWP_WLP();
   static void
   execWP_WA3();
-
   static regQ register_Q; // return address
   static regZ register_Z; // program counter
   static regLP register_LP; // lower accumulator
   static regA register_A; // accumulator
-
   static unsigned conv_WALP_LP[];
   static unsigned conv_WALP_A[];
   static unsigned conv_WLP[];
 };
-
 #endif

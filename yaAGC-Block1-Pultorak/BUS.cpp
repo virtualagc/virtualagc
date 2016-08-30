@@ -1,19 +1,17 @@
 /****************************************************************************
- *  BUS - READ/WRITE BUS subsystem
+ * BUS - READ/WRITE BUS subsystem
  *
- *  AUTHOR:     John Pultorak
- *  DATE:       9/22/01
- *  FILE:       BUS.cpp
+ * AUTHOR: John Pultorak
+ * DATE: 9/22/01
+ * FILE: BUS.cpp
  *
- *  NOTES: see header file.
- *    
+ * NOTES: see header file.
+ *
  *****************************************************************************
  */
 #include "BUS.h"
-
 unsigned BUS::glbl_READ_BUS = 0;
 unsigned BUS::glbl_WRITE_BUS = 0;
-
 ovfState
 BUS::testOverflow(unsigned bus)
 {
@@ -24,4 +22,3 @@ BUS::testOverflow(unsigned bus)
   else
     return NO_OVF;
 }
-

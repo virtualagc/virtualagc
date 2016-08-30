@@ -1,29 +1,27 @@
 /****************************************************************************
- *  OUT - OUTPUT REGISTER subsystem
+ * OUT - OUTPUT REGISTER subsystem
  *
- *  AUTHOR:     John Pultorak
- *  DATE:       9/22/01
- *  FILE:       OUT.h
+ * AUTHOR: John Pultorak
+ * DATE: 9/22/01
+ * FILE: OUT.h
  *
- *  VERSIONS:
- * 
- *  DESCRIPTION:
- *    Output Registers for the Block 1 Apollo Guidance Computer prototype (AGC4).
+ * VERSIONS:
  *
- *  SOURCES:
- *    Mostly based on information from "Logical Description for the Apollo 
- *    Guidance Computer (AGC4)", Albert Hopkins, Ramon Alonso, and Hugh 
- *    Blair-Smith, R-393, MIT Instrumentation Laboratory, 1963.
+ * DESCRIPTION:
+ * Output Registers for the Block 1 Apollo Guidance Computer prototype (AGC4).
  *
- *  NOTES: 
- *    
+ * SOURCES:
+ * Mostly based on information from "Logical Description for the Apollo
+ * Guidance Computer (AGC4)", Albert Hopkins, Ramon Alonso, and Hugh
+ * Blair-Smith, R-393, MIT Instrumentation Laboratory, 1963.
+ *
+ * NOTES:
+ *
  *****************************************************************************
  */
 #ifndef OUT_H
 #define OUT_H
-
 #include "reg.h"
-
 class regOut1 : public reg
 {
 public:
@@ -35,9 +33,7 @@ public:
   ~regOut1()
   {
   }
-  ;
 };
-
 class regOut2 : public reg
 {
 public:
@@ -49,9 +45,7 @@ public:
   ~regOut2()
   {
   }
-  ;
 };
-
 class regOut3 : public reg
 {
 public:
@@ -63,9 +57,7 @@ public:
   ~regOut3()
   {
   }
-  ;
 };
-
 class regOut4 : public reg
 {
 public:
@@ -77,9 +69,7 @@ public:
   ~regOut4()
   {
   }
-  ;
 };
-
 class OUT
 {
 public:
@@ -103,11 +93,10 @@ public:
   execRP_RA14();
   static void
   execWP_WA14();
-
-  static regOut1 register_OUT1;	// output register 1
-  static regOut2 register_OUT2;	// output register 2
-  static regOut3 register_OUT3;	// output register 3
-  static regOut4 register_OUT4;	// output register 4
+  static regOut1 register_OUT1; // output register 1
+  static regOut2 register_OUT2; // output register 2
+  static regOut3 register_OUT3; // output register 3
+  static regOut4 register_OUT4; // output register 4
 };
-
 #endif
+

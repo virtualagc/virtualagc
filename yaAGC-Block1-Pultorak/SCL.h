@@ -1,29 +1,27 @@
 /****************************************************************************
- *  SCL - SCALER subsystem
+ * SCL - SCALER subsystem
  *
- *  AUTHOR:     John Pultorak
- *  DATE:       9/22/01
- *  FILE:       SCL.h
+ * AUTHOR: John Pultorak
+ * DATE: 9/22/01
+ * FILE: SCL.h
  *
- *  VERSIONS:
- * 
- *  DESCRIPTION:
- *    Scaler for the Block 1 Apollo Guidance Computer prototype (AGC4).
+ * VERSIONS:
  *
- *  SOURCES:
- *    Mostly based on information from "Logical Description for the Apollo 
- *    Guidance Computer (AGC4)", Albert Hopkins, Ramon Alonso, and Hugh 
- *    Blair-Smith, R-393, MIT Instrumentation Laboratory, 1963.
+ * DESCRIPTION:
+ * Scaler for the Block 1 Apollo Guidance Computer prototype (AGC4).
  *
- *  NOTES: 
- *    
+ * SOURCES:
+ * Mostly based on information from "Logical Description for the Apollo
+ * Guidance Computer (AGC4)", Albert Hopkins, Ramon Alonso, and Hugh
+ * Blair-Smith, R-393, MIT Instrumentation Laboratory, 1963.
+ *
+ * NOTES:
+ *
  *****************************************************************************
  */
 #ifndef SCL_H
 #define SCL_H
-
 #include "reg.h"
-
 class regF17 : public reg
 {
 public:
@@ -31,13 +29,7 @@ public:
       reg(2, "%01o")
   {
   }
-  virtual
-  ~regF17()
-  {
-  }
-  ;
 };
-
 class regF13 : public reg
 {
 public:
@@ -45,13 +37,7 @@ public:
       reg(2, "%01o")
   {
   }
-  virtual
-  ~regF13()
-  {
-  }
-  ;
 };
-
 class regF10 : public reg
 {
 public:
@@ -59,13 +45,7 @@ public:
       reg(2, "%01o")
   {
   }
-  virtual
-  ~regF10()
-  {
-  }
-  ;
 };
-
 class regSCL : public reg
 {
 public:
@@ -73,13 +53,7 @@ public:
       reg(17, "%06o")
   {
   }
-  virtual
-  ~regSCL()
-  {
-  }
-  ;
 };
-
 class SCL
 {
 public:
@@ -91,21 +65,19 @@ public:
   doexecWP_F13();
   static void
   doexecWP_F10();
-
   static regSCL register_SCL;
-
-  // Normally outputs '0'; outputs '1' for one
-  // clock pulse at the indicated frequency.
+// Normally outputs '0'; outputs '1' for one
+// clock pulse at the indicated frequency.
   static unsigned
-  F17x();    // 0.78125 Hz scaler output
+  F17x(); // 0.78125 Hz scaler output
   static unsigned
-  F13x();    // 12.5 Hz  scaler output
+  F13x(); // 12.5 Hz scaler output
   static unsigned
-  F10x();    // 100 Hz scaler output
-
+  F10x(); // 100 Hz scaler output
   static regF17 register_F17;
   static regF13 register_F13;
   static regF10 register_F10;
 };
 
 #endif
+

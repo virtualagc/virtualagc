@@ -1,12 +1,12 @@
 /****************************************************************************
- *  TPG - TIME PULSE GENERATOR subsystem
+ * TPG - TIME PULSE GENERATOR subsystem
  *
- *  AUTHOR:     John Pultorak
- *  DATE:       9/22/01
- *  FILE:       TPG.cpp
+ * AUTHOR: John Pultorak
+ * DATE: 9/22/01
+ * FILE: TPG.cpp
  *
- *  NOTES: see header file.
- *    
+ * NOTES: see header file.
+ *
  *****************************************************************************
  */
 #include "TPG.h"
@@ -14,13 +14,10 @@
 #include "SCL.h"
 #include "SEQ.h"
 #include "OUT.h"
-
 const char* TPG::tpTypestring[] = // must correspond to tpType enumerated type
       { "STBY", "PWRON", "TP1", "TP2", "TP3", "TP4", "TP5", "TP6", "TP7", "TP8",
           "TP9", "TP10", "TP11", "TP12", "SRLSE", "WAIT" };
-
 regSG TPG::register_SG; // static member
-
 void
 TPG::doexecWP_TPG()
 {
@@ -38,7 +35,6 @@ TPG::doexecWP_TPG()
       if (((!MON::FCLK) || SCL::F13x()))
         mystate = TP1;
       break;
-
     case TP1:
       mystate = TP2;
       break;
@@ -96,4 +92,3 @@ TPG::doexecWP_TPG()
       }
   register_SG.write(mystate);
 }
-
