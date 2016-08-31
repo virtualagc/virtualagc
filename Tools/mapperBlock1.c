@@ -93,25 +93,26 @@
 #define MAX_ENTRY_POINTS 16
 // basicMap[] is really just a set of true/false indicators as to whether the
 // location contained a basic instruction or not.  I hope that erasable
-// (0-01777) can't be hit.
+// (0-01777) can't have an instruction in it.
 #define MEMORY_SIZE (02000 * 035)
-int rope[MEMORY_SIZE] = { 0 };
-int basicMap[MEMORY_SIZE] = { 0 };
-int dataMap[MEMORY_SIZE] = { 0 };
+int rope[MEMORY_SIZE] =
+  { 0 };
+int basicMap[MEMORY_SIZE] =
+  { 0 };
+int dataMap[MEMORY_SIZE] =
+  { 0 };
 int BANKREG = 0;
-int EXTENDED = 0;
 int INDEX = -1;
 int PC = 02000;
 
 int
-initializeBasic (int address)
+initializeBasic(int address)
 {
   if (address < 0 || address >= MEMORY_SIZE)
     {
-      fprintf (stderr, "Address overflow.\n");
+      fprintf(stderr, "Address overflow.\n");
       return (1);
     }
-  EXTENDED = 0;
   INDEX = -1;
   PC = address;
   return (0);
@@ -121,37 +122,34 @@ initializeBasic (int address)
 // it could eventually become the basis for a Block 1 CPU simulator, though
 // I only need the bare beginnings of that right now.  Returns
 //
-//       0      Success
+//      0       Success
 //      1       Address not in memory space
 int
-decodeBasic (void)
+decodeBasic(void)
 {
-  int instruction, keepExtended = 0, keepIndex = 0, retVal = 1;
+  int instruction, keepIndex = 0, retVal = 1;
   // Sanity check.
   if (PC < 0 || PC >= MEMORY_SIZE)
     {
-      fprintf (stderr, "Address overflow.\n");
+      fprintf(stderr, "Address overflow.\n");
       goto done;
     }
   instruction = rope[PC++];
   if (PC != 04000 && PC % 02000 == 0)
     {
-      fprintf (stderr, "End of bank %02o reached.\n", (PC - 1) / 02000);
+      fprintf(stderr, "End of bank %02o reached.\n", (PC - 1) / 02000);
     }
   if (instruction == 047777)
     {
-      keepExtended = 1;
-      EXTENDED = 1;
       goto done;
     }
   switch (instruction & 070000)
-  {
+    {
   case 000000: // TC instruction.
     break;
   case 010000: // CCS instruction.
     break;
   case 020000: // INDEX instruction.
-    keepExtended = 1;
     keepIndex = 1;
 
     break;
@@ -174,12 +172,10 @@ decodeBasic (void)
     break;
   case 070000: // MASK instruction.
     break;
-  }
+    }
 
   retVal = 0;
-  done:;
-  if (!keepExtended)
-    EXTENDED = 0;
+  done: ;
   if (!keepIndex)
     INDEX = -1;
   return (retVal);
@@ -187,7 +183,7 @@ decodeBasic (void)
 
 // A recursive function to map an area starting from an address.
 int
-mapEntryPoint (int address)
+mapEntryPoint(int address)
 {
   while (1)
     {
@@ -196,12 +192,12 @@ mapEntryPoint (int address)
       // Error or exit conditions.
       if (address < 0 || address >= MEMORY_SIZE)
         {
-          fprintf (stderr, "Address overflow.\n");
+          fprintf(stderr, "Address overflow.\n");
           return (1);
         }
       if (address < 02000)
         {
-          fprintf (stderr, "Erasable encountered.\n");
+          fprintf(stderr, "Erasable encountered.\n");
           return (1);
         }
       if (basicMap[address]) // Already hit before.
@@ -223,64 +219,66 @@ main(int argc, char *argv[])
   // Parse the command line.
   for (i = 1; i < argc; i++)
     {
-      if (!strncmp (argv[i], "--rope=", 7))
+      if (!strncmp(argv[i], "--rope=", 7))
         {
           FILE *fp;
-          fp = fopen (&argv[i][7], "rb");
+          fp = fopen(&argv[i][7], "rb");
           if (fp == NULL)
             {
-              fprintf (stderr, "File not found.\n");
+              fprintf(stderr, "File not found.\n");
               return (1);
             }
           for (j = 02000; j < MEMORY_SIZE; j++)
             {
-              k = getc (fp);
+              k = getc(fp);
               if (k == EOF)
                 {
-                  fprintf (stderr, "Unexpected end of file.\n");
+                  fprintf(stderr, "Unexpected end of file.\n");
                   return (1);
                 }
               rope[i] = k << 7;
-              k = getc (fp);
+              k = getc(fp);
               if (k == EOF)
                 {
-                  fprintf (stderr, "Unexpected end of file.\n");
+                  fprintf(stderr, "Unexpected end of file.\n");
                   return (1);
                 }
               rope[i] |= (k >> 1) & 0177;
             }
-          fclose (fp);
+          fclose(fp);
         }
       else if (1 == sscanf(argv[i], "--entry=%o", &j))
         {
           if (numEntryPoints >= MAX_ENTRY_POINTS)
             {
-              fprintf (stderr, "Too many entry points.\n");
+              fprintf(stderr, "Too many entry points.\n");
               return (1);
             }
           entryPoints[numEntryPoints++] = j;
         }
-      else if (!strcmp (argv[i], "--help"))
+      else if (!strcmp(argv[i], "--help"))
         {
-          fprintf (stderr, "Usage:  mapperBlock1 --rope=Filename --entry=Octal [--entry=Octal ...]");
+          fprintf(stderr,
+              "Usage:  mapperBlock1 --rope=Filename --entry=Octal [--entry=Octal ...]");
           return (0);
         }
       else
         {
-          fprintf (stderr, "Unknown switch: \"%s\"\n", argv[i]);
+          fprintf(stderr, "Unknown switch: \"%s\"\n", argv[i]);
           return (1);
         }
     }
   if (numEntryPoints == 0)
     {
-      fprintf (stderr, "No entry points were specified.\n");
+      fprintf(stderr, "No entry points were specified.\n");
       return (1);
     }
 
   for (i = 0; i < numEntryPoints; i++)
     if (mapEntryPoint(entryPoints[i]))
       {
-        fprintf (stderr, "Implementation error for entry point %o.\n", entryPoints[i]);
+        fprintf(stderr, "Implementation error for entry point %o.\n",
+            entryPoints[i]);
         return (1);
       }
 

@@ -366,7 +366,8 @@ EvaluateDecimal (char *s, Address_t *Address)
 	En = 0;
     }
   else if (2 == sscanf (s, "E%dB%d", &En, &Bn))
-    ;
+    {
+    }
   else
     {
       ErrorMsg ("Missing binary point.");
@@ -601,7 +602,8 @@ PassLemap (FILE *fp, int Action)
       Label[0] = Operator[0] = Variables[0] = 0;
       //Extra = Missing = 0;
       if (!s[0])
-	;
+        {
+        }
       else if (!isspace(s[0]))
 	{
 	  i = sscanf (s, "%s%s%s%s", Label, Operator, Variables, sd);
