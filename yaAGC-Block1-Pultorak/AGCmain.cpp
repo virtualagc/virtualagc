@@ -106,6 +106,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <ctype.h>
+#include <stdint.h>
 #include "reg.h"
 #include "TPG.h"
 #include "MON.h"
@@ -323,7 +324,7 @@ void loadMemory()
     printw("%s\n", "Memory loaded.");
   }
 #endif
-static int loadBuf[0xffff + 1]; // temporary buffer for assembling H,L memory data
+static uint16_t loadBuf[02000 * (NUMFBANK + 1) + 1]; // temporary buffer for assembling H,L memory data
 void
 loadEPROM(char* fileName, bool highBytes)
 {
@@ -412,7 +413,7 @@ loadMemory()
   //*******************************************************************
   // EPROM is now in loadBuf; move it to AGC memory.
   // AGC fixed memory only uses NUMFBANK banks.
-  for (int address = 1024; address < 1024 * (NUMFBANK + 1); address++)
+  for (int address = 02000; address < 02000 * (NUMFBANK + 1); address++)
     {
       // Don't load address region 0-1023; that region is allocated
       // to eraseable memory.

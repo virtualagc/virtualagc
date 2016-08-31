@@ -15,7 +15,7 @@ HEADERS:=$(wildcard *.h)
 all: yaAGC-Block1
 
 yaAGC-Block1: $(SOURCE) $(HEADERS) Makefile
-	g++ -O0 -g -std=c++11 -o $@ $(SOURCE) -lncurses
+	g++ -O0 -g -o $@ $(SOURCE) -lncurses
 
 clean:
 	-rm $(TARGETS)

@@ -1,5 +1,6 @@
 #include "reg.h"
 #include <math.h>
+#include <stdlib.h>
 #include "BUS.h"
 unsigned
 reg::buildMask(unsigned s)
