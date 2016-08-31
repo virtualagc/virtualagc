@@ -25,7 +25,7 @@ const char* SEQ::instructionString[] =
   { "TC", "CCS", "INDEX", "XCH", "***", "***", "***", "***", "***", "MP", "DV",
       "SU", "CS", "TS", "AD", "MASK" };
 const char* SEQ::cpTypeString[] =
-  { "NO_PULSE",
+  {  "NO_PULSE",
 // OUTPUTS FROM SUBSYSTEM A
       "CI", "CLG", "CLCTR", "CTR", "GP", "KRPT", "NISQ", "RA", "RB", "RB14",
       "RC", "RG", "RLP", "RP2", "RQ", "RRPA", "RSB", "RSCT", "RU", "RZ", "R1",

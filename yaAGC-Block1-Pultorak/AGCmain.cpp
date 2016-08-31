@@ -132,12 +132,12 @@
 using namespace std;
 
 #define endl "\n\r"
-#define _getch getch
+#define _getch() wgetch(stdscr)
 static int
 _kbhit()
 {
   int c;
-  c = getch();
+  c = wgetch(stdscr);
   if (c != EOF)
     {
       ungetch(c);
@@ -198,6 +198,7 @@ genAGCStates()
   SCL::doexecWP_F13();
   SCL::doexecWP_F10();
   TPG::doexecWP_TPG();
+
 }
 //-----------------------------------------------------------------------
 // SIMULATION LOGIC
@@ -539,8 +540,7 @@ showMenu()
   printw("BLOCK 1 EMULATOR MENU:\n");
   printw(" 'a' = STANDBY ALLOWED\n");
   printw(" 'b' = TOGGLE BREAKPOINT\n");
-  printw(
-      " 'c' = TOGGLE SCALER: when the scaler is off, F13 and F17 are not automatically generated\n");
+  printw(" 'c' = TOGGLE SCALER: (for automatically generating F13 and F17.\n");
   printw(" 'd' = DISPLAY: refreshes current register display.\n");
   printw(" 'e' = EXAMINE: examine contents of memory.\n");
   printw(" 'f' = DEBUG: displays current line of code.\n");
@@ -553,13 +553,13 @@ showMenu()
   printw(" 'q' = QUIT:  quit the program.\n");
   printw(" 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position.\n");
   printw(" 's' = STEP\n");
-  printw(" 'w' = WHERE: set program counter to 02000.\n");
+  printw(" 't' = SINGLE CLOCK.\n");
+  printw(" 'u' = MANUAL CLOCK.\n");
+  printw(" 'v' = FAST CLOCK.\n");
+  printw(" 'w' = WHERE: set program counter.\n");
   printw(" 'x' = F13: manually generate F13 scaler pulse.\n");
   printw(" 'y' = TOGGLE WATCHPOINT\n");
   printw(" 'z' = F17: manually generate F17 scaler pulse.\n");
-  printw(" 'F1' = SINGLE CLOCK.\n");
-  printw(" 'F2' = MANUAL CLOCK.\n");
-  printw(" 'F4' = FAST CLOCK.\n");
   printw(" ']' = +CNTR: give a plus input to a priority counter cell.\n");
   printw(" '[' = -CNTR: give a minus input to a priority counter cell.\n");
   printw(" ';' = CLEAR PARITY ALARM.\n");
@@ -573,11 +573,11 @@ showMenu()
   printw("    'g' = KEY RELEASE.\n");
   printw("    'j' = ENTER KEY.\n");
 }
+#define MAX_LINE_LENGTH 512
 const int startCol = 0; // columns are numbered 0-n
 const int colLen = 5; // number of chars in column
-const int maxLines = 23; // # of total lines to display
+const int maxLines = 24; // # of total lines to display
 const int noffset = 10; // # of lines prior to, and including, selected line
-const int maxLineLen = 79;
 void
 showSourceCode()
 {
@@ -605,9 +605,9 @@ showSourceCode()
     foffset[i] = 0;
   bool foundit = false;
   int lineCount = 0;
-  char s[256];
+  char s[MAX_LINE_LENGTH];
   char valString[20];
-  char out[256];
+  char out[MAX_LINE_LENGTH];
   while (!feof(fp))
     {
       if (!foundit)
@@ -616,7 +616,7 @@ showSourceCode()
           op = (op + 1) % noffset;
         }
       // Read a line of the source code list file.
-      if (fgets(s, 256, fp))
+      if (fgets(s, MAX_LINE_LENGTH, fp))
         {
           // Get the address (CADR) from the line.
           strncpy(valString, s + startCol, colLen);
@@ -629,8 +629,9 @@ showSourceCode()
               else
                 printw("%s", " ");
               // truncate line so it fits in 80 col display
-              strncpy(out, s, maxLineLen);
-              out[maxLineLen] = '\0';
+              strncpy(out, s, MAX_LINE_LENGTH - 1);
+              out[MAX_LINE_LENGTH - 2] = '\n';
+              out[MAX_LINE_LENGTH - 1] = '\0';
               printw("%s", out);
               lineCount++;
               if (lineCount >= maxLines)
@@ -654,9 +655,9 @@ showSourceCode()
 int
 main(int argc, char* argv[])
 {
-
   // Make ncurses getch() non-blocking.
   initscr();
+  keypad(stdscr, TRUE);
   cbreak();
   noecho();
   nodelay(stdscr, TRUE);
@@ -682,7 +683,8 @@ main(int argc, char* argv[])
       // for front-panel input by the user. This uses a Microsoft function;
       // substitute some other non-blocking function to access the keyboard
       // if you're porting this to a different platform.
-      printw("%s", "> ");
+      if (!singleClock)
+        printw("%s", "> ");
       while (!_kbhit())
         {
           if (MON::FCLK || singleClock)
@@ -718,125 +720,42 @@ main(int argc, char* argv[])
                       oldWatchValue = newWatchValue;
                     }
                 }
-              while (MON::FCLK && MON::RUN && genStateCntr > 0);
+              while ((MON::FCLK && MON::RUN && genStateCntr > 0));
               updateAGCDisplay();
+              printw("%s", "> ");
             }
           // for convenience, clear the single step switch on TP1; in the
           // hardware AGC, this happens when the switch is released
           if (MON::STEP && TPG::register_SG.read() == TP1)
-            MON::STEP = 0;
+            {
+              MON::STEP = 0;
+            }
         }
       char key = _getch();
       int newAddress = 02000;
       // Keyboard controls for front-panel:
       switch (key)
         {
-      case 'w':
-        if (newAddress < 06000)
-          {
-            ADR::register_S.write(newAddress);
-            printw("Program counter -> %04o\n", ADR::register_S.read());
-          }
-        else
-          {
-            ADR::register_S.write(newAddress & 01777);
-            ADR::register_BNK.write(newAddress >> 10);
-            printw("Program counter -> %02o,%04o\n", ADR::register_BNK.read(),
-                06000 + ADR::register_S.read());
-          }
-        genAGCStates();
-        MON::displayAGC();
-        break;
-      case 'q':
-        printw("%s\n", "QUIT...");
-        endwin();
-        exit(0);
-      case 'm':
-        showMenu();
-        break;
-      case 'd':
-        genAGCStates();
-        MON::displayAGC();
-        break; // update display
-      case 'l':
-        loadMemory();
-        saveMemory("temp.rope");
-        break;
-      case 'e':
-        examineMemory();
-        break;
-      case 'f':
-        showSourceCode();
-        break;
-      case ']':
-        incrCntr();
-        //genAGCStates();
-        //displayAGC(EVERY_CYCLE);
-        break;
-      case '[':
-        decrCntr();
-        //genAGCStates();
-        //displayAGC(EVERY_CYCLE);
-        break;
-      case 'i':
-        interrupt();
-        //genAGCStates();
-        //displayAGC(EVERY_CYCLE);
-        break;
-      case 'z':
-        //SCL::F17 = (SCL::F17 + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-      case 'x':
-        //SCL::F13 = (SCL::F13 + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-      case 'c':
-        MON::SCL_ENAB = (MON::SCL_ENAB + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-      case 'r':
-        MON::RUN = (MON::RUN + 1) % 2;
-        genAGCStates();
-        if (!MON::FCLK)
-          MON::displayAGC();
-        break;
-      case 's':
-        MON::STEP = (MON::STEP + 1) % 2;
-        genAGCStates();
-        if (!MON::FCLK)
-          MON::displayAGC();
-        break;
-      case 'a':
-        MON::SA = (MON::SA + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-      case 'n':
-        MON::INST = (MON::INST + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-      case 'p':
-        MON::PURST = (MON::PURST + 1) % 2;
-        genAGCStates();
-        MON::displayAGC();
-        break;
-      case 'b':
-        toggleBreakpoint();
-        break;
-      case 'y':
-        toggleWatch();
-        break;
       case ';':
         // Clear ALARM indicators
         PAR::CLR_PALM(); // Asynchronously clear PARITY FAIL
         MON::displayAGC();
         break;
-        // DSKY:
+      case '+':
+        KBD::keypress(KEYIN_PLUS);
+        break;
+      case '-':
+        KBD::keypress(KEYIN_MINUS);
+        break;
+      case '.':
+        KBD::keypress(KEYIN_CLEAR);
+        break;
+      case '/':
+        KBD::keypress(KEYIN_VERB);
+        break;
+      case '*':
+        KBD::keypress(KEYIN_NOUN);
+        break;
       case '0':
         KBD::keypress(KEYIN_0);
         break;
@@ -867,20 +786,28 @@ main(int argc, char* argv[])
       case '9':
         KBD::keypress(KEYIN_9);
         break;
-      case '+':
-        KBD::keypress(KEYIN_PLUS);
+      case 'a':
+        MON::SA = (MON::SA + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
         break;
-      case '-':
-        KBD::keypress(KEYIN_MINUS);
+      case 'b':
+        toggleBreakpoint();
         break;
-      case '.':
-        KBD::keypress(KEYIN_CLEAR);
+      case 'c':
+        MON::SCL_ENAB = (MON::SCL_ENAB + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
         break;
-      case '/':
-        KBD::keypress(KEYIN_VERB);
+      case 'd':
+        genAGCStates();
+        MON::displayAGC();
+        break; // update display
+      case 'e':
+        examineMemory();
         break;
-      case '*':
-        KBD::keypress(KEYIN_NOUN);
+      case 'f':
+        showSourceCode();
         break;
       case 'g':
         KBD::keypress(KEYIN_KEY_RELEASE);
@@ -888,29 +815,112 @@ main(int argc, char* argv[])
       case 'h':
         KBD::keypress(KEYIN_ERROR_RESET);
         break;
+      case 'i':
+        interrupt();
+        //genAGCStates();
+        //displayAGC(EVERY_CYCLE);
+        break;
       case 'j':
         KBD::keypress(KEYIN_ENTER);
         break;
-      case '\0': // must be a function key
-        key = _getch();
-        switch (key)
+      case 'l':
+        loadMemory();
+        saveMemory("temp.rope");
+        break;
+      case 'm':
+        showMenu();
+        break;
+      case 'n':
+        MON::INST = (MON::INST + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+      case 'p':
+        MON::PURST = (MON::PURST + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+      case 'q':
+        printw("%s\n", "QUIT...");
+        endwin();
+        exit(0);
+      case 'r':
+        MON::RUN = (MON::RUN + 1) % 2;
+        genAGCStates();
+        if (!MON::FCLK)
+          MON::displayAGC();
+        break;
+      case 's':
+        MON::STEP = (MON::STEP + 1) % 2;
+        genAGCStates();
+        if (!MON::FCLK)
+          MON::displayAGC();
+        break;
+      case 't': // single clock pulse (when system clock off)
+        printw("%s\n", "Single clock");
+        singleClock = true;
+        break;
+      case 'u': // manual clock (FCLK=0)
+        printw("%s\n", "Manual clock");
+        MON::FCLK = 0;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+      case 'v': // fast clock (FCLK=1)
+        printw("%s\n", "Fast clock");
+        MON::FCLK = 1;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+      case 'w':
+        {
+          char b[80];
+          strcpy(b,
+              getCommand("New address (octal, flat address space) [2000]: "));
+          newAddress = strtol(b, 0, 8);
+          if (newAddress == 0)
+            newAddress = 02000;
+        }
+        if (newAddress < 06000)
           {
-        case 0x3b: // F1: single clock pulse (when system clock off)
-          singleClock = true;
-          break;
-        case 0x3c: // F2: manual clock (FCLK=0)
-          MON::FCLK = 0;
-          genAGCStates();
-          MON::displayAGC();
-          break;
-        case 0x3e: // F4: fast clock (FCLK=1)
-          MON::FCLK = 1;
-          genAGCStates();
-          MON::displayAGC();
-          break;
-        default:
-          printw("function key: %c=%0X\n", key, key);
+            ADR::register_S.write(newAddress);
+            ADR::register_S.clk();
+            printw("Program counter -> %04o\n", ADR::register_S.read());
           }
+        else
+          {
+            ADR::register_S.write(newAddress & 01777);
+            ADR::register_S.clk();
+            ADR::register_BNK.write(newAddress >> 10);
+            ADR::register_BNK.clk();
+            printw("Program counter -> %02o,%04o\n", ADR::register_BNK.read(),
+                06000 + ADR::register_S.read());
+          }
+        genAGCStates();
+        MON::displayAGC();
+        break;
+      case 'x':
+        //SCL::F13 = (SCL::F13 + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+      case 'y':
+        toggleWatch();
+        break;
+      case 'z':
+        //SCL::F17 = (SCL::F17 + 1) % 2;
+        genAGCStates();
+        MON::displayAGC();
+        break;
+      case ']':
+        incrCntr();
+        //genAGCStates();
+        //displayAGC(EVERY_CYCLE);
+        break;
+      case '[':
+        decrCntr();
+        //genAGCStates();
+        //displayAGC(EVERY_CYCLE);
         break;
       default:
         printw("%c=%0X\n", key, key);
