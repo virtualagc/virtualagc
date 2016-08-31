@@ -548,12 +548,12 @@ showMenu()
   printw(" 'i' = INTERRUPT: generates an AGC interrupt, 1-5.\n");
   printw(" 'l' = LOAD:  load rope contents into memory\n");
   printw(" 'm' = MENU:  show this menu of commands.\n");
-  printw(
-      " 'n' = INST:  toggle whether to step by instruction or pulse-sequence\n");
+  printw(" 'n' = INST:  toggle stepping by instruction vs pulse-sequence\n");
   printw(" 'p' = POWER UP RESET\n");
   printw(" 'q' = QUIT:  quit the program.\n");
   printw(" 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position.\n");
   printw(" 's' = STEP\n");
+  printw(" 'w' = WHERE: set program counter to 02000.\n");
   printw(" 'x' = F13: manually generate F13 scaler pulse.\n");
   printw(" 'y' = TOGGLE WATCHPOINT\n");
   printw(" 'z' = F17: manually generate F17 scaler pulse.\n");
@@ -727,11 +727,26 @@ main(int argc, char* argv[])
             MON::STEP = 0;
         }
       char key = _getch();
+      int newAddress = 02000;
       // Keyboard controls for front-panel:
       switch (key)
         {
-      // AGC controls
-      // simulator controls
+      case 'w':
+        if (newAddress < 06000)
+          {
+            ADR::register_S.write(newAddress);
+            printw("Program counter -> %04o\n", ADR::register_S.read());
+          }
+        else
+          {
+            ADR::register_S.write(newAddress & 01777);
+            ADR::register_BNK.write(newAddress >> 10);
+            printw("Program counter -> %02o,%04o\n", ADR::register_BNK.read(),
+                06000 + ADR::register_S.read());
+          }
+        genAGCStates();
+        MON::displayAGC();
+        break;
       case 'q':
         printw("%s\n", "QUIT...");
         endwin();

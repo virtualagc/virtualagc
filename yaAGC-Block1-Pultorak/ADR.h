@@ -102,9 +102,9 @@ public:
   GTR_1777(); // for CPM
   static unsigned
   getEffectiveAddress();
-private:
   static regS register_S; // address register
   static regBNK register_BNK; // bank register
+private:
   static unsigned
   bankDecoder();
   static unsigned conv_WBK[];
