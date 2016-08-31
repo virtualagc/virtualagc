@@ -448,7 +448,7 @@ examineMemory()
   strcpy(theAddress, getCommand("Examine Memory -- enter address (octal)\n: "));
   printw("%s\n", theAddress);
   unsigned address = strtol(theAddress, 0, 8);
-  for (unsigned i = address; i < address + 23; i++)
+  for (unsigned i = address; i < address + 24; i++)
     {
       printw("%06o: %06o\n", i, MEM::readMemory(i));
     }

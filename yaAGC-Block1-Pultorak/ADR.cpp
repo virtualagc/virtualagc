@@ -70,10 +70,10 @@ ADR::GTR_1777()
 unsigned
 ADR::bankDecoder()
 {
-// Memory is organized into 13 banks of 1K words each. The banks are numbered
-// 0-12. Bank 0 is erasable memory; banks 1-12 are fixed (rope) memory. The 10
+// Memory is organized into 29 banks of 1K words each. The banks are numbered
+// 0-28. Bank 0 is erasable memory; banks 1-28 are fixed (rope) memory. The 10
 // lower bits in the S register address memory inside a bank. The 2 upper bits
-// in the S register select the bank. If the 2 upper bits are both 1, the 4-bit
+// in the S register select the bank. If the 2 upper bits are both 1, the 5-bit
 // bank register is used to select the bank.
 // 12 11 Bank
 // 0 0 0 erasable memory

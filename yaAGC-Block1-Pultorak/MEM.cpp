@@ -58,7 +58,7 @@ MEM::readMemory(unsigned address)
 // Address is 14 bits. This function is used by the simulator for examining
 // memory; it is not part of the AGC design.
   unsigned lowAddress = address & 01777;
-  unsigned bank = (address & 036000) >> 10;
+  unsigned bank = (address & 076000) >> 10;
   if (bank == 0)
     return MEM::register_EMEM[lowAddress].read();
   unsigned highAddress = bank << 10;
@@ -74,7 +74,7 @@ MEM::writeMemory(unsigned address, unsigned data)
 // This function could also write the parity into memory
 //************************************************************
   unsigned lowAddress = address & 01777;
-  unsigned bank = (address & 036000) >> 10;
+  unsigned bank = (address & 076000) >> 10;
   if (bank == 0)
     {
       if (lowAddress > 1024)
