@@ -434,9 +434,12 @@ loadEPROM(char* fileName, bool highBytes)
 }
 // Load AGC memory from the specified EPROM files
 void
-loadMemory()
+loadMemory(char *forceFilename)
 {
-  strcpy(filename, getCommand("Load Memory -- enter filename: "));
+  if (forceFilename != NULL)
+    strcpy (filename, forceFilename);
+  else
+    strcpy(filename, getCommand("Load Memory -- enter filename: "));
   printw("%s\n", filename);
   // We first attempt to load from filename.bin (a yaYUL output file).
   // Failing that, we attempt to load from filename.obj (from John's
@@ -549,7 +552,7 @@ updateAGCDisplay()
     {
       if (MON::RUN)
         {
-// update every 2 seconds at the start of a new instruction
+          // update every 2 seconds at the start of a new instruction
           if (displayTimeout || dskyChanged)
             {
               clockCounter++;
@@ -717,7 +720,7 @@ showSourceCode()
                       == sscanf(s, "%u,%u:%o,%o%c", &totalLine, &fileLine,
                           &fileBank, &fileOffset, &c) && isspace(c))
                 {
-                  if (bank == fileBank && offset == fileOffset)
+                  if (bank == fileBank && offset + 06000 == fileOffset)
                     found = 1;
                 }
 
@@ -737,6 +740,28 @@ showSourceCode()
 int
 main(int argc, char* argv[])
 {
+  char *initialRope = NULL;
+  // Parse command line.
+  {
+    int i;
+    unsigned u;
+    for (i = 1; i < argc; i++)
+      {
+        if (1 == sscanf(argv[i], "--go=%o", &u))
+          whereGo = u;
+        else if (!strncmp(argv[i], "--rope=", 7))
+          initialRope = &argv[i][7];
+        else
+          {
+            printf ("Usage:\n");
+            printf ("\tyaAGC-Block1 [OPTIONS]\n");
+            printf ("Possible OPTIONS:\n");
+            printf ("--go=O    Specify starting address O in octal, default 2000.\n");
+            printf ("--rope=F  Specify a rope.\n");
+            return (1);
+          }
+      }
+  }
 
   // Make ncurses getch() non-blocking.
   initscr();
@@ -754,6 +779,8 @@ main(int argc, char* argv[])
   CPM::readEPROM("CPM33_40.hex", CPM::EPROM33_40);
   CPM::readEPROM("CPM41_48.hex", CPM::EPROM41_48);
   CPM::readEPROM("CPM49_56.hex", CPM::EPROM49_56);
+  if (initialRope != NULL)
+    loadMemory(initialRope);
 
   bool singleClock = false;
   genAGCStates();
@@ -766,7 +793,7 @@ main(int argc, char* argv[])
       // for front-panel input by the user. This uses a Microsoft function;
       // substitute some other non-blocking function to access the keyboard
       // if you're porting this to a different platform.
-      if (!singleClock)
+      if (!singleClock && !MON::FCLK)
         printw("%s", "> ");
       while (!_kbhit())
         {
@@ -780,8 +807,9 @@ main(int argc, char* argv[])
               do
                 {
                   CLK::clkAGC();
-                  singleClock = false;
                   genAGCStates();
+                  if (!MON::INST || (MON::INST && TPG::register_SG.read() == TP1))
+                    singleClock = false;
                   genStateCntr--;
                   // Needs more work. It doesn't always stop at the
                   // right location and sometimes stops at the
@@ -803,9 +831,10 @@ main(int argc, char* argv[])
                       oldWatchValue = newWatchValue;
                     }
                 }
-              while ((MON::FCLK && MON::RUN && genStateCntr > 0));
+              while ((MON::FCLK || singleClock) && MON::RUN && genStateCntr > 0);
               updateAGCDisplay();
-              printw("%s", "> ");
+              if (!MON::FCLK)
+                printw("%s", "> ");
             }
           // for convenience, clear the single step switch on TP1; in the
           // hardware AGC, this happens when the switch is released
@@ -907,8 +936,8 @@ main(int argc, char* argv[])
         KBD::keypress(KEYIN_ENTER);
         break;
       case 'l':
-        loadMemory();
-        saveMemory("temp.rope");
+        loadMemory(NULL);
+        //saveMemory("temp.rope");
         break;
       case 'm':
         showMenu();

@@ -18,6 +18,9 @@ regX ALU::register_X; // ALU X register
 regY ALU::register_Y; // ALU Y register
 regU ALU::register_U; // ALU sum
 unsigned ALU::glbl_BUS = 0;
+
+unsigned whereGo = 02000;
+
 //************************************************************
 void
 ALU::execRP_ALU_RB()
@@ -85,7 +88,7 @@ ALU::execRP_ALU_OR_R24()
 void
 ALU::execRP_ALU_OR_R2000()
 {
-  BUS::glbl_WRITE_BUS |= 0002000 | BUS::glbl_READ_BUS; // TC GOPROG instruction
+  BUS::glbl_WRITE_BUS |= whereGo | BUS::glbl_READ_BUS; // TC GOPROG instruction
 }
 //************************************************************
 void

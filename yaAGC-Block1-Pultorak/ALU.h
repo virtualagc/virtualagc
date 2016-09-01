@@ -21,7 +21,11 @@
  */
 #ifndef ALU_H
 #define ALU_H
+
 #include "reg.h"
+
+extern unsigned whereGo;
+
 class regB : public reg
 {
 public:

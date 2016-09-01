@@ -44,12 +44,18 @@ unsigned MON::SCL_ENAB = 1; // "scaler enabled" SW; 0=NO (scaler halted), 1=YES 
 void
 MON::displayAGC()
 {
+  unsigned effectiveAddress = ADR::getEffectiveAddress();
+  char addressString[32];
+  if (effectiveAddress < 06000)
+    sprintf (addressString, "%04o", effectiveAddress);
+  else
+    sprintf (addressString, "%02o,%04o", effectiveAddress/02000, (effectiveAddress%02000)+06000);
   printw("%s",
-      "BLOCK 1 (" __DATE__ ") SIMULATOR 1.16 -------------------------------\n");
-  printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%06o\n",
+      "BLOCK 1 (" __DATE__ ") SIMULATOR 1.16g-0.5 -------------------------------\n");
+  printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%06o PC:%s\n",
       TPG::tpTypestring[TPG::register_SG.read()], SCL::register_F17.read(),
       SCL::register_F13.read(), SCL::register_F10.read(),
-      SCL::register_SCL.read());
+      SCL::register_SCL.read(), addressString);
   printw(" STA:%01o STB:%01o BR1:%01o BR2:%01o SNI:%01o CI:%01o LOOPCTR:%01o\n",
       SEQ::register_STA.read(), SEQ::register_STB.read(),
       SEQ::register_BR1.read(), SEQ::register_BR2.read(),
