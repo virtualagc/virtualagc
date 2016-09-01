@@ -245,6 +245,11 @@
  *				resumption in Windows.
  *		07/17/16 RSB	Commented out a variable that wasn't being
  *				used but was generating compiler warnings.
+ *		08/31/16 MAS	Corrected implementation of DINC and TIME6.
+ *				DINC now uses AddSP16() to do its math. T6RUPT
+ *				can only be triggered by a ZOUT from DINC. TIME6
+ *				only counts when enabled, and is disabled upon
+ *				triggering T6RUPT.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -1023,63 +1028,36 @@ CounterMCDU (int16_t * Counter)
 int
 CounterDINC (agc_t *State, int CounterNum, int16_t * Counter)
 {
-  //static int CountTIME6 = 0;
   int RetVal = 0;
-  //int IsTIME6, FlushTIME6;
   int16_t i;
-  //IsTIME6 = (Counter == &c (RegTIME6));
-  //FlushTIME6 = 0;
   i = *Counter;
   if (i == AGC_P0 || i == AGC_M0)	// Zero?
     {
       // Emit a ZOUT.
       if (CounterNum != 0)
 	ChannelOutput (State, 0x80 | CounterNum, 017);
+
+      RetVal = 1;
     }
   else if (040000 & i)			// Negative?
     {
-      i++;
-      if (i == AGC_M0)
-	{
-	  RetVal = -1;
-	  //if (IsTIME6)
-	  //  FlushTIME6 = 1;
-	}
-      //else if (IsTIME6)
-      //  {
-      //    CountTIME6--;
-      //    if (CountTIME6 <= -160)
-      //      FlushTIME6 = 1;
-      //  }
+      i = AddSP16(SignExtend(i), SignExtend(AGC_P1)) & 077777;
+
       // Emit a MOUT.
       if (CounterNum != 0)
 	ChannelOutput (State, 0x80 | CounterNum, 016);
     }
   else					// Positive?
     {
-      i--;
-      if (i == AGC_P0)
-	{
-	  RetVal = 1;
-	  //if (IsTIME6)
-	  //  FlushTIME6 = 1;
-	}
-      //else if (IsTIME6)
-      //  {
-      //    CountTIME6++;
-      //    if (CountTIME6 >= 160)
-      //      FlushTIME6 = 1;
-      //  }
+      i = AddSP16(SignExtend(i), SignExtend(AGC_M1)) & 077777;
+
       // Emit a POUT.
       if (CounterNum != 0)
 	ChannelOutput (State, 0x80 | CounterNum, 015);
     }
+
   *Counter = i;
-  //if (FlushTIME6 && CountTIME6)
-  //  {
-  //    ChannelOutput (State, 0165, CountTIME6);
-  //    CountTIME6 = 0;
-  //  }
+
   return (RetVal);
 }
 
@@ -1122,14 +1100,14 @@ InterruptRequests (agc_t * State, int16_t Address10, int Sum)
     return;
   if (IsReg(Address10, RegTIME1))
     CounterPINC (&c(RegTIME2));
-  else if (IsReg(Address10, RegTIME6))
-    State->InterruptRequests[1] = 1;
   else if (IsReg(Address10, RegTIME5))
     State->InterruptRequests[2] = 1;
   else if (IsReg(Address10, RegTIME3))
     State->InterruptRequests[3] = 1;
   else if (IsReg(Address10, RegTIME4))
     State->InterruptRequests[4] = 1;
+  // TIME6 requires a ZOUT to happen during a DINC sequence for its
+  // interrupt to fire
 }
 
 //-------------------------------------------------------------------------------
@@ -1650,15 +1628,20 @@ agc_engine (agc_t * State)
 	  if (CounterPINC (&c(RegTIME4)))
 	    State->InterruptRequests[4] = 1;
 	}
-      // I'm not sure if TIME6 is supposed to count when the T6 RUPT
-      // is disabled or not.  For the sake of argument, I'll assume
-      // that it is.  Nor am I sure how many bits this counter has.
-      // I'll assume 14.  Nor if it's out of phase with SCALER1.
-      // Nor ... well, you get the idea.
-      State->ExtraDelay++;
-      if (CounterDINC (State, 0, &c(RegTIME6)))
-	if (040000 & State->InputChannel[013])
-	  State->InterruptRequests[1] = 1;
+      // TIME6 only increments when it has been enabled via CH13 bit 15.
+      // It increments 0.3125ms after TIME1/TIME3, half of the 1/1600 second
+      // clock period as accounted for here. I'm assuming that difference
+      // is small enough, though, and just incrementing along with TIME1
+      if (040000 & State->InputChannel[013])
+        {
+          State->ExtraDelay++;
+          if (CounterDINC (State, 0, &c(RegTIME6)))
+            {
+	      State->InterruptRequests[1] = 1;
+              // Triggering a T6RUPT disables T6 by clearing the CH13 bit
+              CpuWriteIO(State, 013, c(RegTIME6) & 037777);
+            }
+        }
       // Return, so as to account for the time occupied by updating the
       // counters.
       return (0);
