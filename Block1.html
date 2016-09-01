@@ -38,9 +38,15 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#CPU_Architecture_Regis
 
 
 
+
+
+
             Architecture (Registers)</a></li>
         <li><a
             href="file:///home/rburkey/git/virtualagc-web/Block1.html#Memory_Map">Memory
+
+
+
 
 
 
@@ -52,6 +58,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
             Processing</a></li>
         <li><a
             href="file:///home/rburkey/git/virtualagc-web/Block1.html#io_channels">I/O
@@ -59,9 +68,15 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
             Channels</a></li>
         <li><a
 href="file:///home/rburkey/git/virtualagc-web/Block1.html#UnprogrammedSequences">Unprogrammed
+
+
+
 
 
 
@@ -97,6 +112,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Virtual_AGCs_Assembler
 
 
 
+
+
+
             AGC's Assembler (yaYUL)</a><br>
         </li>
         <li><a href="#John_Pultoraks_Assembler_and_Simulator">John
@@ -120,6 +138,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Virtual_AGCs_Assembler
     </p>
     <ul>
       <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block
+
+
+
 
 
 
@@ -194,7 +215,7 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     </p>
     <p>The most-glaring discrepancy is the memory map, which R-393
       describes as being 1024 words of read/write memory and 12
-      1024-word banks of read-only memory, whereas there were in fact 28
+      1024-word banks of read-only memory, whereas there were in fact 24
       banks of read-only memory by the time of the Solarium (Apollo 6
       unmanned mission) software mentioned above. <br>
     </p>
@@ -245,6 +266,9 @@ Guidance
 
 
 
+
+
+
       and Navigation System training slides</a>, July 1965, which are
     perhaps of greater practical utility, if lesser aesthetic
     value.&nbsp; If you click the drawing of the nav-panel DSKY (on the
@@ -259,7 +283,7 @@ Guidance
               href="Block1DSKY-drawing2.png"><img alt=""
                 src="Block1DSKY-drawing2-small.png" style="border: 2px
                 solid ; width: 237px; height: 839px;" height="839"
-                border="0" width="237"></a></td>
+                width="237" border="0"></a></td>
           <td style="text-align: center;"><img style="width: 587px;
               height: 572px;" alt="" src="Block1DSKY-drawing.png"
               height="572" width="587"><br>
@@ -293,12 +317,12 @@ Guidance
     <br>
     Memory is divided into 1024 words (15 bits each) of "erasable"
     memory — i.e., memory which can both be read from and written to —
-    and 28 banks, each with 1024 words of read-only or "fixed" memory.<br>
+    and 24 banks, each with 1024 words of read-only or "fixed" memory.<br>
     <br>
     Conventionally, AGC programming uses octal notation, as opposed to
     decimal or hexadecimal notation, for most purposes, and I'll do that
-    below, but I'll always prefix an extra 0 to the front of an octal
-    number to make it easy to recognize as being octal.&nbsp; For
+    below, but I'll always try to prefix an extra 0 to the front of an
+    octal number to make it easy to recognize as being octal.&nbsp; For
     example, if you see 15, you'll know that it's 15 decimal because
     there's no leading zero, whereas of you see 015, you'll know that
     it's octal (=13 decimal).&nbsp; That's only a convention on this
@@ -314,6 +338,14 @@ Guidance
         Bank 2 of fixed memory.</li>
       <li>Addresses 03,06000-03,07777 — Bank 3 of fixed memory.</li>
       <li>...</li>
+      <li>Addresses 14,06000-14,07777 — Bank 14 of fixed memory.</li>
+      <li><i>Though logically present as far as software is concerned,
+          banks 15, 16, 17, and 20 are not physically present in the
+          hardware.</i><br>
+      </li>
+      <li>Addresses 21,06000-21,07777 —Bank 20 of fixed memory.</li>
+      <li>...<br>
+      </li>
       <li>Addresses 034,06000-034,07777 — Bank 34 of fixed memory.<br>
       </li>
     </ul>
@@ -347,6 +379,9 @@ Guidance
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+
 
 
 
@@ -619,6 +654,9 @@ Guidance
 
 
 
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -633,8 +671,14 @@ Guidance
 
 
 
+
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -664,6 +708,9 @@ Guidance
 
 
 
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -671,6 +718,9 @@ Guidance
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -717,6 +767,9 @@ Guidance
 
 
 
+
+
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a
@@ -725,9 +778,15 @@ href="file:///home/rburkey/git/virtualagc-web/listings/Solarium055/MAIN.agc.html
 
 
 
+
+
+
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
+
 
 
 
@@ -753,6 +812,9 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
 
 
 
+
+
+
       same <b>yaYUL</b> assembler used for Block 2 code</a>.&nbsp; The
     only difference is that you add a command-line switch of --block1,
     but otherwise it operates identically, and accepts the full syntax
@@ -761,6 +823,9 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
       Pultorak's Assembler and Simulator</h3>
     Preliminary to his <a
 href="file:///home/rburkey/git/virtualagc-web/Pultorak.html#John_Pultoraks_Block_I_AGC">construction
+
+
+
 
 
 
@@ -789,10 +854,16 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15, whereas the source code for his
     simulator 1.16 is listed in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
+
 
 
 
@@ -818,6 +889,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -838,6 +912,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
       PDF description of the simulator</a>, though I was forced to
     replace his F1, F2, and F4 commands by other commands ('t', 'u', and
     'v'), as well as to introduce some additional, new commands.&nbsp;
@@ -850,8 +927,6 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         AGC program, which is simply called "agc" (without the quotes).</li>
       <li>Use the 'p' command to power up the system.</li>
       <li>Use the 'r' command to do something I'm unclear about.</li>
-      <li>Use the 'w' command to set the starting address, which is 2000
-        (octal).</li>
       <li>At this point you can use a variety of commands, such as 'e'
         to examine memory, 'f' to display source code, 't' to supply a
         single clock pulse (single-step), 'v' to start the processor
@@ -892,59 +967,94 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         Solarium, but not closely enough to use it without very
         significantly modifying Solarium.&nbsp; Of course, as I
         mentioned, John had no Block 1 software to use as a sample when
-        he developed his system.<br>
-      </li>
-      <li>The long and short of the latter points is that you can
-        neither assemble nor run Solarium or an other
-        previously-existing Block 1 program on the software simulation,
-        unless you are prepared to make enormous efforts to do so,
-        including changes to Solarium, to the assembler, and to the
-        simulator itself.&nbsp; In short, the only thing that the
-        assembler and simulator work conveniently with is the "Block 1"
-        source code which John has manufactured from the Block 2
-        Colossus 249 AGC program.<br>
+        he developed his system, so this is entirely
+        understandable.&nbsp; Fortunately, in the g++ version of the
+        simulator, you can also use the files output by the <b>yaYUL</b>
+        assembler, and bypass John's assembler completely.<br>
       </li>
     </ul>
     <p>It's possible that the first caveat above is merely in my g++
       version, and for all I know, could be absent from the Visual C++
       version.&nbsp; Moreover, theoretically, you could repair the
-      problems introduced into the simulator by R-393.&nbsp; If you then
-      recall from the <i>preceding</i> section that our own <b>yaYUL</b>
-      assembler is capable of assembly Solarium or other "normal" Block
-      1 programs, then if you had some way to convert the files created
-      by <b>yaYUL</b> into files compatible with John's Block 1
-      simulator, you might then be able to simulate Solarium using
-      John's simulator.<br>
+      problems introduced into the simulator by R-393.&nbsp; <br>
     </p>
-    <p>In order to run the simulator, there are two files required for
-      simulating the code of program called (say) "<i>program</i>", and
-      one that's optional for displaying source code in the debugger:<br>
+    <p>Certain files output by whichever assembler is used are needed as
+      inputs to the simulator:<br>
     </p>
     <ul>
-      <li><i>program</i>_H.hex and <i>program</i>_L.hex.&nbsp; These
-        are Motorola hex-files.&nbsp; As you may recall, the AGC has
-        15-bit words, with a 16th bit containing the parity.&nbsp; Thus,
-        each location in the rope memory comprises two bytes.&nbsp; In
-        the case of John's assembler and simulator, the L or low-order
-        byte contains the least-significant 8 bits of the memory
-        location, while the H or high-order byte contains the parity bit
-        and the most-significant 7 bits of the memory location.</li>
-      <li>The optional <i>program</i>.lst file is just an assembly
-        listing of the program.&nbsp; It's format isn't terribly
-        important, except that the first thing in each line that
-        corresponds to a specific memory location is a 5 octal-digit
-        address, and the remainder of the line contains some additional
-        text whose format we don't care about (the line of source
-        code).&nbsp; These octal addresses assume a flat address space,
-        in which erasable memory is at locations 00000-01777 (octal),
-        memory bank 1 is at locations 02000-03777, bank 2 is at
-        04000-05777, 3 is at 06000-07777, 4 is at 10000-11777, and so
-        on.</li>
+      <li>For the simulation itself:</li>
+      <ul>
+        <li>For the Visual C++ simulator version 1.15 and prior:&nbsp; <i>program</i>.obj.&nbsp;
+
+
+          This is an ASCII file, each line of which consists of two
+          octal values, separated by a space.&nbsp; The first octal
+          value is a rope address, and the second is the value stored at
+          that address.&nbsp; As you may recall, the AGC has 15-bit
+          words, with a 16th bit containing the parity. In the true
+          hardware, the parity bit was in the least-significant
+          position, whereas for John's software, the parity-bit is
+          stored in the most-significant position.&nbsp; Note that the
+          addresses in Pultorak's files are based on the notion of a
+          flat address space, rather than a banked one.&nbsp; In this
+          flat memory space, erasable memory is at locations 00000-01777
+          (octal), while fixed-memory bank <i>B</i> (where <i>B</i> is
+          1-34 octal) is at addresses 02000*<i>B</i> through 02000*<i>B</i>+01777.
+
+
+        </li>
+        <li>For the Visual C++ simulator version 1.16:&nbsp; <i>program</i>_H.hex
+
+
+          and <i>program</i>_L.hex.&nbsp; These are Motorola hex-files,
+          in which the H file contains the more-significant bytes from <i>project</i>.obj
+
+
+          (see above), and the L file contains the less-significant
+          bytes.&nbsp; The <i>project</i>.obj file itself is not
+          needed.</li>
+        <li>For the g++ version of the simulator:&nbsp; In
+          most-preferred to least-preferred order, it will try to load:<br>
+        </li>
+        <ol>
+          <li><i>program</i>.bin — a rope file as produced by the
+            Virtual AGC utilities <b>yaYUL</b> or <b>oct2bin</b>.</li>
+          <li><i>program</i>.obj, as described above, if that fails.</li>
+          <li><i>program</i>_H.hex and <i>program</i>_L.hex, as
+            described above, if all else fails.<br>
+          </li>
+        </ol>
+      </ul>
+      <li>Displaying source code in the debugger:&nbsp; The optional <i>program</i>.lst
+
+
+        file is just an assembly listing of the program:</li>
+      <ul>
+        <li>For the Visual C++ simulator, the listing file's format
+          format isn't terribly important, except that the first thing
+          in each line that corresponds to a specific memory location is
+          a 5 octal-digit address, and the remainder of the line
+          contains some additional text whose format we don't care about
+          (the line of source code).&nbsp; <br>
+        </li>
+        <li>For the g++ version of the simulator:&nbsp; Either the
+          assembly-listing format described above can be used, or else a
+          listing produced by yaYUL, for which the command (for an AGC
+          program like Solarium) would be:</li>
+      </ul>
     </ul>
-    <p>At the present time, I have no way to produce such files from the
-      rope file (.bin file) and assembly listing created by <b>yaYUL</b>,
-      but it doesn't sound that difficult.<br>
-    </p>
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <p><tt>../yaYUL/yaYUL --block1 --unpound-page MAIN.agc &gt;</tt><tt><i>program</i></tt><tt>.lst</tt><br>
+          </p>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+    <ul>
+    </ul>
+    <ul>
+    </ul>
     <h3><a name="Virtual_AGCs_CPU_Simulator_yaAGCb1"></a>Virtual AGC's
       CPU Simulator (yaAGCb1) TBD</h3>
     <p>TBD<br>
@@ -956,7 +1066,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-01.<br>
+          2016-09-02.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
