@@ -13,8 +13,8 @@
 #include "ADR.h"
 #include "stdlib.h"
 #include <ncurses.h>
-regEMEM MEM::register_EMEM[1024]; // erasable memory
-regFMEM MEM::register_FMEM[1024 * (NUMFBANK + 1)]; // fixed memory (lowest 1024 words ignored)
+regEMEM MEM::register_EMEM[02000]; // erasable memory
+regFMEM MEM::register_FMEM[02000 * (NUMFBANK + 1)]; // fixed memory (lowest 02000 words ignored)
 unsigned MEM::MEM_DATA_BUS = 0; // data lines: memory bits 15-1
 unsigned MEM::MEM_PARITY_BUS = 0; // parity line: memory bit 16
 void
@@ -55,14 +55,11 @@ MEM::writeMemory(unsigned data)
 unsigned
 MEM::readMemory(unsigned address)
 {
-// Address is 14 bits. This function is used by the simulator for examining
+// Address is 15 bits. This function is used by the simulator for examining
 // memory; it is not part of the AGC design.
-  unsigned lowAddress = address & 01777;
-  unsigned bank = (address & 076000) >> 10;
-  if (bank == 0)
-    return MEM::register_EMEM[lowAddress].read();
-  unsigned highAddress = bank << 10;
-  return MEM::register_FMEM[highAddress | lowAddress].read();
+  if ((address & 076000) == 0)
+    return MEM::register_EMEM[address].read();
+  return MEM::register_FMEM[address].read();
 }
 void
 MEM::writeMemory(unsigned address, unsigned data)

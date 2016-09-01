@@ -99,6 +99,13 @@
  *
  *****************************************************************************
  */
+
+/*
+ * Additional mods:
+ * 2016-09-02 RSB       Lots of adaptations related to using g++, fixing some of
+ *                      the features, and so on.
+ */
+
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -298,35 +305,66 @@ interrupt()
   int i = atoi(iname) - 1;
   INT::rupt[i] = 1;
 }
-#ifdef NOTDEF
+
+// Load AGC memory from a .bin file created by yaYUL or oct2bin.
+int
+loadYul(char *filename)
+{
+  // Add the .bin extension.
+  char fname[1024];
+  uint8_t word[2];
+  strcpy(fname, filename);
+  strcat(fname, ".bin");
+  FILE* fp = fopen(fname, "rb");
+  if (!fp)
+    return (1);
+  unsigned addr = 02000;
+  unsigned data;
+  unsigned parity;
+  while (1 == fread(word, 2, 1, fp))
+    {
+      // The file-data is big-endian and aligned to the most-significant
+      // bit, with a "parity" bit that's always 0 at the least-significant
+      // position.  We need it aligned to the least-significant bit, with
+      // an odd-parity bit at the most-significant position.
+      data = parity = (word[0] << 7) | (word[1] >> 1);
+      parity = (parity ^ (parity << 8));
+      parity = (parity ^ (parity << 4));
+      parity = (parity ^ (parity << 2));
+      parity = (parity ^ (parity << 1));
+      data |= (parity & 0x8000) ^ 0x8000;
+      MEM::writeMemory(addr, data);
+      addr++;
+    }
+  fclose(fp);
+  printw("Memory loaded, %s.\n", fname);
+  return (0);
+}
+
 // Load AGC memory from the specified file object file
-void loadMemory()
-  {
-    strcpy(filename, getCommand("Load Memory -- enter filename: "));
-    printw("%s", "\n");
-    // Add the .obj extension.
-    char fname[80];
-    strcpy(fname, filename);
-    strcat(fname, ".obj");
-    FILE* fp = fopen(fname, "r");
-    if(!fp)
-      {
-        perror("fopen failed:");
-        printw("*** ERROR: Can't load memory for file: %s\n", fname);
-        return;
-      }
-    unsigned addr;
-    unsigned data;
-    while(fscanf(fp, "%o %o", &addr, &data) != EOF)
-      {
-        MEM::writeMemory(addr, data);
-      }
-    fclose(fp);
-    printw("%s\n", "Memory loaded.");
-  }
-#endif
+int
+loadObj(char *filename)
+{
+  // Add the .obj extension.
+  char fname[80];
+  strcpy(fname, filename);
+  strcat(fname, ".obj");
+  FILE* fp = fopen(fname, "r");
+  if (!fp)
+    return (1);
+  unsigned addr;
+  unsigned data;
+  while (fscanf(fp, "%o %o", &addr, &data) != EOF)
+    {
+      MEM::writeMemory(addr, data);
+    }
+  fclose(fp);
+  printw("Memory loaded, %s.\n", fname);
+  return (0);
+}
+
 static uint16_t loadBuf[02000 * (NUMFBANK + 1) + 1]; // temporary buffer for assembling H,L memory data
-void
+int
 loadEPROM(char* fileName, bool highBytes)
 {
   printw("Reading EPROM: %s\n", fileName);
@@ -334,9 +372,8 @@ loadEPROM(char* fileName, bool highBytes)
   FILE* ifp = fopen(fileName, "r");
   if (!ifp)
     {
-      perror("fopen failed for source file");
-      endwin();
-      exit(-1);
+      printw("fopen failed for source file %s\n", fileName);
+      return (1);
     }
   const int addressBytes = 3; // 24-bit address range
   const int sumCheckBytes = 1;
@@ -347,8 +384,7 @@ loadEPROM(char* fileName, bool highBytes)
       if (buf[0] != 'S')
         {
           printw("Error reading start of EPROM record for: %s\n", fileName);
-          endwin();
-          exit(-1);
+          return (1);
         }
       char tmp[256];
       strncpy(tmp, &buf[2], 2);
@@ -389,12 +425,12 @@ loadEPROM(char* fileName, bool highBytes)
           printw(
               "sumCheck failed; file: %s, address: %0X, sumCheck: %0X, mySumCheck: %0X\n",
               fileName, address, sumCheck, mySumCheck);
-          endwin();
-          exit(-1);
+          return (1);
         }
     }
   fclose(ifp);
   printw("%s\n", "Memory loaded.");
+  return (0);
 }
 // Load AGC memory from the specified EPROM files
 void
@@ -402,25 +438,39 @@ loadMemory()
 {
   strcpy(filename, getCommand("Load Memory -- enter filename: "));
   printw("%s\n", filename);
-  char fname[80];
-  // Add the _H.hex extension.
-  strcpy(fname, filename);
-  strcat(fname, "_H.hex");
-  loadEPROM(fname, true);
-  // Add the _L.hex extension.
-  strcpy(fname, filename);
-  strcat(fname, "_L.hex");
-  loadEPROM(fname, false);
-  //*******************************************************************
-  // EPROM is now in loadBuf; move it to AGC memory.
-  // AGC fixed memory only uses NUMFBANK banks.
-  for (int address = 02000; address < 02000 * (NUMFBANK + 1); address++)
+  // We first attempt to load from filename.bin (a yaYUL output file).
+  // Failing that, we attempt to load from filename.obj (from John's
+  // assembler).  Failing that, we fall back filename_H.hex and
+  // filename_L.hex (Motorola hex files similar to filename.obj).
+  if (loadYul(filename))
     {
-      // Don't load address region 0-1023; that region is allocated
-      // to eraseable memory.
-      MEM::writeMemory(address, loadBuf[address]);
+      printw("Could not load %s.bin ... falling back on %s.obj.\n", filename);
+      if (loadObj(filename))
+        {
+          printw(
+              "Could not load %s.obj ... trying %s_H.hex and %s_L.hex instead.\n",
+              filename, filename, filename);
+          char fname[80];
+          // Add the _H.hex extension.
+          strcpy(fname, filename);
+          strcat(fname, "_H.hex");
+          loadEPROM(fname, true);
+          // Add the _L.hex extension.
+          strcpy(fname, filename);
+          strcat(fname, "_L.hex");
+          loadEPROM(fname, false);
+          //*******************************************************************
+          // EPROM is now in loadBuf; move it to AGC memory.
+          // AGC fixed memory only uses NUMFBANK banks.
+          for (int address = 02000; address < 02000 * (NUMFBANK + 1); address++)
+            {
+              // Don't load address region 0-1023; that region is allocated
+              // to eraseable memory.
+              MEM::writeMemory(address, loadBuf[address]);
+            }
+          //*******************************************************************
+        }
     }
-//*******************************************************************
 }
 // Write the entire contents of fixed and
 // eraseable memory to the specified file.
@@ -431,8 +481,8 @@ saveMemory(const char* filename)
   FILE* fp = fopen(filename, "w");
   if (!fp)
     {
-      perror("*** ERROR: fopen failed:");
-      exit(-1);
+      printw("*** ERROR: fopen failed:  %s\n", filename);
+      return;
     }
   char buf[100];
   for (unsigned addr = 020; addr < 1024 * (NUMFBANK + 1); addr++)
@@ -449,9 +499,11 @@ examineMemory()
   strcpy(theAddress, getCommand("Examine Memory -- enter address (octal)\n: "));
   printw("%s\n", theAddress);
   unsigned address = strtol(theAddress, 0, 8);
-  for (unsigned i = address; i < address + 24; i++)
+  for (unsigned i = address; i < address + 24 && i < 02000 * (NUMFBANK + 1);
+      i++)
     {
-      printw("%06o: %06o\n", i, MEM::readMemory(i));
+      int data = MEM::readMemory(i);
+      printw("%06o: %05o %d\n", i, (data & 077777), 1 & (data >> 15));
     }
 }
 // Returns true if time (s) elapsed since last time it returned true; does not block
@@ -598,7 +650,10 @@ showSourceCode()
   // The address we want is the current effective address is the
   // S and bank registers.
   char CADR[colLen + 1];
-  sprintf(CADR, "%05o", ADR::getEffectiveAddress());
+  unsigned effectiveAddress = ADR::getEffectiveAddress(), bank, offset;
+  offset = effectiveAddress % 02000;
+  bank = effectiveAddress / 02000;
+  sprintf(CADR, "%05o", effectiveAddress);
   int op = 0; // offset index
   long foffset[noffset];
   for (int i = 0; i < noffset; i++)
@@ -608,11 +663,13 @@ showSourceCode()
   char s[MAX_LINE_LENGTH];
   char valString[20];
   char out[MAX_LINE_LENGTH];
+  long whereFound = 0, whereNow = 0;
   while (!feof(fp))
     {
+      whereNow = ftell(fp);
       if (!foundit)
         {
-          foffset[op] = ftell(fp);
+          foffset[op] = whereFound = whereNow;
           op = (op + 1) % noffset;
         }
       // Read a line of the source code list file.
@@ -624,7 +681,7 @@ showSourceCode()
           // 'foundit' is true after we have found the desired line.
           if (foundit)
             {
-              if (strcmp(valString, CADR) == 0)
+              if (whereNow == whereFound)
                 printw("%s", ">");
               else
                 printw("%s", " ");
@@ -639,7 +696,32 @@ showSourceCode()
             }
           else
             {
-              if (strcmp(valString, CADR) == 0)
+              int found = 0;
+              unsigned totalLine, fileLine, fileBank, fileOffset, fileFlat;
+              char c;
+
+              // We don't know if the listing is in John Pultorak's format
+              // or yaYUL's so we check both.
+              if (!strcmp(valString, CADR) && isspace(s[colLen]))
+                found = 1; // Pultorak!
+              if (!found
+                  && 4
+                      == sscanf(s, "%u,%u:%o%c", &totalLine, &fileLine,
+                          &fileFlat, &c) && isspace(c))
+                {
+                  if (effectiveAddress < 06000 && fileFlat == effectiveAddress)
+                    found = 1;
+                }
+              if (!found
+                  && 5
+                      == sscanf(s, "%u,%u:%o,%o%c", &totalLine, &fileLine,
+                          &fileBank, &fileOffset, &c) && isspace(c))
+                {
+                  if (bank == fileBank && offset == fileOffset)
+                    found = 1;
+                }
+
+              if (found)
                 {
                   // Reposition the file pointer back several lines so
                   // we can see the code that preceeds the desired
@@ -655,6 +737,7 @@ showSourceCode()
 int
 main(int argc, char* argv[])
 {
+
   // Make ncurses getch() non-blocking.
   initscr();
   keypad(stdscr, TRUE);
@@ -928,3 +1011,4 @@ main(int argc, char* argv[])
     }
   return (0);
 }
+
