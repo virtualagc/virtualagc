@@ -1,8 +1,7 @@
 <!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html;
-      charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
       2.4.16 ppc) [Netscape]">
     <meta name="Author" content="Ronald Burkey">
@@ -11,7 +10,7 @@
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
-    <script type="text/javascript">document.write(headerTemplate.replace("@TITLE@","Programmer's Manual").replace("@SUBTITLE@","Block 1 AGC Assembly Language"))</script>
+    <script type="text/javascript">document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUBTITLE@","in all its Aspects"))</script>
     <br>
     <br>
     <div align="center"><big><big><i><b>This page is currently under
@@ -21,29 +20,95 @@
     <h2>Contents</h2>
     <ul>
       <li><a href="#Blocks_for_All_Occasions">Blocks for All Occasions</a></li>
-      <li><a href="#Intro">Introduction</a><br>
+      <li><a href="#Intro">Introduction</a></li>
+      <li><a href="#Available_Documentation">Available Documentation</a></li>
+      <li><a href="#Block_1_Computer_System">Block 1 Computer System</a></li>
+      <ul>
+        <li><a href="#Computer">Computer</a></li>
+        <li><a href="#DSKY">DSKY</a></li>
+        <li><a href="#Other_Peripherals">Other Peripherals</a><br>
+        </li>
+      </ul>
+      <li><a href="#Hardware_Architecture">Computer Hardware
+          Architecture</a></li>
+      <ul>
+        <li><a
+href="file:///home/rburkey/git/virtualagc-web/Block1.html#CPU_Architecture_Registers">CPU
+
+
+
+
+            Architecture (Registers)</a></li>
+        <li><a
+            href="file:///home/rburkey/git/virtualagc-web/Block1.html#Memory_Map">Memory
+
+
+
+
+            Map</a></li>
+        <li><a
+href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">Interrupt
+
+
+
+
+            Processing</a></li>
+        <li><a
+            href="file:///home/rburkey/git/virtualagc-web/Block1.html#io_channels">I/O
+
+
+
+
+            Channels</a></li>
+        <li><a
+href="file:///home/rburkey/git/virtualagc-web/Block1.html#UnprogrammedSequences">Unprogrammed
+
+
+
+
+            Sequences</a></li>
+      </ul>
+      <li><a href="#Software">Software</a><br>
       </li>
-      <li><a href="#The_Interpreter_vs._the_CPU">The Interpreter vs. the
-          CPU</a><br>
-      </li>
-      <li><a href="#Formatting">General Formatting Information</a></li>
-      <li><a href="#Data_Representation">Data Representation</a></li>
-      <li><a href="#CPU_Architecture_Registers">CPU Architecture
-          (Registers)</a></li>
-      <li><a href="#Memory_Map">Memory Map</a></li>
-      <li><a href="#Interrupt_Processing">Interrupt Processing</a></li>
-      <li><a href="#Instruction_Representation">Instruction
-          Representation</a></li>
-      <li><a href="#AGC4_Instruction_Set">AGC4_Instruction_Set</a></li>
-      <li><a href="#Pseudo-Operations">Pseudo-Operations</a></li>
-      <li><a href="#Interpreter_Instruction_Set">Interpreter Instruction
-          Set</a></li>
-      <li><a href="#io_channels">I/O Channels</a><br>
-      </li>
-      <li><a href="#Instruction-Set_Summary_Tables">Instruction-Set
-          Summary Tables</a></li>
-      <li><a href="#UnprogrammedSequences">Unprogrammed Sequences</a><br>
-      </li>
+      <ul>
+        <li><a href="#The_Interpreter_vs._the_CPU">The Interpreter vs.
+            the CPU's Basic Instruction Set</a><br>
+        </li>
+        <li><a href="#Formatting">Source-Code Formatting Information</a></li>
+        <li><a href="#Data_Representation">Data Representation</a></li>
+        <li><a href="#Instruction_Representation">Instruction
+            Representation</a></li>
+        <li><a href="#AGC4_Instruction_Set">AGC4_Instruction_Set</a></li>
+        <li><a href="#Pseudo-Operations">Pseudo-Operations</a></li>
+        <li><a href="#Interpreter_Instruction_Set">Interpreter
+            Instruction Set</a></li>
+        <li><a href="#Instruction-Set_Summary_Tables">Instruction-Set
+            Summary Tables</a></li>
+      </ul>
+      <li><a href="#Pulse_Sequences">Pulse Sequences</a></li>
+      <li><a href="#Available_Block_1_AGC_Software">Available Block 1
+          AGC Software</a></li>
+      <li><a href="#Available_Supporting_Software">Available Supporting
+          Software</a></li>
+      <ul>
+        <li><a
+href="file:///home/rburkey/git/virtualagc-web/Block1.html#Virtual_AGCs_Assembler_yaYUL">Virtual
+
+
+
+
+            AGC's Assembler (yaYUL)</a><br>
+        </li>
+        <li><a href="#John_Pultoraks_Assembler_and_Simulator">John
+            Pultorak's Assembler and Simulator</a><br>
+        </li>
+        <li><a href="#Virtual_AGCs_CPU_Simulator_yaAGCb1">Virtual AGC's
+            CPU Simulator (yaAGCb1)</a><br>
+        </li>
+        <li><a href="#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">Virtual
+            AGC's DSKY Simulator (yaDSKYb1)</a><br>
+        </li>
+      </ul>
     </ul>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Blocks_for_All_Occasions"></a>Blocks for All Occasions</h2>
@@ -56,19 +121,29 @@
     <ul>
       <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block
 
-          0"</a> &mdash; Earliest preliminary design of the AGC for which I
+
+
+
+
+
+
+
+          0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
         know of) describing it, so the link is simply to that document,
         rather than to a separate page.</li>
-      <li>"Block 1" &mdash; Used for the earlier designs of the Command
+      <li>"Block 1" — Used for the earlier designs of the Command
         Module, which were also referred to a Block 1 spacecraft.&nbsp;
-        Used for the unmanned Apollo 4 and Apollo 6 unmanned missions.</li>
-      <li><a href="assembly_language_manual.html">"Block 2"</a> &mdash; Used
+        Used for the unmanned AS-202 ("Apollo 3"), Apollo 4 and Apollo 6
+        unmanned missions.&nbsp; There was no such thing as a Block 1
+        Lunar Module.<br>
+      </li>
+      <li><a href="assembly_language_manual.html">"Block 2"</a> — Used
         for the later designs of the Command Module, which were also
         referred to a Block 2 spacecraft.&nbsp; Used for the (unmanned)
         Apollo 5 mission's Lunar Module, and for all manned missions.</li>
-      <li><a href="BlockIII.html">"Block 3"</a> &mdash; There was no such
+      <li><a href="BlockIII.html">"Block 3"</a> — There was no such
         thing in the Apollo program, but Hugh Blair-Smith has given us
         some ideas about what it might have looked like if there were.</li>
     </ul>
@@ -77,37 +152,194 @@
     </p>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Intro"></a>Introduction</h2>
-    This manual covers Block 1 assembly-language, as accepted by the <a
-      href="yaYUL.html"><span style="font-weight: bold;">yaYUL</span></a>
-    assembler program.&nbsp; Additionally, Block 1 interpreter-language
-    is covered.<br>
+    TBD<br>
     <br>
-    Now, descriptive material about the Block 1 AGC is not as abundant as for
-    the Block 2.&nbsp; However, the following are available, and are the
-    materials on which I've based the descriptive material on this page:<br>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Available_Documentation"></a>Available Documentation<br>
+    </h2>
+    Now, descriptive material about the Block 1 AGC is not as abundant
+    as for the Block 2.&nbsp; However, the following are available, and
+    are the materials on which I've based the descriptive material on
+    this page:<br>
     <ol>
       <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1008.pdf"
           title="Click to view document" target="_blank">R-393:&nbsp;
-          Logical Description for the Apollo Guidance Computer (AGC 4)</a>, by
-          Albert Hopkins, Ramon Alonso, and Hugh Blair-Smith, July 1966.</li>
+          Logical Description for the Apollo Guidance Computer (AGC 4)</a>,
+        by Albert Hopkins, Ramon Alonso, and Hugh Blair-Smith, July
+        1966.</li>
       <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1721.pdf"
           title="Click to view document" target="_blank">R-467:&nbsp;
           The Compleat Sunrise being a description of Program Sunrise
           (Sunrise 33 - NASA DWG# 1021102)</a>, by R. Battin, R. Crisp,
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
-      <li>John Pultorak's <a href="Pultorak.html#AssemblerSimulatorSourceCode">
-      	Block 1 simulator source code</a>.</li>
+      <li>John Pultorak's <a
+          href="Pultorak.html#AssemblerSimulatorSourceCode"> Block 1
+          simulator source code</a>.</li>
       <li>Solarium 055 <a
-          href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108.jpg">assembly</a>
+href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108.jpg">assembly</a>
         listing, December 4, 1966.</li>
-      <li>Personal communications by Hugh Blair-Smith.<br>
-      </li>
+      <li>Personal communications by Hugh Blair-Smith.</li>
+      <li>Hugh Blair-Smith's book, <i>Left Brains for the Right Stuff</i>,
+        or as he refers to it, <i>LB4TRS</i>.</li>
+    </ol>
+    <p>Of these, Instrumentation Labs document R-393 is the principle
+      documentation of the Block 1 computer system, but it is important
+      to recognize that its descriptions are not entirely
+      accurate.&nbsp; By this I mean not merely that it contains
+      mistakes — as, indeed, any documentation of a sufficiently-complex
+      system will — but that the design of the system was extended after
+      document R-393 was written.&nbsp; It's my intention to correct
+      those deficiencies here, to the extent that I am able to do so.<br>
+    </p>
+    <p>The most-glaring discrepancy is the memory map, which R-393
+      describes as being 1024 words of read/write memory and 12
+      1024-word banks of read-only memory, whereas there were in fact 28
+      banks of read-only memory by the time of the Solarium (Apollo 6
+      unmanned mission) software mentioned above. <br>
+    </p>
+    <hr size="2" width="100%">
+    <h2><a name="Block_1_Computer_System"></a>Block 1 Computer System</h2>
+    <p>TBD<br>
+    </p>
+    <h3><a name="Computer"></a>Computer</h3>
+    <p>TBD<br>
+    </p>
+    <h3><a name="DSKY"></a>DSKY</h3>
+    As in Block 2, the DSKY was the display/keyboard unit with which an
+    astronaut could have entered data into the computer and gotten feed
+    back from it.&nbsp; Block 1 DSKYs differed from Block 2 DSKYs, and
+    even from each other.&nbsp; Recall that the Command Module had two
+    DSKYs (even though it had only one AGC), one on the main control
+    panel and one on the navigation side-panel.&nbsp; The second DSKY
+    was used for entering star or other landmark location
+    sightings.&nbsp; In a Block 2 CM, the main and nav DSKYs are
+    identical.&nbsp; In a Block 1 CM, on the other hand, the main and
+    nav DSKYs were different.<br>
+    <br>
+    <div style="text-align: center;"><img style="width: 904px; height:
+        737px;" alt="Block 1 DSKYs" title="The nav-panel DSKY is on the
+        left, and the main-panel DSKY is on the right."
+        src="Block1DSKYs.jpg" height="737" width="904"><br>
+    </div>
+    <br>
+    The picture above is a crummy reproduction (mine!) of Plate 23
+    (courtesy of Raytheon and Jack Poundstone) in Eldon C. Hall's book,
+    <span style="font-style: italic;">Journey to the Moon: The History
+      of the Apollo Guidance Computer</span>, which anybody interested
+    in this website should immediately run out and purchase.&nbsp; (No,
+    I don't derive any personal benefit from you doing so.)&nbsp; The
+    photo shows Raytheon's first production DSKYs.&nbsp; On the left is
+    the nav-panel DSKY, while on the right is the main-panel
+    DSKY.&nbsp;&nbsp; (Actually, there is some question as to the use of
+    the main-panel DSKY.&nbsp; All Block 1 drawings I can find agree
+    about the nav-panel DSKY.&nbsp; But ... some drawings show the
+    main-panel DSKY as looking like a Block 2 DSKY while others are
+    similar to the photo above.)<br>
+    <br>
+    Below are some drawings from a set of<big> </big><a
+href="http://www.ibiblio.org/apollo/Documents/ApolloTrainingGuidanceAndNavigation_07-65.pdf">Apollo
+Guidance
+
+
+
+
+
+      and Navigation System training slides</a>, July 1965, which are
+    perhaps of greater practical utility, if lesser aesthetic
+    value.&nbsp; If you click the drawing of the nav-panel DSKY (on the
+    left), you can get a larger view in which the text is actually
+    legible.<br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="text-align: center;"><a
+              href="Block1DSKY-drawing2.png"><img alt=""
+                src="Block1DSKY-drawing2-small.png" style="border: 2px
+                solid ; width: 237px; height: 839px;" height="839"
+                border="0" width="237"></a></td>
+          <td style="text-align: center;"><img style="width: 587px;
+              height: 572px;" alt="" src="Block1DSKY-drawing.png"
+              height="572" width="587"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <div style="text-align: center;"><br>
+    </div>
+    <p>TBD<br>
+    </p>
+    <p></p>
+    <h3><a name="Other_Peripherals"></a>Other Peripherals</h3>
+    <p>TBD<br>
+    </p>
+    <ol>
     </ol>
     <hr style="width: 100%; height: 2px;">
-    <h2><a name="The_Interpreter_vs._the_CPU"></a>The Interpreter vs.
-      the CPU<br>
-    </h2>
+    <h2><a name="Hardware_Architecture"></a>Computer Hardware
+      Architecture</h2>
+    <h3><a name="CPU_Architecture_Registers"></a>CPU Architecture
+      (Registers) <br>
+    </h3>
+    <p>TBD<br>
+    </p>
+    <h3><a name="Memory_Map"></a>Memory Map <br>
+    </h3>
+    The Block 1 AGC memory map is far simpler than that of the Block 2
+    AGC.<br>
+    <br>
+    Memory is divided into 1024 words (15 bits each) of "erasable"
+    memory — i.e., memory which can both be read from and written to —
+    and 28 banks, each with 1024 words of read-only or "fixed" memory.<br>
+    <br>
+    Conventionally, AGC programming uses octal notation, as opposed to
+    decimal or hexadecimal notation, for most purposes, and I'll do that
+    below, but I'll always prefix an extra 0 to the front of an octal
+    number to make it easy to recognize as being octal.&nbsp; For
+    example, if you see 15, you'll know that it's 15 decimal because
+    there's no leading zero, whereas of you see 015, you'll know that
+    it's octal (=13 decimal).&nbsp; That's only a convention on this
+    page, and in program listings, expect to see everything in octal
+    with no leading zeroes.<br>
+    <br>
+    Memory is laid out as follows:<br>
+    <ul>
+      <li>Addresses 00000-01777 — erasable memory.</li>
+      <li>Addresses 02000-03777 (or theoretically, 01,06000-01,07777) —
+        Bank 1 of fixed memory.</li>
+      <li>Addresses 04000-05777 (or theoretically, 02,06000-02,07777) —
+        Bank 2 of fixed memory.</li>
+      <li>Addresses 03,06000-03,07777 — Bank 3 of fixed memory.</li>
+      <li>...</li>
+      <li>Addresses 034,06000-034,07777 — Bank 34 of fixed memory.<br>
+      </li>
+    </ul>
+    Thus, fixed memory locations can always be referred to as<br>
+    <blockquote><i>BB,AAAA</i><br>
+    </blockquote>
+    where <i>BB</i> is an octal bank number from 01 to 034, and AAAA is
+    an octal offset into that bank from 06000 to 07777.&nbsp; Only banks
+    01 and 02 have the special short addresses 02000 through 05777, and
+    they are invariably referred to in that way rather than in the <i>BB,AAAA</i>
+    form.<br>
+    <h3><a name="Interrupt_Processing"></a>Interrupt Processing <br>
+    </h3>
+    <p>TBD<br>
+    </p>
+    <h3><a name="io_channels"></a>I/O Channels</h3>
+    TBD<br>
+    <h3><a name="UnprogrammedSequences"></a>Unprogrammed Sequences</h3>
+    TBD<br>
+    <br>
+    <p> </p>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Software"></a>Software</h2>
+    <h3><a name="The_Interpreter_vs._the_CPU"></a>The Interpreter vs.
+      the CPU's Basic Instruction Set<br>
+    </h3>
     As mentioned above, the Block 1 AGC design did not end up being used
     in any moon missions, nor even in any manned missions, but if it <i>had</i>
     been used, the required software could not have been fit into the
@@ -115,6 +347,13 @@
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+
+
+
+
+
 
 
       described here</a>.)&nbsp; Consequently, as with the Block 2
@@ -140,22 +379,26 @@
     specific interpreter instruction meaning "stop interpreting and jump
     to the next location in memory".<br>
     <br>
-    Because of this intermixing, this manual describes both assembly
-    language and interpretive language.<br>
+    Because of this intermixing, both assembly language and interpretive
+    language have to be understood for effective programming of the
+    device.<br>
+    <h3><a name="Formatting"></a>Source-Code Formatting Information<br>
+    </h3>
+    The Virtual AGC project's AGC assembler program is known as <a
+      href="yaYUL.html"><b>yaYUL</b></a>.<br>
     <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Formatting"></a>General Formatting Information<br>
-    </h2>
     The format of source code accepted by <span style="font-weight:
-      bold;">yaYUL</span> differs slightly from that accepted by <span
-      style="font-weight: bold;">YUL</span>. This is partly because
-    without documentation for <span style="font-weight: bold;">YUL</span>,
-    determining the exact format required by it requires more effort
-    than I care for; but also, formatting restrictions based on strict
-    column alignment&mdash;which make a lot of sense with punch-cards&mdash;make
-    little sense now that punch-cards have gone to their final resting
-    place.&nbsp; Thus, <b>yaYUL</b> accepts a format for the Block 1
-    source code which is <i>almost</i> independent of column structure.<br>
+      bold;">yaYUL</span> differs slightly from that accepted by the
+    original <span style="font-weight: bold;">YUL</span> assembler, and
+    thus reflected in the assembly listings created by <b>YUL</b>. This
+    is partly because without documentation for <span
+      style="font-weight: bold;">YUL</span>, determining the exact
+    format required by it requires more effort than I care for; but
+    also, formatting restrictions based on strict column alignment—which
+    make a lot of sense with punch-cards—make little sense now that
+    punch-cards have gone to their final resting place.&nbsp; Thus, <b>yaYUL</b>
+    accepts a format for the Block 1 source code which is <i>almost</i>
+    independent of column structure.<br>
     <br>
     Here are the principles used in formatting Block 1 <span
       style="font-weight: bold;">yaYUL</span> source files, along with
@@ -235,68 +478,15 @@
     </ul>
     These principles are perhaps best understood by viewing actual
     source-code listings from Solarium 055.<br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Data_Representation"></a>Data Representation</h2>
+    <h3><a name="Data_Representation"></a>Data Representation </h3>
     <p>Numerical formats are identical to those for the Block 2 AGC, and
       I advise you to read <a
         href="assembly_language_manual.html#Data_Representation">the
         description of them that appears in the Block 2 discussion</a>.<br>
     </p>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="CPU_Architecture_Registers"></a>CPU Architecture
-      (Registers)</h2>
-    TBD<br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Memory_Map"></a>Memory Map</h2>
-    The Block 1 AGC memory map is far simpler than that of the Block 2
-    AGC.<br>
-    <br>
-    Memory is divided into 1024 words (15 bits each) of "erasable"
-    memory &mdash; i.e., memory which can both be read from and written to &mdash;
-    and 28 banks, each with 1024 words of read-only or "fixed" memory.<br>
-    <br>
-    Conventionally, AGC programming uses octal notation, as opposed to
-    decimal or hexadecimal notation, for most purposes, and I'll do that
-    below, but I'll always prefix an extra 0 to the front of an octal
-    number to make it easy to recognize as being octal.&nbsp; For
-    example, if you see 15, you'll know that it's 15 decimal because
-    there's no leading zero, whereas of you see 015, you'll know that
-    it's octal (=13 decimal).&nbsp; That's only a convention on this
-    page, and in program listings, expect to see everything in octal
-    with no leading zeroes.<br>
-    <br>
-    Memory is laid out as follows:<br>
-    <ul>
-      <li>Addresses 00000-01777 &mdash; erasable memory.</li>
-      <li>Addresses 02000-03777 (or theoretically, 01,06000-01,07777) &mdash;
-        Bank 1 of fixed memory.</li>
-      <li>Addresses 04000-05777 (or theoretically, 02,06000-02,07777) &mdash;
-        Bank 2 of fixed memory.</li>
-      <li>Addresses 03,06000-03,07777 &mdash; Bank 3 of fixed memory.</li>
-      <li>...</li>
-      <li>Addresses 034,06000-034,07777 &mdash; Bank 34 of fixed memory.<br>
-      </li>
-    </ul>
-    Thus, fixed memory locations can always be referred to as<br>
-    <blockquote><i>BB,AAAA</i><br>
-    </blockquote>
-    where <i>BB</i> is an octal bank number from 01 to 034, and AAAA is
-    an octal offset into that bank from 06000 to 07777.&nbsp; Only banks
-    01 and 02 have the special short addresses 02000 through 05777, and
-    they are invariably referred to in that way rather than in the <i>BB,AAAA</i>
-    form.<br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Interrupt_Processing"></a>Interrupt Processing</h2>
-    TBD<br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Instruction_Representation"></a>Instruction
-      Representation</h2>
-    <h3>Assembly-Language Instructions</h3>
+    <h3><a name="Instruction_Representation"></a>Instruction
+      Representation </h3>
+    <h4>Assembly-Language Instructions</h4>
     The instruction set is far smaller, and therefore far simpler, than
     in Block 2.&nbsp; Every assembly-language instruction occupies
     precisely one word of memory (including operand), and consists of 15
@@ -314,120 +504,10 @@
     within a 4096-word area of memory. <br>
     <br>
     TBD<br>
-    <h3>Interpretive Instructions</h3>
-    TBD<br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="AGC4_Instruction_Set"></a>AGC4 Instruction Set</h2>
-    TBD<br>
-    <h3> </h3>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Pseudo-Operations"></a>Pseudo-Operations</h2>
-    <p>The pseudo-ops are a subset of those in Block 2.&nbsp; Actually,
-      <b>yaYUL</b> supports the identical pseudo-ops for Block 1 as it
-      does for Block 2, but some of those pseudo-ops simply make no
-      sense for Block 1 and therefore will never appear in actual
-      code.&nbsp; <a
-        href="assembly_language_manual.html#Pseudo-Operations">See the
-        Block 2 description</a>.<br>
-    </p>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Interpreter_Instruction_Set"></a>Interpreter
-      Instruction Set</h2>
-    Block 1 interpreter language is superficially similar to Block 2
-    interpreter language, but is actually structured quite
-    differently.&nbsp; Moreover, it partakes of certain coding
-    conventions not present in Block 2.&nbsp; It is also missing a
-    number of interpreter commands that are present in Block 2, while it
-    has a number of commands that are not present in Block 2.<br>
-    <h3>Source Code and Encoding<br>
+    <h3><a name="AGC4_Instruction_Set"></a>AGC4 Instruction Set <br>
     </h3>
-    Interpreter source code is structured as a series of what are
-    referred to as "equations", though they are not.&nbsp; Each
-    "equation" consists of a group of commands of variable length,
-    followed by a group of operands of a variable length.<br>
-    <br>
-    There are several different forms an equation can take, and rather
-    than trying to give you a rule for them, I'll just illustrate the 4
-    possible forms they can take:<br>
-    <br>
-    <blockquote><tt><i># Pattern 1:<br>
-          OPERATOR<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          OPERAND<sub>1</sub><br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          OPERAND<sub>N<br>
-            <br>
-          </sub></i></tt><tt><i><tt><i># Pattern 2:<br>
-            </i></tt>OPERATOR</i></tt><tt><i><sub>A</sub> &nbsp;
-          OPERATOR<sub>B</sub><br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          OPERAND<sub>1</sub><br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          OPERAND<sub>N<br>
-            <br>
-          </sub></i></tt><tt><i><tt><i># Pattern 3:<br>
-            </i></tt>OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M <sub></sub><br>
-        </i></tt><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
-
-
-              OPERATOR<sub>1B<br>
-              </sub></i></tt></i></tt><tt><i>.<br>
-          .<br>
-          . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
-        </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>MA</sub>&nbsp;
-
-
-                      OPERATOR<sub>MB<br>
-                      </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; OPERAND<sub>1</sub><br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          OPERAND<sub>N<br>
-          </sub></i></tt><br>
-      <tt><i><sub><br>
-          </sub></i></tt><tt><i><tt><i># Pattern 4:<br>
-            </i></tt>OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M <br>
-        </i></tt><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
-
-
-              OPERATOR<sub>1B<br>
-              </sub></i></tt></i></tt><tt><i>.<br>
-          .<br>
-          . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
-        </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
-                      <sub><br>
-                      </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; OPERAND<sub>1</sub><br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          OPERAND<sub>N<br>
-          </sub></i></tt> </blockquote>
-    Now, each operator employs a certain number of operands, either 0 or
-    1, and you would superficially expect the number of operands in the
-    equation to add up to the number of operands required by the
-    operators.&nbsp; However, this is seldom true, and there can be
-    either more or less operands than you would expect.<br>
-    <br>
-    TBD<br>
-    <br>
-    <h3>STORE</h3>
-    <table style="text-align: left; width: 100%;" border="0"
+    <h4>STORE</h4>
+    <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
@@ -477,24 +557,406 @@
       </tbody>
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
-      bold;"></span><span style="font-weight: bold;"></span><br>
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3><a name="Pseudo-Operations"></a>Pseudo-Operations </h3>
+    <p>The pseudo-ops are a subset of those in Block 2.&nbsp; Actually,
+      <b>yaYUL</b> supports the identical pseudo-ops for Block 1 as it
+      does for Block 2, but some of those pseudo-ops simply make no
+      sense for Block 1 and therefore will never appear in actual
+      code.&nbsp; <a
+        href="assembly_language_manual.html#Pseudo-Operations">See the
+        Block 2 description</a>.<br>
+    </p>
+    <h3><a name="Interpreter_Instruction_Set"></a>Interpreter
+      Instruction Set <br>
+    </h3>
+    Block 1 interpreter language is superficially similar to Block 2
+    interpreter language, but is actually structured quite
+    differently.&nbsp; Moreover, it partakes of certain coding
+    conventions not present in Block 2.&nbsp; It is also missing a
+    number of interpreter commands that are present in Block 2, while it
+    has a number of commands that are not present in Block 2.<br>
+    <h4>Source Code and Encoding<br>
+    </h4>
+    Interpreter source code is structured as a series of what are
+    referred to as "equations", though they are not.&nbsp; Each
+    "equation" consists of a group of commands of variable length,
+    followed by a group of operands of a variable length.<br>
     <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="io_channels"></a>I/O Channels</h2>
+    There are several different forms an equation can take, and rather
+    than trying to give you a rule for them, I'll just illustrate the 4
+    possible forms they can take:<br>
+    <blockquote><tt><i># Pattern 1:<br>
+          OPERATOR<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+            <br>
+          </sub></i></tt><tt><i><tt><i># Pattern 2:<br>
+            </i></tt>OPERATOR</i></tt><tt><i><sub>A</sub> &nbsp;
+          OPERATOR<sub>B</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+            <br>
+          </sub></i></tt><tt><i><tt><i># Pattern 3:<br>
+            </i></tt>OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M <br>
+        </i></tt><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
+
+
+
+
+
+
+
+
+
+              OPERATOR<sub>1B<br>
+              </sub></i></tt></i></tt><tt><i>.<br>
+          .<br>
+          . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
+        </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>MA</sub>&nbsp;
+
+
+
+
+
+
+
+
+
+                      OPERATOR<sub>MB<br>
+                      </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+          </sub></i></tt><br>
+      <tt><i><sub><br>
+          </sub></i></tt><tt><i><tt><i># Pattern 4:<br>
+            </i></tt>OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M <br>
+        </i></tt><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
+
+
+
+
+
+
+
+
+
+              OPERATOR<sub>1B<br>
+              </sub></i></tt></i></tt><tt><i>.<br>
+          .<br>
+          . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
+        </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
+                      <sub><br>
+                      </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; OPERAND<sub>1</sub><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          OPERAND<sub>N<br>
+          </sub></i></tt> </blockquote>
+    Now, each operator employs a certain number of operands, either 0 or
+    1, and you would superficially expect the number of operands in the
+    equation to add up to the number of operands required by the
+    operators.&nbsp; However, this is seldom true, and there can be
+    either more or less operands than you would expect.<br>
+    <br>
     TBD<br>
-    <br>
-    <br>
-    <hr style="width: 100%; height: 2px;"><br>
-    <h2><a name="Instruction-Set_Summary_Tables"></a>Instruction-Set
-      Summary Tables</h2>
+    <h3><a name="Instruction-Set_Summary_Tables"></a>Instruction-Set
+      Summary Tables</h3>
     <span style="font-style: italic;"></span>TBD<br>
-    <h2><a name="UnprogrammedSequences"></a>Unprogrammed Sequences</h2>
+    <br>
+    <hr size="2" width="100%">
+    <h2><a name="Pulse_Sequences"></a>Pulse Sequences</h2>
+    <p>TBD<br>
+    </p>
+    <hr size="2" width="100%">
+    <h2><a name="Available_Block_1_AGC_Software"></a>Available Block 1
+      AGC Software</h2>
+    <p>At present, the only true Block 1 software available is:<br>
+    </p>
+    <ul>
+      <li>Solarium 055 — AGC mission software for the unmanned Apollo 6
+        mission, for which we have:</li>
+      <ul>
+        <li><a
+            href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/">Raw
+
+
+
+
+            images of the Solarium 055 assembly listing</a> once
+          belonging to AGC developer Eldon C. Hall, from 1966.</li>
+        <li><a
+href="file:///home/rburkey/git/virtualagc-web/listings/Solarium055/MAIN.agc.html">Colorized,
+
+
+
+
+            syntax-highlighted assembly listing</a>, from 2016.</li>
+        <li>Source code, <a
+            href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
+
+
+            our GitHub repository</a>.<br>
+        </li>
+      </ul>
+    </ul>
+    <p>though there are prospects for Block 1 software in the
+      future.&nbsp; See also the section on <a
+        href="#John_Pultoraks_Assembler_and_Simulator">John Pultorak's
+        assembler and simulator</a>.<br>
+    </p>
+    <hr size="2" width="100%">
+    <h2><a name="Available_Supporting_Software"></a>Available Supporting
+      Software</h2>
+    <h3><a name="Virtual_AGCs_Assembler_yaYUL"></a>Virtual AGC's
+      Assembler (yaYUL)</h3>
+    The Virtual AGC project itself also provides a Block 1 assembler,
+    and it is <a
+href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo/yaYUL.html">the
+
+
+
+
+      same <b>yaYUL</b> assembler used for Block 2 code</a>.&nbsp; The
+    only difference is that you add a command-line switch of --block1,
+    but otherwise it operates identically, and accepts the full syntax
+    of the Solarium program.<br>
+    <h3><a name="John_Pultoraks_Assembler_and_Simulator"></a>John
+      Pultorak's Assembler and Simulator</h3>
+    Preliminary to his <a
+href="file:///home/rburkey/git/virtualagc-web/Pultorak.html#John_Pultoraks_Block_I_AGC">construction
+
+
+
+
+      project for a hardware simulation of the Block 1 AGC</a>, John
+    Pultorak also developed a Block 1 AGC assembler and Block 1 AGC
+    software CPU simulator.&nbsp; Unfortunately, this software has
+    several deficiencies which make it generally of very little use
+    outside of John's project.&nbsp; This is not intended to be a
+    criticism, but merely a recognition that these programs were
+    developed for a very special purpose, not for general reusability,
+    and that their design relied very heavily, by necessity, on
+    documentation (R-393 in particular), which <a
+      href="#Available_Documentation">as has been described earlier</a>,
+    is not entirely accurate.&nbsp; Therefore, while you might enjoy
+    playing with this software, you may not be able to derive much
+    utility out of it.&nbsp; Of course, if you happen to be a software
+    developer yourself, might also enjoy fixing up the software to the
+    point where it <i>is</i> useful, in which case you should let us
+    know!<br>
+    <br>
+    With that said, John's software source code, buildable with
+    Microsoft Visual C++, is <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator.zip">available
+
+
+
+
+      from us</a>.&nbsp; Unfortunately, his source-code files only cover
+    his simulator versions through 1.15, whereas the source code for his
+    simulator 1.16 is listed in <a
+      href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
+
+
+      PDF description of it</a>, and can be extracted if you're patient
+    enough to do so.&nbsp; I know this because I have done so, though
+    unfortunately didn't think to save it for you.&nbsp; Sorry!<br>
+    <br>
+    Donna Polehn has also created <a
+      href="https://github.com/donnaware/AGC">a kind of Visual C++
+      assembler/simulator development environment</a> based on this
+    code, in so far as I understand it, which you may find
+    interesting.&nbsp; <br>
+    <br>
+    Finally, since I don't myself use Visual C++, or even Windows if I
+    can help it, John's Visual C++ source code was of no direct use to
+    me.&nbsp; I have, however, taken the steps needed to port version
+    1.16 of John's simulator to GNU gcc (g++), and it does appear to
+    work, mostly, though I can't claim to have checked it
+    thoroughly.&nbsp; Right now, you can find it <a
+href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">in
+
+
+
+
+      our GitHub repository's "block1" branch</a>.&nbsp; I have only
+    worked with it in Linux, but I expect it should probably build in
+    Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
+    ncurses installed.&nbsp; All you have to do is to descend into the
+    source-code directory and do "make" or perhaps "gmake".&nbsp; My
+    version of the program built simply by<br>
+    <blockquote><tt>cd <i>DirectoryContainingTheSource</i></tt><tt><br>
+      </tt><tt>make</tt><br>
+    </blockquote>
+    and then run simply by<br>
+    <blockquote><tt>./yaAGC-Block1</tt><br>
+    </blockquote>
+    at which point anything else that happens must be controlled by the
+    program's somewhat arcane interactive command set.&nbsp; John
+    describes the operation using this command set in <a
+      href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
+
+
+      PDF description of the simulator</a>, though I was forced to
+    replace his F1, F2, and F4 commands by other commands ('t', 'u', and
+    'v'), as well as to introduce some additional, new commands.&nbsp;
+    Use the 'm' command to get a complete menu listing.<br>
+    <br>
+    In my version, once the simulator is running, you have to do the
+    following to get the AGC program started:<br>
+    <ul>
+      <li>Use the 'l' command (that's a lower-case L, folks) to load the
+        AGC program, which is simply called "agc" (without the quotes).</li>
+      <li>Use the 'p' command to power up the system.</li>
+      <li>Use the 'r' command to do something I'm unclear about.</li>
+      <li>Use the 'w' command to set the starting address, which is 2000
+        (octal).</li>
+      <li>At this point you can use a variety of commands, such as 'e'
+        to examine memory, 'f' to display source code, 't' to supply a
+        single clock pulse (single-step), 'v' to start the processor
+        running freely, 'u' to stop it from running freely, etc.</li>
+      <li>There's a kind of built-in DSKY simulation as well, though
+        it's not visually anything like a DSKY.<br>
+      </li>
+    </ul>
+    That was the good news.&nbsp; But if you wish to actually use the
+    assembler or simulator for anything other than following his demo
+    from the PDF file, there are many caveats as well:<br>
+    <ul>
+      <li>When I say you can "single step" through the AGC program, I
+        mean that single steps through "<a href="#Pulse_Sequences">pulse
+          sequences</a>" and not through AGC assembly-language
+        instructions.&nbsp; Huh?&nbsp; Well, the "pulse sequences" were
+        a kind of microding for the CPU, with each instruction cycle
+        corresponding to 12 shorter time periods in which one or more
+        (or zero) of the microcode instructions could be executed.&nbsp;
+        Therefore, to single-step through an assembly-language
+        instruction, you actually have to single step 12 times.&nbsp;
+        Actually 15 times after power-up, because there are few extra
+        cycles at the very beginning.&nbsp; (There's a facility for
+        single-stepping instructions rather than pulse-sequences, but so
+        far I haven't figured out how to make it work.)<br>
+      </li>
+      <li>The simulator is very closely modeled on <a
+          href="#Available_Documentation">Instrumentation Labs document
+          R-393</a>, but unfortunately, as mentioned earlier, R-393 is
+        wrong in a number of respect.&nbsp; Thus basically everything
+        the simulator does with respect to <a href="#Memory_Map">the
+          memory map</a> is wrong, from the memory size, down to the
+        symbolic representation used for the addresses, even down to the
+        entry address at which code starts executing after power up.</li>
+      <li>The assembler that produces the input files for the simulator
+        accepts a syntax for the AGC code that John invented, which
+        somewhat resembles the actual syntax in a program listing like
+        Solarium, but not closely enough to use it without very
+        significantly modifying Solarium.&nbsp; Of course, as I
+        mentioned, John had no Block 1 software to use as a sample when
+        he developed his system.<br>
+      </li>
+      <li>The long and short of the latter points is that you can
+        neither assemble nor run Solarium or an other
+        previously-existing Block 1 program on the software simulation,
+        unless you are prepared to make enormous efforts to do so,
+        including changes to Solarium, to the assembler, and to the
+        simulator itself.&nbsp; In short, the only thing that the
+        assembler and simulator work conveniently with is the "Block 1"
+        source code which John has manufactured from the Block 2
+        Colossus 249 AGC program.<br>
+      </li>
+    </ul>
+    <p>It's possible that the first caveat above is merely in my g++
+      version, and for all I know, could be absent from the Visual C++
+      version.&nbsp; Moreover, theoretically, you could repair the
+      problems introduced into the simulator by R-393.&nbsp; If you then
+      recall from the <i>preceding</i> section that our own <b>yaYUL</b>
+      assembler is capable of assembly Solarium or other "normal" Block
+      1 programs, then if you had some way to convert the files created
+      by <b>yaYUL</b> into files compatible with John's Block 1
+      simulator, you might then be able to simulate Solarium using
+      John's simulator.<br>
+    </p>
+    <p>In order to run the simulator, there are two files required for
+      simulating the code of program called (say) "<i>program</i>", and
+      one that's optional for displaying source code in the debugger:<br>
+    </p>
+    <ul>
+      <li><i>program</i>_H.hex and <i>program</i>_L.hex.&nbsp; These
+        are Motorola hex-files.&nbsp; As you may recall, the AGC has
+        15-bit words, with a 16th bit containing the parity.&nbsp; Thus,
+        each location in the rope memory comprises two bytes.&nbsp; In
+        the case of John's assembler and simulator, the L or low-order
+        byte contains the least-significant 8 bits of the memory
+        location, while the H or high-order byte contains the parity bit
+        and the most-significant 7 bits of the memory location.</li>
+      <li>The optional <i>program</i>.lst file is just an assembly
+        listing of the program.&nbsp; It's format isn't terribly
+        important, except that the first thing in each line that
+        corresponds to a specific memory location is a 5 octal-digit
+        address, and the remainder of the line contains some additional
+        text whose format we don't care about (the line of source
+        code).&nbsp; These octal addresses assume a flat address space,
+        in which erasable memory is at locations 00000-01777 (octal),
+        memory bank 1 is at locations 02000-03777, bank 2 is at
+        04000-05777, 3 is at 06000-07777, 4 is at 10000-11777, and so
+        on.</li>
+    </ul>
+    <p>At the present time, I have no way to produce such files from the
+      rope file (.bin file) and assembly listing created by <b>yaYUL</b>,
+      but it doesn't sound that difficult.<br>
+    </p>
+    <h3><a name="Virtual_AGCs_CPU_Simulator_yaAGCb1"></a>Virtual AGC's
+      CPU Simulator (yaAGCb1) TBD</h3>
+    <p>TBD<br>
+    </p>
+    <h3><a name="Virtual_AGCs_DSKY_Simulator_yaDSKYb1"></a>Virtual AGC's
+      DSKY Simulator (yaDSKYb1)</h3>
     TBD<br>
     <br>
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-08-26.<br>
+          2016-09-01.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
