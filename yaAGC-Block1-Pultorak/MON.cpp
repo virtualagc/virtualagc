@@ -11,7 +11,12 @@
  */
 
 #include <stdio.h>
+#ifdef USE_NCURSES
 #include <ncurses.h>
+#else
+#define printw printf
+#define endwin()
+#endif
 
 #include "MON.h"
 #include "TPG.h"

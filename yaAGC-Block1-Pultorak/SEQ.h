@@ -269,6 +269,8 @@ public:
 class SEQ
 {
 public:
+  static int
+  anyWZ();
   static void
   execWP_GENRST();
   static void

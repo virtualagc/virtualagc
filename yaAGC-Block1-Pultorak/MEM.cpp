@@ -12,7 +12,13 @@
 #include "MEM.h"
 #include "ADR.h"
 #include "stdlib.h"
+#ifdef USE_NCURSES
 #include <ncurses.h>
+#else
+#include <stdio.h>
+#define printw printf
+#define endwin()
+#endif
 regEMEM MEM::register_EMEM[02000]; // erasable memory
 regFMEM MEM::register_FMEM[02000 * (NUMFBANK + 1)]; // fixed memory (lowest 02000 words ignored)
 unsigned MEM::MEM_DATA_BUS = 0; // data lines: memory bits 15-1

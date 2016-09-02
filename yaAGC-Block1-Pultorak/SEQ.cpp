@@ -96,6 +96,16 @@ SEQ::getControlPulses()
 //if(strcmp(buf,"") == 0) strcat(buf,"NONE");
   return buf;
 }
+int
+SEQ::anyWZ()
+{
+  for (unsigned i = 0; i < MAXPULSES && glbl_cp[i] != NO_PULSE; i++)
+    {
+      if (glbl_cp[i] == WZ)
+        return (1);
+    }
+  return (0);
+}
 void
 SEQ::execWP_ST1()
 {

@@ -106,7 +106,47 @@
  *                      the features, and so on.
  */
 
+// NCURSES vs PTHREADS.  As John originally designed this program, it
+// depended on the Windows functionality conio.h, which of course *only*
+// existed in Windows.  He needed this basically to be able to asynchronously
+// detect a keystroke.  I at first changed the implementation to use the
+// non-blocking capabilities from NCURSES.  However, the attendant difficulties
+// (such as no backspacing over typos and the inability to run the program
+// in Eclipse) were just too great.  Instead, I pulled in the simple implementation
+// (nbfgets) that I originally used in the original yaAGC, which involves a
+// pthread that reads the keyboard in a blocking fashion, but still appears
+// non-blocking to the main thread.  This has the inconvenience of having to
+// use the Enter key to terminate output, but I think that's a small price to
+// pay.  Of course, none of that stuff would persist into a mature design, since
+// it's all related to a console-based interface for debugging and controlling
+// the DSKY that's only appropriate to a very primitive program.
+#ifdef USE_NCURSES
 #include <ncurses.h>
+#define endl "\n\r"
+#define _getch() wgetch(stdscr)
+static int
+_kbhit()
+  {
+    int c;
+    c = wgetch(stdscr);
+    if (c != EOF)
+      {
+        ungetch(c);
+        return (1);
+      }
+    return (0);
+  }
+
+#else
+// Use nbfgets.c.
+#define printw printf
+#define endwin()
+void
+nbfgets_ready(void);
+char *
+nbfgets(char *Buffer, int Length);
+char userInput[256];
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,22 +176,9 @@
 #include "ISD.h"
 #include "CLK.h"
 
-using namespace std;
+#define ROPE_SIZE (02000 * (NUMFBANK + 1))
 
-#define endl "\n\r"
-#define _getch() wgetch(stdscr)
-static int
-_kbhit()
-{
-  int c;
-  c = wgetch(stdscr);
-  if (c != EOF)
-    {
-      ungetch(c);
-      return (1);
-    }
-  return (0);
-}
+using namespace std;
 
 extern bool dskyChanged;
 //-----------------------------------------------------------------------
@@ -215,6 +242,7 @@ char filename[80];
 char*
 getCommand(const char* prompt)
 {
+#ifdef USE_NCURSES
   static char s[80];
   char* sp = s;
   printw("%s", prompt);
@@ -236,6 +264,9 @@ getCommand(const char* prompt)
   *sp = '\0';
   printw("%s", "\n");
   return s;
+#else
+  return (&userInput[1]);
+#endif
 }
 bool breakpointEnab = false;
 unsigned breakpoint = 0;
@@ -363,7 +394,7 @@ loadObj(char *filename)
   return (0);
 }
 
-static uint16_t loadBuf[02000 * (NUMFBANK + 1) + 1]; // temporary buffer for assembling H,L memory data
+static uint16_t loadBuf[ROPE_SIZE + 1]; // temporary buffer for assembling H,L memory data
 int
 loadEPROM(char* fileName, bool highBytes)
 {
@@ -437,7 +468,7 @@ void
 loadMemory(char *forceFilename)
 {
   if (forceFilename != NULL)
-    strcpy (filename, forceFilename);
+    strcpy(filename, forceFilename);
   else
     strcpy(filename, getCommand("Load Memory -- enter filename: "));
   printw("%s\n", filename);
@@ -465,7 +496,7 @@ loadMemory(char *forceFilename)
           //*******************************************************************
           // EPROM is now in loadBuf; move it to AGC memory.
           // AGC fixed memory only uses NUMFBANK banks.
-          for (int address = 02000; address < 02000 * (NUMFBANK + 1); address++)
+          for (int address = 02000; address < ROPE_SIZE; address++)
             {
               // Don't load address region 0-1023; that region is allocated
               // to eraseable memory.
@@ -488,7 +519,7 @@ saveMemory(const char* filename)
       return;
     }
   char buf[100];
-  for (unsigned addr = 020; addr < 1024 * (NUMFBANK + 1); addr++)
+  for (unsigned addr = 020; addr < ROPE_SIZE; addr++)
     {
       sprintf(buf, "%06o %06o\n", addr, MEM::readMemory(addr));
       fputs(buf, fp);
@@ -502,8 +533,7 @@ examineMemory()
   strcpy(theAddress, getCommand("Examine Memory -- enter address (octal)\n: "));
   printw("%s\n", theAddress);
   unsigned address = strtol(theAddress, 0, 8);
-  for (unsigned i = address; i < address + 24 && i < 02000 * (NUMFBANK + 1);
-      i++)
+  for (unsigned i = address; i < address + 24 && i < ROPE_SIZE; i++)
     {
       int data = MEM::readMemory(i);
       printw("%06o: %05o %d\n", i, (data & 077777), 1 & (data >> 15));
@@ -607,8 +637,9 @@ showMenu()
   printw(" 'p' = POWER UP RESET\n");
   printw(" 'q' = QUIT:  quit the program.\n");
   printw(" 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position.\n");
-  printw(" 's' = STEP\n");
-  printw(" 't' = SINGLE CLOCK: Basically, step one clock pulse or one MCT.\n");
+  printw(" 's' = STEP:  not sure if this does anything.\n");
+  printw(
+      " 't' = SINGLE CLOCK: Basically, step one clock pulse or one instruction.\n");
   printw(" 'u' = MANUAL CLOCK.\n");
   printw(" 'v' = FAST CLOCK.\n");
   printw(" 'w' = WHERE: set program counter.\n");
@@ -634,33 +665,147 @@ const int colLen = 5; // number of chars in column
 const int maxLines = 24; // # of total lines to display
 const int noffset = 10; // # of lines prior to, and including, selected line
 
-/*
 // If/when I finish this code, what it will be is a buffer in memory of the
 // entire assembly listing along with an array that gives an index into the
 // line array for each possible address on the rope.  In other words, given
 // a rope address, the associated line of code and the nearby lines can be
 // instantly found.
-#define MAX_LISTING 65536
-static char *bufferedListing[MAX_LISTING] = { NULL };
-static int listingAddresses[035 * 02000] = { 0 };
+#define MAX_LISTING_LINES 65536 // Empirically, about 30,000 needed.
+static char bufferedListing[MAX_LISTING_LINES][MAX_LINE_LENGTH];
+static int listingAddresses[035 * 02000];
 static int numListingLines = 0;
 void
-bufferTheListing()
+bufferTheListing(char *filename)
 {
-  // Add the .lst extension.
-  char fname[80];
+  // Fill in the listingAddresses[] array with default values interpreted
+  // as "unused".
+  int i;
+  for (i = 0; i < ROPE_SIZE; i++)
+    listingAddresses[i] = -1;
+
+  // Add the .lst extension and open the file.
+  char fname[80], inputLine[1024];
   strcpy(fname, filename);
   strcat(fname, ".lst");
   // Open the file containing the source code listing.
   FILE* fp = fopen(fname, "r");
   if (!fp)
     {
-      printw("*** ERROR: Can't load source list file: %s\n", fname);
+      printw("Can't load source list file: %s\n", fname);
       return;
     }
 
+  // Buffer the file in memory.
+  while (NULL != fgets(inputLine, sizeof(inputLine), fp))
+    {
+      char *s;
+      if (numListingLines >= MAX_LISTING_LINES)
+        {
+          printw("Too many lines in source list.\n");
+          break;
+        }
+      s = strstr(inputLine, "\n");
+      if (*s)
+        *s = 0;
+      if (strlen(inputLine) >= MAX_LINE_LENGTH)
+        {
+          inputLine[MAX_LINE_LENGTH - 1] = 0;
+          inputLine[MAX_LINE_LENGTH - 2] = '.';
+          inputLine[MAX_LINE_LENGTH - 3] = '.';
+          inputLine[MAX_LINE_LENGTH - 4] = '.';
+        }
+      strcpy(bufferedListing[numListingLines], inputLine);
+      numListingLines++;
+    }
+  fclose(fp);
+
+  // Fill in the listingAddresses[] array with the flat addresses
+  // corresponding to the buffered lines.  Or more accurately, given
+  // a flat address in the rope, give the index into the lined buffer
+  // corresponding to that address.  -1 means unused.
+  for (i = 0; i < numListingLines; i++)
+    {
+      char c, *line;
+      bool found = false;
+      unsigned totalLine, fileLine, fileBank, fileOffset, fileFlat,
+          effectiveAddress;
+
+      line = bufferedListing[i];
+
+      // We don't know if the listing is in John Pultorak's format
+      // or yaYUL's so we check both.
+      if (line[0] >= '0' && line[0] <= '7' && line[1] >= '0' && line[1] <= '7'
+          && line[2] >= '0' && line[2] <= '7' && line[3] >= '0'
+          && line[3] <= '7' && line[4] >= '0' && line[4] <= '7'
+          && isspace(line[5]))
+        found = true;
+      else if (4
+          == sscanf(line, "%u,%u:%o%c", &totalLine, &fileLine, &fileFlat, &c)
+          && isspace(c))
+        {
+          effectiveAddress = fileFlat;
+          addressOkay: ;
+          if (effectiveAddress < ROPE_SIZE)
+            {
+              // Okay, we have an address corresponding to the line, and
+              // we know that it is within the rope.  However, we don't want
+              // to use it if the assembler has generated it for various
+              // pseudo-ops rather than for an actual instruction ... which
+              // would be legal, but just not something we want to display
+              // in a program listing.
+              char fields[5][MAX_LINE_LENGTH];
+              int j;
+              j = sscanf(line, "%s%s%s%s%s", &fields[0], &fields[1], &fields[2],
+                  &fields[3], &fields[4]);
+              if (j >= 3 && (!strcmp(fields[2], "BANK") || !strcmp(fields[2], "SETLOC")
+                  || !strcmp(fields[2], "EQUALS") || !strcmp(fields[2], "ERASE")))
+                {
+                }
+              else if (j >= 4 && (!strcmp(fields[3], "EQUALS") || !strcmp(fields[3], "ERASE")))
+                {
+                }
+              else if (j >= 5 && (!strcmp(fields[4], "=")))
+                {
+                }
+              else
+                found = true;
+            }
+        }
+      else if (5
+          == sscanf(line, "%u,%u:%o,%o%c", &totalLine, &fileLine, &fileBank,
+              &fileOffset, &c) && isspace(c))
+        {
+          effectiveAddress = fileBank * 02000 + (fileOffset % 02000);
+          goto addressOkay;
+        }
+      // So at this point, if found is true, then effectiveAddress holds the
+      // address we need to use.
+      if (found)
+        listingAddresses[effectiveAddress] = i;
+    }
 }
-*/
+
+#if 1
+void
+showSourceCode()
+{
+  unsigned effectiveAddress = MON::getPC();
+  int index = listingAddresses[effectiveAddress];
+  if (index < 0)
+    return;
+  int start = index - 5;
+  if (start < 0)
+    start = 0;
+  int end = index + 5;
+  if (end >= ROPE_SIZE)
+    end = ROPE_SIZE - 1;
+  for (int i = start; i <= end; i++)
+    {
+      printw("%c%s\n", (i == index) ? '>' : ' ', bufferedListing[i]);
+    }
+}
+
+#else
 
 void
 showSourceCode()
@@ -768,6 +913,8 @@ showSourceCode()
     }
   fclose(fp);
 }
+#endif
+
 int
 main(int argc, char* argv[])
 {
@@ -775,27 +922,29 @@ main(int argc, char* argv[])
   bool autoShowSourceCode = true;
 
   // Parse command line.
-  {
-    int i;
-    unsigned u;
-    for (i = 1; i < argc; i++)
-      {
-        if (1 == sscanf(argv[i], "--go=%o", &u))
-          whereGo = u;
-        else if (!strncmp(argv[i], "--rope=", 7))
-          initialRope = &argv[i][7];
-        else
-          {
-            printf ("Usage:\n");
-            printf ("\tyaAGC-Block1 [OPTIONS]\n");
-            printf ("Possible OPTIONS:\n");
-            printf ("--go=O    Specify starting address O in octal, default 2000.\n");
-            printf ("--rope=F  Specify a rope.\n");
-            return (1);
-          }
-      }
-  }
+    {
+      int i;
+      unsigned u;
+      for (i = 1; i < argc; i++)
+        {
+          if (1 == sscanf(argv[i], "--go=%o", &u))
+            whereGo = u;
+          else if (!strncmp(argv[i], "--rope=", 7))
+            initialRope = &argv[i][7];
+          else
+            {
+              printf("Usage:\n");
+              printf("\tyaAGC-Block1 [OPTIONS]\n");
+              printf("Possible OPTIONS:\n");
+              printf(
+                  "--go=O    Specify starting address O in octal, default 2000.\n");
+              printf("--rope=F  Specify a rope.\n");
+              return (1);
+            }
+        }
+    }
 
+#ifdef USE_NCURSES
   // Make ncurses getch() non-blocking.
   initscr();
   keypad(stdscr, TRUE);
@@ -803,6 +952,9 @@ main(int argc, char* argv[])
   noecho();
   nodelay(stdscr, TRUE);
   scrollok(stdscr, TRUE);
+#else
+  nbfgets_ready();
+#endif
   setvbuf(stdout, NULL, _IONBF, 0);
 
   CPM::readEPROM("CPM1_8.hex", CPM::EPROM1_8);
@@ -813,9 +965,13 @@ main(int argc, char* argv[])
   CPM::readEPROM("CPM41_48.hex", CPM::EPROM41_48);
   CPM::readEPROM("CPM49_56.hex", CPM::EPROM49_56);
   if (initialRope != NULL)
-    loadMemory(initialRope);
+    {
+      loadMemory(initialRope);
+      bufferTheListing(initialRope);
+    }
 
   bool singleClock = false;
+  bool anyWZ = false;
   genAGCStates();
   MON::displayAGC();
   while (1)
@@ -828,7 +984,11 @@ main(int argc, char* argv[])
       // if you're porting this to a different platform.
       if (!singleClock && !MON::FCLK)
         printw("%s", "> ");
+#ifdef USE_NCURSES
       while (!_kbhit())
+#else
+      while (NULL == nbfgets(userInput, sizeof(userInput)))
+#endif
         {
           if (MON::FCLK || singleClock)
             {
@@ -841,7 +1001,9 @@ main(int argc, char* argv[])
                 {
                   CLK::clkAGC();
                   genAGCStates();
-                  if (!MON::INST || (MON::INST && TPG::register_SG.read() == TP1))
+                  anyWZ = anyWZ || SEQ::anyWZ();
+                  if (!MON::INST
+                      || (MON::INST && TPG::register_SG.read() == TP1 && anyWZ))
                     singleClock = false;
                   genStateCntr--;
                   // Needs more work. It doesn't always stop at the
@@ -878,7 +1040,11 @@ main(int argc, char* argv[])
               MON::STEP = 0;
             }
         }
+#ifdef USE_NCURSES
       char key = _getch();
+#else
+      char key = userInput[0];
+#endif
       int newAddress = 02000;
       // Keyboard controls for front-panel:
       switch (key)
@@ -1006,8 +1172,16 @@ main(int argc, char* argv[])
           MON::displayAGC();
         break;
       case 't': // single clock pulse (when system clock off)
-        printw("%s\n", "Single clock");
-        singleClock = true;
+        if (!MON::PURST && MON::RUN)
+          {
+            printw("%s\n", "Single clock");
+            singleClock = true;
+            anyWZ = false;
+          }
+        else
+          {
+            printw("%s\n", "Must be powered-up and in a running state.");
+          }
         break;
       case 'u': // manual clock (FCLK=0)
         printw("%s\n", "Manual clock");

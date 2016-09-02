@@ -16,7 +16,13 @@
 #include "INT.h"
 #include "ADR.h"
 #include <stdlib.h>
+#ifdef USE_NCURSES
 #include <ncurses.h>
+#else
+#include <stdio.h>
+#define printw printf
+#define endwin()
+#endif
 const char* CPM::subseqString[] =
   { "TC0", "CCS0", "CCS1", "NDX0", "NDX1", "RSM3", "XCH0", "CS0", "TS0", "AD0",
       "MASK0", "MP0", "MP1", "MP3", "DV0", "DV1", "SU0", "RUPT1", "RUPT3",
