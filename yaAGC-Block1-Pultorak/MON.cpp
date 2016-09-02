@@ -41,21 +41,29 @@ unsigned MON::INST = 1; // instruction/sequence step select switch
 unsigned MON::FCLK = 0; // clock mode
 unsigned MON::SA = 0; // "standby allowed" SW; 0=NO (full power), 1=YES (low power)
 unsigned MON::SCL_ENAB = 1; // "scaler enabled" SW; 0=NO (scaler halted), 1=YES (scaler running)
+int
+MON::getPC()
+{
+  unsigned effectiveAddress = CRG::register_Z.read() - 1;
+  if (effectiveAddress >= 06000)
+    effectiveAddress = (effectiveAddress%02000) | (ADR::register_BNK.read() << 10);
+  return (effectiveAddress);
+}
 void
 MON::displayAGC()
 {
-  unsigned effectiveAddress = ADR::getEffectiveAddress();
+  unsigned pc = getPC();
   char addressString[32];
-  if (effectiveAddress < 06000)
-    sprintf (addressString, "%04o", effectiveAddress);
+  if (pc < 06000)
+    sprintf (addressString, "%04o", pc);
   else
-    sprintf (addressString, "%02o,%04o", effectiveAddress/02000, (effectiveAddress%02000)+06000);
+    sprintf (addressString, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
   printw("%s",
       "BLOCK 1 (" __DATE__ ") SIMULATOR 1.16g-0.5 -------------------------------\n");
-  printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%06o PC:%s\n",
+  printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%06o PC:%s flat:%05o\n",
       TPG::tpTypestring[TPG::register_SG.read()], SCL::register_F17.read(),
       SCL::register_F13.read(), SCL::register_F10.read(),
-      SCL::register_SCL.read(), addressString);
+      SCL::register_SCL.read(), addressString, pc);
   printw(" STA:%01o STB:%01o BR1:%01o BR2:%01o SNI:%01o CI:%01o LOOPCTR:%01o\n",
       SEQ::register_STA.read(), SEQ::register_STB.read(),
       SEQ::register_BR1.read(), SEQ::register_BR2.read(),

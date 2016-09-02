@@ -598,17 +598,17 @@ showMenu()
   printw(" 'c' = TOGGLE SCALER: (for automatically generating F13 and F17.\n");
   printw(" 'd' = DISPLAY: refreshes current register display.\n");
   printw(" 'e' = EXAMINE: examine contents of memory.\n");
-  printw(" 'f' = DEBUG: displays current line of code.\n");
+  printw(" 'f' = DEBUG: automatically display source code.\n");
   printw(" 'h' = RESET.\n");
   printw(" 'i' = INTERRUPT: generates an AGC interrupt, 1-5.\n");
   printw(" 'l' = LOAD:  load rope contents into memory\n");
   printw(" 'm' = MENU:  show this menu of commands.\n");
-  printw(" 'n' = INST:  toggle stepping by instruction vs pulse-sequence\n");
+  printw(" 'n' = INST:  toggle stepping by MCT vs pulse-sequence\n");
   printw(" 'p' = POWER UP RESET\n");
   printw(" 'q' = QUIT:  quit the program.\n");
   printw(" 'r' = RUN:  toggle RUN/HALT switch upward to the RUN position.\n");
   printw(" 's' = STEP\n");
-  printw(" 't' = SINGLE CLOCK.\n");
+  printw(" 't' = SINGLE CLOCK: Basically, step one clock pulse or one MCT.\n");
   printw(" 'u' = MANUAL CLOCK.\n");
   printw(" 'v' = FAST CLOCK.\n");
   printw(" 'w' = WHERE: set program counter.\n");
@@ -628,11 +628,40 @@ showMenu()
   printw("    'g' = KEY RELEASE.\n");
   printw("    'j' = ENTER KEY.\n");
 }
-#define MAX_LINE_LENGTH 512
+#define MAX_LINE_LENGTH 132
 const int startCol = 0; // columns are numbered 0-n
 const int colLen = 5; // number of chars in column
 const int maxLines = 24; // # of total lines to display
 const int noffset = 10; // # of lines prior to, and including, selected line
+
+/*
+// If/when I finish this code, what it will be is a buffer in memory of the
+// entire assembly listing along with an array that gives an index into the
+// line array for each possible address on the rope.  In other words, given
+// a rope address, the associated line of code and the nearby lines can be
+// instantly found.
+#define MAX_LISTING 65536
+static char *bufferedListing[MAX_LISTING] = { NULL };
+static int listingAddresses[035 * 02000] = { 0 };
+static int numListingLines = 0;
+void
+bufferTheListing()
+{
+  // Add the .lst extension.
+  char fname[80];
+  strcpy(fname, filename);
+  strcat(fname, ".lst");
+  // Open the file containing the source code listing.
+  FILE* fp = fopen(fname, "r");
+  if (!fp)
+    {
+      printw("*** ERROR: Can't load source list file: %s\n", fname);
+      return;
+    }
+
+}
+*/
+
 void
 showSourceCode()
 {
@@ -644,7 +673,6 @@ showSourceCode()
   FILE* fp = fopen(fname, "r");
   if (!fp)
     {
-      perror("fopen failed:");
       printw("*** ERROR: Can't load source list file: %s\n", fname);
       return;
     }
@@ -653,7 +681,7 @@ showSourceCode()
   // The address we want is the current effective address is the
   // S and bank registers.
   char CADR[colLen + 1];
-  unsigned effectiveAddress = ADR::getEffectiveAddress(), bank, offset;
+  unsigned effectiveAddress = MON::getPC(), bank, offset;
   offset = effectiveAddress % 02000;
   bank = effectiveAddress / 02000;
   sprintf(CADR, "%05o", effectiveAddress);
@@ -663,7 +691,7 @@ showSourceCode()
     foffset[i] = 0;
   bool foundit = false;
   int lineCount = 0;
-  char s[MAX_LINE_LENGTH];
+  char s[512];
   char valString[20];
   char out[MAX_LINE_LENGTH];
   long whereFound = 0, whereNow = 0;
@@ -676,7 +704,7 @@ showSourceCode()
           op = (op + 1) % noffset;
         }
       // Read a line of the source code list file.
-      if (fgets(s, MAX_LINE_LENGTH, fp))
+      if (fgets(s, sizeof(s), fp))
         {
           // Get the address (CADR) from the line.
           strncpy(valString, s + startCol, colLen);
@@ -690,6 +718,9 @@ showSourceCode()
                 printw("%s", " ");
               // truncate line so it fits in 80 col display
               strncpy(out, s, MAX_LINE_LENGTH - 1);
+              out[MAX_LINE_LENGTH - 5] = '.';
+              out[MAX_LINE_LENGTH - 4] = '.';
+              out[MAX_LINE_LENGTH - 3] = '.';
               out[MAX_LINE_LENGTH - 2] = '\n';
               out[MAX_LINE_LENGTH - 1] = '\0';
               printw("%s", out);
@@ -741,6 +772,8 @@ int
 main(int argc, char* argv[])
 {
   char *initialRope = NULL;
+  bool autoShowSourceCode = true;
+
   // Parse command line.
   {
     int i;
@@ -833,6 +866,8 @@ main(int argc, char* argv[])
                 }
               while ((MON::FCLK || singleClock) && MON::RUN && genStateCntr > 0);
               updateAGCDisplay();
+              if (autoShowSourceCode)
+                showSourceCode();
               if (!MON::FCLK)
                 printw("%s", "> ");
             }
@@ -919,7 +954,9 @@ main(int argc, char* argv[])
         examineMemory();
         break;
       case 'f':
-        showSourceCode();
+        autoShowSourceCode = !autoShowSourceCode;
+        if (autoShowSourceCode)
+          showSourceCode();
         break;
       case 'g':
         KBD::keypress(KEYIN_KEY_RELEASE);

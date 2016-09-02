@@ -252,6 +252,7 @@ CPM::controlPulseMatrix()
       | (SEQ::register_SQ.read() << 8) | (SEQ::register_STB.read() << 6)
       | (TPG::register_SG.read() << 2) | (SEQ::register_BR1.read() << 1)
       | SEQ::register_BR2.read();
+  //printw("CPM_A_address = %05o\n", CPM_A_address);
   // Construct address into CPM-A control pulse ROM:
   // Address bits (bit 1 is LSB)
   // 1: register BR2
