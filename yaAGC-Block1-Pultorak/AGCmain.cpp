@@ -478,7 +478,7 @@ loadMemory(char *forceFilename)
   // filename_L.hex (Motorola hex files similar to filename.obj).
   if (loadYul(filename))
     {
-      printw("Could not load %s.bin ... falling back on %s.obj.\n", filename);
+      printw("Could not load %s.bin ... falling back on %s.obj.\n", filename, filename);
       if (loadObj(filename))
         {
           printw(
@@ -755,8 +755,8 @@ bufferTheListing(char *filename)
               // in a program listing.
               char fields[5][MAX_LINE_LENGTH];
               int j;
-              j = sscanf(line, "%s%s%s%s%s", &fields[0], &fields[1], &fields[2],
-                  &fields[3], &fields[4]);
+              j = sscanf(line, "%s%s%s%s%s", fields[0], fields[1], fields[2],
+                  fields[3], fields[4]);
               if (j >= 3 && (!strcmp(fields[2], "BANK") || !strcmp(fields[2], "SETLOC")
                   || !strcmp(fields[2], "EQUALS") || !strcmp(fields[2], "ERASE")))
                 {

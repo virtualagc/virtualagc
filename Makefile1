@@ -1,0 +1,15 @@
+#!/usr/bin/make
+# This is just a temporary makefile for the block1 branch, until
+# that's merged back in to the main branch.  I don't want to 
+# call it "Makefile", so I'm calling it "Makefile1".
+
+.PHONY: all
+all:
+	make -C yaAGC-Block1-Pultorak all
+	make -C yaAGCb1 all
+
+.PHONY: clean
+clean:
+	make -C yaAGC-Block1-Pultorak clean
+	make -C yaAGCb1 clean
+

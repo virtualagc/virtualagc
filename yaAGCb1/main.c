@@ -96,12 +96,18 @@ main(int argc, char *argv[])
   regZ= 02030; // Starting address.
   agc.startTimeNanoseconds = getTimeNanoseconds();
   agc.instructionCountDown = startState; // Set either 0 (paused) or -1 (free running) at the start.
-  if (!agc.instructionCountDown)
-    agc.startOfPause = agc.startTimeNanoseconds;
 
   // Run the virtual AGC.
-  printf("> "); // Visible prompt for user input (but that happens in the background, so don't wait).
-  fflush(stdout); // Make sure the prompt gets printed.
+  if (agc.instructionCountDown == 0)
+    {
+      agc.startOfPause = agc.startTimeNanoseconds;
+      processConsoleDebuggingCommand(NULL);
+    }
+  else
+    {
+      printf("> "); // Visible prompt for user input (but that happens in the background, so don't wait).
+      fflush(stdout); // Make sure the prompt gets printed.
+    }
   while (1) // Runs forever.
     {
       sleepNanoseconds(BILLION / 10); // Sleep 0.1 seconds, so as not to peg the CPU usage.
@@ -114,7 +120,14 @@ main(int argc, char *argv[])
         {
           executeOneInstruction();
           if (agc.instructionCountDown > 0)
-            agc.instructionCountDown--;
+            {
+              agc.instructionCountDown--;
+              if (agc.instructionCountDown == 0)
+                {
+                  agc.startOfPause = getTimeNanoseconds();
+                  processConsoleDebuggingCommand(NULL);
+                }
+            }
         }
 
       // Has the user entered something at the keyboard?  There's a background thread checking
@@ -122,14 +135,14 @@ main(int argc, char *argv[])
       // input, and then proceed with the simulation.
       if (NULL != nbfgets(command, sizeof(command)))
         {
+          int discardCommand;
+          discardCommand = agc.instructionCountDown;
           if (agc.instructionCountDown) // Not already paused?
             agc.startOfPause = getTimeNanoseconds();
           agc.instructionCountDown = 0; // Pause now!
-          processConsoleDebuggingCommand(command, agc.startOfPause);
+          processConsoleDebuggingCommand((discardCommand ? NULL : command));
           if (agc.instructionCountDown) // Get out of pause mode?
             agc.pausedNanoseconds += getTimeNanoseconds() - agc.startOfPause;
-          printf("> "); // Re-prompt.
-          fflush(stdout);
         }
     }
 

@@ -164,7 +164,7 @@ char *
 nbfgets(char *Buffer, int Length);
 
 void
-processConsoleDebuggingCommand(char *command, int64_t currentTime);
+processConsoleDebuggingCommand(char *command);
 
 //--------------------------------------------------------------------------
 // Stuff related to the loaded rope-file.

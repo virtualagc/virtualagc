@@ -41,7 +41,51 @@
 void
 executeOneInstruction (void)
 {
-  agc.countMCT += 2;
+  uint16_t flatAddress, instruction, operand, dummy;
+
+  flatAddress = (regZ < 06000) ? regZ : flatten(regBank, regZ);
   regZ = (regZ & ~01777) + ((regZ + 1) & 01777);
+  instruction = agc.memory[flatAddress];
+  operand = instruction & 007777;
+
+  switch (instruction & 070000)
+  {
+  case 000000: // TC
+    agc.countMCT += 1;
+    regZ = instruction;
+    break;
+  case 030000:
+    agc.countMCT += 2;
+    if (operand < 02000) // XCH
+      {
+        dummy = regA;
+        regA = agc.memory[operand];
+        agc.memory[operand] = dummy;
+      }
+    else  // CAF
+      {
+        if (operand < 06000)
+          regA = agc.memory[operand];
+        else
+          regA = agc.memory[flatten(regBank, operand)];
+      }
+    break;
+  case 050000:
+    agc.countMCT += 2;
+    if (operand < 02000) // TS
+      {
+        if (&agc.memory[operand] == &regBank)
+          agc.memory[operand] = regA & 037;
+        else
+          agc.memory[operand] = regA;
+      }
+    else  // ???
+      {
+      }
+    break;
+  default:
+    agc.countMCT += 2;
+    break;
+  }
 
 }
