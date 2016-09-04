@@ -104,6 +104,9 @@
  * Additional mods:
  * 2016-09-02 RSB       Lots of adaptations related to using g++, fixing some of
  *                      the features, and so on.
+ * 2016-09-04 RSB       On some computers (mine at home but not not some others
+ *                      I've tried, there was a lockup after the first command
+ *                      was read.  Fixed in nbfgets.cpp.
  */
 
 // NCURSES vs PTHREADS.  As John originally designed this program, it
@@ -141,8 +144,6 @@ _kbhit()
 // Use nbfgets.c.
 #define printw printf
 #define endwin()
-void
-nbfgets_ready(void);
 char *
 nbfgets(char *Buffer, int Length);
 char userInput[256];
@@ -952,8 +953,6 @@ main(int argc, char* argv[])
   noecho();
   nodelay(stdscr, TRUE);
   scrollok(stdscr, TRUE);
-#else
-  nbfgets_ready();
 #endif
   setvbuf(stdout, NULL, _IONBF, 0);
 

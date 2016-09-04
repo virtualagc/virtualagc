@@ -65,6 +65,20 @@
  *                              simplicity for myself at this exact instant in
  *                              time.  The original stuff still exists in yaAGC
  *                              and could be substituted if desired.
+ *              2016-09-04 RSB  On some computers (mine at home but not not some others
+ *                              I've tried, there was a lockup after the first command
+ *                              was read.  That's weird, because it has always worked
+ *                              for all other Virtual AGC applications.  Perhaps
+ *                              it's because of C++?  I don't know.  In any case,
+ *                              it was apparently a race problem in which nbfgets()
+ *                              could acknowledge that it had used the input string
+ *                              before nbfgetsThreadFunction() started looking for the
+ *                              acknowledgement.  I replaced the seemingly-clever
+ *                              pthreads stuff I had been using for that with a simple
+ *                              loop that just keep checking the value of a status
+ *                              variable (nbfgetsReady) that was already conveying the
+ *                              necessary info anyway.  I can't think why that wasn't
+ *                              just being done from the start!
  */
 
 #include <pthread.h>
@@ -108,27 +122,25 @@ nbfgetsThreadFunction(void *Arg)
       nbfgetsReady = 1;
 
       // Go to sleep until the string has been processed.
-      pthread_mutex_lock(&nbfgetsMutex);
-      if (pthread_cond_wait(&nbfgetsCond, &nbfgetsMutex) != 0)
+      fprintf(stderr, "Waiting lock\n"); fflush(stderr);
+      while (nbfgetsReady)
         {
-          fputs("pthread error\n", stderr);
+#ifdef WIN32
+          Sleep (1);
+#else
+          struct timespec req, rem;
+          req.tv_sec = 0;
+          req.tv_nsec = 1000000;
+          nanosleep(&req, &rem);
+#endif // WIN32
+          continue;
         }
-      pthread_mutex_unlock(&nbfgetsMutex);
+      fprintf(stderr, "Unlocked\n"); fflush(stderr);
     }
   // This function doesn't actually return, but I've
   // put in the following line to avoid a compiler
   // warning in some compiler versions.
   return (NULL);
-}
-
-// Signals to the thread reading in the input from stdin to actually go
-// ahead and read.
-void
-nbfgets_ready(void)
-{
-  pthread_mutex_lock(&nbfgetsMutex);
-  pthread_cond_broadcast(&nbfgetsCond);
-  pthread_mutex_unlock(&nbfgetsMutex);
 }
 
 // Returns NULL until a string is ready.  The string is always fetched from
@@ -159,8 +171,6 @@ nbfgets(char *Buffer, int Length)
   strncpy(Buffer, nbfgetsBuffer, Length);
   Buffer[Length] = 0;		// Make sure nul-terminated.
   nbfgetsReady = 0;
-  // Tell the other thread to wake up and get another string.
-  pthread_cond_broadcast(&nbfgetsCond);
-  return (Buffer);
+return (Buffer);
 }
 
