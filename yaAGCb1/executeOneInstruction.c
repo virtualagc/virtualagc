@@ -33,6 +33,7 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-03 RSB  Wrote.
+ *              2016-09-04 RSB  Fixed a bug in CCS decrementing.
  */
 
 #include <stdio.h>
@@ -75,6 +76,19 @@ uint16_t
 fixUcForWriting(uint16_t valueFromAthroughLP)
 {
   return (valueFromAthroughLP & 037777) | ((valueFromAthroughLP & 0100000) >> 1);
+}
+
+int
+incTimerCheckOverflow (uint16_t *timer)
+{
+  agc.countMCT += 1;
+  (*timer) += 1;
+  if (*timer == 040000)
+    {
+      *timer = 0;
+      return (1);
+    }
+  return (0);
 }
 
 void
@@ -123,11 +137,20 @@ executeOneInstruction(void)
   // Now execute the stuff specific to the opcode.
   if (opcode == 000000) /* TC */
     {
+      uint16_t oldZ;
       // Recall that Q, Z, and the instruction we generated above are
-      // correctly set up vis-a-vis the 16th bit.
-      regQ= regZ;
-      regZ= instruction;
+      // correctly set up vis-a-vis the 16th bit.  The conditional is to
+      // prevent Q from being overwritten in case the instruction is "TC Q"
+      // ("RETURN"). This is a special case described on p. 3-9 of R-393.
+      // R-393 says that "TC Q" takes 2 MCT; Pultorak says 1 MCT; I believe
+      // Pultorak.
       numMCT = 1;
+      if (instruction != 1)
+        {
+          regQ = regZ;
+          numMCT = 1;
+        }
+      regZ= instruction;
     }
   else if (opcode == 010000) /* CCS */
     {
@@ -143,8 +166,8 @@ executeOneInstruction(void)
           else if (K == 077777) incrementZ(3); // -0
           else incrementZ(2); // < 0
           // Compute the "diminished absolute value" of c(K).
-          if (0 != (K & 040000)) K = -(~K); // Absolute value.
-          if (K > 1)
+          if (0 != (K & 040000)) K = (~K) & 037777; // Absolute value.
+          if (K >= 1)
             K--;
           regA = K;
         }
@@ -240,5 +263,29 @@ executeOneInstruction(void)
     }
 
   agc.countMCT += numMCT;
+
+  /*
+   * Update regTIME1 and regTIME2.  When TIME1
+   * overflows it increments TIME2.  TIME1 counts up every 10 ms.,
+   * i.e., every 1024000/12/100 MCT = 2560/3 MCT.  The starting count is
+   * set to half of this, for no particular reason.
+   */
+  {
+// I think Pultorak's simulator is confused about this and counts up too fast,
+// so for now I try to match him. until I figure that out.  Set PULTORAK 1
+// for the correct timing, I think.
+#define PULTORAK 10
+    static int nextTimerIncrement = 1280;
+    int overflow = 0;
+    if (agc.countMCT * 3 * PULTORAK > nextTimerIncrement)
+      {
+        nextTimerIncrement += 2560;
+        if (incTimerCheckOverflow (&ctrTIME1))
+          incTimerCheckOverflow (&ctrTIME2);
+        incTimerCheckOverflow (&ctrTIME3);
+        incTimerCheckOverflow (&ctrTIME4);
+      }
+  }
+
 }
 

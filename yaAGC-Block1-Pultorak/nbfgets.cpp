@@ -122,7 +122,6 @@ nbfgetsThreadFunction(void *Arg)
       nbfgetsReady = 1;
 
       // Go to sleep until the string has been processed.
-      fprintf(stderr, "Waiting lock\n"); fflush(stderr);
       while (nbfgetsReady)
         {
 #ifdef WIN32
@@ -135,7 +134,6 @@ nbfgetsThreadFunction(void *Arg)
 #endif // WIN32
           continue;
         }
-      fprintf(stderr, "Unlocked\n"); fflush(stderr);
     }
   // This function doesn't actually return, but I've
   // put in the following line to avoid a compiler

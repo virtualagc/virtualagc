@@ -104,9 +104,14 @@
  * Additional mods:
  * 2016-09-02 RSB       Lots of adaptations related to using g++, fixing some of
  *                      the features, and so on.
- * 2016-09-04 RSB       On some computers (mine at home but not not some others
+ * 2016-09-04 RSB       On some computers (mine at home but not some others
  *                      I've tried, there was a lockup after the first command
- *                      was read.  Fixed in nbfgets.cpp.
+ *                      was read.  Fixed it in nbfgets.cpp.
+ *                      Also fixed that fact that single-stepping ('t') was stopping
+ *                      at the beginning of the 2nd MCT of a CCS, rather than after
+ *                      the CCS was finished.  Added a primitive logging function
+ *                      to trace the AGC program's execution, so as to compare on
+ *                      a cycle-by-cycle basis against yaAGCb1.
  */
 
 // NCURSES vs PTHREADS.  As John originally designed this program, it
@@ -178,6 +183,7 @@ char userInput[256];
 #include "CLK.h"
 
 #define ROPE_SIZE (02000 * (NUMFBANK + 1))
+FILE *logFile = NULL;
 
 using namespace std;
 
@@ -233,7 +239,6 @@ genAGCStates()
   SCL::doexecWP_F13();
   SCL::doexecWP_F10();
   TPG::doexecWP_TPG();
-
 }
 //-----------------------------------------------------------------------
 // SIMULATION LOGIC
@@ -479,7 +484,8 @@ loadMemory(char *forceFilename)
   // filename_L.hex (Motorola hex files similar to filename.obj).
   if (loadYul(filename))
     {
-      printw("Could not load %s.bin ... falling back on %s.obj.\n", filename, filename);
+      printw("Could not load %s.bin ... falling back on %s.obj.\n", filename,
+          filename);
       if (loadObj(filename))
         {
           printw(
@@ -758,11 +764,15 @@ bufferTheListing(char *filename)
               int j;
               j = sscanf(line, "%s%s%s%s%s", fields[0], fields[1], fields[2],
                   fields[3], fields[4]);
-              if (j >= 3 && (!strcmp(fields[2], "BANK") || !strcmp(fields[2], "SETLOC")
-                  || !strcmp(fields[2], "EQUALS") || !strcmp(fields[2], "ERASE")))
+              if (j >= 3
+                  && (!strcmp(fields[2], "BANK") || !strcmp(fields[2], "SETLOC")
+                      || !strcmp(fields[2], "EQUALS")
+                      || !strcmp(fields[2], "ERASE")))
                 {
                 }
-              else if (j >= 4 && (!strcmp(fields[3], "EQUALS") || !strcmp(fields[3], "ERASE")))
+              else if (j >= 4
+                  && (!strcmp(fields[3], "EQUALS")
+                      || !strcmp(fields[3], "ERASE")))
                 {
                 }
               else if (j >= 5 && (!strcmp(fields[4], "=")))
@@ -786,7 +796,6 @@ bufferTheListing(char *filename)
     }
 }
 
-#if 1
 void
 showSourceCode()
 {
@@ -806,121 +815,12 @@ showSourceCode()
     }
 }
 
-#else
-
-void
-showSourceCode()
-{
-  // Add the .lst extension.
-  char fname[80];
-  strcpy(fname, filename);
-  strcat(fname, ".lst");
-  // Open the file containing the source code listing.
-  FILE* fp = fopen(fname, "r");
-  if (!fp)
-    {
-      printw("*** ERROR: Can't load source list file: %s\n", fname);
-      return;
-    }
-  printw("%s", "\n");
-  // Get the address of the source code line to display.
-  // The address we want is the current effective address is the
-  // S and bank registers.
-  char CADR[colLen + 1];
-  unsigned effectiveAddress = MON::getPC(), bank, offset;
-  offset = effectiveAddress % 02000;
-  bank = effectiveAddress / 02000;
-  sprintf(CADR, "%05o", effectiveAddress);
-  int op = 0; // offset index
-  long foffset[noffset];
-  for (int i = 0; i < noffset; i++)
-    foffset[i] = 0;
-  bool foundit = false;
-  int lineCount = 0;
-  char s[512];
-  char valString[20];
-  char out[MAX_LINE_LENGTH];
-  long whereFound = 0, whereNow = 0;
-  while (!feof(fp))
-    {
-      whereNow = ftell(fp);
-      if (!foundit)
-        {
-          foffset[op] = whereFound = whereNow;
-          op = (op + 1) % noffset;
-        }
-      // Read a line of the source code list file.
-      if (fgets(s, sizeof(s), fp))
-        {
-          // Get the address (CADR) from the line.
-          strncpy(valString, s + startCol, colLen);
-          valString[colLen] = '\0';
-          // 'foundit' is true after we have found the desired line.
-          if (foundit)
-            {
-              if (whereNow == whereFound)
-                printw("%s", ">");
-              else
-                printw("%s", " ");
-              // truncate line so it fits in 80 col display
-              strncpy(out, s, MAX_LINE_LENGTH - 1);
-              out[MAX_LINE_LENGTH - 5] = '.';
-              out[MAX_LINE_LENGTH - 4] = '.';
-              out[MAX_LINE_LENGTH - 3] = '.';
-              out[MAX_LINE_LENGTH - 2] = '\n';
-              out[MAX_LINE_LENGTH - 1] = '\0';
-              printw("%s", out);
-              lineCount++;
-              if (lineCount >= maxLines)
-                break;
-            }
-          else
-            {
-              int found = 0;
-              unsigned totalLine, fileLine, fileBank, fileOffset, fileFlat;
-              char c;
-
-              // We don't know if the listing is in John Pultorak's format
-              // or yaYUL's so we check both.
-              if (!strcmp(valString, CADR) && isspace(s[colLen]))
-                found = 1; // Pultorak!
-              if (!found
-                  && 4
-                      == sscanf(s, "%u,%u:%o%c", &totalLine, &fileLine,
-                          &fileFlat, &c) && isspace(c))
-                {
-                  if (effectiveAddress < 06000 && fileFlat == effectiveAddress)
-                    found = 1;
-                }
-              if (!found
-                  && 5
-                      == sscanf(s, "%u,%u:%o,%o%c", &totalLine, &fileLine,
-                          &fileBank, &fileOffset, &c) && isspace(c))
-                {
-                  if (bank == fileBank && offset + 06000 == fileOffset)
-                    found = 1;
-                }
-
-              if (found)
-                {
-                  // Reposition the file pointer back several lines so
-                  // we can see the code that preceeds the desired
-                  // line, too.
-                  foundit = true;
-                  fseek(fp, foffset[op], 0);
-                }
-            }
-        }
-    }
-  fclose(fp);
-}
-#endif
-
 int
 main(int argc, char* argv[])
 {
   char *initialRope = NULL;
   bool autoShowSourceCode = true;
+  int stepCount = 0;
 
   // Parse command line.
     {
@@ -932,14 +832,21 @@ main(int argc, char* argv[])
             whereGo = u;
           else if (!strncmp(argv[i], "--rope=", 7))
             initialRope = &argv[i][7];
+          else if (!strncmp(argv[i], "--log=", 6))
+            {
+              logFile = fopen(&argv[i][6], "w");
+              if (logFile == NULL)
+                printw("Cannot open log file %s\n", &argv[i][6]);
+            }
           else
             {
               printf("Usage:\n");
               printf("\tyaAGC-Block1 [OPTIONS]\n");
               printf("Possible OPTIONS:\n");
               printf(
-                  "--go=O    Specify starting address O in octal, default 2000.\n");
+                  "--go=O    Specify starting address (octal), default 2030.\n");
               printf("--rope=F  Specify a rope.\n");
+              printf("--log=F   Specify a log file (default none).\n");
               return (1);
             }
         }
@@ -1002,8 +909,11 @@ main(int argc, char* argv[])
                   genAGCStates();
                   anyWZ = anyWZ || SEQ::anyWZ();
                   if (!MON::INST
-                      || (MON::INST && TPG::register_SG.read() == TP1 && anyWZ))
-                    singleClock = false;
+                      || (MON::INST && TPG::register_SG.read() == TP1 && anyWZ
+                          && SEQ::glbl_subseq != CCS1))
+                    {
+                      singleClock = false;
+                    }
                   genStateCntr--;
                   // Needs more work. It doesn't always stop at the
                   // right location and sometimes stops at the
@@ -1026,11 +936,21 @@ main(int argc, char* argv[])
                     }
                 }
               while ((MON::FCLK || singleClock) && MON::RUN && genStateCntr > 0);
-              updateAGCDisplay();
-              if (autoShowSourceCode)
-                showSourceCode();
-              if (!MON::FCLK)
-                printw("%s", "> ");
+              if (stepCount <= 1)
+                {
+                  updateAGCDisplay();
+                  if (autoShowSourceCode)
+                    showSourceCode();
+                  if (logFile != NULL)
+                    MON::logAGC(logFile);
+                  if (!MON::FCLK)
+                    printw("%s", "> ");
+                }
+              else
+                {
+                  if (logFile != NULL)
+                    MON::logAGC(logFile);
+                }
             }
           // for convenience, clear the single step switch on TP1; in the
           // hardware AGC, this happens when the switch is released
@@ -1038,13 +958,24 @@ main(int argc, char* argv[])
             {
               MON::STEP = 0;
             }
+          if (stepCount > 0)
+            {
+              stepCount--;
+              if (stepCount > 0)
+                {
+                  singleClock = true;
+                  anyWZ = false;
+                }
+            }
+
         }
+      stepCount = 0;
 #ifdef USE_NCURSES
       char key = _getch();
 #else
       char key = userInput[0];
 #endif
-      int newAddress = 02000;
+      int newAddress = 02030;
       // Keyboard controls for front-panel:
       switch (key)
         {
@@ -1157,6 +1088,8 @@ main(int argc, char* argv[])
       case 'q':
         printw("%s\n", "QUIT...");
         endwin();
+        if (logFile != NULL)
+          fclose(logFile);
         exit(0);
       case 'r':
         MON::RUN = (MON::RUN + 1) % 2;
@@ -1173,7 +1106,11 @@ main(int argc, char* argv[])
       case 't': // single clock pulse (when system clock off)
         if (!MON::PURST && MON::RUN)
           {
-            printw("%s\n", "Single clock");
+            stepCount = atoi(&userInput[1]);
+            if (stepCount == 0)
+              printw("%s\n", "Single clock");
+            else
+              printf("%d clocks\n", stepCount);
             singleClock = true;
             anyWZ = false;
           }
@@ -1201,7 +1138,7 @@ main(int argc, char* argv[])
               getCommand("New address (octal, flat address space) [2000]: "));
           newAddress = strtol(b, 0, 8);
           if (newAddress == 0)
-            newAddress = 02000;
+            newAddress = 02030;
         }
         if (newAddress < 06000)
           {

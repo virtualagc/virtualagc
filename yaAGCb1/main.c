@@ -33,6 +33,7 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-03 RSB  Began.
+ *              2016-09-04 RSB  Added --log.
  */
 
 #include <stdio.h>
@@ -45,6 +46,7 @@ main(int argc, char *argv[])
   int i, j, startingAddress = 02030, startState = 0;
   char *ropeFile = "Solarium055.bin", *listingFile = "Solarium055.lst";
   char command[128];
+  FILE *logFile = NULL;
 
   // Parse the command line.
   for (i = 1; i < argc; i++)
@@ -57,6 +59,11 @@ main(int argc, char *argv[])
         startingAddress = j;
       else if (!strcmp(argv[i], "--run"))
         startState = -1;
+      else if (!strncmp(argv[i], "--log=", 6))
+        {
+          logFile = fopen(&argv[i][6], "w");
+          if (logFile == NULL) printf("Could not create log file %s\n", &argv[i][6]);
+        }
       else
         {
           printf("Usage:\n");
@@ -69,6 +76,7 @@ main(int argc, char *argv[])
           printf("--go=OCTAL   Specify program entry point (default 02030).\n");
           printf("--run        By default, the simulation starts up in a paused state.\n");
           printf("             The --run switch starts it in a free-running state.\n");
+          printf("--log=F      Log to a file.\n");
           return (1);
         }
     }
@@ -120,6 +128,7 @@ main(int argc, char *argv[])
               < (getTimeNanoseconds() - agc.startTimeNanoseconds
                   - agc.pausedNanoseconds) / mctNanoseconds)
         {
+          if (logFile != NULL) logAGC(logFile);
           executeOneInstruction();
           if (agc.instructionCountDown > 0)
             {

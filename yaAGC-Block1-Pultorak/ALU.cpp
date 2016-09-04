@@ -19,7 +19,7 @@ regY ALU::register_Y; // ALU Y register
 regU ALU::register_U; // ALU sum
 unsigned ALU::glbl_BUS = 0;
 
-unsigned whereGo = 02000;
+unsigned whereGo = 02030;
 
 //************************************************************
 void

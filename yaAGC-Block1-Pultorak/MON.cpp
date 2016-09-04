@@ -51,7 +51,8 @@ MON::getPC()
 {
   unsigned effectiveAddress = CRG::register_Z.read() - 1;
   if (effectiveAddress >= 06000)
-    effectiveAddress = (effectiveAddress%02000) | (ADR::register_BNK.read() << 10);
+    effectiveAddress = (effectiveAddress % 02000)
+        | (ADR::register_BNK.read() << 10);
   return (effectiveAddress);
 }
 void
@@ -60,9 +61,9 @@ MON::displayAGC()
   unsigned pc = getPC();
   char addressString[32];
   if (pc < 06000)
-    sprintf (addressString, "%04o", pc);
+    sprintf(addressString, "%04o", pc);
   else
-    sprintf (addressString, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
+    sprintf(addressString, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
   printw("%s",
       "BLOCK 1 (" __DATE__ ") SIMULATOR 1.16g-0.5 -------------------------------\n");
   printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%06o PC:%s flat:%05o\n",
@@ -150,5 +151,45 @@ MON::displayAGC()
       DSP::R3S, DSP::R3D1, DSP::R3D2, DSP::R3D3, DSP::R3D4, DSP::R3D5);
   printw("14 OUT4:%06o 35 TIME2:%06o 52 OPT X:%06o\n",
       OUT::register_OUT4.read(), MEM::readMemory(035), MEM::readMemory(052));
+}
+
+/*
+ * If you modify this, be aware that my intention for using this was to be able
+ * to make logs from yaAGC-Block1-Pultorak *and* to make logs in an identical
+ * format from yaAGCb1, so as to be able to compare them on an instruction by
+ * instruction basis.  So of you change this in a way that doesn't correspond to
+ * changes in the function of the same name in yaAGCb1, you will
+ * have destroyed that capability.  Note also that for pragmatic reasons, the
+ * Z register in this simulator is incremented immediately upon starting an
+ * instruction in yaAGCb1, whereas here (which is command-sequence based
+ * rather than basic-instruction based, it updates the Z register just prior to
+ * the start of the instruction ... so they would never match.  That's why the
+ * Z register isn't shown in the log.  You don't lose anything by doing this,
+ * except for the knowledge of the overflow bit in Z (which is only set by being
+ * copied from the A register), so you haven't lost much at all.
+ */
+void
+MON::logAGC(FILE *logFile)
+{
+  unsigned pc = getPC();
+  char addressString[32];
+
+  if (pc < 06000)
+    fprintf(logFile, "%04o\t%u", pc, SCL::register_SCL.read() - 016);
+  else
+    fprintf(logFile, "%02o,%04o\t%u", 017 & (pc >> 10), 06000 + (pc & 01777),
+        SCL::register_SCL.read() - 016);
+  fprintf(logFile,
+      "\tA=%06o\tQ=%06o\tLP=%06o\tOUT0=%05o\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o",
+      CRG::register_A.read(), CRG::register_Q.read(), CRG::register_LP.read(),
+      MEM::readMemory(025), OUT::register_OUT1.read(),
+      OUT::register_OUT2.read(), OUT::register_OUT3.read(),
+      OUT::register_OUT4.read());
+  fprintf(logFile,
+      "\tTIME1=%05o\tTIME2=%05o\tTIME3=%05o\tTIME4=%05o\tBANK=%02o",
+      077777 & MEM::readMemory(036), 077777 & MEM::readMemory(035),
+      077777 & MEM::readMemory(037), 077777 & MEM::readMemory(040),
+      037 & ADR::register_BNK.read());
+  fprintf(logFile, "\n");
 }
 

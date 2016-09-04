@@ -21,11 +21,16 @@
  */
 #ifndef MON_H
 #define MON_H
+
+#include <stdio.h>
+
 class MON
   {
   public:
     static void
     displayAGC();
+    static void
+    logAGC(FILE *logFile);
     static int
     getPC();
     static char* clkTypestring[];
