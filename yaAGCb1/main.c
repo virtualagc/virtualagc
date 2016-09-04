@@ -67,6 +67,8 @@ main(int argc, char *argv[])
           printf(
               "--listing=F  Specify name of a listing file (default Solarium055.lst).\n");
           printf("--go=OCTAL   Specify program entry point (default 02030).\n");
+          printf("--run        By default, the simulation starts up in a paused state.\n");
+          printf("             The --run switch starts it in a free-running state.\n");
           return (1);
         }
     }

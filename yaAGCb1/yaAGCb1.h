@@ -103,6 +103,9 @@ typedef struct
    */
   uint16_t memory[MEMORY_SIZE];
 
+  // Registers not addressable directly by basic instructions.
+  uint16_t INDEX;
+
   // These values are the number of AGC MCT cycles which have occurred since
   // virtual AGC power-up, versus the total number of nanoseconds which have
   // elapsed, minus the time the virtual AGC has spent paused.  In other words,
@@ -194,7 +197,26 @@ extern agcBlock1_t agc;
 #define regBRUPT agc.memory[025]
 #define regARUPT agc.memory[026]
 #define regQRUPT agc.memory[027]
-#define regCOUNTERS &agc.memory[030]
+#define ctrBANKRUPT agc.memory[030]
+#define ctrOVRUPT agc.memory[031]
+#define ctrLPRUPT agc.memory[032]
+#define ctrDSRUPTSW agc.memory[033]
+#define ctrOVCTR agc.memory[034]
+#define ctrTIME2 agc.memory[035]
+#define ctrTIME1 agc.memory[036]
+#define ctrTIME3 agc.memory[037]
+#define ctrTIME4 agc.memory[040]
+#define ctrUPLINK agc.memory[041]
+#define ctrOUTCR1 agc.memory[042]
+#define ctrOUTCR2 agc.memory[043]
+#define ctrPIPAX agc.memory[044]
+#define ctrPIPAY agc.memory[045]
+#define ctrPIPAZ agc.memory[046]
+#define ctrCDUX agc.memory[047]
+#define ctrCDUY agc.memory[050]
+#define ctrCDUZ agc.memory[051]
+#define ctrOPTX agc.memory[052]
+#define ctrOPTY agc.memory[053]
 
 int
 loadYul(char *filename);

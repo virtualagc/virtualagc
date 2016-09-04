@@ -57,12 +57,13 @@ processConsoleDebuggingCommand(char *command)
           agc.instructionCountDown = -1;
           return;
         }
-      if (!strcasecmp(command, "s"))
+      if (!strcasecmp(command, "s") || !strcasecmp(command, "t"))
         {
           agc.instructionCountDown = 1;
           return;
         }
-      if (2 == sscanf(command, "%c%u", &c, &u) && (c == 's' || c == 'S'))
+      if (2 == sscanf(command, "%c%u", &c, &u)
+          && (c == 's' || c == 'S' || c == 't' || c == 'T'))
         {
           agc.instructionCountDown = u;
           return;
@@ -73,10 +74,10 @@ processConsoleDebuggingCommand(char *command)
         }
       if (*command)
         {
-          printf("c  --- continuous run\n");
-          printf("s  --- single step\n");
-          printf("sN --- N single steps\n");
-          printf("q  --- quit\n");
+          printf("       c  --- continuous run\n");
+          printf("  s or t  --- single step\n");
+          printf("sN or tN  --- N single steps\n");
+          printf("       q  --- quit\n");
         }
     }
   for (u = 0; u < MAX_LINE_LENGTH; u++)
@@ -86,18 +87,20 @@ processConsoleDebuggingCommand(char *command)
       (getTimeNanoseconds() - agc.startTimeNanoseconds) / 1000000,
       agc.pausedNanoseconds / 1000000);
   printf(
-      "  A: %05o   IN0: %05o   OUT0: %05o     Bank: %03o   CYR: %05o   ZRUPT: %05o\n",
+      "  A: %06o   IN0: %05o   OUT0: %05o     Bank: %03o   CYR: %05o   ZRUPT: %05o\n",
       regA, regIN0, regOUT0, regBank, regCYR, regZRUPT);
   printf(
-      "  Q: %05o   IN1: %05o   OUT1: %05o   Relint: %-3d    SR: %05o   BRUPT: %05o\n",
-      regQ, regIN1, regOUT1, regRelint, regSR, regBRUPT);
+      "  Q: %06o   IN1: %05o   OUT1: %05o                  SR: %05o   BRUPT: %05o\n",
+      regQ, regIN1, regOUT1, regSR, regBRUPT);
   printf(
-      "  Z: %05o   IN2: %05o   OUT2: %05o   Inhint: %-3d   CYL: %05o   ARUPT: %05o\n",
+      "  Z: %06o   IN2: %05o   OUT2: %05o   Inhint: %-3d   CYL: %05o   ARUPT: %05o\n",
       regZ, regIN2, regOUT2, regInhint, regCYL, regARUPT);
   printf(
-      " LP: %05o   IN3: %05o   OUT3: %05o                  SL: %05o   QRUPT: %05o\n",
+      " LP: %06o   IN3: %05o   OUT3: %05o                  SL: %05o   QRUPT: %05o\n",
       regLP, regIN3, regOUT3, regSL, regQRUPT);
-  printf("                          OUT4: %05o\n", regOUT4);
+  printf(
+      "                           OUT4: %05o                              INDEX: %05o\n",
+      regOUT4, agc.INDEX);
 
   if (regZ< 06000)
   flatAddress = regZ;
