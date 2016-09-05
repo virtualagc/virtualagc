@@ -108,5 +108,6 @@ private:
   static unsigned
   bankDecoder();
   static unsigned conv_WBK[];
+  static unsigned conv_WBK_xch[];
 };
 #endif

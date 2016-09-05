@@ -47,7 +47,7 @@
 void
 writeToErasableOrRegister(uint16_t flatAddress, uint16_t value, int withEditing)
 {
-  if (flatAddress >= 04)
+  if (flatAddress >= 04 && !(flatAddress >= 035 && flatAddress <= 040))
     value &= 077777;
   if (&regBank== &agc.memory[flatAddress]) agc.memory[flatAddress] = value & 037;
   else if (flatAddress < 02000) agc.memory[flatAddress] = value;
@@ -181,7 +181,9 @@ executeOneInstruction(void)
     }
   else if (opcode == 030000) /* XCH (erasable) or CAF (fixed). */
     {
-      writeToErasableOrRegister(operand, fixUcForWriting(regA), 0);
+      // Cannot actually write to regIN
+      if (operand < 04 || operand > 07)
+        writeToErasableOrRegister(operand, fixUcForWriting(regA), 0);
       regA = fetchedFromOperandSignExtended;
     }
   else if (opcode == 040000) /* CS. */
@@ -196,7 +198,15 @@ executeOneInstruction(void)
           if (fetchedOperandOverflow == 0000000 || fetchedOperandOverflow == 0140000)
             {
               // No overflow.
-              writeToErasableOrRegister(operand, regA, 0);
+              int value = regA;
+              // If writing the maximum positive value to TIME1-TIME4, apparently
+              // the overflow is supposed to be set.  This is per Pultorak, but I
+              // don't find any actual documentation about it.  Solarium does refer
+              // to this as a "pseudo-interrupt", but as to whether it means this
+              // or just means "as soon as possible" is hard to day.
+              if (operand >= 035 && operand <= 040 && value == 037777)
+                value = 0137777;
+              writeToErasableOrRegister(operand, value, 0);
             }
           else
             {
@@ -211,14 +221,20 @@ executeOneInstruction(void)
     {
       // FIXME Not sure what's supposed to happen if A already has
       // overflowed.  For now, let's make sure it hasn't.
-      int term1, term2, sum;
+      int16_t term1, term2, sum;
       entrySubtraction:;
       term1 = fixUcForWriting(regA);
-      if ((term1 & 040000) != 0) term1 = -(~term1);
-      term2 = fetchedFromOperand;
-      if ((term2 & 040000) != 0) term2 = -(~term2);
-      sum = term1 + term2;
-      if (sum < 0 ) sum = (~(-sum)) & 0177777;
+      term2 = fetchedFromOperandSignExtended;
+      // Special case:  note that x + -x = -0.
+      if (term1 == ~term2)
+        sum = 0177777;
+      else
+        {
+          if ((term1 & 040000) != 0) term1 = -(~(term1 | ~077777));
+          if ((term2 & 040000) != 0) term2 = -(~term2);
+          sum = term1 + term2;
+          if (sum < 0 ) sum = ~(-sum);
+        }
       regA = sum;
       if ((sum & 0140000) == 0040000) // Positive overflow
         {
@@ -265,16 +281,18 @@ executeOneInstruction(void)
   agc.countMCT += numMCT;
 
   /*
-   * Update regTIME1 and regTIME2.  When TIME1
-   * overflows it increments TIME2.  TIME1 counts up every 10 ms.,
+   * Update regTIME1-4.  When TIME1 overflows it increments
+   * TIME2.  TIME1,3,4 counts up every 10 ms.,
    * i.e., every 1024000/12/100 MCT = 2560/3 MCT.  The starting count is
    * set to half of this, for no particular reason.
    */
   {
-// I think Pultorak's simulator is confused about this and counts up too fast,
-// so for now I try to match him. until I figure that out.  Set PULTORAK 1
-// for the correct timing, I think.
-#define PULTORAK 10
+// Pultorak's simulator was counting 10 times too fast after first ported.
+// The constant PULTORAK was a speed-up factor I was using to match him
+// until I was sure I could/should fix his program, which I have now done,
+// so it's now safe to set the speed-up to 1 now.
+//#define PULTORAK 10
+#define PULTORAK 1
     static int nextTimerIncrement = 1280;
     int overflow = 0;
     if (agc.countMCT * 3 * PULTORAK > nextTimerIncrement)

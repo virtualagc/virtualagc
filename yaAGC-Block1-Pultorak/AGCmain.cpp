@@ -896,7 +896,7 @@ main(int argc, char* argv[])
       while (NULL == nbfgets(userInput, sizeof(userInput)))
 #endif
         {
-          if (MON::FCLK || singleClock)
+          if (MON::RUN && (MON::FCLK || singleClock))
             {
               // This is a performance enhancement. If the AGC is running,
               // don't check the keyboard or simulator display every
@@ -922,6 +922,8 @@ main(int argc, char* argv[])
                       && breakpoint == ADR::getEffectiveAddress())
                     {
                       MON::RUN = 0;
+                      MON::FCLK = 0;
+                      stepCount = 0;
                     }
                   // Halt right after instr that changes a watched
                   // memory location.

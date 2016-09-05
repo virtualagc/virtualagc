@@ -35,6 +35,7 @@ enum
   SGM = 15, // sign bit in memory
   SG = 16, // sign (S2; one's compliment)
   US = 15, // uncorrected sign (S1; overflow), except in register G
+  B15 = 15,
   B14 = 14,
   B13 = 13,
   B12 = 12,

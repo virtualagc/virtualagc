@@ -87,17 +87,17 @@ processConsoleDebuggingCommand(char *command)
       (getTimeNanoseconds() - agc.startTimeNanoseconds) / 1000000,
       agc.pausedNanoseconds / 1000000);
   printf(
-      "  A: %06o   IN0: %05o   OUT0: %05o     Bank: %03o   CYR: %05o   ZRUPT: %05o\n",
-      regA, regIN0, regOUT0, regBank, regCYR, regZRUPT);
+      "  A: %06o   IN0: %05o   OUT0: %05o     Bank: %03o   CYR: %05o   ZRUPT: %05o   TIME1: %06o\n",
+      regA, regIN0, regOUT0, regBank, regCYR, regZRUPT, ctrTIME1);
   printf(
-      "  Q: %06o   IN1: %05o   OUT1: %05o                  SR: %05o   BRUPT: %05o\n",
-      regQ, regIN1, regOUT1, regSR, regBRUPT);
+      "  Q: %06o   IN1: %05o   OUT1: %05o                  SR: %05o   BRUPT: %05o   TIME2: %06o\n",
+      regQ, regIN1, regOUT1, regSR, regBRUPT, ctrTIME2);
   printf(
-      "  Z: %06o   IN2: %05o   OUT2: %05o   Inhint: %-3d   CYL: %05o   ARUPT: %05o\n",
-      regZ, regIN2, regOUT2, regInhint, regCYL, regARUPT);
+      "  Z: %06o   IN2: %05o   OUT2: %05o   Inhint: %-3d   CYL: %05o   ARUPT: %05o   TIME3: %06o\n",
+      regZ, regIN2, regOUT2, regInhint, regCYL, regARUPT, ctrTIME3);
   printf(
-      " LP: %06o   IN3: %05o   OUT3: %05o                  SL: %05o   QRUPT: %05o\n",
-      regLP, regIN3, regOUT3, regSL, regQRUPT);
+      " LP: %06o   IN3: %05o   OUT3: %05o                  SL: %05o   QRUPT: %05o   TIME4: %06o\n",
+      regLP, regIN3, regOUT3, regSL, regQRUPT, ctrTIME4);
   printf(
       "                           OUT4: %05o                              INDEX: %05o\n",
       regOUT4, agc.INDEX);

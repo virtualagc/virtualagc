@@ -55,14 +55,14 @@
 void
 logAGC(FILE *logFile)
 {
-  if ((regZ & 07777) < 06000)
-    fprintf (logFile, "%04o\t%lu", (regZ & 07777), 12 * agc.countMCT);
+  if ((regZ& 07777) < 06000)
+  fprintf (logFile, "%04o\t%lu", (regZ & 07777), 12 * agc.countMCT);
   else
-    fprintf (logFile, "%02o,%04o\t%lu", regBank, (regZ & 07777), 12 * agc.countMCT);
-  fprintf (logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tOUT0=%05o\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o",
-      regA, regQ, regLP,
-      regOUT0, regOUT1, regOUT2, regOUT3, regOUT4);
-  fprintf (logFile, "\tTIME1=%05o\tTIME2=%05o\tTIME3=%05o\tTIME4=%05o\tBANK=%02o", ctrTIME1, ctrTIME2, ctrTIME3, ctrTIME4, 037 & regBank);
+  fprintf (logFile, "%02o,%04o\t%lu", regBank, (regZ & 07777), 12 * agc.countMCT);
+  fprintf (logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%02o", regA, regQ, regLP, 037 & regBank);
+  fprintf (logFile, "\n\tOUT0=%05o\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o", regOUT0, regOUT1, regOUT2, regOUT3, regOUT4);
+  fprintf (logFile, "\n\tIN0=%05o\tIN1=%05o\tIN2=%05o\tIN3=%05o", regIN0, regIN1, regIN2, regIN3);
+  fprintf (logFile, "\n\tTIME1=%06o\tTIME2=%06o\tTIME3=%06o\tTIME4=%06o", ctrTIME1, ctrTIME2, ctrTIME3, ctrTIME4);
   fprintf (logFile, "\n");
 }
 

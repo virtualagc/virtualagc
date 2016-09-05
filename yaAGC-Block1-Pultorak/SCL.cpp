@@ -66,7 +66,19 @@ SCL::doexecWP_F13()
 void
 SCL::doexecWP_F10()
 {
-  int bit = SCL::register_SCL.readField(10, 10);
+  // RSB:  As John wrote this, 'bit' would be 0 for
+  // the first 512 SCL, 1 for the next 1024, 0, for the
+  // next 1024, and so on.  I.e., it would clock at
+  // a 1 ms rate, given a 1.024MHz clock for SCL.
+  // However, this is fed to TIME1,3,4, and they are
+  // supposed to increment every 10 ms.  Possibly
+  // he did this to speed up in debugging, since
+  // otherwise you have to wait quite a long time to
+  // see the timers increment.  At any rate, it's
+  // wrong, and we have to slow it down by a factor
+  // of 10.
+  //int bit = SCL::register_SCL.readField(10, 10);
+  int bit = ((SCL::register_SCL.read() / 10) >> 9) & 1;
   switch (register_F10.read())
     {
   case WAIT_FOR_TRIGGER:

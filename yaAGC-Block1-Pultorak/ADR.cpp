@@ -9,15 +9,22 @@
  *
  *****************************************************************************
  */
+#include <stdio.h>
 #include "reg.h"
 #include "ADR.h"
 #include "SEQ.h"
 #include "BUS.h"
+#include "CPM.h"
 regS ADR::register_S; // address register
 regBNK ADR::register_BNK; // bank register
 // transfer bits 14-11 from the bus into the 4-bit bank register
+//unsigned ADR::conv_WBK[] =
+//  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B14, B13, B12, B11 };
+// transfer bits 15-11 from the bus into the 5-bit bank register
 unsigned ADR::conv_WBK[] =
-  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B14, B13, B12, B11 };
+  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B15, B14, B13, B12, B11 };
+unsigned ADR::conv_WBK_xch[] =
+  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B5, B4, B3, B2, B1 };
 void
 ADR::execWP_WS()
 {
@@ -26,12 +33,23 @@ ADR::execWP_WS()
 void
 ADR::execRP_RBK()
 {
-  BUS::glbl_READ_BUS = register_BNK.read() << 10;
+  printf("DEBUG RBK: %s %s\n", SEQ::instructionString[SEQ::register_SQ.read()], CPM::subseqString[SEQ::glbl_subseq]);
+  // RSB:  Originally just this second part of the conditional was here, but it didn't
+  // for XCH BANKREG, because the bits weren't in the expected position in the input
+  // word when the WBK control-pulse sequence was eventually reached.
+  if (XCH0 == 6)
+    BUS::glbl_READ_BUS = register_BNK.read();
+  else
+    BUS::glbl_READ_BUS = register_BNK.read() << 10;
 }
 void
 ADR::execWP_WBK()
 {
-  register_BNK.writeShift(BUS::glbl_WRITE_BUS, ADR::conv_WBK);
+  printf("DEBUG WBK: %s %s\n", SEQ::instructionString[SEQ::register_SQ.read()], CPM::subseqString[SEQ::glbl_subseq]);
+  if (XCH0 == 6)
+    register_BNK.writeShift(BUS::glbl_WRITE_BUS, ADR::conv_WBK_xch);
+  else
+    register_BNK.writeShift(BUS::glbl_WRITE_BUS, ADR::conv_WBK);
 }
 bool
 ADR::GTR_27()
