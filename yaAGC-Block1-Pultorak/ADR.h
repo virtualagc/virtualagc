@@ -41,7 +41,7 @@ enum specialRegister
 // No bits in these registers
   RELINT_ADDR = 016,
   INHINT_ADDR = 017,
-// In eraseable memory
+// In erasable memory
   CYR_ADDR = 020,
   SR_ADDR = 021,
   CYL_ADDR = 022,

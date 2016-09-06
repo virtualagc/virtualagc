@@ -128,8 +128,7 @@ main(int argc, char *argv[])
               < (getTimeNanoseconds() - agc.startTimeNanoseconds
                   - agc.pausedNanoseconds) / mctNanoseconds)
         {
-          if (logFile != NULL) logAGC(logFile);
-          executeOneInstruction();
+          executeOneInstruction(logFile);
           if (agc.instructionCountDown > 0)
             {
               agc.instructionCountDown--;

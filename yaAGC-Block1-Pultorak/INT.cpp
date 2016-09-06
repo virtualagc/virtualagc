@@ -12,12 +12,15 @@
 #include "INT.h"
 #include "SEQ.h"
 #include "BUS.h"
-regRPCELL INT::register_RPCELL; // latches the selected priority interrupt vector (1-5)
+
+#define NUM_RUPTS 6 // 5
+
+regRPCELL INT::register_RPCELL; // latches the selected priority interrupt vector (1-NUM_RUPTS)
 regINHINT1 INT::register_INHINT1; // inhibits interrupts for 1 instruction (on WOVI)
 regINHINT INT::register_INHINT; // inhibits interrupts on INHINT, reenables on RELINT
 // NOTE: the priority cells (rupt[]) are indexed 0-4, but stored in the
-// RPCELL register as 1-5; (0 in RPCELL means no interrupt)
-unsigned INT::rupt[5];
+// RPCELL register as 1-NUM_RUPTS; (0 in RPCELL means no interrupt)
+unsigned INT::rupt[NUM_RUPTS];
 bool
 INT::IRQ()
 {
@@ -33,16 +36,16 @@ INT::IRQ()
 void
 INT::resetAllRupt()
 {
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < NUM_RUPTS; i++)
     {
       rupt[i] = 0;
     }
 }
-// interrupt vector; outputs 1-5 (decimal) == vector; 0 == no interrupt
+// interrupt vector; outputs 1-NUM_RUPTS (decimal) == vector; 0 == no interrupt
 unsigned
 INT::getPriorityRupt()
 {
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < NUM_RUPTS; i++)
     {
       if (rupt[i])
         return i + 1;
@@ -52,9 +55,13 @@ INT::getPriorityRupt()
 void
 INT::execRP_RRPA()
 {
-  BUS::glbl_READ_BUS = 02000 + (register_RPCELL.read() << 2);
+  // RSB: John was mistaken about the interrupt-vector system for some
+  // reason.  He had the program entry point at 02000, and the interrupt
+  // vectors at 4-word increments above that.  In fact, the interrupt-vector
+  // table is at 02000 and the entry-point is elsewhere.
+  BUS::glbl_READ_BUS = 02000 + ((register_RPCELL.read() - 1) << 2);
 }
-// latches the selected priority interrupt vector (1-5)
+// latches the selected priority interrupt vector (1-NUM_RUPTS)
 // also inhibits additional interrupts while an interrupt is being processed
 void
 INT::execWP_GENRST()

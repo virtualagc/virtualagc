@@ -282,10 +282,29 @@ toggleBreakpoint()
   if (!breakpointEnab)
     {
       char b[80];
-      strcpy(b, getCommand("Set breakpoint: -- enter 14-bit CADR (octal): "));
+      unsigned bank, offset, flat;
+      strcpy(b, getCommand("Set breakpoint: -- enter banked address or 14-bit CADR (octal): "));
       printw("%s\n", b);
-      breakpoint = strtol(b, 0, 8);
-      breakpointEnab = true;
+      if (2 == sscanf(b, "%o,%o", &bank, &offset))
+        {
+          breakpoint = bank * 02000 + offset % 02000;
+          breakpointEnab = true;
+        }
+      else if (1 == sscanf(b, "%o", flat))
+        {
+          breakpoint = flat;
+          breakpointEnab = true;
+        }
+      else
+        {
+          printw("Unrecognized address, breakpoints cleared.\n");
+          breakpointEnab = false;
+        }
+      if (breakpoint < 0 || breakpoint >= ROPE_SIZE)
+        {
+          printw("Address is out of range, breakpoints cleared.\n");
+          breakpointEnab = false;
+        }
     }
   else
     {
@@ -818,7 +837,8 @@ showSourceCode()
 int
 main(int argc, char* argv[])
 {
-  char *initialRope = NULL;
+  int power = 0;
+  char Solarium[] = "Solarium055", *initialRope = Solarium;
   bool autoShowSourceCode = true;
   int stepCount = 0;
 
@@ -838,15 +858,18 @@ main(int argc, char* argv[])
               if (logFile == NULL)
                 printw("Cannot open log file %s\n", &argv[i][6]);
             }
+          else if (!strcmp(argv[i], "--power"))
+            power = 3;
           else
             {
               printf("Usage:\n");
               printf("\tyaAGC-Block1 [OPTIONS]\n");
               printf("Possible OPTIONS:\n");
-              printf(
-                  "--go=O    Specify starting address (octal), default 2030.\n");
-              printf("--rope=F  Specify a rope.\n");
+              printf("--go=O    Starting address (octal), default 2030.\n");
+              printf("--rope=F  Specify a rope, default Solarium055.\n");
               printf("--log=F   Specify a log file (default none).\n");
+              printf("--power   Automatically give 'p', 'r', 't' commands\n");
+              printf("          upon entry.\n");
               return (1);
             }
         }
@@ -921,7 +944,7 @@ main(int argc, char* argv[])
                   if (breakpointEnab
                       && breakpoint == ADR::getEffectiveAddress())
                     {
-                      MON::RUN = 0;
+                      //MON::RUN = 0;
                       MON::FCLK = 0;
                       stepCount = 0;
                     }
@@ -969,14 +992,34 @@ main(int argc, char* argv[])
                   anyWZ = false;
                 }
             }
-
+          if (power)
+            break;
         }
       stepCount = 0;
+      char key;
+      if (power == 3)
+        {
+          key = 'p';
+          power--;
+        }
+      else if (power == 2)
+        {
+          key = 'r';
+          power--;
+        }
+      else if (power == 1)
+        {
+          key = 't';
+          power--;
+        }
+      else
+        {
 #ifdef USE_NCURSES
-      char key = _getch();
+          key = _getch();
 #else
-      char key = userInput[0];
+          key = userInput[0];
 #endif
+        }
       int newAddress = 02030;
       // Keyboard controls for front-panel:
       switch (key)

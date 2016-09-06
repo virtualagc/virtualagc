@@ -57,6 +57,7 @@
 #define YAAGC_BLOCK1_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define MAX_BANK 034
 #define BANK_SIZE 02000
@@ -64,7 +65,13 @@
 
 // A macro for converting a bank number and address within a fixed-memory
 // bank, such as 04,07005 to the "flat" address space.
-#define flatten(bank,offset) ((02000 * bank) + (offset & 01777))
+#define flatten(bank,offset) ((bank == 0) ? offset : ((02000 * bank) + (offset & 01777)))
+
+// Some numerical constants, in AGC format.
+#define AGC_P0 ((int16_t) 0)
+#define AGC_M0 ((int16_t) 077777)
+#define AGC_P1 ((int16_t) 1)
+#define AGC_M1 ((int16_t) 077776)
 
 //--------------------------------------------------------------------------
 // Stuff related to the structure of the virtual Block 1 AGC.  Refer to
@@ -105,6 +112,8 @@ typedef struct
 
   // Registers not addressable directly by basic instructions.
   uint16_t INDEX;
+  uint16_t INTERRUPTED; // Indicates an interrupt is already being processed.
+  uint16_t B;
 
   // These values are the number of AGC MCT cycles which have occurred since
   // virtual AGC power-up, versus the total number of nanoseconds which have
@@ -135,7 +144,7 @@ void
 sleepNanoseconds (int64_t nanoseconds);
 
 void
-executeOneInstruction (void);
+executeOneInstruction (FILE *logFile);
 
 //--------------------------------------------------------------------------
 // Stuff related to debugging.

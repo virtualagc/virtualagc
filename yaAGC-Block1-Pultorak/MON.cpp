@@ -66,10 +66,11 @@ MON::displayAGC()
     sprintf(addressString, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
   printw("%s",
       "BLOCK 1 (" __DATE__ ") SIMULATOR 1.16g-0.5 -------------------------------\n");
-  printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%06o PC:%s flat:%05o\n",
+  printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%u PC:%s flat:%05o\n",
       TPG::tpTypestring[TPG::register_SG.read()], SCL::register_F17.read(),
       SCL::register_F13.read(), SCL::register_F10.read(),
-      (SCL::register_SCL.read() >= 016) ? ((SCL::register_SCL.read() - 016) / 030) : 0, addressString, pc);
+      (SCL::register_SCL.read() >= 016) ?
+          ((SCL::register_SCL.read() - 016) / 014) : 0, addressString, pc);
   printw(" STA:%01o STB:%01o BR1:%01o BR2:%01o SNI:%01o CI:%01o LOOPCTR:%01o\n",
       SEQ::register_STA.read(), SEQ::register_STB.read(),
       SEQ::register_BR1.read(), SEQ::register_BR2.read(),
@@ -175,23 +176,27 @@ MON::logAGC(FILE *logFile)
   char addressString[32];
 
   if (pc < 06000)
-    fprintf(logFile, "%04o\t%u", pc, SCL::register_SCL.read() - 016);
+    fprintf(logFile, "%04o", pc);
   else
-    fprintf(logFile, "%02o,%04o\t%u", 017 & (pc >> 10), 06000 + (pc & 01777),
-        SCL::register_SCL.read() - 016);
-  fprintf(logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%02o",
+    fprintf(logFile, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
+  fprintf(logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%03o\tSCL=%u",
       CRG::register_A.read(), CRG::register_Q.read(), CRG::register_LP.read(),
-      037 & ADR::register_BNK.read());
-  fprintf(logFile, "\n\tOUT0=%05o\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o",
-      MEM::readMemory(025), OUT::register_OUT1.read(),
-      OUT::register_OUT2.read(), OUT::register_OUT3.read(),
-      OUT::register_OUT4.read());
+      037 & ADR::register_BNK.read(), (SCL::register_SCL.read() - 016) / 014);
+  fprintf(logFile, "\n\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o",
+      OUT::register_OUT1.read(), OUT::register_OUT2.read(),
+      OUT::register_OUT3.read(), OUT::register_OUT4.read());
   fprintf(logFile, "\n\tIN0=%05o\tIN1=%05o\tIN2=%05o\tIN3=%05o",
       MEM::readMemory(021), INP::register_IN1.read(), INP::register_IN2.read(),
       INP::register_IN3.read());
   fprintf(logFile, "\n\tTIME1=%06o\tTIME2=%06o\tTIME3=%06o\tTIME4=%06o",
-      MEM::readMemory(036), MEM::readMemory(035),
-      MEM::readMemory(037), MEM::readMemory(040));
+      MEM::readMemory(036), MEM::readMemory(035), MEM::readMemory(037),
+      MEM::readMemory(040));
+  fprintf(logFile, "\n\tARUPT=%06o\tQRUPT=%06o\tZRUPT=%06o\tBRUPT=%06o\tB=%06o",
+      MEM::readMemory(026), MEM::readMemory(027), MEM::readMemory(024),
+      MEM::readMemory(025), ALU::register_B.read());
+  fprintf(logFile, "\n\tCYR=%06o\tSR=%06o\tCYL=%06o\tSL=%06o",
+      MEM::readMemory(020), MEM::readMemory(021), MEM::readMemory(022),
+      MEM::readMemory(023));
   fprintf(logFile, "\n");
 }
 

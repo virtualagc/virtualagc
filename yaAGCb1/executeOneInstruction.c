@@ -45,7 +45,7 @@
 // anything.  If the value needs one, it is assumed to already have
 // a UC bit.
 void
-writeToErasableOrRegister(uint16_t flatAddress, uint16_t value, int withEditing)
+writeToErasableOrRegister(uint16_t flatAddress, uint16_t value)
 {
   if (flatAddress >= 04 && !(flatAddress >= 035 && flatAddress <= 040))
     value &= 077777;
@@ -79,27 +79,101 @@ fixUcForWriting(uint16_t valueFromAthroughLP)
 }
 
 int
-incTimerCheckOverflow (uint16_t *timer)
+incTimerCheckOverflow(uint16_t *timer)
 {
   agc.countMCT += 1;
-  (*timer) += 1;
+  (*timer) = (037777 & *timer) + 1;
   if (*timer == 040000)
     {
-      *timer = 0;
+      *timer = 0100000;
       return (1);
     }
   return (0);
 }
 
+// There had been a discrepancy with Pultorak, in which if A has
+// overflow, then an overflow bit gets written back to the operand
+// location, assuming it happens to be writable and have a useful 16th
+// bit (of which the only examples I know right now are TIME1-4).
+// It kind of makes sense to me in terms of the control pulses,
+// but ....  At any rate, for now at least, let's duplicate this
+// behavior.
 void
-executeOneInstruction(void)
+overflowWriteFix(uint16_t operand)
+{
+  if (operand >= 035 && operand <= 040)
+    agc.memory[operand] |= (regA& 0100000);
+  }
+
+//---------------------------------------------------
+// Various auxiliary functions used for MP,
+// copied from yaAGC.  Probably some duplicates of
+// other stuff that's already here, but I'm just
+// doing quick-and-dirty right now, so I'm not
+// troubling myself to figure it out.
+static int
+SignExtend(int16_t Word)
+{
+  return ((Word & 077777) | ((Word << 1) & 0100000));
+}
+// Convert an AGC-formatted word to CPU-native format.
+static int
+agc2cpu(int Input)
+{
+  if (0 != (040000 & Input))
+    return (-(037777 & ~Input));
+  else
+    return (037777 & Input);
+}
+static int
+cpu2agc2(int Input)
+{
+  if (Input < 0)
+    return (03777777777 & ~(01777777777 & (-Input)));
+  else
+    return (01777777777 & Input);
+}
+static int16_t
+OverflowCorrected(int Value)
+{
+  return ((Value & 037777) | ((Value >> 1) & 040000));
+}
+static void
+DecentToSp(int Decent, int16_t * LsbSP)
+{
+  int Sign;
+  Sign = (Decent & 04000000000);
+  *LsbSP = (037777 & Decent);
+  if (Sign)
+    *LsbSP |= 040000;
+  LsbSP[-1] = OverflowCorrected(0177777 & (Decent >> 14));     // Was 13.
+}
+//---------------------------------------------------
+
+void
+edit(uint16_t flatAddress)
+{
+  if (flatAddress == 022)
+    regCYL= ((regCYL & 040000) >> 14) | ((regCYL << 1) & 077777);
+    else if (flatAddress == 023)
+    regSL = (regSL << 1) & 077776;
+    else if (flatAddress == 020)
+    regCYR = ((regCYR & 1) << 14) | (regCYR >> 1);
+    else if (flatAddress == 021)
+    regSR = (regSR & 040000) | (regSR >> 1);
+  }
+
+void
+executeOneInstruction(FILE *logFile)
 {
   int instruction;
-  uint16_t flatAddress, opcode, operand, dummy, fetchedFromOperand,
+  uint16_t flatAddress, opcode, operand, extracode, dummy, fetchedFromOperand,
       fetchedFromOperandSignExtended, fetchedOperandOverflow;
+  static uint16_t lastInstruction = 0;
 
   numMCT = 2;
 
+  retry: ;
   // Various preliminary stuff that it's just useful to do for any
   // instruction.
   flatAddress = (regZ< 06000) ? regZ : flatten(regBank, regZ);
@@ -107,18 +181,55 @@ executeOneInstruction(void)
   lastZ = regZ;
   incrementZ(1);
   lastINDEX = agc.INDEX;
-  // I believe this generates the correct UC bit and sign bit.
-  if ((agc.INDEX & 040000) == 0)
-    instruction = agc.memory[flatAddress] + agc.INDEX;
-  else
-    instruction = agc.memory[flatAddress] - (077777 & ~agc.INDEX);
+  instruction = agc.memory[flatAddress] + agc.INDEX;
+  if (instruction & 0100000) // Account for 1's complement.
+    instruction++;
   instruction &= 0177777;
 
-  resumeFromInterrupt:;
+  // Prioritized interrupt vectors.
+  extracode = instruction & 0100000;
+  opcode = instruction & 0070000;
+  if (!regInhint&& !agc.INTERRUPTED && 0100000 != (0140000 & regA) && 0040000 != (0140000 & regA)
+  && !extracode)
+    {
+      uint16_t interruptVector = 0;
 
+      // Test for interrupt triggers.
+      if (0100000 & ctrTIME3)// T3RUPT
+      interruptVector = 02000;
+      else if (regIN2 & 077600)// ERRUPT -- 8 fail bits in IN2.
+      interruptVector = 02004;
+      else if (0100000 & ctrTIME4)// DSRUPT
+      interruptVector = 02010;
+      else if (0)// KEYRUPT
+      interruptVector = 02014;
+      else if (0)// UPRUPT
+      interruptVector = 02020;
+      else if (0)// DOWNRUPT
+      interruptVector = 02024;
 
+      // Vector to the interrupt if necessary.
+      if (interruptVector != 0)
+        {
+          agc.countMCT += 3;
+          agc.INTERRUPTED = 1;
+          regZRUPT = regZ;
+          regBRUPT = instruction;
+          regZ = interruptVector;
+          goto retry;
+        }
+    }
+  resumeFromInterrupt: ;
+  agc.B = instruction;
+  if (0 == (agc.B & 0100000))
+    agc.B |= (agc.B & 040000) << 1;
+  if (logFile != NULL)
+    logAGC(logFile, lastZ);
+
+  lastInstruction = instruction;
   agc.INDEX = 0;
-  opcode = instruction & 0170000;
+  extracode = instruction & 0100000;
+  opcode = instruction & 0070000;
   operand = instruction & 007777;
   if (operand < 06000)
     fetchedFromOperand = agc.memory[operand];
@@ -135,7 +246,7 @@ executeOneInstruction(void)
   //    flatAddress, agc.memory[flatAddress], lastINDEX, instruction, opcode, operand, fetchedFromOperand);
 
   // Now execute the stuff specific to the opcode.
-  if (opcode == 000000) /* TC */
+  if (opcode == 0000000) /* TC */
     {
       uint16_t oldZ;
       // Recall that Q, Z, and the instruction we generated above are
@@ -147,55 +258,63 @@ executeOneInstruction(void)
       numMCT = 1;
       if (instruction != 1)
         {
-          regQ = regZ;
+          regQ= regZ;
           numMCT = 1;
         }
-      regZ= instruction;
+      regZ= operand;
     }
-  else if (opcode == 010000) /* CCS */
+  else if (opcode == 010000 && !extracode) /* CCS */
     {
-      if (operand >= 06000) implementationError("CCS accessing fixed memory.");
+      if (operand >= 02000) implementationError("CCS accessing fixed memory.");
       else
         {
           uint16_t K;
           // Arrange to jump.  Recall that Z already points to the next
           // instruction.
           K = (operand >= 04) ? fetchedFromOperand : fixUcForWriting(fetchedFromOperand);
-          if (K == 000000) incrementZ(1); // +0
-          else if (0 == (K & 040000)) incrementZ(0); // >0
-          else if (K == 077777) incrementZ(3); // -0
-          else incrementZ(2); // < 0
+          if (K == 000000) incrementZ(1);// +0
+          else if (0 == (K & 040000)) incrementZ(0);// >0
+          else if (K == 077777) incrementZ(3);// -0
+          else incrementZ(2);// < 0
           // Compute the "diminished absolute value" of c(K).
-          if (0 != (K & 040000)) K = (~K) & 037777; // Absolute value.
+          if (0 != (K & 040000)) K = (~K) & 037777;// Absolute value.
           if (K >= 1)
-            K--;
+          K--;
           regA = K;
+          edit(operand);
         }
     }
-  else if (opcode == 020000) /* INDEX */
+  else if (opcode == 020000 && !extracode) /* INDEX */
     {
       if (operand == 016) regInhint = 0;
       else if (operand == 017) regInhint = 1;
       else if (operand == 025) implementationError("Unimplemented operand RESUME");
       else agc.INDEX = fetchedFromOperand;
     }
-  else if (opcode == 030000) /* XCH (erasable) or CAF (fixed). */
+  else if (opcode == 030000 && !extracode) /* XCH (erasable) or CAF (fixed). */
     {
       // Cannot actually write to regIN
       if (operand < 04 || operand > 07)
-        writeToErasableOrRegister(operand, fixUcForWriting(regA), 0);
+        {
+          writeToErasableOrRegister(operand, fixUcForWriting(regA));
+          edit (operand);
+        }
       regA = fetchedFromOperandSignExtended;
+      overflowWriteFix(operand);
     }
-  else if (opcode == 040000) /* CS. */
+  else if (opcode == 0040000) /* CS. */
     {
       regA = (~fetchedFromOperandSignExtended) & 0177777;
+      overflowWriteFix(operand);
     }
-  else if (opcode == 050000) /* TS. */
+  else if (opcode == 0050000) /* TS. */
     {
-      if (operand >= 06000) implementationError("TS accessing fixed memory.");
+      if (operand >= 02000) implementationError("TS accessing fixed memory.");
       else
         {
-          if (fetchedOperandOverflow == 0000000 || fetchedOperandOverflow == 0140000)
+          uint16_t aOverflowBits;
+          aOverflowBits = regA & 0140000;
+          if (aOverflowBits == 0000000 || aOverflowBits == 0140000)
             {
               // No overflow.
               int value = regA;
@@ -205,8 +324,9 @@ executeOneInstruction(void)
               // to this as a "pseudo-interrupt", but as to whether it means this
               // or just means "as soon as possible" is hard to day.
               if (operand >= 035 && operand <= 040 && value == 037777)
-                value = 0137777;
-              writeToErasableOrRegister(operand, value, 0);
+              value = 0137777;
+              writeToErasableOrRegister(operand, value);
+              edit(operand);
             }
           else
             {
@@ -214,6 +334,18 @@ executeOneInstruction(void)
               incrementZ(1);
               if (0 & (fetchedOperandOverflow & 0100000)) regA = 0000001;// Positive overflow.
               else regA = 0177776;// Negative overflow;
+            }
+          if (operand == 026 /*ARUPT*/)
+            {
+              // In writing to ARUPT, we always set overflow.  Or at least, Pultorak
+              // does.  I suppose this may be an indicator that an interrupt is in
+              // progress, since interrupts can't be triggered while there's overflow
+              // in A.  Whatever.  I use agc.INTERRUPTED for this condition, since
+              // otherwise there's a theoretical race condition.
+              if (regARUPT & 040000)
+              regARUPT &= ~0100000;
+              else
+              regARUPT |= 0100000;
             }
         }
     }
@@ -227,7 +359,7 @@ executeOneInstruction(void)
       term2 = fetchedFromOperandSignExtended;
       // Special case:  note that x + -x = -0.
       if (term1 == ~term2)
-        sum = 0177777;
+      sum = 0177777;
       else
         {
           if ((term1 & 040000) != 0) term1 = -(~(term1 | ~077777));
@@ -248,24 +380,63 @@ executeOneInstruction(void)
           if (ctrOVCTR == 0) ctrOVCTR = 077777; // Convert +0 to -0.
           ctrOVCTR = (ctrOVCTR - 1) & 077777;
         }
+      overflowWriteFix(operand);
     }
   else if (opcode == 070000) /* MASK. */
     {
       regA &= fetchedFromOperandSignExtended;
     }
-  else if (opcode == 0100000) /* MP */
+  else if (opcode == 010000 && extracode) /* MP */
     {
-      numMCT = 10;
+      numMCT = 8;
 
-      implementationError("MP not implemented yet.");
+      // Unlike almost everything else in this program, this is adapted
+      // (copied) from the original Block 2 yaAGC.
+
+      // For MP A (i.e., SQUARE) the accumulator is NOT supposed to
+      // be overflow-corrected.  I do it anyway, since I don't know
+      // what it would mean to carry out the operation otherwise.
+      // Fix later if it causes a problem.
+      // FIX ME: Accumulator is overflow-corrected before SQUARE.
+      int16_t MsWord, LsWord, Operand16, OtherOperand16;
+      int Product;
+      Operand16 = fixUcForWriting(regA);
+      OtherOperand16 = fetchedFromOperandSignExtended;
+      if (OtherOperand16 == AGC_P0 || OtherOperand16 == AGC_M0)
+      MsWord = LsWord = AGC_P0;
+      else if (Operand16 == AGC_P0 || Operand16 == AGC_M0)
+        {
+          if ((Operand16 == AGC_P0 && 0 != (040000 & OtherOperand16)) ||
+              (Operand16 == AGC_M0 && 0 == (040000 & OtherOperand16)))
+          MsWord = LsWord = AGC_M0;
+          else
+          MsWord = LsWord = AGC_P0;
+        }
+      else
+        {
+          int16_t WordPair[2];
+          Product =
+          agc2cpu (SignExtend (Operand16)) *
+          agc2cpu (SignExtend (OtherOperand16));
+          Product = cpu2agc2 (Product);
+          // Sign-extend, because it's needed for DecentToSp.
+          if (02000000000 & Product)
+          Product |= 004000000000;
+          // Convert back to DP.
+          DecentToSp (Product, &WordPair[1]);
+          MsWord = WordPair[0];
+          LsWord = WordPair[1];
+        }
+      regA = SignExtend (MsWord);
+      regLP = SignExtend (LsWord);
     }
-  else if (opcode == 0110000) /* DV */
+  else if (opcode == 020000 && extracode) /* DV */
     {
       numMCT = 18;
 
       implementationError("DV not implemented yet.");
     }
-  else if (opcode == 0120000) /* SU */
+  else if (opcode == 030000 && extracode) /* SU */
     {
       numMCT += 2;
       fetchedFromOperand = (~fetchedFromOperand) & 077777;
@@ -274,7 +445,7 @@ executeOneInstruction(void)
   else
     {
       char message[64];
-      sprintf (message, "Unimplemented opcode %06o", opcode);
+      sprintf (message, "Unimplemented opcode %05o (%06o)", opcode, extracode);
       implementationError(message);
     }
 
@@ -286,24 +457,24 @@ executeOneInstruction(void)
    * i.e., every 1024000/12/100 MCT = 2560/3 MCT.  The starting count is
    * set to half of this, for no particular reason.
    */
-  {
+    {
 // Pultorak's simulator was counting 10 times too fast after first ported.
 // The constant PULTORAK was a speed-up factor I was using to match him
 // until I was sure I could/should fix his program, which I have now done,
 // so it's now safe to set the speed-up to 1 now.
 //#define PULTORAK 10
 #define PULTORAK 1
-    static int nextTimerIncrement = 1280;
-    int overflow = 0;
-    if (agc.countMCT * 3 * PULTORAK > nextTimerIncrement)
-      {
-        nextTimerIncrement += 2560;
-        if (incTimerCheckOverflow (&ctrTIME1))
+      static int nextTimerIncrement = 1280;
+      int overflow = 0;
+      if (agc.countMCT * 3 * PULTORAK > nextTimerIncrement)
+        {
+          nextTimerIncrement += 2560;
+          if (incTimerCheckOverflow(&ctrTIME1))
           incTimerCheckOverflow (&ctrTIME2);
-        incTimerCheckOverflow (&ctrTIME3);
-        incTimerCheckOverflow (&ctrTIME4);
-      }
-  }
+          incTimerCheckOverflow(&ctrTIME3);
+          incTimerCheckOverflow(&ctrTIME4);
+        }
 
+    }
 }
 
