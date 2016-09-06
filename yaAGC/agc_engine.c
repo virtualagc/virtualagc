@@ -2711,7 +2711,7 @@ agc_engine (agc_t * State)
       case 0177:
 	{
 	  // For MP A (i.e., SQUARE) the accumulator is NOT supposed to
-	  // be oveflow-corrected.  I do it anyway, since I don't know
+	  // be overflow-corrected.  I do it anyway, since I don't know
 	  // what it would mean to carry out the operation otherwise.
 	  // Fix later if it causes a problem.
 	  // FIX ME: Accumulator is overflow-corrected before SQUARE.
