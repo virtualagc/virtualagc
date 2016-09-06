@@ -43,9 +43,17 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#CPU_Architecture_Regis
 
 
 
+
+
+
+
             Architecture (Registers)</a></li>
         <li><a
             href="file:///home/rburkey/git/virtualagc-web/Block1.html#Memory_Map">Memory
+
+
+
+
 
 
 
@@ -67,6 +75,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
+
             Processing</a></li>
         <li><a
             href="file:///home/rburkey/git/virtualagc-web/Block1.html#io_channels">I/O
@@ -79,9 +91,17 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
+
             Channels</a></li>
         <li><a
 href="file:///home/rburkey/git/virtualagc-web/Block1.html#UnprogrammedSequences">Unprogrammed
+
+
+
+
 
 
 
@@ -127,14 +147,24 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Virtual_AGCs_Assembler
 
 
 
-            AGC's Assembler (yaYUL)</a><br>
-        </li>
-        <li><a href="#John_Pultoraks_Assembler_and_Simulator">John
-            Pultorak's Assembler and Simulator</a><br>
-        </li>
-        <li><a href="#Virtual_AGCs_CPU_Simulator_yaAGCb1">Virtual AGC's
-            CPU Simulator (yaAGCb1)</a><br>
-        </li>
+
+
+
+
+            AGC's Assembler (yaYUL)</a></li>
+        <li><a href="#CPU_Simulators">CPU Simulators</a></li>
+        <ul>
+          <li><a href="#Comparison">Comparison</a><br>
+          </li>
+        </ul>
+        <ul>
+          <li><a href="#John_Pultoraks_Assembler_and_Simulator">John
+              Pultorak's Assembler and Simulator</a><br>
+          </li>
+          <li><a href="#Virtual_AGCs_CPU_Simulator_yaAGCb1">Virtual
+              AGC's CPU Simulator (yaAGCb1)</a><br>
+          </li>
+        </ul>
         <li><a href="#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">Virtual
             AGC's DSKY Simulator (yaDSKYb1)</a><br>
         </li>
@@ -163,22 +193,26 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Virtual_AGCs_Assembler
 
 
 
-          0"</a> &mdash; Earliest preliminary design of the AGC for which I
+
+
+
+
+          0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
         know of) describing it, so the link is simply to that document,
         rather than to a separate page.</li>
-      <li>"Block 1" &mdash; Used for the earlier designs of the Command
+      <li>"Block 1" — Used for the earlier designs of the Command
         Module, which were also referred to a Block 1 spacecraft.&nbsp;
         Used for the unmanned AS-202 ("Apollo 3"), Apollo 4 and Apollo 6
         unmanned missions.&nbsp; There was no such thing as a Block 1
         Lunar Module.<br>
       </li>
-      <li><a href="assembly_language_manual.html">"Block 2"</a> &mdash; Used
+      <li><a href="assembly_language_manual.html">"Block 2"</a> — Used
         for the later designs of the Command Module, which were also
         referred to a Block 2 spacecraft.&nbsp; Used for the (unmanned)
         Apollo 5 mission's Lunar Module, and for all manned missions.</li>
-      <li><a href="BlockIII.html">"Block 3"</a> &mdash; There was no such
+      <li><a href="BlockIII.html">"Block 3"</a> — There was no such
         thing in the Apollo program, but Hugh Blair-Smith has given us
         some ideas about what it might have looked like if there were.</li>
     </ul>
@@ -222,8 +256,8 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
       documentation of the Block 1 computer system, but it is important
       to recognize that its descriptions are not entirely
       accurate.&nbsp; By this I mean not merely that it contains
-      mistakes &mdash; as, indeed, any documentation of a sufficiently-complex
-      system will &mdash; but that the design of the system was extended after
+      mistakes — as, indeed, any documentation of a sufficiently-complex
+      system will — but that the design of the system was extended after
       document R-393 was written.&nbsp; It's my intention to correct
       those deficiencies here, to the extent that I am able to do so.<br>
     </p>
@@ -285,6 +319,10 @@ Guidance
 
 
 
+
+
+
+
       and Navigation System training slides</a>, July 1965, which are
     perhaps of greater practical utility, if lesser aesthetic
     value.&nbsp; If you click the drawing of the nav-panel DSKY (on the
@@ -299,7 +337,7 @@ Guidance
               href="Block1DSKY-drawing2.png"><img alt=""
                 src="Block1DSKY-drawing2-small.png" style="border: 2px
                 solid ; width: 237px; height: 839px;" height="839"
-                width="237" border="0"></a></td>
+                border="0" width="237"></a></td>
           <td style="text-align: center;"><img style="width: 587px;
               height: 572px;" alt="" src="Block1DSKY-drawing.png"
               height="572" width="587"><br>
@@ -332,7 +370,7 @@ Guidance
     AGC.<br>
     <br>
     Memory is divided into 1024 words (15 bits each) of "erasable"
-    memory &mdash; i.e., memory which can both be read from and written to &mdash;
+    memory — i.e., memory which can both be read from and written to —
     and 24 banks, each with 1024 words of read-only or "fixed" memory.<br>
     <br>
     Conventionally, AGC programming uses octal notation, as opposed to
@@ -347,22 +385,22 @@ Guidance
     <br>
     Memory is laid out as follows:<br>
     <ul>
-      <li>Addresses 00000-01777 &mdash; erasable memory.</li>
-      <li>Addresses 02000-03777 (or theoretically, 01,06000-01,07777) &mdash;
+      <li>Addresses 00000-01777 — erasable memory.</li>
+      <li>Addresses 02000-03777 (or theoretically, 01,06000-01,07777) —
         Bank 1 of fixed memory.</li>
-      <li>Addresses 04000-05777 (or theoretically, 02,06000-02,07777) &mdash;
+      <li>Addresses 04000-05777 (or theoretically, 02,06000-02,07777) —
         Bank 2 of fixed memory.</li>
-      <li>Addresses 03,06000-03,07777 &mdash; Bank 3 of fixed memory.</li>
+      <li>Addresses 03,06000-03,07777 — Bank 3 of fixed memory.</li>
       <li>...</li>
-      <li>Addresses 14,06000-14,07777 &mdash; Bank 14 of fixed memory.</li>
+      <li>Addresses 14,06000-14,07777 — Bank 14 of fixed memory.</li>
       <li><i>Though logically present as far as software is concerned,
           banks 15, 16, 17, and 20 are not physically present in the
           hardware.</i><br>
       </li>
-      <li>Addresses 21,06000-21,07777 &mdash;Bank 20 of fixed memory.</li>
+      <li>Addresses 21,06000-21,07777 —Bank 20 of fixed memory.</li>
       <li>...<br>
       </li>
-      <li>Addresses 034,06000-034,07777 &mdash; Bank 34 of fixed memory.<br>
+      <li>Addresses 034,06000-034,07777 — Bank 34 of fixed memory.<br>
       </li>
     </ul>
     Thus, fixed memory locations can always be referred to as<br>
@@ -395,6 +433,10 @@ Guidance
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+
+
 
 
 
@@ -447,8 +489,8 @@ Guidance
     is partly because without documentation for <span
       style="font-weight: bold;">YUL</span>, determining the exact
     format required by it requires more effort than I care for; but
-    also, formatting restrictions based on strict column alignment&mdash;which
-    make a lot of sense with punch-cards&mdash;make little sense now that
+    also, formatting restrictions based on strict column alignment—which
+    make a lot of sense with punch-cards—make little sense now that
     punch-cards have gone to their final resting place.&nbsp; Thus, <b>yaYUL</b>
     accepts a format for the Block 1 source code which is <i>almost</i>
     independent of column structure.<br>
@@ -539,7 +581,8 @@ Guidance
     </p>
     <h3><a name="Instruction_Representation"></a>Instruction
       Representation </h3>
-    <h4>Assembly-Language Instructions</h4>
+    <h4><a name="Assembly-Language_Instructions"></a>Assembly-Language
+      Instructions</h4>
     The instruction set is far smaller, and therefore far simpler, than
     in Block 2.&nbsp; Every assembly-language instruction occupies
     precisely one word of memory (including operand), and consists of 15
@@ -677,6 +720,10 @@ Guidance
 
 
 
+
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -696,8 +743,16 @@ Guidance
 
 
 
+
+
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -737,6 +792,10 @@ Guidance
 
 
 
+
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -744,6 +803,10 @@ Guidance
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -786,11 +849,15 @@ Guidance
     <p>At present, the only true Block 1 software available is:<br>
     </p>
     <ul>
-      <li>Solarium 055 &mdash; AGC mission software for the unmanned Apollo 6
+      <li>Solarium 055 — AGC mission software for the unmanned Apollo 6
         mission, for which we have:</li>
       <ul>
         <li><a
             href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/">Raw
+
+
+
+
 
 
 
@@ -813,9 +880,17 @@ href="file:///home/rburkey/git/virtualagc-web/listings/Solarium055/MAIN.agc.html
 
 
 
+
+
+
+
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
+
+
 
 
 
@@ -851,12 +926,127 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
 
 
 
+
+
+
+
       same <b>yaYUL</b> assembler used for Block 2 code</a>.&nbsp; The
     only difference is that you add a command-line switch of --block1,
     but otherwise it operates identically, and accepts the full syntax
     of the Solarium program.<br>
-    <h3><a name="John_Pultoraks_Assembler_and_Simulator"></a>John
-      Pultorak's Assembler and Simulator</h3>
+    <h3><a name="CPU_Simulators"></a>CPU Simulators</h3>
+    <h4><a name="Comparison"></a>Comparison</h4>
+    <p>There are two complete Block 1 CPU simulators.&nbsp; Because each
+      has its advantages, both are described in more detail in the
+      sections dedicated to them that follow.&nbsp; However, a capsule
+      comparison is given by the following table.&nbsp; <br>
+    </p>
+    <table align="center" border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <th valign="top">Feature<br>
+          </th>
+          <th valign="top">Pultorak Simulator (yaAGC-Block1)<br>
+          </th>
+          <th valign="top">Virtual AGC Simulator (yaAGCb1)<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">Detailed information<br>
+          </td>
+          <td valign="top"><a
+              href="#John_Pultoraks_Assembler_and_Simulator">See the
+              next section</a><br>
+          </td>
+          <td valign="top"><a href="#Virtual_AGCs_CPU_Simulator_yaAGCb1">See
+
+
+
+              second section after this</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Design rationale<br>
+          </td>
+          <td valign="top">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
+
+              sequences</a><br>
+          </td>
+          <td valign="top">Simulates <a
+              href="#Assembly-Language_Instructions">basic instruction
+              set</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">DSKY?<br>
+          </td>
+          <td valign="top">Textual interface only<br>
+          </td>
+          <td valign="top">Operates with <a
+              href="#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">simulated
+              DSKY</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Other peripherals?<br>
+          </td>
+          <td valign="top">Text-based interface<br>
+          </td>
+          <td valign="top"><a href="developer.html">yaAGC-type socket
+              interface</a> or NASSP/Orbiter interface for
+            implementation of arbitrary peripheral devices<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Language<br>
+          </td>
+          <td valign="top">C++<br>
+          </td>
+          <td valign="top">C<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Platform/Compiler<br>
+          </td>
+          <td valign="top">Any platform supporting gcc or similar<br>
+          </td>
+          <td valign="top">Any platform supporting gcc or similar<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Written by<br>
+          </td>
+          <td valign="top">John Pultorak<br>
+          </td>
+          <td valign="top">Ron Burkey<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">Purpose<br>
+          </td>
+          <td valign="top">Intended to support John's development of his
+            hardware Block 1 simulator.<br>
+          </td>
+          <td valign="top">Intended to intended to integrate into
+            Virtual AGC on the same footing as Block 2 AGC and AEA
+            simulators, and specifically to run <a href="Colossus.html">Solarium
+
+
+
+              055</a>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The table above refers to the version of John Pultorak's
+      simulator which has been ported to gcc and corrected, rather than
+      to his original code, which is also available.&nbsp; Both versions
+      are discussed in the following section.<br>
+    </p>
+    <h4><a name="John_Pultoraks_Assembler_and_Simulator"></a>John
+      Pultorak's Assembler and Simulator</h4>
     Preliminary to his <a
 href="file:///home/rburkey/git/virtualagc-web/Pultorak.html#John_Pultoraks_Block_I_AGC">construction
 
@@ -868,26 +1058,30 @@ href="file:///home/rburkey/git/virtualagc-web/Pultorak.html#John_Pultoraks_Block
 
 
 
-      project for a hardware simulation of the Block 1 AGC</a>, John
-    Pultorak also developed a Block 1 AGC assembler and Block 1 AGC
-    software CPU simulator.&nbsp; Unfortunately, this software has
-    several deficiencies which make it generally of very little use
-    outside of John's project.&nbsp; This is not intended to be a
-    criticism, but merely a recognition that these programs were
-    developed for a very special purpose, not for general reusability,
-    and that their design relied very heavily, by necessity, on
-    documentation (R-393 in particular), which <a
-      href="#Available_Documentation">as has been described earlier</a>,
-    is not entirely accurate.&nbsp; Therefore, while you might enjoy
-    playing with this software, you may not be able to derive much
-    utility out of it.&nbsp; Of course, if you happen to be a software
-    developer yourself, might also enjoy fixing up the software to the
-    point where it <i>is</i> useful, in which case you should let us
-    know!<br>
+
+
+
+
+      project for a hardware simulation of the Block 1 AGC</a>, or even
+    the existence of the Virtual AGC project at all, John Pultorak also
+    developed a Block 1 AGC assembler and Block 1 AGC software CPU
+    simulator as a tool in aiding his development of his hardware
+    simulation.&nbsp; The assembler accepts only John's own syntax
+    rather than actual Block 1 program syntax, based on manual entry and
+    editing of source code (for example, I believe it does not accept
+    Block 1 interpreter code), and I have nothing further to say about
+    it.&nbsp; Editing a 1000-page program for use with it would be
+    overwhelming, particularly when there's an alternate assembler (<b>yaYUL</b>)
+    that already accepts the full syntax.&nbsp; Rather, my scope here is
+    limited to the simulator.<br>
     <br>
-    With that said, John's software source code, buildable with
-    Microsoft Visual C++, is <a
+    John's original software source code for the simulator, intended to
+    be built with Microsoft Visual C++, is <a
 href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator.zip">available
+
+
+
+
 
 
 
@@ -910,6 +1104,10 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
+
       PDF description of it</a>, and can be extracted if you're patient
     enough to do so.&nbsp; I know this because I have done so, though
     unfortunately didn't think to save it for you.&nbsp; Sorry!<br>
@@ -920,13 +1118,24 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
     code, in so far as I understand it, which you may find
     interesting.&nbsp; <br>
     <br>
-    Finally, since I don't myself use Visual C++, or even Windows if I
-    can help it, John's Visual C++ source code was of no direct use to
-    me.&nbsp; I have, however, taken the steps needed to port version
-    1.16 of John's simulator to GNU gcc (g++), and it does appear to
-    work, mostly, though I can't claim to have checked it
-    thoroughly.&nbsp; Right now, you can find it <a
+    Since I don't myself use Visual C++, or even Windows if I can help
+    it, John's Visual C++ source code was of no direct use to me.&nbsp;
+    I have, however, taken the steps needed to port version 1.16 of
+    John's simulator to GNU gcc (g++).&nbsp; Feel free to assume that
+    any deficiencies in the user interface are due my porting
+    effort.&nbsp; It's perhaps worth noting that my purpose in porting
+    this program was primarily to use it as a comparison and sanity
+    check against my own simulator, as described in the next section,
+    and so my motivation in improving the program's user interface
+    (assuming it needs improvement) was lacking.&nbsp; Somebody might
+    find pepping it up an interesting exercise.<br>
+    <br>
+    Right now, you can find this ported code <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">in
+
+
+
+
 
 
 
@@ -939,18 +1148,18 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
-    ncurses installed.&nbsp; All you have to do is to descend into the
-    source-code directory and do "make" or perhaps "gmake".&nbsp; My
-    version of the program built simply by<br>
+    pthreads installed.&nbsp; All you have to do is <br>
     <blockquote><tt>cd <i>DirectoryContainingTheSource</i></tt><tt><br>
       </tt><tt>make</tt><br>
     </blockquote>
-    and then run with John's manufactured Block 1 code simply by<br>
-    <blockquote><tt>./yaAGC-Block1 --rope=agc</tt><br>
+    The program defaults to loading Solarium055, for which you should
+    have Solarium055.bin and Solarium055.lst, or at least links to them,
+    in the current directory.&nbsp; The command to run it is simply<br>
+    <blockquote><tt>./yaAGC-Block1 --power</tt><br>
     </blockquote>
     at which point anything else that happens must be controlled by the
-    program's somewhat arcane interactive command set.&nbsp; John
-    describes the operation using this command set in <a
+    program's internal textual interface.&nbsp; John describes using
+    this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
 
 
@@ -961,131 +1170,224 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
-      PDF description of the simulator</a>, though I was forced to
-    replace his F1, F2, and F4 commands by other commands ('t', 'u', and
-    'v'), as well as to introduce some additional, new commands.&nbsp;
-    Use the 'm' command to get a complete menu listing.<br>
-    <br>
-    In the g++ version, once the simulator is running, you have to do
-    the following to get the AGC program started:<br>
-    <ul>
-      <li>Use the 'p' command to power up the system.</li>
-      <li>Use the 'r' command to do something I'm unclear about.</li>
-      <li>At this point you can use a variety of commands, such as 'e'
-        to examine memory, 'f' to display source code, 't' to supply a
-        single clock pulse (single-step), 'v' to start the processor
-        running freely, 'u' to stop it from running freely, etc.</li>
-      <li>There's a kind of built-in DSKY simulation as well, though
-        it's not visually anything like a DSKY.<br>
-      </li>
-    </ul>
-    That was the good news.&nbsp; But if you wish to actually use the
-    assembler or simulator for anything other than following his demo
-    from the PDF file, please remember the caveat that the simulator is
-    very closely modeled on <a href="#Available_Documentation">Instrumentation
-      Labs document R-393</a>, but unfortunately, as mentioned earlier,
-    R-393 is wrong in a number of respect.&nbsp; Thus basically
-    everything the simulator does with respect to <a href="#Memory_Map">the
 
-      memory map</a> is wrong, from the memory size, down to the
-    symbolic representation used for the addresses, even down to the
-    entry address at which code starts executing after power up.<br>
+
+
+
+      PDF description of the simulator</a>, though my own changes have
+    forced changes in the command set as well.&nbsp; The commands I
+    personally find useful (actually, the only ones I have ever used)
+    are:<br>
     <ul>
+      <li>m&lt;Enter&gt; — displays a menu of commands.</li>
+      <li>n&lt;Enter&gt; — toggles between stepping through
+        control-pulses vs stepping through basic instructions.&nbsp;
+        (The default is basic instructions.)</li>
+      <li>t&lt;Enter&gt; — steps one control pulse or basic instruction.</li>
+      <li>v&lt;Enter&gt; — begin a free run of the program.</li>
+      <li>u&lt;Enter&gt; — stops a free run of the program.<br>
+      </li>
+      <li>t<i>N</i>&lt;Enter&gt; — steps <i>N</i> control pulses or
+        basic instructions.</li>
+      <li>b<i>E</i>&lt;Enter&gt; or b<i>B,O</i>&lt;Enter&gt; — set a
+        breakpoint at erasable or fixed-fixed address <i>E</i> (i.e.,
+        0000-7777) or fixed address <i>B,O</i> (03,6000 through
+        34,7777).&nbsp; All are octal.&nbsp; A "flat" address can also
+        be used.&nbsp; Only one breakpoint can be set at any given time.<br>
+      </li>
+      <li>b — clear a breakpoint if one is set.</li>
+      <li>e<i>N</i>&lt;Enter&gt; — inspect memory words beginning at
+        (erasable, fixed-fixed, or flat, but at present not banked)
+        address <i>N</i>.</li>
+      <li>f&lt;Enter&gt; — toggle source-code display on/off.&nbsp;
+        Default is on. </li>
+      <li>q&lt;Enter&gt; — quit the program.</li>
     </ul>
-    You should also be aware that the assembler that produces the input
-    files for the simulator accepts a syntax for the AGC code that John
-    invented, which somewhat resembles the actual syntax in a program
-    listing like Solarium, but not closely enough to use it without very
-    significantly modifying Solarium.&nbsp; Of course, as I mentioned,
-    John had no Block 1 software to use as a sample when he developed
-    his system, so this is entirely understandable.&nbsp; Fortunately,
-    in the g++ version of the simulator, you can also use the files
-    output by the <b>yaYUL</b> assembler, and bypass John's assembler
-    completely.<br>
-    <ul>
-    </ul>
-    Certain files output by whichever assembler is used are needed as
-    inputs to the simulator. In general, the g++ version of the
-    simulator will accept rope files and assembly listings from <i>either</i>
-    <b>yaYUL</b> or John's assembler.&nbsp; A yaYUL command like the
-    following<br>
-    <blockquote><tt>../yaYUL/yaYUL --block1 --unpound-page MAIN.agc &gt;</tt><tt><i>program</i></tt><tt>.lst<br>
+    <p>There are also commands for the built-in textual DSKY, but I
+      don't understand how they work.<br>
+    </p>
+    <p>There are also command-line options that allow you to do various
+      things, such as selecting a different program than Solarium
+      055.&nbsp; The program will accept rope files and program-listing
+      files created either <b>yaYUL</b> (with the --block1 switch),
+      assuming you had some Block 1 program other than Solarium to work
+      with, or else as produced by John's own assembler.&nbsp; A <b>yaYUL</b>
+      command like the following<br>
+    </p>
+    <blockquote><tt>yaYUL --block1 --unpound-page MAIN.agc &gt;</tt><tt><i>program</i></tt><tt>.lst<br>
         mv MAIN.agc.bin <i>program</i>.bin<br>
       </tt></blockquote>
-    <tt></tt>would produce the necessary files.&nbsp; But the Visual C++
-    version of the simulator accepts only files in the format created by
-    John's assembler, which are the following:<br>
-    <ul>
-      <li>For the simulation itself:</li>
-      <ul>
-        <li>Simulator version 1.15 and prior:&nbsp; <i>program</i>.obj.&nbsp;
-
-
-
-
-          This is an ASCII file, each line of which consists of two
-          octal values, separated by a space.&nbsp; The first octal
-          value is a rope address, and the second is the value stored at
-          that address.&nbsp; As you may recall, the AGC has 15-bit
-          words, with a 16th bit containing the parity. In the true
-          hardware, the parity bit was in the least-significant
-          position, whereas for John's software, the parity-bit is
-          stored in the most-significant position.&nbsp; Note that the
-          addresses in Pultorak's files are based on the notion of a
-          flat address space, rather than a banked one.&nbsp; In this
-          flat memory space, erasable memory is at locations 00000-01777
-          (octal), while fixed-memory bank <i>B</i> (where <i>B</i> is
-          1-34 octal) is at addresses 02000*<i>B</i> through 02000*<i>B</i>+01777.
-
-
-
-
-        </li>
-        <li>Simulator version 1.16:&nbsp; <i>program</i>_H.hex and <i>program</i>_L.hex.&nbsp;
-          These are Motorola hex-files, in which the H file contains the
-          more-significant bytes from <i>project</i>.obj (see above),
-          and the L file contains the less-significant bytes.&nbsp; The
-          <i>project</i>.obj file itself is not needed.</li>
-      </ul>
-      <ul>
-      </ul>
-      <li>For source-code listings in the debugger:&nbsp; <i>program</i>.lst.&nbsp;
-        The listing file's format format isn't terribly important,
-        except that the first thing in each line that corresponds to a
-        specific memory location is a 5 octal-digit address, and the
-        remainder of the line contains some additional text whose format
-        we don't care about (the line of source code).&nbsp; <br>
-      </li>
-      <ul>
-      </ul>
-    </ul>
-    To simulate Solarium in the g++ version of the simulator, assuming
-    you've created Solarium055.bin and Solarium055.lst as described
-    above, you'd do this,<br>
-    <blockquote><tt>./yaAGC-Block1 --go=2030 --rope=Solarium055</tt><br>
+    would produce the necessary files, which could then be run in the
+    simulator as follows:<br>
+    <blockquote>
+      <p><tt>./yaAGC-Block1 --power --rope=<i>program</i></tt><br>
+      </p>
     </blockquote>
-    The switch "--go=2030" is because the simulator uses a power-up
-    entry point into the program of 2000, whereas Solarium actually
-    starts at 2030.&nbsp; I can't blame John too much for this
-    discrepancy, because when I took the issue directly to Hugh
-    Blair-Smith, he swore that 2000 was correct, and then indicated "<font
-      face="Calibri" size="3" color="blue"><span style="font-size:
-        12.0pt;font-family:Calibri;color:blue">OK, so I am gobsmacked"<font
-          color="#000000"> when he saw <a
-href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0035-P1130182.jpg">the
-
-            actual scan of the proper page from Solarium</a>, which
-          started at 2030.&nbsp; So John, if you're reading this, you
-          were in very good company when you made the decision to use
-          address 2000!</font></span></font>
+    As far as John's own sample Block 1 program (agc.bin + agc.lst),
+    which he manufactured manually from portions of Colossus 249, it
+    will actually no longer run properly in this ported version of the
+    simulator, even though the simulator accepts output from John's
+    assembler.&nbsp; It would require the use of John's original Visual
+    C++ code.<br>
+    <br>
+    The reason for this is that the program has not merely been ported
+    from Visual C++ to gcc, but also corrected in a variety of ways, and
+    these corrections prevent John's original code from running,
+    although the changes needed to make is run seem fairly
+    trivial.&nbsp; The <i>reason</i> that the corrections were needed
+    do not reflect on John, or on anybody, but are just an unfortunate
+    fact of life.&nbsp; Specifically, at the time John created his
+    project, the principal (only?) written documentation he had to work
+    from was <a href="#Available_Documentation">Instrumentation Labs
+      document R-393</a>, which was itself inaccurate in a number of
+    ways.&nbsp; As the document itself points out in its Preface,<br>
+    <blockquote><small>"... Fine detail and internal consistency have
+        been under-emphasized for the sake of promptness so that this
+        report could be written within a few weeks of the inception of
+        the design."</small><br>
+    </blockquote>
+    In other words, they had to get it done and get it into service
+    quickly, and didn't have time fix every little thing in it.&nbsp;
+    Moreover, there was no available sample of Block 1 software of any
+    kind for John to work with.&nbsp; In fact, as he himself says, the
+    sole sample of AGC code he had, the Block 2 program Colossus 249,
+    was itself not complete, and was merely a fragment.&nbsp; So all
+    things considered, it is remarkable that he got any of it to work at
+    all, and the fact that there are some errors is inevitable.&nbsp;
+    But those errors are more than enough to prevent John's original
+    code from running on a corrected version of his simulator.<br>
+    <br>
+    The reason I am pointing this out is to provide you with a warning,
+    should you decide to forego the corrected, gcc version of the
+    program, and instead revert to John's original Visual C++
+    simulator.&nbsp; None of the corrections for the problems I've been
+    mentioning have been back-ported to the Visual C++ version of the
+    program.&nbsp; It might be an interesting exercise for somebody to
+    indeed backport these changes.&nbsp; The most-significant problems
+    were:<br>
+    <ol>
+      <li>The memory model is undersized:&nbsp; the amount of fixed rope
+        memory in the device was increased from the 12 banks mentioned
+        in R-393 to 24 banks, and Solarium 055 will in fact not fit into
+        12 banks.</li>
+      <li>The (corrected) interrupt-vector table is at address 2000, and
+        the entry point for the program is at 2030.&nbsp; In the
+        original version of the program, however, they are at 2004 and
+        2000, respectively.</li>
+      <li>Certain assembly-language instructions for writing to the
+        memory-bank register (specifically, the XCH instruction)
+        produced completely incorrect results.</li>
+      <li>Instructions for writing to some of the "editing" registers
+        (CYL, SL, CYR, SR) produced partially incorrect results.<br>
+      </li>
+    </ol>
+    <ul>
+    </ul>
+    A remarkably short list of problems, but nevertheless a list in
+    which one would encounter difficulties <i>immediately</i> in trying
+    to run actual Block 1 software ... as indeed I did.&nbsp; <br>
+    <font face="Calibri" color="blue" size="3"><span style="font-size:
+        12.0pt;font-family:Calibri;color:blue"><font color="#000000"></font></span></font>
     <ul>
     </ul>
     <ul>
     </ul>
-    <h3><a name="Virtual_AGCs_CPU_Simulator_yaAGCb1"></a>Virtual AGC's
-      CPU Simulator (yaAGCb1) TBD</h3>
-    <p>TBD<br>
+    <h4><a name="Virtual_AGCs_CPU_Simulator_yaAGCb1"></a>Virtual AGC's
+      CPU Simulator (yaAGCb1) TBD</h4>
+    <p>My own Block 1 simulator is written independently of <a
+        href="#John_Pultoraks_Assembler_and_Simulator">John Pultorak's</a>,
+      and no code from John's has been reused in mine, nor served as a
+      model for mine.&nbsp; That isn't intended to imply that John's
+      program was not used.&nbsp; In fact, I used it <i>extensively</i>
+      as a cross-check on the functioning of mine, with the intention of
+      being able to run the two side-by-side, and have them match up
+      register-for-register, instruction-for-instruction, on a
+      cycle-by-cycle basis.&nbsp; Sometimes this revealed errors in
+      John's simulator, which I corrected.&nbsp; Other times, it
+      revealed bugs in mine, which I corrected.&nbsp; Often, there were
+      just differences I hadn't anticipated, usually involving
+      arithmetical overflow bits that got written into registers I
+      hadn't expected; in which case, when they were reasonable even if
+      unexpected, I did what checking I could but almost always adopted
+      John's approach in place of my own.<br>
     </p>
+    <p>So the upshot of that is that these programs now behave
+      essentially identically.<br>
+    </p>
+    <p>Then why have two (other than the obvious advantage of being able
+      to cross-check one against the other)?&nbsp; Well, it mainly has
+      to do with the fact that the CPU simulator has to be able to
+      integrate with other Virtual-AGC style peripheral devices, such as
+      simulated DSKYs, to be able to participate in the GUI code::blocks
+      style debugging capabilities that other Virtual AGC simulators
+      have, and so on, and after investigating it I just thought it was
+      cleaner and simpler to start from scratch in doing so.&nbsp;
+      Obviously, others' opinions may differ, and the problems I
+      perceived I was solving could easily be more in my mind than in
+      John's program.<br>
+    </p>
+    <p>Right now, you can find code for my new simulator <a
+        href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+
+
+
+
+
+
+
+
+
+
+
+
+
+        our GitHub repository's "block1" branch</a>.&nbsp; I have only
+      worked with it in Linux, but I expect it should probably build in
+      Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
+      pthreads installed.&nbsp; All you have to do is <br>
+    </p>
+    <blockquote><tt>cd <i>DirectoryContainingTheSource</i></tt><tt><br>
+      </tt><tt>make</tt><br>
+    </blockquote>
+    The program defaults to loading Solarium055, for which you should
+    have Solarium055.bin and Solarium055.lst, or at least links to them,
+    in the current directory.&nbsp; The command to run it is simply<br>
+    <blockquote><tt>./yaAGCb1</tt><br>
+    </blockquote>
+    at which point anything else that happens must be controlled by the
+    program's internal textual interface, because at this writing,
+    neither <a href="Block1.html#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">the
+
+      simulated DSKY interface</a> nor the fancy GUI debugging mentioned
+    above have actually been implemented yet.&nbsp; The program textual
+    debugging interface is indeed <i>extremely</i> primitive, a small
+    subset of the interface to the Pultorak simulator's interface
+    mentioned in the preceding section.&nbsp; The only existing commands
+    at the moment are:<br>
+    <ul>
+      <li>m&lt;Enter&gt; (or actually any unrecognized command) —
+        displays a menu of available commands.<br>
+      </li>
+      <li>t&lt;Enter&gt; — steps one control pulse or basic instruction.</li>
+      <li>t<i>N</i>&lt;Enter&gt; — steps <i>N</i> control pulses or
+        basic instructions.</li>
+      <li>q&lt;Enter&gt; — quit the program.</li>
+    </ul>
+    One useful capability that both of the CPU simulators (Pultorak and
+    Virtual AGC) have is to be able to produce a log file <i>in
+      identical formats</i> of the cycle-by-cycle program
+    execution.&nbsp; This allows easy comparison for discrepancies with
+    programs like diff or <a href="http://meldmerge.org/">meld</a>, or
+    any of a number of others.&nbsp; The steps in either simulator are
+    the same:<br>
+    <ol>
+      <li>Run the simulator with a command-line switch "--log=<i>FILENAME</i>".</li>
+      <li>Execute identical portions of the code in the simulator, for
+        example with "t2000" to execute 2000 assembly-language
+        instructions.</li>
+      <li>Quit the simulator ("q").<br>
+      </li>
+    </ol>
     <h3><a name="Virtual_AGCs_DSKY_Simulator_yaDSKYb1"></a>Virtual AGC's
       DSKY Simulator (yaDSKYb1)</h3>
     TBD<br>
@@ -1093,7 +1395,7 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0035-P1130182
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-02.<br>
+          2016-09-06.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
