@@ -157,24 +157,23 @@ overflowWriteFix(uint16_t operand)
 void
 edit(uint16_t flatAddress)
 {
-#if 0
-  if (flatAddress == 022)
+#if 1
+  if (flatAddress == 020)
     {
-      regCYL= ((regCYL & 040000) >> 14) | ((regCYL << 1) & 077777);
-    }
-  else if (flatAddress == 023)
-    {
-      regSL = (regSL << 1) & 077776;
-    }
-  else if (flatAddress == 020)
-    {
-      regCYR = ((regCYR & 1) << 14) | (regCYR >> 1);
+      regCYR = ((regCYR & 1) << 14) | ((regCYR & 077777) >> 1);
     }
   else if (flatAddress == 021)
     {
       regSR = (regSR & 040000) | (regSR >> 1);
     }
-  else
+  else if (flatAddress == 022)
+    {
+      regCYL= ((regCYL & 040000) >> 14) | ((regCYL << 1) & 077777);
+    }
+  else if (flatAddress == 023)
+    {
+      regSL = ((regSL << 1) & 0077776) | ((regSL & 0100000) >> 15);
+    }
   return;
 #else
   // If table 3-2 on p. 3-3 of R-393 is to be believed, this editing behaves
@@ -183,20 +182,22 @@ edit(uint16_t flatAddress)
     {
       uint16_t before, SG, UC, B14, B1;
       before = agc.memory[flatAddress];
-      SG = agc.memory[flatAddress] & 0100000;
-      UC = agc.memory[flatAddress] & 0040000;
+      SG = before & 0100000;
+      UC = before & 0040000;
       B14 = before & 0020000;
       B1 = before & 1;
       if (flatAddress == 020)
-        agc.memory[flatAddress] = ((before >> 1) & 017777) | (B1 << 15)
+        agc.memory[flatAddress] = ((before >> 1) & 017777) | (B1 << 14)
             | (SG >> 2);
       else if (flatAddress == 021)
-        agc.memory[flatAddress] = ((before >> 1) & 017777) | SG | (SG >> 2);
+        agc.memory[flatAddress] = ((before >> 1) & 017777) | SG | (SG >> 2)
+            | UC;
       else if (flatAddress == 022)
         agc.memory[flatAddress] = ((before << 1) & 037776) | (B14 << 2)
-            | (SG >> 15);
+            | (SG >> 15) | UC;
       else if (flatAddress == 023)
-        agc.memory[flatAddress] = ((before << 1) & 037776) | SG | (SG >> 15);
+        agc.memory[flatAddress] = ((before << 1) & 037776) | SG | (SG >> 15)
+            | UC;
     }
 #endif
 }
@@ -352,9 +353,9 @@ executeOneInstruction(FILE *logFile)
     }
   else if (opcode == 030000 && !extracode) /* XCH (erasable) or CAF (fixed). */
     {
-      if (operand >= 020 && operand <= 023)
+      if (operand == 020 && operand <= 023)
         {
-          agc.memory[operand] = regA;
+          agc.memory[operand] = fixUcForWriting(regA) /* | ((fetchedFromOperand & 0040000) << 1)*/;
           edit(operand);
           regA = fetchedFromOperandSignExtended;
         }
@@ -362,7 +363,7 @@ executeOneInstruction(FILE *logFile)
         {
           // Cannot actually write to regIN
           if (operand < 04 || operand > 07)
-            writeToErasableOrRegister(operand, fixUcForWriting(regA));
+          writeToErasableOrRegister(operand, fixUcForWriting(regA));
           regA = fetchedFromOperandSignExtended;
           overflowWriteFix(operand);
         }
