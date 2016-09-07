@@ -1318,6 +1318,11 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
       <li>Instructions for writing to some of the "editing" registers
         (CYL, SL, CYR, SR) produced partially incorrect results.<br>
       </li>
+      <li>Timer registers (TIME1, 2, 3, and 4) increment at 10&times; the
+      speed they're supposed to.  Specifically, TIME1, 3, and 4, which are
+      supposed to increment every 10 ms., actually increment every 1 ms.
+      TIME2, which is triggered by overflow in TIME1, increments every 16.384
+      seconds rather than every 163.84 seconds as it's supposed to.</li>
     </ol>
     <ul>
     </ul>
