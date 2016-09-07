@@ -312,6 +312,7 @@ typedef struct {
   // it is deposited in the following field.
   char Column8;
   int InversionPending;
+  int commentColumn;
 } ParseInput_t;
 
 typedef struct {
@@ -465,5 +466,7 @@ extern unsigned char SwitchIncrement[4], SwitchInvert[4];
 extern int OpcodeOffset;
 extern int ArgType;
   
+extern int formatOnly;
+
 #endif // INCLUDED_YAYUL_H
 
