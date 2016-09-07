@@ -40,6 +40,51 @@
 #include <time.h>
 #include "yaAGCb1.h"
 
+//---------------------------------------------------
+// Various auxiliary functions used for MP,
+// copied from yaAGC.  Probably some duplicates of
+// other stuff that's already here, but I'm just
+// doing quick-and-dirty right now, so I'm not
+// troubling myself to figure it out.
+static int
+SignExtend(int16_t Word)
+{
+  return ((Word & 077777) | ((Word << 1) & 0100000));
+}
+// Convert an AGC-formatted word to CPU-native format.
+static int
+agc2cpu(int Input)
+{
+  if (0 != (040000 & Input))
+    return (-(037777 & ~Input));
+  else
+    return (037777 & Input);
+}
+static int
+cpu2agc2(int Input)
+{
+  if (Input < 0)
+    return (03777777777 & ~(01777777777 & (-Input)));
+  else
+    return (01777777777 & Input);
+}
+static int16_t
+OverflowCorrected(int Value)
+{
+  return ((Value & 037777) | ((Value >> 1) & 040000));
+}
+static void
+DecentToSp(int Decent, int16_t * LsbSP)
+{
+  int Sign;
+  Sign = (Decent & 04000000000);
+  *LsbSP = (037777 & Decent);
+  if (Sign)
+    *LsbSP |= 040000;
+  LsbSP[-1] = OverflowCorrected(0177777 & (Decent >> 14));     // Was 13.
+}
+//---------------------------------------------------
+
 // Write a value to an erasable address, with or without "editing".
 // If the specified address is in fixed memory, return without doing
 // anything.  If the value needs one, it is assumed to already have
@@ -101,72 +146,66 @@ incTimerCheckOverflow(uint16_t *timer)
 void
 overflowWriteFix(uint16_t operand)
 {
+  // Does the operand have 16 bits?
   if (operand >= 035 && operand <= 040)
-    agc.memory[operand] |= (regA& 0100000);
-  }
-
-//---------------------------------------------------
-// Various auxiliary functions used for MP,
-// copied from yaAGC.  Probably some duplicates of
-// other stuff that's already here, but I'm just
-// doing quick-and-dirty right now, so I'm not
-// troubling myself to figure it out.
-static int
-SignExtend(int16_t Word)
-{
-  return ((Word & 077777) | ((Word << 1) & 0100000));
+    {
+      // Copy the 16th bit from regA.
+      agc.memory[operand] = (agc.memory[operand] & 077777) | (regA& 0100000);
+    }
 }
-// Convert an AGC-formatted word to CPU-native format.
-static int
-agc2cpu(int Input)
-{
-  if (0 != (040000 & Input))
-    return (-(037777 & ~Input));
-  else
-    return (037777 & Input);
-}
-static int
-cpu2agc2(int Input)
-{
-  if (Input < 0)
-    return (03777777777 & ~(01777777777 & (-Input)));
-  else
-    return (01777777777 & Input);
-}
-static int16_t
-OverflowCorrected(int Value)
-{
-  return ((Value & 037777) | ((Value >> 1) & 040000));
-}
-static void
-DecentToSp(int Decent, int16_t * LsbSP)
-{
-  int Sign;
-  Sign = (Decent & 04000000000);
-  *LsbSP = (037777 & Decent);
-  if (Sign)
-    *LsbSP |= 040000;
-  LsbSP[-1] = OverflowCorrected(0177777 & (Decent >> 14));     // Was 13.
-}
-//---------------------------------------------------
 
 void
 edit(uint16_t flatAddress)
 {
+#if 0
   if (flatAddress == 022)
-    regCYL= ((regCYL & 040000) >> 14) | ((regCYL << 1) & 077777);
-    else if (flatAddress == 023)
-    regSL = (regSL << 1) & 077776;
-    else if (flatAddress == 020)
-    regCYR = ((regCYR & 1) << 14) | (regCYR >> 1);
-    else if (flatAddress == 021)
-    regSR = (regSR & 040000) | (regSR >> 1);
-  }
+    {
+      regCYL= ((regCYL & 040000) >> 14) | ((regCYL << 1) & 077777);
+    }
+  else if (flatAddress == 023)
+    {
+      regSL = (regSL << 1) & 077776;
+    }
+  else if (flatAddress == 020)
+    {
+      regCYR = ((regCYR & 1) << 14) | (regCYR >> 1);
+    }
+  else if (flatAddress == 021)
+    {
+      regSR = (regSR & 040000) | (regSR >> 1);
+    }
+  else
+  return;
+#else
+  // If table 3-2 on p. 3-3 of R-393 is to be believed, this editing behaves
+  // only marginally as one might expect.
+  if (flatAddress >= 020 && flatAddress <= 023)
+    {
+      uint16_t before, SG, UC, B14, B1;
+      before = agc.memory[flatAddress];
+      SG = agc.memory[flatAddress] & 0100000;
+      UC = agc.memory[flatAddress] & 0040000;
+      B14 = before & 0020000;
+      B1 = before & 1;
+      if (flatAddress == 020)
+        agc.memory[flatAddress] = ((before >> 1) & 017777) | (B1 << 15)
+            | (SG >> 2);
+      else if (flatAddress == 021)
+        agc.memory[flatAddress] = ((before >> 1) & 017777) | SG | (SG >> 2);
+      else if (flatAddress == 022)
+        agc.memory[flatAddress] = ((before << 1) & 037776) | (B14 << 2)
+            | (SG >> 15);
+      else if (flatAddress == 023)
+        agc.memory[flatAddress] = ((before << 1) & 037776) | SG | (SG >> 15);
+    }
+#endif
+}
 
 void
 executeOneInstruction(FILE *logFile)
 {
   int instruction;
+  int16_t term1, term2, sum;
   uint16_t flatAddress, opcode, operand, extracode, dummy, fetchedFromOperand,
       fetchedFromOperandSignExtended, fetchedOperandOverflow;
   static uint16_t lastInstruction = 0;
@@ -181,9 +220,29 @@ executeOneInstruction(FILE *logFile)
   lastZ = regZ;
   incrementZ(1);
   lastINDEX = agc.INDEX;
-  instruction = agc.memory[flatAddress] + agc.INDEX;
-  if (instruction & 0100000) // Account for 1's complement.
-    instruction++;
+  /*
+   instruction = agc.memory[flatAddress] + agc.INDEX;
+   if (instruction & 0100000) // Account for 1's complement.
+   instruction++;
+   */
+  term1 = agc.memory[flatAddress];
+  if (flatAddress < 4)
+    term1 = fixUcForWriting(term1);
+  term2 = SignExtend(agc.INDEX);
+  // Special case:  note that x + -x = -0.
+  if (term1 == ~term2)
+    sum = 0177777;
+  else
+    {
+      if ((term1 & 040000) != 0)
+        term1 = -(~(term1 | ~077777));
+      if ((term2 & 040000) != 0)
+        term2 = -(~term2);
+      sum = term1 + term2;
+      if (sum < 0)
+        sum = ~(-sum);
+    }
+  instruction = sum;
   instruction &= 0177777;
 
   // Prioritized interrupt vectors.
@@ -293,14 +352,20 @@ executeOneInstruction(FILE *logFile)
     }
   else if (opcode == 030000 && !extracode) /* XCH (erasable) or CAF (fixed). */
     {
-      // Cannot actually write to regIN
-      if (operand < 04 || operand > 07)
+      if (operand >= 020 && operand <= 023)
         {
-          writeToErasableOrRegister(operand, fixUcForWriting(regA));
-          edit (operand);
+          agc.memory[operand] = regA;
+          edit(operand);
+          regA = fetchedFromOperandSignExtended;
         }
-      regA = fetchedFromOperandSignExtended;
-      overflowWriteFix(operand);
+      else
+        {
+          // Cannot actually write to regIN
+          if (operand < 04 || operand > 07)
+            writeToErasableOrRegister(operand, fixUcForWriting(regA));
+          regA = fetchedFromOperandSignExtended;
+          overflowWriteFix(operand);
+        }
     }
   else if (opcode == 0040000) /* CS. */
     {
@@ -313,22 +378,25 @@ executeOneInstruction(FILE *logFile)
       else
         {
           uint16_t aOverflowBits;
+          int value;
           aOverflowBits = regA & 0140000;
-          if (aOverflowBits == 0000000 || aOverflowBits == 0140000)
+          // If writing the maximum positive value to TIME1-TIME4, apparently
+          // the overflow is supposed to be set.  This is per Pultorak, but I
+          // don't find any actual documentation about it.  Solarium does refer
+          // to this as a "pseudo-interrupt", but as to whether it means this
+          // or just means "as soon as possible" is hard to day.
+          if (operand >= 020 && operand <= 023)
             {
-              // No overflow.
-              int value = regA;
-              // If writing the maximum positive value to TIME1-TIME4, apparently
-              // the overflow is supposed to be set.  This is per Pultorak, but I
-              // don't find any actual documentation about it.  Solarium does refer
-              // to this as a "pseudo-interrupt", but as to whether it means this
-              // or just means "as soon as possible" is hard to day.
-              if (operand >= 035 && operand <= 040 && value == 037777)
-              value = 0137777;
-              writeToErasableOrRegister(operand, value);
+              agc.memory[operand] = regA;
               edit(operand);
             }
           else
+            {
+              value = fixUcForWriting(regA);
+              if (operand >= 035 && operand <= 040 && value == 037777) value = 0137777;
+              writeToErasableOrRegister(operand, value);
+            }
+          if (aOverflowBits == 0100000 || aOverflowBits == 0040000)
             {
               // Overflow.
               incrementZ(1);
@@ -358,8 +426,7 @@ executeOneInstruction(FILE *logFile)
       term1 = fixUcForWriting(regA);
       term2 = fetchedFromOperandSignExtended;
       // Special case:  note that x + -x = -0.
-      if (term1 == ~term2)
-      sum = 0177777;
+      if (term1 == ~term2) sum = 0177777;
       else
         {
           if ((term1 & 040000) != 0) term1 = -(~(term1 | ~077777));
@@ -438,8 +505,11 @@ executeOneInstruction(FILE *logFile)
     }
   else if (opcode == 030000 && extracode) /* SU */
     {
-      numMCT += 2;
-      fetchedFromOperand = (~fetchedFromOperand) & 077777;
+      // R-393 says that SU takes 2 more MCT than AD, but the control-pulse
+      // sequences it lists for SU don't support that notion.
+      //numMCT += 2;
+      fetchedFromOperandSignExtended = ~fetchedFromOperand;
+      fetchedFromOperand = fetchedFromOperandSignExtended & 077777;
       goto entrySubtraction;
     }
   else

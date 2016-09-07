@@ -18,6 +18,10 @@
 #define endwin()
 #endif
 
+#include <stdint.h>
+extern int numLogExtras;
+extern uint16_t logExtras[];
+
 #include "MON.h"
 #include "TPG.h"
 #include "MON.h"
@@ -197,6 +201,13 @@ MON::logAGC(FILE *logFile)
   fprintf(logFile, "\n\tCYR=%06o\tSR=%06o\tCYL=%06o\tSL=%06o",
       MEM::readMemory(020), MEM::readMemory(021), MEM::readMemory(022),
       MEM::readMemory(023));
+  if (numLogExtras > 0)
+    {
+      int i;
+      fprintf(logFile, "\n");
+      for (i = 0; i < numLogExtras; i++)
+        fprintf(logFile, "\t%05o=%06o", logExtras[i], MEM::readMemory(logExtras[i]) & ((logExtras[i] >= 060) ? 077777 : ~0));
+    }
   fprintf(logFile, "\n");
 }
 

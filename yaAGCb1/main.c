@@ -40,6 +40,10 @@
 #include <string.h>
 #include "yaAGCb1.h"
 
+#define MAX_LOG_EXTRAS 10
+int numLogExtras = 0;
+uint16_t logExtras[MAX_LOG_EXTRAS];
+
 int
 main(int argc, char *argv[])
 {
@@ -64,6 +68,13 @@ main(int argc, char *argv[])
           logFile = fopen(&argv[i][6], "w");
           if (logFile == NULL) printf("Could not create log file %s\n", &argv[i][6]);
         }
+      else if (1 == sscanf(argv[i], "--extra=%o", &j))
+        {
+          if (numLogExtras < MAX_LOG_EXTRAS && j >= 0 && j < MEMORY_SIZE)
+            logExtras[numLogExtras++] = j;
+          else
+            printf ("Illegal %s\n", argv[i]);
+        }
       else
         {
           printf("Usage:\n");
@@ -77,6 +88,8 @@ main(int argc, char *argv[])
           printf("--run        By default, the simulation starts up in a paused state.\n");
           printf("             The --run switch starts it in a free-running state.\n");
           printf("--log=F      Log to a file.\n");
+          printf("--extra=OCT  In the --log file, add the value at the address OCT\n");
+          printf("             to the log.  There can be up to %d of these.\n", MAX_LOG_EXTRAS);
           return (1);
         }
     }

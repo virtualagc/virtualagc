@@ -76,9 +76,6 @@ loadYul(char *filename)
 #endif
       agc.memory[addr] = data;
     }
-  for (; addr < MEMORY_SIZE; addr++)
-    agc.memory[addr] = 0;
-
   fclose(fp);
   return (0);
 }

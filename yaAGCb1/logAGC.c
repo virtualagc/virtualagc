@@ -52,6 +52,8 @@
 #include <stdio.h>
 #include "yaAGCb1.h"
 
+extern int numLogExtras;
+extern uint16_t logExtras[];
 void
 logAGC(FILE *logFile, uint16_t lastZ)
 {
@@ -63,6 +65,13 @@ logAGC(FILE *logFile, uint16_t lastZ)
   fprintf (logFile, "\n\tTIME1=%06o\tTIME2=%06o\tTIME3=%06o\tTIME4=%06o", ctrTIME1, ctrTIME2, ctrTIME3, ctrTIME4);
   fprintf (logFile, "\n\tARUPT=%06o\tQRUPT=%06o\tZRUPT=%06o\tBRUPT=%06o\tB=%06o", regARUPT, regQRUPT, regZRUPT, regBRUPT, agc.B);
   fprintf(logFile, "\n\tCYR=%06o\tSR=%06o\tCYL=%06o\tSL=%06o", regCYR, regSR, regCYL, regSL);
+  if (numLogExtras > 0)
+    {
+      int i;
+      fprintf(logFile, "\n");
+      for (i = 0; i < numLogExtras; i++)
+        fprintf(logFile, "\t%05o=%06o", logExtras[i], agc.memory[logExtras[i]]);
+    }
   fprintf (logFile, "\n");
 }
 

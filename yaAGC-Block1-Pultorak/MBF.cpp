@@ -24,13 +24,13 @@ unsigned MBF::conv_SBWG[] =
 unsigned MBF::conv_WE[] =
   { BX, SG, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2, B1 };
 unsigned MBF::conv_W20[] =
-  { B1, BX, B15, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
+  { B1, BX, SG, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
 unsigned MBF::conv_W21[] =
-  { B15, BX, B15, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
+  { SG, BX, SG, B14, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2 };
 unsigned MBF::conv_W22[] =
-  { B14, BX, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2, B1, B15 };
+  { B14, BX, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2, B1, SG };
 unsigned MBF::conv_W23[] =
-  { B14, BX, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2, B1, D0 };
+  { SG, BX, B13, B12, B11, B10, B9, B8, B7, B6, B5, B4, B3, B2, B1, SG };
 void
 MBF::execWP_GENRST()
 {

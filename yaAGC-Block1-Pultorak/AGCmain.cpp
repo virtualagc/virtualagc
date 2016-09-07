@@ -184,6 +184,9 @@ char userInput[256];
 
 #define ROPE_SIZE (02000 * (NUMFBANK + 1))
 FILE *logFile = NULL;
+#define MAX_LOG_EXTRAS 10
+int numLogExtras = 0;
+uint16_t logExtras[MAX_LOG_EXTRAS];
 
 using namespace std;
 
@@ -290,7 +293,7 @@ toggleBreakpoint()
           breakpoint = bank * 02000 + offset % 02000;
           breakpointEnab = true;
         }
-      else if (1 == sscanf(b, "%o", flat))
+      else if (1 == sscanf(b, "%o", &flat))
         {
           breakpoint = flat;
           breakpointEnab = true;
@@ -558,7 +561,24 @@ examineMemory()
   char theAddress[20];
   strcpy(theAddress, getCommand("Examine Memory -- enter address (octal)\n: "));
   printw("%s\n", theAddress);
-  unsigned address = strtol(theAddress, 0, 8);
+  unsigned address, bank, offset, flat;
+  if (2 == sscanf(theAddress, "%o,%o", &bank, &offset))
+    {
+      address = bank * 02000 + offset % 02000;
+    }
+  else if (1 == sscanf(theAddress, "%o", &flat))
+    {
+      address = flat;
+    }
+  else
+    {
+      printw("Unrecognized address.\n");
+      return;
+    }
+  if (address < 0 || address >= ROPE_SIZE)
+    {
+      printw("Address is out of range, breakpoints cleared.\n");
+    }
   for (unsigned i = address; i < address + 24 && i < ROPE_SIZE; i++)
     {
       int data = MEM::readMemory(i);
@@ -844,7 +864,7 @@ main(int argc, char* argv[])
 
   // Parse command line.
     {
-      int i;
+      int i, j;
       unsigned u;
       for (i = 1; i < argc; i++)
         {
@@ -860,16 +880,25 @@ main(int argc, char* argv[])
             }
           else if (!strcmp(argv[i], "--power"))
             power = 3;
+          else if (1 == sscanf(argv[i], "--extra=%o", &j))
+            {
+              if (numLogExtras < MAX_LOG_EXTRAS && j >= 0 && j < ROPE_SIZE)
+                logExtras[numLogExtras++] = j;
+              else
+                printf ("Illegal %s\n", argv[i]);
+            }
           else
             {
               printf("Usage:\n");
               printf("\tyaAGC-Block1 [OPTIONS]\n");
               printf("Possible OPTIONS:\n");
-              printf("--go=O    Starting address (octal), default 2030.\n");
-              printf("--rope=F  Specify a rope, default Solarium055.\n");
-              printf("--log=F   Specify a log file (default none).\n");
-              printf("--power   Automatically give 'p', 'r', 't' commands\n");
-              printf("          upon entry.\n");
+              printf("--go=O       Starting address (octal), default 2030.\n");
+              printf("--rope=F     Specify a rope, default Solarium055.\n");
+              printf("--log=F      Specify a log file (default none).\n");
+              printf("--extra=OCT  In the --log file, add the value at the address OCT\n");
+              printf("             to the log.  There can be up to %d of these.\n", MAX_LOG_EXTRAS);
+              printf("--power      Automatically give 'p', 'r', 't' commands\n");
+              printf("             upon entry.\n");
               return (1);
             }
         }
@@ -933,7 +962,7 @@ main(int argc, char* argv[])
                   anyWZ = anyWZ || SEQ::anyWZ();
                   if (!MON::INST
                       || (MON::INST && TPG::register_SG.read() == TP1 && anyWZ
-                          && SEQ::glbl_subseq != CCS1))
+                          && SEQ::glbl_subseq != CCS1 && SEQ::glbl_subseq != STD2))
                     {
                       singleClock = false;
                     }
