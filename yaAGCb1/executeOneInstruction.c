@@ -182,13 +182,13 @@ edit(uint16_t flatAddress)
     {
       uint16_t before, SG, UC, B14, B1;
       before = agc.memory[flatAddress];
-      SG = before & 0100000;
+      SG = regA & 0100000;
       UC = before & 0040000;
       B14 = before & 0020000;
       B1 = before & 1;
       if (flatAddress == 020)
-        agc.memory[flatAddress] = ((before >> 1) & 017777) | (B1 << 14)
-            | (SG >> 2);
+        agc.memory[flatAddress] = ((before >> 1) & 017777) | (B1 << 15)
+            | (SG >> 2) | UC;
       else if (flatAddress == 021)
         agc.memory[flatAddress] = ((before >> 1) & 017777) | SG | (SG >> 2)
             | UC;
@@ -355,9 +355,9 @@ executeOneInstruction(FILE *logFile)
     {
       if (operand == 020 && operand <= 023)
         {
-          agc.memory[operand] = fixUcForWriting(regA) /* | ((fetchedFromOperand & 0040000) << 1)*/;
-          edit(operand);
+          agc.memory[operand] = fixUcForWriting(regA);
           regA = fetchedFromOperandSignExtended;
+          edit(operand);
         }
       else
         {
