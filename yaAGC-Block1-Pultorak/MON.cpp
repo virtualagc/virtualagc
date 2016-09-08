@@ -69,52 +69,52 @@ MON::displayAGC()
   else
     sprintf(addressString, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
   printw("%s",
-      "BLOCK 1 (" __DATE__ ") SIMULATOR 1.16g-0.5 -------------------------------\n");
-  printw(" TP: %-5s F17:%1d F13:%1d F10:%1d SCL:%u PC:%s flat:%05o\n",
-      TPG::tpTypestring[TPG::register_SG.read()], SCL::register_F17.read(),
+      "------------------------------------------------------------------------------------\n");
+  printw("CP(%s): %s\n", TPG::tpTypestring[TPG::register_SG.read()], SEQ::getControlPulses());
+  printw("F17: %1d\t\tF13: %1d\t\tF10: %1d\t\tSCL: %-8u\tPC: %s\tflat: %05o\n",
+      SCL::register_F17.read(),
       SCL::register_F13.read(), SCL::register_F10.read(),
       (SCL::register_SCL.read() >= 016) ?
           ((SCL::register_SCL.read() - 016) / 014) : 0, addressString, pc);
-  printw(" STA:%01o STB:%01o BR1:%01o BR2:%01o SNI:%01o CI:%01o LOOPCTR:%01o\n",
+  printw("STA: %01o\t\tSTB: %01o\t\tBR1: %01o\t\tBR2: %01o\t\tSNI: %01o\t\tCI: %01o\t\tLOOPCTR: %01o\n",
       SEQ::register_STA.read(), SEQ::register_STB.read(),
       SEQ::register_BR1.read(), SEQ::register_BR2.read(),
       SEQ::register_SNI.read(), ALU::register_CI.read(),
       SEQ::register_LOOPCTR.read());
   printw(
-      " RPCELL:%05o INH1:%01o INH:%01o UpCELL:%03o DnCELL:%03o SQ:%02o %-6s %-6s\n",
+      "RPCELL: %05o\tINH1: %01o\t\tINH: %01o\t\tUpCELL: %03o\tDnCELL: %03o\tSQ: %02o\t\t%-6s %-6s\n",
       INT::register_RPCELL.read(), INT::register_INHINT1.read(),
       INT::register_INHINT.read(), CTR::register_UpCELL.read(),
       CTR::register_DnCELL.read(), SEQ::register_SQ.read(),
       SEQ::instructionString[SEQ::register_SQ.read()],
       CPM::subseqString[SEQ::glbl_subseq]);
-  printw(" CP:%s\n", SEQ::getControlPulses());
   // For the G register, bit 15 comes from register G15; the other bits (16, 14-1) come
   // from register G.
-  printw(" S: %04o G:%06o P:%06o (r)RUN :%1d (p)PURST:%1d (F2,F4)FCLK:%1d\n",
+  printw("S: %04o\t\tG: %06o\tP: %06o\t(r)RUN : %1d\t(p)PURST: %1d\t(t,v)FCLK: %1d\n",
       ADR::register_S.read(),
       (MBF::register_G.read() & 0137777) | (PAR::register_G15.read() << 14),
       PAR::register_P.read(), MON::RUN, MON::PURST, MON::FCLK);
-  printw(" RBU:%06o WBU:%06o P2:%01o (s)STEP:%1d\n",
+  printw("RBU: %06o\tWBU: %06o\tP2: %01o\t\t(s)STEP: %1d\n",
       BUS::glbl_READ_BUS & 0177777, BUS::glbl_WRITE_BUS & 0177777,
       PAR::register_P2.read(), MON::STEP);
   char parityAlm = ' ';
   if (PAR::register_PALM.read())
     parityAlm = '*';
-  printw(" B:%06o CADR:%06o (n)INST:%1d PALM:[%c]\n", ALU::register_B.read(),
+  printw("B: %06o\tCADR: %06o\t(n)INST: %1d\tPALM: [%c]\n", ALU::register_B.read(),
       ADR::getEffectiveAddress(), MON::INST, parityAlm);
-  printw(" X:%06o Y:%06o U:%06o (a)SA :%1d\n\n", ALU::register_X.read(),
+  printw("X: %06o\tY: %06o\tU: %06o\t(a)SA: %1d\n\n", ALU::register_X.read(),
       ALU::register_Y.read(), ALU::register_U.read(), MON::SA);
-  printw("00 A:%06o 15 BANK:%02o 36 TIME1:%06o 53 OPT Y:%06o\n",
+  printw("00 A: %06o\t\t15 BANK: %02o\t\t36 TIME1: %06o\t53 OPT Y: %06o\n",
       CRG::register_A.read(), ADR::register_BNK.read(), MEM::readMemory(036),
       MEM::readMemory(053));
-  printw("01 Q:%06o 16 RELINT:%6s 37 TIME3:%06o 54 TRKR X:%06o\n",
-      CRG::register_Q.read(), "", MEM::readMemory(037), MEM::readMemory(054));
-  printw("02 Z:%06o 17 INHINT:%6s 40 TIME4:%06o 55 TRKR Y:%06o\n",
-      CRG::register_Z.read(), "", MEM::readMemory(040), MEM::readMemory(055));
-  printw("03 LP:%06o 20 CYR:%06o 41 UPLINK:%06o 56 TRKR Z:%06o\n",
+  printw("01 Q: %06o\t\t16 RELINT: %s\t\t37 TIME3: %06o\t54 TRKR X: %06o\n",
+      CRG::register_Q.read(), "?", MEM::readMemory(037), MEM::readMemory(054));
+  printw("02 Z: %06o\t\t17 INHINT: %s\t\t40 TIME4: %06o\t55 TRKR Y: %06o\n",
+      CRG::register_Z.read(), "?", MEM::readMemory(040), MEM::readMemory(055));
+  printw("03 LP: %06o\t\t20 CYR: %06o\t\t41 UPLINK: %06o\t56 TRKR Z: %06o\n",
       CRG::register_LP.read(), MEM::readMemory(020), MEM::readMemory(041),
       MEM::readMemory(056));
-  printw("04 IN0:%06o 21 SR:%06o 42 OUTCR1:%06o\n", INP::register_IN0.read(),
+  printw("04 IN0: %06o\t\t21 SR: %06o\t\t42 OUTCR1: %06o\n", INP::register_IN0.read(),
       MEM::readMemory(021), MEM::readMemory(042));
   char progAlm = ' ';
   if (OUT::register_OUT1.read() & 0400)
@@ -131,31 +131,32 @@ MON::displayAGC()
   char comp = ' '; // also called comp acty
   if (OUT::register_OUT1.read() & 001)
     comp = '*';
-  printw("05 IN1:%06o 22 CYL:%06o 43 OUTCR2:%06o CF:[%c%c]:KR [%c]:PA\n",
+  printw("05 IN1: %06o\t\t22 CYL: %06o\t\t43 OUTCR2: %06o\tCF:[%c%c]:KR\t[%c]:PA\n",
       INP::register_IN1.read(), MEM::readMemory(022), MEM::readMemory(043),
       compFail, keyRels, progAlm);
-  printw("06 IN2:%06o 23 SL:%06o 44 PIPA X:%06o\n", INP::register_IN2.read(),
+  printw("06 IN2: %06o\t\t23 SL: %06o\t\t44 PIPA X: %06o\n", INP::register_IN2.read(),
       MEM::readMemory(023), MEM::readMemory(044));
-  printw("07 IN3:%06o 24 ZRUPT:%06o 45 PIPA Y:%06o A:[%c%c] M:[%c%c]\n",
+  printw("07 IN3: %06o\t\t24 ZRUPT: %06o\t45 PIPA Y: %06o\tA:[%c%c]\t\tM:[%c%c]\n",
       INP::register_IN3.read(), MEM::readMemory(024), MEM::readMemory(045),
       upTl, comp, DSP::MD1, DSP::MD2);
   char fc = ' ';
   if (DSP::flash)
     fc = '*';
-  printw("10 OUT0: 25 BRUPT:%06o 46 PIPA Z:%06o V:[%c%c] N:[%c%c] %c\n",
+  printw("10 OUT0: ?????\t\t25 BRUPT: %06o\t46 PIPA Z: %06o\tV:[%c%c]\t\tN:[%c%c]\t %c\n",
       MEM::readMemory(025), MEM::readMemory(046), DSP::VD1, DSP::VD2, DSP::ND1,
       DSP::ND2, fc);
-  printw("11 OUT1:%06o 26 ARUPT:%06o 47 CDU X:%06o R1:[ %c%c%c%c%c%c ]\n",
+  printw("11 OUT1: %06o\t\t26 ARUPT: %06o\t47 CDU X: %06o\tR1:[%c%c%c%c%c%c]\n",
       OUT::register_OUT1.read(), MEM::readMemory(026), MEM::readMemory(047),
       DSP::R1S, DSP::R1D1, DSP::R1D2, DSP::R1D3, DSP::R1D4, DSP::R1D5);
-  printw("12 OUT2:%06o 27 QRUPT:%06o 50 CDU Y:%06o R2:[ %c%c%c%c%c%c ]\n",
+  printw("12 OUT2: %06o\t\t27 QRUPT: %06o\t50 CDU Y: %06o\tR2:[%c%c%c%c%c%c]\n",
       OUT::register_OUT2.read(), MEM::readMemory(027), MEM::readMemory(050),
       DSP::R2S, DSP::R2D1, DSP::R2D2, DSP::R2D3, DSP::R2D4, DSP::R2D5);
-  printw("13 OUT3:%06o 34 OVCTR:%06o 51 CDU Z:%06o R3:[ %c%c%c%c%c%c ]\n",
+  printw("13 OUT3: %06o\t\t34 OVCTR: %06o\t51 CDU Z: %06o\tR3:[%c%c%c%c%c%c]\n",
       OUT::register_OUT3.read(), MEM::readMemory(034), MEM::readMemory(051),
       DSP::R3S, DSP::R3D1, DSP::R3D2, DSP::R3D3, DSP::R3D4, DSP::R3D5);
-  printw("14 OUT4:%06o 35 TIME2:%06o 52 OPT X:%06o\n",
+  printw("14 OUT4: %06o\t\t35 TIME2: %06o\t52 OPT X: %06o\n",
       OUT::register_OUT4.read(), MEM::readMemory(035), MEM::readMemory(052));
+  printw("\n");
 }
 
 /*

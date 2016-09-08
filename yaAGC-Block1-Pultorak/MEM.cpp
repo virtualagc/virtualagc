@@ -20,7 +20,10 @@
 #define endwin()
 #endif
 regEMEM MEM::register_EMEM[02000]; // erasable memory
-regFMEM MEM::register_FMEM[02000 * (NUMFBANK + 1)]; // fixed memory (lowest 02000 words ignored)
+// The amount of memory logically addressable, as opposed to physically addressable,
+// is allocated in order to make sure that bad AGC instructions don't segfault the
+// simulator.
+regFMEM MEM::register_FMEM[02000 * (041 /*NUMFBANK + 1 */)]; // fixed memory (lowest 02000 words ignored)
 unsigned MEM::MEM_DATA_BUS = 0; // data lines: memory bits 15-1
 unsigned MEM::MEM_PARITY_BUS = 0; // parity line: memory bit 16
 void

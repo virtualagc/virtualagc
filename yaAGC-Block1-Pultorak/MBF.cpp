@@ -48,8 +48,8 @@ MBF::execRP_RG()
 void
 MBF::execRP_WE()
 {
-// Write G into memory; shift the sign to bit 15; parity is written from the
-// PAR subsystem
+  // Write G into memory; shift the sign to bit 15; parity is written from the
+  // PAR subsystem
   MEM::MEM_DATA_BUS = (register_G.shiftData(0, MBF::register_G.read(),
       MBF::conv_WE));
 }
@@ -61,11 +61,11 @@ MBF::execWP_WGn()
 void
 MBF::execWP_WGx()
 {
-// This is only used in PINC, MINC, and SHINC. Does not clear G
-// register; writes (ORs) into G from RWBus and writes into parity
-// from 1-15 generator. The sequence calls CLG in a previous TP to
-// reset G to zero, so the OR operation can be safely eliminated
-// from my implementation of the design.
+  // This is only used in PINC, MINC, and SHINC. Does not clear G
+  // register; writes (ORs) into G from RWBus and writes into parity
+  // from 1-15 generator. The sequence calls CLG in a previous TP to
+  // reset G to zero, so the OR operation can be safely eliminated
+  // from my implementation of the design.
   register_G.write(BUS::glbl_WRITE_BUS);
 }
 void

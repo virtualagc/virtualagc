@@ -67,7 +67,7 @@ class regBNK : public reg
 {
 public:
   regBNK() :
-      reg(4, "%02o")
+      reg(5, "%02o")
   {
   }
   virtual

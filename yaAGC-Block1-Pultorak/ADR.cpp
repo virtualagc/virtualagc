@@ -22,7 +22,7 @@ regBNK ADR::register_BNK; // bank register
 //  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B14, B13, B12, B11 };
 // transfer bits 15-11 from the bus into the 5-bit bank register
 unsigned ADR::conv_WBK[] =
-  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B15, B14, B13, B12, B11 };
+  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, US, B14, B13, B12, B11 };
 unsigned ADR::conv_WBK_xch[] =
   { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B5, B4, B3, B2, B1 };
 void

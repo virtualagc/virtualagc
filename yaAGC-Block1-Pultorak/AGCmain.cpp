@@ -705,7 +705,7 @@ showMenu()
   printw("    'g' = KEY RELEASE.\n");
   printw("    'j' = ENTER KEY.\n");
 }
-#define MAX_LINE_LENGTH 132
+#define MAX_LINE_LENGTH 110
 const int startCol = 0; // columns are numbered 0-n
 const int colLen = 5; // number of chars in column
 const int maxLines = 24; // # of total lines to display

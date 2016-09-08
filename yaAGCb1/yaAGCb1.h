@@ -107,8 +107,12 @@ typedef struct
    *
    * The Erasable includes those "special registers" that are identified
    * with memory locations by R-393 Table 3-1.
+   *
+   * The amount of memory logically addressable, as opposed to physically addressable,
+   * is allocated in order to make sure that bad AGC instructions don't segfault the
+   * simulator.
    */
-  uint16_t memory[MEMORY_SIZE];
+  uint16_t memory[041 * 02000 /*MEMORY_SIZE*/];
 
   // Registers not addressable directly by basic instructions.
   uint16_t INDEX;
@@ -141,10 +145,10 @@ typedef struct
 int64_t
 getTimeNanoseconds(void);
 void
-sleepNanoseconds (int64_t nanoseconds);
+sleepNanoseconds(int64_t nanoseconds);
 
 void
-executeOneInstruction (FILE *logFile);
+executeOneInstruction(FILE *logFile);
 
 //--------------------------------------------------------------------------
 // Stuff related to debugging.

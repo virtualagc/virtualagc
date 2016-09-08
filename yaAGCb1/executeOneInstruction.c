@@ -231,7 +231,7 @@ executeOneInstruction(FILE *logFile)
     term1 = fixUcForWriting(term1);
   term2 = SignExtend(agc.INDEX);
   // Special case:  note that x + -x = -0.
-  if (term1 == ~term2)
+  if (077777 & term1 == 077777 & ~term2)
     sum = 0177777;
   else
     {
