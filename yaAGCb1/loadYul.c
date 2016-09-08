@@ -47,11 +47,26 @@ agcBlock1_t agc;
 int
 loadYul(char *filename)
 {
+  int i;
   unsigned addr, data;
   uint8_t word[2];
   FILE* fp;
 
+  // All of the non-memory parts of the agc structure are zeroed
+  // (along with the memory).  Erasable memory above address 060 is
+  // then reinitialized to 0166666, which is actually an illegal value
+  // that the AGC itself couldn't have used, because all writes to these
+  // locations by the AGC are 15-bit only.  Fixed memory is also reinitialized
+  // to 0100000, which is also an illegal value, but it's reminiscent of
+  // the 00000-but-with-wrong-parity which I'm told missing core locations
+  // read back as.  (In the simulator, of course, the 16th bit doesn't
+  // represent parity, merely an unused bit that will never have 1 in it
+  // normally.)
   memset(&agc, 0, sizeof(agc));
+  for (i = 060; i < 02000; i++)
+    agc.memory[i] = 0166666;
+  for (i = 02000; i < sizeof(agc.memory) / 2; i++)
+    agc.memory[i] = 0100000;
 
   fp = fopen(filename, "rb");
   if (fp == NULL)

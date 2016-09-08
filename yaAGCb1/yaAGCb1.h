@@ -233,5 +233,7 @@ extern agcBlock1_t agc;
 
 int
 loadYul(char *filename);
+int
+loadPads(char *filename);
 
 #endif // YAAGC_BLOCK1_H

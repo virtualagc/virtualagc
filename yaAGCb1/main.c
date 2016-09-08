@@ -48,7 +48,8 @@ int
 main(int argc, char *argv[])
 {
   int i, j, startingAddress = 02030, startState = 0;
-  char *ropeFile = "Solarium055.bin", *listingFile = "Solarium055.lst";
+  char *ropeFile = "Solarium055.bin", *listingFile = "Solarium055.lst",
+      *padFile = "Solarium055.pad";
   char command[128];
   FILE *logFile = NULL;
 
@@ -66,14 +67,15 @@ main(int argc, char *argv[])
       else if (!strncmp(argv[i], "--log=", 6))
         {
           logFile = fopen(&argv[i][6], "w");
-          if (logFile == NULL) printf("Could not create log file %s\n", &argv[i][6]);
+          if (logFile == NULL)
+            printf("Could not create log file %s\n", &argv[i][6]);
         }
       else if (1 == sscanf(argv[i], "--extra=%o", &j))
         {
           if (numLogExtras < MAX_LOG_EXTRAS && j >= 0 && j < MEMORY_SIZE)
             logExtras[numLogExtras++] = j;
           else
-            printf ("Illegal %s\n", argv[i]);
+            printf("Illegal %s\n", argv[i]);
         }
       else
         {
@@ -83,13 +85,19 @@ main(int argc, char *argv[])
           printf(
               "--rope=F     Specify name of a rope file (default Solarium055.bin).\n");
           printf(
+              "--pads=F     Specify name of a pad-load file (default Solarium055.pad).\n");
+          printf(
               "--listing=F  Specify name of a listing file (default Solarium055.lst).\n");
           printf("--go=OCTAL   Specify program entry point (default 02030).\n");
-          printf("--run        By default, the simulation starts up in a paused state.\n");
-          printf("             The --run switch starts it in a free-running state.\n");
+          printf(
+              "--run        By default, the simulation starts up in a paused state.\n");
+          printf(
+              "             The --run switch starts it in a free-running state.\n");
           printf("--log=F      Log to a file.\n");
-          printf("--extra=OCT  In the --log file, add the value at the address OCT\n");
-          printf("             to the log.  There can be up to %d of these.\n", MAX_LOG_EXTRAS);
+          printf(
+              "--extra=OCT  In the --log file, add the value at the address OCT\n");
+          printf("             to the log.  There can be up to %d of these.\n",
+              MAX_LOG_EXTRAS);
           return (1);
         }
     }
@@ -101,6 +109,16 @@ main(int argc, char *argv[])
   else
     {
       printf("Rope file %s not found or other error loading it.\n", ropeFile);
+      return (1);
+    }
+
+  // Load the pads.
+  i = loadPads(padFile);
+  if (i == 0)
+    printf("Pad-load file %s loaded.\n", padFile);
+  else
+    {
+      printf ("Pad-load file %s not found or other error loading it.\n", padFile);
       return (1);
     }
 

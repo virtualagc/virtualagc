@@ -43,7 +43,7 @@
 void
 processConsoleDebuggingCommand(char *command)
 {
-  unsigned u, flatAddress;
+  unsigned u, flatAddress, bank, offset;
   int index;
   char c, *s;
 
@@ -68,16 +68,50 @@ processConsoleDebuggingCommand(char *command)
           agc.instructionCountDown = u;
           return;
         }
+      if (3 == sscanf(command, "%c%o,%o", &c, &bank, &offset))
+        {
+          if (bank < 040 && offset >= 06000 && offset <= 07777)
+            {
+              flatAddress = bank * 02000 + (offset & 01777);
+              if (c == 'e' || c == 'E')
+                {
+                  goto examineMemory;
+                }
+            }
+        }
+      else if (2 == sscanf(command, "%c%o", &c, &flatAddress))
+        {
+          if (flatAddress < sizeof(agc.memory) / 2)
+            {
+              if (c == 'e' || c == 'E')
+                {
+                  int i;
+                  examineMemory: ;
+                  for (i = 0; i < 24 && flatAddress < sizeof(agc.memory) / 2;
+                      i++, flatAddress++)
+                    {
+                      if (flatAddress < 06000)
+                        printf("%04o:  %06o\n", flatAddress,
+                            agc.memory[flatAddress]);
+                      else
+                        printf("%02o,%04o:  %06o\n", flatAddress / 02000,
+                            06000 + (flatAddress % 02000), agc.memory[flatAddress]);
+                    }
+                  goto reprompt;
+                }
+            }
+        }
       if (!strcasecmp(command, "q"))
         {
           exit(0);
         }
       if (*command)
         {
-          printf("       c  --- continuous run\n");
-          printf("  s or t  --- single step\n");
-          printf("sN or tN  --- N single steps\n");
-          printf("       q  --- quit\n");
+          printf("         c  --- continuous run\n");
+          printf("    s or t  --- single step\n");
+          printf("  sN or tN  --- N single steps\n");
+          printf("eN or eB,O  --- examine memory at memory location\n");
+          printf("         q  --- quit\n");
         }
     }
   for (u = 0; u < MAX_LINE_LENGTH; u++)
@@ -122,6 +156,7 @@ processConsoleDebuggingCommand(char *command)
           printf("%c%s\n", (i == index) ? '>' : ' ', bufferedListing[i]);
         }
     }
+  reprompt:;
   printf("> "); // Re-prompt.
   fflush(stdout);
 }
