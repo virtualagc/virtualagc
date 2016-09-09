@@ -50,7 +50,7 @@ class regSCL : public reg
 {
 public:
   regSCL() :
-      reg(17, "%06o")
+      reg(32, "%06o")
   {
   }
 };
@@ -66,8 +66,8 @@ public:
   static void
   doexecWP_F10();
   static regSCL register_SCL;
-// Normally outputs '0'; outputs '1' for one
-// clock pulse at the indicated frequency.
+  // Normally outputs '0'; outputs '1' for one
+  // clock pulse at the indicated frequency.
   static unsigned
   F17x(); // 0.78125 Hz scaler output
   static unsigned

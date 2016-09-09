@@ -122,7 +122,7 @@ processConsoleDebuggingCommand(char *command)
       agc.pausedNanoseconds / 1000000);
   printf(
       "  A: %06o   IN0: %05o   OUT0: %05o     Bank: %03o   CYR: %05o   ZRUPT: %05o   TIME1: %06o\n",
-      regA, regIN0, regOUT0, regBank, regCYR, regZRUPT, ctrTIME1);
+      regA, regIN0, regOUT0, regBank >> 10, regCYR, regZRUPT, ctrTIME1);
   printf(
       "  Q: %06o   IN1: %05o   OUT1: %05o                  SR: %05o   BRUPT: %05o   TIME2: %06o\n",
       regQ, regIN1, regOUT1, regSR, regBRUPT, ctrTIME2);

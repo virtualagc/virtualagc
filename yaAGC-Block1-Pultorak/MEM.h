@@ -25,6 +25,7 @@
 #include "reg.h"
 // There are actually 034 (28D) fixed banks.  R393 is wrong in that respect.
 #define NUMFBANK 034 // number of 1024 word fixed memory banks
+#define LOGICALFBANK 040
 class regEMEM : public reg
 {
 public:
@@ -76,8 +77,8 @@ public:
   readMemory();
   static void
   writeMemory(unsigned data);
-// The following functions are used in the simulator,
-// but are implemented in the AGC design.
+  // The following functions are used in the simulator,
+  // but are implemented in the AGC design.
   static unsigned
   readMemory(unsigned address);
   static void

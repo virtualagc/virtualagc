@@ -40,9 +40,17 @@
 #include <string.h>
 #include "yaAGCb1.h"
 
+// FIXME  Forgot to add loadPads() to the repo.  Remove this temporary workaround later.
+int
+loadPads(char *filename)
+{
+  return (0);
+}
+
 #define MAX_LOG_EXTRAS 10
 int numLogExtras = 0;
 uint16_t logExtras[MAX_LOG_EXTRAS];
+int zeroErasable = 0;
 
 int
 main(int argc, char *argv[])
@@ -77,6 +85,8 @@ main(int argc, char *argv[])
           else
             printf("Illegal %s\n", argv[i]);
         }
+      else if (!strcmp(argv[i], "--zero"))
+        zeroErasable = 1;
       else
         {
           printf("Usage:\n");
@@ -98,6 +108,8 @@ main(int argc, char *argv[])
               "--extra=OCT  In the --log file, add the value at the address OCT\n");
           printf("             to the log.  There can be up to %d of these.\n",
               MAX_LOG_EXTRAS);
+          printf("--zero       At power-up, initialize erasable 060-01777 to 0,\n");
+          printf("             rather than the default 0166666.\n");
           return (1);
         }
     }

@@ -25,10 +25,10 @@
 enum ruptAddress
 {
 // Addresses for service routines of vectored interrupts
-  T3RUPT_ADDR = 02004, // option 1: overflow of TIME 3
-  ERRUPT_ADDR = 02010, // option 2: error signal
-  DSRUPT_ADDR = 02014, // option 3: telemetry end pulse or TIME 4 overflow
-  KEYRUPT_ADDR = 02020, // option 4: activity from MARK, keyboard, or tape reader
+  T3RUPT_ADDR = 02000, // option 1: overflow of TIME 3
+  ERRUPT_ADDR = 02004, // option 2: error signal
+  DSRUPT_ADDR = 02010, // option 3: telemetry end pulse or TIME 4 overflow
+  KEYRUPT_ADDR = 02014, // option 4: activity from MARK, keyboard, or tape reader
 };
 enum ruptNumber
 {

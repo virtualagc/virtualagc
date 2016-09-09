@@ -64,7 +64,7 @@ loadYul(char *filename)
   // normally.)
   memset(&agc, 0, sizeof(agc));
   for (i = 060; i < 02000; i++)
-    agc.memory[i] = 0166666;
+    agc.memory[i] = (zeroErasable || i == 01760 || i == 065) ? 0 : 0166666;
   for (i = 02000; i < sizeof(agc.memory) / 2; i++)
     agc.memory[i] = 0100000;
 

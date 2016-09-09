@@ -65,7 +65,7 @@
 
 // A macro for converting a bank number and address within a fixed-memory
 // bank, such as 04,07005 to the "flat" address space.
-#define flatten(bank,offset) ((bank == 0) ? offset : ((02000 * bank) + (offset & 01777)))
+#define flatten(bank,offset) ((bank == 0) ? offset : (bank + (offset & 01777)))
 
 // Some numerical constants, in AGC format.
 #define AGC_P0 ((int16_t) 0)
@@ -118,6 +118,13 @@ typedef struct
   uint16_t INDEX;
   uint16_t INTERRUPTED; // Indicates an interrupt is already being processed.
   uint16_t B;
+
+  // Some bookkeeping I need for interrupts.
+  uint16_t ruptFlatAddress;
+  uint16_t ruptLastINDEX;
+  uint16_t ruptLastZ;
+  uint16_t overflowedTIME3;
+  uint16_t overflowedTIME4;
 
   // These values are the number of AGC MCT cycles which have occurred since
   // virtual AGC power-up, versus the total number of nanoseconds which have
@@ -231,9 +238,34 @@ extern agcBlock1_t agc;
 #define ctrOPTX agc.memory[052]
 #define ctrOPTY agc.memory[053]
 
+extern int zeroErasable;
 int
 loadYul(char *filename);
 int
 loadPads(char *filename);
+
+//--------------------------------------------------------------------------
+// Functions brazenly and brainlessly copied from yaAGC/agc_engine.c into
+// yaAGCb1/fromYaAGC.c, in order to facilitate reusing the Block 2 MP and
+// DV instructions in the Block 1 simulator.
+
+int16_t
+SignExtend(int16_t Word);
+int
+agc2cpu (int Input);
+int
+cpu2agc (int Input);
+int
+agc2cpu2 (int Input);
+int
+cpu2agc2 (int Input);
+int16_t
+OverflowCorrected(int Value);
+int
+SpToDecent (int16_t * LsbSP);
+void
+DecentToSp(int Decent, int16_t * LsbSP);
+int16_t
+AddSP16 (int16_t Addend1, int16_t Addend2);
 
 #endif // YAAGC_BLOCK1_H

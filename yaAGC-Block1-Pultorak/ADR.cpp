@@ -23,8 +23,6 @@ regBNK ADR::register_BNK; // bank register
 // transfer bits 15-11 from the bus into the 5-bit bank register
 unsigned ADR::conv_WBK[] =
   { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, US, B14, B13, B12, B11 };
-unsigned ADR::conv_WBK_xch[] =
-  { BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, BX, B5, B4, B3, B2, B1 };
 void
 ADR::execWP_WS()
 {
@@ -33,22 +31,11 @@ ADR::execWP_WS()
 void
 ADR::execRP_RBK()
 {
-  printf("DEBUG RBK: %s %s\n", SEQ::instructionString[SEQ::register_SQ.read()], CPM::subseqString[SEQ::glbl_subseq]);
-  // RSB:  Originally just this second part of the conditional was here, but it didn't
-  // for XCH BANKREG, because the bits weren't in the expected position in the input
-  // word when the WBK control-pulse sequence was eventually reached.
-  if (XCH0 == 6)
-    BUS::glbl_READ_BUS = register_BNK.read();
-  else
     BUS::glbl_READ_BUS = register_BNK.read() << 10;
 }
 void
 ADR::execWP_WBK()
 {
-  printf("DEBUG WBK: %s %s\n", SEQ::instructionString[SEQ::register_SQ.read()], CPM::subseqString[SEQ::glbl_subseq]);
-  if (XCH0 == 6)
-    register_BNK.writeShift(BUS::glbl_WRITE_BUS, ADR::conv_WBK_xch);
-  else
     register_BNK.writeShift(BUS::glbl_WRITE_BUS, ADR::conv_WBK);
 }
 bool

@@ -110,9 +110,16 @@ PAR::CLR_PALM()
 // asynchronous clear for PARITY ALARM (from MON)
   register_PALM.clear();
 }
+
+// RSB: All parity generation is turned off because: a) I don't care about it
+// in a software sim; and b) it was giving me fits because the parity was
+// showing up in my logs, fooling me into thinking weird stuff was happening
+// and messing up my comparisons between yaAGCb1 and yaAGC-Block1.
+
 unsigned
 PAR::gen1_15Parity(unsigned r)
 {
+#if 0
 //check the lower 15 bits of 'r' and return the odd parity;
 //bit 16 is ignored.
   unsigned evenParity = (1 & (r >> 0)) ^ (1 & (r >> 1)) ^ (1 & (r >> 2))
@@ -120,10 +127,14 @@ PAR::gen1_15Parity(unsigned r)
       ^ (1 & (r >> 7)) ^ (1 & (r >> 8)) ^ (1 & (r >> 9)) ^ (1 & (r >> 10))
       ^ (1 & (r >> 11)) ^ (1 & (r >> 12)) ^ (1 & (r >> 13)) ^ (1 & (r >> 14));
   return ~evenParity & 1; // odd parity
+#else
+  return 0;
+#endif
 }
 unsigned
 PAR::genP_15Parity(unsigned r)
 {
+#if 0
 //check all 16 bits of 'r' and return the odd parity
   unsigned evenParity = (1 & (r >> 0)) ^ (1 & (r >> 1)) ^ (1 & (r >> 2))
       ^ (1 & (r >> 3)) ^ (1 & (r >> 4)) ^ (1 & (r >> 5)) ^ (1 & (r >> 6))
@@ -131,5 +142,8 @@ PAR::genP_15Parity(unsigned r)
       ^ (1 & (r >> 11)) ^ (1 & (r >> 12)) ^ (1 & (r >> 13)) ^ (1 & (r >> 14))
       ^ (1 & (r >> 15));
   return ~evenParity & 1; // odd parity
+#else
+  return 0;
+#endif
 }
 

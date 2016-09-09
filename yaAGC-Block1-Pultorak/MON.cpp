@@ -191,7 +191,7 @@ MON::logAGC(FILE *logFile)
       OUT::register_OUT1.read(), OUT::register_OUT2.read(),
       OUT::register_OUT3.read(), OUT::register_OUT4.read());
   fprintf(logFile, "\n\tIN0=%05o\tIN1=%05o\tIN2=%05o\tIN3=%05o",
-      MEM::readMemory(021), INP::register_IN1.read(), INP::register_IN2.read(),
+      MEM::readMemory(04), INP::register_IN1.read(), INP::register_IN2.read(),
       INP::register_IN3.read());
   fprintf(logFile, "\n\tTIME1=%06o\tTIME2=%06o\tTIME3=%06o\tTIME4=%06o",
       MEM::readMemory(036), MEM::readMemory(035), MEM::readMemory(037),
@@ -207,7 +207,7 @@ MON::logAGC(FILE *logFile)
       int i;
       fprintf(logFile, "\n");
       for (i = 0; i < numLogExtras; i++)
-        fprintf(logFile, "\t%05o=%06o", logExtras[i], MEM::readMemory(logExtras[i]) & ((logExtras[i] >= 060) ? 077777 : ~0));
+        fprintf(logFile, "\t%05o=%06o", logExtras[i], MEM::readMemory(logExtras[i]) /*& ((logExtras[i] >= 060) ? 077777 : ~0)*/);
     }
   fprintf(logFile, "\n");
 }

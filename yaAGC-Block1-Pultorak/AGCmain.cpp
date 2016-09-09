@@ -187,6 +187,7 @@ FILE *logFile = NULL;
 #define MAX_LOG_EXTRAS 10
 int numLogExtras = 0;
 uint16_t logExtras[MAX_LOG_EXTRAS];
+bool zeroErasable = false;
 
 using namespace std;
 
@@ -495,6 +496,29 @@ loadEPROM(char* fileName, bool highBytes)
 void
 loadMemory(char *forceFilename)
 {
+
+  // Initialize memory.  The lowest bit, where the registers are,
+  // is simply zeroed out, but the remainder of erasable and all
+  // of fixed is loaded with "illegal" values having the 16th-bit
+  // set, since the sim has no other way of writing a non-zero
+  // 16th-bit in these areas.
+  int i;
+  for (i = 0; i < 060; i++)
+    {
+      MEM::register_EMEM[i].write(0);
+      MEM::register_EMEM[i].clk();
+    }
+  for (i = 060; i < 02000; i++)
+    {
+      MEM::register_EMEM[i].write((zeroErasable || i == 01760 || i == 0065) ? 0 : 0166666);
+      MEM::register_EMEM[i].clk();
+    }
+  for (i = 02000; i < 041 * 02000; i++)
+    {
+      MEM::register_FMEM[i].write(0100000);
+      MEM::register_FMEM[i].clk();
+    }
+
   if (forceFilename != NULL)
     strcpy(filename, forceFilename);
   else
@@ -887,6 +911,8 @@ main(int argc, char* argv[])
               else
                 printf ("Illegal %s\n", argv[i]);
             }
+          else if (!strcmp(argv[i], "--zero"))
+            zeroErasable = true;
           else
             {
               printf("Usage:\n");
@@ -899,6 +925,8 @@ main(int argc, char* argv[])
               printf("             to the log.  There can be up to %d of these.\n", MAX_LOG_EXTRAS);
               printf("--power      Automatically give 'p', 'r', 't' commands\n");
               printf("             upon entry.\n");
+              printf("--zero       Force erasable 060-01777 to zero on startup.\n");
+              printf("             (Default is the 0166666.)\n");
               return (1);
             }
         }

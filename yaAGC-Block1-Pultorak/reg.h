@@ -21,13 +21,13 @@ public:
     load = true;
     masterVal = mask & v;
   }
-// asynchronous clear
+  // asynchronous clear
   void
   clear()
   {
     slaveVal = 0;
   }
-// load is set when a register is written into.
+  // load is set when a register is written into.
   void
   clk()
   {
@@ -39,12 +39,12 @@ public:
   readField(unsigned msb, unsigned lsb); // bitfield numbered n - 1
   void
   writeField(unsigned msb, unsigned lsb, unsigned v); // bitfield numbered n - 1
-// Write a 16-bit word (in) into the register. Transpose the bits according to
-// the specification (ib).
+  // Write a 16-bit word (in) into the register. Transpose the bits according to
+  // the specification (ib).
   void
   writeShift(unsigned in, unsigned* ib);
-// Return a shifted 16-bit word. Transpose the 'in' bits according to
-// the specification 'ib'. 'Or' the result to out and return the value.
+  // Return a shifted 16-bit word. Transpose the 'in' bits according to
+  // the specification 'ib'. 'Or' the result to out and return the value.
   unsigned
   shiftData(unsigned out, unsigned in, unsigned* ib);
   unsigned
