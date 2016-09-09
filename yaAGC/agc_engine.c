@@ -2471,7 +2471,7 @@ agc_engine (agc_t * State)
 	    }
 	  else if (AbsA == 0 && AbsL == 0 && AbsK != 0)
 	    {
-	      // The divisor is 0 but the dividend is not. The quotient and
+	      // The dividend is 0 but the divisor is not. The quotient and
 	      // the remainder both receive 0 with the sign matching the dividend
 	      if (Dividend == 0)
 	        {
