@@ -1302,27 +1302,22 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     mentioning have been back-ported to the Visual C++ version of the
     program.&nbsp; It might be an interesting exercise for somebody to
     indeed backport these changes.&nbsp; The most-significant problems
-    were:<br>
+    were:
     <ol>
       <li>The memory model is undersized:&nbsp; the amount of fixed rope
-        memory in the device was increased from the 12 banks mentioned
-        in R-393 to 24 banks, and Solarium 055 will in fact not fit into
+        memory in the device was increased after R-393 was written, from the 12 banks 
+        to 24 banks, and Solarium 055 will in fact not fit into
         12 banks.</li>
       <li>The (corrected) interrupt-vector table is at address 2000, and
         the entry point for the program is at 2030.&nbsp; In the
         original version of the program, however, they are at 2004 and
         2000, respectively.</li>
-      <li>Certain assembly-language instructions for writing to the
-        memory-bank register (specifically, the XCH instruction)
-        produced completely incorrect results.</li>
       <li>Timer registers (TIME1, 2, 3, and 4) increment at 10&times; the
       speed they're supposed to.  Specifically, TIME1, 3, and 4, which are
       supposed to increment every 10 ms., actually increment every 1 ms.
       TIME2, which is triggered by overflow in TIME1, increments every 16.384
       seconds rather than every 163.84 seconds as it's supposed to.</li>
     </ol>
-    <ul>
-    </ul>
     A remarkably short list of problems, but nevertheless a list in
     which one would encounter difficulties <i>immediately</i> in trying
     to run actual Block 1 software ... as indeed I did.&nbsp; <br>
@@ -1412,10 +1407,12 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
       <li>m&lt;Enter&gt; (or actually any unrecognized command) —
         displays a menu of available commands.<br>
       </li>
-      <li>t&lt;Enter&gt; — steps one control pulse or basic instruction.</li>
-      <li>t<i>N</i>&lt;Enter&gt; — steps <i>N</i> control pulses or
+      <li>t&lt;Enter&gt; &mdash; steps one control pulse or basic instruction.</li>
+      <li>t<i>N</i>&lt;Enter&gt; &mdash; steps <i>N</i> control pulses or
         basic instructions.</li>
-      <li>q&lt;Enter&gt; — quit the program.</li>
+      <li>e<i>N</i>&lt;Enter&gt; or e<i>B,O</i>&lt;Enter&gt; &mdash; examine
+      the memory at the specified address, and for a few addresses following it.</li>
+      <li>q&lt;Enter&gt; &mdash; quit the program.</li>
     </ul>
     One useful capability that both of the CPU simulators (Pultorak and
     Virtual AGC) have is to be able to produce a log file <i>in
