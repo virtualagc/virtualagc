@@ -181,6 +181,7 @@ char userInput[256];
 #include "CPM.h"
 #include "ISD.h"
 #include "CLK.h"
+extern int loadPads(char *filename);
 
 #define ROPE_SIZE (02000 * (NUMFBANK + 1))
 FILE *logFile = NULL;
@@ -510,7 +511,7 @@ loadMemory(char *forceFilename)
     }
   for (i = 060; i < 02000; i++)
     {
-      MEM::register_EMEM[i].write((zeroErasable || i == 01760 || i == 0065) ? 0 : 0166666);
+      MEM::register_EMEM[i].write((zeroErasable) ? 0 : 0166666);
       MEM::register_EMEM[i].clk();
     }
   for (i = 02000; i < 041 * 02000; i++)
@@ -519,10 +520,7 @@ loadMemory(char *forceFilename)
       MEM::register_FMEM[i].clk();
     }
 
-  if (forceFilename != NULL)
-    strcpy(filename, forceFilename);
-  else
-    strcpy(filename, getCommand("Load Memory -- enter filename: "));
+  strcpy(filename, forceFilename);
   printw("%s\n", filename);
   // We first attempt to load from filename.bin (a yaYUL output file).
   // Failing that, we attempt to load from filename.obj (from John's
@@ -606,7 +604,7 @@ examineMemory()
   for (unsigned i = address; i < address + 24 && i < ROPE_SIZE; i++)
     {
       int data = MEM::readMemory(i);
-      printw("%06o: %05o %d\n", i, (data & 077777), 1 & (data >> 15));
+      printw("%06o: %06o\n", i, data & 077777);
     }
 }
 // Returns true if time (s) elapsed since last time it returned true; does not block
@@ -701,7 +699,6 @@ showMenu()
   printw(" 'f' = DEBUG: automatically display source code.\n");
   printw(" 'h' = RESET.\n");
   printw(" 'i' = INTERRUPT: generates an AGC interrupt, 1-5.\n");
-  printw(" 'l' = LOAD:  load rope contents into memory\n");
   printw(" 'm' = MENU:  show this menu of commands.\n");
   printw(" 'n' = INST:  toggle stepping by MCT vs pulse-sequence\n");
   printw(" 'p' = POWER UP RESET\n");
@@ -950,11 +947,9 @@ main(int argc, char* argv[])
   CPM::readEPROM("CPM33_40.hex", CPM::EPROM33_40);
   CPM::readEPROM("CPM41_48.hex", CPM::EPROM41_48);
   CPM::readEPROM("CPM49_56.hex", CPM::EPROM49_56);
-  if (initialRope != NULL)
-    {
-      loadMemory(initialRope);
-      bufferTheListing(initialRope);
-    }
+  loadMemory(initialRope);
+  loadPads(initialRope);
+  bufferTheListing(initialRope);
 
   bool singleClock = false;
   bool anyWZ = false;
@@ -1169,10 +1164,6 @@ main(int argc, char* argv[])
         break;
       case 'j':
         KBD::keypress(KEYIN_ENTER);
-        break;
-      case 'l':
-        loadMemory(NULL);
-        //saveMemory("temp.rope");
         break;
       case 'm':
         showMenu();

@@ -40,13 +40,6 @@
 #include <string.h>
 #include "yaAGCb1.h"
 
-// FIXME  Forgot to add loadPads() to the repo.  Remove this temporary workaround later.
-int
-loadPads(char *filename)
-{
-  return (0);
-}
-
 #define MAX_LOG_EXTRAS 10
 int numLogExtras = 0;
 uint16_t logExtras[MAX_LOG_EXTRAS];
