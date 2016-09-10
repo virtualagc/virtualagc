@@ -180,6 +180,9 @@ MON::logAGC(FILE *logFile)
   unsigned pc = getPC();
   char addressString[32];
 
+  if (SEQ::glbl_subseq == CCS1 || SEQ::glbl_subseq == STD2 || SEQ::glbl_subseq == RUPT3)
+    return;
+
   if (pc < 06000)
     fprintf(logFile, "%04o", pc);
   else

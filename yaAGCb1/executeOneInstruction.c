@@ -137,6 +137,7 @@ executeOneInstruction(FILE *logFile)
   lastZ = regZ;
   incrementZ(1);
   lastINDEX = agc.INDEX;
+#if 0
   term1 = agc.memory[flatAddress];
   if (flatAddress < 4)
     term1 = fixUcForWriting(term1);
@@ -154,6 +155,9 @@ executeOneInstruction(FILE *logFile)
       if (sum < 0)
         sum = ~(-sum);
     }
+#else
+  sum = AddSP16 (SignExtend(agc.INDEX), (flatAddress < 4) ? agc.memory[flatAddress] : SignExtend(agc.memory[flatAddress]));
+#endif
   instruction = sum;
   instruction &= 0177777;
 

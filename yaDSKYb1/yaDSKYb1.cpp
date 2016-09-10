@@ -36,21 +36,169 @@
  * Mods:        2016-09-04 RSB  Began.
  */
 
-#ifdef MAIN_DSKY
-#include "yaDSKYb1main.h"
-#else
-#include "yaDSKYb1nav.h"
-#endif
+#include "yaDSKYb1.h"
 
-// Just for debugging messages.
-#include <iostream>
-using namespace std;
+///////////////////////////////////////////////////////////////////////////////////////
+// Some debugging functions
 
-// This function defines whatever additional callbacks, properties, etc., are
-// needed in the frame holding the static bitmap of the background image of
-// the DSKY.  It is used in the OnInit() function prior to displaying the frame.
-void OnlyFrame::extraSetup()
+void MyFrame::setAllNumbers(wxBitmap& bitmap)
 {
+  Digit1Reg1->SetBitmap(bitmap);
+  Digit2Reg1->SetBitmap(bitmap);
+  Digit3Reg1->SetBitmap(bitmap);
+  Digit4Reg1->SetBitmap(bitmap);
+  Digit5Reg1->SetBitmap(bitmap);
+  Digit1Reg2->SetBitmap(bitmap);
+  Digit2Reg2->SetBitmap(bitmap);
+  Digit3Reg2->SetBitmap(bitmap);
+  Digit4Reg2->SetBitmap(bitmap);
+  Digit5Reg2->SetBitmap(bitmap);
+  Digit1Reg3->SetBitmap(bitmap);
+  Digit2Reg3->SetBitmap(bitmap);
+  Digit3Reg3->SetBitmap(bitmap);
+  Digit4Reg3->SetBitmap(bitmap);
+  Digit5Reg3->SetBitmap(bitmap);
+  digitProgramLeft->SetBitmap(bitmap);
+  digitProgramRight->SetBitmap(bitmap);
+  digitNounLeft->SetBitmap(bitmap);
+  digitNounRight->SetBitmap(bitmap);
+  digitVerbLeft->SetBitmap(bitmap);
+  digitVerbRight->SetBitmap(bitmap);
+}
+void MyFrame::setAllSigns(wxBitmap& bitmap)
+{
+  PlusMinusReg1->SetBitmap(bitmap);
+  PlusMinusReg2->SetBitmap(bitmap);
+  PlusMinusReg3->SetBitmap(bitmap);
+}
 
+///////////////////////////////////////////////////////////////////////////////////////
+// These are the events for the UI.
+
+BEGIN_EVENT_TABLE(MyFrame, wxFrame)
+    EVT_BUTTON(ID_VERBBUTTON, MyFrame::on_VerbButton_pressed)
+    EVT_BUTTON(ID_NOUNBUTTON, MyFrame::on_NounButton_pressed)
+    EVT_BUTTON(ID_PLUSBUTTON, MyFrame::on_PlusButton_pressed)
+    EVT_BUTTON(ID_MINUSBUTTON, MyFrame::on_MinusButton_pressed)
+    EVT_BUTTON(ID_ZEROBUTTON, MyFrame::on_ZeroButton_pressed)
+    EVT_BUTTON(ID_SEVENBUTTON, MyFrame::on_SevenButton_pressed)
+    EVT_BUTTON(ID_FOURBUTTON, MyFrame::on_FourButton_pressed)
+    EVT_BUTTON(ID_ONEBUTTON, MyFrame::on_OneButton_pressed)
+    EVT_BUTTON(ID_EIGHTBUTTON, MyFrame::on_EightButton_pressed)
+    EVT_BUTTON(ID_FIVEBUTTON, MyFrame::on_FiveButton_pressed)
+    EVT_BUTTON(ID_TWOBUTTON, MyFrame::on_TwoButton_pressed)
+    EVT_BUTTON(ID_NINEBUTTON, MyFrame::on_NineButton_pressed)
+    EVT_BUTTON(ID_SIXBUTTON, MyFrame::on_SixButton_pressed)
+    EVT_BUTTON(ID_THREEBUTTON, MyFrame::on_ThreeButton_pressed)
+    EVT_BUTTON(ID_CLEARBUTTON, MyFrame::on_ClearButton_pressed)
+    EVT_BUTTON(ID_KEYRLSEBUTTON, MyFrame::on_KeyRlseButton_pressed)
+    EVT_BUTTON(ID_ENTERBUTTON, MyFrame::on_EnterButton_pressed)
+    EVT_BUTTON(ID_ERRORRESETBUTTON, MyFrame::on_ErrorResetButton_pressed)
+    EVT_BUTTON(ID_UPTELSWITCH, MyFrame::on_UpTelButton_pressed)
+END_EVENT_TABLE();
+
+
+void MyFrame::on_VerbButton_pressed(wxCommandEvent &event)
+{
+  wxMessageBox("VERB");
+}
+
+void  MyFrame::on_NounButton_pressed(wxCommandEvent &event)
+{
+  wxMessageBox("NOUN");
+}
+
+void  MyFrame::on_PlusButton_pressed(wxCommandEvent &event)
+{
+  setAllSigns(imagePlusMinusPlus);
+}
+
+void  MyFrame::on_MinusButton_pressed(wxCommandEvent &event)
+{
+  setAllSigns(imagePlusMinusMinus);
+}
+
+void  MyFrame::on_ZeroButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg21);
+}
+
+void  MyFrame::on_OneButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg3);
+}
+
+void  MyFrame::on_TwoButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg25);
+}
+
+void  MyFrame::on_ThreeButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg27);
+}
+
+void  MyFrame::on_FourButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg15);
+}
+
+void  MyFrame::on_FiveButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg30);
+}
+
+void  MyFrame::on_SixButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg28);
+}
+
+void  MyFrame::on_SevenButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg19);
+}
+
+void  MyFrame::on_EightButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg29);
+}
+
+void  MyFrame::on_NineButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg31);
+}
+
+void  MyFrame::on_KeyRlseButton_pressed(wxCommandEvent &event)
+{
+  wxMessageBox("Key\nRlse");
+}
+
+void  MyFrame::on_EnterButton_pressed(wxCommandEvent &event)
+{
+  indicatorCompFail->SetBitmap(imageCompFailOn);
+  indicatorCheckFail->SetBitmap(imageCheckFailOn);
+  indicatorComp->SetBitmap(imageCompOn);
+  indicatorUpTl->SetBitmap(imageUptlOn);
+}
+
+void  MyFrame::on_ErrorResetButton_pressed(wxCommandEvent &event)
+{
+  indicatorCompFail->SetBitmap(imageCompFailOff);
+  indicatorCheckFail->SetBitmap(imageCheckFailOff);
+  indicatorComp->SetBitmap(imageCompOff);
+  indicatorUpTl->SetBitmap(imageUptlOff);
+}
+
+void  MyFrame::on_ClearButton_pressed(wxCommandEvent &event)
+{
+  setAllNumbers(image7Seg0);
+  setAllSigns(imagePlusMinusOff);
+}
+
+void  MyFrame::on_UpTelButton_pressed(wxCommandEvent &event)
+{
+  UpTelAccept = !UpTelAccept;
+  if (UpTelAccept) SwitchUpTel->SetBitmapLabel(imageUpTelAccept);
+  else SwitchUpTel->SetBitmapLabel(imageUpTelBlock);
 }
 

@@ -34,18 +34,23 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-04 RSB  Began.
- *
- * This file is automatically included when yaDSKYb1-main.h or yaDSKYb1-nav.h
- * is included, and conversely, should not be included outside those contexts.
  */
 
-#if !defined(YADSKYB1_H) && (defined(YADSKYB1MAIN_H) || defined(YADSKYB1NAV_H))
+#if !defined(YADSKYB1_H)
 #define YADSKYB1_H
 
-// Widget ID numbers for any widgets we need to explicitly address.
-enum {
-  ID_PANEL, // The panel containing the background image.
-  ID_IMAGE // The background image of the DSKY face.
-};
+#if defined(MAIN_DSKY_WIDGETIZED)
 
-#endif // YADSKYB1H
+#include "yaDSKYb1main-widgetized.h"
+
+#elif defined(NAV_DSKY_WIDGETIZED)
+
+#include "yaDSKYb1nav-widgetized.h"
+
+#else
+
+#error Unknown app.
+
+#endif
+
+#endif // YADSKYB1_H

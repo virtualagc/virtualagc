@@ -12,13 +12,13 @@
 # generated from the separate wxGlade projects yaDSKYb1{main,nav}.wxg.
 
 .PHONY: all
-all:	yaDSKYb1main yaDSKYb1nav
+all:	yaDSKYb1main
 
-yaDSKYb1main: yaDSKYb1main.cpp yaDSKYb1main.h yaDSKYb1.cpp yaDSKYb1.h Makefile Block1DSKY-face-P67X.png
-	g++ -DMAIN_DSKY `wx-config --cxxflags` $< yaDSKYb1.cpp `wx-config --libs` -o $@
+yaDSKYb1main: yaDSKYb1main-widgetized.cpp yaDSKYb1main-widgetized.h yaDSKYb1.cpp yaDSKYb1.h Makefile
+	g++ -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` $< yaDSKYb1.cpp `wx-config --libs` -o $@
 
-yaDSKYb1nav: yaDSKYb1nav.cpp yaDSKYb1nav.h yaDSKYb1.cpp yaDSKYb1.h Makefile Block1DSKYnav-face-P67X.png
-	g++ -DNAV_DSKY `wx-config --cxxflags` $< yaDSKYb1.cpp `wx-config --libs` -o $@
+yaDSKYb1nav: yaDSKYb1nav-widgetized.cpp yaDSKYb1nav-widgetized.h yaDSKYb1.cpp yaDSKYb1.h Makefile
+	g++ -DNAV_DSKY_WIDGETIZED `wx-config --cxxflags` $< yaDSKYb1.cpp `wx-config --libs` -o $@
 
 .PHONY: clean
 clean:
