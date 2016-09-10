@@ -348,10 +348,10 @@ executeOneInstruction(FILE *logFile)
   else if (opcode == 060000) /* AD. */
     {
       // FIXME Not sure what's supposed to happen if A already has
-      // overflowed.  For now, let's make sure it hasn't.
+      // overflowed.
       int16_t term1, term2, sum;
       entrySubtraction:;
-#if 1
+#if 0
       term1 = fixUcForWriting(regA);
       term2 = fetchedFromOperandSignExtended;
       // Special case:  note that x + -x = -0.
@@ -366,7 +366,7 @@ executeOneInstruction(FILE *logFile)
           if (sum < 0 ) sum = ~(-sum);
         }
 #else
-      sum = AddSP16 (SignExtend(regA), SignExtend(fetchedFromOperand));
+      sum = AddSP16 (regA, (flatAddress < 4) ? fetchedFromOperand : fetchedFromOperandSignExtended);
 #endif
       regA = sum;
       if ((sum & 0140000) == 0040000) // Positive overflow

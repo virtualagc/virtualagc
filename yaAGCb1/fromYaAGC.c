@@ -43,8 +43,8 @@
 #include "yaAGCb1.h"
 
 // Adds two sign-extended SP values.  The result may contain overflow.
-int16_t
-AddSP16 (int16_t Addend1, int16_t Addend2)
+uint16_t
+AddSP16 (uint16_t Addend1, uint16_t Addend2)
 {
   int Sum;
   Sum = Addend1 + Addend2;

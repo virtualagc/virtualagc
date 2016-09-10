@@ -389,11 +389,13 @@ loadYul(char *filename)
       // position.  We need it aligned to the least-significant bit, with
       // an odd-parity bit at the most-significant position.
       data = parity = (word[0] << 7) | (word[1] >> 1);
+      /*
       parity = (parity ^ (parity << 8));
       parity = (parity ^ (parity << 4));
       parity = (parity ^ (parity << 2));
       parity = (parity ^ (parity << 1));
       data |= (parity & 0x8000) ^ 0x8000;
+      */
       MEM::writeMemory(addr, data);
       addr++;
     }

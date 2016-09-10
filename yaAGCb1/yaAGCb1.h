@@ -265,7 +265,7 @@ int
 SpToDecent (int16_t * LsbSP);
 void
 DecentToSp(int Decent, int16_t * LsbSP);
-int16_t
-AddSP16 (int16_t Addend1, int16_t Addend2);
+uint16_t
+AddSP16 (uint16_t Addend1, uint16_t Addend2);
 
 #endif // YAAGC_BLOCK1_H
