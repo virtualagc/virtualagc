@@ -75,7 +75,7 @@
 typedef unsigned short uint16_t;
 #endif
 #define SOCKET_API_C
-#include "yaAGCb1.h"
+#include "yaDSKYb1.h"
 
 // MAX_CLIENTS is the maximum number of hardware simulations which can be
 // attached.  The DSKY is always one, presumably.  The array is a list of
@@ -187,13 +187,6 @@ ChannelInput(agcBlock1_t *State)
             if (Client->Size >= 4)
               {
                 int uBit, Type, Data;
-                {
-                  int i;
-                  printf("Received: ");
-                  for (i = 0; i < Client->Size; i++)
-                    printf(" %02X", Client->Packet[i]);
-                  printf("\n");
-                }
                 //printf ("Received from %d: %02X %02X %02X %02X\n",
                 //	i, Client->Packet[0], Client->Packet[1],
                 //	Client->Packet[2], Client->Packet[3]);
@@ -221,7 +214,7 @@ ChannelInput(agcBlock1_t *State)
                         Value |= State->memory[Channel]
                             & ~Client->ChannelMasks[Channel];
                         State->memory[Channel] = Value;
-                        printf("%04o -> %05o\n", Channel, Value);
+                        // If this is a keystroke from the DSKY, generate an interrupt req.
                         //---------------------------------------------------------------
                       }
                   }

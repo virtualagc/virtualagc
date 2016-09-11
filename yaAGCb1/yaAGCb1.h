@@ -148,6 +148,13 @@ typedef struct
   //    <0      Free running
   //     0      Paused
   //    >0      Counting down.
+  // Note that both the values 1 and 2 indicate that a single step is to be performed.
+  // 1 is loaded if the 't' command is used, while 2 is loaded if 't1' is used.  The
+  // distinction is that if you used 'tN', then it is assumed you want to stop at any
+  // break/watch encountered, whereas if you used 't' even at a line which happens to
+  // has a break/watch on it, it is assumed you know that and want to proceed without
+  // the hassle of removing the breakpoint and possible restoring it again.  The
+  // breakpoint itself is unchanged.
   int instructionCountDown;
 } agcBlock1_t;
 
@@ -157,7 +164,7 @@ getTimeNanoseconds(void);
 void
 sleepNanoseconds(int64_t nanoseconds);
 
-void
+int
 executeOneInstruction(FILE *logFile);
 
 //--------------------------------------------------------------------------
@@ -178,6 +185,10 @@ executeOneInstruction(FILE *logFile);
 extern char bufferedListing[MAX_LISTING_LINES][MAX_LINE_LENGTH];
 extern int numListingLines;
 extern int listingAddresses[MEMORY_SIZE];
+#define MAX_BREAKS_OR_WATCHES 16
+extern uint16_t breaksOrWatches[MAX_BREAKS_OR_WATCHES];
+extern int numBreaksOrWatches;
+
 // Function for populating the program-listing buffer, given a filename of the
 // listing.  Returns:
 // 0 on success
@@ -297,6 +308,14 @@ void ChannelOutput (agcBlock1_t * State, int Channel, int Value);
 int ChannelInput (agcBlock1_t * State);
 void ChannelRoutine (agcBlock1_t *State);
 void ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t *));
+int
+FormIoPacket (int Channel, int Value, unsigned char *Packet);
+int
+ParseIoPacket (unsigned char *Packet, int *Channel, int *Value, int *uBit);
+void
+UnblockSocket (int SocketNum);
+int
+EstablishSocket (unsigned short portnum, int MaxClients);
 
 // For socket connections.
 #ifdef WIN32

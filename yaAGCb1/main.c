@@ -100,8 +100,9 @@ main(int argc, char *argv[])
           printf(
               "--extra=OCT  In the --log file, add the value at the address OCT\n");
           printf("             to the log.  There can be up to %d of these.\n",
-              MAX_LOG_EXTRAS);
-          printf("--zero       At power-up, initialize erasable 060-01777 to 0,\n");
+          MAX_LOG_EXTRAS);
+          printf(
+              "--zero       At power-up, initialize erasable 060-01777 to 0,\n");
           printf("             rather than the default 0166666.\n");
           return (1);
         }
@@ -123,7 +124,8 @@ main(int argc, char *argv[])
     printf("Pad-load file %s loaded.\n", padFile);
   else
     {
-      printf ("Pad-load file %s not found or other error loading it.\n", padFile);
+      printf("Pad-load file %s not found or other error loading it.\n",
+          padFile);
       return (1);
     }
 
@@ -160,10 +162,7 @@ main(int argc, char *argv[])
 
       // Handle server stuff for socket connections used for i/o channel
       // communications.
-      ChannelRoutine (&agc);
-
-      // Get data from input channels.
-      ChannelInput (&agc);
+      ChannelRoutine(&agc);
 
       // Execute as many virtual AGC instructions as needed to catch up to real time.
       while (agc.instructionCountDown
@@ -171,12 +170,20 @@ main(int argc, char *argv[])
               < (getTimeNanoseconds() - agc.startTimeNanoseconds
                   - agc.pausedNanoseconds) / mctNanoseconds)
         {
-          executeOneInstruction(logFile);
-          if (agc.instructionCountDown > 0)
+          ChannelInput(&agc);
+          if (executeOneInstruction(logFile))
+            goto pause;
+          if (agc.instructionCountDown != 0)
             {
-              agc.instructionCountDown--;
+              if (agc.instructionCountDown > 0)
+                {
+                  agc.instructionCountDown--;
+                  if (agc.instructionCountDown == 1)
+                    agc.instructionCountDown = 0;
+                }
               if (agc.instructionCountDown == 0)
                 {
+                  pause: ;
                   agc.startOfPause = getTimeNanoseconds();
                   processConsoleDebuggingCommand(NULL);
                 }

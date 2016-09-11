@@ -10,7 +10,7 @@
 //
 
 #include <wx/stdpaths.h>
-#include "yaDSKYb1main-widgetized.h"
+#include "yaDSKYb1.h"
 
 // begin wxGlade: ::extracode
 // end wxGlade
@@ -391,6 +391,8 @@ MyApp::OnInit()
 
   wxInitAllImageHandlers();
   frame = new MyFrame(NULL, wxID_ANY, wxEmptyString);
+  frame->Timer = new TimerClass ();
+  frame->Timer->Start (PULSE_INTERVAL);
   SetTopWindow(frame);
   frame->Show();
   return true;

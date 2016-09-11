@@ -78,6 +78,8 @@ MyApp::OnInit()
 
   wxInitAllImageHandlers();
   MyFrame* frame = new MyFrame(NULL, wxID_ANY, wxEmptyString);
+  frame->Timer = new TimerClass ();
+  frame->Timer->Start (PULSE_INTERVAL);
   SetTopWindow(frame);
   frame->Show();
   return true;

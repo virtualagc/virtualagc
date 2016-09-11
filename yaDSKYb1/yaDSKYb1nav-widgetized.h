@@ -27,6 +27,14 @@
 // begin wxGlade: ::extracode
 // end wxGlade
 
+class TimerClass: public wxTimer {
+public:
+    int IoErrorCount;
+
+private:
+    virtual void Notify();
+    void ActOnIncomingIO (unsigned char *Packet);
+};
 
 class MyFrame: public wxFrame {
 public:
@@ -34,6 +42,7 @@ public:
   // end wxGlade
 
   MyFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
+  TimerClass *Timer;
 
 private:
   // begin wxGlade: MyFrame::methods

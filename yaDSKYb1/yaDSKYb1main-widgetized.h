@@ -27,6 +27,15 @@
 // begin wxGlade: ::extracode
 // end wxGlade
 
+class TimerClass: public wxTimer {
+public:
+    int IoErrorCount;
+
+private:
+    virtual void Notify();
+    void ActOnIncomingIO (unsigned char *Packet);
+};
+
 // This is a panel which can have a background image instead of a background
 // color.  I simply copied it from https://wiki.wxwidgets.org/An_image_panel.
 class wxImagePanel : public wxPanel
@@ -38,7 +47,6 @@ class wxImagePanel : public wxPanel
 
     void paintEvent(wxPaintEvent & evt);
     void paintNow();
-
     void render(wxDC& dc);
 
     // some useful events
@@ -71,6 +79,7 @@ class MyFrame: public wxFrame
       imageCompFailOn, imageCompFailOff;
     void setAllNumbers(wxBitmap& bitmap);
     void setAllSigns(wxBitmap& bitmap);
+    TimerClass *Timer;
 
   private:
     // begin wxGlade: MyFrame::methods
@@ -78,7 +87,7 @@ class MyFrame: public wxFrame
     void do_layout();
     // end wxGlade
 
-  protected:
+  public:
     // begin wxGlade: MyFrame::attributes
     wxStaticBitmap* indicatorCompFail;
     wxStaticBitmap* indicatorCheckFail;

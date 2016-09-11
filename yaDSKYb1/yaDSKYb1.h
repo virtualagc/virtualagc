@@ -40,17 +40,16 @@
 #define YADSKYB1_H
 
 #if defined(MAIN_DSKY_WIDGETIZED)
-
 #include "yaDSKYb1main-widgetized.h"
-
 #elif defined(NAV_DSKY_WIDGETIZED)
-
 #include "yaDSKYb1main-widgetized.h"
-
 #else
-
 #error Unknown app.
-
 #endif
+#include "../yaAGCb1/yaAGCb1.h"
+
+// For socket-interface timer.
+extern MyFrame *frame;
+#define PULSE_INTERVAL 100
 
 #endif // YADSKYB1_H

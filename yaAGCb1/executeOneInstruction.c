@@ -48,14 +48,21 @@
 #include <time.h>
 #include "yaAGCb1.h"
 
+// Only for my primitive debugging facility that I'm using
+// during initial development.
+uint16_t breaksOrWatches[MAX_BREAKS_OR_WATCHES];
+int numBreaksOrWatches = 0;
+
 // Write a value to an erasable address.
 void
 writeToErasableOrRegister(uint16_t flatAddress, uint16_t value)
 {
-  if (flatAddress >= 04 && !(flatAddress >= 035 && flatAddress <= 040))
+  if (flatAddress >= 04 /*&& !(flatAddress >= 035 && flatAddress <= 040)*/)
     value &= 077777;
   if (&regBank== &agc.memory[flatAddress]) agc.memory[flatAddress] = value & 076000;
   else if (flatAddress < 02000) agc.memory[flatAddress] = value;
+  if (flatAddress >= 010 && flatAddress <= 014) // OUT0-4
+    ChannelOutput (&agc, flatAddress, value);
 }
 
 static int numMCT;
@@ -118,10 +125,12 @@ edit(uint16_t flatAddress)
   return;
 }
 
-void
+// Returns 0 normally, but 1 if a breakpoint or watchpoint was
+// encountered, so that nothing was actually done.
+int
 executeOneInstruction(FILE *logFile)
 {
-  int instruction;
+  int instruction, i;
   int16_t term1, term2, sum;
   uint16_t flatAddress, opcode, operand, extracode, dummy, fetchedFromOperand,
       fetchedFromOperandSignExtended, fetchedOperandOverflow;
@@ -133,33 +142,49 @@ executeOneInstruction(FILE *logFile)
   // Various preliminary stuff that it's just useful to do for any
   // instruction.
   flatAddress = (regZ< 06000) ? regZ : flatten(regBank, regZ);
+#if 0
+  term1 = agc.memory[flatAddress];
+  if (flatAddress < 4)
+  term1 = fixUcForWriting(term1);
+  term2 = SignExtend(agc.INDEX);
+  // Special case:  note that x + -x = -0.
+  if (077777 & term1 == 077777 & ~term2)
+  sum = 0177777;
+  else
+    {
+      if ((term1 & 040000) != 0)
+      term1 = -(~(term1 | ~077777));
+      if ((term2 & 040000) != 0)
+      term2 = -(~term2);
+      sum = term1 + term2;
+      if (sum < 0)
+      sum = ~(-sum);
+    }
+#else
+  sum = AddSP16(SignExtend(agc.INDEX),
+      (flatAddress < 4) ?
+          agc.memory[flatAddress] : SignExtend(agc.memory[flatAddress]));
+#endif
+  instruction = sum;
+  instruction &= 0177777;
+  if (agc.instructionCountDown != 1) // Breakpoints in my primitive debugging facility in initial development.
+    {
+      uint16_t flatOperandAddress;
+      flatOperandAddress = instruction & 007777;
+      if (flatOperandAddress >= 06000)
+        flatOperandAddress = flatten(regBank, operand);
+      for (i = 0; i < numBreaksOrWatches; i++)
+        if (breaksOrWatches[i] == flatAddress
+            || breaksOrWatches[i] == flatOperandAddress)
+          {
+            agc.instructionCountDown = 0;
+            return (1);
+          }
+    }
   // Increment Z to next location.
   lastZ = regZ;
   incrementZ(1);
   lastINDEX = agc.INDEX;
-#if 0
-  term1 = agc.memory[flatAddress];
-  if (flatAddress < 4)
-    term1 = fixUcForWriting(term1);
-  term2 = SignExtend(agc.INDEX);
-  // Special case:  note that x + -x = -0.
-  if (077777 & term1 == 077777 & ~term2)
-    sum = 0177777;
-  else
-    {
-      if ((term1 & 040000) != 0)
-        term1 = -(~(term1 | ~077777));
-      if ((term2 & 040000) != 0)
-        term2 = -(~term2);
-      sum = term1 + term2;
-      if (sum < 0)
-        sum = ~(-sum);
-    }
-#else
-  sum = AddSP16 (SignExtend(agc.INDEX), (flatAddress < 4) ? agc.memory[flatAddress] : SignExtend(agc.memory[flatAddress]));
-#endif
-  instruction = sum;
-  instruction &= 0177777;
 
   resumeFromInterrupt: ;
   agc.B = instruction;
@@ -186,7 +211,7 @@ executeOneInstruction(FILE *logFile)
           agc.overflowedTIME3 = 0;
         }
 
-      if (!interruptVector && 0 != (regIN2 & 077600))  // ERRUPT -- 8 fail bits in IN2.
+      if (!interruptVector && 0 != (regIN2 & 077600)) // ERRUPT -- 8 fail bits in IN2.
         {
           interruptVector = 02004;
         }
@@ -197,9 +222,11 @@ executeOneInstruction(FILE *logFile)
           agc.overflowedTIME4 = 0;
         }
 
-      if (!interruptVector && 0)  // KEYRUPT
+      if (!interruptVector && 0 != (regIN0 & 040))  // KEYRUPT
         {
           interruptVector = 02014;
+          regIN0 &= ~040;
+          printf("KEYRUPT\n");
         }
 
       if (!interruptVector && 0)  // UPRUPT
@@ -438,65 +465,65 @@ executeOneInstruction(FILE *logFile)
     {
       numMCT = 18;
 
-      {
-        int16_t AccPair[2], AbsA, AbsL, AbsK, Div16, Operand16;
-        int Dividend, Divisor, Quotient, Remainder;
-        // Fetch the values;
-        AccPair[0] = fixUcForWriting (regA);
-        AccPair[1] = regLP;
-        Dividend = SpToDecent (&AccPair[1]);
-        DecentToSp (Dividend, &AccPair[1]);
-        // Check boundary conditions.
-        AbsA = AbsSP (AccPair[0]);
-        AbsL = AbsSP (AccPair[1]);
-        AbsK = AbsSP (fetchedFromOperandSignExtended);
-        if (AbsA > AbsK || (AbsA == AbsK && AbsL != AGC_P0))
-          {
-            // The divisor is smaller than the dividend.  In this case,
-            // we return "total nonsense".
-            regLP = ~0;
-            regA = 0;
-          }
-        else if (AbsA == AbsK && AbsL == AGC_P0)
-          {
-            // The divisor is equal to the dividend.
-            if (AccPair[0] == fetchedFromOperandSignExtended)// Signs agree?
-              {
-                Operand16 = 037777;   // Max positive value.
-                regLP = SignExtend (fetchedFromOperandSignExtended);
-              }
-            else
-              {
-                Operand16 = (077777 & ~037777);       // Max negative value.
-                regLP = SignExtend (fetchedFromOperandSignExtended);
-              }
-            regA = SignExtend (Operand16);
-          }
-        else
-          {
-            // The divisor is larger than the dividend.  Okay to actually divide!
-            // Fortunately, the sign conventions agree with those of the normal
-            // C operators / and %, so all we need to do is to convert the
-            // 1's-complement values to native CPU format to do the division,
-            // and then convert back afterward.  Incidentally, we know we
-            // aren't dividing by zero, since we know that the divisor is
-            // greater (in magnitude) than the dividend.
-            Dividend = agc2cpu2 (Dividend);
-            Divisor = agc2cpu (fetchedFromOperandSignExtended);
-            Quotient = Dividend / Divisor;
-            Remainder = Dividend % Divisor;
-            regA = SignExtend (cpu2agc (Quotient));
-            if (Remainder == 0)
-              {
-                // In this case, we need to make an extra effort, because we
-                // might need -0 rather than +0.
-                if (Dividend >= 0) regLP = AGC_P0;
-                else regLP = SignExtend (AGC_M0);
-              }
-            else
-            regLP = SignExtend (cpu2agc (Remainder));
-          }
-      }
+        {
+          int16_t AccPair[2], AbsA, AbsL, AbsK, Div16, Operand16;
+          int Dividend, Divisor, Quotient, Remainder;
+          // Fetch the values;
+          AccPair[0] = fixUcForWriting (regA);
+          AccPair[1] = regLP;
+          Dividend = SpToDecent (&AccPair[1]);
+          DecentToSp (Dividend, &AccPair[1]);
+          // Check boundary conditions.
+          AbsA = AbsSP (AccPair[0]);
+          AbsL = AbsSP (AccPair[1]);
+          AbsK = AbsSP (fetchedFromOperandSignExtended);
+          if (AbsA > AbsK || (AbsA == AbsK && AbsL != AGC_P0))
+            {
+              // The divisor is smaller than the dividend.  In this case,
+              // we return "total nonsense".
+              regLP = ~0;
+              regA = 0;
+            }
+          else if (AbsA == AbsK && AbsL == AGC_P0)
+            {
+              // The divisor is equal to the dividend.
+              if (AccPair[0] == fetchedFromOperandSignExtended)// Signs agree?
+                {
+                  Operand16 = 037777;   // Max positive value.
+                  regLP = SignExtend (fetchedFromOperandSignExtended);
+                }
+              else
+                {
+                  Operand16 = (077777 & ~037777);       // Max negative value.
+                  regLP = SignExtend (fetchedFromOperandSignExtended);
+                }
+              regA = SignExtend (Operand16);
+            }
+          else
+            {
+              // The divisor is larger than the dividend.  Okay to actually divide!
+              // Fortunately, the sign conventions agree with those of the normal
+              // C operators / and %, so all we need to do is to convert the
+              // 1's-complement values to native CPU format to do the division,
+              // and then convert back afterward.  Incidentally, we know we
+              // aren't dividing by zero, since we know that the divisor is
+              // greater (in magnitude) than the dividend.
+              Dividend = agc2cpu2 (Dividend);
+              Divisor = agc2cpu (fetchedFromOperandSignExtended);
+              Quotient = Dividend / Divisor;
+              Remainder = Dividend % Divisor;
+              regA = SignExtend (cpu2agc (Quotient));
+              if (Remainder == 0)
+                {
+                  // In this case, we need to make an extra effort, because we
+                  // might need -0 rather than +0.
+                  if (Dividend >= 0) regLP = AGC_P0;
+                  else regLP = SignExtend (AGC_M0);
+                }
+              else
+              regLP = SignExtend (cpu2agc (Remainder));
+            }
+        }
     }
   else if (opcode == 030000 && extracode) /* SU */
     {
@@ -538,5 +565,7 @@ executeOneInstruction(FILE *logFile)
         }
 
     }
+
+  return (0);
 }
 
