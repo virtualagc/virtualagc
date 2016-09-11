@@ -12,7 +12,7 @@
 # generated from the separate wxGlade projects yaDSKYb1{main,nav}.wxg.
 
 .PHONY: all
-all:	yaDSKYb1main
+all:	yaDSKYb1main yaDSKYb1nav
 
 yaDSKYb1main: yaDSKYb1main-widgetized.cpp yaDSKYb1main-widgetized.h yaDSKYb1.cpp yaDSKYb1.h Makefile
 	g++ -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` $< yaDSKYb1.cpp `wx-config --libs` -o $@

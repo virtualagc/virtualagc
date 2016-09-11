@@ -45,7 +45,7 @@
 
 #elif defined(NAV_DSKY_WIDGETIZED)
 
-#include "yaDSKYb1nav-widgetized.h"
+#include "yaDSKYb1main-widgetized.h"
 
 #else
 

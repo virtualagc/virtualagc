@@ -158,6 +158,13 @@ main(int argc, char *argv[])
     {
       sleepNanoseconds(BILLION / 10); // Sleep 0.1 seconds, so as not to peg the CPU usage.
 
+      // Handle server stuff for socket connections used for i/o channel
+      // communications.
+      ChannelRoutine (&agc);
+
+      // Get data from input channels.
+      ChannelInput (&agc);
+
       // Execute as many virtual AGC instructions as needed to catch up to real time.
       while (agc.instructionCountDown
           && agc.countMCT

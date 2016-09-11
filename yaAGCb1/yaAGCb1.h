@@ -59,6 +59,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
+//-------------------------------------------------------------------------
+// Block 1 specific address and data constants.
+
 #define MAX_BANK 034
 #define BANK_SIZE 02000
 #define MEMORY_SIZE (BANK_SIZE * (MAX_BANK + 1))
@@ -267,5 +270,40 @@ void
 DecentToSp(int Decent, int16_t * LsbSP);
 uint16_t
 AddSP16 (uint16_t Addend1, uint16_t Addend2);
+
+//-------------------------------------------------------------------------
+// Stuff for the virtual connection between the AGC and its peripherals,
+// also almost-brainlessly adapted from yaAGC (Block 2).
+
+typedef struct
+{
+  int Socket;
+  unsigned char Packet[4];
+  int Size;
+  int ChannelMasks[256];
+} Client_t;
+
+#define DEFAULT_MAX_CLIENTS 10
+
+extern int MAX_CLIENTS;
+extern Client_t *Clients;
+extern int *ServerSockets;
+extern int NumServers;
+extern int SocketInterlaceReload;
+extern int Portnum;
+
+// API for yaAGC-to-peripheral communications.
+void ChannelOutput (agcBlock1_t * State, int Channel, int Value);
+int ChannelInput (agcBlock1_t * State);
+void ChannelRoutine (agcBlock1_t *State);
+void ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t *));
+
+// For socket connections.
+#ifdef WIN32
+#define SOCKET_BROKEN 1
+#else
+#define SOCKET_ERROR -1
+#define SOCKET_BROKEN (errno == EPIPE)
+#endif
 
 #endif // YAAGC_BLOCK1_H
