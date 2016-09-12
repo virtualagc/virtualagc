@@ -13,7 +13,9 @@
 #endif
 #include "agc_help.h"
 
+#define gdbmiHelpDone() gdbmi_status++
 static int gdbmi_status;
+
 
 
 static void gdbmiPrintHelpInfo()
@@ -44,7 +46,7 @@ static void gdbmiPrintHelpShow()
 static void gdbmiPrintHelpSet()
 {
 	printf("set prompt -- Set agc's prompt\n");
-	printf("set variable -- assign result to variable or address\n");
+	printf("set var -- assign value to variable or derefernced address\n");
 }
 
 static void gdbmiPrintHelpBreakpoints()
@@ -77,29 +79,48 @@ static void gdbmiPrintHelpRunning()
 
 static void gdbmiPrintHelpFiles()
 {
-		printf("list -- List specified function or line\n");
+	printf("list -- List specified function or line\n");
 }
 
 static void gdbmiPrintHelpStack()
 {
-		printf("bt -- Print backtrace of all stack frames\n");
-		printf("where -- Print backtrace of all stack frames\n");
+	printf("bt -- Print backtrace of all stack frames\n");
+	printf("where -- Print backtrace of all stack frames\n");
 }
 
 static void gdbmiPrintHelpObscure()
 {
-		printf("log -- Log instructions to a log file\n");
-		printf("getoct -- Converts EXP into octal value\n");
-		printf("inton -- Set interrupt request\n");
-		printf("intoff -- Clear interrupt request\n");
+	printf("log -- Log instructions to a log file\n");
+	printf("getoct -- Converts EXP into octal value\n");
+	printf("inton -- Set interrupt request\n");
+	printf("intoff -- Clear interrupt request\n");
+}
+
+static void gdbmiPrintHelpSetVar(char* s)
+{
+printf("\
+Set the VAR to a value.\n\
+VAR can be a symbol (e.g. MPAC) or a dereferenced ADDRESS.\n\
+ADDRESS can be a pseudo linear address (e.g. 0x6c or 0154) or you can\n\
+use the AGC native address format and speficy the bank and octal value.\n\
+\n\
+Examples setting values for the Multi Purpose Accumulator:\n\
+  set MPAC=9\n\
+  set *0x6c=8\n\
+  set *0154=7\n\
+  set *E0,1554=6\n");
+  gdbmiHelpDone();  
 }
 
 static void gdbmiHandleHelpSet(char* s)
 {
-	printf("List of set subcommands:\n\n");
-	gdbmiPrintHelpSet();
-	printf("\n");
-	gdbmi_status++;
+	if (!strncmp(s," VAR",4)) gdbmiPrintHelpSetVar(s+4);
+	else {
+	  printf("List of set subcommands:\n\n");
+	  gdbmiPrintHelpSet();
+	  printf("\n");
+	}
+	gdbmiHelpDone();
 }
 
 static void gdbmiHandleHelpBreakpoints(char* s)
@@ -107,7 +128,7 @@ static void gdbmiHandleHelpBreakpoints(char* s)
 	printf("List of commands:\n\n");
 	gdbmiPrintHelpBreakpoints();
 	printf("\n");
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 
 static void gdbmiHandleHelpData(char* s)
@@ -115,7 +136,7 @@ static void gdbmiHandleHelpData(char* s)
 	printf("List of commands:\n\n");
 	gdbmiPrintHelpData();
 	printf("\n");
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 
 static void gdbmiHandleHelpRunning(char* s)
@@ -123,7 +144,7 @@ static void gdbmiHandleHelpRunning(char* s)
 	printf("List of commands:\n\n");
 	gdbmiPrintHelpRunning();
 	printf("\n");
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 
 static void gdbmiHandleHelpInfo(char* s)
@@ -131,7 +152,7 @@ static void gdbmiHandleHelpInfo(char* s)
 	printf("List of info subcommands:\n\n");
 	gdbmiPrintHelpInfo();
 	printf("\n");
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 
 static void gdbmiHandleHelpFiles(char* s)
@@ -139,7 +160,7 @@ static void gdbmiHandleHelpFiles(char* s)
 	printf("List of commands:\n\n");
 	gdbmiPrintHelpFiles();
 	printf("\n");
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 
 static void gdbmiHandleHelpStack(char* s)
@@ -147,7 +168,7 @@ static void gdbmiHandleHelpStack(char* s)
 	printf("List of commands:\n\n");
 	gdbmiPrintHelpStack();
 	printf("\n");
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 /*
 static void gdbmiHandleHelpObscure(char* s)
@@ -155,7 +176,7 @@ static void gdbmiHandleHelpObscure(char* s)
 	printf("List of commands:\n\n");
 	gdbmiPrintHelpObscure();
 	printf("\n");
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 */
 
@@ -174,7 +195,7 @@ void gdbmiHandleHelpAll(char* s)
 	gdbmiPrintHelpStack();
 	gdbmiPrintHelpObscure();
         gdbmiPrintHelpShow();
-	gdbmi_status++;
+	gdbmiHelpDone();
 }
 
 void gdbmiHandleHelpDefine(char* s)
@@ -184,9 +205,49 @@ Define a new command name.  Command name is argument.\n\
 Definition appears on following lines, one command per line.\n\
 End with a line of just \"end\".\n\
 ");
-	gdbmi_status++;
+  gdbmiHelpDone();
 }
 
+void gdbmiHandleHelpX(char* s)
+{
+printf("\
+Examine memory: x/FMT ADDRESS.\n\
+ADDRESS is an expression for the memory address to examine,\n\
+which can be a pseudo linear address (e.g. 0x6c or 0154) or you can\n\
+use the AGC native address format and speficy the bank and octal value.\n\
+FMT is a repeat count followed by a format letter and a size letter.\n\
+Format letters are o(octal), x(hex), d(decimal)\n\
+Size letters are b(byte), h(halfword), w(word).\n\
+The specified number of objects of the specified size are printed\n\
+according to the format.\n\
+\n\
+Defaults for format and size letters are those previously used.\n\
+Default count is 1.  \n\
+\n\
+Examples to examine the Multi Purpose Accumulator:\n\
+  x/1 E0,1554\n\
+  x/1 0154\n\
+  x/1 0x6c\n\
+  x/1 &MPAC\n");
+  gdbmiHelpDone();
+}
+
+void gdbmiHandleHelpPrint(char* s)
+{
+printf("\
+Print the value of symbol EXP.\n\
+EXP can be a symbol (e.g. MPAC or &MPAC) or a dereferenced ADDRESS.\n\
+ADDRESS can be a pseudo linear address (e.g. 0x6c or 0154) or you can\n\
+use the AGC native address format and speficy the bank and octal value.\n\
+\n\
+Examples of EXP concerning the Multi Purpose Accumulator:\n\
+  print MPAC\n\
+  print &MPAC\n\
+  print *0x6c\n\
+  print *0154\n\
+  print *E0,1554\n");
+  gdbmiHelpDone();
+}
 
 /**
  * This function prints a summary of all commands supported with a short
@@ -194,7 +255,7 @@ End with a line of just \"end\".\n\
  */
 void gdbmiHandleHelpBreak(char* s)
 {
-	gdbmi_status++;
+  gdbmiHelpDone();
 }
 
 
@@ -213,6 +274,8 @@ void gdbmiHandleHelp(char* s)
 	else if (!strncmp(s," FILES",6)) gdbmiHandleHelpFiles(s+6);
 	else if (!strncmp(s," STACK",6)) gdbmiHandleHelpStack(s+6);
 	else if (!strncmp(s," DEFINE",7)) gdbmiHandleHelpDefine(s+7);
+	else if (!strncmp(s," X",2)) gdbmiHandleHelpX(s+2);
+	else if (!strncmp(s," PRINT",6)) gdbmiHandleHelpPrint(s+6);
 }
 /**
  * This is the main entry function to handle help related commands. Only the
@@ -239,7 +302,7 @@ Type \"help\" followed by a class name for a list of commands in that class.\n\
 Type \"help\" followed by command name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n\
 ");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	  }
 	}
 	return gdbmi_status;
@@ -260,14 +323,14 @@ int legacyHelp(char* s)
 		  "\terasable memory and i/o channels.  However, any\n"
 		  "\tperipherals (such as a DSKY) will not necessarily\n"
 		  "\treturn to their previous states.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP BACKTRACES"))
 	{
 	  printf ("\n"
 		  "backtraces\n"
 		  "\tDisplays the most recent backtrace points.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP BREAK"))
 	{
@@ -279,14 +342,14 @@ int legacyHelp(char* s)
 		  "\t  *ADDRESS: set a breakpoint at address A.  If an address requiring\n"
 		  "\t            a bank number is used, but the bank number is omitted,\n"
 		  "\t            the bank number is taken from the EB or FB register.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP BREAKPOINTS"))
 	{
 	  printf ("\n"
 		  "breakpoints\n"
 		  "\tList the defined breakpoints, watchpoints, and patterns.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP CONT"))
 	{
@@ -296,7 +359,7 @@ int legacyHelp(char* s)
 		  "\tuntil a breakpoint is reached or, in Linux or (for versions\n"
 		  "\t20040810 or later) Win32, until you hit the carriage-return\n"
 		  "\tkey.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP COREDUMP"))
 	{
@@ -307,7 +370,7 @@ int legacyHelp(char* s)
 		  "\twith the --resume switch, causing the AGC program\n"
 		  "\tto continue from exactly this point rather than from\n"
 		  "\tthe beginning.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP DELETE"))
 	{
@@ -321,7 +384,7 @@ int legacyHelp(char* s)
 		  "\n"
 		  "delete V M\n"
 		  "\tDelete the pattern with value V and mask M.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP DUMP"))
 	{
@@ -334,7 +397,7 @@ int legacyHelp(char* s)
 		  "\n"
 		  "dump\n"
 		  "\tSimply repeat the last DUMP performed.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP EDIT"))
 	{
@@ -344,7 +407,7 @@ int legacyHelp(char* s)
 		  "\tIf an address requiring a bank number is used, but the \n"
 		  "\tbank number is omitted, the bank number is taken from the\n"
 		  "\tEB or FB register.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP FILES"))
 	{
@@ -357,7 +420,7 @@ int legacyHelp(char* s)
 		  "\t\tfiles not$          All files ending with NOT.\n"
 		  "\t\tfiles (^not)|(not$) Beginning or ending with NOT.\n"
 		  "\tThe list is arbitrarily truncated after 25 files.\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP FROMFILE"))
 	{
@@ -368,7 +431,7 @@ int legacyHelp(char* s)
 		  "\tkeyboard control will be resumed.  The use I envisage for\n"
 		  "\tthis is to set up a bunch of breakpoints or other initialization.\n"
 		  "\tFROMFILE commands can be nested up to 10 levels.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP GETOCT"))
 	{
@@ -405,28 +468,28 @@ int legacyHelp(char* s)
 		  "\toriginal octal number only has (at most!) 28 significant\n"
 		  "\tbits, and thus there are actually at most 9 significant\n"
 		  "\tdecimal digits.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP INTERRUPTS"))
 	{
 	  printf ("\n"
 		  "interrupts\n"
 		  "\tDisplay the active interrupt-service requests.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP INTOFF"))
 	{
 	  printf ("\n"
 		  "intoff N\n"
 		  "\tClear interrupt-request N (1, 2, ..., 10).\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP INTON"))
 	{
 	  printf ("\n"
 		  "inton N\n"
 		  "\tSet interrupt-request N (1, 2, ..., 10).\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP LOG"))
 	{
@@ -435,7 +498,7 @@ int legacyHelp(char* s)
 		  "\tLog next N instructions to the file yaAGC.log.  The file\n"
 		  "\tformat is very simple, and is only intended to be used\n"
 		  "\tfor regression testing.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP LIST"))
 	{
@@ -449,7 +512,7 @@ int legacyHelp(char* s)
 		  "\t  list FROM,TO, to list a range of lines\n"
 		  "\t  list -, to list lines previous to the current listing\n"
 		  "\t  list, to list the next set of lines\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP MASKOFF"))
 	{
@@ -459,7 +522,7 @@ int legacyHelp(char* s)
 		  "\tN (1, ..., 10).  If N=0, all interrupts are unmasked.\n"
 		  "\tIn other words, this command undoes what the MASKON\n"
 		  "\tcommand does.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP MASKON"))
 	{
@@ -467,7 +530,7 @@ int legacyHelp(char* s)
 		  "maskon N\n"
 		  "\tSet a mask within the debugger to disallow interrupt\n"
 		  "\tN (1, ..., 10).  If N=0, all interrupts are masked.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP PATTERN"))
 	{
@@ -492,21 +555,21 @@ int legacyHelp(char* s)
 		  "\t\t21st\tSigns of Accumulator and L mismatch\n"
 		  "\t\t22nd\tWithin an interrupt\n"
 		  "\t\tother\tZero\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP PRINT"))
 	{
 	  printf ("\n"
 			  "print S\n"
 		  "\tPrints out the value of the symbol S\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP QUIT"))
 	{
 	  printf ("\n"
 			  "quit (or exit)\n"
 		  "\tEnd the program.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP STEP"))
 	{
@@ -514,7 +577,7 @@ int legacyHelp(char* s)
 		  "step [N] (or next [N])\n"
 		  "\tStep through N instructions.  If omitted, N defaults to 1.\n"
 		  "\tYou can also use just the first letter, as shorthand.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP SYM-DUMP"))
 	{
@@ -527,14 +590,14 @@ int legacyHelp(char* s)
 		  "\t\tsym-dump not$          All symbols ending with NOT.\n"
 		  "\t\tsym-dump (^not)|(not$) Beginning or ending with NOT.\n"
 		  "\tThe list is arbitrarily truncated after 25 symbols.\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP SYMBOL-FILE"))
 	{
 	  printf ("\n"
 		  "symbol-file FILE\n"
 		  "\tLoads the FILE as the symbol table\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP WATCH"))
 	{
@@ -550,7 +613,7 @@ int legacyHelp(char* s)
 	  printf ("Or:\n"
 		  "watch A V\n"
 		  "\tSame as above, but waits for the SPECIFIC value V to be written.\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP VIEW"))
 	{
@@ -559,14 +622,14 @@ int legacyHelp(char* s)
 		  "\tThis is a variation of \"watch A\".  It differs only in that\n"
 		  "\tit simply displays the values of variables as they change,\n"
 		  "\trather than interrupting execution.\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 	else if (!strcmp (s, "HELP WHATIS"))
 	{
 	  printf ("\n"
 		  "whatis S\n"
 		  "\tPrints information about the symbol S\n" "\n");
-	  gdbmi_status++;
+	  gdbmiHelpDone();
 	}
 
 	return gdbmi_status;
