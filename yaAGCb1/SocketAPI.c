@@ -220,9 +220,9 @@ ChannelInput(agcBlock1_t *State)
                         Value &= Client->ChannelMasks[Channel];
                         Value |= State->memory[Channel]
                             & ~Client->ChannelMasks[Channel];
+                        if (Channel == 041) State->uplinkReady = 1;
                         State->memory[Channel] = Value;
                         printf("%04o -> %05o\n", Channel, Value);
-                        //---------------------------------------------------------------
                       }
                   }
                 Client->Size = 0;

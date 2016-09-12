@@ -225,12 +225,13 @@ executeOneInstruction(FILE *logFile)
       if (!interruptVector && 0 != (regIN0 & 040))  // KEYRUPT
         {
           interruptVector = 02014;
-          regIN0 &= ~040;
+          //regIN0 &= ~040;
           printf("KEYRUPT\n");
         }
 
-      if (!interruptVector && 0)  // UPRUPT
+      if (!interruptVector && agc.uplinkReady)  // UPRUPT
         {
+          agc.uplinkReady = 0;
           interruptVector = 02020;
         }
 

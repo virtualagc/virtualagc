@@ -126,8 +126,9 @@ typedef struct
   uint16_t ruptFlatAddress;
   uint16_t ruptLastINDEX;
   uint16_t ruptLastZ;
-  uint16_t overflowedTIME3;
-  uint16_t overflowedTIME4;
+  uint16_t overflowedTIME3; // Triggers T3RUPT.
+  uint16_t overflowedTIME4; // Triggers T4RUPT.
+  uint16_t uplinkReady; // Triggers UPRUPT.
 
   // These values are the number of AGC MCT cycles which have occurred since
   // virtual AGC power-up, versus the total number of nanoseconds which have
@@ -251,6 +252,9 @@ extern agcBlock1_t agc;
 #define ctrCDUZ agc.memory[051]
 #define ctrOPTX agc.memory[052]
 #define ctrOPTY agc.memory[053]
+#define ctrTRKRX agc.memory[054]
+#define ctrTRKRY agc.memory[055]
+#define ctrTRKRR agc.memory[056]
 
 extern int zeroErasable;
 int

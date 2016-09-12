@@ -410,7 +410,7 @@ void
 TimerClass::ActOnIncomingIO(unsigned char *Packet)
 {
   static uint16_t lastReceived[16] =
-    { 0 };
+    { 0 }, lastOUT1 = 0;
   static uint8_t signs[3] =
     { 0 };
   int Channel, Value, uBit, i;
@@ -434,7 +434,18 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
     }
   printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
       Value, uBit);
-  if (Channel == 010 && uBit == 0) // IN0
+  if (uBit)
+    return;
+  if (Channel == 011 && Value != (lastOUT1 & 037)) // OUT1
+    {
+      lastOUT1 = Value;
+      // Ignore B1 for now: main-panel DSKY doesn't have a PROG ALM indicator.
+      frame->indicatorCompFail->SetBitmap( (0 == (Value & 2)) ? frame->imageCompFailOff : frame->imageCompFailOn );
+      // Ignore B3 for now: main-panel DSKY doesn't have a KEY RLSE indicator.
+      // Ignore B4 for now: main-panel DSKY doesn't have a SCALER FAIL indicator.
+      frame->indicatorCheckFail->SetBitmap( (0 == (Value & 2)) ? frame->imageCheckFailOff : frame->imageCheckFailOn );
+    }
+  else if (Channel == 010) // OUT0
     {
       int relayword = (Value >> 11) & 017;
       int received = Value & 03777;
