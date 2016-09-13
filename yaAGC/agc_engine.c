@@ -254,6 +254,8 @@
  *				is 0 and the divisor is not, the quotient and
  *				remainder are both 0 with the sign matching the
  *				dividend.
+ *		09/11/16 MAS	Applied Gergo's fix for multi-MCT instructions
+ *				taking a cycle longer than they should.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -1885,7 +1887,7 @@ agc_engine (agc_t * State)
       if (i)
 	{
 	  State->PendFlag = 1;
-	  State->PendDelay = i;
+	  State->PendDelay = i-1;
 	  return (0);
 	}
     }
