@@ -623,7 +623,10 @@ examineMemory()
           // I haven't caught all the special cases here, but right now I'm only interested
           // in address range 04-14.
           if (address == 4)
-            INP::register_IN0.write(Value);
+            {
+              KBD::keypress((keyInType) Value);
+              MEM::writeMemory(04, 040 | Value);
+            }
           else if (address == 5)
             INP::register_IN1.write(Value);
           else if (address == 6)
@@ -1076,7 +1079,7 @@ main(int argc, char* argv[])
                     }
                 }
               while ((MON::FCLK || singleClock) && MON::RUN && genStateCntr > 0);
-              if (stepCount <= 1  && !MON::FCLK)
+              if (stepCount >= 0 && stepCount <= 1  && !MON::FCLK)
                 {
                   updateAGCDisplay();
                   if (autoShowSourceCode)
@@ -1106,6 +1109,11 @@ main(int argc, char* argv[])
                   singleClock = true;
                   anyWZ = false;
                 }
+            }
+          else if (stepCount < 0)
+            {
+              singleClock = true;
+              anyWZ = false;
             }
           if (power)
             break;

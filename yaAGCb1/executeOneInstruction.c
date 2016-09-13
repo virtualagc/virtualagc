@@ -235,7 +235,7 @@ executeOneInstruction(FILE *logFile)
       if (!interruptVector && 0 != (regIN0 & 040))  // KEYRUPT
         {
           interruptVector = 02014;
-          //regIN0 &= ~040;
+          regIN0 &= ~040;
           printf("KEYRUPT\n");
         }
 

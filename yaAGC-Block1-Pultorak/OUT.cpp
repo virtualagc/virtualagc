@@ -15,6 +15,7 @@
 #include "DSP.h"
 #include "ADR.h"
 #include "PAR.h"
+#include "MEM.h"
 #include <stdlib.h>
 regOut1 OUT::register_OUT1; // output register 1
 regOut2 OUT::register_OUT2; // output register 2
@@ -32,6 +33,8 @@ void
 OUT::execWP_WA10()
 {
   DSP::decodeRelayWord(BUS::glbl_WRITE_BUS);
+  // RSB: I stick it into memory too, just so it shows up in the logs.
+  MEM::writeMemory(010, 077777 & BUS::glbl_WRITE_BUS);
 }
 void
 OUT::execRP_RA11()

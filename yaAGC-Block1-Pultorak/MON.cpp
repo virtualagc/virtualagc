@@ -70,13 +70,15 @@ MON::displayAGC()
     sprintf(addressString, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
   printw("%s",
       "------------------------------------------------------------------------------------\n");
-  printw("CP(%s): %s\n", TPG::tpTypestring[TPG::register_SG.read()], SEQ::getControlPulses());
+  printw("CP(%s): %s\n", TPG::tpTypestring[TPG::register_SG.read()],
+      SEQ::getControlPulses());
   printw("F17: %1d\t\tF13: %1d\t\tF10: %1d\t\tSCL: %-8u\tPC: %s\tflat: %05o\n",
-      SCL::register_F17.read(),
-      SCL::register_F13.read(), SCL::register_F10.read(),
+      SCL::register_F17.read(), SCL::register_F13.read(),
+      SCL::register_F10.read(),
       (SCL::register_SCL.read() >= 016) ?
           ((SCL::register_SCL.read() - 016) / 014) : 0, addressString, pc);
-  printw("STA: %01o\t\tSTB: %01o\t\tBR1: %01o\t\tBR2: %01o\t\tSNI: %01o\t\tCI: %01o\t\tLOOPCTR: %01o\n",
+  printw(
+      "STA: %01o\t\tSTB: %01o\t\tBR1: %01o\t\tBR2: %01o\t\tSNI: %01o\t\tCI: %01o\t\tLOOPCTR: %01o\n",
       SEQ::register_STA.read(), SEQ::register_STB.read(),
       SEQ::register_BR1.read(), SEQ::register_BR2.read(),
       SEQ::register_SNI.read(), ALU::register_CI.read(),
@@ -90,7 +92,8 @@ MON::displayAGC()
       CPM::subseqString[SEQ::glbl_subseq]);
   // For the G register, bit 15 comes from register G15; the other bits (16, 14-1) come
   // from register G.
-  printw("S: %04o\t\tG: %06o\tP: %06o\t(r)RUN : %1d\t(p)PURST: %1d\t(t,v)FCLK: %1d\n",
+  printw(
+      "S: %04o\t\tG: %06o\tP: %06o\t(r)RUN : %1d\t(p)PURST: %1d\t(t,v)FCLK: %1d\n",
       ADR::register_S.read(),
       (MBF::register_G.read() & 0137777) | (PAR::register_G15.read() << 14),
       PAR::register_P.read(), MON::RUN, MON::PURST, MON::FCLK);
@@ -100,8 +103,8 @@ MON::displayAGC()
   char parityAlm = ' ';
   if (PAR::register_PALM.read())
     parityAlm = '*';
-  printw("B: %06o\tCADR: %06o\t(n)INST: %1d\tPALM: [%c]\n", ALU::register_B.read(),
-      ADR::getEffectiveAddress(), MON::INST, parityAlm);
+  printw("B: %06o\tCADR: %06o\t(n)INST: %1d\tPALM: [%c]\n",
+      ALU::register_B.read(), ADR::getEffectiveAddress(), MON::INST, parityAlm);
   printw("X: %06o\tY: %06o\tU: %06o\t(a)SA: %1d\n\n", ALU::register_X.read(),
       ALU::register_Y.read(), ALU::register_U.read(), MON::SA);
   printw("00 A: %06o\t\t15 BANK: %02o\t\t36 TIME1: %06o\t53 OPT Y: %06o\n",
@@ -114,8 +117,8 @@ MON::displayAGC()
   printw("03 LP: %06o\t\t20 CYR: %06o\t\t41 UPLINK: %06o\t56 TRKR Z: %06o\n",
       CRG::register_LP.read(), MEM::readMemory(020), MEM::readMemory(041),
       MEM::readMemory(056));
-  printw("04 IN0: %06o\t\t21 SR: %06o\t\t42 OUTCR1: %06o\n", INP::register_IN0.read(),
-      MEM::readMemory(021), MEM::readMemory(042));
+  printw("04 IN0: %06o\t\t21 SR: %06o\t\t42 OUTCR1: %06o\n",
+      INP::register_IN0.read(), MEM::readMemory(021), MEM::readMemory(042));
   char progAlm = ' ';
   if (OUT::register_OUT1.read() & 0400)
     progAlm = '*';
@@ -131,21 +134,23 @@ MON::displayAGC()
   char comp = ' '; // also called comp acty
   if (OUT::register_OUT1.read() & 001)
     comp = '*';
-  printw("05 IN1: %06o\t\t22 CYL: %06o\t\t43 OUTCR2: %06o\tCF:[%c%c]:KR\t[%c]:PA\n",
+  printw(
+      "05 IN1: %06o\t\t22 CYL: %06o\t\t43 OUTCR2: %06o\tCF:[%c%c]:KR\t[%c]:PA\n",
       INP::register_IN1.read(), MEM::readMemory(022), MEM::readMemory(043),
       compFail, keyRels, progAlm);
-  printw("06 IN2: %06o\t\t23 SL: %06o\t\t44 PIPA X: %06o\n", INP::register_IN2.read(),
-      MEM::readMemory(023), MEM::readMemory(044));
-  printw("07 IN3: %06o\t\t24 ZRUPT: %06o\t45 PIPA Y: %06o\tA:[%c%c]\t\tM:[%c%c]\n",
+  printw("06 IN2: %06o\t\t23 SL: %06o\t\t44 PIPA X: %06o\n",
+      INP::register_IN2.read(), MEM::readMemory(023), MEM::readMemory(044));
+  printw(
+      "07 IN3: %06o\t\t24 ZRUPT: %06o\t45 PIPA Y: %06o\tA:[%c%c]\t\tM:[%c%c]\n",
       INP::register_IN3.read(), MEM::readMemory(024), MEM::readMemory(045),
       upTl, comp, DSP::MD1, DSP::MD2);
   char fc = ' ';
   if (DSP::flash)
     fc = '*';
-  printw("10 OUT0: %06o\t\t25 BRUPT: %06o\t46 PIPA Z: %06o\tV:[%c%c]\t\tN:[%c%c]\t %c\n",
-      MEM::readMemory(010),
-      MEM::readMemory(025), MEM::readMemory(046), DSP::VD1, DSP::VD2, DSP::ND1,
-      DSP::ND2, fc);
+  printw(
+      "10 OUT0: %06o\t\t25 BRUPT: %06o\t46 PIPA Z: %06o\tV:[%c%c]\t\tN:[%c%c]\t %c\n",
+      MEM::readMemory(010), MEM::readMemory(025), MEM::readMemory(046),
+      DSP::VD1, DSP::VD2, DSP::ND1, DSP::ND2, fc);
   printw("11 OUT1: %06o\t\t26 ARUPT: %06o\t47 CDU X: %06o\tR1:[%c%c%c%c%c%c]\n",
       OUT::register_OUT1.read(), MEM::readMemory(026), MEM::readMemory(047),
       DSP::R1S, DSP::R1D1, DSP::R1D2, DSP::R1D3, DSP::R1D4, DSP::R1D5);
@@ -181,7 +186,8 @@ MON::logAGC(FILE *logFile)
   unsigned pc = getPC();
   char addressString[32];
 
-  if (SEQ::glbl_subseq == CCS1 || SEQ::glbl_subseq == STD2 || SEQ::glbl_subseq == RUPT3)
+  if (SEQ::glbl_subseq == CCS1 || SEQ::glbl_subseq == STD2
+      || SEQ::glbl_subseq == RUPT3)
     return;
 
   if (pc < 06000)
@@ -190,11 +196,13 @@ MON::logAGC(FILE *logFile)
     fprintf(logFile, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
   fprintf(logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%03o\tSCL=%u",
       CRG::register_A.read(), CRG::register_Q.read(), CRG::register_LP.read(),
-      037 & ADR::register_BNK.read(), (SCL::register_SCL.read() - 016) / 014);
+      037 & ADR::register_BNK.read(),
+      (SCL::register_SCL.read() >= 016) ?
+          ((SCL::register_SCL.read() - 016) / 014) : 0);
   fprintf(logFile, "\n\tOUT0=%05o\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o",
-      MEM::readMemory(010),
-      OUT::register_OUT1.read(), OUT::register_OUT2.read(),
-      OUT::register_OUT3.read(), OUT::register_OUT4.read());
+      MEM::readMemory(010), OUT::register_OUT1.read(),
+      OUT::register_OUT2.read(), OUT::register_OUT3.read(),
+      OUT::register_OUT4.read());
   fprintf(logFile, "\n\tIN0=%05o\tIN1=%05o\tIN2=%05o\tIN3=%05o",
       MEM::readMemory(04), INP::register_IN1.read(), INP::register_IN2.read(),
       INP::register_IN3.read());
@@ -212,7 +220,9 @@ MON::logAGC(FILE *logFile)
       int i;
       fprintf(logFile, "\n");
       for (i = 0; i < numLogExtras; i++)
-        fprintf(logFile, "\t%05o=%06o", logExtras[i], MEM::readMemory(logExtras[i]) /*& ((logExtras[i] >= 060) ? 077777 : ~0)*/);
+        fprintf(logFile, "\t%05o=%06o", logExtras[i],
+            MEM::readMemory(
+                logExtras[i]) /*& ((logExtras[i] >= 060) ? 077777 : ~0)*/);
     }
   fprintf(logFile, "\n");
 }

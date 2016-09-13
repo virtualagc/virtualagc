@@ -14,6 +14,7 @@
 #include "KBD.h"
 #include "MON.h"
 #include "BUS.h"
+#include "MEM.h"
 regIn0 INP::register_IN0; // input register 0
 regIn1 INP::register_IN1; // input register 1
 regIn2 INP::register_IN2; // input register 2
@@ -29,6 +30,7 @@ INP::execRP_RA4()
   register_IN0.writeField(14, 14, MON::SA);
   register_IN0.clk();
   BUS::glbl_READ_BUS = register_IN0.read();
+  MEM::writeMemory(04, 077777 & KBD::kbd);
 }
 void
 INP::execRP_RA5()
