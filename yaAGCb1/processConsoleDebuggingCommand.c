@@ -57,15 +57,24 @@ printFlatAddress(uint16_t flatAddress)
 void
 processConsoleDebuggingCommand(char *command)
 {
-  unsigned u, flatAddress, bank, offset;
-  int i, index;
-  char c, *s;
+  unsigned u, bank, offset;
+  int i, index, flatAddress;
+  char c, c2, *s;
 
   if (command != NULL)
     {
       s = strstr(command, "\n");
       if (s != NULL)
         *s = 0;
+      if (!strcasecmp(command, "l"))
+        {
+          loggingOn = !loggingOn;
+          if (loggingOn)
+            printf("Logging toggled on.\n");
+          else
+            printf("Logging toggled off.\n");
+          return;
+        }
       if (!strcasecmp(command, "c"))
         {
           agc.instructionCountDown = -1;
@@ -93,6 +102,13 @@ processConsoleDebuggingCommand(char *command)
             agc.instructionCountDown = 0;
           return;
         }
+      if (3 == sscanf(command, "%c%c%d", &c, &c2, &flatAddress)
+          && (c == 'b' || c == 'B') && (c2 == 'c' || c2 == 'C')
+          && flatAddress > 0)
+        {
+          flatAddress = -flatAddress;
+          goto breakpoint;
+        }
       if (3 == sscanf(command, "%c%o,%o", &c, &bank, &offset))
         {
           if (bank < 040 && offset >= 06000 && offset <= 07777)
@@ -109,8 +125,11 @@ processConsoleDebuggingCommand(char *command)
                   for (i = 0; i < numBreaksOrWatches; i++)
                     if (breaksOrWatches[i] == flatAddress)
                       {
-                        printf("Removing break/watch %s\n",
-                            printFlatAddress(flatAddress));
+                        if (flatAddress < 0)
+                          printf("Removing break at MCT=%d\n", -flatAddress);
+                        else
+                          printf("Removing break/watch %s\n",
+                              printFlatAddress(flatAddress));
                         if (i < numBreaksOrWatches - 1)
                           memmove(&breaksOrWatches[i], &breaksOrWatches[i + 1],
                               2);
@@ -120,8 +139,11 @@ processConsoleDebuggingCommand(char *command)
                   if (numBreaksOrWatches < MAX_BREAKS_OR_WATCHES)
                     {
                       breaksOrWatches[numBreaksOrWatches++] = flatAddress;
-                      printf("Adding break/watch %s\n",
-                          printFlatAddress(flatAddress));
+                      if (flatAddress < 0)
+                        printf("Adding break at MCT=%d\n", -flatAddress);
+                      else
+                        printf("Adding break/watch %s\n",
+                            printFlatAddress(flatAddress));
                     }
                   else
                     {
@@ -140,7 +162,17 @@ processConsoleDebuggingCommand(char *command)
               if (c == 'e' || c == 'E')
                 {
                   int i;
+                  unsigned Value;
+                  char *s;
                   examineMemory: ;
+                  s = strstr(command, "=");
+                  if (s != NULL)
+                    {
+                      if (1 == sscanf(s, "=%o", &Value) && Value >= 0
+                          && Value <= 0177777)
+                        agc.memory[flatAddress] = Value;
+                      goto reStatus;
+                    }
                   for (i = 0; i < 24 && flatAddress < sizeof(agc.memory) / 2;
                       i++, flatAddress++)
                     {
@@ -185,23 +217,25 @@ processConsoleDebuggingCommand(char *command)
         }
       if (*command)
         {
-          printf("         c  ---  continuous run\n");
-          printf("    s or t  ---  single step\n");
-          printf("  sN or tN  ---  N single steps.  If N<0, free running\n");
-          printf("eN or eB,O  ---  examine memory at memory location\n");
-          printf("bN or bB,0  ---  add/delete breakpoint at location\n");
-          printf("         b  ---  remove all breakpoints\n");
-          printf("        b?  ---  list all breakpoints\n");
-          printf("         q  ---  quit\n");
+          printf("             c --- free run\n");
+          printf("        s or t --- single step\n");
+          printf("      sN or tN --- N single steps.  If N<0, free running\n");
+          printf("    eN or eB,O --- examine memory at memory location\n");
+          printf("eN=V or eB,O=V --- set memory location to octal value V\n");
+          printf("    bN or bB,0 --- add/delete breakpoint at location\n");
+          printf("           bcN --- break after MCT=N is reached\n");
+          printf("             b --- remove all breakpoints\n");
+          printf("            b? --- list all breakpoints\n");
+          printf("             q --- quit\n");
         }
     }
+  reStatus: ;
   for (u = 0; u < MAX_LINE_LENGTH; u++)
     printf("-");
   printf("\n");
   printf("MCT: %ld   Elapsed: %ld ms   Paused: %ld ms   CPU: %ld ms\n",
       agc.countMCT, (getTimeNanoseconds() - agc.startTimeNanoseconds) / 1000000,
-      agc.pausedNanoseconds / 1000000,
-      (agc.countMCT * 12)/1024);
+      agc.pausedNanoseconds / 1000000, (agc.countMCT * 12) / 1024);
   printf(
       "  A: %06o   IN0: %05o   OUT0: %05o     Bank: %03o   CYR: %05o   ZRUPT: %05o   TIME1: %06o\n",
       regA, regIN0, regOUT0, regBank >> 10, regCYR, regZRUPT, ctrTIME1);

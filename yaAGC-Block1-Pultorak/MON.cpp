@@ -142,7 +142,8 @@ MON::displayAGC()
   char fc = ' ';
   if (DSP::flash)
     fc = '*';
-  printw("10 OUT0: ?????\t\t25 BRUPT: %06o\t46 PIPA Z: %06o\tV:[%c%c]\t\tN:[%c%c]\t %c\n",
+  printw("10 OUT0: %06o\t\t25 BRUPT: %06o\t46 PIPA Z: %06o\tV:[%c%c]\t\tN:[%c%c]\t %c\n",
+      MEM::readMemory(010),
       MEM::readMemory(025), MEM::readMemory(046), DSP::VD1, DSP::VD2, DSP::ND1,
       DSP::ND2, fc);
   printw("11 OUT1: %06o\t\t26 ARUPT: %06o\t47 CDU X: %06o\tR1:[%c%c%c%c%c%c]\n",
@@ -190,7 +191,8 @@ MON::logAGC(FILE *logFile)
   fprintf(logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%03o\tSCL=%u",
       CRG::register_A.read(), CRG::register_Q.read(), CRG::register_LP.read(),
       037 & ADR::register_BNK.read(), (SCL::register_SCL.read() - 016) / 014);
-  fprintf(logFile, "\n\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o",
+  fprintf(logFile, "\n\tOUT0=%05o\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o",
+      MEM::readMemory(010),
       OUT::register_OUT1.read(), OUT::register_OUT2.read(),
       OUT::register_OUT3.read(), OUT::register_OUT4.read());
   fprintf(logFile, "\n\tIN0=%05o\tIN1=%05o\tIN2=%05o\tIN3=%05o",

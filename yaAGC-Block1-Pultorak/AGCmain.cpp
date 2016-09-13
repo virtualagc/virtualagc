@@ -181,7 +181,8 @@ char userInput[256];
 #include "CPM.h"
 #include "ISD.h"
 #include "CLK.h"
-extern int loadPads(char *filename);
+extern int
+loadPads(char *filename);
 
 #define ROPE_SIZE (02000 * (NUMFBANK + 1))
 FILE *logFile = NULL;
@@ -280,7 +281,7 @@ getCommand(const char* prompt)
 #endif
 }
 bool breakpointEnab = false;
-unsigned breakpoint = 0;
+int breakpoint = 0;
 void
 toggleBreakpoint()
 {
@@ -288,9 +289,17 @@ toggleBreakpoint()
     {
       char b[80];
       unsigned bank, offset, flat;
-      strcpy(b, getCommand("Set breakpoint: -- enter banked address or 14-bit CADR (octal): "));
+      int mct;
+      strcpy(b,
+          getCommand(
+              "Set breakpoint: -- enter banked address or 14-bit CADR (octal) or cMCT: "));
       printw("%s\n", b);
-      if (2 == sscanf(b, "%o,%o", &bank, &offset))
+      if (1 == sscanf(b, "c%d", &mct) && mct > 0)
+        {
+          breakpoint = -mct;
+          breakpointEnab = true;
+        }
+      else if (2 == sscanf(b, "%o,%o", &bank, &offset))
         {
           breakpoint = bank * 02000 + offset % 02000;
           breakpointEnab = true;
@@ -305,7 +314,7 @@ toggleBreakpoint()
           printw("Unrecognized address, breakpoints cleared.\n");
           breakpointEnab = false;
         }
-      if (breakpoint < 0 || breakpoint >= ROPE_SIZE)
+      if (breakpoint >= ROPE_SIZE)
         {
           printw("Address is out of range, breakpoints cleared.\n");
           breakpointEnab = false;
@@ -390,12 +399,12 @@ loadYul(char *filename)
       // an odd-parity bit at the most-significant position.
       data = parity = (word[0] << 7) | (word[1] >> 1);
       /*
-      parity = (parity ^ (parity << 8));
-      parity = (parity ^ (parity << 4));
-      parity = (parity ^ (parity << 2));
-      parity = (parity ^ (parity << 1));
-      data |= (parity & 0x8000) ^ 0x8000;
-      */
+       parity = (parity ^ (parity << 8));
+       parity = (parity ^ (parity << 4));
+       parity = (parity ^ (parity << 2));
+       parity = (parity ^ (parity << 1));
+       data |= (parity & 0x8000) ^ 0x8000;
+       */
       MEM::writeMemory(addr, data);
       addr++;
     }
@@ -582,8 +591,10 @@ saveMemory(const char* filename)
 void
 examineMemory()
 {
-  char theAddress[20];
-  strcpy(theAddress, getCommand("Examine Memory -- enter address (octal)\n: "));
+  char theAddress[20], *s;
+
+  strcpy(theAddress,
+      getCommand("Examine Memory -- enter octal address or address=value: "));
   printw("%s\n", theAddress);
   unsigned address, bank, offset, flat;
   if (2 == sscanf(theAddress, "%o,%o", &bank, &offset))
@@ -601,12 +612,43 @@ examineMemory()
     }
   if (address < 0 || address >= ROPE_SIZE)
     {
-      printw("Address is out of range, breakpoints cleared.\n");
+      printw("Address is out of range.\n");
     }
-  for (unsigned i = address; i < address + 24 && i < ROPE_SIZE; i++)
+  s = strstr(theAddress, "=");
+  if (s != NULL)
     {
-      int data = MEM::readMemory(i);
-      printw("%06o: %06o\n", i, data & 077777);
+      unsigned Value;
+      if (1 == sscanf(s, "=%o", &Value) && Value >= 0 && Value <= 0177777)
+        {
+          // I haven't caught all the special cases here, but right now I'm only interested
+          // in address range 04-14.
+          if (address == 4)
+            INP::register_IN0.write(Value);
+          else if (address == 5)
+            INP::register_IN1.write(Value);
+          else if (address == 6)
+            INP::register_IN2.write(Value);
+          else if (address == 7)
+            INP::register_IN3.write(Value);
+          else if (address == 011)
+            OUT::register_OUT1.write(Value);
+          else if (address == 012)
+            OUT::register_OUT2.write(Value);
+          else if (address == 013)
+            OUT::register_OUT3.write(Value);
+          else if (address == 014)
+            OUT::register_OUT4.write(Value);
+          else
+            MEM::writeMemory(address, Value);
+        }
+    }
+  else
+    {
+      for (unsigned i = address; i < address + 24 && i < ROPE_SIZE; i++)
+        {
+          int data = MEM::readMemory(i);
+          printw("%06o: %06o\n", i, data & 077777);
+        }
     }
 }
 // Returns true if time (s) elapsed since last time it returned true; does not block
@@ -694,13 +736,15 @@ showMenu()
 {
   printw("BLOCK 1 EMULATOR MENU:\n");
   printw(" 'a' = STANDBY ALLOWED\n");
-  printw(" 'b' = TOGGLE BREAKPOINT\n");
+  printw(" 'b' or 'bc' = TOGGLE BREAKPOINT at address or MCT count\n");
   printw(" 'c' = TOGGLE SCALER: (for automatically generating F13 and F17.\n");
   printw(" 'd' = DISPLAY: refreshes current register display.\n");
-  printw(" 'e' = EXAMINE: examine contents of memory.\n");
+  printw(" 'e' = EXAMINE: examine or change contents of memory.\n");
   printw(" 'f' = DEBUG: automatically display source code.\n");
   printw(" 'h' = RESET.\n");
   printw(" 'i' = INTERRUPT: generates an AGC interrupt, 1-5.\n");
+  if (logFile != NULL)
+    printw(" 'l' = LOGGING: toggle.\n");
   printw(" 'm' = MENU:  show this menu of commands.\n");
   printw(" 'n' = INST:  toggle stepping by MCT vs pulse-sequence\n");
   printw(" 'p' = POWER UP RESET\n");
@@ -882,7 +926,7 @@ main(int argc, char* argv[])
 {
   int power = 0;
   char Solarium[] = "Solarium055", *initialRope = Solarium;
-  bool autoShowSourceCode = true;
+  bool autoShowSourceCode = true, loggingOn = true;
   int stepCount = 0;
 
   // Parse command line.
@@ -908,7 +952,7 @@ main(int argc, char* argv[])
               if (numLogExtras < MAX_LOG_EXTRAS && j >= 0 && j < ROPE_SIZE)
                 logExtras[numLogExtras++] = j;
               else
-                printf ("Illegal %s\n", argv[i]);
+                printf("Illegal %s\n", argv[i]);
             }
           else if (!strcmp(argv[i], "--zero"))
             zeroErasable = true;
@@ -920,11 +964,16 @@ main(int argc, char* argv[])
               printf("--go=O       Starting address (octal), default 2030.\n");
               printf("--rope=F     Specify a rope, default Solarium055.\n");
               printf("--log=F      Specify a log file (default none).\n");
-              printf("--extra=OCT  In the --log file, add the value at the address OCT\n");
-              printf("             to the log.  There can be up to %d of these.\n", MAX_LOG_EXTRAS);
-              printf("--power      Automatically give 'p', 'r', 't' commands\n");
+              printf(
+                  "--extra=OCT  In the --log file, add the value at the address OCT\n");
+              printf(
+                  "             to the log.  There can be up to %d of these.\n",
+                  MAX_LOG_EXTRAS);
+              printf(
+                  "--power      Automatically give 'p', 'r', 't' commands\n");
               printf("             upon entry.\n");
-              printf("--zero       Force erasable 060-01777 to zero on startup.\n");
+              printf(
+                  "--zero       Force erasable 060-01777 to zero on startup.\n");
               printf("             (Default is the 0166666.)\n");
               return (1);
             }
@@ -987,7 +1036,8 @@ main(int argc, char* argv[])
                   anyWZ = anyWZ || SEQ::anyWZ();
                   if (!MON::INST
                       || (MON::INST && TPG::register_SG.read() == TP1 && anyWZ
-                          && SEQ::glbl_subseq != CCS1 && SEQ::glbl_subseq != STD2))
+                          && SEQ::glbl_subseq != CCS1
+                          && SEQ::glbl_subseq != STD2))
                     {
                       singleClock = false;
                     }
@@ -995,12 +1045,23 @@ main(int argc, char* argv[])
                   // Needs more work. It doesn't always stop at the
                   // right location and sometimes stops at the
                   // instruction afterwards, too.
-                  if (breakpointEnab
-                      && breakpoint == ADR::getEffectiveAddress())
+                  if (breakpointEnab)
                     {
-                      //MON::RUN = 0;
-                      MON::FCLK = 0;
-                      stepCount = 0;
+                      int countMCT = (SCL::register_SCL.read() >= 016) ?
+                          ((SCL::register_SCL.read() - 016) / 014) : 0;
+                      if (breakpoint == ADR::getEffectiveAddress())
+                        {
+                          //MON::RUN = 0;
+                          MON::FCLK = 0;
+                          stepCount = 0;
+                          singleClock = 0;
+                        }
+                      else if (breakpoint < 0 && countMCT >= -breakpoint)
+                        {
+                          MON::FCLK = 0;
+                          stepCount = 0;
+                          singleClock = 0;
+                        }
                     }
                   // Halt right after instr that changes a watched
                   // memory location.
@@ -1015,19 +1076,19 @@ main(int argc, char* argv[])
                     }
                 }
               while ((MON::FCLK || singleClock) && MON::RUN && genStateCntr > 0);
-              if (stepCount <= 1)
+              if (stepCount <= 1  && !MON::FCLK)
                 {
                   updateAGCDisplay();
                   if (autoShowSourceCode)
                     showSourceCode();
-                  if (logFile != NULL)
+                  if (logFile != NULL && loggingOn)
                     MON::logAGC(logFile);
                   if (!MON::FCLK)
                     printw("%s", "> ");
                 }
               else
                 {
-                  if (logFile != NULL)
+                  if (logFile != NULL && loggingOn)
                     MON::logAGC(logFile);
                 }
             }
@@ -1166,6 +1227,13 @@ main(int argc, char* argv[])
         break;
       case 'j':
         KBD::keypress(KEYIN_ENTER);
+        break;
+      case 'l':
+        loggingOn = !loggingOn;
+        if (loggingOn)
+          printw("Logging toggled on.\n");
+        else
+          printw("Logging toggled off.\n");
         break;
       case 'm':
         showMenu();

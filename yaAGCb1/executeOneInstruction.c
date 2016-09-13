@@ -50,7 +50,7 @@
 
 // Only for my primitive debugging facility that I'm using
 // during initial development.
-uint16_t breaksOrWatches[MAX_BREAKS_OR_WATCHES];
+int breaksOrWatches[MAX_BREAKS_OR_WATCHES];
 int numBreaksOrWatches = 0;
 
 // Write a value to an erasable address.
@@ -62,7 +62,7 @@ writeToErasableOrRegister(uint16_t flatAddress, uint16_t value)
   if (&regBank== &agc.memory[flatAddress]) agc.memory[flatAddress] = value & 076000;
   else if (flatAddress < 02000) agc.memory[flatAddress] = value;
   if (flatAddress >= 010 && flatAddress <= 014) // OUT0-4
-    ChannelOutput (&agc, flatAddress, value);
+    ChannelOutput(&agc, flatAddress, value);
 }
 
 static int numMCT;
@@ -174,12 +174,22 @@ executeOneInstruction(FILE *logFile)
       if (flatOperandAddress >= 06000)
         flatOperandAddress = flatten(regBank, operand);
       for (i = 0; i < numBreaksOrWatches; i++)
-        if (breaksOrWatches[i] == flatAddress
-            || breaksOrWatches[i] == flatOperandAddress)
-          {
-            agc.instructionCountDown = 0;
-            return (1);
-          }
+        {
+          if (breaksOrWatches[i] >= 0)
+            {
+              if (breaksOrWatches[i] == flatAddress
+                  || breaksOrWatches[i] == flatOperandAddress)
+                {
+                  agc.instructionCountDown = 0;
+                  return (1);
+                }
+            }
+          else if (agc.countMCT >= -breaksOrWatches[i])
+            {
+              agc.instructionCountDown = 0;
+              return (1);
+            }
+        }
     }
   // Increment Z to next location.
   lastZ = regZ;
@@ -190,7 +200,7 @@ executeOneInstruction(FILE *logFile)
   agc.B = instruction;
   if (0 == (agc.B & 0100000))
     agc.B |= (agc.B & 040000) << 1;
-  if (logFile != NULL)
+  if (logFile != NULL && loggingOn)
     logAGC(logFile, lastZ);
   lastInstruction = instruction;
   agc.INDEX = 0;

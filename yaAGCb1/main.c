@@ -44,6 +44,7 @@
 int numLogExtras = 0;
 uint16_t logExtras[MAX_LOG_EXTRAS];
 int zeroErasable = 0;
+int loggingOn = 1;
 
 int
 main(int argc, char *argv[])
@@ -171,7 +172,7 @@ main(int argc, char *argv[])
                   - agc.pausedNanoseconds) / mctNanoseconds)
         {
           ChannelInput(&agc);
-          if (executeOneInstruction(logFile))
+          if (executeOneInstruction(loggingOn ? logFile : NULL))
             goto pause;
           if (agc.instructionCountDown != 0)
             {

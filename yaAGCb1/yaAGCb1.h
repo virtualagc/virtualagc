@@ -167,6 +167,7 @@ sleepNanoseconds(int64_t nanoseconds);
 
 int
 executeOneInstruction(FILE *logFile);
+extern int loggingOn;
 
 //--------------------------------------------------------------------------
 // Stuff related to debugging.
@@ -187,7 +188,9 @@ extern char bufferedListing[MAX_LISTING_LINES][MAX_LINE_LENGTH];
 extern int numListingLines;
 extern int listingAddresses[MEMORY_SIZE];
 #define MAX_BREAKS_OR_WATCHES 16
-extern uint16_t breaksOrWatches[MAX_BREAKS_OR_WATCHES];
+// Note that positive breaksOrWatches are addresses, while negative ones are
+// negatives of MCT values.
+extern int breaksOrWatches[MAX_BREAKS_OR_WATCHES];
 extern int numBreaksOrWatches;
 
 // Function for populating the program-listing buffer, given a filename of the
