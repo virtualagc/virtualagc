@@ -189,7 +189,7 @@ FILE *logFile = NULL;
 #define MAX_LOG_EXTRAS 10
 int numLogExtras = 0;
 uint16_t logExtras[MAX_LOG_EXTRAS];
-bool zeroErasable = false;
+bool zeroErasable = true;
 
 using namespace std;
 
@@ -959,6 +959,8 @@ main(int argc, char* argv[])
             }
           else if (!strcmp(argv[i], "--zero"))
             zeroErasable = true;
+          else if (!strcmp(argv[i], "--uninit"))
+            zeroErasable = false;
           else
             {
               printf("Usage:\n");
@@ -976,8 +978,11 @@ main(int argc, char* argv[])
                   "--power      Automatically give 'p', 'r', 't' commands\n");
               printf("             upon entry.\n");
               printf(
-                  "--zero       Force erasable 060-01777 to zero on startup.\n");
-              printf("             (Default is the 0166666.)\n");
+                  "--zero       At power-up, initialize erasable 060-01777 to 0,\n");
+              printf("             This is the default.\n");
+              printf(
+                  "--uninit     At power-up, initialize erasable 060-01777 to 0166666,\n");
+              printf("             rather than the default 0.\n");
               return (1);
             }
         }
