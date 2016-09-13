@@ -243,6 +243,7 @@ executeOneInstruction(FILE *logFile)
         {
           agc.uplinkReady = 0;
           interruptVector = 02020;
+          printf("UPRUPT\n");
         }
 
       if (!interruptVector && 0)  // DOWNRUPT
