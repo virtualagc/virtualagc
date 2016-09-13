@@ -33,19 +33,19 @@
           Architecture</a></li>
       <ul>
         <li><a
-href="file:///home/rburkey/git/virtualagc-web/Block1.html#CPU_Architecture_Registers">CPU
-            Architecture (Registers)</a></li>
-        <li><a
-            href="file:///home/rburkey/git/virtualagc-web/Block1.html#Memory_Map">Memory
+            href="#Memory_Map">Memory
             Map</a></li>
         <li><a
-href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">Interrupt
+href="#CPU_Architecture_Registers">Registers</a></li>
+        <li><a
+            href="Block1.html#io_channels">I/O
+            Channels</a></li>
+        <li><a href="#Counters_and_Timers">Counters and Timers</a></li>
+        <li><a
+href="#Interrupt_Processing">Interrupt
             Processing</a></li>
         <li><a
-            href="file:///home/rburkey/git/virtualagc-web/Block1.html#io_channels">I/O
-            Channels</a></li>
-        <li><a
-href="file:///home/rburkey/git/virtualagc-web/Block1.html#UnprogrammedSequences">Unprogrammed
+href="Block1.html#UnprogrammedSequences">Unprogrammed
             Sequences</a></li>
       </ul>
       <li><a href="#Software">Software</a><br>
@@ -72,7 +72,7 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#UnprogrammedSequences"
           Software</a></li>
       <ul>
         <li><a
-href="file:///home/rburkey/git/virtualagc-web/Block1.html#Virtual_AGCs_Assembler_yaYUL">Virtual
+href="Block1.html#Virtual_AGCs_Assembler_yaYUL">Virtual
             AGC's Assembler (yaYUL)</a></li>
         <li><a href="#CPU_Simulators">CPU Simulators</a></li>
         <ul>
@@ -250,29 +250,26 @@ Guidance
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Hardware_Architecture"></a>Computer Hardware
       Architecture</h2>
-    <h3><a name="CPU_Architecture_Registers"></a>CPU Architecture
-      (Registers) <br>
-    </h3>
-    <p>TBD<br>
-    </p>
     <h3><a name="Memory_Map"></a>Memory Map <br>
     </h3>
     The Block 1 AGC memory map is far simpler than that of the Block 2
     AGC.<br>
     <br>
-    Memory is divided into 1024 words (15 bits each) of "erasable"
+    Memory is divided into 02000 (octal) mostly 15-bit words of "erasable"
     memory &mdash; i.e., memory which can both be read from and written to &mdash;
-    and 24 banks, each with 1024 words of read-only or "fixed" memory.<br>
+    and 24 banks, each with 02000 words of read-only or "fixed" memory.<br>
     <br>
     Conventionally, AGC programming uses octal notation, as opposed to
     decimal or hexadecimal notation, for most purposes, and I'll do that
-    below, but I'll always try to prefix an extra 0 to the front of an
+    below, but I'll try to remember to prefix an extra 0 to the front of an
     octal number to make it easy to recognize as being octal.&nbsp; For
     example, if you see 15, you'll know that it's 15 decimal because
     there's no leading zero, whereas of you see 015, you'll know that
     it's octal (=13 decimal).&nbsp; That's only a convention on this
-    page, and in program listings, expect to see everything in octal
-    with no leading zeroes.<br>
+    page; in program listings or conversations with AGC developers (assuming you
+    find yourself in a position to engage in such an activity), expect to see everything in octal
+    with no leading zeroes, and don't expect anybody to mention hexadecimal,
+    and only occasionally to encounter decimal numbers.<br>
     <br>
     Memory is laid out as follows:<br>
     <ul>
@@ -302,10 +299,29 @@ Guidance
     01 and 02 have the special short addresses 02000 through 05777, and
     they are invariably referred to in that way rather than in the <i>BB,AAAA</i>
     form.<br>
-    <h3><a name="Interrupt_Processing"></a>Interrupt Processing <br>
-    </h3>
-    <p>TBD<br>
-    </p>
+    Various erasable-memory locations in the address range 0-057 have special
+    purposes, such as being dedicated CPU registers, input/output ports, or
+    counters (such as system timers).
+    <h3><a name="CPU_Architecture_Registers"></a>Registers</h3>
+    There are 4 16-bit registers addressable directly by software, namely<br>
+    <ul><li>A (address 0000) &mdash; the "accumulator", at address 0 in erasable, though normally accessed by it's name,
+    "A". This register is the primary source or destination for most operations.</li>
+    <li>Q (address 0001) &mdash; primarily used to hold the return addresses for subroutines.  It is automatically
+    written to by the TC command when a jump is made to a different memory location.  There is
+    no hardware stack, so the subroutine has the responsibility of saving the contents of Q and
+    restoring it before returning to the calling program, if appropriate.</li>
+    <li>Z (address 0002) &mdash; pointer to the <i>next</i> instruction to be executed in the normal flow
+    (i.e., barring a jump instruction like TC or CCS or an interrupt) after the current
+    instruction is completed.  The Z register is already set up with this value by the
+    previously-executed instruction, before the current program counter is reached.
+    (Note, though, that when using the yaAGCb1 or yaAGC-Block1 CPU simulator program in
+    their debugging mode, the value displayed is always for the <i>current</i> instruction
+    rather than for the next one, since I find it more instructive that way.)  Though the 
+    register is 16 bits, in theory, this pointer is just 12 bits (0000-7777), and the full
+    address, if in banked memory, is formed by adding in the value stored in the Bank register.</li>
+    <li>LP (address 0003) &mdash; principally for holding results of MP operations, or operands for DV
+    operations.</li></ul>
+    <br>
     <h3><a name="io_channels"></a>I/O Channels</h3>
     Unlike the Block 2 system, there is no separate i/o-channel address-space, and
     the i/o channels are simply memory mapped.  There being 4 15-bit input channels and
@@ -352,10 +368,99 @@ Guidance
     <li>OUT4 (address 0014): TBD</li>
     </ul>
     <br>
+    <h3><a name="Counters_and_Timers"></a>Counters and Timers<br>
+    </h3>
+    <p>TBD<br>
+    </p>
+    <h3><a name="Interrupt_Processing"></a>Interrupt Processing</h3>
+    At fixed-memory address 02000, you find a vector-interrupt table,
+    containing 7 interrupt vectors, each 4 words long, which are 
+    triggered automatically in the case of an interrupt ... which
+    are referred to as "RUPTS".  Actually, the 7th is not an 
+    interrupt vector at all, but rather the power-up entry point,
+    but it seems reasonable to lump it in with the other 6.<br><br>
+    The different interrupt types are:<br>
+    <ul>
+    <li>T3RUPT (address 02000) &mdash; T3RUPTs are triggered when
+    <a href="#Counters_and_Timers">CPU TIMER3</a> overflows.  This
+    is used for servicing the WAITLIST ... i.e., for managing
+    multi-tasking.</li>
+    <li>ERRUPT (address 02004) &mdash; ERRUPTs are triggered upon
+    various error conditions reported by hardware, and specifically
+    upon any of the bits B8-B15 in <a href="io_channels">input register IN2</a> becoming
+    active.</li>
+    <li>T4RUPT (address 02010) &mdash; triggered when 
+    <a href="#Counters_and_Timers">CPU TIMER4</a> overflows.
+    This is used for servicing outputs to the DSKY.</li>
+    <li>KEYRUPT (address 02014) &mdash; triggered when 
+    bit B6 in <a href="io_channels">input register IN0</a>
+    becomes active ... i.e., when a DSKY key (or the MARK key)
+    is pressed.</li>
+    <li>UPRUPT (address 02020) &mdash; for servicing uplink
+    data, which is in the same form as (and treated the same
+    way as) DSKY keystrokes.</li>
+    <li>DOWNRUPT (address 02024) &mdash; for servicing the 
+    digital downlink (the telemetry data).</li>
+    <li>Address 02030 &mdash; the power-up entry-point of the
+    software.</li>
+    </ul>
+    <br>
+    An interrupt performs several functions automatically in 
+    hardware before the interrupt-servicing by the software 
+    begins.  The existing Q and Z register values are transferred
+    to the CPU registers QRUPT and ZRUPT, and then an implicit TC 
+    instruction transfers control to the interrupt vector code,
+    thus overwriting Q and Z with new values.  The interrupt-service
+    routine must eventually be terminated with the RESUME
+    instruction, which undoes those steps ... i.e., it restores
+    Q and Z to their original forms and puts the program counter
+    back to what it had been, the position of the next instruction
+    that was due to be reached when the interrupt occurred.<br><br>
+    But
+    note that the instruction stored at that return location 
+    is not necessarily the instruction executed at that point!
+    That's because instructions are sometimes preceded in 
+    memory by an INDEX instruction (described later) which
+    has the effect of altering the instruction in-place, even
+    though usually stored in fixed memory, by adding something
+    to it in advance.  Thus if an interrupt occurs <i>between</i>
+    an INDEX and the instruction being indexed that follows it,
+    it is actually the indexed instruction that will be performed
+    when after the RESUME occurs.  The indexed instruction is
+    stored in a special CPU register, BRUPT, while the 
+    interrupt is being serviced.  This register is so-called 
+    because in normal operation the CPU stores the value of the
+    instruction it is executing in a special hidden, non-addressable
+    register called B.<br><br>
+    Other than Q, Z, and B, the remainder of the state is <i>not</i>
+    automatically stored during the interrupt, and so the interrupt-service
+    routine has to explicitly store any other data which must be
+    retained, such as the A register.<br><br>
+    Only one interrupt can be serviced at a time, and interrupts
+    occurring simultaneously are prioritized in the same order
+    as shown above.
+    <br>
+    Interrupts can be inhibited in a variety of ways, in which
+    case the interrupts don't occur until the inhibiting factor
+    is removed.  These inhibiting factors are:<br><br>
+    <ul>
+    <li>Interrupts can be explicitly disabled using the 
+    assembly-language instruction INHINT, and remain disabled
+    until a subsequent RELINT instruction is encountered.</li>
+    <li>Interrupts are inhibited if there is overflow in the A
+    register, because there is no way to store and restored 
+    overflow during the interrupt.</li>
+    <li>Interrupts are inhibited if there is overflow in the
+    hidden B register.  This condition occurs if the next instruction
+    that would have been executed is an MP, DV, or SU, and relates
+    to the fact that the opcodes for these instructions are 
+    otherwise identical to other instructions, and the only way to
+    distinguish them is if this overflow condition can be checked.</li>
+    </ul>
+    <br>
     <h3><a name="UnprogrammedSequences"></a>Unprogrammed Sequences</h3>
     TBD<br>
     <br>
-    <p> </p>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Software"></a>Software</h2>
     <h3><a name="The_Interpreter_vs._the_CPU"></a>The Interpreter vs.
@@ -684,7 +789,7 @@ Guidance
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a
-href="file:///home/rburkey/git/virtualagc-web/listings/Solarium055/MAIN.agc.html">Colorized,
+href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
@@ -830,7 +935,7 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
     </div>
     <br>
     Preliminary to his <a
-href="file:///home/rburkey/git/virtualagc-web/Pultorak.html#John_Pultoraks_Block_I_AGC">construction
+href="Pultorak.html#John_Pultoraks_Block_I_AGC">construction
       project for a hardware simulation of the Block 1 AGC</a>, or even
     the existence of the Virtual AGC project at all, John Pultorak also
     developed a Block 1 AGC assembler and Block 1 AGC software CPU
