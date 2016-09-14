@@ -35,8 +35,10 @@
  * Mods:        2016-09-12 RSB  Began.
  */
 
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
@@ -44,6 +46,7 @@
 #include "../yaAGCb1/yaAGCb1.h"
 extern int
 CallSocket(char *hostname, unsigned short portnum);
+#define CONNECTED "\nyaDSKY is connected.\n"
 
 // Stuff for the timer we use for reading the socket interface.
 static char DefaultHostname[] = "localhost";
@@ -57,7 +60,7 @@ OutputKeycode(int Keycode)
   int j;
   if (ServerSocket != -1)
     {
-      FormIoPacket (0441, 077, Packet); // Mask for lowest 6 data bits.
+      FormIoPacket(0441, 077, Packet); // Mask for lowest 6 data bits.
       FormIoPacket(041, 040 | Keycode, &Packet[4]); // Data.
       j = send(ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
@@ -69,40 +72,116 @@ OutputKeycode(int Keycode)
 }
 
 int
-main (void)
+main(int argc, char *argv[])
 {
+  int i, batch = 0;
+  unsigned u;
   unsigned char Packet[4];
-  setvbuf(stdin, NULL, _IONBF, 0);
-  initscr();
+
   Portnum = 19675;
+
+  // Parse command line.
+  for (i = 1; i < argc; i++)
+    {
+      if (1 == sscanf(argv[i], "--port=%u", &u))
+        Portnum = u;
+      else if (!strcmp(argv[i], "--batch"))
+        batch = 1;
+      else
+        {
+          printf("Usage:  yaUplinkBlock1 [--port=P] [--batch]\n");
+          printf(
+              "This program accepts the ASCII keycodes ' ', '0'-'9', 'v', 'r', 'k', '+',\n"
+                  "'-', '\n', 'c', and 'n' on stdin, translates them to the DSKY keycodes\n"
+                  "blank, 0-9, VERB, RESET, KEY RLSE, +, -, ENTER, CLEAR, or NOUN, packages them\n"
+                  "according to the yaAGC protocol, and communicates them to the Block 1\n"
+                  "AGC simulator, yaAGCb1, on the selected port (19675 by default).  There\n"
+                  "is a built-in timing delay of 200 ms. between keystrokes.\n"
+                  "In --batch mode, input can come from a script, but otherwise it is\n"
+                  "expected to come from a keyboard.\n");
+          return (1);
+        }
+    }
+
+  // Infinite loop of accepting input on stdin, and sending output to the
+  // AGC.
+  setvbuf(stdin, NULL, _IONBF, 0);
+  if (batch)
+    {
+      printf("Connecting on port %d ...\n", Portnum);
+      printf(
+          "Taking ASCII equivalents of the DSKY keycodes from a script ...\n");
+    }
+  else
+    {
+      initscr();
+      noecho();
+      printw("Connecting on port %d ...\n", Portnum);
+      printw("Input ASCII equivalents of the DSKY keycodes at keyboard ...");
+    }
+  ServerSocket = CallSocket(Hostname, Portnum);
+  if (ServerSocket != -1)
+    {
+      if (batch)
+        printf(CONNECTED);
+      else
+        printw(CONNECTED);
+    }
   while (1)
     {
-      int c;
-      c = getch();
-      if (c == 'b') c = 000;
-      else if (c == '0') c = 020;
-      else if (c >= '1' && c <= '9') c -= '0';
-      else if (c == 'v') c = 021;
-      else if (c == 'r') c = 022;
-      else if (c == 'k') c = 031;
-      else if (c == '+') c = 032;
-      else if (c == '-') c = 033;
-      else if (c == '\n')
+      int c, newc;
+      usleep(200000);
+      if (batch)
         {
-          c = 034;
-          printw("\n");
+          c = getchar();
+          if (c == EOF)
+            break;
+          putchar (c);
         }
-      else if (c == 'c') c = 036;
-      else if (c == 'n') c = 037;
-      else continue;
+      else
+        {
+          c = getch();
+          printw("%c", c);
+        }
+      if (c == ' ')
+        newc = 000;
+      else if (c == '0')
+        newc = 020;
+      else if (c >= '1' && c <= '9')
+        newc = c - '0';
+      else if (c == 'v')
+        newc = 021;
+      else if (c == 'r')
+        newc = 022;
+      else if (c == 'k')
+        newc = 031;
+      else if (c == '+')
+        newc = 032;
+      else if (c == '-')
+        newc = 033;
+      else if (c == '\n')
+        newc = 034;
+      else if (c == 'c')
+        newc = 036;
+      else if (c == 'n')
+        newc = 037;
+      else
+        continue;
+
       if (ServerSocket == -1)
         {
           ServerSocket = CallSocket(Hostname, Portnum);
           if (ServerSocket != -1)
-            printf("\r\nyaDSKY is connected.\r\n");
+            {
+              if (batch)
+                printf(CONNECTED);
+              else
+                printw(CONNECTED);
+            }
         }
       if (ServerSocket != -1)
-        OutputKeycode(c);
+        OutputKeycode(newc);
     }
-  endwin();
+  if (!batch)
+    endwin();
 }
