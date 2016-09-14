@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <wx/utils.h>
 #include "yaDSKYb1.h"
 extern int
 CallSocket(char *hostname, unsigned short portnum);
@@ -175,55 +176,55 @@ MyFrame::on_FourButton_pressed(wxCommandEvent &event)
 void
 MyFrame::on_FiveButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (005);
+  OutputKeycode(005);
 }
 
 void
 MyFrame::on_SixButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (006);
+  OutputKeycode(006);
 }
 
 void
 MyFrame::on_SevenButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (007);
+  OutputKeycode(007);
 }
 
 void
 MyFrame::on_EightButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (010);
+  OutputKeycode(010);
 }
 
 void
 MyFrame::on_NineButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (011);
+  OutputKeycode(011);
 }
 
 void
 MyFrame::on_KeyRlseButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (031);
+  OutputKeycode(031);
 }
 
 void
 MyFrame::on_EnterButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (034);
+  OutputKeycode(034);
 }
 
 void
 MyFrame::on_ErrorResetButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (022);
+  OutputKeycode(022);
 }
 
 void
 MyFrame::on_ClearButton_pressed(wxCommandEvent &event)
 {
-  OutputKeycode (036);
+  OutputKeycode(036);
 }
 
 void
@@ -340,13 +341,24 @@ OutputKeycode(int Keycode)
   int j;
   if (ServerSocket != -1)
     {
-      FormIoPacket (0404, 077, Packet); // Mask for lowest 6 data bits.
+      FormIoPacket(0404, 077, Packet); // Mask for lowest 6 data bits.
       FormIoPacket(04, 040 | Keycode, &Packet[4]); // Data.
       j = send(ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
         {
           close(ServerSocket);
           ServerSocket = -1;
+        }
+      else
+        {
+          wxMilliSleep(50);
+          FormIoPacket(04, 0, &Packet[4]); // Data.
+          j = send(ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
+          if (j == SOCKET_ERROR && SOCKET_BROKEN)
+            {
+              close(ServerSocket);
+              ServerSocket = -1;
+            }
         }
     }
 }
@@ -440,10 +452,14 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
     {
       lastOUT1 = Value;
       // Ignore B1 for now: main-panel DSKY doesn't have a PROG ALM indicator.
-      frame->indicatorCompFail->SetBitmap( (0 == (Value & 2)) ? frame->imageCompFailOff : frame->imageCompFailOn );
+      frame->indicatorCompFail->SetBitmap(
+          (0 == (Value & 2)) ?
+              frame->imageCompFailOff : frame->imageCompFailOn);
       // Ignore B3 for now: main-panel DSKY doesn't have a KEY RLSE indicator.
       // Ignore B4 for now: main-panel DSKY doesn't have a SCALER FAIL indicator.
-      frame->indicatorCheckFail->SetBitmap( (0 == (Value & 2)) ? frame->imageCheckFailOff : frame->imageCheckFailOn );
+      frame->indicatorCheckFail->SetBitmap(
+          (0 == (Value & 2)) ?
+              frame->imageCheckFailOff : frame->imageCheckFailOn);
     }
   else if (Channel == 010) // OUT0
     {
@@ -475,7 +491,8 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
             frame->digitNounRight->SetBitmap(rightDigit);
             break;
           case 8: //  UPACT  n/a R1D1
-            frame->indicatorUpTl->SetBitmap(bit11 ? frame->imageUptlOn : frame->imageUptlOff);
+            frame->indicatorUpTl->SetBitmap(
+                bit11 ? frame->imageUptlOn : frame->imageUptlOff);
             frame->Digit1Reg1->SetBitmap(rightDigit);
             break;
           case 7: //   +R1S R1D2 R1D3
