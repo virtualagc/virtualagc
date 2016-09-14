@@ -475,6 +475,7 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
             frame->digitNounRight->SetBitmap(rightDigit);
             break;
           case 8: //  UPACT  n/a R1D1
+            frame->indicatorUpTl->SetBitmap(bit11 ? frame->imageUptlOn : frame->imageUptlOff);
             frame->Digit1Reg1->SetBitmap(rightDigit);
             break;
           case 7: //   +R1S R1D2 R1D3
