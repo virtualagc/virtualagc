@@ -389,6 +389,37 @@ MyApp::OnInit()
 #endif
   m_locale.AddCatalog(wxT(APP_CATALOG));
 
+  for (int i = 1; i < argc; i++)
+    {
+      wxString Arg = argv[i];
+      wxString ArgStart = Arg.BeforeFirst ('=');
+      wxString ArgEnd = Arg.AfterFirst ('=');
+
+      if (ArgStart.IsSameAs (wxT ("--port")))
+        {
+          long lPortnum;
+          ArgEnd.ToLong (&lPortnum);
+          Portnum = lPortnum;
+          if (Portnum <= 0 || Portnum >= 0x10000)
+            {
+              printf ("The --port switch is out of range.  Must be 1-64K.\n");
+              goto Help;
+            }
+        }
+      else
+        {
+        Help:
+          printf ("USAGE:\n");
+          printf ("\tyaDSKYb1 [OPTIONS]\n");
+          printf ("The available options are:\n");
+          printf ("--port=Portnumber\n");
+          printf ("\tBy default, yaDSKYb1 attempts to connect to the yaAGCb1 program using port %d.\n", Portnum);
+          printf ("\tNote that by default, yaAGCb1 listens for new connections on ports 16971-16980.\n");
+          exit (1);
+        }
+    }
+
+
   wxInitAllImageHandlers();
   frame = new MyFrame(NULL, wxID_ANY, wxEmptyString);
   frame->Timer = new TimerClass ();

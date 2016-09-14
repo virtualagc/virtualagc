@@ -60,14 +60,28 @@ OutputKeycode(int Keycode)
   int j;
   if (ServerSocket != -1)
     {
-      FormIoPacket(0441, 077, Packet); // Mask for lowest 6 data bits.
-      FormIoPacket(041, 040 | Keycode, &Packet[4]); // Data.
+      Keycode &= 037;
+      //FormIoPacket(0441, 077777, Packet); // Mask for lowest 6 data bits.
+      FormIoPacket(041, Keycode | ((Keycode ^ 037) << 5) | (Keycode << 10), &Packet[4]); // Data.
       j = send(ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
         {
           close(ServerSocket);
           ServerSocket = -1;
         }
+#if 0
+      else
+        {
+          usleep(50000);
+          FormIoPacket(041, 037 << 5, &Packet[4]); // Data.
+          j = send(ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
+          if (j == SOCKET_ERROR && SOCKET_BROKEN)
+            {
+              close(ServerSocket);
+              ServerSocket = -1;
+            }
+        }
+#endif
     }
 }
 

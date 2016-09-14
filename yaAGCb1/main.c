@@ -83,6 +83,8 @@ main(int argc, char *argv[])
        defaultErasable = 0;
       else if (!strcmp(argv[i], "--uninit"))
         defaultErasable = 0166666;
+      else if (1 == sscanf(argv[i], "--port=%d", &j))
+        Portnum = j;
       else
         {
           printf("Usage:\n");
@@ -110,6 +112,8 @@ main(int argc, char *argv[])
           printf(
               "--uninit     At power-up, initialize erasable 060-01777 to 0166666,\n");
           printf("             rather than the default 0.\n");
+          printf(
+              "--port=P     Start listening on ports P through P+9. P defaults to 19671.\n");
           return (1);
         }
     }
