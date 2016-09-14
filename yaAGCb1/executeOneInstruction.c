@@ -175,7 +175,15 @@ executeOneInstruction(FILE *logFile)
         flatOperandAddress = flatten(regBank, operand);
       for (i = 0; i < numBreaksOrWatches; i++)
         {
-          if (breaksOrWatches[i] >= 0)
+          if (breaksOrWatches[i] == BREAK_UININITIALIZED
+              && flatOperandAddress < 02000
+              && agc.memory[flatOperandAddress] == defaultErasable
+              && (instruction & 070000) != 050000)
+            {
+              agc.instructionCountDown = 0;
+              return (1);
+            }
+          else if (breaksOrWatches[i] >= 0)
             {
               if (breaksOrWatches[i] == flatAddress
                   || breaksOrWatches[i] == flatOperandAddress)

@@ -109,6 +109,11 @@ processConsoleDebuggingCommand(char *command)
           flatAddress = -flatAddress;
           goto breakpoint;
         }
+      if (!strcasecmp(command, "bu"))
+        {
+          flatAddress = BREAK_UININITIALIZED;
+          goto breakpoint;
+        }
       if (3 == sscanf(command, "%c%o,%o", &c, &bank, &offset))
         {
           if (bank < 040 && offset >= 06000 && offset <= 07777)
@@ -224,6 +229,7 @@ processConsoleDebuggingCommand(char *command)
           printf("eN=V or eB,O=V --- set memory location to octal value V\n");
           printf("    bN or bB,0 --- add/delete breakpoint at location\n");
           printf("           bcN --- break after MCT=N is reached\n");
+          printf("            be --- break on readin an uninitialized erasable\n");
           printf("             b --- remove all breakpoints\n");
           printf("            b? --- list all breakpoints\n");
           printf("             q --- quit\n");

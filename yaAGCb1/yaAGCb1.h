@@ -189,7 +189,9 @@ extern int numListingLines;
 extern int listingAddresses[MEMORY_SIZE];
 #define MAX_BREAKS_OR_WATCHES 16
 // Note that positive breaksOrWatches are addresses, while negative ones are
-// negatives of MCT values.
+// negatives of MCT values.  There are also certain special positive values
+// outside the 16-bit range used for breaks on special conditions.
+#define BREAK_UININITIALIZED 01000000
 extern int breaksOrWatches[MAX_BREAKS_OR_WATCHES];
 extern int numBreaksOrWatches;
 
@@ -259,7 +261,7 @@ extern agcBlock1_t agc;
 #define ctrTRKRY agc.memory[055]
 #define ctrTRKRR agc.memory[056]
 
-extern int zeroErasable;
+extern uint16_t defaultErasable;
 int
 loadYul(char *filename);
 int

@@ -43,7 +43,7 @@
 #define MAX_LOG_EXTRAS 10
 int numLogExtras = 0;
 uint16_t logExtras[MAX_LOG_EXTRAS];
-int zeroErasable = 1;
+uint16_t defaultErasable = 0;
 int loggingOn = 1;
 
 int
@@ -80,9 +80,9 @@ main(int argc, char *argv[])
             printf("Illegal %s\n", argv[i]);
         }
       else if (!strcmp(argv[i], "--zero"))
-        zeroErasable = 1;
+       defaultErasable = 0;
       else if (!strcmp(argv[i], "--uninit"))
-        zeroErasable = 0;
+        defaultErasable = 0166666;
       else
         {
           printf("Usage:\n");
