@@ -106,7 +106,12 @@ incTimerCheckOverflow(uint16_t *timer)
 void
 edit(uint16_t flatAddress)
 {
-  if (flatAddress == 020)
+  if (flatAddress == 03)
+    {
+      uint16_t b1 = regLP & 1;
+      regLP = ((regLP >> 1) & 017777) | (b1 << 15) | (b1 << 14);
+    }
+  else if (flatAddress == 020)
     {
       regCYR= ((regCYR & 1) << 14) | ((regCYR & 077777) >> 1);
     }
@@ -318,8 +323,7 @@ executeOneInstruction(FILE *logFile)
           else incrementZ(2);// < 0
           // Compute the "diminished absolute value" of c(K).
           if (0 != (K & 040000)) K = (~K) & 037777;// Absolute value.
-          if (K >= 1)
-          K--;
+          if (K >= 1) K--;
           regA = K;
           edit(operand);
         }
@@ -355,6 +359,7 @@ executeOneInstruction(FILE *logFile)
         {
           // Full 16-bit.
           agc.memory[operand] = regA;
+          edit(operand);
           regA = fetchedFromOperand;
         }
       else
@@ -377,7 +382,7 @@ executeOneInstruction(FILE *logFile)
           uint16_t aOverflowBits;
           int value;
           aOverflowBits = regA & 0140000;
-          if (operand >= 020 && operand <= 023)
+          if (operand < 04 || (operand >= 020 && operand <= 023))
             {
               agc.memory[operand] = regA;
               edit(operand);
