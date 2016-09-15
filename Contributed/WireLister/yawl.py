@@ -104,7 +104,7 @@ class Signal:
         return self.page_counts[page]
 
     def getSourceList(self):
-        return ','.join(self.src_pages)
+        return ','.join(self.src_pages + self.fanin_expanders + self.fanout_expanders)
 
     def getSinkList(self):
         return ','.join(self.sink_pages)

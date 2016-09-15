@@ -65,8 +65,8 @@ pagecounts = A24-1:1,A25:1
 description = Downlink-related count
 type = I/O logic
 sources = A22-1
-sinks = 
-pagecounts = A22-1:1
+sinks = A22-1
+pagecounts = A22-1:2
 
 [1XP10]
 description = Timepulse 1, crosspoint 10
@@ -92,7 +92,7 @@ pagecounts = A13-1:1,B8:1
 [2PP1]
 description = Timepulse 2 crosspoint fan-in net
 type = Crosspoint
-sources = A4-2
+sources = A4-2,A6-2
 sinks = A4-2
 pagecounts = A4-2:2,A6-2:1
 
@@ -170,8 +170,8 @@ pagecounts = A24-1:1,A25:1
 description = Downlink-related count
 type = I/O logic
 sources = A22-1
-sinks = 
-pagecounts = A22-1:1
+sinks = A22-1
+pagecounts = A22-1:2
 
 [3XP2]
 description = Timepulse 3, crosspoint 2
@@ -365,7 +365,7 @@ pagecounts = A24-1:1,A25:1
 [8PP4]
 description = Timepulse 8 crosspoint fan-in net
 type = Crosspoint
-sources = A4-2
+sources = A4-2,A6-2
 sinks = A6-2
 pagecounts = A4-2:1,A6-2:2
 
@@ -375,13 +375,6 @@ type = Crosspoint
 sources = A6-2
 sinks = A6-2
 pagecounts = A6-2:2
-
-[8XP12]
-description = Timepulse 8, crosspoint 12
-type = Crosspoint
-sources = A5-1
-sinks = 
-pagecounts = A5-1:1
 
 [8XP15]
 description = Timepulse 8, crosspoint 15
@@ -547,7 +540,7 @@ pagecounts = A11-2:2,A24-1:1
 [A2X/]
 description = Control pulse to "Copy A1-16 into X1-16 by private line". Inverted.
 type = Controle pulse
-sources = A6-1
+sources = A6-1,A5-1,A5-2
 sinks = A7-2
 pagecounts = A5-1:1,A5-2:1,A6-1:1,A7-2:1
 
@@ -855,7 +848,7 @@ pagecounts = A4-2:2,A6-2:1,A14-2:1
 [BR12B/]
 description = Complement of BR12B.
 type = 
-sources = A4-2
+sources = A4-2,A14-2
 sinks = A4-2,A5-1,A6-2
 pagecounts = A4-2:2,A5-1:1,A6-2:2,A14-2:1
 
@@ -1541,21 +1534,21 @@ pagecounts = A21-3:2
 [CA2/]
 description = 
 type = 
-sources = A20-2
+sources = A20-2,A24-2
 sinks = A15-2,A19-1,A20-1
 pagecounts = A15-2:1,A19-1:1,A20-1:4,A20-2:1,A24-2:1
 
 [CA3/]
 description = 
 type = 
-sources = A20-1
+sources = A20-1,A20-1,A24-2
 sinks = A15-2,A20-1,A20-2
 pagecounts = A15-2:1,A20-1:8,A20-2:2,A24-2:1
 
 [CA4/]
 description = 
 type = 
-sources = A20-2
+sources = A20-2,A20-2,A21-3
 sinks = A19-2,A20-2,A21-3
 pagecounts = A19-2:1,A20-2:4,A21-3:7
 
@@ -2815,105 +2808,105 @@ pagecounts = A5-2:1,A21-2:1,A21-3:1
 [CHOR01/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A16-2,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A16-2:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR02/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A16-2,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A16-2:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR03/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A16-2,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A16-2:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR04/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A16-2,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A16-2:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR05/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A16-2,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A16-2:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR06/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A16-2,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A16-2:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR07/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A16-2,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A16-2:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR08/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A16-1,A17-2,A23-1
 sinks = A23-1
 pagecounts = A16-1:1,A17-1:1,A17-2:1,A23-1:2
 
 [CHOR09/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A17-2,A23-2
 sinks = A23-2
 pagecounts = A17-1:1,A17-2:1,A23-2:2
 
 [CHOR10/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A17-2,A23-2
 sinks = A23-2
 pagecounts = A17-1:1,A17-2:1,A23-2:2
 
 [CHOR11/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A17-2,A18-2
 sinks = A18-2
 pagecounts = A17-1:1,A17-2:1,A18-2:2
 
 [CHOR12/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A17-2,A18-2
 sinks = A18-2
 pagecounts = A17-1:1,A17-2:1,A18-2:2
 
 [CHOR13/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A17-2,A17-2,A18-2
 sinks = A18-2
 pagecounts = A17-1:1,A17-2:2,A18-2:2
 
 [CHOR14/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A17-2,A18-2,A18-2
 sinks = A18-2
 pagecounts = A17-1:1,A17-2:1,A18-2:3
 
 [CHOR16/]
 description = 
 type = 
-sources = A17-1
+sources = A17-1,A17-2,A18-2
 sinks = A18-2
 pagecounts = A17-1:1,A17-2:1,A18-2:2
 
@@ -3032,7 +3025,7 @@ pagecounts = A7-2:1,A24-2:1
 [CI/]
 description = Complement of CI.
 type = 
-sources = A6-2
+sources = A6-2,A4-2,A5-1,A5-2
 sinks = A24-2
 pagecounts = A4-2:1,A5-1:1,A5-2:1,A6-2:1,A24-2:1
 
@@ -3158,7 +3151,7 @@ pagecounts = A7-2:2
 [CINORM]
 description = 
 type = 
-sources = A7-2
+sources = A7-2,A2-3
 sinks = A7-2
 pagecounts = A2-3:1,A7-2:2
 
@@ -3228,7 +3221,7 @@ pagecounts = A2-1:1,B7:1
 [CLROPE]
 description = 
 type = 
-sources = A14-1
+sources = A14-1,A9-1,A9-1
 sinks = B16,B17
 pagecounts = A9-1:2,A14-1:1,B16:1,B17:1
 
@@ -3256,56 +3249,56 @@ pagecounts = A19-2:1,A24-2:1
 [CO02]
 description = 
 type = 
-sources = A11-2
+sources = A11-2,A11-2
 sinks = 
 pagecounts = A11-2:2
 
 [CO04]
 description = 
 type = 
-sources = A8-1
+sources = A8-1,A8-1,A10-2
 sinks = A8-2
 pagecounts = A8-1:2,A8-2:1,A10-2:1
 
 [CO06]
 description = 
 type = 
-sources = A8-2
+sources = A8-2,A8-2
 sinks = A9-1
 pagecounts = A8-2:2,A9-1:1
 
 [CO08]
 description = 
 type = 
-sources = A9-1
+sources = A9-1,A9-1
 sinks = A9-2
 pagecounts = A9-1:2,A9-2:1
 
 [CO10]
 description = 
 type = 
-sources = A9-2
+sources = A9-2,A9-2
 sinks = A10-1
 pagecounts = A9-2:2,A10-1:1
 
 [CO12]
 description = 
 type = 
-sources = A10-1
+sources = A10-1,A10-1,A10-2
 sinks = A10-2
 pagecounts = A10-1:2,A10-2:2
 
 [CO14]
 description = 
 type = 
-sources = A10-2
+sources = A10-2,A10-2
 sinks = A11-1
 pagecounts = A10-2:2,A11-1:1
 
 [CO16]
 description = 
 type = 
-sources = A11-1
+sources = A11-1,A11-1
 sinks = A11-2
 pagecounts = A11-1:2,A11-2:1
 
@@ -3354,7 +3347,7 @@ pagecounts = A7-1:1,A8-1:1,A8-2:1,A9-1:1,A9-2:1,A10-1:1,A10-2:1,A11-1:1,A11-2:1
 [CSG]
 description = 
 type = 
-sources = A7-1
+sources = A7-1,A7-1
 sinks = A12-2,A19-1
 pagecounts = A7-1:2,A12-2:2,A19-1:1
 
@@ -3389,7 +3382,7 @@ pagecounts = A17-1:1,A29:1
 [CTPLS/]
 description = 
 type = 
-sources = A13-1
+sources = A13-1,A24-2
 sinks = A13-1
 pagecounts = A13-1:2,A24-2:1
 
@@ -3466,7 +3459,7 @@ pagecounts = A20-1:1,A20-2:1,A21-3:3
 [CXB7/]
 description = Complement of CXB7.
 type = 
-sources = A20-1
+sources = A20-1,A20-1
 sinks = A19-1,A20-1,A20-2,A21-3
 pagecounts = A19-1:1,A20-1:3,A20-2:1,A21-3:2
 
@@ -3522,14 +3515,14 @@ pagecounts = A3-2:2,A5-2:2,A6-2:1
 [DATA/]
 description = 
 type = 
-sources = A22-1
+sources = A22-1,A22-2,A22-2,A23-1
 sinks = A22-1
 pagecounts = A22-1:2,A22-2:2,A23-1:1
 
 [DBLTST]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A3-1
 pagecounts = 77:1,A3-1:1,Monitor:1
 
@@ -3579,8 +3572,8 @@ pagecounts = A6-2:1,A21-1:1
 description = 
 type = 
 sources = A21-1
-sinks = 
-pagecounts = A21-1:1
+sinks = A21-1
+pagecounts = A21-1:2
 
 [DISDAC]
 description = 
@@ -3753,7 +3746,7 @@ pagecounts = A13-1:2
 [DOSCAL]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A21-2
 pagecounts = 77:1,A21-2:1,Monitor:1
 
@@ -3930,14 +3923,14 @@ description =
 type = 
 sources = A12-1
 sinks = A7-2,A12-1
-pagecounts = A7-2:2,A12-1:2
+pagecounts = A7-2:1,A12-1:2
 
 [EAD10/]
 description = Complement of EAD10.
 type = 
 sources = A12-1
-sinks = 
-pagecounts = A12-1:1
+sinks = A7-2
+pagecounts = A7-2:1,A12-1:1
 
 [EAD11]
 description = 
@@ -3957,8 +3950,8 @@ pagecounts = A7-2:1,A12-1:1
 description = 
 type = 
 sources = A15-1
-sinks = A12-1
-pagecounts = A12-1:1,A15-1:1
+sinks = A12-1,A15-1
+pagecounts = A12-1:1,A15-1:2
 
 [EB10/]
 description = Complement of EB10.
@@ -3971,8 +3964,8 @@ pagecounts = A15-1:2
 description = 
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [EB11/]
 description = Complement of EB11.
@@ -3985,8 +3978,8 @@ pagecounts = A12-1:1,A15-1:2
 description = 
 type = 
 sources = A15-1
-sinks = A12-1
-pagecounts = A12-1:1,A15-1:1
+sinks = A12-1,A15-1
+pagecounts = A12-1:1,A15-1:2
 
 [EB9/]
 description = Complement of EB9.
@@ -4068,7 +4061,7 @@ pagecounts = A16-2:1,A25:1
 [ERAS]
 description = 
 type = 
-sources = A14-1
+sources = A14-1,A14-1
 sinks = A14-1
 pagecounts = A14-1:3
 
@@ -4096,14 +4089,14 @@ pagecounts = A2-1:3
 [EVNSET/]
 description = Complement of EVNSET.
 type = 
-sources = A2-1
+sources = A2-1,A2-1
 sinks = A2-2,A2-3
 pagecounts = A2-1:2,A2-2:1,A2-3:5
 
 [EXST0/]
 description = 
 type = 
-sources = A3-2
+sources = A3-2,A3-2
 sinks = A3-2,A4-2
 pagecounts = A3-2:4,A4-2:1
 
@@ -4146,15 +4139,15 @@ pagecounts = A2-2:2,A24-1:1
 description = 
 type = 
 sources = A2-2
-sinks = 
-pagecounts = A2-2:1
+sinks = A2-2
+pagecounts = A2-2:2
 
 [F01D]
 description = 
 type = 
 sources = A2-2
-sinks = 
-pagecounts = A2-2:1
+sinks = A2-2
+pagecounts = A2-2:2
 
 [F02A]
 description = 
@@ -4167,8 +4160,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A24-1
-pagecounts = A1-1:1,A24-1:1
+sinks = A1-1,A24-1
+pagecounts = A1-1:2,A24-1:1
 
 [F03A]
 description = 
@@ -4181,8 +4174,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A1-2
-pagecounts = A1-1:1,A1-2:1
+sinks = A1-1,A1-2
+pagecounts = A1-1:2,A1-2:1
 
 [F03B/]
 description = Complement of F03B.
@@ -4202,8 +4195,8 @@ pagecounts = A1-1:2,A19-1:1
 description = 
 type = 
 sources = A1-1
-sinks = A24-1,A24-2
-pagecounts = A1-1:1,A24-1:1,A24-2:1
+sinks = A1-1,A24-1,A24-2
+pagecounts = A1-1:2,A24-1:1,A24-2:1
 
 [F04B/]
 description = Complement of F04B.
@@ -4230,8 +4223,8 @@ pagecounts = A13-1:1,A17-1:1,A19-1:1,A19-2:1,A24-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A24-1
-pagecounts = A1-1:1,A24-1:1
+sinks = A1-1,A24-1
+pagecounts = A1-1:2,A24-1:1
 
 [F05B/]
 description = Complement of F05B.
@@ -4258,8 +4251,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A19-2
-pagecounts = A1-1:1,A19-2:1
+sinks = A1-1,A19-2
+pagecounts = A1-1:2,A19-2:1
 
 [F06B/]
 description = Complement of F06B.
@@ -4286,8 +4279,8 @@ pagecounts = A1-2:1,A24-1:1
 description = 
 type = 
 sources = A1-1
-sinks = A19-2,A24-1
-pagecounts = A1-1:1,A19-2:1,A24-1:1
+sinks = A1-1,A19-2,A24-1
+pagecounts = A1-1:2,A19-2:1,A24-1:1
 
 [F07B/]
 description = Complement of F07B.
@@ -4321,8 +4314,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A13-1
-pagecounts = A1-1:1,A13-1:2
+sinks = A1-1,A13-1
+pagecounts = A1-1:2,A13-1:2
 
 [F08B/]
 description = Complement of F08B.
@@ -4349,8 +4342,8 @@ pagecounts = A18-1:2,A24-2:1
 description = 
 type = 
 sources = A1-1
-sinks = A18-2,A19-2
-pagecounts = A1-1:1,A18-2:1,A19-2:1
+sinks = A1-1,A18-2,A19-2
+pagecounts = A1-1:2,A18-2:1,A19-2:1
 
 [F09B/]
 description = Complement of F09B.
@@ -4370,15 +4363,15 @@ pagecounts = A18-1:2,A24-2:1
 description = 
 type = 
 sources = A1-1
-sinks = A1-1,A13-1,A18-2,A19-2
-pagecounts = A1-1:2,A13-1:1,A18-2:1,A19-2:1
+sinks = A1-1,A18-2,A19-2
+pagecounts = A1-1:2,A18-2:1,A19-2:1
 
 [F10A/]
 description = Complement of F10A.
 type = 
 sources = A19-2
-sinks = A18-2,A19-2
-pagecounts = A18-2:2,A19-2:2
+sinks = A13-1,A18-2,A19-2
+pagecounts = A13-1:1,A18-2:2,A19-2:2
 
 [F10AS0]
 description = 
@@ -4391,8 +4384,8 @@ pagecounts = A18-2:2
 description = 
 type = 
 sources = A1-1
-sinks = A13-1,A19-2
-pagecounts = A1-1:1,A13-1:1,A19-2:1
+sinks = A1-1,A13-1,A19-2
+pagecounts = A1-1:2,A13-1:1,A19-2:1
 
 [F10B/]
 description = Complement of F10B.
@@ -4405,8 +4398,8 @@ pagecounts = A19-2:2
 description = 
 type = 
 sources = A15-1
-sinks = A15-2
-pagecounts = A15-1:1,A15-2:1
+sinks = A15-1,A15-2
+pagecounts = A15-1:2,A15-2:1
 
 [F11/]
 description = Complement of F11.
@@ -4426,8 +4419,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = 
-pagecounts = A1-1:1
+sinks = A1-1
+pagecounts = A1-1:2
 
 [F12]
 description = 
@@ -4454,8 +4447,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A22-1
-pagecounts = A1-1:1,A22-1:1
+sinks = A1-1,A22-1
+pagecounts = A1-1:2,A22-1:1
 
 [F12B/]
 description = Complement of F12B.
@@ -4468,15 +4461,15 @@ pagecounts = A22-1:2
 description = 
 type = 
 sources = A15-1
-sinks = A15-1
-pagecounts = A15-1:2
+sinks = A15-1,A15-2
+pagecounts = A15-1:2,A15-2:1
 
 [F13/]
 description = Complement of F13.
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-2
+pagecounts = A15-1:1,A15-2:1
 
 [F13A]
 description = 
@@ -4489,22 +4482,22 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = 
-pagecounts = A1-1:1
+sinks = A1-1
+pagecounts = A1-1:2
 
 [F14]
 description = 
 type = 
 sources = A15-1
-sinks = A15-1
-pagecounts = A15-1:2
+sinks = A15-1,A15-2
+pagecounts = A15-1:2,A15-2:1
 
 [F14/]
 description = Complement of F14.
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-2
+pagecounts = A15-1:1,A15-2:1
 
 [F14A]
 description = 
@@ -4517,8 +4510,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A13-1
-pagecounts = A1-1:1,A13-1:1
+sinks = A1-1,A13-1
+pagecounts = A1-1:2,A13-1:1
 
 [F14H]
 description = 
@@ -4552,8 +4545,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = 
-pagecounts = A1-1:1
+sinks = A1-1
+pagecounts = A1-1:2
 
 [F16]
 description = 
@@ -4580,8 +4573,8 @@ pagecounts = A1-1:2
 description = 
 type = 
 sources = A1-1
-sinks = 
-pagecounts = A1-1:1
+sinks = A1-1
+pagecounts = A1-1:2
 
 [F17A]
 description = 
@@ -4601,8 +4594,8 @@ pagecounts = A18-1:2
 description = 
 type = 
 sources = A1-1
-sinks = A18-1,A24-1
-pagecounts = A1-1:1,A18-1:1,A24-1:1
+sinks = A1-1,A18-1,A24-1
+pagecounts = A1-1:2,A18-1:1,A24-1:1
 
 [F17B/]
 description = Complement of F17B.
@@ -4636,15 +4629,15 @@ pagecounts = A1-2:1,A23-1:2,A24-2:1
 description = 
 type = 
 sources = A1-2
-sinks = A23-1
-pagecounts = A1-2:1,A23-1:2
+sinks = A1-2,A23-1
+pagecounts = A1-2:2,A23-1:1
 
 [F18B/]
 description = Complement of F18B.
 type = 
 sources = A23-1
-sinks = 
-pagecounts = A23-1:1
+sinks = A23-1
+pagecounts = A23-1:2
 
 [F19A]
 description = 
@@ -4657,8 +4650,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F20A]
 description = 
@@ -4671,8 +4664,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F21A]
 description = 
@@ -4685,8 +4678,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F22A]
 description = 
@@ -4699,8 +4692,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F23A]
 description = 
@@ -4713,8 +4706,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F24A]
 description = 
@@ -4727,8 +4720,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F25A]
 description = 
@@ -4741,8 +4734,8 @@ pagecounts = A1-2:3
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F26A]
 description = 
@@ -4755,8 +4748,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F27A]
 description = 
@@ -4769,8 +4762,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F28A]
 description = 
@@ -4783,8 +4776,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F29A]
 description = 
@@ -4797,8 +4790,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F30A]
 description = 
@@ -4811,8 +4804,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F31A]
 description = 
@@ -4825,8 +4818,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F32A]
 description = 
@@ -4839,8 +4832,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F33A]
 description = 
@@ -4853,8 +4846,8 @@ pagecounts = A1-2:2
 description = 
 type = 
 sources = A1-2
-sinks = 
-pagecounts = A1-2:1
+sinks = A1-2
+pagecounts = A1-2:2
 
 [F5ASB0]
 description = 
@@ -4866,21 +4859,21 @@ pagecounts = A19-1:2,A24-2:1
 [F5ASB0/]
 description = Complement of F5ASB0.
 type = 
-sources = A19-1
+sources = A19-1,A24-2
 sinks = A19-1,A23-1
 pagecounts = A19-1:4,A23-1:1,A24-2:1
 
 [F5ASB2]
 description = 
 type = 
-sources = A19-1
+sources = A19-1,A19-2
 sinks = A19-1,A23-1,A24-2
 pagecounts = A19-1:2,A19-2:1,A23-1:4,A24-2:3
 
 [F5ASB2/]
 description = Complement of F5ASB2.
 type = 
-sources = A19-1
+sources = A19-1,A24-2
 sinks = A18-2,A19-1,A19-2,A23-2
 pagecounts = A18-2:1,A19-1:4,A19-2:2,A23-2:1,A24-2:1
 
@@ -4909,8 +4902,8 @@ pagecounts = A19-2:1,A24-2:1
 description = 
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [FB11/]
 description = Complement of FB11.
@@ -4923,8 +4916,8 @@ pagecounts = A15-1:2
 description = 
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [FB12/]
 description = Complement of FB12.
@@ -4937,8 +4930,8 @@ pagecounts = A15-1:2
 description = 
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [FB13/]
 description = Complement of FB13.
@@ -4951,8 +4944,8 @@ pagecounts = A15-1:2
 description = 
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [FB14/]
 description = Complement of FB14.
@@ -4965,8 +4958,8 @@ pagecounts = A15-1:2
 description = 
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [FB16/]
 description = Complement of FB16.
@@ -5426,7 +5419,7 @@ pagecounts = A8-1:1,A12-1:2
 [G01/]
 description = Complement of G01.
 type = 
-sources = A8-1
+sources = A8-1,A8-1
 sinks = A8-1,A11-2
 pagecounts = A8-1:3,A11-2:1
 
@@ -5461,7 +5454,7 @@ pagecounts = A8-1:1,A12-1:2
 [G02/]
 description = Complement of G02.
 type = 
-sources = A8-1
+sources = A8-1,A8-1
 sinks = A8-1
 pagecounts = A8-1:3
 
@@ -5482,7 +5475,7 @@ pagecounts = A8-2:1,A12-1:2
 [G03/]
 description = Complement of G03.
 type = 
-sources = A8-2
+sources = A8-2,A8-1
 sinks = A8-2
 pagecounts = A8-1:1,A8-2:2
 
@@ -5503,7 +5496,7 @@ pagecounts = A8-2:1,A12-1:1
 [G04/]
 description = Complement of G04.
 type = 
-sources = A8-2
+sources = A8-2,A8-2
 sinks = A8-1,A8-2
 pagecounts = A8-1:1,A8-2:3
 
@@ -5524,7 +5517,7 @@ pagecounts = A9-1:1,A12-1:1
 [G05/]
 description = Complement of G05.
 type = 
-sources = A9-1
+sources = A9-1,A8-2
 sinks = A8-1,A9-1
 pagecounts = A8-1:1,A8-2:1,A9-1:2
 
@@ -5545,7 +5538,7 @@ pagecounts = A9-1:1,A12-1:1
 [G06/]
 description = Complement of G06.
 type = 
-sources = A9-1
+sources = A9-1,A8-2
 sinks = A8-2,A9-1
 pagecounts = A8-2:2,A9-1:2
 
@@ -5566,7 +5559,7 @@ pagecounts = A9-2:1,A12-1:1
 [G07/]
 description = Complement of G07.
 type = 
-sources = A9-2
+sources = A9-2,A9-1
 sinks = A8-2,A9-2
 pagecounts = A8-2:1,A9-1:1,A9-2:2
 
@@ -5895,7 +5888,7 @@ pagecounts = A5-1:1,A21-2:1
 [GNZRO]
 description = 
 type = 
-sources = A12-1
+sources = A12-1,A12-1
 sinks = A12-1
 pagecounts = A12-1:3
 
@@ -5916,14 +5909,14 @@ pagecounts = A3-2:1,A5-1:1
 [GOJAM]
 description = 
 type = 
-sources = A2-2
+sources = A2-2,A2-2,A24-2
 sinks = A2-3,A3-1,A4-1,A5-1,A6-2,A11-1,A12-1,A13-1,A14-1,A15-1,A15-2,A16-1,A16-2,A17-1,A17-2,A18-2,A19-1,A21-2,A22-1,A23-1
 pagecounts = A2-2:2,A2-3:1,A3-1:1,A4-1:2,A5-1:1,A6-2:1,A11-1:1,A12-1:1,A13-1:2,A14-1:4,A15-1:1,A15-2:1,A16-1:2,A16-2:1,A17-1:1,A17-2:1,A18-2:1,A19-1:3,A21-2:2,A22-1:1,A23-1:1,A24-2:1
 
 [GOJAM/]
 description = Complement of GOJAM.
 type = 
-sources = A2-2
+sources = A2-2,A2-1
 sinks = A2-2,A24-2
 pagecounts = A2-1:1,A2-2:2,A24-2:1
 
@@ -6532,7 +6525,7 @@ pagecounts = A3-1:1,A12-1:2
 [INKBT1]
 description = 
 type = 
-sources = A3-1
+sources = A3-1,A21-2
 sinks = A3-1
 pagecounts = A3-1:2,A21-2:1
 
@@ -6784,7 +6777,7 @@ pagecounts = A6-1:1,A12-2:1
 [L16/]
 description = 
 type = 
-sources = A11-2
+sources = A11-2,A4-2
 sinks = A11-2
 pagecounts = A4-2:1,A11-2:3
 
@@ -6966,7 +6959,7 @@ pagecounts = A18-1:1,A26:1
 [MAMU]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A14-1
 pagecounts = 77:1,A14-1:1,Monitor:1
 
@@ -7051,15 +7044,15 @@ pagecounts = A4-1:1,Monitor:1
 description = 
 type = 
 sources = A15-1
-sinks = A6-2
-pagecounts = A6-2:1,A15-1:1
+sinks = A6-2,A15-1
+pagecounts = A6-2:1,A15-1:2
 
 [MCDU/]
 description = Complement of MCDU.
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [MCRO/]
 description = 
@@ -7078,112 +7071,112 @@ pagecounts = 77:1,A13-1:1,Monitor:1
 [MDT01]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A8-1
 pagecounts = 77:1,A8-1:1,Monitor:1
 
 [MDT02]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A8-1
 pagecounts = 77:1,A8-1:1,Monitor:1
 
 [MDT03]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A8-2
 pagecounts = 77:1,A8-2:1,Monitor:1
 
 [MDT04]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A8-2
 pagecounts = 77:1,A8-2:1,Monitor:1
 
 [MDT05]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A9-1
 pagecounts = 77:1,A9-1:1,Monitor:1
 
 [MDT06]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A9-1
 pagecounts = 77:1,A9-1:1,Monitor:1
 
 [MDT07]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A9-2
 pagecounts = 77:1,A9-2:1,Monitor:1
 
 [MDT08]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A9-2
 pagecounts = 77:1,A9-2:1,Monitor:1
 
 [MDT09]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A10-1
 pagecounts = 77:1,A10-1:1,Monitor:1
 
 [MDT10]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A10-1
 pagecounts = 77:1,A10-1:1,Monitor:1
 
 [MDT11]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A10-2
 pagecounts = 77:1,A10-2:1,Monitor:1
 
 [MDT12]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A10-2
 pagecounts = 77:1,A10-2:1,Monitor:1
 
 [MDT13]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A11-1
 pagecounts = 77:1,A11-1:1,Monitor:1
 
 [MDT14]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A11-1
 pagecounts = 77:1,A11-1:1,Monitor:1
 
 [MDT15]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A11-2
 pagecounts = 77:1,A11-2:1,Monitor:1
 
 [MDT16]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A11-2
 pagecounts = 77:1,A11-2:1,Monitor:1
 
@@ -7212,15 +7205,15 @@ pagecounts = A3-1:1,Monitor:1
 description = 
 type = 
 sources = A15-1
-sinks = A6-2
-pagecounts = A6-2:1,A15-1:1
+sinks = A6-2,A15-1
+pagecounts = A6-2:1,A15-1:2
 
 [MINC/]
 description = Complement of MINC.
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [MINHL]
 description = 
@@ -7302,35 +7295,35 @@ pagecounts = A15-2:1,A18-1:2
 [MLDCH]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A21-2
 pagecounts = 77:1,A21-2:1,Monitor:1
 
 [MLOAD]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A21-2
 pagecounts = 77:1,A21-2:1,Monitor:1
 
 [MNHNC]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A21-2
 pagecounts = 77:1,A21-2:1,Monitor:1
 
 [MNHRPT]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A3-1
 pagecounts = 77:1,A3-1:1,Monitor:1
 
 [MNHSBF]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A14-1
 pagecounts = 77:1,A14-1:1,Monitor:1
 
@@ -7414,21 +7407,21 @@ pagecounts = A6-1:2,A8-2:2,A9-1:2,A9-2:2,A10-1:2,A10-2:2,A11-1:2,A11-2:1
 [MONEX/]
 description = Complement of MONEX.
 type = 
-sources = A6-2
+sources = A6-2,A5-1
 sinks = A6-1
 pagecounts = A5-1:1,A6-1:1,A6-2:1
 
 [MONPAR]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A12-1
 pagecounts = 77:1,A12-1:1,Monitor:1
 
 [MONWBK]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A5-2
 pagecounts = 77:1,A5-2:1,Monitor:1
 
@@ -7547,14 +7540,14 @@ pagecounts = 77:1,A24-2:1,Monitor:1
 [MRDCH]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A21-2
 pagecounts = 77:1,A21-2:1,Monitor:1
 
 [MREAD]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A21-2
 pagecounts = 77:1,A21-2:1,Monitor:1
 
@@ -7624,7 +7617,7 @@ pagecounts = A7-2:1,Monitor:1
 [MSBSTP]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = 
 pagecounts = 77:1,Monitor:1
 
@@ -7722,7 +7715,7 @@ pagecounts = A4-1:1,Monitor:1
 [MSTP]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A2-2
 pagecounts = 77:1,A2-2:1,Monitor:1
 
@@ -7736,7 +7729,7 @@ pagecounts = A2-2:1,Monitor:1
 [MSTRT]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A13-1
 pagecounts = 77:1,A13-1:1,Monitor:1
 
@@ -7862,7 +7855,7 @@ pagecounts = A3-2:1,Monitor:1
 [MTCSAI]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A3-1,A4-1
 pagecounts = 77:1,A3-1:1,A4-1:2,Monitor:1
 
@@ -8149,7 +8142,7 @@ pagecounts = A3-2:4
 [NHALGA]
 description = 
 type = 
-sources = 77
+sources = 77,Monitor
 sinks = A13-1
 pagecounts = 77:1,A13-1:1,Monitor:1
 
@@ -8424,14 +8417,14 @@ description =
 type = 
 sources = A16-1
 sinks = A25
-pagecounts = A16-1:1,A25:2
+pagecounts = A16-1:1,A25:1
 
 [OT1207/]
 description = Complement of OT1207.
 type = 
 sources = A16-1
-sinks = 
-pagecounts = A16-1:1
+sinks = A25
+pagecounts = A16-1:1,A25:1
 
 [OTLNK0]
 description = 
@@ -8520,7 +8513,7 @@ pagecounts = A2-2:4,A13-1:1
 [P03]
 description = 
 type = 
-sources = A2-2
+sources = A2-2,A5-1
 sinks = A2-2,A13-1
 pagecounts = A2-2:2,A5-1:1,A13-1:1
 
@@ -8696,15 +8689,15 @@ pagecounts = A12-1:2,A22-2:1,A23-1:1
 description = 
 type = 
 sources = A15-1
-sinks = A6-2
-pagecounts = A6-2:1,A15-1:1
+sinks = A6-2,A15-1
+pagecounts = A6-2:1,A15-1:2
 
 [PCDU/]
 description = Complement of PCDU.
 type = 
 sources = A15-1
-sinks = 
-pagecounts = A15-1:1
+sinks = A15-1
+pagecounts = A15-1:2
 
 [PCHGOF]
 description = 
@@ -8744,7 +8737,7 @@ pagecounts = A2-1:3,A4-1:1
 [PHS4/]
 description = Complement of PHS4.
 type = 
-sources = A2-1
+sources = A2-1,A2-1
 sinks = A4-1,A6-1,A14-1,A21-2,A23-2
 pagecounts = A2-1:2,A4-1:1,A6-1:1,A14-1:4,A21-2:1,A23-2:1
 
@@ -8759,15 +8752,15 @@ pagecounts = A6-1:1,A7-1:1
 description = 
 type = 
 sources = A5-1
-sinks = A6-2
-pagecounts = A5-1:1,A6-2:1
+sinks = A5-1,A6-2
+pagecounts = A5-1:2,A6-2:1
 
 [PINC/]
 description = Complement of PINC.
 type = 
 sources = A5-1
-sinks = 
-pagecounts = A5-1:1
+sinks = A5-1
+pagecounts = A5-1:2
 
 [PIPAFL]
 description = 
@@ -8940,7 +8933,7 @@ pagecounts = A7-1:1,A9-1:2,A9-2:1,A10-1:1
 [PIPSAM/]
 description = Complement of PIPSAM.
 type = 
-sources = A9-1
+sources = A9-1,A9-1
 sinks = A9-2,A10-1
 pagecounts = A9-1:2,A9-2:2,A10-1:2
 
@@ -9129,7 +9122,7 @@ pagecounts = A8-1:1,A8-2:2,A9-1:2,A9-2:2,A10-1:2,A10-2:2,A11-1:2,A11-2:2,A14-2:1
 [R1C/]
 description = Complement of R1C.
 type = 
-sources = A6-2
+sources = A6-2,A4-2
 sinks = A14-2
 pagecounts = A4-2:1,A6-2:1,A14-2:1
 
@@ -9143,7 +9136,7 @@ pagecounts = A5-2:1,A6-2:1,A12-2:1,A15-2:1
 [RA/]
 description = 
 type = 
-sources = A5-2
+sources = A5-2,A4-2,A4-2,A5-1,A5-1
 sinks = A7-2
 pagecounts = A4-2:2,A5-1:2,A5-2:1,A7-2:1
 
@@ -9192,7 +9185,7 @@ pagecounts = A4-2:2,A5-2:1,A6-2:1
 [RB/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A4-2,A4-2,A5-1,A5-1,A5-2,A6-2
 sinks = A7-2
 pagecounts = A4-2:2,A5-1:2,A5-2:1,A6-1:1,A6-2:1,A7-2:1
 
@@ -9206,7 +9199,7 @@ pagecounts = A8-1:1,A14-2:1
 [RB1/]
 description = Complement of RB1.
 type = 
-sources = A6-2
+sources = A6-2,A4-2
 sinks = A14-2
 pagecounts = A4-2:1,A6-2:1,A14-2:1
 
@@ -9374,7 +9367,7 @@ pagecounts = A16-1:1,A25:1
 [RC/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A4-2,A4-2,A5-1,A5-1,A5-2,A6-2
 sinks = A7-2
 pagecounts = A4-2:2,A5-1:2,A5-2:1,A6-1:1,A6-2:1,A7-2:1
 
@@ -9619,14 +9612,14 @@ pagecounts = A7-2:1,A15-1:1
 [RG/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A5-1,A5-2,A5-2
 sinks = A7-2
 pagecounts = A5-1:1,A5-2:2,A6-1:1,A7-2:1
 
 [RGG/]
 description = 
 type = 
-sources = A7-2
+sources = A7-2,A7-1
 sinks = A7-2,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2
 pagecounts = A7-1:1,A7-2:2,A8-1:2,A8-2:2,A9-1:2,A9-2:2,A10-1:2,A10-2:2,A11-1:2,A11-2:2
 
@@ -9675,49 +9668,49 @@ pagecounts = A2-1:2,A2-2:1
 [RL/]
 description = 
 type = 
-sources = A5-2
+sources = A5-2,A5-1
 sinks = A7-2
 pagecounts = A5-1:1,A5-2:1,A7-2:1
 
 [RL01/]
 description = 
 type = 
-sources = A8-1
+sources = A8-1,A15-2
 sinks = A8-1
 pagecounts = A8-1:2,A15-2:1
 
 [RL02/]
 description = 
 type = 
-sources = A8-1
+sources = A8-1,A15-2
 sinks = A8-1
 pagecounts = A8-1:2,A15-2:1
 
 [RL03/]
 description = 
 type = 
-sources = A8-2
+sources = A8-2,A12-2,A15-2
 sinks = A8-2
 pagecounts = A8-2:2,A12-2:1,A15-2:1
 
 [RL04/]
 description = 
 type = 
-sources = A8-2
+sources = A8-2,A12-2
 sinks = A8-2
 pagecounts = A8-2:2,A12-2:1
 
 [RL05/]
 description = 
 type = 
-sources = A9-1
+sources = A9-1,A12-2
 sinks = A9-1
 pagecounts = A9-1:2,A12-2:1
 
 [RL06/]
 description = 
 type = 
-sources = A9-1
+sources = A9-1,A12-2
 sinks = A9-1
 pagecounts = A9-1:2,A12-2:1
 
@@ -9738,14 +9731,14 @@ pagecounts = A9-2:2
 [RL09/]
 description = 
 type = 
-sources = A10-1
+sources = A10-1,A15-1
 sinks = A10-1
 pagecounts = A10-1:2,A15-1:1
 
 [RL10/]
 description = 
 type = 
-sources = A10-1
+sources = A10-1,A15-1
 sinks = A10-1
 pagecounts = A10-1:2,A15-1:1
 
@@ -9759,35 +9752,35 @@ pagecounts = A5-2:1,A7-2:1
 [RL11/]
 description = 
 type = 
-sources = A10-2
+sources = A10-2,A15-1
 sinks = A10-2
 pagecounts = A10-2:2,A15-1:1
 
 [RL12/]
 description = 
 type = 
-sources = A10-2
+sources = A10-2,A15-1
 sinks = A10-2
 pagecounts = A10-2:2,A15-1:1
 
 [RL13/]
 description = 
 type = 
-sources = A11-1
+sources = A11-1,A15-1
 sinks = A11-1
 pagecounts = A11-1:2,A15-1:1
 
 [RL14/]
 description = 
 type = 
-sources = A11-1
+sources = A11-1,A15-1
 sinks = A11-1
 pagecounts = A11-1:2,A15-1:1
 
 [RL15/]
 description = 
 type = 
-sources = A11-2
+sources = A11-2,A10-2
 sinks = A11-2
 pagecounts = A10-2:1,A11-2:2
 
@@ -9801,14 +9794,14 @@ pagecounts = A11-2:3
 [RL16/]
 description = Complement of RL16.
 type = 
-sources = A11-2
+sources = A11-2,A15-1
 sinks = A9-1,A11-2
 pagecounts = A9-1:1,A11-2:2,A15-1:1
 
 [RLG/]
 description = 
 type = 
-sources = A7-2
+sources = A7-2,A7-1
 sinks = A7-2,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2
 pagecounts = A7-1:1,A7-2:2,A8-1:1,A8-2:1,A9-1:1,A9-2:1,A10-1:1,A10-2:1,A11-1:1,A11-2:1
 
@@ -9941,21 +9934,21 @@ pagecounts = A14-1:2
 [ROPER]
 description = 
 type = 
-sources = A15-2
+sources = A15-2,A9-2
 sinks = B16,B17
 pagecounts = A9-2:1,A15-2:1,B16:1,B17:1
 
 [ROPES]
 description = 
 type = 
-sources = A15-2
+sources = A15-2,A9-2
 sinks = B16,B17
 pagecounts = A9-2:1,A15-2:1,B16:1,B17:1
 
 [ROPET]
 description = 
 type = 
-sources = A15-2
+sources = A15-2,A9-2
 sinks = B16,B17
 pagecounts = A9-2:1,A15-2:1,B16:1,B17:1
 
@@ -10011,7 +10004,7 @@ pagecounts = A3-1:2
 [RPTSET]
 description = 
 type = 
-sources = A3-1
+sources = A3-1,A6-2
 sinks = A3-1
 pagecounts = A3-1:2,A6-2:1
 
@@ -10109,7 +10102,7 @@ pagecounts = A18-2:1,A28:1
 [RSC/]
 description = 
 type = 
-sources = A4-2
+sources = A4-2,A12-1
 sinks = A4-2,A14-2
 pagecounts = A4-2:2,A12-1:1,A14-2:1
 
@@ -10207,7 +10200,7 @@ pagecounts = A2-3:1,A3-1:1,A7-2:2,A14-2:1,A24-1:1
 [RU/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A5-1,A5-2,A6-2,A6-2
 sinks = A7-2
 pagecounts = A5-1:1,A5-2:1,A6-1:1,A6-2:2,A7-2:1
 
@@ -10319,7 +10312,7 @@ pagecounts = A17-2:1,A26:1
 [RZ/]
 description = 
 type = 
-sources = A6-2
+sources = A6-2,A5-1,A5-2
 sinks = A7-2
 pagecounts = A5-1:1,A5-2:1,A6-2:1,A7-2:1
 
@@ -10543,112 +10536,112 @@ pagecounts = A16-2:1,A25:1
 [SA01]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A8-1
 pagecounts = A8-1:1,B13:1,B14:1
 
 [SA02]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A8-1
 pagecounts = A8-1:1,B13:1,B14:1
 
 [SA03]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A8-2
 pagecounts = A8-2:1,B13:1,B14:1
 
 [SA04]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A8-2
 pagecounts = A8-2:1,B13:1,B14:1
 
 [SA05]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A9-1
 pagecounts = A9-1:1,B13:1,B14:1
 
 [SA06]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A9-1
 pagecounts = A9-1:1,B13:1,B14:1
 
 [SA07]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A9-2
 pagecounts = A9-2:1,B13:1,B14:1
 
 [SA08]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A9-2
 pagecounts = A9-2:1,B13:1,B14:1
 
 [SA09]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A10-1
 pagecounts = A10-1:1,B13:1,B14:1
 
 [SA10]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A10-1
 pagecounts = A10-1:1,B13:1,B14:1
 
 [SA11]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A10-2
 pagecounts = A10-2:1,B13:1,B14:1
 
 [SA12]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A10-2
 pagecounts = A10-2:1,B13:1,B14:1
 
 [SA13]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A11-1
 pagecounts = A11-1:1,B13:1,B14:1
 
 [SA14]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A11-1
 pagecounts = A11-1:1,B13:1,B14:1
 
 [SA16]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A11-2
 pagecounts = A11-2:2,B13:1,B14:1
 
 [SAP]
 description = 
 type = 
-sources = B13
+sources = B13,B14
 sinks = A12-1
 pagecounts = A12-1:1,B13:1,B14:1
 
@@ -10761,8 +10754,8 @@ pagecounts = A18-1:1,A26:1
 description = 
 type = 
 sources = A14-2
-sinks = 
-pagecounts = A14-2:1
+sinks = A30,A31
+pagecounts = A14-2:1,A30:1,A31:1
 
 [SCAD]
 description = 
@@ -11055,15 +11048,15 @@ pagecounts = A3-1:1,A3-2:2,A4-1:1
 description = 
 type = 
 sources = A3-1
-sinks = A4-2
-pagecounts = A3-1:1,A4-2:1
+sinks = A3-1,A4-2
+pagecounts = A3-1:2,A4-2:1
 
 [SQR10/]
 description = Complement of SQR10.
 type = 
 sources = A3-1
-sinks = A4-2
-pagecounts = A3-1:1,A4-2:1
+sinks = A3-1,A4-2
+pagecounts = A3-1:2,A4-2:1
 
 [SQR11]
 description = 
@@ -11083,22 +11076,22 @@ pagecounts = A3-1:2,A4-2:1
 description = Complement of SQR12.
 type = 
 sources = A3-1
-sinks = 
-pagecounts = A3-1:1
+sinks = A3-1
+pagecounts = A3-1:2
 
 [SQR13]
 description = 
 type = 
 sources = A3-1
-sinks = 
-pagecounts = A3-1:1
+sinks = A3-1
+pagecounts = A3-1:2
 
 [SQR14]
 description = 
 type = 
 sources = A3-1
-sinks = 
-pagecounts = A3-1:1
+sinks = A3-1
+pagecounts = A3-1:2
 
 [SQR16]
 description = 
@@ -11159,7 +11152,7 @@ pagecounts = A4-1:1,A6-2:1
 [ST2/]
 description = Complement of ST2.
 type = 
-sources = A6-2
+sources = A6-2,A5-1
 sinks = A6-2
 pagecounts = A5-1:1,A6-2:2
 
@@ -11174,8 +11167,8 @@ pagecounts = A3-2:1,A4-1:1
 description = 
 type = 
 sources = A4-1
-sinks = 
-pagecounts = A4-1:1
+sinks = A4-1
+pagecounts = A4-1:2
 
 [ST376/]
 description = Complement of ST376.
@@ -11250,7 +11243,7 @@ pagecounts = A4-1:2
 [STNDBY]
 description = 
 type = 
-sources = A18-1
+sources = A18-1,A25
 sinks = A18-1
 pagecounts = A18-1:2,A25:1
 
@@ -11397,7 +11390,7 @@ pagecounts = A8-1:2,A15-1:1
 [SUMA02/]
 description = 
 type = 
-sources = A8-1
+sources = A8-1,A11-1
 sinks = A8-1,A15-1
 pagecounts = A8-1:2,A11-1:1,A15-1:1
 
@@ -11411,7 +11404,7 @@ pagecounts = A8-2:2,A15-1:1
 [SUMA04/]
 description = 
 type = 
-sources = A8-2
+sources = A8-2,A11-1
 sinks = A8-2
 pagecounts = A8-2:2,A11-1:1
 
@@ -11432,7 +11425,7 @@ pagecounts = A9-1:2
 [SUMA07/]
 description = 
 type = 
-sources = A9-2
+sources = A9-2,A11-2
 sinks = A9-2
 pagecounts = A9-2:2,A11-2:1
 
@@ -11467,7 +11460,7 @@ pagecounts = A10-2:2,A15-1:1
 [SUMA12/]
 description = 
 type = 
-sources = A10-2
+sources = A10-2,A11-2
 sinks = A10-2,A15-1
 pagecounts = A10-2:2,A11-2:1,A15-1:1
 
@@ -11495,7 +11488,7 @@ pagecounts = A11-2:2,A24-2:1
 [SUMA16/]
 description = 
 type = 
-sources = A11-2
+sources = A11-2,A11-2
 sinks = A4-1,A11-2,A13-1,A15-1
 pagecounts = A4-1:1,A11-2:3,A13-1:1,A15-1:1
 
@@ -11615,20 +11608,20 @@ pagecounts = A4-1:1,A11-2:2,A13-1:1,A15-1:1
 description = 
 type = 
 sources = A13-1
-sinks = 
-pagecounts = A13-1:1
+sinks = A31
+pagecounts = A13-1:1,A31:1
 
 [SYNC4/]
 description = 
 type = 
 sources = A13-1
-sinks = 
-pagecounts = A13-1:1
+sinks = A30
+pagecounts = A13-1:1,A30:1
 
 [T01]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A24-2
 sinks = A2-3,A4-1,A5-1,A6-1,A14-1
 pagecounts = A2-3:2,A4-1:1,A5-1:1,A6-1:1,A14-1:2,A24-2:1
 
@@ -11649,14 +11642,14 @@ pagecounts = A2-3:2,A24-2:1
 [T02]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A2-3
 sinks = A2-3,A3-1,A6-1,A24-2
 pagecounts = A2-3:3,A3-1:1,A6-1:1,A24-2:1
 
 [T02/]
 description = Complement of T02.
 type = 
-sources = A2-3
+sources = A2-3,A24-2
 sinks = A2-3,A4-2,A5-1,A5-2,A6-1,A12-2,A14-1,A21-2,A24-1
 pagecounts = A2-3:2,A4-2:2,A5-1:2,A5-2:1,A6-1:1,A12-2:1,A14-1:2,A21-2:1,A24-1:1,A24-2:1
 
@@ -11670,14 +11663,14 @@ pagecounts = A2-3:3
 [T03]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A2-1
 sinks = A2-3,A6-1,A12-2,A14-1
 pagecounts = A2-1:1,A2-3:2,A6-1:1,A12-2:1,A14-1:1
 
 [T03/]
 description = Complement of T03.
 type = 
-sources = A2-3
+sources = A2-3,A12-2
 sinks = A2-3,A4-2,A5-1,A5-2,A6-2,A12-1,A13-1,A14-1
 pagecounts = A2-3:2,A4-2:2,A5-1:1,A5-2:1,A6-2:1,A12-1:1,A12-2:1,A13-1:1,A14-1:1
 
@@ -11698,7 +11691,7 @@ pagecounts = A2-3:2,A6-1:1,A12-2:1
 [T04/]
 description = Complement of T04.
 type = 
-sources = A2-3
+sources = A2-3,A12-2
 sinks = A2-3,A4-2,A5-1,A5-2,A6-1,A6-2,A13-1,A14-1
 pagecounts = A2-3:2,A4-2:1,A5-1:1,A5-2:1,A6-1:1,A6-2:1,A12-2:1,A13-1:1,A14-1:1
 
@@ -11712,14 +11705,14 @@ pagecounts = A2-3:2,A6-1:1,A12-2:1,A14-1:2,A18-1:1
 [T05/]
 description = Complement of T05.
 type = 
-sources = A2-3
+sources = A2-3,A12-2
 sinks = A2-3,A4-2,A5-1,A5-2,A14-1
 pagecounts = A2-3:2,A4-2:2,A5-1:1,A5-2:2,A12-2:1,A14-1:2
 
 [T06]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A2-3
 sinks = A2-3,A6-1,A14-1,A24-2
 pagecounts = A2-3:3,A6-1:1,A14-1:1,A24-2:1
 
@@ -11740,14 +11733,14 @@ pagecounts = A2-3:3
 [T07]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A3-1
 sinks = A2-3,A6-1,A12-2,A14-1
 pagecounts = A2-3:2,A3-1:1,A6-1:2,A12-2:1,A14-1:1
 
 [T07/]
 description = Complement of T07.
 type = 
-sources = A2-3
+sources = A2-3,A12-2
 sinks = A2-3,A4-2,A5-1,A5-2,A6-2,A14-1,A21-2,A23-2
 pagecounts = A2-3:2,A4-2:1,A5-1:1,A5-2:1,A6-2:1,A12-2:1,A14-1:1,A21-2:1,A23-2:1
 
@@ -11761,7 +11754,7 @@ pagecounts = A2-3:2,A3-1:1
 [T08]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A2-3
 sinks = A2-3,A6-1,A14-1,A24-2
 pagecounts = A2-3:3,A6-1:1,A14-1:3,A24-2:1
 
@@ -11782,7 +11775,7 @@ pagecounts = A2-3:3
 [T09]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A24-2
 sinks = A2-3,A6-1,A14-1
 pagecounts = A2-3:2,A6-1:1,A14-1:1,A24-2:1
 
@@ -11803,14 +11796,14 @@ pagecounts = A2-3:2,A24-2:1
 [T10]
 description = 
 type = 
-sources = A2-3
+sources = A2-3,A2-3
 sinks = A2-3,A6-1,A12-2,A13-1,A15-1
 pagecounts = A2-3:3,A6-1:1,A12-2:1,A13-1:1,A15-1:1
 
 [T10/]
 description = Complement of T10.
 type = 
-sources = A2-3
+sources = A2-3,A12-2
 sinks = A2-3,A4-2,A5-1,A5-2,A6-2,A7-2,A13-1,A14-1,A21-2
 pagecounts = A2-3:2,A4-2:1,A5-1:2,A5-2:1,A6-2:1,A7-2:1,A12-2:1,A13-1:1,A14-1:3,A21-2:1
 
@@ -11936,7 +11929,7 @@ pagecounts = A15-2:1,A23-2:1
 [T7PHS4]
 description = 
 type = 
-sources = A23-2
+sources = A23-2,A23-1
 sinks = A23-2
 pagecounts = A23-1:1,A23-2:2
 
@@ -12048,14 +12041,14 @@ pagecounts = A13-1:1,A16-2:1
 [TMZ/]
 description = 
 type = 
-sources = A5-2
+sources = A5-2,A4-2,A5-1
 sinks = A4-1
 pagecounts = A4-1:1,A4-2:1,A5-1:1,A5-2:1
 
 [TOV/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A5-2
 sinks = A4-1
 pagecounts = A4-1:1,A5-2:1,A6-1:1
 
@@ -12244,7 +12237,7 @@ pagecounts = A3-2:1,A4-2:1,A5-2:1
 [TSGN/]
 description = 
 type = 
-sources = A5-1
+sources = A5-1,A4-2,A5-2
 sinks = A4-1
 pagecounts = A4-1:1,A4-2:1,A5-1:1,A5-2:1
 
@@ -12398,7 +12391,7 @@ pagecounts = A18-1:1,A19-2:2
 [WA/]
 description = 
 type = 
-sources = A6-2
+sources = A6-2,A5-1,A5-1,A5-2,A6-2
 sinks = A7-1
 pagecounts = A5-1:2,A5-2:1,A6-2:2,A7-1:1
 
@@ -12448,8 +12441,8 @@ pagecounts = A24-1:2
 description = Complement of WATCH.
 type = 
 sources = A24-1
-sinks = 
-pagecounts = A24-1:1
+sinks = A24-1
+pagecounts = A24-1:2
 
 [WATCHP]
 description = 
@@ -12461,7 +12454,7 @@ pagecounts = A13-1:1,A24-1:2
 [WB/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A5-1,A5-2,A5-2
 sinks = A7-1
 pagecounts = A5-1:1,A5-2:2,A6-1:1,A7-1:1
 
@@ -12608,7 +12601,7 @@ pagecounts = A7-2:2,A15-1:1
 [WG/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A4-2,A4-2,A5-1,A6-2,A12-1
 sinks = A7-2,A12-2
 pagecounts = A4-2:2,A5-1:1,A6-1:1,A6-2:1,A7-2:1,A12-1:1,A12-2:1
 
@@ -12664,7 +12657,7 @@ pagecounts = A7-1:2
 [WHOMP]
 description = 
 type = 
-sources = A11-1
+sources = A11-1,A11-1
 sinks = A11-1,A11-2
 pagecounts = A11-1:5,A11-2:2
 
@@ -12685,7 +12678,7 @@ pagecounts = A10-2:2,A11-2:1,A14-1:1
 [WL/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A4-2,A5-2
 sinks = A7-1
 pagecounts = A4-2:1,A5-2:1,A6-1:1,A7-1:1
 
@@ -12839,7 +12832,7 @@ pagecounts = A10-2:2,A14-2:1,A24-2:1
 [WL11/]
 description = Complement of WL11.
 type = 
-sources = A10-2
+sources = A10-2,A14-2
 sinks = A3-1,A4-1,A10-1,A10-2,A12-2,A15-1
 pagecounts = A3-1:1,A4-1:1,A10-1:2,A10-2:4,A12-2:1,A14-2:1,A15-1:1
 
@@ -12902,14 +12895,14 @@ pagecounts = A4-1:1,A11-1:1,A11-2:2
 [WL16]
 description = 
 type = 
-sources = A11-2
+sources = A11-2,A9-1
 sinks = A2-3,A11-2,A14-2,A24-2
 pagecounts = A2-3:1,A9-1:1,A11-2:2,A14-2:1,A24-2:1
 
 [WL16/]
 description = Complement of WL16.
 type = 
-sources = A11-2
+sources = A11-2,A14-2
 sinks = A2-3,A3-1,A4-1,A8-1,A11-1,A11-2,A15-1
 pagecounts = A2-3:1,A3-1:1,A4-1:1,A8-1:2,A11-1:2,A11-2:3,A14-2:1,A15-1:1
 
@@ -12980,15 +12973,15 @@ pagecounts = A22-1:1,A22-2:1
 description = 
 type = 
 sources = A22-2
-sinks = 
-pagecounts = A22-2:1
+sinks = A22-1
+pagecounts = A22-1:1,A22-2:1
 
 [WRD2B3]
 description = 
 type = 
 sources = A22-2
 sinks = A22-1
-pagecounts = A22-1:2,A22-2:1
+pagecounts = A22-1:1,A22-2:1
 
 [WRITE0]
 description = 
@@ -13007,14 +13000,14 @@ pagecounts = A4-2:2
 [WS/]
 description = 
 type = 
-sources = A6-2
+sources = A6-2,A5-2
 sinks = A7-1
 pagecounts = A5-2:1,A6-2:1,A7-1:1
 
 [WSC/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A6-2
 sinks = A14-2
 pagecounts = A6-1:1,A6-2:1,A14-2:1
 
@@ -13049,28 +13042,28 @@ pagecounts = A2-1:3
 [WT/]
 description = Complement of WT.
 type = 
-sources = A2-1
+sources = A2-1,A2-1
 sinks = A2-1,A7-1,A24-1
 pagecounts = A2-1:3,A7-1:2,A24-1:1
 
 [WY/]
 description = 
 type = 
-sources = A5-2
+sources = A5-2,A4-2,A5-1,A5-1,A6-1
 sinks = A7-1
 pagecounts = A4-2:1,A5-1:2,A5-2:1,A6-1:1,A7-1:1
 
 [WY12/]
 description = 
 type = 
-sources = A5-2
+sources = A5-2,A5-1
 sinks = A7-1
 pagecounts = A5-1:1,A5-2:1,A7-1:1
 
 [WYD/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A5-2
 sinks = A7-1
 pagecounts = A5-2:1,A6-1:1,A7-1:1
 
@@ -13105,7 +13098,7 @@ pagecounts = A7-1:1,A8-1:2,A8-2:2,A9-1:2,A9-2:2,A10-1:2,A10-2:2
 [WZ/]
 description = 
 type = 
-sources = A6-1
+sources = A6-1,A5-1,A5-2
 sinks = A7-1
 pagecounts = A5-1:1,A5-2:1,A6-1:1,A7-1:1
 
@@ -13119,7 +13112,7 @@ pagecounts = A7-1:1,A8-1:1,A8-2:1,A9-1:1,A9-2:1,A10-1:1,A10-2:1,A11-1:1,A11-2:1
 [XB0]
 description = 
 type = 
-sources = A14-2
+sources = A14-2,A17-2
 sinks = A14-2,A21-3
 pagecounts = A14-2:3,A17-2:1,A21-3:1
 
@@ -13322,7 +13315,7 @@ pagecounts = A13-1:1,A14-2:2
 [XT0/]
 description = Complement of XT0.
 type = 
-sources = A14-2
+sources = A14-2,A13-1
 sinks = A5-2,A7-1,A7-2,A14-2,A15-2,A16-1,A23-2,A24-1
 pagecounts = A5-2:1,A7-1:1,A7-2:1,A13-1:1,A14-2:2,A15-2:1,A16-1:1,A23-2:1,A24-1:1
 
@@ -13343,7 +13336,7 @@ pagecounts = A13-1:1,A14-2:2
 [XT1/]
 description = Complement of XT1.
 type = 
-sources = A14-2
+sources = A14-2,A13-1
 sinks = A4-1,A14-2,A15-2,A16-2,A17-2,A18-1,A22-1
 pagecounts = A4-1:1,A13-1:1,A14-2:2,A15-2:1,A16-2:1,A17-2:1,A18-1:2,A22-1:1
 
@@ -13945,14 +13938,14 @@ pagecounts = A11-1:2
 [Z15/]
 description = 
 type = 
-sources = A11-2
+sources = A11-2,A5-2
 sinks = A11-2
 pagecounts = A5-2:1,A11-2:2
 
 [Z16/]
 description = 
 type = 
-sources = A11-2
+sources = A11-2,A5-2
 sinks = A11-2
 pagecounts = A5-2:1,A11-2:2
 
