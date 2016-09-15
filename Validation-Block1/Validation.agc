@@ -59,12 +59,15 @@
 		TS	BANK
 		TC	ERRORDSP	# display it on the DSKY.
 
-# Just a little test of ERRORDSP ...		
+# Just a little test of ERRORDSP ... don't normally do it, except when
+# debugging ERRORDSP itself.
+		TC	BYPASSLP	
 LOOP		XCH	ERRNUM
 		AD	ONE
 		XCH	ERRNUM
 		TC	ERRORDSP
 		TC	LOOP
+BYPASSLP
 
 		#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		# Test 1:  what is in the Z register?  Should be the 
@@ -73,12 +76,10 @@ LOOP		XCH	ERRNUM
 		XCH	ERRNUM
 		AD	ONE
 		XCH	ERRNUM
-		XCH	Z		# fetch Z.
-DEST1		TS	LP
-		CAF	WHERE1
-		EXTEND
-		SU	LP
-		EXTEND
+		CAF	ZERO		# fetch Z.
+		AD	Z
+DEST1		EXTEND
+		SU	WHERE1
 		CCS	A
 		TC	ERRORDSP	# Error!
 		TC	TEST1OK
@@ -87,7 +88,8 @@ TEST1OK
 
 		#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		# Test 2:  check of the editing registers.
-		# I've swiped this from the Luminary AGC self-check.
+		# I've swiped this from the Luminary AGC self-check, and 
+		# modified it to account for LP and SL in place of EDOP.
 CYCLSHFT	XCH	ERRNUM
 		AD	ONE
 		XCH	ERRNUM
@@ -96,10 +98,13 @@ CYCLSHFT	XCH	ERRNUM
 		TS	CYL		# C(CYL) = 52524
 		TS	SR		# C(SR) = 12525
 		TS	SL		# C(SL) = 52524
-		AD	CYR		# 37777		C(CYR) = 45252
-		AD	CYL		# 00-12524	C(CYL) = 25251
-		AD	SR		# 00-25251	C(SR) = 05252
-		AD	SL		# 00-25376	C(EDOP) = +0
+		AD	ONE
+		TS	LP		# C(LP) = 72525
+		AD	CYR		# 40000
+		AD	CYL		# 152524
+		AD	SR		# 00-25251
+		AD	SL
+		AD	LP		
 		AD	CONC+S2		# C(CONC+S2) = 52400
 		TC	-1CHK
 		AD	CYR		# 45252
@@ -234,5 +239,7 @@ $Errordsp.agc
 $Utilities.agc		
 $VariablesAndConstants.agc
 
+		SETLOC	5777
+OPOVF		XCADR	0
 
 

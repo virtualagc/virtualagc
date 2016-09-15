@@ -29,25 +29,26 @@
 # OPR ERR and continues.
 
 ERRORDSP	XCH	Q	# Save return address in TEMPK
-		XCH	TEMPK
+		XCH	ERRORDSQ
 		
 		# Blank out all DSKY fields except MODE.  This means
 		# writing out 50000, 44000, ..., 04000.
 		CAF	O50000	
-		TS	LP	# L is the value we want to write to ch 10.
-		CAF	TEN	# A is the loop counter.
-ERRORLOO	XCH	LP
-		TC	IODELAY
+		TS	ERRORDSV	# ERRORDSV is the value we want to write to output.
+		CAF	TEN		# A is the loop counter.
+ERRORLOO	TC	IODELAY		# Delay, preserving A.
+		XCH	ERRORDSV
 		TS	OUT1
 		AD	O-4000
-		XCH	LP
+		XCH	ERRORDSV
 		CCS	A
 		TC	ERRORLOO
 		
 		# Output ERRNUM in MODE. 
 		CAF	O54000
 		TS	TEMPI
-		XCH	ERRNUM
+		CAF	ZERO
+		AD	ERRNUM
 		TS	TEMPJ
 		TC	IODELAY
 		TC	DIGPAIR
@@ -55,7 +56,8 @@ ERRORLOO	XCH	LP
 		# Output ERRSUB in NOUN.
 		CAF	O44000
 		TS	TEMPI
-		XCH	ERRSUB
+		CAF	ZERO
+		AD	ERRSUB
 		TS	TEMPJ
 		TC	IODELAY
 		TC	DIGPAIR
@@ -65,9 +67,7 @@ ERRORLOO	XCH	LP
 		CAF	BIT5
 		TS	OUT1
 		
-		# Wait for PRO key to be pressed.  Please recall that
-		# the PRO key is a low-polarity signal:  0 when pressed,
-		# 1 when released.
+		# Wait for ENTER key to be pressed.
 PRONWAIT	CAF	ZERO
 		AD	IN0
 		MASK	LOW6
@@ -84,19 +84,15 @@ PROPRESS
 		CAF	ZERO
 		TS	OUT1
 		
-		# Wait for PRO key to be released.
+		# Wait for ENTER key to be released.
 PROFWAIT	CAF	ZERO
 		AD	IN0
 		MASK	LOW6
 		CCS	A
-		TC	+4
 		TC	PROFWAIT
-		TC	+2
+		TC	ERRORDSQ	# RETURN
 		TC	PROFWAIT
-
-		# Return.  Recall that a TC to the return address
-		# has already been stored at TEMPK.
-		TC	TEMPK
+		TC	ERRORDSQ	# RETURN
 
 #-------------------------------------------------------------------------
 # Delay a little while.  No registers
@@ -104,15 +100,15 @@ PROFWAIT	CAF	ZERO
 
 IODELAYT	DEC	500
 
-IODELAY		XCH	TEMPJ		# Save accumulator.
+IODELAY		XCH	IODELAYA	# Save accumulator.
 		XCH	Q		# Save the return address.
-		XCH	TEMPK
+		XCH	IODELAYQ
 		NOOP
 		CAF	IODELAYT
 		CCS	A
 		TC	-1
-		XCH	TEMPJ		# Restore accumulator.
-		TC	TEMPK		# return.
+		XCH	IODELAYA	# Restore accumulator.
+		TC	IODELAYQ	# return.
 			
 #-------------------------------------------------------------------------
 # Display a two-digit octal code.  On entry, TEMPI should contain a 
@@ -139,8 +135,8 @@ DIGPAIR		# Shift the error code down by 3 places, so as to get
 		TS	CYR
 		CS	CYR
 		CS	CYR
-		CS	CYR
-		XCH	CYR
+		CAF	ZERO
+		AD	CYR
 		MASK	SEVEN
 		# Convert to a pattern for output.
 		INDEX	A
@@ -150,8 +146,8 @@ DIGPAIR		# Shift the error code down by 3 places, so as to get
 		CS	CYL
 		CS	CYL
 		CS	CYL
-		CS	CYL
-		XCH	CYL
+		CAF	ZERO
+		AD	CYL
 		AD	TEMPI
 		TS	TEMPI
 		# Now do the same for the second octal digit, except that
