@@ -351,7 +351,7 @@ OutputKeycode(int Keycode)
         }
       else
         {
-          wxMilliSleep(50);
+          wxMilliSleep(200);
           FormIoPacket(04, 0, &Packet[4]); // Data.
           j = send(ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
           if (j == SOCKET_ERROR && SOCKET_BROKEN)
