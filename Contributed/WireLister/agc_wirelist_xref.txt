@@ -13,7 +13,7 @@ Signal      Source(s)                       Sink(s)
 1XP10       A4-2                            A4-2,A6-1                                                       
 25KPPS      A24-1                           A25                                                             
 2FSFAL      B8                              A13-1                                                           
-2PP1        A6-2                            A4-2                                                            
+2PP1        A4-2,A6-2                       A4-2                                                            
 2XP3        A4-2                            A4-2,A6-1                                                       
 2XP5        A4-2                            A4-2,A6-2                                                       
 2XP7        A5-1                            A5-1,A6-1                                                       
@@ -78,7 +78,7 @@ A13/        A11-1                           A11-1
 A14/        A11-1                           A11-1                                                           
 A15/        A11-2                           A11-2,A24-1                                                     
 A16/        A11-2                           A11-2,A24-1                                                     
-A2X/        A5-1,A5-2,A6-1                  A7-2                                                            
+A2X/        A6-1,A5-1,A5-2                  A7-2                                                            
 A2XG/       A7-2                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 AD0         A3-2                            A6-2                                                            
 ADS0        A3-2                            A3-2,A5-2,A6-2                                                  
@@ -221,8 +221,8 @@ C57R        A21-3                           A21-3
 C60A        A21-3                           A21-1                                                           
 C60R        A21-3                           A21-3                                                           
 CA2/        A20-2,A24-2                     A15-2,A19-1,A20-1                                               
-CA3/        A20-1,A24-2                     A15-2,A20-1,A20-2                                               
-CA4/        A20-2,A21-3                     A19-2,A20-2,A21-3                                               
+CA3/        A20-1,A20-1,A24-2               A15-2,A20-1,A20-2                                               
+CA4/        A20-2,A20-2,A21-3               A19-2,A20-2,A21-3                                               
 CA5/        A21-3                           A19-1,A20-2,A21-3                                               
 CA6/        A20-2                           A19-1,A21-3,A24-1                                               
 CAD1        A21-1                           A15-2                                                           
@@ -402,20 +402,20 @@ CHBT13      A1-2                            A18-2
 CHBT14      A1-2                            A18-2                                                           
 CHINC       A21-3                           A14-1,A21-2                                                     
 CHINC/      A21-2                           A5-2,A21-3                                                      
-CHOR01/     A16-1,A16-2,A17-1,A17-2,A23-1   A23-1                                                           
-CHOR02/     A16-1,A16-2,A17-1,A17-2         
-CHOR03/     A16-1,A16-2,A17-1,A17-2         
-CHOR04/     A16-1,A16-2,A17-1,A17-2         
-CHOR05/     A16-1,A16-2,A17-1,A17-2         
-CHOR06/     A16-1,A16-2,A17-1,A17-2         
-CHOR07/     A16-1,A16-2,A17-1,A17-2         
-CHOR08/     A16-1,A17-1,A17-2               
+CHOR01/     A17-1,A16-1,A16-2,A17-2,A23-1   A23-1                                                           
+CHOR02/     A17-1,A16-1,A16-2,A17-2,A23-1   A23-1                                                           
+CHOR03/     A17-1,A16-1,A16-2,A17-2,A23-1   A23-1                                                           
+CHOR04/     A17-1,A16-1,A16-2,A17-2,A23-1   A23-1                                                           
+CHOR05/     A17-1,A16-1,A16-2,A17-2,A23-1   A23-1                                                           
+CHOR06/     A17-1,A16-1,A16-2,A17-2,A23-1   A23-1                                                           
+CHOR07/     A17-1,A16-1,A16-2,A17-2,A23-1   A23-1                                                           
+CHOR08/     A17-1,A16-1,A17-2,A23-1         A23-1                                                           
 CHOR09/     A17-1,A17-2,A23-2               A23-2                                                           
 CHOR10/     A17-1,A17-2,A23-2               A23-2                                                           
 CHOR11/     A17-1,A17-2,A18-2               A18-2                                                           
 CHOR12/     A17-1,A17-2,A18-2               A18-2                                                           
-CHOR13/     A17-1,A17-2,A18-2               A18-2                                                           
-CHOR14/     A17-1,A17-2,A18-2               A18-2                                                           
+CHOR13/     A17-1,A17-2,A17-2,A18-2         A18-2                                                           
+CHOR14/     A17-1,A17-2,A18-2,A18-2         A18-2                                                           
 CHOR16/     A17-1,A17-2,A18-2               A18-2                                                           
 CHWL01/     A24-1                           A16-1,A16-2,A17-2,A18-2,A19-1,A22-2,A23-1                       
 CHWL02/     A24-1                           A16-1,A16-2,A17-2,A18-2,A19-1,A22-2                             
@@ -433,7 +433,7 @@ CHWL13/     A24-2                           A16-2,A17-1,A17-2,A22-2,A23-2
 CHWL14/     A24-2                           A16-2,A17-1,A17-2,A22-1,A22-2,A23-2                             
 CHWL16/     A24-2                           A17-2,A22-1,A22-2,A23-2                                         
 CI          A24-2                           A7-2                                                            
-CI/         A4-2,A5-1,A5-2,A6-2             A24-2                                                           
+CI/         A6-2,A4-2,A5-1,A5-2             A24-2                                                           
 CI01/       A7-2                            A8-1                                                            
 CI02/       A8-1                            A8-1                                                            
 CI03/       A8-1                            A8-2                                                            
@@ -451,7 +451,7 @@ CI14/       A11-1                           A11-1
 CI15/       A11-1                           A11-2                                                           
 CI16/       A11-2                           A11-2                                                           
 CIFF        A7-2                            A7-2                                                            
-CINORM      A2-3,A7-2                       A7-2                                                            
+CINORM      A7-2,A2-3                       A7-2                                                            
 CKTAL/      A13-1                           A13-1                                                           
 CLEARA      A8-1                            A14-1                                                           
 CLEARB      A8-2                            A14-1                                                           
@@ -461,25 +461,25 @@ CLG1G       A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-
 CLG2G       A7-1                            A11-1                                                           
 CLK         A2-1                            A26                                                             
 CLOCK       B7                              A2-1                                                            
-CLROPE      A9-1,A14-1                      B16                                                             
+CLROPE      A14-1,A9-1,A9-1                 B16,B17                                                         
 CLXC        A6-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 CNTOF9      A18-2                           A18-2                                                           
 CNTRSB/     A24-2                           A19-2                                                           
-CO02        A11-2                           
-CO04        A8-1,A10-2                      A8-2                                                            
-CO06        A8-2                            A9-1                                                            
-CO08        A9-1                            A9-2                                                            
-CO10        A9-2                            A10-1                                                           
-CO12        A10-1,A10-2                     A10-2                                                           
-CO14        A10-2                           A11-1                                                           
-CO16        A11-1                           A11-2                                                           
+CO02        A11-2,A11-2                     
+CO04        A8-1,A8-1,A10-2                 A8-2                                                            
+CO06        A8-2,A8-2                       A9-1                                                            
+CO08        A9-1,A9-1                       A9-2                                                            
+CO10        A9-2,A9-2                       A10-1                                                           
+CO12        A10-1,A10-1,A10-2               A10-2                                                           
+CO14        A10-2,A10-2                     A11-1                                                           
+CO16        A11-1,A11-1                     A11-2                                                           
 COARSE      A16-2                           A25                                                             
 COMACT      A16-2                           A26                                                             
 CON1        A3-1                            A3-1                                                            
 CON2        A3-1                            A3-1,A13-1                                                      
 CON3        A13-1                           A13-1                                                           
 CQG         A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
-CSG         A7-1                            A12-2,A19-1                                                     
+CSG         A7-1,A7-1                       A12-2,A19-1                                                     
 CSQG        A3-1                            A3-1                                                            
 CT          A2-1                            A2-1,A21-2,A24-2                                                
 CT/         A2-1                            A2-1,A3-1,A7-1,A7-2,A13-1,A24-1                                 
@@ -495,7 +495,7 @@ CXB3/       A20-2                           A20-1,A20-2,A21-3
 CXB4/       A20-2                           A20-1,A20-2,A21-3                                               
 CXB5/       A21-3                           A20-1,A20-2,A21-3                                               
 CXB6/       A21-3                           A20-1,A20-2,A21-3                                               
-CXB7/       A20-1                           A19-1,A20-1,A20-2,A21-3                                         
+CXB7/       A20-1,A20-1                     A19-1,A20-1,A20-2,A21-3                                         
 CYL/        A12-2                           A7-1                                                            
 CYR/        A12-2                           A7-1                                                            
 CZG         A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
@@ -503,8 +503,8 @@ DAS0        A3-2                            A3-2,A5-1,A5-2,A6-2
 DAS0/       A3-2                            A5-1                                                            
 DAS1        A3-2                            A5-2,A6-2                                                       
 DAS1/       A3-2                            A3-2,A5-2,A6-2                                                  
-DATA/       A22-1,A22-2,A23-1               A22-1                                                           
-DBLTST      77                              A3-1                                                            
+DATA/       A22-1,A22-2,A22-2,A23-1         A22-1                                                           
+DBLTST      77,Monitor                      A3-1                                                            
 DCA0        A3-2                            A3-2,A6-2                                                       
 DCS0        A3-2                            A3-2,A6-2                                                       
 DIM0        A3-2                            A3-2                                                            
@@ -536,7 +536,7 @@ DLKPLS      A13-1                           A15-2
 DLKRPT      A18-2                           A13-1,A18-2                                                     
 DNRPTA      A15-2                           A15-1                                                           
 DOFILT      A13-1                           A13-1                                                           
-DOSCAL      77                              A21-2                                                           
+DOSCAL      77,Monitor                      A21-2                                                           
 DRPRST      A15-2                           A13-1                                                           
 DV0         A4-1                            A4-1,A6-2                                                       
 DV0/        A4-1                            A4-2                                                            
@@ -581,12 +581,12 @@ EMSD        A19-1                           A13-1,A21-3
 END         A18-2                           A22-1                                                           
 ENERIM      A16-2                           A25                                                             
 ENEROP      A16-2                           A25                                                             
-ERAS        A14-1                           A14-1                                                           
+ERAS        A14-1,A14-1                     A14-1                                                           
 ERAS/       A14-1                           A14-1                                                           
 ERRST       A18-1                           A13-1                                                           
 EVNSET      A2-1                            A2-1                                                            
-EVNSET/     A2-1                            A2-2,A2-3                                                       
-EXST0/      A3-2                            A3-2,A4-2                                                       
+EVNSET/     A2-1,A2-1                       A2-2,A2-3                                                       
+EXST0/      A3-2,A3-2                       A3-2,A4-2                                                       
 EXST1/      A3-2                            A4-2                                                            
 EXT         A6-2                            A3-1                                                            
 EXTPLS      A12-1                           A3-1,A12-1                                                      
@@ -724,7 +724,7 @@ FF1112      A19-2                           A24-1
 FF1112/     A19-2                           A19-2                                                           
 FILTIN      A13-1                           B8                                                              
 FLASH       A24-2                           A16-2,A24-2                                                     
-FLASH/      A24-2                           
+FLASH/      A24-2                           A16-2                                                           
 FLTOUT      B8                              A13-1                                                           
 FNERAS/     A14-1                           A14-1                                                           
 FREFUN      A28                             A17-1                                                           
@@ -775,27 +775,27 @@ FS32        A1-2                            A1-2
 FS33        A1-2                            A1-2                                                            
 FUTEXT      A3-1                            A3-1,A23-1                                                      
 G01         A8-1                            A12-1                                                           
-G01/        A8-1                            A8-1,A11-2                                                      
+G01/        A8-1,A8-1                       A8-1,A11-2                                                      
 G01A        A12-2                           A13-1                                                           
 G01A/       A12-1                           A12-1,A12-2,A13-1                                               
 G01ED       A12-2                           A8-1                                                            
 G02         A8-1                            A12-1                                                           
-G02/        A8-1,A12-1                      A8-1,A12-1                                                      
+G02/        A8-1,A8-1                       A8-1                                                            
 G02ED       A12-2                           A8-1                                                            
 G03         A8-2                            A12-1                                                           
-G03/        A8-1,A8-2,A12-1                 A8-2,A12-1                                                      
+G03/        A8-2,A8-1                       A8-2                                                            
 G03ED       A12-2                           A8-1                                                            
 G04         A8-2                            A12-1                                                           
-G04/        A8-2                            A8-1,A8-2                                                       
+G04/        A8-2,A8-2                       A8-1,A8-2                                                       
 G04ED       A12-2                           A8-2                                                            
 G05         A9-1                            A12-1                                                           
-G05/        A8-2,A9-1                       A8-1,A9-1                                                       
+G05/        A9-1,A8-2                       A8-1,A9-1                                                       
 G05ED       A12-2                           A8-2                                                            
 G06         A9-1                            A12-1                                                           
-G06/        A8-2,A9-1                       A8-2,A9-1                                                       
+G06/        A9-1,A8-2                       A8-2,A9-1                                                       
 G06ED       A12-2                           A8-2                                                            
 G07         A9-2                            A12-1                                                           
-G07/        A9-1,A9-2                       A8-2,A9-2                                                       
+G07/        A9-2,A9-1                       A8-2,A9-2                                                       
 G07ED       A12-2                           A9-1                                                            
 G08         A9-2                            A12-1                                                           
 G08/        A9-2                            A9-1,A9-2                                                       
@@ -813,7 +813,7 @@ G14         A11-1                           A12-1
 G14/        A11-1                           A10-2,A11-1                                                     
 G15         A11-2                           A12-1                                                           
 G15/        A11-2                           A10-2,A11-2                                                     
-G16         A11-2                           
+G16         A11-2                           A12-1                                                           
 G16/        A11-2                           A11-2                                                           
 G16A/       A12-1                           A12-1,A13-1                                                     
 G16SW/      A13-1                           A11-2                                                           
@@ -842,11 +842,11 @@ GEMP        A12-1                           B12
 GEQZRO/     A12-1                           A4-1                                                            
 GINH        A12-2                           A7-1                                                            
 GNHNC       A5-1                            A21-2                                                           
-GNZRO       A12-1                           A12-1                                                           
+GNZRO       A12-1,A12-1                     A12-1                                                           
 GOJ1        A3-2                            A2-2,A3-2,A5-1,A14-1                                            
 GOJ1/       A3-2                            A5-1                                                            
-GOJAM       A2-2,A24-2                      A2-3,A3-1,A4-1,A5-1,A6-2,A11-1,A12-1,A13-1,A14-1,A15-1,A15-2,A16-1,A16-2,A17-1,A17-2,A18-2,A19-1,A21-2,A22-1,A23-1
-GOJAM/      A2-1,A2-2                       A2-2,A24-2                                                      
+GOJAM       A2-2,A2-2,A24-2                 A2-3,A3-1,A4-1,A5-1,A6-2,A11-1,A12-1,A13-1,A14-1,A15-1,A15-2,A16-1,A16-2,A17-1,A17-2,A18-2,A19-1,A21-2,A22-1,A23-1
+GOJAM/      A2-2,A2-1                       A2-2,A24-2                                                      
 GOSET/      A2-2                            A2-2                                                            
 GTONE       A24-2                           A19-1                                                           
 GTRST       A24-2                           A11-1                                                           
@@ -869,7 +869,7 @@ HIGH0/      A24-1                           A22-1,A22-2
 HIGH1/      A24-1                           A22-2                                                           
 HIGH2/      A24-1                           A22-2                                                           
 HIGH3/      A24-1                           A23-1                                                           
-HIMOD       A15-2                           
+HIMOD       A15-2                           B16,B17                                                         
 HNDRPT      A17-1                           A15-1                                                           
 HOLFUN      A28                             A17-1                                                           
 IC1         A3-2                            A3-2,A5-1                                                       
@@ -901,25 +901,25 @@ IC8/        A3-2                            A5-2
 IC9         A3-2                            A5-2,A6-2                                                       
 IC9/        A3-2                            A3-2                                                            
 ICNT        A22-1                           A22-1                                                           
-IHENV       A14-1                           
+IHENV       A14-1                           B16                                                             
 IIP         A3-1                            A3-1,A13-1                                                      
 IIP/        A3-1                            A3-1,A13-1                                                      
-IL01        A6-1                            
-IL01/       A6-1                            
-IL02        A6-1                            
-IL02/       A6-1                            
-IL03        A6-1                            
-IL03/       A6-1                            
-IL04        A6-1                            
-IL04/       A6-1                            
-IL05        A6-1                            
-IL05/       A6-1                            
-IL06        A6-1                            
-IL06/       A6-1                            
-IL07        A6-1                            
-IL07/       A6-1                            
-ILP         A14-2                           
-ILP/        A14-2                           
+IL01        A6-1                            B16,B17                                                         
+IL01/       A6-1                            B16,B17                                                         
+IL02        A6-1                            B16,B17                                                         
+IL02/       A6-1                            B16,B17                                                         
+IL03        A6-1                            B16,B17                                                         
+IL03/       A6-1                            B16,B17                                                         
+IL04        A6-1                            B16,B17                                                         
+IL04/       A6-1                            B16,B17                                                         
+IL05        A6-1                            B16,B17                                                         
+IL05/       A6-1                            B16,B17                                                         
+IL06        A6-1                            B16,B17                                                         
+IL06/       A6-1                            B16,B17                                                         
+IL07        A6-1                            B16,B17                                                         
+IL07/       A6-1                            B16,B17                                                         
+ILP         A14-2                           B16,B17                                                         
+ILP/        A14-2                           B16,B17                                                         
 IMUCAG      A29                             A17-1                                                           
 IMUFAL      A29                             A17-1                                                           
 IMUOPR      A29                             A17-1                                                           
@@ -969,12 +969,12 @@ L13/        A11-1                           A11-1
 L14/        A11-1                           A11-1,A11-2                                                     
 L15/        A11-2                           A4-1,A7-1,A11-2,A12-2                                           
 L15A/       A12-2                           A6-1                                                            
-L16/        A4-2,A11-2                      A11-2                                                           
+L16/        A11-2,A4-2                      A11-2                                                           
 L2GD/       A6-1                            A7-2                                                            
 L2GDG/      A7-2                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 LEMATT      A29                             A17-1                                                           
 LFTOFF      A27                             A17-1                                                           
-LOMOD       A15-2                           
+LOMOD       A15-2                           B16,B17                                                         
 LOW0/       A22-1                           A22-1,A22-2                                                     
 LOW1/       A22-1                           A22-1,A22-2                                                     
 LOW2/       A22-1                           A22-2                                                           
@@ -995,7 +995,7 @@ LRZVEL      A18-2                           A28
 LVDAGD      A28                             A17-1                                                           
 LXCH0       A3-2                            A3-2                                                            
 MAINRS      A26                             A18-1                                                           
-MAMU        77                              A14-1                                                           
+MAMU        77,Monitor                      A14-1                                                           
 MANR+P      A29                             A17-1                                                           
 MANR+R      A29                             A17-1                                                           
 MANR+Y      A29                             A17-1                                                           
@@ -1005,35 +1005,35 @@ MANR-Y      A29                             A17-1
 MARK        A27                             A18-1                                                           
 MASK0       A3-2                            A3-2,A5-2,A6-2                                                  
 MASK0/      A3-2                            A5-1                                                            
-MBR1        A4-1                            
-MBR2        A4-1                            
+MBR1        A4-1                            Monitor                                                         
+MBR2        A4-1                            Monitor                                                         
 MCDU        A15-1                           A6-2                                                            
 MCDU/       A15-1                           
 MCRO/       A6-1                            A8-1                                                            
-MCTRAL/     A13-1                           77                                                              
-MDT01       77                              A8-1                                                            
-MDT02       77                              A8-1                                                            
-MDT03       77                              A8-2                                                            
-MDT04       77                              A8-2                                                            
-MDT05       77                              A9-1                                                            
-MDT06       77                              A9-1                                                            
-MDT07       77                              A9-2                                                            
-MDT08       77                              A9-2                                                            
-MDT09       77                              A10-1                                                           
-MDT10       77                              A10-1                                                           
-MDT11       77                              A10-2                                                           
-MDT12       77                              A10-2                                                           
-MDT13       77                              A11-1                                                           
-MDT14       77                              A11-1                                                           
-MDT15       77                              A11-2                                                           
-MDT16       77                              A11-2                                                           
-MGOJAM      A2-2                            
-MGP/        A12-1                           
-MIIP        A3-1                            
+MCTRAL/     A13-1                           77,Monitor                                                      
+MDT01       77,Monitor                      A8-1                                                            
+MDT02       77,Monitor                      A8-1                                                            
+MDT03       77,Monitor                      A8-2                                                            
+MDT04       77,Monitor                      A8-2                                                            
+MDT05       77,Monitor                      A9-1                                                            
+MDT06       77,Monitor                      A9-1                                                            
+MDT07       77,Monitor                      A9-2                                                            
+MDT08       77,Monitor                      A9-2                                                            
+MDT09       77,Monitor                      A10-1                                                           
+MDT10       77,Monitor                      A10-1                                                           
+MDT11       77,Monitor                      A10-2                                                           
+MDT12       77,Monitor                      A10-2                                                           
+MDT13       77,Monitor                      A11-1                                                           
+MDT14       77,Monitor                      A11-1                                                           
+MDT15       77,Monitor                      A11-2                                                           
+MDT16       77,Monitor                      A11-2                                                           
+MGOJAM      A2-2                            Monitor                                                         
+MGP/        A12-1                           Monitor                                                         
+MIIP        A3-1                            Monitor                                                         
 MINC        A15-1                           A6-2                                                            
 MINC/       A15-1                           
-MINHL       A3-1                            
-MINKL       A21-2                           
+MINHL       A3-1                            Monitor                                                         
+MINKL       A21-2                           Monitor                                                         
 MISSX       A23-1                           A23-1                                                           
 MISSY       A23-1                           A23-1                                                           
 MISSZ       A24-2                           A23-1                                                           
@@ -1043,27 +1043,27 @@ MKEY3       A25                             A18-1
 MKEY4       A25                             A18-1                                                           
 MKEY5       A25                             A18-1                                                           
 MKRPT       A18-1                           A15-2,A18-1                                                     
-MLDCH       77                              A21-2                                                           
-MLOAD       77                              A21-2                                                           
-MNHNC       77                              A21-2                                                           
-MNHRPT      77                              A3-1                                                            
-MNHSBF      77                              A14-1                                                           
+MLDCH       77,Monitor                      A21-2                                                           
+MLOAD       77,Monitor                      A21-2                                                           
+MNHNC       77,Monitor                      A21-2                                                           
+MNHRPT      77,Monitor                      A3-1                                                            
+MNHSBF      77,Monitor                      A14-1                                                           
 MNIM+P      A27                             A17-1                                                           
 MNIM+R      A28                             A17-1                                                           
 MNIM+Y      A28                             A17-1                                                           
 MNIM-P      A27                             A17-1                                                           
 MNIM-R      A28                             A17-1                                                           
 MNIM-Y      A28                             A17-1                                                           
-MNISQ       A24-1                           
+MNISQ       A24-1                           Monitor                                                         
 MON+CH      A21-2                           A5-1,A5-2,A6-2,A21-2                                            
 MON/        A21-2                           A6-2,A21-2                                                      
-MON800      A24-1                           
+MON800      A24-1                           Monitor                                                         
 MONEX       A6-1                            A6-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
-MONEX/      A5-1,A6-2                       A6-1                                                            
-MONPAR      77                              A12-1                                                           
-MONWBK      77                              A5-2                                                            
-MONWT       A2-1                            
-MOSCAL/     A13-1                           
+MONEX/      A6-2,A5-1                       A6-1                                                            
+MONPAR      77,Monitor                      A12-1                                                           
+MONWBK      77,Monitor                      A5-2                                                            
+MONWT       A2-1                            Monitor                                                         
+MOSCAL/     A13-1                           Monitor                                                         
 MOUT        A6-2                            A23-2                                                           
 MOUT/       A23-2                           A19-1,A19-2,A23-2                                               
 MP0         A3-2                            A5-1,A5-2                                                       
@@ -1074,87 +1074,87 @@ MP1/        A3-2                            A6-1,A6-2
 MP3         A3-2                            A5-1,A5-2,A24-1                                                 
 MP3/        A3-2                            A4-1,A4-2,A5-1,A6-1,A6-2                                        
 MP3A        A4-1                            A2-3,A4-2                                                       
-MPAL/       A12-1                           77                                                              
-MPIPAL/     A13-1                           
-MRAG        A7-2                            
-MRCH        A24-2                           77                                                              
-MRDCH       77                              A21-2                                                           
-MREAD       77                              A21-2                                                           
-MREQIN      A21-2                           
-MRGG        A7-2                            
+MPAL/       A12-1                           77,Monitor                                                      
+MPIPAL/     A13-1                           Monitor                                                         
+MRAG        A7-2                            Monitor                                                         
+MRCH        A24-2                           77,Monitor                                                      
+MRDCH       77,Monitor                      A21-2                                                           
+MREAD       77,Monitor                      A21-2                                                           
+MREQIN      A21-2                           Monitor                                                         
+MRGG        A7-2                            Monitor                                                         
 MRKREJ      A27                             A18-1                                                           
 MRKRST      A27                             A18-1                                                           
-MRLG        A7-2                            
+MRLG        A7-2                            Monitor                                                         
 MROLGT      A16-2                           A25                                                             
-MRPTAL/     A13-1                           77                                                              
-MRSC        A4-2                            
-MRULOG      A7-2                            
-MSBSTP      77                              
-MSCAFL/     A13-1                           77                                                              
-MSCDBL/     A12-1                           77                                                              
-MSP         A12-1                           
-MSQ10       A3-1                            
-MSQ11       A3-1                            
-MSQ12       A3-1                            
-MSQ13       A3-1                            
-MSQ14       A3-1                            
-MSQ16       A3-1                            
-MSQEXT      A3-1                            
-MST1        A4-1                            
-MST2        A4-1                            
-MST3        A4-1                            
-MSTP        77                              A2-2                                                            
-MSTPIT/     A2-2                            
-MSTRT       77                              A13-1                                                           
+MRPTAL/     A13-1                           77,Monitor                                                      
+MRSC        A4-2                            Monitor                                                         
+MRULOG      A7-2                            Monitor                                                         
+MSBSTP      77,Monitor                      
+MSCAFL/     A13-1                           77,Monitor                                                      
+MSCDBL/     A12-1                           77,Monitor                                                      
+MSP         A12-1                           Monitor                                                         
+MSQ10       A3-1                            Monitor                                                         
+MSQ11       A3-1                            Monitor                                                         
+MSQ12       A3-1                            Monitor                                                         
+MSQ13       A3-1                            Monitor                                                         
+MSQ14       A3-1                            Monitor                                                         
+MSQ16       A3-1                            Monitor                                                         
+MSQEXT      A3-1                            Monitor                                                         
+MST1        A4-1                            Monitor                                                         
+MST2        A4-1                            Monitor                                                         
+MST3        A4-1                            Monitor                                                         
+MSTP        77,Monitor                      A2-2                                                            
+MSTPIT/     A2-2                            Monitor                                                         
+MSTRT       77,Monitor                      A13-1                                                           
 MSTRTP      A13-1                           A2-2                                                            
 MSU0        A3-2                            A3-2,A5-1,A6-2                                                  
 MSU0/       A3-2                            A5-1                                                            
-MT01        A2-3                            77                                                              
-MT02        A2-3                            
-MT03        A2-3                            
-MT04        A2-3                            
-MT05        A2-3                            77                                                              
-MT06        A2-3                            
-MT07        A2-3                            
-MT08        A2-3                            
-MT09        A2-3                            
-MT10        A2-3                            
-MT11        A2-3                            
-MT12        A2-3                            77                                                              
-MTCAL/      A13-1                           77                                                              
-MTCSA/      A3-2                            
-MTCSAI      77                              A3-1,A4-1                                                       
-MVFAIL/     A13-1                           77                                                              
-MWAG        A7-1                            
-MWARNF/     A13-1                           
-MWATCH/     A24-1                           77                                                              
-MWBBEG      A7-2                            
-MWBG        A7-1                            
-MWCH        A24-2                           77                                                              
-MWEBG       A7-2                            
-MWFBG       A7-2                            
-MWG         A7-1                            
-MWL01       A8-1                            77                                                              
-MWL02       A8-1                            77                                                              
-MWL03       A8-2                            77                                                              
-MWL04       A8-2                            77                                                              
-MWL05       A9-1                            77                                                              
-MWL06       A9-1                            77                                                              
-MWL07       A9-2                            
-MWL08       A9-2                            
-MWL09       A10-1                           
-MWL10       A10-1                           
-MWL11       A10-2                           
-MWL12       A10-2                           
-MWL13       A11-1                           
-MWL14       A11-1                           
-MWL15       A11-2                           
-MWL16       A11-2                           
-MWLG        A7-1                            
-MWQG        A7-1                            
-MWSG        A7-1                            77                                                              
-MWYG        A7-1                            
-MWZG        A7-1                            
+MT01        A2-3                            77,Monitor                                                      
+MT02        A2-3                            Monitor                                                         
+MT03        A2-3                            Monitor                                                         
+MT04        A2-3                            Monitor                                                         
+MT05        A2-3                            77,Monitor                                                      
+MT06        A2-3                            Monitor                                                         
+MT07        A2-3                            Monitor                                                         
+MT08        A2-3                            Monitor                                                         
+MT09        A2-3                            Monitor                                                         
+MT10        A2-3                            Monitor                                                         
+MT11        A2-3                            Monitor                                                         
+MT12        A2-3                            77,Monitor                                                      
+MTCAL/      A13-1                           77,Monitor                                                      
+MTCSA/      A3-2                            Monitor                                                         
+MTCSAI      77,Monitor                      A3-1,A4-1                                                       
+MVFAIL/     A13-1                           77,Monitor                                                      
+MWAG        A7-1                            Monitor                                                         
+MWARNF/     A13-1                           Monitor                                                         
+MWATCH/     A24-1                           77,Monitor                                                      
+MWBBEG      A7-2                            Monitor                                                         
+MWBG        A7-1                            Monitor                                                         
+MWCH        A24-2                           77,Monitor                                                      
+MWEBG       A7-2                            Monitor                                                         
+MWFBG       A7-2                            Monitor                                                         
+MWG         A7-1                            Monitor                                                         
+MWL01       A8-1                            77,Monitor                                                      
+MWL02       A8-1                            77,Monitor                                                      
+MWL03       A8-2                            77,Monitor                                                      
+MWL04       A8-2                            77,Monitor                                                      
+MWL05       A9-1                            77,Monitor                                                      
+MWL06       A9-1                            77,Monitor                                                      
+MWL07       A9-2                            Monitor                                                         
+MWL08       A9-2                            Monitor                                                         
+MWL09       A10-1                           Monitor                                                         
+MWL10       A10-1                           Monitor                                                         
+MWL11       A10-2                           Monitor                                                         
+MWL12       A10-2                           Monitor                                                         
+MWL13       A11-1                           Monitor                                                         
+MWL14       A11-1                           Monitor                                                         
+MWL15       A11-2                           Monitor                                                         
+MWL16       A11-2                           Monitor                                                         
+MWLG        A7-1                            Monitor                                                         
+MWQG        A7-1                            Monitor                                                         
+MWSG        A7-1                            77,Monitor                                                      
+MWYG        A7-1                            Monitor                                                         
+MWZG        A7-1                            Monitor                                                         
 NAVRST      A26                             A18-1                                                           
 NDR100/     A5-2                            A4-1,A5-2                                                       
 NDX0        A3-2                            A3-2                                                            
@@ -1164,7 +1164,7 @@ NDXX1/      A3-2                            A6-2
 NEAC        A6-2                            A7-1,A7-2                                                       
 NEXST0      A3-2                            A3-2                                                            
 NEXST0/     A3-2                            A3-2                                                            
-NHALGA      77                              A13-1                                                           
+NHALGA      77,Monitor                      A13-1                                                           
 NHVFAL      A25                             A13-1                                                           
 NISQ        A24-1                           A3-1,A11-1                                                      
 NISQ/       A5-1                            A24-1                                                           
@@ -1249,7 +1249,7 @@ PHS2        A2-1                            A2-1
 PHS2/       A2-1                            A3-1,A4-1,A14-1,A21-2                                           
 PHS3/       A24-2                           A4-1,A14-1,A21-2                                                
 PHS4        A2-1                            A2-1,A4-1                                                       
-PHS4/       A2-1                            A4-1,A6-1,A14-1,A21-2,A23-2                                     
+PHS4/       A2-1,A2-1                       A4-1,A6-1,A14-1,A21-2,A23-2                                     
 PIFL/       A6-1                            A7-1                                                            
 PINC        A5-1                            A6-2                                                            
 PINC/       A5-1                            
@@ -1277,7 +1277,7 @@ PIPGZ-      A10-1                           A24-2
 PIPINT      A24-1                           A26                                                             
 PIPPLS/     A24-1                           A7-1,A24-1                                                      
 PIPSAM      A7-1                            A9-1,A9-2,A10-1                                                 
-PIPSAM/     A9-1                            A9-2,A10-1                                                      
+PIPSAM/     A9-1,A9-1                       A9-2,A10-1                                                      
 PIPXM       A23-1                           A20-2,A24-2                                                     
 PIPXP       A23-1                           A20-2,A24-2                                                     
 PIPYM       A23-1                           A20-2,A24-2                                                     
@@ -1302,21 +1302,20 @@ QC2/        A3-1                            A3-2,A4-2
 QC3/        A3-1                            A3-2,A4-2                                                       
 QXCH0       A3-2                            A3-2                                                            
 QXCH0/      A3-2                            A5-2                                                            
-R10/        A6-2                            
 R15         A4-2                            A6-2,A8-1,A8-2                                                  
 R1C         A14-2                           A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
-R1C/        A4-2                            A14-2                                                           
+R1C/        A6-2,A4-2                       A14-2                                                           
 R6          A5-2                            A6-2,A12-2,A15-2                                                
-RA/         A4-2,A5-1,A5-2                  A7-2                                                            
+RA/         A5-2,A4-2,A4-2,A5-1,A5-1        A7-2                                                            
 RAD         A5-1                            A5-1,A12-1                                                      
 RADRG       A12-1                           A6-1,A6-2                                                       
 RADRPT      A18-2                           A15-1,A18-2                                                     
 RADRZ       A12-1                           A6-2                                                            
 RAG/        A7-2                            A7-2,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                
 RAND0       A4-2                            A4-2,A5-2,A6-2                                                  
-RB/         A4-2,A5-1,A5-2,A6-1,A6-2        A7-2                                                            
+RB/         A6-1,A4-2,A4-2,A5-1,A5-1,A5-2,A6-2A7-2                                                            
 RB1         A14-2                           A8-1                                                            
-RB1/        A4-2,A6-2                       A14-2                                                           
+RB1/        A6-2,A4-2                       A14-2                                                           
 RB1F        A6-1                            A15-2                                                           
 RB2         A4-2                            A8-1                                                            
 RBBEG/      A7-2                            A15-1                                                           
@@ -1340,7 +1339,7 @@ RC-Y+R      A16-1                           A25
 RC-Y-R      A16-1                           A25                                                             
 RC-Z+R      A16-1                           A25                                                             
 RC-Z-R      A16-1                           A25                                                             
-RC/         A4-2,A5-1,A5-2,A6-1,A6-2        A7-2                                                            
+RC/         A6-1,A4-2,A4-2,A5-1,A5-1,A5-2,A6-2A7-2                                                            
 RCG/        A7-2                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 RCH/        A6-1                            A24-1,A24-2                                                     
 RCH05/      A16-1                           A16-1                                                           
@@ -1367,23 +1366,23 @@ READ0/      A4-2                            A4-2
 REBG/       A7-2                            A15-1                                                           
 REDRST      A14-1                           A14-1                                                           
 RELPLS      A12-1                           A3-1                                                            
-RESETA      A14-1                           
-RESETB      A14-1                           
-RESETC      A14-1                           
-RESETD      A14-1                           
+RESETA      A14-1                           B16                                                             
+RESETB      A14-1                           B16                                                             
+RESETC      A14-1                           B16                                                             
+RESETD      A14-1                           B16                                                             
 RESTRT      A13-1                           A26                                                             
-REX         A14-1                           
-REY         A14-1                           
+REX         A14-1                           B9                                                              
+REY         A14-1                           B9                                                              
 RFBG/       A7-2                            A15-1                                                           
-RG/         A5-1,A5-2,A6-1                  A7-2                                                            
-RGG/        A7-1,A7-2                       A7-2,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                
+RG/         A6-1,A5-1,A5-2,A5-2             A7-2                                                            
+RGG/        A7-2,A7-1                       A7-2,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                
 RGG1        A7-2                            A7-1,A7-2                                                       
 RHCGO       A19-2                           A19-2,A27,A28,A29                                               
 RILP1       A14-2                           A14-2                                                           
 RILP1/      A14-2                           A14-2                                                           
 RINGA/      A2-1                            A2-1,A2-2                                                       
 RINGB/      A2-1                            A2-1,A2-2                                                       
-RL/         A5-1,A5-2                       A7-2                                                            
+RL/         A5-2,A5-1                       A7-2                                                            
 RL01/       A8-1,A15-2                      A8-1                                                            
 RL02/       A8-1,A15-2                      A8-1                                                            
 RL03/       A8-2,A12-2,A15-2                A8-2                                                            
@@ -1399,10 +1398,10 @@ RL11/       A10-2,A15-1                     A10-2
 RL12/       A10-2,A15-1                     A10-2                                                           
 RL13/       A11-1,A15-1                     A11-1                                                           
 RL14/       A11-1,A15-1                     A11-1                                                           
-RL15/       A10-2,A11-2                     A11-2                                                           
+RL15/       A11-2,A10-2                     A11-2                                                           
 RL16        A11-2                           A11-2                                                           
 RL16/       A11-2,A15-1                     A9-1,A11-2                                                      
-RLG/        A7-1,A7-2                       A7-2,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                
+RLG/        A7-2,A7-1                       A7-2,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                
 RLG1        A7-2                            A7-1,A7-2                                                       
 RLG2        A7-2                            A7-1,A7-2                                                       
 RLG3        A7-2                            A7-1,A7-2                                                       
@@ -1421,9 +1420,9 @@ RNRADM      A18-2                           A13-1,A21-3
 RNRADP      A18-2                           A13-1,A21-3                                                     
 ROLGOF      A28                             A17-1                                                           
 ROP/        A14-1                           A14-1                                                           
-ROPER       A9-2,A15-2                      B16                                                             
-ROPES       A9-2,A15-2                      B16                                                             
-ROPET       A9-2,A15-2                      B16                                                             
+ROPER       A15-2,A9-2                      B16,B17                                                         
+ROPES       A15-2,A9-2                      B16,B17                                                         
+ROPET       A15-2,A9-2                      B16,B17                                                         
 ROR0        A4-2                            A4-2,A5-2                                                       
 RPTA12      A15-1                           A15-1                                                           
 RPTAD3      A15-2                           A15-2                                                           
@@ -1453,13 +1452,13 @@ RSM3        A3-2                            A3-2,A4-2,A5-1
 RSM3/       A3-2                            A4-2,A5-1                                                       
 RSSB        A21-2                           A20-1,A20-2,A21-3                                               
 RSTK/       A14-1                           A6-1                                                            
-RSTKX/      A6-1                            
-RSTKY/      A6-1                            
+RSTKX/      A6-1                            B9                                                              
+RSTKY/      A6-1                            B9                                                              
 RSTRT       A5-1                            A15-1                                                           
 RSTSTG      A5-2                            A4-1,A5-2                                                       
 RT          A2-1                            A2-3                                                            
 RT/         A2-3                            A3-1,A7-2,A14-2,A24-1                                           
-RU/         A5-1,A5-2,A6-1,A6-2             A7-2                                                            
+RU/         A6-1,A5-1,A5-2,A6-2,A6-2        A7-2                                                            
 RUG/        A7-2                            A11-2                                                           
 RULOG/      A7-2                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 RUPT0       A4-2                            A4-2,A5-1,A6-2                                                  
@@ -1475,7 +1474,7 @@ RYWD12      A17-2                           A26
 RYWD13      A17-2                           A26                                                             
 RYWD14      A17-2                           A26                                                             
 RYWD16      A17-2                           A26                                                             
-RZ/         A5-1,A5-2,A6-2                  A7-2                                                            
+RZ/         A6-2,A5-1,A5-2                  A7-2                                                            
 RZG/        A7-2                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 S01         A12-2                           A6-1,A14-2,A17-2                                                
 S01/        A12-2                           A6-1,A14-2                                                      
@@ -1530,9 +1529,9 @@ SB1/        A24-1                           A19-2,A24-1,A24-2
 SB2         A2-2                            A24-1,A24-2                                                     
 SB2/        A24-1                           A7-1,A18-2,A19-1,A19-2,A24-1                                    
 SB4         A2-2                            A24-1                                                           
-SBE         A14-1                           
+SBE         A14-1                           B13                                                             
 SBESET      A14-1                           A14-1                                                           
-SBF         A14-1                           
+SBF         A14-1                           B14                                                             
 SBFSET      A14-1                           A14-1                                                           
 SBY         A18-1                           A2-2,A13-1,A14-2                                                
 SBYBUT      A26                             A18-1                                                           
@@ -1543,13 +1542,13 @@ SCAD        A5-2                            A5-2,A12-1,A14-1
 SCAD/       A5-2                            A14-2                                                           
 SCADBL      A13-1                           A12-1,A13-1                                                     
 SCAFAL      B8                              A13-1                                                           
-SCAS10      A3-1                            
-SCAS17      A21-2                           
-SETAB       A14-1                           
+SCAS10      A3-1                            B8                                                              
+SCAS17      A21-2                           B8                                                              
+SETAB       A14-1                           B16                                                             
 SETAB/      A14-1                           A8-1,A8-2,A14-1                                                 
-SETCD       A14-1                           
+SETCD       A14-1                           B16                                                             
 SETCD/      A14-1                           A8-2,A14-1                                                      
-SETEK       A14-1                           
+SETEK       A14-1                           B9                                                              
 SGUM        A4-1                            A4-1                                                            
 SH3MS/      A19-1                           A19-1                                                           
 SHAFTD      A23-2                           A13-1,A20-2                                                     
@@ -1595,7 +1594,7 @@ ST1/        A4-1                            A3-2,A21-2
 ST1376/     A4-1                            A4-1                                                            
 ST1D        A4-1                            A4-1                                                            
 ST2         A6-2                            A4-1                                                            
-ST2/        A5-1                            A6-2                                                            
+ST2/        A6-2,A5-1                       A6-2                                                            
 ST3/        A4-1                            A3-2                                                            
 ST376       A4-1                            
 ST376/      A4-1                            A4-1                                                            
@@ -1643,7 +1642,7 @@ SUMA12/     A10-2,A11-2                     A10-2,A15-1
 SUMA13/     A11-1                           A11-1,A15-1                                                     
 SUMA14/     A11-1                           A11-1,A15-1                                                     
 SUMA15/     A11-2                           A11-2,A24-2                                                     
-SUMA16/     A11-2                           A4-1,A11-2,A13-1,A15-1                                          
+SUMA16/     A11-2,A11-2                     A4-1,A11-2,A13-1,A15-1                                          
 SUMB01/     A8-1                            A8-1,A15-1                                                      
 SUMB02/     A8-1                            A8-1,A15-1                                                      
 SUMB03/     A8-2                            A8-2,A15-1                                                      
@@ -1665,29 +1664,29 @@ SYNC4/      A13-1
 T01         A2-3,A24-2                      A2-3,A4-1,A5-1,A6-1,A14-1                                       
 T01/        A2-3                            A2-3,A3-1,A4-2,A5-1,A5-2,A6-1,A14-1                             
 T01DC/      A2-3                            A2-3,A24-2                                                      
-T02         A2-3                            A2-3,A3-1,A6-1,A24-2                                            
+T02         A2-3,A2-3                       A2-3,A3-1,A6-1,A24-2                                            
 T02/        A2-3,A24-2                      A2-3,A4-2,A5-1,A5-2,A6-1,A12-2,A14-1,A21-2,A24-1                
 T02DC/      A2-3                            A2-3                                                            
-T03         A2-1,A2-3                       A2-3,A6-1,A12-2,A14-1                                           
+T03         A2-3,A2-1                       A2-3,A6-1,A12-2,A14-1                                           
 T03/        A2-3,A12-2                      A2-3,A4-2,A5-1,A5-2,A6-2,A12-1,A13-1,A14-1                      
 T03DC/      A2-3                            A2-1,A2-3                                                       
 T04         A2-3                            A2-3,A6-1,A12-2                                                 
 T04/        A2-3,A12-2                      A2-3,A4-2,A5-1,A5-2,A6-1,A6-2,A13-1,A14-1                       
 T05         A2-3                            A2-3,A6-1,A12-2,A14-1,A18-1                                     
 T05/        A2-3,A12-2                      A2-3,A4-2,A5-1,A5-2,A14-1                                       
-T06         A2-3                            A2-3,A6-1,A14-1,A24-2                                           
+T06         A2-3,A2-3                       A2-3,A6-1,A14-1,A24-2                                           
 T06/        A2-3                            A2-3,A4-2,A5-1,A5-2,A6-2,A14-1,A19-1                            
 T06DC/      A2-3                            A2-3                                                            
 T07         A2-3,A3-1                       A2-3,A6-1,A12-2,A14-1                                           
 T07/        A2-3,A12-2                      A2-3,A4-2,A5-1,A5-2,A6-2,A14-1,A21-2,A23-2                      
 T07DC/      A2-3                            A2-3,A3-1                                                       
-T08         A2-3                            A2-3,A6-1,A14-1,A24-2                                           
+T08         A2-3,A2-3                       A2-3,A6-1,A14-1,A24-2                                           
 T08/        A2-3                            A2-3,A4-2,A5-1,A5-2,A6-2,A14-1                                  
 T08DC/      A2-3                            A2-3                                                            
 T09         A2-3,A24-2                      A2-3,A6-1,A14-1                                                 
 T09/        A2-3                            A2-3,A4-2,A5-1,A5-2,A13-1                                       
 T09DC/      A2-3                            A2-3,A24-2                                                      
-T10         A2-3                            A2-3,A6-1,A12-2,A13-1,A15-1                                     
+T10         A2-3,A2-3                       A2-3,A6-1,A12-2,A13-1,A15-1                                     
 T10/        A2-3,A12-2                      A2-3,A4-2,A5-1,A5-2,A6-2,A7-2,A13-1,A14-1,A21-2                 
 T10DC/      A2-3                            A2-3                                                            
 T11         A2-3                            A2-3,A6-1,A14-1,A18-1                                           
@@ -1696,7 +1695,7 @@ T12         A2-3                            A2-3,A5-1,A6-1
 T12/        A2-3                            A2-3,A3-1,A4-1,A5-2,A12-2,A14-1,A21-2                           
 T12A        A12-2                           A12-1,A12-2,A14-1,A15-1,A21-1                                   
 T12DC/      A2-3                            A2-2,A2-3                                                       
-T12SET      A2-3                            
+T12SET      A2-3                            A2-3                                                            
 T12USE/     A4-1                            A4-1,A5-2,A6-1                                                  
 T1P         A19-2                           A20-1,A24-2                                                     
 T2P         A19-1                           A20-1,A24-2                                                     
@@ -1706,7 +1705,7 @@ T5P         A19-2                           A20-1,A24-2
 T6ON/       A23-2                           A19-2,A23-2                                                     
 T6P         A19-2                           A20-1,A24-2                                                     
 T6RPT       A15-2                           A23-2                                                           
-T7PHS4      A23-1,A23-2                     A23-2                                                           
+T7PHS4      A23-2,A23-1                     A23-2                                                           
 T7PHS4/     A23-2                           A12-1                                                           
 TC0         A3-2                            A3-2,A5-1,A13-1                                                 
 TC0/        A3-2                            A5-1                                                            
@@ -1722,9 +1721,8 @@ TIMR        A6-1                            A14-1
 TL15        A4-2                            A4-1,A6-2                                                       
 TMPCAU      A13-1                           A26                                                             
 TMPOUT      A16-2                           A13-1                                                           
-TMZ/        A4-2,A5-1,A5-2                  A4-1                                                            
-TO61        A6-2                                                            
-TOV/        A5-2,A6-1                       A4-1                                                            
+TMZ/        A5-2,A4-2,A5-1                  A4-1                                                            
+TOV/        A6-1,A5-2                       A4-1                                                            
 TPARG/      A14-1                           A12-1                                                           
 TPGE        A14-1                           A14-1                                                           
 TPGF        A14-1                           A14-1                                                           
@@ -1751,7 +1749,7 @@ TRST9       A28                             A17-1
 TRUND       A23-2                           A13-1,A20-2                                                     
 TS0         A3-2                            A3-2,A5-2                                                       
 TS0/        A3-2                            A4-2,A5-2                                                       
-TSGN/       A4-2,A5-1,A5-2                  A4-1                                                            
+TSGN/       A5-1,A4-2,A5-2                  A4-1                                                            
 TSGN2       A4-2                            A4-1                                                            
 TSGU/       A6-1                            A4-1,A6-1                                                       
 TSUDO/      A5-1                            A5-1,A12-1                                                      
@@ -1773,7 +1771,7 @@ US2SG       A24-2                           A11-2
 VFAIL       B8                              A13-1                                                           
 VNFLSH      A16-2                           A26                                                             
 W1110       A19-2                           A18-1,A19-2                                                     
-WA/         A5-1,A5-2,A6-2                  A7-1                                                            
+WA/         A6-2,A5-1,A5-1,A5-2,A6-2        A7-1                                                            
 WAG/        A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 WALSG       A7-1                            A7-1                                                            
 WALSG/      A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
@@ -1782,7 +1780,7 @@ WARN        A13-1                           A13-1
 WATCH       A24-1                           A24-1                                                           
 WATCH/      A24-1                           
 WATCHP      A24-1                           A13-1,A24-1                                                     
-WB/         A5-1,A5-2,A6-1                  A7-1                                                            
+WB/         A6-1,A5-1,A5-2,A5-2             A7-1                                                            
 WBBEG/      A7-2                            A7-2,A15-1                                                      
 WBG/        A7-1                            A7-1,A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                
 WCH/        A4-2                            A24-1,A24-2                                                     
@@ -1800,10 +1798,10 @@ WCHG/       A24-1                           A7-1,A16-1,A16-2,A17-2,A22-1,A23-1,A
 WDORDR      A22-1                           A22-1                                                           
 WEBG/       A7-2                            A7-2,A15-1                                                      
 WEDOPG/     A7-1                            A12-2                                                           
-WEX         A14-1                           
-WEY         A14-1                           
+WEX         A14-1                           B9                                                              
+WEY         A14-1                           B9                                                              
 WFBG/       A7-2                            A7-2,A15-1                                                      
-WG/         A4-2,A5-1,A6-1,A6-2,A12-1       A7-2,A12-2                                                      
+WG/         A6-1,A4-2,A4-2,A5-1,A6-2,A12-1  A7-2,A12-2                                                      
 WG1G/       A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 WG2G/       A7-1                            A11-2                                                           
 WG3G/       A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
@@ -1811,10 +1809,10 @@ WG4G/       A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-
 WG5G/       A7-1                            A11-2                                                           
 WGA/        A12-2                           A7-1                                                            
 WGNORM      A7-1                            A7-1                                                            
-WHOMP       A11-1                           A11-1,A11-2                                                     
+WHOMP       A11-1,A11-1                     A11-1,A11-2                                                     
 WHOMP/      A11-1                           A11-1,A14-1                                                     
 WHOMPA      A14-1                           A10-2,A11-2                                                     
-WL/         A4-2,A5-2,A6-1                  A7-1                                                            
+WL/         A6-1,A4-2,A5-2                  A7-1                                                            
 WL01        A8-1                            A8-1,A24-1                                                      
 WL01/       A8-1                            A4-1,A8-1,A11-1,A11-2,A12-2,A15-1                               
 WL02        A8-1                            A8-1,A24-1                                                      
@@ -1845,7 +1843,7 @@ WL14        A11-1                           A11-1,A24-2
 WL14/       A11-1                           A3-1,A4-1,A10-2,A11-1,A11-2,A12-2,A15-1                         
 WL15        A11-2                           A2-3,A11-2                                                      
 WL15/       A11-2                           A4-1,A11-1,A11-2                                                
-WL16        A9-1,A11-2                      A2-3,A11-2,A14-2,A24-2                                          
+WL16        A11-2,A9-1                      A2-3,A11-2,A14-2,A24-2                                          
 WL16/       A11-2,A14-2                     A2-3,A3-1,A4-1,A8-1,A11-1,A11-2,A15-1                           
 WLG/        A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 WOR0        A4-2                            A4-2,A5-2                                                       
@@ -1860,74 +1858,74 @@ WRD2B2      A22-2
 WRD2B3      A22-2                           A22-1                                                           
 WRITE0      A4-2                            A4-2                                                            
 WRITE0/     A4-2                            A4-2                                                            
-WS/         A5-2,A6-2                       A7-1                                                            
+WS/         A6-2,A5-2                       A7-1                                                            
 WSC/        A6-1,A6-2                       A14-2                                                           
 WSCG/       A14-2                           A7-1,A7-2                                                       
 WSG/        A7-1                            A7-1,A12-2                                                      
 WSQG/       A3-1                            A3-1                                                            
 WT          A2-1                            A2-1                                                            
-WT/         A2-1                            A2-1,A7-1,A24-1                                                 
-WY/         A4-2,A5-1,A5-2,A6-1             A7-1                                                            
-WY12/       A5-1,A5-2                       A7-1                                                            
-WYD/        A5-2,A6-1                       A7-1                                                            
+WT/         A2-1,A2-1                       A2-1,A7-1,A24-1                                                 
+WY/         A5-2,A4-2,A5-1,A5-1,A6-1        A7-1                                                            
+WY12/       A5-2,A5-1                       A7-1                                                            
+WYD/        A6-1,A5-2                       A7-1                                                            
 WYDG/       A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 WYDLOG/     A7-1                            A8-1                                                            
 WYHIG/      A7-1                            A11-1,A11-2                                                     
 WYLOG/      A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2                                 
-WZ/         A5-1,A5-2,A6-1                  A7-1                                                            
+WZ/         A6-1,A5-1,A5-2                  A7-1                                                            
 WZG/        A7-1                            A8-1,A8-2,A9-1,A9-2,A10-1,A10-2,A11-1,A11-2                     
 XB0         A14-2,A17-2                     A14-2,A21-3                                                     
 XB0/        A14-2                           A7-1,A7-2,A12-2,A14-2,A15-1,A15-2,A17-1,A17-2,A23-2             
-XB0E        A14-2                           
+XB0E        A14-2                           B9                                                              
 XB1         A14-2                           A14-2                                                           
 XB1/        A14-2                           A7-1,A7-2,A12-2,A14-2,A15-2,A17-1,A17-2,A23-2                   
-XB1E        A14-2                           
+XB1E        A14-2                           B9                                                              
 XB2         A14-2                           A14-2,A20-1                                                     
 XB2/        A14-2                           A7-1,A7-2,A12-2,A14-2,A16-2,A17-1,A23-2                         
-XB2E        A14-2                           
+XB2E        A14-2                           B9                                                              
 XB3         A14-2                           A7-2,A14-2,A20-2                                                
 XB3/        A14-2                           A7-2,A12-2,A14-2,A17-1,A19-1,A22-1,A23-2,A24-1                  
-XB3E        A14-2                           
+XB3E        A14-2                           B9                                                              
 XB4         A14-2                           A14-2,A20-2                                                     
 XB4/        A14-2                           A7-2,A14-2,A15-1,A15-2,A22-1,A23-1,A23-2,A24-1                  
-XB4E        A14-2                           
+XB4E        A14-2                           B9                                                              
 XB5         A14-2                           A14-2,A21-3                                                     
 XB5/        A14-2                           A7-1,A7-2,A14-2,A16-1,A18-1,A19-1,A23-1                         
-XB5E        A14-2                           
+XB5E        A14-2                           B9                                                              
 XB6         A14-2                           A14-2,A21-3                                                     
 XB6/        A14-2                           A7-2,A14-2,A15-2,A16-1,A18-1,A19-1                              
-XB6E        A14-2                           
+XB6E        A14-2                           B9                                                              
 XB7         A14-2                           A14-2,A20-1                                                     
 XB7/        A14-2                           A4-1,A14-2,A15-2,A19-2,A23-2,A24-1                              
-XB7E        A14-2                           
+XB7E        A14-2                           B9                                                              
 XLNK0       A29                             A19-2                                                           
 XLNK0/      A19-2                           A19-1                                                           
 XLNK1       A29                             A19-2                                                           
 XLNK1/      A19-2                           A19-1                                                           
 XT0         A14-2                           A13-1,A14-2                                                     
-XT0/        A13-1,A14-2                     A5-2,A7-1,A7-2,A14-2,A15-2,A16-1,A23-2,A24-1                    
-XT0E        A14-2                           
+XT0/        A14-2,A13-1                     A5-2,A7-1,A7-2,A14-2,A15-2,A16-1,A23-2,A24-1                    
+XT0E        A14-2                           B9                                                              
 XT1         A14-2                           A13-1,A14-2                                                     
-XT1/        A13-1,A14-2                     A4-1,A14-2,A15-2,A16-2,A17-2,A18-1,A22-1                        
-XT1E        A14-2                           
+XT1/        A14-2,A13-1                     A4-1,A14-2,A15-2,A16-2,A17-2,A18-1,A22-1                        
+XT1E        A14-2                           B9                                                              
 XT2         A14-2                           A14-2                                                           
 XT2/        A14-2                           A5-2,A14-2,A15-2                                                
-XT2E        A14-2                           
+XT2E        A14-2                           B9                                                              
 XT3         A14-2                           A14-2                                                           
 XT3/        A14-2                           A5-2,A14-2,A15-2,A17-1,A19-1,A23-1                              
-XT3E        A14-2                           
+XT3E        A14-2                           B9                                                              
 XT4         A14-2                           A14-2                                                           
 XT4/        A14-2                           A5-2,A14-2,A15-1,A15-2                                          
-XT4E        A14-2                           
+XT4E        A14-2                           B9                                                              
 XT5         A14-2                           A14-2                                                           
 XT5/        A14-2                           A5-2,A14-2,A15-1                                                
-XT5E        A14-2                           
+XT5E        A14-2                           B9                                                              
 XT6         A14-2                           A14-2                                                           
 XT6/        A14-2                           A5-2,A14-2                                                      
-XT6E        A14-2                           
+XT6E        A14-2                           B9                                                              
 XT7         A14-2                           A14-2                                                           
 XT7/        A14-2                           A14-2                                                           
-XT7E        A14-2                           
+XT7E        A14-2                           B9                                                              
 XUY01/      A8-1                            A8-1,A11-2                                                      
 XUY02/      A8-1                            A8-1,A11-2                                                      
 XUY03/      A8-2                            A8-1,A8-2                                                       
@@ -1946,40 +1944,40 @@ XUY15/      A11-2                           A11-1,A11-2
 XUY16/      A11-2                           A11-1,A11-2                                                     
 YB0         A14-2                           A14-2                                                           
 YB0/        A14-2                           A5-2,A14-2                                                      
-YB0E        A14-2                           
+YB0E        A14-2                           B9                                                              
 YB1         A14-2                           A14-2                                                           
 YB1/        A14-2                           A14-2                                                           
-YB1E        A14-2                           
+YB1E        A14-2                           B9                                                              
 YB2         A14-2                           A14-2                                                           
 YB2/        A14-2                           A14-2                                                           
-YB2E        A14-2                           
+YB2E        A14-2                           B9                                                              
 YB3         A14-2                           A14-2                                                           
 YB3/        A14-2                           A14-2                                                           
-YB3E        A14-2                           
+YB3E        A14-2                           B9                                                              
 YT0         A7-2                            A7-2                                                            
 YT0/        A7-2                            A5-2,A7-2                                                       
-YT0E        A7-2                            
+YT0E        A7-2                            B9                                                              
 YT1         A7-2                            A7-2                                                            
 YT1/        A7-2                            A7-2                                                            
-YT1E        A7-2                            
+YT1E        A7-2                            B9                                                              
 YT2         A7-2                            A7-2                                                            
 YT2/        A7-2                            A7-2                                                            
-YT2E        A7-2                            
+YT2E        A7-2                            B9                                                              
 YT3         A7-2                            A7-2                                                            
 YT3/        A7-2                            A7-2                                                            
-YT3E        A7-2                            
+YT3E        A7-2                            B9                                                              
 YT4         A7-2                            A7-2                                                            
 YT4/        A7-2                            A7-2                                                            
-YT4E        A7-2                            
+YT4E        A7-2                            B9                                                              
 YT5         A7-2                            A7-2                                                            
 YT5/        A7-2                            A7-2                                                            
-YT5E        A7-2                            
+YT5E        A7-2                            B9                                                              
 YT6         A7-2                            A7-2                                                            
 YT6/        A7-2                            A7-2                                                            
-YT6E        A7-2                            
+YT6E        A7-2                            B9                                                              
 YT7         A7-2                            A7-2                                                            
 YT7/        A7-2                            A7-2                                                            
-YT7E        A7-2                            
+YT7E        A7-2                            B9                                                              
 Z01/        A8-1                            A8-1                                                            
 Z02/        A8-1                            A8-1                                                            
 Z03/        A8-2                            A8-2                                                            
@@ -1994,13 +1992,13 @@ Z11/        A10-2                           A10-2
 Z12/        A10-2                           A10-2                                                           
 Z13/        A11-1                           A11-1                                                           
 Z14/        A11-1                           A11-1                                                           
-Z15/        A5-2,A11-2                      A11-2                                                           
-Z16/        A5-2,A11-2                      A11-2                                                           
+Z15/        A11-2,A5-2                      A11-2                                                           
+Z16/        A11-2,A5-2                      A11-2                                                           
 ZAP         A6-1                            A6-1                                                            
 ZAP/        A6-1                            A6-1,A7-1,A7-2                                                  
 ZEROP       A27                             A17-1                                                           
 ZEROPT      A16-2                           A25                                                             
-ZID         A14-1                           
+ZID         A14-1                           B9                                                              
 ZIMCDU      A16-2                           A25                                                             
 ZIP         A6-1                            A6-1                                                            
 ZIPCI       A6-1                            A6-2                                                            

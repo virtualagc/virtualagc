@@ -24,18 +24,27 @@ DICTIONARY_FILENAME = "agc_wirelist_dictionary.txt"
 class Signal:
     """Class to hold a signal."""
     
-    def __init__(self, name, src=None, sink=None):
+    def __init__(self, name, src=None, sink=None, fanin=False, fanout=False):
         self.name = name
         self.description = ''
         self.type = ''
         self.src_mods = []
         self.src_pages = []
+        self.fanin_pages = []
         self.sink_mods = []
         self.sink_pages = []
         self.page_counts = {}
-        if src and src not in self.src_pages:
+        self.fanin_expanders = []
+        self.fanout_expanders = []
+
+        if src:
             self.src_mods.append(getModuleName(src))
-            self.src_pages.append(src)
+            if fanin:
+                self.fanin_expanders.append(src)
+            elif fanout:
+                self.fanout_expanders.append(src)
+            elif src not in self.src_pages:
+                self.src_pages.append(src)
         if sink and sink not in self.sink_pages:
             self.sink_mods.append(getModuleName(sink))
             self.sink_pages.append(sink)
@@ -49,16 +58,21 @@ class Signal:
                 if sink:
                     self.page_counts[sink] = 1
             
-    def addSource(self, page):
+    def addSource(self, page, fanin=False, fanout=False):
         module = getModuleName(page)
         if module not in self.src_mods:
             self.src_mods.append(module)
-        if page not in self.src_pages:
-            self.src_pages.append(page)
         if page in self.page_counts:
             self.page_counts[page] += 1
         else:
             self.page_counts[page] = 1
+
+        if fanin:
+            self.fanin_expanders.append(page)
+        elif fanout:
+            self.fanout_expanders.append(page)
+        else:
+            self.src_pages.append(page)
 
     def addSink(self, page):
         module = getModuleName(page)
@@ -100,9 +114,9 @@ class Signal:
             if len(self.src_pages) == 0:
                 text = "%-12s%-64s" % (self.name, ','.join(self.sink_pages))
             if len(self.sink_pages) == 0:
-                text = "%-12s%-32s" % (self.name, ','.join(self.src_pages))
+                text = "%-12s%-32s" % (self.name, ','.join(self.src_pages + self.fanin_expanders + self.fanout_expanders))
         else:
-            text = "%-12s%-32s%-64s" % (self.name, ','.join(self.src_pages), ','.join(self.sink_pages))
+            text = "%-12s%-32s%-64s" % (self.name, ','.join(self.src_pages + self.fanin_expanders + self.fanout_expanders), ','.join(self.sink_pages))
         return text
 
     def getPageCounts(self):
@@ -110,6 +124,12 @@ class Signal:
         for page in self.src_pages:
             pages.append(page)
         for page in self.sink_pages:
+            if page not in pages:
+                pages.append(page)
+        for page in self.fanin_expanders:
+            if page not in pages:
+                pages.append(page)
+        for page in self.fanout_expanders:
             if page not in pages:
                 pages.append(page)
         pages.sort(pageSorter)
@@ -257,7 +277,7 @@ def processPage(config, page):
         sys.exit(1)
 
     if num_io != expected_io:
-        print "Error: mismatch on page %s, expected %d outputs, got %d" % (page, expected_out, num_out)
+        print "Error: mismatch on page %s, expected %d inouts, got %d" % (page, expected_io, num_io)
         sys.exit(1)
 
     if inputs:
@@ -268,17 +288,37 @@ def processPage(config, page):
                 wirelist[wire].addSink(page)
     if outputs:
         for wire in outputs:
+            # Outputs can can be marked as fan-in or fan-out
+            fanout = False
+            fanin = False
+            if wire.startswith('_'):
+                wire = wire[1:]
+                fanin = True
+            elif wire.startswith('^'):
+                wire = wire[1:]
+                fanout = True
+
             if wire not in wirelist:
-                wirelist[wire] = Signal(wire, src=page)
+                wirelist[wire] = Signal(wire, src=page, fanin=fanin, fanout=fanout)
             else:
-                wirelist[wire].addSource(page)
+                wirelist[wire].addSource(page, fanin, fanout)
     if inouts:
         for wire in inouts:
+            # Outputs can can be marked as fan-in or fan-out
+            fanout = False
+            fanin = False
+            if wire.startswith('_'):
+                wire = wire[1:]
+                fanin = True
+            elif wire.startswith('^'):
+                wire = wire[1:]
+                fanout = True
+
             if wire not in wirelist:
-                wirelist[wire] = Signal(wire, src=page, sink=page)
+                wirelist[wire] = Signal(wire, src=page, sink=page, fanin=fanin, fanout=fanout)
             else:
                 wirelist[wire].addSink(page)
-                wirelist[wire].addSource(page)
+                wirelist[wire].addSource(page, fanin, fanout)
 
     print "Page %s:" % (page), "%d inputs, %d outputs, %d inouts" % (num_in, num_out, num_io)
     return (num_in, num_out, num_io)
