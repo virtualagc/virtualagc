@@ -453,12 +453,12 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
       lastOUT1 = Value;
       // Ignore B1 for now: main-panel DSKY doesn't have a PROG ALM indicator.
       frame->indicatorCompFail->SetBitmap(
-          (0 == (Value & 2)) ?
+          (0 == (Value & 02)) ?
               frame->imageCompFailOff : frame->imageCompFailOn);
       // Ignore B3 for now: main-panel DSKY doesn't have a KEY RLSE indicator.
       // Ignore B4 for now: main-panel DSKY doesn't have a SCALER FAIL indicator.
       frame->indicatorCheckFail->SetBitmap(
-          (0 == (Value & 2)) ?
+          (0 == (Value & 020)) ?
               frame->imageCheckFailOff : frame->imageCheckFailOn);
     }
   else if (Channel == 010) // OUT0
