@@ -104,7 +104,12 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             if (isLiteralNumber)
               address = atoi(InRecord->Operand);
             else if (Address.Fixed)
-              address = (Address.SReg & 01777) | (Address.FB << 10);
+              {
+                if (Address.FB)
+                  address = (Address.SReg & 01777) | (Address.FB << 10);
+                else
+                  address = Address.SReg;
+              }
             else
               address = Address.Value;
             OutRecord->Words[0] = 077777 & address;
