@@ -552,11 +552,12 @@ executeOneInstruction(FILE *logFile)
     }
   else if (opcode == 030000 && extracode) /* SU */
     {
+
       // R-393 says that SU takes 2 more MCT than AD, but the control-pulse
       // sequences it lists for SU don't support that notion.
       //numMCT += 2;
       fetchedFromOperandSignExtended = ~fetchedFromOperand;
-      fetchedFromOperand = fetchedFromOperandSignExtended & 077777;
+      fetchedFromOperand = fetchedFromOperandSignExtended & 0177777;
       goto entrySubtraction;
     }
   else
