@@ -21,8 +21,7 @@
     <br>
     <h2>Contents</h2>
     <ul>
-      <li><a href="#Blocks_for_All_Occasions">Blocks for All Occasions</a></li>
-      <li><a href="#Intro">Introduction</a></li>
+      <li><a href="#Blocks_for_All_Occasions">Introduction</a></li>
       <li><a href="#Available_Documentation">Available Documentation</a></li>
       <li><a href="#Block_1_Computer_System">Block 1 Computer System</a></li>
       <ul>
@@ -90,7 +89,7 @@
       </ul>
     </ul>
     <hr style="width: 100%; height: 2px;">
-    <h2><a name="Blocks_for_All_Occasions"></a>Blocks for All Occasions</h2>
+    <h2><a name="Blocks_for_All_Occasions"></a>Introduction</h2>
     <p>The design of the AGC went through several stages, which for the
       sake of this discussion we'll call "blocks".&nbsp; However, the
       different block designs, while similar in many ways, were quite
@@ -105,6 +104,7 @@
 
 
 
+
           0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
@@ -113,13 +113,16 @@
       <li>"Block 1" — Used for the earlier designs of the Command
         Module, which were also referred to a Block 1 spacecraft.&nbsp;
         Used for the unmanned AS-202 ("Apollo 3"), Apollo 4 and Apollo 6
-        unmanned missions.&nbsp; There was no such thing as a Block 1
-        Lunar Module.<br>
+        unmanned missions, and <i>would</i> have been used for the
+        Apollo 1 and Apollo 2 manned missions, if the Apollo 1 tragedy
+        had not precluded those missions.&nbsp; No missions were ever
+        flown with Block 1 LM AGCs.<br>
       </li>
       <li><a href="assembly_language_manual.html">"Block 2"</a> — Used
         for the later designs of the Command Module, which were also
         referred to a Block 2 spacecraft.&nbsp; Used for the (unmanned)
-        Apollo 5 mission's Lunar Module, and for all manned missions.</li>
+        Apollo 5 mission's Lunar Module, and for all manned missions,
+        both with an without Lunar Modules.</li>
       <li><a href="BlockIII.html">"Block 3"</a> — There was no such
         thing in the Apollo program, but Hugh Blair-Smith has given us
         some ideas about what it might have looked like if there were.</li>
@@ -128,10 +131,6 @@
       design.<br>
     </p>
     <hr style="width: 100%; height: 2px;">
-    <h2><a name="Intro"></a>Introduction</h2>
-    TBD<br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
     <h2><a name="Available_Documentation"></a>Available Documentation<br>
     </h2>
     Now, descriptive material about the Block 1 AGC is not as abundant
@@ -139,6 +138,10 @@
     are the materials on which I've based the descriptive material on
     this page:<br>
     <ol>
+      <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1009.pdf">R-410:&nbsp;
+          General Design Characteristics of the Apollo Guidance Computer</a>,
+        by Eldon C. Hall, May 1963.<br>
+      </li>
       <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1008.pdf"
           title="Click to view document" target="_blank">R-393:&nbsp;
           Logical Description for the Apollo Guidance Computer (AGC 4)</a>,
@@ -150,6 +153,10 @@
           (Sunrise 33 - NASA DWG# 1021102)</a>, by R. Battin, R. Crisp,
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
+      <li><a href="http://www.ibiblio.org/apollo/documents/E-1574.pdf">E-1574:
+          Keyboard and Display System Program for AGC (Program SUNRISE),
+          by Alan I. Green and Joseph J. Rocchio</a>, August 1964.<br>
+      </li>
       <li>John Pultorak's <a
           href="Pultorak.html#AssemblerSimulatorSourceCode"> Block 1
           simulator source code</a>.</li>
@@ -180,11 +187,76 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     </p>
     <hr size="2" width="100%">
     <h2><a name="Block_1_Computer_System"></a>Block 1 Computer System</h2>
-    <p>TBD<br>
+    <h3><a name="Computer"></a>Computer </h3>
+    <p>The Block 1 AGC was provided in two different configurations, one
+      for the Command Module (then referenced as the C/M), and one for
+      the Lunar Module (at that time still called the LEM, or Lunar
+      Excursion Module).&nbsp; Even though still bummed out (fifty years
+      later) over the change from LEM to LM, for consistency I'll refer
+      to the spacecraft here as the CM and LM.<br>
     </p>
-    <h3><a name="Computer"></a>Computer</h3>
-    <p>TBD<br>
+    <p>The physical configurations of these were different in terms of
+      form factor, weight, and memory capacity — and of course, software
+      — but otherwise identical, and here are the highlights as given by
+      document E-1574:<br>
     </p>
+    <ul>
+      <li>CM Block 1 AGC:</li>
+      <ul>
+        <li><img alt=""
+            src="file:///home/rburkey/git/virtualagc-web/block1-rope.jpg"
+            align="right" height="100" width="308">about 2 cubic feet</li>
+        <li>about 110 pounds</li>
+        <li>24,576 words of "fixed" memory (i.e., read-only memory).</li>
+        <li>Controls two <a href="#DSKY">DSKY</a>s, one for the main
+          control panel, and one for the navigational bay.<br>
+        </li>
+      </ul>
+      <li>LM Block 1 AGC:</li>
+      <ul>
+        <li>about 0.9 cubic feet</li>
+        <li>about 50 pounds</li>
+        <li>12,288 words of "fixed" memory (i.e., read-only memory).</li>
+        <li>Controls one <a href="#DSKY">DSKY</a>.<br>
+        </li>
+      </ul>
+      <li><img alt=""
+          src="file:///home/rburkey/git/virtualagc-web/block1-erasable.jpg"
+          align="right" height="150" width="243">Common:</li>
+      <ul>
+        <li>Power:&nbsp; 180 watts active, 10 watts idle.<br>
+        </li>
+        <li>Memory comprised 16-bit "words", each consisting of 15 bits
+          available for data, and 1 parity bit, all consisting of cores,
+          made of the ferromagnetic alloy called Permalloy, and sewn
+          together into a "rope".<br>
+        </li>
+        <li>1024 words of "erasable" memory (i.e., read-write memory).</li>
+        <li>1's-complement arithmetic, plus overflow.</li>
+        <li>Memory cycle time (MCT): 11.7 μs.<br>
+        </li>
+      </ul>
+    </ul>
+    <p align="left">In point of fact, for the Block 1 CM missions flown,
+      double the stated amount of memory was used, so mission
+      requirements clearly increased in the years following E-1574
+      (1963), and I can't tell you for certain whether the final Block 1
+      design had the physical characteristics described above. <br>
+    </p>
+    <table align="center" cellpadding="24" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="top"><a href="AGC-block1-CM.jpg"><img
+                alt="" src="thm-AGC-block1-CM.jpg" height="300"
+                width="389" border="2"></a><br>
+          </td>
+          <td align="center" valign="top"><a href="AGC-block1-LM.jpg"><img
+                alt="" src="thm-AGC-block1-LM.jpg" height="300"
+                width="331" border="2"></a><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <h3><a name="DSKY"></a>DSKY</h3>
     As in Block 2, the DSKY was the display/keyboard unit with which an
     astronaut could have entered data into the computer and gotten feed
@@ -226,6 +298,7 @@ Guidance
 
 
 
+
       and Navigation System training slides</a>, July 1965, which are
     perhaps of greater practical utility, if lesser aesthetic
     value.&nbsp; If you click the drawing of the nav-panel DSKY (on the
@@ -240,7 +313,7 @@ Guidance
               href="Block1DSKY-drawing2.png"><img alt=""
                 src="Block1DSKY-drawing2-small.png" style="border: 2px
                 solid ; width: 237px; height: 839px;" height="839"
-                border="0" width="237"></a></td>
+                width="237" border="0"></a></td>
           <td style="text-align: center;"><img style="width: 587px;
               height: 572px;" alt="" src="Block1DSKY-drawing.png"
               height="572" width="587"><br>
@@ -508,6 +581,7 @@ Guidance
 
 
 
+
       described here</a>.)&nbsp; Consequently, as with the Block 2
     design, both the native low-level assembly language (referred to as
     "basic") and a higher-level language (referred to as "interpreter")
@@ -769,6 +843,7 @@ Guidance
 
 
 
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -780,8 +855,10 @@ Guidance
 
 
 
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -805,6 +882,7 @@ Guidance
 
 
 
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -812,6 +890,7 @@ Guidance
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -857,12 +936,14 @@ Guidance
 
 
 
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
 
 
 
@@ -886,6 +967,7 @@ Guidance
     The Virtual AGC project itself also provides a Block 1 assembler,
     and it is <a
 href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo/yaYUL.html">the
+
 
 
 
@@ -929,6 +1011,7 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
 
 
 
@@ -1011,6 +1094,7 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
 
 
 
+
               055</a>.<br>
           </td>
         </tr>
@@ -1056,6 +1140,7 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -1066,9 +1151,11 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+
 
 
       GitHub repository's "block1" branch</a>.<br>
@@ -1103,6 +1190,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -1120,6 +1208,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
 
 
 
@@ -1306,7 +1395,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         of the AGC program is accessing uninitialized erasable memory.<br>
       </li>
     </ul>
-    <font face="Calibri" color="blue" size="3"><span style="font-size:
+    <font face="Calibri" size="3" color="blue"><span style="font-size:
         12.0pt;font-family:Calibri;color:blue"></span></font>
     <ul>
     </ul>
@@ -1357,6 +1446,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
         our GitHub repository's "block1" branch</a>.&nbsp; I have only
       worked with it in Linux, but I expect it should probably build in
       Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -1390,6 +1480,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
 
 
         — set the value of an erasable-memory location (including
@@ -1504,6 +1595,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
       our GitHub repository's "block1" branch</a>, and I'll simply refer
     to both as "yaDSKYb1".&nbsp; They differ only in physical
     appearance, and in that the simulated nav-bay DSKY has some
@@ -1533,6 +1625,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     <p>At present, a program called yaUplinkBlock1 is provided (in the
       similarly-named source-code directory <a
         href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+
 
 
 
@@ -1631,11 +1724,13 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
           The Compleat Sunrise</a> briefly covers what was available in
         the Block 1 SUNRISE program (September 1964).&nbsp; <br>
       </li>
       <li>You can pick through <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
 
 
 
@@ -1656,6 +1751,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
       Pultorak's meticulously-crafted Block 1 documents and
       demonstration</a> ... the problem being, you see, that John had no
     Block 1 software to use as a model, and hence based his Block 1
@@ -1669,12 +1765,12 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     But anyway, assuming you have started the simulation as indicated
     above, you'll see the following on the simulated DSKY:<br>
     <br>
-    <table border="1" cellpadding="2" cellspacing="2" width="100%">
+    <table width="100%" border="1" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
           <td valign="middle"><a href="block1-demo/startup.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-startup.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">Startup screen, immediately after starting
             simulation.<br>
@@ -1708,6 +1804,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
               source code</a>, alarm 00203 is "NO IMU MODE INDICATED TO
             COMPUTER".<br>
             <br>
@@ -1720,7 +1817,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/V36E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V36E.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">V36E<br>
           </td>
@@ -1734,7 +1831,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
           <td valign="middle"><a href="block1-demo/V32EV32EV32E.jpg"><img
                 alt="Click to enlarge"
                 src="block1-demo/thm-V32EV32EV32E.jpg" height="200"
-                border="2" width="198"></a><br>
+                width="198" border="2"></a><br>
           </td>
           <td valign="middle">V32EEE</td>
           <td valign="middle">I don't actually know how to get rid of
@@ -1748,7 +1845,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/thm-V31N02E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V31N02E.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">V31N02E<br>
           </td>
@@ -1786,7 +1883,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/V11N16E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V11N16E.jpg"
-                height="200" border="2" width="199"></a><br>
+                height="200" width="199" border="2"></a><br>
           </td>
           <td valign="middle">V11N16E<br>
           </td>
