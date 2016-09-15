@@ -62,6 +62,8 @@ main(int argc, char *argv[])
         ropeFile = &argv[i][7];
       else if (!strncmp(argv[i], "--listing=", 10))
         listingFile = &argv[i][10];
+      else if (!strncmp(argv[i], "--pads=", 7))
+        padFile = &argv[i][7];
       else if (1 == (sscanf(argv[i], "--go=%o", &j)) && j >= 02000 && j < 06000)
         startingAddress = j;
       else if (!strcmp(argv[i], "--run"))
