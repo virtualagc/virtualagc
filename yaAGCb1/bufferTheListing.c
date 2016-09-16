@@ -59,6 +59,8 @@
 #include "yaAGCb1.h"
 
 char bufferedListing[MAX_LISTING_LINES][MAX_LINE_LENGTH];
+int maxDisplayedLineLength = MIN_LINE_LENGTH;
+int maxDisplayedContext = 5;
 int listingAddresses[035 * 02000];
 int numListingLines = 0;
 

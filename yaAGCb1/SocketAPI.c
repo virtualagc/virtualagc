@@ -95,7 +95,10 @@ int SocketInterlaceReload = 50;
 
 //-----------------------------------------------------------------------------
 // Function for broadcasting "output channel" data to all connected clients of
-// yaAGC.
+// yaAGC.  For OUT0, we buffer each output with distinct most-significant
+// 4 bits, to make sure all of the DSKY's relays get updated properly, and not
+// just the most-recent one.
+static uint16_t dskyRelayBuffer[16] = { 0 };
 
 static const unsigned char Signatures[4] =
   { 0x00, 0x40, 0x80, 0xC0 };
@@ -106,11 +109,10 @@ ChannelOutput(agcBlock1_t * State, int Channel, int Value)
   Client_t *Client;
   unsigned char Packet[4];
 
-  // Some output channels have purposes within the CPU, so we have to
-  // account for those separately.
-  // FIXME
+  if (Channel = 010) // OUT1
+    dskyRelayBuffer[(Value >> 11) & 017] = Value;
 
-  // Most output channels are simply transmitted to clients representing
+  // Output channels are simply transmitted to clients representing
   // hardware simulations.
   if (FormIoPacket(Channel, Value, Packet))
     return;
@@ -308,7 +310,12 @@ UpdateAgcPeripheralConnect(void *AgcState, Client_t *Client)
 #define State ((agcBlock1_t *) AgcState)
   int i;
   unsigned char Packet[4];
-  for (i = 010; i <= 014; i++)
+  for (i = 0; i < 16; i++) // Treat OUT0 specially.
+    {
+      FormIoPacket(010, dskyRelayBuffer[i], Packet);
+      send(Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
+    }
+  for (i = 011; i <= 014; i++)
     if (State->memory[i] != 0)
       {
         FormIoPacket(i, State->memory[i], Packet);

@@ -58,7 +58,7 @@ void
 processConsoleDebuggingCommand(char *command)
 {
   unsigned u, bank, offset;
-  int i, index, flatAddress;
+  int i, j, k, index, flatAddress;
   char c, c2, *s;
 
   if (command != NULL)
@@ -113,6 +113,16 @@ processConsoleDebuggingCommand(char *command)
         {
           flatAddress = BREAK_UININITIALIZED;
           goto breakpoint;
+        }
+      if (3 == sscanf(command, "%c%d,%d", &c, &j, &k) && (c == 'p' || c == 'P'))
+        {
+          if (k < 0) k = 0;
+          if (k > 50) k = 50;
+          if (j < MIN_LINE_LENGTH) j = MIN_LINE_LENGTH;
+          if (j > MAX_LINE_LENGTH) j = MAX_LINE_LENGTH;
+          maxDisplayedLineLength = j;
+          maxDisplayedContext = k;
+          goto reStatus;
         }
       if (3 == sscanf(command, "%c%o,%o", &c, &bank, &offset))
         {
@@ -216,7 +226,7 @@ processConsoleDebuggingCommand(char *command)
                 printFlatAddress(breaksOrWatches[i]));
           goto reprompt;
         }
-      if (!strcasecmp(command, "q"))
+      else if (!strcasecmp(command, "q"))
         {
           exit(0);
         }
@@ -232,11 +242,13 @@ processConsoleDebuggingCommand(char *command)
           printf("            be --- break on readin an uninitialized erasable\n");
           printf("             b --- remove all breakpoints\n");
           printf("            b? --- list all breakpoints\n");
+          printf("          pW,C --- displayed length (W columns) and context\n");
+          printf("                   (C lines) of program lines (default 132,5)\n");
           printf("             q --- quit\n");
         }
     }
   reStatus: ;
-  for (u = 0; u < MAX_LINE_LENGTH; u++)
+  for (u = 0; u < maxDisplayedLineLength + 3; u++)
     printf("-");
   printf("\n");
   printf("MCT: %ld   Elapsed: %ld ms   Paused: %ld ms   CPU: %ld ms\n",
@@ -265,7 +277,7 @@ processConsoleDebuggingCommand(char *command)
   index = listingAddresses[flatAddress];
   if (index >= 0)
     {
-      int i, start, end, context = 5;
+      int i, start, end, context = maxDisplayedContext;
 
       start = index - context;
       if (start < 0)
@@ -273,9 +285,25 @@ processConsoleDebuggingCommand(char *command)
       end = index + context;
       if (end >= MEMORY_SIZE)
         end = MEMORY_SIZE - 1;
+      if (end >= start)
+        printf("\n");
       for (i = start; i <= end; i++)
         {
-          printf("%c%s\n", (i == index) ? '>' : ' ', bufferedListing[i]);
+          char s[MAX_LINE_LENGTH];
+          strcpy (s, bufferedListing[i]);
+          strcpy (&s[maxDisplayedLineLength - 4], "...");
+          if (i == index)
+            {
+              printf("   ");
+              for (j = 0; j < MIN_LINE_LENGTH - 1; j++) printf("-");
+              printf("\n");
+              printf(" > %s\n", s);
+              printf("   ");
+              for (j = 0; j < MIN_LINE_LENGTH - 1; j++) printf("-");
+              printf("\n");
+            }
+          else
+            printf("   %s\n", s);
         }
     }
   reprompt: ;

@@ -182,7 +182,10 @@ extern int loggingOn;
  * Thus given a flat address, you can instantly find the line or context of the
  * program listing that corresponds to it.
  */
-#define MAX_LINE_LENGTH 132 // Max length of a program-listing line before we truncate it.
+#define MIN_LINE_LENGTH 105
+#define MAX_LINE_LENGTH 256 // Max length of a program-listing line stored in RAM.
+extern int maxDisplayedLineLength;
+extern int maxDisplayedContext;
 #define MAX_LISTING_LINES 65536 // Empirically, about 30,000 needed for Solarium.
 extern char bufferedListing[MAX_LISTING_LINES][MAX_LINE_LENGTH];
 extern int numListingLines;
