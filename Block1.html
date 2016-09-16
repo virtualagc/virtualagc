@@ -27,6 +27,9 @@
       <ul>
         <li><a href="#Computer">Computer</a></li>
         <li><a href="#DSKY">DSKY</a></li>
+        <li><a href="#Uplink">Uplink</a></li>
+        <li><a href="#Downlink">Downlink</a><br>
+        </li>
         <li><a href="#Other_Peripherals">Other Peripherals</a><br>
         </li>
       </ul>
@@ -64,8 +67,8 @@
       <li><a href="#Available_Supporting_Software">Available Supporting
           Software</a></li>
       <ul>
-        <li><a href="Block1.html#Virtual_AGCs_Assembler_yaYUL">Virtual
-            AGC's Assembler (yaYUL)</a></li>
+        <li><a href="#Virtual_AGCs_Assembler_yaYUL">Virtual AGC's
+            Assembler (yaYUL)</a></li>
         <li><a href="#CPU_Simulators">CPU Simulators</a></li>
         <ul>
           <li><a href="#Comparison">Comparison</a><br>
@@ -81,6 +84,9 @@
         </ul>
         <li><a href="#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">Virtual
             AGC's DSKY Simulator (yaDSKYb1)</a></li>
+        <li><a href="#yaUplinkBlock1">Virtual AGC's Digital Uplink
+            Simulator (yaUplinkBlock1)</a><br>
+        </li>
       </ul>
       <li><a href="#Taking_Solarium_for_a_Spin">Taking Solarium for a
           Spin</a><br>
@@ -98,6 +104,13 @@
     </p>
     <ul>
       <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block
+
+
+
+
+
+
+
 
 
 
@@ -141,6 +154,13 @@
     <ol>
       <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1009.pdf">R-410:&nbsp;
 
+
+
+
+
+
+
+
           General Design Characteristics of the Apollo Guidance Computer</a>,
         by Eldon C. Hall, May 1963.<br>
       </li>
@@ -156,6 +176,13 @@
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
       <li><a href="http://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574:
+
+
+
+
+
+
+
 
           Keyboard and Display System Program for AGC (Program SUNRISE),
           by Alan I. Green and Joseph J. Rocchio</a>, August 1964.<br>
@@ -251,11 +278,11 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
         <tr>
           <td align="center" valign="top"><a href="AGC-block1-CM.jpg"><img
                 alt="" src="thm-AGC-block1-CM.jpg" height="300"
-                border="2" width="389"></a><br>
+                width="389" border="2"></a><br>
           </td>
           <td align="center" valign="top"><a href="AGC-block1-LM.jpg"><img
                 alt="" src="thm-AGC-block1-LM.jpg" height="300"
-                border="2" width="331"></a><br>
+                width="331" border="2"></a><br>
           </td>
         </tr>
       </tbody>
@@ -303,6 +330,13 @@ Guidance
 
 
 
+
+
+
+
+
+
+
       and Navigation System training slides</a>, July 1965, which are
     perhaps of greater practical utility, if lesser aesthetic
     value.&nbsp; If you click the drawing of the nav-panel DSKY (on the
@@ -317,7 +351,7 @@ Guidance
               href="Block1DSKY-drawing2.png"><img alt=""
                 src="Block1DSKY-drawing2-small.png" style="border: 2px
                 solid ; width: 237px; height: 839px;" height="839"
-                border="0" width="237"></a></td>
+                width="237" border="0"></a></td>
           <td style="text-align: center;"><img style="width: 587px;
               height: 572px;" alt="" src="Block1DSKY-drawing.png"
               height="572" width="587"><br>
@@ -326,11 +360,109 @@ Guidance
       </tbody>
     </table>
     <br>
-    <div style="text-align: center;"><br>
-    </div>
+    From our (or perhaps my) standpoint, the most-important
+    characteristic of the DSKY is that it is a very dumb device, in the
+    sense that it is close to being just a set of lights and
+    push-buttons connected directly to electrical outputs and input of
+    the AGC.&nbsp; This is not <i>entirely</i> true, since there would
+    simply be too many such signals if each were provided with it's own
+    dedicated wire, so some of the signals are multiplexed together,
+    latched into internal relays provided by the DSKY.<br>
+    <br>
+    Outputs from the DSKY to the AGC are the states of the pushbuttons
+    on the keypad.&nbsp; These simply directly control 6 bits on the
+    CPU's <tt>IN0</tt> register.&nbsp; Refer to bits <tt>B1-B6</tt> of
+    the <tt>IN0</tt> register in the <a href="#io_channels">"I/O
+      Channels" section below</a>.<br>
+    <br>
+    Uncertainties:&nbsp; Presumably, the following DSKY controls also
+    provide input to the AGC in some sense, but not necessarily, and I
+    haven't figured them out so far:<br>
+    <ul>
+      <li>UPLINK ACCEPT/BLOCK toggle switch.</li>
+      <li>The TEST ALARM pushbutton on the nav-bay version of the DSKY.</li>
+    </ul>
+    <br>
+    Outputs from the AGC's <tt>OUT0</tt> and <tt>OUT1</tt> registers
+    control the DSKY's indicator lamps, octal/decimal displays, and the
+    special "flashing" feature which can cause the illumination of the
+    VERB and NOUN labels to flash on an off.&nbsp; The octal/decimal
+    (7-segment displays plus signs) are controlled by the multiplexing
+    feature earlier.&nbsp; Each 15-bit word placed into the <tt>OUT0</tt>
+    register consists of 4 bits (a "relay word") that specify a
+    particular set of 11 relays in the DSKY, while the other 11 bits
+    specify the data that's supposed to be latched into those
+    relays.&nbsp; In theory, up to 16*11=176 separate relays could be
+    present, and thus 176 signals could be multiplexed by this scheme;
+    in reality, only 11 of the possible 16-bit relay words are used, and
+    not all of <i>their</i> bits are used, so only 113 of the possible
+    176 bits are actually used.<br>
+    <br>
+    Uncertainties:<br>
+    <ul>
+      <li>Solarium 055 also seems to use the relay word 014, which isn't
+        known to correspond to anything in this scheme.<br>
+      </li>
+    </ul>
+    <br>
+    <h3><a name="Uplink"></a>Uplink</h3>
+    <p>The digital uplink was simply a way to have a remote keypad on
+      the ground, which could transmit keystrokes via radio to the AGC
+      aboard the spacecraft as if it were a DSKY.&nbsp; In other words,
+      the only data it could transmit corresponded to DSKY keypad
+      codes.&nbsp; The keycodes were identical to the 5-bit DSKY
+      keycodes as described in the preceding section, but if (say) a
+      5-bit keycode of bits <tt>B5 B4 B3 B2 B1</tt> were to be
+      transmitted, they were supposed to be packaged into the following
+      16-bit format for the uplink:<br>
+    </p>
+    <blockquote>
+      <p><tt>1 B5 B4 B3 B2 B1 </tt><tt><span style="text-decoration:
+            overline;">B5 B4 B3 B2 B1</span></tt><tt> B5 B4 B3 B2 B1<br>
+        </tt></p>
+    </blockquote>
+    where the overbar implies the logical-complement of the bits: 0 is
+    replaced by 1 and vice-versa.&nbsp; The uplink was, of course,
+    serial: the leading 1 was transmitted first, and the
+    least-significant <tt>B1</tt> last.&nbsp; As each bit was received,
+    it was shifted into the least-significant bit of the CPU's <tt>UPLINK</tt>
+    register at address 041, which was initially all zero, and the other
+    bits in the register were shifted upward by one position.&nbsp; When
+    bit 16 of the register eventually became 1, an <tt>UPRUPT</tt>
+    interrupt was triggered, and the AGC's <tt>UPRUPT</tt>
+    interrupt-service routine could read the register, zero it, and
+    process the data it had received.&nbsp; Of course, the way the data
+    was packaged within the transmitted word, it was triply redundant
+    and could thus be checked for corruption and discarded if it was
+    found to be corrupted.&nbsp; <br>
+    <br>
+    After the uplink is detected, the UPTL activity lamp on the DSKY
+    illuminates to inform the astronauts that that an uplink is in
+    progress, and it will remain illuminated in most cases until the
+    uplink sends a KEY RLSE keycode.<br>
+    <br>
+    There was a toggle switch on the DSKY that could be used either to
+    allow uplinked data, or else to block it and allow the spacecraft
+    and/or astronauts to retain complete control of the keypad
+    input.&nbsp; If the uplink was allowed, then they were treated
+    indistinguishably (at least superficially) to keypad input, and the
+    results of the input could be seen on the DSKY.&nbsp; For example,
+    an uplinked V36E would be seen visibly on the DSKY as the VERB area
+    first blanking out, then a 3 appearing, a 6 appearing, and finally,
+    a fresh start being performed, since "fresh start" is the purpose of
+    a V36E.&nbsp; Naturally, the DSKY could not be seen physically on
+    the ground, and the digital-uplink itself did not provide any
+    feedback to the ground as to the effect the remote keystrokes were
+    having aboard the spacecraft.&nbsp; That feedback, among other
+    things, was the responsibility of the digital downlink as covered in
+    the next section.<br>
+    <blockquote>
+      <p> </p>
+    </blockquote>
+    <h3><a name="Downlink"></a>Downlink</h3>
     <p>TBD<br>
     </p>
-    <p></p>
+    <p> </p>
     <h3><a name="Other_Peripherals"></a>Other Peripherals</h3>
     <p>TBD<br>
     </p>
@@ -423,7 +555,6 @@ Guidance
       <li>LP (address 0003) — principally for holding results of MP
         operations, or operands for DV operations.</li>
     </ul>
-    <br>
     <h3><a name="io_channels"></a>I/O Channels</h3>
     Unlike the Block 2 system, there is no separate i/o-channel
     address-space, and the i/o channels are simply memory mapped. There
@@ -437,12 +568,12 @@ Guidance
     these registers is referred to below as B1, and the most-significant
     as B15:
     <ul>
-      <li>IN0 (address 0004): This register is used principally to
-        receive keyboard input from the DSKY, with the following bit
+      <li><tt>IN0</tt> (address 0004): This register is used principally
+        to receive keyboard input from the DSKY, with the following bit
         assignments:</li>
       <ul>
         <li>B1-B5 contains a keycode, if a keypad key is pressed, as
-          follows:</li>
+          follows.&nbsp; Note that not all codes are used:</li>
         <ul>
           <li>00 (octal) for "no key pressed".</li>
           <li>20 (octal) for the digit 0.</li>
@@ -456,8 +587,13 @@ Guidance
           <li>36 for the CLEAR key.</li>
           <li>37 for the NOUN key.</li>
         </ul>
-        <li>B5 is set when any of the B1-B5 <i>or</i> B15 is active,
-          and is what triggers a "KEYRUPT" (keypad interrupt).</li>
+        <li>B6 is set when any of the B1-B5 <i>or</i> B15 is active,
+          and is what triggers a "KEYRUPT" (keypad interrupt).&nbsp; It
+          is perhaps worth noting that the KEYRUPT <i>software</i>
+          expects for the entire lower 6 bits, B6-B1 (and not just B6)
+          to return to zero after the pushbutton is released, and will
+          refuse to process additional keystrokes until this occurs.<br>
+        </li>
         <li>[B7-B13 are not used.]</li>
         <li>[B14 is active when the AGC can be put into
           partially-powered-down "standby mode", and is, I believe,
@@ -466,16 +602,440 @@ Guidance
           pressed, and activates B6 just like the DSKY-keypad keys do.
           It is used to cause the AGC to "mark" the current IMU data.]</li>
       </ul>
-      <li>IN1 (address 0005): TBD</li>
-      <li>IN2 (address 0006): TBD</li>
-      <li>IN3 (address 0007): TBD</li>
-      <li>OUT0 (address 0010): TBD</li>
-      <li>OUT1 (address 0011): TBD</li>
-      <li>OUT2 (address 0012): TBD</li>
-      <li>OUT3 (address 0013): TBD</li>
-      <li>OUT4 (address 0014): TBD</li>
+      <li><tt>IN1</tt> (address 0005): <br>
+      </li>
+      <ul>
+        <li>B1: 1600 pps</li>
+        <li>B2: 800 pps</li>
+        <li>B3: 400 pps</li>
+        <li>B4: 200 pps</li>
+        <li>B5: OR C1, 2, 3, 4, 10 (IMU relay drivers)<br>
+        </li>
+        <li>B6: OR C5, 6, 7, 8, 9 (S/C alarm lights)</li>
+        <li>B7: OR C11, 12 (OP relay drivers)</li>
+        <li>B8-10: not used</li>
+        <li>B11: PARITY alarm.&nbsp; Any of bits B11-B15 (i.e., their
+          logical OR) generate an error interrupt (ERUPT).<br>
+        </li>
+        <li>B12: CROSSPOINT FAIL alarm</li>
+        <li>B13: SR INACTIVE (GO) alarm</li>
+        <li>B14: RUPTLOCK (GO) alarm</li>
+        <li>B15: TCA Trap (GO) alarm<br>
+        </li>
+      </ul>
+      <li><tt>IN2</tt> (address 0006):</li>
+      <ul>
+        <li>B1: OR CDU <span style="text-decoration: overline;">Zero</span></li>
+      </ul>
+      <ul>
+        <li>B2: OR SXT <span style="text-decoration: overline;">Zero</span></li>
+        <li>B3: OR TRACKER <span style="text-decoration: overline;">Zero</span></li>
+        <li>B4: Photocell -</li>
+        <li>B5: Photocell +</li>
+        <li>B6-7: Not used</li>
+        <li>B8: Tracker Fail (RUPT)</li>
+        <li>B9: OPTICS Fail (RUPT2)</li>
+        <li>B10: CDU Fail (RUPT2)</li>
+        <li>B11: ACCEL Fail (RUPT2)</li>
+        <li>B12: IMU Fail (RUPT2)</li>
+        <li>B13: ABORT (RUPT2)</li>
+        <li>B14: BAD BOOST (RUPT2)</li>
+        <li>B15: AGC Power Fail (RUPT2)</li>
+      </ul>
+      <li><tt>IN3</tt> (address 0007): <br>
+      </li>
+      <ul>
+        <li>B1: K1 Zero CDU SW</li>
+        <li>B2: K2</li>
+        <li>B3: K3</li>
+        <li>B4: K4</li>
+        <li>B5: ATTSW</li>
+        <li>B6: TRNSW</li>
+        <li>B7: ZERO OPT</li>
+        <li>B8: MODE SELECT OPT</li>
+        <li>B9: MODE SELECT OPT</li>
+        <li>B10: MODE SELECT OPT</li>
+        <li>B11-12: Not used.</li>
+        <li>B13: MODE SELECT S/C</li>
+        <li>B14: MODE SELECT S/C</li>
+        <li>B15: Lift-off<br>
+        </li>
+      </ul>
+      <li><tt>OUT0</tt> (address 0010):&nbsp; These are outputs from the
+        AGC to the DSKY.&nbsp; Each 15-bit word is of the following
+        format, as a bit-pattern (with the B15 to the left and B1 to the
+        right):&nbsp; <tt>WWWWSAAAAABBBBB</tt>.&nbsp; The field <tt>WWWW</tt>
+        specifies one out potentially 16 distinct sets of 11 relays in
+        the DSKY, and the fields <tt>SAAAAABBBBB</tt> are latched into
+        those sets of relays when this value appears.&nbsp; The behavior
+        of these patterns is quite simple, but is too complex to fix
+        into this one bullet point, so I will describe the behavior of <tt>OUT0</tt>
+        in more detail at the end of this bullet list below.<br>
+      </li>
+      <li><tt>OUT1</tt> (address 0011).&nbsp; Note that the bits of this
+        register do not, in fact conform entirely to any of the
+        available written documents.<br>
+      </li>
+      <ul>
+        <li>B1:&nbsp; PROG alarm on LM DSKY<br>
+        </li>
+        <li>B2:&nbsp; COMP FAIL alarm on DSKY<br>
+        </li>
+        <li>B3:&nbsp; KEY RLSE indicator on LM DSKY<br>
+        </li>
+        <li>B4:&nbsp; SCALER FAIL alarm on LM DSKY<br>
+        </li>
+        <li>B5:&nbsp; CHECK FAIL alarm on DSKY<br>
+        </li>
+        <li>B6:&nbsp; Block UPLINK<br>
+        </li>
+        <li>B7:&nbsp; Not used<br>
+        </li>
+        <li>B8:&nbsp; Slow speed, STANDBY<br>
+        </li>
+        <li>B9:&nbsp; Word Order Telem<br>
+        </li>
+        <li>B10:&nbsp; Block Endpulse<br>
+        </li>
+        <li>B11:&nbsp; PIPA SCALE FINE<br>
+        </li>
+        <li>B12:&nbsp; PIPA SCALE EMERG<br>
+        </li>
+        <li>B13:&nbsp; ENG START<br>
+        </li>
+        <li>B14:&nbsp; START CLOCK<br>
+        </li>
+        <li>B15:&nbsp; ENG OUT-OFF<br>
+        </li>
+      </ul>
+      <li><tt>OUT2</tt> (address 0012):</li>
+      <ul>
+        <li>B1:&nbsp; OPT X<br>
+        </li>
+        <li>B2:&nbsp; OPT Y<br>
+        </li>
+        <li>B3:&nbsp; THRUST (RATE II)<br>
+        </li>
+        <li>B4:&nbsp; +<br>
+        </li>
+        <li>B5:&nbsp; -<br>
+        </li>
+        <li>B6-7:&nbsp; Not used<br>
+        </li>
+        <li>B8:&nbsp; GYR X<br>
+        </li>
+        <li>B9:&nbsp; GYR Y<br>
+        </li>
+        <li>B10:&nbsp; GYR Z<br>
+        </li>
+        <li>B11:&nbsp; CDU X (RATE I)<br>
+        </li>
+        <li>B12:&nbsp; CDU Y<br>
+        </li>
+        <li>B13:&nbsp; CDU Z<br>
+        </li>
+        <li>B14:&nbsp; +<br>
+        </li>
+        <li>B15:&nbsp; -</li>
+      </ul>
+      <li><tt>OUT3</tt> (address 0013):&nbsp; Not used.<br>
+      </li>
+      <li><tt>OUT4</tt> (address 0014):&nbsp; This is a 16-it register,
+        in which a word to be DOWNLINK'd is placed.&nbsp; The 16th bit
+        is the parity.<br>
+      </li>
     </ul>
+    To understand the various fields (<tt>WWWW</tt>, <tt>S</tt>, <tt>AAAAA</tt>,
+    <tt>BBBBB</tt>) used in the <tt>OUT0</tt> word, you have to be able
+    to relate them to the various sets of 7-segment displays and +/-
+    sign displays on the DSKY.&nbsp; Examine the following diagram,
+    which is a stylized representation of the area on the DSKY
+    containing the numerical displays:<br>
+    <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <i>PROGRAM</i><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        [MD1] [MD2]<br>
+        <br>
+        &nbsp;&nbsp;&nbsp; <i>VERB</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <i>NOUN</i><br>
+        [VD1]
+        [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        [ND1] [ND2]<br>
+        <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+        &nbsp;&nbsp;&nbsp; <i>R</i><i>EGISTER 1</i><br>
+        [R1S] [R1D1] [R1D2] [R1D3] [R1D4] [R1D5]<br>
+      </tt><tt><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+        &nbsp;&nbsp; <i>R</i><i>EGISTER 2</i><br>
+        [R2S] [R2D1] [R2D2] [R2D3] [R2D4] [R2D5]<br>
+      </tt><tt><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+        &nbsp;&nbsp; <i>R</i><i>EGISTER 3</i><br>
+        [R3S] [R3D1] [R3D2] [R3D3] [R3D4] [R3D5]<br>
+      </tt></blockquote>
+    Thus, each one of the designations in [brackets] represents a
+    displayed digit or else a +/- sign.&nbsp; For example, [VD1] is the
+    left digit of the "verb".&nbsp; The value of each of signs is
+    determined by a particular combination of <tt>WWWW</tt> and <tt>S</tt>
+    fields, while each of the digits is determined by a particular
+    combination of <tt>WWWW</tt> and <tt>AAAAA</tt> or <tt>BBBBB</tt>
+    fields.&nbsp; The specific mapping used is:<br>
     <br>
+    <div align="center">
+      <table border="1" cellpadding="2" cellspacing="2">
+        <tbody>
+          <tr>
+            <th align="center" valign="middle"><tt>WWWW</tt><tt><br>
+              </tt> </th>
+            <th align="center" valign="middle"><tt>S</tt><tt><br>
+              </tt> </th>
+            <th align="center" valign="middle"><tt>AAAAA</tt><tt><br>
+              </tt> </th>
+            <th align="center" valign="middle"><tt>BBBBB</tt><tt><br>
+              </tt> </th>
+          </tr>
+          <tr>
+            <td align="center" valign="top">014<br>
+            </td>
+            <td align="center" valign="top">TBD<br>
+            </td>
+            <td align="center" valign="top">TBD<br>
+            </td>
+            <td align="center" valign="top">TBD<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">013<br>
+            </td>
+            <td align="center" valign="middle">n/a<br>
+            </td>
+            <td align="center" valign="middle">MD1<br>
+            </td>
+            <td align="center" valign="middle">MD2<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">012<br>
+            </td>
+            <td align="center" valign="middle">FLASH<br>
+            </td>
+            <td align="center" valign="middle">VD1<br>
+            </td>
+            <td align="center" valign="middle">VD2<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">011<br>
+            </td>
+            <td align="center" valign="middle">n/a<br>
+            </td>
+            <td align="center" valign="middle">ND1<br>
+            </td>
+            <td align="center" valign="middle">ND2<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">010<br>
+            </td>
+            <td align="center" valign="middle">UPACT<br>
+            </td>
+            <td align="center" valign="middle">n/a<br>
+            </td>
+            <td align="center" valign="middle">R1D1<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">007<br>
+            </td>
+            <td align="center" valign="middle">R1S +<br>
+            </td>
+            <td align="center" valign="middle">R1D2<br>
+            </td>
+            <td align="center" valign="middle">R1D3<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">006<br>
+            </td>
+            <td align="center" valign="middle">R1S -<br>
+            </td>
+            <td align="center" valign="middle">R1D4<br>
+            </td>
+            <td align="center" valign="middle">R1D5<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">005<br>
+            </td>
+            <td align="center" valign="middle">R2S +<br>
+            </td>
+            <td align="center" valign="middle">R2D1<br>
+            </td>
+            <td align="center" valign="middle">R2D2<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">004<br>
+            </td>
+            <td align="center" valign="middle">R2S -<br>
+            </td>
+            <td align="center" valign="middle">R2D3<br>
+            </td>
+            <td align="center" valign="middle">R2D4<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">003<br>
+            </td>
+            <td align="center" valign="middle">n/a<br>
+            </td>
+            <td align="center" valign="middle">R2D5<br>
+            </td>
+            <td align="center" valign="middle">R3D1<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">002<br>
+            </td>
+            <td align="center" valign="middle">R3S +<br>
+            </td>
+            <td align="center" valign="middle">R3D2<br>
+            </td>
+            <td align="center" valign="middle">R3D3<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">001<br>
+            </td>
+            <td align="center" valign="middle">R3S -<br>
+            </td>
+            <td align="center" valign="middle">R3D4<br>
+            </td>
+            <td align="center" valign="middle">R3D5<br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <br>
+    <br>
+    As you can see, a couple of the <tt>S</tt> fields don't actually
+    correspond to +/- signs at all.&nbsp; FLASH refers to the ability of
+    the DSKY to flash the words "VERB" (appearing above VD1 and VD2) and
+    "NOUN" (appearing above ND1 and ND2) about once per second; this
+    feature is active after FLASH is set to 1, and deactivated (with the
+    words remaining lit) after FLASH is set to 0.&nbsp; The UPACT bit
+    refers to the UPTL activity lamp on the DSKY, and turns that lamp on
+    or off.<br>
+    <br>
+    I have only seen <tt>WWWW</tt>=014 used at "fresh start", and am
+    not sure what it represents, and don't care to speculate at this
+    point.<br>
+    <br>
+    However, the principal purpose of <tt>OUT0</tt> is to control the
+    digits and +/- signs displayed on the DSKY.&nbsp; As an example, the
+    R1S sign is displayed as "+" when R1S+ is 1 and R1S- is 0, while the
+    R1S sign is displayed as "-" when R1S+ is 0 and R1S- is 1.&nbsp; It
+    is blank when both R1S- and R1S+ are 0.&nbsp; (I'm not sure what
+    it's supposed to display if both are 1.)<br>
+    <br>
+    The <tt>AAAAA</tt> and <tt>BBBBB</tt> fields control what digits
+    are displayed in R<i>n</i>D<i>m</i>, but not in the straightforward
+    fashion of 0=0, 1=1, etc.&nbsp; Rather,<br>
+    <br>
+    <div align="center">
+      <table border="1" cellpadding="2" cellspacing="2">
+        <tbody>
+          <tr>
+            <th valign="middle"><tt>AAAAA</tt> <i>or</i> <tt>BBBBB</tt><br>
+            </th>
+            <th valign="middle">Displays<br>
+            </th>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">000<br>
+            </td>
+            <td align="center" valign="middle">blank<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">025<br>
+            </td>
+            <td align="center" valign="middle">0<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">003<br>
+            </td>
+            <td align="center" valign="middle">1<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">031<br>
+            </td>
+            <td align="center" valign="middle">2<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">033<br>
+            </td>
+            <td align="center" valign="middle">3<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">027<br>
+            </td>
+            <td align="center" valign="middle">4<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">036<br>
+            </td>
+            <td align="center" valign="middle">5<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">034<br>
+            </td>
+            <td align="center" valign="middle">6<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">023<br>
+            </td>
+            <td align="center" valign="middle">7<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">035<br>
+            </td>
+            <td align="center" valign="middle">8<br>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle">037<br>
+            </td>
+            <td align="center" valign="middle">9<br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+    </div>
+    <br>
+    So finally, as an example, suppose the value 027576 (<tt>WWWW</tt>=05,
+
+    <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
+    to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
+    positions would display "+35".&nbsp; Since this is latched in the
+    DSKY, those positions continue to display that way until a new word
+    with <tt>WWWW</tt>=05 is written to <tt>OUT0</tt> and are
+    unaffected to writes to <tt>OUT0</tt> with different values of <tt>WWWW</tt>.<br>
     <h3><a name="Counters_and_Timers"></a>Counters and Timers<br>
     </h3>
     <p>TBD<br>
@@ -579,6 +1139,13 @@ Guidance
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+
+
+
+
+
 
 
 
@@ -850,6 +1417,13 @@ Guidance
 
 
 
+
+
+
+
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -863,8 +1437,22 @@ Guidance
 
 
 
+
+
+
+
+
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
 
 
 
@@ -892,6 +1480,13 @@ Guidance
 
 
 
+
+
+
+
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -899,6 +1494,13 @@ Guidance
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
 
 
 
@@ -948,12 +1550,26 @@ Guidance
 
 
 
+
+
+
+
+
+
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
+
+
+
+
+
 
 
 
@@ -979,6 +1595,13 @@ Guidance
     The Virtual AGC project itself also provides a Block 1 assembler,
     and it is <a
 href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo/yaYUL.html">the
+
+
+
+
+
+
+
 
 
 
@@ -1024,6 +1647,13 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
+
+
+
+
+
 
 
 
@@ -1110,6 +1740,13 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
 
 
 
+
+
+
+
+
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -1157,6 +1794,13 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
+
+
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -1169,9 +1813,23 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
+
+
+
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+
+
+
+
+
+
+
 
 
 
@@ -1210,6 +1868,13 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
+
+
+
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -1227,6 +1892,13 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
+
+
+
+
+
 
 
 
@@ -1415,7 +2087,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         of the AGC program is accessing uninitialized erasable memory.<br>
       </li>
     </ul>
-    <font face="Calibri" color="blue" size="3"><span style="font-size:
+    <font face="Calibri" size="3" color="blue"><span style="font-size:
         12.0pt;font-family:Calibri;color:blue"></span></font>
     <ul>
     </ul>
@@ -1468,6 +2140,13 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
+
+
+
+
         our GitHub repository's "block1" branch</a>.&nbsp; I have only
       worked with it in Linux, but I expect it should probably build in
       Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -1501,6 +2180,13 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
+
+
+
+
+
+
 
 
 
@@ -1619,6 +2305,13 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
+
+
+
+
       our GitHub repository's "block1" branch</a>, and I'll simply refer
     to both as "yaDSKYb1".&nbsp; They differ only in physical
     appearance, and in that the simulated nav-bay DSKY has some
@@ -1643,11 +2336,18 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     Unlike the Block 2 AGC, there are not separate i/o ports in the AGC
     for the control-panel and nav-bay DSKYs, so I'm not sure how the
     Block 1 AGC connected to more than one DSKY at a time.<br>
-    <h3><a name="yaYUL"></a>Virtual AGC's Digital Uplink Simulator
-      (yaUplinkBlock1)</h3>
+    <h3><a name="yaUplinkBlock1"></a>Virtual AGC's Digital Uplink
+      Simulator (yaUplinkBlock1)</h3>
     <p>At present, a program called yaUplinkBlock1 is provided (in the
       similarly-named source-code directory <a
         href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+
+
+
+
+
+
+
 
 
 
@@ -1750,11 +2450,25 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
+
+
+
+
           The Compleat Sunrise</a> briefly covers what was available in
         the Block 1 SUNRISE program (September 1964).&nbsp; <br>
       </li>
       <li>You can pick through <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
+
+
+
+
+
 
 
 
@@ -1779,6 +2493,13 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
+
+
+
+
+
+
       Pultorak's meticulously-crafted Block 1 documents and
       demonstration</a> ... the problem being, you see, that John had no
     Block 1 software to use as a model, and hence based his Block 1
@@ -1792,12 +2513,12 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     But anyway, assuming you have started the simulation as indicated
     above, you'll see the following on the simulated DSKY:<br>
     <br>
-    <table border="1" cellpadding="2" cellspacing="2" width="100%">
+    <table width="100%" border="1" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
           <td valign="middle"><a href="block1-demo/startup.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-startup.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">Startup screen, immediately after starting
             simulation.<br>
@@ -1833,6 +2554,13 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
+
+
+
+
+
+
               source code</a>, alarm 00203 is "NO IMU MODE INDICATED TO
             COMPUTER".<br>
             <br>
@@ -1845,7 +2573,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/V36E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V36E.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">V36E<br>
           </td>
@@ -1859,7 +2587,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
           <td valign="middle"><a href="block1-demo/V32EV32EV32E.jpg"><img
                 alt="Click to enlarge"
                 src="block1-demo/thm-V32EV32EV32E.jpg" height="200"
-                border="2" width="198"></a><br>
+                width="198" border="2"></a><br>
           </td>
           <td valign="middle">V32EEE</td>
           <td valign="middle">I don't actually know how to get rid of
@@ -1873,7 +2601,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/thm-V31N02E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V31N02E.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">V31N02E<br>
           </td>
@@ -1911,21 +2639,37 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/V11N16E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V11N16E.jpg"
-                height="200" border="2" width="199"></a><br>
+                height="200" width="199" border="2"></a><br>
           </td>
           <td valign="middle">V11N16E<br>
           </td>
           <td valign="middle">Or perhaps, we might want to display the
             current time since startup.&nbsp; V11, "Update data displays
-            every one-half second", combined with N16E, "Time Seconds",
-            does the trick.&nbsp; <br>
+            every one-half second" (according to R-393), combined with
+            N16E, "Time Seconds", does the trick.&nbsp; <br>
             <br>
-            Though ... nothing is quite right about it, such as how
-            often the screen updates or the total amount of time counted
-            off.&nbsp; The display is in octal, whereas the seemingly
-            more-desirable decimal display (V16N16E) simply puts the AGC
-            into an infinite loop.&nbsp; I fear there may be bugs afoot
-            in the simulator, perhaps in the DV instruction!<br>
+            R-393 isn't quite right about the description, though, since
+            the display seems to update, say, only every 1.3-1.6
+            seconds.&nbsp; Not that the exact rate at which it updates
+            is significant, since it's still too fast for a human to
+            write down the readings or react to them in any important
+            way.<br>
+            <br>
+            But REGISTER 1 really does show the elapsed time, in units
+            of 1/100 second, in octal.&nbsp; So in the example
+            screenshot at left, 27611 (octal) is 12,169 (decimal)
+            hundredths of a second, or 121.69 seconds.&nbsp; A
+            more-accurate description, I suppose, would be that this
+            monitor simply tells us the contents of the CPU's TIME1
+            register (which counts at 10 ms. intervals) every once and a
+            while.&nbsp; TIME1 happens to have only 14 significant bits
+            before overflowing and wrapping around to 0, so it can only
+            count in the range 0-16383 (00000-037777 octal), and thus
+            resets to 0 every 163.84 seconds.<br>
+            <br>
+            There are other time-monitoring verb/noun combinations, but
+            due to bugs in the simulator I can't show you those just
+            yet!<br>
           </td>
         </tr>
       </tbody>
@@ -1935,7 +2679,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-14.<br>
+          2016-09-16.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
