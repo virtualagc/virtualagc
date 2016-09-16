@@ -261,31 +261,24 @@ TimerClass::Notify()
       return;
     }
   // If the noun/verb-flash flag is set, then flash them.
-  if (!--FlashCounter)
+  if (frame->flashing)
     {
-      if (0)
+      frame->flashCounter++;
+      if (frame->flashCounter >= 1000 / PULSE_INTERVAL)
         {
-          FlashCounter = 1;
-          FlashStatus = 1;
-        }
-      else if (FlashStatus)     // Flashing and about to light.
-        FlashCounter = 6;
-      else
-        // Flashing and about to blank.
-        FlashCounter = 2;
-      if (FlashStatus)
-        {
-          if (VerbNounFlashing)
+          frame->flashCounter = 0;
+          frame->flashStateLit = !frame->flashStateLit;
+          if (frame->flashStateLit)
             {
+              frame->labelVerb->SetBitmap(frame->imageVerbLabelOn);
+              frame->labelNoun->SetBitmap(frame->imageNounLabelOn);
+            }
+          else
+            {
+              frame->labelVerb->SetBitmap(frame->imageVerbLabelOff);
+              frame->labelNoun->SetBitmap(frame->imageNounLabelOff);
             }
         }
-      else
-        {
-          if (VerbNounFlashing)
-            {
-            }
-        }
-      FlashStatus = !FlashStatus;
     }
   // Try to connect to the server (yaAGC) if not already connected.
   if (ServerSocket == -1)
@@ -444,8 +437,8 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
           Packet[1], Packet[2], Packet[3]);
       goto Error;
     }
-  printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
-      Value, uBit);
+  //printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
+  //    Value, uBit);
   if (uBit)
     return;
   if (Channel == 011 && Value != (lastOUT1 & 037)) // OUT1
@@ -485,6 +478,24 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
           case 10: // FLASH  VD1  VD2
             frame->digitVerbLeft->SetBitmap(leftDigit);
             frame->digitVerbRight->SetBitmap(rightDigit);
+            if (frame->flashing && bit11 == 0)
+              {
+                printf("Turn flashing off.\n");
+                frame->flashing = false;
+                frame->flashStateLit = true;
+                frame->labelNoun->SetBitmap(frame->imageNounLabelOn);
+                frame->labelVerb->SetBitmap(frame->imageVerbLabelOn);
+                frame->flashCounter = 0;
+              }
+            else if (!frame->flashing && bit11 != 0)
+              {
+                printf("Turn flashing on.\n");
+                frame->flashing = true;
+                frame->flashStateLit = false;
+                frame->labelNoun->SetBitmap(frame->imageNounLabelOff);
+                frame->labelVerb->SetBitmap(frame->imageVerbLabelOff);
+                frame->flashCounter = 0;
+              }
             break;
           case 9: //    n/a  ND1  ND2
             frame->digitNounLeft->SetBitmap(leftDigit);
@@ -536,7 +547,7 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
             setSign(signs[2], frame->PlusMinusReg3);
             break;
           default:
-            printf("Unused relayword %0d\n", relayword);
+            printf("Unused relayword %0o\n", relayword);
             break;
             }
         }

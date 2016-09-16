@@ -104,6 +104,9 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
       wxT("yaDSKYb1/images/Block1DSKY-face-bare.png"), wxBITMAP_TYPE_PNG);
 
   UpTelAccept = false;
+  flashing = false;
+  flashStateLit = true;
+  flashCounter = 0;
   imageUpTelBlock = wxBitmap(wxT("yaDSKYb1/images/UpTel-block-20x40.png"),
       wxBITMAP_TYPE_ANY);
   imageUpTelAccept = wxBitmap(wxT("yaDSKYb1/images/UpTel-accept-20x40.png"),
@@ -152,11 +155,21 @@ MyFrame::MyFrame(wxWindow* parent, int id, const wxString& title,
       wxBITMAP_TYPE_ANY);
   imageCompFailOff = wxBitmap(wxT("yaDSKYb1/images/CompFail-off-63x44.png"),
       wxBITMAP_TYPE_ANY);
+  imageVerbLabelOn = wxBitmap(wxT("yaDSKYb1/images/VerbLabel-on-85x21.png"),
+      wxBITMAP_TYPE_ANY);
+  imageVerbLabelOff = wxBitmap(wxT("yaDSKYb1/images/VerbLabel-off-85x21.png"),
+      wxBITMAP_TYPE_ANY);
+  imageNounLabelOn = wxBitmap(wxT("yaDSKYb1/images/NounLabel-on-93x21.png"),
+      wxBITMAP_TYPE_ANY);
+  imageNounLabelOff = wxBitmap(wxT("yaDSKYb1/images/NounLabel-off-93x21.png"),
+      wxBITMAP_TYPE_ANY);
 
   indicatorCompFail = new wxStaticBitmap(panel, wxID_ANY, imageCompFailOff);
   indicatorCheckFail = new wxStaticBitmap(panel, wxID_ANY, imageCheckFailOff);
   indicatorUpTl = new wxStaticBitmap(panel, wxID_ANY, imageUptlOff);
   indicatorComp = new wxStaticBitmap(panel, wxID_ANY, imageCompOff);
+  labelNoun = new wxStaticBitmap(panel, wxID_ANY, imageNounLabelOn);
+  labelVerb = new wxStaticBitmap(panel, wxID_ANY, imageVerbLabelOn);
   digitProgramLeft = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
   digitProgramRight = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
   digitVerbLeft = new wxStaticBitmap(panel, wxID_ANY, image7Seg0);
@@ -266,7 +279,7 @@ MyFrame::do_layout()
   wxBoxSizer* sizer_3 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
   wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 6, 22, 1); // Registers.
-  wxGridSizer* grid_sizer_3 = new wxGridSizer(2, 2, 21, 20); // Activity/Program/Verb/Noun
+  wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(3 /*2*/, 2, 0 /*21*/, 20); // Activity/Program/Verb/Noun
   wxBoxSizer* sizer_12_copy_1 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_12_copy = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
@@ -293,6 +306,10 @@ MyFrame::do_layout()
   sizer_12->Add(digitProgramRight, 0, 0, 0);
   sizer_12->Add(12, 20, 0, 0, 0);
   grid_sizer_3->Add(sizer_12, 0, 0, 0);
+  //grid_sizer_3->Add(20, 21, 0);
+  //grid_sizer_3->Add(20, 21, 0);
+  grid_sizer_3->Add(labelVerb, 0, 0, 0);
+  grid_sizer_3->Add(labelNoun, 0, 0, 0);
   sizer_12_copy->Add(7, 20, 0, 0, 0);
   sizer_12_copy->Add(digitVerbLeft, 0, 0, 0);
   sizer_12_copy->Add(5, 20, 0, 0, 0);

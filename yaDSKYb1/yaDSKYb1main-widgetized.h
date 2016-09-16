@@ -72,11 +72,15 @@ class MyFrame: public wxFrame
 
     MyFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
     bool UpTelAccept;
+    bool flashing;
+    bool flashStateLit;
+    int flashCounter;
     wxBitmap imageUpTelBlock, imageUpTelAccept, image7Seg0, image7Seg15, image7Seg19,
       image7Seg21, image7Seg25, image7Seg27, image7Seg28, image7Seg29, image7Seg30,
       image7Seg31, image7Seg3, imageCheckFailOn, imageCheckFailOff, imageCompOn, imageCompOff,
       imagePlusMinusPlus, imagePlusMinusMinus, imagePlusMinusOff, imageUptlOn, imageUptlOff,
-      imageCompFailOn, imageCompFailOff;
+      imageCompFailOn, imageCompFailOff, imageVerbLabelOn, imageVerbLabelOff,
+      imageNounLabelOn, imageNounLabelOff;
     void setAllNumbers(wxBitmap& bitmap);
     void setAllSigns(wxBitmap& bitmap);
     TimerClass *Timer;
@@ -93,6 +97,8 @@ class MyFrame: public wxFrame
     wxStaticBitmap* indicatorCheckFail;
     wxStaticBitmap* indicatorUpTl;
     wxStaticBitmap* indicatorComp;
+    wxStaticBitmap* labelVerb;
+    wxStaticBitmap* labelNoun;
     wxStaticBitmap* digitProgramLeft;
     wxStaticBitmap* digitProgramRight;
     wxStaticBitmap* digitVerbLeft;
