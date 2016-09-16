@@ -547,7 +547,8 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
             setSign(signs[2], frame->PlusMinusReg3);
             break;
           default:
-            printf("Unused relayword %0o\n", relayword);
+            printf("Unused relayword %05o (%02o %1o %2o %2o)\n", received,
+                relayword, bit11, bits10_6, bits5_1);
             break;
             }
         }
