@@ -279,7 +279,7 @@ MyFrame::do_layout()
   wxBoxSizer* sizer_3 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
   wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 6, 22, 1); // Registers.
-  wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(3 /*2*/, 2, 0 /*21*/, 20); // Activity/Program/Verb/Noun
+  wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(3 /*2*/, 2, 0 /*21*/, 22); // Activity/Program/Verb/Noun
   wxBoxSizer* sizer_12_copy_1 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_12_copy = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
@@ -291,7 +291,7 @@ MyFrame::do_layout()
   sizer_8->Add(indicatorCompFail, 0, 0, 0);
   sizer_8->Add(5, 20, 0, 0, 0); // Between CompFail and CheckFail
   sizer_8->Add(indicatorCheckFail, 0, 0, 0);
-  sizer_8->Add(32, 20, 0, 0, 0); // Right of CheckFail
+  sizer_8->Add(39, 20, 0, 0, 0); // Right of CheckFail
   sizer_3->Add(sizer_8, 0, 0, 0);
   sizer_3->Add(20, 113, 0, 0, 0);
   sizer_11->Add(0, 20, 0, 0, 0);
@@ -354,7 +354,7 @@ MyFrame::do_layout()
   sizer_4->Add(sizer_6, 0, 0, 0);
   sizer_4->Add(20, 101, 0, 0, 0); // Between KeyRlse and SwitchUpTel
   sizer_5->Add(ButtonKeyRlse, 0, 0, 0);
-  sizer_5->Add(125, 20, 0, 0, 0); // Between KeyRlse and ErrorReset
+  sizer_5->Add(126, 20, 0, 0, 0); // Between KeyRlse and ErrorReset
   sizer_5->Add(ButtonErrorReset, 0, 0, 0);
   sizer_4->Add(sizer_5, 0, 0, 0);
   sizer_4->Add(20, 6, 0, 0, 0); // Between KeyRlse and Keypad
