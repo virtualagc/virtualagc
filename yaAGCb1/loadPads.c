@@ -88,6 +88,14 @@ loadPads(char *filename)
           printf ("Pad load erasable[%04o] = %06o\n", addr, data);
           agc.memory[addr] = data;
         }
+      else if (2 == sscanf(s, "%o %o", &addr, &data) && addr >= 02000 && addr < MEMORY_SIZE && data < 0x10000)
+        {
+          if (addr < 06000)
+            printf ("Patch fixed[%04o] = %06o\n", addr, data);
+          else
+            printf ("Patch fixed[%02o,%04o] = %06o\n", addr / 02000, 06000 + addr % 02000, data);
+          agc.memory[addr] = data;
+        }
     }
 
   fclose(fp);
