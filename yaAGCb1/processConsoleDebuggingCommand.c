@@ -57,6 +57,7 @@ printFlatAddress(uint16_t flatAddress)
 void
 processConsoleDebuggingCommand(char *command)
 {
+  static int eCount = 6;
   unsigned u, bank, offset;
   int i, j, k, index, flatAddress;
   char c, c2, *s;
@@ -73,6 +74,16 @@ processConsoleDebuggingCommand(char *command)
             printf("Logging toggled on.\n");
           else
             printf("Logging toggled off.\n");
+          return;
+        }
+      if (!strcasecmp(command, "li"))
+        {
+          extern int logInstruction;
+          logInstruction = !logInstruction;
+          if (logInstruction)
+            printf("Log includes source line.\n");
+          else
+            printf("Log does not include source line.\n");
           return;
         }
       if (!strcasecmp(command, "c"))
@@ -188,7 +199,7 @@ processConsoleDebuggingCommand(char *command)
                         agc.memory[flatAddress] = Value;
                       goto reStatus;
                     }
-                  for (i = 0; i < 24 && flatAddress < sizeof(agc.memory) / 2;
+                  for (i = 0; i < eCount && flatAddress < sizeof(agc.memory) / 2;
                       i++, flatAddress++)
                     {
                       if (flatAddress < 06000)
@@ -232,19 +243,23 @@ processConsoleDebuggingCommand(char *command)
         }
       if (*command)
         {
-          printf("             c --- free run\n");
-          printf("        s or t --- single step\n");
-          printf("      sN or tN --- N single steps.  If N<0, free running\n");
-          printf("    eN or eB,O --- examine memory at memory location\n");
-          printf("eN=V or eB,O=V --- set memory location to octal value V\n");
           printf("    bN or bB,0 --- add/delete breakpoint at location\n");
           printf("           bcN --- break after MCT=N is reached\n");
           printf("            be --- break on readin an uninitialized erasable\n");
           printf("             b --- remove all breakpoints\n");
           printf("            b? --- list all breakpoints\n");
+          printf("             c --- free run\n");
+          printf("    eN or eB,O --- examine memory at memory location\n");
+          printf("eN=V or eB,O=V --- set memory location to octal value V\n");
+          printf("             l --- toggle logging (if --log used on command\n");
+          printf("                   off or on.\n");
+          printf("            li --- toggle inclusion of of the instruction in\n");
+          printf("                   the log on or off.  Default is off.\n");
           printf("          pW,C --- displayed length (W columns) and context\n");
           printf("                   (C lines) of program lines (default 132,5)\n");
           printf("             q --- quit\n");
+          printf("        s or t --- single step\n");
+          printf("      sN or tN --- N single steps.  If N<0, free running\n");
         }
     }
   reStatus: ;

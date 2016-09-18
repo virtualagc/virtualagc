@@ -72,7 +72,7 @@ MON::displayAGC()
       "------------------------------------------------------------------------------------\n");
   printw("CP(%s): %s\n", TPG::tpTypestring[TPG::register_SG.read()],
       SEQ::getControlPulses());
-  printw("F17: %1d\t\tF13: %1d\t\tF10: %1d\t\tSCL: %-8u\tPC: %s\tflat: %05o\n",
+  printw("F17: %1d\t\tF13: %1d\t\tF10: %1d\t\tMCT: %-8u\tPC: %s\tflat: %05o\n",
       SCL::register_F17.read(), SCL::register_F13.read(),
       SCL::register_F10.read(),
       (SCL::register_SCL.read() >= 016) ?
@@ -194,7 +194,7 @@ MON::logAGC(FILE *logFile)
     fprintf(logFile, "%04o", pc);
   else
     fprintf(logFile, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
-  fprintf(logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%03o\tSCL=%u",
+  fprintf(logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%03o\tMCT=%u",
       CRG::register_A.read(), CRG::register_Q.read(), CRG::register_LP.read(),
       037 & ADR::register_BNK.read(),
       (SCL::register_SCL.read() >= 016) ?
