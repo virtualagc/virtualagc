@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ronald S. Burkey <info@sandroid.org>
+, and  * Copyright 2016 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -396,7 +396,7 @@ executeOneInstruction(FILE *logFile)
             {
               // Overflow.
               incrementZ(1);
-              if (0 & (fetchedOperandOverflow & 0100000)) regA = 0000001;// Positive overflow.
+              if (aOverflowBits == 0040000) regA = 0000001;// Positive overflow.
               else regA = 0177776;// Negative overflow;
             }
         }
@@ -490,6 +490,7 @@ executeOneInstruction(FILE *logFile)
     {
       numMCT = 18;
 
+#if 0
         {
           int16_t AccPair[2], AbsA, AbsL, AbsK, Div16, Operand16;
           int Dividend, Divisor, Quotient, Remainder;
@@ -549,6 +550,33 @@ executeOneInstruction(FILE *logFile)
               regLP = SignExtend (cpu2agc (Remainder));
             }
         }
+#else
+        {
+          int32_t numerator, denominator, quotient, remainder, sign = 1;
+          numerator = regA << 14;
+          if (0 != (0100000 & regA)) numerator |= 030000037777;
+          denominator = (int16_t) ((operand < 4) ? fetchedFromOperand : fetchedFromOperandSignExtended);
+          if (numerator < 0)
+            {
+              sign = -sign;
+              numerator = ~numerator;
+            }
+          if (denominator < 0)
+            {
+              sign = -sign;
+              denominator = ~denominator;
+            }
+          quotient = numerator / denominator;
+          remainder = numerator % denominator;
+          if (quotient > 037777)
+            quotient = 037777;
+          if (sign < 0)
+            quotient = ~quotient;
+          regA = quotient;
+          regQ = ~remainder;
+          regLP = (sign > 0) ? 1 : 0140001;
+        }
+#endif
     }
   else if (opcode == 030000 && extracode) /* SU */
     {
