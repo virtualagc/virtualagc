@@ -82,11 +82,17 @@ main(int argc, char *argv[])
             printf("Illegal %s\n", argv[i]);
         }
       else if (!strcmp(argv[i], "--zero"))
-       defaultErasable = 0;
+        defaultErasable = 0;
       else if (!strcmp(argv[i], "--uninit"))
         defaultErasable = 0166666;
       else if (1 == sscanf(argv[i], "--port=%d", &j))
         Portnum = j;
+      else if (1
+          == sscanf(argv[i], "--width=%d",
+              &j) && j >= MIN_LINE_LENGTH && j <= MAX_LINE_LENGTH)
+        maxDisplayedLineLength = j;
+      else if (1 == sscanf(argv[i], "--context=%d", &j))
+        maxDisplayedContext = j;
       else
         {
           printf("Usage:\n");
@@ -116,6 +122,13 @@ main(int argc, char *argv[])
           printf("             rather than the default 0.\n");
           printf(
               "--port=P     Start listening on ports P through P+9. P defaults to 19671.\n");
+          printf(
+              "--width=N    Set initial value  of the displayed length of source-code\n");
+          printf("             lines.  Default=%d, min=%d, max=%d.\n",
+              maxDisplayedLineLength, MIN_LINE_LENGTH, MAX_LINE_LENGTH);
+          printf(
+              "--context=N  Set initial size of source-line context.  Default is %d.\n",
+              maxDisplayedContext);
           return (1);
         }
     }
