@@ -64,6 +64,10 @@
  block 1.
  2016-08-29 RSB  Implemented Mike Stewart's fix for bug
  https://github.com/rburkey2005/virtualagc/issues/45.
+ 2016-09-18 RSB	 For --block1, changed NOOP from being a synonym
+ for XCH A to XCH 0; the only difference is that XCH A requires an
+ A = 0 pseudo-op (which Solarium, I guess, must already have had),
+ whereas XCH 0 does not.
 
  I don't really try to duplicate the formatting used by the original
  assembly-language code, since that format was appropriate for
@@ -292,7 +296,7 @@ static ParserMatch_t ParsersBlock1[] =
     { "MASK", OP_BASIC, ParseMASK },
     { "MP", OP_BASIC, ParseMP },
     { "NDX", OP_BASIC, ParseINDEX },
-    { "NOOP", OP_BASIC, NULL, "XCH", "A" },
+    { "NOOP", OP_BASIC, NULL, "XCH", "0" },
     { "OCT", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
     { "OCTAL", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
     { "OVIND", OP_BASIC, ParseTS },
