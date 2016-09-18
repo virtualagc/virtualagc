@@ -43,6 +43,7 @@
  * 		07/17/16 RSB	gdbmi_format was commented out everywhere
  * 				it appeared, since it wasn't being used
  * 				and was generating compiler warnings.
+ * 		09/12/16 OH	Add /fmt capabilities to print and output
  */
 
 #include <stdlib.h>
@@ -126,6 +127,31 @@ GdbmiAdjustCmdPtr (int i)
 {
   s += i;
   sraw += i;
+}
+
+
+/**
+ Adjust the command string pointer with the value given.
+ */
+static inline void
+GdbmiSkipSpace ()
+{
+  while (*sraw == ' ') {
+    sraw++;
+    s++;
+  }
+}
+/**
+ * Set the FMT specifier if provided in the command string
+ */
+static inline void GdbmiParseFmt(GdbmiFmt_t* fmt)
+{
+   *fmt = 'o';
+  
+   if (*sraw == '/') {
+	sraw++;
+	*fmt = *sraw++;
+   }
 }
 
 GdbmiResult
@@ -1599,6 +1625,39 @@ GdbmiHandleWhatIs (int i)
   return (GdbmiCmdDone);
 }
 
+void GdbmiPrintFmt(GdbmiFmt_t fmt, unsigned short value)
+{
+  int i;
+  int sign = (value & 0x4000) > 0 ? -1:1;
+  
+  switch(fmt)
+  {
+    case 'o':
+      printf("%#o",value);
+      break;
+    case 'u':
+      printf("%#u",value);
+      break;
+    case 'd':
+      if (sign == 1) printf("+%d",(value & 0x3fff));
+      else printf("-%d",((value ^ 0x3fff) & 0x3fff));
+      break;
+    case 'c':
+      printf("%c",(char)value);
+      break;          
+    case 't':
+      for (i = 15 ;i >= 0; i--)
+	 {
+	   if (value & (1 << i)) printf("1");
+	   else printf("0");
+	 } 
+      break;     
+    case 'x':  
+    default:
+      printf("0x%04x",value);
+  }
+}
+
 static GdbmiResult
 GdbmiHandlePrint (int i)
 {
@@ -1607,14 +1666,20 @@ GdbmiHandlePrint (int i)
   Symbol_t *Symbol = NULL;
   Address_t *agc_addr;
   unsigned gdbmi_addr;
+  GdbmiFmt_t fmt;
 
   /* Adjust the CmdPtr to point to the next token */
   GdbmiAdjustCmdPtr (i);
 
   if (strlen (s) > 1)
     {
+      GdbmiSkipSpace();
+      GdbmiParseFmt(&fmt);
+      
       /* we have an expression */
-      AddrStr = ++sraw;
+      GdbmiSkipSpace();
+      AddrStr = sraw;
+
       if (*AddrStr == '&')
 	{
 	  AddrFlag++;
@@ -1630,17 +1695,26 @@ GdbmiHandlePrint (int i)
 	  agc_addr = &Symbol->Value;
 	  gdbmi_addr = DbgLinearAddr (agc_addr);
 
-	  if (AddrFlag)
-	    printf ("$1 = 0x%x\n", gdbmi_addr);
+	  if (AddrFlag){
+	    printf ("$1 = ");
+	    GdbmiPrintFmt(fmt,gdbmi_addr);
+	    printf ("\n");
+	  }
 	  else
-	    printf ("$1 = %d\n", DbgGetValueByAddress (gdbmi_addr));
+	  {
+	    printf ("$1 = ");
+	    GdbmiPrintFmt(fmt,DbgGetValueByAddress (gdbmi_addr));
+	    printf ("\n");
+	  }
 	}
       else
 	{
 	  if (*AddrStr == '*')
 	    {
 	      gdbmi_addr = DbgLinearAddrFromAddrStr (++AddrStr);
-	      printf ("$1 = %d\n", DbgGetValueByAddress (gdbmi_addr));
+	      printf ("$1 = ");
+	      GdbmiPrintFmt(fmt,DbgGetValueByAddress (gdbmi_addr));
+	      printf ("\n");
 	    }
 	  else
 	    printf ("$1 = %s\n", sraw);
@@ -1648,6 +1722,8 @@ GdbmiHandlePrint (int i)
     }
   return (GdbmiCmdDone);
 }
+
+
 
 static GdbmiResult
 GdbmiHandleOutput (int i)
@@ -1657,14 +1733,19 @@ GdbmiHandleOutput (int i)
   Symbol_t *Symbol = NULL;
   Address_t *agc_addr;
   unsigned gdbmi_addr;
+  GdbmiFmt_t fmt;
 
   /* Adjust the CmdPtr to point to the next token */
   GdbmiAdjustCmdPtr (i);
 
   if (strlen (s) > 1)
-    {
+  {
+      GdbmiSkipSpace();
+      GdbmiParseFmt(&fmt);
+      
       /* we have an expression */
-      AddrStr = ++sraw;
+      GdbmiSkipSpace();
+      AddrStr = sraw;
       if (*AddrStr == '&')
 	{
 	  AddrFlag++;
@@ -1681,16 +1762,16 @@ GdbmiHandleOutput (int i)
 	  gdbmi_addr = DbgLinearAddr (agc_addr);
 
 	  if (AddrFlag)
-	    printf ("0x%x", gdbmi_addr);
+	    GdbmiPrintFmt(fmt,gdbmi_addr);
 	  else
-	    printf ("%d", DbgGetValueByAddress (gdbmi_addr));
+	    GdbmiPrintFmt(fmt,DbgGetValueByAddress (gdbmi_addr));
 	}
       else
 	{
 	  if (*AddrStr == '*')
 	    {
 	      gdbmi_addr = DbgLinearAddrFromAddrStr (++AddrStr);
-	      printf ("%d", DbgGetValueByAddress (gdbmi_addr));
+	      GdbmiPrintFmt(fmt,DbgGetValueByAddress (gdbmi_addr));
 	    }
 	  else
 	    printf ("%s", sraw);

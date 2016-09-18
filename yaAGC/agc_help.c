@@ -240,12 +240,31 @@ EXP can be a symbol (e.g. MPAC or &MPAC) or a dereferenced ADDRESS.\n\
 ADDRESS can be a pseudo linear address (e.g. 0x6c or 0154) or you can\n\
 use the AGC native address format and speficy the bank and octal value.\n\
 \n\
-Examples of EXP concerning the Multi Purpose Accumulator:\n\
-  print MPAC\n\
-  print &MPAC\n\
+EXP may be preceded with /FMT, where FMT is a format letter\n\
+but no count or size letter (see \"x\" command). Without the \n\
+format letter, the default is octal.\n\n\
+Format letters are the usual\n\
+(o)ctal, he(x)adecimal, (d)ecimal, (u)nsigned, (t)wo base (i.e. binary)\n\
+When decimal is selected it will use ones complement implementation.\n\
+\n\
+Examples of EXP with or without formatting:\n\
+  print/d MPAC\n\
+  print/x &MPAC\n\
   print *0x6c\n\
   print *0154\n\
-  print *E0,1554\n");
+  print *E0,1554\n\n\
+");
+
+  gdbmiHelpDone();
+}
+
+void gdbmiHandleHelpOutput(char* s)
+{
+printf("\
+Like \"print\" but don't put in value history and don't print newline.\n\
+This is useful in user-defined commands.\n\
+");
+
   gdbmiHelpDone();
 }
 
@@ -276,6 +295,7 @@ void gdbmiHandleHelp(char* s)
 	else if (!strncmp(s," DEFINE",7)) gdbmiHandleHelpDefine(s+7);
 	else if (!strncmp(s," X",2)) gdbmiHandleHelpX(s+2);
 	else if (!strncmp(s," PRINT",6)) gdbmiHandleHelpPrint(s+6);
+	else if (!strncmp(s," OUTPUT",7)) gdbmiHandleHelpOutput(s+7);
 }
 /**
  * This is the main entry function to handle help related commands. Only the

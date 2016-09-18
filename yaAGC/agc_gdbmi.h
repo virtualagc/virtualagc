@@ -42,6 +42,8 @@ typedef struct
   int       apl;   /* Addresses per line */
 } GdbmiExamCfg_t;
 
+typedef char GdbmiFmt_t;
+
 extern void GdbmiDisplayBreakpointForLine(SymbolLine_t* Line,int BreakpointId );
 extern GdbmiResult GdbmiInterpreter(agc_t* , char*, char* );
 extern void GdbmiPrintFullNameContents(SymbolLine_t *Line);
