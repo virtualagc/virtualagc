@@ -1505,7 +1505,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
               if (Block1)
                 {
                   ParseInputRecord.Operator = "XCH";
-                  ParseInputRecord.Operand = "A";
+                  ParseInputRecord.Operand = "0";
                 }
               else
                 {
