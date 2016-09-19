@@ -69,7 +69,7 @@ MON::displayAGC()
   else
     sprintf(addressString, "%02o,%04o", 017 & (pc >> 10), 06000 + (pc & 01777));
   printw("%s",
-      "------------------------------------------------------------------------------------\n");
+      "--------------------------------------------------------------------------------------------------------------------\n");
   printw("CP(%s): %s\n", TPG::tpTypestring[TPG::register_SG.read()],
       SEQ::getControlPulses());
   printw("F17: %1d\t\tF13: %1d\t\tF10: %1d\t\tMCT: %-8u\tPC: %s\tflat: %05o\n",
