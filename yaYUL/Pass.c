@@ -64,6 +64,10 @@
  block 1.
  2016-08-29 RSB  Implemented Mike Stewart's fix for bug
  https://github.com/rburkey2005/virtualagc/issues/45.
+ 2016-09-18 RSB	 For --block1, changed NOOP from being a synonym
+ for XCH A to XCH 0; the only difference is that XCH A requires an
+ A = 0 pseudo-op (which Solarium, I guess, must already have had),
+ whereas XCH 0 does not.
 
  I don't really try to duplicate the formatting used by the original
  assembly-language code, since that format was appropriate for
@@ -279,10 +283,10 @@ static ParserMatch_t ParsersBlock1[] =
     { "CAF", OP_BASIC, ParseXCH },
     { "CADR", OP_PSEUDO, ParseCADR, "", "", 0, 0, 0, 0, 1 },
     { "CCS", OP_BASIC, ParseCCS },
-    { "COM", OP_BASIC, NULL, "CS", "A" },
+    { "COM", OP_BASIC, NULL, "CS", "0" },
     { "CS", OP_BASIC, ParseCS },
     { "DEC", OP_PSEUDO, ParseDEC, "", "", 0, 0, 0, 0, 1 },
-    { "DOUBLE", OP_BASIC, NULL, "AD", "A" },
+    { "DOUBLE", OP_BASIC, NULL, "AD", "0" },
     { "DV", OP_BASIC, ParseDV },
     { "EQUALS", OP_PSEUDO, ParseEQUALS },
     { "ERASE", OP_PSEUDO, ParseERASE },
@@ -292,23 +296,23 @@ static ParserMatch_t ParsersBlock1[] =
     { "MASK", OP_BASIC, ParseMASK },
     { "MP", OP_BASIC, ParseMP },
     { "NDX", OP_BASIC, ParseINDEX },
-    { "NOOP", OP_BASIC, NULL, "XCH", "A" },
+    { "NOOP", OP_BASIC, NULL, "XCH", "0" },
     { "OCT", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
     { "OCTAL", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
     { "OVIND", OP_BASIC, ParseTS },
-    { "OVSK", OP_BASIC, NULL, "TS", "A" },
+    { "OVSK", OP_BASIC, NULL, "TS", "0" },
     { "RELINT", OP_BASIC, NULL, "INDEX", "$16" },
     { "RESUME", OP_BASIC, NULL, "INDEX", "$25" },
-    { "RETURN", OP_BASIC, NULL, "TC", "Q" },
+    { "RETURN", OP_BASIC, NULL, "TC", "1" },
     { "SETLOC", OP_PSEUDO, ParseSETLOC },
-    { "SQUARE", OP_BASIC, NULL, "MP", "A" },
+    { "SQUARE", OP_BASIC, NULL, "MP", "0" },
     { "STORE", OP_INTERPRETER, ParseSTORE },
     { "SU", OP_BASIC, ParseSU },
     { "TC", OP_BASIC, ParseTC },
     { "TCR", OP_BASIC, ParseTC },
-    { "TCAA", OP_BASIC, NULL, "TS", "Z" },
+    { "TCAA", OP_BASIC, NULL, "TS", "2" },
     { "TS", OP_BASIC, ParseTS },
-    { "XAQ", OP_BASIC, NULL, "TC", "A" },
+    { "XAQ", OP_BASIC, NULL, "TC", "0" },
     { "XCADR", OP_PSEUDO, ParseXCADR, "", "", 0, 0, 0, 0, 1 },
     { "XCH", OP_BASIC, ParseXCH } };
 #define NUM_PARSERS_BLOCK1 (sizeof (ParsersBlock1) / sizeof (ParsersBlock1[0]))
@@ -1501,7 +1505,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
               if (Block1)
                 {
                   ParseInputRecord.Operator = "XCH";
-                  ParseInputRecord.Operand = "A";
+                  ParseInputRecord.Operand = "0";
                 }
               else
                 {
