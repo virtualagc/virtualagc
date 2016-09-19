@@ -137,7 +137,7 @@ typedef struct
   //    countMCT = (getTimeNanoseconds() - startTimeNanoseconds - pausedNanoseconds) / mctNanoseconds
   // on the average.  On short timescales, though, there can be quite a lot of
   // variation.
-  unsigned long countMCT;
+  uint64_t countMCT;
   int64_t startTimeNanoseconds;
   int64_t pausedNanoseconds;
   int64_t startOfPause;
