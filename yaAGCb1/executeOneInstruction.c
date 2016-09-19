@@ -490,70 +490,9 @@ executeOneInstruction(FILE *logFile)
     {
       numMCT = 18;
 
-#if 0
-        {
-          int16_t AccPair[2], AbsA, AbsL, AbsK, Div16, Operand16;
-          int Dividend, Divisor, Quotient, Remainder;
-          // Fetch the values;
-          AccPair[0] = fixUcForWriting (regA);
-          AccPair[1] = regLP;
-          Dividend = SpToDecent (&AccPair[1]);
-          DecentToSp (Dividend, &AccPair[1]);
-          // Check boundary conditions.
-          AbsA = AbsSP (AccPair[0]);
-          AbsL = AbsSP (AccPair[1]);
-          AbsK = AbsSP (fetchedFromOperandSignExtended);
-          if (AbsA > AbsK || (AbsA == AbsK && AbsL != AGC_P0))
-            {
-              // The divisor is smaller than the dividend.  In this case,
-              // we return "total nonsense".
-              regLP = ~0;
-              regA = 0;
-            }
-          else if (AbsA == AbsK && AbsL == AGC_P0)
-            {
-              // The divisor is equal to the dividend.
-              if (AccPair[0] == fetchedFromOperandSignExtended)// Signs agree?
-                {
-                  Operand16 = 037777;   // Max positive value.
-                  regLP = SignExtend (fetchedFromOperandSignExtended);
-                }
-              else
-                {
-                  Operand16 = (077777 & ~037777);       // Max negative value.
-                  regLP = SignExtend (fetchedFromOperandSignExtended);
-                }
-              regA = SignExtend (Operand16);
-            }
-          else
-            {
-              // The divisor is larger than the dividend.  Okay to actually divide!
-              // Fortunately, the sign conventions agree with those of the normal
-              // C operators / and %, so all we need to do is to convert the
-              // 1's-complement values to native CPU format to do the division,
-              // and then convert back afterward.  Incidentally, we know we
-              // aren't dividing by zero, since we know that the divisor is
-              // greater (in magnitude) than the dividend.
-              Dividend = agc2cpu2 (Dividend);
-              Divisor = agc2cpu (fetchedFromOperandSignExtended);
-              Quotient = Dividend / Divisor;
-              Remainder = Dividend % Divisor;
-              regA = SignExtend (cpu2agc (Quotient));
-              if (Remainder == 0)
-                {
-                  // In this case, we need to make an extra effort, because we
-                  // might need -0 rather than +0.
-                  if (Dividend >= 0) regLP = AGC_P0;
-                  else regLP = SignExtend (AGC_M0);
-                }
-              else
-              regLP = SignExtend (cpu2agc (Remainder));
-            }
-        }
-#else
         {
           int32_t numerator, denominator, quotient, remainder, sign = 1;
-          numerator = regA << 14;
+          numerator = fixUcForWriting(regA) << 14;
           if (0 != (0100000 & regA)) numerator |= 030000037777;
           denominator = (int16_t) ((operand < 4) ? fetchedFromOperand : fetchedFromOperandSignExtended);
           if (numerator < 0)
@@ -576,7 +515,6 @@ executeOneInstruction(FILE *logFile)
           regQ = ~remainder;
           regLP = (sign > 0) ? 1 : 0140001;
         }
-#endif
     }
   else if (opcode == 030000 && extracode) /* SU */
     {
