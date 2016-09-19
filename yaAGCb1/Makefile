@@ -18,8 +18,8 @@ yaAGCb1: $(SOURCE) $(HEADERS) Makefile
 
 test.agc.bin: test.agc
 	../../virtualagc/yaYUL/yaYUL --block1 $^ >test.agc.lst
-	touch test.agc.pads
+	touch test.agc.pad
 
 clean:
-	-rm $(TARGETS) test.agc.lst test.agc.pads
+	-rm $(TARGETS) test.agc.lst test.agc.pad*
 
