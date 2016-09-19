@@ -407,23 +407,7 @@ executeOneInstruction(FILE *logFile)
       // overflowed.
       int16_t term1, term2, sum;
       entrySubtraction:;
-#if 0
-      term1 = fixUcForWriting(regA);
-      term2 = fetchedFromOperandSignExtended;
-      // Special case:  note that x + -x = -0.
-      if ((077777 & term1) == (077777 & ~term2)) sum = 0177777;
-      // And -0 + -0 = -0 too, for some reason.
-      else if ((077777 & term1) == 077777 && (077777 & term2) == 077777) sum = 0177777;
-      else
-        {
-          if ((term1 & 040000) != 0) term1 = -(~(term1 | ~077777));
-          if ((term2 & 040000) != 0) term2 = -(~term2);
-          sum = term1 + term2;
-          if (sum < 0 ) sum = ~(-sum);
-        }
-#else
       sum = AddSP16 (regA, (flatAddress < 4) ? fetchedFromOperand : fetchedFromOperandSignExtended);
-#endif
       regA = sum;
       if ((sum & 0140000) == 0040000) // Positive overflow
         {
@@ -543,8 +527,8 @@ executeOneInstruction(FILE *logFile)
    * counted 10X too fast for some reason.
    */
     {
-      static int nextTimerIncrement = 1280;
-      int overflow = 0;
+      static uint64_t nextTimerIncrement = 1280;
+      //int overflow = 0;
       if (agc.countMCT * 3 > nextTimerIncrement)
         {
           nextTimerIncrement += 2560;
