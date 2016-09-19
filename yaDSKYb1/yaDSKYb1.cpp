@@ -441,9 +441,11 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
   //    Value, uBit);
   if (uBit)
     return;
-  if (Channel == 011 && Value != (lastOUT1 & 037)) // OUT1
+  if (Channel == 011 && (Value & 037) != lastOUT1) // OUT1
     {
-      lastOUT1 = Value;
+      printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
+          Value, uBit);
+      lastOUT1 = Value & 037;
       // Ignore B1 for now: main-panel DSKY doesn't have a PROG ALM indicator.
       frame->indicatorCompFail->SetBitmap(
           (0 == (Value & 02)) ?
