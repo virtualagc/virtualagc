@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 # Copyright:    Public domain.
-# Filename:     XXXXXXXX.agc
+# Filename:     DIGITAL_AUTOPILOT_ERASABLE.agc
 # Purpose:      Part of the source code for Aurora (revision 12),
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.

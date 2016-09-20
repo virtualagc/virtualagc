@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 # Copyright:    Public domain.
-# Filename:     XXXXXXXX.agc
+# Filename:     OPTIMUM_PRELAUNCH_ALIGNMENT_CALIBRATION.agc
 # Purpose:      Part of the source code for Aurora (revision 12),
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.

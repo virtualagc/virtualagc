@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 # Copyright:    Public domain.
-# Filename:     XXXXXXXX.agc
+# Filename:     SUM_CHECK_END_OF_BANK_MARKERS.agc
 # Purpose:      Part of the source code for Aurora (revision 12),
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.
