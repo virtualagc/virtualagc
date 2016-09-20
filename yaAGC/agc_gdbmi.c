@@ -133,6 +133,9 @@ const GdmiScalar_t GdbmiScalarMap[] = {
   {"VV",DP,  0.00005128},      // POSITION8: Nautical miles
   {"XX",DP,  1.0/512},         // POSITION9: Meters
   {"YY",DP,  1.0/268435456},   // VELOCITY4: Meters/Centisec
+  {"SP",SP,  1.0/16384},       // GENERIC: Single Precision Fraction.
+  {"DP",DP,  1.0/268435456},   // GENERIC: Double Precision Fraction.
+/*  {"TP",DP,  1.0/4398046511104}// GENERIC: Triple Precision Fraction.  */
   { "A",SP,  1.0},             // OCTAL: Octal
   { "B",SP,  1.0/16384},       // FRACTIONAL: Fraction (Default)
   { "C",SP,  1.0},             // WHOLE: 1 Unit
@@ -187,7 +190,7 @@ GdbmiSkipSpace ()
 }
 
 /**
- Adjust the command string pointer with the value given.
+ Skip to the next token.
  */
 static inline void
 GdbmiNextToken()
@@ -197,7 +200,13 @@ GdbmiNextToken()
   }
 }
 
-static int GdbmiScalar = 1;
+static inline void
+GdbmiGet(char* token)
+{
+  
+}
+
+static int GdbmiScalar = 12;
 
 /**
  * Set the FMT specifier if provided in the command string
@@ -1270,31 +1279,33 @@ GdbmiHandleSetVariable (int i)
   /* Adjust the CmdPtr to point to the next token */
   GdbmiAdjustCmdPtr (i);
 
-  operand1 = s;
-  operand2 = strstr (s, "=");
-  *operand2++ = (char) 0;
+  operand1 = strtok(s,"=");
+  operand2 = strtok(NULL, "=");
+  
+  if (operand1 && operand2)
+  {
+    /* Set value using address */
+    if (operand1[0] == '*')
+      {
+	gdbmi_addr = DbgLinearAddrFromAddrStr (++operand1);
+	if ((gdbmi_addr != ~0) && (GdbmiString2Num (operand2, &gdbmi_val) == 0))
+	  DbgSetValueByAddress (gdbmi_addr, (unsigned short) gdbmi_val);
+      }
+    else /* Must be a symbol */
+      {
+	Symbol = ResolveSymbol (operand1, SYMBOL_VARIABLE);
+	if (Symbol != NULL && !Symbol->Value.Erasable)
+	  Symbol = NULL;
 
-  /* Set value using address */
-  if (operand1[0] == '*')
-    {
-      gdbmi_addr = DbgLinearAddrFromAddrStr (++operand1);
-      if ((gdbmi_addr != ~0) && (GdbmiString2Num (operand2, &gdbmi_val) == 0))
-	DbgSetValueByAddress (gdbmi_addr, (unsigned short) gdbmi_val);
-    }
-  else /* Must be a symbol */
-    {
-      Symbol = ResolveSymbol (operand1, SYMBOL_VARIABLE);
-      if (Symbol != NULL && !Symbol->Value.Erasable)
-	Symbol = NULL;
-
-      if (Symbol != NULL)
-	{
-	  /* Get linear address for display */
-	  gdbmi_addr = DbgLinearAddr (&Symbol->Value);
-	  if (GdbmiString2Num (operand2, &gdbmi_val) == 0)
-	    DbgSetValueByAddress (gdbmi_addr, (unsigned short) gdbmi_val);
-	}
-    }
+	if (Symbol != NULL)
+	  {
+	    /* Get linear address for display */
+	    gdbmi_addr = DbgLinearAddr (&Symbol->Value);
+	    if (GdbmiString2Num (operand2, &gdbmi_val) == 0)
+	      DbgSetValueByAddress (gdbmi_addr, (unsigned short) gdbmi_val);
+	  }
+      }
+  }
   return (GdbmiCmdDone);
 }
 
@@ -1757,7 +1768,7 @@ void GdbmiPrintFmt(GdbmiFmt_t fmt, unsigned value)
       else  printf("+%d",(value & 0x3fff));
       break;
     case 'f':
-      printf("%f",GdbmiDoubleFromAgc(value));
+      printf("%.*f",9,GdbmiDoubleFromAgc(value));
       break;      
     case 'c':
       printf("%c",(char)value);
