@@ -38,11 +38,12 @@
       <ul>
         <li><a href="#Memory_Map">Memory Map</a></li>
         <li><a href="#CPU_Architecture_Registers">Registers</a></li>
+        <li><a href="#Overflow">15 Bits, 16 Bits, Parity, 1's-Complement
+            and Overflow</a><br>
+        </li>
         <li><a href="Block1.html#io_channels">I/O Channels</a></li>
         <li><a href="#Counters_and_Timers">Counters and Timers</a></li>
         <li><a href="#Interrupt_Processing">Interrupt Processing</a></li>
-        <li><a href="Block1.html#UnprogrammedSequences">Unprogrammed
-            Sequences</a></li>
       </ul>
       <li><a href="#Software">Software</a><br>
       </li>
@@ -61,7 +62,7 @@
         <li><a href="#Instruction-Set_Summary_Tables">Instruction-Set
             Summary Tables</a></li>
       </ul>
-      <li><a href="#Pulse_Sequences">Pulse Sequences</a></li>
+      <li><a href="#Pulse_Sequences">Control-Pulse Sequences</a></li>
       <li><a href="#Available_Block_1_AGC_Software">Available Block 1
           AGC Software</a></li>
       <li><a href="#Available_Supporting_Software">Available Supporting
@@ -89,8 +90,9 @@
         </li>
       </ul>
       <li><a href="#Taking_Solarium_for_a_Spin">Taking Solarium for a
-          Spin</a><br>
-      </li>
+          Spin</a></li>
+    </ul>
+    <ul>
       <ul>
       </ul>
     </ul>
@@ -104,6 +106,8 @@
     </p>
     <ul>
       <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block
+
+
 
 
 
@@ -146,6 +150,18 @@
     <p>However, <i>this</i> page confines itself just to the Block 1
       design.<br>
     </p>
+    <p>It would be very easy, I think, particularly if you only looked
+      at very superficially, to dismiss the Block 1 AGC as a computer
+      that was merely a rebranded but otherwise almost-identical version
+      of the Block 2.&nbsp; In fact, I think it would be fairer to say
+      that in spite of family resemblances, these are quite-different
+      machines for which somebody went to a lot of difficulty to make
+      the development experiences seem very similar.&nbsp; Having dealt
+      with both of them at some level of detail, I'll say that using
+      what you know about the one with the other is a quick path to
+      frustration.<br>
+      <br>
+    </p>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Available_Documentation"></a>Available Documentation<br>
     </h2>
@@ -155,6 +171,8 @@
     this page:<br>
     <ol>
       <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1009.pdf">R-410:&nbsp;
+
+
 
 
 
@@ -180,6 +198,8 @@
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
       <li><a href="http://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574:
+
+
 
 
 
@@ -219,7 +239,10 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
       describes as being 1024 words of read/write memory and 12
       1024-word banks of read-only memory, whereas there were in fact 24
       banks of read-only memory by the time of the Solarium (Apollo 6
-      unmanned mission) software mentioned above. <br>
+      unmanned mission) software mentioned above.&nbsp;&nbsp; In other
+      words, Solarium wouldn't have fit into the amount of memory R-393
+      describes.<br>
+      <br>
     </p>
     <hr size="2" width="100%">
     <h2><a name="Block_1_Computer_System"></a>Block 1 Computer System</h2>
@@ -227,9 +250,10 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     <p>The Block 1 AGC was provided in two different configurations, one
       for the Command Module (then referenced as the C/M), and one for
       the Lunar Module (at that time still called the LEM, or Lunar
-      Excursion Module).&nbsp; Even though still bummed out (fifty years
-      later) over the change from LEM to LM, for consistency I'll refer
-      to the spacecraft here as the CM and LM.<br>
+      Excursion Module).&nbsp; Even though personally still bummed out
+      (fifty years later) over the change from LEM to LM, for
+      consistency I'll refer to the spacecraft here as the CM and LM and
+      forego the temptation to instead talk about the LEM.<br>
     </p>
     <p>The physical configurations of these were different in terms of
       form factor, weight, and memory capacity — and of course, software
@@ -273,27 +297,30 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
         </li>
       </ul>
     </ul>
-    <p align="left">In point of fact, for the Block 1 CM missions flown,
-      double the stated amount of memory was used, so mission
-      requirements clearly increased in the years following E-1574
-      (1963), and I can't tell you for certain whether the final Block 1
-      design had the physical characteristics described above. <br>
+    <p align="left"><i>In point of fact</i>, for the Block 1 CM missions
+      flown, <u>double the stated amount of memory was used</u>, so
+      mission requirements clearly increased in the years following
+      E-1574 (1963), and I can't tell you for certain whether the final
+      Block 1 design had the other physical characteristics described
+      above.&nbsp;&nbsp; Nor were any Block 1 LM missions ever flown,
+      and I'm not aware of any Block 1 LM software, so I can't comment
+      on how those requirements may have changed as well.<br>
     </p>
     <table align="center" cellpadding="24" cellspacing="2">
       <tbody>
         <tr>
           <td valign="top"><a href="agc-block1-open.jpg"><img alt=""
-                src="small-agc-block1-open.jpg" height="300" border="2"
-                width="375"></a><br>
+                src="small-agc-block1-open.jpg" height="300" width="375"
+                border="2"></a><br>
           </td>
           <td align="center" valign="top"><a
               href="agc-block1-closed.jpg"><img alt=""
                 src="small-agc-block1-closed.jpg" height="300"
-                border="2" width="375"></a><br>
+                width="375" border="2"></a><br>
           </td>
           <td align="center" valign="top"><a href="AGC-block1-LM.jpg"><img
                 alt="" src="thm-AGC-block1-LM.jpg" height="300"
-                border="2" width="331"></a><br>
+                width="331" border="2"></a><br>
           </td>
         </tr>
       </tbody>
@@ -304,14 +331,26 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
       style="font-style: italic;">Journey to the Moon: The History of
       the Apollo Guidance Computer</span>, which you should buy), while
     the final one depicts the LM version (sorry there's no better
-    picture, taken from document R-410, by ... wait for it ... Eldon C.
-    Hall).<br>
+    picture), taken from document R-410, by ... wait for it ... Eldon C.
+    Hall.<br>
+    <br>
+    Incidentally, a fellow named Francois Rautenbach has recently (at
+    least, it was recent at the time I'm writing this) been engaged in
+    extracting the contents of the core memory from the Block 1 AGC used
+    for unmanned AS-202 mission, sometimes known as "Apollo 3".&nbsp; As
+    a part of that effort, or vice-versa (I'm not sure which), he has
+    also been making <a
+      href="https://www.youtube.com/channel/UC1KeUTUd-fDv553C3UNr7xQ">a
+      series of YouTube videos</a> in which there's a lot of info and
+    there are nice visuals about the Block 1 AGC (and the Block 2 as
+    well), beyond what the poor photographic reproductions above can
+    reveal.&nbsp; Well worth viewing!<br>
     <h3><a name="DSKY"></a>DSKY</h3>
     As in Block 2, the DSKY was the display/keyboard unit with which an
-    astronaut could have entered data into the computer and gotten feed
-    back from it.&nbsp; Block 1 DSKYs differed from Block 2 DSKYs, and
-    even from each other.&nbsp; Recall that the Command Module had two
-    DSKYs (even though it had only one AGC), one on the main control
+    astronaut could have entered data into the computer and gotten
+    feedback from it.&nbsp; Block 1 DSKYs differed from Block 2 DSKYs,
+    and even from each other.&nbsp; Recall that the Command Module had
+    two DSKYs (even though it had only one AGC), one on the main control
     panel and one on the navigation side-panel.&nbsp; The second DSKY
     was used for entering star or other landmark location
     sightings.&nbsp; In a Block 2 CM, the main and nav DSKYs are
@@ -358,6 +397,8 @@ Guidance
 
 
 
+
+
       and Navigation System training slides</a>, July 1965, which are
     perhaps of greater practical utility, if lesser aesthetic
     value.&nbsp; If you click the drawing of the nav-panel DSKY (on the
@@ -372,7 +413,7 @@ Guidance
               href="Block1DSKY-drawing2.png"><img alt=""
                 src="Block1DSKY-drawing2-small.png" style="border: 2px
                 solid ; width: 237px; height: 839px;" height="839"
-                border="0" width="237"></a></td>
+                width="237" border="0"></a></td>
           <td style="text-align: center;"><img style="width: 587px;
               height: 572px;" alt="" src="Block1DSKY-drawing.png"
               height="572" width="587"><br>
@@ -403,13 +444,12 @@ Guidance
       <li>UPLINK ACCEPT/BLOCK toggle switch.</li>
       <li>The TEST ALARM pushbutton on the nav-bay version of the DSKY.</li>
     </ul>
-    <br>
     Outputs from the AGC's <tt>OUT0</tt> and <tt>OUT1</tt> registers
     control the DSKY's indicator lamps, octal/decimal displays, and the
     special "flashing" feature which can cause the illumination of the
-    VERB and NOUN labels to flash on an off.&nbsp; The octal/decimal
+    VERB and NOUN labels to flash on and off.&nbsp; The octal/decimal
     (7-segment displays plus signs) are controlled by the multiplexing
-    feature earlier.&nbsp; Each 15-bit word placed into the <tt>OUT0</tt>
+    feature mentioned earlier.&nbsp; Each 15-bit word placed into the <tt>OUT0</tt>
     register consists of 4 bits (a "relay word") that specify a
     particular set of 11 relays in the DSKY, while the other 11 bits
     specify the data that's supposed to be latched into those
@@ -425,13 +465,12 @@ Guidance
         known to correspond to anything in this scheme.<br>
       </li>
     </ul>
-    <br>
     <h3><a name="Uplink"></a>Uplink</h3>
     <p>The digital uplink was simply a way to have a remote keypad on
       the ground, which could transmit keystrokes via radio to the AGC
       aboard the spacecraft as if it were a DSKY.&nbsp; In other words,
-      the only data it could transmit corresponded to DSKY keypad
-      codes.&nbsp; The keycodes were identical to the 5-bit DSKY
+      the only data the uplink could transmit corresponded to DSKY
+      keypad codes.&nbsp; The keycodes were identical to the 5-bit DSKY
       keycodes as described in the preceding section, but if (say) a
       5-bit keycode of bits <tt>B5 B4 B3 B2 B1</tt> were to be
       transmitted, they were supposed to be packaged into the following
@@ -457,26 +496,26 @@ Guidance
     and could thus be checked for corruption and discarded if it was
     found to be corrupted.&nbsp; <br>
     <br>
-    After the uplink is detected, the UPTL activity lamp on the DSKY
-    illuminates to inform the astronauts that that an uplink is in
-    progress, and it will remain illuminated in most cases until the
-    uplink sends a KEY RLSE keycode.<br>
+    After the uplink was detected, the UPTL activity lamp on the DSKY
+    illuminated to inform the astronauts that an uplink was in progress,
+    and it remained illuminated in most cases until the uplink sent a
+    KEY RLSE keycode to "release" the uplinked keypad.<br>
     <br>
     There was a toggle switch on the DSKY that could be used either to
     allow uplinked data, or else to block it and allow the spacecraft
     and/or astronauts to retain complete control of the keypad
-    input.&nbsp; If the uplink was allowed, then they were treated
-    indistinguishably (at least superficially) to keypad input, and the
-    results of the input could be seen on the DSKY.&nbsp; For example,
-    an uplinked V36E would be seen visibly on the DSKY as the VERB area
-    first blanking out, then a 3 appearing, a 6 appearing, and finally,
-    a fresh start being performed, since "fresh start" is the purpose of
-    a V36E.&nbsp; Naturally, the DSKY could not be seen physically on
-    the ground, and the digital-uplink itself did not provide any
-    feedback to the ground as to the effect the remote keystrokes were
-    having aboard the spacecraft.&nbsp; That feedback, among other
-    things, was the responsibility of the digital downlink as covered in
-    the next section.<br>
+    input.&nbsp; If the uplink was allowed, then the uplinked keycodes
+    were treated indistinguishably (at least superficially) to keypad
+    input, and the results of the input could be seen on the DSKY.&nbsp;
+    For example, an uplinked V36E would be seen visibly on the DSKY as
+    the VERB area first blanking out, then a 3 appearing, a 6 appearing,
+    and finally, a fresh start being performed, since "fresh start" is
+    the purpose of a V36E.&nbsp; Naturally, the DSKY could not be seen
+    physically on the ground, and the digital-uplink itself did not
+    provide any feedback to the ground as to the effect the remote
+    keystrokes were having aboard the spacecraft.&nbsp; That feedback,
+    among other things, was the responsibility of the digital downlink
+    as covered in the next section.<br>
     <blockquote>
       <p> </p>
     </blockquote>
@@ -499,7 +538,7 @@ Guidance
     <br>
     Memory is divided into 02000 (octal) mostly 15-bit words of
     "erasable" memory — i.e., memory which can both be read from and
-    written to — and 24 banks, each with 02000 words of read-only or
+    written to — and 24 banks, each with 02000 words, of read-only or
     "fixed" memory.<br>
     <br>
     Conventionally, AGC programming uses octal notation, as opposed to
@@ -543,50 +582,327 @@ Guidance
     01 and 02 have the special short addresses 02000 through 05777, and
     they are invariably referred to in that way rather than in the <i>BB,AAAA</i>
     form.<br>
+    <br>
     Various erasable-memory locations in the address range 0-057 have
     special purposes, such as being dedicated CPU registers,
-    input/output ports, or counters (such as system timers).
-    <h3><a name="CPU_Architecture_Registers"></a>Registers</h3>
-    There are 4 16-bit registers addressable directly by software,
-    namely<br>
+    input/output ports, or counters (such as system timers).<br>
+    <h3><a name="Overflow"></a>15 Bits, 16 Bits, Parity, 1's-Complement,
+      and Overflow</h3>
+    <p>The information in this section should not differ from equivalent
+      information for Block 2, so if you are confident you understand
+      that, then there's no reason to read it.&nbsp; However, it is not
+      merely cut-and-pasted from corresponding Block 2 descriptive
+      material, and so may (or may not) be useful in itself.<br>
+    </p>
+    <p>Almost all AGC memory words consist of 16 bits, of which 15 bits
+      is "data", and a 16th bit is a parity bit that the AGC hardware
+      can access for the purpose of testing for corruption.&nbsp; If you
+      were to build an AGC or to create a hardware simulation of an AGC,
+      that parity bit would be an important thing to understand and
+      account for, since parity violations are detectable by hardware,
+      cause alarm indicators to trigger, and so on.<br>
+    </p>
+    <p>On the other hand, my own preoccupation in this site, in so far
+      as Block 1 is concerned, is making Solarium and other Block 1
+      programs available within a software simulation of the AGC.&nbsp;
+      Parity is completely irrelevant to that usage, because such an
+      environment is not an embedded one, and parity is just a confusing
+      distraction ... so I don't care about parity, my software
+      simulation doesn't care about parity, and I won't mention parity
+      again.&nbsp; As one of the original AGC developers commented to
+      me, "parity schmarity", and I think that about sums it up.&nbsp;
+      Consequently when I talk about AGC memory, it will almost always
+      be in terms of <i>15</i>-bit words.<br>
+    </p>
+    <p>But there are some exceptions.&nbsp; Certain reserved memory
+      locations, which aren't always (strictly speaking) contained in
+      erasable memory even though addressed as such, consist of 16 bits,
+      but&nbsp; the 16th bit is not parity; rather, it is an indication
+      of "overflow".&nbsp; The principal example of such a privileged
+      location is the "accumulator register", <tt>A</tt>, discussed in
+      the next section.&nbsp; That's because all results of most kinds
+      of arithmetical operations are deposited directly into the
+      accumulator, and if an operation such addition has overflowed,
+      that will first be manifested in the accumulator.&nbsp; Various
+      subsequent operations on that data will behave differently
+      depending on whether or not (or how) overflow is manifested within
+      the accumulator.&nbsp; There are also hidden registers, not
+      addressable by software, and overflow within those registers may
+      have significant implications just like overflow in the
+      accumulator does.<br>
+    </p>
+    <p>I have been chided for liking to think of "overflow" is if it
+      were a condition that has occurred, such as "the accumulator has
+      wrapped around from positive to negative" and thus overflowed, or
+      "the accumulator has wrapped around from negative to
+      positive".&nbsp; That's a poor way to think about overflow in this
+      architecture, for a couple of reasons:<br>
+    </p>
+    <ol>
+      <li>Arithmetical overflow <i>does not</i> "wrap around", in the
+        sense of changing sign, because the AGC employs 1's-complement
+        arithmetic rather than 2's-complement arithmetic.&nbsp;
+        Wrap-around with sign-change is a characteristic of
+        2's-complement arithmetic.&nbsp; However, with 1's complement,
+        overflow does not work that way.&nbsp; If, say, you add 1 to the
+        largest possible positive number, it will indeed wrap around,
+        but it will wrap around to +0 and not to a negative value.</li>
+      <li>Overflow is not an instantaneous condition that disappears,
+        but rather is encoded within the 16-bit value, and continues to
+        be manifested there until some operation occurs which converts
+        the value back to a 15-bit one incapable of retaining the
+        overflow information.</li>
+    </ol>
+    <p>Before getting to the exact encoding of overflow information,
+      though, let's briefly talk about the 1's-complement representation
+      of numbers.&nbsp; Consider a 15-bit number with bits <tt>B15 B14
+        ... B1</tt>.&nbsp; This representation can store 2<sup>14</sup>-1=16383
+
+      distinct positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
+
+      distinct negative numbers (-1 through -16383).&nbsp; Zero actually
+      has two distinct representations, +0 and -0, which act the same
+      for some purposes and <i>differently</i> for others.&nbsp; In
+      other words, +0 and -0 are not completely interchangeable with
+      each other.&nbsp; The positive numbers are encoded the same way
+      they would be in 2's-complement:<br>
+    </p>
+    <blockquote>
+      <p>0 (decimal) = 000 000 000 000 000 (binary)<br>
+        1 (decimal) = 000 000 000 000 001 (binary)<br>
+        2 (decimal) = 000 000 000 000 010 (binary)<br>
+        3 (decimal) = 000 000 000 000 011 (binary)<br>
+        4 (decimal) = 000 000 000 000 100 (binary)<br>
+        ...<br>
+        16383 (decimal) = 111 111 111 111 111 (binary)<br>
+      </p>
+    </blockquote>
+    Negative numbers, in the other hand are not encoded the same way,
+    but are simply the logical complements of the corresponding positive
+    numbers.&nbsp; For example,<br>
+    <blockquote>12345 (decimal) = 011 000 000 111 001 (binary)<br>
+    </blockquote>
+    <p>so<br>
+    </p>
+    <blockquote>-12345 = <span style="text-decoration: overline;">011
+        000 000 111 001</span> = 100 111 111 000 110<br>
+    </blockquote>
+    <p>Now, in 1's-complement there is no "sign bit" as such.&nbsp; In
+      other words you can't turn (say) 3 into -3 or vice-versa by just
+      flipping one bit.&nbsp; Nevertheless, in the examples above, the
+      most-significant bit, bit 15, does indicate the sign, and
+      therefore you can tell whether a number is positive or negative by
+      testing bit 15.&nbsp; For that reason, bit 15 is sometimes called
+      the "sign bit" and is sometimes designated by the special symbol<br>
+    </p>
+    <blockquote><tt>SG</tt> = bit 15 = "sign bit"<br>
+    </blockquote>
+    <p>For those special 16-bit memory locations, like the accumulator,
+      a regular, non-overflowed number will have its 16th bit identical
+      to its 15th bit.&nbsp; It also has a special designation:<br>
+    </p>
+    <blockquote><tt>UC</tt> = bit 16 = "uncorrected sign bit".<br>
+    </blockquote>
+    <p>In other words, for numbers without overflow, <tt>SG </tt>=<tt>
+        UC</tt> (=0 if positive or =1 if negative).&nbsp; For numbers <i>with</i>
+      overflow, though, this is not the case.&nbsp; There are two
+      possibilities for numbers with overflow:<br>
+    </p>
     <ul>
-      <li>A (address 0000) — the "accumulator", at address 0 in
+      <li>"Positive overflow":&nbsp; <tt>UC</tt> = 0 and <tt>SG</tt> =
+        1.</li>
+      <li>"Negative overflow": <tt>UC</tt> = 1 and <tt>SG</tt> = 0.</li>
+    </ul>
+    <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
+      that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
+
+      When the 16-bit form of a number (say, in the accumulator) needs
+      to be converted to a normal 15-bit number (say, to be stored at a
+      location in erasable memory), what happens is that the <tt>UC</tt>
+      bit steps in and kicks the <tt>SG</tt> bit out of the way:<br>
+    </p>
+    <blockquote>
+      <p><tt>UC SG B14 ... B1</tt> (16 bits)&nbsp; →&nbsp; <tt>UC B14
+          ... B1</tt> (15 bits)<br>
+      </p>
+    </blockquote>
+    <p>Let's consider an example of this in action.&nbsp; Imagine we
+      want to increment the largest possible positive number, 037777, by
+      1.&nbsp; Start by just using the same old binary arithmetic you're
+      familiar with, without worrying about "1's-complement" vs
+      "2's-complement" or overflow:<br>
+    </p>
+    <blockquote>0 011 111 111 111 111 + 0 000 000 000 000 001&nbsp;
+      →&nbsp; 0 100 000 000 000 000<br>
+    </blockquote>
+    <p>Having done that, though, we now have overflow, and specifically
+      "positive overflow", since <tt>UC</tt> = 0 and <tt>SG</tt> = 1
+      do not agree with each other.&nbsp; And if we were to save this as
+      a 15-bit number, <tt>UC</tt> = 0 would shift down to overwrite
+      the <tt>SG</tt> = 1, and we'd simply have 000 000 000 000 000, or
+      just 0.<br>
+    </p>
+    <h3><a name="CPU_Architecture_Registers"></a>Registers</h3>
+    Incidentally, note that while I (and everybody else) refer to the
+    registers I'm going to discuss by their names rather than their
+    addresses, the assembler is in fact not aware of those names; they
+    are not reserved words or predefined.&nbsp;&nbsp;&nbsp; Therefore, a
+    program like Solarium will contain pseudo-ops that define these
+    names as having the numerical values of the registers' addresses.<br>
+    <br>
+    There are 4 16-bit registers addressable directly by software and
+    partaking of the 16-bit glory of overflow, <tt>UC</tt>, and <tt>SG</tt>
+    discussed in the preceding section.<br>
+    <ul>
+      <li><tt>A</tt> (address 0000) — the "accumulator", at address 0 in
         erasable, though normally accessed by it's name, "A". This
         register is the primary source or destination for most
-        operations.</li>
-      <li>Q (address 0001) — primarily used to hold the return addresses
-        for subroutines. It is automatically written to by the TC
-        command when a jump is made to a different memory location.
-        There is no hardware stack, so the subroutine has the
-        responsibility of saving the contents of Q and restoring it
-        before returning to the calling program, if appropriate.</li>
-      <li>Z (address 0002) — pointer to the <i>next</i> instruction to
-        be executed in the normal flow (i.e., barring a jump instruction
-        like TC or CCS or an interrupt) after the current instruction is
-        completed. The Z register is already set up with this value by
-        the previously-executed instruction, before the current program
+        operations, and in particular, is where the results of most
+        arithmetical operations are deposited.</li>
+      <li><tt>Q</tt> (address 0001) — primarily used to hold the return
+        addresses for subroutines. It is automatically written to by the
+        <tt>TC</tt> command when a jump is made to a different memory
+        location. There is no hardware stack, so the subroutine has the
+        responsibility of saving the contents of <tt>Q</tt> and
+        restoring it before returning to the calling program, if
+        appropriate.</li>
+      <li><tt>Z</tt> (address 0002) — pointer to the <i>next</i>
+        instruction to be executed in the normal flow (i.e., barring a
+        jump instruction like <tt>TC</tt> or <tt>CCS</tt> or an
+        interrupt) after the current instruction is completed. The <tt>Z</tt>
+        register is already set up with this value by the
+        previously-executed instruction, before the current program
         counter is reached. (Note, though, that when using the yaAGCb1
-        or yaAGC-Block1 CPU simulator program in their debugging mode,
-        the value displayed is always for the <i>current</i>
-        instruction rather than for the next one, since I find it more
-        instructive that way.) Though the register is 16 bits, in
-        theory, this pointer is just 12 bits (0000-7777), and the full
-        address, if in banked memory, is formed by adding in the value
-        stored in the Bank register.</li>
-      <li>LP (address 0003) — principally for holding results of MP
-        operations, or operands for DV operations.</li>
+        CPU simulator program in their debugging mode, the value
+        displayed is always for the <i>current</i> instruction rather
+        than for the next one, since I find it more instructive that
+        way.) Though the register is 16 bits, in theory, this pointer is
+        just 12 bits (0000-7777), and the full address, if in banked
+        memory, is formed by adding in the value stored in the <tt>Bank</tt>
+        register.</li>
+      <li><tt>LP</tt> (address 0003) — principally for holding results
+        of <tt>MP</tt> or <tt>DV</tt> operations, but do <i>not</i>
+        make the mistake of equating it with the Block 2's L
+        register.&nbsp; It's not very useful for much else (a point on
+        which I'm open to correction) because it's an example of
+        something called an "editing register", of which the other
+        examples (described below) are <tt>CYR</tt>, <tt>SR</tt>, <tt>CYL</tt>,
+        and <tt>SL</tt>.&nbsp; What that means is that when you try to
+        store a value in this register, using an assembly-language
+        instruction such as <tt>TS</tt>, it is not stored as-is, but is
+        instead "edited" in a particular way.&nbsp; Furthermore, various
+        assembly-language instructions which seemingly only read this
+        register, will in fact rewrite the register, causing the editing
+        operation to be re-performed in-place.&nbsp; There is a table
+        (3-2) in R-393 that defines the various editing operations that
+        are performed on this select cadre of registers, but it's
+        perhaps a bit hard to figure out for the uninitiated.&nbsp; The
+        specific editing operation performed by <tt>LP</tt> is as
+        follows:&nbsp; If you try to write a set of bits like <tt>B15
+          B14 B13 ... B2 B1 to LP</tt>, it will in fact be written as <tt>B1
+
+          0 B14 B13 ... B1</tt>.&nbsp; Thus, the most-significant
+        original bit <tt>B15</tt> is discarded, and then what's left
+        over is shifted downward, wrapping the old least-significant bit
+        into the new most-significant position.</li>
+    </ul>
+    <p>There's also a variety of 15-bit registers:<br>
+    </p>
+    <ul>
+      <li><tt>Bank</tt> (address 015): When fixed memory having
+        addresses of the form <tt>BB,OOOO</tt> (i.e., bank,offset),
+        only the offset (<tt>OOOO</tt>) is supplied by the instruction
+        operands.&nbsp; (Yes, those are all upper-case letters Oh and
+        not zeroes.)&nbsp; The bank (<tt>BB</tt>) comes instead from the
+        <tt>Bank</tt> register.&nbsp; Only bits <tt>B15 B14 B13 B12 B11</tt>
+        of this register are used, and so all of the lower-order bits of
+        the register are zero.&nbsp; Perhaps confusingly, when the
+        contents of this register are discussed, they are usually
+        discussed as if they were the same as <tt>BB</tt>: i.e., that
+        the register contains values in the range 0-037; in reality, it
+        contains that range of values, but shifted upward by 12 binary
+        places.&nbsp; Consequently, there are tricks that have to be
+        used to effectively store a bank number in the Bank register,
+        and those tricks are discussed later when the instruction set is
+        covered.</li>
+      <li><tt>CYR</tt> (address 020), <tt>SR</tt> (address 021), <tt>CYL</tt>
+        (address 022), <tt>SL</tt> (address 023):&nbsp; These are
+        "editing registers", like <tt>LP</tt> as discussed earlier,
+        which automatically modify values explicitly stored to them, or
+        implicitly rewritten to them as side-effects of various
+        instructions.&nbsp; Table 3-2 of R-393 covers the editing
+        operation with is performed for each of these, but frankly it is
+        very confusing.&nbsp; It is best to think of it as follows:</li>
+      <ul>
+        <li><tt>CYR</tt>:&nbsp; "Rotates" the value to the right.&nbsp;
+          I.e., shifts the (15-bit) value downward by one bit position,
+          and cycles the least-significant bit back upward into the
+          most-significant position.<br>
+        </li>
+        <li><tt>SR</tt>:&nbsp; Shifts the 15-bit value downward,
+          duplicating the most-significant bit.&nbsp; In other words, it
+          is a signed divide-by-two operation.<br>
+        </li>
+        <li><tt>CYL</tt>:&nbsp; "Rotates" the value to the left.&nbsp;
+          I.e., shifts the (15-bit) value upward&nbsp; by one bit
+          position, and cycles the most-significant bit back
+          downward&nbsp; into the least-significant position.</li>
+        <li><tt>SL</tt>:&nbsp; Shifts the 15-bit value upward.&nbsp; In
+          other words, it is a multiply-by-two.</li>
+      </ul>
+      <li><tt>QRUPT</tt> (address 027), <tt>ZRUPT</tt> (address 024), <tt>BRUPT</tt>
+        (address 025):&nbsp; When an <a
+href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">interrupt
+
+          is processed</a>, the existing values of the <tt>Q</tt>, <tt>Z</tt>,
+        and <tt>B</tt> registers are automatically copied into these
+        registers.&nbsp; <tt>B</tt> is a hidden register, not
+        addressable by software, and hence was not discussed with the
+        registers already mentioned, however, it has the important role
+        of holding the numerical value (as opposed to the address) of
+        the next instruction to be executed after resumption from the
+        interrupt-processing.<br>
+      </li>
+      <li><tt>ARUPT</tt> (address 026), <tt>BANKRUPT</tt> (address
+        030),<tt> </tt><tt> OVRUPT</tt> (address 031), <tt>LPRUPT</tt>
+        (address 032), <tt>DSRUPTSW</tt> (address 033):&nbsp; These
+        registers are <i>available</i> for storing the values of other
+        registers during <a href="#Interrupt_Processing">interrupt
+          processing</a>.&nbsp; However, that storage isn't done
+        automatically, and (if desired) has to be done explicitly by the
+        interrupt-service routine itself.&nbsp; In short, these are just
+        regular erasable-memory locations like any other, that just
+        happen to have names that hint at an appropriate use for them.<br>
+      </li>
+    </ul>
+    You might suppose that since the various <tt>RUPT</tt> registers
+    mentioned above are 15-bit, but the values which are supposed to be
+    stored in them are 16-bit, that this could cause a problem.&nbsp; In
+    fact, though interrupts are inhibited when <tt>A</tt> or <tt>B</tt>
+    contain overflow, so they cannot cause a problem.&nbsp; As far as <tt>Q</tt>,
+    <tt>Z</tt>, and <tt>LP</tt> are concerned, while they may
+    theoretically have 16 bits, there is seldom any useful way to use
+    the 16th bit, and for those cases one could use the <tt>INHINT</tt>
+    instruction (discussed later) to inhibit interrupts during a short
+    stretch of code where it might be a problem.<br>
+    <br>
+    In the list above, I've left out a number of registers related to
+    i/o or used as timer/counters, and those are covered in the
+    succeeding sections.<br>
+    <ul>
     </ul>
     <h3><a name="io_channels"></a>I/O Channels</h3>
     Unlike the Block 2 system, there is no separate i/o-channel
-    address-space, and the i/o channels are simply memory mapped, but
-    it's convenient to separate out their description as if there were a
-    separate address space for them. There are&nbsp; 4 15-bit input
-    channels and 5 15-bit output channels. These are not all fully (or
-    correctly) documented in the R-393 or "Compleat Sunrise" documents,
-    so what follows is a description partially taken from the Solarium
-    055 software itself or, where I haven't yet had a chance to verify
-    the data myself, descriptions from R-393 or Compleat Sunrise are
-    given in brackets ([like so]) to indicate my uncertainty about them.
+    address-space, and the i/o channels are simply memory mapped, we'll
+    discuss them separately from the other registers anyway. There
+    are&nbsp; 4 15-bit input channels and 5 15-bit output channels.
+    These are not all fully (or correctly) documented in the R-393 or
+    "Compleat Sunrise" documents, and haven't yet been entirely vetted
+    by me or my colleagues, so you have to take some of them with a
+    grain of salt; that's particularly true when you see a terse
+    description like "1600 pps" as opposed to a more drawn-out
+    description with my signature verbosity.<br>
+    <br>
     The least-significant bit of these registers is referred to below as
     B1, and the most-significant as B15:
     <ul>
@@ -616,13 +932,14 @@ Guidance
           to return to zero after the pushbutton is released, and will
           refuse to process additional keystrokes until this occurs.<br>
         </li>
-        <li>[B7-B13 are not used.]</li>
-        <li>[B14 is active when the AGC can be put into
+        <li>B7-B13 are not used.</li>
+        <li>B14 is active when the AGC can be put into
           partially-powered-down "standby mode", and is, I believe,
-          connected to a control-panel switch that's not on the DSKY.]</li>
-        <li>[B15 is active when the MARK key, not on the DSKY itself, is
+          connected to a control-panel switch that's not on the DSKY.</li>
+        <li>B15 is active when the MARK key, not on the DSKY itself, is
           pressed, and activates B6 just like the DSKY-keypad keys do.
-          It is used to cause the AGC to "mark" the current IMU data.]</li>
+          It is used to cause the AGC to "mark" the current IMU data ...
+          i.e., to snapshot it in memory.</li>
       </ul>
       <li><tt>IN1</tt> (address 0005): <br>
       </li>
@@ -730,7 +1047,11 @@ Guidance
         <li>B15:&nbsp; ENG OUT-OFF<br>
         </li>
       </ul>
-      <li><tt>OUT2</tt> (address 0012):</li>
+      <li><tt>OUT2</tt> (address 0012):&nbsp; This output-register is
+        dedicated to generating pulses for driving peripherals such as
+        the CDUs, and the various bit-fields are described in some
+        detail in the "METHOD FOR GENERATING OUTPUT RATES" section in
+        R-393.</li>
       <ul>
         <li>B1:&nbsp; OPT X<br>
         </li>
@@ -777,8 +1098,12 @@ Guidance
 
 
 
+
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -788,9 +1113,13 @@ Guidance
 
 
 
+
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1062,16 +1391,96 @@ Guidance
 
 
 
+
+
     <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
     to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
     positions would display "+35".&nbsp; Since this is latched in the
     DSKY, those positions continue to display that way until a new word
     with <tt>WWWW</tt>=05 is written to <tt>OUT0</tt> and are
     unaffected to writes to <tt>OUT0</tt> with different values of <tt>WWWW</tt>.<br>
-    <h3><a name="Counters_and_Timers"></a>Counters and Timers<br>
-    </h3>
-    <p>TBD<br>
+    <h3><a name="Counters_and_Timers"></a>Counters and Timers</h3>
+    <p>Counter/timer registers are registers in erasable memory which
+      are automatically incremented or decremented by specific actions
+      of the hardware, independent of the operation of the
+      software.&nbsp; Thus, the software may (in some cases) usefully
+      load an initial value into them, but for the most part just polls
+      the contents of these registers when it needs to do so.&nbsp; In
+      some cases too, an overflow of one of these registers may <a
+        href="#Interrupt_Processing">trigger an interrupt</a>.<br>
     </p>
+    <ul>
+      <li><tt>OVCTR</tt> (address 034):&nbsp; This counter is
+        incremented every time an addition or subtraction operation
+        (i.e., <tt>AD</tt> or <tt>SU</tt>) creates <a
+          href="#Overflow">positive overflow in the accumulator register</a>.&nbsp;
+
+        Conversely, it is decremented every time an addition or
+        subtraction creates a negative overflow.&nbsp; However, just the
+        existence of overflow outside of that context has no effect.<br>
+      </li>
+      <li><tt>TIME2</tt> (address 035):&nbsp; This 14-bit counter
+        increments every time <tt>TIME1</tt> (see below) wraps from
+        037777 to 0; this occurs every 163.84 seconds.&nbsp; <tt>TIME2</tt>
+        and <tt>TIME1</tt> together form a single 28-bit timer counting
+        the number of 10 ms intervals that have elapsed since power-up,
+        and will itself wrap around to zero after just over 31 days ...
+        comfortably longer than any possible Apollo mission.<br>
+      </li>
+      <li><tt>TIME1</tt> (address 036):&nbsp; This 14-bit counter
+        increments every 10 ms.&nbsp; It will wrap around from 037777 to
+        0 every 163.84 seconds.<br>
+      </li>
+      <li><tt>TIME3</tt> (address 037):&nbsp; This 14-bit counter
+        increments every 10 ms, and triggers <a
+          href="#Interrupt_Processing">a T3RUPT interrupt</a> when it
+        counts past its maximum value of 037777.&nbsp; However, it is
+        pre-loaded via software to maintain a nominal interrupt rate of
+        TBD.&nbsp; It is used for managing the "waitlist", which is part
+        of the multi-tasking capability of the system.<br>
+      </li>
+      <li><tt>TIME4</tt> (address 040):&nbsp; This 14-bit timer
+        increments every 10 ms, and triggers <a
+          href="#Interrupt_Processing">a T4RUPT interrupt</a> when it
+        counts past its maximum value of 037777.&nbsp; It is generally
+        pre-loaded by software in a such a way as to do this every 60
+        ms, although sometimes that interval is split into a 20 ms
+        interval followed by a 40 ms interval.&nbsp; The section
+        entitled "T4RUPT OUTPUT CONTROL" in R-467 covers the
+        functionality of the T4RUPT in some detail, but in brief, it
+        handles all sorts of time-sensitive i/o other than the DSKY.<br>
+      </li>
+      <li><tt>UPLINK</tt> (address 041):&nbsp; This 16-bit
+        shift-register receives the data stream of <a href="#Uplink">digital-uplink
+
+          data, as described earlier</a>.&nbsp; It is included in this
+        section because it is implemented in hardware similar to a
+        counter register, although the software simulation simply treats
+        it as any other 15-bit input register.&nbsp; (The reason for the
+        discrepancy between 16-bit and 15-bit here is that the 16th bit,
+        which is physically the first one transmitted, is simply a
+        "start bit" used for synchronization purposes, and carries no
+        data accessible to the software.)<br>
+      </li>
+      <li><tt>OUTCR1</tt> (address 042), <tt>OUTCR2</tt> (address
+        043):&nbsp; Used for counting the logical OR of all the set
+        pulses to the CDUs and gyros.&nbsp; See the "METHOD FOR
+        GENERATING OUTPUT RATES" section in R-393.<br>
+      </li>
+      <li><tt>PIPAX</tt> (address 044), <tt>PIPAY</tt> (address 045), <tt>PIPAZ</tt>
+        (address 046), <tt>CDUX</tt> (address 047), <tt>CDUY</tt>
+        (address 050), <tt>CDUZ</tt> (address 051):&nbsp; Used for
+        capturing accelerometer (PIPA) and angular (CDU) data from the
+        IMU, by means of <a href="#UnprogrammedSequences"><tt>PINC</tt>
+          and <tt>MINC</tt> unprogrammed sequences</a>, I believe.<br>
+      </li>
+      <li><tt>OPTX</tt> (address 052), <tt>OPTY</tt> (address 053), <tt>TRKRX</tt>
+        (address 054), <tt>TRKRY</tt> (address 055), <tt>TRKRR</tt>
+        (address 056):&nbsp; Used for locating fixes from the sextant,
+        by means of <a href="#UnprogrammedSequences"><tt>PINC</tt> and
+          <tt>MINC</tt><tt></tt> unprogrammed sequences</a>, I believe.<br>
+      </li>
+    </ul>
     <h3><a name="Interrupt_Processing"></a>Interrupt Processing</h3>
     At fixed-memory address 02000, you find a vector-interrupt table,
     containing 7 interrupt vectors, each 4 words long, which are
@@ -1103,7 +1512,6 @@ Guidance
         (the telemetry data).</li>
       <li>Address 02030 — the power-up entry-point of the software.</li>
     </ul>
-    <br>
     An interrupt performs several functions automatically in hardware
     before the interrupt-servicing by the software begins. The existing
     Q and Z register values are transferred to the CPU registers QRUPT
@@ -1140,7 +1548,6 @@ Guidance
     Interrupts can be inhibited in a variety of ways, in which case the
     interrupts don't occur until the inhibiting factor is removed. These
     inhibiting factors are:<br>
-    <br>
     <ul>
       <li>Interrupts can be explicitly disabled using the
         assembly-language instruction INHINT, and remain disabled until
@@ -1156,9 +1563,6 @@ Guidance
         them is if this overflow condition can be checked.</li>
     </ul>
     <br>
-    <h3><a name="UnprogrammedSequences"></a>Unprogrammed Sequences</h3>
-    TBD<br>
-    <br>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Software"></a>Software</h2>
     <h3><a name="The_Interpreter_vs._the_CPU"></a>The Interpreter vs.
@@ -1171,6 +1575,8 @@ Guidance
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
 
 
 
@@ -1460,6 +1866,8 @@ Guidance
 
 
 
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -1482,8 +1890,12 @@ Guidance
 
 
 
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1529,6 +1941,8 @@ Guidance
 
 
 
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -1536,6 +1950,8 @@ Guidance
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1572,8 +1988,93 @@ Guidance
     <span style="font-style: italic;"></span>TBD<br>
     <br>
     <hr size="2" width="100%">
-    <h2><a name="Pulse_Sequences"></a>Pulse Sequences</h2>
-    <p>TBD<br>
+    <h2><a name="Pulse_Sequences"></a>Control-Pulse Sequences</h2>
+    <p>As has been explained above, the Block 1 AGC's "basic
+      instructions" (i.e., the assembly-language instructions as opposed
+      to interpretive instruction) mostly require 2 machine cycle times
+      (MCTs) to executed, although the <tt>TS</tt> instruction usually
+      takes only 1 MCT, and others like <tt>MP</tt> or <tt>DV</tt>
+      take considerably more.&nbsp; One MCT requires about 11.7 μs, or
+      more-precisely, 12/1.024 = 11.71875&nbsp; μs (plus or minus
+      whatever the clock tolerance is, of course).<br>
+    </p>
+    <p>That is the viewpoint from the abstraction level of "basic
+      instructions", and is the world-view enforced by our Block 1 CPU
+      simulator, but does not represent the underlying physical reality
+      of hardware AGC.&nbsp; From the physical standpoint:<br>
+    </p>
+    <ul>
+      <li>The CPU operates at a 1.024 MHz clock rate.</li>
+      <li>During each clock period (which for the sake of discussion
+        we'll call an SCL), from 0 to 5 "control pulses" can execute
+        simultaneously and independently of each other.&nbsp; These
+        "control pulses" are essentially microcode instructions that
+        operate on a set of hidden registers, mostly not addressable
+        directly by basic instructions, and are of many types:&nbsp;
+        many more types than there are basic instructions.</li>
+      <li>The basic instructions are simply abstractions consisting of
+        12 or 24 (or some other multiple of 12) sets of 0-5 control
+        pulses each.</li>
+    </ul>
+    <p>The sequence of control pulses corresponding to a basic
+      instruction is, of course, its "control-pulse sequence".&nbsp; In
+      theory, any question about the ultimate behavior of any given
+      basic instruction can be answered by analyzing its control-pulse
+      sequence closely enough, although this can be quite a challenging
+      proposition, particularly for complex instructions like <tt>MP</tt>
+      or <tt>DV</tt>.&nbsp; For example, when the <tt>DV</tt>
+      instruction was defined earlier, certain constraints were placed
+      on the dividend vs the divisor, and if those constraints weren't
+      satisfied, we merely stated that the results were undefined.&nbsp;
+      However, they're not undefined, and you can find out what the
+      result <i>should</i> be if you analyze the control-pulse
+      sequences.&nbsp; However, CPU simulator does not do that, and you
+      cannot expect agreement with the physical AGC in those
+      cases.&nbsp; Of course, the danger is that original AGC developers
+      could have used their inside knowledge of what should have
+      happened, rather than abide by the documented constraints, and
+      hard-coded that tribal knowledge into a program like
+      Solarium.&nbsp; Well, if they did, then it will make me sad.<br>
+    </p>
+    <p>Control-pulse sequences are used for more than just basic
+      instructions, however.&nbsp; All manner of auxiliary operations
+      are coded as control-pulse sequences, and thus occupy CPU time
+      when they occur.&nbsp; These include:<br>
+    </p>
+    <ul>
+      <li>Vectoring to interrupts.</li>
+      <li>Shifting in digital-uplink data.</li>
+      <li>Incrementing timer registers.</li>
+      <li>Incrementing or decrementing counter registers.<br>
+      </li>
+    </ul>
+    <p>My focus in this project is to provide useful software simulation
+      of the AGC and so, while I consider simulation of the
+      control-pulse sequences to be the technically "correct" way of
+      creating such a simulation, I also believe that reaching the point
+      of having a satisfactory practical understanding of control-pulse
+      sequences has a far-steeper learning curve than obtaining a
+      practical understanding of basic AGC assembly-language
+      programming.&nbsp; Moreover, programming the basic instructions
+      much have been what AGC developers did 99% of the time, with
+      teasing out control-pulse sequences (or asking an on-site expert
+      about them) must have represented very little of their time.&nbsp;
+      So from that standpoint, I consider simulating the basic
+      instructions themselves, and ignoring control-pulse sequences, to
+      be the "correct" overall approach.&nbsp; Your opinion may, of
+      course differ.<br>
+    </p>
+    <p>The only knowledge of control-pulse sequences you need in order
+      to follow the remainder of the discussion on the present page is
+      that the control-pulse sequence that increments a CPU counter
+      register is called a <tt>PINC</tt>, and one which decrements it
+      is called a <tt>MINC</tt>.<br>
+    </p>
+    <p>If you do want to find out more about control-pulse sequences in
+      the Block 1 AGC, the discussion of them (intermixed with
+      discussion of basic instructions) is spread throughout Chapter 3
+      of R-393.<br>
+      <br>
     </p>
     <hr size="2" width="100%">
     <h2><a name="Available_Block_1_AGC_Software"></a>Available Block 1
@@ -1586,6 +2087,8 @@ Guidance
       <ul>
         <li><a
             href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/">Raw
+
+
 
 
 
@@ -1626,6 +2129,8 @@ Guidance
 
 
 
+
+
             our GitHub repository</a>.<br>
         </li>
       </ul>
@@ -1641,29 +2146,10 @@ Guidance
     <h3><a name="Virtual_AGCs_Assembler_yaYUL"></a>Virtual AGC's
       Assembler (yaYUL)</h3>
     The Virtual AGC project itself also provides a Block 1 assembler,
-    and it is <a
-href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo/yaYUL.html">the
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      same <b>yaYUL</b> assembler used for Block 2 code</a>.&nbsp; The
-    only difference is that you add a command-line switch of --block1,
-    but otherwise it operates identically, and accepts the full syntax
-    of the Solarium program.<br>
+    and it is <a href="yaYUL.html">the same <b>yaYUL</b> assembler
+      used for Block 2 code</a>.&nbsp; The only difference is that you
+    add a command-line switch of --block1, but otherwise it operates
+    identically, and accepts the full syntax of the Solarium program.<br>
     <h3><a name="CPU_Simulators"></a>CPU Simulators</h3>
     <h4><a name="Comparison"></a>Comparison</h4>
     <p>There are <i>two</i> Block 1 CPU simulators.&nbsp; Because each
@@ -1697,6 +2183,8 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
 
 
 
@@ -1801,6 +2289,8 @@ href="file:///media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo
 
 
 
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -1857,6 +2347,8 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -1878,9 +2370,13 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+
+
 
 
 
@@ -1937,6 +2433,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -1954,6 +2452,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
 
 
 
@@ -2151,7 +2651,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         of the AGC program is accessing uninitialized erasable memory.<br>
       </li>
     </ul>
-    <font face="Calibri" color="blue" size="3"><span style="font-size:
+    <font face="Calibri" size="3" color="blue"><span style="font-size:
         12.0pt;font-family:Calibri;color:blue"></span></font>
     <ul>
     </ul>
@@ -2213,6 +2713,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
         our GitHub repository's "block1" branch</a>.&nbsp; I have only
       worked with it in Linux, but I expect it should probably build in
       Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -2246,6 +2748,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
+
 
 
 
@@ -2382,6 +2886,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
       our GitHub repository's "block1" branch</a>, and I'll simply refer
     to both as "yaDSKYb1".&nbsp; They differ only in physical
     appearance, and in that the simulated nav-bay DSKY has some
@@ -2411,6 +2917,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     <p>At present, a program called yaUplinkBlock1 is provided (in the
       similarly-named source-code directory <a
         href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+
+
 
 
 
@@ -2531,11 +3039,15 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
           The Compleat Sunrise</a> briefly covers what was available in
         the Block 1 SUNRISE program (September 1964).&nbsp; <br>
       </li>
       <li>You can pick through <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
 
 
 
@@ -2578,6 +3090,8 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
+
       Pultorak's meticulously-crafted Block 1 documents and
       demonstration</a> ... the problem being, you see, that John had no
     Block 1 software to use as a model, and hence based his Block 1
@@ -2591,12 +3105,12 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     But anyway, assuming you have started the simulation as indicated
     above, you'll see the following on the simulated DSKY:<br>
     <br>
-    <table border="1" cellpadding="2" cellspacing="2" width="100%">
+    <table width="100%" border="1" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
           <td valign="middle"><a href="block1-demo/startup.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-startup.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">Startup screen, immediately after starting
             simulation.<br>
@@ -2641,6 +3155,8 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
+
               source code</a>, alarm 00203 is "NO IMU MODE INDICATED TO
             COMPUTER".<br>
             <br>
@@ -2653,7 +3169,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/V36E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V36E.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">V36E<br>
           </td>
@@ -2667,7 +3183,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
           <td valign="middle"><a href="block1-demo/V32EV32EV32E.jpg"><img
                 alt="Click to enlarge"
                 src="block1-demo/thm-V32EV32EV32E.jpg" height="200"
-                border="2" width="198"></a><br>
+                width="198" border="2"></a><br>
           </td>
           <td valign="middle">V32EEE</td>
           <td valign="middle">I don't actually know how to get rid of
@@ -2681,7 +3197,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
         <tr>
           <td valign="middle"><a href="block1-demo/thm-V31N02E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V31N02E.jpg"
-                height="200" border="2" width="198"></a><br>
+                height="200" width="198" border="2"></a><br>
           </td>
           <td valign="middle">V31N02E<br>
           </td>
@@ -2717,39 +3233,35 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
           </td>
         </tr>
         <tr>
-          <td valign="middle"><a href="block1-demo/V11N16E.jpg"><img
-                alt="Click to enlarge" src="block1-demo/thm-V11N16E.jpg"
-                height="200" border="2" width="199"></a><br>
+          <td valign="middle"><a href="block1-demo/V16N65E.jpg"><img
+                alt="Click to enlarge" src="block1-demo/thm-V16N65E.jpg"
+                height="200" width="199" border="2"></a><br>
           </td>
-          <td valign="middle">V11N16E<br>
+          <td valign="middle">V16N65E<br>
           </td>
           <td valign="middle">Or perhaps, we might want to display the
-            current time since startup.&nbsp; V11, "Update data displays
-            every one-half second" (according to R-393), combined with
-            N16E, "Time Seconds", does the trick.&nbsp; <br>
+            time since startup.&nbsp; V16, "
+            <meta http-equiv="content-type" content="text/html;
+              charset=UTF-8">
+            Monitor (in decimal) all component (s) of", combined with
+            N65E, "Time (Hours and Seconds)", does the trick.&nbsp; <br>
             <br>
-            R-393 isn't quite right about the description, though, since
-            the display seems to update, say, only every 1.3-1.6
-            seconds.&nbsp; Not that the exact rate at which it updates
-            is significant, since it's still too fast for a human to
-            write down the readings or react to them in any important
-            way.<br>
-            <br>
-            But REGISTER 1 really does show the elapsed time, in units
-            of 1/100 second, in octal.&nbsp; So in the example
-            screenshot at left, 27611 (octal) is 12,169 (decimal)
-            hundredths of a second, or 121.69 seconds.&nbsp; A
-            more-accurate description, I suppose, would be that this
-            monitor simply tells us the contents of the CPU's TIME1
-            register (which counts at 10 ms. intervals) every once and a
-            while.&nbsp; TIME1 happens to have only 14 significant bits
-            before overflowing and wrapping around to 0, so it can only
-            count in the range 0-16383 (00000-037777 octal), and thus
-            resets to 0 every 163.84 seconds.<br>
-            <br>
-            There are other time-monitoring verb/noun combinations, but
-            due to bugs in the simulator I can't show you those just
-            yet!<br>
+            The terse descriptions of the verbs and nouns from resources
+            like R-467 make it a bit tough to figure out what we're
+            actually seeing on the DSKY's display, but you can figure it
+            out with a little bit of cogitation:<br>
+            <ul>
+              <li>REGISTER 1:&nbsp; The time, in decimal, in units of
+                1/100 hours.&nbsp; Therefore, it increments every
+                3600/100=36 seconds.</li>
+              <li>REGISTER 2:&nbsp; The time, in decimal, in units of
+                1/100 seconds.&nbsp; According to R-393, it should be
+                updating every 1/2 second, but it's pretty clear that
+                it's updating once per second instead.&nbsp;&nbsp; Since
+                it only goes up to +99999, obviously we expect it to
+                wrap around to +00000 every 1000 seconds.<br>
+              </li>
+            </ul>
           </td>
         </tr>
       </tbody>
@@ -2759,7 +3271,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-16.<br>
+          2016-09-20.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
