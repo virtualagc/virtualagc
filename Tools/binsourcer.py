@@ -151,6 +151,12 @@ def main():
 
     if infile:
         parse(infile)
+    else:
+        # Put default header text in the output file.
+        ofile = open(outfile, 'w')
+        ofile.write(_DEFAULT_HEADER)
+        ofile.write("\n")
+        ofile.close()
 
     pagedata = {}
 
