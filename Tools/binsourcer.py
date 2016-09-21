@@ -155,7 +155,7 @@ def main():
     global pagedata, page, outfile
     outfile = None
     page = None
-    pagedata = None
+    pagedata = {}
 
     startpage = prompt("Starting page: ")
     if startpage == None:
@@ -215,8 +215,6 @@ def main():
         ofile.write(_DEFAULT_HEADER)
         ofile.write("\n")
         ofile.close()
-
-    pagedata = {}
 
     stop = False
     page = startpage
