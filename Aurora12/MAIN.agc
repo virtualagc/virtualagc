@@ -1,13 +1,13 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	MAIN.agc
-# Purpose:	Part of the source code for Aurora (revision 12),
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	https://www.ibiblio.org/apollo/index.html
-# Page scans:	https://archive.org/details/aurora00dapg
-# Mod history:	2016-09-20 JL	Created.
-#		
+# Copyright:    Public domain.
+# Filename:     MAIN.agc
+# Purpose:      Part of the source code for Aurora (revision 12),
+# Assembler:    yaYUL
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      https://www.ibiblio.org/apollo/index.html
+# Page scans:   https://archive.org/details/aurora00dapg
+# Mod history:  2016-09-20 JL   Created.
+#               
 # MAIN.agc is a little different from the other Aurora12 files  
 # provided, in that it doesn't represent anything that appears 
 # directly in the original source.  What we have done for 
@@ -18,8 +18,8 @@
 # code chunks correspond to natural divisions into sub-programs.  
 # The divisions are by the assembly listing itself.
 
-# Source file name			    	  Starting Page
-# ----------------				  -------------
+# Source file name                                Starting Page
+# ----------------                                -------------
 
 $ASSEMBLY_AND_OPERATION_INFORMATION.agc		# 1
 $ERASABLE_ASSIGNMENTS.agc			# 7
@@ -64,4 +64,4 @@ $RCS_FAILURE_MONITOR.agc			# 635
 $ASCENT_INERTIA_UPDATER.agc			# 639
 $SUM_CHECK_END_OF_BANK_MARKERS.agc		# 642
 
-#Assembly-tables				# 644
+#Assembly-tables                                # 644
