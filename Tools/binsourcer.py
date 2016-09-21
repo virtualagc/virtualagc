@@ -22,6 +22,7 @@
 import sys
 import glob
 import datetime
+import signal
 
 
 _DEFAULT_HEADER = """
@@ -59,6 +60,14 @@ _DEFAULT_HEADER = """
 
 NUMBANKS=34
 """
+
+
+def signal_handler(signal, frame):
+    global pagedata, page, outfile
+    print "Ctrl+C"
+    savePage(outfile, page, pagedata, crash=True)
+    sys.exit(1)
+
 
 def prompt(promptString, default=""):
     response = raw_input(promptString)
@@ -331,4 +340,6 @@ def main():
 
 
 if __name__ == "__main__":
+    global pagedata, page, outfile
+    signal.signal(signal.SIGINT, signal_handler)
     main()
