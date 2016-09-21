@@ -39,13 +39,7 @@
 #if !defined(YADSKYB1_H)
 #define YADSKYB1_H
 
-#if defined(MAIN_DSKY_WIDGETIZED)
-#include "yaDSKYb1main-widgetized.h"
-#elif defined(NAV_DSKY_WIDGETIZED)
-#include "yaDSKYb1main-widgetized.h"
-#else
-#error Unknown app.
-#endif
+#include "yaDSKYb1-widgetized.h"
 #include "../yaAGCb1/yaAGCb1.h"
 
 // For socket-interface timer.

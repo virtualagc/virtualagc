@@ -49,18 +49,6 @@ class wxImagePanel : public wxPanel
     void paintNow();
     void render(wxDC& dc);
 
-    // some useful events
-    /*
-     void mouseMoved(wxMouseEvent& event);
-     void mouseDown(wxMouseEvent& event);
-     void mouseWheelMoved(wxMouseEvent& event);
-     void mouseReleased(wxMouseEvent& event);
-     void rightClick(wxMouseEvent& event);
-     void mouseLeftWindow(wxMouseEvent& event);
-     void keyPressed(wxKeyEvent& event);
-     void keyReleased(wxKeyEvent& event);
-     */
-
     DECLARE_EVENT_TABLE()
   };
 
@@ -70,20 +58,25 @@ class MyFrame: public wxFrame
     // begin wxGlade: MyFrame::ids
     // end wxGlade
 
-    MyFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
+    MyFrame(wxWindow* parent, int id, const wxString& title, const wxString& images, bool inNavBay = false, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
     bool UpTelAccept;
     bool flashing;
     bool flashStateLit;
     int flashCounter;
+    bool navBay;
     wxBitmap imageUpTelBlock, imageUpTelAccept, image7Seg0, image7Seg15, image7Seg19,
       image7Seg21, image7Seg25, image7Seg27, image7Seg28, image7Seg29, image7Seg30,
       image7Seg31, image7Seg3, imageCheckFailOn, imageCheckFailOff, imageCompOn, imageCompOff,
       imagePlusMinusPlus, imagePlusMinusMinus, imagePlusMinusOff, imageUptlOn, imageUptlOff,
       imageCompFailOn, imageCompFailOff, imageVerbLabelOn, imageVerbLabelOff,
-      imageNounLabelOn, imageNounLabelOff;
+      imageNounLabelOn, imageNounLabelOff, imageProgAlmOn, imageProgAlmOff, imageCounterFailOn,
+      imageCounterFailOff, imageRuptLockOn, imageRuptLockOff, imageTcTrapOn, imageTcTrapOff,
+      imageScalerFailOn, imageScalerFailOff, imageTmFailOn, imageTmFailOff, imageKeyRlseOn,
+      imageKeyRlseOff, imageParityFailOn, imageParityFailOff, imageBlankOn, imageBlankOff;
     void setAllNumbers(wxBitmap& bitmap);
     void setAllSigns(wxBitmap& bitmap);
     TimerClass *Timer;
+    wxString imageDirectory;
 
   private:
     // begin wxGlade: MyFrame::methods
@@ -95,6 +88,17 @@ class MyFrame: public wxFrame
     // begin wxGlade: MyFrame::attributes
     wxStaticBitmap* indicatorCompFail;
     wxStaticBitmap* indicatorCheckFail;
+    wxStaticBitmap* indicatorProgAlm;
+    wxStaticBitmap* indicatorCounterFail;
+    wxStaticBitmap* indicatorRuptLock;
+    wxStaticBitmap* indicatorTcTrap;
+    wxStaticBitmap* indicatorScalerFail;
+    wxStaticBitmap* indicatorTmFail;
+    wxStaticBitmap* indicatorParityFail;
+    wxStaticBitmap* indicatorKeyRlse;
+    wxStaticBitmap* indicatorTopMiddle;
+    wxStaticBitmap* indicatorBottomLeft;
+    wxStaticBitmap* indicatorBottomRight;
     wxStaticBitmap* indicatorUpTl;
     wxStaticBitmap* indicatorComp;
     wxStaticBitmap* labelVerb;
@@ -125,6 +129,7 @@ class MyFrame: public wxFrame
     wxStaticBitmap* Digit5Reg3;
     wxBitmapButton* SwitchUpTel;
     wxBitmapButton* ButtonKeyRlse;
+    wxBitmapButton* ButtonTestAlarm;
     wxBitmapButton* ButtonErrorReset;
     wxBitmapButton* ButtonClear;
     wxBitmapButton* ButtonVerb;
@@ -167,7 +172,7 @@ public:
     virtual void on_ThreeButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_ClearButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_UpTelButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
-
+    virtual void on_TestAlarmButton_pressed(wxCommandEvent &event);
   }; // wxGlade: end class
 
 // IDs for objects with events.
@@ -190,7 +195,8 @@ enum {
   ID_KEYRLSEBUTTON,
   ID_ENTERBUTTON,
   ID_ERRORRESETBUTTON,
-  ID_UPTELSWITCH
+  ID_UPTELSWITCH,
+  ID_TESTALARMBUTTON
 };
 
 

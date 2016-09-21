@@ -228,6 +228,15 @@ MyFrame::on_ClearButton_pressed(wxCommandEvent &event)
 }
 
 void
+MyFrame::on_TestAlarmButton_pressed(wxCommandEvent &event)
+{
+  // Have no idea what the TEST ALARM button is supposed to do.
+  // Probably turn on all the indicator lights and 7-segment
+  // displays or something.
+  // FIXME
+}
+
+void
 MyFrame::on_UpTelButton_pressed(wxCommandEvent &event)
 {
   UpTelAccept = !UpTelAccept;
@@ -443,15 +452,21 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
     return;
   if (Channel == 011 && (Value & 037) != lastOUT1) // OUT1
     {
-      printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
-          Value, uBit);
+      //printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
+      //    Value, uBit);
       lastOUT1 = Value & 037;
-      // Ignore B1 for now: main-panel DSKY doesn't have a PROG ALM indicator.
+      frame->indicatorProgAlm->SetBitmap(
+          (0 == (Value & 01)) ?
+              frame->imageProgAlmOff : frame->imageProgAlmOn);
       frame->indicatorCompFail->SetBitmap(
           (0 == (Value & 02)) ?
               frame->imageCompFailOff : frame->imageCompFailOn);
-      // Ignore B3 for now: main-panel DSKY doesn't have a KEY RLSE indicator.
-      // Ignore B4 for now: main-panel DSKY doesn't have a SCALER FAIL indicator.
+      frame->indicatorKeyRlse->SetBitmap(
+          (0 == (Value & 04)) ?
+              frame->imageKeyRlseOff : frame->imageKeyRlseOn);
+      frame->indicatorScalerFail->SetBitmap(
+          (0 == (Value & 010)) ?
+              frame->imageScalerFailOff : frame->imageScalerFailOn);
       frame->indicatorCheckFail->SetBitmap(
           (0 == (Value & 020)) ?
               frame->imageCheckFailOff : frame->imageCheckFailOn);

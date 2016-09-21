@@ -86,9 +86,9 @@ int ErrorCodes = 0;
 int
 FormIoPacket (int Channel, int Value, unsigned char *Packet)
 {
-  if (Channel < 0 || Channel > 0x1ff)
+  if (Channel < 0 || Channel > 077777)
     return (1);
-  if (Value < 0 || Value > 0x7fff)
+  if (Value < 0 || Value > 077777)
     return (1);
   if (Packet == NULL)
     return (1);

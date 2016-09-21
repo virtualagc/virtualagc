@@ -109,16 +109,18 @@ ChannelOutput(agcBlock1_t * State, int Channel, int Value)
   Client_t *Client;
   unsigned char Packet[4];
 
-  if (Channel = 010) // OUT1
+  if (Channel == 010) // OUT1
     dskyRelayBuffer[(Value >> 11) & 017] = Value;
 
   // Output channels are simply transmitted to clients representing
   // hardware simulations.
+  //printf("Forming i/o packet reg[%04o] = %05o\n", Channel, Value);
   if (FormIoPacket(Channel, Value, Packet))
     return;
   for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
     if (Clients[i].Socket != -1)
       {
+        //printf("Sent to client %d: reg[%04o] = %05o\n", i, Channel, Value);
         j = send(Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
         if (j == SOCKET_ERROR && SOCKET_BROKEN)
           {
