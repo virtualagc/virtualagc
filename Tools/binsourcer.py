@@ -98,7 +98,49 @@ def parse(infile):
     ifile.close()
 
 
+def savePage(outfile, page, pagedata, crash=False):
+    print "Saving page..."
+    ofile = open(outfile, 'a')
+    lines = []
+    if crash:
+        lines = """
+
+*********************** CRASH SAVE ***********************
+* Please check data below this point. It may be corrupt! *
+**********************************************************
+
+""".split('\n')
+
+    stop = False
+    for row in range(32):
+        line = ""
+        for col in range(8):
+            pos = row * 8 + col
+            if pos not in pagedata.keys():
+                stop = True
+                break
+            line += "%05o " % pagedata[pos]
+        if stop:
+            break
+        line += "\n"
+        if (row + 1) % 4 == 0:
+            line += "\n"
+        lines.append(line)
+    if crash:
+        lines.append("""
+
+*********************** CRASH SAVE ***********************
+
+""".split('\n'))
+
+    ofile.write("; p. %d\n" % page)
+    ofile.writelines(lines)
+    ofile.write("\n")
+    ofile.close()
+
+
 def main():
+    global pagedata, page, outfile
     startpage = prompt("Starting page: ")
     if startpage == None:
         print >>sys.stderr, "Error, must specify a starting page."
@@ -276,26 +318,7 @@ def main():
                 print
                 block += 1
 
-        print "Saving page..."
-        ofile = open(outfile, 'a')
-        lines = []
-        stop = False
-        for row in range(32):
-            line = ""
-            for col in range(8):
-                pos = row * 8 + col
-                line += "%05o " % pagedata[pos]
-            if stop:
-                break
-            line += "\n"
-            if (row + 1) % 4 == 0:
-                line += "\n"
-            lines.append(line)
-
-        ofile.write("; p. %d\n" % page)
-        ofile.writelines(lines)
-        ofile.write("\n")
-        ofile.close()
+        savePage(outfile, page, pagedata)
 
         response = prompt("Next page (y/n) [n]: ")
         if response == 'y':
