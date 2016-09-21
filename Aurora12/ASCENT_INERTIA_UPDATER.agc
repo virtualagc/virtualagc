@@ -145,7 +145,7 @@ COMMONQR        CAE             1/2JTSQ
 
                 TC              Q                               
 
-JETTORK         DEC             0.00243                         # 500 FT LBS. SCALED AT PI*2(÷16)
-JETTORK1        DEC             0.00267                         # 550 FT LBS. SCALED AT PI*2(÷16)
+JETTORK         DEC             0.00243                         # 500 FT LBS. SCALED AT PI*2(+16)
+JETTORK1        DEC             0.00267                         # 550 FT LBS. SCALED AT PI*2(+16)
 0.35356         DEC             0.35356                         
 ENDDAP25        EQUALS                                          
