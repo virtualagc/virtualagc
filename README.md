@@ -1,3 +1,7 @@
+---
+# We are currently in the process of transcribing [Aurora 12](https://rburkey2005.github.io/virtualagc/Luminary.html#AuroraNutshell), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/rburkey2005/virtualagc/wiki/Aurora-12-Transcription)**
+---
+
 Virtual Apollo Guidance Computer
 ================================
 
