@@ -25,7 +25,8 @@ import datetime
 import signal
 
 
-_DEFAULT_HEADER = """
+_DEFAULT_HEADER = \
+"""
 ; Copyright:    Public domain
 ; Filename:     Solarium055.binsource
 ; Purpose:      An ASCII file used to input an AGC executable in octal format.
@@ -109,39 +110,41 @@ def parse(infile):
 
 def savePage(outfile, page, pagedata, crash=False):
     print "Saving page..."
+    if outfile is None:
+        return
     ofile = open(outfile, 'a')
     lines = []
     if crash:
-        lines = """
-
-*********************** CRASH SAVE ***********************
-* Please check data below this point. It may be corrupt! *
-**********************************************************
-
-""".split('\n')
-
+        if pagedata is None or pagedata == {}:
+            lines = ["\n",
+                "************************** CRASH *************************\n",
+                "*                    No data to save!                    *\n",
+                "**********************************************************\n"]
+        else:
+            lines = ["\n",
+                "*********************** CRASH SAVE ***********************\n",
+                "* Please check data below this point. It may be corrupt! *\n",
+                "**********************************************************\n"]
     stop = False
-    for row in range(32):
-        line = ""
-        for col in range(8):
-            pos = row * 8 + col
-            if pos not in pagedata.keys():
-                stop = True
+    if pagedata:
+        for row in range(32):
+            line = ""
+            for col in range(8):
+                pos = row * 8 + col
+                if pos not in pagedata.keys():
+                    stop = True
+                    break
+                line += "%05o " % pagedata[pos]
+            if stop:
                 break
-            line += "%05o " % pagedata[pos]
-        if stop:
-            break
-        line += "\n"
-        if (row + 1) % 4 == 0:
             line += "\n"
-        lines.append(line)
-    if crash:
-        lines.append("""
-
-*********************** CRASH SAVE ***********************
-
-""".split('\n'))
-
+            if (row + 1) % 4 == 0:
+                line += "\n"
+            lines.append(line)
+    if crash and not (pagedata is None or pagedata == {}):
+        lines.extend(["\n",
+            "*********************** CRASH SAVE ***********************\n",
+            "\n"])
     ofile.write("; p. %d\n" % page)
     ofile.writelines(lines)
     ofile.write("\n")
@@ -150,6 +153,10 @@ def savePage(outfile, page, pagedata, crash=False):
 
 def main():
     global pagedata, page, outfile
+    outfile = None
+    page = None
+    pagedata = None
+
     startpage = prompt("Starting page: ")
     if startpage == None:
         print >>sys.stderr, "Error, must specify a starting page."
