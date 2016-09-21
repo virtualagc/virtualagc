@@ -1,9 +1,9 @@
 #
 # Python program to aid entering AGC binsource.
-# 
+#
 # Jim Lawton 2009-10-09
-# 
-# binsource files are in the form of blocks of 5-digit octal numbers, 
+#
+# binsource files are in the form of blocks of 5-digit octal numbers,
 # 8 per line, 4 lines per block, 8 blocks per page, 4 pages per bank.
 # Example:
 #
@@ -13,11 +13,52 @@
 #     20017 32075 50015 07005 03007 01101 02266 32075
 #
 # Comments begin with a semicolon. The rest of the line is ignored.
-# the BANK keyword specifies the bank number (e.g. "BANK=2"). 
+# the BANK keyword specifies the bank number (e.g. "BANK=2").
+
+# TODO: calculate and print address of row
+# TODO: check checksum
+
 
 import sys
 import glob
 import datetime
+
+
+_DEFAULT_HEADER = """
+; Copyright:    Public domain
+; Filename:     Solarium055.binsource
+; Purpose:      An ASCII file used to input an AGC executable in octal format.
+;               The actual octal (usable by the yaAGC program) must be created
+;               by processing with the oct2bin program (which may be found in
+;               the Tools directory of the virtualagc project).
+;               Refer to www.ibiblio.org/apollo for explanations.
+; Contact:
+; History:      YYYY-MM-DD XXX  Created.
+;
+;
+; This data has been manually transcribed from a scanned listing of TBD
+; build NNN.
+;
+; For convenience, the page numbers (as marked on the printed assembly listing)
+; are given in the comments. The notations V or A (or both or neither) have
+; been added after the page numbers to indicate the proofing method used
+; (Visual or Audio). Regardless of the proofing method (if any), all code is
+; believed to be correct, on the basis of automated checking of the "bugger
+; words" (i.e., bank checksums), except, of course, where stated otherwise.
+; (The parenthesized number, if any, following the V or A, is the number of
+; errors corrected on that proofing pass.)
+;
+; The rule followed here is that each memory page has to be proofed at least
+; once, and that the *final* proofing of any given memory page must have
+; encountered 0 errors.
+;
+; Input-data format:
+;   Each memory bank begins with a "BANK=" line. The remainder of the bank
+;   consists of octal values. Note that banks should be zero-filled at the end
+;   to make the lengths come out correct.
+
+NUMBANKS=34
+"""
 
 def prompt(promptString, default=""):
     response = raw_input(promptString)
@@ -47,43 +88,37 @@ def octPrompt(promptString="5 digit octal: "):
 def parse(infile):
     ifile = open(infile, 'r')
     lines = ifile.readlines()
-    
     print "Parsing input file..."
-    
     for line in lines:
         if line.startswith(';'):
             continue
         if line.startswith("BANK="):
             bank = int(line.split('=')[1])
             print "    Bank %d" % bank
-            
     ifile.close()
-    
-    
-def main():
 
+
+def main():
     startpage = prompt("Starting page: ")
     if startpage == None:
         print >>sys.stderr, "Error, must specify a starting page."
         sys.exit(1)
     else:
         startpage = int(startpage)
-        
     bsFiles = glob.glob('*.binsource')
     if len(bsFiles) == 1:
         defInfile = bsFiles[0]
         promptStr = "Input file (default=%s): " % defInfile
     else:
         defInfile = None
-        promptStr = "Input file: " 
-    
+        promptStr = "Input file: "
     infile = prompt(promptStr)
     if infile == None:
         infile = defInfile
-    
+
     defOutfile = "%s-%d.binsource" % (datetime.datetime.now().strftime("%Y%m%d_%H%M%S"), startpage)
     promptStr = "Output file (default=%s): " % defOutfile
-    
+
     outfile = prompt(promptStr)
     if outfile == None:
         outfile = defOutfile
@@ -91,7 +126,7 @@ def main():
     direction = prompt("Processing direction (0=column order, 1=row order, 2=column/block order) [0]: ")
     if direction == None:
         direction = 0
-    else: 
+    else:
         direction = int(direction)
 
 #    startaddr = prompt("Starting address [02000]: ")
@@ -105,7 +140,7 @@ def main():
 #        else:
 #            startbank = 0
 #            startaddr = int(startaddr, 8)
-        
+
     print "Input file: %s" % infile
     print "Output file: %s" % outfile
     print "Direction: %s" % direction
@@ -113,15 +148,21 @@ def main():
 #    print "Starting bank: %s" % oct(startbank)
 #    print "Starting address: %s" % oct(startaddr)
     print
-    
+
     if infile:
         parse(infile)
-    
+    else:
+        # Put default header text in the output file.
+        ofile = open(outfile, 'w')
+        ofile.write(_DEFAULT_HEADER)
+        ofile.write("\n")
+        ofile.close()
+
     pagedata = {}
 
     stop = False
     page = startpage
-    
+
     while not stop:
         print "Page: %d" % page
 
@@ -129,7 +170,7 @@ def main():
         row = 0
         block = 0
         blockrow = 0
-        
+
         zeroRest = False
         zeroCol = False
 
@@ -167,7 +208,7 @@ def main():
                     for zrow in range(row, 32):
                         pagedata[zrow * 8 + col] = 0
                 col += 1
-                
+
         elif direction == 1:
             # Row order, i.e. left to right for each row of page, top to bottom.
             while row < 32:
@@ -200,9 +241,9 @@ def main():
                 for pos in range(row * 8 + col, 256):
                     pagedata[pos] = 0
             row += 1
-            
+
         else:
-            # Column block order in a page, i.e. top to botton of page for each block of 4 rows, 
+            # Column block order in a page, i.e. top to botton of page for each block of 4 rows,
             # column order within each block.
             while block < 8:
                 print "Block: %02d" % block
@@ -250,23 +291,21 @@ def main():
             if (row + 1) % 4 == 0:
                 line += "\n"
             lines.append(line)
-     
+
         ofile.write("; p. %d\n" % page)
         ofile.writelines(lines)
         ofile.write("\n")
         ofile.close()
-        
+
         response = prompt("Next page (y/n) [n]: ")
         if response == 'y':
             page += 1
             continue
         else:
             break
-    
+
     print "Done"
-    
+
+
 if __name__ == "__main__":
     main()
-
-# TODO: calculate and print address of row
-# TODO: check checksum
