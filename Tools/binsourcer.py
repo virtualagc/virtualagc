@@ -181,6 +181,13 @@ def main():
     if outfile == None:
         outfile = defOutfile
 
+    if os.path.exists(outfile):
+        print "File %s already exists!" % outfile
+        overwrite = prompt("Overwrite? (Y/N) [N]: ")
+        if overwrite == None or overwrite == "N":
+            print >>sys.stderr, "Exiting."
+            sys.exit(1)
+
     direction = prompt("Processing direction (0=column order, 1=row order, 2=column/block order) [0]: ")
     if direction == None:
         direction = 0
