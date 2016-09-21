@@ -58,7 +58,7 @@ def main():
                 print >>sys.stderr, "%s, line %d: invalid page number \"%s\"" % (sfile, linenum, sline)
                 errors += 1
                 fields = sline[1:]
-            elif sline.startswith('# Page'):
+            elif sline.startswith('# Page') or sline.startswith('## Page'):
                 fields = sline[2:]
             else:
                 continue
