@@ -7,7 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        370-376
 # Mod history:  2016-09-20 JL   Created.
-#               2016=-0-21 HG   Initial transfer from scann
+#               2016-09-21 HG   Initial transfer from scan
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -31,7 +31,7 @@
                 BANK    15
                 EBANK=  DNTMBUFF
 LOWIDCOD        OCT     00437           # FOD'S CHOICE.
-# SPECIAL DOWNLINK LIST FOR AGS INITIALIZATION, MUST BE IN LOCATION 2001 OF DOWNLINK FBANK,
+#       SPECIAL DOWNLINK LIST FOR AGS INITIALIZATION, MUST BE IN LOCATION 2001 OF DOWNLINK FBANK,
 AGSLIST         ECADR   UPLOCK
                 ECADR   TIME1
                 ECADR   TIME2   
@@ -103,7 +103,7 @@ DNPHASE2        CAF     BIT7            # SET WORD ORDER BACK TO 1 FOR REMAINDER
 LOOP            TS      ITEMP2          # THESE 12 DP WORDS ARE READ INTO AN
                 AD      LDATALST        # INTERMEDIATE BUFFER SO THEY REFER TO THE
                 EXTEND                  # SAME POINT IN THE EXECUTION OF A MISSION
-                INDEX   A               # PROGRAM. THE WORDS MAY BE IN NON.
+                INDEX   A               # PROGRAM. THE WORDS MAY BE IN NON-
                 INDEX   26D
                 DCA     0               # 12 OF THE DATA LIST ARE USED AS
                 INDEX   ITEMP1          # ADDRESSES OF THE DESIRED DATA.
@@ -309,6 +309,7 @@ NOMDNLST        ECADR   UPLOCK
                 ADRES   OPTYHOLD
                 ADRES   SAMPLSUM
                 ADRES   OLDATAGD
+                ADRES   RADMODES
                 ADRES   PIPAZ
                 ADRES   PIPAX
 ENDDNTMS        EQUALS
