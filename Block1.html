@@ -125,6 +125,8 @@
 
 
 
+
+
           0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
@@ -183,6 +185,8 @@
 
 
 
+
+
           General Design Characteristics of the Apollo Guidance Computer</a>,
         by Eldon C. Hall, May 1963.<br>
       </li>
@@ -198,6 +202,8 @@
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
       <li><a href="http://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574:
+
+
 
 
 
@@ -380,6 +386,8 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     Below are some drawings from a set of<big> </big><a
 href="http://www.ibiblio.org/apollo/Documents/ApolloTrainingGuidanceAndNavigation_07-65.pdf">Apollo
 Guidance
+
+
 
 
 
@@ -658,7 +666,11 @@ Guidance
       of numbers.&nbsp; Consider a 15-bit number with bits <tt>B15 B14
         ... B1</tt>.&nbsp; This representation can store 2<sup>14</sup>-1=16383
 
+
+
       distinct positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
+
+
 
       distinct negative numbers (-1 through -16383).&nbsp; Zero actually
       has two distinct representations, +0 and -0, which act the same
@@ -715,6 +727,8 @@ Guidance
     </ul>
     <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
       that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
+
+
 
       When the 16-bit form of a number (say, in the accumulator) needs
       to be converted to a normal 15-bit number (say, to be stored at a
@@ -801,6 +815,8 @@ Guidance
         follows:&nbsp; If you try to write a set of bits like <tt>B15
           B14 B13 ... B2 B1 to LP</tt>, it will in fact be written as <tt>B1
 
+
+
           0 B14 B13 ... B1</tt>.&nbsp; Thus, the most-significant
         original bit <tt>B15</tt> is discarded, and then what's left
         over is shifted downward, wrapping the old least-significant bit
@@ -853,6 +869,8 @@ Guidance
       <li><tt>QRUPT</tt> (address 027), <tt>ZRUPT</tt> (address 024), <tt>BRUPT</tt>
         (address 025):&nbsp; When an <a
 href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">interrupt
+
+
 
           is processed</a>, the existing values of the <tt>Q</tt>, <tt>Z</tt>,
         and <tt>B</tt> registers are automatically copied into these
@@ -1100,8 +1118,12 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1115,9 +1137,13 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1393,6 +1419,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
     <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
     to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
     positions would display "+35".&nbsp; Since this is latched in the
@@ -1414,6 +1442,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
         incremented every time an addition or subtraction operation
         (i.e., <tt>AD</tt> or <tt>SU</tt>) creates <a
           href="#Overflow">positive overflow in the accumulator register</a>.&nbsp;
+
+
 
         Conversely, it is decremented every time an addition or
         subtraction creates a negative overflow.&nbsp; However, just the
@@ -1452,6 +1482,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
       </li>
       <li><tt>UPLINK</tt> (address 041):&nbsp; This 16-bit
         shift-register receives the data stream of <a href="#Uplink">digital-uplink
+
+
 
           data, as described earlier</a>.&nbsp; It is included in this
         section because it is implemented in hardware similar to a
@@ -1575,6 +1607,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
 
 
 
@@ -1868,6 +1902,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -1892,8 +1928,12 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1943,6 +1983,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -1950,6 +1992,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -2106,12 +2150,16 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
 
 
 
@@ -2183,6 +2231,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
 
 
 
@@ -2291,6 +2341,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -2349,6 +2401,8 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -2372,9 +2426,13 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+
+
 
 
 
@@ -2435,6 +2493,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -2452,6 +2512,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
 
 
 
@@ -2715,6 +2777,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
         our GitHub repository's "block1" branch</a>.&nbsp; I have only
       worked with it in Linux, but I expect it should probably build in
       Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -2748,6 +2812,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
+
 
 
 
@@ -2863,60 +2929,41 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     </ol>
     <h3><a name="Virtual_AGCs_DSKY_Simulator_yaDSKYb1"></a>Virtual AGC's
       DSKY Simulator (yaDSKYb1)</h3>
-    There are two versions of the simulated DSKY, called yaDSKYb1main
-    and yaDSKYb1nave, corresponding to <a href="#DSKY">the
-      control-panel and nav-bay versions of the physical DSKY as
-      described earlier</a>.&nbsp; The code for both of these resides in
-    the same yaDSKYb1/ directory <a
-      href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      our GitHub repository's "block1" branch</a>, and I'll simply refer
-    to both as "yaDSKYb1".&nbsp; They differ only in physical
-    appearance, and in that the simulated nav-bay DSKY has some
-    additional visible controls which are not visible in the simulated
-    control-panel DSKY.<br>
+    There are two versions of the simulated DSKY, corresponding to <a
+      href="#DSKY">the control-panel and nav-bay versions of the
+      physical DSKY as described earlier</a>, but both are available
+    from the same yaDSKYb1 program, with different command-line
+    options.&nbsp; The code resides in the same yaDSKYb1/ directory <a
+href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+      our GitHub repository's "block1" branch</a>. <br>
     <br>
     Building this software is simply a matter of cd'ing into its source
-    directory and running 'make'.&nbsp; <i>At present</i>, you have to
-    run the program from the parent directory (say,
-    git/virtualagc-block1/) rather than from it's own directory (say,
-    git/virtualagc-block1/yaDSKYb1/) because of difficulties with
-    finding its graphical resources at runtime, which I'll resolve
-    later.&nbsp; At any rate, running it is a simple matter of doing the
-    following (usually, after yaAGCb1 is already running):<br>
+    directory and running 'make'. <i>&nbsp; </i>There are a number of
+    graphical images which the program needs to use as resources in
+    order to work properly, and by default these are found in the
+    images/ sub-directory of the same directory in which yaDSKYb1 is
+    being run from, and finding these images is likely the principal
+    problem the program will have in trying to run, but you can specify
+    the directory on the command line: <br>
     <blockquote><tt>cd <i>ParentDirectoryOfyaDSKYb1</i>/<br>
-        yaDSKYb1/yaDSKYb1main [--port=<i>PORTNUM</i>]<br>
+        yaDSKYb1/yaDSKYb1main [--images=<i>DIRECTORY</i>] [--port=<i>PORTNUM</i>]
+        [--nav-bay]<br>
       </tt></blockquote>
     The value for <tt><i>PORTNUM</i></tt> depends on the range of TCP
     ports on which yaAGCb1 is listening, but the default value of 19671
     is usually satisfactory.<br>
     <br>
-    Unlike the Block 2 AGC, there are not separate i/o ports in the AGC
-    for the control-panel and nav-bay DSKYs, so I'm not sure how the
-    Block 1 AGC connected to more than one DSKY at a time.<br>
+    Unlike the Block 2 AGC, there are not separate i/o ports (i.e., IN<i>n</i>
+    and OUT<i>n</i> registers) in the AGC for the control-panel and
+    nav-bay DSKYs, so I'm not sure how the Block 1 AGC connected to more
+    than one DSKY at a time.<br>
     <h3><a name="yaUplinkBlock1"></a>Virtual AGC's Digital Uplink
       Simulator (yaUplinkBlock1)</h3>
     <p>At present, a program called yaUplinkBlock1 is provided (in the
       similarly-named source-code directory <a
         href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+
+
 
 
 
@@ -2989,29 +3036,27 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
       </tt><tt>cd git</tt><tt><br>
       </tt><tt>git clone https://github.com/rburkey2005/virtualagc
         virtualagc</tt><tt><br>
+        make -C virtualagc<br>
       </tt><tt>git clone -b block1
         https://github.com/rburkey2005/virtualagc virtualagc-block1</tt><tt><br>
-      </tt><tt>make -C virtualagc-block1 -f Makefile1</tt><br>
-    </blockquote>
+      </tt><tt>make -C virtualagc-block1 -f Makefile1<br>
+      </tt> </blockquote>
     You need to run the AGC and DSKY simulators separately, as follows,
-    probably from two separate command lines:<br>
-    <blockquote><tt># Start the AGC.</tt><tt><br>
-      </tt><tt>cd git/virtualagc/Solarium055</tt><tt><br>
-      </tt><tt>../../virtualagc-block1/yaAGCb1/yaAGCb1</tt><br>
+    probably from two separate command lines; use the <tt>--nav-bay</tt>,
+    without the brackets shown below, if you want to use the
+    navigational-bay version of the DSKY, but by default you'll get the
+    main control-panel version of the DSKY:<br>
+    <blockquote><tt>cd git/virtualagc-block1</tt><tt>/yaDSKYb1</tt><br>
+      <tt> </tt><tt>yaDSKYb1/yaDSKYb1 [--nav-bay]</tt><br>
     </blockquote>
     and<br>
-    <blockquote><tt># Start the DSKY.</tt><tt><br>
-      </tt><tt>cd git/virtualagc-block1</tt><tt><br>
-      </tt><tt>yaDSKYb1/yaDSKYb1main</tt><br>
-    </blockquote>
-    You'll notice messages in both command-line windows indicating that
-    a connection has been made between the two programs, but not much
-    else, because at this stage the AGC simulator starts up in a kind of
-    primitive debugger in which the simulated AGC is paused.&nbsp; No
-    problem!&nbsp; From the AGC's window, simply give it the command to
-    continue running:<br>
-    <br>
-    <blockquote><tt>c&lt;Enter&gt;</tt><br>
+    <blockquote><tt># Start the AGC.</tt><br>
+      <tt>cd git/virtualagc-block1/yaAGCb1</tt><tt><br>
+      </tt><tt><tt><tt># Make sure that Solarium is available easily to
+            the simulator:<br>
+            ln --symbolic
+            ../../virtualagc/Solarium055/Solarium055.{bin,lst,pad} .<br>
+          </tt></tt>./yaAGCb1 --run</tt><br>
     </blockquote>
     From this point, you can now interact with the AGC, running
     Solarium, entirely through the DSKY.&nbsp; There is kind of a
@@ -3023,6 +3068,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     </ul>
     <ol>
       <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1721.pdf">R-467,
+
+
 
 
 
@@ -3064,6 +3111,8 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
+
           Solarium 055 source code</a> (April 1968), to try and figure
         out what's available.</li>
       <li>You can look at the available documentation for Colossus 237
@@ -3074,6 +3123,8 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     </ol>
     Unfortunately you can't get much useful information from <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_1.pdf">John
+
+
 
 
 
@@ -3157,6 +3208,8 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
+
               source code</a>, alarm 00203 is "NO IMU MODE INDICATED TO
             COMPUTER".<br>
             <br>
@@ -3164,6 +3217,10 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
             register IN2, I believe, which is all zeroes at this point,
             given that there is no IMU, and all zeroes is not recognized
             as a legitimate IMU mode.<br>
+          </td>
+          <td valign="middle"><a href="block1-demo/startup-nav.jpg"><img
+                alt="" src="block1-demo/thm-startup-nav.jpg"
+                height="300" width="90" border="2"></a><br>
           </td>
         </tr>
         <tr>
@@ -3177,6 +3234,10 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
             Start".&nbsp; It doesn't get rid of the Alarm 00203 message,
             but at least it does put us into major mode 00, as we're
             entitled, I expect.<br>
+          </td>
+          <td valign="middle"><a href="block1-demo/V36E-nav.jpg"><img
+                alt="" src="block1-demo/thm-V36E-nav.jpg" height="300"
+                width="90" border="2"></a><br>
           </td>
         </tr>
         <tr>
@@ -3192,6 +3253,10 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
             displays", i.e., scroll the register display downward.&nbsp;
             To get rid of all 3 error codes, we have to do it three
             times.<br>
+          </td>
+          <td valign="middle"><a href="block1-demo/V32EV32EV32E-nav.jpg"><img
+                alt="" src="block1-demo/thm-V32EV32EV32E-nav.jpg"
+                height="300" width="90" border="2"></a><br>
           </td>
         </tr>
         <tr>
@@ -3231,6 +3296,10 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
               the address should be kept at 060 or higher.<br>
             </p>
           </td>
+          <td valign="middle"><a href="block1-demo/V31N02E-nav.jpg"><img
+                alt="" src="block1-demo/thm-V31N02E-nav.jpg"
+                height="300" width="90" border="2"></a><br>
+          </td>
         </tr>
         <tr>
           <td valign="middle"><a href="block1-demo/V16N65E.jpg"><img
@@ -3263,6 +3332,10 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
               </li>
             </ul>
           </td>
+          <td valign="middle"><a href="block1-demo/V16N65E-nav.jpg"><img
+                alt="" src="block1-demo/thm-V16N65E-nav.jpg"
+                height="300" width="90" border="2"></a><br>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -3271,7 +3344,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-20.<br>
+          2016-09-21.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
