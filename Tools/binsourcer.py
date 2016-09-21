@@ -65,9 +65,9 @@ NUMBANKS=34
 
 
 def signal_handler(signal, frame):
-    global pagedata, page, outfile
+    global pagedata, page, outfile, useCommas
     print "Ctrl+C"
-    savePage(outfile, page, pagedata, crash=True)
+    savePage(outfile, page, pagedata, useCommas, crash=True)
     sys.exit(1)
 
 
@@ -109,7 +109,7 @@ def parse(infile):
     ifile.close()
 
 
-def savePage(outfile, page, pagedata, crash=False):
+def savePage(outfile, page, pagedata, useCommas=False, crash=False):
     print "Saving page..."
     if outfile is None:
         return
@@ -134,7 +134,10 @@ def savePage(outfile, page, pagedata, crash=False):
                 pos = row * 8 + col
                 if pos not in pagedata.keys():
                     continue
-                line += "%05o " % pagedata[pos]
+                if useCommas:
+                    line += "%05o, " % pagedata[pos]
+                else:
+                    line += "%05o " % pagedata[pos]
             line += "\n"
             if (row + 1) % 4 == 0:
                 line += "\n"
@@ -150,10 +153,11 @@ def savePage(outfile, page, pagedata, crash=False):
 
 
 def main():
-    global pagedata, page, outfile
+    global pagedata, page, outfile, useCommas
     outfile = None
     page = None
     pagedata = {}
+    useCommas = False
 
     startpage = prompt("Starting page: ")
     if startpage == None:
@@ -192,6 +196,12 @@ def main():
     else:
         direction = int(direction)
 
+    useCommas = prompt("Use comma delimiters? (Y/N) [N]: ")
+    if useCommas == None or useCommas == "N":
+        useCommas = False
+    else:
+        useCommas = True
+
 #    startaddr = prompt("Starting address [02000]: ")
 #    if startaddr == None:
 #        startbank = 0
@@ -210,6 +220,7 @@ def main():
     print "Starting page: %s" % startpage
 #    print "Starting bank: %s" % oct(startbank)
 #    print "Starting address: %s" % oct(startaddr)
+    print "Comma delimiters: %s" % useCommas
     print
 
     if infile:
@@ -337,7 +348,7 @@ def main():
                 print
                 block += 1
 
-        savePage(outfile, page, pagedata)
+        savePage(outfile, page, pagedata, useCommas)
 
         response = prompt("Next page (y/n) [n]: ")
         if response == 'y':
