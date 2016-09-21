@@ -19,6 +19,7 @@
 # TODO: check checksum
 
 
+import os
 import sys
 import glob
 import datetime
@@ -132,11 +133,8 @@ def savePage(outfile, page, pagedata, crash=False):
             for col in range(8):
                 pos = row * 8 + col
                 if pos not in pagedata.keys():
-                    stop = True
-                    break
+                    continue
                 line += "%05o " % pagedata[pos]
-            if stop:
-                break
             line += "\n"
             if (row + 1) % 4 == 0:
                 line += "\n"
