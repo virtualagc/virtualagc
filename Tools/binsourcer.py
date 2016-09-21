@@ -19,12 +19,15 @@
 # TODO: check checksum
 
 
+import os
 import sys
 import glob
 import datetime
+import signal
 
 
-_DEFAULT_HEADER = """
+_DEFAULT_HEADER = \
+"""
 ; Copyright:    Public domain
 ; Filename:     Solarium055.binsource
 ; Purpose:      An ASCII file used to input an AGC executable in octal format.
@@ -59,6 +62,14 @@ _DEFAULT_HEADER = """
 
 NUMBANKS=34
 """
+
+
+def signal_handler(signal, frame):
+    global pagedata, page, outfile, useCommas
+    print "Ctrl+C"
+    savePage(outfile, page, pagedata, useCommas, crash=True)
+    sys.exit(1)
+
 
 def prompt(promptString, default=""):
     response = raw_input(promptString)
@@ -98,7 +109,56 @@ def parse(infile):
     ifile.close()
 
 
+def savePage(outfile, page, pagedata, useCommas=False, crash=False):
+    print "Saving page..."
+    if outfile is None:
+        return
+    ofile = open(outfile, 'a')
+    lines = []
+    if crash:
+        if pagedata is None or pagedata == {}:
+            lines = ["\n",
+                "************************** CRASH *************************\n",
+                "*                    No data to save!                    *\n",
+                "**********************************************************\n"]
+        else:
+            lines = ["\n",
+                "*********************** CRASH SAVE ***********************\n",
+                "* Please check data below this point. It may be corrupt! *\n",
+                "**********************************************************\n"]
+    stop = False
+    if pagedata:
+        for row in range(32):
+            line = ""
+            for col in range(8):
+                pos = row * 8 + col
+                if pos not in pagedata.keys():
+                    continue
+                if useCommas:
+                    line += "%05o, " % pagedata[pos]
+                else:
+                    line += "%05o " % pagedata[pos]
+            line += "\n"
+            if (row + 1) % 4 == 0:
+                line += "\n"
+            lines.append(line)
+    if crash and not (pagedata is None or pagedata == {}):
+        lines.extend(["\n",
+            "*********************** CRASH SAVE ***********************\n",
+            "\n"])
+    ofile.write("; p. %d\n" % page)
+    ofile.writelines(lines)
+    ofile.write("\n")
+    ofile.close()
+
+
 def main():
+    global pagedata, page, outfile, useCommas
+    outfile = None
+    page = None
+    pagedata = {}
+    useCommas = False
+
     startpage = prompt("Starting page: ")
     if startpage == None:
         print >>sys.stderr, "Error, must specify a starting page."
@@ -123,11 +183,24 @@ def main():
     if outfile == None:
         outfile = defOutfile
 
+    if os.path.exists(outfile):
+        print "File %s already exists!" % outfile
+        overwrite = prompt("Overwrite? (Y/N) [N]: ")
+        if overwrite == None or overwrite == "N":
+            print >>sys.stderr, "Exiting."
+            sys.exit(1)
+
     direction = prompt("Processing direction (0=column order, 1=row order, 2=column/block order) [0]: ")
     if direction == None:
         direction = 0
     else:
         direction = int(direction)
+
+    useCommas = prompt("Use comma delimiters? (Y/N) [N]: ")
+    if useCommas == None or useCommas == "N":
+        useCommas = False
+    else:
+        useCommas = True
 
 #    startaddr = prompt("Starting address [02000]: ")
 #    if startaddr == None:
@@ -147,6 +220,7 @@ def main():
     print "Starting page: %s" % startpage
 #    print "Starting bank: %s" % oct(startbank)
 #    print "Starting address: %s" % oct(startaddr)
+    print "Comma delimiters: %s" % useCommas
     print
 
     if infile:
@@ -157,8 +231,6 @@ def main():
         ofile.write(_DEFAULT_HEADER)
         ofile.write("\n")
         ofile.close()
-
-    pagedata = {}
 
     stop = False
     page = startpage
@@ -276,26 +348,7 @@ def main():
                 print
                 block += 1
 
-        print "Saving page..."
-        ofile = open(outfile, 'a')
-        lines = []
-        stop = False
-        for row in range(32):
-            line = ""
-            for col in range(8):
-                pos = row * 8 + col
-                line += "%05o " % pagedata[pos]
-            if stop:
-                break
-            line += "\n"
-            if (row + 1) % 4 == 0:
-                line += "\n"
-            lines.append(line)
-
-        ofile.write("; p. %d\n" % page)
-        ofile.writelines(lines)
-        ofile.write("\n")
-        ofile.close()
+        savePage(outfile, page, pagedata, useCommas)
 
         response = prompt("Next page (y/n) [n]: ")
         if response == 'y':
@@ -308,4 +361,6 @@ def main():
 
 
 if __name__ == "__main__":
+    global pagedata, page, outfile
+    signal.signal(signal.SIGINT, signal_handler)
     main()
