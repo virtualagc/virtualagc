@@ -24,6 +24,42 @@ import glob
 import datetime
 
 
+_DEFAULT_HEADER = """
+; Copyright:    Public domain
+; Filename:     Solarium055.binsource
+; Purpose:      An ASCII file used to input an AGC executable in octal format.
+;               The actual octal (usable by the yaAGC program) must be created
+;               by processing with the oct2bin program (which may be found in
+;               the Tools directory of the virtualagc project).
+;               Refer to www.ibiblio.org/apollo for explanations.
+; Contact:
+; History:      YYYY-MM-DD XXX  Created.
+;
+;
+; This data has been manually transcribed from a scanned listing of TBD
+; build NNN.
+;
+; For convenience, the page numbers (as marked on the printed assembly listing)
+; are given in the comments. The notations V or A (or both or neither) have
+; been added after the page numbers to indicate the proofing method used
+; (Visual or Audio). Regardless of the proofing method (if any), all code is
+; believed to be correct, on the basis of automated checking of the "bugger
+; words" (i.e., bank checksums), except, of course, where stated otherwise.
+; (The parenthesized number, if any, following the V or A, is the number of
+; errors corrected on that proofing pass.)
+;
+; The rule followed here is that each memory page has to be proofed at least
+; once, and that the *final* proofing of any given memory page must have
+; encountered 0 errors.
+;
+; Input-data format:
+;   Each memory bank begins with a "BANK=" line. The remainder of the bank
+;   consists of octal values. Note that banks should be zero-filled at the end
+;   to make the lengths come out correct.
+
+NUMBANKS=34
+"""
+
 def prompt(promptString, default=""):
     response = raw_input(promptString)
     if len(response) == 0:
