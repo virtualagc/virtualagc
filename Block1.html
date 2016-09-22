@@ -128,6 +128,9 @@
 
 
 
+
+
+
           0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
@@ -189,6 +192,9 @@
 
 
 
+
+
+
           General Design Characteristics of the Apollo Guidance Computer</a>,
         by Eldon C. Hall, May 1963.<br>
       </li>
@@ -205,6 +211,9 @@ href="http://www.ibiblio.org/apollo/klabs/history/history_docs/r-393.pdf"
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
       <li><a href="http://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574:
+
+
+
 
 
 
@@ -373,23 +382,32 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
         src="Block1DSKYs.jpg" height="737" width="904"><br>
     </div>
     <br>
-    The picture above is a crummy reproduction (mine!) of Plate 23
-    (courtesy of Raytheon and Jack Poundstone) in Eldon C. Hall's book,
-    <span style="font-style: italic;">Journey to the Moon: The History
-      of the Apollo Guidance Computer</span>, which anybody interested
-    in this website should immediately run out and purchase.&nbsp; (No,
-    I don't derive any personal benefit from you doing so.)&nbsp; The
-    photo shows Raytheon's first production DSKYs.&nbsp; On the left is
-    the nav-panel DSKY, while on the right is the main-panel
-    DSKY.&nbsp;&nbsp; (Actually, there is some question as to the use of
-    the main-panel DSKY.&nbsp; All Block 1 drawings I can find agree
-    about the nav-panel DSKY.&nbsp; But ... some drawings show the
-    main-panel DSKY as looking like a Block 2 DSKY while others are
-    similar to the photo above.)<br>
+    <img alt="" src="EldonHallWithBlock1DSKY.jpg" align="right"
+      height="300" width="201">The picture above is a crummy
+    reproduction (mine!) of Plate 23 (courtesy of Raytheon and Jack
+    Poundstone) in Eldon C. Hall's book, <span style="font-style:
+      italic;">Journey to the Moon: The History of the Apollo Guidance
+      Computer</span>, which anybody interested in this website should
+    immediately run out and purchase.&nbsp; (No, I don't derive any
+    personal benefit from you doing so.)&nbsp; The photo shows
+    Raytheon's first production DSKYs.&nbsp; On the left is the
+    nav-panel DSKY, while on the right is the main-panel DSKY.<br>
+    <br>
+    And just how big were they?&nbsp; Well, the little rulers in the
+    picture don't really give you a sense of it, particularly since you
+    can't tell whether the rulers are measuring inches or
+    centimeters.&nbsp; But in the picture to the right, you see Eldon
+    Hall standing next to one of the control-panel DSKYs, so the answer
+    is, <i>they were very, very big</i>!&nbsp; A nav-bay DSKY would
+    have reached nearly to Eldon's shoulder, if sitting on the same
+    table.<br>
     <br>
     Below are some drawings from a set of<big> </big><a
 href="http://www.ibiblio.org/apollo/Documents/ApolloTrainingGuidanceAndNavigation_07-65.pdf">Apollo
 Guidance
+
+
+
 
 
 
@@ -674,7 +692,13 @@ Guidance
 
 
 
+
+
+
       distinct positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
+
+
+
 
 
 
@@ -734,6 +758,9 @@ Guidance
     </ul>
     <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
       that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
+
+
+
 
 
 
@@ -826,6 +853,9 @@ Guidance
 
 
 
+
+
+
           0 B14 B13 ... B1</tt>.&nbsp; Thus, the most-significant
         original bit <tt>B15</tt> is discarded, and then what's left
         over is shifted downward, wrapping the old least-significant bit
@@ -878,6 +908,9 @@ Guidance
       <li><tt>QRUPT</tt> (address 027), <tt>ZRUPT</tt> (address 024), <tt>BRUPT</tt>
         (address 025):&nbsp; When an <a
 href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">interrupt
+
+
+
 
 
 
@@ -1131,8 +1164,14 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -1152,9 +1191,15 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -1436,6 +1481,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
     <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
     to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
     positions would display "+35".&nbsp; Since this is latched in the
@@ -1457,6 +1505,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
         incremented every time an addition or subtraction operation
         (i.e., <tt>AD</tt> or <tt>SU</tt>) creates <a
           href="#Overflow">positive overflow in the accumulator register</a>.&nbsp;
+
+
+
 
 
 
@@ -1498,6 +1549,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
       </li>
       <li><tt>UPLINK</tt> (address 041):&nbsp; This 16-bit
         shift-register receives the data stream of <a href="#Uplink">digital-uplink
+
+
+
 
 
 
@@ -1624,6 +1678,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+
 
 
 
@@ -1923,6 +1980,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -1950,8 +2010,14 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -2007,6 +2073,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -2014,6 +2083,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -2176,12 +2248,18 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
+
 
 
 
@@ -2256,6 +2334,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
+
 
 
 
@@ -2370,6 +2451,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#Interrupt_Processing">
 
 
 
+
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -2431,6 +2515,9 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -2457,9 +2544,15 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+
+
+
 
 
 
@@ -2526,6 +2619,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -2543,6 +2639,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
+
 
 
 
@@ -2812,6 +2911,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
         our GitHub repository's "block1" branch</a>.&nbsp; I have only
       worked with it in Linux, but I expect it should probably build in
       Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -2845,6 +2947,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
+
+
 
 
 
@@ -3018,6 +3123,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
 
 
 
+
+
+
         our GitHub repository's "block1" branch</a>. It is a simple
       command-line program, in which you can type (or feed in from a
       script) ASCII mnemonics for DSKY keys, which the program then
@@ -3124,11 +3232,17 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
 
 
 
+
+
+
           The Compleat Sunrise</a> briefly covers what was available in
         the Block 1 SUNRISE program (September 1964).&nbsp; <br>
       </li>
       <li>You can pick through <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
+
 
 
 
@@ -3160,6 +3274,9 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     </ol>
     Unfortunately you can't get much useful information from <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_1.pdf">John
+
+
+
 
 
 
@@ -3228,6 +3345,9 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
             an error code in it.&nbsp; Thus, you are seeing "Alarm
             00203".&nbsp; According to <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
+
 
 
 
