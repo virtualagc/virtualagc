@@ -31,7 +31,7 @@
 KEYRUPT1        TS              BANKRUPT
                 XCH             Q
                 TS              QRUPT
-                TC              LODSAMPT                TIME IS SNATCHED IN RUPT FOR NOUN 65.
+                TC              LODSAMPT                # TIME IS SNATCHED IN RUPT FOR NOUN 65.
                 CAF             LOW5
                 EXTEND 
                 RAND            MNKEYIN
@@ -42,54 +42,54 @@ KEYCOM          TS              RUPTREG4
                 2CADR           CHARIN
                 CA              RUPTREG4
                 INDEX           LOCCTR
-                TS              MPAC                    LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
+                TS              MPAC                    # LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
                 TC              RESUME
 ## PAGE 286
 UPRUPT          TS              BANKRUPT
                 XCH             Q
                 TS              QRUPT
-                TC              LODSAMPT                TIME IS SNATCHED IN RUPT FOR NOUN 65.
+                TC              LODSAMPT                # TIME IS SNATCHED IN RUPT FOR NOUN 65.
                 CAF             ZERO
                 XCH             INLINK
                 TS              KEYTEMP1
-                CAF             BIT3                    TURN ON UPACT LIGHT
-                EXTEND                                  (BIT 3 OF CHANNEL 11)
+                CAF             BIT3                    # TURN ON UPACT LIGHT
+                EXTEND                                  # (BIT 3 OF CHANNEL 11)
                 WOR             DSALMOUT
-UPRUPT1         CAF             LOW5                    TEST FOR TRIPLE CHAR REDUNDANCY
-                MASK            KEYTEMP1                LOW5 OF WORD
-                XCH             KEYTEMP1                LOW5 INTO KEYTEMP1
-                XCH             SR                      WHOLE WORD INTO SR
-                TS              KEYTEMP2                ORIGINAL SR INTO KEYTEMP2
+UPRUPT1         CAF             LOW5                    # TEST FOR TRIPLE CHAR REDUNDANCY
+                MASK            KEYTEMP1                # LOW5 OF WORD
+                XCH             KEYTEMP1                # LOW5 INTO KEYTEMP1
+                XCH             SR                      # WHOLE WORD INTO SR
+                TS              KEYTEMP2                # ORIGINAL SR INTO KEYTEMP2
                 TC              SRGHT5
-                MASK            LOW5                    MID 5
+                MASK            LOW5                    # MID 5
                 AD              HI10
                 TC              UPTEST
                 TC              SRGHT5
-                MASK            LOW5                    HIGH 5
+                MASK            LOW5                    # HIGH 5
                 COM
                 TC              UPTEST
-UPOK            TC              RESTORSR                CODE IS GOOD
-                CS              ELRCODE                 IF CODE = ERROR LIGHT RESET, PUT +0
-                AD              KEYTEMP1                INTO BIT1 OF UPLOCK.
-                CCS             A                       IF CODE NOT= ELR, PASS CODE ONLY IF
-                TC              TSTUPLOK                BIT1 OF UPLOCK = 0.
+UPOK            TC              RESTORSR                # CODE IS GOOD
+                CS              ELRCODE                 # IF CODE = ERROR LIGHT RESET, PUT +0
+                AD              KEYTEMP1                # INTO BIT1 OF UPLOCK.
+                CCS             A                       # IF CODE NOT= ELR, PASS CODE ONLY IF
+                TC              TSTUPLOK                # BIT1 OF UPLOCK = 0.
 ELRCODE         OCT             22
                 TC              TSTUPLOK
-                CS              BIT1                    PUT 0 INTO BIT1 OF UPLOCK
+                CS              BIT1                    # PUT 0 INTO BIT1 OF UPLOCK
                 MASK            UPLOCK
                 TS              UPLOCK
                 TC              ACCEPTUP
 TSTUPLOK        CAF             BIT1
                 MASK            UPLOCK
                 CCS             A
-                TC              RESUME                  BIT1 OF UPLOCK = 1.
-ACCEPTUP        XCH             KEYTEMP1                BIT1 OF UPLOCK = 0.
+                TC              RESUME                  # BIT1 OF UPLOCK = 1.
+ACCEPTUP        XCH             KEYTEMP1                # BIT1 OF UPLOCK = 0.
                 TC              KEYCOM
          
-TMFAIL2         TC              RESTORSR                CODE IS BAD
-                CS              BIT1                    LOCK OUT FURTHER UPLINK ACTIVITY (BY
-                MASK            UPLOCK                  PUTTING 1 INTO BIT1 OF UPLOCK) UNTIL ELR
-                AD              BIT1                    IS SENT UP UPLINK.
+TMFAIL2         TC              RESTORSR                # CODE IS BAD
+                CS              BIT1                    # LOCK OUT FURTHER UPLINK ACTIVITY (BY
+                MASK            UPLOCK                  # PUTTING 1 INTO BIT1 OF UPLOCK) UNTIL ELR
+                AD              BIT1                    # IS SENT UP UPLINK.
                 TS              UPLOCK
 TMFAIL1         TC              TMALM
                 TC              RESUME
@@ -99,7 +99,7 @@ RESTORSR        XCH             KEYTEMP2
                 TS              SR
                 TC              Q
          
-TMALM           =               RESUME                  FOR NOW
+TMALM           =               RESUME                  # FOR NOW
 
 SRGHT5          CS              SR
                 CS              SR
@@ -107,7 +107,7 @@ SRGHT5          CS              SR
                 CS              SR
                 CS              SR
                 CS              A
-                TC              Q                       DELIVERS WORD UNCOMPLEMENTED
+                TC              Q                       # DELIVERS WORD UNCOMPLEMENTED
           
 UPTEST          AD              KEYTEMP1
                 CCS             A
