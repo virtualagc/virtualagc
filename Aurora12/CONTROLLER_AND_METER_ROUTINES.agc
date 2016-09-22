@@ -25,3 +25,78 @@
 #       https://www.ibiblio.org/apollo.  
 # The original high-quality digital images are available at archive.org:
 #       https://archive.org/details/aurora00dapg
+
+## Page 368
+
+                SETLOC          ENDEXTVS                        
+                EBANK=          PCOM                            
+
+RHCNTRL         CAF             BIT15                           
+                EXTEND                                          
+                RAND            31                              # CHECK PGNCS CONTROL OF S/C
+                EXTEND                                          
+                BZF             +2                              
+                TCF             NORATE                          
+                CAF             BIT3                            
+                EXTEND                                          
+                RAND            31                              # CHECK OUT-OF-DETENT BIT
+                CCS             A                               
+                TCF             NORATE                          
+
+                CAF             ZERO                            # ZERO COUNTERS
+                TS              RHCP                            
+                TS              RHCY                            
+                TS              RHCR                            
+                CAF             BIT8                            # ENABLE COUNTERS
+                AD              BIT9                            # START READING INTO COUNTERS
+                EXTEND                                          
+                WOR             13                              
+                CAF             BIT5                            
+                TC              WAITLIST                        # COUNTERS FILLED
+                2CADR           ATTCONT                         
+
+                TC              TASKOVER                        
+
+ATTCONT         CS              BIT8                            
+                EXTEND                                          
+                WAND            13                              # RESET COUNTER ENABLE
+                CAF             BIT11                           
+                EXTEND                                          
+                RAND            32                              # CHECK IF IN ATTITUDE HOLD MODE
+                EXTEND                                          
+                BZF             +2                              
+                TC              XAXOVRD                         
+                CA              RHCP                            
+                EXTEND                                          
+                MP              BIT10                           
+                CAF             RHCSCALE                        
+                EXTEND                                          
+                MP              L                               
+                TS              PCOM                            
+                CA              RHCR                            
+                EXTEND                                          
+                MP              BIT10                           
+                CAF             RHCSCALE                        
+                EXTEND                                          
+
+## PAGE 369
+
+                MP              L                               
+                TS              RCOM                            
+XAXOVRD         CA              RHCY                            # YAW CHANNEL ONLY IN AUTO MODE
+                EXTEND                                          
+                MP              BIT10                           
+                CAF             RHCSCALE                        
+                EXTEND                                          
+                MP              L                               
+                TS              YCOM                            
+                TCF             RHCNTRL                         
+
+NORATE          CAF             ZERO                            # SET RATE COMMANDS TO ZERO
+                TS              PCOM                            
+                RS              RCOM                            
+                TS              YCOM                            
+                TC              TASKOVER                        
+
+RHCSCALE        DEC             .44488                          # LEAVES INPUTS SCALED AS PI/4 RAD/SEC.
+ENDCM5          EQUALS                                          
