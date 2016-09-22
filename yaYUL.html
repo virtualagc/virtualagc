@@ -1,119 +1,232 @@
 <!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html;
-      charset=utf-8">
-    <meta name="generator" content="Bluefish 2.2.4" >
-    <meta name="author" content="Ron Burkey" >
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Bluefish 2.2.4">
+    <meta name="author" content="Ron Burkey">
     <title>Virtual AGC yaYUL Page</title>
-    <meta name="author" content="Ron Burkey" >
+    <meta name="author" content="Ron Burkey">
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
     <script type="text/javascript">document.write(headerTemplate.replace("@TITLE@","yaYUL").replace("@SUBTITLE@","The AGC Cross-Assembler"))</script>
     <h1><small>Contents</small></h1>
     <ul>
+      <li><a href="#What_is_YUL">What is YUL?</a><br>
+      </li>
       <li><a href="#What_is_yaYUL_">What is yaYUL?</a></li>
       <li><a href="#Invoking_yaYUL">Invoking yaYUL</a></li>
       <li><a href="#Apollo_Source-Code_Naming">Apollo Source-Code Naming</a></li>
-      <li><a href="#AGC4_Assembly_Language">AGC4 Assembly Language</a><br>
+      <li><a href="#AGC4_Assembly_Language">AGC4 Assembly Language</a></li>
+    </ul>
+    <h2><a name="What_is_YUL"></a>What is YUL?</h2>
+    <p>Apollo Command Module software (<span style="font-weight: bold;">Colossus</span>)
+      or Lunar Module software (<span style="font-weight: bold;">Luminary</span>)
+      was written in a computer language (AGC assembly language)
+      invented at MIT's Instrumentation/Draper lab.&nbsp; Software whose
+      source code is in "assembly language" must be processed to turn it
+      into a binary format ("machine language") understood by the
+      computer itself.&nbsp; The program that converts the human-written
+      source code into machine-readable binary code is called an
+      "assembler".&nbsp; The conversion from source code to machine code
+      took place prior to loading the software into the AGC, so the
+      assembly-language code was actually not actually run by the AGC
+      itself, but rather was processed by ground computers weeks or
+      months prior to the actual Apollo flights.&nbsp; <br>
+      <br>
+      (Incidentally, for debugging purposes, the original developers had
+      a special read-write module which could be programmed from a paper
+      tape and then plugged into the AGC and used as if it were a core
+      rope.&nbsp; While this process was apparently not easy, it was
+      certainly more convenient than manufacturing a core rope.&nbsp;
+      The assembler produced the data for creating the paper tape.)<br>
+    </p>
+    <p>Actually, the situation is slightly more-complex than this.&nbsp;
+      For one thing, in talking about "assembly language" above, I was
+      using generic programming terminology, not necessarily used by the
+      AGC development team.&nbsp; In fact, the programs were generally
+      in a <i>combination of </i><i>two</i><i> different programming
+        languages</i>, intermixed:<br>
+    </p>
+    <ul>
+      <li>The assembly language, which was referred to as "basic"
+        (though having nothing whatever to do with Kemeny &amp; Kurtz's
+        BASIC programming language, invented in roughly the same time
+        frame).</li>
+      <li>Interpreter language, a higher-level language which was
+        executed by an "interpreter" written in basic.<br>
       </li>
+    </ul>
+    <p>In the second place, as the AGC hardware and the developers'
+      ideas changed over time, so did these programming languages, going
+      through various stages.&nbsp; In other words, the programming
+      language itself was not just one thing, but was several different
+      things over time, although it remained constant throughout all the
+      manned missions which actually flew.<br>
+    </p>
+    <p>The original AGC assembler, which turned this mixture of
+      programming languages into an executable program that could be
+      stored in core memories and run on the AGC, was called <span
+        style="font-weight: bold;">YUL</span> (from "yuletide") because
+      the projected delivery date of the MOD 1A guidance computer, with
+      system software, was Christmas, 1959.&nbsp; As time went on, it
+      had to support all of the different "target" languages I mentioned
+      above, and Hugh Blair-Smith, the program's author, tells us that
+      YUL eventually supported the MOD 1A, MOD 1B, MOD 3S, MOD 3C, AGC4
+      (Block I AGC), and two versions of the final Block II AGC, which
+      is seven different targets by my count.&nbsp; In real life, <span
+        style="font-weight: bold;">YUL</span> was eventually succeeded
+      by the <span style="font-weight: bold;">GAP</span> (General
+      Assembly Program), but "YUL" sounds much niftier than "GAP"
+      (which, sorry, sounds like something from Accounting), so we'll
+      keep calling it "YUL".<br>
+    </p>
+    <p><a href="http://www.ibiblio.org/apollo/klabs/images/IMG_9203.JPG"><img
+          alt=""
+          src="file:///home/rburkey/git/virtualagc-web/HughAndYUL.jpg"
+          align="right" height="300" border="2" width="400"></a>YUL, by
+      the way, originally ran on the IBM 650, which quickly ran out of
+      capacity, and hence it was ported to the more-powerful Honeywell
+      800.&nbsp; Now, I don't have a Honeywell 800 in my pocket, so I
+      have no way to run YUL, but I can show you YUL's complete source
+      code, because Hugh has allowed us to have it scanned.&nbsp; If you
+      demand the absolute highest visual quality (by which I mean huge,
+      huge files), you can go to <a
+        href="https://archive.org/details/virtualagcproject">our Virtual
+        AGC Project at archive.org</a> and download the imagery of the
+      source code in various formats.&nbsp; However, if you're willing
+      to get much smaller files, which will download much quicker, but
+      at a slight loss in quality, we've hosted the page images here as
+      well:<br>
+    </p>
+    <ul>
+      <li><a href="http://www.ibiblio.org/apollo/YUL/01%20-%20Intro/">Introduction</a></li>
+      <li><a href="http://www.ibiblio.org/apollo/YUL/02%20-%20Pass%200/">Pass
+
+
+
+          0</a></li>
+      <li><a href="http://www.ibiblio.org/apollo/YUL/03%20-%20Pass%201/">Pass
+
+
+
+          1</a></li>
+      <li><a href="http://www.ibiblio.org/apollo/YUL/04%20-%20Pass%202/">Pass
+
+
+
+          2</a></li>
+      <li><a href="http://www.ibiblio.org/apollo/YUL/05%20-%20Pass%203/">Pass
+
+
+
+          3</a></li>
+      <li><a
+href="http://www.ibiblio.org/apollo/YUL/06%20-%20System%20Manufacturing%20-%20AGC4/">System
+
+
+
+          manufacturing for AGC4</a></li>
+      <li><a
+href="http://www.ibiblio.org/apollo/YUL/07%20-%20System%20Manufacturing%20-%20SACO/">System
+
+
+
+          manufacturing for SACO</a></li>
+      <li><a
+href="http://www.ibiblio.org/apollo/YUL/08%20-%20System%20Manufacturing%20-%20BLK2/">System
+
+
+
+          manufacturing for BLK2</a></li>
+      <li><a
+href="http://www.ibiblio.org/apollo/YUL/09%20-%20System%20Simulators%20-%20AGC4/">System
+
+
+
+          simulators, AGC4</a></li>
+      <li><a
+href="http://www.ibiblio.org/apollo/YUL/10%20-%20System%20Simulators%20-%20SACO/">System
+
+
+
+          simulators, SACO</a><br>
+      </li>
+    </ul>
+    <p>Before you turn up your nose at this idea, though, I'd recommend
+      at least looking over the "Introduction", which contains no actual
+      code, because you may find yourself amused at the peculiar brand
+      of humor you'll find there.&nbsp; There's also <a
+        href="http://www.ibiblio.org/apollo/klabs/video/blair-smith.wmv">a
+        video of Hugh giving a talk about "Pass 0" of the assembler</a>
+      at the MAPLD '04 conference.&nbsp; The picture above is him
+      showing the YUL listing to an interested attendee.<br>
+    </p>
+    <p>The original <span style="font-weight: bold;">YUL</span>
+      accepted a complete program (such as <span style="font-weight:
+        bold;">Luminary</span> or <span style="font-weight: bold;">Colossus</span>)
+      as decks of punch-cards, and seemingly preserved the code in tape
+      libraries; an actual assembly run therefore worked on chunks of
+      code extracted from the tape libraries.&nbsp; The assembler
+      directly outputs binary machine code.&nbsp; There is no linker. </p>
+    <ul>
     </ul>
     <h1><a name="What_is_yaYUL_"></a><small>What is yaYUL?<br>
       </small></h1>
-    Apollo Command Module software (<span style="font-weight: bold;">Colossus</span>)
-    or Lunar Module software (<span style="font-weight: bold;">Luminary</span>)
-    was written in a computer language (AGC4 assembly language) invented
-    at MIT's Instrumentation/Draper lab.&nbsp; Software whose source
-    code is in "assembly language" must be processed to turn it into a
-    binary format ("machine language") understood by the computer
-    itself.&nbsp; The program that converts the human-written source
-    code into machine-readable binary code is called an
-    "assembler".&nbsp; The conversion from source code to machine code
-    takes place prior to loading the software into the AGC, so the
-    assembler software is actually not run by the AGC itself, but rather
-    was run by ground computers weeks or months prior to the actual
-    Apollo flights.&nbsp; <br>
+    Since most people do not have a Honeywell 800 on which to run YUL —
+    and frankly, here at this project we needed to assemble AGC code
+    beginning in 2003, and didn't even have a copy of YUL's program
+    listing until 2016 — I have created a completely new assembler,
+    duplicating the features of the original <span style="font-weight:
+      bold;">YUL</span> to the extent I think important, called <span
+      style="font-weight: bold;">yaYUL</span>.&nbsp; In other words, <span
+      style="font-weight: bold;">yaYUL</span> is used to convert <span
+      style="font-weight: bold;">Luminary</span> or <span
+      style="font-weight: bold;">Colossus</span> source code to a binary
+    format usable by the <span style="font-weight: bold;">yaAGC</span>
+    emulator. <br>
     <br>
-    (Incidentally, for debugging purposes, the original developers had a
-    special read-write module which could be programmed from a paper
-    tape and then plugged into the AGC and used as if it were a core
-    rope.&nbsp; While this process was apparently not easy, it was
-    certainly more convenient than manufacturing a core rope.&nbsp; The
-    assembler produced the data for creating the paper tape.)<br>
-    <br>
-    At present, I'm not aware of any online copy of the source code for
-    the original assembler, called <span style="font-weight: bold;">YUL</span>&mdash;nor
-
-
-    would the type of computer originally used to run the <span
-      style="font-weight: bold;">YUL</span> program be available to do
-    so.&nbsp; That computer, by the way, was the IBM 650, with later
-    porting to the Honywell 800.&nbsp; Therefore, I have created a
-    completely new assembler, duplicating the features of the original <span
-      style="font-weight: bold;">YUL</span> to the extent I think
-    important, called <span style="font-weight: bold;">yaYUL</span>.&nbsp;
-
-
-    In other words, <span style="font-weight: bold;">yaYUL</span> is
-    used to convert <span style="font-weight: bold;">Luminary</span> or
-    <span style="font-weight: bold;">Colossus</span> source code to a
-    binary format usable by the <span style="font-weight: bold;">yaAGC</span>
-    emulator.&nbsp; (Actually, I have <span style="font-style: italic;">seen</span>
-    Hugh Blair-Smith's physical copy of the <span style="font-weight:
-      bold;">YUL</span> source code, and it is an interesting document
-    indeed.&nbsp; We hope/expect that it will be scanned and provided
-    online at <a href="http://www.klabs.org">klabs.org</a>, but that
-    has not yet been accomplished as of this writing, 2004-10-03.)<br>
-    <br>
-    The original AGC assembler was called <span style="font-weight:
-      bold;">YUL</span> (from "yuletide") because the projected delivery
-    date of the MOD 1A guidance computer, with system software, was
-    Christmas, 1959.&nbsp; Hugh Blair-Smith tells us that YUL eventually
-    supported the MOD 1A, MOD 1B, MOD 3S, MOD 3C, AGC4 (Block I AGC),
-    and two versions of the final Block II AGC.&nbsp; <span
-      style="font-weight: bold;">yaYUL</span> is not so flexible as
-    this, and we confine ourselves merely to AGC4 assembly language and
-    interpreter language.&nbsp; In real life, <span style="font-weight:
-      bold;">YUL</span> was eventually succeeded by the <span
-      style="font-weight: bold;">GAP</span> (General Assembly
-    Program).&nbsp; But "yaGAP" doesn't have quite the ring to it that
-    "yaYUL" does, so I feel entitled to ignore that fact.<br>
+    As I mentioned above, YUL itself would accept and assemble language
+    from 7 different (though related) versions of the AGC.&nbsp; <span
+      style="font-weight: bold;">yaYUL</span> is not so clever as this,
+    and limits itself merely to the variants of Block 1 and Block 2
+    languages found in the versions of the AGC programs we've been able
+    to get our hands on.&nbsp; Even though YUL was succeeded by GAP, I
+    don't feel that "yaGAP" has quite the ring to it that "yaYUL" does,
+    so I feel entitled to ignore that fact.<br>
     <br>
     It is important to understand that there is almost no available
     documentation of how the assembler is <span style="font-style:
-      italic;">supposed</span> to operate&mdash;i.e., of the syntax of AGC
+      italic;">supposed</span> to operate—i.e., of the syntax of AGC
     assembly language.&nbsp; (Well, the manual for <span
       style="font-weight: bold;">GAP</span> does exist, but I've not
-    seen it yet.)&nbsp; Most that is known of the syntax of AGC assembly
-    language has been deduced from <span style="font-weight: bold;">Luminary</span>
-    and/or <span style="font-weight: bold;">Colossus</span> assembly
-    listings and, frankly, some of this syntax is very obscure.&nbsp; I
-    have written down what I have learned and what I have deduced in the
-    <a href="assembly_language_manual.html">assembly-language manual</a>.&nbsp;
+    seen it yet.)&nbsp; In the end, most that is known of the syntax of
+    AGC assembly language has been deduced from <span
+      style="font-weight: bold;">Luminary</span> and/or <span
+      style="font-weight: bold;">Colossus</span> assembly listings and,
+    frankly, some of this syntax is very obscure.&nbsp; I have written
+    down what I have learned and what I have deduced in the <a
+      href="assembly_language_manual.html">assembly-language manual</a>.&nbsp;
 Therefore,
 
 
 
+
+
+
+
     <span style="font-weight: bold;">yaYUL</span> is not so much an
-    assembler for AGC assembly language (which is undefined <span
-      style="font-style: italic;">a priori</span>), as much as it is a
-    utility which processes existing <span style="font-weight: bold;">Luminary</span>
-    and/or <span style="font-weight: bold;">Colossus</span> source-code
-    to produce good core-rope images for those specific programs.&nbsp;
-    It is merely <span style="font-style: italic;">hoped</span> that <span
-      style="font-weight: bold;">yaYUL</span> will perform acceptably as
-    a general-purpose assembler for other AGC source-code files.&nbsp; <br>
+    assembler for AGC assembly language (which is fairly nebulous idea),
+    as much as it is a utility which processes <i>existing</i> <span
+      style="font-weight: bold;">Luminary</span> and/or <span
+      style="font-weight: bold;">Colossus</span> source-code to produce
+    good core-rope images for those specific programs.&nbsp; But we've
+    had good luck in feeding most AGC programs into it.<br>
     <br>
-    The original <span style="font-weight: bold;">YUL</span> accepted a
-    complete program (such as <span style="font-weight: bold;">Luminary</span>
-    or <span style="font-weight: bold;">Colossus</span>) as decks of
-    punch-cards, and seemingly preserved the code in tape libraries; an
-    actual assembly run therefore worked on chunks of code extracted
-    from the tape libraries.&nbsp; <span style="font-weight: bold;">yaYUL</span>
-    works in a similar fashion except, of course, that source-code files
-    are accepted rather than punch-card decks.&nbsp; The assembler
-    directly outputs binary machine code.&nbsp; There is no linker. <br>
+    Finally, of course,&nbsp; <span style="font-weight: bold;">yaYUL</span>
+    accepts source-code <i>files</i> rather than punch-card
+    decks.&nbsp; But like YUL, <b>yaYUL</b> directly outputs binary
+    machine code, and there is no linker. <br>
     <h2><a name="Invoking_yaYUL"></a>Invoking yaYUL</h2>
     Running the assembler is very simple.&nbsp; <span
       style="font-weight: bold;">yaYUL</span> is a command-line program,
@@ -221,7 +334,7 @@ Therefore,
     <div style="margin-left: 40px;">This sets the maximum number of
       passes used by the assembler to the number <span
         style="font-style: italic;">n</span>. The assembler will stop as
-      soon as it can&mdash;i.e., it won't necessarily use all of the allowed
+      soon as it can—i.e., it won't necessarily use all of the allowed
       passes, if it does not need to. For example, you might set <span
         style="font-style: italic;">n</span> to 10.&nbsp; <br>
       <br>
@@ -242,6 +355,10 @@ Therefore,
 
 
 
+
+
+
+
               manual</a>) allow forward-references to other <span
               style="font-family: monospace;">EQUALS</span> pseudo-ops.
             For example, consider the following code fragment:<br>
@@ -255,9 +372,17 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
+
                 SYMBOL3</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL3&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -267,9 +392,17 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
+
                 SYMBOL1</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL1&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -280,8 +413,8 @@ EQUALS&nbsp;&nbsp;&nbsp;
               monospace;">SYMBOL1</span> isn't known until the end of
             pass 1, the value of <span style="font-family: monospace;">SYMBOL2</span>
             isn't known until the end of pass 2, and so on. There is no
-            practical limit to the number of passes needed&mdash;if symbol
-            resolution is handled in a straightforward way&mdash;because it
+            practical limit to the number of passes needed—if symbol
+            resolution is handled in a straightforward way—because it
             depends on how many constructs like those above appear
             within the assembly-language source code.&nbsp; Besides,
             this simple-minded use of multiple passes is eerily
@@ -317,7 +450,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
                 involved learning and overcoming some risks of data
                 getting stepped on. And there were always other little
                 enhancements that had to be done, so it wouldn't have
-                been easy&mdash;but I still wish I'd found a way to get it
+                been easy—but I still wish I'd found a way to get it
                 done. I guess one thing that decreased the motivation
                 was that each assembly had to be printed, in about 3 or
                 4 hours on the noisy 600 line-per-minute printer, so
@@ -368,6 +501,10 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
+
       manual</a>.&nbsp; Anyone who's determined to write AGC4
     assembly-language will probably also need to consult the <a
       href="developer.html">developer-info page</a>, which covers
@@ -380,7 +517,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-08-24.<br>
+          2016-09-22.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
