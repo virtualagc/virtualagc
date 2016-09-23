@@ -25,7 +25,7 @@
 #       https://www.ibiblio.org/apollo.  
 # The original high-quality digital images are available at archive.org:
 #       https://archive.org/details/aurora00dapg
-## PAGE 285
+## Page 285
                 BANK            7
         
 KEYRUPT1        TS              BANKRUPT
@@ -44,7 +44,7 @@ KEYCOM          TS              RUPTREG4
                 INDEX           LOCCTR
                 TS              MPAC                    # LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
                 TC              RESUME
-## PAGE 286
+## Page 286
 UPRUPT          TS              BANKRUPT
                 XCH             Q
                 TS              QRUPT
@@ -93,7 +93,7 @@ TMFAIL2         TC              RESTORSR                # CODE IS BAD
                 TS              UPLOCK
 TMFAIL1         TC              TMALM
                 TC              RESUME
-## PAGE 287
+## Page 287
 RESTORSR        XCH             KEYTEMP2
                 DOUBLE
                 TS              SR
@@ -117,7 +117,7 @@ HI10            OCT             77740
                 TC              Q
                 
 # UPACT IS TURNED OFF BY VBRELDSP, ALSO BY ERROR LIGHT RESET.       
-## PAGE 288 
+## Page 288 
 # THE RECEPTION OF A BAD CODE BY UPLINK LOCKS OUT FURTHER UPLINK ACTIVITY
 # BY PLACING A 1 INTO BIT1 OF UPLOCK. BIT9 (ALONG WITH BIT11) OF TMKEYBUF
 # IS SET TO 1 TO SEND AN INDICATION OF THIS SITUATION DOWN THE DOWNLINK.
