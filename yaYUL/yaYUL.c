@@ -238,7 +238,7 @@ main(int argc, char *argv[])
       return (0);
     }
 
-  printf("Apollo Guidance Computer (AGC) assembler, version " NVER
+  printf("Apollo Guidance Computer (AGC) assembler, version " /*NVER*/
   ", built " __DATE__ ", Block %d\n", (Block1 ? 1 : 2));
   printf("(c)2003-2005,2009-2010,2016 Ronald S. Burkey\n");
   printf(

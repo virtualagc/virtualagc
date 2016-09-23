@@ -101,43 +101,43 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           if (!strcmp(InRecord->Mod1, "-"))
             {
 #if 0
-              // This is the range case, "ERASE n - m".
-              i = GetOctOrDec(InRecord->Mod2, &Value2);
-              Value2++;
-              if (i)
-                {
-                  strcpy(OutRecord->ErrorMessage, "End of range missing or illegal.");
-                  OutRecord->Fatal = 1;
-                }
-              else if (Value2 <= Value)
-                {
-                  strcpy(OutRecord->ErrorMessage, "Ending address precedes starting address.");
-                  OutRecord->Fatal = 1;
-                }
-              else
-                {
-                  ParseOutput_t Dummy = { { 0 } }, Dummy2 = { { 0 } };
-                  PseudoToSegmented(Value, &Dummy);
-                  PseudoToSegmented(Value2, &Dummy2);
-                  if (Dummy.Fatal || Dummy.Warning || Dummy2.Fatal || Dummy2.Warning || 
-                      Dummy.ProgramCounter.Invalid || !Dummy.ProgramCounter.Erasable || 
-                      Dummy2.ProgramCounter.Invalid || !Dummy2.ProgramCounter.Erasable || 
-                      Dummy.ProgramCounter.Banked != Dummy2.ProgramCounter.Banked || 
-                      Dummy.ProgramCounter.EB != Dummy2.ProgramCounter.EB)
-                    {
-                      strcpy(OutRecord->ErrorMessage, "May span bank boundary.");
-                      OutRecord->Warning = 1;
-                    }
-                  InRecord->ProgramCounter = Dummy.ProgramCounter;
-                  OutRecord->ProgramCounter = Dummy2.ProgramCounter;
-                }
+//              // This is the range case, "ERASE n - m".
+//              i = GetOctOrDec(InRecord->Mod2, &Value2);
+//              Value2++;
+//              if (i)
+//                {
+//                  strcpy(OutRecord->ErrorMessage, "End of range missing or illegal.");
+//                  OutRecord->Fatal = 1;
+//                }
+//              else if (Value2 <= Value)
+//                {
+//                  strcpy(OutRecord->ErrorMessage, "Ending address precedes starting address.");
+//                  OutRecord->Fatal = 1;
+//                }
+//              else
+//                {
+//                  ParseOutput_t Dummy = { { 0 } }, Dummy2 = { { 0 } };
+//                  PseudoToSegmented(Value, &Dummy);
+//                  PseudoToSegmented(Value2, &Dummy2);
+//                  if (Dummy.Fatal || Dummy.Warning || Dummy2.Fatal || Dummy2.Warning || 
+//                      Dummy.ProgramCounter.Invalid || !Dummy.ProgramCounter.Erasable || 
+//                      Dummy2.ProgramCounter.Invalid || !Dummy2.ProgramCounter.Erasable || 
+//                      Dummy.ProgramCounter.Banked != Dummy2.ProgramCounter.Banked || 
+//                      Dummy.ProgramCounter.EB != Dummy2.ProgramCounter.EB)
+//                    {
+//                      strcpy(OutRecord->ErrorMessage, "May span bank boundary.");
+//                      OutRecord->Warning = 1;
+//                    }
+//                  InRecord->ProgramCounter = Dummy.ProgramCounter;
+//                  OutRecord->ProgramCounter = Dummy2.ProgramCounter;
+//                }
 #else // 0
               //char Mod1[1 + MAX_LINE_LENGTH], Mod2[1 + MAX_LINE_LENGTH];
 
               //strcpy(Mod1, InRecord->Mod1);
               //strcpy(Mod2, InRecord->Mod2);
-              //*InRecord->Mod1 = 0;
-              //*InRecord->Mod2 = 0;
+              // *InRecord->Mod1 = 0;
+              // *InRecord->Mod2 = 0;
               //strcpy(InRecord->Operator, "EQUALS");            
               ParseEQUALS(InRecord, OutRecord);
 
@@ -181,5 +181,3 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }  
   return (0);  
 }
-
-

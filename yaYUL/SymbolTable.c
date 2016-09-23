@@ -88,8 +88,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <fcntl.h>
+#include <io.h>
+#include <share.h>
+#include <direct.h>
+#include <sys\stat.h>
 #include <errno.h>
 
 //-------------------------------------------------------------------------
@@ -928,20 +932,21 @@ void WriteSymbolsToFile(char *fname)
 
   // Open the symbol table file
   step = 1;
-  if ((fd = open (fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
-    goto error;
-
+//  if ((_sopen_s ( &fd, fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, _SH_DENYWR, _S_IREAD | _S_IWRITE)) < 0)
+//    goto error;
+  if ((_sopen_s(&fd, fname, _O_BINARY | _O_WRONLY | _O_CREAT | _O_TRUNC , _SH_DENYWR, _S_IREAD| _S_IWRITE)) < 0)
+	  goto error;
   // Write the SymbolFile_t header to the symbol file, filling its
   // members first.
   step = 2;
-  if (NULL == getcwd(symfile.SourcePath, MAX_PATH_LENGTH))
+  if (NULL == _getcwd(symfile.SourcePath, MAX_PATH_LENGTH))
     goto error;
   symfile.NumberSymbols = SymbolTableSize;
   symfile.NumberLines = LineTableSize; // JMS: 07.28
   LittleEndian32(&symfile.NumberSymbols);
   LittleEndian32(&symfile.NumberLines);
   step = 3;
-  if (write(fd, (void *)&symfile, sizeof(SymbolFile_t)) < 0)
+  if (_write(fd, (void *)&symfile, sizeof(SymbolFile_t)) < 0)
     goto error;
 
   // Loop and write the symbols to a file
@@ -953,7 +958,7 @@ void WriteSymbolsToFile(char *fname)
       LittleEndian32(&symbol.Value.Value);
       LittleEndian32(&symbol.Type);
       LittleEndian32(&symbol.LineNumber);
-      if (write(fd, (void *) &symbol, sizeof(Symbol_t)) < 0)
+      if (_write(fd, (void *) &symbol, sizeof(Symbol_t)) < 0)
         goto error;
     }
 
@@ -966,7 +971,7 @@ void WriteSymbolsToFile(char *fname)
       LittleEndian32(&Line);
       LittleEndian32(&Line.CodeAddress.Value);
       LittleEndian32(&Line.LineNumber);
-      if (write(fd, (void *) &Line, sizeof(SymbolLine_t)) < 0)
+      if (_write(fd, (void *) &Line, sizeof(SymbolLine_t)) < 0)
         goto error;
     }
   if (0)
@@ -978,7 +983,7 @@ void WriteSymbolsToFile(char *fname)
     }
   else
     printf("\nSymbol-table file written.\n");
-  close (fd);
+  _close (fd);
 }
 
 //-------------------------------------------------------------------------
