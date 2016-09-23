@@ -6,6 +6,30 @@
 
 START
 
+# Test CCS CYR
+		CAF	C12345
+		TS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		CCS	CYR
+		NOOP
+		NOOP
+		NOOP
+		NOOP
+
 # Test positive vs negative overflow in TS.
 TSTEST		CAF	C30000
 		AD	C30000
@@ -93,6 +117,7 @@ COMTEST		CAF	C4321
 		
 # Constants and variables used by the program		
 
+CYR		=	20
 POSMAX		OCT	37777
 C12345		OCT	12345
 C4321		OCT	4321
