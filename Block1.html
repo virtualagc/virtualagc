@@ -10,16 +10,8 @@
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
+    <h2> Contents </h2>
     <script type="text/javascript">document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUBTITLE@","in all its Aspects"))</script>
-    <br>
-    <br>
-    <div align="center"><big><big><i><b>This page is currently under
-              construction<br>
-              and concerns work in progress whose description<br>
-              may partially be speculative<br>
-            </b></i></big></big> </div>
-    <br>
-    <h2>Contents</h2>
     <ul>
       <li><a href="#Blocks_for_All_Occasions">Introduction</a></li>
       <li><a href="#Available_Documentation">Available Documentation</a></li>
@@ -131,6 +123,8 @@
 
 
 
+
+
           0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
@@ -195,6 +189,8 @@
 
 
 
+
+
           General Design Characteristics of the Apollo Guidance Computer</a>,
         by Eldon C. Hall, May 1963.<br>
       </li>
@@ -211,6 +207,8 @@ href="http://www.ibiblio.org/apollo/klabs/history/history_docs/r-393.pdf"
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
       <li><a href="http://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574:
+
+
 
 
 
@@ -282,9 +280,8 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     <ul>
       <li>CM Block 1 AGC:</li>
       <ul>
-        <li><img alt=""
-            src="block1-rope.jpg"
-            align="right" height="100" width="308">about 2 cubic feet</li>
+        <li><img alt="" src="block1-rope.jpg" align="right" height="100"
+            width="308">about 2 cubic feet</li>
         <li>about 110 pounds</li>
         <li>24,576 words of "fixed" memory (i.e., read-only memory).</li>
         <li>Controls two <a href="#DSKY">DSKY</a>s, one for the main
@@ -299,9 +296,8 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
         <li>Controls one <a href="#DSKY">DSKY</a>.<br>
         </li>
       </ul>
-      <li><img alt=""
-          src="block1-erasable.jpg"
-          align="right" height="150" width="243">Common:</li>
+      <li><img alt="" src="block1-erasable.jpg" align="right"
+          height="150" width="243">Common:</li>
       <ul>
         <li>Power:&nbsp; 180 watts active, 10 watts idle.<br>
         </li>
@@ -405,6 +401,8 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     Below are some drawings from a set of<big> </big><a
 href="http://www.ibiblio.org/apollo/Documents/ApolloTrainingGuidanceAndNavigation_07-65.pdf">Apollo
 Guidance
+
+
 
 
 
@@ -695,7 +693,11 @@ Guidance
 
 
 
+
+
       distinct positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
+
+
 
 
 
@@ -758,6 +760,8 @@ Guidance
     </ul>
     <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
       that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
+
+
 
 
 
@@ -856,6 +860,8 @@ Guidance
 
 
 
+
+
           0 B14 B13 ... B1</tt>.&nbsp; Thus, the most-significant
         original bit <tt>B15</tt> is discarded, and then what's left
         over is shifted downward, wrapping the old least-significant bit
@@ -907,22 +913,14 @@ Guidance
       </ul>
       <li><tt>QRUPT</tt> (address 027), <tt>ZRUPT</tt> (address 024), <tt>BRUPT</tt>
         (address 025):&nbsp; When an <a
-href="Block1.html#Interrupt_Processing">interrupt
-
-
-
-
-
-
-
-          is processed</a>, the existing values of the <tt>Q</tt>, <tt>Z</tt>,
-        and <tt>B</tt> registers are automatically copied into these
-        registers.&nbsp; <tt>B</tt> is a hidden register, not
-        addressable by software, and hence was not discussed with the
-        registers already mentioned, however, it has the important role
-        of holding the numerical value (as opposed to the address) of
-        the next instruction to be executed after resumption from the
-        interrupt-processing.<br>
+          href="Block1.html#Interrupt_Processing">interrupt is processed</a>,
+        the existing values of the <tt>Q</tt>, <tt>Z</tt>, and <tt>B</tt>
+        registers are automatically copied into these registers.&nbsp; <tt>B</tt>
+        is a hidden register, not addressable by software, and hence was
+        not discussed with the registers already mentioned, however, it
+        has the important role of holding the numerical value (as
+        opposed to the address) of the next instruction to be executed
+        after resumption from the interrupt-processing.<br>
       </li>
       <li><tt>ARUPT</tt> (address 026), <tt>BANKRUPT</tt> (address
         030),<tt> </tt><tt> OVRUPT</tt> (address 031), <tt>LPRUPT</tt>
@@ -1167,8 +1165,12 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1194,9 +1196,13 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1484,6 +1490,8 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
     <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
     to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
     positions would display "+35".&nbsp; Since this is latched in the
@@ -1505,6 +1513,8 @@ href="Block1.html#Interrupt_Processing">interrupt
         incremented every time an addition or subtraction operation
         (i.e., <tt>AD</tt> or <tt>SU</tt>) creates <a
           href="#Overflow">positive overflow in the accumulator register</a>.&nbsp;
+
+
 
 
 
@@ -1549,6 +1559,8 @@ href="Block1.html#Interrupt_Processing">interrupt
       </li>
       <li><tt>UPLINK</tt> (address 041):&nbsp; This 16-bit
         shift-register receives the data stream of <a href="#Uplink">digital-uplink
+
+
 
 
 
@@ -1606,8 +1618,8 @@ href="Block1.html#Interrupt_Processing">interrupt
           href="#Counters_and_Timers">CPU TIMER4</a> overflows. This is
         used for servicing outputs to the DSKY.</li>
       <li>KEYRUPT (address 02014) — triggered when bit B6 in <a
-          href="io_channels">input register IN0</a> becomes active ...
-        i.e., when a DSKY key (or the MARK key) is pressed.</li>
+          href="io_channels">input register <tt>IN0</tt></a> becomes
+        active ... i.e., when a DSKY key (or the MARK key) is pressed.</li>
       <li>UPRUPT (address 02020) — for servicing uplink data, which is
         in the same form as (and treated the same way as) DSKY
         keystrokes.</li>
@@ -1617,14 +1629,17 @@ href="Block1.html#Interrupt_Processing">interrupt
     </ul>
     An interrupt performs several functions automatically in hardware
     before the interrupt-servicing by the software begins. The existing
-    Q and Z register values are transferred to the CPU registers QRUPT
-    and ZRUPT, and then an implicit TC instruction transfers control to
-    the interrupt vector code, thus overwriting Q and Z with new values.
-    The interrupt-service routine must eventually be terminated with the
-    RESUME instruction, which undoes those steps ... i.e., it restores Q
-    and Z to their original forms and puts the program counter back to
-    what it had been, the position of the next instruction that was due
-    to be reached when the interrupt occurred.<br>
+    <tt>Q</tt> and <tt>Z</tt> register values are transferred to the
+    CPU registers <tt>QRUPT</tt> and <tt>ZRUPT</tt>, and then an
+    implicit <tt>TC</tt> instruction transfers control to the interrupt
+    vector code, thus overwriting <tt>Q</tt> and <tt>Z</tt> with new
+    values. The interrupt-service routine must eventually be terminated
+    with the
+    <tt> RESUME</tt> instruction, which undoes those steps ... i.e., it
+    restores <tt>Q</tt> and <tt>Z</tt> to their original forms and
+    puts the program counter back to what it had been, the position of
+    the next instruction that was due to be reached when the interrupt
+    occurred.<br>
     <br>
     But note that the instruction stored at that return location is not
     necessarily the instruction executed at that point! That's because
@@ -1632,18 +1647,19 @@ href="Block1.html#Interrupt_Processing">interrupt
     instruction (described later) which has the effect of altering the
     instruction in-place, even though usually stored in fixed memory, by
     adding something to it in advance. Thus if an interrupt occurs <i>between</i>
-    an INDEX and the instruction being indexed that follows it, it is
-    actually the indexed instruction that will be performed when after
-    the RESUME occurs. The indexed instruction is stored in a special
-    CPU register, BRUPT, while the interrupt is being serviced. This
-    register is so-called because in normal operation the CPU stores the
-    value of the instruction it is executing in a special hidden,
-    non-addressable register called B.<br>
+    an <tt>INDEX</tt> and the instruction being indexed that follows
+    it, it is actually the indexed instruction that will be performed
+    when after the <tt>RESUME</tt> occurs. The indexed instruction is
+    stored in a special CPU register, <tt>BRUPT</tt>, while the
+    interrupt is being serviced. This register is so-called because in
+    normal operation the CPU stores the value of the instruction it is
+    executing in a special hidden, non-addressable register called <tt>B</tt>.<br>
     <br>
-    Other than Q, Z, and B, the remainder of the state is <i>not</i>
-    automatically stored during the interrupt, and so the
-    interrupt-service routine has to explicitly store any other data
-    which must be retained, such as the A register.<br>
+    Other than <tt>Q</tt>, <tt>Z</tt>, and <tt>B</tt>, the remainder
+    of the state is <i>not</i> automatically stored during the
+    interrupt, and so the interrupt-service routine has to explicitly
+    store any other data which must be retained, such as the <tt>A</tt>
+    register.<br>
     <br>
     Only one interrupt can be serviced at a time, and interrupts
     occurring simultaneously are prioritized in the same order as shown
@@ -1653,17 +1669,19 @@ href="Block1.html#Interrupt_Processing">interrupt
     inhibiting factors are:<br>
     <ul>
       <li>Interrupts can be explicitly disabled using the
-        assembly-language instruction INHINT, and remain disabled until
-        a subsequent RELINT instruction is encountered.</li>
-      <li>Interrupts are inhibited if there is overflow in the A
+        assembly-language instruction <tt>INHINT</tt>, and remain
+        disabled until a subsequent <tt>RELINT</tt> instruction is
+        encountered.</li>
+      <li>Interrupts are inhibited if there is overflow in the <tt>A</tt>
         register, because there is no way to store and restored overflow
         during the interrupt.</li>
-      <li>Interrupts are inhibited if there is overflow in the hidden B
+      <li>Interrupts are inhibited if there is overflow in the hidden <tt>B</tt>
         register. This condition occurs if the next instruction that
-        would have been executed is an MP, DV, or SU, and relates to the
-        fact that the opcodes for these instructions are otherwise
-        identical to other instructions, and the only way to distinguish
-        them is if this overflow condition can be checked.</li>
+        would have been executed is an <tt>MP</tt>, <tt>DV</tt>, or <tt>SU</tt>,
+        and relates to the fact that the opcodes for these instructions
+        are otherwise identical to other instructions, and the only way
+        to distinguish them is if this overflow condition can be
+        checked.</li>
     </ul>
     <br>
     <hr style="width: 100%; height: 2px;">
@@ -1678,6 +1696,8 @@ href="Block1.html#Interrupt_Processing">interrupt
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
 
 
 
@@ -1834,7 +1854,8 @@ href="Block1.html#Interrupt_Processing">interrupt
     <h3><a name="Instruction_Representation"></a>Instruction
       Representation </h3>
     <h4><a name="Assembly-Language_Instructions"></a>Assembly-Language
-      Instructions</h4>
+      Instructions, or "Basic"<br>
+    </h4>
     The instruction set is far smaller, and therefore far simpler, than
     in Block 2.&nbsp; Every assembly-language instruction occupies
     precisely one word of memory (including operand), and consists of 15
@@ -1847,14 +1868,125 @@ href="Block1.html#Interrupt_Processing">interrupt
     The 3-bit field <span style="font-family: monospace;">CCC</span>
     represents the instruction type (the "code"), while the 12-bits <span
       style="font-family: monospace;">AAAAAAAAAAAA</span> represent a
-    memory address.&nbsp; With this simple scheme, there are at most 8
-    instruction types, each of which can operate on any memory location
-    within a 4096-word area of memory. <br>
+    memory address.&nbsp; With this simple scheme, there are seemingly
+    at most 8 instruction types, each of which can operate on any memory
+    location within a 4096-word area of memory. <br>
     <br>
-    TBD<br>
-    <h3><a name="AGC4_Instruction_Set"></a>AGC4 Instruction Set <br>
+    Although, actually, more instruction types were packed into this
+    format than just the 8 that would seemingly be allowed by the 3
+    available bits <tt>CCC</tt>.&nbsp; The extra instructions were
+    available in a couple of obvious ways, and in one very subtle,
+    unobvious way.<br>
+    <br>
+    One of the "obvious" ways, of course, is that just as with the Block
+    2 basic instructions, certain special opcode+operand combinations
+    are simply set aside and used differently that one would
+    anticipate.&nbsp; These will be covered in the next section, but for
+    example:&nbsp; If the <tt>INDEX</tt> instruction has the specific
+    operand 017, then it is no longer an <tt>INDEX</tt> operation, but
+    rather as an <tt>INHINT</tt> operation.&nbsp; The other "obvious"
+    way is that certain operations on erasable memory don't make sense
+    for fixed memory, or vice-versa, so their action is different
+    depending on which memory area it applies to.&nbsp; For example, the
+    <tt>XCH</tt> opcode — which means to exchange the contents of the
+    accumulator register with an erasable memory location — is instead
+    interpreted as a <tt>CAF</tt> instruction — which means to load the
+    accumulator from fixed memory — when the operand is a fixed-memory
+    location.<br>
+    <br>
+    The "subtle" way is to use the <tt>INDEX</tt> instruction in an
+    unusual way.&nbsp; The purpose of an <tt>INDEX</tt>, which is
+    covered in the next section, is to arithmetically <i>add</i> a
+    value to the <i>next</i> instruction following it, and this is
+    typically used for accessing an array by adding (or subtracting) a
+    value from the operand of the instruction.&nbsp; However, depending
+    on the value being added or subtracted, it could also be used to
+    change the opcode as well.&nbsp; The most-subtle use, though, is
+    that it's theoretically possible to use <tt>INDEX</tt> to add a
+    value to the next instruction's opcode which will not only change
+    the opcode, but could actually have a 16th bit which is non-zero,
+    and that 16th bit allows you to add a 4th bit <tt>CCCC</tt> to the
+    number of instruction types you can have!&nbsp; In fact, there, are
+    three different types of such "extended" instructions, <tt>MP</tt>,
+    <tt>DV</tt>, and <tt>SU</tt>, all of which will be covered in the
+    next section.&nbsp; What's fascinating about these instructions is
+    that they are encoded in precisely the same way as the <tt>CS, TS</tt>,
+    and <tt>AD</tt><tt></tt> instructions, respectively, and there's
+    literally no way to tell which is which unless you know the
+    instruction that preceded them.&nbsp; Even more fascinating, while
+    the <i>usual</i> case would be that the preceding instruction was
+    an <tt>INDEX</tt> operation that just added a constant value, in
+    which case it's easy to that the instruction following it is
+    "extended", <i>sometimes</i> the <tt>INDEX</tt>'ing was done by
+    adding a <i>variable</i> to the instruction, in order to multiply,
+    divide, or subtract an array element.&nbsp; In that case, even
+    looking at the preceding <tt>INDEX</tt> instruction isn't enough to
+    tell you that the next instruction is "extended": to determine that
+    you have to know the value of the variable, which is hard to know
+    without actually executing the code.&nbsp; Of course, executing the
+    code is no problem for the CPU itself, since that's what the CPU
+    does, but it's a problem for someone (say) disassembling the code,
+    and fortunately it was done extremely rarely.<br>
+    <h3><a name="AGC4_Instruction_Set"></a>Basic Instruction Set&nbsp;</h3>
+    <p>In reading about the effects of the various "basic" instructions
+      below, there are several notational conveniences that you should
+      be aware of:<br>
+    </p>
+    <ul>
+      <li>An MCT is a "machine cycle time", and is 12/1024000 seconds
+        long, or about 11.7 μs.</li>
+      <li>The location of the current instruction is generally referred
+        to as L, so the instruction following the current instruction is
+        L+1, the instruction following that is L+2, and so on.<br>
+      </li>
+      <li> C(<i>x</i>) refers to the contents of location <i>x</i>,
+        which will often be the accumulator, C(<tt>A</tt>), or of the
+        operand, C(<tt>K</tt>).</li>
+      <li>On those rare occasions when it is necessary to distinguish
+        between the "before" and "after" contents of a location, C(<i>x</i>)
+        will be the "after", and b(<i>x</i>) will denote the "before".</li>
+    </ul>
+    <p>As for why it may be necessary to distinguish "before" from
+      "after", one reason is <a href="#CPU_Architecture_Registers">the
+        so-called "editing registers" discussed earlier</a>, namely <tt>LP</tt>,
+      <tt>CYR</tt>, <tt>SR</tt>, <tt>CYL</tt>, and <tt>SL</tt>.&nbsp;
+      Recall that when you <i>write</i> to such a register, what's
+      saved in the register isn't the value you're theoretically writing
+      to it, but rather an "edited" form of that value.&nbsp; For
+      example, with <tt>CYL</tt> this editing process is to rotate all
+      the bits to the left.&nbsp; Some instructions have as a side
+      effect re-writing the operand, denoted (if the operand is <tt>K</tt>)
+      by<br>
+    </p>
+    <blockquote>C(<tt>K</tt>) = b(<tt>K</tt>)<br>
+    </blockquote>
+    <p>Thus even though a given instruction is seemingly using its
+      operand as input rather than for output, if the operand is an
+      editing register, it may be automatically rewritten, and that
+      means it will be re-edited every time the instruction is used.<br>
+    </p>
+    <p>A couple of points about the Block 1 basic instruction set that
+      may not be obvious at first glance are:<br>
+    </p>
+    <ul>
+      <li>There is no instruction for loading the accumulator from
+        erasable memory, though there is one for loading the accumulator
+        from fixed memory (namely <tt>CAF</tt>).&nbsp; There are
+        several workarounds, but one which guarantees no side-effects,
+        unless <tt>K</tt> is an editing register, is "<tt>CS K</tt>"
+        (C(<tt>A</tt>) = -C(<tt>K</tt>)) followed by "<tt>COM</tt>" (C(<tt>A</tt>)
+        = -C(<tt>A</tt>)).</li>
+      <li>There is no instruction without side-effects for saving the
+        accumulator to erasable memory.&nbsp; The <tt>TS</tt>
+        instruction is almost always used for this but can have an
+        unwanted side-effect which must be guarded against, if the
+        accumulator contains <a href="#Overflow">overflow</a>.<br>
+      </li>
+    </ul>
+    <h3>AD</h3>
+    <h3>
     </h3>
-    <h4>STORE</h4>
+    <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
       <tbody>
@@ -1862,35 +1994,36 @@ href="Block1.html#Interrupt_Processing">interrupt
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Description:<br>
           </td>
-          <td style="vertical-align: top;"><br>
+          <td style="vertical-align: top;">"Add"<br>
           </td>
         </tr>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
           </td>
           <td style="vertical-align: top;"><span style="font-family:
-              monospace;">STORE&nbsp; X<br>
+              monospace;">AD K<br>
             </span></td>
         </tr>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Operand(s):<br>
           </td>
-          <td style="vertical-align: top;"><br>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            memory.<br>
           </td>
         </tr>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;"><br>
+          <td style="vertical-align: top;">2 MCT or 3 MCT<br>
           </td>
         </tr>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Octal:<br>
           </td>
           <td style="vertical-align: top;"><span style="font-family:
-              monospace;"><br>
+              monospace;">060000 + K<br>
             </span> </td>
         </tr>
         <tr>
@@ -1899,19 +2032,1440 @@ href="Block1.html#Interrupt_Processing">interrupt
           <td style="vertical-align: top;"><span style="font-weight:
               bold;"></span><span style="font-family: monospace;"></span><span
               style="font-weight: bold;"></span><span style="color:
-              rgb(0, 153, 0);"></span><br>
+              rgb(0, 153, 0);"></span>This instruction adds the contents
+            of a memory location to the accumulator:<br>
+            <blockquote>C(<tt>A</tt>) = C(<tt>A</tt>) + C(<tt>K</tt>)<br>
+            </blockquote>
+            It does, however, have the side effect<br>
+            <blockquote>C(<tt>K</tt>) = b(<tt>K</tt>)<br>
+            </blockquote>
+            which means that if <tt>K</tt> is an editing register, then
+            it will be edited.<br>
+            <br>
+            It should be noted that for any number <i>x</i>,<br>
+            <blockquote><i>x</i> + -<i>x</i> = -0<br>
+            </blockquote>
+            Moreover, if the accumulator contains <a href="#Overflow">overflow</a>
+            after the addition, the <tt>OVCTR</tt> register is modified
+            as follows, thus taking one extra MCT to do so:<br>
+            <ul>
+              <li>If the overflow is positive, then <tt>OVCTR</tt> is
+                incremented by one.</li>
+              <li>If the overflow is negative, then <tt>OVCTR</tt> is
+                decremented by one.</li>
+            </ul>
           </td>
         </tr>
       </tbody>
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
+    <h3><br>
+    </h3>
+    <h3>CAF</h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Clear accumulator and add
+            from fixed memory"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">CAF K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            <i>fixed</i> memory (06000-07777).<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">030000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction loads C(<tt>A</tt>)
+            with C(<tt>K</tt>):<br>
+            <blockquote>C(<tt>A</tt>) = C(<tt>K</tt>)</blockquote>
+            The value is sign-extended before being loaded into the
+            accumulator.<br>
+            <br>
+            The opcode is numerically identical to the <tt>XCH</tt>
+            instructions, with the difference being that <tt>K</tt> is
+            in fixed rather than erasable memory.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3><br>
+    </h3>
+    <h4>CCS</h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Count, Compare, and Skip"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">CCS K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            <i>fixed</i> memory.&nbsp; In other words, it cannot be in
+            erasable memory.&nbsp; If less than 06000 it is in
+            fixed-fixed memory, while if in the range 06000 to 07777 is
+            in banked fixed memory and the <tt>Bank</tt> register is
+            used to determine the applicable memory bank.&nbsp;
+            Sometimes the <tt>TC</tt> occurs then <tt>Bank</tt> holds
+            00000, which is actually interpreted as bank 03.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">010000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This is used for conditional jumps
+            and for loop control, and has several effects.&nbsp; <tt>K</tt>
+            must be in erasable memory, and is thus the address of a
+            variable.&nbsp; The operand is sign-corrected or
+            sign-extended before use, depending on whether it is from a
+            16-bit register or 15-bit memory.<br>
+            <br>
+            The accumulator (<tt>A</tt>) is loaded with the "diminished
+            absolute value" of the operand,<br>
+            <blockquote>C(<tt>A</tt>) = DABS( b(<tt>K</tt>) )<br>
+            </blockquote>
+            where DABS(<i>x</i>) is defined as<br>
+            <blockquote>
+              <table cellpadding="2" cellspacing="2">
+                <tbody>
+                  <tr>
+                    <td valign="middle">DABS(<i>x</i>) = <br>
+                    </td>
+                    <td valign="middle"><font face="Helvetica, Arial,
+                        sans-serif"><big><big><big><big><big>{</big></big></big></big></big></font></td>
+                    <td valign="middle">|<i>x</i>| - 1, if |<i>x</i>|
+                      &gt; 1<br>
+                      <br>
+                      +0, if |<i>x</i>| ≤ 1</td>
+                  </tr>
+                </tbody>
+              </table>
+            </blockquote>
+            Also, <tt>K</tt> is rewritten,<br>
+            <blockquote>C(<tt>K</tt>) = b(<tt>K</tt>)</blockquote>
+            so <tt>K</tt> is edited if it is an editing register.<br>
+            <br>
+            Lastly, a comparison is performed, and a jump is made on the
+            basis of that comparison:<br>
+            <ul>
+              <li>Jump to L+1 (i.e., proceed along the normal flow of
+                execution) if b(<tt>K</tt>) &gt; 0.</li>
+              <li>Jump to L+2 if b(<tt>K</tt>) = +0.</li>
+              <li>Jump to L+3 if b(<tt>K</tt>) &lt; 0.</li>
+              <li>Jump to L+4 if b(<tt>K</tt>) = -0.</li>
+            </ul>
+            <p>If <tt>K</tt> has a 16th bit (for example, if it is the
+              accumulator), it is the 16th bit (UC) which determines the
+              sign, and not the 15th bit (SG).<br>
+            </p>
+            <p><b>Note:</b>&nbsp; the latter description is at odds with
+              the description on p. 3-4 of R-393, which says that C(<tt>K</tt>)
+              rather than b(<tt>K</tt>) is what's tested for the
+              comparison.&nbsp; But <a
+href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembler_and_Simulator">John
+                Pultorak's simulator</a> (and mine) behave the way I've
+              described here, and I trust John's reading of the
+              control-pulse sequences more than I trust R-393.&nbsp; Of
+              course, John <i>got</i> the pulse sequences from R-393,
+              so it's a vicious cycle!&nbsp; The issue may need to be
+              revisited later.<br>
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span><br>
+    <h3>COM</h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Complement"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">COM<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">040000<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction is actually just
+            a mnemonic for "<tt><a href="#CS">CS</a> A</tt>" and hence
+            just negates (take a bitwise inverse) of the accumulator: <br>
+            <blockquote>C(<tt>A</tt>) = -C(<tt>A</tt>)<br>
+            </blockquote>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3><br>
+    </h3>
+    <h3><a name="CS"></a>CS</h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Clear and Subtract"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">CS K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            memory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">040000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction loads the
+            accumulator with the negative of the contents of a memory
+            location:<br>
+            <blockquote>C(<tt>A</tt>) = -C(<tt>K</tt>)<br>
+            </blockquote>
+            which is just the bitwise inverse.&nbsp; It does, however,
+            have the side effect<br>
+            <blockquote>C(<tt>K</tt>) = b(<tt>K</tt>)<br>
+            </blockquote>
+            which means that if <tt>K</tt> is an editing register, then
+            it will be edited.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3>DV</h3>
+    <h3>
+    </h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Divide"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">DV K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            memory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">18 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">050000 + K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This is an "extended" instruction,
+            meaning that it is coded as <br>
+            <blockquote><tt>EXTEND</tt><tt><br>
+              </tt><span style="font-family: monospace;">DV</span><tt> K</tt><br>
+            </blockquote>
+            or by some operation such as<br>
+            <blockquote><tt>INDEX K<sub>0</sub></tt><tt><br>
+              </tt><span style="font-family: monospace;">DV</span><tt> K</tt><br>
+            </blockquote>
+            that produces a 16-bit <span style="font-family:
+              monospace;">DV</span> instruction value ... i.e., whose
+            bit 16 is non-zero.&nbsp; Thus even though the octal value
+            of the instruction is shown above as <tt>050000+K</tt>, and
+            that's what appears in the rope and how the assembler sees
+            it, in fact by the time it is executed it is really <tt>0120000+K</tt>,
+            which is how the CPU sees it.<br>
+            <br>
+            Logically, though not at the control-pulse level, what you
+            can think of this instruction as doing is:<br>
+            <ol>
+              <li>Multiplying the accumulator by 2<sup>14</sup>.</li>
+              <li>Dividing that number by the value stored in the
+                operand.</li>
+              <li>Storing the quotient in the accumulator.</li>
+              <li>Storing the negative of the absolute value of the
+                remainder in <tt>Q</tt>.</li>
+              <li>Setting <tt>LP</tt> to some positive value if the
+                quotient is positive, or to some negative value if the
+                quotient is negative.<br>
+              </li>
+            </ol>
+            In point of fact, it's not just "some" positive or negative
+            value that's stored in <tt>LP</tt>, but rather some
+            specific value determined by the <a href="#Pulse_Sequences">control-pulse
+              sequences</a> defining the <tt>DV</tt> instruction, but
+            R-393 does not define them, and it's impossible to know what
+            they might be without following through the control-pulse
+            sequences in detail. I choose not to do that at this time
+            Unless some AGC developer chose to use his undocumented
+            knowledge of these specific values, which is certainly
+            possible, there should be no need to know the specific
+            values.<br>
+            <br>
+            This instruction envisages that |b(<tt>A</tt>)| &lt; |C(<tt>K</tt>)|
+            but does make some statements about what should happen in
+            other cases<br>
+            <ul>
+              <li> If |b(<tt>A</tt>)| = |C(<tt>K</tt>)|, then |C(<tt>A</tt>)|
+                = 037777 and C(<tt>Q</tt>) = -|C(<tt>K</tt>)|. </li>
+              <li>If |b(<tt>A</tt>)| &gt; |C(<tt>K</tt>)|, then |C(<tt>A</tt>)|
+                = 037777 and C(<tt>Q</tt>) "is meaningless". </li>
+            </ul>
+            The latter condition would always be satisfied if the
+            accumulator initially contains overflow, so that condition
+            should be avoided.<br>
+            <br>
+            C(<tt>K</tt>) is unchanged, unless <tt>K</tt> is itself <tt>A</tt>,
+            <tt>Q</tt> or <tt>LP</tt>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3><br>
+    </h3>
+    <h4>EXTEND </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Extend"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">EXTEND<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">025777<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This is a mnemonic for
+            special form of the <tt>INDEX</tt> instruction which is
+            used for producing the necessary <a href="#Overflow">overflow</a>
+            in the <tt>MP</tt>, <tt>DV</tt>, or <tt>SU</tt>
+            instruction following it, in a way that enables those
+            instruction types, which would otherwise be interpreted as <tt>TS</tt>,
+            <tt>AD</tt>, and <tt>MASK</tt> instructions.&nbsp; In other
+            words, the most-straightforward way to use these extended
+            instructions is as<br>
+            <blockquote><tt>EXTEND</tt><tt><br>
+              </tt><tt>MP K<sub>1</sub></tt><tt><br>
+              </tt><tt>...</tt><tt><br>
+              </tt><tt>EXTEND</tt><tt><br>
+              </tt><tt>DV K<sub>2</sub></tt><tt><br>
+              </tt><tt>...</tt><tt><br>
+              </tt><tt>EXTEND</tt><tt><br>
+              </tt><tt>SU K<sub>3</sub></tt><br>
+            </blockquote>
+            However, using <tt>EXTEND</tt> require a little
+            preparation, because the assembler actually treats it as a
+            mnemonic for "<tt>INDEX 05777</tt>" which will have
+            embarassing results at runtime if the appropriate value
+            isn't actually at address 05777 at runtime.&nbsp; Solarium
+            uses the following code, which assembles the same as "<tt>OCT
+              47777</tt>", so that's what I'd suggest doing:<br>
+            <br>
+            <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                SETLOC&nbsp;&nbsp; 5777&nbsp; # STANDARD LOCATION FOR
+                EXTENDING BITS</tt><tt><br>
+              </tt><tt>OPOVF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                XCADR&nbsp;&nbsp;&nbsp; 0 <br>
+              </tt></blockquote>
+            How does this actually work?&nbsp; Well, suppose you needed
+            to "extend" the instruction <tt>SU 1234</tt>:<br>
+            <br>
+            <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                EXTEND<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                SU 1234<br>
+              </tt></blockquote>
+            These two instructions are the same as <tt>INDEX 5777</tt>
+            and <tt>OCT 61234</tt>, respectively, so when the CPU gets
+            to the <tt>SU</tt>, the instruction that the CPU will be
+            trying to execute is (because of sign-extension)
+            0147777+0161234, which equals 0131234 (in 16-bit 1's
+            complement addition, if there's a 1 in bit 17, which there
+            was in this case, it's removed and 1 is added to the
+            number).&nbsp; The top 4 bits of this 16-bit sum are <tt>CCCC</tt>=1011,
+            which tells the CPU that it's an <tt>SU</tt> instruction,
+            but the operand is still 01234.&nbsp; All of which is, of
+            course, rather convoluted, but it doesn't matter since all
+            you have to remember is that if you stick the <tt>EXTEND</tt>
+            in front then it magically works.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h3>
+    </h3>
+    <h4>INDEX </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Index"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">INDEX K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            memory other than 016, 017, or 025.&nbsp; If less than 06000
+            it is in erasable or fixed-fixed memory, while if in the
+            range 06000 to 07777 is in banked fixed memory and the <tt>Bank</tt>
+            register is used to determine the applicable memory
+            bank.&nbsp; Sometimes the <tt>TC</tt> occurs then <tt>Bank</tt>
+            holds 00000, which is actually interpreted as bank 03.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">020000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction does not
+            affect execution flow — i.e., the next program-counter
+            location after <tt>INDEX</tt> is at L+1 — but next
+            instruction <i>value</i> used is not C(L+1) but rather
+            C(L+1)+C(<tt>K</tt>).&nbsp; In other words, the value stored
+            at <tt>K</tt> is added to the next instruction value found.<br>
+            <br>
+            This effect can be used for several purposes:<br>
+            <ul>
+              <li>Indexing of data, if C(<tt>K</tt>) doesn't cause the
+                operand to overflow 12 bits.</li>
+              <li>Changing the instruction type, if the addition affects
+                the top three bits of the instruction.</li>
+              <li>"Extending" a <tt>CS</tt>, <tt>TS</tt>, or <tt>AD</tt>
+                instruction to an <tt>MP</tt>, <tt>DV</tt>, or <tt>SU</tt>
+                instruction, if the addition causes the instruction
+                value to overflow 15 bits.&nbsp; This is the <i>only</i>
+                manner in which the latter three instruction types can
+                be triggered.</li>
+            </ul>
+            <p>C(<tt>K</tt>) can be either positive or negative.<br>
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h3>MASK</h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Mask"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">MASK K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            memory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">070000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction takes the bitwise
+            AND of the contents of a memory location and the
+            accumulator:<br>
+            <blockquote>C(<tt>A</tt>) = C(<tt>A</tt>) &amp; C(<tt>K</tt>)<br>
+            </blockquote>
+            It does, however, have the side effect<br>
+            <blockquote>C(<tt>K</tt>) = b(<tt>K</tt>)<br>
+            </blockquote>
+            which means that if <tt>K</tt> is an editing register, then
+            it will be edited.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h3>MP</h3>
+    <h3>
+    </h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Multiply"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">MP K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            memory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">8 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">040000 + K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This is an "extended" instruction,
+            meaning that it is coded as <br>
+            <blockquote><tt>EXTEND</tt><tt><br>
+              </tt><tt>MP K</tt><br>
+            </blockquote>
+            or by some operation such as<br>
+            <blockquote><tt>INDEX K<sub>0</sub></tt><tt><br>
+              </tt><tt>MP K</tt><br>
+            </blockquote>
+            that produces a 16-bit <tt>MP</tt> instruction value ...
+            i.e., whose bit 16 is non-zero.&nbsp; Thus even though the
+            octal value of the instruction is shown above as <tt>040000+K</tt>,
+            and that's what appears in the rope and how the assembler
+            sees it, in fact by the time it is executed it is really <tt>0110000+K</tt>,
+            which is how the CPU sees it.<br>
+            <br>
+            This instruction multiplies two single-precision (i.e.,
+            15-bit) values, from a memory location and the accumulator
+            (sign-corrected), and produces a 29-bit value stored in the
+            accumulator (more-significant word) and the <tt>LP</tt>
+            register (less-significant word).&nbsp; In other words,
+            since the ranges of the input and output are each ±2<sup>14</sup>,
+            the range of the product must be just ±2<sup>28</sup>, or 29
+            bits in all; the sign bit is duplicated into each of the two
+            words, making a total of 30 bits.
+            <blockquote>C(<tt>A</tt>,<tt>LP</tt>) = b(<tt>A</tt>) × b(<tt>K</tt>)<br>
+            </blockquote>
+            The signs of the two output registers are identical, and are
+            identical to the product of the signs of the two inputs ...
+            which sounds obvious until you recognize that it covers
+            cases like -0 × +53 = -0.<br>
+            <br>
+            C(<tt>K</tt>) is unchanged, unless <tt>K</tt> is itself <tt>A</tt>
+            or <tt>LP</tt>.<br>
+            <br>
+            <b>Note:</b>&nbsp; R-393, p. 3-7, says that this instruction
+            take 10 MCT.&nbsp; <a
+              href="#John_Pultoraks_Assembler_and_Simulator">John
+              Pultorak's simulator command-sequence simulator</a> says
+            that it takes 8, and for the present time, I accept what
+            John says.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h4>NOOP </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"<tt>No-op</tt>"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">NOOP<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">030000<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction is a
+            mnemonic for "<tt>XCH A</tt>", i.e., exchange the contents
+            of the accumulator with itself.&nbsp; Since that doesn't
+            have any effect other than to use up a couple of MCT, it is
+            a "no operation".<br>
+            <blockquote> </blockquote>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3>
+    </h3>
+    <h3>
+    </h3>
+    <h4>RESUME </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Resume" from interrupt<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">RESUME<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">020025<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction is
+            numerically equivalent to "<tt>INDEX</tt> 25", but is not an
+            <tt>INDEX</tt> instruction.&nbsp; As mentioned before, <a
+              href="#Interrupt_Processing">when an interrupt occurs</a>,
+            it automatically performs a sequence of steps like<br>
+            <blockquote>Inhibit interrupts<br>
+              C(<tt>BRUPT</tt>) = C(<tt>B</tt>)<br>
+              C(<tt>QRUPT</tt>) = C(<tt>Q</tt>)<br>
+              C(<tt>ZRUPT</tt>) = C(<tt>Z</tt>)<br>
+              <a href="#TC">TC</a> to interrupt-service routine<br>
+            </blockquote>
+            where (recall) <tt>B</tt> is the register that holds next
+            instruction that would have been executed when the interrupt
+            occurred.&nbsp; (Not necessarily C(L), since an <tt>INDEX</tt>
+            instruction might have preceded it an altered the numerical
+            value of the instruction.)&nbsp; Note that this interrupt
+            inhibition is a different mechanism from the one used by <a
+              href="#INHINT"><tt>INHINT</tt></a> and <a href="#RELINT"><tt>RELINT</tt></a>.<br>
+            <br>
+            What <tt>RESUME</tt> does is to undo these steps:<br>
+            <blockquote> C(<tt>B</tt>) = C(<tt>BRUPT</tt>)<br>
+              C(<tt>Q</tt>) = C(<tt>QRUPT</tt>)<br>
+              C(<tt>Z</tt>) = C(<tt>ZRUPT</tt>)<br>
+              Stop inhibiting interrupts<br>
+            </blockquote>
+            This has the effect of putting the program counter (<tt>Z</tt>)
+            back to what it had been before the interrupt, restoring any
+            return address that had been in <tt>Q</tt>, and executing
+            the same instruction (<i>numerically</i>) that had been
+            about to execute, regardless of whether it's what was stored
+            at the return location or not: i.e., regardless of whether
+            or not the interrupt had occurred between an <tt>INDEX</tt>
+            instruction and the instruction following it.<br>
+            <br>
+            Notice that in theory, you could force any instruction you
+            like to execute upon return from interrupt, simply by
+            replacing the contents of the <tt>BRUPT</tt> register from
+            within the interrupt-service routine.&nbsp; Why you might
+            want to do that, I can't say.<br>
+            <blockquote>
+            </blockquote>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h4>RETURN </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Return"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">RETURN<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">1 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">000001<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction is a
+            mnemonic for "<tt>TC Q</tt>", meaning that it can be used to
+            return from a subroutine.
+            <blockquote> </blockquote>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h3>SU</h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Subtract"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">SU K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            memory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT or 3 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">060000 + K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This is an "extended" instruction,
+            meaning that it is coded as <br>
+            <blockquote><tt>EXTEND</tt><tt><br>
+              </tt><tt>SU K</tt><br>
+            </blockquote>
+            or by some operation such as<br>
+            <blockquote><tt>INDEX K<sub>0</sub></tt><tt><br>
+              </tt><tt>SU K</tt><br>
+            </blockquote>
+            that produces a 16-bit <tt>SU</tt> instruction value ...
+            i.e., whose bit 16 is non-zero.&nbsp; Thus even though the
+            octal value of the instruction is shown above as <tt>060000+K</tt>,
+            and that's what appears in the rope and how the assembler
+            sees it, in fact by the time it is executed it is really <tt>0130000+K</tt>,
+            which is how the CPU sees it.<br>
+            <br>
+            This instruction subtracts the contents of a memory location
+            from the accumulator:<br>
+            <blockquote>C(<tt>A</tt>) = C(<tt>A</tt>) - C(<tt>K</tt>)<br>
+            </blockquote>
+            In all other respects — timing, side-effects, special cases
+            — it is identical to the <tt>AD</tt> instruction.</td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h4>TCAA </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Transfer control to address
+            in <tt>A</tt>"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">TCAA<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">1 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">000002<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">TBD</td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3>
+    </h3>
+    <h3><a name="TC"></a>TC</h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Transfer Control"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">TC K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address
+            whatever in memory.&nbsp; If less than 06000 it is in
+            erasable or fixed-fixed memory, while if in the range 06000
+            to 07777 is in banked fixed memory and the <tt>Bank</tt>
+            register is used to determine the applicable memory
+            bank.&nbsp; Sometimes the <tt>TC</tt> occurs then <tt>Bank</tt>
+            holds 00000, which is actually interpreted as bank 03.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">1 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">000000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This is used both for
+            unconditional jumps to locations, or for calling
+            subroutines.&nbsp; It can be done for the latter because a
+            side effect is that<br>
+            <blockquote>C(<tt>Q</tt>) = L + 1<br>
+            </blockquote>
+            i.e., that the <tt>Q</tt> register is loaded with the next
+            address following the <tt>TC</tt> instruction (and the
+            original value of <tt>Q</tt> is lost), and a return from a
+            subroutine can be done with the instruction<br>
+            <blockquote><tt>TC Q</tt><br>
+            </blockquote>
+            But there's no stack, so you have to be extremely careful
+            when doing things like calling subroutines from within other
+            subroutines, because each call destroys the existing return
+            address.&nbsp; So one thing that subroutines typically do is
+            to save the <tt>Q</tt> register as a variable immediately
+            upon entry , and to restore it from that variable
+            immediately prior to exiting.<br>
+            <br>
+            Note that a return from interrupt is not done in this
+            manner, and requires its own dedicated instruction, <tt>RESUME</tt>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h3>TS</h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Transfer to Storage"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">TS K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            <i>erasable</i> memory (0-01777).<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT if the accumulator
+            contains no overflow, 3 MCT if the accumulator contains
+            overflow.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">050000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction always the
+            accumulator to memory,<br>
+            <blockquote>C(<tt>K</tt>) = C(<tt>A</tt>)<br>
+            </blockquote>
+            If <tt>K</tt> is 15-bit memory, then <tt>A</tt> is
+            sign-corrected (i.e, <a href="#Overflow">the 16th bit US is
+              moved to the 15th bit SG</a>) before storing.&nbsp; If <tt>K</tt>
+            is an <a href="#CPU_Architecture_Registers">editing
+              register</a>, then editing is performed during storage.<br>
+            <br>
+            <div align="center"><b>Skip on Overflow</b><br>
+            </div>
+            <br>
+            If the accumulator does not contain overflow, then that is
+            the end of the operation.&nbsp; But if the accumulator does
+            contain overflow, then the following "skip on overflow"
+            operation (which occupies an additional 1 MCT) is performed:<br>
+            <ul>
+              <li>If b(<tt>A</tt>) contains positive overflow, then C(<tt>A</tt>)=000001.</li>
+              <li>If b(<tt>A</tt>) contains negative overflow, then C(<tt>A</tt>)=0177776.</li>
+              <li>The instruction at L+1 is skipped, and the next
+                instruction executed is at L+2.<br>
+              </li>
+            </ul>
+            This skip-on-overflow feature is used for multi-precision
+            arithmetic, where it is convenient, but it means that the <span
+              style="font-family: monospace;">TS</span> instruction has
+            to be used with extreme caution in other
+            circumstances.&nbsp; If you think of it merely as a storage
+            instruction, you will quickly run into circumstances where
+            it's behavior is very confusing.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h4>XAQ </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Execute C(<tt>A</tt>) using
+            <tt>Q</tt>"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">XAQ<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">1 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">000000<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction is a
+            mnemonic for "<tt>TC A</tt>", meaning that it will:<br>
+            <ul>
+              <li>Jump to address 0, storing a return address in <tt>Q</tt>.</li>
+              <li>Execute whatever instruction it finds at address 0
+                (which is the <tt>A</tt> register).</li>
+              <li>Proceed to address 1 (presuming that there wasn't a <tt>TC</tt>
+                or <tt>CCS</tt> at address 0).</li>
+              <li>Since what is stored at address 1, the <tt>Q</tt>
+                register, is the return address, which is numerically
+                identical to a <tt>TC</tt> to the return address, it
+                will thus return to the address following the <tt>XAQ</tt>.<br>
+              </li>
+            </ul>
+            However, this is confusing when you see it in a simulation,
+            and R-393 recommends instead using the following presumably
+            less-confusing commands in preference to an <tt>XAQ</tt>:<br>
+            <blockquote><tt>INDEX A</tt><tt><br>
+              </tt><tt>TC 0</tt><br>
+            </blockquote>
+            <blockquote> </blockquote>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h3>XCH</h3>
+    <h3>
+    </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Exchange"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">XCH K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            <i>erasable</i> memory (0-01777).<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">030000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction exchanges C(<tt>A</tt>)
+            and C(<tt>K</tt>).&nbsp; If <tt>K</tt> is an editing
+            register, it is edited in the process of doing this.<br>
+            <br>
+            The opcode is numerically identical to the <tt>CAF</tt>
+            instructions, with the difference being that <tt>K</tt> is
+            in erasable rather than fixed memory.<br>
+            <br>
+            <b>Note:</b>&nbsp; The Virtual AGC Block 1 simulator will
+            not change C(<tt>K</tt>) if <tt>K</tt> happens to be one of
+            the input registers, <tt>IN0</tt> - <tt>IN3</tt>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3><br>
+    </h3>
     <h3><a name="Pseudo-Operations"></a>Pseudo-Operations </h3>
     <p>The pseudo-ops are a subset of those in Block 2.&nbsp; Actually,
       <b>yaYUL</b> supports the identical pseudo-ops for Block 1 as it
       does for Block 2, but some of those pseudo-ops simply make no
       sense for Block 1 and therefore will never appear in actual
-      code.&nbsp; <a
+      code.&nbsp; I know I should have yaYUL exclude the nonsensical
+      pseudo-ops, but I have no present intention of doing so.&nbsp; <a
         href="assembly_language_manual.html#Pseudo-Operations">See the
         Block 2 description</a>.<br>
     </p>
@@ -1983,6 +3537,8 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -2013,8 +3569,12 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -2076,6 +3636,8 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -2083,6 +3645,8 @@ href="Block1.html#Interrupt_Processing">interrupt
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -2251,12 +3815,16 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
 
 
 
@@ -2334,6 +3902,8 @@ href="Block1.html#Interrupt_Processing">interrupt
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
 
 
 
@@ -2454,6 +4024,8 @@ href="Block1.html#Interrupt_Processing">interrupt
 
 
 
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -2518,6 +4090,8 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -2547,9 +4121,13 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+
+
 
 
 
@@ -2622,6 +4200,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -2639,6 +4219,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
 
 
 
@@ -2914,6 +4496,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
         our GitHub repository's "block1" branch</a>.&nbsp; I have only
       worked with it in Linux, but I expect it should probably build in
       Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -2947,6 +4531,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
+
 
 
 
@@ -3126,6 +4712,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
 
 
 
+
+
         our GitHub repository's "block1" branch</a>. It is a simple
       command-line program, in which you can type (or feed in from a
       script) ASCII mnemonics for DSKY keys, which the program then
@@ -3235,11 +4823,15 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
 
 
 
+
+
           The Compleat Sunrise</a> briefly covers what was available in
         the Block 1 SUNRISE program (September 1964).&nbsp; <br>
       </li>
       <li>You can pick through <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
 
 
 
@@ -3274,6 +4866,8 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     </ol>
     Unfortunately you can't get much useful information from <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_1.pdf">John
+
+
 
 
 
@@ -3345,6 +4939,8 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
             an error code in it.&nbsp; Thus, you are seeing "Alarm
             00203".&nbsp; According to <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
 
 
 
@@ -3503,7 +5099,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-22.<br>
+          2016-09-23.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
