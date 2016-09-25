@@ -46,7 +46,8 @@ columns when entering source.
     "auto_indent": true,
     "smart_indent": false,
     "indent_to_bracket": false,
-    "trim_automatic_white_space": false
+    "trim_automatic_white_space": false,
+    "tab_completion": false
 }
 ```
 
