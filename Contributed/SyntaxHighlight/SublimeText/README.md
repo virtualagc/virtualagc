@@ -12,6 +12,9 @@ This syntax supports the following filetypes:
 
 ### [Package Control][3]
 
+*NOTE*: the package has been submitted to Package Control but has not yet been
+approved.
+
  - Command Palette (OS X: `Cmd-Shift-P`, Linux/Windows: `Ctrl-Shift-P`)
  - Select `Package Control: Install Package`.
  - Select `AGC Assembly`
