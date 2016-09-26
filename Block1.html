@@ -45,16 +45,13 @@
         </li>
         <li><a href="#Formatting">Source-Code Formatting Information</a></li>
         <li><a href="#Data_Representation">Data Representation</a></li>
-        <li><a href="#Instruction_Representation">Instruction
+        <li><a href="#Instruction_Representation">Basic Instruction
             Representation</a></li>
-        <li><a href="#AGC4_Instruction_Set">AGC4_Instruction_Set</a></li>
+        <li><a href="#AGC4_Instruction_Set">Basic Instruction Set</a></li>
         <li><a href="#Pseudo-Operations">Pseudo-Operations</a></li>
         <li><a href="#Interpreter_Instruction_Set">Interpreter
             Instruction Set</a></li>
-        <li><a href="#Instruction-Set_Summary_Tables">Instruction-Set
-            Summary Tables</a></li>
       </ul>
-      <li><a href="#Pulse_Sequences">Control-Pulse Sequences</a></li>
       <li><a href="#Available_Block_1_AGC_Software">Available Block 1
           AGC Software</a></li>
       <li><a href="#Available_Supporting_Software">Available Supporting
@@ -72,7 +69,8 @@
               Pultorak's Assembler and Simulator</a><br>
           </li>
           <li><a href="#Virtual_AGCs_CPU_Simulator_yaAGCb1">Virtual
-              AGC's CPU Simulator (yaAGCb1)</a><br>
+              AGC's CPU Simulator (yaAGCb1)</a></li>
+          <li><a href="#Status_of_yaAGCb1">Status of yaAGCb1</a><br>
           </li>
         </ul>
         <li><a href="#Virtual_AGCs_DSKY_Simulator_yaDSKYb1">Virtual
@@ -98,6 +96,9 @@
     </p>
     <ul>
       <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf">"Block
+
+
+
 
 
 
@@ -191,6 +192,9 @@
 
 
 
+
+
+
           General Design Characteristics of the Apollo Guidance Computer</a>,
         by Eldon C. Hall, May 1963.<br>
       </li>
@@ -207,6 +211,9 @@ href="http://www.ibiblio.org/apollo/klabs/history/history_docs/r-393.pdf"
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
       <li><a href="http://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574:
+
+
+
 
 
 
@@ -247,7 +254,7 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
       mistakes — as, indeed, any documentation of a sufficiently-complex
       system will — but that the design of the system was extended after
       document R-393 was written, so that some of the later-superceded
-      information in it is blatently wrong to the point of making
+      information in it is blatantly wrong to the point of making
       anything based on it non-functional.&nbsp; It's my intention to
       correct those deficiencies here, to the extent that I am able to
       do so.<br>
@@ -258,7 +265,34 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
       banks of read-only memory by the time of the Solarium (Apollo 6
       unmanned mission) software mentioned above.&nbsp;&nbsp; In other
       words, Solarium wouldn't have fit into the amount of memory R-393
-      describes.<br>
+      describes.</p>
+    <p>Finally, it's worth noting that people often seem to believe that
+      the electrical schematics of the Block 1 AGC are widely available
+      and are contained in <a
+        href="Pultorak.html#John_Pultoraks_Block_I_AGC">the original
+        PDFs which John Pultorak published of his Block 1 AGC simulation</a>.&nbsp;
+
+
+      While those are fine schematics, and worked well for John's
+      purposes, they are not transcriptions of the original Block 1
+      schematics, but are rather schematics John designed from scratch,
+      based on the textual descriptions he found in R-393.&nbsp; In the
+      first of his PDFs, there is a detailed diary of what he did, and
+      everything in it refers back to R-393, and not to the original
+      schematic diagrams of the Block 1.&nbsp; Thus, John's schematics
+      may or may not be valuable resources for you, depending on your
+      purposes.&nbsp; Of course, I am not perfect by any means, and if
+      I've somehow stupidly overlooked something about what John had at
+      his disposal to work with, let me know!&nbsp; <br>
+    </p>
+    <p>As a separate matter, I am aware of purported actual copies of
+      the Block 1 schematics, but have not (as yet) been able to obtain
+      them for you.&nbsp; I have also been told that although the Block
+      1 and 2 DSKYs were very different externally, they shared the same
+      electrical schematics, although at present I have no copies of the
+      electrical schematics for either.&nbsp; Again, though, I am aware
+      of purported copies of them, but have not yet been able to acquire
+      them.<br>
       <br>
     </p>
     <hr size="2" width="100%">
@@ -372,35 +406,39 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     identical.&nbsp; In a Block 1 CM, on the other hand, the main and
     nav DSKYs were different.<br>
     <br>
-    <div style="text-align: center;"><img style="width: 904px; height:
-        737px;" alt="Block 1 DSKYs" title="The nav-panel DSKY is on the
-        left, and the main-panel DSKY is on the right."
-        src="Block1DSKYs.jpg" height="737" width="904"><br>
+    <div style="text-align: center;"><a href="Block1NavBayDSKY.jpg"><img
+          alt="Block 1 DSKY, nav bay" src="small-Block1NavBayDSKY.jpg"
+          height="400" width="218" border="2"></a>&nbsp;&nbsp;&nbsp; <a
+        href="Block1ControlPanelDSKY.jpg"><img alt=""
+          src="small-Block1ControlPanelDSKY.jpg" height="400"
+          width="398" border="2"></a><br>
     </div>
     <br>
     <img alt="" src="EldonHallWithBlock1DSKY.jpg" align="right"
-      height="300" width="201">The picture above is a crummy
-    reproduction (mine!) of Plate 23 (courtesy of Raytheon and Jack
-    Poundstone) in Eldon C. Hall's book, <span style="font-style:
+      height="300" width="201">The left-hand picture above is a crummy
+    reproduction (mine!) of the nav-bay DSKY (courtesy of Raytheon and
+    Jack Poundstone) in Eldon C. Hall's book, <span style="font-style:
       italic;">Journey to the Moon: The History of the Apollo Guidance
       Computer</span>, which anybody interested in this website should
     immediately run out and purchase.&nbsp; (No, I don't derive any
     personal benefit from you doing so.)&nbsp; The photo shows
-    Raytheon's first production DSKYs.&nbsp; On the left is the
-    nav-panel DSKY, while on the right is the main-panel DSKY.<br>
+    Raytheon's first production nav-bay DSKY.&nbsp; On the right is a
+    photo of a main control-panel DSKY from <a
+      href="http://www.rrauction.com">an auction site</a>.<br>
     <br>
-    And just how big were they?&nbsp; Well, the little rulers in the
-    picture don't really give you a sense of it, particularly since you
-    can't tell whether the rulers are measuring inches or
-    centimeters.&nbsp; But in the picture to the right, you see Eldon
-    Hall standing next to one of the control-panel DSKYs, so the answer
-    is, <i>they were very, very big</i>!&nbsp; A nav-bay DSKY would
-    have reached nearly to Eldon's shoulder, if sitting on the same
-    table.<br>
+    And just how big were they?&nbsp; Well, in the picture to the right,
+    you see Eldon Hall standing next to one of the control-panel DSKYs,
+    so the answer is, <i>they were very, very big</i>!&nbsp; A nav-bay
+    DSKY has the same push-button sizes as the control-panel DSKY and
+    would have reached nearly to Eldon's shoulder, if sitting on the
+    same table.<br>
     <br>
     Below are some drawings from a set of<big> </big><a
 href="http://www.ibiblio.org/apollo/Documents/ApolloTrainingGuidanceAndNavigation_07-65.pdf">Apollo
 Guidance
+
+
+
 
 
 
@@ -695,7 +733,13 @@ Guidance
 
 
 
+
+
+
       distinct positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
+
+
+
 
 
 
@@ -760,6 +804,9 @@ Guidance
     </ul>
     <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
       that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
+
+
+
 
 
 
@@ -853,6 +900,9 @@ Guidance
         specific editing operation performed by <tt>LP</tt> is as
         follows:&nbsp; If you try to write a set of bits like <tt>B15
           B14 B13 ... B2 B1 to LP</tt>, it will in fact be written as <tt>B1
+
+
+
 
 
 
@@ -1077,17 +1127,18 @@ Guidance
       <ul>
         <li>B1:&nbsp; PROG alarm on LM DSKY<br>
         </li>
-        <li>B2:&nbsp; COMP FAIL alarm on DSKY<br>
+        <li>B2:&nbsp; COMP FAIL and alarm on DSKY<br>
         </li>
         <li>B3:&nbsp; KEY RLSE indicator on LM DSKY<br>
         </li>
-        <li>B4:&nbsp; SCALER FAIL alarm on LM DSKY<br>
+        <li>B4:&nbsp; SCALER FAIL or TM FAIL (not sure which) alarm on
+          LM DSKY<br>
         </li>
         <li>B5:&nbsp; CHECK FAIL alarm on DSKY<br>
         </li>
         <li>B6:&nbsp; Block UPLINK<br>
         </li>
-        <li>B7:&nbsp; Not used<br>
+        <li>B7:&nbsp; ERRUPT trap<br>
         </li>
         <li>B8:&nbsp; Slow speed, STANDBY<br>
         </li>
@@ -1167,8 +1218,14 @@ Guidance
 
 
 
+
+
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -1198,9 +1255,15 @@ Guidance
 
 
 
+
+
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -1250,13 +1313,37 @@ Guidance
               </tt> </th>
           </tr>
           <tr>
+            <td valign="top">017<br>
+            </td>
+            <td colspan="3" rowspan="1" align="center" valign="top"><i>(cannot
+
+
+                occur)</i><br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top">016<br>
+            </td>
+            <td colspan="3" rowspan="1" align="center" valign="top"><i>(see
+
+
+                below)</i></td>
+          </tr>
+          <tr>
+            <td valign="top">015<br>
+            </td>
+            <td colspan="3" rowspan="1" align="center" valign="top"><i>(see
+
+
+                below)</i></td>
+          </tr>
+          <tr>
             <td align="center" valign="top">014<br>
             </td>
-            <td align="center" valign="top">TBD<br>
-            </td>
-            <td align="center" valign="top">TBD<br>
-            </td>
-            <td align="center" valign="top">TBD<br>
+            <td colspan="3" rowspan="1" align="center" valign="top"><i>(see
+
+
+                below)</i><br>
             </td>
           </tr>
           <tr>
@@ -1369,6 +1456,13 @@ Guidance
             <td align="center" valign="middle">R3D5<br>
             </td>
           </tr>
+          <tr>
+            <td valign="top">000<br>
+            </td>
+            <td rowspan="1" colspan="3" valign="top"><i>(normal,
+                inactive state)</i><br>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -1382,10 +1476,6 @@ Guidance
     words remaining lit) after FLASH is set to 0.&nbsp; The UPACT bit
     refers to the UPTL activity lamp on the DSKY, and turns that lamp on
     or off.<br>
-    <br>
-    I have only seen <tt>WWWW</tt>=014 used at "fresh start", and am
-    not sure what it represents, and don't care to speculate at this
-    point.<br>
     <br>
     However, the principal purpose of <tt>OUT0</tt> is to control the
     digits and +/- signs displayed on the DSKY.&nbsp; As an example, the
@@ -1492,12 +1582,37 @@ Guidance
 
 
 
+
+
+
     <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
     to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
     positions would display "+35".&nbsp; Since this is latched in the
     DSKY, those positions continue to display that way until a new word
     with <tt>WWWW</tt>=05 is written to <tt>OUT0</tt> and are
     unaffected to writes to <tt>OUT0</tt> with different values of <tt>WWWW</tt>.<br>
+    <br>
+    Regarding the various combinations of <tt>WWWW</tt> not covered
+    above:<br>
+    <ul>
+      <li><tt>WWWW</tt>=000:&nbsp; 0 is the normal state of the OUT0
+        register when no new DSKY activity is currently being commanded,
+        and the register is returned to this state by <a
+          href="#Interrupt_Processing">T4RUPT</a> every few tens of
+        milliseconds.</li>
+      <li><tt>WWWW</tt>=014:&nbsp; In Solarium, this relay-word is
+        created by the CDRVE function, which program comments indicate
+        as pertaining to "SPACECRAFT RELAYS".&nbsp; TBD.</li>
+      <li><tt>WWWW</tt>=015:&nbsp; In Solarium, this relay-word is
+        created by the CDRVE1 function, which program comments indicate
+        as pertaining to "IMU AND CAUTION LIGHTS".&nbsp; TBD.</li>
+      <li><tt>WWWW</tt>=016:&nbsp; In Solarium, this relay-word is
+        created by the CDRVE2 function, which program comments indicate
+        as pertaining to "OPTICS".&nbsp; TBD.&nbsp; </li>
+      <li><tt>WWWW</tt>=017:&nbsp; 017, while a theoretically-possible
+        value for the register, cannot be created by the AGC software
+        (at least not in Solarium).&nbsp;</li>
+    </ul>
     <h3><a name="Counters_and_Timers"></a>Counters and Timers</h3>
     <p>Counter/timer registers are registers in erasable memory which
       are automatically incremented or decremented by specific actions
@@ -1513,6 +1628,9 @@ Guidance
         incremented every time an addition or subtraction operation
         (i.e., <tt>AD</tt> or <tt>SU</tt>) creates <a
           href="#Overflow">positive overflow in the accumulator register</a>.&nbsp;
+
+
+
 
 
 
@@ -1559,6 +1677,9 @@ Guidance
       </li>
       <li><tt>UPLINK</tt> (address 041):&nbsp; This 16-bit
         shift-register receives the data stream of <a href="#Uplink">digital-uplink
+
+
+
 
 
 
@@ -1634,12 +1755,11 @@ Guidance
     implicit <tt>TC</tt> instruction transfers control to the interrupt
     vector code, thus overwriting <tt>Q</tt> and <tt>Z</tt> with new
     values. The interrupt-service routine must eventually be terminated
-    with the
-    <tt> RESUME</tt> instruction, which undoes those steps ... i.e., it
-    restores <tt>Q</tt> and <tt>Z</tt> to their original forms and
-    puts the program counter back to what it had been, the position of
-    the next instruction that was due to be reached when the interrupt
-    occurred.<br>
+    with the <tt> RESUME</tt> instruction, which undoes those steps ...
+    i.e., it restores <tt>Q</tt> and <tt>Z</tt> to their original
+    forms and puts the program counter back to what it had been, the
+    position of the next instruction that was due to be reached when the
+    interrupt occurred.<br>
     <br>
     But note that the instruction stored at that return location is not
     necessarily the instruction executed at that point! That's because
@@ -1696,6 +1816,9 @@ Guidance
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+
 
 
 
@@ -1851,11 +1974,8 @@ Guidance
         href="assembly_language_manual.html#Data_Representation">the
         description of them that appears in the Block 2 discussion</a>.<br>
     </p>
-    <h3><a name="Instruction_Representation"></a>Instruction
+    <h3><a name="Instruction_Representation"></a>Basic Instruction
       Representation </h3>
-    <h4><a name="Assembly-Language_Instructions"></a>Assembly-Language
-      Instructions, or "Basic"<br>
-    </h4>
     The instruction set is far smaller, and therefore far simpler, than
     in Block 2.&nbsp; Every assembly-language instruction occupies
     precisely one word of memory (including operand), and consists of 15
@@ -1983,9 +2103,8 @@ Guidance
         accumulator contains <a href="#Overflow">overflow</a>.<br>
       </li>
     </ul>
-    <h3>AD</h3>
-    <h3>
-    </h3>
+    <h4><a name="AD"></a>AD</h4>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2060,9 +2179,7 @@ Guidance
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
-    <h3><br>
-    </h3>
-    <h3>CAF</h3>
+    <h4>CAF</h4>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2125,8 +2242,6 @@ Guidance
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
-    <h3><br>
-    </h3>
     <h4>CCS</h4>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2229,6 +2344,9 @@ Guidance
               rather than b(<tt>K</tt>) is what's tested for the
               comparison.&nbsp; But <a
 href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembler_and_Simulator">John
+
+
+
                 Pultorak's simulator</a> (and mine) behave the way I've
               described here, and I trust John's reading of the
               control-pulse sequences more than I trust R-393.&nbsp; Of
@@ -2242,9 +2360,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
-    <h3>COM</h3>
-    <h3>
-    </h3>
+    <h4>COM</h4>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2301,11 +2418,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
-    <h3><br>
-    </h3>
-    <h3><a name="CS"></a>CS</h3>
-    <h3>
-    </h3>
+    <h4><a name="CS"></a>CS</h4>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2369,11 +2483,69 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
-    <h3>DV</h3>
-    <h3>
-    </h3>
-    <h3>
-    </h3>
+    <h4>DOUBLE</h4>
+    <h3> </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Double"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">DOUBLE<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT or 3 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">060000<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction is a mnemonic for
+            "<tt>AD A</tt>", and hence doubles the accumulator:<br>
+            <blockquote>C(<tt>A</tt>) = b(<tt>A</tt>) + b(<tt>A</tt>)<br>
+            </blockquote>
+            If the accumulator contains <a
+              href="file:///home/rburkey/git/virtualagc-web/Block1.html#Overflow">overflow</a>
+            after the addition, the effect on the <tt>OVCTR</tt>
+            register is as described for <a href="#AD"><tt>AD</tt></a>.</td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h4>DV</h4>
+    <h3> </h3>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2454,6 +2626,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             In point of fact, it's not just "some" positive or negative
             value that's stored in <tt>LP</tt>, but rather some
             specific value determined by the <a href="#Pulse_Sequences">control-pulse
+
+
+
               sequences</a> defining the <tt>DV</tt> instruction, but
             R-393 does not define them, and it's impossible to know what
             they might be without following through the control-pulse
@@ -2464,12 +2639,21 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             values.<br>
             <br>
             This instruction envisages that |b(<tt>A</tt>)| &lt; |C(<tt>K</tt>)|
+
+
+
             but does make some statements about what should happen in
             other cases<br>
             <ul>
               <li> If |b(<tt>A</tt>)| = |C(<tt>K</tt>)|, then |C(<tt>A</tt>)|
+
+
+
                 = 037777 and C(<tt>Q</tt>) = -|C(<tt>K</tt>)|. </li>
               <li>If |b(<tt>A</tt>)| &gt; |C(<tt>K</tt>)|, then |C(<tt>A</tt>)|
+
+
+
                 = 037777 and C(<tt>Q</tt>) "is meaningless". </li>
             </ul>
             The latter condition would always be satisfied if the
@@ -2484,8 +2668,6 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
-    <h3><br>
-    </h3>
     <h4>EXTEND </h4>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2552,20 +2734,35 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             embarassing results at runtime if the appropriate value
             isn't actually at address 05777 at runtime.&nbsp; Solarium
             uses the following code, which assembles the same as "<tt>OCT
+
+
+
               47777</tt>", so that's what I'd suggest doing:<br>
             <br>
             <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
                 SETLOC&nbsp;&nbsp; 5777&nbsp; # STANDARD LOCATION FOR
                 EXTENDING BITS</tt><tt><br>
               </tt><tt>OPOVF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
                 XCADR&nbsp;&nbsp;&nbsp; 0 <br>
               </tt></blockquote>
             How does this actually work?&nbsp; Well, suppose you needed
             to "extend" the instruction <tt>SU 1234</tt>:<br>
             <br>
             <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
                 EXTEND<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
                 SU 1234<br>
               </tt></blockquote>
             These two instructions are the same as <tt>INDEX 5777</tt>
@@ -2576,6 +2773,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             complement addition, if there's a 1 in bit 17, which there
             was in this case, it's removed and 1 is added to the
             number).&nbsp; The top 4 bits of this 16-bit sum are <tt>CCCC</tt>=1011,
+
+
+
             which tells the CPU that it's an <tt>SU</tt> instruction,
             but the operand is still 01234.&nbsp; All of which is, of
             course, rather convoluted, but it doesn't matter since all
@@ -2586,8 +2786,7 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
       </tbody>
     </table>
     <br>
-    <h3>
-    </h3>
+    <h3> </h3>
     <h4>INDEX </h4>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2664,9 +2863,64 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span> <br>
-    <h3>MASK</h3>
-    <h3>
-    </h3>
+    <h4>INHINT </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Inhibit interrupts"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">INHINT<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">020017<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction causes all
+            interrupts to be inhibited until a <tt>RELINT</tt>
+            instruction is executed.<br>
+            <br>
+            It is actually a mnemonic for an "<tt>INDEX 17</tt>", but
+            there is not actually any register at address 017, and the
+            hardware treats this code specially rather than as an <tt>INDEX</tt>
+            instruction.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h4>MASK</h4>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2729,11 +2983,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span> <br>
-    <h3>MP</h3>
-    <h3>
-    </h3>
-    <h3>
-    </h3>
+    <h4><a name="MP"></a>MP</h4>
+    <h3> </h3>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2881,10 +3133,187 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
-    <h3>
-    </h3>
-    <h3>
-    </h3>
+    <h3> </h3>
+    <h3> </h3>
+    <h4>OVIND</h4>
+    <h3> </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Overflow indicator (?)"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">OVIND K<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;"><tt>K</tt> is any address in
+            <i>fixed</i> memory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT if the accumulator
+            contains no overflow, 3 MCT if the accumulator contains
+            overflow.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">050000 + K<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This instruction is actually
+            identical to <tt>TS</tt>, and is simply a different
+            mnemonic for it that is less confusing when the operand is
+            fixed memory, because when the operand is fixed memory it is
+            impossible to copy the accumulator to the operand.&nbsp;
+            However, all other behavior (setting accumulator to 000001
+            or 177776 and skipping the next instruction on overflow) is
+            identical to what has been described for <a href="#TS"><tt>TS</tt></a>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span> <br>
+    <h4>OVSK </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Overflow skip"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">OVSK<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">050000<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction is a
+            mnemonic for "<tt>TS A</tt>", though its behavior is not
+            precisely identical to what you'd expect <tt>TS A</tt> to
+            do, since C(<tt>A</tt>) is not modified even if there is
+            overflow.<br>
+            <br>
+            As you may expect, its action is to continue to the next
+            address if the accumulator does not contain overflow, but
+            skips the next address and proceeds to the address after
+            that if the accumulator does contain overflow.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h3> </h3>
+    <h4>RELINT </h4>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Release interrupts"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">RELINT<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">2 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">020016<br>
+            </span> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;">This instruction causes all
+            interrupts to be re-enabled after a corresponding a <tt>INHINT</tt>
+            instruction has disabled them.<br>
+            <br>
+            It is actually a mnemonic for an "<tt>INDEX 16</tt>", but
+            there is not actually any register at address 016, and the
+            hardware treats this code specially rather than as an <tt>INDEX</tt>
+            instruction.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
     <h4>RESUME </h4>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -2966,8 +3395,7 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             replacing the contents of the <tt>BRUPT</tt> register from
             within the interrupt-service routine.&nbsp; Why you might
             want to do that, I can't say.<br>
-            <blockquote>
-            </blockquote>
+            <blockquote> </blockquote>
           </td>
         </tr>
       </tbody>
@@ -3026,9 +3454,78 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span> <br>
-    <h3>SU</h3>
-    <h3>
-    </h3>
+    <h4>SQUARE</h4>
+    <h3> </h3>
+    <h3> </h3>
+    <h3> </h3>
+    <table style="text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">"Square"<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Syntax:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">SQUARE<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Operand(s):<br>
+          </td>
+          <td style="vertical-align: top;">None.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold; width:
+            20%;">Timing:<br>
+          </td>
+          <td style="vertical-align: top;">8 MCT<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Octal:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-family:
+              monospace;">040000<br>
+            </span></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Notes:<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold;"></span><span style="font-family: monospace;"></span><span
+              style="font-weight: bold;"></span><span style="color:
+              rgb(0, 153, 0);"></span>This is an "extended" instruction,
+            meaning that it is coded as <br>
+            <blockquote><tt>EXTEND</tt><tt><br>
+              </tt><tt>SQUARE</tt><br>
+            </blockquote>
+            Thus even though the octal value of the instruction is shown
+            above as <tt>040000</tt>, and that's what appears in the
+            rope and how the assembler sees it, in fact by the time it
+            is executed it is really <tt>0110000</tt>, which is how the
+            CPU sees it.<br>
+            <br>
+            This instruction has the effect
+            <blockquote>C(<tt>A</tt>,<tt>LP</tt>) = b(<tt>A</tt>) × b(<tt>A</tt><tt></tt>)<br>
+            </blockquote>
+            and all of the comments for <a href="#MP"><tt>MP</tt></a>
+            apply to it.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"></span><span style="font-weight: bold;"></span>
+    <h4>SU</h4>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -3132,28 +3629,81 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
           <td style="vertical-align: top; font-weight: bold; width:
             20%;">Timing:<br>
           </td>
-          <td style="vertical-align: top;">1 MCT<br>
+          <td style="vertical-align: top;">2 MCT<br>
           </td>
         </tr>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Octal:<br>
           </td>
           <td style="vertical-align: top;"><span style="font-family:
-              monospace;">000002<br>
+              monospace;">050002<br>
             </span> </td>
         </tr>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Notes:<br>
           </td>
-          <td style="vertical-align: top;">TBD</td>
+          <td style="vertical-align: top;">This instruction is a
+            mnemonic for "<tt>TS Z</tt>", though its behavior is not
+            precisely identical to what you'd expect <tt>TS Z</tt> to
+            do, since there is no skip-on-overflow.<br>
+            <br>
+            Suppose that the initial contents of the accumulator, b(<tt>A</tt>),
+            is the logical OR <br>
+            <blockquote>b(<tt>A</tt>) = <tt>OP</tt> | <tt>K</tt><br>
+            </blockquote>
+            where only the 4 most-significant bits of the 16-bit value <tt>OP</tt>
+            may be non-zero, and only the least-significant 12 bits of <tt>K</tt>
+            may be zero.&nbsp; The operation of <tt>TCAA</tt> will be:<br>
+            <ul>
+              <li>C(<tt>A</tt>):</li>
+              <ul>
+                <li>If b(<tt>A</tt>) contains no overflow: C(<tt>A</tt>)=b(<tt>A</tt>).</li>
+                <li>If b(<tt>A</tt>) contains positive overflow: C(<tt>A</tt>)=000001.</li>
+                <li>If b(<tt>A</tt>) contains negative overflow: C(<tt>A</tt>)=177776.</li>
+              </ul>
+              <li>The next instruction executed will be at address <tt>K</tt>.</li>
+            </ul>
+            <p>But there's a tricky aspect to this, in that since <tt>TCAA</tt>
+              is still a "transfer to storage" operation, this means
+              that the 16-bit <tt>Z</tt> register will in fact have its
+              upper 4 bits loaded with <tt>OP</tt>, and those upper 4
+              bits remain set unless you explicitly set them to
+              something else!&nbsp; In other words, the lower 12 bits of
+              <tt>Z</tt> will continue to change as we advance from one
+              instruction to the next, but the upper 12 bits won't
+              change. However, the upper 4 bits of the <tt>Z</tt>
+              register are normally 0, and if <tt>OP</tt> isn't zero,
+              that leaves a potential problem lurking for the
+              future.&nbsp; The problem is what happens when the next <tt>TC</tt>
+              instruction is encountered.&nbsp; Recall that a <tt>TC</tt>
+              instruction, in addition to transferring control, also
+              loads the <tt>Q</tt> register with the return
+              address.&nbsp; Now, that's a shorthand way of saying that
+              <tt>Q</tt> gets loaded with a <tt>TC</tt> to the return
+              address.&nbsp; But if <tt>OP</tt> isn't zero, then what
+              that eventual <tt>TC</tt> loads into <tt>Q</tt> is not a
+              <tt>TC</tt> to the return address, but some other
+              instruction (<tt>OP</tt>) whose operand is the return
+              address.&nbsp; Of course, a TC which is a simple "jump"
+              won't have a problem, since it won't expect to find any
+              return address, and the problem will occur only if you're
+              using it as a call to a subroutine.<br>
+            </p>
+            <p>All of which boils down to saying that unless you intend
+              to exploit this wacky feature, don't use this instruction,
+              or else make sure you get the upper 4 bits of <tt>Z</tt>
+              set back to zero somehow before the next subroutine call you
+              want to use!<br>
+            </p>
+          </td>
         </tr>
       </tbody>
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span>
-    <h3>
-    </h3>
-    <h3><a name="TC"></a>TC</h3>
+    <h3> </h3>
+    <h4><a name="TC"></a>TC or TCR<br>
+    </h4>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -3225,6 +3775,13 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             upon entry , and to restore it from that variable
             immediately prior to exiting.<br>
             <br>
+            The instruction <tt>TCR</tt> does not differ from <tt>TC</tt>
+            in any way, but it may clarify the intention of your source
+            code to use <tt>TCR</tt> when you are calling a subroutine
+            from which there will be a return, and <tt>TC</tt> when you
+            are performing a simple jump.&nbsp; However, this seems to
+            have been done very seldom in a program like Solarium.<br>
+            <br>
             Note that a return from interrupt is not done in this
             manner, and requires its own dedicated instruction, <tt>RESUME</tt>.<br>
           </td>
@@ -3233,9 +3790,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span> <br>
-    <h3>TS</h3>
-    <h3>
-    </h3>
+    <h4><a name="TS"></a>TS</h4>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -3284,7 +3840,7 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
           <td style="vertical-align: top;"><span style="font-weight:
               bold;"></span><span style="font-family: monospace;"></span><span
               style="font-weight: bold;"></span><span style="color:
-              rgb(0, 153, 0);"></span>This instruction always the
+              rgb(0, 153, 0);"></span>This instruction always copies the
             accumulator to memory,<br>
             <blockquote>C(<tt>K</tt>) = C(<tt>A</tt>)<br>
             </blockquote>
@@ -3391,9 +3947,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     </table>
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span> <br>
-    <h3>XCH</h3>
-    <h3>
-    </h3>
+    <h4>XCH</h4>
+    <h3> </h3>
     <h3> </h3>
     <table style="text-align: left; width: 100%;" border="1"
       cellpadding="2" cellspacing="2">
@@ -3539,6 +4094,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -3571,8 +4129,14 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -3638,6 +4202,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -3645,6 +4212,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -3686,9 +4256,6 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
     either more or less operands than you would expect.<br>
     <br>
     TBD<br>
-    <h3><a name="Instruction-Set_Summary_Tables"></a>Instruction-Set
-      Summary Tables</h3>
-    <span style="font-style: italic;"></span>TBD<br>
     <br>
     <hr size="2" width="100%">
     <h2><a name="Pulse_Sequences"></a>Control-Pulse Sequences</h2>
@@ -3817,12 +4384,18 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
+
 
 
 
@@ -3902,6 +4475,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
+
 
 
 
@@ -4026,6 +4602,9 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -4092,6 +4671,9 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -4123,9 +4705,15 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
 href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+
+
+
 
 
 
@@ -4202,6 +4790,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
       our GitHub repository's "block1" branch</a>.&nbsp; I have only
     worked with it in Linux, but I expect it should probably build in
     Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -4219,6 +4810,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
+
 
 
 
@@ -4498,6 +5092,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
+
+
+
         our GitHub repository's "block1" branch</a>.&nbsp; I have only
       worked with it in Linux, but I expect it should probably build in
       Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
@@ -4531,6 +5128,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
+
+
 
 
 
@@ -4647,8 +5247,23 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         refers to the Apollo 1 tragedy, which occurred on January 27,
         1967, and thus is a kind of memoriam for the crew of Apollo
         1.&nbsp; Apollo 1 and Apollo 2, if either had ever flown, would
-        have flown with Block 1 AGCs.<br>
+        have flown with Block 1 AGCs.</li>
+    </ul>
+    <h4><a name="Status_of_yaAGCb1"></a>Status of yaAGCb1</h4>
+    <p>I have not fully completed <b>yaAGCb1</b> in the sense that <b>yaAGC</b>
+      is complete, and thus wouldn't expect it to fully work if
+      integrated into a full spacecraft simulator.&nbsp; While I don't
+      have a complete list at the moment of what works and what doesn't,
+      nor have all the parts of <b>yaAGCb1</b> that I <i>think</i>
+      work been fully tested, I can definitely say that I've not yet
+      bothered with the following:<br>
+    </p>
+    <ul>
+      <li>I have not hooked up simulated input signals to the CPU's
+        counter registers (CDU, PIPA, etc.)<br>
       </li>
+    </ul>
+    <ul>
     </ul>
     <ol>
     </ol>
@@ -4687,6 +5302,9 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
     <p>At present, a program called yaUplinkBlock1 is provided (in the
       similarly-named source-code directory <a
         href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+
+
+
 
 
 
@@ -4825,11 +5443,17 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
 
 
 
+
+
+
           The Compleat Sunrise</a> briefly covers what was available in
         the Block 1 SUNRISE program (September 1964).&nbsp; <br>
       </li>
       <li>You can pick through <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
+
 
 
 
@@ -4866,6 +5490,9 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     </ol>
     Unfortunately you can't get much useful information from <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_1.pdf">John
+
+
+
 
 
 
@@ -4939,6 +5566,9 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
             an error code in it.&nbsp; Thus, you are seeing "Alarm
             00203".&nbsp; According to <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
+
 
 
 
@@ -5099,7 +5729,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-23.<br>
+          2016-09-26.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
