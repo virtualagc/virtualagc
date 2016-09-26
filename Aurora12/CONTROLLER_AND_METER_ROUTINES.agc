@@ -79,7 +79,7 @@ ATTCONT         CS              BIT8
                 CAF             RHCSCALE                        
                 EXTEND                                          
 
-## PAGE 369
+## Page 369
 
                 MP              L                               
                 TS              RCOM                            

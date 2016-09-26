@@ -1502,7 +1502,7 @@ RunOneMachineCycle(void)
     }
 
   int WasJump = 0, Value, Instruction, hwm = 0, Data, ValueToStore;
-  uint16_t *pMem, *dMem0, *dMem1;
+  uint16_t /* *pMem, */ *dMem0, *dMem1;
   Address_t JumpHOP;
 
   // Fetch the current value pointed to by the HOP register.
@@ -1532,10 +1532,12 @@ RunOneMachineCycle(void)
     }
   Value &= 0777;
   // pMem points to the operand memory location as if it contains code.
+  /*
   pMem
       = (Value & 0400) ? (&Binary[0][RESIDUAL_SECTOR][HopRegister.Syllable][Value
           & 0377])
           : (&Binary[0][HopRegister.Page][HopRegister.Syllable][Value & 0377]);
+  */
   // dMem0 and dMem1 point to the operand memory location as if it contains data.
   if (hwm)
     {

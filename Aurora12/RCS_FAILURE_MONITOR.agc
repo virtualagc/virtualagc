@@ -7,7 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        0635-0638
 # Mod history:  2016-09-20 JL   Created.
-                2016-09-21 OH   Initial Transcription
+#               2016-09-21 OH   Initial Transcription
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
