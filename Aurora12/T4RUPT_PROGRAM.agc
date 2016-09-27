@@ -1059,7 +1059,7 @@ ASCDAP          CAF             BIT8                    # CHECK AOSTASK BIT OF D
                 CAE             OMEGAR                  # CREATE OLD OMEGAR
                 TS              OLDWFORR
 
-# ***** EVENTUALLY, USE 2SECWLT4 FROM FIXED-FIXED AND NEW NAME. *****
+# ***** EVENTUALLY, USE 2SECWLT4 FROMM FIXED-FIXED AND NEW NAME. *****
 
                 CAF             2SECWLT4                # SET UP AOSTASK TO BEGIN IN 2 SECONDS
                 TC              WAITLIST                # IT THEN SETS UP A LOOP ON WAITLIST FOR

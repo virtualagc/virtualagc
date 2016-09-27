@@ -30,9 +30,9 @@
                 EBANK=          LST1
 
 SLAP1           INHINT                                  # FRESH START. COMES HERE FROM PINBALL.
-                TC	            STARTSUB	            # SUBROUTINE DOES MOST OF THE WORK.
+                TC              STARTSUB                # SUBROUTINE DOES MOST OF THE WORK.
 
-                CAF	            BIT15                   # TURN OFF ALL DSPTAB +11D LAMPS ONLY ON
+                CAF             BIT15                   # TURN OFF ALL DSPTAB +11D LAMPS ONLY ON
                 TS              DSPTAB          +11D    # REQUESTED FRESH START.
 
                 CAF             ZERO                    # SAME STORY ON ZEROING FAILREG.
