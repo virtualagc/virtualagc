@@ -22,12 +22,12 @@
   Purpose:	A program to display telemetry-downlink info from AGC.
   Compiler:	GNU gcc.
   Reference:	http://www.ibibio.org/apollo
-  Mode:		2009-03-09 RSB.	Began.
-  		2009-03-13 RSB	Added --simple.
-		2009-03-14 RSB	Use smaller default font sizes when the --simple
-				switch is used.  Work around a funky socket 
-				error which appears in Windows.
-		2009-04-07 RSB	Began adding stuff related to MSK formtting.
+  Mods:			2009-03-09 RSB.	Began.
+  				2009-03-13 RSB	Added --simple.
+				2009-03-14 RSB	Use smaller default font sizes when the --simple
+								switch is used.  Work around a funky socket
+								error which appears in Windows.
+				2009-04-07 RSB	Began adding stuff related to MSK formtting.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
