@@ -5,8 +5,9 @@
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.
 # Website:      https://www.ibiblio.org/apollo.
-# Pages:        XXXX-XXXX
+# Pages:        639-641
 # Mod history:  2016-09-20 JL   Created.
+#               2016-09-21 MC   Filled out.
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
