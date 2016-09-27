@@ -448,22 +448,50 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
     }
   //printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
   //    Value, uBit);
+#if 0
+  // The following is just a temporary thing I'm using to debug telemetry,
+  // and really has nothing to do with the DSKY, and so won't appear in the
+  // final program.
+  if (Channel == 014)
+    {
+      static FILE *log = NULL;
+      if (log == NULL)
+        log = fopen("temp.log", "w");
+      if (log != NULL)
+        {
+          int wordOrder = 1 & (lastOUT1 >> 8);
+          // Interpret the data as described on p. 53 of Compleat Sunrise.
+          // Note that the actual data does not seem to correspond in any
+          // way to that description.
+          if (wordOrder)
+            fprintf(log, "Data word: %05o\n", Value & 077777);
+          else if (00000 == (Value & 076000))
+            fprintf(log, "ID word: %04o\n", Value & 01777);
+          else if (02000 == (Value & 076000))
+            fprintf(log, "Input character word: %s %s KEYCODE=%02o\n",
+                (Value & 0100) ? "MARK" : "KEY",
+                (Value & 040) ? "UPLINK" : "KBD", (Value & 037));
+          else
+            fprintf(log, "Relay word: relay=%02o settings=%04o\n",
+                017 & (Value >> 11), (Value & 03777));
+          fflush(log);
+        }
+    }
+#endif
   if (uBit)
     return;
-  if (Channel == 011 && (Value & 037) != lastOUT1) // OUT1
+  if (Channel == 011 && (Value & 037) != (lastOUT1 & 037)) // OUT1
     {
       //printf("yaDSKYb1:  received channel=%02o value=%04o ubit=%o\n", Channel,
       //    Value, uBit);
-      lastOUT1 = Value & 037;
+      lastOUT1 = Value;
       frame->indicatorProgAlm->SetBitmap(
-          (0 == (Value & 01)) ?
-              frame->imageProgAlmOff : frame->imageProgAlmOn);
+          (0 == (Value & 01)) ? frame->imageProgAlmOff : frame->imageProgAlmOn);
       frame->indicatorCompFail->SetBitmap(
           (0 == (Value & 02)) ?
               frame->imageCompFailOff : frame->imageCompFailOn);
       frame->indicatorKeyRlse->SetBitmap(
-          (0 == (Value & 04)) ?
-              frame->imageKeyRlseOff : frame->imageKeyRlseOn);
+          (0 == (Value & 04)) ? frame->imageKeyRlseOff : frame->imageKeyRlseOn);
       frame->indicatorScalerFail->SetBitmap(
           (0 == (Value & 010)) ?
               frame->imageScalerFailOff : frame->imageScalerFailOn);
