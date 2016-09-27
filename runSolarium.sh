@@ -13,5 +13,5 @@ fi
 xterm -e yaDSKYb1/yaDSKYb1 --images=yaDSKYb1/images/ $nav &
 cd yaAGCb1 
 ./yaAGCb1 $1 $2 $3 $4 $5 $6 $7 $8 $9
-killall yaDSKYb1main
+killall yaDSKYb1
 cd -
