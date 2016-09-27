@@ -41,6 +41,7 @@
  *                              parity bits on everything. All the
  *                              instructions implemented now, though I've
  *                              had no way to test DV so far.
+ *              2016-09-27 RSB  Hooked up DSRUPT.
  */
 
 #include <stdlib.h>
@@ -259,9 +260,11 @@ executeOneInstruction(FILE *logFile)
           printf("UPRUPT\n");
         }
 
-      if (!interruptVector && 0)  // DOWNRUPT
+      if (!interruptVector && agc.downlinkReady)  // DOWNRUPT
         {
+          agc.downlinkReady = 0;
           interruptVector = 02024;
+          //printf("DSRUPT\n");
         }
 
       // Vector to the interrupt if necessary.
@@ -538,6 +541,8 @@ executeOneInstruction(FILE *logFile)
             }
           agc.overflowedTIME3 |= incTimerCheckOverflow(&ctrTIME3);
           agc.overflowedTIME4 |= incTimerCheckOverflow(&ctrTIME4);
+          if ((ctrTIME1 % 4) == 0  && 0 == (regOUT1 & 01000))
+            agc.downlinkReady = 1;
         }
 
     }
