@@ -58,10 +58,11 @@
 #include "agc_disassembler.h"
 #include "agc_gdbmi.h"
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #ifdef WIN32
 #include <windows.h>
-#include <sys/time.h>
+#include <time.h>
+//#include <sys/time.h>
 #include "regex.h"
 #define LB "\r\n"
 #else
@@ -1433,7 +1434,7 @@ GdbmiHandleDefine (int i)
 
       if (cmd_idx < GDBMI_MAX_CUSTOM_CMDS)
 	{
-	  gdbmiCustomCmds[cmd_idx].Command = strdup (gdbmi_custom);
+	  gdbmiCustomCmds[cmd_idx].Command = _strdup (gdbmi_custom);
 
 	  printf ("Type commands for definition of \"%s\".\n", sraw);
 	  printf ("End with a line saying just \"end\".\n");
@@ -1450,7 +1451,7 @@ GdbmiHandleDefine (int i)
 		;
 
 	      if (strcmp (gdbmi_element, "end"))
-		gdbmiCustomCmds[cmd_idx].Arguments[arg_idx++] = strdup (
+		gdbmiCustomCmds[cmd_idx].Arguments[arg_idx++] = _strdup (
 		    gdbmi_element);
 	      else
 		{
@@ -2133,7 +2134,7 @@ GdbmiHandleCustom (int i)
 		{
 		  arg_sraw = gdbmiCustomCmds[cmd_idx].Arguments[arg_idx];
 		  if (arg_sraw)
-		    arg_s = strdup (arg_sraw);
+		    arg_s = _strdup (arg_sraw);
 		  else
 		    break;
 

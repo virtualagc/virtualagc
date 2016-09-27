@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #ifdef WIN32
 #include <windows.h>
-#include <sys/time.h>
+#include <time.h>
+//#include <sys/time.h>
 #define LB "\r\n"
 #else
 #include <time.h>

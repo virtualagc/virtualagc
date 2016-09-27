@@ -73,8 +73,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <io.h>
 //#include <sys/uio.h>
-#include <unistd.h>
+//#include <unistd.h>
 
 #include "agc_engine.h"
 #include "agc_symtab.h"
@@ -344,11 +345,11 @@ ReadSymbolTable (char *fname)
       printf ("Cannot open symbol table file: %s\n", fname);
       return 1;
     }
-  fd = fileno (fp);
+  fd = _fileno (fp);
 
   // Read in the SymbolFile_t structure as the header
   //printf ("__BYTE_ORDER=%0x04X\n", BYTE_ORDER);
-  read (fd, &symfile, sizeof(SymbolFile_t));
+  _read (fd, &symfile, sizeof(SymbolFile_t));
   //printf ("NumberSymbols=0x%08X\n", symfile.NumberSymbols);
   //printf ("NumberLines=0x%08X\n", symfile.NumberLines);
   LittleEndian32 (&symfile.NumberSymbols);
@@ -357,7 +358,7 @@ ReadSymbolTable (char *fname)
   //printf ("NumberLines=0x%08X\n", symfile.NumberLines);
 
   /* Set the source path if it is not overridden by command-line option */
-  if (SourcePathName == (char*)0) SourcePathName = strdup (symfile.SourcePath);
+  if (SourcePathName == (char*)0) SourcePathName = _strdup (symfile.SourcePath);
 
   // Allocate the symbol table
   SymbolTableSize = symfile.NumberSymbols;
@@ -376,7 +377,7 @@ ReadSymbolTable (char *fname)
 	}
 
       // Read it in from the symbol table file
-      read (fd, symbol, sizeof(Symbol_t));
+      _read (fd, symbol, sizeof(Symbol_t));
       LittleEndian32 (symbol);
       LittleEndian32 (&symbol->Value.Value);
       LittleEndian32 (&symbol->Type);
@@ -401,7 +402,7 @@ ReadSymbolTable (char *fname)
 	}
 
       // Read it in from the symbol table file
-      read (fd, Line, sizeof(SymbolLine_t));
+      _read (fd, Line, sizeof(SymbolLine_t));
       LittleEndian32 (Line);
       LittleEndian32 (&Line->CodeAddress.Value);
       LittleEndian32 (&Line->LineNumber);
@@ -829,7 +830,7 @@ OpenSourceFile (char *FileName)
   strcpy (CurrentSourcePath, ss);
 
   // Otherwise, we can open the file so complete and return
-  CurrentSourceFile = strdup (FileName);
+  CurrentSourceFile = _strdup (FileName);
   return 0;
 }
 

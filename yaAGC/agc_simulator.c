@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <stdlib.h>
 
 #include "yaAGC.h"
