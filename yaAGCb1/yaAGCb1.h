@@ -37,6 +37,7 @@
  *                              trying to build upon the existing yaAGC (Block 2)
  *                              simulator, or on my port of John Pultorak's
  *                              Block 1 simulator.
+ *              2016-09-27 RSB  Added stuff for DSRUPT.
  *
  * It is important to note that this simulator operates at the basic instruction
  * level and *not* at the control-pulse level, much like the original Block 2
@@ -129,6 +130,7 @@ typedef struct
   uint16_t overflowedTIME3; // Triggers T3RUPT.
   uint16_t overflowedTIME4; // Triggers T4RUPT.
   uint16_t uplinkReady; // Triggers UPRUPT.
+  uint16_t downlinkReady; // Triggers DSRUPT.
 
   // These values are the number of AGC MCT cycles which have occurred since
   // virtual AGC power-up, versus the total number of nanoseconds which have
