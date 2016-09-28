@@ -1,100 +1,102 @@
 /*
- Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
-
- This file is part of yaAGC.
-
- yaAGC is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
-
- yaAGC is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with yaAGC; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
- Filename:     yaYUL.c
- Purpose:      This is an assembler for Apollo Guidance Computer (AGC)
- assembly language.  It is called yaYUL because the original
- assembler was called YUL, and this "yet another YUL".
- Mod History:  04/11/03 RSB    Began.
- 07/03/04 RSB    Provided for placing the object code into
- the object code buffer for subsequent
- output to a file.
- 07/04/04 RSB    For multi-word pseudo-ops like 2DEC, only
- the first word was being written to the
- binary.
- 07/05/04 RSB    Added KeepExtend, to fix the INDEX instruction
- resetting the Extend flag.
- 07/23/04 RSB    Continued changes relating to interpretive
- opcodes and operands.
- 07/17/05 RSB    Fixed some structure-initializer problems
- I discovered when trying to compile for
- Kubuntu-PPC.
- 07/27/05 JMS    Added support for symbolic debugging output.
- 07/28/05 JMS    Added support for writing SymbolLines_to to symbol
- table file.
- 06/27/09 RSB    Began adding support for HtmlOut.
- 06/29/09 RSB    Added some fixes for BASIC vs. PSEUDO-OP in
- HTML colorizing.
- 06/30/09 RSB    Added the feature of inserting arbitrary
- HTML documentation.
- 07/01/09 RSB    Altered style of comments in HTML.  Shortened
- up symbol hyperlinks, where they're local to
- the file.
- 07/26/09 RSB    Fixed, I hope, some of the wrong colorization
- that occurs occasionally when two interpretive
- opcodes appear on the same line.
- 2009-03-09 JL   Fixed an issue with CHECK= causing duplicate symbols.
- Treat CHECK= like MEMORY when parsing labels.
- 2012-10-08 JL   Initialise SB to 1 rather than 0.
- 2016-08-18 RSB  Moved global variables originally allocated
- in yaYUL.h, conditionally on the ORIGINAL_PASS_C
- constant, directly into this file.  It's just too
- difficult to work with them through the Eclipse IDE
- otherwise, since the IDE can't resolve any of them.
- 2016-08-19 RSB  Various Block 1 changes.  Perhaps more importantly,
- no longer dependent on whether tabs vs. spaces
- were used in the source files.
- 2016-08-22 RSB	Implemented the pre-operator '-' across the board for
- block 1.
- 2016-08-29 RSB  Implemented Mike Stewart's fix for bug
- https://github.com/rburkey2005/virtualagc/issues/45.
- 2016-09-18 RSB	 For --block1, changed NOOP from being a synonym
- for XCH A to XCH 0; the only difference is that XCH A requires an
- A = 0 pseudo-op (which Solarium, I guess, must already have had),
- whereas XCH 0 does not.
-
- I don't really try to duplicate the formatting used by the original
- assembly-language code, since that format was appropriate for
- punch-cards, but not really for decent text editors.  [As near as I
- can tell by just reading the source code, it appeared to involved
- fixed-size fields:  (perhaps) nothing in column 1 (or maybe something
- to indicate a remark), 8 characters for a label (but ignored if blank
- in column 2), blank, 6 characters for opcode, blank, etc.]  It's
- particularly easy to ignore the original format, since I don't have
- any machine-readable AGC source code anyhow.  Since it all has to be
- entered manually, it may as well be a more-flexible format.  So
- here's how it will go:
-
- Labels begin in column 1.
- The next field is the opcode or pseudo op.
- The next field is the operand, if any.
- Comments are anything following a pound #.
-
- An exception is anything that looks like +%d or -%d in col. 2.  (These
- notations are just ignored.)
-
- Additionally, arbitrary HTML can be inserted.  This HTML vanishes as
- far as the assembly or the output assembly listing is concerned, but
- is inserted verbatim into output HTML (when the --html switch is used).
- The insert begins with a line containing the tag <HTML> (and nothing
- more) and ends with a line containing the tag </HTML> (and nothing
- more).  There is no check to see that the HTML is legitimate.
+ * Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Filename:    yaYUL.c
+ * Purpose:     This is an assembler for Apollo Guidance Computer (AGC)
+ *              assembly language.  It is called yaYUL because the original
+ *              assembler was called YUL, and this "yet another YUL".
+ * Mod History: 04/11/03 RSB    Began.
+ *              07/03/04 RSB    Provided for placing the object code into
+ *                              the object code buffer for subsequent
+ *                              output to a file.
+ *              07/04/04 RSB    For multi-word pseudo-ops like 2DEC, only
+ *                              the first word was being written to the
+ *                              binary.
+ *              07/05/04 RSB    Added KeepExtend, to fix the INDEX instruction
+ *                               resetting the Extend flag.
+ *              07/23/04 RSB    Continued changes relating to interpretive
+ *                              opcodes and operands.
+ *              07/17/05 RSB    Fixed some structure-initializer problems
+ *                              I discovered when trying to compile for
+ *                              Kubuntu-PPC.
+ *              07/27/05 JMS    Added support for symbolic debugging output.
+ *              07/28/05 JMS    Added support for writing SymbolLines_to to symbol
+ *                              table file.
+ *              06/27/09 RSB    Began adding support for HtmlOut.
+ *              06/29/09 RSB    Added some fixes for BASIC vs. PSEUDO-OP in
+ *                              HTML colorizing.
+ *              06/30/09 RSB    Added the feature of inserting arbitrary
+ *                              HTML documentation.
+ *              07/01/09 RSB    Altered style of comments in HTML.  Shortened
+ *                              up symbol hyperlinks, where they're local to
+ *                              the file.
+ *              07/26/09 RSB    Fixed, I hope, some of the wrong colorization
+ *                              that occurs occasionally when two interpretive
+ *                              opcodes appear on the same line.
+ *              2009-03-09 JL   Fixed an issue with CHECK= causing duplicate symbols.
+ *                              Treat CHECK= like MEMORY when parsing labels.
+ *              2012-10-08 JL   Initialise SB to 1 rather than 0.
+ *              2016-08-18 RSB  Moved global variables originally allocated
+ *                              in yaYUL.h, conditionally on the ORIGINAL_PASS_C
+ *                              constant, directly into this file.  It's just too
+ *                              difficult to work with them through the Eclipse IDE
+ *                              otherwise, since the IDE can't resolve any of them.
+ *              2016-08-19 RSB  Various Block 1 changes.  Perhaps more importantly,
+ *                              no longer dependent on whether tabs vs. spaces
+ *                              were used in the source files.
+ *              2016-08-22 RSB	Implemented the pre-operator '-' across the board for
+ *                              block 1.
+ *              2016-08-29 RSB  Implemented Mike Stewart's fix for bug
+ *                              https://github.com/rburkey2005/virtualagc/issues/45.
+ *              2016-09-18 RSB	For --block1, changed NOOP from being a synonym
+ *                              for XCH A to XCH 0; the only difference is that XCH A requires an
+ *                              A = 0 pseudo-op (which Solarium, I guess, must already have had),
+ *                              whereas XCH 0 does not.
+ *              2016-09-28 RSB  With --format, interpretive operands were aligned
+ *                              properly only for --block1.
+ *
+ * I don't really try to duplicate the formatting used by the original
+ * assembly-language code, since that format was appropriate for
+ * punch-cards, but not really for decent text editors.  [As near as I
+ * can tell by just reading the source code, it appeared to involved
+ * fixed-size fields:  (perhaps) nothing in column 1 (or maybe something
+ * to indicate a remark), 8 characters for a label (but ignored if blank
+ * in column 2), blank, 6 characters for opcode, blank, etc.]  It's
+ * particularly easy to ignore the original format, since I don't have
+ * any machine-readable AGC source code anyhow.  Since it all has to be
+ * entered manually, it may as well be a more-flexible format.  So
+ * here's how it will go:
+ *
+ *      Labels begin in column 1.
+ *      The next field is the opcode or pseudo op (preferably at column 16).
+ *      The next field is the operand, if any.
+ *      Comments are anything following a pound #.
+ *
+ * An exception is anything that looks like +%d or -%d in col. 2.  (These
+ * notations are just ignored.)
+ *
+ * Additionally, arbitrary HTML can be inserted.  This HTML vanishes as
+ * far as the assembly or the output assembly listing is concerned, but
+ * is inserted verbatim into output HTML (when the --html switch is used).
+ * The insert begins with a line containing the tag <HTML> (and nothing
+ * more) and ends with a line containing the tag </HTML> (and nothing
+ * more).  There is no check to see that the HTML is legitimate.
  */
 
 #include "yaYUL.h"
@@ -1297,7 +1299,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           // Block 1 interpreter code, and only to determine that the line contains
           // an address rather than an operator.  Moreover, anything appearing in
           // column 15 is *not* part of the operator.
-          noOperator = Block1;
+          noOperator = 1 /*Block1*/;
           if (strlen(s) >= 16)
             {
               if (!strncmp(&s[16], Fields[i], strlen(Fields[i])))
@@ -1373,7 +1375,11 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             }
           else
             {
-              if (NumInterpretiveOperands && !iMatch && !Match)
+              if (formatOnly && noOperator)
+                {
+                  ParseInputRecord.Operator = "";
+                }
+              else if (NumInterpretiveOperands && !iMatch && !Match)
                 {
                   ParseInputRecord.Operator = "";
                 }
