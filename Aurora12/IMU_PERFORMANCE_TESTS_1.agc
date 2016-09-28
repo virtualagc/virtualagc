@@ -680,7 +680,7 @@ LEMLAB          TC              INTPRET
                 STORE           STARAD          +6      # *ZNB*   *0   -1    0* *E*
                 EXIT
 
-                CS              POSITION
+                CS              POSITON
                 AD              THREE
                 EXTEND
                 BZF             +2
