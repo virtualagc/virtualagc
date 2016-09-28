@@ -32,6 +32,7 @@
                 EBANK=          XSM
 
 
+
 AOTNBIMU        CAF             ONE                     # AOT-NB-IMU FINE ALIGNMENT TEST
                 TS              EROPTN                  # ... TEST CAPABILITY ...
 
@@ -53,7 +54,7 @@ POSLOAD         CAF             V24N30E                 # R1  000X ENTER     POS
                 TCF             ENDTEST
                 TCF             -4
                 XCH             DSPTEM1                 # DO NOT USE POSITION 3 WITH NAV BASE AT
-                TS              POSITION                #    ZERO DEGREE TILT ANGLE. (GIMBAL LOCK)
+                TS              POSITON                 #    ZERO DEGREE TILT ANGLE. (GIMBAL LOCK)
 
                 CCS             DSPTEM1         +1
                 TCF             LEMLAB                  # SPECIAL LAB TEST TO BYPASS MARKS
@@ -71,7 +72,7 @@ POSLOAD         CAF             V24N30E                 # R1  000X ENTER     POS
                 TC              PUTPOSX                 # TO COARSE ALIGN STABLE MEMBER
 
                 TC              GMLCKCHK                # CHECK FOR GIMABL LOCK BEFORE FINE ALIGN
-                TC              OGZERO                  # FOR EARTH RATE COMPENSATION
+                TC              OGCZERO                 # FOR EARTH RATE COMPENSATION
 
                 TC              BANKCALL
                 CADR            IMUFINE                 # FINE ALIGN MODE
@@ -84,12 +85,12 @@ POSLOAD         CAF             V24N30E                 # R1  000X ENTER     POS
 
                 TC              FREEDSP                 # FREE DISPLAY SYSTEM
 
-                TC              SMDCALC                 # TO FINEL ALIGN STABLE MEMBER
+                TC              SMDCALC                 # TO FINE ALIGN STABLE MEMBER
 
 ERFINAL         TC              BANKCALL                # LAST EARTH RATE SHOT
                 CADR            EARTHR
                 CCS             EROPTN                  # IF DESIRED TO COMPENSATE CONTINUALLY
-                TCF             MONSTART                #     CHANGE BY V21 NO2 E XXXXX E 00000 E
+                TCF             MONSTART                #     CHANGE BY V21 N02 E XXXXX E 00000 E
                 TCF             ERFINAL
                 TCF             ENDTEST
                 TS              EROPTN
@@ -109,7 +110,7 @@ MONSTART        TC              FINETIME                # TIME AT INITIAL MISALI
                 TS              PIPZ
                 TS              STOREPL
                 TS              NDXCTR
-                TC              STORRLST                # STORE T(INITIAL) AND PIPAI = 0
+                TC              STORRSLT                # STORE T(INITIAL) AND PIPAI = 0
 
                 INHINT
                 CAF             60SEC                   # INSURE PIPAI VARIES IN ONE DIRECTION
@@ -157,7 +158,7 @@ FINDNAVB        EXTEND                                  # MARKS * CLAC NB OR SM 
                 CADR            MKRELEAS                # RELEASE MARK SYSTEM
                 CAF             ONE
                 TS              DSPTEM1
-                CAF             V01N30E                 # DIAPLY 00001 IN R1
+                CAF             V01N30E                 # DISPLY 00001 IN R1
                 TC              NVSBWAIT
                 CAF             ZERO                    # TO INDICATE GROUND MARKS
                 TC              BANKCALL
@@ -175,7 +176,7 @@ FINDNAVB        EXTEND                                  # MARKS * CLAC NB OR SM 
 
                 TC              INTPRET
                 LXC,1           CALL
-                                MARKSTAT                # BASE ADDRESS VAR AREA FOR AOTNB
+                                MARKSTAT                # BASE ADDRESS VAC AREA FOR AOTNB
                                 AOTNB                   # OPTICS TO NAV BASE COORDINATE FRAME
                 BON             CALL
                                 COAROFIN                # COARSE MARKS = 0    FINE MARKS = 1
@@ -223,6 +224,7 @@ EARRTCOM        TC              BANKCALL                # EARTH RATE COMPENSATIO
                                 NBSM                    # NAV BASE DIRECT TO STABLE MEMBER
                 STORE           STARAD          +6      # TARGET 2 WRT NAV BASE OR STABLE MEMBER
                 STORE           LOS2                    # ...FOR K...
+
 MAXDET          CALL
                                 TAR/EREF                # TARGETS 1,2 WRT EARTH REF FRAME
                 CALL
@@ -241,6 +243,7 @@ GIMANGS1        CAF             TWO                     # BASE ADDRESS GIMBAL AN
 ## Page 449
 PUTPOSX         EXTEND                                  # COARSE ALIGNS STABLE MEMBER
                 QXCH            QPLACE
+
                 TC              INTPRET
                 CALL
                                 CALCGA                  # CALCULATE COARSE ALIGN GIMBAL ANGLES
@@ -268,8 +271,8 @@ SMDCALC         EXTEND                                  # FINE ALIGNS STABLE MEB
                                 +3
                 STCALL          32D
                                 NBSM                    # THEN TO SM PRESENT FRAME
-                STOVL           XDC                     # YSM DESIRED WRT EARTH REF FRAME
-                                YSM
+                STOVL           XDC
+                                YSM                     # YSM DESIRED WRT EARTH REF FRAME
 
                 MXV             VSL1
                                 STARAD                  # THEN TO SM PRESENT OR NAV BASE FRAME
@@ -277,7 +280,7 @@ SMDCALC         EXTEND                                  # FINE ALIGNS STABLE MEB
                                 COAROFIN                # BIT10 FOR LEMLAB TEST
                                 +3
                 STCALL          32D
-                                NBSM                    # TEH TO SM PRESENT FRAME
+                                NBSM                    # THEN TO SM PRESENT FRAME
                 STOVL           YDC
                                 XDC
 
@@ -290,7 +293,7 @@ SMDCALC         EXTEND                                  # FINE ALIGNS STABLE MEB
 
 ## Page 450
                 ECADR           OGC                     # X1 = BASE ADDRESS OF TORQUING ANGLES
-                                PULSEIMU                # TO PUT OUT GYRO TORQUING PUSES
+                                PULSEIMU                # TO PUT OUT GYRO TORQUING PULSES
                 EXIT
 
                 TC              BANKCALL
@@ -319,6 +322,7 @@ MAKEXSMD        EXIT                                    # XSM V   YSM SW   ZSM S
                 DCOMP
                 STORE           XSM             +14D
                 RVQ
+
 
 
 TAR/EREF        AXT,1           AXT,2                   #               TARGET VECTOR
@@ -399,6 +403,7 @@ EARTHR          TC              MAKECADR                # CLACULATES AND COMPENS
                 ECADR           ERCOMP
                                 PULSEIMU                # TO PUT OUT GYRO TORQUING PULSES
                 EXIT
+
                 TC              BANKCALL
                 CADR            IMUSTALL                # WAIT FOR PULSES TO GET OUT
                 TCF             ENDTEST
@@ -437,7 +442,7 @@ OPTDATA         EXTEND                                  # CALLS FOR AZIMUTH AND 
                 ZL                                      # ELEVATION MEASURED FROM HORIZONTAL
                 LXCH            RUN
                 TS              DSPTEM1         +2
-                CAF             V05N30E                 # DIAPLAY TARGET NUMBER IN R3
+                CAF             V05N30E                 # DISPLAY TARGET NUMBER IN R3
                 TC              NVSBWAIT
                 INDEX           RUN
                 DXCH            TAZEL1
@@ -466,7 +471,7 @@ LATAZCHK        DLOAD           SL2                     # CALLS FOR AZIMUTH (SM)
                 RTB             EXIT
                                 1STO2S                  # FRACTION OF REVOLUTION TO 2S COMPLEMENT
 
-                XCH             MPAC                    # AZIMUTH MUST BE 135 DEGREES R1 = +13500
+                XCH             MPAC                    # AZIMUTH MUST BE 135 DEGREES R1 = .13500
                 TS              DSPTEM1                 #    FOR SXT-NB-IMU FINE ALIGNMENT TEST
                 TC              CHECKLD                 # R1  +- XXX.XX    AZIMUTH IN DEGREES (SM)
                 OCT             00661                   # R2  +- XX.XXX    LATITUDE IN DEGREES
@@ -511,7 +516,7 @@ CHECKLD2        CADR            CHECKLD         +2
 POSNJUMP        EXTEND                                  # POSITIONS FOR SXTNBIMU
                 QXCH            QPLACE
 
-                INDEX           POSITION
+                INDEX           POSITON
                 TCF             +1
                 TCF             ENDTEST
                 TCF             POS1
@@ -634,7 +639,7 @@ OGCZERO         EXTEND                                  # ZERO EARTH RATE TORQUI
 
 
 
-GMLCKCHK        CAF             BIT6                    # CHECK FOR GIMBAL LOG  (MGA GREATER 70)
+GMLCKCHK        CAF             BIT6                    # CHECK FOR GIMBAL LOCK  (MGA GREATER 70)
                 MASK            DSPTAB          +11D
                 EXTEND
                 BZF             +2
@@ -896,7 +901,6 @@ EEEE            TC              INTPRET
                                 GENPL           +9D,1
                 DMP
                 DAD
-                DAD
                                 30D
                 STORE           30D
 
@@ -934,8 +938,10 @@ EEEE            TC              INTPRET
                 STORE           DSPTEM2
                 EXIT
 
-                CA              POSITION
+                CA              POSITON
                 TS              DSPTEM2         +2
+
+                CAF             V06N66E
                 TC              NVSBWAIT
                 TC              FLASHON
                 TC              ENDIDLE
@@ -1079,10 +1085,9 @@ ALWAYS          TS              THRUST
                 CA              BIT4
                 EXTEND                                  # A SMERZH FIX.
                 WOR             14
-                CA              BIT6
+                CA              BIT6                    # 320 MS.DELAY
                 TC              WAITLIST
                 2CADR           THROTASK
-
                 TC              TASKOVER
 SOMETIME        CS              LOW11
                 TC              ALWAYS
@@ -1115,7 +1120,6 @@ ALTMET          CA              METERADD
                 CA              ONE
                 TC              WAITLIST
                 2CADR           ALTASK
-
                 RELINT
                 CA              WAITER
                 TC              NVSBWAIT
@@ -1138,7 +1142,7 @@ ALTRMET         CA              MRATEADD
 
 ## Page 470
 #      THE AOT ANGLE CHECKING PROGRAM PROVIDES A SIMPLE VERIFICATION OF THE ACCURACY OF THE AOT,  THE IDEA IS TO
-# COMPUTE THE ANGLE BETWEEN TWO LINES OF SIGHT AS INDICATED BY THE AOT, WHICH IS WHAT THIS PROGRAM DOES
+# COMPUTE THE ANGLE BETWEEN TWO LINES OF SIGHT AS INDICATED BY THE AOT, WHICH IS WHAT THIS PROGRAM DOES.
 # INDEPENDENT KNOWLEDGE OF THE INCLUDED ANGLE PROVIDES A COMPARISON AND THUS A MEASURE OF THE AOT ACCURACY.
 #       THE ISS NEED NOT BE ON TO RUN THIS PROGRAM.
 
@@ -1160,7 +1164,7 @@ AOTANGCK        TC              INTPRET
                 STCALL          COSTH                   # COSTH = V.V
                                 ARCTRIG
                 RTB
-                                1STO2S                  # DP 1S COMP SP 25 COMP.
+                                1STO2S                  # DP 1S COMP SP 2S COMP.
                 STORE           THETA
                 EXIT
                 CAF             THETAADR
@@ -1172,7 +1176,7 @@ AOTANGCK        TC              INTPRET
 
 ## Page 471
                 EBANK=          1400
-ZEROERAS        INHINT                                  # PROGRAM BY MUNTZ TO ZERO ERASABLE
+ZEROERAS        INHINT                                  # PROGRAM BY MUNTZ TO ZERO ERASEABLE
                 CAF             ZERO
                 TS              TIME3
                 CAF             OCT27
@@ -1236,14 +1240,14 @@ KKKK            2DEC            210.39          B-14    # 1230 B-14 FOR CSM
 
 RDRRETN         ADRES           RDR1            +1      # FOR RDR37511
 THETAADR        ECADR           THETA
-XSMADRX         ADRES           XSM
+XSMADRX         ADRES           XSM                     # FOR MAKEXSMD
 
 SCALFTR         2DEC            .64                     # FOR STORRSLT
 
 OMEG/MS         2DEC            .24339048               # GYRO PULSES / 10 MSEC
 
 ## Page 473
-#          THE FOLOWING ROUTINE READS THE CLOCK AND SCALAR (CHANNEL 3 AND 4) INTO A AND L, INSURING THE
+#          THE FOLOWING ROUTINE READS THE CLOCK AND SCALAR (CHANNEL 3 AND 4) INTO A AND L, INSURING THAT THE
 # DATA WAS NOT IN TRANSITION WHEN IT WAS READ.
                 SETLOC          ENDFAILF
 FINETIME        INHINT                                  # RETURNS WITH INTERRUPT INHIBITED.
@@ -1268,6 +1272,7 @@ FINETIME        INHINT                                  # RETURNS WITH INTERRUPT
                 EXTEND
                 READ            HISCALAR
                 TC              Q
+
 ENDIMUF         =
 
 ## Page 474
