@@ -14,7 +14,9 @@
     <ul>
       <li><a href="#What_is_the_Launch_Vehicle_Digital_">What is the
           Launch Vehicle Digital Computer (LVDC)?</a></li>
-      <li><a href="#Peripheral_Devices">Peripheral Devices</a><br>
+      <li><a href="#Peripheral_Devices">Peripheral Devices</a></li>
+      <li><a href="#Interaction_with_the_AGC">Saturn Interaction with
+          the AGC</a><br>
       </li>
       <li><a href="#LVDC_Documentation">LVDC Documentation</a></li>
       <li><a href="#Evolution_of_the_Flight_Software">Evolution of the
@@ -60,6 +62,11 @@ Launch
 
 
 
+
+
+
+
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -88,7 +95,10 @@ Launch
             DSKY, the crew could see a display of various measurements
             taken by the rocket's sensors.&nbsp; I don't think the
             backup capability was ever used in a mission.&nbsp; Correct
-            me if I'm wrong, please!<br>
+            me if I'm wrong, please!&nbsp; However, the AGC's ability to
+            directly control the Saturn IVB was used for other purposes
+            during the mission.&nbsp; <a
+              href="#Interaction_with_the_AGC">Also, see below</a>.<br>
           </td>
         </tr>
       </tbody>
@@ -185,7 +195,7 @@ Launch
         LVDC that it may make more sense to consider them a as forming a
         single unit, though packaged separately.<br>
       </li>
-      <li>The ST-124-M Inertial Platform Assembly&mdash;catchy name!&mdash;was an
+      <li>The ST-124-M Inertial Platform Assembly—catchy name!—was an
         inertial measuring unit that supplied the LVDC with information
         about the rocket's orientation and acceleration.&nbsp; It had 3
         integrating accelerometers that measured acceleration with
@@ -230,7 +240,7 @@ Launch
     </ul>
     At the end of the preceding section was an illustration of a very
     simplified logical view of the interconnection of the LVDC to
-    various peripherals.&nbsp; Here is a somewat more complete
+    various peripherals.&nbsp; Here is a somewhat more complete
     illustration for the Saturn IB:<br>
     <br>
     <div style="text-align: center;"><img style="width: 794px; height:
@@ -240,6 +250,88 @@ Launch
         <div style="text-align: center;"><img style="width: 800px;
             height: 600px;" alt="" src="LVDC-Peripherals-V.jpg"
             height="600" width="800"><br>
+          <div align="left">
+            <h2><a name="Interaction_with_the_AGC"></a>Saturn
+              Interaction with the AGC</h2>
+            <p>The LVDC and the AGC did not actually have any direct
+              interaction, so we may as well talk about how the AGC
+              interacted with the Saturn before immersing ourselves in
+              too much detail about the LVDC.<br>
+            </p>
+            <p><a href="IUFlightControlComputer.jpg"><img alt="Flight
+                  Control Computer"
+                  src="small-IUFlightControlComputer.jpg" align="right"
+                  height="200" width="201" border="2"></a>If you look at
+              either of the graphics at the end of the preceding
+              section, you'll see the four ways that the Instrumentation
+              Unit (IU) in the Saturn IVB and the Spacecraft (i.e, the
+              Command Module) — which are separated by a horizontal
+              dotted line near the tops of the two graphics —
+              interacted:<br>
+            </p>
+            <ol>
+              <li>The Abort Decision signal.</li>
+              <li>The Status signal.</li>
+              <li>The Mode Command signal.</li>
+              <li>The Alternate Steering Commands signals.</li>
+            </ol>
+            The Saturn was always steered by the so-called Flight
+            Control Computer (depicted in the picture at the right), an
+            analog computer whose salient characteristic for our
+            purposes is that it was <i>not</i> the LVDC.&nbsp; However,
+            the flight-control computer did not operate on its own, and
+            thus itself needed to be supervised.&nbsp; Normally, that
+            supervision was performed, by default, by the LVDC,
+            indirectly through the LVDA, the Launch Vehicle Data
+            Adapter.<br>
+            <p>However, it was also possible for the spacecraft to send
+              the flight control computer a signal, the Mode Command,
+              which instructed it to accept Alternate Steering Commands
+              from the AGC rather than the default steering commands
+              from the LVDC/LVDA.&nbsp; Thus, the AGC could steer the
+              Saturn IVB (but not some of the other Saturn stages) by
+              this mechanism.<br>
+            </p>
+            <p>Of course, it was also desirable for the spacecraft to be
+              able to monitor the activity of the Saturn, even under
+              normal conditions when the LVDC was controlling the
+              rocket.&nbsp; Since the spacecraft had its own Inertial
+              Measurement Unit (IMU), it knew its own orientation and
+              acceleration — and hence the Saturn's — at all times, and
+              the AGC could integrate these quantities to know the
+              velocity and position at all times.&nbsp; Thus it was not
+              necessary for the IU to communicate that information to
+              the spacecraft in order for the AGC to monitor the
+              physical motion of the rocket and to display it for the
+              astronauts on the DSKY.<br>
+            </p>
+            <p>I actually have an interesting graphic of the monitoring
+              process to show you.&nbsp; Even though we do not have any
+              of the original LVDC software at the present time, and
+              thus cannot simulate the operation of the LVDC in a
+              digital sense, a fellow named Riley Rainey has used the
+              equations defining the IU to model the physical behavior
+              of the rocket and the spacecraft's IMU, allowing Virtual
+              AGC to monitor the launch behavior on a simulated
+              DSKY.&nbsp; Here's a short movie he has created of that
+              simulation.&nbsp; It's admittedly a little fuzzy, since I
+              blew it up by about 2×, but perhaps we'll be able to get a
+              better one sometime in the future: </p>
+            <div align="center"><a
+href="http://www.ibiblio.org/apollo/RileyRainey/ApolloA%202009-08-05%2022-43-27-68-1200x800-20.mp4"><img
+                  alt="Riley Rainey's simulation video" title="Click to
+                  play video" src="playRiley.jpg" height="200"
+                  width="300" border="2"></a></div>
+            <br>
+            Of course, at the left in the video, you can see the
+            simulated FDAI and DSKY.&nbsp; At the right, you can see
+            telemetry from the AGC.&nbsp; You'll notice that at the
+            beginning of the movie, the DSKY's UPLINK indicator is
+            on.&nbsp; That's apparently because Riley's simulated DSKY
+            isn't fully functional in the sense of accepting keypad
+            input, so Riley is instead feeding the AGC commands via the
+            digital uplink.<br>
+          </div>
         </div>
       </div>
     </div>
@@ -270,9 +362,9 @@ Launch
       </li>
     </ul>
     I have received second-hand anecdotal accounts that the flight
-    software was created by "the Germans"&mdash;i.e., the German scientists
+    software was created by "the Germans"—i.e., the German scientists
     such as Rudolf Drecher and Walter Haeussermann who were engaged in
-    creating the rockets&mdash;in the form of a FORTRAN program.&nbsp; Of
+    creating the rockets—in the form of a FORTRAN program.&nbsp; Of
     course, "the Germans" may simply have directed the coding of the
     FORTRAN program rather than having done it themselves, but I have no
     information about who may have coded that FORTRAN program, nor what
@@ -327,6 +419,11 @@ href="http://www.ibiblio.org/apollo/Documents/LaboratoryMaintenanceInstructionsF
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 
 
+
+
+
+
+
         This is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp;
@@ -343,6 +440,11 @@ System
 
 
 
+
+
+
+
+
           of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
@@ -351,10 +453,20 @@ Handbook,
 
 
 
+
+
+
+
+
           Saturn Launch Vehicles</a>, chapters 11 and 15.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-503-SaturnFlightManual-SA503.pdf">Saturn
 Flight
+
+
+
+
+
 
 
 
@@ -519,8 +631,8 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-206-SkylabSaturnIBFlightM
         instruction (see below).</li>
       <li>0776, 0777 are used for the "HOP save" feature (see below).</li>
     </ul>
-    Finally, address 000&mdash;I believe, in module 0 sector 0 but am not
-    sure&mdash;stores a HOP Register code loaded at reset.<br>
+    Finally, address 000—I believe, in module 0 sector 0 but am not
+    sure—stores a HOP Register code loaded at reset.<br>
     <h3><a name="Layout_of_Memory_Words"></a>Layout of Memory Words</h3>
     <br>
     <div style="text-align: center;"><img style="width: 896px; height:
@@ -568,6 +680,11 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-206-SkylabSaturnIBFlightM
     when A9 is 1 a special sector called the "residual sector" is being
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
+
+
+
+
+
 
 
     Incidentally, the "residual sector" can only be used for addressing
@@ -790,6 +907,11 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-206-SkylabSaturnIBFlightM
 
 
 
+
+
+
+
+
             However, the result will remain in the P-Q register until
             the next <span style="font-family: Courier
               New,Courier,monospace;">MPH</span>, <span
@@ -911,6 +1033,11 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-206-SkylabSaturnIBFlightM
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
+
+
+
 
 
 
@@ -1201,6 +1328,11 @@ However,
 
 
 
+
+
+
+
+
                     of operation<br>
                   </th>
                 </tr>
@@ -1357,6 +1489,11 @@ However,
 
 
 
+
+
+
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -1493,6 +1630,11 @@ Field
 
 
 
+
+
+
+
+
             from PIO Instruction<br>
           </th>
           <th colspan="1" rowspan="2">Data Source<br>
@@ -1502,6 +1644,11 @@ Field
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
 the
+
+
+
+
+
 
 
 
@@ -1555,12 +1702,22 @@ the
 
 
 
+
+
+
+
+
             </span>(?)<br>
           </td>
           <td><br>
           </td>
           <td colspan="1" rowspan="19" style="vertical-align: middle;">For
 all
+
+
+
+
+
 
 
 
@@ -2827,8 +2984,8 @@ all
     </table>
     <h3><a name="Subroutine_Linkage"></a>Subroutine Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
-    HOP constant of the next instruction in sequence&mdash;i.e., on the
-    assumption that no branch occurs&mdash;and this HOP constant is available
+    HOP constant of the next instruction in sequence—i.e., on the
+    assumption that no branch occurs—and this HOP constant is available
     to the next instruction that executes.&nbsp; In most cases, this
     means that an instruction can find out its own address (which isn't
     very interesting), but if the previous instruction was a branch then
@@ -2841,6 +2998,11 @@ all
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
 those
+
+
+
+
+
 
 
 
@@ -2880,7 +3042,7 @@ those
       <li>The LVDC performs a <span style="font-family: Courier
           New,Courier,monospace;"></span><span style="font-family:
           Courier New,Courier,monospace;">HOP 0400</span>, thus
-        transferring control to an interrupt-service routine&mdash;or, as the
+        transferring control to an interrupt-service routine—or, as the
         original documents refer to it, an "input-output
         subprogram".&nbsp; Recall that this does not jump to address
         0400, rather it loads the HOP Register from the value stored at
@@ -2963,6 +3125,11 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-206-SkylabSaturnIBFlightM
 href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-503-SaturnFlightManual-SA503.pdf">Saturn
 
 
+
+
+
+
+
       Flight Manual, SA-503</a> p. 7-21, respectively), and if one
     accounts for the differences in language between the two documents,
     the interrupts are almost entirely the same.<a
@@ -3006,6 +3173,11 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-MAN-206-SkylabSaturnIBFlightM
 href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
 System
 Handbook,
+
+
+
+
+
 
 
 
@@ -3175,7 +3347,7 @@ Handbook,
               makes the irony of their destruction by the evil of "The
               Mindless Primitive" within even more interesting.<br>
             </small>
-            <div style="text-align: right;"><small>&mdash;G. D. Garduno
+            <div style="text-align: right;"><small>—G. D. Garduno
                 (2007), on the movie <i>Forbidden Planet</i></small></div>
           </td>
         </tr>
@@ -3195,7 +3367,7 @@ Handbook,
               evil of "The Mindless Budget-Cutters" even more
               interesting.<br>
             </small>
-            <div style="text-align: right;"><small>&mdash;Ron Burkey (2009),
+            <div style="text-align: right;"><small>—Ron Burkey (2009),
                 on LVDC assembly language</small></div>
           </td>
         </tr>
@@ -3236,6 +3408,11 @@ href="http://www.ibiblio.org/apollo/Documents/IBMStudyReport-63-928-130-Volume2.
     <a
 href="http://www.ibiblio.org/apollo/Documents/CritiqueOfIBMApolloStudyReport.pdf">one
 
+
+
+
+
+
       of those critiques</a>, we have a few precious gems of LVDC
     assembly language, as written by the Instrumentation Labs personnel
     rather than by IBM.&nbsp; <br>
@@ -3256,6 +3433,11 @@ href="http://www.ibiblio.org/apollo/Documents/CritiqueOfIBMApolloStudyReport.pdf
                 vectors A and B to produce&nbsp; vector C.</span><br
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
 
 
 
@@ -3316,6 +3498,11 @@ href="http://www.ibiblio.org/apollo/Documents/CritiqueOfIBMApolloStudyReport.pdf
                 see the equations being<br>
                 # implemented, look at page 7 of <a
 href="http://www.ibiblio.org/apollo/Documents/CritiqueOfIBMApolloStudyReport.pdf">the
+
+
+
+
+
 
 
 
@@ -3618,6 +3805,11 @@ href="http://www.ibiblio.org/apollo/Documents/CritiqueOfIBMApolloStudyReport.pdf
 
 
 
+
+
+
+
+
         where ZERO is a label for some memory location that contains the
         value 0.</li>
       <li>There may have been a <span style="font-family: Courier
@@ -3659,6 +3851,11 @@ href="http://www.ibiblio.org/apollo/Documents/SaturnVLaunchVehicleGuidanceEquati
 
 
 
+
+
+
+
+
           equations</a> relating the outputs to the inputs.&nbsp; While
         creating behavior simulations is not an objective of the Virtual
         AGC project as far as the Apollo CPUs are concerned, there are
@@ -3693,7 +3890,7 @@ href="http://www.ibiblio.org/apollo/Documents/SaturnVLaunchVehicleGuidanceEquati
         the things that would be interesting to have include:<br>
         <ul>
           <li>Source code, source code, source code.&nbsp; Any computer
-            source code&mdash;or for that matter, binary code&mdash;that ran on the
+            source code—or for that matter, binary code—that ran on the
             LVDC would be useful:</li>
           <ul>
             <li>Flight software.</li>
@@ -3707,6 +3904,11 @@ href="http://www.ibiblio.org/apollo/Documents/SaturnVLaunchVehicleGuidanceEquati
           <li>Source code for the software run by the test &amp;
             checkout computers, as opposed to the LVDC itself.</li>
           <li>Any documents missing from the <a href="links.html#LVDC">Document
+
+
+
+
+
 
 
 
@@ -3737,6 +3939,11 @@ href="http://www.ibiblio.org/apollo/Documents/SaturnVLaunchVehicleGuidanceEquati
           subsequently sold to Lockheed-Martin, which has subsequently
           split off to become <a
 href="https://en.wikipedia.org/wiki/Lockheed_Martin_Systems_Integration_%E2%80%93_Owego">Lockheed
+
+
+
+
+
             Martin Systems Integration - Oswego (LMSI)</a>.</p>
         <p>What we don't know is which (if any) of these corporate
           entities "owns" this code.&nbsp; Probably LMSI, but perhaps
@@ -3778,7 +3985,7 @@ href="https://en.wikipedia.org/wiki/Lockheed_Martin_Systems_Integration_%E2%80%9
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-02.<br>
+          2016-09-28.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
