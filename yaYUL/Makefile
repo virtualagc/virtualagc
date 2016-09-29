@@ -85,6 +85,6 @@ install: yaYUL
 	chmod ugo+x ${PREFIX}/bin/yaYUL
 
 %.o: %.c yaYUL.h
-	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -o $@ $<
+	gcc ${CFLAGS} -g -O0 -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -o $@ $<
 	
 

@@ -452,7 +452,7 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
          ParseDNCHAN, ParseSTCALL, ParseSTODL, ParseSTORE, ParseSTOVL,
          ParseVN, Parse2OCT, ParseSBANKEquals, ParseEDRUPT,
          ParseInterpretiveOperand, ParseEqMinus,
-         ParseXCADR; 
+         ParseXCADR, ParseSECSIZ;
 
 extern int Block1;
 extern int Html;
