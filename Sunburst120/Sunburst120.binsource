@@ -1,0 +1,45 @@
+; Copyright:	Public domain
+; Filename:	Sunburst120.binsource
+; Purpose:	An ASCII file used to input the Sunburst120 executable
+;		in octal format.  The actual octal
+;		(usable by the yaAGC program) must be created
+;		by processing with the oct2bin program.
+;		Refer to www.ibiblio.org/apollo for explanations. 
+; Contact:	info@sandroid.org
+; More info:	http://www.ibiblio.org/apollo/Luminary.html.
+; Mods:		2016-09-29 RSB	Began.  
+;			
+; This data is taken from the Sunburst 120 program listing from Don Eyles's
+; private collection, scanned at archive.org, and maintained there in
+; the Virtual AGC collection, http://www.archive.org/details/virtualagcproject,
+; although the more-convenient reduced-size images at 
+; http://www.ibiblio.org/apollo/ScansForConversion/Sunburst120 have
+; been used in creating this file.
+;
+; For convenience, the page numbers (as marked on the printed
+; assembly listing) are given in the comments.  The notations
+; V or A (or both or neither) have been added after the page
+; numbers to indicate the proofing method used (Visual or
+; Audio).  The parenthesized number following the V or A, is 
+; the number of errors corrected on that proofing pass.
+;
+; Input-data format:  Each memory bank begins with a
+; "BANK=" line.  The remainder of the bank consists
+; of octal values.  Note that banks should be zero-filled
+; at the end to make the lengths come out correct.  Since
+; not all of the logical memory banks (0-43) are actually
+; used, we use the "NUMBANKS=" option to specify a smaller
+; number of banks.
+;
+; The data appears in the same order as in YUL assembly
+; listings, namely:
+;	Bank 2, bank 3, bank 0, bank 1,
+;	followed by bank 4, 5, 6, 7, 10, 11, ...
+; (bank numbers in octal).  In other words, banks 2,3 are
+; swapped with banks 0,1, but otherwise the banks are in the
+; order you'd expect.  This is presumably done because banks
+; 2,3 are alternately addressable as non-banked memory, and
+; hence are the more fundamental type of memory.
+
+BANK=2
+; p. 1166
