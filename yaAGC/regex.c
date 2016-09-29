@@ -185,8 +185,9 @@ init_syntax_once ()
 #define REGEX_REALLOCATE(source, osize, nsize) realloc (source, nsize)
 
 #else /* not REGEX_MALLOC  */
+#include <malloc.h>
 
-/* Emacs already defines alloca, sometimes.  */
+   /* Emacs already defines alloca, sometimes.  */
 #ifndef alloca
 
 /* Make alloca work the best possible way.  */

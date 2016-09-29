@@ -2037,7 +2037,7 @@ GdbmiHandleExamine (int j)
 static GdbmiResult
 GdbmiHandleGetOct (int i)
 {
-  CheckDec (s);
+  //CheckDec (s);
   return (GdbmiCmdDone);
 }
 
