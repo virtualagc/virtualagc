@@ -143,7 +143,7 @@ COEFFA1         CAE     ITEMP2          # FORM COEFFA(AOSQ)
                 TS      AXISCNTR
                 
 ALLAXES         INDEX   AXISCNTR
-                CSS     AOSQ            # FORM ABSOLUTE VALUE OF AOS
+                CCS     AOSQ            # FORM ABSOLUTE VALUE OF AOS
                 AD      ONE
                 TCF      +2
                 AD      ONE
@@ -179,7 +179,7 @@ ACCMINVL        INDEX   AXISCNTR
 AXISLOOP        INDEX   AXISCNTR        # SET UP 1/NJTSX TO 1/2JTSX FOR URGENCY
                 TS      1/NJTSQ         # (DOES NOT COUNT FOR U,V-AXES)
                 
-                CSS     AXISCNTR        # DECREMENT LOOP COUNTER AND TEST FOR END
+                CCS     AXISCNTR        # DECREMENT LOOP COUNTER AND TEST FOR END
                 TCF      +2
                 TCF     NEXTCALL        # FINISHED LOOP
                 
