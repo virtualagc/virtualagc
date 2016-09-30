@@ -256,9 +256,9 @@
  *				dividend.
  *		09/11/16 MAS	Applied Gergo's fix for multi-MCT instructions
  *				taking a cycle longer than they should.
- *		09/30/16 MAS	Added emulation of the Night Watchman hardware
- *		                alarm, alarm-generated resets, and the CH77
- *		                restart monitor module.
+ *		09/30/16 MAS	Added emulation of the Night Watchman, TC Trap,
+ *		                and Rupt Lock hardware alarms, alarm-generated 
+ *		                resets, and the CH77 restart monitor module.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -485,6 +485,13 @@ FindMemoryWord (agc_t * State, int Address12)
 
   // Make sure the darn thing really is 12 bits.
   Address12 &= 07777;
+
+  // Check to see if NEWJOB (67) has been accessed for Night Watchman
+  if (Address12 == 067)
+  {
+    // Address 67 has been accessed in some way. Clear the Night Watchman.
+    State->NightWatchman = 0;
+  }
 
   // It should be noted as far as unswitched-erasable and common-fixed memory
   // is concerned, that the following rules actually do result in continuous
@@ -1680,6 +1687,36 @@ agc_engine (agc_t * State)
           State->InputChannel[077] |= CH77_NIGHT_WATCHMAN;
         }
 
+      if (0200 == (0377 & State->InputChannel[ChanSCALER1]))
+        {
+          // The Rupt Lock alarm watches ISR state starting every 160ms
+          State->RuptLock = 1;
+          State->NoRupt = 1;
+        }
+      else if ((State->RuptLock || State->NoRupt) && 0140 == (0377 & State->InputChannel[ChanSCALER1]))
+        {
+          // We've either had no interrupts, or stuck in one, for 140ms. Sound the alarm!
+          TriggeredAlarm = 1;
+
+          // Set the RUPT LOCK bit in channel 77.
+          State->InputChannel[077] |= CH77_RUPT_LOCK;
+        }
+
+      if (010 == (017 & State->InputChannel[ChanSCALER1]))
+        {
+          // The TC Trap alarm watches executing instructions every 5ms
+          State->TCTrap = 1;
+          State->NoTC = 1;
+        }
+      else if ((State->TCTrap || State->NoTC) && 000 == (017 & State->InputChannel[ChanSCALER1]))
+        {
+          // We've either executed no TC at all, or only TCs, for the past 5ms. Sound the alarm!
+          TriggeredAlarm = 1;
+
+          // Set the TC TRAP bit in channel 77.
+          State->InputChannel[077] |= CH77_TC_TRAP;
+        }
+
       // If we triggered any alarms, simulate a GOJAM
       if (TriggeredAlarm)
         {
@@ -1967,6 +2004,9 @@ agc_engine (agc_t * State)
   // which imply that the contents of Z is directly transferred into Q.)
   c (RegZ)= NextZ;
 
+  // Keep track of TC executions for the TC Trap alarm
+  int ExecutedTC = 0;
+
   // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
   // picture of what follows.
   ExtendedOpcode = Instruction >> 9;	//2;
@@ -2002,6 +2042,8 @@ agc_engine (agc_t * State)
 	    c (RegQ)= 0177777 & NextZ;
 	  NextZ = Address12;
 	}
+
+      ExecutedTC = 1;
       break;
     case 010:			// CCS. 
     case 011:
@@ -2051,6 +2093,7 @@ agc_engine (agc_t * State)
       // TCF instruction (1 MCT).
       NextZ = Address12;
       // THAT was easy ... too easy ...
+      ExecutedTC = 1;
       break;
       case 020:// DAS.
       case 021:
@@ -2852,12 +2895,13 @@ agc_engine (agc_t * State)
       // but is much easier here)
       c(RegL) = SignExtend (OverflowCorrected (c(RegL)));
 
-      // Check to see if NEWJOB (67) has been accessed for Night Watchman
-      if (Address12 == 067 && !(0100 == ExtendedOpcode & 0170)) // I/O instructions cannot access address 67
-        {
-          // Address 67 has been accessed in some way. Clear the Night Watchman.
-          State->NightWatchman = 0;
-        }
+      // Check ISR status, and clear the Rupt Lock flags accordingly
+      if (State->InIsr) State->NoRupt = 0;
+      else State->RuptLock = 0;
+
+      // Update TC Trap flags according to the instruction we just executed
+      if (ExecutedTC) State->NoTC = 0;
+      else State->TCTrap = 0;
     }
   return (0);
 }
