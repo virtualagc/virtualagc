@@ -89,8 +89,8 @@
 				to agc_t.
 		04/07/09 RSB	Added ProcessDownlinkList and ProcessDownlinkList_t.
 		09/30/16 MAS	Added InhibitAlarms as a configuration global,
-                                NightWatchman to state, and the first constant
-                                related to channel 77.
+                                alarm flags to state, and the constants related to
+                                channel 77.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -229,6 +229,8 @@ extern long random (void);
 #define ChanSCALER1 04
 #define ChanS 07
 
+#define CH77_TC_TRAP        00004
+#define CH77_RUPT_LOCK      00010
 #define CH77_NIGHT_WATCHMAN 00020
 
 #define NUM_INTERRUPT_TYPES 10
@@ -327,6 +329,10 @@ typedef struct
   //unsigned RegQ16:1;		// Bit "16" of register Q.
   unsigned DownruptTimeValid:1;	// Set if the DownruptTime field is valid.
   unsigned NightWatchman:1;     // Set when Night Watchman is watching. Cleared by accessing address 67.
+  unsigned RuptLock:1;          // Set when rupts are being watched. Cleared by executing any non-ISR instruction
+  unsigned NoRupt:1;            // Set when rupts are being watched. Cleared by executing any ISR instruction
+  unsigned TCTrap:1;            // Set when TC is being watched. Cleared by executing any non-TC/TCF instruction
+  unsigned NoTC:1;              // Set when TC is being watched. Cleared by executing TC or TCF
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;
   // The following pointer is present for whatever use the Orbiter
