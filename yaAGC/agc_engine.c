@@ -256,6 +256,9 @@
  *				dividend.
  *		09/11/16 MAS	Applied Gergo's fix for multi-MCT instructions
  *				taking a cycle longer than they should.
+ *		09/30/16 MAS	Added emulation of the Night Watchman hardware
+ *		                alarm, alarm-generated resets, and the CH77
+ *		                restart monitor module.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -427,6 +430,11 @@ WriteIO (agc_t * State, int Address, int Value)
   // Apparently, these are latched inputs, and this resets the latches.
   if (Address == 033)
     Value = (State->InputChannel[Address] | 076000);
+
+  // Similarly, the CH77 Restart Monitor Alarm Box has latches for
+  // alarm codes that are reset when CH77 is written to.
+  if (Address == 077)
+    Value = 0;
 
   State->InputChannel[Address] = Value;
   if (Address == 010)
@@ -1598,6 +1606,8 @@ agc_engine (agc_t * State)
   // This can only iterate once, but I use 'while' just in case.
   while (ScalerCounter >= SCALER_OVERFLOW)
     {
+      int TriggeredAlarm = 0;
+
       // First, update SCALER1 and SCALER2. These are direct views into
       // the clock dividers in the Scaler module, and so don't take CPU
       // time to 'increment'
@@ -1652,9 +1662,49 @@ agc_engine (agc_t * State)
               CpuWriteIO(State, 013, State->InputChannel[013] & 037777);
             }
         }
-      // Return, so as to account for the time occupied by updating the
-      // counters.
-      return (0);
+
+      // Check alarms
+      if (02000 == (03777 & State->InputChannel[ChanSCALER1]))
+        {
+          // The Night Watchman begins looking once every 1.28s...
+          State->NightWatchman = 1;
+        }
+      else if (State->NightWatchman && 00000 == (03777 & State->InputChannel[ChanSCALER1]))
+        {
+          // NEWJOB wasn't checked before 0.64s elapsed. Sound the alarm!
+          TriggeredAlarm = 1;
+
+          // Set the NIGHT WATCHMAN bit in channel 77. Don't go through CpuWriteIO() because
+          // instructions writing to CH77 clear it. We'll broadcast changes to it in the
+          // generic alarm handler a bit further down.
+          State->InputChannel[077] |= CH77_NIGHT_WATCHMAN;
+        }
+
+      // If we triggered any alarms, simulate a GOJAM
+      if (TriggeredAlarm)
+        {
+          if (!InhibitAlarms) // ...but only if doing so isn't inhibited
+            {
+              // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
+              State->ExtraDelay += 2;
+
+              // The net result of those two is Z = 4000. Interrupt state is cleared.
+              c(RegZ) = 04000;
+              State->InIsr = 0;
+            }
+
+          // Push the CH77 updates to the outside world
+          ChannelOutput (State, 077, State->InputChannel[077]);
+        }
+
+
+      if (State->ExtraDelay)
+        {
+          // Return, so as to account for the time occupied by updating the
+          // counters and/or GOJAM.
+          State->ExtraDelay--;
+          return (0);
+        }
     }
 
   //----------------------------------------------------------------------
@@ -2801,6 +2851,13 @@ agc_engine (agc_t * State)
       // Correct overflow in the L register (this is done on read in the original,
       // but is much easier here)
       c(RegL) = SignExtend (OverflowCorrected (c(RegL)));
+
+      // Check to see if NEWJOB (67) has been accessed for Night Watchman
+      if (Address12 == 067 && !(0100 == ExtendedOpcode & 0170)) // I/O instructions cannot access address 67
+        {
+          // Address 67 has been accessed in some way. Clear the Night Watchman.
+          State->NightWatchman = 0;
+        }
     }
   return (0);
 }
