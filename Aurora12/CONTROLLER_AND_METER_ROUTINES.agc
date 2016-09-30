@@ -94,7 +94,7 @@ XAXOVRD         CA              RHCY                            # YAW CHANNEL ON
 
 NORATE          CAF             ZERO                            # SET RATE COMMANDS TO ZERO
                 TS              PCOM                            
-                RS              RCOM                            
+                TS              RCOM                            
                 TS              YCOM                            
                 TC              TASKOVER                        
 

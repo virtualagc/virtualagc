@@ -66,6 +66,9 @@ FILTER          CAF     M52OF           # RESET TIMER IMMEDIATELY: DT = 20 MS
                 QXCH    QRUPT
 
                 EXTEND                  # SET RUPT ADDRESS TO TOP OF
+                DCA      PFRPTLST       # POST FILTER RUPT LIST
+                DXCH     T5ADR
+                
                 DXCH     PFRPTLST       # ROTATE 2CADR'S IN POST FILTER RUPT LIST
                 DXCH     PFRPTLST +6
                 DXCH     PFRPTLST +4
@@ -76,7 +79,7 @@ FILTER          CAF     M52OF           # RESET TIMER IMMEDIATELY: DT = 20 MS
 
 FILTSTART       TC      T6JOBCHK        # CHECK T6 CLOCK FOR P-AXIS ACTIVITY
 
-# Page 0605
+## Page 0605
                 EXTEND
                 DCA     CDUY            # STORE CDUY AND CDUZ AT PI AND IN 2.5 COM
                 DXCH    STORCDUY
@@ -88,6 +91,7 @@ FILTSTART       TC      T6JOBCHK        # CHECK T6 CLOCK FOR P-AXIS ACTIVITY
                 EXTEND                  #   WHEN IT WAS FIRST READ.
                 BZF     +4              # BRANCH IF TIME WAS THE SAME IN 2 READS.
                 EXTEND
+                READ    +4
                 TS      L               # THIS TIME READ ALWAYS GIVES GOOD NO.
                 TC      STEERADR        # SKIP DTCALC DURING INITIAL PASS
 
@@ -126,7 +130,7 @@ MOVEWGTS        CS      THREE           # SET UP POINTER FOR THIS PASS
                 CAF     WVECTOR +2
                 TS      W2              # MOVE IN NEW W2
 
-# Page 0606
+## Page 0606
 
 FLTZAXIS        CAF     TWO             # SET UP INDEXER FOR D.P. PICKUP AND TO
                 TS      QRCNTR          # INDICATE Z-AXIS FILTER PASS
@@ -151,10 +155,10 @@ FLTYAXIS        INDEX   QRCNTR
                 CAE     Y3DOT           # THETA IS S.P. SCALED AT PI/2 RAD/SEC
                 XCH     CDU3DOT
 
-NOTE THAT THE FILTERED VARIABLES ARE READ DESTRUCTIVELY FOR SPEED AND EFFICIENCY AND THAT Y3DOT IS NOT UPDATED.
-SO IT MUST BE READ NON-DESTRUCTIVELY BUT NEED NOT BE RESTORED AFTER EACH KALMAN FILTER PASS.
+# NOTE THAT THE FILTERED VARIABLES ARE READ DESTRUCTIVELY FOR SPEED AND EFFICIENCY AND THAT Y3DOT IS NOT UPDATED.
+# SO IT MUST BE READ NON-DESTRUCTIVELY BUT NEED NOT BE RESTORED AFTER EACH KALMAN FILTER PASS.
 
-# Page 0607
+## Page 0607
 
 KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
                 EXTEND
@@ -496,7 +500,7 @@ DFQRAXIS        2CADR   QRAXIS
 
 # DUMMY FILTER RUPT AFTER Q,R=AXES RUPT:
 
-FILDUMMY        CAR     MS20F           # RESET TIMER IMMEDIATELY: DT = 20 MS
+FILDUMMY        CAF     MS20F           # RESET TIMER IMMEDIATELY: DT = 20 MS
                 TS      TIME5
 
                 LXCH    BANKRUPT        # INTERRUPT LEAD IN (CONTINUED)

@@ -148,7 +148,7 @@ ALKCG2          DLOAD*          INCR,1
 ALFLT2          VLOAD           VXM
                                 DELVX
                                 GEOMTRX
-                VLS1
+                VSL1
                 DLOAD           DCOMP
                                 MPAC            +3
                 STODL           DPIPAY
@@ -287,7 +287,7 @@ BOOP            DLOAD*          DMPR
                 BDSU
                                 DRIFTO
                 DSU             STADR
-                STDOL           WPLATO
+                STODL           WPLATO
                                 16D
                 DMPR            DMP
                                 20D
@@ -350,6 +350,7 @@ BOOP            DLOAD*          DMPR
                 STODL           ANGY
                                 18D
                 DMP             SL1R                            # MULTIPLY X WPLATT -SL1- PUSH AND RELOAD
+                PDDL            DMPR
                                 12D
                                 WPLATO
                 BDSU
