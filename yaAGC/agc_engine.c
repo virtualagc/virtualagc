@@ -1681,14 +1681,17 @@ agc_engine (agc_t * State)
         }
 
       // If we triggered any alarms, simulate a GOJAM
-      if (!InhibitAlarms && TriggeredAlarm)
+      if (TriggeredAlarm)
         {
-          // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
-          State->ExtraDelay += 2;
+          if (!InhibitAlarms) // ...but only if doing so isn't inhibited
+            {
+              // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
+              State->ExtraDelay += 2;
 
-          // The net result of those two is Z = 4000. Interrupt state is cleared.
-          c(RegZ) = 04000;
-          State->InIsr = 0;
+              // The net result of those two is Z = 4000. Interrupt state is cleared.
+              c(RegZ) = 04000;
+              State->InIsr = 0;
+            }
 
           // Push the CH77 updates to the outside world
           ChannelOutput (State, 077, State->InputChannel[077]);
