@@ -1934,7 +1934,7 @@ agc_engine (agc_t * State)
 	  // request. There's two extra MCTs associated with taking an
 	  // interrupt -- one each for filling ZRUPT and BRUPT.
 	  // Search for the next interrupt request.
-	  for (i = 1; i < NUM_INTERRUPT_TYPES; i++)
+	  for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
 	    {
 	      if (State->InterruptRequests[i] && DebuggerInterruptMasks[i])
 		{
