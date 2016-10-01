@@ -2549,29 +2549,36 @@ agc_engine (agc_t * State)
 	      c (RegL) = (0777777 & random ());
 	      c (RegA) = (0177777 & random ());
 	    }
+	  else if (AbsA == 0 && AbsL == 0)
+	    {
+	      // The dividend is 0 but the divisor is not. The standard DV sign
+	      // convention applies to A, and L remains unchanged.
+	      if ((040000 & c (RegL)) == (040000 & *WhereWord))
+                {
+                  if (AbsK == 0) Operand16 = 037777;	// Max positive value.
+                  else Operand16 = AGC_P0;
+                }
+	      else
+                {
+                  if (AbsK == 0) Operand16 = (077777 & ~037777);	// Max negative value.
+                  else Operand16 = AGC_M0;
+                }
+
+	      c (RegA) = SignExtend (Operand16);
+	    }
 	  else if (AbsA == AbsK && AbsL == AGC_P0)
 	    {
 	      // The divisor is equal to the dividend.
 	      if (AccPair[0] == *WhereWord)// Signs agree?
 		{
 		  Operand16 = 037777;	// Max positive value.
-		  c (RegL) = SignExtend (*WhereWord);
 		}
 	      else
 		{
 		  Operand16 = (077777 & ~037777);	// Max negative value.
-		  c (RegL) = SignExtend (*WhereWord);
 		}
+	      c (RegL) = AccPair[0];
 	      c (RegA) = SignExtend (Operand16);
-	    }
-	  else if (AbsA == 0 && AbsL == 0 && AbsK != 0)
-	    {
-	      // The dividend is 0 but the divisor is not. The standard DV sign
-	      // convention applies to A, and L remains unchanged.
-	      if ((040000 & c (RegL)) == (040000 & *WhereWord))
-	        c (RegA) = AGC_P0;
-	      else
-	        c (RegA) = SignExtend (AGC_M0);
 	    }
 	  else
 	    {
