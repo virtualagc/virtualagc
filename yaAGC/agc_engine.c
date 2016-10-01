@@ -259,6 +259,12 @@
  *		09/30/16 MAS	Added emulation of the Night Watchman, TC Trap,
  *		                and Rupt Lock hardware alarms, alarm-generated 
  *		                resets, and the CH77 restart monitor module.
+ *		10/01/16 RSB	Moved location of "int ExecutedTC = 0" to the
+ *				top of the function, since it triggered compiler
+ *				warnings (and hence errors) for me.  (The
+ *				"goto AllDone" jumped over it, leaving
+ *				ExecutedTC potentially uninitialized.)
+ *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -1512,6 +1518,9 @@ agc_engine (agc_t * State)
   uint16_t ExtendedOpcode;
   int Overflow, Accumulator;
   //int OverflowQ, Qumulator;
+  // Keep track of TC executions for the TC Trap alarm
+  int ExecutedTC = 0;
+
 
   sExtraCode = 0;
 
@@ -2003,9 +2012,6 @@ agc_engine (agc_t * State)
   // the value in Z.  (I deduce this from descriptions of the TC register,
   // which imply that the contents of Z is directly transferred into Q.)
   c (RegZ)= NextZ;
-
-  // Keep track of TC executions for the TC Trap alarm
-  int ExecutedTC = 0;
 
   // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
   // picture of what follows.
