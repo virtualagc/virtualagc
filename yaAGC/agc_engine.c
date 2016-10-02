@@ -264,6 +264,12 @@
  *				warnings (and hence errors) for me.  (The
  *				"goto AllDone" jumped over it, leaving
  *				ExecutedTC potentially uninitialized.)
+ *		10/01/16 MAS	Added a corner case to one of DV's corner cases
+ *				(0 / 0), made CCS consider overflow before the
+ *				diminished absolute value calculation, changed
+ *				how interrupt priorities are handled, and
+ *				corrected ZRUPT to be return addr+1.
+ *				Aurora 12 now passes all of SELFCHK in yaAGC.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1921,27 +1927,15 @@ agc_engine (agc_t * State)
 	  //ProgramCounter > 060 && 
 	  Instruction != 3 && Instruction != 4 && Instruction != 6)
 	{
-	  int i, j;
-	  // We use the InterruptRequests array slightly oddly.  Since the 
-	  // interrupts are numbered 1 to 10 (NUM_INTERRUPT_TYPES), we begin
-	  // indexing the array at 1, so that entry 0 does not hold an 
-	  // interrupt request.  Instead, we use entry 0 to tell the last 
-	  // interrupt type that occurred.  In searches, we begin one up from
-	  // the last interrupt, and then wrap around.  This keeps the same 
-	  // interrupt from happening over and over to the exclusion of all 
-	  // other interrupts.  (I have no clue as to whether the AGC actually
-	  // did this or not.)  Moreover, I assume interrupt vectoring takes 
-	  // one additional machine cycle.  Don't really know, however.
+	  int i;
+	  // Interrupt vectors are ordered by their priority, with the lowest
+	  // address corresponding to the highest priority interrupt. Thus,
+	  // we can simply search through them in order for the next pending
+	  // request. There's two extra MCTs associated with taking an
+	  // interrupt -- one each for filling ZRUPT and BRUPT.
 	  // Search for the next interrupt request.
-	  i = State->InterruptRequests[0];	// Last interrupt serviced.
-	  if (i == 0)
-	    i = State->InterruptRequests[0] = NUM_INTERRUPT_TYPES;// Initialization.
-	  j = i;		// Ending point.
-	  do
+	  for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
 	    {
-	      i++;		// Index at which to start searching.
-	      if (i > NUM_INTERRUPT_TYPES)
-		i = 1;
 	      if (State->InterruptRequests[i] && DebuggerInterruptMasks[i])
 		{
 		  BacktraceAdd (State, i);
@@ -1949,15 +1943,15 @@ agc_engine (agc_t * State)
 		  State->InterruptRequests[i] = 0;
 		  State->InterruptRequests[0] = i;
 		  // Set up the return stuff.
-		  c (RegZRUPT)= ProgramCounter;
+		  c (RegZRUPT)= ProgramCounter + 1;
 		  c (RegBRUPT)= Instruction;
 		  // Vector to the interrupt.
 		  State->InIsr = 1;
 		  NextZ = 04000 + 4 * i;
+	          State->ExtraDelay++;
 		  goto AllDone;
 		}
 	    }
-	  while (i != j);
 	}
     }
 
@@ -2057,8 +2051,9 @@ agc_engine (agc_t * State)
       // Figure out where the data is stored, and fetch it.
       if (Address10 < REG16)
 	{
-	  Operand16 = OverflowCorrected (0177777 & c(Address10));
-	  c (RegA)= odabs (0177777 & c (Address10));
+	  ValueK = 0177777 & c(Address10);
+	  Operand16 = OverflowCorrected (ValueK);
+	  c (RegA)= odabs (ValueK);
 	}
       else			// K!=accumulator.
 	{
@@ -2066,8 +2061,9 @@ agc_engine (agc_t * State)
 	  Operand16 = *WhereWord & 077777;
 	  // Compute the "diminished absolute value", and save in accumulator.
 	  c (RegA) = dabs (Operand16);
+	  // Assign back the read data in case editing is needed
+	  AssignFromPointer (State, WhereWord, Operand16);
 	}
-      AssignFromPointer (State, WhereWord, Operand16);
       // Now perform the actual comparison and jump on the basis
       // of it.  There's no explanation I can find as to what
       // happens if we're already at the end of the memory bank,
@@ -2077,10 +2073,10 @@ agc_engine (agc_t * State)
       // increment it by 2 less because NextZ has already been 
       // incremented.
       if (Address10 < REG16
-	  && ValueOverflowed (0177777 & c (Address10)) == AGC_P1)
+	  && ValueOverflowed (ValueK) == AGC_P1)
       NextZ += 0;
       else if (Address10 < REG16
-	  && ValueOverflowed (0177777 & c (Address10)) == AGC_M1)
+	  && ValueOverflowed (ValueK) == AGC_M1)
       NextZ += 2;
       else if (Operand16 == AGC_P0)
       NextZ += 1;
@@ -2291,7 +2287,7 @@ agc_engine (agc_t * State)
 	  BacktraceAdd (State, 255);
 	  else
 	  BacktraceAdd (State, 0);
-	  NextZ = c (RegZRUPT);
+	  NextZ = c (RegZRUPT) - 1;
 	  State->InIsr = 0;
 #ifdef ALLOW_BSUB
 	  State->SubstituteInstruction = 1;
