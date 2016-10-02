@@ -30,7 +30,7 @@
 ## Page 562
                 BANK            24
                 EBANK=          DT
-# THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH CONTROLS TEH Q,R-AXIS ACTION OF THE LEM USING THE RCS JETS.
+# THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH CONTROLS THE Q,R-AXIS ACTION OF THE LEM USING THE RCS JETS.
 # THE NOMINAL TIME BETWEEN THE Q,R-AXIS RUPTS IS 100 MS (UNLESS THE TRIM GIMBAL CONTROL SYSTEM IS USED, IN WHICH
 # CASE THIS PROGRAM IS IDLE).
 
@@ -50,7 +50,7 @@ QRAXIS          CAF             MS30QR                  # RESET TIME IMMEDIATELY
                 DCA             NULLFILT
                 DXCH            T5ADR
 
-# CALCULATE LEM BODY RATES FOR Q AND R AXES
+# CALCULATE LEM BODY RATES FOR Q AND R AXES:
 
 # THIS COMPUTATION IS VALID FOR BOTH ASCENT ADN DESCENT SINCE THE OFFSET ACCELERATION TERM IS INCLUDED ALWAYS,
 # BUT HAS VALUE ZERO IN DESCENT, AND SINCE THE WEIGHTING FACTORS ARE IN ERASABLE AND DISTINCT.
@@ -58,11 +58,11 @@ QRAXIS          CAF             MS30QR                  # RESET TIME IMMEDIATELY
 # FIRST, CONSTRUCT Y AND Z CDU INCREMENTS:
 
                 CAE             CDUY                    # 2'S COMPLEMENT MEASUREMENT SCALED AT PI
-                TS              L                       # (SAVE FOR UPDATING OLDFORQ)
+                TS              L                       # (SAVE FOR UPDATING OF OLDYFORQ)
                 EXTEND                                  # FORM INCREMENT IN CDUY FOR LAST 100 MS
-                MSU             OLDYFORQ                # (100 MS OLD CDUY SAVED FROM LAST 100 MS)
+                MSU             OLDYFORQ                # (100 MS OLD CDUY SAVED FROM LAST PASS)
                 LXCH            OLDYFORQ                # UPDATE OLDYFORQ WITH NEW CDUY VALUE
-                EXTEND                                  # RESCALE DELAT CDUY FROM PI RADIANS TO
+                EXTEND                                  # RESCALE DELTA CDUY FROM PI RADIANS TO
                 MP              BIT7                    # PI/2(6) RADIANS BY MULTIPLYING BY 64
                 LXCH            ITEMP1                  # SAVE 1'S COMPLEMENT VALUE TEMPORARILY
                 CAE             CDUZ                    # 2'S COMPLEMENT MEASUREMENT SCALED AT PI
@@ -70,7 +70,7 @@ QRAXIS          CAF             MS30QR                  # RESET TIME IMMEDIATELY
                 EXTEND                                  # FORM INCREMENT IN CDUZ FOR LAST 100 MS
                 MSU             OLDZFORQ                # (100 MS OLD CDUZ SAVED FROM LAST PASS)
                 LXCH            OLDZFORQ                # UPDATE OLDZFORQ WITH NEW CDUZ VALUE
-                EXTEND                                  # RESCALE DELAT CDUZ FROM PI RADIANS TO
+                EXTEND                                  # RESCALE DELTA CDUZ FROM PI RADIANS TO
                 MP              BIT7                    # PI/2(6) RADIANS BY MULTIPLYING BY 64
                 LXCH            ITEMP2                  # SVAE 1'S COMPLEMENT VALUE TEMPORARILY
 
@@ -86,20 +86,20 @@ QRAXIS          CAF             MS30QR                  # RESET TIME IMMEDIATELY
                 MP              ITEMP2                  # DELTAR = M31*(DEL CDUY) + M32*(DEL CDUZ)
                 ADS             ITEMP3                  # R-BODY-ANGLE INCREMENT SCALED AT PI/2(6)
 
-                CAE             M21                     # MATRIX VECTOR(WITH X COMPONENT ZERO)
+                CAE             M21                     # MATRIX*VECTOR(WITH X COMPONENT ZERO)
                 EXTEND                                  # CLOBBERS ITEMP2=DEL CDUZ, FOR EFFICIENCY
                 MP              ITEMP1                  # M21 * ITEMP1 = M21 * DELTA CDUY
                 XCH             ITEMP2                  # M22 * ITEMP2 = M22 * DELTA CDUZ
                 EXTEND
                 MP              M22                     # DELTAQ = M21*(DEL CDUY) + M22*(DEL CDUZ)
-                ADS             ITEMP2                  # Q-BODY-ANGLE INCREMETN SCALED AT PI/2(6)
+                ADS             ITEMP2                  # Q-BODY-ANGLE INCREMENT SCALED AT PI/2(6)
 
 # FINALLY, DERIVE Q AND R BODY ANGULAR RATES:
 
                 EXTEND                                  # WFORQR IS K/(NOMINAL DT) SCALED AT 16
                 MP              WFORQR                  # FORM WEIGHTED VALUE OF MEASURED DATA
                 XCH             OMEGAQ                  # SAVE AND BEGIN TO WEIGHT VALUE OF OLD W
-                EXTEND                                  # (1-K) IS SCALED 1 FOR EFFICIENT CALS
+                EXTEND                                  # (1-K) IS SCALED AT 1 FOR EFFICIENT CALC
                 MP              (1-K)QR                 # (K CHANGES EVERY 2 SECS IN ASCENT)
                 AD              JETRATEQ                # WEIGHTED TERM DUE TO JET ACCELERATION
                 AD              AOSQTERM                # TERM DUE TO ASCENT OFFSET ACCELERATION
@@ -108,8 +108,8 @@ QRAXIS          CAF             MS30QR                  # RESET TIME IMMEDIATELY
                 CAE             ITEMP3                  # GET DELTAR
                 EXTEND                                  # WFORQR IS K/(NOMINAL DT) SCALED AT 16
                 MP              WFORQR                  # FORM WEIGHTED VALUE OF MEASURED DATA
-                XCH             OMEGAR                  # SAVE AND BEGIN TO WEIGHT VALUE OLD W
-                EXTEND                                  # (1-K) IS SCALED AT 1 FOR EFFICIENT CALS
+                XCH             OMEGAR                  # SAVE AND BEGIN TO WEIGHT VALUE OF OLD W
+                EXTEND                                  # (1-K) IS SCALED AT 1 FOR EFFICIENT CALC
                 MP              (1-K)QR                 # (K CHANGES EVERY 2 SECS IN ASCENT)
                 AD              JETRATER                # WEIGHTED TERM DUE TO JET ACCELERATION
                 AD              AOSRTERM                # TERM DUE TO ASCENT OFFSET ACCELERATION
@@ -180,7 +180,7 @@ NORMALQ         CAF             BIT13                   # CHECKING ATTITUDE HOLD
 
 ## Page 565
                 EXTEND
-                RAND            31                      # BITS INVERTD
+                RAND            31                      # BITS INVERTED
                 EXTEND
                 BZF             CHKBIT10
                 CAF             BIT14                   # ATT HOLD BIT NOT PRESENT. CHECK FOR AUTO
@@ -188,7 +188,7 @@ NORMALQ         CAF             BIT13                   # CHECKING ATTITUDE HOLD
                 RAND            31
                 EXTEND
                 BZF             ATTSTEER                # AUTOMATIC STEERING, CHECK FOR RATE HOLD
-                EXTEND                                  # IF MODE SELECT SW OFF DO DPIDLER NEXT
+                EXTEND                                  # IF MODE SELECT SW OFF DO DAPIDLER NEXT
                 DCA             IDLEADRQ
                 DXCH            T5ADR
                 TCF             RESUME
@@ -196,9 +196,9 @@ NORMALQ         CAF             BIT13                   # CHECKING ATTITUDE HOLD
 IDLEADRQ        2CADR           DAPIDLER
 
 CHKBIT10        CAF             BIT10                   # BIT10=1 FOR MIN IMP USE OF RHC
-                MASK            DAPBTOOLS
+                MASK            DAPBOOLS
                 EXTEND
-                BZF             CHECKSTIK               # IN ATT-HOLD/RATE COMMAND IF BIT10=0
+                BZF             CHECKSTIK               # IN ATT-HOLD/RATE-COMMAND IF BIT10=0
 
                 CAE             DELAYCTR                # SET TO 2 BY RUPT 10
                 EXTEND
@@ -241,7 +241,7 @@ MINTJET         CAF             +T6TJMIN
                 TS              DELAYCTR
                 TCF             TORQUEV
 
-CHECKSTIK       CAF             BIT15                   # OUT-OF-DETENT BIT
+CHEKSTIK        CAF             BIT15                   # OUT-OF-DETENT BIT
                 EXTEND
                 RAND            31                      # BITS INVERTED
 
@@ -329,7 +329,7 @@ RHCACTIV        CAF             BIT1
                 EXTEND
                 WOR             13
 
-OBETQRRC        CA              RTJETADR
+OBEYQRRC        CA              RTJETADR
                 TS              TJETADR
 
                 CCS             QRATEDIF
@@ -367,7 +367,7 @@ R+Q-CHKR        AD              -RATDEB
                 TC              EDOTVGEN
                 TCF             2-V.RATE
 
-R-Q-CHKAR       AD              -RATEDB
+R-Q-CHKR        AD              -RATEDB
                 EXTEND
                 BZMF            Q-NORTJS
                 TC              EDOTUGEN
@@ -425,18 +425,18 @@ R-,CHKDB        AD              -RATEDB
                 BZMF            2JETS+R
                 TCF             4JETS+R
 
-RTJETIME        CCS             RATEDIF                 # SCLED AT PI/4 RADIANS/SECOND
+RTJETIME        CCS             RATEDIF                 # SCALED AT PI/4 RADIANS/SECOND
                 AD              ONE
                 TCF             +2
                 AD              ONE                     # ABS(RATEDIF)
                 EXTEND
                 MP              1/NJETAC                # SCALED AT 2(8)/PI SECONDS(2)/RADIANS
                 EXTEND
-                MP              BIT4
+                MP              BIT4                    # SCALED AT 2(3) SECONDS
                 CAE             L
                 EXTEND
                 MP              25,32.QR                # TJET NOW PROPERLY SCALED IN A
-                TS              TQR
+                TS              TQR                     # AT 2(4)16/25 SECONDS
 
 ## Page 570
                 TCF              TORQUEV
@@ -449,7 +449,7 @@ XTRANS          CA              ZERO
                 TS              ADDTLT6
                 TS              ADDT6JTS
                 CA              BIT6
-                MASK            DAPBOOLS                # CHECKING RHE ULLAGE BIT
+                MASK            DAPBOOLS                # CHECKING THE ULLAGE BIT
 
                 EXTEND
                 BZF             +4
@@ -476,7 +476,7 @@ NOTORQUE        CA              ZERO
                 BZF             +3                      # 2 AND 10 GOOD
                 CA              +X,B                    # SINCE 2 OR 10 FAILED, USE 6 AND 14 OF B
                 TCF             WRITEON
- +3             CA              +X,B
+ +3             CA              +X,A                    # 2 AND 10 SYSTEM A
                 TCF             WRITEON
 -XTRANS         CAF             1,9-OUT                 # CHECK FOR FAILURE OF 1 OR 9
                 EXTEND
@@ -489,6 +489,9 @@ NOTORQUE        CA              ZERO
                 TCF             WRITEON
 
 ## Page 571
+# DO NECESSARY PARTS OF Q,R-AXES TORQUE VECTOR RECONSTRUCTION HERE AND NOW.  FOR OTHER PARTS WAIT UNTIL THE NEXT
+# P-AXIS RCS DAP T5RUPT.
+
 TORQUEV         CS              TQR                     # CALCULATED Q,R JET TIME (AS IN TIME6)
                 AD              +T6TJMIN
                 EXTEND                                  #   CORRECT BRANCH.
@@ -513,6 +516,10 @@ TQRGTTM1        CA              TQR
                 EXTEND
                 MP              QR.1STOQ
 ## Note: in the scan the two statements above (EXTEND, MP QR.1STOQ) are boxed in (red) and a marked with a question mark
+##     I.E.   ----------------------------
+##            | EXTEND                   |
+##            | MP              QR.1STOQ |   ?
+##            ----------------------------
                 TS              JETRATEQ
                 CA              ITEMP1
                 EXTEND
@@ -526,6 +533,7 @@ TQRGTTM1        CA              TQR
                 EXTEND
                 MP              QR.1STOQ
 ## Note: in the scan the two statements above (EXTEND, MP QR.1STOQ) are boxed in (red) and a marked with a question mark
+##       See above.
                 TS              JETRATER
                 CA              ITEMP1
                 EXTEND
@@ -538,8 +546,9 @@ SKIPQRAD        GENADR          SKIPQRAX
 DOQRSKIP        CA              SKIPQRAD
                 TS              QJUMPADR
 # CHANGE JET ON AND OFF BITS TO ACCOUNT FOR PRESENT STATE OF THE
+
 ## Page 572
-# CHANNEL. THE CHANGES ACCOUNT FOR PURE ROTATON ONLY. NOT TRANSLATION.
+# CHANNEL. THE CHANGES ACCOUNT FOR PURE ROTATON ONLY- NOT TRANSLATION.
                 CA              JTSONNOW                # = JETS WHICH ARE TO GO ON NOW.
                 EXTEND
                 RAND            5                       # MASK THE CHANNEL WITH THE DESIRED STATE.
@@ -561,7 +570,7 @@ TRSLTMN2        CAE             JTSATCHG
 NOTRANS         CS              L
                 AD              BIT15                   # MAKE JET BITS CORRESPOND TO QR AXIS.
                 XCH             JTSATCHG                # JTSONNOW - L = JETS ON AT TOFJTCHG.
-                TS              ADD6JTS                 # JTS ON AT TOFJTCHG +ONDELAY.
+                TS              ADDT6JTS                # JTS ON AT TOFJTCHG +ONDELAY.
                 CA              14-TQRMN
                 TS              ADDTLT6
                 TCF             TOJTLST
@@ -613,7 +622,7 @@ RTJETADR        GENADR          RTJETIME
 ## Page 574
 # Q,R-AXES ATTITUDE STEERING CALCULATIONS:
 
-# EXECUTED WHEN LGC IS IN AUTOMATIC SCSMODE OR IF SCSMODE IS ATTITUDE HOLD AND THE ROTATIONAL HAND CONTROLLER IS
+# (EXECUTED WHEN LGC IS IN AUTOMATIC SCSMODE OR IF SCSMODE IS ATTITUDE HOLD AND THE ROTATIONAL HAND CONTROLLER IS
 # NEITHER OUT OF DETENT NOR IS THE RATE COMMAND BIT SET IN DAPBOOLS)
 
 # IMMEDIATELY AFTER CALCULATING THE ATTITUDE ERRORS, THE FOLLOWING TESTS ARE MADE TO DETERMINE WHETHER THE DESCENT
@@ -637,13 +646,13 @@ INITFILT        GENADR          FILTINIT                # ADDRESS OF FILTER INIT
 # -LEM SEPARATION-206 MISSION PHASE 6) IS REQUESTED(BIT 14 OF DAPBOOLS ON)
 # IF BIT 14 IS OFF, BRANCH TO QERRCALC DIRECTLY AND BEGIN AUTOMATIC
 # STEERING.  IF BIT 14 IS ON, TEST BIT 3 OF DAPBOOLS TO SEE IF THE DESIRED
-# RATE HAS BEEN SAVED YET.  IF IT IS ON, THIS IS NOT THE FIRS PASS AND
+# RATE HAS BEEN SAVED YET.  IF IT IS ON, THIS IS NOT THE FIRST PASS AND
 # THE RATE HAS BEEN SAVED.  GO DIRECTLY TO QERRCALC FOR AUTOMATIC STEERING
 # IF THE BIT IS OFF, THE RATE MUST BE SAVED.  TRANSFER TO SAVERATE(BANK25)
 # AND RETURN AFTER FIRST PASS TO RESUME AND DAPIDLER.
 
 # IN ORDER TO USE RATE HOLD, THE MISSION PROGRAMMER MUST SET BIT 14 OF
-# DAPBOOLS ON AND SET BIT 3 OF DAPBOOLS TO ZERO.  UPON RETURNIBG FROM THE
+# DAPBOOLS ON AND SET BIT 3 OF DAPBOOLS TO ZERO.  UPON RETURNING FROM THE
 # FIRST PASS AT LEAST THROUGH RATE HOLD, THE MISSION PROGRAMMER MUST RESET
 # BIT 3 TO ITS PREVIOUS VALUE IF THIS IS NOT 1, BECASUE SAVERATE SETS BIT3
 # TO 1 FOR ALL PASSES AFTER THE FIRST IN ORDER NOT TO SAVE THE RATE AGAIN.
@@ -656,14 +665,14 @@ INITFILT        GENADR          FILTINIT                # ADDRESS OF FILTER INIT
 
 #    CDUD - SCALED AT +/-PI, DESIRED GIMBAL ANGLE
 
-#    DELCDU -SCALED AT +/-PI, INCREMENT TO CDUD EVERY 100 MS.
+#    DELCDU - SCALED AT +/-PI, INCREMENT TO CDUD EVERY 100 MS.
 
-#    OMEGAPD, QD, RD - SCALED AT +/-PI/4, BODY AXIS RATED
+#    OMEGAPD, QD, RD - SCALED AT +/-PI/4, BODY AXIS RATES
 
-# ALL THESE ARE USED BY AUTOMATIC STEERING MODE EQUATIONS
+# ALL THESE ARE USED BY AUTOMATIC STEERING MODE EQUATIONS.
 
 ## Page 575
-# RATE HOLDE REQUIRES OMEGAP, Q, R EVERY .25 SEC, AND ALSO REQUIRES PILO-
+# RATE HOLD REQUIRES OMEGAP, Q, R EVERY .25 SEC, AND ALSO REQUIRES PILOT-
 # TO-GIMBAL AXIS MATRIX ELEMENTS, MR12, 22, 13, 23 TO BE LOCATED IN THAT
 # ORDER.
 
@@ -680,7 +689,7 @@ ATTSTEER        CS              DAPBOOLS                # DOES BIT14 OF DAPBOOLS
                 CCS             A
                 TCF             QERRCALC                # NO, GO DIRECTLY TO AUTOMATIC STEERING
 
-# CHEK DAPBOOLS, BIT3, TO SEE IF DESIRED RATE HAS BEEN SAVED YET
+# CHECK DAPBOOLS, BIT3, TO SEE IF DESIRED RATE HAS BEEN SAVED YET
 
                 CAE             DAPBOOLS                # DOES BIT3 SHOW THAT THE DESIRED RATE HAS
                 MASK            BIT3                    # BEEN SAVED(NOT FIRST PASS).  IF NOT, GO
@@ -688,7 +697,7 @@ ATTSTEER        CS              DAPBOOLS                # DOES BIT14 OF DAPBOOLS
                 TCF             NEXDLCDU        -1      # YES, COMPUTE THE DELCDUS.
 
 # SAVERATE IS ENTERED ONLY DURING THE FIRST PASS THROUGH RATE HOLD.  IT
-# SAVES TEH CURRETN CDUS FIRST AND TEHN SAVES THE BODY RATES,
+# SAVES THE CURRENT CDUS FIRST IN CDUDS AND THEN SAVES THE BODY RATES,
 # OMEGAP, Q, R IN OMEGAPD, QD, RD.  NEXT, WE SET BIT 3 OF DAPBOOLS TO 1.
 
 SAVERATE        EXTEND                                  # COME HERE FIRST TIME INTO RATE HOLD IN
@@ -711,7 +720,7 @@ SAVERATE        EXTEND                                  # COME HERE FIRST TIME I
 
 # TO COMPUTE TEH DELCDUS, Y AND Z, WE SET UP A LOOP AND SOLVE THE EQUATION
 
-# C(DELCDUY+DLCDUIDX)=(OMEGAQD.C(MR12+DLCDUIDX)+OMEGARD.C(MR13+DLDUIDX)
+# C(DELCDUY+DLCDUIDX)=(OMEGAQD.C(MR12+DLCDUIDX)+OMEGARD.C(MR13+DLCDUIDX))
 #                       .(100MS) SCALED AT PI IN 2S COMPLEMENT(LIKE CDUS)
 
 ## Page 576
@@ -719,7 +728,7 @@ SAVERATE        EXTEND                                  # COME HERE FIRST TIME I
 # PRODUCTS.  DELCDUY IS RESCALED TO 1 AS MR12 AND MR13 ARE SCALED AT 2.
 # AFTER CONVERTING TO TWOS COMPLEMENT, WE SET DELCDUX TO ZERO TO AVOID ANY
 # ROLL DURING RATE HOLD MODE.  NOTE THAT DELCDUS ARE COMPUTED IN THE NEGA-
-# TIVE TO ALLOW 2S COMP. MOD. SUBTRACT LATER ON (CDU-(DELCDU))
+# TIVE TO ALLOW 2S COMP. MOD. SUBTRACT LATER ON (CDU-(-DELCDU))
 
                 CAF             ONE                     # SET UP LOOP INDEX TO COMPUTE DELCDUS.
 NEXDLCDU        TS              DLCDUIDX                # DLCDUIDX = C(A)
@@ -732,14 +741,14 @@ NEXDLCDU        TS              DLCDUIDX                # DLCDUIDX = C(A)
 
                 CS              OMEGARD                 # C(A)=ITEMP1 -OMEGARD.MR23
                 EXTEND
-                INDEX           DLCUIDX                 #                C(A)=ITEMP1 -OMEGARD.MR13
+                INDEX           DLCDUIDX                #                C(A)=ITEMP1 -OMEGARD.MR13
                 MP              MR13                    # MR23 SCALED AT 1        MR13 SCALED AT 2
                 AD              ITEMP1
                 EXTEND                                  # DELT = 100 MS. SCALED AT 4 SEC.
                 MP              100MSCAL
                 TS              ITEMP1                  # ITEMP1 = C(A) . DELT
 
-                CCS             DLCDUIDX
+                CCS             DLCDUIDX                # CHECK INDEX FOR RESCALING
                 TCF             +3                      # DELCDUZ SCALED AT PI/4, RESCALE UNNEEDED
                 CAE             ITEMP1                  # DELCDUY SCALED AT PI/2, RESCALE BY
                 ADS             ITEMP1                  # ADDING TO ITSELF
@@ -762,7 +771,7 @@ QERRCALC        CAE             CDUY                    # Q-ERROR CALCULATION
                 EXTEND
                 MP              M21                     # (CDUY-CDUYD)*M21 SCALED AT PI RADIANS
                 XCH             ER                      # SAVE FIRST TERM (OF TWO) IN OPP.AXIS REG
-                CAE             CDUZ                    # SECOND TERM CALCULATION
+                CAE             CDUZ                    # SECOND TERM CALCULATION:
                 EXTEND
                 MSU             CDUZD                   # CDU ANGLE -ANGLE DESIRED (Z-AXIS)
 
@@ -777,11 +786,11 @@ RERRCALC        CAE             ITEMP1                  # R-ERROR CALCULATION:
                 EXTEND                                  # CDU ANGLE -ANGLE DESIRED (Y-AXIS)
                 MP              M31                     # (CDUY-CDUYD)*M31 SCALED AT PI RADIANS
                 XCH             E                       # SAVE FIRST TERM (OF TWO) IN OPP.AXIS REG
-                CAE             ITEMP2                  # SECOND TERM CALCULATION
+                CAE             ITEMP2                  # SECOND TERM CALCULATION:
                 EXTEND                                  # CDU ANGLE -ANGLE DESIRED (Z-AXIS)
-                MP              M32                     # (CDUZ-DUZD)*M32 SCALED AT PI RADIANS
+                MP              M32                     # (CDUZ-CDUZD)*M32 SCALED AT PI RADIANS
                 ADS             E                       # SAVE SUM OF TERMS, NO OVERFLOW EVER
-                TS              ERROR                   # SAVE R-ERROR FOR EIGHT-BALL DISPLAY
+                TS              RERROR                  # SAVE R-ERROR FOR EIGHT-BALL DISPLAY
 
 # TEST (1): IS THE TRIM GIMBAL FUNCTIONALLY OPERATIVE?
 
@@ -810,7 +819,7 @@ RERRCALC        CAE             ITEMP1                  # R-ERROR CALCULATION:
 LOOPTOP         TS              QRCNTR
                 DOUBLE
                 INDEX           A
-                CCS             OMEGAQ                  # IS ERROR RATE SMALL ENOUGH FOR GTS
+                CCS             OMEGAQ                  # IS ERROR RATE SMALL ENOUGH FOR GTS.
                 AD              -RATLM+1                # -.5 DEG/SEC SCALED AT PI/4 + 1 BIT
                 TCF             +2
                 AD              -RATLM+1
@@ -825,12 +834,12 @@ LOOPTOP         TS              QRCNTR
                 TCF             +2
                 AD              -XBND+1
                 EXTEND
-                BZMF            +2                      # IS ERROR LESS,EQUAL 1.4. DEG.
+                BZMF            +2                      # IS ERROR LESS,EQUAL 1.4 DEG.
                 TCF             STILLRCS                # NO.      USE RCS CONTROL.
-                CCS             QRCNTS                  # THIS AXIS IS FINE.   ARE BOTH DONE.
+                CCS             QRCNTR                  # THIS AXIS IS FINE.   ARE BOTH DONE.
                 TCF             LOOPTOP                 # NOW TRY THE Q AXIS.
                 TCF             GOTOGTS                 # TRANSFER TO TRIM GIMBAL CONTROL
--RATLM+1        OCT             77512                   # -.5 DEG/SEC SCALED AT PI/4 + 1 BIT.
+-RATLM+1        OCT             77512                   # -.5 DEG/SEC SCALED AT PI/4  + 1 BIT.
 -XBND+1         OCT             77601                   # -1.4 DEG SCALED AT PI. + 1 BIT.
 # "STILLRCS" IS THE ENTRY POINT TO RCS ATTITUDE STEERING WHENEVER IT IS FOUND THAT THE TRIM GIMBAL CONTROL
 # SYSTEM SHOULD NOT BE USED:
@@ -838,7 +847,7 @@ LOOPTOP         TS              QRCNTR
 STILLRCS        CAF             DESCADR                 # SET JET SELECT LOGIC RETURN ADDRESS TO
                 TS              TJETADR                 # SET Q,R-AXIS TJETLAW CALCULATION
 
-                TC              T6JOBCHK                # CHECK t6 CLOCK RUPT BEFORE SUBROUTINE
+                TC              T6JOBCHK                # CHECK T6 CLOCK RUPT BEFORE SUBROUTINE
 
 RURGENCY        CAE             1/NJTSR                 # SET-UP URGENCY SUBROUTINE
                 TS              1/NJETAC
@@ -857,11 +866,33 @@ RURGENCY        CAE             1/NJTSR                 # SET-UP URGENCY SUBROUT
 
 QURGENCY        CAE             1/NJTSQ                 # SET-UP URGENCY SUBROUTINE
                 TS              1/NJETAC
-                CS              OMEGAQD                 # EDOTQ = OMEGAQ -OMEGAQD
+                CS              OMEGAQD                 # EDOTQ = OMEGAQ - OMEGAQD
                 AD              OMEGAQ
                 TS              EDOTQ                   # SCALED AT PI/4 RADIANS
                 TC              URGROUTN                # *** SUBROUTINE CALL ***
+
                 TS              URGENCYQ                # URGENCY LEFT IN A SCALED AT 2(4) SECS
+## Note: in the scan the statements starting with QURGENCY are marked with red side bars
+##       and a red box. The box has the marker CAE EDOTQ and an arrow pointing
+##       in between the two statements marked as 'Target' above.
+##
+##                       ...
+##                 TS             1/NJETAC
+##                                        <------|
+##                 CS             OMEGARD        |
+##                                               |
+##                       ...                     |
+##                                               |
+##  QURGENCY     | CAE             1/NJTSQ   |   |
+##               | TS              1/NJETAC  |   |
+##               |---------------------------|   |
+##               | CS              OMEGAQD   |   |
+##  CAE          | AD              OMEGAQ    |---|
+##     EDOTQ     | TS              EDOTQ     |
+##               |---------------------------|
+##               | TC              URGROUTN  |
+##               | TS              URGENCYQ  |
+##
 
                 EXTEND
                 BZF             BURGZERO                # TEST FOR BOTH URGENCIES ZERO
@@ -901,7 +932,7 @@ POSBURG         CAE             TERMA                   # A URGENCY TEST
 
 POSAPOSB        CA              A-B
                 EXTEND
-                BZMF            MINUSU                  # NAGATIVE U-AXIS SELECTED
+                BZMF            MINUSU                  # NEGATIVE U-AXIS SELECTED
 
 2/4JET-R        EXTEND
                 DCA             ER
@@ -924,7 +955,7 @@ POSAPOSB        CA              A-B
                 TCF             4JETS-R
 
 ## Page 580
-                CAE             1/JTSR
+                CAE             1/2JTSR
                 TS              1/NJETAC
                 CS              SIX
                 TCF             POLTYPE                 # GO FIND BEST POLICY
@@ -935,7 +966,7 @@ MINUSU          CAE             .5ACCMNU
                 AD              URGENCYR
                 CCS             A
                 AD              NEGURGUM
-                TCF             +
+                TCF             +2
                 AD              NEGURGUM
                 EXTEND
                 BZMF            2JETS-U
@@ -977,7 +1008,7 @@ PLUSV           CAE             .5ACCMNV
 
 ## Page 581
                 TS              .5ACCMNS
-                CS              UREGNCYQ                # 2 JET OPT/MANS TEST" +V AXIS
+                CS              UREGNCYQ                # 2 JET OPT/MAND TEST" +V AXIS
                 AD              URGENCYR
                 CCS             A
                 AD              NEGURGVM
@@ -996,11 +1027,11 @@ PLUSV           CAE             .5ACCMNV
                 CAF             ZERO
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
-BURGZERO        CAE             URGENCYR                # TEST FOR SECOND URGENCY ASLO ZERO
+BURGZERO        CAE             URGENCYR                # TEST FOR SECOND URGENCY ALSO ZERO
                 EXTEND
                 BZF             XTRANS                  # NO ROTATION NEEDED NOW
 
-                EXTEND                                  # TIME SAVING A,B CALCULATION
+                EXTEND                                  # TIME SAVING A+B CALCULATION
                 MP              SIN22.5
                 TS              TERMB                   # US.SIN(22.5)
                 CAE             URGENCYR
@@ -1035,7 +1066,7 @@ MINUSV          CAE             .5ACCMNV
 
 2JETSM-V        TC              VXFORM
 2-V.RATE        CAF             ONE
-                TCF             POLTYPE                 # GO FIND BRST POLICY
+                TCF             POLTYPE                 # GO FIND BEST POLICY
 
 2JETS-V         CCS             VMANDACC                # ASCENT 2-JET MANDATORY OVER-RIDE TEST
                 TCF             2JETSM-V
@@ -1050,7 +1081,7 @@ NEGANEGB        CAE             A-B
 PLUSU           CAE             .5ACCMNU
                 TS              .5ACCMNE
                 CAE             URGENCYQ                # 2 JET OPT/MAND TEST: +U AXIS
-                AD              UREGENCYR
+                AD              URGENCYR
                 CCS             A
                 AD              NEGURGUM
                 TCF             +2
@@ -1090,7 +1121,7 @@ PLUSU           CAE             .5ACCMNU
 2JETS+R         CCS             RMANDACC                # ASCENT 4-JET OVER-RIDE TEST
                 TCF             4JETS+R
                 CAE             1/2JTSR
-                TS              1.NJETAC
+                TS              1/NJETAC
                 CAF             SIX
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
@@ -1124,10 +1155,10 @@ POLADR          2CADR           POLTYPEP
 
 VXFORM          CAE             1/2JETSV                # GET INVERSE OF V-JET ACCELERATION
                 TS              1/NJETAC
-                CS              EQ
+                CS              EQ                      # COMPLEMENT FOR TRANSFORMATION
                 TS              EQ
                 CS              EDOTQ
-                TCF             UXVFORM         +1
+                TCF             UVXFORM         +1
 UXFORM          CAE             1/2JETSU                # SET INVERSE OF U-JET ACCELERATION
                 TS              1/NJETAC
 
@@ -1165,16 +1196,16 @@ URM             EQUALS          NEGURGUM
 
 
 ## Page 585
-# GENERALIZE URGENCY SUBROUTINE FOR USE ON ALL PILOT AXES (P,Q,R)...
+# GENERALIZED URGENCY SUBROUTINE FOR USE ON ALL PILOT AXES (P,Q,R)...
 
-# DEPENDING ON THE AXIS PROBLEM, EDOTP,EDOTQ,EDOTR IS EXPECTED TO ARRIVE IN A AND 1/JTSP,1/2JTSQ,1/2JTSR IN
+# DEPENDING ON THE AXIS PROBLEM, EDOTP,EDOTQ,EDOTR IS EXPECTED TO ARRIVE IN A AND 1/2JTSP,1/2JTSQ,1/2JTSR IN
 # 1/NJETAC.  NOTE THAT THE Q,R-AXIS PROBLEM IS EXPECTED TO DO THE R-AXIS PROBLEM FIRST (FOR EFFICIENT USE OF
-# ERASABLE) AND THE Q,R-AXIS DOES NOT USE TPSIG.
-# (THIS ROUTINE SHOULD BE IN THE FIXED BANK OF THE Q,R-AXIS PROBLEM SINCE IT IS CALLED ONLY ONCE FROM THE P-AXIS)
+# ERASABLE) AND THE Q,R-AXIS PROBLEM DOES NOT USE TPSIG.
+# (THIS ROUTINE SHOULD BE IN THE FIXED BANK OF THE Q,R-AXIS PROBLEM SINCE IT IS CALLED ONLY ONCE FROM THE P-AXIS.)
 
 URGROUTN        TS              EDOT                    # SAVE FOR REDUCER
-                EXTEND                                  # EXPECT EDOT IN A SCALED t pi/4 rad/sec
-                MP              BIT3                    # TRY TO RESCALE TO PI/16 RADIANS/SEC
+                EXTEND                                  # EXPECT EDOT IN A SCALED AT PI/4 RAD/SEC
+                MP              BIT3                    # TRY TO RESCALE TO PI/16 RADIANS/SECOND
                 EXTEND
                 BZF             +2                      # OVERFLOW CHECK ON NEW SCALING
                 TCF             REDUCERA                # DISTINGUISH BETWEEN P AND Q,R
@@ -1191,7 +1222,7 @@ URGROUTN        TS              EDOT                    # SAVE FOR REDUCER
                 TS              EDOT(2)                 # SCALED AT PI(2)/2(8) RAD(2)/SEC(2)
 
                 EXTEND                                  # 1/2JTSP,1/2JTSQ,1/2JTSR IN 1/NJETAC
-                MP              1/NJETAC                # SCALED AS 2(8)/PI SEC(2)/RAD
+                MP              1/NJETAC                # SCALED AT 2(8)/PI SEC(2)/RAD
                 EXTEND
                 SU              DB                      # DEADBAND SCALED AT PI RADIANS
                 TS              FPQR                    # .5(1/ACC)EDOT(2) - DB SCALED AT PI RADS
@@ -1218,8 +1249,8 @@ FTEST           CCS             EDOT                    # EDOT GUARANTEED NOT +0
 
 ## Page 586
 TPSIGCHG        CS              TPSIG                   # EDOT.L.-0, FPQR.E.-0 (FROM 2ND CSS)
-                TS              TPSIG                   # (SIGN OF P-AXIS JETS IF NEEDE)
-                CAE             EDOT                    # SCALED AT PI/16 RADIANS /SECOND
+                TS              TPSIG                   # (SIGN OF P-AXIS JETS IF NEEDED)
+                CAE             EDOT                    # SCALED AT PI/16 RADIANS/SECOND
                 EXTEND
                 MP              BIT11                   # SCALE TO PI RADIANS/SECOND
                 AD              FPQR                    # (IMPLICIT MULT OF FPQR BY 1/SEC)
@@ -1227,7 +1258,7 @@ TPSIGCHG        CS              TPSIG                   # EDOT.L.-0, FPQR.E.-0 (
 
 EDOTNEG         CS              FPQR                    # SCALED AT PI RADIANS
                 AD              E
-                TS              FPQR                    # e - .5(1/ACC)EDOT(2) + DB
+                TS              FPQR                    # E - .5(1/ACC)EDOT(2) + DB
                 TCF             FTEST
 
 FPMINCAL        CCS             FPQR                    # NECESSARY RETEST ON FPQR
@@ -1242,10 +1273,10 @@ FPMINCAL        CCS             FPQR                    # NECESSARY RETEST ON FP
                 TCF             ZEROURG                 # EDOT.G.+0, F.G.+0
                 CCS             FPQRMIN                 # EDOT.L.-0
                 TCF             NORMURG                 # EDOT.L.-0, F.G.+0 / EDOT.G.+0, F.L.-0
-                TCF             NORMURG                 # EDOT.G._0, F.E.-0 (FROM FIRST CCS)
+                TCF             NORMURG                 # EDOT.G.+0, F.E.-0 (FROM FIRST CCS)
                 TCF             ZEROURG                 # EDOT.L.-0, F.L.-0
 ZEROURG         CAF             ZERO                    # EDOT.L.-0, F.E.-0 (FROM SECOND CCS)
-                TCF             URGSTORE                # THIS URGENCY ZERO ( IN COAST REGIAN)
+                TCF             URGSTORE                # THIS URGENCY ZERO (IN COAST REGIAN)
 
 NORMURG         CAE             FPQRMIN                 # THIS URGENCY FPQRMIN(1/ACC)
 URGMULT         EXTEND
@@ -1265,9 +1296,9 @@ URGSTORE        TC              Q                       # *** RETURN ***
 ## Page 587
 # GENERALIZED T-JET LAW SUBROUTINE FOR USE BY BOTH THE P-AXIS AND THE Q,R-AXIS PROBLEMS (ONCE EACH)...
 
-# DEPENDING ON THE AXIS ABOUT WHICH ROTATION IS DEEMED MOST URGETN, 1/JACC FOR THAT AXIS IS EPECTED IN 1/NJETAC
-# AND THE CORRESPONDING VALUES FOR E, EDOT, AND EFOT(2) ARE ALSO EXPECTED TO BE SET UP IN ADVANCE.
-# (THIS ROUTINE MAT RESIDE IN THE FIXED BANK OF EITHER THE P-AXIS OR Q,R-AXIS PROBLEM.)
+# DEPENDING ON THE AXIS ABOUT WHICH ROTATION IS DEEMED MOST URGETN, 1/JACC FOR THAT AXIS IS EPXECTED IN 1/NJETAC
+# AND THE CORRESPONDING VALUES FOR E, EDOT, AND EDOT(2) ARE ALSO EXPECTED TO BE SET UP IN ADVANCE.
+# (THIS ROUTINE MAY RESIDE IN THE FIXED BANK OF EITHER THE P-AXIS OR Q,R-AXIS PROBLEM.)
 
 # ***** IMPORTANT NOTICE *****
 
@@ -1290,7 +1321,7 @@ URGSTORE        TC              Q                       # *** RETURN ***
 
 # ***** VERY IMPORTANT NOTICE *****
 
-# SINCE THE Q,R-AXES SWITCHED FIXED BANK BECAME VERY FULL ( DUE TO THE ADDITION OF RATE-HOLD MODE AND A BETTER
+# SINCE THE Q,R-AXES SWITCHED FIXED BANK BECAME VERY FULL (DUE TO THE ADDITION OF RATE-HOLD MODE AND A BETTER
 # RCS-GTS INTERFACE), THE LOCAL CALL AND LOCAL ENTRY POINT FOR THE T-JET LAW HAVE BEEN DELETED AS OF REVISION  7
 # OF AURORA (BY JON ADDLESTON 10/24/66).
 
@@ -1310,13 +1341,13 @@ TJET-LAW        TC              T6JOBCHK                # CHECK T6 CLOCK RUPT BE
                 TCF             TORQUEV                 # VECTOR RECONSTRUCTION PROBLEM
 
 
-
-TJETLOC         EXTEND                                  # LOCAL ENTRY FAKES CROSS-BANK IN SMALL DT
+## Note: the following seems to be fully assembled code injected as comment. See the VERY IMPORTANT NOTICE above .
+#    24,1000   0 0006 1  TJETLOC         EXTEND                   LOCAL ENTRY FAKES CROSS-BANK IN SMALL DT
 
 ## Page 588
-                QXCH            RUPTREG                 # SAVE RETURN WHERE  ISWCALL DOES
-                CAF             ISWRETRN        +3      # GET CADR OF RUPTREG3 FROM TC INSTRUCTION
-                TS              Q
+#    24,1001   22 076 0  QXCH            RUPTREG                  SAVE RETURN WHERE  ISWCALL DOES
+#    24,1002   3 4174 1  CAF             ISWRETRN        +3       GET CADR OF RUPTREG3 FROM TC INSTRUCTION
+#    24,1003   54 002 1  TS              Q                        SO TC Q GOES TO RUPTREG3 FOR RETURN
 
                 BANK            25
 
@@ -1325,7 +1356,7 @@ TJETLAW         CS              EDOT                    # TEST EDOT SIGN
                 BZMF            +4
                 TS              EDOT                    # SIGNS OF E AND EDOT CHANGED IF EDOT NEG
                 CS              E                       # TO CONSIDER FUNCTIONS IN UPPER HALF OF
-                TS              E                       # RHE E,EDOT PHASE PLANE
+                TS              E                       # THE E,EDOT PHASE PLANE
 
                 CAE             EDOT(2)                 # SCALED AT PI(2)/2(8) RAD(2)/SEC(2)
                 EXTEND                                  # (1/NJETAC HAS BEEN SET FOR N JETS)
@@ -1343,15 +1374,6 @@ TJETLAW         CS              EDOT                    # TEST EDOT SIGN
                 CAE             EDOT                    # SCALED AT PI/16 RAD/SEC (RATE)
                 EXTEND
                 MP              1/NJETAC                # SCALED AT 2(8)/PI SEC(2)/RAD (ACC) (-1)
-                TS              TERMA                   # SCALED AT 2(4) SEC ( CNTRL SMPL PERIOD)
-                AD              NEGSCP                  # EDOT + .5EDOT(2)/NJETACC - DB
-
-                EXTEND
-                BZMF            NEGHDAP
-
-                CAE             EDOT                    # SCALED AT PI/16 RAD/SEC (RATE)
-                EXTEND
-                MP              1/NJETAC                # SCALED AT 2(8)/PI SEC(2)/RAD (ACC)(-1)
                 TS              TERMA                   # SCALED AT 2(4) SEC (CNTRL SMPL PERIOD)
                 AD              NEGSCP                  # EDOT/NJETACC - CSP SCALED AT 16 SECONDS
 
@@ -1482,7 +1504,7 @@ NOROOT          CAF             MAXRATE
                 TCF             TJSUM                   # SCALED AT 2(4) RADIANS
 
 MAYNOJET        CAF             -TJMIN16
-                AD              TERMA                   # TERMA - TJMIN ACLED AT 2(4) SECONDS
+                AD              TERMA                   # TERMA - TJMIN SCALED AT 2(4) SECONDS
                 EXTEND
                 SQUARE                                  # SCALED AT 2(8) SEC(2)
                 AD              TERMB
@@ -1498,7 +1520,7 @@ NEGCSP          DEC             -.00625                 # 100 MS SCALED AT 2(4) 
 -20MS           DEC             -.00125                 # - 20 MS SCALED AT 16 SECONDS.
 MAXRATE         DEC             0.88889                 # 10 DEGREES/SECOND SCALED AT PI/16
 MAXRATE2        DEC             0.79012                 # 100 DEG(2)/SEC(2) SCALED AT PI(2)/2(8)
-.6DEG/SC        DEC             .005333                 # 6/10 DEGREES/SECOND SACLED AT PI/16
+.6DEG/SC        DEC             0.05333                 # 6/10 DEGREES/SECOND SACLED AT PI/16
 25/32QR         DEC             0.78125
 
 ## Page 592
@@ -1506,6 +1528,7 @@ MAXRATE2        DEC             0.79012                 # 100 DEG(2)/SEC(2) SCAL
 # VALUE IS STORED IN EDOTGEN SCALED AT PI/4 RADIANS/SECOND.
 
                 BANK            24
+
 EDOTUGEN        CAE             1/2JETSU                # FOR U-AXIS TRANSFORMATION
                 TS              1/NJETAC
                 CAE             EDOTQ
@@ -1521,7 +1544,7 @@ EDOTVGEN        CAE             1/2JETSV                # FOR V-AXIS TRANSFORMAT
 
 
 
-# THESE PROGRAMS REDUCE THE RATE ERROR TO 10.6 DEGREES/SECOND
+# THESE PROGRAMS REDUCE THE RATE ERROR TO 10.6 DEGREES/SECOND.
 
 REDUCERA        CS              EDOT                    # TEST FRO P-AXIS PROBLEM
                 AD              EDOTP                   # EXACT MATCH MEANS P-AXIS
@@ -1533,7 +1556,7 @@ REDUCEQR        TC              REDUCESC                # GET SHRINK FACTOR
                 MP              EDOTQ
                 TS              QRATEDIF
 
-                CAE             EDOTR                   # SHRIN R-AXIS COMPONENT
+                CAE             EDOTR                   # SHRINK R-AXIS COMPONENT
                 EXTEND
                 MP              EDOT
                 TS              RRATEDIF
@@ -1555,10 +1578,10 @@ REDUCEP         TC              REDUCESC                # GET SHRINK FACTOR
 REDUCESC        CAF             10.6D/S                 # SCALED AT PI/4
                 EXTEND
                 DV              EDOT                    # RESULT SCALED AT 1
-                TS              EDOT                    # SAVE FACTOR IN EDOT FOR R SHRINAKGE
+                TS              EDOT                    # SAVE FACTOR IN EDOT FOR R SHRINKAGE
                 TC              Q                       # *** RETURN ***
 
-10.6D/S         DEC             0.2311                  # 10.6 DEGRESS/SECOND SCALED AT PI/4
+10.6D/S         DEC             0.23111                 # 10.6 DEGRESS/SECOND SCALED AT PI/4
 
 
 
