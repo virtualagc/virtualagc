@@ -49,6 +49,7 @@
 
 
 
+
           0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
@@ -76,13 +77,6 @@
     assembler program.&nbsp; Additionally, AGC4 interpreter-language is
     covered.<br>
     <br>
-    For those who can tolerate such talk, this document serves as the
-    requirements for processing of machine language by the <span
-      style="font-weight: bold;">yaAGC</span> program, as well as for
-    the assembly language accepted by the <span style="font-weight:
-      bold;">yaYUL</span> program, and that's why this document is
-    versioned.<br>
-    <br>
     The original Apollo documentation from which the information
     presented here was derived, in roughly descending order of
     importance, is:<br>
@@ -95,6 +89,16 @@
       <li><a href="http://www.ibiblio.org/apollo/hrst/archive/1689.pdf"><span
             style="font-style: italic;">AGC4 Memo #9, Block II
             Instructions</span></a>, by Hugh Blair-Smith, July 1966.</li>
+      <li><i><a
+            href="http://www.ibiblio.org/apollo/hrst/archive/1029.pdf">R-700:
+            MIT's Role In Project Apollo Volume III: Computer Subsystem</a></i>,
+        by Eldon C. Hall, August 1972</li>
+      <li><i><a
+            href="http://www.ibiblio.org/apollo/ScansForConversion/Aurora12/">Aurora
+            12 assembly listing</a></i>, November 10, 1966</li>
+      <li><i><a href="links.html#AGC_electrical_schematics">Block II
+            Electrical Schematics and ICDs</a></i>, 1966<br>
+      </li>
       <li><a href="http://www.ibiblio.org/apollo/NARA-SW/E-1077.pdf"
           style="font-style: italic;">E-1077:&nbsp; Preliminary MOD 3C
           Programmers Manual</a>, by R. Alonso, J. H. Laning, Jr., and
@@ -111,10 +115,12 @@
 
 
 
+
           131 (1C) assembly listing</a>,&nbsp; December 19, 1969.&nbsp;
       </li>
       <li><a
           href="http://www.ibiblio.org/apollo/ScansForConversion/Colossus249/">Colossus
+
 
 
 
@@ -236,11 +242,11 @@
         specific commenting methods.)</li>
       <li>If the character '$' is encountered in column 1 of a line,
         then the line contains the name of a source file which is to be
-        inserted at that point. For example, if "$INTERRUPT_LEAD_INS.s"
-        is encountered in column 1, then <span style="font-weight:
-          bold;">yaYUL</span> will process all of the file
-        INTERRUPT_LEAD_INS.s before proceeding to process the remainder
-        of the original source file. (The original <span
+        inserted at that point. For example, if
+        "$INTERRUPT_LEAD_INS.agc" is encountered in column 1, then <span
+          style="font-weight: bold;">yaYUL</span> will process all of
+        the file INTERRUPT_LEAD_INS.agc before proceeding to process the
+        remainder of the original source file. (The original <span
           style="font-weight: bold;">YUL</span> had no such source-code
         directive, since it did not process "files".)<br>
       </li>
@@ -272,7 +278,7 @@
         these notations begin at the first tab stop.</li>
     </ul>
     These principles are perhaps best understood by viewing actual
-    source-code listings, such as ALARM_AND_ABORT.s from the Luminary
+    source-code listings, such as ALARM_AND_ABORT.agc from the Luminary
     131 source code.<br>
     <h3><a name="ButBlankLines"></a>But ... Some Formatting Notes
       Regarding the Original AGC4 Assembly Language</h3>
@@ -367,6 +373,7 @@
           "You can see evidence of the above in the fact that in the
           normal flow of card numbers, the one after such a spacing is
           generally 1 more than that of the card before</small><small>—no
+
 
 
 
@@ -535,6 +542,7 @@ components
 
 
 
+
     of a vector can be represented by three consecutive DP values.<br>
     <h3>Unsigned-Integer (2's-Complement) Format</h3>
     There are some cases, such as the CDU counters described in the next
@@ -582,7 +590,14 @@ components
       (Registers)</h2>
     All CPU registers are memory mapped (see the next section).&nbsp;
     The registers at addresses 00-23 (octal) are central to CPU
-    operations, from the point of view of the instruction set.&nbsp; <br>
+    operations, from the point of view of the instruction set. Registers
+    from addresses 00-07 are flip-flops (well, except for 07) internal
+    to the processor; all other registers are specially handled erasable
+    memory locations. Whenever these flip-flop registers are accessed,
+    their contents get copied to their corresponding erasable memory
+    locations. This link is one-way; erasable memory locations 00-07 can
+    never be read, as all attempts to do so will be redirected to the
+    corresponding flip-flops.<br>
     <br>
     The registers at addresses 24-61 are generically referred to as
     "counters".&nbsp; While the counter registers can be modified under
@@ -604,6 +619,7 @@ components
     counter/timer registers.&nbsp; This is not so.&nbsp; Incrementing or
     decrementing the counter/timer registers is (and was) actually
     implemented by the use of "<a href="#UnprogrammedSequences">unprogrammed
+
 
 
 
@@ -660,8 +676,8 @@ components
     registers, HISCALAR and LOSCALAR, which appear as <a
       href="#io_channels">i/o channels</a> rather than as memory-mapped
     CPU registers, and therefore are not listed in the following table.<br>
-    <table style="text-align: left; width: 100%;" border="1"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Address
@@ -724,6 +740,7 @@ components
 
 
 
+
             Overflow-correction implies:<br>
             <ol>
               <li>The 16th bit of the accumulator is assumed to be the
@@ -763,6 +780,7 @@ components
               accumulator and L with instructions like </strike><strike><span
                 style="font-family: monospace;">XCH L</span></strike><strike>
               or </strike><strike><span style="font-family: monospace;">LXCH
+
 
 
 
@@ -823,7 +841,9 @@ components
             call a procedure, and the instruction automatically updates
             the Q register; similarly, the RETURN instruction returns
             from a called procedure by placing the contents of the Q
-            register into the program-counter register.<br>
+            register into the program-counter register (technically it
+            does an indirect jump through Q, but the net effect is the
+            same).<br>
             <br>
             Note that erasable-memory location 02 is automatically
             duplicated as i/o channel 02, and vice-versa.<br>
@@ -845,9 +865,9 @@ components
             where EEE are the bank-selector bits.<br>
             <br>
             Note that the EEE field of the EB register is duplicated
-            into the BB register (see below).&nbsp; Changes to the EB
-            register are immediately automatically mirrored in the BB
-            register, and vice-versa.<br>
+            into the BB register (see below).&nbsp; Internally, the two
+            point to the same set of flip-flops, and simply provide
+            different means of accessing them.<br>
           </td>
         </tr>
         <tr>
@@ -861,7 +881,7 @@ components
             "Memory Map" below) is mapped into the address range
             2000-3777 (octal).&nbsp; 5 bits are not, of course, adequate
             for selecting among 36 banks, so these 5 bits are
-            supplemented by a 6th bit (the "super bank" bit) from i/o
+            supplemented by a 7th bit (the "super bank" bit) from i/o
             channel 7.&nbsp; In most cases, the superbank bit is 0, and
             so the 5-bit field in the FB register simply selects from
             among banks 0-37 (octal).&nbsp; When the superbank bit is 1,
@@ -869,9 +889,16 @@ components
             select from among banks 0, 1, ..., 27, 40, 41, ..., 47;
             i.e., bank-selection is the same as when the superbank bit
             is 0, except that banks 40-47 are used instead of
-            30-37.&nbsp; <span style="color: rgb(0, 153, 0);">Banks
-              44-47 don't actually exist within the AGC, and so it is
-              mere supposition on my part that they would be selected.</span><br>
+            30-37.&nbsp; <span style="color: rgb(0, 153, 0);"></span>Banks
+            44-47, however, do not exist. Though the AGC can internally
+            calculate addresses in this range, the rope selection
+            circuitry gives up and decides to select no rope at all when
+            given such an address.&nbsp; <font color="#009900">The
+              appropriate strands are still cycled, and a read is still
+              attempted, but we can only guess as to what sort of data
+              would be returned with no ropes selected. Presumably they
+              would read all 0 or all 1, and trip the parity fail alarm,
+              causing a reset.</font><br>
             <br>
             The 15 bits of the FB register are arranged as follows:<br>
             <div style="margin-left: 40px;">FFF FF0 000 000 000<br>
@@ -879,9 +906,9 @@ components
             where FFFFF are the bank-selector bits.<br>
             <br>
             Note that the FFFFF field of the FB register is duplicated
-            into the BB register (see below).&nbsp; Changes to the FB
-            register are immediately automatically mirrored in the BB
-            register, and vice-versa.<br>
+            into the BB register (see below).&nbsp; Internally, the two
+            point to the same set of flip-flops, and simply provide
+            different means of accessing them.<br>
             <br>
             Refer also to <a href="#io_channels">i/o channel</a> 07.<br>
           </td>
@@ -936,10 +963,10 @@ components
             register".&nbsp; This register contains a 3-bit field
             duplicating the EEE field of the EB register, and a 5-bit
             field duplicating the FFFFF field of the FB register.&nbsp;
-            Changes in the EB and FB registers are immediately
-            automatically mirrored in the BB register, and
-            vice-versa.&nbsp; The bits are arranged within the register
-            as follows:<br>
+            Internally, it points to the same flip-flops as the EB and
+            FB registers, so changing it directly changes the other
+            two.&nbsp; The bits are arranged within the register as
+            follows:<br>
             <div style="margin-left: 40px;">FFF FF0 000 000 EEE<br>
               <br>
             </div>
@@ -975,10 +1002,9 @@ components
             routine restore the A register from ARUPT.&nbsp; These
             actions must be done under program control by the interrupt
             service routine.&nbsp; Interrupts are automatically disabled
-            while overflow is present in the accumulator, so transfer of
-            data back and forth between A (16 bits) and ARUPT (15 bits)
-            does not result in loss of overflow indications.<span
-              style="font-weight: bold;"></span><br>
+            while overflow is present in the accumulator, so the fact
+            that overflow would be lost by writing A to ARUPT is not a
+            concern.<span style="font-weight: bold;"></span><br>
           </td>
         </tr>
         <tr>
@@ -1012,9 +1038,12 @@ components
         <tr>
           <td style="vertical-align: top;">13-14<br>
           </td>
-          <td style="vertical-align: top;">(spares)<br>
+          <td style="vertical-align: top;">SAMPTIME<br>
           </td>
-          <td style="vertical-align: top;"><br>
+          <td style="vertical-align: top;">These registers store copies
+            of TIME1 and TIME2, respectively, as sampled in the waitlist
+            interrupt service routine. They are used for Noun 65
+            displays.<br>
           </td>
         </tr>
         <tr>
@@ -1023,13 +1052,13 @@ components
           <td style="vertical-align: top;">ZRUPT<br>
           </td>
           <td style="vertical-align: top;">This register stores the
-            return address of an interrupt service routine.&nbsp; When
-            the CPU vectors to an interrupt service routine, it
-            automatically transfers the value of the Z register (the
-            program counter) into the ZRUPT register.&nbsp; When the
-            interrupt-service routine returns, using the RESUME
-            instruction, the value of ZRUPT is automatically transferred
-            back into the Z register.<br>
+            return address, plus one, of an interrupt service
+            routine.&nbsp; When the CPU vectors to an interrupt service
+            routine, it automatically transfers the value of the Z
+            register (the program counter) into the ZRUPT
+            register.&nbsp; When the interrupt-service routine returns,
+            using the RESUME instruction, the value of ZRUPT is
+            automatically transferred back into the Z register.<br>
           </td>
         </tr>
         <tr>
@@ -1169,10 +1198,9 @@ components
             packed two to a word), and has little value for other
             purposes.&nbsp; When a value is written to this register, it
             is automatically shifted right 7 positions, and the upper 8
-            bits are zeroed.&nbsp;&nbsp; <span style="color: rgb(0,
-              153, 0);">Actually, the contents of the bits 8-15 in the
-              edited result are undefined, as far as I can tell, and
-              making them zero is my own requirement.</span><br>
+            bits are zeroed.&nbsp; Though the zeroing of these bits is
+            undefined in the reference documentation, it nevertheless
+            was the behavior of the hardware.<br>
             <br>
             For example, if the software attempts to write the following
             bits into the EDOP register,<br>
@@ -1193,6 +1221,7 @@ components
           <td colspan="1" rowspan="2" style="vertical-align: top;">TIME1
             is a 15-bit 1's-complement counter which is incremented
             every 10 ms. TIME1 by itself overflows every 2<sup>14</sup>*10
+
 
 
 
@@ -1228,24 +1257,26 @@ components
           </td>
           <td style="vertical-align: top;">TIME3 is a 15-bit
             1's-complement counter which is incremented every 10
-            ms.&nbsp; Upon overflow, it requests an interrupt (T3RUPT),
-            which results in vectoring to the interrupt service routine
-            at address 4014 (octal).&nbsp; This interrupt is used by the
+            ms.&nbsp; It is incremented synchronously with TIME1.&nbsp;
+            Upon overflow, it requests an interrupt (T3RUPT), which
+            results in vectoring to the interrupt service routine at
+            address 4014 (octal).&nbsp; This interrupt is used by the
             "wait-list" for scheduling multi-tasking.&nbsp; <br>
             <br>
-            Incrementing TIME3 is 5 ms. out of phase with incrementing
-            TIME4, so if their respecitve interrupt service routines
-            don't take longer than 4 ms. to execute, the interrupts for
-            the two will not conflict.&nbsp; Software typically uses
-            this counter by having the interrupt service routine reload
-            the counter with a value chosen to insure that the
-            interrupts occur at a desired rate.&nbsp; For example, to
-            make an interrupt occur once per second, at every interrupt
-            the counter would be reloaded with 2<sup>14</sup>-100=16284
-            (decimal).&nbsp; Because 10 ms. is usually much longer than
-            the amount of time needed to vector to the interrupt service
-            routine, it is unnecessary in such calculations to account
-            for the time taken by the interrupt vectoring.<br>
+            Incrementing TIME3 is 7.5 ms. out of phase with incrementing
+            TIME4 (i.e., TIME4 increments 7.5ms after TIME3).&nbsp;
+            Thus, if the TIME3 interrupt service routine doesn't take
+            any longer than 6ms. or so, the interrupts for the two will
+            not conflict.&nbsp; Software typically uses this counter by
+            having the interrupt service routine reload the counter with
+            a value chosen to insure that the interrupts occur at a
+            desired rate.&nbsp; For example, to make an interrupt occur
+            once per second, at every interrupt the counter would be
+            reloaded with 2<sup>14</sup>-100=16284 (decimal).&nbsp;
+            Because 10 ms. is usually much longer than the amount of
+            time needed to vector to the interrupt service routine, it
+            is unnecessary in such calculations to account for the time
+            taken by the interrupt vectoring.<br>
             <br>
             <span style="font-weight: bold;">yaAGC</span> internally
             clocks this counter.<br>
@@ -1264,19 +1295,20 @@ components
             services the DSKY's display.&nbsp; (It does not service DSKY
             keypad.)<br>
             <br>
-            Incrementing TIME3 is 5 ms. out of phase with incrementing
-            TIME4, so if their respecitve interrupt service routines
-            don't take longer than 4 ms. to execute, the interrupts for
-            the two will not conflict.&nbsp; Software typically uses
-            this counter by having the interrupt service routine reload
-            the counter with a value chosen to insure that the
-            interrupts occur at a desired rate.&nbsp; For example, to
-            make an interrupt occur once per second, at every interrupt
-            the counter would be reloaded with 2<sup>14</sup>-100=16284
-            (decimal).&nbsp; Because 10 ms. is usually much longer than
-            the amount of time needed to vector to the interrupt service
-            routine, it is unnecessary in such calculations to account
-            for the time taken by the interrupt vectoring.<br>
+            Incrementing TIME3 is 7.5 ms. out of phase with incrementing
+            TIME4 (i.e., TIME4 increments 7.5ms after TIME3).&nbsp;
+            Thus, the TIME4 interrupt service routine doesn't take any
+            longer than 2 ms. or so, the interrupts for the two will not
+            conflict.&nbsp; Software typically uses this counter by
+            having the interrupt service routine reload the counter with
+            a value chosen to insure that the interrupts occur at a
+            desired rate.&nbsp; For example, to make an interrupt occur
+            once per second, at every interrupt the counter would be
+            reloaded with 2<sup>14</sup>-100=16284 (decimal).&nbsp;
+            Because 10 ms. is usually much longer than the amount of
+            time needed to vector to the interrupt service routine, it
+            is unnecessary in such calculations to account for the time
+            taken by the interrupt vectoring.<br>
             <br>
             &nbsp;<span style="font-weight: bold;">yaAGC</span>
             internally clocks this counter.<br>
@@ -1288,17 +1320,19 @@ components
           <td style="vertical-align: top;">TIME5<br>
           </td>
           <td style="vertical-align: top;">TIME5 is a 15-bit
-            1's-complement counter which is incremented every 10
-            ms.&nbsp; Upon overflow, it requests an interrupt (T5RUPT),
-            which results in vectoring to the interrupt service routine
-            at address 4010 (octal).&nbsp;&nbsp; This is used by the
-            digital autopilot (DAP)<br>
+            1's-complement counter which is incremented every 10 ms. It
+            is incremented 5 ms. out of ph ase with TIME1 and
+            TIME3.&nbsp; Upon overflow, it requests an interrupt
+            (T5RUPT), which results in vectoring to the interrupt
+            service routine at address 4010 (octal).&nbsp;&nbsp; This is
+            used by the digital autopilot (DAP)<br>
             <br>
             Software typically uses this counter by having the interrupt
             service routine reload the counter with a value chosen to
             insure that the interrupts occur at a desired rate.&nbsp;
             For example, to make an interrupt occur once per second, at
             every interrupt the counter would be reloaded with 2<sup>14</sup>-100=16284
+
 
 
 
@@ -1342,30 +1376,37 @@ components
 
 
 
-            <span style="color: rgb(0, 153, 0);">There is a CPU flag
-              which can mask counting of TIME6 on or off.&nbsp;&nbsp; By
-              writing 1 to bit 15 of i/o channel 13 (octal), TIME6
-              counting is enabled; conversely, by writing 0 to that bit,
-              the TIME6 counting is disabled.&nbsp; Upon reaching ±0,
-              the counter requests an interrupt (T6RUPT), which results
-              in vectoring to the interrupt service routine at address
-              4004 (octal), and then turns off the T6RUPT counter-enable
-              bit.</span><br>
+
+            There is a CPU flag which can mask counting of TIME6 on or
+            off.&nbsp;&nbsp; By writing 1 to bit 15 of i/o channel 13
+            (octal), TIME6 counting is enabled; conversely, by writing 0
+            to that bit, the TIME6 counting is disabled.&nbsp; Upon
+            reaching ±0, the counter requests an interrupt (T6RUPT),
+            which results in vectoring to the interrupt service routine
+            at address 4004 (octal), and then turns off the T6RUPT
+            counter-enable bit.<br>
             <br>
             The T6RUPT is used by the digital autopilot (DAP) of the LM
             to control the jets of the reaction control system (RCS).<br>
             <br>
-            <span style="color: rgb(0, 153, 0);">Thus a typical use
-              might be:</span><br style="color: rgb(0, 153, 0);">
+            Thus a typical use might be:<br>
             <ol style="color: rgb(0, 153, 0);">
-              <li>Load TIME6 with a desired time interval for firing a
-                jet, in 1600ths of a second.&nbsp; The maximum allowable
-                count is 37777 octal, or just a little more than 10
-                seconds.</li>
-              <li>Enable the counter with bit 15 of i/o channel 13
-                octal.</li>
-              <li>After the desired time has passed, a T6RUPT occurs,
-                and bit 15 of i/o channel 13 (octal) is reset.</li>
+              <font color="#000000"> </font>
+            </ol>
+            <ol>
+              <li><font color="#000000">Load TIME6 with a desired time
+                  interval for firing a jet, in 1600ths of a
+                  second.&nbsp; The maximum allowable count is 37777
+                  octal, or just a little more than 10 seconds.</font></li>
+              <font color="#000000"> </font>
+              <li><font color="#000000">Enable the counter with bit 15
+                  of i/o channel 13 octal.</font></li>
+              <font color="#000000"> </font>
+              <li><font color="#000000">After the desired time has
+                  passed, a T6RUPT occurs, and bit 15 of i/o channel 13
+                  (octal) is reset.</font></li>
+            </ol>
+            <ol style="color: rgb(0, 153, 0);">
             </ol>
             <span style="color: rgb(0, 153, 0);"></span><span
               style="color: rgb(0, 153, 0);"><span style="font-weight:
@@ -1466,6 +1507,7 @@ components
 
 
 
+
               below</a>) in order to increase the angles by one unit,
             and are processed with the <span style="font-family:
               monospace;">MCDU</span> unprogrammed sequence to decrease
@@ -1503,6 +1545,7 @@ stands
 
 
 
+
             for "Pulsed Integrating Pendulous Accelerometer".&nbsp;
             There are 3 PIPAs mounted on the stable platform of the
             Inertial Management Unit (IMU).&nbsp; Since the PIPAs are
@@ -1514,29 +1557,12 @@ stands
             cm./sec., but do not state the conditions under which the
             two different units are used.<br>
             <br style="color: rgb(0, 153, 0);">
-            <span style="font-weight: bold; color: rgb(0, 153, 0);"></span><span
-              style="color: rgb(0, 153, 0);">I assume these counters are
-              incremented or decremented with </span><span
-              style="font-family: monospace; color: rgb(0, 153, 0);">PINC</span><span
-              style="color: rgb(0, 153, 0);"> or </span><span
-              style="font-family: monospace; color: rgb(0, 153, 0);">MINC</span><span
-              style="color: rgb(0, 153, 0);"> </span><a style="color:
-              rgb(0, 153, 0);" href="#UnprogrammedSequences">unprogrammed
-
-
-
-
-
-
-
-
-
-
-
-
-
-              sequences</a><span style="color: rgb(0, 153, 0);">, but I
-              haven't found any documentation for this conjecture yet.</span><br>
+            <span style="font-weight: bold; color: rgb(0, 153, 0);"></span>These
+            counters are incremented or decremented with <span
+              style="font-family: monospace;">PINC</span> or <span
+              style="font-family: monospace;">MINC</span> <a
+              style="color: rgb(0, 153, 0);"
+              href="#UnprogrammedSequences">unprogrammed sequences</a>.<br>
           </td>
         </tr>
         <tr>
@@ -1604,6 +1630,7 @@ stands
             reliablity, <span style="font-weight: bold;">yaACA</span>
             reports the count to <span style="font-weight: bold;">yaAGC</span>
             via <a href="developer.html#Fictitious_IO_Channels">fictitious
+
 
 
 
@@ -1843,6 +1870,7 @@ stands
 
 
 
+
       of the structure of the memory map</a>, and it may prove helpful
     to have his diagram at hand whilst reading the following
     description.<br>
@@ -1963,15 +1991,10 @@ stands
         fixed-fixed address 6000.</li>
       <li>I/O channels 1 and 2 coincide with the unswitched-erasable
         addresses 1 and 2, or (as implied by the description above) with
-        the switched-erasable addressed E0,1 and E0,2.&nbsp; <span
-          style="color: rgb(0, 153, 0);">I believe I have seen
-          references stating that i/o channel 0 is also duplicated with
-          unswitched-erasable address 0 — i.e., with the
-          accumulator.&nbsp; However, Blair-Smith and notes in the
-          Luminary131 and Colossus249 source code all seem to agree that
-          only i/o channels 1 and 2 are duplicated.&nbsp; Since there
-          doesn't seem to be an i/o channel 0, the point is probably
-          moot.</span><br>
+        the switched-erasable addressed E0,1 and E0,2.&nbsp; Though
+        there may be some documentation that suggests I/O channel 0 was
+        mapped to address 0, this was not the case.<span style="color:
+          rgb(0, 153, 0);"></span><br>
       </li>
     </ul>
     <hr style="width: 100%; height: 2px;">
@@ -1989,7 +2012,7 @@ stands
     the vector table.<br>
     <br>
     <table style="text-align: left; margin-left: auto; margin-right:
-      auto;" border="1" cellpadding="2" cellspacing="2">
+      auto;" cellpadding="2" cellspacing="2" border="1">
       <tbody>
         <tr>
           <td style="font-weight: bold; text-align: center;
@@ -2025,11 +2048,13 @@ or
 
 
 
+
             <a href="#UnprogrammedSequences"><span style="font-family:
                 monospace;">GOJ</span> signal</a>.<br>
           </td>
           <td style="vertical-align: middle; text-align: left;">This is
-            where the program begins executing at power-up.<br>
+            where the program begins executing at power-up, and where
+            hardware resets cause execution to go.<br>
           </td>
         </tr>
         <tr>
@@ -2038,6 +2063,7 @@ or
           <td style="text-align: center; vertical-align: middle;">T6RUPT</td>
           <td style="text-align: center; vertical-align: middle;">Counter-register
 TIME6
+
 
 
 
@@ -2075,6 +2101,7 @@ of
 
 
 
+
             counter-timer TIME5.<br>
           </td>
           <td style="vertical-align: middle; text-align: left;">Used by
@@ -2099,6 +2126,7 @@ of
 
 
 
+
             counter-timer TIME3.</td>
           <td style="vertical-align: middle; text-align: left;">Used by
             the task scheduler (WAITLIST).</td>
@@ -2109,6 +2137,7 @@ of
           <td style="text-align: center; vertical-align: middle;">T4RUPT</td>
           <td style="text-align: center; vertical-align: middle;">Overflow
 of
+
 
 
 
@@ -2146,6 +2175,7 @@ received
 
 
 
+
             from DSKY.<br>
           </td>
           <td style="vertical-align: middle; text-align: left;">The DSKY
@@ -2162,6 +2192,7 @@ received
             vertical-align: middle;">KEYRUPT2</td>
           <td colspan="1" rowspan="1" style="text-align: center;
             vertical-align: middle;"><span style="color: rgb(0, 0, 0);">Keystroke
+
 
 
 
@@ -2220,53 +2251,39 @@ received
           </td>
           <td style="text-align: center; vertical-align: middle;">RADAR
             RUPT</td>
-          <td style="text-align: center; vertical-align: middle;"><span
-              style="color: rgb(0, 153, 0);">Overflow in the
-              counter-register RNRAD.</span></td>
-          <td style="vertical-align: middle; text-align: left;"><span
-              style="color: rgb(0, 153, 0);">Data from the rendezvous
-              radar is apparently assembled similarly to the uplink data
-              described above.&nbsp; When a data word is complete, an
-              interrupt is triggered.</span><br>
+          <td style="text-align: center; vertical-align: middle;">Automatically
+            generated inside the AGC after a set pulse sequence has been
+            sent to the radars.<br>
+          </td>
+          <td style="vertical-align: middle; text-align: left;">Data
+            from the rendezvous radar is assembled similarly to the
+            uplink data described above.&nbsp; When a data word is
+            complete, an interrupt is triggered.<br>
           </td>
         </tr>
         <tr>
-          <td colspan="1" rowspan="2" style="text-align: center;
+          <td colspan="1" rowspan="1" style="text-align: center;
             vertical-align: middle;">4050<br>
           </td>
-          <td style="text-align: center; vertical-align: middle;">RUPT10
-            (LM)<br>
+          <td style="text-align: center; vertical-align: middle;">RUPT10,
+            aka HANDRUPT<br>
           </td>
-          <td style="text-align: center; vertical-align: middle;"><span
-              style="color: rgb(0, 153, 0);">TBD</span></td>
+          <td style="text-align: center; vertical-align: middle;">Selectable
+            from three possible sources:<br>
+            Trap 31A, Trap 31B, and Trap 32.<br>
+          </td>
           <td style="vertical-align: middle; text-align: left;"><span
               style="color: rgb(0, 153, 0);"><span style="color: rgb(0,
-                0, 0);">Used for LM landing guidance</span>, but details
-              are TBD</span></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">HANDRUPT
-
-
-
-
-
-
-
-
-
-
-
-
-
-            (CM)<br>
-          </td>
-          <td style="text-align: center; vertical-align: middle;"><span
-              style="color: rgb(0, 153, 0);">TBD</span></td>
-          <td style="vertical-align: middle; text-align: left;"><span
-              style="color: rgb(0, 153, 0);"><span style="color: rgb(0,
-                0, 0);">Used for CM hand control</span>, but details are
-              TBD</span></td>
+                0, 0);">Used for the hand controller. Only trap 31A is
+                ever used.<br>
+                <br>
+                Trap 31-A (enabled by resetting CH13 bit 12): Causes a
+                RUPT10 when any of CH31 bits 1-6 are set. <br>
+                Trap 31-B (enabled by resetting CH13 bit 13): Causes a
+                RUPT10 when any of CH31 bits 7-12 are set. <br>
+                Trap 32 (enabled by resetting CH13 bit 14): Causes a
+                RUPT10 when any of CH32 bits 1-10 are set.<br>
+              </span></span></td>
         </tr>
       </tbody>
     </table>
@@ -2398,6 +2415,7 @@ received
 
 
 
+
         The field <span style="font-family: monospace;">PPP</span> is
         referred to as the "peripheral code" or "PC".</li>
       <li>Finally, a fourth bit was made available beyond the 15 within
@@ -2412,6 +2430,7 @@ received
         set of "basic instructions", but instead is taken from a
         completely different set of instructions called <span
           style="font-style: italic; font-weight: bold;">extracodes</span>.&nbsp;
+
 
 
 
@@ -2454,8 +2473,8 @@ received
     <h2><a name="AGC4_Instruction_Set"></a>AGC4 Instruction Set</h2>
     <h3>AD<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2556,6 +2575,7 @@ received
 
 
 
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">DOUBLE</span> instruction.<br>
           </td>
@@ -2565,8 +2585,8 @@ received
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>ADS</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2654,6 +2674,7 @@ received
 
 
 
+
             The accumulator is neither overflow-corrected prior to the
             addition nor after it.&nbsp; However, the sum is
             overflow-corrected prior to being saved at <span
@@ -2676,8 +2697,8 @@ received
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>AUG<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2782,8 +2803,8 @@ received
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>BZF</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2885,8 +2906,8 @@ received
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>BZMF</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2992,8 +3013,8 @@ received
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>CA (or CAE or CAF)<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3107,6 +3128,7 @@ received
 
 
 
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">NOOP</span> instruction.<br>
           </td>
@@ -3116,8 +3138,8 @@ received
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>CCS</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3219,6 +3241,7 @@ received
 
 
 
+
                 if <span style="font-family: monospace;">K</span> is
                 one of the registers CYR, SR, CYL, or EDOP, but is
                 otherwise unchanged from its original value.&nbsp; <span
@@ -3227,43 +3250,20 @@ received
               </li>
               <li>A jump is performed, depending on the <span
                   style="font-style: italic;">original</span> (unedited)
-                contents of <span style="font-family: monospace;">K</span>:&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-                If greater than +0, execution continues at the next
+                contents of <span style="font-family: monospace;">K</span><span
+                  style="font-family: monospace;">:</span> If greater
+                than +0 or positive overflow exists, execution continues
+                at the next instruction after the <span
+                  style="font-family: monospace;">CCS</span>.&nbsp; If
+                equal to +0, execution continues at the 2<sup>nd</sup>
                 instruction after the <span style="font-family:
-                  monospace;">CCS</span>.&nbsp; If equal to +0,
-                execution continues at the 2<sup>nd</sup> instruction
-                after the <span style="font-family: monospace;">CCS</span>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-                If less than -0, execution continues at the 3<sup>rd</sup>
+                  monospace;">CCS</span>.&nbsp; If less than -0 or
+                negative overflow exists, execution continues at the 3<sup>rd</sup>
                 instruction after the <span style="font-family:
                   monospace;">CCS</span>.&nbsp; If equal to -0,
                 execution continues at the 4<sup>th</sup> instruction
                 after the <span style="font-family: monospace;">CCS</span>.&nbsp;&nbsp;
+
 
 
 
@@ -3290,17 +3290,19 @@ received
             <br>
             Note that the net effect of the way overflow is treated when
             <span style="font-family: monospace;">K</span> is A, L, or Q
-            is to allow 15-bit loop counters rather than mere 14-bit
+            is to allow 16-bit loop counters rather than mere 15-bit
             loop counters.&nbsp; For example, if A contains +1 with
             +overflow, then <span style="font-family: monospace;">CCS A</span>
             will place +0 with +overflow into A, and another <span
               style="font-family: monospace;">CCS A</span> will place
             037777 without overflow into A, and thus no anomaly is seen
-            when decrementing from +overflow to no overflow.<br>
-            <br>
-            The overflow of the accumulator will generally be cleared by
-            this operation except in the kinds of cases decribed in the
-            preceding paragraph.<br>
+            when decrementing from +overflow to no overflow. If <span
+              style="font-family: monospace;">K </span>has negative
+            overflow going into CCS, the absolute value operation will
+            change it into positive overflow. All overflow conditions
+            are taken into account before this operation; thus, if a
+            given <span style="font-family: monospace;">K </span>has
+            negative overflow, the negative branch of CCS is taken.<br>
           </td>
         </tr>
       </tbody>
@@ -3309,8 +3311,8 @@ received
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>COM<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3381,7 +3383,8 @@ received
               rgb(0, 153, 0);"></span>All 16 bits of the accumulator are
             complemented.&nbsp; Therefore, in addition to negating the
             contents of the register (i.e., converting plus to minus and
-            minus to plus), the overflow is preserved.<br>
+            minus to plus), the overflow is preserved, but swtiches type
+            (i.e., negative overflow will become positive overflow).<br>
             <br>
             This instruction assembles as "<span style="font-family:
               monospace;">CS A</span>".<br>
@@ -3393,8 +3396,8 @@ received
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>CS<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3474,7 +3477,7 @@ received
               monospace;">K</span> is CYR, SR, CYL, or EDOP, then it is
             re-edited.<span style="color: rgb(0, 153, 0);"></span><br>
             <span style="color: rgb(0, 0, 0);"><br>
-              Note that if the source register contains 16 bits (the L
+              Note that if the source register contains 16 bits (the A
               or Q register), then all 16 bits will be complemented and
               transferred to the accumulator, and thus the overflow in
               the source register will be inverted and transferred into
@@ -3497,6 +3500,7 @@ received
 
 
 
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">COM</span> instruction.<br>
           </td>
@@ -3506,8 +3510,8 @@ received
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DAS</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3594,6 +3598,7 @@ Refer
 
 
 
+
             to the <span style="font-family: monospace;">DDOUBL</span>
             instruction for an explanation of this case.<br>
             <br>
@@ -3609,6 +3614,7 @@ Refer
                 style="font-family: monospace; color: rgb(0, 0, 0);">K+1</span><span
                 style="color: rgb(0, 0, 0);">.&nbsp;</span> (</span><a
               style="color: rgb(0, 153, 0);" href="#Data_Representation">See
+
 
 
 
@@ -3660,8 +3666,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DCA<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3762,6 +3768,7 @@ Refer
 
 
 
+
                   L</span>" is an unusual case.&nbsp;&nbsp; Since the
                 less-significant word is processed first and then the
                 more-significant word, the effect will be to first load
@@ -3785,14 +3792,11 @@ Refer
 
 
 
+
             the other hand, the instruction <span style="font-family:
               monospace;">"DCA Q"</span> will cause the full 16-bit
             contents (including overflow) of Q to be loaded into A, and
-            the 15-bit contents of EB to be sign-extended to 16 bits and
-            loaded into L.<br>
-            <br>
-            <span style="font-weight: bold;">Note:</span>&nbsp; The
-            final contents of the L register will be overflow-corrected.<br>
+            the 15-bit contents of EB to be loaded into L.<br>
           </td>
         </tr>
       </tbody>
@@ -3801,8 +3805,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DCOM<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3871,9 +3875,10 @@ Refer
               bold;"></span><span style="font-family: monospace;"></span><span
               style="font-weight: bold;"></span><span style="color:
               rgb(0, 153, 0);"></span>All 16 bits of the accumulator and
-            the L register are complemented.&nbsp; Therefore, in
-            addition to negating the DP value (i.e., converting plus to
-            minus and minus to plus), the overflow is preserved.<br>
+            all 15 bits of the L register are complemented.&nbsp;
+            Therefore, in addition to negating the DP value (i.e.,
+            converting plus to minus and minus to plus), the overflow in
+            the accumulator is preserved.<br>
             <br>
             This instruction assembles as "<span style="font-family:
               monospace;">DCS A</span>".<br>
@@ -3885,8 +3890,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DCS<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3987,11 +3992,13 @@ Refer
 
 
 
+
               A</span>", refer to the <span style="font-family:
               monospace;">DCOM</span> instruction.<span style="color:
               rgb(0, 153, 0);"><span style="color: rgb(0, 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCS
+
 
 
 
@@ -4017,13 +4024,9 @@ Refer
                 On the other hand, the instruction "<span
                   style="font-family: monospace;">DCS Q</span>" will
                 load A with the full 16-bit complement of Q, and will
-                load L with the 15-bit complement of EB as extended to
-                16 bits.<br>
-                <br>
-              </span></span><span style="color: rgb(0, 153, 0);"><span
-                style="color: rgb(0, 0, 0);"><span style="font-weight:
-                  bold;">Note:</span>&nbsp; The final contents of the L
-                register will be overflow-corrected.<br>
+                load L with the 15-bit complement of EB.</span></span><span
+              style="color: rgb(0, 153, 0);"><span style="color: rgb(0,
+                0, 0);"><br>
               </span></span> </td>
         </tr>
       </tbody>
@@ -4032,8 +4035,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DDOUBL<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4127,8 +4130,8 @@ Refer
     <h3> </h3>
     <h3>DIM<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4202,10 +4205,10 @@ Refer
               style="font-weight: bold;"></span><span style="color:
               rgb(0, 153, 0);"><span style="color: rgb(0, 0, 0);">If <span
                   style="font-family: monospace;">K</span> is a 16-bit
-                register like A, L, or Q, then arithmetic is performed
-                on the full 15-bit value (plus sign).&nbsp; Otherwise,
-                only the available 14-bit value (plus sign) is
-                used.&nbsp; </span><span style="color: rgb(0, 0, 0);"></span></span><span
+                register like A or Q, then arithmetic is performed on
+                the full 15-bit value (plus sign).&nbsp; Otherwise, only
+                the available 14-bit value (plus sign) is used.&nbsp; </span><span
+                style="color: rgb(0, 0, 0);"></span></span><span
               style="color: rgb(0, 153, 0);"></span><br>
             <br>
             If the contents of <span style="font-family: monospace;">K</span>
@@ -4216,26 +4219,26 @@ Refer
             be unchanged by the operation.&nbsp; Note, by the way, that
             +1 decrements to -0, as is normal for AGC additions.<br>
             <br>
-            If <span style="font-family: monospace;">K</span> is one of
-            the counter registers which triggers an interrupt upon
-            reaching 0, then an oveflow caused by <span
-              style="font-family: monospace;">DIM</span> will trigger
-            the interrupt also.&nbsp; <span style="color: rgb(0, 153,
-              0);">The register only register so affected would seem to
-              be TIME6</span>.&nbsp; Some of the counter registers such
-            as CDUX-CDUZ are formatted in 2's-complement format, but the
-            <span style="font-family: monospace;">DIM</span> instruction
-            is insensitive to this distinction and always uses normal
-            1's-complement arithmetic.&nbsp; A sharp-eyed reader may
-            notice that the <span style="font-family: monospace;">DIM</span>
-            instruction behaves simularly to the <span
-              style="font-family: monospace;">DINC</span> <a
-              href="#UnprogrammedSequences">unprogrammed sequence</a>,
-            and wonder if it likewise emits <span style="font-family:
-              monospace;">POUT</span>, <span style="font-family:
-              monospace;">MOUT</span>, and <span style="font-family:
-              monospace;">ZOUT</span> output pulses; it does <span
-              style="font-style: italic;">not</span> do so.<br>
+            A sharp-eyed reader may notice that the <span
+              style="font-family: monospace;">DIM</span> instruction
+            behaves simularly to the <span style="font-family:
+              monospace;">DINC</span> <a
+href="file:///home/mstewart/my_virtualagc/assembly_language_manual.html#UnprogrammedSequences">unprogrammed
+              sequence</a>, and wonder if it likewise emits <span
+              style="font-family: monospace;">POUT</span>, <span
+              style="font-family: monospace;">MOUT</span>, and <span
+              style="font-family: monospace;">ZOUT</span> output pulses;
+            it does <span style="font-style: italic;">not</span> do so.
+            Because <span style="font-family: monospace;">ZOUT</span>
+            is one of the conditions for T6RUPT to occur, <span
+              style="font-family: monospace;">DIM</span> <span
+              style="font-family: monospace;">TIME6</span> cannot
+            trigger the interrupt<span style="color: rgb(0, 153, 0);"></span>.&nbsp;
+            Some of the counter registers such as CDUX-CDUZ are
+            formatted in 2's-complement format, but the <span
+              style="font-family: monospace;">DIM</span> instruction is
+            insensitive to this distinction and always uses normal
+            1's-complement arithmetic.<br>
           </td>
         </tr>
       </tbody>
@@ -4244,8 +4247,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DOUBLE<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4330,8 +4333,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DTCB<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4427,8 +4430,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DTCF<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4521,8 +4524,8 @@ Refer
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DV<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4591,23 +4594,10 @@ Refer
           </td>
           <td style="vertical-align: top;"><span style="font-weight:
               bold;"></span><span style="font-family: monospace;"></span><span
-              style="font-weight: bold;"></span>The accumulator and the
-            L register (and the Q register if <span style="font-family:
-              monospace;">K</span> is Q) are <span style="color: rgb(0,
-              153, 0);">overflow-corrected prior to the operation</span>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-            <br>
+              style="font-weight: bold;"></span>The accumulator (and the
+            Q register if <span style="font-family: monospace;">K</span>
+            is Q) is considered as overflow-corrected during this
+            operation.<br>
             <br>
             There are two alternate but equally valid ways of looking at
             this operation.&nbsp; <br>
@@ -4653,9 +4643,18 @@ Refer
             register.&nbsp; For example, suppose that A contains +0 and
             L contains -0; then the overall sign of the dividend is -0.<br>
             <br>
-            If the divisor is equal to the dividend in magnitude, then
-            the A register will be stored with ±37777, while the L
-            register will be stored with the divisor.<br>
+            If the dividend is ±0 but the divisor is non-zero, the L
+            register remains unchanged and the A register is assigned 0
+            with a sign according to the rules above.<br>
+            <br>
+            If the divisor is equal to the dividend in magnitude and
+            they are nonzero, then the A register will be stored with
+            ±37777, while the L register will be stored with the
+            dividend.<br>
+            <br>
+            If both the dividend and the divisor are ±0, the A register
+            will be stored with ±37777, and the L register will remain
+            unchanged.<br>
             <br>
             If the divisor is less than the dividend in magnitude,
             according to Savage&amp;Drake, "we get total nonsense", and
@@ -4673,8 +4672,8 @@ Refer
             <br>
             Several numerical examples are given in Smally:<br>
             <table style="text-align: left; margin-left: auto;
-              margin-right: auto;" border="1" cellpadding="2"
-              cellspacing="2">
+              margin-right: auto;" cellpadding="2" cellspacing="2"
+              border="1">
               <tbody>
                 <tr>
                   <td colspan="4" rowspan="1" style="vertical-align:
@@ -4693,11 +4692,13 @@ as
 
 
 
+
                     Fractional Values (Decimal)<br>
                   </td>
                   <td colspan="5" rowspan="1" style="vertical-align:
                     top; font-weight: bold; text-align: center;">Considered
 as
+
 
 
 
@@ -4768,9 +4769,11 @@ as
 
 
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
 
 
 
@@ -4800,6 +4803,7 @@ as
 
 
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
@@ -4816,9 +4820,11 @@ as
 
 
 
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
 
 
 
@@ -4855,9 +4861,11 @@ as
 
 
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
 
 
 
@@ -4887,6 +4895,7 @@ as
 
 
 
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
@@ -4903,9 +4912,11 @@ as
 
 
 
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
 
 
 
@@ -4942,9 +4953,11 @@ as
 
 
 
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
 
 
@@ -4974,6 +4987,7 @@ as
 
 
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
@@ -4990,9 +5004,11 @@ as
 
 
 
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
 
 
 
@@ -5029,9 +5045,11 @@ as
 
 
 
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
 
 
@@ -5061,6 +5079,7 @@ as
 
 
 
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
@@ -5077,9 +5096,11 @@ as
 
 
 
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
 
 
 
@@ -5119,9 +5140,11 @@ as
 
 
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
 
 
@@ -5151,6 +5174,7 @@ as
 
 
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
@@ -5167,9 +5191,11 @@ as
 
 
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
+
 
 
 
@@ -5207,9 +5233,11 @@ as
 
 
 
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
 
 
@@ -5239,6 +5267,7 @@ as
 
 
 
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
@@ -5255,9 +5284,11 @@ as
 
 
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
+
 
 
 
@@ -5296,6 +5327,7 @@ as
 
 
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
@@ -5312,9 +5344,11 @@ as
 
 
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
 
 
@@ -5344,6 +5378,7 @@ as
 
 
 
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
@@ -5360,6 +5395,7 @@ as
 
 
 
+
                     (77777)<br>
                   </td>
                 </tr>
@@ -5372,6 +5408,7 @@ as
                   <td style="vertical-align: top; text-align: center;">-0.0<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
 
 
@@ -5401,9 +5438,11 @@ as
 
 
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
 
 
 
@@ -5433,9 +5472,11 @@ as
 
 
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
 
 
 
@@ -5474,6 +5515,7 @@ as
 
 
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
@@ -5490,9 +5532,11 @@ as
 
 
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
 
 
@@ -5522,9 +5566,11 @@ as
 
 
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
 
 
@@ -5563,9 +5609,11 @@ as
 
 
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
 
 
@@ -5595,6 +5643,7 @@ as
 
 
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
@@ -5611,9 +5660,11 @@ as
 
 
 
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
 
 
@@ -5640,8 +5691,8 @@ as
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>DXCH</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5746,6 +5797,7 @@ as
 
 
 
+
               L</span>" instruction (in which the source and destination
             ranges overlap, Q&nbsp; (full 16 bits, including overflow)
             goes into A, A&nbsp; goes into L, and L goes into Q.<br>
@@ -5761,8 +5813,8 @@ as
       bold;"></span><span style="font-weight: bold;"></span> <br>
     <h3>EDRUPT<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5788,6 +5840,7 @@ as
               style="color: rgb(0, 0, 0);">is the address of an
               instruction.&nbsp; In assembly, only the lower 9 bits are
               retained, and the upper 3 bits are cleared.&nbsp; </span>However,
+
 
 
 
@@ -5883,10 +5936,9 @@ as
             <span style="color: rgb(0, 153, 0);"><span style="color:
                 rgb(0, 0, 0);"></span></span>The instruction also shoves
             a couple of register values onto the data bus, but does not
-            save them into memory.&nbsp; <span style="color: rgb(0,
-              153, 0);">My assumption is that some kind of external
-              instrumentation was able to capture these values, but that
-              they were irrelevant to normal execution.</span><br>
+            save them into memory.&nbsp; The AGC Monitor (or equivalent
+            external ground support equipment) was able to capture these
+            values, but they were irrelevant to normal execution.<br>
           </td>
         </tr>
       </tbody>
@@ -5894,8 +5946,8 @@ as
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>EXTEND</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6022,8 +6074,8 @@ as
     </table>
     <span style="font-weight: bold;"></span><br>
     <h3>INCR</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6128,8 +6180,8 @@ as
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>INDEX (or NDX)<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6260,6 +6312,7 @@ TC&nbsp;
 
 
 
+
                 &nbsp;&nbsp;&nbsp; JMPTAB<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -6356,6 +6409,7 @@ TC&nbsp;
 
 
 
+
             the special case of <span style="font-family: monospace;">K</span>
             being address&nbsp; 017 octal is not an <span
               style="font-family: monospace;">INDEX</span> instruction,
@@ -6371,8 +6425,8 @@ TC&nbsp;
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span>
     <h3>INHINT</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6485,8 +6539,8 @@ TC&nbsp;
     </table>
     <span style="font-weight: bold;"></span><br>
     <h3>LXCH</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6573,8 +6627,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>MASK (or MSK)<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6655,12 +6709,11 @@ TC&nbsp;
               style="font-family: monospace;">K</span> and A are
             logically anded and stored in the accumulator.&nbsp;
             Otherwise, the source register is 15 bits, and the
-            accumulator is <span style="color: rgb(0, 153, 0);">overflow-adjusted</span>
-            prior to the operation.&nbsp; The contents of <span
-              style="font-family: monospace;">K</span> (which remains
-            unchanged) are then logically ANDed bitwise to the
-            accumulator, and <span style="color: rgb(0, 153, 0);">sign-extended</span>
-            to 16 bits for storage in the accumulator.<br>
+            accumulator is overflow-adjusted prior to the
+            operation.&nbsp; The contents of <span style="font-family:
+              monospace;">K</span> (which remains unchanged) are then
+            logically ANDed bitwise to the accumulator, and
+            sign-extended to 16 bits for storage in the accumulator.<br>
           </td>
         </tr>
       </tbody>
@@ -6669,8 +6722,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>MP<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6791,11 +6844,13 @@ TC&nbsp;
 
 
 
+
             then you would indeed find a result of 4, but it would be in
             L register because it would be part of the DP value 4×2<sup>-28</sup>
             rather than just the integer 4.<br>
             <br>
             For the special case "<span style="font-family: monospace;">MP
+
 
 
 
@@ -6819,8 +6874,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>MSU<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6925,8 +6980,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>NOOP<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7027,8 +7082,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>OVSK<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7112,8 +7167,8 @@ TC&nbsp;
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>QXCH</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7203,8 +7258,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>RAND<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7282,11 +7337,9 @@ TC&nbsp;
             <br>
             If the source is the 16-bit L or Q register, then the full
             16-bit value is logically ANDed with A.&nbsp; Otherwise, the
-            15-bit source is logically ANDed with the <span
-              style="color: rgb(0, 153, 0);">overflow-corrected</span>
-            accumulator, and the result is <span style="color: rgb(0,
-              153, 0);">sign-extended</span> to 16 bits before storage
-            in A.<span style="color: rgb(0, 153, 0);"></span><br>
+            15-bit source is logically ANDed with the overflow-corrected
+            accumulator, and the result is sign-extended to 16 bits
+            before storage in A.<span style="color: rgb(0, 153, 0);"></span><br>
           </td>
         </tr>
       </tbody>
@@ -7295,8 +7348,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>READ<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7369,9 +7422,9 @@ TC&nbsp;
               bold;"></span><span style="font-family: monospace;"></span><span
               style="font-weight: bold;"></span>Refer to the list of
             available <a href="#io_channels">i/o channels</a>.&nbsp; If
-            the source is the 16-bit L or Q register, then the full
-            16-bit value is moved into A.&nbsp; Otherwise, the 15-bit
-            source is sign-extended to 16 bits before storage in A.<br>
+            the source is the 16-bit Q register, then the full 16-bit
+            value is moved into A.&nbsp; Otherwise, the 15-bit source is
+            sign-extended to 16 bits before storage in A.<br>
           </td>
         </tr>
       </tbody>
@@ -7379,8 +7432,8 @@ TC&nbsp;
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>RELINT</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7462,6 +7515,7 @@ TC&nbsp;
 
 
 
+
             with the <span style="font-family: monospace;">INHINT</span>
             instruction.<br>
             <br>
@@ -7495,8 +7549,8 @@ TC&nbsp;
     </table>
     <span style="font-weight: bold;"></span><br>
     <h3>RESUME</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7636,6 +7690,7 @@ TC&nbsp;
 
 
 
+
                 instruction</span><br>
             </div>
             would not index the final instruction as shown, because "<span
@@ -7679,6 +7734,7 @@ TC&nbsp;
 
 
 
+
             A, L, Q, and BB to ARUPT, LRUPT, QRUPT, and BBRUPT.&nbsp; <span
               style="font-style: italic;">Nor does the RESUME
               instruction restore A, L, Q, and BB from ARUPT, LRUPT,
@@ -7703,8 +7759,8 @@ TC&nbsp;
     </table>
     <span style="font-weight: bold;"></span><br>
     <h3>RETURN</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7770,40 +7826,12 @@ TC&nbsp;
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Notes:<br>
           </td>
-          <td style="vertical-align: top;">This instruction is similar
-            to other <span style="font-family: monospace;">TC</span>
-            instructions (see below), but slightly alters the use of the
-            Q register.&nbsp; (In fact, its behavior is identical to the
-            hypothetical instruction "<span style="font-family:
-              monospace;">TCF Q</span>", except that the Q register, at
-            address 00002 octal, is outside the range of allowable
-            targets for the <span style="font-family: monospace;">TCF</span>
-            instruction.)&nbsp; The net effect of this instruction is
-            simply to load the program counter (the Z register) with the
-            value found in the Q register.&nbsp; The assumption is that
-            the value found in the Q register is the return address of a
-            subroutine, because the <span style="font-family:
-              monospace;">TC</span> instruction normally used to
-            activate a subroutine loads the Q register with such a
-            return address, so the effect is to return from a
-            subroutine.<br>
-            <br>
-            Apollo docs such as Blair-Smith or Savage&amp;Drake present
-            it as an obvious characteristic of the <span
-              style="font-family: monospace;">TC</span> instruction that
-            "<span style="font-family: monospace;">TC Q</span>" will act
-            as a subroutine return, because "<span style="font-family:
-              monospace;">TC Q</span>" transfers program control to
-            address 2, and what is found at address 2 is another <span
-              style="font-family: monospace;">TC</span> instruction
-            containing the subroutine return address.&nbsp; In fact,
-            this is not what would happen if "<span style="font-family:
-              monospace;">TC Q</span>" acted like all other <span
-              style="font-family: monospace;">TC</span> instructions,
-            since a normal <span style="font-family: monospace;">TC</span>
-            instruction would actually overwrite the Q register with its
-            own return address, and thus eliminate any return address
-            previously stored there.<br>
+          <td style="vertical-align: top;">This instruction is the same
+            as all other <span style="font-family: monospace;">TC</span>
+            instructions. It makes use of an indirect jump through
+            register Q. (see below). This works because the TC
+            instruction reads the instruction at its target address <i>before</i>
+            updating Q.<br>
           </td>
         </tr>
       </tbody>
@@ -7812,8 +7840,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>ROR<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7892,13 +7920,11 @@ TC&nbsp;
             memory operand, by recalling that the L and Q registers are
             duplicated into i/o-channel space.<br>
             <br>
-            If the source is the 16-bit L or Q register, then the full
-            16-bit value is logically ORed with A.&nbsp; Otherwise, the
-            15-bit source is logically ORed with the <span
-              style="color: rgb(0, 153, 0);">overflow-corrected</span>
-            accumulator, and the result is <span style="color: rgb(0,
-              153, 0);">sign-extended</span> to 16 bits before storage
-            in A.<span style="color: rgb(0, 153, 0);"></span><br>
+            If the source is the 16-bit Q register, then the full 16-bit
+            value is logically ORed with A.&nbsp; Otherwise, the 15-bit
+            source is logically ORed with the overflow-corrected
+            accumulator, and the result is sign-extended to 16 bits
+            before storage in A.<span style="color: rgb(0, 153, 0);"></span><br>
           </td>
         </tr>
       </tbody>
@@ -7907,8 +7933,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>RXOR<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7987,13 +8013,12 @@ TC&nbsp;
             memory operand, by recalling that the L and Q registers are
             duplicated into i/o-channel space.<br>
             <br>
-            If the source is the 16-bit L or Q register, then the full
-            16-bit value is logically exclusive-ORed with A.&nbsp;
-            Otherwise, the 15-bit source is logically exclusive-ORed
-            with the <span style="color: rgb(0, 153, 0);">overflow-corrected</span>
-            accumulator, and the result is <span style="color: rgb(0,
-              153, 0);">sign-extended</span> to 16 bits before storage
-            in A.<span style="color: rgb(0, 153, 0);"></span><br>
+            If the source is the 16-bit Q register, then the full 16-bit
+            value is logically exclusive-ORed with A.&nbsp; Otherwise,
+            the 15-bit source is logically exclusive-ORed with the
+            overflow-corrected accumulator, and the result is
+            sign-extended to 16 bits before storage in A.<span
+              style="color: rgb(0, 153, 0);"></span><br>
           </td>
         </tr>
       </tbody>
@@ -8002,8 +8027,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>SQUARE<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8089,8 +8114,8 @@ TC&nbsp;
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>SU<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8187,8 +8212,8 @@ TC&nbsp;
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>TC (or TCR)</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8288,6 +8313,7 @@ The
 
 
 
+
             <span style="font-family: monospace;">TC</span> instruction
             may also be used to accomplish an indirect jump (i.e., a
             jump to a computed rather than a hard-coded address) by
@@ -8330,6 +8356,7 @@ The
 
 
 
+
               A</span> will require 2 MCT of CPU time instead of the 1
             MCT quoted earlier, since it actually results in <span
               style="font-style: italic;">two</span> <span
@@ -8344,6 +8371,7 @@ The
             <br>
             <span style="text-decoration: underline;">Indirect calls</span>:&nbsp;
 For
+
 
 
 
@@ -8392,8 +8420,8 @@ For
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>TCAA<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8478,8 +8506,8 @@ For
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>TCF</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8567,6 +8595,7 @@ For
 
 
 
+
             an indirect jump, it is necessary to combine an <span
               style="font-family: monospace;">INDEX</span> instruction
             with a <span style="font-family: monospace;">TCF</span>
@@ -8579,8 +8608,8 @@ For
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>TS</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8685,8 +8714,8 @@ For
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>WAND<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8764,28 +8793,14 @@ For
             accumulator and the i/o channel is copied into both the
             accumulator and the i/o channel.<br>
             <br>
-            If the destination is the 16-bit L or Q register, then the
-            full 16-bit value is logically ANDed with A and stored at
-            both A and <span style="font-family: monospace;">K</span>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
+            If the destination is the 16-bit Q register, then the full
+            16-bit value is logically ANDed with A and stored at both A
+            and <span style="font-family: monospace;">K</span>.&nbsp;
             Otherwise, the 15-bit destination is logically ANDed with
-            the <span style="color: rgb(0, 153, 0);">overflow-corrected</span>
-            accumulator and stored to <span style="font-family:
-              monospace;">K</span>, and the result is <span
-              style="color: rgb(0, 153, 0);">sign-extended</span> to 16
-            bits before storage in A.<span style="color: rgb(0, 153,
-              0);"></span><br>
+            the overflow-corrected accumulator and stored to <span
+              style="font-family: monospace;">K</span>, and the result
+            is sign-extended to 16 bits before storage in A.<span
+              style="color: rgb(0, 153, 0);"></span><br>
           </td>
         </tr>
       </tbody>
@@ -8794,8 +8809,8 @@ For
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>WOR<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8876,28 +8891,14 @@ For
             instruction with a memory operand, by recalling that the L
             and Q registers are duplicated into i/o-channel space.<br>
             <br>
-            If the destination is the 16-bit L or Q register, then the
-            full 16-bit value is logically ORed with A and stored at
-            both A and <span style="font-family: monospace;">K</span>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
+            If the destination is the 16-bit Q register, then the full
+            16-bit value is logically ORed with A and stored at both A
+            and <span style="font-family: monospace;">K</span>.&nbsp;
             Otherwise, the 15-bit destination is logically ORed with the
-            <span style="color: rgb(0, 153, 0);">overflow-corrected</span>
-            accumulator and stored to <span style="font-family:
-              monospace;">K</span>, and the result is <span
-              style="color: rgb(0, 153, 0);">sign-extended</span> to 16
-            bits before storage in A.<span style="color: rgb(0, 153,
-              0);"></span><br>
+            overflow-corrected accumulator and stored to <span
+              style="font-family: monospace;">K</span>, and the result
+            is sign-extended to 16 bits before storage in A.<span
+              style="color: rgb(0, 153, 0);"></span><br>
           </td>
         </tr>
       </tbody>
@@ -8906,8 +8907,8 @@ For
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>WRITE<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8983,11 +8984,11 @@ For
               href="assembly_language_manual.html#io_channels">i/o
               channels</a>.<br>
             <br>
-            If the destination is the 16-bit L or Q register, then the
-            full 16-bit value of A is stored into <span
-              style="font-family: monospace;">K</span>.&nbsp; Otherwise,
-            the value is overflow-corrected before storage.<span
-              style="color: rgb(0, 153, 0);"></span><br>
+            If the destination is the 16-bit Q register, then the full
+            16-bit value of A is stored into <span style="font-family:
+              monospace;">K</span>.&nbsp; Otherwise, the value is
+            overflow-corrected before storage.<span style="color: rgb(0,
+              153, 0);"></span><br>
           </td>
         </tr>
       </tbody>
@@ -8995,8 +8996,8 @@ For
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>XCH</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9088,8 +9089,8 @@ For
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>XLQ</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9206,8 +9207,8 @@ For
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>XXALQ</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9336,8 +9337,8 @@ For
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>ZL<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9417,8 +9418,8 @@ For
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>ZQ<br>
     </h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9546,6 +9547,7 @@ For
         style="font-family: monospace;">
       <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 =
+
 
 
 
@@ -9710,6 +9712,7 @@ For
 
 
 
+
         MYLABEL<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -9725,20 +9728,6 @@ For
 
 
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -9755,8 +9744,26 @@ For
 
 
 
+
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -9786,8 +9793,10 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
         MYJUMP<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -9816,23 +9825,26 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -10264,16 +10276,20 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <p><tt>000005,000005:
           ???????&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           EQUALS&nbsp;&nbsp; 0</tt><tt><br>
         </tt><tt>000006,000006: </tt><tt><br>
         </tt><tt>000007,000007:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 2</tt><tt><br>
         </tt><tt>000008,000008:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 25</tt><tt><br>
         </tt><tt>000009,000009:&nbsp;&nbsp;&nbsp;
@@ -10281,19 +10297,23 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           FIRST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000010,000010:&nbsp;&nbsp;&nbsp;
           4001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000011,000011: </tt><tt><br>
         </tt><tt>000012,000012:&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt><tt>000013,000013:&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 64</tt><tt><br>
         </tt><tt>000014,000014:&nbsp;&nbsp;&nbsp;
@@ -10301,13 +10321,16 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           56000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SECOND&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           XCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000015,000015:&nbsp;&nbsp;&nbsp;
           6001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK</tt><tt><br>
         </tt><tt>000016,000016:&nbsp;&nbsp;&nbsp;
           6064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 6</tt><tt><br>
         </tt><tt>000017,000017:&nbsp;&nbsp;&nbsp;
@@ -10315,18 +10338,22 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SECONDB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000018,000018: </tt><tt><br>
         </tt><tt>000019,000019:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           SETLOC&nbsp;&nbsp; FIRST</tt><tt><br>
         </tt><tt>000020,000020:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK</tt><tt><br>
         </tt><tt>000021,000021:&nbsp;&nbsp;&nbsp;
           4025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 12</tt><tt><br>
         </tt><tt>000022,000022:&nbsp;&nbsp;&nbsp;
@@ -10334,14 +10361,17 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           THIRD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000023,000023: </tt><tt><br>
         </tt><tt>000024,000024:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt><tt>000025,000025:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 14</tt><tt><br>
         </tt><tt>000026,000026:&nbsp;&nbsp;&nbsp;
@@ -10349,14 +10379,17 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           FOURTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000027,000027: </tt><tt><br>
         </tt><tt>000028,000028:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt><tt>000029,000029:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 31</tt><tt><br>
         </tt><tt>000030,000030:&nbsp;&nbsp;&nbsp;
@@ -10364,14 +10397,17 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           FIFTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000031,000031: </tt><tt><br>
         </tt><tt>000032,000032:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK&nbsp;&nbsp;&nbsp;&nbsp; 2</tt><tt><br>
         </tt><tt>000033,000033:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 17</tt><tt><br>
         </tt><tt>000034,000034:
@@ -10379,19 +10415,23 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SIXTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt><tt>000035,000035:
           02,2040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK</tt><tt><br>
         </tt><tt>000036,000036:
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 18</tt><tt><br>
         </tt><tt>000037,000037:
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SEVENTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><br>
         <br>
@@ -10428,6 +10468,7 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <h3>SUBRO</h3>
     This is simply discarded by <span style="font-weight: bold;">yaYUL</span>.&nbsp;
 Its
+
 
 
 
@@ -10576,6 +10617,7 @@ These
 
 
 
+
     encode to 15-bit values, and can be used to represent any address in
     fixed-memory banks 00-37.&nbsp; (Superbanks 40-43 are not accesible
     to the interpreter.)&nbsp; I'll designate this rule by <span
@@ -10584,6 +10626,7 @@ These
       <li>Fixed-fixed:&nbsp; <span style="font-family: monospace;">f(X)
           = X</span></li>
       <li>Common-fixed:&nbsp; <span style="font-family: monospace;">f(X)
+
 
 
 
@@ -10633,8 +10676,8 @@ These
     indicate an optional operand (called "<span style="font-family:
       monospace;">Y</span>").<br>
     <h3>STCALL</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -10690,8 +10733,8 @@ These
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>STODL</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -10747,8 +10790,8 @@ These
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>STORE</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -10803,8 +10846,8 @@ These
     <span style="font-weight: bold;"></span><span style="font-weight:
       bold;"></span><span style="font-weight: bold;"></span><br>
     <h3>STOVL</h3>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -10869,10 +10912,11 @@ These
     channels are covered <a href="developer.html#Table_of_IO_Channels">on
 
 
+
       the developer page</a>.<br>
     <br>
-    <table style="text-align: left; width: 100%;" border="1"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Address<br>
@@ -10958,11 +11002,12 @@ These
             "don't care") and 100.&nbsp; In the former case, only memory
             banks 00-37 (octal) are accessible, by means of the FB
             register.&nbsp; In the latter case, however, banks 30-33 are
-            replaced by banks 40-43.&nbsp; (In <span
-              style="font-weight: bold;">yaAGC</span>, banks 34-37 also
-            become inaccessible.)&nbsp; Other bit combinations would
-            have been meaningful in the SUPERBNK channel if more
-            core-ropes had been added to the AGC.<br>
+            replaced by banks 40-43.&nbsp; Banks 34-37 also become
+            inaccessible.&nbsp; Other bit combinations would have been
+            meaningful in the SUPERBNK channel if more core-ropes had
+            been added to the AGC; however, with the available ropes,
+            setting them simply causes the AGC to not select any rope at
+            all (see the discussion in the FB register description).<br>
           </td>
           <td style="vertical-align: top;">Same as Luminary.<br>
           </td>
@@ -10975,7 +11020,7 @@ These
       Summary Tables</h2>
     <br>
     <table style="width: 95%; text-align: left; margin-left: auto;
-      margin-right: auto;" border="1" cellpadding="2" cellspacing="2">
+      margin-right: auto;" cellpadding="2" cellspacing="2" border="1">
       <caption><span style="font-weight: bold;">Numerical Summary of the
           CPU Instruction Set</span><br>
       </caption><tbody>
@@ -10988,6 +11033,7 @@ These
               style="font-family: monospace;">Extracode?</span><br>
           </th>
           <th style="text-align: center; vertical-align: middle;">Address
+
 
 
 
@@ -11049,6 +11095,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">TC K</span> with <span
               style="font-family: monospace;">K=00000</span><br>
           </td>
@@ -11066,6 +11113,7 @@ case
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -11108,6 +11156,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">TC K</span> with <span
               style="font-family: monospace;">K=00002</span></td>
           <td style="text-align: left; vertical-align: middle;"><br>
@@ -11124,6 +11173,7 @@ case
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -11167,6 +11217,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">TC K</span> with <span
               style="font-family: monospace;">K=00004</span></td>
           <td style="text-align: left; vertical-align: middle;">Disable
@@ -11197,10 +11248,12 @@ case
 
 
 
+
             of <span style="font-family: monospace;">TC K</span> with <span
               style="font-family: monospace;">K=00006</span></td>
           <td style="text-align: left; vertical-align: middle;">Interpret
 the
+
 
 
 
@@ -11277,6 +11330,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">TCF K.<br>
             </span>Used only in fixed memory.<span style="font-family:
               monospace;"><br>
@@ -11311,6 +11365,7 @@ integer
 
 
 
+
             addition.<br>
           </td>
         </tr>
@@ -11325,6 +11380,7 @@ integer
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -11386,6 +11442,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">LXCH K</span> with
             <span style="font-family: monospace;">K=00006</span></td>
           <td style="text-align: left; vertical-align: middle;"><br>
@@ -11405,6 +11462,7 @@ case
             address.</td>
           <td style="text-align: left; vertical-align: middle;">Increment
 value
+
 
 
 
@@ -11482,6 +11540,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">CA K</span> with <span
               style="font-family: monospace;">K=00000.<br>
             </span>Used only in erasable memory.<span
@@ -11518,6 +11577,7 @@ case
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -11580,6 +11640,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">INDEX K</span>
             with <span style="font-family: monospace;">K=00017</span></td>
           <td style="text-align: left; vertical-align: middle;">Resume
@@ -11605,6 +11666,7 @@ case
             address.</td>
           <td style="text-align: left; vertical-align: middle;">Double-precision
 exchange
+
 
 
 
@@ -11647,6 +11709,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">DXCH K</span> with
             <span style="font-family: monospace;">K=00004</span></td>
           <td style="text-align: left; vertical-align: middle;"><br>
@@ -11663,6 +11726,7 @@ case
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -11722,6 +11786,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">TS K</span> with <span
               style="font-family: monospace;">K=00000</span></td>
           <td style="text-align: left; vertical-align: middle;"><br>
@@ -11738,6 +11803,7 @@ case
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -11801,6 +11867,7 @@ case
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -12061,6 +12128,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">QXCH K</span> with
             <span style="font-family: monospace;">K=00007</span></td>
           <td style="text-align: left; vertical-align: middle;"><br>
@@ -12134,6 +12202,7 @@ case
           </td>
           <td style="text-align: center; vertical-align: middle;">Special
 case
+
 
 
 
@@ -12235,6 +12304,7 @@ case
 
 
 
+
             of <span style="font-family: monospace;">MP K</span> with <span
               style="font-family: monospace;">K=00000</span></td>
           <td style="text-align: left; vertical-align: middle;"><br>
@@ -12257,11 +12327,12 @@ case
 
 
 
+
         Map</span><br>
     </div>
     <table style="width: 100%; height: 451px; text-align: left;
-      margin-left: auto; margin-right: auto;" border="1" cellpadding="2"
-      cellspacing="2">
+      margin-left: auto; margin-right: auto;" cellpadding="2"
+      cellspacing="2" border="1">
       <tbody>
         <tr>
           <td colspan="3" rowspan="1" style="text-align: center;
@@ -12514,6 +12585,7 @@ case
 
 
 
+
       Architecture</a> section, the AGC provides instruction-like
     entities called "unprogrammed sequences" which are activated
     automatically to modify counter registers upon receiving the proper
@@ -12529,8 +12601,8 @@ case
     to know, even if they cannot explicitly be activated by
     software.&nbsp; <br>
     <br>
-    <table style="text-align: left; width: 100%;" border="1"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Name<br>
@@ -12606,20 +12678,14 @@ case
             follows:<br>
             <ol>
               <li>If the counter is already at ±0, then do not increment
-                or decrement.&nbsp; Output the signals ZOUT <span
-                  style="color: rgb(0, 153, 0);">and <span
-                    style="font-family: monospace;">DINC</span>-request</span>.<br>
+                or decrement.&nbsp; Output the signal ZOUT and clear the
+                T6RUPT-enable flag at bit 15 of i/o channel 13 (octal).<br>
               </li>
               <li>Whereas if the counter greater than +0 then decrement
-                by 1.&nbsp;&nbsp; Also, output the POUT signal <span
-                  style="color: rgb(0, 153, 0);">and the <span
-                    style="font-family: monospace;">DINC</span>-request
-                  signal.</span><br>
+                by 1.&nbsp;&nbsp; Also, output the POUT signal.<br>
               </li>
               <li>Whereas if less than -0 then increment by 1.&nbsp;
-                Also, output the MOUT signal <span style="color: rgb(0,
-                  153, 0);">and the T6RUPT-enable flag at bit 16 of i/o
-                  channel 13 (octal).</span><br>
+                Also, output the MOUT signal.<br>
               </li>
             </ol>
           </td>
@@ -12771,8 +12837,8 @@ case
     <br>
     <hr style="width: 100%; height: 2px;">
     <h2>Modification History</h2>
-    <table style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellpadding="2"
+      cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">v0.50<br>
