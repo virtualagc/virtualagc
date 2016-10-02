@@ -1486,6 +1486,13 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
 #define SCALER_DIVIDER 3
 static int ScalerCounter = 0;
 
+// DSKY
+#define DSKY_OVERFLOW 81920
+#define DSKY_FLASH_PERIOD 4
+static unsigned DskyTimer = 0;
+static unsigned DskyFlash = 0;
+static unsigned DskyChannel163 = 0;
+
 // Fine-alignment.
 // The gyro needs 3200 pulses per second, and therefore counts twice as
 // fast as the regular 1600 pps counters.
@@ -1531,6 +1538,13 @@ agc_engine (agc_t * State)
       State->DownruptTimeValid = 0;
     }
 
+  // The first time through the loop, light up the DSKY RESTART light
+  if (State->CycleCounter == 0)
+    {
+      DskyChannel163 |= DSKY_RESTART;
+      ChannelOutput(State, 0163, DskyChannel163);
+    }
+
   State->CycleCounter++;
 
   //----------------------------------------------------------------------
@@ -1559,6 +1573,7 @@ agc_engine (agc_t * State)
   // second happens to be 160/3 machine cycles.
 
   ScalerCounter += SCALER_DIVIDER;
+  DskyTimer += SCALER_DIVIDER;
 
   //-------------------------------------------------------------------------
 
@@ -1574,6 +1589,42 @@ agc_engine (agc_t * State)
   // counter-increment was performed.
   if (ChannelInput (State))
     return (0);
+
+  // Update DSKY-related timing before we potentially leave due to 
+  // --debug-dsky mode
+  while (DskyTimer >= DSKY_OVERFLOW)
+    {
+      DskyTimer -= DSKY_OVERFLOW;
+      DskyFlash = (DskyFlash + 1) % DSKY_FLASH_PERIOD;
+      DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR);
+
+      // Turn off the restart light if it's been reset
+      if (State->InputChannel[011] & 01000)
+        DskyChannel163 &= ~DSKY_RESTART;
+
+      // ... but turn it on if the alarm test is active
+      if (State->InputChannel[013] & 01000)
+        DskyChannel163 |= DSKY_RESTART;
+
+      // Flashing lights on the DSKY have a period of 1.28s, and a 75% duty cycle
+      if (DskyFlash == 0)
+        {
+          // If V/N FLASH is high, then the lights are turned off
+          if (State->InputChannel[011] & DSKY_VN_FLASH)
+            DskyChannel163 |= DSKY_VN_FLASH;
+        }
+        else
+        {
+          // If KEY REL or OPER ERR are high, those lights are turned on
+          if (State->InputChannel[011] & DSKY_KEY_REL)
+            DskyChannel163 |= DSKY_KEY_REL;
+          if (State->InputChannel[011] & DSKY_OPER_ERR)
+            DskyChannel163 |= DSKY_OPER_ERR;
+        }
+
+        // Send out updated display information
+        ChannelOutput(State, 0163, DskyChannel163);
+    }
 
   // If in --debug-dsky mode, don't want to take the chance of executing
   // any AGC code, since there isn't any loaded anyway.
@@ -1737,6 +1788,11 @@ agc_engine (agc_t * State)
               // The net result of those two is Z = 4000. Interrupt state is cleared.
               c(RegZ) = 04000;
               State->InIsr = 0;
+
+              // Light the RESTART light on the DSKY
+              DskyChannel163 |= DSKY_RESTART;
+              ChannelOutput(State, 0163, DskyChannel163);
+
             }
 
           // Push the CH77 updates to the outside world
