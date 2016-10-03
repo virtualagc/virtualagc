@@ -34,6 +34,7 @@
   Reference:	http://www.ibiblio.org/apollo
   Mods:         12/02/08 OH.	Began rework
                 08/04/16 OH     Fixed the GPL statement and old user-id
+                09/30/16 MAS    Added the InhibitAlarms option.
  */
 
 
@@ -145,6 +146,8 @@ int SimInitialize(Options_t* Options)
 	DebugDsky = Options->debug_dsky;
 	DebugDeda = Options->debug_deda;
 	DedaQuiet = Options->deda_quiet;
+	InhibitAlarms = Options->inhibit_alarms;
+
 
 	//Simulator.DumpInterval = Simulator.DumpInterval;
 	SocketInterlaceReload = Options->interlace;

@@ -196,7 +196,6 @@
 		TCF	DVERROR
 		CCS	L			# Smally says -0, but I think +0.
 		TCF	DVERROR
-		TCF	+3
 		TCF	DVERROR
 		TCF	DVERROR
 		

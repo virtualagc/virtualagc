@@ -34,6 +34,7 @@
   Reference:	http://www.ibiblio.org/apollo
   Mods:         11/30/08 OH.	Began rework
                 08/04/16 OH     Fixed the GPL statement and old user-id
+                09/30/16 MAS    Added the --inhibit-alarms option
  */
 
 
@@ -58,6 +59,7 @@ typedef struct
   int   debug_dsky;
   int   debug_deda;
   int   deda_quiet;
+  int   inhibit_alarms;
   int   quiet;
   int   fullname;
   int   debug;

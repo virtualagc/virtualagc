@@ -74,6 +74,7 @@
 				saved or restored, so I'm adding all of these.
 		03/30/09 RSB	Added the Downlink variable to the core dumps.
 		08/14/16 OH	Issue #29 fix return value of agc_engine_init.
+		09/30/16 MAS    Added initialization of NightWatchman.
 */
 
 // For Orbiter.
@@ -239,6 +240,12 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->DownruptTimeValid = 1;
   State->DownruptTime = 0;
   State->Downlink = 0;
+
+  State->NightWatchman = 0;
+  State->RuptLock = 0;
+  State->NoRupt = 0;
+  State->TCTrap = 0;
+  State->NoTC = 0;
 
   if (CoreDump != NULL)
     {

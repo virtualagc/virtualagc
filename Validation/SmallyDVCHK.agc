@@ -129,7 +129,7 @@
 		EXTEND
 		BZF	+2
 		TCF	DVCERROR
-		CA	L
+		CS	L
 		AD	MAXP-1
 		EXTEND
 		BZF	+2
