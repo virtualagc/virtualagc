@@ -229,9 +229,15 @@ extern long random (void);
 #define ChanSCALER1 04
 #define ChanS 07
 
-#define CH77_TC_TRAP        00004
-#define CH77_RUPT_LOCK      00010
-#define CH77_NIGHT_WATCHMAN 00020
+#define CH77_TC_TRAP        000004
+#define CH77_RUPT_LOCK      000010
+#define CH77_NIGHT_WATCHMAN 000020
+
+#define DSKY_KEY_REL  000020
+#define DSKY_VN_FLASH 000040
+#define DSKY_OPER_ERR 000100
+#define DSKY_RESTART  000200
+#define DSKY_STBY     000400
 
 #define NUM_INTERRUPT_TYPES 10
 
