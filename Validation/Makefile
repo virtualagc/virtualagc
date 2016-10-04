@@ -16,29 +16,9 @@
 #		05/23/09 RSB	Changed the naming of the symtab file to conform
 #				to the new build procedure for VirtualAGC.
 #		2009-07-04 RSB	Added --html switch.
+#		2016-10-04 JL	Changed to use Makefile.inc.
 
-ifndef PREFIX
-PREFIX=/usr/local
-endif
-SSOURCE:=$(wildcard *.agc)
+BASENAME=Validation
+NO_BINSOURCE=yes
+include ../Makefile.inc
 
-default:	Validation.bin Validation.txt
-
-Validation.txt: Validation.bin
-	../Tools/webb2burkey-rope Validation.bin Validation.txt
-
-Validation.bin:	${SSOURCE}
-	../yaYUL/yaYUL --html Validation.agc >Validation.lst
-	mv Validation.agc.bin Validation.bin
-	mv Validation.agc.symtab Validation.symtab
-
-corediff.txt: Validation.bin
-	@echo "No corediff for Validation!" 
-
-clean:
-	-rm -f Validation.bin Validation.lst Validation.agc.bin Validation.txt *~ *.symtab *.html
-	
-install:	default
-	cp Validation.bin ${PREFIX}/bin
-	chmod ugo+r ${PREFIX}/bin/Validation.bin
-	
