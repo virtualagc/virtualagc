@@ -8,6 +8,8 @@
 # Pages:        615-629
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-02 MAS  Transcribed.
+#               2016-10-04 HG   Change 'code' to comments. Looks like code in the scans
+#                               but is actually documentation
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -651,19 +653,19 @@ RTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VA
 
 # ERASEABLE STORAGE CONFIGURATION (NEEDED BY THE INDEXING METHODS):
 ## Page 628
-NEGUQ           ERASE           +2                              # NEGATIVE OF Q-AXIS GIMBAL DRIVE
-(SPWORD)        EQUALS          NEGUQ           +1              # ANY S.P. ERASABLE NUMBER, NOW THRSTCMD
-NEGUR           EQUALS          NEGUQ           +2              # NEGATIVE OF R-AXIS GIMBAL DRIVE
+#               NEGUQ           ERASE           +2                              # NEGATIVE OF Q-AXIS GIMBAL DRIVE
+#               (SPWORD)        EQUALS          NEGUQ           +1              # ANY S.P. ERASABLE NUMBER, NOW THRSTCMD
+#               NEGUR           EQUALS          NEGUQ           +2              # NEGATIVE OF R-AXIS GIMBAL DRIVE
 
-QACCDOT         ERASE           +2                              # Q-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
-(SPWORD)        EQUALS          QACCDOT         +1              # ANY S.P. ERASABLE NUMBER, NOW ACCDOTR
-RACCDOT         EQUALS          QACCDOT         +2              # R-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
+#               QACCDOT         ERASE           +2                              # Q-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
+#               (SPWORD)        EQUALS          QACCDOT         +1              # ANY S.P. ERASABLE NUMBER, NOW ACCDOTR
+#               RACCDOT         EQUALS          QACCDOT         +2              # R-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
                                                                 # NOTE: NOW ACCDOTQ MUST PRECEDE QACCDOT
 
-ALPHAQ          ERASE           +2                              # Q-AXIS ACCELERATION SCALED AT PI/8 R/S2
-(SPWORD)        EQUALS          ALPHAQ          +1              # ANY S.P. ERASABLE NUMBER, NOW OMEGAR
-ALPHAR          EQUALS          ALPHAQ          +2              # R-AXIS ACCELERATION SCALED AT PI/8 R/S2
-                                                                # NOTE: NOW OMEGAP,OMEGAQ PRECEDE ALPHAQ
+#               ALPHAQ          ERASE           +2                              # Q-AXIS ACCELERATION SCALED AT PI/8 R/S2
+#               (SPWORD)        EQUALS          ALPHAQ          +1              # ANY S.P. ERASABLE NUMBER, NOW OMEGAR
+#               ALPHAR          EQUALS          ALPHAQ          +2              # R-AXIS ACCELERATION SCALED AT PI/8 R/S2
+                                                                                # NOTE: NOW OMEGAP,OMEGAQ PRECEDE ALPHAQ
 
 # DEBRIS: L, Q, ITEMP1, ITEMP2, ITEMP6
 
