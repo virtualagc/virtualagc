@@ -9,6 +9,7 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-30 MAS  Began.
 #               2016-10-01 MAS  Completed transcription.
+#               2016-10-04 HG   Capitalize SETLOC`
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -29,7 +30,7 @@
 #       https://archive.org/details/aurora00dapg
 
 ## Page 535
-                setloc          3000
+                SETLOC          3000
 
 # AXIS TRANSFORMATION MATRIX - PILOT TO GIMBAL AXES:
 
