@@ -140,6 +140,8 @@
 #				were included in the installer.
 #		2016-08-29 RSB	Mods related to my personal-build situation, which
 #				shouldn't affect anyone else.
+#		2016-10-04 JL	Added 'format-missions' rukle to reformat all 
+#				mission sources using yaYUL.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -309,7 +311,7 @@ endif # NOGUI
 .PHONY: default
 default: all
 
-.PHONY: missions $(MISSIONS) clean-missions
+.PHONY: missions $(MISSIONS) clean-missions format-missions
 missions: $(MISSIONS)
 
 $(MISSIONS): yaYUL Tools
@@ -317,6 +319,9 @@ $(MISSIONS): yaYUL Tools
 
 clean-missions:
 	for subdir in $(MISSIONS) ; do make -C $$subdir clean ; done
+
+format-missions:
+	for subdir in $(MISSIONS) ; do make -C $$subdir format ; done
 
 .PHONY: corediffs
 corediffs: yaYUL Tools
