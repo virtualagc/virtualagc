@@ -60,11 +60,13 @@ $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst: $(SOURCE)
 	../yaYUL/yaYUL $(YAYUL_ARGS) $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >$(TOPLEVEL).agc.lst
 
 # Compare rope images, and rename output files.
-$(BASENAME).lst $(BASENAME).symtab: $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst $(BASENAME).bin
+$(BASENAME).lst: $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst $(BASENAME).bin
 ifndef NO_BINSOURCE
 	diff -s $(TOPLEVEL).agc.bin $(BASENAME).bin
 endif
 	mv $(TOPLEVEL).agc.lst $(BASENAME).lst
+
+$(BASENAME).symtab: $(BASENAME).lst
 	mv $(TOPLEVEL).agc.symtab $(BASENAME).symtab
 
 corediff.txt: $(BASENAME).bin $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst
