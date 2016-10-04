@@ -16,28 +16,7 @@
 #		2011-05-03 JL	Replaced with newer version from Artemis072.
 #				Point to moved Oct2Bin.
 #		2012-09-16 JL	Updated to match tools dir changes.
+#		2016-10-04 JL	Change to use Makefile.inc.
 
 BASENAME=Colossus249
-
-SOURCE:=$(wildcard *.agc)
-TARGETS=${BASENAME}.bin ${BASENAME}.lst 
-
-default: $(TARGETS)
-
-${BASENAME}.bin: ${BASENAME}.binsource
-	../Tools/oct2bin <${BASENAME}.binsource
-	mv oct2bin.bin $@
-
-MAIN.agc.bin MAIN.agc.lst: ${SOURCE}
-	../yaYUL/yaYUL --unpound-page --html MAIN.agc >MAIN.agc.lst
-
-${BASENAME}.lst: MAIN.agc.bin ${BASENAME}.bin
-	diff -s MAIN.agc.bin ${BASENAME}.bin
-	mv MAIN.agc.lst ${BASENAME}.lst
-	mv MAIN.agc.symtab ${BASENAME}.symtab
-
-corediff.txt: ${BASENAME}.bin MAIN.agc.bin MAIN.agc.lst
-	python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
-
-clean:
-	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html
+include ../Makefile.inc
