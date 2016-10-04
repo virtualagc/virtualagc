@@ -9,5 +9,5 @@
 # 		2016-10-04 JL	Change to use Makefile.inc.
 
 BASENAME=Sunburst120
-EXTRA_YUL_ARGS="--blk2"
+EXTRA_YAYUL_ARGS="--blk2"
 include ../Makefile.inc
