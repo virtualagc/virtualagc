@@ -79,6 +79,10 @@ using namespace std;
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
 
+extern "C" {
+
+	FILE *rfopen(const char *Filename, const char *mode);
+}
 static MainFrame* MainWindow;
 int HalfSize = 0;
 #define PULSE_INTERVAL 100
@@ -958,7 +962,7 @@ bool yaDskyApp::OnInit()
 	  
   DEBUG (-1);
 
-  Portnum = 19797;
+  Portnum = 19697;//default:CM ; LM=19797;
   for (i = 1; i < argc; i++)
     {
       wxString Arg = argv[i];
@@ -1231,7 +1235,7 @@ TimerClass::Notify ()
 	      else
 	        {	
 		  printf ("yaDSKY reports server error %d\n", errno);
-		  close (ServerSocket);
+		  _close (ServerSocket);
 		  ServerSocket = -1;
 		  break;
 	        }
@@ -1567,7 +1571,7 @@ MainFrame::OutputKeycode (int Keycode)
       j = send (ServerSocket, (const char *) Packet, 4, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
         {
-	  close (ServerSocket);
+	  _close (ServerSocket);
 	  ServerSocket = -1;
 	}
     }
@@ -1594,7 +1598,7 @@ MainFrame::OutputPro (int OffOn)
       j = send (ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
         {
-	  close (ServerSocket);
+	  _close (ServerSocket);
 	  ServerSocket = -1;
 	}
     }
@@ -1618,7 +1622,7 @@ xpm2jpg (char *s)
 int 
 MainFrame::ParseCfg (wxString &Filename)
 {
-  FILE *rfopen (const char *Filename, const char *mode);  
+ // FILE *rfopen (const char *Filename, const char *mode);  
   Ind_t *Indptr;
   char s[129], *ss, s1[1024], s2[129], s3[129];
   int i, RetVal = 1, IndNum, BitNum, Polarity, Channel, Latched, RowMask, Row;
