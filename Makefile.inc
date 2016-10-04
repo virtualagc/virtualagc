@@ -1,8 +1,8 @@
 # Copyright:	Public domain.
-# Filename:	Makefile
-# Purpose:	Makefile include for all flights.
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	http://www.ibiblio.org/apollo
+# Filename: 	Makefile.inc
+# Purpose:  	Makefile include for all flights.
+# Contact:  	Ron Burkey <info@sandroid.org>.
+# Website:  	http://www.ibiblio.org/apollo
 # Mod history:	2016-10-04 JL   Created.
 #               2016-10-04 JL   Added format target.
 
@@ -33,7 +33,9 @@ clean:
 
 %.agc.out: %.agc 
 	../yaYUL/yaYUL --format $< >$@
+ifeq "$(REFORMAT)" "yes"
 	mv -f $@ $<
+endif
 
 format: $(SOURCE:.agc=.agc.out)
 
