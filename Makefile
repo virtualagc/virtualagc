@@ -321,7 +321,7 @@ clean-missions:
 	for subdir in $(MISSIONS) ; do make -C $$subdir clean ; done
 
 format-missions:
-	for subdir in $(MISSIONS) ; do make -C $$subdir format ; done
+	for subdir in $(MISSIONS) ; do REFORMAT=no make -C $$subdir format ; done
 
 .PHONY: corediffs
 corediffs: yaYUL Tools

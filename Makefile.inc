@@ -33,7 +33,9 @@ clean:
 
 %.agc.out: %.agc 
 	../yaYUL/yaYUL --format $< >$@
+ifeq "$(REFORMAT)" "yes"
 	mv -f $@ $<
+endif
 
 format: $(SOURCE:.agc=.agc.out)
 
