@@ -14,5 +14,5 @@
 #		2016-10-04 JL	Change to use Makefile.inc.
 
 BASENAME=Solarium055
-EXTRA_YUL_ARGS="--block1"
+EXTRA_YAYUL_ARGS="--block1"
 include ../Makefile.inc
