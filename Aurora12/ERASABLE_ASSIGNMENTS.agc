@@ -7,6 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        7-25
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-04 HG   Insert missed statements
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -295,6 +296,8 @@ NOUNCADR        ERASE                                           # MACHINE CADR F
 MONSAVE         ERASE                                           # N/V CODE FOR MONITOR. (= MONSAVE1-1)
 MONSAVE1        ERASE                                           # NOUNCADR FOR MONITOR(MATBS) =MONSAVE+1
 DSPTAB          ERASE           +11D                            # 0-10D, DISPLAY PANEL BUFF. 11D, C/S LTS.
+CADRSTOR        ERASE                                           # ENDIDLE STORAGE
+GRABLOCK        ERASE                                           # INTERNAL INTERLOCK FOR DISPLAY SYSTEM 
 NVQTEM          ERASE                                           # NVSUB STORAGE FOR CALLING ADDRESS
                                                                 # MUST = NVBNKTEM-1.
 NVBNKTEM        ERASE                                           # NVSUB STORAGE FOR CALLING BANK
