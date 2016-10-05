@@ -8,6 +8,7 @@
 # Pages:        34-122
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-22 HG   Start trancription from scans using Luminary099\INTERPRETER.agc as base
+#               2016-10-04 HG   Fix FBBANK -> FBANK
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -682,7 +683,7 @@ CALL            CS              LOW10                   # FOR ANY OF THE CALL OP
                 TS              QPRET
 
 GOTO            CA              POLISH                  # BASIC BRANCHING SEQUENCE.
-                TS              FBBANK
+                TS              FBANK
                 MASK            LOW10                   # MAKE UP 12 BIT SUB-ADDRESS AND FALL INTO
                 AD              2K                      # FALL INTO THE INTPRET ENTRY UNLESS THE
                 TS              LOC                     # GIVEN ADDRESS WAS IN ERASABLE, IN WHICH

@@ -7,6 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        27-28
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-04 hg   Fix instruction argument, label
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -45,7 +46,7 @@
                 DTCB
                 
                 DXCH            ARUPT                   # T3RUPT
-                CAF             T3RUPTBB
+                CAF             T3RPTBB
                 XCH             BBANK
                 TCF             T3RUPT
                 
@@ -53,7 +54,7 @@
                 CAF             ZERO
                 TCF             T4RUPT
                 EBANK=          M11
-T4RUPTBB        BBCON           T4RUPTA
+T4RPTBB         BBCON           T4RUPTA
 
                 DXCH            ARUPT                   # KEYRUPT1
                 CAF             KEYRPTBB

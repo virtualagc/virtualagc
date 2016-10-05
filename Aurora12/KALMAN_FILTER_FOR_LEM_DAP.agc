@@ -8,6 +8,8 @@
 # Pages:        0604-0614
 # Mod history:  2016-09-20 JL   Created.
 #		2016-09-26 OH	Initial Transcription
+#               2016-10-04 HG   Add missed statements on page 607, added missing ## coments for page numbers
+#                               M520F->MS20F, READ +4 -> READ 4
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -58,7 +60,7 @@ FIRSTADR        GENADR  FILFIRST
 
 MOSTPASS        GENADR  DTCALC          # WORD IN FILTPASS FOR THESE PASSES
 
-FILTER          CAF     M52OF           # RESET TIMER IMMEDIATELY: DT = 20 MS
+FILTER          CAF     MS2OF           # RESET TIMER IMMEDIATELY: DT = 20 MS
                 TS      TIME5
 
                 LXCH    BANKRUPT        # INTERRUPT LEAD IN (CONTINUED)
@@ -91,7 +93,7 @@ FILTSTART       TC      T6JOBCHK        # CHECK T6 CLOCK FOR P-AXIS ACTIVITY
                 EXTEND                  #   WHEN IT WAS FIRST READ.
                 BZF     +4              # BRANCH IF TIME WAS THE SAME IN 2 READS.
                 EXTEND
-                READ    +4
+                READ    4
                 TS      L               # THIS TIME READ ALWAYS GIVES GOOD NO.
                 TC      STEERADR        # SKIP DTCALC DURING INITIAL PASS
 
@@ -174,11 +176,13 @@ KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
 
                 CAE     CDU3DOT         # ADOT SCALED AT PI/2(7)
                 EXTEND
-                MP DT                   # .5ADOTDT SCALED AT PI/2(11)
+                MP      DT              # .5ADOTDT SCALED AT PI/2(11)
                 TS      ITEMP5          # (SAVE FOR ALPHA INTEGRATION)
                 EXTEND
                 MP      BIT7            # RESCALE BY RIGHT SHIFT 8
                 AD      CDU2DOT         # A + .5ADOTDT SCALED AT PI/64
+                EXTEND
+                MP      DT
                 EXTEND
                 MP      BIT11           # RESCALE BY RIGHT SHIFT 4 (KEEP D.P.)
                 DAS     CDUDOT          # W = W + (A + .5ADOTDT)DT SCALED AT PI/4
@@ -188,7 +192,7 @@ KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
                 MP      BIT8            # RESCALE BY RIGHT SHIFT 7 (KEEP D.P.)
                 DAS     CDU2DOT         # A = A + ADOTDT SCALED AT PI/8
 
-# Page 0608
+## Page 0608
 
 # WEIGHTING VECTOR ADJUSTMENT EQUATIONS:
                 EXTEND                  # CONVERT CDU INTEGRATED VALUE FROM DOUBLE
@@ -239,7 +243,7 @@ KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
                 TCF      +2
                 ADS     CDUDOT
 
-# Page 0609
+## Page 0609
                 CAE     DPDIFF          # RESCALE DPDIFF TO PI/64
                 EXTEND
                 MP      BIT8            # DPDIFF (D.P.) * 128
@@ -291,7 +295,7 @@ FILTAXIS        DXCH    CDU
 ONETOTWO        DDOUBL                  # SEE RTB OP CODES IN BANK 15 FOR NOTES ON
                 CCS     A               #   THIS COMPUTATION
 
-# Page 0610
+## Page 0610
 
                 AD      ONE
                 TCF     +2
@@ -344,7 +348,7 @@ FILFIRST        LXCH    DAPTIME         # INITIALIZE TIME
                 TS      D2CDUZFL
                 TS      D2CDU2FL +1
 
-# Page 0611
+## Page 0611
 
                 TS      Y3DOT
                 TS      Z3DOT
@@ -366,7 +370,7 @@ GTS2CADR        2CADR   GTS
 
 POSTPFIL        2CADR   FILTER
 
-# Page 0612
+## Page 0612
 
 # THE KALMAN FILTER WEIGHTINF VECTORS ARE LISTED IN THE FOLLOWING TABLE ALONG WITH THE TIME FROM THE LAST FILTER
 # INITIALIZATION FOR WHICH THEY ARE TO BE USED. (THE VECTORS ARE STORED IN ORDERED TRIPLETS (W0,W1,W2) IN
@@ -419,7 +423,7 @@ WVECTOR         DEC     0.18608         # W0 FROM RELATIVE TIME 1.5 SECS OR MORE
                 DEC     0.19147         # W0 AT RELATIVE TIME = 0.85 SECONDS
                 DEC     0.05328         # W1 AT RELATIVE TIME = 0.85 SECONDS
 
-# Page 0613
+## Page 0613
 
                 DEC     0.40821         # W2 AT RELATIVE TIME = 0.85 SECONDS
                 DEC     0.19659         # W0 AT RELATIVE TIME = 0.80 SECONDS
@@ -471,7 +475,7 @@ WVECTOR         DEC     0.18608         # W0 FROM RELATIVE TIME 1.5 SECS OR MORE
                 DEC     0.61404         # W1 AT RELATIVE TIME = 0.05 SECONDS
                 DEC     0.00006         # W2 AT RELATIVE TIME = 0.05 SECONDS
 
-# Page 0614
+## Page 0614
 
 # DUMMY TRIM GIMBAL RUPT:
 DGTS            CAF     MS30F           # RESET TIMER IMMEDIATELY: DT = 30 MS
