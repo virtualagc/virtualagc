@@ -7,6 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        151-159
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-04 HG   Added missed IDLEADR
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -386,6 +387,8 @@ IM33INIT        OCT             16000                   # NO PIP OR TM FAIL SIGN
 9,6             OCT             440                     # MASK FOR PROG ALARM AND GIMBAL LOCK.
 RMODINIT        OCT             00102
 
+                EBANK=          DT
+IDLEADR         2CADR           DAPIDLER
                 EBANK=          DT
 SETADR          2CADR           SETIDLE
 SWINIT          OCT             0

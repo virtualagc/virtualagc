@@ -69,6 +69,9 @@
  * 		09/26/16 RSB	Added the --blk2 switch.  I think it may be complete,
  * 				but won't be sure until I can assembly the actual
  * 				Aurora.
+ * 		2016-10-05 JL	Added -syntax switch. This just checks the syntax
+ * 				and does not attempt symbol resolution. This is intended for 
+ * 				proofing.
  */
 
 #include "yaYUL.h"
@@ -83,6 +86,7 @@
 // Some global data.
 
 int formatOnly = 0;
+int syntaxOnly = 0;
 int Force = 0;
 char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
@@ -131,7 +135,7 @@ AgcToNative(uint16_t n)
 }
 
 // This function takes two signed integers in AGC format, adds them, and returns
-// the sum (also in AGC format).  If there's overflow or underflow, the 
+// the sum (also in AGC format).  If there's overflow or underflow, the
 // carry is added in also.  This is done because that's the goofy way the
 // AGC checksum is created.
 int
@@ -201,6 +205,14 @@ main(int argc, char *argv[])
         Hardware = 1;
       else if (!strcmp(argv[i], "--format"))
         formatOnly = 1;
+      else if (!strcmp(argv[i], "--syntax"))
+        {
+          syntaxOnly = 1;
+          formatOnly = 0;
+          Html = 0;
+          MaxPasses = 3;
+          OutputSymbols = 0;
+        }
       else if (*argv[i] == '-' || *argv[i] == '/')
         {
           printf("Unknown switch \"%s\".\n", argv[i]);
@@ -322,6 +334,7 @@ main(int argc, char *argv[])
   // but it's not worth the effort to figure it out.
 
   LastUnresolved = UnresolvedSymbols();
+
   for (i = 1; i <= MaxPasses; i++)
     {
       printf("Pass #%d\n", i);
@@ -341,6 +354,13 @@ main(int argc, char *argv[])
       LastUnresolved = k;
       //PrintSymbols ();
     }
+
+  if (syntaxOnly)
+  {
+    printf("Fatal errors:  %d\n", Fatals);
+    printf("Warnings:  %d\n", Warnings);
+    return(Fatals);
+  }
 
   // Print the symbol table.
   printf("\n\n");
@@ -521,6 +541,10 @@ main(int argc, char *argv[])
           "                 enable parity bit calculation\n");
       printf(
           "--format         Just reformat the file and re-output. Don't assemble.\n");
+      printf(
+          "--syntax         Perform syntax-checking only, no symbol resolution.\n");
+      printf(
+          "--max-passes     Set the max number of assembler passes (default: 10).\n");
     }
   if (RetVal || Fatals)
     remove(OutputFilename);
