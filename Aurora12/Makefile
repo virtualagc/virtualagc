@@ -6,7 +6,14 @@
 # Mod history:	2016-09-20 JL	Adapted from similar Luminary 099 Makefile.
 #		2016-10-04 JL	Change to use Makefile.inc.
 #		2016-10-05 JL	Pass --blk2 to yaYUL.
+#		2016-10-05 JL	Pass --syntax to yaYUL for proofing.
 
 BASENAME=Aurora12
-EXTRA_YAYUL_ARGS=--blk2
+
+# Disable binsource checking until ready.
+NO_BINSOURCE=yes
+
+# Only do syntax checking until proofing complete.
+EXTRA_YAYUL_ARGS=--blk2 --syntax
+
 include ../Makefile.inc
