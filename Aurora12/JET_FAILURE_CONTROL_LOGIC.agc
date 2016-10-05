@@ -8,6 +8,7 @@
 # Pages:        594-603
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-04 HG   transcription from scan
+#               2016-10-05 HG   BIT14 -> BIT4
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -119,7 +120,7 @@ NJETCORR        TS              1/NJETAC
 TORKSETP        INDEX           POLRELOC
                 CA              PLOTAB2
                 EXTEND
-                MP              BIT14                   # GET CODE FOR NUMBER OF Q-JETS
+                MP              BIT4                    # GET CODE FOR NUMBER OF Q-JETS
                 INDEX           A
                 CA              TORKTABL                # GET NUMBER OF Q-JETS FROM TABLE AND
                 TS              NO.QJETS                # SAVE FOR TORQUE VECTOR RECONSTRUCTION
