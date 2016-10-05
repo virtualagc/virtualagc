@@ -270,6 +270,10 @@
  *				how interrupt priorities are handled, and
  *				corrected ZRUPT to be return addr+1.
  *				Aurora 12 now passes all of SELFCHK in yaAGC.
+ *		10/04/16 MAS	Added support for standby mode, added the
+ *				standby light to the light test, and fixed
+ *				the speed of scaler counting and phasing of
+ *				TIME6.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
