@@ -841,10 +841,17 @@ PrintSymbolsToFile(FILE *fp)
           if (NULL != strstr(normalized, "&amp;"))
             width += 4;
 
-          fprintf(HtmlOut, "%06d%s:   <a href=\"%s.html#%s\">%-*s</a>   ",
-              i + 1, status, SymbolTable[i].FileName,
-              NormalizeAnchor(SymbolTable[i].Name), width, normalized);
-
+          if (SymbolTable[i].FileName[0])
+            {
+              fprintf(HtmlOut, "%06d%s:   <a href=\"%s.html#%s\">%-*s</a>   ",
+                  i + 1, status, SymbolTable[i].FileName,
+                  NormalizeAnchor(SymbolTable[i].Name), width, normalized);
+            }
+          else
+            {
+              fprintf(HtmlOut, "%06d%s:   %-*s   ",
+                  i + 1, status, width, normalized);
+            }
         }
 
       AddressPrint(&SymbolTable[i].Value);
