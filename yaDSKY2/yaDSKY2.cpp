@@ -657,7 +657,7 @@ void MainFrame::on_ProButton_pressed(wxMouseEvent &event)
   else
     {
       // Press.
-      OutputPro (1);
+      OutputPro (0);
       ProceedPressed = true;
     }
   if (NumMatches)
@@ -707,7 +707,7 @@ void MainFrame::on_LeftMouse_released(wxMouseEvent &event)
 {
     if (ProceedPressed)
     {
-        OutputPro(0);
+        OutputPro(1);
         ProceedPressed = false;
     }
 }

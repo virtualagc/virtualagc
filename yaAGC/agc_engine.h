@@ -339,6 +339,8 @@ typedef struct
   unsigned NoRupt:1;            // Set when rupts are being watched. Cleared by executing any ISR instruction
   unsigned TCTrap:1;            // Set when TC is being watched. Cleared by executing any non-TC/TCF instruction
   unsigned NoTC:1;              // Set when TC is being watched. Cleared by executing TC or TCF
+  unsigned Standby:1;           // Set while the computer is in standby mode.
+  unsigned SbyPressed:1;        // Set while PRO is being held down; cleared by releasing PRO
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;
   // The following pointer is present for whatever use the Orbiter
