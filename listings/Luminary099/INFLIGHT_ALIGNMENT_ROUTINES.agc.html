@@ -88,306 +88,306 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053183,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-053184,000003:                                                                                                  <span class="co">#  Filename:     INFLIGHT_ALIGNMENT_ROUTINES.agc</span>
-053185,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Luminary 1A build 099.</span>
-053186,000005:                                                                                                  <span class="co">#                It is part of the source code for the Lunar Module's (LM)</span>
-053187,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), for Apollo 11.</span>
-053188,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-053189,000008:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-053190,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
-053191,000010:                                                                                                  <span class="co">#  Pages:        1249-1258</span>
-053192,000011:                                                                                                  <span class="co">#  Mod history:  2009-05-26 RSB  Adapted from the corresponding </span>
-053193,000012:                                                                                                  <span class="co">#                                Luminary131 file, using page </span>
-053194,000013:                                                                                                  <span class="co">#                                images from Luminary 1A.</span>
-053195,000014: 
-053196,000015:                                                                                                  <span class="co">#  This source code has been transcribed or otherwise adapted from</span>
-053197,000016:                                                                                                  <span class="co">#  digitized images of a hardcopy from the MIT Museum.  The digitization</span>
-053198,000017:                                                                                                  <span class="co">#  was performed by Paul Fjeld, and arranged for by Deborah Douglas of</span>
-053199,000018:                                                                                                  <span class="co">#  the Museum.  Many thanks to both.  The images (with suitable reduction</span>
-053200,000019:                                                                                                  <span class="co">#  in storage size and consequent reduction in image quality as well) are</span>
-053201,000020:                                                                                                  <span class="co">#  available online at www.ibiblio.org/apollo.  If for some reason you</span>
-053202,000021:                                                                                                  <span class="co">#  find that the images are illegible, contact me at info@sandroid.org</span>
-053203,000022:                                                                                                  <span class="co">#  about getting access to the (much) higher-quality images which Paul</span>
-053204,000023:                                                                                                  <span class="co">#  actually created.</span>
-053205,000024: 
-053206,000025:                                                                                                  <span class="co">#  Notations on the hardcopy document read, in part:</span>
-053207,000026: 
-053208,000027:                                                                                                  <span class="co">#        Assemble revision 001 of AGC program LMY99 by NASA 2021112-61</span>
-053209,000028:                                                                                                  <span class="co">#        16:27 JULY 14, 1969 </span>
-053210,000029: 
-053211,000030:                                                                                                  <span class="co">#  Page 1249</span>
-053212,000031: 22,3773                                           <span class="ps">BANK    </span> 22                                    
-053213,000032: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494E464C49474854">INFLIGHT</a>                              
-053214,000033: 23,2000                                           <span class="ps">BANK    </span>                                       
-053215,000034: 
-053216,000035: 23,3247  E5,1642                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-053217,000036: 
-053218,000037:                                                                                                  <span class="co">#  CALCGTA COMPUTES THE GYRO TORQUE ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.</span>
-053219,000038: 
-053220,000039:                                                                                                  <span class="co">#  THE INPUT IS THE DESIRED STABLE MEMBER COORDINATES REFERRED TO PRESENT STABLE MEMBER COORDINATES.  THE THREE</span>
-053221,000040:                                                                                                  <span class="co">#  HALF-UNIT VECTORS ARE STORED AT XDC, YDC, AND ZDC.</span>
-053222,000041: 
-053223,000042:                                                                                                  <span class="co">#  THE OUTPUTS ARE THE THREE GYRO TORQUE ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,</span>
-053224,000043:                                                                                                  <span class="co">#  MGC, AND OGC RESPECTIVELY.</span>
-053225,000044: 
-053226,000045: 23,3247                                           <span class="ps">COUNT*  </span> $$/INFLT                              
-<a name="43414C43475441"></a>053227,000046: 23,3247           71220        <span class="sm">CALCGTA </span>           <span class="in">ITA     </span> <span class="in">DLOAD     </span>                            <span class="co">#  PUSHDOWN 00-03, 16D-27D, 34D-37D</span>
-053228,000047: 23,3250           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    <span class="co">#  XDC = (XD1 XD2 XD3)</span>
-053229,000048: 23,3251           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>                                   <span class="co">#  YDC = (YD1 YD2 YD3)</span>
-053230,000049: 23,3252           65325                           <span class="in">PDDL    </span> <span class="in">PDDL      </span>                            <span class="co">#  ZDC = (ZD1 ZD2 ZD3)</span>
-053231,000050: 23,3253           06522                                    <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4849365A45524F53">HI6ZEROS</a>                              
-053232,000051: 23,3254           02671                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +4                         
-053233,000052: 23,3255           55476                           <span class="in">DCOMP   </span> <span class="in">VDEF      </span>                            
-053234,000053: 23,3256           77656                           <span class="in">UNIT    </span>                                       
-053235,000054: 23,3257           14027                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                <span class="co">#  ZP = UNIT(-XD3 0 XD1) = (ZP1 ZP2 ZP3)</span>
-053236,000055: 23,3260           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
-053237,000056: 
-053238,000057: 23,3261           77742                           <span class="in">SR1     </span>                                       
-053239,000058: 23,3262           14023                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(IGC) = ZP1</span>
-053240,000059: 23,3263           00033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>     +4                         
-053241,000060: 23,3264           77742                           <span class="in">SR1     </span>                                       
-053242,000061: 23,3265           34021                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(IGC) = ZP3</span>
-053243,000062: 23,3266           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
-053244,000063: 
-053245,000064: 23,3267           16742                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   <span class="co">#  Y GYRO TORQUING ANGLE   FRACTION OF REV.</span>
-053246,000065: 23,3270           02667                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +2                         
-053247,000066: 23,3271           77742                           <span class="in">SR1     </span>                                       
-053248,000067: 23,3272           14023                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(MGC) = XD2</span>
-053249,000068: 23,3273           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
-053250,000069: 
-053251,000070: 23,3274           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            
-053252,000071: 23,3275           02671                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +4                         <span class="co">#  PD00 = (ZP1)(XD3)</span>
-053253,000072: 23,3276           00033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>     +4                         
-053254,000073: 
-053255,000074: 23,3277           45205                           <span class="in">DMP     </span> <span class="in">DSU       </span>                            
-053256,000075: 23,3300           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>                                   <span class="co">#  MPAC = (ZP3)(XD1)</span>
-053257,000076: 23,3301           77626                           <span class="in">STADR   </span>                                       
-053258,000077: 23,3302           43756                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(MGC) = MPAC - PD00</span>
-053259,000078: 23,3303           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
-053260,000079:                                                                                                  <span class="co">#  Page 1250</span>
-053261,000080: 23,3304           26744                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   <span class="co">#  Z GYRO TORQUING ANGLE   FRACTION OF REV.</span>
-053262,000081: 23,3305           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
-053263,000082: 23,3306           77641                           <span class="in">DOT     </span>                                       
-053264,000083: 23,3307           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4443">ZDC</a>                                   
-053265,000084: 23,3310           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(OGC) = ZP . ZDC</span>
-053266,000085: 23,3311           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
-053267,000086: 23,3312           77641                           <span class="in">DOT     </span>                                       
-053268,000087: 23,3313           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#594443">YDC</a>                                   
-053269,000088: 23,3314           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(OGC) = ZP . YDC</span>
-053270,000089: 23,3315           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
-053271,000090: 
-053272,000091: 23,3316           36740                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   <span class="co">#  X GYRO TORQUING ANGLE   FRACTION OF REV.</span>
-053273,000092: 23,3317           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-053274,000093: 
-053275,000094:                                                                                                  <span class="co">#  Page 1251</span>
-053276,000095:                                                                                                  <span class="co">#  ARCTRIG COMPUTES AN ANGLE GIVEN THE SINE AND COSINE OF THIS ANGLE.</span>
-053277,000096: 
-053278,000097:                                                                                                  <span class="co">#  THE INPUTS ARE SIN/4 AND COS/4 STORED UP AT SINTH AND COSTH.</span>
-053279,000098: 
-053280,000099:                                                                                                  <span class="co">#  THE OUTPUT IS THE CALCULATED ANGLE BETWEEN +.5 AND -.5 REVOLUTIONS AND STORED AT THETA.  THE OUTPUT IS ALSO</span>
-053281,000100:                                                                                                  <span class="co">#  AVAILABLE AT MPAC.</span>
-053282,000101: 
-<a name="41524354524947"></a>053283,000102: 23,3320           51545        <span class="sm">ARCTRIG </span>           <span class="in">DLOAD   </span> <span class="in">ABS       </span>                            <span class="co">#  PUSHDOWN  16D-21D</span>
-053284,000103: 23,3321           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
-053285,000104: 23,3322           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
-053286,000105: 23,3323           07534                                    <a href="#5154534E3435">QTSN45</a>                                <span class="co">#  ABS(SIN/4) - SIN(45)/4</span>
-053287,000106: 23,3324           47333                                    <a href="#5452494731">TRIG1</a>                                 <span class="co">#  IF (-45,45) OR (135,-135)</span>
-053288,000107: 
-053289,000108: 23,3325           72545                           <span class="in">DLOAD   </span> <span class="in">SL1       </span>                            <span class="co">#  (45,135) OR (-135,-45)</span>
-053290,000109: 23,3326           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
-053291,000110: 23,3327           75326                           <span class="in">ACOS    </span> <span class="in">SIGN      </span>                            
-053292,000111: 23,3330           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
-053293,000112: 23,3331           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = ARCCOS(COS) WITH SIGN(SIN)</span>
-053294,000113: 23,3332           77616                           <span class="in">RVQ     </span>                                       
-053295,000114: 
-<a name="5452494731"></a>053296,000115: 23,3333           72545        <span class="sm">TRIG1   </span>           <span class="in">DLOAD   </span> <span class="in">SL1       </span>                            <span class="co">#  (-45,45) OR (135,-135)</span>
-053297,000116: 23,3334           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
-053298,000117: 23,3335           77736                           <span class="in">ASIN    </span>                                       
-053299,000118: 23,3336           14025                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = ARCSIN(SIN) WITH SIGN(SIN)</span>
-053300,000119: 23,3337           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
-053301,000120: 23,3340           77640                           <span class="in">BMN     </span>                                       
-053302,000121: 23,3341           47344                                    <a href="#5452494732">TRIG2</a>                                 <span class="co">#  IF (135,-135)</span>
-053303,000122: 
-053304,000123: 23,3342           43545                           <span class="in">DLOAD   </span> <span class="in">RVQ       </span>                            
-053305,000124: 23,3343           00025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = ARCSIN(SIN)   (-45,45)</span>
-053306,000125: 
-<a name="5452494732"></a>053307,000126: 23,3344           75345        <span class="sm">TRIG2   </span>           <span class="in">DLOAD   </span> <span class="in">SIGN      </span>                            <span class="co">#  (135,-135)</span>
-053308,000127: 23,3345           06520                                    <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4849445048414C46">HIDPHALF</a>                              
-053309,000128: 23,3346           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
-053310,000129: 23,3347           77625                           <span class="in">DSU     </span>                                       
-053311,000130: 23,3350           00025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
-053312,000131: 23,3351           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = .5 WITH SIGN(SIN) - ARCSIN(SIN)</span>
-053313,000132: 23,3352           77616                           <span class="in">RVQ     </span>                                       <span class="co">#        (+) - (+) OR (-) - (-)</span>
-053314,000133: 
-053315,000134:                                                                                                  <span class="co">#  Page 1252</span>
-053316,000135:                                                                                                  <span class="co">#  SMNB, NBSM, AND AXISROT, WHICH USED TO APPEAR HERE, HAVE BEEN</span>
-053317,000136:                                                                                                  <span class="co">#  COMBINED IN A ROUTINE CALLED AX*SR*T, WHICH APPEARS AMONG THE POWERED</span>
-053318,000137:                                                                                                  <span class="co">#  FLIGHT SUBROUTINES.</span>
-053319,000138: 
-053320,000139:                                                                                                  <span class="co">#  Page 1253</span>
-053321,000140:                                                                                                  <span class="co">#  CALCGA COMPUTES THE CDU DRIVING ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.</span>
-053322,000141: 
-053323,000142:                                                                                                  <span class="co">#  THE INPUTS ARE  1) THE NAVIGATION BASE COORDINATES REFERRED TO ANY COORDINATE SYSTEM.  THE THREE HALF-UNIT</span>
-053324,000143:                                                                                                  <span class="co">#  VECTORS ARE STORED AT XNB, YNB, AND ZNB.  2) THE DESIRED STABLE MEMBER COORDINATES REFERRED TO THE SAME</span>
-053325,000144:                                                                                                  <span class="co">#  COORDINATE SYSTEM ARE STORED AT XSM, YSM, AND ZSM.</span>
-053326,000145: 
-053327,000146:                                                                                                  <span class="co">#  THE OUTPUTS ARE THE THREE CDU DRIVING ANGLES AND ARE STORED SP AT THETAD, THETAD +1, AND THETAD +2.</span>
-053328,000147: 
-<a name="43414C434741"></a>053329,000148: 23,3353           77601        <span class="sm">CALCGA  </span>           <span class="in">SETPD   </span>                                       <span class="co">#  PUSHDOWN 00-05, 16D-21D, 34D-37D</span>
-053330,000149: 23,3354           00001                                    0                                     
-053331,000150: 23,3355           47375                           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
-053332,000151: 23,3356           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   <span class="co">#  XNB = OGA (OUTER GIMBAL AXIS)</span>
-053333,000152: 23,3357           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59534D">YSM</a>                                   <span class="co">#  YSM = IGA (INNER GIMBAL AXIS)</span>
-053334,000153: 23,3360           41456                           <span class="in">UNIT    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD0 = UNIT(OGA X IGA) = MGA</span>
-053335,000154: 
-053336,000155: 23,3361           44041                           <span class="in">DOT     </span> <span class="in">ITA       </span>                            
-053337,000156: 23,3362           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4E42">ZNB</a>                                   
-053338,000157: 23,3363           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-053339,000158: 23,3364           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(OG) = MGA . ZNB</span>
-053340,000159: 23,3365           00001                                    0                                     
-053341,000160: 23,3366           77641                           <span class="in">DOT     </span>                                       
-053342,000161: 23,3367           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#594E42">YNB</a>                                   
-053343,000162: 23,3370           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(OG) = MGA . YNB</span>
-053344,000163: 23,3371           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
-053345,000164: 23,3372           26740                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
-053346,000165: 23,3373           00001                                    0                                     
-053347,000166: 
-053348,000167: 23,3374           50235                           <span class="in">VXV     </span> <span class="in">DOT       </span>                            <span class="co">#  PROVISION FOR MG ANGLE OF 90 DEGREES</span>
-053349,000168: 23,3375           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
-053350,000169: 23,3376           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59534D">YSM</a>                                   
-053351,000170: 23,3377           77752                           <span class="in">SL1     </span>                                       
-053352,000171: 23,3400           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(MG) = IGA . (MGA X OGA)</span>
-053353,000172: 23,3401           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59534D">YSM</a>                                   
-053354,000173: 23,3402           77641                           <span class="in">DOT     </span>                                       
-053355,000174: 23,3403           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
-053356,000175: 23,3404           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(MG) = IGA . OGA</span>
-053357,000176: 23,3405           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
-053358,000177: 23,3406           02744                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
-053359,000178: 
-053360,000179: 23,3407           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            
-053361,000180: 23,3410           07536                                    <a href="#2E3136362E2E2E">.166...</a>                               
-053362,000181: 23,3411           77644                           <span class="in">BPL     </span>                                       
-053363,000182: 23,3412           47431                                    <a href="#47494D4C4F434B31">GIMLOCK1</a>                              <span class="co">#  IF ANGLE GREATER THAN 60 DEGREES</span>
-053364,000183: 
-<a name="43414C43474131"></a>053365,000184: 23,3413           50375        <span class="sm">CALCGA1 </span>           <span class="in">VLOAD   </span> <span class="in">DOT       </span>                            
-053366,000185: 23,3414           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A534D">ZSM</a>                                   
-053367,000186: 23,3415           00001                                    0                                     
-053368,000187: 23,3416           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(IG) = ZSM . MGA</span>
-053369,000188: 23,3417           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-053370,000189:                                                                                                  <span class="co">#  Page 1254</span>
-053371,000190: 23,3420           45441                           <span class="in">DOT     </span> <span class="in">STADR     </span>                            
-053372,000191: 23,3421           43754                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(IG) = XSM . MGA</span>
-053373,000192: 23,3422           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
-053374,000193: 
-053375,000194: 23,3423           26742                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
-053376,000195: 23,3424           02740                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
-053377,000196: 23,3425           77634                           <span class="in">RTB     </span>                                       
-053378,000197: 23,3426           21620                                    <a href="RTB_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               
-053379,000198: 23,3427           34322                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>                                
-053380,000199: 23,3430           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-053381,000200: 
-<a name="47494D4C4F434B31"></a>053382,000201: 23,3431           77776        <span class="sm">GIMLOCK1</span>           <span class="in">EXIT    </span>                                       
-053383,000202: 23,3432           05567                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
-053384,000203: 23,3433           00401                           <span class="ps">OCT     </span> 00401                                 
-053385,000204: 23,3434           05504                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  GIMBAL LOCK HAS OCCURRED</span>
-053386,000205: 23,3435           00056                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#474C4F4B4641494C">GLOKFAIL</a>                              
-053387,000206: 
-053388,000207: 23,3436           06037                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-053389,000208: 23,3437           77650                           <span class="in">GOTO    </span>                                       
-053390,000209: 23,3440           47413                                    <a href="#43414C43474131">CALCGA1</a>                               
-053391,000210: 
-053392,000211:                                                                                                  <span class="co">#  Page 1255</span>
-053393,000212:                                                                                                  <span class="co">#  AXISGEN COMPUTES THE COORDINATES OF ONE COORDINATE SYSTEM REFERRED TO ANOTHER COORDINATE SYSTEM.</span>
-053394,000213: 
-053395,000214:                                                                                                  <span class="co">#  THE INPUTS ARE  1) THE STAR1 VECTOR REFERRED TO COORDINATE SYSTEM A STORED AT STARAD.  2) THE STAR2 VECTOR</span>
-053396,000215:                                                                                                  <span class="co">#  REFERRED TO COORDINATE SYSTEM A STORED AT STARAD +6.  3) THE STAR1 VECTOR REFERRED TO COORDINATE SYSTEM B STORED</span>
-053397,000216:                                                                                                  <span class="co">#  AT LOCATION 6 OF THE VAC AREA.  4) THE STAR2 VECTOR REFERRED TO COORDINATE SYSTEM B STORED AT LOCATION 12D OF</span>
-053398,000217:                                                                                                  <span class="co">#  THE VAC AREA.</span>
-053399,000218: 
-053400,000219:                                                                                                  <span class="co">#  THE OUTPUT DEFINES COORDINATE SYSTEM A REFERRED TO COORDINATE SYSTEM B.  THE THREE HALF-UNIT VECTORS ARE STORED</span>
-053401,000220:                                                                                                  <span class="co">#  AT LOCATIONS XDC, XDC +6, XDC +12D, AND STARAD, STARAD +6, STARAD +12D.</span>
-053402,000221: 
-<a name="4158495347454E"></a>053403,000222: 23,3441           66370        <span class="sm">AXISGEN </span>           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  PUSHDOWN 00-30D, 34D-37D</span>
-053404,000223: 23,3442           02714                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6                         
-053405,000224: 23,3443           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-053406,000225: 23,3444           02700                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     -6                         
-053407,000226: 
-053408,000227: 23,3445           77601                           <span class="in">SETPD   </span>                                       
-053409,000228: 23,3446           00001                                    0                                     
-<a name="4158495347454E31"></a>053410,000229: 23,3447           46773        <span class="sm">AXISGEN1</span>           <span class="in">VLOAD*  </span> <span class="in">VXV*      </span>                            <span class="co">#  06D   UA = S1</span>
-053411,000230: 23,3450           02723                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D,1                     <span class="co">#        STARAD +00D     UB = S1</span>
-053412,000231: 23,3451           02731                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,1                     
-053413,000232: 23,3452           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  12D   VA = UNIT(S1 X S2)</span>
-053414,000233: 23,3453           06731                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,1                     <span class="co">#        STARAD +06D     VB = UNIT(S1 X S2)</span>
-053415,000234: 23,3454           77773                           <span class="in">VLOAD*  </span>                                       
-053416,000235: 23,3455           02723                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D,1                     
-053417,000236: 
-053418,000237: 23,3456           76433                           <span class="in">VXV*    </span> <span class="in">VSL1      </span>                            
-053419,000238: 23,3457           02731                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,1                     <span class="co">#  18D   WA = UA X VA</span>
-053420,000239: 23,3460           06737                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +24D,1                     <span class="co">#        STARAD +12D     WB = UB X VB</span>
-053421,000240: 
-053422,000241: 23,3461           77700                           <span class="in">TIX,1   </span>                                       
-053423,000242: 23,3462           47447                                    <a href="#4158495347454E31">AXISGEN1</a>                              
-053424,000243: 
-053425,000244: 23,3463           66160                           <span class="in">AXC,1   </span> <span class="in">SXA,1     </span>                            
-053426,000245: 23,3464           00006                                    6                                     
-053427,000246: 23,3465           00036                                    30D                                   
-053428,000247: 
-053429,000248: 23,3466           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            
-053430,000249: 23,3467           00022                                    18D                                   
-053431,000250: 23,3470           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-053432,000251: 23,3471           00006                                    6                                     
-053433,000252: 
-053434,000253: 23,3472           66374                           <span class="in">AXT,2   </span> <span class="in">SSP       </span>                            
-053435,000254: 23,3473           00006                                    6                                     
-053436,000255: 23,3474           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-053437,000256: 23,3475           00002                                    2                                     
-053438,000257: 
-<a name="4158495347454E32"></a>053439,000258: 23,3476           76720        <span class="sm">AXISGEN2</span>           <span class="in">XCHX,1  </span> <span class="in">VLOAD*    </span>                            
-053440,000259: 23,3477           00036                                    30D                                   <span class="co">#  X1=-6 X2=+6   X1=-6 X2=+4     X1=-6 X2=+2</span>
-053441,000260: 23,3500           00001                                    0,1                                   
-053442,000261: 
-053443,000262:                                                                                                  <span class="co">#  Page 1256</span>
-053444,000263: 23,3501           62757                           <span class="in">VXSC*   </span> <span class="in">PDVL*     </span>                            <span class="co">#  J=(UA)(UB1)   J=(UA)(UB2)     J=(UA)(UB3)</span>
-053445,000264: 23,3502           75062                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6,2                       
-053446,000265: 23,3503           00007                                    6,1                                   
-053447,000266: 23,3504           77757                           <span class="in">VXSC*   </span>                                       
-053448,000267: 23,3505           75054                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D,2                     
-053449,000268: 23,3506           30031                           <span class="in">STOVL*  </span> 24D                                   <span class="co">#  K=(VA)(VB1)   J=(VA)(VB2)     J=(VA)(VB3)</span>
-053450,000269: 23,3507           00015                                    12D,1                                 
-053451,000270: 
-053452,000271: 23,3510           53357                           <span class="in">VXSC*   </span> <span class="in">VAD       </span>                            
-053453,000272: 23,3511           75046                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,2                     <span class="co">#  L=(WA)(WB1)   J=(WA)(WB2)     J=(WA)(WB3)</span>
-053454,000273: 23,3512           76455                           <span class="in">VAD     </span> <span class="in">VSL1      </span>                            
-053455,000274: 23,3513           00031                                    24D                                   
-053456,000275: 23,3514           53520                           <span class="in">XCHX,1  </span> <span class="in">UNIT      </span>                            
-053457,000276: 23,3515           00036                                    30D                                   
-053458,000277: 23,3516           06707                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +18D,1                     <span class="co">#  XDC = L+J+K   YDC = L+J+K     ZDC = L+J+K</span>
-053459,000278: 
-053460,000279: 23,3517           77700                           <span class="in">TIX,1   </span>                                       
-053461,000280: 23,3520           47521                                    <a href="#4158495347454E33">AXISGEN3</a>                              
-053462,000281: 
-<a name="4158495347454E33"></a>053463,000282: 23,3521           77704        <span class="sm">AXISGEN3</span>           <span class="in">TIX,2   </span>                                       
-053464,000283: 23,3522           47476                                    <a href="#4158495347454E32">AXISGEN2</a>                              
-053465,000284: 
-053466,000285: 23,3523           77775                           <span class="in">VLOAD   </span>                                       
-053467,000286: 23,3524           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>                                   
-053468,000287: 23,3525           26707                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>                                
-053469,000288: 23,3526           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#594443">YDC</a>                                   
-053470,000289: 23,3527           26715                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6                         
-053471,000290: 23,3530           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4443">ZDC</a>                                   
-053472,000291: 23,3531           02723                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D                       
-053473,000292: 
-053474,000293: 23,3532           77616                           <span class="in">RVQ     </span>                                       
-053475,000294: 
-053476,000295:                                                                                                  <span class="co">#  Page 1257</span>
-<a name="5154534E3435"></a>053477,000296: 23,3533           05520 26075  <span class="sm">QTSN45  </span>           <span class="ps">2DEC    </span> .1768                                 
-053478,000297: 
-<a name="2E3136362E2E2E"></a>053479,000298: 23,3535           05252 25253  <span class="sm">.166... </span>           <span class="ps">2DEC    </span> .1666666667                            
-053480,000299: 
-053481,000300:                                                                                                  <span class="co">#  Page 1258 (empty page)</span>
-053482,000301: 
+053185,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
+053186,000003:                                                                                                  <span class="co">#  Filename:     INFLIGHT_ALIGNMENT_ROUTINES.agc</span>
+053187,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Luminary 1A build 099.</span>
+053188,000005:                                                                                                  <span class="co">#                It is part of the source code for the Lunar Module's (LM)</span>
+053189,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), for Apollo 11.</span>
+053190,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
+053191,000008:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+053192,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
+053193,000010:                                                                                                  <span class="co">#  Pages:        1249-1258</span>
+053194,000011:                                                                                                  <span class="co">#  Mod history:  2009-05-26 RSB  Adapted from the corresponding </span>
+053195,000012:                                                                                                  <span class="co">#                                Luminary131 file, using page </span>
+053196,000013:                                                                                                  <span class="co">#                                images from Luminary 1A.</span>
+053197,000014: 
+053198,000015:                                                                                                  <span class="co">#  This source code has been transcribed or otherwise adapted from</span>
+053199,000016:                                                                                                  <span class="co">#  digitized images of a hardcopy from the MIT Museum.  The digitization</span>
+053200,000017:                                                                                                  <span class="co">#  was performed by Paul Fjeld, and arranged for by Deborah Douglas of</span>
+053201,000018:                                                                                                  <span class="co">#  the Museum.  Many thanks to both.  The images (with suitable reduction</span>
+053202,000019:                                                                                                  <span class="co">#  in storage size and consequent reduction in image quality as well) are</span>
+053203,000020:                                                                                                  <span class="co">#  available online at www.ibiblio.org/apollo.  If for some reason you</span>
+053204,000021:                                                                                                  <span class="co">#  find that the images are illegible, contact me at info@sandroid.org</span>
+053205,000022:                                                                                                  <span class="co">#  about getting access to the (much) higher-quality images which Paul</span>
+053206,000023:                                                                                                  <span class="co">#  actually created.</span>
+053207,000024: 
+053208,000025:                                                                                                  <span class="co">#  Notations on the hardcopy document read, in part:</span>
+053209,000026: 
+053210,000027:                                                                                                  <span class="co">#        Assemble revision 001 of AGC program LMY99 by NASA 2021112-61</span>
+053211,000028:                                                                                                  <span class="co">#        16:27 JULY 14, 1969 </span>
+053212,000029: 
+053213,000030:                                                                                                  <span class="co">#  Page 1249</span>
+053214,000031: 22,3773                                           <span class="ps">BANK    </span> 22                                    
+053215,000032: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#494E464C49474854">INFLIGHT</a>                              
+053216,000033: 23,2000                                           <span class="ps">BANK    </span>                                       
+053217,000034: 
+053218,000035: 23,3247  E5,1642                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+053219,000036: 
+053220,000037:                                                                                                  <span class="co">#  CALCGTA COMPUTES THE GYRO TORQUE ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.</span>
+053221,000038: 
+053222,000039:                                                                                                  <span class="co">#  THE INPUT IS THE DESIRED STABLE MEMBER COORDINATES REFERRED TO PRESENT STABLE MEMBER COORDINATES.  THE THREE</span>
+053223,000040:                                                                                                  <span class="co">#  HALF-UNIT VECTORS ARE STORED AT XDC, YDC, AND ZDC.</span>
+053224,000041: 
+053225,000042:                                                                                                  <span class="co">#  THE OUTPUTS ARE THE THREE GYRO TORQUE ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,</span>
+053226,000043:                                                                                                  <span class="co">#  MGC, AND OGC RESPECTIVELY.</span>
+053227,000044: 
+053228,000045: 23,3247                                           <span class="ps">COUNT*  </span> $$/INFLT                              
+<a name="43414C43475441"></a>053229,000046: 23,3247           71220        <span class="sm">CALCGTA </span>           <span class="in">ITA     </span> <span class="in">DLOAD     </span>                            <span class="co">#  PUSHDOWN 00-03, 16D-27D, 34D-37D</span>
+053230,000047: 23,3250           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    <span class="co">#  XDC = (XD1 XD2 XD3)</span>
+053231,000048: 23,3251           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>                                   <span class="co">#  YDC = (YD1 YD2 YD3)</span>
+053232,000049: 23,3252           65325                           <span class="in">PDDL    </span> <span class="in">PDDL      </span>                            <span class="co">#  ZDC = (ZD1 ZD2 ZD3)</span>
+053233,000050: 23,3253           06522                                    <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4849365A45524F53">HI6ZEROS</a>                              
+053234,000051: 23,3254           02671                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +4                         
+053235,000052: 23,3255           55476                           <span class="in">DCOMP   </span> <span class="in">VDEF      </span>                            
+053236,000053: 23,3256           77656                           <span class="in">UNIT    </span>                                       
+053237,000054: 23,3257           14027                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                <span class="co">#  ZP = UNIT(-XD3 0 XD1) = (ZP1 ZP2 ZP3)</span>
+053238,000055: 23,3260           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
+053239,000056: 
+053240,000057: 23,3261           77742                           <span class="in">SR1     </span>                                       
+053241,000058: 23,3262           14023                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(IGC) = ZP1</span>
+053242,000059: 23,3263           00033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>     +4                         
+053243,000060: 23,3264           77742                           <span class="in">SR1     </span>                                       
+053244,000061: 23,3265           34021                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(IGC) = ZP3</span>
+053245,000062: 23,3266           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
+053246,000063: 
+053247,000064: 23,3267           16742                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   <span class="co">#  Y GYRO TORQUING ANGLE   FRACTION OF REV.</span>
+053248,000065: 23,3270           02667                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +2                         
+053249,000066: 23,3271           77742                           <span class="in">SR1     </span>                                       
+053250,000067: 23,3272           14023                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(MGC) = XD2</span>
+053251,000068: 23,3273           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
+053252,000069: 
+053253,000070: 23,3274           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            
+053254,000071: 23,3275           02671                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +4                         <span class="co">#  PD00 = (ZP1)(XD3)</span>
+053255,000072: 23,3276           00033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>     +4                         
+053256,000073: 
+053257,000074: 23,3277           45205                           <span class="in">DMP     </span> <span class="in">DSU       </span>                            
+053258,000075: 23,3300           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>                                   <span class="co">#  MPAC = (ZP3)(XD1)</span>
+053259,000076: 23,3301           77626                           <span class="in">STADR   </span>                                       
+053260,000077: 23,3302           43756                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(MGC) = MPAC - PD00</span>
+053261,000078: 23,3303           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
+053262,000079:                                                                                                  <span class="co">#  Page 1250</span>
+053263,000080: 23,3304           26744                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   <span class="co">#  Z GYRO TORQUING ANGLE   FRACTION OF REV.</span>
+053264,000081: 23,3305           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
+053265,000082: 23,3306           77641                           <span class="in">DOT     </span>                                       
+053266,000083: 23,3307           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4443">ZDC</a>                                   
+053267,000084: 23,3310           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(OGC) = ZP . ZDC</span>
+053268,000085: 23,3311           00027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A5052494D45">ZPRIME</a>                                
+053269,000086: 23,3312           77641                           <span class="in">DOT     </span>                                       
+053270,000087: 23,3313           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#594443">YDC</a>                                   
+053271,000088: 23,3314           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(OGC) = ZP . YDC</span>
+053272,000089: 23,3315           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
+053273,000090: 
+053274,000091: 23,3316           36740                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   <span class="co">#  X GYRO TORQUING ANGLE   FRACTION OF REV.</span>
+053275,000092: 23,3317           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+053276,000093: 
+053277,000094:                                                                                                  <span class="co">#  Page 1251</span>
+053278,000095:                                                                                                  <span class="co">#  ARCTRIG COMPUTES AN ANGLE GIVEN THE SINE AND COSINE OF THIS ANGLE.</span>
+053279,000096: 
+053280,000097:                                                                                                  <span class="co">#  THE INPUTS ARE SIN/4 AND COS/4 STORED UP AT SINTH AND COSTH.</span>
+053281,000098: 
+053282,000099:                                                                                                  <span class="co">#  THE OUTPUT IS THE CALCULATED ANGLE BETWEEN +.5 AND -.5 REVOLUTIONS AND STORED AT THETA.  THE OUTPUT IS ALSO</span>
+053283,000100:                                                                                                  <span class="co">#  AVAILABLE AT MPAC.</span>
+053284,000101: 
+<a name="41524354524947"></a>053285,000102: 23,3320           51545        <span class="sm">ARCTRIG </span>           <span class="in">DLOAD   </span> <span class="in">ABS       </span>                            <span class="co">#  PUSHDOWN  16D-21D</span>
+053286,000103: 23,3321           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
+053287,000104: 23,3322           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
+053288,000105: 23,3323           07534                                    <a href="#5154534E3435">QTSN45</a>                                <span class="co">#  ABS(SIN/4) - SIN(45)/4</span>
+053289,000106: 23,3324           47333                                    <a href="#5452494731">TRIG1</a>                                 <span class="co">#  IF (-45,45) OR (135,-135)</span>
+053290,000107: 
+053291,000108: 23,3325           72545                           <span class="in">DLOAD   </span> <span class="in">SL1       </span>                            <span class="co">#  (45,135) OR (-135,-45)</span>
+053292,000109: 23,3326           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
+053293,000110: 23,3327           75326                           <span class="in">ACOS    </span> <span class="in">SIGN      </span>                            
+053294,000111: 23,3330           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
+053295,000112: 23,3331           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = ARCCOS(COS) WITH SIGN(SIN)</span>
+053296,000113: 23,3332           77616                           <span class="in">RVQ     </span>                                       
+053297,000114: 
+<a name="5452494731"></a>053298,000115: 23,3333           72545        <span class="sm">TRIG1   </span>           <span class="in">DLOAD   </span> <span class="in">SL1       </span>                            <span class="co">#  (-45,45) OR (135,-135)</span>
+053299,000116: 23,3334           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
+053300,000117: 23,3335           77736                           <span class="in">ASIN    </span>                                       
+053301,000118: 23,3336           14025                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = ARCSIN(SIN) WITH SIGN(SIN)</span>
+053302,000119: 23,3337           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
+053303,000120: 23,3340           77640                           <span class="in">BMN     </span>                                       
+053304,000121: 23,3341           47344                                    <a href="#5452494732">TRIG2</a>                                 <span class="co">#  IF (135,-135)</span>
+053305,000122: 
+053306,000123: 23,3342           43545                           <span class="in">DLOAD   </span> <span class="in">RVQ       </span>                            
+053307,000124: 23,3343           00025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = ARCSIN(SIN)   (-45,45)</span>
+053308,000125: 
+<a name="5452494732"></a>053309,000126: 23,3344           75345        <span class="sm">TRIG2   </span>           <span class="in">DLOAD   </span> <span class="in">SIGN      </span>                            <span class="co">#  (135,-135)</span>
+053310,000127: 23,3345           06520                                    <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4849445048414C46">HIDPHALF</a>                              
+053311,000128: 23,3346           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
+053312,000129: 23,3347           77625                           <span class="in">DSU     </span>                                       
+053313,000130: 23,3350           00025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
+053314,000131: 23,3351           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 <span class="co">#  X = .5 WITH SIGN(SIN) - ARCSIN(SIN)</span>
+053315,000132: 23,3352           77616                           <span class="in">RVQ     </span>                                       <span class="co">#        (+) - (+) OR (-) - (-)</span>
+053316,000133: 
+053317,000134:                                                                                                  <span class="co">#  Page 1252</span>
+053318,000135:                                                                                                  <span class="co">#  SMNB, NBSM, AND AXISROT, WHICH USED TO APPEAR HERE, HAVE BEEN</span>
+053319,000136:                                                                                                  <span class="co">#  COMBINED IN A ROUTINE CALLED AX*SR*T, WHICH APPEARS AMONG THE POWERED</span>
+053320,000137:                                                                                                  <span class="co">#  FLIGHT SUBROUTINES.</span>
+053321,000138: 
+053322,000139:                                                                                                  <span class="co">#  Page 1253</span>
+053323,000140:                                                                                                  <span class="co">#  CALCGA COMPUTES THE CDU DRIVING ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.</span>
+053324,000141: 
+053325,000142:                                                                                                  <span class="co">#  THE INPUTS ARE  1) THE NAVIGATION BASE COORDINATES REFERRED TO ANY COORDINATE SYSTEM.  THE THREE HALF-UNIT</span>
+053326,000143:                                                                                                  <span class="co">#  VECTORS ARE STORED AT XNB, YNB, AND ZNB.  2) THE DESIRED STABLE MEMBER COORDINATES REFERRED TO THE SAME</span>
+053327,000144:                                                                                                  <span class="co">#  COORDINATE SYSTEM ARE STORED AT XSM, YSM, AND ZSM.</span>
+053328,000145: 
+053329,000146:                                                                                                  <span class="co">#  THE OUTPUTS ARE THE THREE CDU DRIVING ANGLES AND ARE STORED SP AT THETAD, THETAD +1, AND THETAD +2.</span>
+053330,000147: 
+<a name="43414C434741"></a>053331,000148: 23,3353           77601        <span class="sm">CALCGA  </span>           <span class="in">SETPD   </span>                                       <span class="co">#  PUSHDOWN 00-05, 16D-21D, 34D-37D</span>
+053332,000149: 23,3354           00001                                    0                                     
+053333,000150: 23,3355           47375                           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
+053334,000151: 23,3356           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   <span class="co">#  XNB = OGA (OUTER GIMBAL AXIS)</span>
+053335,000152: 23,3357           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59534D">YSM</a>                                   <span class="co">#  YSM = IGA (INNER GIMBAL AXIS)</span>
+053336,000153: 23,3360           41456                           <span class="in">UNIT    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD0 = UNIT(OGA X IGA) = MGA</span>
+053337,000154: 
+053338,000155: 23,3361           44041                           <span class="in">DOT     </span> <span class="in">ITA       </span>                            
+053339,000156: 23,3362           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4E42">ZNB</a>                                   
+053340,000157: 23,3363           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+053341,000158: 23,3364           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(OG) = MGA . ZNB</span>
+053342,000159: 23,3365           00001                                    0                                     
+053343,000160: 23,3366           77641                           <span class="in">DOT     </span>                                       
+053344,000161: 23,3367           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#594E42">YNB</a>                                   
+053345,000162: 23,3370           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(OG) = MGA . YNB</span>
+053346,000163: 23,3371           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
+053347,000164: 23,3372           26740                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+053348,000165: 23,3373           00001                                    0                                     
+053349,000166: 
+053350,000167: 23,3374           50235                           <span class="in">VXV     </span> <span class="in">DOT       </span>                            <span class="co">#  PROVISION FOR MG ANGLE OF 90 DEGREES</span>
+053351,000168: 23,3375           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
+053352,000169: 23,3376           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59534D">YSM</a>                                   
+053353,000170: 23,3377           77752                           <span class="in">SL1     </span>                                       
+053354,000171: 23,3400           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(MG) = IGA . (MGA X OGA)</span>
+053355,000172: 23,3401           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59534D">YSM</a>                                   
+053356,000173: 23,3402           77641                           <span class="in">DOT     </span>                                       
+053357,000174: 23,3403           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
+053358,000175: 23,3404           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(MG) = IGA . OGA</span>
+053359,000176: 23,3405           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
+053360,000177: 23,3406           02744                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
+053361,000178: 
+053362,000179: 23,3407           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            
+053363,000180: 23,3410           07536                                    <a href="#2E3136362E2E2E">.166...</a>                               
+053364,000181: 23,3411           77644                           <span class="in">BPL     </span>                                       
+053365,000182: 23,3412           47431                                    <a href="#47494D4C4F434B31">GIMLOCK1</a>                              <span class="co">#  IF ANGLE GREATER THAN 60 DEGREES</span>
+053366,000183: 
+<a name="43414C43474131"></a>053367,000184: 23,3413           50375        <span class="sm">CALCGA1 </span>           <span class="in">VLOAD   </span> <span class="in">DOT       </span>                            
+053368,000185: 23,3414           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A534D">ZSM</a>                                   
+053369,000186: 23,3415           00001                                    0                                     
+053370,000187: 23,3416           24021                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(IG) = ZSM . MGA</span>
+053371,000188: 23,3417           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+053372,000189:                                                                                                  <span class="co">#  Page 1254</span>
+053373,000190: 23,3420           45441                           <span class="in">DOT     </span> <span class="in">STADR     </span>                            
+053374,000191: 23,3421           43754                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(IG) = XSM . MGA</span>
+053375,000192: 23,3422           47320                                    <a href="#41524354524947">ARCTRIG</a>                               
+053376,000193: 
+053377,000194: 23,3423           26742                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
+053378,000195: 23,3424           02740                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+053379,000196: 23,3425           77634                           <span class="in">RTB     </span>                                       
+053380,000197: 23,3426           21620                                    <a href="RTB_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               
+053381,000198: 23,3427           34322                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>                                
+053382,000199: 23,3430           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+053383,000200: 
+<a name="47494D4C4F434B31"></a>053384,000201: 23,3431           77776        <span class="sm">GIMLOCK1</span>           <span class="in">EXIT    </span>                                       
+053385,000202: 23,3432           05567                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
+053386,000203: 23,3433           00401                           <span class="ps">OCT     </span> 00401                                 
+053387,000204: 23,3434           05504                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  GIMBAL LOCK HAS OCCURRED</span>
+053388,000205: 23,3435           00056                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#474C4F4B4641494C">GLOKFAIL</a>                              
+053389,000206: 
+053390,000207: 23,3436           06037                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+053391,000208: 23,3437           77650                           <span class="in">GOTO    </span>                                       
+053392,000209: 23,3440           47413                                    <a href="#43414C43474131">CALCGA1</a>                               
+053393,000210: 
+053394,000211:                                                                                                  <span class="co">#  Page 1255</span>
+053395,000212:                                                                                                  <span class="co">#  AXISGEN COMPUTES THE COORDINATES OF ONE COORDINATE SYSTEM REFERRED TO ANOTHER COORDINATE SYSTEM.</span>
+053396,000213: 
+053397,000214:                                                                                                  <span class="co">#  THE INPUTS ARE  1) THE STAR1 VECTOR REFERRED TO COORDINATE SYSTEM A STORED AT STARAD.  2) THE STAR2 VECTOR</span>
+053398,000215:                                                                                                  <span class="co">#  REFERRED TO COORDINATE SYSTEM A STORED AT STARAD +6.  3) THE STAR1 VECTOR REFERRED TO COORDINATE SYSTEM B STORED</span>
+053399,000216:                                                                                                  <span class="co">#  AT LOCATION 6 OF THE VAC AREA.  4) THE STAR2 VECTOR REFERRED TO COORDINATE SYSTEM B STORED AT LOCATION 12D OF</span>
+053400,000217:                                                                                                  <span class="co">#  THE VAC AREA.</span>
+053401,000218: 
+053402,000219:                                                                                                  <span class="co">#  THE OUTPUT DEFINES COORDINATE SYSTEM A REFERRED TO COORDINATE SYSTEM B.  THE THREE HALF-UNIT VECTORS ARE STORED</span>
+053403,000220:                                                                                                  <span class="co">#  AT LOCATIONS XDC, XDC +6, XDC +12D, AND STARAD, STARAD +6, STARAD +12D.</span>
+053404,000221: 
+<a name="4158495347454E"></a>053405,000222: 23,3441           66370        <span class="sm">AXISGEN </span>           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  PUSHDOWN 00-30D, 34D-37D</span>
+053406,000223: 23,3442           02714                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6                         
+053407,000224: 23,3443           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+053408,000225: 23,3444           02700                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     -6                         
+053409,000226: 
+053410,000227: 23,3445           77601                           <span class="in">SETPD   </span>                                       
+053411,000228: 23,3446           00001                                    0                                     
+<a name="4158495347454E31"></a>053412,000229: 23,3447           46773        <span class="sm">AXISGEN1</span>           <span class="in">VLOAD*  </span> <span class="in">VXV*      </span>                            <span class="co">#  06D   UA = S1</span>
+053413,000230: 23,3450           02723                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D,1                     <span class="co">#        STARAD +00D     UB = S1</span>
+053414,000231: 23,3451           02731                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,1                     
+053415,000232: 23,3452           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  12D   VA = UNIT(S1 X S2)</span>
+053416,000233: 23,3453           06731                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,1                     <span class="co">#        STARAD +06D     VB = UNIT(S1 X S2)</span>
+053417,000234: 23,3454           77773                           <span class="in">VLOAD*  </span>                                       
+053418,000235: 23,3455           02723                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D,1                     
+053419,000236: 
+053420,000237: 23,3456           76433                           <span class="in">VXV*    </span> <span class="in">VSL1      </span>                            
+053421,000238: 23,3457           02731                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,1                     <span class="co">#  18D   WA = UA X VA</span>
+053422,000239: 23,3460           06737                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +24D,1                     <span class="co">#        STARAD +12D     WB = UB X VB</span>
+053423,000240: 
+053424,000241: 23,3461           77700                           <span class="in">TIX,1   </span>                                       
+053425,000242: 23,3462           47447                                    <a href="#4158495347454E31">AXISGEN1</a>                              
+053426,000243: 
+053427,000244: 23,3463           66160                           <span class="in">AXC,1   </span> <span class="in">SXA,1     </span>                            
+053428,000245: 23,3464           00006                                    6                                     
+053429,000246: 23,3465           00036                                    30D                                   
+053430,000247: 
+053431,000248: 23,3466           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            
+053432,000249: 23,3467           00022                                    18D                                   
+053433,000250: 23,3470           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+053434,000251: 23,3471           00006                                    6                                     
+053435,000252: 
+053436,000253: 23,3472           66374                           <span class="in">AXT,2   </span> <span class="in">SSP       </span>                            
+053437,000254: 23,3473           00006                                    6                                     
+053438,000255: 23,3474           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+053439,000256: 23,3475           00002                                    2                                     
+053440,000257: 
+<a name="4158495347454E32"></a>053441,000258: 23,3476           76720        <span class="sm">AXISGEN2</span>           <span class="in">XCHX,1  </span> <span class="in">VLOAD*    </span>                            
+053442,000259: 23,3477           00036                                    30D                                   <span class="co">#  X1=-6 X2=+6   X1=-6 X2=+4     X1=-6 X2=+2</span>
+053443,000260: 23,3500           00001                                    0,1                                   
+053444,000261: 
+053445,000262:                                                                                                  <span class="co">#  Page 1256</span>
+053446,000263: 23,3501           62757                           <span class="in">VXSC*   </span> <span class="in">PDVL*     </span>                            <span class="co">#  J=(UA)(UB1)   J=(UA)(UB2)     J=(UA)(UB3)</span>
+053447,000264: 23,3502           75062                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6,2                       
+053448,000265: 23,3503           00007                                    6,1                                   
+053449,000266: 23,3504           77757                           <span class="in">VXSC*   </span>                                       
+053450,000267: 23,3505           75054                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D,2                     
+053451,000268: 23,3506           30031                           <span class="in">STOVL*  </span> 24D                                   <span class="co">#  K=(VA)(VB1)   J=(VA)(VB2)     J=(VA)(VB3)</span>
+053452,000269: 23,3507           00015                                    12D,1                                 
+053453,000270: 
+053454,000271: 23,3510           53357                           <span class="in">VXSC*   </span> <span class="in">VAD       </span>                            
+053455,000272: 23,3511           75046                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +18D,2                     <span class="co">#  L=(WA)(WB1)   J=(WA)(WB2)     J=(WA)(WB3)</span>
+053456,000273: 23,3512           76455                           <span class="in">VAD     </span> <span class="in">VSL1      </span>                            
+053457,000274: 23,3513           00031                                    24D                                   
+053458,000275: 23,3514           53520                           <span class="in">XCHX,1  </span> <span class="in">UNIT      </span>                            
+053459,000276: 23,3515           00036                                    30D                                   
+053460,000277: 23,3516           06707                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>        +18D,1                     <span class="co">#  XDC = L+J+K   YDC = L+J+K     ZDC = L+J+K</span>
+053461,000278: 
+053462,000279: 23,3517           77700                           <span class="in">TIX,1   </span>                                       
+053463,000280: 23,3520           47521                                    <a href="#4158495347454E33">AXISGEN3</a>                              
+053464,000281: 
+<a name="4158495347454E33"></a>053465,000282: 23,3521           77704        <span class="sm">AXISGEN3</span>           <span class="in">TIX,2   </span>                                       
+053466,000283: 23,3522           47476                                    <a href="#4158495347454E32">AXISGEN2</a>                              
+053467,000284: 
+053468,000285: 23,3523           77775                           <span class="in">VLOAD   </span>                                       
+053469,000286: 23,3524           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#584443">XDC</a>                                   
+053470,000287: 23,3525           26707                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>                                
+053471,000288: 23,3526           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#594443">YDC</a>                                   
+053472,000289: 23,3527           26715                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6                         
+053473,000290: 23,3530           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4443">ZDC</a>                                   
+053474,000291: 23,3531           02723                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +12D                       
+053475,000292: 
+053476,000293: 23,3532           77616                           <span class="in">RVQ     </span>                                       
+053477,000294: 
+053478,000295:                                                                                                  <span class="co">#  Page 1257</span>
+<a name="5154534E3435"></a>053479,000296: 23,3533           05520 26075  <span class="sm">QTSN45  </span>           <span class="ps">2DEC    </span> .1768                                 
+053480,000297: 
+<a name="2E3136362E2E2E"></a>053481,000298: 23,3535           05252 25253  <span class="sm">.166... </span>           <span class="ps">2DEC    </span> .1666666667                            
+053482,000299: 
+053483,000300:                                                                                                  <span class="co">#  Page 1258 (empty page)</span>
+053484,000301: 
 
 End of include-file INFLIGHT_ALIGNMENT_ROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
