@@ -1817,7 +1817,7 @@ agc_engine (agc_t * State)
 	    }
           // TIME6 only increments when it has been enabled via CH13 bit 15.
           // It increments 0.3125ms after TIME1/TIME3
-          if (040000 & State->InputChannel[013] && State->InputChannel[ChanSCALER1] == 1)
+          if (040000 & State->InputChannel[013] && (State->InputChannel[ChanSCALER1] & 01) == 01)
             {
               State->ExtraDelay++;
               if (CounterDINC (State, 0, &c(RegTIME6)))
