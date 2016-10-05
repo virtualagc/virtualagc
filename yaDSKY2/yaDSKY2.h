@@ -226,5 +226,8 @@ public:
     virtual void HotkeyEvent (wxKeyEvent &event);
 }; // wxGlade: end class
 
+// to avoid pulling in agc_engine and more
+int DebugMode = 0;
+int CmOrLm = 0;
 
 #endif // YADSKY2_H

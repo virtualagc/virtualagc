@@ -77,6 +77,7 @@ using namespace std;
 #include "wx/filefn.h"
 
 #include "../yaAGC/yaAGC.h"
+#define SOCKET_API_C
 #include "../yaAGC/agc_engine.h"
 
 extern "C" {
