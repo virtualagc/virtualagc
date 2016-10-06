@@ -104,8 +104,10 @@
 
 
 
+
           0</a></li>
       <li><a href="http://www.ibiblio.org/apollo/YUL/03%20-%20Pass%201/">Pass
+
 
 
 
@@ -116,8 +118,10 @@
 
 
 
+
           2</a></li>
       <li><a href="http://www.ibiblio.org/apollo/YUL/05%20-%20Pass%203/">Pass
+
 
 
 
@@ -129,9 +133,11 @@ href="http://www.ibiblio.org/apollo/YUL/06%20-%20System%20Manufacturing%20-%20AG
 
 
 
+
           manufacturing for AGC4</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/07%20-%20System%20Manufacturing%20-%20SACO/">System
+
 
 
 
@@ -143,9 +149,11 @@ href="http://www.ibiblio.org/apollo/YUL/08%20-%20System%20Manufacturing%20-%20BL
 
 
 
+
           manufacturing for BLK2</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/09%20-%20System%20Simulators%20-%20AGC4/">System
+
 
 
 
@@ -157,13 +165,33 @@ href="http://www.ibiblio.org/apollo/YUL/10%20-%20System%20Simulators%20-%20SACO/
 
 
 
+
           simulators, SACO</a><br>
       </li>
     </ul>
-    <p>Before you turn up your nose at this idea, though, I'd recommend
-      at least looking over the "Introduction", which contains no actual
-      code, because you may find yourself amused at the peculiar brand
-      of humor you'll find there.&nbsp; There's also <a
+    <p>It has been pointed out to me that if this program were for the
+      Honeywell 800 computer, it should be in the ARGUS language:&nbsp;
+      i.e., the input language of the Honeywell 800's ARGUS
+      assembler.&nbsp; However, it is <i>not</i> in ARGUS
+      language.&nbsp; What's the deal with that?&nbsp; Well, there were
+      things the AGC developers wished to do that ARGUS did not support,
+      such as having space characters in symbols, and spreading out the
+      code for readability purposes.&nbsp; So they invented a new
+      format, which they called MITIGUS, and YUL is written in
+      MITIGUS.&nbsp; There was a separate program, a pre-processor,
+      which converted MITIGUS to ARGUS.&nbsp; Unfortunately, we do not
+      have this pre-processor, nor an exact list of rules defining the
+      relationship between MITIGUS and ARGUS, but have been told that
+      it's pretty straightforward, and hopefully won't affect your
+      ability to read the program (and certainly not the comments
+      embedded in the program!) even if you happen to be an expert in
+      ARGUS.<br>
+    </p>
+    <p>Before you turn up your nose at this idea of looking at this
+      code, though, I'd recommend at least looking over the
+      "Introduction", which contains no actual code, because you may
+      find yourself amused at the peculiar brand of humor you'll find
+      there.&nbsp; There's also <a
         href="http://www.ibiblio.org/apollo/klabs/video/blair-smith.wmv">a
         video of Hugh giving a talk about "Pass 0" of the assembler</a>
       at the MAPLD '04 conference.&nbsp; The picture above is him
@@ -215,6 +243,7 @@ href="http://www.ibiblio.org/apollo/YUL/10%20-%20System%20Simulators%20-%20SACO/
     down what I have learned and what I have deduced in the <a
       href="assembly_language_manual.html">assembly-language manual</a>.&nbsp;
 Therefore,
+
 
 
 
@@ -368,6 +397,7 @@ Therefore,
 
 
 
+
               manual</a>) allow forward-references to other <span
               style="font-family: monospace;">EQUALS</span> pseudo-ops.
             For example, consider the following code fragment:<br>
@@ -378,6 +408,7 @@ Therefore,
                 style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL4&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -397,6 +428,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
                 SYMBOL2</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL2&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
@@ -408,9 +440,11 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
                 SYMBOL1</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL1&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -519,6 +553,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
       manual</a>.&nbsp; Anyone who's determined to write AGC4
     assembly-language will probably also need to consult the <a
       href="developer.html">developer-info page</a>, which covers
@@ -531,7 +566,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-22.<br>
+          2016-10-06.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
