@@ -223,7 +223,7 @@ public:
     virtual void on_EntrButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_RsetButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_ThreeButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
-    virtual void on_LeftMouse_released(wxMouseEvent &event);
+    virtual void on_ProButton_released(wxCommandEvent &event);
     virtual void HotkeyEvent (wxKeyEvent &event);
 }; // wxGlade: end class
 
