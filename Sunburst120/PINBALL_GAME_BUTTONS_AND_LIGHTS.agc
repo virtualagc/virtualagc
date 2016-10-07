@@ -9,20 +9,19 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2016-09-30 RSB	Created draft version.
 
-# Page 390
-# PROGRAM NAME -- KEYBOARD AND DISPLAY PROGRAM
-# MOD NO -- 4		DATE -- 27 APRIL 1967		ASSEMBLY -- PINDANCE REV 18
-# MOD BY -- FILENE
-# LOG SECTION -- PINBALL GAME BUTTONS AND LIGHTS
-#
-# FUNCTIONAL DESCRIPTION
-#
-# THE KEYBOARD AND DISPLAY SYSTEM PROGRAM OPERATES UNDER EXECUTIVE
+# Page 232
+# PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM		DATE - 22 NOV 1966
+# MOD NO - 0						LOG SECTION - PINBALL GAME
+# MOD BY - FILENE						      BUTTONS AND LIGHTS
+# 							ASSEMBLY - SUNBURST REV 18
+
+# FUNCTIONAL DESCRIPTION-
+
+#    THE KEYBOARD AND DISPLAY SYSTEM PROGRAM OPERATES UNDER EXECUTIVE
 # CONTROL AND PROCESSES INFORMATION EXCHANGED BETWEEN THE AGC AND THE
 # COMPUTER OPERATOR.  THE INPUTS TO THE PROGRAM ARE FROM THE KEYBOARD,
 # FROM INTERNAL PROGRAM, AND FROM THE UPLINK.
-#
-# THE LANGUAGE OF COMMUNICATION WITH THE PROGRAM IS A PAIR OF WORDS
+#    THE LANGUAGE OF COMMUNICATION WITH THE PROGRAM IS A PAIR OF WORDS
 # KNOWN AS VERB AND NOUN.  EACH OF THESE IS REPRESENTED BY A 2 CHARACTER
 # DECIMAL NUMBER.  THE VERB CODE INDICATES WHAT ACTION IS TO BE TAKEN, THE
 # NOUN CODE INDICATES TO WHAT THIS ACTION IS APPLIED.  NOUNS USUALLY
@@ -31,88 +30,45 @@
 # VERBS ARE GROUPED INTO DISPLAYS, LOADS, MONITORS (DISPLAYS THAT ARE
 # UPDATED ONCE PER SECOND), SPECIAL FUNCTIONS, AND EXTENDED VERBS (THESE
 # ARE OUTSIDE OF THE DOMAIN OF PINBALL AND CAN BE FOUND UNDER LOG SECTION
-# 'EXTENDED VERBS').
-#
-# A LIST OF VERBS AND NOUNS IS GIVEN IN LOG SECTION 'ASSEMBLY AND 
-# OPERATION INFORMATION'.
-#
-## Ram&oacute;n Alonso, one of the original AGC developers, provides a 
-## little more insight:  Apparently, nobody had yet arrived at any kind 
-## of software requirements for the AGC's user interface when the desire
-## arose within the Instrumentation Laboratory to set up a demo 
-## guidance-computer unit with which to impress visitors to the lab.  
-## Of course, this demo would have to <i>do</i> something, if it was going to be 
-## at all impressive, and to do something it would need some software. In 
-## short order, some of the coders threw together a demo program, 
-## inventing and using the verb/noun user-interface concept (in the 
-## whimsical fashion seen in much of this code), but without any idea 
-## that the verb/noun concept would somehow survive into the flight 
-## software.  As time passed, and more and more people became familiar 
-## with the demo, nobody got around to inventing an improvement for the 
-## user interface, so the coders simply built it into the flight software 
-## without any specific requirements to do so.<br>
-## <br>
-## However, that does not mean that the verb/noun interface was universally 
-## beloved.  Ram&oacute;n says that <i>many</i> objections were received from 
-## naysayers, such as "it's not scientific", "it's not dignified", or 
-## even "astronauts won't understand it".  Even though the coders of 
-## the demo hadn't seriously intended the verb/noun interface to be used 
-## in any permanent way, it became a kind of devilish game to counter 
-## these objections with (perhaps) sophistic arguments as to why the 
-## interface was really a good one.  In the end, the coders won.  I don't 
-## know whether they were elated or dismayed by this victory.<br>
-## <br>
-## The astronauts, of course, <i>could</i> understand the interface, 
-## but they did not like it.  Most of them really wanted an interface much 
-## more like that they had used in aircraft:  i.e., lots of dials and 
-## switches.  Dave Scott is the the only astronaut I'm aware of who had 
-## kind words for it (or for the AGC in general), though we are told that 
-## Jim McDivitt wasn't necessary completely hostile to it.<br>
-## <br>
-## <div style="text-align: right;"><small>&mdash;Ron Burkey, 07/2009</small></div>
-#
-# CALLING SEQUENCES --
-#
+# :EXTENDED VERBS:).
+# A LIST OF VERBS AND NOUNS IS GIVEN IN LOG SECTION :ASSEMBLY AND 
+# OPERATION INFORMATION:.
+
+
+# CALLING SEQUENCES -
+
 # KEYBOARD:
-# EACH DEPRESSION OF A KEYBOARD BUTTON ACTIVATES AN INTERRUPT KEYRUPT1
+#    EACH DEPRESSION OF A KEYBOARD BUTTON ACTIVATES INTERRUPT KEYRUPT1
 # AND PLACES THE 5 BIT KEY CODE INTO CHANNEL 15.  KEYRUPT1 PLACES THE KEY
 # CODE INTO MPAC, ENTERS AN EXECUTIVE REQUEST FOR THE KEYBOARD AND DISPLAY
-# PROGRAM (AT 'CHARIN'), AND EXECUTES A RESUME.
-#
+# PROGRAM (AT :CHARIN:), AND EXECUTES A RESUME.
+
 # UPLINK:
-# EACH WORD RECEIVED BY THE UPLINK ACTIVATES INTERRUPT UPRUPT, WHICH
+#    EACH WORD RECEIVED BY THE UPLINK ACTIVATES INTERRUPT UPRUPT, WHICH
 # PLACES THE 5 BIT KEY CODE INTO MPAC, ENTERS AN EXECUTIVE REQUEST FOR THE
-# KEYBOARD AND DISPLAY PROGRAM (AT 'CHARIN') AND EXECUTES A RESUME.
-#
+# KEYBOARD AND DISPLAY PROGRAM (AT :CHARIN:) AND EXECUTES A RESUME.
+
 # INTERNAL PROGRAMS:
-# INTERNAL PROGRAMS CALL PINBALL AT `NVSUB' WITH THE DESIRED VERB/NOUN
+#    INTERNAL PROGRAMS CALL PINBALL AT :NVSUB: WITH THE DESIRED VERB/NOUN
 # CODE IN A (LOW 7 BITS FOR NOUN, NEXT 7 BITS FOR VERB).  DETAILS
-# DESCRIBED ON REMARKS CARDS JUST BEFORE 'NVSUB' AND 'NVSBWAIT' (SEE
+# DESCRIBED ON REMARKS CARDS JUST BEFORE :NVSUB: AND :NVSBWAIT: (SEE
 # SYMBOL TABLE FOR PAGE NUMBERS).
-#
-# NORMAL EXIT MODES --
-#
-#	IF PINBALL WAS CALLED BY EXTERNAL ACTION, THERE ARE FOUR EXITS:
-#		1)	ALL BUT (2), (3), AND (4) EXIT DIRECTLY TO ENDOFJOB.
-#		2)	EXTENDED VERBS GO TO THE EXTENDED VERB FAN AS PART OF THE
-# Page 391
-#			PINBALL EXECUTIVE JOB WITH PRIORITY 30000.  IT IS THE 
-#			RESPONSIBILITY OF THE EXTEDED VERB CALLED TO EVENTUALLY
-#			CHANGE PRIORITY (IF NECESSARY) AND DO AN ENDOFJOB.
-#			ALSO PINBALL IS A NOVAC JOB.  EBANK SET FOR COMMON.
-#		3)	VERB 37.  CHANGE OF PROGRAM (MAJOR MODE) CALLS 'V37' IN THE
-#			SERVICE ROUTINES AS PART OF THE PINBALL EXEC JOB WITH PRIO
-#			30000.  THE NEW PROGRAM CODE (MAJOR MODE) IS LEFT IN A.
-#		4)	KEY RELEASE BUTTON CALLS 'PINBRNCH' IN THE DISPLAY INTERFACE
-#			ROUTINES AS PART OF THE PINBALL EXEC JOB WITH PRIO 30000 IF 
-#			THE KEY RELEASE LIGHT IS OFF AND 'CADRSTOR' IS NOT +0.
-#
-# IF PINBALL WAS CALLED BY INTERNAL PROGRAMS, EXIT FROM PINBALL IS BACK
+#    THERE IS AN INTERLOCK SYSTEM FOR INTERNAL PROGRAMS THAT MUST BE USED
+# IN CONJUNCTION WITH :NVSUB:.  THIS IS CALLED GRAB/FREE.  DETAILS
+# DESCRIBED ON REMARKS JUST BEFORE :GRABDSP:, :GRABWAIT: (SEE SYMBOLD TABLE
+# FOR PAGE NUMERS).
+
+# Page 232
+# NORMAL EXIT MODES-
+
+#    IF PINBALL WAS CALLED BY EXTERNAL ACTION, EXIT IS TO :ENDOFJOB:.
+
+#    IF PINBALL WAS CALLED BY INTERNAL PROGRAMS, EXIT FROM PINBALL IS BACK
 # TO CALLING ROUTINE.  DETAILS DESCRIBED IN REMARKS CARDS JUST BEFORE
-# 'NVSUB' AND 'NVSBWAIT' (SEE SYMBOL TABLE FOR PAGE NUMBERS).
-#
-# ALARM OR ABORT EXIT MODES --
-#
+# :NVSUB: AND :NVSUBWAIT: (SEE SYMBOLD TABLE FOR PAGE NUMBERS).
+
+# ALARM OR ABORT EXIT MODES-
+
 # 	EXTERNAL INITIATION:
 #	IF SOME IMPROPER SEQUENCE OF KEY CODES IS DETECTED, THE OPERATOR
 #	ERROR LIGHT IS TURNED ON AND EXIT IS TO 'ENDOFJOB'.
