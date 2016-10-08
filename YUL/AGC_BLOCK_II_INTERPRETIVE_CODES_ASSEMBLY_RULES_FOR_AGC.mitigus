@@ -7,6 +7,7 @@
 ## Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 ## Pages:        018-023 (6)
 ## Mod history:  2016-10-06 JL   Created.
+##               2016-10-08 JL   Transcribed.
 
 ## This is a top-level file that includes all the modules of the
 ## YUL source code.
@@ -21,4 +22,77 @@
 ##
 
 ## Note: Page numbers are scan page numbers rather than listing.
+
+## Page 18
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   1        PAGE  15
+
+R0001   SUFFIX 01 CODES, INDEXABLE (EXCEPT SETPD) BY ADDING 10 TO SUFFIX.       FOR A KEY TO DATA MODES, SEE PAGE 2.
+
+R0002                   ADDR   PUSH  MODE   OP   MODE  RH  OCT   OCT*  ALTERNATE                ADDRESS CODES
+R0003                   TYPE    UP    IN   MODE  OUT   OP  CODE  CODE  SPELLING          (167777 WILL BE LAST ACM ADDR)
+
+ 0005   00       VLOAD  A14    YES   -     V      V        001   003               A14   ANY 14-BIT ADDRESS -- 0-52,
+ 0007   01       TAD    A14    YES   DT    T      -        005   007                     100-3777, IF LOCATION IN BANK
+ 0009   02       SIGN   E      YES   -     D      -        011   013                     17 OR LESS THEN 20000-47776. IF
+ 0011   03       VXSC   A14    YES   DT/V  V/D    V        015   017                     LOCATION IN BANK 21 OR MORE
+ 0013   04       CGOTO  E+F    NO    -     S      U   YES  021   023                     THEN 52000-167777.  STORED IN
+ 0015   05       TLOAD  A14    YES   -     T      T        025   027                     ARC-CCS FASHION, COMPLEMENTED
+ 0017   06       DLOAD  A14    YES   -     D      D        031   033                     IF INDEXED BY X2.
+ 0019   07       V/SC   A14    YES   DT/V  V/D    V        035   037                     *** SEE ALSO E & F BELOW. ***
+
+ 0021   10       SLOAD  A14    NO    -     S      D        041   043               E     ERASABLE -- 0-52, 100-3777.
+ 0023   11       SSP    E+C    NO    -     S      -        045   047                     STORED IN ARC-CCS FASHION,
+ 0025   12       PDDL   A14    YES   -     D      D        051   053                     COMPLEMENTED IF INDEXED BY X2.
+ 0027   13       MXV    A14    NO    V     M      -        055   057                     *******************************
+ 0029   14       PDVL   A14    YES   -     V      V        061   063                     ALL INTERPRETIVE ADDRESSES
+ 0031   15       CCALL  E+F    NO    -     S      U   YES  065   067                     REFERRING TO ERASABLE ARE PUT
+ 0033   16       VXM    A14    NO    V     M      -        071   073                     INTO ADRES (10 BIT) FORM AND
+ 0035   17       NORM   E      NO    DT    S      -        075   077    SLC              ARE CHECKED FOR CORRECT EBANK.
+
+ 0036   20       DMPR   A14    YES   DT    D      D        101   103               F     FIXED -- 20000-167777.  STORED
+ 0038   21       DDV    A14    YES   DT    D      -        105   107                     AS IS.  ***********************
+ 0040   22       BDDV   A14    YES   DT    D      -        111   113                     ALL INTERPRETIVE ADDRESSES
+ 0042   23   (GEN SHIFT)                                                                 REFERRING TO FIXED ARE PUT INTO
+ 0044   24       VAD    A14    YES   V     V      -        121   123                     FCADR FORM BEFORE ALTERATIONS
+ 0046   25       VSU    A14    YES   V     V      -        125   127                     SUCH AS TRUNCATION TO 14 BITS.
+ 0048   26       BVSU   A14    YES   V     V      -        131   133
+ 0049   27       DOT    A14    YES   V     V      D        135   137
+
+ 0050   30       VXV    A14    YES   V     V      -        141   143               C     CONSTANT -- ANY TYPE OF SINGLE-
+ 0052   31       VPROJ  A14    YES   V     V      -        145   147                     PRECISION CONST.  STORED AS IS.
+ 0054   32       DSU    A14    YES   DT    D      -        151   153
+ 0055   33       BDSU   A14    YES   DT    D      -        155   157            ----------------------------------------
+ 0056   34       DAD    A14    YES   DT    D      -        161   163            RH OP: INDICATES THOSE CODES THAT SHOULD
+ 0057   35                                                                      BE RIGHT-HAND OPERATORS, OR OTHERWISE
+ 0058   36       DMP    A14    YES   DT    D      -        171   173            SHOULD BE ACCOMPANIED BY A BLANK RIGHT-
+ 0059   37       SETPD  E      NO    -     S      -        175   ---            HAND OPERATOR.
+
+ 0060   40       CCLRB  E+F    NO    -     S      B   YES  065   067
+
+
+R0061   GENERAL SHIFT CODES, SUFFIX 01 CODE 23.                                 **** DEFINITION: ARC-CCS(X) = X + SGN(X)
+
+R0062                   MODE  UAL  UAU  IAL   IAU   ADAD   OCT   OCT*                           ADDRESS CODES
+
+ 0064   0        SL      DT   -51   51  -177  177  00200   115   117            UAL -- UNINDEXED ADDRESS LOWER LIMIT
+ 0066   1        SR      DT   -51   51  -177  177  00600   115   117            UAU -- UNINDEXED ADDRESS UPPER LIMIT
+ 0068   2        SLR     D    -34   15  -177  177  01200   115   117            IAL -- INDEXED ADDRESS LOWER LIMIT
+ 0070   3        SRR     D    -15   34  -177  177  01600   115   117            IAU -- INDEXED ADDRESS UPPER LIMIT
+ 0072   4        VSL     V    -34   33  -177  177  00200   115   117            ADAD -- ADDITIVE FOR ADDRESS
+ 0074   5        VSR     V    -33   34  -177  177  00600   115   117            FINISHED ADDRESS STORED LIKE A14 OR E.
+
+## Page 19
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   2        PAGE  16
+
+## Page 20
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   3        PAGE  17
+
+## Page 21
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   4        PAGE  18
+
+## Page 22
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   5        PAGE  19
+
+## Page 23
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   6        PAGE  20
 
