@@ -5,10 +5,10 @@
 ## Contact:      Ron Burkey <info@sandroid.org>.
 ## Website:      https://www.ibiblio.org/apollo/index.html
 ## Page scans:   https://archive.org/details/yulsystemsourcec00hugh
-## Pages:        XXX-XXX
-## Mod history:  2016-10-06 JL   Created.
+## Pages:        014-017 (4)
+## Mod history:  2016-10-08 JL   Created.
 
-## This is a top-level file that includes all the modules of the 
+## This is a top-level file that includes all the modules of the
 ## YUL source code.
 
 ## Annotations:
@@ -21,4 +21,119 @@
 ##
 
 ## Note: Page numbers are scan page numbers rather than listing.
+
+## Page 14
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR BLK2                 USER'S OWN PAGE NO.   1        PAGE  11
+
+R0001   SUFFIX 01 CODES, INDEXABLE (EXCEPT SETPD) BY ADDING 10 TO SUFFIX.       FOR A KEY TO DATA MODES, SEE PAGE 2.
+
+R0002                   ADDR   PUSH  MODE   OP   MODE  RH  OCT   OCT*  ALTERNATE                ADDRESS CODES
+R0003                   TYPE    UP    IN   MODE  OUT   OP  CODE  CODE  SPELLING          (167777 WILL BE LAST ACM ADDR)
+
+ 0005   00       VLOAD  A14    YES   -     V      V        001   003               A14   ANY 14-BIT ADDRESS -- 0-52,
+ 0007   01       TAD    A14    YES   DT    T      -        005   007                     100-3777, IF LOCATION IN BANK
+ 0009   02       SIGN   E      YES   -     D      -        011   013                     17 OR LESS THEN 20000-47776. IF
+ 0011   03       VXSC   A14    YES   DT/V  V/D    V        015   017                     LOCATION IN BANK 21 OR MORE
+ 0013   04       CGOTO  E+F    NO    -     S      U   YES  021   023                     THEN 52000-167777.  STORED IN
+ 0015   05       TLOAD  A14    YES   -     T      T        025   027                     ARC-CCS FASHION, COMPLEMENTED
+ 0017   06       DLOAD  A14    YES   -     D      D        031   033                     IF INDEXED BY X2.
+ 0019   07       V/SC   A14    YES   DT/V  V/D    V        035   037                     *** SEE ALSO E & F BELOW. ***
+
+ 0021   10       SLOAD  A14    NO    -     S      D        041   043               E     ERASABLE -- 0-52, 100-3777.
+ 0023   11       SSP    E+C    NO    -     S      -        045   047                     STORED IN ARC-CCS FASHION,
+ 0025   12       PDDL   A14    YES   -     D      D        051   053                     COMPLEMENTED IF INDEXED BY X2.
+ 0027   13       MXV    A14    NO    V     M      -        055   057                     *******************************
+ 0029   14       PDVL   A14    YES   -     V      V        061   063                     ALL INTERPRETIVE ADDRESSES
+ 0031   15       CCALL  E+F    NO    -     S      U   YES  065   067                     REFERRING TO ERASABLE ARE PUT
+ 0033   16       VXM    A14    NO    V     M      -        071   073                     INTO ADRES (10 BIT) FORM AND
+ 0035   17       NORM   E      NO    DT    S      -        075   077    SLC              ARE CHECKED FOR CORRECT EBANK.
+
+ 0036   20       DMPR   A14    YES   DT    D      D        101   103               F     FIXED -- 20000-167777.  STORED
+ 0038   21       DDV    A14    YES   DT    D      -        105   107                     AS IS.  ***********************
+ 0040   22       BDDV   A14    YES   DT    D      -        111   113                     ALL INTERPRETIVE ADDRESSES
+ 0042   23   (GEN SHIFT)                                                                 REFERRING TO FIXED ARE PUT INTO
+ 0044   24       VAD    A14    YES   V     V      -        121   123                     FCADR FORM BEFORE ALTERATIONS
+ 0046   25       VSU    A14    YES   V     V      -        125   127                     SUCH AS TRUNCATION TO 14 BITS.
+ 0048   26       BVSU   A14    YES   V     V      -        131   133
+ 0049   27       DOT    A14    YES   V     V      D        135   137
+
+ 0050   30       VXV    A14    YES   V     V      -        141   143               C     CONSTANT -- ANY TYPE OF SINGLE-
+ 0052   31       VPROJ  A14    YES   V     V      -        145   147                     PRECISION CONST.  STORED AS IS.
+ 0054   32       DSU    A14    YES   DT    D      -        151   153
+ 0055   33       BDSU   A14    YES   DT    D      -        155   157            ----------------------------------------
+ 0056   34       DAD    A14    YES   DT    D      -        161   163            RH OP: INDICATES THOSE CODES THAT SHOULD
+ 0057   35                                                                      BE RIGHT-HAND OPERATORS, OR OTHERWISE
+ 0058   36       DMP    A14    YES   DT    D      -        171   173            SHOULD BE ACCOMPANIED BY A BLANK RIGHT-
+ 0059   37       SETPD  E      NO    -     S      -        175   ---            HAND OPERATOR.
+
+ 0060   40       CCLRB  E+F    NO    -     S      B   YES  065   067
+
+R0061   GENERAL SHIFT CODES, SUFFIX 01 CODE 23.                                 **** DEFINITION: ARC-CCS(X) = X + SGN(X)
+
+R0062                   MODE  UAL  UAU  IAL   IAU   ADAD   OCT   OCT*                           ADDRESS CODES
+
+ 0064   0        SL      DT   -51   51  -177  177  00200   115   117            UAL -- UNINDEXED ADDRESS LOWER LIMIT
+ 0066   1        SR      DT   -51   51  -177  177  00600   115   117            UAU -- UNINDEXED ADDRESS UPPER LIMIT
+ 0068   2        SLR     D    -34   15  -177  177  01200   115   117            IAL -- INDEXED ADDRESS LOWER LIMIT
+ 0070   3        SRR     D    -15   34  -177  177  01600   115   117            IAU -- INDEXED ADDRESS UPPER LIMIT
+ 0072   4        VSL     V    -34   33  -177  177  00200   115   117            ADAD -- ADDITIVE FOR ADDRESS
+ 0074   5        VSR     V    -33   34  -177  177  00600   115   117            FINISHED ADDRESS STORED LIKE A14 OR E.
+
+## Page 15
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR BLK2                 USER'S OWN PAGE NO.   2        PAGE  12
+
+P0078   SUFFIX 10 CODES, NOT INDEXABLE.
+
+R0079                   ADDR  MODE  RH  OCT   ALTERNATE
+R0080                   TYPE  OUT   OP  CODE  SPELLING                                          ADDRESS CODES
+
+ 0082   00       AXT,2   C     -        002                                        A     ANY 15-BIT ADDRESS -- 0-52,
+ 0084   01       AXT,1   C     -        006                                              100-3777, 20000-167777.  STORED
+ 0086   02       AXC,2   C     -        012                                              AS IS.
+ 0088   03       AXC,1   C     -        016
+ 0090   04       LXA,2   E     -        022
+ 0091   05       LXA,1   E     -        026                                        E     ERASABLE -- 0-52, 100-3777.
+ 0093   06       LXC,2   E     -        032                                              STORED AS IS.
+ 0095   07       LXC,1   E     -        036
+
+ 0096   10       SXA,2   E     -        042                                        F     FIXED -- 20000-167777.  STORED
+ 0098   11       SXA,1   E     -        046                                              AS IS.
+ 0100   12       XCHX,2  E     -        052
+ 0101   13       XCHX,1  E     -        056
+ 0102   14       INCR,2  C     -        062                                        C     CONSTANT -- ANY TYPE OF SINGLE-
+ 0104   15       INCR,1  C     -        066                                              PRECISION CONST.  STORED AS IS.
+ 0106   16       TIX,2   A     -        072
+ 0107   17       TIX,1   A     -        076
+
+ 0108   20       XAD,2   E     -        102
+ 0109   21       XAD,1   E     -        106
+ 0110   22       XSU,2   E     -        112
+ 0111   23       XSU,1   E     -        116
+ 0112   24       BZE     A     -        122
+ 0113   25       GOTO    A     U    YES 126     GO TO
+ 0114   26       BPL     A     -        132
+ 0115   27       BMN     A     -        136
+
+ 0116   30       CALL    A     U    YES 142
+ 0117   31       STQ     E     -        146     ITA
+ 0118   32       RTB     F     U        152
+ 0119   33       BHIZ    A     -        156
+ 0120   34 (SWITCH CODES)
+ 0121   35
+ 0122   36       BOVB    F     -        172
+ 0123   37       BOV     A     -        176
+
+ 012301 40       CALRB   A     B    YES 142
+
+R01231  MODES IN                        OPERAND MODES (FOR BEWARING END BANK)    MODES OUT
+
+R01232  -   DON'T CARE                  D   DOUBLE (2 WORDS)                     -   NO CHANGE
+R01233  D   DOUBLE                      M   MATRIX (18 WORDS)                    B   UNKNOWN, REQUIRE BASIC INSTR. NEXT.
+R01234  DT  DOUBLE OR TRIPLE            S   SINGLE (1 WORD)                      D   DOUBLE
+R01235  V   VECTOR                      T   TRIPLE (3 WORDS)                     I   UNKNOWN, REQUIRE INTERPRETIVE NEXT.
+R01236                                  V   VECTOR (6 WORDS)                     T   TRIPLE
+R01237  NOTE THAT FOR VXSC AND V/SC,                                             U   UNKNOWN
+R01238  IF MODE IN = DT, OP MODE = V, AND IF MODE IN = U OR V, OP MODE = D.      V   VECTOR
+
+## Page 16
 
