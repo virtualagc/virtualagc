@@ -8,6 +8,7 @@
 # Contact:      Ron Burkey <info@sandroid.org>.
 # Website:      www.ibiblio.org/apollo/index.html
 # Mod history:  2016-09-30 RSB  Created draft version.
+#               2016-10-05 RSB  Finished transcription.
 
 # Page 89
                 BANK            01                              
@@ -520,3 +521,145 @@ IDLEADR         2CADR           DAPIDLER
 
                 EBANK=          DT                              
 SETADR          2CADR           SETIDLE                         
+
+# Page 100
+# PROGRAM TO REVERT TO IDLING MODE (P 00).
+
+# CALLING SEQUENCE:  TC (OR TCF)   P00H     UNDER EXEC (NOT INTERRUPTED).
+
+                BLOCK           2                               
+
+P00H            TC              POSTJUMP                        
+                CADR            P00H2                           # DO A PARTIAL FRESH START
+
+
+                BANK            01                              
+P00H2           INHINT                                          
+                TC              STARTSB2                        
+
+                TC              IBNKCALL                        
+                CADR            STOPRATE                        
+
+                TC              IBNKCALL                        
+                CADR            SETMAXDB                        
+
+                TC              FLAG1DWN                        # FOR A MOMENT, INDICATE NON-RESTART-
+                OCT             4000                            # ABILITY, SO A RESTART HERE WILL DO P00H.
+
+                TC              FLAG2DWN                        
+                OCT             20                              # TURN OFF MISSION TIMER FLAG.
+
+                INHINT                                          
+                TC              MR.CLEAN                        # DEACTIVATE ALL RESTART GROUPS.
+
+                CA              LP00H3                          # PICK UP RETURN FOR MSTART.
+                TC              MSTART          -1              # START MISSION TIMERS COUNTING.
+                                                                # WE GET A RELINT AT MSTART.
+
+
+LP00H3          ADRES           P00H3                           
+
+# Page 101
+# FAKESTRT IS ENTERED FROM GOPROG WHEN A RESTART OCCURS AND THE RESTARTABILITY FLAG IS OFF.
+
+                BANK            7                               
+FAKESTRT        TC              ALARM                           
+                OCT             0316                            # FAKESTRT ALARM
+
+                TCF             FORGET2                         
+
+
+# FORGETIT IS ENTERED FROM:
+#          1)  FAKESTRT (VIA FORGET2).
+#          2)  VERB 74 JPLINK COMMAND.
+#          3)  ILLEGAL MISSION PHASE COMES DUE IN MISSION SCHEDULING ROUTINE.
+#          4)  ENGINE FAILURE, ETC.
+
+DOV74           INHINT                                          
+                TC              IBNKCALL                        
+                CADR            STARTSB2                        
+
+                TCF             FORGET2                         # BYPASS THE PROGRAM ALARM & 315 DISPLAY.
+
+FORGETIT        INHINT                                          
+                TC              IBNKCALL                        
+                CADR            STARTSB2                        
+
+                TC              ALARM                           
+                OCT             315                             # UNIQUE ALARM FOR FORGETIT.
+
+FORGET2         TC              FLAG1DWN                        # ENTRY FROM FAKESTRT.
+                OCT             04000                           # KNOCK DOWN RESTART FLAG TO PERMIT P00H.
+
+                INHINT                                          
+                EXTEND                                          
+                DCA             KILLCAD                         
+                DXCH            DVMNEXIT                        
+
+                EXTEND                                          
+                DCA             CADAVER                         
+                DXCH            AVGEXIT                         
+
+                CAF             PINGSMON                        
+                TS              OLDDVSEL                        
+                TS              DVSELECT                        
+
+                TC              IBNKCALL                        
+                CADR            ENGINOFF                        
+
+                TC              IBNKCALL                        
+                CADR            STOPRATE                        
+
+# Page 102
+                TC              IBNKCALL                        
+                CADR            NOULLAGE                        
+
+                TC              IBNKCALL                        
+                CADR            SETMAXDB                        
+
+                CS              BGIMBALS                        # TURN OFF TRIM GIMBALS
+                EXTEND                                          
+                WAND            12                              
+
+                CS              ZERO                            # MAKE ALL RESTART PHASES INACTIVE EXCEPT
+                ZL                                              # SERVICER AND STATE VECTOR COPY.
+                DXCH            -PHASE2                         
+                CS              ZERO                            
+                ZL                                              
+                DXCH            -PHASE3                         
+                CS              ZERO                            
+                ZL                                              
+                DXCH            -PHASE4                         
+                CS              ZERO                            
+                ZL                                              
+                DXCH            -PHASE6                         
+
+                CS              ZERO                            
+                TS              MPHASE1                         # SET TIMER/PHASE PAIRS TO IDLE STATE
+                TS              MPHASE2                         
+                TS              MPHASE3                         
+                TS              MPHASE4                         
+                TS              MTIMER4                         
+                TS              MTIMER3                         
+                TS              MTIMER2                         
+                TS              MTIMER1                         
+
+                TC              POSTJUMP                        
+                CADR            GOPROG2                         
+
+
+AVEGKILL        TC              FLAG1DWN                        # COMES HERE WHEN ENGINE OFF
+                OCT             00041                           # KNOCK DOWN P00H FLAG AND AVERAGEG FLAG
+
+                TCF             ENDOFJOB                        
+
+
+BGIMBALS        OCT             7400                            
+
+PINGSMON        GENADR          PGNCSMON                        
+                EBANK=          LST1                            
+CADAVER         2CADR           SERVEXIT                        
+
+# Page 103
+                EBANK=          LST1                            
+KILLCAD         2CADR           AVEGKILL                        
