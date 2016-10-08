@@ -5,6 +5,7 @@
 # Website:  	http://www.ibiblio.org/apollo
 # Mod history:	2016-10-04 JL   Created.
 #               2016-10-04 JL   Added format target.
+#				2016-10-05 JL	Re-enable HTML output.
 
 # Notes: 
 #
@@ -27,6 +28,9 @@ PREFIX=/usr/local
 endif
 
 YAYUL_ARGS=--unpound-page
+
+# Enable/disable HTML generation.
+GEN_HTML=yes
 ifdef GEN_HTML
 YAYUL_ARGS+=--html
 endif

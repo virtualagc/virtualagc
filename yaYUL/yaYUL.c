@@ -18,6 +18,57 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Filename:	yaYUL.c
+ * Purpose:	This is an assembler for Apollo Guidance Computer (AGC)
+ * 		assembly language.  It is called yaYUL because the original
+ * 		assembler was called YUL, and this "yet another YUL".
+ * Contact:	Ron Burkey <info@sandroid.org>
+ * Website:	www.ibiblio.org/apollo/index.html
+ * Mods:	04/11/03 RSB.	Began.
+ *		07/03/04 RSB.	Now writes the binary file, but does not
+ * 				yet compute the bugger words.  This is
+ * 				principally useful as a temporary measure
+ * 				to allow me to assemble Validation.s,
+ * 				which doesn't use the bugger words.
+ * 		07/04/04 RSB	Now returns non-zero if there are fatal
+ * 				errors in assembly.
+ * 		07/07/04 RSB	Added the predefined symbol "$7".
+ * 		07/26/04 RSB	Added --force.
+ * 		07/30/04 RSB	Added terminating bugger words to banks.
+ * 		08/12/04 RSB	Added NVER.
+ *		05/14/05 RSB	Corrected website reference.
+ * 		07/27/05 JMS	(04/30/05) Write symbol table to binary file
+ * 				with --g flag.
+ * 		07/28/05 RSB	Made --g the default.  Still accepts the
+ * 				--g switch, but it doesn't do anything.
+ * 		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
+ * 				table file.
+ * 		03/17/09 RSB	Make sure there's no .bin file produced on error.
+ * 		06/06/09 RSB	Corrected the address offsets printed in the
+ * 				bugger word table.  (Was printing addresses like
+ * 				33,1777 rather than 33,3777.)
+ * 		06/27/09 RSB	Added some stuff for HtmlOut.  Don't know yet if
+ * 				it will actually go anywhere, or if I'm just
+ * 				messing around.
+ * 		07/25/09 RSB	Began adding the --block1 feature.  Since there's
+ * 				mostly source-level compatibility, the way
+ * 				I'm *trying* to do this is to just basically
+ * 				do a normal assembly but to substitute different
+ * 				binary codes at the final step and to limit
+ * 				the memory size differently.  I'm sure I'll
+ * 				have to add additional tweaks as I go along.
+ * 		02/20/10 RSB	Added --unpound-page.
+ * 		08/18/16 RSB    Various stuff related to --block1.
+ * 		08/21/16 RSB    Now outputs the correct number of banks for --block1.
+ * 		08/23/16 RSB	Corrected the address offsets used for block 1 in the
+ * 				bugger-word table at the end of the listing.  Also,
+ * 				for block 2, yaYUL automatically adds the two
+ * 				extra pre-bugger-word address indicators, but in
+ * 				block 1 these appear explicitly in the code, so
+ * 				if yaYUL were to do it they would appear twice,
+ * 				and the bugger words would be wrong as well.
+ * 		09/26/16 RSB	Added the --blk2 switch.  I think it may be complete,
+ * 				but won't be sure until I can assembly the actual
+ * 				Aurora.
  * Purpose:		This is an assembler for Apollo Guidance Computer (AGC)
  * 				assembly language.  It is called yaYUL because the original
  * 				assembler was called YUL, and this "yet another YUL".
@@ -69,6 +120,60 @@
  * 				09/26/16 RSB	Added the --blk2 switch.  I think it may be complete,
  * 								but won't be sure until I can assembly the actual
  * 								Aurora.
+ * Purpose:	This is an assembler for Apollo Guidance Computer (AGC)
+ * 		assembly language.  It is called yaYUL because the original
+ * 		assembler was called YUL, and this "yet another YUL".
+ * Contact:	Ron Burkey <info@sandroid.org>
+ * Website:	www.ibiblio.org/apollo/index.html
+ * Mods:	04/11/03 RSB.	Began.
+ *		07/03/04 RSB.	Now writes the binary file, but does not
+ * 				yet compute the bugger words.  This is
+ * 				principally useful as a temporary measure
+ * 				to allow me to assemble Validation.s,
+ * 				which doesn't use the bugger words.
+ * 		07/04/04 RSB	Now returns non-zero if there are fatal
+ * 				errors in assembly.
+ * 		07/07/04 RSB	Added the predefined symbol "$7".
+ * 		07/26/04 RSB	Added --force.
+ * 		07/30/04 RSB	Added terminating bugger words to banks.
+ * 		08/12/04 RSB	Added NVER.
+ *		05/14/05 RSB	Corrected website reference.
+ * 		07/27/05 JMS	(04/30/05) Write symbol table to binary file
+ * 				with --g flag.
+ * 		07/28/05 RSB	Made --g the default.  Still accepts the
+ * 				--g switch, but it doesn't do anything.
+ * 		07/28/05 JMS    Added support for writing SymbolLines_to to symbol
+ * 				table file.
+ * 		03/17/09 RSB	Make sure there's no .bin file produced on error.
+ * 		06/06/09 RSB	Corrected the address offsets printed in the
+ * 				bugger word table.  (Was printing addresses like
+ * 				33,1777 rather than 33,3777.)
+ * 		06/27/09 RSB	Added some stuff for HtmlOut.  Don't know yet if
+ * 				it will actually go anywhere, or if I'm just
+ * 				messing around.
+ * 		07/25/09 RSB	Began adding the --block1 feature.  Since there's
+ * 				mostly source-level compatibility, the way
+ * 				I'm *trying* to do this is to just basically
+ * 				do a normal assembly but to substitute different
+ * 				binary codes at the final step and to limit
+ * 				the memory size differently.  I'm sure I'll
+ * 				have to add additional tweaks as I go along.
+ * 		02/20/10 RSB	Added --unpound-page.
+ * 		08/18/16 RSB    Various stuff related to --block1.
+ * 		08/21/16 RSB    Now outputs the correct number of banks for --block1.
+ * 		08/23/16 RSB	Corrected the address offsets used for block 1 in the
+ * 				bugger-word table at the end of the listing.  Also,
+ * 				for block 2, yaYUL automatically adds the two
+ * 				extra pre-bugger-word address indicators, but in
+ * 				block 1 these appear explicitly in the code, so
+ * 				if yaYUL were to do it they would appear twice,
+ * 				and the bugger words would be wrong as well.
+ * 		09/26/16 RSB	Added the --blk2 switch.  I think it may be complete,
+ * 				but won't be sure until I can assembly the actual
+ * 				Aurora.
+ * 		2016-10-05 JL	Added -syntax switch. This just checks the syntax
+ * 				and does not attempt symbol resolution. This is intended for 
+ * 				proofing.
  */
 
 #include "yaYUL.h"
@@ -83,6 +188,7 @@
 // Some global data.
 
 int formatOnly = 0;
+int syntaxOnly = 0;
 int Force = 0;
 char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
@@ -129,7 +235,7 @@ static int AgcToNative(uint16_t n) {
 }
 
 // This function takes two signed integers in AGC format, adds them, and returns
-// the sum (also in AGC format).  If there's overflow or underflow, the 
+// the sum (also in AGC format).  If there's overflow or underflow, the
 // carry is added in also.  This is done because that's the goofy way the
 // AGC checksum is created.
 int Add(int n1, int n2) {
@@ -169,50 +275,64 @@ int main(int argc, char *argv[]) {
 	int OutputSymbols = 1;	// 0;
 	char *SymbolFile = NULL;
 
-	// Parse the command-line options.
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "/?"))
-			goto Done;
-		else if (1 == sscanf(argv[i], "--max-passes=%d", &j))
-			MaxPasses = j;
-		else if (!strcmp(argv[i], "--force"))
-			Force = 1;
-		else if (!strcmp(argv[i], "--g"))
-			OutputSymbols = 1;
-		else if (!strcmp(argv[i], "--html"))
-			Html = 1;
-		else if (!strcmp(argv[i], "--unpound-page"))
-			UnpoundPage = 1;
-		else if (!strcmp(argv[i], "--block1"))
-			Block1 = 1;
-		else if (!strcmp(argv[i], "--blk2"))
-			blk2 = 1;
-		else if (!strcmp(argv[i], "--hardware"))
-			Hardware = 1;
-		else if (!strcmp(argv[i], "--format"))
-			formatOnly = 1;
-		else if (*argv[i] == '-' || *argv[i] == '/') {
-			printf("Unknown switch \"%s\".\n", argv[i]);
-			goto Done;
-		} else if (InputFilename == NULL) {
-			InputFilename = argv[i];
-			OutputFilename = (char *) malloc(5 + strlen(InputFilename));
-			if (OutputFilename == NULL) {
-				printf("Out of memory (1).\n");
-				goto Done;
-			}
-			sprintf(OutputFilename, "%s.bin", InputFilename);
-			//InputFile = fopen (InputFilename, "r");
-			//if (InputFile == NULL)
-			//  {
-			//    printf ("Input file does not exist.\n");
-			//    goto Done;
-			//  }
-			OutputFile = fopen(OutputFilename, "wb");
-			if (OutputFile == NULL) {
-				printf("Cannot create output file.\n");
-				goto Done;
-			}
+  // Parse the command-line options.
+  for (i = 1; i < argc; i++)
+    {
+      if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "/?"))
+        goto Done;
+      else if (1 == sscanf(argv[i], "--max-passes=%d", &j))
+        MaxPasses = j;
+      else if (!strcmp(argv[i], "--force"))
+        Force = 1;
+      else if (!strcmp(argv[i], "--g"))
+        OutputSymbols = 1;
+      else if (!strcmp(argv[i], "--html"))
+        Html = 1;
+      else if (!strcmp(argv[i], "--unpound-page"))
+        UnpoundPage = 1;
+      else if (!strcmp(argv[i], "--block1"))
+        Block1 = 1;
+      else if (!strcmp(argv[i], "--blk2"))
+        blk2 = 1;
+      else if (!strcmp(argv[i], "--hardware"))
+        Hardware = 1;
+      else if (!strcmp(argv[i], "--format"))
+        formatOnly = 1;
+      else if (!strcmp(argv[i], "--syntax"))
+        {
+          syntaxOnly = 1;
+          formatOnly = 0;
+          Html = 0;
+          MaxPasses = 3;
+          OutputSymbols = 0;
+        }
+      else if (*argv[i] == '-' || *argv[i] == '/')
+        {
+          printf("Unknown switch \"%s\".\n", argv[i]);
+          goto Done;
+        }
+      else if (InputFilename == NULL)
+        {
+          InputFilename = argv[i];
+          OutputFilename = (char *) malloc(5 + strlen(InputFilename));
+          if (OutputFilename == NULL)
+            {
+              printf("Out of memory (1).\n");
+              goto Done;
+            }
+          sprintf(OutputFilename, "%s.bin", InputFilename);
+          //InputFile = fopen (InputFilename, "r");
+          //if (InputFile == NULL)
+          //  {
+          //    printf ("Input file does not exist.\n");
+          //    goto Done;
+          //  }
+          OutputFile = fopen(OutputFilename, "wb");
+          if (OutputFile == NULL)
+            {
+              printf("Cannot create output file.\n");
+              goto Done;
+            }
 
 		} else {
 			printf("Two input files defined.\n");
@@ -298,41 +418,53 @@ int main(int argc, char *argv[]) {
 	// there's a more mathematically sophisticated way to do this,
 	// but it's not worth the effort to figure it out.
 
-	LastUnresolved = UnresolvedSymbols();
-	for (i = 1; i <= MaxPasses; i++) {
-		printf("Pass #%d\n", i);
-		j = Pass(0, InputFilename, OutputFile, &Fatals, &Warnings);
-		k = UnresolvedSymbols();
-		if (j == -1) {
-			printf("Unrecoverable error.\n");
-			break;
-		}
-		if (k == 0 || k >= LastUnresolved) {
-			printf("Pass #%d\n", i + 1);
-			Pass(1, InputFilename, OutputFile, &Fatals, &Warnings);
-			break;
-		}
-		LastUnresolved = k;
-		//PrintSymbols ();
-	}
+  LastUnresolved = UnresolvedSymbols();
 
-	// Print the symbol table.
-	printf("\n\n");
-	PrintBankCounts();
-	printf("\n\n");
-	PrintSymbols();
-	printf("\nUnresolved symbols:  %d\n", UnresolvedSymbols());
-	printf("Fatal errors:  %d\n", Fatals);
-	printf("Warnings:  %d\n", Warnings);
-	if (HtmlOut != NULL) {
-		fprintf(HtmlOut, "\n");
-		fprintf(HtmlOut, "</pre>\n<h1>Assembly Status</h1>\n<pre>\n");
-		fprintf(HtmlOut, "Unresolved symbols:  %d\n", UnresolvedSymbols());
-		fprintf(HtmlOut, "Fatal errors:  %d\n", Fatals);
-		fprintf(HtmlOut, "Warnings:  %d\n", Warnings);
-		fprintf(HtmlOut, "\n");
-		fprintf(HtmlOut, "</pre>\n<h1>Bugger Words</h1>\n<pre>\n");
-	}
+  for (i = 1; i <= MaxPasses; i++)
+    {
+      printf("Pass #%d\n", i);
+      j = Pass(0, InputFilename, OutputFile, &Fatals, &Warnings);
+      k = UnresolvedSymbols();
+      if (j == -1)
+        {
+          printf("Unrecoverable error.\n");
+          break;
+        }
+      if (k == 0 || k >= LastUnresolved)
+        {
+          printf("Pass #%d\n", i + 1);
+          Pass(1, InputFilename, OutputFile, &Fatals, &Warnings);
+          break;
+        }
+      LastUnresolved = k;
+      //PrintSymbols ();
+    }
+
+  if (syntaxOnly)
+  {
+    printf("Fatal errors:  %d\n", Fatals);
+    printf("Warnings:  %d\n", Warnings);
+    return(Fatals);
+  }
+
+  // Print the symbol table.
+  printf("\n\n");
+  PrintBankCounts();
+  printf("\n\n");
+  PrintSymbols();
+  printf("\nUnresolved symbols:  %d\n", UnresolvedSymbols());
+  printf("Fatal errors:  %d\n", Fatals);
+  printf("Warnings:  %d\n", Warnings);
+  if (HtmlOut != NULL)
+    {
+      fprintf(HtmlOut, "\n");
+      fprintf(HtmlOut, "</pre>\n<h1>Assembly Status</h1>\n<pre>\n");
+      fprintf(HtmlOut, "Unresolved symbols:  %d\n", UnresolvedSymbols());
+      fprintf(HtmlOut, "Fatal errors:  %d\n", Fatals);
+      fprintf(HtmlOut, "Warnings:  %d\n", Warnings);
+      fprintf(HtmlOut, "\n");
+      fprintf(HtmlOut, "</pre>\n<h1>Bugger Words</h1>\n<pre>\n");
+    }
 
 	// JMS: 07.28
 	// We sort the lines by increasing physical address so we can look them
@@ -427,67 +559,70 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// All done!
-	RetVal = 0;
-	Done:
-	//if (InputFile != NULL)
-	//  fclose (InputFile);
-	if (OutputFile != NULL)
-		fclose(OutputFile);
-	HtmlClose();
-	if (RetVal) {
-		printf("USAGE:\n"
-				"\tyaYUL [OPTIONS] InputFile\n"
-				"The output (binary executable) always has the same name\n"
-				"as the assembly-language input file, except that .bin is \n"
-				"appended to it.  (E.g., Luminary.agc->Luminary.agc.bin.)\n"
-				"No relocatable object-file output format is provided,\n"
-				"because the original development team had no such\n"
-				"capability, and so there is no linker.\n\n"
-				"The assembly listing, including symbol table and any error\n"
-				"messages appear on the standard output.\n\n"
-				"OPTIONS:\n");
-		printf("--help or /?     Display this message.\n");
-		printf("--max-passes=n   By default, the assembler makes at most\n"
-				"                 %d passes trying to resolve addresses.\n"
-				"                 This switch changes that value.\n",
-				MaxPasses);
-		printf("--force          Force creation of core-rope image. (By\n"
-				"                 default, the core-rope is not created if\n"
-				"                 there were fatal errors during assembly.\n");
-		//printf ("--g              Output the binary symbol table to the file\n"
-		//        "                 InputFile.symtab\n");
-		printf(
-				"--html           Causes an HTML file to be created, which is \n"
-						"                 the same as the output listing except that it\n"
-						"                 if a lot more convenient to use. It has syntax\n"
-						"                 highlighting and hyperlinks from where each\n"
-						"                 symbol is used back to where it was defined.\n"
-						"                 The top-level HTML file produced is named the\n"
-						"                 same as the input source file, except with .html\n"
-						"                 replacing .s (if applicable).  Separate HTML\n"
-						"                 files are produced for all source files included\n"
-						"                 with the $ directive, and links between the files\n"
-						"                 are provided.\n");
-		printf("--unpound-page   Bypass --html processing for \"## Page\".\n");
-		printf(
-				"--block1         Assembles Block 1 code.  The default is Block 2.\n");
-		printf(
-				"--blk2           For the early version of Block 2 code, such as\n");
-		printf(
-				"                 in the AURORA program.  Not used for Block 2 in\n");
-		printf(
-				"                 general, though, and not for any flown missions.\n");
-		printf("--hardware       Emit binary with hardware bank order, and\n"
-				"                 enable parity bit calculation\n");
-		printf(
-				"--format         Just reformat the file and re-output. Don't assemble.\n");
-	}
-	if (RetVal || Fatals)
-		remove(OutputFilename);
-	if (RetVal == 0)
-		return (Fatals);
-	else
-		return (RetVal);
+  // All done!
+  RetVal = 0;
+  Done:
+  //if (InputFile != NULL)
+  //  fclose (InputFile);
+  if (OutputFile != NULL)
+    fclose(OutputFile);
+  HtmlClose();
+  if (RetVal)
+    {
+      printf("USAGE:\n"
+          "\tyaYUL [OPTIONS] InputFile\n"
+          "The output (binary executable) always has the same name\n"
+          "as the assembly-language input file, except that .bin is \n"
+          "appended to it.  (E.g., Luminary.agc->Luminary.agc.bin.)\n"
+          "No relocatable object-file output format is provided,\n"
+          "because the original development team had no such\n"
+          "capability, and so there is no linker.\n\n"
+          "The assembly listing, including symbol table and any error\n"
+          "messages appear on the standard output.\n\n"
+          "OPTIONS:\n");
+      printf("--help or /?     Display this message.\n");
+      printf("--max-passes=n   By default, the assembler makes at most\n"
+          "                 %d passes trying to resolve addresses.\n"
+          "                 This switch changes that value.\n", MaxPasses);
+      printf("--force          Force creation of core-rope image. (By\n"
+          "                 default, the core-rope is not created if\n"
+          "                 there were fatal errors during assembly.\n");
+      //printf ("--g              Output the binary symbol table to the file\n"
+      //        "                 InputFile.symtab\n");
+      printf("--html           Causes an HTML file to be created, which is \n"
+          "                 the same as the output listing except that it\n"
+          "                 if a lot more convenient to use. It has syntax\n"
+          "                 highlighting and hyperlinks from where each\n"
+          "                 symbol is used back to where it was defined.\n"
+          "                 The top-level HTML file produced is named the\n"
+          "                 same as the input source file, except with .html\n"
+          "                 replacing .s (if applicable).  Separate HTML\n"
+          "                 files are produced for all source files included\n"
+          "                 with the $ directive, and links between the files\n"
+          "                 are provided.\n");
+      printf("--unpound-page   Bypass --html processing for \"## Page\".\n");
+      printf(
+          "--block1         Assembles Block 1 code.  The default is Block 2.\n");
+      printf(
+          "--blk2           For the early version of Block 2 code, such as\n");
+      printf(
+          "                 in the AURORA program.  Not used for Block 2 in\n");
+      printf(
+          "                 general, though, and not for any flown missions.\n");
+      printf("--hardware       Emit binary with hardware bank order, and\n"
+          "                 enable parity bit calculation\n");
+      printf(
+          "--format         Just reformat the file and re-output. Don't assemble.\n");
+      printf(
+          "--syntax         Perform syntax-checking only, no symbol resolution.\n");
+      printf(
+          "--max-passes     Set the max number of assembler passes (default: 10).\n");
+    }
+  if (RetVal || Fatals)
+    remove(OutputFilename);
+  if (RetVal == 0)
+    return (Fatals);
+  else
+    return (RetVal);
 }
 

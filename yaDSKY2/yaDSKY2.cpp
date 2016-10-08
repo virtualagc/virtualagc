@@ -319,6 +319,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     EntrButton = new wxBitmapButton(this, ID_ENTRBUTTON, wxBitmap(wxT("EntrUp.jpg"), wxBITMAP_TYPE_ANY));
     RsetButton = new wxBitmapButton(this, ID_RSETBUTTON, wxBitmap(wxT("RsetUp.jpg"), wxBITMAP_TYPE_ANY));
 
+    ProButton->Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(MainFrame::on_ProButton_pressed), NULL, this);
+
     set_properties();
     do_layout();
     // end wxGlade
@@ -346,10 +348,10 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_BUTTON(ID_KEYRELBUTTON, MainFrame::on_KeyRelButton_pressed)
     EVT_BUTTON(ID_ENTRBUTTON, MainFrame::on_EntrButton_pressed)
     EVT_BUTTON(ID_RSETBUTTON, MainFrame::on_RsetButton_pressed)
+    EVT_BUTTON(ID_PROBUTTON, MainFrame::on_ProButton_released)
     // end wxGlade
     EVT_CHAR(MainFrame::HotkeyEvent)
 END_EVENT_TABLE();
-
 
 void 
 MainFrame::HotkeyEvent (wxKeyEvent &KeyEvent)
@@ -660,16 +662,16 @@ void MainFrame::on_ProButton_pressed(wxCommandEvent &event)
   else
     {
       // Press.
-      OutputPro (0);	// This is a low-polarity signal.
-      wxMilliSleep (200);
-      // Release.
-      OutputPro (1);
+      OutputPro (0);
+      ProceedPressed = true;
     }
   if (NumMatches)
     {
       Match += wxT ("P");
       MatchCheck ();
     }
+  event.ResumePropagation(INT_MAX);
+  event.Skip();
 }
 
 
@@ -707,6 +709,15 @@ void MainFrame::on_RsetButton_pressed(wxCommandEvent &event)
 
 
 // wxGlade: add MainFrame event handlers
+
+void MainFrame::on_ProButton_released(wxCommandEvent &event)
+{
+    if (ProceedPressed)
+    {
+        OutputPro(1);
+        ProceedPressed = false;
+    }
+}
 
 
 void MainFrame::set_properties()

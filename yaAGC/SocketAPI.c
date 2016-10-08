@@ -259,6 +259,10 @@ ChannelInput (agc_t *State)
 			      State->InterruptRequests[10] = 1;
 			    LastInDetent = InDetent;
 			  }
+                        else if (Channel == 032 && 0 != (Value & 020000))
+			  {
+			    State->SbyPressed = 0;
+			  }
 			//---------------------------------------------------------------
 			// For --debug-dsky mode.
 			if (DebugDsky)
@@ -271,6 +275,7 @@ ChannelInput (agc_t *State)
 				  {
 				    Channel = 015;
 				    Value = 0;
+				    State->SbyPressed = 0;
 				  }
 			      }
 			    if (Channel == 015)
