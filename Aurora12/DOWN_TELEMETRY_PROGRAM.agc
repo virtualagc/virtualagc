@@ -8,6 +8,8 @@
 # Pages:        370-376
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 HG   Initial transfer from scan
+#               2016-10-08 HG   Add missed ECADR RSTACK +46D,
+#                               Remove added decimal markes D       
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -249,6 +251,7 @@ FSTRADTM        ECADR   UPLOCK
                 ECADR   RSTACK +52D
                 ECADR   RSTACK +50D
                 ECADR   RSTACK +48D
+                ECADR   RSTACK +46D
                 ECADR   RSTACK +44D
                 ECADR   RSTACK +42D
                 ECADR   RSTACK +40D
@@ -268,9 +271,9 @@ FSTRADTM        ECADR   UPLOCK
                 ADRES   RSTACK +12D
                 ADRES   RSTACK +10D
                 ADRES   RSTACK +8D
-                ADRES   RSTACK +6D
-                ADRES   RSTACK +4D
-                ADRES   RSTACK +2D
+                ADRES   RSTACK +6
+                ADRES   RSTACK +4
+                ADRES   RSTACK +2
                 ADRES   RSTACK
 ## Page 376        
 #       NOMINAL AURORA DOWNLIST.
