@@ -46,20 +46,21 @@ SPVAC           XCH             Q
 
 # TO SUSPEND A BASIC JOB SO A HIGHER PRIORITY JOB MAY BE SERVICED:
 
-CHANG1          LXCH            Q                               
-                CAF             EXECBANK                        
-                XCH             BBANK                           
-                TCF             CHANJOB                         
+CHANG1          CAF             EXECBANK                              
+                TS              L                      
+                CA              Q                           
+                LXCH            BBANK
+ +4             INHINT
+                TCF             CHANJOB                                                                             
 
 # TO SUSPEND AN INTERPRETIVE JOB:
 
-CHANG2          CS              LOC                             # NEGATIVE LOC SHOWS JOB = INTERPRETIVE.
-# ITRACE (4) REFERS TO "CHANG2"
-                TS              L                               
-# Page 1104
- +2             CAF             EXECBANK                        
-                TS              BBANK                           
-                TCF             CHANJOB         -1              
+CHANG2          CAF             EXECBANK          
+# ITRACE (4) REFERS TO "CHANG2".               
+                TS              BBANK
+                CS              LOC                             # NEGATIVE LOC SHOWS JOB = INTERPRETIVE.
+                LXCH            BANKSET                         # BANKSET, NOT BBANK, HAS RIGHT CONTENTS.
+                TCF             CHANG1          +4              
 
 # Page 1105
 # TO VOLUNTARILY SUSPEND A JOB UNTIL THE COMPLETION OF SOME ANTICIPATED EVENT (I/O EVENT ETC.):
