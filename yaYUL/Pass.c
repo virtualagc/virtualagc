@@ -70,6 +70,8 @@
  *                              whereas XCH 0 does not.
  *              2016-09-28 RSB  With --format, interpretive operands were aligned
  *                              properly only for --block1.
+ *             	2016-10-08 RSB	Added detection of file header consisting of a bunch
+ *             			of ## or blank lines, using the inHeader state variable.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -131,6 +133,7 @@ static int NumFields = 0;
 int Block1 = 0;
 int Html = 0;
 FILE *HtmlOut = NULL;
+int inHeader = 1;
 
 // Data structure used to map opcode or pseudo-op names to function calls.
 // Basically, for each opcode or pseudo-op, there is an external
@@ -1072,6 +1075,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
         {
           // We've reached the end of this input file.  Need to switch
           // files (if we were within an include-file) or to end the pass.
+	  inHeader = 0;
           if (NumStackedIncludes)
             {
               fclose(InputFile);
@@ -1117,6 +1121,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
       // Analyze the input line.
 
+
       // Is it an HTML insert?  If so, transparently process and discard.
       if (formatOnly)
         {
@@ -1136,6 +1141,16 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           ParseOutputRecord.SBank = ParseInputRecord.SBank;
           continue;
         }
+
+      // If it is not a ## line and not completely blank, then we are no longer
+      // in the file header.
+      for (ss = s; *ss && isspace(*ss); ss++);
+      if (*ss == 0) // completely whitespace
+	;
+      else if (s[0] == '#' || s[1] == '#') // is a ## line
+	;
+      else
+	inHeader = 0;
 
       // Is it an "include" directive?
       if (formatOnly && s[0] == '$')
@@ -1203,6 +1218,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
               goto Done;
             }
 
+          inHeader = 1;
           CurrentLineInFile = 0;
           continue;
         }
@@ -2142,7 +2158,8 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                   fprintf(HtmlOut, "%s", NormalizeStringN("", 8));
 
                   if (*ParseInputRecord.Comment)
-                    fprintf(HtmlOut, COLOR_COMMENT "# %s</span>",
+                    fprintf(HtmlOut, COLOR_COMMENT "#%s%s</span>",
+                        (ParseInputRecord.Comment[0] == '#') ? "" : " ",
                         NormalizeString(ParseInputRecord.Comment));
                 }
             }

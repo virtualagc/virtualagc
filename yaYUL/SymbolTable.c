@@ -85,6 +85,7 @@
  *                              haven't caught yet.  Fixed the formatting of this
  *                              file header, which had gotten all gummed up and
  *                              painful to read.
+ *            	2016-10-08 RSB	Added exception to ## (--html) for inHeader.
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -312,6 +313,7 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
   int Width, Pos = 0;
   int i, j;
   char c = 0, *ss;
+  extern int inHeader;
 
   // Process default style file at startup.
   if (!StyleInitialized)
@@ -465,7 +467,7 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
   // RSB 2010-02-20 ... if --unpound-page is used.  Otherwise,
   // process them normally. 
   if ((!strncmp(s, "## ", 3) || !strncmp(s, "##\t", 3))
-      && (strncmp(s + 3, "Page", 4) != 0 || !UnpoundPage))
+      && !inHeader && (strncmp(s + 3, "Page", 4) != 0 || !UnpoundPage))
     {
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
