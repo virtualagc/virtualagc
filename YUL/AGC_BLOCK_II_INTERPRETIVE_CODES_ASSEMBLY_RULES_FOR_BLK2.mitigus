@@ -136,4 +136,111 @@ R01237  NOTE THAT FOR VXSC AND V/SC,                                            
 R01238  IF MODE IN = DT, OP MODE = V, AND IF MODE IN = U OR V, OP MODE = D.      V   VECTOR
 
 ## Page 16
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR BLK2                 USER'S OWN PAGE NO.   3        PAGE  13
+
+P0124   SWITCH CODES, SUFFIX 10 CODE 34.
+
+R0125                   ADDR  MODE  RH  OCT   ADDRESS   ALTERNATE
+R0126                   TYPE  OUT   OP  CODE  ADDITIVE  SPELLING                                ADDRESS CODES
+
+ 0128   00       BONSET SW+A   -        162    00000                               A     ANY 15-BIT ADDRESS -- 0-52,
+ 0130   01       SETGO  SW+A   U    YES 162    00020                                     100-3777, 20000-167777.  STORED
+ 0132   02       BOFSET SW+A   -        162    00040                                     AS IS.
+ 0134   03       SET    SW     -        162    00060
+
+ 0136   04       BONINV SW+A   -        162    00100                               SW    SWITCH BIT NUMBER -- 0-357.
+ 0138   05       INVGO  SW+A   U    YES 162    00120                                     STORED WITH SWITCH WORD NUMBER
+ 0140   06       BOFINV SW+A   -        162    00140                                     0-17 (THE INTEGER QUOTIENT OF
+ 0142   07       INVERT SW     -        162    00160     INV                             N/15) IN BITS 12-9 AND THE BIT-
+ 0144                                                                                    WITHIN-WORD NUMBER (00-16
+ 0146   10       BONCLR SW+A   -        162    00200                                     OCTAL, THE REMAINDER OF N/15)
+ 0148   11       CLRGO  SW+A   U    YES 162    00220                                     IN BITS 4-1.  THIS IS THE ONLY
+ 0150   12       BOFCLR SW+A   -        162    00240                                     INSTANCE OF NUMBERING BITS FROM
+ 0152   13       CLEAR  SW     -        162    00160     CLR                             LEFT TO RIGHT.  357 = 239D.
+
+ 0154   14       BON    SW+A   -        162    00300
+ 0155   16       BOFF   SW+A   -        162    00340     BOF
+
+
+
+R0156   SUFFIX 000 CODES, UNARY OPERATIONS.
+
+R0157                   MODE  MODE  RH  OCT   ALTERNATE
+R0158                    IN   OUT   OP  CODE  SPELLING
+
+ 0159   00       EXIT    -     B    YES 000
+ 0160   01       SQRT    DT    -        010
+ 0161   02       SIN     DT    -        020    SINE
+ 0162   03       COS     DT    -        030    COSINE
+ 0163   04       ASIN    DT    -        040    ARCSIN
+ 0164   05       ACOS    DT    -        050    ARCCOS
+ 0165   06       DSQ     DT    -        060
+ 0166   07       ROUND   DT    D        070
+
+ 0167   10       DCOMP   DT    -        100
+ 0168   11       VDEF    DT    V        110
+ 0169   12       UNIT    V     -        120
+ 0170   13       ABS     DT    -        130
+ 0171   14       VSQ     V     D        140
+ 0172   15       STADR   -     -    YES 150
+ 0173   16       RVQ     -     U    YES 160    ITCQ                                IF QPRET POINTS TO ERASABLE, USE
+ 0174   17       PUSH    -     -        170                                        GOTO  QPRET , NOT RVQ.
+
+ 0175   20       VCOMP   V     -        100
+ 0176   23       ABVAL   V     D        130
+
+## Page 17
+L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR BLK2                 USER'S OWN PAGE NO.   4        PAGE  14
+
+P0177   SUFFIX 100 CODES, SHORT SHIFT OPERATIONS.
+
+R0178                   MODE  OCT CODE
+
+ 0179   00       SL1R    D      004
+ 0180   01       SR1R    D      014
+ 0181   02       SL1     DT     024
+ 0182   03       SR1     DT     034
+ 0183   04       SL2R    D      044
+ 0184   05       SR2R    D      054
+ 0185   06       SL2     DT     064
+ 0186   07       SR2     DT     074
+
+ 0187   10       SL3R    D      104
+ 0188   11       SR3R    D      114
+ 0189   12       SL3     DT     124
+ 0190   13       SR3     DT     134
+ 0101   14       SL4R    D      144
+ 0192   15       SR4R    D      154
+ 0193   16       SL4     DT     164
+ 0194   17       SR4     DT     174
+
+ 0195   20       VSL1    V      004
+ 0196   21       VSR1    V      014
+ 0197   22       VSL2    V      024
+ 0198   23       VSR2    V      034
+ 0199   24       VSL3    V      044
+ 0200   25       VSR3    V      054
+ 0201   26       VSL4    V      064
+ 0202   27       VSR4    V      074
+
+ 0203   30       VSL5    V      104
+ 0204   31       VSR5    V      114
+ 0205   32       VSL6    V      124
+ 0206   33       VSR6    V      134
+ 0207   34       VSL7    V      144
+ 0208   35       VSR7    V      154
+ 0209   36       VSL8    V      164
+ 0210   37       VSR8    V      174
+
+
+
+R0211   STORE CODES, ADDRESS CONSTANTS.  COMPLEMENTED IF POSITIONED AS THE OPERAND OF A STADR CODE.
+
+R0213                   ADDR   PUSH  MODE  OCTAL  INDEX,1   INDEX,2   LOAD*
+R0214                   TYPE    UP   OUT   CODE   ADDITIVE  ADDITIVE  ADDITIVE                  ADDRESS CODES
+
+ 0216   00-02    STORE  E       -     -    00000   02000     04000       -         A14   SEE SUFFIX 01 CODES.
+ 0218   03-10    STODL  E+A14   YES   D    06000   02000     04000     06000       A     SEE SUFFIX 10 CODES.
+ 0220   11-16    STOVL  E+A14   YES   V    22000   02000     04000     06000       E     SEE SUFFIX 10 CODES.
+ 0222   17       STCALL E+A     NO    U    36000     -         -         -
 
