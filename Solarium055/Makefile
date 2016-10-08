@@ -11,28 +11,8 @@
 #		2016-08-24 RSB	Added --block1 switch to yaYUL command line.
 #		2016-08-24 RSB	Added target for corediff.txt.
 #		2016-08-24 RSB	... and other stuff related to that too.
+#		2016-10-04 JL	Change to use Makefile.inc.
 
 BASENAME=Solarium055
-
-SOURCE:=$(wildcard *.agc)
-TARGETS=${BASENAME}.bin ${BASENAME}.lst 
-
-default: $(TARGETS)
-
-${BASENAME}.bin: ${BASENAME}.binsource
-	../Tools/oct2bin <${BASENAME}.binsource
-	mv oct2bin.bin $@
-
-MAIN.agc.bin MAIN.agc.lst: ${SOURCE}
-	../yaYUL/yaYUL --block1 --unpound-page --html MAIN.agc >MAIN.agc.lst
-
-${BASENAME}.lst: MAIN.agc.bin ${BASENAME}.bin
-	diff -s MAIN.agc.bin ${BASENAME}.bin
-	mv MAIN.agc.lst ${BASENAME}.lst
-	mv MAIN.agc.symtab ${BASENAME}.symtab
-
-corediff.txt: ${BASENAME}.bin MAIN.agc.bin MAIN.agc.lst
-	python ../Tools/ropediff.py -p -c -a -o $@ ${BASENAME}.bin MAIN.agc.bin
-
-clean:
-	rm -f *.lst *~ MAIN.agc.bin ${BASENAME}.bin *.symtab oct2bin.bin* *.html
+EXTRA_YAYUL_ARGS="--block1"
+include ../Makefile.inc
