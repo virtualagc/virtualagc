@@ -247,6 +247,9 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->TCTrap = 0;
   State->NoTC = 0;
 
+  State->Standby = 0;
+  State->SbyPressed = 0;
+
   if (CoreDump != NULL)
     {
       cd = fopen (CoreDump, "r");
