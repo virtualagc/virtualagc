@@ -7,18 +7,16 @@
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.
 # Website:      www.ibiblio.org/apollo/index.html
+# Pages:        1049-
 # Mod history:  2016-09-30 RSB  Created draft version.
+#               2016-10-08 PDJ  Updated against Sunburst120 scan.
 
-# Page 1103
+## Page 1049
                 BLOCK           02                              
 
 # TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:
 
-                COUNT*          $$/EXEC                         
-NOVAC           INHINT                                          
-                AD              FAKEPRET                        # LOC(MPAC +6) - LOC(QPRET)
-                TS              NEWPRIO                         # PRIORITY OF NEW JOB + NOVAC C(FIXLOC)
-
+NOVAC           TS              NEWPRIO                         # SAVE PRIORITY OF NEW JOB.             
                 EXTEND                                          
                 INDEX           Q                               # Q WILL BE UNDISTURBED THROUGHOUT.
                 DCA             0                               # 2CADR OF JOB ENTERED.
@@ -30,23 +28,21 @@ NOVAC           INHINT
 
 # TO ENTER A JOB REQUEST REQUIREING A VAC AREA -- E.G., ALL (PARTIALLY) INTERPRETIVE JOBS.
 
-FINDVAC         INHINT                                          
-                TS              NEWPRIO                         
+FINDVAC         TS              NEWPRIO                                         
                 EXTEND                                          
                 INDEX           Q                               
                 DCA             0                               
-SPVACIN         DXCH            NEWLOC                          
+                DXCH            NEWLOC                          
                 CAF             EXECBANK                        
                 XCH             FBANK                           
                 TCF             FINDVAC2                        # OFF TO EXECUTIVE SWITCHED-BANK.
 
 # TO ENTER A FINDVAC WITH THE PRIORITY IN NEWPRIO TO THE 2CADR ARRIVING IN A AND L:
-# USERS OF SPVAC MUST INHINT BEFORE STORING IN NEWPRIO.
 
 SPVAC           XCH             Q                               
                 AD              NEG2                            
                 XCH             Q                               
-                TCF             SPVACIN                         
+                TCF             FINDVAC         +4                         
 
 # TO SUSPEND A BASIC JOB SO A HIGHER PRIORITY JOB MAY BE SERVICED:
 
