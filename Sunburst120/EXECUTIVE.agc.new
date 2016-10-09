@@ -232,11 +232,12 @@ CHANJOB         INDEX           NEWJOB                          # LOC ARRIVES IN
 ENDPRCHG        RELINT                                          
                 DXCH            LOC                             # BASIC JOBS HAVE POSITIVE ADDRESSES, SO              
 
-# Page 1109
+# Page 1054
 
                 EXTEND                                          # DISPATCH WITH A DTCB.
                 BZMF            +2                              # IF INTERPRETIVE, SET UP EBANK, ETC.
-                DTCB                                            
+                DTCB  
+                                                          
 # Page 1110
                 COM                                             # EPILOGUE TO JOB CHANGE FOR INTERPRETIVE
                 AD              ONE                             
