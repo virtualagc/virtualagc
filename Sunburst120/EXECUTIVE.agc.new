@@ -104,11 +104,10 @@ ENDFIND         CA              EXECTEM1                        # RETURN TO CALL
                 TCF             Q               +2                             
 EXECBANK        CADR            FINDVAC2                        
 
-# Page 1106
+# Page 1051
 # LOCATE AN AVAILABLE VAC AREA
 
                 BANK            01                              
-                COUNT*          $$/EXEC                         
 FINDVAC2        TS              EXECTEM1                        # (SAVE CALLER'S BANK FIRST.)
                 CCS             VAC1USE                         
                 TCF             VACFOUND                        
@@ -120,9 +119,7 @@ FINDVAC2        TS              EXECTEM1                        # (SAVE CALLER'S
                 TCF             VACFOUND                        
                 CCS             VAC5USE                         
                 TCF             VACFOUND                        
-                LXCH            EXECTEM1                        
-                CA              Q                               
-                TC              BAILOUT1                        
+                TC              ABORT                        
                 OCT             1201                            # NO VAC AREAS.
 
 VACFOUND        AD              TWO                             # RESERVE THIS VAC AREA BY STORING A ZERO
