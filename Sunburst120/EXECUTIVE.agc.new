@@ -180,45 +180,37 @@ NEXTCORE        CAF             COREINC
                 TCF             NOVAC3                          
                 TC              ABORT                           # NO CORE SETS.
                 OCT             1202                            
-# Page 1108
+# Page 1053
 # THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.
 
- -2             LXCH            LOC                             
- -1             CAE             BANKSET                         # BANKSET, NOT BBANK, HAS RIGHT CONTENTS.
-CHANJOB         INHINT                                          
-                EXTEND                                          
-                ROR             SUPERBNK                        # PICK UP CURRENT SBANK FOR BBCON
-                XCH             L                               # LOC IN A AND BBCON IN L.
- +4             INDEX           NEWJOB                          # SWAP LOC AND BANKSET.
-                DXCH            LOC                             
-                DXCH            LOC                             
+ -1             DXCH            LOC                             
+CHANJOB         INDEX           NEWJOB                          # LOC ARRIVES IN A AND BBANK IN L.                                          
+                DXCH            LOC 
+                DXCH            LOC    
 
-                CAE             BANKSET                         
-                EXTEND                                          
-                WRITE           SUPERBNK                        # SET SBANK FOR NEW JOB.
-                DXCH            MPAC                            # SWAP MULTI-PURPOSE ACCUMULATOR AREAS.
-                INDEX           NEWJOB                          
-                DXCH            MPAC                            
-                DXCH            MPAC                            
-                DXCH            MPAC            +2              
-                INDEX           NEWJOB                          
-                DXCH            MPAC            +2              
-                DXCH            MPAC            +2              
-                DXCH            MPAC            +4              
-                INDEX           NEWJOB                          
-                DXCH            MPAC            +4              
-                DXCH            MPAC            +4              
-                DXCH            MPAC            +6              
-                INDEX           NEWJOB                          
-                DXCH            MPAC            +6              
-                DXCH            MPAC            +6              
+                DXCH            MPAC                            # SWAP MULTI-PURPOSE ACCUMULATOR AREAS. 
+                INDEX           NEWJOB
+                DXCH            MPAC
+                DXCH            MPAC
+                DXCH            MPAC            +2
+                INDEX           NEWJOB
+                DXCH            MPAC            +2
+                DXCH            MPAC            +2
+                DXCH            MPAC            +4
+                INDEX           NEWJOB
+                DXCH            MPAC            +4
+                DXCH            MPAC            +4
+                DXCH            MPAC            +6
+                INDEX           NEWJOB
+                DXCH            MPAC            +6
+                DXCH            MPAC            +6
 
-                CAF             ZERO                            
-                XCH             OVFIND                          # MAKE PUSHLOC NEGATIVE IF OVFIND NZ.
-                EXTEND                                          
-                BZF             +3                              
-                CS              PUSHLOC                         
-                TS              PUSHLOC                         
+                CAF             ZERO
+                XCH             OVFIND                          # MAKE PUSHLOC NEGATIVE IF OVFIND NZ.                        
+                EXTEND 
+                BZF             +3
+                CS              PUSHLOC
+                TS              PUSHLOC
 
                 DXCH            PUSHLOC                         
                 INDEX           NEWJOB                          
@@ -230,17 +222,18 @@ CHANJOB         INHINT
 
                 CCS             PUSHLOC                         # SET OVERFLOW INDICATOR ACCORDING TO
                 CAF             ZERO                            
-                TCF             ENDPRCHG        -1              
-
-# Page 1109
+                TCF             ENDPRCHG        -1
                 CS              PUSHLOC                         
-                TS              PUSHLOC                         
+                TS              PUSHLOC
                 CAF             ONE                             
-                XCH             OVFIND                          
-                TS              NEWJOB                          
+                XCH             OVFIND
+                TS              NEWJOB 
 
 ENDPRCHG        RELINT                                          
-                DXCH            LOC                             # BASIC JOBS HAVE POSITIVE ADDRESSES, SO
+                DXCH            LOC                             # BASIC JOBS HAVE POSITIVE ADDRESSES, SO              
+
+# Page 1109
+
                 EXTEND                                          # DISPATCH WITH A DTCB.
                 BZMF            +2                              # IF INTERPRETIVE, SET UP EBANK, ETC.
                 DTCB                                            
