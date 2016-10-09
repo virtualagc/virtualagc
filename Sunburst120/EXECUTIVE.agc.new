@@ -320,7 +320,7 @@ PRIOCH2         TS              LOC
                 COM                                             
                 TCF             JOBSLP2                         # AND TO EJSCAN.
 
-# Page 1113
+# Page 1058
 # RELEASE THIS CORE SET AND VAC AREA AND SCAN FOR THE JOB OF HIGHEST ACTIVE PRIORITY.
 
 ENDJOB1         INHINT                                          
@@ -328,17 +328,9 @@ ENDJOB1         INHINT
                 TS              BUF             +1              
                 XCH             PRIORITY                        
                 MASK            LOW9                            
-                TS              L                               
-
-                CS              FAKEPRET                        
-                AD              L                               
-
-                EXTEND                                          
-                BZMF            EJSCAN                          # NOVAC ENDOFJOB
-
-                CCS             L                               
-                INDEX           A                               
-                TS              0                               
+                CCS             A
+                INDEX           A
+                TS              0
 
 EJSCAN          CCS             PRIORITY        +12D            
                 TC              EJ1                             
@@ -368,15 +360,9 @@ EJSCAN          CCS             PRIORITY        +12D
                 CCS             PRIORITY        +72D            
                 TC              EJ1                             
                 TC              CCSHOLE                         
-                TCF             +1                              
+                TCF             +1                                                       
 
-                CCS             PRIORITY        +84D            
-# Page 1114
-                TC              EJ1                             
-                TC              CCSHOLE                         
-                TCF             +1                              
-
-# Page 1115
+# Page 1059
 # EVALUATE THE RESULTS OF THE SCAN.
 
                 CCS             BUF             +1              # SEE IF THERE ARE ANY ACTIVE JOBS WAITING
