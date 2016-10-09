@@ -1695,7 +1695,7 @@ agc_engine (agc_t * State)
       // time to 'increment'
       ScalerCounter -= SCALER_OVERFLOW;
       State->InputChannel[ChanSCALER1]++;
-      if (State->InputChannel[ChanSCALER1] == 037777)
+      if (State->InputChannel[ChanSCALER1] == 040000)
         {
           State->InputChannel[ChanSCALER1] = 0;
           State->InputChannel[ChanSCALER2] = (State->InputChannel[ChanSCALER2] + 1) & 037777;
