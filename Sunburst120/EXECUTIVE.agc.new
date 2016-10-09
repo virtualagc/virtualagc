@@ -373,13 +373,13 @@ EJSCAN          CCS             PRIORITY        +12D
                 TCF             DUMMYJOB                        
                 CCS             BUF                             # BUF IS ZERO IS THIS IS A PRIOCHNG AND
                 TCF             +2                              # CHANGED PRIORITY IS STILL HIGHEST.
-                TCF             ENDPRCHG        -1              
+                TCF             ENDPRCHG                      
 
                 INDEX           A                               # OTHERWISE, SET NEWJOB TO THE RELATIVE
                 CAF             0               -1              # ADDRESS OF THE NEW JOB'S CORE SET.
                 AD              -CCSPR                          
                 TS              NEWJOB                          
-                TCF             CHANJOB         -2              
+                TCF             CHANJOB         -1              
 
 EJ1             TS              BUF             +2              
                 AD              BUF             +1              # - OLD HIGH PRIORITY.
