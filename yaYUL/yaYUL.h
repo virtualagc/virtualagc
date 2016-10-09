@@ -455,6 +455,8 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
          ParseXCADR, ParseSECSIZ;
 
 extern int Block1;
+extern int blk2;
+extern char *assemblyTarget;
 extern int Html;
 extern FILE *HtmlOut;
 
