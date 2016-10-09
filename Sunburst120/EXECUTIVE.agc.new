@@ -396,10 +396,11 @@ EJ2             TS              BUF             +1
                 INDEX           BUF                             
                 TC              2                               
 
-# Page 1116
+# Page 1060
 # IDLING AND COMPUTER ACTIVITY (GREEN) LIGHT MAINTENANCE. THE IDLING ROUTINE IS NOT A JOB IN ITSELF,
 # BUT RATHER A SUBROUTINE OF THE EXECUTIVE.
 
+                BLOCK           02
                 EBANK=          SELFRET                         # SELF-CHECK STORAGE IN EBANK.
 
 DUMMYJOB        CS              ZERO                            # SET NEWJOB TO -0 FOR IDLING.
@@ -407,34 +408,43 @@ DUMMYJOB        CS              ZERO                            # SET NEWJOB TO 
                 RELINT                                          
                 CS              TWO                             # TURN OFF THE ACTIVITY LIGHT.
                 EXTEND                                          
-                WAND            DSALMOUT                        
-ADVAN           CCS             NEWJOB                          # IS THE NEWJOB ACTIVE?
-                TCF             NUCHANG2                        # YES... ONE REQUIRING A CHANGE JOB.
+                WAND            DSALMOUT 
+                TCF             CHECKNJ         +2
+
+CHECKNJ         EXTEND                                          # SPECIAL NEWJOB TEST FOR SELF-CHECK,
+                QXCH            SELFRET                         # WHICH RUNS UNDER EXECUTIVE CONTROL,
+ +2             CCS             NEWJOB                          # BUT DOES NOT HAVE A JOBS CORE REGISTERS.
+                TCF             NUCHANGE                        # NEW JOB REQUIRING A CHANGE JOB.
                 CAF             TWO                             # NEW JOB ALREADY IN POSITION FOR
-                TCF             NUDIRECT                        # EXECUTION
+                TCF             NUDIRECT                        # EXECUTION.                
 
-                CA              SELFRET                         
-                TS              L                               # PUT RETURN ADDRESS IN L.
-                CAF             SELFBANK                        
-                TCF             SUPDXCHZ        +1              # AND DISPATCH JOB.
-
-                EBANK=          SELFRET                         
-SELFBANK        BBCON           SELFCHK                         
+ADVAN           CAF             SELFBANK                        # (SIMULATOR ADVAN IF NEWJOB = 77777).
+                TS              BBANK
+                TC              SELFRET
 
 NUDIRECT        EXTEND                                          # TURN THE GREEN LIGHT BACK ON.
                 WOR             DSALMOUT                        
                 DXCH            LOC                             # JOBS STARTED IN THIS FASHION MUST BE
-                TCF             SUPDXCHZ                        
+                DTCB                                            # BASIC.
 
-                BLOCK           2                               # IN FIXED-FIXED SO OTHERS MAY USE.
+NUCHANGE        CAF             TWO
+                EXTEND
+                WOR             DSALMOUT
+                CAF             EXECBANK                        # SWAP CORE SETS.
+                TS              FBANK
+                INHINT                                          # CHANGE JOBS
+                TCF             CHANGJOB        -1                    
 
-                COUNT*          $$/EXEC                         
+                EBANK=          SELFRET                         
+SELFBANK        BBCON           SELFCHK                         
+
+# Page 1061
 
 # SUPDXCHZ -- ROUTINE TO TRANSFER TO SUPEBANK.
 # CALLING SEQUENCE:
 #               TCF     SUPDXCHZ        # WITH 2CADR OF DESIRED LOCATION IN A + L.
 
-SUPDXCHZ        XCH             L                               # BASIC.
+SUPDXCHZ        XCH             L                               
  +1             EXTEND                                          
                 WRITE           SUPERBNK                        
                 TS              BBANK                           
