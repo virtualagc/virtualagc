@@ -440,15 +440,44 @@ SELFBANK        BBCON           SELFCHK
 
 # Page 1061
 
-# SUPDXCHZ -- ROUTINE TO TRANSFER TO SUPEBANK.
-# CALLING SEQUENCE:
-#               TCF     SUPDXCHZ        # WITH 2CADR OF DESIRED LOCATION IN A + L.
+# PRIORITY CONSTANTS (NOTE IN FIXED-FIXED).
 
-SUPDXCHZ        XCH             L                               
- +1             EXTEND                                          
-                WRITE           SUPERBNK                        
-                TS              BBANK                           
-                TC              L                               
+PRIO1           EQUALS          BIT10
+PRIO2           EQUALS          BIT11
+PRIO3           OCT             03000
+PRIO4           EQUALS          BIT12
+PRIO5           OCT             05000
+PRIO6           OCT             06000
+PRIO7           OCT             07000 
+PRIO10          EQUALS          BIT13
+PRIO11          OCT             11000
+PRIO12          =               BNKJUP          +4
+PRIO13          OCT             13000
+PRIO14          OCT             14000
+PRIO15          OCT             15000  
+PRIO16          OCT             16000
+PRIO17          OCT             17000
+PRIO20          EQUALS          BIT14 
+PRIO21          OCT             21000
+PRIO22          OCT             22000
+PRIO23          OCT             23000
+PRIO24          =               NUFAZ           +10
+PRIO25          OCT             25000
+PRIO26          OCT             26000
+PRIO27          OCT             27000
+PRIO30          =               BNKCAL          +2
+PRIO31          OCT             31000
+PRIO32          OCT             32000
+PRIO33          OCT             33000
+PRIO34          OCT             34000
+PRIO35          OCT             35000
+PRIO36          OCT             36000
+PRIO37          OCT             37000
 
-NEG100          OCT             77677                           
+# EBANK CONSTANTS IN FIXED-FIXED
 
+EBANK3          EQUALS          OCT1400
+EBANK4          EQUALS          BIT11
+EBANK5          OCTAL           02400
+EBANK6          EQUALS          PRIO3
+EBANK7          OCTAL           03400
