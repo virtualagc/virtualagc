@@ -8,6 +8,7 @@
 # Pages:        444-474
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-25 HG   Start transfer from scan
+#               2016-10-08 HG   Fix INPRET->INTPRET
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -38,7 +39,7 @@ AOTNBIMU        CAF             ONE                     # AOT-NB-IMU FINE ALIGNM
 
                 TC              BANKCALL
                 CADR            IMUZERO                 # IMU ZERO ENCODER MODE
-                TC              INPRET
+                TC              INTPRET
                 CALL
                                 LATAZCHK                # TO LOAD AZIMUTH (SM) AND LATITUDE
                 CALL
@@ -552,7 +553,7 @@ POS2            TC              INTPRET                 # XSM = SE   YSM = SW   
 
 
 
-POS3            TC              INPRET                  # XSM = SE    YSM = V    ZSM = SW
+POS3            TC              INTPRET                  # XSM = SE    YSM = V    ZSM = SW
                 VLOAD           PDVL
                                 XSM
                                 YSM
