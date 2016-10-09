@@ -62,7 +62,7 @@ CHANG2          CAF             EXECBANK
                 LXCH            BANKSET                         # BANKSET, NOT BBANK, HAS RIGHT CONTENTS.
                 TCF             CHANG1          +4              
 
-# Page 1105
+# Page 1050
 # TO VOLUNTARILY SUSPEND A JOB UNTIL THE COMPLETION OF SOME ANTICIPATED EVENT (I/O EVENT ETC.):
 
 JOBSLEEP        TS              LOC                             
@@ -72,8 +72,7 @@ JOBSLEEP        TS              LOC
 
 # TO AWAKEN A JOB PUT TO SLEEP IN THE ABOVE FASHION:
 
-JOBWAKE         INHINT                                          
-                TS              NEWLOC                          
+JOBWAKE         TS              NEWLOC                                          
                 CS              TWO                             # EXIT IS VIA FINDVAC/NOVAC PROCEDURES.
                 ADS             Q                               
                 CAF             EXECBANK                        
@@ -90,6 +89,10 @@ PRIOCHNG        INHINT                                          # NEW PRIORITY A
                 CA              Q                               
                 TCF             PRIOCH2                         
 
+# TO FREE THE DISPLAY BEFORE ENDOFJOB:
+
+EJFREE          TC              FREEDSP
+
 # TO REMOVE A JOB FROM EXECUTIVE CONSIDERATIONS:
 
 ENDOFJOB        CAF             EXECBANK                        
@@ -98,10 +101,8 @@ ENDOFJOB        CAF             EXECBANK
 
 ENDFIND         CA              EXECTEM1                        # RETURN TO CALLER AFTER JOB ENTRY
                 TS              FBANK                           # COMPLETE.
-                TCF             Q+2                             
+                TCF             Q               +2                             
 EXECBANK        CADR            FINDVAC2                        
-
-FAKEPRET        ADRES           MPAC            -36D            # LOC(MPAC +6) - LOC(QPRET)
 
 # Page 1106
 # LOCATE AN AVAILABLE VAC AREA
