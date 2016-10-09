@@ -8,6 +8,7 @@
 # Pages:        639-641
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 MC   Filled out.
+#               2016-10-05 HG   Insert missed TC ASCENGON
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -52,7 +53,9 @@ IYYTASK         TC              JACCESTQ
 
                 TCF             TASKOVER                        
 
-IZZTASK         TC              JACCESTR                        
+IZZTASK         TC              JACCESTR    
+
+                TC              ASCENGON
 
                 EXTEND                                          
                 DIM             IZZ                             

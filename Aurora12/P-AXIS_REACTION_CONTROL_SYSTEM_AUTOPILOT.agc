@@ -9,6 +9,9 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-02 MAS  Began.
 #               2016-10-03 MAS  Completed.
+#               2016-10-04 HG   add missed instruction TS TOFJTCHG
+#                               comment code look alike
+#                               JSATCHG -> JTSATCHG
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -536,6 +539,7 @@ POS4P           EXTEND
                 TCF             RATE
 JETSOFF         CAF             ZERO
                 TS              JETRATE
+                TS              TOFJTCHG
                 TC              WRITEJTS        +2
                 TCF             RESUME
 # P-AXIS URGENCY FUNCTION CALCULATION
@@ -552,8 +556,8 @@ PURGENCY        CA              CDUY                            # P-ERROR CALCUL
                 CA              CDUX                            # THIRD COMPONENT
                 EXTEND
                 MSU             CDUXD                           # CDU VALUE - ANGLE DESIRED (X-AXIS)
-                EXTEND
-                MP              M13
+#               EXTEND
+#               MP              M13
                 ADS             E                               # SAVE SUM OF TERMS, NO OVERFLOW EVR
 
                 TS              PERROR                          # SAVE P ERR FOR DISPLAY
@@ -706,7 +710,7 @@ T6NXT=+         CS              TOFJTCHG
                 AD              ONE
 ## Page 555
                 TS              T6NEXT          +1
-                CA              JSATCHG
+                CA              JTSATCHG
                 TS              T6NEXTJT        +2
                 TCF             RESUME
  +7             TS              L

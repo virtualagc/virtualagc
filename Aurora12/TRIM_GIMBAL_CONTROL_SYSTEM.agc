@@ -10,6 +10,8 @@
 #               2016-10-02 MAS  Transcribed.
 #               2016-10-04 HG   Change 'code' to comments. Looks like code in the scans
 #                               but is actually documentation
+#               2016-10-08 HG   Change THEATA -> ETHETA 
+#                                      KCENTRAL -> K2CNTRAL   (p. 621)
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -317,9 +319,9 @@ WLARGE          CAE             SF1                             # RESCALE VARIAB
                 TS              SF2
 
 ## Page 621
-ALGORTHM        CAE             THETA                           # GET RESCALED ERROR THETA
+ALGORTHM        CAE             ETHETA                          # GET RESCALED ERROR THETA
                 EXTEND
-                MP              KCENTRAL                        # FORM K(2)*THETA IN D.P.
+                MP              K2CNTRAL                        # FORM K(2)*THETA IN D.P.
                 LXCH            K2THETA                         
                 EXTEND                                          # FORM K(2)*THETA*SF2 IN D.P.
                 MP              SF2
