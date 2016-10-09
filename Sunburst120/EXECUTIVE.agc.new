@@ -139,7 +139,7 @@ NO.CORES        DEC             6
                 TCF             NEXTCORE                        # AN ACTIVE JOB HAS A POSITIVE PRIORITY
                                                                 # BUT A DORMANT JOB'S PRIORITY IS NEGATIVE
 
-# Page 1107
+# Page 1052
 CORFOUND        CA              NEWPRIO                         # SET THE PRIORITY OF THIS JOB IN THE CORE
                 INDEX           LOCCTR                          # SET'S PRIORITY REGISTER AND SET THE
                 TS              PRIORITY                        # JOB'S PUSH-DOWN POINTER AT THE BEGINNING
@@ -154,7 +154,7 @@ CORFOUND        CA              NEWPRIO                         # SET THE PRIORI
                 TS              FIXLOC                          
 
 SPECTEST        CCS             NEWJOB                          # SEE IF ANY ACTIVE JOBS WAITING (RARE).
-                TCF             SETLOC                          # MUST BE AWAKENED OUT UNCHANGED JOB.
+                TCF             SETLOC                          # MUST BE AWAKENED BUT UNCHANGED JOB.
                 TC              CCSHOLE                         
                 TC              CCSHOLE                         
                 TS              NEWJOB                          # +0 SHOWS ACTIVE JOB ALREADY SET.
@@ -178,9 +178,7 @@ NEXTCORE        CAF             COREINC
                 ADS             LOCCTR                          
                 CCS             EXECTEM2                        
                 TCF             NOVAC3                          
-                LXCH            EXECTEM1                        
-                CA              Q                               
-                TC              BAILOUT1                        # NO CORE SETS AVAILABLE.
+                TC              ABORT                           # NO CORE SETS.
                 OCT             1202                            
 # Page 1108
 # THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.
