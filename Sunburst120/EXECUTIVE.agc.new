@@ -237,8 +237,8 @@ ENDPRCHG        RELINT
                 EXTEND                                          # DISPATCH WITH A DTCB.
                 BZMF            +2                              # IF INTERPRETIVE, SET UP EBANK, ETC.
                 DTCB  
-                                                          
-# Page 1110
+
+# Page 1055
                 COM                                             # EPILOGUE TO JOB CHANGE FOR INTERPRETIVE
                 AD              ONE                             
                 TS              LOC                             # RESUME
@@ -251,26 +251,13 @@ JOBSLP1         INHINT
                 TS              PRIORITY                        
                 CAF             LOW7                            
                 MASK            BBANK                           
-                EXTEND                                          
-                ROR             SUPERBNK                        # SAVE OLD SUPERBANK VALUE.
                 TS              BANKSET                         
                 CS              ZERO                            
 JOBSLP2         TS              BUF             +1              # HOLDS -- HIGHEST PRIORITY.
                 TCF             EJSCAN                          # SCAN FOR HIGHEST PRIORITY ALA ENDOFJOB.
 
-NUCHANG2        INHINT                                          # QUICK... DON'T LET NEWJOB CHANGE TO +0.
-                CCS             NEWJOB                          
-                TCF             +3                              # NEWJOB STILL PNZ
-                RELINT                                          # NEW JOB HAS CHANGED TO +0.  WAKE UP JOB
-                TCF             ADVAN           +2              # VIA NUDIRECT.  (VERY RARE CASE.)
+# Page 1056
 
-                CAF             TWO                             
-                EXTEND                                          
-                WOR             DSALMOUT                        # TURN ON ACTIVITY LIGHT
-                DXCH            LOC                             # AND SAVE ADDRESS INFO FOR BENEFIT OF
-                TCF             CHANJOB         +4              #       POSSIBLE SLEEPINT JOB.
-
-# Page 1111
 # TO WAKE UP A JOB, EACH CORE SET IS FOUND TO LOCATE ALL JOBS WHICH ARE ASLEEP.  IF THE FCADR IN THE
 # LOC REGISTER OF ANY SUCH JOB MATCHES THAT SUPPLIED BY THE CALLER, THAT JOB IS AWAKENED.  IF NO JOB IS FOUND,
 # LOCCTR IS SET TO -1 AND NO FURTHER ACTION TAKES PLACE.
