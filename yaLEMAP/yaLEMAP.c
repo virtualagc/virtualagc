@@ -83,6 +83,7 @@ static int Lines;
 static FILE *Lst;
 FILE *HtmlOut = NULL;
 int Html = 0;
+int inHeader = 0;
 
 #define MAX_CHECKSUM_REGIONS 16
 typedef struct

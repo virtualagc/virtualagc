@@ -173,7 +173,7 @@ Add(int n1, int n2)
 int
 main(int argc, char *argv[])
 {
-  int MaxPasses = 10, blk2 = 0;
+  int MaxPasses = 10;
   int RetVal = 1, i, j, k, LastUnresolved, Fatals = 0, Warnings = 0;
   extern int UnpoundPage;
 
@@ -198,9 +198,15 @@ main(int argc, char *argv[])
       else if (!strcmp(argv[i], "--unpound-page"))
         UnpoundPage = 1;
       else if (!strcmp(argv[i], "--block1"))
-        Block1 = 1;
+	{
+	  Block1 = 1;
+	  assemblyTarget = "BLK1";
+	}
       else if (!strcmp(argv[i], "--blk2"))
-        blk2 = 1;
+	{
+	  blk2 = 1;
+	  assemblyTarget = "BLK2";
+	}
       else if (!strcmp(argv[i], "--hardware"))
         Hardware = 1;
       else if (!strcmp(argv[i], "--format"))
@@ -256,7 +262,7 @@ main(int argc, char *argv[])
     }
 
   printf("Apollo Guidance Computer (AGC) assembler, version " NVER
-  ", built " __DATE__ ", Block %d\n", (Block1 ? 1 : 2));
+  ", built " __DATE__ ", target %s\n", assemblyTarget);
   printf("(c)2003-2005,2009-2010,2016 Ronald S. Burkey\n");
   printf(
       "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
@@ -535,6 +541,10 @@ main(int argc, char *argv[])
           "--blk2           For the early version of Block 2 code, such as\n");
       printf(
           "                 in the AURORA program.  Not used for Block 2 in\n");
+      printf(
+	  "                 The default (omitting both --block1 and --blk2)\n");
+      printf(
+	  "                 is correct for almost all surviving AGC software.\n");
       printf(
           "                 general, though, and not for any flown missions.\n");
       printf("--hardware       Emit binary with hardware bank order, and\n"
