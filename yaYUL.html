@@ -83,7 +83,7 @@
     </p>
     <p><a href="http://www.ibiblio.org/apollo/klabs/images/IMG_9203.JPG"><img
           alt="" src="HughAndYUL.jpg" align="right" height="300"
-          width="400" border="2"></a>YUL, by the way, originally ran on
+          border="2" width="400"></a>YUL, by the way, originally ran on
       the IBM 650, which quickly ran out of capacity, and hence it was
       ported to the more-powerful Honeywell 800.&nbsp; Now, I don't have
       a Honeywell 800 in my pocket, so I have no way to run YUL, but I
@@ -105,8 +105,10 @@
 
 
 
+
           0</a></li>
       <li><a href="http://www.ibiblio.org/apollo/YUL/03%20-%20Pass%201/">Pass
+
 
 
 
@@ -119,8 +121,10 @@
 
 
 
+
           2</a></li>
       <li><a href="http://www.ibiblio.org/apollo/YUL/05%20-%20Pass%203/">Pass
+
 
 
 
@@ -134,9 +138,11 @@ href="http://www.ibiblio.org/apollo/YUL/06%20-%20System%20Manufacturing%20-%20AG
 
 
 
+
           manufacturing for AGC4</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/07%20-%20System%20Manufacturing%20-%20SACO/">System
+
 
 
 
@@ -150,6 +156,7 @@ href="http://www.ibiblio.org/apollo/YUL/08%20-%20System%20Manufacturing%20-%20BL
 
 
 
+
           manufacturing for BLK2</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/09%20-%20System%20Simulators%20-%20AGC4/">System
@@ -158,9 +165,11 @@ href="http://www.ibiblio.org/apollo/YUL/09%20-%20System%20Simulators%20-%20AGC4/
 
 
 
+
           simulators, AGC4</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/10%20-%20System%20Simulators%20-%20SACO/">System
+
 
 
 
@@ -252,6 +261,7 @@ Therefore,
 
 
 
+
     <span style="font-weight: bold;">yaYUL</span> is not so much an
     assembler for AGC assembly language (which is fairly nebulous idea),
     as much as it is a utility which processes <i>existing</i> <span
@@ -330,16 +340,67 @@ Therefore,
     --block1<br>
     <div style="margin-left: 40px;">(As of 20160824.)&nbsp; Indicates
       that Block 1 assembly-language is processed rather than Block 2
-      assembly-language.&nbsp; At this writing the only Block 1 source
-      code available is the Solarium 055 program.<br>
+      assembly-language.&nbsp; See also the "--blk2" switch below.<br>
     </div>
     <br>
+    --blk2<br>
+    <div style="margin-left: 40px;">(As of 20161009.)&nbsp; Indicates
+      that the assembly target is BLK2.&nbsp; The topic of "assembly
+      targets" is confusing, and in particular you should note that
+      "--blk2" is not the opposite of "--block1", though the two are
+      indeed mutually exclusive, nor does it comprise all software for
+      the Block 2 AGC.&nbsp; It's important to understand that the
+      original <b>YUL</b> program had to support an evolving range of
+      AGC computer hardware designs, and roughly corresponding to them,
+      an evolving range of language designs, both in terms of the basic
+      instructions (the assembly language) and the interpreter
+      language.&nbsp; As such, <b>YUL</b> supported a variety of
+      "target" systems, each with a short alphanumeric designation (such
+      as "BLK2"), with each corresponding more-or-less to a given
+      hardware architecture <i>plus</i> a given software
+      architecture.&nbsp; However, <b>yaYUL</b> makes no effort to
+      support the same large range of assembly targets as <b>YUL</b>,
+      but merely focuses on those target systems for which we have
+      complete AGC program listings have survived and are available to
+      us now.&nbsp; The specific targets supported by <b>yaYUL</b> are:<br>
+      <ul>
+        <li>The AGC4 target ("--block1" command-line switch) comprises
+          all programs for Block 1 AGC systems, of which the only
+          example we have at this writing is the Solarium 055 program,
+          though Solarium 054 (which exists though we can't get it at
+          present) also falls into this category.</li>
+        <li>The BLK2 target ("--blk2" command-line switch) comprises
+          programs written in an early dialect for Block 2 AGC systems,
+          of which the only example we have at this writing is Aurora 12
+          program, though Retread 44 (coming soon, according to plans)
+          presumably also falls into this category.</li>
+        <li>The AGC target (the default, no command-line switch needed)
+          comprises all of the AGC programs in the later dialect used
+          for actually-flown manned missions, and most other Block 2
+          programs that we have in our inventory as well.</li>
+      </ul>
+      An example of a <b>YUL</b> target <i>not</i> supported by <b>yaYUL</b>
+      is AGC3.<br>
+      <br>
+    </div>
     --force<br>
     <div style="margin-left: 40px;">Forces creation of the core-rope
       image file, which is normally bypassed when fatal errors are
       detected.&nbsp; (As of 2005-09-05, there are no known bugs left in
       <span style="font-weight: bold;">yaYUL</span> that need this
       switch as a workaround.)<br>
+      <br>
+    </div>
+    --format<br>
+    <div style="margin-left: 40px;">(As of 20161009.)&nbsp; Simply
+      reformat the source file into a normalized form (i.e., with
+      standardized alignment of columns), outputting it on stdout, and
+      then exit.&nbsp; This does rely on the input file being at least
+      partially formatted correctly, in the sense that labels begin at
+      column 1 and opcodes at column 17.&nbsp; Either spaces or tabs
+      (interpreted as moving to the next multiple of 8 spaces) can be
+      used in the input but at present, tabs will be converted to spaces
+      in the output.<br>
       <br>
     </div>
     --html<br>
@@ -398,6 +459,7 @@ Therefore,
 
 
 
+
               manual</a>) allow forward-references to other <span
               style="font-family: monospace;">EQUALS</span> pseudo-ops.
             For example, consider the following code fragment:<br>
@@ -408,6 +470,7 @@ Therefore,
                 style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL4&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -429,6 +492,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
                 SYMBOL2</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL2&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
@@ -441,9 +505,11 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
                 SYMBOL1</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL1&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -517,8 +583,16 @@ EQUALS&nbsp;&nbsp;&nbsp;
       </tbody>
     </table>
     <p> </p>
-    There are some additional options available for certain specialized
-    purposes, which you can view with "yaYUL --help".<br>
+    --syntax<br>
+    <div style="margin-left: 40px;">(As of 20161009.)&nbsp; Simply check
+      the syntax and then quit.&nbsp; This is useful, for example, for
+      checking the accuracy of transcriptions of source code, when only
+      portions of the code rather than the entire AGC program are
+      available.<br>
+    </div>
+    <br>
+    There may be some additional options available for certain
+    specialized purposes, which you can view with "yaYUL --help".<br>
     <br>
     <h2><a name="Apollo_Source-Code_Naming"></a>Apollo Source-Code
       Naming</h2>
@@ -554,6 +628,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
       manual</a>.&nbsp; Anyone who's determined to write AGC4
     assembly-language will probably also need to consult the <a
       href="developer.html">developer-info page</a>, which covers
@@ -566,7 +641,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-10-06.<br>
+          2016-10-09.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
