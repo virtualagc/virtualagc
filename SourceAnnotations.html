@@ -1,8 +1,7 @@
 <!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html;
-      charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
       2.4.16 ppc) [Netscape]">
     <meta name="Author" content="Ronald Burkey">
@@ -60,8 +59,8 @@
     hard to produce them.&nbsp;&nbsp; My general strategy for providing
     these annotations is:<br>
     <ul>
-      <li>To fully annotate the Apollo 11 source code&mdash;AGC Luminary 099,
-        AGC Comanche 055, AGS Flight Program 6&mdash;to the extent possible.</li>
+      <li>To fully annotate the Apollo 11 source code—AGC Luminary 099,
+        AGC Comanche 055, AGS Flight Program 6—to the extent possible.</li>
       <li>To fully annotate changes in software from mission to
         mission.&nbsp; For example, the Apollo 12 software (if it was
         available) would be annotated to explain how it differs from
@@ -93,6 +92,7 @@
     style of annotations used by the <a style="font-weight: bold;"
       href="http://www.doxygen.org">doxygen</a> system, though pure HTML
     is used in place of <span style="font-weight: bold;">doxygen</span>'s
+
     custom markup language.<br>
     <br>
     The basic markup looks like this:<br>
@@ -158,7 +158,49 @@
       monospace;">&lt;br&gt;</span> tag must be used for paragraph
     breaks (if any), since otherwise all of the text will be reflowed
     into one large paragraph as in the example above.<br>
-    <br>
+    <h2><small>Important Exceptions to ## Processing</small></h2>
+    <p>In AGC source code, there are remarks present in the original
+      source code, provided contemporaneously by the original AGC
+      developers, and of necessity there are also comments added by
+      "modern" annotators of the code, and it is essential to
+      distinguish between those somehow.&nbsp; No such method of
+      distinguishing between these two types of comments has been
+      formalized in any technical sense, but there are approaches which
+      have been used.<br>
+    </p>
+    <p>One technique is the one described in the preceding section,
+      which is simply to use '#' to precede all of the original
+      comments, and '##' to precede all later comments.&nbsp; This idea
+      has great merit, but would result in a very poor presentation in
+      HTML if <i>all</i> ## comments were always processed precisely as
+      described in the preceding section.&nbsp; The specific culprits
+      would be the headers (consisting of a large number of comments
+      describing the origin of the data, how it was edited, and so on)
+      that we always add to the top of each AGC source-code file, as
+      well as the page numbers we embed in the source-code files making
+      it easy to relate the source-code to the original scans of the AGC
+      programs or the hardcopies of the programs.<br>
+    </p>
+    <p>Consequently, there are two exceptions to the processing of ##
+      comments:<br>
+    </p>
+    <ul>
+      <li>Any comment of the form "## Page ..." is simply treated as a
+        regular comment, and printed with two ## rather than one #, but
+        not subject to any special highlighting as described in the
+        preceding section; and</li>
+      <li>File headers — defined as any sequence of lines beginning with
+        ## in column 1 or lines that have nothing but blanks in them —
+        are also treated as normal comments without any special
+        highlighting.</li>
+    </ul>
+    <p>These two exceptions should, in most cases, make it feasible to
+      mark all "modern" comments with ##, while still taking advantage
+      of the special highlighting that ## provides in the HTML-formatted
+      output.<br>
+    </p>
+    <h2><small>### Annotations</small><br>
+    </h2>
     Styles are defined with statements like "<span style="font-family:
       monospace;">### STYLE=<span style="font-style: italic;">something</span></span>"
     (note the use of "###" rather than "##") and remain in effect until
@@ -370,7 +412,7 @@
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2009-08-17.<br>
+          2009-10-09.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
