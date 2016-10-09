@@ -8,6 +8,7 @@
 # Pages:        148-150
 # Mod history:  2016-09-20 JL   Created.
 #		2016-10-03 JL	Transcribed pages 148-150.
+#               2016-10-08 HG   change TS LXCH -> TS L
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -61,7 +62,7 @@ NEWPHASE	INHINT			# NEW PHASE ARRIVES IN A.
 		DOUBLE
 		XCH	RUPTREG4
 
-PHASCH2		TS	LXCH		# DIRECT VERSION.
+PHASCH2		TS	L		# DIRECT VERSION.
 		COM			# COMPLEMENTED VERSION IMMEDIATELY PRE-
 		INDEX	RUPTREG4	# CEDES THE DIRECT ONE.
 		DXCH	-PHASE0		# COPIES DISAGREE FOR MINIMUM TIME.

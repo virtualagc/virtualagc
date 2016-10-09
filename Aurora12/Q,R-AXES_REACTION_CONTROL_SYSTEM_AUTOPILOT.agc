@@ -7,7 +7,8 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        562-593
 # Mod history:  2016-09-20 JL   Created.
-#               2016-10-30 HG   Started transcibing from scan
+#               2016-09-30 HG   Started transcribing from scan
+#               2016-10-08 HG   Change TS  Q -> TC  Q (p. 584)
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -1183,7 +1184,7 @@ UVXFORM         CAE             EDOTQ                   # TRANSFORM ANGULAR RATE
                 EXTEND
                 MP              .707
                 TS              E                       # SAVE ERROR SCALED AT PI
-                TS              Q
+                TC              Q
 
 .707            DEC             0.70711                 # SQRT(1/2)
 

@@ -8,6 +8,7 @@
 # Pages:        0635-0638
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 OH   Initial Transcription
+#               2016-10-08 HG   fix BANK 20 -> BANK 12  (p.0635)
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -29,7 +30,7 @@
 
 ## Page 0635
 
-                BANK    20
+                BANK    12
 
 ## Page 0636
 # FAILURE MONITOR FOR LEM RCS JETS (4 TIMES/SECOND)
