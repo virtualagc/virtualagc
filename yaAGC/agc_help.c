@@ -245,14 +245,22 @@ but no count or size letter (see \"x\" command). Without the \n\
 format letter, the default is octal.\n\n\
 Format letters are the usual\n\
 (o)ctal, he(x)adecimal, (d)ecimal, (u)nsigned, (t)wo base (i.e. binary)\n\
-When decimal is selected it will use ones complement implementation.\n\
+and (f)loat. When decimal is selected yaAGC will use ones complement\n\
+implementation.\n\n\
+The AGC uses both Single Precision (SP) and (DP) instructions.\n\
+To specify how to print the float number an extension is added to\n\
+the FMT field to select the printing style. The printing style can be any\n\
+of the \"NOUN SCALES AND FORMATS\" (e.g. K for time in 1/100 of a sec).\n\
+In addition there is SP and DP for general single and double precision\n\
+printing. To use the extension use \"print/f:<scalar_type>\n\
 \n\
 Examples of EXP with or without formatting:\n\
   print/d MPAC\n\
   print/x &MPAC\n\
   print *0x6c\n\
   print *0154\n\
-  print *E0,1554\n\n\
+  print *E0,1554\n\
+  print/f:K TIME2\n\n\
 ");
 
   gdbmiHelpDone();
