@@ -11,60 +11,57 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-10 PDJ  Updated based on Sunburst120 scans. 
 
-# Page 1117
-# PROGRAM DESCRIPTION                                                           DATE -- 10 OCTOBER 1966
+## Page 1062
+
+# PROGRAM DESCRIPTION--                                                         DATE -- 10 OCTOBER 1966
 # MOD NO -- 2                                                                   LOG SECTION -- WAITLIST
 # MOD BY -- MILLER      (DTMAX INCREASED TO 162.5 SEC)                          ASSEMBLY -- SUNBURST REV 5
-# MOD 3 BY KERNAN       (INHINT INSERTED AT WAITLIST) 2/28/68 SKIPPER REV 4
-# MOD 4 BY KERNAN       (TWIDDLE IN 54) 3/28/68 SKIPPER REV 13.
 
 # FUNCTIONAL DESCRIPTION --
 #       PART OF A SECTION OF PROGRAMS -- WAITLIST, TASKOVER, T3RUPT, USED TO CALL A PROGRAM (CALLED A TASK),
 #       WHICH IS TO BEGIN IN C(A) CENTISECONDS.  WAITLIST UPDATES TIME3, LST1, AND LST2.  THE MEANING OF THESE LISTS
 #       FOLLOW.
-
+#
 #               C(TIME3) = 16384 -(T1-T) CENTISECONDS, (T=PRESENT TIME, T1-TIME FOR TASK1)
-
+#
 #                       C(LST1)         =       -(T2-T1)+1
 #                       C(LST1 +1)      =       -(T3-T2)+1
 #                       C(LST1 +2)      =       -(T4-T3)+1
 #                                      ...
+#                                      ...
 #                       C(LST1 +6)      =       -(T8-T7)+1
 #                       C(LST1 +7)      =       -(T9-T8)+1
-
+#
 #                       C(LST2)         =       2CADR OF TASK1
 #                       C(LST2 +2)      =       2CADR OF TASK2
+#                                      ...
 #                                      ...
 #                       C(LST2 +14)     =       2CADR OF TASK8
 #                       C(LST2 +16)     =       2CADR OF TASK9
 
 # WARNINGS --
+# -----------
 #       1)      1 <= C(A) <= 16250D (1 CENTISECOND TO 162.5 SEC)
 #       2)      9 TASKS MAXIMUM
 #       3)      TASKS CALLED UNDER INTERRUPT INHIBITED
 #       4)      TASKS END BY TC TASKOVER
 
 # CALLING SEQUENCE --
-#       L-1     CA      DELTAT  (TIME IN CENTISECONDS TO TASK START)
+#       L-2     CAF     DELTAT  (TIME IN CENTISECONDS TO TASK START)
+#       L-1     INHINT
 #       L       TC      WAITLIST
-#       L+1     2CADR   DESIRED TASK.
+#       L+1     2CADR   DESIRED TASK
 #       L+2     (MINOR OF 2CADR)
 #       L+3     RELINT          (RETURNS HERE)
 
-# TWIDDLE --
-#       TWIDDLE IS FOR USE WHEN THE TASK BEING SET UP IS IN THE SAME EBANK AND FBANK AS THE USER.  IN
-#       SUCH CASES, IT IMPROVES UPON WAITLIST BY ELIMINATING THE NEED FOR THE BBCON HALF OF THE 2CADR,
-# Page 1118
-#       SAVING A WORD.  TWIDDLE IS LIKE WAITLIST IN EVERY RESPECT EXCEPT CALLING SEQUENCE, TO WIT,
-#               L-1     CA      DELTAT
-#               L       TC      TWIDDLE
-#               L+1     ADRES   DESIRED TASK
-#               L+2     RELINT          (RETURNS HERE)
-
 # NORMAL EXIT MODES --
+#
 #       AT L+3 OF CALLING SEQUENCE.
 
 # ALARM OR ABORT EXIT MODES --
+
+## Page 1063
+
 #       TC      ABORT
 #       OCT     1203    (WAITLIST OVERFLOW -- TOO MANY TASKS)
 
