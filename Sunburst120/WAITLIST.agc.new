@@ -66,8 +66,8 @@
 #       OCT     1203    (WAITLIST OVERFLOW -- TOO MANY TASKS)
 
 # ERASABLE INITIALIZATION REQUIRED --
-#       ACCOMPLISHED BY FRESH START --  LST2, ..., LST2 +16 = ENDTASK
-#                                       LST1, ..., LST1 +7  = NEG1/2
+#       ACCOMPLISHED BY FRESH START --  LST2, ..., LST2 +16 =ENDTASK
+#                                       LST1, ..., LST1 +7  =NEG1/2
 
 # OUTPUT --
 #       LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
@@ -75,10 +75,11 @@
 # DEBRIS --
 #       CENTRALS -- A,Q,L
 #       OTHER    -- WAITEXIT, WAITADR, WAITTEMP, WAITBANK
-
 # DETAILED ANALYSIS OF TIMING --
+#
 #       CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR) IN EXACTLY DELTA T CENTISECONDS.
-#       THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS:
+#       THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS
+#
 #               LET T0 = THE TIME OF THE TC WAITLIST
 #               LET TS = T0 +147U + COUNTER INCREMENTS (SET UP TIME)
 #               LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)
@@ -87,37 +88,28 @@
 #                        (Z=0, USUALLY).
 #               LET DELTD  = THE ACTUAL TIME TAKEN TO GIVE CONTROL TO 2CADR
 #               THEN DELTD = TS+DELTA T -X +Y +Z +1.05MS* +COUNTERS*
-#               *THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.
+#
+#               *-THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.
 #       IN SHORT, THE ACTUAL TIME TO RETURN CONTROL TO A 2CADR IS AUGMENTED BY THE TIME TO SET UP THE TASK'S
 #       INTERRUPT, ALL COUNTERS TICKING, THE T3RUPT PROCESSING TIME, THE WAITLIST PROCESSING TIME AND THE POSSIBILITY
 #       OF OTHER TASKS INHIBITING THE INTERRUPT.
 
                 BLOCK           02                              
-# Page 1119
                 EBANK=          LST1                            # TASK LISTS IN SWITCHED E BANK.
 
-                COUNT*          $$/WAIT                         
-TWIDDLE         INHINT                                          
-                TS              L                               # SAVE DELAY TIME IN L
-                CA              POSMAX                          
-                ADS             Q                               # CREATING OVERFLOW AND Q-1 IN Q
-                CA              BBANK                           
-                EXTEND                                          
-                ROR             SUPERBNK                        
-                XCH             L                               
-
-WAITLIST        INHINT                                          
-                XCH             Q                               # SAVE DELTA T IN Q AND RETURN IN
+WAITLIST        XCH             Q                               # SAVE DELTA T IN Q AND RETURN IN                                          
                 TS              WAITEXIT                        # WAITEXIT.
                 EXTEND                                          
-                INDEX           WAITEXIT                        # IF TWIDDLING, THE TS SKIPS TO HERE
+                INDEX           A                               
                 DCA             0                               # PICK UP 2CADR OF TASK.
- -1             TS              WAITADR                         # BBCON WILL REMAIN IN L
+                TS              WAITADR                         # BBCON WILL REMAIN IN L
 DLY2            CAF             WAITBB                          # ENTRY FROM FIXDELAY AND VARDELAY.
                 XCH             BBANK                           
                 TCF             WAIT2                           
 
 # RETURN TO CALLER AFTER TASK INSERTION:
+
+# Page 1064
 
 LVWTLIST        DXCH            WAITEXIT                        
                 AD              TWO                             
