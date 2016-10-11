@@ -315,6 +315,9 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
   char c = 0, *ss;
   extern int inHeader;
 
+  //if (WriteOutput)
+  //  printf("HTML -> %s", s);
+
   // Process default style file at startup.
   if (!StyleInitialized)
     {
@@ -466,9 +469,13 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
   // JL 2010-02-17 Don't try to process Page meta-comments.
   // RSB 2010-02-20 ... if --unpound-page is used.  Otherwise,
   // process them normally. 
+  //if (WriteOutput)
+  //  printf("inHeader=%d match=%d UnpoundPage=%d\n", inHeader, strncmp(s + 3, "Page", 4), UnpoundPage);
   if ((!strncmp(s, "## ", 3) || !strncmp(s, "##\t", 3))
       && !inHeader && (strncmp(s + 3, "Page", 4) != 0 || !UnpoundPage))
     {
+      //if (WriteOutput)
+      //  printf("HERE\n");
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
         {

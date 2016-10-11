@@ -1387,6 +1387,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       ParseOutputRecord.SBank = ParseInputRecord.SBank;
       // Get the next line from the file.
       ss = fgets (s, sizeof(s) - 1, InputFile);
+      //printf("LINE -> %s", s);
       // At end of the file?
       if (!ss)
 	{
@@ -1439,6 +1440,17 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
       // Analyze the input line.
 
+      // If it is not a ## line and not completely blank, then we are no longer
+      // in the file header.
+      for (ss = s; *ss && isspace (*ss); ss++)
+        ;
+      if (*ss == 0) // completely whitespace
+        ;
+      else if (s[0] == '#' && s[1] == '#') // is a ## line
+        ;
+      else
+        inHeader = 0;
+
       // Is it an HTML insert?  If so, transparently process and discard.
       if (formatOnly)
 	{
@@ -1458,17 +1470,6 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 	  ParseOutputRecord.SBank = ParseInputRecord.SBank;
 	  continue;
 	}
-
-      // If it is not a ## line and not completely blank, then we are no longer
-      // in the file header.
-      for (ss = s; *ss && isspace (*ss); ss++)
-	;
-      if (*ss == 0) // completely whitespace
-	;
-      else if (s[0] == '#' || s[1] == '#') // is a ## line
-	;
-      else
-	inHeader = 0;
 
       // Is it an "include" directive?
       if (formatOnly && s[0] == '$')
@@ -1575,6 +1576,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       *ss = 0;
 
       // Find and remove the comment field, if any.
+      //printf ("Line -> \"%s\"\n", s);
       ParseInputRecord.commentColumn = 0;
       for (ParseInputRecord.Comment = s;
 	  *ParseInputRecord.Comment
@@ -1590,6 +1592,7 @@ Pass (int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 	  //    if (*ss == '\n')
 	  //        *ss = 0;
 	}
+      //printf ("Comment -> \"%s\"\n", ParseInputRecord.Comment);
 
       if (Block1 && strlen (s) >= 16)
 	{
