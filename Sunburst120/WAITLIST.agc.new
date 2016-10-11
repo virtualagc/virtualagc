@@ -161,12 +161,7 @@ SVCT3           CCS             FLAGWRD2                        # DRIFT FLAG
 # BEGIN TASK INSERTION.
 
                 BANK            01                              
-                COUNT*          $$/WAIT                         
 WAIT2           TS              WAITBANK                        # BBANK OF CALLING PROGRAM.
-                CA              Q                               
-                EXTEND                                          
-                BZMF            WAITP00H                        
-
                 CS              TIME3                           
                 AD              BIT8                            # BIT 8 = OCT 200
                 CCS             A                               # TEST 200 - C(TIME3).  IF POSITIVE,
@@ -193,7 +188,7 @@ WAIT2           TS              WAITBANK                        # BBANK OF CALLI
 # NOTE THAT THIS PROGRAM SECTION IS NEVER ENTERED WHEN T-T1 G/E -1,
 # SINCE TD-T1+1 = (TD-T) + (T-T1+1), AND DELTA T = TD-T G/E +1.  (G/E
 # SYMBOL MEANS GREATER THAN OR EQUAL TO).  THUS THERE NEED BE NO CON-
-# CERN OVER A PREVIOUS OR IMMINENT OVEFLOW OF TIME3 HERE.
+# CERN OVER A PREVIOUS OR IMMINENT OVERFLOW OF TIME3 HERE.
 
                 AD              POS1/2                          # WHEN TD IS NEXT, FORM QUANTITY
                 AD              POS1/2                          #       1.0 - DELTA T = 1.0 - (TD - T)
