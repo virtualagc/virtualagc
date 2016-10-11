@@ -137,7 +137,7 @@ VARDELAY        XCH             Q                               # DT TO Q.  TASK
 
 DELAYEX         TCF             TASKOVER        -2              # RETURNS TO TASKOVER.
 
-# Page 1121
+# Page 1065
 
 # ENDTASK MUST ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
 
@@ -149,24 +149,15 @@ SVCT3           CCS             FLAGWRD2                        # DRIFT FLAG
                 TCF             TASKOVER                        
                 TCF             +1                              
 
-CKIMUSE         CCS             IMUCADR                         # DON'T DO NBDONLY IF SOMEONE ELSE IS IN
-                TCF             SVCT3X                          # IMUSTALL.
-                TCF             +3                              
-                TCF             SVCT3X                          
-                TCF             SVCT3X                          
-
- +3             CAF             PRIO35                          # COMPENSATE FOR NBD COEFFICIENTS ONLY.
+                CAF             PRIO35                          # COMPENSATE FOR NBD COEFFICIENTS ONLY.
                 TC              NOVAC                           #       ENABLE EVERY 81.93 SECONDS
                 EBANK=          NBDX                            
                 2CADR           NBDONLY                         
 
                 TCF             TASKOVER                        
 
-SVCT3X          TC              FIXDELAY                        # DELAY MAX OF 2 TIMES FOR IMUZERO.
-                DEC             500                             
-                TC              SVCT3                           # CHECK DRIFT FLAG AGAIN.
+# Page 1066
 
-# Page 1122
 # BEGIN TASK INSERTION.
 
                 BANK            01                              
