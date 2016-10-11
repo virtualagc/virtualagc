@@ -111,9 +111,10 @@ DLY2            CAF             WAITBB                          # ENTRY FROM FIX
 
 # Page 1064
 
-LVWTLIST        DXCH            WAITEXIT                        
-                AD              TWO                             
-                DTCB                                            
+LVWTLIST        CA              WAITBANK                        
+                TS              BBANK                          
+                INDEX           WAITEXIT
+                TC              2                                            
 
                 EBANK=          LST1                            
 WAITBB          BBCON           WAIT2                           
@@ -129,17 +130,15 @@ FIXDELAY        INDEX           Q                               # BOTH ROUTINES 
 VARDELAY        XCH             Q                               # DT TO Q.  TASK ADRES TO WAITADR.
                 TS              WAITADR                         
                 CA              BBANK                           # BBANK IS SAVED DURING DELAY.
-                EXTEND                                          
-                ROR             SUPERBNK                        # ADD SBANK TO BBCON.
                 TS              L                               
                 CAF             DELAYEX                         
                 TS              WAITEXIT                        # GO TO TASKOVER AFTER TASK ENTRY.
                 TCF             DLY2                            
 
-# Page 1120
 DELAYEX         TCF             TASKOVER        -2              # RETURNS TO TASKOVER.
 
 # Page 1121
+
 # ENDTASK MUST ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
 
                 EBANK=          LST1                            
