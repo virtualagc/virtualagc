@@ -8,7 +8,8 @@
 # Pages:        7-25
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-04 HG   Insert missed statements
-#               2016-10-11 HG   add missing  THRUST  EQUALS  55
+#               2016-10-12 HG   add missing  THRUST  EQUALS  55
+#                               fix label   SQRANG -> SQRARG
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -459,7 +460,7 @@ PHASE5          ERASE
 
 HALFY           ERASE
 ROOTRET         ERASE
-SQRANG          ERASE
+SQRARG          ERASE
 TEMK            EQUALS          HALFY
 SQ              EQUALS          ROOTRET
 

@@ -7,6 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        160-188
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-12 HG   fix operand  DSPRUPTSW -> DSRUPTSW
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -35,10 +36,10 @@ T4RUPT          EXTEND                                  # ZERO OUT0 EVERY T4RUPT
                 INDEX           T4LOC                   # NORMALLY TO NORMT4, BUT TO LMPRESET OR
                 TCF             0                       # DSKYRSET AFTER OUT0 COMMAND.
 
-NORMT4          CCS             DSPRUPTSW               # GOR 7(-1)0.
+NORMT4          CCS             DSRUPTSW                # GOR 7(-1)0.
                 TCF             +2
                 CAF             SEVEN
-                TS              DSPRUPTSW
+                TS              DSRUPTSW
 
                 CAF             T4RPTBB                 # OFF TO SWITCHED BANK
                 XCH             BBANK
@@ -154,7 +155,7 @@ SETTIME4        TS              TIME4
 ## Page 164
 # JUMP TO APPROPRIATE ONCE-PER SECOND (.96 SEC ACTUALLY) ACTIVITY
 
-T4JUMP          INDEX           DSPRUPTSW
+T4JUMP          INDEX           DSRUPTSW
                 TCF             +1
 
                 TC              ALTOUT

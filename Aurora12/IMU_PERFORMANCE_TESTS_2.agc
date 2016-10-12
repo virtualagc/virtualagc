@@ -13,6 +13,7 @@
 #                                            INODES33 -> IMODES33  
 #                                            YSM =4 -> YSM +4
 #                                   instruction CA  DRIFTT -> TS DRIFTT
+#                                   constant 2DEC 32844 B-28  -> 2DEC 342844 B-28
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -1123,7 +1124,7 @@ V16N40S         OCT             01640
 DEC17           DEC             17
 DEC585          2DEC            3200            B+14
 DELYOFF         OCT             00400
-ERUNITS         2DEC            32844           B-28
+ERUNITS         2DEC            342844          B-28
 GENPLAD         GENADR          AZIMUTH
 GYRODPL         ECADR           GYROD
 OGCPL           ECADR           OGC

@@ -8,6 +8,8 @@
 # Pages:        209-217
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 HG   Initial transcription from scans
+#               2016-10-12 HG   Fix label VBU -> VBUF
+#                                         GCOMPS -> GCOMPSW 
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -260,7 +262,7 @@ GCOMPSUB        XCH     MPAC            # ADIA OR ADSRA COEFFICIENT ARRIVES IN A
                 INDEX   BUF             # RESULT = (GYRO PULSES) X 2(+14)
                 DAS     GCOMP           # HI(ADIA)(PIPAI)  OR  HI(ADSRA)(PIPAI)
                 
-                CA      VBU     +1      # PARTIAL RESULT - MINOR
+                CA      VBUF    +1      # PARTIAL RESULT - MINOR
                 EXTEND
                 MP      BIT9            # SCALE 2(+6)      SHIFT RIGHT 6         *
                 TS      L
@@ -276,7 +278,7 @@ DRIFSTUB        EXTEND
                 
                 EXTEND                  # C(A) = NBD    (GYRO PULSES)/(CS) X 2(-5)
                 MP      1/PIPADT        # (CS) X 2(+8)   NOW (GYRO PULSES) X 2(+3)
-                LXCH    MAPC    +1      # SAVE FOR FRACTIONAL COMPENSATION
+                LXCH    MPAC    +1      # SAVE FOR FRACTIONAL COMPENSATION
                 EXTEND
                 MP      BIT4            # SCALE 2(+11)     SHIFT RIGHT 11
                 INDEX   BUF
@@ -300,7 +302,7 @@ DRFTSUB2        CAF     TWO             # PIPAX, PIPAY, PIPAZ
                 
                 MASK    COMPCHK         # DEC -1
                 CCS     A               # ARE GYRO COMMANDS GREATER THAN 2 PULSES
-                TS      GCOMPS          # YES - SET GCOMPSW POSITIVE
+                TS      GCOMPSW         # YES - SET GCOMPSW POSITIVE
                 TC      BUF     +1      # NO
                 
 ## Page 215
