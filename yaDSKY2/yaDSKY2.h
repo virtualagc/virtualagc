@@ -218,7 +218,7 @@ public:
     virtual void on_NineButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_SixButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_ClrButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
-    virtual void on_ProButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
+    virtual void on_ProButton_pressed(wxMouseEvent &event); // wxGlade: <event_handler>
     virtual void on_KeyRelButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_EntrButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_RsetButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
@@ -227,8 +227,5 @@ public:
     virtual void HotkeyEvent (wxKeyEvent &event);
 }; // wxGlade: end class
 
-// to avoid pulling in agc_engine and more
-int DebugMode = 0;
-int CmOrLm = 0;
 
 #endif // YADSKY2_H

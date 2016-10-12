@@ -58,7 +58,7 @@
 // ... and the project's includes.
 #include <stdio.h>
 #include <string.h>
-//#include <netdb.h>
+#include <netdb.h>
 extern int h_errno;
 #include "yaAGC.h"
 #include "agc_engine.h"

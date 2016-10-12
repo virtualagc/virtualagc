@@ -85,6 +85,7 @@
  *                              haven't caught yet.  Fixed the formatting of this
  *                              file header, which had gotten all gummed up and
  *                              painful to read.
+ *            	2016-10-08 RSB	Added exception to ## (--html) for inHeader.
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -97,12 +98,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-//#include <unistd.h>
+#include <unistd.h>
 #include <fcntl.h>
-#include <io.h>
-#include <share.h>
-#include <direct.h>
-#include <sys\stat.h>
 #include <errno.h>
 
 //-------------------------------------------------------------------------
@@ -316,6 +313,10 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
   int Width, Pos = 0;
   int i, j;
   char c = 0, *ss;
+  extern int inHeader;
+
+  //if (WriteOutput)
+  //  printf("HTML -> %s", s);
 
   // Process default style file at startup.
   if (!StyleInitialized)
@@ -468,9 +469,13 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
   // JL 2010-02-17 Don't try to process Page meta-comments.
   // RSB 2010-02-20 ... if --unpound-page is used.  Otherwise,
   // process them normally. 
+  //if (WriteOutput)
+  //  printf("inHeader=%d match=%d UnpoundPage=%d\n", inHeader, strncmp(s + 3, "Page", 4), UnpoundPage);
   if ((!strncmp(s, "## ", 3) || !strncmp(s, "##\t", 3))
-      && (strncmp(s + 3, "Page", 4) != 0 || !UnpoundPage))
+      && !inHeader && (strncmp(s + 3, "Page", 4) != 0 || !UnpoundPage))
     {
+      //if (WriteOutput)
+      //  printf("HERE\n");
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
         {
@@ -973,21 +978,20 @@ WriteSymbolsToFile(char *fname)
 
   // Open the symbol table file
   step = 1;
-//  if ((_sopen_s ( &fd, fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, _SH_DENYWR, _S_IREAD | _S_IWRITE)) < 0)
-//    goto error;
-  if ((_sopen_s(&fd, fname, _O_BINARY | _O_WRONLY | _O_CREAT | _O_TRUNC , _SH_DENYWR, _S_IREAD| _S_IWRITE)) < 0)
-	  goto error;
+  if ((fd = open(fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
+    goto error;
+
   // Write the SymbolFile_t header to the symbol file, filling its
   // members first.
   step = 2;
-  if (NULL == _getcwd(symfile.SourcePath, MAX_PATH_LENGTH))
+  if (NULL == getcwd(symfile.SourcePath, MAX_PATH_LENGTH))
     goto error;
   symfile.NumberSymbols = SymbolTableSize;
   symfile.NumberLines = LineTableSize; // JMS: 07.28
   LittleEndian32(&symfile.NumberSymbols);
   LittleEndian32(&symfile.NumberLines);
   step = 3;
-  if (_write(fd, (void *)&symfile, sizeof(SymbolFile_t)) < 0)
+  if (write(fd, (void *) &symfile, sizeof(SymbolFile_t)) < 0)
     goto error;
 
   // Loop and write the symbols to a file
@@ -999,7 +1003,7 @@ WriteSymbolsToFile(char *fname)
       LittleEndian32(&symbol.Value.Value);
       LittleEndian32(&symbol.Type);
       LittleEndian32(&symbol.LineNumber);
-      if (_write(fd, (void *) &symbol, sizeof(Symbol_t)) < 0)
+      if (write(fd, (void *) &symbol, sizeof(Symbol_t)) < 0)
         goto error;
     }
 
@@ -1012,7 +1016,7 @@ WriteSymbolsToFile(char *fname)
       LittleEndian32(&Line);
       LittleEndian32(&Line.CodeAddress.Value);
       LittleEndian32(&Line.LineNumber);
-      if (_write(fd, (void *) &Line, sizeof(SymbolLine_t)) < 0)
+      if (write(fd, (void *) &Line, sizeof(SymbolLine_t)) < 0)
         goto error;
     }
   if (0)
@@ -1024,7 +1028,7 @@ WriteSymbolsToFile(char *fname)
     }
   else
     printf("\nSymbol-table file written.\n");
-  _close (fd);
+  close(fd);
 }
 
 //-------------------------------------------------------------------------

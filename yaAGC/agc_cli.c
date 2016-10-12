@@ -34,12 +34,13 @@
   Reference:	http://www.ibiblio.org/apollo
   Mods:         11/30/08 OH.	Began rework
                 08/04/16 OH     Fixed the GPL statement and old user-id
+                09/30/16 MAS    Added the --inhibit-alarms option
  */
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <unistd.h>
+#include <unistd.h>
 #include "agc_cli.h"
 #include "agc_engine.h"
 #include "agc_symtab.h"
@@ -89,6 +90,8 @@ static void CliShowUsage(void)
 "                  messages being received from the DEDA, but never to\n"
 "                  send any.  That lets \"yaAGC --debug-deda --deda-quiet\"\n"
 "                  to be used alongside yaAGS without conflict.\n"
+"--inhibit-alarms  Prevents the simulated hardware alarms (Night Watchman\n"
+"                  Rupt Lock, and TC Trap) from causing resets.\n"
 "--cfg=file        The name of a configuration file.  Presently, the\n"
 "                  configuration files is used only for --debug-dsky\n"
 "                  mode.  It would typically be the same configuration\n"
@@ -175,6 +178,7 @@ static void CliInitializeOptions(void)
 	  Options.debug_dsky = 0;
 	  Options.debug_deda = 0;
 	  Options.deda_quiet = 0;
+	  Options.inhibit_alarms = 0;
 	  Options.quiet = 0;
 	  Options.fullname = 0;
 	  Options.debug = 1;
@@ -205,34 +209,35 @@ static int CliProcessArgument(char* token)
 	else if (!strncmp (token, "-core=", 6))
 	{
 		/* If --core is used assume classic behavior is expected */
-		Options.core = _strdup(&token[6]);
+		Options.core = strdup(&token[6]);
 
 		/* with classi behavior default is nodebug */
 		Options.debug = 0;
 	}
-	else if (!strncmp (token, "-directory=", 11))Options.directory = _strdup(&token[11]);
-	else if (!strncmp (token, "-cd=", 4))Options.cd = _strdup(&token[4]);
-	else if (!strncmp (token, "-exec=", 6))Options.core = _strdup(&token[6]);
-	else if (!strncmp (token, "-resume=", 8))Options.resume = _strdup(&token[8]);
+	else if (!strncmp (token, "-directory=", 11))Options.directory = strdup(&token[11]);
+	else if (!strncmp (token, "-cd=", 4))Options.cd = strdup(&token[4]);
+	else if (!strncmp (token, "-exec=", 6))Options.core = strdup(&token[6]);
+	else if (!strncmp (token, "-resume=", 8))Options.resume = strdup(&token[8]);
 	else if (1 == sscanf (token, "-port=%d", &j)) Options.port = j;
 	else if (1 == sscanf (token, "-dump-time=%d", &j)) Options.dump_time = j;
 	else if (!strcmp (token, "-debug-dsky")) Options.debug_dsky = 1;
 	else if (!strcmp (token, "-debug-deda")) Options.debug_deda = 1;
 	else if (!strcmp (token, "-deda-quiet")) Options.deda_quiet = 1;
+	else if (!strcmp (token, "-inhibit-alarms")) Options.inhibit_alarms = 1;
 	else if (!strcmp (token, "-cdu-log")) Options.cdu_log = CduLog;
-	else if (!strncmp (token, "-cfg=", 5)) Options.cfg = _strdup(&token[5]);
+	else if (!strncmp (token, "-cfg=", 5)) Options.cfg = strdup(&token[5]);
 	else if (!strcmp (token, "-fullname")) Options.fullname = 1;
 	else if (!strcmp (token, "-quiet"))Options.quiet = 1;
 	else if (!strcmp (token, "-nodebug")) Options.debug = 0;
 	else if (!strcmp (token, "-debug")) Options.debug = 1;
 	else if (!strcmp (token, "-version")) Options.version = 6;
-	else if (!strncmp (token, "-command=",9)) Options.fromfile = _strdup(&token[9]);
+	else if (!strncmp (token, "-command=",9)) Options.fromfile = strdup(&token[9]);
 	else if (!strncmp (token, "-interpreter=",13)) /* Ignore for now */;
-	else if (!strncmp (token, "-symbols=", 9)) Options.symtab = _strdup(&token[9]);
-	else if (!strncmp (token, "-symtab=", 8)) Options.symtab = _strdup(&token[8]);
+	else if (!strncmp (token, "-symbols=", 9)) Options.symtab = strdup(&token[9]);
+	else if (!strncmp (token, "-symtab=", 8)) Options.symtab = strdup(&token[8]);
 	else if (1 == sscanf (token,"-interlace=%d", &j)) Options.interlace = j;
-	else if (Options.core == (char*)0) Options.core = _strdup(token);
-	else if (Options.resume == (char*)0) Options.resume = _strdup(token);
+	else if (Options.core == (char*)0) Options.core = strdup(token);
+	else if (Options.resume == (char*)0) Options.resume = strdup(token);
 	else result = CLI_E_UNKOWNTOKEN;
 
 	return (result);

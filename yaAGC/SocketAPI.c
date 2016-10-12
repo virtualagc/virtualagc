@@ -189,9 +189,9 @@ ChannelInput (agc_t *State)
 	    if (Client->Size >= 4)
 	      {
 		int uBit, Type, Data;
-		printf ("Received from %d: %02X %02X %02X %02X\n",
-			i, Client->Packet[0], Client->Packet[1],
-			Client->Packet[2], Client->Packet[3]);
+		//printf ("Received from %d: %02X %02X %02X %02X\n",
+		//	i, Client->Packet[0], Client->Packet[1],
+		//	Client->Packet[2], Client->Packet[3]);
 		if (!ParseIoPacket (Client->Packet, &Channel, &Value, &uBit))
 		  {
 		    // Convert to AGC format (upper 15 bits).
@@ -204,7 +204,7 @@ ChannelInput (agc_t *State)
 		      {
 		        // In this case we're dealing with a counter increment.
 			// So increment the counter.
-			printf ("Channel=%02o Int=%o\n", Channel, Value);
+			//printf ("Channel=%02o Int=%o\n", Channel, Value);
 			UnprogrammedIncrement (State, Channel, Value);
 			Client->Size = 0;
 			return (1);

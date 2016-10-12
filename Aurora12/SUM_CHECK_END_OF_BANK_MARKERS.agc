@@ -5,8 +5,9 @@
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.
 # Website:      https://www.ibiblio.org/apollo.
-# Pages:        XXXX-XXXX
+# Pages:        0642-0643
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-09 OH   Transcribed.
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -25,3 +26,97 @@
 #       https://www.ibiblio.org/apollo.  
 # The original high-quality digital images are available at archive.org:
 #       https://archive.org/details/aurora00dapg
+
+## Page 0642
+
+                SETLOC  ENDIMUF
+                TC
+                TC
+                
+                SETLOC  ENDINTF
+                TC
+                TC
+                
+                SETLOC  ENDINTS0
+                TC
+                TC
+                
+                SETLOC  ENDSLFS2
+                TC
+                TC
+                
+                SETLOC  ENDPINS1
+                TC
+                TC
+                
+                SETLOC  ENDPINS2
+                TC
+                TC
+                
+                BANK    06
+                TC
+                TC
+                
+                BANK    07
+                TC
+                TC
+                
+                SETLOC  ENDRTSTS
+                TC
+                TC
+                
+                SETLOC  ENDCMS
+                TC
+                TC
+                
+                SETLOC  ENDT45
+                TC
+                TC
+                
+                SETLOC  ENDAMODS
+                TC
+                TC
+                
+                SETLOC  ENDIMUS1
+                TC
+## Page 0643                
+                TC
+                
+                SETLOC  ENDRTBSS
+                TC
+                TC
+                
+                SETLOC  ENDIMUS3
+                TC
+                TC
+                
+                SETLOC  ENDIMUS2
+                TC
+                TC
+                
+                SETLOC  ENDSLFS1
+                TC
+                TC
+                
+                SETLOC  ENDPREL1
+                TC
+                TC
+                
+                SETLOC  ENDDAP23
+                TC
+                TC
+                
+                SETLOC  ENDDAP24
+                TC
+                TC
+                
+                SETLOC  ENDDAP25
+                TC
+                TC
+                
+                SETLOC  ENDDAP26
+                TC
+                TC
+                
+                
+

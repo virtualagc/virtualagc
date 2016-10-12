@@ -88,6 +88,9 @@
 		03/30/09 RSB	Moved Downlink from CpuWriteIO() local variable
 				to agc_t.
 		04/07/09 RSB	Added ProcessDownlinkList and ProcessDownlinkList_t.
+		09/30/16 MAS	Added InhibitAlarms as a configuration global,
+                                alarm flags to state, and the constants related to
+                                channel 77.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -226,6 +229,16 @@ extern long random (void);
 #define ChanSCALER1 04
 #define ChanS 07
 
+#define CH77_TC_TRAP        000004
+#define CH77_RUPT_LOCK      000010
+#define CH77_NIGHT_WATCHMAN 000020
+
+#define DSKY_KEY_REL  000020
+#define DSKY_VN_FLASH 000040
+#define DSKY_OPER_ERR 000100
+#define DSKY_RESTART  000200
+#define DSKY_STBY     000400
+
 #define NUM_INTERRUPT_TYPES 10
 
 // Max number of 15-bit words in a downlink-telemetry list.
@@ -321,6 +334,11 @@ typedef struct
   unsigned ExtraDelay:3;	// ... and extra, for special cases.
   //unsigned RegQ16:1;		// Bit "16" of register Q.
   unsigned DownruptTimeValid:1;	// Set if the DownruptTime field is valid.
+  unsigned NightWatchman:1;     // Set when Night Watchman is watching. Cleared by accessing address 67.
+  unsigned RuptLock:1;          // Set when rupts are being watched. Cleared by executing any non-ISR instruction
+  unsigned NoRupt:1;            // Set when rupts are being watched. Cleared by executing any ISR instruction
+  unsigned TCTrap:1;            // Set when TC is being watched. Cleared by executing any non-TC/TCF instruction
+  unsigned NoTC:1;              // Set when TC is being watched. Cleared by executing TC or TCF
   unsigned Standby:1;           // Set while the computer is in standby mode.
   unsigned SbyPressed:1;        // Set while PRO is being held down; cleared by releasing PRO
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
@@ -342,10 +360,12 @@ typedef struct
 } DebugRule_t;
 #ifdef AGC_ENGINE_C
 int DebugDsky = 0;
+int InhibitAlarms = 0;
 int NumDebugRules = 0;
 DebugRule_t DebugRules[MAX_DEBUG_RULES];
 #else
 extern int DebugDsky;
+extern int InhibitAlarms;
 extern int NumDebugRules;
 extern DebugRule_t DebugRules[MAX_DEBUG_RULES];
 #endif

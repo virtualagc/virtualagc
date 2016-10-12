@@ -77,16 +77,11 @@ using namespace std;
 #include "wx/filefn.h"
 
 #include "../yaAGC/yaAGC.h"
-#define SOCKET_API_C
 #include "../yaAGC/agc_engine.h"
 
-extern "C" {
-
-	FILE *rfopen(const char *Filename, const char *mode);
-}
 static MainFrame* MainWindow;
 int HalfSize = 0;
-#define PULSE_INTERVAL 100
+#define PULSE_INTERVAL 80
 static char DefaultHostname[] = "localhost";
 char *Hostname = DefaultHostname;
 static char NonDefaultHostname[129];
@@ -100,8 +95,8 @@ static int DebugCounterReg = 032, DebugCounterInc = 1, DebugCounterWhich = 1;
 // TestUplink is set when we want to test the digital uplink by emitting
 // keycodes on the digital uplink rather than on the DSKY channels.
 static int TestUplink = 0;
-static int VerbNounFlashing = 0;
 static int ServerSocket = -1;
+static bool ProceedPressed = false;
 
 static const char SevenSeg0[] = "7Seg-0.jpg";
 
@@ -344,7 +339,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_BUTTON(ID_SIXBUTTON, MainFrame::on_SixButton_pressed)
     EVT_BUTTON(ID_THREEBUTTON, MainFrame::on_ThreeButton_pressed)
     EVT_BUTTON(ID_CLRBUTTON, MainFrame::on_ClrButton_pressed)
-    EVT_BUTTON(ID_PROBUTTON, MainFrame::on_ProButton_pressed)
     EVT_BUTTON(ID_KEYRELBUTTON, MainFrame::on_KeyRelButton_pressed)
     EVT_BUTTON(ID_ENTRBUTTON, MainFrame::on_EntrButton_pressed)
     EVT_BUTTON(ID_RSETBUTTON, MainFrame::on_RsetButton_pressed)
@@ -626,7 +620,7 @@ void MainFrame::on_ClrButton_pressed(wxCommandEvent &event)
 }
 
 
-void MainFrame::on_ProButton_pressed(wxCommandEvent &event)
+void MainFrame::on_ProButton_pressed(wxMouseEvent &event)
 {
   if (DebugCounterMode)
     {
@@ -974,7 +968,7 @@ bool yaDskyApp::OnInit()
 	  
   DEBUG (-1);
 
-  Portnum = 19697;//default:CM ; LM=19797;
+  Portnum = 19797;
   for (i = 1; i < argc; i++)
     {
       wxString Arg = argv[i];
@@ -1181,49 +1175,6 @@ TimerClass::Notify ()
       StartupDelay -= PULSE_INTERVAL;
       return;
     }
-  // If the noun/verb-flash flag is set, then flash them.
-  if (!--FlashCounter)
-    {
-      if (MainWindow->CurrentVD1 == MainWindow->CurrentBlank && 
-          MainWindow->CurrentVD2 == MainWindow->CurrentBlank &&
-          MainWindow->CurrentND1 == MainWindow->CurrentBlank && 
-	  MainWindow->CurrentND2 == MainWindow->CurrentBlank &&
-	  MainWindow->CurrentKeyRel == MainWindow->BlankKeyRel && 
-	  MainWindow->CurrentOprErr == MainWindow->BlankOprErr)
-        {
-          FlashCounter = 1;
-	  FlashStatus = 1;
-	}
-      else if (FlashStatus)	// Flashing and about to light.
-        FlashCounter = 6;
-      else			// Flashing and about to blank.
-        FlashCounter = 2;
-      if (FlashStatus)
-	{
-	  if (VerbNounFlashing)
-	    {
-	      MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentVD1);
-	      MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentVD2);
-	      MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentND1);
-	      MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentND2);
-	    }
-	  MainWindow->ImageSet (MainWindow->KeyRelAnnunciator, MainWindow->CurrentKeyRel);
-	  MainWindow->ImageSet (MainWindow->OprErrAnnunciator, MainWindow->CurrentOprErr);
-	}
-      else
-	{
-	  if (VerbNounFlashing)
-	    {
-	      MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentBlank);
-	      MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentBlank);
-	      MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentBlank);
-	      MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentBlank);
-	    }
-	  MainWindow->ImageSet (MainWindow->KeyRelAnnunciator, MainWindow->BlankKeyRel);
-	  MainWindow->ImageSet (MainWindow->OprErrAnnunciator, MainWindow->BlankOprErr);
-	}
-      FlashStatus = !FlashStatus;
-    }
   // Try to connect to the server (yaAGC) if not already connected.
   if (ServerSocket == -1)
     {
@@ -1247,7 +1198,7 @@ TimerClass::Notify ()
 	      else
 	        {	
 		  printf ("yaDSKY reports server error %d\n", errno);
-		  _close (ServerSocket);
+		  close (ServerSocket);
 		  ServerSocket = -1;
 		  break;
 	        }
@@ -1539,22 +1490,28 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	  else
 	    MainWindow->ImageSet (MainWindow->CompActyAnnunciator, "CompActyOn.jpg");
 	}
-      i = (0 != (Value & 32));
-      if (VerbNounFlashing && !i)
-        {
-	  MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentVD1);
-	  MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentVD2);
-	  MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentND1);
-	  MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentND2);
-	  if (MainWindow->OprErrAnnunciator != NULL)
-	    MainWindow->ImageSet (MainWindow->OprErrAnnunciator, MainWindow->CurrentOprErr);
-	  if (MainWindow->KeyRelAnnunciator != NULL)
-	    MainWindow->ImageSet (MainWindow->KeyRelAnnunciator, MainWindow->CurrentKeyRel);
-	}
-      VerbNounFlashing = i;
+
       Last11 = Value;	
     }
-  return;
+    else if (Channel == 0163)
+    {
+        // Handle Verb/Noun flashing via the fake V/N flash channel 163
+        if (Value & DSKY_VN_FLASH)
+        {
+            MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentBlank);
+            MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentBlank);
+            MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentBlank);
+            MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentBlank);
+        }
+        else
+        {
+            MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentVD1);
+            MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentVD2);
+            MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentND1);
+            MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentND2);
+        }
+    }
+    return;
 Error:
   IoErrorCount++;
 }
@@ -1583,7 +1540,7 @@ MainFrame::OutputKeycode (int Keycode)
       j = send (ServerSocket, (const char *) Packet, 4, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
         {
-	  _close (ServerSocket);
+	  close (ServerSocket);
 	  ServerSocket = -1;
 	}
     }
@@ -1610,7 +1567,7 @@ MainFrame::OutputPro (int OffOn)
       j = send (ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
         {
-	  _close (ServerSocket);
+	  close (ServerSocket);
 	  ServerSocket = -1;
 	}
     }
@@ -1634,7 +1591,7 @@ xpm2jpg (char *s)
 int 
 MainFrame::ParseCfg (wxString &Filename)
 {
- // FILE *rfopen (const char *Filename, const char *mode);  
+  FILE *rfopen (const char *Filename, const char *mode);  
   Ind_t *Indptr;
   char s[129], *ss, s1[1024], s2[129], s3[129];
   int i, RetVal = 1, IndNum, BitNum, Polarity, Channel, Latched, RowMask, Row;

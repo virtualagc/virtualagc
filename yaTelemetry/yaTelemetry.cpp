@@ -499,7 +499,7 @@ TimerClass::Notify ()
 		  //Dummy << wxT ("yaTelemetry reports server error ") << errno;
 		  //wxMessageBox (Dummy);
 		  printf ("yaTerminal reports server error %d\n", errno);
-		  _close (ServerSocket);
+		  close (ServerSocket);
 		  ServerSocket = -1;
 		  break;
 	        }
@@ -654,7 +654,7 @@ bool yaTelemetryApp::OnInit()
     printf ("For more information, consult http://www.ibiblio.org/apollo.\n");
 	    
     // Read the command-line arguments.
-	Portnum = 19700;//standrad for cm; lm=19800;
+    Portnum = 19800;
     CmOrLm = 0;
     for (i = 1; i < argc; i++)
       {

@@ -127,6 +127,74 @@ void UpdateBankCounts(Address_t *pc)
         UsedInBank[bank] = Count;
 }
 
+int
+ParseSECSIZ(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+{
+  int Count = 0, bank = 0, newSize;
+  unsigned sectionSize;
+  Address_t *pc;
+
+  if (1 != sscanf (InRecord->Operand, "%o", &sectionSize) || sectionSize == 0)
+    goto error;
+
+  OutRecord->ProgramCounter = InRecord->ProgramCounter;
+  OutRecord->Extend = InRecord->Extend;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
+  OutRecord->Index = InRecord->Index;
+  OutRecord->IndexValid = InRecord->IndexValid;
+
+  pc = &InRecord->ProgramCounter;
+  if (pc->Invalid || !pc->Address || !pc->Fixed || pc->Overflow)
+    goto error;
+
+  if (pc->Banked) {
+      Count = pc->SReg - (Block1 ? 06000 : 02000);
+      bank = pc->FB + 010 * pc->Super;
+  } else if (pc->Unbanked) {
+      if (Block1) {
+          if (pc->SReg >= 02000 && pc->SReg < 04000) {
+              Count = pc->SReg - 02000;
+              bank = 1;
+          } else if (pc->SReg >= 04000 && pc->SReg < 05777) {
+              // Note:  05777 is used instead of 06000 for a reason.
+              // It's a kludge, but address 05777 is used out of order
+              // (it's the "standard locations for extending bits"
+              // in the fixed-fixed interpreter section), and it
+              // would fool us into thinking the bank is full, when
+              // it really isn't.
+              Count = pc->SReg - 04000;
+              bank = 2;
+          } else
+              goto error;
+      } else {
+        if (pc->SReg >= 04000 && pc->SReg < 06000) {
+            Count = pc->SReg - 04000;
+            bank = 2;
+        } else if (pc->SReg >= 06000 && pc->SReg < 010000) {
+            Count = pc->SReg - 06000;
+            bank = 3;
+        } else
+            goto error;
+      }
+  }
+
+  newSize = Count + sectionSize;
+  if (newSize > 02000)
+    {
+      UsedInBank[bank] = 02000;
+      goto error;
+    }
+  if (newSize > UsedInBank[bank])
+    UsedInBank[bank] = newSize;
+
+  return (0);
+  error:;
+  strcpy(OutRecord->ErrorMessage, "Irregular SECSIZ.");
+  OutRecord->Warning = 1;
+  return (1);
+}
+
 //------------------------------------------------------------------------
 // Return non-zero on unrecoverable error.
 

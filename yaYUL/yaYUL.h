@@ -177,11 +177,9 @@ typedef struct {
 } Address_t;
 
 // Invalid, Constant, Address, SReg, Erasable, Fixed, Unbanked, Banked, EB, FB, Super, Overflow, Value, Syllable.
-// #define REG(n) ((const Address_t) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 })
-#define REG(n) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 }
+#define REG(n) ((const Address_t) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 })
 #define CONSTANT(n) ((const Address_t) { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n, 0 })
-// #define FIXEDADD(n) ((const Address_t) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 })
-#define FIXEDADD(n) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 }
+#define FIXEDADD(n) ((const Address_t) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 })
 
 //----------------------------------------------------------------------------
 // JMS: Begin additions for output of symbol table to a file for symbolic
@@ -454,9 +452,11 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
          ParseDNCHAN, ParseSTCALL, ParseSTODL, ParseSTORE, ParseSTOVL,
          ParseVN, Parse2OCT, ParseSBANKEquals, ParseEDRUPT,
          ParseInterpretiveOperand, ParseEqMinus,
-         ParseXCADR; 
+         ParseXCADR, ParseSECSIZ;
 
 extern int Block1;
+extern int blk2;
+extern char *assemblyTarget;
 extern int Html;
 extern FILE *HtmlOut;
 

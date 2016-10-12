@@ -1,100 +1,105 @@
 /*
- Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
-
- This file is part of yaAGC.
-
- yaAGC is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
-
- yaAGC is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with yaAGC; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
- Filename:     yaYUL.c
- Purpose:      This is an assembler for Apollo Guidance Computer (AGC)
- assembly language.  It is called yaYUL because the original
- assembler was called YUL, and this "yet another YUL".
- Mod History:  04/11/03 RSB    Began.
- 07/03/04 RSB    Provided for placing the object code into
- the object code buffer for subsequent
- output to a file.
- 07/04/04 RSB    For multi-word pseudo-ops like 2DEC, only
- the first word was being written to the
- binary.
- 07/05/04 RSB    Added KeepExtend, to fix the INDEX instruction
- resetting the Extend flag.
- 07/23/04 RSB    Continued changes relating to interpretive
- opcodes and operands.
- 07/17/05 RSB    Fixed some structure-initializer problems
- I discovered when trying to compile for
- Kubuntu-PPC.
- 07/27/05 JMS    Added support for symbolic debugging output.
- 07/28/05 JMS    Added support for writing SymbolLines_to to symbol
- table file.
- 06/27/09 RSB    Began adding support for HtmlOut.
- 06/29/09 RSB    Added some fixes for BASIC vs. PSEUDO-OP in
- HTML colorizing.
- 06/30/09 RSB    Added the feature of inserting arbitrary
- HTML documentation.
- 07/01/09 RSB    Altered style of comments in HTML.  Shortened
- up symbol hyperlinks, where they're local to
- the file.
- 07/26/09 RSB    Fixed, I hope, some of the wrong colorization
- that occurs occasionally when two interpretive
- opcodes appear on the same line.
- 2009-03-09 JL   Fixed an issue with CHECK= causing duplicate symbols.
- Treat CHECK= like MEMORY when parsing labels.
- 2012-10-08 JL   Initialise SB to 1 rather than 0.
- 2016-08-18 RSB  Moved global variables originally allocated
- in yaYUL.h, conditionally on the ORIGINAL_PASS_C
- constant, directly into this file.  It's just too
- difficult to work with them through the Eclipse IDE
- otherwise, since the IDE can't resolve any of them.
- 2016-08-19 RSB  Various Block 1 changes.  Perhaps more importantly,
- no longer dependent on whether tabs vs. spaces
- were used in the source files.
- 2016-08-22 RSB	Implemented the pre-operator '-' across the board for
- block 1.
- 2016-08-29 RSB  Implemented Mike Stewart's fix for bug
- https://github.com/rburkey2005/virtualagc/issues/45.
- 2016-09-18 RSB	 For --block1, changed NOOP from being a synonym
- for XCH A to XCH 0; the only difference is that XCH A requires an
- A = 0 pseudo-op (which Solarium, I guess, must already have had),
- whereas XCH 0 does not.
-
- I don't really try to duplicate the formatting used by the original
- assembly-language code, since that format was appropriate for
- punch-cards, but not really for decent text editors.  [As near as I
- can tell by just reading the source code, it appeared to involved
- fixed-size fields:  (perhaps) nothing in column 1 (or maybe something
- to indicate a remark), 8 characters for a label (but ignored if blank
- in column 2), blank, 6 characters for opcode, blank, etc.]  It's
- particularly easy to ignore the original format, since I don't have
- any machine-readable AGC source code anyhow.  Since it all has to be
- entered manually, it may as well be a more-flexible format.  So
- here's how it will go:
-
- Labels begin in column 1.
- The next field is the opcode or pseudo op.
- The next field is the operand, if any.
- Comments are anything following a pound #.
-
- An exception is anything that looks like +%d or -%d in col. 2.  (These
- notations are just ignored.)
-
- Additionally, arbitrary HTML can be inserted.  This HTML vanishes as
- far as the assembly or the output assembly listing is concerned, but
- is inserted verbatim into output HTML (when the --html switch is used).
- The insert begins with a line containing the tag <HTML> (and nothing
- more) and ends with a line containing the tag </HTML> (and nothing
- more).  There is no check to see that the HTML is legitimate.
+ * Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Filename:    yaYUL.c
+ * Purpose:     This is an assembler for Apollo Guidance Computer (AGC)
+ *              assembly language.  It is called yaYUL because the original
+ *              assembler was called YUL, and this "yet another YUL".
+ * Mod History: 04/11/03 RSB    Began.
+ *              07/03/04 RSB    Provided for placing the object code into
+ *                              the object code buffer for subsequent
+ *                              output to a file.
+ *              07/04/04 RSB    For multi-word pseudo-ops like 2DEC, only
+ *                              the first word was being written to the
+ *                              binary.
+ *              07/05/04 RSB    Added KeepExtend, to fix the INDEX instruction
+ *                               resetting the Extend flag.
+ *              07/23/04 RSB    Continued changes relating to interpretive
+ *                              opcodes and operands.
+ *              07/17/05 RSB    Fixed some structure-initializer problems
+ *                              I discovered when trying to compile for
+ *                              Kubuntu-PPC.
+ *              07/27/05 JMS    Added support for symbolic debugging output.
+ *              07/28/05 JMS    Added support for writing SymbolLines_to to symbol
+ *                              table file.
+ *              06/27/09 RSB    Began adding support for HtmlOut.
+ *              06/29/09 RSB    Added some fixes for BASIC vs. PSEUDO-OP in
+ *                              HTML colorizing.
+ *              06/30/09 RSB    Added the feature of inserting arbitrary
+ *                              HTML documentation.
+ *              07/01/09 RSB    Altered style of comments in HTML.  Shortened
+ *                              up symbol hyperlinks, where they're local to
+ *                              the file.
+ *              07/26/09 RSB    Fixed, I hope, some of the wrong colorization
+ *                              that occurs occasionally when two interpretive
+ *                              opcodes appear on the same line.
+ *              2009-03-09 JL   Fixed an issue with CHECK= causing duplicate symbols.
+ *                              Treat CHECK= like MEMORY when parsing labels.
+ *              2012-10-08 JL   Initialise SB to 1 rather than 0.
+ *              2016-08-18 RSB  Moved global variables originally allocated
+ *                              in yaYUL.h, conditionally on the ORIGINAL_PASS_C
+ *                              constant, directly into this file.  It's just too
+ *                              difficult to work with them through the Eclipse IDE
+ *                              otherwise, since the IDE can't resolve any of them.
+ *              2016-08-19 RSB  Various Block 1 changes.  Perhaps more importantly,
+ *                              no longer dependent on whether tabs vs. spaces
+ *                              were used in the source files.
+ *              2016-08-22 RSB	Implemented the pre-operator '-' across the board for
+ *                              block 1.
+ *              2016-08-29 RSB  Implemented Mike Stewart's fix for bug
+ *                              https://github.com/rburkey2005/virtualagc/issues/45.
+ *              2016-09-18 RSB	For --block1, changed NOOP from being a synonym
+ *                              for XCH A to XCH 0; the only difference is that XCH A requires an
+ *                              A = 0 pseudo-op (which Solarium, I guess, must already have had),
+ *                              whereas XCH 0 does not.
+ *              2016-09-28 RSB  With --format, interpretive operands were aligned
+ *                              properly only for --block1.
+ *             	2016-10-08 RSB	Added detection of file header consisting of a bunch
+ *             			of ## or blank lines, using the inHeader state variable.
+ *             	2016-10-12 RSB  Updated for --blk2.
+ *
+ * I don't really try to duplicate the formatting used by the original
+ * assembly-language code, since that format was appropriate for
+ * punch-cards, but not really for decent text editors.  [As near as I
+ * can tell by just reading the source code, it appeared to involved
+ * fixed-size fields:  (perhaps) nothing in column 1 (or maybe something
+ * to indicate a remark), 8 characters for a label (but ignored if blank
+ * in column 2), blank, 6 characters for opcode, blank, etc.]  It's
+ * particularly easy to ignore the original format, since I don't have
+ * any machine-readable AGC source code anyhow.  Since it all has to be
+ * entered manually, it may as well be a more-flexible format.  So
+ * here's how it will go:
+ *
+ *      Labels begin in column 1.
+ *      The next field is the opcode or pseudo op (preferably at column 16).
+ *      The next field is the operand, if any.
+ *      Comments are anything following a pound #.
+ *
+ * An exception is anything that looks like +%d or -%d in col. 2.  (These
+ * notations are just ignored.)
+ *
+ * Additionally, arbitrary HTML can be inserted.  This HTML vanishes as
+ * far as the assembly or the output assembly listing is concerned, but
+ * is inserted verbatim into output HTML (when the --html switch is used).
+ * The insert begins with a line containing the tag <HTML> (and nothing
+ * more) and ends with a line containing the tag </HTML> (and nothing
+ * more).  There is no check to see that the HTML is legitimate.
  */
 
 #include "yaYUL.h"
@@ -126,9 +131,12 @@ static StackedInclude_t StackedIncludes[MAX_STACKED_INCLUDES];
 static Line_t Fields[6];
 static int NumFields = 0;
 
+char *assemblyTarget = "AGC4";
 int Block1 = 0;
+int blk2 = 0;
 int Html = 0;
 FILE *HtmlOut = NULL;
+int inHeader = 1;
 
 // Data structure used to map opcode or pseudo-op names to function calls.
 // Basically, for each opcode or pseudo-op, there is an external
@@ -140,10 +148,20 @@ FILE *HtmlOut = NULL;
 // The table works as follows:  If the function pointer is NULL, then
 // the Operator and Operand fields are assumed to contain an alias for
 // the opcode, and the alias is used instead of the original opcode.
-// If, further, Operator is empten, then the entire opcode is simply
+// If, further, Operator is empty, then the entire opcode is simply
 // silently discarded.  This is good for things like BNKSUM, which
 // apparently were useful long ago, but are not useful in the present
 // context.
+//
+// Note that the solution for given below for EDRUPT
+// isn't a perfect equivalent for an actual EDRUPT parser
+// within the assembler, since it doesn't allow the assembler to check
+// for the EXTEND bit as it does for other instructions.  However, as EDRUPT
+// is used "for machine checkout only", I can't imagine that I even need
+// it at all ... so I'm willing to dispense with a little cross-checking.
+//
+// This is the table of basic instructions used by default, and is
+// the correct one for most AGC software.
 static ParserMatch_t ParsersBlock2[] =
   {
     { "-1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 077777 },
@@ -210,67 +228,190 @@ static ParserMatch_t ParsersBlock2[] =
     { "DXCH", OP_BASIC, ParseDXCH },
     { "EBANK=", OP_PSEUDO, ParseEBANKEquals },
     { "ECADR", OP_PSEUDO, ParseECADR, "", "", 0, 0, 0, 0, 1 },
-  // The following isn't a perfect equivalent for an actual EDRUPT parser
-  // within the assembler, since it doesn't allow the assembler to check
-  // for the EXTEND bit as it does for other instructions.  However, as EDRUPT
-  // is used "for machine checkout only", I can't imagine that I even need
-  // it at all ... so I'm willing to dispense with a little cross-checking.
-        { "EDRUPT", OP_BASIC, ParseEDRUPT },
-        { "EQUALS", OP_PSEUDO, ParseEQUALS },
-        { "ERASE", OP_PSEUDO, ParseERASE },
-        { "EXTEND", OP_BASIC, NULL, "TC", "$6" },
-        { "FCADR", OP_PSEUDO, ParseFCADR, "", "", 0, 0, 0, 0, 1 },
-        { "GENADR", OP_PSEUDO, ParseGENADR },
-        { "INCR", OP_BASIC, ParseINCR },
-        { "INDEX", OP_BASIC, ParseINDEX },
-        { "INHINT", OP_BASIC, NULL, "TC", "$4" },
-        { "LXCH", OP_BASIC, ParseLXCH },
-        { "MASK", OP_BASIC, ParseMASK },
-        { "MEMORY", OP_PSEUDO, NULL, "", "" },
-        { "MM", OP_PSEUDO, ParseDEC },
-        { "MP", OP_BASIC, ParseMP },
-        { "MSU", OP_BASIC, ParseMSU },
-        { "NDX", OP_BASIC, ParseINDEX },
-        { "NV", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
-        { "OCT", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
-        { "OCTAL", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
-        { "OVSK", OP_BASIC, NULL, "TS", "A" },
-        { "QXCH", OP_BASIC, ParseQXCH },
-        { "RAND", OP_BASIC, ParseRAND },
-        { "READ", OP_BASIC, ParseREAD },
-        { "RELINT", OP_BASIC, NULL, "TC", "$3" },
-        { "REMADR", OP_PSEUDO, ParseGENADR },
-        { "RESUME", OP_BASIC, NULL, "INDEX", "$17" },
-        { "RETURN", OP_BASIC, NULL, "TC", "Q" },
-        { "ROR", OP_BASIC, ParseROR },
-        { "RXOR", OP_BASIC, ParseRXOR },
-        { "SBANK=", OP_PSEUDO, ParseSBANKEquals },
-        { "SETLOC", OP_PSEUDO, ParseSETLOC },
-        { "SQUARE", OP_BASIC, NULL, "MP", "A" },
-        { "STCALL", OP_INTERPRETER, ParseSTCALL },
-        { "STODL", OP_INTERPRETER, ParseSTODL },
-        { "STODL*", OP_INTERPRETER, ParseSTODL, "", "", 04000 },
-        { "STORE", OP_INTERPRETER, ParseSTORE },
-        { "STOVL", OP_INTERPRETER, ParseSTOVL },
-        { "STOVL*", OP_INTERPRETER, ParseSTOVL, "", "", 04000 },
-        { "SU", OP_BASIC, ParseSU },
-        { "SUBRO", OP_PSEUDO, NULL, "" "" },
-        { "TC", OP_BASIC, ParseTC },
-        { "TCR", OP_BASIC, ParseTC },
-        { "TCAA", OP_BASIC, NULL, "TS", "Z" },
-        { "TCF", OP_BASIC, ParseTCF },
-        { "TS", OP_BASIC, ParseTS },
-        { "VN", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
-        { "WAND", OP_BASIC, ParseWAND },
-        { "WOR", OP_BASIC, ParseWOR },
-        { "WRITE", OP_BASIC, ParseWRITE },
-        { "XCH", OP_BASIC, ParseXCH },
-        { "XLQ", OP_BASIC, NULL, "TC", "L" },
-        { "XXALQ", OP_BASIC, NULL, "TC", "A" },
-        { "ZL", OP_BASIC, NULL, "LXCH", "$7" },
-        { "ZQ", OP_BASIC, NULL, "QXCH", "$7" } };
+    { "EDRUPT", OP_BASIC, ParseEDRUPT },
+    { "EQUALS", OP_PSEUDO, ParseEQUALS },
+    { "ERASE", OP_PSEUDO, ParseERASE },
+    { "EXTEND", OP_BASIC, NULL, "TC", "$6" },
+    { "FCADR", OP_PSEUDO, ParseFCADR, "", "", 0, 0, 0, 0, 1 },
+    { "GENADR", OP_PSEUDO, ParseGENADR },
+    { "INCR", OP_BASIC, ParseINCR },
+    { "INDEX", OP_BASIC, ParseINDEX },
+    { "INHINT", OP_BASIC, NULL, "TC", "$4" },
+    { "LXCH", OP_BASIC, ParseLXCH },
+    { "MASK", OP_BASIC, ParseMASK },
+    { "MEMORY", OP_PSEUDO, NULL, "", "" },
+    { "MM", OP_PSEUDO, ParseDEC },
+    { "MP", OP_BASIC, ParseMP },
+    { "MSU", OP_BASIC, ParseMSU },
+    { "NDX", OP_BASIC, ParseINDEX },
+    { "NV", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
+    { "OCT", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
+    { "OCTAL", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
+    { "OVSK", OP_BASIC, NULL, "TS", "A" },
+    { "QXCH", OP_BASIC, ParseQXCH },
+    { "RAND", OP_BASIC, ParseRAND },
+    { "READ", OP_BASIC, ParseREAD },
+    { "RELINT", OP_BASIC, NULL, "TC", "$3" },
+    { "REMADR", OP_PSEUDO, ParseGENADR },
+    { "RESUME", OP_BASIC, NULL, "INDEX", "$17" },
+    { "RETURN", OP_BASIC, NULL, "TC", "Q" },
+    { "ROR", OP_BASIC, ParseROR },
+    { "RXOR", OP_BASIC, ParseRXOR },
+    { "SBANK=", OP_PSEUDO, ParseSBANKEquals },
+    { "SECSIZ", OP_PSEUDO, ParseSECSIZ },
+    { "SETLOC", OP_PSEUDO, ParseSETLOC },
+    { "SQUARE", OP_BASIC, NULL, "MP", "A" },
+    { "STCALL", OP_INTERPRETER, ParseSTCALL },
+    { "STODL", OP_INTERPRETER, ParseSTODL },
+    { "STODL*", OP_INTERPRETER, ParseSTODL, "", "", 04000 },
+    { "STORE", OP_INTERPRETER, ParseSTORE },
+    { "STOVL", OP_INTERPRETER, ParseSTOVL },
+    { "STOVL*", OP_INTERPRETER, ParseSTOVL, "", "", 04000 },
+    { "SU", OP_BASIC, ParseSU },
+    { "SUBRO", OP_PSEUDO, NULL, "" "" },
+    { "TC", OP_BASIC, ParseTC },
+    { "TCR", OP_BASIC, ParseTC },
+    { "TCAA", OP_BASIC, NULL, "TS", "Z" },
+    { "TCF", OP_BASIC, ParseTCF },
+    { "TS", OP_BASIC, ParseTS },
+    { "VN", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
+    { "WAND", OP_BASIC, ParseWAND },
+    { "WOR", OP_BASIC, ParseWOR },
+    { "WRITE", OP_BASIC, ParseWRITE },
+    { "XCH", OP_BASIC, ParseXCH },
+    { "XLQ", OP_BASIC, NULL, "TC", "L" },
+    { "XXALQ", OP_BASIC, NULL, "TC", "A" },
+    { "ZL", OP_BASIC, NULL, "LXCH", "$7" },
+    { "ZQ", OP_BASIC, NULL, "QXCH", "$7" } };
 #define NUM_PARSERS_BLOCK2 (sizeof (ParsersBlock2) / sizeof (ParsersBlock2[0]))
 
+// This is the table of basic instructions for BLK2.  It is almost
+// identical to ParsersBlock2[], but look at STORE, STODL, STOVL, STCALL.
+static ParserMatch_t ParsersBLK2[] =
+  {
+    { "-1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 077777 },
+    { "-2CADR", OP_PSEUDO, Parse2CADR, "", "", 0, 077777, 0, 077777 },
+    { "-2DNADR", OP_DOWNLINK, ParseECADR, "", "", 004000, 077777 },
+    { "-3DNADR", OP_DOWNLINK, ParseECADR, "", "", 010000, 077777 },
+    { "-4DNADR", OP_DOWNLINK, ParseECADR, "", "", 014000, 077777 },
+    { "-5DNADR", OP_DOWNLINK, ParseECADR, "", "", 020000, 077777 },
+    { "-6DNADR", OP_DOWNLINK, ParseECADR, "", "", 024000, 077777 },
+    { "-CCS", OP_BASIC, ParseCCS, "", "", 0, 077777 },
+    { "-DNCHAN", OP_DOWNLINK, ParseDNCHAN, "", "", 0, 077777 },
+    { "-DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 077777 },
+    { "-GENADR", OP_PSEUDO, ParseGENADR, "", "", 0, 077777 },
+    { "=", OP_PSEUDO, ParseEquate },
+    { "=ECADR", OP_PSEUDO, ParseEqualsECADR },
+    { "=MINUS", OP_PSEUDO, ParseEqMinus },
+    { "1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 0 },
+    { "2BCADR", OP_PSEUDO, Parse2CADR },
+    { "2CADR", OP_PSEUDO, Parse2CADR },
+    { "2DEC", OP_PSEUDO, Parse2DEC },
+    { "2DEC*", OP_PSEUDO, Parse2DECstar },
+    { "2DNADR", OP_DOWNLINK, ParseECADR, "", "", 004000, 0 },
+    { "2FCADR", OP_PSEUDO, Parse2FCADR },
+    { "2OCT", OP_PSEUDO, Parse2OCT },
+    { "3DNADR", OP_DOWNLINK, ParseECADR, "", "", 010000, 0 },
+    { "4DNADR", OP_DOWNLINK, ParseECADR, "", "", 014000, 0 },
+    { "5DNADR", OP_DOWNLINK, ParseECADR, "", "", 020000, 0 },
+    { "6DNADR", OP_DOWNLINK, ParseECADR, "", "", 024000, 0 },
+    { "AD", OP_BASIC, ParseAD },
+    { "ADRES", OP_PSEUDO, ParseGENADR },
+    { "ADS", OP_BASIC, ParseADS },
+    { "AUG", OP_BASIC, ParseAUG },
+    { "BANK", OP_PSEUDO, ParseBANK },
+    { "BLOCK", OP_PSEUDO, ParseBLOCK },
+    { "BBCON", OP_PSEUDO, ParseBBCON },
+    { "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },
+    { "BNKSUM", OP_PSEUDO, NULL, "", "" },
+    { "BZF", OP_BASIC, ParseBZF },
+    { "BZMF", OP_BASIC, ParseBZMF },
+    { "CA", OP_BASIC, ParseCA },
+    { "CAE", OP_BASIC, ParseCAE },
+    { "CAF", OP_BASIC, ParseCAF },
+    { "CADR", OP_PSEUDO, ParseCADR, "", "", 0, 0, 0, 0, 1 },
+    { "CCS", OP_BASIC, ParseCCS },
+    { "CHECK=", OP_PSEUDO, ParseCHECKequals },
+    { "COM", OP_BASIC, NULL, "CS", "A" },
+    { "COUNT", OP_PSEUDO, NULL, "", "" },
+    { "COUNT*", OP_PSEUDO, NULL, "", "" },
+    { "CS", OP_BASIC, ParseCS },
+    { "DAS", OP_BASIC, ParseDAS },
+    { "DCA", OP_BASIC, ParseDCA },
+    { "DCOM", OP_BASIC, NULL, "DCS", "A" },
+    { "DCS", OP_BASIC, ParseDCS },
+    { "DDOUBL", OP_BASIC, NULL, "DAS", "A" },
+    { "DEC", OP_PSEUDO, ParseDEC, "", "", 0, 0, 0, 0, 1 },
+    { "DEC*", OP_PSEUDO, ParseDECstar },
+    { "DIM", OP_BASIC, ParseDIM },
+    { "DNCHAN", OP_DOWNLINK, ParseDNCHAN },
+    { "DNPTR", OP_DOWNLINK, ParseGENADR, "", "", 030000, 0 },
+    { "DOUBLE", OP_BASIC, NULL, "AD", "A" },
+    { "DTCB", OP_BASIC, NULL, "DXCH", "Z" },
+    { "DTCF", OP_BASIC, NULL, "DXCH", "$4" },
+    { "DV", OP_BASIC, ParseDV },
+    { "DXCH", OP_BASIC, ParseDXCH },
+    { "EBANK=", OP_PSEUDO, ParseEBANKEquals },
+    { "ECADR", OP_PSEUDO, ParseECADR, "", "", 0, 0, 0, 0, 1 },
+    { "EDRUPT", OP_BASIC, ParseEDRUPT },
+    { "EQUALS", OP_PSEUDO, ParseEQUALS },
+    { "ERASE", OP_PSEUDO, ParseERASE },
+    { "EXTEND", OP_BASIC, NULL, "TC", "$6" },
+    { "FCADR", OP_PSEUDO, ParseFCADR, "", "", 0, 0, 0, 0, 1 },
+    { "GENADR", OP_PSEUDO, ParseGENADR },
+    { "INCR", OP_BASIC, ParseINCR },
+    { "INDEX", OP_BASIC, ParseINDEX },
+    { "INHINT", OP_BASIC, NULL, "TC", "$4" },
+    { "LXCH", OP_BASIC, ParseLXCH },
+    { "MASK", OP_BASIC, ParseMASK },
+    { "MEMORY", OP_PSEUDO, NULL, "", "" },
+    { "MM", OP_PSEUDO, ParseDEC },
+    { "MP", OP_BASIC, ParseMP },
+    { "MSU", OP_BASIC, ParseMSU },
+    { "NDX", OP_BASIC, ParseINDEX },
+    { "NV", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
+    { "OCT", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
+    { "OCTAL", OP_PSEUDO, ParseOCT, "", "", 0, 0, 0, 0, 1 },
+    { "OVSK", OP_BASIC, NULL, "TS", "A" },
+    { "QXCH", OP_BASIC, ParseQXCH },
+    { "RAND", OP_BASIC, ParseRAND },
+    { "READ", OP_BASIC, ParseREAD },
+    { "RELINT", OP_BASIC, NULL, "TC", "$3" },
+    { "REMADR", OP_PSEUDO, ParseGENADR },
+    { "RESUME", OP_BASIC, NULL, "INDEX", "$17" },
+    { "RETURN", OP_BASIC, NULL, "TC", "Q" },
+    { "ROR", OP_BASIC, ParseROR },
+    { "RXOR", OP_BASIC, ParseRXOR },
+    { "SBANK=", OP_PSEUDO, ParseSBANKEquals },
+    { "SECSIZ", OP_PSEUDO, ParseSECSIZ },
+    { "SETLOC", OP_PSEUDO, ParseSETLOC },
+    { "SQUARE", OP_BASIC, NULL, "MP", "A" },
+    { "STCALL", OP_INTERPRETER, ParseSTCALL },
+    { "STODL", OP_INTERPRETER, ParseSTODL },
+    { "STODL*", OP_INTERPRETER, ParseSTODL, "", "", 06000 },
+    { "STORE", OP_INTERPRETER, ParseSTORE },
+    { "STOVL", OP_INTERPRETER, ParseSTOVL },
+    { "STOVL*", OP_INTERPRETER, ParseSTOVL, "", "", 06000 },
+    { "SU", OP_BASIC, ParseSU },
+    { "SUBRO", OP_PSEUDO, NULL, "" "" },
+    { "TC", OP_BASIC, ParseTC },
+    { "TCR", OP_BASIC, ParseTC },
+    { "TCAA", OP_BASIC, NULL, "TS", "Z" },
+    { "TCF", OP_BASIC, ParseTCF },
+    { "TS", OP_BASIC, ParseTS },
+    { "VN", OP_PSEUDO, ParseVN, "", "", 0, 0, 0, 0, 1 },
+    { "WAND", OP_BASIC, ParseWAND },
+    { "WOR", OP_BASIC, ParseWOR },
+    { "WRITE", OP_BASIC, ParseWRITE },
+    { "XCH", OP_BASIC, ParseXCH },
+    { "XLQ", OP_BASIC, NULL, "TC", "L" },
+    { "XXALQ", OP_BASIC, NULL, "TC", "A" },
+    { "ZL", OP_BASIC, NULL, "LXCH", "$7" },
+    { "ZQ", OP_BASIC, NULL, "QXCH", "$7" } };
+#define NUM_PARSERS_BLK2 (sizeof (ParsersBLK2) / sizeof (ParsersBLK2[0]))
+
+// This is the table of basic instructions for all Block 1 AGC software,
+// as far as I know.
 static ParserMatch_t ParsersBlock1[] =
   {
     { "=", OP_PSEUDO, ParseEquate },
@@ -304,6 +445,7 @@ static ParserMatch_t ParsersBlock1[] =
     { "RELINT", OP_BASIC, NULL, "INDEX", "$16" },
     { "RESUME", OP_BASIC, NULL, "INDEX", "$25" },
     { "RETURN", OP_BASIC, NULL, "TC", "1" },
+    { "SECSIZ", OP_PSEUDO, ParseSECSIZ },
     { "SETLOC", OP_PSEUDO, ParseSETLOC },
     { "SQUARE", OP_BASIC, NULL, "MP", "0" },
     { "STORE", OP_INTERPRETER, ParseSTORE },
@@ -320,7 +462,12 @@ static ParserMatch_t ParsersBlock1[] =
 static ParserMatch_t *Parsers = ParsersBlock2;
 static int NUM_PARSERS = NUM_PARSERS_BLOCK2;
 
+// This is the default table of interpreter instructions, and
+// is the one used for all Block 2 software except the BLK2 target
+// (i.e., when the --blk2 command-line switch is used).
 // This table has been pre-sorted and should be kept that way.
+// Note that STCALL, STODL, STORE, and STOVL are implemented as
+// aliases for basic instructions, and so don't appear here.
 static InterpreterMatch_t InterpreterOpcodesBlock2[] =
   {
     { "ABS", 0130, 0 },
@@ -504,104 +651,404 @@ static InterpreterMatch_t InterpreterOpcodesBlock2[] =
     { "SSP*", 0047, 1, 0, 000000,
       { 1, 0 } },
     { "STADR", 0150, 0 },
-  // Note that STCALL, STODL, STORE, and STOVL are implemented as regular instructions.
-        { "STQ", 0156, 1 },
-        { "SXA,1", 0046, 1 },
-        { "SXA,2", 0042, 1 },
-        { "TAD", 0005, 1, 0, 000000,
-          { 1, 0 } },
-        { "TAD*", 0007, 1, 0, 000000,
-          { 1, 0 } },
-        { "TIX,1", 0076, 1 },
-        { "TIX,2", 0072, 1 },
-        { "TLOAD", 0025, 1, 0, 000000,
-          { 1, 0 } },
-        { "TLOAD*", 0027, 1, 0, 000000,
-          { 1, 0 } },
-        { "UNIT", 0120, 0 },
-        { "V/SC", 0035, 1, 0, 000000,
-          { 1, 0 } },
-        { "V/SC*", 0037, 1, 0, 000000,
-          { 1, 0 } },
-        { "VAD", 0121, 1, 0, 000000,
-          { 1, 0 } },
-        { "VAD*", 0123, 1, 0, 000000,
-          { 1, 0 } },
-        { "VCOMP", 0100, 0 },
-        { "VDEF", 0110, 0 },
-        { "VLOAD", 0001, 1, 0, 000000,
-          { 1, 0 } },
-        { "VLOAD*", 0003, 1, 0, 000000,
-          { 1, 0 } },
-        { "VPROJ", 0145, 1, 0, 000000,
-          { 1, 0 } },
-        { "VPROJ*", 0147, 1, 0, 000000,
-          { 1, 0 } },
-        { "VSL", 0115, 1, 2, 020202,
-          { 1, 0 } },
-        { "VSL*", 0117, 1, 2, 020202,
-          { 1, 0 } },
-        { "VSL1", 0004, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSL2", 0024, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSL3", 0044, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSL4", 0064, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSL5", 0104, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSL6", 0124, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSL7", 0144, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSL8", 0164, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSQ", 0140, 0 },
-        { "VSR", 0115, 1, 2, 020602,
-          { 1, 0 } },
-        { "VSR*", 0117, 1, 2, 020602,
-          { 1, 0 } },
-        { "VSR1", 0014, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSR2", 0034, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSR3", 0054, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSR4", 0074, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSR5", 0114, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSR6", 0134, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSR7", 0154, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSR8", 0174, 0, 0, 000000,
-          { 1, 0 } },
-        { "VSU", 0125, 1, 0, 000000,
-          { 1, 0 } },
-        { "VSU*", 0127, 1, 0, 000000,
-          { 1, 0 } },
-        { "VXM", 0071, 1, 0, 000000,
-          { 1, 0 } },
-        { "VXM*", 0073, 1, 0, 000000,
-          { 1, 0 } },
-        { "VXSC", 0015, 1, 0, 000000,
-          { 1, 0 } },
-        { "VXSC*", 0017, 1, 0, 000000,
-          { 1, 0 } },
-        { "VXV", 0141, 1, 0, 000000,
-          { 1, 0 } },
-        { "VXV*", 0143, 1, 0, 000000,
-          { 1, 0 } },
-        { "XAD,1", 0106, 1 },
-        { "XAD,2", 0102, 1 },
-        { "XCHX,1", 0056, 1 },
-        { "XCHX,2", 0052, 1 },
-        { "XSU,1", 0116, 1 },
-        { "XSU,2", 0112, 1 } };
+    { "STQ", 0156, 1 },
+    { "SXA,1", 0046, 1 },
+    { "SXA,2", 0042, 1 },
+    { "TAD", 0005, 1, 0, 000000,
+      { 1, 0 } },
+    { "TAD*", 0007, 1, 0, 000000,
+      { 1, 0 } },
+    { "TIX,1", 0076, 1 },
+    { "TIX,2", 0072, 1 },
+    { "TLOAD", 0025, 1, 0, 000000,
+      { 1, 0 } },
+    { "TLOAD*", 0027, 1, 0, 000000,
+      { 1, 0 } },
+    { "UNIT", 0120, 0 },
+    { "V/SC", 0035, 1, 0, 000000,
+      { 1, 0 } },
+    { "V/SC*", 0037, 1, 0, 000000,
+      { 1, 0 } },
+    { "VAD", 0121, 1, 0, 000000,
+      { 1, 0 } },
+    { "VAD*", 0123, 1, 0, 000000,
+      { 1, 0 } },
+    { "VCOMP", 0100, 0 },
+    { "VDEF", 0110, 0 },
+    { "VLOAD", 0001, 1, 0, 000000,
+      { 1, 0 } },
+    { "VLOAD*", 0003, 1, 0, 000000,
+      { 1, 0 } },
+    { "VPROJ", 0145, 1, 0, 000000,
+      { 1, 0 } },
+    { "VPROJ*", 0147, 1, 0, 000000,
+      { 1, 0 } },
+    { "VSL", 0115, 1, 2, 020202,
+      { 1, 0 } },
+    { "VSL*", 0117, 1, 2, 020202,
+      { 1, 0 } },
+    { "VSL1", 0004, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL2", 0024, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL3", 0044, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL4", 0064, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL5", 0104, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL6", 0124, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL7", 0144, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL8", 0164, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSQ", 0140, 0 },
+    { "VSR", 0115, 1, 2, 020602,
+      { 1, 0 } },
+    { "VSR*", 0117, 1, 2, 020602,
+      { 1, 0 } },
+    { "VSR1", 0014, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR2", 0034, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR3", 0054, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR4", 0074, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR5", 0114, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR6", 0134, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR7", 0154, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR8", 0174, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSU", 0125, 1, 0, 000000,
+      { 1, 0 } },
+    { "VSU*", 0127, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXM", 0071, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXM*", 0073, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXSC", 0015, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXSC*", 0017, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXV", 0141, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXV*", 0143, 1, 0, 000000,
+      { 1, 0 } },
+    { "XAD,1", 0106, 1 },
+    { "XAD,2", 0102, 1 },
+    { "XCHX,1", 0056, 1 },
+    { "XCHX,2", 0052, 1 },
+    { "XSU,1", 0116, 1 },
+    { "XSU,2", 0112, 1 } };
 #define NUM_INTERPRETERS_BLOCK2 (sizeof(InterpreterOpcodesBlock2) / sizeof(InterpreterOpcodesBlock2[0]))
 
+// This is the interpreter table used for the BLK2 target
+// (i.e., when the --blk2 command-line switch is used).
+// It is *not* the default table used for normal Block 2
+// software.  The differences are described in the original
+// YUL code, in the Introduction section, on p. 11 for the
+// BLK2 target (this one!), vs. p. 15 for the AGC target
+// (the default one!). The tables are virtually identical,
+// except the instructions CALL (or CCLRB) and RTB have
+// swapped opcodes, and so have the instructions STQ and
+// BHIZ for some reason.  I am told that there should be
+// differences in STORE, STODL, STOVL, and STCALL as well,
+// though it's not yet clear to me how that could be.
+//
+// Note that STCALL, STODL, STORE, and STOVL are implemented
+// as basic instructions.
+static InterpreterMatch_t InterpreterOpcodesBLK2[] =
+  {
+    { "ABS", 0130, 0 },
+    { "ABVAL", 0130, 0 },
+    { "ARCCOS", 0050, 0 },
+    { "ACOS", 0050, 0 },
+    { "ARCSIN", 0040, 0 },
+    { "ASIN", 0040, 0 },
+    { "AXC,1", 0016, 1 },
+    { "AXC,2", 0012, 1 },
+    { "AXT,1", 0006, 1 },
+    { "AXT,2", 0002, 1 },
+    { "BDDV", 0111, 1, 0, 000000,
+      { 1, 0 } },
+    { "BDDV*", 0113, 1, 0, 000000,
+      { 1, 0 } },
+    { "BDSU", 0155, 1, 0, 000000,
+      { 1, 0 } },
+    { "BDSU*", 0157, 1, 0, 000000,
+      { 1, 0 } },
+    { "BHIZ", 0156, 1 },
+    { "BMN", 0136, 1 },
+    { "BOFCLR", 0162, 2, 1, 000241 },
+    { "BOF", 0162, 2, 1, 000341 },
+    { "BOFF", 0162, 2, 1, 000341 },
+    { "BOFINV", 0162, 2, 1, 000141 },
+    { "BOFSET", 0162, 2, 1, 000041 },
+    { "BON", 0162, 2, 1, 000301 },
+    { "BONCLR", 0162, 2, 1, 000201 },
+    { "BONINV", 0162, 2, 1, 000101 },
+    { "BONSET", 0162, 2, 1, 000001 },
+    { "BOV", 0176, 1 },
+    { "BOVB", 0172, 1 },
+    { "BPL", 0132, 1 },
+    { "BVSU", 0131, 1, 0, 000000,
+      { 1, 0 } },
+    { "BVSU*", 0133, 1, 0, 000000,
+      { 1, 0 } },
+    { "BZE", 0122, 1 },
+    { "CALL", 0142, 1 },
+    { "CALRB", 0142, 1 },
+    { "CCALL", 0065, 2, 0, 000000,
+      { 1, 0 } },
+    { "CCALL*", 0067, 2, 0, 000000,
+      { 1, 0 } },
+    { "CCLRB", 0065, 2, 0, 000000,
+      { 1, 0 } },
+    { "CCLRB*", 0067, 2, 0, 000000,
+      { 1, 0 } },
+    { "CGOTO", 0021, 2, 0, 000000,
+      { 1, 0 } },
+    { "CGOTO*", 0023, 2, 0, 000000,
+      { 1, 0 } },
+    { "CLEAR", 0162, 1, 1, 000261 },
+    { "CLR", 0162, 1, 1, 000261 },
+    { "CLRGO", 0162, 2, 1, 000221 },
+    { "COS", 0030, 0 },
+    { "COSINE", 0030, 0 },
+    { "DAD", 0161, 1, 0, 000000,
+      { 1, 0 } },
+    { "DAD*", 0163, 1, 0, 000000,
+      { 1, 0 } },
+    { "DCOMP", 0100, 0 },
+    { "DDV", 0105, 1, 0, 000000,
+      { 1, 0 } },
+    { "DDV*", 0107, 1, 0, 000000,
+      { 1, 0 } },
+    { "DLOAD", 0031, 1, 0, 000000,
+      { 1, 0 } },
+    { "DLOAD*", 0033, 1, 0, 000000,
+      { 1, 0 } },
+    { "DMP", 0171, 1, 0, 000000,
+      { 1, 0 } },
+    { "DMP*", 0173, 1, 0, 000000,
+      { 1, 0 } },
+    { "DMPR", 0101, 1, 0, 000000,
+      { 1, 0 } },
+    { "DMPR*", 0103, 1, 0, 000000,
+      { 1, 0 } },
+    { "DOT", 0135, 1, 0, 000000,
+      { 1, 0 } },
+    { "DOT*", 0137, 1, 0, 000000,
+      { 1, 0 } },
+    { "DSQ", 0060, 0 },
+    { "DSU", 0151, 1, 0, 000000,
+      { 1, 0 } },
+    { "DSU*", 0153, 1, 0, 000000,
+      { 1, 0 } },
+    { "EXIT", 0000, 0 },
+    { "GOTO", 0126, 1 },
+    { "INCR,1", 0066, 1 },
+    { "INCR,2", 0062, 1 },
+    { "INVERT", 0162, 1, 1, 000161 },
+    { "INVGO", 0162, 2, 1, 000121 },
+    { "ITA", 0156, 1 },
+    { "LXA,1", 0026, 1 },
+    { "LXA,2", 0022, 1 },
+    { "LXC,1", 0036, 1 },
+    { "LXC,2", 0032, 1 },
+    { "MXV", 0055, 1, 0, 000000,
+      { 1, 0 } },
+    { "MXV*", 0057, 1, 0, 000000,
+      { 1, 0 } },
+    { "NORM", 0075, 1, 0, 000000,
+      { 1, 0 } },
+    { "NORM*", 0077, 1, 0, 000000,
+      { 1, 0 } },
+    { "PDDL", 0051, 1, 0, 000000,
+      { 1, 0 } },
+    { "PDDL*", 0053, 1, 0, 000000,
+      { 1, 0 } },
+    { "PDVL", 0061, 1, 0, 000000,
+      { 1, 0 } },
+    { "PDVL*", 0063, 1, 0, 000000,
+      { 1, 0 } },
+    { "PUSH", 0170, 0 },
+    { "ROUND", 0070, 0 },
+    { "RTB", 0152, 1 },
+    { "RVQ", 0160, 0 },
+    { "SET", 0162, 1, 1, 000061 },
+    { "SETGO", 0162, 2, 1, 000021 },
+    { "SETPD", 0175, 1, 0, 000000,
+      { 1, 0 } },
+    { "SIGN", 0011, 1, 0, 000000,
+      { 1, 0 } },
+    { "SIGN*", 0013, 1, 0, 000000,
+      { 1, 0 } },
+    { "SIN", 0020, 0 },
+    { "SINE", 0020, 0 },
+    { "SL", 0115, 1, 2, 020202,
+      { 1, 0 } },
+    { "SL*", 0117, 1, 2, 020202,
+      { 1, 0 } },
+    { "SLOAD", 0041, 1, 0, 000000,
+      { 1, 0 } },
+    { "SLOAD*", 0043, 1, 0, 000000,
+      { 1, 0 } },
+    { "SL1", 0024, 0, 0, 000000,
+      { 1, 0 } },
+    { "SL1R", 0004, 0, 0, 000000,
+      { 1, 0 } },
+    { "SL2", 0064, 0, 0, 000000,
+      { 1, 0 } },
+    { "SL2R", 0044, 0, 0, 000000,
+      { 1, 0 } },
+    { "SL3", 0124, 0, 0, 000000,
+      { 1, 0 } },
+    { "SL3R", 0104, 0, 0, 000000,
+      { 1, 0 } },
+    { "SL4", 0164, 0, 0, 000000,
+      { 1, 0 } },
+    { "SL4R", 0144, 0, 0, 000000,
+      { 1, 0 } },
+    { "SLR", 0115, 1, 2, 021202,
+      { 1, 0 } },
+    { "SLR*", 0117, 1, 2, 021202,
+      { 1, 0 } },
+    { "SQRT", 0010, 0 },
+    { "SR", 0115, 1, 2, 020602,
+      { 1, 0 } },
+    { "SR*", 0117, 1, 2, 020602,
+      { 1, 0 } },
+    { "SR1", 0034, 0, 0, 000000,
+      { 1, 0 } },
+    { "SR1R", 0014, 0, 0, 000000,
+      { 1, 0 } },
+    { "SR2", 0074, 0, 0, 000000,
+      { 1, 0 } },
+    { "SR2R", 0054, 0, 0, 000000,
+      { 1, 0 } },
+    { "SR3", 0134, 0, 0, 000000,
+      { 1, 0 } },
+    { "SR3R", 0114, 0, 0, 000000,
+      { 1, 0 } },
+    { "SR4", 0174, 0, 0, 000000,
+      { 1, 0 } },
+    { "SR4R", 0154, 0, 0, 000000,
+      { 1, 0 } },
+    { "SRR", 0115, 1, 2, 021602,
+      { 1, 0 } },
+    { "SRR*", 0117, 1, 2, 021602,
+      { 1, 0 } },
+    { "SSP", 0045, 2, 0, 000000,
+      { 1, 0 } },
+    { "SSP*", 0047, 1, 0, 000000,
+      { 1, 0 } },
+    { "STADR", 0150, 0 },
+    { "STQ", 0146, 1 },
+    { "SXA,1", 0046, 1 },
+    { "SXA,2", 0042, 1 },
+    { "TAD", 0005, 1, 0, 000000,
+      { 1, 0 } },
+    { "TAD*", 0007, 1, 0, 000000,
+      { 1, 0 } },
+    { "TIX,1", 0076, 1 },
+    { "TIX,2", 0072, 1 },
+    { "TLOAD", 0025, 1, 0, 000000,
+      { 1, 0 } },
+    { "TLOAD*", 0027, 1, 0, 000000,
+      { 1, 0 } },
+    { "UNIT", 0120, 0 },
+    { "V/SC", 0035, 1, 0, 000000,
+      { 1, 0 } },
+    { "V/SC*", 0037, 1, 0, 000000,
+      { 1, 0 } },
+    { "VAD", 0121, 1, 0, 000000,
+      { 1, 0 } },
+    { "VAD*", 0123, 1, 0, 000000,
+      { 1, 0 } },
+    { "VCOMP", 0100, 0 },
+    { "VDEF", 0110, 0 },
+    { "VLOAD", 0001, 1, 0, 000000,
+      { 1, 0 } },
+    { "VLOAD*", 0003, 1, 0, 000000,
+      { 1, 0 } },
+    { "VPROJ", 0145, 1, 0, 000000,
+      { 1, 0 } },
+    { "VPROJ*", 0147, 1, 0, 000000,
+      { 1, 0 } },
+    { "VSL", 0115, 1, 2, 020202,
+      { 1, 0 } },
+    { "VSL*", 0117, 1, 2, 020202,
+      { 1, 0 } },
+    { "VSL1", 0004, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL2", 0024, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL3", 0044, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL4", 0064, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL5", 0104, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL6", 0124, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL7", 0144, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSL8", 0164, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSQ", 0140, 0 },
+    { "VSR", 0115, 1, 2, 020602,
+      { 1, 0 } },
+    { "VSR*", 0117, 1, 2, 020602,
+      { 1, 0 } },
+    { "VSR1", 0014, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR2", 0034, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR3", 0054, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR4", 0074, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR5", 0114, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR6", 0134, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR7", 0154, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSR8", 0174, 0, 0, 000000,
+      { 1, 0 } },
+    { "VSU", 0125, 1, 0, 000000,
+      { 1, 0 } },
+    { "VSU*", 0127, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXM", 0071, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXM*", 0073, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXSC", 0015, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXSC*", 0017, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXV", 0141, 1, 0, 000000,
+      { 1, 0 } },
+    { "VXV*", 0143, 1, 0, 000000,
+      { 1, 0 } },
+    { "XAD,1", 0106, 1 },
+    { "XAD,2", 0102, 1 },
+    { "XCHX,1", 0056, 1 },
+    { "XCHX,2", 0052, 1 },
+    { "XSU,1", 0116, 1 },
+    { "XSU,2", 0112, 1 } };
+#define NUM_INTERPRETERS_BLK2 (sizeof(InterpreterOpcodesBLK2) / sizeof(InterpreterOpcodesBLK2[0]))
+
+// This is the table of interpreter instructions used for all
+// Block 1 software.
 static InterpreterMatch_t InterpreterOpcodesBlock1[] =
   {
     { "ABS", 0124 },
@@ -982,15 +1429,24 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   static char lastLines[10][sizeof(s)] =
     { "", "", "", "", "", "", "", "", "", "" };
 
-  // Make sure of Block 1 vs. Block 2 settings.
+  // Set for the proper assembly target
+  // The default for these settings is Block2 (YUL name AGC, I think).
   if (!BlockAssigned && Block1)
     {
+      // YUL target AGC4, I think.
       Parsers = ParsersBlock1;
       NUM_PARSERS = NUM_PARSERS_BLOCK1;
       InterpreterOpcodes = InterpreterOpcodesBlock1;
       NUM_INTERPRETERS = NUM_INTERPRETERS_BLOCK1;
-      // The default for these settings is Block2, so there's no
-      // need to make any assignments if !Block1.
+    }
+  if (!BlockAssigned && blk2)
+    {
+      // YUL target BLK2, I think, not to be confused with the ;
+      // Block 2 target (AGC) used for most AGC programs.
+      Parsers = ParsersBLK2;
+      NUM_PARSERS = NUM_PARSERS_BLK2;
+      InterpreterOpcodes = InterpreterOpcodesBLK2;
+      NUM_INTERPRETERS = NUM_INTERPRETERS_BLK2;
     }
   BlockAssigned = 1;
 
@@ -1063,11 +1519,13 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       ParseOutputRecord.SBank = ParseInputRecord.SBank;
       // Get the next line from the file.
       ss = fgets(s, sizeof(s) - 1, InputFile);
+      //printf("LINE -> %s", s);
       // At end of the file?
       if (!ss)
         {
           // We've reached the end of this input file.  Need to switch
           // files (if we were within an include-file) or to end the pass.
+          inHeader = 0;
           if (NumStackedIncludes)
             {
               fclose(InputFile);
@@ -1112,6 +1570,17 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
         }
 
       // Analyze the input line.
+
+      // If it is not a ## line and not completely blank, then we are no longer
+      // in the file header.
+      for (ss = s; *ss && isspace(*ss); ss++)
+        ;
+      if (*ss == 0) // completely whitespace
+        ;
+      else if (s[0] == '#' && s[1] == '#') // is a ## line
+        ;
+      else
+        inHeader = 0;
 
       // Is it an HTML insert?  If so, transparently process and discard.
       if (formatOnly)
@@ -1199,6 +1668,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
               goto Done;
             }
 
+          inHeader = 1;
           CurrentLineInFile = 0;
           continue;
         }
@@ -1236,6 +1706,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       *ss = 0;
 
       // Find and remove the comment field, if any.
+      //printf ("Line -> \"%s\"\n", s);
       ParseInputRecord.commentColumn = 0;
       for (ParseInputRecord.Comment = s;
           *ParseInputRecord.Comment
@@ -1251,6 +1722,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           //    if (*ss == '\n')
           //        *ss = 0;
         }
+      //printf ("Comment -> \"%s\"\n", ParseInputRecord.Comment);
 
       if (Block1 && strlen(s) >= 16)
         {
@@ -1297,7 +1769,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           // Block 1 interpreter code, and only to determine that the line contains
           // an address rather than an operator.  Moreover, anything appearing in
           // column 15 is *not* part of the operator.
-          noOperator = Block1;
+          noOperator = 1 /*Block1*/;
           if (strlen(s) >= 16)
             {
               if (!strncmp(&s[16], Fields[i], strlen(Fields[i])))
@@ -1373,7 +1845,11 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             }
           else
             {
-              if (NumInterpretiveOperands && !iMatch && !Match)
+              if (formatOnly && noOperator)
+                {
+                  ParseInputRecord.Operator = "";
+                }
+              else if (NumInterpretiveOperands && !iMatch && !Match)
                 {
                   ParseInputRecord.Operator = "";
                 }
@@ -2134,7 +2610,8 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                   fprintf(HtmlOut, "%s", NormalizeStringN("", 8));
 
                   if (*ParseInputRecord.Comment)
-                    fprintf(HtmlOut, COLOR_COMMENT "# %s</span>",
+                    fprintf(HtmlOut, COLOR_COMMENT "#%s%s</span>",
+                        (ParseInputRecord.Comment[0] == '#') ? "" : " ",
                         NormalizeString(ParseInputRecord.Comment));
                 }
             }

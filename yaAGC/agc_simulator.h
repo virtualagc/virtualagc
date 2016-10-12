@@ -42,8 +42,7 @@
 
 #ifdef WIN32
 #include <windows.h>
-#include <time.h>
-//#include <sys/time.h>
+#include <sys/time.h>
 #define LB "\r\n"
 #else
 #include <time.h>
