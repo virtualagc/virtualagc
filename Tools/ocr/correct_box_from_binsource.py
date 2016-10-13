@@ -28,8 +28,8 @@
 import sys
 
 if len(sys.argv) < 4:
-    print 'Usage:   correct_box_from_binsource.py box_file binsource_file page1 page2 ...'
-    print 'Example: correct_box_from_binsource.py octal.burst.exp0.box Sunburst120.binsource 1173 1208 1210 1260'
+    print('Usage:   correct_box_from_binsource.py box_file binsource_file page1 page2 ...')
+    print('Example: correct_box_from_binsource.py octal.burst.exp0.box Sunburst120.binsource 1173 1208 1210 1260')
     sys.exit(0)
 
 with open(sys.argv[1], 'r+') as box_file, open(sys.argv[2], 'r') as binsource:
@@ -73,7 +73,7 @@ with open(sys.argv[1], 'r+') as box_file, open(sys.argv[2], 'r') as binsource:
 
         print('Replaced %u characters for page %s' % (char_index, page))
     
-    print 'Success! Saving changes to %s.' % sys.argv[1]
+    print('Success! Saving changes to %s.' % sys.argv[1])
     box_file.seek(0)
     box_file.writelines(box_lines)
     box_file.truncate()
