@@ -93,6 +93,7 @@
       href="http://www.doxygen.org">doxygen</a> system, though pure HTML
     is used in place of <span style="font-weight: bold;">doxygen</span>'s
 
+
     custom markup language.<br>
     <br>
     The basic markup looks like this:<br>
@@ -282,6 +283,27 @@
         monospace;">### FILE="<span style="font-style: italic;">filename</span>"</span><br>
     </div>
     <br>
+    More-generally, This command can be used to inject any amount of
+    arbitrary HTML at any point in the HTML versions of the program
+    listings, in a specific source-code file, and isn't limited to
+    boilerplate that is duplicated in multiple files.&nbsp; Thus it can
+    be used to create annotations of any desired complexity.&nbsp;
+    However, it should be noted that while such annotations are great
+    for the HTML versions of the program listings, they don't appear at
+    all in the normal (non-HTML) listings output by yaYUL, nor in the
+    source code itself, as anything other than a filename.&nbsp; So its
+    utility is limited to things that you <i>only</i> want to show up
+    in the HTML versions of the program listings.&nbsp; Note only that
+    but the ### annotations are not automatically formatted for you in
+    any way, in contrast to the ## annotations which are automatically
+    formatted as shown earlier, and thus are somewhat harder to manage
+    stylistically.&nbsp; Most source-code sets do have a
+    Main.annotations file which can be used as a template for producing
+    ###-annotation formatting similar to the ## annotations.&nbsp;
+    Nevertheless, in these respects, the ## annotations, while
+    more-limited in flexibility, are superior for routine program
+    annotations.<br>
+    <br>
     If a file called "Default.style" exists, it will automatically be
     included at the start of every source file.&nbsp; The Default.style
     supplied by Virtual AGC produces the sample annotations style shown
@@ -412,7 +434,7 @@
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2009-10-09.<br>
+          2016-10-13.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
