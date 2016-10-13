@@ -9,6 +9,7 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-22 HG   Start trancription from scans using Luminary099\INTERPRETER.agc as base
 #               2016-10-04 HG   Fix FBBANK -> FBANK
+#               2016-10-12 HG   Fix opernand MAPC +1  -> MPAC +1
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -2185,7 +2186,7 @@ DDVCALL         DXCH            MPAC                    # CALL PRE-DIVIDE NORMAL
 ## Page 100
 /AGREE          CAF             HALF                    # FORCE SIGN AGREEMENT IN DIVIDEND
                 DOUBLE                                  # (ALREADY DONE FOR DIVISOR).
-                AD              MAPC            +1
+                AD              MPAC            +1
                 TS              MPAC            +1
                 CAF             ZERO
                 AD              POSMAX

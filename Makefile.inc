@@ -5,7 +5,11 @@
 # Website:  	http://www.ibiblio.org/apollo
 # Mod history:	2016-10-04 JL   Created.
 #               2016-10-04 JL   Added format target.
-#				2016-10-05 JL	Re-enable HTML output.
+#		2016-10-05 JL	Re-enable HTML output.
+#		2016-10-11 RSB	The executable and html are now built separately,
+#				rather than in one step, since they actually 
+#				need different command-line switches in yaYUL
+#				for optimum prettiness.
 
 # Notes: 
 #
@@ -27,13 +31,11 @@ ifndef PREFIX
 PREFIX=/usr/local
 endif
 
-YAYUL_ARGS=--unpound-page
+# I removed YAYUL_ARGS, since it was basically used only one place,
+# and each of the uses of yaYUL below uses different arguments.
 
 # Enable/disable HTML generation.
 GEN_HTML=yes
-ifdef GEN_HTML
-YAYUL_ARGS+=--html
-endif
 
 TARGETS=$(BASENAME).bin $(BASENAME).lst $(BASENAME).symtab
 ifeq "$(BASENAME)" "Validation"
@@ -41,6 +43,9 @@ TARGETS+=$(BASENAME).txt
 TOPLEVEL=Validation
 else
 TOPLEVEL=MAIN
+ifeq "$(GEN_HTML)" "yes"
+TARGETS+=$(TOPLEVEL).agc.html
+endif
 endif
 
 SOURCE:=$(wildcard *.agc)
@@ -61,7 +66,11 @@ $(BASENAME).txt: $(BASENAME).bin
 
 # Assemble the actual source files.
 $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst: $(SOURCE)
-	../yaYUL/yaYUL $(YAYUL_ARGS) $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >$(TOPLEVEL).agc.lst
+	../yaYUL/yaYUL --unpound-page $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >$(TOPLEVEL).agc.lst
+
+# Generate HTML.
+$(TOPLEVEL).agc.html: $(SOURCE)
+	../yaYUL/yaYUL --html $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >/dev/null
 
 # Compare rope images, and rename output files.
 $(BASENAME).lst: $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst $(BASENAME).bin
@@ -85,7 +94,7 @@ clean:
 
 # Recipe for reformatting an AGC source file.
 %.agc.out: %.agc 
-	../yaYUL/yaYUL --format $< >$@
+	../yaYUL/yaYUL --unpound-page $(EXTRA_YAYUL_ARGS) --format $< >$@
 ifeq "$(REFORMAT)" "yes"
 	mv -f $@ $<
 endif

@@ -22,6 +22,23 @@
   		opcodes.
   Mode:		07/27/04 RSB	Forked from ParseGeneral.c.
                 08/24/16 RSB    Updated for --block1.
+                10/12/16 RSB    Updated for --blk2.  Note that some of the
+                                addressing changes for erasable memory
+                                have been "zenned" into place ... a synonym
+                                I've just coined for "kludged" ... and are
+                                justified by matching the octals in the
+                                Aurora 12 program listing rather than by a
+                                deep understanding of how BLK2 interpretive
+                                addressing for STORE/STCALL/STODL/STOVL
+                                differs from the AGC (later Block 2) interpretive
+                                addressing for which the code was originally
+                                intended.  It has, in fact, been pointed out
+                                to me that BLK2 addressing is explained in
+                                documents E-2052 (http://www.ibiblio.org/apollo/NARA-SW/E-2052.pdf)
+                                and R-489 (http://www.ibiblio.org/apollo/hrst/archive/1687.pdf),
+                                which my poor, old brain has difficulty
+                                comprehending, so any error are entirely
+                                my own fault.
 */
 
 #include "yaYUL.h"
@@ -44,7 +61,7 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
 
   if (!Block1)
     {
-      Opcode += 04000 * ArgType;
+      Opcode += (blk2 ? 02000 : 04000) * ArgType;
     }
   IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
@@ -155,7 +172,7 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
               if (!K.Banked)
                 i = K.SReg;
               else
-                i = 0400 * K.EB + (K.SReg - 01400);
+                i = 0400 * K.EB + (K.SReg - 01400) - (blk2 ? 01000 : 0);
             }
           if (Block1 && ArgType != 0) {
             OpcodeOffset *= 2;
@@ -200,7 +217,7 @@ ParseSTCALL(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   SwitchInvert[0] = 0;
   nnnnFields[0] = 0;
   RawNumInterpretiveOperands = NumInterpretiveOperands = 1;
-  return (ParseST(InRecord, OutRecord, 034000,
+  return (ParseST(InRecord, OutRecord, (blk2 ? 036000 : 034000),
   ERASABLE | ENUMBER | KPLUS1));
 }
 
@@ -212,7 +229,7 @@ ParseSTODL(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   SwitchInvert[0] = 0;
   nnnnFields[0] = 0;
   RawNumInterpretiveOperands = NumInterpretiveOperands = 1;
-  return (ParseST(InRecord, OutRecord, 014000,
+  return (ParseST(InRecord, OutRecord, (blk2 ? 06000 : 014000),
   ERASABLE | ENUMBER | KPLUS1));
 }
 
@@ -233,7 +250,7 @@ ParseSTOVL(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   SwitchInvert[0] = 0;
   nnnnFields[0] = 0;
   RawNumInterpretiveOperands = NumInterpretiveOperands = 1;
-  return (ParseST(InRecord, OutRecord, 024000,
+  return (ParseST(InRecord, OutRecord, (blk2 ? 022000 : 024000),
   ERASABLE | ENUMBER | KPLUS1));
 }
 

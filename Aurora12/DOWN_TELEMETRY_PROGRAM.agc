@@ -9,7 +9,9 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 HG   Initial transfer from scan
 #               2016-10-08 HG   Add missed ECADR RSTACK +46D,
-#                               Remove added decimal markes D       
+#                               Remove added decimal markes D  
+#               2016-10-11 HG   fix label DNPAHSE1 -> DNPHASE1   
+#                                         DNPAHSE2 -> DNPHASE3 
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -159,7 +161,7 @@ TMEXITL         EXTEND
                 WRITE   DNTM2
                 TCF     NOQRSM
                 
-DNPAHSE3        CCS     TMINDEX
+DNPHASE3        CCS     TMINDEX
                 TCF     PHASE3A
                 
                 CAF     LDNPHAS4        # SEND FIXED FORMAT LIST OF DSPTAB AND
