@@ -8,6 +8,8 @@
 # Pages:        7-25
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-04 HG   Insert missed statements
+#               2016-10-12 HG   add missing  THRUST  EQUALS  55
+#                               fix label   SQRANG -> SQRARG
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -83,6 +85,7 @@ CDUZCMD         EQUALS          52
 OPTYCMD         EQUALS          53
 OPTXCMD         EQUALS          54
 EMSD            EQUALS          55
+THRUST          EQUALS          55
 LEMONM          EQUALS          56
 OUTLINK         EQUALS          57
 ALTM            EQUALS          60
@@ -457,7 +460,7 @@ PHASE5          ERASE
 
 HALFY           ERASE
 ROOTRET         ERASE
-SQRANG          ERASE
+SQRARG          ERASE
 TEMK            EQUALS          HALFY
 SQ              EQUALS          ROOTRET
 

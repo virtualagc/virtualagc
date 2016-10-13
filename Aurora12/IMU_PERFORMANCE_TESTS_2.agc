@@ -8,6 +8,12 @@
 # Pages:        475-499
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-27 HG   start transcription from scans
+#               2016-10-12 HG   fix operator TEHTAD -> THETAD
+#                                            TORQDNX -> TORQNDX 
+#                                            INODES33 -> IMODES33  
+#                                            YSM =4 -> YSM +4
+#                                   instruction CA  DRIFTT -> TS DRIFTT
+#                                   constant 2DEC 32844 B-28  -> 2DEC 342844 B-28
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -48,7 +54,7 @@ GEOIMUTT        TC              INTPRET                 # OPTIMUM COMPASS COMES 
                 TS              DSPTEM2         +2
                 TS              THETAD
                 TS              THETAD          +1
-                TS              TEHTAD          +2
+                TS              THETAD          +2
                 TC              BANKCALL
                 CADR            IMUZERO
                 TC              BANKCALL
@@ -192,7 +198,7 @@ VERTDRFT        CA              3990DEC                 # NUMBER OF SECONDS TO S
                 TS              ZSM             +5
 GUESS1          CAF             POSMAX
                 TS              TORQNDX
-                TS              TORQDNX         +1
+                TS              TORQNDX         +1
                 TC              BANKCALL
                 CADR            ESTIMS
 VALMIS          TC              PHASCHNG
@@ -536,7 +542,7 @@ ENDWATCH        INHINT                                  # WWILL STOR GYROCTR AT 
                 TS              SAVE            +1      # AND STOPS TORQUING BY ZEROING TORQ
                 CS              TWO
                 MASK            IMODES33                # THIS TURNS OFF EXEC SWITCH SO THE GYRO
-                TS              INODES33                # TORQ. ENABLE RELAY CAN BE TURNED OFF.
+                TS              IMODES33                # TORQ. ENABLE RELAY CAN BE TURNED OFF.
                 RELINT
 CALCSFE         CA              SAVE                    # GYROCTR AT TEST START
                 EXTEND
@@ -943,7 +949,7 @@ POSN3           CA              HALF                    # Z UP, Y WEST ,X NORTH
 NSFLAGD         CA              TWO
                 TS              PIPINDEX
 NSBUGD          CA              ZERO
-                CA              DRIFTT
+                TS              DRIFTT
                 TC              QPLACE
 
 
@@ -1032,7 +1038,7 @@ POSN9           CA              HALF                    # X UP EAST,Y UP WEST,Z 
                 TS              XSM             +4
                 TS              YSM
                 COM
-                TS              YSM             =4
+                TS              YSM             +4
                 TC              NSBUGD
 
 
@@ -1118,7 +1124,7 @@ V16N40S         OCT             01640
 DEC17           DEC             17
 DEC585          2DEC            3200            B+14
 DELYOFF         OCT             00400
-ERUNITS         2DEC            32844           B-28
+ERUNITS         2DEC            342844          B-28
 GENPLAD         GENADR          AZIMUTH
 GYRODPL         ECADR           GYROD
 OGCPL           ECADR           OGC
