@@ -289,7 +289,7 @@ main(int argc, char *argv[])
               errorCount++;
               fprintf(stderr,
                   "Bank %o, page %d, line %d: Bank is not aligned properly.\n",
-                  currentPage, banknum, line);
+                  banknum, currentPage, line);
             }
           checked = 0;
           checkWords = 02000;
@@ -333,7 +333,7 @@ main(int argc, char *argv[])
             {
               errorCount++;
               fprintf(stderr,
-                  "Bank %d, page %d, line %d: Illegal digit \'%c\'.\n", banknum,
+                  "Bank %o, page %d, line %d: Illegal digit \'%c\'.\n", banknum,
                   currentPage, line, *ss);
             }
         }
@@ -350,7 +350,7 @@ main(int argc, char *argv[])
             {
               errorCount++;
               fprintf(stderr,
-                  "Bank %d, page %d, line %d: Field is not correct width.\n",
+                  "Bank %o, page %d, line %d: Field is not correct width.\n",
                   banknum, currentPage, line);
             }
         }
@@ -358,7 +358,7 @@ main(int argc, char *argv[])
       if (i > 8)
         {
           errorCount++;
-          fprintf(stderr, "Bank %d, page %d, line %d: Too many fields.\n",
+          fprintf(stderr, "Bank %o, page %d, line %d: Too many fields.\n",
               banknum, currentPage, line);
         }
 
@@ -378,7 +378,7 @@ main(int argc, char *argv[])
                 {
                   fprintf(
                   stderr,
-                      "Bank %d, page %d, line %d: The parity field is neither 0 nor 1 at %05o %o.\n",
+                      "Bank %o, page %d, line %d: The parity field is neither 0 nor 1 at %05o %o.\n",
                       banknum, currentPage, line, data[dummy], parity);
                 }
               else
@@ -394,7 +394,7 @@ main(int argc, char *argv[])
                   if (word != 1)
                     {
                       fprintf(stderr,
-                          "Bank %d, page %d, line %d: Parity error at %05o %o\n",
+                          "Bank %o, page %d, line %d: Parity error at %05o %o\n",
                           banknum, currentPage, line, data[dummy], parity);
                     }
                 }
