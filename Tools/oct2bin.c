@@ -288,7 +288,7 @@ main(int argc, char *argv[])
             {
               errorCount++;
               fprintf(stderr,
-                  "Bank %d, page %d, line %d: Bank is not aligned properly.\n",
+                  "Bank %o, page %d, line %d: Bank is not aligned properly.\n",
                   currentPage, banknum, line);
             }
           checked = 0;
