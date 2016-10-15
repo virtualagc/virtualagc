@@ -25,6 +25,8 @@
                 04/27/03 RSB.   Split off from ParseSETLOC.c
                 06/22/03 RSB.   Added PseudoToEBanked.
                 08/18/16 RSB.   Tweaks related to --block1.
+                10/12/16 RSB.   Cosmetic change which should not affect
+                                the output in any way.
  */
 
 #include "yaYUL.h"
@@ -98,7 +100,7 @@ int PseudoToStruct(int Value, Address_t *Address)
         return (1);
     }
 
-    if ((!Block1 && Value <= 01377) || (Block1 && Value <= 01777)) {
+    if ((Block1 && Value <= 01777) || Value <= 01377) {
         Address->Address = 1;
         Address->Erasable = 1;
         Address->Unbanked = 1;

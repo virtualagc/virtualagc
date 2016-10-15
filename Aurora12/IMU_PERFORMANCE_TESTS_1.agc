@@ -9,6 +9,9 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-25 HG   Start transfer from scan
 #               2016-10-08 HG   Fix INPRET->INTPRET
+#               2016-10-11 HG   Fix PIPZ -> PIPAZ
+#                                   DSTEMP1 -> DSPTEM1
+#                                   DSTEM1  -> DSPTEM1
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -108,7 +111,7 @@ MONSTART        TC              FINETIME                # TIME AT INITIAL MISALI
                 CAF             ZERO                    # ZERO PIPA COUNTERS
                 TS              PIPAX
                 TS              PIPAY
-                TS              PIPZ
+                TS              PIPAZ
                 TS              STOREPL
                 TS              NDXCTR
                 TC              STORRSLT                # STORE T(INITIAL) AND PIPAI = 0
@@ -1043,8 +1046,8 @@ PTITRDE         CS              CH12BITS
                 EXTEND
                 WAND            12
                 CA              ZERO
-                TS              DSTEMP1
-                TS              DSTEM1          +1
+                TS              DSPTEM1
+                TS              DSPTEM1          +1
                 TS              TEMP
                 CA              BIT1
                 TS              NOBITS
