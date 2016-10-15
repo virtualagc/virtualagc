@@ -330,12 +330,11 @@ WTLST2          TS              WAITTEMP                        # C(A) = -(TD - 
 #       C(LST2+8)       =       2CADR TASK5
 #       C(LST2+10)      =       2CADR TASK6
 
-# Page 1128
+## Page 1071
+
 # ENTERS HERE ON T3 RUPT TO DISPATCH WAITLISTED TASK.
 
-T3RUPT          EXTEND                                          
-                ROR             SUPERBNK                        # READ CURRENT SUPERBANK VALUE AND
-                TS              BANKRUPT                        # SAVE WITH E AND F BANK VALUES.
+T3RUPT          TS              BANKRUPT                                          
                 EXTEND                                          
                 QXCH            QRUPT                           
 
@@ -366,10 +365,6 @@ T3RUPT2         CAF             NEG1/2                          # DISPATCH WAITL
                 DXCH            LST2            +2              
                 DXCH            LST2                            
 
-                XCH             L                               
-                EXTEND                                          
-                WRITE           SUPERBNK                        # SET SUPERBANK FROM BBCON OF 2CADR
-                XCH             L                               # RESTORE TO L FOR DXCH Z.
                 DTCB                                            
 
 # Page 1129
