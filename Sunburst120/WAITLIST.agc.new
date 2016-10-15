@@ -367,26 +367,21 @@ T3RUPT2         CAF             NEG1/2                          # DISPATCH WAITL
 
                 DTCB                                            
 
-# Page 1129
+## Page 1072
+
 # RETURN, AFTER EXECUTION OF T3 OVERFLOW TASK:
 
                 BLOCK           02                              
-                COUNT*          $$/WAIT                         
 TASKOVER        CCS             RUPTAGN                         # IF +1 RETURN TO T3RUPT, IF -0 RESUME.
                 CAF             WAITBB                          
                 TS              BBANK                           
                 TCF             T3RUPT2                         # DISPATCH NEXT TASK IF IT WAS DUE.
-
-                CA              BANKRUPT                        
-                EXTEND                                          
-                WRITE           SUPERBNK                        # RESTORE SUPERBANK BEFORE RESUME IS DONE
 
 RESUME          EXTEND                                          
                 QXCH            QRUPT                           
 NOQRSM          CA              BANKRUPT                        
                 XCH             BBANK                           
 NOQBRSM         DXCH            ARUPT                           
-                RELINT                                          
                 RESUME                                          
 
 # Page 1130
