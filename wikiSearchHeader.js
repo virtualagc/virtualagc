@@ -1,6 +1,6 @@
 /* Google search bar */
 (function() {
-  var cx = '005579885767466475821:ixs-rbmulwg';
+  var cx = '005579885767466475821:sjqixw0y5ew';
   var gcse = document.createElement('script');
   gcse.type = 'text/javascript';
   gcse.async = true;
