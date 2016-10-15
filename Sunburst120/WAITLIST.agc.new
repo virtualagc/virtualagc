@@ -384,50 +384,22 @@ NOQRSM          CA              BANKRUPT
 NOQBRSM         DXCH            ARUPT                           
                 RESUME                                          
 
-# Page 1130
-# LONGCALL
-# PROGRAM DESCRIPTION                           DATE -- 17 MARCH 1967
-# PROGRAM WRITTEN BY W.H.VANDEVER               LOG SECTION WAITLIST
-# MOD BY -- R. MELANSON TO ADD DOCUMENTATION    ASSEMBLY SUNDISK REV. 100
+## Page 1073
 
-# FUNCTIONAL DESCRIPTION --
+# LONGCALL
+
 #       LONGCALL IS CALLED WITH THE DELTA TIME ARRIVING IN A,L SCALED AS TIME2,TIME1 WITH THE 2CADR OF THE TASK
 #       IMMEDIATELY FOLLOWING THE TC LONGCALL.  FOR EXAMPLE, IT MIGHT BE DONE AS FOLLOWS WHERE TIMELOC IS THE NAME OF
 #       A DP REGISTER CONTAINING A DELTA TIME AND WHERE TASKTODO IS THE NAME OF THE LOCATION AT WHICH LONGCALL IS TO
 #       START.
-# CALLING SEQUENCE --
-#               EXTEND
-#               DCA     TIMELOC
-#               TC      LONGCALL
-#               2CADR   TASKTODO
-# NORMAL EXIT MODE --
-#       1)      TC      WAITLIST
-#       2)      DTCB    (TC L+3 OF CALLING ROUTINE 1ST PASS THRU LONGCYCL)
-#       3)      DTCB    (TO TASKOVER ON SUBSEQUENT PASSES THRU LONGCYCL)
-# ALARM OR ABORT EXIT MODE --
-#       NONE
-# OUTPUT --
-#       LONGTIME AND LONGTIME+1 = DELTA TIME
-#       LONGEXIT AND LONGEXIT+1 = RETURN 2CADR
-#       LONGCADR AND LONGCADR+1 = TASK 2CADR
-#       A = SINGLE PRECISION TIME FOR WAITLIST
-# ERASABLE INITIALIZATION --
-#       A = MOST SIGNIFICANT PART OF DELTA TIME
-#       L = LEAST SIGNIFICANT PART OF DELTA TIME
-#       Q = ADDRESS OF 2CADR TASK VALUE
-# DEBRIS --
-#       A,Q,L
-#       LONGCADR AND LONGCADR+1
-#       LONGEXIT AND LONGEXIT+1
-#       LONGTIME AND LONGTIME+1
-# *** THE FOLLOWING IS TO BE IN FIXED-FIXED AND UNSWITCHED ERASIBLE **
+
+# *** THE FOLLOWING IS TO BE IN FIXED-FIXED AND UNSWITCHED ERRASIBLE ***
 
                 BLOCK           02                              
                 EBANK=          LST1                            
 LONGCALL        DXCH            LONGTIME                        # OBTAIN THE DELTA TIME
 
                 EXTEND                                          # OBTAIN THE 2CADR
-# Page 1131
                 NDX             Q                               
                 DCA             0                               
                 DXCH            LONGCADR                        
@@ -442,20 +414,10 @@ LGCL2CDR        2CADR           LNGCALL2
 # *** THE FOLLOWING MAY BE IN A SWITCHED BANK, INCLUDING ITS ERASABLE ***
 
                 BANK            01                              
-                COUNT*          $$/WAIT                         
 LNGCALL2        LXCH            LONGEXIT        +1              # SAVE THE CORRECT BB FOR RETURN
                 CA              TWO                             # OBTAIN THE RETURN ADDRESS
                 ADS             Q                               
                 TS              LONGEXIT                        
-
-                CA              LONGTIME                        # CHECK FOR LEGITIMATE DELTA-TIME
-                CCS             A                               
-                TCF             LONGCYCL                        # HI-ORDER OK --> ALL IS OK.
-                TCF             +2                              # HI-ORDER ZERO --> CHECK LO-ORDER.
-                TCF             LONGP00H                        # HI-ORDER NEG. --> NEG. DT
- +2             CA              LONGTIME        +1              # CHECK LO-ORDER FOR ZERO OR NEGATIVE.
-                EXTEND                                          
-                BZMF            LONGP00H                        # BAD DELTA-TIME.  ABORT
 
 # *** WAITLIST TASK LONGCYCL ***
 
@@ -470,6 +432,9 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
                                                                 # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC-
                                                                 # TED BIT14 (1 OVER HALF THE POS. VALUE
                                                                 # REPRESENTABLE IN SINGLE WORD)
+
+## Page 1132                
+
                 NOOP                                            # CAN'T GET HERE *************
                 TCF             +1                              
                 CCS             LONGTIME                        
@@ -478,7 +443,7 @@ DPBIT14         OCT             00000
                 OCT             20000                           
 
                                                                 # LONGCALL
-# Page 1132
+
 LASTTIME        CA              BIT14                           # GET BACK THE CORRECT DELTA T FOR WAITLIST
                 ADS             LONGTIME        +1              
                 TC              WAITLIST                        
