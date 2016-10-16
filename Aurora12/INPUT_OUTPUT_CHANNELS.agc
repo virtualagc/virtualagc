@@ -5,11 +5,12 @@
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.
 # Website:      https://www.ibiblio.org/apollo.
-# Pages:        XXXX-XXXX
+# Pages:        26
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-16 JL   Transcribed.
 
 # This source code has been transcribed or otherwise adapted from
-# digitized images of a hardcopy from the private collection of 
+# digitized images of a hardcopy from the private collection of
 # Don Eyles.  The digitization was performed by archive.org.
 
 # Notations on the hardcopy document read, in part:
@@ -20,8 +21,23 @@
 #       [Note that this is the date the hardcopy was made, not the
 #       date of the program revision or the assembly.]
 
-# The scan images (with suitable reduction in storage size and consequent 
-# reduction in image quality) are available online at 
-#       https://www.ibiblio.org/apollo.  
+# The scan images (with suitable reduction in storage size and consequent
+# reduction in image quality) are available online at
+#       https://www.ibiblio.org/apollo.
 # The original high-quality digital images are available at archive.org:
 #       https://archive.org/details/aurora00dapg
+
+## Page 26
+
+HISCALAR 	EQUALS 	3
+LOSCALAR 	EQUALS 	4
+OUT0 		EQUALS 	10
+DSALMOUT 	EQUALS  11
+CHAN12 		EQUALS 	12
+CHAN13 		EQUALS 	13
+CHAN14 		EQUALS 	14
+MNKEYIN		EQUALS 	15
+NAVKEYIN 	EQUALS 	16
+CHAN33		EQUALS	33
+DNTM1 		EQUALS	34
+DNTM2 		EQUALS 	35
