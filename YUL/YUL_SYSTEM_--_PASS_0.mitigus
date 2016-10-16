@@ -10,6 +10,7 @@
 ##               2016-10-13 JL  Started transcription.
 ##               2016-10-14 JL  Added all page numbers and headers.
 ##               2016-10-15 JL  Transcribed pages 41-62.
+##               2016-10-16 JL  Transcribed pages 63-67.
 
 ## Annotations:
 ##
@@ -860,17 +861,243 @@ P0630              EQUIVALENCES.
 ## Page 63
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  23        PAGE  23
 
+P0666              SPECIAL ROUTINE, DONE AT THE BEGINNING OF A YUL JOB.  PACKDATE AND THE TWO-WORD YUL DATE ARE KEPT IN
+R0668   BANK 7, BEYOND THE SENTENCE-READER AREA.  THE LOG NUMBER IN NUMERIC AND ALPHABETIC FORM IS KEPT THERE ALSO.
+R0671   CALLED FROM INIT PAS 0, FOUR PAGES HENCE.
+
+ 0675              SETLOC,4     0             B4
+
+ 0679   BEGIN JOB  TX           L PAR IDLE    -             Z,R0
+ 0680              TN           PARA IDLE     9             N,R0                SET UP BED FOR SIDE GROUPS TO SLEEP IN.
+ 0682              TS           Z,R0,3        C,+1          MON SGSNA           SNATCH AND START GROUPS B AND C.
+ 0684   L PAR IDLE SPEC,B7                                  706
+ 0685              TS           B34T47 BJ     Z,R1          RETRY GPC           (FOLLOWS SUCCESSFUL SNATCH OF GROUP B.)
+ 0687              TX           SAY DIE       -             C,+2                IF CAN'T GET EVEN ONE SIDE GROUP, DIE.
+ 0689   NO GROUP C S, MON TYPER ND2SG MSG     SPRAMR +32    -                   "YUL SYSTEM NEEDS TWO SIDE GROUPS".
+ 06902             TX           BANK 1 BJ     -             Z,X0                UNDO DAMAGE DONE BY GROUP-SNATCHER.
+ 0691              TX, CHAR3    ACA OTHE B    -             BJ TRY MSG
+ 0692              S, MON TYPER BJ TRY MSG    SPRAMR +16    -                   "ASA TO TRY AGAIN".
+ 0694              S, MON TYPER ACA OTHE B    SPRA +16      C,+3                "ACA OTHERWISE   ".
+ 0696              STOP                                     -              S    ASA OR ARA OR DON A WILL TRY AGAIN.
+ 0698   SAY DIE    S, MON TYPER BJ END YUL    SPRA +16      MONITOR             ACA COMES HERE.
+ 0700              TS           B34T47 BJ     Z,R1          C,-2           C    PREPARE TO TRY AGAIN.
+ 0702   RETRY GPC  TS           Z,R0          C,+1          MON SGSNA
+ 0703              RESERVE      1
+ 0704              TS           BANK 1 BJ     Z,X0          SNACH TAP           (FOLLOWS SUCCESSFUL SNATCH OF GROUP C).
+ 0706              LA           Z,R1          ZERO BJ       NO GROUP C          SEEK HELP AFTER TWO FAILURES IN 1/2 SEC.
+ 0708              NA           Z,R1,1        ONE BJ        C,-1                COUNT DOWN FROM 32766.
+ 0710              TS           -             -             RETRY GPC
+
+ 0711   SNACH TAP  EBA          MON LCARD     ZERO BJ       Z,AU1               FORM ADDRESS OF SAVED MONITOR CARD.
+ 0714              TN           N,AU1         10            6,1
+ 0715              TS           ONES BJ       6,11          PHI SENTR           RE-SENTENCE-READ MONITOR CALL CARD.
+ 0717              TS           H1800B        YUL LOG A     MON REL CD     C    RELEASE MON CARD COMMUNICATION AREA.
+
+ 0719              NA           6,19          ONES BJ       C,+2                BRANCH IF THERE'S A WORD AFTER "YUL".
+ 0721              TS           Z,SC,1        -             PHI SNACH           IF NONE, USE TAPE YULPROGS.
+ 0723              TS           6,19          C,+2          PHI SNACH           OTHERWISE, USE TAPE NAMED.
+ 0725              ALF,2        N10<0001YULPROGS
+ 0726              DEC          GGG GGG GGG GGG
+ 0727              TS           COMMA '62     YUL DATE +1   GET LOG NO     C
+ 0728              SWE, C1T4    N,AU2,4       D,1,L         YUL LOG             PROTECT LOG NUMBER FROM MULTIJOBS.
+ 0730              TS           ONES BJ       N,AU2         MON UNLOK      C    KILL MON LINE LIMIT, UNLOCK YULPROGS.
+ 0732              RF,1         -             -
+ 0733              TS           YUL LOG       PHI ARG BJ    PHI TAPE
+ 0734   LOAD LABL  RF,1         1,0           -             -                   LABEL TO BANK 7 FOR DURATION OF JOB.
+ 0736              TS           Z,SC          Z,AU1         YUL DA LZS          CONVERT LOG TO ALPHA, SUPPRESS ZEROS.
+ 07372  PHI ARG BJ RESERVE      1
+ 07374             TX           Z,SH          -             Z,X4
+ 0738              SSL, ONE     1800 AB SW    24            C,+1                APPEND "A" OR "B" TO LOG NUMBER.
+ 0740              WD           YUL LOG A     1 C7 BJ       YUL LOG A
+ 0741              S, MON TYPER BEGIN YUL     SPRAMR +16    -
+ 0742              S, MON TYPER BLANKS BJ     SPRA +8       -                   TYPE "BEGIN YUL SYSTEM".
+ 0744              TS, C1T6     4,2           YUL LOG A     PHI TAPE
+ 0745              RF,1         -             -             -                   VERIFY THAT LABEL IS READ IN.
+
 ## Page 64
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  24        PAGE  24
+
+P0747   VERIFY THAT THE DATE IS REASONABLE.
+
+ 0748   DO MONTH   SWE, D1      PHI DATE      8,L           PACK DATE           UNITS DIGIT OF MONTH.
+ 0750              NA, CHAR1    PHI DATE      ZERO BJ       OC NOV DEC
+ 0751              LA, CHAR2    HEXB C2       PHI DATE      ILLEG DAT           BRANCH IF NON-DECIMAL MONTH.
+ 0753              NA           PACK DATE     ZERO BJ       PRINT MO            BRANCH IF MONTH NOT ZERO.
+
+ 0755   ILLEG DAT  S, MON TYPER PHI DATE      SPRAM +8      -
+ 0756              S, MON TYPER W ILLEGAL     SPRAMR +8     -                   "MM.DD.YY ILLEGAL".
+ 0758              S, MON TYPER FIX DATE      SPRA +16      PHI ABORT           "FIX DATE & RERUN".
+
+ 0760   OC NOV DEC NA, CHAR1    PHI DATE      1 C1          ILLEG DAT           BRANCH IF MONTH = 20 OR MORE
+ 0762              LA, CHAR2    3 C2          PHI DATE      ILLEG DAT           BRANCH IF MONTH = 13 OR MORE
+ 0764              WA           PACK DATE     B D1          PACK DATE           PUT PACKED MONTH IN THE RANGE 10-12.
+
+ 0766   PRINT MO   SWE, D12     PACK DATE     D,11          6,1                 GUARANTEE NO ASTERISK INITIALLY IN 6,1.
+ 0768              WA           6,1           L MONTHS      Z,AU1
+ 0769              TX           N,AU1         -             YUL DATE            STORE ALPHABETIC MONTH NAME.
+
+ 0771   PRINT DAY  SWS, C7T8    PHI DATE      A,3           YUL DATE            TENTATIVELY, 2-DIGIT DAY TO ALPHA DATE.
+ 0773              NA, CHAR7    YUL DATE      ZERO BJ       DO DAY              BRANCH IF DAY = 10 OR MORE.
+ 0775              SWS, C7T8    YUL DATE      A,1,L         YUL DATE            SHIFT UP 1-DIGIT DAY.
+ 0777              LA, CHAR7    YUL DATE      ZERO BJ       ILLEG DAT           BRANCH IF DAY = 0.
+ 0779              TX, CHAR8    COMMA C8      -             YUL DATE
+
+ 0780   DO DAY     NA, CHAR4    PHI DATE      ALF DAY 30    DAY 1T29            BRANCH IF DAY LESS THAN 30.
+ 0782              LA, CHAR5    2 C5          PHI DATE      ILLEG DAT           BRANCH IF DAY = 32 OR MORE.
+ 0784              SWS, B5T9    PHI DATE      21,L          PACK DATE
+ 0785              WA           PACK DATE     BIN DAY 30    PACK DATE           PUT DAY 30 OR 31 IN PACKED DATE.
+
+ 0787   TEN DAYS   TS           -             -             DO YEAR             (USED WHEN DAY LESS THAN 10 OR OVER 29).
+ 0789              WA           PACK DATE     BIN DAY 10    PACK DATE
+ 0790              WA           PACK DATE     BIN DAY 20    PACK DATE           FINISH PACKED DAY NUMBER.
+
+ 0792   DAY 1T29   LA, CHAR4    ALF DAY 30    PHI DATE      ILLEG DAT           BRANCH IF DAY = 40 OR MORE.
+ 0794              LA, CHAR5    HEXB C5 BJ    PHI DATE      ILLEG DAT           BRANCH IF NON-DECIMAL DAY NO.
+ 0796              SWS, B5T9    PHI DATE      21,L          PACK DATE
+ 0797              SSL, CHAR8   PHI DATE      A,4           TEN DAYS       C    INSERT DAY NUMBER INTO PACKED DATE.
+
+ 0799   DO YEAR    SWS, CHAR5   PHI DATE      A,2,L         YUL DATE +1         PUT UNITS DIGIT OF YEAR NUMBER INTO ALF.
+ 0801              NA, CHAR7    PHI DATE      6 C7          ILLEG DAT           RECODE THIS ON DEC. 31, 1969.
+ 0803              LA, CHAR8    PHI DATE      ONE BJ        ILLEG DAT           BRANCH IF 60 OR 61.
+ 0805              LA, CHAR8    HEXB C8       PHI DATE      ILLEG DAT           BRANCH IF NON-DECIMAL YEAR NO.
+ 0807              NA, CHAR4    PHI DATE      ZERO BJ       C,+2                BRANCH IF DAY WAS TWO DIGITS.
+ 0809              SWS, C1T7    YUL DATE +1   A,1,L         YUL DATE +1         OTHERWISE SHIFT UP ALPHA YEAR.
+ 0811              WD           PHI DATE      TWO BJ        N,X6                GUARANTEE N,X6 INITIALLY NOT ALL ONES.
+ 0813              SWS, B10T12  N,X6          12            PACK DATE           PUT DIMINISHED YEAR NO. INTO PACK DATE.
+ 0815              TX           PHI DATE      -             1,4                 PUT DATE IN YUL FILE DIRECTORY.
 
 ## Page 65
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  25        PAGE  25
 
+P0817   SET UP SPECS AND BUFFERS FOR 4-LINE/RECORD COPY-WORKTAPE WRITING.
+
+ 0818   SETUP COP  TX           L COPBS BJ    -             Z,AU2
+ 0819              TX           Z,AU2,1       -             Z,X4
+ 0820              MT           ZERO BJ       33            N,AU2,1             CLEAR 4 X 16 + 2 WORDS IN FIRST BUFFER.
+ 0822              TS           Z,X4          4,68          C,-1           C    SPEC TO START OF BUF FOLLOWS BUF.
+ 0824              RT           4,1           4,67          4,69                PRE-PLANT EOR FOR END BUFFER DETECTION.
+ 0826              TX           Z,AU1         -             N,X4                EACH BUF IS PRECEDED BY SPEC TO OTHER.
+ 0828              TS           Z,AU1         N,AU2         MON SN COR     C
+ 0829              DEC          0000 0000 0018                                  SNATCH UPPER MEMORY BANKS 0-3.
+ 0830              TS           L SET PG HD   Z,SC          C,+2           C
+ 0831              S, MON TYPER ND19B MSG     SPRAMR +32    NO CORE             "YUL SYSTEM NEEDS 19 BANKS: 1-3'".
+ 08312             TX           BANK 1 BJ     -             Z,X0           C    UNDO DAMAGE DONE BY CORE SNATCH.
+ 0832              NA, CHAR8    1,0           ZERO BJ       C,+1           S    EXIT TO SET PG HED IF GOT CURRENT TAPE.
+ 0833              S, PHI LOAD  B SERVICE     0             DO BKUP BJ
+
+
+
+R0834   ALPHABETIC CONSTANTS FOR THE BEGIN-JOB SUBSEGMENT.
+
+ 08341  BLANKS BJ  ALF
+ 08341  H18003     ALF                B
+ 08343  COMMA '62  ALF          , 1962
+ 08344  W ILLEGAL  ALF           ILLEGAL
+ 08345  LUMPED BJ  ALF          13 32 6,                                        MULTIPLE MASKED CONSTANT.
+
+ 08346  BEGIN YUL  ALF,2        BEGIN YUL SYSTEM
+ 08347  FIX DATE   ALF,2        FIX DATE & RERUN
+ 08348  BJ TRY MSG ALF,2        ASA TO TRY AGAIN
+ 08349  BJ END YUL ALF,2        END YUL SYSTEM
+
+ 0835   ND19B MSG  ALF,4        YUL SYSTEM NEEDS 19 BANKS: 1-3'
+ 083505 ND25G MSG  ALF,4        YUL SYSTEM NEED TWO SIDE GROUPS
+ 08351  MONTHS     ALF,4          JAN     FEB    MAR     APR
+ 08352             ALF,4          MAY     JUN    JUL     AUG
+ 08353             ALF,4          SEP     OCT    NOV     DEC
+
 ## Page 66
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  26        PAGE  26
 
+P08354  NUMERIC AND ADDRESS CONSTANTS, ASSIGNMENTS AND EQUIVALENCES FOR THE BEGIN-JOB SUBSEGMENT.
+
+
+
+ 08355  ZERO BJ    OCT          0
+ 08356  ONE BJ     OCT          -1
+ 08357  TWO BJ     OCT          -2
+ 08358  ONES BJ    OCT          GGGG GGGG GGGG
+
+ 08359  B34T47 BJ  OCT          -77776
+ 0836   B D1       DEC          B
+ 08361  1 C7 BJ    OCT          -100
+
+ 08362  HEXB C2    OCT          0012
+ 08363  HEXB C5 BJ OCT          -1200 0000
+ 08364  HEXB C8    OCT          -12
+
+ 08365  BIN DAY 10 OCT          012
+ 08366  BIN DAY 20 OCT          024
+ 08367  BIN DAY 30 OCT          036
+
+
+
+ 083675 BANK 1 BJ  SPEC                                     2048
+ 08368  L MONTHS   SPEC                                     MONTHS -1
+ 08369  LSET PG HD SPEC                                     SET PG HED
+
+
+
+ 083695 L COPBS BJ ASSIGN       0,39
+ 0837   NO CORE    ASSIGN       0,72
+ 08371  DO BKUP BJ ASSIGN       0,86
+ 08372  YUL DA LZS ASSIGN       0,119
+ 08373  B SERVICE  ASSIGN       0,138
+ 08374  ACA OTHE B ASSIGN       0,141
+
+
+
+ 08375  1 C1       EQUALS       LUMPED BJ
+ 08376  3 C2       EQUALS       LUMPED BJ
+ 08377  ALF DAY 30 EQUALS       LUMPED BJ
+ 08378  2 C5       EQUALS       LUMPED BJ
+ 08379  6 C7       EQUALS       LUMPED BJ
+ 0838   COMMA C8   EQUALS       LUMPED BJ
+
 ## Page 67
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  27        PAGE  27
+
+P08384  ROUTINES IN B7,0706 - B7,0714 FOR SIDE GROUPS TO SLEEP IN.
+
+ 083845 PARA IDLE  TX           Z,SC          0             Z,R0                INITIALLY, ESTABLISH SLEEP ADDRESS.
+ 08385  GPB START  TS           -             -             MON SLEEP      C    (REPLACED WITH A SPEC TO WAKE UP).
+ 083855            LA           N,SC,3        N,R0          N,R0                GO BACK TO SLEEP IF FALSE ALARM.
+
+ 08386             TX           Z,SC          -             Z,R0
+ 083865 GPC START  TS           -             -             MON SLEEP      C
+ 08387             LA           N,SC          N,R0          N,R0                SAME AS ABOVE FOR GROUP C.
+
+ 083875            TX           N,R0          -             Z,CSC               EITHER GROUP COLLECTS WAKE ADDR. HERE.
+ 08388             TS           N,SC          N,R0          N,CSC               MAKE THE BED AND GO TO WORK.
+ 083885            TS           -             -             MON SLEEP      C
+
+
+
+ 083895            SETLOC,1
+
+R0839   PROCEDURE WHENEVER PASS 0 IS LOADED (NOT NECESSARILY BETWEEN EACH TASK).  ENTERABLE AT INIT PAS 0.
+
+ 08394  SNATCH Q   SPCR                                     GROUP A
+ 08396             SWE, D12     GROUP A       28            GROUP A             KEEP MAIN GROUP NO. IN TRANSFER VECTOR.
+ 0840              SWS, CHAR3   GROUP A       A,3           ACA OTHE       S    ALSO KEEP IT READY FOR USE BY PASS 0.
+ 08404             S, MON TADDR POSIT REW +1                                    SKIP IF YULPROGS NOT ALREADY SNATCHED.
+ 08408  INIT PAS 0 TS           YUL MASKS     Z,MXR         SET PG HED          ENTRY TO LESSER RE-INITIALIZATION.
+
+ 08412             SWE, CAC3    BANK 1        32            Z,X0                SET UP INDEXES FOR BEGIN-JOB SUBSEGMENT.
+ 08416             TS           L SERVICE     Z,SC          SET PG HED     C
+
+ 0842   SET PG HED TS           L DIRECTY     Z,X1          NEX DIREC      C    SET X1 AND X6.
+ 0844              TS           REVISION +2   OK NOUN       SNATCH Q +2    C    RESET UPDATE-REVISION-NUMBER SWITCH.
+ 0846              NA           1,1           W FROZYUL     C,+2
+ 0847              TS           NO REVISE     REVISION      LOG 2 HEAD          FORBID REVISIONS ON A FROZEN TAPE.
+ 0849              LA           1,1           W 2ND FROZ    C,-1
+ 0850   LOG 2 HEAD TX           YUL LOG A     -             PAGE HEAD +1
+ 0851              TN           YUL DATE      2             PAGE HEAD +12       PUT LOG AND DATE IN PAGE HEADING.
+ 0853              TS           YUL LOG       WORKERS +2    MON UNLOK      C    MINOR IDENTIFICATION FOR ASSEMBLY WRKRS.
+ 0855              RF,1         -             -             -                   UNLOCK YULPROGS.
+ 0857              S, PHI LOAD  W SERVICE     0             C,+1                LOAD SERVICE MODULE.
+ 0859   YUL MASKR  TX           YUL MASKS     -             Z,MXR
+ 0860              TS           EOR           SERCH KEY     POSIT YUL           NEGATE SEARCH FLAG, POSITION YULPROGS.
 
 ## Page 68
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  28        PAGE  28
