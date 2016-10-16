@@ -8,6 +8,7 @@
 # Pages:        29-33
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 MAS  Filled out.
+#               2016-10-15 HG   Fix label ISWCALLL -> ISWCALL
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -146,7 +147,7 @@ IBNKCALL        DXCH            RUPTREG3                        # USES RUPTREG3,
                 CAF             0                               
                 INCR            Q                               
 
-ISWCALLL        TS              L                               
+ISWCALL         TS              L                               
                 LXCH            FBANK                           
                 MASK            LOW10                           
                 XCH             Q                               

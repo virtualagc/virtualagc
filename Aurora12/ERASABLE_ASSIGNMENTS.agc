@@ -10,6 +10,7 @@
 #               2016-10-04 HG   Insert missed statements
 #               2016-10-12 HG   add missing  THRUST  EQUALS  55
 #                               fix label   SQRANG -> SQRARG
+#               2016-10-15 HG   fix label   LASTXMCD -> LASTXCMD     
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -342,7 +343,7 @@ LGYRO           ERASE
 FORVEL          ERASE
 LATVEL          ERASE
 LASTYCMD        ERASE
-LASTXMCD        ERASE
+LASTXCMD        ERASE
 
 ALTSAVE         ERASE           +1
 LMPCMD          ERASE
