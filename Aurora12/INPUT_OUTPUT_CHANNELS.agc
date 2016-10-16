@@ -29,15 +29,15 @@
 
 ## Page 26
 
-HISCALAR 	EQUALS 	3
-LOSCALAR 	EQUALS 	4
-OUT0 		EQUALS 	10
-DSALMOUT 	EQUALS  11
-CHAN12 		EQUALS 	12
-CHAN13 		EQUALS 	13
-CHAN14 		EQUALS 	14
-MNKEYIN		EQUALS 	15
-NAVKEYIN 	EQUALS 	16
-CHAN33		EQUALS	33
-DNTM1 		EQUALS	34
-DNTM2 		EQUALS 	35
+HISCALAR        EQUALS          3                               
+LOSCALAR        EQUALS          4                               
+OUT0            EQUALS          10                              
+DSALMOUT        EQUALS          11                              
+CHAN12          EQUALS          12                              
+CHAN13          EQUALS          13                              
+CHAN14          EQUALS          14                              
+MNKEYIN         EQUALS          15                              
+NAVKEYIN        EQUALS          16                              
+CHAN33          EQUALS          33                              
+DNTM1           EQUALS          34                              
+DNTM2           EQUALS          35                              
