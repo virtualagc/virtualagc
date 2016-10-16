@@ -233,7 +233,7 @@ COASTASC        CAF             0.3125WL
 ## Next line has red markup pointing to: WFORQR <--- WFORP
                 TS              WFORQR
                 EXTEND
-                DCA     (       1-K)S
+                DCA             (1-K)S
                 DXCH            (1-K)QR
 ## Next 4 lines circled in red also some faint markup pointing to ??
 ## as if something is wrong or not clear what the code is doing
