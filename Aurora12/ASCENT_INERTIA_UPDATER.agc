@@ -9,6 +9,7 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 MC   Filled out.
 #               2016-10-05 HG   Insert missed TC ASCENGON
+#               2016-10-16 HG   Fix operand 1/3JTS -> 1/2JTS
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -82,7 +83,7 @@ JACCESTP        CAE             IXX
 
 # Page 640
                 DOUBLE                                          
-                TS              1/3JTSP                         
+                TS              1/2JTSP                         
 
                 CAF             JETTORK                         
                 ZL                                              

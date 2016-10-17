@@ -8,6 +8,15 @@
 # Pages:        160-188
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-12 HG   fix operand  DSPRUPTSW -> DSRUPTSW
+#               2016-10-15 HG   fix operand  DSPRUPTEM -> DSRUPTEM
+#                                            SEDTISSW  -> SETISSW 
+#                                            GLOCKKOK  -> GLOCKOK 
+#                                            NCTFL33   -> NXTFL33  
+#                                            BITS56&15 -> BITS6&15 
+#                                            COSMSG    -> COSMG   
+#                               fix label and operand
+#                                            NXTIBIT   -> NTXIBT
+#                                            GLOCKON   -> GLOCKOK
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -117,7 +126,7 @@ NODSPOUT        CAF             120MRUPT                # SET UP FOR RUPT IN 120
 
                 TS              NOUT
                 CS              ZERO
-                TS              DSPRUPTEM               # SET TO -0 FOR 1ST PASS THRU DSPTAB
+                TS              DSRUPTEM                # SET TO -0 FOR 1ST PASS THRU DSPTAB
                 XCH             DSPCNT
                 AD              NEG0                    # TO PREVENT +0
                 TS              DSPCNT
@@ -131,7 +140,7 @@ TABLNTH         OCT             12                      # DEC 10   LENGTH OF DSP
 120MRUPT        DEC             16372                   # (DSPCNT = 0). +0 INTO NOUT.
                 TS              NOUT
                 TCF             NODSPOUT
-                TS              DSPRUPTEM               # IF DSRUPTEM=-0,1ST PASS THRU DSPTAB
+                TS              DSRUPTEM                # IF DSRUPTEM=-0,1ST PASS THRU DSPTAB
                 CAF             TABLNTH                 # (DSPCNT=0). +0 INTO DSRUPTEM. PASS AGAIN
                 TC              DSPSCAN         -1
 
@@ -399,7 +408,7 @@ ISSUP           CS              OCT54                   # REMOVE CAGING, IMU FAI
                 MASK            IMODES30                # ICDUFAIL INHIBIT FLAGS.
                 TS              IMODES30
 
-                TC              SEDTISSW                # ISS WARNING LIGHT MIGHT HAVE BEEN INIHIBITED.
+                TC              SETISSW                 # ISS WARNING LIGHT MIGHT HAVE BEEN INIHIBITED.
 
                 CS              BIT15                   # REMMVE IMU DELAY COMPLETE DISCRETE.
                 EXTEND
@@ -454,13 +463,13 @@ C33TEST         CA              IMODES33                # SEE IF RELEVENT CHAN33
                 CAF             ZERO
                 XCH             RUPTREG1
                 DOUBLE
-                TCF             NXTIBIT         +1      # SCAN FOR BIT CHANGES.
+                TCF             NXTIBT          +1      # SCAN FOR BIT CHANGES.
 
  -1             AD              ONE
-NXTIBIT         INCR            RUPTREG1
+NXTIBT          INCR            RUPTREG1
  +1             DOUBLE
                 TS              A                       # (CODING IDENTICAL TO CHANNEL 30).
-                TCF             NXTIBIT
+                TCF             NXTIBT
 
                 XCH             RUPTREG2
                 INDEX           RUPTREG1                # GET NEW VALUE OF BIT WHICH CHANGED.
@@ -500,7 +509,7 @@ SETGLOCK        AD              DSPTAB          +11D    # SEE IF PRESENT STATE O
                 CAF             BIT6
                 MASK            IMODES30
                 CCS             A
-                TCF             GLOCKON
+                TCF             GLOCKOK
 
 GLINVERT        CS              DSPTAB          +11D    # INVERT GIMBAL LOCK LAMP.
                 MASK            BIT6
@@ -508,7 +517,7 @@ GLINVERT        CS              DSPTAB          +11D    # INVERT GIMBAL LOCK LAM
                 XCH             DSPTAB          +11D
                 MASK            OCT37737
                 ADS             DSPTAB          +11D
-                TCF             GLOCKKOK
+                TCF             GLOCKOK
 
 GLAMPTST        TC              LAMPTEST                # TURN OFF UNLESS LAMP TEST IN PROGRESS.
                 TCF             GLOCKOK
@@ -642,7 +651,7 @@ UPTMFAST        CCS             A                       # SAME AS DNLINK TOO FAS
 
                 TC              ALARM
                 OCT             1106
-                TCF             NCTFL33
+                TCF             NXTFL33
 ## Page 176
 # CLOSED SUBROUTINES FOR IMU MONITORING
 SETISSW         CAF             OCT15                   # SET ISS WARNING USING THE FAIL BITS IN
@@ -672,7 +681,7 @@ ISSWON          CAF             BIT1
                 WOR             11
                 TC              Q
 
-CAGESUB         CS              BITS56&15               # SET OUTBITS AND INTERNAL FLAGS FOR
+CAGESUB         CS              BITS6&15                # SET OUTBITS AND INTERNAL FLAGS FOR
                 EXTEND                                  # SYSTEM TURN-ON OR CAGE. DISABLE THE
                 WAND            12                      # ERROR COUNTER AND REMOVE IMU DELAY COMP.
                 CAF             BITS4&5                 # SEND ZERO AND COARSE.
@@ -724,7 +733,7 @@ BITS6&15        OCT             40040
 90SECS          DEC             9000
 120MS           DEC             12
 
-GLOCKON         EQUALS          RCSMONIT
+GLOCKOK         EQUALS          RCSMONIT
 NOIMUMON        EQUALS          GLOCKOK
 ## Page 178
 # RR INBIT MONITOR.
@@ -820,7 +829,7 @@ MONREPOS        CAF             BIT11                   # SET FLAG TO SHOW REPOS
 
 OCT32002        OCT             32002
 OCT20002        OCT             20002
-# Page 181
+## Page 181
 # PROGRAM NAME: GPMATRIX          MOD. NO. 0  DATE: OCTOBER 20, 1966
 
 # AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
@@ -871,7 +880,7 @@ GPMATRIX        CAE             CDUZ                    # SINGLE ENTRY POINT
                 EXTEND
                 MP              COSMG                   # -SIN(OG)COS(MG)
                 TS              M31                     # SCALED AT 1
-# Page 182
+## Page 182
                 CAE             CDUX
                 TC              SPCOS                   # COS(CDUX) = COS(OG)
                 TS              M32                     # SCALED AT 1 (ALSO IS MR23)
@@ -880,7 +889,7 @@ GPMATRIX        CAE             CDUZ                    # SINGLE ENTRY POINT
                 MP              COSMG                   # COS(OG)COS(MG)
                 TS              M21                     # SCALED AT 1
 
-                CAE             COSMSG                  # TEST FOR GIMBAL LOCK (OVERFLOW) REGION
+                CAE             COSMG                   # TEST FOR GIMBAL LOCK (OVERFLOW) REGION
                 AD              NEG1/2                  # BY TESTING MIDDLE GIMBAL ANGLE FOR
                 EXTEND                                  # VALUES EQUAL TO OR GREATER THAN 60 DEGS.
                 BZMF            GPGLOCK

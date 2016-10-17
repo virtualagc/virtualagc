@@ -12,6 +12,7 @@
 #               2016-10-04 HG   add missed instruction TS TOFJTCHG
 #                               comment code look alike
 #                               JSATCHG -> JTSATCHG
+#               2016-10-15 HG   Fix operand BITS13-14 -> BIT13-14
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -114,7 +115,7 @@ PAXIS           CAF             MS30P                           # RESET TIMER IM
                 EXTEND                                          # IF BOTH BITS 13 AND 14 OF CHANNEL 31 ARE
                 READ            31                              # EQUAL TO 1, THEN THE SCS MODE SWITCH IS
                 COM                                             # IN THE OFF POSITION.  ACTUALLY, THE TEST
-                MASK            BITS13-14                       # IS MADE ON BOTH THE ATTITUDE HOLD AND
+                MASK            BIT13-14                        # IS MADE ON BOTH THE ATTITUDE HOLD AND
                 EXTEND                                          # AUTOMATIC MODE BITS.
                 BZF             GOIDLE
 

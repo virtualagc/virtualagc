@@ -8,6 +8,8 @@
 # Pages:        151-159
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-04 HG   Added missed IDLEADR
+#               2016-10-16 HG   Fix operand T4L``INIT -> T4LINIT
+#                                           ENDRSTART -> ENDRSTRT
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -200,7 +202,7 @@ DORSTART        CAF             IFAILINH                # LEAVE IMUFAILURE INHIB
                 AD              IM30INIR
                 TS              IMODES30
 ## Page 155
-                TCF             ENDRSTART
+                TCF             ENDRSTRT
 ## Page 156
 # INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.
 
@@ -319,7 +321,7 @@ DSPOFF          TS              MPAC
                 CS              ONE                     # NO RADAR DESIGNATION.
                 TS              SAMPLIM                 # NO RADAR RUPTS EXPECTED.
                 
-                CAF             T4L``INIT
+                CAF             T4LINIT
                 TS              T4LOC
                 
                 CAF             IM33INIT                # NO PIP OR TM FAILS.

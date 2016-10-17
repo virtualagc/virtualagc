@@ -9,7 +9,9 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-22 HG   Start trancription from scans using Luminary099\INTERPRETER.agc as base
 #               2016-10-04 HG   Fix FBBANK -> FBANK
-#               2016-10-12 HG   Fix opernand MAPC +1  -> MPAC +1
+#               2016-10-12 HG   Fix operand MAPC +1  -> MPAC +1
+#               2016-10-15 HG   fix label EIHGT -> EIGHT 
+#                               fix operand BIT14 -> BIT4     
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -1458,7 +1460,7 @@ ELEVEN          DEC             11
 NOUTCON         =               ELEVEN
 TEN             DEC             10
 NINE            DEC             9
-EIHGT           EQUALS          BIT14
+EIGHT           EQUALS          BIT4
 SEVEN           OCT             7
 SIX             EQUALS          REVCNT
 FIVE            OCT             5
