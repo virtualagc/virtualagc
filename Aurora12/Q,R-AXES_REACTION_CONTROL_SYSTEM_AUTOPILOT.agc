@@ -9,6 +9,17 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-30 HG   Started transcribing from scan
 #               2016-10-08 HG   Change TS  Q -> TC  Q (p. 584)
+#               2016-10-15 HG   fix label  MAXJET -> MAXTJET
+#                                          ORGTOA -> URGTOA
+#                                          TQRGTTM1 -> TQRGTTMI 
+#                                          NEGQERROR -> NEGQEROR 
+#                               fix operand NEGSCP -> NEGCSP 
+#                                           UREGNCYQ -> URGENCYQ  
+#                                           .5ACCMNS -> .5ACCMNE 
+#                                           25,32.QR -> 25/32.QR
+#                                           Q-NORTJS -> Q-NORJTS
+#                                           -RATDEB -> -RATEDB
+#                                           CHECKSTIK -> CHEKSTIK
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -199,7 +210,7 @@ IDLEADRQ        2CADR           DAPIDLER
 CHKBIT10        CAF             BIT10                   # BIT10=1 FOR MIN IMP USE OF RHC
                 MASK            DAPBOOLS
                 EXTEND
-                BZF             CHECKSTIK               # IN ATT-HOLD/RATE-COMMAND IF BIT10=0
+                BZF             CHEKSTIK                # IN ATT-HOLD/RATE-COMMAND IF BIT10=0
 
                 CAE             DELAYCTR                # SET TO 2 BY RUPT 10
                 EXTEND
@@ -346,7 +357,7 @@ NOQJETS         CCS             RRATEDIF                # CHECK SIGN OF RATE ERR
                 TCF             R-,CHKDB
                 TCF             XTRANS
 
-NEGQERROR       AD              -RATEDB
+NEGQEROR        AD              -RATEDB
                 EXTEND
                 BZMF            NOQJETS
 
@@ -362,7 +373,7 @@ Q-NORJTS        CS              QRATEDIF
                 BZMF            2JETS+Q
                 TCF             4JETS+Q
 
-R+Q-CHKR        AD              -RATDEB
+R+Q-CHKR        AD              -RATEDB
                 EXTEND
                 BZMF            Q-NORJTS
                 TC              EDOTVGEN
@@ -370,7 +381,7 @@ R+Q-CHKR        AD              -RATDEB
 
 R-Q-CHKR        AD              -RATEDB
                 EXTEND
-                BZMF            Q-NORTJS
+                BZMF            Q-NORJTS
                 TC              EDOTUGEN
                 EXTEND
                 SU              RRATEDIF
@@ -436,7 +447,7 @@ RTJETIME        CCS             RATEDIF                 # SCALED AT PI/4 RADIANS
                 MP              BIT4                    # SCALED AT 2(3) SECONDS
                 CAE             L
                 EXTEND
-                MP              25,32.QR                # TJET NOW PROPERLY SCALED IN A
+                MP              25/32.QR                # TJET NOW PROPERLY SCALED IN A
                 TS              TQR                     # AT 2(4)16/25 SECONDS
 
 ## Page 570
@@ -504,7 +515,7 @@ TORQUEV         CS              TQR                     # CALCULATED Q,R JET TIM
                 CA              JTSATCHG
                 TC              WRITEQR
                 TCF             RESUME
-TQRGTTM1        CA              TQR
+TQRGTTMI        CA              TQR
                 TS              TOFJTCHG
                 AD              -1.5CSP
                 EXTEND
@@ -1008,8 +1019,8 @@ NEGAPOSB        CAE             A+B
 PLUSV           CAE             .5ACCMNV
 
 ## Page 581
-                TS              .5ACCMNS
-                CS              UREGNCYQ                # 2 JET OPT/MAND TEST" +V AXIS
+                TS              .5ACCMNE
+                CS              URGENCYQ                # 2 JET OPT/MAND TEST" +V AXIS
                 AD              URGENCYR
                 CCS             A
                 AD              NEGURGVM
@@ -1291,7 +1302,7 @@ URGMULT         EXTEND
                 TCF             URGSTORE
                 CS              POSMAX
                 TCF             URGSTORE
-ORGTOA          CA              L
+URGTOA          CA              L
 URGSTORE        TC              Q                       # *** RETURN ***
 
 ## Page 587
@@ -1376,12 +1387,12 @@ TJETLAW         CS              EDOT                    # TEST EDOT SIGN
                 EXTEND
                 MP              1/NJETAC                # SCALED AT 2(8)/PI SEC(2)/RAD (ACC) (-1)
                 TS              TERMA                   # SCALED AT 2(4) SEC (CNTRL SMPL PERIOD)
-                AD              NEGSCP                  # EDOT/NJETACC - CSP SCALED AT 16 SECONDS
+                AD              NEGCSP                  # EDOT/NJETACC - CSP SCALED AT 16 SECONDS
 
                 EXTEND
                 BZMF            +3
 
-MAXJET          CAF             BIT14                   # (1/2) IS LIKE POSMAX AT THIS SCALING
+MAXTJET         CAF             BIT14                   # (1/2) IS LIKE POSMAX AT THIS SCALING
                 TCF             NORMRETN                # (OVERFLOW IS THUS PREVENTED)
 
                 CS              HDAP                    # -DBMINIMP + E + EDOT(2)/NJETACC - DB
@@ -1468,7 +1479,7 @@ MAINBRCH        TS              HDAP                    # -HDAP(OLD) + 2E + DBMI
                 MP              1/NJETAC
                 TS              TERMB                   # -(HDAP/DENOM)(1/NJETACC)(2) AT 2(8) SECS
 
-                CAF             NEGSCP                  # SCALED AT 2(4) SECONDS
+                CAF             NEGCSP                  # SCALED AT 2(4) SECONDS
                 AD              TERMA
                 EXTEND
                 SQUARE                                  # SCALED AT 2(8) SECONDS

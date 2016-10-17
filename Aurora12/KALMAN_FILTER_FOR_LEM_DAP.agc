@@ -10,6 +10,11 @@
 #		2016-09-26 OH	Initial Transcription
 #               2016-10-04 HG   Add missed statements on page 607, added missing ## coments for page numbers
 #                               M520F->MS20F, READ +4 -> READ 4
+#               2016-10-15 HG   Fix operand   D2CDU2FL -> D2CDUZFL  
+#                                             FLTAXIS  -> FLTYAXIS      
+#                                             MS2OF    -> MS20F  
+#                               fix label     FILTSTART -> FILSTART
+# 
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -60,7 +65,7 @@ FIRSTADR        GENADR  FILFIRST
 
 MOSTPASS        GENADR  DTCALC          # WORD IN FILTPASS FOR THESE PASSES
 
-FILTER          CAF     MS2OF           # RESET TIMER IMMEDIATELY: DT = 20 MS
+FILTER          CAF     MS20F           # RESET TIMER IMMEDIATELY: DT = 20 MS
                 TS      TIME5
 
                 LXCH    BANKRUPT        # INTERRUPT LEAD IN (CONTINUED)
@@ -79,7 +84,7 @@ FILTER          CAF     MS2OF           # RESET TIMER IMMEDIATELY: DT = 20 MS
 
 # BEGIN THE KALMAN FILTER BY READING CDU ANGLES AND TIME.
 
-FILTSTART       TC      T6JOBCHK        # CHECK T6 CLOCK FOR P-AXIS ACTIVITY
+FILSTART        TC      T6JOBCHK        # CHECK T6 CLOCK FOR P-AXIS ACTIVITY
 
 ## Page 0605
                 EXTEND
@@ -137,7 +142,7 @@ MOVEWGTS        CS      THREE           # SET UP POINTER FOR THIS PASS
 FLTZAXIS        CAF     TWO             # SET UP INDEXER FOR D.P. PICKUP AND TO
                 TS      QRCNTR          # INDICATE Z-AXIS FILTER PASS
 
-                TCF     FLTAXIS
+                TCF     FLTYAXIS
 
 GOYFILTR        CAF     ZERO            # SET INDEXER FOR Y-AXIS
                 TS      QRCNTR
@@ -346,7 +351,7 @@ FILFIRST        LXCH    DAPTIME         # INITIALIZE TIME
                 TS      D2CDUYFL
                 TS      D2CDUYFL +1
                 TS      D2CDUZFL
-                TS      D2CDU2FL +1
+                TS      D2CDUZFL +1
 
 ## Page 0611
 
