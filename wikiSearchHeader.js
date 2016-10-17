@@ -1,13 +1,3 @@
-/* Google search bar */
-(function() {
-  var cx = '005579885767466475821:sjqixw0y5ew';
-  var gcse = document.createElement('script');
-  gcse.type = 'text/javascript';
-  gcse.async = true;
-  gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
-  var s = document.getElementsByTagName('script')[0];
-  s.parentNode.insertBefore(gcse, s);
-})();
 /* Template for the page's header.  You just have to substitute
    for @TITLE@ and @SUBTITLE@ and then print the result at the
    top of the <body>. */
@@ -128,8 +118,6 @@ headerTemplate = '<table nosave="" width="100%" border="1" cellpadding="10">'
   + '</td>' 
   + '</tr>' 
   + '<tr>' 
-  + '<td colspan="2" rowspan="1"><gcse:search></gcse:search><br>' 
-  + '</td>' 
   + '</tr>' 
   + '</tbody>' 
   + '</table>';
