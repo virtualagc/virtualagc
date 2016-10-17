@@ -968,7 +968,7 @@ bool yaDskyApp::OnInit()
 	  
   DEBUG (-1);
 
-  Portnum = 19797;
+  Portnum = 19697;
   for (i = 1; i < argc; i++)
     {
       wxString Arg = argv[i];
