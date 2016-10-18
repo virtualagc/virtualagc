@@ -1,5 +1,5 @@
 ---
-# We are currently in the process of transcribing Sunburst 120 (the Apollo 5 flight software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/rburkey2005/virtualagc/wiki/Sunburst-120-Transcription)**
+# We are currently in the process of transcribing Sunburst 120 (the Apollo 5 flight software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Sunburst-120-Transcription)**
 ---
 
 Virtual Apollo Guidance Computer
@@ -12,8 +12,8 @@ Virtual Apollo Guidance Computer
 |--------------------------|
 | [![travis-image][]][travis-site] |
 
-[travis-image]: https://travis-ci.org/rburkey2005/virtualagc.svg?branch=master
-[travis-site]: https://travis-ci.org/rburkey2005/virtualagc/branches
+[travis-image]: https://travis-ci.org/virtualagc/virtualagc.svg?branch=master
+[travis-site]: https://travis-ci.org/virtualagc/virtualagc/branches
 
 The Apollo spacecraft used for lunar missions in the late 1960's and early 1970's was really two different spacecraft, the Command Module (CM) and the Lunar Module (LM).  The CM was used to get the three astronauts to the moon, and back again.  The LM was used to land two of the astronauts on the moon while the third astronaut remained in the CM, in orbit around the moon. 
 
