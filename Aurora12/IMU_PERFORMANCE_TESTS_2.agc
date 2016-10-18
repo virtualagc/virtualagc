@@ -14,6 +14,13 @@
 #                                            YSM =4 -> YSM +4
 #                                   instruction CA  DRIFTT -> TS DRIFTT
 #                                   constant 2DEC 32844 B-28  -> 2DEC 342844 B-28
+#               2016-10-16 HG   fix label NBOSPL -> NBPOSPL
+#                                         JUMLOAD -> JUMPLOAD
+#                                         WAILP3 -> WAITLP3
+#                               fix operand CHECKCG -> CHECKG
+#                                           WAITPL2 -> WAITLP2 
+#                                           WAITLP -> WAITLP1
+#               2016-10-18 HG  fix operand REULTCT -> RESULTCT
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -105,7 +112,7 @@ GUESS           TC              INTPRET                 # CALCULATE -COS LATITUD
                                 GEORGEB
                 STORE           TRANSM1         +12D
                 EXIT
-JUMLOAD         TC              LOADGTSM
+JUMPLOAD        TC              LOADGTSM
                 TC              BANKCALL
                 CADR            ESTIMS
 TORQUE          TC              PHASCHNG                # FILTER TORQUES PLTFM AND SETS UP ERATE
@@ -294,7 +301,7 @@ LOADIC          CA              ONE
 OPCHK1          CA              TWO
 OPCHK2          TS              PIPINDEX
                 INHINT
-                TC              CHECKCG
+                TC              CHECKG
                 RELINT
                 CA              ZERO
                 INDEX           PIPINDEX
@@ -449,7 +456,7 @@ ENABLE          CAF             BIT6
                 CA              ONE
                 TC              WAITLOOP
                 CCS             COUNTPL
-                TC              WAITPL2
+                TC              WAITLP2
 DIRECTN         TC              BANKCALL                # TORQUING ROUTINE IN IMU PERFORMANCE
                 CADR            SILVER                  #  BANK 3
                 CCS             SOUTHDR                 # A ONE FIRST TIME THROUGH, THEN ZERO
@@ -673,7 +680,7 @@ DATALD          CA              STOREPL
                 INDEX           RESULTCT
                 TS              DATAPL
                 CA              MPAC
-                INDEX           REULTCT
+                INDEX           RESULTCT
                 TS              DATAPL          +1
                 CA              MPAC            +1
                 INDEX           RESULTCT
@@ -767,7 +774,7 @@ WAITLP1         CCS             COUNTPL
                 TC              +4
                 TC              QPLAC
                 TC              +2
-                TC              WAITLP          -1
+                TC              WAITLP1         -1
                 INHINT
                 CAE             LENGTHOT
                 TC              WAITLIST
@@ -781,7 +788,7 @@ WAITLP2         TS              COUNTPL                 # ENTER HERE AFTER DOING
                 CAF             WTLPCADR
                 TC              JOBSLEEP
 WTLPCADR        CADR            WAITLP1
-WAILP3          CAF             WTLPCADR
+WAITLP3         CAF             WTLPCADR
                 TC              JOBWAKE
                 TC              TASKOVER
 
@@ -863,7 +870,7 @@ KODU            EXIT
                 TCF             RADCK
 
 ## Page 493
-NBOSPL          EXTEND                                  # SETS UP AZIMUTH AND VERTICAL VECTORS FOR
+NBPOSPL         EXTEND                                  # SETS UP AZIMUTH AND VERTICAL VECTORS FOR
                 QXCH            QPLACE                  # AXISGEN,RESULTS TO BE USED IN CALCGA TO
                 TC              INTPRET
                 AXC,1           XSU,1                   # AZIMUTH IN NB COORDS

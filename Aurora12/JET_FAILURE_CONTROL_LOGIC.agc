@@ -12,6 +12,7 @@
 #               2016-10-15 HG   fix operand PLOTAB2 -> POLTAB2
 #                                           ASNTPOOL-> ASCNTPOL
 #                               fix label   POLFIND -> POLFND  
+#               2016-10-16 HG   fix operand BIT17 -> bit7
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -71,7 +72,7 @@ POSXPOLS        INDEX           POLRELOC
                 INDEX           POLRELOC                # USE POLRELOC POINTER TO FIND AND
                 CA              POLTAB1                 # EXTRACT THE NUMBER OF TESTABLE
                 EXTEND                                  # POLICIES AND SAVE IN LOOPCTR
-                MP              BIT17
+                MP              BIT7
                 MASK            SEVEN
                 TS              LOOPCTR
                 TCF             +4

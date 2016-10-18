@@ -8,6 +8,7 @@
 # Pages:        0642-0643
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-09 OH   Transcribed.
+#               2016-10-16 HG   Fix operand ENDT45 -> ENDT4S
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -69,7 +70,7 @@
                 TC
                 TC
                 
-                SETLOC  ENDT45
+                SETLOC  ENDT4S
                 TC
                 TC
                 

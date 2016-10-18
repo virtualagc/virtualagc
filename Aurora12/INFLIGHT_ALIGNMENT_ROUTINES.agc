@@ -8,6 +8,8 @@
 # Pages:        404-424
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-15 MC   Completed.
+#               2016-10-16 HG   Fix label AXISROT -> AXISROT1 (Duplicate label) 
+#                               Fix operand RADMODE -> RADMODES
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -263,7 +265,7 @@ ACCUROT         COS
                 32D                                             
                 RVQ                                             
 
-AXISROT         DAD             STADR                           #   MPAC + PD2      .
+AXISROT1        DAD             STADR                           #   MPAC + PD2      .
                 STODL*          32D             +4,2            # S3    S1    S2    .
 ## Page 410      
                 DMP*            SL1                             #      MPAC         .
@@ -742,7 +744,7 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
                 STORE           MODEA                           
                 EXIT                                            
 
-                CS              RADMODE                         # SWAP MODEA AND MODEB IF RR IN MODE2.
+                CS              RADMODES                        # SWAP MODEA AND MODEB IF RR IN MODE2.
                 MASK            BIT12                           
                 CCS             A                               
                 TCF             +4                              

@@ -12,6 +12,7 @@
 #               2016-10-11 HG   Fix PIPZ -> PIPAZ
 #                                   DSTEMP1 -> DSPTEM1
 #                                   DSTEM1  -> DSPTEM1
+#               2016-10-18 HG   Fix operand TAZEL -> TAZEL1
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -345,7 +346,7 @@ TAR1            SLOAD*          SR2                     # X1=2  X2=12  S2=6 . X1
                                 0
                 COS             PUSH                    # PDOO            COS(EL)             PD00
                 SLOAD*          RTB
-                                TAZEL           +2,1
+                                TAZEL1          +2,1
                                 CDULOGIC
                 STORE           2                       # PD02            AZIMUTH             PD02
                 SIN             DMP

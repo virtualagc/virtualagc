@@ -82,7 +82,7 @@ DODOWNTM        TS      BANKRUPT        # DO APPROPRIATE TM PHASE.
                 INDEX   DNTMGOTO
                 TCF     0
                 
-DNPAHSE1        CA      DNLSTADR        # ONCE PER CYCLE (1 SECOND), AN ID IS SENT
+DNPHASE1        CA      DNLSTADR        # ONCE PER CYCLE (1 SECOND), AN ID IS SENT
                 TS      LDATALST        # AND THE DATA LIST SWITCHED TO THAT
                 MASK    LOW10           # SELECTED BY A MISSION OR TEST PROGRAM.
                 EXTEND

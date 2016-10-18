@@ -11,7 +11,8 @@
 #               2016-10-04 HG   Fix FBBANK -> FBANK
 #               2016-10-12 HG   Fix operand MAPC +1  -> MPAC +1
 #               2016-10-15 HG   fix label EIHGT -> EIGHT 
-#                               fix operand BIT14 -> BIT4     
+#                               fix operand BIT14 -> BIT4   
+#               2016-10-16      fix label NEGO -> NEG0  
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -1469,7 +1470,7 @@ THREE           EQUALS          NO.WDS          +1
 TWO             EQUALS          BIT2
 ONE             EQUALS          BIT1
 ZERO            OCT             0
-NEGO            OCT             77777
+NEG0            OCT             77777
 NEGONE          DEC             -1
 
 NEG1            =               NEGONE
