@@ -12,6 +12,9 @@
 #                               but is actually documentation
 #               2016-10-08 HG   Change THEATA -> ETHETA 
 #                                      KCENTRAL -> K2CNTRAL   (p. 621)
+#               2016-10-15 HG   fix label CHECKDRIV -> CHEKDRIV
+#                                         QRUPFILT  -> QRJPFILT
+#                                         -TGNBD+1  -> -TGBND+1
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -167,7 +170,7 @@ LOOPTEST        TS              QRCNTR
                 CCS             QRCNTR                          # YES.  THIS AXIS IS FINE. ARE BOTH DONE.
                 TCF             LOOPTEST                        # TRY THE Q AXIS NOW.
                 TCF             GTSRAXIS                        # USE TRIM GIMBAL CONTROL.
--TGNBD+1        OCT             77512                           # -2 DEG SCALED AT PI, + 1 BIT.
+-TGBND+1        OCT             77512                           # -2 DEG SCALED AT PI, + 1 BIT.
 -RATBD+1        OCT             77423                           # -.65 DEG/SEC SCALED AT PI/4  + 1 BIT
 # ATTITUDE ERROR IS BEYOND TRIM GIMBAL CONTROL LAW RANGE.  SET UP FOR RCS CONTROL LAW (Q,R-AXIS) AND CALCULATE
 # TIMES TO TURN OFF THE GIMBAL DRIVES.
@@ -199,11 +202,11 @@ RCSCNTRL        CAF             POSTQRFL                        # CHANGE LOCATIO
 
 ## There is a line here saying "*      DELETE". Presumably this indicates a change from the last revision.
 POSTQRFL        GENADR          FILDUMMY
-QRUPFILT        GENADR          DUMMYFIL
+QRJPFILT        GENADR          DUMMYFIL
 TGENTRY         2CADR           STILLRCS
 
 
-CHECKDRIV       CAF             ZERO                            # CALCULATE Q-AXIS GIMBAL DRIVE SHUTDOWN T
+CHEKDRIV        CAF             ZERO                            # CALCULATE Q-AXIS GIMBAL DRIVE SHUTDOWN T
                 TC              TGOFFCAL
                 TC              WAITLIST
                 2CADR           OFFGIMQ

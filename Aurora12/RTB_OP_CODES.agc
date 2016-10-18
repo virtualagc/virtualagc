@@ -8,6 +8,8 @@
 # Pages:        425-430
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-03 JL   Transcribed pages 425-430.
+#               2016-10-16 HG   Fix operand LASTXMCD -> LASTXCMD
+#                                           RUPTREG12 -> RUPTREG2 
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -238,7 +240,7 @@ RRSIM2          CAF     BIT2            # SEE IF RR ECTR ENABLED.
                 AD      ONE
                 TS      ITEMP1
 
-                CA      LASTXMCD        # SHAFT RATE DEPENDS ON TRUNNION.
+                CA      LASTXCMD        # SHAFT RATE DEPENDS ON TRUNNION.
                 EXTEND
                 MP      RRSIMG
                 EXTEND
@@ -246,7 +248,7 @@ RRSIM2          CAF     BIT2            # SEE IF RR ECTR ENABLED.
                 TC      CDUINC
                 CA      RUPTREG1
                 TS      TEM2
-                CA      RUPTREG12
+                CA      RUPTREG2
                 TS      BUF
                 TCF     RRSIM
 

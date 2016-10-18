@@ -7,6 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        368-369
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-16 HG  Fix label ENDCM5 -> ENDCMS
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -99,4 +100,4 @@ NORATE          CAF             ZERO                            # SET RATE COMMA
                 TC              TASKOVER                        
 
 RHCSCALE        DEC             .44488                          # LEAVES INPUTS SCALED AS PI/4 RAD/SEC.
-ENDCM5          EQUALS                                          
+ENDCMS          EQUALS                                          

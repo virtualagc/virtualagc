@@ -8,6 +8,9 @@
 # Pages:        514-534
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-27 MAS  Started.
+#               2016-10-15 HG   Fix operand INPRET -> INTPRET
+#                                           PHASECHNG -> PHASCHNG 
+#                               Fix operator TC -> CA
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -62,7 +65,7 @@ RSTGTS1         INHINT                                          #  COMES HERE PH
                 CCS             GEOCOMPS                        # GEOCOMPS IN NON ZERO IF COMPASS
                 TC              +2
                 TC              SLEEPIE         +1              
-                TC              LENGTHOT                        #   TIMES FIVE IS THE NUM OF SEC ERECTING
+                CA              LENGTHOT                        #   TIMES FIVE IS THE NUM OF SEC ERECTING
                 TS              ERECTIME
 
                 TC              NEWMODEX
@@ -77,7 +80,7 @@ ALLOOP          INHINT                                          #  TASK EVERY .5
                 TS              GTSWTLST                        # STORE TIME TO SET UP NEXT WAITLIST
 ALLOOP3         CA              ALTIM
                 TS              GEOSAVED
-                TC              PHASECHNG
+                TC              PHASCHNG
                 OCT             00201
                 TC              +2
 
@@ -450,7 +453,7 @@ RESTEST3        CA              ZERO                            # RESET CHANGE I
                 TS              PREMTRXC
                 RELINT
 ## Page 523
-                TC              INPRET                          # HERE TO CHANGE ORIENTATION
+                TC              INTPRET                         # HERE TO CHANGE ORIENTATION
                 AXT,1                                           # DESIRED IN XSM,PRESENT IN GEOMTRX
                                 18D
                 SSP

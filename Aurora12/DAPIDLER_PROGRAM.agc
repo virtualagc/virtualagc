@@ -7,6 +7,7 @@
 # Website:      https://www.ibiblio.org/apollo.
 # Pages:        557-561
 # Mod history:  2016-09-20 JL   Created.
+#               2016-10-15 HG   FIx operand IZZMASK -> IZZTASK
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -146,7 +147,7 @@ STARTDAP        CAF             ZERO
                                                         ##   2CADR    WCHANGER
                 CA              ONE
                 TC              WAITLIST
-                2CADR           IZZMASK
+                2CADR           IZZTASK
                 
 # THIS SECTION COMPUTES THE RATE OF CHANGE OF ACCELERATION DUE TO THE
 #   ROTATION OF THE GIMBAL ENGINE. THE EQUATION IMPLEMENTED IN BOTH THE

@@ -8,6 +8,8 @@
 # Pages:        377-403
 # Mod history:  2016-09-20 JL   Created.
 # Mod history:  2016-09-22 MAS  Began.
+#               2016-10-16 HG   Fix operand 5BIT14 -> SBIT14
+#                                           DISPLAY -> SDISPLAY 
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -439,7 +441,7 @@ MP--            EXTEND
 ## Page 385
 # DVCH AND DVQXCHK CHECK ALL PULSES OF DV AND QXCH.
 # ALSO CHECKS TS WITH UNDERFLOW
-DVCHK           CA              5BIT14                          # 20000
+DVCHK           CA              SBIT14                          # 20000
                 TS              SKEEP1                          
                 AD              A                               # OVERFLOW
                 AD              S+1                             
@@ -1005,7 +1007,7 @@ S-MAX           OCTAL           40000                           # FOR DOUBLE PRE
                 TC              MPNMBRS         -1              # ROPECHK IS COMPLETED
 
 SOPTION         CCS             SKEEP6                          # DECIDE ON ROPECHK OR SHOWSUM OPTION
-                TC              DISPLAY                         
+                TC              SDISPLAY                         
 VNCON           OCTAL           00501                           # USED IN SHOWSUM. DISPLAY 3 REGISTERS.
 NOBANKNO        OCTAL           33777                           # * CONSTANT, COMPLEMENT OF LAST BANK +1.
 # CHANGE TO 33777 IF BANK 21 IS LAST BANK USED

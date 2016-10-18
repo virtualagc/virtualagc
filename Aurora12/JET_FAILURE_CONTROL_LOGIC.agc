@@ -9,6 +9,10 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-10-04 HG   transcription from scan
 #               2016-10-05 HG   BIT14 -> BIT4
+#               2016-10-15 HG   fix operand PLOTAB2 -> POLTAB2
+#                                           ASNTPOOL-> ASCNTPOL
+#                               fix label   POLFIND -> POLFND  
+#               2016-10-16 HG   fix operand BIT17 -> bit7
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -53,7 +57,7 @@ POLTYPEP        CA              BIT7                    # CHECK + X TRANSLATION
                 BZF             NORMATT
 
 ASCFLGHT        INDEX           POLRELOC
-                CA              ASNTPOOL
+                CA              ASCNTPOL
                 TCF             +9D
 NORMATT         INDEX           POLRELOC
                 CA              NORMLPOL
@@ -68,7 +72,7 @@ POSXPOLS        INDEX           POLRELOC
                 INDEX           POLRELOC                # USE POLRELOC POINTER TO FIND AND
                 CA              POLTAB1                 # EXTRACT THE NUMBER OF TESTABLE
                 EXTEND                                  # POLICIES AND SAVE IN LOOPCTR
-                MP              BIT17
+                MP              BIT7
                 MASK            SEVEN
                 TS              LOOPCTR
                 TCF             +4
@@ -95,7 +99,7 @@ POLLOOP         TS              LOOPCTR                 # RESTORE COUNTER
                 EXTEND                                  # LAST FEASIBLE CHOICE -
                 DIM             POLRELOC                # CREATE UNTESTED POLICY ADDRESS
 
-POLFIND         INDEX           POLRELOC
+POLFND          INDEX           POLRELOC
                 CA              POLTAB1
                 MASK            LOW8                    # GET CHANNEL 5 BIT CONFIGURATION FOR
                 AD              BIT15                   # SET SIGN FOR Q,R AXIS FLAG
@@ -118,7 +122,7 @@ POLFIND         INDEX           POLRELOC
 NJETCORR        TS              1/NJETAC
 
 TORKSETP        INDEX           POLRELOC
-                CA              PLOTAB2
+                CA              POLTAB2
                 EXTEND
                 MP              BIT4                    # GET CODE FOR NUMBER OF Q-JETS
                 INDEX           A
