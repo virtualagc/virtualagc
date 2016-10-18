@@ -9,6 +9,7 @@
 # Mod history:  2016-09-20 JL   Created.
 #               2016-09-21 OH   Initial Transcription
 #               2016-10-08 HG   fix BANK 20 -> BANK 12  (p.0635)
+#               2016-10-16 HG   add missed label RCSMNTR
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -57,7 +58,7 @@ ENDT4S          EQUALS
 
 
                 BANK    25
-                CA      ZERO            # THERE IS A DIFFERENCE, CLEAR MASKS
+RCSMNTR         CA      ZERO            # THERE IS A DIFFERENCE, CLEAR MASKS
                 TS      CH5MASK
                 TS      CH6MASK
 

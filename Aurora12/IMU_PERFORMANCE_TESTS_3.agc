@@ -8,6 +8,7 @@
 # Pages:        0500-0513
 # Mod history:  2016-09-20 JL   Created.
 # 	        2016-10-03 OH	Initial Transcription from images
+#               2016-10-16 HG   Fix operand OGCECADR -> OGC
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -635,7 +636,7 @@ V33N00X         OCT     03300
 
 ECE2CADR        CADR    ECE2
 FZF2CADR        CADR    FZF2
-OGCECADR        ECADR   OGCECADR
+OGCECADR        ECADR   OGC
 
 DEG/SECC        2DEC    576000 B-28
 
