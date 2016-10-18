@@ -1113,3 +1113,21 @@ SCNBVER         2DEC            .5
 LABNBVER        2DEC            0
                 2DEC            0
                 2DEC            -.5
+
+## Page 435
+1SECX           DEC             100
+GEORGED         2DEC            .47408845
+                2DEC            .23125894
+                2DEC            .14561689
+GEORGEC         2DEC            -.06360691
+                2DEC            -.16806746
+                2DEC            .15582939
+GEORGEB         2DEC            -.06806784
+                2DEC            -.75079894
+                2DEC            -.24878704
+                
+DOCHECKG	TC		MAKECADR
+		TS		QPLACES
+		TC		CHECKG
+		CA		QPLACES
+		TC		BANKJUMP
