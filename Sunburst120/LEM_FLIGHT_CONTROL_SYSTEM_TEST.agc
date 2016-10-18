@@ -7,7 +7,8 @@
 ## Assembler:	yaYUL
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
-## Mod history:	2016-09-30 RSB	Created draft version, starting from AURORA 12,
+## Mod history:	2016-09-30 RSB	Created draft version.
+##		2016-10-18 RSB	Corrected against AURORA 12 version,
 ##				with which it is seemingly identical other than
 ##				a handful of comments and EBANK= placements.
 
