@@ -20,6 +20,7 @@
 #                               fix operand CHECKCG -> CHECKG
 #                                           WAITPL2 -> WAITLP2 
 #                                           WAITLP -> WAITLP1
+#               2016-10-18 HG  fix operand REULTCT -> RESULTCT
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -679,7 +680,7 @@ DATALD          CA              STOREPL
                 INDEX           RESULTCT
                 TS              DATAPL
                 CA              MPAC
-                INDEX           REULTCT
+                INDEX           RESULTCT
                 TS              DATAPL          +1
                 CA              MPAC            +1
                 INDEX           RESULTCT

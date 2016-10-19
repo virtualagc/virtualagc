@@ -1102,20 +1102,310 @@ R0839   PROCEDURE WHENEVER PASS 0 IS LOADED (NOT NECESSARILY BETWEEN EACH TASK).
 ## Page 68
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  28        PAGE  28
 
+P0862              MAIN LOOP OF PASS 0.  READS EACH DIRECTOR CARD AND GOES TO THE APPROPRIATE ROUTINE.  IF THE DIRECTOR
+R0864   CARD DOES NOT HAVE A RECOGNIZED CODE IN ITS FIRST FIELD, THE CARD IS TYPED ON THE CONSOLE AND THE NEXT DIRECTOR
+R0866   CARD IS READ.  IF A MONITOR CARD IS READ, YULPROGS IS LABELED AND THE JOB ENDED.  EACH CONTIGUOUS BATCH OF NON-
+R0868   YUL-DIRECTOR CARDS IS COUNTED AND THE COUNT TYPED ON THE CONSOLE.  (THIS HAPPENS WHEN AN ILL-FORMED ASSEMBLY
+R0870   DIRECTOR CARD IS READ AND REJECTED, FOR INSTAMCE).
+
+ 0871   NEX DIREC  TX           PHI WAA       -             Z,X6                ADDRESS OF SENTENCE READER IN/OUT AREA.
+ 0873              NA           N,X6          ONES          END CHECK           BRANCH IF THERE'S NO INVISIBLE DIRECTOR.
+ 0875              TX           N,X1          -             N,X6                ERASE INVISIBLE DIRECTOR FLAG.
+ 0877              TS           NO TYPIST     TYPIST        C,+3                TURN OFF TYPEWRITER FOR TASK DURATION.
+
+ 0879   RD DIRECT  S, PHI READ  6,1
+ 0880              NA, CHAR1    6,1           Y COLUMN 1    NO DIRECT           BRANCH IF NOT A YUL DIRECTOR CARD.
+
+ 0882              TX           ONES          -             6,11                SET COL. 81 STOP.
+ 0884              TS           GB SWITCH     INIT X5       PHI SENTR           BREAK UP YUL DIRECTOR CARD INTO FIELDS.
+ 0886              NN           NON WISE      ZERO          TYP NON YS          TYPE COUNT OF NON-YUL-DIRECTORS IF NZ.
+ 08872             SWS, CHAR8   1,1           A,7           6,1                 MAKE BLANKS IN COLS 2-7 LOOK GOOD.
+ 08873             SWS, ONES    6,1           A,1,L         6,1
+ 08874             NA, CHAR1    6,1           BLANKS        C,+3                NORMALIZE CONTENTS OF COLUMNS 2-8.
+ 08875             TS           -             -             C,-2
+ 08876             S, MON TYPER WR TAP MSG    SPRAMR +40    REJEC DIR           "WRONG TAPE NAME ABBR IN COLS 2-7".
+ 08877             NA, CHAR1    6,1           1,1           C,-1                INITIAL LETTER MUST MATCH THAT OF TAPE.
+ 0888   Y DREC TLU TS           L DIRECTS     Z,X5          COMP DIRC           SET UP TABLE LOOK-UP ON 1ST WORD.
+
+ 0890   TRY DIREC  NA           Z,X5,1        ENDIRECS      COMP DIRC           BRANCH IF NOT END OF TABLE.
+ 0892              TN           6,16          2             WUNRC MSG +3
+ 0893              S, YUL TYPER WUNRC MSG     AMTF +5       REJEC DIR           ANNOUNCE UNRECOGNITION OF FIRST WORD.
+
+ 0895   COMP DIRC  NA           N,X5,1        6,16          TRY DIREC
+ 0896              NA, C1T6     5,0           6,17          TRY DIREC           LOOK FOR 14-CHARACTER MATCH OF 1ST WORD.
+ 0898              SS           N,X5          THREAD 11     C,+1
+ 0899              TS           6 COMMA 19    Z,X5          0                   GO TO APPROPRIATE ROUTINE.
+
+ 0901   NO DIRECT  NA, CHAR1    6,1           STAR COL 1    NOT MON             BRANCH IF NEITHER YUL DIRECTOR OR MON.
+ 0903              TS           Z,SC,2        6,110         MON WAKE       C    HAUL GROUP C OUT OF BED .....
+ 0905              SPCR                                     C,+0                ... LET IT ANNOUNCE ITS IDENTITY ...
+ 0907              TS           ZERO          C,+1          MON REL GP          ... AND FIRE IT.
+
+ 0909              WD           Z,SC          ONE           Z,SC                WAIT FOR GROUP C TO SAY WHO IT IS.
+ 0911              SWS, ACO2    C,-3          8,L           GC FRE MSG
+ 0912              NA, CHAR8    1,0           ONE           C,+2                BRANCH IF NOT COPYING.
+ 0914              S, MON TYPER GC FRE MSG    SPRA +8       -                   TYPE "GC FREE" IF IT WILL DO ANY GOOD.
+ 0916              LA, CAC3     1,0           B36T37        END CHECK -2        BRANCH IF THERE WAS NO TAPE PUNCHING.
+ 09178             S, MON TYPER 22 OUT MSG    SPRA +24      -                   "2200 READY TO DO MONAOUT".
+ 0918              S, MON TYPER ZERO          ATAPE PCH +40 ZERO                LET 2200 BEGIN PUNCHING TAPE.
+
+ 0920              NA, CHAR8    1,0           ZERO          LABEL YUL           RELABEL YULPROGS ONLY WHEN NECESSARY.
+ 0922              NA, CHAR8    1,0           ZERO          DO BACKUP           DO BACKUP PROCEDURE IF APPROPRIATE.
+ 0924   END CHECK  NA, CHAR1    6,1           STAR  COL 1   RD DIRECT           GO READ DIRECTOR UNLESS ENDJOB WAS READ.
+ 0926              LA           ONES          6,2           RD DIRECT           BUT BRANCH AFTER CREATING A BACKUP.
+ 0928              TS           Z,SC,1        6,107         MON WAKE       C
+ 0929              TS           ZERO          C,+1          MON REL GP          DISMISS GROUP B.
+ 0931              WD           Z,SC          ONE           Z,SC                WAIT UNTIL IT'S OUT OF SIGHT.
+ 0933              S, MON TYPER W END YUL     SPRA +16      MONITOR             TYPE "END YUL SYSTEM" AND END JOB.
+
 ## Page 69
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  29        PAGE  29
+
+P0935              SUBROUTINE IN PASS 0 TO TYPE THE SIGNIFICANT WORDS IN AN N-WORD ALPHABETIC MESSAGE.  ENTRY IS A SIM-
+R0937   ULATE CALL (TO THE TRANSFER VECTOR) WITH ADDRESSES AS PER PR* EXCEPT FOR WORD COUNT IN RIGHT 6 BITS OF B ADDRESS
+R0939   -- MAIN PASS 0 MASKS ARE ASSUMED.  THE SIGNIFICANCE PROCESSING IS: OMIT BLANK WORDS AT BEGINNING AND END OF MES-
+R0941   SAGE.  REDUCE EACH IMBEDDED STRING OF BLANK WORDS TO ONE BLANK WORD.  ACTIVE C ADDRESS IS COMPULSORY.
+
+ 0943   TYPIST     PR                                                           (SILENCED BY  NA N,AU1 BLANKS N,AU2).
+ 0945              TS           Z,MXR         TYPER MXR     YUL MASKR      C
+ 0946              SWE, CHAR8   YUL TYPER     12            Z,CSH
+ 0947              WA           Z,CSH         Z,AU1         Z,CSH               FORM LWA+1 OF MESSAGE.
+ 0949              TS           L MSG AREA    Z,CSC         SEND TYP W
+
+ 0950   END TYP Q  LA           Z,CSH         Z,AU1         SEND TYP W +1       BRANCH WHEN WHOLE MESSAGE SCANNED.
+ 0952              NA           N,CSC,1       BLANKS        SEND TYP W          ALWAYS SEND NEXT IF LAST NOT BLANK.
+ 0954              NA           N,AU1         BLANKS        SEND TYP W          SEND NON-BLANK WHEN LAST WORD WAS BLANK.
+ 0956              WD           Z,CSC         ONE           Z,CSC               IGNORE BLANK WORD THAT FOLLOWS A BLANK.
+ 0958   SEND TYP W TS           N,AU1,1       N,CSC         END TYP Q           SEND A WORD TO BE TYPED OUT.
+
+ 0960              SM           Z,CSC,1       Z,SC,5        -                   CONFIRM LAST WORD SENT TO MSG AREA.
+
+ 0962              NA           N,CSC         BLANKS        C,-1                CONFIRM LAST WORD UNLESS IT IS BLANK.
+ 0964              NA           Z,CSC         L MSG AREA    TYP COUNT           BRANCH UNLESS BLANK MSG (END OF TASK).
+ 0966              LA           TYPIST        CAC3          SEND TYP W +1       BRANCH UNLESS TYPEWRITER IN SILENT MODE.
+ 0968              TS           ZERO          TYPIST        SET POG HED    C    RESTORE TYPEWRITER AFTER SECRET TASK.
+ 0970              TS           N,X6          N,X1          N,AU2               ALSO RESTORE FORMER BACKUP STATUS.
+
+ 0972   TYP COUNT  WD           Z,CSC         L MSG AREA    Z,CSC               TENTATIVELY, NO. OF WORDS TO BE TYPED.
+ 0974              TX           L MSG AREA    -             Z,AU1               SET AU1 FOR MONITOR TYPEWRITER.
+ 0976              LA           Z,CSC         ONE           7 OR LESS           OMIT FOLLOWING CHECK FOR 1-WORD MESSAGE.
+ 0978              NA           N,AU1         BLANKS        C,+2
+ 0979              SM           Z,AU1,1       Z,CSC,1       -                   REMOVE LEADING BLANK WORDS FROM MSG.
+ 0981              LA           Z,CSC         SEVEN         7 OR LESS           BRANCH IF ONE MONITOR CALL WILL DO.
+
+ 0983              WD           Z,CSC         SEVEN         TYPIST
+ 0984              SWS, CHAR6   TYPIST        15,L          SPRAM WD            SPECIFY 1 OR 2 WORDS FOR FIRST CALL.
+ 0986              WA           TYPIST        Z,AU1         TYPIST              SAVE STARTING ADDRESS FOR SECOND CALL.
+ 0988              TS           Z,SC,1        -             MON TYPER +1   C    FAKE A SPRAM CALL TO THE MONITOR TYPER.
+ 0990   SPRAM WD   PR                         SPRAM         -
+ 0991              SWS, CHAR6   SEVEN         15,L          YUL TYPER           ALWAYS TYPE 7 WORDS ON THE SECOND CALL.
+ 0993              TS           TYPIST        Z,AU1         7 OR LESS +1        SET UP ADDRESS OF REMAINDER OF MESSAGE.
+
+ 0995   7 OR LESS  SWS, CHAR6   Z,CSC         15,L          YUL TYPER
+ 0996              TX           TYP RTURN     -             Z,AU2
+ 0997              TX           TYPER MXR     -             Z,MXR
+ 0998              TS           YUL TYPER     N,SC,1        MON TYPER +1   C    MAIN SYNTHETIC CALL TO MON. TYPER.
+ 1000   TYPER MXR  RESERVE      1
+
+R1001   INSTRUCTION USED TO DISABLE YUL SYSTEM TYPEWRITER FOR SECRET TASKS.
+
+ 1002   NO TYPIST  NA           N,AU1         BLANKS        N,AU2
+
+R1003   PROCEDURE FOR A CARD WHICH SHOULD HAVE "Y" IN COLUMN 1 BUT DOES NOT.
+
+ 1004   NOT MON    DS           NON WISE      ONE           NON WISE
+ 1005              TS           -             -             NEX DIREC           STEP COUNT AND READ AGAIN.
 
 ## Page 70
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  30        PAGE  30
 
+P1007              TABLE OF RECOGNIZED FIRST WORDS IN YUL DIRECTOR CARDS.
+
+
+
+ 1008   DIRECTS    ALF          ADD
+ 1009              M,A,         A,            A,            ADD COMP            ADD A NEW COMPUTER NAME.
+ 1011              ALF          REMOVE
+ 1012              M,A,         A,            A,            RMOV COMP           REMOVE AN EXISTING COMPUTER NAME.
+ 1014              ALF          MESSAGE
+ 1015              M,A,         A,            A,            MESSAGE             TYPE OUT ARBITRARY MESSAGE.
+ 1017              ALF          DELETE
+ 1018              M,A,         A,            A,            ELIM PRSU           INITIATE DELETION OF PROG OR SUB.
+ 1020              ALF          ASSEMBLE
+ 1021              M,A,         A,            A,            ASSEMBLY            PROGRAM OR SUBROUTINE ASSEMBLY OR REVN.
+
+ 1023   W REPRINT  ALF          REPRINT
+ 1024              M,A,         A,            A,            REPRINT             REPRINT ASSEMBLY LISTING.
+ 1032   W MNUFACT  ALF          MANUFACT
+ 1033              M,A,UR       A,E           A,            MANUFACT            MANUFACTURE ASSEMBLED PROGRAM.
+ 1035              ALF          CLOSE
+ 1036              M,A,         A,            A,            CLOS MONA           LET 2200 MANUFACTURE PAPER/DIGISTORE TP.
+
+ 1038   W CONTROL  ALF          CONTROL
+ 1039              M,A,         A,            A,            CONTROL             BAR REVISION OR DELETION OF SUBROUTINE.
+ 1041   W DECONTR  ALF          DECONTRO
+ 1042              M,A,         A,            A,            DECONTR             ALLOW REVISION OR DELETION OF SUBROUTINE.
+ 1044   W TRANSFR  ALF          TRANSFER
+ 1045              M,A,         A,            A,            XFER PSR            MAKE CARD IMAGE DISC FILE OF PRG OR SUB.
+ 1047   W PRINT    ALF          PRINT
+ 1048              M,A,         A,            A,            PRINT PSR           PRINT SYMBOLIC LISTING OF PROG OR SUBRO.
+ 1050              ALF          PUNCH
+ 1051              M,A,         A,            A,            PUNCH PSR           PUNCH SYMBOLIC PROG. OR SUBRO. DECK.
+
+ 1053   W ASSMBLY  ALF          ASSEMBLY
+ 1054              M,A,         A,            A,            PASS STAT           ASSEMBLY PASS STATUS OPERATIONS.
+ 1056              ALF          MANUFACT
+ 1057              M,A,UR       A,IN          A,G           MANU STAT           MANUFACTURING STATUS STATUS OPERATIONS.
+ 1062              ALF          CREATE
+ 1063              M,A,         A,            A,            CREATE BU           CREATE BACKUP TAPE IN MIDJOB.
+ 1065              ALF          LIST
+ 1066   LAS DIREC  M,A,         A,            A,            UNREADY             LIST PORTIONS OF YUL FILE DIRECTORY.
+
+ 1068   UNREADY    S, YUL TYPER UNRDY MSG     AMTF +4       REJEC DIR           TYPE "UNREADY OPERATION REQUESTED".
+
 ## Page 71
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  31        PAGE  31
+
+P1070              ROUTINE TO RESPOND TO REQUESTS FOR ASSEMBLY OR REVISION OF A PROGRAM OR SUBROUTINE.
+
+ 1072   ASSEMBLY   LA, CAC3     1,8           YFILE LIM     C,+2
+ 1073              S, YUL TYPER DIFUL MSG     AMTF +5       REJEC DIR           CUSS AND ABORT IF FULL DIRECTORY.
+
+ 1075              TS           W ASSMBLY     TASK MSG      TASK OBJC           BREAK DOWN AND REFORM REST OF DIRECTOR.
+ 1077              S, YUL TYPER TASK MSG      AMTF +4       C,+1
+ 1078   TYP ASOBJ  S, YUL TYPER OBJCT MSG     A +7          C,+1                TYPE TASK AND OBJECT OF TASK.
+
+ 1080              WA           Z,X6          OCTAL 20      Z,X5                INCLUDE COMPUTER NAME IN PAGE HEADING.
+ 1082              TN           N,X5,2        2             COMMON
+ 1083              TS           L PGHED P3    Z,S2          PUT CHAR +7    C    MOVE FIRST CHARACTER.
+ 1085              WA           N,X5          1 C6          N,X5                INCLUDE A BLANK AFTER COMPUTER NAME.
+ 1087              TS           Z,SC          Z,S3          WRIT OBJC           MOVE FULL OBJECT MSG TO PAGE HEADING.
+
+ 1089              TS           PROG NAME     SORS NAME     619 TO X5      C    OMIT COMPUTER NAME FROM "END OF" LINE.
+ 1091              WA           L OLD LINE    SIX           Z,S2                GIVE IT TO PASS 1 VIA OLD LINE.
+ 1093              NA           N,X5          W REVISON     NEW END OF          BRANCH IF NEW PROGRAM OR SUBROUTINE.
+
+ 1095              SWS, CHAR1   N,X5,3        A,1           N,52                MOVE "N" OF "REVISION".
+ 1097              TS           N,X5,2        COMMON        PUT CHAR +2    C    MOVE 1ST DIGIT OF REVISION NO.
+ 1099              TS           -             -             C,+2
+
+ 1100   NEW END OF TS           N,X5,2        COMMON        PUT CHAR +3    C    MOVE "N" OF "NEW".
+ 1102              TS           Z,SC          Z,S3          WRIT OBJC           MOVE OBJECT MSG TO "END OF" LINE.
+ 1104              TN           PAGE HEAD +12 2             OLD LINE +12        INCLUDE DATE.
+ 1106              TS           L DIRECTY     Z,X1          FIND COMP      C    SEEK COMPUTER NAME IN DIRECTORY.
+ 1108              S, YUL TYPER UNRCO MSG     AMTF +4       TYP ABORT           CUSS AND EXIT IF NOT THERE.
+
+ 1110   KNWN COMP  TX           Z,X0          -             L COMP NUM          ADDRESS OF COMPUTER NAME FOR PARP CALLS.
+ 1112              LA, P1T3AV   ONES          0,1           CAN ASSE            BRANCH IF PASSES 1-3 AVAILABLE FOR IT.
+ 1114              S, YUL TYPER NASSY MSG     AMTF +4       TYP ABORT
+
+ 1115   CAN ASSE   NA           TASK MSG      W ASSMBLY     REPRINT 2           BRANCH IF DOING REPRINT, NOT ASSEMBLY.
+ 1117              NA, BIT 12   SWITCH        ZERO          NEWVERS2            BRANCH IF DOING VERSION ASSEMBLY.
+ 1119              NA, BIT10    SWITCH        ONES          NEW PRSUB           BRANCH IF NEW PROGRAM OR SUBROUTINE.
+ 1121   REVISION   TS           C,+1          OK NOUN       OK REVN Q           MODIFY "KNOWN PROGRAM/SUBROUTINE" SEARCH
+ 1123              TS           C,+1          OK NOUN       C,+1                BECAUSE HERE ALONE THE REVISION NUMBER
+ 1125              SSL, ONE     3,1           23            OK NOUN -3     C    IS BEING CHANGED.
+ 1127              DA           COMMON        ONE           COMMON              INCREMENT OLD REVN, ASK FOR MATCH.
+ 1129              NA, B36T37   3,1           ONES          OK NOUN +1          BACK TO KNOWN PSR IF NOT CONTROLLED SUB.
+ 1131              SS           W REVISION    CAC12         CONSU MSG +4
+ 1132              S, MON TYPER CONSU MSG     SPRAMR +40    TYP ABORT           CUSS ATTEMPT TO REVISE CONTROLLED SUBRO.
+
+ 1134   NO REVISE  S, MON TYPER NR FRZ MSG    SPRAMR +40    TYP ABORT           REPLACES REVISION, ABOVE, IF FROZE TAPE.
+
+ 1136   OK REVN Q  TS, BIT2     ONES          SWITCH        KNOWN PSR           REQUEST MERGING, CHECK PROGRAM NAME ETC.
+ 1138              TS           Z,X4          L PROG FIL    REVNO SSL           SAVE ADDRESS OF PROG/SUB ENTRY IN FILE.
+
+ 1140              SWS, B13T24  REVNO         24,L          4,1                 NEW REVNO FOR PROG/SUB WITH NO SUBROS.
+ 1142              SWS,THREAD11 4,1           24            Z,X5           C
+ 1143              SWS,B1THRU12 REVNO         36,L          N,X5                NEW REVNO FOR PROG/SUB WITH SUBROS.
+
+ 1145   REVNO SSL  SSL, ONE     4,1           23            C,-3           C
 
 ## Page 72
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  32        PAGE  32
 
+P1146   PLACE PROGRAM OR SUBROUTINE NAME AT HEAD OF AUTHOR'S LIST.
+
+ 1147              NA, BIT9     SWITCH        ZERO          C,+2
+ 1148              TS           W END SYPT    NEXT NAME     AU LATEST           PROGRAM GOES ON TAPE BEFORE END SYPT.
+ 1150              SS           4,1           THREAD 10     Z,X2                POINT TO SUCCESSOR OF SUBRO ON TAPE.
+ 1152              NA           Z,X2          L END THR     C,+2
+ 1153              TS           W END SYLT    NEXT NAME     AU LATEST           LAST SUBRO GOES ON TAPE BEFORE END SYLT.
+ 1155              TX           N,X2          -             NEXT NAME           IN GENERAL, SUBRO STAYS PUT IN REVISION.
+
+ 1157   AU LATEST  LA           PLUS ZERO     3,1           X5 IS NR4           BYPASS IF THIS IS 1ST IN AUTHOR'S LIST.
+ 1159              SS           4,1           B THRED 10    3,1                 SEW UP AUTHOR'S LIST AROUND THIS PR/SUB.
+ 1161              SWS,THREAD10 3,1           12            Z,X3                FOLLOW THE THREAD...
+ 1163              LA           3,1           PLUS ZERO     C,-1                ...UNTIL AUTHOR NAME ENTRY IS FOUND.
+
+ 1165              SWS,BTHRED10 3,1           12            4,1                 POINT TO PR/SUB LAST HANDLED BY AUTHOR.
+ 1167              SWS,ATHRED10 Z,X4          24,L          3,1                 LET AUTHOR NAME POINT TO THIS PROG/SUB.
+
+ 1169   X5 IS NR4  NA, BIT 9    SWITCH        ZERO          C,+2                BRANCH IF DOING SUBROUTINE REVISION.
+ 1171              WA           INIT X5       TWO           INIT X5             CHANGE GB,R2 TO GB,R4.
+ 1173              LA, CAC3     1,9           L END THR     INIT ASSY           BRANCH IF THERE ARE NO DELETES WAITING.
+ 1175              NA, BIT 9    SWITCH        ZERO          GBR2 GBR3           BRANCH IF DOING SUBROUTINE REVISION.
+ 1177              WD           INIT X5       ONE           INIT X5             OTHERWISE CHANGE GB,R4 TO GB,R3.
+ 1179              TS           L SYM THR     Z,S1          INIT ASSY +1
+
+ 1180   NEW PRSUB  TS           Z,X0          Z,X2          FIND PROG +1   C    SEEK PROGRAM/SUBRO NAME IN DIRECTORY.
+ 1182              S, YUL TYPER CONPN MSG     AMTF +5       TYP ABORT           CUSS CONFLICT AND EXIT IF FOUND.
+
+ 1184              SSL, TWO     SWITCH        34            C,+2                "BRANCH" IF DOING TRANSFERRED ASSEMBLY.
+ 1186              SWE, ONES    SUBSTRAB +2   24            SUBSTRAB +2         POSITION LOG NUMBER FOR PASS 1.
+ 1188   NEW DNTRY  TS           -             -             FIND PAIR      C    FIND 2 DIRECTORY LOCATIONS FOR P/S NAME.
+ 1190              TS           PROG NAME     N,X3          DIRENTRY
+
+ 1191              TS           Z,SC          Z,X1          RD SUBDRC
+ 1192              S, MON TYPER TSFRD MSG     SPRAMR +56    TYP ABORT           CUSS LACK OF "FROM FILENAME" SUBDIRECTR.
+ 1194              NA           6,16          W FROM        C,-1
+ 1195              TX           L DIRECTY     -             Z,X1
+ 1196              LA, CHAR1    ONES          6,18          C,-3                BRANCH IF INPUT FILE NAME IS MISSING.
+ 1198              LA, CHAR6    6,21          ZERO          C,+2                BRANCH IF INPUT FILE NAME IS BLANK.
+ 1200              LA, CHAR6    6,21          BIT 32        C,+2                BRANCH IF LENGTH OF NAME IS 16 OR LESS.
+ 1202              S, MON TYPER XIN WRSIZ     SPRAMR +32    REJEC DIR           REJECT ILL-SIZED INPUT FILE NAME.
+ 1204              LA, CHAR1    ONES          6,22          C,+2
+ 1205              S, MON TYPER XIN TERMS     SPRAMR +40    REJEC DIR           CUSS TERMINATOR CHARACTERS IN FILE NAME.
+ 1207              TN           6,19          2             SUBSTRAB            SAVE FILE NAME IN INTERPASS STORAGE.
+ 1209              S, MON TYPER W SOURCE C    SPRAM +8      -
+ 1210              S, MON TYPER SUBSTRAB      SPRA +16      -                   "SOURCE: INPUTFILENAME   ".
+ 1212              LA, CHAR5    ONES          DISC STAT     C,+3
+ 1213              S, MON TYPER TSFRD MSG     SPRAM +24     -
+ 1214              S, MON TYPER XNODF MSG     SPRAMR +8     TYP ABORT           "TRANSFERRED ASSEMBLY NEEDS DISC ".
+ 1216              EX           DISC STAT     B14T18        SUBSTRAB +3         SEND NUMBER OF DISCS IN FILE TO PASS 1.
+
 ## Page 73
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  33        PAGE  33
+
+P1218   TRANSFERRED ASSEMBLY: FIND HIGHEST LOG NUMBER FOR FILE, IGNORING DISABLED FILES AND DELETING UNCONFIRMED ONES.
+
+ 1220              TS           SUBSTRAB      TRONDEX       XIN ANYLG
+
+ 1221   XIN LUKUP  TS           SUBSTRAB +1   TRONDEX +1    DISCAP         C
+ 1222              OCT          -15
+ 1223              SPEC                                     TRONDEX
+ 1224              TS           BIT 10        SORS LINE     FOUND FIL
+ 1225              NA           SUBSTRAB +2   ZERO          C,+2                BRANCH IF A SATISFACTORY FILE WAS FOUND.
+ 1227              S, MON TYPER NOFIL MSG     SPRAMR +24    TYP ABORT           "FILE NOT FOUND ON DISC   ".
+
+ 1229              SSL, ONE     SWITCH        39            VERS PSQ       C
+ 1230              TN           TSFR LINE     3             N,AU2
+ 1231              TN           TRONDEX       2             N,AU2
+ 1232              SWE, ONES    SUBSTRAB +2   D,2           PHI ARG
+ 1233              TS           Z,SC          Z,AU1         YUL D2A ZS
+ 1234              SM           LOG COMMA     N,SH          SORS LINE +9
+ 1235              TN           BLANKS        5             SORS LINE +10
+ 1236              TS           BLANKS        SORS LINE +15 NEW DNTRY -1        COBBLE UP LINE SHOWING SOURCE FILE NAME.
+
+ 1238   FOUND FIL  NA, C7T8     TRONDEX +3    SNTRACOD      XIN LUKUP           LOOK AGAIN IF FILE TYPE IS WRONG.
+ 1240              SSL, ONE     TRONDEX +4    0             C,+1                TEST PSEUDO-CONFIRMATION BIT.
+ 1242              TS           Z,SC,2        -             DISCAP         C    GO TO RELEASE UNCONFIRMED TRACK.
+ 1244              LA           TRONDEX +2    SUBSTRAB +2   XIN LUKUP           BRANCH IF NOT GREATEST FOUND LOG NUMBER.
+ 1246              TS           TRONDEX +2    SUBSTRAB +2   XIN LUKUP           PLANT HIGHEST LOG NUMBER YET FOUND.
+ 1248              OCT          -1017
+ 1249              SPEC                                     TRONDEX
+ 1250   XIN ANYLG  TS           ONES          TRONDEX +2    XIN LUKUP           RESTART SEARCH AFTER TRACK RELEASE.
+ 1252              TS           -             -             DISASTER            BAD RETURN SHOULD BE IMPOSSIBLE HERE.
 
 ## Page 74
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  34        PAGE  34
