@@ -1893,7 +1893,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       // intended to operate at their own address are not followed by an operand.
       // I'm not sure how many different operators are affected by this, so I'm
       // just hard-coding the ones I've seen.
-      if (Block1
+      if ((Block1 || blk2)
           && (NULL == ParseInputRecord.Operand
               || 0 == ParseInputRecord.Operand[0]))
         {

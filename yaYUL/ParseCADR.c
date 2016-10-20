@@ -134,7 +134,7 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                 return (0);
             }
 
-            OutRecord->Words[0] = Address.Value - (Block1 ? 0 : 010000);
+            OutRecord->Words[0] = Address.Value - 010000;
           }
     } else {
         char args[32];

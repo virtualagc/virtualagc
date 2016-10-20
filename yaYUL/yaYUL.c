@@ -439,7 +439,7 @@ main(int argc, char *argv[])
                 Offset = 02000;
             }
           Value = GetBankCount(Bank);
-          if (!Block1 /*&& !blk2*/)
+          if (!Block1 && !blk2)
             {
               if (Value < 01776)
                 {

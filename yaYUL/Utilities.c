@@ -57,7 +57,8 @@ void FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
         }
     }
 
-    *outValue |= sbfix;
+    if (!blk2)
+      *outValue |= sbfix;
 
 #ifdef YAYUL_TRACE
     printf("--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o) fix=%05o value=%06o\n",
