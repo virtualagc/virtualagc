@@ -73,6 +73,9 @@
  *             	2016-10-08 RSB	Added detection of file header consisting of a bunch
  *             			of ## or blank lines, using the inHeader state variable.
  *             	2016-10-12 RSB  Updated for --blk2.
+ *             	2016-10-20 RSB  When the operand for CADR was a simple number, it was
+ *             	                incorrectly treating it as an offset to the current location
+ *             	                rather than a full pseudo-address.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1894,9 +1897,16 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           && (NULL == ParseInputRecord.Operand
               || 0 == ParseInputRecord.Operand[0]))
         {
-          if (!strcmp(ParseInputRecord.Operator, "TC")
-              || !strcmp(ParseInputRecord.Operator, "CADR"))
+          if (!strcmp(ParseInputRecord.Operator, "TC"))
             ParseInputRecord.Operand = "-0";
+          else if (!strcmp(ParseInputRecord.Operator, "CADR"))
+            {
+              static char fakeOperand[32];
+              sprintf(fakeOperand, "%o",
+                  (ParseInputRecord.ProgramCounter.FB << 10)
+                      + (ParseInputRecord.ProgramCounter.SReg & 01777));
+              ParseInputRecord.Operand = fakeOperand;
+            }
         }
 
       // At this point, the input line has been completely parsed into

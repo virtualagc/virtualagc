@@ -1,31 +1,34 @@
 /*
-  Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
-
-  This file is part of yaAGC. 
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:	ParseCADR.c
-  Purpose:	Assembles the CADR and FCADR pseudo-ops.
-  Mods:		04/27/03 RSB.	Began.
-                2012-09-25 JL   Handle arguments like "DUMMYJOB + 2",
-                		i.e. Mod1=+, Mod2=2.
-                2016-08-21 RSB  Adjusted for --block1.
-                2016-08-22 RSB	Removed the block 1 pre-operation '-'
-                		adjustment and put it in Pass.c
-                		instead.
+ *  Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ *  This file is part of yaAGC.
+ *
+ *  yaAGC is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  yaAGC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with yaAGC; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  Filename:	ParseCADR.c
+ *  Purpose:	Assembles the CADR and FCADR pseudo-ops.
+ *  Mods:	04/27/03 RSB.	Began.
+ *              2012-09-25 JL   Handle arguments like "DUMMYJOB + 2",
+ *                		i.e. Mod1=+, Mod2=2.
+ *              2016-08-21 RSB  Adjusted for --block1.
+ *              2016-08-22 RSB	Removed the block 1 pre-operation '-'
+ *                		adjustment and put it in Pass.c
+ *                		instead.
+ *              2016-10-20 RSB  When the operand for CADR was a simple number, it was
+ *                              incorrectly treating it as an offset to the current location
+ *                              rather than a full pseudo-address.
  */
 
 #include "yaYUL.h"
@@ -70,7 +73,8 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
     i = GetOctOrDec(InRecord->Operand, &Value);
     if (!i && *InRecord->Mod1 == 0) {
-        IncPc(&InRecord->ProgramCounter, Value, &Address);
+        //IncPc(&InRecord->ProgramCounter, Value, &Address);
+        PseudoToStruct(Value, &Address);
         DoIt:
         if (Address.Invalid) {
             strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
@@ -89,9 +93,6 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             int address, isLiteralNumber = 0;
             char *s;
             unsigned offset;
-            if (!strcmp(InRecord->Label, "WCADRTAB")) {
-                //fprintf (stderr, "Here!\n");
-            }
             if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
               OpcodeOffset = offset;
             isLiteralNumber = 1;
@@ -102,7 +103,7 @@ int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                   break;
                 }
             if (isLiteralNumber)
-              address = atoi(InRecord->Operand);
+              sscanf(InRecord->Operand, "%o", &address);
             else if (Address.Fixed)
               {
                 if (Address.FB)
