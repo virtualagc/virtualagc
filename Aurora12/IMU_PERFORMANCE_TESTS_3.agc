@@ -10,6 +10,8 @@
 # 	        2016-10-03 OH	Initial Transcription from images
 #               2016-10-16 HG   Fix operand OGCECADR -> OGC
 #               2016-10-18 HG   Fix label DEG/SECC -> DEG/SEC
+#                               Fix operand modifier TS TANG +  -> TS TANG +1
+#                               Fix instruction TC -> TCF
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -224,7 +226,7 @@ CHKX            TC      COARZERO
                 
 CHK6            INDEX   TESTNO
                 CAF     RADECNTR
-                TS      TANG +
+                TS      TANG +1
                 TS      TANG
                 
                 TC      INTPRET
@@ -602,7 +604,7 @@ FZFDSP          CAF     V05N30X
                 TC      NVSBWAIT
                 TC      FLASHON
                 TC      ENDIDLE
-                TC      ENDTST03
+                TCF     ENDTST03
                 TCF     +2
                 TCF     FZFDSP
                 

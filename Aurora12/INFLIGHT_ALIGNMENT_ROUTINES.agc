@@ -10,6 +10,9 @@
 #               2016-10-15 MC   Completed.
 #               2016-10-16 HG   Fix label AXISROT -> AXISROT1 (Duplicate label) 
 #                               Fix operand RADMODE -> RADMODES
+#               2016-10-18 HG   Add missing interpretive operand ZPRIME
+#                                                                8D,1
+#                               Fix opcode STODL -> STCALL
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -61,7 +64,7 @@ CALCGTA         ITA             DLOAD                           # PUSHDOWN 00,02
                 STODL           SINTH                           # SIN(IGC) = ZP1
                 ZPRIME          +4                              
                 SR1                                             
-                STODL           COSTH                           # COS(IGC) = ZP3
+                STCALL          COSTH                           # COS(IGC) = ZP3
                 ARCTRIG                                         
 
                 STODL           IGC                             # Y GYRO TORQUING ANGLE  FRACTION OF REV.
@@ -81,6 +84,7 @@ CALCGTA         ITA             DLOAD                           # PUSHDOWN 00,02
                 ARCTRIG                                         
 
                 STOVL           MGC                             # Z GYRO TORQUING ANGLE  FRACTION OF REV.
+                                ZPRIME
 ## Page 405
                 DOT                                             
                 ZDC                                             
@@ -267,6 +271,7 @@ ACCUROT         COS
 
 AXISROT1        DAD             STADR                           #   MPAC + PD2      .
                 STODL*          32D             +4,2            # S3    S1    S2    .
+                                8D,1
 ## Page 410      
                 DMP*            SL1                             #      MPAC         .
                 32D             +4,1                            # S1COS S2COS S3COS .
