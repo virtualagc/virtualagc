@@ -10,6 +10,8 @@
 # Mod history:  2016-09-22 MAS  Began.
 #               2016-10-16 HG   Fix operand 5BIT14 -> SBIT14
 #                                           DISPLAY -> SDISPLAY 
+#		2016-10-20 RSB	Had to add an EBANK= to make some
+#				2CADR's come out right.
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -1262,7 +1264,8 @@ DV5--           EXTEND
 
 ENDSLFS1        EQUALS                                          
 
-                SETLOC          ENDFAILS                        
+                SETLOC          ENDFAILS   
+                EBANK=		LST1				## Doesn't deduce proper EBANK for some reason.                     
 
 SBNKOPTN        TS              SKEEP1                          
                 CS              A                               # GO TO BACKUP IDLE LOOP IF C(SMODE) IS
