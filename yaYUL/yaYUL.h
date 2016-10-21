@@ -57,6 +57,7 @@
                                directly into Pass.c.  It's just too difficult
                                to work with them through the Eclipse IDE
                                otherwise.
+                10/21/16 RSB   Added provision for --flip.
 */
 
 #ifndef INCLUDED_YAYUL_H
@@ -469,6 +470,7 @@ extern int OpcodeOffset;
 extern int ArgType;
   
 extern int formatOnly;
+extern int flipBugger[044];
 
 #endif // INCLUDED_YAYUL_H
 

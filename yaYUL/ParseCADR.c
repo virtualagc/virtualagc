@@ -36,126 +36,148 @@
 #include <math.h>
 #include <string.h>
 
-int ParseFCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseFCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-    return (ParseCADR(InRecord, OutRecord));
+  return (ParseCADR(InRecord, OutRecord));
 }
 
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error.
-int ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-    Address_t Address;
-    int Value, i;
+  Address_t Address;
+  int Value, i;
 
-    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
-    if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
-        strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
-        OutRecord->Warning = 1;
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
+    {
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
+      OutRecord->Warning = 1;
     }
 
-    OutRecord->EBank = InRecord->EBank;
-    OutRecord->SBank = InRecord->SBank;
-    OutRecord->NumWords = 1;
-    OutRecord->Words[0] = 0;
+  OutRecord->EBank = InRecord->EBank;
+  OutRecord->SBank = InRecord->SBank;
+  OutRecord->NumWords = 1;
+  OutRecord->Words[0] = 0;
 
-    if (InRecord->Extend && !InRecord->IndexValid) {
-        strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
-        OutRecord->Fatal = 1;
-        OutRecord->Extend = 0;
+  if (InRecord->Extend && !InRecord->IndexValid)
+    {
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+      OutRecord->Fatal = 1;
+      OutRecord->Extend = 0;
     }
 
-    if (InRecord->IndexValid) {
-        strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
-        OutRecord->Fatal = 1;
-        OutRecord->IndexValid = 0;
+  if (InRecord->IndexValid)
+    {
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
+      OutRecord->Fatal = 1;
+      OutRecord->IndexValid = 0;
     }
 
-    i = GetOctOrDec(InRecord->Operand, &Value);
-    if (!i && *InRecord->Mod1 == 0) {
-        //IncPc(&InRecord->ProgramCounter, Value, &Address);
-        PseudoToStruct(Value, &Address);
-        DoIt:
-        if (Address.Invalid) {
-            strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
-            OutRecord->Fatal = 1;
-            return (0);
+  i = GetOctOrDec(InRecord->Operand, &Value);
+  if ((Block1 || blk2) && (InRecord->Operand == NULL || *InRecord->Operand == 0))
+    {
+      Address = InRecord->ProgramCounter;
+      goto DoIt;
+    }
+
+  if (!i && *InRecord->Mod1 == 0)
+    {
+      //IncPc(&InRecord->ProgramCounter, Value, &Address);
+      PseudoToStruct(Value, &Address);
+      DoIt:;
+      if (Address.Invalid)
+        {
+          strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
+          OutRecord->Fatal = 1;
+          return (0);
         }
 
-        if (!Address.Address) {
-            strcpy(OutRecord->ErrorMessage, "Destination is not a memory address.");
-            OutRecord->Fatal = 1;
-            return (0);
+      if (!Address.Address)
+        {
+          strcpy(OutRecord->ErrorMessage,
+              "Destination is not a memory address.");
+          OutRecord->Fatal = 1;
+          return (0);
         }
 
-        if (Block1)
-          {
-            int address, isLiteralNumber = 0;
-            char *s;
-            unsigned offset;
-            if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
-              OpcodeOffset = offset;
-            isLiteralNumber = 1;
-            for (s = InRecord->Operand; *s; s++)
-              if (*s > '9' || *s < '0')
-                {
-                  isLiteralNumber = 0;
-                  break;
-                }
-            if (isLiteralNumber)
-              sscanf(InRecord->Operand, "%o", &address);
-            else if (Address.Fixed)
+      if (Block1)
+        {
+          int address, isLiteralNumber = 0;
+          char *s;
+          unsigned offset;
+          if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
+            OpcodeOffset = offset;
+          isLiteralNumber = 1;
+          for (s = InRecord->Operand; *s; s++)
+            if (*s > '9' || *s < '0')
               {
-                if (Address.FB)
-                  address = (Address.SReg & 01777) | (Address.FB << 10);
-                else
-                  address = Address.SReg;
+                isLiteralNumber = 0;
+                break;
               }
-            else
-              address = Address.Value;
-            OutRecord->Words[0] = 077777 & address;
-          }
-        else
-          {
-            if (!Address.Fixed || !Address.Banked) {
-                strcpy(OutRecord->ErrorMessage, "Destination not in an F-bank.");
-                OutRecord->Fatal = 1;
-                return (0);
+          if (isLiteralNumber)
+            sscanf(InRecord->Operand, "%o", &address);
+          else if (Address.Fixed)
+            {
+              if (Address.FB)
+                address = (Address.SReg & 01777) | (Address.FB << 10);
+              else
+                address = Address.SReg;
+            }
+          else
+            address = Address.Value;
+          OutRecord->Words[0] = 077777 & address;
+        }
+      else
+        {
+          if (!Address.Fixed || !Address.Banked)
+            {
+              strcpy(OutRecord->ErrorMessage, "Destination not in an F-bank.");
+              OutRecord->Fatal = 1;
+              return (0);
             }
 
-            // If this is a superbank, we massage a little more to get into the 15-bit
-            // address range.
-            if (Address.Super && Address.FB >= 030)
-                Address.Value -= 010 * 02000;
+          // If this is a superbank, we massage a little more to get into the 15-bit
+          // address range.
+          if (Address.Super && Address.FB >= 030)
+            Address.Value -= 010 * 02000;
 
-            if (Address.Value < 010000 || Address.Value > 0107777) {
-                strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
-                OutRecord->Fatal = 1;
-                return (0);
+          if (Address.Value < 010000 || Address.Value > 0107777)
+            {
+              strcpy(OutRecord->ErrorMessage,
+                  "Destination address out of range.");
+              OutRecord->Fatal = 1;
+              return (0);
             }
 
-            OutRecord->Words[0] = Address.Value - 010000;
-          }
-    } else {
-        char args[32];
+          OutRecord->Words[0] = Address.Value - 010000;
+        }
+    }
+  else
+    {
+      char args[32];
 
-        args[0] = '\0';
+      args[0] = '\0';
 
-        if (*InRecord->Mod1)
-            strcpy(args, InRecord->Mod1);
+      if (*InRecord->Mod1)
+        strcpy(args, InRecord->Mod1);
 
-        // Handle arguments like "DUMMYJOB + 2", i.e. Mod1=+, Mod2=2.
-        if (*InRecord->Mod2)
-            strcat(args, InRecord->Mod2);
+      // Handle arguments like "DUMMYJOB + 2", i.e. Mod1=+, Mod2=2.
+      if (*InRecord->Mod2)
+        strcat(args, InRecord->Mod2);
 
-        // The operand is NOT a number.  Presumably, it's a symbol.
-        i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, args, &Address);
-        if (!i)
-            goto DoIt;
-        sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
-        OutRecord->Fatal = 1;
+      // The operand is NOT a number.  Presumably, it's a symbol.
+      i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand,
+          args, &Address);
+      if (!i)
+        goto DoIt;
+      sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad",
+          InRecord->Operand);
+      OutRecord->Fatal = 1;
     }
 
-    return (0);
+  return (0);
 }
 

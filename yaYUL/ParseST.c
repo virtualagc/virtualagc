@@ -1,45 +1,47 @@
 /*
-  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC. 
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:	ParseST.c
-  Purpose:	Assembles STCALL, STODL, STORE, and STOVAL interpretive
-  		opcodes.
-  Mode:		07/27/04 RSB	Forked from ParseGeneral.c.
-                08/24/16 RSB    Updated for --block1.
-                10/12/16 RSB    Updated for --blk2.  Note that some of the
-                                addressing changes for erasable memory
-                                have been "zenned" into place ... a synonym
-                                I've just coined for "kludged" ... and are
-                                justified by matching the octals in the
-                                Aurora 12 program listing rather than by a
-                                deep understanding of how BLK2 interpretive
-                                addressing for STORE/STCALL/STODL/STOVL
-                                differs from the AGC (later Block 2) interpretive
-                                addressing for which the code was originally
-                                intended.  It has, in fact, been pointed out
-                                to me that BLK2 addressing is explained in
-                                documents E-2052 (http://www.ibiblio.org/apollo/NARA-SW/E-2052.pdf)
-                                and R-489 (http://www.ibiblio.org/apollo/hrst/archive/1687.pdf),
-                                which my poor, old brain has difficulty
-                                comprehending, so any error are entirely
-                                my own fault.
-*/
+ *  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ *  This file is part of yaAGC.
+ *
+ *  yaAGC is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  yaAGC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with yaAGC; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  Filename:	ParseST.c
+ *  Purpose:	Assembles STCALL, STODL, STORE, and STOVAL interpretive
+ *  		opcodes.
+ *  Mode:	07/27/04 RSB	Forked from ParseGeneral.c.
+ *              08/24/16 RSB    Updated for --block1.
+ *              10/12/16 RSB    Updated for --blk2.  Note that some of the
+ *                              addressing changes for erasable memory
+ *                              have been "zenned" into place ... a synonym
+ *                              I've just coined for "kludged" ... and are
+ *                              justified by matching the octals in the
+ *                              Aurora 12 program listing rather than by a
+ *                              deep understanding of how BLK2 interpretive
+ *                              addressing for STORE/STCALL/STODL/STOVL
+ *                              differs from the AGC (later Block 2) interpretive
+ *                              addressing for which the code was originally
+ *                              intended.  It has, in fact, been pointed out
+ *                              to me that BLK2 addressing is explained in
+ *                              documents E-2052 (http://www.ibiblio.org/apollo/NARA-SW/E-2052.pdf)
+ *                              and R-489 (http://www.ibiblio.org/apollo/hrst/archive/1687.pdf),
+ *                              which my poor, old brain has difficulty
+ *                              comprehending, so any error are entirely
+ *                              my own fault.
+ *              10/21/16 RSB    Added a fix to the --blk2 EBANK handling mentioned
+ *                              above, sent by Hartmuth Gutsche.
+ */
 
 #include "yaYUL.h"
 #include <stdlib.h>
@@ -169,15 +171,17 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
             }
           else
             {
-              if (!K.Banked)
+              if (!K.Banked || blk2) // for blk2 banking for erasable is not considered.
                 i = K.SReg;
               else
                 i = 0400 * K.EB + (K.SReg - 01400) - (blk2 ? 01000 : 0);
             }
-          if (Block1 && ArgType != 0) {
-            OpcodeOffset *= 2;
-            OutRecord->Words[0] = 034000 + 2 * i + ArgType;
-          } else
+          if (Block1 && ArgType != 0)
+            {
+              OpcodeOffset *= 2;
+              OutRecord->Words[0] = 034000 + 2 * i + ArgType;
+            }
+          else
             OutRecord->Words[0] = Opcode | i;
         }
     }

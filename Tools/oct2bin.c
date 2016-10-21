@@ -93,6 +93,8 @@
  *            			helpful for proofing.
  *            	2016-10-13 RSB  Updated error messages to make it easier to
  *            	                localize problems.
+ *              2016-10-21 RSB  Now pads the output file appropriately for
+ *                              either Block 1 or Block 2.
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -435,12 +437,17 @@ main(int argc, char *argv[])
     }
 
   check(verbose, line, checked, banknum, checksum);
-  if (ftell(outfile) != (2 * numBanks * 02000))
+  // Pad file to proper length (or else diffs will eventually fail).
+  i = (Block1 ? 034 : 044) * 02000 * 2;
+  while (ftell(outfile) < i)
+    if (0 != putc(0, outfile) || 0 != putc(0, outfile))
+        break;
+  if (ftell(outfile) < i)
     {
       errorCount++;
       fprintf(
       stderr,
-          "Error: The core-rope image is not %o (octal) banks (2 * 02000 * 0%o bytes) long.\n",
+          "Error: The core-rope image is not at least %o (octal) banks (2 * 02000 * 0%o bytes) long.\n",
           numBanks, numBanks);
     }
 

@@ -72,6 +72,12 @@
  * 		2016-10-05 JL	Added -syntax switch. This just checks the syntax
  * 				and does not attempt symbol resolution. This is intended for 
  * 				proofing.
+ * 		2016-10-20 RSB  Restored the TC SELF exception for --blk2 bugger-word
+ * 		                processing, which I had added above and then removed.
+ * 		2016-10-21 RSB  Added --flip switch.  --flip=7 is needed for Aurora12.
+ * 		                Added a fix by Harmuth Gutsche to account for the fact
+ * 		                that fatal errors would defeat a forced save of
+ * 		                the generated rope.
  */
 
 #include "yaYUL.h"
@@ -92,32 +98,14 @@ char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
 FILE *OutputFile = NULL;
 static int Hardware = 0;
+int flipBugger[044] = {0};
 
-#if 0
-static Address_t RegA = REG(00);
-static Address_t RegL = REG(01);
-static Address_t RegQ = REG(02);
-#endif
 static Address_t RegEB = REG(03);
 static Address_t RegFB = REG(04);
 static Address_t RegZ = REG(05);
 static Address_t RegBB = REG(06);
 static Address_t RegZeroes = REG(07);
-#if 0
-static Address_t RegARUPT = REG(010);
-static Address_t RegLRUPT = REG(011);
-static Address_t RegQRUPT = REG(012);
-// Registers 013 and 014 are reserved.
-static Address_t RegZRUPT = REG(015);
-static Address_t RegBBRUPT = REG(016);
-#endif
 static Address_t RegBRUPT = REG(017);
-#if 0
-static Address_t RegCYR = REG(020);
-static Address_t RegSR = REG(021);
-static Address_t RegCYL = REG(022);
-static Address_t RegEDOP = REG(023);
-#endif
 
 //-------------------------------------------------------------------------
 // The following two utility functions are used in computing the bank
@@ -189,6 +177,8 @@ main(int argc, char *argv[])
         goto Done;
       else if (1 == sscanf(argv[i], "--max-passes=%d", &j))
         MaxPasses = j;
+      else if (1 == sscanf(argv[i], "--flip=%o", &j) && j >= 0 && j < 044)
+        flipBugger[j] = 1;
       else if (!strcmp(argv[i], "--force"))
         Force = 1;
       else if (!strcmp(argv[i], "--g"))
@@ -454,12 +444,14 @@ main(int argc, char *argv[])
             }
           if (Value < 02000 && Value != 0)
             {
+              int tryBank;
               for (Bugger = Offset = 0; Offset < Value; Offset++)
                 Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
+              tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
               if (0 == (040000 & Bugger))
-                GuessBugger = Add(Bank, 077777 & ~Bugger);
+                GuessBugger = Add(tryBank, 077777 & ~Bugger);
               else
-                GuessBugger = Add(077777 & ~Bank, 077777 & ~Bugger);
+                GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
               ObjectCode[Bank][Value] = GuessBugger;
               printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
                   (Block1 ? 06000 : 02000) + Value);
@@ -555,8 +547,20 @@ main(int argc, char *argv[])
           "--syntax         Perform syntax-checking only, no symbol resolution.\n");
       printf(
           "--max-passes     Set the max number of assembler passes (default: 10).\n");
+      printf(
+          "--flip=B         By default, whenever possible, yaYUL chooses \"bugger\n");
+      printf(
+          "                 words\" that lead to bank checksums equal to B (where B\n");
+      printf(
+          "                 is the fixed-bank number, in octal).  However, bank checksums\n");
+      printf(
+          "                 equal to -B (in 1's complement) are also valid.  This option\n");
+      printf(
+          "                 is used to instruct yaYUL to use the -B bugger word for bank B.\n");
+      printf(
+          "                 Multiple --flip options can be used.\n");
     }
-  if (RetVal || Fatals)
+  if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);
   if (RetVal == 0)
     return (Fatals);

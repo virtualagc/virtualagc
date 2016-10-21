@@ -142,6 +142,7 @@
 #				shouldn't affect anyone else.
 #		2016-10-04 JL	Added 'format-missions' rukle to reformat all 
 #				mission sources using yaYUL.
+#		2016-10-21 RSB	Added AURORA12 to the missions.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -279,7 +280,8 @@ endif
 BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSES)" LIBS2="$(LIBS)" NOREADLINE=$(NOREADLINE) ReadlineForWin32=$(ReadlineForWin32) $(ARCHS) EXT=$(EXT)
 
 # List of mission software directories to be built.
-MISSIONS = Validation Luminary131 Colossus249 Comanche055 Luminary099 Artemis072 Colossus237 Solarium055
+MISSIONS = Validation Luminary131 Colossus249 Comanche055 
+MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055 Aurora12
 
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse

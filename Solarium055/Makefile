@@ -12,7 +12,10 @@
 #		2016-08-24 RSB	Added target for corediff.txt.
 #		2016-08-24 RSB	... and other stuff related to that too.
 #		2016-10-04 JL	Change to use Makefile.inc.
+#		2016-10-21 RSB	Hadn't accounted for the need for a --block1
+#				arg for oct2bin.
 
 BASENAME=Solarium055
 EXTRA_YAYUL_ARGS="--block1"
+OCT2BIN_ARGS="--block1"
 include ../Makefile.inc

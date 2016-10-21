@@ -76,6 +76,8 @@
  *             	2016-10-20 RSB  When the operand for CADR was a simple number, it was
  *             	                incorrectly treating it as an offset to the current location
  *             	                rather than a full pseudo-address.
+ *              2016-10-21 RSB  Added some --blk2 interpreter fixes and changes to handling
+ *                              of CADR and TC without operands sent in by Hartmuth Gutsche.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -860,7 +862,7 @@ static InterpreterMatch_t InterpreterOpcodesBLK2[] =
     { "INCR,2", 0062, 1 },
     { "INVERT", 0162, 1, 1, 000161 },
     { "INVGO", 0162, 2, 1, 000121 },
-    { "ITA", 0156, 1 },
+    { "ITA", 0146, 1 },
     { "LXA,1", 0026, 1 },
     { "LXA,2", 0022, 1 },
     { "LXC,1", 0036, 1 },
@@ -895,9 +897,9 @@ static InterpreterMatch_t InterpreterOpcodesBLK2[] =
       { 1, 0 } },
     { "SIN", 0020, 0 },
     { "SINE", 0020, 0 },
-    { "SL", 0115, 1, 2, 020202,
+    { "SL", 0115, 1, 2, 000202,
       { 1, 0 } },
-    { "SL*", 0117, 1, 2, 020202,
+    { "SL*", 0117, 1, 2, 000202,
       { 1, 0 } },
     { "SLOAD", 0041, 1, 0, 000000,
       { 1, 0 } },
@@ -919,14 +921,14 @@ static InterpreterMatch_t InterpreterOpcodesBLK2[] =
       { 1, 0 } },
     { "SL4R", 0144, 0, 0, 000000,
       { 1, 0 } },
-    { "SLR", 0115, 1, 2, 021202,
+    { "SLR", 0115, 1, 2, 001202,
       { 1, 0 } },
-    { "SLR*", 0117, 1, 2, 021202,
+    { "SLR*", 0117, 1, 2, 001202,
       { 1, 0 } },
     { "SQRT", 0010, 0 },
-    { "SR", 0115, 1, 2, 020602,
+    { "SR", 0115, 1, 2, 000602,
       { 1, 0 } },
-    { "SR*", 0117, 1, 2, 020602,
+    { "SR*", 0117, 1, 2, 000602,
       { 1, 0 } },
     { "SR1", 0034, 0, 0, 000000,
       { 1, 0 } },
@@ -944,9 +946,9 @@ static InterpreterMatch_t InterpreterOpcodesBLK2[] =
       { 1, 0 } },
     { "SR4R", 0154, 0, 0, 000000,
       { 1, 0 } },
-    { "SRR", 0115, 1, 2, 021602,
+    { "SRR", 0115, 1, 2, 001602,
       { 1, 0 } },
-    { "SRR*", 0117, 1, 2, 021602,
+    { "SRR*", 0117, 1, 2, 001602,
       { 1, 0 } },
     { "SSP", 0045, 2, 0, 000000,
       { 1, 0 } },
@@ -985,9 +987,9 @@ static InterpreterMatch_t InterpreterOpcodesBLK2[] =
       { 1, 0 } },
     { "VPROJ*", 0147, 1, 0, 000000,
       { 1, 0 } },
-    { "VSL", 0115, 1, 2, 020202,
+    { "VSL", 0115, 1, 2, 000202,
       { 1, 0 } },
-    { "VSL*", 0117, 1, 2, 020202,
+    { "VSL*", 0117, 1, 2, 000202,
       { 1, 0 } },
     { "VSL1", 0004, 0, 0, 000000,
       { 1, 0 } },
@@ -1006,9 +1008,9 @@ static InterpreterMatch_t InterpreterOpcodesBLK2[] =
     { "VSL8", 0164, 0, 0, 000000,
       { 1, 0 } },
     { "VSQ", 0140, 0 },
-    { "VSR", 0115, 1, 2, 020602,
+    { "VSR", 0115, 1, 2, 000602,
       { 1, 0 } },
-    { "VSR*", 0117, 1, 2, 020602,
+    { "VSR*", 0117, 1, 2, 000602,
       { 1, 0 } },
     { "VSR1", 0014, 0, 0, 000000,
       { 1, 0 } },
@@ -1889,23 +1891,30 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             ParseInputRecord.Extra = Fields[i];
         }
 
-      // Take care of the silly Block 1 construct where some operators which are
+      // Take care of the silly --block1 or --blk2 construct where some operators which are
       // intended to operate at their own address are not followed by an operand.
       // I'm not sure how many different operators are affected by this, so I'm
       // just hard-coding the ones I've seen.
-      if ((Block1 || blk2)
-          && (NULL == ParseInputRecord.Operand
-              || 0 == ParseInputRecord.Operand[0]))
+      if (NULL == ParseInputRecord.Operand || 0 == ParseInputRecord.Operand[0])
         {
-          if (!strcmp(ParseInputRecord.Operator, "TC"))
-            ParseInputRecord.Operand = "-0";
-          else if (!strcmp(ParseInputRecord.Operator, "CADR"))
+          if (Block1)
             {
-              static char fakeOperand[32];
-              sprintf(fakeOperand, "%o",
-                  (ParseInputRecord.ProgramCounter.FB << 10)
-                      + (ParseInputRecord.ProgramCounter.SReg & 01777));
-              ParseInputRecord.Operand = fakeOperand;
+              if (!strcmp(ParseInputRecord.Operator, "TC"))
+                ParseInputRecord.Operand = "-0";
+              else if (!strcmp(ParseInputRecord.Operator, "CADR"))
+                {
+                  static char fakeOperand[32];
+                  sprintf(fakeOperand, "%o",
+                      (ParseInputRecord.ProgramCounter.FB << 10)
+                          + (ParseInputRecord.ProgramCounter.SReg & 01777));
+                  ParseInputRecord.Operand = fakeOperand;
+                }
+            }
+          else if (blk2)
+            {
+              if (!strcmp(ParseInputRecord.Operator, "TC"))
+                ParseInputRecord.Operand = "-0";
+
             }
         }
 
