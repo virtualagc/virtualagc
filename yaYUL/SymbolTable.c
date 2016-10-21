@@ -86,6 +86,8 @@
  *                              file header, which had gotten all gummed up and
  *                              painful to read.
  *            	2016-10-08 RSB	Added exception to ## (--html) for inHeader.
+ *            	2016-10-20 RSB  Added stuff which may or may not be helpful in building
+ *            	                with Visual Studio.
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -98,9 +100,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifndef MSC_VS
+#include <unistd.h>
+#else
+#include <io.h>
+#include <share.h>
+#include <direct.h>
+#include <sys\stat.h>
+#define write(a,b,c) _write((a),(b),(c))
+#define getcwd(a,b) _getcwd((a),(b))
+#define close(a) _close(a)
+#endif
 
 //-------------------------------------------------------------------------
 // Some global data.
@@ -471,8 +483,8 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
   // process them normally. 
   //if (WriteOutput)
   //  printf("inHeader=%d match=%d UnpoundPage=%d\n", inHeader, strncmp(s + 3, "Page", 4), UnpoundPage);
-  if ((!strncmp(s, "## ", 3) || !strncmp(s, "##\t", 3))
-      && !inHeader && (strncmp(s + 3, "Page", 4) != 0 || !UnpoundPage))
+  if ((!strncmp(s, "## ", 3) || !strncmp(s, "##\t", 3)) && !inHeader
+      && (strncmp(s + 3, "Page", 4) != 0 || !UnpoundPage))
     {
       //if (WriteOutput)
       //  printf("HERE\n");
@@ -858,8 +870,8 @@ PrintSymbolsToFile(FILE *fp)
             }
           else
             {
-              fprintf(HtmlOut, "%06d%s:   %-*s   ",
-                  i + 1, status, width, normalized);
+              fprintf(HtmlOut, "%06d%s:   %-*s   ", i + 1, status, width,
+                  normalized);
             }
         }
 
@@ -978,8 +990,14 @@ WriteSymbolsToFile(char *fname)
 
   // Open the symbol table file
   step = 1;
+#ifdef MSC_VS
+  if ((fd = _sopen_s(&fd, fname, _O_BINARY | _O_WRONLY | _O_CREAT |
+                     _O_TRUNC, _SH_DENYWR, _S_IREAD | _S_IWRITE)) < 0)
+    goto error;
+#else
   if ((fd = open(fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
     goto error;
+#endif
 
   // Write the SymbolFile_t header to the symbol file, filling its
   // members first.

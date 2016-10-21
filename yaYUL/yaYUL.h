@@ -1,72 +1,84 @@
 /*
-  Copyright 2003-2005,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC.
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:     yaYUL.h
-  Purpose:      This is a header file for use with yaYUL.c.
-  Mod History:  04/11/03 RSB   Began.
-                04/19/03 RSB   Began reworking for better use of 
-                               addresses.
-                06/13/03 RSB   Changed criteria for assigning current
-                               address to a label.
-                07/03/04 RSB   Now provide an array into which the binary
-                               can be buffered for later output to a file.
-                07/07/04 RSB   Aliases for ZL and ZQ instructions fixed.
-                07/09/04 RSB   Added 2FCADR.
-                07/21/04 RSB   Now discard COUNT.  Added the "special
-                               downlink opcodes".  Added CAE, CAF, BBCON,
-                               2CADR, 2BCADR.
-                07/22/04 RSB   Added interpretive opcodes.
-                07/23/04 RSB   Added VN, 2OCT, SBANK=, MM, BOF.
-                07/30/04 RSB   Allowed for operation types to be added
-                               to shift operands.
-                09/04/04 RSB   CADR can now pinch-hit for an interpretive operand.
-                09/05/04 RSB   Added =MINUS pseudo-op.
-                07/27/05 JMS   Added SymbolFile_t, SymbolLines_t and added to
-                               Symbol_t for symbol debugging
-                07/28/05 JMS   Added support for writing SymbolLines_to to symbol
-                               table file.
-                06/27/09 RSB   Added HtmlOut.
-                06/29/09 RSB   Added the InstOpcode field.
-                07/01/09 RSB   Altered the way the highlighting styles
-                               (COLOR_XXX) work in order to make them
-                               more flexible and to shorten up the HTML
-                               files more.
-                07/25/09 RSB   Added lots of stuff related to providing
-                               separate binary codes for Block 1 vs. Block 2.
-                09/03/09 JL    Added CHECK= and =ECADR directives.
-                01/31/10 RSB   Added Syllable field to Address_t for 
-                               Gemini OBC and Apollo LVDC.
-                08/18/16 RSB   Moved global variables originally allocated
-                               here, but only when #included in Pass.c,
-                               directly into Pass.c.  It's just too difficult
-                               to work with them through the Eclipse IDE
-                               otherwise.
-                10/21/16 RSB   Added provision for --flip.
-*/
+ *  Copyright 2003-2005,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ *  This file is part of yaAGC.
+ *
+ *  yaAGC is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  yaAGC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with yaAGC; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  Filename:     yaYUL.h
+ *  Purpose:      This is a header file for use with yaYUL.c.
+ *  Mod History:  04/11/03 RSB   Began.
+ *                04/19/03 RSB   Began reworking for better use of
+ *                               addresses.
+ *                06/13/03 RSB   Changed criteria for assigning current
+ *                               address to a label.
+ *                07/03/04 RSB   Now provide an array into which the binary
+ *                               can be buffered for later output to a file.
+ *                07/07/04 RSB   Aliases for ZL and ZQ instructions fixed.
+ *                07/09/04 RSB   Added 2FCADR.
+ *                07/21/04 RSB   Now discard COUNT.  Added the "special
+ *                               downlink opcodes".  Added CAE, CAF, BBCON,
+ *                               2CADR, 2BCADR.
+ *                07/22/04 RSB   Added interpretive opcodes.
+ *                07/23/04 RSB   Added VN, 2OCT, SBANK=, MM, BOF.
+ *                07/30/04 RSB   Allowed for operation types to be added
+ *                               to shift operands.
+ *                09/04/04 RSB   CADR can now pinch-hit for an interpretive operand.
+ *                09/05/04 RSB   Added =MINUS pseudo-op.
+ *                07/27/05 JMS   Added SymbolFile_t, SymbolLines_t and added to
+ *                               Symbol_t for symbol debugging
+ *                07/28/05 JMS   Added support for writing SymbolLines_to to symbol
+ *                               table file.
+ *                06/27/09 RSB   Added HtmlOut.
+ *                06/29/09 RSB   Added the InstOpcode field.
+ *                07/01/09 RSB   Altered the way the highlighting styles
+ *                               (COLOR_XXX) work in order to make them
+ *                               more flexible and to shorten up the HTML
+ *                               files more.
+ *                07/25/09 RSB   Added lots of stuff related to providing
+ *                               separate binary codes for Block 1 vs. Block 2.
+ *                09/03/09 JL    Added CHECK= and =ECADR directives.
+ *                01/31/10 RSB   Added Syllable field to Address_t for
+ *                               Gemini OBC and Apollo LVDC.
+ *                08/18/16 RSB   Moved global variables originally allocated
+ *                               here, but only when #included in Pass.c,
+ *                               directly into Pass.c.  It's just too difficult
+ *                               to work with them through the Eclipse IDE
+ *                               otherwise.
+ *                10/21/16 RSB   Added provision for --flip.  Made some changes
+ *                               which might be helpful for building with
+ *                               MS Visual Studio.
+ */
 
 #ifndef INCLUDED_YAYUL_H
 #define INCLUDED_YAYUL_H
 
 #include <stdio.h>
 
+#if defined(WIN32) && defined(_MSC_VER )
+#define MSC_VS
+#endif
+
 //-------------------------------------------------------------------------
 // Constants.
+
+#ifdef MSC_VS
+#define NVER "TBD"
+#define _CONSOLE
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 // The following constant should be commented out in production code.
 // It is defined only to allow yaYUL to continue to be buildable while
@@ -74,7 +86,10 @@
 // fail) is in progress.
 #define TBD 0
 
-enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
+enum OpType_t
+{
+  OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO
+};
 
 // Colors for HTML.
 #if 0
@@ -140,7 +155,6 @@ enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 #define ERASABLE        0x10000
 #define ENUMBER         0x20000
 
-#define VALID_ADDRESS ((const Address_t) { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } )
 #define INVALID_ADDRESS { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define INVALID_BANK { 0, INVALID_ADDRESS, INVALID_ADDRESS }
 
@@ -150,27 +164,28 @@ enum OpType_t { OP_BASIC, OP_INTERPRETER, OP_DOWNLINK, OP_PSEUDO };
 // A datatype used for addresses or symbol values.  It can represent constants,
 // or addresses in all their glory. IF THIS STRUCTURE IS CHANGED, THE MACROS
 // THAT IMMEDIATELY FOLLOW IT MUST ALSO BE FIXED.
-typedef struct {
+typedef struct
+{
   // We always want the Invalid bit to come first, for the purpose of easily
   // writing static initializers.
-  unsigned Invalid:1;                   // If 1, not yet resolved.
-  unsigned Constant:1;                  // If 1, it's a constant, not an address.
-  unsigned Address:1;                   // If 1, it really is an address.
-  unsigned SReg:12;                     // S-register part of the address.
-  unsigned Erasable:1;                  // If 1, it's in erasable memory.
-  unsigned Fixed:1;                     // If 1, it's in fixed memory.
+  unsigned Invalid :1;                   // If 1, not yet resolved.
+  unsigned Constant :1;                // If 1, it's a constant, not an address.
+  unsigned Address :1;                   // If 1, it really is an address.
+  unsigned SReg :12;                     // S-register part of the address.
+  unsigned Erasable :1;                  // If 1, it's in erasable memory.
+  unsigned Fixed :1;                     // If 1, it's in fixed memory.
   // Note that for some address ranges, the following two are not in
   // conflict.  Erasable banks 0-1 overlap unbanked erasable memory,
   // while fixed banks 2-3 overlap unbanked fixed memory.
-  unsigned Unbanked:1;                  // If 1, it's in unbanked memory.
-  unsigned Banked:1;                    // If 1, it's in banked memory.
+  unsigned Unbanked :1;                  // If 1, it's in unbanked memory.
+  unsigned Banked :1;                    // If 1, it's in banked memory.
   // If Banked==0, the following bits are assigned to be zero.
-  unsigned EB:3;                        // The EB bank bits.
-  unsigned FB:5;                        // The FB bank bits.
-  unsigned Super:1;                     // The super-bank bit.
+  unsigned EB :3;                        // The EB bank bits.
+  unsigned FB :5;                        // The FB bank bits.
+  unsigned Super :1;                     // The super-bank bit.
   // Status bit.  If set, the address is actually invalid, since
   // by implication it is in the wrong bank.
-  unsigned Overflow:1;                  // If 1, last inc. overflowed bank.
+  unsigned Overflow :1;                  // If 1, last inc. overflowed bank.
   // Last, but not least, the value itself.
   int Value;                            // Constant or full pseudo-address.
   // The syllable number ... just for Gemini OBC and Apollo LVDC.
@@ -178,9 +193,17 @@ typedef struct {
 } Address_t;
 
 // Invalid, Constant, Address, SReg, Erasable, Fixed, Unbanked, Banked, EB, FB, Super, Overflow, Value, Syllable.
+#ifdef MSC_VS
+#define VALID_ADDRESS ( { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } )
+#define REG(n) ( { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 })
+#define CONSTANT(n) ( { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n, 0 })
+#define FIXEDADD(n) ( { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 })
+#else
+#define VALID_ADDRESS ((const Address_t) { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } )
 #define REG(n) ((const Address_t) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 })
 #define CONSTANT(n) ((const Address_t) { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n, 0 })
 #define FIXEDADD(n) ((const Address_t) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 })
+#endif
 
 //----------------------------------------------------------------------------
 // JMS: Begin additions for output of symbol table to a file for symbolic
@@ -204,10 +227,11 @@ typedef struct {
 // The SymbolFile_t structure holds the path of the source files (we
 // assume for now there is only one), and the number of Symbol_t and
 // SymbolLine_t structures which follow in the file.
-typedef struct {
+typedef struct
+{
   char SourcePath[MAX_PATH_LENGTH];     // Base path for all source
-  int  NumberSymbols;                   // # of Symbol_t structs
-  int  NumberLines;                     // # of SymbolLine_t structs
+  int NumberSymbols;                   // # of Symbol_t structs
+  int NumberLines;                     // # of SymbolLine_t structs
 } SymbolFile_t;
 
 // The Symbol_t structure represents a symbol within the symbol table
@@ -215,7 +239,8 @@ typedef struct {
 // modifications include adding a "type" to distinguish between symbols
 // which are labels in the code and symbols which are variable names, and
 // the source file from which the symbol came from and its line number
-typedef struct {
+typedef struct
+{
   char Namespace;                       // Kept for historical purposes
   char Name[1 + MAX_LABEL_LENGTH];      // The name of the symbol
   Address_t Value;                      // The symbol address
@@ -242,7 +267,8 @@ typedef struct {
 // file. The location of the line of code is given by an Address_t struct
 // although typically these should only contain addresses of fixed memory
 // locations.
-typedef struct {
+typedef struct
+{
   Address_t CodeAddress;              // The fixed memory location of the code
   char FileName[MAX_FILE_LENGTH];     // The source file name
   unsigned int LineNumber;            // Line number in the source
@@ -257,36 +283,42 @@ typedef struct {
 // Edit a symbol in the table, but include symbol debugging information
 // such as the symbol's type, and the source file/line number from which
 // it came.
-int EditSymbolNew(const char *Name, Address_t *Value, int Type, char *FileName,
-                  unsigned int LineNumber);
+int
+EditSymbolNew(const char *Name, Address_t *Value, int Type, char *FileName,
+    unsigned int LineNumber);
 
 // Writes the symbol table to a file in binary format. See yaYUL.h for
 // more information about the format. Takes the name of the symbol file.
-void WriteSymbolsToFile(char *fname);
+void
+WriteSymbolsToFile(char *fname);
 
 // JMS: 07.28
 //-------------------------------------------------------------------------
 // Delete the line table.
-void ClearLines(void);
+void
+ClearLines(void);
 
 //-------------------------------------------------------------------------
 // Adds a new program line to the table. Takes the Address_t at which this
 // is stored in (fixed) memory, and the file name and line number where it
 // is found. Takes the number of words the instruction takes up in memory.
 // Returns 0 on success, or non-zero on fatal error.
-int AddLine(Address_t *Address, const char *FileName, int LineNumber);
+int
+AddLine(Address_t *Address, const char *FileName, int LineNumber);
 
 //-------------------------------------------------------------------------
 // Sort the line table. Takes which assembler we are using (SORT_YUL or
 // SORT_LEMAP) to use the proper sorting function for the addressing scheme.
-void SortLines(int Type);
+void
+SortLines(int Type);
 
 //----------------------------------------------------------------------------
 // JMS: End additions for output of symbol table
 //----------------------------------------------------------------------------
 
 // For EBANK= and SBANK= manipulations.
-typedef struct {
+typedef struct
+{
   int oneshotPending;              // Set while a one-shot is possible.
   Address_t current;               // Current setting.
   Address_t last;                  // Backup used during 1-shot.
@@ -296,13 +328,15 @@ typedef struct {
 typedef char Line_t[1 + MAX_LINE_LENGTH];
 
 // Stuff for parsers.
-typedef struct {
+typedef struct
+{
   Address_t ProgramCounter;             // Before the operation.
   int Reserved;                         // Unused.
-  char *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2, *Comment, *Extra, *Alias;
-  int Index;     
-  unsigned Extend:1;
-  unsigned IndexValid:1;     
+  char *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2, *Comment, *Extra,
+      *Alias;
+  int Index;
+  unsigned Extend :1;
+  unsigned IndexValid :1;
   Bank_t EBank;
   Bank_t SBank;
   // This isn't really column 8, but rather the column preceding the operator,
@@ -316,7 +350,8 @@ typedef struct {
   int commentColumn;
 } ParseInput_t;
 
-typedef struct {
+typedef struct
+{
   Address_t ProgramCounter;             // After the operation.
   int Reserved;                         // Unused.
   int Words[MAX_ASSEMBLED_WORDS];       // Binary data assembled
@@ -324,22 +359,24 @@ typedef struct {
   Line_t ErrorMessage;                  // If any.
   Address_t LabelValue;                 // Value of the label.
   int Index;
-  unsigned Warning:1;                   // Non-zero for warning.
-  unsigned Fatal:1;                     // Non-zero for fatal error.
-  unsigned LabelValueValid:1;           // Non-zero if LabelValue valid. 
-  unsigned Extend:1;
-  unsigned IndexValid:1;     
+  unsigned Warning :1;                   // Non-zero for warning.
+  unsigned Fatal :1;                     // Non-zero for fatal error.
+  unsigned LabelValueValid :1;           // Non-zero if LabelValue valid.
+  unsigned Extend :1;
+  unsigned IndexValid :1;
   Bank_t EBank;                         // For EBANK= manipulations.
   Bank_t SBank;                         // For SBANK= manipulations.
   int Equals;                           // Non-zero if = or EQUALS.
   char Column8;                         // Used only for Block1.
 } ParseOutput_t;
 
-typedef int Parser_t(ParseInput_t *ParseIn, ParseOutput_t *ParseOut);
+typedef int
+Parser_t(ParseInput_t *ParseIn, ParseOutput_t *ParseOut);
 
 // A structure for matching operator names to the functions for processing
 // them.
-typedef struct {
+typedef struct
+{
   char Name[MAX_LABEL_LENGTH + 1];
   enum OpType_t OpType;
   Parser_t *Parser;                     // If NULL, check for alias.
@@ -348,18 +385,19 @@ typedef struct {
   // The following have really been introduced for the "special downlink
   // opcodes", which are just like some existing opcodes except that 
   // an extra value may be added and the total may be complemented.
-  int Adder;                            // Extra value to add to binary (1st word).
+  int Adder;                         // Extra value to add to binary (1st word).
   int XMask;                            // Value to XOR after adding.
   int Adder2;
   int XMask2;
-  int PinchHit;                         // Act in place of an interpretive operand.
+  int PinchHit;                      // Act in place of an interpretive operand.
 } ParserMatch_t;
 
 // A structure for data about how to assemble interpreter opcodes.  This
 // COULD be handled using the ParserMatch_t structure, if I was willing to
 // add symbols for all of the interpreter codes to the symbol table.
 // However, I'm not really willing to do that.
-typedef struct {
+typedef struct
+{
   char Name[MAX_LABEL_LENGTH + 1];
   unsigned char Code;
   unsigned char NumOperands;
@@ -374,86 +412,125 @@ typedef struct {
 //-------------------------------------------------------------------------
 // Function prototypes.
 
-int Add(int n1, int n2);
-void IncPc(Address_t *Input, int Increment, Address_t *Output);
-void PseudoToSegmented(int Value, ParseOutput_t *OutputRecord);
-void PseudoToEBanked(int Value, ParseOutput_t *OutputRecord);
-int PseudoToStruct(int Value, Address_t *Address);
+int
+Add(int n1, int n2);
+void
+IncPc(Address_t *Input, int Increment, Address_t *Output);
+void
+PseudoToSegmented(int Value, ParseOutput_t *OutputRecord);
+void
+PseudoToEBanked(int Value, ParseOutput_t *OutputRecord);
+int
+PseudoToStruct(int Value, Address_t *Address);
 
 // From SymbolPass.c
-void SymbolPass(const char *InputFilename);
+void
+SymbolPass(const char *InputFilename);
 
 // From Pass.c
-int Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals, int *Warnings);
-int AddressPrint(Address_t *Address);
+int
+Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
+    int *Warnings);
+int
+AddressPrint(Address_t *Address);
 
 // From SymbolTable.c
-void ClearSymbols(void);
-int AddSymbol(const char *Name);
-int EditSymbol(const char *Name, Address_t *Value);
-int SortSymbols(void);
-Symbol_t *GetSymbol(const char *Name);
-void PrintSymbols(void);
-void PrintSymbolsToFile(FILE *fp);
-int UnresolvedSymbols(void);
-double ScaleFactor(char *s);
-int GetOctOrDec(const char *s, int *Value);
-char *NormalizeFilename(char *SourceName);
-int HtmlCreate(char *Filename);
-void HtmlClose(void);
-int HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize, 
-              char *CurrentFilename, int *CurrentLineAll, int *CurrentLineInFile);
-char *NormalizeAnchor(char *Name);
-char *NormalizeString(char *Input);
-char *NormalizeStringN(char *Input, int PadTo);
+void
+ClearSymbols(void);
+int
+AddSymbol(const char *Name);
+int
+EditSymbol(const char *Name, Address_t *Value);
+int
+SortSymbols(void);
+Symbol_t *
+GetSymbol(const char *Name);
+void
+PrintSymbols(void);
+void
+PrintSymbolsToFile(FILE *fp);
+int
+UnresolvedSymbols(void);
+double
+ScaleFactor(char *s);
+int
+GetOctOrDec(const char *s, int *Value);
+char *
+NormalizeFilename(char *SourceName);
+int
+HtmlCreate(char *Filename);
+void
+HtmlClose(void);
+int
+HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
+    char *CurrentFilename, int *CurrentLineAll, int *CurrentLineInFile);
+char *
+NormalizeAnchor(char *Name);
+char *
+NormalizeString(char *Input);
+char *
+NormalizeStringN(char *Input, int PadTo);
 
 // From ParseGeneral.c.
-int ParseGeneral(ParseInput_t *, ParseOutput_t *, int, int);
+int
+ParseGeneral(ParseInput_t *, ParseOutput_t *, int, int);
 
 // From Parse2DEC.c.
-int FetchSymbolPlusOffset(Address_t *OldPc, char *Operand, char *Mod1, Address_t *NewPc);
+int
+FetchSymbolPlusOffset(Address_t *OldPc, char *Operand, char *Mod1,
+    Address_t *NewPc);
 
 // From ParseERASE.c
-int GetErasableBank(Address_t pc);
+int
+GetErasableBank(Address_t pc);
 
 // From ParseGENADR.c
-int GetFixedBank(Address_t pc);
+int
+GetFixedBank(Address_t pc);
 
 // From ParseBANK.c
-void StartBankCounts(void);
-void UpdateBankCounts(Address_t *pc);
-void PrintBankCounts(void);
-int GetBankCount(int Bank);
+void
+StartBankCounts(void);
+void
+UpdateBankCounts(Address_t *pc);
+void
+PrintBankCounts(void);
+int
+GetBankCount(int Bank);
 
 // From ParseST.c
-int ParseComma(ParseInput_t *Record);
+int
+ParseComma(ParseInput_t *Record);
 
 // From Utilities.c.
-void FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue);
-void PrintAddress(const Address_t *address);
-void PrintBank(const Bank_t *bank);
-void PrintAddress(const Address_t *address);
-void PrintInputRecord(const ParseInput_t *record);
-void PrintOutputRecord(const ParseOutput_t *record);
-void PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord);
+void
+FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue);
+void
+PrintAddress(const Address_t *address);
+void
+PrintBank(const Bank_t *bank);
+void
+PrintAddress(const Address_t *address);
+void
+PrintInputRecord(const ParseInput_t *record);
+void
+PrintOutputRecord(const ParseOutput_t *record);
+void
+PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord);
 
 // Various parsers.
-Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK, ParseEquate,
-         Parse2DEC, Parse2DECstar, ParseDEC, ParseDECstar,
-         ParseSETLOC, ParseOCT, ParseTC, ParseCS, ParseAD,
-         ParseMASK, ParseDCA, ParseDCS, ParseMP,
-         ParseCCS, ParseTCF, ParseLXCH, ParseINCR, ParseCA,
-         ParseDAS, ParseADS, ParseINDEX, ParseDXCH, ParseTS,
-         ParseXCH, ParseDV, ParseBZF, ParseMSU, ParseQXCH,
-         ParseAUG, ParseDIM, ParseBZMF, ParseSU, ParseRAND, 
-         ParseREAD, ParseROR, ParseRXOR, ParseWAND, ParseWOR, 
-         ParseWRITE, ParseERASE, ParseGENADR, ParseINDEX,
-         ParseCADR, ParseFCADR, ParseECADR, ParseEBANKEquals, 
-         Parse2FCADR, ParseCAE, ParseCAF, ParseBBCON, Parse2CADR,
-         ParseDNCHAN, ParseSTCALL, ParseSTODL, ParseSTORE, ParseSTOVL,
-         ParseVN, Parse2OCT, ParseSBANKEquals, ParseEDRUPT,
-         ParseInterpretiveOperand, ParseEqMinus,
-         ParseXCADR, ParseSECSIZ;
+Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
+    ParseEquate, Parse2DEC, Parse2DECstar, ParseDEC, ParseDECstar, ParseSETLOC,
+    ParseOCT, ParseTC, ParseCS, ParseAD, ParseMASK, ParseDCA, ParseDCS, ParseMP,
+    ParseCCS, ParseTCF, ParseLXCH, ParseINCR, ParseCA, ParseDAS, ParseADS,
+    ParseINDEX, ParseDXCH, ParseTS, ParseXCH, ParseDV, ParseBZF, ParseMSU,
+    ParseQXCH, ParseAUG, ParseDIM, ParseBZMF, ParseSU, ParseRAND, ParseREAD,
+    ParseROR, ParseRXOR, ParseWAND, ParseWOR, ParseWRITE, ParseERASE,
+    ParseGENADR, ParseINDEX, ParseCADR, ParseFCADR, ParseECADR,
+    ParseEBANKEquals, Parse2FCADR, ParseCAE, ParseCAF, ParseBBCON, Parse2CADR,
+    ParseDNCHAN, ParseSTCALL, ParseSTODL, ParseSTORE, ParseSTOVL, ParseVN,
+    Parse2OCT, ParseSBANKEquals, ParseEDRUPT, ParseInterpretiveOperand,
+    ParseEqMinus, ParseXCADR, ParseSECSIZ;
 
 extern int Block1;
 extern int blk2;
@@ -468,7 +545,7 @@ extern int nnnnFields[4];
 extern unsigned char SwitchIncrement[4], SwitchInvert[4];
 extern int OpcodeOffset;
 extern int ArgType;
-  
+
 extern int formatOnly;
 extern int flipBugger[044];
 

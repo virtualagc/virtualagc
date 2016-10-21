@@ -1,30 +1,34 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC. 
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:     ParseERASE.c
-  Purpose:      Assembles the ERASE pseudo-op.
-  Mod History:  04/19/03 RSB   Began.
-                09/04/04 RSB   Eliminated range allocation (i.e.,
-                               "ERASE start - end"). It turns out
-                               that this is exactly the same as
-                               "EQUALS start".
-*/
+ *  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ *  This file is part of yaAGC.
+ *
+ *  yaAGC is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  yaAGC is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with yaAGC; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  Filename:   ParseERASE.c
+ *  Purpose:    Assembles the ERASE pseudo-op.
+ *  Mods:       04/19/03 RSB    Began.
+ *              09/04/04 RSB    Eliminated range allocation (i.e.,
+ *                              "ERASE start - end"). It turns out
+ *                              that this is exactly the same as
+ *                              "EQUALS start".
+ *              10/21/16 RSB    Eliminated a few comments that were
+ *                              apparently causing problems for
+ *                              MS Visual C, but which served no purpose
+ *                              anyway.
+ */
 
 #include "yaYUL.h"
 #include <stdlib.h>
@@ -44,18 +48,19 @@
 //       7      Bank 7   (03400-03777)
 
 int GetErasableBank(int LinearAddress)
-{
-  if (LinearAddress < 0 || LinearAddress > 03777)
+  {
+    if (LinearAddress < 0 || LinearAddress > 03777)
     return (-2);
-  if (LinearAddress < 01400)
+    if (LinearAddress < 01400)
     return (-1);
-  return (LinearAddress / 0400);    
-}
+    return (LinearAddress / 0400);
+  }
 #endif
 
 //------------------------------------------------------------------------
 // Return non-zero on unrecoverable error.
-int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   int Value, i;
 
@@ -63,7 +68,7 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
 
@@ -72,7 +77,7 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
   if (InRecord->Extend && !InRecord->IndexValid)
     {
-      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
@@ -116,13 +121,17 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                 }
               else
                 {
-                  ParseOutput_t Dummy = { { 0 } }, Dummy2 = { { 0 } };
+                  ParseOutput_t Dummy =
+                    {
+                        { 0}}, Dummy2 =
+                    {
+                        { 0}};
                   PseudoToSegmented(Value, &Dummy);
                   PseudoToSegmented(Value2, &Dummy2);
-                  if (Dummy.Fatal || Dummy.Warning || Dummy2.Fatal || Dummy2.Warning || 
-                      Dummy.ProgramCounter.Invalid || !Dummy.ProgramCounter.Erasable || 
-                      Dummy2.ProgramCounter.Invalid || !Dummy2.ProgramCounter.Erasable || 
-                      Dummy.ProgramCounter.Banked != Dummy2.ProgramCounter.Banked || 
+                  if (Dummy.Fatal || Dummy.Warning || Dummy2.Fatal || Dummy2.Warning ||
+                      Dummy.ProgramCounter.Invalid || !Dummy.ProgramCounter.Erasable ||
+                      Dummy2.ProgramCounter.Invalid || !Dummy2.ProgramCounter.Erasable ||
+                      Dummy.ProgramCounter.Banked != Dummy2.ProgramCounter.Banked ||
                       Dummy.ProgramCounter.EB != Dummy2.ProgramCounter.EB)
                     {
                       strcpy(OutRecord->ErrorMessage, "May span bank boundary.");
@@ -132,22 +141,11 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                   OutRecord->ProgramCounter = Dummy2.ProgramCounter;
                 }
 #else // 0
-              //char Mod1[1 + MAX_LINE_LENGTH], Mod2[1 + MAX_LINE_LENGTH];
-
-              //strcpy(Mod1, InRecord->Mod1);
-              //strcpy(Mod2, InRecord->Mod2);
-              //*InRecord->Mod1 = 0;
-              //*InRecord->Mod2 = 0;
-              //strcpy(InRecord->Operator, "EQUALS");            
               ParseEQUALS(InRecord, OutRecord);
-
-              //strcpy(InRecord->Mod1, Mod1);
-              //strcpy(InRecord->Mod2, Mod2);
-              //strcpy(InRecord->Operator, "ERASE");
 #endif // 0
             }
           else
-            {  
+            {
               // This is the normal case, "ERASE n".
               if (0 != *InRecord->Mod1 && !OutRecord->Fatal)
                 {
@@ -155,18 +153,21 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                   OutRecord->Warning = 1;
                 }
 
-              IncPc(&InRecord->ProgramCounter, 1 + Value, &OutRecord->ProgramCounter);
+              IncPc(&InRecord->ProgramCounter, 1 + Value,
+                  &OutRecord->ProgramCounter);
 
               if (!OutRecord->ProgramCounter.Invalid)
                 {
                   if (!OutRecord->ProgramCounter.Erasable)
                     {
-                      strcpy (OutRecord->ErrorMessage, "Not in erasable memory.");
+                      strcpy(OutRecord->ErrorMessage,
+                          "Not in erasable memory.");
                       OutRecord->Fatal = 1;
                     }
                   else if (OutRecord->ProgramCounter.Overflow)
                     {
-                      strcpy (OutRecord->ErrorMessage, "May overflow memory bank.");
+                      strcpy(OutRecord->ErrorMessage,
+                          "May overflow memory bank.");
                       OutRecord->Warning = 1;
                     }
                 }
@@ -176,10 +177,9 @@ int ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   else if (0 != *InRecord->Operand)
     {
       // Note that if the Operand field is simply missing, it's legal.
-      strcpy (OutRecord->ErrorMessage, "Illegal number.");
+      strcpy(OutRecord->ErrorMessage, "Illegal number.");
       OutRecord->Fatal = 1;
-    }  
-  return (0);  
+    }
+  return (0);
 }
-
 
