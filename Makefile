@@ -20,7 +20,7 @@
 # Purpose:	This makefile is used (recursively) to build all
 #		components of the Virtual AGC project, for Linux and
 #		similar targets.
-# Mods:		10/22/03 RSB	Wrote.
+# Mods:		10/22/03 RSB	Wrote. 
 #		11/02/03 RSB	Added Luminary131.
 #		11/13/03 RSB	Added Colossus249.
 #		05/01/04 RSB	Now provide yadsky also as yaDSKY, after install.
