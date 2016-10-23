@@ -13,6 +13,10 @@
 #               2016-10-18 HG   Add missing interpretive operand ZPRIME
 #                                                                8D,1
 #                               Fix opcode STODL -> STCALL
+#		2016-10-23 RSB	All of the interpretive operands were 
+#				mis-aligned.  (Possibly the file had once been
+#				processed "yaYUL --format" was buggy with
+#				respect to interpretive-operand alignment.)
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of 
@@ -50,53 +54,53 @@
 
 
 CALCGTA         ITA             DLOAD                           # PUSHDOWN 00,02,16D,18D,22D-26D,32D-36D
-                S2                                              # XDC = (XD1 XD2 XD3)
-                XDC                                             # YDC = (YD1 YD2 YD3)
+                                S2                              # XDC = (XD1 XD2 XD3)
+                                XDC                             # YDC = (YD1 YD2 YD3)
                 PDDL            PDDL                            # ZDC = (ZD1 ZD2 ZD3)
-                ZERODP                                          
-                XDC             +4                              
+                                ZERODP                          
+                                XDC             +4              
                 DCOMP           VDEF                            
                 UNIT                                            
                 STODL           ZPRIME                          # ZP = UNIT(-XD3 O XD1) = (ZP1 ZP2 ZP3)
-                ZPRIME                                          
+                                ZPRIME                          
 
                 SR1                                             
                 STODL           SINTH                           # SIN(IGC) = ZP1
-                ZPRIME          +4                              
+                                ZPRIME          +4              
                 SR1                                             
                 STCALL          COSTH                           # COS(IGC) = ZP3
-                ARCTRIG                                         
+                                ARCTRIG                         
 
                 STODL           IGC                             # Y GYRO TORQUING ANGLE  FRACTION OF REV.
-                XDC             +2                              
+                                XDC             +2              
                 SR1                                             
                 STODL           SINTH                           # SIN(MGC) = XD2
-                ZPRIME                                          
+                                ZPRIME                          
 
                 DMP             PDDL                            
-                XDC             +4                              # PD00 = (ZP1)(XD3)
-                ZPRIME          +4                              
+                                XDC             +4              # PD00 = (ZP1)(XD3)
+                                ZPRIME          +4              
 
                 DMP             DSU                             
-                XDC                                             # MPAC = (ZP3)(XD1)
+                                XDC                             # MPAC = (ZP3)(XD1)
                 STADR                                           
                 STCALL          COSTH                           # COS(MGC) = MPAC - PD00
-                ARCTRIG                                         
+                                ARCTRIG                         
 
                 STOVL           MGC                             # Z GYRO TORQUING ANGLE  FRACTION OF REV.
-                                ZPRIME
+                                ZPRIME                          
 ## Page 405
                 DOT                                             
-                ZDC                                             
+                                ZDC                             
                 STOVL           COSTH                           # COS(OGC) = ZP . ZDC
-                ZPRIME                                          
+                                ZPRIME                          
                 DOT                                             
-                YDC                                             
+                                YDC                             
                 STCALL          SINTH                           # SIN(OGC) = ZP . YDC
-                ARCTRIG                                         
+                                ARCTRIG                         
 
                 STCALL          OGC                             # X GYRO TORQUING ANGLE  FRACTION OF REV.
-                S2                                              
+                                S2                              
 ## Page 406
 
 # ARCTRIG COMPUTES AN ANGLE GIVEN THE SINE AND COSINE OF THIS ANGLE.
@@ -109,40 +113,40 @@ CALCGTA         ITA             DLOAD                           # PUSHDOWN 00,02
 
 
 ARCTRIG         DLOAD           ABS                             # PUSHDOWN 16D,18D,20D,22D-26D
-                SINTH                                           
+                                SINTH                           
                 DSU             BMN                             
-                QTSN45                                          # ABS(SIN/4) - SIN(45)/4
-                TRIG1                                           # IF (-45,45) OR (135,-135)
+                                QTSN45                          # ABS(SIN/4) - SIN(45)/4
+                                TRIG1                           # IF (-45,45) OR (135,-135)
 
 
 
                 DLOAD           SL1                             # (45,135) OR (-135,-45)
-                COSTH                                           
+                                COSTH                           
                 ACOS            SIGN                            
-                SINTH                                           
+                                SINTH                           
                 STORE           THETA                           # X = ARCCOS(COS) WITH SIGN(SIN)
                 RVQ                                             
 
 
 
 TRIG1           DLOAD           SL1                             # (-45,45) OR (135,-135)
-                SINTH                                           
+                                SINTH                           
                 ASIN                                            
                 STODL           THETA                           # X = ARCSIN(SIN) WITH SIGN(SIN)
-                COSTH                                           
+                                COSTH                           
                 BMN                                             
-                TRIG2                                           # IF (135,-135)
+                                TRIG2                           # IF (135,-135)
 
                 DLOAD           RVQ                             
-                THETA                                           # X = ARCSIN(SIN)   (-45,45)
+                                THETA                           # X = ARCSIN(SIN)   (-45,45)
 
 
 
 TRIG2           DLOAD           SIGN                            # (135,-135)
-                HALFDP                                          
-                SINTH                                           
+                                HALFDP                          
+                                SINTH                           
                 DSU                                             
-                THETA                                           
+                                THETA                           
                 STORE           THETA                           # X = .5 WITH SIGN(SIN) - ARCSIN(SIN)
                 RVQ                                             #                  (+) - (+) OR (-) - (-)
 ## Page 407
@@ -160,29 +164,29 @@ TRIG2           DLOAD           SIGN                            # (135,-135)
 
 
 SMNB            ITA             CLEAR                           # PUSHDOWN 00,02,04-10D,30D,32D-36D
-                S2                                              
-                NBSMBIT                                         # SET NBSMBIT = 0
+                                S2                              
+                                NBSMBIT                         # SET NBSMBIT = 0
 
 SMNB1           AXT,1           AXT,2                           # ROTATE X,Z, ABOUT Y
-                4                                               
-                0                                               
+                                4                               
+                                0                               
                 CALL                                            
-                AXISROT                                         
+                                AXISROT                         
 
                 AXT,1           AXT,2                           # ROTATE Y,X ABOUT Z
-                2                                               
-                4                                               
+                                2                               
+                                4                               
                 CALL                                            
-                AXISROT                                         
+                                AXISROT                         
 
                 AXT,1           AXT,2                           # ROTATE Z,Y ABOUT X
-                0                                               
-                2                                               
+                                0                               
+                                2                               
                 CALL                                            
-                AXISROT                                         
+                                AXISROT                         
 
                 GOTO                                            
-                S2                                              
+                                S2                              
 ## Page 408
 
 # NBSM TRANSFORMS A STAR DIRECTION FROM NAVIGATION BASE TO STABLE MEMBER COORDINATES.
@@ -198,29 +202,29 @@ SMNB1           AXT,1           AXT,2                           # ROTATE X,Z, AB
 
 
 NBSM            ITA             SET                             # PUSHDOWN 00,02,04-10D,30D,32D-36D
-                S2                                              
-                NBSMBIT                                         # SET NBSMBIT = 1
+                                S2                              
+                                NBSMBIT                         # SET NBSMBIT = 1
 
 NBSM2           AXT,1           AXT,2                           # ROTATE Z,Y ABOUT X
-                0                                               
-                2                                               
+                                0                               
+                                2                               
                 CALL                                            
-                AXISROT                                         
+                                AXISROT                         
 
                 AXT,1           AXT,2                           # ROTATE Y,X ABOUT Z
-                2                                               
-                4                                               
+                                2                               
+                                4                               
                 CALL                                            
-                AXISROT                                         
+                                AXISROT                         
 
                 AXT,1           AXT,2                           # ROTATE X,Z, ABOUT Y
-                4                                               
-                0                                               
+                                4                               
+                                0                               
                 CALL                                            
-                AXISROT                                         
+                                AXISROT                         
 
                 GOTO                                            
-                S2                                              
+                                S2                              
 ## Page 409
 
 # AXISROT IS UTILIZED BY THE SMNB AND NBSM ROUTINES. SEE REMARKS ON THESE ROUTINES FOR INPUTS AND OUTPUTS.
@@ -228,57 +232,57 @@ NBSM2           AXT,1           AXT,2                           # ROTATE Z,Y ABO
 
 
 AXISROT         XSU,1           SLOAD*                          
-                S1                                              #      SMNB         .       NBSM
-                4,1                                             # IG    MG    OG    .  OG    MG    IG
+                                S1                              #      SMNB         .       NBSM
+                                4,1                             # IG    MG    OG    .  OG    MG    IG
                 RTB             XAD,1                           
-                CDULOGIC                                        
-                S1                                              
+                                CDULOGIC                        
+                                S1                              
                 STORE           30D                             
 
 ACCUROT         COS                                             
                 STODL           8D,1                            #              COS(ANGLE)
-                30D                                             
+                                30D                             
                 SIN                                             
                 STORE           10D,1                           #              SIN(ANGLE)
 
                 DMP*            SL1                             
-                32D             +4,2                            
+                                32D             +4,2            
                 PDDL*           DMP*                            #                  PD0
-                8D,1                                            # S3SIN S1SIN S2SIN . S2SIN S1SIN S3SIN
-                32D             +4,2                            
+                                8D,1                            # S3SIN S1SIN S2SIN . S2SIN S1SIN S3SIN
+                                32D             +4,2            
 
                 SL1             PDDL*                           #                  PD2
-                10D,1                                           # S3COS S1COS S2COS . S2COS S1COS S3COS
+                                10D,1                           # S3COS S1COS S2COS . S2COS S1COS S3COS
 
                 DMP*            SL1                             #                 MPAC
-                32D             +4,1                            # S1SIN S2SIN S3SIN . S3SIN S2SIN S1SIN
+                                32D             +4,1            # S1SIN S2SIN S3SIN . S3SIN S2SIN S1SIN
 
                 BOFF                                            
-                NBSMBIT                                         
-                AXISROT1                                        
+                                NBSMBIT                         
+                                AXISROT1                        
 
                 BDSU            STADR                           #                   .   PD2 - MPAC
                 STODL*          32D             +4,2            #                   . S2    S1    S3
-                8D,1                                            
+                                8D,1                            
 
                 DMP*            SL1                             #                   .      MPAC
-                32D             +4,1                            #                   . S3COS S2COS S1COS
+                                32D             +4,1            #                   . S3COS S2COS S1COS
 
                 DAD             STADR                           #                   .   PD0 + MPAC
                 STOVL           32D             +4,1            #                   . S3    S2    S1
-                32D                                             
+                                32D                             
                 RVQ                                             
 
 AXISROT1        DAD             STADR                           #   MPAC + PD2      .
                 STODL*          32D             +4,2            # S3    S1    S2    .
-                                8D,1
+                                8D,1                            
 ## Page 410      
                 DMP*            SL1                             #      MPAC         .
-                32D             +4,1                            # S1COS S2COS S3COS .
+                                32D             +4,1            # S1COS S2COS S3COS .
 
                 DSU             STADR                           #   MPAC - PD0      .
                 STOVL           32D             +4,1            # S1    S2    S3    .
-                32D                                             
+                                32D                             
                 RVQ                                             
 ## Page 411
 
@@ -291,62 +295,62 @@ AXISROT1        DAD             STADR                           #   MPAC + PD2  
 # THE OUTPUTS ARE THE THREE CDU DRIVING ANGLES AND ARE STORED SP AT THETAD, THETAD +1, AND THETAD +2.
 
 CALCGA          VLOAD           VXV                             # PUSHDONW 00-04,16D,18D
-                XNB                                             # XNB = OGA (OUTER GIMBAL AXIS)
-                YSM                                             # YSM = IGA (INNER GIMBAL AXIS)
+                                XNB                             # XNB = OGA (OUTER GIMBAL AXIS)
+                                YSM                             # YSM = IGA (INNER GIMBAL AXIS)
                 UNIT            PUSH                            # PD0 = UNIT(OGA X IGA) = MGA
 
                 DOT             ITA                             
-                ZNB                                             
-                S2                                              
+                                ZNB                             
+                                S2                              
                 STOVL           COSTH                           # COS(OG) = MGA . ZNB
-                0                                               
+                                0                               
                 DOT                                             
-                YNB                                             
+                                YNB                             
                 STCALL          SINTH                           # SIN(OG) = MGA . YNB
-                ARCTRIG                                         
+                                ARCTRIG                         
                 STOVL           OGC                             
-                0                                               
+                                0                               
 
                 VXV             DOT                             # PROVISION FOR MG ANGLE OF 90 DEGREES
-                XNB                                             
-                YSM                                             
+                                XNB                             
+                                YSM                             
                 SL1                                             
                 STOVL           COSTH                           # COS(MG) = IGA . (MGA X OGA)
-                YSM                                             
+                                YSM                             
                 DOT                                             
-                XNB                                             
+                                XNB                             
                 STCALL          SINTH                           # SIN(MG) = IGA . OGA
-                ARCTRIG                                         
+                                ARCTRIG                         
                 STORE           MGC                             
 
                 ABS             DSU                             
-                .166...                                         
+                                .166...                         
                 BPL                                             
-                GIMLOCK1                                        # IF ANGLE GREATER THAN 60 DEGREES
+                                GIMLOCK1                        # IF ANGLE GREATER THAN 60 DEGREES
 
 CALCGA1         VLOAD           DOT                             
-                ZSM                                             
-                0                                               
+                                ZSM                             
+                                0                               
                 STOVL           COSTH                           # COS(IG) = ZSM . MGA
-                XSM                                             
+                                XSM                             
 ## Page 412
                 DOT             STADR                           
                 STCALL          SINTH                           # SIN(IG) = XSM . MGA
-                ARCTRIG                                         
+                                ARCTRIG                         
 
                 STOVL           IGC                             
-                OGC                                             
+                                OGC                             
                 RTB                                             
-                V1STO2S                                         
+                                V1STO2S                         
                 STCALL          THETAD                          
-                S2                                              
+                                S2                              
 
 GIMLOCK1        EXIT                                            
                 TC              ALARM                           
                 OCT             00401                           
                 TC              INTPRET                         
                 GOTO                                            
-                CALCGA1                                         
+                                CALCGA1                         
 ## Page 413
 
 # AXISGEN COMPUTES THE COORDINATES OF ONE COORDINATE SYSTEM REFERRED TO ANOTHER COORDINATE SYSTEM.
@@ -360,70 +364,70 @@ GIMLOCK1        EXIT
 # AT LOCATIONS XDC, XDC +6, XDC +12D, AND STARAD, STARAD +6, STARAD +12D.
 
 AXISGEN         AXT,1           SSP                             # PUSHDOWN 00-22D,24-28D,30D
-                STARAD          +6                              
-                S1                                              
-                STARAD          -6                              
+                                STARAD          +6              
+                                S1                              
+                                STARAD          -6              
 
 AXISGEN1        VLOAD*          VXV*                            # 06D   UA = S1
-                STARAD          +12D,1                          #       STARAD +00D     UB = S1
-                STARAD          +18D,1                          
+                                STARAD          +12D,1          #       STARAD +00D     UB = S1
+                                STARAD          +18D,1          
                 UNIT                                            # 12D   VA = UNIT(S1 X S2)
                 STOVL*          STARAD          +18D,1          #       STARAD +06D     VB = UNIT(S1 X S2)
-                STARAD          +12D,1                          
+                                STARAD          +12D,1          
 
                 VXV*            VSL1                            
-                STARAD          +18D,1                          # 18D   WA = UA X VA
+                                STARAD          +18D,1          # 18D   WA = UA X VA
                 STORE           STARAD          +24D,1          #       STARAD +12D     WB = UB X VB
 
                 TIX,1                                           
-                AXISGEN1                                        
+                                AXISGEN1                        
 
                 AXC,1           SXA,1                           
-                6                                               
-                30D                                             
+                                6                               
+                                30D                             
 
                 AXT,1           SSP                             
-                18D                                             
-                S1                                              
-                6                                               
+                                18D                             
+                                S1                              
+                                6                               
 
                 AXT,2           SSP                             
-                6                                               
-                S2                                              
-                2                                               
+                                6                               
+                                S2                              
+                                2                               
 
 AXISGEN2        XCHX,1          VLOAD*                          
-                30D                                             # X1=-6 X2=+6   X1=-6 X2=+4     X1=-6 X2=+2
-                0,1                                             
+                                30D                             # X1=-6 X2=+6   X1=-6 X2=+4     X1=-6 X2=+2
+                                0,1                             
                 VXSC*           PDVL*                           # J=(UA)(UB1)   J=(UA)(UB2)     J=(UA)(UB3)
-                STARAD          +6,2                            
+                                STARAD          +6,2            
 ## Page 414
-                6,1                                             
+                                6,1                             
                 VXSC*                                           
                 STARAD          +12D,2                          
                 STOVL*          24D                             # K=(VA)(VB1)   J=(VA)(VB2)     J=(VA)(VB3)
-                12D,1                                           
+                                12D,1                           
 
                 VXSC*           VAD                             
-                STARAD          +18D,2                          # L=(WA)(WB1)   J=(WA)(WB2)     J=(WA)(WB3)
+                                STARAD          +18D,2          # L=(WA)(WB1)   J=(WA)(WB2)     J=(WA)(WB3)
                 VAD             VSL1                            
-                24D                                             
+                                24D                             
                 XCHX,1                                          
-                30D                                             
+                                30D                             
                 STORE           XDC             +18D,1          # XDC = L+J+K   YDC = L+J+K     ZDC = L+J+K
 
                 TIX,1                                           
-                AXISGEN3                                        
+                                AXISGEN3                        
 
 AXISGEN3        TIX,2                                           
-                AXISGEN2                                        
+                                AXISGEN2                        
 
                 VLOAD                                           
-                XDC                                             
+                                XDC                             
                 STOVL           STARAD                          
-                YDC                                             
+                                YDC                             
                 STOVL           STARAD          +6              
-                ZDC                                             
+                                ZDC                             
                 STORE           STARAD          +12D            
 
                 RVQ                                             
@@ -463,29 +467,29 @@ TRANSPSE        DXCH            STARAD          +2              # PUSHDOWN NONE
 # THREE UNIT VECTORS ARE STORED AT XSM, YSM, AND ZSM.
 
 SMD/EREF        ITA             VLOAD                           # PUSHDOWN 00,02,04-10D,30D,32D-36D
-                12D                                             
-                XUNIT                                           
+                                12D                             
+                                XUNIT                           
                 STCALL          32D                             
-                SMNB                                            # STABLE MEMBER TO NAVIGATION BASE
+                                SMNB                            # STABLE MEMBER TO NAVIGATION BASE
                 MXV             VSL1                            
-                STARAD                                          # THEN TO EARTH REFERENCE
+                                STARAD                          # THEN TO EARTH REFERENCE
                 STOVL           XSM                             
-                YUNIT                                           
+                                YUNIT                           
 
                 STCALL          32D                             
-                SMNB                                            # STABLE MEMBER TO NAVIGATION BASE
+                                SMNB                            # STABLE MEMBER TO NAVIGATION BASE
                 MXV             VSL1                            
-                STARAD                                          # THEN TO EARTH REFERENCE
+                                STARAD                          # THEN TO EARTH REFERENCE
                 STOVL           YSM                             
-                ZUNIT                                           
+                                ZUNIT                           
 
                 STCALL          32D                             
 ## Page 416
-                SMNB                                            # STABLE MEMBER TO NAVIGATION BASE
+                                SMNB                            # STABLE MEMBER TO NAVIGATION BASE
                 MXV             VSL1                            
-                STARAD                                          # THEN TO EARTH REFERENCE
+                                STARAD                          # THEN TO EARTH REFERENCE
                 STCALL          ZSM                             
-                12D                                             
+                                12D                             
 
 270DEG          2DEC            -.25                            
 
@@ -525,78 +529,78 @@ ZERODP          2DEC            0
 # AT 32D AND AVAILABLE IN VAC ON RETURN TO THE CALLING PROGRAM
 
 AOTNB           SETPD           SLOAD*                          
-                0                                               
-                3,1                                             
+                                0                               
+                                3,1                             
                 RTB             PUSH                            
-                CDULOGIC                                        
+                                CDULOGIC                        
                 STORE           14D                             
                 COS             PDDL                            
                 SIN             PUSH                            
                 SLOAD*          RTB                             
-                5,1                                             
-                CDULOGIC                                        
+                                5,1                             
+                                CDULOGIC                        
                 STORE           16D                             # STORE S IF S AND Y ARE ZERO, S=0
                 BZE             GOTO                            # S NOT ZERO
-                SISZ                                            # S=0
-                SCOMP                                           
+                                SISZ                            # S=0
+                                SCOMP                           
 SISZ            DLOAD           BZE                             # IS Y ZERO
-                14D                                             
-                YISZ                                            # Y=0
+                                14D                             
+                                YISZ                            # Y=0
                 GOTO                                            
-                SCOMP                                           
+                                SCOMP                           
 YISZ            DLOAD           GOTO                            
-                ZERODP                                          
-                SGOT                                            
+                                ZERODP                          
+                                SGOT                            
 SCOMP           DLOAD           DSU                             
-                14D                                             
-                16D                                             # Y=S
+                                14D                             
+                                16D                             # Y=S
                 BDSU                                            
-                NEARONE                                         # S=360-(Y-S)
+                                NEARONE                         # S=360-(Y-S)
 SGOT            DMP             PUSH                            
-                DP1/12                                          
+                                DP1/12                          
                 COS             PDDL                            
                 SIN             PUSH                            
                 DMP             SL1                             
-                0                                               
+                                0                               
                 STODL           0                               
 ## Page 418
-                2                                               
+                                2                               
                 DMP             STADR                           
                 STORE           2                               
 
                 SLOAD*          RTB                             
-                9D,1                                            
-                CDULOGIC                                        
+                                9D,1                            
+                                CDULOGIC                        
                 PUSH            SIN                             
                 PDDL            COS                             
                 PUSH            DMP                             
-                0                                               
+                                0                               
                 PDDL            DMP                             
-                4                                               
-                6                                               
+                                4                               
+                                6                               
                 DAD             SL1                             
                 STADR                                           
                 STODL           32D                             
 
                 DMP                                             
-                4                                               
+                                4                               
                 STODL           4                               
 
                 DMP             BDSU                            
-                0                                               
+                                0                               
                 PUSH            SLOAD*                          
-                8D,1                                            
+                                8D,1                            
                 RTB             PUSH                            
-                CDULOGIC                                        
+                                CDULOGIC                        
                 COS             PDDL                            
                 SIN                                             
                 STORE           0                               
 
                 DMP             PDDL                            
-                4                                               
-                6                                               
+                                4                               
+                                6                               
                 DMP             DAD                             
-                2                                               
+                                2                               
                 SL2                                             
                 STODL           34D                             
 
@@ -605,9 +609,9 @@ SGOT            DMP             PUSH
 
                 DMP                                             
                 BDSU            SL2                             
-                36D                                             
+                                36D                             
                 STOVL           36D                             
-                32D                                             
+                                32D                             
                 RVQ                                             
 ## Page 419
 DP1/12          2DEC            .0833333333                     
@@ -631,46 +635,46 @@ NEARONE         2DEC            .999999999
 
 
 AOTSM           ITA                                             
-                29D                                             
+                                29D                             
                 SETPD           LXC,1                           # PUT BASE ADR OF VAC AREA IN X1
-                12D                                             
-                S1                                              
+                                12D                             
+                                S1                              
                 DLOAD           PUSH                            # ZERO 12 - 13
-                ZERODP                                          
+                                ZERODP                          
                 SLOAD*          RTB                             # LOAD AZIMUTH ANGLE (D)
-                6,1                                             
-                CDULOGIC                                        
+                                6,1                             
+                                CDULOGIC                        
                 PUSH            COS                             
                 PDDL            SIN                             # 1/2 COSD 14-15
                 DCOMP           PUSH                            # -1/2 SIND 16-17
                 SLOAD*          RTB                             # LOAD ELEVATION ANGLE (E)
-                7,1                                             
-                CDULOGIC                                        
+                                7,1                             
+                                CDULOGIC                        
                 PUSH            COS                             
                 STODL           32D                             # 1/2COSE
                 SIN             PUSH                            # 1/2 SINE 18-19
                 DMP             SL1                             
-                16D                                             
+                                16D                             
                 STODL           34D                             # -1/2 SINE SIND UP 18-19
                 DMP             DCOMP                           
-                14D                                             
+                                14D                             
                 SL1                                             
                 STCALL          36D                             # -1/2SINE COSD
-                NBSM                                            # GET X PLANE IN SM
+                                NBSM                            # GET X PLANE IN SM
                 PDVL            STADR                           # X PLANE IN SM IN 12-17
                 STORE           32D                             # Y PLANE IN NB
                 XCHX,1          INCR,1                          
-                S1                                              # ADD ONE TO BASE ADR OF VAC AREA
-                1                                               
+                                S1                              # ADD ONE TO BASE ADR OF VAC AREA
+                                1                               
                 XCHX,1          CALL                            
-                S1                                              # PUT NEW BASE ADR BACK IN S1
-                NBSM                                            # GET Y PLANE IN SM
+                                S1                              # PUT NEW BASE ADR BACK IN S1
+                                NBSM                            # GET Y PLANE IN SM
                 VXV             VSL1                            
                 VCOMP                                           
 ## Page 421
                 STORE           32D                             # STORE STAR VEC REFERRED TO SM
                 GOTO                                            
-                29D                                             
+                                29D                             
 
 ## Page 422
 
@@ -678,26 +682,26 @@ AOTSM           ITA
 # THE HALF UNIT VECTOR, .5( SIN(S)COS(T),-SIN(T),COS(S)COS(T) ) IS LEFT IN MPAC AND 32D.
 
 RRNB            SLOAD           RTB                             
-                TANG                                            
-                CDULOGIC                                        
+                                TANG                            
+                                CDULOGIC                        
                 SETPD           PUSH                            # TRUNNION ANGLE TO 0.
-                0                                               
+                                0                               
                 SIN             DCOMP                           
                 STODL           34D                             # Y COMPONENT.
 
                 COS             PUSH                            # .5 COS(T) TO 0.
                 SLOAD           RTB                             
                 TANG            +1                              
-                CDULOGIC                                        
+                                CDULOGIC                        
                 PUSH            COS                             # SHAFT ANGLE TO 2.
                 DMP             SL1                             
-                0                                               
+                                0                               
                 STODL           36D                             # Z COMPONENT
 
                 SIN             DMP                             
                 SL1                                             
                 STOVL           32D                             
-                32D                                             
+                                32D                             
                 RVQ                                             
 
 ## Page 423
@@ -714,38 +718,38 @@ RRNB            SLOAD           RTB
 #           T(2) = 180 - T(1)
 
 RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL FIND THE MODE 1 SHAFT
-                34D                                             # ANGLE LATER, WE CAN FIND THE MODE 1
+                                34D                             # ANGLE LATER, WE CAN FIND THE MODE 1
                 SETPD           ASIN                            # TRUNNION BY SIMPLY TAKING THE ARCSIN OF
-                0                                               # THE Y COMPONENT, THE ASIN GIVING AN
+                                0                               # THE Y COMPONENT, THE ASIN GIVING AN
                 PUSH            BDSU                            # ANSWER WHOSE ABS VAL IS LES THAN 90 DEG
-                HALFDP                                          
+                                HALFDP                          
                 STODL           4                               # MODE 2 TRUNNION TO 4.
 
-                ZERODP                                          
+                                ZERODP                          
                 STOVL           34D                             # UNIT THE PROJECTION OF THE VECTOR IN THE
-                32D                                             # X-Z PLANE.
+                                32D                             # X-Z PLANE.
                 UNIT            BOVB                            # CALL FOR S/C MANEUVER ON GIMBAL LOCK.
                 DESRETRN        +1                              
                 STODL           32D                             # PROJECTION VECTOR.
-                32D                                             
+                                32D                             
                 SR1             STQ                             
-                S2                                              
+                                S2                              
                 STODL           SINTH                           # USE ARCTRIG SINCE SHAFT COULD BE ARB.
-                36D                                             
+                                36D                             
                 SR1                                             
                 STCALL          COSTH                           
-                ARCTRIG                                         
+                                ARCTRIG                         
 ## Page 424
                 PUSH            DAD                             # MODE 1 SHAFT TO 2.
-                HALFDP                                          # (OVERFLOW DOESNT MATTER SINCE SCALED REV
+                                HALFDP                          # (OVERFLOW DOESNT MATTER SINCE SCALED REV
                 STOVL           6                               
-                4                                               
+                                4                               
                 RTB                                             # FIND MODE 2 CDU ANGLES.
-                2V1STO2S                                        
+                                2V1STO2S                        
                 STOVL           MODEB                           
-                0                                               
+                                0                               
                 RTB                                             # MODE 1 ANGLES TO MODE A.
-                2V1STO2S                                        
+                                2V1STO2S                        
                 STORE           MODEA                           
                 EXIT                                            
 
@@ -760,6 +764,6 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
 
                 TC              INTPRET                         
                 GOTO                                            
-                S2                                              
+                                S2                              
 
 ENDINFSS        EQUALS                                          
