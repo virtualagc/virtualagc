@@ -9,7 +9,7 @@
 # Website:	www.ibiblio.org/apollo.
 # Pages:	651-653
 # Mod history:	2009-05-18 RSB	Transcribed from Luminary 099
-## Page images.
+#				page images.
 #		2009-06-05 RSB	Corrected 4 typos.
 #		2009-06-07 RSB	Fixed a typo.
 #

@@ -62,7 +62,7 @@
 # listed below are in hand.  Notice, though, that the page number herein are those
 # the scanned (PDF) file, and not those which are marked on the scanned pages
 # themselves, so there is not an exact correspondence between YUL-generated
-## Page numbers appearing within tables and the page numbers marked in this source
+# page numbers appearing within tables and the page numbers marked in this source
 # code.
 
 						# pp. 1-5 contain no code/comments.

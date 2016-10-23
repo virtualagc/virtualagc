@@ -5,7 +5,7 @@
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.
 # Website:      https://www.ibiblio.org/apollo/index.html
-## Page scans:   https://archive.org/details/aurora00dapg
+# Page Scans:   https://archive.org/details/aurora00dapg
 # Mod history:  2016-09-20 JL   Created.
 #               
 # MAIN.agc is a little different from the other Aurora12 files  

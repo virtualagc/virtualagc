@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
 # Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-29 OH	New file created.
 # 		2009-09-04 JL	Fix typo.
 #		2010-02-20 RSB	Un-##'d this header.

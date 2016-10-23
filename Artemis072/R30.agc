@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Hartmuth Gutsche <hgutsche@xplornet.com>
 # Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-10-03 HG	Adapted from corresponding Comanche 055 file.
 #		2009-11-18 JL	Minor fixes.
 #		2010-01-26 JL	Updated header comments.

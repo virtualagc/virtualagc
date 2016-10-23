@@ -7,7 +7,7 @@
 # Assembler:	yaYUL
 # Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
 # Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2010-06-02 OH	Adapted from corresponding Colossus 249 file.
 #		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 #		2011-02-12 JL	Minor fixes.

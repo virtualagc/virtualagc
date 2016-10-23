@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Jim Lawton <jim.lawton@gmail.com>.
 # Website:	www.ibiblio.org/apollo/index.html
-## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-12 JL	Created.
 #		2011-01-17 JL	Fixed module name, indentation.
 #		2011-01-23 JL	Fixed module name. 

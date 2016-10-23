@@ -10,7 +10,7 @@
 # Pages:	618-650
 # Mod history:	2009-05-18 RSB	Adapted from the Luminary 131 file of the
 #				same name, as corrected from Luminary 099
-## Page images.
+# 				page images.
 #
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the MIT Museum.  The digitization
