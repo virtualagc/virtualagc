@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 1439
+## Page 1439
 		BANK	14
 		SETLOC	KEYRUPT
 		BANK
@@ -62,7 +62,7 @@ ACCEPTUP	CAF	CHRPRIO		# (NOTE: RUPTREG4 = KEYTEMP1)
 		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
 		TC	RESUME
 
-# Page 1440
+## Page 1440
 # UPRUPT PROGRAM
 
 UPRUPT		TS	BANKRUPT
@@ -113,7 +113,7 @@ TMFAIL2		CS	FLAGWRD7	# LOCK OUT FURTHER UPLINK ACTIVITY
 		ADS	FLAGWRD7	# `ERROR RESET' IS SENT VIA UPLINK.
 		TC	RESUME
 UPTEST		AD	KEYTEMP1
-# Page 1441
+## Page 1441
 		CCS	A
 		TC	TMFAIL2
 HI10		OCT	77740

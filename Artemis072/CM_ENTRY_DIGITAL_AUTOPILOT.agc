@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Sergio Navarro <sergionavarrog@gmail.com>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
 # 		2009-09-03 JL	Duplicate definition of VSQMIN, one line is a comment in page scan.
 # 		2009-09-10 JL	Fixed typos.

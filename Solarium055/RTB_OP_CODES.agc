@@ -7,7 +7,7 @@
 # Assembler:	yaYUL --block1
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-09-29 JL	Adapted from corresponding Artemis072 file.
 
 ## Page 374

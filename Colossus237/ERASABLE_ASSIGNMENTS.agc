@@ -7,7 +7,7 @@
 # Assembler:    yaYUL
 # Contact:      Sergio Navarro <sergionavarrog@gmail.com>
 # Website:      www.ibiblio.org/apollo/index.html
-# Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2009-10-21 SN   Adapted from corresponding Colossus 249 file.
 #		2011-01-22 JL	Minor fixes to whitespace and comments.
 #		2011-04-27 JL	Fixed symbol name.

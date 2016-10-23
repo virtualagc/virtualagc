@@ -35,7 +35,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 504
+## Page 504
 # 1)	PROGRAM NAME -- TARGET DELTA V PROGRAM (P76).
 # 2)	FUNCTIONAL DESCRIPTION -- UPON ENTRY BY ASTRONAUT ACTION, P76 FLASHES DSKY REQUESTS TO THE ASTRONAUT
 #	TO PROVIDE VIA DSKY (1) THE DELTA V TO BE APPLIED TO THE OTHER VEHICLE STATE VECTOR AND (2) THE
@@ -85,7 +85,7 @@ P76		TC	UPFLAG
 			OTHPREC
 COMPMAT		VLOAD	UNIT
 			RATT
-# Page 505
+## Page 505
 		VCOMP			# U(-R)
 		STORE	24D		# U(-R) TO 24D
 		VXV	UNIT		# U(-R) X V = U(V X R)
@@ -136,7 +136,7 @@ INTOTHIS	STCALL	TDEC1
 		
 		TC	UPFLAG
 		ADRES	REINTFLG
-# Page 506
+## Page 506
 
 		TC	INTPRET
 		CALL

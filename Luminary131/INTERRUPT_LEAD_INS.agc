@@ -14,7 +14,7 @@
 # Mod history:	04/11/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
 
-# Page 160
+## Page 160
 		SETLOC	4000 
 		
 		COUNT*	$$/RUPTS	# FIX-FIX LEAD INS
@@ -65,7 +65,7 @@
 		
 		DXCH	ARUPT		# RADAR RUPT
 		CAF	RDRPTBB
-# Page 161
+## Page 161
 		XCH	BBANK
 		TCF	RADAREAD
 		

@@ -29,7 +29,7 @@
 #	This AGC program shall also be referred to as
 #			Colossus 2A
 
-# Page 999
+## Page 999
 		BANK	20
 		SETLOC	MYSUBS
 		BANK
@@ -79,7 +79,7 @@ TSK		TS	KMPAC
 DPADD+		AD	NEGMAX		# KMPAC GREATER THAN 0
 		TCF	TSK
 
-# Page 1000
+## Page 1000
 DPADD-		COM
 		AD	POSMAX		# KMPAC LESS THAN 0
 		TCF	TSK
@@ -89,5 +89,5 @@ DPADD2+		AD	NEGMAX		# CAN NOT OVERFLOW
 		CA	NEGMAX		# UPPER WAS = 0
 		TCF	TSK
 
-# Page 1001 (empty page)
+## Page 1001 (empty page)
 

@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-29 OH	New file created.
 #		2009-09-01 JL	Commented out =ECADR directives, see note below.
 #		2009-09-03 JL	Uncommented =ECADR directives, after modifying yaYUL to skip them.

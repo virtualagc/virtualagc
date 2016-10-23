@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 1379
+## Page 1379
 		BANK	32
 		SETLOC	STARTAB
 		BANK
@@ -70,7 +70,7 @@
 		2DEC	-.4436486945 B-1	# STAR 31	Z
 		
 		2DEC	+.1216171923 B-1	# STAR 30	X
-# Page 1380
+## Page 1380
 		2DEC	-.7703014754 B-1	# STAR 30 	Y
 		2DEC	+.6259751556 B-1	# STAR 30	Z
 		
@@ -104,7 +104,7 @@
 		
 		2DEC	-.9171065276 B-1	# STAR 22	X
 		2DEC	-.3500098785 B-1	# STAR 22	Y
-# Page 1381
+## Page 1381
 		2DEC	-.1908106439 B-1	# STAR 22	Z
 		
 		2DEC	-.4524416631 B-1	# STAR 21	X
@@ -139,7 +139,7 @@
 		2DEC	+.9066387314 B-1	# STAR 14	Y
 		2DEC	+.0924676785 B-1	# STAR 14	Z
 		
-# Page 1382
+## Page 1382
 		2DEC	-.1818957154 B-1	# STAR 13	X
 		2DEC	+.9405318128 B-1	# STAR 13	Y
 		2DEC	-.2869039173 B-1	# STAR 13	Z
@@ -173,7 +173,7 @@
 		2DEC	-.6484940879 B-1	# STAR 6	Z
 		
 		2DEC	+.0131955837 B-1	# STAR 5	X
-# Page 1383
+## Page 1383
 		2DEC	+.0078043793 B-1	# STAR 5	Y
 		2DEC	+.9998824772 B-1	# STAR 5	Z
 		

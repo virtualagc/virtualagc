@@ -32,7 +32,7 @@
 # Refer directly to the online document mentioned above for further
 # information.  Please report any errors to info@sandroid.org.
 
-# Page 1449
+## Page 1449
 		BANK	14
 		SETLOC	KEYRUPT
 		BANK
@@ -60,7 +60,7 @@ ACCEPTUP	CAF	CHRPRIO		# (NOTE: RUPTREG4 = KEYTEMP1)
 		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
 		TC	RESUME
 
-# Page 1450
+## Page 1450
 # UPRUPT PROGRAM
 
 UPRUPT		TS	BANKRUPT
@@ -111,7 +111,7 @@ TMFAIL2		CS	FLAGWRD7	# LOCK OUT FURTHER UPLINK ACTIVITY
 		ADS	FLAGWRD7	# `ERROR RESET' IS SENT VIA UPLINK.
 		TC	RESUME
 UPTEST		AD	KEYTEMP1
-# Page 1451
+## Page 1451
 		CCS	A
 		TC	TMFAIL2
 HI10		OCT	77740

@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-25 JL	Adapted from corresponding Comanche 055 file.
 # 		2010-02-02 JL	Added missing RESUME.
 #		2010-02-20 RSB	Un-##'d this header.

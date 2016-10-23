@@ -29,7 +29,7 @@
 #    This AGC program shall also be referred to as
 #            Colossus 2A
 
-# Page 1389
+## Page 1389
 		BANK	32
 		SETLOC	STARTAB
 		BANK
@@ -65,7 +65,7 @@
 		2DEC	-.4436288486 B-1	# STAR 31	Z
 				            
 		2DEC	+.1217293692 B-1	# STAR 30	X
-# Page 1390		            
+## Page 1390		            
 		2DEC	-.7702732847 B-1	# STAR 30 	Y
 		2DEC	+.6259880410 B-1	# STAR 30	Z
 				            
@@ -99,7 +99,7 @@
 				            
 		2DEC	-.9170097662 B-1	# STAR 22	X
 		2DEC	-.3502146628 B-1	# STAR 22	Y
-# Page 1391		            
+## Page 1391		            
 		2DEC	-.1908999176 B-1	# STAR 22	Z
 				            
 		2DEC	-.4523440203 B-1	# STAR 21	X
@@ -134,7 +134,7 @@
 		2DEC	+.9065485360 B-1	# STAR 14	Y
 		2DEC	+.0924226975 B-1	# STAR 14	Z
 				            
-# Page 1392		            
+## Page 1392		            
 		2DEC	-.1820751783 B-1	# STAR 13	X
 		2DEC	+.9404899869 B-1	# STAR 13	Y
 		2DEC	-.2869271926 B-1	# STAR 13	Z
@@ -168,7 +168,7 @@
 		2DEC	-.6484410356 B-1	# STAR 6	Z
 				            
 		2DEC	+.0130968840 B-1	# STAR 5	X
-# Page 1393		            
+## Page 1393		            
 		2DEC	+.0078062795 B-1	# STAR 5	Y
 		2DEC	+.9998837600 B-1	# STAR 5	Z
 				            

@@ -7,7 +7,7 @@
 # Assembler:    yaYUL
 # Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:      www.ibiblio.org/apollo/index.html
-# Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2011-03-03 JL	Adapted from corresponding Colossus 249 file.
 #		2011-04-27 JL	Fixed symbol name.
 #		2012-10-08 JL	Fixed incorrect value on p808.

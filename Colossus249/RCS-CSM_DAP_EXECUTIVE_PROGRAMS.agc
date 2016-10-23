@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 1012
+## Page 1012
 # CALCULATION OF  AMGB, AMBG  ONCE EVERY SECOND
 #
 #	AMGB =	1	SIN(PSI)		0
@@ -84,7 +84,7 @@ AMBGUPDT	CA	FLAGWRD6	# CHECK FOR RCS AUTOPILOT
 		EXTEND
 		MP	CAPSI
 		COM
-# Page 1013
+## Page 1013
 		TS	AMGB7
 		TCF	ENDOFJOB
 QUADANGL	DEC	660		# = 7.25 DEGREES

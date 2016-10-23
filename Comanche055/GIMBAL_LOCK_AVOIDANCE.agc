@@ -29,7 +29,7 @@
 # Please report any errors to info@sandroid.org.
 
 
-# Page 412
+## Page 412
 		BANK	15		
 		SETLOC	KALCMON1
 		BANK
@@ -80,7 +80,7 @@ ANGLTIME	2DEC	.000190735	# = 100B - 19
 					# MANEUVER ANGLE TO MANEUVER TIME
 QUADROT		2DEC	.1		# ROTATION MATRIX FROM S/C AXES TO CONTROL
 
-# Page 413
+## Page 413
 		2DEC	0		# AXES (X ROT = -7.25 DEG)
 		
 		2DEC	0

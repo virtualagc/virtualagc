@@ -29,7 +29,7 @@
 # Refer directly to the online document mentioned above for further
 # information.  Please report any errors to info@sandroid.org.
 
-# Page 131
+## Page 131
 		SETLOC	4000 
 		
 		COUNT	02/RUPTS
@@ -80,7 +80,7 @@
 		TCF	DODOWNTM
 		
 		DXCH	ARUPT		# RADAR RUPT
-# Page 132
+## Page 132
 		CAF	RDRPTBB
 		XCH	BBANK
 		TCF	VHFREAD

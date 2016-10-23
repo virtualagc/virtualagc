@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 891
+## Page 891
 # S-BAND ANTENNA FOR CM
 
 		BANK	23
@@ -87,7 +87,7 @@ EISOI		VLOAD	VCOMP		# EARTH, R= -RCM
 COVCNV		UNIT	BOV		# TEST OVERFLOW FOR INDICATION OF NULL
 			NOADJUST	# VECTOR
 		PUSH	DOT		# 20D
-# Page 892
+## Page 892
 			HIUNITX		# COMPUTE YAW ANGLE = ACOS (URP.UX)
 		SL1	ACOS		# REVOLUTIONS SCALED B0
 		PDVL	DOT		# 22D YAWANG

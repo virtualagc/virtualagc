@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Sergio Navarro <sergionavarrog@gmail.com>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-03 SN	Adapted from corresponding Comanche 055 file.
 # 		2009-09-04 JL	Fixed typos.
 #		2010-02-20 RSB	Un-##'d this header.

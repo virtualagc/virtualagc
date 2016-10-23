@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 451
+## Page 451
 # GROUND TRACKING DETERMINATION PROGRAM -- P21
 #
 # PROGRAM DESCRIPTION
@@ -81,7 +81,7 @@
 #	NONE
 #
 # DEBRIS
-# Page 452
+## Page 452
 #	CENTRALS -- A,Q,L
 #	OTHER -- THOSE USED BY THE ABOVE LISTED SUBROUTINES
 #	SEE LEMPREC, LAT-LONG
@@ -132,7 +132,7 @@ P21PROG2	DLOAD
 			P21TIME
 		STCALL	TDEC1
 			THISPREC
-# Page 453
+## Page 453
 		GOTO
 			P21PROGA
 P21PROG3	VLOAD	CLEAR

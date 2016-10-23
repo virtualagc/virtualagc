@@ -14,7 +14,7 @@
 # Mod history:	06/08/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above
 
-# Page 1467
+## Page 1467
 		EBANK=	NO.UJETS
 		BANK	16
 		SETLOC	DAPS1
@@ -65,7 +65,7 @@ SMALLTJU	CA	ZERO
 		INDEX	DAPTEMP6
 		XCH	TJP
 		EXTEND
-# Page 1468
+## Page 1468
 		MP	ELEVEN		# 10.24 PLUS
 		CA	L
 		TCF	LOOPRATE

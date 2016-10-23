@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 129
+## Page 129
 		SETLOC	4000 
 		
 		COUNT	02/RUPTS
@@ -85,7 +85,7 @@
 		TCF	DODOWNTM
 		
 		DXCH	ARUPT		# RADAR RUPT
-# Page 130
+## Page 130
 		CAF	RDRPTBB
 		XCH	BBANK
 		TCF	VHFREAD

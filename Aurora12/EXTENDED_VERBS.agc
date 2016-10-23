@@ -27,7 +27,7 @@
 # The original high-quality digital images are available at archive.org:
 #       https://archive.org/details/aurora00dapg
 
-# Page 258
+## Page 258
                 BANK            11
                 EBANK=          OGC
 

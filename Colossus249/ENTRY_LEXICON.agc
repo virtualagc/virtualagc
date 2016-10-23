@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 795
+## Page 795
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE *		COMPUTER NAME
 # --------	-----------				---------------		-------------
 # _
@@ -107,7 +107,7 @@
 # F1		DRANGE/D DRAG	(FINAL PHASE)		2700/805		= FX +5
 #
 # F2		DRANGE/D RDOT	(FINAL PHASE)		2700/2VS NM/FPS		= FX +4
-# Page 796
+## Page 796
 #
 # F3		DRANGE/D (L/D)				2700 NM			= FX
 #
@@ -120,7 +120,7 @@
 # GAMMAL	FLIGHT PATH ANGLE AT VL			1 RADIAN		  VARIABLE HAS MAXIMUM VALUE OF ONE.
 #
 # GAMMAL1	SIMPLE FORM OF GAMMAL			1 RADIAN
-# Page 797
+## Page 797
 #
 # HEADSUP	INDICATOR FOR INITIAL ROLL		1
 #
@@ -196,7 +196,7 @@
 #
 # Y		LATERAL MISS LIMIT			4 RADIANS		NOT SAVED
 
-# Page 798
+## Page 798
 # EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS
 # ----------------------------------------------------------
 #
@@ -258,7 +258,7 @@
 #
 # GONEBY	INDICATES GONE PAST TARGET (SET)	SELF-INITIALIZING	112D, BIT 6
 
-# Page 799
+## Page 799
 # CONSTANTS AND GAINS							VALUE
 # -------------------							-----
 #
@@ -305,7 +305,7 @@
 # 25NM		TOLERANCE TO STOP RANGE ITERATION			25	NM
 # VQUIT		VELOCITY TO STOP STEERING				1000	FPS
 
-# Page 800
+## Page 800
 # CONVERSION FACTORS AND SCALING CONSTANTS
 # ----------------------------------------
 #
@@ -354,7 +354,7 @@
 # QT		MINIMUM DRAG FOR UPCONTROL		805 FPSS	N 69
 # VL		EXIT VELOCITY FOR UP-CONTROL		2 VSAT		N 69
 
-# Page 801
+## Page 801
 # BODY ATTITUDE QUANTITIES (CM/POSE)
 # ----------------------------------
 #

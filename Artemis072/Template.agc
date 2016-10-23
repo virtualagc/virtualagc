@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	??? <???@???.???>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-??-?? ???	Adapted from corresponding Comanche 055 file.
 
 ## Page ???

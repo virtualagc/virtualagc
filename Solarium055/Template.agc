@@ -7,7 +7,7 @@
 # Assembler:	yaYUL --block1
 # Contact:	??? <???@???.???>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Page scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 # Mod history:	2009-??-?? ???	Adapted from corresponding Colossus 249 file.
 
 ## Page ???

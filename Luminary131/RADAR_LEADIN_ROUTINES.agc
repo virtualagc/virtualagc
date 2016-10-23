@@ -14,7 +14,7 @@
 # Mod history:	05/14/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above.
 
-# Page 499
+## Page 499
 		BANK	25
 		SETLOC	RRLEADIN
 		BANK
@@ -64,7 +64,7 @@ DORSAMP2	INHINT
 		CA	RADMODES
 		EXTEND
 		RXOR	CHAN33
-# Page 500
+## Page 500
 		MASK	BIT6
 		EXTEND
 		BZF	R77IN

@@ -33,7 +33,7 @@
 # Refer directly to the online document mentioned above for further
 # information.  Please report any errors to info@sandroid.org.
 
-# Page 1493
+## Page 1493
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 #
@@ -84,7 +84,7 @@ CHKFAIL2	CCS	FAILREG +1
 		TCF	MULTEXIT
 		
 FAIL3		CA	FAILREG +2
-# Page 1494
+## Page 1494
 		MASK	POSMAX
 		CCS	A
 		TCF	MULTFAIL
@@ -133,7 +133,7 @@ PRIOLARM	INHINT			# * * * KEEP IN DISPLAY ROUTINE'S BANK
 		CAF	V05N09
 		TCF	PRIODSPR
 
-# Page 1495
+## Page 1495
 
 		BLOCK	02
 		SETLOC	FFTAG13
@@ -185,7 +185,7 @@ OCT77770	OCT	77770		# DON'T MOVE
 		
 		TC	DOWNFLAG
 		
-# Page 1496
+## Page 1496
 		ADRES	REINTFLG
 		
 		TC	DOWNFLAG

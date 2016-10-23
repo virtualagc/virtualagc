@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 974
+## Page 974
 		BANK	20
 		SETLOC	MYSUBS
 		BANK
@@ -83,7 +83,7 @@ TSK		TS	KMPAC
 DPADD+		AD	NEGMAX		# KMPAC GREATER THAN 0
 		TCF	TSK
 
-# Page 975
+## Page 975
 DPADD-		COM
 		AD	POSMAX		# KMPAC LESS THAN 0
 		TCF	TSK
@@ -93,6 +93,6 @@ DPADD2+		AD	NEGMAX		# CAN NOT OVERFLOW
 		CA	NEGMAX		# UPPER WAS = 0
 		TCF	TSK
 
-# Page 976
+## Page 976
 # This page is empty ... woo-hoo!! -- RSB 2004
 

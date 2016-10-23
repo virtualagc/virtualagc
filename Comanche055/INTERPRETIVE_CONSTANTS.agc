@@ -28,7 +28,7 @@
 #	This AGC program shall also be referred to as
 #			Colossus 2A
 
-# Page 1205
+## Page 1205
 		SETLOC	INTPRET1
 		BANK
 
@@ -52,7 +52,7 @@ DPHALF		=	UNITX
 DPPOSMAX	OCT	37777
 		OCT	37777
 
-# Page 1206
+## Page 1206
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
 		SETLOC	INTPRET2

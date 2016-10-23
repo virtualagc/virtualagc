@@ -25,7 +25,7 @@
 # Refer directly to the online document mentioned above for further information.
 # Please report any errors (relative to 1729.pdf) to info@sandroid.org.
 
-# Page 1094
+## Page 1094
 		BLOCK	02
 		COUNT*	$$/FCONS
 
@@ -76,7 +76,7 @@ ELEVEN		DEC	11
 OCT15		OCT	15
 # R1D1		OCT	16		# PINBALL
 LOW4		OCT	17
-# Page 1095
+## Page 1095
 # BIT5		OCT	00020
 # NC1		OCT	21		# PINBALL
 # VD1		OCT	23		# PINBALL
@@ -127,7 +127,7 @@ C5/2		DEC	.0363551	#		   	(OCTAL 01124)
 V05N09		VN	0509		# (SAME AS OCTAL 1211)
 OCT1400		OCT	01400
 V06N22		VN	0622
-# Page 1096
+## Page 1096
 # MID5		OCT	1740		# PINBALL
 BITS2-10	OCT	1776
 LOW10		OCT	1777
@@ -180,7 +180,7 @@ PRIO32		OCT	32000
 PRIO33		OCT	33000
 PRIO34		OCT	34000
 #		OCT	34034		# T4RUPT	RELTAB +6D		
-# Page 1097
+## Page 1097
 PRIO35		OCT	35000
 PRIO36		OCT	36000
 PRIO37		OCT	37000
@@ -216,7 +216,7 @@ NEG3		DEC	-3
 NEG2		OCT	77775
 NEGONE		DEC	-1
 
-# Page 1098
+## Page 1098
 
 # DEFINED BY EQUALS
 
