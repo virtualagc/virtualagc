@@ -106,8 +106,10 @@
 
 
 
+
           0</a></li>
       <li><a href="http://www.ibiblio.org/apollo/YUL/03%20-%20Pass%201/">Pass
+
 
 
 
@@ -122,8 +124,10 @@
 
 
 
+
           2</a></li>
       <li><a href="http://www.ibiblio.org/apollo/YUL/05%20-%20Pass%203/">Pass
+
 
 
 
@@ -139,9 +143,11 @@ href="http://www.ibiblio.org/apollo/YUL/06%20-%20System%20Manufacturing%20-%20AG
 
 
 
+
           manufacturing for AGC4</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/07%20-%20System%20Manufacturing%20-%20SACO/">System
+
 
 
 
@@ -157,6 +163,7 @@ href="http://www.ibiblio.org/apollo/YUL/08%20-%20System%20Manufacturing%20-%20BL
 
 
 
+
           manufacturing for BLK2</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/09%20-%20System%20Simulators%20-%20AGC4/">System
@@ -166,9 +173,11 @@ href="http://www.ibiblio.org/apollo/YUL/09%20-%20System%20Simulators%20-%20AGC4/
 
 
 
+
           simulators, AGC4</a></li>
       <li><a
 href="http://www.ibiblio.org/apollo/YUL/10%20-%20System%20Simulators%20-%20SACO/">System
+
 
 
 
@@ -252,6 +261,7 @@ href="http://www.ibiblio.org/apollo/YUL/10%20-%20System%20Simulators%20-%20SACO/
     down what I have learned and what I have deduced in the <a
       href="assembly_language_manual.html">assembly-language manual</a>.&nbsp;
 Therefore,
+
 
 
 
@@ -383,6 +393,30 @@ Therefore,
       is AGC3.<br>
       <br>
     </div>
+    --flip=<i>b</i><br>
+    <div style="margin-left: 40px;">AGC memory-bank "bugger words" are
+      not necessarily unique; sometimes they are, but sometimes they are
+      not, and in that case there are two distinct bugger words which
+      could be added to a memory bank, with the self-test accepting
+      either of these as being valid.&nbsp; For one of these possible
+      bugger words, the memory-bank's checksum is equal to the bank
+      number, and for the other it is equal to the negative of the bank
+      number.&nbsp; Normally, when <b>yaYUL</b> adds bugger word to an
+      assembled memory bank, it chooses the one leading to the positive
+      checksum <i>if possible</i>, but uses the one leading to the
+      negative checksum if not.&nbsp; With the --flip=<i>b</i> switch,
+      where <i>b</i> is the number of a fixed-memory bank, in octal,
+      this behavior is reversed for memory-bank <i>b</i>; in other
+      words, for memory bank <i>b</i>, <b>yaYUL</b> will try to use
+      the bugger word leading to a negative checksum, and will fall back
+      on the one leading to a positive checksum otherwise.&nbsp; The
+      only known use of this switch is for bank <i>b</i>=7 of the
+      SUNBURST program.&nbsp; There are notes in the original <b>YUL</b>
+      source code highlighting bank 7 of SUNBURST as a special case, and
+      you are invited to read that source code if interested in this
+      point.<br>
+      <br>
+    </div>
     --force<br>
     <div style="margin-left: 40px;">Forces creation of the core-rope
       image file, which is normally bypassed when fatal errors are
@@ -460,6 +494,7 @@ Therefore,
 
 
 
+
               manual</a>) allow forward-references to other <span
               style="font-family: monospace;">EQUALS</span> pseudo-ops.
             For example, consider the following code fragment:<br>
@@ -470,6 +505,7 @@ Therefore,
                 style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL4&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -493,6 +529,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
                 SYMBOL2</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL2&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
@@ -506,9 +543,11 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
                 SYMBOL1</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL1&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -629,6 +668,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
 
 
 
+
       manual</a>.&nbsp; Anyone who's determined to write AGC4
     assembly-language will probably also need to consult the <a
       href="developer.html">developer-info page</a>, which covers
@@ -641,7 +681,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-10-09.<br>
+          2016-10-23.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
