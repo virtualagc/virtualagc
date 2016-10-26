@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-12 JL	Adapted from corresponding Comanche 055 file.
 # 		2009-09-04 JL	Fixed a bunch of typos. Fixed page numbers.
 #		2010-02-07 JL	Removed spurious STORE instruction on p682.

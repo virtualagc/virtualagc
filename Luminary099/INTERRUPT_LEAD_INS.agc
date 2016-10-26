@@ -26,7 +26,7 @@
 #	16:27 JULY 14, 1969 
 
 
-# Page 153
+## Page 153
 		SETLOC	4000 
 		
 		COUNT*	$$/RUPTS	# FIX-FIX LEAD INS
@@ -77,7 +77,7 @@
 		
 		DXCH	ARUPT		# RADAR RUPT
 		CAF	RDRPTBB
-# Page 154
+## Page 154
 		XCH	BBANK
 		TCF	RADAREAD
 		

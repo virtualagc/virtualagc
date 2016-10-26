@@ -29,7 +29,7 @@
 #    This AGC program shall also be referred to as
 #            Colossus 2A
 
-# Page 934
+## Page 934
 # S-BAND ANTENNA FOR CM
 
 		BANK	23
@@ -82,7 +82,7 @@ EISOI		VLOAD	VCOMP		# EARTH, R= -RCM
 COVCNV		UNIT	BOV		# TEST OVERFLOW FOR INDICATION OF NULL
 			NOADJUST	# VECTOR
 		PUSH	DOT		# 20D
-# Page 935
+## Page 935
 			HIUNITX		# COMPUTE YAW ANGLE = ACOS (URP.UX)
 		SL1	ACOS		# REVOLUTIONS SCALED B0
 		PDVL	DOT		# 22D YAWANG

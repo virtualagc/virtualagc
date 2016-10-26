@@ -25,7 +25,7 @@
 #	Assemble revision 001 of AGC program LMY99 by NASA 2021112-61
 #	16:27 JULY 14, 1969 
 
-# Page 785
+## Page 785
 		BANK	32
 		SETLOC	F2DPS*32
 		BANK
@@ -76,7 +76,7 @@ FLAGORGY	TC	INTPRET		# DIONYSIAN FLAG WAVING
 					# ********************************
 
 IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:
-# Page 786
+## Page 786
 			0		# 	AT 0D LANDING SITE IN MOON FIXED FRAME
 			RLS		#	AT 6D ESTIMATED TIME OF LANDING
 		PDDL	PUSH		#	MPAC NON-ZERO TO INDICATE LUNAR CASE
@@ -127,7 +127,7 @@ IGNALOOP	DLOAD
 #                                                10
 #                                               2   (VGU - 16 VGU KIGNX/B4)
 #                                                       2        0
-# Page 787 new page is actually one line earlier but this would put the indices on a seperate line 
+## Page 787 new page is actually one line earlier but this would put the indices on a seperate line 
 # disconnected from their respective variables
 # THE NUMERATOR IS SCALED IN METERS AT 2(28).  THE DENOMINATOR IS A VELOCITY IN UNITS OF 2(10) M/CS.
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
@@ -177,7 +177,7 @@ DDUMCALC	TS	NIGNLOOP
 			PIPTIME1
 		STOVL	TET		# HOPEFULLY ?GUIDSUB DID NOT
 			RATT1		#	CLOBBER RATT1 AND VATT1
-# Page 788
+## Page 788
 		STOVL	RCV
 			VATT1
 		STCALL	VCV
@@ -228,7 +228,7 @@ P63SPOT2	VLOAD	UNIT		# INITIALIZE KALCMANU FOR BURN ATTITUDE
 		INHINT
 		TC	IBNKCALL
 		CADR	PFLITEDB
-# Page 789
+## Page 789
 		RELINT
 
 		TC	BANKCALL
@@ -270,10 +270,10 @@ CODE500		OCT	00500
 GUIDDURN	2DEC	+66440		# GUIDDURN +6.64400314 E+2
 DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 
-# Page 790
+## Page 790
 #	--------------------------------
 
-# Page 791
+## Page 791
 #	*************************
 #	P68: LANDING CONFIRMATION
 #	*************************
@@ -323,7 +323,7 @@ LANDJUNK	TC	PHASCHNG
 		TCF	-5		# RECYCLE
 
 		TC	INTPRET
-# Page 792
+## Page 792
 		VLOAD			# INITIALIZE GSAV AND (USING REFMF)
 			UNITX		# YNBSAV, ZNBSAV AND ATTFLAG FOR P57
 		STCALL	GSAV

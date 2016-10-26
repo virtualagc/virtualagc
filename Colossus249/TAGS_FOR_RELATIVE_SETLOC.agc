@@ -36,7 +36,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 27
+## Page 27
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
 
 FIXED		MEMORY	120000 - 167777
@@ -82,7 +82,7 @@ MIDDGIM		EQUALS
 
 		BNKSUM	04
 		
-# Page 28
+## Page 28
 		
 		BANK	05
 FRANDRES	EQUALS
@@ -124,7 +124,7 @@ S52/2		EQUALS
 		
 		BANK	12
 CONICS		EQUALS
-# Page 29
+## Page 29
 		BNKSUM	12
 		
 		BANK	13
@@ -162,7 +162,7 @@ DAPS7		EQUALS
 		BNKSUM	17
 		
 		BANK	20
-# Page 30
+## Page 30
 DAPS6		EQUALS
 DAPS1		EQUALS
 DAPS2		EQUALS
@@ -207,7 +207,7 @@ P40S		EQUALS
 		BNKSUM	24
 		
 		BANK	25
-# Page 31
+## Page 31
 REENTRY		EQUALS
 		BNKSUM	25
 		
@@ -250,7 +250,7 @@ P40S3		EQUALS
 R35A		EQUALS
 		BNKSUM	30
 		
-# Page 32
+## Page 32
 		BANK	31
 R35		EQUALS
 RT23		EQUALS
@@ -291,7 +291,7 @@ P17S1		EQUALS
 		BANK	36
 MEASINC		EQUALS
 MEASINC1	EQUALS
-# Page 33
+## Page 33
 P17S		EQUALS
 RTE1		EQUALS
 		BNKSUM	36
@@ -330,7 +330,7 @@ LO6ZEROS	EQUALS	ZEROVEC			# ZERO VECTOR ALWAYS IN LOW MEMORY
 HIDPHALF	EQUALS	UNITX
 LODPHALF	EQUALS	XUNIT
 HIDP1/4		EQUALS	DP1/4TH	
-# Page 34
+## Page 34
 LODP1/4		EQUALS	D1/4			# 2DEC .25
 HIUNITX		EQUALS	UNITX
 HIUNITY		EQUALS	UNITY
@@ -383,12 +383,12 @@ EBQPLACE	ECADR	QPLACES
 
 		BANK	37
 		EBANK=	RN1
-# Page 35
+## Page 35
 EBRN1		ECADR	RN1
 
 #******************************************************************************************************
 
-# Page 36
+## Page 36
 		
 # *** END OF MAIN PROGRAM ***
 

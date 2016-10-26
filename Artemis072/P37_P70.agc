@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Steve Case <case1780@adelphia.net>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-09-01 SMC	Adapted from Comanche055 files.
 # 		2009-09-03 JL	Fixed symbol names, page metadata.
 # 		2009-09-04 JL	Fixed typo.

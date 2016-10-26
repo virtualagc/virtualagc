@@ -7,7 +7,7 @@
 # Assembler:    yaYUL
 # Contact:      Sergio Navarro <sergionavarrog@gmail.com>
 # Website:      www.ibiblio.org/apollo/index.html
-# Page scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:  2009-10-21 SN   Adapted from corresponding Colossus 249 file.
 #		2011-01-17 JL	Renamed to match 237 module name. Minor fixes.
 

@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2010-01-26 JL	Started Artemis072 conversion based on Comanche055 module.
 # 		2010-01-31 JL	Finished Artemis072 conversion. Fixed build errors.
 # 		2010-02-01 JL	Fixed build errors.

@@ -1,146 +1,133 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	T6-RUPT_PROGRAMS.agc
-# Purpose:	A module for revision 0 of BURST120 (Sunburst). It 
-#		is part of the source code for the Lunar Module's
-#		(LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	2016-09-30 RSB	Created draft version.
+# Copyright:    Public domain.
+# Filename:     T6-RUPT_PROGRAMS.agc
+# Purpose:      A module for revision 0 of BURST120 (Sunburst). It
+#               is part of the source code for the Lunar Module's
+#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+# Assembler:    yaYUL
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      www.ibiblio.org/apollo/index.html
+# Mod history:  2016-09-30 RSB  Created draft version.
+#               2016-10-21 HG   Transcribed
 
-# Page 1403
-# PROGRAM NAMES:	(1) T6JOBCHK	MOD. NO. 5	OCTOBER 2, 1967
-#			(2) DOT6RUPT
-# MODIFICATION BY:	LOWELL G. HULL (A.C.ELECTRONICS)
-#
+## Page 483
+# PROGRAM NAMES: (1) DOT6RUPT     MOD. NO. 4  DATE: FEBRUARY 9. 1967
+
+#                (2) T6JOBCHK
+
+# MODIFICATION BY: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
+
 # THESE PROGRAMS ENABLE THE LM DAP TO CONTROL THE THRUST TIMES OF THE REACTION CONTROL SYSTEM JETS BY USING TIME6.
 # SINCE THE LM DAP MAINTAINS EXCLUSIVE CONTROL OVER TIME6 AND ITS INTERRUPTS, THE FOLLOWING CONVENTIONS HAVE BEEN
 # ESTABLISHED AND MUST NOT BE TAMPERED WITH:
-#	1.	NO NUMBER IS EVER PLACED INTO TIME6 EXCEPT BY LM DAP.
-#	2.	NO PROGRAM OTHER THAN LM DAP ENABLES THE TIME6 COUNTER.
-#	3.	TO USE TIME6, THE FOLLOWING SEQUENCE IS ALWAYS EMPLOYED:
-#		A.	A POSITIVE (NON-ZERO) NUMBER IS STORED IN TIME6.
-#		B.	THE TIME6 CLOCK IS ENABLED.
-#		C.	TIME6 IS INTERROGATED AND IS:
-#			I.	NEVER FOUND NEGATIVE (NON-ZERO) OR +0.
-#			II.	SOMETIMES FOUND POSITIVE (BETWEEN 1 AND 240D) INDICATING THAT IT IS ACTIVE.
-#			III.	SOMETIMES FOUND POSMAX INDICATING THAT IT IS INACTIVE AND NOT ENABLED.
-#			IV.	SOMETIMES FOUND NEGATIVE ZERO INDICATING THAT:
-#				A.	A T6RUPT IS ABOUT TO OCCUR AT THE NEXT DINC, OR
-#				B.	A T6RUPT IS WAITING IN THE PRIORITY CHAIN, OR
-#				C.	A T6RUPT IS IN PROCESS NOW.
-#	4.	ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK
-#		EVERY 5 MILLISECONDS TO PROCESS A POSSIBLE WAITING T6RUPT BEFORE IT CAN BE HONORED BY THE HARDWARE.
-#      (5.	PROGRAM JTLST, IN Q,R-AXES, HANDLES THE INPUT LIST.)
-#
-# T6JOBCHK CALLING SEQUENCE:
-#		L	TC	T6JOBCHK
-#		L+1	(RETURN)
-#
+#          1. NO NUMBER IS EVER PLACED INTO TIME6 EXCEPT BY LM DAP.
+#          2. NO PROGRAM OTHER THAN LM DAP ENABLES THE TIME6 COUNTER.
+#          3. ONLY POSITIVE NUMBERS ARE ENTERED INTO TIME6, SO IT COUNTS DOWN TO -0 (MINUS ZERO) TO INTERRUPT.
+#          4. IF -0 IS NOT IN TIME6 WHEN THE INTERRUPT OCCURS, THEN THE INTERRUPT HAS ALREADY BEEN PROCESSED.
+#          5  ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK
+#             EVERY 6 MILLISECONDS TO PROCESS A POSSIBLE WAITING T6RUPT BEFORE IT CAN BE HONORED BY THE HARDWARE.
+
 # DOT6RUPT CALLING SEQUENCE:
-#			DXCH	ARUPT		# T6RUPT LEAD IN AT LOCATION 4004.
-#			EXTEND
-#			DCA	T6ADR
-#			DTCB
-#
-# SUBROUTINES CALLED:	DOT6RUPT CALLS T6JOBCHK.
-#
-# NORMAL EXIT MODES:	T6JOBCHK RETURNS TO L +1.
-#			DOT6RUPT TRANSFERS CONTROL TO RESUME.
-#
-# ALARM/ABORT MODES:	NONE.
-#
-# INPUT:	TIME6		NXT6ADR		OUTPUT:		TIME6		NXT6ADR		CHANNEL 5
-#		T6NEXT		T6NEXT +1			T6NEXT		T6NEXT +1	CHANNEL 6
-#		T6FURTHA	T6FURTHA +1			T6FURTHA	T6FURTHA +1	BIT15/CH13
-#
-# DEBRIS:	T6JOBCHK CLOBBERS A.  DOT6RUPT CLOBBERS NOTHING.
 
-		BLOCK	02
-# Page 1404
-		BANK	17
-		SETLOC	DAPS2
-		BANK
-		EBANK=	T6NEXT
-		COUNT*	$$/DAPT6
+# REF   1                 4004  52 011 0           DXCH   ARUPT           T6RUPT
+#                         4005  0 0006 1           EXTEND
+# REF   1                 4006  3 5045 0           DCA    T6ADR
+#                         4007  52 006 0           DTCB
 
-T6JOBCHK	CCS	TIME6		# CHECK TIME6 FOR WAITING T6RUPT:
-		TC	Q		# NONE: CLOCK COUNTING DOWN.
-		TC	CCSHOLE
-		TC	T6JOBCHK +3
+# T6JOBCHK CALLING SEQUENCE:
 
-# CONTROL PASSES TO T6JOB ONLY WHEN C(TIME6) = -0 (I.E., WHEN A T6RUPT MUST BE PROCESSED).
+# REF   0              23,1000  0 4200 1           TC     T6JOBCHK
+#               L+1     (RETURN)
 
-T6JOB		CAF	POSMAX		# DISABLE CLOCK: NEEDED SINCE RUPT OCCURS
-		EXTEND			# 1 DINC AFTER T6 = 77777. FOR 625 MUSECS
-		WAND	CHAN13		# MUST NOT HAVE T6 = +0 WITH ENABLE SET
+# SUBROUTINES CALLED:   DOT6RUPT CALLS T6JOBCHK.
 
-		CA	POSMAX
-		ZL
-		DXCH	T6FURTHA
-		DXCH	T6NEXT
-		LXCH	NXT6ADR
-		TS	TIME6
+# NORMAL EXIT MODES:    DOT6RUPT TRANSFERS CONTROL TO RESUME.
+#                       T6JOBCHK TRANSFERS CONTROL TO CALLER AT LOCATION AFTER CALL.
 
-		AD	PRIO37
-		TS	A
-		TCF	ENABLET6
-		CA	POSMAX
-		TS	TIME6
-		TCF	GOCH56
-ENABLET6	CA	BIT15
-		EXTEND
-		WOR	CHAN13
-		CA	T6NEXT
-		AD	PRIO37
-		TS	A
-		TCF	GOCH56
-		CA	POSMAX
-		TS	T6NEXT
-GOCH56		INDEX	L
-		TCF	WRITEP -1
+# ALARM/ABORT MODES:    NONE.
 
-		BLOCK	02
-		SETLOC	FFTAG9
-		BANK
-		EBANK=	CDUXD
-		COUNT*	$$/DAPT6
+# INPUT: TIME6,T6NEXT REGS,T6NEXTJT REGS.
 
-		CA	NEXTP
-WRITEP		EXTEND
-		WRITE	CHAN6
-# Page 1405
-		TC	Q
+# OUTPUT: (SAME AS INPUT.)
 
-		CA	NEXTU
-WRITEU		TS	L
-		CS	00314OCT
-		EXTEND
-		RAND	CHAN5
-		AD	L
-		EXTEND
-		WRITE	CHAN5
-		TC	Q
+# DEBRIS: DOT6RUPT: NONE.  T6JOBCHK: A,L
+# *** NOTE: AS OF MOD. NO. 2, T6NEXT AND T6NEXTJT LISTS ARE IN UNSWITCHED ERASABLE. ***
 
-		CA	NEXTV
-WRITEV		TS	L
-		CA	00314OCT
-		TCF	-9D
-00314OCT	OCT	00314
+## Page 484
 
-		BANK	17
-		SETLOC	DAPS2
-		BANK
+                BLOCK           02
+                EBANK=          T6NEXT
 
-		EBANK=	T6NEXT
-		COUNT*	$$/DAPT6
+                EBANK=          T6NEXT
+T6ADR           2CADR           DOT6RUPT                # 2CADR OF INTERRUPT PROCESSOR.
 
-DOT6RUPT	LXCH	BANKRUPT	# (INTERRUPT LEAD INS CONTINUED)
-		EXTEND
-		QXCH	QRUPT
+                BANK            16
+                EBANK=          T6NEXT
 
-		TC	T6JOBCHK	# CALL T6JOBCHK.
+DOT6RUPT        LXCH            BANKRUPT                # (INTERRUPT LEAD IN CONTINUED)
+                EXTEND
+                QXCH            QRUPT
 
-		TCF	RESUME		# END TIME6 INTERRUPT PROCESSOR.
+                TC              T6JOBCHK                # CALL T6JOBCHK
 
+                TCF             RESUME                  # END TIME6 RUPT
+
+
+
+                BLOCK           03
+                EBANK=          T6NEXT
+
+T6JOBCHK        CCS             TIME6                   # CHECK TIME6 FOR WAITING T6RUPT:
+                TC              Q                       # NONE: CLOCK COUTING DOWN.
+                TC              Q                       # NONE: T6RUPT ALREADY PROCESSED.
+                TC              Q                       # NONE: INVALID VALUE. (POSSIBLE ABORT.)
+
+# CONTROL PASSES TO T6JOB ONLY WHEN C(TIME6) = -0 (I.E. WHEN A T6RUPT MUST BE PROCESSED).
+
+T6JOB           CAF             POSMAX                  # DISABLE CLOCK: NEEDED SINCE RUPT OCCURS
+                EXTEND                                  # 1 DINC AFTER T6 = 77777.  FOR 625 MUSECS
+                WAND            13                      # MUST NOT HAVE T6 = +0 WITH ENABLE SET.
+
+                CAF             ZERO                    # UPDATE ORDERED LIST OF T6NEXT REGISTERS
+                XCH             T6NEXT          +1      # 1) PUSH FIRST ENTRY INTO TIME6.
+                XCH             T6NEXT                  # 2) PUSH SECOND ENTRY INTO FIRST PLACE.
+                TS              TIME6                   # 3) ZERO LAST (SECOND) DT IN LIST.
+
+                CCS             TIME6                   # TIME6 EITHER POSITIVE OR PLUS ZERO:
+                TCF             T6NZERO                 # (BRANCH IF TIME6 STILL ACTIVE.)
+
+                CAE             T6NEXTJT                # THESE ARE TRANSLATION JETS (NO DT),
+                TCF             WRITEJTS                # DETERMINE CHANNEL AND WRITE.
+
+T6NZERO         CAF             BIT15                   # ENABLE TIME6 COUNTER TO START TIMING
+                EXTEND                                  # THIS JET FIRING (PROPER JETS NOT YET
+                WOR             13                      # WRITTEN INTO CHANNEL, BUT WILL BE SOON).
+
+                CAF             ZERO                    # UPDATE ORDERED LIST OF JET POLICIES:
+                XCH             T6NEXTJT        +2      # 1) LEAVE JETS TO GO ON NOW IN A.
+
+## Page 485
+                XCH             T6NEXTJT        +1      # 2) CYCLE LIST UP TOWARD TOP.
+                XCH             T6NEXTJT                # 3) ZERO LAST ENTRY IN LIST.
+
+## Page 486
+# THE FOLLOWING JET-ON LOGIC MAY BE USED AS A SUBROUTINE (3 ENTRY POINTS):
+
+# FIRST, LET SGN(A) DETERMINE THE JET CHANNEL:
+#          POSITIVE IMPLIES P-AXIS POLICY.
+#          NEGATIVE IMPLIES Q,R-AXIS POLICY.
+
+WRITEJTS        EXTEND                                  # TEST FOR CHANNEL TO WRITE POLICY IN:
+                BZMF            WRITEQR                 # NEG: Q,R-AXES JETS IN CHANNEL 5
+
+# SECOND, FOR P-AXIS JET POLICIES:
+
+WRITEP          EXTEND                                  # POS: P-AXIS   JETS IN CHANNEL 6
+                WRITE           6
+                TC              Q                       # RETURN.
+
+# THIRD, FOR Q,R-AXES JET POLICIES:
+
+WRITEQR         EXTEND                                  # Q,R-AXES JETS IN CHANNEL 5
+                WRITE           5
+                TC              Q                       # RETURN.

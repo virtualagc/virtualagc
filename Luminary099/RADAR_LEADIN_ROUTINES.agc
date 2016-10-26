@@ -27,7 +27,7 @@
 #	Assemble revision 001 of AGC program LMY99 by NASA 2021112-61
 #	16:27 JULY 14, 1969 
 
-# Page 490
+## Page 490
 		BANK	25
 		SETLOC	RRLEADIN
 		BANK
@@ -79,7 +79,7 @@ DORSAMP2	INHINT
 		AD	RTSTMAX
 		EXTEND
 		
-# Page 491		
+## Page 491		
 		BZF	+3
 		CA	RTSTLOC
 		AD	TWO		# STORAGE IS DP

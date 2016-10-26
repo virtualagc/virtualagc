@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-08-18 JL	Adapted from corresponding Comanche 055 file.
 # 		2009-09-05 JL	Fixed typos.
 #		2010-02-16 JL	Added SBANK= directive on page 1493. 

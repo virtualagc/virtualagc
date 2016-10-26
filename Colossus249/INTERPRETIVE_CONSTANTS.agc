@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 1187
+## Page 1187
 		SETLOC	INTPRET1
 		BANK
 
@@ -52,7 +52,7 @@ DPHALF		=	UNITX
 DPPOSMAX	OCT	37777
 		OCT	37777
 
-# Page 1188
+## Page 1188
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
 		SETLOC	INTPRET2

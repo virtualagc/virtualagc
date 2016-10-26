@@ -14,7 +14,7 @@
 # Mod history:	05/31/03 RSB.	Began transcribing.
 #		05/14/05 RSB	Corrected website reference above
 
-# Page 1099
+## Page 1099
 		SETLOC	INTPRET1
 		BANK
 
@@ -31,7 +31,7 @@ DPHALF		=	UNITX
 DPPOSMAX	OCT	37777
 		OCT	37777
 
-# Page 1100
+## Page 1100
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
 		SETLOC	INTPRET2

@@ -7,7 +7,7 @@
 # Assembler:	yaYUL
 # Contact:	??? <???@???.???>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
 # Mod history:	2009-??-?? ???	Adapted from corresponding Colossus 249 file.
 
 ## Page ???

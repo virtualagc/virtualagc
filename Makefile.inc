@@ -10,6 +10,8 @@
 #				rather than in one step, since they actually 
 #				need different command-line switches in yaYUL
 #				for optimum prettiness.
+#		2016-10-21 RSB	Hadn't been accounting for the fact that 
+#				oct2bin need different args for --block1.
 
 # Notes: 
 #
@@ -57,7 +59,7 @@ $(BASENAME).bin: $(TOPLEVEL).agc.bin
 	mv -f $< $@
 else
 $(BASENAME).bin: $(BASENAME).binsource
-	../Tools/oct2bin <$(BASENAME).binsource
+	../Tools/oct2bin $(OCT2BIN_ARGS) <$(BASENAME).binsource
 	mv oct2bin.bin $@
 endif
 

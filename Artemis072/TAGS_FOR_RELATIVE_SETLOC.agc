@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2009-07-29 OH	Adapted from corresponding Comanche 055 file.
 # 		2009-09-04 JL	Fixed typo: COHTAGS should be CDHTAGS.
 # 		2009-09-04 JL	Added missing LATLONG1 declaration in bank 16. Fix typos. Remove P23S and SXTMARK1.

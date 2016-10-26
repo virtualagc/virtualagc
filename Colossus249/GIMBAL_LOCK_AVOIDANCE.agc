@@ -34,7 +34,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 407
+## Page 407
 		BANK	15
 		
 		SETLOC	KALCMON1
@@ -83,7 +83,7 @@ ARATE		2DEC	.0022222222	# = .05 DEG/SEC
 		
 ANGLTIME	2DEC	.000190735	# = 100B-19 
 					# MANEUVER ANGLE TO MANEUVER TIME
-# Page 408
+## Page 408
 QUADROT		2DEC	.1		# ROTATION MATRIX FROM S/C AXES TO CONTROL
 		2DEC	0		# AXES (X ROT = -7.25 DEG)
 		2DEC	0

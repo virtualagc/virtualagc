@@ -29,7 +29,7 @@
 #	This AGC program shall also be referred to as
 #			Colossus 2A
 
-# Page 1037
+## Page 1037
 # CALCULATION OF  AMGB, AMBG  ONCE EVERY SECOND
 #
 #	AMGB =	1	SIN(PSI)		0
@@ -79,7 +79,7 @@ AMBGUPDT	CA	FLAGWRD6	# CHECK FOR RCS AUTOPILOT
 		EXTEND
 		MP	CAPSI
 		COM
-# Page 1038
+## Page 1038
 		TS	AMGB7
 		TCF	ENDOFJOB
 QUADANGL	DEC	660		# = 7.25 DEGREES

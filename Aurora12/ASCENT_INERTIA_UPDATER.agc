@@ -29,7 +29,7 @@
 # The original high-quality digital images are available at archive.org:
 #       https://archive.org/details/aurora00dapg
 
-# Page 639
+## Page 639
 
 IXXTASK         TC              JACCESTP                        
                 TC              ASCENGON                        
@@ -81,7 +81,7 @@ JACCESTP        CAE             IXX
                 EXTEND                                          
                 DV              4JETTORK                        
 
-# Page 640
+## Page 640
                 DOUBLE                                          
                 TS              1/2JTSP                         
 
@@ -133,7 +133,7 @@ COMMONQR        CAE             1/2JTSQ
                 CAE             1/2JTSQ                         
                 EXTEND                                          
 
-# Page 641
+## Page 641
 
                 MP              1/2JTSR                         
                 EXTEND                                          

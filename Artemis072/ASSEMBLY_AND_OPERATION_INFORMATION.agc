@@ -8,7 +8,7 @@
 # Assembler:	yaYUL
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
-# Page scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
+# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 # Mod history:	2004-12-21 RSB	Created.
 #		2005-05-14 RSB	Corrects website reference above.
 #		2009-07-25 RSB	Fixups for this header so that it can

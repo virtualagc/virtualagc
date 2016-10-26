@@ -36,7 +36,7 @@
 # Colossus 249, this code is instead copied from the corresponding Luminary 131
 # source file, and then is proofed to incorporate any changes.
 
-# Page 498
+## Page 498
 		BANK	34
 		SETLOC	R31
 		BANK
@@ -86,7 +86,7 @@ COMPDISP	VLOAD	VSU
 			X1		# RATT-RONE		PD= 0
 		VSR1
 		VSL*	UNIT
-# Page 499
+## Page 499
 			0,1
 		PDVL	VSU		# UNIT(LOS) TO 0D	PD= 6
 			VATT
@@ -137,7 +137,7 @@ R34ANG		VLOAD	UNIT
 		EXIT
 		CAF	BIT5
 		MASK	EXTVBACT
-# Page 500
+## Page 500
 		EXTEND
 		BZF	ENDEXT		# YES, DIE
 		
@@ -149,7 +149,7 @@ R34ANG		VLOAD	UNIT
 V16N54		VN	1654
 V16N53		VN	1653
 
-# Page 501
+## Page 501
 # THE STATEXTP SUBROUTINE DOES A PRECISION EXTRAPOLATION OF BOTH VEHICLES
 # STATE VECTORS TO PRESENT TIME AND SAVES THEM AS BASE VECTORS.
 # IF SERVICER IS OFF ---
@@ -201,7 +201,7 @@ HAVEBASE	BON	RTB
 			INTYPFLG	# CONIC EXTRAP.
 		STCALL	TET
 			INTEGRVS	# INTEGRATION --- AT LAST ---
-# Page 502
+## Page 502
 		VLOAD
 			RATT
 		STOVL	RONE
@@ -252,7 +252,7 @@ R34LOS		EXIT
 		CA	CDUT
 		INDEX	FIXLOC
 		TS	11D
-# Page 503
+## Page 503
 		CA	FIXLOC
 		AD	SIX
 		COM

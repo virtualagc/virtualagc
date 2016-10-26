@@ -10,6 +10,8 @@
 # 	        2016-10-03 OH	Initial Transcription from images
 #               2016-10-16 HG   Fix operand OGCECADR -> OGC
 #               2016-10-18 HG   Fix label DEG/SECC -> DEG/SEC
+#                               Fix operand modifier TS TANG +  -> TS TANG +1
+#                               Fix instruction TC -> TCF
 
 # This source code has been transcribed or otherwise adapted from
 # digitized images of a hardcopy from the private collection of
@@ -29,7 +31,7 @@
 # The original high-quality digital images are available at archive.org:
 #       https://archive.org/details/aurora00dapg
 
-# Page 0500
+## Page 0500
                 SETLOC	ENDPINS3
                 EBANK=	XSM
 
@@ -71,7 +73,7 @@ TORKX           OCT     01100
 TORKY           OCT     01200
 TORKZ           OCT     01300
 
-# Page 0501
+## Page 0501
 
 SAMODCHK        CAF     ZERO
                 TS      TESTNO
@@ -124,7 +126,7 @@ CHK2            TS      CDUNDX
                 CAF     170ANG
                 INDEX   CDUNDX
                 
-# Page 0502
+## Page 0502
 
                 TS      THETAD
                 
@@ -176,7 +178,7 @@ CHK5            CS      4+6BITS
                 CAF     ECE2CADR
                 TC      JOBSLEEP
                 
-# Page 0503
+## Page 0503
 
 ECE1            CAF     ECE2CADR
                 TC      JOBWAKE
@@ -224,12 +226,12 @@ CHKX            TC      COARZERO
                 
 CHK6            INDEX   TESTNO
                 CAF     RADECNTR
-                TS      TANG +
+                TS      TANG +1
                 TS      TANG
                 
                 TC      INTPRET
                 
-# Page 0504
+## Page 0504
 
                 CALL 
                         RRDESNB
@@ -282,7 +284,7 @@ ERCTRANG        OCT     03013
                 OCT     02660
                 OCT     01042
                 
-# Page 0505
+## Page 0505
 
                 OCT     00000
                 OCT     76736
@@ -319,7 +321,7 @@ RRRATFPS        OCT     00000
                 OCT     77540
                 OCT     77232
                 
-# Page 0506
+## Page 0506
 
 CDURATE         EXTEND
                 QXCH    QPLACE
@@ -371,7 +373,7 @@ CALCRATE        EXTEND
                         SGNAGREE
                 STORE   DSPTEM2
                 
-# Page 0507
+## Page 0507
                 EXIT
                 
 RATEDSP         CAF     V06N66X
@@ -385,7 +387,7 @@ RATEDSP         CAF     V06N66X
                 INCR    RUN
                 TC      QPLACE
                 
-# Page 0508
+## Page 0508
 
 THETADLD        TS      THETAD
                 TS      THETAD +1
@@ -424,7 +426,7 @@ FINEALGN        EXTEND
                 
                 TC      QPLACE
                 
-# Page 0509
+## Page 0509
 
 CH30DSPY        EXTEND
                 QXCH    QPLACE
@@ -470,7 +472,7 @@ ZEROMAIN        CS      4+6BITS
                 
                 TC      Q
                 
-# Page 0510
+## Page 0510
 
 RROPRDLY        EXTEND
                 QXCH    QPLAC
@@ -556,7 +558,7 @@ COARZERO        CAF     ZERO
                 
                 TC      QPLACE
                 
-# Page 0512
+## Page 0512
 
 FNZEROFN        EXTEND
                 QXCH    QPLAC
@@ -602,14 +604,14 @@ FZFDSP          CAF     V05N30X
                 TC      NVSBWAIT
                 TC      FLASHON
                 TC      ENDIDLE
-                TC      ENDTST03
+                TCF     ENDTST03
                 TCF     +2
                 TCF     FZFDSP
                 
                 INCR    RUN
                 TC      QPLAC
                 
-# Page 0513
+## Page 0513
 
 1ANG            OCT     00133
 33.75ANG        OCT     06000

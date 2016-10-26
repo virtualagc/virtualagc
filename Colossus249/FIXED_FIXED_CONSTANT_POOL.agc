@@ -37,7 +37,7 @@
 # Refer directly to the online document mentioned above for further information.
 # Please report any errors (relative to 1701.pdf) to info@sandroid.org.
 
-# Page 1182
+## Page 1182
 		BLOCK	02
 		COUNT*	02/FCONS
 
@@ -87,7 +87,7 @@ ELEVEN		DEC	11
 # OCT14		OCT	14		# ALARM AND ABORT (FILLER)
 OCT15		OCT	15
 # R1D1		OCT	16		# PINBALL
-# Page 1183
+## Page 1183
 LOW4		OCT	17
 # BIT5		OCT	00020
 # ND1		OCT	21		# PINBALL
@@ -138,7 +138,7 @@ V06N22		VN	0622
 # MID5		OCT	1740		# PINBALL
 BITS2-10	OCT	1776
 LOW10		OCT	1777
-# Page 1184
+## Page 1184
 # BIT11		OCT	02000
 # 2K+3		OCT	2003		# PINBALL
 LOW7+2K		OCT	2177		# OP CODE MASK + BANK 1 FBANK SETTING
@@ -190,7 +190,7 @@ PRIO34		OCT	34000
 #		OCT	34034		# T4RUPT	RELTAB +6D		
 PRIO35		OCT	35000
 PRIO36		OCT	36000
-# Page 1185
+## Page 1185
 PRIO37		OCT	37000
 63/64+1		OCT	37401
 # MID7		OCT	37600		# PINBALL
@@ -224,7 +224,7 @@ NEG3		DEC	-3
 NEG2		OCT	77775
 NEGONE		DEC	-1
 
-# Page 1186
+## Page 1186
 
 # DEFINED BY EQUALS
 
