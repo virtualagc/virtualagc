@@ -11,6 +11,8 @@
 ##               2016-10-14 JL  Added all page numbers and headers.
 ##               2016-10-15 JL  Transcribed pages 41-62.
 ##               2016-10-16 JL  Transcribed pages 63-67.
+##               2016-10-18 JL  Transcribed pages 68-73.
+##               2016-10-26 JL  Transcribed pages 74-77.
 
 ## Annotations:
 ##
@@ -520,6 +522,8 @@ P0413   ONE-WORD ALPHABETIC CONSTANTS.
  0429   STAR COL 1 ALF          *
  0430   TAPE NO    ALF          20000000
 
+## The following line makes a string of "blots", non-ASCII characters.
+## I have chosen to represent them as the ASCII "block" character, Unicode 9608.
  0432   W BLOT OBS ALF          ██OBS██
  0433   W BY       ALF          BY
  0434   W SYMBOL   ALF          SYMBOL
@@ -1410,17 +1414,251 @@ P1218   TRANSFERRED ASSEMBLY: FIND HIGHEST LOG NUMBER FOR FILE, IGNORING DISABLE
 ## Page 74
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  34        PAGE  34
 
+P1254   ENTER THE NAME OF A NEW PROGRAM OR SUBROUTINE IN THE DIRECTORY.
+
+ 1255   DIRENTRY   TX           Z,X3,1        -             L PROG FIL          SAVE ADDRESS IN FILE.
+ 1257              TX           PACK DATE     -             N,X3                DATE OF LAST HANDLING GOES WITH NAME.
+ 1259              SWS, BIT 36  SWITCH        27            N,X3                SHOW WHETHER PROGRAM OR SUBROUTINE.
+ 1261              NA, BIT9     SWITCH        ZERO          C,+2
+ 1262              TS           W END SYPT    NEXT NAME     POSN PRGN           PROGRAM GOES ON TAPE BEFORE END SYPT.
+
+ 1264              TX           L END THR     -             Z,X5
+ 1265              SWS,THREAD10 N,X0          12            Z,X5                POINT TO FIRST PROG OF COMPUTER.
+ 1267              TS           Z,X0          Z,X2          FIND SUBN
+
+ 1268              NA, BIT36    5,1           ZERO          FIND SUBN +2        BRANCH IF FOUND A SUBROUTINE.
+ 1270              TX           Z,X5          -             Z,X2
+ 1271              SS           2,1           THREAD 10     Z,X5                ADVANCE POINTER PAIR THRU LIST.
+ 1273   FIND SUBN  NA           Z,X5          L END THR     C,-3                BRANCH IF MORE PROGS OR SUBS TO SEE.
+
+ 1275              TS           W END SYLT    NEXT NAME     POSN SUBN +2        IF NO SUBS (OR NONE AFTER SOURCE), LAST.
+ 1277              NA, BIT12    SWITCH        ONES          C,+2                BRANCH IF NOT DOING VERSION ASSEMBLY.
+ 1279              NA           N,X2          SORS NAME     FIND SUBN -2        VERSION SUBRO GOES ON TAPE AFTER SOURCE.
+ 1281              TS           N,X5          NEXT NAME     POSN SUBN +2        NEW/TRANSFERRED SUBRO GOES 1ST IN SYLT.
+
+ 1283   POSN SUBN  SS           Z,X5          THREAD 10     N,X3                NEW SUBRO POINTS TO SUCCESSOR.
+ 1285              TS, THREAD10 L PROG FIL    2,1           POSN PRGN +2        PREDECESSOR POINTS TO NEW SUBRO.
+ 1287              NA           Z,X2          Z,X0          POSN SUBN           BRANCH UNLESS NOTHING PRECEDES NEW SUB.
+
+ 1289   POSN PRGN  SWS,THREAD10 N,X0          12            N,X3                NEW P/S NAME TO HEAD OF MACHINE'S LIST.
+ 1291              SWS,BTHRED10 L PROG FIL    12,L          N,X0
+
+ 1292              TS           ONES          1,6           FIND AUTH      C    SEEK AUTHOR NAME IN DIRECTORY.
+ 1294              TS           -             -             ADD AUTHR           INCLUDE IT NOW IF NOT FOUND.
+
+ 1296              LA           B1THRU12      3,1           C,+2                BR. IF AUTH HAS 255 OR MORE PROG/SUBS.
+ 1298              WA           3,1           BIT 12        3,1                 OTHERWISE INCREASE HIS TOTAL.
+ 1300              TS           L PROG FIL    Z,X2          SET LAUTH      C
+ 1301              SWS,BTHRED10 3,1           12            2,1                 NEW P/S NAME TO HEAD OF AUTHOR'S LIST.
+ 1303              SWS,ATHRED10 L PROG FIL    24,L          3,1
+ 13031 *           NA, BIT12    SWITCH        ZERO          GBR2 GBR3 -1        BRANCH IF DOING A VERSION ASSEMBLY.
+ 13032             EX           SWITCH        BIT 7         COMMON
+ 13033             LA           COMMON        ZERO          GBR2 GBR3 -1        BRANCH IF NOT IN A SEGMENT ASSEMBLY.
+ 13034             NA, CAC3     1,9           L END THR     C,+2
+ 13035             WA           INIT X5       ONE           INIT X5             IF NO DELETES WAITING, MAKE IT GB,R4.
+ 13036             WA           INIT X5       ONE           INIT X5             IF DELETES ARE WAITING, MAKE IT GB,R3.
+ 13037             TS           -             -             INIT ASSY
+ 1304              LA, CAC3     1,9           L END THR     INIT ASSY           BRANCH IF THERE ARE NO DELETES WAITING.
+ 1306   GBR2 GBR3  WA           INIT X5       SPEC ONE      INIT X5             CHANGE GB,R2 TO -GB,R3.
+
 ## Page 75
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  35        PAGE  35
+
+P1308   PROCEDURE TO INITIALIZE A PERMISSIBLE ASSEMBLY OR REPRINT.
+
+ 1309   INIT ASSY  TX           L SYM THR     -             Z,S1
+ 1310              MT           I SYM THRS    13            N,S1,1              INITIALIZE SYMBOL TABLE CAC-THREADS.
+ 1312              TX           ISY SUB TH    -             N,S1,1              SPECIAL INITIAL VALUE FOR SUBRO DIR ORG.
+ 1314              MT           I SYM THRS    50            N,S1,1
+
+ 1315              TX           L AV TABLE    -             Z,S1
+ 1316              SM           CAC12         ISY SUBTH     N,S1,1              INITIALIZE FIRST SPEC PAIR IN SYM TABLE.
+ 1318              TS           L GPB STT     Z,X4          C,-1           C
+ 1319              WA           OCTAL 20      OCTAL 20      Z,R6
+ 1320              MT           CAC12         62            N,S1,1              INITIALIZE AVAILABILITY TABLE.
+ 1322              NA           Z,R6,1        ZERO          C,-1
+
+ 1323              TX           L B LISTS     -             Z,S1
+ 1324              MT           ZERO          4             N,S1,1              INITIALIZE JOINT BUFFER LIST.
+ 1326              TN           BUF NAMES     8             N,S1,8              INITIALIZE FREE BUFFER LIST.
+ 1328              MT           ZERO          8             N,S1,1              INITIALIZE INPUT AND SAPO BUFFER LISTS.
+ 1330              TS           Z,SC,5        N,X4          MON WAKE       C    WAKE GROUP B TO ASK IT ITS NAME.
+
+ 1332              SPCR                                     COMMON
+ 1333              TX           YUL MASKS     -             Z,MXR
+ 1334              SWE, ONES    COMMON        17            COMMON
+ 1335              SS           COMMON        GROUP IND     INIT X5             PLANT TRUE NAME OF GROUP B.
+ 1337              TX           Z,R0          -             Z,SC                GO BACK TO BED UNTIL PASS 1.
+
+ 1339              SSL, ONE     SWITCH        35            C,+1                FOR TRANSFERRED ASSEMBLY, PRINT SOURCE.
+ 1341              LA, B11T12   SWITCH        ZERO          C,+2                FOR REPRINT, PRINT NAME OF CUSTOMER.
+ 1343              S, PHI PRINT SORS LINE                                       FOR VERSION ASSEMBLY, PRINT SOURCE NAME.
+
+ 1345   SNACH WRK  SWS, CHAR8   TAPE NO       A,7           WORKERS
+ 1346              SWS, CHAR7   TAPE NO       A,6           WORKERS +1          PUT TAPE NUMBER IN SNATCHING PARAMETERS.
+ 1348              S, MON TADDR TAPE NO                                         SKIP IF WORKER MUST BE SNATCHED.
+ 1350              TS           L STOPPER     Z,X4          POSITION +2
+
+ 1351              TS           L STOPPER     Z,X4          PHI SNACH
+## The following line makes a string of "blots", non-ASCII characters.
+## I have chosen to represent them as the ASCII "block" character, Unicode 9608.
+ 1352   WORKERS    ALF,3        W10Y010█YULWRK█ ████████
+
+ 1353   POSITION   TS, CHAR1    TAPE NO       C,+1          PHI TAPE
+ 1354              RW,EH        -             -             -                   REPOSITION WORKERS IN ANY CASE.
+ 1356              TS, CHAR1    TAPE NO       C,+1          PHI TAPE
+ 1357              RF,EH        4,0           -             DISASTER
+ 1358              TS,CHAR1     TAPE NO       C,+1          PHI TAPE
+ 1359              RF,EH        -             -             DISASTER
+ 1360              WA           TAPE NO       BIT 6         TAPE NO
+ 1361              NA, CHAR8    WORKERS       FOUR          SNACH WRK           WORKERS ARE CALLED 2, 3, AND 4.
+
+ 1363              TS           Z,SC          Z,X1          RD SUBDRC           GO TO GET SUBDIRECTOR IF ANY.
+ 1365   LOAD PAS 1 S, PHI LOAD  PASS 1        1             BASE ADDR           LOAD AND GO TO PASS 1 WHEN THEY RUN OUT.
 
 ## Page 76
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  36        PAGE  36
 
+P1367   SUBROUTINE IN PASS 0 TO PROCESS ASSEMBLY AND/OR PRINTING SUBDIRECTORS.
+
+ 1368   ASSY SUBD  WD           Z,X1          ONE           Z,X4                X4 IS USED TO RETURN TO RD SUBDRC CALL.
+ 1370              WA           Z,X6          OCTAL 20      WHODUNIT
+ 1371   LINS COPS  NA           6,16          W PRINT       REN SUP &C
+ 1372              WA           WHODUNIT      THREE         WHODUNIT            SET UP TO EXAMINE NO. OF LINES OR COPYS.
+ 1374              SWE, CHAR8   6,21          12            Z,AU1
+ 1375              LA           Z,AU1         ZERO          NUM WR SIZ
+ 1376              LA           THREE         Z,AU1         NUM WR SIZ          1 OR 2 DECIMAL DIGITS FOR EITHER NO.
+ 1378              SWE, CHAR8   6,19          A,7           COMMON              GET TENS OR ONES DIGIT.
+ 1380              LA           TEN           COMMON        NUM NDEC
+ 1381              LA           Z,AU1         ONE           TEST NVAL           BRANCH IF NUMBER WAS 1 DIGIT ONLY.
+
+ 1383              BT           COMMON        10            COMMON
+ 1384              SWE, CHAR8   6,19          A,6           Z,AU1               UNITS DIGIT OF 2-DIGIT NUMBER.
+ 1386              LA           TEN           Z,AU1         NUM NDEC
+ 1387              WA           COMMON        Z,AU1         COMMON
+
+ 1388   TEST NVAL  LA           COMMON        ONE           NUM RNG ER
+ 1389              LA           COMMON        CHAR 8        LIN OR COP          LIMITS HERE ARE 2 AND 63.
+
+ 1391   NUM RNG ER S, MON TYPER NW RGE MSG    SPRAMR +24    IGN SBDIR
+ 1392   NUM NDEC   S, MON TYPER NW NDC MSG    SPRAMR +24    IGN SBDIR
+ 1393   NUM WR SIZ S. MON TYPER NF WSZ MSG    SPRAMR +24    IGN SBDIR           CUSS, OUST SUBDIRS WITH BAD NUMBERS.
+
+ 1395   LIN OR COP WA           WHODUNIT      THREE         WHODUNIT
+ 1396              NA           6,22          W LINES       CK COPIES
+
+ 1397              LA           COMMON        NINE          NUM RNG ER          MINIMUM LINES/PAGE = 10.
+ 1399              NA           N LINES       54 LINES      DUPLISUB
+ 1400              SWS, CHAR2   COMMON        A,2           N LINES             SET TEMPORARY LENGTH OF PAGE.
+ 1402              SWS, C7T8    6,19          A,6           SET LN MSG
+ 1403              S, MON TYPER SET LN MSG    SPRA +24      4,0                 ANNOUNCE AND GO TO GET NEXT SUBDIRECTOR.
+
+ 1405   CK COPIES  NA           6,22          W COPIES      UNRC SBDR
+ 1406              NA           N COPIES      ZERO          DUPLISUB
+ 1407              TX           COMMON        -             N COPIES            TO BE MODIFIED WHEN PLY IS KNOWN.
+ 1409              SS           6,19          B1THRU12      N COPS MSG
+ 1410              S, MON TYPER N COPS MSG    SPRAMR +24    -
+ 1411              S, MON TYPER WH PLY MSG    SPRAMR +16    -
+ 1412              S, MON TYPER WAA 10060     SPRA +24      4,0
+
+
+
+R1413   ASSEMBLY/REPRINT SUBDIRECTOR CHECKING AND CUSSING.
+
+ 1414   DUP SUB CH LA           L SERVICE     Z,X4          IL REQEST           BRANCH IF NOT AN ASSEMBLY-TYPE TASK.
+ 1416   DUPLISUB   S, MON TYPER DUPSR MSG     SPRAMR +24    IGN SBDIR           CUSS AND IGNORE DUPLICATE SUBDIRECTORS.
+ 1418   IL REQEST  S, MON TYPER IL RQT MSG    SPRAMR +24    IGN SBDIR           CUSS RENUMBER IN REPRINT AND LIKE THAT.
+
 ## Page 77
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  37        PAGE  37
 
+P1420   PROCESSING FOR ASSEMBLY/PRINT SUBDIRECTORS OTHER THAN LINES OR COPIES REQUESTS.
+
+ 1422   REN SUP &C NA           6,17          BLANKS        UNRC SBDR
+ 1423              NA           6,16          W RENUMBR     SUPP OR &C          "RENUMBER" OR "SUPPRESS" OR ETC.
+ 1425   RENUMBER   LA, B2B11    ONES          SWITCH        IL REQEST           REFUSE TO RENUMBER DURING REPRINT.
+ 1427              SSL, ONE     SWITCH        47            DUP SUB CH     C    CHECK DUPLICATION AND CALL FROM PRINT.
+ 1429              SM           SWITCH        BIT 1         SWITCH              SET SWITCH TO MAKE PASS 1 RENUMBER.
+ 1431              S, MON TYPER CDREN MSG     SPRA +16      4,0                 TYPE "RENUMBER CARDS", GET NEXT SUBDIR.
+
+ 1433   SUPP OR &C NA           6,16          W SUPPRES     FRZ B4 UPG          &C = "FREEZE", "BEFORE", OR "UPGRADE".
+ 1435              WA           WHODUNIT      THREE         WHODUNIT
+ 1436              NA           6,19          W CONDIT      UNCONDIT            BRANCH IF NOT "CONDITIONALLY" (ON BAD).
+ 1438              NA           6,20          W CONDIT +1   UNRC SBDR
+ 1439              TN           6,22          3             6,19
+ 1440              TS           B18T20        TEMP MASK     UNCONDIT +1         BOBTAIL MASK FOR CONDITIONAL SUPPRESSION
+ 1442   UNCONDIT   TX           SUPP BITS     -             TEMP MASK
+ 1443              NA           6,19          W SYMBOL      SP OCT MAP          "SUPPRESS SYMBOL" SUFFICES HERE.
+ 1445   SP SYM TAB SSL, ONE     SWITCH        29            DUP SUB CH     C    CHECK DUPLICATION AND CALL FROM PRINT.
+ 1447              SM, TEMPMASK SWITCH        B15 B19       SWITCH
+ 1448              TS           ZERO          WHODUNIT      TYP SUPPR
+
+ 1449   SP OCT MAP NA           6,19          W OCTAL       SUP INACT           "SUPPRESS OCTAL" SUFFICES HERE.
+ 1451              SSL, ONE     SWITCH        28            DUP SUB CH     C    CHECK DUPLICATION AND CALL FROM PRINT.
+ 1453              SM, TEMPMASK SWITCH        B16 B20       SWITCH
+ 1454              TS           ONE           WHODUNIT      TYP SUPPR
+
+ 1455   SUP INACT  NA           6,19          W INACTIV     UNRC SBDR           "SUPPRESS INACTIVE" SUFFICES HERE.
+ 1457              NA           6,20          BLANKS        UNRC SBDR
+ 1458              SSL, ONE     SWITCH        30            DUP SUB CH     C    CHECK DUPLICATION AND CALL FROM PRINT.
+ 1460              SM, TEMPMASK SWITCH        B14 B18       SWITCH
+ 1461              TX           TWO           -             WHODUNIT
+
+ 1462   TYP SUPPR  NA           TEMP MASK     SUPP BITS     C,+2
+ 1463              S, MON TYPER W SUPPRES     SPRAM +8      C,+2                "SUPPRESS".
+ 1465              S, MON TYPER SUP CO MSG    SPRAM +24     -                   "SUPPRESS CONDITIONALLY: ".
+ 1467              SSL, THREE   WHODUNIT      0             C,+1
+ 1468              S, MON TYPER SY TAB MSG    SPRA +24      4,0                 " SYMBOL TABLE LISTING".
+ 1470              S, MON TYPER OC MAP MSG    SPRA +24      4,0                 " OCTAL STORAGE MAP".
+ 1472              S, MON TYPER IN SUB MSG    SPRA +24      4,0                 " INACTIVE SUBROUTINES".
+
+
+
+R1474   PROCEDURE FOR THE SUBDIRECTOR "FREEZE SUBROUTINES", TO INCORPORATE SUBROUTINES INTO A PROGRAM.
+
+ 1476   FRZ B4 UPG NA           6,16          W FREEZE      B4 OR UPGR          IF NOT "FREEZE": "BEFORE" OR "UPGRADE".
+ 1478              TS           6,19          WHODUNIT      RENUMBER       C    REFUSE TO FREEZE DURING REPRINT.
+ 1480              NA           6,19          MANSU MSG     UNRC SBDR
+ 1481              NA, C1T4     6,20          MANSU MSG +1  UNRC SBDR           "SUBROUTINES" IS REQUIRED.
+ 1483              NA, BIT9     SWITCH        ZERO          IL REQEST           REQUIRE PROGRAM ASSEMBLY.
+ 1485              SSL, ONE     SWITCH        31            DUP SUB CH     C    QUIT IF THERE HAS BEEN ANOTHER "FREEZE".
+ 1487              SM           SWITCH        BIT 17        SWITCH              SHOW THAT A "FREEZE" HAS BEEN RECEIVED.
+ 1489              S, MON TYPER FRSUB MSG     SPRA +24      4,0                 "FREEZE SUBROUTINES".
+
 ## Page 78
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  38        PAGE  38
+
+P1491   PROCESSING FOR THE SUBDIRECTOR "BEFORE SUBRNAME", USED IN SUBROUTINE ASSEMBLY TO POSITION A SUBROUTINE ON TAPE.
+
+ 1493   B4 OR UPGR NA           6,16          W BEFORE      UPGRADE             IF NOT "BEFORE", MUST BE "UPGRADE".
+ 1494              TS           6 COMMA 19    WHODUNIT      RENUMBER       C    POINT TO SUBRO NAME, QUIT IF REPRINT.
+ 1496              NA, BIT9     SWITCH        ONES          IL REQEST           REQUIRE SUBROUTINE ASSEMBLY.
+ 1498              SSL, ONE     SWITCH        40            DUP SUB CH     C    QUIT IF THERE HAS BEEN ANOTHER "BEFORE".
+ 1500              SM           SWITCH        BIT 8         SWITCH              SHOW THAT A "BEFORE" HAS BEEN RECEIVED.
+ 1502              NA           6,20          BLANKS        UNRC SBDR           QUIT IF SUBRO NAME IS TOO LONG.
+ 1504              NA, C1T4     6,19          W END SYLT    C,+2
+ 1505   BEFOREND   TS           W END SYLT    NEXT NAME     ACK BEFOR           SUBDIRECTOR SAID "BEFORE END".
+
+ 1507
+ 1508
+ 1509
+
+ 1511
+ 1513
+ 1515
+ 1517
+
+ 1519
+ 1521
+ 1523
+ 1525
+
+ 1527
+ 1529
+ 1531
+ 1533
+ 1535
+ 1537
 
 ## Page 79
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  39        PAGE  39
