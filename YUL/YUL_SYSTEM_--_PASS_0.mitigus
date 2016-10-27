@@ -13,6 +13,7 @@
 ##               2016-10-16 JL  Transcribed pages 63-67.
 ##               2016-10-18 JL  Transcribed pages 68-73.
 ##               2016-10-26 JL  Transcribed pages 74-77.
+##               2016-10-27 JL  Transcribed pages 78-82.
 
 ## Annotations:
 ##
@@ -1639,38 +1640,234 @@ P1491   PROCESSING FOR THE SUBDIRECTOR "BEFORE SUBRNAME", USED IN SUBROUTINE ASS
  1504              NA, C1T4     6,19          W END SYLT    C,+2
  1505   BEFOREND   TS           W END SYLT    NEXT NAME     ACK BEFOR           SUBDIRECTOR SAID "BEFORE END".
 
- 1507
- 1508
- 1509
+ 1507              TX           L COMP NAM    -             Z,X2
+ 1508              SWS,THREAD10 N,X2          12            Z,X2
+ 1509              TS           Z,SH          Z,CSC         B4 WHICH -2         START SEARCH FOR NAMED SUBROUTINE.
 
- 1511
- 1513
- 1515
- 1517
+ 1511              NA, BIT36    2,1           ZERO          B4 WHICH            BRANCH IF FOUND A SUBROUTINE.
+ 1513              SS           2,1           THREAD 10     Z,X2                ADVANCE THROUGH LIST OF PROGRAMS.
+ 1515              NA           Z,X2          L END THR     C,-2                BRANCH UNLESS THERE ARE NO SUBROUTINES.
+ 1517              NA           6,19          W ALL         BAD BEFOR      C    IF "BEFORE ALL", DROP INTO BEFOREND.
 
- 1519
- 1521
- 1523
- 1525
+ 1519   B4 WHICH   NA           6,19          W ALL         ACK BEFOR +2        BRANCH IF REALLY NEED TO FIND SUBRO.
+ 1521              NA           Z,X2          L PROG FIL    ACK BEFOR +1        BRANCH UNLESS SUBRO IS ALREADY FIRST.
+ 1523   ACK BEFOR  S, YUL TYPER 6,2           A +9          4,0                 ACKNOWLEDGE SUBDIRECTOR BY TYPING IT.
+ 1525              TS           N,X2          NEXT NAME     ACK BEFOR           IF "BEFORE ALL", 1ST SUBRO IS SUCCESSOR.
 
- 1527
- 1529
- 1531
- 1533
- 1535
- 1537
+ 1527              NA           6,19          N,X2          BAD BEFOR -2        BRANCH IF DIDN'T FIND NAMES SUBROUTINE.
+ 1529              NA           Z,X2          L PROG FIL    C,-2                OK UNLESS SUBRO WAS TO PRECEDE ITSELF.
+ 1531              S, MON TYPER UNRCS MSG     SPRAMR +32    IGN SBDIR           "SUBROUTINE NAME NOT RECOGNIZED".
+ 1533              SS           2,1           THREAD10      Z,X2                CONTINUE SEARCH FOR NAMED SUBROUTINE.
+ 1535              NA           Z,X2          L END THR     ACK BEFOR +2        BRANCH IF SEARCH DID NOT FAIL.
+ 1537   BAD BEFOR  S, MON TYPER UNRCS MSG     SPRAMR +32    IGN SBDIR           "SUBROUTINE NAME NOT RECOGNIZED".
 
 ## Page 79
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  39        PAGE  39
 
+P1539   PROCESSING FOR THE SUBDIRECTOR "UPGRADE TO REVISION NNN", USED IN TRANSFERRED ASSEMBLY TO ASSIGN AN ARBITRARY
+R15392  REVISION NUMBER TO A PROGRAM OR SUBROUTINE BEING CREATED FROM A DISC FILE, TYPICALLY IN A TAPE-TO-TAPE MOVE.
+
+ 15394  UPGRADE    NA           6,16          W UPGRADE     UNRC SBDR
+ 15396             LA, CHAR3    SWITCH        B14T18        IL REQEST           BRANCH IF NOT TRANSFERRED ASSEMBLY.
+ 15398             TX           DUPLISUB      -             C,+0                COME THRU HERE JUST ONCE PER ASSEMBLY.
+ 1540              TS           6 COMMA 19    WHODUNIT      619 TO X5      C
+ 15402             NA           N,X5,3        W TO          UNRC SBDR
+ 15404             WA           Z,X5          SIX           WHODUNIT
+ 15406             NA           6,28          ONES          UNRC SBDR           GIVE UP IF THERE ARE EXTRA WORDS.
+ 15408             TS           W OF          6,28          FINGER         C    FAKE UP THE FORM "REVISION NNN OF".
+ 1541              NA           N,X5,1        W REVISON     UNRC SBDR
+ 15412             NA           N,X5,2        BLANKS        UNRC SBDR           GUARD AGAINST TASK ABORT.
+ 15414             TX           N,SC,2        -             REJEC DIR           CHANGE TASK ABORT TO SUBDIRECTOR IGNORE.
+ 15416             TS           C,+1          REJEC DIR     IGN SUBDR           RESTORE TASK ABORT ROUTINE.
+ 15418             S, MON TYPER REJEC MSG     SPRAMR +32    -
+ 1542              TS           Z,SC          Z,S2          CVRT REVN           JUDGE AND CONVERT REVISION NUMBER.
+ 15422             TX           C,-2          -             REJEC DIR           RESTORE TASK ABORT ROUTINE.
+ 15424             TX           L PROG FIL    -             Z,X4
+ 15426             SWS, B13T24  REVNO         24,L          4,1                 (TRANSFERRED ASSY STARTS SANS SUBROS).
+ 15428             SS           ZERO          BIT 10        SWITCH              UNDO DAMAGE FROM DETECTION OF REV NO.
+ 1543              S, YUL TYPER 6,2           A +9          C,+1                "UPGRADE TO REVISION NNN".
+ 15431             TX           COMP NAME     -             6,2
+ 15432             TX           W REVISON     -             6,3
+ 15433             SWE, ONES    W OF          A,5           6,4
+ 15434             SWS, C1T4    6,25          A,1           6,4
+ 15435             TN           OBJCT MSG     6             6,5
+ 15436             TS, C1T4     BLANKS        6,5           PHI SENTR           MODIFY OBJECT MESSAGE PER UPGRADING.
+ 15437             TS           COLON C1      COMMON        TYP ASOBJ +1   C
+ 15438             TS           Z,SC          Z,S2          MOD CHEK 3 -1
+ 15439             TS           Z,X5          Z,S2          PUT CN C6 -2   C    MAKE AND DISTRIBUTE NEW OBJECT MESSAGE.
+ 154395            TS           Z,X5,21       -             GO DO AUTH     C    ADVANCE X5 TO AUTHOR NAME AND DECODE IT.
+ 1544              TS           C,+1          KNWN COMP     TYP ASOBJ +1
+ 15441             TS           C,+1          KNWN COMP     LOAD PAS1 -1
+ 15442             TX           Z,X0          -             L COMP NAM
+
 ## Page 80
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  40        PAGE  40
+
+P15449             PROCEDURE TO RESPOND TO A REQUEST FOR A REPRINT OF AN ASSEMBLY LISTING.  DO NOT CONFUSE THIS WITH THE
+R1546   PRINT FUNCTION, WHICH MAKES A SYMBOLIC LISTING ONLY.  THE REPRINT FUNCTION IS JUST LIKE ASSEMBLY EXCEPT THAT
+R1548   THE REVISION NUMBER IS NOT ADVANCED, NO INPUT IS ACCEPTED, AND RENUMBERING MAY NOT BE DONE.  SYPT, SYLT, AND
+R1550   BYPT ARE NOT CHANGED IN ANY WAY.  IN PARTICULAR, THE BYPT/NO BYPT BIT FOR A PROGRAM DOES NOT CHANGE EVEN IF ITS
+R1552   SUBROUTINES HAVE CHANGED SINCE THE LAST ASSEMBLY IN SUCH A WAY AS TO CHANGE THE GOOD/FAIR/BAD RATING OF THE
+R1554   DUMMY ASSEMBLY INHERENT IN REPRINTING.
+
+ 1555   REPRINT    TS           W REPRINT     TASK MSG      TASK OBJC           BREAK DOWN REMAINDER OF YUL DIRECTOR.
+ 1557              SWS, C1T7    TASK MSG +1   A,1,L         TASK MSG +1
+ 1558              SWS, CHAR8   TASK MSG +2   A,1,L         TASK MSG +1
+ 1559              SWS, C1T7    TASK MSG +2   A,1,L         TASK MSG +2         NORMALIZE TASK MESSAGE.
+ 1561              S, YUL TYPER TASK MSG      AMTF +4       TYP ASOBJ           TYPE TASK, GO JOIN ASSEMBLY PROCESS.
+
+R1563   RETURN TO HERE IF WE CAN ASSEMBLE FOR THE NAMED COMPUTER.
+
+ 1564   REPRINT 2  TS           Z,SC          Z,X1          RD SUBDRC
+ 1565              S, MON TYPER 4WHOM MSG     SPRAMR +40    TYP ABORT           REQUIRE SUBDIRECTOR "FOR CUSTOMERNAME".
+ 1567              NA           6,16          W FOR         C,-1
+ 1568              S, YUL TYPER 6,2           A +9          C,+1                TYPE OUT ENTIRE SUBDIRECTOR CARD.
+ 1570              TS           BIT 10        SORS LINE     SET PG HED     C
+ 1571              TN           REP 4 LINE    3             SORS LINE +1
+ 1572              TN           6,2           9             N,AU2
+ 1573              MT           BLANKS        3             N,AU2,1             MAKE UP LINE ABOUT WHO GETS THE REPRINT.
+ 1575              TS, B2B11    ONES          SWITCH        KNOWN PSR           REQUEST REPRINT, CHECK PRG/SUB NAME ETC.
+ 1577              SSL, ONE     4,1           35            C,+1                TEST OBSOLESCENCE BIT.
+ 1579              TS           Z,X4          L PROG FIL    X5 IS NR4           JOIN ASSEMBLY INITIALIZATION.
+
+ 1581              S, MON TYPER PROBS MSG     SPRA +40      -                   CUSS OBSOLETE REPRINT ON TYPEWRITER.
+ 1583              TS           W BLOT OBS    PAGE HEAD +14 C,-2                CUSS OBSOLETE REPRINT ON EVERY PAGE.
+
+
+
+R1585              PROCEDURE TO CREATE A BACKUP TAPE IN MIDJOB, AT THE OPERATOR'S DISCRETION.  EVOKED BY THE DIRECTOR
+R1587   CARD "CREATE BACKUP".
+
+ 1588   CREATE BU  TX           Z,X5          -             WHODUNIT
+ 1589              NA           N,X5,3        W BACKUP      HOWZAT              DEMAND "BACKUP".
+ 1591              TX           Z,X5          -             WHODUNIT
+ 1592              NA           N,X5          ONES          HOWZAT              FORBID SUPERFLUOUS WORDS.
+ 1594              SS           ACA OTHE      CHAR 3        ASCBU MSG
+ 1595              S, MON TYPER ASCBU MSG     SPRAMR +24    -                   "ASA TO CREATE BACKUP;"
+ 1597              S, MON TYPER ACA OTHE      SPRA +16      C,+3                "ACA OTHERWISE"
+ 1599              STOP                                     -              S
+ 1600              S, MON TYPER RIGHT HD      SPRAMR +8     ACCEPT +1           "(SIGH)"
+ 1602              TS           -             -             C,-1           C    ARA OR DON A CREATES BACKUP.
+ 1604              NA, CHAR8    1,0           ZERO          C,+2
+ 1605              TS, CHAR8    ONE           1,0           C,+3                BYPASS LABEL AND REVERT IF MONDAY MORN.
+ 1607              SS           ONE           CHAR8         N,X1                BE SURE TO DO FULL TAPE COPY.
+ 1609              TS           STAR COL 1    6,1           LABEL YUL           PLANT CREATE FLAG, LABEL & REPOSITION.
+ 1611              TS           ONES          6,2           DO BACKUP           PREVENT ENDJOB AFTER BACKUP CREATION.
 
 ## Page 81
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  41        PAGE  41
 
+P1613              VARIATIONS ON ASSEMBLY FOR THE CASE OF ASSEMBLING A NEW PROGRAM (OR SUBROUTINE) AS A VERSION OF AN
+R1615   EXISTING ONE.  ACTS LIKE REVISION EXCEPT THAT THE SOURCE PROGRAM (OR SUBRO) IS PRESERVED.  AUTHOR MAY CHANGE.
+
+
+
+ 1617   NEWVERS    TS           Z,SC          Z,S2          DECOD PSR +1        DECODE PROG OR SUBRO NAME.
+ 1619              TS           Z,SC          Z,X0          CUSS NAUT -1        DECODE AND STANDARDIZE AUTHOR NAME.
+ 1621              TN           6,22          9             6,91                SAVE THESE QUANTITIES IN PARSED FORM.
+ 1623              TS           Z,SC          Z,X1          RD SUBDRC
+ 1624              S, MON TYPER VRSNS MSG     SPRAMR +56    REJEC DIR           CUSSABORT IF SUBDIRECTOR "FROM" MISSING.
+ 1626              NA           6,16          W FROM        C,-1
+ 1627              TX           L DIRECTY     -             Z,X1
+ 1628              NA, BIT 9    SWITCH        ZERO          C,+4                BRANCH IF DOING A SUBROUTINE.
+ 1630              LA, CAC3     1,9           L END THR     C,+2                BRANCH IF THERE ARE NO DELETES WAITING.
+ 1632              TS, BIT33    ZERO          INIT X5       C,+2                COMPENSATE FOR ACTION OF GBR2 GBR3.
+ 1634              WA           INIT X5       TWO           INIT X5             OTHERWISE CHANGE GB,R2 TO GB,R4.
+ 1636              TS           6 COMMA 19    Z,X5          TASK OBJC           BREAK DOWN AND RE-FORM SUBDIRECTOR.
+ 1638              S, YUL TYPER TASK MSG      AMTF +4       C,+1
+ 1639              NA           6,19          W REVISON     C,+4                BRANCH IF SOURCE PROG/SUB IS NEW.
+
+ 1641              TX           W NEW         -             6,19
+ 1642              WA           6,27          1 C6          6,21                CALL VERSION "NEW".
+ 1644              TN           6,28          3             6,22                CLOSE UP SENTENCE TO SUIT.
+
+ 1646              TN           6,91          9             6,25                SUPPLY PROG/SUB AND AUTHOR NAMES.
+ 1648              WD           Z,AU2         THREE         Z,X4                MARK END OF REVISED SENTENCE.
+ 1650              WA           L OLD LINE    SIX           Z,S2                TYPE SYNTHETIC OBJECT MSG FROM OLD LINE.
+ 1652              TS, BIT 12   ONES          SWITCH        619 TO X5      C
+ 1653              TS           N,X5,2        COMMON        PUT CHAR       C
+ 1654              TS           Z,SC          Z,S3          WRIT OBJC
+ 1655              S, YUL TYPER OLD LINE +6   AMTF +6       C,+1                TYPE SYNTHETIC OBJECT MESSAGE.
+ 1657              TN           OLD LINE +5   6             OLD LINE +6         MOP UP THE AREA.
+ 1659              S, MON TYPER W SOURCE C    SPRAM +8      TYP ASOBJ           JOIN REGULAR ASSEMBLY PROCEDURE.
+
+R1661   RETURN TO HERE IF WE CAN ASSEMBLE FOR THE NAMED COMPUTER.
+
+ 1662   NEWVERS2   TS, BIT 2    ONES          SWITCH        KNOWN PSR           CHECK PROG/SUB NAME, REVNO, AUTHOR, ETC.
+ 1664              TS           6,91          PROG NAME     SET REVN       C    RECOVER NEW PROGNAME, FORCE REVISION.
+ 1666              TX           6,97          -             AUTH NAME           RECOVER AUTHOR NAME OF VERSION.
+ 1668              TS           6,98          AUTH NAME +1  C,+3
+ 1669   VERS PSQ   TN           VER PR MSG    3             SORS LINE +1
+ 1670              TN           VER SB MSG    3             SORS LINE +1
+ 1671              SSL, ONE     SWITCH        39            C,-2           C
+ 1672              TN           VERS LINE     3             N,AU2
+ 1673              TN           OBJCT MSG     7             N,AU2
+ 1674              TN           BLANKS        2             N,AU2               SET UP VERSION SOURCE LINE FOR PRINTER.
+ 1676              TS           BIT 10        SORS LINE     NEW PRSUB           GO JOIN PROCEDURE FOR NEW PROG/SUBRO.
+
+R16772  ROUTINE TO STARTLE THE OPERATOR AND GIVE HIM A MESSAGE.
+
+ 16774  MESSAGE    S, MON TYPER BLOTS         SPRAMR +8     -                   MAKE STOMPING NOISE BEFORE AND AFTER.
+ 16776             S, YUL TYPER 6,2           AMTF +9       C,+1
+ 16778             S, MON TYPER BLOTS         SPRA +8       NEX DIREC
+
 ## Page 82
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  42        PAGE  42
+
+P1678              PROCEDURES IN PASS 0 TO RESPOND TO A REQUEST TO CONTROL OR DECONTROL A SUBROUTINE.  A CONTROLLED SUB-
+R1680   ROUTINE CANNOT BE REVISED OR DELETED.  BOTH CONTROLLING AND DECONTROLLING REQUIRE A SUBDIRECTOR STARTING WITH
+R1682   THE WORD "AUTHORIZED", SO THAT THERE WILL BE A RECORD (ON THE CONSOLE TYPEOUTS) OF WHO DID IT.
+
+ 1684   CONTROL    TS           W CONTROL     TASK MSG      TASK OBJC           ANALYZE REST OF DIRECTOR CARD.
+ 1686              SWS, C1T7    TASK MSG +1   A,1,L         TASK MSG +1
+ 1687              SWS, CHAR8   TASK MSG +2   A,1,L         TASK MSG +1
+ 1688              SWS, CIT7    TASK MSG +2   A,1,L         TASK MSG +2         NORMALIZE TASK MESSAGE.
+ 1690              TS, BIT 36   ONES          SWITCH        CON DECON           SET UP FOR REDUNDANCY TEST.
+
+ 1692   DECONTR    TS           W DECONTR     TASK MSG      TASK OBJC           ANALYZE REST OF DIRECTOR CARD.
+ 1694              SWS, ONES    TASK MSG +2   A,1           TASK MSG +2
+ 1695              SWS, CHAR1   TASK MSG +1   A,1           TASK MSG +2
+ 1696              SWS, ONES    TASK MSG +1   A,1           TASK MSG +1
+ 1697              SS           W DECONTR +1  CHAR 1        TASK MSG +1         NORMALIZE TASK MESSAGE.
+ 1699              SM           SWITCH        B36T37        SWITCH              SET UP FOR REDUNDANCY TEST.
+
+ 1701   CON DECON  TS           Z,SC          Z,X0          TYP TKOBJ           TYPE TASK AND OBJECT MESSAGES.
+ 1703              TS           Z,SC          Z,X1          RD SUBDRC
+ 1704              S, MON TYPER AU SUB MSG    SPRAMR +56    TYP ABORT           REQUIRE "AUTHORIZED BY SOMEBODY" SUBDIR.
+ 1706              NA           6,16          AUTHORYZ      C,-1
+ 1707              NA           6,17          AUTHORYZ +1   C,-2
+ 1708              S, YUL TYPER 6,2           A +9          C,+1                TYPE OUT ENTIRE SUBDIRECTOR CARD.
+ 1710              NA, BIT 9    SWITCH        ZERO          C,+2
+ 1711              S, MON TYPER PRO CO MSG    SPRAMR +32    TYP ABORT           CUSS ATTEMPT TO CONTROL/DECONTROL PROG.
+ 1713              TS           L DIRECTY     Z,X1          KNOWN PSR           CHECK SUBRO NAME, REVNO, AUTHOR, ETC.
+ 1715              NA, B36T37   4,1           SWITCH        C,+3                BRANCH IF SUBRO ALREADY IN DESIRED STAT.
+ 1717              HA           4,1           BIT 37        4,1                 CONTROL OR DECONTROL SUBROUTINE.
+ 1719              TS           -             -             ACCEPT -2
+ 1720              S, MON TYPER RDUND MSG     SPRAMR +16    TYP ABORT
+
+R1721              SUBROUTINE IN PASS 0 TO PRESENT SUCCESSIVE SUBROUTINE CALL THREADS OF A PROGRAM OR SUBROUTINE.  WITH
+R1723   THE ADDRESS OF THE PROG/SUBRO IN X2 AND BANK INDICATOR 7 IN X3 AND X4, FILL IN THE NO-MORE-THREADS DISPOSITION
+R1725   AT NO MO SUBS +1 AND ENTER AT SUB THRDS (AT 0,125 FROM ANOTHER BANK).  SWITCH INTO COSEQUENCE FOR MORE CALLS.
+
+ 1727   SUB THRDS  SWS,THREAD11 2,1           24            Z,X3           C    POINT TO FIRST SUBRO THREAD WORD.
+ 1729              NA, BIT25    2.1           ZERO          A THREAD       C    BRANCH IF THERE ARE ANY SUBCALL THREADS.
+ 1731              TS           -             -             NO MO SUBS     C
+
+ 1732   OP THREAD  SWS,THREAD11 N,X3          0             Z,X3           C    FOLLOW THREAD TO NEXT SUBRO THREAD WORD.
+ 1734              SWS,THREAD10 N,X3          36            Z,X4           S    PRESENT OP-FIELD THREAD.
+
+ 1736   A THREAD   SWS,THREAD10 N,X3          24            Z,X4           S    PRESENT A-ADDRESS THREAD.
+
+ 1738              TX           BIT 13        -             TEMP MASK      C
+ 1739              NA, TEMPMASK 3,0           ZERO          NO MO SUBS     C    BRANCH IF A-ADDRESS THREAD WAS THE LAST.
+ 1741              SWS,THREAD10 N,X3          12            Z,X4           S    PRESENT B-ADDRESS THREAD.
+
+ 1743              NA, BIT25    3,0           ZERO          NO MO SUBS     C    BRANCH IF B-ADDRESS THREAD WAS THE LAST.
+ 1745              LA, B37T48   3,0           THREAD 11     OP THREAD      C    BRANCH IF THERE IS ANOTHER THREAD WORD.
+ 1747              SWS,THREAD10 N,X3          0             Z,X4           S    PRESENT C-ADDRESS THREAD.
+
+ 1749   NO MO SUBS SWS,THREAD10 2,1           0             Z,X4           C    FOLLOW THREAD TO NEXT PROG/SUBRO.
+ 1751              PR                                                           (TO BE FILLED IN AT FIRST CALL.)
 
 ## Page 83
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  43        PAGE  43
