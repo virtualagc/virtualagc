@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2016-09-30 RSB	Created draft version.
 #		2016-10-06 RSB	Completed transcription.
+#		2016-10-30 MAS	Corrected DESKBITS->DESCBITS.
 
 # Page 200
 		BANK	11
@@ -649,7 +650,7 @@ NOMSG		CCS	MSGCNT
 		OCT	3777
 
 OKT30		OCT	30
-DESKBITS	TC	MESSAGE		# DESCENT BITS COME HERE IN A.
+DESCBITS	TC	MESSAGE		# DESCENT BITS COME HERE IN A.
 		OCT	16
 		TC	RESUME
 

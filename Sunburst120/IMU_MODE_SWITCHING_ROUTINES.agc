@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2016-09-30 RSB	Created draft version.
 #		2016-10-05 RSB	Completed transcription.
+#		2016-10-30 MAS	Corrected MODEXIT->MODEEXIT.
 
 # Page 138
 		BLOCK	02
@@ -49,7 +50,7 @@ IMUZEROA	CS	IMUSEFLG
 		TS	STATE
 		
 		TC	CAGETSTQ	# IF IMU COMING UP, TURN-ON PROGRAM WILL
-		TCF	MODEXIT		# DO ALL THE WORK.
+		TCF	MODEEXIT	# DO ALL THE WORK.
 		
 		CS	BITS3&4		# INHIBIT ICDUFAIL AND IMUFAIL (IN CASE WE
 		MASK	IMODES30	# JUST CAME OUT OF COARSE ALIGN).

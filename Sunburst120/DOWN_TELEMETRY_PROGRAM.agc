@@ -9,6 +9,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-21 RSB	Transcribed.
+##		2016-10-30 MAS	Corrected NOMDNLIST->NOMDNLST.
 
 ## Page 329
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -291,7 +292,7 @@ LINCR		EQUALS	66D		# LINCR   = NDP1 + NDP2 + 12D
 # AS OF DATE = 02FEB67
 
 # LAST ENTRY IN DOWNLIST WILL BE SENT FIRST, THEN LAST ENTRY - 1  ETC.----
-NOMDNLIST	EQUALS
+NOMDNLST	EQUALS
 UPDNLIST	EQUALS	NOMDNLST	# NOT USED IN 206.
 # ----------------------------DISPLAY TABLES--------------------------------------
 #                                       DSPTAB +10D AND DSPTAB +11D
