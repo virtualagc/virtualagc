@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     SPS_BACK-UP_RCS_CONTROL.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-09-30 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     SPS_BACK-UP_RCS_CONTROL.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-09-30 MAS  Transcribed.
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 629
                 BANK            21
@@ -202,7 +203,7 @@ RATEINIT        CAF             FILTMS50                        # RESET TIMER IM
 
                 CA              BACKHOME                        # ESTABLISH RETURN SWITCH FROM THE PROCESS
                 TS              STEERADR                        # OF READING CDUY,Z AND TIMER.  TO BE USED
-                TCF             FILTSTART       +1              # IN FILTINIT FOR RATE INITIALIZATION
+                TCF             FILSTART        +1              # IN FILTINIT FOR RATE INITIALIZATION
 
 BACKHOME        GENADR          BACKHOME        +1
 

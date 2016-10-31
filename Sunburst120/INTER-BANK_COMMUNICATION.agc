@@ -9,6 +9,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed, largely from Aurora 12 version of the file.
+##		2016-10-31 RSB	Typos.
 
 ## Page 948
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -63,7 +64,7 @@ MAKECADR        CAF             LOW10
 # WITH THE CADR IN A, AT DATACALL WITH JUNK IN L IF NOT SWITCHING SUPERBANKS, OTHERWISE AT SUPDACAL WITH SUPERBANK
 # BITS IN BITS 7-5 IN L (BITS 15-8 AND 4-1 MAY BE JUNK).  DEBRIS = MTEMP.  INHINTS FOR ABOUT 165 MUSEC.
 
-DTACALL         TS              L                               # SAVE CADR (SOLE INPUT HERE).
+DATACALL        TS              L                               # SAVE CADR (SOLE INPUT HERE).
                 EXTEND                                          
                 READ            SUPERBNK                        # THIS PROLOGUE MAKES SUPERSWITCH VACUOUS.
                 XCH             L                               # CADR IN A, SUPERBITS IN L.

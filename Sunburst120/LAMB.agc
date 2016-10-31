@@ -9,8 +9,11 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed from scratch.  Ouch!
+##		2016-10-31 RSB	Typos.
 
 ## Page 926
+		BANK	36
+		EBANK=	SCAXIS
 
 # PROGRAM NAME ... LAMBERT ROUTINE                                        DATE ... 11/29/66
 #
@@ -279,7 +282,7 @@ ELIPLMTS	PUSH	DAD		#				 PL AT 2D
 		PUSH	ABS		#				 PL AT 4D
 		DMP	BDSU		#				 PL AT 2D
 			PERCENT
-		STADAR
+		STADR
 		STODL	26D		# 26D=COGAMX (+5)
 			28D
 		SR	DSU
@@ -314,7 +317,7 @@ DTPRD		VLOAD	UNIT
 		STODL	UNR1
 			36D
 		STOVL	32D		# 32D=R1 (+7)
-			R1VECT
+			R1VEC
 		VSR4	
 		UNIT	PUSH		# 32D=R1 (+7)			 PL AT 6D
 		DOT	SL1
@@ -618,7 +621,7 @@ ERTHSFER	SR*	GOTO
 			TMESTORE
 			
 TIMELONG	DLOAD	GOTO
-			NEAR1
+			NEARI
 			TMESTORE +2
 			
 			
@@ -684,7 +687,7 @@ MINCHECK	DLOAD	DSU
 			DELINDEP
 			XEEDLLMT
 		BPL	DLOAD
-			XEEDLLMIT
+			XEEDLLMT
 			DELINDEP
 		RVQ
 		

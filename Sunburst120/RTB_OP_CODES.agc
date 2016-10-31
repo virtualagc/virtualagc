@@ -9,6 +9,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-16 RSB	Transcribed.
+##		2016-10-31 RSB	Typos.
 
 ## Page 360
 		BANK	15
@@ -220,7 +221,7 @@ RRSIM2          CAF     BIT2            # SEE IF RR ECTR ENABLED.
                 AD      ONE
                 TS      ITEMP1
 
-                CA      LASTXMCD        # SHAFT RATE DEPENDS ON TRUNNION.
+                CA      LASTXCMD        # SHAFT RATE DEPENDS ON TRUNNION.
                 EXTEND
                 MP      RRSIMG
                 EXTEND
@@ -228,7 +229,7 @@ RRSIM2          CAF     BIT2            # SEE IF RR ECTR ENABLED.
                 TC      CDUINC
                 CA      RUPTREG1
                 TS      TEM2
-                CA      RUPTREG12
+                CA      RUPTREG2
                 TS      BUF
                 TCF     RRSIM
 

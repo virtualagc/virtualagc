@@ -9,6 +9,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed.
+##		2016-10-31 RSB	Typos.
 
 ## Page 923
 # PROGRAM NAME - ATMAG
@@ -73,7 +74,7 @@ ATMAG		TC	INTPRET
 		DSU
 			6SEC(18)	# GET NEW TBUP *2(-17)
 		STODL	TBUP
-			V3
+			VE
 		SR1	DDV		# VE*2(-8)
 			TBUP		# AT*2(9)
 		STORE	AT

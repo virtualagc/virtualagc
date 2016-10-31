@@ -11,6 +11,7 @@
 ##		2016-10-18 RSB	Corrected against AURORA 12 version.  (Mostly
 ##				identical, but there was a small amount of code
 ##				added.
+##		2016-10-31 RSB	Typos.
  
 ## Page 380
                 BANK            14
@@ -329,7 +330,7 @@ TAR1            SLOAD*          SR2                     # X1=2  X2=12  S2=6 . X1
                                 0
                 COS             PUSH                    # PDOO            COS(EL)             PD00
                 SLOAD*          RTB
-                                TAZEL           +2,1
+                                TAZEL1          +2,1
                                 CDULOGIC
                 STORE           2                       # PD02            AZIMUTH             PD02
                 SIN             DMP

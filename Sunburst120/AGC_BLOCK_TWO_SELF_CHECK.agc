@@ -17,6 +17,7 @@
 ##				mass of comments at the beginning of the file,
 ##				as well as code for dealing with superbanks,
 ##				which instead come from Luminary 99.
+##		2016-10-31 RSB	Typos.
 
 ## Page 1075
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
@@ -153,7 +154,7 @@ S-ZERO          EQUALS          NEG0
 
                 EBANK=          LST1                            
 ADRS1           ADRES           SKEEP1                          
-SRADRS          ADRES           S4                              
+SRADRS          ADRES           SR                              
 SELFADRS        ADRES           SELFCHK                         # SELFCHK RETURN ADDRESS.  SHOULD BE PUT
                                                                 # IN SELFRET WHEN GOING FROM SELFCHK TO
                                                                 # SHOWSUM AND PUT IN SKEEP1 WHEN GOING

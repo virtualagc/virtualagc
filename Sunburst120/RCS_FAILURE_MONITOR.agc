@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     RCS_FAILURE_MONITOR.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-30 HG   Transcribed
+## Copyright:    Public domain.
+## Filename:     RCS_FAILURE_MONITOR.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-30 HG   Transcribed
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 569
 # PROGRAM DESCRIPTION:
@@ -140,7 +141,7 @@ RCSMON          CA              RCSMONT3
 
                 CS              CH6MASK
                 INDEX           RCSMONT4
-                MASK            FAILTANL        +1
+                MASK            FAILTABL        +1
                 ADS             CH6MASK
 
                 TCF             RCSMONEX                # DONE

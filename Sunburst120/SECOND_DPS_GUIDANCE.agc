@@ -1,15 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     SECOND_DPS_GUIDANCE.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-26 MAS  Began.
-#               2016-10-27 MAS  Completed transcription.
+## Copyright:    Public domain.
+## Filename:     SECOND_DPS_GUIDANCE.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-26 MAS  Began.
+##               2016-10-27 MAS  Completed transcription.
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 871
 
@@ -812,7 +813,7 @@ RVSTOR          TS              RUPTREG1
                 CA              RN1                             
                 INDEX           RUPTREG1                        
                 TS              RN                              # STORE UPDATED RN, VN
-                CCS             RUPTREG                         
+                CCS             RUPTREG1                         
                 TCF             RVSTOR                          
                 EXTEND                                          
                 DCA             PIPTIMET                        
@@ -856,7 +857,7 @@ EXIGEND         EXTEND
                 TC              INTPRET                         
                 PDVL            VSU                             
                                 UNAFC/2                         
-                                UNAFC/2O                        
+                                UNAFC/20                        
                 VSL2            VXSC                            # VSL2 UNDOES MP BIT3 PRECEDING
                 VAD                                             
                                 UNAFC/2                         # YIELDS EXTRAPOLATED UNAFC/2
@@ -1015,7 +1016,7 @@ IGNITN1         TC              INTPRET
                 STOVL           /AFC/OLD                        # OLD VALUE OF /AFC/ FOR USE BY IGNITN2
 
                                 UNAFC/2                         
-                STOVL           UNAFC/2O                        # OLD VALUE OF UNAFC/2
+                STOVL           UNAFC/20                        # OLD VALUE OF UNAFC/2
 
 # EXTRAPOLATE STATE
 
@@ -1108,7 +1109,7 @@ IGNITN2         EXTEND
                 CCS             MPAC                            # TEST HI ORDER
                 TCF             TCOUNTFC                        
                 TCF             TSTLOAFC                        
-                TCF             RETIGN          -2              # RESET COUNTFC
+                TCF             RETIGN2         -2              # RESET COUNTFC
 TSTLOAFC        CA              MPAC            +1              # TEST LO ORDER
                 EXTEND                                          
                 BZMF            RETIGN2         -2              # RESET COUNTFC

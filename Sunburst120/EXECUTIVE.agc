@@ -10,6 +10,7 @@
 ## Pages:        1049-1061
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-08 PDJ  Updated against Sunburst120 scan.
+##		 2016-10-31 RSB	 Some typos.
 
 ## Page 1049
                 BLOCK           02                              
@@ -442,7 +443,7 @@ NUCHANGE        CAF             TWO
                 CAF             EXECBANK                        # SWAP CORE SETS.
                 TS              FBANK
                 INHINT                                          # CHANGE JOBS
-                TCF             CHANGJOB        -1                    
+                TCF             CHANJOB         -1                    
 
                 EBANK=          SELFRET                         
 SELFBANK        BBCON           SELFCHK                         
@@ -460,7 +461,7 @@ PRIO6           OCT             06000
 PRIO7           OCT             07000 
 PRIO10          EQUALS          BIT13
 PRIO11          OCT             11000
-PRIO12          =               BNKJUP          +4
+PRIO12          =               BNKJUP+4
 PRIO13          OCT             13000
 PRIO14          OCT             14000
 PRIO15          OCT             15000  
@@ -470,11 +471,11 @@ PRIO20          EQUALS          BIT14
 PRIO21          OCT             21000
 PRIO22          OCT             22000
 PRIO23          OCT             23000
-PRIO24          =               NUFAZ           +10
+PRIO24          =               NUFAZ+10
 PRIO25          OCT             25000
 PRIO26          OCT             26000
 PRIO27          OCT             27000
-PRIO30          =               BNKCAL          +2
+PRIO30          =               BNKCAL+2
 PRIO31          OCT             31000
 PRIO32          OCT             32000
 PRIO33          OCT             33000

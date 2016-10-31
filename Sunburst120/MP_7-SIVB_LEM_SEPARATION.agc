@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     MP_7-SIVB_LEM_SEPARATION.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-25 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     MP_7-SIVB_LEM_SEPARATION.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-25 MAS  Transcribed.
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 712
                 BANK            25
@@ -319,14 +320,14 @@ SIVB5           TC              IBNKCALL                        # COMMAND +X TRA
                 TC              MPENTRY                         # SCHEDULE DPS COLD SOAK
                 DEC             4                               # TIMER NO. 4
                 DEC             8                               # MISSION PHASE 8
-                ADRES           MPDT08
+                ADRES           MPDTO8
 
                 TCF             TASKOVER
 
 ## Page 719
 2SEC            DEC             200
 40SEC           DEC             4000
-MP07DELT        2SEC            20500
+MP07DELT        2DEC            20500
 
                 EBANK=          TDEC
 MIDAVE2C        2CADR           MIDTOAVE

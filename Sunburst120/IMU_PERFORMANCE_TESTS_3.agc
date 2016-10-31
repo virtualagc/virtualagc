@@ -10,6 +10,7 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##              2016-10-18 RSB	Used Aurora 12 file of the same name as a
 ##				pattern.  A handful of corrections were needed.  
+##		2016-10-31 RSB	Typos.
 
 ## Page 436
 		BANK	23
@@ -593,4 +594,4 @@ ECE2CADR        CADR    ECE2
 FZF2CADR        CADR    FZF2
 OGCECADR        ECADR   OGC
 
-DEG/SECC        2DEC    576000 B-28
+DEG/SEC         2DEC    576000 B-28

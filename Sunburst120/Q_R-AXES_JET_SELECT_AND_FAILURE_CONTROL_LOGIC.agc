@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     Q_R-AXES_JET_SELECT_AND_FAILURE_CONTROL_LOGIC.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-30 HG   Transcribed
+## Copyright:    Public domain.
+## Filename:     Q_R-AXES_JET_SELECT_AND_FAILURE_CONTROL_LOGIC.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-30 HG   Transcribed
+##		2016-10-31 RSB	Typos
 
 ## Page 554
 # PROGRAM: POLTYPEP                MOD. NO. 1  DATE: NOVEMBER 14, 1966
@@ -129,7 +130,7 @@ CHKFAILS        TS              THISPOLY                # A FLAG IS SET TO DO SO
                 EXTEND                                  # FIRST THE REALTIVE ADDRESS INDEXER IS
                 DIM             POLRELOC                # DECREMENTED BY ONE FOR THE NEXT POLICY,
                 CCS             LOOPCTR                 # THEN A CHECK IS MADE FRO ANY MORE USABLE
-                TCF             BETSPOLS                # POLICIES, IF NO MORE, C(LOOPCTR) = +0.
+                TCF             BESTPOLS                # POLICIES, IF NO MORE, C(LOOPCTR) = +0.
 
 # ***** JET FAILURE ABORT SEQUENCE. *****
 
@@ -212,7 +213,7 @@ POLFOUND        CAE             THISPOLY                # GET POSITIVE-VALUED PO
 
 # (ALSO CONTINUATION OF TRANSLATION-WITH-ROTATION LOGIC.)
 
-+/-TRANS        CAF             TWO                     # SET UP LOOP TO TEST ALL THREE POSSIBLE
++/-XTRAN        CAF             TWO                     # SET UP LOOP TO TEST ALL THREE POSSIBLE
                 TS              LOOPCTR                 # TRANSLATION POLICIES, IF 4 JETS ASKED.
 
                 CCS             ANYTRANS                # TEST FOR TRANSLATION REQUESTS: -0 UNUSED

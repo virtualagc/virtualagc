@@ -10,6 +10,7 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-18 RSB	Transcribed by correcting Aurora 12 version of 
 ##				this file.
+##		2016-10-31 RSB	Typos.
 
 ## Page 451
 # PROGRAM NAME-OPTIMUM PRELAUNCH ALIGNMENT CALIBRATION
@@ -69,7 +70,6 @@
 
 # ALL CENTRALS,ALL OF EBANK XSM,AND 78 DEC LOCATIONS  (SEE STOREDTA..
 
-## Page 542
                 BANK            35
                 EBANK=          XSM
 
@@ -78,7 +78,7 @@
 ESTIMS          TC              PHASCHNG
                 OCT             00075
                 CAF		BIT1
-                TC		SETSTRT				# SET RESTART FLAG
+                TC		SETRSTRT			# SET RESTART FLAG
                 
 RSTGTS1         INHINT                                          #  COMES HERE PHASE1 RESTART
                 CA              TIME1
@@ -648,9 +648,9 @@ STOREDTA        CAF             GEOBND
                 INDEX           MPAC
                 CA              ALX1S
                 LXCH            EBANK
-                EBANK=          RESTRICS
+                EBANK=          RESTRTCS
                 INDEX           MPAC
-                TS              RESTRICS
+                TS              RESTRTCS
                 LXCH            EBANK
                 EBANK=          XSM
                 CCS             MPAC
@@ -667,9 +667,9 @@ LOADSTDT        CAF             77DECML
                 CA              GEOBND
                 XCH             EBANK
                 TS              L
-                EBANK=          RESTRICS
+                EBANK=          RESTRTCS
                 INDEX           MPAC
-                CA              RESTRICS
+                CA              RESTRTCS
                 LXCH            EBANK
                 EBANK=          XSM
                 INDEX           MPAC
@@ -935,11 +935,11 @@ GRRNOW		SET		VLOAD				# COME HERE WHEN DELV CHECK SHOWS LIFTOFF
 				10D
 				
 		INHINT
-		CAF		1SEC.1				# DELAY TILL PRELAUNCH IF FINISHED, BUT
+		CAF		1SEC+1				# DELAY TILL PRELAUNCH IF FINISHED, BUT
 		TC		WAITLIST			# NOT SO LONG THAT READACCS HAPPENS FIRST.
 		EBANK=		GTSWTLST
 		2CADR		LIFTFIXT
 		
-		RELING
+		RELINT
 		TCF		PRELTERM
 		

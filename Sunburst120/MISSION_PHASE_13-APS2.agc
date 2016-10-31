@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     MISSION_PHASE_13-APS2.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-29 MAS  Transcribed
+## Copyright:    Public domain.
+## Filename:     MISSION_PHASE_13-APS2.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-29 MAS  Transcribed
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 754
 # MISSION PHASE 13 EXERCISES THE ASCENT GUIDANCE EQUATIONS OF PROG 46
@@ -137,7 +138,7 @@ TIG13           TC              IBNKCALL
 
 # NOW THAT THE ENGINE IS ON AND ULLAGE IS OFF, SET UP DUMMY MP 13 & PUT RESTARTABILITY FLAG UP:
 
-                TC              2PHASCHNG
+                TC              2PHSCHNG
                 OCT             00313                           # 3.31 SPOT IS DUMMY13 TASK.
                 OCT             2                               # GROUP 2 OFF.
 

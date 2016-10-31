@@ -9,6 +9,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-16 RSB	Transcribed.
+##		2016-10-31 RSB	Typos.
 
 ## Page 340
 		BANK	15
@@ -228,8 +229,8 @@ ACCUROT         COS
 		                AXISROT1                                        
 
                 BDSU            STADR                           #                   .   PD2 - MPAC
-                STODL*          32D             +4,2            #                   . S2    S1    S3
-                DLOAD		*
+                STORE	        32D             +4,2            #                   . S2    S1    S3
+                DLOAD*
                 		8D,1                                            
 
                 DMP*            SL1                             #                   .      MPAC
@@ -249,6 +250,7 @@ AXISROT1        DAD             STADR                           #   MPAC + PD2  
 
                 DSU             STADR                           #   MPAC - PD0      .
                 STORE           32D             +4,1            # S1    S2    S3    .
+                VLOAD		RVQ
                 		32D                                             
 # CALCGA COMPUTES THE CDU DRIVING ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.
 
@@ -611,7 +613,7 @@ NEARONE         2DEC            .999999999
 
 AOTSM           STQ		SETPD
 				29D                             # SET UP RETURN
-				9
+				0
 		LXC,1		SLOAD*
 				S1				# COMPLEMENT OF CDU ADR FOR XMARK
 				8D,1				# LOAD APPARENT TILT ANGLE,ONES COMP
@@ -744,7 +746,7 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
                 STORE           MODEA                           
                 EXIT                                            
 
-                CS              RADMODE                         # SWAP MODEA AND MODEB IF RR IN MODE2.
+                CS              RADMODES                        # SWAP MODEA AND MODEB IF RR IN MODE2.
                 MASK            BIT12                           
                 CCS             A                               
                 TCF             +4                              

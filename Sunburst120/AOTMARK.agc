@@ -1,17 +1,19 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	AOTMARK.agc
-# Purpose:	A module for revision 0 of BURST120 (Sunburst).
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	2016-09-30 RSB	Created draft version.
-#		2016-10-05 RSB	Completed transcription.
-#		2016-10-30 MAS	Corrected a couple errors (VKVB53 -> MKVB53, V31N43E->V21N43E).
+## Copyright:	Public domain.
+## Filename:	AOTMARK.agc
+## Purpose:	A module for revision 0 of BURST120 (Sunburst).
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	2016-09-30 RSB	Created draft version.
+##		2016-10-05 RSB	Completed transcription.
+##		2016-10-30 MAS	Corrected a couple errors (VKVB53 -> MKVB53, V31N43E->V21N43E).
+##		2016-10-31 RSB	I had messed up the very end of the file with both missing
+##				and extra goo.
 
-# Page 159
+## Page 159
 		BANK	13
 		EBANK=	AOTAZ
 AOTMARK		INHINT
@@ -60,7 +62,7 @@ MKRELEAS	CAF	ZERO
 		TS	0		# SHOW VAC AREA AVAILABLE
 		TC	SWRETURN
 		
-# Page 160
+## Page 160
 GETMKS		CAF	ZERO
 		TS	XYMARK
 		CAF	BIT14		# FIND IF IN-FLIGHT OR NON-FLIGHT
@@ -110,7 +112,7 @@ DETVB21		CAF	V21N43E
 		CCS	A
 		TC	DETVB21		# BAD CODE, REQUEST AGAIN
 		
-# Page 161
+## Page 161
 		TC	+3		# LOOKS GOOD BUT COULD BE ZERO
 		TC	+1
 		TC	DETVB21
@@ -161,7 +163,7 @@ ROTVB24		CAF	V24N42E		# REQUEST RETICLE ROTATION ANGLES
 		INDEX	BASVAC
 		TS	5		# STORE SPIRAL ROT ANGLE VAC +5
 		
-# Page 162
+## Page 162
 MKOUT		CAF	LOW9
 		MASK	MARKSTAT
 		TS	MARKSTAT	# SET HI5 ZERO
@@ -177,7 +179,7 @@ MKOUT		CAF	LOW9
 ENDMARKS	CAF	ONE
 		TCF	GOODEND
 
-# Page 163
+## Page 163
 MARKRUPT	TS	BANKRUPT
 		CA	CDUY		# STORE CDUS AND TIME NOW -- THEN SEE IF
 		TS	ITEMP3		# WE NEED THEM
@@ -228,7 +230,7 @@ SOMEKEY		CAF	OCT140		# NOT MARK OR MARK REJECT
 		EXTEND
 		RAND	NAVKEYIN
 		EXTEND
-# Page 164		
+## Page 164		
 		BZF	+3		# IF NO BITS
 		
 		TC	POSTJUMP	# IF DESCENT BITS
@@ -280,11 +282,11 @@ VACSTOR		CAF	LOW9		# STORE TIME AND CDUS IN VAC AREA
 		MASK	MARKSTAT
 		AD	XYMARK		# SET MARK MADE BIT IN MARKSTAT=1
 
-# Page 165
+## Page 165
 		TS	MARKSTAT	# AND SET BIT13 ZERO TO SHOW MARK
 		TC	REMARK		# MADE BEFORE A REJECT - GO REMARK.
 		
-# Page 166
+## Page 166
 REMARK		CAF	ZERO
 		TS	MKDEX		# MKDEX=0
 		CAF	BIT11		# LOOK A Y MARK
@@ -336,7 +338,7 @@ MKREJ		CAF	BIT14		# IN-FLIGHT OR NON-FLIGHT
 		TC	REJECT2		# XMARK MADE-REJECT IT
 		TC	REJALARM	# X MARK NOT MADE-ALARM-NO MARKS TO REJ
 		
-# Page 167
+## Page 167
 REJIN		CAF	PRIO3		# WERE IN-FLIGHT MARKS MADE
 		MASK	MARKSTAT
 		CCS	A
@@ -351,7 +353,13 @@ REJECT		CS	BIT13		# SHOW MKREJECT AND SEE MARK MADE
 		MASK	BIT13
 		CCS	A
 		TC	REJECT2		# ANOTHER REJECT
-		CS	XYMARK		# MARK MADE SINCE REJECT -- REJECT MARK IN 1D
+		CS	XYMARK		# MARK MADE SINCE LAST REJECT-REJECT IT
+		MASK	MARKSTAT
+		TS	MARKSTAT
+		TC	REMARK		# GO REQUEST MARKS
+		
+REJECT2		CS	PRIO3		# NO MARKS SINCE LAST REJECT SO SET
+		MASK	MARKSTAT	# MARKSTAT TO WANT X AND Y MARKS
 		XCH	MARKSTAT
 		MASK	BIT14		# IN-FLIGHT OR NON-FLIGHT
 		CCS	A
@@ -371,19 +379,4 @@ DETCODE		EQUALS	XYMARK
 BASVAC		EQUALS	Q
 VB21N30E	OCT	2130
 VB50		OCT	5000
-
-# Page 168
-		
-RENEWMK		MASK	MARKSTAT
-		TS	MARKSTAT
-		TCF	REMARK		# GO REQUEST NEW MARK ACTION
-		
-REJECT2		CS	PRIO3		# ON SECOND REJECT -- DISPLAY VB53 AGAIN
-		TCF	RENEWMK
-		
-SURFREJ		CCS	MARKCNTR	# IF MARK DECREMENT COUNTER
-		TCF	+2
-		TCF	REJALM		# NO MARKS TO REJECT -- ALARM
-		TS	MARKCNTR
-		TC	RESUME
 
