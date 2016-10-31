@@ -1,15 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     ATTITUDE_MANEUVER_ROUTINE.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-20 MAS  Began adapting from Luminary 099.
-#               2016-10-21 MAS  Completed adapting/transcribing.
+## Copyright:    Public domain.
+## Filename:     ATTITUDE_MANEUVER_ROUTINE.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-20 MAS  Began adapting from Luminary 099.
+##               2016-10-21 MAS  Completed adapting/transcribing.
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -512,7 +513,7 @@ PICKAXIS        VLOAD           DOT                             # IF VF X VI = 0
 ROT180          VLOAD           VXV                             # 180 DEG ROTATION IS REQUIRED
                                 MIS             +6              # Y STABLE MEMBER AXIS IN INITIAL S/C AXES
                                 HALFA
-                UINT            VXV                             # FIND Y(SM) X X(I)
+                UNIT            VXV                             # FIND Y(SM) X X(I)
                                 SCAXIS                          # FIND UNIT (VI X UNIT(Y(SM) X X(I)))
 ## Page 646
                 UNIT            BOV                             # PICK A VECTOR PERPENDICULAR TO VI IN THE
@@ -522,7 +523,7 @@ XROT            STODL           COF                             # MANEUVER DOES 
                 GOTO
                                 COMPMATX
 PICKX           VLOAD           GOTO                            # PICK THE X AXIS IN THIS CASE
-                                HAFLA
+                                HALFA
                                 XROT
 
 # FIRST ENTRY POINT- KALCMAN3

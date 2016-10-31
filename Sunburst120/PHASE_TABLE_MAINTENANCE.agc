@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2016-09-30 RSB	Created draft version.
 #		2016-10-04 RSB	Corrected against the Sunburst page scans.
+#		2016-10-30 MAS	Corrected PHASJUMP->PHASCHNG.
 
 # Page 77
 # SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -204,7 +205,7 @@ DSPMMJOB	TC	BANKCALL
 		MASK	BIT15
 		TS	TEMPSW2		# INDICATES WHETHER TO SET TBASE OR NOT
 
-		TCF	PHASJUMP +3
+		TCF	PHASCHNG +3
 
 
 PHASCHNG	INHINT	

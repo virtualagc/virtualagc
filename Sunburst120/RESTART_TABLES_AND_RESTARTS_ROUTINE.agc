@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2016-09-30 RSB	Created draft version.
 #		2016-10-04 RSB	Transcribed.
+#		2016-10-30 MAS	Some spelling corrections and a missing 2CADR symbol.
 
 # Page 62
 # RESTART TABLES
@@ -136,11 +137,11 @@ RTRNCADR	TC	SWRETURN
 	       
 2.15SPOT        DEC     700
                 EBANK=  TDEC
-               -2CADR   TIG4_41
+               -2CADR   TIG4-41
                
 2.17SPOT        DEC     200
                 EBANK=  TDEC
-               -2CADR   TIG4_34
+               -2CADR   TIG4-34
 
 2.21SPOT        OCT     77777
                 EBANK=  TDEC
@@ -152,7 +153,7 @@ RTRNCADR	TC	SWRETURN
 
 2.25SPOT	OCT	77777
 		EBANK=	TDEC
-	       -2CADR	NO11GIKD
+	       -2CADR	MP11HOLD
 
 2.27SPOT	DEC	100
 		EBANK=	TDEC
@@ -231,7 +232,7 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	TDEC
 	       -2CADR	TUMTASK
 
-3.7SPOT		GENADR	DT-LFTJT
+3.7SPOT		GENADR	DT-LETJT
 	       -GENADR	POSTLET	
 		EBANK=	TGRR
 	        BBCON	POSTLET
@@ -416,7 +417,7 @@ RTRNCADR	TC	SWRETURN
 
 6.3SPOT		DEC	500
 		EBANK=	DNTMBUFF
-	       -2CADR
+	       -2CADR   DAPOFF
 
 6.5SPOT		OCTAL	30000
 		EBANK=	STBUFF
@@ -731,6 +732,6 @@ SETRSTRT	LXCH	Q
 		OCT	04000
 		TC	L
 		
- +4		TC	FLAG1DOWN	# USER MISSION PHASE NOT RESTARTABLE
+ +4		TC	FLAG1DWN	# USER MISSION PHASE NOT RESTARTABLE
  		OCT	04000
  		TC	L

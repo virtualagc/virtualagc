@@ -10,6 +10,7 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-14 MAS  Began.
 ##               2016-10-14 MAS  Completed transcription.
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 953
 # SECTION 1  DISPATCHER
@@ -1424,7 +1425,7 @@ DCOMP           CS              MPAC            +2
 
 ## Page 997
 #          CONSTANTS REQUIRED IN FIXED-FIXED.
-DPOSXMAX        OCT             37777
+DPOSMAX        	OCT             37777
 POSMAX          OCT             37777
 LIMITS          EQUALS          POSMAX          +1
 NEG1/2          OCT             -20000                          # MUST BE TWO LOCATIONS AHEAD OF POS1/2

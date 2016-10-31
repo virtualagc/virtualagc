@@ -9,8 +9,9 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Mod history:  2016-09-30 RSB  Created draft version.
 #               2016-10-05 RSB  Finished transcription.
+#               2016-10-30 MAS  A bunch of small corrections, and some missing lines.
 
-# Page 89
+# Page 88
                 BANK            01                              
                 EBANK=          LST1                            
 
@@ -34,7 +35,7 @@ GOON            CAF             BIT14                           # TURN OFF ALL D
                 TS              DAPOFFDT                        # OVERWRITE IN ERASABLE LOAD IF DESIRED.
                 TS              JETRESET                        # PROPERTY OF RCSMONIT
 
-                CA              EBANKS                          
+                CA              EBANK5                          
                 TS              L                               
                 LXCH            EBANK                           
                 EBANK=          ABDELV                          
@@ -47,7 +48,7 @@ GOON            CAF             BIT14                           # TURN OFF ALL D
                 TS              THISCH32                        
                 TS              LMPJFAIL                        
                 TS              CH5MASK                         
-                5S              CH5MASK                         
+                TS              CH6MASK                         
 
                 TS              REDOCTR                         
                 TS              FAILREG                         
@@ -62,7 +63,7 @@ GOON            CAF             BIT14                           # TURN OFF ALL D
                 TS              SLOSHCTR                        # BE REPLACED VIA ERASABLE LOAD.
 
 # Page 89
-DDFSTART        CS              ZERO                            # MAKE ALL MTIMER/MPHASE PAIRS AVAILABLE
+DOFSTART        CS              ZERO                            # MAKE ALL MTIMER/MPHASE PAIRS AVAILABLE
                 TS              MTIMER4                         
                 TS              MTIMER3                         
                 TS              MTIMER2                         
@@ -82,7 +83,7 @@ INITSW          TS              L
                 INDEX           L                               
                 CA              SWINIT                          
                 INDEX           L                               
-                TS              STATF                           
+                TS              STATE                           
                 CCS             L                               
                 TCF             INITSW                          
 
@@ -104,7 +105,7 @@ INITSW          TS              L
                 EXTEND                                          
                 WRITE           6                               
 
-                CAF             IM30TNIF                        # FRESH START IMU INITIALIZATION.
+                CAF             IM30INIF                        # FRESH START IMU INITIALIZATION.
                 TS              IMODES30                        
 
                 CAF             BIT10                           # REMOVE IMU FAIL INHIBIT IN 5 SECS.
@@ -115,7 +116,7 @@ INITSW          TS              L
 # Page 90
                 EXTEND                                          # SETTING T5RUPT FOR SETIDLER PROGRAM
                 DCA             SETADR                          # THE SETIDLER PROGRAM ASSURES 1 SECOND
-                DXCH            T5AD6                           # DELAY BEFORE THE DAPIDLER BEING.
+                DXCH            T5ADR                           # DELAY BEFORE THE DAPIDLER BEING.
 
                 CAF             LNORMT4                         
                 TS              T4LOC                           
@@ -182,7 +183,7 @@ MR.CLEAN        CAF             ELEVEN                          # INITIALIZE PHA
 GOPROG          INCR            REDOCTR                         # ANOTHER RESTART.
 
                 LXCH            Q                               
-                DXCH            RSB&Q                           # SAVE BBANK & Q FOR RESTART ANALYSIS
+                DXCH            RSBB&Q                          # SAVE BBANK & Q FOR RESTART ANALYSIS
 
                 TC              STARTSUB                        
 
@@ -319,7 +320,7 @@ PINACT          CCS             MPAC            +5              # PROCESS ALL RE
                 TC              ALARM                           # RESTART WITH NO ACTIVE GROUPS.
                 OCT             1110                            
 
-                CS              FLATWRD1                        # WAS THE RESTARTABILITY FLAG SET?
+                CS              FLAGWRD1                        # WAS THE RESTARTABILITY FLAG SET?
                 MASK            BIT12                           
                 CCS             A                               
                 TCF             P00H2                           # NO.
@@ -495,7 +496,7 @@ LDNPHAS1        GENADR          DNPHASE1
 LDNTMGO         ECADR           DNTMGOTO                        
 NOMTMLST        GENADR          NOMDNLST                        
 SETCDULM        DEC             0.055555555                     # 10 DEGREES, SCALED IN HALF-REVS.
-IDNCDUN         DEC             198                             # 199 CDU SAMPLES + ONE ID = 4 SES.
+IDNCDUN         DEC             198                             # 199 CDU SAMPLES + ONE ID = 4 SECS.
 LESCHK          GENADR          SELFCHK                         
 LLMPRS2         GENADR          LMPRESET                        
 VAC1ADRC        ADRES           VAC1USE                         
@@ -504,8 +505,10 @@ STARTEB         ECADR           LST1
 NUMGRPS         EQUALS          FIVE                            # SIX GROUPS CURRENTLY.
 -ELR            OCT             -22                             # -ERROR LIGHT RESET KEY CODE.
 -MKREJ          OCT             -20                             # - MARK REJECT.
+TRIMGIMB        OCT             07400                           # TRIM GIMBAL DRIVE BITS IN CHANNEL 12.
 IM30INIF        OCT             37411                           # INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW
-IM30INIR        OCT             37400                           # LEAVE FAIL INHIBITS ALONE.
+IFAILINH        OCT             435                             # ISS OPERATE, & FAILURE INHIBIT BITS.
+IM30INIR        OCT             37400                           # LEAVE FAIL INHIBITS & OPERATE ALONE.
 IM33INIT        OCT             16000                           # NO PIP OR TM FAIL SIGNALS.
 9,6,4           OCT             450                             
 RMODINIT        OCT             00102                           

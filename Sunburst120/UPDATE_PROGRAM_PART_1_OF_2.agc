@@ -1,16 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	UPDATE_PROGRAM_PART_1_OF_2.agc
-# Purpose:	A module for revision 0 of BURST120 (Sunburst). It 
-#		is part of the source code for the Lunar Module's
-#		(LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	2016-09-30 RSB	Created draft version.
-#		2016-10-14 RSB	Transcribed.
+## Copyright:	Public domain.
+## Filename:	UPDATE_PROGRAM_PART_1_OF_2.agc
+## Purpose:	A module for revision 0 of BURST120 (Sunburst). It 
+##		is part of the source code for the Lunar Module's
+##		(LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	2016-09-30 RSB	Created draft version.
+##		2016-10-14 RSB	Transcribed.
+##		2016-10-31 RSB	Typo.
 
-# Page 316
+## Page 316
 # PROGRAM NAME- UPDATE PROGRAM
 # PROGRAM WRITTEN BY- RHODE
 # MOD NO.- 2
@@ -61,7 +62,7 @@
 # V66E		  INITIATE THE LGC DFI TLM CALIBRATE   NONE
 #		  ROUTINE.
 # V67EXXXE        ENTER A THREE DIGIT OCTAL NUMBER     1.   XXX   1-377(OCTAL)     SEE GSOP FOR LIST OF COMMANDS
-# Page 317
+## Page 317
 #                 REPRESENTING THE 8 BIT COMMAND TO
 #                 BE SENT TO THE LMP.
 # V70EIETTTTTE    INCREMENT TIMER I BY TTTTT OCTAL     1.    I    1,2,3,4          MISSION TIMERS
@@ -112,7 +113,7 @@
 #									   DESIRED INTERCEPT POINT IN STABLE
 #									   MEMBER COORD SCALED AT METERS 2(25).
 #									   TIME IS THE TIME SCALED AT CSEC 2(28).
-# Page 318
+## Page 318
 #                                                                          RCO IS THE DESIRED RADIUS AT CUTOFF
 #                                                                           SCALED AT METERS 2(25))
 # V75E4ETTTTTE    UPDATE LGC CLOCK(TIME2,TIME1)        1.    I     4               LGC AND SV CLOCK UPDATE CODE
@@ -163,7 +164,7 @@
 #
 #  .LE. -0                                                  UPDT
 
-# Page 319
+## Page 319
 # TIMER MAINTENANCE LOGIC(BY MMAINT)-
 # TIMERI =  MEANS
 # --------  --------------------------------------------------------------
@@ -214,9 +215,9 @@
 		TS	MPAC
 		CA	11OCT16
 		TS	MPAC	+1
-# Page 320
+## Page 320
 		TC	75UPDAT	+2
-76UPDAT		CA	11OCT75
+75UPDAT		CA	11OCT75
 		TS	MPAC
 		CA	FLAGWRD2		# TEST IF TIMERS ENABLED
 		MASK	BIT5
