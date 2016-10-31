@@ -78,6 +78,7 @@
  *             	                rather than a full pseudo-address.
  *              2016-10-21 RSB  Added some --blk2 interpreter fixes and changes to handling
  *                              of CADR and TC without operands sent in by Hartmuth Gutsche.
+ *              2016-10-31 RSB  Added ITCQ as synonym for RVQ.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -564,6 +565,7 @@ static InterpreterMatch_t InterpreterOpcodesBlock2[] =
     { "INVERT", 0162, 1, 1, 000161 },
     { "INVGO", 0162, 2, 1, 000121 },
     { "ITA", 0156, 1 },
+    { "ITCQ", 0160, 0 },
     { "LXA,1", 0026, 1 },
     { "LXA,2", 0022, 1 },
     { "LXC,1", 0036, 1 },
