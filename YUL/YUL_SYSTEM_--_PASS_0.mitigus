@@ -14,6 +14,8 @@
 ##               2016-10-18 JL  Transcribed pages 68-73.
 ##               2016-10-26 JL  Transcribed pages 74-77.
 ##               2016-10-27 JL  Transcribed pages 78-82.
+##               2016-10-28 JL  Transcribed page 83.
+##               2016-10-31 JL  Transcribed pages 84-90.
 
 ## Annotations:
 ##
@@ -1872,26 +1874,454 @@ R1725   AT NO MO SUBS +1 AND ENTER AT SUB THRDS (AT 0,125 FROM ANOTHER BANK).  S
 ## Page 83
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  43        PAGE  43
 
+P1753              PROCEDURE IN PASS 0 TO RESPOND TO A REQUEST FOR DELETION OF A PROGRAM OR SUBROUTINE.  DETACHES THE
+R1755   PROGRAM OR SUBROUTINE NAME FROM ITS AUTHOR AND ITS COMPUTER, AND PUTS IT IN THE DELETE THREAD FOR DESTRUCTION ON
+R1757   THE NEXT ASSEMBLY.  DOES NOT DELETE A CONTROLLED SUBROUTINE OR A SUBROUTINE THAT IS CALLED BY ANY PROG OR SUB.
+
+ 1759   ELIM PR SU TS           W DLETION     TASK MSG      TASK OBJC           ANALYZE REST OF DIRECTOR CARD.
+ 1761              TS           Z,SC          Z,X0          TYP TKOBJ           TYPE TASK AND OBJECT MESSAGES.
+ 1763              TS           -             -             KNOWN PSR           SEE IF PROGRAM OR SUBRO IS KNOWN.
+ 1765              TN           Z,X2          3             OBJCT MSG
+ 1766              NA, BIT 35   4,1           ONES          ELIMPROG            NO RESTRICTIONS ON PROGRAM DELETION.
+
+ 1768              NA, B36T37   4,1           ONES          C,+3
+ 1769              SS           W DLETION     CAC12         CONSU MSG +4
+ 1770              S, MON TYPER CONSU MSG     SPRAMR +40    TYP ABORT           CUSS ATTEMPT TO DELETE CONTROLLED SUBRO.
+
+ 1772              TX           ZERO          -             COMMON              INITIALIZE COUNT OF USERS OF SUBROUTINE.
+ 1774              SWS,THREAD10 N,X0          12            Z,X2                POINT TO 1ST PROG/SUB OF THIS COMPUTER.
+
+ 1776   DSUB LOOP  TS           N,SC,1        NO MO SUBS +1 SUB THRDS      C    START LOOKING AT SUBRO THREADS FROM
+ 1778              TS           Z,X4          Z,X2          DSUB TEST           EACH PROGRAM AND SUBRO OF THE COMPUTER.
+
+ 1780              NA           Z,X4          OBJCT MSG +2  C,+2                BRANCH IF DIDN'T FIND USE OF THIS SUBRO.
+ 1782              DA           COMMON        ONE           COMMON              COUNT UP THE NUMBER OF USERS.
+ 1784              WD           Z,SC          THREE         Z,SC           C    (REDUNDANT AFTER A MATCH, BUT NO HARM.)
+
+ 1786   DSUB TEST  NA           Z,X2          L END THR     DSUB LOOP           BRANCH IF THERE IS ANOTHER PROG/SUBRO.
+ 1788              TN           OBJCT MSG     3             Z,X2
+ 1789              LA           COMMON        ZERO          DELETION            AN UNUSED SUBROUTINE MAY BE DELETED.
+
+ 1791              TN           WREVN MSG +2  3             OBJCT MSG
+ 1792              TN           NUMUS MSG     3             WREVN MSG +2
+ 1793              TS           C,+1          2DIG REVN -1  BAD REVNO           BORROW BAD-REVISION-NUMBER CUSSER.
+ 1795              S, MON TYPER WREVN MSG +2  SPRAMR +24    C,+1                "NUMBER OF USERS = XXX".
+ 1797              TN           OBJCT MSG     3             WREVN MSG +2
+ 1798              TS           C,+1          2DIG REVN -1  TYP ABORT
+ 1799              S, MON TYPER WREVN MSG     SPRAMR +40    TYP ABORT
+
+
+
+R1800   DELETION PROCEDURE COMMON TO PROGRAMS AND SUBROUTINES: RELEASE ALL SUBRO THREAD WORDS, DETACH PROG/SUB NAME FROM
+R1802   AUTHOR'S LIST (DECREMENT HIS SCORE, DELETING HIM IF IT BECAME ZERO), DETACH PROG/SUB NAME FROM COMPUTER'S LIST,
+R1804   PUT THE COMPUTER NAME IN WITH THE PROG/SUB NAME, AND PUT THE MODIFIED ENTRY AT THE TOP OF THE DELETE LIST.
+
+ 1806   DELETION   TN           OBJCT MSG     3             Z,X2
+ 1807              NA, BIT25    4,1           ONES          DE AUTHOR           BRANCH IF NO SUBRO THREAD WORDS.
+ 1809              SWS,THREAD11 4,1           24            Z,X3                POINT TO FIRST SUBRO THREAD WORD.
+
+ 1811              TS           Z,X3          Z,AU1         C,+2           C    PREPARE TO RELEASE SUBRO THREAD WORD.
+ 1813              TS           Z,X5          Z,X3          C,-1           S    SUPPLY ADDRESS OF NEXT ONE.
+ 1815              SS           N,X3          THREAD 11     Z,X5           C    MAYBE FOLLOW THREAD TO NEXT SUB THRD WD.
+ 1817              LA, B37T48   3,0           THREAD 11     GIVE SLOT      C    RELEASE NON-LAST SUB THRD WORD.
+ 1819              TS           Z,CSC         Z,SC          GIVE SLOT      C    RELEASE LAST SUBRO THREAD WORD.
+
+ 1821              TX           Z,X4          -             Z,X5                DUPLICATE FINAL CONDITIONS OF KNOWN PSR
+ 1823              TS           OBJCT MSG +1  Z,X3          DE AUTHOR            AND DO EFFECT OF DELETION ON AUTHOR.
+
 ## Page 84
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  44        PAGE  44
+
+P1825   WHEN AN OBSOLETE PROGRAM IS DELETED, ERASE THE OBSOLETING BITS IN ITS SUBROUTINES IF THEY PERTAINED ONLY TO THE
+R1827   PROGRAM BEING DELETED.  THIS IS DONE IN TWO PHASES.  PHASE 1: STARTING WITH OBSOLETE PROGRAMS, FOLLOW SUBRO CALL
+R1829   THREADS THAT HAVE OBSOLETING BITS AND PLANT OBSOLETING BITS ON THE SUBROUTINES SO INDICATED, MAKING THEM LOOK
+R1831   LIKE OBSOLETE PROGRAMS (TO A BIT 13 TEST).  REPEAT THIS UNTIL A COMPLETE PASS THROUGH THE COMPUTER'S PROGRAMS
+R1833   AND SUBROUTINES IS MADE WITHOUT ADDING ANY OBSOLETING BITS.  THE RESULT IS THAT ONLY THOSE SUBROUTINES THAT
+R1835   STILL CONTRIBUTE TO SOME PROGRAM'S OBSOLESCENCE ARE MARKED WITH A BIT 13.  PHASE 2: MAKE ONE PASS THROUGH ALL
+R1837   THE SUBROUTINES, CLEARING THE OBSOLETING BITS OF SUBRO CALL THREADS OF UNMARKED SUBROUTINES, AND REMOVING THE
+R1839   MARKS FROM THE MARKED SUBROUTINES.
+
+ 1840   ELIM PROG  SWS, BIT36   4,1           23            SWITCH              TRANSPLANT OBSOLESCENCE BIT.
+ 1842              SS           ZERO          BIT 13        4,1                 REMOVE IT FROM PROGRAM BEING DELETED.
+ 1844              NA, BIT36    SWITCH        ONES          DELETION            IF PROG WASN'T OBSOLETE, DON'T BOTHER.
+
+ 1846   ND1 DELEP  SWS,THREAD10 N,X0          12            Z,X2                POINT TO FIRST PROG/SUB OF COMPUTER.
+ 1848              NA, BIT36    SWITCH        ONES          LP2 DELEP +1        BRANCH WHEN BIT-PLANTING PHASE IS DONE.
+ 1850              TS, BIT36    ZERO          SWITCH        LP1 DELEP +1        START A PASS OF THE BIT-PLANTING PHASE.
+
+ 1852   LP1 DELEP  SWS,THREAD10 2,1           0             Z,X2                FOLLOW THREAD TO NEXT PROG/SUBRO.
+ 1854              LA           Z,X2          L END THR     ND1 DELEP           END OF PASS IF THREAD IS VOID.
+
+ 1856              SSL, FOUR    2,1           33            LP1 DELEP           TEST OBSOLESCENCE OR OBSOLETING BIT.
+ 1858              TS           Z,X4          Z,X2          LP1 DELEP +1
+ 1859              TS           C,-1          NO MO SUBS +1 SUB THRDS      C    CALL FOR SUBRO CALL THREADS OF PROG/SUB.
+
+ 1861              WD           Z,CSC         ONE           Z,AU1
+ 1862              SS           N,AU1         CHAR5         C,+1                USE SAME SHIFT COUNT THAT PRESENTED THR.
+ 1864              SSL, ONE     N,X3                        C,+3                TEST OBSOLETING BIT OF CALL THREAD.
+
+ 1866              SM           4,1           BIT 13        4,1                 PLANT OBSOLETING BIT IN SUBROUTINE ENTR.
+ 1868              SM           SWITCH        BIT 36        SWITCH              CALL FOR ANOTHER PASS.
+ 1870              WD           Z,SC          SIX           Z,SC           C    GO AND ASK FOR ANOTHER THREAD.
+ 1872              SSL, TWO     4,1           34            C,-3                TEST OBSOLETING BIT OF SUBROUTINE.
+
+ 1874   OBSLING Q  SWS,THREAD11 2,1           24            Z,X3                POINT TO 1ST SUBRO THREAD WD OF SUBRO.
+ 1876              NA, BIT 25   2,1           ZERO          C,+2                BRANCH IF THERE REALLY IS ONE.
+ 1878              SS           Z,SC,7        BIT 13        2,1
+
+ 1880              SS           ZERO          B24 B36       N,X3                CLEAR OBSOLETING BITS OF THREAD WORD 1.
+ 1882              SSL, ONE     N,X3          11            C,+1                BRANCH IF THERE IS ONLY ONE THREAD WORD.
+ 1884              TS           Z,SC,2        -             OP THREAD      C    GO AND GET NEXT SUBCALL THREAD WORD.
+ 1886              SWS, ONE     Z,SC,3        16            N,X3                CLEAR LAST OBSOLETING BIT, DO NEXT SUB.
+
+ 1888              TS, P1T3AV   ZERO          3,0           OP THREAD      C    CLEAR OBSOLETING BITS, GET NEXT THRD WD.
+ 1890              SSL, TWO     N,X3          10            C,-1                TEST FINAL-SUB-THREAD-WORD BIT.
+ 1892              SS           ZERO          PAV BITS      N,X3                CLEAR LAST OBSOLETING BITS, DO NEXT SUB.
+
+ 1894   LP2 DELEP  SWS,THREAD10 2,1           0             Z,X2                FOLLOW THREAD TO NEXT PROG OR SUB.
+ 1896              LA           Z,X2          L END THR     DELETION            BRANCH IF PHASE 2 OF OBS-BIT PROC DONE.
+ 1898              NA, BIT36    2,1           ONES          LP2 DELEP           BRANCH IF PROGRAM, NOT SUBROUTINE.
+ 1900              SSL, TWO     2,1           34            OBSLING Q           TEST OBSOLETING BIT OF SUBROUTINE.
 
 ## Page 85
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  45        PAGE  45
 
+P1902   DETACH PROG/SUB NAME FROM AUTHOR AND COMPUTER LISTS, ADD TO DELETE LIST.
+
+ 1903   DE AUTHOR  LA           3,1           PLUS ZERO     NOT 1(AU)           BRANCH IF NOT 1ST IN AUTHOR'S LIST.
+ 1905              SWS,ATHRED10 4,1           12,L          3,1                 REMOVE FROM HEAD OF AUTHOR'S LIST.
+ 1907              TS           Z,X3          X,X5          DECR AUTH           LET X5 POINT TO AUTHOR NAME.
+
+ 1909   NOT 1(AU)  SS           4,1           B THRED 10    3,1                 REMOVE FROM MIDST OF AUTHOR'S LIST.
+ 1911              SWS,THREAD10 5,1           12            Z,X5                X4 AND X5 WERE EQUAL AFTER KNOWN PSR.
+ 1913              LA           5,1           PLUS ZERO     C,-1                LET X5 POINT TO AUTHOR NAME.
+
+ 1915   DECR AUTH  SWS,THREAD10 5,1           24            Z,X3                LET X3 POINT TO AUTHOR'S ACTIVEST PROG.
+ 1917              TS           PLUS ZERO     COMMON        LIVE AUTH +2   C    STAY AWAY IF AUTHOR HAS MORE PROGRAMS.
+ 1919              SWE, CAC3    1,9           16            Z,X6                AUTHOR HAS NO ACTIVE PROGRAMS OR SUBROU-
+ 1921              NA           Z,X6          Z,X5          AUDL SRCH           TINES, SO DELETE HIS NAME.
+
+ 1923              SWS,THREAD10 5,1           12            Z,X3                SEW UP AUTHOR NAME THREAD AROUND AUTHOR
+ 1925              SWS, CAC2    Z,X3          16,L          1,9                 WHO WAS FIRST IN THE DIRECTORY.
+ 1927              TS           -             -             DELE AUTH
+
+ 1928              TX           Z,X3          -             Z,X6
+ 1929   AUDL SRCH  SWS,THREAD10 6,1           12            Z,X3                KEEPING X6 ONE CYCLE BEHIND X3,
+ 1931              NA           Z,X3          Z,X5          C,-1                FIND PRECEDING AUTHOR NAME.
+ 1933              SS           5,1           B THRED 10    6,1                 SEW UP THREAD AROUND AUTHOR.
+
+ 1935   DELE AUTH  SS           5,1           THREAD 11     Z,X6                LET X6 POINT TO 2ND HALF OF AUTHOR NAME.
+ 1937              TS           Z,X5          Z,AU1         GIVE PAIR      C
+ 1938              TS           Z,X6          Z,AU1         GIVE SLOT      C    VACATE SPACE OCCUPIED BY DEFUNCT NAME.
+ 1940              TS           CHAR1         TEMP MASK     SET DL THR          GO TO PREPARE DELETE LIST.
+
+ 1942   LIVE AUTH  WA           COMMON        ONE           COMMON              COUNT UP AUTHOR'S SCORE (EASIEST WAY).
+ 1944              SWS,THREAD10 3,1           12            Z,X3
+ 1945              LA           3,1           PLUS ZERO     LIVE AUTH           THREAD UNTIL AUTHOR NAME FOUND AGAIN.
+ 1947              LA, CAC3     COMMON        D11 D12       C,+2
+ 1948              SS           D11 D12       CAC3          COMMON              REDUCE ANYTHING OVER 254 TO 255.
+ 1950              SPS,B1THRU12 COMMON        8             5,1
+ 1951              TX           CHAR1         -             TEMP MASK
+
+ 1952   SET DL THR SS           PAR MANUF     C1T4 B48      4,1                 CLEAR LOW-ORDER BIT OF DELETE THREAD.
+ 1954              SS           N,X0          TEMP MASK     4,1                 SUPPLY COMPUTER NAME FOR IMPROVED SERCH.
+ 1956              SWE, C1T4    TEMP MASK     A,1           TEMP MASK
+ 1957              NA, TEMPMASK 0,0           BLANKS        C,-2
+ 1958              NA           Z,X2          Z,X0          C,+3                BRANCH IF NOT 1ST IN COMPUTER'S LIST.
+ 1960              SWS,BTHRED10 4,1           12,L          N,X0                DETACH NAME FROM COMPUTER'S LIST.
+ 1962              TS, CAC3     1,9           4,1           C,+2                THREAD THIS TO FORMER FIRST DELETE.
+ 1964              TS, THREAD10 4,1           2,1           C,-1                DETACH NAME FROM COMPUTER'S LIST.
+
+ 1966              SS           Z,X4          CAC3          1,9                 PUT THIS PROG/SUB AT TOP OF DELETE LIST.
+ 1968              SSL, TWO     TYPIST        28            C,+1
+
+ 1969              NA, CHAR8    1,0           ZERO          ACCEPT              BRANCH IF SOME BACKUP ALREADY ORDERED.
+ 1971              SS           TWO           CHAR8         N,X1                CALL FOR BACKUP LABEL AMENDMENT.
+
+ 1973   ACCEPT     S, YUL TYPER ACCEPTED      AMTF +1       C,+1                TYPE ACCEPTANCE OF NAME.
+ 1975              S, YUL TYPER BLANKS        A +1          NEX DIREC
+
 ## Page 86
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  46        PAGE  46
+
+P1976              SUBROUTINE IN PASS 0 TO ANALYZE ALL BUT THE FIRST WORD OF A DIRECTOR CARD WHICH SPECIFIES A TASK TO
+R1978   BE DONE ON A SINGLE PROGRAM, SUCH AS ASSEMBLY, DELETION, MANUFACTURING, ETC.  INITIALIZES VARIABLE ALPHABETIC
+R1980   FIELDS.  SETS UP COMP NAME, PROG NAME, REVNO, AUTH NAME, TASK MSG, AND OBJCT MSG.  SETS BITS 9 AND 10 OF SWITCH.
+R1982   PUTS THE SENTENCE INTO STANDARD FORM AND RETURNS ONLY IF IT IS SYNTACTICALLY CORRECT.
+
+
+
+ 1984   MANUF OBJ  TN           W URING FO    2             TASK MSG +1         ENTRY WHEN TASK IS MANUFACTURING.
+ 1986              TX           BLANKS        -             TASK MSG +3
+ 1987              TX           N,SC,4        -             PUT CN C6           ALTER AND GO TO MAIN PROCEDURE.
+ 1989              TS           L TKMSG P2    Z,S2          PUT CHAR +2    C
+
+ 1990   CPUT CN C6 TS           L TK MSG P1   Z,S2          PUT CHAR +5    C    USED TO RESTORE ALTERATION.
+
+ 1992   TASK OBJC  SWE,ONES     W FOR         A,1           TASK MSG +1
+ 1993              TN           BLANKS        2             TASK MSG +2         SOME INITIALIZATIONS.
+ 1995              TX           Z,SH          -             Z,X0
+ 1996              TX           ZERO          -             SWITCH
+ 19962             TX           L SUBSTRB     -             Z,AU2
+ 19964             MT           ZERO          8             N,AU2,1
+ 1997              TN           BLANKS        15            OLD LINE +1
+ 1998              TN           BLANKS        8             PAGE HEAD +4
+ 1999              TN           BLANKS        7             OBJCT MSG
+
+ 2000              TS           Z,SC          Z,S2          PROG ADJ            DECODE "NEW","REVISION N OF"OR"VERSION".
+ 2002              TS           Z,SC          Z,S2          DECOD CPN           DECODE AND STANDARDIZE COMPUTER NAME.
+ 2004              TN           N,X5          3             6,16                MOVE COMPUTER NAME TO HEAD OF SENTENCE.
+ 2006              TS           6,55          COMMON        COVER UP       C    COVER ITS OLD PLACE IN THE LIST.
+ 2008              TX           COLON C1      -             COMMON
+ 2009              WA           Z,X6          OCTAL 20      Z,S2                FORM ADDRESS EQUIVALENT TO 6,16.
+ 2011              SSL, D12     6,18          12            PUT CHAR       C    APPEND COLON TO COMPITER NAME.
+
+ 2013              TN           6,16          2             COMMON
+ 2014   PUT CN C6  TS           L TKMSG P1    Z,S2          PUT CHAR +5    C    1ST CHAR OF COMPUTER NAME TO TASK MSG.
+ 2016              SWE, D12     6,18          12            Z,S0                COUNT OF CHARACTERS MINUS 1.
+ 2018              TS           Z,SC          Z,S1          MOVE CARS           MOVE REST OF COMPUTER NAME TO TASK MSG.
+
+ 2020              TS           Z,SC          Z,S2          DECOD PSR           DECODE "PROGRAM' OR "SUBROUTINE".
+ 2022              NA           N,X5          ONES          C,+2                ABOVE ALSO STORED PROG OR SUBRO NAME.
+
+ 2024   CUSS NAUT  S, YUL TYPER NAUTH MSG     AMTF +3       REJEC DIR           COMPLAIN ABOUT MISSING AUTHOR NAME.
+
+ 2026              TX           Z,X5          -             WHODUNIT
+ 2027              NA           N,X5,3        W BY          HOWZAT              REJECT IF THIS WORD IS NOT "BY".
+
+ 2029   GO DO AUTH TS           Z,SC          Z,S3          DCOD AUTH           DECODE AND STANDARDIZE AUTHOR NAME.
+ 2031              WD           4,2           1 C6          4,2                 USE DECREASED CHARACTER COUNT.
+ 2033              TX           L OBJC MSG    -             Z,S2
+ 2034   619 TO X5  TX           6 COMMA 19    -             Z,X5                OMIT COMPUTER NAME FROM OBJECT MESSAGE.
+ 2036              TX           N,X5,1        -             COMMON
+ 2037   SEND OBJC  TS           N,X5,1        Z,S3          PUT CHAR       C    OBJECT MESSAGE BEGINS WITH "NEW" OR
+ 2039              TS           Z,X0          Z,S3          WRIT OBJC           "REVISION" AND ENDS WITH AUTHOR NAME.
 
 ## Page 87
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  47        PAGE  47
 
+P2041              SUBROUTINE IN PASS 0 TO CHECK A REQUEST FOR ACTION ON A KNOWN PROGRAM OR SUBROUTINE BY VERIFYING THAT
+R2043   THE COMPUTER NAME, PROGRAM OR SUBROUTINE NAME, REVISION NUMBER, AND AUTHOR NAME ARE MUTUALLY CONSISTENT.  ALSO
+R2045   DELIVERS IN X0 THE ADDRESS OF THE COMPUTER NAME, IN X2 THE ADDRESS OF THE PRECEDING PROGRAM NAME FOR THE COMPU-
+R2047   TER, IN X3 THE ADDRESS OF THE PRECEDING PROGRAM BY THE AUTHOR, AND IN X4 THE ADDRESS OF THE PROG/SUBRO NAME.
+R2049   NOTE THAT IN THE CASE OF X2 AND X3, THE INDEX REGISTER IS SET TO THE ADDRESS OF THE COMPUTER NAME OR AUTHOR NAME
+R2051   RESPECTIVELY IF THERE IS NO PRECEDING PROGRAM.
+
+ 2052   KNOWN PSR  TS           Z,SH          WAUTH MSG +3  FIND COMP      C
+ 2053              S, YUL TYPER UNRCO MSG     AMTF +4       TYP ABORT           CUSS AND ABORT IF NO SUCH COMPUTER.
+
+ 2055              TS           Z,X0          Z,X4          FIND PROG      C    SEE IF NAME EXISTS AS EITHER PROG OR SR.
+ 2057              SSL, TWO     SWITCH        38            C,+2                CHOOSE PROGRAM OR SUBRO TEST IF FOUND.
+ 2059              SSL, TWO     SWITCH        38            C,+2                CHOOSE PROG OR SUBRO CUSS IF NOT FOUND.
+ 2061              NA, BIT 36   3,1           ONES          OK NOUN             BRANCH IF DID AND SHOULD FIND PROGRAM.
+ 2063              S, YUL TYPER UNRCP MSG     AMTF +4       TYP ABORT           CUSS UNRECOGNIZED PROGRAM NAME, ABORT.
+ 2065              NA, BIT 36   3,1           ZERO          OK NOUN             BRANCH IF DID AND SHOULD FIND SUBRO.
+ 2067              S, YUL TYPER UNRCS MSG     AMTF +4       TYP ABORT           CUSS UNRECOGNIZED SUBRO NAME, ABORT.
+
+ 2069              SWE, B37T48  3,1           24            COMMON              GET REVNO OF PROG/SUB WITH SUBROS.
+ 2071              SWS,THREAD11 3,1           24            Z,X4           C
+ 2072              SWE, B37T48  N,X4          36            COMMON              GET REVNO OF PROG/SUB WITH NO SUBROS.
+ 2074   OK NOUN    SSL, ONE     3,1           23            OK NOUN -3     C    SELECT REVNO-FETCHING METHOD.
+ 2076              NA           COMMON        REVNO         BAD REVNO           BRANCH IF REVISION NUMBER DOESN'T MATCH.
+
+ 2078              TN           Z,X3          2             Z,X4                ADDRESS OF PROGRAM NAME TO X4, X5.
+ 2080              SWS,THREAD10 3,1           12            Z,X3                THREAD TO NEXT PROGRAM BY SAME AUTHOR.
+ 2082              LA           3,1           PLUS ZERO     C,-1                REPEAT UNTIL AUTHOR NAME IS FOUND.
+ 2084   SET LAUTH  TX           X,X3          -             L AUTH NAM
+ 2085              SS           3,1           THREAD11      Z,X5                THREAD TO SECOND HALF OF AUTHOR NAME.
+ 2087              NA           N,X3          AUTHNAME      RONG AUTH
+ 2088              NA           N,X5          AUTH NAME +1  RONG AUTH           BRANCH IF AUTHOR NAME IS WRONG.
+
+ 2090              SWS,THREAD11 3,1           24            Z,X5                THREAD TO 1ST PROG/SUB NAME IN AUTHLIST.
+ 2092              TS           Z,X0          L COMP NAM    C,+3                SAVE ADDRESS OF COMPUTER NAME.
+ 2094              TX           Z,X5          -             Z,X3                KEEP X3 ONE STEP BEHIND X5.
+ 2096              SWS,THREAD10 5,1           12            Z,X5                THREAD TO NEXT PROGRAM OR SUB BY AUTHOR.
+ 2098              NA           Z,X5          Z,X4          C,-2                RPT TIL X5 POINTS TO THIS PROG/SUB NAME.
+ 2100              TX           WAUTH MSG +3  -             Z,SC                RETURN WHEN ALL IS WELL.
+
+ 2102   RONG AUTH  TX           N,X3          -             WAUTH MSG +3        TELL THE MAN THE CORRECT AUTHOR NAME.
+ 2104              TX           N,X5          -             WAUTH MSG +4
+ 2105              S, YUL TYPER WAUTH MSG     AMTF +5       TYP ABORT
+
+ 2106   BAD REVNO  LA           COMMON        DEC 99        2DIG REVN           PROCEDURE TO CUSS A WRONG REVISION NO.
+ 2108              SWS, CHAR3   COMMON        22,L          WREVN MSG +4
+ 2109              SWS, ACH4    COMMON        20,L          WREVN MSG +4
+ 2110              SWS, ACH5    COMMON        18,L          WREVN MSG +4
+ 2111              S, MON TYPER WREVN MSG     SPRAMR +40    TYP ABORT           ANNOUNCE CORRECT ONE AND ABORT.
+ 2113   2DIG REVN  LA           COMMON        NINE          1DIG REVN
+ 2114              SWS, CHAR3   COMMON        26,L          WREVN MSG +4
+ 2115              SWS, ACH4    COMMON        24,L          WREVN MSG +4
+ 2116              TS, CHAR5    BLANKS        WREVN MSG +4  2DIG REVN -1
+ 2117   1DIG REVN  SWS, CHAR3   COMMON        30,L          WREVN MSG +4
+ 2118              TS, CHAR4    BLANKS        WREVN MSG +4  1DIG REVN -1
+
 ## Page 88
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  48        PAGE  48
+
+P2119              SUBROUTINE IN PASS 0 TO DECODE A PROGRAM OR SUBROUTINE ADJECTIVE AND SET BIT 10 OF THE SWITCH REG-
+R2121   ISTER ACCORDINGLY (0 IF NEW, 1 IF REVISION).  THE ADJECTIVE IS EITHER "NEW" OR "REVISION N OF", WHERE N IS A
+R2123   DECIMAL NUMBER IN THE RANGE 0-999.  THE VALUE OF THE REVISION NUMBER IS STORED IN RIGHT-JUSTIFIED DECIMAL IN
+R2125   REVNO, ZERO BEING USED AS THE REVISION NUMBER OF A NEW PROGRAM OR SUBROUTINE.  ERROR EXITS ARE PROVIDED FOR ANY
+R2127   VIOLATION OF THESE CONSTRAINTS.  WITH X5 SET TO THE FIRST WORD OF THE ADJECTIVE, ENTRY IS:
+R2129              TS           Z,SC          Z,S2          PROG ADJ
+
+ 2130   TRANSFD Q  NA           N,X5          W TRANSFD     SHUD B REV + 1      BRANCH IF ADJECTIVE ISN'T "TRANSFERRED".
+ 2132              NA           5,1           W TRANSFD +1  HOWZAT
+ 2133              SM           SWITCH        B2 B13        SWITCH              SET SWITCHES FOR MERGING AND XFERRED IN.
+ 2135              WD           4 C6          1 C6          5,2
+ 2136              TS           W NEW         N,X5          C,+2                FOLLOW NEW ASSEMBLY PROCEDURE.
+
+ 2138   PROG ADJ   NA           N,X5          W NEW         SHUD B REV
+ 2139              TX           ZERO          -             REVNO               REVISION NUMBER = 0 IF NEW.
+ 2141              TS           Z,X5,3        -             N,S2                STEP WORD INDEX AND EXIT.
+
+ 2143   SHUD B REV TS           Z,X5          WHODUNIT      TRANSFD Q           IN CASE WORD IS NOT "REVISION",
+ 2145              NA           N,X5          W VERSION     C,+3                "VERSION", OR "TRANSFERRED".
+ 2147              NA           TASK MSG      W ASSMBLY     HOWZAT
+ 2148              NA           6,16          W FROM        NEW VERB            BRANCH ON RECOGNIZING VERSION ASSEMBLY.
+ 2150              NA           N,X5,1        W REVISON     HOWZAT
+ 2151              NA           N,X5,2        BLANKS        HOWZAT              BRANCH IF WORD UNRECOGNIZED.
+
+ 2153   CVRT REVN  SWE, ONES    5,2           12            Z,S1                LENGTH OF REVISION NUMBER.
+ 2155              LA           FOUR          Z,S1          LONG REVN           FOUR AND UP IS ILLEGAL.
+ 2157              LA, CHAR8    OCTAL 20      5,2           NDEC REVN           ERROR IF REVISION NO. NOT HEX.
+ 2159              WA           L SIXES       Z,S1          Z,S0
+ 2160              WA           N,X5          N,S0          COMMON              ZERO LENGTH LOOKS NON-DECIMAL LENGTH 1.
+ 2162              NA, DECTEST  COMMON        ZERO          NDEC REVN           ERROR IF REVISION NO. NOT DECIMAL.
+
+ 2164              TS           Z,X5,2        Z,X4          PHI A2D             CONVERT ALF-DEC, USING S0, S3, R7.
+ 2166              RESERVE      1
+ 2167   NORM REVN  NA, CHAR1    4,0           ZERO          SAVE REVN
+ 2168              LA           ZERO C1       N,X4          SAVE REVN           SUPPRESS LEADING ZEROS BUT LEAVE LONE 0.
+ 2170              SWS, C1T7    N,X4          A,1,L         N,X4                SIMULTANEOUSLY LEFT-NORMALIZE...
+ 2172              TS           Z,S1,1        -             NORM REVN           ...AND DECREMENT CHARACTER COUNT.
+
+ 2174   SAVE REVN  SWS, CHAR6   Z,S1          12,L          N,X5,1              STORE ADJUSTED LENGTH.
+ 2176              TX           Z,X5          -             WHODUNIT
+ 2177              NA           N,X5,3        W OF          HOWZAT              ERROR IF 3RD WORD IS NOT "OF".
+ 2179   SET REVN   SM           SWITCH        BIT 10        SWITCH              SIGNIFY REVISION RATHER THAN NEW.
+ 2181              TS           NORM REVN -1  REVNO         N,S2                FETCH DECIMAL REVISION NUMBER AND EXIT.
+
+R2183   PROCEDURE TO CUSS A REVISION NUMBER OF 4 OR MORE DIGITS.
+
+ 2184   LONG REVN  TN           N,X5          2             LREVN MSG +3
+ 2185              S, YUL TYPER LREVN MSG     AMTF +5       REJEC DIR
+
+R2186   PROCEDURE TO CUSS A NON-DECIMAL REVISION NUMBER.
+
+ 2187   NDEC REVN  TX           N,X5          -             UDRVN MSG +3
+ 2188              S, YUL TYPER UDRVN MSG     AMTF +4       REJEC DIR
 
 ## Page 89
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  49        PAGE  49
 
+P2189              SUBROUTINE IN PASS 0 TO DECODE AND STANDARDIZE A COMPUTER NAME.  THE WORD "MOD" IS IGNORED IF IT PRE-
+R2191   CEDES THE COMPUTER NAME.  THE RAW NAME IS STORED IN COMP NAME.  ERROR EXIT IF NAME IS MORE THAN 4 CHARACTERS
+R2193   LONG.  IF THE NAME BEGINS WITH A DIGIT, IT IS SHIFTED RIGHT 4 CHARACTERS AND "MOD " INSERTED (IN THE SENTENCE
+R2195   ONLY, NOT IN COMP NAME).  WITH X5 SET TO THE WORD IN THE SENTENCE, ENTRY IS:
+
+R2197              TS           Z,SC          Z,S2          DECOD CPN           (THIS IS IN TRANSFER VECTOR AT 0,131.)
+
+
+
+ 2199   DECOD CPN  NA           N,X5          W MOD         C,+2
+ 2200              TS           6,55          COMMON        COVER UP       C    MOVE UP SENTENCE TO COVER "MOD".
+
+ 2202              LA           ONES          N,X5          CUS NO COM          BRANCH IF COMPUTER NAME IS MISSING.
+ 2204              LA, CHAR6    5,2           4 C6          C,+3
+ 2205              TN           N,X5          2             LCPN MSG +3
+ 2206              S, YUL TYPER LCPN MSG      AMTF +5       REJEC DIR           ERROR IF NAME LONGER THAN 4 CHARACTERS.
+
+ 2208              TX           N,X5          -             COMP NAME
+ 2209              NA           COMP NAME     BLANKS        C,+2
+ 2210   CUS NO COM S, YUL TYPER BLCPN MSG     AMTF +3       REJEC DIR           CUSS BLANK COMPUTER NAME AND ABORT.
+ 2212              EX           PAR MANUF     C1T4          COMPUTER            FORM UP A BLANKLESS COMPUTER NAME.
+ 2214              SSL, SEVEN   5,2           12            C,+0                SELECT ON LENGTH OF COMPUTER NAME.
+ 2216              TS, CHAR1    COMP NAME     COMPUTER      C,+4
+ 2217              TS, CHAR2    COMP NAME     COMPUTER      C,-1
+ 2218              TS, CHAR3    COMP NAME     COMPUTER      C,-1
+ 2219              TS, CHAR4    COMP NAME     COMPUTER      C,-1
+ 2220              SS           BLANKS        C5T8          N,X5                ENTER HERE FOR GENERAL COMPNAME FIXER.
+ 2222              LA           TEN C1        N,X5          N,S2                EXIT IF NAME DOES NOT BEGIN WITH DIGIT.
+
+ 2224   MOD CHEK 3 LA, CHAR3    5,0           9 C3          C,+4                BUT EXIT IF 3RD CHARACTER IS ALSO DIGIT.
+
+ 2226              SWS, ONES    N,X5          A,4           N,X5
+ 2227              SS           W MOD         C1T4          N,X5
+ 2228              WA           5,2           4 C6          5,2                 INSERT "MOD" AND ADJUST LENGTH.
+ 2230              TX           Z,S2          -             Z,SC
+
+
+
+R2231   MINOR SUBROUTINE IN PASS 0 TO CLOSE UP THE SENTENCE SO AS TO COVER UP THE WORD JUST EXAMINED.  ENTRY IS:
+
+R2233              TS           6,55          COMMON        COVER UP       C
+
+ 2234   COVER UP   IT           5,3           6,55          N,X5           C    MOVE UP REST OF SENTENCE.
+ 2236              MT           ONES          2             N,AU2,1        C    GUARANTEE END SIGNAL.
+ 2238              TX           COMMON        -             6,55                RESTORE WORD REPLACED BY EOI AND EXIT.
+
+
+
+R2240   PROCEDURE TO CUSS AN UNRECOGNIZED WORD WHICH WAS SET UP BY PUTTING ITS ADDRESS IN WHODUNIT.  (SEE XFER VECTOR).
+
+ 2242   HOWZ THAT  TN           N,AU1         2             WUNRC MSG +3
+ 2243              S, YUL TYPER WUNRC MSG     AMTF +5       REJEC DIR
+
 ## Page 90
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  50        PAGE  50
+
+P2244              SUBROUTINE IN PASS 0 TO DECODE NOUN AND NAME.  THE NOUN IS EITHER "PROGRAM" OR "SUBROUTINE".  THE
+R2246   PROGRAM OR SUBROUTINE NAME IS STORED IN PROGNAME.  ERROR EXIT IF NAME IS LONGER THAN 8 CHARACTERS.  ENTRY IS:
+
+R2248              TS           Z,SC          Z,S2          DECOD PSR           WITH X5 SET TO THE WORD IN THE SENTENCE.
+
+R2250   BIT 9 OF THE SWITCH REGISTER IS SET TO 0 IF PROGRAM OR 1 IF SUBROUTINE.
+
+
+
+ 2251   DECOD PSR  NA           N,X5          W PROGRAM     C,+2
+ 2252              TS           Z,X5,3        -             WHAT PROG           LEAVE SWITCH ALONE IF PROGRAM.
+
+ 22532             NA           N,X5          W SEGMENT     C,+3
+ 22534             SM           SWITCH        BIT 7         SWITCH              SET SEGMENT FLAG AND TREAT LIKE PROGRAM.
+ 22536             TS           Z,X5,3        -             WHAT PROG
+
+ 2254   FINGER     TX           Z,X5          -             WHODUNIT       S
+ 2255              NA           N,X5,1        W SUBROT1     HOWZAT
+ 2256              NA           N,X5,2        W NE          HOWZAT              BRANCH IF UNRECOGNIZED NOUN.
+ 2258              SM           SWITCH        BIT 9         SWITCH
+
+ 2259   WHAT PROG  NA           5,1           BLANKS        LONG PRGN           BRANCH IF NAME IS TOO LONG.
+ 2261              NA           N,X5          BLANKS        C,+2
+ 2262              S, YUL TYPER BLPSN MSG     AMTF +3       REJEC DIR           CUSS BLANK PROGRAM/SUBRO NAME AND ABORT.
+ 2264              TS           N,X5,3        PROG NAME     N,S2                STORE NAME AND EXIT.
+
+ 2266   LONG PRGN  TN           N,X5          2             LPRGN MSG +3
+ 2267              S, YUL TYPER LPRGN MSG     AMTF +5       REJEC DIR           CUSS NAME OF MORE THAN 8 CHARACTERS.
+
+
+
+R2269   ENTRIES TO ROUTINES IN SERVICE MODULE.
+
+ 2270   DO BACKUP  TS           Z,SC          Z,AU1         SERVICE
+ 2271   PRINT PSR  TS           Z,SC,1        Z,AU1         SERVICE
+ 2272   PUNCH PSR  TS           Z,SC,2        Z,AU1         SERVICE
+ 2273   XFER PSR   TS           Z,SC,3        Z,AU1         SERVICE
+
+ 2274   ADD COMP   TS           Z,SC,4        Z,AU1         SERVICE
+ 2275   RMOV COMP  TS           Z,SC,5        Z,AU1         SERVICE
+ 2276   PASS STAT  TS           Z,SC,6        Z,AU1         SERVICE
+ 2277   MANY STAT  TS           Z,SC,7        Z,AU1         SERVICE
+
+
+
+R2279   GENERAL ENTRY TO SERVICE MODULE ROUTINES.
+
+ 2280   SERVICE    SWE, CAC3    BANK 1        32            Z,X0
+ 2281              WD           Z,SH          Z,AU1         Z,AU1
+ 2282              WA           Z,AU1         L SERVICE     Z,AU1
+ 2283              TX           N,AU1         -             Z,SC
 
 ## Page 91
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  51        PAGE  51
