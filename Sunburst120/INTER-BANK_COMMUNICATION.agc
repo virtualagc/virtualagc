@@ -10,6 +10,7 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed, largely from Aurora 12 version of the file.
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
 
 ## Page 948
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -137,7 +138,7 @@ ISWRETRN        XCH             RUPTREG4
 
 USEPRET         XCH             Q                               # FETCH Q, SAVING A
                 TS              LOC                             # L+1 TO LOC
-                CA              FBANK                           
+                CA              BBANK                           
                 TS              BANKSET                         # USERS BANK TO BANKSET
                 CA              BIT8                            
                 TS              EDOP                            # EXIT INSTRUCTION TO EDOP

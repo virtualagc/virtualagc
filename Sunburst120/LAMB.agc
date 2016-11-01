@@ -10,6 +10,11 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed from scratch.  Ouch!
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB  A line reading "OCT B0", which is not supported by yaYUL,
+##				has been replaced by "OCT 1", in lieu of modifying 
+##				yaYUL at this time.  An appropriate program comment was 
+##				also added at this point in the code.  Plus, more typos.
+
 
 ## Page 926
 		BANK	36
@@ -428,7 +433,7 @@ COSFN		PUSH	DCOMP		# 4D=(1-CSD)(+1)		 PL AT 6D
 			+2
 			PI/4		
 ## Page 937
-		STORE	03		# 0D=DELTAE (+3)
+		STORE	0D		# 0D=DELTAE (+3)
 		RVQ
 		
 		
@@ -680,6 +685,7 @@ FRSTTIME	DLOAD	DMP
 ## Page 943
 		SIGN	GOTO
 			DELDEP
+			NEWDELTA
 MINCHECK	DLOAD	DSU
 			MININDEP
 			INDEP
@@ -752,7 +758,10 @@ D1/4		2DEC	.5	B-1
 
 D1/2		2DEC	.5
 
-NEARZERO	2OCT	B0
+## The following line is "NEARZERO 2OCT B0" in the original program listing, but the yaYUL
+## assembler does not syntactically support a bare exponent like "B0" in the operand,
+## so it has been replaced by a numerical equivalent that the assembler does support. 
+NEARZERO	2OCT	1
 
 NEARI		2OCT	3777737777
 

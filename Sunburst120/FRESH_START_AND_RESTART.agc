@@ -1,17 +1,18 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     FRESH_START_AND_RESTART.agc
+## Copyright:    Public domain.
+## Filename:     FRESH_START_AND_RESTART.agc
 # Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-05 RSB  Finished transcription.
-#               2016-10-30 MAS  A bunch of small corrections, and some missing lines.
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-05 RSB  Finished transcription.
+##               2016-10-30 MAS  A bunch of small corrections, and some missing lines.
+##		 2016-11-01 RSB	More typos.
 
-# Page 88
+## Page 88
                 BANK            01                              
                 EBANK=          LST1                            
 
@@ -26,7 +27,7 @@ STARTSIM        CAF             BIT14
                 EBANK=          ITEMP1                          
                 2CADR           BEGIN206                        
 
-GOON            CAF             BIT14                           # TURN OFF ALL DSPTAB +11D LAMPS ONLY ON
+GOON            CAF             BIT15                           # TURN OFF ALL DSPTAB +11D LAMPS ONLY ON
                 TS              DSPTAB          +11D            # REQUESTED FRESH START
 
                 CS              ZERO                            
@@ -62,7 +63,7 @@ GOON            CAF             BIT14                           # TURN OFF ALL D
                 CA              POSMAX                          # TENTATIVELY LOAD WITH INFINITY.  MAY
                 TS              SLOSHCTR                        # BE REPLACED VIA ERASABLE LOAD.
 
-# Page 89
+## Page 89
 DOFSTART        CS              ZERO                            # MAKE ALL MTIMER/MPHASE PAIRS AVAILABLE
                 TS              MTIMER4                         
                 TS              MTIMER3                         
@@ -113,7 +114,7 @@ INITSW          TS              L
                 EBANK=          LST1                            
                 2CADR           IFAILOK                         
 
-# Page 90
+## Page 90
                 EXTEND                                          # SETTING T5RUPT FOR SETIDLER PROGRAM
                 DCA             SETADR                          # THE SETIDLER PROGRAM ASSURES 1 SECOND
                 DXCH            T5ADR                           # DELAY BEFORE THE DAPIDLER BEING.
@@ -162,7 +163,7 @@ ENDRSTRT        RELINT
 
                 TCF             DUMMYJOB        +2              # DONT ZERO NEWJOB
 
-# Page 91
+## Page 91
 MR.CLEAN        CAF             ELEVEN                          # INITIALIZE PHASE TABLE.  DO IT THIS WAY
  +1             TS              BUF                             # TO MINIMIZE THE TIME OF PHASE TABLE
 
@@ -177,7 +178,7 @@ MR.CLEAN        CAF             ELEVEN                          # INITIALIZE PHA
 
                 TC              Q                               
 
-# Page 92
+## Page 92
 # COMES HERE FROM LOCATION 4000, GOJAM, RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
 
 GOPROG          INCR            REDOCTR                         # ANOTHER RESTART.
@@ -229,7 +230,7 @@ LIGHTSET        EXTEND                                          # DONT TRY TO RE
                 CAF             IFAILINH                        # LEAVE IMU FAILURE INHIBITS INTACT ON
                 MASK            IMODES30                        # RESTART, RESETTING ALL FAILURE CODES.
 
-# Page 93
+## Page 93
                 AD              IM30INIR                        # THE RECORD OF THE ISS OPERATE BIT IS
                 TS              IMODES30                        # ALSO LEFT ALONE (206 ONLY).
 
@@ -280,7 +281,7 @@ GOPROG2         RELINT
 
                 CAF             NUMGRPS                         # VERIFY PHASE TABLE AGREEMENT.
 PCLOOP          TS              MPAC            +5              
-# Page 94
+## Page 94
                 DOUBLE                                          
                 EXTEND                                          
                 INDEX           A                               
@@ -308,8 +309,8 @@ NXTRST          TS              MPAC            +5
 PACTIVE         TS              MPAC                            
                 INCR            MPAC                            # ABS OF PHASE.
                 INCR            MPAC            +6              # INDICATE GROUP DEMANDS PRESENT.
-                CAF             RACTCADR                        # GO TO RESTARTS AND PROCESS PHASE INFO.
-                TCF             SWCALL                          # MUST RETURN TO SWRETURN.
+                CA              RACTCADR                        # GO TO RESTARTS AND PROCESS PHASE INFO.
+                TC              SWCALL                          # MUST RETURN TO SWRETURN.
 
 PINACT          CCS             MPAC            +5              # PROCESS ALL RESTART GROUPS.
                 TCF             NXTRST                          
@@ -331,7 +332,7 @@ PTBAD           TC              ALARM                           # SET ALARM TO S
                 OCT             1107                            
 
                 INHINT                                          
-# Page 95
+## Page 95
                 TCF             DOFSTART                        
 
 RACTCADR        CADR            RESTARTS                        
@@ -340,7 +341,7 @@ ENEMA           INHINT                                          # HAVING PRESET 
                 TC              STARTSB2                        # PSEUDO-RESTART.  (THE RESTARTABILITY
                 TCF             GOPROG2                         # FLAG MUST BE SET WHEN ENEMA IS CALLED.)
 
-# Page 96
+## Page 96
 # INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.
 
 STARTSUB        CA              ZERO                            
@@ -391,7 +392,7 @@ STARTSB2        CAF             ZERO                            # ENTRY FROM P00
                 TS              LST1                            
 
                 CS              ENDTASK                         
-# Page 97                
+## Page 97                
                 TS              LST2                            
                 TS              LST2            +2              
                 TS              LST2            +4              
@@ -441,8 +442,8 @@ DSPOFF          TS              MPAC
                 INDEX           MPAC                            
                 TS              DSPTAB                          
                 CCS             MPAC                            
-                TC              DSPOFF                          
-# Page 98
+                TCF             DSPOFF                          
+## Page 98
                 TS              INLINK                          
                 TS              DSPCNT                          
                 TS              CADRSTOR                        
@@ -462,7 +463,8 @@ DSPOFF          TS              MPAC
                 TS              EXTVBACT                        # MAKE EXTENDED VERBS AVAILABLE
                 TS              IMUCADR                         
                 TS              OPTCADR                         
-                TS              RADCADR                         
+                TS              RADCADR 
+                TS		ATTCADR                        
                 TS              LGYRO                           
                 TS              DSRUPTSW                        
                 CAF             NOUTCON                         
@@ -492,7 +494,7 @@ DSPOFF          TS              MPAC
                 TC              Q                               
 
 LDNPHAS1        GENADR          DNPHASE1                        
-# Page 99
+## Page 99
 LDNTMGO         ECADR           DNTMGOTO                        
 NOMTMLST        GENADR          NOMDNLST                        
 SETCDULM        DEC             0.055555555                     # 10 DEGREES, SCALED IN HALF-REVS.
@@ -508,7 +510,7 @@ NUMGRPS         EQUALS          FIVE                            # SIX GROUPS CUR
 TRIMGIMB        OCT             07400                           # TRIM GIMBAL DRIVE BITS IN CHANNEL 12.
 IM30INIF        OCT             37411                           # INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW
 IFAILINH        OCT             435                             # ISS OPERATE, & FAILURE INHIBIT BITS.
-IM30INIR        OCT             37400                           # LEAVE FAIL INHIBITS & OPERATE ALONE.
+IM30INIR        OCT             37000                           # LEAVE FAIL INHIBITS & OPERATE ALONE.
 IM33INIT        OCT             16000                           # NO PIP OR TM FAIL SIGNALS.
 9,6,4           OCT             450                             
 RMODINIT        OCT             00102                           
@@ -525,7 +527,7 @@ IDLEADR         2CADR           DAPIDLER
                 EBANK=          DT                              
 SETADR          2CADR           SETIDLE                         
 
-# Page 100
+## Page 100
 # PROGRAM TO REVERT TO IDLING MODE (P 00).
 
 # CALLING SEQUENCE:  TC (OR TCF)   P00H     UNDER EXEC (NOT INTERRUPTED).
@@ -562,7 +564,7 @@ P00H2           INHINT
 
 LP00H3          ADRES           P00H3                           
 
-# Page 101
+## Page 101
 # FAKESTRT IS ENTERED FROM GOPROG WHEN A RESTART OCCURS AND THE RESTARTABILITY FLAG IS OFF.
 
                 BANK            7                               
@@ -613,7 +615,7 @@ FORGET2         TC              FLAG1DWN                        # ENTRY FROM FAK
                 TC              IBNKCALL                        
                 CADR            STOPRATE                        
 
-# Page 102
+## Page 102
                 TC              IBNKCALL                        
                 CADR            NOULLAGE                        
 
@@ -663,6 +665,6 @@ PINGSMON        GENADR          PGNCSMON
                 EBANK=          LST1                            
 CADAVER         2CADR           SERVEXIT                        
 
-# Page 103
+## Page 103
                 EBANK=          LST1                            
 KILLCAD         2CADR           AVEGKILL                        

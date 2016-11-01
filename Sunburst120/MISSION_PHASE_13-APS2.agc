@@ -10,6 +10,7 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-29 MAS  Transcribed
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 754
 # MISSION PHASE 13 EXERCISES THE ASCENT GUIDANCE EQUATIONS OF PROG 46
@@ -203,10 +204,10 @@ MP13OUT         TC              IBNKCALL                        # DEADBAND SELEC
 1SEC13          DEC             100
 2SECS13         DEC             200
 12SECS13        DEC             1200
-30SECS13        DEC             3000
+30SECS13        2DEC            3000
 
 140SECS         DEC             14000
-342SECS         DEC             34200                           # 342 SECONDS
+342SECS         2DEC            34200                           # 342 SECONDS
 
 AVEG13AD        GENADR          AVERAGEG
                 EBANK=          TDEC

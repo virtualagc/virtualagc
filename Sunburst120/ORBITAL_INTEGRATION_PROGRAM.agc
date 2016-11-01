@@ -10,6 +10,7 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-26 HG   Transcribed
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 776
 # FBR3 SETS UP A TIMESTEP CALL TO KEPLER
@@ -693,7 +694,7 @@ DOW..           VLOAD           VSR6
                 PDDL            DMP
                                 34D
                                 36D
-                VXSC            STADR
+                V/SC            STADR
                 STCALL          FV
                                 NBRANCH
 

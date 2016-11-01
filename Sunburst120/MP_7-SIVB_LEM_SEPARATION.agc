@@ -10,6 +10,7 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-25 MAS  Transcribed.
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 712
                 BANK            25
@@ -189,7 +190,9 @@ SIVB1           TC              2LMP+DT
                 AD              ONE
                 TCF             +3
                 COM
-                AD              POSMAX                          # REQUEST LASTBIAS AT TIG - 30 SECONDS
+                AD              POSMAX 
+                TS		DT2TEMP
+                TC		WAITLIST                        # REQUEST LASTBIAS AT TIG - 30 SECONDS
                 EBANK=          TDEC
                 2CADR           TIG-30
 

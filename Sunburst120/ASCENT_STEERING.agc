@@ -10,6 +10,7 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-24 RSB	Transcribed.
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
 
 ## Page 913
 #    PROGRAM NAME--ASCENT        BY--BERMAN
@@ -257,6 +258,8 @@ GAIN		DLOAD	SETPD		# LOAD YDOTD
 			VE		# STORE IN PDL(0)7)=VG/VE		 2
 		DMP	BDSU		# KTVG/VE
 			KT		# 1/2-KTVG/VE
+			DP.5
+		DAD	DMP		# 1-KTVG/VE
 			DP.5		# VG/VE(1-KTVG/VE)=TGO/TBUP		 0
 		PUSH	DMP		# STORE TGO/TBUP IN PDL(0)		 2
 			TBUP		# TGOX2(-17)
