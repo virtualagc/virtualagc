@@ -8,5 +8,6 @@
 # 		2016-10-05 JL	Set yaYUL args back to default.
 
 BASENAME=Sunburst120
-EXTRA_YAYUL_ARGS=--yul --trace
+EXTRA_YAYUL_ARGS=
+
 include ../Makefile.inc
