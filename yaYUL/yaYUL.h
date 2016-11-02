@@ -552,6 +552,7 @@ extern int flipBugger[044];
 
 extern int trace;
 extern int asYUL;
+extern int numSymbolsReassigned;
 
 #endif // INCLUDED_YAYUL_H
 

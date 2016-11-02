@@ -79,7 +79,14 @@
  * 		                that fatal errors would defeat a forced save of
  * 		                the generated rope.
  *              2016-11-01 RSB  No longer generates checksums for empty banks.
- *              2016-11-02 RSB  Added --yul and --trace.
+ *              2016-11-02 RSB  Added --yul and --trace.  Now continues doing symbol-resolution
+ *                              passes with the pass() function, not merely until all symbols
+ *                              are resolved, but until the value of no symbol changes during
+ *                              a pass.  Otherwise, there was a theoretical possibility,
+ *                              depending on the order in which EQUALS or = appear, that a
+ *                              symbol could be resolved but have the wrong value.  This
+ *                              possibility became a reality in Artemis072 when some fixes
+ *                              to EQUALS/= needed for Sunburst120 were made.
  */
 
 #include "yaYUL.h"
@@ -349,7 +356,7 @@ main(int argc, char *argv[])
           printf("Unrecoverable error.\n");
           break;
         }
-      if (k == 0 || k >= LastUnresolved)
+      if ((k == 0 || k >= LastUnresolved) && numSymbolsReassigned == 0)
         {
           printf("Pass #%d\n", i + 1);
           Pass(1, InputFilename, OutputFile, &Fatals, &Warnings);
