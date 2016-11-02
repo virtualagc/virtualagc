@@ -79,6 +79,12 @@
  *              2016-10-21 RSB  Added some --blk2 interpreter fixes and changes to handling
  *                              of CADR and TC without operands sent in by Hartmuth Gutsche.
  *              2016-10-31 RSB  Added ITCQ as synonym for RVQ.
+ *              2016-11-02 RSB  Now assumes that the left-hand interpretive operator can't
+ *                              begin past column 17.  Had to do this because there's a
+ *                              case in Sunburst where an interpretive operand (NORM) has
+ *                              the same name as an interpregive operator (yes, you guessed
+ *                              it ... NORM!), and otherwise there's no way to distinguish
+ *                              them.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1783,7 +1789,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                 noOperator = 0;
             }
 
-          iMatch = FindInterpreter(Fields[i]);
+          iMatch = noOperator ? NULL : FindInterpreter(Fields[i]);
           Match = FindParser(Fields[i]);
 
           if (Block1)

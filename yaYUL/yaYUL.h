@@ -60,6 +60,7 @@
  *                10/21/16 RSB   Added provision for --flip.  Made some changes
  *                               which might be helpful for building with
  *                               MS Visual Studio.
+ *                11/02/16 RSB   Added provision for --yul and --trace.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -548,6 +549,9 @@ extern int ArgType;
 
 extern int formatOnly;
 extern int flipBugger[044];
+
+extern int trace;
+extern int asYUL;
 
 #endif // INCLUDED_YAYUL_H
 

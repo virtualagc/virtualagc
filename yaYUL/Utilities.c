@@ -21,6 +21,7 @@
  *  Purpose:    Useful utility functions for yaYUL.
  *  History:    2012-10-04 JL   Began.
  *              2016-10-21 RSB  Bypass the use of sbfix for blk2.
+ *              2016-11-02 RSB  Added provision for --trace.
  */
 
 #include "yaYUL.h"
@@ -33,9 +34,7 @@ void
 FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
   int sbfix = 0060;
-#ifdef YAYUL_TRACE
   int tmpval = *outValue;
-#endif
 
   if (address->Fixed)
     {
@@ -48,7 +47,7 @@ FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
               // Banks 0-27 and 40-43 are accessible, banks 30-37 are not.
               if ((address->FB >= 030 && address->FB <= 033 && !address->Super)
                   || (address->FB > 033 && address->FB <= 037))
-                sbfix = 0060;
+                ;
               else
                 sbfix = 0100;
             }
@@ -70,21 +69,21 @@ FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
         }
     }
 
+  //if (asYUL && address->FB < 030 && !address->Super && !record->SBank.current.Super)
+  //  sbfix = 0;
+
   if (!blk2)
     *outValue |= sbfix;
 
-#ifdef YAYUL_TRACE
-  printf("--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o) fix=%05o value=%06o\n",
-      __FUNCTION__,
-      record->ProgramCounter.FB,
-      record->ProgramCounter.Super,
-      record->SBank.current.Super,
-      address->FB,
-      address->Super,
-      tmpval,
-      sbfix,
-      *outValue);
-#endif
+  if (trace)
+    {
+      printf(
+          "--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o,fixed=%d,banked=%d) "
+          "fix=%05o value=%06o\n",
+          __FUNCTION__, record->ProgramCounter.FB, record->ProgramCounter.Super,
+          record->SBank.current.Super, address->FB, address->Super, tmpval,
+          address->Fixed, address->Banked, sbfix, *outValue);
+    }
 }
 
 //-------------------------------------------------------------------------
