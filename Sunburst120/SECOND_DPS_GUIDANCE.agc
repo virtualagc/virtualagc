@@ -266,9 +266,12 @@ LING2F          TCF             LSETEVN
 LING3F          TCF             LSETODD                         
                 TCF             ADTTFNU                         
                 OCT             00114                           
-                ADRES           TBRLING                         
+                ADRES           TBRLING  
                 OCT             00043                           
-                DEC             -.25            E2      B-15    # -.25 SECONDS, TTF UNITS, COMPARES TTF/4
+## The following line is supposed to read "DEC -.25 E2 B-15", which is supposed to
+## assemble to the octal 77763 ... but actually assembles to 77762.  For the present,
+## it is being hard-coded as "OCT 77763" as a workaround.                    
+                OCT		77763  				# -.25 SECONDS, TTF UNITS, COMPARES TTF/4
                 TCF             EXFINAL                         
 
 ## Page 878
