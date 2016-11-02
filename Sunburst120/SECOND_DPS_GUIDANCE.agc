@@ -11,6 +11,11 @@
 ##               2016-10-26 MAS  Began.
 ##               2016-10-27 MAS  Completed transcription.
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 In three places, OCT fractional numbers (such as "OCT .6"),
+##				 which are not supported by yaYUL, have been replaced by 
+##				 decimal equivalents ("DEC .75"), in lieu of modifying 
+##				 yaYUL at this time.  Appropriate comments were also added
+##				 at the points in the code where this happened.
 
 ## Page 871
 
@@ -1666,12 +1671,21 @@ PIGNALG         OCT             00000                           # HI ORDER PART 
 
 1/3DP           2DEC            .3333333333
 
-SP3/8           OCT             .3              B14
-SP9/16          OCT             .44             B14
+## The following line is "SP3/8 OCT .3 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced 
+## by a numerical equivalent that the assembler does support. 
+SP3/8           DEC             .375            B14
+## The following line is "SP9/16 OCT .44 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced 
+## by a numerical equivalent that the assembler does support. 
+SP9/16          DEC             .5625           B14
 2/3DP           2DEC            .6666666667
 
 2DPS2/3         =               2/3DP
-SP3/4           OCT             .6              B14
+## The following line is "SP3/4 OCT .6 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced 
+## by a numerical equivalent that the assembler does support. 
+SP3/4           DEC             .75             B14
 PI/4            2DEC            +3.14159265     B-2
 
 NSCALR-1        OCT             00021                           # 6 X 3 - 1 TO XPR 3 VCTRS, RN, VN, GDT/2

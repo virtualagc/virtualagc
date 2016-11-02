@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     MP9-DPS_1_BURN.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-28 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     MP9-DPS_1_BURN.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-28 MAS  Transcribed.
+##		 2016-11-01 RSB	Typos.
 
 ## Page 728
 # MISSION PHASE 9
@@ -155,6 +156,7 @@ POSTKALC        CS              FLAGWRD2                        # CHECK WHETHER 
                 TC              GOODKALC                        # GOOD RETURN
 
                 CAF             PRIO37                          # BAD RETURN
+                TC		FINDVAC
                 EBANK=          TDEC
                 2CADR           CURT9
 
@@ -327,7 +329,7 @@ TIG9-0          EXTEND
                 OCT             40512                           # 2.51 FOR 9ULLOFF TASK.
 
                 TC              FIXDELAY
-                OCT             50
+                DEC             50
 
 9ULLOFF         TC              IBNKCALL
                 CADR            NOULLAGE                        # +X TRANSLATION-  OFF

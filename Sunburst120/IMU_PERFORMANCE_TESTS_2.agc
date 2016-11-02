@@ -93,6 +93,7 @@ GUESS           TC              INTPRET                 # CALCULATE -COS LATITUD
                                 GEORGEB
                 STORE           TRANSM1         +12D
                 EXIT
+                TC		+2
 JUMPLOAD        TC		FREEDSP			# FREE DISPLAY IF IN GYROCOMPASS
 		TC              LOADGTSM
                 TC              BANKCALL

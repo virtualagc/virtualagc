@@ -10,6 +10,7 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-21 HG   Transcribed
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 487
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.             THE DAPIDLER PROGRAM IS DONE 10 TIMES
@@ -103,7 +104,7 @@ INSRT16B        TCF             PROTCTOR                # RESTART PROTECT ENGINE
 
 # **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
-                CAF             BIT12                   # CHECK FOR STAGE
+                CAF             BIT2                    # CHECK FOR STAGE
                 EXTEND
 
 ## Page 489

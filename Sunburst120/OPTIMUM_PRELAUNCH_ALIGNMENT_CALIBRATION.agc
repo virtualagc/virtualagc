@@ -11,6 +11,7 @@
 ##		2016-10-18 RSB	Transcribed by correcting Aurora 12 version of 
 ##				this file.
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
 
 ## Page 451
 # PROGRAM NAME-OPTIMUM PRELAUNCH ALIGNMENT CALIBRATION
@@ -63,7 +64,7 @@
 #    02    GYROCOMPASSING
 #    03    DOING OPTICAL VERIFICATION (CSM)
 #    04    GRR SIGNAL RECEIVED FINISH UP TORQUE AND TC MP2JOB
-## Page 451
+## Page 452
 #                                                      206 IMPLEMENTATION
 
 # DEBRIS
@@ -118,8 +119,7 @@ RSTGTS1         INHINT                                          #  COMES HERE PH
                 TC              ANNNNNN
 
 ## Page 453
-ALLOOP          INHINT                                          #  TASK EVERY .5 OR 1 SEC (COMPASS-DRIFT)
-                CA              TIME1
+ALLOOP          CA              TIME1
                 XCH             GTSWTLST                        # STORE TIME TO SET UP NEXT WAITLIST
                 TS		OLDGT				# SAVE LAST READ TIME.
                 
@@ -369,7 +369,7 @@ BOOP            DLOAD*          DMPR
                                 DRIFTI
                 DSU
                 PDDL            DMPR
-                                WANGI
+                                WANGT
                                 WANGI
                 DAD             STADR
                 STODL           WPLATI
@@ -930,6 +930,7 @@ PRELTERM	TC		NEWMODEX
 GRRNOW		SET		VLOAD				# COME HERE WHEN DELV CHECK SHOWS LIFTOFF
 				GRRFLAG				# TO HAVE OCCURRED.
 				DELV
+		STORE		DELVBUF
 		SSP		EXIT
 				DT-LIFT				# START LIFTOFF 100 MS AFTER MP2TASK
 				10D

@@ -10,6 +10,7 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-16 RSB	Transcribed.
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
 
 ## Page 340
 		BANK	15
@@ -207,7 +208,7 @@ AXISROT         XSU,1           SLOAD*
                 STORE           30D                             
 
 ACCUROT         COS                                             
-                STODL           8D,1                            #              COS(ANGLE)
+                STORE           8D,1                            #              COS(ANGLE)
                 DLOAD		SIN
                 		30D
                 STORE           10D,1                           #              SIN(ANGLE)
@@ -237,7 +238,7 @@ ACCUROT         COS
                 		32D             +4,1            #                   . S3COS S2COS S1COS
 
                 DAD             STADR                           #                   .   PD0 + MPAC
-                STOVL           32D             +4,1            #                   . S3    S2    S1
+                STORE           32D             +4,1            #                   . S3    S2    S1
                 VLOAD		RVQ
                 		32D
 AXISROT1        DAD             STADR                           #   MPAC + PD2      .

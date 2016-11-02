@@ -10,6 +10,7 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-22 MAS  Transcribed.
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 668
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -197,7 +198,7 @@ AKLOOP          TS              SPNDX                           # CHECK THE MAGN
                 AD              =-5DEG                          # ACHIEVED THE DESIRED ATTITUDE.
 CHECKASG        EXTEND
                 BZMF            AKOK
-                TCF             ALARM
+                TC              ALARM
                 OCT             01412
                 TCF             ENDKMANU
 

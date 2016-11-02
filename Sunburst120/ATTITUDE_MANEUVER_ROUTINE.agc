@@ -11,6 +11,7 @@
 ##               2016-10-20 MAS  Began adapting from Luminary 099.
 ##               2016-10-21 MAS  Completed adapting/transcribing.
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -853,7 +854,7 @@ SNGLCD          2DEC            .008725                         # = SIN(NGL)COS(
 
 CNGL            2DEC            .499695                         # COS(NGL)                      $2
 
-LOCKANGL        DEC             .3333333333                     # $60DEGG
+LOCKANGL        2DEC            .3333333333                     # $60DEGG
 
                 BANK            35
                 EBANK=          MIS

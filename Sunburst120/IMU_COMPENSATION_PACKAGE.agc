@@ -10,6 +10,7 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-30 RSB	Transcribed, primarily by adapting
 ##				the Aurora 12 version of the file.
+##		2016-11-01 RSB	Typos.
 
 ## Page 859
                 BANK    12
@@ -349,6 +350,7 @@ NBDONLY         CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 
 		CA      TIME1           # (CS) X 2(+14)
                 XCH     1/PIPADT        # PREVIOUS TIME
+                RELINT
                 COM
                 AD      1/PIPADT
 NBD2            CCS     A               # CALCULATE ELAPSED TIME
@@ -431,6 +433,7 @@ GCOMPZER        CAF     LGCOMP          # ROUTINE TO ZERO GCOMP BEFORE FIRST
                 TS      MODE
                 
                 CAF     ZERO
+                TS	GCOMPSW
                 TS      GCOMP
                 TS      GCOMP   +1
                 TS      GCOMP   +2

@@ -11,6 +11,7 @@
 ##		2016-10-30 RSB	Transcribed through page 537.
 ##		2016-10-31 RSB	Transcribed.  Boo!
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
 
 ## Page 519
                 BANK            17
@@ -431,7 +432,9 @@ XTRANS          CAF             ZERO			# PICK UP ZERO AND INITIALIZE
                 RAND		31			# CHANNEL 31 BITS INVERTED
 ## Page 528
 		EXTEND
-		BZF		-XTRANS			# NO, IS ULLAGE(+X TRANSLATION) DESIRED
+		BZF		-XTRANS			# YES, -X
+		
+		CAF		BIT6			# NO, IS ULLAGE(+X TRANSLATION) DESIRED
 		MASK		DAPBOOLS
 		CCS		A
 		TCF		+XORULGE		# YES, ULLAGE
@@ -1316,12 +1319,7 @@ MAINBRCH        TS              HDAP                    # -HDAP(OLD) + 2E + DBMI
 
                 CAE             1/NETACC		# .5(1/NETACC+1/ACCMIN) SCALED AT 2(8)/PI.
 ## Page 550
-
-                EXTEND
-                MP              BIT14                   # (1/2)(1/NJETAC)
-
-## Page 590
-                AD              .5ACCMNE
+                ADS             .5ACCMNE		# .5ACCMNE NOW HOLDS DENOM.
 
                 EXTEND					# DENOM(MAXRATE(2)).HDAP AT PI RADIANS.
                 MP              MAXRATE2       
@@ -1476,6 +1474,10 @@ DAPSQRT		TS		SQRTTEMP		# SAVE C(A) PART OF DOUBLE PRECISION ARG.
 		
 		MASK		DAPHIGH7		# IF THIS MASK PRODUCES A WORD OF ZEROS,
 		EXTEND					# C(D.P.ARG) WILL BE SHIFTED LEFT 6 BITS
+		BZF		SQRTSL6			# WITHOUT OVERFLOWING BEFORE USING SPROOT.
+		
+		MASK		DAPHIGH5		# IF THIS MASK PRODUCES A WORD OF ZEROS,
+		EXTEND					# C(D.P.ARG) WILL BE SHIFTED LEFT 4 BITS
 		BZF		SQRTSL4			# WITHOUT OVERFLOWING BEFORE USING SPROOT.
 		
 		CAE		SQRTTEMP		# GET UNSHIFTED S.P. ARGUMENT FOR SPROOT.

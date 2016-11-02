@@ -11,6 +11,7 @@
 ##              2016-10-18 RSB	Used Aurora 12 file of the same name as a
 ##				pattern.  A handful of corrections were needed.  
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
 
 ## Page 436
 		BANK	23
@@ -140,6 +141,9 @@ CHK2            TS      CDUNDX
                 TS      THETAD +1
                 CS      71ANG
                 TC      THETADLD +2
+                
+                CAF	ZERO
+                TC	THETADLD +2
                 
                 TC      FNZEROFN
                 

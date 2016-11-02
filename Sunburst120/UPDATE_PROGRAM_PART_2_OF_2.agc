@@ -10,13 +10,14 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-14 RSB	Transcribed.
 ##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
 
 ## Page 321
 		BANK	26
 		EBANK=	STBUFF
 UPPART2		CA	UPE4
 		TS	EBANK
-		TS	CHECKMM
+		TC	CHECKMM
 		OCT	27
 		TC	+2
 		TC	21XCTALM
@@ -260,7 +261,10 @@ UPEND75		TC	PHASCHNG
 		INHINT			# INHINT BECAUSE PHASCHNG RELINTS AND BECA
 					# USE RESTARTED JOB WILL NEED IT.
 		INDEX	COMPNUMB	# V75
-		TC	0		# FAN TO V72 ROUTINES
+## In the original code, the following line had no operand, which the modern assembler
+## doesn't currently support for this target.  However, "TC -0" (but not "TC 0") 
+## produces the correct result.
+		TC	-0		# FAN TO V72 ROUTINES
 OCTID		OCT	02102
 		TC	I=4
 I=1		EXTEND
@@ -348,7 +352,7 @@ UPQUIT		TC	BANKCALL	# SETS 6.0 SPOT AND DOES ENDOFJOB
 		CADR	ENDUP
 UPRANGE		EXTEND
 		BZMF	UPRAUS		# C(A) LE ZERO RETURN TO Q
-		CA	A
+		CS	A
 		INCR	A
 		AD	UPTEMP
 		EXTEND
@@ -368,7 +372,7 @@ XCTALMRM	TC	CHECKMM
 UPE4		OCT	2000
 AOFC		OCT	00003
 		OCT	00007
-## Page 329
+## Page 328
 		OCT	00013
 		OCT	00002
 UPAOFTP1	ECADR	UPTEMP1
