@@ -1084,7 +1084,7 @@ PLUSU           CAE             1/AMINU
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
 2JETSM+U        TC              UXFORM
-2+U.RATE        CAF             THREE
+2+U.RATE        CAF             ONE
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
 2/4JET+R        CAE		1/AMINR
