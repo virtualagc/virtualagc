@@ -16,6 +16,7 @@
 ##               2016-10-27 JL  Transcribed pages 78-82.
 ##               2016-10-28 JL  Transcribed page 83.
 ##               2016-10-31 JL  Transcribed pages 84-90.
+##               2016-11-01 JL  Transcribed pages 91-94.
 
 ## Annotations:
 ##
@@ -2326,14 +2327,191 @@ R2279   GENERAL ENTRY TO SERVICE MODULE ROUTINES.
 ## Page 91
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  51        PAGE  51
 
+P2284              SUBROUTINE IN PASS 0 TO DECODE AN AUTHOR NAME AND STORE IT IN STANDARDIZED FORM IN AUTHNAME AND
+R2286   AUTHNAME+1 AND IN THE SENTENCE REPLACING THE FIRST WORD OF THE AUTHOR NAME.  STANDARDIZING HERE MEANS CLOSING UP
+R2288   THE WORDS WITH ONLY THE NON-BLANK TERMINATORS INTERVENING.  ERROR EXITS IF THE AUTHOR NAME IS MISSING OR IS
+R2290   LONGER THAN 16 CHARACTERS WHEN STANDARDIZED.  WITH X5 SET TO THE FIRST WORD, ENTRY IS:
+
+R2292              TS           Z,SC          Z,S3          DCOD AUTH
+
+
+
+ 2293   DCOD AUTH  TX           Z,X5          -             Z,X4                SAVE LOCATION OF FIRST WORD.
+ 2295              TX           Z,X5,2        -             Z,S2                SET UP ADDRESS FOR CLOSING UP.
+ 2297              LA           ONES          N,X5          CUSS NAUT           ERROR IF AUTHOR NAME IS MISSING.
+ 2299              TS           ZERO          Z,R6          C,+2                INITIALLY CLEAR LENGTH COUNTER.
+ 2301   HOW LONG   WA           Z,R6          ONE           Z,R6                ADD LENGTH OF TERMINATOR.
+ 2303              SWE, CHAR8   N,X5,3        12            COMMON
+ 2304              NA           COMMON        ZERO          C,+2
+ 2305              S, YUL TYPER BAUTH MSG     AMTF +4       REJEC DIR           CUSS BLANK WORD IN AUTHOR NAME, ABORT.
+ 2307              WA           Z,R6          COMMON        Z,R6                ADD LENGTH OF COMPONENT WORD.
+ 2309              NA           N,X5          ONES          HOW LONG
+
+ 2310              LA           Z,R6          OCTAL 20      LAUTH OK
+ 2311              S, YUL TYPER LAUTH MSG     AMTF +3       REJEC DIR           ERROR IF NAME MORE THAN 16 CHARACTERS.
+
+ 2313   LAUTH OK   TX           Z,X4          -             Z,X5
+ 2314              LA           ONES          4,5           SAVE AUTH           BRANCH IF 1-WORD AUTHOR NAME.
+
+ 2316              LA, CHAR6    4,2           7 C6          C,+2
+ 2317              TX           Z,S2,1        -             -                   IF CLOSING-UP BEGINS IN WORD 2.
+ 2319              TX           4,2           -             COMMON
+ 2320              SSL, SEVEN   4,2           12            PUT CHAR       C    MOVE TERMINATOR OF FIRST WORD.
+ 2322              TS           Z,X5,3        -             CLOS AUTH +1
+
+ 2323   CLOS AUTH  TX           N,X5,1        -             COMMON         C    MOVE TERMINATOR CHARACTER.
+ 2325              TN           N,X5,2        2             COMMON
+ 2326              SWE, CHAR8   N,X5          12            Z,S0
+ 2327              TS           Z,SC          Z,S1          MOVE CARS +3        INSERT COMPONENT WORD.
+ 2329              NA           5,3           ONES          CLOS AUTH
+ 2330              SWS, CHAR6   Z,R6          12,L          4,2                 LENGTH OF STANDARDIZED NAME.
+
+ 2332   SAVE AUTH  TX           N,X4          -             AUTH NAME
+ 2333              TS           4,1           AUTH NAME +1  N,S3                STORE AUTHOR NAME SEPARATELY AND EXIT.
+
 ## Page 92
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  52        PAGE  52
+
+P2335              SUBROUTINE IN PASS 0 TO MOVE PART OF A SENTENCE.  ASSUMES A PREVIOUS ENTRY TO PUT CHAR AND STOPS
+R2337   AFTER MOVING THE WORD WHOSE ADDRESS IN X4, OR BEFORE IF THAT WORD HAS LENGTH 0.  ENTRY IS:
+
+R2339              TS           Z,SC          Z,S3          WRIT OBJC
+
+
+
+ 2340   WRIT OBJC  SWE, CHAR8   N,X5,1        12            Z,S0                LENGTH OF COMPONENT WORD.
+ 2342              TS           Z,SC          Z,S1          MOVE CARS           MOVE ALL BUT 1ST CHAR OF WORD.
+ 2344              TN           N,X5          2             COMMON         C    MOVE 1ST CHARACTER OF NEXT WORD.
+ 2346              NA           Z,X5,2        Z,X4          WRIT OBJC
+
+ 2347              SWE, CHAR8   N,X5          12            Z,S0
+ 2348              LA           Z,S0          ZERO          N,S3                EXIT IF LAST WORD HAS ZERO LENGTH.
+ 2350              TS           Z,S3          Z,S1          MOVE CARS           MOVE LAST WORD AND EXIT.
+
+
+
+R2352              SUBROUTINE IN PASS 0 TO MOVE THE CHARACTERS OF A WORD, ASSUMING A PREVIOUS EBTRY TO PUT CHAR.  WITH
+R2354   THE WORD IN COMMON AND COMMON+1 AND THE FIRST CHARACTER MOVED, ENTRY IS:
+
+R2355              TS           Z,SC          Z,S1          MOVE CARS
+
+ 2356   MOVE CARS  SWS, ONES    COMMON        A,1,L         COMMON
+ 2357              SWS, ONES    COMMON +1     A,1,L         COMMON +1
+ 2358              SS           COMMON +1     CHAR8         COMMON              SHIFT COMMON AND COMMON+1 LEFT 1 CHAR.
+ 2360              SS           BLANKS        CHAR8         COMMON +1      C    MOVE ONE CHARACTER.
+ 2362              NA           Z,S0,1        ONE           MOVE CARS
+ 2363              TX           Z,S1          -             Z,SC
+
+
+
+R2364   MINOR SUBROUTINE TO POSITION YULPROGS JUST AFTER THE LABEL.  ENTER AT POSIT YUL IN TRANSFER VECTOR.
+
+ 2366   POSIT REW  TS           Z,X0          Z,S2          PHI TAPE            SAVE X0.
+ 2368              RW,1         -             -             -                   (USUALLY SUPERFLUOUS).
+ 2370              TS           L STOPPER     Z,X0          PHI TAPE
+ 2371              RF,1         0,0           -             -
+ 2372              TS           Z,S2          Z,X0          PHI TAPE            RESTORE X0.
+ 2374              RF,1         -             -             -
+ 2375              TX           Z,S3          -             Z,SC
 
 ## Page 93
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  53        PAGE  53
 
+P2376              SUBROUTINE IN PASS 0 TO FIND AN AUTHOR NAME IN THE YUL FILE DIRECTORY.  WITH THE NAME IN AUTHNAME,
+R2378   ENTRY IS   TS           ONES          1,6           FIND AUTH      C    RETURNS TO L+2 WITH ADDRESS OF AUTHOR
+R2380   NAME IN X3 IF FOUND, OR TO L+1 WITH ADDRESS OF NEXT ALPHA-EARLIER AUTHOR NAME IN X5 (N,X5 = 1,6 IF NONE) IF NOT.
+
+
+
+ 2382   FIND AUTH  SWE, CAC3    1,9           16            Z,X3           C    ADDRESS OF ALPHA-EARLIEST NAME.
+ 2384              TS           L END THR     Z,X5          C,+2           C    INITIALIZE ADDR OF PREVIOUS NAME.
+ 2386              SWS,THREAD10 3,1           12            Z,X3           C    FOLLOW THREAD TO NEXT NAME.
+ 2388              LA           AUTH NAME     N,X3          PLAC AUTH      C    BRANCH WHEN THIS NAME NOT GREATER.
+ 2390              TS           Z,X3          Z,X5          C,-2           C    UPDATE ADDR OF PREVIOUS NAME.
+
+ 2392   PLAC AUTH  LA           N,X3          AUTH NAME     C,+2           C    BRANCH ON EQUALITY OF 1ST 8 CHARACTERS.
+ 2394              TX           -             -             -                   OTHERWISE EXIT ON NO MATCH.
+
+ 2396              TX           Z,X3          -             Z,AU1          C
+ 2397              SS           3,1           THREAD 11     Z,AU1          C    ADDR OF 2ND 8 CHARS OF FOUND NAME.
+ 2399              NA           N,AU1         AUTH NAME +1  C,+2           C    BRANCH IF MATCH FAILS ON 2ND HALF.
+ 2401              TX           Z,SC,1        -             -                   EXIT SKIPPING WHEN NAME IS FOUND.
+ 2403              LA           N,AU1         AUTH NAME +1  PLAC AUTH -1   C    LOOK AGAIN WHEN FOUND NAME SMALLER.
+ 2405              TX           -             -             -
+
+
+
+R2406              SUBROTUINE IN PASS 0 TO INCLUDE THE AUTHOR NAME GIVEN IN AUTHNAME IN THE YUL FILE DIRECTORY.  ENTRY:
+R2408              TS           ...           ...           ADD AUTHR           WITH X5 SET UP BY FIND AUTH.  RETURNS
+R2410   WITH ADDRESS OF AUTHOR NAME IN X3.
+
+
+
+ 2411   ADD AUTHR  TS           Z,SH          Z,S3          FIND PAIR      C    FIND 2 CONSECUTIVE UNUSED LOCATIONS.
+ 2413              TX           AUTH NAME     -             N,X3                STORE 1ST HALF OF NAME.
+ 2415              TX           PLUS ZERO     -             3,1                 FLAG TO SIGNIFY AUTHOR, NOT PROG OR SUB.
+ 2417              SWS,ATHRED10 Z,X3          24,L          3,1                 PROGRAM THREAD OF BARREN AUTHOR TO SELF.
+ 2419              NA           Z,X5          L END THR     2ND AUTHR           BRANCH IF NOT ALPHA-EARLIEST AUTHOR.
+
+ 2421              SWS,BTHRED10 1,9           4             3,1                 INSERT AT HEAD OF LIST.
+ 2423              SWS, CAC2    Z,X3          16,L          1,9
+ 2424              TS           Z,SC,3        -             FIND SLOT      C    FIND A SINGLE UNUSED LOCATION.
+
+ 2426   2ND AUTHR  SS           5,1           BTHRED10      3,1                 INSERT NEW NAME IN LIST IN ALPHABETICAL
+ 2428              SWS,BTHRED10 Z,X3          12,L          1,9                 ORDER.
+ 2430              TS           -             -             FIND SLOT      C    FIND A SINGLE UNUSED LOCATION.
+
+ 2432              SS           Z,X5          THREAD 11     3,1                 SET THREAD TO 2ND HALF OF NAME.
+ 2434              TS           AUTH NAME +1  N,X5          N,S3                STORE SECOND HALF OF NAME AND EXIT.
+
 ## Page 94
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  54        PAGE  54
+
+P2436              SUBROUTINE IN PASS 0 TO FIND THE ADDRESS OF A SINGLE UNUSED LOCATION IN THE YUL FILE DIRECTORY.  IF
+R2438   THERE ARE NO INTERNAL SLOTS (AS FROM AN EARLIER DELETION), THE DIRECTORY IS LENGTHENED BY 2 WORDS, ONLY THE
+R2440   FIRST BEING RESERVED.  ENTER BY COSEQUENCE CALL TO  FIND SLOT .  THE ADDRESS IS RETURNED IN X5.
+
+
+
+ 2442   FIND SLOT  SWE, CAC3    1,8           32            Z,X5           C    SET UP ADDRESS IF INTERNAL.
+ 2444              NA           Z,X5          L END THR     NOT ADD1       C    BRANCH IF AN INTERNAL LOCATION.
+
+ 2446              TX           1,8           -             Z,X5           C    USE END OF DIRECTORY AS ADDRESS.
+ 2448              EX           1,8           CAC1          5,1            C    THREAD FOLLOWING LOCATION INTO LIST.
+ 2450              WA           1,8           ONE           1,8            C
+ 2451              SWS, CAC1    1,8           32,L          1,8            C    NEW SLOT HEADS THE LIST.
+ 2453              WA           1,8           ONE           1,8                 FINISH LENGTHENING AND EXIT.
+
+ 2455   NOT ADD1   SS           N,X5          CAC1          1,8            C    DELETE LOCATION FROM LIST.
+ 2457              EX           Z,X5          CAC3 M1       Z,R5           C    SET UP TO SEE IF A PAIR IS AFFECTED.
+ 2459              TS           1 COMMA 8     Z,X2          PAIR SRCH +4   C    ADDRESS OF INITIAL THREADS.
+
+ 2461   PAIR SRCH  SWE, CAC3    N,X2          16            Z,X2           C    FOLLOW THE THREAD THROUGH PAIR LIST.
+ 2463              NA           Z,X2,1        Z,R5          C,+2           C    BRANCH IF PAIR NOT CONTAIN THIS SLOT.
+ 2465              SS           N,X2          CAC2          N,X4                SEW UP GAP AROUND PAIR, EXIT.
+ 2467              LA           ONES          N,X2          N,SC,1         C    EXIT IF END OF PAIR LIST.
+ 2469              TS           Z,X2          Z,X4          PAIR SRCH      C    UPDATE ADDRESS OF PREVIOUS PAIR.
+
+
+
+R2471              MINOR SUBROUTINE IN PASS 0 TO TYPE OUT A TASK MESSAGE, SUCH AS "ASSEMBLY FOR MOD 3C", AND THE OBJECT
+R2473   OF THE TASK, SUCH AS "NEW PROGRAM BUGGY BY JOE BLOW".
+R2474   ENTRY IS   TS           Z,SC          Z,X0          TYP TKOBJ
+
+
+
+ 2475   TYP TK OBJ S, YUL TYPER TASK MSG      AMTF +4       C,+1
+ 2476              S, YUL TYPER OBJCT MSG     A +7          0,0
+
+
+
+R2477              SUBROUTINE IN PASS 0 TO VACATE A PAIR OF WORDS IN THE DIRECTORY.  CSC CALL WITH ADDRESS IN AU1.
+R2479   ENTER AT 0,133 IN TRANSFER VECTOR.
+
+ 2480   GIVE PR    TX           1,8           -             N,AU1          C    MAKE 2ND WD POINT ALONG PAIR+SLOT LISTS.
+ 2482              SWS, CAC1    Z,AU2         32,L          1,8            C
+ 2483              SWS, CAC2    Z,AU2         16,L          1,8            C    SET PAIR+SLOT POINTERS TO 1ST WD.
+ 2485              SWS, CAC1    Z,AU1         32,L          32,L                LET WD 1 POINT TO WD 2, EXIT.
 
 ## Page 95
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  55        PAGE  55
