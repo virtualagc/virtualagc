@@ -38,8 +38,8 @@ int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     Address_t Address, ebank;
     int Value, i;
-    extern Line_t CurrentFilename;
-    extern int CurrentLineInFile;
+    //extern Line_t CurrentFilename;
+    //extern int CurrentLineInFile;
 
     IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
