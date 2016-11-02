@@ -11,6 +11,7 @@
 ##		2016-10-04 RSB	Transcribed.
 ##		2016-10-30 MAS	Some spelling corrections and a missing 2CADR symbol.
 ##		2016-11-01 RSB	Typos.
+##		2016-11-02 RSB	More typos.
 
 ## Page 62
 # RESTART TABLES
@@ -567,7 +568,7 @@ ITSLIKEB	CA	RTRNCADR	# TYPE B,             SO STORE RETURN IN
 
 ITSAJOB		NDX	TEMP2G		# NOW ADD THE PRIORITY AND LET;S GO
 		CA	PHSPRDT1
-		TS	GOLOC -1
+		TC	GOLOC -1
 		
 ITSATBL		TS	CYR		# FIND OUT IF THE PHASE IS ODD OR EVEN
 		CCS	CYR

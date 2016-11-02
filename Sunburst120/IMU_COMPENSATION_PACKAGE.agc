@@ -11,6 +11,7 @@
 ##		2016-10-30 RSB	Transcribed, primarily by adapting
 ##				the Aurora 12 version of the file.
 ##		2016-11-01 RSB	Typos.
+##		2016-11-02 RSB	More typos.
 
 ## Page 859
                 BANK    12
@@ -158,7 +159,7 @@
                 
                 CCS     BUF     +2      # PIPAZ, PIPAY, PIPAX
                 AD      NEG1
-                TCF     1/PIPA  +4
+                TCF     1/PIPA1 +1
                 NOOP                    # LESS THAN ZERO IMPOSSIBLE
                 
 ## Page 862                
