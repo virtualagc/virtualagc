@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	IMU_MODE_SWITCHING_ROUTINES.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:    Public domain.
+## Filename:	 IMU_MODE_SWITCHING_ROUTINES.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		 2016-11-02 RSB	Typo (offset-reference +3 was not indented).
 
 ## Page 1384
 		BLOCK	02
@@ -829,7 +830,7 @@ GOMANUR		CA	ATTCADR		# IS KALCMANU FREE
 		TC	POODOO		# NO
 		OCT	1210		# 2 TRYING TO USE SAME DEVICE
 		
-+3		EXTEND
+ +3		EXTEND
 		DCA	BUF2
 		DXCH	ATTCADR		# SAVE FINAL RETURN FOR KALCMAN3
 

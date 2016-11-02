@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	DISPLAY_INTERFACE_ROUTINES.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:    Public domain.
+## Filename:	 DISPLAY_INTERFACE_ROUTINES.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		 2016-11-02 RSB	Typo (offset-reference -1 was not indented).
 
 ## Page 1416
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -1372,7 +1373,7 @@ UNSETR1		INDEX	COPINDEX	# RESET REPEAT AND RETURN REQUEST
 		CAF	ZERO		# *** 205 ONLY MARKBRAN USERS IN
 		TC	SUPERSW		# SUPERBANK 0
 
--1		CAF	THREE		# RETURN TO USERS IMMEDIATE RETURN LOC
+ -1		CAF	THREE		# RETURN TO USERS IMMEDIATE RETURN LOC
 IMMEDRET	INDEX	COPINDEX
 		AD	CADRFLSH
 		TCF	BANKJUMP

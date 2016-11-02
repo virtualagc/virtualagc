@@ -1,16 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	WAITLIST.agc
-# Purpose:	Part of the source code for Colossus build 237.  
-#		This is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), we believe for Apollo 8.
-# Assembler:	yaYUL
-# Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:	2010-06-02 OH	Adapted from corresponding Colossus 249 file.
-#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
-#		2011-02-12 JL	Minor fixes.
+## Copyright:	Public domain.
+## Filename:	WAITLIST.agc
+## Purpose:	Part of the source code for Colossus build 237.  
+##		This is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), we believe for Apollo 8.
+## Assembler:	yaYUL
+## Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:	2010-06-02 OH	Adapted from corresponding Colossus 249 file.
+##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
+##		2011-02-12 JL	Minor fixes.
+##		2016-11-02 RSB	Typo (offset-reference -1 was not indented).
 
 ## Page 1188
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -133,7 +134,7 @@ WAITLIST	INHINT
 		EXTEND
 		INDEX	WAITEXIT	# IF TWIDDLING, THE TS SKIPS TO HERE
 		DCA	0		# PICK UP 2CADR OF TASK.
--1		TS	WAITADR		# BBCON WILL REMAIN IN L
+ -1		TS	WAITADR		# BBCON WILL REMAIN IN L
 DLY2		CAF	WAITBB		# ENTRY FROM FIXDELAY AND VARDELAY.
 		XCH	BBANK
 		TCF	WAIT2
