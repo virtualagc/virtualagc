@@ -1,17 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	AGC_BLOCK_TWO_SELF-CHECK.agc
-# Purpose:	Part of the source code for Colossus build 237.  
-#		This is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), we believe for Apollo 8.
-# Assembler:	yaYUL
-# Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
-#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
-#		2011-02-12 JL	Minor fixes.
-#		2011-04-17 JL	Removed temporary line.
+## Copyright:	Public domain.
+## Filename:	AGC_BLOCK_TWO_SELF-CHECK.agc
+## Purpose:	Part of the source code for Colossus build 237.  
+##		This is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), we believe for Apollo 8.
+## Assembler:	yaYUL
+## Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
+##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
+##		2011-02-12 JL	Minor fixes.
+##		2011-04-17 JL	Removed temporary line.
 
 ## Page 1358
 # PROGRAM DESCRIPTION                                                         DATE  20 DECEMBER 1967

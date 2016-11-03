@@ -1,15 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	P51-P53.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-02-23 JL	Adapted from corresponding Colossus 249 file.
-#		2011-04-17 JL	Removed temporary line.
+## Copyright:    Public domain.
+## Filename:	 P51-P53.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-02-23 JL	Adapted from corresponding Colossus 249 file.
+##		 2011-04-17 JL	Removed temporary line.
 
 ## Page 690
 # PROGRAM NAME- PROG52                                                                   DATE- NOV 30, 1966

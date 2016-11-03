@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	T4RUPT_PROGRAM.agc
-# Purpose:	Part of the source code for Colossus build 237.  
-#		This is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), we believe for Apollo 8.
-# Assembler:	yaYUL
-# Reference:	pp. 128-165
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo.
-# Mod history:	2010-12-04 JL	Adapted from similar Colossus 249 file.
+## Copyright:	Public domain.
+## Filename:	T4RUPT_PROGRAM.agc
+## Purpose:	Part of the source code for Colossus build 237.  
+##		This is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), we believe for Apollo 8.
+## Assembler:	yaYUL
+## Reference:	pp. 128-165
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo.
+## Mod history:	2010-12-04 JL	Adapted from similar Colossus 249 file.
 
 ## Page 128
 		BANK	12

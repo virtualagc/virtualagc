@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-02-27 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:    Public domain.
+## Filename:	 LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-02-27 JL	Adapted from corresponding Colossus 249 file.
 
 ## Page 736
 # LUNAR AND SOLAR EPHEMERIDES SUBROUTINES

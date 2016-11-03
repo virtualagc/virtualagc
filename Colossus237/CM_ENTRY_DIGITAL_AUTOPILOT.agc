@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:    Public domain.
-## Filename:	CM_ENTRY_DIGITAL_AUTOPILOT.agc
+## Filename:	 CM_ENTRY_DIGITAL_AUTOPILOT.agc
 ## Purpose:      Part of the source code for Colossus build 237.
 ##               This is for the Command Module's (CM) Apollo Guidance
 ##               Computer (AGC), we believe for Apollo 8.

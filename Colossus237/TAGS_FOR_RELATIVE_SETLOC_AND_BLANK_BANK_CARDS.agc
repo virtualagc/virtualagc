@@ -1,15 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Sergio Navarro <sergionavarrog@gmail.com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2009-10-21 SN   Adapted from corresponding Colossus 249 file.
-#		2011-01-17 JL	Renamed to match 237 module name. Minor fixes.
+## Copyright:    Public domain.
+## Filename:     TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Sergio Navarro <sergionavarrog@gmail.com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2009-10-21 SN   Adapted from corresponding Colossus 249 file.
+##		 2011-01-17 JL	 Renamed to match 237 module name. Minor fixes.
 
 ## Page 25
 

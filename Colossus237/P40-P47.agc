@@ -1,17 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	P40-P47.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-02-20 JL	Adapted from corresponding Colossus 249 file.
-#		2011-04-24 JL	Fixed incorrect indentation of label.
-#		2012-10-08 JL	Fixed incorrect opcode on p682.
-#		2016-08-14 RSB	Added SBANKs for addressing discrepancies.
+## Copyright:    Public domain.
+## Filename:	 P40-P47.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-02-20 JL	Adapted from corresponding Colossus 249 file.
+##		 2011-04-24 JL	Fixed incorrect indentation of label.
+##		 2012-10-08 JL	Fixed incorrect opcode on p682.
+##		 2016-08-14 RSB	Added SBANKs for addressing discrepancies.
 
 ## Page 637
 # PROGRAM DESCRIPTION **P40CSM**
