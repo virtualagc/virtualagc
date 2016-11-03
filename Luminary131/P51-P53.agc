@@ -1,18 +1,18 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	P51-P53.agc
-# Purpose:	A section of Luminary 1C, revision 131.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
-#		This file is intended to be a faithful transcription, except
-#		that the code format has been changed to conform to the
-#		requirements of the yaYUL assembler rather than the
-#		original YUL assembler.
-# Reference:	pp. 926-982 of 1729.pdf.
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo
-# Mod history:	05/29/03 RSB.	Began transcribing.
-#		2010-10-25 JL	Indentation fixes.
+## Copyright:	Public domain.
+## Filename:	P51-P53.agc
+## Purpose:	A section of Luminary 1C, revision 131.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
+##		This file is intended to be a faithful transcription, except
+##		that the code format has been changed to conform to the
+##		requirements of the yaYUL assembler rather than the
+##		original YUL assembler.
+## Reference:	pp. 926-982 of 1729.pdf.
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo
+## Mod history:	05/29/03 RSB.	Began transcribing.
+##		2010-10-25 JL	Indentation fixes.
 
 ## Page 926
 # PROGRAM NAME -- PROG52			DATE -- JAN 9, 1967

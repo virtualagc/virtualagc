@@ -1,31 +1,31 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	TAGS_FOR_RELATIVE_SETLOC.agc
-# Purpose:	Header information for Luminary 1C, revision 131.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
-#		This file is intended to be a faithful transcription, except
-#		that the code format has been changed to conform to the
-#		requirements of the yaYUL assembler rather than the 
-#		original YUL assembler.
-# Reference:	Pages 33-42 of 1729.pdf.
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	04/23/03 RSB.	First draft.
-#		05/14/05 RSB	Corrected website reference above.
-#
-# The contents of this file, and all associated "Luminary131" files, are
-# transcribed from a scanned document obtained from MIT's website,
-# http://hrst.mit.edu/hrs/apollo/public/archive/1729.pdf.  Notations on this
-# document read, in part:
-#
-#	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
-#	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
-#	This listing contains the flight program for the Lunar Module
-#	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors in this listing (relative to 1729.pdf) to info@sandroid.org.
+## Copyright:	Public domain.
+## Filename:	TAGS_FOR_RELATIVE_SETLOC.agc
+## Purpose:	Header information for Luminary 1C, revision 131.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
+##		This file is intended to be a faithful transcription, except
+##		that the code format has been changed to conform to the
+##		requirements of the yaYUL assembler rather than the 
+##		original YUL assembler.
+## Reference:	Pages 33-42 of 1729.pdf.
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	04/23/03 RSB.	First draft.
+##		05/14/05 RSB	Corrected website reference above.
+##
+## The contents of this file, and all associated "Luminary131" files, are
+## transcribed from a scanned document obtained from MIT's website,
+## http://hrst.mit.edu/hrs/apollo/public/archive/1729.pdf.  Notations on this
+## document read, in part:
+##
+##	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
+##	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
+##	This listing contains the flight program for the Lunar Module
+##	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
+##
+## Refer directly to the online document mentioned above for further information.
+## Please report any errors in this listing (relative to 1729.pdf) to info@sandroid.org.
 
 ## Page 33
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS

@@ -1,23 +1,23 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	P20-P25.agc
-# Purpose:	A section of Luminary 1C, revision 131.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
-#		This file is intended to be a faithful transcription, except
-#		that the code format has been changed to conform to the
-#		requirements of the yaYUL assembler rather than the 
-#		original YUL assembler.
-# Reference:	pp. 501-623 of 1729.pdf.
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	05/15/03 RSB.	Began transcribing.
-#		12/01/03 RSB.	Entered/corrected the previously-missing code from
-#				the bottom of p. 595 using a replacement scan
-#				provided by Gary Neff.
-#		05/14/05 RSB	Corrected website reference above.
-#		2010-10-25 JL	Fixed p583 page number.
-#		2011-05-07 JL	Removed workarounds.
+## Copyright:	Public domain.
+## Filename:	P20-P25.agc
+## Purpose:	A section of Luminary 1C, revision 131.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
+##		This file is intended to be a faithful transcription, except
+##		that the code format has been changed to conform to the
+##		requirements of the yaYUL assembler rather than the 
+##		original YUL assembler.
+## Reference:	pp. 501-623 of 1729.pdf.
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	05/15/03 RSB.	Began transcribing.
+##		12/01/03 RSB.	Entered/corrected the previously-missing code from
+##				the bottom of p. 595 using a replacement scan
+##				provided by Gary Neff.
+##		05/14/05 RSB	Corrected website reference above.
+##		2010-10-25 JL	Fixed p583 page number.
+##		2011-05-07 JL	Removed workarounds.
 
 ## Page 501
 # RENDEZVOUS NAVIGATION PROGRAM 20

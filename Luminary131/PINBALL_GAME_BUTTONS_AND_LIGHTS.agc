@@ -1,20 +1,20 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
-# Purpose:	A section of Luminary 1C, revision 131.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
-#		This file is intended to be a faithful transcription, except
-#		that the code format has been changed to conform to the
-#		requirements of the yaYUL assembler rather than the 
-#		original YUL assembler.
-# Reference:	pp. 397-480 of 1729.pdf.
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo
-# Mod history:	05/11/03 RSB.	Began transcribing.
-#		05/14/03 RSB.	First draft completed.
-#		06/06/03 RSB.	Fixed a bunch of typos in the comments.
-#		2010-10-25 JL	Fixed directive (COUNT# -> COUNT* on p446).
+## Copyright:	Public domain.
+## Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
+## Purpose:	A section of Luminary 1C, revision 131.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
+##		This file is intended to be a faithful transcription, except
+##		that the code format has been changed to conform to the
+##		requirements of the yaYUL assembler rather than the 
+##		original YUL assembler.
+## Reference:	pp. 397-480 of 1729.pdf.
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo
+## Mod history:	05/11/03 RSB.	Began transcribing.
+##		05/14/03 RSB.	First draft completed.
+##		06/06/03 RSB.	Fixed a bunch of typos in the comments.
+##		2010-10-25 JL	Fixed directive (COUNT# -> COUNT* on p446).
 
 ## Page 397
 # PROGRAM NAME -- KEYBOARD AND DISPLAY PROGRAM

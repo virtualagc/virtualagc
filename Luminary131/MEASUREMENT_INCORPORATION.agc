@@ -1,19 +1,19 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	MEASUREMENT_INCORPORATION.agc
-# Purpose:	A section of Luminary 1C, revision 131.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
-#		This file is intended to be a faithful transcription, except
-#		that the code format has been changed to conform to the
-#		requirements of the yaYUL assembler rather than the
-#		original YUL assembler.
-# Reference:	pp. 1148-1157 of 1729.pdf.
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	06/01/03 RSB.	Began transcribing.
-#		05/14/05 RSB	Corrected website reference above.
-#		2010-10-25 JL	Indentation fixes.
+## Copyright:	Public domain.
+## Filename:	MEASUREMENT_INCORPORATION.agc
+## Purpose:	A section of Luminary 1C, revision 131.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
+##		This file is intended to be a faithful transcription, except
+##		that the code format has been changed to conform to the
+##		requirements of the yaYUL assembler rather than the
+##		original YUL assembler.
+## Reference:	pp. 1148-1157 of 1729.pdf.
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	06/01/03 RSB.	Began transcribing.
+##		05/14/05 RSB	Corrected website reference above.
+##		2010-10-25 JL	Indentation fixes.
 
 ## Page 1148
 # INCORP1 -- PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITION
