@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	INTERPRETER.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:    Public domain.
+## Filename:	 INTERPRETER.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
+##		 2016-11-02 RSB	Typo (offset-reference -1 was not indented).
 
 ## Page 1074
 # SECTION 1  DISPATCHER
@@ -1832,7 +1833,7 @@ DVOVF		CAF	POSMAX		# ON DIVISION OVERFLOW OF ANY SORT, SET
 		TC	DANZIG
 
 
--1		INCR	DVSIGN
+ -1		INCR	DVSIGN
 OVF+		CS	BUF +1		# LOAD LOWER ORDER PART OF DIVISOR.
 		TCF	SGNDVOVF	# GET SIGN OF RESULT.
 

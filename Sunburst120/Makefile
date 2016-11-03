@@ -1,8 +1,6 @@
 # Copyright:	Public domain.
 # Filename:	Makefile
-# Purpose:	Makefile for Luminary 1A (build 099).
-#		(The source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC), Apollo 11.)
+# Purpose:	Makefile for Sunburst 120.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	http://www.ibiblio.org/apollo
 # Mod history:	2016-09-29 RSB	created.
@@ -10,4 +8,6 @@
 # 		2016-10-05 JL	Set yaYUL args back to default.
 
 BASENAME=Sunburst120
+EXTRA_YAYUL_ARGS=
+
 include ../Makefile.inc

@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	EXECUTIVE.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:    Public domain.
+## Filename:	 EXECUTIVE.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+##		 2016-11-02 RSB	Typo (offset-reference +1 was not indented).
 
 ## Page 1175
 		BLOCK	02
@@ -469,7 +470,7 @@ NUDIRECT	EXTEND			# TURN THE GREEN LIGHT BACK ON.
 #		TCF	SUPDXCHZ	# WITH 2CADR OF DESIRED LOCATION IN A + L.
 
 SUPDXCHZ	XCH	L		# BASIC.
-+1		EXTEND
+ +1		EXTEND
 		WRITE	SUPERBNK
 		TS	BBANK
 		TC	L

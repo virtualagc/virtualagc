@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     PIPA_READER.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-29 MAS  Adapted from Luminary 099.
+## Copyright:    Public domain.
+## Filename:     PIPA_READER.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-29 MAS  Adapted from Luminary 099.
+## 		 2016-10-31 RSB	 Typos.
 
 ## Page 835
 # *****  PIPA READER *****
@@ -52,7 +53,7 @@
                 BANK            30                              
 PIPASR          EXTEND                                          
                 DCA             TIME2                           
-                DXCH            PIPTIME1                        # CURRENT TIME  POSITIVE VALUE.
+                DXCH            PIPTIME                         # CURRENT TIME  POSITIVE VALUE.
 
                 CS              ZERO                            # INITIALIZE THESE AT NEG ZERO.
                 TS              TEMX                            

@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     MISSION_PHASE_13-APS2.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-29 MAS  Transcribed
+## Copyright:    Public domain.
+## Filename:     MISSION_PHASE_13-APS2.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-29 MAS  Transcribed
+##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 754
 # MISSION PHASE 13 EXERCISES THE ASCENT GUIDANCE EQUATIONS OF PROG 46
@@ -137,7 +139,7 @@ TIG13           TC              IBNKCALL
 
 # NOW THAT THE ENGINE IS ON AND ULLAGE IS OFF, SET UP DUMMY MP 13 & PUT RESTARTABILITY FLAG UP:
 
-                TC              2PHASCHNG
+                TC              2PHSCHNG
                 OCT             00313                           # 3.31 SPOT IS DUMMY13 TASK.
                 OCT             2                               # GROUP 2 OFF.
 
@@ -202,10 +204,10 @@ MP13OUT         TC              IBNKCALL                        # DEADBAND SELEC
 1SEC13          DEC             100
 2SECS13         DEC             200
 12SECS13        DEC             1200
-30SECS13        DEC             3000
+30SECS13        2DEC            3000
 
 140SECS         DEC             14000
-342SECS         DEC             34200                           # 342 SECONDS
+342SECS         2DEC            34200                           # 342 SECONDS
 
 AVEG13AD        GENADR          AVERAGEG
                 EBANK=          TDEC

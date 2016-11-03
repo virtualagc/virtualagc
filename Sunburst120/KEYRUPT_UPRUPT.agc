@@ -1,16 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	RADAR_LEADIN_ROUTINES.agc
-# Purpose:	A module for revision 0 of BURST120 (Sunburst).
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	2016-09-30 RSB	Created draft version.
-#		2016-10-06 RSB	Transcription completed.
+## Copyright:	Public domain.
+## Filename:	KEYRUPT_UPRUPT.agc
+## Purpose:	A module for revision 0 of BURST120 (Sunburst).
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	2016-09-30 RSB	Created draft version.
+##		2016-10-06 RSB	Transcription completed.
+##		2016-10-31 RSB	Typos.
 
-# Page 228
+## Page 228
 		BANK	13
 KEYRUPT1	TS	BANKRUPT
 		XCH	Q
@@ -30,7 +31,7 @@ KEYCOM		TS	RUPTREG4
 		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
 		TC	RESUME
 
-# Page 229
+## Page 229
 # UPRUPT PROGRAM
 
 UPRUPT		TS	BANKRUPT
@@ -64,7 +65,7 @@ UPCK		TC	RESTORSR	# CODE IS GOOD
 ELRCODE		OCT	22
 		TC	TSTUPLOK
 		CS	BIT3
-		MASK	FLATWRD1
+		MASK	FLAGWRD1
 		TS	FLAGWRD1
 		TC	ACCEPTUP
 TSTUPLOK	CAF	BIT3
@@ -82,7 +83,7 @@ TMFAIL2		TC	RESTORSR	# CODE IS BAD
 TMFAIL1		TC	TMALM
 		TC	RESUME
 		
-# Page 230
+## Page 230
 RESTORSR	XCH	KEYTEMP2
 		DOUBLE
 		TS	SR

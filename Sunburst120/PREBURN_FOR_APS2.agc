@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     PREBURN_FOR_APS2.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-28 HG   Transcribed
+## Copyright:    Public domain.
+## Filename:     PREBURN_FOR_APS2.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-28 HG   Transcribed
+##		 2016-10-31 RSB	 Typos
 
 ##Page 911
 #      PREAPS2 IS A PROGRAM WHICH INITIALIZED **ASCENT** FOR THE 2ND APS
@@ -69,7 +70,7 @@ PREAPS2         DXCH            RRETURN
                 STORE           TCO                     # TCO$2(-28)
                 SET             CLEAR
                                 DIRECT                  # DIRECT=1
-                                BAKT04                  # BAKT04 = 0
+                                BAKTO4                  # BAKTO4 = 0
                 SET                                     # TO AVOID CLOBBERING TCO DURING PREBURN
                                 PASS
                 CLEAR           SET                     # CLEAR GUESSW FOR NO COGAVAIL

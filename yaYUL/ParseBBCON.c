@@ -1,5 +1,5 @@
 /*
-  Copyright 2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2004,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -20,6 +20,10 @@
   Filename:     ParseBBCON.c
   Purpose:      Assembles the BBCON pseudo-ops.
   History:      07/21/04 RSB.   Adapted from ParseECADR.c.
+                11/02/16 RSB.   Changed handling of BBCON*, which was previously
+                                hard-coded, but for which the value is no
+                                longer correct in Sunburst 120.  Hopefully
+                                works correctly in all cases now.
  */
 
 #include "yaYUL.h"
@@ -34,6 +38,8 @@ int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     Address_t Address, ebank;
     int Value, i;
+    //extern Line_t CurrentFilename;
+    //extern int CurrentLineInFile;
 
     IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
@@ -58,11 +64,11 @@ int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         OutRecord->IndexValid = 0;
     }
 
-    if (!strcmp(InRecord->Operator, "BBCON*")) {
-        OutRecord->Words[0] = 066100;
-        OutRecord->SBank.current.Super = 1;
-        return (0);
-    }
+    //if (!strcmp(InRecord->Operator, "BBCON*")) {
+    //    OutRecord->Words[0] = 066100;
+    //    OutRecord->SBank.current.Super = 1;
+    //    return (0);
+    //}
 
     i = GetOctOrDec(InRecord->Operand, &Value);
     if (!i && *InRecord->Mod1 == 0) {

@@ -33,6 +33,7 @@
  *              08/21/16 RSB    Adapted for Block 1.
  *              10/20/16 RSB    Somehow the --no-super option got messed up.
  *                              Also, introduced --no-super2.
+ *              11/02/16 RSB    Added the case of 0 to --no-super.
  *
  *  The idea is simple.  We just do a word-by-word compare until we run out of
  *  data, and print messages where the words differ.  Originally I intended to
@@ -54,8 +55,8 @@ int
 main(int argc, char *argv[])
 {
   FILE *f1, *f2;
-  int n1, n2, i, NoSuper = 0, NoSuper2
-       = 0, NoZero = 0, OnlySuper = 0, Block1 = 0;
+  int n1, n2, i, NoSuper = 0, NoSuper2 = 0, NoZero = 0, OnlySuper = 0, Block1 =
+      0;
   unsigned char d1[2], d2[2];
 
   // Parse command-line arguments.
@@ -73,7 +74,7 @@ main(int argc, char *argv[])
           "               (the least-significant bit being position 1)\n"
           "               and 011 in the other word.\n"
           "--only-super   The opposite of the --no-super option.  Shows\n"
-          "               ONLY differences involving 100 vs. 011 in \n"
+          "               ONLY differences involving 000 vs. 100 vs. 011 in \n"
           "               bits 5,6,7.\n"
           "--no-super2    Similar to --no-super, but discards ALL \n"
           "               differences which are merely in bit 7.\n"
@@ -158,12 +159,18 @@ main(int argc, char *argv[])
           }
         else
           {
+            int sub1, sub2;
+            sub1 = 0160 & n1;
+            sub2 = 0160 & n2;
             if (NoSuper2 && 00100 == (n1 ^ n2))
               {
                 continue;
               }
-            else if (0160 == (0160 & (n1 ^ n2))
-                && (0100 == (0160 & n1) || 0060 == (0160 & n1)))
+            else if ((~0160 & n1) == (~0160 & n2) && sub1 != sub2
+                && (((0100 == sub1 || 0060 == sub1 || 0000 == sub1)
+                    && (0100 == sub2 || 0060 == sub2 || 0000 == sub2))
+               || ((0100 == sub1 || 0060 == sub1 || 0160 == sub1)
+                    && (0100 == sub2 || 0060 == sub2 || 0160 == sub2))))
               {
                 if (NoSuper)
                   continue;

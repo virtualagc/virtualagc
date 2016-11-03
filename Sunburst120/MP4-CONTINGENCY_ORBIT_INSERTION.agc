@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     MP4-CONTINGENCY_ORBIT_INSERTION.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-24 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     MP4-CONTINGENCY_ORBIT_INSERTION.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-24 MAS  Transcribed.
+##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 Correction for overprinted area (p. 707).
 
 ## Page 696
                 BANK            33
@@ -201,11 +203,11 @@ MP4HOLD         TC              IBNKCALL
                 TC              FIXDELAY
                 DEC             90                              # DELAY 900 MS.
 
-TIG-4-49        TC              1LMP+DT
+TIG4-49         TC              1LMP+DT
                 DEC             59                              # LEM/S4B SEPARATE-ARM-OFF
                 DEC             100                             # DELAY ONE SECOND
 
-TIG-4-48        TC              1LMP
+TIG4-48         TC              1LMP
                 DEC             91                              # LEM/S4B SEPARATE-COMMAND RESET
 
 # END LEM/S4B SEPARATION ROUTINE
@@ -262,7 +264,7 @@ PRECOI          CAF             KALC4AD
                 STOVL           QAXIS                           # UNIT HORIZONTAL VECTOR NORMAL TO ORBIT
                                 UNITR                           # UNITR FROM AVEG=UNIT(RIGNTION)*2(-1) M
                 STORE           PAXIS1
-                VXV             VSL11
+                VXV             VSL1
                                 QAXIS
 ## Page 701
                 STOVL           SAXIS                           # UNIT HORIZONTAL VECTOR PARALLEL TO ORBIT
@@ -298,7 +300,7 @@ PRECOI          CAF             KALC4AD
                                 DP0
                 STORE           YDOT                            # YDOT = 0
                 SET             GOTO
-                                BAKT04
+                                BAKTO4
                                 ASCENT                          # GO TO USE GEFF SECTION OF ASCENT
 GFKNOWN         SR1                                             # LET AVG GEFF = .5 GEFF
                 STORE           GEFF
@@ -578,11 +580,12 @@ XTRANSON        OCT             00252                           # CHANNEL 5 CODE
 ## erroneous lines, making it not too difficult to tease them apart. They may not be completely
 ## perfect, though. It also looks like the lines of asterisks, which seem to be causing the problems,
 ## are accompanied by random 4s. The placement of them makes it seem like they were probably not in
-## the original program, and are only appearing due to the printer errors.
+## the original program, and are only appearing due to the printer errors.  The correct value for
+## ABLOCK may be related to (but is not exactly equal to) "2DEC 0.30893 E+3 B-9".
 # ************************************************************************                     4
 # CONSTANTS FOR PRECOI CALCULATIONS AND FOR INITIALIZATION OF ASCENT EO.
 # ************************************************************************
-ABLOCK          2DEC            0.30893         E+3 B-9         # ANTICIPATED INITIAL ACCELERATION M/CS/CS
+ABLOCK          2OCT		0503717610		        # ANTICIPATED INITIAL ACCELERATION M/CS/CS
 
                 2DEC            0.2990          E+2 B-7         # INITIAL EXHAUST VELOCITY  M/CS
 

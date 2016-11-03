@@ -1,16 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	ALARM_AND_ABORT.agc
-# Purpose:	A module for revision 0 of BURST120 (Sunburst). It 
-#		is part of the source code for the Lunar Module's
-#		(LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	2016-09-30 RSB	Created draft version.
-#		2016-10-14 RSB	Transcribed.
+## Copyright:	Public domain.
+## Filename:	ALARM_AND_ABORT.agc
+## Purpose:	A module for revision 0 of BURST120 (Sunburst). It 
+##		is part of the source code for the Lunar Module's
+##		(LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	2016-09-30 RSB	Created draft version.
+##		2016-10-14 RSB	Transcribed.
+##		2016-10-31 RSB	Typos.
 
-# Page 313
+## Page 313
 # PROGRAM DESCRIPTION					  DATE- 9 FEB 1967
 # PROGRAM WRITTEN BY M.HAMILTON                LOG SECTION-ALARM AND ABORT
 # MOD BY- R.MELANSON TO ADD DOCUMENTATION      ASSEMBLY SUNBURST REV 107
@@ -55,14 +56,14 @@ CURTAINS	INHINT			# SAVE 2CADR OF USER FOR CURTAINS DISPLAY
 		OCT	00310
 		
 JETENTRY	INHINT
-		CAF	CURTAB
+		CAF	CURTBB
 		XCH	BBANK
 		TCF	FORGETIT
 		
 		EBANK=	LST1
 CURTBB		BBCON	FORGETIT
 		BANK	07
-# Page 314
+## Page 314
 LARMLARM	TC	GRABDSP
 		TCF	ENDOFJOB
 		TCF	DOALARM	+1
@@ -78,7 +79,7 @@ FAILDISP	OCT	01550		# MONITOR DISPLAYS 3 FAILREG REGS
 JETABORT	TC	ALARM
 		OCT	00312
 		
-		TCF	JETENRY
+		TCF	JETENTRY
 
 # ALARM IS CALLED EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL
 
@@ -112,7 +113,7 @@ CHKFAIL1	CCS	FAILREG		# IS ANYTHING IN FAILREG
 		TCF	PROGLARM	# TURN ALARM LIGHT ON FOR FIRST ALARM
 
 CHKFAIL2	CCS	FAILREG +1
-# Page 315
+## Page 315
 		TCF	FAIL3
 		LXCH	FAILREG +1
 		TCF	ARMDSPON	# LIGHT ALREADY ON
@@ -123,6 +124,10 @@ FAIL3		CA	FAILREG +2
 		TCF	MULTFAIL
 		LXCH	FAILREG +2
 		TCF	ARMDSPON	# LAST DISPLAY TURN ON UNTIL ERR RESET
+		
+PROGLARM	CS	DSPTAB	+11D
+		MASK	OCT40400
+		ADS	DSPTAB	+11D
 
 ARMDSPON	CAF	PRIO37
 		TC	NOVAC

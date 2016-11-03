@@ -10,6 +10,9 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##              2016-10-18 RSB	Used Aurora 12 file of the same name as a
 ##				pattern.  A handful of corrections were needed.  
+##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
+##		2016-11-02 RSB	More typos.
 
 ## Page 436
 		BANK	23
@@ -82,7 +85,7 @@ SAMODCHK        CAF     ZERO
                 CAF     135ANG
                 TC      THETADLD
                 
-                CAF     45ANG
+                CAF     ZERO
                 TC      THETADLD +2
                 
                 TC      FNZEROFN
@@ -139,6 +142,9 @@ CHK2            TS      CDUNDX
                 TS      THETAD +1
                 CS      71ANG
                 TC      THETADLD +2
+                
+                CAF	ZERO
+                TC	THETADLD +2
                 
                 TC      FNZEROFN
                 
@@ -556,7 +562,7 @@ FZFDSP          CAF     V05N30X
                 TC      NVSBWAIT
                 TC      FLASHON
                 TC      ENDIDLE
-                TC      ENDTST03
+                TCF      ENDTST03
                 TCF     +2
                 TCF     FZFDSP
                 
@@ -593,4 +599,4 @@ ECE2CADR        CADR    ECE2
 FZF2CADR        CADR    FZF2
 OGCECADR        ECADR   OGC
 
-DEG/SECC        2DEC    576000 B-28
+DEG/SEC         2DEC    576000 B-28

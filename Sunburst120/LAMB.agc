@@ -9,8 +9,16 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed from scratch.  Ouch!
+##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB  A line reading "OCT B0", which is not supported by yaYUL,
+##				has been replaced by "OCT 1", in lieu of modifying 
+##				yaYUL at this time.  An appropriate program comment was 
+##				also added at this point in the code.  Plus, more typos.
+
 
 ## Page 926
+		BANK	36
+		EBANK=	SCAXIS
 
 # PROGRAM NAME ... LAMBERT ROUTINE                                        DATE ... 11/29/66
 #
@@ -279,7 +287,7 @@ ELIPLMTS	PUSH	DAD		#				 PL AT 2D
 		PUSH	ABS		#				 PL AT 4D
 		DMP	BDSU		#				 PL AT 2D
 			PERCENT
-		STADAR
+		STADR
 		STODL	26D		# 26D=COGAMX (+5)
 			28D
 		SR	DSU
@@ -314,7 +322,7 @@ DTPRD		VLOAD	UNIT
 		STODL	UNR1
 			36D
 		STOVL	32D		# 32D=R1 (+7)
-			R1VECT
+			R1VEC
 		VSR4	
 		UNIT	PUSH		# 32D=R1 (+7)			 PL AT 6D
 		DOT	SL1
@@ -425,7 +433,7 @@ COSFN		PUSH	DCOMP		# 4D=(1-CSD)(+1)		 PL AT 6D
 			+2
 			PI/4		
 ## Page 937
-		STORE	03		# 0D=DELTAE (+3)
+		STORE	0D		# 0D=DELTAE (+3)
 		RVQ
 		
 		
@@ -618,7 +626,7 @@ ERTHSFER	SR*	GOTO
 			TMESTORE
 			
 TIMELONG	DLOAD	GOTO
-			NEAR1
+			NEARI
 			TMESTORE +2
 			
 			
@@ -677,6 +685,7 @@ FRSTTIME	DLOAD	DMP
 ## Page 943
 		SIGN	GOTO
 			DELDEP
+			NEWDELTA
 MINCHECK	DLOAD	DSU
 			MININDEP
 			INDEP
@@ -684,7 +693,7 @@ MINCHECK	DLOAD	DSU
 			DELINDEP
 			XEEDLLMT
 		BPL	DLOAD
-			XEEDLLMIT
+			XEEDLLMT
 			DELINDEP
 		RVQ
 		
@@ -749,7 +758,10 @@ D1/4		2DEC	.5	B-1
 
 D1/2		2DEC	.5
 
-NEARZERO	2OCT	B0
+## The following line is "NEARZERO 2OCT B0" in the original program listing, but the yaYUL
+## assembler does not syntactically support a bare exponent like "B0" in the operand,
+## so it has been replaced by a numerical equivalent that the assembler does support. 
+NEARZERO	2OCT	1
 
 NEARI		2OCT	3777737777
 

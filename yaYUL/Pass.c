@@ -78,6 +78,17 @@
  *             	                rather than a full pseudo-address.
  *              2016-10-21 RSB  Added some --blk2 interpreter fixes and changes to handling
  *                              of CADR and TC without operands sent in by Hartmuth Gutsche.
+ *              2016-10-31 RSB  Added ITCQ as synonym for RVQ.
+ *              2016-11-02 RSB  Now assumes that the left-hand interpretive operator can't
+ *                              begin past column 17.  Had to do this because there's a
+ *                              case in Sunburst where an interpretive operand (NORM) has
+ *                              the same name as an interpregive operator (yes, you guessed
+ *                              it ... NORM!), and otherwise there's no way to distinguish
+ *                              them.  Changed handling of BBCON* (which was previously
+ *                              hard-coded, but which no longer works in Sunburst, so now
+ *                              operates, hopefully correctly, on the actual address).
+ *                              Behavior of TC without an operand has been extended to
+ *                              all targets (was previously just for block 1 and BLK2).
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -202,7 +213,8 @@ static ParserMatch_t ParsersBlock2[] =
     { "BANK", OP_PSEUDO, ParseBANK },
     { "BLOCK", OP_PSEUDO, ParseBLOCK },
     { "BBCON", OP_PSEUDO, ParseBBCON },
-    { "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },
+  /*{ "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },*/
+    { "BBCON*", OP_PSEUDO, ParseBBCON },
     { "BNKSUM", OP_PSEUDO, NULL, "", "" },
     { "BZF", OP_BASIC, ParseBZF },
     { "BZMF", OP_BASIC, ParseBZMF },
@@ -327,7 +339,8 @@ static ParserMatch_t ParsersBLK2[] =
     { "BANK", OP_PSEUDO, ParseBANK },
     { "BLOCK", OP_PSEUDO, ParseBLOCK },
     { "BBCON", OP_PSEUDO, ParseBBCON },
-    { "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },
+  /*{ "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },*/
+    { "BBCON*", OP_PSEUDO, ParseBBCON },
     { "BNKSUM", OP_PSEUDO, NULL, "", "" },
     { "BZF", OP_BASIC, ParseBZF },
     { "BZMF", OP_BASIC, ParseBZMF },
@@ -564,6 +577,7 @@ static InterpreterMatch_t InterpreterOpcodesBlock2[] =
     { "INVERT", 0162, 1, 1, 000161 },
     { "INVGO", 0162, 2, 1, 000121 },
     { "ITA", 0156, 1 },
+    { "ITCQ", 0160, 0 },
     { "LXA,1", 0026, 1 },
     { "LXA,2", 0022, 1 },
     { "LXC,1", 0036, 1 },
@@ -1434,6 +1448,8 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   static char lastLines[10][sizeof(s)] =
     { "", "", "", "", "", "", "", "", "", "" };
 
+  numSymbolsReassigned = 0;
+
   // Set for the proper assembly target
   // The default for these settings is Block2 (YUL name AGC, I think).
   if (!BlockAssigned && Block1)
@@ -1781,7 +1797,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                 noOperator = 0;
             }
 
-          iMatch = FindInterpreter(Fields[i]);
+          iMatch = noOperator ? NULL : FindInterpreter(Fields[i]);
           Match = FindParser(Fields[i]);
 
           if (Block1)
@@ -1897,11 +1913,12 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       // just hard-coding the ones I've seen.
       if (NULL == ParseInputRecord.Operand || 0 == ParseInputRecord.Operand[0])
         {
-          if (Block1)
+          if (!strcmp(ParseInputRecord.Operator, "TC")
+              || !strcmp(ParseInputRecord.Operator, "BBCON*"))
+            ParseInputRecord.Operand = "-0";
+          else if (Block1)
             {
-              if (!strcmp(ParseInputRecord.Operator, "TC"))
-                ParseInputRecord.Operand = "-0";
-              else if (!strcmp(ParseInputRecord.Operator, "CADR"))
+              if (!strcmp(ParseInputRecord.Operator, "CADR"))
                 {
                   static char fakeOperand[32];
                   sprintf(fakeOperand, "%o",
@@ -1909,12 +1926,6 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                           + (ParseInputRecord.ProgramCounter.SReg & 01777));
                   ParseInputRecord.Operand = fakeOperand;
                 }
-            }
-          else if (blk2)
-            {
-              if (!strcmp(ParseInputRecord.Operator, "TC"))
-                ParseInputRecord.Operand = "-0";
-
             }
         }
 

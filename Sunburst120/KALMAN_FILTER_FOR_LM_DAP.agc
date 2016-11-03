@@ -10,6 +10,7 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-17 MAS  Began.
 ##               2016-10-18 MAS  Completed adaptation from Aurora 12 / transcription.
+##		 2016-10-31 RSB	 Typos
 
 ## Page 574
 # THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH INITIALIZES THE KALMAN FILTER AND SETS UP A P-AXIS RUPT TO
@@ -550,7 +551,7 @@ RESETCTR        CA              EBANK6                          # SAVE CALLERS E
                 TC              POSTJUMP                        # *TMINAPS OK. JUMP TO THE DELAY LOGIC*
                 CADR            17INSRT
 
-20INSRTC        CA              /TMP2/                          # RESTORE EBANK AND RETURN TO ENGINOFF.
+20INSRTC        CA              /TEMP2/                         # RESTORE EBANK AND RETURN TO ENGINOFF.
                 TS              EBANK
                 TCF             ENGINOFF        +1
 

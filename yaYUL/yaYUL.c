@@ -78,6 +78,15 @@
  * 		                Added a fix by Harmuth Gutsche to account for the fact
  * 		                that fatal errors would defeat a forced save of
  * 		                the generated rope.
+ *              2016-11-01 RSB  No longer generates checksums for empty banks.
+ *              2016-11-02 RSB  Added --yul and --trace.  Now continues doing symbol-resolution
+ *                              passes with the pass() function, not merely until all symbols
+ *                              are resolved, but until the value of no symbol changes during
+ *                              a pass.  Otherwise, there was a theoretical possibility,
+ *                              depending on the order in which EQUALS or = appear, that a
+ *                              symbol could be resolved but have the wrong value.  This
+ *                              possibility became a reality in Artemis072 when some fixes
+ *                              to EQUALS/= needed for Sunburst120 were made.
  */
 
 #include "yaYUL.h"
@@ -98,7 +107,9 @@ char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
 FILE *OutputFile = NULL;
 static int Hardware = 0;
-int flipBugger[044] = {0};
+int flipBugger[044] =
+  { 0 };
+int asYUL = 0, trace = 0;
 
 static Address_t RegEB = REG(03);
 static Address_t RegFB = REG(04);
@@ -187,16 +198,20 @@ main(int argc, char *argv[])
         Html = 1;
       else if (!strcmp(argv[i], "--unpound-page"))
         UnpoundPage = 1;
+      else if (!strcmp(argv[i], "--yul"))
+        asYUL = 1;
+      else if (!strcmp(argv[i], "--trace"))
+        trace = 1;
       else if (!strcmp(argv[i], "--block1"))
-	{
-	  Block1 = 1;
-	  assemblyTarget = "BLK1";
-	}
+        {
+          Block1 = 1;
+          assemblyTarget = "BLK1";
+        }
       else if (!strcmp(argv[i], "--blk2"))
-	{
-	  blk2 = 1;
-	  assemblyTarget = "BLK2";
-	}
+        {
+          blk2 = 1;
+          assemblyTarget = "BLK2";
+        }
       else if (!strcmp(argv[i], "--hardware"))
         Hardware = 1;
       else if (!strcmp(argv[i], "--format"))
@@ -341,7 +356,7 @@ main(int argc, char *argv[])
           printf("Unrecoverable error.\n");
           break;
         }
-      if (k == 0 || k >= LastUnresolved)
+      if ((k == 0 || k >= LastUnresolved) && numSymbolsReassigned == 0)
         {
           printf("Pass #%d\n", i + 1);
           Pass(1, InputFilename, OutputFile, &Fatals, &Warnings);
@@ -352,11 +367,11 @@ main(int argc, char *argv[])
     }
 
   if (syntaxOnly)
-  {
-    printf("Fatal errors:  %d\n", Fatals);
-    printf("Warnings:  %d\n", Warnings);
-    return(Fatals);
-  }
+    {
+      printf("Fatal errors:  %d\n", Fatals);
+      printf("Warnings:  %d\n", Warnings);
+      return (Fatals);
+    }
 
   // Print the symbol table.
   printf("\n\n");
@@ -429,35 +444,38 @@ main(int argc, char *argv[])
                 Offset = 02000;
             }
           Value = GetBankCount(Bank);
-          if (!Block1 && !blk2)
+          if (Value > 0)
             {
-              if (Value < 01776)
+              if (!Block1 && !blk2)
                 {
-                  ObjectCode[Bank][Value] = Value + Offset;
-                  Value++;
+                  if (Value < 01776)
+                    {
+                      ObjectCode[Bank][Value] = Value + Offset;
+                      Value++;
+                    }
+                  if (Value < 01777)
+                    {
+                      ObjectCode[Bank][Value] = Value + Offset;
+                      Value++;
+                    }
                 }
-              if (Value < 01777)
+              if (Value < 02000)
                 {
-                  ObjectCode[Bank][Value] = Value + Offset;
-                  Value++;
+                  int tryBank;
+                  for (Bugger = Offset = 0; Offset < Value; Offset++)
+                    Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
+                  tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
+                  if (0 == (040000 & Bugger))
+                    GuessBugger = Add(tryBank, 077777 & ~Bugger);
+                  else
+                    GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
+                  ObjectCode[Bank][Value] = GuessBugger;
+                  printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
+                      (Block1 ? 06000 : 02000) + Value);
+                  if (HtmlOut != NULL)
+                    fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
+                        GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
                 }
-            }
-          if (Value < 02000 && Value != 0)
-            {
-              int tryBank;
-              for (Bugger = Offset = 0; Offset < Value; Offset++)
-                Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
-              tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
-              if (0 == (040000 & Bugger))
-                GuessBugger = Add(tryBank, 077777 & ~Bugger);
-              else
-                GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
-              ObjectCode[Bank][Value] = GuessBugger;
-              printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
-                  (Block1 ? 06000 : 02000) + Value);
-              if (HtmlOut != NULL)
-                fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
-                    GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
             }
           // Output the binary data.
           for (Offset = 0; Offset < 02000; Offset++)
@@ -534,9 +552,9 @@ main(int argc, char *argv[])
       printf(
           "                 in the AURORA program.  Not used for Block 2 in\n");
       printf(
-	  "                 The default (omitting both --block1 and --blk2)\n");
+          "                 The default (omitting both --block1 and --blk2)\n");
       printf(
-	  "                 is correct for almost all surviving AGC software.\n");
+          "                 is correct for almost all surviving AGC software.\n");
       printf(
           "                 general, though, and not for any flown missions.\n");
       printf("--hardware       Emit binary with hardware bank order, and\n"
@@ -557,8 +575,9 @@ main(int argc, char *argv[])
           "                 equal to -B (in 1's complement) are also valid.  This option\n");
       printf(
           "                 is used to instruct yaYUL to use the -B bugger word for bank B.\n");
-      printf(
-          "                 Multiple --flip options can be used.\n");
+      printf("                 Multiple --flip options can be used.\n");
+      printf("--yul            Assemble as YUL rather than GAP.  Has no effect at present.\n");
+      printf("--trace          Trace some of yaYUL's internal activity, for debugging.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);

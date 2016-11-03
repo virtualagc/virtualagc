@@ -17,6 +17,8 @@
 ##				similar.  This file was thus created by correcting
 ##				the Aurora 12 version against the Sunburst 120
 ##				scanned program listing.
+##		2016-10-31 RSB	Typos.
+##		2016-11-02 RSB	More typos.
 
 ## Page 411
                 BANK            24
@@ -92,7 +94,8 @@ GUESS           TC              INTPRET                 # CALCULATE -COS LATITUD
                                 GEORGEB
                 STORE           TRANSM1         +12D
                 EXIT
-JUMLOAD         TC		FREEDSP			# FREE DISPLAY IF IN GYROCOMPASS
+                TC		+2
+JUMPLOAD        TC		FREEDSP			# FREE DISPLAY IF IN GYROCOMPASS
 		TC              LOADGTSM
                 TC              BANKCALL
                 CADR            ESTIMS
@@ -280,7 +283,7 @@ LOADIC          CA              ONE
 OPCHK1          CA              TWO
 OPCHK2          TS              PIPINDEX
                 INHINT
-                TC              CHECKCG
+                TC              CHECKG
                 RELINT
                 CA              ZERO
                 INDEX           PIPINDEX
@@ -435,7 +438,7 @@ ENABLE          CAF             BIT6
                 CA              ONE
                 TC              WAITLOOP
                 CCS             COUNTPL
-                TC              WAITPL2
+                TC              WAITLP2
 DIRECTN         TC              BANKCALL                #  TORQUING ROUTINE IN IMU PERFORMANCE
                 CADR            SILVER                  #    BANK 3
                 CCS             SOUTHDR                 # A ONE FIRST TIME THROUGH, THEN ZERO
@@ -679,7 +682,7 @@ POSGMBL         EXTEND                                  # COARSE ALIGNING SUBROU
                 TC              BANKCALL
                 CADR            IMUCOARS
                 CA		FLAGWRD1
-                MASC		BIT8
+                MASK		BIT8
                 CCS             A                       # L +1, OTHERWISE TO L +2.
                 TC              LOCK
                 INCR            QPLACE
@@ -753,7 +756,7 @@ WAITLP1         CCS             COUNTPL
                 TC              +4
                 TC              QPLAC
                 TC              +2
-                TC              WAITLP          -1
+                TC              WAITLP1         -1
                 INHINT
                 CAE             LENGTHOT
                 TC              WAITLIST
@@ -769,7 +772,7 @@ WAITLP2         TS              COUNTPL                 # ENTER HERE AFTER DOING
                 CAF             WTLPCADR
                 TC              JOBSLEEP
 WTLPCADR        CADR            WAITLP1
-WAILP3          CAF             WTLPCADR
+WAITLP3         CAF             WTLPCADR
                 TC              JOBWAKE
                 TC              TASKOVER
 
@@ -847,7 +850,7 @@ KODU            EXIT
                 TC              SHOW
 ## Page 429
                 TCF             RADCK
-NBOSPL          EXTEND                                  # SETS UP AZIMUTH AND VERTICAL VECTORS FOR
+NBPOSPL         EXTEND                                  # SETS UP AZIMUTH AND VERTICAL VECTORS FOR
                 QXCH            QPLACE                  # AXISGEN,RESULTS TO BE USED IN CALCGA TO
                 TC              INTPRET
                 AXC,1           XSU,1                   # AZIMUTH IN NB COORDS
@@ -933,7 +936,7 @@ NSBUGD          CA              ZERO
                 TC              QPLACE
 
 
-POSN4           CS              HALF                    #  Z DOWN, Y SOUTH ,X EAST
+POSN4           CA              HALF                    #  Z DOWN, Y SOUTH ,X EAST
                 TS              XSM             +4
                 TS              YSM             +2
                 COM                                     #  NBDY+SRAY=DH,NBDZ+ADIAZ=DV

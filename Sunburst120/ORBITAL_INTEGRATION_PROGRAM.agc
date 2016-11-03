@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     ORBITAL_INTEGRATION_PROGRAM.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-26 HG   Trasncribed
+## Copyright:    Public domain.
+## Filename:     ORBITAL_INTEGRATION_PROGRAM.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-26 HG   Transcribed
+##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 776
 # FBR3 SETS UP A TIMESTEP CALL TO KEPLER
@@ -584,7 +586,7 @@ ZEROLOOP        STORE           YV              +12D,1  # INDICES CAUSE LOOP TO 
 DIFEQ+0         VLOAD           VSR3
                                 FV
                 STCALL          PHIV
-                                DIFEQOM
+                                DIFEQCOM
 DIFEQ+1         VLOAD           VSR1
                                 FV
                 PUSH            VAD
@@ -630,7 +632,7 @@ NEXTCOL         VLOAD*                                  # SET UP NEXT COLUMNS OF
                                 W               +72D,2
                 STCALL          ZV
                                 DIFEQ0
-ENDTSTATE       STOVL           TNUV
+ENDSTATE        STOVL           TNUV
                                 YV
                 STODL           TDELTAV
                                 H
@@ -692,7 +694,7 @@ DOW..           VLOAD           VSR6
                 PDDL            DMP
                                 34D
                                 36D
-                VXSC            STADR
+                V/SC            STADR
                 STCALL          FV
                                 NBRANCH
 
@@ -742,5 +744,5 @@ EARTHTAB        DEC             6
                 2DEC            0.0
                 DEC             -28                     #  28                        3/2
                 2DEC            .6335627                # 400/SQRT(MU)
-MOONVEC         EQUALS          EATHTAB
+MOONVEC         EQUALS          EARTHTAB
 SUNVEC          EQUALS          EARTHTAB        +3      # ******

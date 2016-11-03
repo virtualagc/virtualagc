@@ -1,17 +1,18 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	CM_ENTRY_DIGITAL_AUTOPILOT.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
-#		2011-04-17 JL	Removed temporary line.
-#		2011-04-27 JL	Fixed symbol name.
-#		2011-04-29 JL	Had = instead of DEC.
+## Copyright:    Public domain.
+## Filename:	CM_ENTRY_DIGITAL_AUTOPILOT.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
+##		 2011-04-17 JL	Removed temporary line.
+##		 2011-04-27 JL	Fixed symbol name.
+##		 2011-04-29 JL	Had = instead of DEC.
+##		 2016-11-02 RSB	Typo (offset-target +4 was not indented).
 
 ## Page 1031
 # SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.   GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
@@ -172,7 +173,7 @@ CM/DAPON	CA	EBAOG
 NOTYET		CA	.5SEC
 		TC	BANKCALL
 		CADR	DELAYJOB	# (DELAYJOB DOES INHINT)
-+4		CA	BIT11		# GAMDIFSW = 94D BIT11,  INITLY=0
+ +4		CA	BIT11		# GAMDIFSW = 94D BIT11,  INITLY=0
 		MASK	CM/FLAGS	# IF ZERO, WAIT UNTIL CM/POSE UPDATE.
 		EXTEND
 		BZF	NOTYET

@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     AVERAGE_G_INTEGRATOR.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-29 MAS  Adapted from Colossus 237.
+## Copyright:    Public domain.
+## Filename:     AVERAGE_G_INTEGRATOR.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-29 MAS  Adapted from Colossus 237.
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 842
 # *************************************************************************************************************
@@ -93,6 +94,8 @@ DP1/10          2DEC            0.1
 J(RE)SQ         2DEC            0.060066630     B-5             #      SCALED AT 2(+45)
 
 -MUDT           2DEC*           -7.9720645      E+12 B-55*   
+
+2SEC(17)	2DEC		200		B-17
 
 DP2(-3)         2DEC            0.125
 

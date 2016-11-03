@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     AOSTASK_AND_AOSJOB.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-19 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     AOSTASK_AND_AOSJOB.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-19 MAS  Transcribed.
+## 		 2016-10-30 RSB	 Typos.
 
 ## Page 605
 # PROGRAM NAME: AOSTASK           MOD. NO. 1  DATE: NOVEMBER 20, 1966
@@ -171,13 +172,13 @@ COEFFA1         CAE             COEFFA                          # FORM COEFFA(AO
                 AD              AOSR                            
 ## Page 609
                 EXTEND                                          
-                MP              .70711                          
+                MP              0.70711                          
                 TS              AOSU                            # SCALED AT PI/2 RADIANS/SECOND(2).
 
                 CS              AOSQ                            # THEN, CALCULATE AOSV:
                 AD              AOSR                            
                 EXTEND                                          
-                MP              .70711                          
+                MP              0.70711                          
                 TS              AOSV                            # SCALED AT PI/2 RADIANS/SECOND(2).
 
 # FORM TERMS FOR RATE DERIVATION:
@@ -319,13 +320,13 @@ STCTR1          CA              MASS                            # IN KGS (+15)
                 TCF             LRESC                           
 
 COMMEQS         EXTEND                                          
-                DCA             TORKUET                         # 500 FT-LBS. (+16) PI
+                DCA             TORKJET                         # 500 FT-LBS. (+16) PI
                 EXTEND                                          
                 DV              IXX                             
                 TS              1JACC                           # SCALED BY PI/4
 
                 EXTEND                                          
-                DCA             TORKUET1                        # 550 FT-LBS. (+16) PI
+                DCA             TORKJET1                        # 550 FT-LBS. (+16) PI
 
 ## Page 613
                 EXTEND                                          
@@ -333,7 +334,7 @@ COMMEQS         EXTEND
                 TS              1JACCQ                          # SCALED BY PI/4
 
                 EXTEND                                          
-                DCA             TORKUET1                        # 550 FT-LBS. (+16) PI
+                DCA             TORKJET1                        # 550 FT-LBS. (+16) PI
                 EXTEND                                          
                 DV              IZZ                             
                 TS              1JACCR                          # SCALED BY PI/4
@@ -684,7 +685,7 @@ QRJOB           TS              JOBAXES
 
                 TC              INVACC                          # (USE SUBROUTINE FOR INVERSE.)
 FIFTY3R         INDEX           JOBAXES                         
-                TS              1/AMTNQ                         # SAVE FOR USE BY URGENCY CALCULATIONS.
+                TS              1/AMINQ                         # SAVE FOR USE BY URGENCY CALCULATIONS.
 
                 CS              JOBAXES                         # 2 - C(JOBAXES) CAUSES A BRANCH ONLY WHEN
                 AD              TWO                             # C(JOBAXES) = 3 OR 2, I.E. WHEN DOING
@@ -900,7 +901,7 @@ FIFTY2          CAF             ACCFIFTY
                 TCF             FIFTY2R                         
 
 FIFTY3          CAF             ACCFIFTY                        
-                TCF             FIFT3R                          
+                TCF             FIFTY3R                          
 
 ## Page 627
 # SUBROUTINE NAME: INVACC         MOD. NO. 0  DATE: DECEMBER 3, 1966

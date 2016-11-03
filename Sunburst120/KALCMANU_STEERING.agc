@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     KALCMANU_STEERING.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-22 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     KALCMANU_STEERING.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-22 MAS  Transcribed.
+##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 668
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -196,7 +198,7 @@ AKLOOP          TS              SPNDX                           # CHECK THE MAGN
                 AD              =-5DEG                          # ACHIEVED THE DESIRED ATTITUDE.
 CHECKASG        EXTEND
                 BZMF            AKOK
-                TCF             ALARM
+                TC              ALARM
                 OCT             01412
                 TCF             ENDKMANU
 
@@ -213,7 +215,7 @@ ENDKMANU        CAF             THREE                           # TERMINATE KALC
 
 
                 BANK            34
-                EBANK=          ITEMP
+                EBANK=          TTEMP
 KALCROLL        CA              STATE           +2              # STATE SWITCH NO. 33
                 MASK            BIT12                           # 0(OFF) = PERFORM A FINAL YAW
                 EXTEND                                          #          IF NECESSARY

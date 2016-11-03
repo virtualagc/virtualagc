@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     INTEGRATION_INITIALIZATION.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-29 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     INTEGRATION_INITIALIZATION.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-29 MAS  Transcribed.
+##		 2016-10-31 RSB	 Typos.
 
 ## Page 766
 # AVETOMID PERFORMS THE TRANSITION FROM A THRUSTING PHASE TO A COASTING PHASE.  THE ROUTINE INITIALIZES THE
@@ -52,7 +53,7 @@ SMTOREF         AXT,1           SSP                             # SET UP TIX LOO
                                 6
 SMTOREF1        VLOAD*          VXSC*                           # TRANSFORM STATE FROM SM TO REF SYSTEM
                                 RN              +12D,1
-                                SCALRAVMD       +12D,1
+                                SCLRAVMD        +12D,1
                 VXM             VSL2
                                 REFSMMAT
                 STORE           RRECT           +12D,1

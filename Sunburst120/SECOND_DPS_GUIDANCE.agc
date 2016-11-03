@@ -1,15 +1,22 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     SECOND_DPS_GUIDANCE.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-26 MAS  Began.
-#               2016-10-27 MAS  Completed transcription.
+## Copyright:    Public domain.
+## Filename:     SECOND_DPS_GUIDANCE.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-26 MAS  Began.
+##               2016-10-27 MAS  Completed transcription.
+##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 In three places, OCT fractional numbers (such as "OCT .6"),
+##				 which are not supported by yaYUL, have been replaced by 
+##				 decimal equivalents ("DEC .75"), in lieu of modifying 
+##				 yaYUL at this time.  Appropriate comments were also added
+##				 at the points in the code where this happened.
+##		 2016-11-02 RSB	 More typos.
 
 ## Page 871
 
@@ -259,9 +266,12 @@ LING2F          TCF             LSETEVN
 LING3F          TCF             LSETODD                         
                 TCF             ADTTFNU                         
                 OCT             00114                           
-                ADRES           TBRLING                         
+                ADRES           TBRLING  
                 OCT             00043                           
-                DEC             -.25            E2      B-15    # -.25 SECONDS, TTF UNITS, COMPARES TTF/4
+## The following line is supposed to read "DEC -.25 E2 B-15", which is supposed to
+## assemble to the octal 77763 ... but actually assembles to 77762.  For the present,
+## it is being hard-coded as "OCT 77763" as a workaround.                    
+                OCT		77763  				# -.25 SECONDS, TTF UNITS, COMPARES TTF/4
                 TCF             EXFINAL                         
 
 ## Page 878
@@ -551,7 +561,7 @@ SRS2COMP        DLOAD           DDV
 
 TTF/4CL         EXTEND                                          
                 INDEX           NDX2DPS                         
-                DCS             JDS2                            
+                DCA             JDS2                            
                 DXCH            TABLTTF         +6              # A(3) = JDS2 TO TABLTTF
                 EXTEND                                          
                 INDEX           NDX2DPS                         
@@ -597,7 +607,7 @@ TTF/4CL         EXTEND
                 DXCH            MPAC                            # LOADS TTF/4 (INITIAL GUESS) INTO MPAC
 ## Page 885
                 EXTEND                                          
-                DCA             TABLTTF                         # LOADS A,L WITH TABLTTFL,2
+                DCA             TABLTTFL                        # LOADS A,L WITH TABLTTFL,2
                 TC              ROOTPSRS                        # YIELDS TTF/4 IN MPAC
                 EXTEND                                          
                 DCA             MPAC                            # FETCH TTF/4 KEEPING IT IN MPAC
@@ -812,7 +822,7 @@ RVSTOR          TS              RUPTREG1
                 CA              RN1                             
                 INDEX           RUPTREG1                        
                 TS              RN                              # STORE UPDATED RN, VN
-                CCS             RUPTREG                         
+                CCS             RUPTREG1                         
                 TCF             RVSTOR                          
                 EXTEND                                          
                 DCA             PIPTIMET                        
@@ -856,7 +866,7 @@ EXIGEND         EXTEND
                 TC              INTPRET                         
                 PDVL            VSU                             
                                 UNAFC/2                         
-                                UNAFC/2O                        
+                                UNAFC/20                        
                 VSL2            VXSC                            # VSL2 UNDOES MP BIT3 PRECEDING
                 VAD                                             
                                 UNAFC/2                         # YIELDS EXTRAPOLATED UNAFC/2
@@ -911,7 +921,7 @@ EXQDLIN         CCS             OVFIND                          # IF OVF AFTER C
 
                 DLOAD           SR1R                            # LOAD GOOD /AFC/.
                                 /AFC/                           # SCALE TO THROTCON UNITS.
-                STORE           /AFC/                           # STORE IN THROTCON ACCEL CMD REGISTERS
+                STORE           /ACF/                           # STORE IN THROTCON ACCEL CMD REGISTERS
                 EXIT                                            
                 EXTEND                                          
                 DCA             THROTCOL                        
@@ -1015,7 +1025,7 @@ IGNITN1         TC              INTPRET
                 STOVL           /AFC/OLD                        # OLD VALUE OF /AFC/ FOR USE BY IGNITN2
 
                                 UNAFC/2                         
-                STOVL           UNAFC/2O                        # OLD VALUE OF UNAFC/2
+                STOVL           UNAFC/20                        # OLD VALUE OF UNAFC/2
 
 # EXTRAPOLATE STATE
 
@@ -1108,7 +1118,7 @@ IGNITN2         EXTEND
                 CCS             MPAC                            # TEST HI ORDER
                 TCF             TCOUNTFC                        
                 TCF             TSTLOAFC                        
-                TCF             RETIGN          -2              # RESET COUNTFC
+                TCF             RETIGN2         -2              # RESET COUNTFC
 TSTLOAFC        CA              MPAC            +1              # TEST LO ORDER
                 EXTEND                                          
                 BZMF            RETIGN2         -2              # RESET COUNTFC
@@ -1520,7 +1530,7 @@ AFULLG          2DEC*           +1.276510908    E-5  B+6*
 
 PFCLITE         2DEC*           +3.000000000    E+2  B-15*
 
-AFLITE          2DEC*           +3.781860583    E-5  B-6*
+AFLITE          2DEC*           +3.781860583    E-5  B+6*
 
 PFCTRIM         2DEC*           +2.300000000    E+3  B-15*
 
@@ -1665,12 +1675,21 @@ PIGNALG         OCT             00000                           # HI ORDER PART 
 
 1/3DP           2DEC            .3333333333
 
-SP3/8           OCT             .3              B14
-SP9/16          OCT             .44             B14
+## The following line is "SP3/8 OCT .3 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced 
+## by a numerical equivalent that the assembler does support. 
+SP3/8           DEC             .375            B14
+## The following line is "SP9/16 OCT .44 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced 
+## by a numerical equivalent that the assembler does support. 
+SP9/16          DEC             .5625           B14
 2/3DP           2DEC            .6666666667
 
 2DPS2/3         =               2/3DP
-SP3/4           OCT             .6              B14
+## The following line is "SP3/4 OCT .6 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced 
+## by a numerical equivalent that the assembler does support. 
+SP3/4           DEC             .75             B14
 PI/4            2DEC            +3.14159265     B-2
 
 NSCALR-1        OCT             00021                           # 6 X 3 - 1 TO XPR 3 VCTRS, RN, VN, GDT/2

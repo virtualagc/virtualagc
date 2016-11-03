@@ -10,6 +10,8 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-14 MAS  Began.
 ##               2016-10-14 MAS  Completed transcription.
+##		 2016-10-31 RSB	 Typos.
+##		 2016-11-01 RSB	 More typos.
 
 ## Page 953
 # SECTION 1  DISPATCHER
@@ -1424,7 +1426,7 @@ DCOMP           CS              MPAC            +2
 
 ## Page 997
 #          CONSTANTS REQUIRED IN FIXED-FIXED.
-DPOSXMAX        OCT             37777
+DPOSMAX        	OCT             37777
 POSMAX          OCT             37777
 LIMITS          EQUALS          POSMAX          +1
 NEG1/2          OCT             -20000                          # MUST BE TWO LOCATIONS AHEAD OF POS1/2
@@ -1493,11 +1495,11 @@ BIT13-14        =               PRIO30
 
 SUPER011        OCT             60                              # BITS FOR SUPERBNK SETTING 011
 SUPER100        EQUALS          BIT7                            # BITS FOR SUPERBNK SETTING 100
-                                                                # (LAST 4K OF ROPE)
-SUPER101        OCT             120                             # BITS FOR SUPERBNK SETTING 101
-                                                                # (FIRST 8K OF ACM)
-SUPER110        OCT             140                             # BITS FOR SUPERBNK SETTING 110
-                                                                # (LAST 8K OF ACM)
+#                                                                 (LAST 4K OF ROPE)
+# SUPER101        OCT             120                             BITS FOR SUPERBNK SETTING 101
+#                                                                 (FIRST 8K OF ACM)
+# SUPER110        OCT             140                             BITS FOR SUPERBNK SETTING 110
+#                                                                 (LAST 8K OF ACM)
 HIGH4           OCT             74000
 OCT1400         OCT             01400
 DEC45           DEC             45
