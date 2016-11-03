@@ -11,6 +11,7 @@
 ##		2016-10-04 RSB	Corrected against the Sunburst page scans.
 ##		2016-10-30 MAS	Corrected PHASJUMP->PHASCHNG.
 ##		2016-11-01 RSB	Typos.
+##		2016-11-03 RSB	Added some SBANK= workarounds.
 
 ## Page 77
 # SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -223,6 +224,8 @@ PHASCHNG	INHINT
 		DCA	ADRPCHN2	# OFF TO SWITCHED BANK
 		DTCB
 
+## The following line was not present in the original code.
+		SBANK=	LOWSUPER
 		EBANK=	LST1
 ADRPCHN2	2CADR	PHSCHNG2
 

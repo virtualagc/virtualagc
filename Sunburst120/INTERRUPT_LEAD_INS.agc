@@ -1,19 +1,22 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	INTERRUPT_LEAD_INS.agc
-# Purpose:	A module for revision 0 of BURST120 (Sunburst).
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	2016-09-30 RSB	Created draft version.
-#				I've also corrected this against the Sunburst120
-#				scans, so modulo any errors of mine, should be
-#				ready to go.
+## Copyright:	Public domain.
+## Filename:	INTERRUPT_LEAD_INS.agc
+## Purpose:	A module for revision 0 of BURST120 (Sunburst).
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	2016-09-30 RSB	Created draft version.
+##				I've also corrected this against the Sunburst120
+##				scans, so modulo any errors of mine, should be
+##				ready to go.
+##		2016-11-03 RSB	Some SBANK= workarounds.
 
-# Page 60
+## Page 60
 		SETLOC	4000 
+## The following line was not present in the original code.
+		SBANK=
 		
 		INHINT			# GO
 		CAF	GOBB
@@ -63,7 +66,7 @@
 		DXCH	ARUPT		# RADAR RUPT
 		CAF	RDRPTBB
 		XCH	BBANK
-# Page 61
+## Page 61
 		TCF	NOQRSM 	+1	# WAS TCF RADAREAD (NO RADAR IN 206).
 		
 # TRAPS 31B AND 32 SHOUDL NEVER BE SET.  THEREFORE-
