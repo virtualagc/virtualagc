@@ -39,6 +39,10 @@
 		03/05/09 RSB	Adjusted for --relative-pixmaps.
 		03/07/09 RSB	Automatically change any *.xpm files found in
 				the cfg file to *.jpg.
+		11/02/16 MAS	Made + higher priority than - when both sign
+				bits are set, based on newly discovered
+                                diagrams of DSKY relay wiring. This fixes
+                                the Aurora12/Sunburst 120 DSKY relay test.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -448,10 +452,11 @@ ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
       // Write the sign.
       if (Sign != NULL)
         {
-	  if (0 != (RSign & 1))	
-	    gtk_image_set_from_file (Sign, "MinusOn.jpg");
-	  else if (0 != (RSign & 2))
+	  // + has priority if both are set
+	  if (0 != (RSign & 2))
 	    gtk_image_set_from_file (Sign, "PlusOn.jpg");
+	  else if (0 != (RSign & 1))	
+	    gtk_image_set_from_file (Sign, "MinusOn.jpg");
 	  else				 
 	    gtk_image_set_from_file (Sign, "PlusMinusOff.jpg");
 	}
