@@ -17,6 +17,7 @@
 ##               2016-10-28 JL  Transcribed page 83.
 ##               2016-10-31 JL  Transcribed pages 84-90.
 ##               2016-11-01 JL  Transcribed pages 91-94.
+##               2016-11-03 JL  Transcribed pages 95-107.
 
 ## Annotations:
 ##
@@ -2516,39 +2517,647 @@ R2479   ENTER AT 0,133 IN TRANSFER VECTOR.
 ## Page 95
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  55        PAGE  55
 
+P2487              SUBROUTINE TO FIND A COMPUTER NAME IN THE YUL FILE DIRECTORY.  WITH NAME IN  COMP NAME , ENTRY IS
+R2489   L          TS           ...           ...           FIND COMP      C    RETURNS WITH ADDRESS OF THE NEXT LOWER
+R2491   NAME IN R4 (OR ZERO IF NONE) AND WITH ADDRESS OF NAME (OR NEXT HIGHER IF NO MATCH) IN X0, TO L+2 IF NAME FOUND,
+R2493   OTHERWISE TO L+1.  FIND COMP IS IN THE TRANSFER VECTOR AT 0,134.
+
+
+ 2494   FIND CNAM  SWE, CAC3    1,9           32            Z,X0           C    GET THREAD TO 1ST COMPUTER NAME.
+ 2496              TS           ONES          1,6           C,+2           C    SET UP LIMITING VALUE.
+
+ 2498              SS           N,X0          THREAD 10     Z,X0           C    FOLLOW THREAD TO NEXT HIGHER NAME.
+ 2500              LA, C1T4     COMP NAME     0,0           C,+2           C
+ 2501              TS           Z,X0          Z,R4          C,-2           C
+
+ 2502              NA, C1T4     COMP NAME     0,0           C,+2           C
+ 2503              TX           Z,SC,1        -             -                   EXIT SKIPPING IF NAME FOUND.
+ 2505   NEWP FITS  TS           -             -             -                   EXIT WHEN NAME NOT FOUND.
+
+
+
+R2507              SUBROUTINE TO FIND A PROGRAM OR SUBROUTINE NAME IN THE DIRECTORY.  WITH NAME IN  PROG NAME , ENTRY IS
+R2509   L          TS           ...           ...           FIND PROG      C    IF NAME IS FOUND, RETURN IS TO C+1 WITH
+R2511   LOCATION IN X3 AND LOCATION OF PRECEDING NAME IN X2.  IF NOT FOUND, RETURN IS TO L+2 WITH B7,6 IN X3 AND LOCA-
+R2513   TION OF LAST PROGRAM NAME IN X2.
+
+
+ 2514   FIND PROG  TX           Z,X0          -             Z,X2           C
+ 2515              TX           Z,X0          -             Z,X3           C    TO SET BANK INDICATOR AND BIT 48.
+ 2517              SWS,THREAD10 N,X0          12            Z,X3           C    THREAD TO FIRST PROGRAM.
+ 2519              TS           PROG NAME     1,6           C,+3           C    ENSURE APPARENT FINDING ANYWAY.
+
+ 2521              TX           Z,X3          -             Z,X2           C
+ 2522              SS           2,1           THREAD 10     Z,X3           C    PROGRAM-TO-PROGRAM THREAD.
+ 2524              NA           N,X3          PROG NAME     C,-2           C
+
+ 2525              TX           ONES          -             1,6            C    RESTORE END-OF-LIST SENTINELS.
+ 2527              NA           3,1           ONES          N,SC,1         C    EXIT IF REALLY FOUND.
+ 2529              TX           Z,SC,1        -             -                   EXIT SKIPPING IF NOT FOUND.
+
+
+R2531   MINOR SUBROUTINE IN PASS 0 TO LABEL YULPROGS.  ENTER AT LABEL YUL IN TRANSFER VECOTR.
+
+ 2533   LABL TEST  NN           NON WISE      ZERO          TYP NON YS          TYPE COUNT OF NON-YUL-DIRECTORS IF NZ.
+ 2535              SS           N,X1          BIT 35        FRAME
+ 2536              SS           ZERO          BIT 35        N,X1                REMOVE TAPE PUNCH CALL BIT FROM LABEL.
+ 2538              TX           1,8           -             Z,SH
+ 2539              CC           N,X1          -             N,SH
+ 2540              TS           1,1           FIX SNACH +1  PHI LABEL           ORTHOCOUNT AND WRITE YULPROGS LABEL.
+ 2542              WF,1         1,0           -             -
+ 2543              TS           1,2           FIX SNACH +2  PHI SNACH           UNDO APPARENT TYPE-3-DISPOSITION SNATCH
+ 2545   FIX SNACH  ALF,3        N00<0:01YULPROGS                                CAUSED BY LABELING.
+ 2547              SS           FRAME         BIT 35        N,X1
+ 2548              TS           Z,X5          Z,S3          POSIT REW           POSITION AFTER LABEL AND RETURN.
+
 ## Page 96
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  56        PAGE  56
+
+P2550              SUBROUTINE TO FIND THE ADDRESS OF AN UNUSED WORD PAIR IN THE YUL FILE DIRECTORY.  ENTRY IS
+R2552   L          TS           ...           ...           FIND PAIR      C    RETURNS WITH ADDRESS IN X3.
+
+
+
+ 2554   FIND PAIR  SWE, CAC3    1,8           16            Z,X3           C    GET ADDRESS OF FIRST UNUSED PAIR.
+ 2556              NA           Z,X3          L END THR     NOT ADD 2      C    BRANCH IF ADDRESS NOT VACUOUS.
+
+ 2558              TX           1,8           -             Z,X3           C    THUS UNUSED PAIR IS AT END OF THE FILE.
+ 2560              WA           1,8           TWO           1,8                 LENGTHEN END MARKER ACCORDINGLY, EXIT.
+
+ 2562   NOT ADD2   TS           1 COMMA 8     Z,X4          C,+2           C    A WORD PAIR IS ALSO TWO SINGLETONS.
+ 2564              TX           Z,X2          -             Z,X4           C
+ 2565              SWE, CAC3    N,X4          32            Z,X2           C    THREAD UNTIL FIRST SINGLETON.
+ 2567              NA           Z,X2          Z,X3          C,-2           C
+
+ 2568              WA           Z,X3          ONE           Z,R3           C    FORM ADDRESS OF SECOND SINGLETON.
+ 2570              SS           N,X2          CAC1          N,X4           C    SEW UP GAP AROUND 1ST SINGLETON.
+ 2572              TS           1 COMMA 8     Z,X4          C,+2           C    RESET SINGLETON THREAD.
+
+ 2574              TX           Z,X2          -             Z,X4           C
+ 2575              SWE, CAC3    N,X4          32            Z,X2           C    THREAD UNTIL 2ND SINGLETON.
+ 2577              NA           Z,X2          Z,R3          C,-2           C
+
+ 2578              SS           N,X2          CAC1          N,X4           C    SEW UP GAP AROUND 2ND SINGLETON.
+ 2580              SS           3,1           CAC2          1,8                 SEW UP GAP AROUND PAIR AND EXIT.
+
+
+
+R2582              SUBROUTINE IN PASS 0 TO VACATE A WORD IN THE DIRECTORY.  COSEQUENCE CALL WITH ADDRESS IN AU1.
+
+ 2584   GIVE SLOT  SS           1,8           CAC1          N,AU1          C    MAKE WORD POINT ALONG SLOT LIST.
+ 2586              SWS, CAC1    Z,AU1         32,L          1,8            C    SET SLOT POINTER TO WORD.
+ 2588              HA           Z,AU1         ONE           Z,AU2          C    FORM ADDRESSES OF OTHER HALF OF PAIR.
+ 2590              SWE, CAC3    N,AU1         32            Z,AU1          C    FOLLOW THE SLOT THREAD.
+ 2592              LA           ONES          N,AU1         N,SC,1         C    EXIT WHEN WORD IS NOT PART OF VOID PAIR.
+ 2594              NA           Z,AU1         Z,AU2         C,-2           C    FALL THRU IF OTHER HALF IS VACANT.
+ 2596              SS           ZERO          ONE           Z,AU1          C
+ 2597              SM           Z,AU2         ONE           Z,AU2          C    FORCE ORDER OF ADDRESSES IN AU1, AU2.
+ 2599              SS           1,8           CAC2          N,AU2          C
+ 2600              SWS, CAC2    Z,AU1         16,L          1,8                 INCLUDE PAIR IN PAIR LIST AND EXIT.
 
 ## Page 97
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  57        PAGE  57
 
+P2602              ROUTINE TO RESPOND TO REQUESTS TO MANUFACTURE AN EXISTING PROGRAM.  LOOKS ON DISC FOR THE SPECIFIED
+R2604   REVISION; IF LATEST WAS SPECIFIED AND IS NOT ON DISC, USES TAPE.  ABORTS IF SPECIFIED REVISION IS UNMANUFACTUR-
+R2605   ABLE.  IF ALL IS WELL, LOADS THE MANUFACTURING PROGRAM FOR THE NAMED COMPUTER.
+
+
+
+ 2606   MANUFACT   TS           NEXT NAME     SERCH KEY     TAPE SRCH -1   C    SET GRP B TO SEARCHING FOR END SYLT.
+ 2608              TS           W MNUFACT     TASK MSG      MANUF OBJ           BREAK DOWN AND REFORM REST OF DIRECTOR.
+ 2610              TS           CAC3          SYMS OR NO    ELIM PR SU +1  C    ASSUME NO SYM TAB CALL, TYPE TASK, OBJ.
+
+ 2612              TS           CPUT CN C6    PUT CN C6     FIND COMP      C    SEEK COMPUTER NAME IN DIRECTORY.
+ 2614              S, YUL TYPER UNRCO MSG     AMTF +4       TYP ABORT           CUSS AND EXIT IF NOT THERE.
+
+ 2616              SSL, ONE     0,1           0             C,+1                CAN WE MANUFACTURE FOR THIS COMPUTER...
+ 2618              S, YUL TYPER N MANU MSG    AMTF +5       TYP ABORT           CUSS AND EXIT IF NOT.
+
+ 2620              TS           C,+1          TYP ABORT     SAY ABORT +1
+ 26201             TS           TYP WREVN     2DIG REVN -1  C,+1                ABORT MUST RESTORE REVISION-NO. CUSSER.
+ 26203             TX           SAY ABORT     -             TYP ABORT      S    ..AND THEN RESTORE ITSELF.
+ 26205  SAY ABORT  S, MON TYPER Y ABORT       SPRAMR +16    TYP BORTA
+
+ 26206             TS           C,+1          2DIG REVN -1  TYP WREVN +1
+ 26207             TS           SAY ABORT     TYP ABORT     C,+1                WRONG-REV-NO. MUST RESTORE ABORT.
+ 26209             TX           TYP WREVN     -             WDIG REVN -1   S    ..THEN RESTORE ITSELF..
+ 26211             LA           REVNO         COMMON        OK NOUN +2          ..AND SEE IF REVNO IS REALLY OK FOR MFG.
+ 26213  TYP WREVN  S, MON TYPER WREVN MSG     SPRAMR +40    TYP ABORT           FALL INTO HERE IF SPEC. REVNO TOO BIG.
+
+ 26215             NA, BIT 9    SWITCH        ONES          C,+2
+ 26216             S, MON TYPER MANSU MSG     SPRAMR +40    TYP ABORT           CUSS AND EXIT IF ASKED TO MANUF SUBRO.
+ 26218             TS           Z,X0          L COMP NAM    KNOWN PSR           RETURNS IF THE SPECIFIED REVISION NUMBER
+ 2622              SWE, ONES    REVNO         D,4,L         PHI ARG              IS LESS THAN OR EQUAL TO THE LATEST.
+ 26222             TS           Z,SC          Z,AU1         YUL D2A ZS
+ 26223             SM           COMPUTER      PHI ARG       TRONDEX
+ 26224             SWS, CHAR5   1,1           A,4           TRONDEX             FORM FIRST WORD OF REQUIRED DISC NAME.
+ 26226             TS           ONES          TRONDEX +2    SAY ABORT -1   C    RESTORE ABORT AND WRONG-REVISION-NO....
+ 26228             TS           ZERO          COMMON +1     TYP WREVN -2   C    ...AND INITIALIZE LOG-NUMBER LOCATIONS.
+ 2623              LA           COMMON        REVNO         MANU SEEK           BRANCH IF LATEST REVISION WAS SPECIFIED.
+
+ 26232             SWS, C3T5    TRONDEX       A,3,L         WREVN MSG +4
+ 26234             NA, CHAR3    WREVN MSG +4  ZERO          C,+2
+ 26235             SWS, C3T5    WREVN MSG +4  A,1,L         WREVN MSG +4
+ 26236             NA, CHAR3    WREVN MSG +4  ZERO          C,+2
+ 26237             SWS, C3T5    WREVN MSG +4  A,1,L         WREVN MSG +4        LEFT-NORMALIZE AND ZERO-SUPPRESS.
+ 26239             S, MON TYPER OLRVN MSG     SPRAM +16     -
+ 2624              S, MON TYPER WREVN MSG +4  SPRA +8       -                   "OLD REVISION NO.: NN    ".
+ 26242             LA, CHAR5    ONES          DISC STAT     C,+2
+ 26243             S, MON TYPER ND NMF MSG    SPRAMR +40    TYP ABORT           WITHOUT DISC, REFUSE TO MANUF OLD REV.
+
 ## Page 98
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  58        PAGE  58
+
+P26245  SEARCH THROUGH THE DISC INDEX FOR THE PROGRAM FILE FOR THE THE SPECIFIED REVISION WITH THE HIGHEST LOG NUMBER.
+
+ 26247  MANU SEEK  TS           PROG NAME     TRONDEX +1    DISCAP         C
+ 26248             OCT          -15
+ 26249             SPEC                                     TRONDEX
+ 2625              TS           Z,X4          L PROG FIL    GOOD SEEK           GOT ONE.  NOW, IS IT THE RIGHT ONE?
+ 26252             NA           COMMON -1     ZERO          GOT BINF            BRANCH IF WE GOT A FILE AS SPECIFIED.
+
+ 26254             LA           COMMON        REVNO         C,+2                BR IF LATEST IS WANTED BUT NOT ON DISC.
+ 26256             S, MON TYPER NTHIS MSG     SPRAMR +16    TYP ABORT           "NOT ON THIS DISC".
+ 26258             LA, C7T8     BIT 37        4,1           MANU TAPE           IF LATEST REV IS GOOD, MANUF FROM TAPE.
+
+ 2626              S, MON TYPER DR UMA MSG    SPRAMR +40    TYP ABORT           CUSS AND EXIT IF UNMANUFACTURABLE.
+ 26262  GOOD SEEK  NA, C7T8     TRONDEX +3    YUL FILE      MANU SEEK           TRY AGAIN IF WRONG TYPE (DISABLED, E.G.)
+ 26264             LA           TRONDEX +2    COMMON +1     MANU SEEK           TRY AGAIN IF NOT A HIGHER LOG NUMBER.
+ 26266             TS           TRONDEX +2    COMMON +1     MANU SEEK           RECORD HIGHER LOG NUMBER, TRY AGAIN.
+
+ 26268  GOT BINF   TS           COMMON +1     TRONDEX +2    DISCAP         C
+ 26269             OCT          -1
+ 2627              SPEC                                     TRONDEX             GET BACK WHOLE INDEX ENTRY FOR WINNER.
+ 26272             NA, C7T8     TRONDEX +3    YUL FILE      DISASTER            (IF LOG NUMBERS ARE REALLY SCREWED UP).
+ 26274             LA           BIT 1         TRONDEX +11   GOOD SEEK -1        CUSS AND EXIT IF UNMANUFACTURABLE.
+
+ 26276             S, MON TYPER FDISC MSG     SPRA +16      -                   "FOUND ON DISC  ".
+ 26278             SWE, C5T8    TRONDEX +5    24            COMMON +1           SAVE LOG NUMBER OF LAST REFERENCE.
+ 2628              EX           TRONDEX +5    C5T8          TRONDEX +5
+ 26281             SWE, C5T8    YUL LOG       24            COMMON
+ 26282             DS           COMMON        COMMON +1     COMMON              COMPUTE PERIOD OF IDLENESS.
+ 26284             LN           FIFTY         COMMON        NO NEW CWD          NO NEW CHARLIE-WORD IF VERY SHORT.
 
 ## Page 99
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  59        PAGE  59
 
+P262852 COMPUTE THE DECAY OF THE CHARLIE-WORD (A FIGURE OF MERIT, NAMED FOR ITS DESIGNER, CHARLES P. WERNER) SINCE THE
+R262854 LAST USE OF THIS FILE, APPLYING A FACTOR OF 0.8465 FOR EVERY 1000 LOG NUMBERS OF IDELNESS.  THEN ADD 2500 AND
+R262856 APPLY A LIMIT OF 10000, SO THAT THE FILE DOES NOT LONG OUTLIVE ITS LAST USE.
+
+ 26286             DM           TRONDEX +5    CW FACTOR     TRONDEX +5
+ 26287             DS           COMMON        THOUSAND      COMMON
+ 26288             LN           COMMON        ZERO          C,-2                APPLY EXPONENTIAL DECAY FOR IDLENSS.
+ 2629              DA           TRONDEX +5    CHAS 2500     TRONDEX +5
+ 26291             LA           TRONDEX +5    DEC 10000     C,+2
+ 26292             TX           DEC 10000     -             TRONDEX +5          APPLY LIMITED REWARD FOR INDUSTRY.
+
+ 26294  NO NEW CWD TS, C1T4     YUL LOG       TRONDEX +5    DISCAP         C    APPLY CURRENT LOG NUMBER AND REWRITE.
+ 26296             OCT          -12
+ 26297             SPEC                                     TRONDEX
+ 26298             SWE, ONES    TRONDEX +6    24            TRONDEX +6          ALIGN DISC ADDRESS OF FIRST SUBFILE.
+ 2630              TX           ZERO          -             SRCH TEST           WIPE OUT SEARCH UP TAPE...
+ 26302             NA           SERCH KEY     EOR           C,-1                ...AND WAIT FOR IT TO ABORT.
+ 26304             TS           FOUND BUF +1  Z,X5          PHI TAPE            FETCH BUFFER NAME AND REWIND TAPE.
+ 26306             RW,1         -             -             -
+ 26307             S, DISC READ 5,3           CHK DF ERR +4 TRONDEX +6          READ AUTHMEMO RECORD OF PROGRAM.
+ 26309             S, MON TYPER DF ERR MSG    SPRAM +16     MDF ERROR           CUSS AND EXIT IF FILE IS UNREADABLE.
+ 2631              TX           W AUTHMEM     -             5,2
+ 26311             TX           PROG NAME     -             5,1                 GOOD READ: FILL OUT FIRST THREE WORDS.
+ 26313             TS           COMPUTER      N,X5          C,+2
+
+ 26314  MANU TAPE  TX           ZERO          -             TRONDEX +6          NO DISC ADDRESS MEANS MANUF FROM TAPE.
+ 2634              SS           0,1           THREAD 10     Z,X0
+ 2635              TX           CHAR 1        -             TEMP MASK
+ 26355             TX           PAR MANUF     -             COMMON
+ 2636              SS           N,X0          TEMP MASK     COMMON              FORM NAME OF MANUFACTURING
+ 2638              SWE, C1T4    TEMP MASK     A,1           TEMP MASK           PROGRAM FOR THIS COMPUTER.
+ 2640              NA, TEMPMASK 0,0           BLANKS        C,-2
+ 2641              TS           Z,SC          Z,X1          RD SUBDRC           GO TO SENTENCE-READ FIRST SUBDIRECTOR.
+ 2643              S, YUL TYPER SD MIS MSG    AMTF +3       TYP ABORT           CUSS AND ABORT IF NO SUBDIRECTOR.
+ 2645              SS           W SOURCE C    CHAR 6        LOAD PAS 1          SET TO BACK UP 21 PROGRAMS TO PASS 1.
+ 2647              S, PHI LOAD  COMMON        2             BASE ADDR           LOAD AND GO TO MANUFACTURING PROGRAM.
+
+
+
+R26481  ROUTINE TO RESPOND TO AN OPERATOR'S REQUEST TO CLOSE THE MONAIN TAPE ON THE 2200 AND BEGIN PUNCHING OR WRITING.
+
+ 26482  CLOS MONA  TX           Z,X5          -             WHODUNIT
+ 264821            NA           N,X5,3        W MONAIN      HOWZAT
+ 26483             TX           Z,X5          -             WHODUNIT
+ 264831            NA           N,X5,3        W TAPE        HOWZAT
+ 26484             TX           Z,X5          -             WHODUNIT
+ 264841            NA           N,X5          ONES          HOWZAT
+ 26485             LA, CAC3     B36T37        1,0           C,+2                BRANCH IF THERE IS SOME MONAIN DATA.
+ 26486             S, MON TYPER NO MDS MSG    SPRAMR +24    REJEC DIR           "NO MONAIN DATA STORED".
+ 26487             SS           ZERO          BIT 35        N,X1                CLEAR MONAIN DATA PRESENCE BIT.
+ 26488             S, MON PUNCH ZERO          ATAPE PCH +40 ZERO                SEND END-OF-JOB SIGNAL TO MONAIN.
+ 26489             S, MON TYPER 22 OUT MSG    SPRAMR +24    MANUF RTN           "2200 READY TO DO MONAOUT".
+
 ## Page 100
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  60        PAGE  60
+
+P2649              SUBROUTINE TO SEARCH YULPROGS FOR A RECORD WHOSE SECOND WORD IS THE ARGUMENT PROVIDED IN SERCH KEY.
+R2651   WHEN FINISHED, WAKES GROUP A AND RESTORES THE END-OF-RECORD WORD TO SERCH KEY.  YULPROGS IS POSITIONED AFTER THE
+R2653   RECORD FOLLOWING THE ONE THAT SATISFIED THE SEARCH.  BOTH RECORDS ARE AVAILABLE IN MEMORY VIA X1 AND X2 OF GRP
+R2655   B.  THE SEARCH MAY BE CUT OFF IN CASE OF ABORT BY PUTTING A PROCEED IN SRCH TEST.  ENTER AT TAP SERCH IN TRANS-
+R2657   FER VECTOR, OR AT TAPE SRCH -1 WHEN THERE IS NO COMPUTER NAME.
+
+ 2658              TS           L SERVICE     L COMP NAM    TAP SERCH      C    USE 0000 FOR COMPUTER NAME IF NONE.
+ 2660   TAPE SRCH  WA           Z,CSC         ONE           N,CSH          C
+ 2661              TS           Z,SC          Z,CSC         MON WAKE       C    EXIT AND LET GROUP B CARRY ON.
+
+R2663   GROUP B ACTION BEGINS HERE.
+
+ 2664              TX           YUL MASKS     -             Z,MXR
+ 2665              TN           BUF NAMES +6  2             Z,X1                USE ASSEMBLY BUFFERS 7 AND 8.
+ 2667              HA           SERCH KEY     ONES          2,1                 ENSURE NO FALSE ALARM FIRST TIME.
+
+ 2669              TS           Z,X1          Z,X3          PHI TAPE
+ 2670              RF,1         1,0           -             DISASTER
+ 2671              TN           Z,X2          2             Z,X1                SWAP BUFFERS.
+ 2673   SRCH TEST  NA           1,1           SERCH KEY     SRCH TEST -3
+
+ 2674              LA           SRCH TEST     ZERO          C,+3                SKIP OUT IF SEARCH WAS CUT OFF.
+ 2676              LA           N,X1          C5T8          C,+2                ASSUME AGREEMENT IF NO COMPUTER NAME.
+ 2678              NA, C1T4     1,0           COMPUTER      SRCH TEST -3        SEARCH AGAIN IF WRONG COMPUTER.
+
+ 2680   SRCH DONE  TS           Z,X1          FOUND BUF     PHI TAPE
+ 2681              RF,1         -             -             -
+ 26812             TX           Z,X2          -             FOUND BUF +1
+ 2682              TS           EOR           SERCH KEY     MON WAKE       C    SIGNAL SUCCESS OF SEARCH, WAKE GROUP A.
+ 2684              TX           Z,R0          -             Z,SC                GO TO BED UNTIL NEEDED AGAIN.
+
+
+
+R2686              PROCEDURE TO MAKE GROUP B APPEAR TO ANNOUNCE A TASK ABORTION.  IF A SEARCH OF YULPROGS IS IN PROG-
+R2688   RESS, HALTS IT AND POSITIONS YULPROGS JUST AFTER THE LABEL.  ENTRY IS IN TRANSFER VECTOR.
+
+ 2690   TYP BORTA  S, MON TYPER BLANKS        SPRA +8       -
+ 2691              TX           ZERO          -             SRCH TEST
+ 2692              NA           SERCH KEY     EOR           C,-1                WAIT FOR SEARCH TO BE INTERRUPTED.
+
+ 2694              TX           FETCH SS1     -             FETCH SSN           RESTORE SUBSTRAND FETCHER.
+ 2696              TX           NO TP TASK    -             PNCH FRAM           RESTORE TAPE PUNCHING TO INITIAL STATE.
+ 2698              TS           N,SC,1        SRCH TEST     POSIT YYUL          RESTORE INSTRUCTION, POSITION YULPROGS.
+ 2700              NA           1,1           SERCH KEY     SRCH TEST -3
+ 2701              TS           YUL MASKS     Z,MXR         SET PG HED          PROCEED TO NEXT TASK.
 
 ## Page 101
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  61        PAGE  61
 
+P2703   SUBROUTINE IN PASS 0 TO PEEK AT AND SENTENCE-READ CARDS.  EXITS TO L+2 IF THE NEXT CARD IS A SUBDIRECTOR ("S" IN
+R2705   COLUMN 1), OR TO L+1 IF NOT.  ENTER WITH L+1 IN X1 (CALLING FROM BANK 1) OR BY SEQUENCE CALL TO RD SBDIRC IN THE
+R2707   TRANSFER VECTOR.
+
+ 2708   RD SUBDRC  TX           Z,MXR         -             Z,R6
+ 2709              TS           YUL MASKS     Z.MXR         NEX DIREC      C
+ 2710              TS           PHI WAA       Z,X4          PHI PEEK       C    PEEK AT NEXT CARD.
+ 2712              NA, CHAR1    4,0           S COLUMN 1    NOT S CARD          BRANCH IF NOT A SUBDIRECTOR.
+
+ 2714              S, PHI READ  6,1                                             SET UP FOR SENTENCE READING.
+ 2716   SET COL 81 TS           ONES          6,11          PHI SENTR           BREAK DOWN SUBDIRECTOR.
+ 2718              TS           Z,R6          Z.MXR         1,1
+
+ 2719   NOT S CARD TS           Z,R6          Z.MXR         N,X1                NON-SKIPPING EXIT IN THIS CASE.
+
+
+
+R2721              MANUFACTURING SUBROUTINE IN PASS 0 TO WAIT FOR GROUP B TO FIND END SYLT, AND SET IT GOING ON A
+R2723   SEARCH FOR THE FIRST SUBSTRAND OF THE PROGRAM BEING MANUFACTURED.  ENTER WITH RETURN IN X4 (BANK 1) OR BY SE-
+R2725   QUENCE CALL TO E SYLT OK IN THE TRANSFER VECTOR.  ASSUMES THAT PROG NAME IS SET.  ALTERABLE FOR SYMBOL TABLE.
+
+ 2727   EN SYLT OK TX           L GPB STT     -             Z,X3
+ 2728              NA           SERCH KEY     EOR           GROUP NAP           SLEEP IF GB STILL SEEKING END SYLT.
+ 2730              TX           ZERO          -             SERCH KEY
+ 2731              WA           Z,SC          ONE           N,X3
+ 2732              TS           Z,X4          Z,SC          MON WAKE       C    SET GB GOING AND EXIT.
+
+R2734   GROUP B ACTION AT END SYLT.
+
+ 2735   E SYLT LUP TS           Z,X1          Z,X3          RD PARAG
+ 2740              NA           1,1           PROG NAME     E SYLT LUP          BRANCH IF NOT DESIRED PROGRAM.
+ 2742              LA           N,X1          C5T8          C,+2                ASSUME AGREEMENT IF NO COMPUTER NAME.
+ 2744              NA, C1T4     1,0           COMPUTER      E SYLT LUP          LOOK AGAIN IF WRONG COMPUTER.
+ 2746              LA           SYMS OR NO    1,2           E SYLT LUP          BRANCH IF NOT RIGHT TYPE OF RECORD.
+ 2748              TS           CAC3          SYMS OR NO    SRCH DONE           USE NORMAL END SEARCH PROCEDURE.
+
+
+
+R2752              MANUFACTURING SUBROUTINE IN PASS 0 TO FETCH A SUBSTRAND.  ENTER WITH RETURN IN X4 (BANK 1) OR BY
+R2753   SEQUENCE CALL TO FETCH SS IN THE TRANSFER VECTOR.  RETURNS TO L+2 IF THERE IS A SUBSTRAND, OTHERWISE TO L+1.
+
+ 2754   FETCH SSN  TS           ZERO          FETCH SSN     AWAIT GB            BRANCH IF GROUP B SEEKING FIRST SS.
+ 27544             TS           Z,MXR         FETCH SSN     YUL MASKR      C
+ 2755              TS           Z,X1          Z,X3          RD PARAG
+ 2756   AWAIT GB   NA           SERCH KEY     EOR           GROUP NAP           SLEEP IF GB STILL SEARCHING.
+ 2757              TX           FOUND BUF     -             Z,X1
+ 2758              TS           FOUND BUF +1  Z,X2          PICK EXIT           SET UP GROUP A INDEXES, GET SUBSTRAND.
+
 ## Page 102
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  62        PAGE  62
+
+P27585  SUBROUTINE TO READ THE AUTHMEMO RECORD, A SYMBOL TABLE RECORD, OR A PARAGRAPH FROM DISC OR TAPE AS REQUIRED.
+
+ 2759   RD PARAG   NA           TRONDEX +6    ZERO          C,+3
+ 27592             NA           2,1           EOR           FROM TAPE           BRANCH IF USING TAPE, NOT DISC.
+ 27594             TS           EOR           1,1           FROM TAPE -1        SET UP SECOND EOF RECORD JUST IN CASE.
+ 2760              WA           TRONDEX +6    A4 MINUS 4    TRONDEX +6          ADD 4 TO DISC ADDR, SUB 4 FROM COUNT.
+ 2762              NA, C7T8     TRONDEX +6    ZERO          FROM DISC           BRANCH UNLESS RECD WAS LAST OF SUBFILE.
+ 2764              SWE, ONES    TRONDEX +7    24            TRONDEX +6          MAYBE MOVE UP ADDRESS OF 2ND SUBFILE.
+ 2766              NA           TRONDEX +6    ZERO          C,+2                BRANCH TO BEGIN 2ND SUBFILE.
+ 2768              TS           EOR           1,1           PROC DISK -1        END OF FILE.  SEND LAST RECORD OF FILE.
+ 2770              TX           ZERO          -             TRONDEX +7          SHOW THAT WE ARE IN 2ND SUBFILE.
+
+ 2772   FROM DISC  S, DISC READ 1,3           CHK DF ERR +4 TRONDEX +6          READ A PARAGRAPH OF 256 WORDS.
+ 2774              S, MON TYPER DF ERR MSG    SPRAM +16     MDF ERROR
+ 2775              TS           PROG NAME     1,1           PROC DISC           SUPPLY PROGRAM NAME AFTER GOOD READ.
+ 2777   MDF ERROR  S, MON TYPER TRONDEX       SPRAM +16     -
+ 2778              S, MON TYPER TRONDEX +2    SPRAMR +72    -                   CUSS UNREADABLE FILE (LOG NUMBER IN HEX)
+ 2780              S, MON TYPER Y ABORT       SPRAMR +16    MANUF RTN           VARY NORMAL ABORT PROCEDURE.
+
+ 27819             TS           ONES          1,2           DISC CHEK
+ 2782   PROC DISC  WA           Z,X2          C 259         Z,CSC
+ 2783              CC           N,X2          -             N,CSC               MOVE EOR TO RIGHT PLACE.
+ 27831             NA           2,2           W AUTHMEM     SYMBOLS Q           BRANCH UNLESS ABOUT TO DELIVER AUTHMEMO.
+ 27833             WA, C5T8     2,71          C 255         MID POINT
+ 27834             SWE, CAC3    MID POINT     8             MID POINT           FORM NUMBER OF SYMBOL TABLE RECORDS.
+ 27836             TN           2,5           8             SUBSTRAB
+ 27837             TS           W SYMBLS 0    E SYLT BAN    SYMBOLS Q +1        PREPARE TO SET UP TITLES ON SYM TAB RCS.
+
+ 27839  SYMBOLS Q  NA, C1T6     2,2           W SYMBLS  0   PARA LAST -1        BRANCH UNLESS DELIVERING SYM TAB RECORD.
+ 27841             LA           MID POINT     ZERO          PARA LAST +1        BRANCH IF NO MORE SYM TAB RECORDS.
+
+ 27843             WD           MID POINT     ONE           MID POINT           COUNT DOWN SYMBOL TABLE RECORDS.
+ 27845             WA           E SYLT BAN    ONE           E SYLT BAN          COUNT UP CHAR 8 OF "SYMBOLSN".
+ 27847             TS           E SYLT BAN    1,2           FROM TAPE -1
+
+ 278478            LA           ONES          1,2           FROM TAPE +2        BRANCH IF DELIVERING LAST PARAGRAPH.
+ 27848  PARA LAST  WA           MID POINT     ONE           MID POINT           ADVANCE PARAGRAPH NUMBER.
+ 2785              SWE, LOW5    MID POINT     0             E SYLT BAN          PARAGRAPH NUMBER WITHIN SUBSTRAB WORD.
+ 27852             WD           N,SC,2        E SYLT BAN    E SYLT BAN          COMPUTE SHIFT COUNT FOR SSL AND TAB.
+ 27854             OCT          -55
+ 27855  PARAG YES  TS           MID POINT     1,2           FROM TAPE -1        PUT PARAGRAPH NUMBER INTO RECORD.
+ 27857             SWS, CHAR5   E SYLT BAN    A,3,L         MANUF SSL
+ 27858             SWE, SEVEN   MID POINT     5             E SYLT BAN
+ 27859             WA           L SUBSTRB     E SYLT BAN    Z,AU1               SELECT A SUBSTRAB WORD.
+ 27861  MANUF SSL  SSL, FOUR    N,AU1                       PARA LAST           GOT TO PARAG YES IF GOT NEXT PARAG NO.
+
+ 27868             TS           COMPUTER      N,X1          FROM TAPE +2
+ 27869  FROM TAPE  TS           -             -             PHI TAPE
+ 2787              RF,1         1,0           -             DISASTER            DOUBLE-BUFFERED READ.
+ 2789              TN           Z,X2          2             Z,X1                SWAP BUFFERS.
+ 2791              LA           SERCH KEY     ZERO          E SYLT LUP +1       RETURN TO EN SYLT OK LOOP.
+
+ 27922             TX           FETCH SSN     -             Z,MXR
+ 2793   PICK EXIT  LA           1,2           CAC3          4,1                 SKIPPING EXIT IF NEW RECD IS PARAGRAPH.
+ 2795              TX           Z,X4          -             Z,SC                EXIT WITH AUTHMEMO, SYMBOLS, OR EOFRI.
 
 ## Page 103
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  63        PAGE  63
 
+P2797              MANUFACTURING AND SIMULATION SUBROUTINE IN PASS 0 TO IGNORE AND CUSS A BAD BUT NOT VITAL SUBDIRECTOR.
+R2799   ENTER WITH CARD IN SENTENCE READER AREA AND WITH RETURN IN X4 (BANK 1) OR SEQUENCE CALL TO IGN SUBDR IN THE
+R2801   TRANSFER VECTOR.
+
+ 2802   IGN SBDIR  S, YUL TYPER IGNOR MSG     AMTF +4       C,+1                TYPE "THEREFORE THIS CARD IS IGNORED:".
+ 2804              S, YUL TYPER 6,2           A+9           4,0                 TYPE SIGNIFICANT WORDS AND EXIT.
+
+
+R2806              MANUFACTURING AND SIMULATION SUBROUTINE IN PASS 0 TO CUSS AN UNRECOGNIZED WORD IN A SUBDIRECTOR CARD
+R2808   AND CAUSE THE CARD TO BE IGNORED.  ENTER WITH C(WHODUNIT) SET AND RETURN IN X4 (BANK 1) OR SEQUENCE CALL TO
+R2810   UNRC SUBR IN THE TRANSFER VECTOR.
+
+ 2811   UNRC SBDR  TX           WHODUNIT      -             Z,SH
+ 2812              TN           N,SH          2             WUNRC MSG +3
+ 2813              S, YUL TYPER WUNRC MSG     AMTF +5       IGN SBDIR           CUSS BAD WORD AND IGNORE CARD.
+
+
+R2815              MANUFACTURING SUBROUTINE IN PASS 0 TO PUNCH ON TAPE THE OBJECT MESSAGE, THUS IDENTIFYING COMPLETELY
+R2817   THE PROGRAM REPRESENTED.  ENTER WITH RETURN IN X4 (BANK 1) OR BY SEQUENCE CALL TO PCH LEDER IN THE TRANSFER
+R2819   VECTOR.  PROVIDE ONE PREFATORY WORD IN FRAME.
+
+ 2820   PNCH LEDR  TX           FRAME         -             LEADR MSG
+ 2821              TN           OBJCT  MSG    7             LEADR MSG +1        MOVE OBJECT MESSAGE FOR PUNCHING.
+ 2823              TS           Z,SC,7        Z,S1          PCH TITLE
+ 2824   LEADR MSG  RESERVE      8
+ 2825              TX           Z,X4          -             Z,SC
+
+
+
+R2826              SUBROUTINE IN PASS 0 TO COMBINE THE FUNCTIONS OF THE MONITOR DECIMAL-TO-ALPHABETIC CONVERTER AND LEFT
+R2828   ZERO SUPPRESSOR.  SEQUENCE CALL WITH RETURN IN AU1, TO YUL DA LZS IN THE TRANSFER VECTOR WITH ARGUMENT AT N,AU1,
+R2830   OR ENTER HERE WITH ARGUMENT IN PHI ARG.  USE EITHER RESULT (FIRST IS AT N,SH UPON RETURN) OR BOTH.
+
+ 2832   YUL D2A ZS TS           Z,MXR         Z,AU2         YUL MASKR      C
+ 2833              SWS, C5T8    PHI ARG       8             PHI ARG
+ 2834              SWS,DECALFM1 PHI ARG       4             PHI ARG
+ 2835              SWS,DECALFM2 PHI ARG       2             PHI ARG
+ 2836              SWS,DECALFM3 PHI ARG       2             PHI ARG             SPREAD LEFT 8 DIGITS TO ALPHABETIC.
+ 2838              TS           C1T7          TEMP MASK     PHI ARG +1
+ 2839              SWS, C1T7    TEMP MASK     A,1,L         TEMP MASK
+ 2840              NA, TEMPMASK PHI ARG +2    ZERO          C,-1
+ 2841              SS           BLANKS        TEMP MASK     PHI ARG +2          BLANK OUT AS MANY AS 7 LEADING ZEROS.
+ 2843              TS           Z,AU2         Z,MXR         N,AU1
+
+ 2844   PHI ARG    RESERVE      1
+ 2845              TS           C,-1          C,+1          C,-4
+ 2846              RESERVE      1
+
+ 2847              ALF,4         CARDS PUNCHED BY LOG AND TASK                  THESE MUST FOLLOW PHI ARG +2.
+
 ## Page 104
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  64        PAGE  64
+
+P2489   SUBROUTINE TO SEND N WORDS OF ALPHABETIC IDENTIFICATION TO MON-A, TO BE PUNCHED INTO PAPER TAPE IN BLOCK-LETTER
+R2851   FORM.  ENTRY IS TO THE TRANSFER VECTOR, THUS:
+R2852              TS           Z,SC,(N-1)    Z,S1          PCH TITLE           FOLLOWED BY THE N WORDS TO BE PUNCHED.
+R2854   LEAVES CSC SET TO PCH FRAME AS IF FOR DATA TRASNMISSION.
+
+ 2855   PTP TITLE  NA           PNCH FRAM     END FLAG Q    IN TP TASK     C    BRANCH IF NO TAPE PUNCHING TASK GOING.
+ 2857              NA           BKB PLACE     BANK B        SEND DATA      C    CLEAN OUT DATA FRAME BUFFER.
+ 2859              TS           Z,S0,1        Z,S2          BEG PH ALF     S    FORM HISTORY AND LWA, RETURN TO S MODE.
+ 2861   BEG PH ALF SS           SWITCH        B34T35        TITL SEND           COPY END FLAG AS BEGIN-PARAGRAPH BIT.
+ 2863              SS           ZERO          B34T35        SWITCH              CLEAR OUT END FLAG (INCLUDES END TASK).
+ 2865              TN           Z,X0          2             SAVE XS
+ 2866              TN           Z,S1          2             Z,X0                SET UP FWA AND LWA OF TITLE.
+ 2868   TITL SEND  S, MON PUNCH 0,0           ATAPE PCH +16 1,0                 SEND N WORDS OF BLOCK-LETTER 1.0.
+ 2870              TS           BKB PLACE     Z,SH          BEG PH ALF     C    REMOVE POSSIBLE BEGIN-PARAGRAPH BIT.
+ 2872              TN           SAVE XS       2             Z,X0
+ 2873              TS           Z,S0          Z,SC          PCH FRAME -1   C    SET UP CSC FOR CALLER AND RETURN.
+
+
+R2875   MINOR SUBROUTINE TO INITIALIZE A TAPE PUNCHING TASK WHEN ITS FIRST FRAME OR TITLE IS SUBMITTED.
+
+ 2877   IN TP TASK TX           Z,CSH         -             SAVE XS +2     C
+ 2878              EX           1800 AB SW    B24 B36       SAVE XS        C
+ 2879              LA           SAVE XS       C5T8          C,+2           C    BRANCH IF RUNNING ON 1800 A.
+ 2881              S, MON TYPER TAPE B MSG    SPRAMR +32    TYP ABORT           "CAN'T PUNCH TAPE WITH THIS 1800".
+ 2884              TS           Z,SC          SAVE XS +1    C,+1           S
+ 2895              TX           L DIRECTY     -             Z,S2
+ 2896              SS           N,S2          BIT 35        GRADE LIM           SET BIT IF NOT 1ST TAPE PUNCHING TASK.
+ 2900              SM           SWITCH        C5T8          SAVE XS             FORM PAPER-GRADE AND DATA-UNLIMIT WORD.
+ 2902              SS           ZERO          ACH4          SWITCH              REVERT PAPER GRADE TO PINK OILED PAPER.
+ 2904   GRADE LIM  S, MON PUNCH SAVE XS       ATAPE PCH +1  SAVE XS             SPECIFY PAPER GRADE, KILL DATA LIMIT.
+ 2906              TS           END FLAG Q    PNCH FRAM     C,+2                INITIALIZE TITLE AND FRAME ROUTINES.
+ 2908              S, MON TYPER NTPCH MSG     SPRAMR +16    TYP ABORT           "NO TAPE PUNCHING".
+ 29092             SM           N,S2          BIT 35        N,S2                SHOW THAT SOME PUNCHING IS TO BE DONE.
+ 29094             TN           SAVE XS +1    2             Z,SC           C    NOW PROCESS FIRST FRAME OR TITLE.
+
+
+R2910   MINOR SUBROUTINE TO TYPE OUT THE COUNT OF CARDS BYPASSED BECAUSE THEY LACKED A "Y" IN COLUMN 1.
+
+ 2912   TYP NON YS TX           Z,SH          -             TYP RTURN
+ 2913              SWE, ONES    NON WISE      D,4,L         PHI ARG
+ 2914              TS           Z,SC          Z,AU1         YUL D2A ZS
+ 2915              TX           PHI ARG       -             NON WISE
+ 2916              NA, CHAR1    NON WISE      ZERO          C,+3
+ 2917              SWE, ONES    NON WISE      A,1,L         NON WISE            ALPHABETIZE AND NORMALIZE.
+ 2919              TS, CHAR8    BLANKS        NON WISE      C,-2
+
+ 2920              S, MON TYPER NUM NONS      SPRAMR +24    -
+ 2921              S, MON TYPER BLANKS        SPRA +8       -
+ 2922              TX           ZERO          -             NON WISE
+ 2923              TX           TYP RTURN     -             Z,SC
 
 ## Page 105
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  65        PAGE  65
 
+P2924   SUBROUTINE TO PROCESS DATA FRAMES DESTINED FOR PAPER TAPE.  COLLECTS UP TO 2040 FRAMES IN BANK B BEFORE CALLING
+R2926   IN MON-A TO HAUL THEM AWAY.  INITIALLY, MAKE COSEQUENCE CALL TO PCH FRAME IN THE TRANSFER VECTOR WITH DATA IN
+R2928   LOW 8 BITS OF FRAME, SUBSEQUENTLY MAY ENTER BY PUTTING DATA IN FRAME AND SWITCHING TO COSEQUENCE MODE.
+
+
+
+ 2930   PNCH FRAM  TS           END FLAG Q    PNCH FRAM     IN TP TASK     C    (INITIAL STATE OF PNCH FRAM).
+ 2932              LA           BKB PLACE     END BANK B    SET FRAME -2   C    BRANCH IF BANK B BUFFER NOT BLOATED.
+ 2934              TS           Z,CSC,3       -             SEND DATA      C    SHIP 2040 FRAMES OF DATA TO MON-A.
+
+ 2936   END FLAG D NA           BKB PLACE     BANK B        SEND DATA      C    CLEAR OUT BUFFER AT END OF PARAGRAPH.
+ 2938              SS           SWITCH        B34T35        DATA SEND      C    SET BEGIN-PARAGRAPH BIT FOR NEXT XMIT.
+ 2940              SS           ZERO          B34T35        SWITCH         C    CLEAR END FLAG (INCLUDES END TASK BIT).
+
+ 2942   SET FRAME  TX           BKB PLACE     -             Z,SH           C
+ 2943              TS           FRAME         N,SH,1        PCH FRAME -1   C    SET FRAME INTO BUFFER AND EXIT.
+
+ 2945   END FLAG Q LA           BIT 34        Z,SH          END FLAG D     C    BRANCH IF END FLAG IS ON.
+
+
+
+R2947   MINOR SUBROUTINE TO SEND UP TO 2040 ACCUMULATED PAPER TAPE FRAMES TO MON-A.
+
+ 2949   SEND DATA  TS           Z,SC          SAVE XS +2    C,+1           S
+ 2950              TS           Z,CSH         SAVE XS +3    BEG PH ALF +2  C    SAVE RETURN, X0, X1.
+ 2952              TX           BANK B        -             Z,X0
+ 2953              WD           BKB PLACE     ONE           Z,X1
+ 2954              TX           BANK B        -             BKB PLACE           SHOW THAT BUFFER WILL BE EMPTY.
+ 2956   DATA SEND  S, MON PUNCH 0,0           ATAPE PCH +32 1,0                 SEND PAPER TAPE DATA FRAMES.
+ 2958              SS           ZERO          B34T35        DATA SEND           CLEAR POSSIBLE BEGIN-PARAGRAPH BIT.
+ 2960              TN           SAVE XS       2             Z,X0
+ 2961              TN           SAVE XS +2    2             Z,SC           C
+
+
+
+R2962   PROCEDURE AT MANUF RTN (RETURN FROM ANY TASK USING PASS 0 AS A MONITOR) TO RE-INITIALIZE SUBSTRAND FETCHING AND
+R2964   TAPE PUNCHING ROUTINES.  ENTER AT END M TASK.
+
+ 2965   END SEND Q NA           BKB PLACE     BANK B        SEND DATA      C    CLEAN OUT DATA BUFFER.
+ 2967              TS           Z,CSC         Z,SC          BEG PH ALF +1  C    CLEAR END FLAG, REVERT TO SEQUENCE MODE.
+
+ 2969   END M TASK NA           PNCH FRAM     NO TP TASK    C,+2                BRANCH IF ENDING A TAPE PUNCHING TASK.
+ 2971              TS           FETCH SS1     FETCH SSN     INIT PAS0           INITIALIZE FETCHING AND EXIT.
+ 2973              TS           NO TP TASK    PNCH FRAM     END SEND Q     C
+
+ 2974   NO TP TASK TS           END FLAG Q    PNCH FRAM     IN TP TASK     C
+ 2975   FETCH SS1  TS           ZERO          FETCH SSN     AWAIT GB
+
 ## Page 106
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  66        PAGE  66
+
+P3025              GENERAL-PURPOSE CARD-PUNCHING SUBROUTINE IN PASS 0.  ALWAYS PUNCHES ON-LINE, BUT BENEFITS FROM DRUM
+R3027   BUFFERING OF CARDS IN THE 200 OR 2200.  THE FIRST CARD PUNCHED FOR ANY TASK IS AN IDENTIFIER WHICH, VIEWED FROM
+R3029   THE REAR, DISPLAYS THE LOG AND TASK NUMBERS IN BLOCK LETTERS. THE LAST CARD PUNCHED IN A TASK IS A CHECKERBOARD.
+R3031   ENTRY:     S,0,87       CARD CW                     RETURN              WHERE THE CONTROL WORD GIVES THE MODE.
+R3033   TO CLOSE OUT A CARD-PUNCHING TASK, A CALL MUST BE MADE IN WHICH CARD CW ADDRESSES AN EOR WORD.  AT 0,88 IS
+R3035              TS           Z,MXR         FRAME         PNCH CARD           0,87 IS TAGGED PUNCH CD.
+
+
+ 3037              SETLOC,3C    1984          B1
+
+ 3038   PNCH CARD  TX           YUL MASKS     -             Z,MXR
+ 3039              EBA          Z,AU1         ZERO          PUNCH ADR           SAVE ADDRESS OF CARD CONTROL WORD.
+ 3041              SS           Z,AU2         CAC3          PUNCH CD            SAVE RETURN ADDRESS.
+ 3043              LA           BIT 32        CRD COUNT     LAST CRD Q          BRANCH IF NOT FIRST CARD OF TASK.
+
+ 3045   SN CPUNCH  TS           OCTAL 20      Z,AU1         MON SN QIP     C    SNATCH CARD-PUNCH FOR ON-LINE PUNCHING.
+ 3047              TS           PHI WAA       Z,X4          1ST CARD            ACCESS INTERTASK STORAGE AREA.
+ 3049              S, MON TYPER CPUNV MSG     SPRAMR +24    -                   "CARD PUNCH UNAVAILABLE".
+ 3051              SS           ACA OTHE      CHAR3         ASTRY MSG           PUT GROUP A IDENTITY INTO MESSAGE.
+ 3053              S, MON TYPER ASTRY MSG     SPRAMR +16    -                   "ASA TO TRY AGAIN".
+ 3055              S, MON TYPER ACA OTHE      SPRA +16      -                   "ACA OTHERWISE".
+ 3057              TS           L SN CPNCH    Z,SC          C,+1           C
+ 3058              STOP                                     -              S    ASA OR ARA OR DON A WILL TRY AGAIN.
+ 3060              S, MON TYPER NCOUT MSG     SPRAMR +16    TYP ABORT           "NO CARD OUTPUT".
+
+ 3062   1ST CARD   DA, CAC3     4,104         ONE           4,104               INCREMENT CARD-PUNCH-TASK NUMBER.
+ 3064              SWE, ONES    4,104         24            TASK LOG            FETCH DATA FOR BLOCK-LETTER IDENTIFIER.
+ 3066              TX           BANK B        -             Z,AU2
+ 3067              MT           ZERO          21            N,AU2,1             BLANK OUT BINARY CARD IMAGE.
+ 3069              SWE, CAC3    NUMBASE       16            Z,X4                POINT TO ARRAY OF BLOCK-NUMERAL CODES.
+ 3071   BB VIA AU2 TX           BANK B        -             Z,AU2          S
+ 3072              SWE, ONES    THREE         17            N,AU2,11            CONTROL BITS TO SET BINARY PUNCH MODE.
+ 3074              SWE, ONES    C1T7          A,1           TEMP MASK           SYNTHETIC C2T8 MASK.
+
+ 3076   OUTLINES   SWS, ACH4    TASK LOG      24            C,+1
+ 3077              TX           4,0           -             N,AU2,1             PLANT BLOCK NUMERAL IN CARD.
+ 3079              SWE,TEMPMASK TASK LOG      D,1           TASK LOG
+ 3080              NA           TASK LOG      ZERO          OUTLINES            LOOP END CAUSES ZERO-SUPPRESS OF TASK.
+ 3082              TS           BANK B        Z,X4          PUNCH HED      C    USE SPECIAL ENTRY INTO CARD-PUNCH SUBRO.
+
+ 3084   LAST CRD Q EBA          PUNCH ADR     ZERO          Z,X4                RECOVER ADDRESS OF CONTROL WORD.
+ 3086              NA           N,X4          EOR           SEND CARD           BRANCH IF NOT THE CLOSING-OUT CALL.
 
 ## Page 107
 L      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  67        PAGE  67
 
+P3088   ON RECEIVING A CLOSE-OUT CALL, PUNCH A CHECKERBOARD CARD, TYPE THE NUMBER OF CARDS PUNCHED, AND PUNCH A BLANK
+R3090   CARD TO RUN OUT THE PUNCH.
+
+ 3091   LAST CARD  WA           BANK B        ONE           Z,AU2
+ 3092              MT           CHECKERS      20            N,AU2,1             CREATE CHECKERBOARD CARD.
+ 3094              TS           BANK B        Z,X4          PUNCH ONE      C    PUNCH THE CHECKERBOARD.
+ 3096              TS           CRD COUNT     PHI ARG       TYP NON YS +2  C
+ 3097              S, MON TYPER PHI ARG +2    SPRAM +40     -                   "    NNNN CARDS PUNCHED BY LOG AND TASK"
+ 3099              TS           PHI WAA       Z,X4          BB VIA AU2     C
+ 3100              TX           ZERO          -             N,AU2,1
+ 3101              MT           BLANKS        10            N,AU2,1             CREATE BLANK ALPHABETIC CARD IMAGE.
+ 3103              S, MON TYPER 4,104         SPRA +72      -                   HEX: "LLL LLL 000 TTT".
+ 3105              TS           BANK B        Z,X4          PUNCH ONE      C    PUNCH FINAL BLANK CARD IN ALPHA MODE.
+ 3107              EX           CRD COUNT     CAC3          CRD COUNT           RESET CARD COUNT TO ZERO.
+ 3109              TS           RLS CD PCH    Z,AU1         MON SN QIP     C    RELEASE THE CARD PUNCH.
+ 3111              TS           PUNCH CD      Z,SC          PNCH EXIT      C
+
+R3112   EVERY CARD SENT BY A CALLER COMES HERE EVENTUALLY.
+
+ 3113   SEND CARD  TS           -             -             PUNCH ONE      C    NORMAL WAY TO SEND A CARD.
+ 3115              TS           PUNCH CD      Z,SC          PNCH EXIT      C
+ 3116   PNCH EXIT  TX           FRAME         -             Z,MXR          S
+
+ 3117   PUNCH HED  TN           4,17          4             4,3            C    MOVE TASK NUMBER TO PLACE ON CARD.
+ 3119              TN           N,CSC,4       4             4,7            C    PLANT BLOCK LETTERS: "TASK".
+ 3121              OCT          -00 4224 1076,  -22 5252 5244
+ 3122              OCT          -70 2422 2470,  -02 0276 0202
+ 3123              TN           N,CSC,5       4             4,17           C    PLANT "LOG:" AND TAB TO PUNCH ONE.
+ 3125              OCT          -00 0000 2424,  -72 5242 4234
+ 3126              OCT          -34 4242 4234,  -40 4040 4076
+
+ 3127              WF, DA       -             -             INCR COCT           BRANCH IF 200 GOT CARD INFO OK.
+ 3129   PUNCH ONE  SWS, CHAR1   MON PRADS     A,2,L         C,+1           C    SUPPLY TRUE ADDRESS OF PUNCH.
+ 3131              WF, DA       4,0           -             -
+ 3132              TS, CHAR1    C,-1          PUNCH ONE -1  PUNCH ONE -1   C
+ 3133   INCR COCT  DA           CRD COUNT     BIT 32        CRD COUNT      S    INCREMENT COUNT OF CARDS IN TASK.
+
+
+
+ SEQBRK            END          YUL PASS 0    GENERAL
