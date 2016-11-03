@@ -22,6 +22,10 @@
  *  History:    2012-10-04 JL   Began.
  *              2016-10-21 RSB  Bypass the use of sbfix for blk2.
  *              2016-11-02 RSB  Added provision for --trace.
+ *              2016-11-03 RSB  Added the "unestablished" state for superbits.
+ *                              It *still* doesn't work like I expect, but
+ *                              at least it lets me assemble Sunburst 120
+ *                              (and all prior AGC programs).
  */
 
 #include "yaYUL.h"
@@ -30,13 +34,20 @@
 
 //-------------------------------------------------------------------------
 // Adjust superbank bits in terms of SBANK= and so on.
+int isEstablishedSBANK = 0;
 void
 FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
   int sbfix = 0060;
   int tmpval = *outValue;
 
-  if (address->Fixed)
+  if (!isEstablishedSBANK)
+    {
+      sbfix = 0;
+      if (!blk2)
+        *outValue &= ~0160;
+    }
+  else if (address->Fixed)
     {
       if (address->Banked)
         {
@@ -69,13 +80,10 @@ FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
         }
     }
 
-  //if (asYUL && address->FB < 030 && !address->Super && !record->SBank.current.Super)
-  //  sbfix = 0;
-
   if (!blk2)
     *outValue |= sbfix;
 
-  if (trace)
+  if (trace && thisIsTheLastPass)
     {
       printf(
           "--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o,fixed=%d,banked=%d) "

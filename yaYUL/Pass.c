@@ -89,6 +89,8 @@
  *                              operates, hopefully correctly, on the actual address).
  *                              Behavior of TC without an operand has been extended to
  *                              all targets (was previously just for block 1 and BLK2).
+ *              2016-11-03 RSB  Added the "unestablished" state for superbits, required
+ *                              for Sunburst 120.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -129,6 +131,7 @@
 
 Line_t CurrentFilename;
 int CurrentLineInFile = 0;
+int thisIsTheLastPass = 0;
 
 // We allow a certain number of levels of include files.  To handle this,
 // we need a stack of input files.
@@ -1448,6 +1451,8 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   static char lastLines[10][sizeof(s)] =
     { "", "", "", "", "", "", "", "", "", "" };
 
+  isEstablishedSBANK = 1;
+  thisIsTheLastPass = WriteOutput;
   numSymbolsReassigned = 0;
 
   // Set for the proper assembly target
