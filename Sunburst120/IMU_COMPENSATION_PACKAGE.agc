@@ -65,7 +65,7 @@
 #        ADIA                (MERU)/(G)         630.36633      (GYRO PULSES)/(PIPA PULSE) X 2(-6)
 #        ADSRA               (MERU)/(G)         630.36633      (GYRO PULSES)/(PIPA PULSE) X 2(-6)
 
-##Page 860
+## Page 860
 # CONVERSION TABLE
 #       1 PIPA PULSE = 1.00 (CM)/(SEC)               1 ERU = 7.29209817 X 10(-5) (RAD)/(SEC)
 #       1 ERU = 15.04104488 (ARCSEC)/(SEC)           1 (CM)/(SEC)(SEC) = .01 (PIPA PULSES)/(CS)
@@ -116,7 +116,7 @@
 #       CENTRALS - A,L,Q
 #       OTHER - BUF - BUF +2, VBUF - VBUF +2, GCOMPSW
 
-##Page 861
+## Page 861
 1/PIPA          CAF     LGCOMP          # SAVE EBANK OF CALLING PROGRAM
                 XCH     EBANK
                 TS      MODE

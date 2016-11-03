@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     MISSION_PHASE_11-DPS2_FITH_APS1.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-28 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     MISSION_PHASE_11-DPS2_FITH_APS1.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-28 MAS  Transcribed.
 
 ## Page 739
                 BANK            36
