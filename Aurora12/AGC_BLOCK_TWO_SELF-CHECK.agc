@@ -1,37 +1,37 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     AGC_BLOCK_TWO_SELF-CHECK.agc
-# Purpose:      Part of the source code for Aurora (revision 12).
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      https://www.ibiblio.org/apollo.
-# Pages:        377-403
-# Mod history:  2016-09-20 JL   Created.
-# Mod history:  2016-09-22 MAS  Began.
-#               2016-10-16 HG   Fix operand 5BIT14 -> SBIT14
-#                                           DISPLAY -> SDISPLAY 
-#		2016-10-20 RSB	Had to add an EBANK= to make some
-#				2CADR's come out right.
-#		2016-10-21 RSB	Removed yesterday's EBANK=, due to
-#				yaYUL fixes HG gave me.
+## Copyright:    Public domain.
+## Filename:     AGC_BLOCK_TWO_SELF-CHECK.agc
+## Purpose:      Part of the source code for Aurora (revision 12).
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      https://www.ibiblio.org/apollo.
+## Pages:        377-403
+## Mod history:  2016-09-20 JL   Created.
+## Mod history:  2016-09-22 MAS  Began.
+##               2016-10-16 HG   Fix operand 5BIT14 -> SBIT14
+##                                           DISPLAY -> SDISPLAY 
+##		2016-10-20 RSB	Had to add an EBANK= to make some
+##				2CADR's come out right.
+##		2016-10-21 RSB	Removed yesterday's EBANK=, due to
+##				yaYUL fixes HG gave me.
 
-# This source code has been transcribed or otherwise adapted from
-# digitized images of a hardcopy from the private collection of 
-# Don Eyles.  The digitization was performed by archive.org.
+## This source code has been transcribed or otherwise adapted from
+## digitized images of a hardcopy from the private collection of 
+## Don Eyles.  The digitization was performed by archive.org.
 
-# Notations on the hardcopy document read, in part:
+## Notations on the hardcopy document read, in part:
 
-#       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP
-#       NOV 10, 1966
+##       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP
+##       NOV 10, 1966
 
-#       [Note that this is the date the hardcopy was made, not the
-#       date of the program revision or the assembly.]
+##       [Note that this is the date the hardcopy was made, not the
+##       date of the program revision or the assembly.]
 
-# The scan images (with suitable reduction in storage size and consequent 
-# reduction in image quality) are available online at 
-#       https://www.ibiblio.org/apollo.  
-# The original high-quality digital images are available at archive.org:
-#       https://archive.org/details/aurora00dapg
+## The scan images (with suitable reduction in storage size and consequent 
+## reduction in image quality) are available online at 
+##       https://www.ibiblio.org/apollo.  
+## The original high-quality digital images are available at archive.org:
+##       https://archive.org/details/aurora00dapg
 
 ## Page 377
                 BANK            20                              

@@ -1,43 +1,43 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc
-# Purpose:      Part of the source code for Aurora (revision 12).
-# Assembler:    yaYUL
-# Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-# Website:      https://www.ibiblio.org/apollo.
-# Pages:        562-593
-# Mod history:  2016-09-20 JL   Created.
-#               2016-09-30 HG   Started transcribing from scan
-#               2016-10-08 HG   Change TS  Q -> TC  Q (p. 584)
-#               2016-10-15 HG   fix label  MAXJET -> MAXTJET
-#                                          ORGTOA -> URGTOA
-#                                          TQRGTTM1 -> TQRGTTMI 
-#                                          NEGQERROR -> NEGQEROR 
-#                               fix operand NEGSCP -> NEGCSP 
-#                                           UREGNCYQ -> URGENCYQ  
-#                                           .5ACCMNS -> .5ACCMNE 
-#                                           25,32.QR -> 25/32.QR
-#                                           Q-NORTJS -> Q-NORJTS
-#                                           -RATDEB -> -RATEDB
-#                                           CHECKSTIK -> CHEKSTIK
+## Copyright:    Public domain.
+## Filename:     Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc
+## Purpose:      Part of the source code for Aurora (revision 12).
+## Assembler:    yaYUL
+## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:      https://www.ibiblio.org/apollo.
+## Pages:        562-593
+## Mod history:  2016-09-20 JL   Created.
+##               2016-09-30 HG   Started transcribing from scan
+##               2016-10-08 HG   Change TS  Q -> TC  Q (p. 584)
+##               2016-10-15 HG   fix label  MAXJET -> MAXTJET
+##                                          ORGTOA -> URGTOA
+##                                          TQRGTTM1 -> TQRGTTMI 
+##                                          NEGQERROR -> NEGQEROR 
+##                               fix operand NEGSCP -> NEGCSP 
+##                                           UREGNCYQ -> URGENCYQ  
+##                                           .5ACCMNS -> .5ACCMNE 
+##                                           25,32.QR -> 25/32.QR
+##                                           Q-NORTJS -> Q-NORJTS
+##                                           -RATDEB -> -RATEDB
+##                                           CHECKSTIK -> CHEKSTIK
 
-# This source code has been transcribed or otherwise adapted from
-# digitized images of a hardcopy from the private collection of
-# Don Eyles.  The digitization was performed by archive.org.
+## This source code has been transcribed or otherwise adapted from
+## digitized images of a hardcopy from the private collection of
+## Don Eyles.  The digitization was performed by archive.org.
 
-# Notations on the hardcopy document read, in part:
+## Notations on the hardcopy document read, in part:
 
-#       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP
-#       NOV 10, 1966
+##       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP
+##       NOV 10, 1966
 
-#       [Note that this is the date the hardcopy was made, not the
-#       date of the program revision or the assembly.]
+##       [Note that this is the date the hardcopy was made, not the
+##       date of the program revision or the assembly.]
 
-# The scan images (with suitable reduction in storage size and consequent
-# reduction in image quality) are available online at
-#       https://www.ibiblio.org/apollo.
-# The original high-quality digital images are available at archive.org:
-#       https://archive.org/details/aurora00dapg
+## The scan images (with suitable reduction in storage size and consequent
+## reduction in image quality) are available online at
+##       https://www.ibiblio.org/apollo.
+## The original high-quality digital images are available at archive.org:
+##       https://archive.org/details/aurora00dapg
 
 ## Page 562
                 BANK            24
