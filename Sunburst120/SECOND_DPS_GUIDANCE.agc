@@ -16,6 +16,7 @@
 ##				 decimal equivalents ("DEC .75"), in lieu of modifying 
 ##				 yaYUL at this time.  Appropriate comments were also added
 ##				 at the points in the code where this happened.
+##		 2016-11-02 RSB	 More typos.
 
 ## Page 871
 
@@ -265,9 +266,12 @@ LING2F          TCF             LSETEVN
 LING3F          TCF             LSETODD                         
                 TCF             ADTTFNU                         
                 OCT             00114                           
-                ADRES           TBRLING                         
+                ADRES           TBRLING  
                 OCT             00043                           
-                DEC             -.25            E2      B-15    # -.25 SECONDS, TTF UNITS, COMPARES TTF/4
+## The following line is supposed to read "DEC -.25 E2 B-15", which is supposed to
+## assemble to the octal 77763 ... but actually assembles to 77762.  For the present,
+## it is being hard-coded as "OCT 77763" as a workaround.                    
+                OCT		77763  				# -.25 SECONDS, TTF UNITS, COMPARES TTF/4
                 TCF             EXFINAL                         
 
 ## Page 878
@@ -557,7 +561,7 @@ SRS2COMP        DLOAD           DDV
 
 TTF/4CL         EXTEND                                          
                 INDEX           NDX2DPS                         
-                DCS             JDS2                            
+                DCA             JDS2                            
                 DXCH            TABLTTF         +6              # A(3) = JDS2 TO TABLTTF
                 EXTEND                                          
                 INDEX           NDX2DPS                         
@@ -603,7 +607,7 @@ TTF/4CL         EXTEND
                 DXCH            MPAC                            # LOADS TTF/4 (INITIAL GUESS) INTO MPAC
 ## Page 885
                 EXTEND                                          
-                DCA             TABLTTF                         # LOADS A,L WITH TABLTTFL,2
+                DCA             TABLTTFL                        # LOADS A,L WITH TABLTTFL,2
                 TC              ROOTPSRS                        # YIELDS TTF/4 IN MPAC
                 EXTEND                                          
                 DCA             MPAC                            # FETCH TTF/4 KEEPING IT IN MPAC
@@ -917,7 +921,7 @@ EXQDLIN         CCS             OVFIND                          # IF OVF AFTER C
 
                 DLOAD           SR1R                            # LOAD GOOD /AFC/.
                                 /AFC/                           # SCALE TO THROTCON UNITS.
-                STORE           /AFC/                           # STORE IN THROTCON ACCEL CMD REGISTERS
+                STORE           /ACF/                           # STORE IN THROTCON ACCEL CMD REGISTERS
                 EXIT                                            
                 EXTEND                                          
                 DCA             THROTCOL                        
@@ -1526,7 +1530,7 @@ AFULLG          2DEC*           +1.276510908    E-5  B+6*
 
 PFCLITE         2DEC*           +3.000000000    E+2  B-15*
 
-AFLITE          2DEC*           +3.781860583    E-5  B-6*
+AFLITE          2DEC*           +3.781860583    E-5  B+6*
 
 PFCTRIM         2DEC*           +2.300000000    E+3  B-15*
 

@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:	P34-P35,_P74-P75.agc
-# Purpose:      Part of the source code for Colossus build 237.
-#               This is for the Command Module's (CM) Apollo Guidance
-#               Computer (AGC), we believe for Apollo 8.
-# Assembler:    yaYUL
-# Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:      www.ibiblio.org/apollo/index.html
-# Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:  2011-02-03 JL   Adapted from corresponding Colossus 249 file.
+## Copyright:    Public domain.
+## Filename:	 P34-P35,_P74-P75.agc
+## Purpose:      Part of the source code for Colossus build 237.
+##               This is for the Command Module's (CM) Apollo Guidance
+##               Computer (AGC), we believe for Apollo 8.
+## Assembler:    yaYUL
+## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:      www.ibiblio.org/apollo/index.html
+## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:  2011-02-03 JL   Adapted from corresponding Colossus 249 file.
 
 ## Page 450
 # TRANSFER PHASE INITITIATION (TPI) PROGRAMS (P34 AND P74)

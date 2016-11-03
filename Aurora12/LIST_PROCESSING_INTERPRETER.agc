@@ -1,36 +1,36 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     LIST_PROCESSING_INTERPRETER.agc
-# Purpose:      Part of the source code for Aurora (revision 12).
-# Assembler:    yaYUL
-# Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-# Website:      https://www.ibiblio.org/apollo.
-# Pages:        34-122
-# Mod history:  2016-09-20 JL   Created.
-#               2016-09-22 HG   Start trancription from scans using Luminary099\INTERPRETER.agc as base
-#               2016-10-04 HG   Fix FBBANK -> FBANK
-#               2016-10-12 HG   Fix operand MAPC +1  -> MPAC +1
-#               2016-10-15 HG   fix label EIHGT -> EIGHT 
-#                               fix operand BIT14 -> BIT4   
-#               2016-10-16      fix label NEGO -> NEG0  
+## Copyright:    Public domain.
+## Filename:     LIST_PROCESSING_INTERPRETER.agc
+## Purpose:      Part of the source code for Aurora (revision 12).
+## Assembler:    yaYUL
+## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:      https://www.ibiblio.org/apollo.
+## Pages:        34-122
+## Mod history:  2016-09-20 JL   Created.
+##               2016-09-22 HG   Start trancription from scans using Luminary099\INTERPRETER.agc as base
+##               2016-10-04 HG   Fix FBBANK -> FBANK
+##               2016-10-12 HG   Fix operand MAPC +1  -> MPAC +1
+##               2016-10-15 HG   fix label EIHGT -> EIGHT 
+##                               fix operand BIT14 -> BIT4   
+##               2016-10-16      fix label NEGO -> NEG0  
 
-# This source code has been transcribed or otherwise adapted from
-# digitized images of a hardcopy from the private collection of
-# Don Eyles.  The digitization was performed by archive.org.
+## This source code has been transcribed or otherwise adapted from
+## digitized images of a hardcopy from the private collection of
+## Don Eyles.  The digitization was performed by archive.org.
 
-# Notations on the hardcopy document read, in part:
+## Notations on the hardcopy document read, in part:
 
-#       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP
-#       NOV 10, 1966
+##       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP
+##       NOV 10, 1966
 
-#       [Note that this is the date the hardcopy was made, not the
-#       date of the program revision or the assembly.]
+##       [Note that this is the date the hardcopy was made, not the
+##       date of the program revision or the assembly.]
 
-# The scan images (with suitable reduction in storage size and consequent
-# reduction in image quality) are available online at
-#       https://www.ibiblio.org/apollo.
-# The original high-quality digital images are available at archive.org:
-#       https://archive.org/details/aurora00dapg
+## The scan images (with suitable reduction in storage size and consequent
+## reduction in image quality) are available online at
+##       https://www.ibiblio.org/apollo.
+## The original high-quality digital images are available at archive.org:
+##       https://archive.org/details/aurora00dapg
 
 
 ## Page 34

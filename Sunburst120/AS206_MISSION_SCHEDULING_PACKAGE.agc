@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     AS206_MISSION_SCHEDULING_PACKAGE.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-#               is part of the source code for the Lunar Module's
-#               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:    yaYUL
-# Contact:      Ron Burkey <info@sandroid.org>.
-# Website:      www.ibiblio.org/apollo/index.html
-# Mod history:  2016-09-30 RSB  Created draft version.
-#               2016-10-29 MAS  Transcribed.
+## Copyright:    Public domain.
+## Filename:     AS206_MISSION_SCHEDULING_PACKAGE.agc
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+##               is part of the source code for the Lunar Module's
+##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:    yaYUL
+## Contact:      Ron Burkey <info@sandroid.org>.
+## Website:      www.ibiblio.org/apollo/index.html
+## Mod history:  2016-09-30 RSB  Created draft version.
+##               2016-10-29 MAS  Transcribed.
 
 ## Page 801
 #          THE FOLLOWING ROUTINES IMPLEMENT THE MISSION SCHEDULING LOGIC AS DESCRIBED IN CHAPTER 4 OF THE

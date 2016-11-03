@@ -1,16 +1,16 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	DOWNLINK_LISTS.agc
-# Purpose:	Part of the source code for Colossus build 237.  
-#		This is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), we believe for Apollo 8.
-# Assembler:	yaYUL
-# Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:	2010-06-04 OH	Adapted from corresponding Colossus 249 file.
-#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-hash page numbers.
-#		2011-01-09 JL   Fixed indentation, whitespace.
+## Copyright:	Public domain.
+## Filename:	DOWNLINK_LISTS.agc
+## Purpose:	Part of the source code for Colossus build 237.  
+##		This is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), we believe for Apollo 8.
+## Assembler:	yaYUL
+## Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:	2010-06-04 OH	Adapted from corresponding Colossus 249 file.
+##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-hash page numbers.
+##		2011-01-09 JL   Fixed indentation, whitespace.
 
 ## Page 165
 

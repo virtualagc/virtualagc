@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	RTB_OP_CODES.agc
-# Purpose:	Part of the source code for Solarium build 55. This
-#		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
-# Assembler:	yaYUL --block1
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
-# Mod history:	2009-09-29 JL	Adapted from corresponding Artemis072 file.
+## Copyright:	Public domain.
+## Filename:	RTB_OP_CODES.agc
+## Purpose:	Part of the source code for Solarium build 55. This
+##		is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), for Apollo 6.
+## Assembler:	yaYUL --block1
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Mod history:	2009-09-29 JL	Adapted from corresponding Artemis072 file.
 
 ## Page 374
 

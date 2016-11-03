@@ -1,44 +1,44 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	ERASABLE_ASSIGNMENTS.agc
-# Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.
-#		It is part of the source code for the Command Module's (CM)
-#		Apollo Guidance Computer (AGC), for Apollo 11.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo.
-# Mod history:	2009-05-06 RSB	Started adapting from the Colossus249/ file 
-#				of the same name, using Comanche055 page 
-#				images. Only through page 51 so far.
-#		2009-05-07 RSB	Through page 92 so far.
-#		2009-05-07 RSB	(Again!) First draft completed.
-#		2009-05-20 RSB	Fixed some bugs uncovered in trial assemblies:
-#				EMDOT, STATEXIT, VGDISP, DVPREV, POSTCDH,
-#				RETROFLG not defined correctly, changed the
-#				typing of labels 9X9LOC1 and 9X9LOC2, 
-#				R32FLBIT -> R31FLBIT.
-#		2009-05-21 RSB	Corrected definition of DELBRTMP, which 
-#				chained to quite a lot of off-by-one errors.
-#				Changed a +8 to a +8D.
-#		2010-08-24 JL	Fixed page numbers. Added missing comment character. Fixed page number comment.
-#		2011-05-08 JL	Removed workarounds.
+## Copyright:	Public domain.
+## Filename:	ERASABLE_ASSIGNMENTS.agc
+## Purpose:	Part of the source code for Colossus 2A, AKA Comanche 055.
+##		It is part of the source code for the Command Module's (CM)
+##		Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo.
+## Mod history:	2009-05-06 RSB	Started adapting from the Colossus249/ file 
+##				of the same name, using Comanche055 page 
+##				images. Only through page 51 so far.
+##		2009-05-07 RSB	Through page 92 so far.
+##		2009-05-07 RSB	(Again!) First draft completed.
+##		2009-05-20 RSB	Fixed some bugs uncovered in trial assemblies:
+##				EMDOT, STATEXIT, VGDISP, DVPREV, POSTCDH,
+##				RETROFLG not defined correctly, changed the
+##				typing of labels 9X9LOC1 and 9X9LOC2, 
+##				R32FLBIT -> R31FLBIT.
+##		2009-05-21 RSB	Corrected definition of DELBRTMP, which 
+##				chained to quite a lot of off-by-one errors.
+##				Changed a +8 to a +8D.
+##		2010-08-24 JL	Fixed page numbers. Added missing comment character. Fixed page number comment.
+##		2011-05-08 JL	Removed workarounds.
 
-# This source code has been transcribed or otherwise adapted from digitized
-# images of a hardcopy from the MIT Museum.  The digitization was performed
-# by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
-# thanks to both.  The images (with suitable reduction in storage size and
-# consequent reduction in image quality as well) are available online at
-# www.ibiblio.org/apollo.  If for some reason you find that the images are
-# illegible, contact me at info@sandroid.org about getting access to the 
-# (much) higher-quality images which Paul actually created.
-#
-# Notations on the hardcopy document read, in part:
-#
-#	Assemble revision 055 of AGC program Comanche by NASA
-#	2021113-051.  10:28 APR. 1, 1969  
-#
-#	This AGC program shall also be referred to as
-#			Colossus 2A
+## This source code has been transcribed or otherwise adapted from digitized
+## images of a hardcopy from the MIT Museum.  The digitization was performed
+## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+## thanks to both.  The images (with suitable reduction in storage size and
+## consequent reduction in image quality as well) are available online at
+## www.ibiblio.org/apollo.  If for some reason you find that the images are
+## illegible, contact me at info@sandroid.org about getting access to the 
+## (much) higher-quality images which Paul actually created.
+##
+## Notations on the hardcopy document read, in part:
+##
+##	Assemble revision 055 of AGC program Comanche by NASA
+##	2021113-051.  10:28 APR. 1, 1969  
+##
+##	This AGC program shall also be referred to as
+##			Colossus 2A
 
 
 ## Page 37

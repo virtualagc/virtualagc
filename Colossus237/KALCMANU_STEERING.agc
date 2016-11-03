@@ -1,18 +1,18 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	KALCMANU_STEERING.agc
-# Purpose:	Part of the source code for Colossus build 237.  
-#		This is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), we believe for Apollo 8.
-# Assembler:	yaYUL
-# Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:	2010-06-01 OH	Adapted from corresponding Colossus 249 file.
-#		2010-12-04 JL	Remove Colossus 249 header comments. Change 
-#				to double-hash page numbers.
-#		2011-01-27 JL	Minor fixes.
-#		2016-08-14 RSB	Added SBANKs for addressing discrepancies.
+## Copyright:	Public domain.
+## Filename:	KALCMANU_STEERING.agc
+## Purpose:	Part of the source code for Colossus build 237.  
+##		This is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), we believe for Apollo 8.
+## Assembler:	yaYUL
+## Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:	2010-06-01 OH	Adapted from corresponding Colossus 249 file.
+##		2010-12-04 JL	Remove Colossus 249 header comments. Change 
+##				to double-hash page numbers.
+##		2011-01-27 JL	Minor fixes.
+##		2016-08-14 RSB	Added SBANKs for addressing discrepancies.
 
 ## Page 405
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS

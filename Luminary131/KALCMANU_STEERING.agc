@@ -1,19 +1,19 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	KALCMANU_STEERING.agc
-# Purpose:	A section of Luminary 1C, revision 131.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
-#		This file is intended to be a faithful transcription, except
-#		that the code format has been changed to conform to the
-#		requirements of the yaYUL assembler rather than the 
-#		original YUL assembler.
-# Reference:	pp. 372-376 of 1729.pdf.
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	05/11/03 RSB	Began transcribing.
-#		05/14/05 RSB	Corrected website reference above.
-#		2011-05-07 JL	Removed workarounds.
+## Copyright:	Public domain.
+## Filename:	KALCMANU_STEERING.agc
+## Purpose:	A section of Luminary 1C, revision 131.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
+##		This file is intended to be a faithful transcription, except
+##		that the code format has been changed to conform to the
+##		requirements of the yaYUL assembler rather than the 
+##		original YUL assembler.
+## Reference:	pp. 372-376 of 1729.pdf.
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	05/11/03 RSB	Began transcribing.
+##		05/14/05 RSB	Corrected website reference above.
+##		2011-05-07 JL	Removed workarounds.
 
 ## Page 372
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS

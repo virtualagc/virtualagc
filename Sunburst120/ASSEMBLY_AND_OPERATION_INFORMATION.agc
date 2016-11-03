@@ -1,17 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	ASSEMBLY_AND_OPERATION_INFORMATION.agc
-# Purpose:	A module for revision 0 of BURST120 (Sunburst).
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 5.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo/index.html
-# Mod history:	2016-09-30 RSB	Created draft version.  Corrected it against the 
-#				Sunburst 120 scans, so should be ready to go 
-#				except for any errors I may have introduced myself.
+## Copyright:	Public domain.
+## Filename:	ASSEMBLY_AND_OPERATION_INFORMATION.agc
+## Purpose:	A module for revision 0 of BURST120 (Sunburst).
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	2016-09-30 RSB	Created draft version.  Corrected it against the 
+##				Sunburst 120 scans, so should be ready to go 
+##				except for any errors I may have introduced myself.
 
-# Page 1
+## Page 1
 
 # 	   THIS LISTING IS A COPY OF A VERSION OF THE PROGRAM INTENDED FOR USE IN THE ON-BOARD PRIMARY GUIDANCE
 # COMPUTER IN THE UNMANNED FLIGHT OF APOLLO LUNAR MODULE 1  ---  THE AS206 MISSION.
@@ -23,7 +23,7 @@
 # INSTITUTE OF TECHNOLOGY, 75 CAMBRIDGE PARKWAY, CAMBRIDGE, MASSACHUSETTS, UNDER DSR PROJECT 55-23850, SPONSORED
 # BY THE MANNED SPACECRAFT CENTER OF THE NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, CONTRACT NAS 9-4065.
 
-# Page 2
+## Page 2
 
 # TABLE OF LOG CARDS:
 # ----- -- --- ------
@@ -75,7 +75,7 @@
 # MP 7 - SIVB/LEM SEPARATION
 # MISSION PHASE 8 - DPS COLD SOAK
 # MP9-DPS 1 BURN
-# Page 3
+## Page 3
 # MISSION PHASE 11 - DPS2/FITH/APS1
 # MISSION PHASE 13 - APS2
 # MISSION PHASE 16 - RCS COLD SOAK
@@ -106,7 +106,7 @@
 # WAITLIST
 # AGC BLOCK TWO SELF-CHECK
 
-# Page 4
+## Page 4
 
 # VERB AND NOUN INFORMATION
 
@@ -154,7 +154,7 @@
 # 46  SAMPLE RADAR ONCE PER SECOND (UNUSED IN 206)
 # 47  PERFORM LEM FCS TEST
 # 50  PLEASE PERFORM
-# Page 5
+## Page 5
 # 51  PLEASE MARK
 # 52  PLEASE MARK Y
 # 53  PLEASE MARK X OR Y
@@ -179,7 +179,7 @@
 # 76  STATE VECTOR UPDATE
 # 77  ILLEGAL VERB
 
-# Page 6
+## Page 6
 # NORMAL NOUNS				    		SCALE AND DECIMAL POINT			
 # 00  NOT IN USE
 # 01  SPECIFY MACHINE ADDRESS (FRACTIONAL)		(.XXXXX)
@@ -228,7 +228,7 @@
 # 54  GYRO SPIN AXIS ACCELERATION DRIFT			(.BBXXXXX(MILIRAD/SEC)/(CM/SEC SEC))
 # END OF NORMAL NOUNS
 
-# Page 7
+## Page 7
 # MIXED NOUNS
 # 55  LANDING RADAR ALTITUDE, TIME (SECONDS)		(XXXXX.FEET, XXX.XXSEC)               	(UNUSED IN 206)
 # 56  LANDING RADAR VELX, TIME (SECONDS)		(XXXXX.FEET/SEC, XXX.XXSEC)           	(UNUSED IN 206)
@@ -251,7 +251,7 @@
 # 76  POSITION VECTOR					(XXXX.XKILOMETERS FOR EACH)
 # 77  VELOCITY VECTOR					(XXXX.XMETERS/SEC FOR EACH)
 
-# Page 8
+## Page 8
 # TABLE OF ERROR CODES
 
 
@@ -297,7 +297,7 @@
 # 00412     OVERFLOW AFTER COMPUTATIONS OF AFCS1  		   (MP 11)
 
 
-# Page 9
+## Page 9
 # RADAR ERRORS
 
 # 00501	    RADAR ANTENNA OUT OF LIMITS OF EACH MODE
@@ -344,7 +344,7 @@
 # INTERPRETER ERRORS
 
 # 01301	    ARCSIN-ARCCOS ARGUMENT TOO LARGE. ABORT
-# Page 10
+## Page 10
 # 01302	    SQRT CALLED WITH NEGATIVE ARGUMENT. ABORT
 
 
@@ -366,7 +366,7 @@
 # 01600	    DRIFT TEST OVERFLOW
 # 01601     BAD IMU TORQUE IN DRIFT OR IN GYROCOMPASS
 
-# Page 11
+## Page 11
 
 # INSTRUCTION CODES:
 #

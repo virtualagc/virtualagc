@@ -1,40 +1,40 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     P11.agc
-# Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
-#               It is part of the source code for the Command Module's (CM)
-#               Apollo Guidance Computer (AGC), for Apollo 11.
-# Assembler:    yaYUL
-# Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-# Website:      www.ibiblio.org/apollo.
-# Pages:	533-550
-# Mod history:  2009-05-13 HG   Started adapting from the Colossus249/ file 
-#                		of the same name, using Comanche055 page 
-#                		images 0533.jpg - 0550.jpg. 
-#		2009-05-20 RSB	Corrections: ERTHALT -> EARTHALT, 
-#				STATSW -> SATSW.
-#		2009-05-23 RSB	At end of RESCALES, corrected TC 0 to TC Q.
-#				Added an SBANK= prior to a 2CADR.
-#		2010-08-24 JL	Fixed page numbers. Added missing comment character on p537.
-#		2011-05-08 JL	Flagged SBANK= workaround for future removal.
-#		2011-05-17 JL	Removed all SBANK= workarounds.
+## Copyright:    Public domain.
+## Filename:     P11.agc
+## Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
+##               It is part of the source code for the Command Module's (CM)
+##               Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:    yaYUL
+## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:      www.ibiblio.org/apollo.
+## Pages:	533-550
+## Mod history:  2009-05-13 HG   Started adapting from the Colossus249/ file 
+##                		of the same name, using Comanche055 page 
+##                		images 0533.jpg - 0550.jpg. 
+##		2009-05-20 RSB	Corrections: ERTHALT -> EARTHALT, 
+##				STATSW -> SATSW.
+##		2009-05-23 RSB	At end of RESCALES, corrected TC 0 to TC Q.
+##				Added an SBANK= prior to a 2CADR.
+##		2010-08-24 JL	Fixed page numbers. Added missing comment character on p537.
+##		2011-05-08 JL	Flagged SBANK= workaround for future removal.
+##		2011-05-17 JL	Removed all SBANK= workarounds.
 
-# This source code has been transcribed or otherwise adapted from digitized
-# images of a hardcopy from the MIT Museum.  The digitization was performed
-# by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
-# thanks to both.  The images (with suitable reduction in storage size and
-# consequent reduction in image quality as well) are available online at
-# www.ibiblio.org/apollo.  If for some reason you find that the images are
-# illegible, contact me at info@sandroid.org about getting access to the 
-# (much) higher-quality images which Paul actually created.
-#
-# Notations on the hardcopy document read, in part:
-#
-#    Assemble revision 055 of AGC program Comanche by NASA
-#    2021113-051.  10:28 APR. 1, 1969  
-#
-#    This AGC program shall also be referred to as
-#            Colossus 2A
+## This source code has been transcribed or otherwise adapted from digitized
+## images of a hardcopy from the MIT Museum.  The digitization was performed
+## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+## thanks to both.  The images (with suitable reduction in storage size and
+## consequent reduction in image quality as well) are available online at
+## www.ibiblio.org/apollo.  If for some reason you find that the images are
+## illegible, contact me at info@sandroid.org about getting access to the 
+## (much) higher-quality images which Paul actually created.
+##
+## Notations on the hardcopy document read, in part:
+##
+##    Assemble revision 055 of AGC program Comanche by NASA
+##    2021113-051.  10:28 APR. 1, 1969  
+##
+##    This AGC program shall also be referred to as
+##            Colossus 2A
 ## Page 533
 # EARTH ORBIT INSERTION MONITOR PROGRAM
 # *************************************

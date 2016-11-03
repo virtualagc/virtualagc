@@ -1,29 +1,40 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC. 
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:     ParseEQUALS.c
-  Purpose:      Assembles the EQUALS or = pseudo-op.
-  Mod History:  04/16/03 RSB   Began.
-                07/26/04 RSB   Offset moved out of symbol and into 
-                               global variable.
-                07/27/05 JMS   Added support for symbol debugging
-*/
+ * Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Filename:     ParseEQUALS.c
+ * Purpose:      Assembles the EQUALS or = pseudo-op.
+ * Mod History:  04/16/03 RSB   Began.
+ *               07/26/04 RSB   Offset moved out of symbol and into
+ *                              global variable.
+ *               07/27/05 JMS   Added support for symbol debugging.
+ *               11/02/16 RSB   Modified treatment of "EQUALS number", where
+ *                              "number" is a large number.  Small numbers
+ *                              continue to be treated as constant, while
+ *                              larger ones are treated as flat addresses.
+ *                              This was needed for Sunburst, and specifically
+ *                              for the SAVERASE label.  Mods to the operands,
+ *                              such as +1 or -25, are now treated differently,
+ *                              and hopefully more-correctly, because the old
+ *                              method was failing for the very large mods
+ *                              found some places in SUNBURST.  However, I
+ *                              kept the older algorithm for --block1 targets.
+ */
 
 #include "yaYUL.h"
 #include <stdlib.h>
@@ -42,19 +53,22 @@ extern int CurrentLineInFile;
 // The symbol value will have an Invalid field if not resolved yet.
 // ... Later:  For a very long time, I simply added the offset into the
 // symbol value.  However, I eventually realized that in doing this it 
-// circumvent all kinds of crazy things the assembler wants to do with
+// circumvents all kinds of crazy things the assembler wants to do with
 // offsets --- such as converting one operand type to another.  Therefore,
 // I now simply put the offset into a global variable, where it is 
 // eventually added to the already-processed opcode+operand.  
-int FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1, Address_t *Value)
+int
+FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1,
+    Address_t *Value)
 {
   Symbol_t *Symbol;
+  Address_t dummyAddress;
   int i, Offset;
-  
+
   i = GetOctOrDec(Operand, &Offset);
   if (!i)
     {
-      IncPc (pc, Offset, Value);
+      IncPc(pc, Offset, Value);
       return (0);
     }
   Value->Invalid = 1;
@@ -65,27 +79,38 @@ int FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1, Address_t *V
   i = GetOctOrDec(Mod1, &Offset);
   if (!i)
     {
-      //IncPc (&Symbol->Value, Offset, Value);
-      OpcodeOffset = Offset;
-      // I'm not sure how to treat very big offsets.  Empirically, this works.
-      if (OpcodeOffset >= 0)
-        OpcodeOffset &= 07777;
+      if (Block1)
+        {
+          //IncPc (&Symbol->Value, Offset, Value);
+          OpcodeOffset = Offset;
+          // I'm not sure how to treat very big offsets.  Empirically, this works.
+          if (OpcodeOffset >= 0)
+            OpcodeOffset &= 07777;
+          else
+            OpcodeOffset = -(07777 & -OpcodeOffset);
+        }
       else
-        OpcodeOffset = -(07777 & -OpcodeOffset);
+        {
+          PseudoToStruct(Symbol->Value.Value + Offset, &dummyAddress);
+          *Value = dummyAddress;
+        }
     }
-  return (0);    
+  return (0);
 }
 
 //------------------------------------------------------------------------
 // Return 0 on success.
-int ParseEquate(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseEquate(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   return (ParseEQUALS(InRecord, OutRecord));
 }
 
-int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+int
+ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  Address_t LabelValue = { 1 };
+  Address_t LabelValue =
+    { 1 };
   int Value, i;
 
   OutRecord->ProgramCounter = InRecord->ProgramCounter;
@@ -109,7 +134,7 @@ int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   if (*InRecord->Operand == 0 && *InRecord->Mod1 == 0)
     {
       EditSymbolNew(InRecord->Label, &InRecord->ProgramCounter, SYMBOL_CONSTANT,
-                    CurrentFilename, CurrentLineInFile);
+          CurrentFilename, CurrentLineInFile);
       OutRecord->LabelValue = InRecord->ProgramCounter;
       return (0);
     }
@@ -119,40 +144,42 @@ int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     {
       // The operand is NOT a number.  Presumably, it's a symbol.
       if (!strcmp(InRecord->Mod1, "+") || !strcmp(InRecord->Mod1, "-"))
-      {
+        {
           // Handle the case of whitespace between +/- and the actual offset. 
           if (*InRecord->Mod2 != 0)
-          {
+            {
               char mod[1 + MAX_LINE_LENGTH];
 
               strcpy(mod, InRecord->Mod1);
               strcat(mod, InRecord->Mod2);
-              i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, 
-                                        InRecord->Operand, 
-                                        mod, 
-                                        &LabelValue);
-          }
+              i = FetchSymbolPlusOffset(&InRecord->ProgramCounter,
+                  InRecord->Operand, mod, &LabelValue);
+            }
           else
-          {
-              sprintf(OutRecord->ErrorMessage, "Syntax error, invalid offset specified");
+            {
+              sprintf(OutRecord->ErrorMessage,
+                  "Syntax error, invalid offset specified");
               OutRecord->Fatal = 1;
-              return(0);
-          }
-      }
+              return (0);
+            }
+        }
       else
-      {
-          i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, 
-                                    InRecord->Operand, 
-                                    InRecord->Mod1, 
-                                    &LabelValue);
-      }
+        {
+          //if (!strcmp(InRecord->Operand, "VPRED"))
+          //  {
+          //    fprintf(stderr, "Hello\n");
+          //  }
+          i = FetchSymbolPlusOffset(&InRecord->ProgramCounter,
+              InRecord->Operand, InRecord->Mod1, &LabelValue);
+        }
 
       if (i)
-      {
-          sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
+        {
+          sprintf(OutRecord->ErrorMessage,
+              "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
           OutRecord->Fatal = 1;
-          return(0);
-      }
+          return (0);
+        }
 
       if (OpcodeOffset)
         {
@@ -164,7 +191,8 @@ int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             IncPc(&LabelValue, OpcodeOffset, &LabelValue);
         }
 
-      EditSymbolNew(InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
+      EditSymbolNew(InRecord->Label, &LabelValue, SYMBOL_CONSTANT,
+          CurrentFilename, CurrentLineInFile);
       OutRecord->LabelValueValid = 1;
     }
   else
@@ -182,12 +210,13 @@ int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         {
           if (Value < -16383 || Value > 32767)
             {
-              strcpy(OutRecord->ErrorMessage, "Value out of range---truncating");
+              strcpy(OutRecord->ErrorMessage,
+                  "Value out of range---truncating");
               OutRecord->Warning = 1;
               if (Value < -16383)
                 Value = -16383;
               else if (Value > 32767)
-                Value = 32767;  
+                Value = 32767;
             }
 
           LabelValue.Invalid = 0;
@@ -199,7 +228,8 @@ int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           if (!TempOutput.ProgramCounter.Invalid)
             {
               LabelValue = TempOutput.ProgramCounter;
-              if (!strcmp(InRecord->Operator, "ERASE"))
+              if (!strcmp(InRecord->Operator, "ERASE")
+                  || (Value >= 02000 && !strcmp(InRecord->Operator, "EQUALS")))
                 {
                   // Special case. This is to handle "ERASE start - end" constructs, 
                   // which should not be tagged as constants.
@@ -213,11 +243,12 @@ int ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             }
         }
 
-      EditSymbolNew(InRecord->Label, &LabelValue, SYMBOL_CONSTANT, CurrentFilename, CurrentLineInFile);
+      EditSymbolNew(InRecord->Label, &LabelValue, SYMBOL_CONSTANT,
+          CurrentFilename, CurrentLineInFile);
     }
 
   OutRecord->LabelValue = LabelValue;
 
-  return (0);  
+  return (0);
 }
 

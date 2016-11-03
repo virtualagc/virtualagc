@@ -1,18 +1,18 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	POWERED_FLIGHT_SUBROUTINES.agc
-# Purpose:	Part of the source code for Solarium build 55. This
-#		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
-# Assembler:	yaYUL --block1
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
-# Mod history:	2009-09-27 JL	Created.
-#		2016-08-20 RSB	Typos.
-#		2016-08-21 RSB	More typos.
-#		2016-08-23 RSB	More of the same.
-#		2016-08-24 RSB	And a few final ones!
+## Copyright:	Public domain.
+## Filename:	POWERED_FLIGHT_SUBROUTINES.agc
+## Purpose:	Part of the source code for Solarium build 55. This
+##		is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), for Apollo 6.
+## Assembler:	yaYUL --block1
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Mod history:	2009-09-27 JL	Created.
+##		2016-08-20 RSB	Typos.
+##		2016-08-21 RSB	More typos.
+##		2016-08-23 RSB	More of the same.
+##		2016-08-24 RSB	And a few final ones!
 
 ## Page 628
 # THIS ROUTINE ENTERED AT CDUTRIG READS PRESENT CDU REGISTERS AND STORES THEM SCALED AT ONE REVOLUTION AS A DP

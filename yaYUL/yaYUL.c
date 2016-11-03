@@ -79,6 +79,14 @@
  * 		                that fatal errors would defeat a forced save of
  * 		                the generated rope.
  *              2016-11-01 RSB  No longer generates checksums for empty banks.
+ *              2016-11-02 RSB  Added --yul and --trace.  Now continues doing symbol-resolution
+ *                              passes with the pass() function, not merely until all symbols
+ *                              are resolved, but until the value of no symbol changes during
+ *                              a pass.  Otherwise, there was a theoretical possibility,
+ *                              depending on the order in which EQUALS or = appear, that a
+ *                              symbol could be resolved but have the wrong value.  This
+ *                              possibility became a reality in Artemis072 when some fixes
+ *                              to EQUALS/= needed for Sunburst120 were made.
  */
 
 #include "yaYUL.h"
@@ -101,6 +109,7 @@ FILE *OutputFile = NULL;
 static int Hardware = 0;
 int flipBugger[044] =
   { 0 };
+int asYUL = 0, trace = 0;
 
 static Address_t RegEB = REG(03);
 static Address_t RegFB = REG(04);
@@ -189,6 +198,10 @@ main(int argc, char *argv[])
         Html = 1;
       else if (!strcmp(argv[i], "--unpound-page"))
         UnpoundPage = 1;
+      else if (!strcmp(argv[i], "--yul"))
+        asYUL = 1;
+      else if (!strcmp(argv[i], "--trace"))
+        trace = 1;
       else if (!strcmp(argv[i], "--block1"))
         {
           Block1 = 1;
@@ -343,7 +356,7 @@ main(int argc, char *argv[])
           printf("Unrecoverable error.\n");
           break;
         }
-      if (k == 0 || k >= LastUnresolved)
+      if ((k == 0 || k >= LastUnresolved) && numSymbolsReassigned == 0)
         {
           printf("Pass #%d\n", i + 1);
           Pass(1, InputFilename, OutputFile, &Fatals, &Warnings);
@@ -563,6 +576,8 @@ main(int argc, char *argv[])
       printf(
           "                 is used to instruct yaYUL to use the -B bugger word for bank B.\n");
       printf("                 Multiple --flip options can be used.\n");
+      printf("--yul            Assemble as YUL rather than GAP.  Has no effect at present.\n");
+      printf("--trace          Trace some of yaYUL's internal activity, for debugging.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);

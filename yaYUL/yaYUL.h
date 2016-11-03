@@ -60,6 +60,10 @@
  *                10/21/16 RSB   Added provision for --flip.  Made some changes
  *                               which might be helpful for building with
  *                               MS Visual Studio.
+ *                11/02/16 RSB   Added provision for --yul and --trace.
+ *                11/03/16 RSB   Added variable needed for tracking whether or not
+ *                               a "superbit" setting has been established in the
+ *                               program or not.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -548,6 +552,12 @@ extern int ArgType;
 
 extern int formatOnly;
 extern int flipBugger[044];
+
+extern int trace;
+extern int asYUL;
+extern int numSymbolsReassigned;
+extern int thisIsTheLastPass;
+extern int isEstablishedSBANK;
 
 #endif // INCLUDED_YAYUL_H
 

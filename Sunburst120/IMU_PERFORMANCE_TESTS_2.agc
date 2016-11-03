@@ -18,6 +18,7 @@
 ##				the Aurora 12 version against the Sunburst 120
 ##				scanned program listing.
 ##		2016-10-31 RSB	Typos.
+##		2016-11-02 RSB	More typos.
 
 ## Page 411
                 BANK            24
@@ -935,7 +936,7 @@ NSBUGD          CA              ZERO
                 TC              QPLACE
 
 
-POSN4           CS              HALF                    #  Z DOWN, Y SOUTH ,X EAST
+POSN4           CA              HALF                    #  Z DOWN, Y SOUTH ,X EAST
                 TS              XSM             +4
                 TS              YSM             +2
                 COM                                     #  NBDY+SRAY=DH,NBDZ+ADIAZ=DV

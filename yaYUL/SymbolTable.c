@@ -88,6 +88,10 @@
  *            	2016-10-08 RSB	Added exception to ## (--html) for inHeader.
  *            	2016-10-20 RSB  Added stuff which may or may not be helpful in building
  *            	                with Visual Studio.
+ *              2016-11-02 RSB  The symbol table, which formerly displayed the C, I, etc.
+ *                              notations only in block 1, now does it for all targets.
+ *                              EditSymbolNew() now tracks how many symbol values have
+ *                              *changed*" during a pass, for post-analysis by pass().
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -837,19 +841,16 @@ PrintSymbolsToFile(FILE *fp)
             fprintf(HtmlOut, "\n");
         }
 
-      if (Block1)
-        {
-          if (SymbolTable[i].Value.Invalid)
-            status = ",I";
-          else if (SymbolTable[i].Value.Constant)
-            status = ",C";
-          else if (SymbolTable[i].Value.Erasable)
-            status = ",E";
-          else if (SymbolTable[i].Value.Fixed)
-            status = ",F";
-          else
-            status = ",?";
-        }
+      if (SymbolTable[i].Value.Invalid)
+        status = ",I";
+      else if (SymbolTable[i].Value.Constant)
+        status = ",C";
+      else if (SymbolTable[i].Value.Erasable)
+        status = ",E";
+      else if (SymbolTable[i].Value.Fixed)
+        status = ",F";
+      else
+        status = ",?";
       fprintf(fp, "%6d%s:   %-*s   ", i + 1, status,
       MAX_LABEL_LENGTH, SymbolTable[i].Name);
       if (HtmlOut)
@@ -920,7 +921,7 @@ UnresolvedSymbols(void)
 // its file and line number. This table is needed to print out the source
 // line as we step through code. It is also needed for "break <line #>".
 SymbolLine_t *LineTable = NULL;
-int LineTableSize = 0, LineTableMax = 0;
+int LineTableSize = 0, LineTableMax = 0, numSymbolsReassigned = 0;
 
 //------------------------------------------------------------------------
 // Assign a symbol a new value including is type, and the file name/line
@@ -933,9 +934,10 @@ EditSymbolNew(const char *Name, Address_t *Value, int Type, char *FileName,
   char Namespace = 0;
   Symbol_t *Symbol;
 
-  //if (!strcmp(Name, "DECON")) {
+  //if (!strcmp(Name, "VPRED"))
+  //  {
   //    fprintf(stderr, "Here!\n");
-  //}
+  //  }
 
   // Find out where the symbol is located in the symbol table.
   Symbol = GetSymbol(Name);
@@ -958,6 +960,8 @@ EditSymbolNew(const char *Name, Address_t *Value, int Type, char *FileName,
 #endif
 
   // Reassign the value.
+  if (memcmp(&Symbol->Value, Value, sizeof (*Value)))
+    numSymbolsReassigned++;
   Symbol->Value = *Value;
 
   // Assign the symbol type, file name, and line number
@@ -992,8 +996,8 @@ WriteSymbolsToFile(char *fname)
   step = 1;
 #ifdef MSC_VS
   if ((fd = _sopen_s(&fd, fname, _O_BINARY | _O_WRONLY | _O_CREAT |
-                     _O_TRUNC, _SH_DENYWR, _S_IREAD | _S_IWRITE)) < 0)
-    goto error;
+              _O_TRUNC, _SH_DENYWR, _S_IREAD | _S_IWRITE)) < 0)
+  goto error;
 #else
   if ((fd = open(fname, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
     goto error;

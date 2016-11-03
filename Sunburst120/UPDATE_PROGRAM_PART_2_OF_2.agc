@@ -11,6 +11,10 @@
 ##		2016-10-14 RSB	Transcribed.
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
+##		2016-11-02 RSB	Removed workaround I had added for TC without
+##				an operand.  Ended up supporting it in yaYUL
+##				instead, since it had already been supported
+##				for block 1 and BLK2 targets anyway.
 
 ## Page 321
 		BANK	26
@@ -261,10 +265,7 @@ UPEND75		TC	PHASCHNG
 		INHINT			# INHINT BECAUSE PHASCHNG RELINTS AND BECA
 					# USE RESTARTED JOB WILL NEED IT.
 		INDEX	COMPNUMB	# V75
-## In the original code, the following line had no operand, which the modern assembler
-## doesn't currently support for this target.  However, "TC -0" (but not "TC 0") 
-## produces the correct result.
-		TC	-0		# FAN TO V72 ROUTINES
+		TC			# FAN TO V72 ROUTINES
 OCTID		OCT	02102
 		TC	I=4
 I=1		EXTEND

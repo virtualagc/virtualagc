@@ -12,6 +12,7 @@
 ##		2016-10-31 RSB	Transcribed.  Boo!
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
+##		2016-11-02 RSB	More typos.
 
 ## Page 519
                 BANK            17
@@ -66,7 +67,7 @@ BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASURE
                 CAE             M31                     # MATRIX*VECTOR(WITH x COMPONENT ZERO)
                 EXTEND
                 MP              ITEMP1                  # M31 * ITEMP1 = M31 * DELTA CDUY
-                TS              ITEMP4
+                DXCH            ITEMP4
                 CAE             M32                     # M32 * ITEMP2 = M32 * DELTA CDUZ
                 EXTEND
                 MP              ITEMP2                  # DELTAR = M31*(DEL CDUY) + M32*(DEL CDUZ)
@@ -82,7 +83,7 @@ BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASURE
                 CAE             M21                     # MATRIX*VECTOR(WITH X COMPONENT ZERO)
                 EXTEND                                  # CLOBBERS ITEMP2=DEL CDUZ, FOR EFFICIENCY
                 MP              ITEMP1                  # M21 * ITEMP1 = M21 * DELTA CDUY
-                XCH             ITEMP2                  # M22 * ITEMP2 = M22 * DELTA CDUZ
+                DXCH            ITEMP2                  # M22 * ITEMP2 = M22 * DELTA CDUZ
                 EXTEND
                 MP              M22                     # DELTAQ = M21*(DEL CDUY) + M22*(DEL CDUZ)
                 DAS             ITEMP2                  # DOUBLE PRECISION Q-BODY-ANGLE INCREMENT
@@ -101,7 +102,7 @@ BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASURE
                 AD              AOSQTERM                # TERM DUE TO ASCENT OFFSET ACCELERATION
                 ADS             OMEGAQ                  # TOTAL RATE ESTIMATE SCALED AT PI/4
 
-                CAE             ITEMP3                  # GET DELTAR
+                CAE             ITEMP4                  # GET DELTAR
                 EXTEND                                  # WFORQR IS K/(NOMINAL DT) SCALED AT 16
                 MP              WFORQR                  # FORM WEIGHTED VALUE OF MEASURED DATA
                 XCH             OMEGAR                  # SAVE AND BEGIN TO WEIGHT VALUE OF OLD W
@@ -560,7 +561,7 @@ MS30QR          OCTAL           37775
 MS50QR          OCTAL           37773
 16/32400        DEC             0.00049
 BIT8,9          OCTAL           00600
-MCOMPTQR        OCTAL           -16                     # -10 MS COMPUATAION TIME
+MCOMPTQR        DEC             -16                     # -10 MS SCALED AS TIME6.
 14-TQRMN        DEC             11
 # START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*********************
 ## Page 531
@@ -1054,7 +1055,7 @@ MINUSV          CAE             1/AMINV
                 BZMF		2JETS-V
 
 2JETSM-V        TC              VXFORM
-2-V.RATE        CAF             ONE
+2-V.RATE        CAF             SEVEN
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
 2JETS-V         CCS             NJ-V    
@@ -1074,7 +1075,7 @@ PLUSU           CAE             1/AMINU
                 AD              URGENCYQ
                 AD              URGENCYR
                 EXTEND
-                BZMF            2JETS+U
+                BZMF            2JETSM+U
 
 2JETS+U         CCS             NJ+U
                 TCF             2JETSM+U
@@ -1083,7 +1084,7 @@ PLUSU           CAE             1/AMINU
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
 2JETSM+U        TC              UXFORM
-2+U.RATE        CAF             THREE
+2+U.RATE        CAF             ONE
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
 2/4JET+R        CAE		1/AMINR
@@ -1098,7 +1099,7 @@ PLUSU           CAE             1/AMINU
                 EXTEND
                 BZMF            2JETS+R
 
-4JETS+R         CAF             THREE
+4JETS+R         CS              THREE
                 TCF             POLTYPE                 # GO FIND BEST POLICY
 
 2JETS+R         CCS             NJ+R
@@ -1297,13 +1298,13 @@ NEGHDAP         CAE             EDOT(2)                 # SCALED AT PI(2)/2(8) R
                 AD              DBMINIMP		# (DURING APS BURNS DBMINIMP = 0.)
                 EXTEND
                 BZMF            +2
-                TC              XTRANS			# NO ROTATION JETS NEEDED.
+                TCF             XTRANS			# NO ROTATION JETS NEEDED.
 
  +2             CS              MAXRATE                 # 10 DEG/SEC SCALED AT PI/16 RAD/SEC
                 AD              EDOT                    # EDOT-MAXRATE SCALED AT PI/16 RAD/SEC.
                 EXTEND
                 BZMF            +2
-                TC              XTRANS
+                TCF             XTRANS
 
  +2             CS              EDOT                    # RATE ERROR SCALED AT PI/16 RAD/SEC.
                 EXTEND					# (LIMITED TO +/- 11.25 DEG/SEC.)
@@ -1358,7 +1359,7 @@ MAINBRCH        TS              HDAP                    # -HDAP(OLD) + 2E + DBMI
                 SQUARE					# (1.5CSP-EDOT/NETACC)(2) AT 256 SECS.
                 DAS		INVACCSQ		# (1.5CSP-EDOT/NETACC)(2) - TERMB
                 
-                CAE		INVACCSQ	+1	# CHECK HIGH ORDER PART, IF NON-ZERO.
+                CAE		INVACCSQ		# CHECK HIGH ORDER PART, IF NON-ZERO.
                 EXTEND
                 BZF		ONLYTST1
                 TCF		ONLYTST1	+1

@@ -1,16 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	MAIN.agc
-# Purpose:	Part of the source code for Colossus build 237.  
-#		This is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), we believe for Apollo 8.
-# Assembler:	yaYUL
-# Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-# Mod history:	2010-05-18 OH	Adapted from corresponding Colossus 249 file.
-#		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
-#		2011-02-08 JL	Minor fixes.
+## Copyright:	Public domain.
+## Filename:	MAIN.agc
+## Purpose:	Part of the source code for Colossus build 237.  
+##		This is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), we believe for Apollo 8.
+## Assembler:	yaYUL
+## Contact:	Onno Hommes <ohommes@alumni.cmu.edu>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history:	2010-05-18 OH	Adapted from corresponding Colossus 249 file.
+##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
+##		2011-02-08 JL	Minor fixes.
+##		2016-11-02 RSB	Typo (offset-references +2 and +3 not indented).
 
 ## Page 740
 # PROGRAM:             P61
@@ -188,7 +189,7 @@ P62.2		EXTEND
 		TC	-5		# ENTER
 		TC	P61.3		# FOR PHASCHNG AND ENDOFJOB.
 
-+3		TC	POSTJUMP
+ +3		TC	POSTJUMP
 		CADR	CM/DAPON	# DISABLE RCS DAP, ENABLE ENTRY DAP AND
 #					  DO ATTITUDE HOLD.
 
@@ -607,7 +608,7 @@ RETRN3		TC	ALARM
 RETRN2		TC	ALARM
 		OCT	01427		# IMU REVERSED
 
-+2		CAF	V05N09
+ +2		CAF	V05N09
 		TC	BANKCALL
 		CADR	GODSPR		# DO DISPLAY
 		CA	10SECS

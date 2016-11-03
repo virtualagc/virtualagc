@@ -12,6 +12,7 @@
 ##               2016-10-21 MAS  Completed adapting/transcribing.
 ##		 2016-10-31 RSB	 Typos.
 ##		 2016-11-01 RSB	 More typos.
+##		 2016-11-02 RSB	 More typos.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -1163,7 +1164,7 @@ ENDMANU         EXIT
                 2CADR           GOODMANU                        # GOODEND
 
                 RELINT
-                TCF             ENDOFJOB                        
+                TC              ENDOFJOB                        
 
 TOOBAD          EXIT                                            # INITIAL OR FINAL GIMBAL ANGLES IN
                 CAF             TWO                             # GIMBAL LOCK

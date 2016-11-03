@@ -11,6 +11,7 @@
 ##		2016-10-16 RSB	Transcribed.
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
+##		2016-11-02 RSB	More typos.
 
 ## Page 340
 		BANK	15
@@ -783,7 +784,7 @@ RRNB            SLOAD           RTB
                 STODL           36D                             # Z COMPONENT
 
                 SIN             DMP                             
-                		SL1                                             
+                SL1                                             
                 STOVL           32D                             
                 		32D                                             
                 RVQ                                             

@@ -17,6 +17,7 @@
 ##                                   And some uncommented comments.
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
+##		2016-11-03 RSB	Modified the SBANK= workaround.
 
 ## Page 12
 
@@ -1224,7 +1225,7 @@ TIGNTION	EQUALS	E4LOAD	+25	# DP TIME OF STATE (VPATCHER).
 
 LEMMASS2	ERASE	3776 - 3777
 
-LEMMASS1	-	MPAC		# *******TEMPORARY***************************
+LEMMASS1	=	MPAC		# *******TEMPORARY***************************
 
 # ERASABLES FOR MASS UPDATE ROUTINE
 
@@ -1961,9 +1962,8 @@ ABVLAOSQ	EQUALS	MPAC	+6	# -ABVAL(AOSQ) SCALED AT PI/2 RAD/SEC(2).
 ## Page 58
 ABVLAOSR	EQUALS	MPAC	+7	# -ABVAL(AOSR) SCALED AT PI/2 RAD/SEC(2).
 
-## The next three lines were not present in the original program listing, and provide a 
+## The next two lines were not present in the original program listing, and provide a 
 ## workaround for a discrepancy between the modern and original assembler programs.
 		BANK	30
 LOWSUPER	EQUALS
-		SBANK=	LOWSUPER
 		

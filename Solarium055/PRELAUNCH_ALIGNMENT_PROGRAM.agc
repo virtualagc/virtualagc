@@ -1,17 +1,17 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	PRELAUNCH_ALIGNMENT_PROGRAM.agc
-# Purpose:	Part of the source code for Solarium build 55. This
-#		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
-# Assembler:	yaYUL --block1
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
-# Mod history:	2009-10-05 JL	Created.
-#		2009-10-30 JL	Fixed filename comment.
-#		2016-08-20 RSB	Resolved Jim's uncertainty about TP.
-#		2016-08-23 RSB	Typos.
+## Copyright:	Public domain.
+## Filename:	PRELAUNCH_ALIGNMENT_PROGRAM.agc
+## Purpose:	Part of the source code for Solarium build 55. This
+##		is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), for Apollo 6.
+## Assembler:	yaYUL --block1
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Mod history:	2009-10-05 JL	Created.
+##		2009-10-30 JL	Fixed filename comment.
+##		2016-08-20 RSB	Resolved Jim's uncertainty about TP.
+##		2016-08-23 RSB	Typos.
 
 ## Page 332
 

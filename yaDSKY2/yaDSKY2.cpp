@@ -49,6 +49,21 @@
 				transmissions.  Increased the flashing
 				frequency as well, by about 20%.  It's
 				still not accurate.
+		2016-10-01 MAS	Converted several signals over to the new
+				fictitious channel 163, driven by the AGC.
+                                The flashing timing is now driven by the
+                                AGC itself, as was the actual DSKY, and the
+                                timing should be very accurate. RESTART and
+                                STANDBY lights should now work. PROCEED has
+                                been changed such that it can be held down,
+                                so it's possible to go to standby.
+		2016-10-05 MAS	Re-implemented PROCEED logic to be compatible
+				with older wxwidgets.
+		2016-11-02 MAS	Made + higher priority than - when both sign
+				bits are set, based on newly discovered
+                                diagrams of DSKY relay wiring. This fixes
+                                the Aurora12/Sunburst 120 DSKY relay test.
+
   
   The yaDSKY2 program is intended to be a completely identical drop-in
   replacement for the yaDSKY program as it exists at 2009-03-06.  
@@ -1444,10 +1459,11 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
       // Write the sign.
       if (Sign != NULL)
         {
-	  if (0 != (RSign & 1))	
-	    MainWindow->ImageSet (Sign, "MinusOn.jpg");
-	  else if (0 != (RSign & 2))
+	  // + has priority if both are set
+	  if (0 != (RSign & 2))
 	    MainWindow->ImageSet (Sign, "PlusOn.jpg");
+	  else if (0 != (RSign & 1))	
+	    MainWindow->ImageSet (Sign, "MinusOn.jpg");
 	  else				 
 	    MainWindow->ImageSet (Sign, "PlusMinusOff.jpg");
 	}

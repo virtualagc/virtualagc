@@ -1,7 +1,7 @@
 ### FILE="Main.annotation"
 ## Copyright:    Public domain.
 ## Filename:     FRESH_START_AND_RESTART.agc
-# Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
+## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
 ##               is part of the source code for the Lunar Module's
 ##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
 ## Assembler:    yaYUL

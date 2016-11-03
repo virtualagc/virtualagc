@@ -1,15 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	KEYRUPT_UPRUPT_FRESH_START.agc
-# Purpose:	Part of the source code for Solarium build 55. This
-#		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
-# Assembler:	yaYUL --block1
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
-# Mod history:	2009-09-15 JL	Created.
-# 		2016-08-17 RSB	Corrected a duplicated symbol TFAIL2 on p. 479.
+## Copyright:	Public domain.
+## Filename:	KEYRUPT_UPRUPT_FRESH_START.agc
+## Purpose:	Part of the source code for Solarium build 55. This
+##		is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), for Apollo 6.
+## Assembler:	yaYUL --block1
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Mod history:	2009-09-15 JL	Created.
+## 		2016-08-17 RSB	Corrected a duplicated symbol TFAIL2 on p. 479.
 ## Page 477
 
 		BANK	4

@@ -1,44 +1,44 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	EXTENDED_VERBS.agc
-# Purpose:	Part of the source code for Comanche, build 055. It
-#		is part of the source code for the Command Module's
-#		(CM) Apollo Guidance Computer (AGC), Apollo 11.
-# Assembler:	yaYUL
-# Reference:	pp. 236-267
-# Contact:	Ron Burkey <info@sandroid.org>,
-#  		Fabrizio Bernardini <fabrizio@spacecraft.it>
-# Website:	http://www.ibiblio.org/apollo.
-# Mod history:	2009-05-18 FB	Transcription Batch 3 Assignment.
-#		2009-05-20 RSB	Corrections:  POODOO -> P00DOO,
-#				GOTOPOOH -> GOTOP00H, added a couple of 
-#				missing instructions in Verb 96.
-#		2009-05-23 RSB	In SYSTEST, corrected TC FLAGWRD1 to 
-#				CA FLAGWRD1.  Added a variety of SBANK=
-#				statements prior to 2CADRs.  One day I'll
-#				have to figure out what yaYUL is doing 
-#				wrong with those ....
-#		2010-08-29 JL	Fixed +3 and +8 pseudo-labels which were accidentally symbols.
-#		2011-05-08 JL	Flagged SBANK= workarounds for future removal.
-#		2011-05-17 JL	Removed all SBANK= workarounds.
+## Copyright:	Public domain.
+## Filename:	EXTENDED_VERBS.agc
+## Purpose:	Part of the source code for Comanche, build 055. It
+##		is part of the source code for the Command Module's
+##		(CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:	yaYUL
+## Reference:	pp. 236-267
+## Contact:	Ron Burkey <info@sandroid.org>,
+##  		Fabrizio Bernardini <fabrizio@spacecraft.it>
+## Website:	http://www.ibiblio.org/apollo.
+## Mod history:	2009-05-18 FB	Transcription Batch 3 Assignment.
+##		2009-05-20 RSB	Corrections:  POODOO -> P00DOO,
+##				GOTOPOOH -> GOTOP00H, added a couple of 
+##				missing instructions in Verb 96.
+##		2009-05-23 RSB	In SYSTEST, corrected TC FLAGWRD1 to 
+##				CA FLAGWRD1.  Added a variety of SBANK=
+##				statements prior to 2CADRs.  One day I'll
+##				have to figure out what yaYUL is doing 
+##				wrong with those ....
+##		2010-08-29 JL	Fixed +3 and +8 pseudo-labels which were accidentally symbols.
+##		2011-05-08 JL	Flagged SBANK= workarounds for future removal.
+##		2011-05-17 JL	Removed all SBANK= workarounds.
 
-# The contents of the "Comanche055" files, in general, are transcribed 
-# from scanned documents. 
-#
-#	Assemble revision 055 of AGC program Comanche by NASA
-#	2021113-051.  April 1, 1969.  
-#
-#	This AGC program shall also be referred to as Colossus 2A
-#
-#	Prepared by
-#			Massachusetts Institute of Technology
-#			75 Cambridge Parkway
-#			Cambridge, Massachusetts
-#
-#	under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further
-# information.  Please report any errors to info@sandroid.org.
+## The contents of the "Comanche055" files, in general, are transcribed 
+## from scanned documents. 
+##
+##	Assemble revision 055 of AGC program Comanche by NASA
+##	2021113-051.  April 1, 1969.  
+##
+##	This AGC program shall also be referred to as Colossus 2A
+##
+##	Prepared by
+##			Massachusetts Institute of Technology
+##			75 Cambridge Parkway
+##			Cambridge, Massachusetts
+##
+##	under NASA contract NAS 9-4065.
+##
+## Refer directly to the online document mentioned above for further
+## information.  Please report any errors to info@sandroid.org.
 
 ## Page 236
 		BANK	7

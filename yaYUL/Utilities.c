@@ -21,6 +21,11 @@
  *  Purpose:    Useful utility functions for yaYUL.
  *  History:    2012-10-04 JL   Began.
  *              2016-10-21 RSB  Bypass the use of sbfix for blk2.
+ *              2016-11-02 RSB  Added provision for --trace.
+ *              2016-11-03 RSB  Added the "unestablished" state for superbits.
+ *                              It *still* doesn't work like I expect, but
+ *                              at least it lets me assemble Sunburst 120
+ *                              (and all prior AGC programs).
  */
 
 #include "yaYUL.h"
@@ -29,15 +34,20 @@
 
 //-------------------------------------------------------------------------
 // Adjust superbank bits in terms of SBANK= and so on.
+int isEstablishedSBANK = 0;
 void
 FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
 {
   int sbfix = 0060;
-#ifdef YAYUL_TRACE
   int tmpval = *outValue;
-#endif
 
-  if (address->Fixed)
+  if (!isEstablishedSBANK)
+    {
+      sbfix = 0;
+      if (!blk2)
+        *outValue &= ~0160;
+    }
+  else if (address->Fixed)
     {
       if (address->Banked)
         {
@@ -48,7 +58,7 @@ FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
               // Banks 0-27 and 40-43 are accessible, banks 30-37 are not.
               if ((address->FB >= 030 && address->FB <= 033 && !address->Super)
                   || (address->FB > 033 && address->FB <= 037))
-                sbfix = 0060;
+                ;
               else
                 sbfix = 0100;
             }
@@ -73,18 +83,15 @@ FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
   if (!blk2)
     *outValue |= sbfix;
 
-#ifdef YAYUL_TRACE
-  printf("--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o) fix=%05o value=%06o\n",
-      __FUNCTION__,
-      record->ProgramCounter.FB,
-      record->ProgramCounter.Super,
-      record->SBank.current.Super,
-      address->FB,
-      address->Super,
-      tmpval,
-      sbfix,
-      *outValue);
-#endif
+  if (trace && thisIsTheLastPass)
+    {
+      printf(
+          "--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o,fixed=%d,banked=%d) "
+          "fix=%05o value=%06o\n",
+          __FUNCTION__, record->ProgramCounter.FB, record->ProgramCounter.Super,
+          record->SBank.current.Super, address->FB, address->Super, tmpval,
+          address->Fixed, address->Banked, sbfix, *outValue);
+    }
 }
 
 //-------------------------------------------------------------------------

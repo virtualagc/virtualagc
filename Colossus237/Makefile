@@ -25,6 +25,7 @@
 # 		2016-10-04 JL	Change to use Makefile.inc.
 
 BASENAME=Colossus237
+EXTRA_YAYUL_ARGS=
 
 ${BASENAME}.binsource: ${BASENAME}.binsource2.txt
 	../Tools/listing2binsource ${VERBOSE} $^ $@
