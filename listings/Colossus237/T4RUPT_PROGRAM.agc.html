@@ -87,16 +87,16 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-005668,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-005669,000003:                                                                                                  <span class="co">#  Filename:     T4RUPT_PROGRAM.agc</span>
-005670,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.  </span>
-005671,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-005672,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-005673,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-005674,000008:                                                                                                  <span class="co">#  Reference:    pp. 128-165</span>
-005675,000009:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-005676,000010:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
-005677,000011:                                                                                                  <span class="co">#  Mod history:  2010-12-04 JL   Adapted from similar Colossus 249 file.</span>
+005668,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+005669,000003:                                                                                                  <span class="co">## Filename:    T4RUPT_PROGRAM.agc</span>
+005670,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.  </span>
+005671,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
+005672,000006:                                                                                                  <span class="co">##              Computer (AGC), we believe for Apollo 8.</span>
+005673,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+005674,000008:                                                                                                  <span class="co">## Reference:   pp. 128-165</span>
+005675,000009:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+005676,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
+005677,000011:                                                                                                  <span class="co">## Mod history: 2010-12-04 JL   Adapted from similar Colossus 249 file.</span>
 005678,000012: 
 </pre>
 </span>
@@ -319,7 +319,7 @@ Page 132
 005827,000161:                                                                                                  <span class="co">#        JUMP TO APPROPRIATE ONCE-PER SECOND (.96 SEC ACTUALLY) ACTIVITY</span>
 005828,000162: 
 <a name="54344A554D50"></a>005829,000163: 06,2116           50070        <span class="sm">T4JUMP  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-005830,000164: 06,2117           12120                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+005830,000164: 06,2117           12120                           <span class="op">TCF     </span> +1                                    
 005831,000165: 
 005832,000166: 06,2120           12130                           <span class="op">TCF     </span> <a href="#4F505454455354">OPTTEST</a>                               
 005833,000167: 06,2121           12765                           <span class="op">TCF     </span> <a href="#4F50544D4F4E">OPTMON</a>                                
@@ -601,7 +601,7 @@ Page 137
 006039,000373: 06,2252           41320                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IF TURN-ON REQUEST, WE SHOULD HAVE IMU</span>
 006040,000374: 06,2253           74702                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495439">BIT9</a>                                  <span class="co">#  OPERATE.</span>
 006041,000375: 06,2254           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-006042,000376: 06,2255           12260                           <span class="op">TCF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+006042,000376: 06,2255           12260                           <span class="op">TCF     </span> +3                                    
 006043,000377: 
 006044,000378: 06,2256           05537                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  ALARM IF NOT</span>
 006045,000379: 06,2257           00213                           <span class="ps">OCT     </span> 213                                   
@@ -1059,7 +1059,7 @@ Page 145
 006385,000719: 06,2537           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SEE IF DELAY PRESENT DISCRETE HAS BEEN</span>
 006386,000720: 06,2540           02012                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                <span class="co">#  SENT. IF SO, ACTION COMPLETE.</span>
 006387,000721: 06,2541           00006                           <span class="op">EXTEND  </span>                                       
-006388,000722: 06,2542           12544                           <span class="op">BZF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+006388,000722: 06,2542           12544                           <span class="op">BZF     </span> +2                                    
 006389,000723: 06,2543           12227                           <span class="op">TCF     </span> <a href="#4E5854494641494C">NXTIFAIL</a>                              
 006390,000724: 
 006391,000725: 06,2544           34711                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  IF NOT, SET BIT TO INDICATE REQUEST NOT</span>
@@ -1536,9 +1536,9 @@ Page 155
 006722,001056: 06,2773           03224                           <span class="op">TC      </span> <a href="#4F43445546545354">OCDUFTST</a>                              <span class="co">#  PROCESS OCDUFAIL BIT CHANGE</span>
 006723,001057: 
 <a name="33334F50544D4F4E"></a>006724,001058: 06,2774           11303        <span class="sm">33OPTMON</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                <span class="co">#  BYPASS IF TVC TAKEOVER</span>
-006725,001059: 06,2775           13001                           <span class="op">TCF     </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    
-006726,001060: 06,2776           13001                           <span class="op">TCF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
-006727,001061: 06,2777           13001                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+006725,001059: 06,2775           13001                           <span class="op">TCF     </span> +4                                    
+006726,001060: 06,2776           13001                           <span class="op">TCF     </span> +3                                    
+006727,001061: 06,2777           13001                           <span class="op">TCF     </span> +2                                    
 006728,001062: 06,3000           15222                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
 006729,001063: 
 006730,001064: 06,3001           31331                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              <span class="co">#  LOOK FOR OPTICS MODE SWITCH CHANGE</span>
@@ -1558,7 +1558,7 @@ Page 155
 006744,001078: 
 006745,001079: 06,3016           74706                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  SEE IF CSC</span>
 006746,001080: 06,3017           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-006747,001081: 06,3020           03022                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  CSC-SET SWSAMPLE POS</span>
+006747,001081: 06,3020           03022                           <span class="op">TC      </span> +2                                    <span class="co">#  CSC-SET SWSAMPLE POS</span>
 006748,001082: 06,3021           37716                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  ZOPTICS-SET SWSAMPLE (-1)</span>
 <a name="53455453414D50"></a>006749,001083: 06,3022           55314        <span class="sm">SETSAMP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535753414D504C45">SWSAMPLE</a>                              <span class="co">#  CURRENT OPTICS SWITCH SETTING</span>
 006750,001084: 
@@ -1650,7 +1650,7 @@ Page 157
 006808,001142: 06,3100           03112                           <span class="op">TC      </span> <a href="#4D414E544F435343">MANTOCSC</a>                              <span class="co">#  NOW AT CSC</span>
 006809,001143: 06,3101           03107                           <span class="op">TC      </span> <a href="#4D414E544F4D414E">MANTOMAN</a>                              <span class="co">#  STILL MANUAL</span>
 006810,001144: 06,3102           11316                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57544F5054494F4E">WTOPTION</a>                              <span class="co">#  ZOPTICS-LOOK AT ZOPTICS RETURN OPTION</span>
-006811,001145: 06,3103           03105                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  5 SEC RETURN GOOD-CONTINUE ZOPTICS</span>
+006811,001145: 06,3103           03105                           <span class="op">TC      </span> +2                                    <span class="co">#  5 SEC RETURN GOOD-CONTINUE ZOPTICS</span>
 006812,001146: 06,3104           03151                           <span class="op">TC      </span> <a href="#4F50545A45524F">OPTZERO</a>                               <span class="co">#  ZOPTICS MUST START ANEW</span>
 006813,001147: 
 006814,001148: 06,3105           03216                           <span class="op">TC      </span> <a href="#494E49545A4F5054">INITZOPT</a>                              <span class="co">#  SHOW ZERO OPTICS PROCESSING</span>
@@ -1685,7 +1685,7 @@ Page 157
 <a name="435343544F4D414E"></a>006843,001177: 06,3133           11303        <span class="sm">CSCTOMAN</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                <span class="co">#  SEE IF COARS WORKING</span>
 006844,001178: 06,3134           03140                           <span class="op">TC      </span> <a href="#43414E434F415253">CANCOARS</a>                              <span class="co">#  COARS WORKING-SWITCH NOT CSC-KILL COARS</span>
 006845,001179: 06,3135           03140                           <span class="op">TC      </span> <a href="#43414E434F415253">CANCOARS</a>                              
-006846,001180: 06,3136           03137                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  NO COARS-NORMAL EXIT</span>
+006846,001180: 06,3136           03137                           <span class="op">TC      </span> +1                                    <span class="co">#  NO COARS-NORMAL EXIT</span>
 006847,001181: 06,3137           03154                           <span class="op">TC      </span> <a href="#5345544445534D44">SETDESMD</a>                              
 </pre>
 </span>
@@ -1867,13 +1867,13 @@ Page 161
 006969,001303: 10,2001           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
 006970,001304: 10,2002           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GET ABS(CDUS)</span>
 006971,001305: 10,2003           67707                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31332C31342C3135">13,14,15</a>                              
-006972,001306: 10,2004           12006                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  ABS(CDUS) - 45 DEG</span>
+006972,001306: 10,2004           12006                           <span class="op">TCF     </span> +2                                    <span class="co">#  ABS(CDUS) - 45 DEG</span>
 006973,001307: 10,2005           12003                           <span class="op">TCF     </span> -2                                    
 006974,001308: 10,2006           00006                           <span class="op">EXTEND  </span>                                       
 006975,001309: 10,2007           62016                           <span class="op">BZMF    </span> <a href="#4F5A4F4E45">OZONE</a>                                 <span class="co">#  LESS THAN 45 DEG-SET ZONE 0</span>
 006976,001310: 10,2010           31307                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4F4E45">ZONE</a>                                  <span class="co">#  IF ZONE ZERO, CHANGE TO + OR - OTHERWISE</span>
 006977,001311: 10,2011           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DONT MESS WITH ZONE</span>
-006978,001312: 10,2012           12014                           <span class="op">BZF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+006978,001312: 10,2012           12014                           <span class="op">BZF     </span> +2                                    
 006979,001313: 10,2013           12020                           <span class="op">TCF     </span> <a href="#434F4E5444525645">CONTDRVE</a>                              <span class="co">#  JUST CONTINUE</span>
 006980,001314: 10,2014           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  GREATER THAN 45 DEG-SET ZONE TO SIGN CDU</span>
 006981,001315: 10,2015           12017                           <span class="op">TCF     </span> <a href="#4F5A4F4E45">OZONE</a>      +1                         
@@ -1881,8 +1881,8 @@ Page 161
 006983,001317: 10,2017           55307                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4F4E45">ZONE</a>                                  
 006984,001318: 10,2020                                           <span class="ps">COUNT*  </span> $$/<a href="#543452555054">T4RUPT</a>                             
 <a name="434F4E5444525645"></a>006985,001319: 10,2020           11303        <span class="sm">CONTDRVE</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                
-006986,001320: 10,2021           02025                           <span class="op">TC      </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    <span class="co">#  WORK COARS OPTICS</span>
-006987,001321: 10,2022           02025                           <span class="op">TC      </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    <span class="co">#  WORK COARS OPTICS</span>
+006986,001320: 10,2021           02025                           <span class="op">TC      </span> +4                                    <span class="co">#  WORK COARS OPTICS</span>
+006987,001321: 10,2022           02025                           <span class="op">TC      </span> +3                                    <span class="co">#  WORK COARS OPTICS</span>
 006988,001322: 10,2023           05222                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  NO OPT</span>
 006989,001323: 10,2024           05222                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  NO OPT</span>
 006990,001324: 
@@ -1893,7 +1893,7 @@ Page 161
 006995,001329: 10,2030           34701                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  SEE IF OCDUS ZEROED SINCE LAST FSTART</span>
 006996,001330: 10,2031           71331                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              
 006997,001331: 10,2032           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-006998,001332: 10,2033           02036                           <span class="op">TC      </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+006998,001332: 10,2033           02036                           <span class="op">TC      </span> +3                                    
 006999,001333: 10,2034           05537                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  OPTICS NOT ZEROED</span>
 007000,001334: 10,2035           00120                           <span class="ps">OCT     </span> 00120                                 
 007001,001335: 
@@ -1933,7 +1933,7 @@ Page 162
 007021,001355: 10,2056           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
 007022,001356: 10,2057           60000                           <span class="op">DOUBLE  </span>                                       
 007023,001357: 10,2060           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-007024,001358: 10,2061           12063                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  NO OVFL</span>
+007024,001358: 10,2061           12063                           <span class="op">TCF     </span> +2                                    <span class="co">#  NO OVFL</span>
 007025,001359: 
 007026,001360: 10,2062           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  WITH OVFL</span>
 <a name="53544F52434D44"></a>007027,001361: 10,2063           51303        <span class="sm">STORCMD </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                
@@ -1948,7 +1948,7 @@ Page 162
 007036,001370: 
 007037,001371: 10,2070           10036                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553">CDUS</a>                                  <span class="co">#  IF CDUS GREATER THAN +OR- 90 DEG CHECK</span>
 007038,001372: 10,2071           64673                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#  FOR POSSIBLE STOP PROBLEM</span>
-007039,001373: 10,2072           12074                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+007039,001373: 10,2072           12074                           <span class="op">TCF     </span> +2                                    
 007040,001374: 10,2073           12071                           <span class="op">TCF     </span> -2                                    
 007041,001375: 10,2074           00006                           <span class="op">EXTEND  </span>                                       
 007042,001376: 10,2075           62122                           <span class="op">BZMF    </span> <a href="#434D445345545550">CMDSETUP</a>                              <span class="co">#  CDU LESS THAN 90 DEG, NO PROBLEMS</span>
@@ -1966,7 +1966,7 @@ Page 162
 007054,001388: 10,2110           12122                           <span class="op">TCF     </span> <a href="#434D445345545550">CMDSETUP</a>                              <span class="co">#  SIGN ZONE NOT EQUAL TO SIGN COMMAND</span>
 007055,001389: 10,2111           11161                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4445534F505453">DESOPTS</a>                               <span class="co">#  SEE IF DESOPTS BETWEEN -90 AND +90</span>
 007056,001390: 10,2112           64673                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                
-007057,001391: 10,2113           12115                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  ABS(DESOPTS) - 90 DEG</span>
+007057,001391: 10,2113           12115                           <span class="op">TCF     </span> +2                                    <span class="co">#  ABS(DESOPTS) - 90 DEG</span>
 007058,001392: 10,2114           12112                           <span class="op">TCF     </span> -2                                    
 007059,001393: 10,2115           00006                           <span class="op">EXTEND  </span>                                       
 </pre>
@@ -1984,7 +1984,7 @@ Page 163
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-007061,001395: 10,2116           62120                           <span class="op">BZMF    </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  DESOPTS IN FIRST OR FOURTH QUAD</span>
+007061,001395: 10,2116           62120                           <span class="op">BZMF    </span> +2                                    <span class="co">#  DESOPTS IN FIRST OR FOURTH QUAD</span>
 007062,001396: 10,2117           12122                           <span class="op">TCF     </span> <a href="#434D445345545550">CMDSETUP</a>                              
 007063,001397: 10,2120           41306                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D4D414E444F">COMMANDO</a>   +1                         <span class="co">#  REVERSE REGULAR COMMAND</span>
 007064,001398: 10,2121           55306                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D4D414E444F">COMMANDO</a>   +1                         
@@ -2007,7 +2007,7 @@ Page 163
 007081,001415: 
 007082,001416: 10,2136           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GREATER THAN 45 DEG-USE OPSMAX WITH</span>
 007083,001417: 10,2137           34672                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  CORRECT SIGN</span>
-007084,001418: 10,2140           02142                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+007084,001418: 10,2140           02142                           <span class="op">TC      </span> +2                                    
 007085,001419: 10,2141           44672                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
 007086,001420: 10,2142           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
 007087,001421: 10,2143           02063                           <span class="op">TC      </span> <a href="#53544F52434D44">STORCMD</a>                               

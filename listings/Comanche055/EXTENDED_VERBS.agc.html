@@ -88,46 +88,46 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010163,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-010164,000003:                                                                                                  <span class="co">#  Filename:     EXTENDED_VERBS.agc</span>
-010165,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Comanche, build 055. It</span>
-010166,000005:                                                                                                  <span class="co">#                is part of the source code for the Command Module's</span>
-010167,000006:                                                                                                  <span class="co">#                (CM) Apollo Guidance Computer (AGC), Apollo 11.</span>
-010168,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-010169,000008:                                                                                                  <span class="co">#  Reference:    pp. 236-267</span>
-010170,000009:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>,</span>
-010171,000010:                                                                                                  <span class="co">#                Fabrizio Bernardini &lt;fabrizio@spacecraft.it></span>
-010172,000011:                                                                                                  <span class="co">#  Website:      http://www.ibiblio.org/apollo.</span>
-010173,000012:                                                                                                  <span class="co">#  Mod history:  2009-05-18 FB   Transcription Batch 3 Assignment.</span>
-010174,000013:                                                                                                  <span class="co">#                2009-05-20 RSB  Corrections:  POODOO -> P00DOO,</span>
-010175,000014:                                                                                                  <span class="co">#                                GOTOPOOH -> GOTOP00H, added a couple of </span>
-010176,000015:                                                                                                  <span class="co">#                                missing instructions in Verb 96.</span>
-010177,000016:                                                                                                  <span class="co">#                2009-05-23 RSB  In SYSTEST, corrected TC FLAGWRD1 to </span>
-010178,000017:                                                                                                  <span class="co">#                                CA FLAGWRD1.  Added a variety of SBANK=</span>
-010179,000018:                                                                                                  <span class="co">#                                statements prior to 2CADRs.  One day I'll</span>
-010180,000019:                                                                                                  <span class="co">#                                have to figure out what yaYUL is doing </span>
-010181,000020:                                                                                                  <span class="co">#                                wrong with those ....</span>
-010182,000021:                                                                                                  <span class="co">#                2010-08-29 JL   Fixed +3 and +8 pseudo-labels which were accidentally symbols.</span>
-010183,000022:                                                                                                  <span class="co">#                2011-05-08 JL   Flagged SBANK= workarounds for future removal.</span>
-010184,000023:                                                                                                  <span class="co">#                2011-05-17 JL   Removed all SBANK= workarounds.</span>
+010163,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+010164,000003:                                                                                                  <span class="co">## Filename:    EXTENDED_VERBS.agc</span>
+010165,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Comanche, build 055. It</span>
+010166,000005:                                                                                                  <span class="co">##              is part of the source code for the Command Module's</span>
+010167,000006:                                                                                                  <span class="co">##              (CM) Apollo Guidance Computer (AGC), Apollo 11.</span>
+010168,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+010169,000008:                                                                                                  <span class="co">## Reference:   pp. 236-267</span>
+010170,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>,</span>
+010171,000010:                                                                                                  <span class="co">##              Fabrizio Bernardini &lt;fabrizio@spacecraft.it></span>
+010172,000011:                                                                                                  <span class="co">## Website:     http://www.ibiblio.org/apollo.</span>
+010173,000012:                                                                                                  <span class="co">## Mod history: 2009-05-18 FB   Transcription Batch 3 Assignment.</span>
+010174,000013:                                                                                                  <span class="co">##              2009-05-20 RSB  Corrections:  POODOO -> P00DOO,</span>
+010175,000014:                                                                                                  <span class="co">##                              GOTOPOOH -> GOTOP00H, added a couple of </span>
+010176,000015:                                                                                                  <span class="co">##                              missing instructions in Verb 96.</span>
+010177,000016:                                                                                                  <span class="co">##              2009-05-23 RSB  In SYSTEST, corrected TC FLAGWRD1 to </span>
+010178,000017:                                                                                                  <span class="co">##                              CA FLAGWRD1.  Added a variety of SBANK=</span>
+010179,000018:                                                                                                  <span class="co">##                              statements prior to 2CADRs.  One day I'll</span>
+010180,000019:                                                                                                  <span class="co">##                              have to figure out what yaYUL is doing </span>
+010181,000020:                                                                                                  <span class="co">##                              wrong with those ....</span>
+010182,000021:                                                                                                  <span class="co">##              2010-08-29 JL   Fixed +3 and +8 pseudo-labels which were accidentally symbols.</span>
+010183,000022:                                                                                                  <span class="co">##              2011-05-08 JL   Flagged SBANK= workarounds for future removal.</span>
+010184,000023:                                                                                                  <span class="co">##              2011-05-17 JL   Removed all SBANK= workarounds.</span>
 010185,000024: 
-010186,000025:                                                                                                  <span class="co">#  The contents of the "Comanche055" files, in general, are transcribed </span>
-010187,000026:                                                                                                  <span class="co">#  from scanned documents. </span>
-010188,000027: 
-010189,000028:                                                                                                  <span class="co">#        Assemble revision 055 of AGC program Comanche by NASA</span>
-010190,000029:                                                                                                  <span class="co">#        2021113-051.  April 1, 1969.  </span>
-010191,000030: 
-010192,000031:                                                                                                  <span class="co">#        This AGC program shall also be referred to as Colossus 2A</span>
-010193,000032: 
-010194,000033:                                                                                                  <span class="co">#        Prepared by</span>
-010195,000034:                                                                                                  <span class="co">#                        Massachusetts Institute of Technology</span>
-010196,000035:                                                                                                  <span class="co">#                        75 Cambridge Parkway</span>
-010197,000036:                                                                                                  <span class="co">#                        Cambridge, Massachusetts</span>
-010198,000037: 
-010199,000038:                                                                                                  <span class="co">#        under NASA contract NAS 9-4065.</span>
-010200,000039: 
-010201,000040:                                                                                                  <span class="co">#  Refer directly to the online document mentioned above for further</span>
-010202,000041:                                                                                                  <span class="co">#  information.  Please report any errors to info@sandroid.org.</span>
+010186,000025:                                                                                                  <span class="co">## The contents of the "Comanche055" files, in general, are transcribed </span>
+010187,000026:                                                                                                  <span class="co">## from scanned documents. </span>
+010188,000027:                                                                                                  <span class="co">##</span>
+010189,000028:                                                                                                  <span class="co">##      Assemble revision 055 of AGC program Comanche by NASA</span>
+010190,000029:                                                                                                  <span class="co">##      2021113-051.  April 1, 1969.  </span>
+010191,000030:                                                                                                  <span class="co">##</span>
+010192,000031:                                                                                                  <span class="co">##      This AGC program shall also be referred to as Colossus 2A</span>
+010193,000032:                                                                                                  <span class="co">##</span>
+010194,000033:                                                                                                  <span class="co">##      Prepared by</span>
+010195,000034:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
+010196,000035:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
+010197,000036:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
+010198,000037:                                                                                                  <span class="co">##</span>
+010199,000038:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
+010200,000039:                                                                                                  <span class="co">##</span>
+010201,000040:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further</span>
+010202,000041:                                                                                                  <span class="co">## information.  Please report any errors to info@sandroid.org.</span>
 010203,000042: 
 </pre>
 </span>
@@ -148,7 +148,7 @@ Page 236
 010206,000045: 43,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4558545645524253">EXTVERBS</a>                              
 010207,000046: 43,2000                                           <span class="ps">BANK    </span>                                       
 010208,000047: 
-010209,000048: 43,2000  0002757                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+010209,000048: 43,2000  E5,1757                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
 010210,000049: 
 010211,000050: 43,2000                                           <span class="ps">COUNT*  </span> $$/EXTVB                              
 010212,000051: 
@@ -792,7 +792,7 @@ Page 248
 010682,000521: 
 010683,000522: 43,2411           35070                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5052494F3136">PRIO16</a>                                <span class="co">#  PRELAUNCH AZIMUTH CHANGE</span>
 010684,000523: 43,2412           05147                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-010685,000524: 43,2413  0002671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+010685,000524: 43,2413  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
 010686,000525: 43,2413           03742 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#415A4D5448434731">AZMTHCG1</a>                              
 010687,000526: 
 010688,000527: 43,2415           05412                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
@@ -1829,7 +1829,7 @@ Page 266
 011453,001292: 43,3155           04701                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
 011454,001293: 43,3156           10011                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#563337">V37</a>                                   <span class="co">#  GO TO P00</span>
 011455,001294: 
-011456,001295: 43,3157  0002751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              
+011456,001295: 43,3157  E5,1751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              
 <a name="563532"></a>011457,001296: 43,3157           05364        <span class="sm">V52     </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS P22 OPERATING</span>
 011458,001297: 43,3160           00026                           <span class="ps">MM      </span> 22         B-14                       
 011459,001298: 43,3161           02120                           <span class="op">TC      </span> <a href="#414C4D2F454E44">ALM/END</a>                               <span class="co">#  NO</span>
@@ -1870,7 +1870,7 @@ Page 267
 <a name="563637"></a>011480,001319: 43,3201           02076        <span class="sm">V67     </span>           <span class="op">TC      </span> <a href="#5445535458414354">TESTXACT</a>                              
 011481,001320: 43,3202           35061                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5052494F35">PRIO5</a>                                 
 011482,001321: 43,3203           05147                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-011483,001322: 43,3204  0002400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>                                     
+011483,001322: 43,3204  E5,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>                                     
 011484,001323: 43,3204           03624 60105                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#56363743414C4C">V67CALL</a>                               
 011485,001324: 
 011486,001325: 43,3206           05217                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              

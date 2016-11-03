@@ -87,17 +87,17 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061285,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-061286,000003:                                                                                                  <span class="co">#  Filename:     SERVICE_ROUTINES.agc</span>
-061287,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-061288,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-061289,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-061290,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-061291,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-061292,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-061293,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-061294,000011:                                                                                                  <span class="co">#  Mod history:  2011-04-17 JL   Adapted from corresponding Colossus 249 file.</span>
-061295,000012: 
+061294,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+061295,000003:                                                                                                  <span class="co">## Filename:     SERVICE_ROUTINES.agc</span>
+061296,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+061297,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+061298,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+061299,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+061300,000008:                                                                                                  <span class="co">## Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+061301,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+061302,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+061303,000011:                                                                                                  <span class="co">## Mod history:  2011-04-17 JL  Adapted from corresponding Colossus 249 file.</span>
+061304,000012: 
 </pre>
 </span>
 </p>
@@ -113,49 +113,49 @@ Page 1449
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061297,000014:    7717                                           <span class="ps">BLOCK   </span> 3                                     
-061298,000015:    6000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414736">FFTAG6</a>                                
-061299,000016:    6000                                           <span class="ps">BANK    </span>                                       
-061300,000017:    7717                                           <span class="ps">COUNT   </span> 03/FLAG                               
-061301,000018: 
-<a name="5550454E5432"></a>061302,000019:    7717           54001        <span class="sm">UPENT2  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  WHICH FLAGWORD IS IT</span>
-061303,000020:    7720           74716                           <span class="op">MASK    </span> <a href="#4F435437">OCT7</a>                                  
-061304,000021:    7721           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE IN L FOR INDEXING</span>
-061305,000022: 
-061306,000023:    7722           75630                           <span class="op">MASK    </span> <a href="ALARM_AND_ABORT.agc.html#4F43543737373730">OCT77770</a>                              <span class="co">#  OBTAIN THE BIT INFORMATION</span>
-061307,000024:    7723           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  PREVENT INTERUPTS</span>
-061308,000025:    7724           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  STORE THE BIT INFORMATION TEMPORARIALY</span>
-061309,000026: 
-061310,000027:    7725           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061311,000028:    7726           40074                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
-061312,000029:    7727           70061                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-061313,000030:    7730           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061314,000031:    7731           26074                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
-061315,000032:    7732           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  RELEASE INTERUPT INHIBIT</span>
-061316,000033: 
-061317,000034:    7733           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE CORRECT RETURN ADDRESS</span>
-061318,000035:    7734           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN</span>
-061319,000036: 
-<a name="444F574E454E5432"></a>061320,000037:    7735           54001        <span class="sm">DOWNENT2</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  WHICH FLAGWORD IS IT</span>
-061321,000038:    7736           74716                           <span class="op">MASK    </span> <a href="#4F435437">OCT7</a>                                  
-061322,000039:    7737           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE IN L FOR INDEXING</span>
-061323,000040: 
-061324,000041:    7740           75630                           <span class="op">MASK    </span> <a href="ALARM_AND_ABORT.agc.html#4F43543737373730">OCT77770</a>                              <span class="co">#  OBTAIN THE BIT INFORMATION</span>
-061325,000042:    7741           40000                           <span class="op">COM     </span>                                       <span class="co">#  START TO PROCESS THE INFORMATION</span>
-061326,000043: 
-061327,000044:    7742           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  PREVENT INTERUPTS</span>
-061328,000045:    7743           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061329,000046:    7744           70074                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
-061330,000047:    7745           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061331,000048:    7746           54074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
-061332,000049:    7747           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  RELEASE INTERUPT INHIBIT</span>
-061333,000050: 
-061334,000051:    7750           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE CORRECT RETURN ADDRESS</span>
-061335,000052:    7751           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN</span>
-061336,000053: 
-<a name="4F435437"></a>061337,000054:    7752     4716               <span class="sm">OCT7    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
-061338,000055: 10,3671                                           <span class="ps">BANK    </span> 10                                    
-061339,000056: 
+061306,000014:    7717                                           <span class="ps">BLOCK   </span> 3                                     
+061307,000015:    6000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414736">FFTAG6</a>                                
+061308,000016:    6000                                           <span class="ps">BANK    </span>                                       
+061309,000017:    7717                                           <span class="ps">COUNT   </span> 03/FLAG                               
+061310,000018: 
+<a name="5550454E5432"></a>061311,000019:    7717           54001        <span class="sm">UPENT2  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  WHICH FLAGWORD IS IT</span>
+061312,000020:    7720           74716                           <span class="op">MASK    </span> <a href="#4F435437">OCT7</a>                                  
+061313,000021:    7721           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE IN L FOR INDEXING</span>
+061314,000022: 
+061315,000023:    7722           75630                           <span class="op">MASK    </span> <a href="ALARM_AND_ABORT.agc.html#4F43543737373730">OCT77770</a>                              <span class="co">#  OBTAIN THE BIT INFORMATION</span>
+061316,000024:    7723           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  PREVENT INTERUPTS</span>
+061317,000025:    7724           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  STORE THE BIT INFORMATION TEMPORARIALY</span>
+061318,000026: 
+061319,000027:    7725           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061320,000028:    7726           40074                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
+061321,000029:    7727           70061                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+061322,000030:    7730           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061323,000031:    7731           26074                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
+061324,000032:    7732           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  RELEASE INTERUPT INHIBIT</span>
+061325,000033: 
+061326,000034:    7733           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE CORRECT RETURN ADDRESS</span>
+061327,000035:    7734           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN</span>
+061328,000036: 
+<a name="444F574E454E5432"></a>061329,000037:    7735           54001        <span class="sm">DOWNENT2</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  WHICH FLAGWORD IS IT</span>
+061330,000038:    7736           74716                           <span class="op">MASK    </span> <a href="#4F435437">OCT7</a>                                  
+061331,000039:    7737           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE IN L FOR INDEXING</span>
+061332,000040: 
+061333,000041:    7740           75630                           <span class="op">MASK    </span> <a href="ALARM_AND_ABORT.agc.html#4F43543737373730">OCT77770</a>                              <span class="co">#  OBTAIN THE BIT INFORMATION</span>
+061334,000042:    7741           40000                           <span class="op">COM     </span>                                       <span class="co">#  START TO PROCESS THE INFORMATION</span>
+061335,000043: 
+061336,000044:    7742           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  PREVENT INTERUPTS</span>
+061337,000045:    7743           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061338,000046:    7744           70074                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
+061339,000047:    7745           50001                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061340,000048:    7746           54074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
+061341,000049:    7747           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  RELEASE INTERUPT INHIBIT</span>
+061342,000050: 
+061343,000051:    7750           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE CORRECT RETURN ADDRESS</span>
+061344,000052:    7751           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN</span>
+061345,000053: 
+<a name="4F435437"></a>061346,000054:    7752     4716               <span class="sm">OCT7    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
+061347,000055: 10,3671                                           <span class="ps">BANK    </span> 10                                    
+061348,000056: 
 </pre>
 </span>
 </p>
@@ -171,55 +171,55 @@ Page 1450
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061341,000058:                                                                                                  <span class="co">#      UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.   USING THEM, WHETHER OR</span>
-061342,000059:                                                                                                  <span class="co">#  NOT IN INTERRUPT, ONE MAY SET OR CLEAR ANY SINGLE, NAMED BIT IN ANY ERASABLE REGISTER, SUBJECT OF COURSE TO</span>
-061343,000060:                                                                                                  <span class="co">#  EBANK SETTING.   A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL</span>
-061344,000061:                                                                                                  <span class="co">#  ASSEMBLER.</span>
-061345,000062: 
-061346,000063:                                                                                                  <span class="co">#      AT PRESENT THE ONLY NAMED BITS ARE THOSE IN THE FLAGWORDS.   ASSEMBLER CHANGES WILL MAKE IT POSSIBLE TO</span>
-061347,000064:                                                                                                  <span class="co">#  NAME ANY BIT IN ERASABLE MEMORY.</span>
-061348,000065: 
-061349,000066:                                                                                                  <span class="co">#      CALLING SEQUENCES ARE AS FOLLOWS:-</span>
-061350,000067: 
-061351,000068:                                                                                                  <span class="co">#                      TC     UPFLAG                    TC     DOWNFLAG</span>
-061352,000069:                                                                                                  <span class="co">#                      ADRES  NAME OF FLAG              ADRES  NAME OF FLAG</span>
-061353,000070: 
-061354,000071:                                                                                                  <span class="co">#      RETURN IS TO THE LOCATION FOLLOWING THE "ADRES" ABOUT .58 MS AFTER THE "TC".</span>
-061355,000072: 
-061356,000073:                                                                                                  <span class="co">#      UPON RETURN A CONTAINS THE CURRENT FLAGWRD SETTING.</span>
-061357,000074: 
-061358,000075:    5435                                           <span class="ps">BLOCK   </span> 02                                    
-061359,000076:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
-061360,000077:    4000                                           <span class="ps">BANK    </span>                                       
-061361,000078:    5435                                           <span class="ps">COUNT*  </span> $$/FLAG                               
-061362,000079: 
-<a name="5550464C4147"></a>061363,000080:    5435           30002        <span class="sm">UPFLAG  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061364,000081:    5436           05453                           <span class="op">TC      </span> <a href="#4445424954">DEBIT</a>                                 
-061365,000082:    5437           40000                           <span class="op">COM     </span>                                       <span class="co">#  +(15 - BIT)</span>
-061366,000083:    5440           00006                           <span class="op">EXTEND  </span>                                       
-061367,000084:    5441           04001                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 <span class="co">#  SET BIT</span>
-<a name="434F4D464C4147"></a>061368,000085:    5442           50061        <span class="sm">COMFLAG </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-061369,000086:    5443           54074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
-061370,000087:    5444           22063                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-061371,000088:    5445           00003                           <span class="op">RELINT  </span>                                       
-061372,000089:    5446           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061373,000090: 
-061374,000091: 
-<a name="444F574E464C4147"></a>061375,000092:    5447           30002        <span class="sm">DOWNFLAG</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061376,000093:    5450           05453                           <span class="op">TC      </span> <a href="#4445424954">DEBIT</a>                                 
-061377,000094:    5451           70001                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESET BIT</span>
-061378,000095:    5452           15442                           <span class="op">TCF     </span> <a href="#434F4D464C4147">COMFLAG</a>                               
-061379,000096: 
-061380,000097: 
-<a name="4445424954"></a>061381,000098:    5453           64712        <span class="sm">DEBIT   </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  GET DE BITS</span>
-061382,000099:    5454           00004                           <span class="op">INHINT  </span>                                       
-061383,000100:    5455           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-061384,000101:    5456           34721                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5734">LOW4</a>                                  <span class="co">#  DEC15</span>
-061385,000102:    5457           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-061386,000103:    5460           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-061387,000104:    5461           27777                           <span class="op">CA      </span> 0          -1                         <span class="co">#  ADRES</span>
-061388,000105:    5462           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061389,000106:    5463           34714                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+061350,000058:                                                                                                  <span class="co">#      UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.   USING THEM, WHETHER OR</span>
+061351,000059:                                                                                                  <span class="co">#  NOT IN INTERRUPT, ONE MAY SET OR CLEAR ANY SINGLE, NAMED BIT IN ANY ERASABLE REGISTER, SUBJECT OF COURSE TO</span>
+061352,000060:                                                                                                  <span class="co">#  EBANK SETTING.   A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL</span>
+061353,000061:                                                                                                  <span class="co">#  ASSEMBLER.</span>
+061354,000062: 
+061355,000063:                                                                                                  <span class="co">#      AT PRESENT THE ONLY NAMED BITS ARE THOSE IN THE FLAGWORDS.   ASSEMBLER CHANGES WILL MAKE IT POSSIBLE TO</span>
+061356,000064:                                                                                                  <span class="co">#  NAME ANY BIT IN ERASABLE MEMORY.</span>
+061357,000065: 
+061358,000066:                                                                                                  <span class="co">#      CALLING SEQUENCES ARE AS FOLLOWS:-</span>
+061359,000067: 
+061360,000068:                                                                                                  <span class="co">#                      TC     UPFLAG                    TC     DOWNFLAG</span>
+061361,000069:                                                                                                  <span class="co">#                      ADRES  NAME OF FLAG              ADRES  NAME OF FLAG</span>
+061362,000070: 
+061363,000071:                                                                                                  <span class="co">#      RETURN IS TO THE LOCATION FOLLOWING THE "ADRES" ABOUT .58 MS AFTER THE "TC".</span>
+061364,000072: 
+061365,000073:                                                                                                  <span class="co">#      UPON RETURN A CONTAINS THE CURRENT FLAGWRD SETTING.</span>
+061366,000074: 
+061367,000075:    5435                                           <span class="ps">BLOCK   </span> 02                                    
+061368,000076:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
+061369,000077:    4000                                           <span class="ps">BANK    </span>                                       
+061370,000078:    5435                                           <span class="ps">COUNT*  </span> $$/FLAG                               
+061371,000079: 
+<a name="5550464C4147"></a>061372,000080:    5435           30002        <span class="sm">UPFLAG  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061373,000081:    5436           05453                           <span class="op">TC      </span> <a href="#4445424954">DEBIT</a>                                 
+061374,000082:    5437           40000                           <span class="op">COM     </span>                                       <span class="co">#  +(15 - BIT)</span>
+061375,000083:    5440           00006                           <span class="op">EXTEND  </span>                                       
+061376,000084:    5441           04001                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 <span class="co">#  SET BIT</span>
+<a name="434F4D464C4147"></a>061377,000085:    5442           50061        <span class="sm">COMFLAG </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+061378,000086:    5443           54074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
+061379,000087:    5444           22063                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+061380,000088:    5445           00003                           <span class="op">RELINT  </span>                                       
+061381,000089:    5446           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061382,000090: 
+061383,000091: 
+<a name="444F574E464C4147"></a>061384,000092:    5447           30002        <span class="sm">DOWNFLAG</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061385,000093:    5450           05453                           <span class="op">TC      </span> <a href="#4445424954">DEBIT</a>                                 
+061386,000094:    5451           70001                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESET BIT</span>
+061387,000095:    5452           15442                           <span class="op">TCF     </span> <a href="#434F4D464C4147">COMFLAG</a>                               
+061388,000096: 
+061389,000097: 
+<a name="4445424954"></a>061390,000098:    5453           64712        <span class="sm">DEBIT   </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  GET DE BITS</span>
+061391,000099:    5454           00004                           <span class="op">INHINT  </span>                                       
+061392,000100:    5455           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+061393,000101:    5456           34721                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5734">LOW4</a>                                  <span class="co">#  DEC15</span>
+061394,000102:    5457           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+061395,000103:    5460           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+061396,000104:    5461           27777                           <span class="op">CA      </span> 0          -1                         <span class="co">#  ADRES</span>
+061397,000105:    5462           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061398,000106:    5463           34714                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
 </pre>
 </span>
 </p>
@@ -235,16 +235,16 @@ Page 1451
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061391,000108:    5464           00006                           <span class="op">EXTEND  </span>                                       
-061392,000109:    5465           10061                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  A = FLAGWRD, L = (15 - BIT)</span>
-061393,000110:    5466           52062                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-061394,000111:    5467           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-061395,000112:    5470           30074                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
-061396,000113:    5471           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  CURRENT STATE</span>
-061397,000114:    5472           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-061398,000115:    5473           44674                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  -(15 - BIT)</span>
-061399,000116:    5474           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061400,000117: 
+061400,000108:    5464           00006                           <span class="op">EXTEND  </span>                                       
+061401,000109:    5465           10061                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  A = FLAGWRD, L = (15 - BIT)</span>
+061402,000110:    5466           52062                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+061403,000111:    5467           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+061404,000112:    5470           30074                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
+061405,000113:    5471           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  CURRENT STATE</span>
+061406,000114:    5472           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+061407,000115:    5473           44674                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  -(15 - BIT)</span>
+061408,000116:    5474           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061409,000117: 
 </pre>
 </span>
 </p>
@@ -260,56 +260,56 @@ Page 1452
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061402,000119:                                                                                                  <span class="co">#  DELAYJOB- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.</span>
-061403,000120: 
-061404,000121:                                                                                                  <span class="co">#  ENTRANCE REQUIREMENTS...</span>
-061405,000122:                                                                                                  <span class="co">#                                                   CAF    DT              DELAY JOB FOR DT CENTISECS</span>
-061406,000123:                                                                                                  <span class="co">#                                                   TC     BANKCALL</span>
-061407,000124:                                                                                                  <span class="co">#                                                   CADR   DELAYJOB</span>
-061408,000125: 
-061409,000126: 06,3651                                           <span class="ps">BANK    </span> 06                                    
-061410,000127: 00,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444C41594A4F42">DLAYJOB</a>                               
-061411,000128: 00,2000                                           <span class="ps">BANK    </span>                                       
-061412,000129: 
-061413,000130:                                                                                                  <span class="co">#  THIS MUST REMAIN IN BANK 0 *****************************************</span>
-061414,000131: 00,3730                                           <span class="ps">COUNT   </span> 00/DELAY                              
-061415,000132: 
-<a name="44454C41594A4F42"></a>061416,000133: 00,3730           00004        <span class="sm">DELAYJOB</span>           <span class="op">INHINT  </span>                                       
-061417,000134: 00,3731           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  STORE DELAY DT IN Q FOR DLY -1 IN</span>
-061418,000135: 
-061419,000136: 00,3732           36214                           <span class="op">CAF     </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#44454C41594E554D">DELAYNUM</a>                              <span class="co">#  WAITLIST</span>
-<a name="44454C4C4F4F50"></a>061420,000137: 00,3733           54070        <span class="sm">DELLOOP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-061421,000138: 00,3734           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-061422,000139: 00,3735           31141                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41594C4F43">DELAYLOC</a>                              <span class="co">#  IS THIS DELAYLOC AVAILABLE</span>
-061423,000140: 00,3736           00006                           <span class="op">EXTEND  </span>                                       
-061424,000141: 00,3737           13744                           <span class="op">BZF     </span> <a href="#4F4B3244454C4159">OK2DELAY</a>                              <span class="co">#  YES</span>
-061425,000142: 
-061426,000143: 00,3740           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  NO, TRY NEXT DELAYLOC</span>
-061427,000144: 00,3741           13733                           <span class="op">TCF     </span> <a href="#44454C4C4F4F50">DELLOOP</a>                               
-061428,000145: 
-061429,000146: 00,3742           05604                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F5554">BAILOUT</a>                               <span class="co">#  NO AVAILABLE LOCS AVAILABLE.</span>
-061430,000147: 00,3743           01104                           <span class="ps">OCT     </span> 1104                                  
-061431,000148: 
-<a name="4F4B3244454C4159"></a>061432,000149: 00,3744           33764        <span class="sm">OK2DELAY</span>           <span class="op">CA      </span> <a href="#5443534C454550">TCSLEEP</a>                               <span class="co">#  SET WAITLIST IMMEDIATE RETURN</span>
-061433,000150: 00,3745           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
-061434,000151: 
-061435,000152: 00,3746           30004                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-061436,000153: 00,3747           60070                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  STORE BBANK FOR TASK CALL</span>
-061437,000154: 00,3750           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061438,000155: 
-061439,000156: 00,3751           33765                           <span class="op">CAF     </span> <a href="#57414B45434144">WAKECAD</a>                               <span class="co">#  STORE CADR FOR TASK CALL</span>
-061440,000157: 00,3752           15146                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#444C5932">DLY2</a>       -1                         <span class="co">#  DLY IS IN WAITLIST ROUTINE</span>
-061441,000158: 
-<a name="5443474554434144"></a>061442,000159: 00,3753           04604        <span class="sm">TCGETCAD</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  GET CALLERS FCADR</span>
-061443,000160: 
-061444,000161: 00,3754           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-061445,000162: 00,3755           55141                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41594C4F43">DELAYLOC</a>                              <span class="co">#  SAVE DELAY CADRS</span>
-061446,000163: 
-061447,000164: 00,3756           05070                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F42534C454550">JOBSLEEP</a>                              
-061448,000165: 
-<a name="57414B4552"></a>061449,000166: 00,3757           34714        <span class="sm">WAKER   </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-061450,000167: 00,3760           50006                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-061451,000168: 00,3761           57141                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41594C4F43">DELAYLOC</a>                              <span class="co">#  MAKE DELAYLOC AVAILABLE</span>
+061411,000119:                                                                                                  <span class="co">#  DELAYJOB- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.</span>
+061412,000120: 
+061413,000121:                                                                                                  <span class="co">#  ENTRANCE REQUIREMENTS...</span>
+061414,000122:                                                                                                  <span class="co">#                                                   CAF    DT              DELAY JOB FOR DT CENTISECS</span>
+061415,000123:                                                                                                  <span class="co">#                                                   TC     BANKCALL</span>
+061416,000124:                                                                                                  <span class="co">#                                                   CADR   DELAYJOB</span>
+061417,000125: 
+061418,000126: 06,3651                                           <span class="ps">BANK    </span> 06                                    
+061419,000127: 00,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444C41594A4F42">DLAYJOB</a>                               
+061420,000128: 00,2000                                           <span class="ps">BANK    </span>                                       
+061421,000129: 
+061422,000130:                                                                                                  <span class="co">#  THIS MUST REMAIN IN BANK 0 *****************************************</span>
+061423,000131: 00,3730                                           <span class="ps">COUNT   </span> 00/DELAY                              
+061424,000132: 
+<a name="44454C41594A4F42"></a>061425,000133: 00,3730           00004        <span class="sm">DELAYJOB</span>           <span class="op">INHINT  </span>                                       
+061426,000134: 00,3731           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  STORE DELAY DT IN Q FOR DLY -1 IN</span>
+061427,000135: 
+061428,000136: 00,3732           36214                           <span class="op">CAF     </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#44454C41594E554D">DELAYNUM</a>                              <span class="co">#  WAITLIST</span>
+<a name="44454C4C4F4F50"></a>061429,000137: 00,3733           54070        <span class="sm">DELLOOP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+061430,000138: 00,3734           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+061431,000139: 00,3735           31141                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41594C4F43">DELAYLOC</a>                              <span class="co">#  IS THIS DELAYLOC AVAILABLE</span>
+061432,000140: 00,3736           00006                           <span class="op">EXTEND  </span>                                       
+061433,000141: 00,3737           13744                           <span class="op">BZF     </span> <a href="#4F4B3244454C4159">OK2DELAY</a>                              <span class="co">#  YES</span>
+061434,000142: 
+061435,000143: 00,3740           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  NO, TRY NEXT DELAYLOC</span>
+061436,000144: 00,3741           13733                           <span class="op">TCF     </span> <a href="#44454C4C4F4F50">DELLOOP</a>                               
+061437,000145: 
+061438,000146: 00,3742           05604                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F5554">BAILOUT</a>                               <span class="co">#  NO AVAILABLE LOCS AVAILABLE.</span>
+061439,000147: 00,3743           01104                           <span class="ps">OCT     </span> 1104                                  
+061440,000148: 
+<a name="4F4B3244454C4159"></a>061441,000149: 00,3744           33764        <span class="sm">OK2DELAY</span>           <span class="op">CA      </span> <a href="#5443534C454550">TCSLEEP</a>                               <span class="co">#  SET WAITLIST IMMEDIATE RETURN</span>
+061442,000150: 00,3745           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
+061443,000151: 
+061444,000152: 00,3746           30004                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+061445,000153: 00,3747           60070                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  STORE BBANK FOR TASK CALL</span>
+061446,000154: 00,3750           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061447,000155: 
+061448,000156: 00,3751           33765                           <span class="op">CAF     </span> <a href="#57414B45434144">WAKECAD</a>                               <span class="co">#  STORE CADR FOR TASK CALL</span>
+061449,000157: 00,3752           15146                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#444C5932">DLY2</a>       -1                         <span class="co">#  DLY IS IN WAITLIST ROUTINE</span>
+061450,000158: 
+<a name="5443474554434144"></a>061451,000159: 00,3753           04604        <span class="sm">TCGETCAD</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  GET CALLERS FCADR</span>
+061452,000160: 
+061453,000161: 00,3754           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+061454,000162: 00,3755           55141                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41594C4F43">DELAYLOC</a>                              <span class="co">#  SAVE DELAY CADRS</span>
+061455,000163: 
+061456,000164: 00,3756           05070                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F42534C454550">JOBSLEEP</a>                              
+061457,000165: 
+<a name="57414B4552"></a>061458,000166: 00,3757           34714        <span class="sm">WAKER   </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+061459,000167: 00,3760           50006                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+061460,000168: 00,3761           57141                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41594C4F43">DELAYLOC</a>                              <span class="co">#  MAKE DELAYLOC AVAILABLE</span>
 </pre>
 </span>
 </p>
@@ -325,13 +325,13 @@ Page 1453
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061453,000170: 00,3762           05074                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               
-061454,000171: 
-061455,000172: 00,3763           05213                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-061456,000173: 
-<a name="5443534C454550"></a>061457,000174: 00,3764           03751        <span class="sm">TCSLEEP </span>           <span class="ps">GENADR  </span> <a href="#5443474554434144">TCGETCAD</a>   -2                         
-<a name="57414B45434144"></a>061458,000175: 00,3765           03757        <span class="sm">WAKECAD </span>           <span class="ps">GENADR  </span> <a href="#57414B4552">WAKER</a>                                 
-061459,000176: 
+061462,000170: 00,3762           05074                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               
+061463,000171: 
+061464,000172: 00,3763           05213                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+061465,000173: 
+<a name="5443534C454550"></a>061466,000174: 00,3764           03751        <span class="sm">TCSLEEP </span>           <span class="ps">GENADR  </span> <a href="#5443474554434144">TCGETCAD</a>   -2                         
+<a name="57414B45434144"></a>061467,000175: 00,3765           03757        <span class="sm">WAKECAD </span>           <span class="ps">GENADR  </span> <a href="#57414B4552">WAKER</a>                                 
+061468,000176: 
 </pre>
 </span>
 </p>
@@ -347,52 +347,52 @@ Page 1454
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061461,000178:                                                                                                  <span class="co">#  GENTRAN, A BLOCK TRANSFER ROUTINE.</span>
-061462,000179: 
-061463,000180:                                                                                                  <span class="co">#  WRITTEN BY D. EYLES</span>
-061464,000181:                                                                                                  <span class="co">#  MOD 1 BY KERNAN                                                         UTILITYM REV 17 11/18/67</span>
-061465,000182: 
-061466,000183:                                                                                                  <span class="co">#  MOD 2 BY SCHULENBERG  (REMOVE RELINT)   SKIPPER REV 4 2/28/68</span>
-061467,000184: 
-061468,000185:                                                                                                  <span class="co">#           THIS ROUTINE IS USEFUL FOR TRANSFERRING N CONSECUTIVE ERASABLE OR FIXED QUANTITIES TO SOME OTHER N</span>
-061469,000186:                                                                                                  <span class="co">#  CONSECUTIVE ERASABLE LOCATIONS.  IF BOTH BLOCKS OF DATA ARE IN SWITCHABLE EBANKS, THEY MUST BE IN THE SAME ONE.</span>
-061470,000187: 
-061471,000188:                                                                                                  <span class="co">#           GENTRAN IS CALLABLE IN A JOB AS WELL AS A RUPT.  THE CALLING SEQUENCE IS:</span>
-061472,000189: 
-061473,000190:                                                                                                  <span class="co">#                                          I        CA     N-1             # OF QUANTITIES MINUS ONE.</span>
-061474,000191:                                                                                                  <span class="co">#                                          I +1     TC     GENTRAN         IN FIXED-FIXED.</span>
-061475,000192:                                                                                                  <span class="co">#                                          I +2     ADRES  L               STARTING ADRES OF DATA TO BE MOVED.</span>
-061476,000193:                                                                                                  <span class="co">#                                          I +3     ADRES  M               STARTING ADRES OF DUPLICATION BLOCK.</span>
-061477,000194:                                                                                                  <span class="co">#                                          I +4                            RETURNS HERE.</span>
-061478,000195: 
-061479,000196:                                                                                                  <span class="co">#           GENTRAN TAKES 25 MCT'S (300 MICROSECONDS) PER ITEM + 5 MCT'S (60 MICS) FOR ENTERING AND EXITING.</span>
-061480,000197: 
-061481,000198:                                                                                                  <span class="co">#           A, L AND ITEMP1 ARE NOT PRESERVED.</span>
-061482,000199: 
-061483,000200:    5475                                           <span class="ps">BLOCK   </span> 02                                    
-061484,000201:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414734">FFTAG4</a>                                
-061485,000202:    4000                                           <span class="ps">BANK    </span>                                       
-061486,000203: 
-061487,000204:    5475     0061                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-061488,000205: 
-061489,000206:    5475                                           <span class="ps">COUNT*  </span> $$/TRAN                               
-061490,000207: 
-<a name="47454E5452414E"></a>061491,000208:    5475           00004        <span class="sm">GENTRAN </span>           <span class="op">INHINT  </span>                                       
-061492,000209:    5476           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  SAVE N-1.</span>
-061493,000210:    5477           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  C(Q) = ADRES L.</span>
-061494,000211:    5500           60000                           <span class="op">AD      </span> 0                                     <span class="co">#  ADRES (L + N - 1).</span>
-061495,000212:    5501           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-061496,000213:    5502           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  C(ABOVE).</span>
-061497,000214:    5503           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE DATA.</span>
-061498,000215:    5504           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-061499,000216:    5505           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061500,000217:    5506           60001                           <span class="op">AD      </span> 1                                     <span class="co">#  ADRES (M + N - 1).</span>
-061501,000218:    5507           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-061502,000219:    5510           22000                           <span class="op">LXCH    </span> 0                                     <span class="co">#  STUFF IT.</span>
-061503,000220:    5511           10061                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  LOOP UNTIL N-1 = 0.</span>
-061504,000221:    5512           15476                           <span class="op">TCF     </span> <a href="#47454E5452414E">GENTRAN</a>    +1                         
-061505,000222:    5513           16710                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   <span class="co">#  RETURN TO CALLER.</span>
-061506,000223: 
+061470,000178:                                                                                                  <span class="co">#  GENTRAN, A BLOCK TRANSFER ROUTINE.</span>
+061471,000179: 
+061472,000180:                                                                                                  <span class="co">#  WRITTEN BY D. EYLES</span>
+061473,000181:                                                                                                  <span class="co">#  MOD 1 BY KERNAN                                                         UTILITYM REV 17 11/18/67</span>
+061474,000182: 
+061475,000183:                                                                                                  <span class="co">#  MOD 2 BY SCHULENBERG  (REMOVE RELINT)   SKIPPER REV 4 2/28/68</span>
+061476,000184: 
+061477,000185:                                                                                                  <span class="co">#           THIS ROUTINE IS USEFUL FOR TRANSFERRING N CONSECUTIVE ERASABLE OR FIXED QUANTITIES TO SOME OTHER N</span>
+061478,000186:                                                                                                  <span class="co">#  CONSECUTIVE ERASABLE LOCATIONS.  IF BOTH BLOCKS OF DATA ARE IN SWITCHABLE EBANKS, THEY MUST BE IN THE SAME ONE.</span>
+061479,000187: 
+061480,000188:                                                                                                  <span class="co">#           GENTRAN IS CALLABLE IN A JOB AS WELL AS A RUPT.  THE CALLING SEQUENCE IS:</span>
+061481,000189: 
+061482,000190:                                                                                                  <span class="co">#                                          I        CA     N-1             # OF QUANTITIES MINUS ONE.</span>
+061483,000191:                                                                                                  <span class="co">#                                          I +1     TC     GENTRAN         IN FIXED-FIXED.</span>
+061484,000192:                                                                                                  <span class="co">#                                          I +2     ADRES  L               STARTING ADRES OF DATA TO BE MOVED.</span>
+061485,000193:                                                                                                  <span class="co">#                                          I +3     ADRES  M               STARTING ADRES OF DUPLICATION BLOCK.</span>
+061486,000194:                                                                                                  <span class="co">#                                          I +4                            RETURNS HERE.</span>
+061487,000195: 
+061488,000196:                                                                                                  <span class="co">#           GENTRAN TAKES 25 MCT'S (300 MICROSECONDS) PER ITEM + 5 MCT'S (60 MICS) FOR ENTERING AND EXITING.</span>
+061489,000197: 
+061490,000198:                                                                                                  <span class="co">#           A, L AND ITEMP1 ARE NOT PRESERVED.</span>
+061491,000199: 
+061492,000200:    5475                                           <span class="ps">BLOCK   </span> 02                                    
+061493,000201:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414734">FFTAG4</a>                                
+061494,000202:    4000                                           <span class="ps">BANK    </span>                                       
+061495,000203: 
+061496,000204:    5475     0061                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+061497,000205: 
+061498,000206:    5475                                           <span class="ps">COUNT*  </span> $$/TRAN                               
+061499,000207: 
+<a name="47454E5452414E"></a>061500,000208:    5475           00004        <span class="sm">GENTRAN </span>           <span class="op">INHINT  </span>                                       
+061501,000209:    5476           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  SAVE N-1.</span>
+061502,000210:    5477           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  C(Q) = ADRES L.</span>
+061503,000211:    5500           60000                           <span class="op">AD      </span> 0                                     <span class="co">#  ADRES (L + N - 1).</span>
+061504,000212:    5501           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+061505,000213:    5502           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  C(ABOVE).</span>
+061506,000214:    5503           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE DATA.</span>
+061507,000215:    5504           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+061508,000216:    5505           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061509,000217:    5506           60001                           <span class="op">AD      </span> 1                                     <span class="co">#  ADRES (M + N - 1).</span>
+061510,000218:    5507           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+061511,000219:    5510           22000                           <span class="op">LXCH    </span> 0                                     <span class="co">#  STUFF IT.</span>
+061512,000220:    5511           10061                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  LOOP UNTIL N-1 = 0.</span>
+061513,000221:    5512           15476                           <span class="op">TCF     </span> <a href="#47454E5452414E">GENTRAN</a>    +1                         
+061514,000222:    5513           16710                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   <span class="co">#  RETURN TO CALLER.</span>
+061515,000223: 
 </pre>
 </span>
 </p>
@@ -408,17 +408,17 @@ Page 1455
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061508,000225:                                                                                                  <span class="co">#  B5OFF   ZERO BIT 5 OF EXTVBACT, WHICH IS SET BY TESTXACT.</span>
-061509,000226: 
-061510,000227:                                                                                                  <span class="co">#           MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT</span>
-061511,000228: 
-061512,000229:    5514                                           <span class="ps">COUNT*  </span> $$/EXTVB                              
-061513,000230: 
-<a name="42354F4646"></a>061514,000231:    5514           44706        <span class="sm">B5OFF   </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
-061515,000232:    5515           71044                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
-061516,000233:    5516           55044                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
-061517,000234:    5517           05112                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-061518,000235: 
+061517,000225:                                                                                                  <span class="co">#  B5OFF   ZERO BIT 5 OF EXTVBACT, WHICH IS SET BY TESTXACT.</span>
+061518,000226: 
+061519,000227:                                                                                                  <span class="co">#           MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT</span>
+061520,000228: 
+061521,000229:    5514                                           <span class="ps">COUNT*  </span> $$/EXTVB                              
+061522,000230: 
+<a name="42354F4646"></a>061523,000231:    5514           44706        <span class="sm">B5OFF   </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
+061524,000232:    5515           71044                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
+061525,000233:    5516           55044                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
+061526,000234:    5517           05112                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+061527,000235: 
 </pre>
 </span>
 </p>
@@ -434,25 +434,25 @@ Page 1456
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061520,000237:                                                                                                  <span class="co">#  SUBROUTINES TO TURNOFF AND TURN ON TRACKER FAIL LIGHT.</span>
-061521,000238: 
-<a name="54524641494C4F46"></a>061522,000239:    5520           00004        <span class="sm">TRFAILOF</span>           <span class="op">INHINT  </span>                                       
-061523,000240:    5521           47704                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543430323030">OCT40200</a>                              <span class="co">#  TURN OFF TRACKER LIGHT</span>
-061524,000241:    5522           71036                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-061525,000242:    5523           64674                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
-061526,000243:    5524           55036                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-061527,000244:    5525           41331                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              <span class="co">#  TO INSURE THAT OCDU FAIL WILL GO ON</span>
-061528,000245:    5526           74704                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  AGAIN IF IT WAS ON IN ADDITION TO</span>
-061529,000246:    5527           27331                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              <span class="co">#  TRACKER FAIL.</span>
-061530,000247: 
-<a name="524551"></a>061531,000248:    5530           00003        <span class="sm">REQ     </span>           <span class="op">RELINT  </span>                                       
-061532,000249:    5531           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061533,000250: 
-<a name="54524641494C4F4E"></a>061534,000251:    5532           00004        <span class="sm">TRFAILON</span>           <span class="op">INHINT  </span>                                       
-061535,000252:    5533           41036                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  TURN ON</span>
-061536,000253:    5534           77704                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543430323030">OCT40200</a>                              
-061537,000254:    5535           27036                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-061538,000255:    5536           15530                           <span class="op">TCF     </span> <a href="#524551">REQ</a>                                   
+061529,000237:                                                                                                  <span class="co">#  SUBROUTINES TO TURNOFF AND TURN ON TRACKER FAIL LIGHT.</span>
+061530,000238: 
+<a name="54524641494C4F46"></a>061531,000239:    5520           00004        <span class="sm">TRFAILOF</span>           <span class="op">INHINT  </span>                                       
+061532,000240:    5521           47704                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543430323030">OCT40200</a>                              <span class="co">#  TURN OFF TRACKER LIGHT</span>
+061533,000241:    5522           71036                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+061534,000242:    5523           64674                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
+061535,000243:    5524           55036                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+061536,000244:    5525           41331                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              <span class="co">#  TO INSURE THAT OCDU FAIL WILL GO ON</span>
+061537,000245:    5526           74704                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  AGAIN IF IT WAS ON IN ADDITION TO</span>
+061538,000246:    5527           27331                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              <span class="co">#  TRACKER FAIL.</span>
+061539,000247: 
+<a name="524551"></a>061540,000248:    5530           00003        <span class="sm">REQ     </span>           <span class="op">RELINT  </span>                                       
+061541,000249:    5531           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061542,000250: 
+<a name="54524641494C4F4E"></a>061543,000251:    5532           00004        <span class="sm">TRFAILON</span>           <span class="op">INHINT  </span>                                       
+061544,000252:    5533           41036                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  TURN ON</span>
+061545,000253:    5534           77704                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543430323030">OCT40200</a>                              
+061546,000254:    5535           27036                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+061547,000255:    5536           15530                           <span class="op">TCF     </span> <a href="#524551">REQ</a>                                   
 
 End of include-file SERVICE_ROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

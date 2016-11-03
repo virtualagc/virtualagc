@@ -87,17 +87,17 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042000,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-042001,000003:                                                                                                  <span class="co">#  Filename:     MYSUBS.agc</span>
-042002,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-042003,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-042004,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-042005,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-042006,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-042007,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-042008,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-042009,000011:                                                                                                  <span class="co">#  Mod history:  2011-03-15 JL   Adapted from corresponding Colossus 249 file.</span>
-042010,000012: 
+042002,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+042003,000003:                                                                                                  <span class="co">## Filename:     MYSUBS.agc</span>
+042004,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+042005,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+042006,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+042007,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+042008,000008:                                                                                                  <span class="co">## Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+042009,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+042010,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+042011,000011:                                                                                                  <span class="co">## Mod history:  2011-03-15 JL  Adapted from corresponding Colossus 249 file.</span>
+042012,000012: 
 </pre>
 </span>
 </p>
@@ -113,57 +113,57 @@ Page 967
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042012,000014: 20,3550                                           <span class="ps">BANK    </span> 20                                    
-042013,000015: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D5953554253">MYSUBS</a>                                
-042014,000016: 21,2000                                           <span class="ps">BANK    </span>                                       
-042015,000017: 
-042016,000018: 21,2026     0154                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-<a name="5350434F5331"></a>042017,000019: 21,2026     4767               <span class="sm">SPCOS1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
-<a name="535053494E31"></a>042018,000020: 21,2026     4770               <span class="sm">SPSIN1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
-<a name="5350434F5332"></a>042019,000021: 21,2026     4767               <span class="sm">SPCOS2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
-<a name="535053494E32"></a>042020,000022: 21,2026     4770               <span class="sm">SPSIN2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
-042021,000023: 
-042022,000024: 
-042023,000025: 21,2026                                           <span class="ps">COUNT   </span> 21/DAPMS                              
-042024,000026: 
-042025,000027:                                                                                                  <span class="co">#  ONE AND ONE HALF PRECISION MULTIPLICATION ROUTINE</span>
-042026,000028: 
-<a name="534D414C4C4D50"></a>042027,000029: 21,2026           55512        <span class="sm">SMALLMP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  A(X+Y)</span>
-042028,000030: 21,2027           00006                           <span class="op">EXTEND  </span>                                       
-042029,000031: 21,2030           71511                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
-042030,000032: 21,2031           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  AY</span>
-042031,000033: 21,2032           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-042032,000034: 21,2033           57510                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-042033,000035: 21,2034           00006                           <span class="op">EXTEND  </span>                                       
-042034,000036: 21,2035           71512                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  AX</span>
-042035,000037: 21,2036           21511                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 <span class="co">#  AX+AY</span>
-042036,000038: 21,2037           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-042037,000039: 
-042038,000040: 
-042039,000041:                                                                                                  <span class="co">#  SUBROUTINE FOR DOUBLE PRECISION ADDITIONS OF ANGLES</span>
-042040,000042:                                                                                                  <span class="co">#  A AND L CONTAIN A DP(1S) ANGLE SCALED BY 180 DEGS TO BE ADDED TO KMPAC.</span>
-042041,000043:                                                                                                  <span class="co">#  RESULT IS PLACED IN KMPAC.  TIMING = 6 MCT (22 MCT ON OVERFLOW)</span>
-042042,000044: 
-<a name="4450414444"></a>042043,000045: 21,2040           21511        <span class="sm">DPADD   </span>           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-042044,000046: 21,2041           00006                           <span class="op">EXTEND  </span>                                       
-042045,000047: 21,2042           12057                           <span class="op">BZF     </span> <a href="#54534B">TSK</a>        +1                         <span class="co">#  NO OVERFLOW</span>
-042046,000048: 21,2043           11510                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-042047,000049: 21,2044           12060                           <span class="op">TCF     </span> <a href="#44504144442B">DPADD+</a>                                <span class="co">#  + OVERFLOW</span>
-042048,000050: 21,2045           12047                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-042049,000051: 21,2046           12062                           <span class="op">TCF     </span> <a href="#44504144442D">DPADD-</a>                                <span class="co">#  - OVERFLOW</span>
-042050,000052: 21,2047           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
-042051,000053: 21,2050           12065                           <span class="op">TCF     </span> <a href="#4450414444322B">DPADD2+</a>                               <span class="co">#  UPPER = 0, LOWER +</span>
-042052,000054: 21,2051           12053                           <span class="op">TCF     </span> <a href="REENTRY_CONTROL.agc.html#2B32">+2</a>                                    
-042053,000055: 21,2052           40000                           <span class="op">COM     </span>                                       <span class="co">#  UPPER = 0, LOWER -</span>
-042054,000056: 21,2053           64672                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  LOWER = 0, A=0</span>
-042055,000057: 21,2054           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  CAN NOT OVERFLOW</span>
-042056,000058: 21,2055           34672                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
-<a name="54534B"></a>042057,000059: 21,2056           55510        <span class="sm">TSK     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-042058,000060: 21,2057           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-042059,000061: 
-<a name="44504144442B"></a>042060,000062: 21,2060           64674        <span class="sm">DPADD+  </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  KMPAC GREATER THAN 0</span>
-042061,000063: 21,2061           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
-042062,000064: 
+042014,000014: 20,3550                                           <span class="ps">BANK    </span> 20                                    
+042015,000015: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D5953554253">MYSUBS</a>                                
+042016,000016: 21,2000                                           <span class="ps">BANK    </span>                                       
+042017,000017: 
+042018,000018: 21,2026     0154                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+<a name="5350434F5331"></a>042019,000019: 21,2026     4767               <span class="sm">SPCOS1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
+<a name="535053494E31"></a>042020,000020: 21,2026     4770               <span class="sm">SPSIN1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
+<a name="5350434F5332"></a>042021,000021: 21,2026     4767               <span class="sm">SPCOS2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
+<a name="535053494E32"></a>042022,000022: 21,2026     4770               <span class="sm">SPSIN2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
+042023,000023: 
+042024,000024: 
+042025,000025: 21,2026                                           <span class="ps">COUNT   </span> 21/DAPMS                              
+042026,000026: 
+042027,000027:                                                                                                  <span class="co">#  ONE AND ONE HALF PRECISION MULTIPLICATION ROUTINE</span>
+042028,000028: 
+<a name="534D414C4C4D50"></a>042029,000029: 21,2026           55512        <span class="sm">SMALLMP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  A(X+Y)</span>
+042030,000030: 21,2027           00006                           <span class="op">EXTEND  </span>                                       
+042031,000031: 21,2030           71511                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
+042032,000032: 21,2031           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  AY</span>
+042033,000033: 21,2032           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+042034,000034: 21,2033           57510                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+042035,000035: 21,2034           00006                           <span class="op">EXTEND  </span>                                       
+042036,000036: 21,2035           71512                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  AX</span>
+042037,000037: 21,2036           21511                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 <span class="co">#  AX+AY</span>
+042038,000038: 21,2037           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+042039,000039: 
+042040,000040: 
+042041,000041:                                                                                                  <span class="co">#  SUBROUTINE FOR DOUBLE PRECISION ADDITIONS OF ANGLES</span>
+042042,000042:                                                                                                  <span class="co">#  A AND L CONTAIN A DP(1S) ANGLE SCALED BY 180 DEGS TO BE ADDED TO KMPAC.</span>
+042043,000043:                                                                                                  <span class="co">#  RESULT IS PLACED IN KMPAC.  TIMING = 6 MCT (22 MCT ON OVERFLOW)</span>
+042044,000044: 
+<a name="4450414444"></a>042045,000045: 21,2040           21511        <span class="sm">DPADD   </span>           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+042046,000046: 21,2041           00006                           <span class="op">EXTEND  </span>                                       
+042047,000047: 21,2042           12057                           <span class="op">BZF     </span> <a href="#54534B">TSK</a>        +1                         <span class="co">#  NO OVERFLOW</span>
+042048,000048: 21,2043           11510                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+042049,000049: 21,2044           12060                           <span class="op">TCF     </span> <a href="#44504144442B">DPADD+</a>                                <span class="co">#  + OVERFLOW</span>
+042050,000050: 21,2045           12047                           <span class="op">TCF     </span> +2                                    
+042051,000051: 21,2046           12062                           <span class="op">TCF     </span> <a href="#44504144442D">DPADD-</a>                                <span class="co">#  - OVERFLOW</span>
+042052,000052: 21,2047           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
+042053,000053: 21,2050           12065                           <span class="op">TCF     </span> <a href="#4450414444322B">DPADD2+</a>                               <span class="co">#  UPPER = 0, LOWER +</span>
+042054,000054: 21,2051           12053                           <span class="op">TCF     </span> +2                                    
+042055,000055: 21,2052           40000                           <span class="op">COM     </span>                                       <span class="co">#  UPPER = 0, LOWER -</span>
+042056,000056: 21,2053           64672                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  LOWER = 0, A=0</span>
+042057,000057: 21,2054           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  CAN NOT OVERFLOW</span>
+042058,000058: 21,2055           34672                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
+<a name="54534B"></a>042059,000059: 21,2056           55510        <span class="sm">TSK     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+042060,000060: 21,2057           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+042061,000061: 
+<a name="44504144442B"></a>042062,000062: 21,2060           64674        <span class="sm">DPADD+  </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  KMPAC GREATER THAN 0</span>
+042063,000063: 21,2061           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
+042064,000064: 
 </pre>
 </span>
 </p>
@@ -179,15 +179,15 @@ Page 968
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="44504144442D"></a>042064,000066: 21,2062           40000        <span class="sm">DPADD-  </span>           <span class="op">COM     </span>                                       
-042065,000067: 21,2063           64672                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  KMPAC LESS THAN 0</span>
-042066,000068: 21,2064           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
-042067,000069: 
-<a name="4450414444322B"></a>042068,000070: 21,2065           64674        <span class="sm">DPADD2+ </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  CAN NOT OVERFLOW</span>
-042069,000071: 21,2066           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
-042070,000072: 21,2067           34674                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
-042071,000073: 21,2070           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
-042072,000074: 
+<a name="44504144442D"></a>042066,000066: 21,2062           40000        <span class="sm">DPADD-  </span>           <span class="op">COM     </span>                                       
+042067,000067: 21,2063           64672                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  KMPAC LESS THAN 0</span>
+042068,000068: 21,2064           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
+042069,000069: 
+<a name="4450414444322B"></a>042070,000070: 21,2065           64674        <span class="sm">DPADD2+ </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  CAN NOT OVERFLOW</span>
+042071,000071: 21,2066           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
+042072,000072: 21,2067           34674                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
+042073,000073: 21,2070           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
+042074,000074: 
 </pre>
 </span>
 </p>

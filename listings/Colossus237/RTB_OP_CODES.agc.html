@@ -87,17 +87,17 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062276,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-062277,000003:                                                                                                  <span class="co">#  Filename:     RTB_OP_CODES.agc</span>
-062278,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-062279,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-062280,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-062281,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-062282,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-062283,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-062284,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-062285,000011:                                                                                                  <span class="co">#  Mod history:  2011-04-17 JL   Adapted from corresponding Colossus 249 file.</span>
-062286,000012: 
+062285,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+062286,000003:                                                                                                  <span class="co">## Filename:     RTB_OP_CODES.agc</span>
+062287,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+062288,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+062289,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+062290,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+062291,000008:                                                                                                  <span class="co">## Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+062292,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+062293,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+062294,000011:                                                                                                  <span class="co">## Mod history:  2011-04-17 JL  Adapted from corresponding Colossus 249 file.</span>
+062295,000012: 
 </pre>
 </span>
 </p>
@@ -113,56 +113,56 @@ Page 1472
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062288,000014: 22,3505                                           <span class="ps">BANK    </span> 22                                    
-062289,000015: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#525442434F444553">RTBCODES</a>                              
-062290,000016: 22,2000                                           <span class="ps">BANK    </span>                                       
-062291,000017: 
-062292,000018: 22,3505  0002713                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
-062293,000019: 22,3505                                           <span class="ps">COUNT*  </span> $$/<a href="INTERPRETER.agc.html#525442">RTB</a>                                
-062294,000020: 
-062295,000021:                                                                                                  <span class="co">#           LOAD TIME2, TIME1 INTO MPAC:</span>
-062296,000022: 
-<a name="4C4F414454494D45"></a>062297,000023: 22,3505           00006        <span class="sm">LOADTIME</span>           <span class="op">EXTEND  </span>                                       
-062298,000024: 22,3506           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-062299,000025: 22,3507           16024                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>                                
-062300,000026: 
-062301,000027:                                                                                                  <span class="co">#           CONVERT THE SINGLE PRECISION 2'S COMPLEMENT NUMBER ARRIVING IN MPAC (SCALED IN HALF-REVOLUTIONS) TO A</span>
-062302,000028:                                                                                                  <span class="co">#  DP 1'S COMPLEMENT NUMBER SCALED IN REVOLUTIONS.</span>
-062303,000029: 
-<a name="4344554C4F474943"></a>062304,000030: 22,3510           10154        <span class="sm">CDULOGIC</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062305,000031: 22,3511           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-062306,000032: 22,3512           13515                           <span class="op">TCF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
-062307,000033: 22,3513           13514                           <span class="op">NOOP    </span>                                       
-062308,000034: 22,3514           44675                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
-062309,000035: 
-062310,000036: 22,3515           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-062311,000037: 22,3516           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-062312,000038: 22,3517           56154                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062313,000039: 22,3520           00006                           <span class="op">EXTEND  </span>                                       
-062314,000040: 22,3521           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
-062315,000041: 22,3522           20155                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062316,000042: 22,3523           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                <span class="co">#  MODE IS ALREADY AT DOUBLE-PRECISION</span>
-062317,000043: 
-062318,000044:                                                                                                  <span class="co">#           READ THE PIPS INTO MPAC WITHOUT CHANGING THEM:</span>
-062319,000045: 
-<a name="5245414450495053"></a>062320,000046: 22,3524           00004        <span class="sm">READPIPS</span>           <span class="op">INHINT  </span>                                       
-062321,000047: 22,3525           30037                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 
-062322,000048: 22,3526           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062323,000049: 22,3527           30040                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
-062324,000050: 22,3530           54157                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-062325,000051: 22,3531           30041                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 
-062326,000052: 22,3532           00003                           <span class="op">RELINT  </span>                                       
-062327,000053: 22,3533           54161                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-062328,000054: 
-062329,000055: 22,3534           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-062330,000056: 22,3535           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-062331,000057: 22,3536           54160                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
-062332,000058: 22,3537           54162                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
-062333,000059: 
-<a name="5645434D4F4445"></a>062334,000060: 22,3540           16470        <span class="sm">VECMODE </span>           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#564D4F4445">VMODE</a>                                 
-062335,000061:                                                                                                  <span class="co">#           FORCE TP SIGN AGREEMENT IN MPAC:</span>
-062336,000062: 
-<a name="53474E4147524545"></a>062337,000063: 22,3541           07226        <span class="sm">SGNAGREE</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#54504147524545">TPAGREE</a>                               
+062297,000014: 22,3505                                           <span class="ps">BANK    </span> 22                                    
+062298,000015: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#525442434F444553">RTBCODES</a>                              
+062299,000016: 22,2000                                           <span class="ps">BANK    </span>                                       
+062300,000017: 
+062301,000018: 22,3505  E5,1713                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
+062302,000019: 22,3505                                           <span class="ps">COUNT*  </span> $$/<a href="INTERPRETER.agc.html#525442">RTB</a>                                
+062303,000020: 
+062304,000021:                                                                                                  <span class="co">#           LOAD TIME2, TIME1 INTO MPAC:</span>
+062305,000022: 
+<a name="4C4F414454494D45"></a>062306,000023: 22,3505           00006        <span class="sm">LOADTIME</span>           <span class="op">EXTEND  </span>                                       
+062307,000024: 22,3506           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+062308,000025: 22,3507           16024                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>                                
+062309,000026: 
+062310,000027:                                                                                                  <span class="co">#           CONVERT THE SINGLE PRECISION 2'S COMPLEMENT NUMBER ARRIVING IN MPAC (SCALED IN HALF-REVOLUTIONS) TO A</span>
+062311,000028:                                                                                                  <span class="co">#  DP 1'S COMPLEMENT NUMBER SCALED IN REVOLUTIONS.</span>
+062312,000029: 
+<a name="4344554C4F474943"></a>062313,000030: 22,3510           10154        <span class="sm">CDULOGIC</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062314,000031: 22,3511           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+062315,000032: 22,3512           13515                           <span class="op">TCF     </span> +3                                    
+062316,000033: 22,3513           13514                           <span class="op">NOOP    </span>                                       
+062317,000034: 22,3514           44675                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
+062318,000035: 
+062319,000036: 22,3515           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+062320,000037: 22,3516           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+062321,000038: 22,3517           56154                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062322,000039: 22,3520           00006                           <span class="op">EXTEND  </span>                                       
+062323,000040: 22,3521           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
+062324,000041: 22,3522           20155                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062325,000042: 22,3523           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                <span class="co">#  MODE IS ALREADY AT DOUBLE-PRECISION</span>
+062326,000043: 
+062327,000044:                                                                                                  <span class="co">#           READ THE PIPS INTO MPAC WITHOUT CHANGING THEM:</span>
+062328,000045: 
+<a name="5245414450495053"></a>062329,000046: 22,3524           00004        <span class="sm">READPIPS</span>           <span class="op">INHINT  </span>                                       
+062330,000047: 22,3525           30037                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 
+062331,000048: 22,3526           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062332,000049: 22,3527           30040                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
+062333,000050: 22,3530           54157                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+062334,000051: 22,3531           30041                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 
+062335,000052: 22,3532           00003                           <span class="op">RELINT  </span>                                       
+062336,000053: 22,3533           54161                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+062337,000054: 
+062338,000055: 22,3534           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+062339,000056: 22,3535           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+062340,000057: 22,3536           54160                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
+062341,000058: 22,3537           54162                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
+062342,000059: 
+<a name="5645434D4F4445"></a>062343,000060: 22,3540           16470        <span class="sm">VECMODE </span>           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#564D4F4445">VMODE</a>                                 
+062344,000061:                                                                                                  <span class="co">#           FORCE TP SIGN AGREEMENT IN MPAC:</span>
+062345,000062: 
+<a name="53474E4147524545"></a>062346,000063: 22,3541           07226        <span class="sm">SGNAGREE</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#54504147524545">TPAGREE</a>                               
 </pre>
 </span>
 </p>
@@ -178,56 +178,56 @@ Page 1473
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062339,000065: 22,3542           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
-062340,000066: 
-062341,000067:                                                                                                  <span class="co">#           CONVERT THE DP 1'S COMPLEMENT ANGLE SCALED IN REVOLUTIONS TO A SINGLE PRECISION 2'S COMPLEMENT ANGLE</span>
-062342,000068:                                                                                                  <span class="co">#  SCALED IN HALF-REVOLUTIONS.</span>
-062343,000069: 
-<a name="3153544F3253"></a>062344,000070: 22,3543           03573        <span class="sm">1STO2S  </span>           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
-062345,000071: 22,3544           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-062346,000072: 22,3545           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-062347,000073: 22,3546           16027                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#4E45574D4F4445">NEWMODE</a>                               
-062348,000074: 
-062349,000075:                                                                                                  <span class="co">#           DO 1STO2S ON A VECTOR OF ANGLES:</span>
-062350,000076: 
-<a name="563153544F3253"></a>062351,000077: 22,3547           03573        <span class="sm">V1STO2S </span>           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               <span class="co">#  ANSWER ARRIVES IN A AND MPAC.</span>
-062352,000078: 
-062353,000079: 22,3550           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-062354,000080: 22,3551           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062355,000081: 22,3552           03573                           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
-062356,000082: 22,3553           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-062357,000083: 
-062358,000084: 22,3554           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-062359,000085: 22,3555           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062360,000086: 22,3556           03573                           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
-062361,000087: 22,3557           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-062362,000088: 
-062363,000089: 22,3560           30161                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-062364,000090: 22,3561           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062365,000091: 
-<a name="54504D4F4445"></a>062366,000092: 22,3562           34712        <span class="sm">TPMODE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  MODE IS TP.</span>
-062367,000093: 22,3563           16027                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#4E45574D4F4445">NEWMODE</a>                               
-062368,000094: 
-062369,000095:                                                                                                  <span class="co">#           V1STO2S FOR 2 COMPONENT VECTOR. USED BY RR.</span>
-062370,000096: 
-<a name="32563153544F3253"></a>062371,000097: 22,3564           03573        <span class="sm">2V1STO2S</span>           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
-062372,000098: 22,3565           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-062373,000099: 22,3566           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062374,000100: 22,3567           03573                           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
-062375,000101: 22,3570           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-062376,000102: 22,3571           30157                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-062377,000103: 22,3572           16024                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>                                
-062378,000104: 
-062379,000105:                                                                                                  <span class="co">#           SUBROUTINE TO DO DOUBLING AND 1'S TO 2'S CONVERSION:</span>
-062380,000106: 
-<a name="31544F32535542"></a>062381,000107: 22,3573           52155        <span class="sm">1TO2SUB </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  FINAL MPAC +1 UNSPECIFIED.</span>
-062382,000108: 22,3574           20001                           <span class="op">DDOUBL  </span>                                       
-062383,000109: 22,3575           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-062384,000110: 22,3576           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-062385,000111: 22,3577           13601                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
-062386,000112: 22,3600           40000                           <span class="op">COM     </span>                                       <span class="co">#  THIS WAS REVERSE OF MSU.</span>
-062387,000113: 
-062388,000114: 22,3601           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  AND SKIP ON OVERFLOW.</span>
+062348,000065: 22,3542           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
+062349,000066: 
+062350,000067:                                                                                                  <span class="co">#           CONVERT THE DP 1'S COMPLEMENT ANGLE SCALED IN REVOLUTIONS TO A SINGLE PRECISION 2'S COMPLEMENT ANGLE</span>
+062351,000068:                                                                                                  <span class="co">#  SCALED IN HALF-REVOLUTIONS.</span>
+062352,000069: 
+<a name="3153544F3253"></a>062353,000070: 22,3543           03573        <span class="sm">1STO2S  </span>           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
+062354,000071: 22,3544           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+062355,000072: 22,3545           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+062356,000073: 22,3546           16027                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#4E45574D4F4445">NEWMODE</a>                               
+062357,000074: 
+062358,000075:                                                                                                  <span class="co">#           DO 1STO2S ON A VECTOR OF ANGLES:</span>
+062359,000076: 
+<a name="563153544F3253"></a>062360,000077: 22,3547           03573        <span class="sm">V1STO2S </span>           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               <span class="co">#  ANSWER ARRIVES IN A AND MPAC.</span>
+062361,000078: 
+062362,000079: 22,3550           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+062363,000080: 22,3551           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062364,000081: 22,3552           03573                           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
+062365,000082: 22,3553           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+062366,000083: 
+062367,000084: 22,3554           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+062368,000085: 22,3555           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062369,000086: 22,3556           03573                           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
+062370,000087: 22,3557           54155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+062371,000088: 
+062372,000089: 22,3560           30161                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+062373,000090: 22,3561           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062374,000091: 
+<a name="54504D4F4445"></a>062375,000092: 22,3562           34712        <span class="sm">TPMODE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  MODE IS TP.</span>
+062376,000093: 22,3563           16027                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#4E45574D4F4445">NEWMODE</a>                               
+062377,000094: 
+062378,000095:                                                                                                  <span class="co">#           V1STO2S FOR 2 COMPONENT VECTOR. USED BY RR.</span>
+062379,000096: 
+<a name="32563153544F3253"></a>062380,000097: 22,3564           03573        <span class="sm">2V1STO2S</span>           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
+062381,000098: 22,3565           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+062382,000099: 22,3566           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062383,000100: 22,3567           03573                           <span class="op">TC      </span> <a href="#31544F32535542">1TO2SUB</a>                               
+062384,000101: 22,3570           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+062385,000102: 22,3571           30157                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+062386,000103: 22,3572           16024                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>                                
+062387,000104: 
+062388,000105:                                                                                                  <span class="co">#           SUBROUTINE TO DO DOUBLING AND 1'S TO 2'S CONVERSION:</span>
+062389,000106: 
+<a name="31544F32535542"></a>062390,000107: 22,3573           52155        <span class="sm">1TO2SUB </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  FINAL MPAC +1 UNSPECIFIED.</span>
+062391,000108: 22,3574           20001                           <span class="op">DDOUBL  </span>                                       
+062392,000109: 22,3575           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+062393,000110: 22,3576           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+062394,000111: 22,3577           13601                           <span class="op">TCF     </span> +2                                    
+062395,000112: 22,3600           40000                           <span class="op">COM     </span>                                       <span class="co">#  THIS WAS REVERSE OF MSU.</span>
+062396,000113: 
+062397,000114: 22,3601           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  AND SKIP ON OVERFLOW.</span>
 </pre>
 </span>
 </p>
@@ -243,13 +243,13 @@ Page 1474
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062390,000116: 22,3602           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-062391,000117: 
-062392,000118: 22,3603           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  OVERFLOW UNCORRECT AND IN MSU.</span>
-062393,000119: 22,3604           34673                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
-062394,000120: 22,3605           26154                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062395,000121: 22,3606           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-062396,000122: 
+062399,000116: 22,3602           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+062400,000117: 
+062401,000118: 22,3603           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  OVERFLOW UNCORRECT AND IN MSU.</span>
+062402,000119: 22,3604           34673                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
+062403,000120: 22,3605           26154                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062404,000121: 22,3606           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+062405,000122: 
 </pre>
 </span>
 </p>
@@ -265,52 +265,52 @@ Page 1475
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062398,000124:                                                                                                  <span class="co">#           SUBROUTINE TO INCREMENT CDUS</span>
-<a name="494E435243445553"></a>062399,000125: 22,3607           33622        <span class="sm">INCRCDUS</span>           <span class="op">CAF     </span> <a href="#4C4F435448455441">LOCTHETA</a>                              
-062400,000126: 22,3610           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PLACE ADRES(THETA) IN BUF.</span>
-062401,000127: 22,3611           30154                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  INCREMENT IN 1S COMPL.</span>
-062402,000128: 22,3612           03623                           <span class="op">TC      </span> <a href="#434455494E43">CDUINC</a>                                
-062403,000129: 
-062404,000130: 22,3613           24130                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-062405,000131: 22,3614           30157                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-062406,000132: 22,3615           03623                           <span class="op">TC      </span> <a href="#434455494E43">CDUINC</a>                                
-062407,000133: 
-062408,000134: 22,3616           24130                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-062409,000135: 22,3617           30161                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-062410,000136: 22,3620           03623                           <span class="op">TC      </span> <a href="#434455494E43">CDUINC</a>                                
-062411,000137: 
-062412,000138: 22,3621           13540                           <span class="op">TCF     </span> <a href="#5645434D4F4445">VECMODE</a>                               
-062413,000139: 
-<a name="4C4F435448455441"></a>062414,000140: 22,3622           01155        <span class="sm">LOCTHETA</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>                                
-062415,000141: 
-062416,000142:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE INCREMENTS IN 2S COMPLEMENT THE REGISTER WHOSE ADDRESS IS IN BUF BY THE 1S COMPL.</span>
-062417,000143:                                                                                                  <span class="co">#  QUANTITY FOUND IN TEM2. THIS MAY BE USED TO INCREMENT DESIRED IMU AND OPTICS CDU ANGLES OR ANY OTHER 2S COMPL.</span>
-062418,000144:                                                                                                  <span class="co">#  (+0 UNEQUAL TO -0) QUANTITY. MAY BE CALLED BY BANKCALL/SWCALL.</span>
-062419,000145: 
-<a name="434455494E43"></a>062420,000146: 22,3623           54142        <span class="sm">CDUINC  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  <span class="co">#  1S COMPL.QUANT. ARRIVES IN ACC. STORE IT</span>
-062421,000147: 22,3624           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-062422,000148: 22,3625           10000                           <span class="op">CCS     </span> 0                                     <span class="co">#  CHANGE 2S COMPLE. ANGLE(IN BUF) INTO 1S</span>
-062423,000149: 22,3626           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-062424,000150: 22,3627           13633                           <span class="op">TCF     </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    
-062425,000151: 22,3630           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-062426,000152: 22,3631           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  OVEFLOW HERE IF 2S COMPL. IS 180 DEG.</span>
-062427,000153: 22,3632           40000                           <span class="op">COM     </span>                                       
-062428,000154: 
-062429,000155: 22,3633           60142                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  <span class="co">#  SULT MOVES FROM 2ND TO 3D QUAD.(OR BACK)</span>
-062430,000156: 22,3634           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  BACK TO 2S COMPL.</span>
-062431,000157: 22,3635           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-062432,000158: 22,3636           13640                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
-062433,000159: 22,3637           40000                           <span class="op">COM     </span>                                       
-062434,000160: 22,3640           54142                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  <span class="co">#  STORE 14BIT QUANTITY WITH PRESENT SIGN</span>
-062435,000161: 22,3641           13645                           <span class="op">TCF     </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    
-062436,000162: 22,3642           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   SIGN.</span>
-062437,000163: 22,3643           34673                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                <span class="co">#  FIX IT,BY ADDING IN 37777 OR 40000</span>
-062438,000164: 22,3644           60142                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
-062439,000165: 
-062440,000166: 22,3645           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-062441,000167: 22,3646           54000                           <span class="op">TS      </span> 0                                     <span class="co">#  STORE NEW ANGLE IN 2S COMPLEMENT.</span>
-062442,000168: 22,3647           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-062443,000169: 
+062407,000124:                                                                                                  <span class="co">#           SUBROUTINE TO INCREMENT CDUS</span>
+<a name="494E435243445553"></a>062408,000125: 22,3607           33622        <span class="sm">INCRCDUS</span>           <span class="op">CAF     </span> <a href="#4C4F435448455441">LOCTHETA</a>                              
+062409,000126: 22,3610           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PLACE ADRES(THETA) IN BUF.</span>
+062410,000127: 22,3611           30154                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  INCREMENT IN 1S COMPL.</span>
+062411,000128: 22,3612           03623                           <span class="op">TC      </span> <a href="#434455494E43">CDUINC</a>                                
+062412,000129: 
+062413,000130: 22,3613           24130                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+062414,000131: 22,3614           30157                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+062415,000132: 22,3615           03623                           <span class="op">TC      </span> <a href="#434455494E43">CDUINC</a>                                
+062416,000133: 
+062417,000134: 22,3616           24130                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+062418,000135: 22,3617           30161                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+062419,000136: 22,3620           03623                           <span class="op">TC      </span> <a href="#434455494E43">CDUINC</a>                                
+062420,000137: 
+062421,000138: 22,3621           13540                           <span class="op">TCF     </span> <a href="#5645434D4F4445">VECMODE</a>                               
+062422,000139: 
+<a name="4C4F435448455441"></a>062423,000140: 22,3622           01155        <span class="sm">LOCTHETA</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>                                
+062424,000141: 
+062425,000142:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE INCREMENTS IN 2S COMPLEMENT THE REGISTER WHOSE ADDRESS IS IN BUF BY THE 1S COMPL.</span>
+062426,000143:                                                                                                  <span class="co">#  QUANTITY FOUND IN TEM2. THIS MAY BE USED TO INCREMENT DESIRED IMU AND OPTICS CDU ANGLES OR ANY OTHER 2S COMPL.</span>
+062427,000144:                                                                                                  <span class="co">#  (+0 UNEQUAL TO -0) QUANTITY. MAY BE CALLED BY BANKCALL/SWCALL.</span>
+062428,000145: 
+<a name="434455494E43"></a>062429,000146: 22,3623           54142        <span class="sm">CDUINC  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  <span class="co">#  1S COMPL.QUANT. ARRIVES IN ACC. STORE IT</span>
+062430,000147: 22,3624           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+062431,000148: 22,3625           10000                           <span class="op">CCS     </span> 0                                     <span class="co">#  CHANGE 2S COMPLE. ANGLE(IN BUF) INTO 1S</span>
+062432,000149: 22,3626           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+062433,000150: 22,3627           13633                           <span class="op">TCF     </span> +4                                    
+062434,000151: 22,3630           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+062435,000152: 22,3631           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  OVEFLOW HERE IF 2S COMPL. IS 180 DEG.</span>
+062436,000153: 22,3632           40000                           <span class="op">COM     </span>                                       
+062437,000154: 
+062438,000155: 22,3633           60142                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  <span class="co">#  SULT MOVES FROM 2ND TO 3D QUAD.(OR BACK)</span>
+062439,000156: 22,3634           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  BACK TO 2S COMPL.</span>
+062440,000157: 22,3635           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+062441,000158: 22,3636           13640                           <span class="op">TCF     </span> +2                                    
+062442,000159: 22,3637           40000                           <span class="op">COM     </span>                                       
+062443,000160: 22,3640           54142                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  <span class="co">#  STORE 14BIT QUANTITY WITH PRESENT SIGN</span>
+062444,000161: 22,3641           13645                           <span class="op">TCF     </span> +4                                    
+062445,000162: 22,3642           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   SIGN.</span>
+062446,000163: 22,3643           34673                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                <span class="co">#  FIX IT,BY ADDING IN 37777 OR 40000</span>
+062447,000164: 22,3644           60142                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
+062448,000165: 
+062449,000166: 22,3645           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+062450,000167: 22,3646           54000                           <span class="op">TS      </span> 0                                     <span class="co">#  STORE NEW ANGLE IN 2S COMPLEMENT.</span>
+062451,000168: 22,3647           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+062452,000169: 
 </pre>
 </span>
 </p>
@@ -326,14 +326,14 @@ Page 1476
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062445,000171:                                                                                                  <span class="co">#           RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL. ECADR OF COMMANDS ARRIVES IN X1.</span>
-062446,000172: 
-<a name="50554C5345494D55"></a>062447,000173: 22,3650           50120        <span class="sm">PULSEIMU</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                <span class="co">#  ADDRESS OF GYRO COMMANDS SHOULD BE IN X1</span>
-062448,000174: 22,3651           30046                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
-062449,000175: 22,3652           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-062450,000176: 22,3653           17125                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D5550554C5345">IMUPULSE</a>                              
-062451,000177: 22,3654           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
-062452,000178: 
+062454,000171:                                                                                                  <span class="co">#           RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL. ECADR OF COMMANDS ARRIVES IN X1.</span>
+062455,000172: 
+<a name="50554C5345494D55"></a>062456,000173: 22,3650           50120        <span class="sm">PULSEIMU</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                <span class="co">#  ADDRESS OF GYRO COMMANDS SHOULD BE IN X1</span>
+062457,000174: 22,3651           30046                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
+062458,000175: 22,3652           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+062459,000176: 22,3653           17125                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D5550554C5345">IMUPULSE</a>                              
+062460,000177: 22,3654           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
+062461,000178: 
 </pre>
 </span>
 </p>
@@ -349,48 +349,48 @@ Page 1477
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062454,000180:                                                                                                  <span class="co">#  EACH ROUTINE TAKES A 3X3 MATRIX STORED IN DOUBLE PRECISION IN A FIXED AREA OF ERASABLE MEMORY AND REPLACES IT</span>
-062455,000181:                                                                                                  <span class="co">#  WITH THE TRANSPOSE MATRIX. TRANSP1 USES LOCATIONS XNB+0,+1 THROUGH XNB+16D, 17D AND TRANSP2 USES LOCATIONS</span>
-062456,000182:                                                                                                  <span class="co">#  XNB1+0,+1 THROUGH XNB1+16D, 17D. EACH MATRIX IS STORED BY ROWS.</span>
-062457,000183: 
-<a name="584E424542"></a>062458,000184: 22,3655           02713        <span class="sm">XNBEB   </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
-<a name="584E42314542"></a>062459,000185: 22,3656           02554        <span class="sm">XNB1EB  </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>                                  
-062460,000186: 
-062461,000187: 22,3657  0002713                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
-062462,000188: 
-<a name="5452414E535031"></a>062463,000189: 22,3657           33655        <span class="sm">TRANSP1 </span>           <span class="op">CAF     </span> <a href="#584E424542">XNBEB</a>                                 
-062464,000190: 22,3660           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-062465,000191: 22,3661           53716                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +2                         
-062466,000192: 22,3662           53722                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +6                         
-062467,000193: 22,3663           53716                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +2                         
-062468,000194: 
-062469,000195: 22,3664           53720                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +4                         
-062470,000196: 22,3665           53730                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +12D                       
-062471,000197: 22,3666           53720                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +4                         
-062472,000198: 
-062473,000199: 22,3667           53726                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +10D                       
-062474,000200: 22,3670           53732                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +14D                       
-062475,000201: 22,3671           53726                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +10D                       
-062476,000202: 22,3672           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
-062477,000203: 
-062478,000204: 
-062479,000205: 22,3673  0002554                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>                                  
-062480,000206: 
-<a name="5452414E535032"></a>062481,000207: 22,3673           33656        <span class="sm">TRANSP2 </span>           <span class="op">CAF     </span> <a href="#584E42314542">XNB1EB</a>                                
-062482,000208: 22,3674           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-062483,000209: 22,3675           53557                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +2                         
-062484,000210: 22,3676           53563                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +6                         
-062485,000211: 22,3677           53557                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +2                         
-062486,000212: 
-062487,000213: 22,3700           53561                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +4                         
-062488,000214: 22,3701           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +12D                       
-062489,000215: 22,3702           53561                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +4                         
-062490,000216: 
-062491,000217: 22,3703           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +10D                       
-062492,000218: 22,3704           53573                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +14D                       
-062493,000219: 22,3705           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +10D                       
-062494,000220: 22,3706           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
-062495,000221: 
+062463,000180:                                                                                                  <span class="co">#  EACH ROUTINE TAKES A 3X3 MATRIX STORED IN DOUBLE PRECISION IN A FIXED AREA OF ERASABLE MEMORY AND REPLACES IT</span>
+062464,000181:                                                                                                  <span class="co">#  WITH THE TRANSPOSE MATRIX. TRANSP1 USES LOCATIONS XNB+0,+1 THROUGH XNB+16D, 17D AND TRANSP2 USES LOCATIONS</span>
+062465,000182:                                                                                                  <span class="co">#  XNB1+0,+1 THROUGH XNB1+16D, 17D. EACH MATRIX IS STORED BY ROWS.</span>
+062466,000183: 
+<a name="584E424542"></a>062467,000184: 22,3655           02713        <span class="sm">XNBEB   </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
+<a name="584E42314542"></a>062468,000185: 22,3656           02554        <span class="sm">XNB1EB  </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>                                  
+062469,000186: 
+062470,000187: 22,3657  E5,1713                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
+062471,000188: 
+<a name="5452414E535031"></a>062472,000189: 22,3657           33655        <span class="sm">TRANSP1 </span>           <span class="op">CAF     </span> <a href="#584E424542">XNBEB</a>                                 
+062473,000190: 22,3660           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+062474,000191: 22,3661           53716                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +2                         
+062475,000192: 22,3662           53722                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +6                         
+062476,000193: 22,3663           53716                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +2                         
+062477,000194: 
+062478,000195: 22,3664           53720                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +4                         
+062479,000196: 22,3665           53730                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +12D                       
+062480,000197: 22,3666           53720                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +4                         
+062481,000198: 
+062482,000199: 22,3667           53726                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +10D                       
+062483,000200: 22,3670           53732                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +14D                       
+062484,000201: 22,3671           53726                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>        +10D                       
+062485,000202: 22,3672           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
+062486,000203: 
+062487,000204: 
+062488,000205: 22,3673  E5,1554                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>                                  
+062489,000206: 
+<a name="5452414E535032"></a>062490,000207: 22,3673           33656        <span class="sm">TRANSP2 </span>           <span class="op">CAF     </span> <a href="#584E42314542">XNB1EB</a>                                
+062491,000208: 22,3674           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+062492,000209: 22,3675           53557                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +2                         
+062493,000210: 22,3676           53563                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +6                         
+062494,000211: 22,3677           53557                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +2                         
+062495,000212: 
+062496,000213: 22,3700           53561                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +4                         
+062497,000214: 22,3701           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +12D                       
+062498,000215: 22,3702           53561                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +4                         
+062499,000216: 
+062500,000217: 22,3703           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +10D                       
+062501,000218: 22,3704           53573                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +14D                       
+062502,000219: 22,3705           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E4231">XNB1</a>       +10D                       
+062503,000220: 22,3706           16030                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
+062504,000221: 
 </pre>
 </span>
 </p>
@@ -406,56 +406,56 @@ Page 1478
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062497,000223:                                                                                                  <span class="co">#           THE SUBROUTINE  SIGNMPAC  SETS C(MPAC, MPAC +1) TO SIGN(MPAC).</span>
-062498,000224:                                                                                                  <span class="co">#  FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.    ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.</span>
-062499,000225: 
-062500,000226:                                                                                                  <span class="co">#  ENTRY MAY BE BY EITHER OF THE FOLLOWING:</span>
-062501,000227: 
-062502,000228:                                                                                                  <span class="co">#  1.       LIMIT THE SIZE OF MPAC ON INTERPRETIVE OVERFLOW:</span>
-062503,000229:                                                                                                  <span class="co">#  ENTRY:          BOVB</span>
-062504,000230:                                                                                                  <span class="co">#                         SIGNMPAC</span>
-062505,000231: 
-062506,000232:                                                                                                  <span class="co">#  2.       GENERATE IN MPAC THE SIGNUM FUNCTION OF MPAC:</span>
-062507,000233:                                                                                                  <span class="co">#  ENTRY:          RTB</span>
-062508,000234:                                                                                                  <span class="co">#                         SIGNMPAC</span>
-062509,000235: 
-062510,000236:                                                                                                  <span class="co">#  IN EITHER CASE, RETURN IS TO  THE NEXT INTERPRETIVE INSTRUCTION IN THE CALLING SEQUENCE.</span>
-062511,000237: 
-<a name="5349474E4D504143"></a>062512,000238: 22,3707           00006        <span class="sm">SIGNMPAC</span>           <span class="op">EXTEND  </span>                                       
-062513,000239: 22,3710           34672                           <span class="op">DCA     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#44504F534D4158">DPOSMAX</a>                               
-062514,000240: 22,3711           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062515,000241: 22,3712           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-<a name="44504D4F4445"></a>062516,000242: 22,3713           34714        <span class="sm">DPMODE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SETS MPAC +2 TO ZERO IN THE PROCESS</span>
-062517,000243: 22,3714           16026                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>     +2                         
-062518,000244: 22,3715           13716                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
-062519,000245: 22,3716           00006                           <span class="op">EXTEND  </span>                                       
-062520,000246: 22,3717           44672                           <span class="op">DCS     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#44504F534D4158">DPOSMAX</a>                               
-062521,000247: 22,3720           16024                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>                                
-062522,000248: 
-062523,000249:                                                                                                  <span class="co">#      RTB OP CODE NORMUNIT IS LIKE INTERPRETIVE INSTRUCTION UNIT, EXCEPT THAT IT CAN BE DEPENDED ON NOT TO BLOW</span>
-062524,000250:                                                                                                  <span class="co">#  UP WHEN THE VECTOR BEING UNITIZED IS VERY SAMLL -- IT WILL BLOW UP WHEN ALL COMPONENTS ARE ZERO.   IF NORMUNIT</span>
-062525,000251:                                                                                                  <span class="co">#  IS USED AND THE UPPER ORDER HALVES OF ALL COMPONENTS ARE ZERO, THE MAGNITUDE RETURNED IN 36D WILL BE TOO LARGE</span>
-062526,000252:                                                                                                  <span class="co">#  BY A FACTOR OF 2(13) AND THE SQUARED MAGNITUDE RETURNED AT 34D WILL BE TOO BIG BY A FACTOR OF 2(26).</span>
-062527,000253: 
-<a name="4E4F524D554E5831"></a>062528,000254: 22,3721           34712        <span class="sm">NORMUNX1</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-062529,000255: 22,3722           13724                           <span class="op">TCF     </span> <a href="#4E4F524D554E4954">NORMUNIT</a>   +1                         
-<a name="4E4F524D554E4954"></a>062530,000256: 22,3723           34714        <span class="sm">NORMUNIT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-062531,000257: 22,3724           60120                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-062532,000258: 22,3725           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-062533,000259: 22,3726           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  GET SIGN AGREEMENT IN ALL COMPONENTS</span>
-062534,000260: 22,3727           01010                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#5645434147524545">VECAGREE</a>                              
-062535,000261: 22,3730           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-062536,000262: 22,3731           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
-062537,000263: 22,3732           13734                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
-062538,000264: 22,3733           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
-062539,000265: 22,3734           10157                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-062540,000266: 22,3735           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
-062541,000267: 22,3736           13740                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
-062542,000268: 22,3737           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
-062543,000269: 22,3740           10161                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-062544,000270: 22,3741           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
-062545,000271: 22,3742           13744                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
-062546,000272: 22,3743           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
+062506,000223:                                                                                                  <span class="co">#           THE SUBROUTINE  SIGNMPAC  SETS C(MPAC, MPAC +1) TO SIGN(MPAC).</span>
+062507,000224:                                                                                                  <span class="co">#  FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.    ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.</span>
+062508,000225: 
+062509,000226:                                                                                                  <span class="co">#  ENTRY MAY BE BY EITHER OF THE FOLLOWING:</span>
+062510,000227: 
+062511,000228:                                                                                                  <span class="co">#  1.       LIMIT THE SIZE OF MPAC ON INTERPRETIVE OVERFLOW:</span>
+062512,000229:                                                                                                  <span class="co">#  ENTRY:          BOVB</span>
+062513,000230:                                                                                                  <span class="co">#                         SIGNMPAC</span>
+062514,000231: 
+062515,000232:                                                                                                  <span class="co">#  2.       GENERATE IN MPAC THE SIGNUM FUNCTION OF MPAC:</span>
+062516,000233:                                                                                                  <span class="co">#  ENTRY:          RTB</span>
+062517,000234:                                                                                                  <span class="co">#                         SIGNMPAC</span>
+062518,000235: 
+062519,000236:                                                                                                  <span class="co">#  IN EITHER CASE, RETURN IS TO  THE NEXT INTERPRETIVE INSTRUCTION IN THE CALLING SEQUENCE.</span>
+062520,000237: 
+<a name="5349474E4D504143"></a>062521,000238: 22,3707           00006        <span class="sm">SIGNMPAC</span>           <span class="op">EXTEND  </span>                                       
+062522,000239: 22,3710           34672                           <span class="op">DCA     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#44504F534D4158">DPOSMAX</a>                               
+062523,000240: 22,3711           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062524,000241: 22,3712           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+<a name="44504D4F4445"></a>062525,000242: 22,3713           34714        <span class="sm">DPMODE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SETS MPAC +2 TO ZERO IN THE PROCESS</span>
+062526,000243: 22,3714           16026                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>     +2                         
+062527,000244: 22,3715           13716                           <span class="op">TCF     </span> +1                                    
+062528,000245: 22,3716           00006                           <span class="op">EXTEND  </span>                                       
+062529,000246: 22,3717           44672                           <span class="op">DCS     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#44504F534D4158">DPOSMAX</a>                               
+062530,000247: 22,3720           16024                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#534C4F414432">SLOAD2</a>                                
+062531,000248: 
+062532,000249:                                                                                                  <span class="co">#      RTB OP CODE NORMUNIT IS LIKE INTERPRETIVE INSTRUCTION UNIT, EXCEPT THAT IT CAN BE DEPENDED ON NOT TO BLOW</span>
+062533,000250:                                                                                                  <span class="co">#  UP WHEN THE VECTOR BEING UNITIZED IS VERY SAMLL -- IT WILL BLOW UP WHEN ALL COMPONENTS ARE ZERO.   IF NORMUNIT</span>
+062534,000251:                                                                                                  <span class="co">#  IS USED AND THE UPPER ORDER HALVES OF ALL COMPONENTS ARE ZERO, THE MAGNITUDE RETURNED IN 36D WILL BE TOO LARGE</span>
+062535,000252:                                                                                                  <span class="co">#  BY A FACTOR OF 2(13) AND THE SQUARED MAGNITUDE RETURNED AT 34D WILL BE TOO BIG BY A FACTOR OF 2(26).</span>
+062536,000253: 
+<a name="4E4F524D554E5831"></a>062537,000254: 22,3721           34712        <span class="sm">NORMUNX1</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+062538,000255: 22,3722           13724                           <span class="op">TCF     </span> <a href="#4E4F524D554E4954">NORMUNIT</a>   +1                         
+<a name="4E4F524D554E4954"></a>062539,000256: 22,3723           34714        <span class="sm">NORMUNIT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+062540,000257: 22,3724           60120                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+062541,000258: 22,3725           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+062542,000259: 22,3726           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  GET SIGN AGREEMENT IN ALL COMPONENTS</span>
+062543,000260: 22,3727           01010                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#5645434147524545">VECAGREE</a>                              
+062544,000261: 22,3730           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+062545,000262: 22,3731           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
+062546,000263: 22,3732           13734                           <span class="op">TCF     </span> +2                                    
+062547,000264: 22,3733           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
+062548,000265: 22,3734           10157                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+062549,000266: 22,3735           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
+062550,000267: 22,3736           13740                           <span class="op">TCF     </span> +2                                    
+062551,000268: 22,3737           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
+062552,000269: 22,3740           10161                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+062553,000270: 22,3741           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
+062554,000271: 22,3742           13744                           <span class="op">TCF     </span> +2                                    
+062555,000272: 22,3743           13765                           <span class="op">TCF     </span> <a href="#4E4F5348494654">NOSHIFT</a>                               
 </pre>
 </span>
 </p>
@@ -471,34 +471,34 @@ Page 1479
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062548,000274: 22,3744           30155                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  SHIFT ALL COMPONENTS LEFT 13</span>
-062549,000275: 22,3745           00006                           <span class="op">EXTEND  </span>                                       
-062550,000276: 22,3746           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-062551,000277: 22,3747           20155                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DAS GAINS A LITTLE ACCURACY</span>
-062552,000278: 22,3750           30160                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
-062553,000279: 22,3751           00006                           <span class="op">EXTEND  </span>                                       
-062554,000280: 22,3752           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-062555,000281: 22,3753           20160                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-062556,000282: 22,3754           30162                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
-062557,000283: 22,3755           00006                           <span class="op">EXTEND  </span>                                       
-062558,000284: 22,3756           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-062559,000285: 22,3757           20162                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-062560,000286: 22,3760           34720                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#544849525445454E">THIRTEEN</a>                              
-062561,000287: 22,3761           50156                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-062562,000288: 22,3762           54045                           <span class="op">TS      </span> 37D                                   
-<a name="4F464654554E4954"></a>062563,000289: 22,3763           04574        <span class="sm">OFFTUNIT</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-062564,000290: 22,3764           01024                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#554E4954">UNIT</a>       +1                         <span class="co">#  SKIP THE "TC VECAGREE" DONE AT UNIT</span>
-062565,000291: 
-062566,000292: 
-<a name="4E4F5348494654"></a>062567,000293: 22,3765           34714        <span class="sm">NOSHIFT </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-062568,000294: 22,3766           13761                           <span class="op">TCF     </span> <a href="#4F464654554E4954">OFFTUNIT</a>   -2                         
-062569,000295: 
-062570,000296: 
-062571,000297:                                                                                                  <span class="co">#   RTB  VECSGNAG   ...FORCES SIGN AGREEMENT OF VECTOR IN MPAC.</span>
-062572,000298: 
-<a name="56454353474E4147"></a>062573,000299: 22,3767           04555        <span class="sm">VECSGNAG</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-062574,000300: 22,3770           01010                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#5645434147524545">VECAGREE</a>                              
-062575,000301: 22,3771           06030                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
+062557,000274: 22,3744           30155                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  SHIFT ALL COMPONENTS LEFT 13</span>
+062558,000275: 22,3745           00006                           <span class="op">EXTEND  </span>                                       
+062559,000276: 22,3746           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+062560,000277: 22,3747           20155                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  DAS GAINS A LITTLE ACCURACY</span>
+062561,000278: 22,3750           30160                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
+062562,000279: 22,3751           00006                           <span class="op">EXTEND  </span>                                       
+062563,000280: 22,3752           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+062564,000281: 22,3753           20160                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+062565,000282: 22,3754           30162                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
+062566,000283: 22,3755           00006                           <span class="op">EXTEND  </span>                                       
+062567,000284: 22,3756           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+062568,000285: 22,3757           20162                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+062569,000286: 22,3760           34720                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#544849525445454E">THIRTEEN</a>                              
+062570,000287: 22,3761           50156                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+062571,000288: 22,3762           54045                           <span class="op">TS      </span> 37D                                   
+<a name="4F464654554E4954"></a>062572,000289: 22,3763           04574        <span class="sm">OFFTUNIT</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+062573,000290: 22,3764           01024                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#554E4954">UNIT</a>       +1                         <span class="co">#  SKIP THE "TC VECAGREE" DONE AT UNIT</span>
+062574,000291: 
+062575,000292: 
+<a name="4E4F5348494654"></a>062576,000293: 22,3765           34714        <span class="sm">NOSHIFT </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+062577,000294: 22,3766           13761                           <span class="op">TCF     </span> <a href="#4F464654554E4954">OFFTUNIT</a>   -2                         
+062578,000295: 
+062579,000296: 
+062580,000297:                                                                                                  <span class="co">#   RTB  VECSGNAG   ...FORCES SIGN AGREEMENT OF VECTOR IN MPAC.</span>
+062581,000298: 
+<a name="56454353474E4147"></a>062582,000299: 22,3767           04555        <span class="sm">VECSGNAG</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+062583,000300: 22,3770           01010                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#5645434147524545">VECAGREE</a>                              
+062584,000301: 22,3771           06030                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#44414E5A4947">DANZIG</a>                                
 
 End of include-file RTB_OP_CODES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

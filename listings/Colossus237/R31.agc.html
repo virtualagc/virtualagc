@@ -87,16 +87,16 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-021354,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-021355,000003:                                                                                                  <span class="co">#  Filename:     R31.agc</span>
-021356,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-021357,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-021358,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-021359,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-021360,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-021361,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-021362,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-021363,000011:                                                                                                  <span class="co">#  Mod history:  2011-02-05 JL   Adapted from corresponding Colossus 249 file.</span>
+021354,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+021355,000003:                                                                                                  <span class="co">## Filename:     R31.agc</span>
+021356,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+021357,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+021358,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+021359,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+021360,000008:                                                                                                  <span class="co">## Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+021361,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+021362,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+021363,000011:                                                                                                  <span class="co">## Mod history:  2011-02-05 JL   Adapted from corresponding Colossus 249 file.</span>
 021364,000012: 
 </pre>
 </span>
@@ -135,9 +135,9 @@ Page 494
 <a name="444953504E3558"></a>021385,000033: 35,3163           30105        <span class="sm">DISPN5X </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524439">FLAGWRD9</a>                              <span class="co">#  TEST R31FLAG (IN SUNDANCE R31FLAG WILL</span>
 021386,000034: 35,3164           74707                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#      ALWAYS BE SET AS R34 DOES NOT EXIST)</span>
 021387,000035: 35,3165           00006                           <span class="op">EXTEND  </span>                                       
-021388,000036: 35,3166           13171                           <span class="op">BZF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+021388,000036: 35,3166           13171                           <span class="op">BZF     </span> +3                                    
 021389,000037: 35,3167           33310                           <span class="op">CAF     </span> <a href="#5631364E3534">V16N54</a>                                <span class="co">#  R31    USE NOUN 54</span>
-021390,000038: 35,3170           03172                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+021390,000038: 35,3170           03172                           <span class="op">TC      </span> +2                                    
 021391,000039: 35,3171           33311                           <span class="op">CAF     </span> <a href="#5631364E3533">V16N53</a>                                <span class="co">#  R34    USE NOUN 53</span>
 021392,000040: 35,3172           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
 021393,000041: 35,3173           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B46">GOMARKF</a>                               
@@ -193,7 +193,7 @@ Page 495
 021429,000077: 35,3235           15330                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5448495341584953">THISAXIS</a>                              <span class="co">#  UNITX FOR CM, UNITZ FOR LM</span>
 021430,000078: 35,3236           77214                           <span class="in">BON     </span> <span class="in">VLOAD     </span>                            <span class="co">#  CHK R31FLAG. ON=R31 THETA, OFF=R34 PHI</span>
 021431,000079: 35,3237           04713                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#523331464C4147">R31FLAG</a>                               
-021432,000080: 35,3240           73242                                    <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#      R31-THETA</span>
+021432,000080: 35,3240           73242                                    +2                                    <span class="co">#      R31-THETA</span>
 021433,000081: 35,3241           00015                                    12D                                   
 021434,000082: 35,3242           77624                           <span class="in">CALL    </span>                                       
 021435,000083: 35,3243           47601                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#2A4E42534D2A">*NBSM*</a>                                
@@ -312,7 +312,7 @@ Page 497
 021520,000168: 35,3351           02272                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4241534554494D45">BASETIME</a>                              
 021521,000169: 35,3352           43014                           <span class="in">BOF     </span> <span class="in">SET       </span>                            <span class="co">#  GET APPROPRIATE MOONFLAG SETTING</span>
 021522,000170: 35,3353           04343                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              
-021523,000171: 35,3354           73356                                    <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+021523,000171: 35,3354           73356                                    +2                                    
 021524,000172: 35,3355           00063                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
 021525,000173: 35,3356           77614                           <span class="in">SET     </span>                                       
 021526,000174: 35,3357           01473                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E545950464C47">INTYPFLG</a>                              <span class="co">#  CONIC EXTRAP.</span>
@@ -352,7 +352,7 @@ Page 498
 021546,000194: 35,3402           02272                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4241534554494D45">BASETIME</a>                              
 021547,000195: 35,3403           43014                           <span class="in">BOF     </span> <span class="in">SET       </span>                            
 021548,000196: 35,3404           04343                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              
-021549,000197: 35,3405           73407                                    <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+021549,000197: 35,3405           73407                                    +2                                    
 021550,000198: 35,3406           00063                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
 021551,000199: 35,3407           35517                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   
 021552,000200: 35,3410           27066                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E544547525653">INTEGRVS</a>                              

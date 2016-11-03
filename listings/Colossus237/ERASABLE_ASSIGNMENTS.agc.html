@@ -87,18 +87,18 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001415,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-001416,000003:                                                                                                  <span class="co">#  Filename:     ERASABLE_ASSIGNMENTS.agc</span>
-001417,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-001418,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-001419,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-001420,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-001421,000008:                                                                                                  <span class="co">#  Contact:      Sergio Navarro &lt;sergionavarrog@gmail.com></span>
-001422,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-001423,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-001424,000011:                                                                                                  <span class="co">#  Mod history:  2009-10-21 SN   Adapted from corresponding Colossus 249 file.</span>
-001425,000012:                                                                                                  <span class="co">#                2011-01-22 JL   Minor fixes to whitespace and comments.</span>
-001426,000013:                                                                                                  <span class="co">#                2011-04-27 JL   Fixed symbol name.</span>
+001415,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+001416,000003:                                                                                                  <span class="co">## Filename:     ERASABLE_ASSIGNMENTS.agc</span>
+001417,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+001418,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+001419,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+001420,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+001421,000008:                                                                                                  <span class="co">## Contact:      Sergio Navarro &lt;sergionavarrog@gmail.com></span>
+001422,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+001423,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+001424,000011:                                                                                                  <span class="co">## Mod history:  2009-10-21 SN   Adapted from corresponding Colossus 249 file.</span>
+001425,000012:                                                                                                  <span class="co">##               2011-01-22 JL  Minor fixes to whitespace and comments.</span>
+001426,000013:                                                                                                  <span class="co">##               2011-04-27 JL  Fixed symbol name.</span>
 001427,000014: 
 </pre>
 </span>
@@ -2053,7 +2053,7 @@ Page 65
 002930,001517: 
 <a name="5354415445"></a>002931,001518:    0074                        <span class="sm">STATE   </span>           <span class="ps">ERASE   </span> +11D                                  
 002932,001519: 
-<a name="464C414746494C4C"></a>002933,001520:    0110                        <span class="sm">FLAGFILL</span>           <span class="ps">ERASE   </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    <span class="co">#  SPACE FOR FUTURE FLAGS</span>
+<a name="464C414746494C4C"></a>002933,001520:    0110                        <span class="sm">FLAGFILL</span>           <span class="ps">ERASE   </span> +3                                    <span class="co">#  SPACE FOR FUTURE FLAGS</span>
 002934,001521: 
 </pre>
 </span>
@@ -2117,8 +2117,8 @@ Page 66
 002980,001567: 
 002981,001568:                                                                                                  <span class="co">#  ALSO MIXTEMP+1 = VBUF+4, MIXTEMP+2 = VBUF+5.</span>
 002982,001569: 
-<a name="425546"></a>002983,001570:    0130                        <span class="sm">BUF     </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  TEMPORARY SCALAR STORAGE.</span>
-<a name="42554632"></a>002984,001571:    0133                        <span class="sm">BUF2    </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="425546"></a>002983,001570:    0130                        <span class="sm">BUF     </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  TEMPORARY SCALAR STORAGE.</span>
+<a name="42554632"></a>002984,001571:    0133                        <span class="sm">BUF2    </span>           <span class="ps">ERASE   </span> +1                                    
 <a name="494E4445584C4F43"></a>002985,001572:    0135     0130               <span class="sm">INDEXLOC</span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>                                   <span class="co">#  CONTAINS ADDRESS OF SPECIFIED INDEX.</span>
 <a name="5357574F5244"></a>002986,001573:    0135     0130               <span class="sm">SWWORD  </span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>                                   <span class="co">#  ADDRESS OF SWITCH WORD.</span>
 </pre>
@@ -2334,7 +2334,7 @@ Page 70
 003141,001728:                                                                                                  <span class="co">#            OPTICS MARKING , UNSHARED.                                    (8D)</span>
 003142,001729: 
 <a name="4D4B4E4458"></a>003143,001730:    0354                        <span class="sm">MKNDX   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4D4B54325431"></a>003144,001731:    0355                        <span class="sm">MKT2T1  </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="4D4B54325431"></a>003144,001731:    0355                        <span class="sm">MKT2T1  </span>           <span class="ps">ERASE   </span> +1                                    
 <a name="4D4B43445559"></a>003145,001732:    0357                        <span class="sm">MKCDUY  </span>           <span class="ps">ERASE   </span>                                       
 <a name="4D4B43445553"></a>003146,001733:    0360                        <span class="sm">MKCDUS  </span>           <span class="ps">ERASE   </span>                                       
 <a name="4D4B4344555A"></a>003147,001734:    0361                        <span class="sm">MKCDUZ  </span>           <span class="ps">ERASE   </span>                                       
@@ -2342,7 +2342,7 @@ Page 70
 <a name="4D4B43445558"></a>003149,001736:    0363                        <span class="sm">MKCDUX  </span>           <span class="ps">ERASE   </span>                                       
 003150,001737:                                                                                                  <span class="co">#           FOR EXCLUSIVE USE OF SYS TEST STANDARD LEAD INS                (2)</span>
 003151,001738: 
-<a name="4542554632"></a>003152,001739:    0364                        <span class="sm">EBUF2   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  R(2) UNSHARED</span>
+<a name="4542554632"></a>003152,001739:    0364                        <span class="sm">EBUF2   </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  R(2) UNSHARED</span>
 003153,001740: 
 </pre>
 </span>
@@ -2370,7 +2370,7 @@ Page 71
 <a name="43414452464C5348"></a>003163,001750:    0372                        <span class="sm">CADRFLSH</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)TMP</span>
 <a name="434144524D41524B"></a>003164,001751:    0373                        <span class="sm">CADRMARK</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)TMP</span>
 <a name="54454D50464C5348"></a>003165,001752:    0374                        <span class="sm">TEMPFLSH</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)TMP</span>
-<a name="4641494C524547"></a>003166,001753:    0375                        <span class="sm">FAILREG </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  B(3)PRM  3 ALARM-ABORT USER'S 2CADR</span>
+<a name="4641494C524547"></a>003166,001753:    0375                        <span class="sm">FAILREG </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  B(3)PRM  3 ALARM-ABORT USER'S 2CADR</span>
 003167,001754: 
 003168,001755:    0400                                           <span class="ps">SETLOC  </span> 400                                   
 003169,001756:                                                                                                  <span class="co">#           VAC AREAS. -BE CAREFUL OF PLACEMENT-                           (220D)</span>
@@ -2507,8 +2507,8 @@ Page 73
 <a name="4341445253544F52"></a>003272,001859:    1042                        <span class="sm">CADRSTOR</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  ENDIDLE STORAGE</span>
 <a name="4453504C495354"></a>003273,001860:    1043                        <span class="sm">DSPLIST </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  WAITING REG FOR DSP SYST INTERNAL USE</span>
 <a name="4558545642414354"></a>003274,001861:    1044                        <span class="sm">EXTVBACT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXTENDED VERB ACTIVITY INTERLOCK</span>
-<a name="44535054454D31"></a>003275,001862:    1045                        <span class="sm">DSPTEM1 </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  BUFFER STORAGE AREA 1 (MOSTLY FOR TIME)</span>
-<a name="44535054454D32"></a>003276,001863:    1050                        <span class="sm">DSPTEM2 </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  BUFFER STORAGE AREA 2 (MOSTLY FOR DEG)</span>
+<a name="44535054454D31"></a>003275,001862:    1045                        <span class="sm">DSPTEM1 </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  BUFFER STORAGE AREA 1 (MOSTLY FOR TIME)</span>
+<a name="44535054454D32"></a>003276,001863:    1050                        <span class="sm">DSPTEM2 </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  BUFFER STORAGE AREA 2 (MOSTLY FOR DEG)</span>
 003277,001864: 
 003278,001865: 
 <a name="44535054454D58"></a>003279,001866:    1053     1051               <span class="sm">DSPTEMX </span>           <span class="ps">EQUALS  </span> <a href="#44535054454D32">DSPTEM2</a>    +1                         <span class="co">#  B(2) S-S DISPLAY BUFFER FOR EXT. VERBS.</span>
@@ -2623,10 +2623,10 @@ Page 75
 <a name="52415445494E4458"></a>003360,001947:    1130                        <span class="sm">RATEINDX</span>           <span class="ps">ERASE   </span>                                       <span class="co">#   (1)    USED BY KALCMANU</span>
 <a name="4F5054494F4E31"></a>003361,001948:    1131                        <span class="sm">OPTION1 </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)   NOUN 06 USES THIS</span>
 <a name="4F5054494F4E32"></a>003362,001949:    1132                        <span class="sm">OPTION2 </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)   NOUN 06 USES THIS</span>
-<a name="4C4F4E4743414452"></a>003363,001950:    1133                        <span class="sm">LONGCADR</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)    LONGCALL REGISTER</span>
-<a name="4C4F4E4742415345"></a>003364,001951:    1135                        <span class="sm">LONGBASE</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)    LONGCALL REGISTER</span>
-<a name="4C4F4E4754494D45"></a>003365,001952:    1137                        <span class="sm">LONGTIME</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)    LONGCALL REGISTER</span>
-<a name="44454C41594C4F43"></a>003366,001953:    1141                        <span class="sm">DELAYLOC</span>           <span class="ps">ERASE   </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+<a name="4C4F4E4743414452"></a>003363,001950:    1133                        <span class="sm">LONGCADR</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)    LONGCALL REGISTER</span>
+<a name="4C4F4E4742415345"></a>003364,001951:    1135                        <span class="sm">LONGBASE</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)    LONGCALL REGISTER</span>
+<a name="4C4F4E4754494D45"></a>003365,001952:    1137                        <span class="sm">LONGTIME</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)    LONGCALL REGISTER</span>
+<a name="44454C41594C4F43"></a>003366,001953:    1141                        <span class="sm">DELAYLOC</span>           <span class="ps">ERASE   </span> +3                                    
 <a name="4E56574F524431"></a>003367,001954:    1145                        <span class="sm">NVWORD1 </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
 <a name="54454D50523630"></a>003368,001955:    1146                        <span class="sm">TEMPR60 </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
 <a name="5052494F54494D45"></a>003369,001956:    1147                        <span class="sm">PRIOTIME</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
@@ -2637,10 +2637,10 @@ Page 75
 003374,001961:                                                                                                  <span class="co">#           MISC.  INCLUDING RESTART COUNTER, GIMBAL ANGLE  SAVE  AND</span>
 003375,001962:                                                                                                  <span class="co">#           STANDBY VERB ERASABLES. REDOCTR BEFORE THETAD (DWNLNK)         (16D)</span>
 003376,001963: 
-<a name="54494D4532534156"></a>003377,001964:    1150                        <span class="sm">TIME2SAV</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)TMP</span>
-<a name="5343414C53415645"></a>003378,001965:    1152                        <span class="sm">SCALSAVE</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)TMP</span>
+<a name="54494D4532534156"></a>003377,001964:    1150                        <span class="sm">TIME2SAV</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)TMP</span>
+<a name="5343414C53415645"></a>003378,001965:    1152                        <span class="sm">SCALSAVE</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)TMP</span>
 <a name="5245444F435452"></a>003379,001966:    1154                        <span class="sm">REDOCTR </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PRM CONTAINS NUMBER OF RESTARTS.</span>
-<a name="544845544144"></a>003380,001967:    1155                        <span class="sm">THETAD  </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  B(3)PRM DESIRED GIM ANGLES FOR MANEUVER.</span>
+<a name="544845544144"></a>003380,001967:    1155                        <span class="sm">THETAD  </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  B(3)PRM DESIRED GIM ANGLES FOR MANEUVER.</span>
 <a name="43504849"></a>003381,001968:    1160     1155               <span class="sm">CPHI    </span>           <span class="ps">=       </span> <a href="#544845544144">THETAD</a>                                <span class="co">#          (OUTER)</span>
 <a name="435448455441"></a>003382,001969:    1160     1156               <span class="sm">CTHETA  </span>           <span class="ps">=       </span> <a href="#544845544144">THETAD</a>     +1                         <span class="co">#          (INNER)</span>
 <a name="43505349"></a>003383,001970:    1160     1157               <span class="sm">CPSI    </span>           <span class="ps">=       </span> <a href="#544845544144">THETAD</a>     +2                         <span class="co">#          (MIDDLE)</span>
@@ -2684,7 +2684,7 @@ Page 76
 003407,001994: 
 <a name="524E"></a>003408,001995:    1170                        <span class="sm">RN      </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
 <a name="564E"></a>003409,001996:    1176                        <span class="sm">VN      </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
-<a name="50495054494D45"></a>003410,001997:    1204                        <span class="sm">PIPTIME </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM (MUST BE FOLLOWED BY GDT/2)</span>
+<a name="50495054494D45"></a>003410,001997:    1204                        <span class="sm">PIPTIME </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM (MUST BE FOLLOWED BY GDT/2)</span>
 003411,001998: 
 003412,001999: 
 003413,002000:                                                                                                  <span class="co">#           SERVICER STORAGE.                                              (45D)</span>
@@ -2767,7 +2767,7 @@ Page 77
 003476,002063: 
 003477,002064: 
 003478,002065: 
-<a name="54454D504F5231"></a>003479,002066:    1300                        <span class="sm">TEMPOR1 </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)TMP</span>
+<a name="54454D504F5231"></a>003479,002066:    1300                        <span class="sm">TEMPOR1 </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)TMP</span>
 003480,002067: 
 003481,002068: 
 003482,002069:                                                                                                  <span class="co">#           T4RUPT ERASABLE.                                               (6D)</span>
@@ -2775,7 +2775,7 @@ Page 77
 <a name="4453525550545357"></a>003484,002071:    1302                        <span class="sm">DSRUPTSW</span>           <span class="ps">ERASE   </span>                                       
 <a name="4F5054494E44"></a>003485,002072:    1303                        <span class="sm">OPTIND  </span>           <span class="ps">ERASE   </span>                                       
 <a name="4C4759524F"></a>003486,002073:    1304                        <span class="sm">LGYRO   </span>           <span class="ps">ERASE   </span>                                       
-<a name="434F4D4D414E444F"></a>003487,002074:    1305                        <span class="sm">COMMANDO</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="434F4D4D414E444F"></a>003487,002074:    1305                        <span class="sm">COMMANDO</span>           <span class="ps">ERASE   </span> +1                                    
 003488,002075: 
 </pre>
 </span>
@@ -2802,7 +2802,7 @@ Page 78
 003497,002084: 
 <a name="54364C4F43"></a>003498,002085:    1310                        <span class="sm">T6LOC   </span>           <span class="ps">ERASE   </span>                                       
 <a name="5436414452"></a>003499,002086:    1311                        <span class="sm">T6ADR   </span>           <span class="ps">ERASE   </span>                                       
-<a name="54354C4F43"></a>003500,002087:    1312                        <span class="sm">T5LOC   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="54354C4F43"></a>003500,002087:    1312                        <span class="sm">T5LOC   </span>           <span class="ps">ERASE   </span> +1                                    
 003501,002088: 
 003502,002089: 
 003503,002090:                                                                                                  <span class="co">#           MODE SWITCHING ERASABLE.                                       (14D)</span>
@@ -2813,11 +2813,11 @@ Page 78
 <a name="5A4F5054434E54"></a>003508,002095:    1317                        <span class="sm">ZOPTCNT </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PRM</span>
 <a name="494D4F4445533330"></a>003509,002096:    1320                        <span class="sm">IMODES30</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PRM</span>
 <a name="494D4F4445533333"></a>003510,002097:    1321                        <span class="sm">IMODES33</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PRM</span>
-<a name="4D4F444543414452"></a>003511,002098:    1322                        <span class="sm">MODECADR</span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  B(3)TMP</span>
+<a name="4D4F444543414452"></a>003511,002098:    1322                        <span class="sm">MODECADR</span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  B(3)TMP</span>
 <a name="494D5543414452"></a>003512,002099:    1325     1322               <span class="sm">IMUCADR </span>           <span class="ps">=       </span> <a href="#4D4F444543414452">MODECADR</a>                              
 <a name="4F505443414452"></a>003513,002100:    1325     1323               <span class="sm">OPTCADR </span>           <span class="ps">=       </span> <a href="#4D4F444543414452">MODECADR</a>   +1                         
 <a name="52414443414452"></a>003514,002101:    1325     1324               <span class="sm">RADCADR </span>           <span class="ps">=       </span> <a href="#4D4F444543414452">MODECADR</a>   +2                         
-<a name="41545443414452"></a>003515,002102:    1325                        <span class="sm">ATTCADR </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  B(3)PRM</span>
+<a name="41545443414452"></a>003515,002102:    1325                        <span class="sm">ATTCADR </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  B(3)PRM</span>
 <a name="4154545052494F"></a>003516,002103:    1330     1327               <span class="sm">ATTPRIO </span>           <span class="ps">=       </span> <a href="#41545443414452">ATTCADR</a>    +2                         
 <a name="4D41524B53544154"></a>003517,002104:    1330                        <span class="sm">MARKSTAT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PRM</span>
 <a name="4F50544D4F444553"></a>003518,002105:    1331                        <span class="sm">OPTMODES</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PRM</span>
@@ -2835,11 +2835,11 @@ Page 78
 003530,002117: 
 003531,002118:                                                                                                  <span class="co">#           CRS61.1 STORAGE. -USED IN R63 (VERB 89)-                       (5D)</span>
 003532,002119: 
-<a name="4350484958"></a>003533,002120:    1333                        <span class="sm">CPHIX   </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  B(3)DSP NOUN 96 CALCULATED BY CRS61.1</span>
+<a name="4350484958"></a>003533,002120:    1333                        <span class="sm">CPHIX   </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  B(3)DSP NOUN 96 CALCULATED BY CRS61.1</span>
 003534,002121: 
 003535,002122: 
 003536,002123: 
-<a name="544556454E54"></a>003537,002124:    1336                        <span class="sm">TEVENT  </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)     TIME OF EVENT FOR DOWNLIST</span>
+<a name="544556454E54"></a>003537,002124:    1336                        <span class="sm">TEVENT  </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)     TIME OF EVENT FOR DOWNLIST</span>
 <a name="544C4946544F4646"></a>003538,002125:    1340     1336               <span class="sm">TLIFTOFF</span>           <span class="ps">=       </span> <a href="#544556454E54">TEVENT</a>                                
 003539,002126: 
 </pre>
@@ -2901,9 +2901,9 @@ Page 79
 003582,002169: 
 003583,002170:                                                                                                  <span class="co">#           KEPLER STORAGE                                                 (6D)</span>
 003584,002171: 
-<a name="584D4F44554C4F"></a>003585,002172:    1343                        <span class="sm">XMODULO </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  I(2) GREATER 2PI KEPLER</span>
-<a name="544D4F44554C4F"></a>003586,002173:    1345                        <span class="sm">TMODULO </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  I(2) GREATER 2 KEPLER</span>
-<a name="455053494C4F4E54"></a>003587,002174:    1347                        <span class="sm">EPSILONT</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  I(2) TMP</span>
+<a name="584D4F44554C4F"></a>003585,002172:    1343                        <span class="sm">XMODULO </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  I(2) GREATER 2PI KEPLER</span>
+<a name="544D4F44554C4F"></a>003586,002173:    1345                        <span class="sm">TMODULO </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  I(2) GREATER 2 KEPLER</span>
+<a name="455053494C4F4E54"></a>003587,002174:    1347                        <span class="sm">EPSILONT</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  I(2) TMP</span>
 003588,002175: 
 </pre>
 </span>
@@ -2923,7 +2923,7 @@ Page 80
 003590,002177: 
 003591,002178:                                                                                                  <span class="co">#           P37    **RETURN TO EARTH  (PAD LOAD) ****                      (2D)</span>
 003592,002179: 
-<a name="5254454431"></a>003593,002180:    1351                        <span class="sm">RTED1   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  I(2)PL VGAMMA POLY COEF              B-3</span>
+<a name="5254454431"></a>003593,002180:    1351                        <span class="sm">RTED1   </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  I(2)PL VGAMMA POLY COEF              B-3</span>
 003594,002181: 
 003595,002182: 
 003596,002183:                                                                                                  <span class="co">#           P40    ***STEERING ROUTINE*** PAD LOAD                         (1D)</span>
@@ -2934,7 +2934,7 @@ Page 80
 003601,002188: 
 003602,002189:                                                                                                  <span class="co">#           P23     ***PAD LOAD****                                        (2D)</span>
 003603,002190: 
-<a name="484F52495A414C54"></a>003604,002191:    1354                        <span class="sm">HORIZALT</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  I(2)PL  HORIZION ALTITUDE       M  B-29</span>
+<a name="484F52495A414C54"></a>003604,002191:    1354                        <span class="sm">HORIZALT</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  I(2)PL  HORIZION ALTITUDE       M  B-29</span>
 003605,002192: 
 003606,002193: 
 003607,002194:                                                                                                  <span class="co">#           P-20        ALTERNATE LOS VARIANCE     PAD LOAD*****           (1D)</span>
@@ -2973,12 +2973,12 @@ Page 81
 003626,002213: 
 003627,002214:                                                                                                  <span class="co">#           RESTART STORAGE.                                               (2D)</span>
 003628,002215: 
-<a name="5253424251"></a>003629,002216: E3,1432                        <span class="sm">RSBBQ   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM SAVE BB AND Q FOR RESTARTS.</span>
+<a name="5253424251"></a>003629,002216: E3,1432                        <span class="sm">RSBBQ   </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM SAVE BB AND Q FOR RESTARTS.</span>
 003630,002217: 
 003631,002218: 
 003632,002219:                                                                                                  <span class="co">#           MORE LONGCALL STORAGE. (MUST BE IN LST1 S BANK).               (2D)</span>
 003633,002220: 
-<a name="4C4F4E4745584954"></a>003634,002221: E3,1434                        <span class="sm">LONGEXIT</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)TMP MAY BE SELDOM OVERLAYED.</span>
+<a name="4C4F4E4745584954"></a>003634,002221: E3,1434                        <span class="sm">LONGEXIT</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)TMP MAY BE SELDOM OVERLAYED.</span>
 003635,002222: 
 003636,002223: 
 003637,002224:                                                                                                  <span class="co">#           PHASE-CHANGE LISTS PART II.                                    (12D)</span>
@@ -3098,32 +3098,32 @@ Page 83
 <a name="525245435443534D"></a>003723,002310: E3,1554                        <span class="sm">RRECTCSM</span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM CSM VARIABLES.</span>
 <a name="5252454354484953"></a>003724,002311: E3,1562  E3,1554               <span class="sm">RRECTHIS</span>           <span class="ps">=       </span> <a href="#525245435443534D">RRECTCSM</a>                              
 <a name="565245435443534D"></a>003725,002312: E3,1562                        <span class="sm">VRECTCSM</span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
-<a name="54455443534D"></a>003726,002313: E3,1570                        <span class="sm">TETCSM  </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM</span>
+<a name="54455443534D"></a>003726,002313: E3,1570                        <span class="sm">TETCSM  </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM</span>
 <a name="54455454484953"></a>003727,002314: E3,1572  E3,1570               <span class="sm">TETTHIS </span>           <span class="ps">=       </span> <a href="#54455443534D">TETCSM</a>                                
 <a name="44454C544143534D"></a>003728,002315: E3,1572                        <span class="sm">DELTACSM</span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
 <a name="4E555643534D"></a>003729,002316: E3,1600                        <span class="sm">NUVCSM  </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
 <a name="52435643534D"></a>003730,002317: E3,1606                        <span class="sm">RCVCSM  </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
 <a name="56435643534D"></a>003731,002318: E3,1614                        <span class="sm">VCVCSM  </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
-<a name="544343534D"></a>003732,002319: E3,1622                        <span class="sm">TCCSM   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM</span>
-<a name="584B455043534D"></a>003733,002320: E3,1624                        <span class="sm">XKEPCSM </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM</span>
+<a name="544343534D"></a>003732,002319: E3,1622                        <span class="sm">TCCSM   </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM</span>
+<a name="584B455043534D"></a>003733,002320: E3,1624                        <span class="sm">XKEPCSM </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM</span>
 003734,002321: 
 003735,002322:                                                                                                  <span class="co">#           (RRECTLEM...XKEPLEM MUST BE KEPT IN THIS ORDER)</span>
 003736,002323: 
 <a name="52524543544C454D"></a>003737,002324: E3,1626                        <span class="sm">RRECTLEM</span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM LEM VARIABLES</span>
 <a name="52524543544F5448"></a>003738,002325: E3,1634  E3,1626               <span class="sm">RRECTOTH</span>           <span class="ps">=       </span> <a href="#52524543544C454D">RRECTLEM</a>                              
 <a name="56524543544C454D"></a>003739,002326: E3,1634                        <span class="sm">VRECTLEM</span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
-<a name="5445544C454D"></a>003740,002327: E3,1642                        <span class="sm">TETLEM  </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM</span>
+<a name="5445544C454D"></a>003740,002327: E3,1642                        <span class="sm">TETLEM  </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM</span>
 <a name="5445544F54484552"></a>003741,002328: E3,1644  E3,1642               <span class="sm">TETOTHER</span>           <span class="ps">=       </span> <a href="#5445544C454D">TETLEM</a>                                
 <a name="44454C54414C454D"></a>003742,002329: E3,1644                        <span class="sm">DELTALEM</span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
 <a name="4E55564C454D"></a>003743,002330: E3,1652                        <span class="sm">NUVLEM  </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
 <a name="5243564C454D"></a>003744,002331: E3,1660                        <span class="sm">RCVLEM  </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
 <a name="5643564C454D"></a>003745,002332: E3,1666                        <span class="sm">VCVLEM  </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  B(6)PRM</span>
-<a name="54434C454D"></a>003746,002333: E3,1674                        <span class="sm">TCLEM   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM</span>
-<a name="584B45504C454D"></a>003747,002334: E3,1676                        <span class="sm">XKEPLEM </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PRM</span>
+<a name="54434C454D"></a>003746,002333: E3,1674                        <span class="sm">TCLEM   </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM</span>
+<a name="584B45504C454D"></a>003747,002334: E3,1676                        <span class="sm">XKEPLEM </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PRM</span>
 003748,002335: 
 <a name="58373839"></a>003749,002336: E3,1700                        <span class="sm">X789    </span>           <span class="ps">ERASE   </span> +5                                    
-<a name="54455048454D"></a>003750,002337: E3,1706                        <span class="sm">TEPHEM  </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
-<a name="415A4F"></a>003751,002338: E3,1711                        <span class="sm">AZO     </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="54455048454D"></a>003750,002337: E3,1706                        <span class="sm">TEPHEM  </span>           <span class="ps">ERASE   </span> +2                                    
+<a name="415A4F"></a>003751,002338: E3,1711                        <span class="sm">AZO     </span>           <span class="ps">ERASE   </span> +1                                    
 <a name="554E495457"></a>003752,002339: E3,1713                        <span class="sm">UNITW   </span>           <span class="ps">ERASE   </span> +5                                    
 <a name="2D41594F"></a>003753,002340: E3,1721  E3,1713               <span class="sm">-AYO    </span>           <span class="ps">EQUALS  </span> <a href="#554E495457">UNITW</a>                                 <span class="co">#   (2)</span>
 <a name="41584F"></a>003754,002341: E3,1721  E3,1715               <span class="sm">AXO     </span>           <span class="ps">EQUALS  </span> <a href="#554E495457">UNITW</a>      +2                         <span class="co">#   (2)</span>
@@ -3161,7 +3161,7 @@ Page 84
 003772,002359:                                                                                                  <span class="co">#           AVERAGEG INTEGRATOR STORAGE.                                   (8D)</span>
 003773,002360: 
 <a name="554E495452"></a>003774,002361: E3,1757                        <span class="sm">UNITR   </span>           <span class="ps">ERASE   </span> +5                                    
-<a name="524D4147"></a>003775,002362: E3,1765                        <span class="sm">RMAG    </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="524D4147"></a>003775,002362: E3,1765                        <span class="sm">RMAG    </span>           <span class="ps">ERASE   </span> +1                                    
 003776,002363: 
 003777,002364: 
 003778,002365:                                                                                                  <span class="co">#        **** CONICSEX (PLANETARY INERT. ORIEN.) ****</span>
@@ -3203,7 +3203,7 @@ Page 85
 <a name="574F5242504F53"></a>003800,002387: E4,1404                        <span class="sm">WORBPOS </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL                            M B-14</span>
 <a name="574F524256454C"></a>003801,002388: E4,1405                        <span class="sm">WORBVEL </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL                          M/CSECB0</span>
 <a name="533232575355424C"></a>003802,002389: E4,1406                        <span class="sm">S22WSUBL</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL                            M B-14</span>
-<a name="5250564152"></a>003803,002390: E4,1407                        <span class="sm">RPVAR   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PL</span>
+<a name="5250564152"></a>003803,002390: E4,1407                        <span class="sm">RPVAR   </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PL</span>
 003804,002391: 
 003805,002392:                                                                                                  <span class="co">#           CONISEX STORAGE.       -PAD LOADED-                            (6D)</span>
 003806,002393: 
@@ -3213,13 +3213,13 @@ Page 85
 003810,002397: 
 003811,002398:                                                                                                  <span class="co">#           ENTRY STORAGE.         -PAD LOADED-                            (2D)</span>
 003812,002399: 
-<a name="454D53414C54"></a>003813,002400: E4,1417                        <span class="sm">EMSALT  </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  I(2)PL</span>
+<a name="454D53414C54"></a>003813,002400: E4,1417                        <span class="sm">EMSALT  </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  I(2)PL</span>
 003814,002401: 
 003815,002402: 
 003816,002403:                                                                                                  <span class="co">#           P35 CONSTANTS.         -PAD LOADED-                            (4D)</span>
 003817,002404: 
-<a name="41544947494E43"></a>003818,002405: E4,1421                        <span class="sm">ATIGINC </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PL</span>
-<a name="50544947494E43"></a>003819,002406: E4,1423                        <span class="sm">PTIGINC </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PL</span>
+<a name="41544947494E43"></a>003818,002405: E4,1421                        <span class="sm">ATIGINC </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PL</span>
+<a name="50544947494E43"></a>003819,002406: E4,1423                        <span class="sm">PTIGINC </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PL</span>
 003820,002407: 
 003821,002408: 
 003822,002409:                                                                                                  <span class="co">#           LUNAR LANDING SIGHT DATA. -PAD LOADED-                         (6D)</span>
@@ -3462,7 +3462,7 @@ Page 89
 004003,002590:                                                                                                  <span class="co">#  WHILE 504 USES TRANSM1 AND ALFOK .</span>
 004004,002591: 
 <a name="5452414E534D31"></a>004005,002592: E4,1551                        <span class="sm">TRANSM1 </span>           <span class="ps">EQUALS  </span> 2000                                  <span class="co">#   (19) INITIALIZATION FOR IMU TESTS</span>
-<a name="414C46444B"></a>004006,002593: E4,1551  0002022               <span class="sm">ALFDK   </span>           <span class="ps">=       </span> <a href="#5452414E534D31">TRANSM1</a>    +18D                       <span class="co">#   (144) ERASABLE LOAD IN 504</span>
+<a name="414C46444B"></a>004006,002593: E4,1551  E4,1422               <span class="sm">ALFDK   </span>           <span class="ps">=       </span> <a href="#5452414E534D31">TRANSM1</a>    +18D                       <span class="co">#   (144) ERASABLE LOAD IN 504</span>
 004007,002594:                                                                                                  <span class="co">#  END OF PERF. TEST ERASABLE IN BANK 4</span>
 004008,002595: 
 004009,002596:                                                                                                  <span class="co">#      *-*-* V82 *-*-*                                                     (6D)</span>
@@ -3503,44 +3503,44 @@ Page 90
 004030,002617: 
 <a name="57"></a>004031,002618: E5,1400                        <span class="sm">W       </span>           <span class="ps">EQUALS  </span> 2400                                  <span class="co">#  B(162)</span>
 004032,002619: 
-<a name="454D4154524958"></a>004033,002620: E5,1400  0002570               <span class="sm">EMATRIX </span>           <span class="ps">=       </span> <a href="#57">W</a>          +120D                      <span class="co">#  B(42E    USED TO CONVERT W TO 6X6</span>
-<a name="454E442D57"></a>004034,002621: E5,1400  0002642               <span class="sm">END-W   </span>           <span class="ps">EQUALS  </span> <a href="#57">W</a>          +162D                      <span class="co">#  **NEXT AVAILABLE LOC AFTER W MATRIX**</span>
+<a name="454D4154524958"></a>004033,002620: E5,1400  E5,1570               <span class="sm">EMATRIX </span>           <span class="ps">=       </span> <a href="#57">W</a>          +120D                      <span class="co">#  B(42E    USED TO CONVERT W TO 6X6</span>
+<a name="454E442D57"></a>004034,002621: E5,1400  E5,1642               <span class="sm">END-W   </span>           <span class="ps">EQUALS  </span> <a href="#57">W</a>          +162D                      <span class="co">#  **NEXT AVAILABLE LOC AFTER W MATRIX**</span>
 004035,002622: 
 004036,002623: 
 004037,002624:                                                                                                  <span class="co">#           AUTO-OPTICS STORAGE -R52-</span>
 004038,002625: 
 004039,002626:                                                                                                  <span class="co">#  DO NOT MOVE FROM E5,1554. A DELICATE BALANCE EXISTS BETWEEN THIS AND P03</span>
-<a name="584E4231"></a>004040,002627: E5,1400  0002554               <span class="sm">XNB1    </span>           <span class="ps">EQUALS  </span> <a href="#57">W</a>          +108D                      <span class="co">#  B(6D)TMP</span>
-<a name="594E4231"></a>004041,002628: E5,1400  0002562               <span class="sm">YNB1    </span>           <span class="ps">EQUALS  </span> <a href="#584E4231">XNB1</a>       +6                         <span class="co">#  B(6)TMP</span>
-<a name="5A4E4231"></a>004042,002629: E5,1400  0002570               <span class="sm">ZNB1    </span>           <span class="ps">EQUALS  </span> <a href="#594E4231">YNB1</a>       +6                         <span class="co">#  B(6)TMP</span>
-<a name="53415651523532"></a>004043,002630: E5,1400  0002576               <span class="sm">SAVQR52 </span>           <span class="ps">EQUALS  </span> <a href="#5A4E4231">ZNB1</a>       +6                         <span class="co">#  I(2)TMP</span>
+<a name="584E4231"></a>004040,002627: E5,1400  E5,1554               <span class="sm">XNB1    </span>           <span class="ps">EQUALS  </span> <a href="#57">W</a>          +108D                      <span class="co">#  B(6D)TMP</span>
+<a name="594E4231"></a>004041,002628: E5,1400  E5,1562               <span class="sm">YNB1    </span>           <span class="ps">EQUALS  </span> <a href="#584E4231">XNB1</a>       +6                         <span class="co">#  B(6)TMP</span>
+<a name="5A4E4231"></a>004042,002629: E5,1400  E5,1570               <span class="sm">ZNB1    </span>           <span class="ps">EQUALS  </span> <a href="#594E4231">YNB1</a>       +6                         <span class="co">#  B(6)TMP</span>
+<a name="53415651523532"></a>004043,002630: E5,1400  E5,1576               <span class="sm">SAVQR52 </span>           <span class="ps">EQUALS  </span> <a href="#5A4E4231">ZNB1</a>       +6                         <span class="co">#  I(2)TMP</span>
 004044,002631: 
 004045,002632: 
-<a name="504C414E564543"></a>004046,002633: E5,1400  0002600               <span class="sm">PLANVEC </span>           <span class="ps">EQUALS  </span> <a href="#53415651523532">SAVQR52</a>    +2                         <span class="co">#  B(6) S-S SIGHTING VECTOR IN REF. COOR.</span>
-<a name="545349474854"></a>004047,002634: E5,1400  0002606               <span class="sm">TSIGHT  </span>           <span class="ps">EQUALS  </span> <a href="#504C414E564543">PLANVEC</a>    +6                         <span class="co">#  B(2) S-S TIME OF SIGHTING</span>
+<a name="504C414E564543"></a>004046,002633: E5,1400  E5,1600               <span class="sm">PLANVEC </span>           <span class="ps">EQUALS  </span> <a href="#53415651523532">SAVQR52</a>    +2                         <span class="co">#  B(6) S-S SIGHTING VECTOR IN REF. COOR.</span>
+<a name="545349474854"></a>004047,002634: E5,1400  E5,1606               <span class="sm">TSIGHT  </span>           <span class="ps">EQUALS  </span> <a href="#504C414E564543">PLANVEC</a>    +6                         <span class="co">#  B(2) S-S TIME OF SIGHTING</span>
 004048,002635: 
 004049,002636: 
 004050,002637: 
 004051,002638:                                                                                                  <span class="co">#           RENDEZVOUS -P34-35                                             (26D)</span>
 004052,002639: 
-<a name="44564C4F53"></a>004053,002640: E5,1400  0002610               <span class="sm">DVLOS   </span>           <span class="ps">EQUALS  </span> <a href="#545349474854">TSIGHT</a>     +2                         <span class="co">#  I(6) S-S DELTA VELOCITY,LOS COORD-DISPL1</span>
-<a name="44454C544152"></a>004054,002641: E5,1400  0002610               <span class="sm">DELTAR  </span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>                                 <span class="co">#  I(2)</span>
-<a name="54494E54534F49"></a>004055,002642: E5,1400  0002610               <span class="sm">TINTSOI </span>           <span class="ps">EQUALS  </span> <a href="#44454C544152">DELTAR</a>                                <span class="co">#  I(2) INTERCEPT TIME FOR  SOI MANEUVER</span>
-<a name="44454C5454494D45"></a>004056,002643: E5,1400  0002612               <span class="sm">DELTTIME</span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>      +2                         <span class="co">#  I(2)</span>
-<a name="5441524754494D45"></a>004057,002644: E5,1400  0002614               <span class="sm">TARGTIME</span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>      +4                         <span class="co">#  I(2)</span>
-<a name="554E524D"></a>004058,002645: E5,1400  0002616               <span class="sm">UNRM    </span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>      +6                         <span class="co">#  I(6) S-S</span>
-<a name="554C4F53"></a>004059,002646: E5,1400  0002624               <span class="sm">ULOS    </span>           <span class="ps">EQUALS  </span> <a href="#554E524D">UNRM</a>       +6                         <span class="co">#  I(6) S-S UNIT LINE OF SIGHT VECTOR</span>
-<a name="41435443454E54"></a>004060,002647: E5,1400  0002632               <span class="sm">ACTCENT </span>           <span class="ps">EQUALS  </span> <a href="#554C4F53">ULOS</a>       +6                         <span class="co">#  I(2) S-S CENTRAL ANGLE BETWEEN ACTIVE</span>
+<a name="44564C4F53"></a>004053,002640: E5,1400  E5,1610               <span class="sm">DVLOS   </span>           <span class="ps">EQUALS  </span> <a href="#545349474854">TSIGHT</a>     +2                         <span class="co">#  I(6) S-S DELTA VELOCITY,LOS COORD-DISPL1</span>
+<a name="44454C544152"></a>004054,002641: E5,1400  E5,1610               <span class="sm">DELTAR  </span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>                                 <span class="co">#  I(2)</span>
+<a name="54494E54534F49"></a>004055,002642: E5,1400  E5,1610               <span class="sm">TINTSOI </span>           <span class="ps">EQUALS  </span> <a href="#44454C544152">DELTAR</a>                                <span class="co">#  I(2) INTERCEPT TIME FOR  SOI MANEUVER</span>
+<a name="44454C5454494D45"></a>004056,002643: E5,1400  E5,1612               <span class="sm">DELTTIME</span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>      +2                         <span class="co">#  I(2)</span>
+<a name="5441524754494D45"></a>004057,002644: E5,1400  E5,1614               <span class="sm">TARGTIME</span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>      +4                         <span class="co">#  I(2)</span>
+<a name="554E524D"></a>004058,002645: E5,1400  E5,1616               <span class="sm">UNRM    </span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>      +6                         <span class="co">#  I(6) S-S</span>
+<a name="554C4F53"></a>004059,002646: E5,1400  E5,1624               <span class="sm">ULOS    </span>           <span class="ps">EQUALS  </span> <a href="#554E524D">UNRM</a>       +6                         <span class="co">#  I(6) S-S UNIT LINE OF SIGHT VECTOR</span>
+<a name="41435443454E54"></a>004060,002647: E5,1400  E5,1632               <span class="sm">ACTCENT </span>           <span class="ps">EQUALS  </span> <a href="#554C4F53">ULOS</a>       +6                         <span class="co">#  I(2) S-S CENTRAL ANGLE BETWEEN ACTIVE</span>
 004061,002648:                                                                                                  <span class="co">#           VEH AT TPI IGNITION TIME AND</span>
 004062,002649:                                                                                                  <span class="co">#           TARGET VECTOR.</span>
-<a name="44454C56545049"></a>004063,002650: E5,1400  0002634               <span class="sm">DELVTPI </span>           <span class="ps">EQUALS  </span> <a href="#41435443454E54">ACTCENT</a>    +2                         <span class="co">#  I(2)    NOUN 58 FOR P34.</span>
-<a name="44454C56545046"></a>004064,002651: E5,1400  0002636               <span class="sm">DELVTPF </span>           <span class="ps">EQUALS  </span> <a href="#44454C56545049">DELVTPI</a>    +2                         <span class="co">#  I(2)    NOUN 58,59 FOR P34,35.</span>
-<a name="504F5354545049"></a>004065,002652: E5,1400  0002640               <span class="sm">POSTTPI </span>           <span class="ps">EQUALS  </span> <a href="#44454C56545046">DELVTPF</a>    +2                         <span class="co">#  I(2)    NOUN 58 FOR P34.</span>
-<a name="5444454332"></a>004066,002653: E5,1400  0002634               <span class="sm">TDEC2   </span>           <span class="ps">EQUALS  </span> <a href="#44454C56545049">DELVTPI</a>                               <span class="co">#   (2)</span>
+<a name="44454C56545049"></a>004063,002650: E5,1400  E5,1634               <span class="sm">DELVTPI </span>           <span class="ps">EQUALS  </span> <a href="#41435443454E54">ACTCENT</a>    +2                         <span class="co">#  I(2)    NOUN 58 FOR P34.</span>
+<a name="44454C56545046"></a>004064,002651: E5,1400  E5,1636               <span class="sm">DELVTPF </span>           <span class="ps">EQUALS  </span> <a href="#44454C56545049">DELVTPI</a>    +2                         <span class="co">#  I(2)    NOUN 58,59 FOR P34,35.</span>
+<a name="504F5354545049"></a>004065,002652: E5,1400  E5,1640               <span class="sm">POSTTPI </span>           <span class="ps">EQUALS  </span> <a href="#44454C56545046">DELVTPF</a>    +2                         <span class="co">#  I(2)    NOUN 58 FOR P34.</span>
+<a name="5444454332"></a>004066,002653: E5,1400  E5,1634               <span class="sm">TDEC2   </span>           <span class="ps">EQUALS  </span> <a href="#44454C56545049">DELVTPI</a>                               <span class="co">#   (2)</span>
 004067,002654: 
 004068,002655:                                                                                                  <span class="co">#           ALIGNMENT                                                      (12D)</span>
-<a name="5354415253415631"></a>004069,002656: E5,1400  0002610               <span class="sm">STARSAV1</span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>                                 <span class="co">#  I(6)TMP RESTART STAR SAVE.</span>
-<a name="5354415253415632"></a>004070,002657: E5,1400  0002616               <span class="sm">STARSAV2</span>           <span class="ps">EQUALS  </span> <a href="#5354415253415631">STARSAV1</a>   +6                         <span class="co">#  I(6)TMP RESTART STAR SAVE.</span>
+<a name="5354415253415631"></a>004069,002656: E5,1400  E5,1610               <span class="sm">STARSAV1</span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>                                 <span class="co">#  I(6)TMP RESTART STAR SAVE.</span>
+<a name="5354415253415632"></a>004070,002657: E5,1400  E5,1616               <span class="sm">STARSAV2</span>           <span class="ps">EQUALS  </span> <a href="#5354415253415631">STARSAV1</a>   +6                         <span class="co">#  I(6)TMP RESTART STAR SAVE.</span>
 </pre>
 </span>
 </p>
@@ -3556,23 +3556,23 @@ Page 91
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="5553"></a>004072,002659: E5,1400  0002616               <span class="sm">US      </span>           <span class="ps">=       </span> <a href="#5354415253415632">STARSAV2</a>                              <span class="co">#           (CISLUNAR TAG FOR STARSAV2).</span>
+<a name="5553"></a>004072,002659: E5,1400  E5,1616               <span class="sm">US      </span>           <span class="ps">=       </span> <a href="#5354415253415632">STARSAV2</a>                              <span class="co">#           (CISLUNAR TAG FOR STARSAV2).</span>
 004073,002660: 
 004074,002661: 
 004075,002662: 
 004076,002663:                                                                                                  <span class="co">#           TPI SEARCH                                                     (26D)</span>
 004077,002664: 
-<a name="4954"></a>004078,002665: E5,1400  0002610               <span class="sm">IT      </span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>                                 <span class="co">#   (6)</span>
-<a name="544845545A45524F"></a>004079,002666: E5,1400  0002616               <span class="sm">THETZERO</span>           <span class="ps">EQUALS  </span> <a href="#4954">IT</a>         +6                         <span class="co">#   (2)</span>
-<a name="544649"></a>004080,002667: E5,1400  0002620               <span class="sm">TFI     </span>           <span class="ps">EQUALS  </span> <a href="#544845545A45524F">THETZERO</a>   +2                         <span class="co">#   (2)</span>
-<a name="44454C564545"></a>004081,002668: E5,1400  0002622               <span class="sm">DELVEE  </span>           <span class="ps">EQUALS  </span> <a href="#544649">TFI</a>        +2                         <span class="co">#   (2)</span>
-<a name="4850"></a>004082,002669: E5,1400  0002624               <span class="sm">HP      </span>           <span class="ps">EQUALS  </span> <a href="#44454C564545">DELVEE</a>     +2                         <span class="co">#   (2)</span>
-<a name="54464F"></a>004083,002670: E5,1400  0002626               <span class="sm">TFO     </span>           <span class="ps">EQUALS  </span> <a href="#4850">HP</a>         +2                         <span class="co">#   (2)</span>
-<a name="48504F"></a>004084,002671: E5,1400  0002630               <span class="sm">HPO     </span>           <span class="ps">EQUALS  </span> <a href="#54464F">TFO</a>        +2                         <span class="co">#   (2)</span>
-<a name="44454C56454F"></a>004085,002672: E5,1400  0002632               <span class="sm">DELVEO  </span>           <span class="ps">EQUALS  </span> <a href="#48504F">HPO</a>        +2                         <span class="co">#   (2)</span>
-<a name="4D414756545049"></a>004086,002673: E5,1400  0002634               <span class="sm">MAGVTPI </span>           <span class="ps">EQUALS  </span> <a href="#44454C56454F">DELVEO</a>     +2                         <span class="co">#  I(2) TMP MAG OF DELTAVTPI OR VMID</span>
-<a name="52454C44454C56"></a>004087,002674: E5,1400  0002636               <span class="sm">RELDELV </span>           <span class="ps">EQUALS  </span> <a href="#4D414756545049">MAGVTPI</a>    +2                         <span class="co">#  I(2) TMP MAG OF DELTAVTPF</span>
-<a name="5433544F5434"></a>004088,002675: E5,1400  0002640               <span class="sm">T3TOT4  </span>           <span class="ps">EQUALS  </span> <a href="#52454C44454C56">RELDELV</a>    +2                         <span class="co">#  I(2) DSP NOUN 39 FOR P34, 35. TPI TO TIN</span>
+<a name="4954"></a>004078,002665: E5,1400  E5,1610               <span class="sm">IT      </span>           <span class="ps">EQUALS  </span> <a href="#44564C4F53">DVLOS</a>                                 <span class="co">#   (6)</span>
+<a name="544845545A45524F"></a>004079,002666: E5,1400  E5,1616               <span class="sm">THETZERO</span>           <span class="ps">EQUALS  </span> <a href="#4954">IT</a>         +6                         <span class="co">#   (2)</span>
+<a name="544649"></a>004080,002667: E5,1400  E5,1620               <span class="sm">TFI     </span>           <span class="ps">EQUALS  </span> <a href="#544845545A45524F">THETZERO</a>   +2                         <span class="co">#   (2)</span>
+<a name="44454C564545"></a>004081,002668: E5,1400  E5,1622               <span class="sm">DELVEE  </span>           <span class="ps">EQUALS  </span> <a href="#544649">TFI</a>        +2                         <span class="co">#   (2)</span>
+<a name="4850"></a>004082,002669: E5,1400  E5,1624               <span class="sm">HP      </span>           <span class="ps">EQUALS  </span> <a href="#44454C564545">DELVEE</a>     +2                         <span class="co">#   (2)</span>
+<a name="54464F"></a>004083,002670: E5,1400  E5,1626               <span class="sm">TFO     </span>           <span class="ps">EQUALS  </span> <a href="#4850">HP</a>         +2                         <span class="co">#   (2)</span>
+<a name="48504F"></a>004084,002671: E5,1400  E5,1630               <span class="sm">HPO     </span>           <span class="ps">EQUALS  </span> <a href="#54464F">TFO</a>        +2                         <span class="co">#   (2)</span>
+<a name="44454C56454F"></a>004085,002672: E5,1400  E5,1632               <span class="sm">DELVEO  </span>           <span class="ps">EQUALS  </span> <a href="#48504F">HPO</a>        +2                         <span class="co">#   (2)</span>
+<a name="4D414756545049"></a>004086,002673: E5,1400  E5,1634               <span class="sm">MAGVTPI </span>           <span class="ps">EQUALS  </span> <a href="#44454C56454F">DELVEO</a>     +2                         <span class="co">#  I(2) TMP MAG OF DELTAVTPI OR VMID</span>
+<a name="52454C44454C56"></a>004087,002674: E5,1400  E5,1636               <span class="sm">RELDELV </span>           <span class="ps">EQUALS  </span> <a href="#4D414756545049">MAGVTPI</a>    +2                         <span class="co">#  I(2) TMP MAG OF DELTAVTPF</span>
+<a name="5433544F5434"></a>004088,002675: E5,1400  E5,1640               <span class="sm">T3TOT4  </span>           <span class="ps">EQUALS  </span> <a href="#52454C44454C56">RELDELV</a>    +2                         <span class="co">#  I(2) DSP NOUN 39 FOR P34, 35. TPI TO TIN</span>
 004089,002676:                                                                                                  <span class="co">#                                          T (CAN NOT SHARE WITH RETURN TO EARTH)</span>
 004090,002677: 
 </pre>
@@ -3595,52 +3595,52 @@ Page 92
 004094,002681:                                                                                                  <span class="co">#           (CALCSMSC IS A SUBSET OF S41.1 AT LEAST)</span>
 004095,002682:                                                                                                  <span class="co">#           (CRS61.1 IS A SUBSET OF P20)</span>
 004096,002683: 
-<a name="58534D"></a>004097,002684: E5,1400  0002671               <span class="sm">XSM     </span>           <span class="ps">EQUALS  </span> <a href="#454E442D57">END-W</a>      +23D                       <span class="co">#  B(6)</span>
-<a name="59534D"></a>004098,002685: E5,1400  0002677               <span class="sm">YSM     </span>           <span class="ps">EQUALS  </span> <a href="#58534D">XSM</a>        +6                         <span class="co">#  B(6)TMP</span>
-<a name="5A534D"></a>004099,002686: E5,1400  0002705               <span class="sm">ZSM     </span>           <span class="ps">EQUALS  </span> <a href="#59534D">YSM</a>        +6                         <span class="co">#  B(6)TMP</span>
+<a name="58534D"></a>004097,002684: E5,1400  E5,1671               <span class="sm">XSM     </span>           <span class="ps">EQUALS  </span> <a href="#454E442D57">END-W</a>      +23D                       <span class="co">#  B(6)</span>
+<a name="59534D"></a>004098,002685: E5,1400  E5,1677               <span class="sm">YSM     </span>           <span class="ps">EQUALS  </span> <a href="#58534D">XSM</a>        +6                         <span class="co">#  B(6)TMP</span>
+<a name="5A534D"></a>004099,002686: E5,1400  E5,1705               <span class="sm">ZSM     </span>           <span class="ps">EQUALS  </span> <a href="#59534D">YSM</a>        +6                         <span class="co">#  B(6)TMP</span>
 004100,002687: 
-<a name="584443"></a>004101,002688: E5,1400  0002713               <span class="sm">XDC     </span>           <span class="ps">EQUALS  </span> <a href="#5A534D">ZSM</a>        +6                         <span class="co">#  B(6)TMP</span>
-<a name="594443"></a>004102,002689: E5,1400  0002721               <span class="sm">YDC     </span>           <span class="ps">EQUALS  </span> <a href="#584443">XDC</a>        +6                         <span class="co">#  B(6)TMP</span>
-<a name="5A4443"></a>004103,002690: E5,1400  0002727               <span class="sm">ZDC     </span>           <span class="ps">EQUALS  </span> <a href="#594443">YDC</a>        +6                         <span class="co">#  B(6)TMP</span>
+<a name="584443"></a>004101,002688: E5,1400  E5,1713               <span class="sm">XDC     </span>           <span class="ps">EQUALS  </span> <a href="#5A534D">ZSM</a>        +6                         <span class="co">#  B(6)TMP</span>
+<a name="594443"></a>004102,002689: E5,1400  E5,1721               <span class="sm">YDC     </span>           <span class="ps">EQUALS  </span> <a href="#584443">XDC</a>        +6                         <span class="co">#  B(6)TMP</span>
+<a name="5A4443"></a>004103,002690: E5,1400  E5,1727               <span class="sm">ZDC     </span>           <span class="ps">EQUALS  </span> <a href="#594443">YDC</a>        +6                         <span class="co">#  B(6)TMP</span>
 004104,002691: 
-<a name="584E42"></a>004105,002692: E5,1400  0002713               <span class="sm">XNB     </span>           <span class="ps">=       </span> <a href="#584443">XDC</a>                                   
-<a name="594E42"></a>004106,002693: E5,1400  0002721               <span class="sm">YNB     </span>           <span class="ps">=       </span> <a href="#594443">YDC</a>                                   
-<a name="5A4E42"></a>004107,002694: E5,1400  0002727               <span class="sm">ZNB     </span>           <span class="ps">=       </span> <a href="#5A4443">ZDC</a>                                   
+<a name="584E42"></a>004105,002692: E5,1400  E5,1713               <span class="sm">XNB     </span>           <span class="ps">=       </span> <a href="#584443">XDC</a>                                   
+<a name="594E42"></a>004106,002693: E5,1400  E5,1721               <span class="sm">YNB     </span>           <span class="ps">=       </span> <a href="#594443">YDC</a>                                   
+<a name="5A4E42"></a>004107,002694: E5,1400  E5,1727               <span class="sm">ZNB     </span>           <span class="ps">=       </span> <a href="#5A4443">ZDC</a>                                   
 004108,002695: 
 004109,002696: 
 004110,002697:                                                                                                  <span class="co">#           OVERLAYS WITHIN ALIGNMENT/SYSTEST/CALCSMSC COMMON STORAGE.</span>
 004111,002698: 
-<a name="2D434F5342"></a>004112,002699: E5,1400  0002673               <span class="sm">-COSB   </span>           <span class="ps">EQUALS  </span> <a href="#58534D">XSM</a>        +2                         <span class="co">#   (2)TMP</span>
-<a name="53494E42"></a>004113,002700: E5,1400  0002675               <span class="sm">SINB    </span>           <span class="ps">EQUALS  </span> <a href="#2D434F5342">-COSB</a>      +2                         <span class="co">#   (2)TMP</span>
+<a name="2D434F5342"></a>004112,002699: E5,1400  E5,1673               <span class="sm">-COSB   </span>           <span class="ps">EQUALS  </span> <a href="#58534D">XSM</a>        +2                         <span class="co">#   (2)TMP</span>
+<a name="53494E42"></a>004113,002700: E5,1400  E5,1675               <span class="sm">SINB    </span>           <span class="ps">EQUALS  </span> <a href="#2D434F5342">-COSB</a>      +2                         <span class="co">#   (2)TMP</span>
 004114,002701: 
 004115,002702: 
 004116,002703:                                                                                                  <span class="co">#           ALIGNMENT/SYSTEST COMMON STORAGE.                              (18D)</span>
 004117,002704: 
-<a name="535441524144"></a>004118,002705: E5,1400  0002735               <span class="sm">STARAD  </span>           <span class="ps">EQUALS  </span> <a href="#5A4443">ZDC</a>        +6                         <span class="co">#  I(18D)TMP</span>
+<a name="535441524144"></a>004118,002705: E5,1400  E5,1735               <span class="sm">STARAD  </span>           <span class="ps">EQUALS  </span> <a href="#5A4443">ZDC</a>        +6                         <span class="co">#  I(18D)TMP</span>
 004119,002706: 
 004120,002707: 
 004121,002708:                                                                                                  <span class="co">#           ALIGNMENT/SYSTEST/AUTO OPTICS COMMON STORAGE.                  (17D)</span>
 004122,002709: 
-<a name="4F4743"></a>004123,002710: E5,1400  0002757               <span class="sm">OGC     </span>           <span class="ps">EQUALS  </span> <a href="#535441524144">STARAD</a>     +18D                       <span class="co">#  I(2)TMP</span>
-<a name="494743"></a>004124,002711: E5,1400  0002761               <span class="sm">IGC     </span>           <span class="ps">EQUALS  </span> <a href="#4F4743">OGC</a>        +2                         <span class="co">#  I(2)TMP</span>
-<a name="4D4743"></a>004125,002712: E5,1400  0002763               <span class="sm">MGC     </span>           <span class="ps">EQUALS  </span> <a href="#494743">IGC</a>        +2                         <span class="co">#  I(2)TMP</span>
-<a name="53544152"></a>004126,002713: E5,1400  0002765               <span class="sm">STAR    </span>           <span class="ps">EQUALS  </span> <a href="#4D4743">MGC</a>        +2                         <span class="co">#  I(6)TMP</span>
-<a name="534143"></a>004127,002714: E5,1400  0002773               <span class="sm">SAC     </span>           <span class="ps">EQUALS  </span> <a href="#53544152">STAR</a>       +6                         <span class="co">#  I(2)TMP</span>
-<a name="504143"></a>004128,002715: E5,1400  0002775               <span class="sm">PAC     </span>           <span class="ps">EQUALS  </span> <a href="#534143">SAC</a>        +2                         <span class="co">#  I(2)TMP</span>
-<a name="514D494E"></a>004129,002716: E5,1400  0002777               <span class="sm">QMIN    </span>           <span class="ps">EQUALS  </span> <a href="#504143">PAC</a>        +2                         <span class="co">#  B(1)TMP</span>
+<a name="4F4743"></a>004123,002710: E5,1400  E5,1757               <span class="sm">OGC     </span>           <span class="ps">EQUALS  </span> <a href="#535441524144">STARAD</a>     +18D                       <span class="co">#  I(2)TMP</span>
+<a name="494743"></a>004124,002711: E5,1400  E5,1761               <span class="sm">IGC     </span>           <span class="ps">EQUALS  </span> <a href="#4F4743">OGC</a>        +2                         <span class="co">#  I(2)TMP</span>
+<a name="4D4743"></a>004125,002712: E5,1400  E5,1763               <span class="sm">MGC     </span>           <span class="ps">EQUALS  </span> <a href="#494743">IGC</a>        +2                         <span class="co">#  I(2)TMP</span>
+<a name="53544152"></a>004126,002713: E5,1400  E5,1765               <span class="sm">STAR    </span>           <span class="ps">EQUALS  </span> <a href="#4D4743">MGC</a>        +2                         <span class="co">#  I(6)TMP</span>
+<a name="534143"></a>004127,002714: E5,1400  E5,1773               <span class="sm">SAC     </span>           <span class="ps">EQUALS  </span> <a href="#53544152">STAR</a>       +6                         <span class="co">#  I(2)TMP</span>
+<a name="504143"></a>004128,002715: E5,1400  E5,1775               <span class="sm">PAC     </span>           <span class="ps">EQUALS  </span> <a href="#534143">SAC</a>        +2                         <span class="co">#  I(2)TMP</span>
+<a name="514D494E"></a>004129,002716: E5,1400  E5,1777               <span class="sm">QMIN    </span>           <span class="ps">EQUALS  </span> <a href="#504143">PAC</a>        +2                         <span class="co">#  B(1)TMP</span>
 004130,002717: 
 004131,002718: 
 004132,002719:                                                                                                  <span class="co">#        **** COLP50S ****                                                 (1D))</span>
 004133,002720: 
-<a name="43554C54524958"></a>004134,002721: E5,1400  0002735               <span class="sm">CULTRIX </span>           <span class="ps">EQUALS  </span> <a href="#564541525448">VEARTH</a>                                <span class="co">#  VEARTH, VSUN, VMOON</span>
+<a name="43554C54524958"></a>004134,002721: E5,1400  E5,1735               <span class="sm">CULTRIX </span>           <span class="ps">EQUALS  </span> <a href="#564541525448">VEARTH</a>                                <span class="co">#  VEARTH, VSUN, VMOON</span>
 004135,002722: 
 004136,002723: 
 004137,002724:                                                                                                  <span class="co">#           OVERLAYS WITHIN ALIGNMENT/SYSTEST COMMON STORAGE.              (24D)</span>
 004138,002725: 
-<a name="564541525448"></a>004139,002726: E5,1400  0002735               <span class="sm">VEARTH  </span>           <span class="ps">EQUALS  </span> <a href="#535441524144">STARAD</a>                                <span class="co">#   (6)TMP</span>
-<a name="5653554E"></a>004140,002727: E5,1400  0002743               <span class="sm">VSUN    </span>           <span class="ps">EQUALS  </span> <a href="#564541525448">VEARTH</a>     +6                         <span class="co">#   (6)TMP</span>
-<a name="564D4F4F4E"></a>004141,002728: E5,1400  0002751               <span class="sm">VMOON   </span>           <span class="ps">EQUALS  </span> <a href="#5653554E">VSUN</a>       +6                         <span class="co">#   (6)TMP</span>
-<a name="534158"></a>004142,002729: E5,1400  0002757               <span class="sm">SAX     </span>           <span class="ps">EQUALS  </span> <a href="#564D4F4F4E">VMOON</a>      +6                         <span class="co">#   (6)TMP</span>
+<a name="564541525448"></a>004139,002726: E5,1400  E5,1735               <span class="sm">VEARTH  </span>           <span class="ps">EQUALS  </span> <a href="#535441524144">STARAD</a>                                <span class="co">#   (6)TMP</span>
+<a name="5653554E"></a>004140,002727: E5,1400  E5,1743               <span class="sm">VSUN    </span>           <span class="ps">EQUALS  </span> <a href="#564541525448">VEARTH</a>     +6                         <span class="co">#   (6)TMP</span>
+<a name="564D4F4F4E"></a>004141,002728: E5,1400  E5,1751               <span class="sm">VMOON   </span>           <span class="ps">EQUALS  </span> <a href="#5653554E">VSUN</a>       +6                         <span class="co">#   (6)TMP</span>
+<a name="534158"></a>004142,002729: E5,1400  E5,1757               <span class="sm">SAX     </span>           <span class="ps">EQUALS  </span> <a href="#564D4F4F4E">VMOON</a>      +6                         <span class="co">#   (6)TMP</span>
 004143,002730: 
 </pre>
 </span>
@@ -3662,42 +3662,42 @@ Page 93
 004147,002734: 
 004148,002735:                                                                                                  <span class="co">#           CONICS ROUTINE STORAGE.                                        (87D)</span>
 004149,002736: 
-<a name="44454C58"></a>004150,002737: E5,1400  0002642               <span class="sm">DELX    </span>           <span class="ps">EQUALS  </span> <a href="#454E442D57">END-W</a>                                 <span class="co">#  I(2)TMP</span>
-<a name="44454C54"></a>004151,002738: E5,1400  0002644               <span class="sm">DELT    </span>           <span class="ps">EQUALS  </span> <a href="#44454C58">DELX</a>       +2                         <span class="co">#  I(2)TMP</span>
-<a name="555252454354"></a>004152,002739: E5,1400  0002646               <span class="sm">URRECT  </span>           <span class="ps">EQUALS  </span> <a href="#44454C54">DELT</a>       +2                         <span class="co">#  I(6)TMP</span>
-<a name="52434E4F524D"></a>004153,002740: E5,1400  0002654               <span class="sm">RCNORM  </span>           <span class="ps">EQUALS  </span> <a href="#555252454354">URRECT</a>     +6                         <span class="co">#  I(2)TMP</span>
+<a name="44454C58"></a>004150,002737: E5,1400  E5,1642               <span class="sm">DELX    </span>           <span class="ps">EQUALS  </span> <a href="#454E442D57">END-W</a>                                 <span class="co">#  I(2)TMP</span>
+<a name="44454C54"></a>004151,002738: E5,1400  E5,1644               <span class="sm">DELT    </span>           <span class="ps">EQUALS  </span> <a href="#44454C58">DELX</a>       +2                         <span class="co">#  I(2)TMP</span>
+<a name="555252454354"></a>004152,002739: E5,1400  E5,1646               <span class="sm">URRECT  </span>           <span class="ps">EQUALS  </span> <a href="#44454C54">DELT</a>       +2                         <span class="co">#  I(6)TMP</span>
+<a name="52434E4F524D"></a>004153,002740: E5,1400  E5,1654               <span class="sm">RCNORM  </span>           <span class="ps">EQUALS  </span> <a href="#555252454354">URRECT</a>     +6                         <span class="co">#  I(2)TMP</span>
 <a name="5850524556"></a>004154,002741: E5,1400  E3,1552               <span class="sm">XPREV   </span>           <span class="ps">EQUALS  </span> <a href="#584B4550">XKEP</a>                                  <span class="co">#  I(2)TMP</span>
-<a name="5231564543"></a>004155,002742: E5,1400  0002656               <span class="sm">R1VEC   </span>           <span class="ps">EQUALS  </span> <a href="#52434E4F524D">RCNORM</a>     +2                         <span class="co">#  I(6)TMP</span>
-<a name="5232564543"></a>004156,002743: E5,1400  0002664               <span class="sm">R2VEC   </span>           <span class="ps">EQUALS  </span> <a href="#5231564543">R1VEC</a>      +6                         <span class="co">#  I(6)TMP</span>
-<a name="5444455349524544"></a>004157,002744: E5,1400  0002672               <span class="sm">TDESIRED</span>           <span class="ps">EQUALS  </span> <a href="#5232564543">R2VEC</a>      +6                         <span class="co">#  I(2)TMP</span>
-<a name="47454F4D53474E"></a>004158,002745: E5,1400  0002674               <span class="sm">GEOMSGN </span>           <span class="ps">EQUALS  </span> <a href="#5444455349524544">TDESIRED</a>   +2                         <span class="co">#  I(1)TMP</span>
-<a name="554E"></a>004159,002746: E5,1400  0002675               <span class="sm">UN      </span>           <span class="ps">EQUALS  </span> <a href="#47454F4D53474E">GEOMSGN</a>    +1                         <span class="co">#  I(6)TMP</span>
-<a name="5654415247544147"></a>004160,002747: E5,1400  0002703               <span class="sm">VTARGTAG</span>           <span class="ps">EQUALS  </span> <a href="#554E">UN</a>         +6                         <span class="co">#  I(1)TMP</span>
-<a name="56544152474554"></a>004161,002748: E5,1400  0002704               <span class="sm">VTARGET </span>           <span class="ps">EQUALS  </span> <a href="#5654415247544147">VTARGTAG</a>   +1                         <span class="co">#  I(6)TMP</span>
-<a name="52544E4C414D42"></a>004162,002749: E5,1400  0002712               <span class="sm">RTNLAMB </span>           <span class="ps">EQUALS  </span> <a href="#56544152474554">VTARGET</a>    +6                         <span class="co">#  I(1)TMP</span>
-<a name="5532"></a>004163,002750: E5,1400  0002713               <span class="sm">U2      </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>    +1                         <span class="co">#  I(6)TMP</span>
-<a name="4D414756454332"></a>004164,002751: E5,1400  0002721               <span class="sm">MAGVEC2 </span>           <span class="ps">EQUALS  </span> <a href="#5532">U2</a>         +6                         <span class="co">#  I(2)TMP</span>
-<a name="555231"></a>004165,002752: E5,1400  0002723               <span class="sm">UR1     </span>           <span class="ps">EQUALS  </span> <a href="#4D414756454332">MAGVEC2</a>    +2                         <span class="co">#  I(6)TMP</span>
-<a name="534E5448"></a>004166,002753: E5,1400  0002731               <span class="sm">SNTH    </span>           <span class="ps">EQUALS  </span> <a href="#555231">UR1</a>        +6                         <span class="co">#  I(2)TMP</span>
-<a name="43535448"></a>004167,002754: E5,1400  0002733               <span class="sm">CSTH    </span>           <span class="ps">EQUALS  </span> <a href="#534E5448">SNTH</a>       +2                         <span class="co">#  I(2)TMP</span>
-<a name="312D43535448"></a>004168,002755: E5,1400  0002735               <span class="sm">1-CSTH  </span>           <span class="ps">EQUALS  </span> <a href="#43535448">CSTH</a>       +2                         <span class="co">#  I(2)TMP</span>
-<a name="435354482D52484F"></a>004169,002756: E5,1400  0002737               <span class="sm">CSTH-RHO</span>           <span class="ps">EQUALS  </span> <a href="#312D43535448">1-CSTH</a>     +2                         <span class="co">#  I(2)TMP</span>
-<a name="50"></a>004170,002757: E5,1400  0002741               <span class="sm">P       </span>           <span class="ps">EQUALS  </span> <a href="#435354482D52484F">CSTH-RHO</a>   +2                         <span class="co">#  I(2)TMP</span>
-<a name="523141"></a>004171,002758: E5,1400  0002743               <span class="sm">R1A     </span>           <span class="ps">EQUALS  </span> <a href="#50">P</a>          +2                         <span class="co">#  I(2)TMP</span>
-<a name="52564543"></a>004172,002759: E5,1400  0002656               <span class="sm">RVEC    </span>           <span class="ps">EQUALS  </span> <a href="#5231564543">R1VEC</a>                                 <span class="co">#  I(6)TMP</span>
-<a name="56564543"></a>004173,002760: E5,1400  0002745               <span class="sm">VVEC    </span>           <span class="ps">EQUALS  </span> <a href="#523141">R1A</a>        +2                         <span class="co">#  I(6)TMP</span>
-<a name="52544E5454"></a>004174,002761: E5,1400  0002712               <span class="sm">RTNTT   </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>                               <span class="co">#  I(1)TMP</span>
-<a name="454343"></a>004175,002762: E5,1400  0002753               <span class="sm">ECC     </span>           <span class="ps">EQUALS  </span> <a href="#56564543">VVEC</a>       +6                         <span class="co">#  I(2)TMP</span>
-<a name="52544E5452"></a>004176,002763: E5,1400  0002712               <span class="sm">RTNTR   </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>                               <span class="co">#  I(1)TMP</span>
-<a name="52544E41505345"></a>004177,002764: E5,1400  0002712               <span class="sm">RTNAPSE </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>                               <span class="co">#  I(1)TMP</span>
-<a name="5232"></a>004178,002765: E5,1400  0002721               <span class="sm">R2      </span>           <span class="ps">EQUALS  </span> <a href="#4D414756454332">MAGVEC2</a>                               <span class="co">#  I(2)TMP</span>
-<a name="52544E50524D"></a>004179,002766: E5,1400  0002755               <span class="sm">RTNPRM  </span>           <span class="ps">EQUALS  </span> <a href="#454343">ECC</a>        +2                         <span class="co">#  I(1)TMP</span>
-<a name="53474E52444F54"></a>004180,002767: E5,1400  0002756               <span class="sm">SGNRDOT </span>           <span class="ps">EQUALS  </span> <a href="#52544E50524D">RTNPRM</a>     +1                         <span class="co">#  I(1)TMP</span>
-<a name="5244455349524544"></a>004181,002768: E5,1400  0002757               <span class="sm">RDESIRED</span>           <span class="ps">EQUALS  </span> <a href="#53474E52444F54">SGNRDOT</a>    +1                         <span class="co">#  I(2)TMP</span>
-<a name="44454C444550"></a>004182,002769: E5,1400  0002761               <span class="sm">DELDEP  </span>           <span class="ps">EQUALS  </span> <a href="#5244455349524544">RDESIRED</a>   +2                         <span class="co">#  I(2)TMP</span>
-<a name="444550524556"></a>004183,002770: E5,1400  0002763               <span class="sm">DEPREV  </span>           <span class="ps">EQUALS  </span> <a href="#44454C444550">DELDEP</a>     +2                         <span class="co">#  I(2)TMP</span>
-<a name="544552524C414D42"></a>004184,002771: E5,1400  0002761               <span class="sm">TERRLAMB</span>           <span class="ps">EQUALS  </span> <a href="#44454C444550">DELDEP</a>                                <span class="co">#  I(2)TMP</span>
-<a name="5450524556"></a>004185,002772: E5,1400  0002763               <span class="sm">TPREV   </span>           <span class="ps">EQUALS  </span> <a href="#444550524556">DEPREV</a>                                <span class="co">#  I(2)TMP</span>
+<a name="5231564543"></a>004155,002742: E5,1400  E5,1656               <span class="sm">R1VEC   </span>           <span class="ps">EQUALS  </span> <a href="#52434E4F524D">RCNORM</a>     +2                         <span class="co">#  I(6)TMP</span>
+<a name="5232564543"></a>004156,002743: E5,1400  E5,1664               <span class="sm">R2VEC   </span>           <span class="ps">EQUALS  </span> <a href="#5231564543">R1VEC</a>      +6                         <span class="co">#  I(6)TMP</span>
+<a name="5444455349524544"></a>004157,002744: E5,1400  E5,1672               <span class="sm">TDESIRED</span>           <span class="ps">EQUALS  </span> <a href="#5232564543">R2VEC</a>      +6                         <span class="co">#  I(2)TMP</span>
+<a name="47454F4D53474E"></a>004158,002745: E5,1400  E5,1674               <span class="sm">GEOMSGN </span>           <span class="ps">EQUALS  </span> <a href="#5444455349524544">TDESIRED</a>   +2                         <span class="co">#  I(1)TMP</span>
+<a name="554E"></a>004159,002746: E5,1400  E5,1675               <span class="sm">UN      </span>           <span class="ps">EQUALS  </span> <a href="#47454F4D53474E">GEOMSGN</a>    +1                         <span class="co">#  I(6)TMP</span>
+<a name="5654415247544147"></a>004160,002747: E5,1400  E5,1703               <span class="sm">VTARGTAG</span>           <span class="ps">EQUALS  </span> <a href="#554E">UN</a>         +6                         <span class="co">#  I(1)TMP</span>
+<a name="56544152474554"></a>004161,002748: E5,1400  E5,1704               <span class="sm">VTARGET </span>           <span class="ps">EQUALS  </span> <a href="#5654415247544147">VTARGTAG</a>   +1                         <span class="co">#  I(6)TMP</span>
+<a name="52544E4C414D42"></a>004162,002749: E5,1400  E5,1712               <span class="sm">RTNLAMB </span>           <span class="ps">EQUALS  </span> <a href="#56544152474554">VTARGET</a>    +6                         <span class="co">#  I(1)TMP</span>
+<a name="5532"></a>004163,002750: E5,1400  E5,1713               <span class="sm">U2      </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>    +1                         <span class="co">#  I(6)TMP</span>
+<a name="4D414756454332"></a>004164,002751: E5,1400  E5,1721               <span class="sm">MAGVEC2 </span>           <span class="ps">EQUALS  </span> <a href="#5532">U2</a>         +6                         <span class="co">#  I(2)TMP</span>
+<a name="555231"></a>004165,002752: E5,1400  E5,1723               <span class="sm">UR1     </span>           <span class="ps">EQUALS  </span> <a href="#4D414756454332">MAGVEC2</a>    +2                         <span class="co">#  I(6)TMP</span>
+<a name="534E5448"></a>004166,002753: E5,1400  E5,1731               <span class="sm">SNTH    </span>           <span class="ps">EQUALS  </span> <a href="#555231">UR1</a>        +6                         <span class="co">#  I(2)TMP</span>
+<a name="43535448"></a>004167,002754: E5,1400  E5,1733               <span class="sm">CSTH    </span>           <span class="ps">EQUALS  </span> <a href="#534E5448">SNTH</a>       +2                         <span class="co">#  I(2)TMP</span>
+<a name="312D43535448"></a>004168,002755: E5,1400  E5,1735               <span class="sm">1-CSTH  </span>           <span class="ps">EQUALS  </span> <a href="#43535448">CSTH</a>       +2                         <span class="co">#  I(2)TMP</span>
+<a name="435354482D52484F"></a>004169,002756: E5,1400  E5,1737               <span class="sm">CSTH-RHO</span>           <span class="ps">EQUALS  </span> <a href="#312D43535448">1-CSTH</a>     +2                         <span class="co">#  I(2)TMP</span>
+<a name="50"></a>004170,002757: E5,1400  E5,1741               <span class="sm">P       </span>           <span class="ps">EQUALS  </span> <a href="#435354482D52484F">CSTH-RHO</a>   +2                         <span class="co">#  I(2)TMP</span>
+<a name="523141"></a>004171,002758: E5,1400  E5,1743               <span class="sm">R1A     </span>           <span class="ps">EQUALS  </span> <a href="#50">P</a>          +2                         <span class="co">#  I(2)TMP</span>
+<a name="52564543"></a>004172,002759: E5,1400  E5,1656               <span class="sm">RVEC    </span>           <span class="ps">EQUALS  </span> <a href="#5231564543">R1VEC</a>                                 <span class="co">#  I(6)TMP</span>
+<a name="56564543"></a>004173,002760: E5,1400  E5,1745               <span class="sm">VVEC    </span>           <span class="ps">EQUALS  </span> <a href="#523141">R1A</a>        +2                         <span class="co">#  I(6)TMP</span>
+<a name="52544E5454"></a>004174,002761: E5,1400  E5,1712               <span class="sm">RTNTT   </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>                               <span class="co">#  I(1)TMP</span>
+<a name="454343"></a>004175,002762: E5,1400  E5,1753               <span class="sm">ECC     </span>           <span class="ps">EQUALS  </span> <a href="#56564543">VVEC</a>       +6                         <span class="co">#  I(2)TMP</span>
+<a name="52544E5452"></a>004176,002763: E5,1400  E5,1712               <span class="sm">RTNTR   </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>                               <span class="co">#  I(1)TMP</span>
+<a name="52544E41505345"></a>004177,002764: E5,1400  E5,1712               <span class="sm">RTNAPSE </span>           <span class="ps">EQUALS  </span> <a href="#52544E4C414D42">RTNLAMB</a>                               <span class="co">#  I(1)TMP</span>
+<a name="5232"></a>004178,002765: E5,1400  E5,1721               <span class="sm">R2      </span>           <span class="ps">EQUALS  </span> <a href="#4D414756454332">MAGVEC2</a>                               <span class="co">#  I(2)TMP</span>
+<a name="52544E50524D"></a>004179,002766: E5,1400  E5,1755               <span class="sm">RTNPRM  </span>           <span class="ps">EQUALS  </span> <a href="#454343">ECC</a>        +2                         <span class="co">#  I(1)TMP</span>
+<a name="53474E52444F54"></a>004180,002767: E5,1400  E5,1756               <span class="sm">SGNRDOT </span>           <span class="ps">EQUALS  </span> <a href="#52544E50524D">RTNPRM</a>     +1                         <span class="co">#  I(1)TMP</span>
+<a name="5244455349524544"></a>004181,002768: E5,1400  E5,1757               <span class="sm">RDESIRED</span>           <span class="ps">EQUALS  </span> <a href="#53474E52444F54">SGNRDOT</a>    +1                         <span class="co">#  I(2)TMP</span>
+<a name="44454C444550"></a>004182,002769: E5,1400  E5,1761               <span class="sm">DELDEP  </span>           <span class="ps">EQUALS  </span> <a href="#5244455349524544">RDESIRED</a>   +2                         <span class="co">#  I(2)TMP</span>
+<a name="444550524556"></a>004183,002770: E5,1400  E5,1763               <span class="sm">DEPREV  </span>           <span class="ps">EQUALS  </span> <a href="#44454C444550">DELDEP</a>     +2                         <span class="co">#  I(2)TMP</span>
+<a name="544552524C414D42"></a>004184,002771: E5,1400  E5,1761               <span class="sm">TERRLAMB</span>           <span class="ps">EQUALS  </span> <a href="#44454C444550">DELDEP</a>                                <span class="co">#  I(2)TMP</span>
+<a name="5450524556"></a>004185,002772: E5,1400  E5,1763               <span class="sm">TPREV   </span>           <span class="ps">EQUALS  </span> <a href="#444550524556">DEPREV</a>                                <span class="co">#  I(2)TMP</span>
 004186,002773: 
 </pre>
 </span>
@@ -3720,30 +3720,30 @@ Page 94
 004191,002778:                                                                                                  <span class="co">#           MEASUREMENT INCORPORATION STORAGE.                             (66D)</span>
 004192,002779:                                                                                                  <span class="co">#           (CALLED BY P20, P22, P23)</span>
 004193,002780: 
-<a name="4F4D4547414D31"></a>004194,002781: E5,1400  0002642               <span class="sm">OMEGAM1 </span>           <span class="ps">EQUALS  </span> <a href="#454E442D57">END-W</a>                                 <span class="co">#  I(6)TMP</span>
-<a name="4F4D4547414D32"></a>004195,002782: E5,1400  0002650               <span class="sm">OMEGAM2 </span>           <span class="ps">EQUALS  </span> <a href="#4F4D4547414D31">OMEGAM1</a>    +6                         <span class="co">#  I(6)TMP</span>
-<a name="4F4D4547414D33"></a>004196,002783: E5,1400  0002656               <span class="sm">OMEGAM3 </span>           <span class="ps">EQUALS  </span> <a href="#4F4D4547414D32">OMEGAM2</a>    +6                         <span class="co">#  I(6)TMP</span>
-<a name="484F4C4457"></a>004197,002784: E5,1400  0002664               <span class="sm">HOLDW   </span>           <span class="ps">EQUALS  </span> <a href="#4F4D4547414D33">OMEGAM3</a>    +6                         <span class="co">#  I(18)TMP</span>
-<a name="5444504F53"></a>004198,002785: E5,1400  0002706               <span class="sm">TDPOS   </span>           <span class="ps">EQUALS  </span> <a href="#484F4C4457">HOLDW</a>      +18D                       <span class="co">#  I(6)TMP</span>
-<a name="544456454C"></a>004199,002786: E5,1400  0002714               <span class="sm">TDVEL   </span>           <span class="ps">EQUALS  </span> <a href="#5444504F53">TDPOS</a>      +6                         <span class="co">#  I(6)TMP</span>
+<a name="4F4D4547414D31"></a>004194,002781: E5,1400  E5,1642               <span class="sm">OMEGAM1 </span>           <span class="ps">EQUALS  </span> <a href="#454E442D57">END-W</a>                                 <span class="co">#  I(6)TMP</span>
+<a name="4F4D4547414D32"></a>004195,002782: E5,1400  E5,1650               <span class="sm">OMEGAM2 </span>           <span class="ps">EQUALS  </span> <a href="#4F4D4547414D31">OMEGAM1</a>    +6                         <span class="co">#  I(6)TMP</span>
+<a name="4F4D4547414D33"></a>004196,002783: E5,1400  E5,1656               <span class="sm">OMEGAM3 </span>           <span class="ps">EQUALS  </span> <a href="#4F4D4547414D32">OMEGAM2</a>    +6                         <span class="co">#  I(6)TMP</span>
+<a name="484F4C4457"></a>004197,002784: E5,1400  E5,1664               <span class="sm">HOLDW   </span>           <span class="ps">EQUALS  </span> <a href="#4F4D4547414D33">OMEGAM3</a>    +6                         <span class="co">#  I(18)TMP</span>
+<a name="5444504F53"></a>004198,002785: E5,1400  E5,1706               <span class="sm">TDPOS   </span>           <span class="ps">EQUALS  </span> <a href="#484F4C4457">HOLDW</a>      +18D                       <span class="co">#  I(6)TMP</span>
+<a name="544456454C"></a>004199,002786: E5,1400  E5,1714               <span class="sm">TDVEL   </span>           <span class="ps">EQUALS  </span> <a href="#5444504F53">TDPOS</a>      +6                         <span class="co">#  I(6)TMP</span>
 004200,002787: 
-<a name="5A49"></a>004201,002788: E5,1400  0002722               <span class="sm">ZI      </span>           <span class="ps">EQUALS  </span> <a href="#544456454C">TDVEL</a>      +6                         <span class="co">#  I(18)</span>
+<a name="5A49"></a>004201,002788: E5,1400  E5,1722               <span class="sm">ZI      </span>           <span class="ps">EQUALS  </span> <a href="#544456454C">TDVEL</a>      +6                         <span class="co">#  I(18)</span>
 004202,002789: 
 004203,002790:                                                                                                  <span class="co">#           P22-P23 STORAGE.                                               (8D)</span>
 004204,002791: 
-<a name="323253554253434C"></a>004205,002792: E5,1400  0002744               <span class="sm">22SUBSCL</span>           <span class="ps">EQUALS  </span> <a href="#5A49">ZI</a>         +18D                       <span class="co">#  DE OF ABCDE LANDMARK ID NO.</span>
-<a name="43584F4646"></a>004206,002793: E5,1400  0002745               <span class="sm">CXOFF   </span>           <span class="ps">EQUALS  </span> <a href="#323253554253434C">22SUBSCL</a>   +1                         <span class="co">#  B OF ABCDE OFFSET INDICATOR</span>
-<a name="384B4B"></a>004207,002794: E5,1400  0002746               <span class="sm">8KK     </span>           <span class="ps">EQUALS  </span> <a href="#43584F4646">CXOFF</a>      +1                         <span class="co">#  B(1)TMP INDEX OF PRESENT MARK.</span>
-<a name="384E4E"></a>004208,002795: E5,1400  0002747               <span class="sm">8NN     </span>           <span class="ps">EQUALS  </span> <a href="#384B4B">8KK</a>        +1                         <span class="co">#  B(1)TMP </span>
-<a name="5332324C4F43"></a>004209,002796: E5,1400  0002750               <span class="sm">S22LOC  </span>           <span class="ps">EQUALS  </span> <a href="#384E4E">8NN</a>        +1                         <span class="co">#  I(1)TMP MARK DATA LOC</span>
-<a name="4C414E444D41524B"></a>004210,002797: E5,1400  0002751               <span class="sm">LANDMARK</span>           <span class="ps">EQUALS  </span> <a href="#5332324C4F43">S22LOC</a>     +1                         <span class="co">#  B(1)DSP NOUN 70 FOR P22,51, R52,53.</span>
-<a name="484F52495A4F4E"></a>004211,002798: E5,1400  0002752               <span class="sm">HORIZON </span>           <span class="ps">EQUALS  </span> <a href="#4C414E444D41524B">LANDMARK</a>   +1                         <span class="co">#  B(1)DSP NOUN 70 FOR P22,51, R52,53.</span>
-<a name="49444F464C4D4B"></a>004212,002799: E5,1400  0002753               <span class="sm">IDOFLMK </span>           <span class="ps">EQUALS  </span> <a href="#484F52495A4F4E">HORIZON</a>    +1                         <span class="co">#  B(1)</span>
+<a name="323253554253434C"></a>004205,002792: E5,1400  E5,1744               <span class="sm">22SUBSCL</span>           <span class="ps">EQUALS  </span> <a href="#5A49">ZI</a>         +18D                       <span class="co">#  DE OF ABCDE LANDMARK ID NO.</span>
+<a name="43584F4646"></a>004206,002793: E5,1400  E5,1745               <span class="sm">CXOFF   </span>           <span class="ps">EQUALS  </span> <a href="#323253554253434C">22SUBSCL</a>   +1                         <span class="co">#  B OF ABCDE OFFSET INDICATOR</span>
+<a name="384B4B"></a>004207,002794: E5,1400  E5,1746               <span class="sm">8KK     </span>           <span class="ps">EQUALS  </span> <a href="#43584F4646">CXOFF</a>      +1                         <span class="co">#  B(1)TMP INDEX OF PRESENT MARK.</span>
+<a name="384E4E"></a>004208,002795: E5,1400  E5,1747               <span class="sm">8NN     </span>           <span class="ps">EQUALS  </span> <a href="#384B4B">8KK</a>        +1                         <span class="co">#  B(1)TMP </span>
+<a name="5332324C4F43"></a>004209,002796: E5,1400  E5,1750               <span class="sm">S22LOC  </span>           <span class="ps">EQUALS  </span> <a href="#384E4E">8NN</a>        +1                         <span class="co">#  I(1)TMP MARK DATA LOC</span>
+<a name="4C414E444D41524B"></a>004210,002797: E5,1400  E5,1751               <span class="sm">LANDMARK</span>           <span class="ps">EQUALS  </span> <a href="#5332324C4F43">S22LOC</a>     +1                         <span class="co">#  B(1)DSP NOUN 70 FOR P22,51, R52,53.</span>
+<a name="484F52495A4F4E"></a>004211,002798: E5,1400  E5,1752               <span class="sm">HORIZON </span>           <span class="ps">EQUALS  </span> <a href="#4C414E444D41524B">LANDMARK</a>   +1                         <span class="co">#  B(1)DSP NOUN 70 FOR P22,51, R52,53.</span>
+<a name="49444F464C4D4B"></a>004212,002799: E5,1400  E5,1753               <span class="sm">IDOFLMK </span>           <span class="ps">EQUALS  </span> <a href="#484F52495A4F4E">HORIZON</a>    +1                         <span class="co">#  B(1)</span>
 004213,002800: 
 004214,002801: 
 004215,002802: 
 004216,002803:                                                                                                  <span class="co">#           ******P23***                                                   (1D)</span>
-<a name="5452554E494F4E"></a>004217,002804: E5,1400  0002754               <span class="sm">TRUNION </span>           <span class="ps">EQUALS  </span> <a href="#49444F464C4D4B">IDOFLMK</a>    +1                         <span class="co">#  B(1)</span>
+<a name="5452554E494F4E"></a>004217,002804: E5,1400  E5,1754               <span class="sm">TRUNION </span>           <span class="ps">EQUALS  </span> <a href="#49444F464C4D4B">IDOFLMK</a>    +1                         <span class="co">#  B(1)</span>
 004218,002805: 
 </pre>
 </span>
@@ -3765,8 +3765,8 @@ Page 95
 004222,002809: 
 004223,002810:                                                                                                  <span class="co">#           SYSTEM TEST STORAGE.                                           (174)</span>
 004224,002811: 
-<a name="415A494D555448"></a>004225,002812: E5,1400                        <span class="sm">AZIMUTH </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
-<a name="4C41544954554445"></a>004226,002813: E5,1402                        <span class="sm">LATITUDE</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="415A494D555448"></a>004225,002812: E5,1400                        <span class="sm">AZIMUTH </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="4C41544954554445"></a>004226,002813: E5,1402                        <span class="sm">LATITUDE</span>           <span class="ps">ERASE   </span> +1                                    
 004227,002814: 
 <a name="5452554E41"></a>004228,002815: E5,1404     1160               <span class="sm">TRUNA   </span>           <span class="ps">EQUALS  </span> <a href="#4445534F505454">DESOPTT</a>                               
 <a name="534841465441"></a>004229,002816: E5,1404     1161               <span class="sm">SHAFTA  </span>           <span class="ps">EQUALS  </span> <a href="#4445534F505453">DESOPTS</a>                               
@@ -3787,8 +3787,8 @@ Page 95
 <a name="534F5554484452"></a>004244,002831: E5,1431                        <span class="sm">SOUTHDR </span>           <span class="ps">ERASE   </span>                                       
 <a name="54415247312F32"></a>004245,002832: E5,1432  E5,1431               <span class="sm">TARG1/2 </span>           <span class="ps">=       </span> <a href="#534F5554484452">SOUTHDR</a>                               
 <a name="54415A454C31"></a>004246,002833: E5,1432                        <span class="sm">TAZEL1  </span>           <span class="ps">ERASE   </span> +5                                    
-<a name="54454D5054494D45"></a>004247,002834: E5,1440                        <span class="sm">TEMPTIME</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
-<a name="544D41524B"></a>004248,002835: E5,1442                        <span class="sm">TMARK   </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+<a name="54454D5054494D45"></a>004247,002834: E5,1440                        <span class="sm">TEMPTIME</span>           <span class="ps">ERASE   </span> +1                                    
+<a name="544D41524B"></a>004248,002835: E5,1442                        <span class="sm">TMARK   </span>           <span class="ps">ERASE   </span> +1                                    
 <a name="47454E504C"></a>004249,002836: E5,1444                        <span class="sm">GENPL   </span>           <span class="ps">ERASE   </span> +134D                                 
 <a name="43445554494D4549"></a>004250,002837: E5,1653  E5,1444               <span class="sm">CDUTIMEI</span>           <span class="ps">=       </span> <a href="#47454E504C">GENPL</a>                                 
 <a name="43445554494D4546"></a>004251,002838: E5,1653  E5,1446               <span class="sm">CDUTIMEF</span>           <span class="ps">=       </span> <a href="#47454E504C">GENPL</a>      +2                         
@@ -3923,7 +3923,7 @@ Page 97
 004352,002939:                                                                                                  <span class="co">#  END OF 504 + ALIGN ERASE.</span>
 004353,002940: 
 004354,002941: 
-<a name="454E442D4535"></a>004355,002942: E5,1653  0002777               <span class="sm">END-E5  </span>           <span class="ps">EQUALS  </span> <a href="#514D494E">QMIN</a>                                  <span class="co">#  LAST USED E5 ADDRESS</span>
+<a name="454E442D4535"></a>004355,002942: E5,1653  E5,1777               <span class="sm">END-E5  </span>           <span class="ps">EQUALS  </span> <a href="#514D494E">QMIN</a>                                  <span class="co">#  LAST USED E5 ADDRESS</span>
 004356,002943: 
 </pre>
 </span>
@@ -3953,8 +3953,8 @@ Page 98
 004368,002955: 
 004369,002956:                                                                                                  <span class="co">#           R22 PAD LOADS                                                  ( 5D ).</span>
 004370,002957: 
-<a name="52564152"></a>004371,002958: E6,1402                        <span class="sm">RVAR    </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  I(2) PL  VHF RADAR</span>
-<a name="525641524D494E"></a>004372,002959: E6,1404                        <span class="sm">RVARMIN </span>           <span class="ps">ERASE   </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  I(3) PL  VHF RADAR</span>
+<a name="52564152"></a>004371,002958: E6,1402                        <span class="sm">RVAR    </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  I(2) PL  VHF RADAR</span>
+<a name="525641524D494E"></a>004372,002959: E6,1404                        <span class="sm">RVARMIN </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  I(3) PL  VHF RADAR</span>
 004373,002960: 
 004374,002961: 
 004375,002962: 
@@ -3968,23 +3968,23 @@ Page 98
 004383,002970:                                                                                                  <span class="co">#  ******** PAD LOADED TVC DAP VARIABLES.**********************************(26D)</span>
 004384,002971: 
 <a name="455354524F4B4552"></a>004385,002972: E6,1412                        <span class="sm">ESTROKER</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL</span>
-<a name="454B5052494D45"></a>004386,002973: E6,1413                        <span class="sm">EKPRIME </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PL</span>
+<a name="454B5052494D45"></a>004386,002973: E6,1413                        <span class="sm">EKPRIME </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PL</span>
 <a name="45544445434159"></a>004387,002974: E6,1415                        <span class="sm">ETDECAY </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  I(1)PL</span>
-<a name="454B544C582F49"></a>004388,002975: E6,1416                        <span class="sm">EKTLX/I </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PL</span>
+<a name="454B544C582F49"></a>004388,002975: E6,1416                        <span class="sm">EKTLX/I </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PL</span>
 <a name="4554564344542F32"></a>004389,002976: E6,1420                        <span class="sm">ETVCDT/2</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL</span>
 <a name="4554535749544348"></a>004390,002977: E6,1421                        <span class="sm">ETSWITCH</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL</span>
 <a name="45434F5246524143"></a>004391,002978: E6,1422                        <span class="sm">ECORFRAC</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL</span>
-<a name="4552455046524143"></a>004392,002979: E6,1423                        <span class="sm">EREPFRAC</span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)PL</span>
+<a name="4552455046524143"></a>004392,002979: E6,1423                        <span class="sm">EREPFRAC</span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)PL</span>
 <a name="504143544F4646"></a>004393,002980: E6,1425                        <span class="sm">PACTOFF </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL, DSP N48 R01 = PTRIM, RD2 = YTRIM</span>
 <a name="594143544F4646"></a>004394,002981: E6,1426                        <span class="sm">YACTOFF </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)PL, CONSECUTIVE WITH PACTOFF</span>
 <a name="415030"></a>004395,002982: E6,1427                        <span class="sm">AP0     </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
-<a name="415031"></a>004396,002983: E6,1430                        <span class="sm">AP1     </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)</span>
-<a name="415032"></a>004397,002984: E6,1432                        <span class="sm">AP2     </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)</span>
-<a name="415033"></a>004398,002985: E6,1434                        <span class="sm">AP3     </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)</span>
+<a name="415031"></a>004396,002983: E6,1430                        <span class="sm">AP1     </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)</span>
+<a name="415032"></a>004397,002984: E6,1432                        <span class="sm">AP2     </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)</span>
+<a name="415033"></a>004398,002985: E6,1434                        <span class="sm">AP3     </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)</span>
 004399,002986: 
-<a name="425031"></a>004400,002987: E6,1436                        <span class="sm">BP1     </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)</span>
-<a name="425032"></a>004401,002988: E6,1440                        <span class="sm">BP2     </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)</span>
-<a name="425033"></a>004402,002989: E6,1442                        <span class="sm">BP3     </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)</span>
+<a name="425031"></a>004400,002987: E6,1436                        <span class="sm">BP1     </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)</span>
+<a name="425032"></a>004401,002988: E6,1440                        <span class="sm">BP2     </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)</span>
+<a name="425033"></a>004402,002989: E6,1442                        <span class="sm">BP3     </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)</span>
 <a name="415930"></a>004403,002990: E6,1444  E6,1427               <span class="sm">AY0     </span>           <span class="ps">=       </span> <a href="#415030">AP0</a>                                   
 <a name="415931"></a>004404,002991: E6,1444  E6,1430               <span class="sm">AY1     </span>           <span class="ps">=       </span> <a href="#415031">AP1</a>                                   
 <a name="415932"></a>004405,002992: E6,1444  E6,1432               <span class="sm">AY2     </span>           <span class="ps">=       </span> <a href="#415032">AP2</a>                                   
@@ -4012,7 +4012,7 @@ Page 99
 004413,003000:                                                                                                  <span class="co">#  ******* EXCLUSIVE TVC DAP VARIABLES. ***********************************(5D)</span>
 004414,003001: 
 <a name="56393756434E5452"></a>004415,003002: E6,1444                        <span class="sm">V97VCNTR</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
-<a name="54454D50444150"></a>004416,003003: E6,1445                        <span class="sm">TEMPDAP </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(2)</span>
+<a name="54454D50444150"></a>004416,003003: E6,1445                        <span class="sm">TEMPDAP </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(2)</span>
 <a name="4D524B52544D50"></a>004417,003004: E6,1447  E6,1445               <span class="sm">MRKRTMP </span>           <span class="ps">=       </span> <a href="#54454D50444150">TEMPDAP</a>                               <span class="co">#       ((B(1)))</span>
 <a name="434E5452"></a>004418,003005: E6,1447                        <span class="sm">CNTR    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
 <a name="4F474144"></a>004419,003006: E6,1450                        <span class="sm">OGAD    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
@@ -4043,7 +4043,7 @@ Page 99
 <a name="49415647"></a>004444,003031: E6,1471                        <span class="sm">IAVG    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)                            MASSPROP</span>
 <a name="494156472F544C58"></a>004445,003032: E6,1472                        <span class="sm">IAVG/TLX</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
 004446,003033: 
-<a name="4C454D4D415353"></a>004447,003034: E6,1473                        <span class="sm">LEMMASS </span>           <span class="ps">ERASE   </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  B(1) DSP NOUN 47 (R2)       LEM/CSMMASS</span>
+<a name="4C454D4D415353"></a>004447,003034: E6,1473                        <span class="sm">LEMMASS </span>           <span class="ps">ERASE   </span> +1                                    <span class="co">#  B(1) DSP NOUN 47 (R2)       LEM/CSMMASS</span>
 <a name="43534D4D415353"></a>004448,003035: E6,1475  E6,1474               <span class="sm">CSMMASS </span>           <span class="ps">EQUALS  </span> <a href="#4C454D4D415353">LEMMASS</a>    +1                         <span class="co">#  B(1) DSP NOUN 47 (R1)       FOR DOWNLINK</span>
 <a name="5745494748542F47"></a>004449,003036: E6,1475                        <span class="sm">WEIGHT/G</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  B(1)</span>
 <a name="4D415353"></a>004450,003037: E6,1476  E6,1475               <span class="sm">MASS    </span>           <span class="ps">=       </span> <a href="#5745494748542F47">WEIGHT/G</a>                              
@@ -5402,8 +5402,8 @@ Page 123
 005467,004054: 
 005468,004055:                                                                                                  <span class="co">#           MORE CONICS STORAGE.                                           (4)</span>
 <a name="434F4741"></a>005469,004056: E7,1426                        <span class="sm">COGA    </span>           <span class="ps">EQUALS  </span> 3774                                  <span class="co">#  I(2) COTAN OF INITIAL FLIGHT  PATH ANGLE</span>
-<a name="494E444550"></a>005470,004057: E7,1426  0003774               <span class="sm">INDEP   </span>           <span class="ps">EQUALS  </span> <a href="#434F4741">COGA</a>                                  <span class="co">#  I(1) USED BY SUBROUTINE:ITERATOR:</span>
-<a name="455053494C4F4E4C"></a>005471,004058: E7,1426  0003776               <span class="sm">EPSILONL</span>           <span class="ps">EQUALS  </span> <a href="#434F4741">COGA</a>       +2                         <span class="co">#  I(2) TMP</span>
+<a name="494E444550"></a>005470,004057: E7,1426  E7,1774               <span class="sm">INDEP   </span>           <span class="ps">EQUALS  </span> <a href="#434F4741">COGA</a>                                  <span class="co">#  I(1) USED BY SUBROUTINE:ITERATOR:</span>
+<a name="455053494C4F4E4C"></a>005471,004058: E7,1426  E7,1776               <span class="sm">EPSILONL</span>           <span class="ps">EQUALS  </span> <a href="#434F4741">COGA</a>       +2                         <span class="co">#  I(2) TMP</span>
 005472,004059: 
 005473,004060: 
 005474,004061:                                                                                                  <span class="co">#           RENDEZVOUS GUIDANCE STORAGE.  - P32...P35 -                    (10D)</span>

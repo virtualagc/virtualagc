@@ -87,16 +87,16 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-018000,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-018001,000003:                                                                                                  <span class="co">#  Filename:     SYSTEM_TEST_STANDARD_LEAD_INS.agc</span>
-018002,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-018003,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-018004,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-018005,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-018006,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-018007,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-018008,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-018009,000011:                                                                                                  <span class="co">#  Mod history:  2011-01-27 JL   Adapted from corresponding Colossus 249 file.</span>
+018000,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+018001,000003:                                                                                                  <span class="co">## Filename:     SYSTEM_TEST_STANDARD_LEAD_INS.agc</span>
+018002,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+018003,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+018004,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+018005,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+018006,000008:                                                                                                  <span class="co">## Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+018007,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+018008,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+018009,000011:                                                                                                  <span class="co">## Mod history:  2011-01-27 JL   Adapted from corresponding Colossus 249 file.</span>
 018010,000012: 
 </pre>
 </span>
@@ -113,7 +113,7 @@ Page 411
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-018012,000014: 22,3310  0002671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+018012,000014: 22,3310  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
 018013,000015: 
 018014,000016: 33,2000                                           <span class="ps">BANK    </span> 33                                    
 018015,000017: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#452F50524F47">E/PROG</a>                                
@@ -152,8 +152,8 @@ Page 411
 018048,000050: 04,2566           27777                           <span class="op">CA      </span> 0          -1                         <span class="co">#  GET CADR OF ROUTINE.</span>
 018049,000051: 04,2567           04561                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  GO TO ROUTINE, SETTING Q TO SWRETURN</span>
 018050,000052:                                                                                                  <span class="co">#                                          AND RESTORING A + L.</span>
-018051,000053: 04,2570           02574                           <span class="op">TC      </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#2B34">+4</a>                                    <span class="co">#  TX Q, V34, OR BAD STALL RETURN.</span>
-018052,000054: 04,2571           02573                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  PROCEED OR GOOD STALL RETURN.</span>
+018051,000053: 04,2570           02574                           <span class="op">TC      </span> +4                                    <span class="co">#  TX Q, V34, OR BAD STALL RETURN.</span>
+018052,000054: 04,2571           02573                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED OR GOOD STALL RETURN.</span>
 018053,000055: 04,2572           24364                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  ENTER OR RECYCLE RETURN.</span>
 018054,000056: 04,2573           24364                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 
 <a name="452F535749544348"></a>018055,000057: 04,2574           52365        <span class="sm">E/SWITCH</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 

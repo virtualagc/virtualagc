@@ -85,40 +85,40 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-025715,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-025716,000003:                                                                                                  <span class="co">#  Filename:     KALMAN_FILTER_FOR_LEM_DAP.agc</span>
-025717,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Aurora (revision 12).</span>
-025718,000005:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-025719,000006:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-025720,000007:                                                                                                  <span class="co">#  Website:      https://www.ibiblio.org/apollo.</span>
-025721,000008:                                                                                                  <span class="co">#  Pages:        0604-0614</span>
-025722,000009:                                                                                                  <span class="co">#  Mod history:  2016-09-20 JL   Created.</span>
-025723,000010:                                                                                                  <span class="co">#                2016-09-26 OH   Initial Transcription</span>
-025724,000011:                                                                                                  <span class="co">#                2016-10-04 HG   Add missed statements on page 607, added missing ## coments for page numbers</span>
-025725,000012:                                                                                                  <span class="co">#                                M520F->MS20F, READ +4 -> READ 4</span>
-025726,000013:                                                                                                  <span class="co">#                2016-10-15 HG   Fix operand   D2CDU2FL -> D2CDUZFL  </span>
-025727,000014:                                                                                                  <span class="co">#                                              FLTAXIS  -> FLTYAXIS      </span>
-025728,000015:                                                                                                  <span class="co">#                                              MS2OF    -> MS20F  </span>
-025729,000016:                                                                                                  <span class="co">#                                fix label     FILTSTART -> FILSTART</span>
-025730,000017:                                                                                                  <span class="co">#  </span>
+025715,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+025716,000003:                                                                                                  <span class="co">## Filename:     KALMAN_FILTER_FOR_LEM_DAP.agc</span>
+025717,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Aurora (revision 12).</span>
+025718,000005:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+025719,000006:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+025720,000007:                                                                                                  <span class="co">## Website:      https://www.ibiblio.org/apollo.</span>
+025721,000008:                                                                                                  <span class="co">## Pages:        0604-0614</span>
+025722,000009:                                                                                                  <span class="co">## Mod history:  2016-09-20 JL   Created.</span>
+025723,000010:                                                                                                  <span class="co">##              2016-09-26 OH   Initial Transcription</span>
+025724,000011:                                                                                                  <span class="co">##               2016-10-04 HG   Add missed statements on page 607, added missing ## coments for page numbers</span>
+025725,000012:                                                                                                  <span class="co">##                               M520F->MS20F, READ +4 -> READ 4</span>
+025726,000013:                                                                                                  <span class="co">##               2016-10-15 HG   Fix operand   D2CDU2FL -> D2CDUZFL  </span>
+025727,000014:                                                                                                  <span class="co">##                                             FLTAXIS  -> FLTYAXIS      </span>
+025728,000015:                                                                                                  <span class="co">##                                             MS2OF    -> MS20F  </span>
+025729,000016:                                                                                                  <span class="co">##                               fix label     FILTSTART -> FILSTART</span>
+025730,000017:                                                                                                  <span class="co">## </span>
 025731,000018: 
-025732,000019:                                                                                                  <span class="co">#  This source code has been transcribed or otherwise adapted from</span>
-025733,000020:                                                                                                  <span class="co">#  digitized images of a hardcopy from the private collection of</span>
-025734,000021:                                                                                                  <span class="co">#  Don Eyles.  The digitization was performed by archive.org.</span>
+025732,000019:                                                                                                  <span class="co">## This source code has been transcribed or otherwise adapted from</span>
+025733,000020:                                                                                                  <span class="co">## digitized images of a hardcopy from the private collection of</span>
+025734,000021:                                                                                                  <span class="co">## Don Eyles.  The digitization was performed by archive.org.</span>
 025735,000022: 
-025736,000023:                                                                                                  <span class="co">#  Notations on the hardcopy document read, in part:</span>
+025736,000023:                                                                                                  <span class="co">## Notations on the hardcopy document read, in part:</span>
 025737,000024: 
-025738,000025:                                                                                                  <span class="co">#        473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP</span>
-025739,000026:                                                                                                  <span class="co">#        NOV 10, 1966</span>
+025738,000025:                                                                                                  <span class="co">##       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP</span>
+025739,000026:                                                                                                  <span class="co">##       NOV 10, 1966</span>
 025740,000027: 
-025741,000028:                                                                                                  <span class="co">#        [Note that this is the date the hardcopy was made, not the</span>
-025742,000029:                                                                                                  <span class="co">#        date of the program revision or the assembly.]</span>
+025741,000028:                                                                                                  <span class="co">##       [Note that this is the date the hardcopy was made, not the</span>
+025742,000029:                                                                                                  <span class="co">##       date of the program revision or the assembly.]</span>
 025743,000030: 
-025744,000031:                                                                                                  <span class="co">#  The scan images (with suitable reduction in storage size and consequent</span>
-025745,000032:                                                                                                  <span class="co">#  reduction in image quality) are available online at</span>
-025746,000033:                                                                                                  <span class="co">#        https://www.ibiblio.org/apollo.</span>
-025747,000034:                                                                                                  <span class="co">#  The original high-quality digital images are available at archive.org:</span>
-025748,000035:                                                                                                  <span class="co">#        https://archive.org/details/aurora00dapg</span>
+025744,000031:                                                                                                  <span class="co">## The scan images (with suitable reduction in storage size and consequent</span>
+025745,000032:                                                                                                  <span class="co">## reduction in image quality) are available online at</span>
+025746,000033:                                                                                                  <span class="co">##       https://www.ibiblio.org/apollo.</span>
+025747,000034:                                                                                                  <span class="co">## The original high-quality digital images are available at archive.org:</span>
+025748,000035:                                                                                                  <span class="co">##       https://archive.org/details/aurora00dapg</span>
 025749,000036: 
 </pre>
 </span>

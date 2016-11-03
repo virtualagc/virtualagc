@@ -87,16 +87,16 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009986,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-009987,000003:                                                                                                  <span class="co">#  Filename:     EXTENDED_VERBS.agc</span>
-009988,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.  </span>
-009989,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-009990,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-009991,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-009992,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-009993,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-009994,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-009995,000011:                                                                                                  <span class="co">#  Mod history:  2011-01-15 JL   Adapted from corresponding Colossus 249 file.</span>
+009986,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+009987,000003:                                                                                                  <span class="co">## Filename:    EXTENDED_VERBS.agc</span>
+009988,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.  </span>
+009989,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
+009990,000006:                                                                                                  <span class="co">##              Computer (AGC), we believe for Apollo 8.</span>
+009991,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+009992,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+009993,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+009994,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+009995,000011:                                                                                                  <span class="co">## Mod history: 2011-01-15 JL   Adapted from corresponding Colossus 249 file.</span>
 009996,000012: 
 </pre>
 </span>
@@ -117,7 +117,7 @@ Page 229
 009999,000015: 43,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4558545645524253">EXTVERBS</a>                              
 010000,000016: 43,2000                                           <span class="ps">BANK    </span>                                       
 010001,000017: 
-010002,000018: 43,2000  0002757                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+010002,000018: 43,2000  E5,1757                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
 010003,000019: 
 010004,000020: 43,2000                                           <span class="ps">COUNT*  </span> $$/EXTVB                              
 010005,000021:                                                                                                  <span class="co">#  FAN-OUT</span>
@@ -226,7 +226,7 @@ Page 230
 010094,000110: 
 010095,000111: 43,2114           44711                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  BLANK EVERYTHING EXCEPT MM AND VERB</span>
 010096,000112: 43,2115           04170                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56535542">NVSUB</a>                                 
-010097,000113: 43,2116           02117                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+010097,000113: 43,2116           02117                           <span class="op">TC      </span> +1                                    
 </pre>
 </span>
 </p>
@@ -296,7 +296,7 @@ Page 232
 010136,000152: 
 010137,000153: 43,2136           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  STALL</span>
 010138,000154: 43,2137           17516                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D555354414C4C">IMUSTALL</a>                              
-010139,000155: 43,2140           02141                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+010139,000155: 43,2140           02141                           <span class="op">TC      </span> +1                                    
 010140,000156: 
 010141,000157: 43,2141           02125                           <span class="op">TC      </span> <a href="#474F50494E">GOPIN</a>                                 
 010142,000158: 
@@ -378,7 +378,7 @@ Page 233
 010204,000220: 43,2162           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
 010205,000221: 43,2163           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
 010206,000222: 43,2164           05423                           <span class="op">TC      </span> <a href="#5445524D45585456">TERMEXTV</a>                              
-010207,000223: 43,2165           12166                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+010207,000223: 43,2165           12166                           <span class="op">TCF     </span> +1                                    
 </pre>
 </span>
 </p>
@@ -436,7 +436,7 @@ Page 235
 010234,000250: 
 010235,000251: 43,2206           11314                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535753414D504C45">SWSAMPLE</a>                              <span class="co">#  SEE IF SWITCH AT COMPUTER</span>
 010236,000252: 43,2207           02214                           <span class="op">TC      </span> +5                                    <span class="co">#  SWITCH AT COMPUTER</span>
-010237,000253: 43,2210           02211                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  NOT ON COMPUTER</span>
+010237,000253: 43,2210           02211                           <span class="op">TC      </span> +1                                    <span class="co">#  NOT ON COMPUTER</span>
 010238,000254: 43,2211           04400                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                <span class="co">#  TURN ON OPERATOR ERR</span>
 010239,000255: 43,2212           05537                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  AND ALARM</span>
 010240,000256: 43,2213           00115                           <span class="ps">OCT     </span> 00115                                 
@@ -454,7 +454,7 @@ Page 235
 010252,000268: 43,2224           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
 010253,000269: 43,2225           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
 010254,000270: 43,2226           05423                           <span class="op">TC      </span> <a href="#5445524D45585456">TERMEXTV</a>                              
-010255,000271: 43,2227           02230                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  PROCEED</span>
+010255,000271: 43,2227           02230                           <span class="op">TC      </span> +1                                    <span class="co">#  PROCEED</span>
 010256,000272: 
 010257,000273: 43,2230           31773                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534143">SAC</a>                                   
 010258,000274: 43,2231           55161                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4445534F505453">DESOPTS</a>                               
@@ -512,7 +512,7 @@ Page 236
 010296,000312: 43,2247           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
 010297,000313: 43,2250           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
 010298,000314: 43,2251           05423                           <span class="op">TC      </span> <a href="#5445524D45585456">TERMEXTV</a>                              
-010299,000315: 43,2252           02253                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    <span class="co">#  PROCEED WITHOUT A LOAD</span>
+010299,000315: 43,2252           02253                           <span class="op">TC      </span> +1                                    <span class="co">#  PROCEED WITHOUT A LOAD</span>
 010300,000316: 
 010301,000317: 43,2253           32274                           <span class="op">CAF     </span> <a href="#494D5546494E4556">IMUFINEV</a>                              <span class="co">#  RE-DISPLAY OUR OWN VERB</span>
 010302,000318: 43,2254           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
@@ -758,7 +758,7 @@ Page 241
 <pre>
 010473,000489: 43,2407           34763                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3136">PRIO16</a>                                <span class="co">#  PRELAUNCH AZIMUTH CHANGE</span>
 010474,000490: 43,2410           05042                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-010475,000491: 43,2411  0002671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+010475,000491: 43,2411  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
 010476,000492: 43,2411           03737 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#415A4D5448434731">AZMTHCG1</a>                              
 010477,000493: 43,2413           05301                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
 010478,000494: 43,2414           00174                           <span class="ps">OCT     </span> 00174                                 
@@ -809,7 +809,7 @@ Page 242
 010509,000525: 43,2432           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
 010510,000526: 43,2433           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
 010511,000527: 43,2434           12450                           <span class="op">TCF     </span> <a href="#54524D415454434B">TRMATTCK</a>                              
-010512,000528: 43,2435           02436                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+010512,000528: 43,2435           02436                           <span class="op">TC      </span> +1                                    
 010513,000529: 43,2436           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                
 010514,000530: 43,2437           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET E6 FOR NEEDLES.</span>
 010515,000531: 
@@ -926,7 +926,7 @@ Page 244
 <a name="535441424C495348"></a>010598,000614: 43,2522           40102        <span class="sm">STABLISH</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              <span class="co">#  VB 46</span>
 010599,000615: 43,2523           74105                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543630303030">OCT60000</a>                              <span class="co">#  NOT PERMITTED WHEN TVC DAP IS ON.</span>
 010600,000616: 43,2524           00006                           <span class="op">EXTEND  </span>                                       
-010601,000617: 43,2525           62527                           <span class="op">BZMF    </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+010601,000617: 43,2525           62527                           <span class="op">BZMF    </span> +2                                    
 010602,000618: 43,2526           02124                           <span class="op">TC      </span> <a href="#414C4D2F454E44">ALM/END</a>                               
 010603,000619: 43,2527           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                <span class="co">#  SET EBANK TO E6</span>
 010604,000620: 43,2530           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
@@ -1009,7 +1009,7 @@ Page 246
 <a name="44415044495350"></a>010653,000669: 43,2541           40102        <span class="sm">DAPDISP </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              
 010654,000670: 43,2542           74105                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543630303030">OCT60000</a>                              
 010655,000671: 43,2543           00006                           <span class="op">EXTEND  </span>                                       
-010656,000672: 43,2544           62546                           <span class="op">BZMF    </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  TVC = 10, CS YIELDS 01, BZMF TO CONTINUE</span>
+010656,000672: 43,2544           62546                           <span class="op">BZMF    </span> +2                                    <span class="co">#  TVC = 10, CS YIELDS 01, BZMF TO CONTINUE</span>
 010657,000673: 43,2545           02124                           <span class="op">TC      </span> <a href="#414C4D2F454E44">ALM/END</a>                               <span class="co">#  RETURN IF TVC</span>
 010658,000674: 
 010659,000675: 43,2546           02076                           <span class="op">TC      </span> <a href="#5445535458414354">TESTXACT</a>                              
@@ -1031,7 +1031,7 @@ Page 246
 010675,000691: 42,2006           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  GOXDSP ROUTINES USED FOR EXTENDED VERBS.</span>
 010676,000692: 
 010677,000693: 42,2007           05423                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  EXT. VBS GO TO ENDEXT, NOT ENDOFJOB.</span>
-010678,000694: 42,2010           02012                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+010678,000694: 42,2010           02012                           <span class="op">TC      </span> +2                                    
 010679,000695: 42,2011           02004                           <span class="op">TC      </span> <a href="#444F4E4F554E3436">DONOUN46</a>                              
 010680,000696: 
 010681,000697: 42,2012           31466                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
@@ -1063,7 +1063,7 @@ Page 247
 010693,000709: 42,2024           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
 010694,000710: 
 010695,000711: 42,2025           05423                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
-010696,000712: 42,2026           02030                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+010696,000712: 42,2026           02030                           <span class="op">TC      </span> +2                                    
 010697,000713: 42,2027           02022                           <span class="op">TC      </span> <a href="#444F4E4F554E3437">DONOUN47</a>                              
 010698,000714: 42,2030           31466                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  DO MASS PROPERTIES CALCULATION ONLY IF</span>
 010699,000715: 42,2031           74371                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#  CONFIG = 1(CSM), 2(CSM/LM), 6(CSM/LMA)</span>
@@ -1218,7 +1218,7 @@ Page 250
 010806,000822:                                                                                                  <span class="co">#      3. RELEASE EXT VERB DISPLAY SYSTEM</span>
 <a name="474F544F523231"></a>010807,000823: 43,2576           05447        <span class="sm">GOTOR21 </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  CLEAR R23FLG</span>
 010808,000824: 43,2577           00025                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523233464C47">R23FLG</a>                                <span class="co">#  BIT 9  FLAG 1</span>
-010809,000825: 43,2600           02603                           <span class="op">TC      </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+010809,000825: 43,2600           02603                           <span class="op">TC      </span> +3                                    
 <a name="474F544F523233"></a>010810,000826: 43,2601           05435        <span class="sm">GOTOR23 </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  SET R23FLG</span>
 010811,000827: 43,2602           00025                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523233464C47">R23FLG</a>                                <span class="co">#  BIT 9  FLAG 1</span>
 010812,000828: 43,2603           02076                           <span class="op">TC      </span> <a href="#5445535458414354">TESTXACT</a>                              
@@ -1537,7 +1537,7 @@ Page 256
 011041,001057: 43,2766           32777                           <span class="op">CA      </span> <a href="#564E434F4E">VNCON</a>                                 <span class="co">#  * 0501</span>
 011042,001058: 43,2767           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  *</span>
 011043,001059: 43,2770           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  *</span>
-011044,001060: 43,2771           02774                           <span class="op">TC      </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    <span class="co">#  *</span>
+011044,001060: 43,2771           02774                           <span class="op">TC      </span> +3                                    <span class="co">#  *</span>
 011045,001061: 43,2772           03630                           <span class="op">TC      </span> <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html#4E5854424E4B">NXTBNK</a>                                <span class="co">#  *</span>
 011046,001062: 43,2773           02764                           <span class="op">TC      </span> <a href="#4E4F4B494C4C">NOKILL</a>                                <span class="co">#  *</span>
 011047,001063: 43,2774           33242                           <span class="op">CA      </span> <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html#53454C4641445253">SELFADRS</a>                              
@@ -1644,7 +1644,7 @@ Page 258
 <span style="font-family: monospace;">
 <pre>
 011122,001138: 43,3044           04303                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              
-011123,001139: 43,3045           67050                                    <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+011123,001139: 43,3045           67050                                    +3                                    
 011124,001140: 43,3046           77614                           <span class="in">CLEAR   </span>                                       
 011125,001141: 43,3047           04264                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E4F5448">MOONOTH</a>                               
 011126,001142: 43,3050           77776                           <span class="in">EXIT    </span>                                       
@@ -1690,7 +1690,7 @@ Page 258
 011166,001182: 43,3110           43014                           <span class="in">SET     </span> <span class="in">BON       </span>                            
 011167,001183: 43,3111           04063                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              
 011168,001184: 43,3112           04304                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E4F5448">MOONOTH</a>                               
-011169,001185: 43,3113           67116                                    <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+011169,001185: 43,3113           67116                                    +3                                    
 011170,001186: 43,3114           77614                           <span class="in">CLEAR   </span>                                       
 </pre>
 </span>
@@ -1774,7 +1774,7 @@ Page 260
 011222,001238: 43,3151           04574                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
 011223,001239: 43,3152           10010                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#563337">V37</a>                                   <span class="co">#  GO TO POO</span>
 011224,001240: 
-011225,001241: 43,3153  0002751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              
+011225,001241: 43,3153  E5,1751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              
 <a name="563532"></a>011226,001242: 43,3153           05253        <span class="sm">V52     </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS P22 OPERATING</span>
 011227,001243: 43,3154           00026                           <span class="ps">MM      </span> 22         B-14                       
 011228,001244: 43,3155           02124                           <span class="op">TC      </span> <a href="#414C4D2F454E44">ALM/END</a>                               <span class="co">#  NO</span>
@@ -1800,7 +1800,7 @@ Page 260
 <a name="563637"></a>011248,001264: 43,3174           02076        <span class="sm">V67     </span>           <span class="op">TC      </span> <a href="#5445535458414354">TESTXACT</a>                              
 011249,001265: 43,3175           34754                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F35">PRIO5</a>                                 
 011250,001266: 43,3176           05042                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-011251,001267: 43,3177  0002400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>                                     
+011251,001267: 43,3177  E5,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>                                     
 011252,001268: 43,3177           03571 60105                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#56363743414C4C">V67CALL</a>                               
 011253,001269: 43,3201           05112                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
 011254,001270:                                                                                                  <span class="co">#  VB 44.   SET SURFACE FLAG.</span>

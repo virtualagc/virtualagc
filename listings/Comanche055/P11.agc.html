@@ -88,42 +88,42 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023223,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-023224,000003:                                                                                                  <span class="co">#  Filename:     P11.agc</span>
-023225,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.</span>
-023226,000005:                                                                                                  <span class="co">#                It is part of the source code for the Command Module's (CM)</span>
-023227,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), for Apollo 11.</span>
-023228,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-023229,000008:                                                                                                  <span class="co">#  Contact:      Hartmuth Gutsche &lt;hgutsche@xplornet.com>.</span>
-023230,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo.</span>
-023231,000010:                                                                                                  <span class="co">#  Pages:        533-550</span>
-023232,000011:                                                                                                  <span class="co">#  Mod history:  2009-05-13 HG   Started adapting from the Colossus249/ file </span>
-023233,000012:                                                                                                  <span class="co">#                                of the same name, using Comanche055 page </span>
-023234,000013:                                                                                                  <span class="co">#                                images 0533.jpg - 0550.jpg. </span>
-023235,000014:                                                                                                  <span class="co">#                2009-05-20 RSB  Corrections: ERTHALT -> EARTHALT, </span>
-023236,000015:                                                                                                  <span class="co">#                                STATSW -> SATSW.</span>
-023237,000016:                                                                                                  <span class="co">#                2009-05-23 RSB  At end of RESCALES, corrected TC 0 to TC Q.</span>
-023238,000017:                                                                                                  <span class="co">#                                Added an SBANK= prior to a 2CADR.</span>
-023239,000018:                                                                                                  <span class="co">#                2010-08-24 JL   Fixed page numbers. Added missing comment character on p537.</span>
-023240,000019:                                                                                                  <span class="co">#                2011-05-08 JL   Flagged SBANK= workaround for future removal.</span>
-023241,000020:                                                                                                  <span class="co">#                2011-05-17 JL   Removed all SBANK= workarounds.</span>
+023223,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+023224,000003:                                                                                                  <span class="co">## Filename:     P11.agc</span>
+023225,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.</span>
+023226,000005:                                                                                                  <span class="co">##               It is part of the source code for the Command Module's (CM)</span>
+023227,000006:                                                                                                  <span class="co">##               Apollo Guidance Computer (AGC), for Apollo 11.</span>
+023228,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+023229,000008:                                                                                                  <span class="co">## Contact:      Hartmuth Gutsche &lt;hgutsche@xplornet.com>.</span>
+023230,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo.</span>
+023231,000010:                                                                                                  <span class="co">## Pages:       533-550</span>
+023232,000011:                                                                                                  <span class="co">## Mod history:  2009-05-13 HG   Started adapting from the Colossus249/ file </span>
+023233,000012:                                                                                                  <span class="co">##                              of the same name, using Comanche055 page </span>
+023234,000013:                                                                                                  <span class="co">##                              images 0533.jpg - 0550.jpg. </span>
+023235,000014:                                                                                                  <span class="co">##              2009-05-20 RSB  Corrections: ERTHALT -> EARTHALT, </span>
+023236,000015:                                                                                                  <span class="co">##                              STATSW -> SATSW.</span>
+023237,000016:                                                                                                  <span class="co">##              2009-05-23 RSB  At end of RESCALES, corrected TC 0 to TC Q.</span>
+023238,000017:                                                                                                  <span class="co">##                              Added an SBANK= prior to a 2CADR.</span>
+023239,000018:                                                                                                  <span class="co">##              2010-08-24 JL   Fixed page numbers. Added missing comment character on p537.</span>
+023240,000019:                                                                                                  <span class="co">##              2011-05-08 JL   Flagged SBANK= workaround for future removal.</span>
+023241,000020:                                                                                                  <span class="co">##              2011-05-17 JL   Removed all SBANK= workarounds.</span>
 023242,000021: 
-023243,000022:                                                                                                  <span class="co">#  This source code has been transcribed or otherwise adapted from digitized</span>
-023244,000023:                                                                                                  <span class="co">#  images of a hardcopy from the MIT Museum.  The digitization was performed</span>
-023245,000024:                                                                                                  <span class="co">#  by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many</span>
-023246,000025:                                                                                                  <span class="co">#  thanks to both.  The images (with suitable reduction in storage size and</span>
-023247,000026:                                                                                                  <span class="co">#  consequent reduction in image quality as well) are available online at</span>
-023248,000027:                                                                                                  <span class="co">#  www.ibiblio.org/apollo.  If for some reason you find that the images are</span>
-023249,000028:                                                                                                  <span class="co">#  illegible, contact me at info@sandroid.org about getting access to the </span>
-023250,000029:                                                                                                  <span class="co">#  (much) higher-quality images which Paul actually created.</span>
-023251,000030: 
-023252,000031:                                                                                                  <span class="co">#  Notations on the hardcopy document read, in part:</span>
-023253,000032: 
-023254,000033:                                                                                                  <span class="co">#     Assemble revision 055 of AGC program Comanche by NASA</span>
-023255,000034:                                                                                                  <span class="co">#     2021113-051.  10:28 APR. 1, 1969  </span>
-023256,000035: 
-023257,000036:                                                                                                  <span class="co">#     This AGC program shall also be referred to as</span>
-023258,000037:                                                                                                  <span class="co">#             Colossus 2A</span>
+023243,000022:                                                                                                  <span class="co">## This source code has been transcribed or otherwise adapted from digitized</span>
+023244,000023:                                                                                                  <span class="co">## images of a hardcopy from the MIT Museum.  The digitization was performed</span>
+023245,000024:                                                                                                  <span class="co">## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many</span>
+023246,000025:                                                                                                  <span class="co">## thanks to both.  The images (with suitable reduction in storage size and</span>
+023247,000026:                                                                                                  <span class="co">## consequent reduction in image quality as well) are available online at</span>
+023248,000027:                                                                                                  <span class="co">## www.ibiblio.org/apollo.  If for some reason you find that the images are</span>
+023249,000028:                                                                                                  <span class="co">## illegible, contact me at info@sandroid.org about getting access to the </span>
+023250,000029:                                                                                                  <span class="co">## (much) higher-quality images which Paul actually created.</span>
+023251,000030:                                                                                                  <span class="co">##</span>
+023252,000031:                                                                                                  <span class="co">## Notations on the hardcopy document read, in part:</span>
+023253,000032:                                                                                                  <span class="co">##</span>
+023254,000033:                                                                                                  <span class="co">##    Assemble revision 055 of AGC program Comanche by NASA</span>
+023255,000034:                                                                                                  <span class="co">##    2021113-051.  10:28 APR. 1, 1969  </span>
+023256,000035:                                                                                                  <span class="co">##</span>
+023257,000036:                                                                                                  <span class="co">##    This AGC program shall also be referred to as</span>
+023258,000037:                                                                                                  <span class="co">##            Colossus 2A</span>
 </pre>
 </span>
 </p>

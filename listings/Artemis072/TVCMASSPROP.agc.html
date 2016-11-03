@@ -87,20 +87,20 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041948,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-041949,000003:                                                                                                  <span class="co">#  Filename:     TVCMASSPROP.agc</span>
-041950,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Artemis (i.e., Colossus 3),</span>
-041951,000005:                                                                                                  <span class="co">#                build 072.  This is for the Command Module's (CM)</span>
-041952,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC), we believe for</span>
-041953,000007:                                                                                                  <span class="co">#                Apollo 15-17.</span>
-041954,000008:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-041955,000009:                                                                                                  <span class="co">#  Contact:      Steve Case &lt;case1780@adelphia.net></span>
-041956,000010:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-041957,000011:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
-041958,000012:                                                                                                  <span class="co">#  Mod history:  2009-09-13 SMC  Adapted from Comanche055 files.</span>
-041959,000013:                                                                                                  <span class="co">#                2009-09-14 JL   Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.</span>
-041960,000014:                                                                                                  <span class="co">#                2010-02-20 RSB  Un-##'d this header.</span>
-041961,000015: 
+041949,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+041950,000003:                                                                                                  <span class="co">## Filename:    TVCMASSPROP.agc</span>
+041951,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Artemis (i.e., Colossus 3),</span>
+041952,000005:                                                                                                  <span class="co">##              build 072.  This is for the Command Module's (CM)</span>
+041953,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), we believe for</span>
+041954,000007:                                                                                                  <span class="co">##              Apollo 15-17.</span>
+041955,000008:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+041956,000009:                                                                                                  <span class="co">## Contact:     Steve Case &lt;case1780@adelphia.net></span>
+041957,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+041958,000011:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
+041959,000012:                                                                                                  <span class="co">## Mod history: 2009-09-13 SMC  Adapted from Comanche055 files.</span>
+041960,000013:                                                                                                  <span class="co">##              2009-09-14 JL   Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.</span>
+041961,000014:                                                                                                  <span class="co">##              2010-02-20 RSB  Un-##'d this header.</span>
+041962,000015: 
 </pre>
 </span>
 </p>
@@ -116,58 +116,58 @@ Page 954
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041963,000017: 
-041964,000018:                                                                                                  <span class="co">#  PROGRAM NAME....MASSPROP</span>
-041965,000019:                                                                                                  <span class="co">#  LOG SECTION....TVCMASSPROP            PROGRAMMER...MELANSON (ENGEL, SCHLUNDT)</span>
-041966,000020: 
-041967,000021: 
-041968,000022:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
-041969,000023: 
-041970,000024:                                                                                                  <span class="co">#        MASSPROP OPERATES IN TWO MODES:(1)IF LEM MASS OR CONFIGURATION ARE UPDATED (MASSPROP DOES NOT TEST</span>
-041971,000025:                                                                                                  <span class="co">#  FOR THIS) THE ENTIRE PROGRAM MUST BE RUN THROUGH, BREAKPOINT VALUES AND DERIVATIVES OF THE OUTPUTS WITH</span>
-041972,000026:                                                                                                  <span class="co">#  RESPECT TO CSM MASS BEING CALCULATED PRIOR TO CALCULATION OF THE OUTPUTS. (2)OTHERWISE, THE OUTPUTS CAN BE</span>
-041973,000027:                                                                                                  <span class="co">#  CALCULATED USING PREVIOUSLY COMPUTED BREAKPOINT VALUES AND DERIVATIVES.</span>
-041974,000028: 
-041975,000029:                                                                                                  <span class="co">#  CALLING SEQUENCES</span>
-041976,000030: 
-041977,000031:                                                                                                  <span class="co">#        IF LEM MASS OR CONFIGURATION HAS BEEN UPDATED, TRANSFER TO MASSPROP, OTHERWISE TRANSFER TO FIXCW.</span>
-041978,000032:                                                                                                  <span class="co">#                L       TC      BANKCALL OR IBNKCALL</span>
-041979,000033:                                                                                                  <span class="co">#                L+1     CADR    MASSPROP</span>
-041980,000034:                                                                                                  <span class="co">#                        OR</span>
-041981,000035:                                                                                                  <span class="co">#                L+1     CADR    FIXCW</span>
-041982,000036: 
-041983,000037:                                                                                                  <span class="co">#                L+2     RETURNS VIA Q</span>
-041984,000038: 
-041985,000039:                                                                                                  <span class="co">#  CALLED   IN PARTICULAR BY DONOUN47 (JOB) AND TVCEXECUTIVE (TASK)</span>
-041986,000040: 
-041987,000041:                                                                                                  <span class="co">#  JOBS OR TASKS INITIATED - NONE</span>
-041988,000042: 
-041989,000043:                                                                                                  <span class="co">#  SUBROUTINES CALLED - NONE</span>
-041990,000044: 
-041991,000045:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
-041992,000046: 
-041993,000047:                                                                                                  <span class="co">#        LEMMASS MUST CONTAIN LEM MASS SCALED AT B+16 IN KILOGRAMS</span>
-041994,000048:                                                                                                  <span class="co">#        CSMMASS MUST CONTAIN CSM MASS SCALED AT B+16 IN KILOGRAMS</span>
-041995,000049: 
-041996,000050:                                                                                                  <span class="co">#        DAPDATR1 MUST BE SET TO INDICATE VEHICLE CONFIGURATION.</span>
-041997,000051:                                                                                                  <span class="co">#                BITS (15,14,13)  =  ( 0 , 0 , 1 )       LEM OFF</span>
-041998,000052:                                                                                                  <span class="co">#                                    ( 0 , 1 , 0 )       LEM ON (ASCNT,DSCNT)</span>
-041999,000053:                                                                                                  <span class="co">#                                    ( 1 , 1 , 0 )       LEM ON (ASCNT ONLY)</span>
-042000,000054: 
-042001,000055: 
-042002,000056:                                                                                                  <span class="co">#  ALARMS - NONE</span>
-042003,000057: 
-042004,000058:                                                                                                  <span class="co">#  EXIT -   TC     Q</span>
-042005,000059: 
-042006,000060:                                                                                                  <span class="co">#  OUTPUTS:</span>
-042007,000061: 
-042008,000062:                                                                                                  <span class="co">#        (1)IXX, SINGLE PRECISION SCALED AT B+20 IN KG-M SQ.</span>
-042009,000063:                                                                                                  <span class="co">#        (2)IAVG, SINGLE PRECISION SCALED AT B+20 IN KG-M SQ.</span>
-042010,000064:                                                                                                  <span class="co">#        (3)IAVG/TLX, SINGLE PRECISION, SCALED AT B+2 SEC-SQD</span>
-042011,000065:                                                                                                  <span class="co">#        THEY ARE STORED IN CONSECUTIVE REGISTERS IXX0, IXX1, IXX2</span>
-042012,000066: 
-042013,000067:                                                                                                  <span class="co">#        CONVERSION FACTOR:  (SLUG-FTSQ) = 0.737562 (KG-MSQ)</span>
-042014,000068: 
+041964,000017: 
+041965,000018:                                                                                                  <span class="co">#  PROGRAM NAME....MASSPROP</span>
+041966,000019:                                                                                                  <span class="co">#  LOG SECTION....TVCMASSPROP            PROGRAMMER...MELANSON (ENGEL, SCHLUNDT)</span>
+041967,000020: 
+041968,000021: 
+041969,000022:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
+041970,000023: 
+041971,000024:                                                                                                  <span class="co">#        MASSPROP OPERATES IN TWO MODES:(1)IF LEM MASS OR CONFIGURATION ARE UPDATED (MASSPROP DOES NOT TEST</span>
+041972,000025:                                                                                                  <span class="co">#  FOR THIS) THE ENTIRE PROGRAM MUST BE RUN THROUGH, BREAKPOINT VALUES AND DERIVATIVES OF THE OUTPUTS WITH</span>
+041973,000026:                                                                                                  <span class="co">#  RESPECT TO CSM MASS BEING CALCULATED PRIOR TO CALCULATION OF THE OUTPUTS. (2)OTHERWISE, THE OUTPUTS CAN BE</span>
+041974,000027:                                                                                                  <span class="co">#  CALCULATED USING PREVIOUSLY COMPUTED BREAKPOINT VALUES AND DERIVATIVES.</span>
+041975,000028: 
+041976,000029:                                                                                                  <span class="co">#  CALLING SEQUENCES</span>
+041977,000030: 
+041978,000031:                                                                                                  <span class="co">#        IF LEM MASS OR CONFIGURATION HAS BEEN UPDATED, TRANSFER TO MASSPROP, OTHERWISE TRANSFER TO FIXCW.</span>
+041979,000032:                                                                                                  <span class="co">#                L       TC      BANKCALL OR IBNKCALL</span>
+041980,000033:                                                                                                  <span class="co">#                L+1     CADR    MASSPROP</span>
+041981,000034:                                                                                                  <span class="co">#                        OR</span>
+041982,000035:                                                                                                  <span class="co">#                L+1     CADR    FIXCW</span>
+041983,000036: 
+041984,000037:                                                                                                  <span class="co">#                L+2     RETURNS VIA Q</span>
+041985,000038: 
+041986,000039:                                                                                                  <span class="co">#  CALLED   IN PARTICULAR BY DONOUN47 (JOB) AND TVCEXECUTIVE (TASK)</span>
+041987,000040: 
+041988,000041:                                                                                                  <span class="co">#  JOBS OR TASKS INITIATED - NONE</span>
+041989,000042: 
+041990,000043:                                                                                                  <span class="co">#  SUBROUTINES CALLED - NONE</span>
+041991,000044: 
+041992,000045:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
+041993,000046: 
+041994,000047:                                                                                                  <span class="co">#        LEMMASS MUST CONTAIN LEM MASS SCALED AT B+16 IN KILOGRAMS</span>
+041995,000048:                                                                                                  <span class="co">#        CSMMASS MUST CONTAIN CSM MASS SCALED AT B+16 IN KILOGRAMS</span>
+041996,000049: 
+041997,000050:                                                                                                  <span class="co">#        DAPDATR1 MUST BE SET TO INDICATE VEHICLE CONFIGURATION.</span>
+041998,000051:                                                                                                  <span class="co">#                BITS (15,14,13)  =  ( 0 , 0 , 1 )       LEM OFF</span>
+041999,000052:                                                                                                  <span class="co">#                                    ( 0 , 1 , 0 )       LEM ON (ASCNT,DSCNT)</span>
+042000,000053:                                                                                                  <span class="co">#                                    ( 1 , 1 , 0 )       LEM ON (ASCNT ONLY)</span>
+042001,000054: 
+042002,000055: 
+042003,000056:                                                                                                  <span class="co">#  ALARMS - NONE</span>
+042004,000057: 
+042005,000058:                                                                                                  <span class="co">#  EXIT -   TC     Q</span>
+042006,000059: 
+042007,000060:                                                                                                  <span class="co">#  OUTPUTS:</span>
+042008,000061: 
+042009,000062:                                                                                                  <span class="co">#        (1)IXX, SINGLE PRECISION SCALED AT B+20 IN KG-M SQ.</span>
+042010,000063:                                                                                                  <span class="co">#        (2)IAVG, SINGLE PRECISION SCALED AT B+20 IN KG-M SQ.</span>
+042011,000064:                                                                                                  <span class="co">#        (3)IAVG/TLX, SINGLE PRECISION, SCALED AT B+2 SEC-SQD</span>
+042012,000065:                                                                                                  <span class="co">#        THEY ARE STORED IN CONSECUTIVE REGISTERS IXX0, IXX1, IXX2</span>
+042013,000066: 
+042014,000067:                                                                                                  <span class="co">#        CONVERSION FACTOR:  (SLUG-FTSQ) = 0.737562 (KG-MSQ)</span>
+042015,000068: 
 </pre>
 </span>
 </p>
@@ -183,52 +183,52 @@ Page 955
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042016,000070: 
-042017,000071:                                                                                                  <span class="co">#  OUTPUTS ARE CALCULATED AS FOLLOWS :</span>
-042018,000072: 
-042019,000073:                                                                                                  <span class="co">#   (1) IF LEM DOCKED, LEMMASS IS FIRST ELIMINATED AS A PARAMETER</span>
-042020,000074: 
-042021,000075:                                                                                                  <span class="co">#        VARST0 = INTVALUE0 + LEMMASS(SLOPEVAL0)         IXX             BREAKPOINT VALUE</span>
-042022,000076:                                                                                                  <span class="co">#        VARST1 = INTVALUE1 + LEMMASS(SLOPEVAL1)         IAVG            BREAKPOINT VALUE</span>
-042023,000077:                                                                                                  <span class="co">#        VARST2 = INTVALUE2 + LEMMASS(SLOPEVAL2)         IAVG/TLX        BREAKPOINT VALUE</span>
-042024,000078: 
-042025,000079:                                                                                                  <span class="co">#        VARST3 = INTVALUE3 + LEMMASS(SLOPEVAL3)         IAVG/TLX        SLOPE  FOR CSMMASS > 33956 LBS  ( SPS > 10000 LBS)</span>
-042026,000080:                                                                                                  <span class="co">#        VARST4 = INTVALUE4 + LEMMASS(SLOPEVAL4)         IAVG            SLOPE  FOR CSMMASS > 33956 LBS  ( SPS > 10000 LBS)</span>
-042027,000081: 
-042028,000082:                                                                                                  <span class="co">#        VARST5 = INTVALUE5 + LEMMASS(SLOPEVAL5)         IXX             SLOPE  FOR ALL VALUES OF CSMMASS</span>
-042029,000083: 
-042030,000084:                                                                                                  <span class="co">#        VARST6 = INTVALUE6 + LEMMASS(SLOPEVAL6)         IAVG            SLOPE  FOR CSMMASS &lt; 33956 LBS  ( SPS &lt; 10000 LBS)</span>
-042031,000085:                                                                                                  <span class="co">#        VARST7 = INTVALUE7 + LEMMASS(SLOPEVAL7)         IAVG/TLX        SLOPE  FOR CSMMASS &lt; 33956 LBS  ( SPS &lt; 10000 LBS)</span>
-042032,000086: 
-042033,000087:                                                                                                  <span class="co">#        VARST8 = INTVALUE8 + LEMMASS(SLOPEVAL8)         IAVG            DECREMENT  TO BRKPT VALUE WHEN LEM DSCNT STAGE OFF</span>
-042034,000088:                                                                                                  <span class="co">#        VARST9 = INTVALUE9 + LEMMASS(SLOPEVAL9)         IAVG/TLX        DECREMENT  TO BRKPT VALUE WHEN LEM DSCNT STAGE OFF</span>
-042035,000089: 
-042036,000090:                                                                                                  <span class="co">#   (2) IF LEM NOT DOCKED</span>
-042037,000091: 
-042038,000092:                                                                                                  <span class="co">#        VARST0 = NOLEMVAL0      WHERE THE MEANING AND SCALING OF VARST0</span>
-042039,000093:                                                                                                  <span class="co">#          .         .           TO VARST9 ARE THE SAME AS GIVEN ABOVE</span>
-042040,000094:                                                                                                  <span class="co">#          .         .</span>
-042041,000095:                                                                                                  <span class="co">#          .         .           NOTE... FOR THIS CASE, VARST8,9 HAVE NO</span>
-042042,000096:                                                                                                  <span class="co">#        VARST9 = NOLEMVAL9      MEANING (THEY ARE COMPUTED BUT NOT USED)</span>
-042043,000097: 
-042044,000098:                                                                                                  <span class="co">#   (3) THE FINAL OUTPUT CALCULATIONS ARE THEN DONE</span>
-042045,000099: 
-042046,000100:                                                                                                  <span class="co">#        IXX0 =  VARST0 + (CSMMASS + NEGBPW)VARST5               IXX</span>
-042047,000101: 
-042048,000102:                                                                                                  <span class="co">#        IXX1 =  VARST1 + (CSMMASS + NEGBPW)VARST(4 OR 6)        IAVG</span>
-042049,000103: 
-042050,000104:                                                                                                  <span class="co">#        IXX2 =  VARST2 + (CSMMASS + NEGBPW)VARST(3 OR 7)        IAVG/TLX</span>
-042051,000105: 
-042052,000106:                                                                                                  <span class="co">#  THE DATA USED CAME FROM CSM/LM SPACECRAFT OPERATIONAL DATA BOOK.</span>
-042053,000107:                                                                                                  <span class="co">#        VOL. 3, NASA DOCUMENT SNA-8-D-027 (MARCH 1968)</span>
-042054,000108: 
-042055,000109:                                                                                                  <span class="co">#  PERTINENT MASS DATA :         CSM WEIGHT  (FULL)  64100 LBS</span>
-042056,000110:                                                                                                  <span class="co">#                                            (EMPTY) 23956 LBS</span>
-042057,000111:                                                                                                  <span class="co">#                                LEM WEIGHT  (FULL)  32000 LBS</span>
-042058,000112:                                                                                                  <span class="co">#                                            (EMPTY) 14116 LBS</span>
-042059,000113: 
-042060,000114:                                                                                                  <span class="co">#  (WEIGHTS ARE FROM AMENDMENT #1 (APRIL 24,1968) TO ABOVE DATA BOOK)</span>
-042061,000115: 
+042017,000070: 
+042018,000071:                                                                                                  <span class="co">#  OUTPUTS ARE CALCULATED AS FOLLOWS :</span>
+042019,000072: 
+042020,000073:                                                                                                  <span class="co">#   (1) IF LEM DOCKED, LEMMASS IS FIRST ELIMINATED AS A PARAMETER</span>
+042021,000074: 
+042022,000075:                                                                                                  <span class="co">#        VARST0 = INTVALUE0 + LEMMASS(SLOPEVAL0)         IXX             BREAKPOINT VALUE</span>
+042023,000076:                                                                                                  <span class="co">#        VARST1 = INTVALUE1 + LEMMASS(SLOPEVAL1)         IAVG            BREAKPOINT VALUE</span>
+042024,000077:                                                                                                  <span class="co">#        VARST2 = INTVALUE2 + LEMMASS(SLOPEVAL2)         IAVG/TLX        BREAKPOINT VALUE</span>
+042025,000078: 
+042026,000079:                                                                                                  <span class="co">#        VARST3 = INTVALUE3 + LEMMASS(SLOPEVAL3)         IAVG/TLX        SLOPE  FOR CSMMASS > 33956 LBS  ( SPS > 10000 LBS)</span>
+042027,000080:                                                                                                  <span class="co">#        VARST4 = INTVALUE4 + LEMMASS(SLOPEVAL4)         IAVG            SLOPE  FOR CSMMASS > 33956 LBS  ( SPS > 10000 LBS)</span>
+042028,000081: 
+042029,000082:                                                                                                  <span class="co">#        VARST5 = INTVALUE5 + LEMMASS(SLOPEVAL5)         IXX             SLOPE  FOR ALL VALUES OF CSMMASS</span>
+042030,000083: 
+042031,000084:                                                                                                  <span class="co">#        VARST6 = INTVALUE6 + LEMMASS(SLOPEVAL6)         IAVG            SLOPE  FOR CSMMASS &lt; 33956 LBS  ( SPS &lt; 10000 LBS)</span>
+042032,000085:                                                                                                  <span class="co">#        VARST7 = INTVALUE7 + LEMMASS(SLOPEVAL7)         IAVG/TLX        SLOPE  FOR CSMMASS &lt; 33956 LBS  ( SPS &lt; 10000 LBS)</span>
+042033,000086: 
+042034,000087:                                                                                                  <span class="co">#        VARST8 = INTVALUE8 + LEMMASS(SLOPEVAL8)         IAVG            DECREMENT  TO BRKPT VALUE WHEN LEM DSCNT STAGE OFF</span>
+042035,000088:                                                                                                  <span class="co">#        VARST9 = INTVALUE9 + LEMMASS(SLOPEVAL9)         IAVG/TLX        DECREMENT  TO BRKPT VALUE WHEN LEM DSCNT STAGE OFF</span>
+042036,000089: 
+042037,000090:                                                                                                  <span class="co">#   (2) IF LEM NOT DOCKED</span>
+042038,000091: 
+042039,000092:                                                                                                  <span class="co">#        VARST0 = NOLEMVAL0      WHERE THE MEANING AND SCALING OF VARST0</span>
+042040,000093:                                                                                                  <span class="co">#          .         .           TO VARST9 ARE THE SAME AS GIVEN ABOVE</span>
+042041,000094:                                                                                                  <span class="co">#          .         .</span>
+042042,000095:                                                                                                  <span class="co">#          .         .           NOTE... FOR THIS CASE, VARST8,9 HAVE NO</span>
+042043,000096:                                                                                                  <span class="co">#        VARST9 = NOLEMVAL9      MEANING (THEY ARE COMPUTED BUT NOT USED)</span>
+042044,000097: 
+042045,000098:                                                                                                  <span class="co">#   (3) THE FINAL OUTPUT CALCULATIONS ARE THEN DONE</span>
+042046,000099: 
+042047,000100:                                                                                                  <span class="co">#        IXX0 =  VARST0 + (CSMMASS + NEGBPW)VARST5               IXX</span>
+042048,000101: 
+042049,000102:                                                                                                  <span class="co">#        IXX1 =  VARST1 + (CSMMASS + NEGBPW)VARST(4 OR 6)        IAVG</span>
+042050,000103: 
+042051,000104:                                                                                                  <span class="co">#        IXX2 =  VARST2 + (CSMMASS + NEGBPW)VARST(3 OR 7)        IAVG/TLX</span>
+042052,000105: 
+042053,000106:                                                                                                  <span class="co">#  THE DATA USED CAME FROM CSM/LM SPACECRAFT OPERATIONAL DATA BOOK.</span>
+042054,000107:                                                                                                  <span class="co">#        VOL. 3, NASA DOCUMENT SNA-8-D-027 (MARCH 1968)</span>
+042055,000108: 
+042056,000109:                                                                                                  <span class="co">#  PERTINENT MASS DATA :         CSM WEIGHT  (FULL)  64100 LBS</span>
+042057,000110:                                                                                                  <span class="co">#                                            (EMPTY) 23956 LBS</span>
+042058,000111:                                                                                                  <span class="co">#                                LEM WEIGHT  (FULL)  32000 LBS</span>
+042059,000112:                                                                                                  <span class="co">#                                            (EMPTY) 14116 LBS</span>
+042060,000113: 
+042061,000114:                                                                                                  <span class="co">#  (WEIGHTS ARE FROM AMENDMENT #1 (APRIL 24,1968) TO ABOVE DATA BOOK)</span>
+042062,000115: 
 </pre>
 </span>
 </p>
@@ -244,56 +244,56 @@ Page 956
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042063,000117: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4441504D415353">DAPMASS</a>                               
-042064,000118: 05,2000                                           <span class="ps">BANK    </span>                                       
-042065,000119: 05,3313  E6,1446                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452">CNTR</a>                                  
-042066,000120: 05,3313                                           <span class="ps">COUNT*  </span> $$/MASP                               
-042067,000121: 
-042068,000122: 
-<a name="4D41535350524F50"></a>042069,000123: 05,3313           34322        <span class="sm">MASSPROP</span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E494E45">NINE</a>                                  <span class="co">#  MASSPROP USES TVC/RCS INTERRUPT TEMPS</span>
-042070,000124: 05,3314           55506                 +1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  SET UP TEN PASSES</span>
-<a name="4C454D54455354"></a>042071,000125: 05,3315           31465        <span class="sm">LEMTEST </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  DETERMINE LEM STATUS</span>
-042072,000126: 05,3316           74754                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 
-042073,000127: 05,3317           00006                           <span class="op">EXTEND  </span>                                       
-042074,000128: 05,3320           13324                           <span class="op">BZF     </span> <a href="#4C454D594553">LEMYES</a>                                
-042075,000129: 
-<a name="4C454D4E4F"></a>042076,000130: 05,3321           51506        <span class="sm">LEMNO   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  LEM NOT ATTACHED</span>
-042077,000131: 05,3322           33410                           <span class="op">CAF     </span> <a href="#4E4F4C454D56414C">NOLEMVAL</a>                              
-042078,000132: 05,3323           13334                           <span class="op">TCF     </span> <a href="#53544F494E5354">STOINST</a>                               
-042079,000133: 
-<a name="4C454D594553"></a>042080,000134: 05,3324           31472        <span class="sm">LEMYES  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEM IS ATTACHED</span>
-042081,000135: 05,3325           60000                           <span class="op">DOUBLE  </span>                                       
-042082,000136: 05,3326           00006                           <span class="op">EXTEND  </span>                                       
-042083,000137: 05,3327           51506                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
-042084,000138: 05,3330           73432                           <span class="op">MP      </span> <a href="#534C4F504556414C">SLOPEVAL</a>                              
-042085,000139: 05,3331           20001                           <span class="op">DDOUBL  </span>                                       
-042086,000140: 05,3332           51506                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
-042087,000141: 05,3333           63420                           <span class="op">AD      </span> <a href="#494E5456414C5545">INTVALUE</a>                              
-042088,000142: 
-<a name="53544F494E5354"></a>042089,000143: 05,3334           51506        <span class="sm">STOINST </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  STORAGE INST BEGIN HERE</span>
-042090,000144: 05,3335           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>                                
-042091,000145: 05,3336           11506                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  ARE ALL TEN PASSES COMPLETED</span>
-042092,000146: 05,3337           13314                           <span class="op">TCF     </span> <a href="#4D41535350524F50">MASSPROP</a>   +1                         <span class="co">#  NO - GO DECREMENT PHI333</span>
-042093,000147: 
-<a name="445854455354"></a>042094,000148: 05,3340           11465        <span class="sm">DXTEST  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  IF NEG, BIT15 IS 1, LEM DSCNT STAGE OFF</span>
-042095,000149: 05,3341           13347                           <span class="op">TCF     </span> <a href="#4649584357">FIXCW</a>                                 
-042096,000150: 05,3342           13347                           <span class="op">TCF     </span> <a href="#4649584357">FIXCW</a>                                 
-042097,000151: 05,3343           53522                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>     +8D                        
-042098,000152: 05,3344           21513                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>     +1                         
-042099,000153: 05,3345           33445                           <span class="op">CA      </span> <a href="#44584954464958">DXITFIX</a>                               
-042100,000154: 05,3346           27520                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>     +7                         
-042101,000155: 
-<a name="4649584357"></a>042102,000156: 05,3347           34767        <span class="sm">FIXCW   </span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  COMPUTATION PHASE BEGINS HERE.  SET UP</span>
-042103,000157: 05,3350           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  THREE PASSES</span>
-042104,000158: 05,3351           55507                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                
-042105,000159: 
-042106,000160: 05,3352           31473                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               <span class="co">#  GET DELTA CSM WEIGHT - SIGN DETERMINES</span>
-042107,000161: 05,3353           63444                           <span class="op">AD      </span> <a href="#4E4547425057">NEGBPW</a>                                <span class="co">#  SLOPE LOCATIONS.</span>
-042108,000162: 05,3354           60000                           <span class="op">DOUBLE  </span>                                       
-042109,000163: 05,3355           55510                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50333333">TEMP333</a>                               
-042110,000164: 
-042111,000165: 05,3356           00006                           <span class="op">EXTEND  </span>                                       
-042112,000166: 05,3357           63362                           <span class="op">BZMF    </span> <a href="#5045474759">PEGGY</a>                                 <span class="co">#  DETERMINE CORRECT SLOPE</span>
+042064,000117: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4441504D415353">DAPMASS</a>                               
+042065,000118: 05,2000                                           <span class="ps">BANK    </span>                                       
+042066,000119: 05,3313  E6,1446                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452">CNTR</a>                                  
+042067,000120: 05,3313                                           <span class="ps">COUNT*  </span> $$/MASP                               
+042068,000121: 
+042069,000122: 
+<a name="4D41535350524F50"></a>042070,000123: 05,3313           34322        <span class="sm">MASSPROP</span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E494E45">NINE</a>                                  <span class="co">#  MASSPROP USES TVC/RCS INTERRUPT TEMPS</span>
+042071,000124: 05,3314           55506                 +1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  SET UP TEN PASSES</span>
+<a name="4C454D54455354"></a>042072,000125: 05,3315           31465        <span class="sm">LEMTEST </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  DETERMINE LEM STATUS</span>
+042073,000126: 05,3316           74754                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 
+042074,000127: 05,3317           00006                           <span class="op">EXTEND  </span>                                       
+042075,000128: 05,3320           13324                           <span class="op">BZF     </span> <a href="#4C454D594553">LEMYES</a>                                
+042076,000129: 
+<a name="4C454D4E4F"></a>042077,000130: 05,3321           51506        <span class="sm">LEMNO   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  LEM NOT ATTACHED</span>
+042078,000131: 05,3322           33410                           <span class="op">CAF     </span> <a href="#4E4F4C454D56414C">NOLEMVAL</a>                              
+042079,000132: 05,3323           13334                           <span class="op">TCF     </span> <a href="#53544F494E5354">STOINST</a>                               
+042080,000133: 
+<a name="4C454D594553"></a>042081,000134: 05,3324           31472        <span class="sm">LEMYES  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEM IS ATTACHED</span>
+042082,000135: 05,3325           60000                           <span class="op">DOUBLE  </span>                                       
+042083,000136: 05,3326           00006                           <span class="op">EXTEND  </span>                                       
+042084,000137: 05,3327           51506                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
+042085,000138: 05,3330           73432                           <span class="op">MP      </span> <a href="#534C4F504556414C">SLOPEVAL</a>                              
+042086,000139: 05,3331           20001                           <span class="op">DDOUBL  </span>                                       
+042087,000140: 05,3332           51506                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
+042088,000141: 05,3333           63420                           <span class="op">AD      </span> <a href="#494E5456414C5545">INTVALUE</a>                              
+042089,000142: 
+<a name="53544F494E5354"></a>042090,000143: 05,3334           51506        <span class="sm">STOINST </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  STORAGE INST BEGIN HERE</span>
+042091,000144: 05,3335           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>                                
+042092,000145: 05,3336           11506                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  ARE ALL TEN PASSES COMPLETED</span>
+042093,000146: 05,3337           13314                           <span class="op">TCF     </span> <a href="#4D41535350524F50">MASSPROP</a>   +1                         <span class="co">#  NO - GO DECREMENT PHI333</span>
+042094,000147: 
+<a name="445854455354"></a>042095,000148: 05,3340           11465        <span class="sm">DXTEST  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  IF NEG, BIT15 IS 1, LEM DSCNT STAGE OFF</span>
+042096,000149: 05,3341           13347                           <span class="op">TCF     </span> <a href="#4649584357">FIXCW</a>                                 
+042097,000150: 05,3342           13347                           <span class="op">TCF     </span> <a href="#4649584357">FIXCW</a>                                 
+042098,000151: 05,3343           53522                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>     +8D                        
+042099,000152: 05,3344           21513                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>     +1                         
+042100,000153: 05,3345           33445                           <span class="op">CA      </span> <a href="#44584954464958">DXITFIX</a>                               
+042101,000154: 05,3346           27520                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>     +7                         
+042102,000155: 
+<a name="4649584357"></a>042103,000156: 05,3347           34767        <span class="sm">FIXCW   </span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  COMPUTATION PHASE BEGINS HERE.  SET UP</span>
+042104,000157: 05,3350           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  THREE PASSES</span>
+042105,000158: 05,3351           55507                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                
+042106,000159: 
+042107,000160: 05,3352           31473                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               <span class="co">#  GET DELTA CSM WEIGHT - SIGN DETERMINES</span>
+042108,000161: 05,3353           63444                           <span class="op">AD      </span> <a href="#4E4547425057">NEGBPW</a>                                <span class="co">#  SLOPE LOCATIONS.</span>
+042109,000162: 05,3354           60000                           <span class="op">DOUBLE  </span>                                       
+042110,000163: 05,3355           55510                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50333333">TEMP333</a>                               
+042111,000164: 
+042112,000165: 05,3356           00006                           <span class="op">EXTEND  </span>                                       
+042113,000166: 05,3357           63362                           <span class="op">BZMF    </span> <a href="#5045474759">PEGGY</a>                                 <span class="co">#  DETERMINE CORRECT SLOPE</span>
 </pre>
 </span>
 </p>
@@ -309,36 +309,36 @@ Page 957
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042114,000168: 05,3360           37701                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
-042115,000169: 05,3361           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
-042116,000170: 
-<a name="5045474759"></a>042117,000171: 05,3362           51506        <span class="sm">PEGGY   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  ALL IS READY - CALCULATE OUTPUTS NOW</span>
-042118,000172: 05,3363           31516                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535435">VARST5</a>                                <span class="co">#  GET SLOPE</span>
-042119,000173: 05,3364           00006                           <span class="op">EXTEND  </span>                                       
-042120,000174: 05,3365           71510                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50333333">TEMP333</a>                               <span class="co">#  MULT BY DELTA CSM WEIGHT</span>
-042121,000175: 05,3366           60000                           <span class="op">DOUBLE  </span>                                       
-042122,000176: 05,3367           51507                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                
-042123,000177: 05,3370           61511                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>                                <span class="co">#  ADD BREAKPOINT VALUE</span>
-042124,000178: 05,3371           51507                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                
-042125,000179: 05,3372           55467                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   <span class="co">#  ****** OUTPUTS (IXX0, IXX1, IXX2) ******</span>
-042126,000180: 
-042127,000181: 
-042128,000182: 05,3373           11507                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                <span class="co">#  BOOKKEEPING  - MASSPROP FINISHED OR NOT</span>
-042129,000183: 05,3374           13404                           <span class="op">TCF     </span> <a href="#424F4B4B455032">BOKKEP2</a>                               <span class="co">#  NO - GO TAKE CARE OF INDEXING REGISTERS</span>
-042130,000184: 
-042131,000185: 05,3375           31465                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  UPDATE WEIGHT/G</span>
-042132,000186: 05,3376           74753                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-042133,000187: 05,3377           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042134,000188: 05,3400           31472                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               
-042135,000189: 05,3401           61473                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
-042136,000190: 05,3402           55475                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5745494748542F47">WEIGHT/G</a>                              <span class="co">#  SCALED AT B+16 IN KILOGRAMS</span>
-<a name="454E444D41535350"></a>042137,000191: 05,3403           00002        <span class="sm">ENDMASSP</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-042138,000192: 
-<a name="424F4B4B455032"></a>042139,000193: 05,3404           55507        <span class="sm">BOKKEP2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                <span class="co">#  REDUCE PSI BY ONE</span>
-042140,000194: 05,3405           00006                           <span class="op">EXTEND  </span>                                       
-042141,000195: 05,3406           27506                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
-042142,000196: 05,3407           13362                           <span class="op">TCF     </span> <a href="#5045474759">PEGGY</a>                                 
-042143,000197: 
+042115,000168: 05,3360           37701                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
+042116,000169: 05,3361           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
+042117,000170: 
+<a name="5045474759"></a>042118,000171: 05,3362           51506        <span class="sm">PEGGY   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                <span class="co">#  ALL IS READY - CALCULATE OUTPUTS NOW</span>
+042119,000172: 05,3363           31516                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535435">VARST5</a>                                <span class="co">#  GET SLOPE</span>
+042120,000173: 05,3364           00006                           <span class="op">EXTEND  </span>                                       
+042121,000174: 05,3365           71510                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50333333">TEMP333</a>                               <span class="co">#  MULT BY DELTA CSM WEIGHT</span>
+042122,000175: 05,3366           60000                           <span class="op">DOUBLE  </span>                                       
+042123,000176: 05,3367           51507                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                
+042124,000177: 05,3370           61511                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564152535430">VARST0</a>                                <span class="co">#  ADD BREAKPOINT VALUE</span>
+042125,000178: 05,3371           51507                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                
+042126,000179: 05,3372           55467                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   <span class="co">#  ****** OUTPUTS (IXX0, IXX1, IXX2) ******</span>
+042127,000180: 
+042128,000181: 
+042129,000182: 05,3373           11507                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                <span class="co">#  BOOKKEEPING  - MASSPROP FINISHED OR NOT</span>
+042130,000183: 05,3374           13404                           <span class="op">TCF     </span> <a href="#424F4B4B455032">BOKKEP2</a>                               <span class="co">#  NO - GO TAKE CARE OF INDEXING REGISTERS</span>
+042131,000184: 
+042132,000185: 05,3375           31465                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  UPDATE WEIGHT/G</span>
+042133,000186: 05,3376           74753                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+042134,000187: 05,3377           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042135,000188: 05,3400           31472                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               
+042136,000189: 05,3401           61473                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
+042137,000190: 05,3402           55475                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5745494748542F47">WEIGHT/G</a>                              <span class="co">#  SCALED AT B+16 IN KILOGRAMS</span>
+<a name="454E444D41535350"></a>042138,000191: 05,3403           00002        <span class="sm">ENDMASSP</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+042139,000192: 
+<a name="424F4B4B455032"></a>042140,000193: 05,3404           55507        <span class="sm">BOKKEP2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505349333333">PSI333</a>                                <span class="co">#  REDUCE PSI BY ONE</span>
+042141,000194: 05,3405           00006                           <span class="op">EXTEND  </span>                                       
+042142,000195: 05,3406           27506                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504849333333">PHI333</a>                                
+042143,000196: 05,3407           13362                           <span class="op">TCF     </span> <a href="#5045474759">PEGGY</a>                                 
+042144,000197: 
 </pre>
 </span>
 </p>
@@ -354,40 +354,40 @@ Page 958
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042145,000199: 
-<a name="4E4F4C454D56414C"></a>042146,000200: 05,3410           00616        <span class="sm">NOLEMVAL</span>           <span class="ps">DEC     </span> 25445.     B-20                       
-042147,000201: 05,3411           02526                           <span class="ps">DEC     </span> 87450.     B-20                       
-042148,000202: 05,3412           02352                           <span class="ps">DEC     </span> .30715     B-2                        
-042149,000203: 05,3413           01471                           <span class="ps">DEC     </span> 1.22877    E-5        B+12            
-042150,000204: 05,3414           00634                           <span class="ps">DEC     </span> 1.6096     B-6                        
-042151,000205: 05,3415           00612                           <span class="ps">DEC     </span> 1.54       B-6                        
-042152,000206: 05,3416           03706                           <span class="ps">DEC     </span> 7.77177    B-6                        
-042153,000207: 05,3417           04425                           <span class="ps">DEC     </span> 3.46458    E-5        B+12            
-042154,000208: 
-<a name="494E5456414C5545"></a>042155,000209: 05,3420           00644        <span class="sm">INTVALUE</span>           <span class="ps">DEC     </span> 26850      B-20                       
-042156,000210: 05,3421           03710                           <span class="ps">DEC     </span> 127518     B-20                       
-042157,000211: 05,3422           04246                           <span class="ps">DEC     </span> .54059     B-2                        
-042158,000212: 05,3423           02011                           <span class="ps">DEC     </span> .153964    E-4        B+12            
-042159,000213: 05,3424           77501                           <span class="ps">DEC     </span> -.742923   B-6                        
-042160,000214: 05,3425           00612                           <span class="ps">DEC     </span> 1.5398     B-6                        
-042161,000215: 05,3426           04656                           <span class="ps">DEC     </span> 9.68       B-6                        
-042162,000216: 05,3427           10372                           <span class="ps">DEC     </span> .647625    E-4        B+12            
-042163,000217: 05,3430           77126                           <span class="ps">DEC     </span> -27228.    B-20                       
-042164,000218: 05,3431           76261                           <span class="ps">DEC     </span> -.206476   B-2                        
-042165,000219: 
-<a name="534C4F504556414C"></a>042166,000220: 05,3432           00767        <span class="sm">SLOPEVAL</span>           <span class="ps">DEC     </span> 1.96307    B-6                        
-042167,000221: 05,3433           15624                           <span class="ps">DEC     </span> 27.5774    B-6                        
-042168,000222: 05,3434           03054                           <span class="ps">DEC     </span> 2.3548     E-5        B+12            
-042169,000223: 05,3435           04532                           <span class="ps">DEC     </span> 2.1777     E-9        B+26            
-042170,000224: 05,3436           10433                           <span class="ps">DEC     </span> 1.044      E-3        B+8             
-042171,000225: 05,3437           00000                           <span class="ps">DEC     </span> 0          B-14                       
-042172,000226: 05,3440           22070                           <span class="ps">DEC     </span> 2.21068    E-3        B+8             
-042173,000227: 05,3441           03204                           <span class="ps">DEC     </span> 1.5166     E-9        B+26            
-042174,000228: 05,3442           77266                           <span class="ps">DEC     </span> -1.284     B-6                        
-042175,000229: 05,3443           02476                           <span class="ps">DEC     </span> 2.         E-5        B+12            
-042176,000230: 
-<a name="4E4547425057"></a>042177,000231: 05,3444           70364        <span class="sm">NEGBPW  </span>           <span class="ps">DEC     </span> -15402.17  B-16                       
-<a name="44584954464958"></a>042178,000232: 05,3445           75420        <span class="sm">DXITFIX </span>           <span class="ps">DEC*    </span> -1.88275   E-5        B+12*           
+042146,000199: 
+<a name="4E4F4C454D56414C"></a>042147,000200: 05,3410           00616        <span class="sm">NOLEMVAL</span>           <span class="ps">DEC     </span> 25445.     B-20                       
+042148,000201: 05,3411           02526                           <span class="ps">DEC     </span> 87450.     B-20                       
+042149,000202: 05,3412           02352                           <span class="ps">DEC     </span> .30715     B-2                        
+042150,000203: 05,3413           01471                           <span class="ps">DEC     </span> 1.22877    E-5        B+12            
+042151,000204: 05,3414           00634                           <span class="ps">DEC     </span> 1.6096     B-6                        
+042152,000205: 05,3415           00612                           <span class="ps">DEC     </span> 1.54       B-6                        
+042153,000206: 05,3416           03706                           <span class="ps">DEC     </span> 7.77177    B-6                        
+042154,000207: 05,3417           04425                           <span class="ps">DEC     </span> 3.46458    E-5        B+12            
+042155,000208: 
+<a name="494E5456414C5545"></a>042156,000209: 05,3420           00644        <span class="sm">INTVALUE</span>           <span class="ps">DEC     </span> 26850      B-20                       
+042157,000210: 05,3421           03710                           <span class="ps">DEC     </span> 127518     B-20                       
+042158,000211: 05,3422           04246                           <span class="ps">DEC     </span> .54059     B-2                        
+042159,000212: 05,3423           02011                           <span class="ps">DEC     </span> .153964    E-4        B+12            
+042160,000213: 05,3424           77501                           <span class="ps">DEC     </span> -.742923   B-6                        
+042161,000214: 05,3425           00612                           <span class="ps">DEC     </span> 1.5398     B-6                        
+042162,000215: 05,3426           04656                           <span class="ps">DEC     </span> 9.68       B-6                        
+042163,000216: 05,3427           10372                           <span class="ps">DEC     </span> .647625    E-4        B+12            
+042164,000217: 05,3430           77126                           <span class="ps">DEC     </span> -27228.    B-20                       
+042165,000218: 05,3431           76261                           <span class="ps">DEC     </span> -.206476   B-2                        
+042166,000219: 
+<a name="534C4F504556414C"></a>042167,000220: 05,3432           00767        <span class="sm">SLOPEVAL</span>           <span class="ps">DEC     </span> 1.96307    B-6                        
+042168,000221: 05,3433           15624                           <span class="ps">DEC     </span> 27.5774    B-6                        
+042169,000222: 05,3434           03054                           <span class="ps">DEC     </span> 2.3548     E-5        B+12            
+042170,000223: 05,3435           04532                           <span class="ps">DEC     </span> 2.1777     E-9        B+26            
+042171,000224: 05,3436           10433                           <span class="ps">DEC     </span> 1.044      E-3        B+8             
+042172,000225: 05,3437           00000                           <span class="ps">DEC     </span> 0          B-14                       
+042173,000226: 05,3440           22070                           <span class="ps">DEC     </span> 2.21068    E-3        B+8             
+042174,000227: 05,3441           03204                           <span class="ps">DEC     </span> 1.5166     E-9        B+26            
+042175,000228: 05,3442           77266                           <span class="ps">DEC     </span> -1.284     B-6                        
+042176,000229: 05,3443           02476                           <span class="ps">DEC     </span> 2.         E-5        B+12            
+042177,000230: 
+<a name="4E4547425057"></a>042178,000231: 05,3444           70364        <span class="sm">NEGBPW  </span>           <span class="ps">DEC     </span> -15402.17  B-16                       
+<a name="44584954464958"></a>042179,000232: 05,3445           75420        <span class="sm">DXITFIX </span>           <span class="ps">DEC*    </span> -1.88275   E-5        B+12*           
 
 End of include-file TVCMASSPROP.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

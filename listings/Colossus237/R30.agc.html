@@ -87,16 +87,16 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-021739,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-021740,000003:                                                                                                  <span class="co">#  Filename:     R30.agc</span>
-021741,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-021742,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-021743,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-021744,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-021745,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-021746,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-021747,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-021748,000011:                                                                                                  <span class="co">#  Mod history:  2011-02-05 JL   Adapted from corresponding Colossus 249 file.</span>
+021739,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+021740,000003:                                                                                                  <span class="co">## Filename:     R30.agc</span>
+021741,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+021742,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+021743,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+021744,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+021745,000008:                                                                                                  <span class="co">## Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+021746,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+021747,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+021748,000011:                                                                                                  <span class="co">## Mod history:  2011-02-05 JL   Adapted from corresponding Colossus 249 file.</span>
 021749,000012: 
 </pre>
 </span>
@@ -212,7 +212,7 @@ Page 504
 021833,000096: 23,2345           04555                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
 021834,000097: 23,2346           20465                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
 021835,000098: 23,2347           05423                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE</span>
-021836,000099: 23,2350           02352                           <span class="op">TC      </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  PROCEED</span>
+021836,000099: 23,2350           02352                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED</span>
 021837,000100: 23,2351           02344                           <span class="op">TC      </span> -5                                    <span class="co">#  DATA IN. OPTION1+1 = 1 FOR THIS VEHICLE.</span>
 021838,000101:                                                                                                  <span class="co">#                 UNEQ 1 FOR OTHER VEHICLE.</span>
 021839,000102: 23,2352           34707                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  80 MS</span>
@@ -398,7 +398,7 @@ Page 507
 021977,000240: 23,2546           36214                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 
 021978,000241: 23,2547           71742                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              
 021979,000242: 23,2550           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-021980,000243: 23,2551           02552                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+021980,000243: 23,2551           02552                           <span class="op">TC      </span> +1                                    
 021981,000244: 23,2552           05213                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IF NO FLAGBITS SET DONT' CHANGE TFF OR</span>
 021982,000245:                                                                                                  <span class="co">#                                          -TPER, BUT CONTINUE LOOP.</span>
 021983,000246: 23,2553           02561                           <span class="op">TC      </span> <a href="#545045525449434B">TPERTICK</a>                              <span class="co">#  ONLY BIT 1 SET. INCR -TPER BY 1 SEC.</span>
@@ -630,7 +630,7 @@ Page 511
 022153,000416:                                                                                                  <span class="co">#                                          IF MOON CENTERED, RESCALE FROM (-27)M.</span>
 022154,000417:                                                                                                  <span class="co">#                                           IF EARTH CENTERED ALREADY AT (-29)M.</span>
 022155,000418: 23,2712           04742                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#   OFF FOR EARTH , ON FOR MOON.</span>
-022156,000419: 23,2713           46714                                    <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+022156,000419: 23,2713           46714                                    +1                                    
 022157,000420: 23,2714           77624                           <span class="in">CALL    </span>                                       <span class="co">#  IF RAPO > MAXNM, SET RAPO =9999.9 NM.</span>
 022158,000421: 23,2715           46754                                    <a href="#4D415843484B">MAXCHK</a>                                <span class="co">#  OTHERWISE STORE (RAPO-RPADTEM) IN HAPO.</span>
 <a name="53544F524841504F"></a>022159,000422: 23,2716           16352        <span class="sm">STORHAPO</span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4841504F58">HAPOX</a>                                 
@@ -642,7 +642,7 @@ Page 511
 022165,000428:                                                                                                  <span class="co">#                                          IF MOON CENTERED, RESCALE FROM (-27)M.</span>
 022166,000429:                                                                                                  <span class="co">#                                          IF EARTH CENTERED ALREADY AT (-29)M.</span>
 022167,000430: 23,2724           04742                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  OFF FOR EARTH,  ON FOR MOON.</span>
-022168,000431: 23,2725           46726                                    <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+022168,000431: 23,2725           46726                                    +1                                    
 022169,000432: 23,2726           77624                           <span class="in">CALL    </span>                                       <span class="co">#  IF HPER > MAXNM, SET HPER = 9999.9 NM.</span>
 022170,000433: 23,2727           46754                                    <a href="#4D415843484B">MAXCHK</a>                                
 </pre>
@@ -683,7 +683,7 @@ Page 512
 022192,000455: 
 <a name="4D415843484B"></a>022193,000456: 23,2754           51025        <span class="sm">MAXCHK  </span>           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM</span>
 022194,000457: 23,2755           06764                                    <a href="#4D41584E4D">MAXNM</a>                                 
-022195,000458: 23,2756           46761                                    <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    <span class="co">#  OTHERWISE C(MPAC) - B(MPAC).</span>
+022195,000458: 23,2756           46761                                    +3                                    <span class="co">#  OTHERWISE C(MPAC) - B(MPAC).</span>
 022196,000459: 23,2757           43415                           <span class="in">DAD     </span> <span class="in">RVQ       </span>                            
 022197,000460: 23,2760           06764                                    <a href="#4D41584E4D">MAXNM</a>                                 
 022198,000461: 23,2761           43545                 +3        <span class="in">DLOAD   </span> <span class="in">RVQ       </span>                            <span class="co">#  (USED BY P30 - P37 ALSO)</span>

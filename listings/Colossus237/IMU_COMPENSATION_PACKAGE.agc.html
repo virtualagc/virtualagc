@@ -87,16 +87,16 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-012518,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-012519,000003:                                                                                                  <span class="co">#  Filename:     IMU_COMPENSATION_PACKAGE.agc</span>
-012520,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.</span>
-012521,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-012522,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-012523,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-012524,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-012525,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-012526,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-012527,000011:                                                                                                  <span class="co">#  Mod history:  2011-01-23 JL   Adapted from corresponding Colossus 249 file.</span>
+012518,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+012519,000003:                                                                                                  <span class="co">## Filename:     IMU_COMPENSATION_PACKAGE.agc</span>
+012520,000004:                                                                                                  <span class="co">## Purpose:      Part of the source code for Colossus build 237.</span>
+012521,000005:                                                                                                  <span class="co">##               This is for the Command Module's (CM) Apollo Guidance</span>
+012522,000006:                                                                                                  <span class="co">##               Computer (AGC), we believe for Apollo 8.</span>
+012523,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+012524,000008:                                                                                                  <span class="co">## Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+012525,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+012526,000010:                                                                                                  <span class="co">## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+012527,000011:                                                                                                  <span class="co">## Mod history:  2011-01-23 JL   Adapted from corresponding Colossus 249 file.</span>
 012528,000012: 
 </pre>
 </span>
@@ -126,8 +126,8 @@ Page 290
 012540,000024: 06,3264           54163                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  
 012541,000025: 
 012542,000026: 06,3265           11477                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
-012543,000027: 06,3266           13271                           <span class="op">TCF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
-012544,000028: 06,3267           13271                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+012543,000027: 06,3266           13271                           <span class="op">TCF     </span> +3                                    
+012544,000028: 06,3267           13271                           <span class="op">TCF     </span> +2                                    
 012545,000029: 06,3270           13407                           <span class="op">TCF     </span> <a href="#4952494731">IRIG1</a>                                 <span class="co">#  RETURN</span>
 012546,000030: 
 012547,000031: 06,3271           00004                           <span class="op">INHINT  </span>                                       <span class="co">#   ASSURE COMPLETE COMPENSATION OF DELV'S</span>
@@ -298,7 +298,7 @@ Page 294
 <span style="font-family: monospace;">
 <pre>
 012658,000142: 06,3377           11477                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  ARE GYRO COMMANDS GREATER THAN 2 PULSES</span>
-012659,000143: 06,3400           13402                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  YES   </span>
+012659,000143: 06,3400           13402                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES   </span>
 012660,000144: 06,3401           13407                           <span class="op">TCF     </span> <a href="#4952494731">IRIG1</a>                                 <span class="co">#  NO    </span>
 012661,000145: 
 012662,000146: 06,3402           34764                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3137">PRIO17</a>                                <span class="co">#  LEM PRIORITY HIGHER-THIS FOR PRELAUNCH</span>
@@ -378,7 +378,7 @@ Page 295
 012722,000206: 06,3463           56130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
 012723,000207: 06,3464           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
 012724,000208: 06,3465           11471                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D50">GCOMP</a>                                 <span class="co">#  ARE GYRO COMMANDS 1 PULSE OR GREATER</span>
-012725,000209: 06,3466           13470                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  YES</span>
+012725,000209: 06,3466           13470                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES</span>
 012726,000210: 06,3467           00131                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  NO</span>
 012727,000211: 
 012728,000212: 06,3470           77716                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
@@ -463,15 +463,15 @@ Page 297
 <span style="font-family: monospace;">
 <pre>
 <a name="4E42444F4E4C59"></a>012781,000265: 06,3542           11477        <span class="sm">NBDONLY </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
-012782,000266: 06,3543           13546                           <span class="op">TCF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
-012783,000267: 06,3544           13546                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+012782,000266: 06,3543           13546                           <span class="op">TCF     </span> +3                                    
+012783,000267: 06,3544           13546                           <span class="op">TCF     </span> +2                                    
 012784,000268: 06,3545           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
 012785,000269: 
 012786,000270: 06,3546           00004                           <span class="op">INHINT  </span>                                       
 012787,000271: 06,3547           10076                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  PREREAD T3RUPT MAY COINCIDE</span>
 012788,000272: 06,3550           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
 012789,000273: 06,3551           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-012790,000274: 06,3552           13553                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#2B31">+1</a>                                    
+012790,000274: 06,3552           13553                           <span class="op">TCF     </span> +1                                    
 012791,000275: 
 012792,000276: 06,3553           30025                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  (CS) X 2(+14)</span>
 012793,000277: 06,3554           57074                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F504950414454">1/PIPADT</a>                              <span class="co">#  PREVIOUS TIME</span>
@@ -481,7 +481,7 @@ Page 297
 <a name="4E424432"></a>012797,000281: 06,3560           10000        <span class="sm">NBD2    </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  CALCULATE ELAPSED TIME</span>
 012798,000282: 06,3561           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  NO TIME1 OVERFLOW</span>
 012799,000283: 06,3562           13567                           <span class="op">TCF     </span> <a href="#4E424433">NBD3</a>                                  <span class="co">#  RESTORE TIME DIFFERENCE AND JUMP</span>
-012800,000284: 06,3563           13565                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  TIME1 OVERFLOW</span>
+012800,000284: 06,3563           13565                           <span class="op">TCF     </span> +2                                    <span class="co">#  TIME1 OVERFLOW</span>
 012801,000285: 06,3564           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  IF ELAPSED TIME = 0  (DIFFERENCE = -0)</span>
 012802,000286: 
 012803,000287: 06,3565           40000                           <span class="op">COM     </span>                                       <span class="co">#  CALCULATE ABSOLUTE DIFFERENCE</span>
@@ -569,8 +569,8 @@ Page 299
 012857,000341: 06,3637           17075                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#504950555345">PIPUSE</a>                                
 012858,000342: 
 012859,000343: 06,3640           11477                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47434F4D505357">GCOMPSW</a>                               <span class="co">#  BYPASS IF GCOMPSW NEGATIVE</span>
-012860,000344: 06,3641           13644                           <span class="op">TCF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
-012861,000345: 06,3642           13644                           <span class="op">TCF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+012860,000344: 06,3641           13644                           <span class="op">TCF     </span> +3                                    
+012861,000345: 06,3642           13644                           <span class="op">TCF     </span> +2                                    
 012862,000346: 06,3643           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
 012863,000347: 
 012864,000348: 06,3644           37665                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3331">PRIO31</a>                                <span class="co">#  2 SECONDS SCALED (CS) X 2(+8)</span>

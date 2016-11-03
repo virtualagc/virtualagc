@@ -87,17 +87,17 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-007549,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-007550,000003:                                                                                                  <span class="co">#  Filename:     FRESH_START_AND_RESTART.agc</span>
-007551,000004:                                                                                                  <span class="co">#  Purpose:      Part of the source code for Colossus build 237.  </span>
-007552,000005:                                                                                                  <span class="co">#                This is for the Command Module's (CM) Apollo Guidance</span>
-007553,000006:                                                                                                  <span class="co">#                Computer (AGC), we believe for Apollo 8.</span>
-007554,000007:                                                                                                  <span class="co">#  Assembler:    yaYUL</span>
-007555,000008:                                                                                                  <span class="co">#  Contact:      Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-007556,000009:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-007557,000010:                                                                                                  <span class="co">#  Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-007558,000011:                                                                                                  <span class="co">#  Mod history:  2011-01-10 JL   Adapted from corresponding Colossus 249 file.</span>
-007559,000012:                                                                                                  <span class="co">#                2011-04-27 JL   Minor fixes.</span>
+007549,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+007550,000003:                                                                                                  <span class="co">## Filename:    FRESH_START_AND_RESTART.agc</span>
+007551,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.  </span>
+007552,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
+007553,000006:                                                                                                  <span class="co">##              Computer (AGC), we believe for Apollo 8.</span>
+007554,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+007555,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+007556,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+007557,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+007558,000011:                                                                                                  <span class="co">## Mod history: 2011-01-10 JL   Adapted from corresponding Colossus 249 file.</span>
+007559,000012:                                                                                                  <span class="co">##              2011-04-27 JL   Minor fixes.</span>
 007560,000013: 
 </pre>
 </span>
@@ -435,14 +435,14 @@ Page 181
 007810,000263: 05,2517           34364                           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   
 007811,000264: 05,2520           71360                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              
 007812,000265: 05,2521           00006                           <span class="op">EXTEND  </span>                                       
-007813,000266: 05,2522           12524                           <span class="op">BZF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  IF ERESTORE NOT = +0 OR +N LESS THAN 2K,</span>
+007813,000266: 05,2522           12524                           <span class="op">BZF     </span> +2                                    <span class="co">#  IF ERESTORE NOT = +0 OR +N LESS THAN 2K,</span>
 007814,000267: 05,2523           12370                           <span class="op">TCF     </span> <a href="#444F465354415254">DOFSTART</a>                              <span class="co">#  DOUBT E MEMORY AND DO A FRESH START.</span>
 007815,000268: 05,2524           41360                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              
 007816,000269: 05,2525           00006                           <span class="op">EXTEND  </span>                                       
 007817,000270: 05,2526           12543                           <span class="op">BZF     </span> <a href="#444F525354415254">DORSTART</a>                              <span class="co">#  = +0 CONTINUE WITH RESTART.</span>
 007818,000271: 05,2527           61377                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
 007819,000272: 05,2530           00006                           <span class="op">EXTEND  </span>                                       
-007820,000273: 05,2531           12533                           <span class="op">BZF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    <span class="co">#  = SKEEP7, RESTORE E MEMORY.</span>
+007820,000273: 05,2531           12533                           <span class="op">BZF     </span> +2                                    <span class="co">#  = SKEEP7, RESTORE E MEMORY.</span>
 007821,000274: 05,2532           12370                           <span class="op">TCF     </span> <a href="#444F465354415254">DOFSTART</a>                              <span class="co">#  NOT = SKEEP7, DOUBT E MEM,DO FRESH START.</span>
 007822,000275: 05,2533           31374                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
 007823,000276: 05,2534           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  EBANK OF E MEMORY THAT WAS UNDER TEST.</span>
@@ -653,7 +653,7 @@ Page 184
 007986,000439: 05,2741           00015                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4E4B4559494E">MNKEYIN</a>                               <span class="co">#  MAIN DSKY KEYCODES</span>
 007987,000440: 05,2742           63155                           <span class="op">AD      </span> <a href="#2D454C52">-ELR</a>                                  
 007988,000441: 05,2743           00006                           <span class="op">EXTEND  </span>                                       
-007989,000442: 05,2744           12746                           <span class="op">BZF     </span> <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+007989,000442: 05,2744           12746                           <span class="op">BZF     </span> +2                                    
 007990,000443: 
 <a name="4E4F4E41564B4559"></a>007991,000444: 05,2745           00002        <span class="sm">NONAVKEY</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
 007992,000445: 
@@ -1363,7 +1363,7 @@ Page 196
 <a name="4E4F5556454155"></a>008528,000981: 04,2245           34704        <span class="sm">NOUVEAU </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
 008529,000982: 04,2246           70074                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              
 008530,000983: 04,2247           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-008531,000984: 04,2250           12253                           <span class="op">TCF     </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    
+008531,000984: 04,2250           12253                           <span class="op">TCF     </span> +3                                    
 008532,000985: 04,2251           05447                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  NO, RESET IMUSE FLAG.</span>
 008533,000986: 04,2252           00007                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D555345">IMUSE</a>                                 <span class="co">#  BIT 8 FLAG 0</span>
 008534,000987: 04,2253           50774                 +3        <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E444558">MINDEX</a>                                
@@ -1670,7 +1670,7 @@ Page 201
 008765,001218: 04,2475  E4,1763                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B54">KT</a>                                    <span class="co">#  EBANK SETTING REQUIRED BY MM 35</span>
 008766,001219: 04,2475  E4,1770                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53554245584954">SUBEXIT</a>                               <span class="co">#  EBANK SETTING REQUIRED BY MM 34</span>
 008767,001220: 04,2475  E7,1625                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2B4D4741">+MGA</a>                                  <span class="co">#  EBANK SETTING REQUIRED BY MM 30</span>
-008768,001221: 04,2475  0002751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              <span class="co">#  EBANK SETTING REQUIRED BY MM 23</span>
+008768,001221: 04,2475  E5,1751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              <span class="co">#  EBANK SETTING REQUIRED BY MM 23</span>
 008769,001222: 04,2475     0301                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  EBANK SETTING REQUIRED BY MM 22</span>
 008770,001223: 04,2475  0003777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57484F4341524553">WHOCARES</a>                              <span class="co">#  EBANK SETTING REQUIRED BY MM 21</span>
 008771,001224: 04,2475  E6,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455354524F4B4552">ESTROKER</a>                              <span class="co">#  EBANK SETTING REQUIRED BY MM 20</span>
@@ -1760,7 +1760,7 @@ Page 202
 <a name="53544154455550"></a>008841,001294: 13,2000           43014        <span class="sm">STATEUP </span>           <span class="in">SET     </span> <span class="in">BOF       </span>                            <span class="co">#  EXTRAPOLATE CM STATE VECTOR</span>
 008842,001295: 13,2001           01474                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56494E54464C4147">VINTFLAG</a>                              
 008843,001296: 13,2002           01751                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F524257464C4147">ORBWFLAG</a>                              <span class="co">#  ALSO 6X6 W-MATRIX IF VALID</span>
-008844,001297: 13,2003           26006                                    <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#2B33">+3</a>                                    <span class="co">#       FOR ORBITAL NAVIGATION</span>
+008844,001297: 13,2003           26006                                    +3                                    <span class="co">#       FOR ORBITAL NAVIGATION</span>
 008845,001298: 13,2004           77614                           <span class="in">SET     </span>                                       
 </pre>
 </span>
@@ -1792,7 +1792,7 @@ Page 203
 008859,001312: 13,2021           26621                                    <a href="INTEGRATION_INITIALIZATION.agc.html#53455449464C4753">SETIFLGS</a>                              <span class="co">#       AND 6X6 W-MATRIX IF VALID</span>
 008860,001313: 13,2022           43014                           <span class="in">BOF     </span> <span class="in">SET       </span>                            
 008861,001314: 13,2023           02756                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52454E4457464C47">RENDWFLG</a>                              <span class="co">#       FOR RENDEZVOUS NAVIGATION</span>
-008862,001315: 13,2024           26026                                    <a href="TIME_OF_FREE_FALL.agc.html#2B32">+2</a>                                    
+008862,001315: 13,2024           26026                                    +2                                    
 008863,001316: 13,2025           01476                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44494D30464C4147">DIM0FLAG</a>                              
 008864,001317: 13,2026           45014                           <span class="in">SET     </span> <span class="in">CALL      </span>                            
 008865,001318: 13,2027           01467                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5052454349464C47">PRECIFLG</a>                              

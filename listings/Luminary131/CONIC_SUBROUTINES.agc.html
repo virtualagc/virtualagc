@@ -92,21 +92,21 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047844,000002:                                                                                                  <span class="co">#  Copyright:    Public domain.</span>
-047845,000003:                                                                                                  <span class="co">#  Filename:     CONIC_SUBROUTINES.agc</span>
-047846,000004:                                                                                                  <span class="co">#  Purpose:      A section of Luminary 1C, revision 131.</span>
-047847,000005:                                                                                                  <span class="co">#                It is part of the source code for the Lunar Module's (LM)</span>
-047848,000006:                                                                                                  <span class="co">#                Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.</span>
-047849,000007:                                                                                                  <span class="co">#                This file is intended to be a faithful transcription, except</span>
-047850,000008:                                                                                                  <span class="co">#                that the code format has been changed to conform to the</span>
-047851,000009:                                                                                                  <span class="co">#                requirements of the yaYUL assembler rather than the</span>
-047852,000010:                                                                                                  <span class="co">#                original YUL assembler.</span>
-047853,000011:                                                                                                  <span class="co">#  Reference:    pp. 1158-1202 of 1729.pdf.</span>
-047854,000012:                                                                                                  <span class="co">#  Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-047855,000013:                                                                                                  <span class="co">#  Website:      www.ibiblio.org/apollo/index.html</span>
-047856,000014:                                                                                                  <span class="co">#  Mod history:  06/01/03 RSB.   Began transcribing.</span>
-047857,000015:                                                                                                  <span class="co">#                05/14/05 RSB    Corrected website reference above.</span>
-047858,000016:                                                                                                  <span class="co">#                2010-08-24 JL   Fixed page 1162 number.</span>
+047844,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+047845,000003:                                                                                                  <span class="co">## Filename:    CONIC_SUBROUTINES.agc</span>
+047846,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary 1C, revision 131.</span>
+047847,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+047848,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.</span>
+047849,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+047850,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+047851,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+047852,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+047853,000011:                                                                                                  <span class="co">## Reference:   pp. 1158-1202 of 1729.pdf.</span>
+047854,000012:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+047855,000013:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+047856,000014:                                                                                                  <span class="co">## Mod history: 06/01/03 RSB.   Began transcribing.</span>
+047857,000015:                                                                                                  <span class="co">##              05/14/05 RSB    Corrected website reference above.</span>
+047858,000016:                                                                                                  <span class="co">##              2010-08-24 JL   Fixed page 1162 number.</span>
 047859,000017: 
 </pre>
 </span>
@@ -226,10 +226,10 @@ Page 1160
 047933,000091:                                                                                                  <span class="co">#        X1 (38D)        NONE                    INDEX REGISTER SET TO -2D OR -10D ACCORDING TO WHETHER THE EARTH OR MOON,</span>
 047934,000092:                                                                                                  <span class="co">#                                                        RESPECTIVELY, IS THE CENTRAL BODY</span>
 047935,000093:                                                                                                  <span class="co">#        TAU             +28                     DESIRED TRANSFER TIME IN CENTISECONDS (DP)</span>
-047936,000094:                                                                                                  <span class="co">#                                                        MAY BE POS OR NEG AND ABSOLUTE VALUE MAY BE GREATER OR LESS THAN ONE ORBITAL </span>
-047937,000095:                                                                                                  <span class="co">#        XKEPNEW         +17 FOR EARTH           DP GUESS OF ROOT X OF KEPLER'S EQN IN SQRT(METERS).  SIGN SHOULD AGREE WITH THAT OF T</span>
-047938,000096:                                                                                                  <span class="co">#                        +16 FOR MOON                    AND ABS VALUE SHOULD BE LESS THAN THAT CORRESPONDING TO A PERIOD, VIZ., 2PI S</span>
-047939,000097:                                                                                                  <span class="co">#                                                        MAJOR AXIS), FOR SPEED OF CONVERGENCE, BUT IF EITHER CONDITION FAILS, XKEPNEW</span>
+047936,000094:                                                                                                  <span class="co">#                                                        MAY BE POS OR NEG AND ABSOLUTE VALUE MAY BE GREATER OR LESS THAN ONE ORBITAL +</span>
+047937,000095:                                                                                                  <span class="co">#        XKEPNEW         +17 FOR EARTH           DP GUESS OF ROOT X OF KEPLER'S EQN IN SQRT(METERS).  SIGN SHOULD AGREE WITH THAT OF T+</span>
+047938,000096:                                                                                                  <span class="co">#                        +16 FOR MOON                    AND ABS VALUE SHOULD BE LESS THAN THAT CORRESPONDING TO A PERIOD, VIZ., 2PI S+</span>
+047939,000097:                                                                                                  <span class="co">#                                                        MAJOR AXIS), FOR SPEED OF CONVERGENCE, BUT IF EITHER CONDITION FAILS, XKEPNEW+</span>
 047940,000098:                                                                                                  <span class="co">#                                                        BY KEPLER TO A POOR BUT VALID GUESS.</span>
 047941,000099:                                                                                                  <span class="co">#        TC              +28                     DP PREV. VALUE OF TIME IN CENTISECS.  MUST BE LESS THAN ONE ORBITAL PERIOD.</span>
 047942,000100:                                                                                                  <span class="co">#        XPREV           +17 FOR EARTH           DP PREV. VALUE OF X IN SQRT(METERS).  MUST BE LESS THAN AN X CORRESPONDING TO ONE</span>
@@ -258,7 +258,7 @@ Page 1160
 047965,000123:                                                                                                  <span class="co">#                        +27 FOR MOON</span>
 047966,000124:                                                                                                  <span class="co">#        VCV             +7 FOR EARTH            DP TERMINAL VELOCITY VECTOR IN METERS/CENTISEC</span>
 047967,000125:                                                                                                  <span class="co">#                        +5 FOR MOON</span>
-047968,000126:                                                                                                  <span class="co">#        TC              +28                     DP TRANSFER TIME IN CENTISECS TO WHICH KEPLER CONVERGED.  ALWAYS LESS THAN ONE PERIOD</span>
+047968,000126:                                                                                                  <span class="co">#        TC              +28                     DP TRANSFER TIME IN CENTISECS TO WHICH KEPLER CONVERGED.  ALWAYS LESS THAN ONE PERIOD+</span>
 047969,000127:                                                                                                  <span class="co">#        XPREV           +17 FOR EARTH           DP VALUE OF X IN SQRT(METERS) TO WHICH KEPLER CONVERGED.  ALWAYS LESS THAN THE X</span>
 047970,000128:                                                                                                  <span class="co">#                        +16 FOR MOON                    CORRSPONDING ONE PERIOD.</span>
 </pre>
@@ -288,7 +288,7 @@ Page 1161
 047981,000139:                                                                                                  <span class="co">#                        +27 FOR MOON</span>
 047982,000140:                                                                                                  <span class="co">#        ALPHA           -22 FOR EARTH           DP INVERSE OF SEMI-MAJOR AXIS IN 1/METERS</span>
 047983,000141:                                                                                                  <span class="co">#                        -20 FOR MOON</span>
-047984,000142:                                                                                                  <span class="co">#        TMODULO         +28                     DP INTEGRAL NUMBER OF PERIODS IN CENTISECS.  WHICH WAS SUBTRACTED FROM TAU. TO PRODUC</span>
+047984,000142:                                                                                                  <span class="co">#        TMODULO         +28                     DP INTEGRAL NUMBER OF PERIODS IN CENTISECS.  WHICH WAS SUBTRACTED FROM TAU. TO PRODUC+</span>
 047985,000143:                                                                                                  <span class="co">#                                                        TAU. OF LESS THAN ONE PERIOD.</span>
 047986,000144: 
 047987,000145:                                                                                                  <span class="co">#  PARAMETERS OF NO USE --</span>
@@ -349,8 +349,8 @@ Page 1162
 048028,000186:                                                                                                  <span class="co">#        TDESIRED        +28                     DP DESIRED TRANSFER TIME IN CENTISECONDS</span>
 048029,000187:                                                                                                  <span class="co">#        X1 (38D)        NONE                    INDEX REGISTER SET TO -2D OR -10D ACCORDING TO WHETHER THE EARTH OR MOON,</span>
 048030,000188:                                                                                                  <span class="co">#                                                        RESPECTIVELY, IS THE CENTRAL BODY</span>
-048031,000189:                                                                                                  <span class="co">#        GEOMSGN         NONE                    SP +.5 IF DESIRED TRANSFER ANGLE IS LESS THAN 180 DEGREES, -.5 IF GREATER THAN 180 DE</span>
-048032,000190:                                                                                                  <span class="co">#        GUESSW          NONE                    AN INTERPRETER SWITCH TO BE SET IF NO GUESS OF COGA IS AVAILABLE, CLEAR IF A GUESS OF</span>
+048031,000189:                                                                                                  <span class="co">#        GEOMSGN         NONE                    SP +.5 IF DESIRED TRANSFER ANGLE IS LESS THAN 180 DEGREES, -.5 IF GREATER THAN 180 DE+</span>
+048032,000190:                                                                                                  <span class="co">#        GUESSW          NONE                    AN INTERPRETER SWITCH TO BE SET IF NO GUESS OF COGA IS AVAILABLE, CLEAR IF A GUESS OF+</span>
 </pre>
 </span>
 </p>
@@ -373,12 +373,12 @@ Page 1163
 048038,000196:                                                                                                  <span class="co">#                                                        LAMBERT IS TO COMPUTE ITS OWN NORMAL (UN).</span>
 048039,000197:                                                                                                  <span class="co">#        UN              +1                      DP UNIT NORMAL TO THE DESIRED ORBIT PLANE IN THE DIRECTION OF THE RESULTING ANGULAR</span>
 048040,000198:                                                                                                  <span class="co">#                                                        MOMENTUM VECTOR.  THIS WILL BE IGNORED IF NORMSW IS CLEAR.</span>
-048041,000199:                                                                                                  <span class="co">#        VTARGTAG        NONE                    A S.P. TAG TO BE SET TO ZERO IF LAMBERT IS TO COMUTE THE VELOCITY OF R2VEC AS WELL AS</span>
+048041,000199:                                                                                                  <span class="co">#        VTARGTAG        NONE                    A S.P. TAG TO BE SET TO ZERO IF LAMBERT IS TO COMUTE THE VELOCITY OF R2VEC AS WELL AS+</span>
 048042,000200:                                                                                                  <span class="co">#                                                        AT R1VEC.</span>
 048043,000201:                                                                                                  <span class="co">#        ITERCTR         NONE                    A S.P. COUNTER WHICH SPECIFIES THE MAXIMUM NUMBER OF ITERATIONS ALLOWABLE.</span>
-048044,000202:                                                                                                  <span class="co">#                                                        [AN ITERATION MEANS A PASS THRU KEPLER EQN (DELTIME).  AT LEAST ONE OF THESE </span>
+048044,000202:                                                                                                  <span class="co">#                                                        [AN ITERATION MEANS A PASS THRU KEPLER EQN (DELTIME).  AT LEAST ONE OF THESE +</span>
 048045,000203:                                                                                                  <span class="co">#                                                        ALWAYS OCCUR, EVEN IF COGA CORRESPONDING TO SOLUTION WERE INPUT AS A GUESS.]</span>
-048046,000204:                                                                                                  <span class="co">#                                                        TWENTY ITERATIONS ARE SUFFICIENT TO SOLVE ALL PROBLEMS INCLUDING THOSE WITHOU</span>
+048046,000204:                                                                                                  <span class="co">#                                                        TWENTY ITERATIONS ARE SUFFICIENT TO SOLVE ALL PROBLEMS INCLUDING THOSE WITHOU+</span>
 048047,000205: 
 048048,000206:                                                                                                  <span class="co">#  SUBROUTINES CALLED --</span>
 048049,000207:                                                                                                  <span class="co">#        GEOM, GETX, DELTIME, ITERATOR, LAMENTER (PART OF NEWSTATE)</span>
@@ -428,11 +428,11 @@ Page 1164
 048079,000237:                                                                                                  <span class="co">#                         SCALE FACTOR</span>
 048080,000238:                                                                                                  <span class="co">#        VARIABLE        IN POWERS OF 2          DESCRIPTION AND REMARKS</span>
 048081,000239:                                                                                                  <span class="co">#        --------        --------------          -----------------------</span>
-048082,000240:                                                                                                  <span class="co">#        VVEC            +7 FOR EARTH            DP INITIAL VELOCITY VECTOR IN METERS/CENTISECOND REQUIRED TO SATISFY THE BOUNDARY VAL</span>
+048082,000240:                                                                                                  <span class="co">#        VVEC            +7 FOR EARTH            DP INITIAL VELOCITY VECTOR IN METERS/CENTISECOND REQUIRED TO SATISFY THE BOUNDARY VAL+</span>
 048083,000241:                                                                                                  <span class="co">#                        +5 FOR MOON                     PROBLEM.</span>
 048084,000242:                                                                                                  <span class="co">#        VTARGET         +7 FOR EARTH            DP RESULTANT VELOCITY VECTOR AT R2VEC IN METERS/CENTISECOND.</span>
 048085,000243:                                                                                                  <span class="co">#                        +5 FOR MOON</span>
-048086,000244:                                                                                                  <span class="co">#        SOLNSW          NONE                    INTERPRETER SWITCH WHICH IS SET IF THE SUBROUTINE CANNOT SOLVE THE PROBLEM, CLEAR IF </span>
+048086,000244:                                                                                                  <span class="co">#        SOLNSW          NONE                    INTERPRETER SWITCH WHICH IS SET IF THE SUBROUTINE CANNOT SOLVE THE PROBLEM, CLEAR IF +</span>
 048087,000245:                                                                                                  <span class="co">#                                                        SOLUTION EXISTS.</span>
 048088,000246: 
 048089,000247:                                                                                                  <span class="co">#        FOR OTHER OUTPUT WHICH MAY BE OF USE, SEE DEBRIS.</span>
@@ -505,7 +505,7 @@ Page 1165
 048142,000300:                                                                                                  <span class="co">#                        +5 FOR MOON</span>
 048143,000301:                                                                                                  <span class="co">#        SNTH            +1              `       DP SINE OF THE TRUE-ANOMALY-DIFFERENCE THROUGH WHICH THE STATE IS TO BE UPDATED</span>
 048144,000302:                                                                                                  <span class="co">#        CSTH            +1                      DP COSINE OF THE ANGLE</span>
-048145,000303:                                                                                                  <span class="co">#        RVSW            NONE                    AN INTERPRETIVE SWITCH TO BE SET IF ONLY TIME IS TO BE AN OUTPUT, CLEAR IF THE NEW ST</span>
+048145,000303:                                                                                                  <span class="co">#        RVSW            NONE                    AN INTERPRETIVE SWITCH TO BE SET IF ONLY TIME IS TO BE AN OUTPUT, CLEAR IF THE NEW ST+</span>
 048146,000304:                                                                                                  <span class="co">#                                                        IS TO BE COMPUTED ALSO.</span>
 048147,000305:                                                                                                  <span class="co">#        X1 (38D)        NONE                    INDEX REGISTER TO BE SET TO -2D OR -10D ACCORDING TO WHETHER THE EARTH OR MOON,</span>
 048148,000306:                                                                                                  <span class="co">#                                                        RESPECTIVELY, IS THE CENTRAL BODY.</span>
@@ -556,7 +556,7 @@ Page 1166
 048179,000337:                                                                                                  <span class="co">#        T(30D)          +28                     DP TRANSFER TIME IN CENTISECONDS</span>
 048180,000338:                                                                                                  <span class="co">#        INFINFLG        NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF THE TRANSFER ANGLE REQUIRES CLOSURE THROUGH</span>
 048181,000339:                                                                                                  <span class="co">#                                                        INFINITY (NO SOLUTION), CLEAR IF A PHYSICAL SOLUTION IS POSSIBLE.</span>
-048182,000340:                                                                                                  <span class="co">#        COGAFLAG        NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF RESTRICTION 1 HAS BEEN VIOLATED (NO SOLUTION),</span>
+048182,000340:                                                                                                  <span class="co">#        COGAFLAG        NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF RESTRICTION 1 HAS BEEN VIOLATED (NO SOLUTION),+</span>
 048183,000341:                                                                                                  <span class="co">#                                                        CLEAR IF NOT.</span>
 048184,000342: 
 048185,000343:                                                                                                  <span class="co">#        IN ADDITION, IF RVSW IS CLEAR, THE FOLLOWING ARE OUTPUT --</span>
@@ -654,8 +654,8 @@ Page 1168
 048249,000407:                                                                                                  <span class="co">#                        +5 FOR MOON</span>
 048250,000408:                                                                                                  <span class="co">#        RDESIRED        +29 FOR EARTH           DP TERMINAL RADIAL DISTANCE ON CONIC TRAJECTORY FOR WHICH TRANSFER TIME IS TO BE</span>
 048251,000409:                                                                                                  <span class="co">#                        +27 FOR MOON                    COMPUTED</span>
-048252,000410:                                                                                                  <span class="co">#        SGNRDOT         NONE                    SP TAG SET TO +.5 OR -.5 ACCORDING TO WHETHER THE RADIAL VELOCITY AT RDESIRED IS TO B</span>
-048253,000411:                                                                                                  <span class="co">#                                                        POSITIVE OR NEGATIVE, RESPECTIVELY.   THIS TAG REDUCES THE DOUBLE-VALUED PROB</span>
+048252,000410:                                                                                                  <span class="co">#        SGNRDOT         NONE                    SP TAG SET TO +.5 OR -.5 ACCORDING TO WHETHER THE RADIAL VELOCITY AT RDESIRED IS TO B+</span>
+048253,000411:                                                                                                  <span class="co">#                                                        POSITIVE OR NEGATIVE, RESPECTIVELY.   THIS TAG REDUCES THE DOUBLE-VALUED PROB+</span>
 </pre>
 </span>
 </p>
@@ -674,7 +674,7 @@ Page 1169
 048255,000413:                                                                                                  <span class="co">#                                                        SINGLE-VALUED PROBLEM.</span>
 048256,000414:                                                                                                  <span class="co">#        X1 (38D)        NONE                    INDEX REGISTER TO BE SET TO -2D OR -10D ACCORDING TO WHETHER THE EARTH OR MOON,</span>
 048257,000415:                                                                                                  <span class="co">#                                                        RESPECTIVELY, IS THE CENTRAL BODY.</span>
-048258,000416:                                                                                                  <span class="co">#        RVSW            NONE                    AN INTERPRETIVE SWITCH TO BE SET IF ONLY TIME IS TO BE AN OUTPUT, CLEAR IF THE NEW ST</span>
+048258,000416:                                                                                                  <span class="co">#        RVSW            NONE                    AN INTERPRETIVE SWITCH TO BE SET IF ONLY TIME IS TO BE AN OUTPUT, CLEAR IF THE NEW ST+</span>
 048259,000417:                                                                                                  <span class="co">#                                                        IS TO BE COMPUTED ALSO.</span>
 048260,000418: 
 048261,000419:                                                                                                  <span class="co">#  SUBROUTINES CALLED --</span>
@@ -708,9 +708,9 @@ Page 1169
 048289,000447:                                                                                                  <span class="co">#        T (30D)         +28                     DP TRANSFER TIME IN CENTISECONDS.</span>
 048290,000448:                                                                                                  <span class="co">#        INFINFLG        NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF RDESIRED AND SGNRDOT REQUIRE CLOSURE THROUGH</span>
 048291,000449:                                                                                                  <span class="co">#                                                        INFINITY (NO SOLUTION), CLEAR IF A PHYSICAL SOLUTION IS POSSIBLE.</span>
-048292,000450:                                                                                                  <span class="co">#        COGAFLAG        NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF RESTRICTION 1 HAS BEEN VIOLATED (NO SOLUTION),</span>
+048292,000450:                                                                                                  <span class="co">#        COGAFLAG        NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF RESTRICTION 1 HAS BEEN VIOLATED (NO SOLUTION),+</span>
 048293,000451:                                                                                                  <span class="co">#                                                        CLEAR IF NOT.</span>
-048294,000452:                                                                                                  <span class="co">#        APSESW          NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF RDESIRED WAS GREATER THAN RADIUS OF APOCENTER </span>
+048294,000452:                                                                                                  <span class="co">#        APSESW          NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF RDESIRED WAS GREATER THAN RADIUS OF APOCENTER +</span>
 </pre>
 </span>
 </p>
@@ -726,11 +726,11 @@ Page 1170
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048296,000454:                                                                                                  <span class="co">#                                                        LESS THAN RADIUS OF PERICENTER.  THE APOCENTER OR PERICENTER SOLUTION, RESPEC</span>
-048297,000455:                                                                                                  <span class="co">#                                                        WILL THEN BE RETURNED.  THE SWITCH IS CLEAR IF RDESIRED WAS BETWEEN PERICENTE</span>
+048296,000454:                                                                                                  <span class="co">#                                                        LESS THAN RADIUS OF PERICENTER.  THE APOCENTER OR PERICENTER SOLUTION, RESPEC+</span>
+048297,000455:                                                                                                  <span class="co">#                                                        WILL THEN BE RETURNED.  THE SWITCH IS CLEAR IF RDESIRED WAS BETWEEN PERICENTE+</span>
 048298,000456:                                                                                                  <span class="co">#                                                        APOCENTER.</span>
-048299,000457:                                                                                                  <span class="co">#        SOLNSW          NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF THE CONIC IS SO CLOSE TO A CIRCLE THAT THE TER</span>
-048300,000458:                                                                                                  <span class="co">#                                                        POINT IS AMBIGUOUS, VIOLATING RESTRICTION 3.  IF ECCENTRICITY IS GREATER THAN</span>
+048299,000457:                                                                                                  <span class="co">#        SOLNSW          NONE                    AN INTERPRETIVE SWITCH WHICH IS SET IF THE CONIC IS SO CLOSE TO A CIRCLE THAT THE TER+</span>
+048300,000458:                                                                                                  <span class="co">#                                                        POINT IS AMBIGUOUS, VIOLATING RESTRICTION 3.  IF ECCENTRICITY IS GREATER THAN+</span>
 048301,000459:                                                                                                  <span class="co">#                                                        MINUS-18, THE SWITCH IS CLEAR.</span>
 048302,000460: 
 048303,000461:                                                                                                  <span class="co">#        IN ADDITION, IF RVSW IS CLEAR, THE FOLLOWING ARE OUTPUT --</span>
