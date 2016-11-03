@@ -8,6 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2009-05-05 RSB	Adapted from Luminary131/MAIN.agc.
+#		2016-11-03 RSB	Removed duplicate page #1.
 #
 # The contents of the "Luminary099" files, in general, are
 # transcribed from a digital images created from a hardcopy of the program
@@ -68,8 +69,7 @@
 # referenced to page numbers) created by GAP, but not duplicated by yaYUL, so it's
 # still valuable even if the source-files listed below are at hand.
 
-$CONTRACT_AND_APPROVALS.agc			# p. 1
-$ASSEMBLY_AND_OPERATION_INFORMATION.agc		# pp. 2-27
+$ASSEMBLY_AND_OPERATION_INFORMATION.agc		# pp. 1-27
 $TAGS_FOR_RELATIVE_SETLOC.agc			# pp. 28-37
 $CONTROLLED_CONSTANTS.agc			# pp. 38-53
 $INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc	# pp. 54-60

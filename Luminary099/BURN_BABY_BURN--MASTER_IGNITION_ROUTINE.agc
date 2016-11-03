@@ -1,39 +1,40 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	BURN_BABY_BURN--MASTER_IGNITION_ROUTINE.agc
-# Purpose: 	Part of the source code for Luminary 1A build 099.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC), for Apollo 11.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website:	www.ibiblio.org/apollo.
-# Pages:	731-751
-# Mod history:	2009-05-19 RSB	Adapted from the corresponding 
-#				Luminary131 file, using page 
-#				images from Luminary 1A.
-#		2009-06-07 RSB	Corrected 3 typos.
-#		2009-07-23 RSB	Added Onno's notes on the naming
-#				of this function, which he got from
-#				Don Eyles.
-#		2011-01-06 JL	Fixed pseudo-label indentation.
-#		2011-05-08 JL	Removed workarounds.
+## Copyright:	Public domain.
+## Filename:	BURN_BABY_BURN--MASTER_IGNITION_ROUTINE.agc
+## Purpose: 	Part of the source code for Luminary 1A build 099.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo.
+## Pages:	731-751
+## Mod history:	2009-05-19 RSB	Adapted from the corresponding 
+##				Luminary131 file, using page 
+##				images from Luminary 1A.
+##		2009-06-07 RSB	Corrected 3 typos.
+##		2009-07-23 RSB	Added Onno's notes on the naming
+##				of this function, which he got from
+##				Don Eyles.
+##		2011-01-06 JL	Fixed pseudo-label indentation.
+##		2011-05-08 JL	Removed workarounds.
 
-# This source code has been transcribed or otherwise adapted from
-# digitized images of a hardcopy from the MIT Museum.  The digitization
-# was performed by Paul Fjeld, and arranged for by Deborah Douglas of
-# the Museum.  Many thanks to both.  The images (with suitable reduction
-# in storage size and consequent reduction in image quality as well) are
-# available online at www.ibiblio.org/apollo.  If for some reason you
-# find that the images are illegible, contact me at info@sandroid.org
-# about getting access to the (much) higher-quality images which Paul
-# actually created.
-#
-# Notations on the hardcopy document read, in part:
-#
-#	Assemble revision 001 of AGC program LMY99 by NASA 2021112-61
-#	16:27 JULY 14, 1969 
+## This source code has been transcribed or otherwise adapted from
+## digitized images of a hardcopy from the MIT Museum.  The digitization
+## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
+## the Museum.  Many thanks to both.  The images (with suitable reduction
+## in storage size and consequent reduction in image quality as well) are
+## available online at www.ibiblio.org/apollo.  If for some reason you
+## find that the images are illegible, contact me at info@sandroid.org
+## about getting access to the (much) higher-quality images which Paul
+## actually created.
+##
+## Notations on the hardcopy document read, in part:
+##
+##	Assemble revision 001 of AGC program LMY99 by NASA 2021112-61
+##	16:27 JULY 14, 1969 
 
 ## Page 731
+## <br><br>
 ## At the get-together of the AGC developers celebrating the 40th anniversary
 ## of the first moonwalk, Don Eyles (one of the authors of this routine along
 ## with Peter Adler) has related to us a little interesting history behind the
@@ -45,6 +46,7 @@
 ## hottest new records. Magnificent Montague was the charismatic voice of
 ## soul music in Chicago, New York, and Los Angeles from the mid-1950s to 
 ## the mid-1960s.
+
 # BURN, BABY, BURN -- MASTER IGNITION ROUTINE
 
 		BANK	36
