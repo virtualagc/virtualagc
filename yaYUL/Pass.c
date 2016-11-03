@@ -90,7 +90,8 @@
  *                              Behavior of TC without an operand has been extended to
  *                              all targets (was previously just for block 1 and BLK2).
  *              2016-11-03 RSB  Added the "unestablished" state for superbits, required
- *                              for Sunburst 120.
+ *                              for Sunburst 120.  Also, detecting the ## header didn't
+ *                              work quite right if the first non-header line was "## Page N".
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1603,7 +1604,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
         ;
       if (*ss == 0) // completely whitespace
         ;
-      else if (s[0] == '#' && s[1] == '#') // is a ## line
+      else if (s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &k)) // is a ## line
         ;
       else
         inHeader = 0;
