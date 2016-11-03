@@ -1,15 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	INTERRUPT_TRANSFER_ROUTINES.agc
-# Purpose:	Part of the source code for Solarium build 55. This
-#		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
-# Assembler:	yaYUL --block1
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
-# Mod history:	2009-09-14 JL	Created.
-#		2016-08-18 RSB	Some corrections.
+## Copyright:	Public domain.
+## Filename:	INTERRUPT_TRANSFER_ROUTINES.agc
+## Purpose:	Part of the source code for Solarium build 55. This
+##		is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), for Apollo 6.
+## Assembler:	yaYUL --block1
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Mod history:	2009-09-14 JL	Created.
+##		2016-08-18 RSB	Some corrections.
 
 ## Page 35
 		SETLOC	2000

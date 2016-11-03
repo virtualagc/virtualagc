@@ -1,15 +1,15 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	IMU_COMPENSATION_PACKAGE.agc
-# Purpose:	Part of the source code for Solarium build 55. This
-#		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
-# Assembler:	yaYUL --block1
-# Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-# Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
-# Mod history:	2009-09-29 JL	Created.
-#		2016-08-18 RSB	Typos.
+## Copyright:	Public domain.
+## Filename:	IMU_COMPENSATION_PACKAGE.agc
+## Purpose:	Part of the source code for Solarium build 55. This
+##		is for the Command Module's (CM) Apollo Guidance
+##		Computer (AGC), for Apollo 6.
+## Assembler:	yaYUL --block1
+## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:	www.ibiblio.org/apollo/index.html
+## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
+## Mod history:	2009-09-29 JL	Created.
+##		2016-08-18 RSB	Typos.
 
 ## Page 214
 
