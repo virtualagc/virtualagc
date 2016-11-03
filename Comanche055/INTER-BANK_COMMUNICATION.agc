@@ -1,37 +1,37 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     INTER-BANK_COMMUNICATION.agc
-# Purpose:      Part of the source code for Comanche, build 055. It
-#               is part of the source code for the Command Module's
-#               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-# Assembler:    yaYUL
-# Reference:    pp. 1103-1106
-# Contact:      Ron Burkey <info@sandroid.org>
-# Website:      http://www.ibiblio.org/apollo.
-# Mod history:  2009-05-08 RSB	Adapted from Colossus249/ file of same name
-#				and page images. Corrected various typos
-#				in the transcription of program comments,
-#				and these should be back-ported to 
-#				Colossus249.
-#		2011-05-08 JL	Removed workaround.
+## Copyright:    Public domain.
+## Filename:     INTER-BANK_COMMUNICATION.agc
+## Purpose:      Part of the source code for Comanche, build 055. It
+##               is part of the source code for the Command Module's
+##               (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:    yaYUL
+## Reference:    pp. 1103-1106
+## Contact:      Ron Burkey <info@sandroid.org>
+## Website:      http://www.ibiblio.org/apollo.
+## Mod history:  2009-05-08 RSB	Adapted from Colossus249/ file of same name
+##				and page images. Corrected various typos
+##				in the transcription of program comments,
+##				and these should be back-ported to 
+##				Colossus249.
+##		2011-05-08 JL	Removed workaround.
 
-# The contents of the "Comanche055" files, in general, are transcribed 
-# from scanned documents. 
-#
-#       Assemble revision 055 of AGC program Comanche by NASA
-#       2021113-051.  April 1, 1969.  
-#
-#       This AGC program shall also be referred to as Colossus 2A
-#
-#       Prepared by
-#                       Massachusetts Institute of Technology
-#                       75 Cambridge Parkway
-#                       Cambridge, Massachusetts
-#
-#       under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further
-# information.  Please report any errors to info@sandroid.org.
+## The contents of the "Comanche055" files, in general, are transcribed 
+## from scanned documents. 
+##
+##       Assemble revision 055 of AGC program Comanche by NASA
+##       2021113-051.  April 1, 1969.  
+##
+##       This AGC program shall also be referred to as Colossus 2A
+##
+##       Prepared by
+##                       Massachusetts Institute of Technology
+##                       75 Cambridge Parkway
+##                       Cambridge, Massachusetts
+##
+##       under NASA contract NAS 9-4065.
+##
+## Refer directly to the online document mentioned above for further
+## information.  Please report any errors to info@sandroid.org.
 
 ## Page 1103
 # THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE

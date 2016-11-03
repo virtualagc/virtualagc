@@ -1,33 +1,33 @@
 ### FILE="Main.annotation"
-# Copyright:    Public domain.
-# Filename:     P76.agc
-# Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
-#               It is part of the source code for the Command Module's (CM)
-#               Apollo Guidance Computer (AGC), for Apollo 11.
-# Assembler:    yaYUL
-# Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-# Website:      www.ibiblio.org/apollo.
-# Pages:	pp  511-513
-# Mod history:  2009-05-08 HG    Adapting from the Luminary131/ file 
-#               of the same name, using Comanche055 page 
-#               images 0511.jpg - 0513.jpg. 
-#
-# This source code has been transcribed or otherwise adapted from digitized
-# images of a hardcopy from the MIT Museum.  The digitization was performed
-# by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
-# thanks to both.  The images (with suitable reduction in storage size and
-# consequent reduction in image quality as well) are available online at
-# www.ibiblio.org/apollo.  If for some reason you find that the images are
-# illegible, contact me at info@sandroid.org about getting access to the 
-# (much) higher-quality images which Paul actually created.
-#
-# Notations on the hardcopy document read, in part:
-#
-#    Assemble revision 055 of AGC program Comanche by NASA
-#    2021113-051.  10:28 APR. 1, 1969  
-#
-#    This AGC program shall also be referred to as
-#            Colossus 2A
+## Copyright:    Public domain.
+## Filename:     P76.agc
+## Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
+##               It is part of the source code for the Command Module's (CM)
+##               Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:    yaYUL
+## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:      www.ibiblio.org/apollo.
+## Pages:	 pp  511-513
+## Mod history:  2009-05-08 HG    Adapting from the Luminary131/ file 
+##               of the same name, using Comanche055 page 
+##               images 0511.jpg - 0513.jpg. 
+##
+## This source code has been transcribed or otherwise adapted from digitized
+## images of a hardcopy from the MIT Museum.  The digitization was performed
+## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+## thanks to both.  The images (with suitable reduction in storage size and
+## consequent reduction in image quality as well) are available online at
+## www.ibiblio.org/apollo.  If for some reason you find that the images are
+## illegible, contact me at info@sandroid.org about getting access to the 
+## (much) higher-quality images which Paul actually created.
+##
+## Notations on the hardcopy document read, in part:
+##
+##    Assemble revision 055 of AGC program Comanche by NASA
+##    2021113-051.  10:28 APR. 1, 1969  
+##
+##    This AGC program shall also be referred to as
+##            Colossus 2A
 
 ## Page 511
 # 1)	PROGRAM NAME -- TARGET DELTA V PROGRAM (P76).

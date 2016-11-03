@@ -1,38 +1,38 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	IMU_CALIBRATION_AND_ALIGNMENT.agc
-# Purpose:      Part of the source code for Comanche, build 055. It
-#               is part of the source code for the Command Module's
-#               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-# Assembler:    yaYUL
-# Reference:    pp. 423-455
-# Contact:      Onno Hommes <ohommes@cmu.edu>
-# Website:      http://www.ibiblio.org/apollo.
-# Mod history:  2009-05-10 OH	Batch 1 Assignment Comanche Transcription
-#		2009-05-20 RSB	Corrections: P00D00H -> P00DOOH, definition
-#				of 25DECML fixed.
-#		2009-05-23 RSB	At SPECSTS, corrected to PRIO22.
-#		2010-08-28 JL	Fixed indentation.
-#		2011-05-08 JL	Flagged SBANK= workaround for future removal.
-#		2011-05-17 JL	Removed all SBANK= workarounds.
+## Copyright:	Public domain.
+## Filename:	IMU_CALIBRATION_AND_ALIGNMENT.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 423-455
+## Contact:     Onno Hommes <ohommes@cmu.edu>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-10 OH	Batch 1 Assignment Comanche Transcription
+##		2009-05-20 RSB	Corrections: P00D00H -> P00DOOH, definition
+##				of 25DECML fixed.
+##		2009-05-23 RSB	At SPECSTS, corrected to PRIO22.
+##		2010-08-28 JL	Fixed indentation.
+##		2011-05-08 JL	Flagged SBANK= workaround for future removal.
+##		2011-05-17 JL	Removed all SBANK= workarounds.
 
-# The contents of the "Comanche055" files, in general, are transcribed 
-# from scanned documents. 
-#
-#       Assemble revision 055 of AGC program Comanche by NASA
-#       2021113-051.  April 1, 1969.  
-#
-#       This AGC program shall also be referred to as Colossus 2A
-#
-#       Prepared by
-#                       Massachusetts Institute of Technology
-#                       75 Cambridge Parkway
-#                       Cambridge, Massachusetts
-#
-#       under NASA contract NAS 9-4065.
-#
-# Refer directly to the online document mentioned above for further
-# information.  Please report any errors to info@sandroid.org.
+## The contents of the "Comanche055" files, in general, are transcribed 
+## from scanned documents. 
+##
+##       Assemble revision 055 of AGC program Comanche by NASA
+##       2021113-051.  April 1, 1969.  
+##
+##       This AGC program shall also be referred to as Colossus 2A
+##
+##       Prepared by
+##                       Massachusetts Institute of Technology
+##                       75 Cambridge Parkway
+##                       Cambridge, Massachusetts
+##
+##       under NASA contract NAS 9-4065.
+##
+## Refer directly to the online document mentioned above for further
+## information.  Please report any errors to info@sandroid.org.
 
 ## Page 423
 # NAME --	IMU PERFORMANCE TESTS 2
