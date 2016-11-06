@@ -9,8 +9,9 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-24 MAS  Transcribed.
-##		 2016-10-31 RSB	 Typos.
-##		 2016-11-01 RSB	 Correction for overprinted area (p. 707).
+##               2016-10-31 RSB  Typos.
+##               2016-11-01 RSB  Correction for overprinted area (p. 707).
+##               2016-11-06 MAS  Removed workaround for overprinted area.
 
 ## Page 696
                 BANK            33
@@ -580,12 +581,11 @@ XTRANSON        OCT             00252                           # CHANNEL 5 CODE
 ## erroneous lines, making it not too difficult to tease them apart. They may not be completely
 ## perfect, though. It also looks like the lines of asterisks, which seem to be causing the problems,
 ## are accompanied by random 4s. The placement of them makes it seem like they were probably not in
-## the original program, and are only appearing due to the printer errors.  The correct value for
-## ABLOCK may be related to (but is not exactly equal to) "2DEC 0.30893 E+3 B-9".
+## the original program, and are only appearing due to the printer errors.
 # ************************************************************************                     4
 # CONSTANTS FOR PRECOI CALCULATIONS AND FOR INITIALIZATION OF ASCENT EO.
 # ************************************************************************
-ABLOCK          2OCT		0503717610		        # ANTICIPATED INITIAL ACCELERATION M/CS/CS
+ABLOCK          2DEC            0.30893         E-3 B+9         # ANTICIPATED INITIAL ACCELERATION M/CS/CS
 
                 2DEC            0.2990          E+2 B-7         # INITIAL EXHAUST VELOCITY  M/CS
 
