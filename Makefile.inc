@@ -12,6 +12,10 @@
 #				for optimum prettiness.
 #		2016-10-21 RSB	Hadn't been accounting for the fact that 
 #				oct2bin need different args for --block1.
+#		2016-11-07 RSB	The 2016-10-11 change must have broken building
+#				the HTML for Validation.agc, which in turn
+#				broke the ability to build the installer
+#				for VirtualAGC.
 
 # Notes: 
 #
@@ -45,9 +49,9 @@ TARGETS+=$(BASENAME).txt
 TOPLEVEL=Validation
 else
 TOPLEVEL=MAIN
+endif
 ifeq "$(GEN_HTML)" "yes"
 TARGETS+=$(TOPLEVEL).agc.html
-endif
 endif
 
 SOURCE:=$(wildcard *.agc)

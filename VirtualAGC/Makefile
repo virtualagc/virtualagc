@@ -80,9 +80,18 @@
 #				the executables.
 #		2016-08-07 RSB	The Validation "mission" was missing.
 #		2016-08-28 RSB	Activated Solarium055 mission.
+#		2016-11-07 RSB	Added the Aurora12 and Sunburst120 missions,
+#				but also made it so that the MISSIONS 
+#				environment variable is assign herein only if
+#				it doesn't previously exists.
 
 APP=VirtualAGC
-MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055 Luminary099 Colossus237 Validation Solarium055
+ifndef MISSIONS
+MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055
+MISSIONS+=Luminary099 Colossus237 Validation Solarium055 Aurora12 Sunburst120
+else
+MISSIONS+=FP6 FP8
+endif
 
 # For cross-platform building --- i.e., for building Win32 and Mac OS X versions
 # of VirtualAGC on a Linux platform --- it is assumed that the IMCROSS
