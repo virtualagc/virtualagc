@@ -284,6 +284,7 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
 MISSIONS += Aurora12 Sunburst120
+export MISSIONS
 
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
