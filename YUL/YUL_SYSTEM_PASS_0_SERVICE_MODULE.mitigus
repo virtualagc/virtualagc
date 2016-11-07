@@ -7,6 +7,7 @@
 ## Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 ## Pages:        108-152
 ## Mod history:  2016-10-06 JL   Created.
+##               2016-11-07 JL   Transcribed pages 108-124.
 
 ## Annotations:
 ##
@@ -19,3 +20,778 @@
 
 ## Note: Page numbers are scan page numbers rather than listing.
 
+## Page 108
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   1        PAGE  68
+
+R0001   WE ARE DEEPLY INDEBTED TO THE ONE, THE ONLY, THE GREAT JOHN SHAW FOR THE FOLLOWING STRING MAGIC....
+R0003   JSOCT-
+
+
+
+ 0004              SETLOC,2     0             B4
+
+
+
+ 0005              MASKGRP,1    S,0           F,0
+
+
+
+R0006              THE YUL SYSTEM PASS 0 SERVICE MODULE IS LOADED (INTO BANK 4) WHENEVER PASS 0 IS LOADED.  IT SERVES TO
+R0008   PREVENT PASS 0 FROM OVERFLOWING ITS BANK.  THE CONTENTS OF THE SERVICE MODULE FALL INTO THREE MAIN CLASSES:
+
+R0010   1)  SYSTEM FUNCTIONS NOT RELATED TO A PARTICULAR COMPUTER OR PROGRAM -- E.G. BACKUP TRAPE PROCESSING.
+R0012   2)  OPERATIONS ON A PARTICULAR PROGRAM OR SUBROUTINE THAT ARE ALIKE FOR ALL COMPUTERS -- E.G. PUNCH SYMB. DECK.
+R0014   3)  OPERATIONS ON THE STATUS OF A PARTICULAR COMPUTER -- E.G. ADD COMPUTER NAME.
+
+R0016   MAIN PASS 0, RUNNING IN BANK 1, REFERENCES THE SERVICE MODULE BY AUGMENTING SPEC,B4...0 AND USING THE SPEC
+R0018   CONSTANT REFERENCED THEREBY.
+
+
+
+R0019   RUDIMENTARY TRANSFER VECTOR AT BASE 0 OF SERVICE MODULE:
+
+ 0020   L BACKUP   SPEC                                       BACKUP
+ 0021   L PRINT PS SPEC                                       PRINT PS
+ 0022   L PUNCH PS SPEC                                       PUNCH PS
+ 0023   L XFER PS  SPEC                                       XFER PS
+
+ 0024   L ADD COM  SPEC                                       ADD COM
+ 0025   L RMOV COM SPEC                                       RMOV COM
+ 0026   L PASS STA SPEC                                       PASS STA
+ 0027   L MANU STA SPEC                                       MANU STA
+
+## Page 109
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   2        PAGE  69
+
+P0029   ONE-WORD ALPHABETIC CONSTANTS.
+
+ 0030   A999999    ALF          09999990
+ 0031   ASTRISK    ALF          *
+ 0032   COMA 1962  ALF          , 1962
+ 0033   DASH 1T3   ALF          ---
+ 0034   DASHES     ALF          --------
+
+ 0035   PASSS RE   ALF          RE: ASSE
+ 0036   MANUS RE   ALF            RE: MA
+ 0038   PASS S EQU ALF            = ASSE
+ 0039   MANU S EQU ALF              = MA
+
+ 0040   S ZERO C1  ALF          0
+ 0041   4 C1       ALF          4
+ 0042   EQUALS C1  ALF          =
+ 0043   L COLUMN 1 ALF          L
+ 0044   T COLUMN 1 ALF          T
+ 0045   P COLUMN 1 ALF          P
+ 0046   Y COLYUM 1 ALF          Y      3
+ 0047   PMAX9 MSJ  ALF          PMAX = 9
+## (jl) I think ALF specifies units of a H-800 word (48 bits). So ALF on its own
+## means 8 6-bit characters. I'm assuming the word is blank-filled.
+ 0048   S BLANKS   ALF
+
+ 0049   S BLOTS    ALF          ████████
+ 0050   S COLON C1 ALF          :
+ 00505  S SIGH     ALF          (SIGH)
+ 0051   SW CMPUTR  ALF          COMPUTER
+ 0052   S W MOD    ALF          MOD
+
+ 0053   SW PRINT   ALF          PRINT
+ 0054   SW PUNCH   ALF          PUNCH
+ 0055   W 254P     ALF          254+
+ 0056   W AMENDED  ALF           AMENDED
+
+ 0057   W AS       ALF          AS
+ 0058   W AUTHORC  ALF          AUTHOR:
+ 0059   W CHECKED  ALF          CHECKED
+ 0060   W COMPUTR  ALF          COMPUTER
+ 0061   W CONTRL   ALF           CONTROL
+ 0062   S FOR      ALF          FOR
+ 0063   W IS       ALF          IS
+ ## (jl) Hand annotation on the listing, insert line
+ ##     W LENGTH   ALF          LENGTH =                    (=PATCH)
+ 0064   W NAME     ALF          NAME
+ 0065   S NEW      ALF          NEW
+ 0066   WM NEW     ALF           (NEW)
+ 0067   W NO       ALF             NO
+
+## Page 110
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   3        PAGE  70
+
+P0068   ONE-WORD ALPHABETIC CONSTANTS CONCLUDED.
+
+ 0069   W NONE     ALF           (NONE)
+ 0070   W OBS      ALF            *OBS*
+ 0071   W OBSOLET  ALF          OBSOLETE
+ 0072   W OLD      ALF          OLD
+ 0073   W OUT      ALF          OUT
+ 0074   W PASS     ALF          PASS
+ 0075   W PASS 0   ALF          YULPASS0
+ 0076   W PNCHING  ALF          PUNCHING
+ 0077   W PRNTING  ALF          PRINTING
+ 0078   W PROGRMS  ALF          PROGRAMS
+
+ 0079   W SOFTWAR  ALF          SOFTWARE
+ 0080   W SNONE    ALF          S: NONE
+ 0081   W STATUS   ALF          STATUS:
+ 0082   S NO DISC  ALF          NO DISC:
+ 0083   W UNUSED   ALF          UNUSED
+ 0084   W YES      ALF            YES
+ 00841  YUL D LIST ALF          YULDLIST
+ 0085   ZSUP ONE   ALF                 1
+
+
+
+R0086   ALPHABETIC ARRAYS.
+
+ 0088   BKUP LINE  ALF,4         DIRECTORY LISTING OF YULPROGS #
+ 0089   BUREL MSG  ALF,2        BACKUP RELABELED
+ 0090   CHEDL MSG  ALF,3        CHECK DIRECTORY LISTING
+ 0091   COMPU MSG  ALF,2
+ 0092   COMUS MSG  ALF,3        COMPUTER IS STILL IN USE
+ 0093   CONCN MSG  ALF,5        CONFLICT WITH EXISTING COMPUTER NAME-
+ 0094   DCLAV MSG  ALF,3        DECLARED AVAILABLE
+ 0095   DCLOB MSG  ALF,3        DECLARED OBSOLETE
+ 0096   DCLOK MSG  ALF,3        DECLARED CHECKED OUT
+ 0097   MANUS MSG  ALF,2        NUFACTURING FOR
+
+## Page 111
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   4        PAGE  71
+
+R
+P0098   ALPHABETIC ARRAYS CONTINUED.
+
+ 0099   MNTN LINE  ALF,4        YUL SYSTEM MAINTENANCE FUNCTION:
+ 0100   NEWCO MSG  ALF,3          NEW COMPUTER:
+ 0101   NEW LINE   OCT          0
+ 0102              ALF,5
+ 0103              ALF,5
+ 0104              ALF,5
+ 0105   NOMAT MSG  ALF,4        NO MATCH FOUND FOR THIS CARD:
+ 0106   NOTAV MSG  ALF,2        NOT AVAILABLE
+ 0107   NOW OP MSG ALF,4         NOW OPERATING FROM NEW YULPROGS
+
+ 0108   OBUWK MSG  ALF,4        FORMER BACKUP WILL BE WORKER
+ 0109   OP SLP MSJ ALF,2        OPERATOR ASLEEP
+ 0110   PASSS MSG  ALF,2        MBLY PASS █ FOR
+ 0111   PCH CARD   OCT          0
+ 0112              ALF,5
+ 0113              ALF,5
+
+## Page 112
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   5        PAGE  72
+
+P0114   ALPHABETIC ARRAYS CONTINUED.
+
+ 0115   XFR CONFL  ALF,4        CONFLICT WITH EXISTING FILE NAME
+ 0116   LAK TR MSG ALF,4         INSUFFICIENT TRACKS AVAILABLE;
+ 0117   W CDIMS ON ALF,3         CARD IMAGES ON DISC
+
+ 0118   PRSUB HDS  ALF,4          NAME  REVISION     AUTHOR
+ 0119              ALF,5        LAST ASSEMBLED  M'F'ABLE    SUBROUTINES
+ 0120              ALF,5        (OBSOLETING SUBROUTINES PREFIXED BY "/")
+
+ 01202  ASAMB MSG  ALF,4        ASA TO AMEND BACKUP TAPE LABEL;
+ 01204  S ACA OTHE ALF,2        ACA OTHERWISE
+ 0121   REDUN MSG  ALF,2           REDUNDANT
+ 0122   REMCO MSG  ALF,4        REMOVING COMPUTER NAME:
+ 0123   SFWR HEDS  ALF,3        ASSEMBLY PASS 1
+ 0124              ALF,3        ASSEMBLY PASS 2
+ 0125              ALF,3        ASSEMBLY PASS 3
+ 0126              ALF,5         MANUFACTURING
+
+## Page 113
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   6        PAGE  73
+
+P0127   ALPHABETIC ARRAYS CONTINUED.
+
+ 0130   STATS MSG  ALF,4
+ 0131   STNED MSG  ALF,3        STILL NEEDED BY
+ 0132   SURCO MSG  ALF,4        COMPUTER NAME NOT RECOGNIZED.
+ 0133   UNAVP MSG  ALF,2        UNAVAILABLE
+ 01332  UNCSD MSG  ALF,3        UNNECESSARY SUBDIRECTOR:
+
+ 0134   USER LOG   OCT          0002
+ 0135              ALF,5
+ 0136              ALF,5
+ 0137              ALF,5         USER'S OWN PAGE NO.
+
+ 0138   W TRNSFER  ALF          TRANSFER
+ 0139              ALF,5         NEEDS SUBDIRECTOR GIVING DISCFILE NAME
+ 0140   XFR WRSIZ  ALF,4        DISCFILE NAME VOID OR TOO LONG
+ 0141   XFR TERMS  ALF,5        DISCFILE NAME CONTAINS TERMINATOR CHARS.
+ 0143   NO XFR MSG ALF,3         CAN'T PERFORM TRANSFER
+
+## Page 114
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   7        PAGE  74
+
+P91435  ALPHABETIC ARRAYS CONCLUDED.
+
+
+
+ 0144   WAA 10060  ALF,3        W   A   A10060  0000000P
+ 0145   W AVALABL  ALF,2        AVAILABLE
+ 0146   W CARD DUN ALF,2        CARD OUTPUT SENT
+ 0147   W END REV  ALF,2          END OF REVISIO
+
+ 0148   W LAB AVAL ALF,2           AVAILABLE
+ 0149   W LAB CHKO ALF,2          CHECKED OUT
+ 0150   W LAB UNAV ALF,2         NOT AVAILABLE
+ 0151   W LAST ASS ALF,2        LAST ASSEMBLED 0
+ 0152   W LIST DUN ALF,2        LISTING FINISHED
+
+ 0153   W NPR SUBS ALF,5            NUMBER OF PROGRAMS AND SUBROUTINES:
+ 0154   W PASS 1   ALF,2        ASSEMBLY PASS 1
+ 0155              ALF,2        ASSEMBLY PASS 2
+ 0156              ALF,2        ASSEMBLY PASS 3
+ 0157   W MANUF    ALF,2        MANUFACTURING
+ 0158   W SUBROS   ALF,2        SUBROUTINES
+ 0159   YUL BU MSG ALF,4        PRESENT YULPROGS WILL BE BACKUP
+
+ 01591  MONTHS     ALF,4          JAN     FEB     MAR     APR
+ 01592             ALF,4          MAY     JUN     JUL     AUG
+ 01593             ALF,4          SEP     OCT     NOV     DEC
+
+## Page 115
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   8        PAGE  75
+
+P0160   NUMERIC CONSTANTS.
+
+ 0161   5 LINES    OCT          0005
+ 0162   A ADRES    OCT          0000 7777
+ 0163   B9         OCT          001
+ 0164   B10        OCT          0004
+ 0165   B12        OCT          0001
+ 01652  B9 B12     OCT          0011
+ 0166   128 BLOX   OCT          0000 02
+ 0167   B9B10      OCT          0014
+
+ 0168   B7T13      OCT          00774
+ 0169   S B14T18   OCT          0000 37
+ 0171   B ADDR 6   OCT          -6 0000
+ 0172   BAN EOFRI  OCT          -420 0000
+ 0173   END OF 1   OCT          7611 1111 1111 1150
+ 0174   LEFT HALF  DEC          GGGGGG
+ 0175   OCTAL 60   OCT          -60
+ 0176   S 1 C6     OCT          -1 0000
+
+ 0177   DISABLED   DEC          -GF0
+ 0178   S BIT 32   DEC          -10000
+ 0180   S13        FXBIN        -13
+ 0181   S 4SPACE   OCT          0004
+ 0182   S BIT 1    OCT          4
+ 0183   S C1T2     OCT          7777
+ 0184   S CAC 3    DEC          - GGGG
+
+ 0185   S D12      DEC          -G
+ 0186   S NINE     DEC          -9
+ 0187   S ONE      OCT          -1
+ 0188   SP1        OCT          0001
+ 0189   S PLS ZERO DEC          +0
+
+## Page 116
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   9        PAGE  76
+
+P0190   NUMERIC CONSTANTS CONCLUDED.
+
+ 0191   SSWITCH    OCT          0
+ 0192   S TEN C1   OCT          12
+ 0193   S THRED 10 OCT          -3776
+ 0194   S THRED 11 OCT          -3777
+ 0195   S TWO      OCT          -2
+
+ 0196   S THREE    OCT          -3
+ 0197   S SIX      DEC          -6
+ 0198   S EIGHT    DEC          -8
+ 0199   S CHAR 1   OCT          77
+ 0200   S CHAR 8   OCT          -77
+ 0201   S C2T7     OCT          0077 7777 7777 7700
+ 0202   S FOUR     OCT          -4
+
+ 0203   SLASH      OCT          -61
+ 0204   USER PAGE  DEC          0
+ 0205   OK BANNER  OCT          -120 0000, -120 0000, -420 0000
+ 0206              OCT          -120 0000, -120 0000, -420 0000
+
+ 0207   B ARG      DEC          000EEEEE
+ 0208   AVCO BITS  OCT          4001 4001 4001 4001
+ 0209   MANU MASK  OCT          -7777
+ 0210   S PAV BITS OCT          0001 0001 0001 0001
+ 0211   PCO BITS   OCT          4000 4000 4000 4000
+
+## Page 117
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  10        PAGE  77
+
+P0212   ASSIGNMENTS IN YUL PASS 0 TRANSFER VECTOR.
+
+ 0213   PROG NAME  ASSIGN       0,0
+ 0214   SWITCH     ASSIGN       0,2
+ 0215   L OLD LINE ASSIGN       0,3
+ 0216   OLD LINE   ASSIGN       0,4
+
+ 0217   PAGE HEAD  ASSIGN       0,20
+ 0218   PAGE NO    ASSIGN       0,36
+ 0219   L COP BUFS ASSIGN       0,39
+ 0220   LIN COUNT  ASSIGN       0,41
+
+ 0221   L PROG FIL ASSIGN       0,44
+ 0222   N LINES    ASSIGN       0,45
+ 0223   L COMP NAM ASSIGN       0,46
+ 0224   N COPIES   ASSIGN       0,47
+
+ 0225   PAPER PLY  ASSIGN       0,48
+ 0226   L AUTH NAM ASSIGN       0,51
+ 0227   COMPURTER  ASSIGN       0,53
+ 0228   YUL TYPER  ASSIGN       0,63
+
+ 0229   RD SBDIRC  ASSIGN       0,65
+ 0230   HOWZAT     ASSIGN       0,66
+ 0231   IGN SUBDR  ASSIGN       0,68
+ 0232   MANUF RTN  ASSIGN       0,76
+ 0233   YUL MASKS  ASSIGN       0,77
+ 0234   OCTAL 20   ASSIGN       0,78
+
+ 0236   SERCH KEY  ASSIGN       0,79
+ 0236   WHODUNIT   ASSIGN       0,80
+ 0237   6 COMMA 19 ASSIGN       0,81
+ 0238   L GPB STT  ASSIGN       0,82
+
+ 0239   L DIRECTY  ASSIGN       0,83
+ 0240   BANK 1     ASSIGN       0,83
+ 02402  CHAS 2500  ASSIGN       0,84
+ 0241   PUNCH CD   ASSIGN       0,87
+ 0242   TYP ABORT  ASSIGN       0,89
+ 0243   L OBJC MSG ASSIGN       0,90
+
+ 0244   REJEC DIR  ASSIGN       0,91
+ 0245   TASK MSG   ASSIGN       0,93
+ 0246   TASK OBJC  ASSIGN       0,97
+ 0247   TYP TK OBJ ASSIGN       0,98
+ 0248   KNOWN PSR  ASSIGN       0,99                                            (CONTINUED).
+
+## Page 118
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  11        PAGE  78
+
+P02485  FURTHER ASSIGNMENTS.
+
+ 0249   TAPE SRCH  ASSIGN       0,100
+ 0250   L PGHED P3 ASSIGN       0,101
+ 0251   ASSY SUBD  ASSIGN       0,102
+ 0252   COMMON     ASSIGN       0,103
+
+ 0253   PUT CHAR   ASSIGN       0,105
+ 0254   WRIT OBJC  ASSIGN       0,114
+ 0255   LABEL YUL  ASSIGN       0,115
+ 0256   POSIT YUL  ASSIGN       0,116
+
+ 0259   PHI WAA    ASSIGN       0,117
+ 0260   GROUP A    ASSIGN       0,118
+ 0261   YUL D2A ZS ASSIGN       0,119
+ 0262   FOUND BUF  ASSIGN       0,120
+ 0263   GROUP NAP  ASSIGN       0,122
+
+ 0264   SUB THRDS  ASSIGN       0,125
+ 0265   DISASTER   ASSIGN       0,126
+ 0266   COMP NAME  ASSIGN       0,128
+ 0267   1 COMMA 8  ASSIGN       0,129
+
+ 0268   ACCEPT M2  ASSIGN       0,130
+ 0269   DECOD CPN  ASSIGN       0,131
+ 0270   CPN FIXER  ASSIGN       0,132
+ 0271   GIVE PAIR  ASSIGN       0,133
+
+ 0272   FIND COMP  ASSIGN       0,134
+ 0273   FIND PAIR  ASSIGN       0,135
+ 0274   L BLANCD   ASSIGN       0,136
+ 0275   REVNO      ASSIGN       0,137
+ 0276   S LINE     ASSIGN       2,0
+
+## Page 119
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  12        PAGE  79
+
+P0277   ADDRESS CONSTANTS.
+
+ 0278   BANK 5     SPEC,B5                                  DAMN ZERO
+ 0279   L BUF 1    SPEC,B5                                  512
+ 0280   L BUF 2    SPEC,B5                                  1024
+ 0281   L BUF 3    SPEC,B5                                  1536
+ 0282   L TEMP MSK SPEC                                     TEMP MASK
+ 0283   L END MLIS SPEC                                     END M LIST
+ 0284   L NEW LINE SPEC                                     NEW LINE
+
+ 0285   L LONG CUS SPEC                                     LONG CUSS
+ 0286   L PUT IT   SPEC                                     PUT IT ON
+ 0287   L PCH CARD SPEC                                     PCH CARD +1
+ 0288              SPEC                                     PCH CARD +6
+ 0289   L S MONTHS SPEC                                     MONTHS -1
+ 0290   L BANK 1   SPEC,B1                                  DAMN ZERO
+
+ 0291   L W PASS 1 SPEC                                     W PASS 1
+ 0292   INIT WD 8  CAC,B7       6             6             10
+ 0293   S BANK 1   CAC          2048                        MOR SUBW Q
+ 0294   S END THR  SPEC,B7                                  6
+
+
+ 0295   XFR BUFFS  SPEC,B7                                  2045
+ 0296   XFR LIMIT  SPEC,BC                                  2043
+ 0297              SPEC,BC                                  2046
+ 0298              SPEC,BG                                  2044
+ 0299              RESERVE      2
+
+
+
+R0300   RESERVATIONS.
+
+ 0301   TRINDEX    RESERVE      15
+ 0302   COMP LOCN  RESERVE      1
+ 0303   PASS MASK  RESERVE      1
+ 0304   SAVE X23   RESERVE      2
+ 0305   SAVE X4    RESERVE      1
+ 0306   TASK 2     RESERVE      1
+
+
+ 0307   TEMP MSK   RESERVE      1
+ 0308   PRG OR SUB RESERVE      1
+ 0309   DISCALIM   RESERVE      1
+ 0310   TRACK LOG  RESERVE      1
+ 0311   DISC ADDR  RESERVE      1
+ 0312   XFR PLACE  RESERVE      1
+
+## Page 120
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  13        PAGE  80
+
+P0313   EQUIVALENCES.
+
+ 0314   ALPHA      EQUALS       0
+ 0315   BINARY     EQUALS       16
+ 0316   L JUNK     EQUALS       L BUF 2
+ 03161  L MOR SBWQ EQUALS       S BANK 1
+ 0317   S C1T4     EQUALS       LEFT HALF
+ 0318   SP2        EQUALS       USER LOG
+ 0319   SP3        EQUALS       PAGE HEAD
+ 0320   S ZERO     EQUALS       PCH CARD
+ 0321   DEPAGIN8   EQUALS       L PGHED P3
+ 0322   S STOPPER  EQUALS       S CAC 3
+ 0323   SNATRACK   EQUALS       SLASH
+
+
+
+R0324   JUMP TABLE FOR UNSQUEEZING CARD IMAGES FROM TAPE.
+
+ 0325   EXPANDER   MT           N,X4,1        5             N,X6,1
+ 0326              TN           N,X4,4        4             6,1
+ 0327              TX           N,X4,1        -             N,X6           C
+ 0328              TN           N,X4,3        3             6,2
+ 0329              TX           N,X4,1        -             N,X6           C
+ 0330              TS           N,X4,1        6,1           C,+2           C
+ 0331              TX           N,X4,1        -             N,X6           C
+ 0332              TN           N,X4,2        2             6,3
+ 0333              TX           N,X4,1        -             N,X6           C
+ 0334              TS           N,X4,1        6,1           C,+2           C
+ 0335              MT           N,X4,1        3             N,X6,2
+ 0336              TS           N,X4,1        6,2           C,+4           C
+ 0337              TX           N,X4,1        -             N,X6           C
+ 0338              TS           N,X4,1        6,1           C,+2           C
+ 0339              MT           N,X4,1        2             N,X6,4
+ 0340              TX           N,X4,1        -             6,4
+ 0341              MT           N,X4,1        4             N,X6,1
+ 0342              TN           N,X4,3        3             6,1
+ 0343              TX           N,X4,1        -             N,X6           C
+ 0344              TN           N,X4,2        2             6,2
+ 0345              TX           N,X4,1        -             N,X6           C
+ 0346              TS           N,X4,1        6,1           C,+2           C
+ 0347              MT           N,X4,1        2             N,X6,3
+ 0348              TX           N,X4,1        -             6,3
+ 0349              MT           N,X4,1        3             N,X6,1
+ 0350              TN           N,X4,2        2             6,1
+ 0351              MT           N,X4,1        2             N,X6,2
+ 0352              TX           N,X4,1        -             6,2
+ 0353              MT           N,X4,1        2             N,X6,1
+ 0354              TX           N,X4,1        -             6,1
+ 0355              TX           N,X4,1        -             N,X6
+ 0356              TX           -             -             -
+
+## Page 121
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  14        PAGE  81
+
+P0357              ROUTINE IN SERVICE MODULE FOR PRINTING A SYMBOLIC LISTING, PUNCHING A SYMBOLIC DECK, OR BOTH SIMUL-
+R0359   TANEOUSLY.  FOR THE LATTER CASE, THE VERB ON THE DIRECTOR CARD MAY BE EITHER "PRINT, PUNCH" OR "PUNCH, PRINT".
+R0361   THE SYMBOLIC DECK PUNCHED BY THIS ROUTINE IS HEADED BY AN EXACT COPY OF THE YUL DIRECTOR CARD, THUS IDENTIFYING
+R0363   THE DECK AND INCIDENTALLY SHOWING WHETHER A LISTING WAS MADE AT THE SAME TIME.  THE FORMAT OF THE LISTING IS
+R0365   THAT OF A YUL ASSEMBLY LISTING IN WHICH ALL CARDS ARE REMARKS CARDS.  THE NUMBER OF COPIES AND THE NUMBER OF
+R0367   LINES PER PAGE ARE GOVERNED BY THE SAME SUBDIRECTORS AS IN ASSEMBLY.
+
+
+
+R0368   ENTRY TO PRINT A SYMBOLIC LISTING OF A PROGRAM OR SUBROUTINE.
+
+ 0369   PRINT PS   NA           6,19          SW PUNCH      C,+4                BRANCH UNLESS PUNCHING ALSO WANTED.
+ 0371              TN           6,22          33            6,19                SHIFT UP SENTENCE TO COVER 2ND VERB.
+ 0373              TX           B10           -             SSWITCH             SET INDICATOR BIT FOR PUNCHING.
+ 0375              TS           W PNCHING     TASK2         PRINTASK
+
+ 0376              NA           6,19          W TRNSFER     C,+3                BRANCH IF NOT "PRINT, TRANSFER".
+ 0378              TS, BIT12    S ONES        S SWITCH      PRINT PS +1    C    SET INDICATOR BIT FOR TRANSFERRING.
+ 0380              TX           W TRNSFER     -             TASK2
+
+ 0381   PRINTASK   TS           W PRNTING     TASK MSG      TASK OBJC           BREAK DOWN AND RE-FORM REST OF DIRECTOR.
+ 0383              TS, BIT9     S ONES        SSWITCH       PRINT PCH           SET INDICATOR BIT FOR PRINTING.
+
+R0385   ENTRY TO PUNCH A SYMBOLIC DECK OF A PROGRAM OR SUBROUTINE.
+
+ 0386   PUNCH PS   NA           6,19          SW PRINT      C,+4                BRANCH UNLESS PRINTING ALSO WANTED.
+ 0388              TN           6,22          33            6,19                SHIFT UP SENTENCE TO COVER 2ND VERB.
+ 0390              TX           B9            -             SSWITCH             SET INDICATOR BIT FOR PRINTING.
+ 0392              TX           W PRNTING     -             TASK 2
+ 0393              TS           W PNCHING     TASK MSG      TASK OBJC           BREAK DOWN AND RE-FORM REST OF DIRECTOR.
+ 0395              TS, BIT10    S ONES        SSWITCH       PRINT PCH           SET INDICATOR BIT FOR PUNCHING.
+
+R0397   SIMILAR ENTRANCE FOR FILING ON THE DISC ALL OR PART OF A PROGRAM OR SUBROUTINE IN SYMBOLIC CARD IMAGE FORM.  MAY
+R0399   ALSO SPECIFY PRINTING.  REQUIRES A SUBDIRECTOR WITH "AS" AND A DISC FILE NAME CHOSEN BY THE USER.
+
+ 0401   XFER PS    NA           6,19          SW PRINT      C,+4                BRANCH UNLESS PRINTING ALSO WANTED.
+ 0403              TN           6,22          33            6,19                SHIFT UP SENTENCE TO COVER 2ND VERB.
+ 0405              TX           B9            -             S SWITCH            SET INDICATOR BIT FOR PRINTING.
+ 0407              TX           W PRNTING     -             TASK2
+ 0408              TS           W TRNSFER     TASK MSG      TASK OBJC           BREAK DOWN AND RE-FORM REST OF DIRECTOR.
+ 0410              TS, BIT12    S ONES        S SWITCH      PRINT PCH           SET INDICATOR BIT FOR TRANSFERRING.
+
+## Page 122
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  15        PAGE  82
+
+P0412   COMMON PROCEDURE, PRINTING, PUNCHING, AND TRANSFERRING.
+
+ 0413   PRINT PCH  SWE, CAC3    S BANK 1      32            Z,X0
+ 0414              SWS, D12     S ZERO        0             S SWITCH            INITIALIZE CARD SELECTION MODE.
+ 0416              LA           B9 B10        S SWITCH      C,+2                BRANCH IF PRINTING AND PUNCHING.
+ 0418              NA           S SWITCH      B9 B12        C,+3                BRANCH IF DOING ONLY ONE TASK.
+ 0420              S, YUL TYPER TASK MSG      AMTF +4       C,+1                TYPE FIRST TASK MESSAGE OF TWO.
+ 0422              TX           TASK2         -             TASK MSG
+ 0423              TS           Z,SC          WHODUNIT      TYP TKOBJ           TYPE LAST TASK AND OBJECT OF TASK(S).
+ 0425              SWE, CAC3    S BANK 1      32            Z,X0
+ 0426              TS           Z,X4          SAVE X4       KNOWN PSR           CHECK REVN, AUTHOR NAME, ETC.
+ 0428              SWE, CAC3    S BANK 1      32            Z,X0
+ 0429              TS           PROG NAME     SERCH KEY     TAPE SRCH      C    SET GRP B SEARCHING FOR PROG OR SUBRO.
+ 0431              NA, BIT12    S SWITCH      S ONES        NOT XFER            BRANCH IF NOT TRANSFERRING.
+
+ 0433              LA, CHAR5    S ONES        DISC STAT     C,+3
+ 0434              S, MON TYPER S NO DISC     SPRAM +8      -                   "NO DISC;".
+ 0436   CANT XFER  S, MON TYPER NO XFR MSG    SPRAMR +24    TYP ABORT           " CAN'T PERFORM TRANSFER".
+
+ 0438              EX           DISC STAT     S B14T18      DISCALIM            EXTRACT NUMBER OF DISCS.
+ 04392             TN           6,16          39            6,120
+ 0440              TS           -             -             RD SBDIRC
+ 0441              S, MON TYPER W TRNSFER     SPRAMR +48    CANT XFER           CUSS LACK OF "AS FILENAME" SUBDIRECTOR.
+ 0443              NA           6,16          W AS          C,-1
+ 0444              LA, CHAR1    S ONES        6,18          C,-2                BRANCH IF FILE NAME NOT ON CARD.
+ 0446              LA, CHAR6    6,21          S ZERO        C,+2                BRANCH IF NAME HAS ZERO LENGTH.
+ 0448              LA, CHAR6    6,21          S BIT 32      C,+2                BRANCH IF LENGTH IS 16 OR LESS.
+ 0450              S, MON TYPER XFR WRSIZ     SPRAMR +32    REJEC DIR           "DISCFILE NAME VOID OR TOO LONG".
+ 0452              LA, CHAR1    S ONES        6,22          C,+2
+ 0453              S, MON TYPER XFR TERMS     SPRAMR +40    REJEC DIR           "DISCFILE NAME CONTAINS TERMINATORS".
+ 0455              TN           6,19          2             TRINDEX
+ 0456              S, MON TYPER 6,2           A +9          C,+1                "AS OUTPUTFILENAME  ".
+ 04572             TN           6,120         39            6,16
+ 0458   XFR RE TLU TS           S ONES        TRINDEX +2    TR LOOKUP           RESTART LOOKUP AFTER TRACK RELEASE.
+
+ 0460              SS           S ZERO        S D 12        TRINDEX +3
+ 0461              NA, C7T8     TRINDEX       DISABLED      SETRALOG -1         IGNORE DISABLED FILES.
+
+ 0463   TR LOOKUP  TS           S ZERO        TRINDEX +4    DISCAP         C
+ 0464              OCT          -15
+ 0465              SPEC                                     TRINDEX
+ 0466              SSL, THREE   TR LOOKUP +1  0             C,+1                TO C,+2 ON LOOKUP, TO C,+4 ON RELEASE.
+ 0468              TS           SNATRACK      TRINDEX +3    SETRALOG            THERE ARE NO FILE NAME CONFLICTS; BEGIN.
+
+ 0470              NA, C7T8     TRINDEX +3    SNATRACK      XFR RE TLU +1       IGNORE OTHER-TYPE FILE WITH SAME NAME.
+ 0472              SSL, ONE     TRINDEX +4    0             C,+2                TEST PSEUDO-CONFIRMATION BIT.
+ 0474              TS, CHAR8    S BLANKS      TR LOOKUP +1  XFR RE TLU          RESTORE LOOKUP MODE AFTER TRACK RELEASE.
+
+ 0476              TS, CHAR8    S D 12        TR LOOKUP +1  TR LOOKUP           RELEASE OLD UNCONFIRMED TRACKS.
+ 0478              S, MON TYPER XFR CONFL     SPRAMR +32    TYP ABORT           "CONFLICT WITH EXISTING FILE NAME".
+
+ 0480   SETRALOG   SWE, C5T8    YUL LOG       D,6           TRACK LOG           JOB'S LOG ON 1ST TRACK, 1 LESS EACH SUC.
+ 0482              TS           CHAS 2500     TRINDEX +5    PRINT HED -1        SET UP CHARLIE-WORD OF 2500 FOR ALL TRX.
+
+## Page 123
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  16        PAGE  83
+
+P04835  INITIALIZATION OF PUNCHING AND PRINTING.
+
+ 0484   NOT XFER   NA, BIT10    SSWITCH       S ONES        PRINT HED           BRANCH IF NOT PUNCHING.
+
+ 0486              TX           Y COLYUM 1    -             PCH CARD +1
+ 0487              TN           6,2           9             PCH CARD +2
+ 0488              S, PUNCH CD  PCH CARD      ALPHA         C,+1                PUNCH YUL DIRECTOR CARD AS HEADER.
+ 0490              NA, BIT9     SSWITCH       S ONES        INIT PRNT +1        BRANCH IF NOT PRINTING.
+
+ 0492   PRINT HED  WA           Z,X6          OCTAL 20      Z,X5                INCLUDE COMPUTER NAME IN PAGE HEAD.
+ 0494              TX           L PGHED P3    -             Z,S2
+ 0495              TS           N,X5,2        COMMON        PUT CHAR +7    C
+ 0496              WA           N,X5          S 1 C6        N,X5
+ 0497              TS           SAVE X4       Z,X4          WRIT OBJC           WRITE OBJECT MESSAGE IN PAGE HEAD.
+
+ 0499              TX           S ZERO        -             N COPIES
+ 0500              TS, B2B11    S ONES        SWITCH        RD SBDIRC           PROHIBIT "RENUMBER", GET SUBDIRECTOR.
+ 0502              TX           Z,SC,1        -             -                   CHECK ON NUMBER OF COPIES WHEN SBDS END.
+ 0504              TS           S ZERO        PAPER PLY     ASSY SUBD           PROCESS PRINTING SUBDIRECTORS.
+
+ 0506              LA           N COPIES      S ZERO        INIT PRINT          BRANCH IF NO EXTRA COPIES TO BE MADE.
+
+ 0508   PLY WAIT   TX           C,+0          0             Z,AU2,31
+ 0509              TX           C,+0          0             Z,AU1,31
+ 0510              NA           PAPER PLY     S ZERO        9 PLY CHEK          BRANCH WHEN OPERATOR HAS REPLIED.
+ 0512              NA           Z,AU1,1       S ONE         C,-1
+ 0513              NA           Z,AU2,1       S ONE         C,-3
+ 0514              S, MON TYPER OP SLP MSJ    SPRA +16      -                   AFTER TOO LONG, TYPE "OPERATOR ASLEEP".
+ 0516              TS           S ONE         PAPER PLY     OK PLY
+
+ 0517   9 PLY CHEK LA           PAPER PLY     S NINE        OK PLY
+ 0518              S, MON TYPER PMAX9 MSJ     SPRAMR +8     -
+ 0519              TX           S ZERO        -             PAPER PLY
+ 0520              S, MON TYPER WAA 10060     SPRA +24      PLY WAIT            ASK AGAIN AFTER UNSATISFACTORY REPLY.
+
+ 0522              TS           S ZERO        N COPIES      INIT PRNT
+ 0523   OK PLY     LA           N COPIES      PAPER PLY     C,-1                BRANCH IF ONE RUN THRU PRINTER WILL DO.
+ 0525              S, MON TADDR COPY OP
+ 0526              TS           PAPER PLY     COMMON        POSIT CPY           GO POSITION PRE-SNATCHED TAPE.
+
+ 0528              TS           PAPER PLY     COMMON        PHI SNACH
+ 0529              ALF,2        W10Y0102YULWRK2
+ 0530   S ONES     DEC          GGGG GGGG GGGG
+
+## Page 124
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  17        PAGE  84
+
+P0531   INITIALIZATION FOR MULTIPLE PRINTER RUNS, RECEPTION OF CARD IMAGES.
+
+ 0532   POSIT CPY  TS           -             -             PHI TAPE
+ 0533   COPY OP    RW,2         -             -             -
+ 0534              TS           S STOPPER     Z,X4          PHI TAPE
+ 0535              RF,2         4,0           -             -                   SPACE FORWARD OVER LABEL.
+ 0537              WD           N COPIES      S ONE         N COPIES
+ 0538              WA           COMMON        PAPER PLY     COMMON
+ 0539              LA           COMMON        N COPIES      C,-1                COMPUTE EXACT NUMBER OF COPIES.
+ 0541              TS           COMMON        N COPIES      PHI TAPE
+ 0542              RF,2         -             -             -
+
+ 0543   INIT PRNT  TN           PAGE HEAD +1  13            OLD LINE +1         SET UP TITLE ON COVER SHEET.
+ 0545              TS           L NEW LINE    Z,X2          RD SBDIRC           SLINE IS ASSIGNED TO 2,0.
+ 0547              TS           S BLANKS      PAGE HEAD +14 FETCH SYM -2        PROCEED WHEN OUT OF SUBDIRECTORS.
+ 05472             S, MON TYPER UNCSD MSG     SPRAMR +24    -                   "UNNECESSARY SUBDIRECTOR:".
+ 05474             S, YUL TYPER 6,2           A +9          INIT PRNT +1
+ 0548              TS           L JUNK        Z,X3          FETCH SYM           FAIL-SAFE WHEN 1ST CARD IS RIGHT PRINT.
+
+ 0550              NA           5,2           EOR           FIX CARD            BRANCH IF MORE CARDS IN CURRENT RECORD.
+ 0552   FETCH SYM  NA           SERCH KEY     EOR           GROUP NAP           SLEEP UNTIL GRP B LOCATES RECORD.
+ 0554              TX           FOUND BUF     -             Z,X4
+ 0555              EX           N,X4          LEFT HALF     TASK 2              SAVE INDICATOR: SQUEEZED OR NOT.
+ 0557              TX           L BUF 1       -             Z,X5
+ 0558              RT           N,X4          -             N,X5,2              MOVE RECORD TO SAFETY.
+ 0560              WD           Z,AU2         S 13          Z,AU2
+ 0561              TX           Z,AU2,10      -             Z,AU1
+ 0562              NA           END OF 1      N,AU1,1       C,+2                SEE IF THIS RECORD CONTAINS "END OF".
+ 05632             TS           -             -             PR PCH REW
+ 0564              NA           Z,AU1         Z,AU2         C,-2
+ 0565              TX           PROG NAME     -             SERCH KEY
+ 0566   SET UP GPB TX           L GPB STT     -             Z,SH
+ 0567              TS           N,SC,3        N,SH          MON WAKE       C    SET GRP B GOING AFTER READING LAST RECD.
+ 0569              SPEC                                     SRCH TEST -3
+
+ 0570   PR PCH REW TS           -             -             PHI TAPE
+ 0571              RW,1         -             -             -                   REWIND YULPROGS AFTER READING LAST RECD.
+
+ 0573   FIX CARD   TX           L PCH CARD    -             Z,X6
+ 0574              LA           TASK 2        S ZERO        END OF Q -1         BRANCH IF RECORD IS NOT CONDENSED.
+
+ 0576              TX           Z,X5          -             Z,X4                KEEP FWA IN X5.
+ 0578              MT           S BLANKS      10            N,X6,1
+ 0579              TX           L PCH CARD    -             Z,X6
+ 0580              SSL, LOW5    N,X4,1        0             EXPANDER       C    RECONSTITUTE FIRST HALF OF CARD.
+ 0582              TX           L PCH CARD +1 -             Z,X6
+ 0583              SSL, LOW5    N,X5          5             EXPANDER       C    RECONSTITUTE SECOND HALF OF CARD.
+ 0585              TS           Z,X4          Z,X5          END OF Q
+
+ 0586              MT           N,X5,1        10            N,X6,1              MOVE UNCONDENSED CARD.
+
+## Page 125
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  18        PAGE  85
+
+## Page 126
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  19        PAGE  86
+
+## Page 127
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  20        PAGE  87
+
+## Page 128
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  21        PAGE  88
+
+## Page 129
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  22        PAGE  89
+
+## Page 130
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  23        PAGE  90
+
+## Page 131
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  24        PAGE  91
+
+## Page 132
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  25        PAGE  92
+
+## Page 133
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  26        PAGE  93
+
+## Page 134
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  27        PAGE  94
+
+## Page 135
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  28        PAGE  95
+
+## Page 136
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  29        PAGE  96
+
+## Page 137
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  30        PAGE  97
+
+## Page 138
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  31        PAGE  98
+
+## Page 139
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  32        PAGE  99
+
+## Page 140
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  33        PAGE 100
+
+## Page 141
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  34        PAGE 101
+
+## Page 142
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  35        PAGE 102
+
+## Page 143
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  36        PAGE 103
+
+## Page 144
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  37        PAGE 104
+
+## Page 145
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  38        PAGE 105
+
+## Page 146
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  39        PAGE 106
+
+## Page 147
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  40        PAGE 107
+
+## Page 148
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  41        PAGE 108
+
+## Page 149
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  42        PAGE 109
+
+## Page 150
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  43        PAGE 110
+
+## Page 151
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  44        PAGE 111
+
+## Page 152
+L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  45        PAGE 112
