@@ -1,26 +1,26 @@
-## Copyright:    Public domain.
-## Filename:     MAIN.s
-## Purpose:      Part of the source code for YUL (revision 9),
-## Assembler:    TBD
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      https://www.ibiblio.org/apollo/index.html
-## Page scans:   https://archive.org/details/yulsystemsourcec00hugh
-## Pages:        018-023 (6)
-## Mod history:  2016-10-06 JL   Created.
-##               2016-10-08 JL   Transcribed.
+# Copyright:    Public domain.
+# Filename:     AGC_BLOCK_II_INTERPRETIVE_CODES_ASSEMBLY_RULES_FOR_AGC.mitigus
+# Purpose:      Part of the source code for YUL (revision 9),
+# Assembler:    TBD
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      https://www.ibiblio.org/apollo/index.html
+# Page scans:   https://archive.org/details/yulsystemsourcec00hugh
+# Pages:        018-023 (6)
+# Mod history:  2016-10-06 JL   Created.
+#               2016-10-08 JL   Transcribed.
 
-## Annotations:
-##
-##   B L A I R - S M I T H
-##    Y U L   S Y S T E M
-##
-##       Listings in
-##    MITIGUS  Format
-##
+# Annotations:
+#
+#   B L A I R - S M I T H
+#    Y U L   S Y S T E M
+#
+#       Listings in
+#    MITIGUS  Format
+#
 
-## Note: Page numbers are scan page numbers rather than listing.
+# Note: Page numbers are scan page numbers rather than listing.
 
-## Page 18
+# Page 18
 L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   1        PAGE  15
 
 R0001   SUFFIX 01 CODES, INDEXABLE (EXCEPT SETPD) BY ADDING 10 TO SUFFIX.       FOR A KEY TO DATA MODES, SEE PAGE 2.
@@ -69,11 +69,11 @@ R0003                   TYPE    UP    IN   MODE  OUT   OP  CODE  CODE  SPELLING 
 
 R0061   GENERAL SHIFT CODES, SUFFIX 01 CODE 23.                                 **** DEFINITION: ARC-CCS(X) = X + SGN(X)
 
-## Annotation: in the listing "MODE" in the line below is crossed out, and "MODE IN;OUT" is written instead.
-##   The "MODE" column entries are modified:
-##      DT -> DT;-
-##      D  -> DT;D
-##      V  -> V;-
+# Annotation: in the listing "MODE" in the line below is crossed out, and "MODE IN;OUT" is written instead.
+#   The "MODE" column entries are modified:
+#      DT -> DT;-
+#      D  -> DT;D
+#      V  -> V;-
 R0062                   MODE  UAL  UAU  IAL   IAU   ADAD   OCT   OCT*                           ADDRESS CODES
 
  0064   0        SL      DT   -51   51  -177  177  20200   115   117            UAL -- UNINDEXED ADDRESS LOWER LIMIT
@@ -83,7 +83,7 @@ R0062                   MODE  UAL  UAU  IAL   IAU   ADAD   OCT   OCT*           
  0072   4        VSL     V    -34   33  -177  177  20200   115   117            ADAD -- ADDITIVE FOR ADDRESS
  0074   5        VSR     V    -33   34  -177  177  20600   115   117            FINISHED ADDRESS STORED LIKE A14 OR E.
 
-## Page 19
+# Page 19
 L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   2        PAGE  16
 
 P0078   SUFFIX 10 CODES, NOT INDEXABLE.
@@ -139,7 +139,7 @@ R01236                                  V   VECTOR (6 WORDS)                    
 R01237  NOTE THAT FOR VXSC AND V/SC,                                             U   UNKNOWN
 R01238  IF MODE IN = DT, OP MODE = V, AND IF MODE IN = U OR V, OP MODE = D.      V   VECTOR
 
-## Page 20
+# Page 20
 L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   3        PAGE  17
 
 P0124   SWITCH CODES, SUFFIX 10 CODE 34.
@@ -193,50 +193,50 @@ R0158                    IN   OUT   OP  CODE  SPELLING
  0175   20       VCOMP   V     -        100
  0176   23       ABVAL   V     D        130
 
-## Page 21
+# Page 21
 L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   4        PAGE  18
 
 P0177   SUFFIX 100 CODES, SHORT SHIFT OPERATIONS.
 
-## Annotation: in the listing, the table heading below is modified to change
-## "MODE" to "MODE IN", and to add another column "MODE OUT".
-R0178                   MODE  OCT CODE                  ## Annotated entries:
-                                                        ## MODE IN      MODE OUT
- 0179   00       SL1R    D      004                     ## DT           D
- 0180   01       SR1R    D      014                     ## DT           D
- 0181   02       SL1     DT     024                     ## DT           -
- 0182   03       SR1     DT     034                     ## DT           -
- 0183   04       SL2R    D      044                     ## DT           D
- 0184   05       SR2R    D      054                     ## DT           D
- 0185   06       SL2     DT     064                     ## DT           -
- 0186   07       SR2     DT     074                     ## DT           -
+# Annotation: in the listing, the table heading below is modified to change
+# "MODE" to "MODE IN", and to add another column "MODE OUT".
+R0178                   MODE  OCT CODE                  # Annotated entries:
+                                                        # MODE IN      MODE OUT
+ 0179   00       SL1R    D      004                     # DT           D
+ 0180   01       SR1R    D      014                     # DT           D
+ 0181   02       SL1     DT     024                     # DT           -
+ 0182   03       SR1     DT     034                     # DT           -
+ 0183   04       SL2R    D      044                     # DT           D
+ 0184   05       SR2R    D      054                     # DT           D
+ 0185   06       SL2     DT     064                     # DT           -
+ 0186   07       SR2     DT     074                     # DT           -
 
- 0187   10       SL3R    D      104                     ## DT           D
- 0188   11       SR3R    D      114                     ## DT           D
- 0189   12       SL3     DT     124                     ## DT           -
- 0190   13       SR3     DT     134                     ## DT           -
- 0101   14       SL4R    D      144                     ## DT           D
- 0192   15       SR4R    D      154                     ## DT           D
- 0193   16       SL4     DT     164                     ## DT           -
- 0194   17       SR4     DT     174                     ## DT           -
+ 0187   10       SL3R    D      104                     # DT           D
+ 0188   11       SR3R    D      114                     # DT           D
+ 0189   12       SL3     DT     124                     # DT           -
+ 0190   13       SR3     DT     134                     # DT           -
+ 0101   14       SL4R    D      144                     # DT           D
+ 0192   15       SR4R    D      154                     # DT           D
+ 0193   16       SL4     DT     164                     # DT           -
+ 0194   17       SR4     DT     174                     # DT           -
 
- 0195   20       VSL1    V      004                     ## V            -
- 0196   21       VSR1    V      014                     ## V            -
- 0197   22       VSL2    V      024                     ## V            -
- 0198   23       VSR2    V      034                     ## V            -
- 0199   24       VSL3    V      044                     ## V            -
- 0200   25       VSR3    V      054                     ## V            -
- 0201   26       VSL4    V      064                     ## V            -
- 0202   27       VSR4    V      074                     ## V            -
+ 0195   20       VSL1    V      004                     # V            -
+ 0196   21       VSR1    V      014                     # V            -
+ 0197   22       VSL2    V      024                     # V            -
+ 0198   23       VSR2    V      034                     # V            -
+ 0199   24       VSL3    V      044                     # V            -
+ 0200   25       VSR3    V      054                     # V            -
+ 0201   26       VSL4    V      064                     # V            -
+ 0202   27       VSR4    V      074                     # V            -
 
- 0203   30       VSL5    V      104                     ## V            -
- 0204   31       VSR5    V      114                     ## V            -
- 0205   32       VSL6    V      124                     ## V            -
- 0206   33       VSR6    V      134                     ## V            -
- 0207   34       VSL7    V      144                     ## V            -
- 0208   35       VSR7    V      154                     ## V            -
- 0209   36       VSL8    V      164                     ## V            -
- 0210   37       VSR8    V      174                     ## V            -
+ 0203   30       VSL5    V      104                     # V            -
+ 0204   31       VSR5    V      114                     # V            -
+ 0205   32       VSL6    V      124                     # V            -
+ 0206   33       VSR6    V      134                     # V            -
+ 0207   34       VSL7    V      144                     # V            -
+ 0208   35       VSR7    V      154                     # V            -
+ 0209   36       VSL8    V      164                     # V            -
+ 0210   37       VSR8    V      174                     # V            -
 
 
 
@@ -250,7 +250,7 @@ R0214                   TYPE    UP   OUT   CODE   ADDITIVE  ADDITIVE  ADDITIVE  
  0220   11-16    STOVL  E+A14   YES   V    24000     -         -       04000       E     SEE SUFFIX 10 CODES.
  0222   17       STCALL E+A     NO    U    34000     -         -         -
 
-## Page 22
+# Page 22
 L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   5        PAGE  19
 
 P0225   HOW TO PATCH INTERPRETIVE CODING FOR SIMULATIONS
@@ -307,7 +307,7 @@ R0273   ADD REL. ADDRESS 1567 - 1400:    2567
 R0274   STODL* ADDITIVE = 14000 + 4000: 22567
 R0275   (IF FOLLOWS STADR, COMPLEMENT:  55210)
 
-## Page 23
+# Page 23
 L      @AGC BLOCK II INTERPRETIVE CODES: ASSEMBLY RULES FOR AGC                  USER'S OWN PAGE NO.   6        PAGE  20
 P0276            OTHER INTERPRETIVE ADDRESSES ARE CADRS.  TO MAKE A CADR FROM A PSEUDO-ADDRESS, SUBTRACT 10000.  IF THE
 R0278   RESULT IS OVER 77777 (BANKS 40-43), SUBTRACT 20000 MORE.  TO CONVERT FBANK NOTATION INTO A CADR, REDUCE BANK 4X
