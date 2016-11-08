@@ -1,3 +1,5 @@
+This branch has been merged back into master, and is now obsolete, though the information below is probably still correct.
+
 # virtualagc
 Virtual Apollo Guidance Computer (AGC) software
 
