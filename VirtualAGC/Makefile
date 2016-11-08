@@ -238,6 +238,8 @@ ifeq "${YADEDA_SUFFIX}" ""
 else
 	${CP} ../yaDEDA2/*.xpm $@
 endif
+	${CP} -a ../yaDSKYb1/images $@/images-yaDSKYb1
+	-rm -rf $@/images-yaDSKYb1/CVS $@/images-yaDSKYb1/.xvpics
 	${CP} ../jWiz/*.jpg $@
 	-rm -rf $@/pixmaps/yaDEDA/CVS $@/pixmaps/yaDEDA/.xvpics
 	${CP} ../yaTelemetry/*.jpg $@
@@ -278,7 +280,11 @@ EXECUTABLES:=\
 	../yaUniverse/yaUniverse \
 	../ControlPulseSim/ControlPulseSim \
 	../yaTelemetry/yaTelemetry \
-	../jWiz/jWiz
+	../jWiz/jWiz \
+	../yaAGCb1/yaAGCb1 \
+	../yaAGC-Block1-Pultorak/yaAGC-Block1 \
+	../yaDSKYb1/yaDSKYb1 \
+	../yaUplinkBlock1/yaUplinkBlock1
 ifeq "${YADSKY_SUFFIX}" ""
 EXECUTABLES+=../yaDSKY/src/yaDSKY
 else
