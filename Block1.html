@@ -126,6 +126,10 @@
 
 
 
+
+
+
+
           0"</a> — Earliest preliminary design of the AGC for which I
         have any documentation, not used in any missions, and with no
         known existing code.&nbsp; There's a single document (that I
@@ -195,6 +199,10 @@
 
 
 
+
+
+
+
           General Design Characteristics of the Apollo Guidance Computer</a>,
         by Eldon C. Hall, May 1963.<br>
       </li>
@@ -211,6 +219,10 @@ href="http://www.ibiblio.org/apollo/klabs/history/history_docs/r-393.pdf"
         A. Green, T. J. Lawton, C. A. Muntz, J. Rocchio, and E. Smally,
         September 1964.</li>
       <li><a href="http://www.ibiblio.org/apollo/Documents/E-1574.pdf">E-1574:
+
+
+
+
 
 
 
@@ -271,6 +283,10 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
       and are contained in <a
         href="Pultorak.html#John_Pultoraks_Block_I_AGC">the original
         PDFs which John Pultorak published of his Block 1 AGC simulation</a>.&nbsp;
+
+
+
+
 
 
       While those are fine schematics, and worked well for John's
@@ -436,6 +452,10 @@ href="http://www.ibiblio.org/apollo/ScansForConversion/Solarium055/0001-P1130108
     Below are some drawings from a set of<big> </big><a
 href="http://www.ibiblio.org/apollo/Documents/ApolloTrainingGuidanceAndNavigation_07-65.pdf">Apollo
 Guidance
+
+
+
+
 
 
 
@@ -736,7 +756,15 @@ Guidance
 
 
 
+
+
+
+
       distinct positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
+
+
+
+
 
 
 
@@ -804,6 +832,10 @@ Guidance
     </ul>
     <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
       that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
+
+
+
+
 
 
 
@@ -900,6 +932,10 @@ Guidance
         specific editing operation performed by <tt>LP</tt> is as
         follows:&nbsp; If you try to write a set of bits like <tt>B15
           B14 B13 ... B2 B1 to LP</tt>, it will in fact be written as <tt>B1
+
+
+
+
 
 
 
@@ -1221,8 +1257,16 @@ Guidance
 
 
 
+
+
+
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -1258,9 +1302,17 @@ Guidance
 
 
 
+
+
+
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -1318,6 +1370,10 @@ Guidance
             <td colspan="3" rowspan="1" align="center" valign="top"><i>(cannot
 
 
+
+
+
+
                 occur)</i><br>
             </td>
           </tr>
@@ -1325,6 +1381,10 @@ Guidance
             <td valign="top">016<br>
             </td>
             <td colspan="3" rowspan="1" align="center" valign="top"><i>(see
+
+
+
+
 
 
                 below)</i></td>
@@ -1335,12 +1395,20 @@ Guidance
             <td colspan="3" rowspan="1" align="center" valign="top"><i>(see
 
 
+
+
+
+
                 below)</i></td>
           </tr>
           <tr>
             <td align="center" valign="top">014<br>
             </td>
             <td colspan="3" rowspan="1" align="center" valign="top"><i>(see
+
+
+
+
 
 
                 below)</i><br>
@@ -1585,6 +1653,10 @@ Guidance
 
 
 
+
+
+
+
     <tt>S</tt>=1, <tt>AAAAA</tt>=033, <tt>BBBBB</tt>=036) is written
     to <tt>OUT0</tt>.&nbsp; Then in REGISTER 2, the leftmost three
     positions would display "+35".&nbsp; Since this is latched in the
@@ -1640,6 +1712,10 @@ Guidance
 
 
 
+
+
+
+
         Conversely, it is decremented every time an addition or
         subtraction creates a negative overflow.&nbsp; However, just the
         existence of overflow outside of that context has no effect.<br>
@@ -1677,6 +1753,10 @@ Guidance
       </li>
       <li><tt>UPLINK</tt> (address 041):&nbsp; This 16-bit
         shift-register receives the data stream of <a href="#Uplink">digital-uplink
+
+
+
+
 
 
 
@@ -1816,6 +1896,10 @@ Guidance
     CPU's native assembly language.&nbsp; (Nor even in the Block 2
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
+
+
+
+
 
 
 
@@ -2347,6 +2431,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
                 Pultorak's simulator</a> (and mine) behave the way I've
               described here, and I trust John's reading of the
               control-pulse sequences more than I trust R-393.&nbsp; Of
@@ -2629,6 +2717,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
               sequences</a> defining the <tt>DV</tt> instruction, but
             R-393 does not define them, and it's impossible to know what
             they might be without following through the control-pulse
@@ -2642,6 +2734,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
             but does make some statements about what should happen in
             other cases<br>
             <ul>
@@ -2649,8 +2745,16 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
                 = 037777 and C(<tt>Q</tt>) = -|C(<tt>K</tt>)|. </li>
               <li>If |b(<tt>A</tt>)| &gt; |C(<tt>K</tt>)|, then |C(<tt>A</tt>)|
+
+
+
+
 
 
 
@@ -2737,15 +2841,27 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
               47777</tt>", so that's what I'd suggest doing:<br>
             <br>
             <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
+
                 SETLOC&nbsp;&nbsp; 5777&nbsp; # STANDARD LOCATION FOR
                 EXTENDING BITS</tt><tt><br>
               </tt><tt>OPOVF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -2758,8 +2874,16 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
                 EXTEND<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -2773,6 +2897,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             complement addition, if there's a 1 in bit 17, which there
             was in this case, it's removed and 1 is added to the
             number).&nbsp; The top 4 bits of this 16-bit sum are <tt>CCCC</tt>=1011,
+
+
+
+
 
 
 
@@ -3648,6 +3776,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             do, since there is no skip-on-overflow.<br>
             <br>
             Suppose that the initial contents of the accumulator, b(<tt>A</tt>),
+
+
+
+
             is the logical OR <br>
             <blockquote>b(<tt>A</tt>) = <tt>OP</tt> | <tt>K</tt><br>
             </blockquote>
@@ -3692,8 +3824,8 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
             <p>All of which boils down to saying that unless you intend
               to exploit this wacky feature, don't use this instruction,
               or else make sure you get the upper 4 bits of <tt>Z</tt>
-              set back to zero somehow before the next subroutine call you
-              want to use!<br>
+              set back to zero somehow before the next subroutine call
+              you want to use!<br>
             </p>
           </td>
         </tr>
@@ -4097,6 +4229,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -4132,8 +4268,16 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
                       OPERATOR<sub>MB<br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -4205,6 +4349,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt><tt><i>.<br>
           .<br>
@@ -4212,6 +4360,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
         </i></tt><tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>M</sub>
                       <sub><br>
                       </sub></i></tt></i></tt></i></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -4387,12 +4539,20 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
             images of the Solarium 055 assembly listing</a> once
           belonging to AGC developer Eldon C. Hall, from 1966.</li>
         <li><a href="listings/Solarium055/MAIN.agc.html">Colorized,
             syntax-highlighted assembly listing</a>, from 2016.</li>
         <li>Source code, <a
             href="https://github.com/rburkey2005/virtualagc/tree/master/Solarium055">in
+
+
+
+
 
 
 
@@ -4475,6 +4635,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
           <td valign="middle"><b>Design rationale</b><b><br>
             </b> </td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
+
+
 
 
 
@@ -4605,6 +4769,10 @@ href="file:///home/rburkey/git/virtualagc-web/Block1.html#John_Pultoraks_Assembl
 
 
 
+
+
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -4674,6 +4842,10 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
+
       from us</a>.&nbsp; Unfortunately, his source-code files only cover
     his simulator versions through 1.15.&nbsp; Nevertheless, I have
     extracted version 1.16 from the program listing in <a
@@ -4708,9 +4880,13 @@ href="http://www.ibiblio.org/apollo/Pultorak_files/PultorakAssemblerAndSimulator
 
 
 
+
+
+
+
       PDF description</a>, and it is contained in the
     Pultorak-Simulator-1.16/ directory of <a
-href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">our
+href="https://github.com/virtualagc/virtualagc/tree/master/Pultorak-Simulator-1.16">our
 
 
 
@@ -4737,7 +4913,11 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
-      GitHub repository's "block1" branch</a>.<br>
+
+
+
+
+      GitHub repository</a>.<br>
     <br>
     Donna Polehn has also created <a
       href="https://github.com/donnaware/AGC">a kind of Visual C++
@@ -4762,7 +4942,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     fun.<br>
     <br>
     Right now, you can find this ported code <a
-href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultorak">in
+href="https://github.com/virtualagc/virtualagc/tree/master/yaAGC-Block1-Pultorak">in
 
 
 
@@ -4793,10 +4973,14 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
-      our GitHub repository's "block1" branch</a>.&nbsp; I have only
-    worked with it in Linux, but I expect it should probably build in
-    Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
-    pthreads installed.&nbsp; All you have to do is <br>
+
+
+
+
+      our GitHub repository</a>.&nbsp; I have only worked with it in
+    Linux, but I expect it should probably build in Mac OS X or Windows
+    (with MinGW/Msys), as long as you have g++ and pthreads
+    installed.&nbsp; All you have to do is <br>
     <blockquote><tt>cd <i>DirectoryContainingTheSource</i></tt><tt><br>
       </tt><tt>make</tt><br>
     </blockquote>
@@ -4810,6 +4994,10 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
     program's internal textual interface.&nbsp; John describes using
     this command set in <a
       href="http://www.ibiblio.org/apollo/Pultorak_files/build_agc_7.pdf">his
+
+
+
+
 
 
 
@@ -5063,8 +5251,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
       problems I perceived I was solving could easily be more in my mind
       than in John's program.<br>
     </p>
-    <p>Right now, you can find code for my new simulator <a
-        href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+    <p>You can find code for my new simulator <a
+        href="https://github.com/virtualagc/virtualagc/tree/master/yaAGCb1">in
 
 
 
@@ -5095,10 +5283,14 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
 
 
 
-        our GitHub repository's "block1" branch</a>.&nbsp; I have only
-      worked with it in Linux, but I expect it should probably build in
-      Mac OS X or Windows (with MinGW/Msys), as long as you have g++ and
-      pthreads installed.&nbsp; All you have to do is <br>
+
+
+
+
+        our GitHub repository</a>.&nbsp; I have only worked with it in
+      Linux, but I expect it should probably build in Mac OS X or
+      Windows (with MinGW/Msys), as long as you have g++ and pthreads
+      installed.&nbsp; All you have to do is <br>
     </p>
     <blockquote><tt>cd <i>DirectoryContainingTheSource</i></tt><tt><br>
       </tt><tt>make</tt><br>
@@ -5128,6 +5320,10 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
         the memory at the specified address, and for a few addresses
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
+
+
+
+
 
 
 
@@ -5274,8 +5470,8 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGC-Block1-Pultora
       physical DSKY as described earlier</a>, but both are available
     from the same yaDSKYb1 program, with different command-line
     options.&nbsp; The code resides in the same yaDSKYb1/ directory <a
-href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
-      our GitHub repository's "block1" branch</a>. <br>
+href="https://github.com/virtualagc/virtualagc/tree/master/yaDSKYb1">in
+      our GitHub repository</a>. <br>
     <br>
     Building this software is simply a matter of cd'ing into its source
     directory and running 'make'. <i>&nbsp; </i>There are a number of
@@ -5301,7 +5497,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
       Simulator (yaUplinkBlock1)</h3>
     <p>At present, a program called yaUplinkBlock1 is provided (in the
       similarly-named source-code directory <a
-        href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
+href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
 
 
 
@@ -5332,11 +5528,14 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
 
 
 
-        our GitHub repository's "block1" branch</a>. It is a simple
-      command-line program, in which you can type (or feed in from a
-      script) ASCII mnemonics for DSKY keys, which the program then
-      converts to the proper uplink format and sends to the Block 1 AGC
-      simulator.<br>
+
+
+
+
+        our GitHub repository</a>. It is a simple command-line program,
+      in which you can type (or feed in from a script) ASCII mnemonics
+      for DSKY keys, which the program then converts to the proper
+      uplink format and sends to the Block 1 AGC simulator.<br>
     </p>
     <p>The ASCII mnemonics for the various DSKY keys, rather
       straightforwardly, are:<br>
@@ -5379,28 +5578,22 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
     you're really keen on trying bleeding-edge stuff, there are some
     things you can do with it.&nbsp; <br>
     <br>
-    First, prepare.&nbsp; Here are the steps I personally follow (in my
-    home directory) to built the software in Linux:<br>
-    <blockquote><tt>mkdir git</tt><tt><br>
-      </tt><tt>cd git</tt><tt><br>
-      </tt><tt>git clone https://github.com/rburkey2005/virtualagc
-        virtualagc</tt><tt><br>
-        make -C virtualagc<br>
-      </tt><tt>git clone -b block1
-        https://github.com/rburkey2005/virtualagc virtualagc-block1</tt><tt><br>
-      </tt><tt>make -C virtualagc-block1 -f Makefile1<br>
-      </tt> </blockquote>
-    You need to run the AGC and DSKY simulators separately, as follows,
-    probably from two separate command lines; use the <tt>--nav-bay</tt>,
-    without the brackets shown below, if you want to use the
-    navigational-bay version of the DSKY, but by default you'll get the
-    main control-panel version of the DSKY:<br>
-    <blockquote><tt>cd git/virtualagc-block1</tt><tt>/yaDSKYb1</tt><br>
+    If you have a version of the VirtualAGC GUI that's new enough to
+    have support for Solarium, you can run it by selecting Apollo 6 in
+    the GUI.&nbsp; <br>
+    <br>
+    If not, you have to at least have built the virtualagc source
+    tree.&nbsp; You then need to run the AGC and DSKY simulators
+    separately, as follows, probably from two separate command lines;
+    use the <tt>--nav-bay</tt>, without the brackets shown below, if
+    you want to use the navigational-bay version of the DSKY, but by
+    default you'll get the main control-panel version of the DSKY:<br>
+    <blockquote><tt>cd <i>PathToVirtualagcSourceTree</i></tt><tt>/yaDSKYb1</tt><br>
       <tt> </tt><tt>yaDSKYb1/yaDSKYb1 [--nav-bay]</tt><br>
     </blockquote>
     and<br>
     <blockquote><tt># Start the AGC.</tt><br>
-      <tt>cd git/virtualagc-block1/yaAGCb1</tt><tt><br>
+      <tt><tt>cd <i>PathToVirtualagcSourceTree</i></tt><tt>/</tt>yaAGCb1</tt><tt><br>
       </tt><tt><tt><tt># Make sure that Solarium is available easily to
             the simulator:<br>
             ln --symbolic
@@ -5446,11 +5639,19 @@ href="https://github.com/rburkey2005/virtualagc/tree/block1/yaAGCb1">in
 
 
 
+
+
+
+
           The Compleat Sunrise</a> briefly covers what was available in
         the Block 1 SUNRISE program (September 1964).&nbsp; <br>
       </li>
       <li>You can pick through <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
+
+
 
 
 
@@ -5519,6 +5720,10 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
 
 
 
+
+
+
+
       Pultorak's meticulously-crafted Block 1 documents and
       demonstration</a> ... the problem being, you see, that John had no
     Block 1 software to use as a model, and hence based his Block 1
@@ -5530,7 +5735,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     <br>
     <br>
     But anyway, assuming you have started the simulation as indicated
-    above, you'll see the following on the simulated DSKY:<br>
+    above, I do know enough to tell you how to do a few things with it:<br>
     <br>
     <table width="100%" border="1" cellpadding="2" cellspacing="2">
       <tbody>
@@ -5566,6 +5771,10 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
             an error code in it.&nbsp; Thus, you are seeing "Alarm
             00203".&nbsp; According to <a
 href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">the
+
+
+
+
 
 
 
@@ -5729,7 +5938,7 @@ href="http://www.ibiblio.org/apollo/listings/Solarium055/ASSEMBLY_AND_OPERATION_
     <hr style="width: 100%; height: 2px;"><br>
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-09-26.<br>
+          2016-11-08.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
