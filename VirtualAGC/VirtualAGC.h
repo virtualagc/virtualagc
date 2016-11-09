@@ -156,6 +156,7 @@ enum
 class TimerClass : public wxTimer
 {
 public:
+  virtual ~TimerClass() {};
   int IoErrorCount;
   int Portnum;
   int KeycodeIndex;
@@ -174,6 +175,7 @@ public:
   // begin wxGlade: Simulation::ids
   // end wxGlade
 
+  virtual ~Simulation() {};
   Simulation(wxWindow* parent, int id, const wxString& title,
       const wxPoint& pos = wxDefaultPosition,
       const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
@@ -236,6 +238,7 @@ public:
   VirtualAGC(wxWindow* parent, int id, const wxString& title,
       const wxPoint& pos = wxDefaultPosition,
       const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
+  virtual ~VirtualAGC() {};
 
   // For keeping track of a running simulation.
   Simulation *SimulationWindow;
