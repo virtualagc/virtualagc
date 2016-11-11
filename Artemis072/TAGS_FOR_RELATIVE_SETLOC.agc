@@ -3,7 +3,7 @@
 ## Filename:	ABSOLUTE_LOCATIONS_FOR_UPDATES.agc
 ## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
 ##		build 072.  This is for the Command Module's (CM) 
-##		Apollo Guidance Computer (AGC), we believe for 
+##		Apollo Guidance Computer (AGC), for 
 ##		Apollo 15-17.
 ## Assembler:	yaYUL
 ## Contact:	Onno Hommes <ohommes@alumni.cmu.edu>

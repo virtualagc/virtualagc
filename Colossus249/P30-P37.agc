@@ -3,7 +3,7 @@
 ## Filename:	P30-P37.agc
 ## Purpose:	Part of the source code for Colossus, build 249.
 ##		It is part of the source code for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.
+##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
 ## Reference:	pp. 630-643 of 1701.pdf.
 ## Contact:	Ron Burkey <info@sandroid.org>.

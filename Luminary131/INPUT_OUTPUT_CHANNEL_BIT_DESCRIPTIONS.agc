@@ -3,7 +3,7 @@
 ## Filename:	INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc
 ## Purpose:	The main source file for Luminary 1C, revision 131.
 ##		It is part of the source code for the Lunar Module's (LM)
-##		Apollo Guidance Computer (AGC) for Apollo 13 and Apollo 14.
+##		Apollo Guidance Computer (AGC) for Apollo 13.
 ## Assembler:	yaYUL
 ## Reference:	pp. 59-65 of 1729.pdf.
 ## Contact:	Ron Burkey <info@sandroid.org>.
