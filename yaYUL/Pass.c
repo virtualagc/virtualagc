@@ -92,6 +92,12 @@
  *              2016-11-03 RSB  Added the "unestablished" state for superbits, required
  *                              for Sunburst 120.  Also, detecting the ## header didn't
  *                              work quite right if the first non-header line was "## Page N".
+ *              2016-11-11 RSB  Added a heap of stuff for accepting either .agc
+ *                              or .yul files (where the description of the
+ *                              latter comes from the "Preliminary MOD 3C
+ *                              Programmer's Manual", or a mixture, transparently
+ *                              converting .yul to .agc internally on-the-fly.
+ *                              It *almost* works, but not quite yet.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -144,6 +150,7 @@ typedef struct
   Line_t InputFilename;
   int CurrentLineInFile;
   FILE *HtmlOut;
+  int yulType; // 0 for .agc, 1 for .yul.
 } StackedInclude_t;
 static StackedInclude_t StackedIncludes[MAX_STACKED_INCLUDES];
 
@@ -1435,6 +1442,7 @@ int
 Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
     int *Warnings)
 {
+  int yulType = 0;
   int IncludeDirective;
   ParserMatch_t *Match;
   InterpreterMatch_t *iMatch;
@@ -1494,6 +1502,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   InputFile = fopen(CurrentFilename, "r");
   if (!InputFile)
     goto Done;
+  yulType = (NULL != strstr(InputFilename, ".yul"));
 
   // Loop on the lines of the input file.  The assembler passes differ
   // among themselves as follows:
@@ -1581,6 +1590,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
               CurrentLineInFile =
                   StackedIncludes[NumStackedIncludes].CurrentLineInFile;
               HtmlOut = StackedIncludes[NumStackedIncludes].HtmlOut;
+              yulType = StackedIncludes[NumStackedIncludes].yulType;
               s[0] = 0;
             }
           else
@@ -1658,6 +1668,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           StackedIncludes[NumStackedIncludes].CurrentLineInFile =
               CurrentLineInFile;
           StackedIncludes[NumStackedIncludes].HtmlOut = HtmlOut;
+          StackedIncludes[NumStackedIncludes].yulType = yulType;
           NumStackedIncludes++;
 
           if (sscanf(s, "$%s", CurrentFilename) != 1)
@@ -1694,6 +1705,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                   CurrentFilename, CurrentLineInFile);
               goto Done;
             }
+          yulType = (NULL != strstr(CurrentFilename, ".yul"));
 
           inHeader = 1;
           CurrentLineInFile = 0;
@@ -1731,6 +1743,101 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             ss++;
         }
       *ss = 0;
+
+      /*
+       * If the input file is of type .yul, then we need to transform the
+       * input line into something we'd expect to find in a .agc file instead.
+       * The .yul files have a fixed column alignment, as follows (with info
+       * taken more-or-less from the MOD 3C document, as freely-interpreted
+       * by me):
+       *
+       *        Column 1        Card type:
+       *                                blank   contains code
+       *                                R       full-line comment, starting at
+       *                                        col 9.
+       *                                P       comment consisting of page name,
+       *                                        starting at col 9.
+       *                                A       not in 3C doc, but I think it's
+       *                                        a comment that begins at col 41.
+       *                        I only look at blank, R, and A, and ignore
+       *                        all others.
+       *        Columns 2-7     Card sequence number ... I ignore it.
+       *        Column 8        Spacing:
+       *                                blank   ends line with \n
+       *                                2       ends line with \n\n
+       *                                4       ends line with \n\n\n\n
+       *                                8       advances to next page after line.
+       *                        I treat all identically, as \n.
+       *        Columns 9-16    (If a code card) the line label.
+       *        Columns 18-23   (If a code card) the operator, pseudo-op
+       *        Columns 25-40   (If a code card) the operand, mod1, mod2
+       *        Columns 41-80   (If a code card) the line's comment
+       *
+       * Blank lines or lines beginning with ## are passed through unchanged.
+       */
+      if (yulType && s[0] != 0)
+        {
+          Line_t card;
+          int len;
+          char c;
+
+          memcpy (card, s, sizeof(card));
+          len = strlen(card);
+
+          if (len < 8)
+            {
+              s[0] = 0;
+            }
+          else if (card[0] == ' ')
+            {
+              if (len < 17)
+                sprintf (s, "%s", &card[8]);
+              else
+                {
+                  card[16] = 0;
+                  sprintf (s, "%-16s", &card[8]);
+                  if (len < 25)
+                    sprintf (&s[16], "%s", &card[17]);
+                  else
+                    {
+                      card[23] = 0;
+                      sprintf(&s[16], "%-8s", &card[17]);
+                      if (len < 41)
+                        sprintf(&s[24], "%s", &card[24]);
+                      else
+                        {
+                          c = card[40];
+                          card[40] = 0;
+                          sprintf(&s[24], "%-24s", &card[24]);
+                          card[40] = c;
+                          sprintf(&s[48], "# %s", &card[40]);
+                        }
+                    }
+                }
+            }
+          else if (card[0] == 'R')
+            {
+              sprintf (s, "# %s", &card[8]);
+            }
+          else if (card[0] == 'A')
+            {
+              if (len > 40)
+                sprintf (s, "\t\t\t\t\t\t# %s", &card[40]);
+              else
+                sprintf (s, "\t\t\t\t\t\t#");
+            }
+          else
+            {
+              s[0] = 0;
+            }
+        }
+#if 0
+      if (yulType)
+        {
+          printf ("%s\n", s);
+          continue;
+        }
+#endif
 
       // Find and remove the comment field, if any.
       //printf ("Line -> \"%s\"\n", s);
