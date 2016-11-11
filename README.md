@@ -1,6 +1,3 @@
----
-# We are currently in the process of transcribing Sunburst 120 (the Apollo 5 flight software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Sunburst-120-Transcription)**
----
 
 Virtual Apollo Guidance Computer
 ================================
