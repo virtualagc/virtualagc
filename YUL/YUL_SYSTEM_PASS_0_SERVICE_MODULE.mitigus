@@ -8,7 +8,7 @@
 # Pages:        108-152
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-07 JL   Transcribed pages 108-124.
-#               2016-11-11 JL   Transcribed pages 125-132.
+#               2016-11-11 JL   Transcribed pages 125-133.
 
 # Annotations:
 #
@@ -1110,6 +1110,58 @@ R1030   LOOP TO COPY OLD YULPROGS TO NEW.                                       
 
 # Page 133
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  26        PAGE  93
+
+P1065   PROCEDURE TO SHORTEN LABEL BY PACKING UP USED WORDS AND REVALUING THE THREADS, USING SOMETHING SIMILAR IN FORM
+R1067   TO A SIMPLE TWO-PASS ASSEMBLER.  THIS PAGE: PASS 1, LEAVING BANK 7 ADDRESSES IN BANK 5.
+
+ 1069   SHORTEN    TX           BANK 5        -             Z,X3
+ 1070              TX           Z,X3          -             Z,R1
+ 1071              TX           Z,X3          -             Z,R2                DISTRIBUTE BANK 5 INDICATOR TO R1,2.
+ 1073              TX           1,8           -             Z,X2
+ 1074              RT           1,6           N,X2          3,6                 COPY LABEL INTO BANK 5.
+ 1076   INIT SLOT  TX           INIT WD 8     -             1,8
+ 1077              TX           INIT WD 8     -             Z,X2                PREPARE TO BUILD SHORTER LABEL IN BNK 7.
+ 1079              SWS,THREAD10 3,9           32            Z,R1                BANK 5 (OLD) ADDRESS OF FIRST COMPUTER.
+ 1081              TS           S ONES        3,6           LAST COM Q          MAKE ANY TERMINAL THREAD LOOK AT ONES.
+
+ 1083   MOVE COMP  TN           N,R1          2             N,X2                MOVE COMPUTER NAME WITH SOFTWARE STATUS.
+ 1085              TX           Z,X2          -             N,R1                LEAVE FORWARDING ADDRESS.
+ 1087              SWS,THREAD10 N,X2          0             Z,R1                THREAD TO NEXT COMPUTER (OLD ADDRESS).
+ 1089              SWS,THREAD10 N,X2,2        12            Z,R2                B5 THREAD TO PROGRAMS OF COMPUTER.
+ 1091              TS           Z,R2          Z,R3          LAST PRG Q          PUT BANK INDICATOR 5 IN R3.
+
+ 1093   MOVE PSR   TN           N,R2          2             N,X2                MAIN WORD PAIR OF PROG/SUB ENTRY.
+ 1095              TX           Z,X2,1        -             N,R2                LEAVE FORWARDING ADDRESS.
+ 1097              SWS,THREAD10 N,X2          0             Z,R2                THREAD TO NEXT PROG/SUB OF COMPUTER.
+ 1099              NA, BIT25    2,0           S ONES        LAST PRG Q -1       BRANCH IF PROG/SUB HAS NO SUBROUTINES.
+
+ 1101              SWS,THREAD11 N,X2          24            Z,R3                THREAD TO WORD 3 (1ST SUBRO THREAD WD).
+ 1103              SM           Z,X2,1        Z,SC,1        -
+ 1104              SWS,THREAD11 Z,AU1         0             Z,R3                THREAD TO NEXT WORD OF SUBRO THREADS.
+ 1106              TS           N,R3          N,X2          PUT 1 WORD     C    STORE THREAD WORD PENDING CHECK.
+ 1108              SSL, FOUR    Z,AU1         9             C,-2                AFTER CHECK, STEP BACK IF MORE THREDWDS.
+ 1110              TX           Z,X2,1        -             -                   (DONE FOR SUBRO-LESS PROGRAM OR SUBRO).
+ 1112   LAST PRG Q NA           N,R2          S ONES        MOVE PSR            BRANCH IF MORE PROG/SUBS FOR THIS COMP.
+
+ 1114   LAST COM Q NA           N,R1          S ONES        MOVE COMP           BRANCH IF MORE COMPUTERS TO MOVE.
+
+ 1116              SWS,THREAD10 3,9           16            Z,R1                BANK 5 ADDRESS OF FIRST AUTHOR NAME.
+ 1118              LA           S ONES        N,R1          LAS AUTH Q +1       BRANCH IF THERE ARE NO AUTHORS.
+
+ 1120   MOVE AUTN  TN           N,R1          2             N,X2                MOVE 1ST HALF AND THREADS OF AUTHORNAME.
+ 1122              TX           Z,X2,1        -             N,R1                LEAVE FORWARDING ADDRESS.
+ 1124              SWS,THREAD10 N,X2          12            Z,R1                THREAD TO NEXT AUTHOR NAME.
+ 1126              SWS,THREAD11 N,X2,1        0             Z,R3                THREAD TO 2ND HALF OF AUTHOR NAME.
+ 1128              TS           N,R3          N,X2          PUT 1 WORD     C    STORE LIKE PROG/SUB THREAD WORD, ABOVE.
+ 1130   LAS AUTH Q NA           N,R1          S ONES        MOVE AUTN           BRANCH IF MORE AUTHOR NAMES TO MOVE.
+
+ 1132              SWS,THREAD10 3,9           0             Z,R1                BANK 5 ADDRESS OF FIRST DELETE.
+ 1134              LA           S ONES        N,R1          LAS DELE Q +1       BRANCH IF THERE ARE NO DELETES.
+
+ 1136   MOV DELES  TN           N,R1          2             N,X2                MOVE DELETE ENTRY.
+ 1138              TX           Z,X2,1        -             N,R1                LEAVE FORWARDING ADDRESS.
+ 1140              SWS,THREAD10 N,X2,1        0             Z,R1                THREAD TO NEXT DELETE.
+ 1142   LAS DELE Q NA           N,R1          S ONES        MOVE DELES          BRANCH IF MORE DELETES TO MOVE.
 
 # Page 134
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  27        PAGE  94
