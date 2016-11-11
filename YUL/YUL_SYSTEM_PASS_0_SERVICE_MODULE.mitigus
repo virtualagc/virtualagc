@@ -8,6 +8,7 @@
 # Pages:        108-152
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-07 JL   Transcribed pages 108-124.
+#               2016-11-11 JL   Transcribed pages 125-132.
 
 # Annotations:
 #
@@ -714,26 +715,398 @@ P0531   INITIALIZATION FOR MULTIPLE PRINTER RUNS, RECEPTION OF CARD IMAGES.
 # Page 125
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  18        PAGE  85
 
+P0588   SELECT CARD IMAGES FOR SYMBOLIC-CARD-IMAGE TYPE TASK.
+
+ 0589   END OF Q   LA           END OF 1      PCH CARD +1   END PR PCH          BRANCH IF JUST RECONSTITUTED "END OF".
+
+ 0591   TEST MODE  SSL, D12     S SWITCH      0             C,+1                BRANCH ON 4-WAY CARD SELECTION MODE.
+ 0593              TS           PHI WAA       Z,X4          SEL PEEK            INIITAL MODE = 0.
+ 0595              TS           PHI WAA       Z,X4          SEEK MTCH           REQUEST-SEEKING MODE = 1.
+ 0597              SSL, ONE     PCH CARD +1   5             C,+1                ACCEPT UNTIL SEQBREAK (MODE = 2).
+ 0599              TS           -             -             USE CARD            ACCEWPT ALL (MODE = 3) OR COND. ACCEPT.
+
+ 0601              TX           PHI WAA       -             Z,X4
+ 0602   SEL PEEK   TS           Z,X4,1        Z,X6          PHI PEEK       C    PEEK AT POSSIBLE REQUEST CARD.
+ 0604              NA, CHAR1    4,0           ASTRISK       C,+2
+ 0605              SSL, ONE     S SWITCH      1             C,+3                IF MONITOR CARD, TEST MODE AGAIN.
+ 0607              NA, CHAR1    4,0           Y COLYUM 1    C,+3
+ 0608              SSL, ONE     S SWITCH      1             C,+1                IF YUL DIRECTOR, TEST MODE AGAIN.
+ 0610              TS, CHAR8    S THREE       S SWITCH      USE CARD            ACCEPT ALL IF NO REQUESTS.
+ 0612              TN           N,X4          10            6,1
+ 0613              TX           Z,X5          -             SAVE X4
+ 0614              TX, CHAR8    S ONE         -             S SWITCH            SET UP MODE 1 (SEEK 80-COLUMN MATCH).
+ 0616              TX           L TEMP MSK    -             Z,AU1
+ 0617              NA, CHAR1    6,1           T COLUMN 1    C,+2
+ 0618              TS, CHAR1    L COLUMN 1    6,1           C,+2                CHANGE "T" CARD TO "L" CARD.
+ 0620              NA, CHAR1    6,1           L COLUMN 1    SEL UNLOG           BRANCH OF NOT ANY KIND OF LOG CARD.
+ 0622              NA,DATE MASK 6,9           S BLANKS      C,+2
+ 0623              TS           S CHAR 1      N,AU1         SEEK MTCH -1        DO NOT TEST COLUMNS 2-8 OF LOG CARDS.
+ 0625              TX, CHAR6    DASHES        -             6,9
+ 0626              TS, CHAR1    DASHES        6,10          C,-2                PUT DASHES INTO DATE.
+ 0628   SEL UNLOG  SM           S CHAR 1      S C2T7        N,AU1               CHECK ALL BUT COLUMN 8 OF NON-LOG CARDS.
+ 0630              SWE,YYNNYYYY 6,1           A,3           6,12
+ 0631              TS           S SIX         Z,X5          C,+2                SET UP CHECK ON 6-COLUMN CARD NO. FIELD.
+ 0633   CNDO CHEK  SWS, ONES    6,12          A,1           6,12
+ 0634              LA, CHAR2    6,12          END OF 1      C,+3                BRANCH IF CHARACTER IS A DIGIT.
+ 0636              NA, CHAR2    6,12          S BLANKS      SEEK MTCH -1
+ 0637              TX, CHAR2    S ZERO        -             6,12                REPLACE BLANK BY ZERO.
+ 0639              NA           Z,X5,1        S ONE         COND CHEK
+ 0640              LA           A999999       6,12          SEEK MTCH -1        CARD NUMBER 999999 IS ALSO A SEQ. BREAK.
+ 0642              SS           6,12          S C2T7        6,1                 STANDARDIZE NON-SEQUENCE-BREAK NUMBER.
+ 0644              TS           SAVE X4       Z,X5          TEST MODE +2        REQUEST CARD IS NOW READY TO LOOK AT.
+
+ 0646   SEEK MTCH  NA, TEMPMASK PCH CARD +1   4,1           FETCH SYM -1        FAST IGNORE IF FIRST WORD DOESN'T MATCH.
+ 0648              TN           PCH CARD +1   1             4,1                 SET UP AU1 AND AU2.
+ 0650              TX           S NINE        -             Z,CSH
+ 0651              NA           N,AU1,1       N,AU2,1       FETCH SYM -1        IGNORE CARD IF ANY NON-MATCH.
+ 0653              NA           Z,CSH,1       S ONE         C,-1
+ 0654              S, PHI READ  4,1                                             READ USED REQUEST CARD AFTER SUCCESS.
+ 0656              TX, CHAR8    S TWO         -             S SWITCGH           SET UP MODE 2 TO ACCEPT UNTIL SEQBREAK.
+
 # Page 126
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  19        PAGE  86
+
+P0658   PREPARE A CARD IMAGE FOR TRANSFERRING, PRINTING, PUNCHING, OR PRINTING WITH EITHER TRANSFERRING OR PUNCHING.
+
+ 0660   USE CARD   NA, BIT12    S SWITCH      S ONES        NOT XFER 2          BRANCH IF NOT TRANSFERRING.
+ 0662              TS           S ZERO        C,+0          SNATCH TR           SNATCH TRACK HERE FIRST TIME ONLY.
+ 0664              TX           XFR PLACE     -             Z,X4
+ 0665              NA           XFR PLACE     XFR LIMIT     SEND XFER           BRANCH IF NOT END OF OUTPUT BUFFER.
+
+ 0667              EX           EOR           LEFT HALF     N,X4,2              PLANT END-OF-BUFFER FLAG.
+ 0669              TS           EOR           N,X4          DISC CHEK
+ 0670   XFR LD X4  TX           XFR BUFFS     -             Z,X4           S
+ 0671              TN           XFR BUFFS     2             XFR BUFFS +4
+ 0672              TN           N,AU1         4             XFR BUFFS           SWAP OUTPUT BUFFER NAMES.
+ 0674              S, DISC WAIT 4,0           128           DISC ADDR           WRITE BLOCKS OF 8192 WORDS ON THE DISC.
+ 0676              WA           DISC ADDR     128 BLOX      DISC ADDR
+ 0678              TS           XFR BUFFS     XFR PLACE     XFR LD X4      C
+ 0679              NA           DISC ADDR     DISCALIM      SEND XFER
+
+ 0680   SNATCH TR  SWE, C1T4    TRACK LOG     D,6,L         TRINDEX +2
+ 0681              TS, C1T4     TRINDEX +2    TRINDEX +5    DISCAP         C
+ 0682   TR CODE WD OCT          -1016                                           SNATCH A TRACK, GIVE IT A LOG NUMBER.
+ 0684              SPEC                                     TRINDEX
+ 0685              TS           XFR BUFFS     Z,X4          NEW TRACK           TRACK SNATCH WAS SUCCESSFUL.
+ 0687   XFER FAIL  NA, C1T4     TRINDEX +2    YUL LOG       C,+2                BRANCH UNLESS ALL TRACKS ARE RELEASED.
+ 0689              S, MON TYPER LAK TR MSG    SPRAM +32     CANT XFER           "INSUFFICIENT TRACKS AVAILABLE;".
+
+ 0691              DA           TRACK LOG     S ONE         TRACK LOG           INCREMENT LOG NUMBER TOWARD JOB LOG NO.
+ 0693              SWE, C1T4    TRACK LOG     D,6,L         TRINDEX +2
+ 0694              TS           -             -             DISCAP         C
+ 0695              OCT          -1017
+ 0696              SPEC                                     TRINDEX
+ 0697              TS           -             -             XFER FAIL
+ 0698              TS           -             -             DISASTER            BAD RETURN SHOULD BE IMPOSSIBLE HERE.
+
+ 0700   NEW TRACK  DS           TRACK LOG     S ONE         TRACK LOG           DECREMENT LOG NUMBER FOR EACH TRACK.
+ 0702              EX           TR CODE WD    B7T13         DISC ADDR
+ 0703              SS           DISC ADDR     B7T13         DISCALIM            FORM DISC ADDRESSES OF TRACK AND TR +1.
+
+ 0705   SEND XFER  TN           PCH CARD +1   10            N,X4,10
+ 07052             TX           Z,X4          -             XFR PLACE
+ 0706              LA           END OF 1      PCH CARD +1   CLOSE XFR           BRANCH IF THAT WAS "END OF" CARD.
 
 # Page 127
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  20        PAGE  87
 
+P0708   PREPARE A CARD IMAGE FOR PRINTING AND/OR PUNCHING.
+
+ 0709   NOT XFER 2 SSL, FOUR    PCH CARD +1   3             C,+1                BRANCH IF CARD IS A SEQUENCE BREAK.
+ 0711              NA, CHAR7    PCH CARD +1   S ZERO        C,+4                BACKWARDS ZERO SUPPRESS IN COLUMNS 7,6.
+ 0713              TX, CHAR7    S BLANKS      -             PCH CARD +1
+ 0714              NA, CHAR6    PCH CARD +1   S ZERO        C,+2
+ 0715              TX, CHAR6    S BLANKS      -             PCH CARD +1
+
+ 0716              SS           S ZERO        OCTAL 60      PCH CARD +1         REMOVE SEQUENCE BREAK FLAG & ASTERISK.
+ 0718              NA, CHAR8    PCH CARD +1   S NINE        C,+3                BRANCH IF CARD NOT RIGHT PRINT REMARKS.
+ 0720              TN           PCH CARD +2   5             3,11                DEPOSIT RIGHT PRINT IN OLD LINE.
+ 0722              TS           -             -             ASK PUNCH
+
+ 0723              NA, BIT9     SSWITCH       S ONES        ASK PUNCH           BRANCH IF NOT PRINTING.
+
+ 0725              TN           PCH CARD +1   10            SLINE +1
+ 0726              MT           S BLANKS      5             N,AU2,1
+ 0727              SWE, BIT 1   SLINE +1      4             SLINE
+ 0728              SWS, ACO2    SLINE +1      12            SLINE
+ 0729              TX, CHAR8    S BLANKS      -             SLINE +1            TRANSLATE UPSPACING NOTATION.
+ 0731   SET OLD    TX           L OLD LINE    -             Z,X3
+ 0732              TX           Z,X2          -             L OLD LINE          BEGIN SWAP OF PRINT BUFFERS.
+ 0734              NA, CHAR1    SLINE +1      L COLUMN 1    NO NEW LOG
+
+ 0735              TX, C5T8     ZSUP ONE      -             USERLOG +13         INITIALIZE USER'S OWN PAGE NUMBER.
+ 0737              TX, C5T8     S BLANKS      -             SLINE +10           DELETE ANY PAGE NUMBER IN CARD.
+ 0739              TN           SLINE +1      10            USERLOG +1          SET LOG LINE ASIDE AS SUBHEAD.
+ 0741              MT           N,AU2,1       5             N,AU1,1             BUT PRINT "USER'S OWN PAGE NO.   1".
+ 0743              TS           S ONE         USER PAGE     PRIN SKIP -1        SKIP BEFORE PRINTING LOG CARD.
+
+ 0745   NO NEW LOG NA, CHAR1    SLINE +1      P COLUMN 1    C,+2                UNLESS IMMEDIATELY PRECEDED BY LOG CARD.
+ 0746              NA, CHAR1    3,1           L COLUMN 1    PRIN SKIP -1        SKIP BEFORE PRINTING "P" CARD.
+
+ 0748              LA           S BIT 1       N,X3          PRIN SKIP           SKIP IF LAST LINE SO SPECIFIED.
+ 0750              WA           LIN COUNT     N,X3          LIN COUNT           ADD IN UPSPACING OF LAST LINE.
+ 0752              LA           LIN COUNT     N LINES       PRINT OLD           BRANCH IF MORE ROOM ON THIS PAGE.
+
+ 0754              TX           S BIT 1       -             N,X3
+ 0755   PRIN SKIP  NA           N COPIES      S ZERO        COPY PRT2
+ 0756              S, PHI PRINT DEPAGIN8
+ 0757              NA           N COPIES      S ZERO        COPY PRT2           BRANCH IF MUST WRITE ON COPY TAPE.
+ 0759              S, PHI PRINT 3,0                                             PRINT LAST LINE ON PREVIOUS PAGE.
+ 0761              DA           PAGE NO       S ONE         PAGE NO
+ 0762              SWE, ONES    PAGE NO       D,4,L         SERV ARG
+ 0763              TS           Z,SC          Z,AU1         S D2A ZSUP
+ 0764              TX, C5T8     SERV ARG +2   -             PAGE HEAD +15
+ 0765              NA           N COPIES      S ZERO        COPY PRT2           BRANCH IF MUST WRITE ON COPY TAPE.
+ 0767              S, PHI PRINT PAGE HEAD
+ 0768              TX           PAGE HEAD     -             LIN COUNT           RESET LINE COUNT TO 3.
+ 0770              LA           USER PAGE     SZERO         PRINT OLD +2        BRANCH IF NO LOG CARDS YET.
+
 # Page 128
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  21        PAGE  88
+
+P0772   PRINT LOG LINE HERE ON ITS 2ND AND SUBSEQUENT APPEARANCES.
+
+ 0773              NA           USER PAGE     S ONE         PRINT LOG           BRANCH IF LOG CARD ALREADY ESTABLISHED.
+ 0775              TS           S TWO         USER PAGE     PRINT OLD +2        SET PAGE NUMBER FOR NEXT TIME.
+
+ 0777   PRINT LOG  SWE, ONES    USER PAGE     D,4,L         SERV ARG
+ 0778              TS           Z,SC          Z,AU1         S D2A ZSUP
+ 0779              TX, C5T8     SERV ARG +2   -             USER LOG +13
+ 0780              NA           N COPIES      S ZERO        COPY PRT2           BRANCH IF MUST WRITE ON COPY TAPE.
+ 0782              S, PHI PRINT USER LOG
+ 0783              DA           USER PAGE     S ONE         USER PAGE
+ 0784              TS           5 LINES       LIN COUNT     PRINT OLD +2
+
+ 0785   PRINT OLD  NA           N COPIES      S ZERO        COPY PRT2           BRANCH IF MUST WRITE ON COPY TAPE.
+ 0787              S, PHI PRINT 3,0                                             NORMAL WAY OF PRINTING OLD LINE.
+ 0789              TX           Z,X3,1        -             Z,X2
+ 0790              MT           S BLANKS      15            N,X3,1
+ 0791              TX           L OLD LINE    -             Z,X3
+ 0792              TS           S ZERO        N,X2          ASK PUNCH           FINISH BUFFER SWAP, SWAB OUT NEW LINE.
+
+R0794   MINOR SUBROUTINE TO COPY EACH LINE PRINTED ONTO THE COPY TAPE WHEN MORE THAN ONE PRINTER RUN IS REQUIRED.
+
+ 0796   COPY PRT2  SS           N,SH          A ADRES       C,+2
+ 0797              WA           L COP BUFS    S ONE         Z,X6
+ 0798              TN                         16            N,X6,15             COLLECT 4 LINES BEFORE  WRITING.
+ 0800               TX          Z,SH          -              COMMON
+ 0801               NA          6,3           EOR           COPY EXIT           BRANCH IF RECORD NOT FILLED YET.
+
+ 0803              TX           6,4           -              Z,X6
+ 0804              CC           6,1           -             6,65
+ 0805              TS           N,X6          L COP BUFS    PHI TAPE            SWAP TAPE BUFFERS.
+ 0807              WF,2         6,1           -             DISASTER
+
+ 0808              TX           COMMON        -             Z,SC
+ 0809   COPY EXIT  TS           Z,X6          L COP BUFS    C,-1                ADVANCE POINTER WITHIN BUFFER.
+
+
+
+ 0811   ASK PUNCH  NA, BIT10    SSWITCH       S ONES        FETCH SYM -1        BRANCH IF NOT PUNCHING.
+ 0813              NA, CHAR8    PCH CARD +1   S ONE         C,+2
+ 0814              TX, CHAR8    S BLANKS      -             PCH CARD +1         BLANK OUT "1" IN COLUMN 8.
+ 0816              S, PUNCH CD  PCH CARD      ALPHA         FETCH SYM -1
 
 # Page 129
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  22        PAGE  89
 
+P0817   CLOSE OUT PUNCHING, PRINTING, TRANSFERRING, OR PRINTING WITH PUNCHING OR TRANSFERRING.
+
+ 0819   END PR PCH TS           PAGE HEAD     N,X3          SEL PEEK -1    C    FORCE SP3 BEFORE "END OF" CARD.
+ 0821              TX           Z,X4,1        -             Z,X6
+ 0822              TS           S BIT 1       SLINE         PHI PEEK       C    PEEK AHEAD FOR (HOPEFULLY) Y OR *.
+ 0824              TN           W END REV     2             SLINE +1
+ 0825              TN           PCH CARD +2   6             SLINE +3
+ 0826              TN           W LAST ASS    2             SLINE +11
+ 0827              TN           PCH CARD +8   2             SLINE +13           FORM UP COMPLETE "END OF " LINE.
+ 0829              NA, CHAR1    4,0           Y COLYUM 1    C,+2                BRANCH IF NEXT CARD NOT A YUL DIRECTOR.
+ 0831              TS, CHAR1    PCH CARD +2   SLINE +13     C,+5                (INCLUDE "N" IN "LAST ASSEMBLED ON".)
+ 0833              NA, CHAR1    4,0           ASTRISK       C,+2                BRANCH IF THERE'S AN UNUSED DETAIL CARD.
+ 0835              TS           Y COLYUM 1    6,1           C,-2                HIDE ASTERISK FROM "END CHECK" IN BNK 1.
+ 0837              S, YUL TYPER NOMAT MSG     AMTF +4       C,+1                CUSS 1ST UNUSED DETAIL CARD ON CONSOLE.
+ 0839              S, YUL TYPER 4,0           A +10         C,-2
+ 0840              NA, BIT9     S SWITCH      S ONES        CLOSFER Q           BRANCH IF NOT PRINTING.
+
+ 0842   CLOSE PRT  NA           Z,X3          L JUNK        C,+2
+ 0843              TS           L OLD LINE    Z,X3          END PR PCH     C    IN CASE NOTHING WAS PRINTED.
+ 0845              NA           N COPIES      S ZERO        COPY PRT2           BRANCH IF MUST WRITE ON COPY TAPE.
+ 0847              S, PHI PRINT 3,0                                             PRINT LAST ORDINARY LINE.
+ 0849              NA           N COPIES      S ZERO        COPY PRT2           BRANCH IF MUST WRITE ON COPY TAPE.
+ 0851              S, PHI PRINT SLINE                                           PRINT "END OF" LINE.
+ 0853   CLOSFER Q  NA, BIT12    S SWITCH      S ZERO        USE CARD +1         IF TRANSFERRING, SEND "END OF" CARD.
+ 0855              NA, BIT10    SSWITCH       S ONES        END PRINT           BRANCH IF NOT PUNCHING.
+
+ 0857   CLOSE PCH  S, PUNCH CD  EOR           BINARY        C,+1                CLOSE OUT PUNCHING.
+ 0859              NA, BIT9     SSWITCH       S ZERO        C,+2                BRANCH IF PRINTING ALSO.
+ 0861              S, MON TYPER W CARD DUN    SPRAMR +16    RELOAD P0           ANNOUNCE END OF CARD OUTPUT.
+ 0863              S, MON TYPER W CARD DUN    SPRA +16      END PRINT
+
+ 08639             MT           S ZERO        10            N,X4,1
+ 0864   CLOSE XFR  NA           Z,X4          XFR LIMIT     C,-1
+ 0865              EX           EOR           LEFT HALF     N,X4,2
+ 0866              TS           EOR           N,X4          XFR LD X4      C
+ 0867              S, DISC WRIT 4,0           128           DISC ADDR           CLOSE OUT, SEND RECD W/ "END OF" CARD.
+ 0869              TS           -             -             DISC CHEK           PREPARE PSEUDO-CONFIRMATION BIT.
+
+ 0871   TCONFIRM   DA           TRACK LOG     S ONE         TRACK LOG           INCREMENT LOG TOWARD JOB LOG.
+ 0873              SWE, C1T4    TRACK LOG     D,6,L         TRINDEX +2
+ 08732             TS           -             -             DISCAP         C
+ 08733             OCT          -1
+ 08734             SPEC                                     TRINDEX             LOOK UP EACH TRACK, THEN MODIFY INDEX.
+ 08736             TS           S ONE         TRINDEX +4    C,+2                PLANT PSEUDO-CONFIRMATION BIT.
+ 08738             TS           -             -             DISASTER
+ 0874              TX           CHAS 2500     -             TRINDEX +5          CLEAN OUT SUPERFLUOUS BITS IN ADDRESS.
+ 0876              TS, C1T4     TRINDEX +2    TRINDEX +5    DISCAP         C
+ 0877              OCT          -12                                             PLANT PSEUDO-CONFIRMATION BIT IN INDEX.
+ 0879              SPEC                                     TRINDEX
+ 0880              NA, C1T4     TRINDEX +2    YUL LOG       TCONFIRM
+
+ 0881              SWS, CHAR6   PAGE HEAD +1  A,1,L         W CDIMS ON +2       PUT 1800 SUFFIX LETTER IN MESSAGE.
+ 0883              NA, BIT9     S SWITCH      S ZERO        C,+2                BRANCH IF PRINTING ALSO.
+ 0885              S, MON TYPER W CDIMS ON    SPRAMR +24    RELOAD P0
+ 0886              S, MON TYPER W CDIMS ON    SPRA   +24    END PRINT           ANNOUNCE "CARD IMAGES ON DISC X".
+
 # Page 130
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  23        PAGE  90
+
+P08875  RUN COPY TAPE ONTO PRINTER AS REQUIRED, AND END TASK.
+
+ 0888   END PRINT  LA           N COPIES      S ZERO        RUNOUT PR           BRANCH IF ONE PRINTER RUN WAS ENOUGH.
+ 0890              NA           Z,X6          L COP BUFS    C,+3                BRANCH WHEN LAST COPY BUFFER CLOSED OUT.
+ 0892              TS           L BLANCD      Z,X2          COPY PRT2           FILL OUT LAST COPY BUFFER.
+ 0894              TS           2,0           2,0           C,-2
+ 0895              S, MON EOFRI COPY UP       -             S ZERO              CLOSE OUT COPY TAPE.
+
+ 0898   COPIES     TS           S TWO         Z,R2          PHI TAPE
+ 0899              RW,2         -             -             -
+ 0900              TS           L COP BUFS    Z,X4          PHI TAPE            FETCH BUFFER ADDRESSES.
+ 0902              RF,2         4,1           -             DISASTER            SPACE OVER LABEL, READ FIRST LINE.
+ 0904              NA           Z,R2,1        S ONE         C,-2
+ 0905              WD           N COPIES      PAPER PLY     N COPIES
+ 0906              TS           -             -             GET LOG NO     C
+ 0907              SWS, D8T12   Z,SC,4        16            N,AU2               CLEAR MONITOR'S PRINTLINE COUNTER & TAB.
+
+ 0909   PRINT COP  S, PHI PRINT 3,1
+ 0910              S, PHI PRINT 3,17
+ 0911              S, PHI PRINT 3,33
+ 0912              S, PHI PRINT 3,49
+ 0913              TX           Z,X4          -             Z,X3
+ 0914              TS           N,X3          Z,X4          PHI TAPE            READ AND SWAP BUFFERS.
+ 0915              RF,2         4,1           -             DISASTER
+ 0917              NA, BANBITS  3,1           BAN EOFRI     PRINT COP
+
+ 0918              TS           Z,X4          Z,X2          PHI TAPE            (IN CASE X2 WAS SET TO BLANCARD).
+ 0920              RF,2         -             -             -                   FINISH READING SECOND EOFRI.
+ 0922              NA           N COPIES      PAPER PLY     COPIES              BRANCH IF MORE RUNS ARE NEEDED.
+ 0924              TS           Z,X2,1        -             PHI PEEK       C    X4 HAS AN OK VALUE HERE.
+ 0926              NA, CHAR1    4,0           ASTRISK       C,+2                BRANCH IF ANOTHER YUL TASK FOLLOWS.
+ 0928              TS           Z,SC,1        -             MON RLEAS           OTHERWISE RELEASE COPY TAPE.
+ 0930              TS           -             -             PHI TAPE
+ 0931              RW,2         -             -             -
+
+ 0932   RUNOUT PR  TS           S 4SPACE      N,X2,1        GET LOG NO     C
+ 0933              SWS, D8T12   S ZERO                      N,AU2
+ 0934              MT           S BLANKS      15            N,X2,1
+ 0935              WD           Z,X2          OCTAL 20      Z,X2
+ 0936              S, PHI PRINT 2,0
+ 0937              S, PHI PRINT 2,0
+ 0938              S, PHI PRINT 2,0                                             FORCE LAST LINES THROUGH BUFPRINT.
+ 0940              S, MON TYPER W LIST DUN    SPRAMR +16    -                   ANNOUNCE END OF LISTING.
+
+ 0942   RELOAD P0  S, MON TYPER S BLANKS      SPRA +8       -
+ 0943              S, PHI LOAD  W   PASS 0    2             BASE ADDR           RELOAD PASS 0 AND DO NEXT TASK (IF ANY).
 
 # Page 131
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  24        PAGE  91
 
+P0945              PROCEDURE IN THE SERVICE MODULE TO ENSURE THAT THE BACKUP YULPROGS IS BROUGHT ENTIRELY UP TO DATE AT
+R0947   THE END OF EACH JOB, AND TO CHECK WHETHER THE BACKUP IS UP TO DATE AT THE BEGINNING OF A JOB.  THIS AIM IS AC-
+R0949   COMPLISHED IN ONE OF TWO WAYS: IF AN ASSEMBLY (NOT REJECTED AS A BAD MERGE) HAS BEEN RECORDED ON ONE TAPE BUT
+R0951   NOT ON THE OTHER, THE CURRENT YULPROGS IS COPIED IN ITS ENTIRETY ONTO A WORKER, WHICH THEN BECOMES THE NEW
+R0953   YULPROGS.  IF A DELETION OR OTHER "FILE-MAINTENANCE" ACTIVITY (ONE THAT AFFECTS THE LABEL RECORD ONLY) HAS BEEN
+R0955   RECORDED ON ONE TAPE BUT NOT ON THE OTHER, THE BACKUP IS CALLED FOR AND ITS LABEL RECORD IS AMENDED.  THE ENTIRE
+R0957   COPY OCCURS IF AT THE BEGINNING OR END OF A JOB LOCATION 7,0000 CONTAINS 6034 0020 0020 0001.  IT CAN OCCUR AT
+R0959   THE BEGINNING OF A JOB WHEN A BACKUP TAPE IS MOUNTED AS THE PRINCIPAL YULPROGS.  THIS IS TYPICALLY DONE WHEN THE
+R0961   REGULAR YULPROGS HAS BEEN CLOBBERED IN SOME WAY.  AN ASSEMBLY PLACES THIS PATTERN IN 7,0000 AS SOON AS IT IS AS-
+R0963   SURED OF NOT BEING REJECTED FOR BAD MERGING.  WHENEVER A NEW YULPROGS IS MADE AT THE END OF A JOB, THE FORMER
+R0965   BACKUP IS CALLED FOR AND RETURNED TO WORKER STATUS.  LABEL AMENDMENT IS EVOKED AT EITHER END OF A JOB BY THE
+R0967   PATTERN 6034 0020 0020 0002 IN 7,0000.  THIS IS GENERATED BY DELETION, ADDING A NEW COMPUTER NAME, PUNCHING A
+R0969   MASTER DECK, ETC.  A DIRECTORY LISTING IS PRINTED AS DESCRIBED BELOW, BUT IT IS CALLED AN "AMENDED" LISTING.
+
+R0971              GROUP B PRINTS A DIRECTORY LISTING.  FOR EACH ESTABLISHED COMPUTER, THE SOFTWARE STATUS IS PRINTED,
+R0973   AND THE PROGRAMS AND SUBROUTINES FOR THAT COMPUTER ARE LISTED. WITH REVISION NUMBER, AUTHOR, DATE LAST
+R0975   ASSEMBLED, EXISTENCE OF BINARY RECORD (PROGRAMS) OR CONTROL STATUS (SUBROUTINES), AND LIST OF SUBSIDIARY SUB-
+R0977   ROUTINES GIVEN FOR EACH.  ESTABLISHED AUTHORS ARE LISTED, WITH THE NUMBER OF PROGRAMS AND SUBROUTINES CREDITED
+R0979   TO EACH.  WHEN THE LISTING IS FINISHED, GROUP B HOISTS A FLAG AND EXPIRES.
+
+
+ 0981   BACKUP     TS           S ZERO        COMMON        SET UP GPB     C    COMMUNICATION FLAG FOR END.
+ 0983              TS           Z,SC,4        N,SH          MON WAKE       C
+
+ 0984   BK1 VIA X0 TX           L BANK 1      -             Z,X0
+ 0985              TX           L DIRECTY     -             Z,X1
+ 0986              TX           PHI WAA       -             Z,X6
+ 0987              TS           YUL MASKS     Z,MXR         LIST LABL           START GROUP B GOING ON LISTING.
+
+ 0989              TX           1,1           -             YUL BU MSG +1
+ 0991              NA, CHAR8    1,0           S ONE         AMEND BUL           BRANCH IF ONLY MUST AMEND BACKUP LABEL.
+
 # Page 132
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  25        PAGE  92
+
+P0993   PROCEDURE TO MAKE A WORKER INTO A NEW YULPROGS.
+
+ 0994              S, YUL TYPER YUL BU MSG    A+4           C,+1                ANNOUNCE TASK ON TYPEWRITER.
+ 0996              TX           1,1           -             SNATCH T6 +2
+ 0997              TS           1,2           SNATCH T6 +3  MON RLEAS           RELEASE YULPROGS, PREPARE RESNATCH.
+ 0999   YUL PROP   RW,1         -             -             -
+ 1000              DA, C7T8     1,2           S ONE         1,2                 INCREMENT YULPROGS SERIAL NUMBER.
+ 1002   SNATCH T6  TS, C1T4     YUL LOG       1,2           PHI SNACH           RESNATCH YULPROGS, PROTECT AND SAVE.
+ 1004              ALF,3        N00J0006YULPROGSLLLLRRSS
+ 1005              TS           S ONE         TASK 2        PHI TAPE            PLAY SAFE WITH T6.
+ 1007              RW,6         -             -             -
+ 1008              S, MON TADDR COPY OP                                         SKIP IF WE POSSESS A TAPE 2.
+ 1010              TS           Z,SC,1        -             MON RLEAS           YES, SO WE MUST RELEASE IT.
+ 1012              TX           Z,SC,1        -             -                   NO, SO SKIP AGAIN.
+ 1014              RW,2         -             -             -                   (GOES WITH RELEASE CALL ABOVE).
+ 1016              TS           L BUF 3       Z,X5          PHI SNACH           SNATCH WORKER AS NEW YULPROGS.
+ 1018              ALF,3        W10Y0101NEWYULPR
+ 1019              TS           L BUF 2       Z,X4          POSIT YUL           POSITION, LIKE OLD TAPE, AFTER LABEL.
+ 1021              TS           S STOPPER     Z,X2          PHI TAPE
+ 1022              RF,6         2,0           -             -                   BYPASS LABEL ON OLD YULPROGS.
+ 1024              TX           L BUF 1       -             Z,X3
+ 1025              TN           OK BANNER +3  3             OK BANNER           INITIALIZE CHECKING FUNCTION IN COPYING.
+ 1027              TS           L BUF 3       Z,X2          PHI TAPE
+ 1028              RF,6         2,0           -             -                   READ FIRST RECORD TO BE COPIED.
+
+R1030   LOOP TO COPY OLD YULPROGS TO NEW.                                       THE DANCE OF THE INDEX REGISTERS, AS IN
+ 1032   BAKUP LUP  TS           Z,X3          Z,X2          PHI TAPE            PASS 3, THE EFFECT BEING AN EFFICIENT
+ 1034              RF,6         2,0           -             DISASTER            AND QUIET TRIPLE-BUFFERED COPY OF OLD
+ 1036              TX           Z,X4          -             Z,X3                YULPROGS TO NEW.
+ 1038              NA, CAC3     5,0           TASK2         CLOBBERD            BRANCH IF RECORD NUMBER IS WRONG.
+ 1040              LA, BANBITS  5,0           S ZERO        INC RECNO           BRANCH ON GOOD RECD NO. AND ZERO BANNER.
+ 1042              NA, BANBITS  5,0           OK BANNER     CLOBBERD            BRANCH IF WRONG BANNER BITS.
+ 1044              TN           OK BANNER +1  2             OK BANNER           MOVE NEXT LEGAL BANNER CONFIG. UP.
+ 1046   INC RECNO  WA           WA            S ONE         TASK2
+# Annotation: Operand3 is hand-changed from C,+3 to C,+5.
+ 1047              NA, BANBITS  5,0           BAN EOFRI     C,+3                BRANCH UNLESS ABOUT TO WRITE 1ST EOFRI.
+
+ 1049              S, MON EOFRI YUL PROP                    5,0                 CLOSE NEW YULPROGS OSTENTATIOUSLY.
+# Annotation:
+#                  S, MON TYPER W LENGTH      SPRAM +8      -
+#                  S, MON TYPER TASK2         SPRA -56      -
+# =PATCH
+ 1051              TS           Z,SC,3        -             MON RLEAS           NOW RELEASE OLD YULPROGS FOR GOOD.
+
+ 1053              TS           Z,X5          Z,X4          PHI TAPE
+ 1054              WF,1         4,0           -             DISASTER
+ 1055              TS           Z,X2          Z,X5          BAKUP LUP
+
+ 1056              RW,6         -             -             -                   GOES WITH RELEASE CALL ABOVE.
+ 1058              TS           L BUF 3       Z,X3          PHI TAPE
+ 1059              RB,1         3,0           -             SHORTEN             READ BACKWARD, BRANCHING AT BEGINNING.
+ 1061              TS           Z,SC          COMMON        MON WAKE       C    SIGNAL END OF COPYING LOOP.
+ 1063              TS           C,+0          C,-1          C,-3                SAVE TIME BY DOING THAT JUST ONCE.
 
 # Page 133
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  26        PAGE  93
