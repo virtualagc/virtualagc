@@ -2321,10 +2321,6 @@ VirtualAGC::FormCommands(void)
               DirCmd = wxT(" --directory=");
               DebugMode = 1;
             }
-          if (missionRadioButtons[ID_VALIDATIONBUTTON-ID_FIRSTMISSION]->GetValue())
-            {
-              yaAGC += wxT(" --inhibit-alarms");
-            }
         }
     }
   else

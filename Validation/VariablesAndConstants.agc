@@ -24,6 +24,7 @@
 #				similar logical tests for ROR, WOR, RAND,
 #				WAND, and RXOR.
 #		07/07/04 RSB.	Addes SKEEP1 through SKEEP7.
+#		11/12/16 MAS.	Added TIME1-TIME6 and NEWJOB.
 
 #-----------------------------------------------------------------------
 # Constants and read-only memory.
@@ -99,6 +100,7 @@ SEVEN		DEC	7
 TWNTHREE	DEC	23
 BIT1		OCT	1
 BIT7		OCT	100
+BIT10		OCT	1000
 BIT14		OCT	20000
 MAXP		OCT	37777
 MAXP-1		OCT	37776
@@ -147,6 +149,14 @@ XORR1R2		OCT	31463
 #-------------------------------------------------------------------------
 # Some variables.
 
+		SETLOC	24
+TIME2		ERASE
+TIME1		ERASE
+TIME3		ERASE
+TIME4		ERASE
+TIME5		ERASE
+TIME6		ERASE
+
 		SETLOC	61
 		
 ERRNUM		ERASE			# Error-code, reported to DSKY.
@@ -157,7 +167,11 @@ TEMPI		ERASE
 TEMPJ		ERASE
 TEMPK		ERASE
 
+		SETLOC	67
+NEWJOB		ERASE
+
 # For Smally's tests.
+		SETLOC	71
 SKEEP1		ERASE
 SKEEP2		ERASE
 SKEEP3		ERASE
