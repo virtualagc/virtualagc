@@ -151,7 +151,7 @@ DIGPAIR		# Shift the error code down by 3 places, so as to get
 		AD	TEMPI
 		TS	TEMPI
 		# Now do the same for the second octal digit, except that
-		# all the shifting isn't neeeded.
+		# all the shifting isn't needed.
 		CA	TEMPJ
 		MASK	SEVEN
 		INDEX	A

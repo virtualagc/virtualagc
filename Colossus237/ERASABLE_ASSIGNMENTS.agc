@@ -3,7 +3,7 @@
 ## Filename:     ERASABLE_ASSIGNMENTS.agc
 ## Purpose:      Part of the source code for Colossus build 237.
 ##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), we believe for Apollo 8.
+##               Computer (AGC), for Apollo 8.
 ## Assembler:    yaYUL
 ## Contact:      Sergio Navarro <sergionavarrog@gmail.com>
 ## Website:      www.ibiblio.org/apollo/index.html

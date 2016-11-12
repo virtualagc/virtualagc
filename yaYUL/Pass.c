@@ -92,6 +92,12 @@
  *              2016-11-03 RSB  Added the "unestablished" state for superbits, required
  *                              for Sunburst 120.  Also, detecting the ## header didn't
  *                              work quite right if the first non-header line was "## Page N".
+ *              2016-11-11 RSB  Added a heap of stuff for accepting either .agc
+ *                              or .yul files (where the description of the
+ *                              latter comes from the "Preliminary MOD 3C
+ *                              Programmer's Manual", or a mixture, transparently
+ *                              converting .yul to .agc internally on-the-fly.
+ *                              It *almost* works, but not quite yet.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -144,6 +150,7 @@ typedef struct
   Line_t InputFilename;
   int CurrentLineInFile;
   FILE *HtmlOut;
+  int yulType; // 0 for .agc, 1 for .yul.
 } StackedInclude_t;
 static StackedInclude_t StackedIncludes[MAX_STACKED_INCLUDES];
 
@@ -1435,6 +1442,7 @@ int
 Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
     int *Warnings)
 {
+  int yulType = 0;
   int IncludeDirective;
   ParserMatch_t *Match;
   InterpreterMatch_t *iMatch;
@@ -1494,6 +1502,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   InputFile = fopen(CurrentFilename, "r");
   if (!InputFile)
     goto Done;
+  yulType = (NULL != strstr(InputFilename, ".yul"));
 
   // Loop on the lines of the input file.  The assembler passes differ
   // among themselves as follows:
@@ -1581,6 +1590,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
               CurrentLineInFile =
                   StackedIncludes[NumStackedIncludes].CurrentLineInFile;
               HtmlOut = StackedIncludes[NumStackedIncludes].HtmlOut;
+              yulType = StackedIncludes[NumStackedIncludes].yulType;
               s[0] = 0;
             }
           else
@@ -1658,6 +1668,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           StackedIncludes[NumStackedIncludes].CurrentLineInFile =
               CurrentLineInFile;
           StackedIncludes[NumStackedIncludes].HtmlOut = HtmlOut;
+          StackedIncludes[NumStackedIncludes].yulType = yulType;
           NumStackedIncludes++;
 
           if (sscanf(s, "$%s", CurrentFilename) != 1)
@@ -1694,6 +1705,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                   CurrentFilename, CurrentLineInFile);
               goto Done;
             }
+          yulType = (NULL != strstr(CurrentFilename, ".yul"));
 
           inHeader = 1;
           CurrentLineInFile = 0;
@@ -1731,6 +1743,9 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             ss++;
         }
       *ss = 0;
+
+      if (yulType)
+	yul2agc(s);
 
       // Find and remove the comment field, if any.
       //printf ("Line -> \"%s\"\n", s);

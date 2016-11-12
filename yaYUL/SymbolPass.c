@@ -1,28 +1,29 @@
 /*
-  Copyright 2003 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC. 
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  Filename:	SymbolPass.c
-  Purpose:	A pass intended to do nothing but to identify symbols
-  		defined in the program.  (Basically, anything beginning
-		in column 1, but not beginning with # or $.
-  Mode:		04/17/03 RSB.	Began.
-*/
+ * Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Filename:	SymbolPass.c
+ * Purpose:	A pass intended to do nothing but to identify symbols
+ * 		defined in the program.  (Basically, anything beginning
+ *		in column 1, but not beginning with # or $.
+ * Mode:	04/17/03 RSB.	Began.
+ *		11/11/16 RSB.	Added provision for .yul.
+ */
 
 #include "yaYUL.h"
 #include <stdio.h>
@@ -41,6 +42,7 @@ typedef struct {
   FILE *InputFile;
   Line_t InputFilename;
   int CurrentLineInFile;
+  int yulType;
 } StackedInclude_t;
 static StackedInclude_t StackedIncludes[MAX_STACKED_INCLUDES];
 
@@ -57,7 +59,7 @@ SymbolPass (const char *InputFilename)
   Line_t s;
   char *Comment, *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2;
   FILE *InputFile;
-  int CurrentLineAll = 0, CurrentLineInFile = 0;
+  int CurrentLineAll = 0, CurrentLineInFile = 0, yulType;
   int i;				// dummies.
   char *ss;				// dummies.
   
@@ -66,6 +68,7 @@ SymbolPass (const char *InputFilename)
   InputFile = fopen (CurrentFilename, "r");
   if (InputFile == NULL)
     goto Done;
+  yulType = (NULL != strstr(CurrentFilename, ".yul"));
 
   // Loop on the lines of the input file.  
   s[sizeof (s) - 1] = 0;
@@ -86,6 +89,7 @@ SymbolPass (const char *InputFilename)
 	      strcpy (CurrentFilename, 
 	              StackedIncludes[NumStackedIncludes].InputFilename);
 	      CurrentLineInFile = StackedIncludes[NumStackedIncludes].CurrentLineInFile; 
+	      yulType = StackedIncludes[NumStackedIncludes].yulType;
 	      continue;
 	    }
 	  else
@@ -117,6 +121,7 @@ SymbolPass (const char *InputFilename)
 	  strcpy (StackedIncludes[NumStackedIncludes].InputFilename,
 	  	  CurrentFilename);
 	  StackedIncludes[NumStackedIncludes].CurrentLineInFile = CurrentLineInFile;
+	  StackedIncludes[NumStackedIncludes].yulType = yulType;
 	  NumStackedIncludes++;
 	  if (1 != sscanf (s, "$%s", CurrentFilename))
 	    {
@@ -130,9 +135,43 @@ SymbolPass (const char *InputFilename)
 	      printf ("Include-file \"%s\" does not exist.\n", CurrentFilename);
 	      goto Done;
 	    }	    
+	  yulType = (NULL != strstr(CurrentFilename, ".yul"));
 	  continue;
 	} 
     
+      // Frankly, tabs and newlines will cause me a lot of problems further down, since
+      // there are actually a couple of things we need to use column alignment to check
+      // out.  So let's just start by expanding all tabs to spaces.
+      ss = strstr(s, "\n");
+      if (ss != NULL)
+        *ss = 0;
+      s[sizeof(s) - 1] = 0;
+      for (ss = s; *ss;)
+        {
+          if (*ss == '\t')
+            {
+              int pos, tabStop, len;
+              pos = ss - s;
+              tabStop = ((pos + 8) & ~7);
+              len = strlen(ss + 1);
+              if (tabStop + len >= sizeof(s))
+                len = sizeof(s) - tabStop - 1;
+              if (len > 0)
+                memmove(&s[tabStop], &s[pos + 1], len + 1);
+              else
+                s[tabStop] = 0;
+              for (; pos < tabStop && pos < sizeof(s); pos++)
+                s[pos] = ' ';
+              ss = &s[tabStop];
+            }
+          else
+            ss++;
+        }
+      *ss = 0;
+
+      if (yulType)
+	yul2agc(s);
+
       // Set up appropriate default values for various fields.
       Label = FalseLabel = Operator = Operand = Mod1 = Mod2 = "";
     

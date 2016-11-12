@@ -144,6 +144,7 @@
 #				mission sources using yaYUL.
 #		2016-10-21 RSB	Added AURORA12 to the missions.
 #		2016-11-03 RSB	Added SUNBURST120 to the missions.
+#		2016-11-08 RSB	Merged in block1 branch.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -153,7 +154,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2016-08-21-working\\\"
+NVER:=\\\"2016-11-08-working\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -288,6 +289,7 @@ export MISSIONS
 
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
+SUBDIRS += yaAGC-Block1-Pultorak yaAGCb1 yaUplinkBlock1 Validation-Block1
 SUBDIRS += $(MISSIONS)
 
 ifndef NOGUI
@@ -308,6 +310,7 @@ SUBDIRS += yaACA2
 SUBDIRS += yaACA3
 SUBDIRS += yaTelemetry 
 SUBDIRS += jWiz
+SUBDIRS += yaDSKYb1
 SUBDIRS += VirtualAGC
 endif # NOGUI
 
@@ -374,6 +377,9 @@ yaTelemetry:
 .PHONY: jWiz
 jWiz:
 	$(BUILD) -C $@ $(ISMACOSX) $(DEV_STATIC)
+
+yaAGC-Block1-Pultorak yaAGCb1 yaDSKYb1 yaUplinkBlock1 yaValidation-Block1:
+	$(BUILD) -C $@ $(DEV_STATIC)
 
 .PHONY: VirtualAGC
 VirtualAGC:
@@ -469,6 +475,11 @@ clean: clean-missions
 	$(MAKE) -C yaDEDA2 clean
 	$(MAKE) -C yaACA2 clean
 	$(MAKE) -C Tools clean
+	$(MAKE) -C yaAGC-Block1-Pultorak clean
+	$(MAKE) -C yaAGCb1 clean
+	$(MAKE) -C yaDSKYb1 clean
+	$(MAKE) -C yaUplinkBlock1 clean
+	$(MAKE) -C Validation-Block1 clean
 	-rm -f `find . -name "core"` FP6/*.aea.html FP8/*.aea.html
 
 autogen:
