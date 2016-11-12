@@ -30,6 +30,10 @@
 #				been fixed not to need it.  The last time
 #				I checked, Julian's sim would still need\
 #				it, but that was a month or so ago.
+#		11/12/16 MAS	Added a periodic TIME3 interrupt and
+#				poking of NEWJOB to appease the night
+#				watchman and rupt lock alarms. Validation
+#				should now work without alarms inhibited.
 
 # This program is probably not a bad introduction on how to write an AGC
 # program that interacts with the DSKY, though it doesn't use any interrupts.  
@@ -50,18 +54,70 @@
 #-------------------------------------------------------------------------
 		
 		SETLOC	4000 
-		
-		# An interrupt-vector table will go here when (if) I become
-		# interested in validating the interrupt behavior, but for
-		# now I'm just interested in how the instructions perform,
-		# so the program simply starts here.
+# We begin with an interrupt vector table. There are 10 possible interrupts,
+# plus the restart vector which comes first. Currently only the TIME3
+# interrupt is used in Validation.
+		INHINT			# GO
+		CA	O37774		# Schedule the first TIME3 interrupt
+		TS	TIME3
+		TCF	INIT		# Proceed with initialization
+
+		RESUME			# T6RUPT
+		NOOP
+		NOOP
+		NOOP
+
+		RESUME			# T5RUPT
+		NOOP
+		NOOP
+		NOOP
+
+		DXCH	ARUPT		# T3RUPT
+		EXTEND			# Back up A, L, and Q
+		QXCH	QRUPT
+		TCF	T3RUPT		# Transfer to the T3RUPT handler
+
+		RESUME			# T4RUPT
+		NOOP
+		NOOP
+		NOOP
+
+		RESUME			# KEYRUPT1
+		NOOP
+		NOOP
+		NOOP
+
+		RESUME			# KEYRUPT2
+		NOOP
+		NOOP
+		NOOP
+
+		RESUME			# UPRUPT
+		NOOP
+		NOOP
+		NOOP
+
+		RESUME			# DOWNRUPT
+		NOOP
+		NOOP
+		NOOP
+
+		RESUME			# RADAR RUPT
+		NOOP
+		NOOP
+		NOOP
+
+		RESUME			# RUPT10
+		NOOP
+		NOOP
+		NOOP
 		
 		# We start by testing a few random items that pop into my
 		# mind, and then proceed to test the instructions, to the
 		# extent feasible.
 		
 		# Initialization.
-		INHINT
+INIT		RELINT
 		CA	ZEROES		# zero out A
 		TS	ERRNUM		# and the error-code
 		TS	ERRSUB
@@ -334,6 +390,7 @@ DONE		TCF	DONE
 $Errordsp.agc
 $Utilities.agc		
 $VariablesAndConstants.agc
+$Interrupts.agc
 
 
 

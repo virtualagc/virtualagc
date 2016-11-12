@@ -22,6 +22,7 @@
 # Mod history:	07/04/04 RSB.	Began.
 #		07/10/04 RSB.	Added display of the error sub-code.
 #		07/17/04 RSB.	PRO key signal level inverted.
+#		11/12/16 MAS.	Added NEWJOB poking.
 		
 #-------------------------------------------------------------------------
 # Display the error code.  What this does is to clear the entire display,
@@ -73,13 +74,14 @@ ERRORLOO	XCH	L
 		# Wait for PRO key to be pressed.  Please recall that
 		# the PRO key is a low-polarity signal:  0 when pressed,
 		# 1 when released.
-PRONWAIT	EXTEND
+PRONWAIT	CS	NEWJOB
+		EXTEND
 		READ	CH32
 		MASK	BIT14
 		CCS	A
 		TCF	PRONWAIT
 PROPRESS		
-		
+
 		# Turn off the OPR ERR lamp.
 		CA	ZEROES
 		TC	IODELAY
@@ -87,7 +89,8 @@ PROPRESS
 		WRITE	CH11		
 		
 		# Wait for PRO key to be released.
-PROFWAIT	EXTEND
+PROFWAIT	CS	NEWJOB
+		EXTEND
 		READ	CH32
 		MASK	BIT14
 		CCS	A
@@ -110,8 +113,9 @@ IODELAYT	DEC	500
 IODELAY		TS	TEMPJ		# Save accumulator.
 		NOOP
 		CA	IODELAYT
+		TS	NEWJOB
 		CCS	A
-		TCF	-1
+		TCF	-2
 		CA	TEMPJ		# Restore accumulator.
 		RETURN
 			

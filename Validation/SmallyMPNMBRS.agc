@@ -21,6 +21,7 @@
 #		E-2065, which is a document titled "Block II AGC
 #		Self-Check and Show-Banksum", by Edwin D. Smally.
 # Mod history:	07/07/04 RSB.	Began.
+# 		11/12/16 MAS.	Added NEWJOB poking.
 #
 # Similar code was apparently originally in Luminary and/or Colossus,
 # but much of it was removed over the course of time to make more room.  
@@ -40,6 +41,7 @@ MPLOOP1		TS	SKEEP2
 		NOOP
 		NOOP
 		TCF	MPERROR
+		CS	NEWJOB
 		CA	SKEEP2
 		AD	NEGONE
 		EXTEND
@@ -63,6 +65,7 @@ MPLOOP2		TS	SKEEP2
 		NOOP
 		NOOP
 		TCF	MPERROR
+		CS	NEWJOB
 		CA	SKEEP2
 		AD	NEGONE
 		EXTEND
@@ -82,6 +85,7 @@ MPLOOP3		TS	SKEEP1
 		NOOP
 		NOOP
 		TCF	MPERROR
+		CS	NEWJOB
 		CA	SKEEP1
 		AD	NEGONE
 		EXTEND
@@ -105,6 +109,7 @@ MPLOOP4		TS	SKEEP1
 		NOOP
 		NOOP
 		TCF	MPERROR
+		CS	NEWJOB
 		CA	SKEEP1
 		AD	NEGONE
 		EXTEND

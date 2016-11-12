@@ -274,6 +274,11 @@
  *				standby light to the light test, and fixed
  *				the speed of scaler counting and phasing of
  *				TIME6.
+ *		11/12/16 MAS	Stopped preventing interrupts on Q and L
+ *				overflow (only A overflow should do so). This
+ *				was causing the O-UFLOW check in Validation
+ *				to never allow interrupts, triggering a rupt
+ *				lock alarm.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -2037,9 +2042,7 @@ agc_engine (agc_t * State)
       // Handle interrupts.
       if (DebuggerInterruptMasks[0] && !State->InIsr && State->AllowInterrupt
 	  && !State->ExtraCode && State->IndexValue == 0 && !State->PendFlag
-	  && !Overflow && ValueOverflowed (c(RegL)) == AGC_P0
-	  && ValueOverflowed (c(RegQ)) == AGC_P0 &&
-	  //ProgramCounter > 060 && 
+	  && !Overflow && //ProgramCounter > 060 && 
 	  Instruction != 3 && Instruction != 4 && Instruction != 6)
 	{
 	  int i;
