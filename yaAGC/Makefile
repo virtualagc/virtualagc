@@ -74,6 +74,7 @@
 #				on 64-bit Linux Mint and Ubuntu).  Neither the
 #				problem nor the fix presumably affects anybody 
 #				else's builds.
+#		2016-11-12 RSB	"Permanently" disabled READLINE.
 
 LIBS=${LIBS2}
 
@@ -90,6 +91,11 @@ default: yaAGC
 #	export NOREADLINE=yes
 #	make
 # instead of just 'make'. 
+# ... Later:  the line below just permanently disables it.  It's solely 
+# present for the convenience of people doing command-line debugging, and
+# Onno assures me that it acts weird and messes up debugging.  So why have
+# it at all?
+NOREADLINE=yes
 
 # Alberto Galdo's iPhone mod.
 ifdef IPHONE
