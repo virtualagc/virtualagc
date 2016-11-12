@@ -16,6 +16,7 @@
 #				the HTML for Validation.agc, which in turn
 #				broke the ability to build the installer
 #				for VirtualAGC.
+#		2016-11-11 RSB	Added the (optional) EXTRA_TARGETS.
 
 # Notes: 
 #
@@ -56,7 +57,7 @@ endif
 
 SOURCE:=$(wildcard *.agc)
 
-default: $(TARGETS)
+default: $(TARGETS) $(EXTRA_TARGETS)
 
 ifdef NO_BINSOURCE
 $(BASENAME).bin: $(TOPLEVEL).agc.bin
@@ -96,7 +97,8 @@ else
 endif
 
 clean:
-	-rm -f *.lst *~ $(TOPLEVEL).agc.bin $(BASENAME).bin *.symtab oct2bin.bin* *.html
+	-rm -f *.lst *~ $(TOPLEVEL).agc.bin $(BASENAME).bin \
+		*.symtab oct2bin.bin* *.html $(EXTRA_TARGETS)
 
 # Recipe for reformatting an AGC source file.
 %.agc.out: %.agc 

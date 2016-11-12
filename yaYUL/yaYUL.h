@@ -506,6 +506,10 @@ GetBankCount(int Bank);
 int
 ParseComma(ParseInput_t *Record);
 
+// From yul2agc.c.
+void
+yul2agc (char *s);
+
 // From Utilities.c.
 void
 FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue);
