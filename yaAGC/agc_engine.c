@@ -279,6 +279,9 @@
  *				was causing the O-UFLOW check in Validation
  *				to never allow interrupts, triggering a rupt
  *				lock alarm.
+ *		11/12/16 MAS	Apparently CH11 bit 10 only turns off RESTART
+ *				*on write*, with the actual value of the
+ *				channel being otherwise  meaningless.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -416,6 +419,14 @@ unsigned IoWriteCounts[01000];
 FILE *CduLog = NULL;
 
 //-----------------------------------------------------------------------------
+// DSKY handling constants and variables.
+#define DSKY_OVERFLOW 81920
+#define DSKY_FLASH_PERIOD 4
+static unsigned DskyTimer = 0;
+static unsigned DskyFlash = 0;
+static unsigned DskyChannel163 = 0;
+
+//-----------------------------------------------------------------------------
 // Functions for reading or writing from/to i/o channels.  The reason we have
 // to provide a function for this rather than accessing the i/o-channel buffer
 // directly is that the L and Q registers appear in both memory and i/o space,
@@ -456,6 +467,11 @@ WriteIO (agc_t * State, int Address, int Value)
   // alarm codes that are reset when CH77 is written to.
   if (Address == 077)
     Value = 0;
+
+  // The DSKY RESTART light is reset whenever CH11 bit 10 is written
+  // with a 1.
+  if (Address == 011 && (Value & 01000))
+    DskyChannel163 &= ~DSKY_RESTART;
 
   State->InputChannel[Address] = Value;
   if (Address == 010)
@@ -1501,13 +1517,6 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
 #define SCALER_DIVIDER 3
 static int ScalerCounter = 0;
 
-// DSKY
-#define DSKY_OVERFLOW 81920
-#define DSKY_FLASH_PERIOD 4
-static unsigned DskyTimer = 0;
-static unsigned DskyFlash = 0;
-static unsigned DskyChannel163 = 0;
-
 // Fine-alignment.
 // The gyro needs 3200 pulses per second, and therefore counts twice as
 // fast as the regular 1600 pps counters.
@@ -1612,10 +1621,6 @@ agc_engine (agc_t * State)
       DskyTimer -= DSKY_OVERFLOW;
       DskyFlash = (DskyFlash + 1) % DSKY_FLASH_PERIOD;
       DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR);
-
-      // Turn off the restart light if it's been reset
-      if (State->InputChannel[011] & 01000)
-        DskyChannel163 &= ~DSKY_RESTART;
 
       // ... but turn it on if the alarm test is active
       if (State->InputChannel[013] & 01000)

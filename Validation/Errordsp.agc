@@ -23,6 +23,7 @@
 #		07/10/04 RSB.	Added display of the error sub-code.
 #		07/17/04 RSB.	PRO key signal level inverted.
 #		11/12/16 MAS.	Added NEWJOB poking.
+#		11/12/16 MAS.	Clear the RESTART light upon PRO.
 		
 #-------------------------------------------------------------------------
 # Display the error code.  What this does is to clear the entire display,
@@ -96,6 +97,11 @@ PROFWAIT	CS	NEWJOB
 		CCS	A
 		TCF	+2
 		TCF	PROFWAIT
+
+		# Turn off the RESTART lamp.
+		CA	BIT10
+		EXTEND
+		WOR	CH11
 
 		# Restore the return address.  (Could actually just
 		# "TC TEMPK" here.)
