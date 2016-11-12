@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-07 JL   Transcribed pages 108-124.
 #               2016-11-11 JL   Transcribed pages 125-133.
+#               2016-11-12 JL   Transcribed pages 134-135.
 
 # Annotations:
 #
@@ -1166,8 +1167,106 @@ R1067   TO A SIMPLE TWO-PASS ASSEMBLER.  THIS PAGE: PASS 1, LEAVING BANK 7 ADDRE
 # Page 134
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  27        PAGE  94
 
+P1144   SHORTENING PROCEDURE CONTINUED: PASS 2, USING SUBADDRESSES IN BANK 7 TO REFERENCE LOCATIONS IN BANK 5 CONTAINING
+P1146   NEW SUBADDRESSES FOR BANK 7.  IN OTHER WORDS, FILL IN DEFINITIONS OF SYMBOLS.
+
+ 1148              SS           Z,X2          S CAC 3       1,8                 STORE LENGTH OF SHORTENED LABEL.
+ 1150              TX           S END THR     -             3,6                 CLOSE TERMINAL THREAD ON ITSELF.
+ 1152              SWS,THREAD10 3,9           32            Z,R1                BANK 5 ADDRESS OF FIRST COMPUTER.
+ 1154              SWS, CAC1    N,R1          32,L          1,9                 ...YIELDS BANK 7 ADDRESS OF DITTO.
+ 1156              TX           Z,R1          -             Z,AU2               SUPPLY BANK 5 INDICATOR TO AU2.
+ 1158              TS           N,R1          Z,R4          CMPS DUN Q
+
+ 1159   XFORM CMP  SWS,THREAD10 N,R4          12            Z,R2
+ 1160              SWS,BTHRED10 N,R2          12,L          N,R4                REVALUE THREAD TO FIRST PROGRAM/SUBRO.
+ 1162              SWS,THREAD10 N,R4          0             Z,R1
+ 1163              SWS,THREAD10 N,R1          0             N,R4,1              REVALUE THREAD TO NEXT COMPUTER.
+ 1165              TS           Z,R4          Z,AU1         4 THREADS      C    REVALUE ALL FOUR SOFTWARE THREADS.
+ 1167              TS           N,R1          Z,R4          10 BIT THR          SET UP THREAD TO NEXT COMPUTER NAME.
+
+ 1169   XFORM PSR  WA           N,R2          S ONE         Z,X2
+ 1170              TS           Z,X2          Z,AU1         2 THREADS      C    REVALUE AUTHOR AND PROG/SUBRO THREADS.
+ 1172              SWS,THREAD10 N,X2          0             Z,R2                SAVE PROGRAM/SUBROUTINE THREAD.
+ 1174              SWS,THREAD10 N,R2          0             N,X2
+ 1175              NA, BIT 25   2,0           S ONES        PSRS DUN Q          PROG/SUBRO WITHOUT SUBROUTINES IS DONE.
+
+ 1177              SWS,THREAD11 N,X2          24            Z,R3                THREAD TO WORD 3 (1ST SUBRO THREAD WD).
+ 1179              SWS,ATHRED11 N,R3          24,L          N,X2                REVALUE THREAD TO WORD 3.
+ 1181              TS           N,R3          Z,AU1         3 THREADS      C    FIRST SUBRO THREAD WORD HAS 3 THREADS.
+ 1183   MOR SUBW Q SSL, ONE     N,AU1         11            C,+3                BRANCH IF JUST ONE SUBRO THREAD WORD.
+ 1185              SWS,THREAD11 N,AU1         0             Z,AU1               FOLLOW THREAD TO NEXT SUBRO THREAD WORD.
+ 1187              TS           L MOR SBWQ    Z,SC          4 THREADS      C    SUBRO THREAD WORDS HAVE UP TO 4 THREADS.
+ 1189              TX           Z,SH          -             Z,SC           C    DO 11-BIT THREAD AND GO AROUND AGAIN.
+
+ 1191   10 BIT THR TX           Z,CSC,3       -             -              C    DO 10-BIT THREAD AT END OF PROG/SUB PRC.
+ 1193   PSRS DUN Q NA           N,R2          S END THR     XFORM PSR           BRANCH IF MORE PROG/SUBS FOR THIS COMP.
+
+ 1195   CMPS DUN Q NA           Z,R4          S END THR     XFOM CMP            BRANCH IF MORE COMPUTERS TO REVALUE.
+
+ 1197              SWS,THREAD10 3,9           16            Z,R1                BANK 5 ADDRESS OF FIRST AUTHOR NAME.
+ 1199              SWS, CAC2    N,R1          16,L          1,9                 REVALUE THREAD TO FIRST AUTHOR.
+ 1201              TS           N,R1          Z,R4          AUTS DUN Q
+
+ 1202   XFORM AUT  TS           Z,R4          Z,AU1         3 THREADS      C    AUTHOR THREAD WORD HAS 3 THREADS.
+ 1204              SWS,THREAD11 N,R4          12            Z,R4           C
+ 1205   AUTS DUN Q NA           Z,R4,1        S END THR     XFORM AUT           BRANCH IF MORE AUTHORS TO REVALUE.
+ 1207              SWS,THREAD10 3,9           0             Z,R1                BANK 5 ADDRESS OF FIRST DELETE.
+ 1209              SWS, CAC3    N,R1          0             1,9                 REVALUE THREAD TO FIRST DELETE.
+ 1211              TS           N,R1          Z,R4          DELS DUN Q
+
+ 1212   XFORM DEL  SWS,THREAD10 N,R4          0             Z,R1
+ 1213              SWS, CAC3    N,R1          0             N,R4                REVALUE THREAD TO NEXT DELETE.
+ 1215              TX           N,R4          -             Z,R4
+ 1216   DELS DUN Q NA           Z,R4,1        S END THR     XFORM DEL           BRANCH IF MORE DELETES TO REVALUE.
+
 # Page 135
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  28        PAGE  95
+
+P1218   TERMINATION OF FULL COPY.  WRITE SHORTENED LABEL RECORD ON NEW YULPROGS AND INSTALL IT IN OFFICE.
+
+ 1220              TS           1,1           NOW OP MSG +3 PHI TAPE
+ 1221              RB,1         -             -             -
+ 1222              NA, CHAR8    1,0           S ONE         C,+2                BRANCH IF FULL-COPY FLAG IS NOW OFF.
+ 1224              LA           REVERT ID     S ZERO        C,-1                WAIT FOR SEQUENCE # OF FORMER BACKUP.
+ 1226              TS, CHAR8    S ZERO        1,0           LABEL YUL           LABEL AND UPGRADE NEW YULPROGS.
+ 1228              TS           S ONES        COMMON        MON WAKE       C    SHOW END OF READBACK IF WE GET HERE 1ST.
+ 1230   BKUP STOP  TS           -             -             GROUP NAP
+ 1231              S, MON TYPER NOW OP MSG    SPRAMR +32    RELOAD P0           REPLACES BKUP STOP WHEN GROUP B IS DONE.
+
+
+
+R1233   MINOR SUBROUTINE TO PLACE A SINGLE WORD IN THE NEW LABEL AREA.
+
+ 1234   PUT 1 WORD SWE, CAC3    1,8           32            Z,AU2          C    ADDRESS OF FIRST 1-WORD EMPTY SPACE.
+ 1236              TX           N,R3          -             Z,AU1          C    SAVE RIGHT 12 BITS OF WORD.
+ 1238              NA           Z,AU2         S END THR     INSERT WD      C    BRANCH IF THERE IS A HOLE FOR IT.
+
+ 1240              TX           Z,X2,1        -             N,R3           C    LEAVE FORWARDING ADDRESS.
+ 1242              SWS, CAC1    Z,AU2         32,L          N,X2           C    PLACE TERMINAL THREAD IN HOLE.
+ 1244              SWS, CAC1    Z,X2,1        32,L          1,8                 RECORD PRESENCE OF HOLE, EXIT.
+
+ 1246   INSERT WD  TX           N,R3          -             N,AU2          C    PLACE WORD IN HOLE.
+ 1248              TS           Z,AU2         N,R3          INIT SLOT      C    LEAVE FORWARDING ADDRESS, RESET THREAD.
+
+
+
+R1250   FOUR MINOR SUBROUTINES TO REVALUE FROM ONE TO FOUR THREADS IN THE WORD AT N,AU1.  THEN-BIT THREADS ARE ASSUMED.
+
+ 1252   4 THREADS  SWS,THREAD10 N,AU1         36            Z,AU2          C
+ 1253              SWS,OTHRED10 N,AU2         36,L          N,AU1          C    REVALUE OPCODE-FILLED THREAD.
+
+ 1255   3 THREADS  SWS,THREAD10 N,AU1         24            Z,AU2          C
+ 1256              SWS,ATHRED10 N,AU2         24,L          N,AU1          C    REVALUE A-ADDRESS-FIELD THREAD.
+
+ 1258   2 THREADS  SWS,THREAD10 N,AU1         12            Z,AU2          C
+ 1259              SWS,BTHRED10 N,AU2         12,L          N,AU1               REVALUE A-ADDRESS-FIELD THREAD AND EXIT.
+
+ 1261   1 THREAD   SWS,THREAD11 N,AU1         0             Z,AU2          C    BACK INTO CSC MODE GETS 11-BIT THREAD.
+ 1263              SWS,THREAD11 N,AU2         0             N,AU1          C
+ 1264              SWS, ONE     S ZERO        0             Z,AU2
+
+ 1265              SWS,THREAD10 N,AU1         0             Z,AU2          C    INCR CSC BY 3 AND DITTO FOR 10-BIT THRD.
+ 1267              SWS,THREAD10 N,AU2         0             N,AU1
 
 # Page 136
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  29        PAGE  96
