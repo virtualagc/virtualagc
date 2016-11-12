@@ -9,7 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-07 JL   Transcribed pages 108-124.
 #               2016-11-11 JL   Transcribed pages 125-133.
-#               2016-11-12 JL   Transcribed pages 134-135.
+#               2016-11-12 JL   Transcribed pages 134-152.
 
 # Annotations:
 #
@@ -21,6 +21,8 @@
 #
 
 # Note: Page numbers are scan page numbers rather than listing.
+
+L      @YUL SYSTEM PASS 0 SERVICE MODULE
 
 # Page 108
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.   1        PAGE  68
@@ -1271,50 +1273,688 @@ R1250   FOUR MINOR SUBROUTINES TO REVALUE FROM ONE TO FOUR THREADS IN THE WORD A
 # Page 136
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  29        PAGE  96
 
+P1268   AMEND LABEL OF BACKUP TAPE.
+
+ 1269   AMEND BUL  SWS, CHAR3   GROUP A       A,5,L         ASAMB MSG
+ 12692             S, MON TYPER ASAMB MSG     SPRAMR +32    -                   "ASA TO AMEND BACKUP TAPE LABEL;"
+ 12694             TX, CHAR3    ASAMB MSG     -             S ACA OTHE
+ 12696             S, MON TYPER S ACA OTHE    SPRA +16      AMEND SC            "ACA OTHERWISE"
+ 1270   AMED QST   STOP                                     -              S
+ 12702             TS, CHAR8    S ZERO        1,0           C,+1           S    WIPE OUT AMEND FLAG AFTER REFUSAL.
+ 12704             NA           BKUP STOP     BKUP STOP +1  GROUP NAP           WAIT FOR GROUP B TO FINISH LISTING.
+ 12706             S, MON TYPER S SIGH        SPRAMR +8     RELOAD P0           "(SIGH)"
+ 12708  AMEND SC   TS           -             -             AMEND QST      C    ARA OR DON A AMENDS BACKUP TAPE LABEL.
+ 1271              DS, C7T8     1,2           S ONE         SNATCH B6 +2
+ 1272              TS           1,1           SNATCH B6 +1  PHI SNACH
+ 1273   SNATCH B6  ALF,2        N00/0006YULPROGS
+ 1274              DEC          GGGGGG GGG 000                                  SNATCH BACKUP TAPE FOR RELABELING.
+ 1276              TS           L BUF 3       Z,X2          PHI TAPE
+ 1277              RW,6         -             -             -
+ 1278              TS           L BUF 3       Z,X3          PHI TAPE
+ 1279              RF,6         2,0           -             -                   READ LABEL INTO TEMPORARY AREA.
+ 1281              WD           1,8           Z,X1          Z,X4
+ 1282              WA           Z,X3          Z,X4          Z,X3                LOCATE END OF NEW LABEL IN TEMP. AREA.
+ 1284              TS           1,8           Z,X4          PHI TAPE
+ 1285              RF,6         -             -             -
+ 1286              LA, CAC3     2,8           1,8           C,+2                BRANCH IF BACKUP LABEL IS NO LONGER.
+ 1288              TX           2,8           -             Z,X3                STRETCH LABEL RECORD OUT TO OLD LENGTH.
+ 1290              TS           1,5           2,5           MON UNLOK      C
+ 1291              WF,6         -             -             -                   UNLOCK BACKUP BEFORE RELABELING IT.
+ 1293              IT           1,6           N,X4          2,6                 MOVE NEW FACTS INTO TEMPORARY AREA.
+ 1295              CC           N,X2          -             N,X3
+ 1296              TS           2,1           S FIX SN +1   PHI LABEL
+ 1297              WF,6         2,0           -             -                   WRITE AMENDED LABEL ON BACKUP TAPE.
+ 1299              TS           2,2           S FIX SN +2   PHI SNACH
+ 1300   S FIX SN   ALF,3        N00/0:06YULPROGS                                UNDO EVIL EFFECTS OF LABELING.
+ 1302              TS           -             -             MON RLEAS
+ 1303              RW,6         -             -             -                   PUT BACKUP TAPE BACK ON SHELF.
+ 1305              TS           -             -             MON UNLOK      C
+ 1306              WF,1         -             -             -                   UNLOCK CURRENT TAPE BEFORE UNLABELING.
+ 1308              NA           BKUP STOP     BKUP STOP +1  GROUP NAP           SLEEP UNTIL GROUP B FINISHES.
+ 1310              TS, CHAR8    S ZERO        1,0           LABEL YUL           NOW WRITE CLEAN LABEL ON CURRENT TAPE.
+ 1312              S, MON TYPER BUREL MSG     SPRAMR +16    RELOAD P0           TYPE "BACKUP RELABELED".
+
+R1314   SUBROUTINE IN SERVICE MODULE TO COMBINE THE FUNCTIONS OF THE MONITOR DECIMAL-TO-ALPHABETIC CONVERTER AND LEFT
+R1316   ZERO SUPPRESSOR.  SET UP ARGUMENT IN SERV ARG, SEQUENCE CALL WITH RETURN IN AU1.  USE EITHER RESULT OR BOTH.
+
+ 1319   S D2A ZSUP TX           Z,AU1         -             SERV ARG +2         SAVE RETURN DURING TRIP TO BANK 1.
+ 1321              TS           Z,SC          Z,AU1         YUL D2A ZS
+ 1322   SERV ARG   RESERVE      1
+ 1323              TX           N,SC,1        -             Z,AU1
+ 1324              RESERVE      1
+ 1325              TX           N,SH,2        -             SERV ARG
+ 1326              TS           N,SH          SERV ARG +2   N,AU1               MOVE RESULTS TO THIS BANK AND EXIT.
+
 # Page 137
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  30        PAGE  97
+
+P1328   GROUP B ACTIVITY DURING YULPROGS COPY, PRINTING A COMPLETE DIRECTORY LISTING.
+
+ 1330   LIST LABL  TX           YUL LOG A     -             PAGE HEAD +1
+ 1331              TN           MNTN LINE     4             PAGE HEAD +2        ANNOUNCE YUL SYSTEM MAINTENANCE FCN.
+ 1333              SWS, C7T8    1,1           A,2,L         BKUP LINE +2
+ 1334              SWS, C1T6    1,1           A,2,L         BKUP LINE +3        PUT ACTUAL NAME OF TAPE INTO PAGE HEAD.
+ 1336              NA, CHAR8    1,0           S ONE         C,+2                BRANCH IF NOT DOING FULL BACKUP COPY.
+ 1338              TS           1,2           COMMON +1     C,+3                OTHERWISE LISTING IS OF CURRENT TAPE.
+ 1340              TX           W AMENDED     -             N,AU2,1             INSERT "AMENDED" INTO PAGE HEAD.
+ 1342              DS, C7T8     1,2           S ONE         COMMON +1           SUPPLY SERIAL NO. OF BACKUP.
+
+ 1344              TX           B ARG         -             SERV ARG
+ 1345              SWS,B1THRU12 COMMON +1     D,9,L         SERV ARG
+ 1346              TX           Z,AU2         -             Z,X5
+ 1347              TS           Z,SC          Z,AU1         S D2A ZSUP          CONVERT YULPROGS SERIAL NUMBER TO ALPHA.
+ 1349              TN           BKUP LINE     4             N,X5
+ 1350              TX           SERV ARG      -             N,AU2               PUT SERIAL NO. IN PAGE HEAD.
+ 1352              TN           YUL DATE      2             PAGE HEAD +12
+ 1353              TX           S BLANKS      -             N,AU2
+ 1354              TS           L NEW LINE    Z,X2          INIT PRNT      C    SET UP FRONT PAGE COVER.
+ 1356              SWE, CAC3    1,9           32            Z,X5                GET ADDRESS OF FIRST COMPUTER NAME.
+ 1358   SET SP1    TS           SP1           SLINE         SET OLD        C    SLINE IS ASSIGNED TO 2,0.
+ 1360              TN           SW CMPUTR     1             SLINE +1
+ 1361              MT           S BLANKS      2             N,AU2,1
+ 1362              NA           Z,X5          S END THR     M LIS CMPS          BRANCH IF THERE ARE ANY COMPUTERS.
+ 1364              TX           W SNONE       -             SLINE +2
+ 1365              TS           L END M LIS   Z,X4          PRINT LIN           PRINT LACK AND GO TO FINALIZATION.
+
+ 1367   M LIS CMPS TX           S COLON C1    -             SLINE +2
+ 1368              CWS, C3T6    N,X5          A,2           SLINE +2            PRINT COMPUTER NAME.
+ 1370              TX           S BLANKS      -             COMPU LIN
+ 1371              TX           S BLANKS      -             COMPU LIN +1
+ 1372              TX, C1T6     S BLOTS       -             COMPU LIN
+ 1373              NA, CHAR6    SLINE +2      S BLANKS      C,+6
+ 1374              TX, CHAR6    SLINE +2      -             COMPU LIN
+ 1375              NA, CHAR5    SLINE +2      S BLANKS      C,+4
+ 1376              TX, CHAR5    SLINE +2      -             COMPU LIN
+ 1377              NA, CHAR4    SLINE +2      S BLANKS      C,+2
+ 1378              TX, CHAR4    SLINE +2      -             COMPU LIN           UNDERLINE COMPUTER NAME WITH BLOTS.
+ 1380              LA, CHAR1    S TEN C1      5,0           PRIN CNAM           BRANCH UNLESS NAME BEGINS WITH DIGIT.
+ 1382              LA, CHAR3    5,0           END OF 1      PRIN CNAM           BRANCH ALSO IF 3RD CHARACTER IS A DIGIT.
+
+ 1384              SWS, C1T2    SLINE +2      A,4           SLINE +2
+ 1385              SWS, C7T8    SLINE +2      A,4           SLINE +2            MOVE NAME OVER...
+ 1387              SWS, C3T6    S W MOD       A,2           SLINE +2            ...AND INSERT "MOD".
+ 1389              SWS, ONES    COMPU LIN     A,4           COMPU LIN
+ 1390              SWS, C1T2    COMPU LIN     0             COMPU LIN +1
+ 1391              TX, C1T6     S BLOTS       -             COMPU LIN           MOVE UNDERLINE OVER ACCORDINGLY.
+
+ 1393   PRIN C NAM TS           Z,SC          Z,X4          PRINT LIN           PRINT ACTUAL COMPUTER NAME.
+ 1395   SET SP3    TX           SP3           -             SLINE
+ 1396              TX           S BLOTS       -             SLINE +1
+ 1397              TN           COMPU LIN     2             SLINE +2            SET UP UNDERLINE OF BLOTS.
+ 1399   GO PRINT   TS           Z,SC          Z,X4          PRINT LIN
 
 # Page 138
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  31        PAGE  98
 
+P1400   PROCEDURE TO TEST AND PRINT THE STATUS OF SOFTWARE FOR EACH COMPUTER.
+
+ 1401              TX           W SOFTWAR     -             SLINE +2            SET UP HEADING ABOUT SOFTWARE STATUS.
+ 1403   MSPACE1    TS           SP1           SLINE         GO PRINT       C
+ 1404              TS           DASHES        SLINE +2      MSPACE2        C    UNDERLINE IT.
+ 1406              TN           SFWR HEDS     14            SLINE +2            SET UP COLUMN HDGS FOR SOFTWARE STATUS.
+ 1408   MSPACE2    TS           SP2           SLINE         GO PRINT       C
+ 1409              TX           Z,X5          -             Z,CSC               SET BANK INDICATOR 7, EVEN BIT INTO CSC.
+ 1411              TX           S FOUR        -             Z,CSH
+ 1412              WA           Z,X2          S TWO         Z,AU2               POINT TO SECOND WORD OF PRINT LINE.
+
+ 1414   SOF ST LUP NA, BIT12    5,1           S ZERO        C,+2                BRANCH IF THIS PASS IS AVAILABLE.
+ 1416              TS           L SFW STAS    Z,AU1         SET STATS
+
+ 1417              LA           S BIT 1       5,1           C,+3                BRANCH IF THIS PASS IS CHECKED OUT.
+ 1419              SWE, CAC3    N,SC,2        16            Z,AU1
+
+ 1420   L SFW STAS CAC          W LAB CHKO    W LAB AVAL    W LAB UNAV
+ 1421              SWE, CAC3    L SFW STAS    32            Z,AU1
+
+ 1422   SET STATS  MT           N,AU1,1       2             N,AU2,1             SET SOFTWARE PASS STATUS IN PRINT.
+ 1424              SWS,THREAD10 5,1           36            Z,CSC
+ 1425              NA           Z,CSC         Z,X5          C,+2                BRANCH IF SOFTWARE IS BORROWED.
+ 1427              TS           S BLANKS      N,AU2,1       C,+2                NO SPECIAL MARK WHEN PASS USES OWN SFW.
+ 1429              SWS, C1T4    N,CSC         0             N,AU2,1             NAME OF OWNER OF BORROWED SOFTWARE.
+ 1431              SWE, ONES    5,1           12,L          5,1                 ROTATE WORD TO STATUS OF NEXT PASS.
+ 1433              NA           Z,CSH,1       S ONE         SOF ST LUP          BRANCH IF HAVEN'T DONE 4 PASSES YET.
+
+ 1449   M SPACE 3  TS           SP3           SLINE         GO PRINT       C
+
 # Page 139
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  32        PAGE  99
+
+P1450   PROCEDURE TO PRINT A LIST OF PORGRAMS AND A LIST OF SUBROUTINES FOR EACH COMPUTER, WITH STATUS INFORMATION.
+
+ 1452              TS           W PROGRMS     SLINE +2      MSPACE 1       C
+ 1453              TS           Z,X5          COMP LOCN     MSPAC1 +1      C    PRINT AND UNDERLINE PROGRAM HEADING.
+ 1455              TX           S ZERO        -             PRG OR SUB          DO THE LIST OF PROGRAMS FIRST.
+
+ 1457   LIST PR SU TN           PRSUB HDS     14            SLINE +2
+ 1458              SS           W CONTRL      PRG OR SUB    SLINE +8            ALTER PROG HEADER TO SUBRO IF NECESSARY.
+ 1460              TS           SP2           SLINE         GO PRINT       C    PRINT COL HDGS FOR PROG OR SUBRO LIST.
+ 1462              SWS,THREAD10 N,X5          12            Z,X5                THREAD TO FIRST PROG OR SUBRO OF COMP.
+ 1464              LA           Z,X5          S END THR     NO PRSUBS           BRANCH IF NO PROGRAMS OR SUBROS.
+
+ 1466   M LIST PS  NA, BIT 36   5,1           PRG OR SUB    END PRSB Q          BR IF PRG WHEN WANT SUBS OR VICE VERSA.
+ 1468              TX           N,X5          -             SLINE +2            SET PROGRAM OR SUBROUTINE NAME IN PRINT.
+ 1470              SSL, TWO     5,1           22            C,+1                FIND OUT WHERE REVISION NO. IS STORED.
+ 1472              SWE, C1T2    5,1           D,3,L         SERV ARG            IN WORD 2 IF NO SUBROUTINES.
+ 1474              TS           W NONE        SLINE +10     ALF REVN            SHOW LACK OF SUBSIDIARY SUBROS.
+
+ 1476              TX           Z,X5          -             Z,R2                HANG ON TO BANK INDICATOR.
+ 1478              SWS,THREAD11 5,1           24            Z,R2
+ 1479              EX           N,R2          S C1T2        SERV ARG            REVISION NUMBER IS IN WORD 3.
+
+ 1481   ALF REVN   NA           SERV ARG      S ZERO        C,+2
+ 1482              TS           WM NEW        SLINE +3      C,+3                SAY "NEW" IF REVISIUON 0.
+
+ 1484              TS           Z,SC          Z,AU1         S D2A ZSUP
+ 1485              SWS, C3T5    SERV ARG +2   A,2           SLINE +3            SET UP ZERO-SUPPRESSED REVISION NUMBER.
+
+ 1487              NA           PRG OR SUB    S ZERO        UNUSUB Q            BRANCH IF DOING SUBROUTINE LIST.
+ 1489              SSL, ONE     5,1           35            C,+1                TEST OBSOLESCENCE BIT.
+ 1491   PSN VIA X4 TS           Z,X5          Z,X4          LIST AUTH           HANG ON TO BANK INDICATOR.
+ 1493              SSL, TWO     5,1           22            C,-1                IF NO SUBROS, THAT WAS NOT AN OBS BIT.
+ 1495              TS           W OBS         SLINE +1      C,-2                SUBSIDIARY SUBROS HAVE CHANGED.
+
+R1497   IF A SUBROUTINE IS NOT CALLED BY ANY PROGRAM OR SUBROUTINE, MARK IT "UNUSED".  (IGNORE BANK ERROR AT 0982.1).
+
+ 1499   UNUSUB Q   TN           Z,X2          2             SAVE X23
+ 1500              TX           COMP LOCN     -             Z,X2                POINT TO COMPUTER NAME ENTRY.
+ 1502              TN           Z,X2          2             Z,X3                DISTRIBUTE BANK INDICATOR 7.
+ 1504              SWS,THREAD10 N,X2          12            Z,X2                POINT TO FIRST PROGRAM OR SUBROUTINE.
+ 1506              TS           N,SC,6        -             SUB THRDS      C    ASK FOR PRESENTATION OF SUBRO THREADS.
+ 1508              WD           Z,SC          FOUR          Z,SC           S    (DISPOSITION WHEN THREADS RUN OUT).
+
+ 1510              TS           Z,X4          Z,X2          C,-2                GO TO EXAMINE NEXT PROGRAM OR SUBRO.
+ 1512              NA           Z,X4          S END THR     C,-1                BRANCH IF THERE ARE MORE PROGS OR SUBS.
+ 1514              TN           SAVE X23      2             Z,X2
+ 1515              TS           W UNUSED      SLINE +1      PSN VIA X4          PUT "UNUSED" AT LEFT OF SUBROUTINE NAME.
+
+ 1517              TX           -             -             -              C    ASK FOR NEXT SUBROUTINE CALL THREAD.
+ 1519              NA           Z,X4          Z,X5          C,-1                BRANCH IF SUB NOT CALLED VIA THIS THRED.
+ 1521              TN           SAVE X23      2             Z,X2                LEAVE LOOP WHEN FIRST USER IS FOUND.
 
 # Page 140
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  33        PAGE 100
 
+P1523   SET UP AUTHOR NAME, DATE OF LAST ASSEMBLY, WHETHER A PROGRAM HAS BINARY RECORDS, OR WHETHER A SUBROUTINE IS
+R1525   CONTROLLED.
+
+ 1526   LIST AUTH  SWS,THREAD1O 4,1           12            Z,X4
+ 1527              LA           4,1           S PLS ZERO    C,-1                BRANCH IF AUTHOR NAME NOT FOUND.
+
+ 1529              TX           N,X4          -             SLINE +4            SET UP FIRST WORD OF AUTHOR NAME.
+ 1531              SS           4,1           S THRED 11    Z,X4
+ 1532              TX           N,X4          -             SLINE +5            SET UP SECOND WORD OF AUTHOR NAME.
+ 1534              SWE, D12     5,1           44            Z,R2
+ 1535              WA           Z,R2          L S MONTHS    Z,R2
+ 1536              TX           N,R2          -             SLINE +6            SET UP ALPHABETIC MONTH ABBREVIATION.
+ 1538              SWE, THREE   5,1           42            COMMON +1
+ 1539              DT           COMMON +1     8             COMMON +1
+ 1540              SWE, SEVEN   5,1           39            Z,R2
+ 1541              DA           COMMON +1     Z,R2          COMMON +1
+ 1542              LA           COMMON +1     S D12         C,+2                BRANCH IF 1-DIGIT DECIMAL DAY NUMBER.
+ 1544              SWS, CHAR7   COMMON +1     2,L           SLINE +6
+ 1545              SS           COMMON +1     S D12         SLINE +6            SET UP DECIMAL DAY NUMBER.
+ 1547              SWE, 7C6     5,1           24            COMMON +1
+ 1548              WA           COMA 1962     COMMON +1     SLINE +7            SET UP COMMA AND YEAR NUMBER.
+ 1550              SSL, ONE     5,1           11            C,+1                TEST FOR BINARY (PROG) OR CONTROL (SUB).
+ 1552              TS           W NO          SLINE +8      C,+2
+ 1553              TX           W YES         -             SLINE +8
+ 1554              NA, BIT 25   5,1           S ONES        END PRSB Q -1       BRANCH IF NO SUBSIDIARY SUBROUTINES.
+
 # Page 141
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  34        PAGE 101
+
+P1556   LIST THE NAMES OF SUBSIDIARY SUBROUTINES OF THE PROGRAM OR SUBROUTINE BEING DESCRIBED, AT FOUR TO THE LINE.
+
+ 1558              TN           Z,X4          2             Z,R1                HANG ON TO BANK INDICATORS.
+ 1560              SWS,THREAD11 5,1           24            Z,R1                THREAD TO WORD 3 (1ST SUBRO THREAD WD).
+ 1562              WA           Z,X2          S EIGHT       Z,R7
+ 1563              TS           Z,R7,8        Z,R6          PRA SUBTH           POINT TO ENDS OF SUBRO LIST AREA.
+
+ 1565   PRO SUBTH  SS           N,R1          S THRED 11    Z,R1                FOLLOW THREAD TO NEXT SUBRO THREAD WORD.
+ 1567              SWS,THREAD10 N,R1          36            Z,R2                GET SUBROUTINE THREAD FROM OP CODE.
+ 1569              SSL, ONE     N,R1          36            PR SLAVES      C    TEST OBSOLETING BIT AND PRINT.
+
+ 1571   PRA SUBTH  SWS,THREAD10 N,R1          24            Z,R2                GET SUBROUTINE THREAD FROM A ADDRESS.
+ 1573              SSL, ONE     N,R1          24            PR SLAVES      C    TEST OBSOLETING BIT AND PRINT.
+ 1575              SSL, ONE     N,R1          35            LASUB THR      C    SEE IF THIS IS THE LAST SUBRO THREAD.
+
+ 1577   PRB SUBTH  SWS,THREAD10 N,R1          12            Z,R2                GET SUBROUTINE THREAD FROM B ADDRESS.
+ 1579              SSL, ONE     N,R1          12            PR SLAVES      C    TEST OBSOLETING BIT AND PRINT.
+ 1581              SSL, ONE     N,R1          23            LASUB THR      C    SEE IF THIS IS THE LAST SUBRO THREAD.
+
+ 1583   PRC SUBTH  SSL, ONE     N,R1          11            C,+1                SEE IF THIS IS THE LAST SUBRO THREAD.
+ 1585              TS           -             -             PRO SUBTH
+ 1586              SS           N,R1          S THRED 10    Z,R2                GET SUBROUTINE THREAD FROM C ADDRESS.
+ 1588              SSL, ONE     N,R1          0             PR SLAVES      C    TEST OBSOLETING BIT AND PRINT.
+
+ 1590   LASUB THR  TX           -             -             -              C    RETURN EXCEPT FROM C ADDRESS.
+ 1592              TS           Z,R6,8        -             C,+1                FORCE SEQUENCE MODE.
+ 1594              LA           Z,R6          Z,R7          C,+2                BRANCH IF LIST IS ALL PRINTED.
+ 1596              TS           SP2           SLINE         GO PRINT       C    OTHERWISE PRINT PARTIAL LINE NOW.
+ 1598              TS           SP2           N,X3          END PRSB Q          DOUBLE-SPACE RETROACTIVELY.
+
+R1600   MINOR SUBROUTINE TO SET IN PRINT THE NAMES OF SUBSIDIARY SUBROUTINES, PREFIXING OBSOLETE ONES BY "/".
+
+ 1602   PR SLAVES  SM           Z,R6,1        Z,CSC,1       -              C    ENTER HERE IF NOT AN OBSOLETING SUBRO.
+ 1604              SS           SLASH         S CHAR 8      N,R6,1         C    ENTER HERE TO SHOW PATH OF OBSOLESCENCE.
+ 1606              TX           N,R2          -             N,R6,1         C    SET SUBROUTINE NAME IN PRINT.
+ 1608              NA           Z,R6          Z,R7          N,SC,1         C    RETURN IF LINE NOT FULL YET.
+ 1610              WA           Z,X3          S EIGHT       Z,R7           C    RESET POINTERS TO OTHER PRINT BUFFER.
+ 1612              TS           Z,R7,8        Z,R6          M SPACE 1      C    PRINT 4 SUBSIDIARY SUBRO NAMES, RETURN.
+
+ 1614              TS           SP2           S LINE        GO PRINT       C    PRINT PROG OR SUBRO WITHOUT SUBROUTINES.
+ 1616   END PRSB Q SS           5,1           S THRED 10    Z,X5
+ 1617              NA           Z,X5          S END THR     M LIST PS           BRANCH IF THERE ARE MORE PROGS OR SUBS.
 
 # Page 142
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  35        PAGE 102
 
+P1619   TERMINATION OF EITHER THE PROGRAM LIST OR THE SUBROUTINE LIST.
+
+ 1620              NA           3,2           PR SUB HDS    NO PRSUBS +2        BRANCH IF THE LIST IS NOT EMPTY.
+ 1622   NO PRSUBS  TN           3,1           14            3,2
+ 1623              TX           W NONE        -             3,2                 ERASE HEADINGS AND SUBSTITUTE "(NONE)".
+ 1625              TX           SP3           -             N,X3
+ 1626              SS           S BIT 1       PRG OR SUB    N,X3                SP3 AFTER PROG LIST, SKIP AFTER SUBRO.
+ 1628              NA           PRG OR SUB    S ZERO        EN COMS Q           BRANCH IF JUST FINISHED SUBROUTINE LIST.
+
+ 1630              TS           W SUBROS      SLINE +2      EN COMPS Q     C
+ 1631              TS           W SUBROS +1   SLINE +3      M SPACE 1      C
+ 1632              TS           DASH 1T3      SLINE +3      M SPACE 1 +1   C    PRINT AND UNDERLINE SUBROUTINE HEADING.
+ 1634              TS           S ONES        PRG OR SUB    LIST PRSU           BEGIN LIST OF SUBROUTINES FOR COMPUTER.
+
+ 1636   EN COMPS Q TX           COMP LOCN     -             Z,X5
+ 1637              TS           SW CMPUTR     SLINE +1      SET SP1        C
+ 1638              SS           N,X5          S THRED 10    Z,X5
+ 1639              NA           Z,X5          S END THR     M LIS CMPS          BRANCH IF THERE ARE MORE COMPUTERS.
+
+R1641   PROCEDURE TO LIST ESTABLISHED AUTHORS.
+
+ 1642   M LIS AUTS SWE, CAC3    1,9           16            Z,X5                GET ADDRESS OF FIRST AUTHOR NAME.
+ 1644              LA           Z,X5          S END THR     END M LIST          BRANCH IF THERE ARE NO AUTHORS.
+
+ 1646   M LIS AUTH TX           W AUTHOR C    -             SLINE +1
+ 1647              TX           N,X5          -             SLINE +2            SET UP FIRST WORD OF AUTHOR NAME.
+ 1649              TX           Z,X5          -             Z,R2
+ 1650              SS           5,1           S THRED 11    Z,R2
+ 1651              TX           N,R2          -             SLINE +3            SET UP SECOND WORD OF AUTHOR NAME.
+ 1653              TN           W NPR SUBS    5             SLINE +4
+ 1654              LA           5,1           S C1T2        C,+2                BRANCH IF LESS THAN 255 PROGS AND SUBS.
+ 1656              TS           W 254P        SLINE +9      MOR AUTH Q          OTHERWISE JUST SAY "254+".
+
+ 1658              SWE, 3D8     5,1           26            SERV ARG
+ 1659              DT           SERV ARG      8             SERV ARG            CONVERT NUMBER TO DECIMAL.
+ 1661              SWE, 7D8     5,1           23            COMMON +1
+ 1662              DA           SERV ARG      COMMON +1     SERV ARG
+ 1663              DT           SERV ARG      8             SERV ARG
+ 1664              SWE, 7D8     5,1           20            COMMON +1
+ 1665              DA           SERV ARG      COMMON +1     SERV ARG
+ 1666              TS           Z,SC          Z,AU1         S D2A ZSUP          CONVERT TO ALPHABETIC.
+ 1668              SWS, C1T3    SERV ARG +2   A,5,L         SLINE +9
+
+ 1669   MOR AUTH Q TS           SP2           SLINE         GO PRINT       C    PRINT AN AUTHOR LINE.
+ 1671              SWS,THREAD10 5,1           12            Z,X5
+ 1672              NA           Z,X5          S END THR     M LIS AUTH          BRANCH IF THERE ARE MORE AUTHORS.
+
 # Page 143
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  36        PAGE 103
+
+P1674   FINALIZING PROCEDURE IN DIRECTORY LISTING.
+
+ 1675   END M LIST TX           S BIT 1       -             N,X3
+ 1676              S, PHI PRINT 3,0           -             -                   PRINT FINAL LINE OF LISTING.
+ 16762             NA, CHAR5    DISC STAT     S ONES        AFTER YDL +2        AVOID YULDLIST IF DISC IS INOPERATIVE.
+ 16764             S, MON RELOX YUL D LIST                  XFR LIMIT           YULDLIST WILL RUN IN BANK C HERE.
+ 16766             TS           Z,AU2,1       Z,AU1         YDL RETRN +1   C    SAVE BASE ADDRESS.
+ 16768             NA           N,AU2         BYE BYE       AFTER YDL           CANCEL QUIETLY IF WRONG REV OF YULDLIST.
+ 1677              TS           YDL RETRN     N,AU2         N,AU1               PLANT SPECIAL EXIT AND EXECUTE YULDLIST.
+
+ 16772  BYE BYE    TS           -             -             MONITOR             (SHOULD BE AT BASE ADDRESS +1).
+ 16773  YUL RETRN  TS           -             -             N,S3
+ 16774             TX           Z,CSC         -             Z,S3           S    MAKE S3 POINT TO SPECIAL RETURN.
+
+ 16776  AFTER YDL  TS           L BANK 1      Z,X0          BK1 VIA X0 +1  C
+ 16778             TX           YUL MASKS     -             Z,MXR          C    SET UP ALL SPECIAL REGS AFTER YULDLIST.
+ 1678              TN           S 4 SPACE     1             N,X3
+ 1679              MT           S BLANKS      14            N,AU2,1             FORM SPACER LINE.
+ 16802             S, PHI PRINT DEPAGIN8
+ 1681              S, PHI PRINT 3,0
+ 1682              S, PHI PRINT 3,0
+ 1683              S, PHI PRINT 3,0                                             FORCE LAST LINES THROUGH BUFPRINT.
+ 1685              NA, CHAR8    1,0           S ONE         LIST XIT            BRANCH IF NOT DOING FULL BACKUP COPY.
+ 1687              TS           N,SC,2        Z,X4          C,+2           C
+ 1688              SPEC,B7                                  601
+ 1689              NA,CHAR1     4,0           ASTRISK       PHI PEEK       C    CHECK ON STAR WHETHER HAVE READ OR NOT.
+ 1691              NA, CHAR1    4,0           ASTRISK       LIST XIT            BRANCH IF MORE TASKS IN THIS JOB.
+
+ 1693              LA           COMMON        S ZERO        GROUP NAP           SLEEP IF COPYING NOT DONE YET.
+ 16948             TS           S ONES        REVERT ID     -
+ 1695              DS, C7T8     1,2           S TWO         REVERT ID           FORM SEQUENCE NUMBER OF GRANDFATHER.
+ 1697              NA           COMMON        S ONES        GROUP NAP           SLEEP IF READ-BACK NOT DONE YET.
+
+ 16981             NA, BTHRED10 $PAR IDLE     S ZERO        REVERT GF           BRANCH IF NOT FIRST BACKUP IN THE JOB.
+ 169812            TX, BTHRED10 S ONES        -             $PAR IDLE           REVERT ALL GRAMPAS MADE IN THIS JOB.
+ 16982             NA           1,1           N,SC,6        C,+2                TEMPORARY UNTIL SUPER-CAREFUL TAPE OPS.
+ 16984             ALF          NANSTONE
+ 1699   REVERT GF  S, MON TYPER OBUWK MSG     SPRA +32      -                   TYPE "FORMER BACKUP WILL BE WORKER".
+ 1701              TS           1,1           C,+2          PHI SNACH           SUPPLY TRUE NAME OF GRANDFATHER TAPE.
+ 1703              ALF,2        N00L0006YULPROGS                                SNATCH FORMER BACKUP, TYPE 3 DISPO.
+ 1705   REVERT ID  DEC          0
+
+ 1706              TS           -             -             MON RLEAS
+ 1707              RW,6         -             -             -                   DEMOTE GRANDFATHER TO WORKER.
+
+ 1709   LIST XIT   TS           BKUP STOP +1  BKUP STOP     MON WAKE       C    ALLOW GROUP A TO EXIT FROM TASK.
+ 1711              TS           S ONES        REVERT ID     N,R0                GROUP B GOES TO BED.
 
 # Page 144
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  37        PAGE 104
 
+P1713              PRINTING SUBROUTINE IN PASS 0 WITH ONE-LINE DELAY, AS IN PASSES 2 AND 3.  PERFORMS PAGINATION.  ENTER
+R1715   WITH RETURN IN X4.
+
+
+
+ 1716   PRINT LIN  LA           S BIT 1       N,X3          PRINZ KIP           ALWAYS SKIP IF CODE SAYS SO.
+
+ 1718              WA           LIN COUNT     N,X3          LIN COUNT
+ 1719              LA           LIN COUNT     N LINES       PRINT OLE           BRANCH IF STILL IN SAME PAGE.
+
+ 1721              TX           S BIT 1       -             N,X3                SUPPLY SKIP WHEN COUNT OVERFLOWS.
+ 1723   PRINZ KIP  S, PHI PRINT DEPAGIN8
+ 1724              S, PHI PRINT 3,0
+ 1725              DA           PAGE NO       S ONE         PAGE NO
+ 1726              SWE, ONES    PAGE NO       D,4,L         SERV ARG
+ 1727              TS           Z,SC          Z,AU1         S D2A ZSUP
+ 1728              TX, C5T8     SERV ARG +2   -             PAGE HEAD +15
+ 1729              S, PHI PRINT PAGE HEAD                                       PRINT HEADING WITH ZERO-SUPPRESSED PGNO.
+ 1731              TS           PAGE HEAD     LIN COUNT     PRINT OLE +1
+
+ 1732   PRINT OLE  S, PHI PRINT 3,0
+
+ 1733              TX           Z,X2          -             L OLD LINE
+ 1734              TX           Z,X3,1        -             Z,X2                SWAP PRINT DELAY BUFFERS.
+ 1736              MT           S BLANKS      15            N,X3,1              SWAB OUT CURRENT LINE.
+ 1738              TX           L OLD LINE    -             Z,X3
+ 1739              TS           S ZERO        N,X2          N,X4
+
+
+
+R1740   BRUTAL ROUTINE TO TYPE OUT THE LONG CUSS (SEE NEXT PAGE) AND COME TO AN IMMUTABLE STOP.
+
+ 1742   CLOBBERD   S, MON TYPER OH DAMN       SPRAMR +8     -
+ 1743              TX           1,1           -             LONG CUSS           FILL IN ACTUAL TAPE NAME.
+ 1745              TX           L LONG CUS    -             Z,X6
+ 1746              S, MON TYPER 6,0           SPRAMR +40    -
+ 1747              NA           Z,X6,5        L PUT IT      C,-1
+
+ 1748              S, MON TYPER S BLANKS      SPRA +8       -
+ 1749              TS           Z,SC          Z,R0          C,+1           C    NEITHER ASA NOR ACA NOR ARA NOR FAX
+ 1751              STOP                                     -                   SHALL BUDGE US FROM THIS SPOT.
+ 1753              TS           -             -             C,-2
+
 # Page 145
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  38        PAGE 105
+
+P1754   A LONG CUSS FOR A DISTRESSING SITUATION.
+
+
+
+ 1755   OH DAMN    ALF          OH DAMN.
+ 1756   LONG CUSS  ALF,5        YULPROGS IS CLOBBERED. PLEASE DO THUNDER
+ 1757              ALF,5        EDIT *TEI.A72 (T = ACTUAL DRIVE NUMBER),
+ 1758              ALF,5        ASK FIELD SERVICE TO INSPECT THIS TAPE,
+ 1759              ALF,5        MOUNT BACKUP AND RERUN JOB AS REQUIRED.
+ 1760              ALF,5        IF NO BACKUP, FREEZE OPERATIONS ON THIS
+ 1761              ALF,5        TAPE UNTIL I CAN REPAIR THE DAMAGE. IF I
+ 1762              ALF,5        AM UNAVAILABLE AND THERE IS NO BACKUP
+ 1763              ALF,5        AND THE JOB HAS TO BE DONE  IN A HURRY,
+ 1764              ALF,5        TRANSFER THE PROGRAM TO THE DISC, AND
+ 1765   PUT IT ON  ALF,5        PUT IT ON ANOTHER TAPE.   (SIGNED) H B-S
 
 # Page 146
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  39        PAGE 106
 
+P1766              ROUTINE TO PROCESS THE ANNOUNCEMENT THAT A NEW COMPUTER NAME IS TO BE RECOGNIZED.
+
+ 1768   ADD COM    NA           N,X5          S NEW         C,+2
+ 1769              TX           Z,X5,3        -             -                   "NEW" IS OPTIONAL HERE.
+ 1771              TX           Z,X5          -             WHODUNIT
+ 1772              NA           N,X5,1        W COMPUTR     HOWZAT
+ 1773              NA           N,X5,2        S BLANKS      HOWZAT              "COMPUTER" IS REQUIRED.
+ 1775              NA           N,X5          W NAME        C,+2
+ 1776              TX           Z,X5,3        -             -                   "NAME" IS OPTIONAL.
+
+ 1778              TS           -             -             DECOD CPN      C    DECODE COMPUTER NAME.
+ 1780              TX           Z,SC,2        -             Z,CSC          C    MAKE FOLLOWING TWO WORDS A SUBROUTINE.
+ 1782   NO EXTRAS  WA           Z,X5          S THREE       WHODUNIT       C
+ 1783              NA           5,3           S ONES        HOWZAT              SUPERFLUOUS WORDS ARE FORBIDDEN.
+ 1785              TS           N,X5          NEWCO MSG +2  FIND PAIR      C    FIND ROOM FOR COMPUTER NAME ENTRY.
+ 1787              S, YUL TYPER NEWCO MSG     AMTF +3       C,+1                ANNOUNCE NEW NAME.
+
+ 1789              TS           -             -             FIND COMP      C    SEE IF IT EXISTS ALREADY.
+ 1791              TS           Z,SC,1        -             CHED LIST +1   C    XO TO X2, L BANK 1 TO X0.
+ 1792              S, MON TYPER CONCN MSG     SPRAMR +40    SM ABORT            CUSS AND ABORT IF CONFLICT.
+ 1794              EX           COMP NAME     S C1T4        N,X3                FORM COMPUTER NAME ENTRY.
+ 1796              SS           Z,X2          S THRED 10    N,X3
+ 1797              SWS,BTHRED10 S END THR     12,L          N,X3                INSERT VACUOUS PROGRAM THREAD.
+ 1799              EX           Z,X3          S THRED 10    3,1
+ 1800              SWS,BTHRED10 3,1           12,L          3,1
+ 1801              SWS, C1T4    3,1           24,L          3,1                 ASSUME IT HAS ITS OWN PARTICULAR PASSES.
+ 1803              NA           Z,R4          S ZERO        C,+3                BRANCH IF NOT SMALLEST OF COMPUTER NAMS.
+
+ 1805              SWS, CAC1    Z,X3          32,L          1,9                 OTHERWISE THREAD TO IT THUS.
+ 1807              TS           -             -             ACCEPT M2
+
+ 1808              SS           Z,X3          S THRED 10    N,R4
+ 1809              TS           -             -             ACCEPT M2           THREAD TO THIS FROM NEXT SMALLER CNAME.
+
+
+
+R1811   TRIVIAL ROUTINES TO ABORT A TASK FROM THE SERVICE MODULE.
+
+ 1812   SM ABORT   TS           L BANK 1      Z,X0          TYP ABORT
+ 1813   SM REJECT  TS           L BANK 1      Z,X0          REJEC DIR
+
 # Page 147
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  40        PAGE 107
+
+P1814   PROCEDURE TO PROCESS THE ANNOUNCEMENT THAT AN OLD COMPUTER (NAME) IS TO BE REMOVED.
+
+
+
+ 1816   RMOV COM   NA           N,X5          W OLD         C,+2                "OLD" IS OPTIONAL.
+ 1818              TX           Z,X5,3        -             -
+ 1819              TX           Z,X5          -             WHODUNIT
+ 1820              NA           N,X5,1        W COMPUTR     HOWZAT
+ 1821              NA           N,X5,1        S BLANKS      HOWZAT              "COMPUTER" IS REQUIRED.
+ 1823              NA           N,X5          W NAME        C,+2                "NAME" IS OPTIONAL.
+ 1825              TX           Z,X5,3        -             -
+
+ 1826              TS           -             -             DECOD CPN      C
+ 1827              TS           N,X5          REMCO MSG +3  NO EXTRAS      C
+ 1828              S, MON TYPER REMCO MSG     SPRAMR +32    -                   DECODE COMPUTER NAME AND ANNOUNCE TASK.
+
+ 1830              TS           -             -             FIND COMP      C    LOOK UP COMPUTER NAME.
+ 1832              S, MON TYPER SURCO MSG     SPRAMR +32    SM ABORT            CUSS AND ABORT IF NO SUCH COMPUTER.
+
+ 1834              LA,BTHRED10  0,0           B ADDR 6      C,+3                BRANCH IF COMPUTER HAS NO PROGRAMS.
+ 1836              S, MON TYPER COMUS MSG     SPRAMR +24    CHED LIST           CUSS ABOUT REMOVING COMPUTER IN USE.
+ 1838   CHED LIST  S, MON TYPER CHEDL MSG     SPRAMR +24    SM ABORT            TELL HIM TO CHECK THE DIRECTORY LISTING.
+
+ 1840              TS           Z,X0          Z,X2          BK1 VIA X0     C
+ 1841              SWE, CAC3    1,9           32            Z,X3                CHECKING ON SOFTWARE SHARING: LOCATION
+ 1843              TS           Z,X2          L COMP NAM    THIS COM Q          OF 1ST COMPUTER AND OF THIS ARE SET UP.
+
+ 1845   SOFT SHAR  TX           N,X3          -             N,X5
+ 1846              TS           -             -             CPN FIXER      C    EXPAND COMPUTER NAME TO STANDARD FORM.
+ 1848              TX           N,X5          -             STNED MSG +2
+ 1849              TX           L W PASS 1    -             Z,X4
+
+ 1850   SHAR LOOP  SWS, ONES    3,1           12,L          3,1                 ROTATE SOFTWARE THREADS.
+ 1852              NA, THREAD10 3,1           L COMP NAM    4 PASS CT           BRANCH IF NO SHARING HERE.
+ 1854              SM           L COMP NAM    S CHAR 1      L COMP NAM          SET FLAG TO SHOW SOME SHARING.
+ 1856              S, MON TYPER 4,0           SPRAM +16     -
+ 1857              S, MON TYPER STNED MSG     SPRAMR +24    -                   TYPE OUT WHO NEEDS WHICH SOFTWARE.
+ 1859   4 PASS CT  NA           N,X4,2        W MANUF       SHAR LOOP           DO ALL 4 "PASSES" FOR EACH OTHER COMP.
+
+ 1861              SS           N,X3          S THRED 10    Z,X3                FOLLOW THE THREAD TO NEXT COMPUTER.
+ 1863              LA           Z,X3          1 COMMA 8     CHK SHARE           BRANCH IF ALL COMPUTERS DONE.
+ 1865   THIS COM Q NA           Z,X3          Z,X2          SOFT SHAR           BRANCH IF NOT COMPUTER BEING REMOVED.
+ 1867              TS           -             -             C,-3
+
+ 1868   CHK SHARE  LA           S CHAR 1      L COMP NAM    TYP ABORT           ABORT IF THERE WAS ANY SHARING.
+ 1870              NA           Z,R4          S ZERO        NOT 1ST CO          BRANCH IF COMPUTER NOT 1ST IN LIST.
+ 1872              SS           N,X2          S THRED 10    Z,X3
+ 1873              SWS, CAC1    Z,X3          32,L          1,9                 SEW UP THREAD AROUND THIS COMPUTER.
+ 1875              TX           Z,SC,1        -             -
+
+ 1876   NOT 1ST CO SS           N,X2          S THRED 10    N,R4                SEW UP THREAD AROUND THIS COMPUTER.
+ 1878              TS           Z,X2          Z,AU1         GIVE PAIR      C    GIVE UP ITS TWO WORDS.
+ 1880              TS           -             -             ACCEPT M2           CALL FOR BACKUP LABEL AMENDMENT IF NEC.
 
 # Page 148
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  41        PAGE 108
 
+P1882              ROUTINE TO PROCESS A DECLARATION THAT ASSEMBLY PASS 1, ASSEMBLY PASS 2, ASSEMBLY PASS 3, OR MANUFACT-
+R1884   URING FOR A PARTICULAR COMPUTER IS AVAILABLE, CHECKED OUT, OR OBSOLETE.  CUSSES RESULT FROM VARIOUS INCONSISTEN-
+R1886   CIES AND REDUNDANCIES IN SUCH DECLARATIONS.  A PASS (GENERIC TERM FOR THE FOUR ITEMS ABOVE) MAY BE DECLARED
+R1888   CHECKED OUT OR OBSOLETE ONLY AFTER BEING DECLARED AVAILABLE.  ANY PASS MAY BE DECLARED EQUIVALENT TO THE CORRES-
+R1890   PONDING PASS FOR ANOTHER COMPUTER.
+
+
+
+ 1893   PASS STA   TX           Z,X5          -             WHODUNIT            ENTRY FOR STATUS OF ASSEMBLY PASSES.
+ 1895              NA           N,X5,3        W PASS        HOWZAT              "PASS" IS REQUIRED.
+ 1897              TX           Z,X5          -             WHODUNIT
+ 1898              NA, CHAR6    5,2           S 1 C6        HOWZAT              PASS NUMBER MUST BE ONE DIGIT.
+ 1900              LA           N,X5          S ZERO C1     HOWZAT
+ 1901              LA           4 C1          N,X5          HOWZAT              AND MUST BE IN THE RANGE 1-3.
+ 1903              SWS, CHAR3   N,X5,3        A,2           PASSS MSG +1        PUT PASS NUMBER IN ANNOUNCEMENT.
+ 1905              SSL, CHAR8   PASSS MSG +1  A,5           MASKIFTS -1    C    SHIFT MASK ACCORDING TO PASS.
+ 1907              TN           PASSS MSG     2             STATS MSG +1        STATUS MESSAGE DEALS WITH A PASS.
+ 1909              TS           PASSS RE      STATS MSG     CHECK FOR
+
+ 1910   MASKIFTS   SWE, ONES    MANU MASK     12            PASS MASK
+ 1911              SWE, ONES    MANU MASK     24            PASS MASK
+ 1912              SWE, ONES    MANU MASK     36            PASS MASK           MASK FOR 2ND WD OF COMPUTER NAME ENTRY.
+
+ 1914   MANU STA   TX           MANU MASK     -             PASS MASK           ENTRY FOR STATUS OF MANUFACTURING.
+ 1916              TN           MANUS MSG     2             STATS MSG +1
+ 1917              TX           MANUS RE      -             STATS MSG
+
+ 1922   CHECK FOR  TX           Z,X5          -             WHODUNIT            JOINT ROUTINE FOR STATUS DECLARATIONS.
+ 1924              NA           N,X5,3        S FOR         HOWZAT
+
+ 1925   WHOS STAT  TS           -             -             DECOD CPN      C    DECODE COMPUTER NAME.
+ 1927              TX           N,X5          -             STATS MSG +3
+ 1928              S, YUL TYPER STATS MSG     A +4          C,+1                ANNOUNCE WHICH PASS FOR WHICH COMPUTER.
+ 1930              TS           -             -             FIND COMP      C    FIND COMPUTER NAME IN DIRECTORY.
+ 1932              S, MON TYPER SURCO MSG     SPRAMR +32    SM REJECT           CUSS AND ABORT IF NONEXISTENT COMPUTER.
+ 1934              TS           Z,X0          Z,X2          BK1 VIA X0     C
+ 1937              NA, CHAR1    5,2           EQUALS C1     CHECK IS            BRANCH IF ABSOLUTE DECLARATION.
+
 # Page 149
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  42        PAGE 109
+
+P1939   PROCEDURE FOR EQUIVALENCE DECLARATIONS.
+
+ 1940              WA           Z,X6          OCTAL 20      Z,X4
+ 1941   EQIV LOOP  WA           Z,X5,3        S THREE       WHODUNIT            WHEN "*" IS THE NON-BLANK TERMINATOR OF
+ 1943              NA           N,X5          N,X4,1        HOWZAT              THE COMPUTER NAME, THE DECLARATION IS:
+ 1945              NA           5,1           N,X4,2        HOWZAT              A PASS (NOT SIMULATION) FOR THE 1ST-
+ 1947              NA           N,X5          S FOR         EQIV LOOP           NAMED COMPUTER = THAT FOR THE 2ND-NAMED.
+
+R1949   AT THIS POINT WE KNOW THAT ALL THE WORDS THROUGH "FOR" WERE DUPLICATED.
+
+ 1950              NA           STATS MSG     MANUS RE      C,+2
+ 1951              TS           MANUS EQU     STATS MSG     C,+2                CHANGE "RE:" TO "=" (MANUFACTURING).
+ 1953              TX           PASSS EQU     -             STATS MSG           CHANGE "RE:" TO "=" (ASSEMBLY PASSES).
+ 1955              TS           Z,X5,3        -             WHOS STAT      C    DECODE SECOND COMPUTER NAME.
+
+ 1957              TX           COMP NAME     -             STATS MSG +3
+ 1958              S, YUL TYPER STATS MSG     A +4          C,+1                ANNOUNCE EQUIVALENCE.
+ 1960              TS           Z,X2          Z,X4          FIND COMP      C    SAVE ADDR. OF 1ST NAME, FIND 2ND.
+ 1962              S, YUL TYPER SURCO MSG     AMTF +4       TYP ABORT           CUSS AND ABORT IF NO SUCH COMPUTER.
+ 19632             TS           Z,X0          Z,X2          BK1 VIA X0     C
+ 1964              NA           Z,X2          Z,X4          XFER STAT           BRANCH IF NAMES ARE DIFFERENT.
+ 1966              EX           Z,X2          S THRED 10    TEMP MSK            WHEN NAMES ARE SAME, IT MEANS THAT THE
+ 1968              SWS, C1T6    TEMP MASK     12,L          TEMP MSK             COMPUTER HAS STOPPED SHARING A PASS.
+ 1970              SWS, C1T6    TEMP MASK     24,L          TEMP MSK            MAKE 4 COPIES OF COMPUTER NAME ADDRESS.
+ 1972              SS           TEMP MASK     PASS MASK     2,1                 SHOW THAT COMPUTER HAS OWN VERSION.
+
+ 1974   XFER STAT  SS           2,1           PASS MASK     4,1                 TRANSFER KNOWN STATUS.
+
+ 1976              EX           PASS MASK     S PAV BITS    TEMP MSK            FORM AVAILABILITY BIT FOR THIS PASS.
+ 1978              S, MON TYPER W STATUS      SPRAM +8      -                   TYPE "STATUS: ".
+ 1980              EX           2,1           TEMP MSK      COMMON
+ 1981              NA           COMMON        S ZERO        C,+2
+ 1982              S, MON TYPER UNAVP MSG     SPRAMR +16    AC PA STAT          ANNOUNCE AND EXIT IF UNAVAILABLE.
+ 1984              EX           PASS MASK     PCO BITS      TEMP MSK            FORM CHECKOUT BIT FOR THE PASS.
+ 1986              EX           2,1           TEMP MSK      COMMON
+ 1987              NA           COMMON        S ZERO        C,+2
+ 1988              S, MON TYPER W AVALABL     SPRAMR +16    AC PA STAT          ANNOUNCE AND EXIT IF AVAILABLE.
+ 1990              S, MON TYPER W CHECKED     SPRAMR +16    AC PA STAT          ANNOUNCE AND EXIT IF CHECKED OUT.
 
 # Page 150
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  43        PAGE 110
 
+P2000   PROCEDURE FOR ABSOLUTE, RATHER THAN EQUIVALENCE, DECLARATION.
+
+ 2001   CHECK IS   NA           5,3           W IS          C,+2                "IS" IS OPTIONAL HERE.
+ 2003              TX           Z,X5,3        -             -
+ 2004              WA           Z,X5,3        S THREE       WHODUNIT
+ 2005              NA           N,X5          W AVALABL     CHK OR OBS          BRANCH IF CANNOT BE "AVAILABLE".
+ 2007              NA           5,1           W AVALABL +1  HOWZAT              CUSS AND ABORT IF MIS-SPELLED.
+ 2009              S, YUL TYPER DCLAV MSG     AMTF +3       C,+1                TYPE "DECLARED AVAILABLE".
+ 2011              EX           PASS MASK     S PAV BITS    TEMP MSK            FORM AVAILABILITY BIT FOR PASS.
+ 2016              EX           2,1           TEMP MSK      COMMON
+ 2017              NA           COMMON        TEMP MSK      C,+2
+ 2018   TYP REDUN  S, YUL TYPER REDUN MSG     AMTF +2       TYP ABORT           CUSS AND ABORT IF REDUNDANT.
+ 2020              SM           2,1           TEMP MSK      2,1
+ 2021              TS           -             -             AC PA STAT          SIGNAL AVAILABILITY OR CHECKOUT, EXIT.
+
+ 2023   CHK OR OBS NA           N,X5          W CHECKED     OBSOLETE            BRANCH IF CANNOT BE "CHECKED OUT".
+ 2025              WA           Z,X5,3        S THREE       WHODUNIT
+ 2026              NA           N,X5          W OUT         HOWZAT              CUSS AND ABORT IF MIS-SPELLED.
+ 2028              S, YUL TYPER DCLOK MSG     AMTF +3       C,+1                TYPE "DECLARED CHECKED OUT".
+ 2030              EX           PASS MASK     S PAV BITS    TEMP MSK            FORM AVAILABILITY BIT FOR THE PASS.
+ 2035              EX           2,1           TEMP MSK      COMMON
+ 2036              NA           COMMON        S ZERO        C,+2
+ 2037              S, YUL TYPER NOTAV MSG     AMTF +2       TYP ABORT           CUSS AND ABORT IF NOT AVAILABLE.
+ 2039              EX           PASS MASK     PCO BITS      TEMP MSK            FORM CHECKOUT BIT FOR THE PASS.
+ 2041              TS           -             -             TYP REDUN -2
+
+ 2042   OBSOLETE   NA           N,X5,1        W OBSOLET     HOWZAT
+ 2043              NA           N,X5          S BLANK       HOWZAT              CUSS AND ABORT IF NOT "OBSOLETE".
+ 2045              S, YUL TYPER DCLOB MSG     AMTF +3       C,+1                TYPE "DECLARED OBSOLETE".
+ 2047              EX           PASS MASK     AVCO BITS     TEMP MSK            FORM AVAIL AND CHKO BITS FOR PASS.
+ 2051              EX           2,1           TEMP MSK      COMMON
+ 2052              NA           COMMON        S ZERO        C,+2                BRANCH IF NOW CALLED AVAILABLE.
+ 2054              S, YUL TYPER NOTAV MSG     AMTF +2       TYP ABORT           CUSS AND ABORT OTHERWISE.
+ 2056              SS           S ZERO        TEMP MSK      2,1                 ERASE AVAIL AND CHKO BITS, EXIT.
+
+R2058   COMMON EXIT FOR ACCEPTANCE OF ANY PASS STATUS CHANGE.
+
+ 2059   AC PA STAT NA, CHAR8    1,0           S ZERO        MANUF RTN           BRANCH IF SOME BACKUP ALREADY WANTED.
+ 2061              TS, CHAR8    S TWO         1,0           MANUF RTN           CALL FOR BACKUP LABEL AMENDMENT.
+
 # Page 151
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  44        PAGE 111
 
+P3000              COMMON SUBSEGMENT IN BANK 4 FOR OVERSPILL OF BANK 1.
+
+ 3001   OVERSPIL   EQUALS       AC PA STAT - L BACKUP +12                       LEAVE ROOM FOR 10 PATCHES.
+
+ 3002              SETLOC,5C    OVERSPIL      B4
+
+ 3003   NUMERALS   OCT          3442 4242 34,  4040 7644 40
+ 3004              OCT          4452 4262 44,  2452 5252 42
+ 3005              OCT          2076 2430 20,  2252 5252 56
+ 3006              OCT          2252 5252 34,  0206 1222 42
+ 3007              OCT          2452 5252 24,  3452 5252 44
+
 # Page 152
 L      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  45        PAGE 112
+
+# This page is assembly status ionformation only. Omitted.
