@@ -64,6 +64,7 @@
  *                11/03/16 RSB   Added variable needed for tracking whether or not
  *                               a "superbit" setting has been established in the
  *                               program or not.
+ *                11/14/16 RSB   Added --to-yul.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -131,7 +132,9 @@ enum OpType_t
 #define HTML_TABLE_END "</td>\n</tr>\n</tbody>\n</table>\n"
 
 #define MAX_LABEL_LENGTH 10    // Max length of symbols (8 + optional ,1 or ,2).
-#define MAX_LINE_LENGTH 132
+#define MAX_LINE_LENGTH 256    // Was 132, but it's easy to accidentally make
+                               // the lines longer by poorly estimating the
+                               // amount of space in comments, and so on.
 #define COMMENT_SEPARATOR '#'
 // The following value is stored in the symbol table for any symbols
 // whose values have not yet been resolved.
@@ -555,6 +558,8 @@ extern int OpcodeOffset;
 extern int ArgType;
 
 extern int formatOnly;
+extern int toYulOnly, toYulOnlySequenceNumber;
+extern Line_t toYulOnlyLogSection;
 extern int flipBugger[044];
 
 extern int trace;

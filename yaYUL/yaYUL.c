@@ -87,6 +87,7 @@
  *                              symbol could be resolved but have the wrong value.  This
  *                              possibility became a reality in Artemis072 when some fixes
  *                              to EQUALS/= needed for Sunburst120 were made.
+ *              2016-11-14 RSB  Added --to-yul.
  */
 
 #include "yaYUL.h"
@@ -101,6 +102,8 @@
 // Some global data.
 
 int formatOnly = 0;
+int toYulOnly = 0, toYulOnlySequenceNumber;
+Line_t toYulOnlyLogSection;;
 int syntaxOnly = 0;
 int Force = 0;
 char *InputFilename = NULL, *OutputFilename = NULL;
@@ -224,6 +227,11 @@ main(int argc, char *argv[])
           MaxPasses = 3;
           OutputSymbols = 0;
         }
+      else if (2 == sscanf(argv[i], "--to-yul=%d,%[^\n]", &j, toYulOnlyLogSection))
+        {
+          toYulOnly = 1;
+          toYulOnlySequenceNumber = j;
+        }
       else if (*argv[i] == '-' || *argv[i] == '/')
         {
           printf("Unknown switch \"%s\".\n", argv[i]);
@@ -260,7 +268,7 @@ main(int argc, char *argv[])
         }
     }
 
-  if (formatOnly)
+  if (formatOnly || toYulOnly)
     {
       Pass(0, InputFilename, NULL, &Fatals, &Warnings);
       return (0);
@@ -578,6 +586,10 @@ main(int argc, char *argv[])
       printf("                 Multiple --flip options can be used.\n");
       printf("--yul            Assemble as YUL rather than GAP.  Has no effect at present.\n");
       printf("--trace          Trace some of yaYUL's internal activity, for debugging.\n");
+      printf("--to-yul=S,L     Processes a single input file in .agc format, outputting\n");
+      printf("                 an equivalent .yul file on stdout.  S (a decimal number\n");
+      printf("                 is the initial card-sequence number.  L (a string) is the\n");
+      printf("                 name of the log section to use as a P-card.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);

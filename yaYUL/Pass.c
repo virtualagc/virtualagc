@@ -98,6 +98,8 @@
  *                              Programmer's Manual", or a mixture, transparently
  *                              converting .yul to .agc internally on-the-fly.
  *                              It *almost* works, but not quite yet.
+ *              2016-11-14 RSB  Added the '#>' construct in .yul files.  Added
+ *                              --to-yul.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1419,9 +1421,8 @@ static Address_t DefaultAddress = INVALID_ADDRESS;
   };
 
 static ParseOutput_t ParseOutputRecord,
-DefaultParseOutput =
-  {
-  INVALID_ADDRESS,    // ProgramCounter
+  DefaultParseOutput=
+  { INVALID_ADDRESS,    // ProgramCounter
 0,                  // Reserved
         { 0, 0 },           // Words [0:1]
       0,                  // NumWords
@@ -1613,14 +1614,36 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       for (ss = s; *ss && isspace(*ss); ss++)
         ;
       if (*ss == 0) // completely whitespace
-        ;
+        {
+          if (toYulOnly)
+            {
+              printf("%-80s\n", "");
+              continue;
+            }
+        }
       else if (s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &k)) // is a ## line
         ;
-      else
-        inHeader = 0;
+      else if (inHeader)
+        {
+          inHeader = 0;
+          if (toYulOnly)
+            {
+              printf("P%04d   %-72s\n", toYulOnlySequenceNumber++,
+                  toYulOnlyLogSection);
+            }
+        }
+
+      // Convert the construct "#>' (column 1) used in .yul files to an
+      // indented ##-style comment.
+      if (yulType && s[0] == '#' && s[1] == '>')
+        {
+          s[1] = '#';
+          memmove(&s[6], s, 1 + strlen(s));
+          memset(s, '\t', 6);
+        }
 
       // Is it an HTML insert?  If so, transparently process and discard.
-      if (formatOnly)
+      if (formatOnly || toYulOnly)
         {
           if (s[0] == '#' && s[1] == '#')
             {
@@ -1718,7 +1741,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       ParseInputRecord.Column8 = ' ';
       ParseInputRecord.InversionPending = 0;
       ss = strstr(s, "\n");
-      if (ss != NULL)
+      if (ss != NULL )
         *ss = 0;
       s[sizeof(s) - 1] = 0;
       for (ss = s; *ss;)
@@ -1745,7 +1768,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       *ss = 0;
 
       if (yulType)
-	yul2agc(s);
+        yul2agc(s);
 
       // Find and remove the comment field, if any.
       //printf ("Line -> \"%s\"\n", s);
@@ -1763,6 +1786,14 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           //for (ss = ParseInputRecord.Comment; *ss; ss++)
           //    if (*ss == '\n')
           //        *ss = 0;
+          if (toYulOnly && ParseInputRecord.Comment[0] == COMMENT_SEPARATOR)
+            {
+              ParseInputRecord.Comment++;
+              if (*ParseInputRecord.Comment == ' ')
+                ParseInputRecord.Comment++;
+              printf("#>%-38s%-40s\n", "", ParseInputRecord.Comment);
+              *ParseInputRecord.Comment = 0;
+            }
         }
       //printf ("Comment -> \"%s\"\n", ParseInputRecord.Comment);
 
@@ -1887,7 +1918,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             }
           else
             {
-              if (formatOnly && noOperator)
+              if ((formatOnly || toYulOnly) && noOperator)
                 {
                   ParseInputRecord.Operator = "";
                 }
@@ -2001,6 +2032,48 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                 }
             }
           printf("\n");
+          continue;
+        }
+      if (toYulOnly)
+        {
+          char dummyLabel[32], dummyOperator[32], dummyOperand[48];
+          if (*ParseInputRecord.Comment == ' ')
+            ParseInputRecord.Comment++;
+          if (ParseInputRecord.commentColumn == 0
+              && ParseInputRecord.Comment[0] != 0)
+            {
+              printf("R%04d   %-72s\n", toYulOnlySequenceNumber++,
+                  ParseInputRecord.Comment);
+              continue;
+            }
+          if (ParseInputRecord.Label[0] == 0
+              && ParseInputRecord.Operator[0] == 0
+              && ParseInputRecord.Operand[0] == 0)
+            {
+              if (ParseInputRecord.Comment[0] == 0)
+                printf("R%04d   %-72s\n", toYulOnlySequenceNumber++, "");
+              else
+                printf("A%04d   %-32s%-40s\n", toYulOnlySequenceNumber++, "",
+                    ParseInputRecord.Comment);
+              continue;
+            }
+
+          if (ParseInputRecord.Label[0])
+            strcpy(dummyLabel, ParseInputRecord.Label);
+          else if (ParseInputRecord.FalseLabel[0])
+            sprintf(dummyLabel, " %s", ParseInputRecord.FalseLabel);
+          else
+            dummyLabel[0] = 0;
+          if (ParseInputRecord.Column8 != ' ')
+            sprintf(dummyOperator, "%c%s", ParseInputRecord.Column8,
+                ParseInputRecord.Operator);
+          else
+            strcpy(dummyOperator, ParseInputRecord.Operator);
+          sprintf(dummyOperand, "%s %s %s", ParseInputRecord.Operand,
+              ParseInputRecord.Mod1, ParseInputRecord.Mod2);
+          printf(" %04d   %-8s %-6s %-16s%-40s\n", toYulOnlySequenceNumber++,
+              dummyLabel, dummyOperator, dummyOperand,
+              ParseInputRecord.Comment);
           continue;
         }
 

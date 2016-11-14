@@ -57,6 +57,9 @@
    *        Columns 41-80   (If a code card) the line's comment
    *
    * Blank lines or lines beginning with ## are passed through unchanged.
+   * Lines beginning with #> are passed though slightly modified, in that
+   * "#>" is replaced by "\t\t\t\t\t\t##" ... i.e., this kind of line represents
+   * an indented ##-style comment, as opposed to a full-line ##-style comment.
    */
 void
 yul2agc (char *s)
