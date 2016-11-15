@@ -7,6 +7,7 @@
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        153-210
 # Mod history:  2016-10-06 JL   Created.
+#               2016-11-15 JL   Transcribed pages 153-162.
 
 # Annotations:
 #
@@ -37,46 +38,456 @@ R0002   JSOCT-
 
 
 
-R0005              YUL SYSTEM PASS 1
+R0005              YUL SYSTEM PASS 1 READS CARDS ONLY (NEW ASSEMBLY), OR MERGES CARDS WITH SYPT OR SYLT RECORDS (REVI-
+R0007   SION OR VERSION ASSEMBLY).  ONE-SHOT MODIFICATION OF SUBPROGRAMS WILL BE ALLOWED SOME DAY, CARDS BEING MERGED
+R0009   WITH SYLT RECORDS BUT NO PERMANENT CHANGES BEING MADE IN THE SYLT.  CORRECT ORDERING OF CARD NUMBERS IS REQUIRED
+R0011   (ON PAIN OF CUSSING IN NEW ASSEMBLY, OR REJECTION OF ALL INPUT IN REVISION OR VERSION ASSEMBLY).
 
+R0015              PASS 1 COPIES SYPTSAVES AND SYLTSAVES FROM TAPE 1 TO TAPE 3, AND BYPTSAVES FROM TAPE 1 TO TAPE 4.
+R0017   IT ALSO WRITES POPO (PASS ONE PROGRAM OUTPUT) RECORDS ON TAPE 2.  ITS CHIEF OPERATIONS ON SOME IMPORTANT TYPES
+R0019   OF CARDS ARE LISTED BELOW:
 
+R0020           1) INSTRUCTIONS AND CONSTANTS.   PROCESSING OF LOCATION FIELD (GENERALLY AFFECTING THE LOCATION COUNTER)
+R0022              AND DEFINITION OF LOCATION SYMBOL ARE DONE.  FIXED MEMORY IS RESERVED AS NEEDED.  LEFTOVERS ARE
+R0024              MARKED AS SUCH.  15 BITS OF CODED INFORMATION (MOSTLY OP CODE) ARE ATTACHED TO INSTRUCTION CARDS.
 
+R0026           2) IS,=,EQUALS.   AN ATTEMPT IS MADE TO DEFINE THE LOCATION SYMBOL BY EVALUATING THE ADDRESS FIELD.
+R0028              FAILURE OF THIS OPERATION BY REASON OF AN UNDEFINED ADDRESS SYMBOL "NEARLY DEFINES" THE SYMBOL.
+
+R0030           3) ERASE.   ERASABLE MEMORY IS RESERVED AS REQUESTED. EXCEPT FOR LEFTOVER ERASE CARDS.
+
+R0032           4) OTHER CLERICAL CODES.   THESE GENERALLY HAVE THEIR EFFECT IN PASS 1 (E.G. MANIPULATING THE LOCATION
+R0034              COUNTER).
 
 # Page 154
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   2        PAGE   2
 
+P0035   INTERPASS STORAGE.  63 WORDS.
+
+
+
+ 0036   PROG NAME  RESERVE      1
+ 0037   NEXT NAME  RESERVE      1
+ 0038   SWITCH     RESERVE      1
+ 0039   L OLD LINE RESERVE      1
+
+ 0040   OLD LINE   RESERVE      16
+ 0041   PAGE HEAD  RESERVE      16
+
+ 0042   PAGE NO    RESERVE      1
+ 0044   SYM PLACE  RESERVE      1
+ 0045   SYM TAB XS RESERVE      1
+ 0046   L COP BUFS RESERVE      1
+
+ 0048   MID POINT  RESERVE      1
+ 0049   LIN COUNT  RESERVE      1
+ 0050   N WD RECS  RESERVE      1
+ 0051   E SYLT BAN RESERVE      1
+
+ 0052   L PROG FIL RESERVE      1
+ 0053   N LINES    RESERVE      1
+ 0054   L COMP NAM RESERVE      1
+ 0055   N COPIES   RESERVE      1
+
+ 0056   PAPER PLY  RESERVE      1
+ 00561  ERR PAGES  RESERVE      1
+ 00562  N ERR LINS RESERVE      1
+ 00563  L AUTH NAM RESERVE      1
+
+ 00564  SORS NAME  RESERVE      1
+ 00565  COMPUTER   RESERVE      1
+ 00568  SEG OWNER  RESERVE      1
+
+ 00569  SUBSTRAB   RESERVE      8
+
+
+
+R0057              THE FOLLOWING INSTRUCTION IS PLACED AT THE BASE ADDRESS (10077) OF PASS 1 FOR CONVENIENCE.
+
+ 0059   YUL PASS 1 TS           P1 MASKS      Z.MXR         INISH P1            INITIALIZATION CONTINUED ON PAGE 66.
+
+R006004 SIMULATED EXTENDED TS ROUTINE, PLACED HERE TO TAKE ADVANTAGE OF THE 7.
+
+ 00601  ETS        EQUALS       YUL PASS 1
+ 00602             SWS, C7T8    ETS           12            C,+2           C    ADDRESS OF REGISTER TO BE LOADED.
+ 00604             EX           N,AU1         CAC 3         ETS            C    INPUT IS 16 BITS.
+ 00606             EBA          ETS           BIT 25        Z,0            C    OUTPUT IS 24 BITS.
+ 00608             NA           Z,CSH         Z,SC          N,AU2          C
+ 00609             TX           Z,AU2         -             Z,SC           C    EXIT IN SAME MODE AS ENTRY.
 
 # Page 155
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   3        PAGE   3
 
+P0061   TRANSFER VECTOR ENTRIES 69 ONWARD.  (TRANSFER VECTOR BEGINS WITH PROGNAME.)
+
+ 006104 BIT 32     DEC          -1 0000
+ 006108 BIT 45 NOT OCT          -177767
+ 006112 TWO        OCT          -2
+ 006116 NINE       DEC          -9
+
+ 00612  FREE NTRY  OCT          -133760
+ 006124 FREE EXIT  OCT          -133760
+ 006128 SAPO NTRY  OCT          - 33777
+
+ 006132 P1 MASKS   MASKBASE     S,0           F,0                               CAC2 HOLDS L NEXT SUB.
+ 006134 END PARAS  DEC          +GGGG
+ 006136 END YUL    ALF,3        END YUL PASS 1  PASS 1 ≠
+
+
+R00614  ROUTINE FOR ALL UNMANAGEABLE TROUBLES.
+
+ 006144 DISASTER   MPC,H        Z,1           301           MON PCR             IMITATE THE ACTION OF A BACKGROUND.
+ 006148            ALF          DISASTER
+
+
+R006152 SUBROUTINE TO DELIVER THE NAME OF A FREE BUFFER IN AU1.  SLEEPS WHILE WAITING IF NEED BE. COSEQUENCE IN AND OUT.
+
+ 006156 GRAB FREE  TS           Z,CSH         Z,AU2         C,+3           C    SAVE RETURN ADDRESS.
+ 00616             TS           N,R7          Z,AU1         C,+4           C    FETCH NAME OF BUFFER.
+ 006164            TS           Z,SC          Z,AU1         CSC SLEEP      S    SLEEP IF THERE ARE NO FREE BUFFERS.
+ 006168            TS           FREE EXIT     Z,R7          -              C
+ 006172            SSL,ONE      N,R7          16            C,-3           C    TEST WHETHER THERE IS A FREE BUFFER.
+ 006176            TS           BIT 32        N,R7,1        -              C    PLANT BUSY FLAG IN FREE LIST.
+ 00618             EX           Z,R7          BIT 45 NOT    FREE EXIT      C    MODULATE FREE LIST EXIT POINTER.
+ 006184            TX           Z,AU2         -             Z,CSC          C
+
+
+R006188 CLOSED SUBROUTINE TO DEMOTE A BUFFER IN JOINT STATUS TO INPUT OR SAVE STATUS, OR FREE A BUFFER WITHOUT JOINT
+R006192 STATUS.  IF BUFFER IS KNOWN NOT TO BE IN JOINT STATUS, ENTER AT SET FREE.  PROVIDE BUFFER NAME IN Z,SH.
+
+ 006196 FREE IN SV TS           JOINT XIT     Z,R7          -              C
+ 0062              LA           Z,SH          N,R7          C,+2           C    BRANCH IF BUFFER MIGHT BE IN JOINT STAT.
+ 006204            TS           FREE NTRY     Z,R7          SET FREE +1    C    OTHERWISE PUT NAME INTO FREE LIST.
+ 006208            LA           N,R7          Z,SH          DISJOINT       C    BRANCH IF BUFFER IS IN JOINT STATUS.
+
+ 006212 SET FREE   TS           FREE NTRY     Z,R7          -              C    OTHERWISE PUT NAME INTO FREE LIST.
+ 006216            TS           Z,SH          N,R7,1        -              C
+ 00622             EX           Z,R7          BIT 45 NOT    FREE NTRY      C    MODULATE FREE LIST ENTRY POINTER.
+ 006224            TS           Z,SC          Z,CSC         MON WAKE       C
+
+ 006228 DISJOINT   TS           ZERO          N,R7,1        -              C    REPLACE IN JOINT LIST WITH VOID FLAG.
+ 006232            SM           Z,R7          BIT 46 R      JOINT XIT      S    MODULATE JOINT LIST EXIT POINTER, EXIT.
+
+
+R006236 MINOR SUBROUTINE TO SLEEP IN COSEQUENCE MODE.
+
+ 00624  CSC SLEEP  TS           -             -             MON SLEEP      C
+ 006244            TS           Z,AU1         Z,SC          N,SH           C
 
 # Page 156
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   4        PAGE   4
 
+P006248*           MASKS FOR MAIN PART OF PASS 1.
+
+
+
+ 006249*        DELETE
+ 0063   B,BIT2     OCT          2
+ 0064   MERJ MODE  EQUALS       BIT 2
+ 0065   B,BIT3     OCT          1
+ 0066   TAPE KEPT  EQUALS       BIT 3
+ 0067   B,BIT5     OCT          02
+ 0068   KNOW SUBS  EQUALS       BIT 5
+ 0069   B,BIT6     OCT          01
+ 0070   CORRECT    EQUALS       BIT 6                                           FIELD AND SHIFT MASKS 1-4.
+
+ 0072   B,BIT8     OCT          002
+ 0074   B,BIT9     OCT          001
+ 0075   B,BIT10    OCT          0004
+ 0076   B,BIT11    OCT          0002                                            FIELD AND SHIFT MASKS 5-8.
+
+ 0078   B,BIT12    OCT          0001
+ 0079   B,BIT13    OCT          0000 4
+ 0080   B,BIT14    OCT          0000 2
+ 0081   B,BIT16    OCT          0000 04                                         FIELD AND SHIFT MASKS 9-12.
+
+ 0083   B,BIT37    OCT          -4000
+ 0084   B,BIT43    OCT          -40
+ 0085   B,B2B6     OCT          21
+ 0086   B,B3T6     OCT          17                                              FIELD AND SHIFT MASKS 13-16.
+
+ 0088   B,B8B17    OCT          0020 02
+ 0089   B,B12B14   OCT          0001 2
+ 0090   B,B25T27   OCT          -7000 0000
+ 0091   L STYPE    EQUALS       B25T27
+ 0092   B,CHAR7    OCT          -7700                                           FIELD AND SHIFT MASKS 17-20.
+
+ 0094   B,D8       DEC          -G 0000
+ 0095   B,D12      DEC          -G
+ 0096   B,CHAR1    OCT          77
+ 0097   CD TYPE    EQUALS       CHAR1
+ 0098   B,CHAR2    OCT          0077                                            FIELD AND SHIFT MASKS 21-24.
+
+ 0100   B,CHAR8    OCT          -77
+ 0101   B,C1T6     OCT          7777 7777 7777
+ 0102   B,C2T7     OCT          0077 7777 7777 77
+ 0103   B,C2T8     OCT          0077 7777 7777 7777
+ 0104   FIX MAG    EQUALS       C2T8                                            FIELD AND SHIFT MASKS 25-28.
+
+ 0106   B,CAC3     DEC          -GGGG
+ 0107   B,CACN     OCT          0
+ 0108   ALF MASK   EQUALS       CACN
+ 0109   B,SPECMAG  OCT          -7 7777
+ 0110   B,DATEMASK OCT          -77 7700 7777                                   FIELD AND SHIFT MASKS 29-32.
 
 # Page 157
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   5        PAGE   5
 
+P0112   SHIFT MASKS, PASS 1.
+
+ 0113   S,BIT1     OCT          4
+ 0114   S,BIT46R   OCT          -4
+ 0115   S,B5T6     OCT          03
+ 0116   S,B19T25   OCT          0000 0077 4                                     SHIFT MASKS 33-36.
+
+ 0118   S,B22T25   OCT          0000 0007 4
+ 0119   S,B22T32   OCT          0000 0007 7760
+ 0120   S,B25T30   OCT          -7700 0000
+ 0121   S,B26T30   OCT          -3700 0000                                      SHIFT MASKS 37-40.
+
+ 0123   S,C7T8     OCT          -7777
+ 0124   S,D7       DEC          -G0 0000
+ 0125   S,CAC23    DEC          -GGGG GGGG
+ 0126   S,CAC2     DEC          0000 GGGG                                       SHIFT MASKS 41-44.
+
+ 0128   S,CAC12    DEC          GGGG GGGG
+ 0129   S,ONE      OCT          -1
+ 0130   S,ONES     DEC          GGGG GGGG GGGG
+ 0131   S,OCTMASK  OCT          -7777 7770                                      SHIFT MASKS 45-48.
+
+ 0133   S,YYNNYYYY OCT          7777 0000 7777 7777
+ 0134   S,THREAD10 OCT          -3776
+ 0135   S,D4       DEC          000G
+ 0136   S,PROGSUB  OCT          001                                             SOME PARAPROGRAM FIELD MASKS.
+
+ 0138   S,B7T13    OCT          00774
+ 0139   S,KNEWSUBS OCT          02
+ 0140   S,CAC3R    OCT          -177777
+ 0141   S,BIT 36R  OCT          -1 0000
+
+ 0142   S,C1T4     OCT          7777 7777
+ 0143   S,BIT44    OCT          -20
+ 0144   S,BIT4     OCT          04
+ 0145   S,B38T48   OCT          -3777
+
+ 0147   S, LOW5    OCT          -37
+ 0148   S,BIT12R   OCT          0001
+ 0149   S,C5T8     DEC          -GGG GGG
+ 0150   S,ACO2     OCT          0007
 
 # Page 158
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   6        PAGE   6
 
+P0151              DEFINITIONS OF SYMBOLS, CONSTANTS, VARIABLE AND TEMPORARY STORAGES, ETC. FOR THE MAIN (GROUP A) PART
+R0153   OF PASS 1.  THIS PAGE: ASSIGNMENTS AND VARIABLE STORAGE RESERVATIONS.
+
+ 0155   HEALTH     ASSIGN       0,0
+ 0156   CARDNO WD  ASSIGN       0,1
+ 0157   LOC FIELD  ASSIGN       0,2
+ 0158   OP FIELD   ASSIGN       0,3
+ 0159   ADDRESS 1  ASSIGN       0,4
+ 0160   ADDRESS 2  ASSIGN       0,5
+ 0161   DATE WORD  ASSIGN       0,9
+
+ 016105 PHI TAPE   ASSIGN       7,1
+ 01611  MON SNACH  ASSIGN       7,2
+ 0162   MON PEEK   ASSIGN       7,3
+ 0163   EOR        ASSIGN       7,4
+ 0164   PHI LOAD   ASSIGN       7,7
+ 0166   MON READ   ASSIGN       7,15
+ 0168   MON SENTR  ASSIGN       7,40
+ 016802 MON A2D    ASSIGN       7,41
+ 0169   BASE ADDR  ASSIGN       7,47
+ 016904 MON WAKE   ASSIGN       7,99
+ 016905 DISCAP     ASSIGN       7,114
+ 016906 MON SLEEP  ASSIGN       7,166
+ 016909 DISC STAT  ASSIGN       7,210
+ 01691  MON TYPER  ASSIGN       7,215
+ 016915 MON PCR    ASSIGN       7,220
+ 016916 DISC CHEK  ASSIGN       7,221
+ 01692  MON TADDR  ASSIGN       7,223
+ 01695  DISC READ  ASSIGN       7,239
+
+ 0171   RL CD HLTH RESERVE      1
+ 0172   REAL CARD  RESERVE      10
+ 0173   PROC RTRN  RESERVE      1
+ 0174   CARD NO    RESERVE      1
+
+ 0175   CN LIMIT   RESERVE      1
+ 0176   COMMON     RESERVE      10
+ 0177   TP CD HLTH RESERVE      1
+ 0178   TAPE CARD  RESERVE      10
+
+ 0179   FIELD COD  RESERVE      2
+ 0180   ADR WD     RESERVE      2
+ 0181   SAVE LOC   RESERVE      1
+ 0182   LOC VALUE  RESERVE      1
+
+ 0184   LOC CTR    RESERVE      1
+ 0185   POB PLACE  RESERVE      1
+ 0186   INB PLACE  RESERVE      1
+
+ 0187   POPO SUFF  RESERVE      1
+ 0188   END POBUF  RESERVE      1
+ 0190   END TYP TA RESERVE      1
+ 0191   MERJ RTRN  RESERVE      1
+ 0192   AVAIL MSK  RESERVE      1
+ 0193   DIG FILE   RESERVE      8
 
 # Page 159
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   7        PAGE   7
 
+P0194   NUMERIC CONSTANTS -- FIRST OF TWO PAGES.
+
+
+
+ 0195   BIT 20     DEC          00001
+ 0196   (REMARK)   OCT          06
+ 0197   BIT 45     DEC          -8
+ 0199   B43T44     OCT          -60
+
+ 01999  BIT 23     OCT          0000 0002
+ 0200   BIT 24     OCT          0000 0001
+ 0203   SIX        OCT          -6
+ 0204   REAL CDNO  OCT          0
+ 0205   BIT 7      OCT          004
+
+ 0207   TAPE CDNO  OCT          0
+ 0208   (DELETE)   OCT          05
+
+ 0209   (RIGHT P)  OCT          07
+ 0211   (MEMORY)   OCT          11
+ 0212   SPEC SIGN  OCT          -10 0000
+
+ 0213   STARMSKS   OCT          77, 0077, 0000 77, 0000 0077
+ 0214              OCT          -7700 0000, -77 0000
+
+ 0215   (INSTR)    OCT          12
+ 0216   (ILLOP)    OCT          13
+ 0217   (DECML)    OCT          14
+ 0218   (OCTAL)    OCT          15
+
+ 0219   XFORMS     DEC          468 9B5 318 G
+ 02195             DEC          47C DEG 42F 2
+ 0220              DEC          47C DEG 42F 2
+ 02205             DEC          C7C DE6 42C 4
+ 0221              DEC          C7C DE7 42C 4
+ 02215             DEC          07C DEG 62G G
+ 0222              DEC          37C DEG 42C 7
+ 02225             DEC          37C DEG 42C 7
+ 0223              DEC          1CC FFG C2C C
+ 02235             DEC          3DF DFG D2F D
+ 0224              DEC          3EF FEG E2F E
+ 02245             DEC          1CC FFG C2C C
+ 0225              DEC          3DF DFG D2F D
+ 02255             DEC          3EF FEG E2F E
+ 0226              DEC          1FF FFG F2F F
+ 02265             DEC          1GG GGG G2G G
 
 # Page 160
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   8        PAGE   8
 
+P0227   NUMERIC CONSTANTS -- SECOND OF TWO PAGES.
+
+ 022799 LAST CDNO  ALF          00000000
+ 0228   TYPE E     OCT          -4000 0000                                      TYPE E TERMINATES A2D CONV OF LAST CDNO.
+ 0229   TYPE F     OCT          -2000 0000
+ 0230   TYPE N     OCT          -1000 0000
+
+ 0231   (EQUALS)   OCT          16
+ 0232   B5 B8 B10  OCT          0224
+ 0233   BIT 15     OCT          0000 1
+ 02335  BIT 31     OCT          -40 0000
+ 0238   THREE      OCT          -3
+
+ 0239   (2DECML)   OCT          22
+ 0240   (HEAD)     OCT          24
+ 0241   (2LATE)    OCT          25
+ 0242   (BLOCK)    OCT          23
+ 0243   (SUBRO)    OCT          26
+ 02431  (NW INST)  OCT          27
+ 02432  (EVEN)     OCT          30
+ 02433  (COUNT)    OCT          31
+ 02434  (INCINS)   OCT          042                                             LIKE AN ACCEPTOR WITH A DEFECT: NO @.
+ 02435  (SEGNUM)   OCT          32
+ 0244   MAX CARDN  DEC          0999898
+ 0245   DEC ALF M1 DEC          -GG0 000 GG0
+ 0246   DEC ALF M2 DEC          03D 03D 03D 03D
+ 0247   B24 B32    OCT          -1 0020 0000
+ 0248   B8T48      DEC          -1GG GGGG GGGG
+ 0250   C253       FXBIN        -253
+ 0251   BIT 17     DEC          0000 8
+ 02511  BIT 18     OCT          0000 01
+ 02512  BIT 19     OCT          0000 004
+ 0252   3 D8       DEC          -30000
+ 0253   5D8        DEC          -5 0000
+ 0254   DD8        DEC          -D 0000
+ 0255   B25T26     OCT          -6000 0000
+ 02561  BAD1 BITS  DEC          00277
 
 # Page 161
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   9        PAGE   9
 
+P0257   ALPHABETIC CONSTANTS -- FIRST OF TWO PAGES.
+
+ 02571  PARP NAME  ALF          ????PAS1
+ 02572  PASS 2     ALF          YULPASS2
+ 02573  P1 EPILOG  ALF          YULENDP1
+
+ 0258   (END OF)   ALF          00000000
+ 0259   END OF 1   OCT          7611 1111 1111 1150
+ 0260              ALF,4
+ 0261              ALF,4
+ 0262   BLANKS     ALF
+ # The following line makes a string of "blots", non-ASCII characters.
+ # I have chosen to represent them as the ASCII "block" character, Unicode 9608.
+ 0263   BLOTS      ALF          ████████
+ 0264   W INSERT   ALF           INSERT
+ 0265   AMPRSANS   ALF          &&&&&&&&
+ 0266   A999999    ALF          09999990
+ 0267   W MODIFY   ALF           MODIFY
+ 0268   ASTRISKS   ALF          ********
+ 0269   W SQBRMIN  ALF          0SEQBRK-
+ 0270   W CARDNO   ALF           CARDNO
+ 02701  W CARDNS   ALF           CARDNS
+ 0271   W CORRECT  ALF          CORRECT
+ 0272   W CHANGE   ALF          CHANGE
+ 0273   END ERR M  ALF,5        20000000<██████MTHE FOLLOWING CARDS ARE
+ 0274              ALF,5        REJECTED BECAUSE THEY COULDN'T BE MERGED
+ 0275              ALF          :
+ 0276   INC INSRT  ALF,4        E██████AINCOMPLETE INSERTION
 
 # Page 162
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  10        PAGE  10
 
+P0277   ALPHABETIC CONSTANTS -- SECOND OF TWO PAGES.
+
+ 0278   DOLLARS    ALF          $$$$$$$$
+ 0279   W DELETE   ALF           DELETE
+ 0280   W PRESERV  ALF          PRESERVE
+ 0281   DASHES     ALF          --------
+ 0282   WH PLY MSG ALF,2        WHAT PLY PAPER½½
+ 02821  WAA 10060  ALF,3        W   A   A10060  0000000P
+ 0283   OP SLP MSG ALF,2        OPERATOR ASLEEP
+ 0284   W THROUGH  ALF          THROUGH
+ 0285   W TO       ALF          TO
+ 0286   W SEQBRAK  ALF          SEQBREAK
+ 02862  W SEQBRK   ALF          SEQBRK
+ 0287   W MEMORY   ALF           MEMORY
+ 02875  W SEGNUM   ALF           SEGNUM
+ 0288   W THRU     ALF          THRU
+ 0289   W BEGIN    ALF          BEGIN
+ 02891  W END      ALF          END
+ 0290   W ST TYPES ALF,3        ERASABLEFIXED   SPEC/NON
+ 0291   HEAD       ALF
+ 0292   W ANYWHAR  ALF          ANYWHERE
+ 0293   W LOG      ALF          LOG
+ 0294   W OUTOSEQ  ALF          OUTOFSEQ
+ 0295   TASK REJ   ALF,5        E██████ATHIS TASK IS REJECTED. RESUBMIT
+ 0296              ALF,5        CORRECTED DECK WITH SAME DIRECTOR CARD.
+ 0297   W WITH     ALF          WITH
+ 0298   POINT C1   ALF          .
+ 0299   W OWNER EQ ALF,2        OWNER = ????????
 
 # Page 163
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  11        PAGE  11
