@@ -8,6 +8,7 @@
 # Pages:        153-210
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-15 JL   Transcribed pages 153-162.
+#               2016-11-16 JL   Transcribed pages 163-166.
 
 # Annotations:
 #
@@ -492,18 +493,214 @@ P0277   ALPHABETIC CONSTANTS -- SECOND OF TWO PAGES.
 # Page 163
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  11        PAGE  11
 
+P0300   ADDRESS CONSTANTS.
+
+
+
+ 0301   L END OF   CAC          9216                        (END OF)            ALSO R COLUMN 1.
+ 0303   L END P1   CAC          8192                        END PASS 1          ALSO Q COLUMN 1.
+ 0305   L GET REAL CAC          7168                        GET REAL            ALSO P COLUMN 1.
+ 0307   L END ERRM CAC          3072                        END ERR M           ALSO L COLUMN 1.
+ 0309   L COMP CNS CAC          1024                        COMP CDNS           ALSO J COLUMN 1.
+
+ 03101  L SEND DEL SPEC                                     SEND DELF
+ 0311   L CARD W9  SPEC                                     REAL CARD +9
+ 0312   L SUB RJUS SPEC                                     SUB RJUST
+ 0313   ST TAB MAX SPEC,B5                                  927
+
+ 0314   SOURCE     CAC          15043         TAPE CARD -1  REAL CARD -1
+ 0315   N L CHAR 6 SPEC                                     STARMSKS +6    -
+ 0316   L NEXT SUB RESERVE      1
+ 0317   L XFORMS   SPEC                                     XFORM
+
+ 0318   L DIG FILE SPEC                                     DIG FILE
+ 0319   L SYM THR  SPEC, B5                                 836
+ 03191  LL SUB TAB SPEC, B5                                 849
+ 0320   L TYP TAB  SPEC, B5                                 900
+ 0321   L AV TABLE SPEC,B4                                  DAMN ZERO
+
+ 0322   L PRSV CNS CAC          INSRT LUP                   PRESERVE
+ 032201 L INSRT LP EQUALS       L PRSV CNS
+# Annotation: Handwritten insert.
+#0322.9 L DIRECTY  SPEC, B7                                 DAMN ZERO
+ 0323   L END THR  SPEC, B7                                 6
+ 0324   MON WAA    SPEC, B7                                 600
+ 0326   L LAST CNO SPEC                                     LAST CDNO
+ 0327   L DISASTR  SPEC                                     DISASTER
+
+ 0333   JOINT XIT  OCT          -33757
+ 0334   RL TYP TAB SPEC, B2                                 2000
+ 0335   L FIND CDN SPEC                                     FIND CDNO
+ 0336   L BOTH CDS CAC          24576         TAPE CARD +1  REAL CARD +1        ALSO Y COLUMN 1.
 
 # Page 164
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  12        PAGE  12
 
+P0338   EQUIVALENCES.
+
+ 0339   ZERO       EQUALS       (END OF)
+ 0340   CHAR 6     EQUALS       STAR MSKS +5
+ 0341   (MODIFY)   EQUALS       BIT 6
+ 0342   (CARD NO)  EQUALS       B5T6
+
+ 0343   P COLUMN 1 EQUALS       L GET REAL
+ 0344   L COLUMN 1 EQUALS       L END ERR M
+ 03441  T COLUMN 1 EQUALS       W THRU
+ 0345   R COLUMN 1 EQUALS       L END OF
+
+ 0346   LOW LIM    EQUALS       ADR WD
+ 0347   HI LIM     EQUALS       ADR WD +1
+ 0348   (ALIREM)   EQUALS       BIT 3
+ 0349   TN MASK    EQUALS       COMMON +8
+
+ 0350   COUNT FLD  EQUALS       B25T30
+ 0351   J COLUMN 1 EQUALS       L COMP CNS
+ 0352   LOC STATE  EQUALS       COMMON +9
+ 0353   (SETLOC)   EQUALS       B3T6
+
+ 0354   INRECNT    EQUALS       SUBSTRAB +5
+ 0355   LOC LOC    EQUALS       COMMON +7
+ 0356   (ERASE)    EQUALS       BIT 2
+ 0358   (2CTAL)    EQUALS       B2B6
+ 0359   TEN C1     EQUALS       (INSTR)
+ 0360   DAMN ZERO  EQUALS       0
+ 0361   INPUT NAM  EQUALS       SUBSTRAB +6
+
+ 0362   AFIELD     EQUALS       COMMON +4
+ 0363   EIGHT      EQUALS       BIT 45
+ 0364   UNSIG NUM  EQUALS       (BLOCK)
+ 0365   DC1        EQUALS       (HEAD)
+ 0366   ALF 9 C1   EQUALS       (MEMORY)
+
+ 0367   CHAR5      EQUALS       B25T30
+ 0368   ALF9C2     EQUALS       END OF 1
+ 0369   BIT 25     EQUALS       TYPE E
+ 0370   DEC ALF M3 EQUALS       AMPRSANS
+ 0373   B5 Z8 B10  EQUALS       W LOG
+
+ 0374   A COLUMN 1 EQUALS       B2B6
+ 0375   END SY TAB EQUALS       L AV TABLE
+ 0376   Y COLUMN 1 EQUALS       L BOTH CDS
+ 0377   EQUALS C1  EQUALS       (ILLOP)
+ 03771  (ACCEPT)   EQUALS       BIT 4
+
+ 03772  THREAD 11  EQUALS       B38T48
+ 0378   ZX         EQUALS       8
+ 03781  SPRA       EQUALS       128
+ 03782  SPRAMR     EQUALS       384
+
+ 0380   OCT 4000   EQUALS       BIT 37
+ 0381   2 D8       EQUALS       BIT 31
 
 # Page 165
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  13        PAGE  13
 
+P0440              GET REAL IS NORMALLY THE CHIEF NODE OF PASS 1.  OCCASIONALLY MERGE CONTROL PROCEDURES TAKE OVER,
+R0442   ACCEPTING OR REJECTING TAPE CARDS.
+
+ 0443   GET REAL   TS           -             -             GET CARD            GET A CARD AND BRANCH ON NO END OF FILE.
+ 0445              TS           L END OF      Z,X0          TP RUNOUT           RUN OUT TAPE CARDS AT END OF FILE.
+ 0447   MODE Q1    NA, MERJMODE SWITCH        ONES          MODIF CHK           BRANCH IF IN MAIN PART OF NEW PROGRAM.
+ 0449              NA, TAPEKEPT SWITCH        ZERO          MODIF CHK           BRANCH IF A TAPE CARD IS WAITING.
+ 0451              TS           Z,SC,19       Z,S3          GET TAPE       C    GET TAPE CARD.
+
+R0453   FALL THROUGH ON END OF FILE.  TAB TO MODIF CHK NORMALLY.
+
+ 04532             NA, BIT8     SWITCH        ONES          C,+2                BRANCH IF NOT FREEZING SUBROUTINES.
+ 04534             TS           L END OF      Z,X0          SEND POPO      C
+ 0454              TS           L END ERRM    Z,X0          SEND POPO      C    TAPE CARDS RAN OUT BEFORE REAL CARDS.
+ 0456              SWE, CAC3    SOURCE        16            Z,X0                PREPARE TO CUSS REMAINING REAL CARDS.
+
+ 0458   HEAVE HO   TN           RL CD HLTH    11            TP CD HLTH          MOVE CARD OUT OF HARM'S WAY.
+ 0460              TS, CD TYPE  (MODIFY)      TP CP HLTH    GET CARD
+ 0461              TS, D12      EIGHT         TAPE CARD     LAST BARF           SET UP PAGE SKIP ON END OF FILE.
+ 04622             TS, D12      TWO           TAPE CARD     SEND POPO      C    ALL REJECTS BUT LAST ARE SPACED 2.
+ 04624             NA, CHAR1    REAL CARD     BLANKS        LAST BARF -1
+ 04626             LA, D12      NINE          REAL CARD     LAST BARF -1
+ 04628             NA, C2T7     REAL CARD +2  W DELETE      C,+2                BAR FALSE DISORDER CUSS WHEN REJECTING
+ 0463              TS           LAST CDNO     REAL CDNO     HEAVE HO            DELETE CARDS.
+ 04632             NA, C2T7     REAL CARD +2  W CARDNO      LAST BARF -1
+ 04634             TS           MON WAA       Z,X6          MCCD ADRF +1
+ 04636             NA           FIELD COD     BIT 2         LAST BARF -1
+ 04638             TX           CN LIMIT      -             REAL CDNO           DITTO FOR CARDNO CARDS.
+ 0464              TS           REAL CDNO     LAST CDNO     HEAVE HO
+
+ 0465   LAST BARF  TS           END YUL +2    END YUL +1    SEND POPO      C    SET UP TYPED CUSS AND SEND LAST REJECT.
+ 0467              TX           L END P1      -             Z,SC
+
+R0468   AS WE ARRIVE AT MODIF CHK WE ALWAYS HAVE ONE REAL CARD AND ONE TAPE CARD READY TO BE SERVICED.
+
+ 0470   MODIF CHK  NA, C2T7     REAL CARD +2  W MODIFY      NO MODIFY           SEE IF OPERATION CODE OF REAL CARD IS
+ 0472              NA, CHAR1    REAL CARD     BLANKS        NO MODIFY           "MODIFY".
+ 0474              LA, D12      NINE          REAL CARD     NO MODIFY           BUT DON'T BE FOOLED BY A REMARKS CARD.
+
+ 0478              TX           (MODIFY)      -             RL CD HLTH          INDICATE CARD TYPE.
+ 0480   MODE Q2    NA, MERJMODE SWITCH        ZERO          TP MODIFY           WHEN MERGING, RUN TO NEXT SUBROUTINE.
+
+R0482                                                                           WHEN IN MAIN PART OF NEW PROGRAM SEND
+ 0484              TS           Z,SC          PROC RTRN     PROC REAL           THE "MODIFY" CARD, CREATE AND SEND THE
+ 0486              TN           (END OF)      11            RL CD HLTH          "END OF" CARD MADE UP BY PASS 0, AND
+ 0488   REGLR NEW  TS           L GET REAL    PROC RTRN     PROC REAL           PROCESS THE LATTER.
+
+ 0490   TP MODIFY  TX           Z,SC,1        -             PROC RTRN           SET UP SEARCH FOR "END OF" CARD.
+ 0492              TS           L DISASTR     Z,S3          GET TAPE       C    GET ANOTHER TAPE CARD IF NOT FOUND YET.
+ 0494              NA           TAPE CARD     END OF 1      PROC TAPE
+
+ 0495              TS           Z,SC          PROC RTRN     PROC REAL           PROCES "MODIFY" JUST BEFORE "END OF".
+ 0497              TS           L GET REAL    PROC RTRN     PROC TAPE
+
+ 0498   NO MODIFY  NA, MERJMODE SWITCH        ONES          REGLR NEW           PROCESS REAL CARD WITH NO FURTHER ADO.
 
 # Page 166
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  14        PAGE  14
 
+P0500   COMP CDNS IS THE HEART OF THE MERGING PROCESS.  IF THE TAPE CARD IS CHOSEN, IT CANNOT BE AN "END OF" CARD.
+
+ 0502   COMP CDNS  LA           REAL CDNO     TAPE CDNO     KEEP TAPE           BRANCH IF REAL CARD COMES FIRST.
+ 0504              TS           Z,SC          PROC RTRN     PROC TAPE           SINCE THE LAST CARD OF A TAPE FILE IS
+ 0506              TS           L COMP CNS    Z,SC          GET TAPE       C    NUMBERED 999999, WE GUARANTEE NO EOF.
+
+R0508   AT THIS POINT, THE REAL CARD IS OF PRIMARY INTEREST.  EITHER IT IS A MERGE CONTROL CARD (OTHER THAN "MODIFY") OR
+R0510   IT PRECEDES THE TAPE CARD, OR REPLACES IT.  THE MERGE CONTROL CODES ARE CARDNO (CHANGE OR CORRECT A CARD NUMBER)
+R0512   AND DELETE.  A CARD WITH "=" IN COLUMN 1 ACCEPTS A LIKE-NUMBERED CARD WITH THE SAME CONTENTS OF COLUMNS 9-80.
+
+
+
+ 0514   KEEP TAPE  SM           SWITCH        TAPE KEPT     SWITCH              INDICATE THAT A TAPE CARD IS WAITING.
+ 05152             LA, D12      NINE          REAL CARD     NOT MCCD            RIGHT PRINT CAN'T BE MERGE CONTROL CARD.
+ 0516              NA, CHAR1    REAL CARD     EQUALS C1     NOT ACEPT           BRANCH IF NOT AN ACCEPTOR CARD.
+
+ 0518              TS, CD TYPE  (ACCEPT)      RL CD HLTH    TEST MCCD      C    REJECT IF DISORDERED CARD NUMBER.
+ 0520              TS           BLANKS        COMMON        PROC REAL      C    MAKE X0 POINT TO THE REAL CARD.
+ 0521              TS, C2T7     REAL CARD     COMMON        ANAL SUBF      C    ANALYZE CARD NUMBER FIELD.
+ 05222             SS           ZERO          BIT 9         HEALTH              DISABLE COMPLAINT ABOUT "D" ERROR.
+ 0523              NA           COMMON        W LOG         NOT EQ LOG          BRANCH IF NOT ACCEPTING A LOG CARD.
+ 05241             NA, DATEMASK REAL CARD +8  BLANKS        C,+2                BRANCH IF DASHES SHOULD BE PUT IN DATE.
+ 0525              TS           CHAR1         MERJ RTRN     ACCEPT              PREPARE TO LOOK AT COLUMN 1.
+ 05261             SS           DASHES        CHAR 6        REAL CARD +8
+ 05262             TS, CHAR1    DASHES        REAL CARD +9  C,-2
+ 0527   NOT EQ LOG TS           ZERO          MERJ RTRN     ACCEPT
+
+ 0528   ACC NEXT   TS           Z,SC          PROC RTRN     PROC TAPE
+ 0529              TS           L DISASTR     Z,S3          GET TAPE       C    ACCEPT A CARD AND GET ANOTHER.
+
+ 0531   ACCEPT     NA           TAPE CARD     END OF 1      C,+2
+ 0532              TS, BIT 10   ONES          RL CD HLTH    BAD MERGE           ILLEGAL TO ACCEPT AN "END OF" CARD THUS.
+
+ 0534              NA           TAPE CDNO     REAL CDNO     ACC NEXT            DEMAND EQUALITY OF FORMAL CARD NUMBER.
+ 05351             TX           MERJ RTRN     -             ALF MASK
+ 0536              NA, ALFMASK  TAPE CARD     W LOG         ACC NEXT            BRANCH IF TAPE CARD SHOULD BE LOG.
+ 0538              SWE, CAC3    L BOTH CDS    16            Z,AU1
+ 0539              TX           L BOTH CDS    -             Z,AU2
+ 0540              NA           N,AU1,1       N,AU2         ACC NEXT            BRANCH IF DIFFERENCE IN COLS. 9-80.
+ 0542              NA           Z,AU2,1       L CARD W9     C,-1
+
+ 0543              NA, CHAR1    TAPE CARD     W LOG         C,+2
+ 0544              LA           ALF MASK      ZERO          ACC NEXT            BR IF IS LOG BUT SHOULD NOT BE.
+
+ 0546   MARK CARD  SM           TAPE CARD     BIT 44        TAPE CARD           MARK CARD AS ACCEPTED.
+ 0548              TS           SOURCE        Z,X0          SEND POPO      C    SEND ACCEPTOR CARD.
+ 0550              TS           L GET REAL    PROC RTRN     PROC TAPE           PROCESS ACCEPTED CARD, GET ANOTHER REAL.
 
 # Page 167
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  15        PAGE  15
