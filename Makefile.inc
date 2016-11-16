@@ -44,7 +44,7 @@ endif
 # Enable/disable HTML generation.
 GEN_HTML=yes
 
-TARGETS=$(BASENAME).bin $(BASENAME).lst $(BASENAME).symtab $(BASENAME).cbp
+TARGETS=$(BASENAME).bin $(BASENAME).lst $(BASENAME).symtab
 ifeq "$(BASENAME)" "Validation"
 TARGETS+=$(BASENAME).txt
 TOPLEVEL=Validation
