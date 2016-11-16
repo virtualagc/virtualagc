@@ -145,6 +145,10 @@
 #		2016-10-21 RSB	Added AURORA12 to the missions.
 #		2016-11-03 RSB	Added SUNBURST120 to the missions.
 #		2016-11-08 RSB	Merged in block1 branch.
+#		2016-11-16 RSB	Certain resources needed only by the "standard"
+#				32-bit Linux VirtualAGC VM I'm now creating are
+#				added to the installation bundle.  These are
+#				related to debugging on Code::blocks. 
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -287,6 +291,11 @@ MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
 MISSIONS += Aurora12 Sunburst120
 export MISSIONS
 
+# Missions needing code::blocks project files.
+cbMISSIONS = Validation Luminary131 Colossus249 Comanche055 
+cbMISSIONS += Luminary099 Artemis072 Colossus237 Aurora12 Sunburst120
+cbMISSIONS := $(patsubst %,%.cbp,$(cbMISSIONS))
+
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
 SUBDIRS += yaAGC-Block1-Pultorak yaAGCb1 yaUplinkBlock1 Validation-Block1
@@ -319,7 +328,7 @@ endif # NOGUI
 .PHONY: default
 default: all
 
-.PHONY: missions $(MISSIONS) clean-missions format-missions
+.PHONY: $(MISSIONS) clean-missions format-missions
 missions: $(MISSIONS)
 
 $(MISSIONS): yaYUL Tools
@@ -338,7 +347,7 @@ corediffs: yaYUL Tools
 .PHONY: all all-archs
 all: ARCHS=default
 all-archs: ARCHS=all-archs
-all all-archs: $(SUBDIRS)
+all all-archs: $(cbMISSIONS) $(SUBDIRS)
 
 .PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA ControlPulseSim
 Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim:
@@ -453,6 +462,20 @@ dev:	clean
 snapshot-ephemeris:
 	cd .. ; tar --bzip2 -cvf $(WEBSITE)/Downloads/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
 	ls -l $(WEBSITE)/Downloads
+
+# Code::blocks project file ... for using code::blocks on Linux only.  The 
+# cbp file produced needs slight mods to the directory structure for Windows
+# or Mac.  However, these files are fine for the standard VirtualAGC VM I'm
+# creating.
+%.cbp:
+	sed "s/@name@/"$*"/" templateAGC-top.cbp >$*/temp.txt
+	cd $* ; \
+	for n in *.agc ; \
+	do \
+		echo '                <Unit filename="'$$n'" />'; \
+	done >>temp.txt
+	cat templateAGC-bottom.cbp >>$*/temp.txt
+	mv $*/temp.txt $*/$@
 
 clean: clean-missions
 	$(MAKE) -C yaLEMAP clean

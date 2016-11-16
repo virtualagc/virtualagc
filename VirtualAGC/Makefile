@@ -84,6 +84,10 @@
 #				but also made it so that the MISSIONS 
 #				environment variable is assign herein only if
 #				it doesn't previously exists.
+#		2016-11-16 RSB	Certain resources needed only by the "standard"
+#				32-bit Linux VirtualAGC VM I'm now creating are
+#				added to the installation bundle.  These are
+#				related to debugging on Code::blocks. 
 
 APP=VirtualAGC
 ifndef MISSIONS
@@ -309,6 +313,11 @@ temp/lVirtualAGC : % : VirtualAGC %/bin %/Resources
 	for n in $@/bin/* ; do strip $$n ; done
 	${CP} ../scripts/SimStop $@/bin
 	chmod +x $@/bin/SimStop
+	cp ../Makefile.inc $@/Resources/source
+	mkdir $@/Resources/source/yaYUL
+	mkdir $@/Resources/source/Tools
+	cp ../yaYUL/yaYUL $@/Resources/source/yaYUL
+	cp ../Tools/oct2bin $@/Resources/source/Tools
 
 temp/VirtualAGC : % : VirtualAGC.exe %/bin %/Resources
 	for n in ${EXECUTABLES} ../yaAGC/WinAGC ; do cp $$n.exe $@/bin ; done
