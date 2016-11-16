@@ -467,6 +467,17 @@ snapshot-ephemeris:
 # cbp file produced needs slight mods to the directory structure for Windows
 # or Mac.  However, these files are fine for the standard VirtualAGC VM I'm
 # creating.
+Validation.cbp:
+	sed "s/@name@/Validation/" templateAGC-top.cbp >Validation/temp.txt
+	sed --in-place 's/MAIN[.]agc[.]bin/Validation.agc.bin/' Validation/temp.txt
+	cd Validation ; \
+	for n in *.agc ; \
+	do \
+		echo '                <Unit filename="'$$n'" />'; \
+	done >>temp.txt
+	cat templateAGC-bottom.cbp >>Validation/temp.txt
+	mv Validation/temp.txt Validation/$@
+
 %.cbp:
 	sed "s/@name@/"$*"/" templateAGC-top.cbp >$*/temp.txt
 	cd $* ; \
