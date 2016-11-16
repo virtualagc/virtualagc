@@ -8,7 +8,7 @@
 # Pages:        153-210
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-15 JL   Transcribed pages 153-162.
-#               2016-11-16 JL   Transcribed pages 163-166.
+#               2016-11-16 JL   Transcribed pages 163-169.
 
 # Annotations:
 #
@@ -705,14 +705,159 @@ R0512   AND DELETE.  A CARD WITH "=" IN COLUMN 1 ACCEPTS A LIKE-NUMBERED CARD WI
 # Page 167
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  15        PAGE  15
 
+P05511  PROCEDURE TO DETECT AND PROCESS REQUESTS FOR CHANGING OR CORRECTING CARD NUMBERS, USING THE "CARDNO" CODE.  THE
+R05513  "CARDNS" CODE IS SIMILAR, BUT STARTS RENUMBERING FROM THAT VALUE UNTIL THE NEXT LOG CARD.  "PRESERVE CARDNS"
+R05515  TURNS OFF RENUMBERING.  IF "RENUMBER" SUBDIRECTOR WAS USED, IT RESUMES AFTER THE REIGN OF ANY "CARDNS" CODE.
+
+ 0552   NOT ACEPT  NA, CHAR1    REAL CARD     BLANKS        NOT MCCD            BRANCH IF CANNOT BE MERGE CONTROL CARD.
+ 05542             NA, C2T7     REAL CARD +2  W CARDNS      CARDNO CQ           BRANCH IF NOT A "CARDNS" CODE.
+ 05544             NA           REAL CARD +1  W PRESERV     CARDNO CQ +1
+ 055444            TX, CD TYPE  (CARDNO)      -             RL CD HLTH
+ 05545             NA           REAL CARD +3  BLANKS        TEST MCCD -2
+ 05546             NA           REAL CARD +4  BLANKS        TEST MCCD -2
+ 05547             NA, CHAR2    RL CD HLTH    ZERO          BAD MERGE           REJECT "PRESERVE CARDNS" FOR ANY DEFECT.
+ 05548             TS           L PRSV CNS    MERJ RTRN     FIND CDNO           CONTINUED ON FOLLOWING PAGE.
+
+ 0555   CARDNO CQ  NA, C2T7     REAL CARD +2  W CARDNO      DELETE CQ           BRANCH IF NOT A "CARDNO" CODE.
+ 0557              TS           REAL CARD +1  COMMON        ANAL SUBF      C    ANALYZE LOCATION FIELD.
+ 0559              NA           COMMON        W CORRECT     C,+3
+ 0560              SM           SWITCH        CORRECT       SWITCH              SET UP SEARCH FOR BAD CARD NUMBER IF
+ 0562              TS           ZERO          RL CD HLTH    C,+4                "CORRECT" BUT NEVER CUSS THIS CARD NO.
+ 0564              NA           COMMON        W CHANGE      C,+2
+ 0565              TS, CORRECT  ZERO          SWITCH        C,+2                SEEK OK CARD NUMBER IF "CHANGE".
+ 0567              SM           RL CD HLTH    BIT 8         RL CD HLTH          CUSS BAD LOCATION FIELD.
+ 0569              TS, CD TYPE  (CARDNO)      RL CD HLTH    MCCD ADRF           NOTE TYPE, ANALYZE ADDRESS FIELD.
+ 0571              LA           FIELD COD     BIT 2         C,+2
+ 0572              TS, BIT 9    ONES          RL CD HLTH    BAD MERGE           CUSS BAD ADDRESS FIELD.
+ 0574              LA           FIELD COD     BIT 3         C,-1
+ 0576   TEST MCCD  NA, CHAR2    RL CD HLTH    ZERO          BAD MERGE           REJECT "CARDNO" FOR ANY SIN.
+
+ 0579              TS           Z,SC          MERJ RTRN     FIND CDNO           SET UP CARD WHOSE NUMBER IS TO BE CHGD.
+ 0581   CHANGE     TS, C2T7     CN LIMIT      TAPE CARD     MARK CARD      C    CHANGE EXTERNAL CARD NUMBER.
+ 0582              NA, CHAR1    TAPE CARD     L COLUMN 1    C,+3                ON LOG CARD, CHANGE IS SUPERFICIAL ONLY.
+ 0583              NA, C2T7     TAPE CARD     ZERO          SEND CCNO
+ 0584              TS, C2T7     BLANKS        TAPE CARD     SEND CCNO           ..THOUGH SQB SETTING IS BLANKED.
+ 0585              SS           ZERO          BIT 43        TAPE CARD           CLEAR POSSIBLE SEQUENCE BREAK BIT.
+ 0586              TX           CN LIMIT      -             TAPE CARD           CHANGE INTERNAL CARD NUMBER.
+ 0587              NA           TAPE CDNO     BIT 6         SEND CCNO           IF SEQ. BR., SET EXTERNAL CARD NUMBER TO
+ 0588              SM           TAPE CARD     W SQBRMIN     TAPE CARD           SEQBRK AND SET BIT 43.
+
+ 0589   SEND CCNO  TS           SOURCE        Z,X0          SEND POP       C    SEND "CARDNO", "CARDNS", OR "DELETE".
+ 0590              NA, C2T7     REAL CARD +2  W CARDNO      C,+2                BRANCH IF A SECTION WAS RENUMBERED.
+ 05901             TS, C2T7     TAPE CDNO     REAL CDNO     MARK CARD +2        NEW NUMBER IS CRITERION FOR NEXT REAL.
+ 059014            LA           SWITCH        BIT 1         C,+2                IF RENUMBERING IS NOW UNDER WAY, COMPARE
+ 059016            EX           FIELD COD +1  C2T7          LAST CDNO           NEW NUMBER WITH LAST CARD'S RENUMBER.
+ 05902             TS           N,SC,2        RNUM TEST     ACC NEXT       C    PROCESS CARD WITH RENUMBERING DISABLED.
+ 0591              TX           C,+1          -             RNUM TEST      C    RESTORE RENUMBERING TEST TO NORMAL.
+ 05912             LA           BIT 1         SWITCH        REM CHECK      C
+ 0592              TS           L LAST CNO    Z,X4          MON A2D             SET UP FOR PARTIAL RENUMBERING.
+ 0593   RENUMBER   RESERVE      1
+ 0594              EX           REAL CDNO     C2T7          LAST CDNO           FOR CARDNS, KEEP OLD SEQUENCE CRITERION.
+ 0595              LA           BIT 1         SWITCH        GET REAL            EXIT IF RENUMBERING IS NOW UNDER WAY.
+ 0596              SM           SWITCH        BIT 1         SWITCH              CALL FOR PARTIAL RENUMBERING.
+ 0597              TS           C,+1          RESTART N +1  GET REAL            MAKE IT STOP AFTER FIRST LOG CARD.
+ 0598              TS           ZERO          RENUMBER      NON RNUM +1    C
 
 # Page 168
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  16        PAGE  16
 
+P06031  PROCEDURE TO DETECT AND PROCESS "DELETE" CARDS.
+
+ 0604   DELETE CQ  NA, C2T7     REAL CARD +2  W DELETE      INSERT CD           BRANCH IF NOT A "DELETE" CODE.
+ 0606              NA           REAL CARD +1  W OUTOSEQ     C,+4                BRANCH IF LOCATION FIELD NOT "OUTOFSEQ".
+ 0608              SM           SWITCH        CORRECT       SWITCH              SET UP SEARCH FOR BAD CARD NUMBER.
+ 0610              TS           ZERO          RL CD HLTH    C,+4                NEVER CUSS THIS CARD NUMBER.
+
+ 0612              TS, BIT 8    ONES          RL CD HLTH    C,+2                CUSS BAD LOCATION FIELD.
+ 0614              NA           REAL CARD +1  BLANKS        C,-1
+ 0615              SS           ZERO          CORRECT       SWITCH              SET UP SEARCH FOR OK CARD NUMBER.
+
+ 0617              TS, CD TYPE  (DELETE)      RL CD HLTH    MCCD ADRF           ANALYZE ADDRESS FIELD.
+ 0619              NA           FIELD COD     ZERO          DEL SEVRL           BRANCH IF ADDRESS NOT BLANK.
+ 0621              NA, CHAR2    RL CD HLTH    ZERO          DELE FAIL +1        REJECT SINGLETON DELETE FOR BAD CARD NO.
+ 0622              TS           L SEND DEL    MERJ RTRN     FIND CDNO           GO FIND SINGLE CARD TO BE DELETED.
+
+ 0623   DEL SEVRL  LA           ONES          FIELD COD     C,+2                BRANCH IF MEANINGLESS ADDRESS FIELD.
+ 0625              LA           BIT 1         FIELD COD     C,+2                BRANCH IF ADR FIELD FORMAT OK.
+ 0627              TS, BIT 9    ONES          RL CD HLTH    DELE FAIL +1        CUSS BAD ADDRESS FIELD.
+
+ 0629              NA           REAL CDNO     BIT 6         OK DELE Q -1        BRANCH IF FIRST CARDNO IS NOT SEQ BREAK.
+ 0631              NA           CN LIMIT      BIT 6         OK DELE Q           BRANCH IF 2ND CARDNO IS NOT SEQ BREAK.
+ 0633              TS, BIT 12   ONES          RL CD HLTH    DELE FAIL +1        CUSS IF 1ST CARDN NOT LESS THAN 2ND.
+
+ 0634              LA           CN LIMIT      REAL CDNO     C,-1
+ 0635   OK DELE Q  NA, CHAR2    RL CD HLTH    ZERO          DELE FAIL +1        REJECT "DELETE" CARD FOR ANY SIN.
+
+ 0637              TS           Z,SC          MERJ RTRN     FIND CDNO           SET UP CARD TO BE DELETED.
+ 06382             TS           Z,SC          MERJ RTRN     GET TAPE       C    FETCH NEXT CARD TO LOOK AT NUMBER.
+ 0639              LA           CN LIMIT      TAPE CDNO     C,+2
+ 0640              TS           MERJ RTRN     Z,SC          GET TAPE       C    DELETE TAPE CARD AND GET ANOTHER.
+
+ 0642              NA           CN LIMIT      TAPE CDNO     DELE FAIL           SECOND NUMBER MUST MATCH EXISTING ONE.
+
+ 0644   SEND DELE  TS           LAST CDNO     REAL CDNO     SEND CCNO      C    SEND "DELETE" CARD.
+ 06452             NA           TAPE CARD     END OF 1      C,+2                ALLOW DELETION OF ANY BUT "END OF" CARD.
+ 06454             TS, TAPEKEPT ONES          SWITCH        GET REAL            KEEP IT AND MAYBE INSERT BEFORE IT.
+ 0646              TS, TAPEKEPT ZERO          SWITCH        GET REAL            END OF DELETION PROCESS.
+
+ 06471  DELE FAIL  SM           RL CD HLTH    BIT 11        RL CD HLTH
+ 06472             TS           LAST CDNO     REAL CDNO     BAD MERGE
+
+
+R06473  END OF "PRESERVE CARDNS" ROUTINE, CARRIED OVER FROM PRECEDING PAGE.
+
+ 06474  PRESERVE   LA           SWITCH        BIT 1         MARK CARD +1        EXIT QUIETLY IF RENUMBERING ALREADY OFF.
+ 064745            LA           REAL CDNO     FIELD COD +1  BAD PRESV           BRANCH IF PRESERVATION CAUSES DISORDER.
+ 06475             SS           ZERO          BIT 1         SWITCH
+ 06476             NA           RESTART N +1  REST REST     MARK CARD +1        EXIT IF RENUMBERING WAS IN LOG SEC ONLY.
+ 06477             TS           C,+1          RENJMALL      MARK CARD +1        MODIFY LOG CARD ROUTINE TO START RENUM.
+ 06478             TS           ZERO          RENJMALL      RENUMBER +3    C
+
+ 06479  BAD PRESV  TS, CHAR2    BIT 7         RL CD HLTH    BAD MERGE
 
 # Page 169
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  17        PAGE  17
 
+P0648   PROCEDURE TO DETECT AND PROCESS "INSERT" CARDS.
+
+ 064803 INSERT CQ  NA, C2T7     REAL CARD +2  W INSERT      NOT MCCD
+ 064806            TS           REAL CARD +1  COMMON        ANAL SUBF      C    LOCATION FIELD MUST BE "BEGIN" OR "END".
+ 064812            NA           COMMON        W BEGIN       BAD INSTL           REQUIRED OUTSIDE OF INSERTION MODE.
+ 064818 INS ADDRF  TS, CD TYPE  (CARDNO)      RL CD HLTH    MCCD ADRF           PASS 2 PROCESSING IS SAME AS FOR CARDNO.
+ 064824            NA           FIELD COD     ZERO          BAD INSTL +1        BRANCH IF THERE IS A CARD NUMBER CHANGE.
+ 06483             SSL, ONE     SWITCH        47            C,+1                "BRANCH" IF RENUMBERING IS NOW ON.
+ 064836            TS           REAL CDNO     CN LIMIT      BAD INSTL +2        NO RENUM, NO CHANGE: USE INSERT CARD NO.
+ 064842            TS           ONES          CN LIMIT      BAD INSTL +2        RENUM, NO CHANGE: USE CURRENT RENUMBER.
+
+ 064848 BAD INSTL  TS, BIT 8    ONES          RL CD HLTH    INS ADDRF
+ 064851            NA           FIELD COD     BIT 3         TEST MCCD -2        REJECT IF MEANINGLESS ADDRESS FIELD.
+ 064857            NA, CHAR2    RL CD HLTH    ZERO          BAD MERGE           REJECT INSERT CARD FOR ANY DEFECT.
+
+ 064863            NA           REAL CDNO     TAPE CDNO     C,+3
+ 064866            LA           END OF 1      TAPE CARD     C,+2                INSERTED CARDS CANNOT REPLACE "END OF".
+ 064872            SS           ZERO          TAPE KEPT     SWITCH              REPLACE OLD CARD BY INSERTED CARDS.
+ 064878            TS           SOURCE        Z,X0          SEND POPO      C    SEND "BEGIN INSERT" CARD.
+ 064884            NA           RESTART N +1  REST REST     C,+2
+ 064887            SWS, BIT46R  SWITCH        45            SWITCH              SHOW THAT RENUMBERING, IF ON, IS TOTAL.
+ 064893            TS           REST REST     RESTART N +1  RENUMBER +3    C    TURN ON RENUMBERING IN "TOTAL" MODE.
+ 064899            LA           ONES          CN LIMIT      INSRT LUP           BRANCH IF CURRENT RENUMBER WILL DO.
+
+ 064905            TS           -             -             GET CARD
+ 064908            TS           (INCINS)      RL CD HLTH    BAD MERGE -2        REJECT IF GOT END OF CARD INPUT FILE.
+ 064914            SS           CN LIMIT      C2T7          REAL CARD           APPLY SPECIFIED OR IMPLIED NUMBER.
+ 06492             NA, CHAR1    REAL CARD     L COLUMN 1    C,+2
+ 064923            TS, C2T7     BLANKS        REAL CARD     SEND INS1           INSERTED LOG CARDS GET BLANKS IN CC 2-7.
+
+ 064929            SS           ZERO          BIT 43        REAL CARD           CLEAR SEQUENCE BREAK BIT FROM NON-LOGS.
+ 064935            TS           CN LIMIT      REAL CDNO     BAD INSA 2 +1  C    CLEAR OUT-OF-SEQUENCE BIT.
+ 064938            NA           REAL CDNO     BIT 6         SEND INS1
+ 064941            SM           REAL CARD     W SQBRMIN     REAL CARD           SPECIFIED SEQ. BRK. GETS "SEQBRK".
+
+ 064947 SEND INS1  TS           RENUMBER -3   RNUM TEST     TP RUNOUT +1   C    PROCESS 1ST INSERTED CARD W/ RENUM OFF.
+ 064953            EX           CN LIMIT      C2T7          LAST CDNO
+ 064956            TS           L LAST CNO    Z,X4          MON A2D
+ 064959            RESERVE      1
+ 064962            TS           C,-1          RENUMBER      RENUMBER +1    C    SET RENUMBERING GOING WITH NEW NUMBER.
 
 # Page 170
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  18        PAGE  18
