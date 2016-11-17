@@ -1,40 +1,36 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	RT8_OP_CODES.agc
-## Purpose:	Part of the source code for Colossus, build 249.
-##		It is part of the source code for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), for Apollo 9.
-## Assembler:	yaYUL
-## Reference:	Starts on p. 1498 of 1701.pdf.
-## Contact:	Ron Burkey <info@sandroid.org>.
-## Website:	www.ibiblio.org/apollo.
-## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+## Copyright:   Public domain.
+## Filename:    RTB_OP_CODES.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 1508-1516
+## Contact:     Ron Burkey <info@sandroid.org>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-07 RSB	Adapted from Colossus249/RT8_OP_CODES.agc
+##				and page images. 
+##		2009-05-07 RSB	Oops! Left out the entire last page before.
 ##
-## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
-## document read, in part:
+## The contents of the "Comanche055" files, in general, are transcribed 
+## from scanned documents. 
 ##
-##	Assemble revision 249 of AGC program Colossus by NASA
-##	2021111-041.  October 28, 1968.  
+##       Assemble revision 055 of AGC program Comanche by NASA
+##       2021113-051.  April 1, 1969.  
 ##
-##	This AGC program shall also be referred to as
-##				Colossus 1A
+##       This AGC program shall also be referred to as Colossus 2A
 ##
-##	Prepared by
-##			Massachusetts Institute of Technology
-##			75 Cambridge Parkway
-##			Cambridge, Massachusetts
-##	under NASA contract NAS 9-4065.
+##       Prepared by
+##                       Massachusetts Institute of Technology
+##                       75 Cambridge Parkway
+##                       Cambridge, Massachusetts
 ##
-## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+##       under NASA contract NAS 9-4065.
 ##
-## In some cases, where the source code for Luminary 131 overlaps that of 
-## Colossus 249, this code is instead copied from the corresponding Luminary 131
-## source file, and then is proofed to incorporate any changes.
+## Refer directly to the online document mentioned above for further
+## information.  Please report any errors to info@sandroid.org.
 
-## Page 1498
+## Page 1508
 		BANK	22
 		SETLOC	RTBCODES
 		BANK
@@ -80,13 +76,14 @@ READPIPS	INHINT
 		TS	MPAC +1
 		TS	MPAC +4
 		TS	MPAC +6
-		
 VECMODE		TCF	VMODE
 
 # FORCE TP SIGN AGREEMENT IN MPAC:
 
 SGNAGREE	TC	TPAGREE
-## Page 1499
+		
+## Page 1509
+		
 		TCF	DANZIG
 
 # CONVERT THE DP 1'S COMPLEMENT ANGLE SCALED IN REVOLUTIONS TO A SINGLE PRECISION 2'S COMPLEMENT ANGLE
@@ -137,7 +134,7 @@ TPMODE		CAF	ONE		# MODE IS TP.
 		COM			# THIS WAS REVERSE OF MSU.
 
 		TS	MPAC		# AND SKIP ON OVERFLOW.
-## Page 1500
+## Page 1510
 		TC	Q
 
 		INDEX	A		# OVERFLOW UNCORRECT AND IN MSU.
@@ -145,7 +142,7 @@ TPMODE		CAF	ONE		# MODE IS TP.
 		ADS	MPAC
 		TC	Q
 
-## Page 1501
+## Page 1511
 # SUBROUTINE TO INCREMENT CDUS
 
 INCRCDUS	CAF	LOCTHETA
@@ -193,7 +190,7 @@ CDUINC		TS	TEM2		# 1'S COMPL. QUANT. ARRIVES IN ACC.  STORE IT
 		TS	0		# STORE NEW ANGLE IN 2'S COMPLEMENT.
 		TC	Q
 
-## Page 1502
+## Page 1512
 # RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL.  ECADR OF COMMANDS ARRIVES IN X1.
 
 PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
@@ -202,7 +199,7 @@ PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
 		CADR	IMUPULSE
 		TCF	DANZIG
 
-## Page 1503
+## Page 1513
 # EACH ROUTINE TAKES A 3X3 MATRIX STORED IN DOUBLE PRECISION IN A FIXED AREA OF ERASABLE MEMORY AND REPLACES IT
 # WITH THE TRANSPOSE MATRIX.  TRANSP1 USES LOCATIONS XNB+0,+1 THROUGH XNB+16D,+17D AND TRANSP2 USES LOCATIONS
 # XNB1+0,+1 THROUGH XNB1+16D,+17D.  EACH MATRIX IS STORED BY ROWS.
@@ -243,7 +240,7 @@ TRANSP2		CAF	XNB1EB
 		DXCH	XNB1 +10D
 		TCF	DANZIG
 
-## Page 1504
+## Page 1514
 # THE SUBROUTINE SIGNMPAC SETS C(MPAC, MPAC +1) TO SIGN(MPAC).
 # FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.  ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.
 #
@@ -269,8 +266,8 @@ DPMODE		CAF	ZERO		# SETS MPAC +2 TO ZERO IN THE PROCESS
 
 # RTB OP CODE NORMUNIT IS LIKE INTERPRETIVE INSTRUCTION UNIT, EXCEPT THAT IT CAN BE DEPENDED ON NOT TO BLOW
 # UP WHEN THE VECTOR BEING UNITIZED IS VERY SAMLL -- IT WILL BLOW UP WHEN ALL COMPONENT ARE ZERO.  IF NORMUNIT
-# IS USED AND THE UPPER ORDER HALVES OF ALL COMPONENTS ARE ERO, THE MAGNITUDE RETURNS IN 36D WILL BE TOO LARGE
-# BY A FACTOR OF 2(13) AND THE SQURED MAGNITUDE RETURNED ATE 34D WILL BE TOO BIG BY A FACTOR OF 2(26).
+# IS USED AND THE UPPER ORDER HALVES OF ALL COMPONENTS ARE ZERO, THE MAGNITUDE RETURNS IN 36D WILL BE TOO LARGE
+# BY A FACTOR OF 2(13) AND THE SQURED MAGNITUDE RETURNED AT 34D WILL BE TOO BIG BY A FACTOR OF 2(26).
 
 NORMUNX1	CAF	ONE
 		TCF	NORMUNIT +1
@@ -291,7 +288,7 @@ NORMUNIT	CAF	ZERO
 		TCF	NOSHIFT
 		TCF	+2
 		TCF	NOSHIFT
-## Page 1505
+## Page 1515
 		CA	MPAC +1		# SHIFT ALL COMPONENTS LEFT 13
 		EXTEND
 		MP	BIT14
@@ -319,8 +316,41 @@ VECSGNAG	TC	BANKCALL
 		CADR	VECAGREE
 		TC	DANZIG
 
-# *** END OF SATRAP  .007 ***
+## Page 1516
+# MODULE CHANGE FOR NEW LUNAR GRAVITY MODEL
+		SETLOC	MODCHG3
+		BANK
+QUALITY1	BOF	DLOAD
+			MOONFLAG
+			NBRANCH
+			URPV
+		DSQ	GOTO
+			QUALITY2
+		SETLOC	MODCHG2
+		BANK
+QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
+			URPV	+2	# Y COMPONENT, B1
+		DSU
+		DMP	VXSC		# 5(Y**2-X**2)UR
+			5/8		# CONSTANT, 5B3
+			URPV		# VECTOR, RESULT MAXIMUM IS 5, SCALING
+					# HERE B6
+		VSL3	PDDL		# STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ
+			URPV		# X COMPONENT, B1
+		SR1	DAD		# 2 X X COMPONENT FOR B3 SCALING
+			2D		# ADD TO VECTOR X COMPONENT OF ANSWER.
+					# SAME AS MULTIPLYING BY UNITX.  MAX IS 7.
+		STODL	2D
+			URPV	+2	# Y COMPONENT, B1
+		SR1	BDSU		# 2 X Y COMPONENT FOR B3 SCALING
+			4D		# SUBTRACT FROM VECTOR Y COMPONENT OF
+					# ANSWER, SAME AS MULTIPLYING BY UNITY.
+					# MAX IS 7.
+		STORE 	4D		# 2D HAS VECTOR, B3.
+		SLOAD	VXSC		# MULTIPLY COEFFICIENT TIMES VECTOR IN 2D
+			E3J22R2M
+		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
+			COSPHI/2	# SAME AS URPV +4, Z COMPONENT
 
-
-
+# *** END OF CHIEFTAN.028 ***
 
