@@ -1,0 +1,58 @@
+### FILE="Main.annotation"
+## Copyright:   Public domain.
+## Purpose:     A section of Luminary revision 210.
+##              It is part of the source code for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 15-17.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. XXX-XXX
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+
+## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
+
+
+## Page 1101
+		BLOCK	02
+
+# SINGLE PRECISION SINE AND COSINE
+
+		COUNT*	$$/INTER
+SPCOS		AD	HALF		# ARGUMENTS SCALED AT PI
+SPSIN		TS	TEMK
+		TCF	SPT
+		CS	TEMK
+SPT		DOUBLE
+		TS	TEMK
+		TCF	POLLEY
+		XCH	TEMK
+		INDEX	TEMK
+		AD 	LIMITS
+		COM
+		AD	TEMK
+		TS	TEMK
+		TCF	POLLEY
+		TCF	ARG90
+POLLEY		EXTEND
+		MP	TEMK
+		TS	SQ
+		EXTEND
+		MP	C5/2
+		AD	C3/2
+		EXTEND
+		MP	SQ
+		AD	C1/2
+		EXTEND
+		MP	TEMK
+		DDOUBL
+		TS	TEMK
+		TC	Q
+ARG90		INDEX	A
+		CS	LIMITS
+		TC	Q		# RESULT SCALED AT 1.
+		
+
