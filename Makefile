@@ -149,6 +149,9 @@
 #				32-bit Linux VirtualAGC VM I'm now creating are
 #				added to the installation bundle.  These are
 #				related to debugging on Code::blocks. 
+#		2016-11-17 RSB	Fixed a "sed --in-place ..." that doesn't work on
+#				systems with non-GNU sed, such as FreeBSD or
+#				Solaris.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -468,8 +471,7 @@ snapshot-ephemeris:
 # or Mac.  However, these files are fine for the standard VirtualAGC VM I'm
 # creating.
 Validation.cbp:
-	sed "s/@name@/Validation/" templateAGC-top.cbp >Validation/temp.txt
-	sed --in-place 's/MAIN[.]agc[.]bin/Validation.agc.bin/' Validation/temp.txt
+	sed -e "s/@name@/Validation/" -e 's/MAIN[.]agc[.]bin/Validation.agc.bin/' templateAGC-top.cbp >Validation/temp.txt
 	cd Validation ; \
 	for n in *.agc ; \
 	do \
