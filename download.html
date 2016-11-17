@@ -10,534 +10,392 @@
     <script type="text/javascript" src="Header.js"></script>
   </head>
   <body style="background-image: url(gray3.jpg);">
-    <script type="text/javascript">document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@","Installers for Linux/Windows/Mac OS X<br>Software Source Code"))</script>
-    <h2>Contents</h2>
-    <ul>
-      <li><a href="#Prerequisites">Prerequisites for Binary-Package
-          Installation</a><br>
-      </li>
-      <li><a href="#Downloads">Downloads</a> (source code package;
-        Windows and Mac OS X binary packages)</li>
-      <li><a href="#InstallBinary">Installing binary packages</a></li>
-      <ul>
-        <li><a href="#InstallLinux">Linux</a></li>
-        <li><a href="#InstallWindows">Windows</a></li>
-        <li><a href="#InstallMac">Mac OS X</a></li>
-        <li><a href="#Raspberry_Pi_Raspbian">Raspberry Pi (Raspbian)</a><br>
-        </li>
-      </ul>
-      <li><a href="download.html#Whats_In_a_Full_Download">Contents of
-          the development snapshot</a></li>
-      <li><a href="#Extras">Extras!</a> (Optional stuff requiring manual
-        setup)</li>
-      <ul>
-        <li><a href="#Source_Highlighting">AGC/AEA Source-Code Syntax
-            Highlighting</a></li>
-        <li><a href="#Debugging">gdb-compatible AGC/AEA debugging</a></li>
-        <ul>
-          <li><a href="#One-time_setup_procedure_for">One-time setup
-              procedure for Code::Blocks</a></li>
-          <li><a href="#Project-creation_procedure_in">Project-creation
-              procedure for Code::Blocks</a><br>
-          </li>
-        </ul>
-      </ul>
-      <li><a href="#Build">Building the Virtual AGC software</a><br>
-      </li>
-      <ul>
-        <li><a href="#BuildLinux">Linux</a></li>
-        <li><a href="#BuildRPI">Raspberry Pi (Raspbian)</a><br>
-        </li>
-        <li><a href="#FreeBSD">FreeBSD</a></li>
-        <li><a href="#Solaris">Solaris</a></li>
-        <li><a href="#Mac_OS_X">Mac OS X</a><br>
-        </li>
-        <li><a href="#BuildOther">Windows</a></li>
-        <li><a href="#iPhone">iPhone</a><br>
-        </li>
-        <li><a href="#Cross-Compiling">Cross-compiling</a><br>
-        </li>
-      </ul>
-      <li><a href="download.html#Running_the_Validation_Suite">Running
-          the Validation Suite of the simulated AGC<br>
-        </a></li>
-      <li><a href="#Some_platform-specific_odditities">Some
-          platform-specific odditities</a><br>
-      </li>
-    </ul>
-    <h2><a name="Prerequisites"></a>Prerequisites for Binary-Package
-      Installation<br>
-    </h2>
-    Obviously, I'm not in a position to test on every platform known to
-    man, but the following represents my beliefs based on the testing
-    I've been able do do.&nbsp; Note that when I say that Virtual AGC
-    "works" on a given platform, it may still be subject to some <a
-      href="#Some_platform-specific_odditities">limitations or reduced
-      functionality</a> in some areas.<br>
-    <ul>
-      <li>All platforms:&nbsp; Install <a href="http://www.tcl.tk/">Tcl/Tk</a>
-        if not already installed.&nbsp; I don't know how pervasive a
-        problem it is&mdash;i.e., which operating systems or versions of <span
-          style="font-weight: bold;">Tck/Tk</span> it affects&mdash;but in
-        recently trying to install <span style="font-weight: bold;">Tcl/Tk</span>
-        on Microsoft Vista, I found that the installation program does
-        not create a file called "wish.exe", but instead creates a file
-        called "wish85.exe".&nbsp; This prevents certain features of
-        Virtual AGC from working.&nbsp; In the case of Windows Vista, I
-        fixed it by duplicating the file "c:\tcl\bin\wish85.exe" and
-        calling the duplicate "c:\tcl\bin\wish.exe".&nbsp; Sorry about
-        this, but I don't honestly see what I can do about it.<br>
-      </li>
-      <li>Linux:&nbsp; The <span style="font-weight: bold;">X-Window</span>
-        system, <span style="font-weight: bold;">xterm</span>, and <span
-          style="font-weight: bold;">gtk+</span> libraries must be
-        installed.<br>
-      </li>
-      <li>Operating systems:</li>
-      <ul>
-        <li>Mac OS X:&nbsp; <br>
-        </li>
-        <ul>
-          <li>10.4 and later, Intel and PowerPC, are believed to work.<br>
-          </li>
-          <li>10.2 or prior is known <span style="font-weight: bold;
-              font-style: italic;">not</span> to work.</li>
-        </ul>
-        <ul>
-        </ul>
-        <li>Windows:</li>
-        <ul>
-          <li>XP is known to work.</li>
-          <li>Vista and Windows 7 are known to work but <a
-              href="#Some_platform-specific_odditities">various
-              workarounds</a> need to be applied and some patience may
-            be needed.<br>
-          </li>
-          <li>Windows 98 or prior is known <span style="font-weight:
-              bold; font-style: italic;">not</span> to work.</li>
-          <li>Only 32-bit systems were tried; the behavior on 64-bit
-            systems is unknown.<br>
-          </li>
-          <li>Others (2000) are untried and unknown.<br>
-          </li>
-        </ul>
-        <li>Linux 'x86:</li>
-        <ul>
-          <li>Fedora Core 4 and later versions are believed to work;
-            Fedora Core 1 is known <span style="font-weight: bold;
-              font-style: italic;">not</span> to work.<br>
-          </li>
-          <li>Ubuntu 7.04 and later versions are believed to work.</li>
-          <li>SuSE 10.1 and later versions are believed to work.</li>
-          <li>Both 32-bit and 64-bit systems seem okay.<br>
-          </li>
-          <li>Other distributions and earlier versions of those listed
-            above: untried and unknown.</li>
-        </ul>
-        <li>FreeBSD:</li>
-        <ul>
-          <li>Currently, I am working only with PC-BSD 7.1, which is
-            based on FreeBSD 7.2.&nbsp; In the past it worked also with
-            PC-BSD 7.02, which is based on FreeBSD 7.1.&nbsp; There is
-            no binary package for this platform, but if built from
-            source it seems to work. <br>
-          </li>
-        </ul>
-        <li>OpenSolaris:</li>
-        <ul>
-          <li>Currently, I am working only with OpenSolaris 0811.&nbsp;
-            There is no binary package for this platform, but if built
-            from source it partially works.&nbsp; I'm not satisfied with
-            it at this point.<br>
-          </li>
-        </ul>
-      </ul>
-      <ul>
-      </ul>
-    </ul>
-    <h2><a name="Downloads"></a>Downloads</h2>
-    The development snapshot is versioned, and all released snapshots
-    remain available perpetually in the <a
-      href="http://www.ibiblio.org/apollo/Downloads/">archive</a>.&nbsp;
-    However,
-    for economy, binary downloads are not versioned and simply are
-    current with the latest development snapshot.&nbsp; The GitHub
-    repository represents a separate source tree that was forked at some
-    point into a subversion repository at Google Code, then merged back
-    in May 2009, and then finally converted to a GitHub repository when
-    Google Code ceased active operation; therefore, all development
-    snapshots after May 2009 can be found in the GitHub repository, but
-    not prior to that time.<br>
-    <br>
-    <table style="text-align: left; margin-left: auto; margin-right:
-      auto;" border="1" cellpadding="2" cellspacing="2">
+    <script type="text/javascript">document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@","Installation Instructions for<br>Linux/Windows/Mac OS X and others"))</script>
+    <div align="center"> <br>
+      <br>
+    </div>
+    <table align="center" border="1" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
-          <th style="vertical-align: top; font-weight: bold;">Item<br>
-          </th>
-          <th style="vertical-align: top; font-weight: bold;">Download<br>
-          </th>
-          <td style="vertical-align: top;"><span style="font-weight:
-              bold;">Notes</span><br>
+          <td colspan="3" rowspan="1" valign="top">
+            <div align="center"><big><b>Current Virtual AGC Versions</b></big><br>
+            </div>
           </td>
         </tr>
         <tr>
-          <td>Current source-code repository<br>
-          </td>
-          <td><a href="https://github.com/rburkey2005/virtualagc">From
-              GitHub<br>
-            </a></td>
-          <td>See the instructions for <a href="#BuildLinux">compiling
-              from source</a>.<br>
-            <br>
-            Note that all of the installers below, including the ones
-            listed as<br>
-            "older", are essentially functionally equivalent.&nbsp;
-            However, for <br>
-            GitHub versions 2016-08-14 and beyond, the Apollo 8 AGC <br>
-            source code (Colossus 237) has been finalized, and Apollo 8
-            <br>
-            is thus enabled in VirtualAGC if building from source. <br>
-          </td>
+          <td valign="top"><b>For all platforms</b><b><br>
+            </b></td>
+          <td valign="top"><b>Complete source code:</b></td>
+          <td valign="top"><a
+              href="https://github.com/virtualagc/virtualagc">Current</a></td>
         </tr>
         <tr>
-          <td valign="middle">Pre-built Linux installer</td>
-          <td valign="middle"><a
-href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-installer-2016-08-07">64-bit
-
-              VirtualAGC-installer-2016-08-07</a><br>
-            or<br>
-            <a
-href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-installer32-2016-08-07">32-bit
-
-              VirtualAGC-installer32-2016-08-07</a><br>
+          <td valign="top"><b>For Windows, Mac, Linux, Solaris, FreeBSD
+              (32- or 64-bit 'x86)</b><b><br>
+            </b></td>
+          <td valign="top"><b>VirtualBox virtual machine (VM):</b><br>
           </td>
-          <td valign="top">See the <a href="download.html#InstallLinux">installation
+          <td valign="top"><a
+              href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-runtime.tar.7z">2016-11-16,
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-              instructions</a> and the <a
-              href="download.html#Some_platform-specific_odditities">platform-specific
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              quirks</a>.&nbsp; <br>
-            Unlike previous Linux installers, this is not intended to be
-            <br>
-            generic with respect to the version of Linux.&nbsp; It was
-            specifically<br>
-            built for Linux Mint 17.3, and therefore hopefully works<br>
-            Ubuntu 14.04 and later as well.&nbsp; Nevertheless, your
-            experience <br>
-            may vary.<br>
-            <br>
-            Nor is the installer self-contained.&nbsp; You may or may
-            not still need<br>
-            to install some additional packages from your Linux
-            version's <br>
-            repository to make it work, such as:&nbsp; libsdl,
-            libncurses5, <br>
-            liballegro4.4 or 4, or libwxgtk2.8.<br>
-          </td>
+              900MB</a></td>
         </tr>
         <tr>
-          <td valign="middle">Pre-built for Raspberry Pi<br>
-            (Raspbian)<br>
-          </td>
-          <td valign="middle"><a
-href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar.bz2">Application
+          <td valign="top"><b>For Ubuntu 14.04 (32-bit 'x86)</b><b><br>
+            </b></td>
+          <td valign="top"><b>Installer program:<br>
+            </b></td>
+          <td valign="top"><a
+              href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-installer">2016-11-16,
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-              bundle, 2016-08-13</a><br>
-          </td>
-          <td valign="top">See the <a href="#Raspberry_Pi_Raspbian">installation
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              instructions</a> and the <a href="#BuildRPI">Raspberry Pi
-              specific build<br>
-              instructions</a>.&nbsp; This was built for the 2016-05-27
-            version of Raspbian,<br>
-            and I don't know enough about it to know if the version of <br>
-            Raspbian is significant or not.&nbsp; <br>
-            <br>
-            Scott Sumner and Laszlo Morocz have also built this
-            previously and<br>
-            figured out how to do it, so this wouldn't be here except
-            for them. <br>
-            Many thanks to Scott and Laszlo! <br>
-          </td>
-        </tr>
-        <tr align="center">
-          <td colspan="3" rowspan="1" valign="top"><b>Older</b><br>
-          </td>
+              27MB</a></td>
         </tr>
         <tr>
-          <td>Pre-built Linux x86 installer<br>
-          </td>
-          <td><a
-href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-installer-2010-02-20">VirtualAGC-installer-2010-02-20</a><br>
-          </td>
-          <td>See the <a href="#InstallLinux">installation instructions</a>
-            and the <a href="#Some_platform-specific_odditities">platform-specific
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              quirks</a>.&nbsp; <br>
-            This is a self-contained generic Linux installer, but since
-            it is older, <br>
-            the installed software may not work properly on some newer
-            versions<br>
-            of Linux. (It is known <i>not</i> to work, for example, on
-            either 32-bit or <br>
-            64-bit Linux Mint 17.3 or Ubuntu 14.04.)<br>
-          </td>
+          <td valign="top"><b>For Raspberry Pi (Raspbian)</b><b><br>
+            </b></td>
+          <td valign="top"><b>Tarball:</b></td>
+          <td valign="top"><a
+href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar.bz2">2016-08-13</a></td>
         </tr>
+      </tbody>
+    </table>
+    <h2>Introduction</h2>
+    <p>This page covers various ways to download and/or install Virtual
+      AGC project software.&nbsp; Three methods are currently
+      recommended, and a fourth is possible if not really recommended:<br>
+    </p>
+    <ol>
+      <li>If you simply wish to <i>run</i> one of the provided AGC or
+        AEA simulations, examine the AGC or AEA program code, and/or do
+        visual debugging of (Block II) AGC code, then the easiest thing
+        to do is to <a href="#Downloading_Running_or_Updating">download
+          and run the provided VirtualBox virtual machine</a>.&nbsp; The
+        VM is guaranteed to work properly on any 32-bit or 64-bit 'x86
+        platform for which VirtualBox is available, namely Windows, Mac,
+        Linux, and Solaris, and (<a
+href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">according
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          to this page</a>) FreeBSD as well even though the latter is
+        not obvious from the VirtualBox website.<br>
+      </li>
+      <li>If you just happen to have a computer system which is
+        currently supported by an installation package, then you can <a
+          href="#Platforms_Directly_Supported_by">simply download and
+          install the proper installation package</a>.&nbsp; At present,
+        however, these platforms are only the following:</li>
+      <ol>
+        <li>Raspberry Pi</li>
+        <li>Ubuntu 14.04 32-bit 'x86.<br>
+        </li>
+      </ol>
+      <li>If you wish to do not only the above, but also wish to delve
+        more deeply into the Virtual AGC project code (as opposed to
+        just the AGC/AEA code), then you should instead <a
+          href="#Downloading_and_Building_Virtual_AGC">download the
+          Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        This works on many more platforms, though is more-involved to
+        set up, and visual AGC debugging may not be possible easily on
+        platforms other than 'x86 Windows, Mac, or Linux.<br>
+      </li>
+      <li>If you are satisfied with <i>older</i> versions of Virtual
+        AGC, many additional computer platforms were once directly
+        supported with installer programs, which you can still find <a
+          href="download-less-old.html">here</a> or <a
+          href="download-old.html">here</a>.&nbsp; Ideally, we would
+        like to directly support all major platforms with Virtual AGC
+        installer programs, but in practice it is far too hard to do so
+        with the resources available at present, so this is no longer
+        currently done.</li>
+    </ol>
+    <p>Note that a lot of detail about known quirks on different
+      platforms, and about trouble-shooting, can be found at the older
+      links listed in approach #4 above, but isn't found on the present
+      page.&nbsp; That's because the information hasn't been updated in
+      so long that its reliability is dubious, and because many of the
+      platforms mentioned there are long-obsolete.&nbsp; It should also
+      be noted that the build-instructions for some platforms presented
+      here are similarly out-of-date and may need corrections.<br>
+    </p>
+    <h2><a name="Downloading_Running_or_Updating"></a>Downloading,
+      Running, or Updating Virtual AGC in VirtualBox</h2>
+    <h3>Characteristics of the Virtual AGC VM<br>
+    </h3>
+    <p>The approach described here should work with any 32-bit or 64-bit
+      'x86 version of Windows, Mac, Linux, Solaris, or FreeBSD.&nbsp;
+      It's nice because it lets you work with the most-commonly-desired
+      elements of Virtual AGC, while skipping past the most-annoying and
+      tricky setup steps.&nbsp; It provides you with a "virtual
+      machine", with Virtual AGC and other things you need in order to
+      be able to work with Virtual AGC already pre-installed and
+      pre-configured.<br>
+    </p>
+    <p>When the VM is run, the first thing you see is the VirtualAGC
+      GUI, from which you can run an AGC simulation using various
+      selectable options, browse nicely syntax-highlighted AGC source
+      code, or various other things.&nbsp; In the screenshots below,
+      you'll also notice a "website" desktop icon, which lets you browse
+      to the website you happen to be looking at right at this instant
+      not a big deal (you're already doing it, right?), but convenient
+      for making downloads directly into the VM.<br>
+    </p>
+    <table width="100%" cellpadding="2" cellspacing="2">
+      <tbody>
         <tr>
-          <td>Pre-built Win32 installer<br>
+          <td align="center" valign="top"><a
+              href="VirtualAGC-runtime-gui.jpg"><img alt="" title="Click
+                to enlarge" src="small-VirtualAGC-runtime-gui.jpg"
+                height="265" width="360" border="2"></a><br>
           </td>
-          <td><a
-              href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-setup.exe">VirtualAGC-setup.exe</a><br>
+          <td align="center" valign="top"><a
+              href="VirtualAGC-runtime-sim.jpg"><img alt="" title="Click
+                to enlarge" src="small-VirtualAGC-runtime-sim.jpg"
+                height="265" width="360" border="2"></a><br>
           </td>
-          <td>See the <a href="#InstallWindows">installation
-              instructions</a> and the <a
-              href="#Some_platform-specific_odditities">platform-specific
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              quirks</a>. </td>
-        </tr>
-        <tr>
-          <td>Pre-built Mac OS X installer<br>
-          </td>
-          <td><a
-              href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC.app.tar.gz">VirtualAGC.app.tar.gz</a><br>
-          </td>
-          <td>See the <a href="#InstallMac">installation instructions</a>
-            and the <a href="#Some_platform-specific_odditities">platform-specific
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              quirks</a>. </td>
-        </tr>
-        <tr>
-          <td>Source code development snapshot<br>
-            for the installers listed immediately<br>
-            above.<br>
-          </td>
-          <td><a
-href="http://www.ibiblio.org/apollo/Downloads/yaAGC-dev-20100220.tar.bz2">yaAGC-dev-20100220.tar.bz2</a><br>
-            (same as subversion rev 609 <br>
-            from <a
-              href="https://code.google.com/archive/p/virtualagc/">obsolete
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              Google Code repository</a>)<br>
-          </td>
-          <td>See the instructions for <a
-              href="download.html#BuildLinux">compiling from source</a>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>Prior releases<br>
-          </td>
-          <td><a href="http://www.ibiblio.org/apollo/Downloads/">Archive</a><br>
-          </td>
-          <td><br>
+          <td align="center" valign="top"><a
+              href="VirtualAGC-runtime-browse.jpg"><img alt=""
+                title="Click to enlarge"
+                src="small-VirtualAGC-runtime-browse.jpg" height="265"
+                width="360" border="2"></a><br>
           </td>
         </tr>
       </tbody>
     </table>
-    <p> </p>
-    Note that the Mac OS X binary package includes a program called <a
-      style="font-weight: bold;"
-      href="http://software.jessies.org/terminator/">Terminator</a>
-    which I haven't written, but which is available under the GNU GPL
-    license.&nbsp; If you so desire, you can download the <span
-      style="font-weight: bold;">Terminator</span> source code for the
-    version whose binary is being provided by <a
-      href="http://www.ibiblio.org/apollo/Downloads/terminator-source.tar.gz">clicking
-      here</a>.&nbsp; I have neither modified nor recompiled this
-    code.&nbsp; Neither the <span style="font-weight: bold;">Terminator</span>
-    source code nor binary is versioned as provided here, because the
-    files <span style="font-style: italic;">I</span> downloaded were
-    not versioned by the <span style="font-weight: bold;">Terminator</span>
-    project itself.<br>
-    <br>
-    You should note, by the way, that alternate installation options
-    might be available at now-archival-only <a
-      href="http://code.google.com/p/virtualagc/">Google Code page</a>
-    for certain specific computer configurations. (Whereas my "standard"
-    install focuses almost entirely on wide cross-platform consistency.)
-    While I won't try to track those alternate packages in detail here,
-    I'm aware that (for example) there's a 64-bit Fedora 12 RPM there
-    that's consistent with the 201000220 snapshot.&nbsp; I'm told by
-    Onno Hommes that the following advantages can be expected from using
-    the RPM rather than my "standard" install:<br>
+    <p align="left">The other main thing the VM allows you to do is to
+      work with the AGC source code in <a href="http://codeblocks.org/">Code::Blocks</a>.&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      Code::Blocks is an Integrated Development Environment (IDE), which
+      means that you can edit the AGC source code and reassemble it ...
+      but more importantly, it means you can <i>visually debug</i> it:
+      i.e., single-step through the AGC code, examine AGC variables, and
+      so forth, so that you can get a very intimate understanding of how
+      the AGC code works, if that's something that interests you.&nbsp;
+      Most of the desktop icons in the images above are for debugging
+      the various versions of AGC code in Code::Blocks.&nbsp; For
+      example, in the VM screenshot below, the Luminary 131 (Apollo 13
+      LM) code is being debugged, and the program is at line 379 (the <tt>EXTEND</tt>
+      instruction) of the Fresh Start and Restart section of the code.<br>
+    </p>
+    <p align="center"><br>
+      <a href="VirtualAGC-runtime-dbg.jpg"><img alt="" title="Click to
+          enlarge" src="small-VirtualAGC-runtime-dbg.jpg" height="530"
+          width="720" border="2"></a><br>
+    </p>
+    <p>Okay, enough of the sales pitch already!&nbsp; What's do you
+      actually have to do to install the thing?<br>
+    </p>
+    <h3>Installation of the Virtual AGC VM<br>
+    </h3>
+    <p>It's hard to pin down exactly what computer resources you'll need
+      to run the VM.&nbsp; The minimum is probably around 2 GB of RAM
+      and 12GB of free disk space, but the more of everything you have,
+      the better.&nbsp; In particular, you will have a far more
+      satisfactory experience if your CPU has <a
+        href="https://en.wikipedia.org/wiki/X86_virtualization">VT-x
+        (Intel) or AMD-V (AMD) extensions</a>.&nbsp; The VM itself
+      requires only about 5GB of disk space, but in the process of
+      decompressing the downloaded VM, you'll temporarily need a lot
+      more (hence the 12GB mentioned).<br>
+    </p>
+    <p>Before doing anything with Virtual AGC as such, you should take
+      care of the following:<br>
+    </p>
     <ul>
-      <li>Installation is faster and better-behaved if some auxiliary
-        requirements like Tcl/Tk aren't installed.</li>
-      <li>Better compliance to Linux standards, such as installation
-        under /opt.</li>
-      <li>Better permissions settings for some files.</li>
-      <li>Easier upgrade.<br>
-      </li>
+      <li>If VirtualBox is not already installed, <a
+          href="https://www.virtualbox.org">download and install
+          VirtualBox</a>, using whatever version is suitable for your
+        computer system.&nbsp; The Virtual AGC virtual machine (VM) you
+        will download was created with <a
+          href="https://www.virtualbox.org/wiki/Download_Old_Builds_4_3">VirtualBox
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          4.3.40</a>, but it should work with later versions as well.</li>
+      <li>The VM is compressed in tar.7z form for downloading, so if
+        your operating system doesn't already have software support for
+        tar.7z archives, you need to install extra software that
+        provides it.&nbsp; In Linux, you're probably okay without doing
+        anything, or at worst just using your distribution's software
+        repository.&nbsp; For other platforms, a little googling reveals
+        that the program <a href="http://www.7-zip.org/download.html">7zip</a>
+        provides tar.7z for Windows, and there are "unofficial"
+        installers for Mac, Solaris, and FreeBSD.&nbsp; However, various
+        other programs work as well, I think, such as <a
+          href="http://www.winzip.com/win/en/index.htm">WinZip</a>.</li>
     </ul>
-    <h2><a name="InstallBinary"></a>Installing binary packages</h2>
-    <h3><a name="InstallLinux"></a>Linux</h3>
-    (<b>Note:</b> the installer program may not be marked as
-    "executable" after download, so please change its desktop-icon
-    properties permissions to "executable", or else do "chmod +x
-    VirtualAGC-installer" from the command line.) Simply run the
-    installation program, which is <span style="font-weight: bold;">VirtualAGC-installer</span>.&nbsp;
-Usage
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    will be obvious to you.&nbsp; A desktop icon called "Virtual AGC"
-    will be installed unless you deselect it.&nbsp; Additionally, a
-    program group will be placed on your Gnome or KDE start menu called
-    "Virtual AGC", and it will contain both the <span
-      style="font-weight: bold;">VirtualAGC</span> program and an
-    uninstaller program. (I'm not sure what happens in alternate desktop
-    environments like XFCE.)&nbsp; On some systems the start menu may
+    <p>Then to actually install the VirtualAGC VM, you do the following.
+      <br>
+    </p>
+    <ol>
+      <li>Download the current compressed VM, as listed at the top of
+        this page.<br>
+      </li>
+      <li>Uncompress it, resulting in a folder called
+        "VirtualAGC-runtime".&nbsp; This may (or may not) be a 2-step
+        process, in which the .tar.7z file is first uncompressed into a
+        .tar file, which in turn needs to be uncompressed to get the
+        mentioned folder.&nbsp; The .tar.7z (and .tar) file are no
+        longer used after that and may be deleted ... though obviously <i>we'd</i>
+        prefer you retained it for a while to make sure you don't need
+        to download it again if some mishap occurs.&nbsp; VirtualBox
+        tends to store all of its virtual machines in the same folder
+        (on Linux, for example, that folder is "~/VirtualBox VMs"), so
+        although it's not necessary to do so, you might want to move the
+        VirtualAGC-runtime folder into the corresponding "VirtualBox
+        VMs" folder on your computer.</li>
+      <li>In whatever file-system browser your computer has, descend
+        into the VirtualAGC-runtime folder, and double-click the mouse
+        on the file VirtualAGC-runtime.vbox.&nbsp; This makes VirtualBox
+        aware of your VM, and may or may not actually immediately run
+        it.&nbsp; At any rate, the VM will be visible in VirtualBox's
+        manager program, and you can run it from there.</li>
+    </ol>
+    <p>In its as-downloaded form, the VM is typically configured to use
+      1GB of RAM and 2 CPU cores.&nbsp; You can dial these settings down
+      in VirtualBox, but you may need to scale your expectations at the
+      same time.&nbsp; For example, with 512GB of RAM and 1 CPU core,
+      you may find that simulation and debugging works perfectly fine,
+      but browsing the source code may be miserable, due to the fact
+      that modern browsers (Mozilla Firefox is what's included in the
+      VM) take enormous amounts of RAM.<br>
+    </p>
+    <h3>Updating the Virtual AGC VM</h3>
+    <p>Because the VM is such a large download, you don't want to have
+      to download it every time there's updated Virtual AGC software!<br>
+    </p>
+    <p>Because the VM is based on 32-bit Ubuntu 14.04, which (surprise!)
+      happens to be one of the <a
+        href="#Platforms_Directly_Supported_by">target platforms
+        supported directly by a Virtual AGC installer program</a>, the
+      updating the VM to new Virtual AGC versions is generally quite
+      simple.&nbsp; Do all of the following from <i>within</i> the VM
+      itself:<br>
+    </p>
+    <ol>
+      <li>Exit from the VirtualAGC program, if it's running in the
+        VM.&nbsp; (In other words, we just want the VM desktop, without
+        any programs running on it.)<br>
+      </li>
+      <li>Download the current Virtual AGC Ubuntu 14.04 32-bit
+        installer, as listed at the top of this page.<a
+          href="http://www.ibiblio.org/apollo/Download/VirtualAGC-installer"></a></li>
+      <li>Make the VirtualAGC-installer executable:&nbsp; right-click on
+        it, and on the pop-up list that appears choose
+        Properties/Permissions, and change the Execute setting to "Only
+        owner".</li>
+      <li>Double-click VirtualAGC-installer to run it, accepting all of
+        the defaults offered to you by the installer program.<br>
+      </li>
+    </ol>
+    <h2><a name="Platforms_Directly_Supported_by"></a>Platforms Directly
+      Supported by Virtual AGC Installers</h2>
+    <h3>Virtual AGC Installer for Raspberry Pi (Raspbian)</h3>
+    Installation is trivial:<br>
+    <ol>
+      <li>Download the current Raspberry Pi installation tarball, as
+        listed at the top of this page.<a
+href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar.bz2"></a></li>
+      <li>Unpack the installation tarball somewhere:&nbsp; "tar --bzip2
+        -xvf VirtualAGC-Raspbian-<i>VERSION</i>.tar.bz2".<br>
+      </li>
+    </ol>
+    This gives you a directory called lVirtualAGC/.&nbsp; To run the
+    program, simply do the following from the command line, or set up a
+    desktop icon that does the equivalent:<br>
+    <blockquote> sudo apt-get install libwxgtk2.8-0 libsdl libncurses5
+      liballegro4 tk<br>
+      cd lVirtualAGC/Resources<br>
+      ../bin/VirtualAGC<br>
+    </blockquote>
+    <h3>Installer for Ubuntu 14.04 32-bit 'x86 Linux</h3>
+    Installation:<br>
+    <ol>
+      <li>Install the following system libraries from the Ubuntu
+        repository:&nbsp; tk, libsdl1.2, libncurses5, liballegro4.4,
+        libgtk2.0, libwxgtk2.8.</li>
+      <li>Download the Virtual AGC Ubuntu installer, as listed at the
+        top of this page.<br>
+      </li>
+      <li>Make the VirtualAGC-installer executable:&nbsp; some ways of
+        doing that are to change its desktop-icon properties permissions
+        to "executable", or to do "chmod +x VirtualAGC-installer" from
+        the command line.</li>
+      <li>Double-click VirtualAGC-installer to run it.<br>
+      </li>
+    </ol>
+    A desktop icon called "Virtual AGC" will be installed unless you
+    deselect it.&nbsp; Additionally, a program group will be placed on
+    your desktop start menu called "Virtual AGC", and it will contain
+    both the <span style="font-weight: bold;">VirtualAGC</span> program
+    and an uninstaller program.&nbsp; On some systems the start menu may
     not be immediately updated and therefore you may not see the
     "Virtual AGC" program group until you log in the next time.<br>
     <br>
@@ -564,637 +422,56 @@ about
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       configuring it</a>.<br>
-    <br>
-    Note to FreeBSD users:&nbsp; You may anticipate that the Linux
-    version of Virtual AGC can be installed, due to the optional Linux
-    compatibility layer of FreeBSD.&nbsp; I would not recommend it,
-    since (in my experiments) it worked just enough to give you a false
-    sense of hope, but not enough to do anything useful.&nbsp; Please <a
-      href="#FreeBSD">build from source</a> instead if using FreeBSD.<br>
-    <br>
-    And don't forget to read the <a href="download.html#Prerequisites">prerequisites</a>,
-    the <a href="faq.html#Troubleshooting">trouble-shooting tips</a>,
-    and the <a href="download.html#Some_platform-specific_odditities">list
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      of quirks</a> for this platform.<br>
-    <h3><a name="InstallWindows"></a>Windows</h3>
-    Simply run the setup program, which is <span style="font-weight:
-      bold;">VirtualAGC-setup.exe</span>.&nbsp; Usage will be obvious to
-    you.&nbsp; A desktop icon called "Virtual AGC" will be installed
-    unless you deselect it.&nbsp; Additionally, a program group will be
-    placed on your Windows start menu called "Virtual AGC", and it will
-    contain both the <span style="font-weight: bold;">VirtualAGC</span>
-    program and an uninstaller program.<br>
-    <br>
-    If you are using Windows Vista or Windows 7, <a href="#VistaQuirks">there
-are
-additional
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      configuration steps you need to perform</a>, or else the software
-    will not work.<br>
-    <br>
-    If you try to use the ACA simulation (joystick) and it doesn't
-    work,&nbsp;<a
-      href="yaTelemetry.html#Joystick_configuration_for_use_with_the">read
-about
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      configuring it</a>.&nbsp;&nbsp; And don't forget to read the <a
-      href="download.html#Prerequisites">prerequisites</a> and the <a
-      href="faq.html#Troubleshooting">trouble-shooting tips</a>.<br>
-    <br>
-    <h3><a name="InstallMac"></a>Mac OS X<br>
-    </h3>
-    Place <span style="font-weight: bold;">VirtualAGC.app.tar.gz</span>
-    on the desktop, and double-click it to extract the contents.&nbsp;
-    The reward will be the creation of a desktop icon for <span
-      style="font-weight: bold;">VirtualAGC</span>.&nbsp; Double-click
-    the icon to run the program.<br>
-    <br>
-    If you wish to uninstall Virtual AGC, just drag the desktop icon
-    into the trash.&nbsp; Note that this will also delete any custom
-    files (configurations, core dumps, etc.) which may have been
-    created, so if you want to preserve any of them you need to do so
-    manually.<br>
-    <br>
-    If you try to use the ACA simulation (joystick) and it doesn't
-    work,&nbsp;<a
-      href="yaTelemetry.html#Joystick_configuration_for_use_with_the">read
-about
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      configuring it</a>.&nbsp;&nbsp; And don't forget to read the <a
-      href="download.html#Prerequisites">prerequisites</a>, the <a
-      href="faq.html#Troubleshooting">trouble-shooting tips</a>, and the
-    <a href="download.html#Some_platform-specific_odditities">list of
-      quirks</a> for this platform.<br>
-    <h3><a name="Raspberry_Pi_Raspbian"></a>Raspberry Pi (Raspbian)</h3>
-    "Installing" the provided tarball, if you choose to download it, is
-    as simple as unpacking the tarball someplace, which gives you a
-    directory called lVirtualAGC/.&nbsp; To run the program, simply do
-    the following from the command line, or set up a desktop icon that
-    does the equivalent:<br>
-    <br>
-    &nbsp;cd lVirtualAGC/Resources<br>
-    &nbsp;../bin/VirtualAGC<br>
-    <h2><a name="Whats_In_a_Full_Download"></a>Contents of the
-      development snapshot<br>
-    </h2>
-    <table style="width: 1516px; text-align: left; margin-left: auto;
-      margin-right: auto; height: 1996px;" border="1" cellpadding="2"
-      cellspacing="2">
+    <h2><a name="Downloading_and_Building_Virtual_AGC"></a>Downloading
+      and Building Virtual AGC from Source</h2>
+    <table align="center" border="1" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
-          <th>Directory<br>
-          </th>
-          <th>Contents<br>
-          </th>
-          <td><span style="font-weight: bold;">Status</span><br>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="1">yaAGC/Colossus249/<br>
-          </td>
-          <td>Source code (*.agc) and binary (*.bin and *.binsource)
-            image for Build 249 of the <span style="font-weight: bold;">Colossus</span>
-            (AGC Command Module) program.&nbsp; (Apollo 9.)<br>
-          </td>
-          <td>100% complete, proofed, and known to be <a
-              href="Colossus.html#Validity">valid</a>.</td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="2">yaAGC/Luminary131/<br>
-          </td>
-          <td>Source code (*.agc) and binary (*.bin and *.binsource)
-            image for Build 131 of the <span style="font-weight: bold;">Luminary</span>
-            (AGC Lunar Module) program.&nbsp; (Apollo 13.)<br>
-          </td>
-          <td>100% complete, proofed, and known to be <a
-              href="Luminary.html#Validity">valid</a>. <br>
-          </td>
-        </tr>
-        <tr>
-          <td>Some utilities.</td>
-          <td>
-            <ul>
-              <li><span style="font-weight: bold;">Oct2Bin</span> ---
-                converts a set of <span style="font-weight: bold;">Luminary</span>/<span
-                  style="font-weight: bold;">Colossus</span> binaries
-                given in the form of an ASCII file to a core-rope
-                binary, or vice-versa.&nbsp; This is 100% working.&nbsp;
-                Needed only for validating data entry for programs like
-                <span style="font-weight: bold;">Luminary</span> or <span
-                  style="font-weight: bold;">Colossus</span>.<br>
-              </li>
-              <li><span style="font-weight: bold;">CheckDec</span> ---
-                allows interactive entry of decimal numbers (suitable
-                for <span style="font-family: monospace;">DEC</span>/<span
-                  style="font-family: monospace;">2DEC</span>
-                pseudo-ops), and immediate viewing of their binary
-                forms.&nbsp; This is 100% working.&nbsp; Needed only for
-                experimenting with the binary formats the AGC uses for
-                storing numbers.<br>
-              </li>
-              <li><span style="font-weight: bold;">webb2burkey-rope</span>
-                --- converts the core-rope files used in Virtual AGC to
-                the format used by Julian Webb's AGC simulator, and
-                vice-versa.&nbsp; This is 100% working, but since few of
-                you have Webb's simulator, the point is moot.</li>
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="1">yaAGC/Artemis072/<br>
-          </td>
-          <td>Source code (*.agc) and binary (*.bin and *.binsource)
-            image for Build 072 of the <span style="font-weight: bold;">Artemis</span>
-            or <span style="font-weight: bold;">Colossus 3</span> (AGC
-            Command Module) program.&nbsp; (Apollo 15-17.)<br>
-          </td>
-          <td>100% complete, proofed, and debugged.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/Comanche055/<br>
-          </td>
-          <td>Source code (*.agc) and binary (*.bin and *.binsource)
-            image for Build 055 of <span style="font-weight: bold;">Comanche</span>
-            (<span style="font-weight: bold;">Colossus 2</span>).&nbsp;
-            (Apollo 11.)<br>
-          </td>
-          <td>100% complete, and debugged.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/Luminary099/<br>
-          </td>
-          <td>Source code (*.agc) and binary (*.bin and *.binsource)
-            image for Build 099 of <span style="font-weight: bold;">Luminary</span>.&nbsp;
-(Apollo
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            11.)<br>
-          </td>
-          <td>100% complete, and debugged.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/Solarium055/<br>
-          </td>
-          <td>Source code (*.agc) and binary (*.binsource) for Build 055
-            of <span style="font-weight: bold;">Solarium</span> (AGC
-            Command Module) program.&nbsp; (Apollo 6.)</td>
-          <td>100% complete, and debugged, but there's no way to run in
-            <span style="font-weight: bold;">yaAGC</span>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaAGC/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaAGC</span>
-            (AGC emulator) program.<br>
-          </td>
-          <td>100% complete and working.</td>
-        </tr>
-        <tr>
-          <td>yaAGC/ControlPulseSim<br>
-          </td>
-          <td>An emulator for the AGC at the "control-pulse" (microcode)
-            level rather than the instruction level.<br>
-          </td>
-          <td>Allows interactive simulation of some (but not all)
-            control-pulse sequences (microcode) for the AGC.&nbsp; This
-            program is only for the very brave, and very little of it
-            works.&nbsp; I'll probably never complete much more of it.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaDSKY/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaDSKY</span>
-            (DSKY emulator) program.<br>
-          </td>
-          <td>99% complete.&nbsp; (The STBY and RESTART indicator lamps
-            are inoperable.)&nbsp; In addition to being a DSKY
-            simulation, this program can print out downlinked telemetry
-            data.&nbsp; This program has been superceded by <span
-              style="font-weight: bold;">yaDSKY2</span>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaDSKY2/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaDSKY2</span>
-            (DSKY emulator) program.<br>
-          </td>
-          <td>99% complete.&nbsp; (The STBY and RESTART indicator lamps
-            are inoperable.)&nbsp; This program has superceded <span
-              style="font-weight: bold;">yaDSKY</span>.</td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaUniverse/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaUniverse</span>
-            (spacecraft motion emulator) program. <br>
-          </td>
-          <td>Is now capable of modeling the motion of heavenly bodies
-            and spacecraft under gravitational influences.&nbsp; This,
-            perhaps, 25% of what's required in the full program.</td>
-        </tr>
-        <tr>
-          <td style="text-decoration: line-through;">yaAGC/yaIMU/<br>
-          </td>
-          <td style="text-decoration: line-through;">Source code for the
-            <span style="font-weight: bold;">yaIMU</span> (inertial
-            measurement unit emulator) program. </td>
-          <td><span style="text-decoration: line-through;">This program
-              has not yet been started.</span>&nbsp; <small>(Because of
-              Stephan Hotto's contributed <a href="yaTelemetry.html"><span
-                  style="font-weight: bold;">LM_Simulator</span></a>
-              program, the <span style="font-weight: bold;">yaIMU</span>
-              program is no longer needed, and therefore is no longer
-              being planned.)</small><br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaAOT/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaAOT</span>
-            (alignment optical telescope emulator) program. </td>
-          <td>This program has not yet been started.</td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaACA/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaACA</span>
-            (attitude controller assembly emulator) program. </td>
-          <td>This program is 100% complete and seems fine on a
-            standalone basis, but the complete system environment for it
-            has not yet been demonstrated to work.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaACA2/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaACA2</span>
-            (attitude controller assembly emulator) program.</td>
-          <td>This program is an alternate to <span style="font-weight:
-              bold;">yaACA</span> and <span style="font-weight: bold;">yaACA3</span>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaACA3/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaACA3</span>
-            (attitude controller assembly emulator) program.</td>
-          <td>This program has superceded <span style="font-weight:
-              bold;">yaACA</span>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/jWiz/<br>
-          </td>
-          <td>Source code for <span style="font-weight: bold;">jWiz</span>,
-            a program to select/configure <span style="font-weight:
-              bold;">yaACA</span>, <span style="font-weight: bold;">yaACA2</span>,
-            and <span style="font-weight: bold;">yaACA3</span>.<br>
-          </td>
-          <td>Working.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaTelemetry/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaTelemetry</span>
-            (telemetry-downlink console) program.<br>
-          </td>
-          <td>This program is 100% complete and functional.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaYUL/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaYUL</span>
-            (AGC cross-assembler) program.<br>
-          </td>
-          <td>100% complete, and capable of assembling every Block 1 and
-            Block 2 program source code available to us.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/Validation/<br>
-          </td>
-          <td>Source code for a (newly-written) program in AGC
-            assembly-langauge that is used to test the emulator's
-            instruction set.<br>
-          </td>
-          <td>About as complete as it's going to get!</td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaAGS/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaAGS</span>
-            (Abort Guidance System emulator) program.<br>
-          </td>
-          <td>Now working.&nbsp; Probably there are a number of bugs and
-            unimplemented features, but at least it can pass the
-            built-in self-test, and can perform the few operations I
-            personally know how to activate.&nbsp; :-)<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaDEDA/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaDEDA</span>
-            (emulator for the Data Entry and Display&nbsp;
-            Assembly&mdash;i.e., the AGS user interface) program<br>
-          </td>
-          <td>I think this program is 100% working.&nbsp; This program
-            has been superceded by <span style="font-weight: bold;">yaDEDA2</span>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/yaDEDA2/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaDEDA2</span>
-            (emulator for the Data Entry and Display&nbsp;
-            Assembly&mdash;i.e., the AGS user interface) program</td>
-          <td>I think this program is 100% working.&nbsp; This program
-            has superceded <span style="font-weight: bold;">yaDEDA</span>.</td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="3">yaAGC/yaLEMAP/<br>
-          </td>
-          <td>Source code for the <span style="font-weight: bold;">yaLEMAP</span>
-            (AGS cross-assembler) program.<br>
-          </td>
-          <td>I think this program is 100% working, though there could
-            be bugs I'm not aware of.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>Sample AGS source code.<br>
-          </td>
-          <td>100% complete and correct.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>Utilities<br>
-          </td>
-          <td><span style="font-weight: bold;">binLEMAP</span> --- like
-            <span style="font-weight: bold;">Oct2Bin</span>, but for the
-            AGS instead of the AGC.&nbsp; 100% working.&nbsp; Needed
-            only for validating source-code data entry for programs like
-            AGS <span style="font-weight: bold;">FP6</span> or <span
-              style="font-weight: bold;">FP8</span>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/FP6/<br>
-          </td>
-          <td>Source code (*.aea) and binary (*.bin and *.binsource) for
-            AGS <span style="font-weight: bold;">FP6</span> (Flight
-            Program 6)<br>
-          </td>
-          <td>It is believed that the source code is 100% complete and
-            correct, and that the binary produced by assembling the
-            source with <span style="font-weight: bold;">yaLEMAP</span>
-            is 100% complete and correct. </td>
-        </tr>
-        <tr>
-          <td>yaAGC/FP8/<br>
-          </td>
-          <td>Source code (*.aea) and binary for AGS <span
-              style="font-weight: bold;">FP8</span> (Flight Program 8)<br>
-          </td>
-          <td>It is believed that the source code is 100% complete and
-            correct, and that the binary produced by assembling the
-            source with <span style="font-weight: bold;">yaLEMAP</span>
-            is 100% complete and correct.<br>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left;">yaAGC/Contributed/LM_Simulator/<br>
-          </td>
-          <td style="text-align: left;"><span style="font-weight: bold;">Tcl/Tk</span>
-            source code, contributed by Stephan Hotto.<br>
-          </td>
-          <td style="text-align: left;">Continually evolving in its
-            conception, and I'm not the author, so I can't give a
-            percentage of completion.&nbsp; <span style="font-style:
-              italic;">At present</span>, the program has the following
-            features: <br>
-            <ul>
-              <li>An operational IMU. <br>
-              </li>
-              <li>An operational FDA ball.<br>
-              </li>
-              <li>An operational "DSKY Lite" (an alternate DSKY
-                simulation), for use on target computer platforms where
-                <span style="font-weight: bold;">yaDSKY</span> cannot be
-                built. <br>
-              </li>
-              <li>An operational i/o-channel monitor</li>
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">yaAGC/Contributed/GamePack/<br>
-          </td>
-          <td style="vertical-align: top;">A one- or two-player
-            tic-tac-toe and a Simon game, contributed by John Pultorak.<br>
-          </td>
-          <td style="vertical-align: top;">The source code for these
-            games is complete, but has not presently been converted for
-            the <span style="font-weight: bold;">yaYUL</span>
-            assemembler, or adapted appropriately to actually be run in
-            <span style="font-weight: bold;">yaAGC</span>.<br>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">yaAGC/Contributed/SyntaxHighlight/<br>
-          </td>
-          <td style="vertical-align: top;">AGC and AEA assembly-language
-            highlighters for various text-editor programs in Linux and
-            Windows, contributed by Onno Hommes.<br>
-          </td>
-          <td>Complete.<br>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">yaAGC/Contributed/DebugScripts/<br>
-          </td>
-          <td style="vertical-align: top;">Assistance for GUI-based
-            debugging of AGC programs, in programs like <span
-              style="font-weight: bold;">Code::Blocks</span>,
-            contributed by Onno Hommes.<br>
-          </td>
-          <td>Working.<br>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">yaAGC/Tools/<br>
-            yaAGC/Contributed/WireLister/<br>
-          </td>
-          <td style="vertical-align: top;">Some tools contributed by Jim
-            Lawton.&nbsp; I'm not presently sure what all of them are or
-            of their general utility.<br>
-          </td>
-          <td>Don't know.<br>
-          </td>
-        </tr>
-        <tr>
-          <td>yaAGC/VirtualAGC/<br>
-          </td>
-          <td>Top-level GUI front-end <span style="font-weight: bold;">VirtualAGC</span>
-            for all other Virtual AGC programs.<br>
-          </td>
-          <td>Working and very usable.&nbsp; (Much more so than the
-            alternative shell scripts it has replaced, anyhow!)<br>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">yaAGC/yaASM/<br>
-          </td>
-          <td style="vertical-align: top;">A Gemini OBC and Apollo LVDC
-            assembler.<br>
-          </td>
-          <td style="vertical-align: top;">This is a work in
-            progress.&nbsp; It is valueless at present to any end-user.<br>
-          </td>
+          <td valign="top"><i>(This entire section is under
+              construction.&nbsp; Except for the Raspberry Pi, Linux,
+              and iPhone sub-sections, all of the sub-sections related
+              to other platforms are so far out of date and unworkable
+              not that it's not even funny.&nbsp; Right now, all of the
+              descriptive material in those sub-sections is a
+              hodge-podge of ancient, presumably unworkable instructions
+              related to old operating system versions and old Virtual
+              AGC versions, intermixed with new, untested, stream of
+              consciousness records of the things I'm trying right
+              now.&nbsp; I'm updating these sub-sections as fast as I
+              can work out the issues.)</i></td>
         </tr>
       </tbody>
     </table>
-    <br>
-    <br>
-    <h2><a name="Extras"></a>Extras!&nbsp; (Optional stuff requiring
-      manual setup)<br>
-    </h2>
-    <h3><a name="Source_Highlighting"></a>AGC/AEA Source-Code Syntax
-      Highlighting</h3>
-    Onno Hommes has developed AGC and AEA specific syntax-highlighting
-    extensions for various editing programs often used for developing
-    software source code:&nbsp; <span style="font-weight: bold;">Kate</span>,
-    <span style="font-weight: bold;">KWrite</span>, <span
-      style="font-weight: bold;">Kdevelop</span>, <span
-      style="font-weight: bold;">Eclipse</span>, <span
-      style="font-weight: bold;">vim</span>, <span style="font-weight:
-      bold;">TextPad</span>, and (maybe) <span style="font-weight:
-      bold;">emacs</span>. &nbsp; Although there's no real way to
-    integrate this feature with Virtual AGC software proper, each of the
-    available downloads (source-code development snapshot and
-    Linux/Win32/Mac binary installers) do provide the appropriate
-    configuration files for updating the various text-editing
-    programs.&nbsp; There is also a file called EnableSyntaxAGC.odt
-    included there which contains instructions for doing so.&nbsp; (At
-    present, you may want to use the free <a
-      href="http://www.openoffice.org">OpenOffice.org</a> office suite
-    to read this file.)&nbsp; <br>
-    <br>
-    For a binary installation, the files just mentioned can be found
-    under the installation directory (typically
-    "~/VirtualAGC/Resources/SyntaxHighlight" in Linux, "c:\Program
-    Files\Virtual AGC\Resources\SyntaxHighlight" in Windows, and
-    "~/Desktop/VirtualAGC.app/Contents/Resources/SyntaxHighlight" in Mac
-    OS X).&nbsp; For a development snapshot, look in
-    "yaAGC/Contributed/SyntaxHighlight".<br>
-    <br>
-    Here's a nice screenshot (click to enlarge) of what source
-    highlighting looks like in <span style="font-weight: bold;">Kdevelop</span>.&nbsp;
-As
+    <h3>Limitation</h3>
+    <p>Building Virtual AGC from source actually has a limitation
+      compared to running the VM as described above, which is that while
+      the VM is already set up for visual debugging of AGC code using
+      Code::Blocks, this capability is not a part of Virtual AGC
+      proper.&nbsp; That is, it has its own set of installations,
+      requirements, and setups, distinct from those of building Virtual
+      AGC proper ... which is what's discussed below.&nbsp; If (once
+      Virtual AGC is built and working satisfactorily) you want to do
+      visual debugging, you need to install Code::Blocks and should
+      consult <a
+href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">the
 
 
 
@@ -1211,83 +488,9 @@ As
 
 
 
-
-
-
-
-    you can see, it's a lot more pleasant to read the AGC source code
-    with the highlighting than without it.<br>
-    <ul>
-    </ul>
-    <div style="text-align: center;"><a href="SyntaxAGC-Kdevelop.jpg"><img
-          style="border: 2px solid ; width: 300px; height: 240px;"
-          alt="Screenshot of source highlighting in KDevelop"
-          title="Click to enlarge" src="SyntaxAGC-Kdevelop-thumb.jpg"
-          height="240" width="300" border="0"></a></div>
-    <span style="font-weight: bold;"></span><br>
-    Of course, syntax highlighting is also provided when browsing
-    AGC/AEA source code from the <span style="font-weight: bold;">VirtualAGC</span>
-    GUI&mdash;thanks to enhancements to the assemblers prompted by seeing
-    Onno's text-editor extensions in action&mdash;but the <span
-      style="font-weight: bold;">VirtualAGC</span> GUI
-    syntax-highlighting depends on having previously assembled the
-    programs and does not provide developmental editing of the source
-    code.
-    <h3><a name="Debugging"></a>gdb-compatible AGC/AEA debugging</h3>
-    Onno has also done a lot of work on changing the debugging options
-    of the AGC and AEA simulations&mdash;i.e., the ability to debug AGC and
-    AEA assembly-language code&mdash;from the original methods I conceived to
-    a <span style="font-weight: bold;">gdb</span>-compatible method in
-    which <span style="font-weight: bold;">gdb</span> commands and GUI
-    front-ends like <span style="font-weight: bold;">Kdbg</span>, <span
-      style="font-weight: bold;">Code::Blocks</span>, or <span
-      style="font-weight: bold;">EMACS</span> could be used.&nbsp; This
-    is largely working.&nbsp; The official explanation is maintained by
-    Onno at <a href="http://code.google.com/p/virtualagc/">the separate
-      website Onno has set up</a>.&nbsp; <br>
-    <h4><a name="One-time_setup_procedure_for"></a>One-time setup
-      procedure for Code::Blocks</h4>
-    What follows is my explanation of the minimum one-time setup steps
-    needed to make CUI-based debugging via <span style="font-weight:
-      bold;">Code::Blocks</span> work directly with the <span
-      style="font-weight: bold;">VirtualAGC</span> GUI.&nbsp; With some
-    luck, we may be able to eventually provide scripts to automate the
-    setup, but for now it's a manual procedure.&nbsp; <span
-      style="font-style: italic;">Note that I'm describing work in
-      progress, and so my description may not yet be fully accurate</span>.<br>
-    <br>
-    In the explanation that follows, we'll need to refer to the folder
-    in which Virtual AGC is installed, which differs from platform to
-    platform and according to your installation or build choices.&nbsp;
-    By default, the installation directory will be something like:.
-    <ul>
-      <li>For a default Linux binary installation:&nbsp; "~/VirtualAGC".</li>
-      <li>For a default Win32 binary installation:&nbsp; "c:\Program
-        Files\Virtual AGC".</li>
-      <li>For a default Mac OS X binary installation:&nbsp;
-        "~/VirtualAGC.app/Contents".</li>
-      <li>For a native build from source code, it's more complex, but
-        could be:&nbsp; "yaAGC/VirtualAGC/temp/lVirtualAGC".</li>
-    </ul>
-    For simplicity we'll just refer to it as <span style="font-style:
-      italic;">InstallDir</span>.&nbsp; Also, we'll always pretend for
-    simplicity that the character '/' is used as a path separator, even
-    though it is really '\' on Windows.<br>
-    <br>
-    So here is the setup procedure:<br>
-    <ol>
-      <li>Install <a href="http://www.codeblocks.org/"><span
-            style="font-weight: bold;">Code::Blocks</span></a> for your
-        desired development platform.&nbsp; (If you are
-        developing/debugging your AGC/AEA code in Linux, <span
-          style="font-weight: bold;">Code::Blocks</span> may be in your
-        Linux distribution's packaging system.)</li>
-      <li>Installation of AGC/AEA syntax-highlighting enhancement for <span
-          style="font-weight: bold;">Code::Blocks</span>:</li>
-      <ol style="list-style-type: upper-alpha;">
-        <li>Copy the contents of <span style="font-style: italic;">InstallDir</span>/Resources/SyntaxHighlight/CodeBlocks/lexers/
-to
-the
+        instructions for development using Code::Blocks on our GitHub
+        wiki</a>, as well as <a
+        href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 
 
 
@@ -1304,45 +507,12 @@ the
 
 
 
-
-
-
-
-          lexers/ folder of your <span style="font-weight: bold;">Code::Blocks</span>
-          installation:</li>
-        <ol style="list-style-type: lower-alpha;">
-          <li>For a default Linux installation:&nbsp;
-            "/usr/share/codeblocks/lexers".</li>
-          <li>For a default Win32 installation:&nbsp; TBD.</li>
-          <li>For a default Mac OS X installation:&nbsp; TBD.</li>
-        </ol>
-        <li>Run <span style="font-weight: bold;">Code::Blocks</span>.<br>
-        </li>
-        <li>Verify installation of syntax-highlighting by selecting
-          Settings/Editor/Syntax-highlighting from the main menu.&nbsp;
-          If "AGC Assembly" and "AEA assembly" are among the choices in
-          the language-selection drop-down list, then the
-          syntax-highlighting enhancement has been installed properly.</li>
-      </ol>
-      <li>Configuration of AGC toolchain:</li>
-      <ol style="list-style-type: upper-alpha;">
-        <li>From the main menu, select Settings/Compiler-and-debugger.</li>
-        <li>In the Global-compiler-settings section:</li>
-        <ol style="list-style-type: lower-alpha;">
-          <li>Make sure that "GNU gcc Compiler" is the "Selected
-            compiler".</li>
-          <li>Click the "Copy" button and in the "Add new compiler"
-            pop-up window that appears, choose the name "AGC yaYUL
-            Assembler".</li>
-          <li>In the "Compiler Flags" tab, make sure that no flags are
-            enabled.</li>
-          <li>In the "Toolchain executables" tab (which you may need to
-            scroll rightward to find): </li>
-          <ul>
-            <li value="9"><span style="text-decoration: underline;">For
-                Mac OS X only</span>, in the "Additional Paths" tab next
-              to the "Program Files" tab, add the path "<span
-                style="font-style: italic;">InstallDir</span>/MacOS".&nbsp;
+        instructions for visual debugging</a>.<br>
+    </p>
+    <h3>Getting the Source Code<br>
+    </h3>
+    <p>The complete up-to-the-moment source code is available from <a
+        href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 
 
 
@@ -1359,46 +529,37 @@ the
 
 
 
+      There are several ways which one might choose to download it, such
+      as <a
+        href="https://github.com/virtualagc/virtualagc/archive/master.zip">in
 
 
 
 
-              (All of the other settings below are in the "Program
-              Files" tab and apply to all platforms unless stated
-              otherwise.)<br>
-            </li>
-            <li>For the "Compiler's installation directory" choose <span
-                style="font-style: italic;">InstallDir</span>.</li>
-            <li>For the "C compiler", "C++ compiler", "Linker for
-              dynamic libs", and "Linker for static libs" choose either
-              "yaYUL" or "yaYUL.exe" depending on your platform.</li>
-            <li>For the "Debugger", set "yaAGC" or "yaAGC.exe" depending
-              on your platform.</li>
-            <li>Leave the "Resource compiler" setting blank.</li>
-            <li><span style="text-decoration: underline;">For Win32</span>,
-              you may will probably need to change the "Make program"
-              setting whatever 'make' you're actually using, and to add
-              the path in which it is located to the "Additional Paths"
-              tab.<br>
-            </li>
-            <li><span style="text-decoration: underline;">For FreeBSD
-                only</span>, if you are using GNU make rather than the
-              default 'make' provided by the operating system, change
-              the "Make program" setting to "gmake".<br>
-            </li>
-          </ul>
-        </ol>
-      </ol>
-      <li>Configuration of AEA toolchain:&nbsp; <span
-          style="font-style: italic;">Not implemented yet</span>.</li>
-    </ol>
-    <h4><a name="Project-creation_procedure_in"></a>Project-creation
-      procedure in Code::Blocks</h4>
-    TBD<br>
-    <br>
-    <h2><a name="Build"></a>Building the Virtual AGC software<br>
-    </h2>
-    <h3><a name="BuildLinux"></a>Linux</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+        a zipfile</a> or using the 'git' program, which in Linux (for
+      example) would look like this:<br>
+    </p>
+    <blockquote>
+      <p>git clone https://github.com/virtualagc/virtualagc<br>
+      </p>
+    </blockquote>
+    In either case, you end up with a folder called virtualagc.&nbsp;
+    What you do with it after that depends on which platform you intend
+    to run Virtual AGC on, and that's the topic of the next few
+    sections.<br>
+    <h3>Linux </h3>
     <p>I would recommend reading <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
 
@@ -1418,109 +579,27 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
-        instructions at the GitHub repository</a>, which (of course)
-      cover building from a Git clone of the code base.&nbsp; However,
-      the following are some older (though extremely-similar)
-      instructions related specifically to building from the development
-      snapshot tarballs.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        instructions at the GitHub repository</a>.<br>
     </p>
-    <span style="font-weight: bold;"></span><span style="font-weight:
-      bold;">Prerequisites:</span>&nbsp; You will need the normal <span
-      style="font-weight: bold;">gcc</span> C/C++ compiler toolchain, as
-    well as developer packages ("dev" or "devel") for <a
-      href="http://www.wxwidgets.org"><span style="font-weight: bold;">wxWidgets</span></a>
-    and <a href="http://www.libsdl.org/"><span style="font-weight:
-        bold;">SDL</span></a>.&nbsp; I have been using the 2.8.<i>x</i>
-    branch of wxWidgets, as opposed (say) to the 3.<i>x</i> branch, and
-    I believe you probably need to do that as well; fortunately, both
-    can be installed on the computer at the same time. These are all
-    available in the package repositories of the common current Linux
-    distributions, though figuring out what the package names are can be
-    an adventure.&nbsp; Or, you can install them from source if you
-    swing that way.<br>
-    <br>
-    From the command line, unpack the development-snapshot tarball as
-    follows:<br>
-    <br>
-    <div style="margin-left: 40px;"><span style="font-family: Courier
-        New,Courier,monospace;">tar --bzip2 -xf yaAGC-dev-</span><span
-        style="font-style: italic; font-family: Courier
-        New,Courier,monospace;">YYYYMMDD</span><span style="font-family:
-        Courier New,Courier,monospace;">.tar.bz2</span><br>
-    </div>
-    <br>
-    After unpacking there will be a new directory called
-    "yaAGC".&nbsp;&nbsp; To build the programs, <br>
-    <br>
-    <div style="margin-left: 40px;"><span style="font-family: Courier
-        New,Courier,monospace;">cd yaAGC</span><br style="font-family:
-        Courier New,Courier,monospace;">
-      <span style="font-family: Courier New,Courier,monospace;"># <span
-          style="font-weight: bold; font-style: italic;">Do not</span>
-        "configure".</span><br style="font-family: Courier
-        New,Courier,monospace;">
-      <span style="font-family: Courier New,Courier,monospace;">make</span><br
-        style="font-family: Courier New,Courier,monospace;">
-      <span style="font-family: Courier New,Courier,monospace;"># <span
-          style="font-weight: bold; font-style: italic;">Do not</span>
-        "make install".</span><span style="font-family: monospace;"><br
-          style="font-family: monospace;">
-      </span><span style="font-family: monospace;"></span><br>
-    </div>
-    (Note that while there is a 'configure' script provided, it is
-    presently used only for setting up builds of a couple of
-    now-obsoleted programs.&nbsp; Therefore, it does not matter whether
-    you run it or not, nor whether it succeeds or fails.)<br>
-    <br>
-    You'll find that this has created a directory
-    yaAGC/VirtualAGC/temp/lVirtualAGC/, which is same as the
-    installation directory provided by the binary installer program, <span
-      style="font-weight: bold;">VirtualAGC-installer</span>.&nbsp; To
-    match the default setup of the installer program, you would<br>
-    <br>
-    <div style="margin-left: 40px;"><span style="font-family: Courier
-        New,Courier,monospace;">mv yaAGC/VirtualAGC/temp/lVirtualAGC
-        ~/VirtualAGC</span><br>
-    </div>
-    <br>
-    (assuming you don't already have a directory ~/VirtualAGC/) and make
-    a desktop icon called "Virtual AGC" that links to
-    ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally used for the
-    desktop icon is found at&nbsp;
-    ~/VirtualAGC/bin/ApolloPatch2.png.&nbsp; At this point you would
-    have something equivalent to what the binary installer would have
-    provided, except that you would have no uninstaller program. <br>
-    <br>
-    If you try to use the ACA simulation (joystick) and it doesn't
-    work,&nbsp;<a
-      href="yaTelemetry.html#Joystick_configuration_for_use_with_the">read
-about
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      configuring it</a>.&nbsp;&nbsp; And don't forget to read the <a
-      href="download.html#Prerequisites">prerequisites</a>, the <a
-      href="faq.html#Troubleshooting">trouble-shooting tips</a>, and the
-    <a href="download.html#Some_platform-specific_odditities">list of
-      quirks</a> for this platform.<br>
-    <h3><a name="BuildRPI"></a>Raspberry Pi (Raspbian)</h3>
+    <h3> <span style="font-weight: bold;"></span><span
+        style="font-weight: bold;"></span>Raspberry Pi (Raspbian) </h3>
     This really isn't any different from building it on <a
       href="#BuildLinux">any other Linux system</a>, but I'll go through
     the steps for you anyway, which should work even on a completely new
@@ -1568,124 +647,68 @@ about
     </ul>
     <p>If that's too much for you, there are some things you may be able
       to do to make it more efficient.&nbsp; First, note that the
-      VirtualAGC program &mdash; which isn't a component of the simulation,
+      VirtualAGC program — which isn't a component of the simulation,
       but merely a convenient graphical interface so that you don't have
-      to memorize command-line options for the actual components &mdash; takes
+      to memorize command-line options for the actual components — takes
       25-30% of the CPU (for either of the two Pi models mentioned
-      above) by itself.&nbsp; Tou don't really need to run it if you
-      don't want to.&nbsp; So:<br>
-    </p>
-    <ol>
-    </ol>
+      above) by itself.&nbsp; You don't really need to run it if you
+      don't want to.&nbsp; But how do you run a simulation easily
+      without VirtualAGC?&nbsp; Well, if you run the simulation just <i>once</i>
+      from VirtualAGC, and exit the simulation immediately after
+      starting it, you'll find that it has automatically created a
+      script called "simulate" which can be used to start that exact
+      configuration of the simulation without running VirtualAGC
+      itself.&nbsp; As a result, you get CPU utilizations closer to 50%
+      or 10%, respectively, on the two Pi models mentioned above.&nbsp;
+      To just run that script, you do this:</p>
     <ul>
-      <li>If you run the simulation just once from VirtualAGC, and exit
-        the simulation immediately after starting it, you'll find that
-        it has automatically created a script called "simulate" which
-        can be used to start that exact configuration of the simulation
-        without running VirtualAGC itself.&nbsp; As a result, you get
-        CPU utilizations closer to 50% or 10%, respectively, on the two
-        Pi models mentioned above.&nbsp; To just run that script, you do
-        this:</li>
     </ul>
     <blockquote>
-      <p>cd VirtualAGC/temp/lVirtualAGC/Resources<br>
-        ./simulate<br>
-      </p>
+      <blockquote>
+        <p>cd VirtualAGC/temp/lVirtualAGC/Resources<br>
+          ./simulate<br>
+        </p>
+      </blockquote>
     </blockquote>
-    <ul>
-      <li>If you're more-adventurous, and more programming-savvy, there
-        may be a way to get various programs, but specifically yaAGC and
-        yaAGS, to use less CPU cycles, at the cost of less accuracy
-        time-wise.&nbsp; At various places in the program suite,
-        individual programs are put to sleep using the nanosleep()
-        function, specifically to avoid using CPU cycles.&nbsp; So if
-        you search for "nanosleep", you'll often find nanosleeps with of
-        req.tv_nsec=10000000 nanoseconds, or 10 milliseconds.&nbsp;
-        Selectively changing some of those to (say) 100 milliseconds
-        (100000000) or even 250 milliseconds (250000000) might reduce
-        the CPU utilization of those particular programs.&nbsp; If you
-        do try it and it works better for you, let me know!</li>
-    </ul>
     <ol>
     </ol>
     <h3><a name="FreeBSD"></a>FreeBSD</h3>
-    Development snapshots 20090405 through 20090421 could be built
-    natively in PC-BSD 7.02 (based on FreeBSD 7.1), and snapshots
-    20090502 and after can be build natively on PC-BSD 7.1 (based on
-    FreeBSD 7.2).&nbsp; Other versions of FreeBSD may work, but I have
-    no great confidence because my knowledge of FreeBSD is nil.<br>
-    <br>
-    As mentioned above, I would <span style="font-style: italic;
-      font-weight: bold;">not</span> recommend installing the Linux
-    binary version of Virtual AGC.&nbsp; You may be able to run the
-    installer, but if your experience is like mine you won't like what
-    happens after that.&nbsp; Thus you should build from source instead,
-    according to the instructions in this section. <br>
-    <br>
-    Here's the way <span style="font-style: italic;">I</span> made it
-    work, in PC-BSD 7.1 with its software-developer package group
-    intalled:<br>
-    <ul>
-      <li>I installed <a href="http://www.wxwidgets.org"><span
-            style="font-weight: bold;">wxWidgets</span></a> 2.8.9 from
-        source into /usr/local.&nbsp; You have to do something beyond my
-        understanding to get the system to find libwx*.so* at
-        runtime.&nbsp; I managed to monkey it into working, but I'm not
-        sure what I did, and you FreeBSD users are unlikely to care
-        about my wrong methods anyhow.&nbsp; Please let me know the
-        answer if you find one.<br>
+    The following steps were tried under <a
+      href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>,
+    since installation of actual FreeBSD is too hard for any mortal.<br>
+    <ol>
+      <li>Using the 'AppCafe', I installed all of the packages (of which
+        there were 3) for wx28-gtk2 2.8.12_6.</li>
+      <li>I installed GNU 'make' (gmake) with the command "sudo pkg
+        install gmake".</li>
+      <li>In the Virtual AGC source directory (which for me was
+        ~/git/virtualagc), I ran "gmake FREEBSD=yes".<br>
       </li>
-      <li>I installed <a
-          href="http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html">GNU
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <span style="font-weight: bold;">readline</span></a> 6.0 from
-        source into /usr/local.&nbsp; (As a BSD kind of person, you may
-        be tempted to install the BSD-licensed <a
-          href="http://www.thrysoee.dk/editline/">editline</a> library
-        instead, but it is not fully feature-compatible and cannot be
-        used.)</li>
-      <li>I found that <span style="font-weight: bold;">libSDL</span>
-        was already installed.</li>
-      <li>I installed <span style="font-weight: bold;">Tcl/Tk</span>
-        ("pkg_add -r tk-wrapper").<br>
-      </li>
-      <li>I unpacked the Virtual AGC snapshot tarball ("<span
-          style="font-family: Courier New,Courier,monospace;">tar
-          --bzip2 -xf yaAGC-dev-<span style="font-style: italic;">YYYYMMDD</span></span><span
-          style="font-style: italic; font-family: Courier
-          New,Courier,monospace;"></span><span style="font-family:
-          Courier New,Courier,monospace;">.tar.bz2</span>").</li>
-      <li>I cd'd into the yaAGC/ directory and built ("gmake
-        FREEBSD=yes").&nbsp; <span style="font-weight: bold;
-          font-style: italic;">Do</span> <span style="font-style:
-          italic; font-weight: bold;">not</span> "configure" and <span
-          style="font-weight: bold; font-style: italic;">do</span> <span
-          style="font-weight: bold; font-style: italic;">not</span>
-        "gmake install".</li>
-    </ul>
+    </ol>
+    This didn't actually work, because the source tree needs various
+    fixups before it can work, but if it had worked:<br>
+    <br>
     You'll find that this has created a directory
-    yaAGC/VirtualAGC/temp/lVirtualAGC/<span style="font-weight: bold;"></span>.&nbsp;
+    VirtualAGC/temp/lVirtualAGC/<span style="font-weight: bold;"></span>.&nbsp;
 I'd
 suggest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1709,14 +732,17 @@ suggest
     you should also<br>
     <br>
     <div style="margin-left: 40px;"><span style="font-family: Courier
-        New,Courier,monospace;">mv yaAGC/VirtualAGC/temp/lVirtualAGC
+        New,Courier,monospace;">mv VirtualAGC/temp/lVirtualAGC
         ~/VirtualAGC</span><br>
     </div>
     <br>
-    (assuming you don't already have a directory ~/VirtualAGC/) and make
-    a desktop icon called "Virtual AGC" that links to
-    ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally used for the
-    desktop icon is found at&nbsp;
+    (assuming you don't already have a directory ~/VirtualAGC/).&nbsp;
+    This isn't really necessary, but duplicates the setup that Virtual
+    AGC's Linux installer programs use.<br>
+    <br>
+    I'd also suggest that you make a desktop icon called "Virtual AGC"
+    that links to ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally
+    used for the desktop icon is found at&nbsp;
     ~/VirtualAGC/bin/ApolloPatch2.png.&nbsp; The end result of these
     manipulations is something identical to what the Linux binary
     installer would have produced except that it will actually work and
@@ -1746,107 +772,58 @@ about
 
 
 
-      configuring it</a>.&nbsp;&nbsp; And don't forget to read the <a
-      href="download.html#Prerequisites">prerequisites</a>, the <a
-      href="faq.html#Troubleshooting">trouble-shooting tips</a>, and the
-    <a href="download.html#Some_platform-specific_odditities">list of
-      quirks</a> for this platform.<br>
-    <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      configuring it</a>.<br>
     <h3><a name="Solaris"></a>Solaris</h3>
-    Note that I've only tried OpenSolaris 0811.&nbsp; In order to get
-    development snapshot 20090503 (and hopefully beyond) to build,
-    having no knowledge of Solaris, I had to do quite a lot of ignorant
-    monkeying around.&nbsp; When that happens, of course, there may be
-    essential steps of the process that don't get recorded, or extra
-    steps that are accomplished but serve no purpose.&nbsp; I expect
-    that any Solaris users are likely clever enough about their OS to
-    figure these things out and let me know of deficiencies in my
-    description.&nbsp; <br>
+    I tried these things using Solaris 11.3.&nbsp; Note that my
+    knowledge of Solaris is mid-way between "completely ignorant" and
+    "dangerously misinformed".<br>
+    <ol>
+      <li>Installed wxWidgets, gtk2, tcl-8, and tk-8 using the Package
+        Manager.</li>
+      <li>In the Virtual AGC source directory (which for me was
+        ~/git/virtualagc), I ran "gmake".</li>
+    </ol>
+    This didn't actually work, because the source tree needs various
+    fixups before it can work, but if it had worked:<br>
     <br>
-    There are so many problems on Solaris right now that I'd hesitate to
-    recommend using Virtual AGC in that environment.<br>
-    <br>
-    At any rate, here are the one-time setup steps I performed:<br>
-    <ul>
-      <li>I installed (or happily accepted the pre-installation, as the
-        case may be) the following packages, using the package system:</li>
-      <ul>
-        <li>SUNWgnome-common-devel</li>
-        <li>SUNWGtk</li>
-        <li>SUNWxorg-headers</li>
-        <li>FSWxorg-headers</li>
-        <li>SUNWncurses</li>
-        <li>SUNWtcl</li>
-        <li>SUNWtk</li>
-        <li>SUNWlibsdl<br>
-        </li>
-      </ul>
-      <li>Installed <a
-          href="http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html">GNU
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <span style="font-weight: bold;">readline</span></a> 6.0 from
-        source into /usr/local.</li>
-      <li>I installed <a href="http://www.wxwidgets.org/"><span
-            style="font-weight: bold;">wxWidgets</span></a> 2.8.9 from
-        source into /usr/local, configuring with "configure
-        --disable-shared".&nbsp; (While there is a package called
-        SUNWwxwidgets which can be installed from the package system, in
-        the version I tried the switches produced by `wx-config
-        --cxxflags` are incompatible with <span style="font-weight:
-          bold;">gcc</span>, so I eliminated it.&nbsp; Your luck might
-        be better.)&nbsp; The Virtual AGC makefiles are simply going to
-        take the first <span style="font-weight: bold;">wx-config</span>
-        found in the PATH, so the present makefiles may be too simple
-        for you if you have more than one version of <span
-          style="font-weight: bold;">wxWidgets</span> installed.</li>
-      <li>I installed <a style="font-weight: bold;"
-          href="http://alleg.sourceforge.net">Allegro</a> 4.2.2 from
-        source into /usr/local, configuring as "configure
-        --enable-shared=no --enable-static=yes".<br>
-      </li>
-      <li>I put /usr/local/bin into my PATH, or otherwise somehow get
-        /usr/local/bin/wx-config linked into your PATH.<br>
-      </li>
-    </ul>
-    After that, build Virtual AGC as follows:<br>
-    <ul>
-      <li>Unpack the Virtual AGC snapshot tarball ("<span
-          style="font-family: Courier New,Courier,monospace;">tar
-          --bzip2 -xf yaAGC-dev-<span style="font-style: italic;">YYYYMMDD</span></span><span
-          style="font-style: italic; font-family: Courier
-          New,Courier,monospace;"></span><span style="font-family:
-          Courier New,Courier,monospace;">.tar.bz2</span>").</li>
-      <li>Then 'cd' into the yaAGC/ directory and build ("make
-        SOLARIS=yes").&nbsp; <span style="font-weight: bold;
-          font-style: italic;">Do</span> <span style="font-style:
-          italic; font-weight: bold;">not</span> "configure" and <span
-          style="font-weight: bold; font-style: italic;">do</span> <span
-          style="font-weight: bold; font-style: italic;">not</span>
-        "gmake install".</li>
-    </ul>
     You'll find that this has created a directory
-    yaAGC/VirtualAGC/temp/lVirtualAGC/<span style="font-weight: bold;"></span>.&nbsp;
+    VirtualAGC/temp/lVirtualAGC/<span style="font-weight: bold;"></span>.&nbsp;
 I'd
 suggest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1870,29 +847,64 @@ suggest
     you should also<br>
     <br>
     <div style="margin-left: 40px;"><span style="font-family: Courier
-        New,Courier,monospace;">mv yaAGC/VirtualAGC/temp/lVirtualAGC
+        New,Courier,monospace;">mv VirtualAGC/temp/lVirtualAGC
         ~/VirtualAGC</span><br>
     </div>
     <br>
-    (assuming you don't already have a directory ~/VirtualAGC/) and make
-    a desktop icon called "Virtual AGC" that links to
-    ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally used for the
-    desktop icon is found at&nbsp;
+    (assuming you don't already have a directory ~/VirtualAGC/).&nbsp;
+    This isn't really necessary, but duplicates the setup that Virtual
+    AGC's Linux installer programs use.<br>
+    <br>
+    I'd also suggest that you make a desktop icon called "Virtual AGC"
+    that links to ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally
+    used for the desktop icon is found at&nbsp;
     ~/VirtualAGC/bin/ApolloPatch2.png.&nbsp; The end result of these
-    manipulations is something identical to what a binary installer
-    would have produced (if one existed), except that there won't be any
-    uninstaller program.<br>
+    manipulations is something identical to what the Linux binary
+    installer would have produced except that it will actually work and
+    that there won't be any uninstaller program.<br>
     <br>
-    Sadly, none of the ACA simulation (joystick) programs work in this
-    environment, so you'll have no joystick controls.&nbsp; But I
-    suppose it's possible that this is just my test environment, which
-    is a virtual machine, so you might have better luck than
-    I.&nbsp;&nbsp; And don't forget to read the <a
-      href="download.html#Prerequisites">prerequisites</a>, the <a
-      href="faq.html#Troubleshooting">trouble-shooting tips</a>, and the
-    <a href="download.html#Some_platform-specific_odditities">list of
-      quirks</a> for this platform.<br>
-    <br>
+    If you try to use the ACA simulation (joystick) and it doesn't
+    work,&nbsp;<a
+href="file:///home/rburkey/git/virtualagc-web/yaTelemetry.html#Joystick_configuration_for_use_with_the">read
+about
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      configuring it</a>.<br>
     <h3><a name="Mac_OS_X"></a>Mac OS X<br>
     </h3>
     Note that <span style="font-style: italic;">personally</span> I
@@ -1953,6 +965,23 @@ suggest
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           the source tarball</a>, unpack it, configure it
         ("./configure"), build it ("make"), and install it ("sudo make
         install").&nbsp; This puts <span style="font-weight: bold;">SDL</span>
@@ -1963,6 +992,23 @@ suggest
         tarball ("tar -xjf yaAGC-dev-<span style="font-style: italic;">YYYYMMDD</span>.tar.bz2"),
 thus
 creating
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2022,6 +1068,23 @@ creating
     And don't forget to read the <a href="download.html#Prerequisites">prerequisites</a>,
     the <a href="faq.html#Troubleshooting">trouble-shooting tips</a>,
     and the <a href="download.html#Some_platform-specific_odditities">list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2116,10 +1179,44 @@ should
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         find that there is a download file specifically labeled as a
         Win32 development package for <span style="font-weight: bold;">MinGW</span>.&nbsp;
 Within
 your
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2146,6 +1243,23 @@ your
         The /usr directory withing <span style="font-weight: bold;">Msys</span>
         will probably correspond to something like c:\msys\1.0\ in your
         Windows filesystem. &nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2197,6 +1311,23 @@ your
       <li>Install <a
           href="http://gnuwin32.sourceforge.net/packages/readline.htm">GNU
 readline
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2284,11 +1415,28 @@ readline
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       of quirks</a> for this platform.<br>
     <h3><a name="iPhone"></a>iPhone</h3>
     For development snapshot 20090802 and later, it's possible to build
-    <span style="font-weight: bold;">yaAGC</span>&mdash;not the entire Virtual
-    AGC suite, just <b>yaAGC</b>&mdash;from (I guess) a Mac, if you've
+    <span style="font-weight: bold;">yaAGC</span>—not the entire Virtual
+    AGC suite, just <b>yaAGC</b>—from (I guess) a Mac, if you've
     downloaded an iPhone development kit.&nbsp; From the "I guess" in
     the preceding sentence, you'll probably be able to deduce that I'm
     just parrotting someone else's words and don't really know what I'm
@@ -2307,176 +1455,6 @@ readline
     itself is, it's obviously only marginally useful until such time as
     there's a DSKY.&nbsp; You should be able to do command-line
     debugging, however, so you could in theory run and debug AGC code.<br>
-    <br>
-    <h3><a name="Cross-Compiling"></a>Cross-Compiling</h3>
-    On the very-low-probability chance that somebody actually wants to
-    know how to build the Windows and Mac versions on a Linux box, it's
-    very simple to do.&nbsp; It is, however, very wasteful of calendar
-    time (if not personal time), computer resources, and bandwidth to
-    set up the <span style="font-style: italic;">first</span> time, so
-    I would not advise you to do it on a lark:<br>
-    <ol>
-      <li>The oldest Linux on which I've made this work is Fedora Core
-        5, so presumably any newer Linux would be okay.&nbsp; You will
-        need the normal <span style="font-weight: bold;">gcc</span>
-        C/C++ compilier toolchain, as well as developer packages ("dev"
-        or "devel") for <a href="http://www.wxwidgets.org/"><span
-            style="font-weight: bold;">wxWidgets</span></a> (2.8.9 or
-        later), <a href="http://www.libsdl.org/"><span
-            style="font-weight: bold;">SDL</span></a>, and <a
-          style="font-weight: bold;"
-          href="http://alleg.sourceforge.net/">Allegro</a>.&nbsp; These
-        are all available in the package repositories of the recent
-        common Linux distributions, though figuring out what the package
-        names are can be an adventure.&nbsp; Or, you can install them
-        from source .<br>
-      </li>
-      <li>Download the installation tarball for the Windows/Mac
-        cross-compiling environment called <a style="font-weight:
-          bold;" href="http://www.sandroid.org/imcross">I'm Cross!</a>&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        Please use version 20090426 or later.<br>
-      </li>
-      <li>In an empty directory (which for the sake of argument I'll
-        call ~/Projects), unpack the <span style="font-weight: bold;">I'm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          Cross</span> tarball.&nbsp; This will give you a directory
-        called ~/Projects/IMCROSS/.</li>
-      <li>Within ~/Projects/IMCROSS/ create a text file called
-        Makefile.override-settings containing the following line:&nbsp;
-        "NO_SDL=".<br>
-      </li>
-      <li>Install <span style="font-weight: bold;">I'm Cross!</span>
-        using the instructions on the <span style="font-weight: bold;">I'm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          Cross!</span> website, noting in particular that you may have
-        to install some additional software to insure that the Mac OS X
-        tools and libraries are installed.&nbsp; However, do not
-        customize the <span style="font-weight: bold;">I'm Cross!</span>
-        installation, since Virtual AGC is designed to accept the <span
-          style="font-weight: bold;">I'm Cross!</span> defaults.&nbsp;
-        This is the part that takes a long time, and a lot of bandwidth
-        and disk space.&nbsp; The good news is that you can walk away
-        from it and let it do its job unattended.<br>
-      </li>
-      <li>Unpack the Virtual AGC development snapshot
-        (yaAGC-dev-YYYYMMDD.tar.bz2) someplace.</li>
-      <li>Browse to the web to download the <a style="font-weight:
-          bold;" href="http://software.jessies.org/terminator/">Terminator</a>
-        dmg file.&nbsp; In theory you may be able to 'mount' this in
-        Linux, but I simply opened it in Mac OS X.&nbsp; Inside, you'll
-        find an application called "Terminator", which (considering the
-        way Mac OS X works) is actually a folder called
-        "Terminator.app".&nbsp; Make a tarball from this ("tar -cjvf
-        Terminator.app.tar.bz2 Terminator.app"), and copy
-        Terminator.app.bz2 to the parent directory on your Linux box
-        where you unpacked the Virtual AGC development snapshot.&nbsp;
-        (In other words, Terminator.app.tar.bz2 and yaAGC/ should be in
-        the same directory.)<br>
-      </li>
-      <li>Back on Linux again, 'cd' into the yaAGC/ directory created by
-        unpacking the tarball.</li>
-      <li>Do "make all-archs".</li>
-      <li>In the directory yaAGC/VirtualAGC/, you'll find the
-        binary-installation packages for Linux (<span
-          style="font-weight: bold;">VirtualAGC-installer</span>),
-        Windows (<span style="font-weight: bold;">VirtualAGC-setup.exe</span>),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        and Mac OS X (<span style="font-weight: bold;">VirtualAGC.app.tar.gz</span>).</li>
-    </ol>
-    The Windows/Mac binary packages you get this way are equivalent if
-    not necessarily byte-for-byte identical to the ones I
-    distribute.&nbsp; However, the Linux binary package will be very
-    different, and do not be fooled into thinking that it is as portable
-    as the one I provide.&nbsp; Very likely, it would work on only a
-    very restricted range of Linux boxes.&nbsp; The reason for this is
-    that I've gone out of my way to create a very generic Linux system
-    (with static as opposed to shared libraries to the extent possible)
-    on which I build the distribution Linux installer for Virtual
-    AGC.&nbsp; If you want to know how to do <span style="font-style:
-      italic;">that</span>, <a
-      href="http://www.sandroid.org/imcross#LinuxCrossProblems">the <span
-        style="font-weight: bold;">I'm Cross!</span> website provides
-      instructions</a>.&nbsp; It's considerably <span
-      style="font-style: italic;">more</span> time-consuming to set up
-    than a standard <span style="font-weight: bold;">I'm Cross!</span>
-    setup is.<br>
     <h2><a name="Running_the_Validation_Suite"></a>Running the
       Validation Suite of the simulated AGC<br>
     </h2>
@@ -2511,460 +1489,11 @@ readline
     If this doesn't work for some reason, refer to the trouble-shooting
     info in the <a href="faq.html">FAQ</a>.<br>
     <br>
-    <h2><a name="Some_platform-specific_odditities"></a>Some
-      platform-specific oddities</h2>
-    Here are some strange things I noted when testing out the
-    downloadable binary-installation packages on various target
-    platforms.&nbsp; I can't say whether these quirks would continue to
-    exist if Virtual AGC was built from source.&nbsp; Nor do I claim to
-    have done a 100% test of all Virtual AGC features on each platform,
-    since Virtual AGC is a pretty large and complex set of programs; in
-    particular, I do not claim to have tested joystick operation with
-    any thoroughness.&nbsp; But if you have difficulties, you may or may
-    not find some help for them below.<br>
-    <ul>
-      <li>Very slow machines.</li>
-      <ul>
-        <li>You may find that the simulation uses &gt;100% of the
-          available CPU, particularly if the <span style="font-weight:
-            bold;">Tcl/Tk</span>-based <span style="font-weight: bold;">LM-Simulator</span>
-          component is being used.&nbsp; I fear that the only workaround
-          for this at present is to turn off the interfaces of the
-          simulation which you don't need.</li>
-        <li>You may find that the simulation (and particularly <span
-            style="font-weight: bold;">LM-Simulator</span>) aborts at
-          startup, possibly with a pop-up box indicating that there is a
-          failure to connect to <span style="font-weight: bold;">yaAGC</span>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          This problem is caused by the time needed to start the various
-          program components.&nbsp; You can introduce extra delay before
-          these checks are performed by editing a pair of files in the
-          installation directory (by default, ~/VirtualAGC/Resources in
-          Linux, c:\Program Files\Virtual AGC\Resources in Windows, or
-          ~/Desktop/VirtualAGC.app/Contents/Resources in Mac OS
-          X).&nbsp; In the file SimStop, change "sleep 5" to "sleep
-          30".&nbsp; In the file VirtualAGC.tcl, change "after 5000" to
-          "after 30000".&nbsp; These change some 5-second delays to 30
-          seconds.</li>
-      </ul>
-      <li>Networking must be properly configured, even though Virtual
-        AGC does not by default communicate with other computers,
-        because Virtual AGC uses TCP ports which Virtual AGC uses to
-        interconnect the various bits and pieces of the
-        simulation.&nbsp; So if you don't have a network card or
-        wireless, it may be difficult to get Virtual AGC to work.&nbsp;
-        Specifically:<br>
-      </li>
-      <ul>
-        <li>If you have SE Linux (or I guess, the equivalent security
-          features in Windows/Mac OS X) enabled, it may block Virtual
-          AGC from using networking as being an untrusted
-          application.&nbsp; (I believe that most modern Linux
-          distributions, such as Fedora, enable SE Linux functionality
-          by default.)&nbsp; Personally, I have no need for SE Linux ,
-          so I always just completely disable it, and hence I can't give
-          you much additional insight into <span style="font-style:
-            italic;">details</span> about reconfiguring it, but I
-          presume there's some way to identify the bits and pieces of
-          Virtual AGC (namely VirtualAGC, yaAGC, yaAGS, yaDSKY2,
-          yaDEDA2, yaTelemetry, and Tcl/Tk) as being trusted
-          applications.</li>
-        <li>If you have a personal firewall software enabled, it may
-          block the TCP ports which Virtual AGC uses.&nbsp; The ports in
-          question are (by default) 19697-19706, 19797-19806, and
-          19897-19906.&nbsp; I generally just disable personal firewalls
-          on my computers since I'm always behind a physical firewall
-          anyway, but usually there's some sort of a GUI configuration
-          program you can run to open holes in the firewall for specific
-          TCP ports.</li>
-        <li>By default, it is generally possible when making network
-          connection to refer to a computer either by the host name you
-          assign it when you install the operating system, or by the
-          default name "localhost".&nbsp; Virtual AGC uses the
-          latter.&nbsp; I am told that there are some conditions,
-          possibly having to do with the use of wireless (though the
-          problem has been reported to me as a problem with the Network
-          Manager on Fedora 11 Linux), in which the computer cannot be
-          accessed using the default name "localhost".&nbsp; Hence
-          Virtual AGC fails.&nbsp; In Linux, this can be gotten around
-          by adding the line "127.0.0.1 localhost" in the file
-          /etc/hosts.&nbsp; (If the line "127.0.0.1 <span
-            style="font-style: italic;">something</span>" already
-          exists, then just add "localhost" to the end of it.)&nbsp; I
-          presume that you can diagnose both the problem and verify the
-          fix by trying "ping localhost" from a command line.&nbsp;
-          Thanks to Onno Hommes for pointing out this problem and the
-          fix for it.<br>
-        </li>
-      </ul>
-      <li>Linux, installed from binary package<br>
-      </li>
-      <ul>
-        <li>Fedora Core 1&mdash;the <span style="font-weight: bold;">VirtualAGC</span>
-          binary distribution is unusable on Fedora Core 1.&nbsp; I
-          believe that a build from source does work.</li>
-        <li>Fedora Core 4, 32-bit&mdash;no oddities noted.</li>
-        <li>Fedora Core 5, 32-bit&mdash;no oddities noted.</li>
-        <li>Fedora 10, 32-bit&mdash;some odd fonts and odd positioning of text
-          was noted, but nothing that would make Virtual AGC
-          unusable.&nbsp; Fedora 10 is extremely odd in that it does not
-          install <span style="font-weight: bold;">xterm</span> by
-          default, and if you don't install it yourself you'll find that
-          a number of <span style="font-weight: bold;">VirtualAGC</span>
-          features don't work.&nbsp; (Thanks to Onno Hommes for noticing
-          this!)&nbsp; I also have a report that the joystick
-          configurator does not work properly even when <span
-            style="font-weight: bold;">xterm</span> is added, but it
-          worked for me.<br>
-        </li>
-        <li>Ubuntu 7.04, 32-bit&mdash;no odditites noted.</li>
-        <li>Ubuntu 8.04, 64-bit&mdash;no oddities noted.</li>
-        <li>Ubuntu 8.10, 32-bit&mdash;no oddities noted.</li>
-        <li>OpenSUSE 10.1, 32-bit&mdash;no oddities noted.</li>
-        <li>OpenSUSE 11.1, 32-bit&mdash;the KDE 4 desktop system refused to
-          admit that the installer program (<span style="font-weight:
-            bold;">VirtualAGC-installer</span>) was an executable
-          program, so it was necessary to run the installer from the
-          command-line rather than by clicking on its desktop
-          icon.&nbsp; Moreover, the installer could not be run unless a
-          software package called "itcl" (which is present on the
-          OpenSUSE distribution disk) was installed.&nbsp; Fortunately,
-          the installer ran normally, and the KDE 4 desktop did
-          recognize <span style="font-weight: bold;">VirtualAGC</span>
-          itself as an executable program after installation.&nbsp;
-          Positioning of text in some of the <span style="font-weight:
-            bold;">VirtualAGC</span> screens was somewhat unusual, but
-          not unusable.<br>
-        </li>
-      </ul>
-      <li>Windows, installed from binary package</li>
-      <ul>
-        <li>Windows 95, 98&mdash;<span style="font-weight: bold;">VirtualAGC</span>
-          is unusable on Windows 95 or 98, even if it could be built
-          from source there.&nbsp; The reason is that none of the batch
-          files created by Virtual AGC are compatible with the command
-          shell in Windows 95 or 98.&nbsp; It is possible that
-          individual programs like <span style="font-weight: bold;">yaAGC</span>
-          or <span style="font-weight: bold;">yaDSKY2</span> may be
-          usable there if controlled from the command line rather than
-          from the <span style="font-weight: bold;">VirtualAGC</span>
-          GUI, but I no longer have any means of verifying or denying
-          this.</li>
-        <li>Windows 2000&mdash;unknown.</li>
-        <li>Windows XP&mdash;</li>
-        <ul>
-          <li>Windows will sometimes (but not always) pop up a warning
-            window asking whether it should "block" or "unblock" <span
-              style="font-weight: bold;">yaAGC</span> or <span
-              style="font-weight: bold;">yaAGS</span>&mdash;presumably because
-            they are servers and therefore might do Very Bad Things to
-            your computer.&nbsp; I think the only thing the "block" does
-            is to prevent network access via a firewall, and since
-            usually all of your Virtual AGC servers and clients are
-            running on the same computer anyway, it doesn't really
-            matter whether you block or unblock: it seems to work fine
-            either way.<br>
-          </li>
-          <li>Some of the programs (such as the telemetry monitor) may
-            not always be closable from the operating-system-supplied
-            controls around the border of the windows.&nbsp; However,
-            they will close down normally if (for example) you close the
-            DSKY.</li>
-          <li>The <span style="font-weight: bold;">yaACA</span> program
-            is unusable, because if its window loses focus it is unable
-            to access the joystick thereafter.</li>
-          <li><span style="font-weight: bold;"></span>Windows always
-            displays a message when <span style="font-weight: bold;">yaACA2</span>
-            shuts down that it has experienced "a problem" and asks
-            whether or not you want Microsoft informed.&nbsp; Well, I
-            don't know why the message appears, but <span
-              style="font-weight: bold;">yaACA2</span> seems to work
-            well enough for our purposes.&nbsp; Neverthless, if the
-            message annoys you, you should use the default <span
-              style="font-weight: bold;">yaACA3</span> anyway (assuming
-            that it works for you).<br>
-          </li>
-          <li>The main GUI programs (<span style="font-weight: bold;">yaDSKY2</span>,
-            <span style="font-weight: bold;">yaDEDA2</span>, <span
-              style="font-weight: bold;">yaTelemetry</span>) don't seem
-            to produce any console output, so if you run them from a
-            command line&mdash;say, "yaDSKY2 --help"&mdash;you won't see any
-            messages.&nbsp; I believe that you may still be able to see
-            something if you pipe the output into a file&mdash;as, for
-            example, "yaDSKY2 --help &gt;temp.txt".</li>
-          <li style="text-decoration: line-through;">The "debug" mode
-            for the <span style="font-weight: bold;">yaAGS</span>
-            program displays no prompt, but otherwise seems to work
-            properly.</li>
-          <li style="text-decoration: line-through;">The "debug" mode
-            for the <span style="font-weight: bold;">yaAGC</span>
-            program sometimes displays garbage characters upon pressing
-            keys at startup.&nbsp; However, the commands being entered
-            by the keystrokes are interpreted correctly and after
-            executing a command or two it settles down and works
-            properly.<br>
-          </li>
-          <li>If using the command-line debug modes for <span
-              style="font-weight: bold;">yaAGS</span> or <span
-              style="font-weight: bold;">yaAGC</span>, their terminal
-            windows will not close automatically when the other windows
-            close, nor will <span style="font-weight: bold;">yaAGC</span>
-            or <span style="font-weight: bold;">yaAGS</span> be
-            halted.&nbsp; You'll have to close those windows manually.<br>
-          </li>
-        </ul>
-        <li><a name="VistaQuirks"></a>Windows Vista and Windows 7&mdash;I do
-          not have dedicated Windows Vista or Windows 7 machines on
-          which to perform testing.&nbsp; However, because of the
-          continued complaints I've received about Vista, I have been
-          able to do some limited testing with Windows Vista Home Basic
-          and with the Windows 7 Release Candidate.&nbsp; Additionally,
-          I have received some notes on this subject from users of my <a
-            href="http://www.sandroid.org/GutenMark">Project Gutenberg
-            Prettifier, <span style="font-weight: bold;">GutenMark</span></a>,
-          whose programs are constructed using techniques similar to
-          Virtual AGC.&nbsp; So here are some things that may or may not
-          be useful to note:</li>
-        <ul>
-          <li>&nbsp;Jim Adcock (thanks, Jim!) sent word that it was
-            necessary to change the properties of all of&nbsp; the .exe
-            files in the bin/ sub-directory of the installation
-            directory (by default, "c:\Program files\VirtualAGC\bin') to
-            "Run as Administrator".&nbsp; I personally did not find it
-            necessary to do this for Virtual AGC.<br>
-          </li>
-          <li>A user identified only as "Wendl" (thanks, Wendl!) sent
-            word that it was additionally necessary to change the
-            properties of the .exe files to select compatibility with XP
-            Service Pack 2.&nbsp; I personally did not find it necessary
-            to do this for Virtual AGC.</li>
-          <li>Brendan O'Rourke (thanks Brendan!) has pointed out that an
-            error "Cannot create file simulation.bat" occurs when trying
-            to run the simulation.&nbsp; I have found that this
-            may&nbsp; not happen at first, but may begin happening after
-            Windows is shut down and then restarted again later.&nbsp;
-            The problem appears to be that Windows is not consistent in
-            the permissions you are given, so you are fooled into
-            thinking that Virtual AGC works, but only later find that
-            you don't have the proper permissions to run it.&nbsp; Here
-            is the fix:</li>
-          <ol>
-            <li><img style="width: 751px; height: 281px;" alt=""
-                src="VistaFix-1.jpg" align="top" height="281"
-                width="751"></li>
-            <li><img style="width: 387px; height: 493px;" alt=""
-                src="VistaFix-2.jpg" align="top" height="493"
-                width="387"></li>
-            <li><img style="width: 387px; height: 459px;" alt=""
-                src="VistaFix-3.jpg" align="top" height="459"
-                width="387"><br>
-            </li>
-          </ol>
-        </ul>
-      </ul>
-    </ul>
-    <ul>
-      <ul>
-        <ul>
-          <li>File dialogs may not open to the proper folders.&nbsp; <span
-              style="text-decoration: line-through;">For example, in
-              trying to select a source-code file to assemble, I've
-              found that the file dialog opens at Resources\scenarios,
-              whereas it is supposed to open at Resources\source.</span></li>
-          <li><span style="text-decoration: line-through;">The
-              command-line debug modes for </span><span
-              style="font-weight: bold; text-decoration: line-through;">yaAGC</span><span
-              style="text-decoration: line-through;"> and </span><span
-              style="font-weight: bold; text-decoration: line-through;">yaAGS</span><span
-              style="text-decoration: line-through;"> may sometimes
-              display garbage at first when you type at the keyboard,
-              though eventually starts properly displaying
-              keystrokes.&nbsp; Unfortunately, unlike other versions of
-              Windows in which this is merely an annoyance, in Vista/Win
-              7 it may instead cause the simulation to abort.&nbsp; I've
-              had pretty good luck working around this by hitting a few
-              carriage returns before typing in the first actual
-              debugging command.</span><br>
-          </li>
-        </ul>
-      </ul>
-    </ul>
-    <ul>
-      <li>Windows, natively built from source</li>
-      <ul>
-        <li>The <span style="font-weight: bold;">yaACA3</span>
-          joystick-handler program cannot display the joystick readings,
-          and therefore is hard to configure using the "Handler"
-          functionality.&nbsp; (Also, after trying to configure it with
-          "Handler", it remains running rather then being closed down,
-          and you have to manually terminate it by using ctrl-alt-delete
-          to bring up a process list.)&nbsp; In spite of these quirks,
-          it does actually work properly when running a simulation.</li>
-        <li>AGC/AGS program listings may or may not align at the proper
-          tab-stop positions when viewed in a browser.<br>
-        </li>
-      </ul>
-      <li>Mac OS X, installed from binary package<br>
-      </li>
-      <ul>
-        <li>All&mdash;Mac OS X insists on opening all of the windows (DSKY,
-          DEDA, telemetry monitor, etc.) exactly atop each other, so
-          that on each run you have to manally move the windows around
-          in order to see them.</li>
-        <li>10.2 and prior&mdash;the <span style="font-weight: bold;">VirtualAGC</span>
-          binary distribution is unusable on these platforms.<br>
-        </li>
-      </ul>
-      <ul>
-        <li>10.3.9 and 10.4.11 (PowerPC)&mdash;</li>
-        <ul>
-          <li>The IMU (<span style="font-weight: bold;">LM-Simulator</span>)
-            does not seem to respond to the hand-controller (<span
-              style="font-weight: bold;">yaACA3</span>), even though
-            both of them appear to work individually.&nbsp; This may
-            have something to do with the fact that the iMac I'm running
-            it on is old and very slow.&nbsp; (The simulation takes
-            &gt;100% of the CPU time.)</li>
-          <li>The AGS/DEDA pair of programs seems to intermittently
-            freeze up and require rebooting.&nbsp; I suspect that this
-            is because on the old 400 MHz G3 I'm using the CPU loading
-            is at 300%, and there are some timing requirements on
-            AGS/DEDA communications that aren't being met.&nbsp; But I'm
-            not sure, and it could be a different bug.</li>
-        </ul>
-        <li>10.3.9 (PowerPC)&mdash;</li>
-        <ul>
-          <li>The file-save and file-open dialogs for core-dump saves
-            and opens, and for Digital Uplink, refuse to navigate to the
-            proper directory (by default,
-            ~/Desktop/VirtualAGC.app/Contents/Resources/scenarios/); it
-            may be advisable to copy or link this directory to the
-            Desktop or some other accessible location if you wish to use
-            these features.&nbsp; </li>
-        </ul>
-        <ul>
-          <li>Can't run <span style="font-weight: bold;">yaAGC</span>
-            or <span style="font-weight: bold;">yaAGS</span> in --debug
-            mode from <span style="font-weight: bold;">VirtualAGC</span>.<br>
-          </li>
-        </ul>
-        <li>10.5.6 (Intel)&mdash;In spite of my best efforts, I've seen
-          instances in which <a
-            href="yaTelemetry.html#LM_Simulator_by_Stephan_Hotto">the <span
-              style="font-weight: bold;">LM-Simulator</span> portion of
-            the simulation suite</a> does not shut down when the
-          remainder of the simulation shuts down, and needs to be
-          terminated manually from its menu.</li>
-        <li>Even on my fastest box (which is a Core Duo Mac Mini), <span
-            style="font-weight: bold;">LM-Simulator</span> runs at
-          fractional speed, and is therefore useless (whilst the
-          remainder of Virtual AGC proper is running fine at full
-          speed).&nbsp; I suspect an incompatibility in <span
-            style="font-weight: bold;">Tcl/Tk</span>.</li>
-        <li style="text-decoration: line-through;">The "debug" mode for
-          the <span style="font-weight: bold;">yaAGS</span> program
-          displays no prompt, but otherwise seems to work properly.</li>
-        <li style="text-decoration: line-through;">The "debug" mode for
-          the <span style="font-weight: bold;">yaAGC</span> program
-          sometimes displays garbage characters upon pressing keys at
-          startup.&nbsp; However, the commands being entered by the
-          keystrokes are interpreted correctly and after executing a
-          command or two it settles down and works properly.</li>
-      </ul>
-      <li>Mac OS X, built natively from source</li>
-      <ul>
-        <li>The "Retro" display mode of the <span style="font-weight:
-            bold;">yaTelemetry</span> program may not work.<br>
-        </li>
-      </ul>
-      <li>FreeBSD, natively built from source.</li>
-      <ul>
-        <li>For joystick handling, <span style="font-weight: bold;">yaACA3</span>
-          works, but <span style="font-weight: bold;">yaACA2</span> and
-          <span style="font-weight: bold;">yaACA</span> do not.</li>
-        <li>There is some unusual horizontal positioning in some text
-          which is supposed to be centered.</li>
-        <li>The crossed-out sub-items are observations of problems which
-          I no longer observe.<br>
-        </li>
-        <ul>
-          <li style="text-decoration: line-through;">When running <span
-              style="font-weight: bold;">yaAGS</span> in command-line
-            debug mode, there is no command-line prompt, except that one
-            appears sometimes <span style="font-style: italic;">after</span>
-            hitting the carriage-return.&nbsp; Nevertheless, it seems to
-            work properly otherwise.</li>
-          <li style="text-decoration: line-through;">Source browsing
-            does not seem to work from <span style="font-weight: bold;">VirtualAGC</span>,
-            because the paths to the html files (which exist!) aren't
-            constructed properly.</li>
-          <li><span style="text-decoration: line-through;">Nor does
-              assembly of source code from </span><span
-              style="font-weight: bold; text-decoration: line-through;">VirtualAGC</span><span
-              style="text-decoration: line-through;"> work, presumably
-              for the same reason (badly-constructed paths).</span><br>
-          </li>
-        </ul>
-        <li>What success I had was with PC-BSD 7.1.&nbsp; I was
-          previously able to build on PC-BSD 7.02, but have not had a
-          working setup for a while to see if it still works in 7.02.</li>
-      </ul>
-      <li>Solaris.</li>
-      <ul>
-        <li>Only OpenSolaris 0811 has been tried.</li>
-        <li>There is some unusual horizontal positioning in some text
-          which is supposed to be centered.</li>
-        <li>No joystick-handler program is available.&nbsp; (<span
-            style="font-weight: bold;">yaACA2</span> doesn't build,
-          while <span style="font-weight: bold;">yaACA</span> and <span
-            style="font-weight: bold;">yaACA3</span> build but don't
-          work ... at least for me.)</li>
-        <li>Redrawing of graphical objects seems intermittent.&nbsp; For
-          example, some digits on the DSKY might get updated, and others
-          might not.</li>
-        <li>The telemetry-display program never displays any telemetry.</li>
-        <li>In command-line debug mode, <span style="font-weight:
-            bold;">yaAGC</span> and <span style="font-weight: bold;">yaAGS</span>
-          spontaneously abort and end the simulation.</li>
-        <li>Sometimes there is a spurious i/o command; for example, when
-          running the "validation" program on the AGC, the it often
-          seems as if it starts out with the PRO key pressed.<br>
-        </li>
-        <li>It appears to me that several of these phenomena may be due
-          to data being lost or otherwise corrupted in the socket
-          system; perhaps some of the socket uptions I'm using aren't as
-          portable as I imagined.</li>
-        <li>Assembly doesn't work from within the <span
-            style="font-weight: bold;">VirtualAGC</span>
-          environment.&nbsp; I suspect that the file-open dialogs in
-          Solaris may cause the current working directory to change in
-          ways I haven't been anticipating.</li>
-      </ul>
-    </ul>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-08-19.<br>
+          2016-11-17.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
