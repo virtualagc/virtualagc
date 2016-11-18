@@ -75,6 +75,7 @@
 #				problem nor the fix presumably affects anybody 
 #				else's builds.
 #		2016-11-12 RSB	"Permanently" disabled READLINE.
+#		2016-11-18 RSB	Explicitly include socket library in Solaris.
 
 LIBS=${LIBS2}
 
@@ -115,11 +116,9 @@ ifdef MACOSX
 CFLAGS2 += -I/usr/local/include
 LIBS += /usr/local/lib/libreadline.a
 else # MACOSX
-#ifdef SOLARIS
-#LIBS += /usr/local/lib/libreadline.a
-#else # SOLARIS
-#LIBS += -lreadline
-#endif # SOLARIS
+ifdef SOLARIS
+LIBS += -lxnet
+endif # SOLARIS
 LIBS += -lreadline
 endif # MACOSX
 endif # NOREADLINE

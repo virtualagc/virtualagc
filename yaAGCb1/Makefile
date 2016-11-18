@@ -3,10 +3,15 @@
 # Purpose:	Build my (Ron Burkey) Block 1 AGC simulator.
 # Reference:	http://www.ibiblio.org/apollo/Pultorak.html
 # Mod history:	2016-09-03 RSB	Began
+#		2016-11-18 RSB	Explicitly include socket library in Solaris.
 
 TARGETS:=yaAGCb1 test.agc.bin
 SOURCE:=$(wildcard *.c)
 HEADERS:=$(wildcard *.h)
+
+ifdef SOLARIS
+LIBS += -lxnet
+endif # SOLARIS
 
 .PHONY: all
 .PHONY: default
