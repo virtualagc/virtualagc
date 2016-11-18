@@ -151,11 +151,12 @@
 #				related to debugging on Code::blocks. 
 #		2016-11-17 RSB	Fixed a "sed --in-place ..." that doesn't work on
 #				systems with non-GNU sed, such as FreeBSD or
-#				Solaris.
+#				Solaris.  Other fixes of a similar nature, for those
+#				same operating systems.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
-#	Use "make SOLARIS=yes" for Solaris.
+#	Use "gmake SOLARIS=yes" for Solaris.
 #	Use "make WIN32=yes" for Windows.
 #	Use "gmake FREEBSD=yes" for FreeBSD.
 #	Use "make" for Linux.
@@ -213,6 +214,7 @@ ifdef SOLARIS
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
 LIBS+=-lnsl
+export CC=gcc
 endif
 
 # Some adjustments for building in Mac OS X
