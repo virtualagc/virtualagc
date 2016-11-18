@@ -80,7 +80,7 @@ typedef unsigned short uint16_t;
 #define SOCKET_API_C
 #include "yaAGCb1.h"
 
-// For Solaris.
+// For Solaris and Mac OS X.
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif

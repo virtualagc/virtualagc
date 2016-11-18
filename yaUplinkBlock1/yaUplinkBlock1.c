@@ -57,6 +57,11 @@ extern int
 CallSocket(char *hostname, unsigned short portnum);
 #define CONNECTED "\nyaDSKY is connected.\n"
 
+// For Solaris and Mac OS X.
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 // Stuff for the timer we use for reading the socket interface.
 static char DefaultHostname[] = "localhost";
 char *Hostname = DefaultHostname;
