@@ -1,5 +1,5 @@
 /*
- Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
+ Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
 
  This file is part of yaAGC.
 
@@ -65,6 +65,7 @@
  Added some robustness checking to the
  data stream on the tcp port.
  03/19/09 RSB	Added DedaQuiet.
+ 11/18/16 RSB	Worked around lack of MSG_NOSIGNAL in Solaris.
  */
 
 #include <errno.h>
@@ -76,6 +77,11 @@ typedef unsigned short uint16_t;
 #endif
 #define SOCKET_API_C
 #include "yaAGCb1.h"
+
+// For Solaris.
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
 
 // MAX_CLIENTS is the maximum number of hardware simulations which can be
 // attached.  The DSKY is always one, presumably.  The array is a list of
