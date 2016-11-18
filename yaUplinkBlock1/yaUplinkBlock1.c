@@ -33,6 +33,8 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-12 RSB  Began.
+ * 		2016-11-18 RSB	Accounted for different location of ncurses.h
+ * 				in Solaris.
  */
 
 #include <unistd.h>
@@ -42,7 +44,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#ifdef SOLARIS
+#include <ncurses/ncurses.h>
+#else
 #include <ncurses.h>
+#endif
 #include "../yaAGCb1/yaAGCb1.h"
 extern int
 CallSocket(char *hostname, unsigned short portnum);
