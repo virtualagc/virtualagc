@@ -13,9 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Artemis072 version.
 ##		2016-11-18 RRB	Transcribed
-## NOTE: Page numbers below have yet to be updated from Artemis072 to Luminary210!
 
-## Page 36
+## Page 1
 # ABSOLUTE LOCATIONS FOR UPDATES
 
 # ECADR			MNEMONIC
