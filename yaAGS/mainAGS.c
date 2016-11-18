@@ -278,7 +278,8 @@ main (int argc, char *argv[])
   RealTimeOffsetAGS = times (&DummyTime);	// The starting time of the program.
   CycleCount = State.CycleCounter * sysconf (_SC_CLK_TCK);	// Number of AEA cycles so far.
   RealTimeOffsetAGS -= (CycleCount + AEA_PER_SECOND / 2) / AEA_PER_SECOND;
-  LastRealTimeAGS = ~0UL;
+  LastRealTimeAGS = 0;
+  LastRealTimeAGS = ~LastRealTimeAGS;
   while (1)
     {
       RealTimeAGS = times (&DummyTime);
