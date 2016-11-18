@@ -381,7 +381,7 @@ ProcessAorC:
                 int16_t value = rope[bank][j];
 
                 // Subsequent unassigned words in the same bank will be set to zero.
-                if (value > 077777 || value < 0) {
+                if (/*value > 077777 ||*/ value < 0) {
                     //if (verbose)
                     //    printf("Zeroing unassigned word at (%02o,%04o).\n", bank, BANK_OFFSET + j);
                     value = 0;
