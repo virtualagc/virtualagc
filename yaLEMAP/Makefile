@@ -46,8 +46,6 @@ else	# MSYSTEM
 PREFIX=/usr/local
 endif	# MSYSTEM
 
-NOERRORFORMAT=-Wno-error=format=
-
 .PHONY:	default
 default: binLEMAP SampleCodeAGS.lst \
 	../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab \
@@ -116,6 +114,6 @@ install: default
 	
 
 %.o:	%.c ../yaYUL/yaYUL.h
-	gcc ${CFLAGS} -DNVER=${NVER} $(NOERRORFORMAT) -DINSTALLDIR=${PREFIX} -Wall -c -o $@ $<
+	gcc ${CFLAGS0} -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -c -o $@ $<
 	
 

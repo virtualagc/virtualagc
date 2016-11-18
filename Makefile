@@ -249,18 +249,22 @@ endif
 # to catch every possible problem before sending it out into the world.
 ifeq ($(USER),rburkey)
 WEBSITE=../sandroid.org/public_html/apollo
-CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
+CFLAGS0=-Werror -DALLOW_BSUB -g -O0
+CFLAGS=-Wall $(CFLAGS0)
 yaACA=
 else 
 ifdef DEV_BUILD
-CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
+CFLAGS0=-Werror -DALLOW_BSUB -g -O0
+CFLAGS=-Wall $(CFLAGS0)
 yaACA=
 else 
 ifdef DEBUG_BUILD
-CFLAGS=-DALLOW_BSUB -g -O0
+CFLAGS0=-DALLOW_BSUB -g -O0
+CFLAGS=$(CFLAGS0)
 yaACA=-
 else
-CFLAGS=-DALLOW_BSUB
+CFLAGS0=-DALLOW_BSUB
+CFLAGS=$(CFLAGS0)
 yaACA=-
 endif
 endif
@@ -271,6 +275,7 @@ endif
 # for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
 ifdef WIN32
 EXT=.exe
+CFLAGS0+=-I/usr/local/include
 CFLAGS+=-I/usr/local/include
 LIBS+=-L/usr/local/lib
 LIBS+=-lkernel32
