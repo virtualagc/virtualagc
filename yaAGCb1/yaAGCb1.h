@@ -57,8 +57,32 @@
 #ifndef YAAGC_BLOCK1_H
 #define YAAGC_BLOCK1_H
 
-#include <stdint.h>
 #include <stdio.h>
+
+#if defined(__APPLE_CC__) && !defined(unix)
+#define unix
+#endif
+#ifdef unix
+#include <stdint.h>
+#ifdef __APPLE_CC__
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#elif !defined(__WORDSIZE)
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#elif __WORDSIZE < 64
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#else
+#define FORMAT_64U "%lu"
+#define FORMAT_64O "%lo"
+#endif
+#elif defined(WIN32)
+#include <windows.h>
+#include <winsock2.h>
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#endif
 
 //-------------------------------------------------------------------------
 // Block 1 specific address and data constants.

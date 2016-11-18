@@ -43,7 +43,10 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <stdint.h>
-#ifndef __WORDSIZE
+#ifdef __APPLE_CC__
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#elif !defined(__WORDSIZE)
 #define FORMAT_64U "%llu"
 #define FORMAT_64O "%llo"
 #elif __WORDSIZE < 64
