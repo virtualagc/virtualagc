@@ -7,12 +7,12 @@
 ##              that the code format has been changed to conform to the
 ##              requirements of the yaYUL assembler rather than the
 ##              original YUL assembler.
-## Reference:   pp. XXX-XXX
+## Reference:   p. 1
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Artemis072 version.
-
+##		2016-11-18 RRB	Transcribed
 ## NOTE: Page numbers below have yet to be updated from Artemis072 to Luminary210!
 
 ## Page 36
@@ -20,16 +20,12 @@
 
 # ECADR			MNEMONIC
 # -----			--------
-		=ECADR	UPSVFLAG	# CSM/LM STATE VECTOR UPDATE
+		=ECADR	UPSVFLAG
 		
-		=ECADR	XSMD		# DESIRED REFSMMAT UPDATE
+		=ECADR	XSMD
 
-		=ECADR	REFSMMAT	# REFSMMAT UPDATE
+		=ECADR	REFSMMAT
 		
-		=ECADR	DELVSLV		# EXTERNAL DELTA-V UPDATE
-		
-		=ECADR	LAT(SPL)	# RETROFIRE EXT DELTA-V OR ENTRY UPDATE
-		
-		=ECADR	TIG		# LAMBERT TARGET UPDATE
-		
-		=ECADR	RLS		# LANDING SITE VECTOR UPDATE
+		=ECADR	DELVSLV	
+	
+		=ECADR	RLS
