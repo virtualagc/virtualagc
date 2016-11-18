@@ -339,4 +339,7 @@ EstablishSocket (unsigned short portnum, int MaxClients);
 #define SOCKET_BROKEN (errno == EPIPE)
 #endif
 
+void
+logAGC(FILE *logFile, uint16_t lastZ);
+
 #endif // YAAGC_BLOCK1_H

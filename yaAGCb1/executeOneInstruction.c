@@ -1,5 +1,5 @@
 /*
-, and  * Copyright 2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2016 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *

@@ -53,10 +53,12 @@
 		                (namely, that yaAGC no longer listened on the
 		                specified port on 64-bit Linux Mint and Ubuntu)
 		                has actually been fixed in the makefile.
+		11/18/15 RSB	Added unistd.h (for Solaris).
 
 */
 
 // ... and the project's includes.
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>

@@ -123,9 +123,7 @@ LIBS += -lreadline
 endif # MACOSX
 endif # NOREADLINE
 
-ifndef SOLARIS
 NOERRORFORMAT=-Wno-error=format=
-endif
 
 CFLAGS2 += -DGDBMI
 
