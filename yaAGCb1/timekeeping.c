@@ -35,9 +35,19 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-03 RSB  Wrote.
+ * 		2016-11-18 RSB	Added workaround for non-existence of clock_gettime()
+ * 				on Mac OS X, found here:
+ * 				http://stackoverflow.com/questions/5167269/clock-gettime-alternative-in-mac-os-x
  */
 
 #include <time.h>
+#include <sys/time.h>
+
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #include <string.h>
 #include "yaAGCb1.h"
 
@@ -47,7 +57,19 @@ getTimeNanoseconds(void)
   int64_t currentTime;
   struct timespec timeSpec;
 
+  #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  timeSpec.tv_sec = mts.tv_sec;
+  timeSpec.tv_nsec = mts.tv_nsec;
+
+  #else
   clock_gettime(CLOCK_REALTIME, &timeSpec);
+  #endif
+
   currentTime = timeSpec.tv_sec;
   currentTime *= BILLION;
   currentTime += timeSpec.tv_nsec;
