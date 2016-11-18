@@ -22,6 +22,14 @@
 #ifndef SEQ_H
 #define SEQ_H
 #include "reg.h"
+
+// In Solaris, in sys/regset.h (which has nothing to do with us at all, but is
+// indirectly included by stdlib.h), CS is already #defined.  We need to get
+// rid of that definition.
+#ifdef CS
+#undef CS
+#endif
+
 #define MAXPULSES 15
 #define MAX_IPULSES 5 // no more than 5 instruction-generated pulses active at any time
 enum cpType
