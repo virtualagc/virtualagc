@@ -1,61 +1,62 @@
 /*
-  Copyright 2003-2005,2016 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC.
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
-  Filename:	agc_utilities.c
-  Purpose:	Miscellaneous functions, useful for agc_engine or for other
-  		yaAGC-family functions.
-  Compiler:	GNU gcc.
-  Contact:	Ron Burkey <info@sandroid.org>
-  Reference:	http://www.ibiblio.org/apollo/index.html
-  Mods:		04/21/03 RSB.	Began.
-  		08/20/03 RSB.	Added uBit to ParseIoPacket.
-		05/30/04 RSB	Various.
-		07/12/04 RSB	Q is now 16 bits.
-		01/31/05 RSB	Added the setsockopt call to 
-				EstablishSocket.
-		02/27/05 RSB	Added the license exception, as required by
-				the GPL, for linking to Orbiter SDK libraries.
-		04/30/05 RSB	Added workaround for lack of Win32 close().
-		05/14/05 RSB	Corrected website references.
-		05/29/05 RSB	Added a couple of AGS equivalents for packet
-				function.
-		08/06/16 RSB    Added several error messages to help track
-		                down why this is failing.  It turns out that
-		                gethostbyname() no longer works (at least on
-		                some Linux distributions) if statically
-		                linked.  Therefore, the problem I was seeing
-		                (namely, that yaAGC no longer listened on the
-		                specified port on 64-bit Linux Mint and Ubuntu)
-		                has actually been fixed in the makefile.
-		11/18/15 RSB	Added unistd.h (for Solaris).
-
-*/
+ * Copyright 2003-2005,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
+ * Filename:	agc_utilities.c
+ * Purpose:	Miscellaneous functions, useful for agc_engine or for other
+ * 		yaAGC-family functions.
+ * Compiler:	GNU gcc.
+ * Contact:	Ron Burkey <info@sandroid.org>
+ * Reference:	http://www.ibiblio.org/apollo/index.html
+ * Mods:		04/21/03 RSB.	Began.
+ * 		08/20/03 RSB.	Added uBit to ParseIoPacket.
+ *		05/30/04 RSB	Various.
+ *		07/12/04 RSB	Q is now 16 bits.
+ *		01/31/05 RSB	Added the setsockopt call to
+ *				EstablishSocket.
+ *		02/27/05 RSB	Added the license exception, as required by
+ *				the GPL, for linking to Orbiter SDK libraries.
+ *		04/30/05 RSB	Added workaround for lack of Win32 close().
+ *		05/14/05 RSB	Corrected website references.
+ *		05/29/05 RSB	Added a couple of AGS equivalents for packet
+ *				function.
+ *		08/06/16 RSB    Added several error messages to help track
+ *		                down why this is failing.  It turns out that
+ *		                gethostbyname() no longer works (at least on
+ *		                some Linux distributions) if statically
+ *		                linked.  Therefore, the problem I was seeing
+ *		                (namely, that yaAGC no longer listened on the
+ *		                specified port on 64-bit Linux Mint and Ubuntu)
+ *		                has actually been fixed in the makefile.
+ *		11/18/15 RSB	Added unistd.h (for Solaris).  Added a couple
+ *				of other header files for FreeBSD.
+ *
+ */
 
 // ... and the project's includes.
 #include <unistd.h>
@@ -63,6 +64,8 @@
 #include <string.h>
 #include <netdb.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include "yaAGCb1.h"
 extern int h_errno;
 
