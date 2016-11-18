@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC.
 
@@ -65,6 +65,7 @@
 				Added some robustness checking to the
 				data stream on the tcp port.
 		03/19/09 RSB	Added DedaQuiet.
+		11/18/16 RSB	Worked around lack of MSG_NOSIGNAL in Solaris.
 */
 
 #include <errno.h>
@@ -76,6 +77,11 @@ typedef unsigned short uint16_t;
 #include "yaAGC.h"
 #define SOCKET_API_C
 #include "agc_engine.h"
+
+// For Solaris.
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
 
 //-----------------------------------------------------------------------------
 // Function for broadcasting "output channel" data to all connected clients of
