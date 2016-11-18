@@ -338,14 +338,14 @@ $(MISSIONS): yaYUL Tools
 	$(BUILD) -C $@
 
 clean-missions:
-	for subdir in $(MISSIONS) ; do make -C $$subdir clean ; done
+	for subdir in $(MISSIONS) ; do $(BUILD) -C $$subdir clean ; done
 
 format-missions:
 	for subdir in $(MISSIONS) ; do REFORMAT=no make -C $$subdir format ; done
 
 .PHONY: corediffs
 corediffs: yaYUL Tools
-	for subdir in $(MISSIONS) ; do make -C $$subdir corediff.txt ; done
+	for subdir in $(MISSIONS) ; do $(BUILD) -C $$subdir corediff.txt ; done
 
 .PHONY: all all-archs
 all: ARCHS=default
