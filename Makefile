@@ -153,6 +153,7 @@
 #				systems with non-GNU sed, such as FreeBSD or
 #				Solaris.  Other fixes of a similar nature, for those
 #				same operating systems.
+#		2016-11-18 RSB	Removed yaACA2 from FreeBSD build.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -325,7 +326,9 @@ endif
 ifndef WIN32
 SUBDIRS += yaACA
 endif
+ifndef FREEBSD
 SUBDIRS += yaACA2
+endif
 SUBDIRS += yaACA3
 SUBDIRS += yaTelemetry 
 SUBDIRS += jWiz
