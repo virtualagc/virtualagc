@@ -123,6 +123,10 @@ LIBS += -lreadline
 endif # MACOSX
 endif # NOREADLINE
 
+ifndef SOLARIS
+NOERRORFORMAT=-Wno-error=format=
+endif
+
 CFLAGS2 += -DGDBMI
 
 # Alberto Galdo's iPhone mod.
@@ -210,7 +214,7 @@ checkdec.o: ../Tools/checkdec.c
 	${CC} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
-	${CC} ${CFLAGS} ${CFLAGS2} -Wno-error=format= -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	${CC} ${CFLAGS} ${CFLAGS2} $(NOERRORFORMAT) -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 #----------------------------------------------------------------------------------
 # Building for multiple architectures, using IMCROSS. 
