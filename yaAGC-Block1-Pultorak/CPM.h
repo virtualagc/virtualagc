@@ -48,11 +48,11 @@ private:
 // Assert the set of control pulses by adding them to the list of currently
 // active control signals.
   static void
-  assert(cpType* pulse);
+  assertj(cpType* pulse);
 // Assert a control pulse by adding it to the list of currently asserted
 // control pulses.
   static void
-  assert(cpType pulse);
+  assertj(cpType pulse);
   static void
   get_CPM_A(int CPM_A_address);
   static void

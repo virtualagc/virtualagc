@@ -66,7 +66,7 @@ CPM::clearControlPulses()
     SEQ::glbl_cp[i] = NO_PULSE;
 }
 void
-CPM::assert(cpType* pulse)
+CPM::assertj(cpType* pulse)
 {
   int j = 0;
   for (unsigned i = 0; i < MAXPULSES && j < MAX_IPULSES && pulse[j] != NO_PULSE;
@@ -80,7 +80,7 @@ CPM::assert(cpType* pulse)
     }
 }
 void
-CPM::assert(cpType pulse)
+CPM::assertj(cpType pulse)
 {
   for (unsigned i = 0; i < MAXPULSES; i++)
     {
@@ -169,7 +169,7 @@ CPM::checkEPROM(int inval, int lowbit)
   for (int mask = 0x1; inval && mask != 0x100; mask = mask << 1)
     {
       if (inval & mask)
-        assert((cpType) lowbit);
+        assertj((cpType) lowbit);
       lowbit++;
     }
 }
@@ -195,8 +195,8 @@ CPM::get_CPM_A(int address)
   // in R-393.
   if (SEQ::register_LOOPCTR.read() == 6)
     {
-      assert(ST2); // STA <- 2
-      assert(CLCTR); // CTR <- 0
+      assertj(ST2); // STA <- 2
+      assertj(CLCTR); // CTR <- 0
     }
   //*****************************************************************
   // Now that the EPROM tables are used for CPM-A, this function is only
@@ -211,7 +211,7 @@ CPM::get_CPM_A(int address)
   switch (TPG::register_SG.read())
     {
   case PWRON:
-    assert(WB); // TC GOPROG copied to B (see CPM-C for related assertions)
+    assertj(WB); // TC GOPROG copied to B (see CPM-C for related assertions)
     break;
   case TP12:
     if (SEQ::register_SNI.read() == 1)
@@ -219,7 +219,7 @@ CPM::get_CPM_A(int address)
         if (!INT::IRQ())
           {
             // Normal instruction
-            assert(RB); // SQ <- B (see CPM-C for related assertions)
+            assertj(RB); // SQ <- B (see CPM-C for related assertions)
           }
       }
     break;
@@ -280,20 +280,20 @@ CPM::controlPulseMatrix()
       switch (ADR::register_S.read())
         {
       case 020:
-        assert(W20);
+        assertj(W20);
         break;
       case 021:
-        assert(W21);
+        assertj(W21);
         break;
       case 022:
-        assert(W22);
+        assertj(W22);
         break;
       case 023:
-        assert(W23);
+        assertj(W23);
         break;
       default:
         if (ADR::GTR_17())
-          assert(WGn); // not a central register
+          assertj(WGn); // not a central register
         }
     }
   if (SEQ::isAsserted(RSC))
@@ -301,46 +301,46 @@ CPM::controlPulseMatrix()
       switch (ADR::register_S.read())
         {
       case 00:
-        assert(RA0);
+        assertj(RA0);
         break;
       case 01:
-        assert(RA1);
+        assertj(RA1);
         break;
       case 02:
-        assert(RA2);
+        assertj(RA2);
         break;
       case 03:
-        assert(RA3);
+        assertj(RA3);
         break;
       case 04:
-        assert(RA4);
+        assertj(RA4);
         break;
       case 05:
-        assert(RA5);
+        assertj(RA5);
         break;
       case 06:
-        assert(RA6);
+        assertj(RA6);
         break;
       case 07:
-        assert(RA7);
+        assertj(RA7);
         break;
       case 010:
-        assert(RA10);
+        assertj(RA10);
         break;
       case 011:
-        assert(RA11);
+        assertj(RA11);
         break;
       case 012:
-        assert(RA12);
+        assertj(RA12);
         break;
       case 013:
-        assert(RA13);
+        assertj(RA13);
         break;
       case 014:
-        assert(RA14);
+        assertj(RA14);
         break;
       case 015:
-        assert(RBK);
+        assertj(RBK);
         break;
       default:
         break; // 016, 017
@@ -350,34 +350,34 @@ CPM::controlPulseMatrix()
     switch (ADR::register_S.read())
       {
     case 00:
-      assert(WA0);
+      assertj(WA0);
       break;
     case 01:
-      assert(WA1);
+      assertj(WA1);
       break;
     case 02:
-      assert(WA2);
+      assertj(WA2);
       break;
     case 03:
-      assert(WA3);
+      assertj(WA3);
       break;
     case 010:
-      assert(WA10);
+      assertj(WA10);
       break;
     case 011:
-      assert(WA11);
+      assertj(WA11);
       break;
     case 012:
-      assert(WA12);
+      assertj(WA12);
       break;
     case 013:
-      assert(WA13);
+      assertj(WA13);
       break;
     case 014:
-      assert(WA14);
+      assertj(WA14);
       break;
     case 015:
-      assert(WBK);
+      assertj(WBK);
       break;
     default:
       break; // 016, 017
@@ -388,7 +388,7 @@ CPM::controlPulseMatrix()
   switch (TPG::register_SG.read())
     {
   case STBY:
-    assert(GENRST);
+    assertj(GENRST);
     // inhibit all alarms
     // init "SQ" complex
     // clear branch registers
@@ -398,14 +398,14 @@ CPM::controlPulseMatrix()
     // Level-triggered registers are zeroed by GENRST anded with CLK2.
     break;
   case PWRON:
-    assert(R2000);
-//assert(WB); // TC GOPROG copied to B (implemented in CPM-A)
+    assertj(R2000);
+//assertj(WB); // TC GOPROG copied to B (implemented in CPM-A)
     break;
   case TP1:
     // Moved this from TP12 to TP1 because CLISQ was getting cleared in the
     // hardware AGC before TPG was clocked; therefore TPG was not seeing the
     // SNI indication.
-    assert(CLISQ); // SNI <- 0
+    assertj(CLISQ); // SNI <- 0
   case TP5:
     // EMEM must be available in G register by TP6
     if (ADR::GTR_17() && // not a central register
@@ -413,12 +413,12 @@ CPM::controlPulseMatrix()
         !SEQ::isAsserted(SDV1) && // not a loop counter subseq
         !SEQ::isAsserted(SMP1))
       {
-        assert(SBWG);
+        assertj(SBWG);
       }
     if (ADR::EQU_17())
-      assert(INH); // INHINT (INDEX 017)
+      assertj(INH); // INHINT (INDEX 017)
     if (ADR::EQU_16())
-      assert(CLINH); // RELINT (INDEX 016)
+      assertj(CLINH); // RELINT (INDEX 016)
     break;
   case TP6:
     // FMEM must be available in G register by TP7
@@ -426,7 +426,7 @@ CPM::controlPulseMatrix()
         !SEQ::isAsserted(SDV1) && // not a loop counter subseq
         !SEQ::isAsserted(SMP1))
       {
-        assert(SBWG);
+        assertj(SBWG);
       }
     break;
   case TP11:
@@ -439,44 +439,44 @@ CPM::controlPulseMatrix()
         !SEQ::isAsserted(SDV1) && // not a loop counter subseq
         !SEQ::isAsserted(SMP1))
       {
-        assert(WE);
+        assertj(WE);
       }
     // Additional interrupts are inhibited during servicing of an interrupt;
     // Remove the inhibition when RESUME is executed (INDEX 025)
     if (SEQ::isAsserted(SRSM3))
-      assert(CLRP);
+      assertj(CLRP);
     break;
   case TP12:
     // DISABLE INPUT CHANGE TO PRIORITY COUNTER (reenable after TP1)
     // Check the priority counters; service any waiting inputs on the next
     // memory cycle.
-    assert(WPCTR);
+    assertj(WPCTR);
     if (SEQ::register_SNI.read() == 1) // if SNI is set, get next instruction
       {
         if (INT::IRQ()) // if interrupt requested (see CPM-A for similar assertion)
           {
             // Interrupt: SQ <- 0 (the default RW bus state)
-            assert(RPT); // latch interrupt vector
-            assert(SETSTB); // STB <- 1
+            assertj(RPT); // latch interrupt vector
+            assertj(SETSTB); // STB <- 1
           }
         else
           {
             // Normal instruction
-            //assert(RB); // SQ <- B (implemented in CPM-A)
-            assert(CLSTB); // STB <- 0
+            //assertj(RB); // SQ <- B (implemented in CPM-A)
+            assertj(CLSTB); // STB <- 0
           }
-        assert(WSQ);
-        assert(CLSTA); // STA <- 0
+        assertj(WSQ);
+        assertj(CLSTA); // STA <- 0
         // Remove inhibition of interrupts (if they were) AFTER the next instruction
-        assert(CLINH1); // INHINT1 <- 0
+        assertj(CLINH1); // INHINT1 <- 0
       }
     else if (CTR::getSubseq() == NOPSEL) // if previous sequence was not a counter
       {
         // get next sequence for same instruction.
-        assert(WSTB); // STB <- STA
-        assert(CLSTA); // STA <- 0
+        assertj(WSTB); // STB <- STA
+        assertj(CLSTA); // STA <- 0
       }
-    //assert(CLISQ); // SNI <- 0 (moved to TP1)
+    //assertj(CLISQ); // SNI <- 0 (moved to TP1)
     break;
   default:
     ;
