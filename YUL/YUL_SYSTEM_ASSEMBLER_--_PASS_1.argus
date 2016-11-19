@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-15 JL   Transcribed pages 153-162.
 #               2016-11-16 JL   Transcribed pages 163-169.
+#               2016-11-19 JL   Transcribed pages 170-180.
 
 # Annotations:
 #
@@ -862,46 +863,561 @@ P0648   PROCEDURE TO DETECT AND PROCESS "INSERT" CARDS.
 # Page 170
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  18        PAGE  18
 
+P064968 PROCEDURE DURING INSERTION MODE: IGNORE CARD NUMBER ERRORS, SEARCH FOR "END INSERT" CARD, AND PROCESS REAL CRDS.
+
+ 064974 INSRT LUP  TS           -             -             GET CARD
+ 064977            TS           (INCINS)      RL CD HLTH    BAD MERGE -2        REJECT IF "END INSERT" CARD IS MISSING.
+ 064983            NA, CHAR1    REAL CARD     BLANKS        PROC INS
+ 064986            LA, D12      NINE          REAL CARD     PROC INS
+ 064989            NA, C2T7     REAL CARD +2  W INSERT      PROC INS            BRANCH IF INSERTED CARD IS NOT "INSERT".
+
+ 064995            TS           REAL CARD +1  COMMON        ANAL SUBF      C
+ 064998            NA           COMMON        W END         BAD INSL 2          REQUIRED WHILE IN INSERTION MODE.
+ 065004            NA           REAL CARD +3  BLANKS        BAD INSA 2
+ 065007            NA           REAL CARD +4  BLANKS        BAD INSA 2          ADDR FLD OF "END INSERT" MUST BE BLANK.
+ 065013            TS, CD TYPE  (CARDNO)      RL CD HLTH    C,+3
+ 065016 BAD INSL 2 TS, BIT8     ONES          RL CD HLTH    C,-3
+ 065019 BAD INSA 2 TS, BIT9     ONES          RL CD HLTH    C,-2
+ 065022            SS           ZERO          BIT 7         RL CD HLTH          CLEAR OUT-OF-SEQUENCE BIT.
+ 065028            NA, CHAR2    RL CD HLTH    ZERO          BAD MERGE           REJECT "END INSERT" FOR ANY DEFECT.
+
+ 065034            SSL, ONE     SWITCH        2             C,+1                "BRANCH" IF TOTAL RENUMBERING WAS ON.
+ 06504             TS           DELETE CQ -1  RESTART N +1  C,+2                ENTER PARTIAL RENUMBERING MODE.
+ 065046            SS           ZERO          BIT 46R       SWITCH
+ 065049            TS           L GET REAL    Z,SC          SEND POPO      C    SEND "END INSERT", LEAVE INSERTION MODE.
+
+ 065055 PROC INS   TX           ZERO          -             LAST CDNO
+ 065058            SWE, CAC3    L INSRT LP    32            PROC RTRN
+ 065061            TS           ZERO          RL CD HLTH    PROC REAL           NORMAL PROCESSING FOR INSERTED CARDS.
+
+ 065067 REST REST  TS           ZERO          RENUMBER      MOVE POPO      C    OCCUPIES RESTART N +1 IN TOTAL RENUM.
+
+ 06509             TN           INC INSRT     4             REAL CARD           AT BAD MERGE -2, SET BAD-INSERT CUSS.
+ 065093            MT           BLANKS        6             N,AU2,1
+
+
+
+R0651   COMMON PROCEDURE WHEN MERGING IS GIVEN UP FOR LOST FOR ANY REASON.
+
+ 0652   BAD MERGE  TS           SOURCE        Z,X0          SEND POPO      C    SEND BAD MERGE CONTROL CARD.
+ 06531             SS           BLANKS        CHAR 8        REAL CARD
+ 06532             S, MON TYPER REAL CARD     SPRA +56      -                   TYPE MOST GUILTY CARD.
+ 0654              TN           TASK REJ      10            REAL CARD
+ 0655              TS           END ERR M     RL CD HLTH    SEND POPO      C    ANNOUNCE REJECTION OF TASK.
+ 0664              TS           Z,SC          PROC RTRN     PROC TAPE           LOOP TO ACCEPT REMAINING TAPE CARDS.
+ 0667              TS           Z,SC,3        Z,S3          GET TAPE       C    ACCEPT ALL TAPE CARDS.
+ 0669              TS           -             -             GET CARD            SEE WHETHER TO THROW OUT REMAINING REAL
+ 0671              TS           END YUL +2    END YUL +1    END PASS 1          CARDS, BEING CAREFUL NOT TO ANNOUNCE
+ 0673              TS           REAL CDNO     LAST CDNO     HEAVE HO -2         SAME IF THERE ARE NONE.
+ 0675              TS           -             -             PROC TAPE
 
 # Page 171
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  19        PAGE  19
 
+P0676              SUBROUTINE IN PASS 1 TO FIND THE TAPE CARD TO WHICH A MERGE CONTROL CARD REFERS.  ENTER WITH RETURN
+P0678   PRESET IN MERJ RTRN.  EXITS TO BAD MERGE IF NO EXACT CARD NUMBER MATCH IS FOUND BEFORE A SEQUENCE BREAK.
+
+ 0680   FIND CDNO  NA           TAPE CDNO     BIT 6         TC NOT SQB          BRANCH IF TAPE CARD NOT SEQUENCE BREAK.
+ 0682              LA           END OF 1      TAPE CARD     TC NOT SQB -1       ALWAYS ILLEGAL TO FIND AN "END OF" CARD.
+
+ 0684              NA           TAPE CDNO     REAL CDNO     C,+3                BRANCH IF REAL CARD NOT SEQUENCE BREAK.
+ 0686              NA, CORRECT  SWITCH        ONES          CDN FOUND           BRANCH IF NOT SEEKING BAD CARD NUMBER.
+ 0688              TS, BIT 8    ONES          RL CD HLTH    BAD MERGE           CUSS ILLEGAL LOCATION FIELD.
+
+ 0690              TS, BIT 10   ONES          RL CD HLTH    BAD MERGE           CUSS FAILURE TO FIND MATCH.
+
+ 0692   TC NOT SQB NA           TAPE CDNO     REAL CDNO     POASS TAPE          BRANCH IF NO MATCH YET.
+ 0694              NA, CORRECT  SWITCH        ZERO          CDN FOUND +1        BRANCH IF LOOKING FOR BAD CARD NUMBER.
+ 0696              NA           TP CD HLTH    ZERO          PASS TAPE           BAD CARD NUMBER IMPLIES NO MATCH.
+
+ 0698   CDN FOUND  TX           MERJ RTRN     -             Z,SC                SUCCESSFUL RETURN.
+
+ 0700              NA           TP CD HLTH    ZERO          C,-1                BRANCH IF DESIRED BAD CARD NO. FOUND.
+
+ 0702   PASS TAPE  TS           Z,SC          PROC RTRN     PROC TAPE
+ 0703              TS           L FIND CDN    Z,SC          GET TAPE       C    PROCESS A TAPE CARD AND LOOK AGAIN.
+
+R0704   TP TUNOUT IS A (HAPPY) PROCEDURE WHEN REAL CARDS RUN OUT FIRST.
+
+ 07041  TP RUNOUT  NA, MERJMODE SWITCH        ZERO          C,+2                BRANCH IF MERGING.
+ 07042             TS           Z,SC          PROC RTRN     PROC REAL +1        PROCESS NEWLY CREATED "END OF" CARD.
+ 07043             WA           Z,SC          ONE           PROC RTRN
+ 07044             NA, TAPEKEPT SWITCH        ZERO          PROC TAPE           PROCESS TAPE CARD IF AVAILABLE.
+ 07045             TS           L END P1      Z,S3          GET TAPE       C    FETCH FINAL TAPE CARDS.
+ 07046             TS           -             -             PROC TAPE
+
+R07047  FINAL SEQUENCE CHECKING BEFORE PROCESSING.  SEE NEXT PAGE.
+
+ 070475 VS LAST CN LA, C2T7     CARD NO       LAST CDNO     C,+2           C    BRANCH IF POSSIBLE SEQUENCE ERROR.
+ 07048             SS           Z,CSC,2       BIT 7         HEALTH         C    CLEAR POSSIBLE ERROR BIT, TAB TO EXIT.
+ 070485            LA           BIT 6         CARD NO       C,-1           C    ALL IS WELL IF THIS CARD IS A SEQ. BRK.
+ 07049             SM           HEALTH        BIT 7         HEALTH         C    INDICATE CARD NUMBER OUT OF SEQUENCE.
+ 070495            EX           CARD NO       C2T7          LAST CDNO      C    SET UP NEXT CRITERION AND RETURN.
+
+R0705   WE GET TO NOT MCCD FOR EVERY REAL CARD THAT IS NOT A MERGE CONTROL CARD.
+
+ 0706   NOT MCCD   LA           RL CD HLTH    ZERO          C,+2
+ 0707              TS, CD TYPE  END ERR M     RL CD HLTH    BAD MERGE           CARD NO. ERROR IN REVISION CARDS IS BAD.
+ 0709              NA           REAL CDNO     TAPE CDNO     REGLR NEW           BRANCH IF REAL CARD PRECEDES TAPE CARD.
+ 07101             NA, CHAR1    REAL CARD     T COLUMN 1    C,+2
+ 07102             TS, CHAR1    L COLUMN 1    REAL CARD     REGLR NEW           FORCE SAME IF REAL CARD IS "TUCK-IN".
+ 0711              LA           END OF 1      TAPE CARD     REGLR NEW           FORCE SAME IF TAPE CARD IS "END OF".
+ 0713              TS, TAPEKEPT ZERO          SWITCH        REGLR NEW           OTHERWISE REPLACE TAPE CARD WITH REAL.
 
 # Page 172
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  20        PAGE  20
 
+P0715   INTRODUCTION TO THE PROCESSING OF A TAPE CARD.  RETURN HAS BEEN SET UP BEFOREHAND.
+
+ 0717   PROC TAPE  SWE, CAC3    SOURCE        16            Z,X0                SET UP ADDRESS OF TAPE CARD.
+ 0719              TS           TAPE CDNO     CARD NO       VS LAST CN     C    FINAL CHECK ON TAPE CARD NO. SEQUENCE.
+ 0721              TS, TAPEKEPT ZERO          SWITCH        PROCESS             UNKEEP AND PROCESS TAPE CARD.
+
+R0723   INTRODUCTION TO THE PROCESSING OF A REAL CARD.  RETURN HAS BEEN SET UP BEFOREHAND.
+
+ 0725   PROC REAL  TX           SOURCE        -             Z,X0                SET UP ADDRESS OF REAL CARD.
+ 0727              TS           REAL CDNO     CARD NO       VS LAST CN     C    FINAL CHECK ON REAL CARD NO. SEQUENCE.
+
+R0729   PROCESSING OF ALL BUT MERGE CONTROL CARDS BEGINS HERE.
+
+ 0730   PROCESS    NA, D12      CARDNO WD     NINE          NOT RIGHT           BRANCH IF NOT A RIGHT PRINT CARD.
+ 0732              TS, CD TYPE  (RIGHTP)      HEALTH        XMIT RTRN           XMIT RTRN SENDS POPO AND RETURNS.
+
+ 0734   NOT RIGHT  NA, CHAR1    CARDNO WD     R COLUMN 1    C,+2
+ 0735              TS, CD TYPE  (REMARK)      HEALTH        XMIT RTRN           REMARKS CARD WITH R IN COLUMN 1.
+
+ 0737              NA, CHAR1    CARDNO WD     A COLUMN 1    C,+2
+ 0738              TS, CD TYPE  (ALIREM)      HEALTH        XMIT RTRN           ALIGNED REMARKS CARD WITH "A" IN COL. 1.
+
+ 0740              NA, CHAR1    CARDNO WD     P COLUMN 1    C,+2
+ 0741              TS, CD TYPE  (REMARK)      HEALTH        XMIT RTRN           REMARKS CARD WITH P IN COLUMN 1.
+
+ 0743              NA, CHAR1    CARDNO WD     L COLUMN 1    NOT 9RAPL
+ 07435  RENUMALL   PR                                                           SEE PRESERVE CARDNS.
+ 0744              NA, DATEMASK DATE WORD     BLANKS        C,+2                BRANCH IF DASHES SHOULD BE PUT IN DATE.
+ 0746              SSL, ONE     CARDNO WD     4             UNMKD LOG           REMARKS CARD (LOG CARD).
+ 0748              SS           DASHES        CHAR6         DATE WORD
+ 0749              TS, CHAR1    DASHES        DATE WORD +1  C,-2
+
+ 07492             TS           (ACCEPT)      HEALTH        SEND POPO      C    SEND A DUMMY ACCEPTOR AHEAD OF A MARKED
+ 07494  UNMKD LOG  TS           (REMARK)      HEALTH        XMIT RTRN           LOG CARD ENTERING AS A MEMBER OF A
+ 07496             NA, KNOWSJBS SWITCH        ZERO          C,-2                CALLED SUBRO; PASS 2 MARK WILL BE "@".
+ 07498             TS           (REMARK)      HEALTH        XMIT RTRN
+
+ 0750   NOT 9RAPL  NA           CARDNO WD     END OF 1      C,+2                CHECK FOR "END OF" INFORMATION FROM TAPE
+ 0752              TS, CD TYPE  (END OF)      HEALTH        END OF              OR (NEW PROGRAM OR SUBRO) FROM PASS 0.
+
+ 07538             NA, CD TYPE  HEALTH        (MODIFY)      NON REM             CHECK FOR MODIFY CARD.
+ 0754   XMIT RTRN  TS           PROC RTRN     Z,SC          SEND POPO      C
+
+R0755   NON REM CONSTITUTES AN EARLY PERIOD PROCEDURE, SINCE MEMORY CARDS ARE ALLOWED ONLY UNTIL THE
+R0757   FIRST CARD WHICH IS NOT A REMARKS OR RIGHT PRINT CARD OR A MEMORY CARD.  IN SEGMENT ASSEMBLIES, ONE SEGNUM CARD
+R0759   IS REQUIRED IN THE EARLY PERIOD.  THESE EARLY PERIOD OP CODES MUST BE DISCOVERED AT NON REM OR SEGNUM Q.
+
+ 0760   NON REM    NA,C2T7      OP FIELD      W MEMORY      SEGNUM Q            BRANCH IF ERLY PERIOD IS OVER.
 
 # Page 173
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  21        PAGE  21
 
+P0762   TWO PAGES OF PROCESSING FOR FIXED MEMORY, ERASABLE MEMORY, OR SPEC/NON MEMORY CODE CARDS.
+
+ 0764              TS           Z,SC          Z,X4          ADR FIELD           DECODE ADDRESS FIELD.
+ 0766              LA           ONES          FIELD COD     BAD MEM AD          ABORT IF MEANINGLESS ADDRESS FIELD.
+ 0768              NA, B2B6     FIELD COD     ONES          BAD MEM AD          REJECT IF 1ST SUBFIELD NOT UNSIGNED NUM.
+ 0773              SWS, CAC2    ADR WD        16,L          HEALTH              STORE LOWER LIMIT.
+ 0775              NA           FIELD COD +1  ZERO          C,+2                BRANCH IF THERES A SIGNED NUMERIC PART.
+ 0777              TS           ADR WD        ADR WD +1     WHICH MEM           UPPER AND LOWER LIMITS ARE EQUAL.
+ 0782              NA, BIT 5    FIELD COD +1  ZERO          WHICH MEM -1        MINUS MEANS THRU IN THIS CASE.
+
+ 0784              LA, FIX MAG  LOW LIM       LOW LIM       WHICH MEM           NEW NAMES FOR ADR WD AND ADR WD +1.
+ 0786   BAD MEM AD TS, BIT 11   ONES          HEALTH        MEM EXIT            PROCEDURE WHEN ADDRESS IS MEANINGLESS.
+ 0788              TS, BIT 12   ONES          HEALTH        MEM EXIT            PROCEDURE WHEN ADDRESS IS TOO BIG.
+
+ 0790              BA           ADR WD        ADR WD +1     ADR WD +1           FORM UPPER LIMIT WHEN MODIFIER IS PLUS.
+ 0792   WHICH MEM  LA, FIX MAG  ADR LIMIT     HI LIM        BAD MEM AD +1       BRANCH IF UPPER TOO BIG FOR MACHINE.
+ 0794              SS           HI LIM        CAC3          HEALTH              STORE UPPER LIMIT.
+ 0796              TS           LOC FIELD     COMMON        ANAL SUBF      C
+
+ 0797              NA           FIELD COD     BIT 1         NO MEM TYP          REJECT IF NOT SYMBOLIC.
+ 0799              TS           L TYP TAB     Z,X4          SET M TYPE     C
+ 0800              NN           LOW LIM       ZERO          LL NZ
+ 0801              TS           Z,X4          Z,X6          LL ZERO
+
+ 0802   SET M TYPE NA           COMMON        W ST TYPES    C,+2           C
+ 0803              SWS, LSTYPE  ONE           25            ADR WD +1           ATTACH ERASABLE CODE TO UPPER LIMIT.
+
+ 0805              NA           COMMON        W ST TYPES +1 C,+2           C
+ 0806              SWS, LSTYPE  ONE           26            ADR WD +1           ATTACH FIXED CODE TO UPPER LIMIT.
+
+ 0808              NA           COMMON        W ST TYPES +2 C,+2           C
+ 0809              SWS, LSTYPE  ONE           27            ADR WD +1           ATTACH SPEC/NON CODE TO UPPER LIMIT.
+
+ 0811   NO MEM TYP TS, BIT 8    ONES          HEALTH        MEM EXIT            REJECT ILL-FORMED MEMORY CARD.
+
+ 0813   LL ZERO    LA, CAC3     4,0           HI LIM        C,+2                DOES REQ COVER ALL 1ST PRESENT CATEGORY.
+ 0815              TS           ZERO          COMMON        CHECK TM1           NO, IT COVERS LESS.
+ 0817              TS, LSTYPE   HI LIM        4,0           FIND TM +1          PUT REQ TYPE IN 1ST CATEGORY.
+
+ 0819   LL NZ      WD           LOW LIM       ONE           LOW LIM             USE REDUCED LOWER LIMIT.
+ 0821              LA, CAC3     LOW LIM       4,0           C,+2                FIND FIRST CATEGORY AFFECTED BY REQUEST.
+ 0823              TS           Z,X4,1        -             C,-1
+
+ 0824   FIND TM    TS           Z,X4          Z,X6          CHK HI LIM          BEGIN SEARCH FOR LAST AFFECTED CATEGORY.
+
+ 0826              NA           Z,X6,1        END TYP TA    CHK HI LIM          BRANCH IF UPPER LIMIT ISNT MAX ADDRESS.
+
+ 0828              NA           Z,X4          END TYP TA    CHK HI LIM -2       BR IF REQ COVERS MORE THAN FINAL CATEG.
+ 0830              NA, LSTYPE   HI LIM        4,0           C,+2                BRANCH IF REQUEST IS NON-TRIVIAL.
 
 # Page 174
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  22        PAGE  22
 
+P0832   EXIT FOR MEMORY CARDS WITH ANY FAULT.
+
+ 0833   MEM EXIT   TS, CD TYPE  (MEMORY)      HEALTH        XMIT RTRN
+
+ 0834              BS           ZERO          ONE           COMMON              PREPARE TO LENGTHEN TABLE BY 1 PLACE.
+ 0836              TS           CAC3          TN MASK       COMPUTE N -1        PREPARE TO USE LOWER LIMIT.
+
+ 0838              TX           END TYP TA    -             Z,X6                UNDO INCREMENT.
+ 0840              TS, LSTYPE   HI LIM        6,0           C,+2                ATTACH REQ TYPE TO FINAL CATEGORY.
+
+ 0842   CHK HI LIM LA, CAC3     6,0           HI LIM        FIND TM +1          SEARCH FOR LAST AFFECTED CATEGORY.
+
+ 0844              BS           Z,X6          Z,X4          COMMON              COMPUTE DIRECTION AND EXTENT OF SHIFT.
+ 0846              NA, LSTYPE   HI LIM        4,0           CHECK TM2           BRANCH IF NO TYPE MATCH ON LOWER SIDE.
+
+ 0848   CHECK TM1  NA, LSTYPE   HI LIM        6,0           C,+2                BR IF TYPE MATCH ON LOWER, NOT UPPER.
+
+ 0850              TS           ZERO          TN MASK       CHECK TM2 +3        USE NEITHER LIMIT IF BOTH TYPE MATCHES.
+
+ 0852              TX           HI LIM        -             LOW LIM             USE UPPER LIMIT ONLY.
+ 0854              TS           ONES          TN MASK       C,+3
+
+ 0855   CHECK TM2  TX           CAC3          -             TN MASK             USE LOWER LIMIT NORMALLY.
+ 0857              NA, LSTYPE   HI LIM        6,0           C,+3                BR IF NO TYPE MATCH EITHER SIDE.
+
+ 0859              BS           COMMON        ONE           COMMON              INCREMENT EXTENT OF SHIFT.
+ 0861              TS           ZERO          TN MASK +1    COMPUTE N           USE LOWER LIMIT ONLY.
+
+ 0863              BS           COMMON        TWO           COMMON              INCREASE EXTENT OF SHIFT BY 2.
+ 0865              TX           ONES          -             TN MASK +1          USE UPPER LIMIT NORMALLY.
+
+ 0867   COMPUTE N  LA, CAC3     COMMON        ZERO          MOV TABLE +1        BRANCH IF EXTENT OF SHIFT IS ZERO.
+
+ 0869              BS           Z,X6          END TYP TA    COMMON +1           THE NUMBER OF WORDS SHIFTED IS THE
+ 0871              BS           COMMON +1     ONE           COMMON +1           NUMBER OF CATEGORIES FROM THE LAST
+ 0873              SWS,COUNTFLD COMMON +1     18,L          MOV TABLE           AFFECTED CATEGORY ONWARD.
+ 0875              LN           COMMON        ZERO          SHORTEN             BRANCH TO COMPRESS TABLE.
+
+ 0877   LENGTHEN   WD           END TYP TA    SPEC SIGN     Z,X6                FORM NEGATIVE ADDRESSES TO SHIFT FWD.
+ 0879              WA           Z,X6          COMMON        Z,CSC
+ 0880              LA           Z,CSC         ST TAB MAX    MOV TABLE
+ 0881              TS, BIT 13   ONES          HEALTH        MEM EXIT            BAD EXIT IF LENGTHENING GOES TOO FAR.
+
+ 0883   SHORTEN    WD           Z,X6          COMMON        Z,CSC               FORM POSITIVE ADDRESSES TO SHIFT BWD.
+
+ 0885   MOV TABLE  TN           N,X6          0             N,CSC               SHIFT PART OF TABLE AS DESCRIBED.
+ 0887              SS           LOW LIM       TN MASK       N,X4,1              FILL IN LOWER LIMIT OF REQ.
+ 0889              SS           HI LIM        TN MASK +1    N,X4                FILL IN UPPER LIMIT OF REQ.
+ 0891              BS           END TYP TA    COMMON        END TYP TA          COMPUTE NEW END OF TABLE.
+ 0893              TS, CD TYPE  (MEMORY)      HEALTH        XMIT RTRN
 
 # Page 175
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  23        PAGE  23
 
+P089301            PROCEDURE TO RESPOND TO THE OP CODE "SEGNUM", WHICH MUST OCCUR ONCE IN THE EARLY PERIOD OF A SEGMENT
+R089303 ASSEMBLY.  ITS FUNCTION IS TO NAME THE PROGRAM THAT THE SEGMENT IS TO RUN WITH, THAT IS, THE PROGRAM THAT "OWNS"
+R089305 THE SEGMENT.  THE RESULT OF THIS PROCESSING IS TO GARNISH THE ASSEMBLY LISTING WITH THE NAME OF THE OWNER, AND
+R089307 PLACE THE NAME OF THE OWNER INTO SEG OWNER, WHERE THE TAPE-READING GROUP WILL FIND IT AND ENTER THAT PROGRAM'S
+R089309 ENTIRE SYMBOL TABLE INTO THE SEGMENT ASSEMBLY.
+
+
+
+ 08931  SEGNUM Q   NA, C2T7     OP FIELD      W SEGNUM      END EARLY           IF NOT MEMORY OR SEGNUM, END EARLY PER.
+ 089314            EX           SWITCH        BIT 7         COMMON
+ 089316            LA           COMMON        ZERO          END EARLY           BAD NEWS IF NOT SEGMENT ASSEMBLY.
+ 08932             TS           LOC FIELD     COMMON        ANAL SUBF      C    LOC FIELD SHOULD NAME OWNING PROGRAM.
+ 089324            TX, CD TYPE  (SEGNUM)      -             HEALTH
+ 089326            NA           FIELD COD     BIT 1         BAD SEGNO           NAME OF OWNER MUST LOOK LIKE A SYMBOL.
+
+ 08933             TX           L COMP NAM    -             Z,X4
+ 089332            SWS,THREAD10 N,X4          12            Z,X4                POINT TO NAME OF THIS SEGMENT.
+ # Annotation on listing.
+ # Add 2 lines:
+ #                 TX           Z,SC,1        -             -
+ #                 SS           4,1           THREAD10      Z,X4
+ 089336            NA           Z,X4          L END THR     C,+3                BRANCH TO CONTINUE SEARCH FOR OWNER.
+
+ 08934  BAD SEGNO  SS           ZERO          BIT 7         SWITCH              ABANDON ATTEMPT AT SEGMENT ASSEMBLY.
+ 089344            TS, BIT 8    ONES          HEALTH        END SEGNO           CUSS AND DO IT AS PROGRAM ASSEMBLY.
+
+ # Annotation on listing.
+ # Card 089348 (following line) crossed out, and arrow pointing up to annotation before card 089336.
+ 089348            SS           4,1           THREAD10      Z,X4                FOLLOW THREAD TO NEXT PROG OR SEG.
+ 089352            NA           N,X4          COMMON        BAD SEGNO -1        BRANCH IF DIDNT FIND NAME OF OWNER.
+
+ 089356            SWS, C7T8    4,1           24            HEALTH              FIRST ASSUME THAT OWNER HAS NO SUBROS.
+ 08936             SSL, ONE     4,1           23            C,+1           C    BRANCH TO GET REV NUMBER IF IT DOES.
+ 089364            SSL, ONE     4,1           12            C,+3
+ # Annotation on listing.
+ # Following line replaced with:
+ #                 SM           L DIRECTY     HEALTH        Z,AU1
+ 089366            SS           HEALTH        THREAD 10     Z,X4           C
+ # Annotation on listing.
+ # Following line replaced with:
+ #                 SWS. C7T8    N,AU1         36            HEALTH
+ 089368            SWS, C7T8    N,X4          36            HEALTH         S    FETCH REV NO FROM 1ST SUB THREAD WORD.
+ 089372            TS           COMMON        SEG OWNER     C,+2                IF PROGRAM, IT'S A PROPER OWNER.
+ 089376            TS           -             -             BAD SEGNO           IF SUBROUTINE, IT AIN'T.
+ 08938 *           TX           W OWNER EQ    -             OLD LINE +14
+ 089382            TX           SEG OWNER     -             OLD LINE +15        ANNOUNCE OWNER ON COVER SHEET.
+ 089386            SWS, CHAR8   SEG OWNER     A,1,L         PAGE HEAD +13
+ 089388*           SWS, CHAR1   SEG OWNER     A,1,L         PAGE HEAD +14
+ 08939             SWS, C2T7    SEG OWNER     A,1,L         PAGE HEAD +14       DECORATE PAGE HEAD SIMILARLY.
+ 089394 END SEGNO  TS           LATE MEM      SEGNUM Q +3   XMIT RTRN           ALLOW JUST ONE SEGNUM CARD PER SEGMENT.
 
 # Page 176
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  24        PAGE  24
 
+P0894   END EARLY IS EXECUTED AS SOON AS A CARD IS FOUND WHICH DOES NOT BELONG TO THE EARLY PERIOD.
+
+ 0896   END EARLY  TX           CHECK OP      -             NON REM             INHIBIT SPECIAL CHECK FOR "MEMORY" CODE.
+
+R0898   GENERAL OPERATION CODE CHECKING BEGINS HERE.
+
+ 0899   CHECK OP   TS           BLANKS        COMMON        C,+1
+ 0900              TS, C2T7     OP FIELD      COMMON        ANAL SUBF      C    ANALYZE OPERATION CODE FIELD.
+ 0902              LA           FIELD COD     ZERO          OP SEARCH
+
+ 0903              NA           FIELD COD     BIT 1         NON SYM OP          BRANCH IF OP FIELD NOT SYMBOLIC.
+ 0905              TS           N L CAR 6     Z,S3          SYMBOL OP           INITIALIZE ASTERISK SEARCH.
+
+ 0907   NON SYM OP NA, BIT6     FIELD COD     ONES          ILLEGOP             SIGNED NUMERIC OP IS ILLEGAL.
+ 0909   SHIFT NOP  SPS, B22T32  COMMON +1     0             HEALTH              SHIFT COUNT IS FILLED IN WHEN LOADING.
+ 0911              LN           COMMON +1     MAX NUM OP    INSTRUCT            BRANCH IF NUM OP HAS OK SIZE.
+
+ 09122  ILLEGOP    SS           TYPE F        L STYPE       SWITCH
+ 0913              TS           ZERO          LOC STATE     BLNK LOCN      C
+ 0917              TS, CD TYPE  (ILLOP)       HEALTH        REG INCON +1        ADVANCE LOC CTR FOR ILLEGAL OP CODE.
+
+ 0919              NA, ALFMASK  COMMON        BLANKS        C,+2                BRANCH WHEN RIGHTMOST NBC FOUND.
+ 0921   SYMBOL OP  TS           N,S3,1        ALF MASK      C,-1                FIND RIGHTMOST NBC BY SHIFTING MASK.
+ 0923              NA, ALFMASK  COMMON        ASTRISKS      C,+3                BRANCH IF THERE IS NO RIGHT ASTERISK.
+ 0925              SM           HEALTH        BIT 11        HEALTH              SIGNAL ASTERISK FOUND.
+ 0927              SS           BLANKS        ALF MASK      COMMON              BLANK OUT SAME.
+ 0929   OP SEARCH  TX           M OP THRS     -             Z,X4
+ 0930              SWS, B22T25  COMMON        17            C,+1                USE BITS 5-8 OF OPERATION SYMBOL TO
+ 0932              SWE, ONES    4,0           0             Z,X4                INDEX INTO NON-THREADED LIST.
+ 0934              TX           Z,SC,1        -             -
+ 0935   SPECL OP   LA           N,X4,1        ZERO          ILLEGOP             ZERO WORD SIGNIFIES END OF SUBLIST.
+ 0937              NA,C1T6      COMMON        4,0           C,-1                OP CODE TABLE SEARCH.
+ 0939              NA, BIT 37   4,0           ZERO          C,+2                BRANCH ON MACHINE CODE FOUND.
+
+ 0941              SS           N,X4          B38T48        Z,SC                GO TO APPROPRIATE CLERICAL CODE ROUTINE.
+
+ 0943   OP FOUND   SWS, B22T32  N,X4          16,L          HEALTH              STORE OP CODE XLATION AND CONTROL INFO.
+
+R0945   PASS 1 PROCESSING FOR INSTRUCTIONS AND SINGLE-PRECISION CONSTANTS.
+
+ 0946   INSTRUCT   TS, CD TYPE  (INSTR)       HEALTH        C,+3
+
+ 0947   DECIMAL    TS, CD TYPE  (DECML)       HEALTH        C,+2
+
+ 0948   OCTAL      TX, CD TYPE  (OCTAL)       -             HEALTH
+
+ 0949              SS           TYPE F        L STYPE       SWITCH              ALL INSTRS AND CONSTS GO INTO FIXED MEM.
+ 0951              NA, CHAR1    CARDNO WD     J COLUMN 1    REG INCON           BRANCH IF NOT LEFTOVER.
+ 0953              TS           Z,SC,1        -             LFTVR LOC      C    TRANSLATE LOCATION FIELD.
+
+ 0955   REG INCON  TS           ZERO          LOC STATE     LOCATION       C    TRANSLATE REGULAR LOCATION FIELD.
+ 0957              SM           HEALTH        LOC STATE     HEALTH              STORE RESULTS OF TRANSLATION.
+ 0959              TS           -             -             XMIT RTRN
 
 # Page 177
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  25        PAGE  25
 
+P0960              PROCEDURES FOR THE CLERICAL FUNCTIONS REPRESENTED BY "IS", "=", OR "EQUALS" (AND ITS VARIANTS "=PLUS"
+R0062   AND "=MINUS"), AND BY "LOC" OR "SETLOC".  THESE CODES MAY HAVE ANY ADDRESS FORMAT ACCEPTABLE FOR INSTRUCTIONS,
+R0964   EXCEPT THAT ANY ADDRESS SYMBOL IN A SETLOC CARD MUST BE PREDEFINED.  THE "=PLUS" AND "=MINUS" CODES DIFFER FROM
+R0966   "EQUALS" ONLY IN ADDING OR SUBTRACTING THE LOCATION COUNTER TO (FROM) THE ADDRESS FIELD VALUE.  IF EQUALS FAILS
+R0968   TO DEFINE ITS LOCATION SYMBOL BY REASON OF AN UNDEFINED (NOT ILL-DEFINED) ADDRESS SYMBOL, IT KEEPS THE MODIFIER,
+R0970   AND PASS 1.5 TRIES TO MAKE THE DEFINITION, UNTIL WHICH TIME THE SYMBOL IS SAID TO BE NEARLY-DEFINED.  THE
+R0972   ADDRESS GENERATED FOR SETLOC MUST BE IN FIXED OR GENERAL ERASABLE MEMORY.  SETLOC FAILURE LEAVES LOC CTR ALONE.
+
+ 0974   IS EQUALS  TS           ZERO          LOC LOC       C,+3                ENTRY FOR IS, =, EQUALS.
+ 09742  EQU MINUS  TS           LOC CTR       LOC LOC       C,+2                ENTRY FOR =MINUS.
+ 09744  EQU PLUS   BS           ZERO          LOC CTR       LOC LOC             ENTRY FOR =PLUS.
+ 0975              TS, CD TYPE  (EQUALS)      HEALTH        C,+3
+ 0976   SETLOC     TX, CD TYPE  (SETLOC)      -             HEALTH              ENTRY FOR LOC, SETLOC.
+ 09772             TX           ZERO          -             LOC LOC
+
+ 0978              NA, BIT 11   HEALTH        ZERO          ILLEGOP             ASTERISK MAKES ILLEGAL OP.
+ 0982   DECOD ADR  TS           Z,SC          Z,X4          ADR FIELD           DECODE ADDRESS FIELD.
+ 0984              NA           FIELD COD     ONES          C,+2
+ 0985              TS, BIT 13   ONES          HEALTH        NO ADRESS           ABORT IF MEANINGLESS ADDRESS FIELD.
+
+ 09862             LA, FIX MAG  ONES          LOC LOC       CH IL SIZE +1       BAD LOC CTR KILLS =PLUS AND =MINUS NOW.
+ 098622            NA           FIELD COD     ZERO          COMBIN LC -1
+ 098624            TS           B2 B6         FIELD COD     BAD LOC Q      C    IF BLANK ADR FIELD, FAKE UP ABSOLUTE.
+ 098626            BS           ZERO          LOC CTR       ADR WD
+ 09864             TX           BIT 2         -             FIELD COD +1
+ 09865             TS           LOC LOC       ADR WD +1     COMBIN LC +1        FAKE UP A MODIFIER IF IT LACKS ONE.
+ 098655            LA           FIELD COD +1  ZERO          C,-2
+
+ 09866  COMBIN LC  BA           ADR WD +1     LOC LOC       ADR WD +1           COMBINE LOC CTR WITH EXISTING MODIFIER.
+ 09867             SWS, BIT5    ADR WD +1     1             FIELD COD +1        SET UP SIGN OF NET MODIFIER.
+ 0987              LA, B2B6     ONES          FIELD COD     IL MODIF Q          BRANCH IF MAIN PART IS UNSIGNED NUMERIC.
+ 0999              LA           BIT 1         FIELD COD     SYM IS LOC          BRANCH IF ADDRESS FIELD CONTAINS A SYM.
+ 1001   BAD LOC Q  LA           ONES          LOC CTR       CH IL SIZE +1       BRANCH IF LOCATION COUNTER IS BAD.
+ 1002              BS           ADR WD        LOC CTR       ADR WD              FORM ADDRESS RELATIVE TO L.C. SETTING.
+
+ 1004   IL MODIF Q BA           ADR WD        ADR WD +1     ADR WD              ADD MODIFIER PART TO UNSIGNED NUMERIC.
+ 1006              TS           ADR WD        LOC LOC       CH IL SIZE          GO TO TEST SIZE OF NUM + MODIFIER.
 
 # Page 178
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  26        PAGE  26
 
+P10079  EXAMINE CONDITION OF ADDRESS SYMBOL IN EQUALS OR SETLOC.
+
+ 1008   SYM IS LOC TS           ADR WD        COMMON        ANAL SYMB      C    ANALYZE ADDRESS SYMBOL HISTORY.
+ 1010              NA           COMMON +2     ONES          C,+2
+ 1011              TS, BIT16    ONES          HEALTH        NO ADRESS           EXIT IF SYMBOL TABLE IS FULL.
+
+ 10128             EBS          Z,X2          BIT 25        ETS
+ 1013              SWS, CAC2    ETS           16,L          HEALTH              STORE ADDRESS OF ADDRESS SYMBOL.
+ 1015              LA           3 D8          COMMON +2     C,+3
+ 10151             LA           COMMON +2     ZERO          C,+2
+ 1016              TS, BIT 12   ONES          HEALTH        NO ADRESS           SIGNAL ADDRESS NEARLY DEFINED.
+
+ 1018              SWE, D12     COMMON +2     16            Z,S0                USE HEALTH OF SYMBOL...
+ 1020   FIND XFRM  WA           Z,S0          L XFORMS      Z,S0                ...TO FIND TRANSFORM.
+ 1022              SSL, ONE     N,S0          44            C,+1                TEST PREDEFINITION BIT.
+ 1024              TS, BIT 11   ONES          HEALTH        NO ADRESS           SIGNAL ADDRESS UNDEFINED AS YET.
+
+ 1026              SSL, ONE     N,S0          45            C,+1                TEST DEF/NO-DEF BIT.
+ 1028              TS, BIT 14   ONES          HEALTH        NO ADRESS           SHOW OVERSIZE/ILL-DEFINED ADDR SYMBOL.
+
+ 1032              EX           COMMON +2     CAC3          LOC LOC
+ 1038              BS           LOC LOC       ADR WD +1     LOC LOC             ADD MODIFIER TO SYMBOL DEFINITION.
+
+R10391  CHECK ON SIZE OF ADDRESS FIELD VALUE, AND, IF SETLOC, ON MEMORY TYPE AND CONFLICT AS WELL.
+
+ 1040   CH IL SIZE LA, FIX MAG  LOC LOC       MAX ISEQL     C,+2
+ 1041              TS, BIT 14   ONES          HEALTH        NO ADRESS           OVERSIZE FROM ALL PATHS BUT UNDEF.
+
+ 1045              SS           LOC LOC       CAC3          HEALTH
+ 1046              LA, CD TYPE  HEALTH        (EQUALS)      ISEQ LSYM           BRANCH FOR NORMAL IS,= PATH.
+
+ 1048              TX           L TYP TAB     -             Z,X5
+ 1049              LA, CAC3     HEALTH        5,0           C,+2                LOOK UP MEMORY TYPE FOR SETLOC.
+ 1051              TS           Z,X5,1        -             C,-1
+
+ 1052              NA, L STYPE  5,0           TYPE N        C,+2
+ 1053              TS, BIT 10   ONES          HEALTH        ND SETLOC           SIGNAL SETLOC TO SPEC/NON MEMORY.
+ 1055              EX           HEALTH        CAC3          LOC CTR             CHIEF NORMAL ACTION OF SETLOC.
+ 1057   ND SETLOC  NA           LOC FIELD     BLANKS        C,+2
+ 1058              TS           PROC RTRN     Z,SC          SEND POPO      C    AS PER XMIT RTRN.
+ 1060              TS, BIT 8    ONES          HEALTH        XMIT RTRN           CUSS ABOUT NON-BLANK LOC FIELD IN LOC.
+
+ 1071   NO ADRESS  NA, CD TYPE  HEALTH        (EQUALS)      ND SETLOC           MAKE FAULTY SETLOC VOID.
+ 1073              TS           ONES          LOC LOC       ISEQ LSYM           SIGNAL NO DEFINITION FOR LOCSYM OF IS,=.
+
+R10751  CONFLICT-CHECKING LOOP FOR POSTDEFINITION OF LEFTOVERS BY IS OR = (CALLED FROM LEFTYPER-1).
+
+ 10753  ISL CONFQ  TS           COMMON +2     Z,AU1         C,+3
+ 10754             LA           HI LIM        Z,AU1         IT IS               EXIT (S0 IS CHANGED IF ANY CONFLICT).
+ 107542            WA           Z,AU1         ONE           Z,AU1
+ 10755             TS           Z,AU1         COMMON        AVAIL 2        C    SCAN FORWARD THROUGH LEFTOVER BLOCK.
+ 10756             LA           BIT 32        COMMON        ISL CONFQ +1        BRANCH IF NO CONFLICT THIS TIME.
+ 10757             TS           Z,SC          Z,S0          ISL CONFQ +1        FORCE SPECIAL TRANSFORM IF CONFLICT.
+ 10758             DEC          -B00 000
 
 # Page 179
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  27        PAGE  27
 
+P1076   THE FOLLOWING SECTION DEALS WITH THE LOCATION SYMBOL OF AN IS, =, OR EQUALS CARD ACCORDING TO THE DISPOSITION OF
+R1078   THE ADDRESS FIELD.
+
+ 1079   ISEQ LSYM  TS           LOC FIELD     COMMON        ANAL SUBF      C    ANALYZE LOCATION FIELD OF IS,=,EQUALS.
+ 1081              NA           FIELD COD     BIT 1         XMIT RTRN           SIGNAL ERROR IF NOT SYMBOLIC, AND EXIT.
+
+ 1083              TS, BIT8     ONES          HEALTH        ANAL SYMB      C    SIGNAL SYMB LOCN, GET SYMBOL HISTORY.
+ 10842             NA           COMMON +2     ONES          C,+3
+ 1085              SM           HEALTH        BIT 15        HEALTH
+ 1086              TS           PROC RTRN     Z,SC          SEND POPO      C    ABORT IF SYMBOL TABLE IS FULL.
+
+ 1088              TS           COMMON        COMMON +1     FIND XFRM -1   C
+ 1089              TX           2,1           -             COMMON +3      C    SAVE SYMBOL, GET ADDRESS OF TRANSFORM.
+ 10901             LA           COMMON +2     2 D8          IT IS -1
+ 10932             NA, D8       COMMON +2     5D8           IT IS -1            BRANCH IF LOC SYM WAS NOT LEFTOVER.
+ 10934             NA           LOC LOC       ONES          C,+3                BRANCH IF AN OK DEFINITION WAS MADE.
+ 10936             SM           N,X2          D4            N,X2                THROW UP HANDS IF EQUALS FAILED TO DEF.
+ 1094              TS           -             -             NOT OK DEF
+
+ 1098              SSL, ONE     COMMON +2     15            C,+1
+ 1099              TS           TYPE F        COMMON        C,+2                WHEN SYMBOL GOES WITH LEFTO CON OR INST.
+ 1101              TX           TYPE E        -             COMMON              WHEN SYMBOL GOES WITH LEFTOVER ERASE.
+ 1103              TX           L TYP TAB     -             Z,X5
+ 1104              LA, CAC3     LOC LOC       5,0           C,+2                BRANCH WHEN MEMORY TYPE IS KNOWN.
+ 1106              TS           Z,X5,1        -             C,-1
+
+ 1107              NA, LSTYPE   5,0           COMMON        LEFTYPER            BR IF LEFTOVER EQUATED TO WRONG TYPE.
+ 1109              EX           COMMON +2     SPEC MAG      COMMON
+ 1110              WA, FIX MAG  COMMON        LOC LOC       HI LIM              FORM END OF LEFTOVER BLOCK.
+ 1112              LA, CAC3     HI LIM        5,0           ISL CONFQ           BR IF MEM TYPE OK FOR WHOLE BLOCK.
+ 1114   LEFTYPER   TS, D8       DD8           COMMON +2     IT IS +1            INDICATE TYPE ERROR IN SYMBOL TABLE.
+
+ 1116   NOT OK DEF NA, BIT 13   HEALTH        ONES          C,+2
+ 1117              TS, D8       ONES          COMMON +2     END IS              MEANINGLESS ADDRESS MAKES HEALTH = G.
+
+ 1119              NA, BIT 14   HEALTH        ONES          C,+3
+ 1120   EQ OVSIZE  SWS, D8      N,S0          D,1,L         COMMON +2           USE TRANSFORMS FOR OVERSIZE DEFINITION.
+ 1122              TS           -             -             END IS
 
 # Page 180
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  28        PAGE  28
 
+P1123   IF THE ONLY TROUBLE WITH AN EQUALS CARD IS AN UNDEFINED ADDRESS SYMBOL, MAKE PASS 1.5 TRY TO FIX IT UP.
+
+ 11235             LA, FIX MAG  ADR WD +1     SPEC MAG      C,+2
+ 11236             TS, BIT 14   ONES          HEALTH        EQ OVSIZE           BEING SIGNED, MODIFIER IS 15 BITS.
+ 11238             SWE, CAC3    ADR WD +1     1,L           COMMON +2           STORE MODIFIER WITH SIGN AT RIGHT END.
+
+ 1124   DEFINER Q  SWE, CAC3    HEALTH        16            ETS                 POINT TO DEFINER.
+ 11242             SWS, CAC12   ETS           32,L          COMMON +3
+ 11243             LA           ETS           ZERO          NEARLY              BRANCH IF DEFINER DIDN'T FIT IN TABLE.
+ 112445            EBA          ETS           BIT 25        Z,X5
+ 11245             SWS, CAC2    5,1           16,L          COMMON +3           DEFINER'S 1ST DEFINEE IS OUR CO-DEFINEE.
+ 112465            EBS          Z,X2          BIT 25        ETS
+ 11247             SS           ETS           CAC3          5,1                 THIS SYM IS NOW DEFINER'S 1ST DEFINEE.
+
+ 11251             LA           N,X2          CAC3          NEARLY              BRANCH IF THIS IS THE FIRST DEFINTION.
+ 11252             LA           END SY TAB    SYM PLACE     NEARLY
+ 112522            NA           SYM PLACE     SPEC MAG      C,+2
+ 112524            WA           SYM PLACE     THREE         SYM PLACE           SKIP OVER 32K STOPPER.
+ 11253             WA, CAC3     SYM PLACE     ONE           5,1                 THIS MULT. DEF. WILL GET A NEW HOME.
+ 11254             S, ETS       3,0           ZX +4         C,+1                POINT TO MULT. DEF. INTRODUCTUON.
+ 11255             LA           CAC12         4,2           NEARLY              BRANCH IF IT REALLY IS ONE.
+ 11256             WA           SYM PLACE     BIT 46R       ETS                 THIS IS THE SECOND DEFINTIION, SO MAKE
+ 112564            NA           ETS           SPEC SIGN     C,+2                ROOM FOR THE MULT. DEF. INTRODUCTION.
+ 112566            WA           ETS           THREE         ETS                 SKIP OVER 32 STOPPER.
+ 11257             LA           END SY TAB    ETS           NEARLY
+ 11258             SS           ETS           CAC3          5,1                 INTRO. POINTS TO THIS DEF (NOW CURRENT).
+ 1126   NEARLY     SS           N,S0          D8            COMMON +2           USE UNDEFINITION TRANSFORMS.
+ 1128              TS           -             -             END IS
+
+ 11282             LA           ONES          LOC LOC       NOT OK DEF          BRANCH IF NO OK DEFINITION.
+ 1129   IT IS      SWS, D8      N,S0          D,1           COMMON +2           USE NORMAL IS,=,EQUALS TRANSFORM.
+ 1131              SS           LOC LOC       CAC3          COMMON +2
+
+ 11318  END IS     TX           BIT 8         -             LOC STATE
+ 1132              TS           Z,SC          Z,X6          SY DEF XIT          STORE ENTRY IN SYMBOL TABLE.
+ 11332             NA, B8B17    LOC STATE     ONES          XMIT RTRN           EXIT UNLESS LOC SYMBOL FAILED TO FIT.
+ 11334             NA, CD TYPE  HEALTH        (ERASE)       C,+2                BRANCH IF OP CODE IS EQUALS.
+ 11336             TS, BIT16    ONES          HEALTH        XMIT RTRN           SHOW UNFITTING OF ERASE LOC SYM.
+ 11338             SM           HEALTH        BIT 15        HEALTH              SHOW UNFITTING OF EQUALS LOC SYM.
+ 1134              TS           -             -             XMIT RTRN
 
 # Page 181
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  29        PAGE  29
