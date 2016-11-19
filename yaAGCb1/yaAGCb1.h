@@ -84,6 +84,33 @@
 #define FORMAT_64O "%llo"
 #endif
 
+// The following is used to get the int16_t datatype.
+#ifdef WIN32
+// Win32
+typedef short int16_t;
+typedef signed char int8_t;
+#ifdef __MINGW32__
+typedef unsigned long long uint64_t;
+#else
+typedef unsigned __int64 uint64_t;
+#endif
+#elif defined (__embedded__)
+// Embedded, gcc cross-compiler.
+typedef short int16_t;
+typedef signed char int8_t;
+typedef unsigned short uint16_t;
+#elif defined (SDCC)
+// SDCC (8-bit 8051)
+typedef int int16_t;
+typedef signed char int8_t;
+typedef unsigned uint16_t;
+extern long random (void);
+#else // WIN32
+// All other (Linux, Mac OS, etc.)
+//#include <sys/types.h>
+#include <stdint.h>
+#endif // WIN32
+
 //-------------------------------------------------------------------------
 // Block 1 specific address and data constants.
 

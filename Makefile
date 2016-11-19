@@ -279,6 +279,7 @@ EXT=.exe
 CFLAGS0+=-I/usr/local/include
 CFLAGS+=-I/usr/local/include
 LIBS+=-L/usr/local/lib
+LIBS+=-L/usr/lib
 LIBS+=-lkernel32
 LIBS+=-lwsock32
 CURSES=../yaAGC/random.c

@@ -15,13 +15,20 @@ HEADERS:=$(wildcard *.h)
 .PHONY: default
 .PHONY: clean
 
+LIBS = 
+ifdef WIN32
+LIBS = "-L/usr/lib"
+endif
+LIBS += -lncurses -lpthread
+
+
 all default: yaAGC-Block1
 
 # Note that actually only one of -lncurses or -lpthread is
 # needed, depending on whether or not the constant USE_NCURSES
 # is #defined.
 yaAGC-Block1: $(SOURCE) $(HEADERS) Makefile
-	g++ -O0 -g -o $@ $(SOURCE) -lncurses -lpthread
+	g++ -O0 -g -o $@ $(SOURCE) $(LIBS)
 
 clean:
 	-rm $(TARGETS)
