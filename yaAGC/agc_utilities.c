@@ -60,8 +60,9 @@
 #include <string.h>
 #ifndef WIN32
 #include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #endif
-extern int h_errno;
 #include "yaAGC.h"
 #include "agc_engine.h"
 

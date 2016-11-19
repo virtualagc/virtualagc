@@ -69,7 +69,6 @@
 #endif
 #include <fcntl.h>
 #include "yaAGCb1.h"
-extern int h_errno;
 
 // Used for socket-operation error codes.
 int ErrorCodes = 0;
