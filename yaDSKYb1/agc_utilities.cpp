@@ -59,7 +59,9 @@
 // ... and the project's includes.
 #include <stdio.h>
 #include <string.h>
+#ifndef WIN32
 #include <netdb.h>
+#endif
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/socket.h>

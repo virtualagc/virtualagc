@@ -58,7 +58,9 @@
 // ... and the project's includes.
 #include <stdio.h>
 #include <string.h>
+#ifndef WIN32
 #include <netdb.h>
+#endif
 extern int h_errno;
 #include "yaAGC.h"
 #include "agc_engine.h"

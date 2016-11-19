@@ -283,6 +283,7 @@ LIBS+=-lkernel32
 LIBS+=-lwsock32
 CURSES=../yaAGC/random.c
 CURSES+=-lregex
+export CC=gcc
 else
 CURSES=-lcurses
 endif
