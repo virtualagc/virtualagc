@@ -267,7 +267,7 @@ ifeq "${EXT}" ".exe"
 	#	${CP} /usr/local/bin/$$n*.dll $@ ; \
 	#done
 	# Newer usage (2016-11-19)
-	for n in msys-1.0 ncurses regex ; \
+	for n in 1.0 ncurses regex ; \
 	do \
 		${CP} /usr/bin/msys-$$n*.dll $@ ; \
 	done
