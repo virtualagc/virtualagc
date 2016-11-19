@@ -64,10 +64,10 @@
 #include <string.h>
 #ifndef WIN32
 #include <netdb.h>
-#endif
-#include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#endif
+#include <fcntl.h>
 #include "yaAGCb1.h"
 extern int h_errno;
 

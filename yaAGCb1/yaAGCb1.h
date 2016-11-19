@@ -87,16 +87,7 @@
 // The following is used to get the int16_t datatype.
 #ifdef WIN32
 // Win32
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef signed char int8_t;
-#ifdef __MINGW32__
-typedef unsigned long long uint64_t;
-typedef long long int64_t;
-#else
-typedef unsigned __int64 uint64_t;
-typedef __int64 int64_t;
-#endif
+#include <stdint.h>
 #elif defined (__embedded__)
 // Embedded, gcc cross-compiler.
 typedef short int16_t;

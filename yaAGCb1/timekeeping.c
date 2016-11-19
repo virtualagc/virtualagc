@@ -68,7 +68,6 @@ int clock_gettime (clockid_t __clock_id, struct timespec *__tp)
 // Win32 doesn't have clock_gettime.
 #ifdef WIN32
 #include <winbase.h>
-struct timespec { long tv_sec; long tv_nsec; };    //header part
 #define CLOCK_REALTIME 0
 int clock_gettime(int id, struct timespec *spec)      //C-file part
 {
