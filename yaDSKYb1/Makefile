@@ -7,12 +7,20 @@
 EXTRASOURCE=yaDSKYb1.cpp SocketAPI.cpp agc_utilities.cpp
 EXTRAHEADERS=yaDSKYb1.h
 
+ifdef SOLARIS
+NLIBS = -lxnet
+endif # SOLARIS
+ifdef WIN32
+NLIBS = -lwsock32
+endif
+
 .PHONY: all 
 .PHONY: default
 all default:	yaDSKYb1
 
 yaDSKYb1: yaDSKYb1-widgetized.cpp yaDSKYb1-widgetized.h ${EXTRASOURCE} ${EXTRAHEADERS} Makefile
-	g++ -g -O0 -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` $< ${EXTRASOURCE} `wx-config --libs` -o $@
+	g++ -g -O0 -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` \
+		$< ${EXTRASOURCE} `wx-config --libs` -o $@ $(NLIBS)
 
 .PHONY: clean
 clean:

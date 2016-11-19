@@ -13,6 +13,10 @@ ifdef SOLARIS
 LIBS += -lxnet
 endif # SOLARIS
 
+ifdef WIN32
+LIBS += -lwsock32
+endif
+
 .PHONY: all
 .PHONY: default
 .PHONY: clean
