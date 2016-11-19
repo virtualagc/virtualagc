@@ -72,6 +72,9 @@ EXTRA_WIN_LIBS=-lwsock32
 endif
 endif
 
+ifndef WIN32
+LIBS2+=-lX11
+endif
 
 .PHONY:	default
 default: ${APP}
@@ -99,7 +102,7 @@ ${APP}: ${SOURCES} ${HEADERS}
 		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
 		`wx-config --libs` \
-		${LIBS2} -lX11
+		${LIBS2}
 	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}

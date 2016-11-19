@@ -42,9 +42,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#ifndef WIN32
 #include <sys/socket.h>
+#endif
 #include <errno.h>
-#ifdef SOLARIS
+#if defined(SOLARIS) || defined(WIN32)
 #include <ncurses/ncurses.h>
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
