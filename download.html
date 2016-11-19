@@ -17,26 +17,54 @@
     <table align="center" border="1" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
-          <td colspan="3" rowspan="1" valign="top">
-            <div align="center"><big><b>Current Virtual AGC Versions</b></big><br>
+          <td colspan="4" rowspan="1" valign="top">
+            <div align="center"><big><b>Current Versions of Virtual AGC
+                  Downloads</b></big><br>
             </div>
           </td>
         </tr>
         <tr>
-          <td valign="top"><b>For all platforms</b><b><br>
-            </b></td>
-          <td valign="top"><b>Complete source code:</b></td>
-          <td valign="top"><a
-              href="https://github.com/virtualagc/virtualagc">Current</a></td>
+          <th align="left" valign="top">Target Platform<small><br>
+            </small></th>
+          <th align="left" valign="top">Description<small><br>
+            </small></th>
+          <th align="left" valign="top">Download Version<small><br>
+            </small></th>
+          <th align="left" valign="top">Instructions<small><br>
+            </small></th>
         </tr>
         <tr>
-          <td valign="top"><b>For Windows, Mac, Linux, Solaris, FreeBSD
-              (32- or 64-bit 'x86)</b><b><br>
-            </b></td>
-          <td valign="top"><b>VirtualBox virtual machine (VM):</b><br>
+          <td valign="top">All platforms (but only Linux and<br>
+            Windows currently have workable<br>
+            build-instructions)<br>
           </td>
-          <td valign="top"><a
-              href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-runtime.tar.7z">2016-11-16,
+          <td valign="middle">Complete source code<br>
+            (Apps, AGC, and AEA)<br>
+          </td>
+          <td valign="middle"><a
+              href="https://github.com/virtualagc/virtualagc">Current</a></td>
+          <td valign="middle"><a
+              href="#Downloading_and_Building_Virtual_AGC">Building from
+              source</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">Windows, Mac OS X, Linux, Solaris, <br>
+            or FreeBSD (32- or 64-bit 'x86)<br>
+          </td>
+          <td valign="middle">VirtualBox virtual machine<br>
+            (Apps and visual AGC <br>
+            debugging)<br>
+          </td>
+          <td valign="middle"><a
+              href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-runtime.tar.7z">2016-11-19,
+
+
+
+
+
+
+
 
 
 
@@ -44,13 +72,19 @@
 
 
               900MB</a></td>
+          <td valign="middle"><a href="#Downloading_Running_or_Updating">Using
+
+
+
+              the VM</a><br>
+          </td>
         </tr>
         <tr>
-          <td valign="top"><b>For Ubuntu 14.04 (32-bit 'x86)</b><b><br>
-            </b></td>
-          <td valign="top"><b>Installer program:<br>
-            </b></td>
-          <td valign="top"><a
+          <td valign="top">Ubuntu 14.04 (32-bit 'x86)<br>
+          </td>
+          <td valign="top">App-installer program<br>
+          </td>
+          <td valign="middle"><a
               href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-installer">2016-11-16,
 
 
@@ -58,18 +92,81 @@
 
 
 
+
+
+
+
+
+
+
               27MB</a></td>
+          <td valign="middle"><a
+              href="#Installer_for_Ubuntu_14.04_32-bit_x86">Using Ubuntu
+              installer</a><br>
+          </td>
         </tr>
         <tr>
-          <td valign="top"><b>For Raspberry Pi (Raspbian)</b><b><br>
-            </b></td>
-          <td valign="top"><b>Tarball:</b></td>
-          <td valign="top"><a
-href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar.bz2">2016-08-13</a></td>
+          <td valign="top">Raspberry Pi (Raspbian-Jessie)<br>
+          </td>
+          <td valign="top">App-installation tarball<br>
+          </td>
+          <td valign="middle"><a
+href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar.bz2">2016-08-13,
+
+
+
+              12MB<br>
+            </a></td>
+          <td valign="middle"><a href="#Raspberry_Pi_Raspbian_">Using
+              Raspbian tarball</a><br>
+          </td>
         </tr>
       </tbody>
     </table>
-    <h2>Introduction</h2>
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#Introduction">Introduction</a></li>
+      <li><a href="#Downloading_Running_or_Updating">Downloading,
+          Running, or Updating Virtual AGC in VirtualBox</a></li>
+      <ul>
+        <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
+
+
+
+            of the Virtual AGC VM</a></li>
+        <li><a href="#Installation_of_the_Virtual_AGC_VM_">Installation
+            of the Virtual AGC VM</a></li>
+        <li><a href="#Updating_the_Virtual_AGC_VM">Updating the Virtual
+            AGC VM</a></li>
+      </ul>
+      <li><a href="#Platforms_Directly_Supported_by">Platforms Directly
+          Supported by Virtual AGC Installers</a></li>
+      <ul>
+        <li><a href="#Virtual_AGC_Installer_for_Raspberry_Pi">Virtual
+            AGC Installer for Raspberry Pi (Raspbian)</a></li>
+        <li><a href="#Installer_for_Ubuntu_14.04_32-bit_x86">Installer
+            for Ubuntu 14.04 32-bit 'x86 Linux</a></li>
+      </ul>
+      <li><a href="#Downloading_and_Building_Virtual_AGC">Downloading
+          and Building Virtual AGC from Source</a></li>
+      <ul>
+        <li><a href="#Limitation">Limitation</a></li>
+        <li><a href="#Getting_the_Source_Code_">Getting the Source Code</a></li>
+        <li><a href="#Linux_">Linux</a></li>
+        <li><a href="#Raspberry_Pi_Raspbian_">Raspberry Pi (Raspbian)</a></li>
+        <li><a href="#FreeBSD">FreeBSD</a></li>
+        <li><a href="#Solaris">Solaris</a></li>
+        <li><a href="#Mac_OS_X">Mac OS X</a></li>
+        <li><a href="#Windows">Windows</a></li>
+        <li><a href="#iPhone">iPhone</a></li>
+      </ul>
+      <li><a href="#Running_the_Validation_Suite">Running the Validation
+          Suite of the Simulated AGC</a></li>
+      <li><a href="#Some_Resource_Issues_on_Slower">Some Resource Issues
+          on Slower Computers, Such as Raspberry Pi</a><br>
+      </li>
+    </ul>
+    <h2><a name="Introduction"></a>Introduction</h2>
     <p>This page covers various ways to download and/or install Virtual
       AGC project software.&nbsp; Three methods are currently
       recommended, and a fourth is possible if not really recommended:<br>
@@ -84,6 +181,13 @@ href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar
         platform for which VirtualBox is available, namely Windows, Mac,
         Linux, and Solaris, and (<a
 href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">according
+
+
+
+
+
+
+
 
 
 
@@ -134,6 +238,13 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
 
 
 
+
+
+
+
+
+
+
         This works on many more platforms, though is more-involved to
         set up, and visual AGC debugging may not be possible easily on
         platforms other than 'x86 Windows, Mac, or Linux.<br>
@@ -146,7 +257,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
         like to directly support all major platforms with Virtual AGC
         installer programs, but in practice it is far too hard to do so
         with the resources available at present, so this is no longer
-        currently done.</li>
+        being done currently.</li>
     </ol>
     <p>Note that a lot of detail about known quirks on different
       platforms, and about trouble-shooting, can be found at the older
@@ -159,13 +270,22 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
     </p>
     <h2><a name="Downloading_Running_or_Updating"></a>Downloading,
       Running, or Updating Virtual AGC in VirtualBox</h2>
-    <h3>Characteristics of the Virtual AGC VM<br>
+    <h3><a name="Characteristics_of_the_Virtual_AGC_VM"></a>Characteristics
+
+
+
+      of the Virtual AGC VM<br>
     </h3>
-    <p>The approach described here should work with any 32-bit or 64-bit
-      'x86 version of Windows, Mac, Linux, Solaris, or FreeBSD.&nbsp;
-      It's nice because it lets you work with the most-commonly-desired
-      elements of Virtual AGC, while skipping past the most-annoying and
-      tricky setup steps.&nbsp; It provides you with a "virtual
+    <p>The approach described here should work with any host system
+      supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
+
+
+
+      namely, any 32-bit or 64-bit 'x86 version of Windows, Mac, Linux,
+      Solaris, or FreeBSD.&nbsp; It's nice because it lets you work with
+      the most-commonly-desired elements of Virtual AGC, while skipping
+      past the most-annoying and tricky setup steps, such as compiling
+      Virtual AGC's source code.&nbsp; It provides you with a "virtual
       machine", with Virtual AGC and other things you need in order to
       be able to work with Virtual AGC already pre-installed and
       pre-configured.<br>
@@ -179,30 +299,37 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
       not a big deal (you're already doing it, right?), but convenient
       for making downloads directly into the VM.<br>
     </p>
-    <table width="100%" cellpadding="2" cellspacing="2">
+    <table cellpadding="2" cellspacing="2" width="100%">
       <tbody>
         <tr>
           <td align="center" valign="top"><a
               href="VirtualAGC-runtime-gui.jpg"><img alt="" title="Click
                 to enlarge" src="small-VirtualAGC-runtime-gui.jpg"
-                height="265" width="360" border="2"></a><br>
+                height="265" border="2" width="360"></a><br>
           </td>
           <td align="center" valign="top"><a
               href="VirtualAGC-runtime-sim.jpg"><img alt="" title="Click
                 to enlarge" src="small-VirtualAGC-runtime-sim.jpg"
-                height="265" width="360" border="2"></a><br>
+                height="265" border="2" width="360"></a><br>
           </td>
           <td align="center" valign="top"><a
               href="VirtualAGC-runtime-browse.jpg"><img alt=""
                 title="Click to enlarge"
                 src="small-VirtualAGC-runtime-browse.jpg" height="265"
-                width="360" border="2"></a><br>
+                border="2" width="360"></a><br>
           </td>
         </tr>
       </tbody>
     </table>
     <p align="left">The other main thing the VM allows you to do is to
       work with the AGC source code in <a href="http://codeblocks.org/">Code::Blocks</a>.&nbsp;
+
+
+
+
+
+
+
 
 
 
@@ -234,12 +361,13 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
     <p align="center"><br>
       <a href="VirtualAGC-runtime-dbg.jpg"><img alt="" title="Click to
           enlarge" src="small-VirtualAGC-runtime-dbg.jpg" height="530"
-          width="720" border="2"></a><br>
+          border="2" width="720"></a><br>
     </p>
     <p>Okay, enough of the sales pitch already!&nbsp; What's do you
       actually have to do to install the thing?<br>
     </p>
-    <h3>Installation of the Virtual AGC VM<br>
+    <h3><a name="Installation_of_the_Virtual_AGC_VM_"></a>Installation
+      of the Virtual AGC VM<br>
     </h3>
     <p>It's hard to pin down exactly what computer resources you'll need
       to run the VM.&nbsp; The minimum is probably around 2 GB of RAM
@@ -262,6 +390,13 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
         computer system.&nbsp; The Virtual AGC virtual machine (VM) you
         will download was created with <a
           href="https://www.virtualbox.org/wiki/Download_Old_Builds_4_3">VirtualBox
+
+
+
+
+
+
+
 
 
 
@@ -327,7 +462,14 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
       that modern browsers (Mozilla Firefox is what's included in the
       VM) take enormous amounts of RAM.<br>
     </p>
-    <h3>Updating the Virtual AGC VM</h3>
+    <p>Note that username and password for the VM are both
+      "virtualagc".&nbsp; Since you are automatically logged in whenever
+      you run the VM, you don't normally need this information, but it's
+      good to know just in case (for example) you ever need to install
+      some new, non-Virtual-AGC software on it, or perform some other
+      administrative action. </p>
+    <h3><a name="Updating_the_Virtual_AGC_VM"></a>Updating the Virtual
+      AGC VM</h3>
     <p>Because the VM is such a large download, you don't want to have
       to download it every time there's updated Virtual AGC software!<br>
     </p>
@@ -357,7 +499,8 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
     </ol>
     <h2><a name="Platforms_Directly_Supported_by"></a>Platforms Directly
       Supported by Virtual AGC Installers</h2>
-    <h3>Virtual AGC Installer for Raspberry Pi (Raspbian)</h3>
+    <h3><a name="Virtual_AGC_Installer_for_Raspberry_Pi"></a>Virtual AGC
+      Installer for Raspberry Pi (Raspbian)</h3>
     Installation is trivial:<br>
     <ol>
       <li>Download the current Raspberry Pi installation tarball, as
@@ -375,7 +518,8 @@ href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar
       cd lVirtualAGC/Resources<br>
       ../bin/VirtualAGC<br>
     </blockquote>
-    <h3>Installer for Ubuntu 14.04 32-bit 'x86 Linux</h3>
+    <h3><a name="Installer_for_Ubuntu_14.04_32-bit_x86"></a>Installer
+      for Ubuntu 14.04 32-bit 'x86 Linux</h3>
     Installation:<br>
     <ol>
       <li>Install the following system libraries from the Ubuntu
@@ -439,28 +583,17 @@ about
 
 
 
+
+
+
+
+
+
+
       configuring it</a>.<br>
     <h2><a name="Downloading_and_Building_Virtual_AGC"></a>Downloading
       and Building Virtual AGC from Source</h2>
-    <table align="center" border="1" cellpadding="2" cellspacing="2">
-      <tbody>
-        <tr>
-          <td valign="top"><i>(This entire section is under
-              construction.&nbsp; Except for the Raspberry Pi, Linux,
-              and iPhone sub-sections, all of the sub-sections related
-              to other platforms are so far out of date and unworkable
-              not that it's not even funny.&nbsp; Right now, all of the
-              descriptive material in those sub-sections is a
-              hodge-podge of ancient, presumably unworkable instructions
-              related to old operating system versions and old Virtual
-              AGC versions, intermixed with new, untested, stream of
-              consciousness records of the things I'm trying right
-              now.&nbsp; I'm updating these sub-sections as fast as I
-              can work out the issues.)</i></td>
-        </tr>
-      </tbody>
-    </table>
-    <h3>Limitation</h3>
+    <h3><a name="Limitation"></a>Limitation</h3>
     <p>Building Virtual AGC from source actually has a limitation
       compared to running the VM as described above, which is that while
       the VM is already set up for visual debugging of AGC code using
@@ -472,6 +605,13 @@ about
       visual debugging, you need to install Code::Blocks and should
       consult <a
 href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">the
+
+
+
+
+
+
+
 
 
 
@@ -507,12 +647,26 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
+
+
+
+
+
+
         instructions for visual debugging</a>.<br>
     </p>
-    <h3>Getting the Source Code<br>
+    <h3><a name="Getting_the_Source_Code_"></a>Getting the Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
+
+
+
+
+
+
+
 
 
 
@@ -548,6 +702,13 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
+
+
+
+
+
+
         a zipfile</a> or using the 'git' program, which in Linux (for
       example) would look like this:<br>
     </p>
@@ -555,12 +716,11 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
       <p>git clone https://github.com/virtualagc/virtualagc<br>
       </p>
     </blockquote>
-    In either case, you end up with a folder called virtualagc.&nbsp;
+    In either case, you end up with a folder called virtualagc.&nbsp; <br>
+    <br>
     What you do with it after that depends on which platform you intend
     to run Virtual AGC on, and that's the topic of the next few
-    sections.<br>
-    <h3>Linux </h3>
-    <p>I would recommend reading <a
+    sections.&nbsp; It's also possible that <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
 
 
@@ -596,161 +756,58 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
-        instructions at the GitHub repository</a>.<br>
-    </p>
-    <h3> <span style="font-weight: bold;"></span><span
-        style="font-weight: bold;"></span>Raspberry Pi (Raspbian) </h3>
-    This really isn't any different from building it on <a
-      href="#BuildLinux">any other Linux system</a>, but I'll go through
-    the steps for you anyway, which should work even on a completely new
-    Raspbian install.&nbsp; Laszlo Morocz provided the original
-    instructions, but I have tweaked them somewhat:<br>
-    <ul>
-      <li>Tested with the 2016-05-27 version of Raspbian-Jessie.<br>
-      </li>
-      <li>The build goes a lot faster if you do it on (say) a physical
-        hard disk on the USB port, rather than on the standard SD card.</li>
-    </ul>
-    <p>You can then do the following, from a command line:<br>
-    </p>
-    <blockquote>
-      <p>sudo apt-get install wx2.8-headers libwxgtk2.8-0
-        libwxgtk2.8-dev libsdl-dev libncurses5-dev liballegro4-dev git<br>
-        git clone https://www.github.com/rburkey2005/virtualagc<br>
-        cd virtualagc<br>
-        make<br>
-      </p>
-    </blockquote>
-    The end result of this rather lengthy process is the directory
-    (within the virtualagc/ directory containing the complete source
-    tree)&nbsp; called VirtualAGC/temp/lVirtualAGC/, which in fact
-    contains everything you need to run the program, which you can do
-    either in-place, or after copying it to some other location.&nbsp;
-    To actually run the program (say, in place), you do this:<br>
-    <blockquote>cd VirtualAGC/temp/lVirtualAGC/Resources<br>
-      ../bin/VirtualAGC<br>
-    </blockquote>
-    Or, of course, you could create a desktop icon that does basically
-    this same thing.<br>
+
+
+
+
+
+
+
+      instructions at the GitHub repository</a> may (or may not) be more
+    up-to-date than those here.<br>
+    <h3><a name="Linux_"></a>Linux </h3>
+    <table border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
+          </td>
+          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <br>
-    Laszlo mentions the additional (disquieting) fact that the CPU
-    utilization rather high, and indeed if you ran every available
-    option on an early-model Pi, you could find yourself using close to
-    100% of the CPU.&nbsp; For the default configuration of VirtualAGC
-    (Lunar Module AGC with DSKY and Telemetry but without abort system
-    or IMU), I find the following:<br>
-    <ul>
-      <li>Pi B+:&nbsp; 80% CPU utilization.&nbsp; <br>
-      </li>
-      <li>Pi 3: 40% CPU utilization.<br>
-      </li>
-    </ul>
-    <p>If that's too much for you, there are some things you may be able
-      to do to make it more efficient.&nbsp; First, note that the
-      VirtualAGC program — which isn't a component of the simulation,
-      but merely a convenient graphical interface so that you don't have
-      to memorize command-line options for the actual components — takes
-      25-30% of the CPU (for either of the two Pi models mentioned
-      above) by itself.&nbsp; You don't really need to run it if you
-      don't want to.&nbsp; But how do you run a simulation easily
-      without VirtualAGC?&nbsp; Well, if you run the simulation just <i>once</i>
-      from VirtualAGC, and exit the simulation immediately after
-      starting it, you'll find that it has automatically created a
-      script called "simulate" which can be used to start that exact
-      configuration of the simulation without running VirtualAGC
-      itself.&nbsp; As a result, you get CPU utilizations closer to 50%
-      or 10%, respectively, on the two Pi models mentioned above.&nbsp;
-      To just run that script, you do this:</p>
-    <ul>
-    </ul>
-    <blockquote>
-      <blockquote>
-        <p>cd VirtualAGC/temp/lVirtualAGC/Resources<br>
-          ./simulate<br>
-        </p>
-      </blockquote>
-    </blockquote>
+    These instructions apply to building Virtual AGC on Ubuntu-like
+    systems, but are probably directly applicable to most Ubuntu,
+    Debian, or Mint desktop systems.&nbsp; They are known to work on
+    64-bit Linux Mint 17.3 and 32-bit Ubuntu 14.04.&nbsp; If you have a
+    Linux distribution with a different kind of packaging system, such
+    as Fedora, you'll probably have to adapt the first step somewhat.<br>
     <ol>
-    </ol>
-    <h3><a name="FreeBSD"></a>FreeBSD</h3>
-    The following steps were tried under <a
-      href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>,
-    since installation of actual FreeBSD is too hard for any mortal.<br>
-    <ol>
-      <li>Using the 'AppCafe', I installed all of the packages (of which
-        there were 3) for wx28-gtk2 2.8.12_6.</li>
-      <li>I installed GNU 'make' (gmake) with the command "sudo pkg
-        install gmake".</li>
+      <li>Install various packages:&nbsp; "sudo apt-get install
+        libsdl1.2-dev libncurses5-dev liballegro4.4-dev g++
+        libgtk2.0-dev libwxgtk2.8-dev".&nbsp; (Sometimes, it's
+        liballegro4-dev.)<br>
+      </li>
       <li>In the Virtual AGC source directory (which for me was
-        ~/git/virtualagc), I ran "gmake FREEBSD=yes".<br>
+        ~/git/virtualagc), run "make".&nbsp; (Even though there is a
+        'configure' script, do not use it, nor should you "make
+        install".)<br>
       </li>
-    </ol>
-    This didn't actually work, because the source tree needs various
-    fixups before it can work, but if it had worked:<br>
-    <br>
-    You'll find that this has created a directory
-    VirtualAGC/temp/lVirtualAGC/<span style="font-weight: bold;"></span>.&nbsp;
-I'd
-suggest
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    you should also<br>
-    <br>
-    <div style="margin-left: 40px;"><span style="font-family: Courier
-        New,Courier,monospace;">mv VirtualAGC/temp/lVirtualAGC
-        ~/VirtualAGC</span><br>
-    </div>
-    <br>
-    (assuming you don't already have a directory ~/VirtualAGC/).&nbsp;
-    This isn't really necessary, but duplicates the setup that Virtual
-    AGC's Linux installer programs use.<br>
-    <br>
-    I'd also suggest that you make a desktop icon called "Virtual AGC"
-    that links to ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally
-    used for the desktop icon is found at&nbsp;
-    ~/VirtualAGC/bin/ApolloPatch2.png.&nbsp; The end result of these
-    manipulations is something identical to what the Linux binary
-    installer would have produced except that it will actually work and
-    that there won't be any uninstaller program.<br>
-    <br>
-    If you try to use the ACA simulation (joystick) and it doesn't
-    work,&nbsp;<a
-      href="yaTelemetry.html#Joystick_configuration_for_use_with_the">read
+      <li>This will have created a directory
+        VirtualAGC/temp/lVirtualAGC/, which contains all the results of
+        the build.&nbsp; I'd suggest (optionally) creating a symbolic
+        link ("ln --symbolic") from this directory to ~/VirtualAGC,
+        simply to conform to the directory set-up the Linux Virtual AGC
+        installer uses.&nbsp; I'd also suggest that you make a desktop
+        icon called "Virtual AGC" that links to
+        ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally used for
+        the desktop icon is found at&nbsp;
+        ~/VirtualAGC/bin/ApolloPatch2.png.</li>
+      <li>If you try to use the ACA simulation (joystick) and it doesn't
+        work,&nbsp;<a
+          href="yaTelemetry.html#Joystick_configuration_for_use_with_the">read
 about
 
 
@@ -789,82 +846,125 @@ about
 
 
 
-      configuring it</a>.<br>
-    <h3><a name="Solaris"></a>Solaris</h3>
-    I tried these things using Solaris 11.3.&nbsp; Note that my
-    knowledge of Solaris is mid-way between "completely ignorant" and
-    "dangerously misinformed".<br>
-    <ol>
-      <li>Installed wxWidgets, gtk2, tcl-8, and tk-8 using the Package
-        Manager.</li>
-      <li>In the Virtual AGC source directory (which for me was
-        ~/git/virtualagc), I ran "gmake".</li>
+
+
+
+
+
+
+
+          configuring it</a>.</li>
     </ol>
-    This didn't actually work, because the source tree needs various
-    fixups before it can work, but if it had worked:<br>
+    <p> </p>
+    <h3><a name="Raspberry_Pi_Raspbian_"></a> <span style="font-weight:
+        bold;"></span><span style="font-weight: bold;"></span>Raspberry
+      Pi (Raspbian) </h3>
+    <table border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
+          </td>
+          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <br>
-    You'll find that this has created a directory
-    VirtualAGC/temp/lVirtualAGC/<span style="font-weight: bold;"></span>.&nbsp;
-I'd
-suggest
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    you should also<br>
+    This really isn't any different from building it on <a
+      href="#BuildLinux">any other Linux system</a>, but I'll go through
+    the steps for you anyway in a bit more detail, for a completely
+    clean Raspbian installation.&nbsp; Laszlo Morocz provided the
+    original instructions.&nbsp; They have been tested with
+    Raspbian-Jessie.&nbsp; Note that while not a <i>requirement</i>,
+    the building process goes a lot faster if you do it on (say) a
+    physical hard disk on the USB port, rather than on the standard SD
+    card.
+    <ul>
+    </ul>
+    <p>Do the following, from a command line:<br>
+    </p>
+    <blockquote>
+      <p>sudo apt-get install wx2.8-headers libwxgtk2.8-0
+        libwxgtk2.8-dev libsdl-dev libncurses5-dev liballegro4-dev git<br>
+        git clone https://www.github.com/virtualagc/virtualagc<br>
+        cd virtualagc<br>
+        make<br>
+      </p>
+    </blockquote>
+    The end result of this rather lengthy process is the directory
+    (within the virtualagc/ directory containing the complete source
+    tree)&nbsp; called VirtualAGC/temp/lVirtualAGC/, which in fact
+    contains everything you need to run the program, which you can do
+    either in-place, or after copying it to some other location.&nbsp;
+    To actually run the program (say, in place), you do this:<br>
+    <blockquote>cd VirtualAGC/temp/lVirtualAGC/Resources<br>
+      ../bin/VirtualAGC<br>
+    </blockquote>
+    Or, of course, you could create a desktop icon that does basically
+    this same thing.
+    <ol>
+    </ol>
+    <h3><a name="FreeBSD"></a>FreeBSD</h3>
+    <table border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="middle"><img alt="" src="redX.png"
+              height="75" width="70"><br>
+          </td>
+          <td align="center" valign="middle"><big><big><b>This fails!</b></big></big><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <br>
-    <div style="margin-left: 40px;"><span style="font-family: Courier
-        New,Courier,monospace;">mv VirtualAGC/temp/lVirtualAGC
-        ~/VirtualAGC</span><br>
-    </div>
-    <br>
-    (assuming you don't already have a directory ~/VirtualAGC/).&nbsp;
-    This isn't really necessary, but duplicates the setup that Virtual
-    AGC's Linux installer programs use.<br>
-    <br>
-    I'd also suggest that you make a desktop icon called "Virtual AGC"
-    that links to ~/VirtualAGC/bin/VirtualAGC.&nbsp; The image normally
-    used for the desktop icon is found at&nbsp;
-    ~/VirtualAGC/bin/ApolloPatch2.png.&nbsp; The end result of these
-    manipulations is something identical to what the Linux binary
-    installer would have produced except that it will actually work and
-    that there won't be any uninstaller program.<br>
-    <br>
-    If you try to use the ACA simulation (joystick) and it doesn't
-    work,&nbsp;<a
+    The instructions here relate to building Virtual AGC using <a
+      href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
+
+
+
+
+
+
+    This isn't the latest version of FreeBSD (version 11), but that's
+    much harder to install, and I'm too lazy to mess with it.&nbsp; At
+    any rate, I know nothing about FreeBSD, so my instructions may not
+    be the most-efficient ones.&nbsp; The executive summary is that
+    Virtual AGC builds, but none of the graphical programs work once
+    built.&nbsp; My notes are below, if anyone wants to take up the
+    mantle and figure out how to make this actually work.<br>
+    <ol>
+      <li>Install 'cmake' and GNU 'make' (gmake) with the command "sudo
+        pkg install cmake gmake".</li>
+      <li><a href="http://www.wxwidgets.org">Download wxWidgets 2.8.12</a>,
+        or as close to that 2.8.x version as you can get, and
+        build/install from source (use the --enable-unicode switch with
+        'configure').&nbsp; Yes, wxWidgets can be installed from a
+        "package", but this doesn't give you the essential 'wx-config'
+        utility.&nbsp; Probably it could be installed from a "port"
+        instead, but I'm too ignorant to try that (and didn't set up the
+        ports system anyway).</li>
+      <li><a href="http://liballeg.org/old.html">Download Allegro 4.4.2</a>,
+        or as close to that 4.4.x version as you can get, and
+        build/install from source.&nbsp; Prior to building Allegro, I
+        had to do this: "sudo ln -s /usr/local/lib/libasound* /usr/lib";
+        I'm sure there's a much cleaner way to handle that problem
+        (namely, that Allegro couldn't find libasound), but I don't know
+        what it is.<br>
+      </li>
+      <li>In the Virtual AGC source directory (which for me was
+        ~/git/virtualagc), run "gmake FREEBSD=yes".</li>
+      <li>This will have created a directory
+        VirtualAGC/temp/lVirtualAGC/, which contains all the results of
+        the build.&nbsp; I'd suggest (optionally) creating a symbolic
+        link ("ln -s") from this directory to ~/VirtualAGC, simply to
+        conform to the directory set-up the Linux Virtual AGC installer
+        uses.&nbsp; I'd also suggest that you make a desktop icon called
+        "Virtual AGC" that links to ~/VirtualAGC/bin/VirtualAGC.&nbsp;
+        The image normally used for the desktop icon is found at&nbsp;
+        ~/VirtualAGC/bin/ApolloPatch2.png.</li>
+      <li>If you try to use the ACA simulation (joystick) and it doesn't
+        work,&nbsp;<a
 href="file:///home/rburkey/git/virtualagc-web/yaTelemetry.html#Joystick_configuration_for_use_with_the">read
 about
 
@@ -904,47 +1004,6 @@ about
 
 
 
-      configuring it</a>.<br>
-    <h3><a name="Mac_OS_X"></a>Mac OS X<br>
-    </h3>
-    Note that <span style="font-style: italic;">personally</span> I
-    build the Mac OS X version of the Virtual AGC binaries <a
-      href="#Cross-Compiling">in Linux</a> rather than in Mac OS
-    X.&nbsp; Nevertheless, in development snapshot 20090415 and later,
-    it's possible to build the Mac OS X version of Virtual AGC natively
-    from Mac OS X 10.5.&nbsp; I've only tried it in 10.5.6 (Intel)
-    myself.&nbsp; Anything I say below about building in 10.4 is pure
-    speculation.&nbsp; Note also that since I don't use this procedure
-    myself, you can't expect that I try it out for every development
-    snapshot.&nbsp; Building the Mac version natively according to the
-    instructions below gives you something functionally identical to the
-    binary download package, except that you won't have the alternate
-    joystick handler (<span style="font-weight: bold;">yaACA</span>), so
-    if the primary joystick handler (<span style="font-weight: bold;">yaACA3</span>)
-    doesn't work for your joystick model then you won't be able to use a
-    joystick.<br>
-    <br>
-    Note that most of the steps below are one-time setup, and that the
-    actual build after setup is complete is quite simple.<br>
-    <ol>
-      <li>Mac OS X 10.5 includes <span style="font-weight: bold;">wxWidgets</span>
-        2.8.4, which in theory is too early a version.&nbsp;
-        Nevertheless, it appears to work and I won't quibble about
-        it.&nbsp; Mac OS X 10.4 includes <span style="font-weight:
-          bold;">wxWidgets</span> 2.5, which is definitely (I think) not
-        going to work, so you'll want to install <span
-          style="font-weight: bold;">wxWidgets</span> 2.8.9 or later;
-        probably you'll need to do this <a
-          href="http://www.wxwidgets.org">from source</a>.</li>
-      <li><span style="font-weight: bold;">SDL</span>, which is needed
-        for the joystick handler program (<span style="font-weight:
-          bold;">yaACA3</span>) is also pre-installed, but I haven't
-        figured out how to use it.&nbsp; (<span style="font-weight:
-          bold;">Hint</span>: if from a command line a program called
-        "sdl-config" is in your PATH, you <span style="font-style:
-          italic;">don't</span> need to install <span
-          style="font-weight: bold;">SDL</span>; if it isn't, then you
-        do.)&nbsp; So what I did was to <a href="http://www.libsdl.org">download
 
 
 
@@ -952,215 +1011,251 @@ about
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          the source tarball</a>, unpack it, configure it
-        ("./configure"), build it ("make"), and install it ("sudo make
-        install").&nbsp; This puts <span style="font-weight: bold;">SDL</span>
-        into /usr/local, where it won't conflict with your
-        already-installed version.</li>
-      <li>From a command-line, cd to some (preferably empty) working
-        directory and unpack the Virtual AGC development-snapshot
-        tarball ("tar -xjf yaAGC-dev-<span style="font-style: italic;">YYYYMMDD</span>.tar.bz2"),
-thus
-creating
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        a sub-folder called yaAGC/ containing the Virtual AGC source
-        tree.</li>
-      <li>Browse to the web to download the <a style="font-weight:
-          bold;" href="http://software.jessies.org/terminator/">Terminator</a>
-        application's dmg file.</li>
-      <li>Double-click the <span style="font-weight: bold;">Terminator</span>
-        dmg file, and once it's open find the <span style="font-weight:
-          bold;">Terminator</span> application (<img style="width: 20px;
-          height: 20px;" alt="" src="Terminator.png" align="middle"
-          height="41" width="42">).</li>
-      <li>Drag the <span style="font-weight: bold;">Terminator</span>
-        application from the open dmg file to the working directory in
-        which you created yaAGC/ in step 3 above.<br>
-      </li>
-      <li>From a command line in that working directory, make a tarball
-        from Terminator.app ("tar -cjvf Terminator.app.tar.bz2
-        Terminator.app").&nbsp; Once you have the tarball, you can
-        eliminate the <span style="font-weight: bold;">Terminator</span>
-        app itself, along with its dmg file.<br>
-      </li>
-      <li>From the working directory (not from within the yaAGC/
-        directory) you would build Virtual AGC using the command "make
-        -C yaAGC MACOSX=yes".&nbsp; In the&nbsp; folder
-        yaAGC/VirtualAGC/temp/, you should now find the <span
-          style="font-weight: bold;">VirtualAGC</span> application (<img
-          style="width: 20px; height: 20px;" alt=""
-          src="ApolloPatch3.png" align="middle" height="40" width="40">).<br>
-      </li>
-      <li>If you like, drag the <span style="font-weight: bold;">VirtualAGC</span>
-        application from yaAGC/VirtualAGC/temp/ to the desktop.&nbsp;
-        (It's better to drag rather than to use a 'cp' command, to make
-        sure that Mac OS X admits that the folder is actually an
-        application.)<br>
-      </li>
-      <li>Y<span style="font-weight: bold;"></span>ou're ready to go!</li>
+          configuring it</a>.&nbsp; Note that yaACA and yaACA3 are
+        built, but not yaACA2.</li>
     </ol>
-    And don't forget to read the <a href="download.html#Prerequisites">prerequisites</a>,
-    the <a href="faq.html#Troubleshooting">trouble-shooting tips</a>,
-    and the <a href="download.html#Some_platform-specific_odditities">list
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      of quirks</a> for this platform.
-    <h3><a name="BuildOther"></a>Windows<br>
-    </h3>
-    <span style="font-weight: bold;"></span> Note that <span
-      style="font-style: italic;">personally</span> I build the Windows
-    version of the Virtual AGC binaries <a
-      href="download.html#Cross-Compiling">in Linux</a> rather than in
-    Windows.&nbsp; However, Onno Hommes (thanks, Onno!) has worked out
-    the build procedures, so for versions of May 2009 and later, you
-    should be able to do a native build on Windows.&nbsp; I have tried
-    it only on Windows XP and Windows 7.&nbsp; Since I have no interest
-    in it myself, this capability is not tested for every development
-    snapshot.&nbsp; First-time setup of the Windows box is somewhat
-    time-consuming, but the build is pretty easy after that.&nbsp; I
-    have information only on using open-source tools for this, and if
-    you wish to use tools like Microsoft Visual C++ you'll have to work
-    out the details for yourself.&nbsp; (If you do, expect it to be easy
-    to build the AGC and AGS CPU simulation programs and more difficult
-    to build the various GUI interfaces such as the DSKY and DEDA.)<br>
-    <br>
-    The trick is to install a Linux-like environment in which to build
-    the Virtual AGC software; but the Virtual AGC software itself does
-    not then need the Linux-like environment to run.&nbsp; Here are the
-    steps for first-time setup.&nbsp; I fear that a certain amount of
-    knowledge of UNIX-like systems is needed, so if you are a pure
-    Windows person you may find that the following steps are more
-    trouble to figure out than they are worth to you.<br>
+    <p>Unfortunately, GUI programs like Virtual AGC or yaDSKY2 do not
+      work at the end of this process.&nbsp; You simply get the message<br>
+    </p>
+    <blockquote>
+      <p><tt>/usr/local/lib/compat/libstdc++.so.6: version
+          GLIBCXX_3.4.11 required by /usr/local/lib/libwx_baseu-2.8.so.0
+          not found<br>
+        </tt></p>
+    </blockquote>
+    <p>There are several <i>other</i> versions of <tt>/usr/local/lib/compat/libstdc++.so.6</tt>
+      present (3 others, by my count), and as for whether any of them
+      may work, I can't say.<tt><br>
+      </tt></p>
     <ol>
-      <li>Install the <a href="http://www.mingw.org">MinGW</a>
-        compiler, using the downloadable setup.exe file.&nbsp; Use the
-        default choices for installation directory, etc.&nbsp; Among the
-        options you should choose (if given the choice) are installation
-        of the <span style="font-weight: bold;">g++</span> compiler and
-        of <span style="font-weight: bold;">make</span>.</li>
-      <li>Install the <a href="http://www.mingw.org">Msys</a>
-        (Linux-like command shell) environment using the downloadable
-        setup.exe file.<br>
+    </ol>
+    <h3><a name="Solaris"></a>Solaris</h3>
+    <table border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="middle"><img alt="" src="redX.png"
+              height="75" width="70"><br>
+          </td>
+          <td align="center" valign="middle"><big><big><b>This fails!</b></big></big><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    The instructions here relate to building Virtual AGC using Solaris
+    11.3.&nbsp; Note that my knowledge of Solaris is mid-way between
+    "completely ignorant" and "dangerously misinformed", so you have to
+    take what I say with a grain of salt.&nbsp; The executive summary is
+    that I have been unable to build any of Virtual AGC's graphical
+    programs in Solaris 11.3, though I was able to build all of them,
+    once upon a time, in much earlier versions of both.&nbsp; I wash my
+    hands of it.&nbsp; My notes are below, and if anyone <i>else</i>
+    wants to figure it out and tell me how to do it, I'd be happy to
+    update the instructions.<br>
+    <br>
+    In <i>theory</i>, building Virtual AGC should be possible with the
+    following instructions:<br>
+    <ol>
+      <li>Install gcc and wxWidgets from Solaris's Package
+        Manager.&nbsp; Or alternately, install them using the <a
+          href="https://www.opencsw.org/">Open CSW system</a>, which
+        allows using a newer version of gcc/g++ (though at the cost of
+        having to add /opt/csw/bin to the PATH).<br>
       </li>
+      <li>Install gtk2, tcl-8, tk-8, ncurses, freeglut, and cmake using
+        the Package Manager.</li>
+      <li><a href="http://liballeg.org">Allegro</a> is not available in
+        the Package Manager, and needs to be installed from
+        source.&nbsp; I found it impossible to build Allegro 4.2 and 4.4
+        (used on other platforms), and so used Allegro 5.1 instead ...
+        though I don't know if that's actually compatible or not.</li>
+      <li>In the Virtual AGC source directory (which for me was
+        ~/git/virtualagc), run "gmake SOLARIS=yes".</li>
+      <li>This will have created a directory
+        VirtualAGC/temp/lVirtualAGC/, which contains all the results of
+        the build.&nbsp; I'd suggest (optionally) creating a symbolic
+        link ("ln -s") from this directory to ~/VirtualAGC, simply to
+        conform to the directory set-up the Linux Virtual AGC installer
+        uses.&nbsp; I'd also suggest that you make a desktop icon called
+        "Virtual AGC" that links to ~/VirtualAGC/bin/VirtualAGC.&nbsp;
+        The image normally used for the desktop icon is found at&nbsp;
+        ~/VirtualAGC/bin/ApolloPatch2.png.</li>
+      <li>If you try to use the ACA simulation (joystick) and it doesn't
+        work,&nbsp;<a
+          href="yaTelemetry.html#Joystick_configuration_for_use_with_the">read
+about
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          configuring it</a>.</li>
+    </ol>
+    <p>In <i>reality</i>, this does <u>not</u> work ... or rather,
+      step #4 builds all of the Virtual AGC command-line programs (such
+      as yaYUL and yaAGC) and successfully test-assembles all AGC and
+      AEA code, but immediately fails in trying to build any GUI
+      (wxWidgets-based) Virtual AGC programs (such as yaDSKY2).&nbsp;
+      The problem is that wxWidgets (and specifically, the wxWidgets
+      utility wx-config) expects the C++ compiler to have a command-line
+      option "-mt", which GNU g++ does not, but Solaris's native C++
+      compiler apparently does.&nbsp; The -mt switch is needed to insure
+      that certain libraries are linked in the proper order, and if the
+      switch is removed, then there are numerous unresolved symbols at
+      link-time.<br>
+    </p>
+    <p>As a workaround, you could imagine building wxWidgets from
+      source, using gcc, rather than installing it as a package.&nbsp;
+      However, this is an exercise in frustration, and I've not managed
+      to make wxWidgets 2.8 (or any other version) build in this way.<br>
+    </p>
+    <h3><a name="Mac_OS_X"></a>Mac OS X</h3>
+    <table border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="middle"><img alt="" src="redX.png"
+              height="75" width="70"><br>
+          </td>
+          <td align="center" valign="middle"><big><big><b>This fails!</b></big></big><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    I believe that wxWidgets probably needs to be built from source on
+    the Mac OS X platform in order to build Virtual AGC.&nbsp; While I
+    was once able to do this on very old versions of Mac OS X, I can no
+    longer discover a method for doing so.&nbsp; It is also possible
+    that my efforts are stymied by the fact that my Mac can't run any
+    version of Mac OS X newer than Lion (10.7), and I am stuck with
+    correspondingly-old versions of Xcode, so perhaps this is all very
+    simple with new Macs; and perhaps not.&nbsp; <a
+      href="https://github.com/virtualagc/virtualagc/blob/master/README.md">The
+
+
+
+
+
+
+      README file at GitHub</a> may or may not contain useful
+    information on building in newer versions of Mac OS X.&nbsp; Let me
+    know if you deduce a build-method that works.
+    <h3><a name="Windows"></a>Windows</h3>
+    <table border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
+          </td>
+          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    This section relates to building Virtual AGC on 64-bit Windows 7,
+    though the procedure doesn't seem to have anything in it that's
+    specific to that version of Windows.&nbsp; (It's merely that I've
+    only <i>tried</i> it on Windows 7.)&nbsp; The building process uses
+    MinGW/Msys (as opposed to Visual Studio), and I don't know whether
+    or not there is a valid Visual Studio build process.<br>
+    <br>
+    First-time setup of the Windows box is somewhat time-consuming (but
+    building Virtual AGC is pretty easy after that): <br>
+    <ol>
+      <li>Install <a href="http://www.mingw.org">the <b>MinGW</b>
+          compiler and the <b>Msys</b> Linux-like command-line
+          development environment</a>, using the downloadable "MinGW
+        Installation Manager".&nbsp; This installation program changes
+        over time, so I cannot tell you precisely how to use it, and can
+        only give you a general idea.&nbsp; Use the default choices for
+        installation directory (c:\mingw) and other settings, if any are
+        offered.&nbsp; Note that by default, the batch file
+        c:\mingw\msys\1.0\msys.bat is what's used to start the <b>Msys</b>
+        command shell as in the next step below, and you might want to
+        manually create a desktop icon or a Windows start-menu entry for
+        running that batch file.&nbsp; If you are unlucky enough to have
+        a Windows user name containing spaces, you will encounter
+        difficulties.&nbsp; The instructions at the www.mingw.org
+        website explain what to do in that situation.&nbsp; Specific
+        packages which you need to install using the MinGW Installation
+        Manager, at least at this writing, which may not be among the
+        defaults are:</li>
+      <ul>
+        <li>All of the packages in the "Basic Setup", except Ada,
+          FORTRAN, and Objective-C compilers.</li>
+        <li>Among the packages in "All Packages":<br>
+        </li>
+        <ul>
+          <li>"msys-libregex" (dev+dll)</li>
+          <li>"msys-libncurses" (dev+dll)</li>
+          <li>"msys-wget"</li>
+          <li>"msys-unzip"</li>
+        </ul>
+      </ul>
       <li>Run <span style="font-weight: bold;">Msys</span>, to bring up
-        a command shell.&nbsp; If you are unlucky enough to have a
-        Windows user name containing spaces, you will encounter
-        difficulties.&nbsp; For example, my home directory in <span
-          style="font-weight: bold;">Msys</span> is "/home/Ron Burkey",
-        and this messes up some of the build steps that need to be
-        performed.&nbsp; My solution to this was to create a directory
-        called "/home/rburkey" and to 'cd' to that directory whenever
-        starting up Msys.&nbsp; It would also be wise to change the
-        value of the HOME environment variable to reflect this
-        change.&nbsp; When I refer below to your "home directory", I
-        mean whatever your equivalent of "/home/rburkey" is.<br>
+        a command shell.&nbsp; <i>All</i> of the following steps occur
+        within this command shell and not at a "DOS" command line.&nbsp;
+        Some of the "DOS" commands you probably are familiar with (such
+        as "dir") don't work in this shell, while Linux-type
+        replacements ("ls -l") are used instead.&nbsp; Some commands,
+        like "cd", work almost the same way, though there are subtle
+        differences. Also, '/' is the separator for folders in
+        path-names, rather than '\'.&nbsp; Google for "bash" if you're
+        interested in these kinds of differences.&nbsp; <br>
       </li>
-      <li>Install the <a href="http://www.libsdl.org">SDL library</a>.&nbsp;
-You
-should
+      <li>Install the <a href="http://www.libsdl.org">SDL library,
+          version 1.2</a>.&nbsp; You should find that there is a
+        download file specifically labeled as a Win32 development
+        library for <span style="font-weight: bold;">MinGW</span>.&nbsp;
 
 
+        Within your <span style="font-weight: bold;">Msys</span> home
+        directory, unpack the download file, 'cd' into the directory it
+        creates.&nbsp; Do "mkdir /usr/local", and run the command "make
+        install-sdl prefix=/usr/local".&nbsp; (The /usr directory within
+        <span style="font-weight: bold;">Msys</span> will probably
+        correspond to something like c:\mingw\msys\1.0\ in your Windows
+        filesystem.) &nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
 
 
 
@@ -1168,81 +1263,6 @@ should
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        find that there is a download file specifically labeled as a
-        Win32 development package for <span style="font-weight: bold;">MinGW</span>.&nbsp;
-Within
-your
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <span style="font-weight: bold;">Msys</span> home directory,
-        unpack the download file, 'cd' into the directory it creates,
-        and run the command "make install-sdl prefix=/usr/local".&nbsp;
-        The /usr directory withing <span style="font-weight: bold;">Msys</span>
-        will probably correspond to something like c:\msys\1.0\ in your
-        Windows filesystem. &nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
 
 
 
@@ -1287,153 +1307,85 @@ your
         these installation locations.&nbsp; Note, however, that the
         Virtual AGC binaries you are going to create are <span
           style="font-style: italic;">not</span> installed under
-        /usr/local.</li>
-      <li>Obtain a source tarball of <a
-          href="http://www.wxwidgets.org/">wxWidgets</a>.&nbsp; At
-        present, Virtual AGC binary packages are always built with <span
-          style="font-weight: bold;">wxWidgets</span> 2.8.9, so 2.8.9 is
-        a safe choice though it is not the only choice which
-        works.&nbsp; Unpack the tarball in your home directory, 'cd'
-        into the directory this creates, and then do "./configure",
-        "make", and "make install".&nbsp; The "configure" step will
-        accept various command-line options that select unicode vs.
-        ansi, static linking vs. dynamic linking, etc., but the default
-        options seem to work fine.</li>
-      <li>Install <a href="http://sourceware.org/pthreads-win32/">POSIX
-          Threads for Windows</a> ("pthreads").&nbsp; There may be a
-        number of methods that work, but here is what I did:&nbsp;
-        Unpack the source tarball, 'cd' into the directory it creates,
-        then run the command "make clean GC-inlined".&nbsp; This creates
-        various files that you should copy into /usr/local as
-        follows:&nbsp; copy *.dll into /usr/local/bin; copy *.h into
-        /usr/local/include; copy the single libpthread*.a file created
-        into /usr/local/lib and rename it libpthread.a.</li>
-      <li>Install <a
-          href="http://gnuwin32.sourceforge.net/packages/readline.htm">GNU
-readline
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          for Windows</a>.&nbsp; You should find zipfiles of both
-        "binaries" and "developer files" are available for
-        download.&nbsp; They should both be downloaded and unpacked into
-        /usr/local.&nbsp; (I.e., each zipfile contains directories like
-        bin/, include/, lib/, and so on, and we want these to be merged
-        into /usr/local/bin/, usr/local/include/, etc.)</li>
-      <li>Install a regular-expression library.&nbsp; The <a
-          href="http://www.mingw.org">MinGW project</a> has a
-        "contributed" regex library ("libgnurx") that you can use.&nbsp;
-        Download both the "bin" and "dev" tarballs and unpack them into
-        /usr/local.<br>
+        /usr/local, because while the Virtual AGC apps are being created
+        using <b>Msys</b>, <b>Msys</b> is not needed to run them ...
+        they are simply Windows programs like any other.<br>
+      </li>
+      <li>Obtain a source zipfile of <a
+          href="http://www.wxwidgets.org/">wxWidgets, version 2.8.12</a>,
+        or as close to this 2.8.x version as is available.&nbsp; Of the
+        several varieties offered for download (wxAll, wxMSW, wxGTK,
+        ...) chose wxMSW, and make sure you get the source code rather
+        than an installer program.&nbsp; Unzip the downloaded file in
+        your home directory, 'cd' into the directory this creates, and
+        then do "./configure --enable-unicode", "make", and "make
+        install".</li>
+      <li>Though it has nothing to do with <i>building</i> Virtual AGC,
+        if you want to have access to Stephen Hotto's contributed Lunar
+        Module accessories when you <i>run</i> Virtual AGC, you'll also
+        have to <a href="https://www.tcl.tk/software/tcltk/">install
+          Tcl/Tk</a>.&nbsp; <br>
       </li>
     </ol>
-    If all of this was done correctly, you should now be able to build
-    Virtual AGC, as follows:<br>
+    Once this one-time setup is complete, you should now be able to
+    build Virtual AGC as follows.&nbsp; As above, all of the following
+    steps take place in the <b>Msys</b> command shell, and <u>not</u>
+    from a "DOS" command line:<br>
     <ol style="list-style-type: lower-alpha;">
-      <li>Unpack the development tarball in your home directory: "tar
-        -xjvf yaAGC-dev-<span style="font-style: italic;">YYYYMMDD</span>.tar.bz2".</li>
-      <li>Build it: "make -C yaAGC WIN32=yes".</li>
-      <li>On Windows 7&nbsp; (but not on XP) I found it necessary
-        additionally to copy c:\MinGW\bin\mingwm10.dll to
-        yaAGC/VirtualAGC/temp/lVirtualAGC/Resources/.&nbsp; Whether this
-        is a difference between Windows 7 and XP, or whether it's some
-        ghastly improvement to MinGW since the time I installed it last
-        on XP, I can't say at the present time (and am not too motivated
-        to figure out).<br>
+      <li>Get the Virtual AGC source code from GitHub (from the link at
+        the top of this page), either by using 'git', if installed on
+        your computer, or by downloading a zipfile and unzipping
+        it.&nbsp; For the sake of discussion, I'm going to suppose that
+        the folder you get from doing this is called "virtualagc" and is
+        in your home directory.<br>
+      </li>
+      <li>Do "cd virtualagc".<br>
+      </li>
+      <li>Build it: "make WIN32=yes".&nbsp; <br>
       </li>
     </ol>
-    This will create a directory yaAGC/VirtualAGC/temp/lVirtualAGC/
-    which is the "installation directory".&nbsp; When you download and
-    run the Virtual AGC Win32 setup.exe file, this is the directory you
-    get, except that the setup program copies "lVirtualAGC/" to
-    "c:\Program Files\" and renames it "Virtual AGC".&nbsp; In fact,
-    this directory is relocatable, and you can move it wherever you
-    like; nor does it need to remain within the <span
-      style="font-weight: bold;">Msys</span> environment.&nbsp; Whether
-    you leave this directory in place, or whether you move it to Program
-    Files, you really need to create a desktop icon in order to run the
-    program.&nbsp; The desktop icon should point to
-    lVirtualAGC\bin\VirtualAGC.exe as the executable, and should use a
-    "starting directory" of lVirtualAGC\Resources\.&nbsp; The graphic
-    normally used for the desktop icon is ApolloPatch2.jpg in the
-    lVirtualAGC\Resources directory.<br>
-    <br>
-    And don't forget to read the <a href="download.html#Prerequisites">prerequisites</a>,
-    the <a href="faq.html#Troubleshooting">trouble-shooting tips</a>,
-    and the <a href="download.html#Some_platform-specific_odditities">list
+    <p>There are also a couple of optional post-build steps you can
+      perform:<br>
+    </p>
+    <ol style="list-style-type: lower-alpha;">
+      <li>(Optional.) The build process will have created a directory
+        VirtualAGC/temp/lVirtualAGC/ which is the "installation
+        directory".&nbsp; There's presently no Virtual AGC Windows
+        setup.exe file, but there was in the past and may be in the
+        future; what it does is to copy this "lVirtualAGC/" folder to
+        "c:\Program Files\" and rename it "VirtualAGC".&nbsp; So you
+        might want to do that as well, to maintain compatibility.&nbsp;
+        In fact, this directory is relocatable, and you can move it
+        wherever you like; nor does it need to remain within the <span
+          style="font-weight: bold;">Msys</span> environment.&nbsp; <br>
+      </li>
+      <li>(Optional.) Whether you leave this directory in place, or
+        whether you move it to Program Files, you probably want to
+        create a desktop icon or an entry in the start menu in order to
+        run the VirtualAGC program.&nbsp; The desktop icon should point
+        to <i>Path-to-lVirtualAGC</i>\bin\VirtualAGC.exe as the
+        executable, and should use a "starting directory" of <i>Path-to-lVirtualAGC</i>\Resources.&nbsp;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      of quirks</a> for this platform.<br>
+        (The graphic normally used for the desktop icon is
+        ApolloPatch2.jpg in the <i>Path-to-lVirtualAGC</i>\Resources
+        directory, but apparently Windows doesn't allow use of anything
+        so mundane as a jpeg file for a desktop icon.)</li>
+    </ol>
     <h3><a name="iPhone"></a>iPhone</h3>
+    <table border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td align="center" valign="middle"><img alt=""
+              src="yellowQuestion.png" height="75" width="70"><br>
+          </td>
+          <td align="center" valign="middle"><big><big><b>Still okay?</b></big></big><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
     For development snapshot 20090802 and later, it's possible to build
     <span style="font-weight: bold;">yaAGC</span>—not the entire Virtual
     AGC suite, just <b>yaAGC</b>—from (I guess) a Mac, if you've
@@ -1488,12 +1440,47 @@ readline
     </ol>
     If this doesn't work for some reason, refer to the trouble-shooting
     info in the <a href="faq.html">FAQ</a>.<br>
-    <br>
+    <h2><a name="Some_Resource_Issues_on_Slower"></a>Some Resource
+      Issues on Slower Computers, Such as Raspberry Pi<br>
+    </h2>
+    On new but slow computers like Raspberry Pi, or old computers such
+    as PowerPC-based Macs, the CPU utilization for Virtual AGC can be
+    rather high.&nbsp; Indeed if you ran every available option on an
+    early-model Pi, you could find yourself using close to 100% of the
+    CPU.&nbsp; For the default configuration of VirtualAGC (Lunar Module
+    AGC with DSKY and Telemetry but without abort system or IMU), I find
+    the following:<br>
+    <ul>
+      <li>Pi B+:&nbsp; 80% CPU utilization.&nbsp; <br>
+      </li>
+      <li>Pi 3: 40% CPU utilization.<br>
+      </li>
+    </ul>
+    <p>If that's too much for you, there are some things you may be able
+      to do to make it more efficient.&nbsp; First, note that the
+      VirtualAGC program — which isn't a component of the simulation,
+      but merely a convenient graphical interface so that you don't have
+      to memorize command-line options for the actual components —
+      actually takes 25-30% of the CPU (for either of the two Pi models
+      mentioned above) all by itself.&nbsp; You don't really need to run
+      it if you don't want to.&nbsp; But how do you run a simulation
+      easily without VirtualAGC?&nbsp; Well, if you run the simulation
+      just <i>once</i> from VirtualAGC, and exit the simulation
+      immediately after starting it, you'll find that it has
+      automatically created a script called "simulate" which can be used
+      to start that exact configuration of the simulation without
+      running VirtualAGC itself.&nbsp; As a result, you get CPU
+      utilizations closer to 50% or 10%, respectively, on the two Pi
+      models mentioned above.&nbsp; To just run that script, you do
+      this:</p>
+    <blockquote> <tt>cd VirtualAGC/temp/lVirtualAGC/Resources</tt><tt><br>
+      </tt><tt> ./simulate</tt><br>
+    </blockquote>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-11-17.<br>
+          2016-11-19.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
