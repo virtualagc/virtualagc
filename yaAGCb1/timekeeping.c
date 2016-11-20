@@ -52,8 +52,9 @@
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
+#include <mach/mach_time.h>
 #define CLOCK_REALTIME 0
-int clock_gettime (int clock_id, struct timespec *__tp)
+int clock_gettime (int clock_id, struct timespec *timeSpec)
 {
   clock_serv_t cclock;
   mach_timespec_t mts;
