@@ -271,6 +271,9 @@ endif
 endif
 WEBSITE=..
 endif
+ifdef MACOSX
+yaACA=-
+endif
 
 # Note:  The CURSES variable is misnamed.  It really is just any special libraries
 # for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
@@ -290,8 +293,8 @@ CURSES=-lcurses
 endif
 
 ifdef MACOSX
-CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro -I/opt/local/include/allegro5
-CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro -I/opt/local/include/allegro5
+CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro
+CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro
 endif
 
 # We assume a *nix build environment.
@@ -369,12 +372,12 @@ all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(cbMISSIONS) $(SUBDIRS)
 
-.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA ControlPulseSim
-Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim:
+.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 ControlPulseSim
+Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 ControlPulseSim:
 	$(BUILD) -C $@ 
 
-.PHONY: yaACA3
-yaACA3:
+.PHONY: yaACA yaACA3
+yaACA yaACA3:
 	${yaACA}$(BUILD) -C $@ 
 
 .PHONY: yaDEDA
