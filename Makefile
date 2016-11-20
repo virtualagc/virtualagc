@@ -290,8 +290,8 @@ CURSES=-lcurses
 endif
 
 ifdef MACOSX
-CFLAGS0+=-I/opt/local/include/allegro -I/opt/local/include/allegro5
-CFLAGS+=-I/opt/local/include/allegro -I/opt/local/include/allegro5
+CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro -I/opt/local/include/allegro5
+CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro -I/opt/local/include/allegro5
 endif
 
 # We assume a *nix build environment.
