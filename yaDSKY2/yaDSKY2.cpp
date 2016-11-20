@@ -976,9 +976,9 @@ bool yaDskyApp::OnInit()
   textdomain (GETTEXT_PACKAGE);
 #endif
 
-  cout << std::string ("yaDSKY2 Apollo DSKY simulation, ver " VER(NVER) ", built " __DATE__ " " __TIME__ "\n");
-  cout << std::string ("Copyright 2009 by Ronald S. Burkey\n");
-  cout << std::string ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
+  cout << string ("yaDSKY2 Apollo DSKY simulation, ver " VER(NVER) ", built " __DATE__ " " __TIME__ "\n");
+  cout << string ("Copyright 2009 by Ronald S. Burkey\n");
+  cout << string ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 	  
   DEBUG (-1);
 
@@ -989,9 +989,11 @@ bool yaDskyApp::OnInit()
       wxString ArgStart = Arg.BeforeFirst ('=');
       wxString ArgEnd = Arg.AfterFirst ('=');
       
-      wxString msg;
-      msg << "Arg " << i << " = \"" << Arg << "\"\n";
-      cout << msg;
+      cout << string ("Arg ");
+      cout << i;
+      cout << string (" = \"");
+      cout << string(Arg.mb_str());
+      cout << string ("\"\n");
 
       if (Arg.IsSameAs (wxT ("--relative-pixmaps")))
         {
@@ -1109,9 +1111,12 @@ bool yaDskyApp::OnInit()
 	}	
     }
   DEBUG (0);
-  wxString msg;
-  msg << "Hostname=" << Hostname << ", port=" << Portnum << "\n";
-  cout << msg;
+
+  cout << string ("Hostname=");
+  cout << string (Hostname);
+  cout << string (", port=");
+  cout << Portnum;
+  cout << string ("\n");
   	
   // The following is sort of an abbreviated form of some stuff that 
   // ParseCfg does, and is called in case --cfg didn't appear on the 

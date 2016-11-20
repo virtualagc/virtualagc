@@ -548,11 +548,11 @@ yaDedaAppClass::OnInit ()
   MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString);
 
   cout
-      << std::string (
+      << string (
 	  "yaDEDA2 Apollo DEDA simulation, ver " VER(NVER) ", built " __DATE__ " " __TIME__ "\n");
-  cout << std::string ("Copyright 2009 by Ronald S. Burkey\n");
+  cout << string ("Copyright 2009 by Ronald S. Burkey\n");
   cout
-      << std::string (
+      << string (
 	  "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 
   Portnum = 19897;
@@ -562,9 +562,12 @@ yaDedaAppClass::OnInit ()
       wxString ArgStart = Arg.BeforeFirst ('=');
       wxString ArgEnd = Arg.AfterFirst ('=');
 
-      wxString msg;
-      msg << "Arg " << i << " = \"" << Arg << "\"\n";
-      cout << msg;
+      cout << string ("Arg ");
+      cout << i;
+      cout << string (" = \"");
+      cout << string(Arg.mb_str());
+      cout << string ("\"\n");
+
       if (Arg.IsSameAs (wxT ("--relative-pixmaps")))
 	{
 	  // Does nothing.  Legacy from yaDSKY.
@@ -652,9 +655,11 @@ yaDedaAppClass::OnInit ()
 	  exit (1);
 	}
     }
-  wxString msg;
-  msg << "Hostname=" << Hostname << ", port=" << Portnum << "\n";
-  cout << msg;
+  cout << string ("Hostname=");
+  cout << string (Hostname);
+  cout << string (", port=");
+  cout << Portnum;
+  cout << string ("\n");
 
   SetTopWindow (MainWindow);
 
