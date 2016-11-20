@@ -372,12 +372,12 @@ all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(cbMISSIONS) $(SUBDIRS)
 
-.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 ControlPulseSim
-Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 ControlPulseSim:
+.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse ControlPulseSim
+Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse ControlPulseSim:
 	$(BUILD) -C $@ 
 
-.PHONY: yaACA yaACA3
-yaACA yaACA3:
+.PHONY: yaACA yaACA2 yaACA3
+yaACA yaACA2 yaACA3:
 	${yaACA}$(BUILD) -C $@ 
 
 .PHONY: yaDEDA
