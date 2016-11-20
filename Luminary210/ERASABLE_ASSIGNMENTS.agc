@@ -12,7 +12,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
-##              2016-11-   HG   Transcribed
+##              2016-11-19 HG   Transcribed
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -123,7 +123,7 @@ CDUZCMD         EQUALS          52
 CDUTCMD         EQUALS          53                      # RADAR TRUNNION COMMAND
 CDUSCMD         EQUALS          54                      # RADAR SHAFT COMMAND
 
-## Page 94
+## Page 95
 THRUST          EQUALS          55
 LEMONM          EQUALS          56
 OUTLINK         EQUALS          57
@@ -1245,8 +1245,8 @@ EPSILONT        ERASE           +1                      # I(2)
 
 #          R36 STORAGE  (N90)                             (6D)
 YLEM            ERASE           +5                      # I(2)
-YDOTLEM         ERASE           YLEM            +2      # I(2)
-PHILEM          ERASE           YDOTLEM         +2      # I(2)
+YDOTLEM         EQUALS          YLEM            +2      # I(2)
+PHILEM          EQUALS          YDOTLEM         +2      # I(2)
 
 
 #          VERB 83 STORAGE.                              (18D)
@@ -1464,8 +1464,8 @@ PITCH           EQUALS          YAW             +2      # I(2)TMP
 #          SERVICER FOR LUNAR ASCENT AND DESCENT         (14D)
 
 G(CSM)          EQUALS          GEFF            +2      # I(6) FOR UPDATE OF COMMAND MODULE STATE
-R(CSM)          EQUALS          R-OTHER                 #      VECTORS BY LEM; ANALOGS OF GDT/2,
-V(CSM)          EQUALS          V-OTHER                 #      R, AND V, RESPECTIVELY OF THE CSM
+#R(CSM)          EQUALS          R-OTHER                #      VECTORS BY LEM; ANALOGS OF GDT/2,
+#V(CSM)          EQUALS          V-OTHER                #      R, AND V, RESPECTIVELY OF THE CSM
 WM              EQUALS          G(CSM)          +6      # I(6) TMP - LUNAR ROTATION VECTOR (SM)
 /LAND/          EQUALS          WM              +6      # B(2) LUNAR RADIUS AT LANDING SITE
 #
@@ -1757,7 +1757,7 @@ OMEGAM1         EQUALS          GRP2SVQ         +1      # I(6)
 OMEGAM2         EQUALS          OMEGAM1         +6      # I(6)
 OMEGAM3         EQUALS          OMEGAM2         +6      # I(6)
 HOLDW           EQUALS          OMEGAM3         +6      # I(18)
-                
+
 TRIPA           EQUALS          DELTAX                  # I(3)TMP
 TEMPVAR         EQUALS          TRIPA           +3      # I(3)TMP
 
@@ -1790,18 +1790,18 @@ TEMPADD         =               GENPL           +4
 TEMP            =               GENPL           +5
 NOBITS          =               GENPL           +6
 CHAN            =               GENPL           +7
-        
+
 LOS1            =               GENPL           +8D
 LOS2            =               GENPL           +14D
-                        
+
 DATAPL          EQUALS          GENPL           +30D
-REULTCT         EQUALS          GENPL           +67D    
+REULTCT         EQUALS          GENPL           +67D
 AINLA           =               GENPL                   # 110 DEC OR 156 OCT LOCATIONS
-                        
+
 WANGO           EQUALS          AINLA                   # VERT ERATE
 WANGI           EQUALS          AINLA           +2D     # HORIZONTAL ERATE
 WANGT           EQUALS          AINLA           +4D     # T
-TORQNDX         =               WANGT           
+TORQNDX         =               WANGT
 DRIFTT          EQUALS          AINLA           +6D
 ALX1S           EQUALS          AINLA           +8D
 CMPX1           EQUALS          AINLA           +9D     # IND
@@ -1817,8 +1817,8 @@ DRIFTO          EQUALS          AINLA           +38D    # VERT
 DRIFTI          EQUALS          AINLA           +40D    # SOU
 VLAUN           EQUALS          AINLA           +44D
 ACCWD           EQUALS          AINLA           +46D
-        
-## Page 133 
+
+## Page 133
 POSNV           EQUALS          AINLA           +52D
 DPIPAY          EQUALS          AINLA           +54D    # SOUTH
 DPIPAZ          EQUALS          AINLA           +58D    # NORTH  IP INCREMENT
@@ -1830,7 +1830,7 @@ WPLATI          EQUALS          AINLA           +84D
 GEOCOMPS        EQUALS          AINLA           +86D
 ERCOMP          EQUALS          AINLA           +87D
 ZERONDX         EQUALS          AINLA           +93D
-        
+
 THETAN          =               ALK             +4
 FILDELV         EQUALS          THETAN          +6      #  AGS ALIGNMENT STORAGE
 INTVEC          EQUALS          FILDELV         +2
@@ -1839,8 +1839,8 @@ ASECXT          =               AINLA           +95D
 PERFDLAY        EQUALS          AINLA           +96D    # B(2) DELAY TIME BEF. START DRIFT MEASURE
 OVFLOWCK        EQUALS          AINLA           +98D    # (1) SET MEANS OVERFLOW IN IMU PERF TEST
                                                         #     AND CAUSES TERMINATION
-        
-        
+
+
 END-E5          EQUALS          2777                    # END OF EBANK 5
 
 ## Page 134
@@ -1875,11 +1875,11 @@ IGNAOSR         ERASE                                   # B(1)PL
 
 M11             ERASE                                   # SCALED AT 1
 M21             ERASE                                   # SCALED AT 1
-M31             ERASE           
+M31             ERASE
 M22             ERASE                                   # SCALED AT 1.
 M32             ERASE                                   # SCALED AT 1.
 
-#  ANGLE MEASUREMENTS.                                    (31D)  
+#  ANGLE MEASUREMENTS.                                    (31D)
 
 OMEGAP          ERASE           +4                      # BODY-AXIS ROT. RATES SCALED AT PI/4 AND
 OMEGAQ          EQUALS          OMEGAP          +1      # BODY-AXIS ACCELERATIONS SCALED AT PI/8
@@ -1887,9 +1887,9 @@ OMEGAR          EQUALS          OMEGAP          +2
 #     RETAIN THE ORDER OF ALPHAQ AND ALPHAR FOR DOWNLINK PURPOSES.
 ALPHAQ          EQUALS          OMEGAP          +3
 ALPHAR          EQUALS          OMEGAP          +4
-OMEGAU          ERASE           +1              
+OMEGAU          ERASE           +1
 OMEGAV          =               OMEGAU          +1
-        
+
 TRAPEDP         ERASE           +5
 TRAPEDQ         =               TRAPEDP         +1
 TRAPEDR         =               TRAPEDP         +2
@@ -1903,7 +1903,7 @@ EDOTQ           ERASE           +1
 EDOTR           =               EDOTQ           +1      #  MANY SHAREING NAMES
 QRATEDIF        EQUALS          EDOTQ                   # ALTERNATIVE NAMES:
 RRATEDIF        EQUALS          EDOTR                   # DELETE WHEN NO. OF REFERENCES = 0
-        
+
 URATEDIF        EQUALS          OMEGAU
 VRATEDIF        EQUALS          OMEGAV
 OLDXFORP        ERASE           +2                      # STORED CDU READINGS FOR STATE
@@ -1944,7 +1944,7 @@ NEXTU           =               NEXTP           +1
 NEXTV           =               NEXTP           +2
 -2JETLIM        ERASE           +1                      # RATE COMMAND 4-JET RATE DIFFERENCE LIMIT
 -RATEDB         EQUALS          -2JETLIM        +1      # AND RATE DEADBAND FOR ASCENT OR DESCENT
-        
+
 TARGETDB        EQUALS          -RATEDB                 # MAN. CONTROL TARGET DB COMPLEMENT.
 
 #       *** Q,R AXIS ERASABLES ***                        (3)
@@ -1954,14 +1954,14 @@ PBIT            EQUALS          BIT10
 QRBIT           EQUALS          BIT11
 UERROR          EQUALS          DAPTREG5                # U,V-AXES ATT ERROR FOR RCS CONTROL LAWS
 VERROR          =               UERROR          +1
-RETJADR         ERASE   
+RETJADR         ERASE
 TEMPNUM         EQUALS          DAPTEMP4
 NUMBERT         EQUALS          DAPTEMP5
 ROTINDEX        EQUALS          DAPTEMP6
 ROTEMP1         EQUALS          DAPTEMP1
 ROTEMP2         EQUALS          DAPTEMP2
 POLYTEMP        EQUALS          DAPTEMP3
-SENSETYP        ERASE   
+SENSETYP        ERASE
 ABSTJ           EQUALS          DAPTEMP1                # ABS VALUE OF JET-FIRING TIME
 ABSEDOTP        EQUALS          DAPTEMP1
 
@@ -1971,12 +1971,12 @@ ABSEDOTP        EQUALS          DAPTEMP1
 GTSTEMPS        EQUALS          DAPTEMP1                # GTS IS PART OF THE JASK.
 SHFTFLAG        EQUALS          GTSTEMPS        +2      # COUNT BITS FOR GTSQRT SHIFTING.
 ININDEX         EQUALS          GTSTEMPS        +5      # INDEX FOR SHIFT LOOP IN GTSQRT.
-                
+
 SAVESR          EQUALS          AXISCTR                 # CANNOT BE A DAPTEMP - GTS USES THEM ALL.
-                
+
 SCRATCH         EQUALS          GTSTEMPS        +7      # ROOTCYCL ERASABLE
 HALFARG         EQUALS          GTSTEMPS        +8D     # ROOTCYCL ERASABLE.
-                
+
 K2THETA         EQUALS          GTSTEMPS                # D.P., K*ERROR,  NEGUSUM
 KCENTRAL        EQUALS          GTSTEMPS        +2      # S.P., K FROM KQ OR KRDAP, AT PI/2(8)
 K2CNTRAL        EQUALS          GTSTEMPS        +3      # D.P., GTS SCRATCH CELLS.
@@ -1986,20 +1986,20 @@ DEL             EQUALS          GTSTEMPS        +6      # S.P., SGN FUNCTION VAL
 A2CNTRAL        EQUALS          GTSTEMPS        +7      # D.P., GTS SCRATCH CECLS.
 QRCNTR          EQUALS          GTSTEMPS        +9D     # S.P.,INDEX FOR GTS LOOP THROUGH Q,R AXES
 FUNCTION        EQUALS          GTSTEMPS        +10D    # D.P.,ARGUMENT FOR GRSQRT,SCRATCH FOR GTS
-                
+
 NEGUQ           ERASE           +2                      # NEGATIVE OF Q-AXIS GIMBAL DRIVE
 #                               NEGUQ           +1      #   DEFINED AND USED ELSEWHERE
 NEGUR           EQUALS          NEGUQ           +2      # NEGATIVE OF R-AXIS GIMBAL DRIVE
-        
+
 KQ              ERASE           +2                      # S.P.,JERK TERM FOR GTS, AT PI/2(8)
 AXISCTR         EQUALS          KQ              +1
 KRDAP           EQUALS          KQ              +2      # .3 ACCDOTR SCALED AT PI/2(8)
-        
+
 ACCDOTQ         ERASE           +3                      # Q-JERK SCALED AT PI/2(7) UNSIGNED
 QACCDOT         EQUALS          ACCDOTQ         +1      # Q-JERK SCALED AT PI/2(7) SIGNED
 ACCDOTR         EQUALS          ACCDOTQ         +2      # R-JERK SCALED AT PI/2(7) UNSIGNED
 RACCDOT         EQUALS          ACCDOTQ         +3      # R-JERK SCALED AT PI/2(7) SIGNED
-        
+
 QDIFF           EQUALS          QERROR                  # ATTITUDE ERRORS:
 RDIFF           EQUALS          RERROR                  # SCALED AT PI RADIANS
 
@@ -2011,25 +2011,25 @@ RDIFF           EQUALS          RERROR                  # SCALED AT PI RADIANS
 JETRATE         EQUALS          DAPTREG1
 JETRATEQ        EQUALS          JETRATE         +1      # THE LAST CONTROL SAMPLE PERIOD OF 100 MS
 JETRATER        EQUALS          JETRATE         +2      # SCALED AT PI/4 RADIANS/SECOND
-                                        
+
 DOWNTORK        ERASE           +5                      # ACCUMULATED JET TORQUE COMMANDED ABOUT
 POSTORKP        EQUALS          DOWNTORK                #   +,-P, +,-U, +,-V RESPECTIVELY.
-NETTOTKP        EQUALS          DOWNTORK        +1      #  
+NETTOTKP        EQUALS          DOWNTORK        +1      #
 POSTORKU        EQUALS          DOWNTORK        +2      #   NOT INITIALIZED; PERMITTED TO OVERFLOW
 
 ## Page 138
 NEGTORKU        EQUALS          DOWNTORK        +3      # SCALED AT 32 JET-SEC, OR ABOUT 2.0 JET-
 POSTORKV        EQUALS          DOWNTORK        +4      #     MSEC PER BIT.
 NEGTORKV        EQUALS          DOWNTORK        +5
-        
+
 NO.PJETS        ERASE           +2
 NO.UJETS        =               NO.PJETS        +1
 NO.VJETS        =               NO.UJETS        +1
 TJP             ERASE           +2
 TJU             =               TJP             +1
 TJV             =               TJP             +2
-        
-L,PVT-CG        ERASE   
+
+L,PVT-CG        ERASE
 1JACC           ERASE           +3
 1JACCQ          EQUALS          1JACC           +1      # SCALED AT PI/4 RADIANS/SECOND
 1JACCR          EQUALS          1JACC           +2
@@ -2048,7 +2048,7 @@ AOSQ            ERASE           +5                      # OFFSET ACC. ESTIMATES,
 AOSR            EQUALS          AOSQ            +2      # AND SCALED AT PI/2.
 AOSU            EQUALS          AOSQ            +4      # UV-AXES OFFSET ACC. FROMED BY VECTOR
 AOSV            EQUALS          AOSQ            +5      # ADDITION OF Q.R.  AT PI/2 RAD/SEC(2).
-                
+
 AOSQTERM        ERASE           +1                      # (.1-.05K)AOS
 AOSRTERM        EQUALS          AOSQTERM        +1      # SCALED AT PI/4 RADIANS/SECOND.
 
@@ -2066,7 +2066,7 @@ HH              EQUALS          DAPTREG3                # DOUBLE PRECISION.
 # HH +1         EQUALS          DAPTREG4
 E               EQUALS          DAPTREG6                # TIME SHARE WITH VERROR
 EDOT            EQUALS          OMEGAV
-        
+
 # INPUT TO TJET LAW (PERMANENT ERASABLES).              (48D)
 
 ## Page 139
@@ -2074,7 +2074,7 @@ TJETU           =               TJU                     # EQUATE NAMES.  INDEXED
 BLOCKTOP        ERASE           +47D
 #               * SEE AOSTASK AND AOSJOB LOG SECTION FOR ERASABLE DEFINITIONS
 #                                        IN THIS AREA.
-                 
+
 1/ANET1         =               BLOCKTOP        +16D    # THESE 8 PARAMETERS ARE SET UP BY 1/ACCS
 1/ANET2         =               1/ANET1         +1      # FOR MINIMUM JETS ABOUT THE U-AXIS WHEN
 1/ACOAST        =               1/ANET1         +4      # EDOT IS POSITIVE.  TJETLAW INDEXES BY
@@ -2088,10 +2088,10 @@ ACCSWU          =               BLOCKTOP                # SET BY 1/ACCS TO SHOW 
 ACCSWV          =               ACCSWU          +1      # JETS ARE REQUIRED BECAUSE OF AOS.
 FLAT            =               BLOCKTOP        +6      # WIDTH OF MINIMUM IMPULSE ZONE.
 ZONE3LIM        =               BLOCKTOP        +7      # HEIGHT OF MINIMUM IMPULSE ZONE (AT 4 SEC)
-        
+
 COEFFQ          ERASE           +1                      # COEFFQ AND COEFFR ARE USED IN ROT-TOUV
 COEFFR          EQUALS          COEFFQ          +1      # TO REXOLVE Q,R COMPONENTS INTO U,V COMP.
-        
+
 # VARIABLES FOR GTS-QRAXIS CONTROL EXCHANGE.              (4)
 
 ALLOWGTS        EQUALS          NEGUQ           +1      # INSERT INTO UNUSED LOCATION
@@ -2107,7 +2107,7 @@ RGIMTIMR        EQUALS          QGIMTIMR        +2      # R-GIMBAL DRIVE TIMER, 
 CDUXD           ERASE           +2                      # CDU DESIRED REGISTERS:
 CDUYD           EQUALS          CDUXD           +1      # SCALED AT PI RADIANS (180 DEGREES)
 CDUZD           EQUALS          CDUXD           +2      # (STORE IN 2'S COMPLEMENT)
-        
+
 DELCDUX         ERASE           +2                      # NEGATIVE OF DESIRED 100MS CDU INCREMENT:
 DELCDUY         EQUALS          DELCDUX         +1      # SCALED AT PI RADIANS (180 DEGREES)
 DELCDUZ         EQUALS          DELCDUX         +2      # (STORE IN 2S COMPLEMENT)
@@ -2117,24 +2117,24 @@ DELCDUZ         EQUALS          DELCDUX         +2      # (STORE IN 2S COMPLEMEN
 OMEGAPD         ERASE           +2                      # ATTITUDE MANEUVER DESIRED RATES:
 OMEGAQD         EQUALS          OMEGAPD         +1      # (NOT EXPLICITLY REFERENCED IN GTS CNTRL)
 OMEGARD         EQUALS          OMEGAPD         +2      # SCALED AT PI/4 RADIANS/SECOND
-        
+
 # KALCMANU STORAGE.                             (24D)
 
 ## Page 140
 MIS             ERASE           +23D                    # I(18D)
 COF             EQUALS          MIS             +18D    # I(6)
-        
-        
+
+
 # KALCMANU STORAGE.                                     (33D)
-        
+
 BCDU            ERASE           +30D                    # B(3)
 KSPNDX          EQUALS          BCDU            +3      # B(1)
 KDPNDX          EQUALS          KSPNDX          +1      # B(1)
-        
+
 TMIS            EQUALS          KDPNDX          +1      # I(18) MUST BE IN SAME BANK AS RCS DAP
 COFSKEW         EQUALS          TMIS            +18D    # I(6)  MUST BE IN SAME BANK AS RCS DAP
 CAM             EQUALS          COFSKEW         +6      # I(2)  MUST BE IN SAME BANK AS RCS DAP
-        
+
 AM              ERASE           +1                      # I(2) THIS WAS ONCE IN E5 OVERLAYING OGC
 
 # FIRST-ODER OVERLAYS IN KALCMANU                       (25D)
@@ -2170,10 +2170,10 @@ NDXCDUW         EQUALS          QCDUWUSR        +1      # B(1)TMP
 FLAGOODW        EQUALS          NDXCDUW         +1      # B(1)TMP
 UNFC/2          EQUALS          FLAGOODW        +1      # I(6)IN
 
-## Page 141     
+## Page 141
 UNWC/2          EQUALS          UNFC/2          +6      # I(6)IN
 UNFV/2          EQUALS          UNWC/2          +6      # I(6) S-S
-UNFVX/2         =               UNFV/2          
+UNFVX/2         =               UNFV/2
 UNFVY/2         =               UNFV/2          +2
 UNFVZ/2         =               UNFV/2          +4
 -DELGMB         EQUALS          UNFV/2          +6      # B(3)TMP
@@ -2218,7 +2218,7 @@ DAPTREG3        EQUALS          DAPTEMP1        +8D
 DAPTREG4        EQUALS          DAPTEMP1        +9D
 DAPTREG5        EQUALS          DAPTEMP1        +10D
 DAPTREG6        EQUALS          DAPTEMP1        +11D
-                
+
 DAPARUPT        EQUALS          DAPTEMP1        +12D
 DAPLRUPT        EQUALS          DAPARUPT        +1
 
@@ -2228,7 +2228,7 @@ DAPZRUPT        EQUALS          DAPARUPT        +4
 
                                                         # (DAPZRUPT IS ALSO A JASK-IN-PROGRESS FLAG)
 
-                                                        
+
 #          NEEDLER(ATTITUDE ERROR EIGHT BALL DISPLAY) STORAGE.   (6D)
 
 T5TEMP          EQUALS          ITEMP1
@@ -2236,7 +2236,7 @@ DINDX           EQUALS          ITEMP3
 AK              ERASE           +2                      # NEEDLER ATTITUDE INPUTS, SCALED AT 180
 AK1             EQUALS          AK              +1      # DEGREES.  P,Q,R AXES IN AK,AK1,AK2.
 AK2             EQUALS          AK              +2
-        
+
 EDRIVEX         ERASE           +2                      # NEEDLER DISPLAY REGS AT 1800 DEGREES.
 EDRIVEY         EQUALS          EDRIVEX         +1      # SO THAT 384 BITS REPRESENT 42 3/16 DEGREES.
 EDRIVEZ         EQUALS          EDRIVEX         +2
@@ -2269,7 +2269,7 @@ RCSFLAGS        ERASE                                   # AUTOPILOT FLAG WORD
                                                         # 11) QRBIT- MANUAL CONTROL SWITCH
                                                         # 12) PSKIP CONTROL (PJUMPADR)
                                                         # 13) 1/ACCJOB CONTROL (ACCSET)
-                                                        
+
 ## Page 143
 END-E6          EQUALS           AZBIAS         +1      # NEXT AVAILABLE LOC IN E6.
 
@@ -2340,7 +2340,7 @@ DELVSLV         =               DELVLVC                 # (TEMP STORAGE OF SAME 
 #          P30-P40 INTERFACE UNSHARED.                   (2D)
 
 # ******* NOTE:  TIG IS USED BY ALL POWERED FLIGHT PROGRAMS        ******
-# *******              INCLUDING P12, ABORTS, AND LUNAR LANDING.  ******* 
+# *******              INCLUDING P12, ABORTS, AND LUNAR LANDING.  *******
 
 TIG             ERASE           +1                      # B(2)
 
@@ -2353,10 +2353,10 @@ DELLT4          ERASE           +1                      # I(2) TIME DIFFERENCE
 
 #          LANDING RADAR - R12   (OVERLAY)               (2D)
 
-HLROFF          EQUALS          DELLT4                  # B(1),I(2) TMP  NO LANDING RADAR UPDATES 
+HLROFF          EQUALS          DELLT4                  # B(1),I(2) TMP  NO LANDING RADAR UPDATES
                                                         #                 BELOW THIS ALTITUDE.
-                                                        
-                                                        
+
+
 #          CLOKTASK, BURNBABY                            (3D)
 
 TTOGO           ERASE           +1                      # B(2)
@@ -2378,13 +2378,13 @@ LOSCOUNT        ERASE                                   # B(1)
 # ****           (DOWNLINKED ON THE DESCENT/ASCENT LIST AS THE
 # ****             LOW ORDER PART OF AOG TELEMETRY WORD)
 # ****                AND USED IN SERVICER, P63 RESTART, AND R12READ.
- 
+
 #    RETAIN THE ORDER OF AIG TO TRKMKCNT FOR DOWNLINK PURPOSES.
 
 AIG             ERASE                                   # B(1)OUT  GIMBAL ANGLES
 AMG             ERASE                                   # B(1)OUT  (MUST BE
 AOG             ERASE                                   # B(1)OUT   CONSECUTIVE)
-                
+
 TRKMKCNT        ERASE                                   # B(1)TMP  TEMPORARY MARK STORAGE.
 MARKCTR         =               TRKMKCNT
 
@@ -2399,8 +2399,8 @@ QSAVED          ERASE                                   # B(1) PRM SAVE FOR Q
 RTRN            ERASE                                   # B(1) PRM SAVE FOR Q
 NN              ERASE           +1                      # B(2)
 SUBEXIT         ERASE                                   # B(1) PRM SAVE Q
-                
-                
+
+
 E7OVERLA        EQUALS                                  # START OF E7 OVERLAYS.
 WHOCARES        EQUALS          E7OVERLA                # DUMMY FOR EBANK INSENSITIVE 2CADRS
 
@@ -2441,11 +2441,11 @@ LOOPCT          EQUALS          POSTTPI                 # CSI NEWTON ITERATION C
 HAFPA1          EQUALS          POSTCDH                 # HALF PERIOD
 GAMPREV         ERASE           +1                      # PREVIOUS GAMMA
 DVPREV          EQUALS          DELVTPI                 # PREVIOUS DELVCSI
-DELDV           ERASE           +1D     
+DELDV           ERASE           +1D
 CSIALRM         ERASE           +1                      # FIRST SOLUTION ALARM
-VERBNOUN        ERASE           
+VERBNOUN        ERASE
 TITER           EQUALS          CSIALRM                 # ITERATION COUNTER
-RDOTV           ERASE           +1      
+RDOTV           ERASE           +1
 VAPREC          EQUALS          VPASS1                  # I(6) S-S PREC VEC FOR NOM TPI TIME(ACTIVE)
 RAPREC          EQUALS          RPASS1                  # I(6) S-S PREC VEC FOR NOM TPI TIME(ACTIVE)
 VPPREC          EQUALS          VPASS2                  # I(6) S-S PREC VEC FOR NOM TPI TIME(PASSIVE)
@@ -2456,7 +2456,7 @@ DELTEEO         EQUALS          POSTTPI                 # I(2) S-S BACK VALUES O
 CENTANG         ERASE           +1                      # I(2) S-S CENTRAL ANGLE COVERED (TPI-TPF)
 
 
-                
+
 #          SOME P47 STORAGE                              (6D)
 
 ## Page 148
@@ -2496,7 +2496,7 @@ QTEMP1          ERASE                                   # I(1)TMP HOLDS RETURN.
 #
 
 
-#          R52 TEMPORARY          
+#          R52 TEMPORARY
 
 SAVQR52         EQUALS          QTEMP1
 
@@ -2510,360 +2510,452 @@ COZY4           ERASE           +1                      # COS OF ANGLE WHEN ROTA
 INTIME          EQUALS          GAMPREV                 # TIME OF RINIT
 
 ## Page 149
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# PERIAPO STORAGE.                              (2D)
+#          PERIAPO STORAGE. (2D)
 
-XXXALT          ERASE   +1              # RADIUS TO LAUNCH PAD OR LANDING SITE
+XXXALT          ERASE           +1                      # RADIUS TO LAUNCH PAD OR LANDING SITE
 
-# END-IN/M      EQUALS  XXXALT +2       # NEXT AVAIL ERASABLE AFTER INITVEL/MIDGIM
+#          S40.1 STORAGE.                                (12D)
 
-## Page 150
-# S40.1 STORAGE.                                (12D)
-
-UT              ERASE   +11D            # I(6) THRUST DIRECTION
-VGTIG           EQUALS  UT +6           # I(6)OUT
-VGPREV          =       VGTIG
-
+UT              ERASE           +11D                    # I(6) THRUST DIRECTION
+VGTIG           EQUALS          UT              +6      # I(6)OUT
+VGPREV          =               VGTIG
 # ASTEER STORAGE.                               (22D)
 
-VG              ERASE   +21D            # I(6)
-RMAG            EQUALS  VG +6           # I(2)
-MUASTEER        EQUALS  RMAG  +2        # I(2)
-MU/A            EQUALS  MUASTEER +2     # I(2)
-RTMAG           EQUALS  MU/A +2         # I(2)
-R1C             EQUALS  RTMAG +2        # I(6)
-SS              EQUALS  R1C +6          # I(2)
+VG              ERASE           +21D                    # I(6)
+RMAG            EQUALS          VG              +6      # I(2)
+MUASTEER        EQUALS          RMAG            +2      # I(2)
+MU/A            EQUALS          MUASTEER        +2      # I(2)
+RTMAG           EQUALS          MU/A            +2      # I(2)
+R1C             EQUALS          RTMAG           +2      # I(6)
+SS              EQUALS          R1C             +6      # I(2)
 
-IC              =       DELVSIN
-TIGSAVE         =       P21TIME
-TIGSAVEP        =       SCAXIS
-MUSCALE         =       SCAXIS +2
+#          ASTEER                                         (11D)
 
-# P40 STORAGE.                                  (6D)
+IC              =               DELVSIN                 # I(6) CHORD VECTOR:  RTARG VEC - POS VEC
+TIGSAVE         =               P21TIME                 # USED TO DETERMINE WHEN YOU
+TIGSAVEP        =               SCAXIS                  #   WANT TO DO ASTEER NEXT
+MUSCALE         =               SCAXIS          +2      # HOLDS INDEX VALUE
 
-# F, MDOT, AND TDECAY MUST BE CONTIGUOUS FOR WLOAD
 
-F               ERASE   +5              # I(2)TMP S40.1 GENERATES THIS FOR S40.3
-MDOT            EQUALS  F +2            # I(2)TMP MASS CHNG RATE, KG/CS AT 2**3.
-TDECAY          EQUALS  MDOT +2         # I(2)IN DELTA-T TAILOFF, (2**28)CS.
-VEX             ERASE   +1              # I(2) EXHAUST VELOCITY FOR TGO COMPUTAT'N
+#          P40 STORAGE.                                  (8D)
 
-# MIDTOAV1(2) STORAGE.  (CALLED BY P40,P41,P42)         (1D)
+#               F, MDOT, AND TDECAY MUST BE CONTIGUOUS FOR VLOAD.
+F               ERASE           +5                      # I(2)TMP THRUST MAG 10**4 NEWTONS (B-7)
+MDOT            EQUALS          F               +2      # I(2)TMP MASS CHNG RATE, KG/CS AT 2**3.
+TDECAY          EQUALS          MDOT            +2      # I(2)IN  DELTA-T TAILOFF, (2**28)CS.
+VEX             ERASE           +1                      # I(2) EXHAUST VELOCITY FOR TGO COMPUTAT'N
 
-IRETURN1        ERASE                   # B(1) RETURN FROM MIDTOAV1 AND 2.
+
+#         MIDTOAV1(2) STORAGE.  (CALLED BY P40,P41,P42)         (1D)
+
+IRETURN1        ERASE                                   # B(1)     RETURN FROM MIDTOAV1 AND 2
+
+## Page 150
+# ******* OVERLAY NUMBER 1 IN EBANK 7  *******
+
+
+#         INITVEL (CALLED BY P34,35,38,39,10,11,S40.9,S40.1)    (6D)
+
+RTARG1          EQUALS          VACT1                   # I(6)S TEMP STORAGE OF RTARG
+#
+
+#         P35-P40 INTERFACE.                              (6D)
+
+VPASS4          EQUALS          VPASS1                  # I(6)TMP VELOCITY OF PASSIVE AT INTERCEPT
+
+
+#          LAT-LONG TEMPORARIES.  CAN OVERLAY WITH S40.1         (3D)
+
+ERADM           EQUALS          UT                      # I(2)
+INCORPEX        EQUALS          ERADM           +2      # I(1)
+
+#          LRS24.1 STORAGE.  (CAN SHARE WITH P30'S)      (40D)
+
+RLMSRCH         EQUALS          INCORPEX        +1      # I(6) TMP LM POSITION VECTOR
+VXRCM           EQUALS          RLMSRCH         +6      # I(6)    CM V X R VECTOR
+LOSDESRD        EQUALS          VXRCM           +6      # I(6)    DESIRED LOS VECTOR
+UXVECT          EQUALS          LOSDESRD        +6      # I(6)    X-AXIS SRCH PATTERN COORDS
+UYVECT          EQUALS          UXVECT          +6      # I(6)    Y-AXIS SRCH PATTERN COORDS
+DATAGOOD        EQUALS          UYVECT          +6      # B(1)DSP FOR R1 - ALL 1-S WHEN LOCKON
+OMEGDISP        EQUALS          DATAGOOD        +1      # B(2)    ANGLE OMEGA DISPLAYED IN R2
+OMEGAD          =               OMEGDISP                #         PINBALL DEFINITION.
+NSRCHPNT        EQUALS          OMEGDISP        +2      # B(1)TMP SEARCH PATTERN POINT COUNTER.
+SAVLEMV         EQUALS          NSRCHPNT        +1      # I(6) S-S SAVES LOSVEL
 
 ## Page 151
-# ******* OVERLAY NUMBER 1 IN EBANK 7 *******
+# ******* OVERLAY NUMBER 2 IN EBANK 7 *******
+#
 
-# INITVEL (CALLED BY P34,35,38,39,10,11,S40.9,S40.1)    (6D)
 
-RTARG1          EQUALS  VACT1           # I(6)S TEMP STORAGE OF RTARG
+#          INCORP STORAGE IN E7.                         (47D)
 
-# P35-P40 INTERFACE.                            (6D)
+TX789           EQUALS          E7OVERLA                # I(6)
+GAMMA           EQUALS          TX789           +6      # I(3)
+OMEGA           EQUALS          GAMMA           +3      # I(18)
+BVECTOR         EQUALS          OMEGA           +18D    # I(18)
+DELTAQ          EQUALS          BVECTOR         +18D    # I(2)
+#          AOTMARK STORAGE                               (3D)
 
-VPASS4          EQUALS  VPASS1          # I(6)TMP VELOCITY OF PASSIVE AT INTERCEPT
+WHATMARK        EQUALS          DELTAQ          +2      # B(1)TMP  SIGHTING TECHNIQUE DETERMINATOR
+XYMARK          EQUALS          MARKCNTR        +1      # B(1)TMP  MARK INDENTIFICATION REGISTER
+MKDEX           EQUALS          XYMARK          +1      # B(1)TMP INDEX FOR AOTMARK
+#
 
-# LAT-LONG TEMPORARIES.  CAN OVERLAY WITH S40.1         (3D)
+#          P50SM AOTMARK                                  (14D)
 
-ERADM           EQUALS  UT              # I(2)TMP LM POSITION VECTOR
-INCORPEX        EQUALS  ERADM +2        # I(1)    CM V X R VECTOR
+XPLANE          EQUALS          BVECTOR                 # I(6)TMP MARK PLANE
+YPLANE          EQUALS          XPLANE          +6      # I(6)
+XMKCNTR         EQUALS          P21TIME                 # B(1)  X SIGHTING MK CNTR
+YMKCNTR         EQUALS          P21TIME         +1      # B(1)  Y SIGHTING MK CNTR
 
-# LRS24.1 STORAGE.  (CAN SHARE WITH P30'S)              (40D)
 
-RLMSRCH         EQUALS  INCORPEX +1     # I(6)TMP LM POSITION VECTOR
-VXRCM           EQUALS  RLMSRCH +6      # I(6)    CM V X R VECTOR
-LOSDESRD        EQUALS  VXRCM +6        # I(6)    DESIRED LOS VECTOR
-UXVECT          EQUALS  LOSDESRD +6     # I(6)    X-AXIS SRCH PATTERN COORDS
-UYVECT          EQUALS  UXVECT +6       # I(6)    Y-AXIS SRCH PATTERN COORDS
-DATAGOOD        EQUALS  UYVECT +6       # B(1)DSP FOR R1 -- ALL 1-S WHEN LOCKON
-OMEGDISP        EQUALS  DATAGOOD +1     # B(2)    ANGLE OMEGA DISPLAYED IN R2
-OMEGAD          =       OMEGDISP        #         PINBALL DEFINITION
-NSRCHPNT        EQUALS  OMEGDISP +2     # B(1)TMP SEARCH PATTERN POINT COUNTER.
-SAVLEMV         EQUALS  NSRCHPNT +1     # I(6)S-S SAVES LOSVEL
+#         PLANET STORAGE                                (8D)
+
+PLANVEC         EQUALS          MKDEX           +1      # (6) REFER VECTOR OF PLANET
+TSIGHT          EQUALS          PLANVEC         +6      # (2) TIME OF MARK OR EST TIME OF MARK
+#
+
+
+#          AOTMARK STORAGE                               (15D)
+
+THETEST         EQUALS          TSIGHT          +2      # I(2)TMP  STAR VECTOR COMPUTATION TMP
+ESTER1          EQUALS          THETEST         +2      # I(2)TMP  STAR VECTOR COMPUTATION TMP
+ESTER2          EQUALS          ESTER1          +2      # I(2)TMP  STAR VECTOR COMPUTATION TMP
+DELTHET         EQUALS          ESTER2          +2      # I(2)TMP  STAR VECTOR COMPUTATION TMP
+NOMKCNT         EQUALS          DELTHET         +2      # B(1)TMP  MARK SET REJECT CTR
+BODY            EQUALS          NOMKCNT         +1      # I(6)TMP STAR VEC IN NAV BASE COOR
+#          LRS22.3 STORAGE. (CAN SHARE WITH P30'S AND OVERLAY LRS24.1)  (30D),
+
+LGRET           EQUALS          RLMSRCH                 # I(1)TMP
+RDRET           EQUALS          LGRET                   # B(1) TEMP RETURN.
+IGRET           EQUALS          LGRET                   # B(1) TEMP RETURN.
+MX              EQUALS          RDRET           +1      # I(6)
+MY              EQUALS          MX              +6      # I(6)
+MZ              EQUALS          MY              +6      # I(6)
+SCALSHFT        EQUALS          MZ              +6      # B(1) SCALE SHIFT FOR EARTH/MOON
 
 ## Page 152
-# ******* OVERLAY NUMBER 2 IN EBANK 7 *******
-
-# INCORP STORAGE IN E7.                         (47D)
-
-TX789           EQUALS  E7OVERLA        # I(6)
-GAMMA           EQUALS  TX789 +6        # I(3)
-OMEGA           EQUALS  GAMMA +3        # I(18)
-BVECTOR         EQUALS  OMEGA +18D      # I(18)
-DELTAQ          EQUALS  BVECTOR +18D    # I(2)
-
-# AOTMARK STORAGE                               (3D)
-
-MARKCNTR        EQUALS  DELTAQ +2       # I(1)
-XYMARK          EQUALS  MARKCNTR +1     # B(1)
-MKDEX           EQUALS  XYMARK +1       # B(1)TMP INDEX FOR AOTMARK
-
-# PLANET STORAGE                                (8D)
-
-PLANVEC         EQUALS  MKDEX +1        # (6) REFER VECTOR OF PLANET
-TSIGHT          EQUALS  PLANVEC +6      # (2) TIME OF MARK OR EST TIME OF MARK
-
-# LRS22.3 STORAGE.  (CAN SHARE WITH P30'S AND OVERLAY LRS24.1)  (30D)
-
-LGRET           EQUALS  RLMSRCH         # I(1)TMP
-RDRET           EQUALS  LGRET           # B(1) TEMP RETURN.
-IGRET           EQUALS  LGRET           # B(1) TEMP RETURN.
-MX              EQUALS  RDRET +1        # I(6)
-MY              EQUALS  MX +6           # I(6)
-MZ              EQUALS  MY +6           # I(6)
-E0              EQUALS  MX              # I(2)
-E1              EQUALS  MX +2           # I(2)
-E2              EQUALS  MX +4           # I(2)
-E3              EQUALS  E2 +2           # I(2)
-SCALSHFT        EQUALS  MZ +6           # B(1) SCALE SHIFT FOR EARTH/MOON
-RXZ             EQUALS  SCALSHFT +1     # I(2)
-ULC             EQUALS  RXZ +2          # I(6)
-SINTHETA        EQUALS  ULC +6          # I(2)
+RXZ             EQUALS          SCALSHFT        +1      # I(2)
+ULC             EQUALS          RXZ             +2      # I(6)
+SINTHETA        EQUALS          ULC             +6      # I(2)
 
 # ***** IN OVERLAY ONE *****
 
-N49FLAG         EQUALS  RDOTMSAV        # B(1)S FLAG INDICATING V0649 RESPONSE
+#     R22 / NOUN 49 DISPLAY
 
-# LRS22.1 STORAGE.  (MUST NOT SHARE WITH P30'S)         (13D)
+N49FLAG         EQUALS          RDOTMSAV                # B(1)S    FLAG INDICATING V0649 RESPONSE
 
-# (OUTPUTS ARE TO LRS22.3)
+
+#     LRS22.1 STORAGE.  (MUST NOT SHARE WITH P30'S)         (13D)
+
+#     (OUTPUTS ARE TO LRS22.3)
+
+RRTRUN          EQUALS          SINTHETA        +2      # B(2)OUT  RR TRUNNION ANGLE
+RRSHAFT         EQUALS          RRTRUN          +2      # B(2)OUT RR SHAFT ANGLE
+LRS22.1X        EQUALS          RRSHAFT         +2      # B(1)TMP
+RRBORSIT        EQUALS          LRS22.1X        +1      # I(6) TMP RADAR BORESIGHT VECTOR.
+RDOTMSAV        EQUALS          RRBORSIT        +6      # B(2) S    RR RANGE-RATE(FPS)
+
+
+#     LRS22.1 (SAME AS PREVIOUS SECTION) ALSO DOWNLINK FOR RR (R29)(10D) CANNOT SHARE WITH L.A.D.
+
+#     NOTE: MKTIME IS USED BY LANDING AS WELL AS REND RADAR.
+
+RDOTM           EQUALS          RDOTMSAV        +2      # B(2)OUT  RANGE-RATE READING
+TANGNB          EQUALS          RDOTM           +2      # B(2)TMP  RR GIMBAL ANGLES
+#     RETAIN THE ORDER OF MKTIME TO RM FOR DOWNLINK PURPOSES
+MKTIME          EQUALS          TANGNB          +2      # B(2) TIME OF RR READING (RR AND LR)
+RM              EQUALS          MKTIME          +2      # I(2)OUT RANGE READING
+RANGRDOT        EQUALS          RM              +2      # B(2) DOWNLINKED RAW RANGE AND RRATE
+
+#     LANDING OVERLAY                               (1D)
+
+THRDISP         EQUALS          RDOTM                   # B(1) PERCENT OF FTP I 10,500 LBS.
+
+
+GTCTIME         EQUALS          TANGNB                  # B(2)  STATE VECTOR TIEM CORRESPONDING
+                                                        #   TO -- GUIDANCE THRUST COMMAND
+
+#     R61LEM - PREFERRED TRACKING ATTITUDE ROUTINE  **IN OVERLAY ONE**
+#              (CALLED BY P20,R22LEM,LSR22.3)            (1D)
+
+R65CNTR         EQUALS          RRBORSIT        +5      # B(1)SS  COUNT NUMBER OF TIMES PREFERRED
+                                                        #         TRACKING ROUTINE IS TO CYCLE
+
+#     P21 STORAGE                                   (2D)
 
 ## Page 153
-RRTRUN          EQUALS  SINTHETA +2     # B(2)OUT RR TRUNNION ANGLE
-RRSHAFT         EQUALS  RRTRUN +2       # B(2)OUT RR SHAFT ANGLE
-LRS22.1X        EQUALS  RRSHAFT +2      # B(1)TMP
-RRBORSIT        EQUALS  LRS22.1X +1     # I(6)TMP RADAR BORESIGHT VECTOR.
-RDOTMSAV        EQUALS  RRBORSIT +6     # B(2)S RR RANGE-RATE (FPS)
+P21TIME         EQUALS          RANGRDOT        +2      # I(2)TMP
 
-# LRS22.1 (SAME AS PREVIOUS SECTION) ALSO DOWNLINK FOR RR (R29)         (10D) CANNOT SHARE WITH L.A.D.
 
-RDOTM           EQUALS  RDOTMSAV +2     # B(2)OUT RANGE-RATE READING
-TANGNB          EQUALS  RDOTM +2        # B(2)TMP RR GIMBAL ANGLES
-# RETAIN THE ORDER OF MKTIME TO RM FOR DOWNLINK PURPOSES
-MKTIME          EQUALS  TANGNB +2       # B(2)OUT TIME OF RR READING
-RM              EQUALS  MKTIME +2       # I(2)OUT RANGE READING
-RANGRDOT        EQUALS  RM +2           # B(2) DOWNLINKED RAW RANGE AND RRATE
-
-# LANDING OVERLAY                               (1D)
-
-THRDISP         EQUALS  RDOTM           # B(1) PERCENT OF FTP I 10,500 LBS.
-
-# R61LEM -- PREFERRED TRACKING ATTITUDE ROUTINE **IN OVERLAY ONE**
-# (CALLED BY P20, R22LEM, LSR22.3)              (1D)
-
-R65CNTR         EQUALS  RRBORSIT +5     # B(1)SS COUNT NUMBER OF TIMES PREFERRED
-                                        #        TRACKING ROUTINE IS TO CYCLE
-
-# P21 STORAGE                                   (2D)
-
-P21TIME         EQUALS  RANGRDOT +2     # I(2)TMP
-
-# KALCMANU, VECPOINT STORAGE.  CALLED BY R63, R61, R65.         (12D)
-
-SCAXIS          EQUALS  P21TIME +2      # I(6)
-POINTVSM        EQUALS  SCAXIS +6       # I(6)
+#     INPUTS TO VECPOINT. CALLED BY R60-R65 (ATTITUDE MANEUVERS)         (12D)
+SCAXIS          EQUALS          P21TIME         +2      # I(6)
+POINTVSM        EQUALS          SCAXIS          +6      # I(6)
 
 ## Page 154
 
-# ******* OVERLAY NUMBER 3 IN EBANK 7 *******
+# *******  OVERLAY NUMBER 3 IN EBANK 7  *******
 
-# SERVICER STORAGE                              (6D)
 
-ABVEL           EQUALS  E7OVERLA        # B(2) DISPLAY
-HDOTDISP        EQUALS  ABVEL +2        # B(2) DISPLAY
-TTFDISP         EQUALS  HDOTDISP +2     # B(2) DISPLAY
 
-# BURN PROG STORAGE.                            (2D)
+#          SERVICER STORAGE                              (6D)
 
-SAVET-30        EQUALS  TTFDISP +2      # B(2)TMP TIG-30 RESTART
+ABVEL           EQUALS          E7OVERLA                # B(2) DISPLAY
+HDOTDISP        EQUALS          ABVEL           +2      # B(2) DISPLAY
+TTFDISP         EQUALS          HDOTDISP        +2      # B(2) DISPLAY
 
-# SERVICER STORAGE.                             (69D)
 
-VGBODY          EQUALS  SAVET-30 +2     # B(6)OUT SET BY S41.1 VG LEM, SC.COORDS
-DELVCTL         =       VGBODY
-DVTOTAL         EQUALS  VGBODY +6       # B(2) DISPLAY NOUN
-GOBLTIME        EQUALS  DVTOTAL +2      # B(2) NOMINAL TIG FOR CALC. OF GOBLATE.
-ABDVCONV        EQUALS  GOBLTIME +2     # I(2)
-DVCNTR          EQUALS  ABDVCONV +2     # B(1)
-TGO             EQUALS  DVCNTR +1       # B(2)
-R               EQUALS  TGO +2          # I(6)
-UNITGOBL        EQUALS  R               # I(6)
-V               EQUALS  R +6
-DELVREF         EQUALS  V               # I(6)
-HCALC           EQUALS  DELVREF +6      # B(2) LR
-UNIT/R/         EQUALS  HCALC +2        # I(6)
+#          ASCENT GUIDANCE FOR LUNAR LANDING             (2D)
 
-# (THE FOLLOWING SERVICER ERASABLES CAN BE SHARED WITH SECOND DPS GUIDANCE STORAGE)
+RDOT            EQUALS          HDOTDISP                # I(2)
 
-RN1             EQUALS  UNIT/R/ +6      # B(6)
-VN1             EQUALS  RN1 +6          # I(6)          ( IN ORDER )
-PIPTIME1        EQUALS  VN1 +6          # B(2)          (    FOR   )
-GDT1/2          EQUALS  PIPTIME1 +2     # I(6)          (   COPY   )
-MASS1           EQUALS  GDT1/2 +6       # I(2)          (   CYCLE  )
-R1S             EQUALS  MASS1 +2        # I(6)
-V1S             EQUALS  R1S +6          # I(6)
 
-# ALIGNMENT/S40.2,3 COMMON STORAGE.             (18D)
+#          BURN PROG STORAGE.                            (2D)
 
-XSMD            EQUALS  V1S +6          # I(6)
-YSMD            EQUALS  XSMD +6         # I(6)
-ZSMD            EQUALS  YSMD +6         # I(6)
+SAVET-30        EQUALS          TTFDISP         +2      # B(2)TMP TIG-30 RESTART
 
-XSCREF          =       XSMD
-YSCREF          =       YSMD
+
+#          SERVICER STORAGE.                             (69D)
+
+VGBODY          EQUALS          SAVET-30        +2      # B(6)OUT SET BY S41.1 VG LEM, SC.COORDS
+DELVCTL         =               VGBODY
+DVTOTAL         EQUALS          VGBODY          +6      # B(2) DISPLAY NOUN
+GOBLTIME        EQUALS          DVTOTAL         +2      # B(2) NOMINAL TIG FOR CALC. OF GOBLATE.
+ABDVCONV        EQUALS          GOBLTIME        +2      # I(2)
+DVCNTR          EQUALS          ABDVCONV        +2      # B(1)
+TGO             EQUALS          DVCNTR          +1      # B(2)
+R               EQUALS          TGO             +2      # I(6)
+UNITGOBL        EQUALS          R                       # I(6)
+V               EQUALS          R               +6
+DELVREF         EQUALS          V                       # I(6)
+HCALC           EQUALS          DELVREF         +6      # B(2)    LR
+UNIT/R/         EQUALS          HCALC           +2      # I(6)
+#          (THE FOLLOWING SERVICER ERASABLES CAN BE SHARED WITH SECOND DPS GUIDANCE STORAGE)
+
+RN1             EQUALS          UNIT/R/         +6      # B(6)
+VN1             EQUALS          RN1             +6      # I(6)                      ( IN ORDER )
+PIPTIME1        EQUALS          VN1             +6      # B(2)                      (    FOR   )
+GDT1/2          EQUALS          PIPTIME1        +2      # I(6)                      (   COPY   )
+MASS1           EQUALS          GDT1/2          +6      # I(2)                      (   CYCLE  )
+DVCNTRL         EQUALS          MASS1                   # B(1)TMP  RESTART REG FOR DVCNTR
+R1S             EQUALS          MASS1           +2      # I(6)
+V1S             EQUALS          R1S             +6      # I(6)
+
+
+#          P71 RESTART PROTECTION                        (2D)
+
 ## Page 155
-ZSCREF          =       ZSMD
+TGO1            EQUALS          VGBODY                  # B(2)TMP
 
-END-ALIG        EQUALS  ZSMD +6         # NEXT AVAIL ERASABLE AFTER ALIGN/S40.2,3
 
-# ****** P22 ******                             (24D)
+#          ALIGNMENT/S40.2,3 COMMON STORAGE.             (18D)
 
-RSUBL           EQUALS  END-ALIG        # I(6)S-S       LM POSITION VECTOR
-UCSM            EQUALS  RSUBL +6        # I(6)S-S       VECTOR U
-NEWVEL          EQUALS  UCSM +6         # I(6)S-S       TERMINAL VELOCITY VECTOR
-NEWPOS          EQUALS  NEWVEL +6       # I(6)S-S       TERMINAL POSITION VECTOR
-LNCHTM          EQUALS  NEWPOS +6       # I(2)S-S       EST. LAUNCH TIME FOR LEM
-TRANSTM         EQUALS  LNCHTM +2       # I(2)S-S       TRANSFER TIME
-NCSMVEL         EQUALS  TRANSTM +2      # I(6)S-S       NEW CSM VELOCITY
+XSMD            EQUALS          V1S             +6      # I(6)
+YSMD            EQUALS          XSMD            +6      # I(6)
+ZSMD            EQUALS          YSMD            +6      # I(6)
 
-# ****** P21 ******                             (18D)
+XSCREF          =               XSMD
+YSCREF          =               YSMD
+ZSCREF          =               ZSMD
 
-P21ORIG         =       DISPDEX
-P21BASER        EQUALS  RLMSRCH         # I(6)TMP
-P21BASEV        EQUALS  P21BASER +6     # I(6)TMP
-P21VEL          EQUALS  P21BASEV +6     # I(2)TMP       *** NOUN 91 ***
-P21GAM          EQUALS  P21VEL +2       # I(2)TMP       *** NOUN 91 ***
-P21ALT          EQUALS  P21GAM +2       # I(2)TMP       *** NOUN 91 ***
+END-ALIG        EQUALS          ZSMD            +6      # NEXT AVAIL ERASABLE AFTER ALIGN/S40.2,3
+
+
+#          ****** P22 ******                             (34D)
+
+RSUBL           EQUALS          END-ALIG                # I(6)S-S  LM POSITION VECTOR
+UCSM            EQUALS          RSUBL           +6      # I(6)S-S  VECTOR U
+NEWVEL          EQUALS          UCSM            +6      # I(6)S-S  TERMINAL VELOCITY VECTOR
+NEWPOS          EQUALS          NEWVEL          +6      # I(6)S-S  TERMINAL POSITION VECTOR
+LNCHTM          EQUALS          NEWPOS          +6      # I(2)S-S  EST. LAUNCH TIME FOR LEM
+TRANSTM         EQUALS          LNCHTM          +2      # I(2)S-S TRANSFER TIME
+NCSMVEL         EQUALS          TRANSTM         +2      # I(6)S-S NEW CSM VELOCITY
+#
+
+#          ****** P21 ******                             (18D)
+
+P21ORIG         =               DISPDEX
+P21BASER        EQUALS          RLMSRCH                 # I(6)TMP
+P21BASEV        EQUALS          P21BASER        +6      # I(6)TMP
+P21VEL          EQUALS          P21BASEV        +6      # I(2)TMP  *** NOUN 91 ***
+P21GAM          EQUALS          P21VEL          +2      # I(2)TMP  *** NOUN 91 ***
+P21ALT          EQUALS          P21GAM          +2      # I(2)TMP  *** NOUN 91 ***
 
 ## Page 156
-# ******* OVERLAY NUMBER 4 IN EBANK 7 *******
+# *******  OVERLAY NUMBER 4 IN EBANK 7  *******
+#
 
 # VARIABLES FOR SECOND DPS GUIDANCE (THE LUNAR LANDING)         (18D)
 
 # THESE ERASABLES MAY BE SHARED WITH CARE
 
-OURTEMPS        =       RN1             # OVERLAY LAST PART OF SERVICER
-LANDTEMP        =       OURTEMPS        # B(6)  GUIDANCE
-TTF/8TMP        =       LANDTEMP +6     # B(2)  GUIDANCE
-ELINCR          =       TTF/8TMP +2     # B(2)  GUIDANCE
-AZINCR          =       ELINCR +2       # B(2)  GUIDANCE
-KEEP-2          =       AZINCR +2       # B(2)  GUIDANCE
-TABLTTF         =       KEEP-2 +2       # B(2)  GUIDANCE
-TPIPOLD         =       TABLTTF +9D     # B(2)  GUIDANCE
-E2DPS           EQUALS  OURPERMS
+OURTEMPS        =               RN1                     # OVERLAY LAST PART OF SERVICER
+LANDTEMP        =               OURTEMPS                # B(6)     GUIDANCE
+TTF/8TMP        =               LANDTEMP        +6      # B(2)    GUIDANCE
+ELINCR          =               TTF/8TMP        +2      # B(2)    GUIDANCE
+AZINCR          =               ELINCR          +2      # B(2)    GUIDANCE
+KEEP-2          =               AZINCR          +2      # B(2)    TO PREVENT PIPTIME1 OVERLAY
+TABLTTF         =               KEEP-2          +2      # B(2)    GUIDANCE
+TPIPOLD         =               TABLTTF         +9D     # B(2)    GUIDANCE
+E2DPS           EQUALS          OURPERMS
+
+
 
 # THESE ERASABLES MUST NOT OVERLAY GOBLTIME OR SERVICER
 
-PIFPSET         =       XSMD            # B(1)  THROTTLE
-RTNHOLD         =       PIFPSET +1      # B(1)  THROTTLE
-FWEIGHT         =       RTNHOLD +1      # B(2)  THROTTLE
-PIF             =       FWEIGHT +2      # B(2)  THROTTLE
-PSEUDO55        =       PIF +2          # B(1)  THROTTLE DOWNLINK
-FC              =       PSEUDO55 +1     # B(2)  THROTTLE
-TTHROT          =       FC +2           # B(1)  THROTTLE
-FCOLD           =       TTHROT +1       # B(1)  THROTTLE
+PIFPSET         =               XSMD                    # B(1)    THROTTLE
+RTNHOLD         =               PIFPSET         +1      # B(1)    THROTTLE
+FWEIGHT         =               RTNHOLD         +1      # B(2)    THROTTLE
+PIF             =               FWEIGHT         +2      # B(2)   THROTTLE
+PSEUDO55        =               PIF             +2      # B(1)   THROTTLE DOWNLINK
+FC              =               PSEUDO55        +1      # B(2)    THROTTLE
+TTHROT          =               FC              +2      # B(1)    THROTTLE
+FCOLD           =               TTHROT          +1      # B(1)    THROTTLE
+
+
 
 # THESE ERASABLES SHOULD NOT BE SHARED DURING P63, P64, P65, P66, P67
 
-OURPERMS        =       FCOLD +1        # B(1)  GUIDANCE
-WCHPHOLD        =       OURPERMS        # B(1)  GUIDANCE
-FILLER          =       WCHPHOLD +1
-FLPASS0         =       FILLER +1       # B(1)  GUIDANCE
-TPIP            =       FLPASS0 +1      # B(2)
-VGU             =       TPIP +2         # B(6)  GUIDANCE
-LAND            =       VGU +6          # B(6)  GUIDANCE        CONTIGUOUS
-TTF/8           =       LAND +6         # B(2)  GUIDANCE        CONTIGUOUS
-ELIDUMMY        =       TTF/8 +2        # (1)   DUMMY FOR ELINCR1
-AZIDUMMY        =       ELIDUMMY +1     # (1)   DUMMY FOR AZONCR1
-ZERDUMMY        =       AZIDUMMY +1     # (1)   DUMMY FOR ZERLINA
-ELVDUMMY        =       ZERDUMMY +1     # (1)   DUMMY FOR ELVIRA
-LRADRET         =       ELVDUMMY +1     # B(1)  LR
-VSELECT         =       LRADRET +1      # B(1)  LR
-VMEAS           =       VSELECT +1      # B(2)  LR
-HMEAS           =       VMEAS +2        # B(2)  LR
-VN2             =       HMEAS +2        # B(6)  LR
+OURPERMS        =               FCOLD           +1      # MUSTN'T OVERLAY OURTEMPS OR SERVICER
+WCHPHOLD        =               OURPERMS                # B(1)    GUIDANCE
+511CTR          =               WCHPHOLD        +1      # B(1) R12 - CONTROLS 511 ALARM
+FLPASS0         =               511CTR          +1      # B(1) GUIDANCE
+CNTTHROT        EQUALS          FLPASSO                 # B(1) CNT THROTS BETWEEN OMISSIONS OF P66
+TPIP            =               FLPASS0         +1      # B(2)
+VGU             =               TPIP            +2      # B(6)    GUIDANCE
+LAND            =               VGU             +6      # B(6)    GUIDANCE    CONTIGUOUS
+TTF/8           =               LAND            +6      # B(2)    GUIDANCE    CONTIGUOUS
+AZINCR1         =               TTF/8           +2      # (1)     REDESIGNATOR
+ELINCR1         =               AZINCR1         +1      # (1)     REDESIGNATOR
+ZERLINA         =               ELINCR1         +1      # (1)     REDESIGNATOR
+ELVIRA          =               ZERLINA         +1      # (1)     REDESIGNATOR
+LRPOS           =               ELVIRA          +1      # B(1)    LAST LR ANTENNA POSITION
+
+#                               ** NOTE: GAP OF 1 SP LOCATION HERE IN THIS P63 THRU P66 OVERLAY **
+
 ## Page 157
-GNUR            =       VN2             # B(6)  LR
-GNUV            =       VN2             # B(6)  LR
-LRADRET1        =       VN2             # B(1)  LR
-DELTAH          =       VN2 +6          # B(2)  DISPLAY
-FUNNYDSP        =       DELTAH +2       # B(2)  DISPLAY
-EOURPERM        EQUALS  FUNNYDSP +2     # NEXT AVAILABLE ERASABLE AFTER OURPERMS
+VMEAS           =               LRPOS           +2      # B(2) LR VELOCITY READ BY BEAM X, Y OR Z
+HMEAS           =               VMEAS           +2      # B(2)    LR
+VN2             =               HMEAS           +2      # B(6)    LR
+GNUR            =               VN2                     # B(6)     LR
+GNUV            =               VN2                     # B(6)     LR
+DELTAH          =               VN2             +6      # B(2)    DISPLAY
+FUNNYDSP        =               DELTAH          +2      # B(2)    DISPLAY
+EOURPERM        EQUALS          FUNNYDSP        +2      # NEXT AVAILABLE ERASABLE AFTER OURPERMS
+OVFRET          EQUALS          LOSCOUNT                # B(1) RETURN FROM DESCENT OVERFLOW SUBRO
+
+
 
 # (ERASABLES WHICH OVERLAY THE ABOVE BLOCK)
 
-VDGVERT         =       ELIDUMMY        # B(2)  P65,P66
-NIGNLOOP        =       ZERDUMMY        # B(1)  IGNALG
-NGUIDSUB        =       ELVDUMMY        # B(1)  IGNALG
-WCHVERT         =       ELVDUMMY        # B(1)  P65,P66,P67
-FUELNEED        =       FUNNYDSP        # B(1)  DISPLAY
-TREDES          =       FUNNYDSP        # B(1)  DISPLAY
-LOOKANGL        =       FUNNYDSP +1     # B(1)  DISPLAY
-
-# ERASABLES CONVENIENTLY DEFINABLE IN THE WORK AREA
-
-PROJ            =       18D             # I(2)  GUIDANCE
-UNLRB/2         =       20D             # I(6)  GUIDANCE (DURING P64 ONLY)
-UNLR/2          =       20D             # I(6)  GUIDANCE
+VDGVERT         =               AZINCR1                 # B(2)  DESIRED VERTICAL VELOCITY - P66
+NIGNLOOP        =               ZERLINA                 # B(1)   IGNALG
+NGUIDSUB        =               ELVIRA                  # B(1)   IGNALG
+TREDES          =               FUNNYDSP                # B(1)    DISPLAY
+LOOKANGL        =               FUNNYDSP        +1      # B(1)    DISPLAY
+#
 
 # THE END OF THE LUNAR LANDING ERASABLES
+#
 
-# R12 (FOR LUNAR LANDING)                       (6D)
 
-LRLCTR          EQUALS  EOURPERM        # B(1) LR DATA TEST
-LRRCTR          EQUALS  LRLCTR +1       # B(1)
-LRMCTR          EQUALS  LRRCTR +1       # B(1)
-LRSCTR          EQUALS  LRMCTR +1       # B(1)
-STILBADH        EQUALS  LRSCTR +1       # B(1)
-STILBADV        EQUALS  STILBADH +1     # B(1)
+#          R12 (FOR LUNAR LANDING)                       (6D)
 
-# LANDING ANALOGS DISPLAY STORAGE.              (40D)
+LRLCTR          EQUALS          EOURPERM                # B(1) LR DATA TEST
+LRRCTR          EQUALS          LRLCTR          +1      # B(1)
+LRMCTR          EQUALS          LRRCTR          +1      # B(1)
+LRSCTR          EQUALS          LRMCTR          +1      # B(1)
+STILBADH        EQUALS          LRSCTR          +1      # B(1)
+STILBADV        EQUALS          STILBADH +1             # B(1)
+#
 
-LATVMETR        EQUALS  STILBADV +1     # B(1)PRM LATVEL MONITOR METER (AN ORDER)
-FORVMETR        EQUALS  LATVMETR +1     # B(1)PRM FORVEL MONITOR METER (-ED PAIR)
-LATVEL          EQUALS  FORVMETR +1     # B(1)PRM LATERAL VELOCITY (AN ORDER)
-FORVEL          EQUALS  LATVEL +1       # B(1)PRM FORWARD VELOCITY (-ED PAIR)
-TRAKLATV        EQUALS  FORVEL +1       # B(1)PRM MONITOR FLG 4 LATVEL (AN ORDER)
-TRAKFWDV        EQUALS  TRAKLATV +1     # B(1)PRM MONIT. FLAG FOR FORVEL (ED PAIR)
-VHY             EQUALS  TRAKFWDV +1     # B(1)PRM VHY=VMP.UHYP (AN ORDER)
+
+#          LANDING ANALOGS DISPLAY STORAGE.              (32D)
+
+G-VBIASX        =               STILBADV        +1      # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
+G-VBIASY        =               G-VBIASX        +1      # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
+G-VBIASZ        =               G-VBIASY        +1      # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
+VSURFACE        =               G-VBIASZ        +1      # B(6)    LUNAR SURFACE VELOCITY
+HCASCLAD        =               VSURFACE        +6      # B(2)    ALTITUDE IN UNITS OF 2(15) M
+HDOTLAD         =               HCALCLAD        +2      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
+DALTRATE        =               HDOTLAD         +2      # B(1)    DALTRATE UNITS OF 2(-9) M/CS/CS
+RUNITX          =               DALTRATE        +1      # B(1)    X-COMPONENT OF UNIT/R/ FULL-SIZE
+RUNITY          =               RUNITX          +1      # B(1)    Y-COMPONENT OF UNIT/R/ FULL-SIZE
+RUNITZ          =               RUNITY          +1      # B(1)    Z-COMPONENT OF UNIT/R/ FULL-SIZE
+DT              =               RUNITZ          +1      # TIME SINCE LAST PIPTIME
+VVECTX          =               DT              +1      # B(2)    X-COMPONENT OF SM REL. VELOCITY
+
 ## Page 158
-VHZ             EQUALS  VHY +1          # B(1)PRM VHZ=VMP.UHZP (-ED PAIR)
-VVECT           EQUALS  VHZ +1          # B(3)PRM UPDATED S.P. VELOCITY VECTOR
-ALTRATE         EQUALS  VVECT +3        # B(1)PRM ALTITUDE RATE IN BIT UNITS
-ALTSAVE         EQUALS  ALTRATE +1      # B(2)PRM ALTITUDE IN BIT UNITS
-LADQSAVE        EQUALS  ALTSAVE +2      # B(1)PARM SAVE Q IN LAND1SP
-DT              EQUALS  LADQSAVE +1     # B(1)PRM TIME 1 MINUS (PIPTIME +1)
-DALTRATE        EQUALS  DT +1           # B(1)PRM ALTITUDE RATE ERROR CORRECTION
-UHYP            EQUALS  DALTRATE +1     # B(6)PRM SM UNIT VECTOR
-QAXIS           =       UHYP
-UHZP            EQUALS  UHYP +6         # B(6)PRM SM UNIT VECTOR
-DELVS           EQUALS  UHZP +6         # B(6)PRM DELVS = WMXR
-ALTBITS         EQUALS  DELVS +6        # B(2)PRM ALTITUDE IN BIT UNITS. 2.34 FT/BIT
-RUNIT           EQUALS  ALTBITS +2      # B(3)PRM SM HALF-UNIT R VECTOR
-LASTLADW        EQUALS  RUNIT +2        # ONLY A TAG TO SIGNIFY LAST L.A.D. WORD
+VVECTY          =               VVECTX          +1      # B(2)    Y-COMPONENT OF SM REL. VELOCITY
+VVECTZ          =               VVECTY          +1      # B(2)    Z-COMPONENT OF SM REL. VELOCITY
+ALTRATE         =               VVECTZ          +1      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
+ALTITUDE        =               ALTRATE         +2      # B(2)    ALTITUDE IN UNITS OF 2(15) M
+LATVMETR        =               ALTITUDE        +2      # B(1)    LATERAL VELOCITY METER INDICATOR
+FORVMETR        =               LATVMETR        +1      # B(1)    FORWARD VELOCITY METER INDICATOR
+FORVEL          =               FORVMETR        +1      # B(2)    FORWARD VELOCITY FOR DSKY (N60)
+PIPCTR1         =               VVECTY                  # B(1)    TEMPORARY FOR PIPCTR
 
-# P66 ERASABLES (R.O.D.)                        (1D)
 
-RODCOUNT        EQUALS  RUNIT +3
+ALTRTEMP        =               ITEMP3                  # B(2)    ALTITUDE-RATE TEMPORARY
+ALTTEMP         =               ITEMP3                  # B(2)    ALTITUDE TEMPORARY
+VHY             =               ITEMP3                  # B(2)    VELOCITY ALONG UHYP (I.E. SM-Y)
+VHZ             =               ITEMP5                  # B(2)    VELOCITY ALONG UHZP
+FORVTEMP        =               RUPTREG1                # B(2)    FORWARD VELOCITY TEMPORARY
+LATVEL          =               RUPTREG3                # B(2)    LATERAL VELOCITY TEMPORARY
 
-# P66 ERASABLES (R.O.D.)                        (14D)
 
-RODSCAL1        EQUALS  RM              # B(1)
-LASTTPIP        EQUALS  RODSCAL1 +1     # I(2)
-THISTPIP        EQUALS  LASTTPIP +2     # B(2)
-OLDPIPAX        EQUALS  THISTPIP +2     # B(1)
-OLDPIPAY        EQUALS  OLDPIPAX +1     # B(1)
-OLDPIPAZ        EQUALS  OLDPIPAY +1     # B(1)
-DELVROD         EQUALS  OLDPIPAZ +1     # B(6)
 
-# NOUN 63 COMPONENT                             (2D)
+#          DOWNLINK QTY -- GOOD THROUGHOUT LANDING -- LOADED IN SERVICER (2D)
 
-HCALC1          EQUALS  DELVROD +6      # I(2)
+TRUDELH         EQUALS          FORVEL          +2      # I(2)DNLK  TRUE DELTA H FOR DOWNLINK,
+                                                        #     LOADED BEFORE ENTERING TERRAIN MODEL
+
+
+# P66 ERASABLES (HORIZONTAL VELOCITY NULLING GUIDANCE)
+VHZC            EQUALS          DELVLVC                 # B(6) VELOCITY HORIZONTAL COMMAND
+#
+
+
+#          P66 ERASABLES (R.O.D.)                         (1D)
+
+RODCOUNT        EQUALS          R65CNTR         +1      # B(1)    ROD CLICK COUNTER
+#
+
+#          P66 ERASABLES (R.O.D.)                        (14D)
+
+# *** NOTE: OLDPIPAX,Y,Z AND DELVROD MUST BE KEPT ADJACENT AND IN THAT ORDER FOR P66 INITIALIZATION ****
+
+RODSCAL1        EQUALS          RM                     # B(1)
+LASTTPIP        EQUALS          RODSCAL1        +1     # I(2)
+THISTPIP        EQUALS          LASTTPIP        +2     # B(2)
+OLDPIPAX        EQUALS          THISTPIP        +2     # B(1)
+OLDPIPAY        EQUALS          OLDPIPAX        +1     # B(1)
+OLDPIPAZ        EQUALS          OLDPIPAY        +1     # B(1)
+DELVROD         EQUALS          OLDPIPAZ        +1     # B(6)
+#
+
+
+#          TERRAIN MODEL TEMPORARY -- LOADED IN SERVICER        (2D)
 
 ## Page 159
-# ******* OVERLAY NUMBER 5 IN EBANK 7 *******
+TEMDELH         EQUALS          DELVROD                 # I(2)TMP  STORES TRUE DELTAH IN TER. MOD.
 
-# ASCENT GUIDANCE ERASABLES.                    (21D)
+
+# NOUN 63 COMPONENT                             (2D)
+HCALC1          EQUALS          DELVROD         +6      # I(2)
+#
+
+# LANDING RADAR DOWNLINK
+HMEASDL         EQUALS          HCALC1          +2      # B(2)
+#
+
+## Page 160
+# *******  OVERLAY NUMBER 5 IN EBANK 7  *******
+#
+
+
+
+#          ASCENT GUIDANCE ERASABLES.                    (21D)
 
 RCO             EQUALS          END-ALIG                # I(2)TMP TARGET RADIUS AND OUT-OF-PLANE
 YCO             EQUALS          RCO             +2      # I(2)TMP DISTANCE, SCALED AT 2(24).
@@ -2874,9 +2966,11 @@ XRANGE          EQUALS          1/DV3           +2      # B(2)TMP
 ENGOFFDT        EQUALS          XRANGE          +2      # B(1)TMP
 VGVECT          EQUALS          ENGOFFDT        +1      # I(6)OUT VELOCITY-TO-BE-GAINED.
 TXO             EQUALS          VGVECT          +6      # I(2)TMP TIME AT WHICH X-AXIS OVERRIDE
-                                        # IS ALLOWED.
+                                                        # IS ALLOWED.
 
-# END OF THE ASCENT GUIDANCE ERASABLES
+1/DVO           EQUALS          MASS1                   # B(2)TMEP  ATMAG TEMPORARY
 
-END-E7          EQUALS  3777            # ** LAST LOCATION USED IN E7 **
 
+# END OF THE ASCENT GUIDANCE ERASABLES.
+
+END-E7          EQUALS          3777                    # ** LAST LOCATION USED IN E7 **
