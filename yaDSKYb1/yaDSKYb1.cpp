@@ -39,7 +39,8 @@
 #include <sys/types.h>
 #ifndef WIN32
 #include <sys/socket.h>
-#else
+#endif
+#ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
 #include <errno.h>

@@ -100,8 +100,7 @@ SOURCES:=${APP}.cpp \
 HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
-	g++ -DNVER=${NVER} ${MACFLAG} -Wall \
-		-Wno-unused-local-typedefs -Wno-unused-but-set-variable \
+	g++ -DNVER=${NVER} ${MACFLAG} \
 		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
 		`wx-config --libs` \

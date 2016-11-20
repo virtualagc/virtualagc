@@ -154,13 +154,13 @@ default: Linux
 all-archs: Linux Win32 MacOsX
 
 .PHONY: Linux
+ifdef MACOSX
+Linux: temp/VirtualAGC.app
+else
 ifeq "${USER}" "rburkey"
 Linux: VirtualAGC-installer
 else
-ifndef MACOSX
 Linux: temp/lVirtualAGC
-else
-Linux: temp/VirtualAGC.app
 endif
 endif
 

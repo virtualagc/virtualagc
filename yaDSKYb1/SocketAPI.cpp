@@ -72,7 +72,8 @@
 #include <stdio.h>
 #ifndef WIN32
 #include <sys/socket.h>
-#else
+#endif
+#ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
 #define SOCKET_API_C
