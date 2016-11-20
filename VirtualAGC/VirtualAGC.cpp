@@ -2603,7 +2603,7 @@ VirtualAGC::FormScript(void)
   wxFile Fout;
   if (Fout.Create(wxT("simulate"), true, wxS_DEFAULT | wxS_IXUSR | wxS_IXGRP))
     {
-      Fout.Write(wxT("#!/bin/bash\n"));
+      Fout.Write(wxT("#!/bin/sh\n"));
 #ifdef __APPLE__
       Fout.Write (wxT ("PATH=$PATH:/usr/X11/bin\n"));
 #endif
