@@ -347,10 +347,11 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   // it to an absolute path.
   if (ExecutableDirectory.GetChar(0) != '/')
     {
+      wxString old = ExecutableDirectory;
       wxString WorkingDir = wxGetCwd();
       ExecutableDirectory = WorkingDir;
       ExecutableDirectory += PATH_DELIMITER;
-      ExecutableDirectory += ExecutableDirectory;
+      ExecutableDirectory += old;
     }
 #endif
   wxString TopDirectory = ExecutableDirectory.BeforeLast(PATH_DELIMITER);
