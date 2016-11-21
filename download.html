@@ -34,9 +34,9 @@
             </small></th>
         </tr>
         <tr>
-          <td valign="top">All platforms (but only Linux and<br>
-            Windows currently have workable<br>
-            build-instructions)<br>
+          <td valign="top">All platforms (but Solaris and <br>
+            Mac OS X don't currently have <br>
+            workable build-instructions)<br>
           </td>
           <td valign="middle">Complete source code<br>
             (Apps, AGC, and AEA)<br>
@@ -71,8 +71,10 @@
 
 
 
+
               900MB</a></td>
           <td valign="middle"><a href="#Downloading_Running_or_Updating">Using
+
 
 
 
@@ -86,6 +88,7 @@
           </td>
           <td valign="middle"><a
               href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-installer">2016-11-16,
+
 
 
 
@@ -115,6 +118,7 @@ href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar
 
 
 
+
               12MB<br>
             </a></td>
           <td valign="middle"><a href="#Raspberry_Pi_Raspbian_">Using
@@ -130,6 +134,7 @@ href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar
           Running, or Updating Virtual AGC in VirtualBox</a></li>
       <ul>
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
+
 
 
 
@@ -204,6 +209,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
 
 
 
+
           to this page</a>) FreeBSD as well even though the latter is
         not obvious from the VirtualBox website.<br>
       </li>
@@ -222,6 +228,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
         just the AGC/AEA code), then you should instead <a
           href="#Downloading_and_Building_Virtual_AGC">download the
           Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
+
 
 
 
@@ -274,10 +281,12 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
 
 
 
+
       of the Virtual AGC VM<br>
     </h3>
     <p>The approach described here should work with any host system
       supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
+
 
 
 
@@ -346,6 +355,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
 
 
 
+
       Code::Blocks is an Integrated Development Environment (IDE), which
       means that you can edit the AGC source code and reassemble it ...
       but more importantly, it means you can <i>visually debug</i> it:
@@ -390,6 +400,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
         computer system.&nbsp; The Virtual AGC virtual machine (VM) you
         will download was created with <a
           href="https://www.virtualbox.org/wiki/Download_Old_Builds_4_3">VirtualBox
+
 
 
 
@@ -590,6 +601,7 @@ about
 
 
 
+
       configuring it</a>.<br>
     <h2><a name="Downloading_and_Building_Virtual_AGC"></a>Downloading
       and Building Virtual AGC from Source</h2>
@@ -628,9 +640,11 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
+
 
 
 
@@ -683,9 +697,11 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
       There are several ways which one might choose to download it, such
       as <a
         href="https://github.com/virtualagc/virtualagc/archive/master.zip">in
+
 
 
 
@@ -722,6 +738,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
     to run Virtual AGC on, and that's the topic of the next few
     sections.&nbsp; It's also possible that <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
 
 
 
@@ -853,6 +870,7 @@ about
 
 
 
+
           configuring it</a>.</li>
     </ol>
     <p> </p>
@@ -909,10 +927,10 @@ about
     <table border="1" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
-          <td align="center" valign="middle"><img alt="" src="redX.png"
-              height="75" width="70"><br>
+          <td align="center" valign="middle"><img alt=""
+              src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This fails!</b></big></big><br>
+          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
           </td>
         </tr>
       </tbody>
@@ -926,32 +944,50 @@ about
 
 
 
-    This isn't the latest version of FreeBSD (version 11), but that's
-    much harder to install, and I'm too lazy to mess with it.&nbsp; At
-    any rate, I know nothing about FreeBSD, so my instructions may not
-    be the most-efficient ones.&nbsp; The executive summary is that
-    Virtual AGC builds, but none of the graphical programs work once
-    built.&nbsp; My notes are below, if anyone wants to take up the
-    mantle and figure out how to make this actually work.<br>
+
+    That isn't the latest version of FreeBSD (version 11), but it's much
+    easier to install than FreeBSD proper, and should be 100% equivalent
+    for the same version numbers.&nbsp; At any rate, I know nothing
+    about FreeBSD, so my instructions may not be the most-efficient
+    ones.&nbsp; The executive summary is that the build process works,
+    and VirtualAGC acts normally once built.&nbsp; <br>
+    <br>
+    Setup:<br>
     <ol>
-      <li>Install 'cmake' and GNU 'make' (gmake) with the command "sudo
-        pkg install cmake gmake".</li>
-      <li><a href="http://www.wxwidgets.org">Download wxWidgets 2.8.12</a>,
-        or as close to that 2.8.x version as you can get, and
-        build/install from source (use the --enable-unicode switch with
-        'configure').&nbsp; Yes, wxWidgets can be installed from a
-        "package", but this doesn't give you the essential 'wx-config'
-        utility.&nbsp; Probably it could be installed from a "port"
-        instead, but I'm too ignorant to try that (and didn't set up the
-        ports system anyway).</li>
-      <li><a href="http://liballeg.org/old.html">Download Allegro 4.4.2</a>,
-        or as close to that 4.4.x version as you can get, and
-        build/install from source.&nbsp; Prior to building Allegro, I
-        had to do this: "sudo ln -s /usr/local/lib/libasound* /usr/lib";
-        I'm sure there's a much cleaner way to handle that problem
-        (namely, that Allegro couldn't find libasound), but I don't know
-        what it is.<br>
+      <li>Install 'cmake' and GNU 'make' (gmake) using the "package"
+        system, with the command "sudo pkg install cmake gmake".</li>
+      <li>Install the "ports" system, if you haven't already.<br>
       </li>
+      <li>Install wxWidgets 2.8.12, or as close to that 2.8.x version as
+        you can get, using the "ports" system:&nbsp; "cd
+        /usr/ports/x11-toolkits/wxgtk28" and "sudo make install".</li>
+      <li>For whatever reason, the 'wx-config' program is installed with
+        a different name.&nbsp; Make a symbolic link with the proper
+        name for it somewhere in your path:&nbsp; "mkdir $HOME/bin" and
+        "ln -s /usr/local/bin/wxgtk2u-2.8-config
+        $HOME/bin/wx-config".&nbsp; If you test this with the command
+        "wx-config --list", you should see that the default wxWidgets
+        configuration is "gtk2-unicode-release-2.8".<br>
+      </li>
+      <li><a href="http://liballeg.org/old.html">Download Allegro 4.4.2</a>,
+        or as close to that 4.4.x version as you can get.&nbsp; Prior to
+        building Allegro, I had to do this: "sudo ln -s
+        /usr/local/lib/libasound* /usr/lib"; I'm sure there's a much
+        cleaner way to handle that problem (namely, that Allegro
+        couldn't find libasound), but I don't know what it is.&nbsp; To
+        build and install, do this:</li>
+      <ul>
+        <li>"cd allegro-4.4.2"</li>
+        <li>"mkdir Build"</li>
+        <li>"cd Build"</li>
+        <li>"cmake .."</li>
+        <li>"make"</li>
+        <li>"sudo make install"</li>
+      </ul>
+    </ol>
+    <p>Building Virtual AGC:<br>
+    </p>
+    <ol>
       <li>In the Virtual AGC source directory (which for me was
         ~/git/virtualagc), run "gmake FREEBSD=yes".</li>
       <li>This will have created a directory
@@ -1011,22 +1047,10 @@ about
 
 
 
+
           configuring it</a>.&nbsp; Note that yaACA and yaACA3 are
         built, but not yaACA2.</li>
     </ol>
-    <p>Unfortunately, GUI programs like Virtual AGC or yaDSKY2 do not
-      work at the end of this process.&nbsp; You simply get the message<br>
-    </p>
-    <blockquote>
-      <p><tt>/usr/local/lib/compat/libstdc++.so.6: version
-          GLIBCXX_3.4.11 required by /usr/local/lib/libwx_baseu-2.8.so.0
-          not found<br>
-        </tt></p>
-    </blockquote>
-    <p>There are several <i>other</i> versions of <tt>/usr/local/lib/compat/libstdc++.so.6</tt>
-      present (3 others, by my count), and as for whether any of them
-      may work, I can't say.<tt><br>
-      </tt></p>
     <ol>
     </ol>
     <h3><a name="Solaris"></a>Solaris</h3>
@@ -1128,6 +1152,7 @@ about
 
 
 
+
           configuring it</a>.</li>
     </ol>
     <p>In <i>reality</i>, this does <u>not</u> work ... or rather,
@@ -1161,15 +1186,19 @@ about
       </tbody>
     </table>
     <br>
-    I believe that wxWidgets probably needs to be built from source on
-    the Mac OS X platform in order to build Virtual AGC.&nbsp; While I
-    was once able to do this on very old versions of Mac OS X, I can no
-    longer discover a method for doing so.&nbsp; It is also possible
-    that my efforts are stymied by the fact that my Mac can't run any
-    version of Mac OS X newer than Lion (10.7), and I am stuck with
-    correspondingly-old versions of Xcode, so perhaps this is all very
-    simple with new Macs; and perhaps not.&nbsp; <a
-      href="https://github.com/virtualagc/virtualagc/blob/master/README.md">The
+    This section relates to building Virtual AGC on Mac OS X Lion
+    (10.7), with Xcode 4.6.3.&nbsp; The executive summary is that the
+    compilation all works, but that I am not forming the "app" folder
+    structure properly, apparently, so right now the programs have
+    problems running even though probabaly built correctly.<br>
+    <br>
+    Note that both the Mac OS X and Xcode versions are both very far
+    behind the times ... but they're the latest that can be installed on
+    the newest Mac I have, and unless somebody wants to give me a newer
+    one for free, that's the last Mac I'll ever have.&nbsp; So these
+    instructions may or may not work on your Mac.&nbsp; Similarly, <a
+      href="https://github.com/virtualagc/virtualagc/blob/master/README.md">the
+
 
 
 
@@ -1178,7 +1207,79 @@ about
 
       README file at GitHub</a> may or may not contain useful
     information on building in newer versions of Mac OS X.&nbsp; Let me
-    know if you deduce a build-method that works.
+    know if you have a better build procedure than I do.<br>
+    <br>
+    Setup:<br>
+    <ol>
+      <li>Install <a href="https://developer.apple.com/download/more">most-current
+          version of Xcode for your version of Mac OS X</a> ... of
+        course!<br>
+      </li>
+      <li><a href="https://www.macports.org/">Install MacPorts</a>.</li>
+      <li>Use MacPorts to install wxWidgets 2.8.12:&nbsp; "sudo port
+        install wxgtk-2.8" or "sudo port install wxWidgets-2.8",
+        depending on your Xcode version.</li>
+      <li>Use MacPorts to install cmake:&nbsp; "sudo port install
+        cmake".<br>
+      </li>
+      <li>Install Allegro 4.4.2:</li>
+      <ul>
+        <li>Use MacPorts:&nbsp; "sudo port install allegro".&nbsp; That
+          doesn't work on some versions of Xcode, in which case instead
+          use the next step.&nbsp; Be aware that Allegro version 5.x
+          does not work for our purposes, so alternate installations
+          like "sudo port install allegro5" aren't helpful.<br>
+        </li>
+        <li>Install from source:</li>
+        <ul>
+          <li><a href="http://liballeg.org/old.html">Download</a> and
+            unpack the source code for version 4.4.2.</li>
+          <li>"cd allegro-4.4.2"</li>
+          <li>"mkdir Build"</li>
+          <li>"cd Build"</li>
+          <li>"cmake .."</li>
+          <li>"make"</li>
+          <li>"sudo make install"</li>
+        </ul>
+        <li>If <i>both</i> of the approaches above fail, as they did on
+          my (obsolete) Mac, it's not a disaster, and you can still
+          proceed.<br>
+        </li>
+      </ul>
+    </ol>
+    <p>Building Virtual AGC:<br>
+    </p>
+    <ol type="a">
+      <li>'cd' into Virtual AGC source directory, as obtained from
+        GitHub.</li>
+      <li>Determine where wxWidgets was installed by using the command
+        "port contents wxgtk-2.8 | grep /bin/" (or "port contents
+        wxWidgets-2.8 | grep /bin/").&nbsp; What you're actually trying
+        to find out is the directory in which the program 'wx-config' is
+        installed.&nbsp; In my case, I found that the location was
+        /opt/local/Library/Framework/wxWidgets.frameworks/Versions/wxGTK/2.8/bin.&nbsp;
+        You have to add that to your PATH, so that the 'wx-config'
+        program can be found during the build.&nbsp; The command is
+        "export PATH=$PATH:/opt/local/.../bin".&nbsp; You can test that
+        it worked with a command like "wx-config --list", from which we
+        would like to see that the default configuration is
+        "gtk2-unicode-release-2.8".&nbsp; By the way, unless you make
+        this change to the PATH permanent, the PATH will be reset back
+        to the default one as soon as you close the command-line
+        terminal you're using for this.</li>
+      <li>Do "make MACOSX=yes".</li>
+      <li>The preceding step creates a directory called
+        VirtualAGC/temp/VirtualAGC.app, which is the Mac OS X "app" for
+        the VirtualAGC GUI program.&nbsp; You might want to (optionally)
+        drag it onto the Desktop.</li>
+    </ol>
+    <p>The process above works, but for some reason the VirtualAGC.app
+      folder structure is no longer formed correctly.&nbsp; You can run
+      VirtualAGC, but none the other stuff it's supposed to control
+      (like browsing the source code or running a simulation) works, due
+      to the malformation mentioned.&nbsp; Once that's fixed, I suspect
+      that it will run properly.<br>
+    </p>
     <h3><a name="Windows"></a>Windows</h3>
     <table border="1" cellpadding="2" cellspacing="2">
       <tbody>
@@ -1249,6 +1350,7 @@ about
         library for <span style="font-weight: bold;">MinGW</span>.&nbsp;
 
 
+
         Within your <span style="font-weight: bold;">Msys</span> home
         directory, unpack the download file, 'cd' into the directory it
         creates.&nbsp; Do "mkdir /usr/local", and run the command "make
@@ -1256,6 +1358,7 @@ about
         <span style="font-weight: bold;">Msys</span> will probably
         correspond to something like c:\mingw\msys\1.0\ in your Windows
         filesystem.) &nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
+
 
 
 
@@ -1365,6 +1468,7 @@ about
         run the VirtualAGC program.&nbsp; The desktop icon should point
         to <i>Path-to-lVirtualAGC</i>\bin\VirtualAGC.exe as the
         executable, and should use a "starting directory" of <i>Path-to-lVirtualAGC</i>\Resources.&nbsp;
+
 
 
 
@@ -1480,7 +1584,7 @@ about
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-11-19.<br>
+          2016-11-20.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
