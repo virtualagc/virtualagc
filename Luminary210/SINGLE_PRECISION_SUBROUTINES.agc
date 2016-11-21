@@ -7,16 +7,14 @@
 ##              that the code format has been changed to conform to the
 ##              requirements of the yaYUL assembler rather than the
 ##              original YUL assembler.
-## Reference:   pp. XXX-XXX
+## Reference:   p. 1100
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+##		2016-11-21 RRB	Changed page numbers for Luminary210
 
-## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
-
-
-## Page 1101
+## Page 1100
 		BLOCK	02
 
 # SINGLE PRECISION SINE AND COSINE
