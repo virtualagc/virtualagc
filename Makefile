@@ -237,6 +237,7 @@ ifdef SOLARIS
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
 LIBS+=-lnsl
+export SOLARIS
 endif
 
 # Some adjustments for building in Mac OS X
@@ -247,12 +248,14 @@ endif
 ifdef MACOSX
 #NOREADLINE=yes
 ISMACOSX:=MACOSX=yes
+export MACOSX
 endif
 
 # Some adjustments for building in FreeBSD
 ifdef FREEBSD
 LIBS+=`pkg-config --libs gtk+-2.0`
 LIBS+=`pkg-config --libs glib`
+export FREEBSD
 endif
 
 # GROUP is the main group to which the USER belongs.  This seems to be defined
@@ -299,6 +302,7 @@ endif
 # Note:  The CURSES variable is misnamed.  It really is just any special libraries
 # for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
 ifdef WIN32
+export WIN32
 EXT=.exe
 CFLAGS0+=-I/usr/local/include
 CFLAGS+=-I/usr/local/include
@@ -315,6 +319,19 @@ endif
 ifdef MACOSX
 CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro
 CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro
+endif
+
+ifdef MACOSX
+CFLAGS0+=-DMACOSX=yes
+CFLAGS+=-DMACOSX=yes
+endif
+ifdef SOLARIS
+CFLAGS0+=-SOLARIS=yes
+CFLAGS+=-SOLARIS=yes
+endif
+ifdef FREEBSD
+CFLAGS0+=-FREEBSD=yes
+CFLAGS+=-FREEBSD=yes
 endif
 
 # We assume a *nix build environment.
