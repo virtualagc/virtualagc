@@ -198,7 +198,11 @@ nbfgetsThreadFunction (void *Arg)
   // This function doesn't actually return, but I've
   // put in the following line to avoid a compiler
   // warning in some compiler versions.
+  // ... Whereas leaving it in gives compiler warnings in
+  // other versions.
+#if 0
   return (NULL);
+#endif
 }
 
 // Signals to the thread reading in the input from stdin to actually go

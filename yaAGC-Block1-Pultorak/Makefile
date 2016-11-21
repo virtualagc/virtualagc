@@ -1,7 +1,6 @@
 # Copyright:	Public Domain
 # Filename:	Makefile
-# Purpose:	Build John Pultorak's Block 1 simulator
-#		with GNU g++.
+# Purpose:	Build John Pultorak's Block 1 simulator.
 # Reference:	http://www.ibiblio.org/apollo/Pultorak.html
 # Mod history:	2016-08-29 RSB	Began
 #		2016-09-03 RSB	Replaced ncurses by a pthreads-based
@@ -28,7 +27,7 @@ all default: yaAGC-Block1
 # needed, depending on whether or not the constant USE_NCURSES
 # is #defined.
 yaAGC-Block1: $(SOURCE) $(HEADERS) Makefile
-	g++ -O0 -g -o $@ $(SOURCE) $(LIBS)
+	${CC} -O0 -g -o $@ $(SOURCE) $(LIBS)
 
 clean:
 	-rm $(TARGETS)

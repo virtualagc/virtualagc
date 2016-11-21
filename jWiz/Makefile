@@ -100,7 +100,7 @@ SOURCES:=${APP}.cpp \
 HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
-	g++ -DNVER=${NVER} ${MACFLAG} \
+	${CC} -DNVER=${NVER} ${MACFLAG} \
 		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
 		`wx-config --libs` \
@@ -108,7 +108,7 @@ ${APP}: ${SOURCES} ${HEADERS}
 	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}
-	${PREFIX_WIN}-g++ \
+	${PREFIX_WIN}-${CC} \
 		`${BIN_WIN}/wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
 		`${BIN_WIN}/wx-config ${WXSTATIC} --libs` \
@@ -116,7 +116,7 @@ ${APP}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}-strip $@
 
 ${APP}-macosx: ${SOURCES} ${HEADERS}
-	powerpc-apple-darwin9-g++ \
+	powerpc-apple-darwin9-${CC} \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
@@ -132,7 +132,7 @@ ${APP}-macosx: ${SOURCES} ${HEADERS}
 # maneuvers I had to go through here, and I don't remember gaving these 
 # problems before.
 ignore-${APP}-macosx: ${SOURCES} ${HEADERS}
-	powerpc-apple-darwin9-g++ \
+	powerpc-apple-darwin9-${CC} \
 		-arch ppc -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
@@ -143,7 +143,7 @@ ignore-${APP}-macosx: ${SOURCES} ${HEADERS}
 		$@-ppc \
 		-remove i386 \
 		-output $@-ppc-a		
-	i686-apple-darwin9-g++ \
+	i686-apple-darwin9-${CC} \
 		-arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/i686-apple-darwin9 \

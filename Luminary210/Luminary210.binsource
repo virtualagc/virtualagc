@@ -31,12 +31,14 @@
 ; Input-data format: Each memory bank begins with a
 ; "BANK=" line. The remainder of the bank consists
 ; of octal values. Note that banks should be zero-filled
-; at the end to make the lengths come out correct.
+; at the end (or 000001 if PARITY=1) to make the lengths come 
+; out correct.
 ;
 ; The data appears in the same order as in GAP assembly
 ; listings, namely:
-; Bank 2, bank 3, bank 0, bank 1,
-; followed by bank 4, 5, 6, 7, 10, 11, ...
+; 		Bank 2, bank 3, bank 0, bank 1,
+; followed by 
+;		bank 4, 5, 6, 7, 10, 11, ...
 ; (bank numbers in octal). In other words, banks 2,3 are
 ; swapped with banks 0,1, but otherwise the banks are in the
 ; order you'd expect. This is presumably done because banks

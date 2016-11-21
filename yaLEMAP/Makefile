@@ -77,23 +77,23 @@ SampleCodeAGS.lst: yaLEMAP SampleCodeAGS.aea
 	mv yaLEMAP.lst SampleCodeAGS.lst
 
 binLEMAP: binLEMAP.c
-	gcc ${CFLAGS} -o $@ $^
+	${cc} ${CFLAGS} -o $@ $^
 	./binLEMAP <SampleCodeAGS.binsource
 
 binLEMAP.exe: binLEMAP.c
-	i386-mingw32-gcc ${CFLAGS} -o $@ $^
+	i386-mingw32-${cc} ${CFLAGS} -o $@ $^
 
 binLEMAP-macosx: binLEMAP.c
-	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} -o $@ $^
+	powerpc-apple-darwin9-${cc} -arch i386 -arch ppc ${CFLAGS} -o $@ $^
 
 yaLEMAP: yaLEMAP.c ../yaYUL/SymbolTable.c
-	gcc ${CFLAGS} -o $@ $^ -lm
+	${cc} ${CFLAGS} -o $@ $^ -lm
 
 yaLEMAP.exe: yaLEMAP.c ../yaYUL/SymbolTable.c
-	i386-mingw32-gcc ${CFLAGS} -o $@ $^ -lm
+	i386-mingw32-${cc} ${CFLAGS} -o $@ $^ -lm
 
 yaLEMAP-macosx: yaLEMAP.c ../yaYUL/SymbolTable.c
-	powerpc-apple-darwin9-gcc -arch i386 -arch ppc ${CFLAGS} -o $@ $^ -lm
+	powerpc-apple-darwin9-${cc} -arch i386 -arch ppc ${CFLAGS} -o $@ $^ -lm
 
 .PHONY:	clean
 clean:
@@ -114,6 +114,6 @@ install: default
 	
 
 %.o:	%.c ../yaYUL/yaYUL.h
-	gcc ${CFLAGS0} -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -c -o $@ $<
+	${cc} ${CFLAGS0} -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -c -o $@ $<
 	
 

@@ -19,7 +19,7 @@ endif
 all default:	yaDSKYb1
 
 yaDSKYb1: yaDSKYb1-widgetized.cpp yaDSKYb1-widgetized.h ${EXTRASOURCE} ${EXTRAHEADERS} Makefile
-	g++ -g -O0 -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` \
+	${CC} -g -O0 -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` \
 		$< ${EXTRASOURCE} `wx-config --libs` -o $@ $(NLIBS)
 
 .PHONY: clean

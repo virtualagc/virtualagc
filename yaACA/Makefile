@@ -58,10 +58,10 @@ endif
 CFILES:=$(wildcard *.c)
 
 yaACA: $(CFILES:%.c=%.o)
-	gcc ${CFLAGS} -o $@ $^ -L../yaAGC -lyaAGC ${ALLEGRO}
+	${cc} ${CFLAGS} -o $@ $^ -L../yaAGC -lyaAGC ${ALLEGRO}
 
 yaACA-nay.exe: ${CFILES} ../yaAGC/agc_utilities.c
-	i386-mingw32-gcc -I../yaAGC \
+	i386-mingw32-${cc} -I../yaAGC \
 		${CFLAGS} -DNVER=${NVER} \
 		-DALLEGRO_STATICLINK \
 		-Wl,--subsystem,windows \
@@ -69,7 +69,7 @@ yaACA-nay.exe: ${CFILES} ../yaAGC/agc_utilities.c
 		-lalleg_s -lwsock32 ${ALLEGRO_EXTRA_LIBS}
 
 yaACA-cfg.exe: ${CFILES} ../yaAGC/agc_utilities.c
-	i386-mingw32-gcc -I../yaAGC \
+	i386-mingw32-${cc} -I../yaAGC \
 		${CFLAGS} -DNVER=${NVER} \
 		-DALLEGRO_STATICLINK \
 		-Wall -o $@ $^ \
@@ -81,7 +81,7 @@ yaACA-cfg.exe: ${CFILES} ../yaAGC/agc_utilities.c
 # is that yaACA-cfg has console output, but for some reason
 # cannot access the joystick whilst connected to yaAGC.
 yaACA.exe: ${CFILES} ../yaAGC/agc_utilities.c
-	i386-mingw32-gcc -I../yaAGC \
+	i386-mingw32-${cc} -I../yaAGC \
 		${CFLAGS} -DNVER=${NVER} \
 		-DALLEGRO_STATICLINK \
 		-Wl,--subsystem,windows \
@@ -89,7 +89,7 @@ yaACA.exe: ${CFILES} ../yaAGC/agc_utilities.c
 		-lalleg_s -lwsock32 ${ALLEGRO_EXTRA_LIBS}
 
 yaACA-macosx: ${CFILES} ../yaAGC/agc_utilities.c
-	powerpc-apple-darwin9-gcc -arch ppc -arch i386 -I../yaAGC \
+	powerpc-apple-darwin9-${cc} -arch ppc -arch i386 -I../yaAGC \
 		`${HOME}/IMCROSS/mac/bin/allegro-config --cflags` \
 		${CFLAGS} -DNVER=${NVER} \
 		-Wall -o $@ $^ \
@@ -103,6 +103,6 @@ install: yaACA
 	chmod ugo+x ${PREFIX}/bin/${EXENAME}
 
 %.o:	%.c
-	gcc ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -I../yaAGC -o $@ $<
+	${cc} ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -I../yaAGC -o $@ $<
 	
 

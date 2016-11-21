@@ -12,7 +12,7 @@ LIBS=-L/usr/lib -lwsock32
 endif
 
 yaUplinkBlock1: yaUplinkBlock1.c ../yaAGCb1/SocketAPI.c ../yaAGCb1/agc_utilities.c
-	gcc $(EXTRAS) -o $@ $^ $(LIBS) -lncurses
+	${cc} $(EXTRAS) -o $@ $^ $(LIBS) -lncurses
 
 .PHONY: clean
 clean:

@@ -24,7 +24,7 @@ endif
 all default: ${TARGETS}
 
 yaAGCb1: $(SOURCE) $(HEADERS) Makefile
-	gcc -O0 -g -o $@ $(SOURCE) -lpthread $(LIBS)
+	${cc} -O0 -g -o $@ $(SOURCE) -lpthread $(LIBS)
 
 test.agc.bin: test.agc
 	../../virtualagc/yaYUL/yaYUL --block1 $^ >test.agc.lst

@@ -37,7 +37,7 @@ endif
 default: ${TARGET}
 
 ${TARGET}: ${TARGET}.cpp Makefile
-	g++ ${CFLAGS} `wx-config --cxxflags` -o $@ \
+	${CC} ${CFLAGS} `wx-config --cxxflags` -o $@ \
 		-I../enet/include $< ../enet/*.c \
 		`wx-config --libs`
 

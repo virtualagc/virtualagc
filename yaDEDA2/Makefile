@@ -103,7 +103,7 @@ SOURCES:=${APPNAME}.cpp \
 HEADERS:=${APPNAME}.h
 
 ${APPNAME}: ${SOURCES} ${HEADERS}
-	g++ \
+	${CC} \
 		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
 		`wx-config --libs` \
@@ -111,7 +111,7 @@ ${APPNAME}: ${SOURCES} ${HEADERS}
 	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES} ${HEADERS}
-	${PREFIX_WIN}-g++ \
+	${PREFIX_WIN}-${CC} \
 		`${BIN_WIN}wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
 		`${BIN_WIN}wx-config ${WXSTATIC} --libs` \
@@ -119,7 +119,7 @@ ${APPNAME}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}-strip $@
 
 ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
-	powerpc-apple-darwin9-g++ \
+	powerpc-apple-darwin9-${CC} \
 		-arch ppc -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
@@ -130,7 +130,7 @@ ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
 		$@-ppc \
 		-remove i386 \
 		-output $@-ppc-a		
-	i686-apple-darwin9-g++ \
+	i686-apple-darwin9-${CC} \
 		-arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/i686-apple-darwin9 \

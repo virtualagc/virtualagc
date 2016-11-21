@@ -177,6 +177,28 @@ DATE:=`date +%Y%m%d`
 DEV_STATIC=DEV_STATIC=yes
 # *******************************************************************
 
+# Select compiler basenames.  We use
+#	${cc}	C compiler
+#	${CC}	C++ compiler
+# These are almost always gcc and g++, respectively, but on some
+# platforms it's necessary to use non-GNU compilers (even if the 
+# GNU compilers are actually available and installed)  in order to 
+# be able to access the native builds of wxWidgets for programs
+# like yaDSKY2. 
+cc=gcc
+CC=g++
+ifdef SOLARIS
+cc=cc
+CC=CC
+endif
+ifdef IPHONE
+cc=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-gcc-4.0.1
+CC=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-g++-4.0.1
+LIBS=
+endif
+export cc
+export CC
+
 # Comment out the following line(s) to use yaDSKY rather than yaDSKY2 and/or 
 # yaDEDA by yaDEDA2.  yaDSKY/yaDEDA have been replaced by yaDSKY2/yaDEDA2 
 # principally because yaDSKY/yaDEDA are gtk+ based while yaDSKY2/yaDEDA2
@@ -215,7 +237,6 @@ ifdef SOLARIS
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
 LIBS+=-lnsl
-export CC=gcc
 endif
 
 # Some adjustments for building in Mac OS X
@@ -287,7 +308,6 @@ LIBS+=-lkernel32
 LIBS+=-lwsock32
 CURSES=../yaAGC/random.c
 CURSES+=-lregex
-export CC=gcc
 else
 CURSES=-lcurses
 endif

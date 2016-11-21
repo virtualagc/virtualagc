@@ -195,7 +195,7 @@ SOURCES:=${APP}.cpp \
 HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
-	g++ -DONNO_STYLE \
+	${CC} -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
 		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
@@ -204,7 +204,7 @@ ${APP}: ${SOURCES} ${HEADERS}
 	strip $@${EXT}
 
 ${APP}.exe: ${SOURCES} ${HEADERS}
-	${PREFIX_WIN}-g++ -DONNO_STYLE \
+	${PREFIX_WIN}-${CC} -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
 		`${BIN_WIN}/wx-config ${WXSTATIC} --cxxflags` \
 		-o $@ ${SOURCES} \
@@ -213,7 +213,7 @@ ${APP}.exe: ${SOURCES} ${HEADERS}
 	${PREFIX_WIN}-strip $@
 
 ${APP}-macosx: ${SOURCES} ${HEADERS}
-	${PREFIX_MAC}-g++ -DONNO_STYLE \
+	${PREFIX_MAC}-${CC} -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --cxxflags` \
