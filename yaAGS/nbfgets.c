@@ -195,12 +195,10 @@ nbfgetsThreadFunction (void *Arg)
       // Go to sleep until the string has been processed.
       pthread_cond_wait (&nbfgetsCond, &nbfgetsMutex);
     }
+#ifndef SOLARIS
   // This function doesn't actually return, but I've
   // put in the following line to avoid a compiler
   // warning in some compiler versions.
-  // ... Whereas leaving it in gives compiler warnings in
-  // other versions.
-#if 0
   return (NULL);
 #endif
 }
