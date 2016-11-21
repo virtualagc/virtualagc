@@ -326,12 +326,12 @@ CFLAGS0+=-DMACOSX=yes
 CFLAGS+=-DMACOSX=yes
 endif
 ifdef SOLARIS
-CFLAGS0+=-SOLARIS=yes
-CFLAGS+=-SOLARIS=yes
+CFLAGS0+=-DSOLARIS=yes
+CFLAGS+=-DSOLARIS=yes
 endif
 ifdef FREEBSD
-CFLAGS0+=-FREEBSD=yes
-CFLAGS+=-FREEBSD=yes
+CFLAGS0+=-DFREEBSD=yes
+CFLAGS+=-DFREEBSD=yes
 endif
 
 # We assume a *nix build environment.
