@@ -10,6 +10,7 @@
 #               2016-11-15 JL   Transcribed pages 153-162.
 #               2016-11-16 JL   Transcribed pages 163-169.
 #               2016-11-19 JL   Transcribed pages 170-180.
+#               2016-11-20 JL   Transcribed pages 181-183.
 
 # Annotations:
 #
@@ -1422,14 +1423,154 @@ P1123   IF THE ONLY TROUBLE WITH AN EQUALS CARD IS AN UNDEFINED ADDRESS SYMBOL, 
 # Page 181
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  29        PAGE  29
 
+P1135              PROCEDURE TO HANDLE THE CLERICAL CODE ..ERASE..  IF THE ADDRESS FIELD IS BLANK OR SIGNED NUMERIC, THE
+R1137   LOCATION COUNTER GIVES THE LOWER LIMIT AND IS ADVANCED TO HIGH LIMIT +1.
+
+
+
+ 1138   ERASE      TX, CD TYPE  (ERASE)       -             HEALTH
+ 1139              NA, BIT 11   HEALTH        ZERO          ILLEGOP             ASTERISK MAKES ILLEGAL OP.
+ 1141              TS           Z,SC          Z,X4          ADR FIELD           DECODE ADDRESS FIELD.
+
+ 1143              NA           FIELD COD     ONES          C,+2
+ 1144   ERAS WHAT  TS, BIT11    ONES          HEALTH        ER LOC SYM          WHEN ADDRESS IS MEANINGLESS.
+
+ 1146              NA, B2B6     FIELD COD     ONES          NOT ERANU           BRANCH IF NO U/S NUMERIC PART.
+ 1148              NA           FIELD COD +1  ZERO          C,+2
+ 1149              TS           ADR WD        ADR WD +1     CH ER SIZE          LONE NUMERIC IS BOTH LIMITS.
+
+ 1151              LA           ADR WD +1     BIT 7         ERAS THRU           MINUS SIGN ON MODIFIER MEANS THRU.
+ 1153              BA           ADR WD +1     ADR WD        ADR WD +1           FOR PLUS MODIFIER, UPPER LIMIT IS SUM.
+ 1155              TS           -             -             CH ER SIZE
+
+ 1156   ERAS  THRU BS           ZERO          ADR WD +1     ADR WD +1           UPPER LIMIT IS NEGATIVE OF MODIFIER.
+ 1158              LA           ADR WD        ADR WD +1     CH ER SIZE          BRANCH IF LIMITS ARE IN OK ORDER.
+ 1160              TS, BIT 12   ONES          HEALTH        ER LOC SYM          BAD NEWS WHEN LOWER LIMIT IS GREATER.
+
+ 1162   NOT ERA NU NA           FIELD COD     BIT 1         NOT ERSYM
+ 1163              NA           ADR WD        W ANYWHAR     ERAS WHAT           ERROR IF SYMBOL IS NOT ..ANYWHERE..
+ 1165              SM           HEALTH        BIT 15        HEALTH              MARK CARD AS LEFTOVER.
+ 1167              NA           FIELD COD +1  ZERO          C,+2
+ 1168              TS           ZERO          HI LIM        ERA LEFTO           WHEN SYMBOL IS ALONE.
+
+ 1170              LA           ADR WD +1     BIT 7         ERAS WHAT           BAD NEWS WHEN MODIFIER IS MINUS.
+ 1174              LA, FIX MAG  ADR WD +1     SPEC MAG      ERA LEFTO           BRANCH IF MODIFIER HAS OK SIZE.
+ 1176              TS, BIT 12   ONES          HEALTH        ER LOC SYM          WHEN LEFTOVER BLOCK LENGTH TOO BIG.
+
+ 1178   NOT ERSYM  LA           ONES          LOC CTR       C,-1                CHECK FOR ILLEGAL LOC CNTR VALUE.
+ 1181              NA           FIELD COD     ZERO          C,+2                BRANCH IF ADDRESS FIELD IS NOT BLANK.
+ 1183              TS           BIT 1         HI LIM        LC LOW LIM          ERASE CURRENT LOCATION ONLY.
+
+ 1185              NA           FIELD COD +1  ZERO          C,+2                BRANCH IF THERES 2 SIGNED NUMERIC PARTS.
+ 1187              TS           ADR WD        HI LIM        C,+2
+ 1188              BA           ADR WD        ADR WD +1     HI LIM
+ 1189   LC LOW LIM SM           LOC CTR       BIT 1         LOW LIM             AREA BEGINS WITH LOC CNTR VALUE ANYHOW.
+ 1191              LN           HI LIM        ONE           C,+2                NEGATIVE UPPER LIMIT MEANS THROUGH HERE.
+ 1193              BA           HI LIM        LOW LIM       HI LIM              OTHERWISE HI LIM GAVE REL ADRES OF END.
+ 1195              SS           LOW LIM       CHAR 1        HI LIM              ENSURE POSITIVE UPPER LIMIT.
+ 1197              LA           LOW LIM       HI LIM        C,+2                BRANCH IF LIMITS ARE IN OK ORDER.
+ 1199              TS, BIT 12   ONES          HEALTH        ER LOC SYM
+
+ 1201              LA, FIX MAG  ADR LIMIT     HI LIM        C,-1                ERROR IF UPPER LIM TOO BIG FOR MACHINE.
+ 1203              WA, FIX MAG  HI LIM        ONE           LOC CTR             FOR BLANK OR SIGNED NUM ADDRESSES ONLY.
 
 # Page 182
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  30        PAGE  30
 
+P1207   CHECK ADDRESS VALUES FOR SIZE, MEMORY TYPE, AND CONFLICT WITH OTHER ERASE CARDS.
+
+ 1209   CH ER SIZE LA, FIX MAG  HI LIM        MAX ISEQL     C,+2
+ 1210              TS, BIT12    ONES          HEALTH        ER LOC SYM          WHEN ADDRESS SIZE(S) ARE WRONG.
+ 1212              LA           ONES          LOW LIM       C,-1
+
+ 1213              SS           HI LIM        CAC3          HEALTH
+ 1214              SWS, CAC2    LOW LIM       16,L          HEALTH              PUT LIMITS INTO CARD.
+
+ 1216              TX           L TYP TAB     -             Z,X5
+ 1217              LA, CAC3     LOW LIM       5,0           C,+2                LOOK UP MEMORY TYPE OF LOWER LIMIT.
+ 1219              TS           Z,X5,1        -             C,-1
+
+ 1220              NA, LSTYPE   5,0           TYPE E        ERA TYPO            ERROR IF LOWER NOT ERASABLE.
+ 1222              LA, CAC3     HI LIM        5,0           C,+2                OK IF HIGH LIMIT IN SAME CATEGORY.
+ 1224   ERA TYPO   TS, BIT13    ONES          HEALTH        ER LOC SYM
+
+ 1225              EX           LOW LIM       FIX MAG       LOC LOC
+ 1226   ERA CONFQ  TS           LOC LOC       COMMON        AVAIL2         C    CHECK AVAILABILITY OF BLOCK.
+ 12272             WA           LOC LOC       ONE           LOC LOC
+ 1228              LA           BIT 32        COMMON        C,+2
+ 1229              SM           HEALTH        BIT 14        HEALTH              SIGNAL CONFLICT.
+ 1231              LA, FIX MAG  LOC LOC       HI LIM        ERA CONFQ
+
+ 1232   ER LOC SYM TS           LOC FIELD     COMMON        ANAL SUBF      C    ANALYZE LOCATION FIELD OF NON-LEFTOVER.
+ 1234              LA           FIELD COD     ZERO          XMIT RTRN           OK EXIT IF BLANK.
+
+ 1236              LA           FIELD COD     BIT 1         C,+3                BRANCH IF SYMBOLIC.
+ 1238              NA, B2B6     FIELD COD     ONES          XMIT RTRN           OK EXIT IF SIGNED NUMERIC.
+
+ 1240   B16(H)     TS, BIT 16   ONES          HEALTH        XMIT RTRN           ERROR EXIT IF UNSIGNED NUMERIC.
+
+ 1242              TS, BIT8     ONES          HEALTH        ANAL SYMB      C    ANALYZE LOCATION SYMBOL.
+ 1245              LA           ONES          COMMON +2     B16(H)              ERROR EXIT IF SYMBOL TABLE IS FULL.
+
+ 1252              TS           COMMON        COMMON +1     FIND XFRM -1   C    SAVE SYMBOL, ISOLATE OLD HEALTH.
+ 1253              WA           Z,S0          L XFORMS      Z,S0                GET ADDRESS OF LOCATION TRANSFORMS.
+ 1255              NA, BIT11    HEALTH        ONES          C,+2
+ 1256              TS, D8       ONES          COMMON +2     END TS              SYMBOL HEALTH BECOMES G IF ILLEG. ADR.
 
 # Page 183
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  31        PAGE  31
 
+P12575  SELECT AND APPLY TRANSFORM FOR ERASE LOCATION SYMBOL.
+
+ 1258              NA, BIT 12   HEALTH        ONES          C,+3
+ 1259              SWS, D8      N,S0          D,5           COMMON +2           USE TRANSFORM FOR OVERSIZE ASSIGNMENT.
+ 1261              TS           -             -             END IS
+
+ 1262              NA, BIT13    HEALTH        ONES          C,+3
+ 1263              SWS, D8      N,S0          D,4           COMMON +2           USE TRANSFORM FOR MEMORY TYPE ERROR.
+ 1265              TS, CAC3     LOW LIM       COMMON +2     END IS
+
+ 1266              NA, BIT14    HEALTH        ONES          C,+3
+ 1267              SWS, D8      N,S0          D,3           COMMON +2           USE TRANSFORM FOR CONFLICT.
+ 1269              TS, CAC3     LOW LIM       COMMON +2     END IS
+
+ 1270              SWS, D8      N,S0          D,6           COMMON +2           USE NORMAL ERASE TRANSFORM.
+ 1272              TS, CAC3     LOW LIM       COMMON +2     END IS
+
+R1273   PROCEDURE TO HANDLE THE LOCATION FIELD OF A LEFTOVER ERASE CARD.
+
+ 1274   ERA LEFTO  SS           HI LIM        SPEC MAG      HEALTH
+ 1275              TS           LOC FIELD     COMMON        ANAL SUBF      C
+ 1276              NA           FIELD COD     BIT 1         XMIT RTRN           ERROR EXIT IF NOT SYMBOLIC.
+ 1278              TS, BIT8     ONES          HEALTH        ANAL SYMB      C
+ 1280              LA           ONES          COMMON +2     B16(H)              ERROR EXIT IF SYMBOL TABLE FULL.
+
+ 12812             TX           COMMON        -             COMMON +1           SAVE SYMBOL FOR SY DEF XIT.
+ 1282              LA           3 D8          COMMON +2     PRED ELEF           BRANCH IF SYMBOL IS PREDEFINED.
+ 12822             LA           COMMON +2     ZERO          GOT ELEFP -2
+ 1283              SM           HEALTH        BIT 10        HEALTH              SIGNAL PREDEFINITION FAILURE.
+ 12842  ERA LEF MD SS           ZERO          CAC3          HEALTH              IF ERASABLE LEFTO IS MULTIPLY DEFINED.
+ 1285              TS           D8            COMMON +2     END IS              MAKE HEALTH G AND EXIT.
+
+ 12885             SWE, CAC23   M ELEFTOP     16            COMMON +2           GET MACHINE'S ERAS LEFTO PARAMETERS.
+ 1289              TX           M ELEFTOP     -             Z,SC                VISIT MACHINE'S OWN ROUTINE.
+ 12895  GOT ELEFP  SWS, B26T30  COMMON +2     8             C,+1                USE (16 - MODULARITY) AS SHIFT COUNT.
+ 1290              SWE, CAC3    CAC3                        CACN                FORM LEFTOVER BLOCK SIZE LIMIT.
+ 12905             LA, SPECMAG  HI LIM        CACN          ANYWHA OK           BRANCH IF GOOD ERASABLE LEFTOVER.
+
+ 1291              SWE, ONES    EIGHT         16,L          COMMON +2           BLOCK SIZE TOO BIG CAUSES ILL-DEF SYM.
+ 12915             SS           ZERO          CAC23         HEALTH
+ 1292              TS, BIT12    ONES          HEALTH        END IS
+
+ 12925  ANYWHA OK  SM           COMMON +2     HI LIM        COMMON +2           PUT BLOCK SIZE INTO SYM TAB AND HEALTH.
+ 1293              TS, SPECMAG  HI LIM        HEALTH        END IS
+
+ 12935  PRED ELEF  HA           HEALTH        BIT 15        HEALTH              REMOVE LEFTOVER STATUS.
+ 1294              LA           5 D8          COMMON +2     ERA LEF MD          BRANCH IF BAD MULTIPLE DEFINITION.
+ 12945             EX           COMMON +2     CAC3          LOW LIM
+ 1295              WA, CAC3     LOW LIM       HEALTH        HI LIM
+ 12955             WD           COMMON +2     3 D8          COMMON +2           SET UP QUANTITIES AS FOR NON-LEFTOVER.
+ 12965             TS, CAC3     ZERO          HEALTH        CH ER SIZE          ERASE AND REJOIN MAIN SEQUENCE.
 
 # Page 184
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  32        PAGE  32
