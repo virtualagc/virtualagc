@@ -100,16 +100,16 @@ SOURCES:=${APPNAME}.c \
 //HEADERS:=${APPNAME}.h
 
 ${APPNAME}: ${SOURCES} ${HEADERS}
-	gcc \
+	${cc} \
 		${NATIVE_SDL_CFLAGS} \
-		-DNVER=${NVER} \
+		-DNVER=${NVER} ${CFLAGS0} \
 		-o $@ ${SOURCES} ${WINFLAGS} \
 		${NATIVE_SDL_LIBS} \
 		${CURSES} ${LIBS2}
 	strip $@${EXT}
 
 ${APPNAME}.exe: ${SOURCES} ../yaAGC/random.c ${HEADERS}
-	${PREFIX_WIN}-gcc \
+	${PREFIX_WIN}-${cc} \
 		${WIN_SDL_CFLAGS} \
 		-DNVER=${NVER} \
 		-o $@ ${SOURCES} ../yaAGC/random.c -lwsock32 \
@@ -117,7 +117,7 @@ ${APPNAME}.exe: ${SOURCES} ../yaAGC/random.c ${HEADERS}
 	${PREFIX_WIN}-strip $@
 
 ${APPNAME}-macosx: ${SOURCES} ${HEADERS}
-	powerpc-apple-darwin9-gcc \
+	powerpc-apple-darwin9-${cc} \
 		-arch i386 -arch ppc -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
@@ -132,7 +132,7 @@ temp:
 		$@-ppc \
 		-remove i386 \
 		-output $@-ppc-a		
-	i686-apple-darwin9-gcc \
+	i686-apple-darwin9-${cc} \
 		-arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/i686-apple-darwin9 \

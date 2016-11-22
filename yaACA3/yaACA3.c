@@ -376,7 +376,9 @@ main (int argc, char *argv[])
       PulseACA ();				// Manage server connection.
     }
 
+#ifndef SOLARIS
   return (0);
+#endif
 }
 
 

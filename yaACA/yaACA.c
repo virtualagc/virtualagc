@@ -98,7 +98,11 @@
 //#define ALLEGRO_NO_MAGIC_MAIN
 //#endif // WIN32
 #define ALLEGRO_USE_CONSOLE
+#ifdef __APPLE__
+#include "allegro.h"
+#else
 #include <allegro.h>
+#endif
 #ifdef WIN32
 #include <winalleg.h>
 #include <windows.h>

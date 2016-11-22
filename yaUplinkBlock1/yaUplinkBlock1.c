@@ -33,6 +33,8 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-12 RSB  Began.
+ * 		2016-11-18 RSB	Accounted for different location of ncurses.h
+ * 				in Solaris, along with missing MSG_NOSIGNAL.
  */
 
 #include <unistd.h>
@@ -40,13 +42,27 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#ifndef WIN32
 #include <sys/socket.h>
+#endif
 #include <errno.h>
+#if defined(SOLARIS) || defined(WIN32)
+#include <ncurses/ncurses.h>
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+#else
 #include <ncurses.h>
+#endif
 #include "../yaAGCb1/yaAGCb1.h"
 extern int
 CallSocket(char *hostname, unsigned short portnum);
 #define CONNECTED "\nyaDSKY is connected.\n"
+
+// For Solaris and Mac OS X.
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
 
 // Stuff for the timer we use for reading the socket interface.
 static char DefaultHostname[] = "localhost";

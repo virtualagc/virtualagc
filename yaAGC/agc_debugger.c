@@ -562,7 +562,7 @@ DbgInitialize (Options_t * Options, agc_t * State)
   FromFiles[0] = stdin;
 
   /* Allow a command file to be used with initial debugger commands */
-  if (Options->fromfile > 0)
+  if (Options->fromfile != NULL)
     {
       if (NumFromFiles < MAX_FROMFILES)
 	{
@@ -575,7 +575,7 @@ DbgInitialize (Options_t * Options, agc_t * State)
   /* If a new source path is given then apply this to prevent the
    * default source path from the symbol table to be used.
    */
-  if (Options->directory > 0)
+  if (Options->directory != NULL)
     SourcePathName = Options->directory;
 
   /* Add the AGC starting point */
@@ -893,7 +893,7 @@ DbgNativeAddr (unsigned linear_addr)
 unsigned
 DbgLinearAddr (Address_t * agc_addr)
 {
-  unsigned LinearAddress = ~0; /* Default invalid Address */
+  unsigned LinearAddress = ~((unsigned) 0); /* Default invalid Address */
 
   if (agc_addr->SReg < 01400) /* Must be Unbanked Eraseable */
     {
@@ -996,7 +996,7 @@ DbgGetValueByAddress (unsigned gdbmi_addr)
 unsigned
 DbgLinearAddrFromAddrStr (char *addr_str)
 {
-  unsigned Address = ~0;
+  unsigned Address = ~((unsigned) 0);
   unsigned Bank, SReg;
   Symbol_t *Symbol = NULL;
   Address_t *agc_addr;
@@ -1004,7 +1004,7 @@ DbgLinearAddrFromAddrStr (char *addr_str)
   /* First determine if this address is a pseudo address or a banked
    * address by checking the existence of a comma (i.e. banked address )
    */
-  if (strstr (addr_str, ",") > 0)
+  if (strstr (addr_str, ",") != NULL)
     {
       /* Try Eraseable translation first then fixed */
       if (2 == sscanf (addr_str, "E%o,%o", &Bank, &SReg))
@@ -1020,7 +1020,7 @@ DbgLinearAddrFromAddrStr (char *addr_str)
 	    Address = DbgLinearFixedAddr (SReg, Bank, 0);
 	}
     }
-  else if (strstr (addr_str, "&") > 0)
+  else if (strstr (addr_str, "&") != NULL)
     {
       /* Looks like a symbol based address */
       addr_str++;

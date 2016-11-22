@@ -201,7 +201,7 @@ public:
     wxBitmapButton* RsetButton;
     // end wxGlade
 
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 
 public:
     virtual void on_VerbButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>

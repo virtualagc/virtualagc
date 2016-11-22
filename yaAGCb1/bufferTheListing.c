@@ -34,6 +34,7 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-03 RSB  Wrote.
+ * 		2016-11-18 RSB	Added missing ctype.h.
  *
  * This program does not require any specially-formatted file from yaYUL, other
  * than the normal assembly listing.  It will also load listing files created
@@ -56,6 +57,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "yaAGCb1.h"
 
 char bufferedListing[MAX_LISTING_LINES][MAX_LINE_LENGTH];

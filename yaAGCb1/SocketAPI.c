@@ -1,81 +1,88 @@
 /*
- Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
-
- This file is part of yaAGC.
-
- yaAGC is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
-
- yaAGC is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with yaAGC; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
- In addition, as a special exception, Ronald S. Burkey gives permission to
- link the code of this program with the Orbiter SDK library (or with
- modified versions of the Orbiter SDK library that use the same license as
- the Orbiter SDK library), and distribute linked combinations including
- the two. You must obey the GNU General Public License in all respects for
- all of the code used other than the Orbiter SDK library. If you modify
- this file, you may extend this exception to your version of the file,
- but you are not obligated to do so. If you do not wish to do so, delete
- this exception statement from your version.
-
- Filename:	SocketAPI.c
- Purpose:	This is an implementation of yaAGC-to-peripheral
- communications by means of a socket interface.  If some
- other means of communications is desired, such as a
- memory-mapped i/o-channel interface, just replace the
- functions in this file with alternate functions.
- Compiler:	GNU gcc.
- Contact:	Ron Burkey <info@sandroid.org>
- Reference:	http://www.ibiblio.org/apollo/index.html
- Mods:		08/18/04 RSB.	Split off from agc_engine.c.
- 02/27/05 RSB	Added the license exception, as required by
- the GPL, for linking to Orbiter SDK libraries.
- 05/14/05 RSB	Corrected website references.
- 05/15/05 RSB	Fixed bug in which counter increments
- would endlessly recur.  SOCKET_API_C added
- for agc_engine.h.
- 05/31/05 RSB	--debug-deda mode.
- 06/05/05 RSB	Corrected polarity of discretes in
- --debug-deda mode.  Corrected positioning
- of bits in the "input discretes".
- 06/07/05 RSB	Fixed bit positioning in DEDA shift
- register.
- 06/26/05 RSB	Accounted for uplinked data.
- 07/09/05 RSB	Accounted for rotational hand controller (RHC)
- in LM. In retrospect, this is a bad place
- to handle it, since it won't automatically
- be handled in NullAPI.c.  I'll worry about
- that later.
- 03/11/09 RSB	Added casts of various char types (unsigned
- char, char, const char) to other char types
- for function parameters.  Without these,
- there were fatal compilation errors with
- some versions of g++.
- 03/18/09 RSB	Removed printed messages about adding/removing
- sockets when the DebugMode flag is set.
- Added some robustness checking to the
- data stream on the tcp port.
- 03/19/09 RSB	Added DedaQuiet.
+ * Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
+ * Filename:	SocketAPI.c
+ * Purpose:	This is an implementation of yaAGC-to-peripheral
+ * 		communications by means of a socket interface.  If some
+ * 		other means of communications is desired, such as a
+ * 		memory-mapped i/o-channel interface, just replace the
+ * 			functions in this file with alternate functions.
+ * Compiler:	GNU gcc.
+ * Contact:	Ron Burkey <info@sandroid.org>
+ * Reference:	http://www.ibiblio.org/apollo/index.html
+ * Mods:	08/18/04 RSB.	Split off from agc_engine.c.
+ *		02/27/05 RSB	Added the license exception, as required by
+ * 				the GPL, for linking to Orbiter SDK libraries.
+ * 		05/14/05 RSB	Corrected website references.
+ * 		05/15/05 RSB	Fixed bug in which counter increments
+ * 				would endlessly recur.  SOCKET_API_C added
+ * 				for agc_engine.h.
+ * 		05/31/05 RSB	--debug-deda mode.
+ * 		06/05/05 RSB	Corrected polarity of discretes in
+ * 				--debug-deda mode.  Corrected positioning
+ * 				of bits in the "input discretes".
+ * 		06/07/05 RSB	Fixed bit positioning in DEDA shift
+ * 				register.
+ * 		06/26/05 RSB	Accounted for uplinked data.
+ * 		07/09/05 RSB	Accounted for rotational hand controller (RHC)
+ * 				in LM. In retrospect, this is a bad place
+ * 				to handle it, since it won't automatically
+ * 				be handled in NullAPI.c.  I'll worry about
+ * 				that later.
+ * 		03/11/09 RSB	Added casts of various char types (unsigned
+ * 				char, char, const char) to other char types
+ * 				for function parameters.  Without these,
+ * 				there were fatal compilation errors with
+ * 				some versions of g++.
+ * 		03/18/09 RSB	Removed printed messages about adding/removing
+ * 				sockets when the DebugMode flag is set.
+ * 				Added some robustness checking to the
+ * 				data stream on the tcp port.
+ * 		03/19/09 RSB	Added DedaQuiet.
+ * 		11/18/16 RSB	Worked around lack of MSG_NOSIGNAL in Solaris.
+ * 				Added missing unistd.h.
  */
 
+#include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef WIN32
 #include <sys/socket.h>
-#ifdef WIN32
-typedef unsigned short uint16_t;
 #endif
 #define SOCKET_API_C
 #include "yaAGCb1.h"
+
+// For Solaris and Mac OS X.
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
 
 // MAX_CLIENTS is the maximum number of hardware simulations which can be
 // attached.  The DSKY is always one, presumably.  The array is a list of
@@ -226,7 +233,7 @@ ChannelInput(agcBlock1_t *State)
                             & ~Client->ChannelMasks[Channel];
                         if (Channel == 041) State->uplinkReady = 1;
                         State->memory[Channel] = Value;
-                        printf("%lu: %04o -> %05o\n", State->countMCT, Channel, Value);
+                        printf(FORMAT_64U ": %04o -> %05o\n", State->countMCT, Channel, Value);
                       }
                   }
                 Client->Size = 0;

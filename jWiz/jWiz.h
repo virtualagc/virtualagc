@@ -140,7 +140,7 @@ protected:
     wxPanel* panel_3;
     // end wxGlade
 
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 
 public:
     virtual void Test3Clicked(wxCommandEvent &event); // wxGlade: <event_handler>

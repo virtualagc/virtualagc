@@ -165,7 +165,7 @@ public:
     wxBitmapButton* KeyHold;
     // end wxGlade
 
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 
 public:
     virtual void on_KeyPlus_pressed(wxCommandEvent &event); // wxGlade: <event_handler>

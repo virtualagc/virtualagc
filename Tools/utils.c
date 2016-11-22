@@ -155,7 +155,7 @@ generateBuggerWord (int verbose, int bank, int length, int16_t *code)
     {
       int16_t value = code[i];
 
-      if (value > 077777 || value < 0)
+      if (/*value > 077777 ||*/ value < 0)
 	{
 	  fprintf (stderr, "Warning: zeroing unassigned word at (%02o,%04o).\n",
 		   bank, BANK_OFFSET + i);

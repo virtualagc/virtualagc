@@ -200,11 +200,16 @@ typedef struct
 } Address_t;
 
 // Invalid, Constant, Address, SReg, Erasable, Fixed, Unbanked, Banked, EB, FB, Super, Overflow, Value, Syllable.
-#ifdef MSC_VS
+#if defined(MSC_VS)
 #define VALID_ADDRESS ( { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } )
 #define REG(n) ( { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 })
 #define CONSTANT(n) ( { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n, 0 })
 #define FIXEDADD(n) ( { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 })
+#elif defined(SOLARIS)
+#define VALID_ADDRESS ((const Address_t) { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } )
+#define REG(n) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 }
+#define CONSTANT(n) { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n, 0 }
+#define FIXEDADD(n) { 0, 0, 1, n, 0, 1, 1, 0, 0, 0, 0, 0, n, 0 }
 #else
 #define VALID_ADDRESS ((const Address_t) { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } )
 #define REG(n) ((const Address_t) { 0, 0, 1, n, 1, 0, 1, 0, 0, 0, 0, 0, n, 0 })

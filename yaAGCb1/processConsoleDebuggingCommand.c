@@ -266,7 +266,7 @@ processConsoleDebuggingCommand(char *command)
   for (u = 0; u < maxDisplayedLineLength + 3; u++)
     printf("-");
   printf("\n");
-  printf("MCT: %ld   Elapsed: %ld ms   Paused: %ld ms   CPU: %ld ms\n",
+  printf("MCT: " FORMAT_64U "   Elapsed: " FORMAT_64U " ms   Paused: " FORMAT_64U " ms   CPU: " FORMAT_64U " ms\n",
       agc.countMCT, (getTimeNanoseconds() - agc.startTimeNanoseconds) / 1000000,
       agc.pausedNanoseconds / 1000000, (agc.countMCT * 12) / 1024);
   printf(

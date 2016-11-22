@@ -68,14 +68,14 @@ all-archs: default yaYUL.exe yaYUL-macosx
 CFILES:=$(wildcard *.c)
 
 yaYUL:	$(CFILES:%.c=%.o)
-	gcc ${CFLAGS} -o $@ $^ -lm
+	${cc} ${CFLAGS} -o $@ $^ -lm
 
 yaYUL.exe: ${CFILES}
-	$(PREFIX_WIN)gcc ${CFLAGS} -DNVER=${NVER} \
+	$(PREFIX_WIN)${cc} ${CFLAGS} -DNVER=${NVER} \
 		-Wall -o $@ $^ -lm
 
 yaYUL-macosx: ${CFILES}
-	$(PREFIX_MAC)gcc -arch ppc -arch i386 ${CFLAGS} -DNVER=${NVER} -Wall -o $@ $^ -lm
+	$(PREFIX_MAC)${cc} -arch ppc -arch i386 ${CFLAGS} -DNVER=${NVER} -Wall -o $@ $^ -lm
 
 clean:
 	-rm -f yaYUL *.o *~ *.exe *-macosx Utilities/SplitInterp Utilities/*.exe
@@ -85,6 +85,6 @@ install: yaYUL
 	chmod ugo+x ${PREFIX}/bin/yaYUL
 
 %.o: %.c yaYUL.h
-	gcc ${CFLAGS} -g -O0 -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -o $@ $<
+	${cc} ${CFLAGS} -g -O0 -DNVER=${NVER} -DINSTALLDIR=${PREFIX} -Wall -c -o $@ $<
 	
 

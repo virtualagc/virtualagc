@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="@name@" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="agc_yayul_compiler" />
+		<Build>
+			<Target title="MAIN.agc.bin">
+				<Option output="MAIN.agc.bin" prefix_auto="0" extension_auto="0" />
+				<Option object_output="/home/virtualagc/VirtualAGC/Resources/source/@name@/.objs" />
+				<Option type="1" />
+				<Option compiler="agc_yayul_compiler" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<MakeCommands>
+					<Build command="$make $target" />
+					<CompileFile command="$make" />
+					<Clean command="$make clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q" />
+					<SilentBuild command="$make $target &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>

@@ -1,40 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	RT8_OP_CODES.agc
-## Purpose:	Part of the source code for Colossus, build 249.
-##		It is part of the source code for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), for Apollo 9.
-## Assembler:	yaYUL
-## Reference:	Starts on p. 1498 of 1701.pdf.
-## Contact:	Ron Burkey <info@sandroid.org>.
-## Website:	www.ibiblio.org/apollo.
-## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
-##
-## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
-## document read, in part:
-##
-##	Assemble revision 249 of AGC program Colossus by NASA
-##	2021111-041.  October 28, 1968.  
-##
-##	This AGC program shall also be referred to as
-##				Colossus 1A
-##
-##	Prepared by
-##			Massachusetts Institute of Technology
-##			75 Cambridge Parkway
-##			Cambridge, Massachusetts
-##	under NASA contract NAS 9-4065.
-##
-## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
-##
-## In some cases, where the source code for Luminary 131 overlaps that of 
-## Colossus 249, this code is instead copied from the corresponding Luminary 131
-## source file, and then is proofed to incorporate any changes.
+## Copyright:   Public domain.
+## Purpose:     A section of Luminary revision 210.
+##              It is part of the source code for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 15-17.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. XXX-XXX
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 
-## Page 1498
+## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
+
+
+## Page 1394
 		BANK	22
 		SETLOC	RTBCODES
 		BANK
@@ -64,29 +46,10 @@ CDULOGIC	CCS	MPAC
 		MP	HALF
 		DAS	MPAC
 		TCF	DANZIG		# MODE IS ALREADY AT DOUBLE-PRECISION
-		
-# READ THE PIPS INTO MPAC WITHOUT CHANGING THEM:
-
-READPIPS	INHINT
-		CA	PIPAX
-		TS	MPAC
-		CA	PIPAY
-		TS	MPAC +3
-		CA	PIPAZ
-		RELINT
-		TS	MPAC +5
-		
-		CAF	ZERO
-		TS	MPAC +1
-		TS	MPAC +4
-		TS	MPAC +6
-		
-VECMODE		TCF	VMODE
 
 # FORCE TP SIGN AGREEMENT IN MPAC:
 
 SGNAGREE	TC	TPAGREE
-## Page 1499
 		TCF	DANZIG
 
 # CONVERT THE DP 1'S COMPLEMENT ANGLE SCALED IN REVOLUTIONS TO A SINGLE PRECISION 2'S COMPLEMENT ANGLE
@@ -104,6 +67,7 @@ V1STO2S		TC	1TO2SUB		# ANSWER ARRIVES IN A AND MPAC.
 		DXCH	MPAC +5
 		DXCH	MPAC
 		TC	1TO2SUB
+## Page 1395
 		TS	MPAC +2
 
 		DXCH	MPAC +3
@@ -137,33 +101,12 @@ TPMODE		CAF	ONE		# MODE IS TP.
 		COM			# THIS WAS REVERSE OF MSU.
 
 		TS	MPAC		# AND SKIP ON OVERFLOW.
-## Page 1500
 		TC	Q
 
 		INDEX	A		# OVERFLOW UNCORRECT AND IN MSU.
 		CAF	LIMITS
 		ADS	MPAC
 		TC	Q
-
-## Page 1501
-# SUBROUTINE TO INCREMENT CDUS
-
-INCRCDUS	CAF	LOCTHETA
-		TS	BUF		# PLACE ADRES(THETA) IN BUF.
-		CAE	MPAC		# INCREMENT IN 1'S COMPL.
-		TC	CDUINC
-		
-		INCR	BUF
-		CAE	MPAC +3
-		TC	CDUINC
-		
-		INCR	BUF
-		CAE	MPAC +5
-		TC	CDUINC
-		
-		TCF	VECMODE
-		
-LOCTHETA	ADRES	THETAD
 
 # THE FOLLOWING ROUTINE INCREMENTS IN 2'S COMPLEMENT THE REGISTER WHOSE ADDRESS IS IN BUF BY THE 1'S COMPL.
 # QUANTITY FOUND IN TEM2.  THIS MAY BE USED TO INCRMENT DESIRED IMU AND OPTICS CDU ANGLES OR ANY OTHER 2'S COMPL.
@@ -175,6 +118,7 @@ CDUINC		TS	TEM2		# 1'S COMPL. QUANT. ARRIVES IN ACC.  STORE IT
 		AD	ONE
 		TCF	+4
 		AD	ONE
+## Page 1396
 		AD	ONE		# OVEFLOW HERE IF 2'S COMPL. IS 180 DEG.
 		COM
 
@@ -193,7 +137,7 @@ CDUINC		TS	TEM2		# 1'S COMPL. QUANT. ARRIVES IN ACC.  STORE IT
 		TS	0		# STORE NEW ANGLE IN 2'S COMPLEMENT.
 		TC	Q
 
-## Page 1502
+## Page 1397
 # RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL.  ECADR OF COMMANDS ARRIVES IN X1.
 
 PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
@@ -202,48 +146,7 @@ PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
 		CADR	IMUPULSE
 		TCF	DANZIG
 
-## Page 1503
-# EACH ROUTINE TAKES A 3X3 MATRIX STORED IN DOUBLE PRECISION IN A FIXED AREA OF ERASABLE MEMORY AND REPLACES IT
-# WITH THE TRANSPOSE MATRIX.  TRANSP1 USES LOCATIONS XNB+0,+1 THROUGH XNB+16D,+17D AND TRANSP2 USES LOCATIONS
-# XNB1+0,+1 THROUGH XNB1+16D,+17D.  EACH MATRIX IS STORED BY ROWS.
-
-XNBEB		ECADR	XNB
-XNB1EB		ECADR	XNB1
-
-		EBANK=	XNB
-		
-TRANSP1		CAF	XNBEB
-		TS	EBANK
-		DXCH	XNB +2
-		DXCH	XNB +6
-		DXCH	XNB +2
-		
-		DXCH	XNB +4
-		DXCH	XNB +12D
-		DXCH	XNB +4
-		
-		DXCH	XNB +10D
-		DXCH	XNB +14D
-		DXCH	XNB +10D
-		TCF	DANZIG
-		EBANK=	XNB1
-		
-TRANSP2		CAF	XNB1EB
-		TS	EBANK
-		DXCH	XNB1 +2
-		DXCH	XNB1 +6
-		DXCH	XNB1 +2
-		
-		DXCH	XNB1 +4
-		DXCH	XNB1 +12D
-		DXCH	XNB1 +4
-		
-		DXCH	XNB1 +10D
-		DXCH	XNB1 +14D
-		DXCH	XNB1 +10D
-		TCF	DANZIG
-
-## Page 1504
+## Page 1398
 # THE SUBROUTINE SIGNMPAC SETS C(MPAC, MPAC +1) TO SIGN(MPAC).
 # FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.  ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.
 #
@@ -291,7 +194,7 @@ NORMUNIT	CAF	ZERO
 		TCF	NOSHIFT
 		TCF	+2
 		TCF	NOSHIFT
-## Page 1505
+## Page 1399
 		CA	MPAC +1		# SHIFT ALL COMPONENTS LEFT 13
 		EXTEND
 		MP	BIT14
@@ -319,8 +222,6 @@ VECSGNAG	TC	BANKCALL
 		CADR	VECAGREE
 		TC	DANZIG
 
-# *** END OF SATRAP  .007 ***
-
-
+# *** END OF SKIPPER .101 ***
 
 

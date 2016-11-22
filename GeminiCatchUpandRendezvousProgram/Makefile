@@ -75,7 +75,7 @@ BENCH7:	BENCH7.for \
 
 # Compiles any C-language functions I needed to port assembly code.
 %.o:	%.c
-	gcc ${DEBUG} -Wall -c -o $@ $^
+	${cc} ${DEBUG} -Wall -c -o $@ $^
 
 # Creates temporary files from *.f named *.for to hold the dynamically
 # transformed FORTRAN code.  The transformations performed are as follows:

@@ -75,6 +75,7 @@
 #				problem nor the fix presumably affects anybody 
 #				else's builds.
 #		2016-11-12 RSB	"Permanently" disabled READLINE.
+#		2016-11-18 RSB	Explicitly include socket library in Solaris.
 
 LIBS=${LIBS2}
 
@@ -104,7 +105,7 @@ endif
 
 LIBS0:=${LIBS}
 ifndef NOREADLINE
-CURSESLIB=-lcurses
+CURSESLIB=-lncurses
 CFLAGS2 = -DUSE_READLINE
 ifdef MACOSX
 # This assumes that readline has been installed into the default (/usr/local)
@@ -115,11 +116,9 @@ ifdef MACOSX
 CFLAGS2 += -I/usr/local/include
 LIBS += /usr/local/lib/libreadline.a
 else # MACOSX
-#ifdef SOLARIS
-#LIBS += /usr/local/lib/libreadline.a
-#else # SOLARIS
-#LIBS += -lreadline
-#endif # SOLARIS
+ifdef SOLARIS
+LIBS += -lxnet
+endif # SOLARIS
 LIBS += -lreadline
 endif # MACOSX
 endif # NOREADLINE
@@ -130,13 +129,8 @@ CFLAGS2 += -DGDBMI
 ifdef IPHONE
 IPHONE_DEV=/Developer/Platforms/iPhoneOS.platform/Developer
 CFLAGS2 += -isysroot ${IPHONE_DEV}/SDKs/iPhoneOS2.0.sdk/
-CC=${IPHONE_DEV}/usr/bin/arm-apple-darwin9-gcc-4.0.1
 LIBS=
 endif # IPHONE
-
-ifndef CC
-CC=gcc
-endif
 
 # For now, disabling readline support for Win32, because it's messed up 
 # really badly in Vista.
@@ -180,13 +174,13 @@ LIBOBJECTS := \
 
 ifeq "${EXT}" ".exe"
 NATIVE_WINAGC=WinAGC.exe
-CC_WINAGC=gcc
+CC_WINAGC=${cc}
 else
-CC_WINAGC=i386-mingw32-gcc
+CC_WINAGC=i386-mingw32-${cc}
 endif
 
 yaAGC:	$(OBJECTS) checkdec.o libyaAGC.a ${NATIVE_WINAGC}
-	${CC} ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} checkdec.o \
+	${cc} ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} checkdec.o \
 	libyaAGC.a -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm ${CURSES}
 
 libyaAGC.a: ${LIBOBJECTS}
@@ -208,10 +202,10 @@ install:	yaAGC
 	chmod ugo+x ${PREFIX}/bin/yaAGC
 
 checkdec.o: ../Tools/checkdec.c
-	${CC} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	${cc} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
-	${CC} ${CFLAGS} ${CFLAGS2} -Wno-error=format= -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+	${cc} ${CFLAGS0} ${CFLAGS2} -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 #----------------------------------------------------------------------------------
 # Building for multiple architectures, using IMCROSS. 
@@ -225,7 +219,7 @@ all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx
 CSOURCE:=$(patsubst %.o,%.c,${OBJECTS} ${LIBOBJECTS}) ../Tools/checkdec.c
 
 yaAGC.exe: ${CSOURCE} random.c
-	i386-mingw32-gcc \
+	i386-mingw32-${cc} \
 		${CFLAGS} ${CFLAGS2_WIN32} -DNVER=${NVER} \
 		 -DPTW32_STATIC_LIB -DPCRE_STATIC \
 		`${HOME}/IMCROSS/i386-mingw32/bin/pcre-config --cflags-posix` \
@@ -237,7 +231,7 @@ WinAGC.exe: WinAGC.c
 
 MACDIR:=${HOME}/IMCROSS/mac
 yaAGC-macosx: ${CSOURCE}
-	powerpc-apple-darwin9-gcc -arch ppc -arch i386 \
+	powerpc-apple-darwin9-${cc} -arch ppc -arch i386 \
 		-I${MACDIR}/include \
 		${CFLAGS} ${CFLAGS2} -DNVER=${NVER} \
 		-o $@ $^ -L${MACDIR}/lib -L. ${LIBS} -lpthread -lm ${CURSESLIB}
@@ -246,7 +240,7 @@ ifdef COLDFIRE
 #----------------------------------------------------------------------------------
 # Embedded-firmware stuff for Coldfire is below this line.	
 	
-ECC = m68k-elf-gcc
+ECC = m68k-elf-${cc}
 EAR = m68k-elf-ar
 EAS = m68k-elf-as
 ELD = m68k-elf-ld

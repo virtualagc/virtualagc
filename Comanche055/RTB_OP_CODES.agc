@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
-## Filename:    RT8_OP_CODES.agc
+## Filename:    RTB_OP_CODES.agc
 ## Purpose:     Part of the source code for Comanche, build 055. It
 ##              is part of the source code for the Command Module's
 ##              (CM) Apollo Guidance Computer (AGC), Apollo 11.

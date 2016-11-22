@@ -59,10 +59,13 @@
 // ... and the project's includes.
 #include <stdio.h>
 #include <string.h>
+#ifndef WIN32
 #include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif
 #include <fcntl.h>
 #include "yaDSKYb1.h"
-extern int h_errno;
 
 // Used for socket-operation error codes.
 int ErrorCodes = 0;

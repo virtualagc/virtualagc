@@ -15,7 +15,7 @@ EXT=$3
 WIN=$4
 
 SRCPATHS="*.binsource *.agc *.aea Apollo32.png *.agc.html *.aea.html"
-SRCPATHS="$SRCPATHS *.pad Solarium055.lst"
+SRCPATHS="$SRCPATHS *.pad *.cbp Makefile Solarium055.lst"
 
 mkdir $DESTDIR
 

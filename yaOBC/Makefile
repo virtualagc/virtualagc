@@ -54,16 +54,16 @@ all-archs: \
 	${SAVE}
 
 ${TARGET} ${TARGET2}: % : %.c ../yaASM/yaASM.h Makefile
-	gcc ${CFLAGS} -m32 -o $@ -I../enet/include \
+	${cc} ${CFLAGS} -m32 -o $@ -I../enet/include \
 		$< ../enet/*.c -lpthread -lm
 
 ${TARGET}.exe ${TARGET2}.exe: %.exe : %.c ../yaASM/yaASM.h Makefile
-	i386-mingw32-gcc -DPTW32_STATIC_LIB -O3 -o $@ \
+	i386-mingw32-${cc} -DPTW32_STATIC_LIB -O3 -o $@ \
 		-I../enet/include $< ../enet/*.c \
 		-lpthreadGC2-static -lm -lwsock32 -lws2_32 -lwinmm
 
 ${TARGET}-macosx ${TARGET2}-macosx: %-macosx : %.c ../yaASM/yaASM.h Makefile
-	powerpc-apple-darwin9-gcc -arch i386 -arch ppc -O3 \
+	powerpc-apple-darwin9-${cc} -arch i386 -arch ppc -O3 \
 		-o $@ -I../enet/include $< ../enet/*.c -lpthread -lm
 
 .PHONY:	clean
@@ -72,6 +72,6 @@ clean:
 		*.o *.bin *.lst *.io *~
 
 %.o:	%.c ../yaYUL/yaYUL.h
-	gcc ${CFLAGS} -DNVER=${NVER} -c -o $@ $<
+	${cc} ${CFLAGS} -DNVER=${NVER} -c -o $@ $<
 	
 

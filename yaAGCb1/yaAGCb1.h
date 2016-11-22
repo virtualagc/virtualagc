@@ -57,8 +57,53 @@
 #ifndef YAAGC_BLOCK1_H
 #define YAAGC_BLOCK1_H
 
-#include <stdint.h>
 #include <stdio.h>
+
+#if defined(__APPLE_CC__) && !defined(unix)
+#define unix
+#endif
+#ifdef unix
+#include <stdint.h>
+#ifdef __APPLE_CC__
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#elif !defined(__WORDSIZE)
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#elif __WORDSIZE < 64
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#else
+#define FORMAT_64U "%lu"
+#define FORMAT_64O "%lo"
+#endif
+#elif defined(WIN32)
+#include <windows.h>
+#include <winsock2.h>
+#define FORMAT_64U "%llu"
+#define FORMAT_64O "%llo"
+#endif
+
+// The following is used to get the int16_t datatype.
+#ifdef WIN32
+// Win32
+#include <stdint.h>
+#elif defined (__embedded__)
+// Embedded, gcc cross-compiler.
+typedef short int16_t;
+typedef signed char int8_t;
+typedef unsigned short uint16_t;
+#elif defined (SDCC)
+// SDCC (8-bit 8051)
+typedef int int16_t;
+typedef signed char int8_t;
+typedef unsigned uint16_t;
+extern long random (void);
+#else // WIN32
+// All other (Linux, Mac OS, etc.)
+//#include <sys/types.h>
+#include <stdint.h>
+#endif // WIN32
 
 //-------------------------------------------------------------------------
 // Block 1 specific address and data constants.
@@ -338,5 +383,8 @@ EstablishSocket (unsigned short portnum, int MaxClients);
 #define SOCKET_ERROR -1
 #define SOCKET_BROKEN (errno == EPIPE)
 #endif
+
+void
+logAGC(FILE *logFile, uint16_t lastZ);
 
 #endif // YAAGC_BLOCK1_H

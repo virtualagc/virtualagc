@@ -61,6 +61,7 @@
  * 				compiler warnings.
  * 		2016-08-23 RSB  An allocation of Block1, simply to avoid
  * 		                a linker error for the updated SymbolTable.c.
+ * 		2016-11-18 RSB	Fixed up a function protype.
  *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
@@ -242,7 +243,7 @@ PrintComments (int i)
 }
 
 static void
-HtmlChar ( c)
+HtmlChar (char c)
 {
   if (c == '<')
     fprintf (HtmlOut, "&lt;");

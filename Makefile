@@ -145,10 +145,19 @@
 #		2016-10-21 RSB	Added AURORA12 to the missions.
 #		2016-11-03 RSB	Added SUNBURST120 to the missions.
 #		2016-11-08 RSB	Merged in block1 branch.
+#		2016-11-16 RSB	Certain resources needed only by the "standard"
+#				32-bit Linux VirtualAGC VM I'm now creating are
+#				added to the installation bundle.  These are
+#				related to debugging on Code::blocks. 
+#		2016-11-17 RSB	Fixed a "sed --in-place ..." that doesn't work on
+#				systems with non-GNU sed, such as FreeBSD or
+#				Solaris.  Other fixes of a similar nature, for those
+#				same operating systems.
+#		2016-11-18 RSB	Removed yaACA2 from FreeBSD build.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
-#	Use "make SOLARIS=yes" for Solaris.
+#	Use "gmake SOLARIS=yes" for Solaris.
 #	Use "make WIN32=yes" for Windows.
 #	Use "gmake FREEBSD=yes" for FreeBSD.
 #	Use "make" for Linux.
@@ -167,6 +176,28 @@ DATE:=`date +%Y%m%d`
 # libraries into the installers, however, so don't use them!
 DEV_STATIC=DEV_STATIC=yes
 # *******************************************************************
+
+# Select compiler basenames.  We use
+#	${cc}	C compiler
+#	${CC}	C++ compiler
+# These are almost always gcc and g++, respectively, but on some
+# platforms it's necessary to use non-GNU compilers (even if the 
+# GNU compilers are actually available and installed)  in order to 
+# be able to access the native builds of wxWidgets for programs
+# like yaDSKY2. 
+cc=gcc
+CC=g++
+ifdef SOLARIS
+cc=cc
+CC=CC
+endif
+ifdef IPHONE
+cc=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-gcc-4.0.1
+CC=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-g++-4.0.1
+LIBS=
+endif
+export cc
+export CC
 
 # Comment out the following line(s) to use yaDSKY rather than yaDSKY2 and/or 
 # yaDEDA by yaDEDA2.  yaDSKY/yaDEDA have been replaced by yaDSKY2/yaDEDA2 
@@ -206,6 +237,11 @@ ifdef SOLARIS
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
 LIBS+=-lnsl
+CFLAGS0 += /opt/csw/include/wx-2.8
+CFLAGS += /opt/csw/include/wx-2.8
+dummy:=$(PATH):/opt/csw/bin
+export PATH=$(dummy)
+export SOLARIS
 endif
 
 # Some adjustments for building in Mac OS X
@@ -216,12 +252,14 @@ endif
 ifdef MACOSX
 #NOREADLINE=yes
 ISMACOSX:=MACOSX=yes
+export MACOSX
 endif
 
 # Some adjustments for building in FreeBSD
 ifdef FREEBSD
 LIBS+=`pkg-config --libs gtk+-2.0`
 LIBS+=`pkg-config --libs glib`
+export FREEBSD
 endif
 
 # GROUP is the main group to which the USER belongs.  This seems to be defined
@@ -240,30 +278,43 @@ endif
 # to catch every possible problem before sending it out into the world.
 ifeq ($(USER),rburkey)
 WEBSITE=../sandroid.org/public_html/apollo
-CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
-yaACA=
+CFLAGS0=-Werror -DALLOW_BSUB -g -O0
+CFLAGS=-Wall $(CFLAGS0)
+yaACA=-
 else 
 ifdef DEV_BUILD
-CFLAGS=-Wall -Werror -DALLOW_BSUB -g -O0
-yaACA=
+CFLAGS0=-Werror -DALLOW_BSUB -g -O0
+CFLAGS=-Wall $(CFLAGS0)
+yaACA=-
 else 
 ifdef DEBUG_BUILD
-CFLAGS=-DALLOW_BSUB -g -O0
+CFLAGS0=-DALLOW_BSUB -g -O0
+CFLAGS=$(CFLAGS0)
 yaACA=-
 else
-CFLAGS=-DALLOW_BSUB
+CFLAGS0=-DALLOW_BSUB
+CFLAGS=$(CFLAGS0)
 yaACA=-
 endif
 endif
 WEBSITE=..
 endif
+ifdef MACOSX
+yaACA=-
+endif
+ifdef SOLARIS
+yaACA=-
+endif
 
 # Note:  The CURSES variable is misnamed.  It really is just any special libraries
 # for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
 ifdef WIN32
+export WIN32
 EXT=.exe
+CFLAGS0+=-I/usr/local/include
 CFLAGS+=-I/usr/local/include
 LIBS+=-L/usr/local/lib
+LIBS+=-L/usr/lib
 LIBS+=-lkernel32
 LIBS+=-lwsock32
 CURSES=../yaAGC/random.c
@@ -271,6 +322,31 @@ CURSES+=-lregex
 else
 CURSES=-lcurses
 endif
+
+ifdef MACOSX
+CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro
+CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro
+endif
+
+ifdef SOLARIS
+CFLAGS0 += -I/opt/csw/include/wx-2.8
+CFLAGS += -I/opt/csw/include/wx-2.8
+endif
+
+ifdef MACOSX
+CFLAGS0+=-DMACOSX=yes
+CFLAGS+=-DMACOSX=yes
+endif
+ifdef SOLARIS
+CFLAGS0+=-DSOLARIS=yes
+CFLAGS+=-DSOLARIS=yes
+endif
+ifdef FREEBSD
+CFLAGS0+=-DFREEBSD=yes
+CFLAGS+=-DFREEBSD=yes
+endif
+export CFLAGS0
+export CFLAGS
 
 # We assume a *nix build environment.
 
@@ -286,6 +362,11 @@ MISSIONS = Validation Luminary131 Colossus249 Comanche055
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
 MISSIONS += Aurora12 Sunburst120
 export MISSIONS
+
+# Missions needing code::blocks project files.
+cbMISSIONS = Validation Luminary131 Colossus249 Comanche055 
+cbMISSIONS += Luminary099 Artemis072 Colossus237 Aurora12 Sunburst120
+cbMISSIONS := $(patsubst %,%.cbp,$(cbMISSIONS))
 
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
@@ -306,7 +387,9 @@ endif
 ifndef WIN32
 SUBDIRS += yaACA
 endif
+ifndef FREEBSD
 SUBDIRS += yaACA2
+endif
 SUBDIRS += yaACA3
 SUBDIRS += yaTelemetry 
 SUBDIRS += jWiz
@@ -314,38 +397,50 @@ SUBDIRS += yaDSKYb1
 SUBDIRS += VirtualAGC
 endif # NOGUI
 
+# EXTSW is the switch for cp that's equivalent to -a in Linux.
+ifdef MACOSX
+EXTSW=-pR
+else
+ifdef SOLARIS
+EXTSW=-r -@ -P
+else
+EXTSW=-a
+endif
+endif
+export EXTSW
+
 .PHONY: $(SUBDIRS)
 
 .PHONY: default
 default: all
 
-.PHONY: missions $(MISSIONS) clean-missions format-missions
+.PHONY: $(MISSIONS) clean-missions format-missions
 missions: $(MISSIONS)
 
 $(MISSIONS): yaYUL Tools
 	$(BUILD) -C $@
 
 clean-missions:
-	for subdir in $(MISSIONS) ; do make -C $$subdir clean ; done
+	for subdir in $(MISSIONS) ; do $(BUILD) -C $$subdir clean ; done
 
 format-missions:
 	for subdir in $(MISSIONS) ; do REFORMAT=no make -C $$subdir format ; done
 
 .PHONY: corediffs
 corediffs: yaYUL Tools
-	for subdir in $(MISSIONS) ; do make -C $$subdir corediff.txt ; done
+	for subdir in $(MISSIONS) ; do $(BUILD) -C $$subdir corediff.txt ; done
 
 .PHONY: all all-archs
 all: ARCHS=default
 all-archs: ARCHS=all-archs
-all all-archs: $(SUBDIRS)
+all all-archs: $(cbMISSIONS) $(SUBDIRS)
 
-.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA ControlPulseSim
-Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim:
+.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse ControlPulseSim
+Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse ControlPulseSim:
 	$(BUILD) -C $@ 
 
-.PHONY: yaACA3
-yaACA3:
+.PHONY: yaACA yaACA2 yaACA3
+yaACA yaACA2 yaACA3:
 	${yaACA}$(BUILD) -C $@ 
 
 .PHONY: yaDEDA
@@ -385,6 +480,10 @@ yaAGC-Block1-Pultorak yaAGCb1 yaDSKYb1 yaUplinkBlock1 yaValidation-Block1:
 VirtualAGC:
 	$(BUILD) -C $@ "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC)
 
+.PHONY: VirtualAGC-installer
+VirtualAGC-installer: all
+	$(BUILD) -C VirtualAGC "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC) VirtualAGC-installer
+
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
 AGC_LISTINGS = $(addprefix listing-agc-, $(MISSIONS))
@@ -419,9 +518,9 @@ buildbox: dev
 
 .PHONY: binaries
 binaries: clean all-archs
-	cp -a VirtualAGC/VirtualAGC-installer $(WEBSITE)/Downloads
-	cp -a VirtualAGC/VirtualAGC-setup.exe $(WEBSITE)/Downloads
-	cp -a VirtualAGC/VirtualAGC.app.tar.gz $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC-installer $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC-setup.exe $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC.app.tar.gz $(WEBSITE)/Downloads
 	ls -ltr $(WEBSITE)/Downloads | tail -4
 
 # I used this only for creating a development snapshot.  It's no use to anybody
@@ -453,6 +552,30 @@ dev:	clean
 snapshot-ephemeris:
 	cd .. ; tar --bzip2 -cvf $(WEBSITE)/Downloads/yaAGC-ephemeris.tar.bz2 yaAGC/yaUniverse/*.txt
 	ls -l $(WEBSITE)/Downloads
+
+# Code::blocks project file ... for using code::blocks on Linux only.  The 
+# cbp file produced needs slight mods to the directory structure for Windows
+# or Mac.  However, these files are fine for the standard VirtualAGC VM I'm
+# creating.
+Validation.cbp:
+	sed -e "s/@name@/Validation/" -e 's/MAIN[.]agc[.]bin/Validation.agc.bin/' templateAGC-top.cbp >Validation/temp.txt
+	cd Validation ; \
+	for n in *.agc ; \
+	do \
+		echo '                <Unit filename="'$$n'" />'; \
+	done >>temp.txt
+	cat templateAGC-bottom.cbp >>Validation/temp.txt
+	mv Validation/temp.txt Validation/$@
+
+%.cbp:
+	sed "s/@name@/"$*"/" templateAGC-top.cbp >$*/temp.txt
+	cd $* ; \
+	for n in *.agc ; \
+	do \
+		echo '                <Unit filename="'$$n'" />'; \
+	done >>temp.txt
+	cat templateAGC-bottom.cbp >>$*/temp.txt
+	mv $*/temp.txt $*/$@
 
 clean: clean-missions
 	$(MAKE) -C yaLEMAP clean
@@ -489,3 +612,38 @@ ifndef NOGUI
 	cd yaDEDA && ./autogen.sh --prefix=$(PREFIX)
 endif
 
+TMP:=temp.virtualagc
+.PHONY: install
+install: all
+ifdef MACOSX
+	cp ${EXTSW} VirtualAGC/temp/VirtualAGC.app ~/Desktop
+else
+ifdef WIN32
+	-mkdir c:/"Program Files"/VirtualAGC
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* c:/"Program Files"/VirtualAGC
+	@echo "You might want to make a launcher icon on your Desktop that uses:"
+	@echo "  1. Executable c:\Program Files\VirtualAGC\bin\VirtualAGC.exe"
+	@echo "  2. Working directory c:\Program Files\VirtualAGC\Resources"
+	@echo "  3. Icon c:\Program Files\VirtualAGC\Resources\ApolloPatch2.png"
+else
+	# Create installation directory.
+	-mkdir ~/VirtualAGC
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* ~/VirtualAGC
+ifdef SOLARIS
+	@echo "We'd like to create a desktop icon.  For whatever lame reason, Solaris"
+	@echo "desktop icons have no way to set the working directory, so if we made an" 
+	@echo "icon, it wouldn't work."
+else
+	@echo "[Desktop Entry]" >$(TMP)
+	@echo "Encoding=UTF-8" >>$(TMP)
+	@echo "Name=VirtualAGC" >>$(TMP)
+	@echo "Comment=Virtual AGC GUI Application" >>$(TMP)
+	@echo "Terminal=false" >>$(TMP)
+	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(TMP)
+	@echo "Type=Application" >>$(TMP)
+	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(TMP)
+	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(TMP)
+	mv $(TMP) $$HOME/Desktop/VirtualAGC.desktop
+endif
+endif
+endif

@@ -1624,7 +1624,7 @@ GdbmiHandleDumpMemory (int i)
 
   if (3 == sscanf (sraw, "%s 0x%x 0x%x", filename, &start_addr, &end_addr))
     {
-      if (end_addr >= start_addr && start_addr >= 0 && end_addr < 0114000)
+      if (end_addr >= start_addr && /*start_addr >= 0 &&*/ end_addr < 0114000)
 	{
 	  target = fopen (filename, "w");
 	  if (target != NULL)
@@ -1656,7 +1656,7 @@ GdbmiHandleRestoreMemory (int i)
   end_addr = 0114000;
   if (3 >= sscanf (sraw, "%s 0x%x 0x%x", filename, &start_addr, &end_addr))
     {
-      if (start_addr >= 0 && start_addr < 0114000)
+      if (/*start_addr >= 0 &&*/ start_addr < 0114000)
 	{
 	  gdbmi_addr = start_addr;
 	  source = fopen (filename, "r");

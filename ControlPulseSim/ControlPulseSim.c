@@ -64,7 +64,7 @@ u (void)
 int
 main (void)
 {
-  char ss[129] = { 0 }, sf[129], *sss, CondFlags[2] = "XX";
+  char ss[129] = { 0 }, sf[129], *sss, CondFlags[3] = "XX";
   int i, Address, Value;
   FILE *fin = NULL;
   fin = stdin;

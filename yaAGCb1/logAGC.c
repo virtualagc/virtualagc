@@ -72,7 +72,7 @@ logAGC(FILE *logFile, uint16_t lastZ)
       flatAddress = regBank | (lastZ & 01777);
       fprintf (logFile, "%02o,%04o", regBank >> 10, (lastZ & 07777));
     }
-  fprintf (logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%03o\tMCT=%lu", regA, regQ, regLP, (regBank >> 10) & 037, agc.countMCT);
+  fprintf (logFile, "\tA=%06o\tQ=%06o\tLP=%06o\tBANK=%03o\tMCT=" FORMAT_64U, regA, regQ, regLP, (regBank >> 10) & 037, agc.countMCT);
   fprintf (logFile, "\n\tOUT0=%05o\tOUT1=%05o\tOUT2=%05o\tOUT3=%05o\tOUT4=%05o", regOUT0, regOUT1, regOUT2, regOUT3, regOUT4);
   fprintf (logFile, "\n\tIN0=%05o\tIN1=%05o\tIN2=%05o\tIN3=%05o", regIN0, regIN1, regIN2, regIN3);
   fprintf (logFile, "\n\tTIME1=%06o\tTIME2=%06o\tTIME3=%06o\tTIME4=%06o", ctrTIME1, ctrTIME2, ctrTIME3, ctrTIME4);

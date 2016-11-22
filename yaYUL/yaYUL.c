@@ -103,7 +103,7 @@
 
 int formatOnly = 0;
 int toYulOnly = 0, toYulOnlySequenceNumber;
-Line_t toYulOnlyLogSection;;
+Line_t toYulOnlyLogSection;
 int syntaxOnly = 0;
 int Force = 0;
 char *InputFilename = NULL, *OutputFilename = NULL;

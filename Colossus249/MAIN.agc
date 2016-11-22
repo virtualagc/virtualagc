@@ -80,104 +80,104 @@
 # but not duplicated by yaYUL, so it's still valuable even if the source-files
 # listed below are in hand.
 
-						# pp. 1-2 contain no code/comments.
-$ASSEMBLY_AND_OPERATION_INFORMATION.agc		# pp. 3-26
-$TAGS_FOR_RELATIVE_SETLOC.agc			# pp. 27-36
+						        # pp. 1-2 contain no code/comments.
+$ASSEMBLY_AND_OPERATION_INFORMATION.agc		        # pp. 3-26
+$TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc      # pp. 27-36
 
 # KILERASE
-$ERASABLE_ASSIGNMENTS.agc			# pp. 37-128
+$ERASABLE_ASSIGNMENTS.agc			        # pp. 37-128
 
 # KOOLADE
-$INTERRUPT_LEAD_INS.agc				# pp. 129-130
-$T4RUPT_PROGRAM.agc				# pp. 131-167
-$DOWNLINK_LISTS.agc				# pp. 168-178
-$FRESH_START_AND_RESTART.agc			# pp. 179-206
-$RESTART_TABLES.agc				# pp. 207-217
-$SXTMARK.agc 					# pp. 218-231
-$EXTENDED_VERBS.agc				# pp. 232-264
-$PINBALL_NOUN_TABLES.agc			# pp. 265-281
-$CSM_GEOMETRY.agc				# pp. 282-293
-$IMU_COMPENSATION_PACKAGE.agc			# pp. 294-303
-$PINBALL_GAME_BUTTONS_AND_LIGHTS.agc		# pp. 304-384
-$R60_62.agc					# pp. 385-393
-$ANGLFIND.agc					# pp. 394-406
-$GIMBAL_LOCK_AVOIDANCE.agc			# pp. 407-408
-$KALCMANU_STEERING.agc				# pp. 409-414
-$SYSTEM_TEST_STANDARD_LEAD_INS.agc		# pp. 415-417
-$IMU_CALIBRATION_AND_ALIGNMENT.agc		# pp. 418-450
+$INTERRUPT_LEAD_INS.agc				        # pp. 129-130
+$T4RUPT_PROGRAM.agc				        # pp. 131-167
+$DOWNLINK_LISTS.agc				        # pp. 168-178
+$FRESH_START_AND_RESTART.agc			        # pp. 179-206
+$RESTART_TABLES.agc				        # pp. 207-217
+$SXTMARK.agc 					        # pp. 218-231
+$EXTENDED_VERBS.agc				        # pp. 232-264
+$PINBALL_NOUN_TABLES.agc			        # pp. 265-281
+$CSM_GEOMETRY.agc				        # pp. 282-293
+$IMU_COMPENSATION_PACKAGE.agc			        # pp. 294-303
+$PINBALL_GAME__BUTTONS_AND_LIGHTS.agc		        # pp. 304-384
+$R60,R62.agc					        # pp. 385-393
+$ANGLFIND.agc					        # pp. 394-406
+$GIMBAL_LOCK_AVOIDANCE.agc			        # pp. 407-408
+$KALCMANU_STEERING.agc				        # pp. 409-414
+$SYSTEM_TEST_STANDARD_LEAD_INS.agc		        # pp. 415-417
+$IMU_CALIBRATION_AND_ALIGNMENT.agc		        # pp. 418-450
 
 # SMOOCH
-$GROUND_TRACKING_DETERMINATION_PROGRAM.agc	# pp. 451-453
-$P34-35_P74-75.agc				# pp. 454-497
-$R31.agc					# pp. 498-503
-$P76.agc					# pp. 504-506
-$R30.agc					# pp. 507-517
-$STABLE_ORBIT.agc				# pp. 518-527
+$GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc	# pp. 451-453
+$P34-P35,_P74-P75.agc				        # pp. 454-497
+$R31.agc					        # pp. 498-503
+$P76.agc					        # pp. 504-506
+$R30.agc					        # pp. 507-517
+$STABLE_ORBIT.agc				        # pp. 518-527
 
 # PANDORA
-$P11.agc					# pp. 528-544
-$TPI_SEARCH.agc					# pp. 545-555
-$P20-P25.agc					# pp. 556-629
-$P30-P37.agc					# pp. 630-643
-$P40-P47.agc					# pp. 644-696
-$P51-P53.agc					# pp. 697-742
-$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc	# pp. 743-746
-$P61-P67.agc					# pp. 747-776
-$SERVICER207.agc				# pp. 777-794
-$ENTRY_LEXICON.agc				# pp. 795-801
-$REENTRY_CONTROL.agc				# pp. 802-839
-$CM_BODY_ATTITUDE.agc				# pp. 840-846
-$P37_P70.agc					# pp. 847-890
-$S-BAND_ANTENNA_FOR_CM.agc			# pp. 891-892
-$LUNAR_LANDMARK_SELECTION_FOR_CM.agc		# pp. 893-902
+$P11.agc					        # pp. 528-544
+$TPI_SEARCH.agc					        # pp. 545-555
+$P20-P25.agc					        # pp. 556-629
+$P30,P37.agc					        # pp. 630-643
+$P40-P47.agc					        # pp. 644-696
+$P51-P53.agc					        # pp. 697-742
+$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc	        # pp. 743-746
+$P61-P67.agc					        # pp. 747-776
+$SERVICER207.agc				        # pp. 777-794
+$ENTRY_LEXICON.agc				        # pp. 795-801
+$REENTRY_CONTROL.agc				        # pp. 802-839
+$CM_BODY_ATTITUDE.agc				        # pp. 840-846
+$P37,P70.agc					        # pp. 847-890
+$S-BAND_ANTENNA_FOR_CM.agc			        # pp. 891-892
+$LUNAR_LANDMARK_SELECTION_FOR_CM.agc		        # pp. 893-902
 
 # DAPCSM
-$TVCINITIALIZE.agc				# pp. 903-906
-$TVCEXECUTIVE.agc				# pp. 907-914
-$TVCMASSPROP.agc				# pp. 915-919
-$TVCRESTARTS.agc				# pp. 920-924
-$TVCDAPS.agc					# pp. 925-946
-$TVCSTROKETEST.agc				# pp. 947-951
-$TVCROLLDAP.agc					# pp. 952-964
-$TVCGEN3FILTERS.agc				# pp. 965-973
-$MYSUBS.agc					# pp. 974-976
-$RCS-CSM_DIGITAL_AUTOPILOT.agc			# pp. 977-999
-$AUTOMATIC_MANEUVERS.agc			# pp. 1000-1011
-$RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc		# pp. 1012-1013
-$JET_SELECTION_LOGIC.agc			# pp. 1014-1037
-$CM_ENTRY_DIGITAL_AUTOPILOT.agc			# pp. 1038-1074
+$TVCINITIALIZE.agc				        # pp. 903-906
+$TVCEXECUTIVE.agc				        # pp. 907-914
+$TVCMASSPROP.agc				        # pp. 915-919
+$TVCRESTARTS.agc				        # pp. 920-924
+$TVCDAPS.agc					        # pp. 925-946
+$TVCSTROKETEST.agc				        # pp. 947-951
+$TVCROLLDAP.agc					        # pp. 952-964
+$TVCGEN3FILTERS.agc				        # pp. 965-973
+$MYSUBS.agc					        # pp. 974-976
+$RCS-CSM_DIGITAL_AUTOPILOT.agc			        # pp. 977-999
+$AUTOMATIC_MANEUVERS.agc			        # pp. 1000-1011
+$RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc		        # pp. 1012-1013
+$JET_SELECTION_LOGIC.agc			        # pp. 1014-1037
+$CM_ENTRY_DIGITAL_AUTOPILOT.agc			        # pp. 1038-1074
 
 # SATRAP
-$DOWN-TELEMETRY_PROGRAM.agc			# pp. 1075-1084
-$INTER-BANK_COMMUNICATION.agc			# pp. 1085-1088
-$INTERPRETER.agc				# pp. 1089-1181
-$FIXED_FIXED_CONSTANT_POOL.agc			# pp. 1182-1186
-$INTERPRETIVE_CONSTANTS.agc			# pp. 1187-1188
-$SINGLE_PRECISION_SUBROUTINES.agc		# p.  1189
-$EXECUTIVE.agc					# pp. 1190-1202
-$WAITLIST.agc					# pp. 1203-1217
-$LATITUDE_LONGITUDE_SUBROUTINES.agc		# pp. 1218-1224
-$PLANETARY_INERTIAL_ORIENTATION.agc		# pp. 1225-1233
-$MEASUREMENT_INCORPORATION.agc			# pp. 1234-1243
-$CONIC_SUBROUTINES.agc				# pp. 1244-1290
-$INTEGRATION_INITIALIZATION.agc			# pp. 1291-1313
-$ORBITAL_INTEGRATION.agc			# pp. 1314-1334
-$INFLIGHT_ALIGNMENT_ROUTINES.agc		# pp. 1335-1344
-$POWERED_FLIGHT_SUBROUTINES.agc			# pp. 1345-1362
-$TIME_OF_FREE_FALL.agc				# pp. 1363-1378
-$STAR_TABLES.agc				# pp. 1379-1383
-$AGC_BLOCK_TWO_SELF-CHECK.agc			# pp. 1384-1393
-$PHASE_TABLE_MAINTENANCE.agc			# pp. 1394-1403
-$RESTARTS_ROUTINE.agc				# pp. 1404-1409
-$IMU_MODE_SWITCHING_ROUTINES.agc		# pp. 1410-1438
-$KEYRUPT_UPRUPT.agc				# pp. 1439-1441
-$DISPLAY_INTERFACE_ROUTINES.agc			# pp. 1442-1474
-$SERVICE_ROUTINES.agc				# pp. 1475-1482
-$ALARM_AND_ABORT.agc				# pp. 1483-1486
-$UPDATE_PROGRAM.agc				# pp. 1487-1497
-$RT8_OP_CODES.agc				# pp. 1498-1505
+$DOWN-TELEMETRY_PROGRAM.agc			        # pp. 1075-1084
+$INTER-BANK_COMMUNICATION.agc			        # pp. 1085-1088
+$INTERPRETER.agc				        # pp. 1089-1181
+$FIXED-FIXED_CONSTANT_POOL.agc			        # pp. 1182-1186
+$INTERPRETIVE_CONSTANTS.agc			        # pp. 1187-1188
+$SINGLE_PRECISION_SUBROUTINES.agc		        # p.  1189
+$EXECUTIVE.agc					        # pp. 1190-1202
+$WAITLIST.agc					        # pp. 1203-1217
+$LATITUDE_LONGITUDE_SUBROUTINES.agc		        # pp. 1218-1224
+$PLANETARY_INERTIAL_ORIENTATION.agc		        # pp. 1225-1233
+$MEASUREMENT_INCORPORATION.agc			        # pp. 1234-1243
+$CONIC_SUBROUTINES.agc				        # pp. 1244-1290
+$INTEGRATION_INITIALIZATION.agc			        # pp. 1291-1313
+$ORBITAL_INTEGRATION.agc			        # pp. 1314-1334
+$INFLIGHT_ALIGNMENT_ROUTINES.agc		        # pp. 1335-1344
+$POWERED_FLIGHT_SUBROUTINES.agc			        # pp. 1345-1362
+$TIME_OF_FREE_FALL.agc				        # pp. 1363-1378
+$STAR_TABLES.agc				        # pp. 1379-1383
+$AGC_BLOCK_TWO_SELF-CHECK.agc			        # pp. 1384-1393
+$PHASE_TABLE_MAINTENANCE.agc			        # pp. 1394-1403
+$RESTARTS_ROUTINE.agc				        # pp. 1404-1409
+$IMU_MODE_SWITCHING_ROUTINES.agc		        # pp. 1410-1438
+$KEYRUPT,_UPRUPT.agc				        # pp. 1439-1441
+$DISPLAY_INTERFACE_ROUTINES.agc			        # pp. 1442-1474
+$SERVICE_ROUTINES.agc				        # pp. 1475-1482
+$ALARM_AND_ABORT.agc				        # pp. 1483-1486
+$UPDATE_PROGRAM.agc				        # pp. 1487-1497
+$RTB_OP_CODES.agc				        # pp. 1498-1505
 
-						# pp. 1506-1746: YUL-generated tables.
+						        # pp. 1506-1746: YUL-generated tables.
 
 
 

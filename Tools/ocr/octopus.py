@@ -29,12 +29,19 @@ import numpy as np
 import cv2
 import sys
 import math
+import argparse
 
-if len(sys.argv) != 3:
-    print('Usage: octopus.py input_image.jp2 output_image.tif')
-    sys.exit(0)
+parser = argparse.ArgumentParser(description='Prepare octal pages of AGC program listings for OCR')
+parser.add_argument('input_file', help="Input image path")
+parser.add_argument('output_file', help="Output image path")
+parser.add_argument('--no-crop', help="Only perform the threshold steps; don't crop down as for octals.", action="store_true")
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument('--burst120', help="Perform BURST120 processing", action="store_true")
+group.add_argument('--luminary210', help="Perform LUMINARY 210 processing", action="store_true")
 
-img = cv2.imread(sys.argv[1])
+args = parser.parse_args()
+
+img = cv2.imread(args.input_file)
 
 # Get the L channel of the image in LAB color space
 lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
@@ -42,7 +49,14 @@ l_channel,_,_ = cv2.split(lab)
 
 # Blur and threshold the image
 blurred = cv2.GaussianBlur(l_channel, (1,5), 0)
-_,thresh = cv2.threshold(blurred, 130, 255, cv2.THRESH_BINARY)
+if args.burst120:
+    _,thresh = cv2.threshold(blurred, 180, 255, cv2.THRESH_BINARY)
+else:
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+
+if args.no_crop:
+    cv2.imwrite(args.output_file, thresh)
+    sys.exit(0)
 
 # Eliminate random flecks. We do this by finding all the contours in the image
 # and taking a look at their relative locations and size. We'll be building up
@@ -115,7 +129,8 @@ cimg, contours, hierarchy = cv2.findContours(dilated2, cv2.RETR_LIST, cv2.CHAIN_
 top_y = 0
 typ_h = 0 
 for c in contours:
-    if cv2.contourArea(c) > 80000:
+    x,_,w,_ = cv2.boundingRect(c)
+    if w > 1200:
         _,y,_,h = cv2.boundingRect(c)
         if y > top_y:
             top_y = y
@@ -151,14 +166,14 @@ no_addr = no_header[:, left_x+left_w:]
 dilated4 = cv2.dilate(~no_addr, np.ones((17,3), np.uint8), iterations=8)
 cimg, contours, hierarchy = cv2.findContours(dilated4, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 for c in contours:
-    x,_,w,_ = cv2.boundingRect(c)
-    if w > 100:
+    x,_,w,h = cv2.boundingRect(c)
+    if w > 110 and h > 400:
         # NOTE: If a line makes it through the thresholding and deflecking steps, there's a 
         # good chance we're going to accidentally blow out the parities of the next column
         # over or more. If that happens, drop the (x-100) below to (x-40) or less, as
         # required, and then manually edit out whatever makes it through and erase the
         # line causing the problem before feeding it into Tesseract.
-        cv2.rectangle(no_addr, (x-100,0), (x,no_addr.shape[1]), 255, -1)
+        cv2.rectangle(no_addr, (x-120,0), (x,no_addr.shape[1]), 255, -1)
 
 # Last non-octal thing that's left is @s for unused words at the end of a bank. Dilate
 # mostly horizontally (enough to pull in the parities), and look for things that aren't wide 
@@ -170,10 +185,31 @@ for c in contours:
     if w < 75:
         cv2.rectangle(no_addr, (x,y), (x+w,y+h), 255, -1)
 
+# Finally, crop to just what remains to minimize whitespace.
+dilated6 = cv2.dilate(~no_addr, np.ones((5,5), np.uint8), iterations=15)
+cimg, contours, hierarchy = cv2.findContours(dilated6, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+ymin = 99999
+xmin = 99999
+ymax = 0
+xmax = 0
+for c in contours:
+    x,y,w,h = cv2.boundingRect(c)
+    if x < xmin:
+        xmin = x
+    if y < ymin:
+        ymin = y
+    if x+w > xmax:
+        xmax = x+w
+    if y+h > ymax:
+        ymax = y+h
+
+print(ymin,ymax,xmin,xmax)
+final_image = no_addr[ymin:ymax, xmin:xmax]
+
 
 # All done! Write out the prepared image
-cv2.imwrite(sys.argv[2], no_addr)
+cv2.imwrite(args.output_file, final_image)
 
-# cv2.imshow('image', no_addr)
+# cv2.imshow('image', dilated6)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
