@@ -11,6 +11,7 @@
 #               2016-11-16 JL   Transcribed pages 163-169.
 #               2016-11-19 JL   Transcribed pages 170-180.
 #               2016-11-20 JL   Transcribed pages 181-183.
+#               2016-11-22 JL   Transcribed pages 184-187.
 
 # Annotations:
 #
@@ -1575,18 +1576,222 @@ R1273   PROCEDURE TO HANDLE THE LOCATION FIELD OF A LEFTOVER ERASE CARD.
 # Page 184
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  32        PAGE  32
 
+P1297              PASS 1 PROCESSING FOR DOUBLE PRECISION CONSTANTS.  RESERVES AND TESTS ONE LOCATION IN ADDITION TO
+R1299   THAT REFERENCED BY THE REGULAR LOCATION TRANSLATION PROCEDURE.
+
+ 1300   2OCTAL     TS, CD TYPE  (2OCTAL)      HEALTH        C,+2
+ 1301   2DECIMAL   TX, CD TYPE  (2DECML)      -             HEALTH
+ 1302              TX           ONES          -             SAVE LOC            SET UP LATER TEST.
+ 1304              SS           TYPE F        L STYPE       SWITCH
+ 1305              NA, CHAR1    CARDNO WD     J COLUMN 1    REG DPCON           BRANCH IF NOT LEFTOVER.
+ 1307              SM           HEALTH        ONE           HEALTH              BLOCK LENGTH -1.
+ 1309              TS           Z,SC,1        -             LFTVR LOC      C    TRANSLATE LEFTOVER LOCATION FIELD.
+
+ 1311   REG DPCON  TS           ZERO          LOC STATE     LOCATION       C    TRANSLATE REGULAR LOCATION FIELD.
+ 1313              SM           HEALTH        LOC STATE     HEALTH
+ 1314              NA, B12B14   HEALTH        ZERO          XMIT RTRN           EXIT IF LEFTOVER OR OVERSIZE LOCATION.
+ 1316              LA           ONES          SAVE LOC      C,+2                BRANCH IF LOC CTR  WAS NOT SAVED.
+ 1318              WA, CAC3     HEALTH        ONE           LOC CTR
+ 1319              TS           LOC CTR       LOC VALUE     INCR LCTR      C
+ 1321              LA           LOC VALUE     MAX LOC       C,+3                BRANCH IF SIZE OF 2ND LOC IS OK.
+ 1323              SM           HEALTH        BIT 14        HEALTH
+ 1324              TS           ONES          LOC CTR       DP LOC END          WHEN 2ND LOC VALUE IS TOO BIG.
+
+ 13252             SSL, ONE     HEALTH        33            C,+1                BRANCH IF 1ST LOC IN BAD MEMORY TYPE.
+ 1326              NA, CAC3     HEALTH        5,0           CONFQ 2             BRANCH IF 1ST LOC NOT END OF CATEGORY.
+ 1328              SM           HEALTH        BIT 15        HEALTH              WHICH WOULD MEAN TYPE ERROR ON AT LEAST
+ 1330              NA, B8B17    HEALTH        BIT 8         DP LOC END          ONE OF THE LOCATIONS.
+ 1332              SWS, D7      N,X2          D,3           C,+1                IF LOC IS SYMBOLIC AND IN TABLE, USE THE
+ 1334              SWS, D4      N,SC,8        0             N,X2                DP TYPE ERROR TRANSFORMATION.
+ 1336              DEC          GFFD FF9F D900
+
+ 1337   CONFQ 2    TS           LOC VALUE     COMMON        AVAIL2         C    TEST AND RESERVE 2ND LOCATION.
+ 1339              LA           BIT 32        COMMON        DP LOC END          BRANCH IF IT WAS AVAILABLE.
+ 1341              SM           HEALTH        BIT 16        HEALTH
+ 1342              NA, B8B17    HEALTH        BIT 8         DP LOC END
+ 1343              SWS, D7      N,X2          D,3           C,+1                WITH SAME CONDITIONS AS FOR TYPE ERROR,
+ 1345              SWS, D4      N,SC,1        0             N,X2                USE DP CONFLICT TRANSFORM.
+ 1347              DEC          GFEF FBFF EB00
+
+ 1348   DP LOC END LA           ONES          SAVE LOC      XMIT RTRN           EXIT IF LOC CTR  WAS NOT SAVED.
+ 1350              TS           SAVE LOC      LOC CTR       XMIT RTRN           RESTORE LOC CTR  AND EXIT.
+
+
+R135105            PASS 1 PROCEDURE FOR AN EVEN CARD.  INCREMENTS LOCTION COUNTER IF IT IS ODD.
+
+ 13511  EVEN       NA, BIT 11   HEALTH        ZERO          ILLEGOP             ASTERISK MAKES ILLEGAL OP.
+ 13512             NA           ADDRESS 1     BLANKS        NB EVELOC
+ 13513             NA           ADDRESS 2     BLANKS        NB EVELOC
+ 13514             LA           MAX LOC       LOC CTR       C,+2                BRANCH IF LOC CTR ALREADY AT MAXIMUM.
+ 13515             SSL, ONE     LOC CTR       0             C,+2           C
+ 13516             SWS, BIT 14  LOC CTR       34,L          HEALTH              MAYBE CUSS ATTEMPT TO FLY OFF THE END.
+ 13517             TS, CD TYPE  (EVEN)        HEALTH        C,+2
+ 13518             WA           LOC CTR       ONE           LOC CTR        S    LOCATION IS ODD, SO ADD ONE.
+
+ 135185            TS           LOC CTR       LOC LOC       CH IL SIZE
+ 13519  NB EVELOC  TS, BIT 13   ONES          HEALTH        EVEN +3             CUSS MILDLY AT NON-BLANK ADDRESS FIELDS.
 
 # Page 185
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  33        PAGE  33
 
+P1352              PASS 1 PROCESSING FOR A BLOCK CARD.  NO SYMBOLIC SUBFIELD IS ALLOWED IN THE ADDRESS FIELD, AND THE
+R1354   MODIFIER, IF THERE IS ONE, MUST BE POSITIVE AND LESS THAN THE BLOCK SIZE FOR THE COMPUTER.  THE ABSOLUTE PART,
+R1356   IF THERE IS ONE, MUST BE A VALID BLOCK NUMBER IN FIXED OR ERASABLE.
+
+ 1357   BLOCK      NA, BIT 11   HEALTH        ZERO          ILLEGOP             ASTERISK MAKES ILLEGAL OP.
+ 1359              TS           Z,SC          Z,X4          ADR FIELD           DECODE ADDRESS FIELD.
+ 1361              LA           ONES          FIELD COD     ILFO BLOK           WHEN ADDRESS FIELD IS MEANINGLESS.
+ 1362              LA           FIELD COD     ZERO          BLANK BLK           BRANCH IF ADDRESS FIELD IS BLANK.
+ 13621             NA, B2B6     FIELD COD     BIT 2         BLOK SHIF -1        BRANCH UNLESS MAIN PART IS SIGNED NUM.
+ 13622             NA           FIELD COD +1  ZERO          C,+2                BRANCH IF THERE ARE 2 SIGNED NUM PARTS.
+ 13623             TS           ADR WD        ADR WD +1     C,+2
+ 13624             BA           ADR WD        ADR WD +1     ADR WD +1           COLLECT MODIFIER AS MINOR PART OF ADDR.
+
+ 13625  BLANK BLK  NA           LOC CTR       ONES          C,+2
+ 13626             TS, BIT14    ONES          HEALTH        BLOCK LOC           CANNOT EVALUATE REL TO BAD LOCATION.
+ 13627             TX           LOC CTR       -             LOC VALUE
+ 13628             SS           ZERO          BLOK ONES     LOC VALUE           SET LOC VALUE TO BEGINNING OF BANK.
+ 13629             TS           FIELD COD     FIELD COD +1  BLOK SHIF +1        SHOW WHETHER MODIFIER IS PRESENT.
+ 1363              NA, B2B6     FIELD COD     ONES          ILFO BLOK           WHEN THERE IS NI NUMERIC PART.
+
+ 1365   BLOK SHIF  SPE, FIX MAG ADR WD        0             LOC VALUE           SHIFT AMOUNT SUPPLIED BY INITIALIZATION.
+ 1367              LA           FIELD COD +1  ZERO          CH BL SIZE          BRANCH IF THERE IS NO MODIFIER.
+
+ 1369              LA           ADR WD +1     BIT 7         ILFO BLOK           ERROR IF MODIFIER IS MINUS.
+ 1371              LA, FIXMAG   ADR WD +1     BLOK ONES     C,+2                BRANCH IF MODIFIER LESS THAN BLOCK SIZE.
+ 1373   ILFO BLOK  TS, BIT 12   ONES          HEALTH        BLOCK LOC           ILLEGAL ADDRESS FIELD FORMAT EXIT.
+
+ 1375              BS           LOC VALUE     ADR WD +1     LOC VALUE           ADD MODIFIER TO SHIFTED NUMERIC.
+ 1379   CH BL SIZE LA           LOC VALUE     MAX LOC       C,+2
+ 1380              TS, BIT 11   ONES          HEALTH        BLOCK LOC           EXIT FOR NO SUCH BLOCK.
+
+ 1382              TX           L TYP TAB     -             Z,X5
+ 1383              LA, CAC3     LOC VALUE     5,0           C,+2                LOOK UP MEMORY TYPE.
+ 1385              TS           Z,X5,1        -             C,-1
+ 1386              NA, LSTYPE   5,0           TYPE N        C,+2                BRANCH IF IN FIXED OR ERASABLE.
+ 1388              TS, BIT 13   ONES          HEALTH        BLOCK LOC           MEMORY TYPE ERROR EXIT.
+
+ 1390              TX           LOC VALUE     -             Z,X4
+ 1391              SM           LOC VALUE     BLOK ONES     LOC VALUE           FORM END OF MAJOR BLOCK.
+ 1393              LA, CAC3     LOC VALUE     5,0           C,+2                BRANCH IF MAJOR BLOCK END COMES FIRST.
+ 1395              EX           N,X5          CAC3          LOC VALUE           WHEN MINOR BLOCK END COMES FIRST.
+
+ 1397              TS           Z,X4          COMMON        AVAIL1         C    NON-DESTRUCTIVE AVAILABILITY TEST.
+ 1399              LA           BIT 32        COMMON        GOOD BLOK           BRANCH IF AVAILABLE.
+ 14001             WA           Z,X4          ONE           Z,X4
+ 1401              LA           Z,X4          LOC VALUE     C,-3
+ 1402              TS, BIT 10   ONES          HEALTH        BLOCK LOC           WHEN BLOCK IS FULL.
+
+ 1404   GOOD BLOK  SM           HEALTH        Z,X4          HEALTH              STORE FOUND ADDRESS.
+ 1406              TX           Z,X4          -             LOC CTR             SET LOC CTR  ACCORDINGLY.
+
+ 1408   BLOCK LOC  NA           LOC FIELD     BLANKS        C,+2
+ 1409              TS, CD TYPE  (BLOCK)       HEALTH        XMIT RTRN
+ 1410              TS, BIT 8    ONES          HEALTH        C,-1                SIGNAL NON-BLANK LOCATION FIELD.
 
 # Page 186
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  34        PAGE  34
 
+P1412              PASS 1 PROCESSING OF A HEAD OR TAIL CARD.  RIGHT-JUSTIFIED LOCATION FIELD AND USES RIGHTMOST CHARAC-
+R1414   TER, EVEN IF BLANK.
+
+
+
+ 1415   HEAD TAIL  NA, BIT 11   HEALTH        ZERO          ILLEGOP             ASTERISK MAKES ILLEGAL OP.
+ 1417              TX           LOC FIELD     -             HEAD
+ 1418              TX           BIT 45        -             Z,S0                LOOP LIMIT IS 8.
+
+ 1420              NA, CHAR8    HEAD          BLANKS        C,+3
+ 1421              SWS, ONES    HEAD          A,1           HEAD                RIGHT-JUSTIFY.
+ 1423              NA           Z,S0,1        ONE           C,-2
+
+ 1424              SS           HEAD          CHAR 8        HEALTH              STORE HEAD IN POPO.
+ 1431              TS, CD TYPE  (HEAD)        HEALTH        XMIT RTRN
+
+
+
+R1432              PROCEDURE FOR MEMORY OR SEGNUM CARDS THAT ARRIVE TOO LATE.
+
+ 1433   LATE MEM   TS, CD TYPE  (2LATE)       HEALTH        XMIT RTRN
+
+
+
+R1434              PROCEDURES FOR FIRST "END OF" CARD AND SUBSEQUENT "END OF" CARDS.
+
+ 1436   END OF     TS           SEND ENDO     END OF        END EARLY      C    AT FIRST SUCH CARD, WAKE RD1 AND TELL
+ 1438              TS, KNOWSUBS ONES          SWITCH        MON WAKE       C    IT THE SUBROUTINES ARE KNOWN.
+ 1440              SS           ZERO          BIT 1         SWITCH              PROHIBIT RENUMBERING IN SUBROUTINES.
+ 14402             TX           BIT 24        -             B24 B32             TURN OFF DIRECT BIT FOR SUBRO DIRECTORY.
+ 14404             TS           LL SUB TAB    Z,X4          ST SUB THR     C    INITIALIZE THREAD TO CURRENT SUBROUTINE.
+ 1441              TX           ZERO          -             REAL CDNO           PREVENT FALSE ALARMS IN REJECTION.
+ 14412             NA, BIT11    SWITCH        ZERO          SEND ENDO           USE EXISTING "END OF" CARD FOR REPRINT.
+ 1442              NA, MERJMODE SWITCH        ONES          SEND ENDO           WHEN REVISING, FIRST "END OF" CARD MUST
+ 1444              TN           (END OF)      11            HEALTH              BE REPLACED BY THE ONE MADE BY PASS 0.
+
+ 1446   SEND ENDO  TS           LL SUB TAB    Z,X5          SEND ENDO +1        THIS ALONE FOR 2ND "END OF" ET SEQ.
+ 144612            EBA          N,X5          BIT 25        Z,X5
+ 144614            LA           ONES          N,X5          ST SUB THR +1
+
+ 14462             SS           ZERO          BIT 24        N,X5,1              WIPE OUT CURRENT-PROG/SUB CALL BIT
+ 14464             S, ETS       5,0           ZX +5         C,+1                IN SUBROUTINE DIRECTORY ENTRIES.
+ 14466             NA           N,X5          ONES          C,-2                BRANCH IF MORE SUBS IN THIS ASSEMBLY.
+ 146672            S, ETS       L NEXT SUB    ZX +4         C,+1                POINT TO NEXT SUBROUTINE TO ENTER ASSY.
+ 144674            SWE, CHAR8   N,X4          A,3           HEAD                ESTABLISH HEAD SPECIFIED IN CALL.
+ 144676            SSL, ONE     N,X4,1        25            C,+1                "BRANCH" IF THERE IS A GOOD BASE ADDR.
+ 144678            TS           ONES          LOC CTR       C,+2
+ 14468             SWE, CAC3    N,X4          16            LOC CTR
+ 144682 ST SUB THR TX           N,X4          -             L NEXT SUB          LEAVE POINTER TO FOLLOWING SUBROUTINE.
+ 144684            NA, BIT8     SWITCH        ONES          XMIT RTRN           EXIT VIA SEND POPO UNLESS FREEZING SUBS.
+ 144686            TX           PROC RTRN     -             Z,SC                OTHERWISE KILL INTERMEDIATE "END OF"S.
 
 # Page 187
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  35        PAGE  35
 
+P1447              PASS 1 PROCESSING OF A SUBROUTINE CALL CARD.  EXTRACTS A SUBROUTINE NAME AND AN OPTIONAL HEAD DESIG-
+R144705 NATION FROM THE ADDRESS FIELD, ENTERS THE SUBROUTINE NAME AND BASE ADDRESS IN THE AD HOC SUBROUTINE DIRECTORY,
+R14471  AND MARKS THE SUBROUTINE ACTIVE OR INACTIVE.  ALSO USES THE BASE ADDRESS TO DEFINE THE SYMBOL, IF ANY, IN THE
+R144715 LOCATION FIELD.
+
+
+
+ 14472  SUBRO      TX, CD TYPE  (SUBRO)       -             HEALTH
+ 14473             TX, BIT11    ZERO          -             HEALTH              ASTERISK BIT HAS A DIFFERENT USE HERE.
+ 144732            LA           END OF        SEND ENDO     ILLEGOP             SNUB SUBRO CARDS AFTER 1ST "END OF".
+ 14474             NA, BIT 9    SWITCH        ZERO          ILLEGOP             FOR NOW, FORBID SUBROS TO CALL SUBROS.
+ 14476             NA           ADDRESS 2     BLANKS        SUB RJUST -1
+ 14477             NA           ADDRESS 1     BLANKS        C,+2                ADDRESS FIELD ALL BLANK IS BAD.
+ 14479  SUB AD ILF TS, BIT12    ONES          HEALTH        BAD SBCAL
+
+ 1448              TX           BLANKS        -             AFIELD
+ 14481             TS           ADDRESS 1     AFIELD +1     SUB RJUST
+ 14482             TN           ADDRESS 1     2             AFIELD
+
+ 14483  SUB RJUST  NA, CHAR8    AFIELD +1     BLANKS        C,+2                RIGHT-JUSTIFY ADDRESS IN AFIELD.
+ 14485             TS           L SUB RJUS    Z,SC          2SRT 1C        C
+ 14486  CUR HED SB SWE, CHAR5   HEAD          A,3,L         COMMON +3           ASSIGN PREVAILING HEAD TO SUBROUTINE.
+ 14488             NA, CHAR7    AFIELD +1     BLANKS        SNAM SIZ Q          BRANCH IF NO HEAD WAS GIVEN IN ADDRESS.
+ 1449              SWE, CHAR5   AFIELD +1     A,3,L         COMMON +3           USE LONELY CHAR AT RIGHT AS HEAD FOR SB.
+ 14492             SS           BLANKS        CHAR 8        AFIELD +1
+ 14493             NA           AFIELD        BLANKS        SUB LJUST
+ 14494             NA           AFIELD +1     BLANKS        SNAM SIZ Q +1       BRANCH UNLESS 1-CHAR UNHEADED SUB NAME.
+ 14496             SWS, CHAR1   COMMON +3     A,4,L         AFIELD              PUT SUBROUTINE NAME BACK.
+ 14498             TS           Z,SC,8        -             CUR HED SB     C    RESTORE PREV. HEAD, TAB TO ST SUBNAM.
+
+ 1450   S NAM SIZQ NA           AFIELD        BLANKS        SUB AD ILF          BRANCH IF SUBRO NAME OVER 8 CHARACTERS.
+ 14502             TX           AFIELD +1     -             AFIELD
+ 14503             TX           BLANKS        -             AFIELD +1
+
+ 14504  SUB LJUST  NA, CHAR1    AFIELD        BLANKS        ST SUBNAM           LEFT-JUSTIFY SUBROUTINE NAME.
+ 14506             SWS, ONES    AFIELD        A,1,L         AFIELD
+ 14507             SWS, ONES    AFIELD +1     A,1,L         AFIELD +1
+ 14508             SS           AFIELD +1     CHAR 8        AFIELD
+ 14509             TS, CHAR8    BLANKS        AFIELD +1     SUB LJUST
+
+ 1451   ST SUBNAM  NA           AFIELD +1     BLANKS        SUD AD ILF          BRANCH IF SUBROUTINE NAME OVER 8 CHARS.
+ 14512             TX           L COMP NAM    -             Z,X4
+ 14513             SWS,THREAD10 N,X4          12            Z,X4                POINT TO 1ST PROG/SUBRO OF MACHINE.
+ 14515             TX           LL SUB TAB    -             Z,X6                POINT TO ORIGIN OF SUBRO DIRECTORY.
+ 14517             S, ETS       6,0           ZX +5         MOR SUBS Q +3       POINT TO FIRST CALLED SUBROUTINE.
 
 # Page 188
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  36        PAGE  36
@@ -1679,235 +1884,4 @@ R1273   PROCEDURE TO HANDLE THE LOCATION FIELD OF A LEFTOVER ERASE CARD.
 # Page 210
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  58        PAGE  58
 
-
-# Page 153
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   1        PAGE   1
-
-
-# Page 154
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   2        PAGE   2
-
-
-# Page 155
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   3        PAGE   3
-
-
-# Page 156
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   4        PAGE   4
-
-
-# Page 157
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   5        PAGE   5
-
-
-# Page 158
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   6        PAGE   6
-
-
-# Page 159
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   7        PAGE   7
-
-
-# Page 160
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   8        PAGE   8
-
-
-# Page 161
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.   9        PAGE   9
-
-
-# Page 162
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  10        PAGE  10
-
-
-# Page 163
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  11        PAGE  11
-
-
-# Page 164
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  12        PAGE  12
-
-
-# Page 165
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  13        PAGE  13
-
-
-# Page 166
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  14        PAGE  14
-
-
-# Page 167
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  15        PAGE  15
-
-
-# Page 168
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  16        PAGE  16
-
-
-# Page 169
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  17        PAGE  17
-
-
-# Page 170
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  18        PAGE  18
-
-
-# Page 171
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  19        PAGE  19
-
-
-# Page 172
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  20        PAGE  20
-
-
-# Page 173
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  21        PAGE  21
-
-
-# Page 174
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  22        PAGE  22
-
-
-# Page 175
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  23        PAGE  23
-
-
-# Page 176
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  24        PAGE  24
-
-
-# Page 177
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  25        PAGE  25
-
-
-# Page 178
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  26        PAGE  26
-
-
-# Page 179
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  27        PAGE  27
-
-
-# Page 180
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  28        PAGE  28
-
-
-# Page 181
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  29        PAGE  29
-
-
-# Page 182
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  30        PAGE  30
-
-
-# Page 183
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  31        PAGE  31
-
-
-# Page 184
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  32        PAGE  32
-
-
-# Page 185
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  33        PAGE  33
-
-
-# Page 186
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  34        PAGE  34
-
-
-# Page 187
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  35        PAGE  35
-
-
-# Page 188
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  36        PAGE  36
-
-
-# Page 189
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  37        PAGE  37
-
-
-# Page 190
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  38        PAGE  38
-
-
-# Page 191
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  39        PAGE  39
-
-
-# Page 192
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  40        PAGE  40
-
-
-# Page 193
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  41        PAGE  41
-
-
-# Page 194
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  42        PAGE  42
-
-
-# Page 195
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  43        PAGE  43
-
-
-# Page 196
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  44        PAGE  44
-
-
-# Page 197
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  45        PAGE  45
-
-
-# Page 198
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  46        PAGE  46
-
-
-# Page 199
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  47        PAGE  47
-
-
-# Page 200
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  48        PAGE  48
-
-
-# Page 201
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  49        PAGE  49
-
-
-# Page 202
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  50        PAGE  50
-
-
-# Page 203
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  51        PAGE  51
-
-
-# Page 204
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  52        PAGE  52
-
-
-# Page 205
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  53        PAGE  53
-
-
-# Page 206
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  54        PAGE  54
-
-
-# Page 207
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  55        PAGE  55
-
-
-# Page 208
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  56        PAGE  56
-
-
-# Page 209
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  57        PAGE  57
-
-
-# Page 210
-#      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  58        PAGE  58
 
