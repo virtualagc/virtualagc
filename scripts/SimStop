@@ -9,15 +9,19 @@ trap "" 0 1 2 9 15 17 19 23
 sleep 5
 
 # Try to determine where GNU grep is.  Usually, this is just 'grep', but on
-# Solaris it's 'ggrep', and 'grep' is something that doesn't have the 
-# options we need.
-if echo $OSTYPE | grep -c '[sS][oO][lL][aA][rR][iI][sS]'
-then 
-	GREP=ggrep
+# Solaris it's 'ggrep', and 'grep' is something that doesn't have the
+# options we need.  I tried checking the OSTYPE environment variable, but
+# that variable doesn't seem to get set when SimStop is called from VirtualAGC.
+# Checking for ggrep isn't a very good test, but it's the best I have at the
+# moment.
+if which ggrep
+then
+        GREP=ggrep
 else
-	GREP=grep
+        GREP=grep
 fi
 
+echo GREP=$GREP
 
 # Now we have a big loop that just keeps checking that all of the processes
 # are running.  If not, we stop all of them and exit.
