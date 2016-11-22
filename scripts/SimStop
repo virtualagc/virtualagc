@@ -8,6 +8,17 @@
 trap "" 0 1 2 9 15 17 19 23
 sleep 5
 
+# Try to determine where GNU grep is.  Usually, this is just 'grep', but on
+# Solaris it's 'ggrep', and 'grep' is something that doesn't have the 
+# options we need.
+if echo $OSTYPE | grep -c '[sS][oO][lL][aA][rR][iI][sS]'
+then 
+	GREP=ggrep
+else
+	GREP=grep
+fi
+
+
 # Now we have a big loop that just keeps checking that all of the processes
 # are running.  If not, we stop all of them and exit.
 echo Scanning for program status of processes ${PIDS}
@@ -21,19 +32,19 @@ do
     # shouldn't be necessary, but I found after migrating from SuSE 9.0 to 9.1
     # that the following test sometimes says that the process has terminated
     # when it really hasn't.
-    if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
+    if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
     then
-      if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
+      if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
       then
-	if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
+	if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
 	then
-	  if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
+	  if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
 	  then
-	    if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
+	    if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
 	    then
-	      if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
+	      if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
 	      then
-		if [ 1 -ne `ps -U ${USER} | grep -E -c "(^| )${n} "` ]
+		if [ 1 -ne `ps -U ${USER} | $GREP -E -c "(^| )${n} "` ]
 		then
 		  echo Process ${n} has terminated.
 		  i=0
