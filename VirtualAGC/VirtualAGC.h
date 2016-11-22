@@ -251,7 +251,7 @@ public:
   wxPanel* ScriptPanel;
   wxPanel* DetailPanel;
 
-  DECLARE_EVENT_TABLE();
+  DECLARE_EVENT_TABLE()
 
 public:
   virtual void
@@ -418,7 +418,7 @@ protected:
   wxGridSizer* interfaceStylesBox;
   wxGridSizer* debuggerBox;
 
-  DECLARE_EVENT_TABLE();
+  DECLARE_EVENT_TABLE()
 
 public:
   virtual void

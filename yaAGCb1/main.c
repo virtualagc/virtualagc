@@ -231,5 +231,7 @@ main(int argc, char *argv[])
         }
     }
 
+#ifndef SOLARIS
   return (0);
+#endif
 }

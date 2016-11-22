@@ -112,11 +112,6 @@ SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 JAMMER_DIR=${HOME}/IMCROSS/installjammer
 
 # cp and sed work slightly differently on Mac OS X than elsewhere.
-ifdef MACOSX
-EXTSW=-pR
-else
-EXTSW=-a
-endif
 INPLACE=-i~
 CP=cp
 CP+=${EXTSW}

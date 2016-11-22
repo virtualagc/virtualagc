@@ -237,6 +237,10 @@ ifdef SOLARIS
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
 LIBS+=-lnsl
+CFLAGS0 += /opt/csw/include/wx-2.8
+CFLAGS += /opt/csw/include/wx-2.8
+dummy:=$(PATH):/opt/csw/bin
+export PATH=$(dummy)
 export SOLARIS
 endif
 
@@ -298,6 +302,9 @@ endif
 ifdef MACOSX
 yaACA=-
 endif
+ifdef SOLARIS
+yaACA=-
+endif
 
 # Note:  The CURSES variable is misnamed.  It really is just any special libraries
 # for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
@@ -321,6 +328,11 @@ CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro
 CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro
 endif
 
+ifdef SOLARIS
+CFLAGS0 += -I/opt/csw/include/wx-2.8
+CFLAGS += -I/opt/csw/include/wx-2.8
+endif
+
 ifdef MACOSX
 CFLAGS0+=-DMACOSX=yes
 CFLAGS+=-DMACOSX=yes
@@ -333,6 +345,8 @@ ifdef FREEBSD
 CFLAGS0+=-DFREEBSD=yes
 CFLAGS+=-DFREEBSD=yes
 endif
+export CFLAGS0
+export CFLAGS
 
 # We assume a *nix build environment.
 
@@ -382,6 +396,18 @@ SUBDIRS += jWiz
 SUBDIRS += yaDSKYb1
 SUBDIRS += VirtualAGC
 endif # NOGUI
+
+# EXTSW is the switch for cp that's equivalent to -a in Linux.
+ifdef MACOSX
+EXTSW=-pR
+else
+ifdef SOLARIS
+EXTSW=-r -@ -P
+else
+EXTSW=-a
+endif
+endif
+export EXTSW
 
 .PHONY: $(SUBDIRS)
 
@@ -488,9 +514,9 @@ buildbox: dev
 
 .PHONY: binaries
 binaries: clean all-archs
-	cp -a VirtualAGC/VirtualAGC-installer $(WEBSITE)/Downloads
-	cp -a VirtualAGC/VirtualAGC-setup.exe $(WEBSITE)/Downloads
-	cp -a VirtualAGC/VirtualAGC.app.tar.gz $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC-installer $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC-setup.exe $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC.app.tar.gz $(WEBSITE)/Downloads
 	ls -ltr $(WEBSITE)/Downloads | tail -4
 
 # I used this only for creating a development snapshot.  It's no use to anybody
