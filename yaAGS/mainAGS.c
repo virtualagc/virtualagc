@@ -311,11 +311,13 @@ main (int argc, char *argv[])
 	}
     }
 
+#ifndef SOLARIS
 #ifdef PTW32_STATIC_LIB
   // You wouldn't need this if I had compiled pthreads_w32 as a DLL.
   pthread_win32_process_detach_np ();
 #endif  
 
   return (0);
+#endif
 }
 

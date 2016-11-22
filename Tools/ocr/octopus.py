@@ -34,6 +34,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Prepare octal pages of AGC program listings for OCR')
 parser.add_argument('input_file', help="Input image path")
 parser.add_argument('output_file', help="Output image path")
+parser.add_argument('--no-crop', help="Only perform the threshold steps; don't crop down as for octals.", action="store_true")
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('--burst120', help="Perform BURST120 processing", action="store_true")
 group.add_argument('--luminary210', help="Perform LUMINARY 210 processing", action="store_true")
@@ -52,6 +53,10 @@ if args.burst120:
     _,thresh = cv2.threshold(blurred, 180, 255, cv2.THRESH_BINARY)
 else:
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+
+if args.no_crop:
+    cv2.imwrite(args.output_file, thresh)
+    sys.exit(0)
 
 # Eliminate random flecks. We do this by finding all the contours in the image
 # and taking a look at their relative locations and size. We'll be building up

@@ -177,6 +177,28 @@ DATE:=`date +%Y%m%d`
 DEV_STATIC=DEV_STATIC=yes
 # *******************************************************************
 
+# Select compiler basenames.  We use
+#	${cc}	C compiler
+#	${CC}	C++ compiler
+# These are almost always gcc and g++, respectively, but on some
+# platforms it's necessary to use non-GNU compilers (even if the 
+# GNU compilers are actually available and installed)  in order to 
+# be able to access the native builds of wxWidgets for programs
+# like yaDSKY2. 
+cc=gcc
+CC=g++
+ifdef SOLARIS
+cc=cc
+CC=CC
+endif
+ifdef IPHONE
+cc=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-gcc-4.0.1
+CC=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-g++-4.0.1
+LIBS=
+endif
+export cc
+export CC
+
 # Comment out the following line(s) to use yaDSKY rather than yaDSKY2 and/or 
 # yaDEDA by yaDEDA2.  yaDSKY/yaDEDA have been replaced by yaDSKY2/yaDEDA2 
 # principally because yaDSKY/yaDEDA are gtk+ based while yaDSKY2/yaDEDA2
@@ -215,7 +237,7 @@ ifdef SOLARIS
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
 LIBS+=-lnsl
-export CC=gcc
+export SOLARIS
 endif
 
 # Some adjustments for building in Mac OS X
@@ -226,12 +248,14 @@ endif
 ifdef MACOSX
 #NOREADLINE=yes
 ISMACOSX:=MACOSX=yes
+export MACOSX
 endif
 
 # Some adjustments for building in FreeBSD
 ifdef FREEBSD
 LIBS+=`pkg-config --libs gtk+-2.0`
 LIBS+=`pkg-config --libs glib`
+export FREEBSD
 endif
 
 # GROUP is the main group to which the USER belongs.  This seems to be defined
@@ -271,20 +295,43 @@ endif
 endif
 WEBSITE=..
 endif
+ifdef MACOSX
+yaACA=-
+endif
 
 # Note:  The CURSES variable is misnamed.  It really is just any special libraries
 # for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
 ifdef WIN32
+export WIN32
 EXT=.exe
 CFLAGS0+=-I/usr/local/include
 CFLAGS+=-I/usr/local/include
 LIBS+=-L/usr/local/lib
+LIBS+=-L/usr/lib
 LIBS+=-lkernel32
 LIBS+=-lwsock32
 CURSES=../yaAGC/random.c
 CURSES+=-lregex
 else
 CURSES=-lcurses
+endif
+
+ifdef MACOSX
+CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro
+CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro
+endif
+
+ifdef MACOSX
+CFLAGS0+=-DMACOSX=yes
+CFLAGS+=-DMACOSX=yes
+endif
+ifdef SOLARIS
+CFLAGS0+=-DSOLARIS=yes
+CFLAGS+=-DSOLARIS=yes
+endif
+ifdef FREEBSD
+CFLAGS0+=-DFREEBSD=yes
+CFLAGS+=-DFREEBSD=yes
 endif
 
 # We assume a *nix build environment.
@@ -362,12 +409,12 @@ all: ARCHS=default
 all-archs: ARCHS=all-archs
 all all-archs: $(cbMISSIONS) $(SUBDIRS)
 
-.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA ControlPulseSim
-Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse yaACA2 yaACA yaACA3 ControlPulseSim:
+.PHONY: Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse ControlPulseSim
+Tools yaLEMAP yaAGC yaAGS yaYUL yaUniverse ControlPulseSim:
 	$(BUILD) -C $@ 
 
-.PHONY: yaACA3
-yaACA3:
+.PHONY: yaACA yaACA2 yaACA3
+yaACA yaACA2 yaACA3:
 	${yaACA}$(BUILD) -C $@ 
 
 .PHONY: yaDEDA

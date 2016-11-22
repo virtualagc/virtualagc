@@ -347,10 +347,11 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   // it to an absolute path.
   if (ExecutableDirectory.GetChar(0) != '/')
     {
+      wxString old = ExecutableDirectory;
       wxString WorkingDir = wxGetCwd();
       ExecutableDirectory = WorkingDir;
       ExecutableDirectory += PATH_DELIMITER;
-      ExecutableDirectory += ExecutableDirectory;
+      ExecutableDirectory += old;
     }
 #endif
   wxString TopDirectory = ExecutableDirectory.BeforeLast(PATH_DELIMITER);
@@ -2603,7 +2604,7 @@ VirtualAGC::FormScript(void)
   wxFile Fout;
   if (Fout.Create(wxT("simulate"), true, wxS_DEFAULT | wxS_IXUSR | wxS_IXGRP))
     {
-      Fout.Write(wxT("#!/bin/bash\n"));
+      Fout.Write(wxT("#!/bin/sh\n"));
 #ifdef __APPLE__
       Fout.Write (wxT ("PATH=$PATH:/usr/X11/bin\n"));
 #endif

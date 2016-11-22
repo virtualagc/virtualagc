@@ -38,18 +38,48 @@
  * 		2016-11-18 RSB	Added workaround for non-existence of clock_gettime()
  * 				on Mac OS X, found here:
  * 				http://stackoverflow.com/questions/5167269/clock-gettime-alternative-in-mac-os-x
+ * 		2016-11-19 RSB	And a Windows workaround too:
+ * 				http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
  */
 
 #include <time.h>
 #include <sys/time.h>
 
+#include <string.h>
+#include "yaAGCb1.h"
+
+// OS X does not have clock_gettime.
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
+#include <mach/mach_time.h>
+#define CLOCK_REALTIME 0
+int clock_gettime (int clock_id, struct timespec *timeSpec)
+{
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  timeSpec->tv_sec = mts.tv_sec;
+  timeSpec->tv_nsec = mts.tv_nsec;
+}
 #endif
 
-#include <string.h>
-#include "yaAGCb1.h"
+// Win32 doesn't have clock_gettime.
+#ifdef WIN32
+#include <winbase.h>
+#define CLOCK_REALTIME 0
+int clock_gettime(int id, struct timespec *spec)      //C-file part
+{
+   __int64 wintime;
+   GetSystemTimeAsFileTime((FILETIME*)&wintime);
+   wintime      -=116444736000000000LL;  //1jan1601 to 1jan1970
+   spec->tv_sec  =wintime / 10000000LL;           //seconds
+   spec->tv_nsec =wintime % 10000000LL * 100;      //nano-seconds
+   return 0;
+}
+#endif
 
 int64_t
 getTimeNanoseconds(void)
@@ -57,18 +87,7 @@ getTimeNanoseconds(void)
   int64_t currentTime;
   struct timespec timeSpec;
 
-  #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
-  clock_serv_t cclock;
-  mach_timespec_t mts;
-  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-  clock_get_time(cclock, &mts);
-  mach_port_deallocate(mach_task_self(), cclock);
-  timeSpec.tv_sec = mts.tv_sec;
-  timeSpec.tv_nsec = mts.tv_nsec;
-
-  #else
   clock_gettime(CLOCK_REALTIME, &timeSpec);
-  #endif
 
   currentTime = timeSpec.tv_sec;
   currentTime *= BILLION;

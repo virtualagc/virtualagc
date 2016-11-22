@@ -58,8 +58,11 @@
 // ... and the project's includes.
 #include <stdio.h>
 #include <string.h>
+#ifndef WIN32
 #include <netdb.h>
-extern int h_errno;
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif
 #include "yaAGC.h"
 #include "agc_engine.h"
 

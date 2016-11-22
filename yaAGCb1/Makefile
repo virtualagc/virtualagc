@@ -13,6 +13,10 @@ ifdef SOLARIS
 LIBS += -lxnet
 endif # SOLARIS
 
+ifdef WIN32
+LIBS += -lwsock32
+endif
+
 .PHONY: all
 .PHONY: default
 .PHONY: clean
@@ -20,7 +24,7 @@ endif # SOLARIS
 all default: ${TARGETS}
 
 yaAGCb1: $(SOURCE) $(HEADERS) Makefile
-	gcc -O0 -g -o $@ $(SOURCE) -lpthread $(LIBS)
+	${cc} -O0 -g -o $@ $(SOURCE) -lpthread $(LIBS)
 
 test.agc.bin: test.agc
 	../../virtualagc/yaYUL/yaYUL --block1 $^ >test.agc.lst

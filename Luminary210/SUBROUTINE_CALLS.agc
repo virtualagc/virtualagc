@@ -7,23 +7,24 @@
 ##              that the code format has been changed to conform to the
 ##              requirements of the yaYUL assembler rather than the
 ##              original YUL assembler.
-## Reference:   pp. XXX-XXX
+## Reference:   p. 91
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Artemis072 version.
+##              2016-11-18 HG   Transcribed
 
-## NOTE: Page numbers below have yet to be updated from Artemis072 to Luminary210!
-
-
-## Page 37
+## Page 91
 # SUBROUTINE_CALLS
 
-		SUBRO	ERASTOTL	041
-		SUBRO	DIOGENES	064
-		SUBRO	MEDUSA		035
-		SUBRO	MENLAUS		061
-		SUBRO	ULYSSES		029
-		SUBRO	ZEUS		046
+                SUBRO           LUMERASE        176
+                SUBRO           LEMONAID        156
+                SUBRO           LEMP20S         168
+                SUBRO           LEMP30S         105
+                SUBRO           KISSING         067
+                SUBRO           FLY             197
+                SUBRO           LEMP50S         130
+                SUBRO           SKIPPER         131
+                SUBRO           LMDAP           032
 
 # *** END OF MAIN PROGRAM ***
