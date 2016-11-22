@@ -242,7 +242,7 @@ ifeq "${YADEDA_SUFFIX}" ""
 else
 	${CP} ../yaDEDA2/*.xpm $@
 endif
-	${CP} -a ../yaDSKYb1/images $@/images-yaDSKYb1
+	${CP} ../yaDSKYb1/images $@/images-yaDSKYb1
 	-rm -rf $@/images-yaDSKYb1/CVS $@/images-yaDSKYb1/.xvpics
 	${CP} ../jWiz/*.jpg $@
 	-rm -rf $@/pixmaps/yaDEDA/CVS $@/pixmaps/yaDEDA/.xvpics

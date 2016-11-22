@@ -102,7 +102,7 @@ SOURCES:=${APPNAME}.c \
 ${APPNAME}: ${SOURCES} ${HEADERS}
 	${cc} \
 		${NATIVE_SDL_CFLAGS} \
-		-DNVER=${NVER} \
+		-DNVER=${NVER} ${CFLAGS0} \
 		-o $@ ${SOURCES} ${WINFLAGS} \
 		${NATIVE_SDL_LIBS} \
 		${CURSES} ${LIBS2}

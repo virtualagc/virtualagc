@@ -2600,9 +2600,9 @@ bool
 VirtualAGC::FormScript(void)
 {
 #ifdef __APPLE__
-  wxString ExecutableDirectory = wxT ("../MacOS");
+  wxString localExecutableDirectory = wxT ("../MacOS");
 #else
-  wxString ExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
+  wxString localExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
 #endif
   wxFile Fout;
   if (Fout.Create(wxT("simulate"), true, wxS_DEFAULT | wxS_IXUSR | wxS_IXGRP))
@@ -2704,7 +2704,7 @@ VirtualAGC::FormScript(void)
         }
 
       Fout.Write(wxT("export PIDS\n"));
-      Fout.Write(ExecutableDirectory + wxT("/SimStop\n"));
+      Fout.Write(localExecutableDirectory + wxT("/SimStop\n"));
 #ifdef __APPLE__
       // In Mac OS X, starting LM_Simulator starts a child process which
       // actually runs the program, and when SimStop eventually kills the
