@@ -612,6 +612,7 @@ ifndef NOGUI
 	cd yaDEDA && ./autogen.sh --prefix=$(PREFIX)
 endif
 
+TMP:=temp.virtualagc
 .PHONY: install
 install: all
 ifdef MACOSX
@@ -628,21 +629,21 @@ else
 	# Create installation directory.
 	-mkdir ~/VirtualAGC
 	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* ~/VirtualAGC
-ifndef SOLARIS
-	# Create desktop icon.  For whatever lame reason, Solaris desktop
-	# icons have no way to set the working directory, so if we made an 
-	# icon it wouldn't work.
-	TMP=mktemp
-	@echo "[Desktop Entry]" >>$$TMP
-	@echo "Encoding=UTF-8" >>$$TMP
-	@echo "Name=VirtualAGC" >>$$TMP
-	@echo "Comment=Virtual AGC GUI Application" >>$$TMP
-	@echo "Terminal=false" >>$$TMP
-	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$$TMP
-	@echo "Type=Application" >>$$TMP
-	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$$TMP
-	@echo "Path=$$HOME/VirtualAGC/Resources" >>$$TMP
-	mv $$TMP $$HOME/Desktop/VirtualAGC.desktop
+ifdef SOLARIS
+	@echo "We'd like to create a desktop icon.  For whatever lame reason, Solaris"
+	@echo "desktop icons have no way to set the working directory, so if we made an" 
+	@echo "icon, it wouldn't work."
+else
+	@echo "[Desktop Entry]" >$(TMP)
+	@echo "Encoding=UTF-8" >>$(TMP)
+	@echo "Name=VirtualAGC" >>$(TMP)
+	@echo "Comment=Virtual AGC GUI Application" >>$(TMP)
+	@echo "Terminal=false" >>$(TMP)
+	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(TMP)
+	@echo "Type=Application" >>$(TMP)
+	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(TMP)
+	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(TMP)
+	mv $(TMP) $$HOME/Desktop/VirtualAGC.desktop
 endif
 endif
 endif

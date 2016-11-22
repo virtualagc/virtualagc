@@ -172,7 +172,7 @@ int SimInitialize(Options_t* Options)
 	Simulator.NextCoreDump = Simulator.RealTimeOffset + Simulator.DumpInterval;
 	SimSetCycleCount(SIM_CYCLECOUNT_AGC); // Num. of AGC cycles so far.
 	Simulator.RealTimeOffset -= (Simulator.CycleCount + AGC_PER_SECOND / 2) / AGC_PER_SECOND;
-	Simulator.LastRealTime = ~0UL;
+	Simulator.LastRealTime = ~((clock_t) 0);
 
 	return (result | Options->version);
 }
