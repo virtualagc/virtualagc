@@ -152,11 +152,7 @@ all-archs: Linux Win32 MacOsX
 ifdef MACOSX
 Linux: temp/VirtualAGC.app
 else
-ifeq "${USER}" "rburkey"
-Linux: VirtualAGC-installer
-else
 Linux: temp/lVirtualAGC
-endif
 endif
 
 .PHONY: Win32

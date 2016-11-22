@@ -280,12 +280,12 @@ ifeq ($(USER),rburkey)
 WEBSITE=../sandroid.org/public_html/apollo
 CFLAGS0=-Werror -DALLOW_BSUB -g -O0
 CFLAGS=-Wall $(CFLAGS0)
-yaACA=
+yaACA=-
 else 
 ifdef DEV_BUILD
 CFLAGS0=-Werror -DALLOW_BSUB -g -O0
 CFLAGS=-Wall $(CFLAGS0)
-yaACA=
+yaACA=-
 else 
 ifdef DEBUG_BUILD
 CFLAGS0=-DALLOW_BSUB -g -O0
@@ -480,6 +480,10 @@ yaAGC-Block1-Pultorak yaAGCb1 yaDSKYb1 yaUplinkBlock1 yaValidation-Block1:
 VirtualAGC:
 	$(BUILD) -C $@ "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC)
 
+.PHONY: VirtualAGC-installer
+VirtualAGC-installer: all
+	$(BUILD) -C VirtualAGC "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC) VirtualAGC-installer
+
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
 AGC_LISTINGS = $(addprefix listing-agc-, $(MISSIONS))
@@ -608,3 +612,30 @@ ifndef NOGUI
 	cd yaDEDA && ./autogen.sh --prefix=$(PREFIX)
 endif
 
+.PHONY: install
+install: all
+ifdef MACOSX
+	cp ${EXTSW} VirtualAGC/temp/VirtualAGC.app ~/Desktop
+else
+ifdef WIN32
+	-mkdir c:/"Program Files"/VirtualAGC
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* c:/"Program Files"/VirtualAGC
+	@echo "You might want to make a launcher icon on your Desktop that uses:"
+	@echo "  1. Executable c:\Program Files\VirtualAGC\bin\VirtualAGC.exe"
+	@echo "  2. Working directory c:\Program Files\VirtualAGC\Resources"
+	@echo "  3. Icon c:\Program Files\VirtualAGC\Resources\ApolloPatch2.png"
+else
+	# Create installation directory.
+	-mkdir ~/VirtualAGC
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* ~/VirtualAGC
+	# Create desktop icon.
+	@echo "[Desktop Entry]" >$$HOME/Desktop/VirtualAGC.desktop
+	@echo "Name=VirtualAGC" >>$$HOME/Desktop/VirtualAGC.desktop
+	@echo "Comment=Virtual AGC GUI Application" >>$$HOME/Desktop/VirtualAGC.desktop
+	@echo "Terminal=false" >>$$HOME/Desktop/VirtualAGC.desktop
+	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$$HOME/Desktop/VirtualAGC.desktop
+	@echo "Type=Application" >>$$HOME/Desktop/VirtualAGC.desktop
+	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$$HOME/Desktop/VirtualAGC.desktop
+	@echo "Path=$$HOME/VirtualAGC/Resources" >>$$HOME/Desktop/VirtualAGC.desktop
+endif
+endif
