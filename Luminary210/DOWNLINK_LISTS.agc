@@ -307,7 +307,7 @@ RENDEZVU        EQUALS                                  # SEND ID BY SPECIAL COD
                 1DNADR          IMODES30                # IMODES30,IMODES33
                 1DNADR          TIG                     # TIG,+1
                 DNPTR           LMREND05                # COMMON DATA
-                1DNADR          LMREND10                # COMMON DATA
+                DNPTR           LMREND10                # COMMON DATA
                 1DNADR          TET                     # TET,+1
                 1DNADR          CENTANG                 # CENTANG,+1
                 1DNADR          NN                      # NN,+1
@@ -474,7 +474,7 @@ SURFALIN        EQUALS                                  # SEND ID BY SPECIAL COD
                 6DNADR          YNBSAV                  # YNBSAV+0...+5,SNBSAV+0...+5
                 1DNADR          X789                    # X789,+1
                 1DNADR          TET                     # TET,+1
-                1DNADR          LASTCYMD                # LASTCYMD,LASTXCMD
+                1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
                 DNPTR           LMLSAL02                # COMMON DATA
                 1DNADR          TIME2                   # TIME/1
                 DNPTR           LMLSAL03                # COLLECT SNAPSHOT
