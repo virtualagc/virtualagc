@@ -12,11 +12,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+##              2016-11-23 AS   Transcribed
 
-## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
 
+## Page 1468
+# KALMAN_FILTER
 
-## Page 1467
 		EBANK=	NO.UJETS
 		BANK	16
 		SETLOC	DAPS1
@@ -67,7 +68,7 @@ SMALLTJU	CA	ZERO
 		INDEX	DAPTEMP6
 		XCH	TJP
 		EXTEND
-## Page 1468
+## Page 1469
 		MP	ELEVEN		# 10.24 PLUS
 		CA	L
 		TCF	LOOPRATE
@@ -87,5 +88,3 @@ ROTORQUE	CA	DAPTEMP2
 NEGTORK		COM
 		INCR	Q
 		TCF	STORTORK
-		
-
