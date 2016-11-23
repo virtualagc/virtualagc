@@ -613,26 +613,42 @@ ifndef NOGUI
 endif
 
 iTMP:=temp.virtualagc
+WINPATH=$(subst \,/,$(USERPROFILE))/VirtualAGC
 .PHONY: install
 install: all
 ifdef MACOSX
 	cp ${EXTSW} VirtualAGC/temp/VirtualAGC.app ~/Desktop
+	@echo "Run Virtual AGC from its desktop icon."
 else
 ifdef WIN32
-	-mkdir c:/"Program Files"/VirtualAGC
-	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* c:/"Program Files"/VirtualAGC
-	@echo "You might want to make a launcher icon on your Desktop that uses:"
-	@echo "  1. Executable c:\Program Files\VirtualAGC\bin\VirtualAGC.exe"
-	@echo "  2. Working directory c:\Program Files\VirtualAGC\Resources"
-	@echo "  3. Icon c:\Program Files\VirtualAGC\Resources\ApolloPatch2-transparent.ico"
+	@echo WINPATH=$(WINPATH)
+	-mkdir "$(WINPATH)"
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* "$(WINPATH)"
+	@echo ""
+	@echo "================================================================"
+	@echo "You might want to make a launcher icon on your Desktop that uses"
+	@echo "the following stuff from the $(USERPROFILE)\\VirtualAGC folder:"
+	@echo "  1. Executable: bin\VirtualAGC.exe"
+	@echo "  2. Working directory: Resources"
+	@echo "  3. Icon: Resources\ApolloPatch2-transparent.ico"
+	@echo "Or else, run Virtual AGC from a Windows command-line as follows:"
+	@echo "  cd VirtualAGC\\Resources"
+	@echo "  ..\\bin\\VirtualAGC"
+	@echo "================================================================"
 else
 	# Create installation directory.
 	-mkdir ~/VirtualAGC
 	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* ~/VirtualAGC
 ifdef SOLARIS
-	@echo "We'd like to create a desktop icon.  For whatever lame reason, Solaris"
-	@echo "desktop icons have no way to set the working directory, so if we made an" 
-	@echo "icon, it wouldn't work."
+	@echo ""
+	@echo "================================================================"
+	@echo "We cannot create a Virtual AGC desktop shortcut.  For whatever"
+	@echo "reason, Solaris desktop shortcuts have no way to set the working"
+	@echo "directory, so if we made shortcut, it wouldn't work. Run Virtual"
+	@echo "AGC from a command line as follows:"
+	@echo "  cd VirtualAGC/Resources"
+	@echo "  ../bin/VirtualAGC"
+	@echo "================================================================"
 else
 	@echo "[Desktop Entry]" >$(iTMP)
 	@echo "Encoding=UTF-8" >>$(iTMP)
@@ -643,7 +659,15 @@ else
 	@echo "Type=Application" >>$(iTMP)
 	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(iTMP)
 	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(iTMP)
+	chmod +x $(iTMP)
 	mv $(iTMP) $$HOME/Desktop/VirtualAGC.desktop
+	@echo ""
+	@echo "================================================================"
+	@echo "Run Virtual AGC from its desktop icon."
+	@echo "Or else, run Virtual AGC from a command-line as follows:"
+	@echo "  cd VirtualAGC/Resources"
+	@echo "  ../bin//VirtualAGC"
+	@echo "================================================================"
 endif
 endif
 endif
