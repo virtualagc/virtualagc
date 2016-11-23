@@ -75,8 +75,10 @@
 
 
 
+
               900MB</a></td>
           <td valign="middle"><a href="#Downloading_Running_or_Updating">Using
+
 
 
 
@@ -94,6 +96,7 @@
           </td>
           <td valign="middle"><a
               href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-installer">2016-11-16,
+
 
 
 
@@ -131,6 +134,7 @@ href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar
 
 
 
+
               12MB<br>
             </a></td>
           <td valign="middle"><a href="#Raspberry_Pi_Raspbian_">Using
@@ -146,6 +150,7 @@ href="http://www.ibiblio.org/apollo/Downloads/VirtualAGC-Raspbian-2016-08-13.tar
           Running, or Updating Virtual AGC in VirtualBox</a></li>
       <ul>
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
+
 
 
 
@@ -228,6 +233,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
 
 
 
+
           to this page</a>) FreeBSD as well even though the latter is
         not obvious from the VirtualBox website.<br>
       </li>
@@ -246,6 +252,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
         just the AGC/AEA code), then you should instead <a
           href="#Downloading_and_Building_Virtual_AGC">download the
           Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
+
 
 
 
@@ -306,10 +313,12 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
 
 
 
+
       of the Virtual AGC VM<br>
     </h3>
     <p>The approach described here should work with any host system
       supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
+
 
 
 
@@ -386,6 +395,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
 
 
 
+
       Code::Blocks is an Integrated Development Environment (IDE), which
       means that you can edit the AGC source code and reassemble it ...
       but more importantly, it means you can <i>visually debug</i> it:
@@ -430,6 +440,7 @@ href="https://www.freebsd.org/doc/handbook/virtualization-host-virtualbox.html">
         computer system.&nbsp; The Virtual AGC virtual machine (VM) you
         will download was created with <a
           href="https://www.virtualbox.org/wiki/Download_Old_Builds_4_3">VirtualBox
+
 
 
 
@@ -638,6 +649,7 @@ about
 
 
 
+
       configuring it</a>.<br>
     <h2><a name="Downloading_and_Building_Virtual_AGC"></a>Downloading
       and Building Virtual AGC from Source</h2>
@@ -646,13 +658,14 @@ about
       compared to running the VM as described above, which is that while
       the VM is already set up for visual debugging of AGC code using
       Code::Blocks, this capability is not a part of Virtual AGC
-      proper.&nbsp; That is, it has its own set of installations,
-      requirements, and setups, distinct from those of building Virtual
-      AGC proper ... which is what's discussed below.&nbsp; If (once
-      Virtual AGC is built and working satisfactorily) you want to do
-      visual debugging, you need to install Code::Blocks and should
-      consult <a
+      proper.&nbsp; That is, Code::Blocks based AGC debugging has its
+      own set of installations, requirements, and setups, distinct from
+      those of building Virtual AGC proper ... which is what's discussed
+      below.&nbsp; If (once Virtual AGC is built and working
+      satisfactorily) you want to do visual debugging, you need to
+      install Code::Blocks and should consult <a
 href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">the
+
 
 
 
@@ -683,6 +696,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
+
 
 
 
@@ -743,9 +757,11 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
       There are several ways which one might choose to download it, such
       as <a
         href="https://github.com/virtualagc/virtualagc/archive/master.zip">in
+
 
 
 
@@ -831,6 +847,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
+
       instructions at the GitHub repository</a> may (or may not) be more
     up-to-date than those here.<br>
     <h3><a name="Linux_"></a>Linux </h3>
@@ -840,8 +857,9 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
           <td align="center" valign="middle"><img alt=""
               src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
-          </td>
+          <td align="center" valign="middle"><big><big><b>This works!<br>
+                </b><small><small><small><i>Last verified: 2016-11-23</i></small></small></small><br>
+              </big></big> </td>
         </tr>
       </tbody>
     </table>
@@ -867,14 +885,15 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <ol>
     </ol>
     <ul>
-      <li>In the Virtual AGC source directory (which for me was
-        ~/git/virtualagc), run "make install".&nbsp; (This does not
-        require a 'sudo', and you shouldn't used one.)</li>
+      <li>In the Virtual AGC source directory, run "make install" or
+        "make clean install".&nbsp; (This does not require a 'sudo', and
+        you shouldn't use one.)</li>
     </ul>
     This process creates a desktop icon from which you can run Virtual
-    AGC.&nbsp; You can "uninstall" by removing the icon, the
-    ~/VirtualAGC folder, and the source-code directory you downloaded
-    from GitHub.<br>
+    AGC.&nbsp; In some versions of Linux, you will need to right-click
+    the icon and indicate that it is "trusted" before it will work
+    properly. You can "uninstall" by removing the icon, the ~/VirtualAGC
+    folder, and the source-code directory you downloaded from GitHub.<br>
     <p> </p>
     <h3><a name="Raspberry_Pi_Raspbian_"></a> <span style="font-weight:
         bold;"></span><span style="font-weight: bold;"></span>Raspberry
@@ -916,10 +935,11 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
         make install<br>
       </p>
     </blockquote>
-    (No 'sudo' should be used.)&nbsp; This process creates a desktop
-    icon from which you can run Virtual AGC.&nbsp; You can "uninstall"
-    by removing the icon, the ~/VirtualAGC folder, and the source-code
-    directory you downloaded from GitHub.
+    or perhaps "make clean install" instead.&nbsp; (No 'sudo' should be
+    used.)&nbsp; This process creates a desktop icon from which you can
+    run Virtual AGC.&nbsp; You can "uninstall" by removing the icon, the
+    ~/VirtualAGC folder, and the source-code directory you downloaded
+    from GitHub.
     <p> </p>
     <ol>
     </ol>
@@ -930,14 +950,16 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
           <td align="center" valign="middle"><img alt=""
               src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
-          </td>
+          <td align="center" valign="middle"><big><big><b>This works!<br>
+                </b><i><small><small><small>Last verified: 2016-11-23</small></small></small></i><br>
+              </big></big> </td>
         </tr>
       </tbody>
     </table>
     <br>
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
+
 
 
 
@@ -993,8 +1015,11 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <ol>
     </ol>
     <ul>
-      <li>In the Virtual AGC source directory (which for me was
-        ~/git/virtualagc), run "gmake FREEBSD=yes".</li>
+      <li>In the Virtual AGC source directory, run "gmake FREEBSD=yes
+        install" or "gmake FREEBSD=yes clean install".&nbsp; (Note that
+        'sudo' is neither necessary nor desirable.)&nbsp; Note the use
+        of 'gmake' rather than just 'make'<br>
+      </li>
     </ul>
     This process creates a desktop icon from which you can run Virtual
     AGC.&nbsp; You can "uninstall" by removing the icon, the
@@ -1010,8 +1035,9 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
           <td align="center" valign="middle"><img alt=""
               src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
-          </td>
+          <td align="center" valign="middle"><big><big><b>This works!<br>
+                </b><small><small><small><i>Last verified: 2016-11-23</i></small></small></small><br>
+              </big></big> </td>
         </tr>
       </tbody>
     </table>
@@ -1026,6 +1052,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
 
 
           Oracle Developer Studio tools</a>.&nbsp; I used version 12.5,
@@ -1046,20 +1073,23 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     </ol>
     <ul>
       <li>In the Virtual AGC source directory (which for me was
-        ~/git/virtualagc), run "gmake SOLARIS=yes install".</li>
+        ~/git/virtualagc), run "gmake SOLARIS=yes install" or "gmake
+        SOLARIS=yes clean install".&nbsp; (Note that 'sudo' is neither
+        necessary nor desirable.)&nbsp; Note the use of 'gmake' (rather
+        than just 'make').<br>
+      </li>
     </ul>
-    This will create an "installation directory" called ~/VirtualAGC,
-    and you can run the program like so:<br>
-    <blockquote>cd ~/VirtualAGC/Resources<br>
-      ../bin/VirtualAGC<br>
-    </blockquote>
-    Unfortunately, Solaris seems to be crippled, in that you can't
-    associate a working directory with a desktop launcher icon, so "make
-    install" doesn't create the desktop launcher icon for you that it
-    would on some other platforms.<br>
+    This creates a Virtual AGC launcher (which is actually just a shell
+    script) on the Desktop, and you can run Virtual AGC from that.&nbsp;
+    If it asks you whether to "Run" or "Run in terminal", the proper
+    choice is "Run".&nbsp; Unfortunately, no icon gets associated with
+    the launcher, but you can optionally associate one by right-clicking
+    on the launcher, selecting Properties, and using
+    ~/VirtualAGC/Resources/ApolloPatch2-transparent.png as the image.<br>
     <br>
-    &nbsp;You can "uninstall" by the ~/VirtualAGC folder, and the
-    source-code directory you downloaded from GitHub.<br>
+    You can "uninstall" by the deleting the desktop launcher, the&nbsp;
+    ~/VirtualAGC folder, and the source-code directory you downloaded
+    from GitHub.<br>
     <p> </p>
     <h3><a name="Mac_OS_X"></a>Mac OS X</h3>
     <table border="1" cellpadding="2" cellspacing="2">
@@ -1096,6 +1126,7 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
 
 
 
+
       README file at GitHub</a> may or may not contain useful
     information on building in newer versions of Mac OS X.&nbsp; Let me
     know if you have a better build procedure than I do.<br>
@@ -1103,6 +1134,7 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
     Setup:<br>
     <ol>
       <li>Install <a href="https://developer.apple.com/download/more">most-current
+
 
 
 
@@ -1155,6 +1187,7 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
 
 
 
+
         You have to add that to your PATH, so that the 'wx-config'
         program can be found during the build.&nbsp; The command is
         "export PATH=$PATH:/opt/local/.../bin".&nbsp; You can test that
@@ -1164,12 +1197,11 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
         this change to the PATH permanent, the PATH will be reset back
         to the default one as soon as you close the command-line
         terminal you're using for this.</li>
-      <li>Do "make MACOSX=yes".</li>
+      <li>Do "make MACOSX=yes install" or "make MACOSX=yes clean
+        install".</li>
     </ol>
-    Refer to <a
-href="file:///home/rburkey/git/virtualagc-web/download.html#Running_VirtualAGC">the
-
-      explanation of how to run the program</a>.<br>
+    The result is that a new app icon appears on the desktop, and you
+    can launch Virtual AGC from that.<br>
     <p> </p>
     <ol type="a">
     </ol>
@@ -1187,8 +1219,9 @@ href="file:///home/rburkey/git/virtualagc-web/download.html#Running_VirtualAGC">
           <td align="center" valign="middle"><img alt=""
               src="greenCheckmark.png" height="75" width="72"><br>
           </td>
-          <td align="center" valign="middle"><big><big><b>This works!</b></big></big><br>
-          </td>
+          <td align="center" valign="middle"><big><big><b>This works!<br>
+                </b><small><small><small><i>Last verified: 2016-11-23</i></small></small></small><br>
+              </big></big> </td>
         </tr>
       </tbody>
     </table>
@@ -1254,6 +1287,7 @@ href="file:///home/rburkey/git/virtualagc-web/download.html#Running_VirtualAGC">
 
 
 
+
         Within your <span style="font-weight: bold;">Msys</span> home
         directory, unpack the download file, 'cd' into the directory it
         creates.&nbsp; Do "mkdir /usr/local", and run the command "make
@@ -1261,6 +1295,7 @@ href="file:///home/rburkey/git/virtualagc-web/download.html#Running_VirtualAGC">
         <span style="font-weight: bold;">Msys</span> will probably
         correspond to something like c:\mingw\msys\1.0\ in your Windows
         filesystem.) &nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
+
 
 
 
@@ -1350,22 +1385,18 @@ href="file:///home/rburkey/git/virtualagc-web/download.html#Running_VirtualAGC">
       </li>
       <li>Do "cd virtualagc".<br>
       </li>
-      <li>Build it: "make WIN32=yes".&nbsp; <br>
+      <li>Build it: "make WIN32=yes install" or "make WIN32=yes clean
+        install".&nbsp; <br>
       </li>
     </ol>
-    The software build is in the following subdirectory of whatever
-    directory you stored the Virtual AGC source code downloaded from
-    GitHub:<br>
-    <blockquote><i>AbsolutePathToSourceCodeDirectory</i>\VirtualAGC\temp\lVirtualAGC\<br>
-    </blockquote>
-    What you want to do is to make a Desktop icon for a program launcher
-    that uses the following items in that folder:<br>
+    This process creates a Desktop launcher for Virtual AGC (actually,
+    it's just a batch file on your Desktop), and you can run Virtual AGC
+    from that launcher.<br>
+    <br>
+    You can "uninstall" simply by removing the desktop icon and
+    %HOMEPATH%<i></i>\VirtualAGC, and whatever source-folder you
+    downloaded from GitHub.<br>
     <ul>
-      <li>Executable: bin\VirtualAGC.exe</li>
-      <li>Working directory: Resources</li>
-      <li>Icon: Unfortunately, I don't have one that's compatible with
-        Windows just yet ... so don't worry about it for now.<br>
-      </li>
     </ul>
     <p> </p>
     <h3><a name="iPhone"></a>iPhone</h3>
@@ -1475,7 +1506,7 @@ href="file:///home/rburkey/git/virtualagc-web/download.html#Running_VirtualAGC">
     <hr style="width: 100%; height: 2px;">
     <center><i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2016-11-22.<br>
+          2016-11-23.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
