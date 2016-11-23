@@ -640,14 +640,21 @@ else
 	-mkdir ~/VirtualAGC
 	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* ~/VirtualAGC
 ifdef SOLARIS
+	@echo "#!/bin/sh" >$(iTMP)
+	@echo "export LD_LIBRARY_PATH=/opt/csw/lib" >>$(iTMP)
+	@echo "cd ~/VirtualAGC/Resources" >>$(iTMP)
+	@echo "../bin/VirtualAGC &" >>$(iTMP)
+	chmod +x $(iTMP)
+	mv $(iTMP) $$HOME/Desktop/VirtualAGC
 	@echo ""
 	@echo "================================================================"
-	@echo "We cannot create a Virtual AGC desktop shortcut.  For whatever"
-	@echo "reason, Solaris desktop shortcuts have no way to set the working"
-	@echo "directory, so if we made shortcut, it wouldn't work. Run Virtual"
-	@echo "AGC from a command line as follows:"
-	@echo "  cd VirtualAGC/Resources"
-	@echo "  ../bin/VirtualAGC"
+	@echo "Run Virtual AGC from its desktop launcher.  (You can change the"
+	@echo "icon associated with the launcher by right-click, Properties, and"
+	@echo "selecting ~/VirtualAGC/Resources/ApolloPatch2-transparent.png.)"
+	@echo "If given the choice between \"Run\" and \"Run in Terminal\", choose"
+	@echo "\"Run\".  Or else, run Virtual AGC from a command-line as follows:"
+	@echo "  cd ~/VirtualAGC/Resources"
+	@echo "  ../bin//VirtualAGC"
 	@echo "================================================================"
 else
 	@echo "[Desktop Entry]" >$(iTMP)
@@ -665,7 +672,7 @@ else
 	@echo "================================================================"
 	@echo "Run Virtual AGC from its desktop icon."
 	@echo "Or else, run Virtual AGC from a command-line as follows:"
-	@echo "  cd VirtualAGC/Resources"
+	@echo "  cd ~/VirtualAGC/Resources"
 	@echo "  ../bin//VirtualAGC"
 	@echo "================================================================"
 endif
