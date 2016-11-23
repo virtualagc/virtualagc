@@ -612,7 +612,7 @@ ifndef NOGUI
 	cd yaDEDA && ./autogen.sh --prefix=$(PREFIX)
 endif
 
-TMP:=temp.virtualagc
+iTMP:=temp.virtualagc
 .PHONY: install
 install: all
 ifdef MACOSX
@@ -624,7 +624,7 @@ ifdef WIN32
 	@echo "You might want to make a launcher icon on your Desktop that uses:"
 	@echo "  1. Executable c:\Program Files\VirtualAGC\bin\VirtualAGC.exe"
 	@echo "  2. Working directory c:\Program Files\VirtualAGC\Resources"
-	@echo "  3. Icon c:\Program Files\VirtualAGC\Resources\ApolloPatch2.png"
+	@echo "  3. Icon c:\Program Files\VirtualAGC\Resources\ApolloPatch2-transparent.ico"
 else
 	# Create installation directory.
 	-mkdir ~/VirtualAGC
@@ -634,16 +634,16 @@ ifdef SOLARIS
 	@echo "desktop icons have no way to set the working directory, so if we made an" 
 	@echo "icon, it wouldn't work."
 else
-	@echo "[Desktop Entry]" >$(TMP)
-	@echo "Encoding=UTF-8" >>$(TMP)
-	@echo "Name=VirtualAGC" >>$(TMP)
-	@echo "Comment=Virtual AGC GUI Application" >>$(TMP)
-	@echo "Terminal=false" >>$(TMP)
-	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(TMP)
-	@echo "Type=Application" >>$(TMP)
-	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(TMP)
-	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(TMP)
-	mv $(TMP) $$HOME/Desktop/VirtualAGC.desktop
+	@echo "[Desktop Entry]" >$(iTMP)
+	@echo "Encoding=UTF-8" >>$(iTMP)
+	@echo "Name=VirtualAGC" >>$(iTMP)
+	@echo "Comment=Virtual AGC GUI Application" >>$(iTMP)
+	@echo "Terminal=false" >>$(iTMP)
+	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(iTMP)
+	@echo "Type=Application" >>$(iTMP)
+	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(iTMP)
+	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(iTMP)
+	mv $(iTMP) $$HOME/Desktop/VirtualAGC.desktop
 endif
 endif
 endif
