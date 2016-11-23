@@ -517,7 +517,7 @@ LUNABIT         =               BIT12
 
 # BIT 11 FLAG 3 (L)
 NODOPO7        =               049D                    #       SYSTEM TESTS             SYSTEM TESTS
-NOPO7BIT       =               BIT11                   #       NOT ALLOWED              ALLOWED
+NOP07BIT       =               BIT11                   #       NOT ALLOWED              ALLOWED
 
 # BIT 10 FLAG 3 (S)
 
