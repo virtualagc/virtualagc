@@ -613,7 +613,7 @@ ifndef NOGUI
 endif
 
 iTMP:=temp.virtualagc
-WINPATH=$(subst \,/,$(USERPROFILE))/VirtualAGC
+WINHOME=$(subst \,/,$(USERPROFILE))
 .PHONY: install
 install: all
 ifdef MACOSX
@@ -621,16 +621,14 @@ ifdef MACOSX
 	@echo "Run Virtual AGC from its desktop icon."
 else
 ifdef WIN32
-	@echo WINPATH=$(WINPATH)
-	-mkdir "$(WINPATH)"
-	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* "$(WINPATH)"
+	-mkdir "$(WINHOME)/VirtualAGC"
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* "$(WINHOME)/VirtualAGC"
+	@echo "cd %HOMEPATH%\\VirtualAGC\\Resources" >$(iTMP)
+	@echo "..\\bin\\VirtualAGC" >>$(iTMP)
+	mv $(iTMP) $(WINHOME)/Desktop/VirtualAGC.bat
 	@echo ""
 	@echo "================================================================"
-	@echo "You might want to make a launcher icon on your Desktop that uses"
-	@echo "the following stuff from the $(USERPROFILE)\\VirtualAGC folder:"
-	@echo "  1. Executable: bin\VirtualAGC.exe"
-	@echo "  2. Working directory: Resources"
-	@echo "  3. Icon: Resources\ApolloPatch2-transparent.ico"
+	@echo "Run Virtual AGC from its desktop launcher."
 	@echo "Or else, run Virtual AGC from a Windows command-line as follows:"
 	@echo "  cd VirtualAGC\\Resources"
 	@echo "  ..\\bin\\VirtualAGC"
