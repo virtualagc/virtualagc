@@ -12,6 +12,7 @@
 #               2016-11-19 JL   Transcribed pages 170-180.
 #               2016-11-20 JL   Transcribed pages 181-183.
 #               2016-11-22 JL   Transcribed pages 184-187.
+#               2016-11-23 JL   Transcribed pages 188-195.
 
 # Annotations:
 #
@@ -1796,34 +1797,382 @@ R144715 LOCATION FIELD.
 # Page 188
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  36        PAGE  36
 
+P145185 LOOK UP THE SUBROUTINE NAME IN THE TAPE DIRECTORY AND THE AD HOC DIRECTORY SIMULTANEOUSLY.
+
+ 14519  SUB LUKUP  NA           Z,AU1         Z,X4          NOT IN DIR          COMPARE AD HOC DIRECTORY WITH TAPE DIR.
+ 14521             NA           N,AU1         AFIELD        NEXT DSUB           COMPARE WITH SUBROUTINE BEING CALLED.
+ 14523             SM           HEALTH        BIT 13        HEALTH              CUSS MULTIPLE CALLS FROM ONE PROGRAM.
+ 14525             TX           CHAR 5        -             ALF MASK
+ 14526             NA, ALF MASK COMMON +3     5,1           C,+2                BRANCH IF HEAD DESIGNATIONS CONFLICT.
+ 14528  BAD SBCAL  TS           ZERO          Z,X2          SUBRO LOC           SHOW THAT THERE IS NO BASE ADDRESS.
+ 1453              SM           HEALTH        BIT 19        HEALTH
+ 14531             TS           ZERO          Z,X2          SUBRO LOC
+
+ 14532  NEXT DSUB  EBA          Z,X5          ONE           Z,X6
+ 14533             S, ETS       6,0           ZX +5         C,+1                ADVANCE ONE PLACE IN AD HOC DIRECTORY.
+
+ 14535  MOR SUBS Q SWS,THREAD10 4,1           0             Z,X4                ADVANCE ONE PLACE IN TAPE DIRECTORY.
+ 14537             NA           Z,X4          L END THR     C,+2                BRANCH IF THERE ARE MORE SUBS OR PROGS.
+ 14539             TS, BIT11    ONES          HEALTH        BAD SB CAL          CUSS UNRECOGNIZED SUBROUTINE NAME.
+
+ 14541             SSL, BIT46R  4,1           10            MOR SUBS Q          "BRANCH" IF PROGRAM, NOT SUBROUTINE.
+ 14543             TS           N,X5          Z,AU1         SUB LUKUP           FETCH THREAD FROM AD HOC DIRECTORY.
+
+ 14545  NOT IN DIR NA           N,X4          AFIELD        MOR SUBS Q          COMPARE TAPE DIRECTORY SUBRO WITH CALL.
+ 14547             SWS, B22T32  Z,X4          16,L          HEALTH              THREAD HEALTH TO TAPE FILE DIRECTORY.
+ 14549             SWS, BIT13   4,1           35,L          HEALTH              MAYBE CUSS MULTIPLE CALLS FROM 1 PROG.
+ 14551             SM           4,1           ONE           4,1                 SHOW THAT THIS SUBROUTINE IS CALLED.
+ 14553             NA           SYM PLACE     END SY TAB    C,+3                BRANCH IF THERE'S ROOM FOR AD HOC ENTRY.
+ 14555             SM           HEALTH        BIT 18        HEALTH              CUSS NO ROOM IN SYM TAB FOR AD HOC SUB.
+ 14557             TS           ZERO          Z,X2          SUBRO LOC
+
+ 14558             SM           COMMON +3     Z,X4          COMMON
+ 14559             SM           COMMON        B24 B32       COMMON              CREATE WORD 1 OF AD HOC SUBRO DIRECTORY.
+ 14561             TS           L PROG FIL    Z,X3          C,+2           C
+ 14562             SSL, ONE     3,1           23            C,+2                A PROG WHO HAD NO SUBS HAS ONLY ACTIVES.
+ 14564             TX           L END THR     -             Z,X2           S
+ 14565  ACTIV SUB  TS           BIT 31        COMMON +2     SUBRO DIR      C    PREPARE ACTIVE-SUBROUTINE BIT.
+ 145662            LA, CHAR7    ASTRISKS      OP FIELD      C,-1                OP CODE "SUBRO*" DEMANDS PRINTING.
 
 # Page 189
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  37        PAGE  37
 
+P145665 SCAN PROGRAM'S TREE OF SUBROUTINE THREADS TO FIND ACTIVE SUBROUTINES.
+
+ 14567             SWS,THREAD11 3,1           24            Z,X3                POINT TO FIRST SUBRO THREAD WORD.
+ 14569  THREAD 2Q  SWS,THREAD10 N,X3          24            Z,X2                FOLLOW THREAD AND POINT TO A SUBROUTINE.
+ 14571             SSL, ONE     N,X3          24            SUB THRD Q     C    TEST OBSOLETING-THREAD BIT.
+ 14573             NA, BIT13    3,0           ZERO          ACTIV SUB           TEST LAST-THREAD-IN-TREE BIT.
+
+ 14575             SWS,THREAD10 N,X3          12            Z,X2
+ 14576             SSL, ONE     N,X3          12            SUB THRD Q     C
+ 14578             SSL, ONE     N,X3          23            ACTIV SUB -1   C
+ 14579             NA, BIT37    3,0           ONES          THREAD 1Q           DITTO FOR THIRD THREAD IN THREAD WORD.
+
+ 14581             SS           N,X3          THREAD 10     Z,X2
+ 14582             SSL, ONE     N,X3          0             SUB THRD Q     C
+ 14583             TS           BIT 31        COMMON +2     SUBRO DIR      C    DITTO FOR FOURTH THREAD IN THREAD WORD.
+
+ 14585  THREAD 1Q  SS           N,X3          THREAD 11     Z,X3                FOLLOW THREAD TO THE NEXT THREAD WORD.
+ 14587             SWS,THREAD10 N,X3          36            Z,X2
+ 14588             SSL, ONE     N,X3          36            SUB THRD Q     C    TEST OBSOLETING BIT OF FIRST THREAD.
+ 1459              TS           -             -             THREAD 2Q           (THERE'S ALWAYS A 2ND THD AFTER A 1ST).
+
+ 14592  SUB THRD Q TS           ZERO          COMMON +2     C,+2           C    ENTER HERE ON INACTIVE SUBRO.
+ 14594             TX           BIT 31        -             COMMON +2      C    ENTER HERE ON ACTIVE SUBROUTINE.
+ 14596             NA           Z,X2          Z,X4          N,SC,1         C    EXIT IF NOT THE SUBRO NOW BEING CALLED.
+
+R145975 STORE FINISHED ENTRY IN AD HOC SUBROUTINE DIRECTORY AND PROCESS LOCATION FIELD, CHECKING CONFLICT OF 1ST LOC.
+
+ 14599  SUBRO DIR  SM           COMMON        COMMON +2     COMMON         C
+ 145992            NA, BIT8     SWITCH        ONES          C,+2           C    BRANCH IF NOT FREEZING SUBROUTINES.
+ 145994            TS, CHAR1    R COLUMN 1    CARDNO WD     XMIT RTRN           OTHERWISE MAKE SUBRO CARDS INTO REMARKS.
+ 145998            EBA          Z,X6          ZERO          Z,X3           C
+ 1460              TS           Z,CSC         Z,SC          NEW UNSYM      C    STORE AD HOC SUBROUTINE ENTRY IN SYMTAB.
+ 14602             TS, CHAR1    END ERR M +1  SYM OR NOT    CLR COMM 2     C    RESTORE SYMBOL SUROUTINE.
+
+ 14604  SUBRO LOC  EBA          Z,X2          ZERO          LOC LOC
+ 14605             WD           OK L TYPE     ONE           OK L TYPE           MODIFY LOCATION SUBROUTINE SO AS NOT TO
+ 14607             TS, L STYPE  TYPE F        SWITCH        REG INCON      C    RESERVE ANY LOCATIONS, WHILE CHECKING.
+ 14609             WA           OK L TYPE     ONE           OK L TYPE
+ 1461              LA           LOC LOC       ZERO          SUBRO XIT
+ 146105            LA           ONES          LOC CTR       REG INCON +1        EXIT NOW IF NO GOOD LOCATION.
+ 14611             EBS          LOC LOC       ONE           Z,X2                POINT TO SUBROUTINE DIRECTORY ENTRY.
+ 146115            SM           N,X2          BIT 23        N,X2,1              SHOW THAT THERE IS A BASE ADDRESS.
+ 14613             SWS, CAC2    LOC STATE     16,L          N,X2                STORE BASE ADDRESS IN AD HOC SUBRO NTRY.
+ 14615  SUBRO XIT  TS           LOC VALUE     LOC CTR       REG INCON +1
+
+
+
+R14616  TRIVIAL SUBROUTINE TO INCREMENT LOC CTR UNLESS IT IS BAD.
+
+ 14617  INCR LCTR  LA           ONES          LOC CTR       N,SC,1         C
+ 14618             WA           LOC CTR       ONE           LOC CTR        S
 
 # Page 190
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  38        PAGE  38
 
+P14619             SUBROUTINE IN PASS 1 TO BREAK DOWN THE ADDRESS FIELD OF A MERGE CONTROL CARD, THAT IS, WITH AN OP
+R1463   CODE OF "CARDNO" OR "DELETE".  USES THE SENTENCE READER.  SETS UP FIELDCOD AND CNLIMIT AS FOLLOWS:
+
+R1465   FIELD ALL BLANK         FIELDCOD=0
+R1466   "THROUGH" WITH NUMBER   FIELDCOD=B1, CNLIMIT=NUMBER
+R14661  "THRU"    WITH NUMBER   FIELDCOD=B1, CNLIMIT=NUMBER
+R14663  "TO"      WITH NUMBER   FIELDCOD=B2, CNLIMIT=NUMBER
+R1467   "WITH"    WITH NUMBER   FIELDCOD=B3, CNLIMIT=NUMBER
+
+R1468   THE NUMBER IN THE ADDRESS FIELD MAY BE "SEQBREAK" OR "SEQBRK" CAUSING CNLIMIT TO BECOME ALF 10000000, OR UP TO 6
+R1470   DECIMAL DIGITS WITH AN OPTIONAL DECIMAL POINT.  IF THE POINT IS PRESENT, THERE MAY BE UP TO FOUR DIGITS TO ITS
+R1472   LEFT AND UP TO TWO DIGITS ON ITS RIGHT.  IF THE POINT IS ABSENT AND THERE ARE FOUR DIGITS OR LESS, THE POINT IS
+R1474   ASSUMED TO BE AT THEIR IMMEDIATE RIGHT.  IF THE POINT IS ABSENT AND THERE ARE FIVE OR SIX DIGITS, THE POINT IS
+R1476   ASSUMED TO FOLLOW THE FOURTH DIGIT.  AT LEAST ONE BLANK OR OTHER TERMINATOR MUST SEPARATE THE TWO SUBFIELDS, BUT
+R1478   NO IMBEDDED BLANKS ARE ALLOWED IN EITHER SUBFIELD.  IF ANY OF THESE RULES ARE VIOLATED OR THERE IS A THIRD
+R1480   SUBFIELD, FIELDCOD IS SET TO ALL ONES AND THE CARD IS IGNORED AND CUSSED AT FOR A MEANINGLESS ADDRESS FIELD.
+R1482   THE NUMBER SET UP IN CNLIMIT IS STANDARDIZED TO SIX DIGITS THUS: ALF 0NNNNNN0, WITH A POINT ASSUMED AFTER CHAR5.
+
+ 1484   MCCD ADRF  TX           MON WAA       -             Z,X6
+ 1485              TN           REAL CARD +3  2             6,2
+ 1486              SM           CHAR1         Z,SH          6,4                 SLYLY HIDE RETURN ADDRESS.
+ 1488              TS           -             -             MON SENTR           SET UP AND CALL SENTENCE READER.
+ 1491              NA           6,16          BLANKS        C,+3
+ 1492              NA, CHAR1    6,18          ONES          BAD MCCD            CUSS IF CONTAINS TERMINATOR ONLY.
+ 1494              TS           ZERO          FIELD COD     MCAF DONE           EXIT IF ADDRESS FIELD ALL BLANK.
+
+ 1496              NA, CHAR1    6,18          BLANKS        BAD MCCD
+ 1497              NA, CHAR1    6,21          ONES          BAD MCCD            CUSS UNWANTED TERMINATORS.
+ 1499              NA           6,16          W THROUGH     C,+2
+ 1500              TS           BIT 1         FIELD COD     MCCD NUMB
+ 1501              NA           6,16          W THRU        C,+2
+ 1502              TS           BIT 1         FIELD COD     MCCD NUMB           SIGNIFY THROUGH AND GO TO FIND NUMBER.
+
+ 15032             NA           6,16          W WITH        C,+2
+ 15034             TS           BIT 3         FIELD COD     MCCD NUMB           SIGNIFY WITH.
+
+ 1504              NA           6,16          W TO          BAD MCCD
+ 1505              TX           BIT 2         -             FIELD COD           SIGNIFY TO.
+
+ 1507   MCCD NUMB  NA           6,19          W SEQBRAK     C,+2
+ 1508              TS           BIT 6         CN LIMIT      MCAF DONE
+ 15092             NA           6,19          W SEQBRK      C,+2
+ 15094             TS           BIT 6         CN LIMIT      MCAF DONE           EXIT WHEN NUMBER IS SEQUENCE BREAK.
+
+ 1510              TX           CHAR 6        -             ALF MASK
+ 1511              LA           ONES          6,19          BAD MCCD
+ 1512              LA, ALF MASK 6,21          ZERO          BAD MCCD            BAD EXIT WHEN NUMBER IS MISSING.
+ 1514              TX           BIT 46R       -             Z,S3                COUNTER OF DIGITS BEFORE POINT.
+ 1516              TX           ZERO          -             CN LIMIT
+ 1517              LA, ALF MASK 6,21          SPEC MAG      NEX CN DIG +1       LENGTH OF NUMBER MAY BE UP TO SEVEN.
+
+ 1519   BAD MCCD   TS           ONES          FIELD COD     MCAF DONE           SIGNIFY MEANINGLESS FIELD AND EXIT.
 
 # Page 191
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  39        PAGE  39
 
+P1521   LOOP TO ANALYZE CARD NUMBER IN ADDRESS FIELD.
+
+ 1522   NEX CN DIG SWS, ONES    6,19          A,1,L         6,19                MOVE NEXT CHARACTER INTO POSITION.
+ 1524              LA, CHAR1    TEN C1        6,19          PT BLANK            BRANCH IF NOT A DIGIT.
+ 1526              LA           Z,S3,1        ZERO          FRAC CN +2          BRANCH IF THIS THE FIFTH DIGIT.
+
+ 1528              SWS, ONES    CN LIMIT      A,1,L         CN LIMIT            MOVE UP PREVIOUS DIGITS.
+ 1530              SWS, CHAR5   6,19          A,4           CN LIMIT            PLANT A BEFORE-POINT DIGIT.
+ 1532              TS           -             -             NEX CN DIG
+
+R1533   IF THE FIFTH OR EARLIER CARD IS NOT A DIGIT, IT MUST BE A DECIMAL POINT OR A BLANK.
+
+ 1535   PT BLANK   NA, CHAR1    6,19          POINT C1      END MCCDA
+
+ 1536   FRAC CN    SWS, ONES    6,19          A,1,L         6,19
+ 1537              LA, CHAR1    TEN C1        6,19          END MCCDA
+ 1538              SWS, ALFMASK 6,19          A,5           CN LIMIT            PLANT FIRST DIGIT AFTER POINT.
+
+ 1540              SWS, ONES    6,19          A,1,L         6,19
+ 1541              LA, CHAR1    TEN C1        6,19          END MCCDA
+ 1542              SWS, CHAR7   6,19          A,6           CN LIMIT            PLANT SECOND DIGIT AFTER POINT.
+ 1544              SWS, ONES    6,19          A,1,L         6,19
+
+ 1545   END MCCDA  NA, CHAR1    6,19          BLANKS        BAD MCCD            BAD EXIT IF QUEER CHARACTER.
+ 1547              NA           6,22          ONES          BAD MCCD            BAD EXIT IF THIRD SUBFIELD.
+ 1549              LA, C2T7     A999999       CN LIMIT      MCCD NUMB +1        CHECK FOR 999999 SEQUENCE BREAK.
+ 1551   MCAF DONE  TX           6,4           -             Z,SC
 
 # Page 192
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  40        PAGE  40
 
+P1567              SUBROUTINE IN PASS 1 TO GET A REAL CARD.  NORMALLY PERFORMS CARD NUMBER CHECKING.  RESPONSE TO YUL
+R1569   DIRECTOR OR MONITOR CARD (END OF FILE SITUATIONS) IS TO PEEK ONLY.
+R1575   RETURNS TO L+1 ON END OF FILE, OR TO L+2 OTHERWISE, WITH CARD IMAGE IN REAL CARD.
+
+
+
+ 15762  GET CARD   WA           SOURCE        ONE           Z,X4
+ 1577              TS           Z,SH          Z,X5          MON PEEK       C    SAVE RETURN AND PEEK AT CARD.
+ 1579              NA, CHAR1    4,0           Y COLUMN 1    ENDJOB Q            BRANCH IF NOT A YUL DIRECTOR CARD.
+
+ 1581              SWS, BIT4    Z,SC,1        19            SWITCH              SHOW THAT ANOTHER TASK FOLLOWS.
+
+ 1603   ENDJOB Q   NA, CHAR1    4,0           ASTRISKS      C,+2                BRANCH IF NOT ANY KIND OF END OF FILE.
+ 1605              TS           BIT 6         REAL CDNO     N,X5                END OF FILE EXIT AFTER PEEK AT MON CARD.
+
+ 16062             NA, BIT11    SWITCH        ZERO          5,0                 SEE NO INPUT IF REPRINTING.
+
+ 1607              S, MON READ  REAL CARD     -              -
+ 1608              NA, CHAR8    REAL CARD     BLANKS        C,+2
+ 1609              TS, CHAR8    ONE           REAL CARD     ACCEPT CD           INSERT UPSPACE 1 FOR BLANK.
+
+ 16102             NA, CHAR8    REAL CARD     BIT 43        C,+2
+ 16104             TS, CHAR8    TWO           REAL CARD     ACCEPT CD           ASSUME MINUS IS A FAT-FINGERING OF 2.
+
+ 1611              LA, D12      REAL CARD     NINE          C,+2
+ 1612              TS, CHAR8    BIT 45        REAL CARD     ACCEPT CD           INSERT FORM-SKIP FOR NON-NUMERIC.
+
+ 1614              SS           ZERO          B43T44        REAL CARD           CLEAR ZONE BITS OF VERTICAL FORMAT.
+ 1618   ACCEPT CD  SWS, BIT 44  SWITCH        42            REAL CARD           MARK ALL CARDS ENTERING DURING MERGING.
+ 1620              LA, CHAR1    REAL CARD     BLANKS        C,+4                BRANCH IF COLUMN 1 WAS 00-15.
+ 1622              LA, B3T6     REAL CARD     ZERO          C,+2                BLOT OUT 20, 40, OR 60.
+ 1624              LA, B3T6     REAL CARD     ALF 9 C1      C,+3                ALLOW ANY LETTER IN COLUMN 1.
+ 1626              TS, CHAR1    BLOTS         REAL CARD     C,+2                BLOT OUT UNDESIRABLE COLUMN 1 CONTENTS.
+ 1628              LA, CHAR1    REAL CARD     (INSTR)       C,-1                ALLOW 13, 14, AND 15.
+ 1630              TX           ZERO          -             RL CD HLTH
 
 # Page 193
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  41        PAGE  41
 
+P1639   CARD NUMBER SEQUENCE CHECKING AND SEQUENCE BREAK ANALYSIS.
+
+ 1640              SWE,YYNNYYYY REAL CARD     A,3           CARD NO             ISOLATE CARD NO. FOR SEQ. BRK. ANALYSIS.
+ 1642              TS           SIX           Z,X4          CDNO CHEK +1
+
+ 1643   CDNO CHEK  SWS, ONES    CARD NO       A,1           CARD NO
+ 1644              LA, CHAR2    CARD NO       ALF 9 C2      C,+3                BRANCH IF CHARACTER IS NUMERIC.
+ 1646              NA, CHAR2    CARD NO       BLANKS        SEQ BREAK -1        BRANCH IF CHARACTER IS NOT NUM OR BLANK.
+ 1648              SS           ZERO          CHAR2         CARD NO             SUBSTITUTE ZERO FOR BLANK.
+ 1650              NA           Z,X4,1        ONE           CDNO CHEK
+
+ 1651              LA           A999999       CARD NO       SEQ BREAK           CARD NUMBER 999999 IS A SEQUENCE BREAK.
+
+ 16522             LA, D12      NINE          REAL CARD     TEST ORDR           DO NOT TEST COLUMN 1 OF RIGHT PRINT.
+ 1653              NA, CHAR1    REAL CARD     L COLUMN 1    RC NOT LOG          A LOG CARD IS AN AUTOMATIC SEQ. BREAK.
+
+ 16542             TS, C2T7     BLANKS        REAL CARD     SEQ BREAK           REMOVE CONFUSING INFO FROM LOG CARD.
+
+ 16544             LA, CHAR1    REAL CARD     EQUALS C1     SEQ BREAK           ALLOW FOR "LOG" IN COL 2-7 OF ACCEPTOR.
+ 16546             TS, C2T7     ZERO          REAL CARD     CDNO CHEK -2        SHOW ILLEGAL NUMBER FIELD BY ZERO.
+ 16548             NA, C2T7     REAL CARD     W SQBRMIN     C,-2                "SEQBRK" IS ONLY NON-NUMERIC ALLOWED.
+
+ 1655   SEQ BREAK  SM           REAL CARD     BIT 43        REAL CARD           INSERT SEQUENCE BREAK BIT IN CARD.
+ 1657              TS           BIT 6         REAL CDNO     5,1                 SET UP CRITERION AFTER SEQUENCE BREAK.
+
+ 16581  RC NOT LOG NA, CHAR1    REAL CARD     T COLUMN 1    C,+2                BRANCH IF NOT TINS (TUCK IN NEW SECTION)
+ 16583             TS, C2T7     BLANKS        REAL CARD     SEQ BREAK           ...WHICH IS AN INCIPIENT LOG CARD.
+
+ 16585             NA, CHAR1    REAL CARD     BLANKS        TEST ORDR
+ 16587             NA, C2T7     REAL CARD +2  W MODIFY      TEST ORDR
+ 16588             WA           SOURCE        ONE           Z,X4
+ 16589             TS, C2T7     BLANKS        REAL CARD     SEQ BREAK           OP CODE "MODIFY" IS AUTOMATIC SEQ. BRK.
+
+ 1659   TEST ORDR  LA, C2T7     CARD NO       REAL CDNO     DISORDER
+
+ 1660              TX, C2T7     CARD NO       -             REAL CARD           KEEP NORMAL FORM OF CARD NUMBER ON TAPE.
+ 1662              TS           CARD NO       REAL CDNO     5,1                 SET UP NEXT CRITERION.
+
+ 1664   DISORDER   TS           BIT 7         RL CD HLTH    TEST ORDR +1
 
 # Page 194
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  42        PAGE  42
 
+P1665              SUBROUTINE IN PASS 1 TO GET AN INPUT CARD IMAGE FROM TAPE VIA RD1.  TO INDICATE EOF ACTION, ENTRY IS
+R1667              TS           L EOF EXIT    Z,S3          GET TAPE       C    (L EOF EXIT MIGHT WELL BE Z,SC,1).
+R1669   IGNORES END SYPT ENTIRELY, RETURNS EOF-WISE ON END SYLT, RETURNS EOF-WISE ON END BYPT AND ANY SUBSEQUENT CALLS.
+R1671   LOOKS FOR A BUFFERFUL NO SOONER THAN IT NEEDS IT, AND FREES A BUFFER, WAKING PARAPROGRAM RD1,
+R1673   AS SOON AS THE LAST CARD HAS BEEN DELIVERED.  CHECKS FOR SEQUENCE BREAK OR SEQUENCE ERROR.
+
+
+
+ 1675   GET TAPE   TX           N,CSC,2       -             GET TAPE       C    INITIAL, OR BUFFER-SEEKING, MODE.
+ 1677              TS           INB PLACE     Z,X4          MOVE TPIN      C
+
+ 1679              TS           Z,SC          Z,AU1         CSC SLEEP      S
+ 1681              LA           N,R5          ZERO          C,-1           C    GO TO SLEEP IF NO INPUT RECORD READY.
+ 1683              TX           N,R5          -             Z,X4           C
+ 1684              LA, D8       4,0           ZERO          IN CHECK       C    BRANCH IF RECORD LACKS EOF BANNER BITS.
+ 1685              TS           ZERO          C,+0          TPIN EXIT -2   C    DISMISS END SYLT BUFFER, SET FOR EOFRI.
+ 16852             TX           EOR OR EOF +3 -             GET TAPE       C    DISMISS EOFRI BUFFER, SET TRIVIAL EXIT.
+
+ 1686   EOR OR EOF TS           N,R5          Z,CSC         C,+1           S
+ 1687              TS           ZERO          N,R5,1        FREE IN SV     C    DEMOTE OR FREE BUFFER.
+ 1688              SS           ZERO          BIT 46 R      Z,R5           S
+ 1689              TS           Z,S3          Z,SC          MON WAKE       C    REMOVE BUFFER FROM INPUT LIST, WAKE RD1.
+
+ 1690   IN CHECK   LA           N,X4,1        CHAR 5        MOVE TPIN +1   C    BR IF NO COMP NAME: MUST BE XFER INPUT.
+ 1691              TX           C1T4          -             CAC N          C    SYNTHETIC MASK FOR INPUT RECD COUNTER.
+ 1692              NA           N,X4          INPUT NAM     C,+2           C    BRANCH IF STARTING PROGRAM OR NEW SUBRO.
+ 1693              TS           N,X4,1        INPUT NAM     C,+3           C
+ 1694              NA           HEALTH        ZERO          DISASTER       C    LAST CARD SHOULD HAVE BEEN "END OF".
+ 1695              TS, CACN     ZERO          INRECNT       C,-2           C    RESET COUNT OF RECDS IN PROG OR SUBRO.
+ 1696              LA, CACN     4,0           ZERO          MOVE TPIN      C    ACCEPT UN-NUMBERED (OLD) RECORDS.
+ 1697              WA           INRECNT       BIT 15        INRECNT        C
+ 1698              NA, CACN     4,0           INRECNT       DISASTER       C    BRANCH IF INCOMING RECORD NO. IS WRONG.
+ 1699   MOVE TPIN  TS           Z,SC          INB PLACE     UNSQUEEZ       S    SHIFT TO SEQUENCE MODE TO RESTORE BLANK.
+
+ 16994             WA           GET TAPE +1   TWO           GET TAPE       C    SET SWITCH FOR TRANSFERRED INPUT.
+ 16996             TN           N,X4,10       11            TAPE CARD -1   C    INPUT FROM DISC IS NOT SQUEEZED.
+
+ 16998             TS           B5 B8 B10     CACN          C,+2           C
+ 169985            SWS, BIT44   Z,CSC,1       16            TAPE CARD      C    CLEAR ASTERISK IF FETCHING MAIN INPUT,
+ 16999             NA, CACN     SWITCH        B5 Z8 B10     C,-1           C    FREEZING SUBROUTINES, OR NOT REVISING.
+ 1700              TX           ZERO          -             TP CD HLTH     C
+ 1701              NA, BIT 43   TAPE CARD     ONES          C,+2           C    BRANCH IF NO SEQUENCE BREAK.
+ 1703              TS           BIT 6         TAPE CDNO     TEST EOR       C    SET UP POST-BREAK CRITERION.
+
+ 1705              LA, C2T7     TAPE CARD     TAPE CDNO     C,+3           C    BRANCH IF SEQUENCE ERROR.
+ 1707              TX           ZERO          -             TAPE CDNO      C
+ 1708              TS,C2T7      TAPE CARD     TAPE CDNO     TEST EOR       C    SET UP NEW CRITERION.
+ 1710              TS           BIT 7         TP CD HLTH    C,-2           C    PUT SEQUENCE ERROR BIT IN HEALTH.
+ 1712   TEST EOR   NA           4,2           EOR           TPIN EXIT      C    BRANCH IF NOT END OF RECORD.
+
+ 1714              TX           Z,SC          -             Z,S3           C    SET UP END-OF-RECORD EXIT.
+ 1715              TS           C,+1          GET TAPE      EOR OR EOF     C    SET UP BUFFER-SEEKING MODE.
+ 1717              TX           N,CSC,2       -             GET TAPE       C
+ 1719   TPIN EXIT  TX           Z,X4          -             INB PLACE           MARK PLACE IN BUFFER AND EXIT.
 
 # Page 195
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  43        PAGE  43
 
+P172001 PROCEDURE TO RECONSTITUTE CARD IMAGES BY RESTORING BLANK WORDS.  A CARD IMAGE IS REPRESENTED BY A CODE WORD FOL-
+R172003 LOWED BY THE NON-BLANK WORDS IN THE CARD.  BITS 48-39 OF THE CODE WORD CORRESPOND TO THE 10 WORDS OF THE CARD,
+R172005 1 INDICATING A BLANK WORD AND 0 INDICATING A NON-BLANK WORD TO BE OBTAINED FROM THE CONDENSED RECORD.  THE
+R172007 AVERAGE RUNNING TIME OF A JUMP TABLE "SUBROUTINE" IS 9 MEMORY CYCLES.
+
+ 172008 UNSQUEEZ   TS           N,X4          Z,SH          C,+3           C
+ 17201             SWE, CAC3    L TAP CARD    32            Z,X5
+ 172011            MT           BLANKS        10            N,X6,1
+ 172013            TX           L TAP CARD    -             Z,X6           S
+ 172014            SSL, LOW5    N,X4,1        0             EXPANDER       C
+ 172016            SWE, CAC3    L TAP CARD    16            Z,X6
+ 172017            SSL, LOW5    Z,SH          5             EXPANDER       C
+ 172019            TS           INB PLACE     Z,SC          MOVE TPIN +3   C
+
+ 172021 L TAP CARD CAC          EXPANDER      TAPE CARD +5  TAPE CARD
+
+ 172022            SETLOC,5     1024          B7
+
+ 172023 EXPANDER   MT           N,X4,1        5             N,X6,1
+ 172024            TN           N,X4,4        4             6,1
+ 172025            TX           N,X4,1        -             N,X6           C
+ 172026            TN           N,X4,3        3             6,2
+ 172027            TX           N,X4,1        -             N,X6           C
+ 172028            TS           N,X4,1        6,1           C,+2           C
+ 172029            TX           N,X4,1        -             N,X6           C
+ 17203             TN           N,X4,2        2             6,3
+ 172031            TX           N,X4,1        -             N,X6           C
+ 172032            TS           N,X4,1        6,1           C,+2           C
+ 172033            MT           N,X4,1        3             N,X6,2
+ 172034            TS           N,X4,1        6,2           C,+4           C
+ 172035            TX           N,X4,1        -             N,X6           C
+ 172036            TS           N,X4,1        6,1           C,+2           C
+ 172037            MT           N,X4,1        2             N,X6,4
+ 172038            TX           N,X4,1        -             6,4
+
+ 172039            MT           N,X4,1        4             N,X6,1
+ 17204             TN           N,X4,3        3             6,1
+ 172041            TX           N,X4,1        -             N,X6           C
+ 172042            TN           N,X4,2        2             6,2
+ 172043            TX           N,X4,1        -             N,X6           C
+ 172044            TS           N,X4,1        6,1           C,+2           C
+ 172045            MT           N,X4,1        2             N,X6,3
+ 172046            TX           N,X4,1        -             6,3
+ 172047            MT           N,X4,1        3             N,X6,1
+ 172048            TN           N,X4,2        2             6,1
+ 172049            MT           N,X4,1        2             N,X6,2
+ 17205             TX           N,X4,1        -             6,2
+ 172051            MT           N,X4,1        2             N,X6,1
+ 172052            TX           N,X4,1        -             6,1
+ 172053            TX           N,X4,1        -             N,X6
+ 172054            TX           -             -             -
+
+ 172055            SETLOC,1
+ 172056 EXPANDER   ASSIGN       5,0
 
 # Page 196
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  44        PAGE  44
