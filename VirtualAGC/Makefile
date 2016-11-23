@@ -225,7 +225,7 @@ temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Content
 	for n in ${MISSIONS}; do \
 		sh ./CopyApolloSource.sh $@ $$n ${EXTSW} ${WIN32} ;\
 	done
-	${CP} *.png $@
+	${CP} *.png *.ico $@
 	${CP} ../yaDSKY/src/*.ini $@
 ifeq "${YADSKY_SUFFIX}" ""	
 	${CP} ../yaDSKY/pixmaps $@/pixmaps/yaDSKY
