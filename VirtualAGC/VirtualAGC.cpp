@@ -340,7 +340,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   // in Mac OS X.  The commonality here is the relative relationship
   // of the executables to the data files such as png images.
   ExecutableDirectory = wxStandardPaths::Get().GetExecutablePath().BeforeLast(
-      PATH_DELIMITER);
+  PATH_DELIMITER);
 #ifndef WIN32
   // In FreeBSD, for some reason, the operation above sometimes or always
   // returns a relative path rather than an absolute one.  So we need to convert
@@ -627,8 +627,8 @@ VirtualAGC::AgcFilenameBrowseEvent(wxCommandEvent &event)
               if (wxYES
                   != wxMessageBox(
                       wxT("This source file is in the installation directory.\n"
-                          "Assembling it may overwrite some of Virtual AGC\'s\n"
-                          "distribution files.  Are you sure?"), wxT("Warning"),
+                      L"Assembling it may overwrite some of Virtual AGC\'s\n"
+                      L"distribution files.  Are you sure?"), wxT("Warning"),
                       wxYES_NO | wxICON_QUESTION))
                 goto Done;
             }
@@ -780,8 +780,8 @@ VirtualAGC::AeaFilenameBrowseEvent(wxCommandEvent &event)
               if (wxYES
                   != wxMessageBox(
                       wxT("This source file is in the installation directory.\n"
-                          "Assembling it may overwrite some of Virtual AGC\'s\n"
-                          "distribution files.  Are you sure?"), wxT("Warning"),
+                          L"Assembling it may overwrite some of Virtual AGC\'s\n"
+                          L"distribution files.  Are you sure?"), wxT("Warning"),
                       wxYES_NO | wxICON_QUESTION))
                 goto Done;
             }
@@ -985,14 +985,14 @@ VirtualAGC::CoreSaveEvent(wxCommandEvent &event)
           wxString Pathname = DialogS->GetPath();
           if (!Pathname.AfterLast('.').IsSameAs(wxT("core")))
             wxMessageBox(wxT("Note that you did not add the .core extension.\n"
-                "If you browse for core files later, you will\n"
-                "not see this file as a Core File and will have\n"
-                "to select All Files for it to show up."), wxT("Warning"),
+                L"If you browse for core files later, you will\n"
+                L"not see this file as a Core File and will have\n"
+                L"to select All Files for it to show up."), wxT("Warning"),
                 wxICON_WARNING);
           CoreFilename->SetValue(Pathname);
           wxSetWorkingDirectory(ResourceDirectory);
-          wxCopyFile(CoreFile, Pathname, true );
-          CustomResumeButton->SetValue(true );
+          wxCopyFile(CoreFile, Pathname, true);
+          CustomResumeButton->SetValue(true);
           EnforceConsistency();
         }
       delete DialogS;
@@ -1010,12 +1010,12 @@ void
 VirtualAGC::NoviceButtonEvent(wxCommandEvent &event)
 {
   TEMPTRACE ("17");
-  DeviceAcaCheckbox->SetValue(false );
-  DeviceTelemetryCheckbox->SetValue(false );
-  DeviceAeaCheckbox->SetValue(false );
-  DeviceCpumonCheckbox->SetValue(false );
-  StartupWipeButton->SetValue(true );
-  AgcDebugNormalButton->SetValue(true );
+  DeviceAcaCheckbox->SetValue(false);
+  DeviceTelemetryCheckbox->SetValue(false);
+  DeviceAeaCheckbox->SetValue(false);
+  DeviceCpumonCheckbox->SetValue(false);
+  StartupWipeButton->SetValue(true);
+  AgcDebugNormalButton->SetValue(true);
   EnforceConsistency();
 }
 
@@ -1023,15 +1023,15 @@ void
 VirtualAGC::ExpertButtonEvent(wxCommandEvent &event)
 {
   TEMPTRACE ("18");
-  DeviceAcaCheckbox->SetValue(true );
-  DeviceTelemetryCheckbox->SetValue(true );
-  DeviceAeaCheckbox->SetValue(true );
-  DeviceCpumonCheckbox->SetValue(true );
-  DeviceImuCheckbox->SetValue(true );
-  DeviceDiscoutCheckbox->SetValue(true );
-  DeviceCrewinCheckbox->SetValue(true );
-  DeviceSysinCheckbox->SetValue(true );
-  DevicePropulsionCheckbox->SetValue(true );
+  DeviceAcaCheckbox->SetValue(true);
+  DeviceTelemetryCheckbox->SetValue(true);
+  DeviceAeaCheckbox->SetValue(true);
+  DeviceCpumonCheckbox->SetValue(true);
+  DeviceImuCheckbox->SetValue(true);
+  DeviceDiscoutCheckbox->SetValue(true);
+  DeviceCrewinCheckbox->SetValue(true);
+  DeviceSysinCheckbox->SetValue(true);
+  DevicePropulsionCheckbox->SetValue(true);
   EnforceConsistency();
 }
 
@@ -1049,10 +1049,10 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
     return;
   if (!FormScript())
     return;
-  RunButton->Enable(false );
+  RunButton->Enable(false);
   Hide();
   SimulationWindow = new Simulation(this, wxID_ANY, wxEmptyString);
-  SimulationWindow->Enable(true );
+  SimulationWindow->Enable(true);
   int mission;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
 
@@ -1130,7 +1130,7 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
   delete SimulationWindow;
   Show();
   Raise();
-  RunButton->Enable(true );
+  RunButton->Enable(true);
 }
 
 void
@@ -1182,8 +1182,8 @@ VirtualAGC::AgcSourceEvent(wxCommandEvent &event)
         break;
       }
   if (mission >= ID_AGCCUSTOMBUTTON && AgcCustomButton->GetValue())
-    Dummy = wxT("file://")
-        + AgcCustomFilename->GetValue().BeforeLast('.') + wxT(".agc.html");
+    Dummy = wxT("file://") + AgcCustomFilename->GetValue().BeforeLast('.')
+        + wxT(".agc.html");
   wxLaunchDefaultBrowser(Dummy);
 }
 
@@ -1205,8 +1205,8 @@ VirtualAGC::AeaSourceEvent(wxCommandEvent &event)
   else if (FlightProgram8Button->GetValue())
     Dummy += wxT("FP8/FP8.aea.html");
   else if (AeaCustomButton->GetValue())
-    Dummy = wxT("file://")
-        + AeaCustomFilename->GetValue().BeforeLast('.') + wxT(".aea.html");
+    Dummy = wxT("file://") + AeaCustomFilename->GetValue().BeforeLast('.')
+        + wxT(".aea.html");
   wxLaunchDefaultBrowser(Dummy);
 }
 
@@ -1280,13 +1280,13 @@ VirtualAGC::set_properties()
   AgcCustomFilename->SetToolTip(
       wxT(
           "If you wish to run guidance-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
-  AgcCustomFilename->Enable(false );
+  AgcCustomFilename->Enable(false);
   AgcFilenameBrowse->SetMinSize(wxSize(50, 24));
   AgcFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   AgcFilenameBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of the AGC runtime software using a file-selection dialog.  This can be either a pre-compiled binary, or it can be AGC assembly-language source code.  If the latter, then VirtualAGC will actually compile it for you using the yaYUL utility."));
-  AgcFilenameBrowse->Enable(false );
+  AgcFilenameBrowse->Enable(false);
   DeviceListLabel->SetBackgroundColour(wxColour(255, 255, 255));
   DeviceListLabel->SetFont(wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
   DeviceListLabel->SetToolTip(
@@ -1296,13 +1296,13 @@ VirtualAGC::set_properties()
   DeviceAgcCheckbox->SetToolTip(
       wxT(
           "We assume that you will ALWAYS need to run the simulated guidance computer (AGC), so we don't allow you the option of deselecting it."));
-  DeviceAgcCheckbox->Enable(false );
+  DeviceAgcCheckbox->Enable(false);
   DeviceAgcCheckbox->SetValue(1);
   DeviceDskyCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
   DeviceDskyCheckbox->SetToolTip(
       wxT(
           "We assume that you will ALWAYS need to run the simulated display/keypad (DSKY), so we don't allow you the option of deselecting it."));
-  DeviceDskyCheckbox->Enable(false );
+  DeviceDskyCheckbox->Enable(false);
   DeviceDskyCheckbox->SetValue(1);
   DeviceAcaCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
   DeviceAcaCheckbox->SetToolTip(
@@ -1324,7 +1324,7 @@ VirtualAGC::set_properties()
   DeviceDedaCheckbox->SetToolTip(
       wxT(
           "The DEDA was the display/keyboard interface used for the LM abort computer (AEA)."));
-  DeviceDedaCheckbox->Enable(false );
+  DeviceDedaCheckbox->Enable(false);
   DeviceCpumonCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
   DeviceCpumonCheckbox->SetToolTip(
       wxT(
@@ -1333,27 +1333,27 @@ VirtualAGC::set_properties()
   DeviceImuCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It is basically an interface to the Inertial Monitoring Unit (IMU).  It gives continuous feedback on the velocity and attitude of the spacecraft.  The FDAI (8-ball) provides a visual status of the pitch/yaw/roll.  "));
-  DeviceImuCheckbox->Enable(false );
+  DeviceImuCheckbox->Enable(false);
   DeviceDiscoutCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
   DeviceDiscoutCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a visual indicator of the states of various discrete signals controlled by the guidance computer.  In the actual spacecraft, these signals were not all collected together into a single window like this."));
-  DeviceDiscoutCheckbox->Enable(false );
+  DeviceDiscoutCheckbox->Enable(false);
   DeviceCrewinCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
   DeviceCrewinCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a way to turn various signals on or off (as the crew would have done with switches or buttons) and to feed those signals to the guidance computer."));
-  DeviceCrewinCheckbox->Enable(false );
+  DeviceCrewinCheckbox->Enable(false);
   DeviceSysinCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
   DeviceSysinCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a way to set the states of various signals used as inputs to the guidance computer that would normally have been set by systems within the spacecraft that are not present in this simulation."));
-  DeviceSysinCheckbox->Enable(false );
+  DeviceSysinCheckbox->Enable(false);
   DevicePropulsionCheckbox->SetBackgroundColour(wxColour(255, 255, 255));
   DevicePropulsionCheckbox->SetToolTip(
       wxT(
           "This is part of the \"LM_Simulator\" subsystem.  It provides a continuous monitor of the spacecraft's fuel level, thrust, and so on.  The data is closely tied to the LM at this point, and is limited value in the CM."));
-  DevicePropulsionCheckbox->Enable(false );
+  DevicePropulsionCheckbox->Enable(false);
   NoviceButton->SetBackgroundColour(wxColour(240, 240, 240));
   NoviceButton->SetToolTip(
       wxT(
@@ -1367,8 +1367,9 @@ VirtualAGC::set_properties()
       wxT(
           "Click this to view the assembly listing (source code) for the selected AGC simulation type(s)."));
   AeaSourceButton->SetBackgroundColour(wxColour(240, 240, 240));
-  AeaSourceButton->SetToolTip(wxT(
-      "Click this to view the selected AEA Flight Program assembly listing."));
+  AeaSourceButton->SetToolTip(
+      wxT(
+          "Click this to view the selected AEA Flight Program assembly listing."));
   OptionList->SetBackgroundColour(wxColour(255, 255, 255));
   OptionList->SetFont(wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
   OptionList->SetToolTip(
@@ -1387,13 +1388,13 @@ VirtualAGC::set_properties()
   CustomResumeButton->SetToolTip(
       wxT("Select a custom memory-core file from which to resume operation."));
   CoreFilename->SetBackgroundColour(wxColour(255, 255, 255));
-  CoreFilename->Enable(false );
+  CoreFilename->Enable(false);
   CoreBrowse->SetMinSize(wxSize(50, 24));
   CoreBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   CoreBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of an AGC core dump from which to resume execution."));
-  CoreBrowse->Enable(false );
+  CoreBrowse->Enable(false);
   CoreSaveButton->SetMinSize(wxSize(50, 24));
   CoreSaveButton->SetBackgroundColour(wxColour(240, 240, 240));
   CoreSaveButton->SetToolTip(
@@ -1409,8 +1410,8 @@ VirtualAGC::set_properties()
   DskyLiteButton->SetToolTip(
       wxT(
           "The DSKY Lite is an alternate simulation of the display/keypad unit, using software contributed by Stephan Hotto.  There may be some circumstances under which you would find it useful.  However, it can only be used if in the \"Devices\" menu you select \"AGC CPU Bus/Input/Output Monitor\" and DO NOT select \"Telemetry Downlink Monitor\"."));
-  DskyNavButton->SetToolTip(wxT(
-      "Nav-bay DSKY (vs main control-panel DSKY), for Block I only."));
+  DskyNavButton->SetToolTip(
+      wxT("Nav-bay DSKY (vs main control-panel DSKY), for Block I only."));
   DownlinkLabel->SetBackgroundColour(wxColour(255, 255, 255));
   TelemetryResizable->SetToolTip(
       wxT(
@@ -1444,12 +1445,12 @@ VirtualAGC::set_properties()
   FlightProgram4Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 9 LM for the first orbital test of the LM.  This will run the AEA/AGS software designated as Flight Program 3 or 4."));
-  FlightProgram4Button->Enable(false );
+  FlightProgram4Button->Enable(false);
   FlightProgram5Button->SetBackgroundColour(wxColour(255, 255, 255));
   FlightProgram5Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 10 LM, which was the first LM test in the lunar neighborhood.  The Apollo 10 mission experienced a mishap associated with the AGC and AEA both trying to control the LM simultaneously.  This will run the AEA/AGS software designated as Flight Program 5."));
-  FlightProgram5Button->Enable(false );
+  FlightProgram5Button->Enable(false);
   FlightProgram6Button->SetBackgroundColour(wxColour(255, 255, 255));
   FlightProgram6Button->SetToolTip(
       wxT(
@@ -1459,7 +1460,7 @@ VirtualAGC::set_properties()
   FlightProgram7Button->SetToolTip(
       wxT(
           "Click this to simulate the Apollo 12-14 LM ... maybe.  We're not actually sure which missions were associated with this software version.  This will run the AEA/AGS software designated as Flight Program 7."));
-  FlightProgram7Button->Enable(false );
+  FlightProgram7Button->Enable(false);
   FlightProgram8Button->SetBackgroundColour(wxColour(255, 255, 255));
   FlightProgram8Button->SetToolTip(
       wxT(
@@ -1473,13 +1474,13 @@ VirtualAGC::set_properties()
   AeaCustomFilename->SetToolTip(
       wxT(
           "If you wish to run abort-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
-  AeaCustomFilename->Enable(false );
+  AeaCustomFilename->Enable(false);
   AeaFilenameBrowse->SetMinSize(wxSize(50, 24));
   AeaFilenameBrowse->SetBackgroundColour(wxColour(240, 240, 240));
   AeaFilenameBrowse->SetToolTip(
       wxT(
           "Click this button to select the name of the AEA runtime software using a file-selection dialog.  This can be either a pre-compiled binary, or it can be AEA assembly-language source code.  If the latter, then VirtualAGC will actually compile it for you using the yaLEMAP utility."));
-  AeaFilenameBrowse->Enable(false );
+  AeaFilenameBrowse->Enable(false);
   RunButton->SetBackgroundColour(wxColour(240, 240, 240));
   RunButton->SetToolTip(
       wxT(
@@ -1489,8 +1490,9 @@ VirtualAGC::set_properties()
       wxT(
           "When you change the various settings above, they are persistent.  In other words, if you run this program again, the settings will be whatever you set them at in the prior run.  If you click this button, it will return the settings to the defaults that existed when this program was first installed."));
   ExitButton->SetBackgroundColour(wxColour(240, 240, 240));
-  ExitButton->SetToolTip(wxT(
-      "Click this button to exit this program.  Your settings will be saved."));
+  ExitButton->SetToolTip(
+      wxT(
+          "Click this button to exit this program.  Your settings will be saved."));
 }
 
 void
@@ -1745,7 +1747,7 @@ public:
   OnInit();
 };
 
-IMPLEMENT_APP(VirtualAgcApp)
+IMPLEMENT_APP (VirtualAgcApp)
 
 static VirtualAGC *MainFrame;
 bool
@@ -1757,7 +1759,7 @@ VirtualAgcApp::OnInit()
   MainFrame = new VirtualAGC(NULL, wxID_ANY, wxEmptyString);
   SetTopWindow(MainFrame);
   MainFrame->Show();
-  return true ;
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1766,8 +1768,8 @@ VirtualAgcApp::OnInit()
 void
 VirtualAGC::EnableRunButton(void)
 {
-  RunButton->Enable(true );
-  Show(true );
+  RunButton->Enable(true);
+  Show(true);
 }
 
 // This function checks the enabling/disabling of all controls, and makes sure that
@@ -1803,15 +1805,15 @@ VirtualAGC::EnforceConsistency(void)
   CoreFilename->Enable(!block1);
   CoreBrowse->Enable(!block1);
   CoreSaveButton->Enable(!block1);
-  DskyLabel->Enable(true );
-  DskyFullButton->Enable(true );
+  DskyLabel->Enable(true);
+  DskyFullButton->Enable(true);
   DskyHalfButton->Enable(!block1);
   DskyLiteButton->Enable(!block1);
   DskyNavButton->Enable(block1);
   if (block1 && (DskyHalfButton->GetValue() || DskyLiteButton->GetValue()))
-    DskyFullButton->SetValue(true );
+    DskyFullButton->SetValue(true);
   else if (!block1 && DskyNavButton->GetValue())
-    DskyFullButton->SetValue(true );
+    DskyFullButton->SetValue(true);
   DownlinkLabel->Enable(!block1);
   TelemetryResizable->Enable(!block1);
   TelemetryRetro->Enable(!block1);
@@ -1825,53 +1827,53 @@ VirtualAGC::EnforceConsistency(void)
   AeaDebugNormalButton->Enable(!block1);
   AeaDebugMonitorButton->Enable(!block1);
 
-  DeviceAgcCheckbox->SetValue(true );
-  DeviceDskyCheckbox->SetValue(true );
+  DeviceAgcCheckbox->SetValue(true);
+  DeviceDskyCheckbox->SetValue(true);
   NoviceButton->Enable(!block1);
   ExpertButton->Enable(!block1);
-  RunButton->Enable(true );
+  RunButton->Enable(true);
 
   IsCustom = AgcCustomButton->GetValue();
   EnableLM(IsLM && !abnormalCase);
   EnableCustomAGC(IsCustom);
   DeviceTelemetryCheckbox->Enable(!abnormalCase);
   if (!DeviceTelemetryCheckbox->IsEnabled())
-    DeviceTelemetryCheckbox->SetValue(false );
+    DeviceTelemetryCheckbox->SetValue(false);
   //if (DeviceTelemetryCheckbox->GetValue () && DskyLiteButton->GetValue ())
   //  DskyFullButton->SetValue (true);
   DeviceCpumonCheckbox->Enable(!abnormalCase);
   if (!DeviceCpumonCheckbox->IsEnabled())
-    DeviceCpumonCheckbox->SetValue(false );
+    DeviceCpumonCheckbox->SetValue(false);
   if (!DeviceCpumonCheckbox->GetValue())
     {
       if (DskyLiteButton->GetValue())
-        DskyFullButton->SetValue(true );
-      DeviceImuCheckbox->Enable(false );
-      DeviceDiscoutCheckbox->Enable(false );
-      DeviceCrewinCheckbox->Enable(false );
-      DeviceSysinCheckbox->Enable(false );
-      DevicePropulsionCheckbox->Enable(false );
+        DskyFullButton->SetValue(true);
+      DeviceImuCheckbox->Enable(false);
+      DeviceDiscoutCheckbox->Enable(false);
+      DeviceCrewinCheckbox->Enable(false);
+      DeviceSysinCheckbox->Enable(false);
+      DevicePropulsionCheckbox->Enable(false);
     }
   if (!DeviceAcaCheckbox->IsEnabled())
-    DeviceAcaCheckbox->SetValue(false );
+    DeviceAcaCheckbox->SetValue(false);
   JoystickConfigure->Enable(DeviceAcaCheckbox->GetValue());
   if (!DeviceAeaCheckbox->IsEnabled())
     {
-      DeviceAeaCheckbox->SetValue(false );
-      DeviceDedaCheckbox->SetValue(false );
+      DeviceAeaCheckbox->SetValue(false);
+      DeviceDedaCheckbox->SetValue(false);
     }
   DedaLabel->Enable(DeviceAeaCheckbox->GetValue());
   AeaDebugLabel->Enable(DeviceAeaCheckbox->GetValue());
   if (!DeviceImuCheckbox->IsEnabled())
-    DeviceImuCheckbox->SetValue(false );
+    DeviceImuCheckbox->SetValue(false);
   if (!DeviceDiscoutCheckbox->IsEnabled())
-    DeviceDiscoutCheckbox->SetValue(false );
+    DeviceDiscoutCheckbox->SetValue(false);
   if (!DeviceCrewinCheckbox->IsEnabled())
-    DeviceCrewinCheckbox->SetValue(false );
+    DeviceCrewinCheckbox->SetValue(false);
   if (!DeviceSysinCheckbox->IsEnabled())
-    DeviceSysinCheckbox->SetValue(false );
+    DeviceSysinCheckbox->SetValue(false);
   if (!DevicePropulsionCheckbox->IsEnabled())
-    DevicePropulsionCheckbox->SetValue(false );
+    DevicePropulsionCheckbox->SetValue(false);
   DskyLiteButton->Enable(
       DeviceCpumonCheckbox->GetValue() /* && !DeviceTelemetryCheckbox->GetValue () */);
   DskyNavButton->Enable(block1);
@@ -1911,7 +1913,7 @@ VirtualAGC::EnableAEA(bool YesNo)
   FlightProgram8Button->Enable(YesNo);
   AeaCustomButton->Enable(YesNo);
   EnableCustomAEA(YesNo && AeaCustomButton->GetValue());
-  DeviceDedaCheckbox->Enable(false );
+  DeviceDedaCheckbox->Enable(false);
   EnableDEDA(YesNo && DeviceDedaCheckbox->GetValue());
   AeaDebugNormalButton->Enable(YesNo);
   AeaDebugMonitorButton->Enable(YesNo);
@@ -1958,36 +1960,36 @@ VirtualAGC::EnableCpumon(bool YesNo)
 void
 VirtualAGC::SetDefaultConfiguration(void)
 {
-  missionRadioButtons[ID_LUMINARY131BUTTON - ID_FIRSTMISSION]->SetValue(true );
+  missionRadioButtons[ID_LUMINARY131BUTTON - ID_FIRSTMISSION]->SetValue(true);
   AgcCustomFilename->SetValue(wxT(""));
-  FlightProgram6Button->SetValue(true );
+  FlightProgram6Button->SetValue(true);
   AeaCustomFilename->SetValue(wxT(""));
-  DeviceAgcCheckbox->SetValue(true );
-  DeviceDskyCheckbox->SetValue(true );
-  DeviceAcaCheckbox->SetValue(false );
-  DeviceTelemetryCheckbox->SetValue(true );
-  DeviceAeaCheckbox->SetValue(false );
-  DeviceDedaCheckbox->SetValue(false );
-  DeviceCpumonCheckbox->SetValue(false );
-  DeviceImuCheckbox->SetValue(false );
-  DeviceDiscoutCheckbox->SetValue(false );
-  DeviceCrewinCheckbox->SetValue(false );
-  DeviceSysinCheckbox->SetValue(false );
-  DevicePropulsionCheckbox->SetValue(false );
-  StartupWipeButton->SetValue(true );
-  AgcDebugNormalButton->SetValue(true );
+  DeviceAgcCheckbox->SetValue(true);
+  DeviceDskyCheckbox->SetValue(true);
+  DeviceAcaCheckbox->SetValue(false);
+  DeviceTelemetryCheckbox->SetValue(true);
+  DeviceAeaCheckbox->SetValue(false);
+  DeviceDedaCheckbox->SetValue(false);
+  DeviceCpumonCheckbox->SetValue(false);
+  DeviceImuCheckbox->SetValue(false);
+  DeviceDiscoutCheckbox->SetValue(false);
+  DeviceCrewinCheckbox->SetValue(false);
+  DeviceSysinCheckbox->SetValue(false);
+  DevicePropulsionCheckbox->SetValue(false);
+  StartupWipeButton->SetValue(true);
+  AgcDebugNormalButton->SetValue(true);
   if (Points >= StartingPoints)
     {
-      DedaFullButton->SetValue(true );
-      DskyFullButton->SetValue(true );
+      DedaFullButton->SetValue(true);
+      DskyFullButton->SetValue(true);
     }
   else
     {
-      DedaHalfButton->SetValue(true );
-      DskyHalfButton->SetValue(true );
+      DedaHalfButton->SetValue(true);
+      DskyHalfButton->SetValue(true);
     }
-  AeaDebugNormalButton->SetValue(true );
-  TelemetryResizable->SetValue(true );
+  AeaDebugNormalButton->SetValue(true);
+  TelemetryResizable->SetValue(true);
 }
 
 // Reads a configuration file to get all of the settings.
@@ -2103,7 +2105,7 @@ void
 VirtualAGC::WriteConfigurationFile(void)
 {
   wxFile Fout;
-  if (Fout.Create(wxT("VirtualAGC.cfg"), true ))
+  if (Fout.Create(wxT("VirtualAGC.cfg"), true))
     {
       WRITE_TEXT_SETTING(AgcCustomFilename);
       WRITE_TEXT_SETTING(AeaCustomFilename);
@@ -2164,76 +2166,76 @@ VirtualAGC::WriteConfigurationFile(void)
 bool
 VirtualAGC::FormLmsIni(void)
 {
-  bool IsLM = true;
+  //bool IsLM = true;
   wxFile Fout;
-  if (Fout.Create(wxT("LM_Simulator/lm_simulator.ini"), true ))
+  if (Fout.Create(wxT("LM_Simulator/lm_simulator.ini"), true))
     {
       if (missionRadioButtons[ID_LUMINARY99BUTTON - ID_FIRSTMISSION]->GetValue())
         {
           // These are the numbers for LM 7 --- must correct or fix.
           Fout.Write(wxT("LM_Weight_Ascent_KG           4670.0\n"
-              "LM_Weight_Descent_KG          10694.0\n"
-              "Ascent_Propellant_Mass_KG     2353.0\n"
-              "Ascent_Thrust_N               15600.0\n"
-              "Ascent_Specific_Impulse_MS    3050.0\n"
-              "Descent_Propellant_Mass_KG    8355.0\n"
-              "Descent_Propulsion_Min_N      4560.0\n"
-              "Descent_Propulsion_Max_N      45040.0\n"
-              "Descent_Specific_Impulse_MS   3050.0\n"
-              "RCS_Propellant_Mass_KG        287.0\n"
-              "RCS_Thrust_N                  445.0\n"
-              "RCS_Specific_Impulse_MS       2840.0\n"));
+              L"LM_Weight_Descent_KG          10694.0\n"
+              L"Ascent_Propellant_Mass_KG     2353.0\n"
+              L"Ascent_Thrust_N               15600.0\n"
+              L"Ascent_Specific_Impulse_MS    3050.0\n"
+              L"Descent_Propellant_Mass_KG    8355.0\n"
+              L"Descent_Propulsion_Min_N      4560.0\n"
+              L"Descent_Propulsion_Max_N      45040.0\n"
+              L"Descent_Specific_Impulse_MS   3050.0\n"
+              L"RCS_Propellant_Mass_KG        287.0\n"
+              L"RCS_Thrust_N                  445.0\n"
+              L"RCS_Specific_Impulse_MS       2840.0\n"));
         }
       else if (missionRadioButtons[ID_LUMINARY131BUTTON - ID_FIRSTMISSION]->GetValue())
         {
           // These are the numbers for LM 7 --- must correct or fix.
           Fout.Write(wxT("LM_Weight_Ascent_KG           4670.0\n"
-              "LM_Weight_Descent_KG          10694.0\n"
-              "Ascent_Propellant_Mass_KG     2353.0\n"
-              "Ascent_Thrust_N               15600.0\n"
-              "Ascent_Specific_Impulse_MS    3050.0\n"
-              "Descent_Propellant_Mass_KG    8355.0\n"
-              "Descent_Propulsion_Min_N      4560.0\n"
-              "Descent_Propulsion_Max_N      45040.0\n"
-              "Descent_Specific_Impulse_MS   3050.0\n"
-              "RCS_Propellant_Mass_KG        287.0\n"
-              "RCS_Thrust_N                  445.0\n"
-              "RCS_Specific_Impulse_MS       2840.0\n"));
+              L"LM_Weight_Descent_KG          10694.0\n"
+              L"Ascent_Propellant_Mass_KG     2353.0\n"
+              L"Ascent_Thrust_N               15600.0\n"
+              L"Ascent_Specific_Impulse_MS    3050.0\n"
+              L"Descent_Propellant_Mass_KG    8355.0\n"
+              L"Descent_Propulsion_Min_N      4560.0\n"
+              L"Descent_Propulsion_Max_N      45040.0\n"
+              L"Descent_Specific_Impulse_MS   3050.0\n"
+              L"RCS_Propellant_Mass_KG        287.0\n"
+              L"RCS_Thrust_N                  445.0\n"
+              L"RCS_Specific_Impulse_MS       2840.0\n"));
         }
       else if (AgcCustomButton->GetValue()) // Pretend generalized LM
         {
           // These are the numbers for LM 7 --- must correct or fix.
           Fout.Write(wxT("LM_Weight_Ascent_KG           4670.0\n"
-              "LM_Weight_Descent_KG          10694.0\n"
-              "Ascent_Propellant_Mass_KG     2353.0\n"
-              "Ascent_Thrust_N               15600.0\n"
-              "Ascent_Specific_Impulse_MS    3050.0\n"
-              "Descent_Propellant_Mass_KG    8355.0\n"
-              "Descent_Propulsion_Min_N      4560.0\n"
-              "Descent_Propulsion_Max_N      45040.0\n"
-              "Descent_Specific_Impulse_MS   3050.0\n"
-              "RCS_Propellant_Mass_KG        287.0\n"
-              "RCS_Thrust_N                  445.0\n"
-              "RCS_Specific_Impulse_MS       2840.0\n"));
+              L"LM_Weight_Descent_KG          10694.0\n"
+              L"Ascent_Propellant_Mass_KG     2353.0\n"
+              L"Ascent_Thrust_N               15600.0\n"
+              L"Ascent_Specific_Impulse_MS    3050.0\n"
+              L"Descent_Propellant_Mass_KG    8355.0\n"
+              L"Descent_Propulsion_Min_N      4560.0\n"
+              L"Descent_Propulsion_Max_N      45040.0\n"
+              L"Descent_Specific_Impulse_MS   3050.0\n"
+              L"RCS_Propellant_Mass_KG        287.0\n"
+              L"RCS_Thrust_N                  445.0\n"
+              L"RCS_Specific_Impulse_MS       2840.0\n"));
         }
       else // CM
         {
-          IsLM = false;
+          //IsLM = false;
           // These numbers are meaningless for the CM, but LM_Simulator
           // isn't designed for the CM (though nevertheless useful) and
           // will abort if some values aren't present.
           Fout.Write(wxT("LM_Weight_Ascent_KG           4670.0\n"
-              "LM_Weight_Descent_KG          10694.0\n"
-              "Ascent_Propellant_Mass_KG     2353.0\n"
-              "Ascent_Thrust_N               15600.0\n"
-              "Ascent_Specific_Impulse_MS    3050.0\n"
-              "Descent_Propellant_Mass_KG    8355.0\n"
-              "Descent_Propulsion_Min_N      4560.0\n"
-              "Descent_Propulsion_Max_N      45040.0\n"
-              "Descent_Specific_Impulse_MS   3050.0\n"
-              "RCS_Propellant_Mass_KG        287.0\n"
-              "RCS_Thrust_N                  445.0\n"
-              "RCS_Specific_Impulse_MS       2840.0\n"));
+              L"LM_Weight_Descent_KG          10694.0\n"
+              L"Ascent_Propellant_Mass_KG     2353.0\n"
+              L"Ascent_Thrust_N               15600.0\n"
+              L"Ascent_Specific_Impulse_MS    3050.0\n"
+              L"Descent_Propellant_Mass_KG    8355.0\n"
+              L"Descent_Propulsion_Min_N      4560.0\n"
+              L"Descent_Propulsion_Max_N      45040.0\n"
+              L"Descent_Specific_Impulse_MS   3050.0\n"
+              L"RCS_Propellant_Mass_KG        287.0\n"
+              L"RCS_Thrust_N                  445.0\n"
+              L"RCS_Specific_Impulse_MS       2840.0\n"));
         }
 #ifdef WIN32
       Fout.Write (wxT ("Operating_System Windows\n"));
@@ -2274,12 +2276,13 @@ VirtualAGC::FormLmsIni(void)
     }
   else
     {
-      wxMessageBox(wxT(
-          "Cannot create lm_simulator.ini.\nLM-Simulator won\'t run properly."),
+      wxMessageBox(
+          wxT(
+              "Cannot create lm_simulator.ini.\nLM-Simulator won\'t run properly."),
           wxT("Warning"), wxOK | wxICON_HAND);
-      return (false );
+      return (false);
     }
-  return (true );
+  return (true);
 }
 
 // Forms command lines for other programs we want to execute for the
@@ -2296,9 +2299,9 @@ VirtualAGC::FormCommands(void)
   CmSim = LmSim = AeaSim = false;
 
 #ifdef __APPLE__
-  wxString ExecutableDirectory = wxT ("../MacOS");
+  wxString localExecutableDirectory = wxT ("../MacOS");
 #else
-  wxString ExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
+  wxString localExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
 #endif
   wxString CoreBin, CMorLM, Port, TelemetrySwitches, DirCmd;
 
@@ -2308,11 +2311,11 @@ VirtualAGC::FormCommands(void)
     {
       if (block1)
         {
-          yaAGC = ExecutableDirectory + PathDelimiter + wxT("yaAGCb1");
+          yaAGC = localExecutableDirectory + PathDelimiter + wxT("yaAGCb1");
         }
       else
         {
-          yaAGC = ExecutableDirectory + PathDelimiter + wxT("yaAGC");
+          yaAGC = localExecutableDirectory + PathDelimiter + wxT("yaAGC");
           if (AgcDebugMonitorButton->GetValue())
             {
 #ifdef ONNO_STYLE
@@ -2328,7 +2331,7 @@ VirtualAGC::FormCommands(void)
     yaAGC = wxT("");
   if (DeviceDskyCheckbox->GetValue())
     {
-      yaDSKY = ExecutableDirectory + PathDelimiter;
+      yaDSKY = localExecutableDirectory + PathDelimiter;
 #ifdef __APPLE__
       yaDSKY += wxT ("yaDSKYb1.app/Contents/MacOS/");
 #endif
@@ -2360,22 +2363,22 @@ VirtualAGC::FormCommands(void)
       // which case yaACA-0.cfg or yaACA2-0.cfg will exist --- we use
       // it instead.
       if (wxFileExists(wxT("yaACA2-0.cfg")))
-        yaACA = ExecutableDirectory + PathDelimiter + wxT("yaACA2");
+        yaACA = localExecutableDirectory + PathDelimiter + wxT("yaACA2");
       else if (wxFileExists(wxT("yaACA-0.cfg")))
         {
 #ifdef WIN32
           FunkyYaACA = true;
 #endif
-          yaACA = ExecutableDirectory + PathDelimiter + wxT("yaACA");
+          yaACA = localExecutableDirectory + PathDelimiter + wxT("yaACA");
         }
       else
-        yaACA = ExecutableDirectory + PathDelimiter + wxT("yaACA3");
+        yaACA = localExecutableDirectory + PathDelimiter + wxT("yaACA3");
     }
   else
     yaACA = wxT("");
   if (DeviceTelemetryCheckbox->GetValue())
     {
-      yaTelemetry = ExecutableDirectory + PathDelimiter;
+      yaTelemetry = localExecutableDirectory + PathDelimiter;
 #ifdef __APPLE__
       yaTelemetry += wxT ("yaTelemetry.app/Contents/MacOS/");
 #endif
@@ -2388,7 +2391,7 @@ VirtualAGC::FormCommands(void)
   if (DeviceAeaCheckbox->GetValue())
     {
       AeaSim = true;
-      yaAGS = ExecutableDirectory + PathDelimiter + wxT("yaAGS");
+      yaAGS = localExecutableDirectory + PathDelimiter + wxT("yaAGS");
       if (AeaDebugMonitorButton->GetValue())
         yaAGS += wxT(" --debug");
       if (FlightProgram4Button->GetValue())
@@ -2405,7 +2408,7 @@ VirtualAGC::FormCommands(void)
         CoreBin = AeaCustomFilename->GetValue();
       else
         // This can't happen.
-        return (false );
+        return (false);
       yaAGS += wxT(" --core=\"") + CoreBin + wxT("\"");
     }
   else
@@ -2418,7 +2421,7 @@ VirtualAGC::FormCommands(void)
     }
   if (DeviceDedaCheckbox->GetValue())
     {
-      yaDEDA = ExecutableDirectory + PathDelimiter;
+      yaDEDA = localExecutableDirectory + PathDelimiter;
 #ifdef YADEDA2
 #ifdef __APPLE__
       yaDEDA += wxT ("yaDEDA2.app/Contents/MacOS/");
@@ -2463,15 +2466,15 @@ VirtualAGC::FormCommands(void)
         {
           CoreBin = AgcCustomFilename->GetValue();
           if (DebugMode)
-            DirCmd +=
-                wxT("\"") + CoreBin.BeforeLast(PATH_DELIMITER) + wxT("\"");
+            DirCmd += wxT("\"") + CoreBin.BeforeLast(PATH_DELIMITER)
+                + wxT("\"");
           CMorLM = wxT("LM");
           Port = wxT("19797");
         }
       else
         {
           /* This can't happen */
-          return (false );
+          return (false);
         }
     }
   wxString CorePad, CoreLst;
@@ -2528,7 +2531,7 @@ VirtualAGC::FormCommands(void)
       else
         yaDSKY += wxT(" --cfg=") + CMorLM + wxT(".ini --port=") + Port;
     }
-  return (true );
+  return (true);
 }
 
 // This function takes the various command-lines which have already
@@ -2597,9 +2600,9 @@ bool
 VirtualAGC::FormScript(void)
 {
 #ifdef __APPLE__
-  wxString ExecutableDirectory = wxT ("../MacOS");
+  wxString localExecutableDirectory = wxT ("../MacOS");
 #else
-  wxString ExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
+  wxString localExecutableDirectory = wxT("..") + PathDelimiter + wxT("bin");
 #endif
   wxFile Fout;
   if (Fout.Create(wxT("simulate"), true, wxS_DEFAULT | wxS_IXUSR | wxS_IXGRP))
@@ -2701,7 +2704,7 @@ VirtualAGC::FormScript(void)
         }
 
       Fout.Write(wxT("export PIDS\n"));
-      Fout.Write(ExecutableDirectory + wxT("/SimStop\n"));
+      Fout.Write(localExecutableDirectory + wxT("/SimStop\n"));
 #ifdef __APPLE__
       // In Mac OS X, starting LM_Simulator starts a child process which
       // actually runs the program, and when SimStop eventually kills the
@@ -2717,9 +2720,9 @@ VirtualAGC::FormScript(void)
     {
       wxMessageBox(wxT("Cannot create simulation script."), wxT("Warning"),
           wxOK | wxICON_HAND);
-      return (false );
+      return (false);
     }
-  return (true );
+  return (true);
 }
 
 #endif
@@ -2770,27 +2773,27 @@ END_EVENT_TABLE();
 void
 Simulation::MoreEvent(wxCommandEvent &event)
 {
-  Show(false );
+  Show(false);
   LessButton->Enable();
   MoreButton->Disable();
   DetailPanel->Show();
   InvalidateBestSize();
   Layout();
   Fit();
-  Show(true );
+  Show(true);
 }
 
 void
 Simulation::LessEvent(wxCommandEvent &event)
 {
-  Show(false );
+  Show(false);
   LessButton->Disable();
   MoreButton->Enable();
   DetailPanel->Hide();
   InvalidateBestSize();
   Layout();
   Fit();
-  Show(true );
+  Show(true);
 }
 
 void
@@ -2854,7 +2857,7 @@ Simulation::set_properties()
       wxT(
           "Click this button to display the script which is being run.  This could be helpful to know if you'd like to run a custom simulation that VirtualAGC can't handle, such as having 2 DSKYs, ganging multiple PCs interconnected via ethernet, etc."));
   LessButton->SetToolTip(wxT("Click this button to hide the script data."));
-  LessButton->Enable(false );
+  LessButton->Enable(false);
   UploadButton->SetToolTip(
       wxT(
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
@@ -3151,7 +3154,7 @@ Simulation::Upload(wxString &Filename)
       LessButton->Disable();
       DetailShown = DetailPanel->IsShown();
       DetailPanel->Hide();
-      UplinkPanel->Show(true );
+      UplinkPanel->Show(true);
       UplinkText->Clear();
       if (UnitType == UT_AEA)
         UplinkText->AppendText(wxT("Digital uplink to AEA starting ..."));
@@ -3354,7 +3357,7 @@ TimerClass::Notify()
                     }
                   FormIoPacket(0173, Keycode, Packet);
                   i = send(ServerSocket, (const char *) Packet, 4,
-                      MSG_NOSIGNAL);
+                  MSG_NOSIGNAL);
                   if (i == SOCKET_ERROR && SOCKET_BROKEN)
                     {
                       close(ServerSocket);

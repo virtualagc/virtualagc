@@ -112,11 +112,6 @@ SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 JAMMER_DIR=${HOME}/IMCROSS/installjammer
 
 # cp and sed work slightly differently on Mac OS X than elsewhere.
-ifdef MACOSX
-EXTSW=-pR
-else
-EXTSW=-a
-endif
 INPLACE=-i~
 CP=cp
 CP+=${EXTSW}
@@ -157,11 +152,7 @@ all-archs: Linux Win32 MacOsX
 ifdef MACOSX
 Linux: temp/VirtualAGC.app
 else
-ifeq "${USER}" "rburkey"
-Linux: VirtualAGC-installer
-else
 Linux: temp/lVirtualAGC
-endif
 endif
 
 .PHONY: Win32
@@ -234,7 +225,7 @@ temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Content
 	for n in ${MISSIONS}; do \
 		sh ./CopyApolloSource.sh $@ $$n ${EXTSW} ${WIN32} ;\
 	done
-	${CP} *.png $@
+	${CP} *.png *.ico $@
 	${CP} ../yaDSKY/src/*.ini $@
 ifeq "${YADSKY_SUFFIX}" ""	
 	${CP} ../yaDSKY/pixmaps $@/pixmaps/yaDSKY
@@ -247,7 +238,7 @@ ifeq "${YADEDA_SUFFIX}" ""
 else
 	${CP} ../yaDEDA2/*.xpm $@
 endif
-	${CP} -a ../yaDSKYb1/images $@/images-yaDSKYb1
+	${CP} ../yaDSKYb1/images $@/images-yaDSKYb1
 	-rm -rf $@/images-yaDSKYb1/CVS $@/images-yaDSKYb1/.xvpics
 	${CP} ../jWiz/*.jpg $@
 	-rm -rf $@/pixmaps/yaDEDA/CVS $@/pixmaps/yaDEDA/.xvpics

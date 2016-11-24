@@ -276,7 +276,7 @@ Options_t* CliParseArguments(int argc, char *argv[])
 	{
 		/* If a new working directory is specified then change to it
 		 * immediately */
-		if (Options.cd > 0)
+		if (Options.cd != NULL)
 		  {
 		    if (chdir(Options.cd) < 0)
 		      {

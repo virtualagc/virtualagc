@@ -105,7 +105,7 @@ endif
 
 LIBS0:=${LIBS}
 ifndef NOREADLINE
-CURSESLIB=-lcurses
+CURSESLIB=-lncurses
 CFLAGS2 = -DUSE_READLINE
 ifdef MACOSX
 # This assumes that readline has been installed into the default (/usr/local)

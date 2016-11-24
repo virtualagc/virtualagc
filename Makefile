@@ -237,6 +237,10 @@ ifdef SOLARIS
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
 LIBS+=-lnsl
+CFLAGS0 += /opt/csw/include/wx-2.8
+CFLAGS += /opt/csw/include/wx-2.8
+dummy:=$(PATH):/opt/csw/bin
+export PATH=$(dummy)
 export SOLARIS
 endif
 
@@ -276,12 +280,12 @@ ifeq ($(USER),rburkey)
 WEBSITE=../sandroid.org/public_html/apollo
 CFLAGS0=-Werror -DALLOW_BSUB -g -O0
 CFLAGS=-Wall $(CFLAGS0)
-yaACA=
+yaACA=-
 else 
 ifdef DEV_BUILD
 CFLAGS0=-Werror -DALLOW_BSUB -g -O0
 CFLAGS=-Wall $(CFLAGS0)
-yaACA=
+yaACA=-
 else 
 ifdef DEBUG_BUILD
 CFLAGS0=-DALLOW_BSUB -g -O0
@@ -296,6 +300,9 @@ endif
 WEBSITE=..
 endif
 ifdef MACOSX
+yaACA=-
+endif
+ifdef SOLARIS
 yaACA=-
 endif
 
@@ -321,6 +328,11 @@ CFLAGS0+=-I/opt/local/include -I/opt/local/include/allegro
 CFLAGS+=-I/opt/local/include -I/opt/local/include/allegro
 endif
 
+ifdef SOLARIS
+CFLAGS0 += -I/opt/csw/include/wx-2.8
+CFLAGS += -I/opt/csw/include/wx-2.8
+endif
+
 ifdef MACOSX
 CFLAGS0+=-DMACOSX=yes
 CFLAGS+=-DMACOSX=yes
@@ -333,6 +345,8 @@ ifdef FREEBSD
 CFLAGS0+=-DFREEBSD=yes
 CFLAGS+=-DFREEBSD=yes
 endif
+export CFLAGS0
+export CFLAGS
 
 # We assume a *nix build environment.
 
@@ -382,6 +396,18 @@ SUBDIRS += jWiz
 SUBDIRS += yaDSKYb1
 SUBDIRS += VirtualAGC
 endif # NOGUI
+
+# EXTSW is the switch for cp that's equivalent to -a in Linux.
+ifdef MACOSX
+EXTSW=-pR
+else
+ifdef SOLARIS
+EXTSW=-r -@ -P
+else
+EXTSW=-a
+endif
+endif
+export EXTSW
 
 .PHONY: $(SUBDIRS)
 
@@ -454,6 +480,10 @@ yaAGC-Block1-Pultorak yaAGCb1 yaDSKYb1 yaUplinkBlock1 yaValidation-Block1:
 VirtualAGC:
 	$(BUILD) -C $@ "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC)
 
+.PHONY: VirtualAGC-installer
+VirtualAGC-installer: all
+	$(BUILD) -C VirtualAGC "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC) VirtualAGC-installer
+
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
 AGC_LISTINGS = $(addprefix listing-agc-, $(MISSIONS))
@@ -488,9 +518,9 @@ buildbox: dev
 
 .PHONY: binaries
 binaries: clean all-archs
-	cp -a VirtualAGC/VirtualAGC-installer $(WEBSITE)/Downloads
-	cp -a VirtualAGC/VirtualAGC-setup.exe $(WEBSITE)/Downloads
-	cp -a VirtualAGC/VirtualAGC.app.tar.gz $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC-installer $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC-setup.exe $(WEBSITE)/Downloads
+	cp ${EXTSW} VirtualAGC/VirtualAGC.app.tar.gz $(WEBSITE)/Downloads
 	ls -ltr $(WEBSITE)/Downloads | tail -4
 
 # I used this only for creating a development snapshot.  It's no use to anybody
@@ -582,3 +612,38 @@ ifndef NOGUI
 	cd yaDEDA && ./autogen.sh --prefix=$(PREFIX)
 endif
 
+TMP:=temp.virtualagc
+.PHONY: install
+install: all
+ifdef MACOSX
+	cp ${EXTSW} VirtualAGC/temp/VirtualAGC.app ~/Desktop
+else
+ifdef WIN32
+	-mkdir c:/"Program Files"/VirtualAGC
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* c:/"Program Files"/VirtualAGC
+	@echo "You might want to make a launcher icon on your Desktop that uses:"
+	@echo "  1. Executable c:\Program Files\VirtualAGC\bin\VirtualAGC.exe"
+	@echo "  2. Working directory c:\Program Files\VirtualAGC\Resources"
+	@echo "  3. Icon c:\Program Files\VirtualAGC\Resources\ApolloPatch2.png"
+else
+	# Create installation directory.
+	-mkdir ~/VirtualAGC
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* ~/VirtualAGC
+ifdef SOLARIS
+	@echo "We'd like to create a desktop icon.  For whatever lame reason, Solaris"
+	@echo "desktop icons have no way to set the working directory, so if we made an" 
+	@echo "icon, it wouldn't work."
+else
+	@echo "[Desktop Entry]" >$(TMP)
+	@echo "Encoding=UTF-8" >>$(TMP)
+	@echo "Name=VirtualAGC" >>$(TMP)
+	@echo "Comment=Virtual AGC GUI Application" >>$(TMP)
+	@echo "Terminal=false" >>$(TMP)
+	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(TMP)
+	@echo "Type=Application" >>$(TMP)
+	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(TMP)
+	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(TMP)
+	mv $(TMP) $$HOME/Desktop/VirtualAGC.desktop
+endif
+endif
+endif
