@@ -1,6 +1,14 @@
 #!/usr/bin/python
 # Note:  The octal portions of binsource files are assumed to consist
 # of 8 6-octal-digit fields, separated by a single space between fields.
+#
+# In terms of the geometry of the image, this function requires:
+#	Upper-left pixel coordinates of bounding box of upper-left octal digit.
+#	Pixel-spacing between characters horizontally.
+#	Pixel-spacing between character-rows vertically.  (1.2X is used between blocks.)
+#	Angle clockwise from x-axis of a vertical row.
+#
+# Thus, all it does geometrically is rotate the image and displace it.
 
 import sys
 import re
@@ -25,12 +33,12 @@ if pageInBank < 0 or pageInBank >= 4:
 	print 'Page', pageInBank, 'is out of range.'
 	sys.exit()
 binsourceFilename = sys.argv[5]
+
 topPixelRow = float(sys.argv[6])
 leftPixelCol = float(sys.argv[7])
 characterSpacing = float(sys.argv[8])
 rowSpacing = float(sys.argv[9])
 angle = float(sys.argv[10])
-
 cos = math.cos(angle * math.pi / 180.0)
 sin = math.sin(angle * math.pi / 180.0)
 
