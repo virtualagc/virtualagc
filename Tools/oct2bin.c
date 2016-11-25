@@ -95,6 +95,10 @@
  *            	                localize problems.
  *              2016-10-21 RSB  Now pads the output file appropriately for
  *                              either Block 1 or Block 2.
+ *              2016-11-24 RSB	Previously, the page numbers reported in the
+ *              		error message were 100% dependent on the comments.
+ *              		Now they also include an estimate from the number
+ *              		of lines of octals already read.
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -214,7 +218,7 @@ int
 main(int argc, char *argv[])
 {
   FILE *outfile, *proofFile;
-  int dummy, data[8], line, checked = 1;
+  int dummy, data[8], line, checked = 1, octLine = 0, octPage, octOffset, firstPage = -1;
   uint16_t dummy16, banknum = 0;
   int count, checkWords = 0;
   char s[129], *ss;
@@ -255,7 +259,7 @@ main(int argc, char *argv[])
   if (outfile == NULL)
     {
       errorCount++;
-      fprintf(stderr, "Error: Cannot create the output file oct2bin.bin.\n");
+      fprintf(stderr, "Error: Cannot create the output file oct2bin.bin.\nl");
       return (1);
     }
   proofFile = fopen("oct2bin.proof", "wb");
@@ -326,6 +330,15 @@ main(int argc, char *argv[])
           continue;
         }
 
+      if (1 == sscanf(s, "%d", &dummy))
+	{
+	  octLine++;
+	  octPage = (octLine + 31) / 32;
+	  octOffset = octLine - 32 * (octPage - 1);
+	  octPage += firstPage - 1;
+	}
+
+
       // Check for certain garbage conditions.
       for (ss = s; *ss; ss++)
         {
@@ -335,8 +348,8 @@ main(int argc, char *argv[])
             {
               errorCount++;
               fprintf(stderr,
-                  "Bank %o, page %d, line %d: Illegal digit \'%c\'.\n", banknum,
-                  currentPage, line, *ss);
+                  "Bank %o, page %d(%d:%d), line %d: Illegal digit \'%c\'.\n", banknum,
+                  currentPage, octPage, octOffset, line, *ss);
             }
         }
 
@@ -352,16 +365,16 @@ main(int argc, char *argv[])
             {
               errorCount++;
               fprintf(stderr,
-                  "Bank %o, page %d, line %d: Field is not correct width.\n",
-                  banknum, currentPage, line);
+                  "Bank %o, page %d(%d:%d), line %d: Field is not correct width.\n",
+                  banknum, currentPage, octPage, octOffset, line);
             }
         }
 
       if (i > 8)
         {
           errorCount++;
-          fprintf(stderr, "Bank %o, page %d, line %d: Too many fields.\n",
-              banknum, currentPage, line);
+          fprintf(stderr, "Bank %o, page %d(%d:%d), line %d: Too many fields.\n",
+              banknum, currentPage, octPage, octOffset, line);
         }
 
       // Now, parse like the wind!
@@ -380,8 +393,8 @@ main(int argc, char *argv[])
                 {
                   fprintf(
                   stderr,
-                      "Bank %o, page %d, line %d: The parity field is neither 0 nor 1 at %05o %o.\n",
-                      banknum, currentPage, line, data[dummy], parity);
+                      "Bank %o, page %d(%d:%d), line %d: The parity field is neither 0 nor 1 at %05o %o.\n",
+                      banknum, currentPage, octPage, octOffset, line, data[dummy], parity);
                 }
               else
                 {
@@ -396,8 +409,8 @@ main(int argc, char *argv[])
                   if (word != 1)
                     {
                       fprintf(stderr,
-                          "Bank %o, page %d, line %d: Parity error at %05o %o\n",
-                          banknum, currentPage, line, data[dummy], parity);
+                          "Bank %o, page %d(%d:%d), line %d: Parity error at %05o %o\n",
+                          banknum, currentPage, octPage, octOffset, line, data[dummy], parity);
                     }
                 }
             }
@@ -430,7 +443,11 @@ main(int argc, char *argv[])
               if (1 == sscanf(ss, "Page%d", &j) || 1 == sscanf(ss, "page%d", &j)
                   || 1 == sscanf(ss, "PAGE%d", &j)
                   || 1 == sscanf(ss, "p.%d", &j))
-                currentPage = j;
+        	{
+        	  currentPage = j;
+        	  if (firstPage < 0)
+        	    firstPage = j;
+        	}
             }
           fprintf(proofFile, "%s", s);
         }
