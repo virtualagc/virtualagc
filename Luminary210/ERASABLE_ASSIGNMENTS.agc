@@ -19,6 +19,8 @@
 ##                                  label   HCASCLAD -> HCALCLAD   
 ##                                          NETTOTKP -> NEGTORKP 
 ##                                          RBRRGZ   -> RBRFGZ 
+##              2016-11-26 HG   Fix label   REULTCT  -> RESULTCT  
+
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -1801,7 +1803,7 @@ LOS1            =               GENPL           +8D
 LOS2            =               GENPL           +14D
 
 DATAPL          EQUALS          GENPL           +30D
-REULTCT         EQUALS          GENPL           +67D
+RESULTCT        EQUALS          GENPL           +67D
 AINLA           =               GENPL                   # 110 DEC OR 156 OCT LOCATIONS
 
 WANGO           EQUALS          AINLA                   # VERT ERATE
