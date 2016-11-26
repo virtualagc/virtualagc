@@ -7,7 +7,8 @@
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        211-222
 # Mod history:  2016-10-06 JL   Created.
-#               2016-10-25 JL   Transcribed pages 211-214.
+#               2016-11-25 JL   Transcribed pages 211-214.
+#               2016-11-26 JL   Transcribed pages 215-219.
 
 # Annotations:
 #
@@ -173,7 +174,7 @@ R3004   IF THERE ARE DELETES AND THE TASK IS A PROGRAM ASSEMBLY, THEN SYPT RECOR
 R3006   AND SECOND FOR WANTEDNESS.  HERE C(X5) = +GB,R3, SO THAT 5,Z,0 = N,R3 = DELETEQ.  THEN 5,Z,1 IS ACTIVE IF THE
 R3008   RECORD IS NOT DELETED AND = N,R4 = WANTPROG.
 
-R3009   ANALOGOUS RULES GOIVERN SYLT RECORDS IN SUBROUTINE REVISIONS, EXCEPT THAT IN SYLT, N,R2 = DO SAVE ALWAYS.
+R3009   ANALOGOUS RULES GOVERN SYLT RECORDS IN SUBROUTINE REVISIONS, EXCEPT THAT IN SYLT, N,R2 = DO SAVE ALWAYS.
 
  3011   END FILE Q LA           N,X2          CAC 3 P       5,Z,0               BRANCH IF NOT END OF FILE.
 
@@ -208,161 +209,161 @@ R3009   ANALOGOUS RULES GOIVERN SYLT RECORDS IN SUBROUTINE REVISIONS, EXCEPT THA
 
 P3042   PROCEDURE FOR THE END OF THE SYPT (SYMBOLIC YUL PROGRAM TAPE).
 
- 3043   END SYPT   
+ 3043   END SYPT   SSL, D12     Z,X5          0             C,-1                ENSURE WANTEDNESS CHECK DURING SYLT.
 
- 3045              
- 3047              
- 3049              
- 3051              
- 3053              
- 3055              
+ 3045              SM           Z,X5,2        Z,SC,1        -                   CHANGE GB,R2 TO GB,R4.
+ 3047              SM           Z,X5          SPEC SGN P    Z,X5                CHANGE -GB,R3 TO +GB,R3.
+ 3049              TS           N,X2          EOF BANER     SAVE MODE -1   C    HIDE END SYPT FROM WWT, GO TO SAVE MODE.
+ 3051              TS           L PROG FIL    Z,X4          FIND SUBS      C    POINT TO NAME OF 1ST POSSIBLE SUBRO.
+ 3053              NA, PROG SUB SWITCH        7             UNWASSL             TEST PROG/SUB BIT WHEN NO (OTHER) SUBS.
+ 3055              NA, PROG SUB SWITCH        ZERO          ITS A SUBR          TEST PROG/SUB BIT WHEN THERE ARE SUBROS.
 
- 3057   ITS A PROG 
- 3059              
+ 3057   ITS A PROG TX           L SUBKNO Q    -             Z,R4                SET UP WAIT FOR SUBROS OF THIS COMPUTER.
+ 3059              TS           N,X4          LIST NAME     UNWASSL +1          POINT TO FIRST SUBROUTINE OF COMPUTER.
 
- 3061   ITS A SUBR 
+ 3061   ITS A SUBR SSL, ONE     SWITCH        46            UNWASSL             OMIT WANT QUESTION IF NOT MERGING.
 
- 3063   UNWASSL    
+ 3063   UNWASSL    SSL, D12     Z,X5          0             UNWASSL -3     C    
 
- 3064              
- 3065              
- 3067              
+ 3064              NA           NEXT NAME     W END SYPT    C,+2
+ 3065              NA           Z,S1          ZERO          DO ALT OP           MAYBE AWAIT DISC XFER HERE IF PROGRAM.
+ 3067              TS           N,X4          LIST NAME     DO SAVE
 
- 3068   UNWANT     
- 3070              
+ 3068   UNWANT     HA           Z,X5          SPEC SGN P    Z,X5                CHANGE +GB,R3 TO -GB,R3.
+ 3070              WD           Z,X5          TWO           Z,X5                CHANGE GB,R4 TO GB,R2.
 
- 3072   FIND SUBS  
- 3074              
- 3076              
- 3078              
+ 3072   FIND SUBS  SWS,THREAD10 4,1           0             Z,X4           C    SUBROUTINE TO FIND SUBROUTINE NAMES...
+ 3074              LA,BIT36R    4,1           ZERO          C,-1           C    SUBS FOR THIS MACH. ONLY ON THIS THREAD.
+ 3076              LA           Z,X4          L END THR 1   N,SC,1         C    BRANCH IF ONLY END OF LIST WAS FOUND.
+ 3078              TS           Z,SC,1        -             -                   EXIT SKIPPING WITH NAME FOUND VIA X4.
 
- 3080   SUB CALL Q 
+ 3080   SUB CALL Q LA, ONE      4,1           ZERO          FIND SUBS      C    
 
- 3081   SUB KNOW Q 
- 3083              
+ 3081   SUB KNOW Q NA           TAPRO NAM     LIST NAME     N,R2                BYPASS RECORDS UNTIL 1ST POSSIBLE SUBRO.
+ 3083              LA,KNEW SUBS SWITCH        ZERO          DO ALT OP           WAIT FOR SUBROS TO BE ACCOUNTED FOR.
 
- 3085              
- 3087              
+ 3085              TS           SUB CALL Q    FIND SUBS +1  FIND SUBS +1   C    LOOK FOR NAME OF 1ST CALLED SUBRO.
+ 3087              TS           Z,R2          Z,SC          UNWASSL        C    SAVE REST OF SYLT IF NONE.
 
- 3089              
- 3090              
- 3092              
+ 3089              NA           NEXT NAME     W END SYLT    C,+2
+ 3090              TX           N,X4          -             NEXT NAME           SPECIFY LOCATION OF TAPE BREAK.
+ 3092              TX           L GET SUBS    -             Z,R4                SET UP SEARCH FOR SLAVE SUBROUTINES.
 
- 3094   SEE NEXT   
- 3096              
- 3098              
- 3100              
+ 3094   SEE NEXT   NA           TAPRO NAM     N,X4          N,R2                SAVE IF NOT 1ST REC. OF NEXT WANTED.
+ 3096              SS           ZERO          ONE P         4,1                 REMOVE CALL BIT FROM SUBROUTINE NAME.
+ 3098              TS           N,X4          WANTED        FIND SUBS      C    SET NEXT AS WANTED AND SEEK NEXT SLAVE.
+ 3100              TX           WANT PROG     -             GET SUBS            CHECK WANT ONLY IF NO MORE SUBROS.
 
- 3102   GET SUBS   
- 3104              
+ 3102   GET SUBS   NA           TAPRO NAM     WANTED        SEE NEXT            BRANCH IF NOT OF CURRENT SUBROUTINE.
+ 3104              TS           L DO INSAV    Z,SC          SAVEMODE -1    C    DO BOTH INPUT AND SAVE.
 
 R3106   PROCEDURE FOR THE END OF THE SYLT (SYMBOLIC YUL LIBRARY TAPE).
 
- 3107   END SYLT   
- 3109   
- 3111   
+ 3107   END SYLT   TS           INIT X5       Z,X5          SAVE MODE -1   C    RESTORE CRITERION FOR WANTEDNESS CHECK.
+ 3109              NA           Z,S1          ZERO          DO ALT OP           MAYBE AWAIT END OF DISC XFER IF SUBRO.
+ 3111              TS           Z,SC          Z,X4          DO INP SAV          SET UP BYPT PROCEDURE.
 
 # Page 216
 #      @YUL SYSTEM ASSEMBLER PARA PASS 1                                         USER'S OWN PAGE NO.   6        PAGE  64
 
 P311202 PROCEDURE TO ADD THE OWNER'S SYMBOL TABLE TO A SEGMENT'S SYMBOL TABLE.
 
- 311204            
- 31121             
- 311213            
- 311219            
+ 311204            NA           TAPRO NAM     SEG OWNER     OLD BINQ            BRANCH IF NOT AUTHMEMO OF SEG'S OWNER.
+ 31121             TX           L EORVF M2    -             Z,AU1
+ 311213            NA           N,AU1         ZERO          C,-1                WAIT UNTIL PASS 1 IS DONE WITH SYM TAB.
+ 311219            TS           Z,SC          Z,R4          DO SAVE             SAVE AUTHMEMO AND PROCESS SYMTAB BELOW.
 
- 311225            
- 311231            
- 311232*FLIP MXR   
- 311234            
- 31124             
- 311246            
+ 311225            LA           TAPRO NAM +1  CAC3 P        OLD BINQ -1         BACK TO NORMAL WHEN A PARAGRAPH COMES.
+ 311231            TN           Z,X1          5             SAVE XSP
+ 311232*FLIP MXR   HA           Z,MXR         ONE P         Z,MXR          S
+ 311234            WA           Z,X2          THREE P       Z,X4                X4 POINTS TO 1ST SYMBOL IN RECORD.
+ 31124             WA           Z,X4          OCT 400       END SYMBF           END SYMBF POINTS TO FIRST ORTHOWORD.
+ 311246            SWE, CAC3    L COMMON P    16            Z,X1
 
- 311249 SEG SYMBS  
- 311252            
- 311258            
- 311264            
- 31127             
- 311273            
- 311277*           
- 311279            
+ 311249 SEG SYMBS  TX           N,X4,1        -             COMMON
+ 311252            SWE, CAC3    L ANAL SYM    32            Z,CSC          C    ANALYZE HISTORY OF SYMBOL.
+ 311258            LA           COMMON +2     CAC3 P        C,+3                BRANCH IF SYMBOL IS UNDEFINED.
+ 311264            SM           N,X2          D4T8 P        N,X2                OTHERWISE IT'S IN MISCELLANEOUS TROUBLE.
+ 31127             TS           Z,X4,1        -             C,+2
+ 311273            SS           N,X4,1        D4T8 P        N,X2                SUPPLY HEALTH AND DEFINITION FROM OWNER.
+ 311277*           LA           ONES P        N,X4          C,+2
+ 311279 OLD BINQ   NA           Z,X4          END SYMBF     SEG SYMBS
 
- 311282            
- 311285*           
- 311291            
- 3113   OLD BINQ   
+ 311282            TN           SAVE XSP      5             Z,X1
+ 311285*           TS           L DO SAVE     Z,SC          FLIP MXR       C    SAVE EACH SYMBOL TABLE RECORD.
+ 311291            TS           Z,SC          Z,R4          DO SAVE             SAVE FIRST PARAGRAPH, CONTINUE BELOW.
+ 3113   OLD BINQ   NA           TAPRO NAM     PROG NAME     DO SAVE             SAVE LOAD DECK UNLESS OF PROG BEING REV.
 
 R3115   DISPOSITIONS OF RECORDS FROM TAPE 1.  "SLEEP" MEANS "DO DISC (TRANSFERRED) INPUT IF NECESSARY, OTHERWISE SLEEP".
 
- 3116   DO DELETE  
- 3118              
- 3120              
- 3121              
- 3123              
+ 3116   DO DELETE  LA           Z,X3          ZERO          RD NEXT             SIMPLY READ AGAIN IF NO REMOTE COMING.
+ 3118              TX           Z,X3          -             Z,X0                SWAP NEXT AND REMOTE BUFFERS.
+ 3120              TS           Z,X2          Z,X3          PHI TAPE
+ 3121              RF,1         3,0           -             DISASTER            READ A NEW REMOTE.
+ 3123              TS           Z,X0          Z,X2          RD REMOTE +2
 
- 3126   DO INP SAV 
- 3128              
- 3130              
- 3132              
- 3134              
+ 3126   DO INP SAV NA           N,R5          ZERO          DO ALT OP           GO TO SLEEP IF JOINT LIST IS FULL.
+ 3128              TX           Z,X2          -             N,R5,1              PUT BUFFER INTO JOINT STATUS.
+ 3130              SM           Z,R5          BIT 46        Z,R5                MODULATE JOINT LIST ENTRY POINTER.
+ 3132              TX           N,SC,1        -             REMOTE Q -1         CALL FOR SAVE AFTER INPUT.
+ 3134              TS           ZERO          REMOTE Q -1   DO SAVE
 
- 3135   DO INPUT   
- 3137              
- 3139              
+ 3135   DO INPUT   NA           N,R6          ZERO          DO ALT OP           GO TO SLEEP IF INPUT LIST IS FULL.
+ 3137              TS           Z,X2          N,R6,1        MON WAKE       C    PUT BUFFER INTO INPUT LIST, WAKE PASS 1.
+ 3139              SWS, BIT46R  Z,SC,5        16            Z,R6                MODULATE INPUT LIST ENTRY POINTER, SKIP.
 
- 3141              
- 3143              
- 3145   DO SAVE    
- 3146              
- 3148              
- 3150              
+ 3141              LA           N,R7          ZERO          C,+3                BRANCH IF SAPO LIST NOT FULL.
+ 3143              TS           Z,SC,1        -             DO ALT OP           OTHERWISE SLEEP UNTIL THERE'S A VACANCY.
+ 3145   DO SAVE    TS           SAPO NTRY     Z,R7          C,-2
+ 3146              TS           Z,X2          N,R7,1        -                   PUT SAVE BUFFER INTO SAPO STATUS.
+ 3148              SM           Z,R7          BIT 46        SAPO NTRY           MODULATE SAPO LIST ENTRY POINTER.
+ 3150              PR
 
 # Page 217
 #      @YUL SYSTEM ASSEMBLER PARA PASS 1                                         USER'S OWN PAGE NO.   7        PAGE  65
 
 P3151              PROCEDURE AFTER DISPOSITION OF EACH BUFFER.
 
- 3152   REMOTE Q   
- 3154              
- 3156   CH NEX BUF 
- 3157              
- 3159   RD NEXT    
- 3161              
+ 3152   REMOTE Q   LA           Z,X3          ZERO          CH NEX BUF          GO FOR A BUFFER IF NO REMOTE.
+ 3154              TS           Z,X3          Z,X2          CH REM BUF          CHANGE REMOTE TO NEXT, GO FOR REMOTE.
+ 3156   CH NEX BUF TS           Z,SC          Z,CSC         GRAB FREE      C
+ 3157              TS           Z,AU1         Z,X2          C,+1           S    ACQUIRE A FREE BUFFER.
+ 3159   RD NEXT    TS           Z,X2          Z,X3          PHI TAPE            SET UP DOUBLE TRY FOR REMOTE.
+ 3161              RF,1         2,0           -             DISASTER
 
- 3162   CH REM BUF 
- 3164              
- 3165   REM BUF OK 
- 3167              
- 3169              
- 3170              
- 3171              
+ 3162   CH REM BUF LA           Z,S1          ZERO          GRAB REM -1         BRANCH IF NO DISC TRANSFER INPUT TO DO.
+ 3164              TS           Z,SC,5        -             DO ALT OP
+ 3165   REM BUF OK NA           N,R7          BIT 32        GRAB REM            BRANCH IF WE HAVE A BUFFER FOR REMOTE.
+ 3167              LA           Z,X3          ZERO          RD REMOTE +2        GIVE UP AFTER 2ND FAILURE AT REMOTE.
+ 3169              TS           ZERO          Z,X3          PHI TAPE
+ 3170              RF,1         -             -             DISASTER
+ 3171              TS           FREE EXIT     Z,R7          REM BUF OK          SECOND TRY FOR A REMOTE BUFFER.
 
- 3173   GRAB REM   
- 3175              
- 3177              
- 3179   RD REMOTE  
- 3180              
- 3181              
- 3183              
- 3185              
- 3186              
- 3187              
- 3189              
- 3190              
- 3192              
- 3194              
- 3196              
- 3198              
- 3200              
+ 3173   GRAB REM   TS           N,R7          Z,X3          -                   GRAB NAME OF REMOTE BUFFER.
+ 3175              TS           BIT 32        N,R7,1        -                   PLANT BUSY FLAG IN FREE LIST.
+ 3177              EX           Z,R7          BIT 45 NOT    FREE EXIT           MODULATE FREE LIST EXIT POINTER.
+ 3179   RD REMOTE  TS           -             -             PHI TAPE
+ 3180              RF,1         3,0           -             DISASTER
+ 3181              NA, PROG SUB SWITCH        ZERO          SAVE MODE +2        ALWAYS CUT TAPE AT BEGINNING IN PROGRAM
+ 3183              TS           L DO SAVE     Z,R2          SAVE MODE +1        ASSEMBLY.  NOTE SEQUENCE MODE CALL HERE.
+ 3185              CC           N,X2          -             LHS
+ 3186              NA           LHS           ZERO          DISASTER
+ 3187              NA           LHS +1        ZERO          DISASTER            BRANCH IF INCOMING RECORD HAD BAD ORTHO.
+ 3189              WA           REC COUNT     ONE P         REC COUNT
+ 3190              NA, CAC3R    2,0           REC COUNT     DISASTER            BRANCH IF IT HAD BAD RECORD NUMBER.
+ 3192              LA           N,X2          C5T8 P        END FILE Q          IF NO COMPUTER NAME, SEE WHETHER EOF.
+ 3194              HA           N,X2          COMPUTER      LHS                 FORM LEFT-HALF ZERO IF NAMES MATCH.
+ 3196              LA           LHS           C5T8 P        5,Z,0               IF OK COMPUTER NAME, DO 3-WAY BRANCH.
+ 3198              NA           5,Z,0         N,R4          5,Z,0               OTHERWISE DO ANYTHING BUT INPUT.
+ 3200              TX           Z,R2          -             Z,SC                ...WHICH FOR WRONG COMPUTER BECOMES SAV.
 
 R3202   CLOSED SUBROUTINE TO CHANGE FROM PASSOVER TO SAVE MODE FOR NOMINALLY SAVE RECORDS.
 
- 3204              
- 3205   SAVEMODE   
- 3207              
- 3209              
- 3211              
+ 3204              NA           Z,R2          L DO DELET    N,SC,1         C
+ 3205   SAVEMODE   TX           L DO SAVE     -             Z,R2           C    SAVES HEREAFTER ARE WRITTEN ON TAPE 3.
+ 3207              SWE, SPECMAG N,X2          0             MID POINT           RECORD NO. OF 1ST RECORD WRITTEN OVER.
+ 3209              TN           RD REMOTE +4  10            RD REMOTE +2        DO THAT TEST ON FIRST RECORD ONLY.
+ 3211              TS           -             -             RD REMOTE +2
 
 # Page 218
 #      @YUL SYSTEM ASSEMBLER PARA PASS 1                                         USER'S OWN PAGE NO.   8        PAGE  66
@@ -374,49 +375,49 @@ R3216   SIDERING ALL RECORDS TO HAVE EQUAL LENGTH AND THAT RECORDS ARE REWOUND O
 R3218   IF BIT 11 OF SWITCH IS FOUND TO BE ON BEFORE OR DURING POSITIONING, EITHER THE TASK IS A REPRINT, OR A MERGING
 R3220   ERROR HAS BEEN FOUND.  IN THESE CASES, YULPROGS WILL NOT BE WRITTEN ON, SO REWIND AND FORGET POSITIONING.
 
- 3222   END BYPT   
- 3223              
- 3224              
- 3226              
- 3228              
- 3230              
- 3231              
- 3233              
- 3235              
- 3237              
+ 3222   END BYPT   TS           -             -             PHI TAPE
+ 3223              RF,1         -             -             -                   
+ 3224              LA           Z,X3          ZERO          C,+2                BRANCH IF THERE IS NO REMOTE.
+ 3226              TS           Z,X3          Z,SH          SET FREE       C    FREE REMOTE EOFRI BUFFER.
+ 3228              TS           C,+1          REMOTE Q      DO INP SAV          TRANSMIT EOFRI RECORD.
+ 3230              TS           -             -             C,+1
+ 3231              WD           N,X2          MID POINT     Z,S3                FORM COUNT FOR BACKWARDS RUN.
+ 3233              LA           Z,X3          ZERO          C,+2                BRANCH IF THERE WAS NO REMOTE BUFFER.
+ 3235              WA           Z,S3          ONE P         Z,S3                INCLUDE 2ND EOFRI IN BACKSPACE COUNT.
+ 3237              WA           MID POINT     MID POINT     LHS
 
- 3238   END P1 RB  
- 3240              
+ 3238   END P1 RB  SSL, ONE     SWITCH        37            C,+1                OMIT TEST IF BIT 11 IS ON.
+ 3240              LA           Z,S3          LHS           BK SPACE            BRANCH IF BACKSPACING IS BETTER.
 
- 3242   END P1 RW  
- 3243              
- 3244              
+ 3242   END P1 RW  TS           MID POINT     Z,S3          PHI TAPE
+ 3243              RW,1         -             -             -
+ 3244              WA           Z,S3          ONE P         Z,S3                FORM COUNT FOR READING FORWARD.
 
- 3246   END P1 RF  
- 3247              
+ 3246   END P1 RF  SSL, ONE     SWITCH        37            C,+1
+ 3247              TS           Z,SC,4        -             PHI TAPE
 
- 3248              
- 3249              
- 3251              
- 3253              
+ 3248              LA           MID POINT     Z,S3          C,+2
+ 3249              TS           -             -             END P1 RW           IF REWIND WAS NOT DONE, GO TO DO IT NOW.
+ 3251              NA           MID POINT     Z,S3          DEAD STOP -1        OTHERWISE NO-HUNT FROM BIT TEST TO STOP.
+ 3253              TS           -             -             END P1 RW
 
- 3254              
- 3255              
+ 3254              RF,1         1,0           -             DISASTER
+ 3255              NA           Z,S3,1        ONE P         END P1 RF
 
- 3256   BK SPACE   
- 3257              
- 3258              
+ 3256   BK SPACE   TS           -             -             PHI TAPE
+ 3257              RB,1         1,0           -             DISASTER
+ 3258              NA           Z,S3,1        ZERO          END P1 RB           GO TO REWIND AND HALT IF BIT 11 IS ON.
 
- 3260              
- 3262              
+ 3260              TS           ZERO          Z,S3          PHI TAPE            PLAY SAFE ABOUT MOD3 CHECK BITS.
+ 3262              RB,1         -             -             DISASTER            FINAL DUMMY READ FOR POSITIONING.
 
- 3264              
+ 3264              SWS, CHAR1   ZERO          0             END PARAS
 
 
 
 R3265   FINAL INSTRUCTION FOR PARAPROGRAMS.
 
- 3266   DEAD STOP  
+ 3266   DEAD STOP  TS           Z,R0          Z,SC          MON WAKE       C    WAKE OTHERS AND GO BACK TO BED.
 
 # Page 219
 #      @YUL SYSTEM ASSEMBLER PARA PASS 1                                         USER'S OWN PAGE NO.   9        PAGE  67
@@ -428,45 +429,45 @@ R3270   PUT ON THE DISC BY A TRANSFER TASK.  THE RESULT OF A "TRANSFERRED ASSEMB
 
 R3272   CONSTANTS, RESERVATION, AND EQUIVALENCES.
 
- 3273   130 IN A   
- 3274   OCT 1000   
- 3275   8 BLOX     
- 3276   SNATRACK   
+ 3273   130 IN A   PR           130
+ 3274   OCT 1000   OCT          -1000
+ 3275   8 BLOX     OCT          0000 0010
+ 3276   SNATRACK   DEC          -31
 
- 3277   DF INC MSG 
- 3278   END RUINS  
+ 3277   DF INC MSG ALF,3        DISC FILE INCOMPLETE (½)
+ 3278   END RUINS  ALF,5        ⌑999999Q   RUINS OF INCOMPLETE DISCFILE
 
- 3279   DISC BUF 1 
- 3280   DISC BUF 2 
- 3281   TRINDEX    
+ 3279   DISC BUF 1 CAC                        XFR BEGIN     13288
+ 3280   DISC BUF 2 SPEC                                     13800
+ 3281   TRINDEX    RESERVE      15
 
- 3282   L XFR BEGN 
+ 3282   L XFR BEGN EQUALS       DISC BUF 1
 
 
 
- 3283   MOVE RECD  
- 3285              
+ 3283   MOVE RECD  RT           N,AU1         -             N,S3                MOVE RECORD FROM DISCBUF2 TO DISCBUF 1.
+ 3285              NA           DISC ADDR     DISCALIM      READ DB2            BRANCH UNLESS JUST EXHAUSTED A TRACK.
 
- 3287              
- 3289   XFR BEGIN  
- 3290              
- 3291              
- 3293              
- 3294              
- 3295   SET DTRAP  
- 3297              
- 3299              
+ 3287              DS           TRACK LOG     ONE P         TRACK LOG           DECREMENT LOG NO. FROM TRACK TO TRACK.
+ 3289   XFR BEGIN  SWS, C1T4    TRACK LOG     D,6,L         TRINDEX +2
+ 3290              TS           ZERO          DISC ADDR     DISCAP         C
+ 3291              OCT          -1                                              LOOKUP TRACK WITH KNOWN LOG NUMBER.
+ 3293              SPEC                                     TRINDEX
+ 3294              TS, B7T13    TRINDEX +6    DISC ADDR     C,-2
+ 3295   SET DTRAP  TS           DF INCOMP     DTRAP LOC     DTRAP LOC -1        SET UP CUSS FOR INCOMPLETE DISCFILE.
+ 3297              NA, C7T8     TRINDEX +3    SNATRACK      C,-1                GIVE UP QUICK IF FILE IS WRONG TYPE.
+ 3299              SWS, B7T13   DISC ADDR     0             DISCALIM
 
- 3300   READ DB2   
- 3301              
- 3303              
- 3304              
- 3306   DTRAP LOC  
- 3308              
+ 3300   READ DB2   TX           DISC BUF 2    -             Z,X0
+ 3301              S, DISC READ 0,0           8             DISC ADDR           READ 512 WORDS FROM DISC.
+ 3303              WA           DISC ADDR     8 BLOX        DISC ADDR
+ 3304              TX           SAME 8K       -             C,+0                (SPECIAL INITIAL STATE).
+ 3306   DTRAP LOC  NA           N,R1          ZERO          DO ALT OP           DO TAPE OPS IF WAITING FOR DISC.
+ 3308              NA, C1T4     1,0           EOR           SAME 8K             BRANCH IF NOT END OF 8K-WORD SUPER-RECD.
 
- 3310              
- 3312              
- 3314              
+ 3310              HA           C,-1          130 IN A      C,-1                AUGMENT IS ALTERNATIVELY 0 AND 130.
+ 3312              LA, B22T25   C,-2          BIT 25 P      MOVE BAK 2          BRANCH IF END OF 8K BUT NOT END OF 16K.
+ 3314              TS           DISC BUF 2    Z,X1          SAME 8K +1          AFTER 16K, NO INPUT, THEN MOVE, READ.
 
 # Page 220
 #      @YUL SYSTEM ASSEMBLER PARA PASS 1                                         USER'S OWN PAGE NO.  10        PAGE  68
