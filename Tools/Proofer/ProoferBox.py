@@ -119,7 +119,7 @@ for index in range(startIndex, endIndex):
 		digitIndex = int(characters[characterIndex])
 		if boxOctal == digitIndex:
 			digit = images[digitIndex].clone()
-			operator = 'xor' 
+			operator = 'darken' #'xor' 
 		else:
 			digit = imagesColored[digitIndex].clone()
 			operator = 'darken'
