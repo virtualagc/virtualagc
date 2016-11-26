@@ -13,6 +13,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-19 HG   Transcribed
+##              2016-11-25 HG   Fix operand MARKCNTR -> WHATMARK
+##                                          ASBC0    -> ABSC0 
+##                                          ARPFGZ   -> ABRFGZ    
+##                                  label   HCASCLAD -> HCALCLAD   
+##                                          NETTOTKP -> NEGTORKP 
+##                                          RBRRGZ   -> RBRFGZ 
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -1497,7 +1503,7 @@ VELBIAS         EQUALS          W                       # I(2) PL BIAS VALUE FOR
 # PLEASE PRESERVE THE ORDER OF RBRFGX THROUGH TCGIAPPR.
 RBRFGX          EQUALS          VELBIAS         +2      # I(2)  POSITION TARGETS
 RAPFGX          EQUALS          RBRFGX          +2      # I(2)
-RBRRGZ          EQUALS          RAPFGX          +2      # I(2)
+RBRFGZ          EQUALS          RAPFGX          +2      # I(2)
 RAPFGZ          EQUALS          RBRFGZ          +2      # I(2)
 VBRFGX          EQUALS          RAPFGZ          +2      # I(2)  VELOCITY TARGETS
 VAPFGX          EQUALS          VBRFGX          +2      # I(2)
@@ -1506,7 +1512,7 @@ VAPFGZ          EQUALS          VBRFGZ          +2      # I(2)
 ABRFGX          EQUALS          VAPFGZ          +2      # I(2)  ACCELERTAION TARGETS
 AAPFGX          EQUALS          ABRFGX          +2      # I(2)
 ABRFGZ          EQUALS          AAPFGX          +2      # I(2)
-AAPFGZ          EQUALS          ARPFGZ          +2      # I(62
+AAPFGZ          EQUALS          ABRFGZ          +2      # I(62
 VBRFG*          EQUALS          AAPFGZ          +2      # I(2)  SCALED TARGETS FOR TTF/8CL
 VAPFG*          EQUALS          VBRFG*          +2      # I(2)
 ABRFG*          EQUALS          VAPFG*          +2      # I(2)
@@ -1553,7 +1559,7 @@ LRWVFX          EQUALS          LRWVFY          +1      # B(1)   LR VEL WEIG    
 LRWVFF          EQUALS          LRWVFX          +1      # B(1)   LR VEL WEIG      FUNCTIONS
 
 ABSC0           EQUALS          LRWVFF          +1      # B(1)  ABSCISSAE DEFINING TERRAIN MODEL
-ABSC1           EQUALS          ASBC0           +1      # B(1)
+ABSC1           EQUALS          ABSC0           +1      # B(1)
 ABSC2           EQUALS          ABSC1           +1      # B(1)
 ABSC3           EQUALS          ABSC2           +1      # B(1)
 ABSC4           EQUALS          ABSC3           +1      # B(1)
@@ -2014,7 +2020,7 @@ JETRATER        EQUALS          JETRATE         +2      # SCALED AT PI/4 RADIANS
 
 DOWNTORK        ERASE           +5                      # ACCUMULATED JET TORQUE COMMANDED ABOUT
 POSTORKP        EQUALS          DOWNTORK                #   +,-P, +,-U, +,-V RESPECTIVELY.
-NETTOTKP        EQUALS          DOWNTORK        +1      #
+NEGTORKP        EQUALS          DOWNTORK        +1      #
 POSTORKU        EQUALS          DOWNTORK        +2      #   NOT INITIALIZED; PERMITTED TO OVERFLOW
 
 ## Page 138
@@ -2597,7 +2603,7 @@ DELTAQ          EQUALS          BVECTOR         +18D    # I(2)
 #          AOTMARK STORAGE                               (3D)
 
 WHATMARK        EQUALS          DELTAQ          +2      # B(1)TMP  SIGHTING TECHNIQUE DETERMINATOR
-XYMARK          EQUALS          MARKCNTR        +1      # B(1)TMP  MARK INDENTIFICATION REGISTER
+XYMARK          EQUALS          WHATMARK        +1      # B(1)TMP  MARK INDENTIFICATION REGISTER
 MKDEX           EQUALS          XYMARK          +1      # B(1)TMP INDEX FOR AOTMARK
 #
 
@@ -2876,7 +2882,7 @@ G-VBIASX        =               STILBADV        +1      # B(1)    ACC DUE TO GRA
 G-VBIASY        =               G-VBIASX        +1      # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
 G-VBIASZ        =               G-VBIASY        +1      # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
 VSURFACE        =               G-VBIASZ        +1      # B(6)    LUNAR SURFACE VELOCITY
-HCASCLAD        =               VSURFACE        +6      # B(2)    ALTITUDE IN UNITS OF 2(15) M
+HCALCLAD        =               VSURFACE        +6      # B(2)    ALTITUDE IN UNITS OF 2(15) M
 HDOTLAD         =               HCALCLAD        +2      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
 DALTRATE        =               HDOTLAD         +2      # B(1)    DALTRATE UNITS OF 2(-9) M/CS/CS
 RUNITX          =               DALTRATE        +1      # B(1)    X-COMPONENT OF UNIT/R/ FULL-SIZE
