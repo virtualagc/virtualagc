@@ -122,7 +122,7 @@ to reside within the same folder, as is the case in the source distribution, and
 be the current working directory when ProoferBox.py is actually run.  However,
 input and output files for it can reside an any other folder.
 
-     `./ProoferBox.py BWINPUTIMAGE OUTPUTIMAGE BANK PAGEINBANK BINSOURCE`
+     ./ProoferBox.py BWINPUTIMAGE OUTPUTIMAGE BANK PAGEINBANK BINSOURCE
 
 The command-line parameters are:
 
@@ -131,3 +131,16 @@ The command-line parameters are:
 * `BANK` is the AGC memory-bank number, from 0 to 35 decimal.  Octal values would be misinterpreted.
 * `PAGEINBANK` is the printout-page within the memory bank, from 0 to 3.
 * `BINSOURCE` is the pathname to the AGC program's binsource file, the file whose contents are being proofed.
+
+Here is a simple bash script that applies ProoferBox.py to a complete set of B&W octal 
+pages:
+
+	pageNum=STARTINGPAGEOFOCTALS
+	for bank in 2 3 0 1 `seq 4 35`
+	do
+		for pageInBank in 0 1 2 3
+		do 
+			./ProoferBox.py BWIMAGEDIR/$pageNum.tif OUTPUTDIR/$pageNum.png $bank $pageInBank PATHTOBINSOURCEFILE
+			pageNum=$((pageNum+1))
+		done
+	done
