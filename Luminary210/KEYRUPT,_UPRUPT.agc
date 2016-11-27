@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-23 AS   Transcribed
+##              2016-11-27 HG   fix opcode  CSS   ->  CCS
+##                                  operand lOW5  ->  LOW5 
 
 
 ## Page 1335
@@ -56,7 +58,7 @@ UPRUPT          TS                      BANKRUPT
                 TS                      KEYTEMP1
                 CA                      FLAGWRD3        # AFTER EARTH LAUNCH?
                 MASK                    NOP07BIT
-                CSS                     A
+                CCS                     A
                 TCF                     UPRPT1          # YES
                 CA                      KEYTEMP1        # NO: SUM UPLINK DATA
                 ADS                     UPSUM
@@ -64,7 +66,7 @@ UPRUPT          TS                      BANKRUPT
 UPRPT1          CAF                     BIT3            # TURN ON UPACT LIGHT
                 EXTEND                                  # (BIT 3 OF CHANNEL 11)
                 WOR                     DSALMOUT
-                CAF                     lOW5            # TEST FOR TRIPLE CHAR REDUNDANCY
+                CAF                     LOW5            # TEST FOR TRIPLE CHAR REDUNDANCY
                 MASK                    KEYTEMP1        # LOW5 OF WORD
                 XCH                     KEYTEMP1        # LOW5 INTO KEYTEMP1
                 EXTEND

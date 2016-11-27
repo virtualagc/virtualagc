@@ -277,7 +277,7 @@ FORVOUT         CS              FORVMETR                # SUBTRACT METER INDICAT
                 ADS             L
                 CA              MAXDBITS
                 TC              LADLIMIT                # LIMIT CHANGE TO ABOUT 300 F/S
-                AD              NEGO
+                AD              NEG0
                 TS              CDUSCMD
                 ADS             FORVMETR                # UPDATE METER INDICATOR
 
@@ -298,7 +298,7 @@ LATVOUT         CS              LATVMETR                # SUBTRACT METER INDICAT
                 ADS             L
                 CAF             MAXDBITS
                 TC              LADLIMIT                # LIMIT CHANGE TO ABOUT 300 F/S
-                AD              NEGO
+                AD              NEG0
                 TS              CDUTCMD
                 ADS             LATVMETR                # UPDATE METER INDICATOR
 
@@ -362,7 +362,7 @@ CROSCOMP        CS              FLAGWRD0                # IS R10FLAG SET TO INDI
                 CA              M32                     # COS(AOG)
                 EXTEND
                 MP              VHZ             +1
-                TS              ITEMPZ
+                TS              ITEMP2
                 CS              M22                     # SIN(AOG)
                 EXTEND
                 MP              VHY             +1
@@ -419,7 +419,7 @@ APSLAD          TS              FORVTEMP                # DURING ASCENT AND ABOR
 # LANDING ANALOG DISPLAYS INITIALIZATION
 # ***************************************************************************************
 
-DISPINIT        TC              CROSSCOMP               # FIRST COMPUTE BUT NOT OUTPUT VELOCITIES
+DISPINIT        TC              CROSCOMP               # FIRST COMPUTE BUT NOT OUTPUT VELOCITIES
 
                 CS              FLAGWRD1                # SET DIDFLAG
                 MASK            DIDFLBIT
@@ -460,7 +460,7 @@ DISPRSET        TC              CROSCOMP                # FIRST COMPUTE BUT NOT 
                 TS              FLAGWRD1
 
                 CAF             BIT8                    # WAS INERTIAL DATA JUST DISPLAYED?
-                MASK            INODES33
+                MASK            IMODES33
                 CCS             A
                 CAF             BIT2                    # YES:  DISABLE RR ERROR COUNTER AND
                 AD              BIT8                    # NO:   RESET DISPLAY INERTIAL DATA OUTBIT
@@ -480,17 +480,17 @@ DISPRSET        TC              CROSCOMP                # FIRST COMPUTE BUT NOT 
 # CONSTANTS ON A-CARDS ARE FOUND IN THE CONTROLLED CONSTANTS SECTION
 
 ## Page 904
-LANAKPIP        DEC             .0512                   # SCALES PIPAS TO UNITS OF 2(5) M/CS
+# LANAKPIP        DEC             .0512                   # SCALES PIPAS TO UNITS OF 2(5) M/CS
 
-MAXVEL          OCT             00466                   # A98.645 F/S IN UNITS OF 2(5) M/CS
+# MAXVEL          OCT             00466                   # A98.645 F/S IN UNITS OF 2(5) M/CS
 
-MAXDBITS        OCT             01034                   # ABOUT 300 F/S
+# MAXDBITS        OCT             01034                   # ABOUT 300 F/S
 
-VELCONV         DEC             .03594                  # SCALES VEL AT ONE M/CS TO .5571 F/S/BIT
+# VELCONV         DEC             .03594                  # SCALES VEL AT ONE M/CS TO .5571 F/S/BIT
 
-ALTRCONV        DEC             .16020                  # SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT
+# ALTRCONV        DEC             .16020                  # SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT
 
-ALTCONV         DEC             .69954                  # SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT
+# ALTCONV         DEC             .69954                  # SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT
 
 BITSET          =               PRIO6                   # CROSS-POINTER DRIVE BITS
 
