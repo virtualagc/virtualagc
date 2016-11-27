@@ -13,6 +13,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-23 HG   Transcribed
+##              2016-11-25 HG   Fix label    MARKREJ -> MKREJ
+##                                  opernand NOVAK   -> NOVAC
+##                                           GOMARKER-> GOMARKFR
+##                                           CMKCNTR -> XMKCNTR 
 
 ## Page 255
                 SETLOC          AOTMARK1
@@ -694,7 +698,7 @@ ENDSTOR         TCF             REMARK
 
 ## Page 272
 REMARK          CAF             PRIO15                  # ENTER JOB TO CHANGE DISPLAY
-                TC              NOVAK
+                TC              NOVAC
                 EBANK=          XYMARK
                 2CADR           CHANGEVB
 
@@ -711,7 +715,7 @@ CHANGEVB        CA              WHATMARK
                 INDEX           WHATMARK
                 CAF             V06N79*                 # EITHER V21N79 OR V 22N79 LOAD VERB
                 TC              BANKCALL
-                CADR            GOMARKER
+                CADR            GOMARKFR
 
                 TCF             KILLAOT                 # VB34-TERMINATE
                 TCF             N79DISP
@@ -723,7 +727,7 @@ CHANGEVB        CA              WHATMARK
 
 N79DISP         CAF             V06N79*                 # ENTER-DISPLAY V06N79 FOR VERIFY
                 TC              BANKCALL
-                CADR            GOMARKER
+                CADR            GOMARKFR
 
                 TC              KILLAOT
                 TCF             SURFAGAN
@@ -753,8 +757,8 @@ DP1/8           2DEC            .125
 
 ## Page 274
 # MARK REJECT ROUTINE
-MARKREJ         INDEX           XYMARK
-                CCS             CMKCNTR
+MKREJ           INDEX           XYMARK
+                CCS             XMKCNTR
                 TCF             REJMK
 
                 TC              ALARM
