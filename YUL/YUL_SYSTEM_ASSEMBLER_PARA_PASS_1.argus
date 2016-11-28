@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2016-11-25 JL   Transcribed pages 211-214.
 #               2016-11-26 JL   Transcribed pages 215-219.
+#               2016-11-27 JL   Transcribed pages 220-222.
 
 # Annotations:
 #
@@ -474,54 +475,54 @@ R3272   CONSTANTS, RESERVATION, AND EQUIVALENCES.
 
 P3316   EACH 512-WORD RECORD FROM DISC HAS A COMPLETE 26-CARD INPUT RECORD AND PIECES OF ONE OR TWO MORE.
 
- 3318   MOVE BAK 2 
- 3320              
- 3322              
- 3323              
+ 3318   MOVE BAK 2 RT           1,132         -             1,130               SINCE TRANSFER HAD PUT 819 CARDS IN 8K.
+ 3320              TS           FREE EXIT     Z,R7          XFR INPUT           INPUT LAST 26 CARDS IN OLD 8K.
+ 3322              WD           DISC BUF 2    TWO           Z,AU1
+ 3323              SM           Z,X1,2        Z,SC,2        -
 
- 3324   SAMKE 8K   
- 3326              
- 3327              
- 3329              
+ 3324   SAMKE 8K   TS           FREE EXIT     Z,R7          XFR INPUT           INPUT 26 CARDS (260 WORDS) TO PASS 1.
+ 3326              TX           DISC BUF 2    -             Z,AU1
+ 3327              WD           Z,X1          OCT 1000      Z,X1                BECAUSE RECORD IS MOVED BACK 512 WORDS.
+ 3329              TS           DISC BUF 1    Z,S3          MOVE RECD           CLEAR OUT DISC BUF 2 FOR NEW DISC READ.
 
 R3331   SUBROUTINE TO DELIVER 26 CARDS TO PASS 1 BY WAY OF THE INPUT LIST.
 
- 3332   XFR INPUT  
- 3333              
+ 3332   XFR INPUT  TS           Z,SH          Z,S3          -
+ 3333              NA           N,R7          BIT 32        GRAB XFER           BRANCH IF THERE IS A FREE BUFFER.
 
- 3335   DO ALT OP  
- 3336              
- 3338              
- 3340              
- 3341              
+ 3335   DO ALT OP  TS           Z,S1          Z,SC          C,+1           C
+ 3336              LA           Z,S1          ZERO          C,+2           C    BRANCH IF NOT DOING TRANSFERRED ASSY.
+ 3338              WD           Z,SH          ONE P         Z,S1           S    SET UP S1 FOR RETURN AND DO OTHER OP.
+ 3340              WD           Z,SH          ONE P         Z,SC           C
+ 3341              TS           Z,SC          Z,CSC         MON SLEEP      C
 
- 3342   GRAB XFER  
- 3343              
- 3345   XF SET AU2 
- 3347              
- 3349              
- 3350              
- 3352              
- 3354              
- 3355              
- 3356              
+ 3342   GRAB XFER  TS           N,R7          Z,S2          GRAB REM +1    C
+ 3343              TS           D12 P         Z,CSH         -              C    REMOVE BUFFER NAME FROM FREE LIST.
+ 3345   XF SET AU2 TN           ZERO          2             N,S2           S    CLEAR 1ST WORD OF 265-WORD BUFFER.
+ 3347              MT           N,X1,1        52            N,AU2,1             MOVE 260 WORDS.
+ 3349              LA           BIT 46        Z,CSH,3       C,-1
+ 3350              TX           END RUINS     -             N,AU2,1             SET UP SEARCH FOR "END OF" CARD.
+ 3352              TS           EOR           N,AU2         XF SET AU2     C    MAKE 264-WD BUFF LOOK LIKE ODD TAPE REC.
+ 3354              NA           N,AU2,10      END RUINS     C,+0
+ 3355              WD           Z,AU2,1       NINE          Z,AU1
+ 3356              NA           N,AU1         EOR           END DFILE           BRANCH IF FOUND THE "END OF" CARD.
 
- 3358   DO X INPUT 
- 3360              
- 3362              
- 3364              
+ 3358   DO X INPUT NA           N,R6          ZERO          DO ALT OP           SLEEP OR DO TAPE IF NO ROOM IN INPUTLST.
+ 3360              TS           Z,S2          N,R6,1        MON WAKE       C    PUT BUFFER IN INPUT STATUS, WAKE PASS 1.
+ 3362              SS           ZERO          BIT 46        Z,R6                MODULATE INPUT LIST ENTRY POINTER.
+ 3364              NA           Z,S3          Z,S1          N,S3                EXIT UNLESS JUST SENT LAST INPUT.
 
- 3366              
- 3368              
+ 3366              NA           N,R1          ZERO          DO ALT OP           SLEEP OR DO TAPE UNTIL DISC READ DONE.
+ 3368              TS           ZERO          Z,S1          N,S3                SHOW END OF DISC OPS, EXIT.
 
- 3370   END DFILE  
- 3372              
+ 3370   END DFILE  TX           EOR           -             N,AU2               SHORTEN BUFFER CONTAINING "END OF" CARD.
+ 3372              TS           Z,S1          Z,S3          DO X INPUT          SET FLAG AND DO LAST INPUT.
 
- 3374   DF INCOMP  
- 3376              
- 3377              
- 3379              
- 3381              
+ 3374   DF INCOMP  S, MON TYPER DF INC MSG    SPRA +24      C,+1                "DISCFILE INCOMPLETE (?)".
+ 3376              TN           END RUINS     5             N,X1
+ 3377              TN           TRINDEX       2             N,AU2               PHONY UP AN "END OF" CARD.
+ 3379              SWS, BIT 11  ONE P         11            SWITCH              CALL THIS ASSEMBLY A REJECT.
+ 3381              TS           END YUL +2    END YUL +1    SAME 8K             SET FLAG FOR END OF RD1.
 
 # Page 221
 #      @YUL SYSTEM ASSEMBLER PARA PASS 1                                         USER'S OWN PAGE NO.  11        PAGE  69
@@ -535,72 +536,72 @@ R3389   END OF PASS 1, TAPES 2 AND 3 ARE REWOUND.
 
 
 
- 3390              
- 3391   CH SP LIST 
- 3393              
- 3395              
- 3397              
- 3399              
+ 3390              TS           -             -             MON SLEEP      C
+ 3391   CH SP LIST LA           N,R6          ZERO          C,-1                GO TO SLEEP IF SAPO LIST IS EMPTY.
+ 3393              TX           N,R6          -             Z,X2                RECEIVE NAME OF SAPO BUFFER.
+ 3395              TS           ZERO          N,R6,1        MON WAKE       C    PLANT VOID FLAG IN SAPO LIST.
+ 3397              SM           Z,R6          BIT 46        Z,R6                MODULATE SAPO LIST EXIT POINTER.
+ 3399              LA           N,X2          ZERO          WRIT POPO           BRANCH IF SAPO IS A POPO BUFFER.
 
- 3401              
- 3403   WRITE SAV  
- 3404              
- 3406              
- 3408              
+ 3401              TS           TRY PO REM    CH SP LIST    PHI TAPE            SET REMOTE SWITCH TO POPO.
+ 3403   WRITE SAV  WF,3         2,0           -             DISASTER
+ 3404              LA           Z,X3          ZERO          C,+2                BRANCH IF THERE IS NO SAVE REMOTE.
+ 3406              TS           Z,X3          Z,SH          FREE IN SV     C    FREE SAVE REMOTE.
+ 3408              LA, C5T8     2,0           EOF BANER     LAS2REM1            BRANCH IF NOT END SYLT OR END BYPT.
 
- 3410              
- 3412              
- 3413              
- 3415              
- 3416              
- 3417              
- 3418   FREE EOF   
- 3420              
- 3421              
- 3422              
- 3424              
+ 3410              WA           WRITE SAV     BIT 6 P       WRITE SAV           CHANGE TAPE 3 TO TAPE 4.
+ 3412              TS           ZERO          Z,X3          PHI TAPE
+ 3413              WF,3         2,0           -             DISASTER            WRITE END-OF-FILE RECORD AGAIN.
+ 3415              WA           DUMMY SAV     BIT 6 P       DUMMY SAV
+ 3416              TS           WRITE SAV     C,-2          PHI TAPE
+ 3417              WF,3         -             -             DISASTER
+ 3418   FREE EOF   TS           Z,X2          Z,SH          FREE IN SV     C    FREE END-OF-FILE BUFFER.
+ 3420              TS           DUMMY SAV     C,-2          PHI TAPE
+ 3421              RW,3         -             -             -
+ 3422              TS           C,+1          FREE EOF +1   CH SP LIST          CHANGE POST-EOF ACTION AND LOOP.
+ 3424              TS           ZERO          W34 WAIT      WR2 WAIT            END OF W34 SECTION OF WWT.
 
- 3426   SAV REMOT  
- 3428              
- 3430              
- 3432   DUMMY SAV  
- 3433              
- 3434              
+ 3426   SAV REMOT  LA           Z,X3          ZERO          CH SP LIST -1       GO TO SLEEP IF NEITHER TYPE OF REMOTE.
+ 3428              LA           Z,X3          ZERO          PO REMOT            BRANCH IF NO SAVE REMOTE.
+ 3430              TS           TRY PO REM    CH SP LIST    PHI TAPE            SET REMOTE SWITCHG TO POPO.
+ 3432   DUMMY SAV  WF,3         -             -             DISASTER
+ 3433              TS           Z,X3          Z,SH          FREE IN SV     C
+ 3434              TS           ZERO          Z,X3          CH SP LIST          FREE SAVE REMOTE & SHOW LACK THEROF.
 
- 3436   TRY SA MEM 
- 3438   LAS2REM1   
+ 3436   TRY SA MEM LA           N,R6          ZERO          SAV REMOT +1        BRANCH IF SAPO LIST IS EMPTY.
+ 3438   LAS2REM1   TS           Z,X2          Z,X3          CH SP LIST
 
 # Page 222
 #      @YUL SYSTEM ASSEMBLER PARA PASS 1                                         USER'S OWN PAGE NO.  12        PAGE  70
 
 P3439   PROCEDURE IN PARAPROGRAM WWT TO DISPATCH A POPO BUFFER.
 
- 3440   WRIT POPO  
- 3442              
- 3443              
- 3445              
- 3447              
+ 3440   WRIT POPO  TS           TRY SA REM    CH SP LIST    PHI TAPE            SET REMOTE SWITCH TO SAVE.
+ 3442              WF,2         2,0           -             DISASTER
+ 3443              LA           Z,X4          ZERO          C,+2                BRANCH IF THERE IS NO POPO REMOTE.
+ 3445              TS           Z,X4          Z,SH          SET FREE       C    FREE POPO REMOTE.
+ 3447              NA           2,2           W END POPO    LAS2REM2            BRANCH IF NOT END OF TAPE.
 
- 3449              
- 3450              
- 3451              
- 3453              
- 3455              
- 3456              
+ 3449              TS           ZERO          Z,X4          PHI TAPE
+ 3450              WF,2         -             -             DISASTER
+ 3451              TS           Z,X2          Z,SH          SET FREE       C    FREE END POPO BUFFER.
+ 3453              TS           TRY SA REM    CH SP LIST    PHI TAPE            SET REMOTE SWITCH TO SAVE MODE.
+ 3455              RW,2         -             -             -
+ 3456              TS           WR2 WAIT +1   WR2 WAIT      W34 WAIT            END OF WR2 SECTION OF WWT.
 
- 3458   PO REMOT   
- 3460              
- 3462              
- 3464              
- 3465              
- 3466              
+ 3458   PO REMOT   LA           Z,X4          ZERO          CH SP LIST -1       BRANCH IF NEITHER TYPE OF REMOTE.
+ 3460              LA           Z,X4          ZERO          SAV REMOT           BRANCH IF THERE IS NO POPO REMOTE.
+ 3462              TS           TRY SA REM    CH SP LIST    PHI TAPE            SET REMOTE SWITCH TO SAVE MODE.
+ 3464              WF,2         -             -             DISASTER
+ 3465              TS           Z,X4          Z,SH          SET FREE       C
+ 3466              TS           ZERO          Z,X4          CH SP LIST          FREE POPO REMOTE & SHOW LACK THEREOF.
 
- 3468   TRY PO REM 
- 3470   LAS2REM2   
+ 3468   TRY PO REM LA           N,R6          ZERO          PO REMOT +1         BRANCH IF SAPO LIST IS EMPTY.
+ 3470   LAS2REM2   TS           Z,X2          Z,X4          CH SP LIST          LAST POPO BECOMES POPO REMOTE.
 
- 3472   W34 WAIT   
- 3473   WR2 WAIT   
- 3474              
+ 3472   W34 WAIT   TS           -             -             CH SP LIST          
+ 3473   WR2 WAIT   TS           -             -             CH SP LIST          
+ 3474              TS, CAC3R    ZERO          END PARAS     DEAD STOP
 
 
 
@@ -610,19 +611,19 @@ P3439   PROCEDURE IN PARAPROGRAM WWT TO DISPATCH A POPO BUFFER.
 
 R3475   INITIALIZING SEQUENCES FOR PARAPROGRAMS.
 
- 3477   PASS 1 GPB 
- 3479              
- 3481              
- 3483              
- 3485              
- 3486              
- 3488              
- 3490              
- 3492              
- 3493              
- 3495              
- 3496              
- 3498              
+ 3477   PASS 1 GPB HA           P1 MASKS      ONE P         Z,MXR               SIDE GRPS USE SAME S, INVERSE F AS GP A.
+ 3479              TN           SUBSTRAB      2             TRINDEX             DISC FILE NAME OF TRANSFERRED INPUT.
+ 3481              EBA          Z,X7          BIT 46        Z,X1                PRETEND X1 IS LOOKING AT AN END-BUFFLAG.
+ 3483              TN           L DO DELET    5             Z,R2                LOAD ADDRESSES FOR INSTANT BRANCHING.
+ 3485              SSL, ONE     SWITCH        35            C,+1
+ 3486              TS           ZERO          Z,S1          C,+2                SHOW THAT THERE IS NO TRANSFERRED INPUT.
+ 3488              SWE, CAC3    L XFR BEGN    16            Z,S1                SHOW TAPE ROUTINES WHERE TO GO FOR DISC.
+ 3490              TX           INIT X5       -             Z,X5                SET X5 TO R2, +-R3, OR R4 OF GROUP B.
+ 3492              EBS          Z,X7          OCT 200       Z,R1
+ 3493              SWE, B38T48  DISC CHEK     24            C,+0                GET A ADDRESS OF ORDER IN XFER VECTOR.
+ 3495              EBA          Z,R1          C,-1          Z,R1
+ 3496              EBA          N,R1          THREE P       Z,R1                POINT TO DFLOK (DISC FILE LOCK) IN MON.
+ 3498              TS           SORS NAME     WANTED        CH NEX BUF          BEGIN READING TAPE 1.
 
- 3501   PASS 1 GPC 
- 3503              
+ 3501   PASS 1 GPC TS           SAPO NTRY     Z,R6          PASS1 GPB      C    LOAD BUFFER LIST ADDRESS AND MXR.
+ 3503              TS           ZERO          Z,X4          DUMMY SAV +2        INITIALIZE REMOTE SWITCH AND BEGIN.
