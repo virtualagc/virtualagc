@@ -87,7 +87,7 @@ Records
 The tapes store different kinds of records.
  - SYLT: Symbolic YUL Library Tape
  - SYPT: Symbolic YUL Program Tape
- - BYPT: 
+ - BYPT: Binary YUL Program Tape [?]
 
 
 Machine Tables
