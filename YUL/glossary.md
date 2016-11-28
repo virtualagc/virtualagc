@@ -28,6 +28,7 @@ Monitor Calls
  - MON LOK
  - MON RELOX 
  - MON WAKE
+ - MON SLEEP
  - MON RLEAS
  - MONITOR
 
