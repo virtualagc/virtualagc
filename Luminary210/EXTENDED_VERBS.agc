@@ -13,122 +13,124 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-20 MAS  Updated for Luminary 210.
+##              2016-11-27 HG   Fix operand 2SECDELV  -> 2SECDELY
+##                              replace tabs with spaces 
 
 ## Page 275
-		BANK	7
-		SETLOC	EXTVERBS
-		BANK
-		
-		EBANK=	OGC
-		
-		COUNT*	$$/EXTVB
+                BANK    7
+                SETLOC  EXTVERBS
+                BANK
+
+                EBANK=  OGC
+
+                COUNT*  $$/EXTVB
 # FAN-OUT
 
-GOEXTVB		INDEX	MPAC		# VERB-40 IS IN MPAC
-		TC	LST2FAN		# FAN AS BEFORE.
-		
-LST2FAN		TC	VBZERO		# VB40 ZERO (USED WITH NOUN 20 OR 72 ONLY)
-		TC	VBCOARK		# VB41 COARSE ALIGN (USED WITH NOUN 20 OR
-					#                                 72 ONLY)
-		TC	IMUFINEK	# VB42 FINE ALIGN IMU
-		TC	IMUATTCK	# VB43  LOAD IMU ATTITUDE ERROR METERS.
-		TC	RRDESEND	# VB44 TERMINATE CONTINUOUS DESIGNATE
-		TC	ALM/END		# VB45 SPARE
-		TC	ALM/END		# VB46 SPARE
-		TC	V47TXACT	# VB47 AGS INITIALIZATION
-		TC	DAPDISP		# VB48  LOAD A/P DATA
-		TCF	CREWMANU	# VB49 START AUTOMATIC ATTITUDE MANEUVER
-		TC	GOLOADLV	# VB50 PLEASE PERFORM
-		TC	ALM/END		# VB51 SPARE
-		TC	GOLOADLV	# VB52 PLEASE MARK X - RETICLE.
-		TC	GOLOADLV	# VB53 PLEASE MARK Y - RETICLE.
-		TC	GOLOADLV	# VB54 PLEASE MARK X OR Y - RETICLE
-		TC	ALINTIME	# VB55 ALIGN TIME
-		TC	TRMTRACK	# VB56 TERMINATE TRACKING - P20 + P25
-		TC	LRON		# VB57 PERMIT  LANDING RADAR UPDATES
-		TC	LROFF		# VB58 INHIBIT LANDING RADAR UPDATES
-		TC	LRPOS2K		# VB59 COMMAND LR TO POSITION 2.
-		TC	RATEDISP	# VB60 DISPLAY DAP ESTIMATED RATES
-		TC	DAPATTER	# VB61 DISPLAY DAP ATTITUDE ERROR
-		TC	TOTATTER	# VB62 DISPLAY TOTAL ATTITUDE ERROR
-		TC	R04		# VB63 SAMPLE RADAR ONCE PER SECOND
-		TC	VB64		# VB64 CALCULATE,DISPLAY S-BAND ANT ANGLES
-		TC	SNUFFOUT	# VB65 DISABLE U,V JETS DURING DPS BURNS.
-		TC	ATTACHED	# VB66 ATTACHED	  MOVE THIS TO OTHER STATE
-		TC	V67		# VB67 W MATRIX MONITOR
-		TC	TEROFF		# VB68 TAKE OUT TERRAIN MODEL IN DESCENT
-VERB69		TC	VERB69		# VB69 FORCE A HARDWARE RESTART
-		TC	V70UPDAT	# VB70 UPDATE LIFTOFF TIME.
-		TC	V71UPDAT	# VB71 UNIVERSAL UPDATE - BLOCK ADDRESS.
-		TC	V72UPDAT	# VB72 UNIVERSAL UPDATE - SINGLE ADDRESS.
-		TC	V73UPDAT	# VB73 UPDATE AGC TIME (OCTAL).
-		TC	DNEDUMP		# VB74 INITIALIZE DOWN-TELEMETRY PROGRAM
-					#        FOR ERASABLE DUMP.
-		TC	OUTSNUFF	# VB75 ENABLE U,V JETS DURING DPS BURNS.
+GOEXTVB         INDEX   MPAC            # VERB-40 IS IN MPAC
+                TC      LST2FAN         # FAN AS BEFORE.
+
+LST2FAN         TC      VBZERO          # VB40 ZERO (USED WITH NOUN 20 OR 72 ONLY)
+                TC      VBCOARK         # VB41 COARSE ALIGN (USED WITH NOUN 20 OR
+                                        #                                 72 ONLY)
+                TC      IMUFINEK        # VB42 FINE ALIGN IMU
+                TC      IMUATTCK        # VB43  LOAD IMU ATTITUDE ERROR METERS.
+                TC      RRDESEND        # VB44 TERMINATE CONTINUOUS DESIGNATE
+                TC      ALM/END         # VB45 SPARE
+                TC      ALM/END         # VB46 SPARE
+                TC      V47TXACT        # VB47 AGS INITIALIZATION
+                TC      DAPDISP         # VB48  LOAD A/P DATA
+                TCF     CREWMANU        # VB49 START AUTOMATIC ATTITUDE MANEUVER
+                TC      GOLOADLV        # VB50 PLEASE PERFORM
+                TC      ALM/END         # VB51 SPARE
+                TC      GOLOADLV        # VB52 PLEASE MARK X - RETICLE.
+                TC      GOLOADLV        # VB53 PLEASE MARK Y - RETICLE.
+                TC      GOLOADLV        # VB54 PLEASE MARK X OR Y - RETICLE
+                TC      ALINTIME        # VB55 ALIGN TIME
+                TC      TRMTRACK        # VB56 TERMINATE TRACKING - P20 + P25
+                TC      LRON            # VB57 PERMIT  LANDING RADAR UPDATES
+                TC      LROFF           # VB58 INHIBIT LANDING RADAR UPDATES
+                TC      LRPOS2K         # VB59 COMMAND LR TO POSITION 2.
+                TC      RATEDISP        # VB60 DISPLAY DAP ESTIMATED RATES
+                TC      DAPATTER        # VB61 DISPLAY DAP ATTITUDE ERROR
+                TC      TOTATTER        # VB62 DISPLAY TOTAL ATTITUDE ERROR
+                TC      R04             # VB63 SAMPLE RADAR ONCE PER SECOND
+                TC      VB64            # VB64 CALCULATE,DISPLAY S-BAND ANT ANGLES
+                TC      SNUFFOUT        # VB65 DISABLE U,V JETS DURING DPS BURNS.
+                TC      ATTACHED        # VB66 ATTACHED   MOVE THIS TO OTHER STATE
+                TC      V67             # VB67 W MATRIX MONITOR
+                TC      TEROFF          # VB68 TAKE OUT TERRAIN MODEL IN DESCENT
+VERB69          TC      VERB69          # VB69 FORCE A HARDWARE RESTART
+                TC      V70UPDAT        # VB70 UPDATE LIFTOFF TIME.
+                TC      V71UPDAT        # VB71 UNIVERSAL UPDATE - BLOCK ADDRESS.
+                TC      V72UPDAT        # VB72 UNIVERSAL UPDATE - SINGLE ADDRESS.
+                TC      V73UPDAT        # VB73 UPDATE AGC TIME (OCTAL).
+                TC      DNEDUMP         # VB74 INITIALIZE DOWN-TELEMETRY PROGRAM
+                                        #        FOR ERASABLE DUMP.
+                TC      OUTSNUFF        # VB75 ENABLE U,V JETS DURING DPS BURNS.
 ## Page 276
-		TC	MINIMP		# VB76 MINIMUM IMPULSE MODE
-		TC	NOMINIMP	# VB77 RATE COMMAND MODE
-		TC	R77		# VB78 START LR SPURIOUS RETURN TEST
-		TC	R77END		# VB79 TERMINATE LR SPURIOUS RETURN TEST
-		TC	LEMVEC		# VB80 UPDATE LEM STATE VECTOR
-		TC	CSMVEC		# VB81 UPDATE CSM STATE VECTOR
-		TC	V82PERF		# VB82 REQUEST ORBIT PARAM DISPLAY (R30)
-		TC	V83PERF		# VB83 REQUEST REND PARAM DISPLAY (R31)
-		TC	ALM/END		# VB84 SPARE
-		TC	VERB85		# VB85 DISPLAY RR LOS AZ AND ELEV
-		TC	ALM/END		# VB86 SPARE
-		TC	ALM/END		# VB87 SPARE
-		TC	ALM/END		# VB88 SPARE
-		TC	V89PERF		# VB89 ALIGN XORZ LEM AXIS ALONG LOS (R63)
-		TC	V90PERF		# VB90 OUT OF PLANE RENDEZVOUS DISPLAY
-		TC	GOSHOSUM	# VB91 DISPLAY BANK SUM.
-		TC	SYSTEST		# VB92 OPERATE IMU PERFORMANCE TEST.
-		TC	WMATRXNG	# VB93 CLEAR RENDWFLG
-		TC	ALM/END		# VB94 SPARE
-		TC	UPDATOFF	# VB95 NO STATE VECTOR UPDATE ALLOWED
-		TC	VERB96		# VB96 INTERRUPT INTEGRATION AND GO TO P00
-		TC	GOLOADLV	# VB97 PLEASE VERIFY ENGINE FAILURE
-		TC	ALM/END		# VB98 SPARE
-		TC	GOLOADLV	# VB99 PLEASE ENABLE ENGINE
-		
+                TC      MINIMP          # VB76 MINIMUM IMPULSE MODE
+                TC      NOMINIMP        # VB77 RATE COMMAND MODE
+                TC      R77             # VB78 START LR SPURIOUS RETURN TEST
+                TC      R77END          # VB79 TERMINATE LR SPURIOUS RETURN TEST
+                TC      LEMVEC          # VB80 UPDATE LEM STATE VECTOR
+                TC      CSMVEC          # VB81 UPDATE CSM STATE VECTOR
+                TC      V82PERF         # VB82 REQUEST ORBIT PARAM DISPLAY (R30)
+                TC      V83PERF         # VB83 REQUEST REND PARAM DISPLAY (R31)
+                TC      ALM/END         # VB84 SPARE
+                TC      VERB85          # VB85 DISPLAY RR LOS AZ AND ELEV
+                TC      ALM/END         # VB86 SPARE
+                TC      ALM/END         # VB87 SPARE
+                TC      ALM/END         # VB88 SPARE
+                TC      V89PERF         # VB89 ALIGN XORZ LEM AXIS ALONG LOS (R63)
+                TC      V90PERF         # VB90 OUT OF PLANE RENDEZVOUS DISPLAY
+                TC      GOSHOSUM        # VB91 DISPLAY BANK SUM.
+                TC      SYSTEST         # VB92 OPERATE IMU PERFORMANCE TEST.
+                TC      WMATRXNG        # VB93 CLEAR RENDWFLG
+                TC      ALM/END         # VB94 SPARE
+                TC      UPDATOFF        # VB95 NO STATE VECTOR UPDATE ALLOWED
+                TC      VERB96          # VB96 INTERRUPT INTEGRATION AND GO TO P00
+                TC      GOLOADLV        # VB97 PLEASE VERIFY ENGINE FAILURE
+                TC      ALM/END         # VB98 SPARE
+                TC      GOLOADLV        # VB99 PLEASE ENABLE ENGINE
+
 # END OF EXTENDED VERB FAN
 
 
-TESTXACT	CCS	EXTVBACT	# ARE EXTENDED VERBS BUSY
-		TC	ALM/END		# YES, TURN ON OPERATOR LIGHT
-		CA	FLAGWRD4	# ARE PRIORITY DISPLAYS USING DSKY
-		MASK	OC24100
-		CCS	A
-		TC	ALM/END		# YES
-		CAF	OCT25		# SET BITS 1, 3, AND 5
-SETXTACT	TS	EXTVBACT	# NO.  SETFLAG TO SHOW EXT VERB DISPLAY
-					# SYSTEM BUSY
-					
-		CA	Q
-		TS	MPAC +1
-		
-		CS	TWO		# BLANK EVERYTHING EXCEPT MM AND VERB
-		TC	NVSUB
-		TC	+1
-		CCS	NEWJOB
-		TC	CHANG1
-		
-		TC	MPAC +1
-		
-TERMEXTV 	EQUALS 	ENDEXT
-## Page 277
-ENDEXTVB	EQUALS	ENDEXT
+TESTXACT        CCS     EXTVBACT        # ARE EXTENDED VERBS BUSY
+                TC      ALM/END         # YES, TURN ON OPERATOR LIGHT
+                CA      FLAGWRD4        # ARE PRIORITY DISPLAYS USING DSKY
+                MASK    OC24100
+                CCS     A
+                TC      ALM/END         # YES
+                CAF     OCT25           # SET BITS 1, 3, AND 5
+SETXTACT        TS      EXTVBACT        # NO.  SETFLAG TO SHOW EXT VERB DISPLAY
+                                        # SYSTEM BUSY
 
-ALM/END		TC	FALTON		# TURN ON OPERATOR ERROR LIGHT
-GOPIN		TC	POSTJUMP
-		CADR	PINBRNCH
-		
-CHKP00H		CA	MODREG		# CHECK FOR P00 OR P00-.
-		EXTEND
-		BZF	TCQ
-		TC	ALM/END
-		
-OC24100		OCT	24100
+                CA      Q
+                TS      MPAC +1
+
+                CS      TWO             # BLANK EVERYTHING EXCEPT MM AND VERB
+                TC      NVSUB
+                TC      +1
+                CCS     NEWJOB
+                TC      CHANG1
+
+                TC      MPAC +1
+
+TERMEXTV        EQUALS  ENDEXT
+## Page 277
+ENDEXTVB        EQUALS  ENDEXT
+
+ALM/END         TC      FALTON          # TURN ON OPERATOR ERROR LIGHT
+GOPIN           TC      POSTJUMP
+                CADR    PINBRNCH
+
+CHKP00H         CA      MODREG          # CHECK FOR P00 OR P00-.
+                EXTEND
+                BZF     TCQ
+                TC      ALM/END
+
+OC24100         OCT     24100
 
 ## Page 278
 #          VBZERO       VERB 40            DESCRIPTION
@@ -141,28 +143,28 @@ OC24100		OCT	24100
 #              5. DON'T DIFFERENIATE BETWEEN A BAD OR GOOD RETURN.
 #              6. EXIT, RE-ESTABLISHING THE INTERRUPTED DISPLAY (IF ANY).
 
-VBZERO		TC	OP/INERT
-		TC	IMUZEROK	# RETURN HERE IF NOUN = ICDU(20)
-		TC	RRZEROK		# RETURN HERE IF NOUN = RCDU(72)
-IMUZEROK	TC	CKMODCAD
-		TC	BANKCALL	# KEYBOARD REQ FOR ISS CDUZERO
-		CADR	IMUZERO
-		
-		TC	BANKCALL	# STALL
-		CADR	IMUSTALL
-		TC	+1
-		
-		TC	GOPIN		# IMUZERO
-		
-RRZEROK		TC	RDRUSECK
-		TC	BANKCALL
-		CADR	RRZERO
-		
-RWAITK		TC	BANKCALL
-		CADR	RADSTALL
-		TCF	+1
-		TC	GOPIN		# RRZERO
-		
+VBZERO          TC      OP/INERT
+                TC      IMUZEROK        # RETURN HERE IF NOUN = ICDU(20)
+                TC      RRZEROK         # RETURN HERE IF NOUN = RCDU(72)
+IMUZEROK        TC      CKMODCAD
+                TC      BANKCALL        # KEYBOARD REQ FOR ISS CDUZERO
+                CADR    IMUZERO
+
+                TC      BANKCALL        # STALL
+                CADR    IMUSTALL
+                TC      +1
+
+                TC      GOPIN           # IMUZERO
+
+RRZEROK         TC      RDRUSECK
+                TC      BANKCALL
+                CADR    RRZERO
+
+RWAITK          TC      BANKCALL
+                CADR    RADSTALL
+                TCF     +1
+                TC      GOPIN           # RRZERO
+
 #          LRPOS2K          VERB 59            DESCRIPTION
 #              COMMAND LANDING RADAR TO POSITION 2
 #             1. EXIT WITH OP ERROR IF SOMEONE IS USING EITHER RADAR.
@@ -170,39 +172,39 @@ RWAITK		TC	BANKCALL
 #                 THE PRESCRIBED TIME.
 #              3. RE-ESTABLISH THE DISPLAYS.
 
-LRPOS2K		CA	FLAGWRD7
-		MASK	AVEGFBIT
-		EXTEND
-		BZF	LRPOS2K1	# AVERAGE G NOT ON
-		CS	FLGWRD11
-		MASK	LRBYBIT
-		EXTEND
-		BZF	ALM/END		# IF AVE G ON AND NOT R12- OPERATOR ERROR
-		TC	POSTJUMP
-		CADR	V59GP63
-LRPOS2K1	TC	RDRUSECK
+LRPOS2K         CA      FLAGWRD7
+                MASK    AVEGFBIT
+                EXTEND
+                BZF     LRPOS2K1        # AVERAGE G NOT ON
+                CS      FLGWRD11
+                MASK    LRBYBIT
+                EXTEND
+                BZF     ALM/END         # IF AVE G ON AND NOT R12- OPERATOR ERROR
+                TC      POSTJUMP
+                CADR    V59GP63
+LRPOS2K1        TC      RDRUSECK
 ## Page 279
-		TC	BANKCALL	
-		CADR	LRP2COMM	# COMMAND LR TO POS2
+                TC      BANKCALL
+                CADR    LRP2COMM        # COMMAND LR TO POS2
 # V61      VERB 61, DISPLAY DAP ATTITUDE ERRORS ON FDAI ATTITUDE ERROR NEEDLES.
 
-DAPATTER	TC	DOWNFLAG
-		ADRES	NEEDLFLG
-		TCF	TOTATTER +2
-		
+DAPATTER        TC      DOWNFLAG
+                ADRES   NEEDLFLG
+                TCF     TOTATTER +2
+
 # V62      VERB 62, DISPLAY TOTAL ATTITUDE ERRORS ON FDAI ATTITUDE ERROR NEEDLES.
 
-TOTATTER	TC	UPFLAG
-		ADRES	NEEDLFLG
- +2		TC	DOWNFLAG
- 		ADRES	NEED2FLG
-		TC	GOPIN
-		
+TOTATTER        TC      UPFLAG
+                ADRES   NEEDLFLG
+ +2             TC      DOWNFLAG
+                ADRES   NEED2FLG
+                TC      GOPIN
+
 # V60      VERB 60, DISPLAY DAP ESTIMATED RATES ON FDAI ATTITUDE ERROR NEEDLES.
 
-RATEDISP	TC	UPFLAG
-		ADRES	NEED2FLG
-		TC	GOPIN
+RATEDISP        TC      UPFLAG
+                ADRES   NEED2FLG
+                TC      GOPIN
 
 #
 
@@ -249,199 +251,199 @@ RATEDISP	TC	UPFLAG
 #                      3. DISABLE R25
 #                   C. V22 E 1 E, R1 = 00001, PROCEED
 #                      1. SET LOCK-ON SWITCH
-VBCOARK		TC	OP/INERT
-		TC	IMUCOARK		# RETURN HERE IF NOUN = ICDU(20)
-		TC	RRDESNBK		# RETURN HERE IF NOUN = RCDU(72)
+VBCOARK         TC      OP/INERT
+                TC      IMUCOARK                # RETURN HERE IF NOUN = ICDU(20)
+                TC      RRDESNBK                # RETURN HERE IF NOUN = RCDU(72)
 #          RETURNS TO L+1 IF IMU OR L+2 IF RR.
 
-OP/INERT	CS	OCT24
-		AD	NOUNREG
-		EXTEND
+OP/INERT        CS      OCT24
+                AD      NOUNREG
+                EXTEND
 ## Page 281
-		BZF	TCQ			# IF = 20.
-		
-		AD	RRIMUDIF		# -52
-		EXTEND
-		BZF	Q+1
-		
-		TC	ALM/END			# ILLEGAL.
-		
-RRIMUDIF	DEC	-52			# THE IMU
-IMUCOARK	TC	CKMODCAD
-		TC	TESTXACT		# COARSE ALIGN FROM KEYBOARD.
-		CAF	VNLODCDU		# CALL FOR THETAD LOAD
-		TC	BANKCALL
-		CADR	GOXDSPF
-		TC	TERMEXTV
-		TCF	+1
-		
-ICORK2		CAF	IMUCOARV		# RE-DISPLAY COARSE ALIGN VERB.
-		TC	BANKCALL
-		CADR	EXDSPRET
-		
-		TC	BANKCALL		# CALL MODE SWITCHING PROG
-		CADR	IMUCOARS
-		
-		TC	BANKCALL		# STALL
-		CADR	IMUSTALL
-		TC	ENDEXTVB
-		TC	ENDEXTVB
-		
-VNLODCDU	VN	2522
-IMUCOARV	VN	4100
+                BZF     TCQ                     # IF = 20.
+
+                AD      RRIMUDIF                # -52
+                EXTEND
+                BZF     Q+1
+
+                TC      ALM/END                 # ILLEGAL.
+
+RRIMUDIF        DEC     -52                     # THE IMU
+IMUCOARK        TC      CKMODCAD
+                TC      TESTXACT                # COARSE ALIGN FROM KEYBOARD.
+                CAF     VNLODCDU                # CALL FOR THETAD LOAD
+                TC      BANKCALL
+                CADR    GOXDSPF
+                TC      TERMEXTV
+                TCF     +1
+
+ICORK2          CAF     IMUCOARV                # RE-DISPLAY COARSE ALIGN VERB.
+                TC      BANKCALL
+                CADR    EXDSPRET
+
+                TC      BANKCALL                # CALL MODE SWITCHING PROG
+                CADR    IMUCOARS
+
+                TC      BANKCALL                # STALL
+                CADR    IMUSTALL
+                TC      ENDEXTVB
+                TC      ENDEXTVB
+
+VNLODCDU        VN      2522
+IMUCOARV        VN      4100
 
 ## Page 282
 #          DESIGNATE TO DESIRED GIMBAL ANGLES.
 
-RRDESNBK	TC	RDRUSECK
-		TC	TESTXACT
-RRWAIT		CA	RADMODES		# IS A REMODE OR REPOSITION IN PROGRESS
-		MASK	BIT14&11
-REFTAG9		=	REMODBIT
-REFTAG10	=	REPOSBIT
-		EXTEND
-		BZF	OKTOGO			# NO - CONTINUE
+RRDESNBK        TC      RDRUSECK
+                TC      TESTXACT
+RRWAIT          CA      RADMODES                # IS A REMODE OR REPOSITION IN PROGRESS
+                MASK    BIT14&11
+REFTAG9         =       REMODBIT
+REFTAG10        =       REPOSBIT
+                EXTEND
+                BZF     OKTOGO                  # NO - CONTINUE
 
-		TC	BANKCALL		# YES - WAIT UNTIL FINISHED TO PREVENT
-		CADR	2SECDELV		# CONFLICTS IN RR DESIGNATE
-		TCF	RRWAIT
+                TC      BANKCALL                # YES - WAIT UNTIL FINISHED TO PREVENT
+                CADR    2SECDELY                # CONFLICTS IN RR DESIGNATE
+                TCF     RRWAIT
 
-OKTOGO		TC	CLRADMOD
-		CAF	VNLDRCDU		# ASK FOR GIMBAL ANGLES.
-		TC	BANKCALL
-		CADR	GOXDSPF
-		TC	TERMEXTV
-		TCF	-4			# V33
-		
-		TC	BANKCALL		# ASK OP FOR LOCK ON REQUIREMENTS.
-		CADR	AURLOKON
-		
-		CAF	OPTCOARV		# RE-DISPLAY OUR OWN VERB
-		TC	BANKCALL
-		CADR	EXDSPRET
-		
-		CAF	PRIO20
-		TC	FINDVAC
-		EBANK=	LOSCOUNT
-		2CADR	RRDESK2
+OKTOGO          TC      CLRADMOD
+                CAF     VNLDRCDU                # ASK FOR GIMBAL ANGLES.
+                TC      BANKCALL
+                CADR    GOXDSPF
+                TC      TERMEXTV
+                TCF     -4                      # V33
 
-		
-		TCF	TERMEXTV		# FREES DISPLAY.
-		
-VNLDRCDU	VN	2473
-OPTCOARV	EQUALS	IMUCOARV		# DIFFERENT NOUNS.
+                TC      BANKCALL                # ASK OP FOR LOCK ON REQUIREMENTS.
+                CADR    AURLOKON
 
-RRDESK2		TC	BANKCALL
-		CADR	RRDESNB
-		
-		TC	+1			# DUMMY NEEDED SINCE DESRETRN DOES INCR
-		CA	PRIORITY
-		MASK	LOW9
-		CCS	A
-		INDEX	A
-		TS	A			# RELEASE THIS JOBS VAC AREA.
-		COM				# INSURE ENDOFJOB DOES A NOVAC END (BZMF).
+                CAF     OPTCOARV                # RE-DISPLAY OUR OWN VERB
+                TC      BANKCALL
+                CADR    EXDSPRET
+
+                CAF     PRIO20
+                TC      FINDVAC
+                EBANK=  LOSCOUNT
+                2CADR   RRDESK2
+
+
+                TCF     TERMEXTV                # FREES DISPLAY.
+
+VNLDRCDU        VN      2473
+OPTCOARV        EQUALS  IMUCOARV                # DIFFERENT NOUNS.
+
+RRDESK2         TC      BANKCALL
+                CADR    RRDESNB
+
+                TC      +1                      # DUMMY NEEDED SINCE DESRETRN DOES INCR
+                CA      PRIORITY
+                MASK    LOW9
+                CCS     A
+                INDEX   A
+                TS      A                       # RELEASE THIS JOBS VAC AREA.
+                COM                             # INSURE ENDOFJOB DOES A NOVAC END (BZMF).
 ## Page 283
-		ADS	PRIORITY
-		TC	BANKCALL		# WAIT FOR COMPLETION OF DESIGNATE
-		CADR	RADSTALL
-		TC	+2			# BADEND-NO LOCKON OR OUT OF LIMITS
-		TC	ENDOFJOB		# GOODEND-LOCKON ACHIEVED
-		TC	ALARM
-		OCT	503			# TURN ON ALARM LIGHT -503 DESIGNATE FAIL
-		TC	ENDOFJOB
+                ADS     PRIORITY
+                TC      BANKCALL                # WAIT FOR COMPLETION OF DESIGNATE
+                CADR    RADSTALL
+                TC      +2                      # BADEND-NO LOCKON OR OUT OF LIMITS
+                TC      ENDOFJOB                # GOODEND-LOCKON ACHIEVED
+                TC      ALARM
+                OCT     503                     # TURN ON ALARM LIGHT -503 DESIGNATE FAIL
+                TC      ENDOFJOB
 
 
-RRDESEND	CCS	RADMODES		# TERMINATE CONTINOUUS DESIGNATE ONLY
-		TCF	GOPIN
-		TCF	GOPIN
-		TCF	+1
-REMODCHK	CA	RADMODES		# CHECK FOR REMODE OR REPOSITION
-		MASK	BIT14&11
-REFTAG1		=	REMODBIT
-REFTAG2		=	REPOSBIT
-		EXTEND
-		BZF	NOREMODE		# NO
+RRDESEND        CCS     RADMODES                # TERMINATE CONTINOUUS DESIGNATE ONLY
+                TCF     GOPIN
+                TCF     GOPIN
+                TCF     +1
+REMODCHK        CA      RADMODES                # CHECK FOR REMODE OR REPOSITION
+                MASK    BIT14&11
+REFTAG1         =       REMODBIT
+REFTAG2         =       REPOSBIT
+                EXTEND
+                BZF     NOREMODE                # NO
 
-		CAF	1SEC			# YES- WAIT 1 SECOND AND CHECK AGAIN
-		TC	BANKCALL
-		CADR	DELAYJOB
-		TC	REMODCHK
-NOREMODE	TC	CLRADMOD
-		CAF	1SEC
-		TC	BANKCALL
-		CADR	DELAYJOB
-		TC	DOWNFLAG		# ENABLE R25 GIMBAL MONITOR
-		ADRES	NORRMON
-		TCF	GOPIN
+                CAF     1SEC                    # YES- WAIT 1 SECOND AND CHECK AGAIN
+                TC      BANKCALL
+                CADR    DELAYJOB
+                TC      REMODCHK
+NOREMODE        TC      CLRADMOD
+                CAF     1SEC
+                TC      BANKCALL
+                CADR    DELAYJOB
+                TC      DOWNFLAG                # ENABLE R25 GIMBAL MONITOR
+                ADRES   NORRMON
+                TCF     GOPIN
 
-BIT14&11	=	PRIO22
+BIT14&11        =       PRIO22
 #
 
 
-		SETLOC	EXTVB1
-		BANK
-		COUNT*	$$/EXTVB
-		
-AURLOKON	TC	MAKECADR
-		TS	DESRET
-		CAF	TWO
-		TS	OPTIONX +1
-		CAF	SIX			# OPTION CODE FOR V04N12
-		TS	OPTIONX
-		
- -5		CAF	V04N1272
- 		TC	BANKCALL		#      R2   00001  LOCK-ON
+                SETLOC  EXTVB1
+                BANK
+                COUNT*  $$/EXTVB
+
+AURLOKON        TC      MAKECADR
+                TS      DESRET
+                CAF     TWO
+                TS      OPTIONX +1
+                CAF     SIX                     # OPTION CODE FOR V04N12
+                TS      OPTIONX
+
+ -5             CAF     V04N1272
+                TC      BANKCALL                #      R2   00001  LOCK-ON
 ## Page 284
-		CADR	GOMARKFR
-		TCF	ENDEXT			# V34
-		TCF	+5			# V33
-		TCF	-5			# V32
-		CAF	BIT3
-		TC	BLANKET
-		TC	ENDOFJOB
-		
- +5		CA	OPTIONX +1
- 		MASK	BIT2
-		CCS	A
-		TCF	NOLOKON
-		TC	UPFLAG
-		ADRES	LOKONSW
-		TCF	AURLKON1
-		
-NOLOKON		TC	DOWNFLAG		# IF NO LOCK-ON, SET BIT15 OF RADMADES TO
-		ADRES	LOKONSW			# INDICATE THAT CONTINUOUS DESIGNATION IS
-		TC	UPFLAG			# WANTED (TO BE TERMINATED BY V44.)
-		ADRES	CDESFLAG
-		TC	UPFLAG			# SET NO RR ANGLE MONITOR FLAG.
-		ADRES	NORRMON			# (DISABLE R25 RR GIMBAL MONITOR IN T4RUPT
-AURLKON1	RELINT
-		CA	DESRET
-		TCF	BANKJUMP
+                CADR    GOMARKFR
+                TCF     ENDEXT                  # V34
+                TCF     +5                      # V33
+                TCF     -5                      # V32
+                CAF     BIT3
+                TC      BLANKET
+                TC      ENDOFJOB
 
-		
-V04N1272	VN	412
--LOKONFG	OCT	-20
+ +5             CA      OPTIONX +1
+                MASK    BIT2
+                CCS     A
+                TCF     NOLOKON
+                TC      UPFLAG
+                ADRES   LOKONSW
+                TCF     AURLKON1
 
-		BANK	43
-		SETLOC	EXTVERBS
-		BANK
-		COUNT*	$$/EXTVB
-
-LRON		TC	UPFLAG			# PERMIT INCORPORATION OF LR DATA      V57
-		ADRES	LRINH
-		TC	GOPIN
-
-LROFF		TC	DOWNFLAG		# INHIBIT INCORPORATION OF LR DATA     V58
-		ADRES	LRINH
-		TC	GOPIN
-
-TEROFF		TC	UPFLAG			# BYPASS TERRAIN MODEL
-		ADRES	NOTERFLG
-		TCF	GOPIN
+NOLOKON         TC      DOWNFLAG                # IF NO LOCK-ON, SET BIT15 OF RADMADES TO
+                ADRES   LOKONSW                 # INDICATE THAT CONTINUOUS DESIGNATION IS
+                TC      UPFLAG                  # WANTED (TO BE TERMINATED BY V44.)
+                ADRES   CDESFLAG
+                TC      UPFLAG                  # SET NO RR ANGLE MONITOR FLAG.
+                ADRES   NORRMON                 # (DISABLE R25 RR GIMBAL MONITOR IN T4RUPT
+AURLKON1        RELINT
+                CA      DESRET
+                TCF     BANKJUMP
 
 
-		EBANK=	OGC
+V04N1272        VN      412
+-LOKONFG        OCT     -20
+
+                BANK    43
+                SETLOC  EXTVERBS
+                BANK
+                COUNT*  $$/EXTVB
+
+LRON            TC      UPFLAG                  # PERMIT INCORPORATION OF LR DATA      V57
+                ADRES   LRINH
+                TC      GOPIN
+
+LROFF           TC      DOWNFLAG                # INHIBIT INCORPORATION OF LR DATA     V58
+                ADRES   LRINH
+                TC      GOPIN
+
+TEROFF          TC      UPFLAG                  # BYPASS TERRAIN MODEL
+                ADRES   NOTERFLG
+                TCF     GOPIN
+
+
+                EBANK=  OGC
 
 ## Page 285
 #          IMUFINEK     VERB 42            DESCRIPTION
@@ -461,37 +463,37 @@ TEROFF		TC	UPFLAG			# BYPASS TERRAIN MODEL
 #                          1. EXECUTE IMUPULSE (TORQUE IRIGS).
 #                          2. EXECUTE IMUSTALL AND RELEASE EXT VERB DISPLAY SYSTEM.
 
-IMUFINEK	TC	CKMODCAD
-		TC	TESTXACT		# FINE ALIGN WITH GYRO TORQUING.
-		CAF	VNLODGYR		# CALL FOR LOAD OF GYRO COMMANDS
-		TC	BANKCALL
-		CADR	GOXDSPF
-		TC	TERMEXTV
-		TC	+1			# PROCEED WITHOUT A LOAD
-		
-		CAF	IMUFINEV		# RE-DISPLAY OUR OWN VERB
-		TC	BANKCALL
-		CADR	EXDSPRET
-		
-		TC	BANKCALL		# CALL MODE SWITCH PROG
-		CADR	IMUFINE
-		
-		TC	BANKCALL		# HIBERNATION
-		CADR	IMUSTALL
-		TC	ENDEXTVB
-		
-FINEK2		CAF	LGYROBIN		# PINBALL LEFT COMMANDS IN OGC REGISTERS
-		TC	BANKCALL
-		CADR	IMUPULSE
-		
-		TC	BANKCALL		# WAIT FOR PULSES TO GET OUT.
-		CADR	IMUSTALL
-		TC	ENDEXTVB
-		TC	ENDEXTVB
-		
-LGYROBIN	ECADR	OGC
-VNLODGYR	VN	2593
-IMUFINEV	VN	4200
+IMUFINEK        TC      CKMODCAD
+                TC      TESTXACT                # FINE ALIGN WITH GYRO TORQUING.
+                CAF     VNLODGYR                # CALL FOR LOAD OF GYRO COMMANDS
+                TC      BANKCALL
+                CADR    GOXDSPF
+                TC      TERMEXTV
+                TC      +1                      # PROCEED WITHOUT A LOAD
+
+                CAF     IMUFINEV                # RE-DISPLAY OUR OWN VERB
+                TC      BANKCALL
+                CADR    EXDSPRET
+
+                TC      BANKCALL                # CALL MODE SWITCH PROG
+                CADR    IMUFINE
+
+                TC      BANKCALL                # HIBERNATION
+                CADR    IMUSTALL
+                TC      ENDEXTVB
+
+FINEK2          CAF     LGYROBIN                # PINBALL LEFT COMMANDS IN OGC REGISTERS
+                TC      BANKCALL
+                CADR    IMUPULSE
+
+                TC      BANKCALL                # WAIT FOR PULSES TO GET OUT.
+                CADR    IMUSTALL
+                TC      ENDEXTVB
+                TC      ENDEXTVB
+
+LGYROBIN        ECADR   OGC
+VNLODGYR        VN      2593
+IMUFINEV        VN      4200
 #          GOLOADLV     VERB 50            DESCRIPTION
 #                       AND OTHER PLEASE
 ## Page 286
@@ -502,33 +504,33 @@ IMUFINEV	VN	4200
 #              2. THE EXECUTION OF A VERB 33 (PROCEED WITHOUT DATA) INDICATES THE REQUESTED ACTION IS NOT DESIRED.
 
 ## [WORKAROUND] Moved to below the 2CADR a few lines below here --- RSB 2004.
-##		SBANK=	PINSUPER	# FOR LOADLV1 AND SHOWSUM CADR'S.
+##              SBANK=  PINSUPER        # FOR LOADLV1 AND SHOWSUM CADR'S.
 ## [WORKAROUND]
-		
-GOLOADLV	TC	FLASHOFF
 
-		CAF	PINSUPBT
-		EXTEND
-		WRITE	SUPERBNK
-		TC	POSTJUMP
-		CADR	LOADLV1
+GOLOADLV        TC      FLASHOFF
+
+                CAF     PINSUPBT
+                EXTEND
+                WRITE   SUPERBNK
+                TC      POSTJUMP
+                CADR    LOADLV1
 # VERB 47 - AGS INITIALIZATION - R47.
 
 #          SEE LOG SECTION AGS INITIALIZATION FOR OTHER PERTINENT REMARKS.
 
-V47TXACT	TC	TESTXACT	# NO OTHER EXTVERB.
-		CAF	PRIO4
-		TC	FINDVAC
-		EBANK=	AGSBUFF
-		2CADR	AGSINIT
-		
-		TC	ENDOFJOB
-		
-CKMODCAD	CA 	MODECADR
-		EXTEND
-		BZF	TCQ
-		TC	ALM/END		# SOMEBODY IS USING MODECADR SO EXIT
-		
+V47TXACT        TC      TESTXACT        # NO OTHER EXTVERB.
+                CAF     PRIO4
+                TC      FINDVAC
+                EBANK=  AGSBUFF
+                2CADR   AGSINIT
+
+                TC      ENDOFJOB
+
+CKMODCAD        CA      MODECADR
+                EXTEND
+                BZF     TCQ
+                TC      ALM/END         # SOMEBODY IS USING MODECADR SO EXIT
+
 ## Page 287
 #          ALINTIME     VERB 55            DESCRIPTION
 #                 REQUIRE P00 OR P00-.
@@ -539,278 +541,278 @@ CKMODCAD	CA 	MODECADR
 #              5. RELEASE EXT VERB DISPLAY SYSTEM
 
 ## [WORKAROUND] Moved from the top of VERB 50 a few lines above here --- RSB 2004.
-		SBANK=	PINSUPER	# FOR LOADLV1 AND SHOWSUM CADR'S
+                SBANK=  PINSUPER        # FOR LOADLV1 AND SHOWSUM CADR'S
 ## [WORKAROUND]
-		
-ALINTIME	TC	TESTXACT
-		TC	POSTJUMP	# NO ROOM IN 43
-		CADR	R33
-		
-		BANK	42
-		SETLOC	SBAND
-		BANK
-		COUNT*	$$/R33
-		
-R33		CAF	PRIO7
-		TC	PRIOCHNG
-		CAF	VNLODDT
-		TC	BANKCALL
-		CADR	GOXDSPF
-		TC	ENDEXT		# TERMINATE
-		TC	ENDEXT		# PROCEED
-		CS	DEC23		# DATA IN OR RESEQUENCE(UNLIKELY)
-		AD	MPAC		# RECALL LEFT VERB IN MPAC
-		EXTEND
-		BZF	UPDATIME	# GO AHEAD WITH UPDATE ONLY IF RECALL
-		TC	ENDEXT		#   WITH V23 (DATA IN).
-		
-UPDATIME	INHINT			# DELTA TIME IS IN DSPTEM1, +1.
-		CAF	ZERO
-		TS	MPAC +2		# NEEDED FOR TP AGREE
-		TS	L		# ZERO T1 + 2 WHILE ALIGNING.
-		DXCH	TIME2
-		DXCH	MPAC
-		DXCH	DSPTEM2 +1	# INCREMENT
-		DAS	MPAC
-		
-		TC	TPAGREE		# FORCE SIGN AGREEMENT.
-		DXCH	MPAC		# NEW CLOCK.
-		DAS	TIME2
-		RELINT
-UPDTMEND	TC	ENDEXT
 
-DEC23		DEC	23		# V 23
+ALINTIME        TC      TESTXACT
+                TC      POSTJUMP        # NO ROOM IN 43
+                CADR    R33
 
-VNLODDT		VN	2524		# V25N24 FOR LOAD DELTA TIME
+                BANK    42
+                SETLOC  SBAND
+                BANK
+                COUNT*  $$/R33
+
+R33             CAF     PRIO7
+                TC      PRIOCHNG
+                CAF     VNLODDT
+                TC      BANKCALL
+                CADR    GOXDSPF
+                TC      ENDEXT          # TERMINATE
+                TC      ENDEXT          # PROCEED
+                CS      DEC23           # DATA IN OR RESEQUENCE(UNLIKELY)
+                AD      MPAC            # RECALL LEFT VERB IN MPAC
+                EXTEND
+                BZF     UPDATIME        # GO AHEAD WITH UPDATE ONLY IF RECALL
+                TC      ENDEXT          #   WITH V23 (DATA IN).
+
+UPDATIME        INHINT                  # DELTA TIME IS IN DSPTEM1, +1.
+                CAF     ZERO
+                TS      MPAC +2         # NEEDED FOR TP AGREE
+                TS      L               # ZERO T1 + 2 WHILE ALIGNING.
+                DXCH    TIME2
+                DXCH    MPAC
+                DXCH    DSPTEM2 +1      # INCREMENT
+                DAS     MPAC
+
+                TC      TPAGREE         # FORCE SIGN AGREEMENT.
+                DXCH    MPAC            # NEW CLOCK.
+                DAS     TIME2
+                RELINT
+UPDTMEND        TC      ENDEXT
+
+DEC23           DEC     23              # V 23
+
+VNLODDT         VN      2524            # V25N24 FOR LOAD DELTA TIME
 
 ## Page 288
 #          SET UP FOR RADAR SAMPLING.
 
-		BANK	42
-		SETLOC	EXTVERBS
-		BANK
-		
-		EBANK=	RSTACK
-		
-		COUNT*	$$/R0477
-		
-R77		TC	RDRUSECK	# TRY TO AVOID THE 1210.
-		CA	FLAGWRD3	# IS R04 RUNNING?
-		MASK	R04FLBIT
-		CCS	A
-		TC	ALM/END		# YES.
-		TC	UPFLAG
-		ADRES	R77FLAG
-		TCF	R04Z
-		
-R04		TC	RDRUSECK	# TRY TO AVOID THE 1210.
-		TC	TESTXACT
-		TC	UPFLAG
-		ADRES	R04FLAG		# SET R04FLAG FOR ALARMS
-		
-R04Z		CAF	EBANK4
-		TS	EBANK
-		CAF	1SEC+1		# SAMPLE ONCE PER SECOND
-		TS	RSAMPDT
-		CAF	ZERO
-		TS	RTSTLOC
-		TS	RFAILCNT	# ZERO BAD SAMPLE COUNTER
-		
-		INHINT
-		CS	LRPOSCAL	# INITIALIZE
-		MASK	RADMODES	#     BIT9   LR RANGE  LOW SCALE =0
-		TS	RADMODES	#     BIT6   LR POS 1 =0
-		CAF	LRPOSCAL	#     BIT3   RR RANGE  LOW SCALE =0
-		EXTEND
-		RAND	CHAN33
-		ADS	RADMODES
-		RELINT
-		
-		CS	FLAGWRD3	# CHECK R04FLAG      R04 =1    R77 =0
-		MASK	R04FLBIT
-		CCS	A
-		TCF	R04K
-		
-		CAF	ONE		# INDICATES RENDEZVOUS DESIRED
-		TS	OPTIONX +1
-R04A		CAF	BIT3		# OPTION CODE FOR V04N12
-		
+                BANK    42
+                SETLOC  EXTVERBS
+                BANK
+
+                EBANK=  RSTACK
+
+                COUNT*  $$/R0477
+
+R77             TC      RDRUSECK        # TRY TO AVOID THE 1210.
+                CA      FLAGWRD3        # IS R04 RUNNING?
+                MASK    R04FLBIT
+                CCS     A
+                TC      ALM/END         # YES.
+                TC      UPFLAG
+                ADRES   R77FLAG
+                TCF     R04Z
+
+R04             TC      RDRUSECK        # TRY TO AVOID THE 1210.
+                TC      TESTXACT
+                TC      UPFLAG
+                ADRES   R04FLAG         # SET R04FLAG FOR ALARMS
+
+R04Z            CAF     EBANK4
+                TS      EBANK
+                CAF     1SEC+1          # SAMPLE ONCE PER SECOND
+                TS      RSAMPDT
+                CAF     ZERO
+                TS      RTSTLOC
+                TS      RFAILCNT        # ZERO BAD SAMPLE COUNTER
+
+                INHINT
+                CS      LRPOSCAL        # INITIALIZE
+                MASK    RADMODES        #     BIT9   LR RANGE  LOW SCALE =0
+                TS      RADMODES        #     BIT6   LR POS 1 =0
+                CAF     LRPOSCAL        #     BIT3   RR RANGE  LOW SCALE =0
+                EXTEND
+                RAND    CHAN33
+                ADS     RADMODES
+                RELINT
+
+                CS      FLAGWRD3        # CHECK R04FLAG      R04 =1    R77 =0
+                MASK    R04FLBIT
+                CCS     A
+                TCF     R04K
+
+                CAF     ONE             # INDICATES RENDEZVOUS DESIRED
+                TS      OPTIONX +1
+R04A            CAF     BIT3            # OPTION CODE FOR V04N12
+
 ## Page 289
-		TS	OPTIONX
-		CAF	V04N12X
-		TC	BANKCALL	#     R2   00001  RENDEZVOUS RADAR
-		CADR	GOMARKFR	#          00002  LANDING RADAR
-		TCF	R04END		# V34
-		TCF	+5		# V33
-		TCF	R04A +2		# R2
-		CAF	BIT3
-		TC	BLANKET
-		TC	ENDOFJOB
-		
-		CA	OPTIONX	+1	# SAVE DESIRED OPTION     RR =1     LR =2
-		TS	RTSTDEX
-		
-R04X		CAF	SIX		# RR OR LR DESIRED
-		MASK	RTSTDEX
-		CCS	A
-		TCF	R04L		# LANDING RADAR
-		TS	RTSTBASE	# FOR RR   BASE = 0, MAX = 1
-		
-R04B		CAF	BIT2		# IS RR AUTO MODE DISCRETE PRESENT
-		EXTEND
-		RAND	CHAN33
-		EXTEND
-		BZF	R04C		# YES
-		
-		CAF	201R04		# REQUEST SELECTION OF RR AUTO MODE
-		TS	DSPTEM1
-		CAF	V50N25X
-		TC	BANKCALL
-		CADR	GOMARK4
-		TCF	R04END		# V34
-		TCF	R04B		# V33
-		TCF	-7		# E
-		
-R04C		CAF	BIT14		# ENABLE RR AUTO TRACKER
-		EXTEND
-		WOR	CHAN12
-		
-		CAF	TWO
-		TS	RTSTMAX		# FOR SEQUENTIAL STORAGE
-		
-		TC	WAITLIST
-		EBANK=	RSTACK
-		2CADR	RADSAMP
-		
-		RELINT
-		
-		CS	FLAGWRD3	# CHECK R04FLAG      R04 =1    R77 =0
-		MASK	R04FLBIT
+                TS      OPTIONX
+                CAF     V04N12X
+                TC      BANKCALL        #     R2   00001  RENDEZVOUS RADAR
+                CADR    GOMARKFR        #          00002  LANDING RADAR
+                TCF     R04END          # V34
+                TCF     +5              # V33
+                TCF     R04A +2         # R2
+                CAF     BIT3
+                TC      BLANKET
+                TC      ENDOFJOB
+
+                CA      OPTIONX +1      # SAVE DESIRED OPTION     RR =1     LR =2
+                TS      RTSTDEX
+
+R04X            CAF     SIX             # RR OR LR DESIRED
+                MASK    RTSTDEX
+                CCS     A
+                TCF     R04L            # LANDING RADAR
+                TS      RTSTBASE        # FOR RR   BASE = 0, MAX = 1
+
+R04B            CAF     BIT2            # IS RR AUTO MODE DISCRETE PRESENT
+                EXTEND
+                RAND    CHAN33
+                EXTEND
+                BZF     R04C            # YES
+
+                CAF     201R04          # REQUEST SELECTION OF RR AUTO MODE
+                TS      DSPTEM1
+                CAF     V50N25X
+                TC      BANKCALL
+                CADR    GOMARK4
+                TCF     R04END          # V34
+                TCF     R04B            # V33
+                TCF     -7              # E
+
+R04C            CAF     BIT14           # ENABLE RR AUTO TRACKER
+                EXTEND
+                WOR     CHAN12
+
+                CAF     TWO
+                TS      RTSTMAX         # FOR SEQUENTIAL STORAGE
+
+                TC      WAITLIST
+                EBANK=  RSTACK
+                2CADR   RADSAMP
+
+                RELINT
+
+                CS      FLAGWRD3        # CHECK R04FLAG      R04 =1    R77 =0
+                MASK    R04FLBIT
 ## Page 290
-		CCS	A
-		TCF	GOPIN		# R77
-		
-		CAF	SIX		# RR OR LR
-		MASK	RTSTDEX
-		CCS	A
-		TCF	R04LR		# LR
-		
-R04RR		CAF	V16N72		# DISPLAY RR CDU ANGLES (1/SEC)
-		TC	BANKCALL	#          R1  +  XXX.XX DEG   TRUNNION
-		CADR	GOMARKF		#          R2  +  XXX.XX DEG   SHAFT
-		TCF	R04END		# V34      R3     BLANK
-		TCF	+2		# V33
-		TCF	R04RR		# V32
-		
-		CAF	V16N78		# DISPLAY RR RANGE AND RANGE RATE (1/SEC)
-		TC	BANKCALL	#          R1  +- XXX.XX NM    RANGE
-		CADR	GOMARKF		#          R2  +- XXXX.X FPS   RANGE RATE
-		TCF	R04END		# V34      R3     BLANK
-		TCF	R04Y		# V33
-		TCF	R04RR		# V32
-		
-R04LR		CAF	V16N66		# DISPLAY LR RANGE AND POSITON (1/SEC)
-		TC	BANKCALL	#          R1  +- XXXXX. FT   LR RANGE
-		CADR	GOMARKF		#          R2  +  0000X.      POS. NO.
-		TCF	R04END		# V34      R3     BLANK
-		TCF	+2		# V33
-		TCF	R04LR		# V32
-		
-		CAF	V16N67		# DISPLAY LR VELX, VELY, VELZ (1/SEC)
-		TC	BANKCALL	#          R1  +- XXXXX. FPS   LR V(X)
-		CADR	GOMARKF		#          R2  +- XXXXX. FPS   LR V(Y)
-		TCF	R04END		# V34      R3  +- XXXXX. FPS   LR V(Z)
-		TCF	R04Y		# V33
-		TCF	R04LR		# V32
-		
-R04Y		CAF	ZERO		# TO TERMINATE SAMPLING
-		TS	RSAMPDT
-		TC	BANKCALL
-		CADR	2SECDELY	# WAIT FOR LAST RADARUPT
-		CAF	1SEC+1		# SAMPLE ONCE PER SECOND
-		TS	RSAMPDT
-		CAF	ZERO		# FOR STORING RESULTS
-		TS	RTSTLOC
-		CCS	RTSTBASE	#  CHECK WHICH RADAR HAD BEEN SAMPLED
-		CS	ONE		# WAS LR
-		AD	TWO		# WAS RR
-		TCF	R04X -1	
-		
-R04K		CAF	250MS+1		# SAMPLE 4 LR COMPONENTS PER SECOND.
+                CCS     A
+                TCF     GOPIN           # R77
+
+                CAF     SIX             # RR OR LR
+                MASK    RTSTDEX
+                CCS     A
+                TCF     R04LR           # LR
+
+R04RR           CAF     V16N72          # DISPLAY RR CDU ANGLES (1/SEC)
+                TC      BANKCALL        #          R1  +  XXX.XX DEG   TRUNNION
+                CADR    GOMARKF         #          R2  +  XXX.XX DEG   SHAFT
+                TCF     R04END          # V34      R3     BLANK
+                TCF     +2              # V33
+                TCF     R04RR           # V32
+
+                CAF     V16N78          # DISPLAY RR RANGE AND RANGE RATE (1/SEC)
+                TC      BANKCALL        #          R1  +- XXX.XX NM    RANGE
+                CADR    GOMARKF         #          R2  +- XXXX.X FPS   RANGE RATE
+                TCF     R04END          # V34      R3     BLANK
+                TCF     R04Y            # V33
+                TCF     R04RR           # V32
+
+R04LR           CAF     V16N66          # DISPLAY LR RANGE AND POSITON (1/SEC)
+                TC      BANKCALL        #          R1  +- XXXXX. FT   LR RANGE
+                CADR    GOMARKF         #          R2  +  0000X.      POS. NO.
+                TCF     R04END          # V34      R3     BLANK
+                TCF     +2              # V33
+                TCF     R04LR           # V32
+
+                CAF     V16N67          # DISPLAY LR VELX, VELY, VELZ (1/SEC)
+                TC      BANKCALL        #          R1  +- XXXXX. FPS   LR V(X)
+                CADR    GOMARKF         #          R2  +- XXXXX. FPS   LR V(Y)
+                TCF     R04END          # V34      R3  +- XXXXX. FPS   LR V(Z)
+                TCF     R04Y            # V33
+                TCF     R04LR           # V32
+
+R04Y            CAF     ZERO            # TO TERMINATE SAMPLING
+                TS      RSAMPDT
+                TC      BANKCALL
+                CADR    2SECDELY        # WAIT FOR LAST RADARUPT
+                CAF     1SEC+1          # SAMPLE ONCE PER SECOND
+                TS      RSAMPDT
+                CAF     ZERO            # FOR STORING RESULTS
+                TS      RTSTLOC
+                CCS     RTSTBASE        #  CHECK WHICH RADAR HAD BEEN SAMPLED
+                CS      ONE             # WAS LR
+                AD      TWO             # WAS RR
+                TCF     R04X -1
+
+R04K            CAF     250MS+1         # SAMPLE 4 LR COMPONENTS PER SECOND.
 ## Page 291
-		TS	RSAMPDT
-		
-R04L		CAF	TWO
-		TS	RTSTBASE	# FOR LR   BASE = 2, MAX = 3
-		CAF	SIX
-		TCF	R04C +4
-R04END		CAF	ZERO		# ZERO RSAMPDT
-		TS	RSAMPDT		# TO TERMINATE SAMPLING
-		CAF	BIT8		# WAIT 1.28 SECONDS FOR POSSIBLE
-		TC	BANKCALL	# PENDING RUPT.
-		CADR	DELAYJOB
-		
-		INHINT
-		CS	BIT14		# DISABLE RR AUTO TRACKER
-		EXTEND
-		WAND	CHAN12
+                TS      RSAMPDT
 
-		TC	DOWNFLAG
-		ADRES	R04FLAG		# SIGNAL END OF R04.
-		
-		TC	ENDEXT
+R04L            CAF     TWO
+                TS      RTSTBASE        # FOR LR   BASE = 2, MAX = 3
+                CAF     SIX
+                TCF     R04C +4
+R04END          CAF     ZERO            # ZERO RSAMPDT
+                TS      RSAMPDT         # TO TERMINATE SAMPLING
+                CAF     BIT8            # WAIT 1.28 SECONDS FOR POSSIBLE
+                TC      BANKCALL        # PENDING RUPT.
+                CADR    DELAYJOB
 
-R77END		CAF	EBANK4		# TO TERMINATE SAMPLING
-		TS	EBANK
-		CAF	ZERO
-		TS	RSAMPDT
-		CAF	BIT6		# WAIT 320 MS FOR POSSIBLE
-		TC	BANKCALL	# PENDING RUPT.
-		CADR	DELAYJOB
-		
-		TC	DOWNFLAG
-		ADRES	R77FLAG
-		TCF	GOPIN
-		
-V16N72		VN	1672
-V16N78		VN	1678
-V16N66		VN	1666
-V16N67		VN	1667
-V04N12X		VN	412
-V50N25X		VN	5025
-201R04		OCT	00201
-1SEC+1		DEC	101
-250MS+1		EQUALS	CALLCODE
-LRPOSCAL	OCT	444
+                INHINT
+                CS      BIT14           # DISABLE RR AUTO TRACKER
+                EXTEND
+                WAND    CHAN12
+
+                TC      DOWNFLAG
+                ADRES   R04FLAG         # SIGNAL END OF R04.
+
+                TC      ENDEXT
+
+R77END          CAF     EBANK4          # TO TERMINATE SAMPLING
+                TS      EBANK
+                CAF     ZERO
+                TS      RSAMPDT
+                CAF     BIT6            # WAIT 320 MS FOR POSSIBLE
+                TC      BANKCALL        # PENDING RUPT.
+                CADR    DELAYJOB
+
+                TC      DOWNFLAG
+                ADRES   R77FLAG
+                TCF     GOPIN
+
+V16N72          VN      1672
+V16N78          VN      1678
+V16N66          VN      1666
+V16N67          VN      1667
+V04N12X         VN      412
+V50N25X         VN      5025
+201R04          OCT     00201
+1SEC+1          DEC     101
+250MS+1         EQUALS  CALLCODE
+LRPOSCAL        OCT     444
 
 ## Page 292
-RDRUSECK	CS	FLAGWRD5	# IS R77 RUNNING?
-		MASK	R77FLBIT
-		CCS	A
-		TC	ALM/END		# YES.
-		CS	FLAGWRD7	# IS SERVICER RUNNING AND HENCE POSSIBLY
-		MASK	V37FLBIT	# R12 USING THE LR?
-		CCS	A
-		TCF	CHECKRR		# NO
-		CA	FLGWRD11	# YES, IS R12 ON?
-		MASK	LRBYBIT		# BIT 15
-		EXTEND
-		BZF	ALM/END		# YES
-CHECKRR		CS	FLAGWRD1	# IS THE TRACK FLAG SET AND HENCE POSSIBLY
-		MASK	TRACKBIT	# P20 USING THE RR?
-		CCS	A
-		TC	Q		# NOT ALLOWED DURING P20
-		TC	ALM/END		# P22 OR P25,  (R65)
-		COUNT* 	$$/EXTVB
-		
-VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY,MAKE IT BUSY.
-		CAF	PRIO4
-		TC	FINDVAC
-		EBANK=	ALPHASB
-		2CADR	SBANDANT	# CALC.,DISPLAY S-BAND ANTENNA ANGLES.
-		
-		TC	ENDOFJOB
-		
+RDRUSECK        CS      FLAGWRD5        # IS R77 RUNNING?
+                MASK    R77FLBIT
+                CCS     A
+                TC      ALM/END         # YES.
+                CS      FLAGWRD7        # IS SERVICER RUNNING AND HENCE POSSIBLY
+                MASK    V37FLBIT        # R12 USING THE LR?
+                CCS     A
+                TCF     CHECKRR         # NO
+                CA      FLGWRD11        # YES, IS R12 ON?
+                MASK    LRBYBIT         # BIT 15
+                EXTEND
+                BZF     ALM/END         # YES
+CHECKRR         CS      FLAGWRD1        # IS THE TRACK FLAG SET AND HENCE POSSIBLY
+                MASK    TRACKBIT        # P20 USING THE RR?
+                CCS     A
+                TC      Q               # NOT ALLOWED DURING P20
+                TC      ALM/END         # P22 OR P25,  (R65)
+                COUNT*  $$/EXTVB
+
+VB64            TC      TESTXACT        # IF DISPLAY SYS. NOT BUSY,MAKE IT BUSY.
+                CAF     PRIO4
+                TC      FINDVAC
+                EBANK=  ALPHASB
+                2CADR   SBANDANT        # CALC.,DISPLAY S-BAND ANTENNA ANGLES.
+
+                TC      ENDOFJOB
+
 ## Page 293
 #          IMUATTCK      VERB 43           DESCRIPTION
 #              LOAD IMU ATTITUDE ERROR METERS
@@ -820,73 +822,73 @@ VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY,MAKE IT BUSY.
 #                 4. REQUEST LOAD OF N22  (VAUES TO BE DISPLAYED).
 #                 5. ON PROCEED OR ENTER RE-DISPLAY V43 AND SEND PULSES.
 
-IMUATTCK	TC	CHKP00H		# VB 76 - LOAD IMU ATT. ERROR METERS
+IMUATTCK        TC      CHKP00H         # VB 76 - LOAD IMU ATT. ERROR METERS
 
-		CAF	BITS4&5		# SEE IF COARSE ALIGN ENABLE AND ZERO IMU
-		EXTEND			# CDUS BITS ARE ON
-		RAND	CHAN12
-		CCS	A
-		TCF	ALM/END		# NOT ALLOWED IF IMU COARSE OR IMU ZERO ON
-		
-		CAF	BIT13-14	# BOTH BITS 13 AND 14 MUST BE 1
-		EXTEND			# INDICATING THE MODE SELECTED IS OFF.
-		RXOR	CHAN31
-		MASK	BIT13-14
-		EXTEND
-		BZF	+2		# NEEDLES IS OFF.
-		TCF	ALM/END		# EXIT.  NEEDLES IS ON.
-		
-		TC	TESTXACT
-		
-		CAF	VNLODCDU
-		TC	BANKCALL
-		CADR	GOXDSPF
-		TC	ENDEXT		# V34
-		TC	+1
-		CAF	V43K		# REDISPLAY OUR VERB.
-		TC	BANKCALL
-		CADR	EXDSPRET
-		CAF	BIT6
-		EXTEND
-		WOR	CHAN12		# ENABLE ERROR COUNTERS.
-		CAF	TWO
-		TC	WAITLIST	# PUT OUT COMMANDS IN .32 SECONDS.
-		EBANK=	THETAD
-		2CADR	ATTCK2
-		
-		TCF	ENDEXT
-		
-		BANK	42
-		SETLOC	PINBALL3	# SOMETHING IN B42.
-		BANK
-		
-		COUNT*	$$/EXTVB
+                CAF     BITS4&5         # SEE IF COARSE ALIGN ENABLE AND ZERO IMU
+                EXTEND                  # CDUS BITS ARE ON
+                RAND    CHAN12
+                CCS     A
+                TCF     ALM/END         # NOT ALLOWED IF IMU COARSE OR IMU ZERO ON
+
+                CAF     BIT13-14        # BOTH BITS 13 AND 14 MUST BE 1
+                EXTEND                  # INDICATING THE MODE SELECTED IS OFF.
+                RXOR    CHAN31
+                MASK    BIT13-14
+                EXTEND
+                BZF     +2              # NEEDLES IS OFF.
+                TCF     ALM/END         # EXIT.  NEEDLES IS ON.
+
+                TC      TESTXACT
+
+                CAF     VNLODCDU
+                TC      BANKCALL
+                CADR    GOXDSPF
+                TC      ENDEXT          # V34
+                TC      +1
+                CAF     V43K            # REDISPLAY OUR VERB.
+                TC      BANKCALL
+                CADR    EXDSPRET
+                CAF     BIT6
+                EXTEND
+                WOR     CHAN12          # ENABLE ERROR COUNTERS.
+                CAF     TWO
+                TC      WAITLIST        # PUT OUT COMMANDS IN .32 SECONDS.
+                EBANK=  THETAD
+                2CADR   ATTCK2
+
+                TCF     ENDEXT
+
+                BANK    42
+                SETLOC  PINBALL3        # SOMETHING IN B42.
+                BANK
+
+                COUNT*  $$/EXTVB
 ## Page 294
-ATTCK2		CAF	TWO		# PUT OUT COMMANDS.
- +1		TS	Q		# CDU WILL LIMIT EXCESS DATA.
- 		INDEX	A
-		CA	THETAD
-		EXTEND
-		MP	ATTSCALE
-		INDEX	Q
-		XCH	CDUXCMD
-		CCS	Q
-		TCF	ATTCK2 +1
-		
-		CAF	13,14,15
-		EXTEND
-		WOR	CHAN14
-		TCF	TASKOVER	# LEAVE ERROR COUNTERS ENABLED.
-		
-ATTSCALE	DEC	0.1
+ATTCK2          CAF     TWO             # PUT OUT COMMANDS.
+ +1             TS      Q               # CDU WILL LIMIT EXCESS DATA.
+                INDEX   A
+                CA      THETAD
+                EXTEND
+                MP      ATTSCALE
+                INDEX   Q
+                XCH     CDUXCMD
+                CCS     Q
+                TCF     ATTCK2 +1
 
-		BANK	7
-		SETLOC	EXTVERBS
-		BANK
-		
-		COUNT*	$$/EXTVB
-		
-V43K		VN	4300
+                CAF     13,14,15
+                EXTEND
+                WOR     CHAN14
+                TCF     TASKOVER        # LEAVE ERROR COUNTERS ENABLED.
+
+ATTSCALE        DEC     0.1
+
+                BANK    7
+                SETLOC  EXTVERBS
+                BANK
+
+                COUNT*  $$/EXTVB
+
+V43K            VN      4300
 #          V82PERF     VERB 82             DESCRIPTION
 #              REQUEST ORBIT PARAMETERS DISPLAY (R30)
 # 1. IF AVERAGE G IS OFF:
@@ -897,7 +899,7 @@ V43K		VN	4300
 #          CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
 #           RPER (PERIGEE RADIUS), RAP0 (APOGEE RADIUS), HPER (PERIGEE
 #           HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HAPO (APOGEE
-#           HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO 
+#           HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO
 #           INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).
 #          FLASH MONITOR V16N44 (HAPO, HPER, TFF).TFF IS -59M59S IF IT WAS
 #           NOT COMPUTABLE, OTHERWISE IT INCREMENTS ONCE PER SECOND.
@@ -914,16 +916,16 @@ V43K		VN	4300
 #           RESULTS BY N50E. SPLASH COMPUTATION DONE ONCE PER TWO SECS.
 
 ## Page 295
-V82PERF		TC	TESTXACT
+V82PERF         TC      TESTXACT
 
-		CAF	PRIO7		# LESS THAN LAMBERT.  R30,V82
-		TC	PRIOCHNG
-		EXTEND
-		DCA	V82CON
-		TC	SUPDXCHZ	# V82CALL IN DIFF SUPERBANK FROM V82PERF
-		
-		EBANK=	HAPO
-V82CON		2CADR	V82CALL
+                CAF     PRIO7           # LESS THAN LAMBERT.  R30,V82
+                TC      PRIOCHNG
+                EXTEND
+                DCA     V82CON
+                TC      SUPDXCHZ        # V82CALL IN DIFF SUPERBANK FROM V82PERF
+
+                EBANK=  HAPO
+V82CON          2CADR   V82CALL
 
 #          VB83PERF     VERB 83            DESCRIPTION
 #              REQUEST RENDEZVOUS PARAMETER DISPLAY (R31)
@@ -934,17 +936,17 @@ V82CON		2CADR	V82CALL
 #                     R2  RANGE RATE
 #                     R3  THETA
 
-V83PERF		TC	TESTXACT
+V83PERF         TC      TESTXACT
 
-		CAF	BIT2
-		TC	WAITLIST
-		EBANK=	TSTRT
-		2CADR	R31CALL
-		
-		TC	ENDOFJOB
-		
+                CAF     BIT2
+                TC      WAITLIST
+                EBANK=  TSTRT
+                2CADR   R31CALL
+
+                TC      ENDOFJOB
+
 # VERB 89 DESCRIPTION     RENDEZVOUS FINAL ATTITUDE ROUTINE (R63)
- 
+
 # CALLED BY VERB 89 ENTER DURING P00. PRIO 10 USED.  CALCULATES AND
 # DISPLAYS FINAL FDAI BALL ANGLES TO POINT LM +X OR +Z AXIS AT CSM.
 
@@ -974,15 +976,15 @@ V83PERF		TC	TESTXACT
 #    PROCEED - RESET 3AXISFLG AND CALL R60LEM FOR ATTITUDE MANEUVER.
 
 
-V89PERF		TC	CHKP00H
-		TC	TESTXACT
-		CAF	PRIO10
-		TC	FINDVAC
-		EBANK=	RONE
-		2CADR	V89CALL
-		
-		TC	ENDOFJOB
-		
+V89PERF         TC      CHKP00H
+                TC      TESTXACT
+                CAF     PRIO10
+                TC      FINDVAC
+                EBANK=  RONE
+                2CADR   V89CALL
+
+                TC      ENDOFJOB
+
 #          V90PERF     VERB 90             DESCRIPTION
 #              REQUEST RENDEZVOUS OUT-OF-PLANE DISPLAY (R36)
 #              1. SET EXT VERB DISPLAY BUSY FLAG.
@@ -994,24 +996,24 @@ V89PERF		TC	CHKP00H
 #                     PSI  ANGLE BTW LINE OF SIGHT AND FORWARD
 #                          DIRECTION VECTOR IN HORIZONTAL PLANE - DEGREES
 
-V90PERF		CS	FLAGWRD7
-		MASK	V37FLBIT
-		EXTEND
-		BZF	ALM/END		# AVERAGE G ON: ILL EAGLE
-		TC	TESTXACT
-		CAF	PRIO7		# R36,V90
-		TC	FINDVAC
-		EBANK=	TIG
-		2CADR	R36
-		
-		TCF	ENDOFJOB
+V90PERF         CS      FLAGWRD7
+                MASK    V37FLBIT
+                EXTEND
+                BZF     ALM/END         # AVERAGE G ON: ILL EAGLE
+                TC      TESTXACT
+                CAF     PRIO7           # R36,V90
+                TC      FINDVAC
+                EBANK=  TIG
+                2CADR   R36
+
+                TCF     ENDOFJOB
 #          MINIMP     VERB 76              DESCRIPTION
 #              MINIMUM IMPULSE MODE
 #              1. SET MINIMUM IMPULSE RHC MODE FLAG TO 1.
 
-MINIMP		TC	UPFLAG		# SET PULSES = 1 (MIN. IMPULSE MODE)
-		ADRES	PULSEFLG
-		TCF	GOPIN		# RETURN VIA PINBRNCH
+MINIMP          TC      UPFLAG          # SET PULSES = 1 (MIN. IMPULSE MODE)
+                ADRES   PULSEFLG
+                TCF     GOPIN           # RETURN VIA PINBRNCH
 
 ## Page 297
 #          NOMINIMP     VERB 77            DESCRIPTION
@@ -1019,13 +1021,13 @@ MINIMP		TC	UPFLAG		# SET PULSES = 1 (MIN. IMPULSE MODE)
 #              1. SET MINIMUM IMPULSE RHC MODE FLAG TO 0. (ZERO INDICATES NOT MINIMUM IMPULSE MODE.).
 #              2. MOVE CDUX,CDUY,CDUZ INTO CDUXD,CDUYD,CDUZD.
 
-NOMINIMP	TC	DOWNFLAG	# SET PULSES = 0 (NOT MINIMUM IMPULSE MODE
-		ADRES	PULSEFLG
-		INHINT
-		TC	IBNKCALL
-		CADR	ZATTEROR
-		TC	GOPIN
-		
+NOMINIMP        TC      DOWNFLAG        # SET PULSES = 0 (NOT MINIMUM IMPULSE MODE
+                ADRES   PULSEFLG
+                INHINT
+                TC      IBNKCALL
+                CADR    ZATTEROR
+                TC      GOPIN
+
 ## Page 298
 #          CREWMANU     VERB 49            DESCRIPTION
 #              START AUTOMATIC ATTITUDE MANEUVER
@@ -1045,17 +1047,17 @@ NOMINIMP	TC	DOWNFLAG	# SET PULSES = 0 (NOT MINIMUM IMPULSE MODE
 #                 C. ENTER
 #                    1. REPEAT FLASHING V06,N22.
 
-CREWMANU	TC	CHKP00H		# DEMAND P00
-	
-		TC	TESTXACT
-		
-		CAF	PRIO10
-		TC	FINDVAC
-		EBANK=	BCDU
-		2CADR	R62DISP
-		
-		TC	ENDOFJOB
-		
+CREWMANU        TC      CHKP00H         # DEMAND P00
+
+                TC      TESTXACT
+
+                CAF     PRIO10
+                TC      FINDVAC
+                EBANK=  BCDU
+                2CADR   R62DISP
+
+                TC      ENDOFJOB
+
 ## Page 299
 # TRMTRACK     VERB 56                     DESCRIPTION
 #              TERMINATE TRACKING (P20 AND P25).
@@ -1068,196 +1070,196 @@ CREWMANU	TC	CHKP00H		# DEMAND P00
 #              2. ZERO GROUP 2 TO HALT P20.
 #              3. TRANSFER CONTROL TO GOPROG2 (SOFTWARE RESTART).
 
-TRMTRACK	CA	BITS9+7		# IS REND OR P25 FLAG ON
-		MASK	FLAGWRD0
-		EXTEND
-		BZF	GOPIN		# NO
-		
-		TC	DOWNFLAG	# ENSURE SEARCH FLAG IS OFF
-		ADRES	SRCHOPTN
-		
-		CA	TRACKBIT	# IS TRACK FLAG ON?
-		MASK	FLAGWRD1
-		EXTEND
-		BZF	CLRRND
-		TC	POSTJUMP
-		CADR	TRMTRAK1
+TRMTRACK        CA      BITS9+7         # IS REND OR P25 FLAG ON
+                MASK    FLAGWRD0
+                EXTEND
+                BZF     GOPIN           # NO
 
-CLRRND		CS	BITS9+7		# TURN OFF RENDVZFLG AND P25FLAG
-REFTAG5		=	RNDVZBIT
-REFTAG6		=	P25FLBIT
-		MASK	FLAGWRD0
-		TS	FLAGWRD0
-		TCF	GOPIN
+                TC      DOWNFLAG        # ENSURE SEARCH FLAG IS OFF
+                ADRES   SRCHOPTN
 
-		SETLOC	FFTAG5
-		BANK
-		
-BITS9+7		OCT	500
+                CA      TRACKBIT        # IS TRACK FLAG ON?
+                MASK    FLAGWRD1
+                EXTEND
+                BZF     CLRRND
+                TC      POSTJUMP
+                CADR    TRMTRAK1
+
+CLRRND          CS      BITS9+7         # TURN OFF RENDVZFLG AND P25FLAG
+REFTAG5         =       RNDVZBIT
+REFTAG6         =       P25FLBIT
+                MASK    FLAGWRD0
+                TS      FLAGWRD0
+                TCF     GOPIN
+
+                SETLOC  FFTAG5
+                BANK
+
+BITS9+7         OCT     500
 
 
-		SETLOC	SBAND		# BANK 42
-		BANK
-		
-		COUNT*	$$/EXTVB
-		
-TRMTRAK1	CAF	BIT14
-		TS	AGSCODE
-		
-		TC	INTPRET
-		CLEAR	CLEAR		# TURN OFF UPDATFLG AND IMUSE
-			IMUSE
+                SETLOC  SBAND           # BANK 42
+                BANK
+
+                COUNT*  $$/EXTVB
+
+TRMTRAK1        CAF     BIT14
+                TS      AGSCODE
+
+                TC      INTPRET
+                CLEAR   CLEAR           # TURN OFF UPDATFLG AND IMUSE
+                        IMUSE
 ## Page 300
-			UPDATFLG
-		CALL	
-			INTSTALL	# DONT INTERRUPT INTEGRATION
-		EXIT
-		
-		TC	PHASCHNG
-		OCT	2		# KILL GROUP 2 TO HALT P20 ACTIVITY
-		
-		INHINT
-		TC	IBNKCALL	# ZERO THE COMMANDED RATES TO STOP
-		CADR	STOPRATE	# MANEUVER
-		
-		TC	IBNKCALL
-		CADR	RESTORDB
-		
-		TC	CLRADMOD	# CLEAR BITS 10 + 15 OF RADMODES.
-		
-		CS	BIT14		# DISABLE LOCKON
-		EXTEND
-		WAND	CHAN12
-		CS	TRACKBIT	# TURN OFF TRACKFLG
-		MASK	FLAGWRD1
-		TS	FLAGWRD1
-		CS	BITS9+7		# TURN OFF RENDVZFLG AND P25FLAG
-REFTAG7		=	RNDVZBIT
-REFTAG8		=	P25FLBIT
-		MASK	FLAGWRD0
-		TS	FLAGWRD0
+                        UPDATFLG
+                CALL
+                        INTSTALL        # DONT INTERRUPT INTEGRATION
+                EXIT
 
-		TC	POSTJUMP
-		CADR	GOPROG2		# CAUSE RESTART.
-		
+                TC      PHASCHNG
+                OCT     2               # KILL GROUP 2 TO HALT P20 ACTIVITY
+
+                INHINT
+                TC      IBNKCALL        # ZERO THE COMMANDED RATES TO STOP
+                CADR    STOPRATE        # MANEUVER
+
+                TC      IBNKCALL
+                CADR    RESTORDB
+
+                TC      CLRADMOD        # CLEAR BITS 10 + 15 OF RADMODES.
+
+                CS      BIT14           # DISABLE LOCKON
+                EXTEND
+                WAND    CHAN12
+                CS      TRACKBIT        # TURN OFF TRACKFLG
+                MASK    FLAGWRD1
+                TS      FLAGWRD1
+                CS      BITS9+7         # TURN OFF RENDVZFLG AND P25FLAG
+REFTAG7         =       RNDVZBIT
+REFTAG8         =       P25FLBIT
+                MASK    FLAGWRD0
+                TS      FLAGWRD0
+
+                TC      POSTJUMP
+                CADR    GOPROG2         # CAUSE RESTART.
+
 #          DNEDUMP     VERB 74             DESCRIPTION
 #              INITIALIZE DOWN-TELEMETRY PROGRAM FOR ERASABLE MEMORY DUMP.
 #              1. SET EXT VERB DISPLAY BUSY FLAG.
 #              2. REPLACE CURRENT DOWNLIST WITH ERASABLE MEMORY.
 #              3. RELEASE EXT VERB DISPLAY.
 
-		SETLOC	EXTVERBS
-		BANK
+                SETLOC  EXTVERBS
+                BANK
 
-		COUNT*	$$/EXTVB
+                COUNT*  $$/EXTVB
 
-		EBANK=	400
-DNEDUMP		CAF	LDNDUMPI
-		TS	DNTMGOTO
-		TC	GOPIN
+                EBANK=  400
+DNEDUMP         CAF     LDNDUMPI
+                TS      DNTMGOTO
+                TC      GOPIN
 
-V74		EQUALS	DNEDUMP
-LDNDUMPI	REMADR	DNDUMPI
+V74             EQUALS  DNEDUMP
+LDNDUMPI        REMADR  DNDUMPI
 
 ## Page 301
 #          LEMVEC     VERB 80              DESCRIPTION
 #              UPDATE LEM STATE VECTOR
 #                 RESET VEHUPFLG TC 0
 
-LEMVEC		TC	DOWNFLAG
-		ADRES	VEHUPFLG	# VB 80 - VEHUPFLG DOWN INDICATES LEM
-		
-		TC	NOUPDOWN
+LEMVEC          TC      DOWNFLAG
+                ADRES   VEHUPFLG        # VB 80 - VEHUPFLG DOWN INDICATES LEM
+
+                TC      NOUPDOWN
 #          CSMVEC     VERB 81              DESCRIPTION
 #              UPDATE CSM STATE VECTOR
 #                 SET   VEHUPFLG TO 1
 
-CSMVEC		TC	UPFLAG
-		ADRES	VEHUPFLG	# VB 81 - VEHUPFLG UP INDICATES CSM
-		
-NOUPDOWN	TC	DOWNFLAG
-		ADRES	NOUPFLAG
-		
-		TCF	GOPIN
-		
+CSMVEC          TC      UPFLAG
+                ADRES   VEHUPFLG        # VB 81 - VEHUPFLG UP INDICATES CSM
+
+NOUPDOWN        TC      DOWNFLAG
+                ADRES   NOUPFLAG
+
+                TCF     GOPIN
+
 #          UPDATOFF   VERB 95      DESCRIPTION
 #              INHIBIT STATE VECTOR UPDATES BY INCORP
 #                 SET NOUPFLAG TO 1
 
-UPDATOFF	TC	UPFLAG		# VB 95 SET NOUPFLAG
-		ADRES	NOUPFLAG
-		
-		TC	GOPIN
+UPDATOFF        TC      UPFLAG          # VB 95 SET NOUPFLAG
+                ADRES   NOUPFLAG
+
+                TC      GOPIN
 
 ## Page 302
 #          SYSTEST     VERB 92             DESCRIPTION
 #            OPERATE IMU PERFORMANCE TEST.
 #              1. REQUIRE PROGRAM 00 OR TURN ON OPERATOR ERROR.
 #              2. SET EXT VERB BUSY FLAG.
-		EBANK=	QPLACE
-		
-SYSTEST		TC	CHKP00H		# DEMAND P00
+                EBANK=  QPLACE
 
-		CS	FLAGWRD3	# DO NOT ALLOW P07 IN FLIGHT
-		MASK	NOP07BIT	# IF FLAG IS SET, TURN ON OE LITE AND EXIT
-		EXTEND
-		BZF	ALM/END
-		TC	TESTXACT
+SYSTEST         TC      CHKP00H         # DEMAND P00
 
-		CAF	PRIO22
-		TC	FINDVAC
-		EBANK=	QPLACE
-		SBANK=	IMUSUPER
-		2CADR	REDO
-		
-		TC	ENDOFJOB
-		
+                CS      FLAGWRD3        # DO NOT ALLOW P07 IN FLIGHT
+                MASK    NOP07BIT        # IF FLAG IS SET, TURN ON OE LITE AND EXIT
+                EXTEND
+                BZF     ALM/END
+                TC      TESTXACT
+
+                CAF     PRIO22
+                TC      FINDVAC
+                EBANK=  QPLACE
+                SBANK=  IMUSUPER
+                2CADR   REDO
+
+                TC      ENDOFJOB
+
 # VERB 93         CLEAR RENDWFLG, CAUSES W-MATRIX TO BE RE-INITIALIZED.
 
-WMATRXNG	INHINT
-		CS	RENDWBIT
-		MASK	FLAGWRD5
-		TS	FLAGWRD5
-		
-		TC	GOPIN
-		
-GOSHOSUM	EQUALS	SHOWSUM
+WMATRXNG        INHINT
+                CS      RENDWBIT
+                MASK    FLAGWRD5
+                TS      FLAGWRD5
 
-SHOWSUM		TC	CHKP00H		# *
-		TC	TESTXACT	# *
-		CAF	PRIO7		# ALLOW OTHER CHARINS.
-		TC	PRIOCHNG
-		CAF	S+1		# *
-		TS	SKEEP6		# * SHOWSUM OPTION
-		CAF	S+ZERO		# *
-		TS	SMODE		# * TURN OFF SELF-CHECK
-		CA	SELFADRS	# *
-		TS	SELFRET		# *
-		TC	STSHOSUM	# * ENTER ROPECHK
+                TC      GOPIN
 
-SDISPLAY	LXCH	SKEEP2		# * BANK # FOR DISPLAY
-		LXCH	SKEEP3		# * BUGGER WORD FOR DISPLAY
-NOKILL		CA	ADRS1		# *
-		TS	MPAC +2		# *
-		CA	VNCON		# * 0501
+GOSHOSUM        EQUALS  SHOWSUM
+
+SHOWSUM         TC      CHKP00H         # *
+                TC      TESTXACT        # *
+                CAF     PRIO7           # ALLOW OTHER CHARINS.
+                TC      PRIOCHNG
+                CAF     S+1             # *
+                TS      SKEEP6          # * SHOWSUM OPTION
+                CAF     S+ZERO          # *
+                TS      SMODE           # * TURN OFF SELF-CHECK
+                CA      SELFADRS        # *
+                TS      SELFRET         # *
+                TC      STSHOSUM        # * ENTER ROPECHK
+
+SDISPLAY        LXCH    SKEEP2          # * BANK # FOR DISPLAY
+                LXCH    SKEEP3          # * BUGGER WORD FOR DISPLAY
+NOKILL          CA      ADRS1           # *
+                TS      MPAC +2         # *
+                CA      VNCON           # * 0501
 ## Page 303
-		TC	BANKCALL	# *
-		CADR	GOXDSPF		# *
-		TC	+3		# *
-		TC	NXTBNK		# *
-		TC	NOKILL		# *
-		CA	SELFADRS
-		TS	SKEEP1
-		
-		TC	ENDEXT		# *
+                TC      BANKCALL        # *
+                CADR    GOXDSPF         # *
+                TC      +3              # *
+                TC      NXTBNK          # *
+                TC      NOKILL          # *
+                CA      SELFADRS
+                TS      SKEEP1
 
-VNCON		VN	501		# *
+                TC      ENDEXT          # *
 
-ENDSUMS		CA	SKEEP6		# *
-		EXTEND			# *
-		BZF	SELFCHK		# * ROPECHK, START SELFCHK AGAIN.
-		TC	STSHOSUM	# * START SHOWSUM AGAIN.
-		
+VNCON           VN      501             # *
+
+ENDSUMS         CA      SKEEP6          # *
+                EXTEND                  # *
+                BZF     SELFCHK         # * ROPECHK, START SELFCHK AGAIN.
+                TC      STSHOSUM        # * START SHOWSUM AGAIN.
+
 ## Page 304
 #          DAPDISP     VERB 48             DESCRIPTION
 #              LOAD AUTO PILOT  DATA
@@ -1294,207 +1296,207 @@ ENDSUMS		CA	SKEEP6		# *
 #          2 - 2.0 DEG/SEC
 #          3 -10.0 DEG/SEC
 
-DAPDISP		TC	TESTXACT
-		CAF	PRIO7		# R03
-		TC	PRIOCHNG
-		TC	POSTJUMP
-		CADR	DAPDATA1
-		BANK	34
-		SETLOC	LOADDAP
-		BANK
-		
-		COUNT*	$$/R03
-		
-		SBANK=	LOWSUPER	# FOR SUBSEQUENT LOW 2CADR'S.
-		
-DAPDATA1	CAF	BOOLSMSK	# SET DISPLAY ACCORDING TO DAPBOOLS BITS.
-		MASK	DAPBOOLS	# LM
-## Page 305
-		TS	DAPDATR1	# LM
-		CS	FLGWRD10	# SET BIT 14 TO BE COMPLEMENT OF APSFLAG.
-		MASK	APSFLBIT
-		CCS	A
-		CAF	BIT14
-		ADS	DAPDATR1
-CHKDATA1	CAE	DAPDATR1	# IF BITS 13 AND 14 ARE BOTH ZERO, FORCE
-		MASK	BIT13-14	#   A ONE INTO BIT 13.
-		EXTEND
-		BZF	FORCEONE
-		CAE	DAPDATR1	# ENSURE THAT NO ILLEGAL BITS SET BY CREW.
-MSKDATR1	MASK	DSPLYMSK
-		TS	DAPDATR1
-		CAF	V04N46		# DISPLAY DAP CONIFG. / CHANBKUP
-		TC	BANKCALL
-		CADR	GOXDSPFR
-		TCF	ENDEXT		# V34E  TERMINATE
-		TCF	DPDAT1		# V33E  PROCEED
-		TCF	CHKDATA1	# E     NEW DATA    CHECK AND REDISPLAY
-		CAF	BIT3		# BLANK R3
-		TC	BLANKET
-		TCF	ENDOFJOB
-FORCEONE	CAF	BIT13
-		ADS	DAPDATR1
-		TCF	MSKDATR1
-		
-DPDAT1		INHINT			# INHINT FOR SETTING OF FLAG BITS AND MASS
-		CS	APSFLBIT	#   ON BASIS OF DISPLAYED DAPDATR1.
-		MASK	FLGWRD10
-		TS	L		# SET APSFLAG TO BE COMPLEMENT OF BIT 14.
-		CS	DAPDATR1
-		MASK	BIT14
-		CCS	A
-		CAF	APSFLBIT
-		AD	L
-		TS	FLGWRD10
-		CS	DAPDATR1	# SET BITS OF DAPBOOLS ON BASIS OF DISPLAY
-		MASK	BIT13-14	#   MASK OUT CSMDOCKD (BIT 13) UNLESS BOTH
-		CCS	A		#   13 AND 14 ARE SET.
-		CS	CSMDOCKD
-		AD	BOOLSMSK
-		MASK	DAPDATR1
-		TS	L
-		CS	BOOLSMSK
-		MASK	DAPBOOLS
-		AD	L
-		TS	DAPBOOLS
-		MASK	CSMDOCKD	# LOAD MASS IN ACCORDANCE WITH CSMDOCKD.
-		CCS	A		#   MASS IS USUALLY ALREADY OKAY, SO DO
-		CAE	CSMMASS		#   NOT TOUCH ITS LOW-ORDER PART.
-## Page 301
-		AD	LEMMASS
-		TS	MASS
-		CAE	DAPBOOLS
-		MASK	ACC4OR2X	# 2 OR 4 JET X-TRANSLATION
-		EXTEND			# (BIT ACC4OR2X = 1 FOR 4 JETS)
-		BZF	+5
-		CS	BIT15
-		MASK	FLAGWRD1	# CLEAR NJTSFLAG TO 0 FOR 4 JETS
-		TS	FLAGWRD1
-		TCF	+4
-		CS	FLAGWRD1	# SET NJTSFLAG TO 1 FOR 2 JETS
-		MASK	BIT15
-		ADS	FLAGWRD1
-		CA	DAPBOOLS	# SELECT DESIRED KALCMANU AUTOMATIC
-		MASK	THREE		# MANEUVER RATE
-		DOUBLE			# RATEINDX HAS TO BE 0,2,4,6 SINCE RATES
-		TS	RATEINDX	# ARE DP
-		TC	POSTJUMP
-		CADR	STIKLOAD
-		
-V04N46		VN	0446
-DSPLYMSK	OCT	33133
-BOOLSMSK	OCT	13133
-		BANK	01
-		SETLOC	LOADDAP1
-		BANK
-		
-		COUNT*	$$/R03
-		
-STIKLOAD	CAF	EBANK6
-		TS	EBANK
-		EBANK=	STIKSENS
-		CA	RHCSCALE	# SET STICK SENSITIVITY TO CORRESPOND TO A
-		MASK	DAPBOOLS	# MAXIMUM COMMANDED RATE (AT 42 COUNTS) OF
-		CCS	A		# 20 D/S(NORMAL) OR 4 D/S(FINE), SCALED
-		CA	NORMAL		# AT 45 D/S.
-		AD	FINE
-		TS	STIKSENS
-		CA	-0.6D/S
-		TS	-RATEDB		# LM-ONLY BREAKOUT LEVEL IS .6 D/S.
-		CA	CSMDOCKD	# IF CSM-DOCKED, DIVIDE STICK SENSITIVITY
-		MASK	DAPBOOLS	# BY 10. NORMAL SCALING IS THEN 2 D/S AND
-		EXTEND			# FINE SCALING IS 0.4 D/S
-		BZF	+7		# BRANCH IF CSM IS NOT DOCKED.
-		CA	STIKSENS
-		EXTEND
-		MP	1/10
-		TS	STIKSENS
-		CA	-0.3D/S		# CSM-DOCKED BREAKOUT LEVEL IS .3 D/S.
-		TS	-RATEDB
-## Page 307
-		RELINT			# PROCEED TO NOUN 47, MASS LOAD,
-		
-DAPDATA2	CAF	V0647
-		TC	BANKCALL
-		CADR	GOXDSPFR
-		TCF	ENDR03		# V34E  TERMINATE. FIRST SET DB, DO 1/ACCS
-		TCF	DAPDAT2		# V33E  PROCEED
-		TCF	DAPDATA2	#       LOAD NEW DATA AND RECYCLE
-		CAF	BIT3		# BLANKS R3
-		TC	BLANKET		#            LM
-		TCF	ENDOFJOB
-ENDR03		INHINT
-		TC	IBNKCALL
-		CADR	RESTORDB
-		TCF	ENDEXT		# DOES RELINT
+DAPDISP         TC      TESTXACT
+                CAF     PRIO7           # R03
+                TC      PRIOCHNG
+                TC      POSTJUMP
+                CADR    DAPDATA1
+                BANK    34
+                SETLOC  LOADDAP
+                BANK
 
-DAPDAT2		CS	FLGWRD10	# DETERMINE STAGE FROM APSFLAG
-		MASK	APSFLBIT
-		CCS	A
-		CA	MINLMD
-		AD	MINMINLM
-		AD	LEMMASS		# LEMMASS MUST BE GREATER THAN EMPTY LEM
-		EXTEND
-		BZMF	DAPDATA2	# ASK FOR NEW MASSES
-		CAE	DAPBOOLS
-		MASK	CSMDOCKD
-		EXTEND
-		BZF	LEMALONE	# SKIP TEST ON CSMMASS IF NOT DOCKED.
-		CS	MINCSM		# TEST CSM MASS
-		AD	CSMMASS		# CSMMASS MUST BE GREATER THAN EMPTY CSM
-		EXTEND
-		BZMF	DAPDATA2	# ASK FOR NEW MASSES
-		CAE	CSMMASS		# DOCKED:  MASS = CSMMASS + LEMMASS
-LEMALONE	AD	LEMMASS		# LEM ALONE:  MASS = LEMMASS
-		ZL
-		DXCH	MASS
-		INHINT
-		TC	IBNKCALL	# SET DEADBANK AND COMPUTE MOMENTS OF
-		CADR	RESTORDB	#   INERTIA.
-		RELINT			# PROCEED TO NOUN 48 (OR END).
-		
-DAPDATA3	CS	FLGWRD10
-		MASK	APSFLBIT
-		EXTEND			# END ROUTINE IF LEM HAS STAGED.
-		BZF	ENDEXT	
-		CAF	V06N48		# DISPLAY TRIM ANGLES AND REQUEST RESPONSE
-		TC	BANKCALL
-		CADR	GOXDSPFR
-		TC	ENDEXT
-		TCF	DPDAT3		# V33E GO DO TRIM (WAITLIST TO TRIMGIMB)
+                COUNT*  $$/R03
+
+                SBANK=  LOWSUPER        # FOR SUBSEQUENT LOW 2CADR'S.
+
+DAPDATA1        CAF     BOOLSMSK        # SET DISPLAY ACCORDING TO DAPBOOLS BITS.
+                MASK    DAPBOOLS        # LM
+## Page 305
+                TS      DAPDATR1        # LM
+                CS      FLGWRD10        # SET BIT 14 TO BE COMPLEMENT OF APSFLAG.
+                MASK    APSFLBIT
+                CCS     A
+                CAF     BIT14
+                ADS     DAPDATR1
+CHKDATA1        CAE     DAPDATR1        # IF BITS 13 AND 14 ARE BOTH ZERO, FORCE
+                MASK    BIT13-14        #   A ONE INTO BIT 13.
+                EXTEND
+                BZF     FORCEONE
+                CAE     DAPDATR1        # ENSURE THAT NO ILLEGAL BITS SET BY CREW.
+MSKDATR1        MASK    DSPLYMSK
+                TS      DAPDATR1
+                CAF     V04N46          # DISPLAY DAP CONIFG. / CHANBKUP
+                TC      BANKCALL
+                CADR    GOXDSPFR
+                TCF     ENDEXT          # V34E  TERMINATE
+                TCF     DPDAT1          # V33E  PROCEED
+                TCF     CHKDATA1        # E     NEW DATA    CHECK AND REDISPLAY
+                CAF     BIT3            # BLANK R3
+                TC      BLANKET
+                TCF     ENDOFJOB
+FORCEONE        CAF     BIT13
+                ADS     DAPDATR1
+                TCF     MSKDATR1
+
+DPDAT1          INHINT                  # INHINT FOR SETTING OF FLAG BITS AND MASS
+                CS      APSFLBIT        #   ON BASIS OF DISPLAYED DAPDATR1.
+                MASK    FLGWRD10
+                TS      L               # SET APSFLAG TO BE COMPLEMENT OF BIT 14.
+                CS      DAPDATR1
+                MASK    BIT14
+                CCS     A
+                CAF     APSFLBIT
+                AD      L
+                TS      FLGWRD10
+                CS      DAPDATR1        # SET BITS OF DAPBOOLS ON BASIS OF DISPLAY
+                MASK    BIT13-14        #   MASK OUT CSMDOCKD (BIT 13) UNLESS BOTH
+                CCS     A               #   13 AND 14 ARE SET.
+                CS      CSMDOCKD
+                AD      BOOLSMSK
+                MASK    DAPDATR1
+                TS      L
+                CS      BOOLSMSK
+                MASK    DAPBOOLS
+                AD      L
+                TS      DAPBOOLS
+                MASK    CSMDOCKD        # LOAD MASS IN ACCORDANCE WITH CSMDOCKD.
+                CCS     A               #   MASS IS USUALLY ALREADY OKAY, SO DO
+                CAE     CSMMASS         #   NOT TOUCH ITS LOW-ORDER PART.
+## Page 301
+                AD      LEMMASS
+                TS      MASS
+                CAE     DAPBOOLS
+                MASK    ACC4OR2X        # 2 OR 4 JET X-TRANSLATION
+                EXTEND                  # (BIT ACC4OR2X = 1 FOR 4 JETS)
+                BZF     +5
+                CS      BIT15
+                MASK    FLAGWRD1        # CLEAR NJTSFLAG TO 0 FOR 4 JETS
+                TS      FLAGWRD1
+                TCF     +4
+                CS      FLAGWRD1        # SET NJTSFLAG TO 1 FOR 2 JETS
+                MASK    BIT15
+                ADS     FLAGWRD1
+                CA      DAPBOOLS        # SELECT DESIRED KALCMANU AUTOMATIC
+                MASK    THREE           # MANEUVER RATE
+                DOUBLE                  # RATEINDX HAS TO BE 0,2,4,6 SINCE RATES
+                TS      RATEINDX        # ARE DP
+                TC      POSTJUMP
+                CADR    STIKLOAD
+
+V04N46          VN      0446
+DSPLYMSK        OCT     33133
+BOOLSMSK        OCT     13133
+                BANK    01
+                SETLOC  LOADDAP1
+                BANK
+
+                COUNT*  $$/R03
+
+STIKLOAD        CAF     EBANK6
+                TS      EBANK
+                EBANK=  STIKSENS
+                CA      RHCSCALE        # SET STICK SENSITIVITY TO CORRESPOND TO A
+                MASK    DAPBOOLS        # MAXIMUM COMMANDED RATE (AT 42 COUNTS) OF
+                CCS     A               # 20 D/S(NORMAL) OR 4 D/S(FINE), SCALED
+                CA      NORMAL          # AT 45 D/S.
+                AD      FINE
+                TS      STIKSENS
+                CA      -0.6D/S
+                TS      -RATEDB         # LM-ONLY BREAKOUT LEVEL IS .6 D/S.
+                CA      CSMDOCKD        # IF CSM-DOCKED, DIVIDE STICK SENSITIVITY
+                MASK    DAPBOOLS        # BY 10. NORMAL SCALING IS THEN 2 D/S AND
+                EXTEND                  # FINE SCALING IS 0.4 D/S
+                BZF     +7              # BRANCH IF CSM IS NOT DOCKED.
+                CA      STIKSENS
+                EXTEND
+                MP      1/10
+                TS      STIKSENS
+                CA      -0.3D/S         # CSM-DOCKED BREAKOUT LEVEL IS .3 D/S.
+                TS      -RATEDB
+## Page 307
+                RELINT                  # PROCEED TO NOUN 47, MASS LOAD,
+
+DAPDATA2        CAF     V0647
+                TC      BANKCALL
+                CADR    GOXDSPFR
+                TCF     ENDR03          # V34E  TERMINATE. FIRST SET DB, DO 1/ACCS
+                TCF     DAPDAT2         # V33E  PROCEED
+                TCF     DAPDATA2        #       LOAD NEW DATA AND RECYCLE
+                CAF     BIT3            # BLANKS R3
+                TC      BLANKET         #            LM
+                TCF     ENDOFJOB
+ENDR03          INHINT
+                TC      IBNKCALL
+                CADR    RESTORDB
+                TCF     ENDEXT          # DOES RELINT
+
+DAPDAT2         CS      FLGWRD10        # DETERMINE STAGE FROM APSFLAG
+                MASK    APSFLBIT
+                CCS     A
+                CA      MINLMD
+                AD      MINMINLM
+                AD      LEMMASS         # LEMMASS MUST BE GREATER THAN EMPTY LEM
+                EXTEND
+                BZMF    DAPDATA2        # ASK FOR NEW MASSES
+                CAE     DAPBOOLS
+                MASK    CSMDOCKD
+                EXTEND
+                BZF     LEMALONE        # SKIP TEST ON CSMMASS IF NOT DOCKED.
+                CS      MINCSM          # TEST CSM MASS
+                AD      CSMMASS         # CSMMASS MUST BE GREATER THAN EMPTY CSM
+                EXTEND
+                BZMF    DAPDATA2        # ASK FOR NEW MASSES
+                CAE     CSMMASS         # DOCKED:  MASS = CSMMASS + LEMMASS
+LEMALONE        AD      LEMMASS         # LEM ALONE:  MASS = LEMMASS
+                ZL
+                DXCH    MASS
+                INHINT
+                TC      IBNKCALL        # SET DEADBANK AND COMPUTE MOMENTS OF
+                CADR    RESTORDB        #   INERTIA.
+                RELINT                  # PROCEED TO NOUN 48 (OR END).
+
+DAPDATA3        CS      FLGWRD10
+                MASK    APSFLBIT
+                EXTEND                  # END ROUTINE IF LEM HAS STAGED.
+                BZF     ENDEXT
+                CAF     V06N48          # DISPLAY TRIM ANGLES AND REQUEST RESPONSE
+                TC      BANKCALL
+                CADR    GOXDSPFR
+                TC      ENDEXT
+                TCF     DPDAT3          # V33E GO DO TRIM (WAITLIST TO TRIMGIMB)
 
 ## Page 308
-		TCF	-5		#      LOAD NEW DATA AND RECYCLE
-		CAF	BIT3
-		TC	BLANKET		# BLANK R3
-		TCF	ENDOFJOB
-DPDAT3		CAF	BIT1
-		TC	WAITLIST
-		EBANK=	ROLLTIME
-		2CADR	TRIMGIMB
-		
-		TCF	ENDOFJOB	# DOES A RELINT
-TRIMDONE	CAF	V50N48
-		TC	BANKCALL	# TRIM IS FINISHED: PLEASE TERMINATE R03
-		CADR	GOMARK3R -1
-		TC	ENDEXT		# V34E TERMINATE
-		TC	ENDEXT
-		TC	ENDEXT
-		CAF	OCT24		# BIT5 TO CHANGE TO PERFORM, 3 TO BLANK R3
-		TC	BLANKET
-		TCF	ENDOFJOB
-		
-V0647		VN	0647
-V06N48		VN	0648
+                TCF     -5              #      LOAD NEW DATA AND RECYCLE
+                CAF     BIT3
+                TC      BLANKET         # BLANK R3
+                TCF     ENDOFJOB
+DPDAT3          CAF     BIT1
+                TC      WAITLIST
+                EBANK=  ROLLTIME
+                2CADR   TRIMGIMB
 
-V50N48		=	V06N48
+                TCF     ENDOFJOB        # DOES A RELINT
+TRIMDONE        CAF     V50N48
+                TC      BANKCALL        # TRIM IS FINISHED: PLEASE TERMINATE R03
+                CADR    GOMARK3R -1
+                TC      ENDEXT          # V34E TERMINATE
+                TC      ENDEXT
+                TC      ENDEXT
+                CAF     OCT24           # BIT5 TO CHANGE TO PERFORM, 3 TO BLANK R3
+                TC      BLANKET
+                TCF     ENDOFJOB
 
-NORMAL		DEC	.660214
-					# NORMAL SCALING IS 20 D/S
-FINE		DEC	.165054		# FINE STICK SCALING (4 D/S).
-1/10		DEC	.1		# FACTOR FOR CSM-DOCKED SCALING
--0.6D/S		DEC	-218
--0.3D/S		DEC	-109
+V0647           VN      0647
+V06N48          VN      0648
+
+V50N48          =       V06N48
+
+NORMAL          DEC     .660214
+                                        # NORMAL SCALING IS 20 D/S
+FINE            DEC     .165054         # FINE STICK SCALING (4 D/S).
+1/10            DEC     .1              # FACTOR FOR CSM-DOCKED SCALING
+-0.6D/S         DEC     -218
+-0.3D/S         DEC     -109
 
 ## Page 309
 # VERB 66.  VEHICLES ARE ATTACHED.  MOVE THIS VEHICLE STATE VECTOR TO
@@ -1502,62 +1504,62 @@ FINE		DEC	.165054		# FINE STICK SCALING (4 D/S).
 
 #     USE SUBROUTINE GENTRAN.
 
-		BANK	7
-		SETLOC	EXTVERBS
-		BANK
-		
-		COUNT*	$$/EXTVB
-		
-		EBANK=	RRECTHIS
-		
-ATTACHED	CS	FLAGWRD8
-		MASK	SURFFBIT
-		EXTEND
-		BZF	ALM/END		# TURN ON OE AND EXIT IF SURFFLAG SET.
-		CAF	PRIO10
-		TC	FINDVAC
-		EBANK=	RRECTHIS
-		
-		2CADR	ATTACHIT
-		
-		TC	ENDOFJOB
-		
-ATTACHIT	TC	INTPRET
-		CALL
-			INTSTALL
-		SET	BON
-			MOONOTH
-			MOONTHIS
-			+3
-		CLEAR
-			MOONOTH
-		EXIT
-		CAF	OCT51
-		TC	GENTRAN
-		ADRES	RRECTHIS	# OUR STATE VECTOR INTO OTHER VIA GENTRAN
-		ADRES	RRECTOTH
-		
-		RELINT
-		TC	INTPRET
-		CALL			# UPDATE R-OTHER, V-OTHER
-			PTOALEM
-		LXA,2	CALL
-			PBODY
-			SVDWN1
-		EXIT
-		
-		CAF	TCPINAD
+                BANK    7
+                SETLOC  EXTVERBS
+                BANK
+
+                COUNT*  $$/EXTVB
+
+                EBANK=  RRECTHIS
+
+ATTACHED        CS      FLAGWRD8
+                MASK    SURFFBIT
+                EXTEND
+                BZF     ALM/END         # TURN ON OE AND EXIT IF SURFFLAG SET.
+                CAF     PRIO10
+                TC      FINDVAC
+                EBANK=  RRECTHIS
+
+                2CADR   ATTACHIT
+
+                TC      ENDOFJOB
+
+ATTACHIT        TC      INTPRET
+                CALL
+                        INTSTALL
+                SET     BON
+                        MOONOTH
+                        MOONTHIS
+                        +3
+                CLEAR
+                        MOONOTH
+                EXIT
+                CAF     OCT51
+                TC      GENTRAN
+                ADRES   RRECTHIS        # OUR STATE VECTOR INTO OTHER VIA GENTRAN
+                ADRES   RRECTOTH
+
+                RELINT
+                TC      INTPRET
+                CALL                    # UPDATE R-OTHER, V-OTHER
+                        PTOALEM
+                LXA,2   CALL
+                        PBODY
+                        SVDWN1
+                EXIT
+
+                CAF     TCPINAD
 ## Page 310
-		INDEX	FIXLOC
-		TS	QPRET
-		TC	POSTJUMP
-		CADR	INTWAKE		# FREE INTEGRATION AND EXIT.
-		
-TCPIN		RTB
-			PINBRNCH
-			
-OCT51		OCT	51
-TCPINAD		CADR	TCPIN
+                INDEX   FIXLOC
+                TS      QPRET
+                TC      POSTJUMP
+                CADR    INTWAKE         # FREE INTEGRATION AND EXIT.
+
+TCPIN           RTB
+                        PINBRNCH
+
+OCT51           OCT     51
+TCPINAD         CADR    TCPIN
 
 # VERB 96  SET QUITFLAT TO STOP INTEGRATION.
 
@@ -1565,35 +1567,35 @@ TCPINAD		CADR	TCPIN
 #          STATEINT WILL CHECK QUITFLAG AND SKIP 1ST PASS,
 #                 THUS ALLOWING A 10 MINUTE PERIOD WITHOUT INTEGRATION.
 
-VERB96		TC	UPFLAG		# QUITFLAG WILL CAUSE INTEGRATION TO EXIT
-		ADRES	QUITFLAG	#    AT NEXT TIMESTEP
-		
-		CAF	ZERO
-		TC	POSTJUMP
-		CADR	V37		# GO TO P00
+VERB96          TC      UPFLAG          # QUITFLAG WILL CAUSE INTEGRATION TO EXIT
+                ADRES   QUITFLAG        #    AT NEXT TIMESTEP
+
+                CAF     ZERO
+                TC      POSTJUMP
+                CADR    V37             # GO TO P00
 
 
 # VERB 67 :   DISPLAY OF W MATRIX
 
-V67		TC	TESTXACT
-		CAF	PRIO5
-		TC	FINDVAC
-		EBANK=	WWPOS
-		2CADR	V67CALL
-		
-		TC	ENDOFJOB
-		
+V67             TC      TESTXACT
+                CAF     PRIO5
+                TC      FINDVAC
+                EBANK=  WWPOS
+                2CADR   V67CALL
+
+                TC      ENDOFJOB
+
 # VERB 65         DISABLE U,V JETS DURING DPS BURNS
 
-SNUFFOUT	TC	UPFLAG
-		ADRES	SNUFFER
-		TC	GOPIN
-		
+SNUFFOUT        TC      UPFLAG
+                ADRES   SNUFFER
+                TC      GOPIN
+
 # VERB 75         ENABLE U,V JETS DURING DPS BURNS
 
-OUTSNUFF	TC	DOWNFLAG
-		ADRES	SNUFFER
-		TC	GOPIN
+OUTSNUFF        TC      DOWNFLAG
+                ADRES   SNUFFER
+                TC      GOPIN
 # VERB 85         DISPLAY RR LOS AZIMUTH AND ELEVATION.
 
 #          AZIMUTH IS THE ANGLE BETWEEN THE LOS AND THE X-Z NB PLANE, 0 - 90 DEG IN THE +Y HEMISPHERE,
@@ -1602,86 +1604,86 @@ OUTSNUFF	TC	DOWNFLAG
 ## Page 311
 #          ELEVATION IS THE ANGLE BETWEEN +ZNB AND THE PROJECTION OF THE LOS INTO THE X-Z PLANE, 0 - 360 ABOUT +Y.
 
-		EBANK=	RR-AZ
-VERB85		TC	TESTXACT
-		TC	POSTJUMP
-		CADR	DSPRRLOS
-		
-		SETLOC	PINBALL2
-		BANK
-		
-		COUNT*	$$/EXTVB
-		
-DSPRRLOS	CAF	PRIO5
-		TC	FINDVAC
-		EBANK=	RR-AZ
-		2CADR	RRLOSDSP
-		
-		CAF	PRIO4
-		TC	PRIOCHNG
-		CAF	V16N56
-		TC	BANKCALL
-		CADR	GOMARKFR
-		TC	B5OFF
-		TC	B5OFF
-		TC	B5OFF
-		
-		CAF	BIT3
-		TC	BLANKET
-		TC	ENDOFJOB
+                EBANK=  RR-AZ
+VERB85          TC      TESTXACT
+                TC      POSTJUMP
+                CADR    DSPRRLOS
 
-V16N56		VN	1656
+                SETLOC  PINBALL2
+                BANK
+
+                COUNT*  $$/EXTVB
+
+DSPRRLOS        CAF     PRIO5
+                TC      FINDVAC
+                EBANK=  RR-AZ
+                2CADR   RRLOSDSP
+
+                CAF     PRIO4
+                TC      PRIOCHNG
+                CAF     V16N56
+                TC      BANKCALL
+                CADR    GOMARKFR
+                TC      B5OFF
+                TC      B5OFF
+                TC      B5OFF
+
+                CAF     BIT3
+                TC      BLANKET
+                TC      ENDOFJOB
+
+V16N56          VN      1656
 
 
-		SETLOC	PINBALL1
-		BANK
+                SETLOC  PINBALL1
+                BANK
 
-RRLOSDSP	EXTEND
-		DCA	CDUT
-		DXCH	MPAC
-		TC	INTPRET
-		CALL
-			RRNBMPAC	# GET RR LOS IN BODY AXIS.
-		STORE	0D		# UNIT LOS
-		STODL	6D
-			HI6ZEROS
-		STOVL	8D
-			6D
-		UNIT
-		STORE	6D		# UNIT OF LOS PROJ IN X-Z PLANE
-		DOT
+RRLOSDSP        EXTEND
+                DCA     CDUT
+                DXCH    MPAC
+                TC      INTPRET
+                CALL
+                        RRNBMPAC        # GET RR LOS IN BODY AXIS.
+                STORE   0D              # UNIT LOS
+                STODL   6D
+                        HI6ZEROS
+                STOVL   8D
+                        6D
+                UNIT
+                STORE   6D              # UNIT OF LOS PROJ IN X-Z PLANE
+                DOT
 ## Page 312
-			UNITZ
-		STOVL	COSTH		# 16D
-			UNITX
-		DOT	
-			6D
-		STCALL	SINTH		# 18D
-			ARCTRIG
-		BPL	DAD		# INSURE DISPLAY OF 0 - 360 DEG.
-			+2
-			DPPOSMAX	# INTRODUCES AN ERROR OF B-28 REVS.
-		STOVL	RR-ELEV
-			0D
-		DOT
-			UNITY
-		STOVL	SINTH
-			0D
-		DOT
-			6D
-		STCALL	COSTH
-			ARCTRIG
-		BPL	DAD		# INSURE DISPLAY OF 0 - 360 DEG.
-			+2
-			DPPOSMAX	# INTRODUCES AN ERROR OF B-28 REVS.
-		STORE	RR-AZ
-		EXIT
-		CA	1SEC
-		TC	BANKCALL
-		CADR	DELAYJOB
-		
-		CA	BIT5
-		MASK	EXTVBACT
-		CCS	A
-		TC	RRLOSDSP
-		TC	ENDEXT
+                        UNITZ
+                STOVL   COSTH           # 16D
+                        UNITX
+                DOT
+                        6D
+                STCALL  SINTH           # 18D
+                        ARCTRIG
+                BPL     DAD             # INSURE DISPLAY OF 0 - 360 DEG.
+                        +2
+                        DPPOSMAX        # INTRODUCES AN ERROR OF B-28 REVS.
+                STOVL   RR-ELEV
+                        0D
+                DOT
+                        UNITY
+                STOVL   SINTH
+                        0D
+                DOT
+                        6D
+                STCALL  COSTH
+                        ARCTRIG
+                BPL     DAD             # INSURE DISPLAY OF 0 - 360 DEG.
+                        +2
+                        DPPOSMAX        # INTRODUCES AN ERROR OF B-28 REVS.
+                STORE   RR-AZ
+                EXIT
+                CA      1SEC
+                TC      BANKCALL
+                CADR    DELAYJOB
+
+                CA      BIT5
+                MASK    EXTVBACT
+                CCS     A
+                TC      RRLOSDSP
+                TC      ENDEXT
