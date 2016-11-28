@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    ERASABLE_ASSIGNMENTS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -20,6 +21,7 @@
 ##                                          NETTOTKP -> NEGTORKP 
 ##                                          RBRRGZ   -> RBRFGZ 
 ##              2016-11-26 HG   Fix label   REULTCT  -> RESULTCT  
+##              2016-11-28 HG   Fix operand SAMPLIN  -> SAMPLIM
 
 
 ## Page 92
@@ -627,7 +629,7 @@ SQ              ERASE                                   # (1)
 #     **** RADAR ****
 
 SAMPLIM         ERASE                                   # B(1)      LR    R12,P60S,R04,R77
-RADUSE          EQUALS          SAMPLIN                 # B(1)PRM   BOTH  P20,P22,R12,R04
+RADUSE          EQUALS          SAMPLIM                 # B(1)PRM   BOTH  P20,P22,R12,R04
 SAMPLSUM        ERASE           +3                      # B(1),I(2) BOTH
 RRTARGET        EQUALS          SAMPLSUM                # I(6)      RR  P20,P22,R04,V41
 
