@@ -89,3 +89,35 @@ The tapes store different kinds of records.
  - SYPT: Symbolic YUL Program Tape
  - BYPT: 
 
+
+Machine Tables
+--------------
+
+For each ta rget machine (called 'computer' in YUL), there is a table of opcodes supported. These tables (see images page 229 & following), are constructed using the ARGUS "M" opcode, which means 'mixed constant', i.e. the 'alphanumeric compressed' data type. This is a 48-bit word structured as 6 6-bit characters and a 12-bit number (see diagram III-1 on page 28 of the H-1800 manual). 
+
+Here is an example of some entries from the AGC4 table:
+
+    0138   CODES 10   M,A,MP       A,            A,            B,6200
+    0139              M,A,DM       A,P           A,            B,4541
+    0140              M,A,DM       A,PR          A,            B,5101
+    0141              M,A,DO       A,T           A,            B,5641
+    0142              M,A,UN       A,IT          A,            B,4231
+    0143              M,A,DM       A,OV          A,E           B,5531
+    0144              M,A,DO       A,UB          A,LE          B,7002
+    0146              OCT          0
+
+In the table entries, each "A" operand to the "M" code is part of the 6-character string part, and the "B" operand supplies an octal number representing 0-4095.
+
+Each table is null-terminated.
+
+So, for example, applying this to the fragment above, we get:
+       MP      6200
+       DMP     4541
+       DMPR    5101
+       DOT     5641
+       UNIT    4231
+       DMOVE   5531
+       DOUBLE  7002
+
+etc...
+
