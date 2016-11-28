@@ -38,6 +38,7 @@ parser.add_argument('--no-crop', help="Only perform the threshold steps; don't c
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('--burst120', help="Perform BURST120 processing", action="store_true")
 group.add_argument('--luminary210', help="Perform LUMINARY 210 processing", action="store_true")
+group.add_argument('--luminary69', help="Perform LUMINARY 69 processing", action="store_true")
 
 args = parser.parse_args()
 
@@ -48,11 +49,23 @@ lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
 l_channel,_,_ = cv2.split(lab)
 
 # Blur and threshold the image
-blurred = cv2.GaussianBlur(l_channel, (1,5), 0)
 if args.burst120:
+    blurred = cv2.GaussianBlur(l_channel, (1,5), 0)
     _,thresh = cv2.threshold(blurred, 180, 255, cv2.THRESH_BINARY)
-else:
+elif args.luminary210:
+    blurred = cv2.GaussianBlur(l_channel, (1,5), 0)
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+elif args.luminary69:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = ~cv2.inRange(diff, 30, 225) # Reject pixels too black or too white
+else:
+    raise RuntimeError("Unknown program type selected")
 
 if args.no_crop:
     cv2.imwrite(args.output_file, thresh)

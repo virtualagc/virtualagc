@@ -612,38 +612,67 @@ ifndef NOGUI
 	cd yaDEDA && ./autogen.sh --prefix=$(PREFIX)
 endif
 
-TMP:=temp.virtualagc
+iTMP:=temp.virtualagc
+WINHOME=$(subst \,/,$(USERPROFILE))
 .PHONY: install
 install: all
 ifdef MACOSX
 	cp ${EXTSW} VirtualAGC/temp/VirtualAGC.app ~/Desktop
+	@echo "Run Virtual AGC from its desktop icon."
 else
 ifdef WIN32
-	-mkdir c:/"Program Files"/VirtualAGC
-	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* c:/"Program Files"/VirtualAGC
-	@echo "You might want to make a launcher icon on your Desktop that uses:"
-	@echo "  1. Executable c:\Program Files\VirtualAGC\bin\VirtualAGC.exe"
-	@echo "  2. Working directory c:\Program Files\VirtualAGC\Resources"
-	@echo "  3. Icon c:\Program Files\VirtualAGC\Resources\ApolloPatch2.png"
+	-mkdir "$(WINHOME)/VirtualAGC"
+	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* "$(WINHOME)/VirtualAGC"
+	@echo "cd %HOMEPATH%\\VirtualAGC\\Resources" >$(iTMP)
+	@echo "..\\bin\\VirtualAGC" >>$(iTMP)
+	mv $(iTMP) $(WINHOME)/Desktop/VirtualAGC.bat
+	@echo ""
+	@echo "================================================================"
+	@echo "Run Virtual AGC from its desktop launcher."
+	@echo "Or else, run Virtual AGC from a Windows command-line as follows:"
+	@echo "  cd VirtualAGC\\Resources"
+	@echo "  ..\\bin\\VirtualAGC"
+	@echo "================================================================"
 else
 	# Create installation directory.
 	-mkdir ~/VirtualAGC
 	cp ${EXTSW} VirtualAGC/temp/lVirtualAGC/* ~/VirtualAGC
 ifdef SOLARIS
-	@echo "We'd like to create a desktop icon.  For whatever lame reason, Solaris"
-	@echo "desktop icons have no way to set the working directory, so if we made an" 
-	@echo "icon, it wouldn't work."
+	@echo "#!/bin/sh" >$(iTMP)
+	@echo "export LD_LIBRARY_PATH=/opt/csw/lib" >>$(iTMP)
+	@echo "cd ~/VirtualAGC/Resources" >>$(iTMP)
+	@echo "../bin/VirtualAGC &" >>$(iTMP)
+	chmod +x $(iTMP)
+	mv $(iTMP) $$HOME/Desktop/VirtualAGC
+	@echo ""
+	@echo "================================================================"
+	@echo "Run Virtual AGC from its desktop launcher.  (You can change the"
+	@echo "icon associated with the launcher by right-click, Properties, and"
+	@echo "selecting ~/VirtualAGC/Resources/ApolloPatch2-transparent.png.)"
+	@echo "If given the choice between \"Run\" and \"Run in Terminal\", choose"
+	@echo "\"Run\".  Or else, run Virtual AGC from a command-line as follows:"
+	@echo "  cd ~/VirtualAGC/Resources"
+	@echo "  ../bin//VirtualAGC"
+	@echo "================================================================"
 else
-	@echo "[Desktop Entry]" >$(TMP)
-	@echo "Encoding=UTF-8" >>$(TMP)
-	@echo "Name=VirtualAGC" >>$(TMP)
-	@echo "Comment=Virtual AGC GUI Application" >>$(TMP)
-	@echo "Terminal=false" >>$(TMP)
-	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(TMP)
-	@echo "Type=Application" >>$(TMP)
-	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(TMP)
-	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(TMP)
-	mv $(TMP) $$HOME/Desktop/VirtualAGC.desktop
+	@echo "[Desktop Entry]" >$(iTMP)
+	@echo "Encoding=UTF-8" >>$(iTMP)
+	@echo "Name=VirtualAGC" >>$(iTMP)
+	@echo "Comment=Virtual AGC GUI Application" >>$(iTMP)
+	@echo "Terminal=false" >>$(iTMP)
+	@echo "Exec=$$HOME/VirtualAGC/bin/VirtualAGC" >>$(iTMP)
+	@echo "Type=Application" >>$(iTMP)
+	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(iTMP)
+	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(iTMP)
+	chmod +x $(iTMP)
+	mv $(iTMP) $$HOME/Desktop/VirtualAGC.desktop
+	@echo ""
+	@echo "================================================================"
+	@echo "Run Virtual AGC from its desktop icon."
+	@echo "Or else, run Virtual AGC from a command-line as follows:"
+	@echo "  cd ~/VirtualAGC/Resources"
+	@echo "  ../bin//VirtualAGC"
+	@echo "================================================================"
 endif
 endif
 endif
