@@ -186,19 +186,19 @@
 
                 BANK            35
                 SETLOC          CSI/CDH
-                BANK    
+                BANK
                 EBANK=          SUBEXIT
                 COUNT*          $$/P3272
 P32             TC              AVFLAGA
                 TC              P32STRT
 P72             TC              AVFLAGP
-P32STRT         EXTEND  
+P32STRT         EXTEND
                 DCA             P30ZERO
                 DXCH            CENTANG
                 TC              P32/P72A
-ALMXITA         SXA,2   
+ALMXITA         SXA,2
                                 CSIALRM
-ALMXIT          LXC,1   
+ALMXIT          LXC,1
                                 CSIALRM
                 SLOAD*          EXIT
                                 ALARM/TB -1,1
@@ -215,103 +215,103 @@ P32/P72A        TC              P20FLGON
                 TS              TCSI
                 TS              TCSI            +1
 VN0611          CAF             V06N11                  # TCSI
-                TC              VNP00H  
-                TC              INTPRET 
-                DLOAD           DCOMP   
-                                TCSI    
-                BMN             DLOAD   
-                                VN0655  
-## Page 628             
-                                TETLEM  
-                STCALL          TDEC1   
-                                PRECSET 
-                VLOAD           VSR*    
-                                RACT3   
-                                0,2     
-                STOVL           RVEC    
-                                VACT3   
-                VSR*            SET     
-                                0,2     
-                                RVSW    
-                STODL           VVEC    
-                                DPPOSMAX        
-                STCALL          RDESIRED        
-                                TIMERAD 
-                DAD             
-                                TDEC2   
-                STORE           TCSI    
-                EXIT            
-                TC              VN0611  
-VN0655          EXIT            
+                TC              VNP00H
+                TC              INTPRET
+                DLOAD           DCOMP
+                                TCSI
+                BMN             DLOAD
+                                VN0655
+## Page 628
+                                TETLEM
+                STCALL          TDEC1
+                                PRECSET
+                VLOAD           VSR*
+                                RACT3
+                                0,2
+                STOVL           RVEC
+                                VACT3
+                VSR*            SET
+                                0,2
+                                RVSW
+                STODL           VVEC
+                                DPPOSMAX
+                STCALL          RDESIRED
+                                TIMERAD
+                DAD
+                                TDEC2
+                STORE           TCSI
+                EXIT
+                TC              VN0611
+VN0655          EXIT
                 CAF             V06N55                  # NN, ELEV(RGLOS)
-                TC              BANKCALL        
-                CADR            GOFLASH 
-                TC              GOTOP00H        
-                TC              +2      
-                TC              -5      
+                TC              BANKCALL
+                CADR            GOFLASH
+                TC              GOTOP00H
+                TC              +2
+                TC              -5
                 CAF             V06N37                  # TTPI
-                TC              VNP00H  
-                TC              INTPRET 
-                DLOAD           
-                                TCSI    
-                STCALL          TIG     
-                                SELECTMU        
-P32/P72B        CALL            
-                                ADVANCE 
-                SETPD           VLOAD   
-                                00      
-                                VPASS1  
-                PDVL            PDDL    
-                                RPASS1  
-                                TCSI    
-                PDDL            PDDL    
-                                TTPI    
-                                TWOPI   
-                PUSH            CALL    
-                                INTINT  
-                CALL            
-                                PASSIVE 
-                CALL            
-                
-## Page 629             
-                                CSI/A   
-P32/P72C        BON             SET     
-                                FINALFLG        
-                                P32/P72D        
-                                UPDATFLG        
-P32/P72D        DLOAD           
-                                T1TOT2  
-P32/P72E        STORE           T1TOT2  
-                DSU             BPL     
-                                60MIN   
-                                P32/P72E        
-                DLOAD           
-                                T2TOT3  
-P32/P72F        STORE           T2TOT3  
-                DSU             BPL     
-                                60MIN   
-                                P32/P72F        
-                EXIT            
-                CAF             V06N75  
-                TC              VNP00H  
-                TC              INTPRET 
-                VLOAD           CALL    
-                                DELVEET1        
-                                S32/33.1        
-                STOVL           DELVEET1        
-                                RACT2   
-                STOVL           RACT1   
-                                DELVEET2        
-                AXT,1           CALL    
-                VN              0682    
-                                DISDVLVC        
-                DLOAD           
-                                TTPI    
-                STCALL          TTPIO   
-                                VN1645  
-                GOTO            
-                                P32/P72B        
-        
+                TC              VNP00H
+                TC              INTPRET
+                DLOAD
+                                TCSI
+                STCALL          TIG
+                                SELECTMU
+P32/P72B        CALL
+                                ADVANCE
+                SETPD           VLOAD
+                                00
+                                VPASS1
+                PDVL            PDDL
+                                RPASS1
+                                TCSI
+                PDDL            PDDL
+                                TTPI
+                                TWOPI
+                PUSH            CALL
+                                INTINT
+                CALL
+                                PASSIVE
+                CALL
+
+## Page 629
+                                CSI/A
+P32/P72C        BON             SET
+                                FINALFLG
+                                P32/P72D
+                                UPDATFLG
+P32/P72D        DLOAD
+                                T1TOT2
+P32/P72E        STORE           T1TOT2
+                DSU             BPL
+                                60MIN
+                                P32/P72E
+                DLOAD
+                                T2TOT3
+P32/P72F        STORE           T2TOT3
+                DSU             BPL
+                                60MIN
+                                P32/P72F
+                EXIT
+                CAF             V06N75
+                TC              VNP00H
+                TC              INTPRET
+                VLOAD           CALL
+                                DELVEET1
+                                S32/33.1
+                STOVL           DELVEET1
+                                RACT2
+                STOVL           RACT1
+                                DELVEET2
+                AXT,1           CALL
+                VN              0682
+                                DISDVLVC
+                DLOAD
+                                TTPI
+                STCALL          TTPIO
+                                VN1645
+                GOTO
+                                P32/P72B
+
 ## Page 630
 # CONSTANT DELTA HEIGHT (CDH) PROGRAMS (P33 AND P73)
 
@@ -479,15 +479,15 @@ P33/P73A        TC              P20FLGON
                 CAF             V06N13                  # TCDH
                 TC              VNP00H
                 TC              INTPRET
-                DLOAD   
+                DLOAD
                                 TTPIO
                 STODL           TTPI
                                 TCDH
                 STCALL          TIG
                                 SELECTMU
-P33/P73B        CALL    
+P33/P73B        CALL
                                 ADVANCE
-                CALL    
+                CALL
                                 CDHMVR
                 SETPD           VLOAD
                                 0D
@@ -495,7 +495,7 @@ P33/P73B        CALL
                 PDVL            CALL
                                 RACT2
                                 INTINT3P
-                CALL    
+                CALL
                                 ACTIVE
                 SETPD           VLOAD
                                 0D
@@ -503,7 +503,7 @@ P33/P73B        CALL
                 PDVL            CALL
                                 RPASS2
                                 INTINT3P
-                CALL    
+                CALL
                                 PASSIVE
                 DLOAD           SET
                                 P30ZERO
@@ -519,11 +519,11 @@ P33/P73B        CALL
                 CADR            GOFLASH
                 TC              GOTOP00H
                 TC              +2
-                
-## Page 634     
+
+## Page 634
                 TC              P33/P73A
                 TC              INTPRET
-                DLOAD   
+                DLOAD
                                 P30ZERO
                 STORE           NOMTPI
 P33/P73C        BON             SET
@@ -534,12 +534,12 @@ P33/P73D        DLOAD           DAD
                                 NOMTPI
                                 TTPI
                 STORE           TTPI
-                DSU     
+                DSU
                                 TCDH
 P33/P73E        DSU             BPL
                                 60MIN
                                 P33/P73E
-                DAD     
+                DAD
                                 60MIN
                 STODL           T1TOT2
                                 TTPI
@@ -552,7 +552,7 @@ P33/P73F        ABS             DSU
                                 60MIN
                 SIGN            STADR
                 STORE           T2TOT3
-                EXIT    
+                EXIT
                 CAF             V06N75
                 TC              VNP00H
                 TC              INTPRET
@@ -561,17 +561,17 @@ P33/P73F        ABS             DSU
                                 S32/33.1
                 STCALL          DELVEET2
                                 VN1645
-                GOTO    
+                GOTO
                                 P33/P73B
-        
-## Page 635     
+
+## Page 635
 # ..... AVFLAGA/P .....
 
-# SUBROUTINES USED      
-       
-#          UPFLAG  
-#          DOWNFLAG        
-        
+# SUBROUTINES USED
+
+#          UPFLAG
+#          DOWNFLAG
+
 AVFLAGA         EXTEND                                  # AVFLAG = LEM
                 QXCH            SUBEXIT
                 TC              UPFLAG
@@ -582,22 +582,22 @@ AVFLAGP         EXTEND                                  # AVFLAG = CSM
                 TC              DOWNFLAG
                 ADRES           AVFLAG
                 TC              SUBEXIT
-P20FLGON        EXTEND  
+P20FLGON        EXTEND
                 QXCH            SUBEXIT
                 TC              UPFLAG
                 ADRES           UPDATFLG                # SET UPDATFLG
                 TC              UPFLAG
                 ADRES           TRACKFLG                # SET TRACKFLG
                 TC              SUBEXIT
-        
-## Page 636     
+
+## Page 636
 # ..... DISDVLVC .....
-       
-# SUBROUTINES USED      
-       
-#       S32/33.X        
-#        VNP00H  
-        
+
+# SUBROUTINES USED
+
+#       S32/33.X
+#        VNP00H
+
 DISDVLVC        STORE           DELVLVC
                 STQ             CALL
                                 NORMEX
@@ -608,16 +608,16 @@ DISDVLVC        STORE           DELVLVC
                 VSL1            SXA,1
                                 VERBNOUN
                 STORE           DELVLVC
-                EXIT    
+                EXIT
                 CA              VERBNOUN
                 TC              VNP00H
                 TC              INTPRET
-                GOTO    
+                GOTO
                                 NORMEX
-        
-## Page 637    
+
+## Page 637
 # ..... CONSTANTS .....
-        
+
 V06N11          VN              0611
 V06N13          VN              0613
 V06N75          VN              0675
@@ -625,7 +625,7 @@ SN359+          2DEC            -.000086601
 CS359+          2DEC            +.499999992
 P30ZERO         2DEC            0
 60MIN           2DEC            360000
-        
+
 ALARM/TB        OCT             00600                   # NO 1
                 OCT             00601                   #    2
                 OCT             00602                   #    3
@@ -633,25 +633,25 @@ ALARM/TB        OCT             00600                   # NO 1
                 OCT             00604                   #    5
                 OCT             00605                   #    6
                 OCT             00606                   #    7
-        
-## Page 638     
+
+## Page 638
 # ..... CSI/A     .....
-       
-# SUBROUTINES USED      
-       
-#       VECSHIFT        
-#       TIMETHET        
-#       PERIAPO 
-#       SHIFTR1 
-#       INTINT2C        
-#       CDHMVR  
-#       PERIAPO1        
-#       INTINT  
-#       ACTIVE  
-        
+
+# SUBROUTINES USED
+
+#       VECSHIFT
+#       TIMETHET
+#       PERIAPO
+#       SHIFTR1
+#       INTINT2C
+#       CDHMVR
+#       PERIAPO1
+#       INTINT
+#       ACTIVE
+
                 BANK            34
                 SETLOC          CSI/CDH1
-                BANK    
+                BANK
                 EBANK=          SUBEXIT
                 COUNT*          $$/CSI
 LOOPMX          2DEC            16
@@ -659,72 +659,73 @@ INITST          2DEC            .03048          B-7     #     INITIAL DELDV = 10
 DVMAX1          2DEC            3.0480          B-7     #     MAXIMUM DV1 = 1000 FPS
 DVMAX2          2DEC            3.014472        B-7     #                    989 FPS
 1DPB2           2DEC            1.0             B-2
-1DPB28          2DEC            1       
+1DPB28          2DEC            1
 PMINE           2DEC            157420          B-29    # 85 NM    - MUST BE 8 WORDS BEFORE PMINM
 EPSILN1         2DEC            .0003048        B-7     #      .1 FPS
 NICKELDP        2DEC            .021336         B-7     # 7 FPS (CHANGED FROM .05 FPS)
 FIFPSDP         2DEC            -.152400        B-7     #      50 FPS
 PMINM           2DEC            10668           B-29    # 35000 FT - MUST BE 8 WORDS AFTER PMINE
 DELMAX1         2DEC            .6096000        B-7     #      200 FPS
-ONETHTH         2DEC            .0001           B-3       
+ONETHTH         2DEC            .0001           B-3
 TMIN            2DEC            60000                   # 10 MIN
-                
+
 CSI/A           CLEAR           SET                     # INITIALIZE INDICATORS
                                 S32.1F1                 # DVT1 HAS EXCEEDED MAX INDICATOR
                                 S32.1F2                 # FIRST PASS FOR NEWTON ITERATION INDICATOR
-                                
-## Page 639    XXXXXXXXXX         
-                CLEAR           SET     
-                                S32.1F3A                # 00=1ST 2 PASSES 2ND CYCLE, 01=FIRST CYCLE
-                                S32.1F3B                # 10=2ND CYCLE, 11=50 FPS STAGE 2ND CYCLE
-                DLOAD           
-                                P30ZERO 
-                STORE           LOOPCT  
-                STORE           CSIALRM 
-CSI/B           SETPD           VLOAD   
-                                0D      
-                                RACT1   
+
+## Page 639
+                CLEAR           SET
+                                S32.1F3A                # 00=1ST 2 PASSES 2ND CYCLE 01=FIRST CYCLE
+                                S32.1F3B                # 10=2ND CYCLE 11=50FPS STAGE 2ND CYCLE
+                DLOAD
+                                P30ZERO
+                STORE           LOOPCT
+                STORE           CSIALRM
+CSI/B           SETPD           VLOAD
+                                0D
+                                RACT1
                 ABVAL           PUSH                    # RA1                           B29 PL02D
-                NORM            SR1     
-                                X2                      #                               B29-N2+ B1 PL04D
-                PDVL            ABVAL   
-                                RPASS3  
-                NORM            BDDV                    # RA1/RP3                       B1 PL02D
-                                X1      
-                XSU,2           SR*                     #                               B2
-                                X1      
-                                1,2     
-                DAD             DMP                     # (1+(RA1/RP3))RA1              B29_B2=B31 PL00D
-                                1DPB2   
-                NORM            PDDL                    #                               PL02D
-                                X1      
+                NORM            SR1
+                                X2                      #                        B29-N2+ B1 PL04D
+                PDVL            ABVAL
+                                RPASS3
+                NORM            BDDV                    # RA1/RP3                        B1 PL02D
+                                X1
+                XSU,2           SR*                     #                                B2
+                                X1
+                                1,2
+                DAD             DMP                     # (1+(RA1/RP3))RA1       B29+B2=B31 PL00D
+                                1DPB2
+                NORM            PDDL                    #                                   PL02D
+                                X1
                                 RTMU
-                SR1             DDV                     #                               B38-B3= B7 PL00D
-                SL*             SQRT                    #                               B7
-                                0 -7,1          
-                PDVL            UNIT                    #                                          PL02D
-                                RACT1           
-                PDVL            VXV             
-                                UP1             
+                SR1             DDV                     #                        B38-B3= B7 PL00D
+                SL*             SQRT                    #                                B7
+                                0 -7,1
+                PDVL            UNIT                    #                                   PL02D
+                                RACT1
+                PDVL            VXV
+                                UP1
                 UNIT                                    # UNIT(URP1 X UVP1 X URA1) = UH1
-                DOT             SL1                     # VA1 . UH1                     B7
-                                VACT1           
-                BDSU            STADR                   #                               PL00D
-                STODL           DELVCSI         
+                DOT             SL1                     # VA1 . UH1                      B7
+                                VACT1
+                BDSU            STADR                   #                                   PL00D
+                STODL           DELVCSI
                                 INITST                  # 10 FPS
-                STORE           DELDV           
+                STORE           DELDV
 CSI/B1          DLOAD           DAD                     # IF LOOPCT = 16
-                                LOOPCT          
+                                LOOPCT
                                 1DPB28
                 STORE           LOOPCT
                 DSU             AXT,2
                                 LOOPMX
                                 6
-                BPL     
+                BPL
                                 SCNDSOL
-CSI/B2          SETPD   
+CSI/B2          SETPD
                                 0D
-## Page 644     
+
+## Page 640
                 DLOAD           ABS
                                 DELVCSI
                 DSU             BMN
@@ -736,20 +737,20 @@ CSI/B2          SETPD
                                 SCNDSOL
                 BOFF            BON
                                 S32.1F3A
-                                CSI/B22         # FLAG 3 NEQ 3
+                                CSI/B22                 # FLAG 3 NEQ 3
                                 S32.1F3B
                                 SCNDSOL
 CSI/B22         SET             DLOAD
                                 S32.1F1
                                 DVMAX2
-                SIGN    
+                SIGN
                                 DELVCSI
                 STORE           DELVCSI
 CSI/B23         VLOAD           PUSH
                                 RACT1
                 UNIT            PDVL
                                 UP1
-                VXV             UNIT            # UNIT (URP1 X UVP1 X URA1) = UH1
+                VXV             UNIT                    # UNIT (URP1 X UVP1 X URA1) = UH1
                 VXSC            VSL1
                                 DELVCSI
                 STORE           DELVEET1
@@ -759,25 +760,26 @@ CSI/B23         VLOAD           PUSH
 CSI/B23D        STCALL          VACT4
                                 VECSHIFT
                 STOVL           VVEC
-                SET     
+                SET
                                 RVSW
                 STOVL           RVEC
                                 SN359+
-                STCALL          SNTH            # ALSO CSTH
+                STCALL          SNTH                    # ALSO CSTH
                                 TIMETHET
                 SR1             LXA,1
                                 RTX1
                 STCALL          HAFPA1
                                 PERIAPO
-                CALL    
+                CALL
                                 SHIFTR1
                 STODL           POSTCSI
                                 CENTANG
                 BZE             GOTO
                                 +2
-## Page 645     
+
+## Page 641
                                 CIRCL
-                DLOAD   
+                DLOAD
                                 ECC
                 DSU             BMN
                                 ONETHTH
@@ -788,11 +790,11 @@ CSI/B23D        STCALL          VACT4
                 SETPD           NORM
                                 2D
                                 X1
-                PDVL            DOT             #                       PL04D
+                PDVL            DOT                     #                                       PL04D
                                 RACT1
                                 VACT4
                 ABS             DDV
-                                02D             # (/RDOTV/)/R1          B38-B29= B7
+                                02D                     # (/RDOTV/)/R1              B38-B29= B7
                 SL*             DSU
                                 0,1
                                 NICKELDP
@@ -803,14 +805,14 @@ CSI/B23D        STCALL          VACT4
                                 1DPB2
                 STODL           14D
                                 RTSR1/MU
-                SR1             DDV             # (1/ROOTMU)/R1         B-16-B29 = B-45 PL02D
+                SR1             DDV                     # (1/ROOTMU)/R1         B-16-B29 = B-45 PL02D
                 PDDL            DMP
                                 P
                                 R1
-                CALL    
+                CALL
                                 SHIFTR1
                 SL4             SL1
-                SQRT            DMP             # ((P/MU)**.5)/R1       B14+B-14 = B-31 BL02D
+                SQRT            DMP                     # ((P/MU)**.5)/R1       B14+B-45 = B-31 PL02D
                 BOFF            SL3
                                 CMOONFLG
                                 CSI/B3
@@ -818,19 +820,20 @@ CSI/B3          PDVL            DOT
                                 RACT1
                                 VACT4
                 STORE           RDOTV
-                ABS     
-                NORM            DMP             # ((P/MU)**.5)RDOTV/R1  PL02D
+                ABS
+                NORM            DMP                     # ((P/MU)**.5)RDOTV/R1                  PL02D
                                 X2
-                XSU,1           SL*             #                       B-31+B36-B3 = B2
+                XSU,1           SL*                     #                  B-31+B36-B3 = B2
                                 X2
                                 3,1
                 STODL           12D
                                 P30ZERO
-## Page 646     
+
+## Page 642
                 STORE           16D
                 VLOAD           UNIT
                                 12D
-                STOVL           SNTH            # ALSO STORES CSTH AND 0
+                STOVL           SNTH                    # ALSO STORES CSTH AND 0
                                 RACT1
                 PDVL            SIGN
                                 VACT4
@@ -838,7 +841,7 @@ CSI/B3          PDVL            DOT
                 VCOMP           CALL
                                 VECSHIFT
                 STOVL           VVEC
-                SET     
+                SET
                                 RVSW
                 STCALL          RVEC
                                 TIMETHET
@@ -852,13 +855,13 @@ CSI/B3          PDVL            DOT
 CIRCL           SETPD           DLOAD
                                 00D
                                 P30ZERO
-                PUSH    
+                PUSH
 NTP/2           DLOAD           DMP
                                 NN
                                 HAFPA1
                 SL              DSU
                                 14D
-                DAD     
+                DAD
                                 TCSI
                 STORE           TCDH
                 BDSU            AXT,2
@@ -870,17 +873,18 @@ NTP/2           DLOAD           DMP
                 VLOAD           PDVL
                                 VACT4
                                 RACT1
-                CALL    
+                CALL
                                 INTINT2C
                 STOVL           RACT2
                                 VATT
                 STOVL           VACT2
                                 VPASS1
                 SETPD           PDVL
-## Page 647     
+
+## Page 643
                                 0D
                                 RPASS1
-                CALL    
+                CALL
                                 INTINT2C
                 STOVL           RPASS2
                                 VATT
@@ -892,7 +896,7 @@ NTP/2           DLOAD           DMP
                 PDVL            CALL
                                 VACT3
                                 PERIAPO1
-                CALL    
+                CALL
                                 SHIFTR1
                 STOVL           POSTCDH
                                 VACT3
@@ -904,64 +908,65 @@ NTP/2           DLOAD           DMP
                                 TTPI
                 PDDL            PUSH
                                 TWOPI
-                CALL    
+                CALL
                                 INTINT
-                CALL    
+                CALL
                                 ACTIVE
-                DLOAD   
+                DLOAD
                                 ELEV
                 SETPD           SINE
                                 6D
                 PDVL            UNIT
                                 RACT3
-                STORE           00D             # URA3 AT 00D
-                PDVL            VXV             # PL14D, PL08D
+                STORE           00D                     # URA3 AT 00D
+                PDVL            VXV                     # PL14D,PL08D
                                 UP1
-                UNIT    
-                PDDL            COSINE          # UNIT(URA3 X UVA3 X URA3) = UH3        B1 PL14D
+                UNIT
+                PDDL            COSINE                  # UNIT(URA3XUVA3XURA3) = UH3       B1 PL14D
                                 ELEV
-                VXSC            STADR           # (COSLOS)(UH3)                         B2 PL08D
-                STORE           18D             #       PLUS
-                DLOAD           VXSC            # (SINLOS)(URA3) = U                    B2 PL00D
+                VXSC            STADR                   # (COSLOS)(UH3)                    B2 PL08D
+                STORE           18D                     #     PLUS
+                DLOAD           VXSC                    # (SINLOS)(URA3) = U               B2 PL00D
                 VAD             VSL1
-                                18D             #                                       B1
-                PUSH            DOT             #                                       PL06D
-                                RACT3           # (U . RA3) = TEMP1                     B1 + B29 = B30
-                SL1             PUSH            #                                       B29 PL08D
-## Page 648     
-                DSQ             TLOAD           # TEMP1**2                              B58
+                                18D                     #                                  B1
+                PUSH            DOT                     #                                     PL06D
+                                RACT3                   # (U . RA3) = TEMP1     B1 +B29 = B30
+                SL1             PUSH                    #                                 B29 PL08D
+
+## Page 644
+                DSQ             TLOAD                   # TEMP1**2                        B58
                                 MPAC
-                PDVL            DOT             #                                       PL11D
+                PDVL            DOT                     #                                     PL11D
                                 RACT3
                                 RACT3
-                TLOAD           DCOMP           # RA3 . RA3
+                TLOAD           DCOMP                   # RA3.RA3
                                 MPAC
-                PDVL            DOT             # RP3 . RP3                             B58 PL14D
+                PDVL            DOT                     # RP3.RP3                         B58 PL14D
                                 RPASS3
-                                RPASS3          #                                       PL11D
-                TAD             TAD             # TEMP1**2 + RA3.RA3 + RP3.RP3 = TEMP2  PL08D
+                                RPASS3                  #                                       PL11D
+                TAD             TAD                     # TEMP1**2+RA3.RA3+RP3.RP3=TEMP2        PL08D
                 BPL             DLOAD
                                 K10RK2
                                 LOOPCT
                 DSU             AXT,2
                                 1DPB28
                                 1D
-                BZE     
+                BZE
                                 ALMXITA
                 DLOAD           SR1
                                 DELDV
                 STORE           DELDV
-                BDSU    
+                BDSU
                                 DVPREV
                 STCALL          DELVCSI
                                 CSI/B1
-K10RK2          SQRT            PUSH            # TEMP3 = TEMP2**.5             B29 PL10D
+K10RK2          SQRT            PUSH                    # TEMP3 = TEMP2**.5                B29 PL10D
                 DCOMP           DSU
-                                06D             # -TEMP1-TEMP3 = K2 AT 10D
-                STODL           10D             #                               PL08D
-                DSU             STADR           #                               PL06D
-                STORE           12D             # -TEMP1+TEMP3 = K1 AT 12D
-                ABS     
+                                06D                     # -TEMP1-TEMP3 =K2 AT 10D
+                STODL           10D                     #                                      PL08D
+                DSU             STADR                   #                                      PL06D
+                STORE           12D                     # -TEMP1+TEMP3 =K1 AT 12D
+                ABS
                 STODL           14D
                                 10D
                 ABS             DSU
@@ -969,40 +974,41 @@ K10RK2          SQRT            PUSH            # TEMP3 = TEMP2**.5             
                 BMN             DLOAD
                                 K2.
                                 12D
-                STORE           10D             # K = K1
-K2.             DLOAD   
+                STORE           10D                     # K=K1
+K2.             DLOAD
                                 10D
                 VXSC            VSL1
-                VAD             UNIT            # V = RA3 + KU UNIT             B1
+                VAD             UNIT                    # V=RA3+KU UNIT                    B1
                                 RACT3
                 PDVL            UNIT
-                                RPASS3          #                               PL06D
+                                RPASS3                  #                                      PL06D
                 PDVL            UNIT
-                                VPASS3          #                               PL12D
-## Page 649     
-                VXV             PDVL            # UVP3 X URP3                   PL18D
+                                VPASS3                  #                                      PL12D
+
+## Page 645
+                VXV             PDVL                    # UVP3 X URP3                          PL18D
                                 06D
                                 06D
                 VXV             DOT
                                 00D
-                STADR                           #                               PL12D
-                STOVL           12D             # (URP3 X V).(UVP3 X URP3)=TEMP PL06D
-                DOT             SL1             #                               PL00D
+                STADR                                   #                                     PL12D
+                STOVL           12D                     # (URP3XV).(UVP3XURP3)=TEMP PL06D     PL06D
+                DOT             SL1                     #                                     PL00D
                 ARCCOS          SIGN
-                                12D             #                               B0
-                SR1             PUSH            # GAMMA = SIGN(TEMP)ARCOS(UNITV.URP3)   PL02D
+                                12D                     #                                 B0
+                SR1             PUSH                    # GAMMA=SIGN(TEMP)ARCOS(UNITV.URP3)   PL02D
                 BON             DLOAD
                                 S32.1F2
                                 FRSTPAS
-                                00D             # NOT THE FIRST PASS OF A CYCLE
-                DSU             PDDL            # GAMMA-GAMPREV                 B1 PL04D
+                                00D                     # NOT THE FIRST PASS OF A CYCLE
+                DSU             PDDL                    # GAMMA-GAMPREV                    B1 PL04D
                                 GAMPREV
                                 DELVCSI
-                DSU             NORM            #                               B7
+                DSU             NORM                    #                                  B7
                                 DVPREV
                                 X1
-                BDDV            PDDL            # (GAM-GAMPREV)/(DV-DVPREV)     B-6+N1 PL06D
-                                02D             #       = SLOPE
+                BDDV            PDDL                    # (GAM-GAMPREV)/(DV-DVPREV)    B-6+N1 PL06D
+                                02D                     #         = SLOPE
                                 DELVCSI
                 STORE           DVPREV
                 BOFF            BOFF
@@ -1016,13 +1022,13 @@ K2.             DLOAD
                 BPL             DLOAD
                                 FIFTYFPS
                                 INITST
-                SIGN    
+                SIGN
                                 DELDV
                 STORE           DELDV
                 SET             CLEAR
                                 S32.1F3A
                                 S32.1F3B
-FRSTPAS         DLOAD   
+FRSTPAS         DLOAD
                                 00D
                 STODL           GAMPREV
                                 DELVCSI
@@ -1030,7 +1036,8 @@ FRSTPAS         DLOAD
                 DSU             CLEAR
                                 DELDV
                                 S32.1F2
-## Page 650     
+
+## Page 646
                 STCALL          DELVCSI
                                 CSI/B1
 THRDCHK         BON             BON
@@ -1041,7 +1048,7 @@ THRDCHK         BON             BON
 FIFTYFPS        DLOAD           SIGN
                                 FIFPSDP
                                 04D
-                SIGN    
+                SIGN
                                 GAMPREV
                 STORE           DELDV
                 DCOMP           DAD
@@ -1059,7 +1066,7 @@ NEWTN           DLOAD           NORM
                 BDDV            XSU,1
                                 00D
                                 X2
-                SR*     
+                SR*
                                 0,1
                 STODL           DELDV
                                 00D
@@ -1081,12 +1088,13 @@ CSISTEP         DLOAD           DSU
                                 DELVCSI
                                 DELDV
                 STCALL          DELVCSI
-## Page 651     
+
+## Page 647
                                 CSI/B1
 CSI/SOL         DLOAD           AXT,2
                                 POSTCSI
                                 2
-                LXA,1   
+                LXA,1
                                 RTX1
                 DSU*            BMN
                                 PMINE -2,1
@@ -1130,14 +1138,15 @@ SCNDSOL         BON             BOFF
                                 S32.1F3B
                 STCALL          LOOPCT
                                 CSI/B
-        
-## Page 652     
-# ***** ADVANCE *****   
-#       
-# SUBROUTINES USED      
-#       PRECSET 
-#       ROTATE  
-        
+
+## Page 648
+# ..... ADVANCE    .....
+
+# SUBROUTINES USED
+
+#       PRECSET
+#       ROTATE
+
 ADVANCE         STQ             DLOAD
                                 SUBEXIT
                                 TIG
@@ -1153,7 +1162,7 @@ ADVANCE         STQ             DLOAD
                 STORE           RPASS1
                 UNIT            VXV
                                 VPASS1
-                UNIT    
+                UNIT
                 STOVL           UP1
                                 RACT3
                 STCALL          RTIG
@@ -1166,10 +1175,10 @@ ADVANCE         STQ             DLOAD
                 STORE           VACT2
                 STCALL          VACT1
                                 SUBEXIT
-        
-## Page 653     
-# ***** ROTATE *****    
-        
+
+## Page 649
+# ..... ROTATE     .....
+
 ROTATE          PUSH            PUSH
                 DOT             VXSC
                                 UP1
@@ -1178,51 +1187,52 @@ ROTATE          PUSH            PUSH
                 UNIT            PDVL
                 ABVAL           VXSC
                 VSL1            RVQ
-        
-## Page 654     
-# ***** INTINTNA *****  
-        
+
+## Page 650
+# ..... INTINTNA   .....
+
 INTINT2C        PDDL            PDDL
                                 TCSI
                                 TCDH
                 PDDL            PUSH
                                 TWOPI
-                GOTO    
+                GOTO
                                 INTINT
 INTINT3P        PDDL            PDDL
                                 TCDH
                                 TTPI
                 PDDL            PUSH
                                 P30ZERO
-                GOTO    
+                GOTO
                                 INTINT
-        
-## Page 655     
-# ***** S32/33.1 *****  
-#       
-# SUBROUTINES USED      
-#       S32/33.X        
-        
+
+## Page 651
+# ..... S32/33.1  .....
+
+# SUBROUTINES USED
+
+#       S32/33.X
+
 S32/33.1        STQ             AXT,1
                                 SUBEXIT
                 VN              0681
-                CALL    
+                CALL
                                 DISDVLVC
-                CALL    
+                CALL
                                 S32/33.X
                 VLOAD           VXM
                                 DELVLVC
                                 0D
-                VSL1    
+                VSL1
                 STORE           DELVSIN
                 PUSH            ABVAL
                 STOVL           DELVSAB
-                GOTO    
+                GOTO
                                 SUBEXIT
-        
-## Page 656     
-# ***** S32/33.X *****  
-        
+
+## Page 652
+# ..... S32/33.X  .....
+
 S32/33.X        SETPD           VLOAD
                                 6D
                                 UP1
@@ -1231,23 +1241,24 @@ S32/33.X        SETPD           VLOAD
                 UNIT            VCOMP
                 PUSH            VXV
                                 UP1
-                VSL1    
+                VSL1
                 STORE           0D
-                RVQ     
-        
-## Page 657     
-# ***** CDHMVR *****    
-#       
-# SUBROUTINES USED      
-#       VECSHIFT        
-#       TIMETHET        
-#       SHIFTR1 
-        
+                RVQ
+
+## Page 653
+# ..... CDHMVR     .....
+
+# SUBROUTINES USED
+
+#       VECSHIFT
+#       TIMETHET
+#       SHIFTR1
+
 CDHMVR          STQ             VLOAD
                                 SUBEXIT
                                 RACT2
                 PUSH            UNIT
-                STOVL           UNVEC           # UR SUB A
+                STOVL           UNVEC                   # UR SUB A
                                 RPASS2
                 UNIT            DOT
                                 UNVEC
@@ -1258,7 +1269,7 @@ CDHMVR          STQ             VLOAD
                 SR2             DSU
                 SQRT            SL1
                 PDVL            VCOMP
-                VXV     
+                VXV
                                 RPASS2
                 DOT             PDDL
                                 UP1
@@ -1269,7 +1280,7 @@ CDHMVR          STQ             VLOAD
                                 VPASS2
                                 VECSHIFT
                 STOVL           VVEC
-                CLEAR   
+                CLEAR
                                 RVSW
                 STCALL          RVEC
                                 TIMETHET
@@ -1279,51 +1290,52 @@ CDHMVR          STQ             VLOAD
                 STORE           18D
                 DOT             SL1R
                                 UNVEC
-                PDVL            ABVAL           # 0D = V SUB PV
+                PDVL            ABVAL                   # 0D = V SUB PV
                 SL*             PDVL
                                 0,2
                                 RACT2
-                ABVAL           PDDL            # 2D = LENGTH OF R SUB A
-                DSU     
-## Page 658     
+                ABVAL           PDDL                    # 2D = LENGTH OF R SUB A
+                DSU
+
+## Page 654
                                 02D
-                STODL           DIFFALT         # DELTA H IN METERS             B+29
+                STODL           DIFFALT                 # DELTA H IN METERS             B+29
                                 R1A
-                NORM            PDDL            # 2 - R V**/MU                  04D
+                NORM            PDDL                    # 2 - R V**/MU                          04D
                                 X1
                                 R1
-                CALL    
+                CALL
                                 SHIFTR1
                 SR1R            DDV
                 SL*             PUSH
                                 0 -5,1
-                DSU             PDDL            # A SUB A                       B+29 04D
+                DSU             PDDL                    # A SUB A                       B+29    04D
                                 DIFFALT
-                SR2             DDV             # A SUB P                       B+31
-                                04D             #                               B+2
-                PUSH            SQRT            # A SUB P/A SUB A               06D
+                SR2             DDV                     # A SUB P                      B+31
+                                04D                     #                              B+2
+                PUSH            SQRT                    #    A SUB P/A SUB A             06D
                 DMPR            DMP
                                 06D
                                 00D
-                SL3R            PDDL            # V SUB A V METERS/CS           B+7 08D
-                                02D             # R SUB A MAGNITUDE             B+29
+                SL3R            PDDL                    # V SUB A V METERS/CS           B+7     08D
+                                02D                     # R SUB A MAGNITUDE    B+29
                 NORM            PDDL
                                 X1
                                 RTMU
-                SR1             DDV             # 2MU B+38
-                SL*             PDDL            # 2 MU/R SUBAA                  B+14 10D
+                SR1             DDV                     # 2MU  B+38
+                SL*             PDDL                    #    2 MU/R SUBAA      B+14       10D
                                 0 -5,1
-                                04D             # ASUBA                         B+29
+                                04D                     # ASUBA                        B+29
                 NORM            PDDL
                                 X2
                                 RTMU
                 SR1             DDV
                 SL*             BDSU
-                                0 -6,2          # 2U/R - U/A                    B+14 (METERS/CS)SQ
-                PDDL            DSQ             #                               10D
+                                0 -6,2                  # 2U/R - U/A    B+14 (METERS/CS)SQ
+                PDDL            DSQ                     #                                       10D
                                 08D
                 BDSU            SQRT
-                PDVL            VXV             # SQRT(MU(2/R SUB 1-1/A SUB A)-VSUBA2)  10D
+                PDVL            VXV                     # SQRT(MU(2/R SUB 1-1/A SUB A)-VSUBA2)10D
                                 UP1
                                 UNVEC
                 UNIT            VXSC
@@ -1332,43 +1344,44 @@ CDHMVR          STQ             VLOAD
                                 UNVEC
                                 08D
                 VAD             VSL1
-                STADR   
+                STADR
                 STORE           VACT3
-                VSU     
+                VSU
                                 VACT2
-## Page 659     
-                STCALL          DELVEET2        # DELTA VCDH -- REFERENCE COORDINATES
+## Page 655
+                STCALL          DELVEET2                # DELTA VCDH - REFERENCE COORDINATES
                                 SUBEXIT
-        
-## Page 660     
-# ***** COMPTGO *****   
-#       
-# SUBROUTINES USED      
-#       CLOKTASK        
-#       2PHSCHNG        
-        
+
+## Page 656
+# ..... COMPTGO   .....
+
+# SUBROUTINES USED
+
+#          CLOKTASK
+#          2PHSCHNG
+
                 BANK            35
                 SETLOC          CSI/CDH
-                BANK    
-        
+                BANK
+
                 EBANK=          RTRN
-        
+
                 COUNT*          $$/P3575
-        
-COMPTGO         EXTEND  
+
+COMPTGO         EXTEND
                 QXCH            RTRN
                 CAF             ZERO
                 TS              DISPDEX
                 CAF             BIT2
-                INHINT  
+                INHINT
                 TC              WAITLIST
                 EBANK=          WHICH
                 2CADR           CLOKTASK
-        
+
                 TC              2PHSCHNG
                 OCT             40036
                 OCT             05024
                 OCT             13000
                 TC              RTRN
-        
+
 # *** END OF LEMP30S .105 ***
