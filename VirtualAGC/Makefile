@@ -407,7 +407,7 @@ else # MACOSX
 temp/VirtualAGC.app : % : VirtualAGC create-bundle %/Contents/MacOS %/Contents/Resources
 	for n in ${EXECUTABLES} ; do ${CP} $$n $@/Contents/MacOS ; done
 	-tar -C $@/Contents/MacOS -xjf ../../Terminator.app.tar.bz2
-	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz ; \
+	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz yaDSKYb1 ; \
 	do \
 	  ${CP} template.app $@/Contents/MacOS/$$n.app ; \
 	  mv $@/Contents/MacOS/$$n.app/Contents/Resources/VirtualAGC.icns $@/Contents/MacOS/$$n.app/Contents/Resources/$$n.icns ; \
