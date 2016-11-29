@@ -1,7 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    ERASABLE_ASSIGNMENTS.agc
-## Filename:    ERASABLE_ASSIGNMENTS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -23,6 +22,7 @@
 ##                                          RBRRGZ   -> RBRFGZ 
 ##              2016-11-26 HG   Fix label   REULTCT  -> RESULTCT  
 ##              2016-11-28 HG   Fix operand SAMPLIN  -> SAMPLIM
+##              2016-11-29 HG   fix label   DVCNTRL  -> DVCNTR1
 
 
 ## Page 92
@@ -2748,7 +2748,7 @@ VN1             EQUALS          RN1             +6      # I(6)                  
 PIPTIME1        EQUALS          VN1             +6      # B(2)                      (    FOR   )
 GDT1/2          EQUALS          PIPTIME1        +2      # I(6)                      (   COPY   )
 MASS1           EQUALS          GDT1/2          +6      # I(2)                      (   CYCLE  )
-DVCNTRL         EQUALS          MASS1                   # B(1)TMP  RESTART REG FOR DVCNTR
+DVCNTR1         EQUALS          MASS1                   # B(1)TMP  RESTART REG FOR DVCNTR
 R1S             EQUALS          MASS1           +2      # I(6)
 V1S             EQUALS          R1S             +6      # I(6)
 

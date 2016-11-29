@@ -17,6 +17,7 @@
 ##              2016-11-28 MAS  Completed transcription. Lots of changes (including
 ##                              the new terrain model) and lots and lots of updated
 ##                              comments.
+##              2016-11-29 HG   fix opcode  BDSL  -> BDSU
 
 ## Page 860
 		BANK	37
@@ -1104,7 +1105,7 @@ POSUPDAT	TC	QUIKFAZ5
 
 		SR1	DAD
 			LAND +4
-		BDSL	SL		# SCALE RANGE TO UNITS OF 2(18) METERS
+		BDSU	SL		# SCALE RANGE TO UNITS OF 2(18) METERS
 			R1S +4
 			6D
 		BOVB	EXIT
