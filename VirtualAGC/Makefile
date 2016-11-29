@@ -88,6 +88,7 @@
 #				32-bit Linux VirtualAGC VM I'm now creating are
 #				added to the installation bundle.  These are
 #				related to debugging on Code::blocks. 
+#		2016-11-29 RSB	Fixed formation of .app sub-directories for Mac.
 
 APP=VirtualAGC
 ifndef MISSIONS
@@ -384,7 +385,7 @@ temp/VirtualAGC.app : % : VirtualAGC-macosx create-bundle %/Contents/MacOS %/Con
 		mv $$n `echo $$n | sed "s/-macosx//"` ; \
 	done
 	tar -C $@/Contents/MacOS -xjf ../../Terminator.app.tar.bz2
-	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz ; \
+	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz yaDSKYb1 ; \
 	do \
 	  ${CP} template.app $@/Contents/MacOS/$$n.app ; \
 	  mv $@/Contents/MacOS/$$n.app/Contents/Resources/VirtualAGC.icns $@/Contents/MacOS/$$n.app/Contents/Resources/$$n.icns ; \
