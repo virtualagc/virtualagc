@@ -12,7 +12,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
-##              2016-11-17 HG   Trnascribed
+##              2016-11-17 HG   Transcribed
+##              2016-11-28 HG   fix label  ABTFLAGS  --> ABTFLGS
 
 
 ## Page 29
@@ -155,7 +156,7 @@ LOADDAP         EQUALS
 
                 BANK            21
 DAPS4           EQUALS
-ABTFLAGS        EQUALS
+ABTFLGS         EQUALS
 R10             EQUALS
 R11             EQUALS
 MANUR           EQUALS
