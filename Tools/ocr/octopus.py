@@ -41,6 +41,8 @@ group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('--burst120', help="Perform BURST120 processing", action="store_true")
 group.add_argument('--luminary210', help="Perform LUMINARY 210 processing", action="store_true")
 group.add_argument('--luminary69', help="Perform LUMINARY 69 processing", action="store_true")
+group.add_argument('--comanche55', help="Perform COMANCHE 55 processing", action="store_true")
+group.add_argument('--luminary99', help="Perform LUMINARY 99 processing", action="store_true")
 
 args = parser.parse_args()
 
@@ -66,6 +68,15 @@ elif args.luminary69:
     # Difference the original L channel with the thickened lines (which is inverted)
     diff = blurred + thickend_lines
     thresh = ~cv2.inRange(diff, 30, 225) # Reject pixels too black or too white
+elif args.comanche55 or argc.luminary99:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = ~cv2.inRange(diff, 50, 245) # Reject pixels too black or too white
 else:
     raise RuntimeError("Unknown program type selected")
 
