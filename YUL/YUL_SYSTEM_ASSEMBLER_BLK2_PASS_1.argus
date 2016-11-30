@@ -174,19 +174,19 @@ R00761             SPECIAL ROUTINE IN PASS 1 FOR BLK2 TO ALLOCATE LEFTOVER ERASE
  00767             TS           C,+1          COMMON +2     GOT ELEFP
  00768             CAC                        8197
 
-R00761             SPECIAL ROUTINE IN PASS 1 FOR BLK2 TO ALLOCATE LEFTOVER INSTRUCTIONS AND CONSTANTS TO FIXED BANKS.
+R0077              SPECIAL ROUTINE IN PASS 1 FOR BLK2 TO ALLOCATE LEFTOVER INSTRUCTIONS AND CONSTANTS TO FIXED BANKS.
 
- 00762  B2 FLEFTO  LA           LOC CTR       C7T8          FF OR ERAS
- 005022            LA           ONES          LOC CTR       FF OR ERAS +1       IF BAD LOC CTR, ANYWHERE IN FIXED IS OK.
- 00503             SS           LOC CTR       B33T38M       C,+2                IF LOC CTR IS IN A BANK, SO IS LEFTOVER.
- 00504             TS           C,+1          COMMON +2     GOT FLEFP
- 00505             CAC                        6149                         -
+ 00771  B2 FLEFTO  LA           LOC CTR       C7T8          FF OR ERAS
+ 007712            LA           ONES          LOC CTR       FF OR ERAS +1       IF BAD LOC CTR, ANYWHERE IN FIXED IS OK.
+ 00772             SS           LOC CTR       B33T38M       C,+2                IF LOC CTR IS IN A BANK, SO IS LEFTOVER.
+ 00773             TS           C,+1          COMMON +2     GOT FLEFP
+ 00774             CAC                        6149                         -
 
- 00506  FF OR ERAS LA           OCT  4000     LOC CTR       GOT FLEFP           IF FIXED FIXED, ORIG. PARAMETER WAS OK.
- 00507             TS           C,+1          COMMON +2     GOT FLEFP           IF ERASABLE, ANYWHERE IN FIXED IS OK.
- 00508             CAC                        7061          2048           -
+ 00775  FF OR ERAS LA           OCT  4000     LOC CTR       GOT FLEFP           IF FIXED FIXED, ORIG. PARAMETER WAS OK.
+ 00776             TS           C,+1          COMMON +2     GOT FLEFP           IF ERASABLE, ANYWHERE IN FIXED IS OK.
+ 00777             CAC                        7061          2048           -
 
-R00761 *SPECIAL ROUTINE IN PASS 1 FOR BLK2 TO CHANGE FIXED MEMORY TO SPEC/NON IN A SEGMENT ASSEMBLY.
+R00778 *SPECIAL ROUTINE IN PASS 1 FOR BLK2 TO CHANGE FIXED MEMORY TO SPEC/NON IN A SEGMENT ASSEMBLY.
 
  007782*SEG TEST   EX           SWITCH        BIT 7         SEG TEST
  007784*           LA           SEG TEST      ZERO          POST SPEC           EXIT IF NOT IN A SEGMENT ASSEMBLY.
