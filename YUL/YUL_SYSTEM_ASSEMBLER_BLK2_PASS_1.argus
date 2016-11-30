@@ -165,12 +165,12 @@ R0071              CONSTANTS.
 
 R00761             SPECIAL ROUTINE IN PASS 1 FOR BLK2 TO ALLOCATE LEFTOVER ERASED REGIONS TO ERASABLE BANKS.
 
- 00762  B2 ELEFTO  LA           OCT 4000      LOC CTR       GOT ELEFP           
+ 00762  B2 ELEFTO  LA           OCT 4000      LOC CTR       GOT ELEFP           IF LOC CTR IS IN FIXED, ORIG. PARAM OK.
  00763             LA           OCT 1400      LOC CTR       C,+3
- 00764             TS           C,+1          COMMON +2     GOT ELEFP           
+ 00764             TS           C,+1          COMMON +2     GOT ELEFP           IF LOC CTR IN UNSWITCHED E, SO IS LEFTO.
  00765             CAC                        8229
 
- 00766             SS           LOC CTR       B38T40M       C,+2                
+ 00766             SS           LOC CTR       B38T40M       C,+2                IF LOC CTR IS IN A BANK, SO IS LEFTOVER.
  00767             TS           C,+1          COMMON +2     GOT ELEFP
  00768             CAC                        8197
 
