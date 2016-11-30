@@ -232,6 +232,26 @@ R0017              OPERATION CODE THREADS AND TABLES FOR AGC4, USED IN PASS 1.
  0124              CAC          CODES 61                    CODES 60
  0125              CAC          CODES 71                    CODES 70
 
+# These are opcode tables, constructed using the "M" opcode, which means 'mixed constant',
+# i.e. the 'alphanumeric compressed' data type. This is a 48-bit word structured as 6 6-bit 
+# characters and 3 4-bit BCD digits. So, in the table entries below, each "A" operand to the 
+# "M" code is part of the 6-character string part, and the "B" operand supplies an octal 
+# number representing 0-4095.
+
+# So, for example, applying this to the tables below, we get:
+#       MP      6200
+#       DMP     4541
+#       DMPR    5101
+#       DOT     5641
+#       UNIT    4231
+#       DMOVE   5531
+#       DOUBLE  7002
+#       AD      7000
+#       NDX     5040
+#       VAD     5341
+#       ACOS    4731
+# etc...
+
 R01256             AGC4 OPERATION CODE TABLES.  PLEASE IGNORE THE BANK ERRORS.
 
  0126   CODES 01   M,A,MA       A,SK          A,            B,7400
@@ -253,26 +273,6 @@ R01256             AGC4 OPERATION CODE TABLES.  PLEASE IGNORE THE BANK ERRORS.
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 1                                         USER'S OWN PAGE NO.   5        PAGE  77
 
 P01375  AGC4 OPERATION CODE TABLES CONTINUED.  PLEASE IGNORE THE BANK ERRORS.
-
-# These are opcode tables, constructed using the "M" opcode, which means 'mixed constant',
-# i.e. the 'alphanumeric compressed' data type. This is a 48-bit word structured as 6 6-bit 
-# characters and 3 4-bit BCD digits. So, in the table entries below, each "A" operand to the 
-# "M" code is part of the 6-character string part, and the "B" operand supplies an octal 
-# number representing 0-4095.
-
-# So, for example, applying this to the tables below, we get:
-#       MP      6200
-#       DMP     4541
-#       DMPR    5101
-#       DOT     5641
-#       UNIT    4231
-#       DMOVE   5531
-#       DOUBLE  7002
-#       AD      7000
-#       NDX     5040
-#       VAD     5341
-#       ACOS    4731
-# etc...
 
  0138   CODES 10   M,A,MP       A,            A,            B,6200
  0139              M,A,DM       A,P           A,            B,4541
