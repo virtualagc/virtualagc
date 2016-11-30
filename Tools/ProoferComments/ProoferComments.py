@@ -17,15 +17,22 @@ from wand.drawing import Drawing
 from wand.color import Color
 
 # Parse command-line arguments
-if len(sys.argv) != 5:
+if len(sys.argv) < 5:
 	print 'Usage:'
-	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE'
+	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE [NODASHES]'
+	print 'BWINPUTIMAGE is the pathname to the B&W cropped image with just the comments.'
+	print 'OUTPUTIMAGE is the pathname at which to write the composite proofing image.'
+	print 'PAGENUMBER is the page number within the original scanned assembly listing.'
+	print 'AGCSOURCEFILE is the pathname of the AGC source file containing the PAGENUMBER.'
+	print 'NODASHES (0 or 1, default 1 of omitted) is an indication to ignore all dashes'
+	print '         in comments. (This switch is used only in debugging.)'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
 outImage = sys.argv[2]
 pageNumber = int(sys.argv[3])
 agcSourceFilename = sys.argv[4]
+noDashes = int(sys.argv[5])
 
 # Read in the input image ... i.e., the B&W octal page.
 img = Image(filename=backgroundImage)
@@ -53,7 +60,7 @@ for box in file:
 		addIt = 1 # For general characters.
 	if boxWidth > 4 and boxWidth < 9 and boxHeight > 16 and boxHeight < 32:
 		addIt = 1 # For parentheses.
-	if boxHeight < 8 and boxWidth > 16 and boxWidth < 24:
+	if boxHeight > 3 and boxHeight < 8 and boxWidth > 16 and boxWidth < 24:
 		addIt = 1 # For minus signs.
 	if addIt:
 		boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
@@ -66,6 +73,8 @@ file = open (agcSourceFilename, 'r')
 lines = []
 currentPage = -1
 blankLinePattern = re.compile(r"\A\s*\Z")
+allMinusPattern = re.compile(r"\A\s*[-][-\s]*\Z")
+allUnderscorePattern = re.compile(r"\A\s*_[_\s]*\Z")
 for line in file:
 	if line.lower().startswith("## page "):
 		fields = line.split()
@@ -78,10 +87,18 @@ for line in file:
 	parts = line.partition("#") # Find the start of the comment, if any.
 	if parts[0] == line or parts[2].startswith("#"): # If no comment, or a ##-style comment, ignore the line.
 		continue
-	if re.match(blankLinePattern, parts[2]): # And if the comment itself is blank, ignore the line too.
-		continue;
-	lines.append(parts[2])
+	comment = parts[2]
+	if noDashes:
+		comment = comment.replace("-", "")
+	if re.match(blankLinePattern, comment): # And if the comment itself is blank, ignore the line too.
+		continue
+	#if re.match(allMinusPattern, comment): # Rows of all dashes or underscores don't seem to appear in box files.
+	#	continue
+	#if re.match(allUnderscorePattern, comment): # Rows of all dashes or underscores don't seem to appear in box files.
+	#	continue
+	lines.append(comment)
 file.close()
+print lines
 
 # At this point, we've populated lines[] with just the non-blank comments from,
 # the selected page, which is precisely what should appear in the box file as well.
