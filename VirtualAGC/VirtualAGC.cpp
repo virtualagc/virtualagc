@@ -79,6 +79,7 @@
  *                              because almost all of the event handlers only
  *                              did one thing (namely, call EnforceConsistency()).
  *                              All lingering comments from wxGlade removed.
+ *              2016-11-29 RSB  Fixed formation of 'simulate' script for Mac.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -1171,6 +1172,9 @@ VirtualAGC::AgcSourceEvent(wxCommandEvent &event)
 {
   wxString Dummy;
   Dummy = wxT("file://");
+#ifdef MACOSX
+  Dummy = wxT("");
+#endif
   Dummy += ResourceDirectory;
   Dummy += wxT("/source/");
   int mission;
@@ -1192,6 +1196,9 @@ VirtualAGC::AeaSourceEvent(wxCommandEvent &event)
 {
   wxString Dummy;
   Dummy = wxT("file://");
+#ifdef MACOSX
+  Dummy = wxT("");
+#endif
   Dummy += ResourceDirectory;
   Dummy += wxT("/source/");
   if (FlightProgram4Button->GetValue())
@@ -2333,7 +2340,10 @@ VirtualAGC::FormCommands(void)
     {
       yaDSKY = localExecutableDirectory + PathDelimiter;
 #ifdef __APPLE__
-      yaDSKY += wxT ("yaDSKYb1.app/Contents/MacOS/");
+      if (block1)
+    	  yaDSKY += wxT ("yaDSKYb1.app/Contents/MacOS/");
+      else
+    	  yaDSKY += wxT ("yaDSKY2.app/Contents/MacOS/");
 #endif
       if (block1)
         {
