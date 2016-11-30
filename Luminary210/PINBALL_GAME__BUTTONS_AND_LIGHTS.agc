@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    PINBALL_GAME__BUTTONS_AND_LIGHTS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.

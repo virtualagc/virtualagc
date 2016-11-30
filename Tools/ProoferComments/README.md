@@ -1,94 +1,95 @@
-This is work in progress, and all of the description here is speculation, based on the
-behavior of ProoferBox.py.  (Actually, at the moment, these remarks are really just a
-cut-and-paste of the remarks from ProoferBox.py.
-
 # Introduction
 
-The program ProoferComments.py is a tool that I hope will greatly speed up proofing of 
-program comments in AGC source files obtained by transcribing AGC assembly-listing printouts.
+The problem being addressed is that regardless of the specific technique used to produce the
+AGC source code files from the AGC assembly listings (the theoretically-available techniques
+being keyboard entry, voice recognition, and optical character recognition), the source code
+files are nevertheless imperfect representations of the original due to the inevitable errors
+such as typos introduced by the data-entry procedure.  The correctness of the source code proper
+itself is of little concern, since ultimately it is always eventually assembled into executable
+"octal rope" form, and can be compared in this form to known-good octal ropes, and hence there
+is a deterministic (and relatively efficient) process for repairing the source code's errors.
+However, the correctness of the transcribed AGC program's _comments_ is always a concern, since 
+the comments do not contribute to the octal rope.  There is no satisfactory process for finding errors 
+in the comments ... one is reduced either
+to reading and re-reading the comments, or else trying to locate some of the 
+errors by cross-comparisons between different versions of the same AGC program.  But either process
+is dubious in terms of the confidence one can have in them, and there is no metric other than
+the sheer number of hours spent on the task that can be applied to give you any greater confidence.
 
-The idea is this:  Regardless of the form of the original AGC assembly listing 
-(i.e., whether green & white paper or else white paper with black lines), it is possible
-to use octopus.py to turn the octal listings into a high-contrast pure black & white
-bilevel image.  This may be used as a basis for OCR'ing the data entry in binsource form
-or not, but regardless of how fast and convenient the data-entry process may become 
-because of it, and no matter how error-free the resulting binsource file may be, 
-the binsource file still needs to be proofed by comparison against the original data.
+The program ProoferComments.py is a tool which, with some luck, we might be able to use to
+make the proofing process for the AGC program comments managable. By "proofing", I mean checking for
+checking for discrepancies between the original AGC assembly listings and the transcribed
+(ASCII) AGC source.  The tool is (at this point) applicable only to the textual content of 
+the program comments, and ignores all white space (i.e., columnar alightment of the text).
 
-Furthermore, the proofing methods used up to this point, namely visual side-by-side 
-comparison of the binsource vs the scanned assembly listing, or alternatively using 
-text-to-speech on the binsource while visually inspecting the scanned assembly listing,
-it is an extremely time-consuming and tiring process that requires anywhere from 
-24 to 48 man-hours by my estimation ... which translates to weeks of calendar time, or
-even months, if doesn't work at it incessantly.  Nasty!
+# A Way to Drastically Speed Up Proofing, With Much-Improved Confidence in the Results
 
-# A Possible Way to Drastically Speed Up Proofing
+In this method, we start with high-quality B&W versions of an AGC program listing, as created
+by octopus.py or some suitable cousin of it.  This imagery is cropped or masked, hopefully automatically,
+in such a way that _only_ the program comments remain.
 
-The idea is that once a binsource file is available, having the correct number of octals,
-but whether or not containing errors, it should be possible to:
+Another component needed to complete the task is the transcribed AGC source files which are being checked.
+The _must_ have been input in such a way that all of the original comments (i.e., those in the scanned
+assembly listings) are prefixed by "#", whereas all "modern" comments added later are prefixed instead
+by "##".
 
-1. Programatically generate image files directly from the binsource files, using
-   fonts that closely match the scanned octals, and character positions
-   and spacings that closely match the scanned octals.
-2. Composite the generated image from the preceding step with 
-   the B&W octal images.
+For any given scanned AGC page, what ProoferComments.py does is this:
 
-The result of such a procedure would be a _new_ image similar to the B&W octal images,
-except that at positions where there was a character match there still be octal digits,
-but at the positions of _mismatches_ there would be shapes not visually recognizable as
-characters.  Depending on the colors used and the method of combining the two images,
-these mismatched areas might stand out very dramatically.
+1. From the B&W cropped image containing only comments, used the Tesseract OCR engine
+   to determined the positions ("bounding boxes") of every character.  Primitive 
+   optical character recognition is coincidentally performed as a byproduct, but 
+   having this OCR data is not essential to the process.
+2. From the transcribed AGC source code, discards all of the blank lines, modern comments
+   ("##"), and source code, leaving just the original comments, minus the "#" we've added
+   to them in transcription.  A new graphical image is produced, consisting simply of all
+   these remaining comment characters, _positioned and scaled to fit the bounding boxes_
+   described above. These comment characters are rendered in color (i.e., not in black),
+   typically in dark green, but in red if it so happens that they don't match the character
+   guessed by Tesseract in the step above.  That the images are in color is essential;
+   that the color _differs_ depending on whether or not Tesseract's guesses correspond to them
+   is not essential, but is useful.
+3. Overlays the original B&W image atop this newly-created image, and saves this final
+   result.
 
-Therefore, a visual inspection of the combined images would _very quickly_ identify 
-mismatched character positions.  The errors would still need to be corrected, but the
-bottleneck of an extremely-long comparison effort, either visual or audio, would be
-eliminated, thus greatly cutting the effort involved.
+The result of such a procedure is a new graphics file, similar to the original B&W octal images,
+except that at positions where the transcripion of the source code _doesn't match_ the original
+scan, there will be a blob that doesn't look like an alphanumeric character, in some montage of 
+black, red, and green; where the transcription
+does match the scan, there will be an alphanumeric character, in black.
 
-# The Method Adopted by ProoferBox.py
+Thus the proofing process is no longer a matter of _comparing_ the transcribed source code to
+the original scans, but rather simply of examining the images to see whether the look like black
+alphanumerics, or whether they look like colored blobs.  Needless to say, this is a visual
+inspection which a human being can perform quite rapidly.
+
+# The Method Adopted by ProoferComments.py
 
 ## Rationale
 
-ProoferBox.py creates a "combined image" as described in the preceding section for a 
-single page of B&W octals, given the binsource file corresponding to the AGC program.
+ProoferComments.py creates a "combined image" as described in the preceding section for a 
+single page of B&W comments, given the source-code files corresponding to the AGC program.
 
 Because the font used in the AGC assembly-listing printouts does not correspond to any
-readily-available modern font (as far as I can tell), ProoferBox.py relies on having a
-set of pre-generated PNG files, two for each octal digit (one in B&W just like the B&W page
-of octals, and another that is identical, but in red).  The black ones are: 0t.png, 1t.png, ..., and 7t.png,
-while the red ones are 0m.png, ..., 7m.png.
-When ProoferBox.py generates the combined image, it overlays (with an appropriate 
-overlaying method) these octal-digit files onto the original B&W image.
+readily-available modern font (as far as I can tell), ProoferComments.py relies on having a
+set of pre-generated PNG files, two for each alphanumeric character plus certain punctuation.
+Only the characters actually found in the printouts are supported, so that all of the capital
+letters are represented, but non of the lower-case letters are.  One of these PNG files is a color indicating a match with
+Tesseract, usually dark green, and other is in a color indicating a non-match with Tesseract, 
+generally red.  These are all stored in the asciiFont/ folder, and have names like matchN.png
+and nomatchN.png, where N is the decimal value of the ASCII code for that character.  For 
+example, match65.png is a green capital-A.
 
-## Preparation of the Individual Octal-Digit Files
+## Preparation of the Individual Character PNG Files
 
-Because ProoferBox.py scales the digits appropriately, and because the fonts of 
+These files are all created by loading B&W AGC scan pages into GIMP, finding good-looking
+examples of the desired characters, and cutting them out as new images.  They are also
+typically repaired on a pixel-by-pixel basis, and converted to bi-level B&W.
+Because ProoferComments.py scales the digits appropriately, and because the fonts of 
 almost all of the AGC assembly listing printouts are almost identical, I expect that
 the octal-digit files only need to be created once, although in principle they could be
 prepared separately for every AGC printout.
 
-The digit-preparation process is performed
-entirely within GIMP.
-
-1. Load a representative bilevel B&W octal page into GIMP.
-2. Change the image type to RGB.
-3. Add an alpha-transparency layer if none exists.
-4. Use a select-by-color operation to select the entire black area ... i.e., all the 
-   octal digits.
-5. Invert the selection, so that the entire white background is selected.
-6. Delete the background, so that it becomes transparent.
-7. For each of the octal characters 0, 1, 2, 3, 4, 5, 6, and 7, find the nicest 
-   looking example of that character you can, and use rectangle selection to 
-   select a box around that character, in which the black pixels go exactly to the
-   boundaries of the box, with no intervening white pixels.  It is helpful in doing
-   this to zoom in to 800%, to make sure that no part of the digit is omitted in the
-   process.  Then copy the box and paste-as-new to get just the digit in a new
-   window, and export the image as 0t.png, 1t.png, or whatever.
-8. For each of the octal digits now opened in a individual windows, do a color-select
-   of the black, visible portions of the digit, and change the color of that area
-   to pure red (#FF0000).  Re-export as 0m.png, 1m.png, etc.
-
-The new octal-digit image files must all be stored in the same folder as ProoferBox.py
-itself.
+EVERYTHING BELOW THIS HAS NOT YET BEEN CORRECTED.
 
 ## Theory of Operation
 

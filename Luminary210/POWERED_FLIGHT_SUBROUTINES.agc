@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    POWERED_FLIGHT_SUBROUTINES.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.

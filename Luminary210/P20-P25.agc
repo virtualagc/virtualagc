@@ -1,5 +1,7 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    P20-P25.agc
+## Filename:    P20-P25.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -15,6 +17,8 @@
 ##              2016-11-23 MAS  Began transcription.
 ##              2016-11-27 MAS  Completed transcription. Largely the same, but RR handling was
 ##                              rewritten, and there are other small changes here and there.
+##              2016-11-28 HG   Fix  operand P20S23  --> P20S3
+##                                           RENRAD  --> RENDRAD   
 
 ## Page 507
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -2775,7 +2779,7 @@ BADRUPT		TS	RADUSE
 WHICHRAD	CS	THREE		# IF RADBITS IS LESS THAN THREE,
 		AD	RADBITS		# THE RENDEZVOUS RADAR IS BEING READ.
 		EXTEND
-		BZF	RENRAD
+		BZF	RENDRAD
 
 LANDRAD		CS	FLAGWRD5	# THE LANDING RADAR IS BEING READ
 		MASK	R77FLBIT
@@ -4166,7 +4170,7 @@ INTGRCAL	STQ	DLOAD
 # THIS ROUTINE INITIALIZES THE W-MATRIX BY ZEROING ALL W THEN SETTING
 # DIAGONAL ELEMENTS TO INITIAL STORED VALUES.
 
-                SETLOC  P20S23
+                SETLOC  P20S3
                 BANK
 
 		EBANK=	W
