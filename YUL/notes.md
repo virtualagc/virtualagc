@@ -177,3 +177,28 @@ Examples:
     0005              MASKGRP,1    S,0           F,0
     0002              MASKGRP,6    S,0           F,0
 
+
+Tapes
+-----
+
+YUL uses tapes for both archival and intermediate storage. The use of tapes is occasionally documented in the code.
+
+TAPE 1  
+    Pass 2 writes merged SYPT records (program assembly) or SYLT records (subroutine assembly). 
+
+TAPE 2
+    Pass 1 writes POPO (Pass One Program Output) records. 
+    Pass 2 reads POPO records. 
+
+TAPE 3  
+    Pass 2 reads saved SYPT and SYLT records.
+
+TAPE 4  
+    Pass 2 writes "UNSORTED WORD RECORDS".
+
+There are other names by which tapes (disks?) are referred to also:
+
+    YULPROGS    
+    EXPEROGS    
+
+-end-
