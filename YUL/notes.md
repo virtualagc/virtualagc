@@ -121,3 +121,59 @@ So, for example, applying this to the fragment above, we get:
 
 etc...
 
+
+SETLOC
+------
+
+The following sets location counter to "upper half of bank 7":
+
+    0001              SETLOC,6C    1024          B7
+
+I think that means that the arguments have the following meanings:
+
+    1:  6C      ?
+    2:  1024    Offset from the start of the bank?
+    3:  B7      Bank number, i.e. 7.
+
+Taking another example:
+
+    00026             SETLOC,1C    0             B1
+
+gives:
+
+    1:  1C      ?
+    2:  0       Offset from the start of the bank, i.e. 0?
+    3:  B1      Bank number, i.e. 1.
+
+Q: Do bank numbers start at 0 or 1?
+
+
+MASKGRP
+-------
+
+What does MASKGRP do?
+
+Examples:
+
+    0005              MASKGRP,1    S,0           F,0
+    0004              MASKGRP,1    S,0           F,0
+    0002              MASKGRP,6    S,0           F,0
+    0005              MASKGRP,1    S,0           F,0
+    0004  *           MASKGRP,3    S,1           F,1
+    01162             MASKGRP      S,0           F,0
+    0005              MASKGRP,1    S,0           F,0
+    00602             MASKGRP,3    S,1           F,1
+    00895             MASKGRP,1    S,0           F,0
+    0092              MASKGRP,3    S,1           F,1
+    014115            MASKGRP      S,0           F,0
+    0005  *           MASKGRP,1    S,1           F,1
+    01354             MASKGRP      S,0           F,0
+    0005              MASKGRP,1    S,0           F,0
+    00732             MASKGRP,3    S,1           F,1
+    0132              MASKGRP,1    S,0           F,0
+    0135              MASKGRP,3    S,1           F,1
+    018415            MASKGRP      S,0           F,0
+    0005              MASKGRP,1    S,0           F,0
+    0005              MASKGRP,1    S,0           F,0
+    0002              MASKGRP,6    S,0           F,0
+
