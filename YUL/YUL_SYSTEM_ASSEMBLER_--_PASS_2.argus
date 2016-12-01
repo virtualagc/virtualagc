@@ -129,78 +129,942 @@ R00541  SIMULATED EXTENDED TS ROUTINE, PLACED HERE TO TAKE ADVANTAGE OF THE 7.  
 # Page 267
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.   3        PAGE   3
 
+P005478 TRANSFER VECTOR ENTRIES 69 ONWARD.  (TRANSFER VECTOR BEGINS WITH PROGNAME.)
+
+ 00548  ZERO       OCT          0
+ 005484 BIT 45 NOT OCT          -177767
+ 005488 BIT 46     OCT          -4
+
+ 005492 FREE EXIT  OCT          -133760
+ 005496 SYPT NTRY  OCT          -33777
+ 0055   L CUS LIST SPEC                                     CUSS LIST
+ 006132 GENL MXR   MASKBASE     S,0           F,0
+
+ 00508  CONTINUE   DEC          +0
+ 005512 MAY MERGE  DEC          +0
+ 005516 END PARAS  DEC          +G
+ 00552  LYST SYPT  TS           SYPT NTRY     Z,R4          LIST SYPT -2   C
+
+R005521 ROUTINE FOR ALL UNMANAGEABLE TROUBLES.
+
+ 005524 DISASTER   MPC, H       Z,1           301           MON PCR             IMITATE THE ACTION OF A BACKGROUND.
+ 006148            ALF          DISASTER
+
+R005532 COSEQUENCE SLEEPING SUBROUTINE.  ENTRY:  TS  Z,SC  Z,AU1  CSC SLEEP  S
+
+ 005536 CSC SLEEP  TS           -             -             MON SLEEP      C
+ 00554             TS           Z,AU1         Z,SC          N,SH           C    RECOVER SAVED SC AND EXIT.
+
+R005544 TRIVIAL SUBROUTINE(S) TO RELEASE A TAPE IF THERE WILL NOT BE ANOTHER TASK, OR JUST REWIND IT IF THERE WILL.
+
+ 005548 RELS OR RW TS           Z,SC          Z,CSC         PHI RLEAS
+ 005552            TS           Z,SC          Z,CSC         PHI TAPE
+
+R005556 COSEQUENCE SUBROUTINE TO PLACE IN AU1 THE NAME OF A FREE BUFFER.  SLEEPS IF NECESSARY UNTIL A BUFFER IS FREE.
+
+ 00556  GRAB FREE  TS           Z,CSH         Z,AU2         C,+3           C    USE CSH FOR RETURN ADDRESS.
+ 005564            TS           N,R4          Z,AU1         C,+4           C    GET BUFFER NAME.
+ 005568            TS           Z,SC          Z,AU1         CSC SLEEP      C    GO TO SLEEP UNTIL A BUFFER IS FREE.
+ 005572            TS           FREE EXIT     Z,R4          -              C    GET FREE LIST EXIT POINTER.
+ 005576            SSL, ONE     N,R4          16            C,-3           C    TEST WHETHER THERE ARE ANY FREE BUFFERS.
+ 00558             TS           BIT 32        N,R4,1        -              C    PLANT BUSY FLAG IN FREE LIST.
+ 005584            EX           Z,R4          BIT 45 NOT    FREE EXIT      C    MODULATE FREE LIST EXIT POINTER.
+ 005588            TX           Z,AU2         -             Z,CSC          C    MAY BE USED IN SC MODE WITH CARE.
 
 # Page 268
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.   4        PAGE   4
 
+P005599            FIELD AND SHIFT MASKS FOR GENERAL PART OF PASS 2.
+
+
+
+ 0056   B,BIT 1    OCT          4
+ 0057   B,BIT 2    OCT          2
+ 0058   B,BIT 3    OCT          1
+ 0059   B,B2B6     OCT          21
+
+ 0060   B,B3T6     OCT          17
+ 0061   B,BIT7     OCT          004
+ 0062   B,BIT8     OCT          002
+ 0063   B,BIT9     OCT          001
+
+ 0065   B,BIT11    OCT          0002
+ 0066   B,BIT 12   OCT          0001
+ 0067   B,B11T12   OCT          0003
+ 0068   B,BIT14    OCT          00002
+
+ 0069   B,BIT15    OCT          00001
+ 0070   B,BIT16    OCT          0000 04
+ 0071   B,BIT17    DEC          00008
+ 0072   B,BIT33    DEC          -8000
+
+ 0074   B,B1B17B33 DEC          8000 8000 8000
+ 0075   B,ALLBUTB1 DEC          7GGG GGGG GGGG
+ 0076   B,ONE      OCT          -1
+ 0077   B,C7T8     OCT          -7777                                           C7T8 MUST BE THE 20TH B MASK.
+
+ 0078   B,D12      DEC          -G
+ 0079   B,D2T12    DEC          0GGG GGGG GGGG
+ 0080   B,CHAR1    OCT          77
+ 0081   B,CHAR7    OCT          -7700
+
+ 0082   B,CHAR8    OCT          -77
+ 0083   B,C2T8     OCT          0077 7777 7777 7777
+ 0084   B,BIT34    OCT          -40000
+ 0085   B,CAC3     DEC          -GGGG
+
+ 0086   B,CHAR6    OCT          -77 0000
+ 0087   B,C5T8     OCT          -7777 7777
+ 0089   B,AVMSK    OCT          0                                               VARIABLE MASK.
+ 0091   B,BIT44    OCT          -20
 
 # Page 269
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.   5        PAGE   5
 
+P0093   FURTHER SHIFT MASKS FOR THE GENERAL PART OF PASS 2.
+
+ 0094   S,BIT36    OCT          -1 0000
+ 0095   S,B2T8     DEC          7G
+ 0096   S,B5T6     OCT          03
+ 0097   S,TWO      OCT          -2
+
+ 0098   S,B10T12   OCT          0007
+ 0099   S,B19T25   OCT          0000 0077 4
+ 0100   S,B20T25   OCT          0000 0037 4
+ 0101   S,B26T30   OCT          -3700 0000
+
+ 0102   S,B28T30   OCT          -700 0000
+ 0103   S,B38T48   OCT          -3777
+ 0104   S,C1T7     OCT          7777 7777 7777 7700
+ 0105   S,DECALFM1 OCT          0000 7777 0000 7777
+
+ 0107   S,B42T48   OCT          -177
+ 0108   S,B44T47   OCT          -36
+ 0109   S,B47T48   OCT          -3
+ 0111   S,DECALFM2 OCT          0074 0074 0074 0074
+
+ 0112   S,DECALFM3 OCT          1717 1717 1717 1717
+ 0113   S,D1T11    DEC          GGGG GGGG GGG0
+ 0114   S,D1D3T12  DEC          G0GG GGGG GGGG
+ 0115   S,D8T12    DEC          -G GGGG
+
+ 0116   S,SPECMAG  OCT          -77777
+ 0117   S,CAC2     DEC          0000 GGGG
+ 0118   S,D4T8     DEC          000G GGGG
+ 0119   S,D1T3     DEC          GGG
+
+ 0120   S,ONES     DEC          GGGG GGGG GGGG
+ 0121   S,OCTMASK  OCT          -7777 7770
+ 0122   S,THREAD10 OCT          -3776
+ 0123   S,BIT38    OCT          -2000
+
+ 0124   S,B1THRU45 OCT          7777 7777 7777 7770
+ 0125   S,C1T4     OCT          7777 7777
+ 0126   S,BIT29    OCT          -200 0000
+ 0127   S,BADRES   OCT          -7777 0000
 
 # Page 270
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.   6        PAGE   6
 
+P0129              CONSTANTS, VARIABLE STORAGE, ASSIGNMENTS, ETC. FOR GENERAL PASS 2.
+
+R0131   VARIABLE STORAGE RESERVATIONS.
+
+ 0132   POPO BUFF  RESERVE      1
+ 0133   POB PLACE  RESERVE      1
+ 0134   HEALTH     RESERVE      12
+ 0135   CARD       EQUALS       HEALTH +1
+ 0136   MOD RETRN  RESERVE      1
+
+ 0137   SAVE W6    RESERVE      1
+ 0138   MAX DECML  RESERVE      3
+ 0139   ISCALE     EQUALS       MAX DECML +1
+ 0140   MAX NUMBR  EQUALS       MAX DECML +2
+ 0141   LOCATION   RESERVE      1
+
+ 0142   2ND ALF    RESERVE      2
+ 0144   2ND HALF   RESERVE      1
+ 0145   WORD       RESERVE      1
+ 0146   COMMON     RESERVE      10
+
+ 0147   WORD PAGE  RESERVE      1
+ 0148   L WD BUFF  RESERVE      1
+ 0149   L OLD FWA  RESERVE      1
+ 0150   ADR WD     RESERVE      3
+ 0151   EQUALOC    RESERVE      3
+
+ 0152   ADDRESS    RESERVE      1
+ 0153   SYB PLACE  RESERVE      1
+ 0154   SYPT BUFF  RESERVE      1
+ 0155   END SYBUF  RESERVE      1
+ 0156   FIELD COD  RESERVE      2
+
+ 0157   AFIELD     RESERVE      3
+ 0158   ADDRESS 1  EQUALS       CARD +3
+ 0159   ADDRESS 2  EQUALS       CARD +4
+ 0160   DIG FILE   RESERVE      8
+ 0161   SENT LOC   RESERVE      1
+
+ 0162   EXPONENT   RESERVE      1
+ 0163   MANTISSA   RESERVE      1
+ 0164   FULL DELT  RESERVE      1
+ 0165   NFUL DELT  RESERVE      1
+ 0166   CARACTER   RESERVE      1
+
+ 0167   CON WORD   RESERVE      1
+ 0168   NUMBER     RESERVE      1
+ 0169   E NUMBER   RESERVE      1
+ 0170   DEC DIGS   RESERVE      1
+ 0171   B NUMBER   RESERVE      1
+ 01711  WBUF FULL  RESERVE      1
 
 # Page 271
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.   7        PAGE   7
 
+P0173   NUMERICAL CONSTANTS.
+
+ 0174   COUNT PTR  OCT          -4010 0001                                      (INITIAL CONDITION).
+ 0175   MIN ADRES  OCT          0                                               POPO BUFF THRU MIN ADRES ARE AN ARRAY.
+ 0176   (RIGHTP)   OCT          07
+ 0177   D4         DEC          000G
+ 0178   B39T48     OCT          -1777
+ 0179   OCT 1777   EQUALS       B39T48
+
+ 0180   BIT 32     DEC          -1 0000
+ 0181   C31        OCT          -37
+ 0182   TYPE E     OCT          -4000 0000
+ 0183   TYPE F     OCT          - 2000 0000
+ 0184   6D4        DEC          0006
+ 0186   5D8        DEC          -5 0000
+ 0190   CD8        DEC          -C 0000
+ 0191   B26T48     OCT          -3777 7777
+ 0192   DEC 600    DEC          -600
+ 0193   DEC 999    DEC          -999
+ 0195   EIGHT      DEC          -8
+ 0196   UNSIG NUM  OCT          23
+ 0197   PLUS 75    FXBIN        75
+ 0198   TEN        FXBIN        -10
+ 0199   FL UNITY   FLDEC        1.0
+ 0200   BIT 41     OCT          -200
+ 0201   B210       FXBIN        -210
+ 0202   HEX 49L    DEC          49
+ 0203   B1B2       OCT          6
+ 0204   FLI ZERO   DEC          DB
+ 02061  HALF ADJ   FLDEC        0.5
+ 0207   PLUS 42    FXBIN        42
+ 0208   PLUS 3     FXBIN        3
+ 0209   B1B5T48    DEC          8GGG GGGG GGGG
+ 0210   B25T26     OCT          -6000 0000
+ 0211   DEC5 FLAG  DEC          5
+ 0212   DEC6 FLAG  DEC          6
+ 02122  USER PAGE  DEC          0
+ 02125  B20T24     OCT          0000 0037
+ 02126  A ADRES    OCT          0000 7777
+ 02127  DEF XFORM  OCT          -311116 15554
+ 02128  CAC12      DEC          GGGG GGGG
 
 # Page 272
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.   8        PAGE   8
 
+P0213              PRINT LINE STORAGE; EQUIVALENCES AND ASSIGNMENTS.
+
+
+
+ 02131  LINE STOR  OCT          0
+ 02132             ALF,5
+ 02133             ALF,5
+ 02134             ALF,5
+
+
+
+ 0214   LINE       ASSIGN       0,0
+
+ 02145  CUSS LIST  ASSIGN       1,0
+
+ 0215   PHI TAPE   ASSIGN       7,1
+ 0216   EOR        ASSIGN       7,4
+ 0217   PHI LOAD   ASSIGN       7,7
+ 0218   PHI RLEAS  ASSIGN       7,19
+
+ 0220   PHI PRINT  ASSIGN       7,23
+ 0221   BASE ADDR  ASSIGN       7,47
+ 02213  MON WAKE   ASSIGN       7,99
+ 02216  MON SLEEP  ASSIGN       7,166
+ 02218  MON TYPER  ASSIGN       7,215
+ 02219  MON PCR    ASSIGN       7,220
 
 # Page 273
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.   9        PAGE   9
 
+P0222   ASSIGNMENTS TO ALLOW MASKS TO BE USED AS CONSTANTS.
+
+
+
+ 022201 BIT 1      ASSIGN       1,064
+ 022202 BIT 2      ASSIGN       1,065
+ 022203 BIT 3      ASSIGN       1,066
+ 022204 B2B6       ASSIGN       1,067
+
+ 022205 B3T6       ASSIGN       1,068
+ 022206 BIT7       ASSIGN       1,069
+ 022207 BIT8       ASSIGN       1,070
+ 022208 BIT9       ASSIGN       1,071
+
+ 022209 BIT11      ASSIGN       1,072
+ 02221  BIT 12     ASSIGN       1,073
+ 022211 B11T12     ASSIGN       1,074
+ 022212 BIT14      ASSIGN       1,075
+
+ 022213 BIT15      ASSIGN       1,076
+ 022214 BIT16      ASSIGN       1,077
+ 022215 BIT17      ASSIGN       1,078
+ 022216 BIT33      ASSIGN       1,079
+
+ 022217 B1B17B33   ASSIGN       1,080
+ 022218 ALLBUTB1   ASSIGN       1,081
+ 022219 ONE        ASSIGN       1,082
+ 02222  C7T8       ASSIGN       1,083
+
+ 022221 D12        ASSIGN       1,084
+ 022222 D2T12      ASSIGN       1,085
+ 022223 CHAR1      ASSIGN       1,086
+ 022224 CHAR7      ASSIGN       1,087
+
+ 022225 CHAR8      ASSIGN       1,088
+ 022226 C2T8       ASSIGN       1,089
+ 022227 BIT34      ASSIGN       1,090
+ 022228 CAC3       ASSIGN       1,091
+
+ 022229 CHAR6      ASSIGN       1,092
+ 02223  C5T8       ASSIGN       1,093
+ 022231 AVMSK      ASSIGN       1,094
+ 022232 BIT44      ASSIGN       1,095
+
+ 022233 BIT36      ASSIGN       1,096
+ 022234 B2T8       ASSIGN       1,097
+ 022235 B5T6       ASSIGN       1,098
+ 022236 TWO        ASSIGN       1,099
+
+ 022237 B10T12     ASSIGN       1,100
+ 022238 B19T25     ASSIGN       1,101
+ 022239 B20T25     ASSIGN       1,102
+ 02224  B26T30     ASSIGN       1,103
+
+ 022241 B28T30     ASSIGN       1,104
 
 # Page 274
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  10        PAGE  10
 
+ 022242 B38T48     ASSIGN       1,105
+ 022243 C1T7       ASSIGN       1,106
+ 022244 DECALFM1   ASSIGN       1,107
+
+ 022245 B42T48     ASSIGN       1,108
+ 022246 B44T47     ASSIGN       1,109
+ 022247 B47T48     ASSIGN       1,110
+ 022248 DECALFM2   ASSIGN       1,111
+
+ 022249 DECALFM3   ASSIGN       1,112
+ 02225  D1T11      ASSIGN       1,113
+ 022251 D1D3T12    ASSIGN       1,114
+ 022252 D8T12      ASSIGN       1,115
+
+ 022253 SPECMAG    ASSIGN       1,116
+ 022254 CAC2       ASSIGN       1,117
+ 022255 D4T8       ASSIGN       1,118
+ 022256 D1T3       ASSIGN       1,119
+
+ 022257 ONES       ASSIGN       1,120
+ 022258 OCTMASK    ASSIGN       1,121
+ 022259 THREAD10   ASSIGN       1,122
+ 02226  B1T38      ASSIGN       1,123
+
+ 022261 B1THRU45   ASSIGN       1,124
+ 022262 C1T4       ASSIGN       1,125
+ 022263 BIT29      ASSIGN       1,126
+ 022264 BADRES     ASSIGN       1,127
+
+
+
+ 022265 LASTREM    EQUALS       BIT8
+ 022266 SPEC SIGN  EQUALS       BIT33
+ 022267 CACN       EQUALS       AV MSK
+ 022268 THREE      EQUALS       B47T48
+
+ 022269 FL ZERO    EQUALS       BIT1
+ 02227  A COLUMN 1 EQUALS       B2 B6
+ 022271 OCT 3777   EQUALS       C7T8
+ 022272 OCT 10000  EQUALS       BIT 36
+
+ 022273 OCT 3777   EQUALS       B38T48
+ 022274 OCT 177    EQUALS       B42T48
+ 022275 C1T2       EQUALS       D1T3
+ 022276 OCT 2000   EQUALS       BIT 38
+
+ 022277 ALF 2000   EQUALS       BIT 29
+ 022278 BIT 25     EQUALS       TYPE E
+ 022279 FOUR       EQUALS       BIT 46
+ 02229  SPRA       EQUALS       128
+ 022291 ZX         EQUALS       8
 
 # Page 275
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  11        PAGE  11
 
+P0223   ALPHABETIC CONSTANTS.
+
+ 0224   PARP NAME  ALF          ????PAS2
+ 02241  OLD PAGE   EQUALS       PARP NAME
+ 0225   PASS 3     ALF          YULPASS3
+ 0226   W END POPO ALF          END¢POPO
+ 0227   E COLUMN 1 ALF          E██████
+ 0228   BLOT WORD  ALF,2        ████████████████
+ 0229   ASTRISKS   ALF          ********
+ 0230   C COLUMN 1 ALF          C
+ 0231   BLANKS     ALF
+ 0232   W BAD WORD ALF          BAD WORD
+ 0233   HEAD       ALF
+ 0234   W LAST     ALF          LAST
+ 02342  REF 1XXX   ALF          REF >1K
+ 02344  W TO       ALF           TO
+ 02346  W REV      ALF            REV
+ 0235   ALF 9 C1   ALF          9
+ 0236   DC1        ALF          D
+ 0237   POINT C8   ALF          0000000.
+ 0238   EC8        ALF          0000000E
+ 0239   BC8        ALF          0000000B
+ 0240   STAR C8    ALF          0000000*
+ 0241   P COLUMN 1 ALF          P      @
+ 024101 COMERC AT  EQUALS       P COLUMN 1
+ 0242   L COLUMN 1 ALF          L      *
+ 024201 MARKER     EQUALS       L COLUMN 1
+ 02421  ZSUP ONE   ALF          █      1
+ 024211 BLOT C1    EQUALS       ZSUP ONE
+ 02422  USERLOG    OCT          0002
+ 02423             ALF,5
+ 02424             ALF,5        
+ 02425             ALF,5         USER'S OWN PAGE NO.
+
+ 02426  W END NEW  ALF,2            END OF
+ 02427  W END REV  ALF,2          END OF REVISIO
+ 02428  W REVNO    ALF          N 0 OF
+ 02429  W LASS ASS ALF,2        LAST ASSEMBLED O
 
 # Page 276
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  12        PAGE  12
 
+P04299             ADDRESS CONSTANTS.
+
+ 0243   L CD TYPES CAC          1024                        CARD TYPS
+ 02431  J COL 1    EQUALS       L CD TYPES
+ 02432  J COLUMN 1 EQUALS       J COL 1
+
+ 0244   CARD TYPS  CAC          MODIFY        14            END OF
+ 0245              CAC          CARD NO       14            END ERROR
+ 0246              CAC          DELETE        14            ACCEPT
+ 0247              CAC          DISASTER      2             REMARKS
+ 0248              CAC          MEMORY        14            NO LOC SYM
+ 0249              CAC          ILLEGOP       10            INSTRUCT
+ 0250              CAC          OCTAL         DAMN ZERO     DECIMAL
+ 0251              CAC          SETLOC        15            EQUALS
+ 0252              CAC          2OCTAL        3             ERASE
+ 0253              CAC          BLOCK         12            2DECIMAL
+ 0254              CAC          TOO LATE      15            HEAD TAIL
+ 0255              CAC          INSTRUCT +1   15            SUBRO
+ 0256              CAC          COUNT         15            EVEN
+ 02561             CAC                        3             SEGNUM
+
+ 0257   L PASS 2   CAC          14343         11089         PASS 2
+ 0258   L PROC WD  SPEC                                     PROC WORD
+ 02581  L END CARD SPEC                                     CARD +10
+ 02591  L NEXT SUB RESERVE      1
+ 0261   L LINE     SPEC                                     LINE STOR
+ 02615  L AV TABLE SPEC,B4                                  DAMN ZERO
+ 0262   L SYM THR  SPEC,B5                                  836
+ 0263   L TYP TAB  SPEC,B5                                  900
+ 0264   L CUSSER   SPEC                                     CUSSER
+ 0265   L SUSTAB   SPEC                                     SUBSTRAB
+ 0266   BANK 5     CAC          30720                       10240
+ 0267   DEPAGIN8   EQUALS       BANK 5
+ 0268   L DIRECTY  SPEC,B7                                  DAMN ZERO
+ 02681  DAMN ZERO  EQUALS       0
+ 0269   L DIG FILE CAC          10240                       DIG FILE
+ 02691  SHARP C1   EQUALS       L DIG FILE
+ 0270   L END THR  SPEC,B7                                  6
+ 0271   END SY TAB EQUALS       L AV TABLE
 
 # Page 277
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  13        PAGE  13
 
+P0330              BEGINNING OF PASS 2 LOOP.  BEGINS BY GETTING A POPO CARD FROM TAPE 2.
+
+ 0332   PASS 2     TS           PASS 2 OLD    PASS 2        PHI TAPE            BEGINNING-OF-BUFFER STATE.
+ 0334              RF,2         -             -             DISASTER
+ 0335              WA           POPO BUFF     ONE           Z,X4
+ 0336              NA           4,1           W END POPO    PASS 2 OLD +1
+ 0337              TS           -             -             END PASS 2          END OF POPO FILE MEANS END OF PASS 2.
+
+ 0339   END ERROR  NA, CHAR1    CARD          B1B2          PASS 2 OLD -3       BRANCH UNLESS ANNOUNCEMENT OF REJECTS.
+ 03402             SS           CARD          CHAR1         L COLUMN 1          END ERROR MESSAGE MUST BE LAST LOG LINE.
+ 03404             TS           OWN PROC      QU COL SSL -2 UN LAS REM     C    INHIBIT CHECK ON COLUMNS 1, 17, AND 24.
+ 0341              TS, BIT34    ONES          SWITCH        MODIFY              PRINT ERROR MESSAGE ABOUT THAT.
+ 0343              S, MON TYPER PAGE HEAD +14 SPRA +16      -                   "█REJECT PAGE NNN".
+ 03442             SM           SWITCH        BIT 44        SWITCH              SHUT OFF PRINTING OF REST OF PROGRAM.
+ 03444             TS           C,-3          C,-2          C,-2                TYPE THAT JUST ONCE.
+
+ 0345   PASS 2 OLD TS           POB PLACE     Z,X4          C,+1
+ 0346              TN           N,X4,11       11            HEALTH              MOVE POPO INTO HEALTH AND CARD.
+ 0348              NA           4,2           EOR           NO PO EOR           BRANCH IF NOT END OF RECORD.
+
+ 0350              TS           POPO BUFF     Z,X4          PHI TAPE
+ 0351              RF,2         4,0           -             DISASTER
+ 0352              TX           N,SC,1        -             PASS 2              RE-INITIALIZE LOOP.
+ 0354              TS           PASS 2 OLD    PASS 2        PHI TAPE
+
+ 0355   NO PO EOR  TX           Z,X4          -             POB PLACE           SAVE PLACE IN BUFFER.
+ 03554             TS           ZERO          EQUALOC       PRINT LIN      C    CLEAR LOCATION SYMBOL SWITCH.
+ 0356              NA, LAST REM SWITCH        ONES          RIGHT PQ -1         BRANCH IF LAST CARD WASNT REMARKS.
+
+ 0358   UN LAS REM SS           ZERO          LAST REM      SWITCH         S
+ 0359              NA, CHAR1    HEALTH        (RIGHTP)      RIGHT PQ -1         BRANCH IF THIS CARD ISNT RIGHT PRINT.
+
+ 03601             NA, BIT44    CARD          ONES          C,+2                BRANCH IF LINE UNAFFECTED BY THIS REV.
+ 03603             TS, CHAR8    MARKER        3,1           MARK LINE +1
+ 0361              TS           -             -             SEND SYPT      C
+ 0362              TN           CARD +1       5             3,11                SET RIGHT PRINT REMARKS IN PRINT.
+ 0364              NA, BIT 7    HEALTH        ONES          CUSSER              BRANCH IF NO RIGHT PRINT CARDNO ERROR.
+
+ 0366              SWS, B38T48  CUSS LIST     32            Z,R5                ADDRESS OF CDNO CUSS USING B.I. 5 IN R5.
+ 0367              TN           N,R5          4             LINE +12            MAKE UP CARD NUMBER ERROR NOTE.
+ 0369              LA           BIT 1         CUSS LIST     REM CN ERR
+
+ 0370              WA           Z,X0          THREE         Z,X5                IF 1ST CUSS OF PAGE, LEFT END OF BLOTS.
+ 03702             TS           Z,SC,3        COMMON        GO NUM CUS     C    APPLY SERIAL NUMBER TO CUSS.
+
+ 0371   REM CN ERR SWE, CAC3    CUSS LIST     32            COMMON
+ 0373              TS, BIT 1    ZERO          CUSS LIST     PRIN CUSS      C    CUSS CRD NUMBER ERROR IN REMARKS CARD.
+ 0375              NA, CHAR 1   HEALTH        (RIGHTP)      MAIN ONLY           BRANCH IF THIS CARD NOT RIGHT PRINT.
+ 0377              TS, CAC3     6 CAC3        COMMON        COUNT CUS      C    CARD NUMBER ERROR(S) COUNT AS A CUSS.
+
+ 0383   MAIN ONLY  SM           BIT 1         TEN           COMMON              REL ADDR FOR CUSS WITH WITH RETURN FLAG.
+ 0385              TS           Z,SC,1        -             COUNT CUS      C
+
+ 0387              LA           BIT 1         CUSS LIST     REM CN ERR          BRANCH IF LONE REMARKS CARD HAS BAD NUM.
 
 # Page 278
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  14        PAGE  14
 
+P0389   PROCEDURE WHEN LAST CARD WAS NOT LEFT PRINT REMARKS.
+
+ 0390   RIGHT PQ   SS           CARD          C1T7          LINE +1             SET UP COLUMNS 1-7.
+ 0391              NA, BIT44    CARD          ZERO          MARK LINE           BRANCH IF LINE AFFECTED BY THIS REVISON.
+ 0393              SWS, BIT 1   HEALTH        6,L           CUSS LIST           MAYBE CUSS CARD NUMBER SEQUENCE ERROR.
+ 0395              NA, CHAR1    HEALTH        (RIGHTP)      WHAT TYPE           BRANCH IF CARD IS NOT RIGHT PRINT.
+
+ 0396              TN           CARD +1       5             LINE +11            PRINT UNDER 1ST HALF OF REMARKS FIELD.
+ 0398              TS, CHAR1    C COLUMN 1    LINE +1       NO LOC SYM          MAKE RIGHT PRINT A CONTINUATION CARD.
+
+ 0400   WHAT TYPE  SWS, BIT 1   CARD          4             LINE                MAYBE SET UP SKIP BIT.
+ 0402              SPS, B10T12  CARD          8             LINE                MAYBE SET UP SPACE COUNT.
+ 0406              TN           CARD +1       9             LINE +7             SET UP COLUMNS 9-80.
+ 04091             SS           ZERO          BIT 2         SWITCH              TURN OFF LEFTOVER SWITCH.
+ 0410              TX           L CD TYPES    -             Z,X4
+ 0411              SWS, B20T25  HEALTH        19            OWN PROC
+ 04112             SS           OWN PROC      B20T24        QUCOL SSL
+ 04114             SWS, BIT 29  OWN PROC      4             QUCOL SSL           SET UP BRANCHES ON CARD TYPE.
+ 04116  QUCOL SSL  SSL, B47T48  4,0           16            C,+1                USE TERNARY KEY TO CHECK WHETHER COLUMNS
+
+ 04118             NA, CHAR1    CARD          J COL 1       C,+3                1, 17, AND 24 CONTAIN QUEER INFORMATION.
+ 041191            TS           -             -             OWN PROC +2
+
+ 0412   OWN PROC   SWE, CAC3    4,0           0             Z,SC                GOI TO OWN PROCEDURE.
+
+ 04122             NA, CHAR1    CARD          BLANKS        QUEER C1
+ 04124             NA, CHAR1    CARD +2       BLANKS        QUEER C17
+ 04126             NA, CHAR8    CARD +2       BLANKS        QUEER C24
+ 04128             TS           -             -             OWN PROC
+
+
+
+R0413   TRIVIAL SUBROUTINE IN PASS 2 TO MARK A LINE AFFECTED BY THE CURRENT REVISION.
+
+ 04132  MARK LINE  SS           MARKER        CHAR8         LINE +1             MARK PRINT POSITION 8 OF LINE.
+ 04136             SS           ASTRISKS      CHAR8         MARKER              RESTORE ASTERISK AFTER ACCEPTANCE.
+ 04138             TX           Z,SH          -             Z,SC
 
 # Page 279
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  15        PAGE  15
 
+ 0414
+ 0415
+ 0416
+ 0417
+ 0418
+ 0419
+ 0420
+ 0421
+ 0422
+ 0423
+ 0424
+ 0425
+ 0426
+ 0427
+ 0428
+ 0429
+ 0430
+ 0431
+ 0432
+ 0433
+ 0434
+ 0435
+ 0436
+ 0437
+ 0438
+ 0439
+ 0440
+ 0441
+ 0442
+ 0443
+ 0444
+ 0445
+ 0446
+ 0447
+ 0448
+ 0449
+ 0450
+ 0451
+ 0452
 
 # Page 280
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  16        PAGE  16
 
+ 0454
+ 0455
+ 0456
+ 0457
+ 0458
+ 0459
+ 0460
+ 0461
+ 0462
+ 0463
+ 0464
+ 0465
+ 0466
+ 0467
+ 0468
+ 0469
+ 0470
+ 0471
+ 0472
+ 0473
+ 0474
+ 0475
+ 0476
+ 0477
+ 0478
+ 0479
+ 0480
+ 0481
+ 0482
+ 0483
+ 0484
+ 0485
+ 0486
+ 0487
+ 0488
+ 0489
+ 0490
+ 0491
+ 0492
+ 0493
+ 0494
+ 0495
+ 0496
+ 0497
+ 0498
 
 # Page 281
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  17        PAGE  17
 
+ 0500
+ 0501
+ 0502
+ 0503
+ 0504
+ 0505
+ 0506
+ 0507
+ 0508
+ 0509
+ 0510
+ 0511
+ 0512
+ 0513
+ 0514
+ 0515
+ 0516
+ 0517
+ 0518
+ 0519
+ 0520
+ 0521
+ 0522
+ 0523
+ 0524
+ 0525
+ 0526
+ 0527
+ 0528
+ 0529
+ 0530
+ 0531
+ 0532
+ 0533
+ 0534
+ 0535
+ 0536
+ 0537
+ 0538
+ 0539
+ 0540
+ 0541
+ 0542
+ 0543
+ 0544
+ 0545
+ 0546
+ 0547
+ 0548
+ 0549
+ 0550
+ 0551
+ 0552
+ 0553
+ 0554
+ 0555
+ 0556
+ 0557
+ 0558
+ 0559
+ 0560
+ 0561
+ 0562
 
 # Page 282
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  18        PAGE  18
 
+ 0684
+ 0685
+ 0686
+ 0687
+ 0688
+ 0689
+ 0690
+ 0691
+ 0692
+ 0693
+ 0694
+ 0695
+ 0696
+ 0697
+ 0698
+ 0699
+ 0700
+ 0701
+ 0702
+ 0703
+ 0704
+ 0705
+ 0706
+ 0707
+ 0708
+ 0709
+ 0710
+ 0711
+ 0712
+ 0713
+ 0714
+ 0715
+ 0716
+ 0717
+ 0718
+ 0719
+ 0720
+ 0721
+ 0722
+ 0723
+ 0724
+ 0725
+ 0726
+ 0727
+ 0728
+ 0729
+ 0730
+ 0731
+ 0732
+ 0733
+ 0734
+ 0735
+ 0736
 
 # Page 283
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  19        PAGE  19
 
+ 0738
+ 0739
+ 0740
+ 0741
+ 0742
+ 0743
+ 0744
+ 0745
+ 0746
+ 0747
+ 0748
+ 0749
+ 0750
+ 0751
+ 0752
+ 0753
+ 0754
+ 0755
+ 0756
+ 0757
+ 0758
+ 0759
+ 0760
+ 0761
+ 0762
+ 0763
+ 0764
+ 0765
+ 0766
+ 0767
+ 0768
+ 0769
+ 0770
+ 0771
+ 0772
+ 0773
+ 0774
+ 0775
+ 0776
+ 0777
+ 0778
+ 0779
+ 0780
+ 0781
+ 0782
+ 0783
+ 0784
+ 0785
+ 0786
+ 0787
+ 0788
+ 0789
+ 0790
+ 0791
+ 0792
+ 0793
 
 # Page 284
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  20        PAGE  20
 
+ 0805
+ 0806
+ 0807
+ 0808
+ 0809
+ 0810
+ 0811
+ 0812
+ 0813
+ 0814
+ 0815
+ 0816
+ 0817
+ 0818
+ 0819
+ 0820
+ 0821
+ 0822
+ 0823
+ 0824
+ 0825
+ 0826
+ 0827
+ 0828
+ 0829
+ 0830
+ 0831
+ 0832
+ 0833
+ 0834
+ 0835
+ 0836
+ 0837
 
 # Page 285
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  21        PAGE  21
 
+ 0840
+ 0841
+ 0842
+ 0843
+ 0844
+ 0845
+ 0846
+ 0847
+ 0848
+ 0849
+ 0850
+ 0851
+ 0852
+ 0853
+ 0854
+ 0855
+ 0856
+ 0857
+ 0858
+ 0859
+ 0860
+ 0861
+ 0862
+ 0863
+ 0864
+ 0865
+ 0866
+ 0867
+ 0868
+ 0869
+ 0870
+ 0871
+ 0872
+ 0873
+ 0874
+ 0875
+ 0876
+ 0877
+ 0878
+ 0879
+ 0880
+ 0881
+ 0882
+ 0883
+ 0884
+ 0885
+ 0886
+ 0887
+ 0888
+ 0889
+ 0890
+ 0891
+ 0892
+ 0893
+ 0894
+ 0895
+ 0896
+ 0897
 
 # Page 286
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  22        PAGE  22
