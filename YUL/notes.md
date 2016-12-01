@@ -184,6 +184,8 @@ Tapes
 YUL uses tapes for both archival and intermediate storage. The use of tapes is occasionally documented in the code.
 
 TAPE 1  
+    Pass 1 reads SYPTSAVES and SYLTSAVES.
+    Pass 1 reads BYPTSAVES.
     Pass 2 writes merged SYPT records (program assembly) or SYLT records (subroutine assembly). 
 
 TAPE 2
@@ -193,11 +195,13 @@ TAPE 2
     Released at the end of Pass 2, unless there is another task.
 
 TAPE 3  
+    Pass 1 writes SYPTSAVES and SYLTSAVES.
     Pass 2 reads saved SYPT and SYLT records.
     Rewound at the end of Pass 2. 
     Released at the end of Pass 2, unless there is another task.
 
 TAPE 4  
+    Pass 1 writes BYPTSAVES.
     Pass 2 writes "unsorted word records".
     Rewound at the end of pass 2. 
 
