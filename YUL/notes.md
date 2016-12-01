@@ -30,6 +30,7 @@ Monitor Calls
  - MON WAKE
  - MON SLEEP
  - MON RLEAS
+ - MON PCR
  - MONITOR
 
  - $PAR IDLE ?
