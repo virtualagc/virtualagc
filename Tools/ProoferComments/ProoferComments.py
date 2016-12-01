@@ -98,7 +98,6 @@ for line in file:
 	#	continue
 	lines.append(comment)
 file.close()
-print lines
 
 # At this point, we've populated lines[] with just the non-blank comments from,
 # the selected page, which is precisely what should appear in the box file as well.
