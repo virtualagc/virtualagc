@@ -14,6 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-01 RSB	Completed.
+##              2016-12-01 HG   Add missing instructions for INTADR, UPDATADR
+##                              fix operand GOTOPOOH  -> GOTOP00H
+
 
 ## Page 711
 # 1) PROGRAM NAME - TARGET DELTA V PROGRAM (P76).
@@ -150,11 +153,15 @@ OUT		CLEAR	EXIT		# ALLOW V37.  NO NEED TO CLEAR NODOFLAG AT
 					#  RESPONSES TRANSFER THERE FROM P76+.
 ENDP76		CAF	ZERO
 		TS	MARKCTR		# CLEAR RR TRACKING MARK COUNTER
-		TCF	GOTOPOOH
+		TCF	GOTOP00H
 
 V06N84		NV	0684
 		NV	0681
 V06N3376	NV	0633
+INTADR          CADR    OTHPREC
+                CADR    THISPREC
+UPDATADR        CADR    ATOPOTH
+                CADR    ATOPTHIS
 P76SUB1		AXT,2	SET
 			2
 			MOONFLAG	# SET MEANS MOON IS SPHERE OF INFLUENCE.
