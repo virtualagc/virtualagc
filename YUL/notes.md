@@ -189,12 +189,17 @@ TAPE 1
 TAPE 2
     Pass 1 writes POPO (Pass One Program Output) records. 
     Pass 2 reads POPO records. 
+    Rewound at the end of Pass 2. 
+    Released at the end of Pass 2, unless there is another task.
 
 TAPE 3  
     Pass 2 reads saved SYPT and SYLT records.
+    Rewound at the end of Pass 2. 
+    Released at the end of Pass 2, unless there is another task.
 
 TAPE 4  
-    Pass 2 writes "UNSORTED WORD RECORDS".
+    Pass 2 writes "unsorted word records".
+    Rewound at the end of pass 2. 
 
 There are other names by which tapes (disks?) are referred to also:
 
