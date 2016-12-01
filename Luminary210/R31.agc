@@ -16,6 +16,8 @@
 ##		2016-12-01 RSB	Completed.  Other than correction of typos
 ##				in comments and change in the positioning
 ##				of the constant V16N54, there were no changes.
+##              2016-12-01 HG   fix operand V15N54  -> V16N54
+##                              remove V16N54 from its old location 
 
 ## Page 706
 		BANK	40
@@ -44,7 +46,7 @@ DSPDELAY	TC	FIXDELAY
 		TCF	TASKOVER
 
 V16N54		VN	1654
-DISPN5X		CAF	V15N54
+DISPN5X		CAF	V16N54
 		TC	BANKCALL
 		CADR	GOMARKF
 		TC	B5OFF
@@ -251,5 +253,4 @@ ONEBASE		TC	INTPRET		# GET CSM BASE VECTOR
 		RTB	GOTO
 			LOADTIME
 			DOCMBASE
-
-V16N54		VN	1654
+                        
