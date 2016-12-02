@@ -55,6 +55,7 @@ img.alpha_channel = 'activate'
 call([ 'tesseract', backgroundImage, 'eng.agc.exp0', '-psm', '6', 'batch.nochop', 'makebox', 'agcChars.txt' ])
 file =open ('eng.agc.exp0.box', 'r')
 boxes = []
+rejectedBoxes = []
 sumBoxWidthsByLine = [0]
 numBoxesByLine = [0]
 charForWidthsPattern = re.compile(r"[A-HK-Z02-9]")
@@ -70,11 +71,11 @@ for box in file:
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
 	addIt = 0
-	if boxWidth > 8 and boxHeight > 8 and boxWidth < 24 and boxHeight < 40:
+	if boxWidth > 8 and boxHeight > 8 and boxWidth < 28 and boxHeight < 40:
 		addIt = 1 # For general characters.
 	if boxWidth > 4 and boxWidth < 9 and boxHeight > 16 and boxHeight < 32:
 		addIt = 1 # For parentheses.
-	if boxHeight > 3 and boxHeight < 8 and boxWidth > 16 and boxWidth < 24:
+	if boxHeight > 3 and boxHeight < 10 and boxWidth > 16 and boxWidth < 24:
 		addIt = 1 # For minus signs.
 	if addIt:
 		# New line?
@@ -92,6 +93,10 @@ for box in file:
 		boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 			      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 			      'boxHeight':boxHeight})
+	else:
+		rejectedBoxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
+				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
+				      'boxHeight':boxHeight})
 file.close()
 
 # At this point, one thing we have, for each row of characters, is the sum of all the box widths
@@ -123,14 +128,15 @@ if denom != 0:
 	widthsEstimated = 1
 	alpha = float(S0 * S11 - S1 * S01) / denom
 	beta = float(S1 * S00 - S0 * S01) / denom
-if widthsEstimated:
-	print alpha, beta
-	for i in range(0,len(numBoxesByLine)):
-		if numBoxesByLine[i] == 0:
-			numBoxesByLine[i] = 1
-		print i, alpha + beta * i, sumBoxWidthsByLine[i], numBoxesByLine[i], float(sumBoxWidthsByLine[i])/numBoxesByLine[i]
-else:
-	print "Width of spaces not estimated"
+if 0:
+	if widthsEstimated:
+		print alpha, beta
+		for i in range(0,len(numBoxesByLine)):
+			if numBoxesByLine[i] == 0:
+				numBoxesByLine[i] = 1
+			print i, alpha + beta * i, sumBoxWidthsByLine[i], numBoxesByLine[i], float(sumBoxWidthsByLine[i])/numBoxesByLine[i]
+	else:
+		print "Width of spaces not estimated"
 
 # Read in the AGC source file.
 file = open (agcSourceFilename, 'r')
@@ -182,13 +188,34 @@ for ascii in range(128):
 	else:
 		imagesNomatch.append(Image(filename="asciiFont/127.png"))
 
-# Loop on lines on the selected page.  
+# Prepare a drawing-context.
 draw = Drawing()
+evilColor = Color("#FF00FF")
+draw.stroke_color = evilColor
+draw.stroke_width = 4
+draw.fill_opacity = 0
+
+# Draw empty frames around all of the rejected boxes.
+for i in range(0,len(rejectedBoxes)):
+	boxTop = rejectedBoxes[i]['boxTop']
+	boxBottom= rejectedBoxes[i]['boxBottom']
+	boxLeft = rejectedBoxes[i]['boxLeft']
+	boxRight = rejectedBoxes[i]['boxRight']
+	draw.line((boxLeft,boxTop), (boxRight,boxTop))
+	draw.line((boxLeft,boxBottom), (boxRight,boxBottom))
+	draw.line((boxRight,boxTop), (boxRight,boxBottom))
+	draw.line((boxLeft,boxTop), (boxLeft,boxBottom))
+
+# Loop on lines on the selected page.  
 row = 0
 boxIndex = 0
 for row in range(0, len(lines)):
 	if boxIndex >= len(boxes):
-		print 'Out of boxes in page, on row', row
+		#print 'Out of boxes in page, on row', row
+		top = boxes[boxIndex-1]['boxBottom']
+		bottom = backgroundHeight
+		middle = backgroundWidth / 2
+		draw.line((middle,top), (middle,bottom))
 		break
 	# Loop on non-blank characters in the row.
 	firstChar = 1
@@ -196,12 +223,20 @@ for row in range(0, len(lines)):
 		if re.match(blankLinePattern, character):
 			continue
 		if boxIndex >= len(boxes):
-			print 'Out of boxes in page, on row', row, "character", character
+			#print 'Out of boxes in page, on row', row, "character", character
+			top = boxes[boxIndex-1]['boxBottom']
+			bottom = backgroundHeight
+			middle = backgroundWidth / 2
+			draw.line((middle,top), (middle,bottom))
 			break
 		if boxIndex > 0 and not firstChar:
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
 			   boxes[boxIndex]['boxBottom'] > boxes[boxIndex-1]['boxBottom'] + rowFloor:
-				print 'Out of boxes in row', row, "character", character
+				#print 'Out of boxes in row', row, "character", character
+				left = boxes[boxIndex-1]['boxRight']
+				right = backgroundWidth
+				middle = (boxes[boxIndex-1]['boxTop'] + boxes[boxIndex-1]['boxBottom']) / 2
+				draw.line((left,middle), (right,middle))
 				break
 		firstChar = 0
 		asciiCode = ord(character)
@@ -219,12 +254,14 @@ for row in range(0, len(lines)):
 	if boxIndex > 0 and boxIndex < len(boxes) and \
 	   boxes[boxIndex]['boxLeft'] >= boxes[boxIndex-1]['boxLeft'] and \
 	   boxes[boxIndex]['boxBottom'] <= boxes[boxIndex-1]['boxBottom'] + rowFloor:
-	   	print 'Extra boxes in row', row
+	   	#print 'Extra boxes in row', row
 		while boxIndex < len(boxes):
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
 			   boxes[boxIndex]['boxBottom'] > boxes[boxIndex-1]['boxBottom'] + rowFloor:
 				break
 			boxIndex += 1
+
+# Perform all the pending drawing operations.
 draw(img)
 
 # Create the output image.
