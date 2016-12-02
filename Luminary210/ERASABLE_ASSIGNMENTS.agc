@@ -23,6 +23,7 @@
 ##              2016-11-26 HG   Fix label   REULTCT  -> RESULTCT  
 ##              2016-11-28 HG   Fix operand SAMPLIN  -> SAMPLIM
 ##              2016-11-29 HG   fix label   DVCNTRL  -> DVCNTR1
+##              2016-12-02 HG   fix opernad FLPASSO  -> FLPASS0
 
 
 ## Page 92
@@ -2831,7 +2832,7 @@ OURPERMS        =               FCOLD           +1      # MUSTN'T OVERLAY OURTEM
 WCHPHOLD        =               OURPERMS                # B(1)    GUIDANCE
 511CTR          =               WCHPHOLD        +1      # B(1) R12 - CONTROLS 511 ALARM
 FLPASS0         =               511CTR          +1      # B(1) GUIDANCE
-CNTTHROT        EQUALS          FLPASSO                 # B(1) CNT THROTS BETWEEN OMISSIONS OF P66
+CNTTHROT        EQUALS          FLPASS0                 # B(1) CNT THROTS BETWEEN OMISSIONS OF P66
 TPIP            =               FLPASS0         +1      # B(2)
 VGU             =               TPIP            +2      # B(6)    GUIDANCE
 LAND            =               VGU             +6      # B(6)    GUIDANCE    CONTIGUOUS
