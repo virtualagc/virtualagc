@@ -99,67 +99,88 @@ example, match65.png is a green capital-A.
 These files are all created by loading B&W AGC scan pages into GIMP, finding good-looking
 examples of the desired characters, and cutting them out as new images.  They are also
 typically repaired on a pixel-by-pixel basis, and converted to bi-level B&W.
-Because ProoferComments.py scales the digits appropriately, and because the fonts of 
+Because ProoferComments.py scales the characters appropriately to the bounding boxes, and because the fonts of 
 almost all of the AGC assembly listing printouts are almost identical, I expect that
 the octal-digit files only need to be created once, although in principle they could be
 prepared separately for every AGC printout.
 
-EVERYTHING BELOW THIS HAS NOT YET BEEN CORRECTED.
-
 ## Theory of Operation
 
-ProoferBox.py uses the [Tesseract OCR engine](https://github.com/tesseract-ocr), but not
-for OCR'ing, and no "training" of the engine is needed.  Rather, Tesseract's ability to create
-"bounding boxes" for all of the characters in the B&W octals image, and to output that data in
+ProoferComments.py uses the [Tesseract OCR engine](https://github.com/tesseract-ocr), but not
+for OCR'ing, and no "training" of the engine has been performed.  Rather, Tesseract's ability to create
+"bounding boxes" for all of the characters in the bi-level B&W image produced by octopus.py, and to output that data in
 machine readable form, is used.
 
-The bounding boxes found by Tesseract (in a high-quality B&W image) are in 1-to-1 correspondence
-with the digits in a binsource file (assuming that the binsource option PARITY=1 is used).  What
-ProoferBox.py does is to simply position the 0t.png, 1t.png, ... files mentioned in the
-preceding section, into the bounding boxes, scaling them appropriately.  
+The bounding boxes found by Tesseract (in a properly-cropped high-quality B&W image) are in 1-to-1 correspondence
+with the characters in the code comments in the AGC source code.  What
+ProoferComments.py does, basically, is to position the matchN.png and nomatchN.png files mentioned in the
+preceding section into the bounding boxes, using just comment characters and ignoring all of the source code
+that isn't a comment, scaling them appropriately.  
 
-As a supplementary feature, if the octal digit Tesseract expects to find there does not agree
-with the binsource file for a given box, the colored 0m.png, 1m.png, ... file is used instead,
-to make it stand out even more in the composite image.
+ProoferComments.py also provides a couple of supplementary services which are helpful in diagnosing certain
+kinds of errors:
 
-# Requirements for ProoferBox.py
+* It filters out bounding boxes that have an unusual size or shape, treating them as noise and not trying
+  to fit comment-characters into them.  This may not be necessary as octopus.py continues to mature and
+  improve, though it is helpful if non-comment material is cropped from the imagery using a program such
+  as GIMP or Photoshop.
+* Sometimes the amount of noise is great enough, even with the noise filtering mentioned above, that
+  Tesseract's bounding boxes cannot be matched 1-to-1 with comment characters.  Specifically, there may
+  be too many or two few bounding boxes for the number of comment characters.  ProoferComments.py marks
+  this condition visually in a distinctive way.
+
+# Requirements for ProoferComments.py
 
 * Python 2.5
 * [Wand 0.4.4](http://docs.wand-py.org)
 * [ImageMagick](http://www.imagemagick.org)
-* [Tesseract OCR engine](https://github.com/tesseract-ocr)
+* [Tesseract OCR engine](https://github.com/tesseract-ocr), including the default English-language dataset.
 
 Beware of the ghastly 
 tendency of some Linux distributions (if you're using Linux) to install GraphicsMagick
 in place of ImageMagick, whilst pretending that ImageMagick is what has been installed.
 I don't know of any of this works with GraphicsMagick, and don't care.
 
-# Usage of ProoferBox.py
+# Usage of ProoferComments.py
 
-ProoferBox.py requires the files 0t.png, ..., 7t.png, 0m.png, ..., 7m.png, and octals
-to reside within the same folder, as is the case in the source distribution, and this should
-be the current working directory when ProoferBox.py is actually run.  However,
+ProoferComments.py requires the files match0.png-match127.png and nomatch0.png-nomatch127.png font-image files described earlier.  Not all the files need be present, since not all 7-bit ASCII characters appear in AGC printouts.  The files match127.png and nomatch127.png (typically, solid rectangular blocks) are used in case a character for a missing file is encountered.
+
+These font images must reside in the asciiFont/ folder, which must be present in the same folder as ProoferComments.py itself. You must 'cd' to the folder containing ProoferComments.py before running it, or the font images won't be found.  However,
 input and output files for it can reside an any other folder.
 
-     ./ProoferBox.py BWINPUTIMAGE OUTPUTIMAGE BANK PAGEINBANK BINSOURCE
+     ./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE \[SCALE\]
 
 The command-line parameters are:
 
-* `BWINPUTIMAGE` is the pathname to a B&W page of octals, as prepared by octopus.py.
+* `BWINPUTIMAGE` is the pathname to a bi-level B&W AGC assembly-listing page image, with all 
+   non-comment characters removed, as prepared by octopus.py.
 * `OUTPUTIMAGE` is the pathname to where the composite image for proofing will be written.
-* `BANK` is the AGC memory-bank number, from 0 to 35 decimal.  Octal values would be misinterpreted.
-* `PAGEINBANK` is the printout-page within the memory bank, from 0 to 3.
-* `BINSOURCE` is the pathname to the AGC program's binsource file, the file whose contents are being proofed.
+* `PAGENUMBER` is the page number of the AGC assembly-listing being processed, as indicated
+  by comments in the source code of the form "## Page `PAGENUMBER`".
+* `AGCSOURCEFILE` is the source-code file (\*.agc) in which the `PAGENUMBER` resides.
+* `SCALE` (optional, default 1.0) is a multiplier for the resolution (DPI) of the `BWINPUTIMAGE`.
+  It should not be necessary for archive.org scans, since they are all very similar to one another,
+  but is needed for imagery of a significantly-different resolution obtained from other sources.
 
-Here is a simple bash script that applies ProoferBox.py to a complete set of B&W octal 
-pages:
+# Markings in the Proofing Images Output by ProoferComments.py
 
-	pageNum=STARTINGPAGEOFOCTALS
-	for bank in 2 3 0 1 `seq 4 35`
-	do
-		for pageInBank in 0 1 2 3
-		do 
-			./ProoferBox.py BWIMAGEDIR/$pageNum.tif OUTPUTDIR/$pageNum.png $bank $pageInBank PATHTOBINSOURCEFILE
-			pageNum=$((pageNum+1))
-		done
-	done
+Ideally, there is a 1-to-1 match between the number of bounding boxes found by Tesseract in the B&W image
+and the number of comment characters in the source code.  In this case, the proofing image looks like
+the B&W image, except that
+
+1. Characters that _match_ (i.e., where the source-code transcription was _correct_) may have a 
+   barely-noticeable green or red fringe 
+   around them.  The color is not significant: if red, it merely means that Tesseract guessed the character
+   wrong, while if green it means that Tesseract guessed the character correctly ... we couldn't care
+   less what Tesseract guessed, so it doesn't matter what color it was.
+2. Characters that _don't match_ (i.e, where the source-code transcription was _wrong_) won't look like
+   characters at all.  They'll look like two characters superimposed (the correct one and the incorrect one),
+   one in black, and the other in green or red.
+
+If there's noise which ProoferComments.py's noise filter has been able to detect, the proofing image will
+usually look very much like what's described above, except that additionally, the noise specks which have
+been filtered out will have magenta boxes drawn around them to call attention to them.  They can 
+be ignored if the proofing image is otherwise normal, but are useful if the image is not normal and you
+need to determine why.
+
+... to be continued ...
