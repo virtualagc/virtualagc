@@ -19,13 +19,18 @@ from wand.color import Color
 # Parse command-line arguments
 if len(sys.argv) < 5:
 	print 'Usage:'
-	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE [NODASHES]'
+	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE [SCALE]'
 	print 'BWINPUTIMAGE is the pathname to the B&W cropped image with just the comments.'
 	print 'OUTPUTIMAGE is the pathname at which to write the composite proofing image.'
 	print 'PAGENUMBER is the page number within the original scanned assembly listing.'
 	print 'AGCSOURCEFILE is the pathname of the AGC source file containing the PAGENUMBER.'
-	print 'NODASHES (0 or 1, default 0 of omitted) is an indication to ignore all dashes'
-	print '         in comments. (This switch is used only in debugging.)'
+	print 'SCALE (optional, default 1.0) represents the resolution of the imagery, relative'
+	print '      to archive.org\'s scan of Luminary 210.  The process is not very sensitive'
+	print '      to this, but some imagery obtained by other means is significantly different'
+	print '      in scale, and should be adjusted with this parameter.  Think of it as being'
+	print '      a multiplier for the DPI.  (By which I mean the true DPI of the physical'
+	print '      page, and not the value for the DPI embedded in the graphics files, which'
+	print '      may not be accurate.)'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -33,9 +38,9 @@ outImage = sys.argv[2]
 pageNumber = int(sys.argv[3])
 agcSourceFilename = sys.argv[4]
 if len(sys.argv) >= 6:
-	noDashes = int(sys.argv[5])
+	scale = float(sys.argv[5])
 else:
-	noDashes = 0
+	scale = 1.0
 
 # Read in the input image ... i.e., the B&W octal page.
 img = Image(filename=backgroundImage)
@@ -59,7 +64,7 @@ rejectedBoxes = []
 sumBoxWidthsByLine = [0]
 numBoxesByLine = [0]
 charForWidthsPattern = re.compile(r"[A-HK-Z02-9]")
-rowFloor = 15
+rowFloor = 15 * scale
 row = 0
 for box in file:
 	boxFields = box.split()
@@ -71,11 +76,11 @@ for box in file:
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
 	addIt = 0
-	if boxWidth > 8 and boxHeight > 8 and boxWidth < 28 and boxHeight < 40:
+	if boxWidth > 8 * scale and boxHeight > 8 * scale and boxWidth < 28 * scale and boxHeight < 40 * scale:
 		addIt = 1 # For general characters.
-	if boxWidth > 4 and boxWidth < 9 and boxHeight > 16 and boxHeight < 32:
+	if boxWidth > 4 * scale and boxWidth < 9 * scale and boxHeight > 16 * scale and boxHeight < 32 * scale:
 		addIt = 1 # For parentheses.
-	if boxHeight > 3 and boxHeight < 10 and boxWidth > 16 and boxWidth < 24:
+	if boxHeight > 3 * scale and boxHeight < 10 * scale and boxWidth > 16 * scale and boxWidth < 24 * scale:
 		addIt = 1 # For minus signs.
 	if addIt:
 		# New line?
@@ -143,8 +148,6 @@ file = open (agcSourceFilename, 'r')
 lines = []
 currentPage = -1
 blankLinePattern = re.compile(r"\A\s*\Z")
-allMinusPattern = re.compile(r"\A\s*[-][-\s]*\Z")
-allUnderscorePattern = re.compile(r"\A\s*_[_\s]*\Z")
 for line in file:
 	if line.lower().startswith("## page "):
 		fields = line.split()
@@ -158,14 +161,8 @@ for line in file:
 	if parts[0] == line or parts[2].startswith("#"): # If no comment, or a ##-style comment, ignore the line.
 		continue
 	comment = parts[2]
-	if noDashes:
-		comment = comment.replace("-", "")
 	if re.match(blankLinePattern, comment): # And if the comment itself is blank, ignore the line too.
 		continue
-	#if re.match(allMinusPattern, comment): # Rows of all dashes or underscores don't seem to appear in box files.
-	#	continue
-	#if re.match(allUnderscorePattern, comment): # Rows of all dashes or underscores don't seem to appear in box files.
-	#	continue
 	lines.append(comment)
 file.close()
 
@@ -191,8 +188,9 @@ for ascii in range(128):
 # Prepare a drawing-context.
 draw = Drawing()
 evilColor = Color("#FF00FF")
+extraColor = Color("#FF8000")
 draw.stroke_color = evilColor
-draw.stroke_width = 4
+draw.stroke_width = 4 * scale
 draw.fill_opacity = 0
 
 # Draw empty frames around all of the rejected boxes.
@@ -209,6 +207,7 @@ for i in range(0,len(rejectedBoxes)):
 # Loop on lines on the selected page.  
 row = 0
 boxIndex = 0
+draw.stroke_color = extraColor
 for row in range(0, len(lines)):
 	if boxIndex >= len(boxes):
 		#print 'Out of boxes in page, on row', row
@@ -259,6 +258,15 @@ for row in range(0, len(lines)):
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
 			   boxes[boxIndex]['boxBottom'] > boxes[boxIndex-1]['boxBottom'] + rowFloor:
 				break
+			else:
+				boxTop = boxes[boxIndex]['boxTop']
+				boxBottom= boxes[boxIndex]['boxBottom']
+				boxLeft = boxes[boxIndex]['boxLeft']
+				boxRight = boxes[boxIndex]['boxRight']
+				draw.line((boxLeft,boxTop), (boxRight,boxTop))
+				draw.line((boxLeft,boxBottom), (boxRight,boxBottom))
+				draw.line((boxRight,boxTop), (boxRight,boxBottom))
+				draw.line((boxLeft,boxTop), (boxLeft,boxBottom))
 			boxIndex += 1
 
 # Perform all the pending drawing operations.
