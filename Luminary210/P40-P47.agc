@@ -22,6 +22,8 @@
 ##				about one error per page!
 ##		2016-12-02 RSB	3 more errors found, after fixes to ProoferComments.py,
 ##				bringing the average errors-per-page to *exactly* 1.  :-)
+##		2015-12-02 RSB	4 more errors found, with additional improvements to
+##				ProoferComments.py ... so, 38 errors for 34 lines.
 
 ## Page 747
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -110,7 +112,7 @@
 P40LM		TC	PHASCHNG
 		OCT	04024
 
-		CAF	P40ADRES	# INITIALIZATION FOR BURNBABY
+		CAF	P40ADRES	# INITIALIZATION FOR BURNBABY.
 		TS	WHICH
 
 		CA	FLGWRD10
@@ -396,7 +398,7 @@ STARTP47	TC	PHASCHNG
 		2CADR	P47BODY
 
 		TCF	REDO4.2		# CHECKS PHASE 5 AND GOES TO PREREAD
-					# SEE TIG-30 IN BURNBABY
+					# SEE TIG-30 IN BURNBABY.
 
 CALCN83		TC	INTPRET
 		VLOAD	VAD
@@ -779,7 +781,7 @@ SMALLEPS	PUSH	SXA,1
 		GOTO
 			QTEMP
 
-EPS1		2DEC*	2.777777778 E-2*	# 10 DEGREES AT 1 REVOLUTION
+EPS1		2DEC*	2.777777778 E-2*	# 10 DEGREES AT 1 REVOLUTION.
 
 EPS2		2DEC*	9.722222222 E-2*	# 35 DEGREES AT 1 REVOLUTION.
 
@@ -1256,7 +1258,7 @@ RASTEER1	VLOAD	ABVAL
 		SQRT	SIGN		# SQRT((2(S-R)/RC)(MU - MU(S-C)/2A))
 			GEOMSGN		# (GEOMSGN = SGNA IN GSOP)
 		STORE	32D		# + OR - A
-		DLOAD	DMP		# A=SGNA(SQRT((2(S-R)/RC)(MU-MU(S-C)/2A))
+		DLOAD	DMP		# A=SGNA(SQRT((2(S-R)/RC)(MU-MU(S-C)/2A)))
 			SS
 			MU/A		
 		BDSU	
