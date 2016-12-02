@@ -30,9 +30,9 @@ pre-existing corresponding section from Luminary 131, which had been available f
 point and had been subject, presumably, to scrutiny by many people.  Because the code was pre-existing,
 I was free to concentrate on detailed correction of the comments in the code rather than the physical
 effort of transcription, and I found and corrected many such errors.  _After_ the transcription was
-complete, I checked it with ProoferComments.py and immediately found and corrected 34 more errors in
+complete, I checked it with ProoferComments.py and immediately found and corrected 38 more errors in
 that way.  It so happens that the P40-47 log section has 34 pages, so what I had found (and corrected
-with the assistance of ProoferComments.py) one additional error per page, in spite of my best efforts
+with the assistance of ProoferComments.py) more than 1 additional error per page, in spite of my best efforts
 to previously eliminate the errors by visual inspection.  Admittedly, many of these errors were trivial,
 but some were quite important ... and a couple of fixes were even to restore typos made by the original
 AGC developers, which I had accidentally removed before.  :-)
@@ -185,5 +185,12 @@ need to determine why.
 
 There are really two cases:  that of there being extra bounding boxes in a row (relative to the number of comment characters), and that of there being too few.
 
-... to be continued ...
+If there are _extra_ bounding boxes on a line, they are displayed much like the noise-boxes mentioned above,
+except that they are in orange rather than magenta.
+
+Conversely, if there are _too few_ bounding boxes on a line, a horizontal orange line is drawn after the last
+bounding box, to the edge of the page.  If we've completely run out of bounding boxes, not just on a line
+but on the entire page, the orange line is vertical instead, from the bottom of the final bounding box to 
+the bottom of the page.
+
 
