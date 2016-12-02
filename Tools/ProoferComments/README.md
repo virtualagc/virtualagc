@@ -183,4 +183,7 @@ been filtered out will have magenta boxes drawn around them to call attention to
 be ignored if the proofing image is otherwise normal, but are useful if the image is not normal and you
 need to determine why.
 
+There are really two cases:  that of there being extra bounding boxes in a row (relative to the number of comment characters), and that of there being too few.
+
 ... to be continued ...
+
