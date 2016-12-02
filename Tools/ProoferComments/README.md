@@ -20,7 +20,22 @@ The program ProoferComments.py is a tool which, with some luck, we might be able
 make the proofing process for the AGC program comments managable. By "proofing", I mean checking for
 checking for discrepancies between the original AGC assembly listings and the transcribed
 (ASCII) AGC source.  The tool is (at this point) applicable only to the textual content of 
-the program comments, and ignores all white space (i.e., columnar alightment of the text).
+the program comments, and ignores all white space (i.e., columnar alightment of the text), though in
+theory it may eventually be usable to address column-alignment as well.
+
+To give some idea of the scale of the problem and of the effectiveness of ProoferComments.py for 
+addressing it, yesterday I transcribed the P40-47 log section of Luminary 210 from the scanned
+page imagery of that program into source code.  The source code is _almost_ identical to the 
+pre-existing corresponding section from Luminary 131, which had been available for 13 years at that
+point and had been subject, presumably, to scrutiny by many people.  Because the code was pre-existing,
+I was free to concentrate on detailed correction of the comments in the code rather than the physical
+effort of transcription, and I found and corrected many such errors.  _After_ the transcription was
+complete, I checked it with ProoferComments.py and immediately found and corrected 34 more errors in
+that way.  It so happens that the P40-47 log section has 34 pages, so what I had found (and corrected
+with the assistance of ProoferComments.py) one additional error per page, in spite of my best efforts
+to previously eliminate the errors by visual inspection.  Admittedly, many of these errors were trivial,
+but some were quite important ... and a couple of fixes were even to restore typos made by the original
+AGC developers, which I had accidentally removed before.  :-)
 
 # A Way to Drastically Speed Up Proofing, With Much-Improved Confidence in the Results
 
