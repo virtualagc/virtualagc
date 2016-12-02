@@ -13,7 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
-##              2016-12-01 HG   Transcribed
+##              2016-12-02 HG   Transcribed
 
 ## Page 794
                 EBANK=          E2DPS
