@@ -24,7 +24,7 @@ if len(sys.argv) < 5:
 	print 'OUTPUTIMAGE is the pathname at which to write the composite proofing image.'
 	print 'PAGENUMBER is the page number within the original scanned assembly listing.'
 	print 'AGCSOURCEFILE is the pathname of the AGC source file containing the PAGENUMBER.'
-	print 'NODASHES (0 or 1, default 1 of omitted) is an indication to ignore all dashes'
+	print 'NODASHES (0 or 1, default 0 of omitted) is an indication to ignore all dashes'
 	print '         in comments. (This switch is used only in debugging.)'
 	sys.exit()
 
@@ -32,7 +32,10 @@ backgroundImage = sys.argv[1]
 outImage = sys.argv[2]
 pageNumber = int(sys.argv[3])
 agcSourceFilename = sys.argv[4]
-noDashes = int(sys.argv[5])
+if len(sys.argv) >= 6:
+	noDashes = int(sys.argv[5])
+else:
+	noDashes = 0
 
 # Read in the input image ... i.e., the B&W octal page.
 img = Image(filename=backgroundImage)
@@ -42,10 +45,21 @@ backgroundHeight = img.height
 img.type = 'truecolor'
 img.alpha_channel = 'activate'
 
-# Shell out to have tesseract generate the box file, and read it in..
-call([ 'tesseract', backgroundImage, 'eng.burst.exp0', '-psm', '6', 'batch.nochop', 'makebox' ])
-file =open ('eng.burst.exp0.box', 'r')
+# Shell out to have tesseract generate the box file, and read it in.
+# While reading it in, we will reject all boxes that appear to us to be
+# noise, and moreover will form an array of the average widths of the 
+# boxes, with a separate width for each row.  This latter data we'll use
+# later to try to deduce the columnar alignment of the comments (in terms
+# of characters.  For trying to figure this out, we'll only uses alphanumerics,
+# other than I and 1, and only within a certain range of widths.
+call([ 'tesseract', backgroundImage, 'eng.agc.exp0', '-psm', '6', 'batch.nochop', 'makebox', 'agcChars.txt' ])
+file =open ('eng.agc.exp0.box', 'r')
 boxes = []
+sumBoxWidthsByLine = [0]
+numBoxesByLine = [0]
+charForWidthsPattern = re.compile(r"[A-HK-Z02-9]")
+rowFloor = 15
+row = 0
 for box in file:
 	boxFields = box.split()
 	boxChar = boxFields[0]
@@ -63,10 +77,60 @@ for box in file:
 	if boxHeight > 3 and boxHeight < 8 and boxWidth > 16 and boxWidth < 24:
 		addIt = 1 # For minus signs.
 	if addIt:
+		# New line?
+		boxIndex = len(boxes)
+		if boxIndex > 0:
+		   	if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > boxes[boxIndex-1]['boxBottom'] + rowFloor:
+		   		sumBoxWidthsByLine.append(0)
+		   		numBoxesByLine.append(0)
+		   		row += 1
+		# Is it a box we want to use for figuring out the width of space characters?
+		if re.match(charForWidthsPattern,boxChar) and boxWidth > 16 and boxWidth < 24:
+			row = len(numBoxesByLine) - 1
+			sumBoxWidthsByLine[row] += boxWidth
+			numBoxesByLine[row] += 1
 		boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 			      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 			      'boxHeight':boxHeight})
 file.close()
+
+# At this point, one thing we have, for each row of characters, is the sum of all the box widths
+# for "wide" characters (e.g., not I or 1), and the number of boxes used to compute the sum.
+# These are in the sumBoxWidthsByLine[] and numBoxesByLine[] arrays, respectively.  If we divide
+# the one by the other, we'll have an average character width, and from that we'll have a basis
+# for guessing the width of the space character --- which varies by line, because the projection
+# of the page image isn't perfectly rectangular --- for each line.  However, there will be a 
+# lot of variation, due to the fact that the data is so imperfect, so actually create a regression
+# line for width vs line-number, and use that regression line (alpha + beta * row) to estimate 
+# the character widths, instead of using the raw line-by-line data.  A weighted least-squares fit 
+# is used, in which the weights come from numBoxesByLine[].
+widthsEstimated = 0
+alpha = 0
+beta = 0
+S0 = 0
+S1 = 0
+S00 = 0
+S01 = 0
+S11 = 0
+for i in range(0,len(numBoxesByLine)):
+	S0 += sumBoxWidthsByLine[i]
+	S1 += i * sumBoxWidthsByLine[i]
+	S00 += numBoxesByLine[i]
+	S01 += i * numBoxesByLine[i]
+	S11 += i * i * numBoxesByLine[i]
+denom = S00 * S11 - S01 * S01
+if denom != 0:
+	widthsEstimated = 1
+	alpha = float(S0 * S11 - S1 * S01) / denom
+	beta = float(S1 * S00 - S0 * S01) / denom
+if widthsEstimated:
+	print alpha, beta
+	for i in range(0,len(numBoxesByLine)):
+		if numBoxesByLine[i] == 0:
+			numBoxesByLine[i] = 1
+		print i, alpha + beta * i, sumBoxWidthsByLine[i], numBoxesByLine[i], float(sumBoxWidthsByLine[i])/numBoxesByLine[i]
+else:
+	print "Width of spaces not estimated"
 
 # Read in the AGC source file.
 file = open (agcSourceFilename, 'r')
@@ -120,7 +184,6 @@ for ascii in range(128):
 
 # Loop on lines on the selected page.  
 draw = Drawing()
-rowFloor = 15
 row = 0
 boxIndex = 0
 for row in range(0, len(lines)):
