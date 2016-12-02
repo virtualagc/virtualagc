@@ -23,7 +23,7 @@
 ##              2016-11-26 HG   Fix label   REULTCT  -> RESULTCT  
 ##              2016-11-28 HG   Fix operand SAMPLIN  -> SAMPLIM
 ##              2016-11-29 HG   fix label   DVCNTRL  -> DVCNTR1
-##              2016-12-02 HG   fix opernad FLPASSO  -> FLPASS0
+##              2016-12-02 HG   fix operand FLPASSO  -> FLPASS0
 
 
 ## Page 92
