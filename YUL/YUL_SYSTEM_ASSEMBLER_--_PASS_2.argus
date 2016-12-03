@@ -7,6 +7,7 @@
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        265-331
 # Mod history:  2016-10-06 JL   Created.
+#               2016-12-03 JL   Transcribed pages 279-282.
 
 # Annotations:
 #
@@ -694,218 +695,198 @@ R0413   TRIVIAL SUBROUTINE IN PASS 2 TO MARK A LINE AFFECTED BY THE CURRENT REVI
 # Page 279
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  15        PAGE  15
 
- 0414
- 0415
- 0416
- 0417
- 0418
- 0419
- 0420
- 0421
- 0422
- 0423
- 0424
- 0425
- 0426
- 0427
- 0428
- 0429
- 0430
- 0431
- 0432
- 0433
- 0434
- 0435
- 0436
- 0437
- 0438
- 0439
- 0440
- 0441
- 0442
- 0443
- 0444
- 0445
- 0446
- 0447
- 0448
- 0449
- 0450
- 0451
- 0452
+P0414              PROCEDURE IN PASS 2 FOR INSTRUCTIONS.  CALLS FOR LOCATION PROCESSING, OP CODE AND ADDRESS PROCESSING,
+R0416   AND GOES ON TO PROCESS THE RESULTING WORD.
+
+ 0417   INSTRUCT   TS           Z,SC          Z,X4          INSTRONT
+ 0418              SWE, CAC3    M PROC OP     32            Z,CSC
+ 0419              TS           L PROC WD     MOD RETRN     N,CSC
+
+
+
+R0420              PROCEDURE IN PASS 2 FOR SINGLE-PRECISION DECIMAL CONSTANTS.  CALLS FOR LOCATION PROCESSING, TRANSLA-
+R0422   TION OF THE CONSTANT, AND WORD PROCESSING.
+
+ 0423   DECIMAL    TS           Z,SC          Z,X4          INSTRONT
+ 0424              TS           CARD +5       SAVE W6       DELIMIT        C    ENSURE DELIMITING OF FIELD BY ASTERISK.
+ 0426              TN           D1 PARAMS     3             MAX DECML           SET PARAMETERS FOR 1P DECIMAL.
+ 0428              TS           N,SC          Z,X4          DEC CONST           TRANSLATE CONSTANT.
+ 0430   L FINI 1P  CAC          CARD +3                     C,+1
+
+ 0431              SWE, CAC3    M PROC 1P     16            Z,CSC
+ 0432              TX           L PROC WD     -             Z,SC           C
+
+
+
+R0433              PROCEDURE IN PASS 2 FOR SINGLE-PRECISION OCTAL CONSTANTS.  CALLS FOR LOCATION PROCESSING, TRANSLATION
+R0435   OF THE CONSTANT, AND WORD PROCESSING.
+
+ 0436   OCTAL      TS           Z,SC          Z,X4          INSTRONT
+ 0437              TS           CARD +5       SAVE W6       DELIMIT        C    ENSURE DELIMITING OF FIELD BY ASTERISK.
+ 0439              TX           K1 MAXNUM     -             MAX NUMBR           SET LIMIT FOR 1P OCTAL NUMBER.
+ 04401             SWS, B28T30  ONE           18,L          SIGND OCT           SET UP TO SHIFT LIMIT 1 IF SIGNED.
+ 0441              TS           L FINI 1P     Z,X4          OCT CONST           TRANSLATE CONSTANT AND JOIN DECIMAL.
+
+
+
+R0443   TRIVIAL SUBROUTINE TO DELIMIT A CONSTANT FIELD BY AN ASTERISK, USING THE PRESENCE OR ABSENCE OF AN ASTERISK IN
+R0445   THE OPERATION CODE FIELD.  ALSO SETS UP Z,S3 TO THE BEGINNING OF THE FIELD.
+
+ 0447   DELIMIT    SWE, CAC3    L FINI 1P     32            Z,S3           C
+ 0448              SSL, ONE     HEALTH        37            C,+1           C    TEST SO-CALLED INDIRECT ADDRESSING BIT.
+ 0450              TX           ASTRISKS      -             CARD +5             IF ZERO, FIELD IS 2 WORDS LONG.
+ 0452              SM           ASTRISKS      B5T6          CARD +10            IF ONE, THERE SHOULD BE AN EXPLICIT *.
 
 # Page 280
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  16        PAGE  16
 
- 0454
- 0455
- 0456
- 0457
- 0458
- 0459
- 0460
- 0461
- 0462
- 0463
- 0464
- 0465
- 0466
- 0467
- 0468
- 0469
- 0470
- 0471
- 0472
- 0473
- 0474
- 0475
- 0476
- 0477
- 0478
- 0479
- 0480
- 0481
- 0482
- 0483
- 0484
- 0485
- 0486
- 0487
- 0488
- 0489
- 0490
- 0491
- 0492
- 0493
- 0494
- 0495
- 0496
- 0497
- 0498
+P0454              PROCEDURE IN PASS 2 FOR DOUBLE-PRECISION DECIMAL CONSTANTS.  CALLS FOR LOCATION PROCESSING, TRANSLA-
+R0456   TION OF THE CONSTANT, PRINTS THE FIRST LINE, SENDS THE FIRST WORD IF POSSIBLE, SETS UP A CONTINUATION LINE,
+R0458   PROCESSES THE SECOND LOCATION, SETS UP THE SECOND WORD, AND CALLS FOR WORD PROCESSING.
+
+ 0460   2 DECIMAL  TS           Z,SC          Z,X4          INSTRONT
+ 0461              TS           CARD +5       SAVE W6       DELIMIT        C    ENSURE DELIMITING OF FIELD BY ASTERISK.
+ 0463              TN           D2 PARAMS     3             MAX DECML           SET PARAMETERS FOR 2P DECIMAL.
+ 0465              TS           N,SC          Z,X4          DEC CONST
+ 0466   L FINI 1P  CAC                                      C,+1
+
+ 0467              SWE, CAC3    M PROC 2P     32            Z,CSC          C    FINISH WORDS ACCORDING TO MACHINE.
+ 0471              TS           Z,SC          Z,X4          PRINT LIN           PRINT FIRST LINE.
+ 0473              TX           L OLD LINE    -             Z,X3
+ 0474              TS           3,1           LINE +1       SEND WORD      C    SEND WORD THAT HAS VALID LOCATION.
+ 0475              SS           C COLUMN 1    CHAR1         LINE +1             SET UP CONTINUATION LINE.
+ 0477              LA           ONES          LOCATION      2 BAD LOCS          `BRANCH IF BOTH LOCATIONS ARE BAD.
+
+ 0479              NA, BIT 14   HEALTH        ONES          C,+2                BRANCH IF BOTH LOCATIONS ARE GOOD.
+ 0481              TS           ONES          LOCATION      C,+2                WHEN ONLY 2ND LOCATION IS BAD.
+
+ 0483              WA           LOCATION      ONE           LOCATION
+
+ 0484   2 BAD LOCS SWE, CAC3    M PLOC EB     16            Z,CSC          C    PRINT SECOND LOCATION.
+ 0486              SS           2ND ALF       CON MASK      LINE +5
+ 0487              SS           2ND ALF +1    CON MASK +1   LINE +6             PRINT SECOND WORD.
+ 0489              TS           2ND HALF      WORD          PROC WORD
+
+
+
+
+R0490              PROCEDURE IN PASS 2 FOR DOUBLE-PRECISION OCTAL CONSTANTS.  CALLS FOR LOCATION PROCESSING, TRANSLATION
+R0492   OF THE CONSTANT, AND JOINS THE 2DECIMAL PROCEDURE.
+
+ 0493   2 OCTAL    TS           Z,SC          Z,X4          INSTRONT
+ 0494              TS           CARD +5       SAVE W6       DELIMIT        C    ENSURE DELIMITING OF FIELD BY ASTERISK.
+ 0496              TX           K2 MAXNUM     -             MAX NUMBR           SET UP LIMIT ON SIZE OF CONSTANT.
+ 04971             SWS, B28T30  TWO           18,L          SIGND OCT           SET UP TO SHIFT LIMIT 2 IF SIGNED.
+ 0498              TS           L FINI 2P     Z,X4          OCT CONST           TRANSLATE AND JOIN 2DECIMAL.
 
 # Page 281
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  17        PAGE  17
 
- 0500
- 0501
- 0502
- 0503
- 0504
- 0505
- 0506
- 0507
- 0508
- 0509
- 0510
- 0511
- 0512
- 0513
- 0514
- 0515
- 0516
- 0517
- 0518
- 0519
- 0520
- 0521
- 0522
- 0523
- 0524
- 0525
- 0526
- 0527
- 0528
- 0529
- 0530
- 0531
- 0532
- 0533
- 0534
- 0535
- 0536
- 0537
- 0538
- 0539
- 0540
- 0541
- 0542
- 0543
- 0544
- 0545
- 0546
- 0547
- 0548
- 0549
- 0550
- 0551
- 0552
- 0553
- 0554
- 0555
- 0556
- 0557
- 0558
- 0559
- 0560
- 0561
- 0562
+P0500              SUBROUTINE IN PASS 2 TO PROCESS THE LOCATION FIELD OF AN INSTRICTION OR CONSTAMT.  CUSSES ABOUT LOCA-
+R0502   TION FORMAT AND VALUE, DETERMINES THE VALUE OF A LEFTOVER LOCATION IF REQUIRED, AND PRINTS THE LOCATION VALUE
+R0504   WITH END OF BLOCK OR BANK NOTATION IF REQUIRED.  RETURN VIA X4.
+
+ 0505   INSTRONT   NA, BIT 8    HEALTH        ZERO          C,+3                BRANCH IF LOCATION IS SYMBOLIC.
+ 05054             SWS, BIT 1   HEALTH        12,L          CUSS LIST +1        MAYBE CUSS REJECTION OF LEFTOVER STATUS.
+ 05058             TS           Z,SC,2        -             SETLOC         C    MAYBE CUSS "D" ERROR, ZERO EQUALOC.
+
+ 050595            SWS, BIT 33  HEALTH        16            CUSS LIST +4        MAYBE CUSS LOC SYM NO FIT IN TABLE.
+ 0506              TS           Z,SC          Z,X6          LOC SYM 1           ANALYZE AND PRE-PROCESS LOCATION SYMBOL.
+ 05062             LA           EQUALOC       ZERO          MAYBE CUS           BRANCH IF SYMBOL DIDN'T FIT IN TABLE.
+ 05066             SWS, BIT 1   HEALTH        12,L          CUSS LIST +17       MAYBE CUSS WRONGFUL PREDEFINITION.
+ 05068             SWS, B38T48  CUSS LIST +17 32            Z,R5                PUT LOCATION SYMBOL INTO CUSS IN CASE IT
+ 05069             TS           -             -             SYM CUSS 2     C    WAS WRONGFULLY PREDEFINED.
+
+ 0507   MAYBE CUS  SWS, BIT 1   HEALTH        13,L          CUSS LIST +2        MAYBE CUSS OVERSIZE LOCATION VALUE.
+ 0509              SWS, BIT 33  HEALTH        18            CUSS LIST +1        MAYBE CUSS LOCATION MEMORY TYPE ERROR.
+ 0511              SWS, BIT 17  HEALTH        1             CUSS LIST +1        MAYBE CUSS CONFLICT IN LOCATION CONTENT.
+ 0513              SWS, BIT 17  HEALTH        7             CUSS LIST +4        MAYBE CUSS PREDEFINITION FAILURE.
+ 05144             NA, BIT14    HEALTH        ZERO          REGULOC -2          BRANCH IF THERE'S NO GOOD LOCATION VALU.
+ 0515              NA, BIT 12   HEALTH        ONES          REGULOC             BRANCH IF LOCATION NOT LEFTOVER.
+
+ 0516              NA, BIT8     HEALTH        ONES          REGULOC             BRANCH IF NO LOCATION FIELD SYMBOL.
+ 0517              SM           SWITCH        BIT 2         SWITCH              TURN ON LEFTOVER SWITCH.
+ 0519              LA           BIT 1         EQUALOC +1    C,+2                BRANCH IF THE LEFTOVER WAS DEFINED.
+ 0520              TS           ONES          LOCATION      REGULOC +1          SHOW LACK OF LOCATION VALUE.
+ 0521              SS           COMMON +2     CAC3          HEALTH              USE VALUE FOUND BY PASS 1.5.
+
+ 0522   REGULOC    EX           HEALTH        CAC3          LOCATION
+ 0523              SWE, CAC3    M PLOC EB     16            Z,CSC
+ 0524              TX           Z,X4          -             Z,SC           C    PRINT LOCATION VALUE AND RETURN.
+
+R0530   SUBROUTINE IN PASS 2 TO ANALYZE AND PRE-PROCESS A LOCATION SYMBOL.
+
+ 0532   LOC SYM 1  TS           CARD +1       COMMON        ANALOXIM            FETCH LOCATION FIELD OF CARD.
+ 0534              NA, CHAR1    COMMON        BLANKS        ANALOXIM +1         BRANCH WHEN SYMBOL IS NORMALIZED.
+ 0536              SWE, ONES    COMMON        A,1,L         COMMON
+ 0537   ANALOXIM   TS           ZERO          EQUALOC +1    C,-2                SHOW UNDEFINED WHEN NOT FIT IN TABLE.
+
+ 0539              NA, BIT 33   CUSS LIST +4  ONES          LSYM FITS           BRANCH IF LOCATION SYMBOL IS IN TABLE.
+ 0541              TS           ZERO          EQUALOC       FULLNESS +1    C    SET UP PARAMETERS TO SHOW FULL TABLE.
+ 0543              SS           CUSS LIST +4  B38T48        Z,R5
+ 0544              TS           Z,X6          Z,SC          SYM CUSS 2     C    CUSS FIT FAILURE AND EXIT.
+
+ 0546   LSYM FITS  TS           COMMON        EQUALOC       ANAL SYMB      C    GET HISTORY OF NORMALIZED SYMBOL.
+ 0548              LA           2,1           D4            NO MUL DEF          BRANCH IF NO PAGE-OF-DEFINITION FOR SYM.
+ 0550              S, ETS       3,0           ZX +5         C,+1                OTHERWISE, POINT TO MULT. DEF. FLAG.
+ 0552              SM           CAC12         N,X2          5,2                 ADVANCE POINTER TO NEXT MEMBER OF SET.
+ 0554              S, ETS       2,0           ZX +2         C,+1
+ 05542             TS           Z,X2,1        -             FOUND SYM      C    GET HISTORY OF THIS DEFINITION.
+ 0556   NO MUL DEF EBA          Z,X2          ZERO          EQUALOC +1          COPY OTHER SYMBOL PARAMETERS TO SAFETY.
+ 0558              SWS, B26T30  COMMON +2     2,L           C,+1                USE SYMBOL HEALTH AS SHIFT COUNT.
+ 0560              SWS, BIT 1   DEF XFORM                   EQUALOC +1          SHOW WHETHER THERE IS A VALID DEFINITON.
+ 0562              TS           COMMON +2     EQUALOC +2    N,X6
 
 # Page 282
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  18        PAGE  18
 
- 0684
- 0685
- 0686
- 0687
- 0688
- 0689
- 0690
- 0691
- 0692
- 0693
- 0694
- 0695
- 0696
- 0697
- 0698
- 0699
- 0700
- 0701
- 0702
- 0703
- 0704
- 0705
- 0706
- 0707
- 0708
- 0709
- 0710
- 0711
- 0712
- 0713
- 0714
- 0715
- 0716
- 0717
- 0718
- 0719
- 0720
- 0721
- 0722
- 0723
- 0724
- 0725
- 0726
- 0727
- 0728
- 0729
- 0730
- 0731
- 0732
- 0733
- 0734
- 0735
- 0736
+P0684              ROUTINE IN PASS 2 TO FINISH PROCESSING A WORD (EITHER AN INSTRUCTION OR CONSTANT).  RELEASES THE LINE
+R0686   FOR PRINTING, TRANSMITS WORD TO "SEND WORD" IF THE LOCATION IS VALID, SETS UP ALL CUSSES CONCERNING THE LOCATION
+R0688   SYMBOL IF ANY, RESTORES "NO LOC SYM" AS A GENERAL END PROCEDURE, RELEASES THE CARD FOR TRANSMISSION TO TAPE AS A
+R0690   SYPT OR SYLT RECORD COMPONENT, AND PROCEEDS TO THE UNIVERSAL CUSSING ROUTINE.
+
+ 0691   PROC WORD  TS           Z,SC          Z,X4          PRINT LIN           RELEASE LINE FOR PRINTING.
+ 06912             TS           N,SC,1        NO LOC SYM    SEND WORD      C    TEMPORARY CHANGE TO NO LOC SYM.
+ 06914             TX           PROC WORD     -             NO LOC SYM
+
+ 0692   NO WORD    NA, BIT 8    HEALTH        ONES          ZEQUALOC            BRANCH IF THERE IS NO LOCATION SYMBOL.
+ 0694              NA           EQUALOC       ZERO          HEALTH CD           BRANCH IF LOC SYM IS IN SYMBOL TABLE.
+
+ 0699   ZEQUALOC   TS           ZERO          EQUALOC       NO LOC SYM
+
+ 0702   HEALTH CQ  TN           EQUALOC       3             COMMON              RECOVER LOCATION SYMBOL PARAMETERS.
+ 0704              LA           CD8           COMMON +2     C,+2                BRANCH IF SYMBOL HEALTH IS C OR MORE.
+ 0706              SSL, B44T47  COMMON +2     15            NO LOC SYM -12      BRANCH ON HEALTHS 5 - B.
+ 0708              SWS, B38T48  CUSS LIST +7  16            Z,R5
+ 0709              TS, BIT 17   ONES          CUSS LIST +7  SYM CUSS 2     C    CUSS MULTIPLE DEFINITION.
+ 0711              SSL, B44T47  COMMON +2     15            HELTHS 8C -22       BRANCH ON HEALTHS C - G.
+
+ 07121             SS           ZERO          BIT 17        CUSS LIST +7        INHIBIT MULT. DEF. CUSS FOR HEALTHS F,G.
+ 0713   SYM CUSS 4 TS           Z,SC,2        -             SYM CUSS 2     C    SET UP LOCATION SYMBOL FOR CUSSING.
+
+ 0714   HEALTH 5   SWS, B38T48  CUSS LIST +10 32            Z,R5
+ 0715              TS, BIT 1    ONES          CUSS LIST +10 SYM CUSS 4          INDEFINABLY LEFTOVER.
+
+ 0716   NO LOC SYM TS           Z,SC          Z,X4          PRINT LIN           (CHANGED, RESTORED BY PROC WORD ENTRY.)
+ 0718              S, ETS       EQUALOC +1    ZX +2         PAG LOXIM           RECOVER LOC SYM ENTRY ADR, JOIN SETLOC.
+
+ 0720   HEALTH 7   SWS, B38T48  CUSS LIST +7  16            Z,R5
+ 0721              TS, BIT 17   ONES          CUSS LIST +7  SYM CUSS 4          MULTIPLE DEFINITION.
+
+ 0723   HELTHS 8C  SS           CUSS LIST +6  B38T48        Z,R5
+ 0724              TS, BIT 33   ONES          CUSS LIST +6  SYM CUSS 4          OVERSIZE LOCATION.
+
+ 0726   HELTHS 9D  SWS, B38T48  CUSS LIST +5  16            Z,R5
+ 0727              TS, BIT 17   ONES          CUSS LIST +5  SYM CUSS 4          MEMORY TYPE ERROR.
+
+ 0729   HELTHS BE  SWS, B38T48  CUSS LIST +6  32            Z,R5
+ 0730              TS, BIT 1    ONES          CUSS LIST +6  SYM CUSS 4          CONFLICT OF LOCATION CONTENTS.
+
+ 0732   HEALTH F   SWS, B38T48  CUSS LIST +8  32            Z,R5
+ 0733              TS, BIT 1    ONES          CUSS LIST +8  SYM CUSS 4 -1       MULTIPLE ERRORS.
+
+ 0735   HEALTH G   SS           CUSS LIST +8  B38T48        Z,R5
+ 0736              TS, BIT 33   ONES          CUSS LIST +8  SYM CUSS 4 -1       MISCELLANEOUS TROUBLE.
 
 # Page 283
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  19        PAGE  19
