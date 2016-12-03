@@ -31,10 +31,11 @@ if len(sys.argv) < 5:
 	print '      a multiplier for the DPI.  (By which I mean the true DPI of the physical'
 	print '      page, and not the value for the DPI embedded in the graphics files, which'
 	print '      may not be accurate.)'
-	print 'NODASHES (optional, default 0) comments which are nothing more than rows of dashes.'
-	print '      This is here because sometimes Tesseract simply refuses to create bounding boxes'
-	print '      for this case.  If nodashes==1, that is the only effect it has.  If nodashes>1,'
-	print '      it actually removes all dashes.'
+	print 'NODASHES (optional, default 0) if > 1, removes comments which are nothing more'
+	print '      than rows of dashes or underlines.  This is needed because sometimes Tesseract'
+	print '      simply refuses to create bounding boxes for such lines.  If nodashes>=1,'
+	print '      then all dashes (not just rows consisting exclusively of them) are removed,'
+	print '      while if nodashes>=2 then all underlines are removed as well.'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -157,6 +158,7 @@ lines = []
 currentPage = -1
 blankLinePattern = re.compile(r"\A\s*\Z")
 allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
+allUnderlinesPattern = re.compile(r"\A\s*[_][_\s]*\Z")
 for line in file:
 	if line.lower().startswith("## page "):
 		fields = line.split()
@@ -174,8 +176,12 @@ for line in file:
 		continue
 	if nodashes >= 1 and re.match(allDashesPattern, comment):
 		continue
+	if nodashes >= 1 and re.match(allUnderlinesPattern, comment):
+		continue
 	if nodashes >= 2:
 		comment = comment.replace("-", "")
+	if nodashes >= 3:
+		comment = comment.replace("_", "")
 	lines.append(comment)
 file.close()
 
