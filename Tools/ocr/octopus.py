@@ -31,6 +31,8 @@ import sys
 import math
 import argparse
 import functools
+import PIL
+from pytesseract import image_to_string
 
 parser = argparse.ArgumentParser(description='Prepare octal pages of AGC program listings for OCR')
 parser.add_argument('input_file', help="Input image path")
@@ -140,10 +142,11 @@ if args.comments:
     leftmost_box = cv2.boundingRect(contours[0])
     if leftmost_box[0] == 0 or leftmost_box[2] < 80:
         # This is very likely a column of holes. Crop it out.
-        target_image = result[:,leftmost_box[0]+leftmost_box[2]:]
+        target_image_raw = result[:,leftmost_box[0]+leftmost_box[2]:]
         thresh = thresh[:,leftmost_box[0]+leftmost_box[2]:]
     else:
-        target_image = result
+        target_image_raw = result
+    _,target_image = cv2.threshold(target_image_raw, 180, 255, cv2.THRESH_BINARY)
 
     # Create a structuring element to dilate to the right (trying to preserve exact leftmost pixels)
     element = np.zeros((1,65), np.uint8)
@@ -192,6 +195,7 @@ if args.comments:
         header_box[2] = rightmost_point - header_box[0]
         header_box[3] = lowest_point - header_box[1]
 
+    print(header_box)
     # Calculate the average column width for rough cropping
     # TODO: Possibly make the cropping smarter
     header_width = header_box[2]-33*5
@@ -205,6 +209,7 @@ if args.comments:
     line_y = header_box[1]
     line_num = 0 # current estimated line number
     in_comment = True # whether or not we're inside a comment
+    const_second_word = False
     crop_top = 0
 
     for i,c in enumerate(contours):
@@ -226,6 +231,7 @@ if args.comments:
             line_num += 1
             line_y = y
 
+            const_second_word = False
             if in_comment and x_delta > column_width*.5:
                 # This line does not start with a card type indicator, meaning it's code or something else.
                 in_comment = False
@@ -233,12 +239,22 @@ if args.comments:
                 # This line starts with a card type indicator, so it's a comment.
                 in_comment = True
 
+                # For YUL listings, a card marker following a non-comment line might possibly be a C, indicating
+                # the second word of a multi-word pseudo op (2DEC, 2CADR, etc.). Try to determine whether or not
+                # we've got such a line.
+                if in_comment and line_num > 2:
+                    pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*10])
+                    txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP')
+                    if txt[0] == 'C':
+                        const_second_word = True
+                
+
         # If the y position of this box is less than line_y, mark it as the new highest point on the line
         if y < line_y:
             line_y = y
 
         # Draw this contour if we're in a comment and beyond the headers
-        if in_comment and line_num > 2:
+        if in_comment and not const_second_word and line_num > 2:
             cv2.drawContours(mask, [c], -1, 0, -1)
 
     # We also want everything from column 80 on
