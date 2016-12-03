@@ -135,7 +135,7 @@ if args.no_crop:
 if args.comments:
     # First we need to remove holes along the left side. Find them by dilating vertically and looking for
     # a wide-enough left column
-    hole_vdilated = cv2.dilate(~result, np.ones((121,7), np.uint8), iterations=1)
+    hole_vdilated = cv2.dilate(~result, np.ones((121,21), np.uint8), iterations=1)
     cimg, contours, hierarchy = cv2.findContours(hole_vdilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     contours.sort(key=lambda c: cv2.boundingRect(c)[0])
 
