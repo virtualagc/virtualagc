@@ -19,7 +19,7 @@ from wand.color import Color
 # Parse command-line arguments
 if len(sys.argv) < 5:
 	print 'Usage:'
-	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE [SCALE]'
+	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE [SCALE [NODASHES]]'
 	print 'BWINPUTIMAGE is the pathname to the B&W cropped image with just the comments.'
 	print 'OUTPUTIMAGE is the pathname at which to write the composite proofing image.'
 	print 'PAGENUMBER is the page number within the original scanned assembly listing.'
@@ -31,6 +31,10 @@ if len(sys.argv) < 5:
 	print '      a multiplier for the DPI.  (By which I mean the true DPI of the physical'
 	print '      page, and not the value for the DPI embedded in the graphics files, which'
 	print '      may not be accurate.)'
+	print 'NODASHES (optional, default 0) comments which are nothing more than rows of dashes.'
+	print '      This is here because sometimes Tesseract simply refuses to create bounding boxes'
+	print '      for this case.  If nodashes==1, that is the only effect it has.  If nodashes>1,'
+	print '      it actually removes all dashes.'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -41,6 +45,10 @@ if len(sys.argv) >= 6:
 	scale = float(sys.argv[5])
 else:
 	scale = 1.0
+if len(sys.argv) >= 7:
+	nodashes = int(sys.argv[6])
+else:
+	nodashes = 0
 
 # Read in the input image ... i.e., the B&W octal page.
 img = Image(filename=backgroundImage)
@@ -148,6 +156,7 @@ file = open (agcSourceFilename, 'r')
 lines = []
 currentPage = -1
 blankLinePattern = re.compile(r"\A\s*\Z")
+allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
 for line in file:
 	if line.lower().startswith("## page "):
 		fields = line.split()
@@ -163,6 +172,10 @@ for line in file:
 	comment = parts[2]
 	if re.match(blankLinePattern, comment): # And if the comment itself is blank, ignore the line too.
 		continue
+	if nodashes >= 1 and re.match(allDashesPattern, comment):
+		continue
+	if nodashes >= 2:
+		comment = comment.replace("-", "")
 	lines.append(comment)
 file.close()
 
