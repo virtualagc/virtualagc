@@ -150,7 +150,7 @@ if args.comments:
     for i in range(int(element.shape[1]/2)+1):
         element[0,i] = 1
 
-    # Do the dilation. This should bleed together the header.
+    # Do the dilation. This should bleed together most of the header.
     dilated = cv2.dilate(~target_image, element, iterations=5)
 
     # Locate the top header line, which stretches all 120 columns and thus both bounds and
@@ -172,11 +172,25 @@ if args.comments:
     # Locate the header in the boxes. It'll be towards the front (hopefully exactly the front), and
     # pretty wide
     header_box = None
-    for c in contours:
+    for i,c in enumerate(contours):
         box = cv2.boundingRect(c)
         if (box[2] > 1200):
-            header_box = box
+            header_start = i
+            header_box = list(box)
             break
+
+    # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
+    # dilation above doesn't quite bleed everything together)
+    for c in contours[i+1:]:
+        box = cv2.boundingRect(c)
+        if abs(header_box[0]-box[0]) <= 50:
+            break
+        rightmost_point = max(header_box[0]+header_box[2], box[0]+box[2])
+        lowest_point = max(header_box[1]+header_box[3], box[1]+box[3])
+        header_box[0] = min(header_box[0], box[0])
+        header_box[1] = min(header_box[1], box[1])
+        header_box[2] = rightmost_point - header_box[0]
+        header_box[3] = lowest_point - header_box[1]
 
     # Calculate the average column width for rough cropping
     # TODO: Possibly make the cropping smarter
