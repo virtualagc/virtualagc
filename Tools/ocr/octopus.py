@@ -139,14 +139,21 @@ if args.comments:
     cimg, contours, hierarchy = cv2.findContours(hole_vdilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     contours.sort(key=lambda c: cv2.boundingRect(c)[0])
 
+    left_lim = 0
+    right_lim = result.shape[1]
+
     leftmost_box = cv2.boundingRect(contours[0])
     if leftmost_box[0] == 0 or leftmost_box[2] < 80:
         # This is very likely a column of holes. Crop it out.
-        target_image_raw = result[:,leftmost_box[0]+leftmost_box[2]:]
-        thresh = thresh[:,leftmost_box[0]+leftmost_box[2]:]
-    else:
-        target_image_raw = result
-    _,target_image = cv2.threshold(target_image_raw, 180, 255, cv2.THRESH_BINARY)
+        left_lim = leftmost_box[0]+leftmost_box[2]
+
+    rightmost_box = cv2.boundingRect(contours[-1])
+    if rightmost_box[0]+rightmost_box[2] >= 0 or rightmost_box[2] < 80:
+        # This is very likely a column of holes. Crop it out.
+        right_lim = rightmost_box[0]
+
+    target_image = result[:,left_lim:right_lim]
+    thresh = thresh[:,left_lim:right_lim]
 
     # Create a structuring element to dilate to the right (trying to preserve exact leftmost pixels)
     element = np.zeros((1,65), np.uint8)
