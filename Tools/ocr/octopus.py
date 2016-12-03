@@ -156,7 +156,7 @@ if args.comments:
     thresh = thresh[:,left_lim:right_lim]
 
     # Create a structuring element to dilate to the right (trying to preserve exact leftmost pixels)
-    element = np.zeros((1,65), np.uint8)
+    element = np.zeros((1,15), np.uint8)
     for i in range(int(element.shape[1]/2)+1):
         element[0,i] = 1
 
@@ -165,6 +165,9 @@ if args.comments:
 
     # Locate the top header line, which stretches all 120 columns and thus both bounds and
     # provides reference to where on the page the various columns begin
+    cv2.imshow('image', dilated)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     cimg, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
     # Sort the contours by "line", considering lines breaks to be about 25 characters apart.
@@ -191,7 +194,7 @@ if args.comments:
 
     # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
     # dilation above doesn't quite bleed everything together)
-    for c in contours[i+1:]:
+    for c in contours[header_start+1:]:
         box = cv2.boundingRect(c)
         if abs(header_box[0]-box[0]) <= 50:
             break
@@ -202,10 +205,9 @@ if args.comments:
         header_box[2] = rightmost_point - header_box[0]
         header_box[3] = lowest_point - header_box[1]
 
-    print(header_box)
     # Calculate the average column width for rough cropping
     # TODO: Possibly make the cropping smarter
-    header_width = header_box[2]-33*5
+    header_width = header_box[2]-7*5
     column_width = int(header_width/120)
 
     # Create a mask onto which we'll draw the contours of words and lines we want to let through
@@ -276,31 +278,32 @@ if args.comments:
     comments_only = target_image + mask
     inside_header = comments_only[crop_top-20:, left_limit-20:header_box[0]+header_width+20]
 
-    # Look for contours in the imge to find the final limits
-    _,thresh2 = cv2.threshold(inside_header, 180, 255, cv2.THRESH_BINARY)
-    dilated2 = cv2.dilate(~thresh2, np.ones((5,5), np.uint8), iterations=4)
-    cimg, contours, hierarchy = cv2.findContours(dilated2, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    # # Look for contours in the imge to find the final limits
+    # _,thresh2 = cv2.threshold(inside_header, 180, 255, cv2.THRESH_BINARY)
+    # dilated2 = cv2.dilate(~thresh2, np.ones((5,5), np.uint8), iterations=4)
+    # cimg, contours, hierarchy = cv2.findContours(dilated2, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     
-    xmin = 99999
-    ymin = 99999
-    xmax = 0
-    ymax = 0
+    # xmin = 99999
+    # ymin = 99999
+    # xmax = 0
+    # ymax = 0
 
-    for c in contours:
-        x,y,w,h = cv2.boundingRect(c)
-        if x < xmin:
-            xmin = x
-        if y < ymin:
-            ymin = y
-        if x+w > xmax:
-            xmax = x+w
-        if y+h > ymax:
-            ymax = y+h
+    # for c in contours:
+    #     x,y,w,h = cv2.boundingRect(c)
+    #     if x < xmin:
+    #         xmin = x
+    #     if y < ymin:
+    #         ymin = y
+    #     if x+w > xmax:
+    #         xmax = x+w
+    #     if y+h > ymax:
+    #         ymax = y+h
 
-    if xmin < xmax:
-        final_image = inside_header[max(ymin-20,0):ymax+20, max(xmin-20,0):xmax+20]
-    else:
-        final_image = inside_header
+    # if xmin < xmax:
+    #     final_image = inside_header[max(ymin-20,0):ymax+20, max(xmin-20,0):xmax+20]
+    # else:
+    #     final_image = inside_header
+    final_image = inside_header
 
 
 else:
