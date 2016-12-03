@@ -70,21 +70,17 @@ elif args.luminary69:
     # Difference the original L channel with the thickened lines (which is inverted)
     diff = blurred + thickend_lines
     thresh = ~cv2.inRange(diff, 30, 225) # Reject pixels too black or too white
-elif args.comanche55 or argc.luminary99:
-    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+elif args.comanche55 or args.luminary99:
+    blurred = cv2.GaussianBlur(l_channel, (3,3), 0)
     # Isolate the lines by eroding very strongly horizontally
     lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
-    # Beef them up a bit by vertically dilating
-    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
     # Difference the original L channel with the thickened lines (which is inverted)
-    diff = blurred + thickend_lines
-    thresh = ~cv2.inRange(diff, 50, 245) # Reject pixels too black or too white
+    diff = blurred + lines_only
+    # Blur a bit more then threshold the image
+    diff = cv2.GaussianBlur(diff, (7,7), 0)
+    thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 4)
 else:
     raise RuntimeError("Unknown program type selected")
-
-if args.no_crop:
-    cv2.imwrite(args.output_file, thresh)
-    sys.exit(0)
 
 # Eliminate random flecks. We do this by finding all the contours in the image
 # and taking a look at their relative locations and size. We'll be building up
@@ -131,6 +127,10 @@ for c in contours:
 
 # Removed all the masked pixels from our image
 result = thresh + ~mask
+
+if args.no_crop:
+    cv2.imwrite(args.output_file, result)
+    sys.exit(0)
 
 if args.comments:
     # First we need to remove holes along the left side. Find them by dilating vertically and looking for
