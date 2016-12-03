@@ -242,10 +242,10 @@ if args.comments:
                 # For YUL listings, a card marker following a non-comment line might possibly be a C, indicating
                 # the second word of a multi-word pseudo op (2DEC, 2CADR, etc.). Try to determine whether or not
                 # we've got such a line.
-                if in_comment and line_num > 2:
-                    pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*10])
-                    txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP')
-                    if txt[0] == 'C':
+                if line_num > 2:
+                    pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
+                    txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
+                    if txt[0] == 'C' or txt[0] == '0':
                         const_second_word = True
                 
 
