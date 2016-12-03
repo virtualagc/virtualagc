@@ -148,7 +148,7 @@ if args.comments:
         left_lim = leftmost_box[0]+leftmost_box[2]
 
     rightmost_box = cv2.boundingRect(contours[-1])
-    if rightmost_box[0]+rightmost_box[2] >= 0 or rightmost_box[2] < 80:
+    if rightmost_box[0]+rightmost_box[2] >= right_lim or rightmost_box[2] < 80:
         # This is very likely a column of holes. Crop it out.
         right_lim = rightmost_box[0]
 
