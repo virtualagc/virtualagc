@@ -103,6 +103,8 @@ for box in file:
 	# it unproofable.  So take care in adjusting this.
 	if boxWidth > 4 * scale and boxWidth < 9 * scale and boxHeight > 25 * scale and boxHeight < 32 * scale:
 		addIt = 1 # For parentheses.
+	if boxWidth > 5 * scale and boxWidth < 9 * scale and boxHeight > 20 * scale and boxHeight < 32 * scale:
+		addIt = 1 # For T's with cut-off tops.
 	if boxHeight > 3 * scale and boxHeight < 10 * scale and boxWidth > 16 * scale and boxWidth < 24 * scale:
 		addIt = 1 # For minus signs.
 	if addIt:
