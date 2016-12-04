@@ -165,9 +165,6 @@ if args.comments:
 
     # Locate the top header line, which stretches all 120 columns and thus both bounds and
     # provides reference to where on the page the various columns begin
-    cv2.imshow('image', dilated)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
     cimg, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
     # Sort the contours by "line", considering lines breaks to be about 25 characters apart.
