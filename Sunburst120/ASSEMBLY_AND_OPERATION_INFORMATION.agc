@@ -13,6 +13,7 @@
 ##		2016-12-03 RSB	Used ProoferComments.py to check the comments.  
 ##				Fixed 30 errors (in 11 pages, so nearly 3 errors
 ##				per page).
+##		2016-12-04 RSB	Fixed yet another typo, with an improved ProoferComments.py.
 
 ## Page 1
 
@@ -59,7 +60,7 @@
 # OPTIMUM PRELAUNCH ALIGNMENT CALIBRATION
 # DAP INTERFACE SUBROUTINES
 # T6-RUPT PROGRAMS
-# DAPIDLER PROGRAMS
+# DAPIDLER PROGRAM
 # P-AXIS REACTION CONTROL SYSTEM AUTOPILOT
 # Q,R-AXES REACTION CONTROL SYSTEM AUTOPILOT
 # Q,R-AXES JET SELECT AND FAILURE CONTROL LOGIC
