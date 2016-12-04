@@ -10,16 +10,19 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-05 RSB  Finished transcription.
 ##               2016-10-30 MAS  A bunch of small corrections, and some missing lines.
-##		 2016-11-01 RSB	More typos.
+##		 2016-11-01 RSB	 More typos.
+##		 2016-12-03 RSB	 Fixed various typos using octopus/ProoferComments, but
+##				 there are still a couple of pages that are problematic
+##				 with respect to octopus, so the process isn't completed.
 
 ## Page 88
                 BANK            01                              
                 EBANK=          LST1                            
 
 SLAP1           INHINT                                          # FRESH START.  COMES HERE FROM PINBALL.
-                TC              STARTSUB                        # SUBROUTINE DOES MOST OF THE WORK
+                TC              STARTSUB                        # SUBROUTINE DOES MOST OF THE WORK.
 
-STARTSW         TCF             GOON                            # PATCH FOR SIMULATION
+STARTSW         TCF             GOON                            # PATCH FOR SIMULATIONS
 
 STARTSIM        CAF             BIT14                           
 
@@ -28,20 +31,20 @@ STARTSIM        CAF             BIT14
                 2CADR           BEGIN206                        
 
 GOON            CAF             BIT15                           # TURN OFF ALL DSPTAB +11D LAMPS ONLY ON
-                TS              DSPTAB          +11D            # REQUESTED FRESH START
+                TS              DSPTAB          +11D            # REQUESTED FRESH START.
 
                 CS              ZERO                            
                 TS              RSTRTWRD                        
                 TS              THRUST                          # INITIALIZE THROTTLE COUNTER.
                 TS              DAPOFFDT                        # OVERWRITE IN ERASABLE LOAD IF DESIRED.
-                TS              JETRESET                        # PROPERTY OF RCSMONIT
+                TS              JETRESET                        # PROPERTY OF RCSMONIT.
 
                 CA              EBANK5                          
                 TS              L                               
                 LXCH            EBANK                           
                 EBANK=          ABDELV                          
                 CA              ZERO                            
-                TS              ABDELV                          # FOR DAP INITIALIZATON
+                TS              ABDELV                          # FOR DAP INITIALIZATION
                 TS              ABDELV          +1              
                 EBANK=          LST1                            
                 LXCH            EBANK                           
@@ -64,7 +67,7 @@ GOON            CAF             BIT15                           # TURN OFF ALL D
                 TS              SLOSHCTR                        # BE REPLACED VIA ERASABLE LOAD.
 
 ## Page 89
-DOFSTART        CS              ZERO                            # MAKE ALL MTIMER/MPHASE PAIRS AVAILABLE
+DOFSTART        CS              ZERO                            # MAKE ALL MTIMER/MPHASE PAIRS AVAILABLE.
                 TS              MTIMER4                         
                 TS              MTIMER3                         
                 TS              MTIMER2                         
@@ -117,7 +120,7 @@ INITSW          TS              L
 ## Page 90
                 EXTEND                                          # SETTING T5RUPT FOR SETIDLER PROGRAM
                 DCA             SETADR                          # THE SETIDLER PROGRAM ASSURES 1 SECOND
-                DXCH            T5ADR                           # DELAY BEFORE THE DAPIDLER BEING.
+                DXCH            T5ADR                           # DELAY BEFORE THE DAPIDLER BEGINS.
 
                 CAF             LNORMT4                         
                 TS              T4LOC                           
@@ -132,7 +135,7 @@ INITSW          TS              L
                 TS              DNTMGOTO                        
 
                 CA              SETCDULM                        
-                TS              CDULMIT                         # OVERWRITE IN ERASABLE LOAD IF DESIRED
+                TS              CDULMIT                         # OVERWRITE IN ERASABLE LOAD IF DESIRED.
 
                 CA              IDNCDUN                         
                 TS              DNCDUN                          # OVERWRITE IN ERASABLE LOAD IF DESIRED.
@@ -184,14 +187,14 @@ MR.CLEAN        CAF             ELEVEN                          # INITIALIZE PHA
 GOPROG          INCR            REDOCTR                         # ANOTHER RESTART.
 
                 LXCH            Q                               
-                DXCH            RSBB&Q                          # SAVE BBANK & Q FOR RESTART ANALYSIS
+                DXCH            RSBB&Q                          # SAVE BBANK & Q FOR RESTART ANALYSIS.
 
                 TC              STARTSUB                        
 
                 CA              BIT15                           # TEST THE OSC FAIL BIT TO SEE IF WE HAVE
                 EXTEND                                          # HAD A POWER TRANSIENT.  IF SO, ATTEMPT
                 WAND            33                              # A RESTART.  IF NOT, CHECK THE PRESENT
-                EXTEND                                          # STATE OF AGC WARNING
+                EXTEND                                          # STATE OF AGC WARNING.
                 BZF             LIGHTSET                        
 
                 CA              BIT14                           # IF AGC WARNING ON (BIT = 0), DO A FRESH
@@ -285,7 +288,7 @@ PCLOOP          TS              MPAC            +5
                 DOUBLE                                          
                 EXTEND                                          
                 INDEX           A                               
-                DCA             -PHASE1                         # COMPLEMENT INTO A - DIRECT INTO L.
+                DCA             -PHASE1                         # COMPLEMENT INTO A, DIRECT INTO L.
                 EXTEND                                          
                 RXOR            L                               # RESULT MUST BE -0 FOR AGREEMENT.
                 CCS             A                               
@@ -351,7 +354,7 @@ STARTSUB        CA              ZERO
                 WRITE           6                               
 
                 EXTEND                                          
-                WRITE           12                              # TURN OFF TRIM GIMBAL
+                WRITE           12                              # TURN OFF TRIM GIMBAL.
 
                 CA              POSMAX                          
                 TS              TIME3                           # 37777 TO TIME3.
@@ -372,7 +375,7 @@ STARTSB2        CAF             ZERO                            # ENTRY FROM P00
                 EXTEND                                          
                 WAND            12                              
 
-                CAF             PRIO34                          # ENABLE INTERRUPTS
+                CAF             PRIO34                          # ENABLE INTERRUPTS.
                 EXTEND                                          
                 WRITE           13                              
 
@@ -535,7 +538,7 @@ SETADR          2CADR           SETIDLE
                 BLOCK           2                               
 
 P00H            TC              POSTJUMP                        
-                CADR            P00H2                           # DO A PARTIAL FRESH START
+                CADR            P00H2                           # A PARTIAL FRESH START.
 
 
                 BANK            01                              
