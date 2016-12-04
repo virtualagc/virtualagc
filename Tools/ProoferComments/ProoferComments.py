@@ -41,9 +41,15 @@ if len(sys.argv) < 5:
 	sys.exit()
 
 backgroundImage = sys.argv[1]
+if not os.path.isfile(backgroundImage):
+	print "Error: Input image file", backgroundImage, "does not exist"
+	sys.exit(1)
 outImage = sys.argv[2]
 pageNumber = int(sys.argv[3])
 agcSourceFilename = sys.argv[4]
+if not os.path.isfile(agcSourceFilename):
+	print "Error: Input source file", agcSourceFilename, "does not exist"
+	sys.exit(1)
 agcSourceDirectory = os.path.split(agcSourceFilename)[0]
 if len(sys.argv) >= 6:
 	scale = float(sys.argv[5])
