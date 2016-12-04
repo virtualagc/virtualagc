@@ -142,15 +142,21 @@ if args.comments:
     left_lim = 0
     right_lim = result.shape[1]
 
-    leftmost_box = cv2.boundingRect(contours[0])
-    if leftmost_box[0] == 0 or leftmost_box[2] < 80:
-        # This is very likely a column of holes. Crop it out.
-        left_lim = leftmost_box[0]+leftmost_box[2]
+    for c in contours:
+        box = cv2.boundingRect(c)
+        if box[0] == 0 or box[2] < 80:
+            # This is very likely a column of holes. Crop it out.
+            left_lim = box[0]+box[2]
+        else:
+            break
 
-    rightmost_box = cv2.boundingRect(contours[-1])
-    if rightmost_box[0]+rightmost_box[2] >= right_lim or rightmost_box[2] < 80:
-        # This is very likely a column of holes. Crop it out.
-        right_lim = rightmost_box[0]
+    for c in reversed(contours):
+        box = cv2.boundingRect(c)
+        if box[0]+box[2] >= right_lim-100:
+            # This is very likely a column of holes. Crop it out.
+            right_lim = box[0]
+        else:
+            break
 
     target_image = result[:,left_lim:right_lim]
     thresh = thresh[:,left_lim:right_lim]
@@ -162,6 +168,10 @@ if args.comments:
 
     # Do the dilation. This should bleed together most of the header.
     dilated = cv2.dilate(~target_image, element, iterations=5)
+    cv2.imshow('image', target_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    cv2.imwrite('line_dilated.png', dilated)
 
     # Locate the top header line, which stretches all 120 columns and thus both bounds and
     # provides reference to where on the page the various columns begin
@@ -220,6 +230,9 @@ if args.comments:
 
     for i,c in enumerate(contours):
         x,y,w,h = cv2.boundingRect(c)
+        if w < 10 and h < 10:
+            # Probably junk that's made it through
+            continue
 
         # Check the x-position of the bounding box. If it's sufficiently close to the start of
         # the previous line, we can use its x-position to determine whether or not we're still
