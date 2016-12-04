@@ -184,7 +184,8 @@ def readFile( filename ):
 			#print "Here '", includedFile, "'"
 			readFile(agcSourceDirectory + "/" + includedFile)
 			continue
-		if line.lower().startswith("## page "):
+		#if line.lower().startswith("## page "):
+		if re.match(r"## page [0-9].*", line.lower()):
 			fields = line.split()
 			currentPage = int(fields[2])
 			continue
