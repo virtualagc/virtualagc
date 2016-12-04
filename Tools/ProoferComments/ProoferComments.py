@@ -24,6 +24,8 @@ if len(sys.argv) < 5:
 	print 'OUTPUTIMAGE is the pathname at which to write the composite proofing image.'
 	print 'PAGENUMBER is the page number within the original scanned assembly listing.'
 	print 'AGCSOURCEFILE is the pathname of the AGC source file containing the PAGENUMBER.'
+	print '      The AGC-file inclusion directive $ is supported, so the top-level file'
+	print '      MAIN.agc can be used in order to make scripting easier.' 
 	print 'SCALE (optional, default 1.0) represents the resolution of the imagery, relative'
 	print '      to archive.org\'s scan of Luminary 210.  The process is not very sensitive'
 	print '      to this, but some imagery obtained by other means is significantly different'
@@ -42,6 +44,7 @@ backgroundImage = sys.argv[1]
 outImage = sys.argv[2]
 pageNumber = int(sys.argv[3])
 agcSourceFilename = sys.argv[4]
+agcSourceDirectory = os.path.split(agcSourceFilename)[0]
 if len(sys.argv) >= 6:
 	scale = float(sys.argv[5])
 else:
@@ -85,9 +88,14 @@ for box in file:
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
 	addIt = 0
-	if boxWidth > 8 * scale and boxHeight > 8 * scale and boxWidth < 28 * scale and boxHeight < 40 * scale:
+	if boxWidth > 8 * scale and boxHeight > 8 * scale and boxWidth < 28 * scale and boxHeight < 44 * scale:
 		addIt = 1 # For general characters.
-	if boxWidth > 4 * scale and boxWidth < 9 * scale and boxHeight > 16 * scale and boxHeight < 32 * scale:
+	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
+	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
+	# that some printouts (like Sunburst 120) liked to stick in as short vertical line segments next to
+	# characters like M or H.  And either one messes up the alignment of the remainder of the line, making
+	# it unproofable.  So take care in adjusting this.
+	if boxWidth > 4 * scale and boxWidth < 9 * scale and boxHeight > 25 * scale and boxHeight < 32 * scale:
 		addIt = 1 # For parentheses.
 	if boxHeight > 3 * scale and boxHeight < 10 * scale and boxWidth > 16 * scale and boxWidth < 24 * scale:
 		addIt = 1 # For minus signs.
@@ -153,37 +161,48 @@ if 0:
 		print "Width of spaces not estimated"
 
 # Read in the AGC source file.
-file = open (agcSourceFilename, 'r')
 lines = []
 currentPage = -1
 blankLinePattern = re.compile(r"\A\s*\Z")
 allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
 allUnderlinesPattern = re.compile(r"\A\s*[_][_\s]*\Z")
-for line in file:
-	if line.lower().startswith("## page "):
-		fields = line.split()
-		currentPage = int(fields[2])
-		continue
-	if currentPage > pageNumber:
-		break;
-	if currentPage < pageNumber:
-		continue
-	parts = line.partition("#") # Find the start of the comment, if any.
-	if parts[0] == line or parts[2].startswith("#"): # If no comment, or a ##-style comment, ignore the line.
-		continue
-	comment = parts[2]
-	if re.match(blankLinePattern, comment): # And if the comment itself is blank, ignore the line too.
-		continue
-	if nodashes >= 1 and re.match(allDashesPattern, comment):
-		continue
-	if nodashes >= 1 and re.match(allUnderlinesPattern, comment):
-		continue
-	if nodashes >= 2:
-		comment = comment.replace("-", "")
-	if nodashes >= 3:
-		comment = comment.replace("_", "")
-	lines.append(comment)
-file.close()
+def readFile( filename ):
+	"Reads an AGC source file, recursively if containing $ operators."
+	global lines, currentPage, pageNumber, blankLinePattern, allDashesPattern, allUnderlinesPattern, nodashes
+	#print "Reading file", filename
+	file = open (filename, 'r')
+	for rawline in file:
+		line = rawline.rstrip()
+		if line.startswith("$"):
+			includedFile = re.sub(r'^[$](.*[.]agc).*', r'\1', line)
+			#print "Here '", includedFile, "'"
+			readFile(agcSourceDirectory + "/" + includedFile)
+			continue
+		if line.lower().startswith("## page "):
+			fields = line.split()
+			currentPage = int(fields[2])
+			continue
+		if currentPage > pageNumber:
+			break;
+		if currentPage < pageNumber:
+			continue
+		parts = line.partition("#") # Find the start of the comment, if any.
+		if parts[0] == line or parts[2].startswith("#"): # If no comment, or a ##-style comment, ignore the line.
+			continue
+		comment = parts[2]
+		if re.match(blankLinePattern, comment): # And if the comment itself is blank, ignore the line too.
+			continue
+		if nodashes >= 1 and re.match(allDashesPattern, comment):
+			continue
+		if nodashes >= 1 and re.match(allUnderlinesPattern, comment):
+			continue
+		if nodashes >= 2:
+			comment = comment.replace("-", "")
+		if nodashes >= 3:
+			comment = comment.replace("_", "")
+		lines.append(comment)
+	file.close()
+readFile(agcSourceFilename)
 
 # At this point, we've populated lines[] with just the non-blank comments from,
 # the selected page, which is precisely what should appear in the box file as well.
@@ -229,8 +248,11 @@ boxIndex = 0
 draw.stroke_color = extraColor
 for row in range(0, len(lines)):
 	if boxIndex >= len(boxes):
-		#print 'Out of boxes in page, on row', row
-		top = boxes[boxIndex-1]['boxBottom']
+		if boxIndex < 1:
+			top = 0
+		else:
+			#print 'Out of boxes in page, on row', row
+			top = boxes[boxIndex-1]['boxBottom']
 		bottom = backgroundHeight
 		middle = backgroundWidth / 2
 		draw.line((middle,top), (middle,bottom))
