@@ -23,6 +23,7 @@
 ##				There were some additional fixes to whitespace and
 ##				##-style comments that I accidentally noticed
 ##				along the way.
+##		2016-12-04 RSB	Another typo discovered with an improved ProoferComments.py.
 
 ## Page 12
 
@@ -592,6 +593,7 @@ T6NEXTJT	ERASE	+2		# LIST OF JET POLICIES FOR JTLST PROGRAM
 DELAYCTR	ERASE			# COUNTER FOR MINIMUM IMPULSE USE OF RHC
 
 ## Page 26
+# ERASABLE ASSIGNMENTS FOR AVERAGE G INTEGRATOR:
 
 RN		ERASE	+5
 VN		ERASE	+5
