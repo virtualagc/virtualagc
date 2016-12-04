@@ -168,10 +168,6 @@ if args.comments:
 
     # Do the dilation. This should bleed together most of the header.
     dilated = cv2.dilate(~target_image, element, iterations=5)
-    cv2.imshow('image', target_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    cv2.imwrite('line_dilated.png', dilated)
 
     # Locate the top header line, which stretches all 120 columns and thus both bounds and
     # provides reference to where on the page the various columns begin
