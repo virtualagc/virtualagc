@@ -8,6 +8,7 @@
 # Pages:        265-331
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-03 JL   Transcribed pages 279-282.
+#               2016-12-05 JL   Transcribed pages 283-287.
 
 # Annotations:
 #
@@ -891,169 +892,252 @@ R0690   SYPT OR SYLT RECORD COMPONENT, AND PROCEEDS TO THE UNIVERSAL CUSSING ROU
 # Page 283
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  19        PAGE  19
 
- 0738
- 0739
- 0740
- 0741
- 0742
- 0743
- 0744
- 0745
- 0746
- 0747
- 0748
- 0749
- 0750
- 0751
- 0752
- 0753
- 0754
- 0755
- 0756
- 0757
- 0758
- 0759
- 0760
- 0761
- 0762
- 0763
- 0764
- 0765
- 0766
- 0767
- 0768
- 0769
- 0770
- 0771
- 0772
- 0773
- 0774
- 0775
- 0776
- 0777
- 0778
- 0779
- 0780
- 0781
- 0782
- 0783
- 0784
- 0785
- 0786
- 0787
- 0788
- 0789
- 0790
- 0791
- 0792
- 0793
+P0738              
+R0740   
+R0742   
+R0744   
+R0746   
+R0748   
+R0750   
+
+
+
+ 0751   SEND WORD  LA           ONES          LOCATION      N,SC,1         C    IMMEDIATE EXIT FOR BAD LOCATION.
+
+ 0753              SPS, B26T30  LOCATION      10,L          C,+1           C    CHOOSE FROM 256 SUBSTRAND USE BITS.
+ 0755              SWE, ONES    BIT 1         0             COMMON         C
+ 0756              SWE, D12     LOCATION      13            COMMON +1      C
+ 0757              WA           COMMON +1     L SUSTAB      Z,S3           C
+ 0758              SM           N,S3          COMMON        N,S3           C    MARK SUBSTRAND BIT ACCORD TO THIS LOCN.
+ 0760              NA           WORD          W BAD WORD    OD PARITY      C
+ 0761              TS           -             -             NEW BUF Q -1   C    BYPASS PARITY COMPUTATION FOR BAD WORD.
+
+ 0763   OD PARITY  TX           WORD          -             COMMON         C    PARITY COMPUTATION FOR GOOD WORD ONLY.
+ 0765              WA           WORD          WORD          WORD           C
+ 0766              SWE, ONES    COMMON        1             COMMON +1      C
+ 0767              HA           COMMON        COMMON +1     COMMON         C
+ 0768              HA           COMMON        WORD          COMMON         C
+ 0769              SWE, ONES    COMMON        3             COMMON +1      C
+ 0770              HA           COMMON        COMMON +1     COMMON         C
+ 0771              SWE, ONES    COMMON        6             COMMON +1      C
+ 0772              HA           COMMON        COMMON +1     COMMON         C
+ 0773              SWE, ONES    COMMON        12            COMMON +1      C
+ 0774              HA           COMMON        COMMON +1     COMMON         C
+ 0775              SWE, ONES    COMMON        24            COMMON +1      C
+ 0776              HA           COMMON        COMMON +1     COMMON         C
+ 0777              HA, ONE      COMMON        ONE           WORD           C    PUT PARITY BIT IN WORD.
+ 07781             TX           L OLD LINE    -             Z,X4           C
+ 0779              SS           ZERO          CHAR 6        4,6            C
+ 0780              SWS, BIT 35  WORD          12,L          4,6            C    SET PARITY BIT IN PRINT.
+ 07811             LA           BIT 1         WORD          C,+2           C
+ 0782              TS           ZERO          COMMON        FLAG CON -1    C    SET UP ZERO IF NO INTERNAL FLAG.
+ 0784              LA           B1B2          WORD          FLAG CON       C    BRANCH IF WORD IS A CONSTANT.
+ 0786              NA, BIT 3    WORD          ONES          C,+2           C
+ 07862             TS           PRET FLAG     COMMON        FLAG CON +1    C    SET UP EXTERNAL INTERPRETIVE FLAG.
+ 07864             TX           MISC FLAG     -             COMMON         C    SET UP EXTERNAL MISCELLANEOUS FLAG.
+ 07871             NA, CHAR1    CARD +2       BIT 1         C,+2           C    PUT CONSTANT FLAG ON NEGATIVE INSTRUCTN.
+ 0788   FLAG CON   TX           CONS FLAG     -             COMMON         C    SET UP EXTERNAL CONSTANT FLAG.
+ 0789              SS           COMMON        FLAG MASK     WORD           C    APPLY CHOSEN EXTERNAL FLAG TO WORD.
+
+ 07908             WA           SENT LOC      ONE           SENT LOC       C    ADVANCE CONTIGUITY CRITERION.
+ 0791   NEW BUF Q  TS           L WD BUFF     Z,R7          START BUF      C    SPECIAL NEW-BUFFER STATUS INITIALLY.
+
+ 07922             NA           PAGE NO       OLD PAGE      CHANG FWA      C    BRANCH IF PAGE NUMBER HAS CHANGED.
+
+ 0793   STORE WD   TS           WORD          N,R7,1        WB FULL Q      C
 
 # Page 284
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  20        PAGE  20
 
- 0805
- 0806
- 0807
- 0808
- 0809
- 0810
- 0811
- 0812
- 0813
- 0814
- 0815
- 0816
- 0817
- 0818
- 0819
- 0820
- 0821
- 0822
- 0823
- 0824
- 0825
- 0826
- 0827
- 0828
- 0829
- 0830
- 0831
- 0832
- 0833
- 0834
- 0835
- 0836
- 0837
+P0805   PROCEDURE TO BEGIN RE-USE OF BUFFER.
+
+ 0808   NEW BUFF   TS           L WD BUFF     Z,R7          PHI TAPE
+ 0809              WF,4         -             -             DISASTER            WAIT FOR RECORD TO FINISH WRITING.
+ 0811              TS           Z,S1          Z,SC          C,+1           C    SWITCH BACK TO COSEQUENCE MODE.
+
+ 0813   START BUF  TN           CAC2          1             N,R7,1         C    SET BANNER WORD, R7, AU2.
+ 08133             MT           ONES          44            N,AU2,1        C    FILL BUFFER WITH ONES INITIALLY.
+ 08135             LA           Z,AU2         WBUF FULL     C,-1           C
+
+ 08137             TS           UNSET NEW     NEW BUFF Q    CHANG FWA +3   C
+
+ 0814   CHANG FWA  WD           SENT LOC      ONE           COMMON         C
+ 08142             TX           L OLD FWA     -             Z,AU1          C
+ 08144             SWS, CAC2    COMMON        16,L          N,AU1          C    FINISH OLD FWA-LWA WORD WITH LWA.
+
+ 0815              TX           Z,R7          -             L OLD FWA      C    NOTE PLACE IN BUFFER.
+ 08152             SWE, ONE     SWITCH        45            OLD PAGE       C
+ 08153             DA           PAGE NO       OLD PAGE      OLD PAGE       C    PAGE NUMBER COMPENSATED FOR OWED HEADS.
+ 081532            TX           OLD PAGE      -             WORD PAGE      C
+ 081534            LA           WORD PAGE     DEC 999       C,+3           C
+ 081536            LA, C7T8     DEC 600       WORD PAGE     C,+2           C
+ 081538            WD           WORD PAGE     DEC 600       WORD PAGE      C    CONVERT HUNDREDS DIGIT TO HEXADECIMAL.
+ 08154             SWE, ONES    OLD PAGE      32,L          N,R7           C    PUT PAGE NUMBER IN FWA-LWA WORD.
+ 08156             SM           N,R7          LOCATION      N,R7,1         C    SET UP FWA AND LOCATION.
+ 0816              TS           LOCATION      SENT LOC      STORE WD       C    SET UP COMPARISON LOCATION.
+
+ 0817   WB FULL Q  EBA          COUNT PTR     ZERO          Z,X4           C
+ 08172             DA, D2T12    4,0           BIT 32        4,0            C    INCREMENT WORD COUNT FOR CURRENT RTNE.
+ 08174             SWS, D1T3    WORD PAGE     D,9,L         N,X4           C    KEEP PAGE OF LAST WORD IN REACH OF RTNE.
+ 0818              LA           Z,R7          WBUF FULL     N,SC,1         C    EXIT IF NOT AT OR NEAR END OF BUFFER.
+
+ 0822   SEND WBUF  WA           WBUF FULL     THREE         Z,R7           C    MAKE ALL RECORDS OF UNIFORM SIZE.
+ 0825              TX           L OLD FWA     -             Z,AU1          C
+ 0826              SWS, CAC2    SENT LOC      16,L          N,AU1          C    FINISH LAST FWA-LWA WD IN RECORD.
+ 0828              TX           L WD BUFF     -             Z,X4           C
+ 0829              CC           N,X4          -             N,R7           C
+ 0830              TS           Z,SC          Z,S1          C,+1                SWITCH TO SEQUENCE MODE.
+ 0832              TS           SET NEW       NEW BUF Q     PHI TAPE
+ 0833              WF,4         4,0           -             DISASTER
+ 0834              TS           Z,R0,1        -             N,S1                STEP COUNT OF WORD RECORDS AND EXIT.
+
+ 0836   SET NEW    TS           Z,SC          Z,S1          NEW BUFF       S
+ 0837   UNSET NEW  NA           SENT LOC      LOCATION      CHANG FWA      C
 
 # Page 285
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  21        PAGE  21
 
- 0840
- 0841
- 0842
- 0843
- 0844
- 0845
- 0846
- 0847
- 0848
- 0849
- 0850
- 0851
- 0852
- 0853
- 0854
- 0855
- 0856
- 0857
- 0858
- 0859
- 0860
- 0861
- 0862
- 0863
- 0864
- 0865
- 0866
- 0867
- 0868
- 0869
- 0870
- 0871
- 0872
- 0873
- 0874
- 0875
- 0876
- 0877
- 0878
- 0879
- 0880
- 0881
- 0882
- 0883
- 0884
- 0885
- 0886
- 0887
- 0888
- 0889
- 0890
- 0891
- 0892
- 0893
- 0894
- 0895
- 0896
- 0897
+P0838              PROCEDURE IN PASS 2 FOR SETLOC.  DOES NOT ACCEPT ANY CHANGES IN THE STATUS OF AN ADDRESS SYMBOL.
+
+ 0840   SETLOC     TS           ZERO          EQUALOC       EQUALS         C    MAYBE CUSS  D  ERROR.
+ 0842              SWS, BIT 17  HEALTH        9             CUSS LIST +14       MAYBE CUSS NONBLANK LOC FIELD.
+ 0844              SWS, BIT 33  HEALTH        23            CUSS LIST +1        MAYBE CUSS WRONG MEMORY TYPE.
+ 0846              SWS, BIT 33  HEALTH        20            CUSS LIST +2        MAYBE CUSS MEANINGLESS ADDRESS FIELD.
+ 0848              SWS, BIT 17  HEALTH        3             CUSS LIST +3        MAYBE CUSS ADDRESS SIZE ERROR.
+ 0850              NA, BIT 16   HEALTH        ONES          ASYM FITZ           BRANCH IF ADR SYM FITTED IN SYM TAB.
+
+ 0852              TS           Z,SC          Z,X4          ADR FIELD
+ 0853              NA, CHAR8    ADR WD        BLANKS        C,+2
+ 0854              SS           HEAD          CHAR8         ADR WD              GET ADDRESS SYMBOL (HEADED).
+ 0856              SWS, B38T48  CUSS LIST +5  32            Z,R5
+ 0857              TS           ADR WD        COMMON        SYM CUSS 2     C
+ 0858              TS, BIT 1    ONES          CUSS LIST +5  FORM LOC -1         CUSS FULLNESS OF SYMBOL TABLE.
+
+ 0860   ASYM FITZ  TS           Z,SC,1        Z,SH          FITS FITZ      C    RECOVER ADDRESS SYMBOL INFORMATION.
+ 0861              TS           ZERO          Z,X2          FORM LOCN           BRANCH IF NO ADDRESS SYMBOL.
+
+ 0865              NA, BIT11    HEALTH        ONES          C,+3
+ 0866              SS           CUSS LIST +14 B38T48        Z,R5                UNDEFINED SETLOC SYMBOL IS FATAL.
+ 0867              TS, BIT 33   ONES          CUSS LIST +14 SYM CUSS 2     C    CUSS NO DEFINE BY PASS 1.
+
+ 0869              NA, BIT 12   HEALTH        ONES          C,+3
+ 0870              SWS, B38T48  CUSS LIST +15 32            Z,R5
+ 0871              TS, BIT 1    ONES          CUSS LIST +15 SYM CUSS 2     C    CUSS NEAR DEFINE BY PASS 1.
+
+ 0873              SWE, D8T12   N,X2          16            COMMON +2           GET SYMBOL TABLE INFO ENTRY.
+ 0877              TX           RESTORQ       -             SYMB MOD Q
+ 0884              TS           Z,SC          Z,X5          SYMB FITS           MODIFY AND VISIT ADDRESS SYMBOL CUSSER.
+
+ 0885   RESTORQ    TS           SYMB MOD A    SYMB MOD Q    C,+1                EXECUTED EITHER HERE OR THERE.
+ 0887              NA, B11T12   HEALTH        ZERO          FORM LOCN -1        BRANCH IF NO DEFINTIION FROM PASS 1.
+ 08882             SWE, THREE   HEALTH        34            LOCATION
+ 08884             LA           LOCATION      ZERO          FORM LOCN           BRANCH IF NO ADDRESS FIELD PROBLEMS.
+ 0889              TS           ONES          LOCATION      C,+2                SIGNAL BAD LOCATION.
+
+ 0891   FORM LOCN  EX           HEALTH        CAC3          LOCATION            USE DETERMINED LOCATION.
+ 0893              TX           M PLOC IS     -             Z,CSC          C    PRINT LOC VALUE IF ANY.
+ 0895              TS           Z,SC          Z,X4          PRINT LIN
+
+ 08953  PAG LOXIM  SWE, ONE     SWITCH        45            EQUALOC +1          COMPENSATES IF PAGE HEADS ARE OWED.
+ 08956             DA           EQUALOC +1    PAGE NO       EQUALOC +1          PREPARE PAGE NUMBER OF DEFINE OR REFER.
+ 08957             LA           EQUALOC +1    DEC 999       C,+3                BRANCH IF NUMBER IS STORABLE AS IS.
+ 08958             LA, C7T8     DEC 600       EQUALOC +1    C,+2                BRANCH TO MODULATE A NUMBER OVER 1599.
+ 08959             WD           EQUALOC +1    DEC 600       EQUALOC +1          CONVERT HUNDREDS DIGIT TO HEXADECIMAL.
+ 0896              LA           EQUALOC       ZERO          C,+2                BRANCH IF NO LOC SYMBOL IN SYM TABLE.
+ 08963             SWS, D1T3    EQUALOC +1    D,9,L         2,1                 RECORD PAGE ON WHICH SYMBOL WAS DEFINED.
+ 08966             LA           L REF SYM     ZERO          SEND CUSS           BRANCH IF NO ADDRESS SYMBOL IN SYM TAB.
+ 0897              EBA          L REF SYM     ONE           Z,X2                POINT TO THRID WORD OF SYM TAB ENTRY.
+ 08973             TS           ZERO          L REF SYM     REFRENCE            CLEAR REF ANALYSIS FLAG, GO TO PAGE 22.
 
 # Page 286
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  22        PAGE  22
 
+P0898              PROCEDURE IN PASS 2 FOR IS,=,EQUALS CARDS.  PRINTS VALUE, CUSSES FOR FORMAT, VALUE, AND BOTH SYMBOLS.
+
+
+
+ 0903   EQUALS     SWS, BIT 17  HEALTH        8             CUSS LIST           MAYBE CUSS  D  ERROR.
+ 0905              SWS, BIT 17  HEALTH        9             CUSS LIST +15       MAYBE CUSS UNSYMBOLIC LOC FIELD.
+ 0907              HA           CUSS LIST +15 BIT 17        CUSS LIST +15       (THAT BIT INVERTED IN ERR/WARN CODE).
+ 0909              SWS, BIT 17  HEALTH        7             CUSS LIST +4        MAYBE CUSS PREDEFINITION FAILURE.
+ 0910              SWS, BIT 33  HEALTH        18            CUSS LIST +4        MAYBE CUSS LOC SYM NO FIT IN TABLE.
+ 0911              SWS, BIT 33  HEALTH        20            CUSS LIST +2        MAYBE CUSS MEANINGLESS ADDRESS FIELD.
+ 0913              SWS, BIT 17  HEALTH        3             CUSS LIST +3        MAYBE CUSS ADDRESS SIZE ERROR.
+ 0915              NA, BIT 17   CUSS LIST +15 ONES          C,+2                BRANCH IF LOCATION IS SYMBOLIC.
+ 0917              TS           ZERO          EQUALOC       C,+2                PROCLAIM ABSENCE OF LOCATION SYMBOL.
+
+ 0919              TS           Z,SC          Z,X6          LOC SYM 1           ANALYZE AND PRE-PROCESS LOCATION SYMBOL.
+ 0936              NA, BIT 16   HEALTH        ONES          ASYM FITS           BRANCH IF ADDRESS SYMBOL IS IN TABLE.
+
+ 0938              TS           Z,SC          Z,X4          ADR FIELD
+ 0939              NA, CHAR8    ADR WD        BLANKS        C,+2
+ 0940              SS           HEAD          CHAR 8        ADR WD              FORM HEADED SYMBOL.
+ 0942              SWS, B38T48  CUSS LIST +5  32            Z,R5
+ 0943              TS           ADR WD        COMMON        SYM CUSS 2     C    CUSS FULLNESS.
+ 0945              TS, BIT 1    ONES          CUSS LIST +3  FORM LOCN -1        GOI TO JOIN END OF SETLOC PROCEDURE.
+
+ 0947   FITS FITZ  SWE, CAC3    HEALTH        16            ETS            C
+ 09475             LA           ETS           ZERO          N,SH           C    EXIT TO N+1 IF NO ADDRESS SYMBOL.
+ 0948              EBA          ETS           B26T48        Z,X2           C    POINT TO SYMBOL IN TABLE WITH PLUS SPEC.
+ 0949              TS           N,X2,1        COMMON        FIND OR NO +1  C    FETCH INFORMATION WORD FOR SYMBOL.
+
+ 0950   ASYM FITS  TS           Z,SC,1        Z,SH          FITS FITZ      C    RECOVER ADDRESS SYMBOL INFORMATION.
+ 0952              TS           ZERO          Z,X2          FORM EQLC           BRANCH IF THERE IS NO ADDRESS SYMBOL.
+ 0954              TS           C,+1          SYMB MOD Q    RESTORQ -1     C    CALL FOR ADDRESS SYMBOL CUSSING.
+ 0956              TS           SYMB MOD A    SYMB MOD Q    C,+1                EXECUTED EITHER HERE OR THERE.
+
+ 0958   FORM EQLC  LA           EQUALOC       ZERO          FORM LOCN -1        EXIT WHEN NO LOCATION SYMBOL.
+ 0962              LA           BIT 1         EQUALOC +1    C,+2                BRANCH IF SYMBOL IS DEFINED.
+ 0964              TS           ONES          LOCATION      C,+2                SHOW LACK OF LOCATION VALUE.
+ 0966              EX           EQUALOC +2    CAC3          LOCATION
+ 0968              TX           M PLOC IS     -             Z,CSC          C    PRINT LOCATION VALUE.
+ 0970              TN           EQUALOC       3             COMMON              MOVE LOCATION SYMBOL QUANTITIES FOR
+ 0972              LA           5 D8          EQUALOC +2    HEALTH CQ           CUSSING BY PROC WORD, DONE FOR 5 THRU G.
+
+ 0974              SSL, B44T47  COMMON +2     15            C,-1                SELECT LOCAL CUSSING PROCEDURE ON 1 - 4.
 
 # Page 287
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  23        PAGE  23
 
+P09751  DISPOSITION OF EQUALS CARD LOCATION SYMBOL HEALTH STATES.
+
+ 0976   HEALTH 1   SWS, B38T48  CUSS LIST +9  16            Z,R5
+ 0978              TS, BIT17    ONES          CUSS LIST +9  SYM CUSS 4          NEARLY DEFINED BY EQUALS.
+
+ 0980   HEALTH 2   SWS, B38T48  CUSS LIST +10 16            Z,R5
+ 0982              TS, BIT17    ONES          CUSS LIST +10 SYM CUSS 4          MULTIPLY DEFINED INCLUDING NEARLY BY =.
+
+ 0984   HEALTH 3   TS           Z,SC          Z,X4          PRINT LIN
+ 0985              S, ETS       EQUALOC +1    ZX +2         PAG LOXIM           DEFINED BY EQUALS (NO CUSS).
+
+ 0987   HEALTH 4   SS           CUSS LIST +10 B38T48        Z,R5
+ 0988              TS, BIT33    ONES          CUSS LIST +10 SYM CUSS 4          MULTIPLY DEFINED INCLUDING BY EQUALS.
+
+
+
+R0990   CONTINUATION OF PAG LOXIM.  COUNT NUMBER OF REFERENCES TO EACH SYMBOL AND KEEP A RECORD OF 1ST AND LAST PAGES.
+R0991   IN 2ND AND 3RD WORDS OF PRINTLINE, GIVE SERIAL NO. OF REFERENCE AND PAGE OF LAST REFERENCE AS REF NNN LAST PPP.
+
+ 09915  REFRENCE   TX           L OLD LINE    -             Z,X3
+ 0992              NA, C7T8     2,0           ZERO          C,+3                BRANCH IF THIS IS NOT THE FIRST REF.
+ 0994              SWS,DECALFM1 EQUALOC +1    D,6,L         N,X2                RECORD PAGE NUMBER OF FIRST REFERENCE.
+ 0996              TS           -             -             REF SERNO -1
+
+ 0997   REF SUPP Q NA, BIT44    SWITCH        ONES          REF SERNO           BRANCH IF DOING A SUPPRESSED SUBROUTINE.
+ 0998              SWE,DECALFM1 N,X2          D,3,L         ARG 1
+ 1000              DA           ZERO          ARG 1         ARG 1               CONVERT HEX HUNDREDS DIGIT TO DECIMAL.
+ 1002              TS           W LAST        3,3           P2 D2A LZS     C
+ 1004              SWS, C5T8    ARG 1         A,2           3,3                 SET IN PRINT PAGE OF LAST REF IN ALPHA.
+ 1006              SWS, B ADRES EQUALOC +1    D,3,L         N,X2                RECORD PAGE NUMBER OF LATEST REFERENCE.
+
+ 1008   REF SERNO  TX           REF 1XXX      -             3,2                 TENTATIVELY, SET UP "REF >1K".
+ 1010              LA, C7T8     DEC 999       2,0           SEND CUSS           IF OVER 999 REFERENCES, LEAVE IT THERE.
+ 1012              DA, C7T8     2,0           ONE           2,0                 COUNT UP REFERENCES TO EACH SYMBOL.
+ 1014              SWE,DECALFM1 N,X2          D,6,L         ARG 1
+ 1016              TS, C5T8     W BAD WORD    ARG 1         P2 D2A LZS     C    MAKE BITS 25-28 = 1101 TO BECOME BLANK.
+ 1020              SWS, C5T8    ARG 1         A,1           3,2                 SET IN PRINT SERIAL NO. OF REF IN ALPHA.
+
+ 1024   SEND CUSS  TS           L CUSSER      Z,SC          SEND SYPT      C    RELEASE CARD FOR TAPE AND GO TO CUSS.
 
 # Page 288
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  24        PAGE  24
