@@ -140,11 +140,13 @@ if args.comments:
     contours.sort(key=lambda c: cv2.boundingRect(c)[0])
 
     left_lim = 0
-    right_lim = result.shape[1]
+    right_edge = result.shape[1]
+    right_lim = right_edge
 
     for c in contours:
         box = cv2.boundingRect(c)
-        if box[0] == 0 or box[2] < 80:
+        print(box, left_lim)
+        if box[0] <= 1 or (box[0] <= 80 and box[2] < 80):
             # This is very likely a column of holes. Crop it out.
             left_lim = box[0]+box[2]
         else:
@@ -152,7 +154,7 @@ if args.comments:
 
     for c in reversed(contours):
         box = cv2.boundingRect(c)
-        if box[0]+box[2] >= right_lim-100:
+        if box[0]+box[2] >= right_edge-100:
             # This is very likely a column of holes. Crop it out.
             right_lim = box[0]
         else:
@@ -260,7 +262,7 @@ if args.comments:
                 if line_num > 2:
                     pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
                     txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
-                    if txt[0] == 'C' or txt[0] == '0':
+                    if txt and (txt[0] == 'C' or txt[0] == '0'):
                         const_second_word = True
                 
 
