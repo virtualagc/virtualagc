@@ -145,7 +145,7 @@ if args.comments:
 
     for c in contours:
         box = cv2.boundingRect(c)
-        print(box, left_lim)
+        #print(box, left_lim)
         if box[0] <= 1 or (box[0] <= 80 and box[2] < 80):
             # This is very likely a column of holes. Crop it out.
             left_lim = box[0]+box[2]
@@ -361,7 +361,7 @@ else:
         if cv2.contourArea(c) > 50000:
             x,_,w,_ = cv2.boundingRect(c)
             if x < left_x:
-                print(x)
+                #print(x)
                 left_x = x
                 left_w = w
 
@@ -414,7 +414,7 @@ else:
         if y+h > ymax:
             ymax = y+h
 
-    print(ymin,ymax,xmin,xmax)
+    #print(ymin,ymax,xmin,xmax)
     final_image = no_addr[ymin:ymax, xmin:xmax]
 
 
