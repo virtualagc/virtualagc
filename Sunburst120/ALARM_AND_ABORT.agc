@@ -10,6 +10,8 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-14 RSB	Transcribed.
 ##		2016-10-31 RSB	Typos.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
+##				changes made.
 
 ## Page 313
 # PROGRAM DESCRIPTION					  DATE- 9 FEB 1967
@@ -68,7 +70,7 @@ LARMLARM	TC	GRABDSP
 		TCF	ENDOFJOB
 		TCF	DOALARM	+1
 		
-DOALARM		TC	GRABWAIT	# DISPLAY FAILREG
+DOALARM		TC	GRABWAIT	# DISPLAY FAILREG.
 		CAF	FAILDISP
 		TC	NVSBWAIT
 		
@@ -86,9 +88,9 @@ JETABORT	TC	ALARM
 # CALLING SEQUENCE,
 
 #		TC	ALARM
-#		OCT	AAANN		# ALARM NO. NN IN GENERAL AREA AAA.
+#		OCT	AAANN		ALARM NO. NN IN GENERAL AREA AAA.
 
-#					# (RETURNS HERE)
+#					(RETURNS HERE)
 
 
 		BLOCK	02

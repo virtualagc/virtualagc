@@ -13,6 +13,8 @@
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
 ##		2016-11-02 RSB	More typos.
+##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
+##				completed, changes made.
 
 ## Page 436
 		BANK	23
@@ -30,7 +32,7 @@ SILVER          EXTEND
                 WOR     14C             #  SELECTS THE MINUS WINDING
 
 TORK            CAF     POSMAX
-                TS      GYROCTR         # 16383 PULSES =2.8125 DEG LESS ONE PULSES
+                TS      GYROCTR         # 16383 PULSES =2.8125 DEG LESS ONE PULSE
                 
                 CCS     GYTOBETQ        # C(K)= 1 FOR X, -0 FOR Y, -1FOR Z.
                 TC      SELECTX
@@ -304,7 +306,7 @@ CDURATE         EXTEND
                 
                 CS      CDULIMIT
                 INDEX   CDUNDX
-                AD      CDUX            # CATCH FIRST PULSES
+                AD      CDUX            # CATCH FIRST PULSE
                 EXTEND
                 BZMF    CDURATE +3      # LOOK AGAIN
                 

@@ -11,6 +11,8 @@
 ##		2016-10-18 RSB	Corrected against AURORA 12 version,
 ##				with which it is seemingly identical other than
 ##				a handful of comments and EBANK= placements.
+##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
+##				completed, changes made.
 
 ## Page 367
                 BANK            6
@@ -24,7 +26,7 @@
 #            (2) ENGINE ON - OFF TASK
 #            (3) DESCENT ENGINE GIMBAL TRIM TASK
 #            (4) DESCENT ENGINE THROTTLE TASK
-#            (5) INTERFACE CONTROL CHANNEL LOOK TASK
+#            (5) INTERFACE CHANNEL LOOK TASK
 
 
 FCSSTART        TC              GRABWAIT                        # SO NOTHING DISRUPTS THE LOAD.

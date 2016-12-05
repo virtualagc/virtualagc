@@ -12,7 +12,8 @@
 ##		2016-10-31 RSB	Typo.
 ##		2016-12-05 RSB	Proofed with octopus/ProoferComments
 ##				and various comments corrected, but the
-#				proofing process is not yet completed.
+##				proofing process is not yet completed.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed.
 
 ## Page 316
 # PROGRAM NAME- UPDATE PROGRAM
