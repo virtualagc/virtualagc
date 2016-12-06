@@ -14,6 +14,8 @@
 ##		 2016-12-03 RSB	 Fixed various typos using octopus/ProoferComments, but
 ##				 there are still a couple of pages that are problematic
 ##				 with respect to octopus, so the process isn't completed.
+##		 2016-12-05 RSB	 octopus/ProoferComments based comment-proofing completed;
+##				 some corrections made.
 
 ## Page 88
                 BANK            01                              
@@ -533,12 +535,12 @@ SETADR          2CADR           SETIDLE
 ## Page 100
 # PROGRAM TO REVERT TO IDLING MODE (P 00).
 
-# CALLING SEQUENCE:  TC (OR TCF)   P00H     UNDER EXEC (NOT INTERRUPTED).
+# CALLING SEQUENCE:  TC (OR TCF)   POOH     UNDER EXEC (NOT INTERRUPTED).
 
                 BLOCK           2                               
 
 P00H            TC              POSTJUMP                        
-                CADR            P00H2                           # A PARTIAL FRESH START.
+                CADR            P00H2                           # DO A PARTIAL FRESH START.
 
 
                 BANK            01                              
@@ -552,7 +554,7 @@ P00H2           INHINT
                 CADR            SETMAXDB                        
 
                 TC              FLAG1DWN                        # FOR A MOMENT, INDICATE NON-RESTART-
-                OCT             4000                            # ABILITY, SO A RESTART HERE WILL DO P00H.
+                OCT             4000                            # ABILITY, SO A RESTART HERE WILL DO POOH.
 
                 TC              FLAG2DWN                        
                 OCT             20                              # TURN OFF MISSION TIMER FLAG.
@@ -579,7 +581,7 @@ FAKESTRT        TC              ALARM
 
 # FORGETIT IS ENTERED FROM:
 #          1)  FAKESTRT (VIA FORGET2).
-#          2)  VERB 74 JPLINK COMMAND.
+#          2)  VERB 74 UPLINK COMMAND.
 #          3)  ILLEGAL MISSION PHASE COMES DUE IN MISSION SCHEDULING ROUTINE.
 #          4)  ENGINE FAILURE, ETC.
 
@@ -597,7 +599,7 @@ FORGETIT        INHINT
                 OCT             315                             # UNIQUE ALARM FOR FORGETIT.
 
 FORGET2         TC              FLAG1DWN                        # ENTRY FROM FAKESTRT.
-                OCT             04000                           # KNOCK DOWN RESTART FLAG TO PERMIT P00H.
+                OCT             04000                           # KNOCK DOWN RESTART FLAG TO PERMIT POOH.
 
                 INHINT                                          
                 EXTEND                                          
@@ -657,7 +659,7 @@ FORGET2         TC              FLAG1DWN                        # ENTRY FROM FAK
 
 
 AVEGKILL        TC              FLAG1DWN                        # COMES HERE WHEN ENGINE OFF
-                OCT             00041                           # KNOCK DOWN P00H FLAG AND AVERAGEG FLAG
+                OCT             00041                           # KNOCK DOWN POOH FLAG AND AVERAGEG FLAG
 
                 TCF             ENDOFJOB                        
 

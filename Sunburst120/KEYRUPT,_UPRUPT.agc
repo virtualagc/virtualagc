@@ -12,6 +12,8 @@
 ##		2016-10-31 RSB	Typos.
 ##		2016-12-04 RSB	Proofed with octopus/ProoferComments and fixed various
 ##				comments, but the proofing process is not completed.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
+##				changes made.
 
 ## Page 228
 		BANK	13
@@ -30,7 +32,7 @@ KEYCOM		TS	RUPTREG4
 
 		CA	RUPTREG4
 		INDEX	LOCCTR
-		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
+		TS	MPAC		# LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
 		TC	RESUME
 
 ## Page 229

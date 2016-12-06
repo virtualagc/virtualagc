@@ -11,12 +11,14 @@
 ##               2016-10-21 HG   Transcribed
 ##		 2016-10-31 RSB	 Typos.
 ##		 2016-11-01 RSB	 More typos.
+##		 2016-12-05 RSB	 Comment-proofing with octopus/ProoferComments
+##				 completed, changes made.
 
 ## Page 487
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.             THE DAPIDLER PROGRAM IS DONE 10 TIMES
 # PER SECOND UNTIL THE ASTRONAUT DESIRES THE DAP TO WAKE UP, AND THE IMU AND CDUS ARE READY FOR USE BY THE DAP.
 # THE NECESSARY INITIALIZATION OF THE DAP IS DONE BY THE DAPIDLER PROGRAM.
-# ADDITIONAL WORK MUST BE DONE ON DAPIDLER IN THE FURTURE.
+# ADDITIONAL WORK MUST BE DONE ON DAPIDLER IN THE FUTURE.
 
 
 
@@ -73,7 +75,7 @@ DAPIDLEI        CAF             DATAGOOD
 
 STARTDAP        TC              IBNKCALL
                 FCADR           STOPRATE
-                CAF             ZERO                    # *********** INITIALIZE: *********
+                CAF             ZERO                    # ********** INITIALIZE: **********
                 TS              TIME6                   # T6RUPT CLOCK
                 TS              TP                      # RATE DERIVATION DTS
                 TS              TQR
@@ -92,7 +94,7 @@ STARTDAP        TC              IBNKCALL
                 TS              T6NEXT          +1
                 TS              ADDT6JTS
                 TS              ADDTLT6
-                TS              DELAYCTR                # MINIMUM IMPULSE RHC MODE COINTER.
+                TS              DELAYCTR                # MINIMUM IMPULSE RHC MODE COUNTER.
                 TS              ALPHAQ                  # DESCENT ACCELERATION ESTIMATES.
                 TS              ALPHAR
                 TS              DISPLACT                # EIGHTBALL ROUTINE SWITCH.
@@ -101,7 +103,7 @@ STARTDAP        TC              IBNKCALL
 # START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 INSRT16B        TCF             PROTCTOR                # RESTART PROTECT ENGINE-ON AND GIMBAL
-
+							#   DRIVE BITS.
 # **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
                 CAF             BIT2                    # CHECK FOR STAGE
@@ -113,7 +115,7 @@ INSRT16B        TCF             PROTCTOR                # RESTART PROTECT ENGINE
                 BZF             +9D                     # (BRANCH FOR ASCENT.)
 
                 CAF             ZERO                    # 1/ACCS BRANCHING VALUE IS ZERO FOR
-                TS              -.06R/S2                # DESCENT IN LM DAP
+                TS              -.06R/S2                # DESCENT LM DAP.
 
                 EXTEND                                  # SET DESCENT URGENCY LIMIT = 1.5 SECONDS
                 DCA             URGLMDWN                # AS BOUND TO USE MAXIMUM JETS.
@@ -160,6 +162,8 @@ INSRT16B        TCF             PROTCTOR                # RESTART PROTECT ENGINE
                 DXCH            WFORP                   # WFORQR = K/DT = K/.15 = 1/.15 = 0.41667
 
 ## Page 490
+# SET UP WAITLIST CALL TO RESET WFORP AND WFORQR:
+
                 CAF             180MS
                 TC              WAITLIST
                 EBANK=          WFORQR

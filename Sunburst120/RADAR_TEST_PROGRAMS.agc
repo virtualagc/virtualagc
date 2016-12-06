@@ -10,6 +10,8 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-06 RSB	Completed transcription.
 ##		2016-12-04 RSB	Proofed comments using octopus/ProoferComments.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
+##				changes made.
 
 ## Page 198
 		BANK	10
@@ -17,7 +19,7 @@
 		
 # RADAR SAMPLING LOOP.
 
-RADSAMP		CCS	RSAMPDT		# TIMES NORMAL ONCE-PER-SECOND SAMPLING
+RADSAMP		CCS	RSAMPDT		# TIMES NORMAL ONCE-PER-SECOND SAMPLING.
 		TCF	+2
 		
 		TCF	TASKOVER	# +0 INSERTED MANUALLY TERMINATES TEST.

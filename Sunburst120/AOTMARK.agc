@@ -15,6 +15,8 @@
 ##		2016-11-01 RSB	More typos.
 ##		2016-12-04 RSB	Fixed various typos in the comments, using octopus/ProoferComments.
 ##				However, don't regard the comments as completely proofed yet.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
+##				changes made.
 
 ## Page 159
 		BANK	13
@@ -236,9 +238,9 @@ SOMEKEY		CAF	OCT140		# NOT MARK OR MARK REJECT
 		RAND	NAVKEYIN
 		EXTEND
 ## Page 164		
-		BZF	+3		# IF NO INBITS
+		BZF	+3		# IF NO INBITS.
 		
-		TC	POSTJUMP	# IF DESCENT BITS
+		TC	POSTJUMP	# IF DESCENT BITS.
 		CADR	DESCBITS
 		
  +3		TC	ALARM	
@@ -252,11 +254,11 @@ XMKRUPT		CAF	ZERO
 YMKRUPT		CAF	ONE
 		TS	RUPTREG1	# SET Y MARK STORE INDEX TO ONE
 		CAF	BIT11
-		TS	XYMARK		# SET MARK IDENTIFICATION
+		TS	XYMARK		# SET MARK ID
 		
 		MASK	MARKSTAT
 		CCS	A
-		TC	+2		# THIS MARK NOT DESIRED
+		TC	+2		# MARK MADE BUT NOT DESIRED
 		TC	VACSTOR		# MARK DESIRED AND MADE-STORE CDUS
 		TC	ALARM
 		OCT	114
