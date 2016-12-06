@@ -175,13 +175,13 @@ if args.comments:
     # provides reference to where on the page the various columns begin
     cimg, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
-    # Sort the contours by "line", considering lines breaks to be about 25 characters apart.
+    # Sort the contours by "line", considering lines breaks to be about 15 characters apart.
     # This approximates top-to-bottom, left-to-right reading order, as we would get from
     # something like Tesseract.
     def line_sort(a,b):
         ax,ay,_,_ = cv2.boundingRect(a)
         bx,by,_,_ = cv2.boundingRect(b)
-        if abs(ay-by) > 25:
+        if abs(ay-by) > 15:
             return ay-by
         else:
             return ax-bx
@@ -192,7 +192,7 @@ if args.comments:
     header_box = None
     for i,c in enumerate(contours):
         box = cv2.boundingRect(c)
-        if (box[2] > 1200):
+        if (box[2] > 1000):
             header_start = i
             header_box = list(box)
             break
@@ -201,7 +201,7 @@ if args.comments:
     # dilation above doesn't quite bleed everything together)
     for c in contours[header_start+1:]:
         box = cv2.boundingRect(c)
-        if abs(header_box[0]-box[0]) <= 50:
+        if abs(header_box[0]-box[0]) <= 30:
             break
         rightmost_point = max(header_box[0]+header_box[2], box[0]+box[2])
         lowest_point = max(header_box[1]+header_box[3], box[1]+box[3])
@@ -228,7 +228,7 @@ if args.comments:
 
     for i,c in enumerate(contours):
         x,y,w,h = cv2.boundingRect(c)
-        if w < 10 and h < 10:
+        if (w < 10 or h < 10):
             # Probably junk that's made it through
             continue
 
@@ -264,7 +264,6 @@ if args.comments:
                     txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
                     if txt and (txt[0] == 'C' or txt[0] == '0'):
                         const_second_word = True
-                
 
         # If the y position of this box is less than line_y, mark it as the new highest point on the line
         if y < line_y:
@@ -273,6 +272,10 @@ if args.comments:
         # Draw this contour if we're in a comment and beyond the headers
         if in_comment and not const_second_word and line_num > 2:
             cv2.drawContours(mask, [c], -1, 0, -1)
+
+    # Special case for only a single line on the page
+    if line_num == 3:
+        crop_top = line_y
 
     # We also want everything from column 80 on
     cv2.rectangle(mask, (header_box[0] + column_width*80, crop_top), (target_image.shape[1], target_image.shape[0]), 0, -1)
