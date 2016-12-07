@@ -134,7 +134,7 @@ SENDID		CA	DNLSTADR	# INITIALIZE DOWNLIST ADDRESS AS SELECTED
 		TCF	DNTMEXIT	# SEND LIST ID WORD AND SPECIAL ID CODE
 		
 		
-# ...........................................
+# ........................................................................
 SNAPSHOT	EXTEND
 		QXCH	DNQ		# SAVE RETURN ADDRESS
 		CAF	ZERO		# INITIALIZE THE 
@@ -142,10 +142,10 @@ SNAPSHOT	EXTEND
 		CAF	DNSNAP-2	# INITIALIZE LOOP COUNTER(ITEMP2) TO
 SNAPLOOP	TS	ITEMP2		# TOTAL NO. OF SNAPSHOT DP WORDS LESS 2.
 		AD	LDATALST	# CALCULATE ADDRESS OF NEXT
-		EXTEND			# ENTRY IN DOWNLIST
+		EXTEND			# ENTRY IN DOWNLIST.
 		INDEX	A		# PICK UP THE DOUBLE PRECISION WORD FROM
 		INDEX	0		# THE NEXT ENTRY
-		DCA	0		# IN THE DOWNLIST
+		DCA	0		# IN THE DOWNLIST.
 		INDEX	ITEMP1		# AND SAVE IT IN THE NEXT AVAILABLE LOC
 		DXCH	DNTMBUFF	# IN DNTMBUFF SNAPSHOT BUFFER.
 		CAF	TWO		# INCREMENT DNTMBUFF INCREMENTER(ITEMP1)
@@ -183,7 +183,7 @@ DNSNAP-2	ADRES	NSNAP	-2	# NO. OF DP SNAPSHOT WORDS -2  CONSTANT
 LSENDSNP	ADRES	SENDSNAP	# LOC OF ROUTINE WHICH SENDS SNAPSHOT BUFF
 		
 		
-# ..........................................
+# ........................................................................
 SENDDP		EXTEND			# ENTER WITH NO. DP WORDS REMAINING TO
 		QXCH	DNQ		# BE SENT IN A. SAVE RETURN ADDRESS.
 		TS	TMINDEX		# PLACE NO. OF DP WORDS TO BE SENT AFTER
@@ -217,7 +217,7 @@ SENDDPA		CCS	TMINDEX		# ANY DP WORDS REMAINING TO BE SENT.
 LSENDDPA	ADRES	SENDDPA		# LOC OF ROUTINE WHICH SENDS DP WORDS.
 	
 		
-# ..........................................
+# ........................................................................
 SENDCH		EXTEND
 ## Page 333
 		QXCH	DNQ		# SAVE RETURN ADDRESS
@@ -250,7 +250,7 @@ FIXLSTCL	OCT	33		# CHANNEL 33
 		OCT	12		# CHANNEL 12
 	
 		
-# ...........................................
+# ........................................................................
 SENDDSTB	EXTEND
 		QXCH	DNQ		# SAVE RETURN ADDRESS
 		CAF	LSENDDSA	# SET UP DNTMGOTO SO PROGRAM CONTROL WILL
@@ -269,7 +269,7 @@ SENDDSA		CCS	TMINDEX		# ANY WORDS LEFT IN DSPTAB TO BE SENT.....
 LSENDDSA	ADRES	SENDDSA		# LOC OF ROUTINE WHICH SENDS DISPLAY TABLE
 
 		
-# ..........................................
+# ........................................................................
 ## Page 334
 SENDTIME	EXTEND			# SET DP DNTMGOTO SO PROGRAM CONTROL WILL
 		QXCH	DNTMGOTO	# GO TO INSTRUCTION AFTER TC SENDTIME.
@@ -278,7 +278,7 @@ SENDTIME	EXTEND			# SET DP DNTMGOTO SO PROGRAM CONTROL WILL
 		TCF	DNTMEXIT	# NOW GO SEND A AND L.
 	
 		
-# ...........................................
+# ........................................................................
 DNDP1-1		ADRES	NDP1	-1	# NO. OF DP WORDS IN GROUP 1 LESS 1
 DNDP2-1		ADRES	NDP2	-1	# NO. OF DP WORDS IN GROUP 2 LESS 1	
 DNLINCR		ADRES	LINCR		# RELATIVE LOC OF FIRST GROUP IN DOWNLIST.
@@ -298,19 +298,19 @@ LINCR		EQUALS	66D		# LINCR   = NDP1 + NDP2 + 12D
 # LAST ENTRY IN DOWNLIST WILL BE SENT FIRST, THEN LAST ENTRY - 1       ---
 NOMDNLST	EQUALS
 UPDNLIST	EQUALS	NOMDNLST	# NOT USED IN 206.
-# ----------------------DISPLAY TABLES------------------------------------
+# ---------------------DISPLAY TABLES------------------------------------
 #                                       DSPTAB +10D AND DSPTAB +11D
 #                                       DSPTAB +8D AND DSPTAB +9D
 #					DSPTAB +6  AND DSPTAB +7
 #					DSPTAB +4  AND DSPTAB +5
 #  					DSPTAB +2  AND DSPTAB +3
 #					DSPTAB     AND DSPTAB +1
-# -----------------------CHANNELS-----------------------------------------
+# -----------------------CHANNELS----------------------------------------
 #					CHANNELS 32 AND 33
 #					CHANNELS 30 AND 31
 #					CHANNELS 13 AND 14
 # 					CHANNELS 11 AND 12
-# -------------DOUBLE PRECISION - ANY EBANK  (GROUP 2)--------------------
+# -------------DOUBLE PRECISION - ANY EBANK  (GROUP 2)-------------------
 		ECADR	STATE	+2	# (FLAGWRD2,DAPBOOLS) FLAGWORDS
 		ECADR	STATE		# (STATE,FLAGWRD1) FLAGWORDS
 		ECADR	OMEGAR	-1	# (GARBAGE,OMEGAR) ANGULAR RATES ABOUT THE

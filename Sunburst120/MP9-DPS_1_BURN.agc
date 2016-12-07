@@ -70,7 +70,7 @@ MP9JOB          CAF             BIT9
                 DCA             5M15S
                 DAS             TDI                             # SET TDI=TIME2+5M15S
 
-                CAF             EQU2ADR                         # SET COMPUTATIONAL STEPS
+                CAF             EQU2ADR                         # SET COMPUTATIINAL STEPS
                 TS              SHJUMP1
 
                 TC              PHASCHNG

@@ -561,7 +561,7 @@ TCO+15          TC              2LMP+DT
 
 # ************************************************************************
 # TIME INCREMENTS FOR WAITLISTS IN MP4 - XXXXXCEK = DEC XXXXX00 CS
-# ************************************************************************
+# ************************************************************************	   4
 002CEK          DEC             200
 ## The two above lines were printed on top of each other. Luckily the first is all asterisks so it's easy
 ## to tell what should have happened.

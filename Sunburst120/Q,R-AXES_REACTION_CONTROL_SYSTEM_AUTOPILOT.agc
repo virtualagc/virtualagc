@@ -1255,7 +1255,7 @@ TJETLAW         CS              EDOT                    # TEST ON EDOT SIGN:
                 EXTEND
                 BZMF            +3
 
-MAXTJET         CAF             BIT14                   # (1/2) IS LIKE POSMAX AT THIS SCALING
+MAXTJET         CAF             BIT14                   # (1/2) IS LIKE POSMAX AT THIS SCALING.
                 TCF             NORMRETN                # (OVERFLOW IS PREVENTED IN THIS WAY.)
 
                 CS              HDAP                    # MINIMPDB-E-(EDOT(2)/NETACC)+DB

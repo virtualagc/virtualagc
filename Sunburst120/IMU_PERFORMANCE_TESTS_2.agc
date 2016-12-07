@@ -59,7 +59,7 @@ IMUBACK         CA              ZERO
                 TS              DSPTEM2
                 TC              BANKCALL                # ISS RETURNS IN COARSE ALIGN MODE TO
                 CADR            IMUCOARS                # ENABLE OPERATOR TO DECIDE WHAT TO DO
-							# ABOUT GIMBLE LOCK
+							# ABOUT GIMBAL LOCK
 		CCS		GEOCOMPS
 		TC		+3
                 TC              SHOWLD
@@ -751,7 +751,7 @@ FALNE1          CA              CDUX
                 TC              QPLACE
 
 ## Page 427
-WAITLOOP        EXTEND                                  # LOOPS IN X SEC INCREMETNS FOR NUMBER OF
+WAITLOOP        EXTEND                                  # LOOPS IN X SEC INCREMENTS FOR NUMBER OF
                 QXCH            QPLAC
                 TS              COUNTPL                 # NUMBER PUT INTO LENGTHOT
 WAITLP1         CCS             COUNTPL

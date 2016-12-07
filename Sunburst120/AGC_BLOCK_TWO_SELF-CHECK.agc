@@ -513,7 +513,7 @@ MP-+            EXTEND
                 AUG             SKEEP6                          # $ AUG ERASABLE, -2
                 AD              L                               # 40000
 MP--            EXTEND                                          
-                MP              SKEEP6                          # +1, 37776
+                MP              SKEEP6                          # $ +1, 37776
                 TC              +1CHK                           
                 CS              L                               # 40001
                 AD              DVCON                           
