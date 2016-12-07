@@ -8,14 +8,12 @@
 ##              that the code format has been changed to conform to the
 ##              requirements of the yaYUL assembler rather than the
 ##              original YUL assembler.
-## Reference:   pp. XXX-XXX
+## Reference:   pp. 1246-1255
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
-
-## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
-
+##		2016-12-07 RRB	Updated for Luminary210.
 
 ## Page 1246
 		BANK	22
@@ -130,7 +128,7 @@ TRIG2		DLOAD	SIGN		# (135,-135)
 # CALCGA COMPUTES THE CDU DRIVING ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.
 #
 # THE INPUTS ARE  1) THE NAVIGATION BASE COORDINATES REFERRED TO ANY COORDINATE SYSTEM.  THE THREE HALF-UNIT
-# VECTORS ARE STORED AT XNB, YNB, AND ZNB.  2) THE DESIRED STABLE MEMBER COORDINATES REFERRED TO THE SAME
+# VECTORS ARE STORED AT XNB,YNB, AND ZNB.  2) THE DESIRED STABLE MEMBER COORDINATES REFERRED TO THE SAME
 # COORDINATE SYSTEM ARE STORED AT XSM, YSM, AND ZSM.
 #
 # THE OUTPUTS ARE THE THREE CDU DRIVING ANGLES AND ARE STORED SP AT THETAD, THETAD +1, AND THETAD +2.
@@ -217,16 +215,16 @@ AXISGEN		AXT,1	SSP		# PUSHDOWN 00-30D, 34D-37D
 		SETPD
 			0
 AXISGEN1	VLOAD*	VXV*		# 06D	UA = S1
-			STARAD +12D,1	#	STARAD +00D	UB = S1
+			STARAD +12D,1	#	 STARAD +00D	UB = S1
 			STARAD +18D,1
 		UNIT			# 12D	VA = UNIT(S1 X S2)
-		STORE	STARAD +18D,1	#	STARAD +06D	VB = UNIT(S1 X S2)
+		STORE	STARAD +18D,1	#	 STARAD +06D	VB = UNIT(S1 X S2)
 		VLOAD*
 			STARAD +12D,1
 
 		VXV*	VSL1
 			STARAD +18D,1	# 18D	WA = UA X VA
-		STORE	STARAD +24D,1	#	STARAD +12D	WB = UB X VB
+		STORE	STARAD +24D,1	#	 STARAD +12D	WB = UB X VB
 
 		TIX,1
 			AXISGEN1
