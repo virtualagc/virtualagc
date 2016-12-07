@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-18 HG   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO 
 
 ## Page 63
 #         FLAGWORDS 0-11 ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -160,7 +161,7 @@
 # PDSPFLAG      076             BIT 12 FLAG 5           PDSPFBIT
 # PFRATFLG      041             BIT 4  FLAG 2           PFRATBIT
 # PINBRFLG      069             BIT 6  FLAG 4           PINBRBIT
-# P00HFLAG      045             BIT 15 FLAG 3           P00HBIT
+# POOHFLAG      045             BIT 15 FLAG 3           POOHBIT
 # PRECIFLG      052             BIT 8  FLAG 3           PRECIBIT
 # PRIODFLG      061             BIT 14 FLAG 4           PRIODBIT
 # PRONVFLG      068             BIT 7  FLAG 4           PRONVBIT
@@ -498,8 +499,8 @@ FLAGWRD3        =               STATE           +3      #       (045-059)
                                                         #       (SET)                   (RESET)
 
 # BIT 15 FLAG 3
-P00HFLAG        =               045D                    #       INHIBIT BACKWARDS       ALLOW BACKWARDS
-P00HBIT         =               BIT15                   #       INTEGRATION             INTEGRATION
+POOHFLAG        =               045D                    #       INHIBIT BACKWARDS       ALLOW BACKWARDS
+POOHBIT         =               BIT15                   #       INTEGRATION             INTEGRATION
 #
 
 # BIT 14 FLAG 3 (S)
@@ -534,7 +535,7 @@ R04FLBIT        =               BIT9
 
 # BIT 8 FLAG 3  (S)
 PRECIFLG        =               052D                    #       NORMAL INTEGRATION      ENGAGES 4-TIME STEP
-                                                        #       IN P00                  (P00) LOGIC IN INTE-
+                                                        #       IN POO                  (POO) LOGIC IN INTE-
 PRECIBIT        =               BIT8                    #                               GRATION
 #
 

@@ -18,6 +18,7 @@
 ##                              the new terrain model) and lots and lots of updated
 ##                              comments.
 ##              2016-11-29 HG   fix opcode  BDSL  -> BDSU
+##              2016-12-07 HG   fix P00 -> POO (appears only in comments)
 
 ## Page 860
 		BANK	37
@@ -442,13 +443,13 @@ SERVIDLE	EXTEND			# DISCONNECT SERVICER FROM ALL GUIDANCE
 		DCA	NEG0
 		DXCH	-PHASE6
 
-		CAF	OCT33		# 4.33SPOT FOR GOP00FIX
+		CAF	OCT33		# 4.33SPOT FOR GOPOOFIX
 		TS	L
 		COM
 		DXCH	-PHASE4
 
 		TCF	WHIMPER		# PERFORM A SOFTWARE RESTART AND PROCEED
-					# TO GOTOP00H WHILE SERVICER CONTINUES TO
+					# TO GOTOPOOH WHILE SERVICER CONTINUES TO
 					# RUN, ALBEIT IN A GROUND STATE WHERE
 					# ONLY STATE-VECTOR DEPENDENT FUNCTIONS
 					# ARE MAINTAINED.

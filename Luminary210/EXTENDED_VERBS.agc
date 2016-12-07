@@ -16,6 +16,7 @@
 ##              2016-11-20 MAS  Updated for Luminary 210.
 ##              2016-11-27 HG   Fix operand 2SECDELV  -> 2SECDELY
 ##                              replace tabs with spaces 
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 275
                 BANK    7
@@ -89,7 +90,7 @@ VERB69          TC      VERB69          # VB69 FORCE A HARDWARE RESTART
                 TC      WMATRXNG        # VB93 CLEAR RENDWFLG
                 TC      ALM/END         # VB94 SPARE
                 TC      UPDATOFF        # VB95 NO STATE VECTOR UPDATE ALLOWED
-                TC      VERB96          # VB96 INTERRUPT INTEGRATION AND GO TO P00
+                TC      VERB96          # VB96 INTERRUPT INTEGRATION AND GO TO POO
                 TC      GOLOADLV        # VB97 PLEASE VERIFY ENGINE FAILURE
                 TC      ALM/END         # VB98 SPARE
                 TC      GOLOADLV        # VB99 PLEASE ENABLE ENGINE
@@ -126,7 +127,7 @@ ALM/END         TC      FALTON          # TURN ON OPERATOR ERROR LIGHT
 GOPIN           TC      POSTJUMP
                 CADR    PINBRNCH
 
-CHKP00H         CA      MODREG          # CHECK FOR P00 OR P00-.
+CHKPOOH         CA      MODREG          # CHECK FOR POO OR POO-.
                 EXTEND
                 BZF     TCQ
                 TC      ALM/END
@@ -534,7 +535,7 @@ CKMODCAD        CA      MODECADR
 
 ## Page 287
 #          ALINTIME     VERB 55            DESCRIPTION
-#                 REQUIRE P00 OR P00-.
+#                 REQUIRE POO OR POO-.
 #              1. SET EXT VERB DISPLAY BUSY FLAG.
 #              2. DISPLAY FLASHING V25,N24 (LOAD DELTA TIME FOR AGC CLOCK.
 #              3. REQUIRE EXECUTION OF VERB 23.
@@ -817,13 +818,13 @@ VB64            TC      TESTXACT        # IF DISPLAY SYS. NOT BUSY,MAKE IT BUSY.
 ## Page 293
 #          IMUATTCK      VERB 43           DESCRIPTION
 #              LOAD IMU ATTITUDE ERROR METERS
-#                 1. REQUIRE P00 OR FRESH START.
+#                 1. REQUIRE POO OR FRESH START.
 #                 2. REQUIRE COARSE ALIGN ENABLE AND ZERO ICDU BITS OFF.
 #                 3. REQUIRE THAT NEEDLES BE OFF.
 #                 4. REQUEST LOAD OF N22  (VAUES TO BE DISPLAYED).
 #                 5. ON PROCEED OR ENTER RE-DISPLAY V43 AND SEND PULSES.
 
-IMUATTCK        TC      CHKP00H         # VB 76 - LOAD IMU ATT. ERROR METERS
+IMUATTCK        TC      CHKPOOH         # VB 76 - LOAD IMU ATT. ERROR METERS
 
                 CAF     BITS4&5         # SEE IF COARSE ALIGN ENABLE AND ZERO IMU
                 EXTEND                  # CDUS BITS ARE ON
@@ -948,13 +949,13 @@ V83PERF         TC      TESTXACT
 
 # VERB 89 DESCRIPTION     RENDEZVOUS FINAL ATTITUDE ROUTINE (R63)
 
-# CALLED BY VERB 89 ENTER DURING P00. PRIO 10 USED.  CALCULATES AND
+# CALLED BY VERB 89 ENTER DURING POO. PRIO 10 USED.  CALCULATES AND
 # DISPLAYS FINAL FDAI BALL ANGLES TO POINT LM +X OR +Z AXIS AT CSM.
 
-# 1. KEY IN V 89 E ONLY IF IN PROG 00. IF NOT IN P00, OPERATOR ERROR AND
+# 1. KEY IN V 89 E ONLY IF IN PROG 00. IF NOT IN POO, OPERATOR ERROR AND
 # EXIT R63, OTHERWISE CONTINUE.
 
-# 2. IF IN P00, DO IMU STATUS CHECK ROUTINE (R02BOTH). IF IMU ON AND ITS
+# 2. IF IN POO, DO IMU STATUS CHECK ROUTINE (R02BOTH). IF IMU ON AND ITS
 # ORIENTATION KNOWN TO LGC, CONTINUE.
 
 # 3. FLASH DISPLAY V 04 N 06.  R2 INDICATES WHICH SPACECRAFT AXIS IS TO
@@ -977,7 +978,7 @@ V83PERF         TC      TESTXACT
 #    PROCEED - RESET 3AXISFLG AND CALL R60LEM FOR ATTITUDE MANEUVER.
 
 
-V89PERF         TC      CHKP00H
+V89PERF         TC      CHKPOOH
                 TC      TESTXACT
                 CAF     PRIO10
                 TC      FINDVAC
@@ -1041,14 +1042,14 @@ NOMINIMP        TC      DOWNFLAG        # SET PULSES = 0 (NOT MINIMUM IMPULSE MO
 #              1. DISPLAY FLASHING V06,N22.
 #                 RESPONSES
 #                 A. TERMINATE
-#                    1. GO TO GOTOP00H.
+#                    1. GO TO GOTOPOOH.
 #                 B. PROCEED
 #                    1. SET 3AXISFLG TO INDICATE MANEUVER IS SPECIFIED BY 3 AXIS.
 #                    2. EXECUTE R60LEM (ATTITUDE MANEUVER).
 #                 C. ENTER
 #                    1. REPEAT FLASHING V06,N22.
 
-CREWMANU        TC      CHKP00H         # DEMAND P00
+CREWMANU        TC      CHKPOOH         # DEMAND POO
 
                 TC      TESTXACT
 
@@ -1063,7 +1064,7 @@ CREWMANU        TC      CHKP00H         # DEMAND P00
 # TRMTRACK     VERB 56                     DESCRIPTION
 #              TERMINATE TRACKING (P20 AND P25).
 #              1. KNOCK DOWN RENDEZVOUS, TRACK, AND UPDATE FLAGS.
-#              2. REQUIRE P20 OR  P25 NOT RUNNING ALONE OR GO TO GOTOP00H (REQUEST PROGRAM 00).
+#              2. REQUIRE P20 OR  P25 NOT RUNNING ALONE OR GO TO GOTOPOOH (REQUEST PROGRAM 00).
 #              3. SCHEDULE V56TOVAC WITH PRIORITY 30.
 
 #              V56TOVAC
@@ -1199,7 +1200,7 @@ UPDATOFF        TC      UPFLAG          # VB 95 SET NOUPFLAG
 #              2. SET EXT VERB BUSY FLAG.
                 EBANK=  QPLACE
 
-SYSTEST         TC      CHKP00H         # DEMAND P00
+SYSTEST         TC      CHKPOOH         # DEMAND POO
 
                 CS      FLAGWRD3        # DO NOT ALLOW P07 IN FLIGHT
                 MASK    NOP07BIT        # IF FLAG IS SET, TURN ON OE LITE AND EXIT
@@ -1226,7 +1227,7 @@ WMATRXNG        INHINT
 
 GOSHOSUM        EQUALS  SHOWSUM
 
-SHOWSUM         TC      CHKP00H         # *
+SHOWSUM         TC      CHKPOOH         # *
                 TC      TESTXACT        # *
                 CAF     PRIO7           # ALLOW OTHER CHARINS.
                 TC      PRIOCHNG
@@ -1564,7 +1565,7 @@ TCPINAD         CADR    TCPIN
 
 # VERB 96  SET QUITFLAT TO STOP INTEGRATION.
 
-#          GO TO V37 WITH ZERO TO CAUSE P00.
+#          GO TO V37 WITH ZERO TO CAUSE POO.
 #          STATEINT WILL CHECK QUITFLAG AND SKIP 1ST PASS,
 #                 THUS ALLOWING A 10 MINUTE PERIOD WITHOUT INTEGRATION.
 
@@ -1573,7 +1574,7 @@ VERB96          TC      UPFLAG          # QUITFLAG WILL CAUSE INTEGRATION TO EXI
 
                 CAF     ZERO
                 TC      POSTJUMP
-                CADR    V37             # GO TO P00
+                CADR    V37             # GO TO POO
 
 
 # VERB 67 :   DISPLAY OF W MATRIX

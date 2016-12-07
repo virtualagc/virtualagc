@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-02 HG   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 794
                 EBANK=          E2DPS
@@ -78,7 +79,7 @@ WHATDISP        TCF             P63DISPS                # BRAKQUAD
 
 # ALARM ROUTINE FOR TTF COMPUTATION:
 
-                TCF             1406P00                 # IGNALG
+                TCF             1406POO                 # IGNALG
 WHATALM         TCF             1406ALM                 # BRAKQUAD
                 TCF             1406ALM                 # APPRQUAD
 #
@@ -903,7 +904,7 @@ P64DISPS        CA              TREDES                  # HAS TREDES REACHED ZER
                 CAF             V06N64                  # OTHERWISE USE FLASHING DISPLAY
                 TC              BANKCALL
                 CADR            REFLASH
-                TCF             GOTOP00H                # TERMINATE
+                TCF             GOTOPOOH                # TERMINATE
                 TCF             P64CEED                 # PROCEED     PERMIT REDESIGNATIONS
                 TCF             P64DISPS                # RECYCLE
 
@@ -935,7 +936,7 @@ VERTDISP        TC              VACRLEAS
                 CADR            REFLASH
 
 ## Page 813
-                TCF             GOTOP00H                # TERMINATE
+                TCF             GOTOPOOH                # TERMINATE
                 TCF             STOPFIRE                # PROCEED
                 TCF             STOPFIRE                # V32E
 
@@ -1633,7 +1634,7 @@ TDISPSET        CA              TTF/8
                 TC              Q
 
 
-1406P00         TC              P00DOO
+1406POO         TC              POODOO
                 OCT             21406
 1406ALM         TC              ALARM
                 OCT             01406

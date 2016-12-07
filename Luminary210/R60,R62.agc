@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-27 HG   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 487
 # MOD NO: 0                             DATE: 1 MAY 1968
@@ -38,9 +39,9 @@
 #
 #     A. ENTER - RESET 3-AXIS FLAG AND RETURN TO CLIENT.
 #
-#     B. TERMINATE - IF IN P00 GO TO STEP 5A. OTHERWISE CHECK IF R61 IS
+#     B. TERMINATE - IF IN POO GO TO STEP 5A. OTHERWISE CHECK IF R61 IS
 #        THE CALLING PROGRAM. IF IN R61 AN EXIT IS MADE TO GOTOV56. IF
-#        NOT IN R61 AND EXIT IS DONE VIA GOTOP00H.
+#        NOT IN R61 AND EXIT IS DONE VIA GOTOPOOH.
 #
 #     C. PROCEED - CONTINUE WITH PROGRAM AT STEP 6.
 
@@ -207,14 +208,14 @@ RER60           TC              UPFLAG                  # SET PRIO DISPLAY FLAG 
 
                 TC              TBASE2
 
-R61TEST         CA              MODREG                  # IF WE ARE IN P00 IT MUST BE V49 OR V89
+R61TEST         CA              MODREG                  # IF WE ARE IN POO IT MUST BE V49 OR V89
                 EXTEND
                 BZF             ENDMANU1                # THUS WE GO TO ENDEXT VIA USER
 
                 CA              FLAGWRD5
                 MASK            PDSPFBIT
                 EXTEND
-                BZF             GOTOP00H                # NO
+                BZF             GOTOPOOH                # NO
                 TC              GOTOV56                 # YES
 
 BIT14+7         OCT             20100

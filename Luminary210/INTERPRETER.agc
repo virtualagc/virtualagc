@@ -15,6 +15,7 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-03 MAS  Started transcription.
 ##              2016-12-07 MAS  Completed transcription.
+##              2016-12-07 HG   fix P00 -> POO (only in operand POODOO1)
 
 ## Page 1000
 # SECTION 1  DISPATCHER
@@ -2551,7 +2552,7 @@ ZEROANS		CAF	ZERO		# FORCE ANSWER TO ZERO HERE.
 		TCF	FIXROOT
 
 SQRTABRT	DXCH	LOC
-		TC	P00DOO1
+		TC	POODOO1
 		OCT	21302
 
 SMPAC+		AD	-1/2+2		# SEE IF ARGUMENT GREATER THAN OR EQUAL TO

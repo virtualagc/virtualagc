@@ -15,6 +15,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-28 HG   Transcribed
+##              2016-12-07 HG   fix P00 -> POO
 
 ## Page 620
 # PROGRAM DESCRIPTION P30       DATE 3-6-67
@@ -28,10 +29,10 @@
 
 # CALLING SEQUENCE VIA JOB FROM V37
 
-# EXIT VIA V37 CALL CR TO GOTOP00H (V34E)
+# EXIT VIA V37 CALL CR TO GOTOPOOH (V34E)
 
 # SUBROUTINE CALLS-FLAGUP, PHASCHNG, BANKCALL, ENDOFJOB, GOFLASH, GOFLASHR
-#                  GOPERF3R, INTPRET, BLANKET, GOTOP00H, R02BOTH, S30.1,
+#                  GOPERF3R, INTPRET, BLANKET, GOTOPOOH, R02BOTH, S30.1,
 #                  TIG/N35, MIDGIM, DISPMGA
 
 # ERASABLE INITIALIZATION- STATE VECTOR
@@ -52,10 +53,10 @@ P30             TC              UPFLAG                  # SET UPDATE FLAG
                 ADRES           TRACKFLG
 
 P30N33          CAF             V06N33                  # T OF IGN
-                TC              VNP00H                  # RETURN ON PROCEED, P00H ON TERMINATE
+                TC              VNPOOH                  # RETURN ON PROCEED, POOH ON TERMINATE
 
                 CAF             V06N81                  # DISPLAY DELTA V (LV)
-                TC              VNP00H                  #     REDISPLAY ON RECYCLE
+                TC              VNPOOH                  #     REDISPLAY ON RECYCLE
 
                 TC              DOWNFLAG                # RESET UPDATE FLAG
                 ADRES           UPDATFLG
@@ -69,7 +70,7 @@ P30N33          CAF             V06N33                  # T OF IGN
 PARAM30         CAF             V06N42                  # DISPLAY APOGEE,PERIGEE ,DELTA V
 
 ## Page 621
-                TC              VNP00H
+                TC              VNPOOH
 
                 TC              INTPRET
                 SET
