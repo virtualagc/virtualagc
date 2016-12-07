@@ -94,6 +94,7 @@ call([ 'tesseract', backgroundImage, 'eng.agc.exp0', '-psm', psm, 'batch.nochop'
 file =open ('eng.agc.exp0.box', 'r')
 boxes = []
 rejectedBoxes = []
+pendingBoxes = []
 sumBoxWidthsByLine = [0]
 numBoxesByLine = [0]
 charForWidthsPattern = re.compile(r"[A-HK-Z02-9]")
@@ -102,7 +103,10 @@ sumBottomsInRow = 0
 numCharsInRow = 0
 numBoxWidths = 10
 sumBoxWidths = 16 * numBoxWidths * scale
-nominalSpacing = 4 * scale
+nominalColSpacing = 4 * scale
+nominalRowSpacing = 10 * scale
+nominalRowHeight = 24 * scale
+nominalTwoRowHeight = nominalRowHeight + nominalRowSpacing + nominalRowHeight
 row = 0
 for box in file:
 	boxFields = box.split()
@@ -113,6 +117,59 @@ for box in file:
 	boxTop = backgroundHeight - 1 - int(boxFields[4])
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
+	# Take care of a box in the pendingBoxes[] array, if there is one.
+	# This algorithm is going to discard the box if it happens to be at
+	# the very end of the row, but I don't really care about that.
+	if len(boxes) > 0 and len(pendingBoxes) > 0:
+		#refBottom = (sumBottomsInRow + boxBottom + 0.0) / (numCharsInRow + 1)
+		if pendingBoxes[0]['boxBottom'] < boxTop:
+			rejectedBoxes.append(pendingBoxes[0])
+			del pendingBoxes[0]
+		elif pendingBoxes[0]['boxTop'] >= boxBottom - 1.3 * nominalRowHeight and \
+		     pendingBoxes[0]['boxBottom'] < boxBottom + 0.6 * nominalRowHeight and \
+		     pendingBoxes[0]['boxRight'] <= boxLeft:
+		     	lastBox = boxes[len(boxes)-1]
+		     	startOfRow = 0
+		     	if pendingBoxes[0]['boxLeft'] < lastBox['boxLeft']:
+		     		startOfRow = 1
+		     	if numCharsInRow > 0 and pendingBoxes[0]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+		     		startOfRow = 1
+		     	if startOfRow == 0 or pendingBoxes[0]['boxLeft'] >= lastBox['boxRight']:
+			     	# Add the pending box to the list of actual boxes.  Normally these
+			     	# are one character wide, but I've actually seen cases where they're
+			     	# more (such as 3 cols by 2 rows, in which case the pending box would
+			     	# actually be 3 wide), so we have to perform additional splits in this
+			     	# case.  The computation models the one performed a little later for
+			     	# the "real" boxes (as opposed to split ones).
+				avgBoxWidth = float(sumBoxWidths) / numBoxWidths
+				width = pendingBoxes[0]['boxWidth']
+				widthRatio = width/avgBoxWidth
+				if 1 or widthRatio < 1.5:
+					boxes.append(pendingBoxes[0])
+				else:
+					n = int(round((width + nominalColSpacing)/(avgBoxWidth+nominalColSpacing)))
+					width = int(width/n) - 1
+					height = pendingBoxes[0]['boxHeight']
+					left = pendingBoxes[0]['boxLeft']
+					right = left + width - 1 + nominalColSpacing
+					top = pendingBoxes[0]['boxTop']
+					bottom = pendingBoxes[0]['boxBottom']
+					for i in range(0,n):
+						boxes.append({'boxChar':boxChar, 'boxLeft':left, 'boxBottom':bottom,
+							      'boxRight':right, 'boxTop':top, 'boxWidth':width, 
+							      'boxHeight':height})
+						left += width + nominalColSpacing - 1
+						right += width + nominalColSpacing - 1
+			else:
+				if 0:
+					print "B"
+					print {'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
+					      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
+					      'boxHeight':boxHeight}
+					print lastBox
+					print pendingBoxes[0]
+				rejectedBoxes.append(pendingBoxes[0])
+			del pendingBoxes[0]	
 	addIt = 0
 	addAs = 1
 	if boxWidth > 8 * scale and boxHeight > 8 * scale and boxWidth < 28 * scale and boxHeight < 44 * scale:
@@ -130,11 +187,25 @@ for box in file:
 		addIt = 1 # For T's with cut-off tops.
 	if boxHeight > 3 * scale and boxHeight < 10 * scale and boxWidth > 16 * scale and boxWidth < 24 * scale:
 		addIt = 1 # For minus signs.
-	# For the wacky boxes containing multiple characters that Tesseract sometimes produces.
+	# The following is for the wacky boxes N-character wide bounding boxes that Tesseract sometimes produces.
 	avgBoxWidth = float(sumBoxWidths) / numBoxWidths
-	if boxWidth/avgBoxWidth > 1.5 and boxHeight > 18 * scale and boxHeight < 36 * scale and not addIt:
+	widthRatio = boxWidth/avgBoxWidth
+	if widthRatio > 1.5 and boxHeight > 18 * scale and boxHeight < 36 * scale and not addIt:
 		addIt = 1
-		addAs = int(round((boxWidth + nominalSpacing)/(avgBoxWidth+nominalSpacing)))
+		addAs = int(round((boxWidth + nominalColSpacing)/(avgBoxWidth+nominalColSpacing)))
+	# The following is for the wacky double-high bounding boxes (i.e., containing characters in two different
+	# rows) that Tesseract sometimes produces.
+	if widthRatio > 0.7 and widthRatio < 1.3 and boxHeight > 0.6 * nominalTwoRowHeight and \
+	   boxHeight < 1.2 * nominalTwoRowHeight and not addIt:
+		addIt = 1
+		# We're going to split the box into two vertically, adding the top half to the current row
+		# and putting the bottom half into the pendingBoxes[] array, where it will either be used
+		# or discarded when the next row is processed.
+		pendingBoxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
+			      'boxRight':boxRight, 'boxTop':int(round(boxBottom-nominalRowHeight)), 'boxWidth':boxWidth, 
+			      'boxHeight':int(round(nominalRowHeight))})
+		boxBottom = int(round(boxTop + nominalRowHeight))
+		boxHeight = int(round(nominalRowHeight))
 	if addIt:
 		# New line?
 		boxIndex = len(boxes)
@@ -151,15 +222,15 @@ for box in file:
 			sumBoxWidthsByLine[row] += boxWidth
 			numBoxesByLine[row] += 1
 		boxWidth = int(boxWidth/addAs) - 1
-		boxRight = boxLeft + boxWidth - 1 + nominalSpacing
+		boxRight = boxLeft + boxWidth - 1 + nominalColSpacing
 		for i in range(0,addAs):
 			sumBottomsInRow += boxBottom
 			numCharsInRow += 1
 			boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 				      'boxHeight':boxHeight})
-			boxLeft += boxWidth + nominalSpacing - 1
-			boxRight += boxWidth + nominalSpacing - 1
+			boxLeft += boxWidth + nominalColSpacing - 1
+			boxRight += boxWidth + nominalColSpacing - 1
 			
 	else:
 		rejectedBoxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
