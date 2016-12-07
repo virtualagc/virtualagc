@@ -19,7 +19,7 @@ from wand.color import Color
 # Parse command-line arguments
 if len(sys.argv) < 5:
 	print 'Usage:'
-	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE [SCALE [NODASHES]]'
+	print '\t./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE [SCALE [NODASHES [PSM]]]'
 	print 'BWINPUTIMAGE is the pathname to the B&W cropped image with just the comments.'
 	print 'OUTPUTIMAGE is the pathname at which to write the composite proofing image.'
 	print 'PAGENUMBER is the page number within the original scanned assembly listing.'
@@ -38,6 +38,14 @@ if len(sys.argv) < 5:
 	print '      simply refuses to create bounding boxes for such lines.  If nodashes>=1,'
 	print '      then all dashes (not just rows consisting exclusively of them) are removed,'
 	print '      while if nodashes>=2 then all underlines are removed as well.'
+	print 'PSM (optional, default 4) is a parameter passed to Tesseract for finding bounding'
+	print '      boxes of characters in the input image.  Both 4 and 6 work fairly well, but'
+	print '      sadly, on individual pages one or the other may be better than the other.'
+	print '      I think that PSM = 4 is marginally better on the average, but 6 is safer.'
+	print '      It\'s also true that Tesseract 3 and Tesseract 4 may produce better or worse'
+	print '      bounding boxes at different locations on different pages.  I don\'t provide'
+	print '      any specific option for that, however.  I don\'t know if training affects the'
+	print '      selection of bounding boxes or not.'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -59,6 +67,10 @@ if len(sys.argv) >= 7:
 	nodashes = int(sys.argv[6])
 else:
 	nodashes = 0
+if len(sys.argv) >= 8:
+	psm = sys.argv[7]
+else:
+	psm = '6'
 
 # Read in the input image ... i.e., the B&W octal page.
 img = Image(filename=backgroundImage)
@@ -75,7 +87,10 @@ img.alpha_channel = 'activate'
 # later to try to deduce the columnar alignment of the comments (in terms
 # of characters.  For trying to figure this out, we'll only uses alphanumerics,
 # other than I and 1, and only within a certain range of widths.
-call([ 'tesseract', backgroundImage, 'eng.agc.exp0', '-psm', '6', 'batch.nochop', 'makebox', 'agcChars.txt' ])
+# Mike advises to *always* use -psm=6, but -psm=4 works better for me (less
+# bad bounding boxes and text having no bounding boxes at all), and I don't
+# see the extra processing time he warns about. 
+call([ 'tesseract', backgroundImage, 'eng.agc.exp0', '-psm', psm, 'batch.nochop', 'makebox', 'agcChars.txt' ])
 file =open ('eng.agc.exp0.box', 'r')
 boxes = []
 rejectedBoxes = []
@@ -83,6 +98,11 @@ sumBoxWidthsByLine = [0]
 numBoxesByLine = [0]
 charForWidthsPattern = re.compile(r"[A-HK-Z02-9]")
 rowFloor = 15 * scale
+sumBottomsInRow = 0
+numCharsInRow = 0
+numBoxWidths = 10
+sumBoxWidths = 16 * numBoxWidths * scale
+nominalSpacing = 4 * scale
 row = 0
 for box in file:
 	boxFields = box.split()
@@ -94,8 +114,11 @@ for box in file:
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
 	addIt = 0
+	addAs = 1
 	if boxWidth > 8 * scale and boxHeight > 8 * scale and boxWidth < 28 * scale and boxHeight < 44 * scale:
 		addIt = 1 # For general characters.
+		numBoxWidths += 1
+		sumBoxWidths += boxWidth
 	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
 	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
 	# that some printouts (like Sunburst 120) liked to stick in as short vertical line segments next to
@@ -107,22 +130,37 @@ for box in file:
 		addIt = 1 # For T's with cut-off tops.
 	if boxHeight > 3 * scale and boxHeight < 10 * scale and boxWidth > 16 * scale and boxWidth < 24 * scale:
 		addIt = 1 # For minus signs.
+	# For the wacky boxes containing multiple characters that Tesseract sometimes produces.
+	avgBoxWidth = float(sumBoxWidths) / numBoxWidths
+	if boxWidth/avgBoxWidth > 1.5 and boxHeight > 18 * scale and boxHeight < 36 * scale and not addIt:
+		addIt = 1
+		addAs = int(round((boxWidth + nominalSpacing)/(avgBoxWidth+nominalSpacing)))
 	if addIt:
 		# New line?
 		boxIndex = len(boxes)
-		if boxIndex > 0:
-		   	if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > boxes[boxIndex-1]['boxBottom'] + rowFloor:
+		if numCharsInRow > 0:
+		   	if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > sumBottomsInRow/numCharsInRow + rowFloor:
 		   		sumBoxWidthsByLine.append(0)
 		   		numBoxesByLine.append(0)
 		   		row += 1
+		   		sumBottomsInRow = 0
+		   		numCharsInRow = 0
 		# Is it a box we want to use for figuring out the width of space characters?
 		if re.match(charForWidthsPattern,boxChar) and boxWidth > 16 and boxWidth < 24:
 			row = len(numBoxesByLine) - 1
 			sumBoxWidthsByLine[row] += boxWidth
 			numBoxesByLine[row] += 1
-		boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
-			      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
-			      'boxHeight':boxHeight})
+		boxWidth = int(boxWidth/addAs) - 1
+		boxRight = boxLeft + boxWidth - 1 + nominalSpacing
+		for i in range(0,addAs):
+			sumBottomsInRow += boxBottom
+			numCharsInRow += 1
+			boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
+				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
+				      'boxHeight':boxHeight})
+			boxLeft += boxWidth + nominalSpacing - 1
+			boxRight += boxWidth + nominalSpacing - 1
+			
 	else:
 		rejectedBoxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
@@ -212,6 +250,7 @@ def readFile( filename ):
 		lines.append(comment)
 	file.close()
 readFile(agcSourceFilename)
+#print lines
 
 # At this point, we've populated lines[] with just the non-blank comments from,
 # the selected page, which is precisely what should appear in the box file as well.
@@ -267,7 +306,8 @@ for row in range(0, len(lines)):
 		draw.line((middle,top), (middle,bottom))
 		break
 	# Loop on non-blank characters in the row.
-	firstChar = 1
+	sumBottomsInRow = 0
+	numCharsInRow = 0
 	for character in list(lines[row]):
 		if re.match(blankLinePattern, character):
 			continue
@@ -278,35 +318,57 @@ for row in range(0, len(lines)):
 			middle = backgroundWidth / 2
 			draw.line((middle,top), (middle,bottom))
 			break
-		if boxIndex > 0 and not firstChar:
+		if numCharsInRow > 0:
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
-			   boxes[boxIndex]['boxBottom'] > boxes[boxIndex-1]['boxBottom'] + rowFloor:
+			   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
 				#print 'Out of boxes in row', row, "character", character
 				left = boxes[boxIndex-1]['boxRight']
 				right = backgroundWidth
 				middle = (boxes[boxIndex-1]['boxTop'] + boxes[boxIndex-1]['boxBottom']) / 2
 				draw.line((left,middle), (right,middle))
 				break
-		firstChar = 0
+		sumBottomsInRow += boxes[boxIndex]['boxBottom']
+		numCharsInRow += 1
 		asciiCode = ord(character)
 		if boxes[boxIndex]['boxChar'] == character:
 			fontChar = imagesMatch[asciiCode].clone()
 		else:
 			fontChar = imagesNomatch[asciiCode].clone()
+		fontWidth = fontChar.width * scale
+		fontHeight = fontChar.height * scale
+		minFontHeight = 0.9*fontHeight
+		maxFontHeight = 1.3*fontHeight
+		minFontWidth = 0.7*fontWidth
+		maxFontWidth = 1.3*fontWidth
 		operator = 'darken' 
-		fontChar.resize(boxes[boxIndex]['boxWidth'], boxes[boxIndex]['boxHeight'], 'cubic')
-		draw.composite(operator=operator, left=boxes[boxIndex]['boxLeft'], 
-			       top=boxes[boxIndex]['boxTop'], width=boxes[boxIndex]['boxWidth'], 
-			       height=boxes[boxIndex]['boxHeight'], image=fontChar)
+		if boxes[boxIndex]['boxHeight'] > minFontHeight and boxes[boxIndex]['boxHeight'] < maxFontHeight and \
+		   boxes[boxIndex]['boxWidth'] > minFontWidth and boxes[boxIndex]['boxWidth'] < maxFontWidth:
+			fontChar.resize(boxes[boxIndex]['boxWidth'], boxes[boxIndex]['boxHeight'], 'cubic')
+			draw.composite(operator=operator, left=boxes[boxIndex]['boxLeft'], 
+				       top=boxes[boxIndex]['boxTop'], width=boxes[boxIndex]['boxWidth'], 
+				       height=boxes[boxIndex]['boxHeight'], image=fontChar)
+		else:
+			if fontWidth <= minFontWidth:
+				fontWidth = minFontWidth
+			elif fontWidth >= maxFontWidth:
+				fontWidth = maxFontWidth
+			if fontHeight <= minFontHeight:
+				fontHeight = minFontHeight
+			elif fontHeight >= maxFontHeight:
+				fontHeight = maxFontHeight
+			fontChar.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
+			draw.composite(operator=operator, left=round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0), 
+				       top=round((boxes[boxIndex]['boxTop']+boxes[boxIndex]['boxBottom']-fontHeight)/2.0), width=fontWidth, 
+				       height=fontHeight, image=fontChar)
 		boxIndex += 1
 	
-	if boxIndex > 0 and boxIndex < len(boxes) and \
+	if numCharsInRow > 0 and boxIndex < len(boxes) and \
 	   boxes[boxIndex]['boxLeft'] >= boxes[boxIndex-1]['boxLeft'] and \
-	   boxes[boxIndex]['boxBottom'] <= boxes[boxIndex-1]['boxBottom'] + rowFloor:
+	   boxes[boxIndex]['boxBottom'] <= sumBottomsInRow/numCharsInRow + rowFloor:
 	   	#print 'Extra boxes in row', row
 		while boxIndex < len(boxes):
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
-			   boxes[boxIndex]['boxBottom'] > boxes[boxIndex-1]['boxBottom'] + rowFloor:
+			   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
 				break
 			else:
 				boxTop = boxes[boxIndex]['boxTop']
