@@ -9,6 +9,8 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-29 MAS  Transcribed.
+##		 2016-12-06 RSB	 Comment-proofing via octopus/ProoferComments;
+##				 changes were made.
 
 ## Page 832
 # PROGRAM DETECTS SPIN ABOUT NAV.AXES AND SETS BIT 13 OF FLAGWORD1 ON IF SPIN IS IN EXCESS OF 2.99 DEGREES/SEC .
@@ -63,7 +65,7 @@ TMTSK           CA              BIT14
                                                                 #        * OMEGAX *   *     *   * DCDUY *
 ## Page 833
                                                                 #        * OMEGAY * = * M   * X * DCDUZ *
-                                                                #        * OMEGAZ * = *  GP *   * DCDUX *
+                                                                #        * OMEGAZ *   *  GP *   *+DCDUX *
 
                 TS              OMEGA                           # COMPUTE OMEGAX
                 CA              M11

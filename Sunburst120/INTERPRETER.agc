@@ -12,7 +12,9 @@
 ##               2016-10-14 MAS  Completed transcription.
 ##		 2016-10-31 RSB	 Typos.
 ##		 2016-11-01 RSB	 More typos.
-
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
+	
 ## Page 953
 # SECTION 1  DISPATCHER
 
@@ -199,7 +201,7 @@ PUSHUP          CAF             OCT23                           # IF THE LOW 5 B
                 MASK            CYR                             # 20, THIS OP REQUIRES SPECIAL ATTENTION.
                 AD              -OCT10                          # (NO -0).
                 CCS             A                               
-                TCF             REGUP                           # FOR ALL CODES GREATEER THAN OCT 7.
+                TCF             REGUP                           # FOR ALL CODES GREATER THAN OCT 7.
 
 -OCT10          OCT             -10                             
 
@@ -231,7 +233,7 @@ OCTAL3          OCT             3                               # 2 IN DP, AND 3
 #           TEST THE SECOND PREFIX BIT TO SEE IF THIS IS A MISCELLANEOUS OR A UNARY/SHORT SHIFT OPERATION.
 
 OPJUMP2         CCS             CYR                             # TEST SECOND PREFIX BIT.
-                TCF             OPJUMP3                         # TEST THIRD BIT TO SEE IF UNARY OR SHIFT
+                TCF             OPJUMP3                         # TEST THIRD BIT TO SEE IF UNARY OR SHIFT.
 
 -ENDVAC         DEC             -45                             
 
@@ -253,8 +255,8 @@ ITR7            INDEX           A
 ## Page 961
 #          COMPLETE THE DISPATCHING OF UNARY AND SHORT SHIFT OPERATIONS.
 
-OPJUMP3         TS              FBANK                           # CALL IN BANK 0 (BIT5S 11-15 OF A ARE 0.)
-#          ITRACE (6) REFERS TO "OPJUMP3"
+OPJUMP3         TS              FBANK                           # CALL IN BANK 0 (BIT5 11-15 OF A ARE 0.)
+#          ITRACE (6) REFERS TO "OPJUMP3".
                 CCS             CYR                             # TEST THIRD PREFIX BIT.
                 INDEX           A                               # THE DECREMENTED UNARY CODE IS IN BITS
                 TCF             UNAJUMP                         # 1-4 OF A (ZERO, EXIT, HAS BEEN DETECTED)
@@ -336,7 +338,7 @@ MISCJUMP        TCF             AXT                             # 00 - ADDRESS T
                 TCF             BOV(B)                          # 17 - BRANCH ON OVERFLOW TO BASIC OR INT.
 
 ## Page 964
-#          THE FOLLOWING JUMP TABLE APPLIES TO UNARY INSTRUCTIONS.
+#          THE FOLLOWING JUMP TABLE APPIES TO UNARY INSTRUCTIONS.
 
                 BANK            0                               # 00 - EXIT - DETECTED EARLIER.
 UNAJUMP         TCF             SQRT                            # 01 - SQUARE ROOT.
@@ -367,7 +369,7 @@ UNAJUMP         TCF             SQRT                            # 01 - SQUARE RO
 #          1. STORE               STORE MPAC. THE E ADDRESS MAY BE INDEXED.
 #          2. STODL               STORE MPAC AND RE-LOAD IT IN DP WITH THE NEXT ADDRESS (THE LOAD MAY BE INDEXED).
 #          3. STOVL               STORE MPAC AND RE-LOAD A VECTOR (AS ABOVE).
-#          4. STCALL              STORE AND DO A CALL (BOTH ADDRESES MUST BE DIRECT HERE).
+#          4. STCALL              STORE AND DO A CALL (BOTH ADDRESSES MUST BE DIRECT HERE).
 
 #          STODL AND STOVL WILL TAKE FROM THE PUSH-DOWN LIST IF NO LOAD ADDRESS IS GIVEN.
 
@@ -378,7 +380,7 @@ STADR           CA              BANKSET                         # THE STADR CODE
                 INCR            LOC                             
 ITR1            INDEX           LOC                             # THE STORECODE WAS STORED COMPLEMENTED TO
                 CS              0                               # MAKE IT LOOK LIKE AN OPCODE PAIR.
-                AD              NEGONE                          # (YUL CAN'T REMOVE 1 BECAUSE OF EARLY CCS)
+                AD              NEGONE                          # (YUL CANT REMOVE 1 BECAUSE OF EARLY CCS)
 
 DOSTORE         TS              ADDRWD                          
                 MASK            LOW11                           # ENTRY FROM DISPATCHER. SAVE THE ERASABLE
@@ -671,7 +673,7 @@ GOTO            CA              POLISH                          # BASIC BRANCHIN
                 EBANK=          1400                            # SO YUL DOESN'T CUSS THE "CA 1400" BELOW.
 
 GOTOERS         CA              POLISH                          # THE GIVEN ADDRESS IS IN ERASABLE - SEE
-                AD              -ENDVAC                         # IF RELATIVE TO THE WORK ARA.
+                AD              -ENDVAC                         # IF RELATIVE TO THE WORK AREA.
                 CCS             A                               
                 CA              POLISH                          # GENERAL ERASABLE.
                 TCF             GOTOGE                          
@@ -874,7 +876,7 @@ SETOVF          TS              OVFIND                          # SET OVFIND IF 
 # ARITHMETIC SUBROUTINES REQUIRED IN FIXED-FIXED.
 #          1.  DMPSUB     DOUBLE PRECISION MULTIPLY. MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
 #                         IS IN ADDRWD AND LEAVE A TRIPLE PRECISION RESULT IN MPAC.
-#          2.  ROUNDSUB   ROUND THE TRIPLE PRECISION CONTENTS OF MPAC TO DOUBLE PRECISION.
+#          2.  ROUNDSUB   ROUND THE TRIPLE PRECISON CONTENTS OF MPAC TO DOUBLE PRECISION.
 #          3.  DOTSUB     TAKE THE DOT PRODUCT OF THE VECTOR IN MPAC AND THE VECTOR WHOSE ADDRESS IS IN ADDRWD
 #                         AND LEAVE THE TRIPLE PRECISION RESULT IN MPAC.
 #          4.  POLY       USING THE CONTENTS OF MPAC AS A DP ARGUMENT, EVALUATE THE POLYNOMIAL WHOSE DEGREE AND
@@ -924,7 +926,7 @@ VROUND          XCH             MPAC            +2              # BUT WE NEEDNT 
                 TS              L                               
                 TC              Q                               
 
-                AD              MPAC            +1              # ADD ROUDING BIT IF MPAC +2 WAS GREATER
+                AD              MPAC            +1              # ADD ROUNDING BIT IF MPAC +2 WAS GREATER
                 TS              MPAC            +1              # THAN .5 IN MAGNITUDE.
                 TC              Q                               
 
@@ -1035,7 +1037,7 @@ POLYCOM         CAF             LVBUF                           # INCOMING X WIL
                 DXCH            VBUF                            # SAVING X IN VBUF
                 TCF             POLY2                           
 
-POLYLOOP        TS              POLYCNT                         # SAVE DECREMENTD LOOP COUNTER
+POLYLOOP        TS              POLYCNT                         # SAVE DECREMENTED LOOP COUNTER
                 CS              TWO                             
                 ADS             POLISH                          # REGRESS COEFFICIENT POINTER
 
@@ -1429,7 +1431,7 @@ DCOMP           CS              MPAC            +2
 DPOSMAX        	OCT             37777
 POSMAX          OCT             37777
 LIMITS          EQUALS          POSMAX          +1
-NEG1/2          OCT             -20000                          # MUST BE TWO LOCATIONS AHEAD OF POS1/2
+NEG1/2          OCT             -20000                          # MUST BE TWO LOCATIONS AHEAD OF POS1/2.
 
 BIT15           OCT             40000                           # BIT TABLE FOLLOWS.
 BIT14           OCT             20000
@@ -1515,7 +1517,7 @@ DEC45           DEC             45
 #          5.  VSR1 TO VSR8       VECTOR SHIFT RIGHT (ALWAYS ROUNDS).
 #          6.  VSL1 TO VSL8       VECTOR SHIFT LEFT (NEVER ROUNDS).
 
-#          THE FOLLOWING CODES REQUIRE AND ADDRESS WHICH MAY BE INDEXED:*
+#          THE FOLLOWING CODES REQUIRE AN ADDRESS WHICH MAY BE INDEXED:*
 
 #          1.  SR                 SCALAR SHIFT RIGHT.
 #          2.  SRR                SCALAR SHIFT RIGHT AND ROUND.
@@ -1692,7 +1694,7 @@ TSLCLOOP        INCR            MPTEMP                          # INCREMENT SHIF
                 DAS             MPAC            +1              
                 AD              MPAC                            
                 ADS             MPAC                            
-TSLCTEST        DOUBLE                                          # SEE IF (ANOTHER) SHIFT IS REQUIRED
+TSLCTEST        DOUBLE                                          # SEE IF (ANOTHER) SHIFT IS REQUIRED.
                 OVSK                                            
                 TCF             TSLCLOOP                        # YES - INCREMENT COUNT AND SHIFT AGAIN.
 
@@ -1736,7 +1738,7 @@ GENSHFT2        TS              MPTEMP                          # DECREMENTED SH
                 TCF             LEFT-                           # NEGATIVE SHIFT COUNT WITH SR OR SRR.
 
 ## Page 1006
-#          GENERAL SHIFT RIGHT
+#          GENERAL SHIFT RIGHT.
 
 RIGHT           CCS             MODE                            # SEE IF VECTOR OR SCALAR.
                 TCF             GENSCR                          
@@ -1973,7 +1975,7 @@ DVNORM          CA              BUF                             # SEE IF DIVISOR
 
                 DDOUBL                                          # PROLOGUE WHICH NORMALIZES THE DIVIDEND
                 DDOUBL                                          # WHEN IT IS KNOWN THAT NO DIVISION
-                DDOUBL                                          # OVEFLOW WILL OCCUR.
+                DDOUBL                                          # OVERFLOW WILL OCCUR.
                 DDOUBL                                          
                 DDOUBL                                          
                 DDOUBL                                          
@@ -1989,7 +1991,7 @@ DVNORM          CA              BUF                             # SEE IF DIVISOR
 MAXTEST         CCS             MAXDVSW                         # 0 IF MAJORS MIGHT BE =, -1 OTHERWISE.
 BIASHI          DEC             .4192           B-1             # SQRT CONSTANTS
 
-                TCF             MAXDV                           # CHECK TO SEE IF THAY ARE NOW EQUAL.
+                TCF             MAXDV                           # CHECK TO SEE IF THEY ARE NOW EQUAL.
 
 ## Page 1014
 #          THE FOLLOWING IS A GENERAL PURPOSE DOUBLE PRECISION DIVISION ROUTINE. IT DIVIDES MPAC BY BUF AND LEAVES
@@ -2081,7 +2083,7 @@ MAXDV           CS              MPAC                            # SEE IF MAXDV C
                 AD              BUF                             # NORMALIZATION.
                 EXTEND                                          
                 BZF             +2                              
-                TCF             GENDDV                          # MPAC NOW LESS THAN BUFF - DIVIDE AS USUAL
+                TCF             GENDDV                          # MPAC NOW LESS THAN BUF - DIVIDE AS USUAL
 
  +2             CAF             POSMAX                          # SET MAJOR PART OF RESULT.
                 TS              MPAC                            
@@ -2208,7 +2210,7 @@ DDVCALL         DXCH            MPAC                            # CALL PRE-DIVID
 
 ## Page 1021
 /AGREE          CAF             HALF                            # FORCE SIGN AGREEMENT IN DIVIDEND
-                DOUBLE
+                DOUBLE						# (ALREADY DONE FOR DIVISOR).
                 AD              MPAC            +1
                 TS              MPAC            +1
                 CAF             ZERO
@@ -2232,7 +2234,7 @@ SLOPELO         DEC             .8324
 ## Page 1022
 #          THE FOLLOWING ROUTINE EXECUTES THE UNIT INSTRUCTION, WHICH TAKES THE UNIT OF THE VECTOR IN MPAC.
 
-UNIT            TC              MPACVBUF                        # SAVE ARGUMENT IN VBUF.
+UNIT            TC              MPACVBUF                        # SAVE THE ARGUMENT IN VBUF.
                 CAF             ZERO                            # MUST SENSE OVERFLOW IN FOLLOWING DOT.
                 XCH             OVFIND                          
                 TS              TEM1                            
@@ -2455,7 +2457,7 @@ PUSH            EXTEND                                          # PUSH DOWN MPAC
 TPUSH           CA              MPAC            +2              
                 TCF             ENDTPUSH        +2              
 
-RVQ             INDEX           FIXLOC                          # RVQ -- RETURN IVA QPRET.
+RVQ             INDEX           FIXLOC                          # RVQ - RETURN IVA QPRET.
                 CA              QPRET                           
                 TS              POLISH                          
                 TCF             GOTO            +4              # (ASSUME QPRET POINTS TO FIXED ONLY.)
@@ -2472,7 +2474,7 @@ DSQSUB          CA              MPAC            +1              # SQUARES THE SC
                 XCH             MPAC            +1              
                 EXTEND                                          
                 MP              MPAC                            
-                DDOUBL                                          # AND MAYBE OVEFLOW.
+                DDOUBL                                          # AND MAYBE OVERFLOW.
                 DAS             MPAC            +1              # AND SET A TO NET OVERFLOW.
                 XCH             MPAC                            
                 EXTEND                                          
@@ -2567,7 +2569,7 @@ SMPAC+          AD              -1/2+2                          # SEE IF ARGUMEN
 ARGHI           CAF             SLOPEHI                         # ARGUMENT BETWEEN .25 AND .5. GET A
                 EXTEND                                          # LINEAR APPROXIMATION FOR THIS RANGE.
                 MP              MPAC                            
-                AD              BIASHI                          # X0/2 = (MPAC/2)(SLOPHI) + BIASHI/2.
+                AD              BIASHI                          # X0/2 = (MPAC/2)(SLOPEHI) + BIASHI/2.
 
  +4             TS              BUF                             # X0/2 (ARGLO ENTERS HERE).
                 CA              MPAC                            # SINGLE-PRECISION THROUGHOUT.
@@ -2576,7 +2578,7 @@ ARGHI           CAF             SLOPEHI                         # ARGUMENT BETWE
                 DV              BUF                             # (MPAC/2)/(X0/2)
                 EXTEND                                          
                 MP              HALF                            
-                ADS             BUF                             # X1 = X0/2 + .5(MPAX/2)/(X0/2).
+                ADS             BUF                             # X1 = X0/2 + .5(MPAC/2)/(X0/2).
 
                 EXTEND                                          
                 MP              HALF                            # FORM UP X1/2.
@@ -2642,7 +2644,7 @@ NORMTEST        CCS             CYL                             # SEE IF ARGUMEN
 ## Page 1032
 # TRIGONOMETRIC FUNCTION PACKAGE.
 
-#          THE FOLLOWING TRIGONOMETRIC FUNCTIONS ARE AVAIALABLE AS INTERPRETIVE OPERATIONS:
+#          THE FOLLOWING TRIGONOMETRIC FUNCTIONS ARE AVAILABLE AS INTERPRETIVE OPERATIONS:
 
 #          1.  SIN                COMPUTES (1/2)SINE(2 PI MPAC).
 #          2.  COS                COMPUTES (1/2)COSINE(2 PI MPAC).
@@ -2876,7 +2878,7 @@ BUFNEG          CCS             A
 
 AXT             TC              TAGSUB                          # SELECT APPROPRIATE INDEX REGISTER.
                 CA              POLISH                          
-XSTORE          INDEX           INDEXLOC                        # CONTAINS C(FIXLOC) OR C(FIXLOC)+1
+XSTORE          INDEX           INDEXLOC                        # CONTAINS C(FIXLOC) OR C(FIXLOC)+1.
                 TS              X1                              
                 TCF             DANZIG                          
 
@@ -3024,7 +3026,7 @@ CALL/ITA        CCS             CYR
                 TCF             MSTORE1                         
 
 ## Page 1043
-#          THE FOLLOWING OPERATIONS ARE AVAILABLE FOR ALTERING AND TESTING INTERPRETATIVE SWITCHES:
+#          THE FOLLOWING OPERATIONS ARE AVAILABLE FOR ALTERING AND TESTING INTERPRETIVE SWITCHES:
 
 # 00       BONSET                 SET A SWITCH AND DO A GOTO IF IT WAS ON.
 # 01       SETGO                  SET A SWITCH AND DO A GOTO.
@@ -3095,7 +3097,7 @@ SWSTORE         INDEX           SWWORD
 ## Page 1045
  +13D           RELINT                                          # 11 - NOOP.
                 CAF             BIT13                           
-                EXTEND                                          # DISPATCH SEQUENCE CHANGING OR BRANCING
+                EXTEND                                          # DISPATCH SEQUCE CHANGING OR BRANCHING
                 MP              POLISH                          # CODE.
                 MASK            B3TOB4                          
                 INDEX           A                               

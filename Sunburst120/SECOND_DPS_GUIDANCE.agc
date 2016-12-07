@@ -17,6 +17,8 @@
 ##				 yaYUL at this time.  Appropriate comments were also added
 ##				 at the points in the code where this happened.
 ##		 2016-11-02 RSB	 More typos.
+##		 2016-12-06 RSB	 Comment proofing via octopus/ProoferComments
+##				 performed, and changes made.
 
 ## Page 871
 
@@ -547,7 +549,7 @@ SRS2COMP        DLOAD           DDV
                 CA              ZERO                            #       SECOND COMPONENTS
                 TS              RS              +2              #       OF RS AND VS ARE
                 TS              RS              +3              #       ZEROED HERE TO PREVENT
-                TS              VS              +2              #       OVERFLOW TROBULE IN
+                TS              VS              +2              #       OVERFLOW TROUBLE IN
                 TS              VS              +3              #       THE ACS EQUATION.
                 TC              PHASCHNG                        # TIME ONLY?
  +402           OCT             04022                           
@@ -650,7 +652,7 @@ TTF/4CL         EXTEND
 
                 PUSH            VSU                             # PUSH ACS UNTIL SEEN IF AFCS OVERFLOWS
                                 ASPRT                           
-                BOV                                             
+                BOV                                             # BRANCH, SET ALARM, RETAIN GOOD AFCS
                                 OVF2DPS2                        
                                                                 # -      -   -
                 STOVL           AFCS                            # AFCS = ACS-ASPRT
@@ -1002,7 +1004,7 @@ OVF2DPS4        TS              OVFIND                          # OVERFLOW AFTER
 # CONDITIONS INCLUDE A FREE-FALL EXTRAPOLATION OF THE ACTUAL ORBIT.) THE EXTRAPOLATION PERFORMED BY IGNITN1
 # INCLUDES ALL EFFECTS OF ENGINE THRUST DURING THE LITEUP PROCEDURE, AND IT USES THE
 # THRUST POINTING DIRECTION WHICH WILL BE COMMANDED AT THE INITIATION OF MAXIMUM THRUST.
-# THIS EXTRAPOLATED STATE IS THEN FED TO TEH GUIDANCE EQUATIONS, WHICH COMPUTE THE THRUST POINTING
+# THIS EXTRAPOLATED STATE IS THEN FED TO THE GUIDANCE EQUATIONS, WHICH COMPUTE THE THRUST POINTING
 # DIRECTION (UNAFC/2) AND THE THRUST ACCELERATION MAGNITUDE COMMAND (/AFC/).
 
 # IGNITN2 THEN RECEIVES THIS OUTPUT DATA FROM THE GUIDANCE EQUATIONS AND DETERMINES WHETHER THE THRUST
@@ -1174,7 +1176,7 @@ TCOUNTFC        CCS             COUNTFC
 # XTRIGN1 RECEIVES THE EXTRAPOLATION PERIOD IN PDUM; THE INITIAL STATE IN RDUM, VDUM; THE THRUST ACCELERATION
 # MAGNITUDE IN MPAC, DIRECTION IN UNAFC/2; AND JERK IN JDUM.
 
-# IT LEAVES GRAVITY IN GDUM, THE TOTAL INITIAL ACCELERATION IN ADUM, AND THE EXTRAPLOATED STATE IN RDUM, VDUM.
+# IT LEAVES GRAVITY IN GDUM, THE TOTAL INITIAL ACCELERATION IN ADUM, AND THE EXTRAPOLATED STATE IN RDUM, VDUM.
 
 # PRESENTLY THE DUM REGISTERS OCCUPY LOCATIONS FIXLOC +6 THRU FIXLOC +45 OCTAL.
 
@@ -1325,7 +1327,7 @@ ROOTPSRS        EXTEND
 ## Page 901
                 TS              DERPTR                          # DER TABL POINTER
                 TS              MPAC            +5              # DER TABL ADRES
-                CCS             MPAC            +4              # NO POWER SERIES DEGREE 1 OR LESS
+                CCS             MPAC            +4              # NO POWER SERIES OF DEGREE 1 OR LESS
                 TS              MPAC            +6              # N-2
                 CA              ZERO                            # MODE USED AS ITERATION COUNTER. MODE
                 TS              MODE                            # MUST BE POS SO ABS WON'T COMP MPAC+3 ETC
@@ -1335,7 +1337,7 @@ ROOTPSRS        EXTEND
                 EXTEND                                          
                 DCA             MPAC                            # FETCH ROOT GUESS, KEEPING IT IN MPAC
                 DXCH            ROOTPS                          # AND IN ROOTPS
-                INDEX           MPAC            +3              # PWR TABLE ADRES
+                INDEX           MPAC            +3              # PWR TABL ADRES
                 CA              5                               # PRECROOT TO A
                 TC              SHORTMP                         # YIELDS DP PRODUCT IN MPAC
                 TC              USPRCADR                        
@@ -1380,7 +1382,7 @@ ROOTLOOP        EXTEND
 
                 EXTEND                                          
                 DCA             ROOTPS                          
-                DXCH            MPAC                            # CURRENT ROOT TO MPAC, FETCHING DERIVATIVE
+                DXCH            MPAC                            # CURRENT ROOT TO MPAC, FETCHING DERIVTIVE
                 DXCH            BUF                             # LEAVE DERIVATIVE IN BUF AS DIVISOR
                 EXTEND                                          
                 DCA             MPAC            +3              # LOAD A, L WITH PWR TABL ADRES, N-1

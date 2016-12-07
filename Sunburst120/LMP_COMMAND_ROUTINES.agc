@@ -9,6 +9,8 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-28 HG   transcribed
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 799
 #          THE FOLLOWING SUBROUTINES ALLOW MISSION PROGRAMS TO REQUEST LMP (LEM MISSION PROGRAMMER) OUTPUTS.
@@ -77,7 +79,7 @@ UPLMPIN         CCS             LMPIN                   # UPDATE POINTER
                 TCF             +2
 
 1LMP+DT         EXTEND                                  # SAVE RETURN FOR RESTARTS
-                QXCH            LMPRET
+                QXCH            LMPRET			# IS LXCH IF FROM ABOVE
                 CA              BBANK
                 TS              LMPBBANK
 

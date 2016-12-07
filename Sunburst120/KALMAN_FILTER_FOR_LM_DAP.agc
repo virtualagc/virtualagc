@@ -1,16 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     KALMAN_FILTER_FOR_LM_DAP.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-17 MAS  Began.
-##               2016-10-18 MAS  Completed adaptation from Aurora 12 / transcription.
-##		 2016-10-31 RSB	 Typos
+## Copyright:   	Public domain.
+## Filename:    KALMAN_FILTER_FOR_LM_DAP.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-17 MAS  Began.
+##              2016-10-18 MAS  Completed adaptation from Aurora 12 / transcription.
+##		2016-10-31 RSB	Typos
+##		2016-12-06 RSB	Comment-proofing via octopus/ProoferComments; changes
+##				were made.
 
 ## Page 574
 # THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH INITIALIZES THE KALMAN FILTER AND SETS UP A P-AXIS RUPT TO
@@ -52,7 +54,7 @@ FILTER          CAF             MS30F                           # RESET TIMER IM
                 DCA             PFRPTLST                        # POST FILTER RUPT LIST
                 DXCH            T5ADR                           
 
-                CS              T5ADR                           # IF THE TRIM GIBMAL CONTROL RUPT IS NEXT,
+                CS              T5ADR                           # IF THE TRIM GIMBAL CONTROL RUPT IS NEXT,
                 AD              GTS2CADR                        # REDUCE THE LENGTH OF THIS TIME5 RUPT.
                 EXTEND
                 BZF             +2
@@ -149,6 +151,7 @@ FLTYAXIS        INDEX           QRCNTR
 # SO IT MUST BE READ NON-DESTRUCTIVELY BUT NEED NOT BE RESTORED AFTER EACH KALMAN FILTER PASS.
 
 ## Page 577
+# INTEGRATION EXTRAPOLATION EQUATIONS:
 
 KLMNFLTR        CAE             CDU2DOT                         # A SCALED AT PI/8 (USE S.P.)
                 EXTEND                                          
@@ -225,7 +228,7 @@ KLMNFLTR        CAE             CDU2DOT                         # A SCALED AT PI
                 EXTEND                                          #  .     .
                 MP              W1                              # CDU = CDU + DPDIFF (D.P.) * W1 (S.P.)
                 DAS             CDUDOT                          
-                CAE             ITEMP5                          # W1 IS CALED AT 32
+                CAE             ITEMP5                          # W1 IS SCALED AT 32
                 EXTEND                                          # DPDIFF IS RESCALED TO PI/128
                 MP              W1                              # W1*DPDIFF IS SCALED AT PI/4 (AS CDUDOT)
                 ADS             CDUDOT          +1              
@@ -279,7 +282,7 @@ FILTAXIS        DXCH            CDU
 # SUBROUTINE FOR FILTER WHICH TAKES 1 COMPLEMENT NUMBER INTO A 2 COMP.
 
 ONETOTWO        DDOUBL                                          # SEE RTB OP CODES IN BANK 15 FOR NOTES ON
-                CCS             A                               #   THIS COMPUTATION
+                CCS             A                               #   THIS COMPUTATION.
                 AD              ONE                             
                 TCF             +2                              
                 COM                                             
@@ -296,7 +299,7 @@ ONETOTWO        DDOUBL                                          # SEE RTB OP COD
 FILFIRST        LXCH            DAPTIME                         # INITIALIZE TIME.
                 CAF             POINT=90                        # INITIALIZE THE WEIGHTING VECTOR POINTER
                 TS              WPOINTER                        
-                CAF             MOSTPASS                        # SET UP FOR THE NEXT PASSES
+                CAF             MOSTPASS                        # SET UP FOR NEXT PASSES
                 TS              STEERADR                        
                 EXTEND                                          # SET UP POST FILTER RUPT LIST
                 DCA             DGTSFADR                        
@@ -323,7 +326,7 @@ FILFIRST        LXCH            DAPTIME                         # INITIALIZE TIM
                 MP              BIT14                           
                 DXCH            CDUZFIL                         
                 CA              ZERO                            
-                TCF             +4                              # RATES INITIALIZED BY RATEINIT
+                TCF             +4                              # RATES INITIALIZED BY RATEINIT.
                 TS              DCDUYFIL        +1              
                 TS              DCDUZFIL                        
                 TS              DCDUZFIL        +1              
@@ -362,7 +365,7 @@ POSTPFIL        2CADR           FILTER
 # INITIALIZATION FOR WHICH THEY ARE TO BE USED.  (THE VECTORS ARE STORED IN ORDERED TRIPLES (W0,W1,W2) IN
 # DESCENDING ORDER IN TIME WITH THE STEADY STATE VALUES AT THE TOP.)
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 # WEIGHTING VECTOR SET :   07/28/67     9:07
 
@@ -463,7 +466,7 @@ WVECTOR         DEC             0.07679                         # W0 AT RELATIVE
                 DEC             0.47825                         # W0 AT RELATIVE TIME : 0.05 SECONDS
                 DEC             0.57064                         # W1 AT RELATIVE TIME : 0.05 SECONDS
                 DEC             0.00174                         # W2 AT RELATIVE TIME : 0.05 SECONDS
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 ## Page 585
 # DUMMY TRIM GIMBAL RUPT:
@@ -507,7 +510,7 @@ FILDUMMY        CAF             MS30120                         # RESET TIMER IM
                 TC              TORQUEVK
                 TCF             RESUME                          
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 # CODING FOR RATE HOLD MODE WRITTEN OVER.
 
@@ -557,7 +560,7 @@ RESETCTR        CA              EBANK6                          # SAVE CALLERS E
 
 # FOLLOWING CODING LEFT IN PLACE TO PRESERVE RELATIVE ADDRESSES.
 
-                TS              DELCDUX                         # IF 0, DONE DELCDUY AND ZERO DELCDUX
+                TS              DELCDUX                         # IF 0, DONE DELCDUY AND ZERO DELCDUX.
 
 
 
@@ -565,7 +568,7 @@ RESETCTR        CA              EBANK6                          # SAVE CALLERS E
                 TCF             RESUME
                 TC              CCSHOLE
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 ## Page 587
 # THIS SUBROUTINE COMPUTES JET TORQUE CONTRIBUTION TO RATE
@@ -671,7 +674,7 @@ DORUTDUM        CAF             MS30120                         # FILDUMMY ENTRY
                 EXTEND
                 MP              25/32KF
                 TS              TQR
-                AD              -DELAYT                         # TQR SHOULD HOLD THE COMPLETE ON.TIME.
+                AD              -DELAYT                         # TQR SHOULD HOLD THE COMPLETE ON-TIME.
                 TS              TOFJTCHG
                 TC              TORQUEVK
 

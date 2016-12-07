@@ -11,6 +11,8 @@
 ##               2016-10-29 MAS  Transcribed
 ##		 2016-10-31 RSB	 Typos.
 ##		 2016-11-01 RSB	 More typos.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 754
 # MISSION PHASE 13 EXERCISES THE ASCENT GUIDANCE EQUATIONS OF PROG 46
@@ -25,7 +27,7 @@
                 EBANK=          AMEMORY
 
 MP13JOB         TC              FLAG1DWN
-                OCT             04000                           # KNOCK DOWN THE RESTART FLAG
+                OCT             04000                           # KNOCK DOWN RESTART FLAG
 
                 EXTEND
                 DCA             TIME2                           # PICK UP CURRENT TIME
@@ -326,7 +328,7 @@ FEEDREST        CS              FLAGWRD2                        # CHECK FEED TES
                 DEC             191                             # RCS MAIN S/O VALVES SYS B-OPEN RESET
                 DEC             79                              # RCS ASCENT FEED VALVES SYS B-CLOSE RESET
 
-                TC              MPRETRN                         # RETURN TO MISSION PORGRAM
+                TC              MPRETRN                         # RETURN TO MISSION PROGRAM
 
 ## Page 762
 # COME HERE IF WE GET A RESTART AFTER THE ENGINE IS ON & ULLAGE IS OFF.  SET UP SERVICER SWITCHES TO CAUSE THE

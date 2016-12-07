@@ -10,6 +10,8 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-28 HG   Transcribed
 ##		 2016-10-31 RSB	 Typos
+##		 2016-12-06 RSB	 Comment proofing via octopus/ProoferComments
+##				 performed, and changes made.
 
 ## Page 911
 #      PREAPS2 IS A PROGRAM WHICH INITIALIZED **ASCENT** FOR THE 2ND APS
@@ -38,7 +40,7 @@ PREAPS2         DXCH            RRETURN
                 VXSC            PDVL                    # Q1* COS27*2(-1)
                                 COS27                   # IN PDL(0)*2(-1)                          2
                                 UNITR                   # LOAD UR*2(-1)
-                VXSC            BVSU                    # UR SIN27*(-1)
+                VXSC            BVSU                    # UR SIN27*2(-1)
                                 SIN27                   # Q1 COS27-UR SIN27 = Q
                 STADR                                   #                                          0
                 STORE           QAXIS                   # STORE QAXIS
@@ -61,7 +63,7 @@ PREAPS2         DXCH            RRETURN
                                 ASCRET
                                 PRAPS                   # LOAD RETURN ADD. FROM ASCENT
                                 TGONOM
-                STORE           TGO                     # TGO$2(-1)
+                STORE           TGO                     # TGO$2(-17)
 
 ## Page 912
                 SR              DAD

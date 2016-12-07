@@ -9,6 +9,8 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-28 MAS  Transcribed.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 720
                 BANK            27
@@ -111,7 +113,7 @@ MP8TASK         TC              1LMP+DT                         # LMP COMMAND
                 DEC             200                             # 2 SECONDS DELAY
 
                 TC              1LMP+DT                         # LMP COMMAND
-                DEC             199                             # MASTER C+W ALARM RESET- COMAND RESET
+                DEC             199                             # MASTER C+W ALARM RESET- COMMAND RESET
                 DEC             100                             # 1 SECOND
 
 ## Page 722

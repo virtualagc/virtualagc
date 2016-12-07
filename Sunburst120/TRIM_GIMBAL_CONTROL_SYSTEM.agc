@@ -1,16 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     TRIM_GIMBAL_CNTROL_SYSTEM.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-18 MAS  Began.
-##               2016-10-19 MAS  Completed transcription.
-##		 2016-10-31 RSB	 Typos
+## Copyright:   Public domain.
+## Filename:    TRIM_GIMBAL_CNTROL_SYSTEM.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-18 MAS  Began.
+##              2016-10-19 MAS  Completed transcription.
+##		2016-10-31 RSB	 Typos
+##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
+##				changes made.
 
 ## Page 591
                 BANK            21
@@ -127,11 +129,11 @@ GTSTEST         CAF             TRYGIMBL                        # VERIFY THAT GT
                 MASK            DAPBOOLS                        
                 CCS             A                               
                 TCF             RCSCNTRL                        # GTS NOT OPERATIVE
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 INSERT21        TCF             CHKCNTR                         # GO CHECK TRIMCNTR (AT END OF BANK 21).
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 LOOPTEST        TS              QRCNTR                          
                 INDEX           QRCNTR                          
@@ -194,13 +196,13 @@ RCSCNTRL        EXTEND                                          # CHANGE LOCATIO
 POSTQRFL        2CADR           FILDUMMY                        # WATCH OUT FOR BANK SWITCHING D. GOSS
 
                 EBANK=          AOSQTERM
-QRJPFILT        2CADR           DUMMYFIL                        # NECESSARY BECAUS DUMMYFIL IS IN BANK 16.
+QRJPFILT        2CADR           DUMMYFIL                        # NECESSARY BECAUSE DUMMYFIL IN BANK 16.
 
                 EBANK=          DT
 TGENTRY         2CADR           STILLRCS                        
 
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 CHEKDRIV        CCS             PASSCTR                         # ENOUGH FILTER PASSES FOR DRIVE DONE?
                 TCF             COLDFILT                        #   NO.  JUST STOP DRIVES.
@@ -216,7 +218,7 @@ COLDFILT        CAF             ZERO                            # FILTER NOT WAR
 
                 TC              CCSHOLE                         # FILLER (TO PRESERVE ADDRESSES)
                 TC              CCSHOLE                         # FILLER (TO PRESERVE ADDRESSES)
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 ## Page 595
 # THE DRIVE SETTING ALGORITHM
@@ -266,13 +268,13 @@ WSFTEST         TS              SF2
 
 # LOOPTEST CODING BYPASSES THE OMEGA MAGNITUDE TEST, BUT A CHANGE IN THE TEST BOUNDS COULD REQUIRE ITS USE AGAIN.
 
-#                 CCS             WCENTRAL                        # TEST ON MAGNITUDE OF OMEGA
+#                 CCS             WCENTRAL                      TEST ON MAGNITUDE OF OMEGA
 #                 AD              -.04438                         
 #                 TCF             +2                              
 ## Page 596
 #                 AD              -.04438                         
 #                 EXTEND                                          
-#                 BZMF            ASFTEST                         # IF SMALL, GO TO ALPHA TEST
+#                 BZMF            ASFTEST                       IF SMALL, GO TO ALPHA TEST
 #                 TCF             WLARGE                          
                 TCF             ASFTEST                         # OMEGA IS ALWAYS BOUNDED BY .65 DEG/SEC.
 ACCDOTSM        CAE             KCENTRAL                        # RESCALE IF ACCDOT IS SMALL
@@ -527,7 +529,7 @@ RTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VA
 #                                                  CAF     NEGMAX         RETURN HERE FOR NO Q DRIVE.
 #                                                  TS      (QTIME)        RETURN HERE WITH TIME IN A (DECASECONDS)
 
-#                                                  CAF     TWO            INDEX FOR R-AXIS
+#                                                  CAF     TWO            INDEX FOR R-AXIS.
 #                                                  TC      TGOFFCAL
 #                                                  CAF     NEGMAX         RETURN HERE FOR NO R DRIVE.
 #                                                  TS      (RTIME)        RETURN HERE WITH TIME IN A (DECASECONDS)
@@ -543,7 +545,7 @@ RTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VA
 #        3. THE ACCELERATION APPROXIMATION FROM THE DESCENT KALMAN FILTER TRANSFORMED TO PILOT AXES (ALPHAQ OR
 # ALPHAR) SCALED AT PI/8 RAD/SEC(2).
 
-#        4. CHANNEL 12 CONTAINS THE TRIM GIMBAL DRIVES AND OTHER BITS.
+#        4. CHANNEL 12 CONTAINS THE GIMBAL DRIVES AND OTHER BITS.
 # OUTPUT 5. THE NEGATIVE GIMBAL DRIVE FLAG (NEGUQ AND NEGUR) WHERE A +1 BIT REQUESTS POSITIVE GIMBAL DRIVE
 #           (ANGULAR ACCELERATION DECREASING), A -1 BIT REQUESTS NEGATIVE GIMBAL DRIVE (ANG. ACC. INCREASING).
 #           A ZERO INDICATES NO DRIVE.
@@ -634,7 +636,7 @@ TGOFFNOW        CAF             ZERO                            # MAKE SURE PLUS
 
                 TC              CCSHOLE                         #   (FILLER)
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 QRNDXER         EQUALS          ITEMP1                          # INDEXER FOR Q OR R AXIS
 NZACCDOT        EQUALS          ITEMP2                          # TEMPORARY STORAGE FOR NON-ZERO ACCDOT
@@ -642,7 +644,7 @@ NZACCDOT        EQUALS          ITEMP2                          # TEMPORARY STOR
 -2MIN256        DEC             -.46875                         # - 2 MINUTES SCALED AT 256
 128/164         OCTAL           31000                           # 128/163.84 CONVERTING 256 TO WAITLIST/2
 .1-.05K)        OCTAL           01146                           # .0375=.075 SCALED AT 2
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 TESTCNTR        CCS             SIMPCNTR                        # USE BIGBOX FOR PASSCTR INITIALIZATION
                 TCF             BIGLOAD                         # UNTIL SIMPCNTR IS +0. THEN USE COUNTBOX.
@@ -653,7 +655,7 @@ TESTCNTR        CCS             SIMPCNTR                        # USE BIGBOX FOR
 BIGLOAD         CAE             BIGBOX
                 TCF             LOADCNTR
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 # THE NEXT FIVE CELLS ARE LEFT IN FOR SPACING.
 

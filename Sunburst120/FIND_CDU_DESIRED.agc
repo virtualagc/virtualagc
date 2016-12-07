@@ -9,10 +9,13 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-29 MAS  Transcribed.
+##		 2016-12-06 RSB	 Comment-proofing via octopus/ProoferComments;
+##				 changes were made.
 
 ## Page 838
 # THIS ROUTINE FINDCDUD COMPUTES DESIRED CDU,S WHICH CAN BE FED TO
 # DAP LATER ON.
+# DESIRED CDU,S WILL BE IN 2,S COMP
 
 # INPUT
 
@@ -20,7 +23,7 @@
 # CDUX,CDUY,CDUZ INFORM OF A SP VECTOR CDUTEMP,+2,+4.
 # DELV HALF UNIT VECTOR. PIPAS READING
 # AXISD IS A HALF UNIT VECTOR
-# CUDX,Y,Z  ARE IN 2,S COMP
+# CDUX,Y,Z  ARE IN 2,S COMP
 
 # THIS ROUTINE CAN BE ENTERED FROM INTERPRETIVE . CALL FINDCDUD
 

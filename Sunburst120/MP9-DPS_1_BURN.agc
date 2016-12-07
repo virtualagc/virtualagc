@@ -9,7 +9,9 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-28 MAS  Transcribed.
-##		 2016-11-01 RSB	Typos.
+##		 2016-11-01 RSB	 Typos.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 728
 # MISSION PHASE 9
@@ -126,7 +128,7 @@ DPS1EQU2        DLOAD                                           # COMPUTES MANEU
                 CAF             EQU3ADR
                 TS              SHJUMP1
 
-                CAF             70SECS9                         # CALL POTKALC 70 SECS LATER
+                CAF             70SECS9                         # CALL POSTKALC 70 SECS LATER
                 TC              WAITLIST
                 EBANK=          TDEC
                 2CADR           POSTKALC
@@ -142,7 +144,7 @@ CALLKALC        INHINT
 
                 TC              BANKCALL
                 CADR            ATTSTALL                        # SEE IF KALCMANU FINISHED
-CURT9           TC              CURTAINS                        # UNFINISHED MANUEVER
+CURT9           TC              CURTAINS                        # UNFINISHED MANEUVER
 
                 TC              PHASCHNG
                 OCT             00432                           # 2.43 FOR POSTKALC.  DON'T RESET TBASE.

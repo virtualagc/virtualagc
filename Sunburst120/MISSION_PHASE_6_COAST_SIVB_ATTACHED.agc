@@ -9,6 +9,8 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-25 MAS  Transcribed.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 no changes made.
 
 ## Page 709
 # PROGRAM DESCRIPTION

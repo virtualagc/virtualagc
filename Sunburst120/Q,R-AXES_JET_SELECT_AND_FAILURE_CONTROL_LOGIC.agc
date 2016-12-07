@@ -1,15 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     Q_R-AXES_JET_SELECT_AND_FAILURE_CONTROL_LOGIC.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-30 HG   Transcribed
+## Copyright:   Public domain.
+## Filename:    Q_R-AXES_JET_SELECT_AND_FAILURE_CONTROL_LOGIC.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-30 HG   Transcribed
 ##		2016-10-31 RSB	Typos
+##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments
+##				completed, and fixes made.
 
 ## Page 554
 # PROGRAM: POLTYPEP                MOD. NO. 1  DATE: NOVEMBER 14, 1966
@@ -61,7 +63,7 @@
 
 # DEBRIS: A,L,ALLL ITEMPS,ALL RUPTREGS.
 
-# INITIALIZAION AT ROTATION REQUEST ENTRY POINT:
+# INITIALIZATION AT ROTATION REQUEST ENTRY POINT:
 
 ## Page 555
                 BANK            20
@@ -73,7 +75,7 @@ POLTYPEP        CAF             ZERO                    # SET VOLATILE SWITCHES 
                 TS              TRANSNOW                # 3) NO TRANS. DURING ROT. KNOWN YET.
                 TS              TRANSAVE                # 4) NO TRANSLATION POLICY SELECTED YET.
 
-# TEST FOR SENSE OF ROTATION JETS.  (MAKE TRANSLATION REQUEST FROM THE ASTRONAUTS'S STICK OVERRIDE INTERNAL ULLAGE)
+# TEST FOR SENSE OF ROTATION JETS.  (MAKE TRANSLATION REQUEST FROM THE ASTRONAUT'S STICK OVERRIDE INTERNAL ULLAGE)
 
                 CAF             BIT7                    # ASTRONAUT +X TRANSLATION REQUEST TEST.
                 EXTEND
@@ -127,9 +129,9 @@ CHKFAILS        TS              THISPOLY                # A FLAG IS SET TO DO SO
                 CCS             A                       # IF C(A) = +0, THEN THERE ARE NO FAILURES
                 TCF             +2                      # IN THIS POLICY AND THE LM DAP USES IT.
                 TCF             POLFOUND                # IF C(A) IS NOT +0, IT IS POSITIVE AND
-                EXTEND                                  # FIRST THE REALTIVE ADDRESS INDEXER IS
+                EXTEND                                  # FIRST THE RELATIVE ADDRESS INDEXER IS
                 DIM             POLRELOC                # DECREMENTED BY ONE FOR THE NEXT POLICY,
-                CCS             LOOPCTR                 # THEN A CHECK IS MADE FRO ANY MORE USABLE
+                CCS             LOOPCTR                 # THEN A CHECK IS MADE FOR ANY MORE USABLE
                 TCF             BESTPOLS                # POLICIES, IF NO MORE, C(LOOPCTR) = +0.
 
 # ***** JET FAILURE ABORT SEQUENCE. *****
@@ -228,7 +230,7 @@ POLFOUND        CAE             THISPOLY                # GET POSITIVE-VALUED PO
 # ENTER HERE FOR -X TRANSLATION POLICIES:
 
 -XPOLICY        CAF             FIVE                    # SET POLRELOC FOR -X TRANS. INDEXING.
-                TS              POLRELOC                # (INITIAL VALUE ALWYAS FOR 4-JET POLICY.)
+                TS              POLRELOC                # (INITIAL VALUE ALWAYS FOR 4-JET POLICY.)
 
 # TEST FOR TRANSLATION TO BE COMBINED WITH ROTATION JETS.
 
@@ -242,7 +244,7 @@ POLFOUND        CAE             THISPOLY                # GET POSITIVE-VALUED PO
                 CCS             A                       # 0: 2 JET MODE (SKIP OUT).
                 TCF             TRANCONT                # 1: 4 JET MODE (CONTINUE).
 
-# TEST TRANSLATION POLICIES FOR JET FAILURE:
+# TEST TRANSLATION POLICIES FOR JET FAILURES:
 
 TRANNEXT        INDEX           POLRELOC                # PICK UP POLICY FOR +/-X TRANSLATION
                 CAF             TRANPOLY                # FROM TABLE (INDEXED WITHIN REQUESTED
@@ -268,7 +270,7 @@ TRANNEXT        INDEX           POLRELOC                # PICK UP POLICY FOR +/-
                 CS              TWO                     # TEST IF POLICY IS USING FOUR JETS (WHICH
                 AD              LOOPCTR                 # IS EQUIVALENT TO LOOPCTR = 2).  IF 4-JET
                 EXTEND                                  # THIS POLICY MUST BE USED AS JTSATCHG.
-                BZF             TRAN4JET                # OTHERWISE, MUST CHECK TRNASAVE FIRST.
+                BZF             TRAN4JET                # OTHERWISE, MUST CHECK TRANSAVE FIRST.
 
 # WHEN NOT 4-JET TRANSLATION,  CHECK FOR SAVED POLICY:
 
@@ -301,7 +303,7 @@ TRANSTOR        CAE             THISPOLY                # SAVE THIS POLICY FOR L
                 CAE             THISPOLY                # USE BOTH ROTATION AND TRANSLATION JETS
                 ADS             JTSONNOW                # AT JTSONNOW (BIT 15 IS ALREADY SET).
 
-                TCF             TRANSLAT                # GO START FINDING JTSATCHG POLICY.
+                TCF             TRANSLAT                # GO TO START FINDING JTSATCHG POLICY.
 
 # STOP SEARCH IF GOOD TRANSLATION POLICY ALREADY RECORDED:
 
@@ -322,7 +324,7 @@ TRANCONT        EXTEND                                  # CONTINUE THE TRANSLATI
                 CCS             TRANSNOW                # IF FAILURES STOP TRANSLATION DURING
                 TCF             TRANSLAT                # ROTATION' CONTINUE BY FINDING JTSATCHG.
 
-                TCF             ABORTJET                # TURN OF JETS AND ABORT.
+                TCF             ABORTJET                # TURN OFF JETS AND ABORT.
 
 # BEGIN SEARCH FOR JTSATCHG POLICY:
 
@@ -348,7 +350,7 @@ LATERJET        AD              BIT15                   # SET BIT 15 TO INDICATE
                 MASK            NETACNDX                # OF JETS, DIRECTION, AND AXIS' COMPUTE
                 CCS             A                       # THE INDEX VALUE FOR 2 JETS ABOUT THAT
                 TCF             +3                      # AXIS (IN THAT DIRECTION).  CONTRIVANCE
-                EXTEND                                  # MAKES THIS EQUIVALENT TO  IF BIT1 IS ON
+                EXTEND                                  # MAKES THIS EQUIVALENT TO  IF BIT1 IS ON.
                 AUG             NETACNDX                # (INDEP. OF SIGN)  AUGMENT  NETACNDX.
 
 # TRANSFORM POINTER TO CORRESPOND TO JETS ACTUALLY CHOSEN.
@@ -407,8 +409,8 @@ TORKTABL        DEC             0                       # FROM THE 3 PACKED BITS
                 DEC             -4                      # 010: -1 JET   100: -2 JETS  110: -4 JETS
 
 
-# RELATIVE ADDRESSES AND NUMBER OF ALTERNATIVE POLICIES ARE LISTED IN THE FOLLOWINF TABLES.  EACH ENTRY HAS THE FORM
-#          0XYYY  WHERE   X INDICATES THE NUMBER OF ALTERNATIVE POLICIES AND
+# RELATIVE ADDRESSES AND NUMBER OF ALTERNATE POLICIES ARE LISTED IN THE FOLLOWING TABLES.  EACH ENTRY HAS THE FORM
+#          0XYYY  WHERE   X INDICATES THE NUMBER OF ALTERNATE POLICIES AND
 #                       YYY IS THE RELATIVE ADDRESS IN POLTABLE OF THE "OPTIMAL" POLICY.
 
 # FORCE-COUPLE POLICIES:
@@ -467,7 +469,7 @@ NORMLPOL        OCTAL           02026                   # +2 U-AXIS JETS
                 OCTAL           01117                   # +1 V-AXIS JETS
                 OCTAL           02120                   # +2 V-AXIS JETS
                 OCTAL           01122                   # -1 V-AXIS JETS
-                OCTAL           02123                   # -2 V-AXIS JETS
+                OCTAL           02123                   # -2 V AXIS JETS
 
 ## Page 565
 
@@ -477,7 +479,7 @@ TRANPOLY        OCTAL           +00042                  #  2 10       * +X TRANS
                 OCTAL           +00210                  #  6 14       *                         1
                 OCTAL           +00252                  #  2  6 10 14 *                         2
 
-                OCTAL           +00104                  #  3 13       * -X TRANSLATIO JETS      3
+                OCTAL           +00104                  #  3 13       * -X TRANSLATION JETS     3
                 OCTAL           +00021                  #  1  9       *                         4
                 OCTAL           +00125                  #  1  5  9 13 *                         5
 
@@ -511,7 +513,7 @@ POLTABLE        OCTAL           +14025                  #  5  9       * +Q-AXIS 
                 OCTAL           +02031                  #  6  9       *                         22
                 OCTAL           +03133                  #  2  6  9 13 *                         23
 
-# FORCE COUPLE AND + X SENSE POLICIES:
+# FORCE COUPLE AND +X SENSE POLICIES:
 
                 OCTAL           -04405                  #  5          * +U-AXIS FORCE-COUPLES   24
                 OCTAL           -04601                  # 14          *     AND +X SENSE        25

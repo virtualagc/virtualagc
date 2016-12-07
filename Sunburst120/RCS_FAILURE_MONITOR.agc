@@ -1,20 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     RCS_FAILURE_MONITOR.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-30 HG   Transcribed
-##		 2016-10-31 RSB	 Typos.
+## Copyright:   Public domain.
+## Filename:    RCS_FAILURE_MONITOR.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-30 HG   Transcribed
+##		2016-10-31 RSB	 Typos.
+##		2016-12-06 RSB	Comment proofing via octopus/ProoferComments
+##				performed, and changes made.
 
 ## Page 569
-# PROGRAM DESCRIPTION:
+# PROGRAM DESCRIPTION                                     DATE: 7 JAN 67 
 
-#          AUTHOR:  J S MILLER    (MIT INSTRUMENTATION LAB))
+#          AUTHOR:  J S MILLER    (MIT INSTRUMENTATION LAB)
 
 #          THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 960 MS.  ITS FUNCTION IS TO EXAMINE THE STATE
 # OF THE LOW 8 BITS OF CHAN 32 TO SEE IF RCS-JET FAILURE BITS HAVE APPEARED OR DISAPPEARED.  WHEN A STATE CHANGE
@@ -63,12 +65,12 @@
 
 ## Page 570
                 BANK            12
-                EBANK=          STATE                   # NO SWITCHED ERASABLE USED
+                EBANK=          STATE                   # NO SWITCHED ERASABLE USED.
 
 RCSMONIT        CCS             JETRESET                # CHECK WHETHER A RESET IS WAITING.
                 TC              STORCOM         -1      # THERE IS A RESET TO SEND.  DO IT.
                 CS              ZERO
-                TS              JETRESET                # DEACTIVATE BUFFER.
+                TS              JETRESET                # DEACTIVATE THE BUFFER.
 
 AFTRESET        CS              ZERO
                 EXTEND                                  # PICK UP & INVERT INVERTED CHANNEL 32.
@@ -110,7 +112,7 @@ RCSMON          CA              RCSMONT3
                 XCH             L                       # ZERO TO L IN THE PROCESS.
 
  -3             INCR            L
-                DOUBLE                                  # BOUND TO GET OVERFLOW, SINCE WE
+                DOUBLE                                  # BOUND TO GET AN OVERFLOW, SINCE WE
                 OVSK                                    # ASSURED INITIAL NZ IN A.
                 TCF             -3
 
@@ -132,10 +134,10 @@ RCSMON          CA              RCSMONT3
                 TC              STORCOM                 # SEND THE ISOLATION COMMAND.
 
                 CA              RCSMONT3
-                ADS             LMPJFAIL                # SET BIT SHOWING COMMAND SENT.
+                ADS             LMPJFAIL                # SET THE BIT SHOWING COMMAND SENT.
 
-                CS              CH5MASK                 # SET JET-FAIL BITS IN CH5MASK &
-                INDEX           RCSMONT4                # CHMASK6
+                CS              CH5MASK                 # SET THE JET-FAIL BITS IN CH5MASK &
+                INDEX           RCSMONT4                # CH6MASK.
                 MASK            FAILTABL
                 ADS             CH5MASK
 
@@ -144,7 +146,7 @@ RCSMON          CA              RCSMONT3
                 MASK            FAILTABL        +1
                 ADS             CH6MASK
 
-                TCF             RCSMONEX                # DONE
+                TCF             RCSMONEX                # DONE.
 
 ## Page 572
 LMPBIT=1        CS              RCSMONT3                # THE GROUND HAS RE-ENABLED A PAIR.
@@ -160,7 +162,7 @@ LMPBIT=1        CS              RCSMONT3                # THE GROUND HAS RE-ENAB
                 CS              FAILTABL        +1
                 MASK            CH6MASK
                 TS              CH6MASK
-                TCF             RCSMONEX                # DONE
+                TCF             RCSMONEX                # DONE.
 
 
 
@@ -180,7 +182,7 @@ KILLPAIR        2OCT            40250           00252   # 2A. JETS 10 & 11.  CMD
                 2OCT            40136           00140   # 3A. JETS  5 &  8.  CMDS  94 &  95.
                 2OCT            40350           00352   # 4A. JETS  2 &  4.  CMDS 232 & 233.
 
-#          FAILTABL ENTRIES CONTAIN THE BIT FOR CH5MASK IN THE UPPER WORD, AND TH BIT FOR CH6MASK IN THE LOWER.
+#          FAILTABL ENTRIES CONTAIN THE BIT FOR CH5MASK IN THE UPPER WORD, AND THE BIT FOR CH6MASK IN THE LOWER.
 
 FAILTABL        2OCT            00040           00010
                 2OCT            00020           00020
