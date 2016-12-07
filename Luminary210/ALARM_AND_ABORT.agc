@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 TB   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 1378
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -121,7 +122,7 @@ WHIMPER         CA              TWO
                 RESUME                                          
                 TC              POSTJUMP                        # RESUME SENDS CONTROL HERE
                 CADR            ENEMA                           
-P00DOO          INHINT                                          
+POODOO          INHINT                                          
                 CA              Q                               
 ABORT2          TS              ALMCADR                         
                 INDEX           Q                               
@@ -132,11 +133,11 @@ OCT77770        OCT             77770                           # DON'T MOVE
                 CCS             EXTVBACT                        # DO BAILOUT NOT POODOO IF EXT. VB. ACTIVE
                 TCF             WHIMPER         -1
 
-                CAF             OCT35                           # 4.35SPOT FOR GOP00DOO
+                CAF             OCT35                           # 4.35SPOT FOR GOPOODOO
                 TS              L                               
                 COM                                             
                 DXCH            -PHASE4                         
-GOP00DOO        INHINT                                          
+GOPOODOO        INHINT                                          
                 TC              BANKCALL                        # RESET STATEFLG, REINTFLG, AND NODOFLAG.
                                                                 #   ALSO RNDVZFLG, P25FLAG AND TRACKFLG
                 CADR            FLAGS                           
@@ -152,7 +153,7 @@ GOP00DOO        INHINT
 STRTIDLE        CAF             BBSERVDL                        
                 TC              SUPERSW                         
                 TC              BANKCALL                        # PUT SERVICER INTO ITS "GROUND" STATE
-                CADR            SERVIDLE                        # AND PROCED TO GOTOP00H.
+                CADR            SERVIDLE                        # AND PROCED TO GOTOPOOH.
 CCSHOLE         INHINT                                          
                 CA              Q                               
                 TC              ABORT2                          
@@ -174,7 +175,7 @@ BOTHABRT        TS              ITEMP1
                 TS              L                               
                 TCF             CHKFAIL1                        
 
-P00DOO1         INHINT                                          
+POODOO1         INHINT                                          
                 DXCH            ALMCADR                         
                 CAF             ADR77770                        
                 TCF             BOTHABRT                        

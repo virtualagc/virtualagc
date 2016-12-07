@@ -13,6 +13,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+##              2016-12-07 HG   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 661
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -171,7 +173,7 @@
 
 ## Page 664
 #       AVFLAGP
-#       VNP00H
+#       VNPOOH
 #       DISPLAYE
 #       SELECTMU
 #       PRECSET
@@ -179,7 +181,7 @@
 #       ALARM
 #       BANKCALL
 #       GOFLASH
-#       GOTOP00H
+#       GOTOPOOH
 #       TIMETHET
 #       S34/35.2
 #       PERIAPO1
@@ -196,7 +198,7 @@ P34             TC              AVFLAGA
 P74             TC              AVFLAGP
 P34/P74A        TC              P20FLGON                # SET UPDATFLG, TRACKFLG
                 CAF             V06N37                  # TTPI
-                TC              VNP00H
+                TC              VNPOOH
                 EXTEND
                 DCA             130DEG
                 DXCH            CENTANG
@@ -247,7 +249,7 @@ INTLOOP         DLOAD           DAD
                 CAF             V05N09
                 TC              BANKCALL
                 CADR            GOFLASH
-                TC              GOTOP00H
+                TC              GOTOPOOH
                 TC              P34/P74A                # PROCEED
                 TC              -7                      # V32
 
@@ -261,7 +263,7 @@ SWCHCLR         BONCLR          BON
                 TC              P34/P74E
 P34/P74D        EXIT
                 CAF             V06N37                  # TTPI
-                TC              VNP00H
+                TC              VNPOOH
 P34/P74E        TC              INTPRET
                 SETPD           DLOAD
                                 0D
@@ -309,7 +311,7 @@ P34/P74E        TC              INTPRET
                 STORE           TIG
                 EXIT
                 CAF             V06N58
-                TC              VNP00H
+                TC              VNPOOH
                 TC              INTPRET
                 CALL
                                 S34/35.5
@@ -854,10 +856,10 @@ ALLSET          STOVL           TET
 
 #       BANKCALL
 #       GOFLASH
-#       GOTOP00H
+#       GOTOPOOH
 #       S34/35.3
 #       S34.35.4
-#       VNP00H
+#       VNPOOH
 
 S34/35.5        STQ             BON
                                 SUBEXIT
@@ -873,7 +875,7 @@ FLAGON          CLEAR           VLOAD
  +5             CAF             V06N81
                 TC              BANKCALL
                 CADR            GOFLASH
-                TC              GOTOP00H
+                TC              GOTOPOOH
                 TC              +2                      # PRO
                 TC              FLAGON          +5      # LOAD
  +2             CA              EBANK7
@@ -921,7 +923,7 @@ FLAGOFF         CALL
 #       DELAYJOB
 #       COMPTGO
 #       GOFLASHR
-#       GOTOP00H
+#       GOTOPOOH
 #       FLAGUP
 
 VN1645          STQ             DLOAD
@@ -963,7 +965,7 @@ KILCLOCK        CA              Z
                 TS              DISPDEX
 
 ## Page 684
-                TC              GOTOP00H
+                TC              GOTOPOOH
 N45PROC         CS              FLAGWRD2
                 MASK            BIT6
                 EXTEND
@@ -988,7 +990,7 @@ CLUPDATE        CA              Z
 
 #       BANKCALL
 #       GOFLASHR
-#       GOTOP00H
+#       GOTOPOOH
 #       BLANKET
 #       ENDOFJOB
 
@@ -997,7 +999,7 @@ DISPLAYE        EXTEND
                 CAF             V06N55
                 TCR             BANKCALL
                 CADR            GOFLASH
-                TCF             GOTOP00H
+                TCF             GOTOPOOH
                 TC              NORMEX
                 TCF             -5
 
@@ -1011,21 +1013,21 @@ P3XORP7X        CAF             HIGH9
                 INCR            Q
                 RETURN
 
-# ..... VNP00H     .....
+# ..... VNPOOH     .....
 
 # SUBROUTINES USED
 
 #       BANKCALL
 #       GOFLASH
-#       GOTOP00H
+#       GOTOPOOH
 
-VNP00H          EXTEND
+VNPOOH          EXTEND
                 QXCH            RTRN
                 TS              VERBNOUN
                 CA              VERBNOUN
                 TCR             BANKCALL
                 CADR            GOFLASH
-                TCF             GOTOP00H
+                TCF             GOTOPOOH
                 TC              RTRN
                 TCF             -5
 

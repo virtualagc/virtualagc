@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-22 HG   Transcribed
+##              2016-12-07 HG   fix P00 -> POO
 
 ## Page 222
                 BANK            10
@@ -70,7 +71,7 @@ DOFSTRT1        CA              PRIO30
                 TS              PVALVEST                # FOR RCS FAILURE MONITOR
                 TS              ERESTORE                # ***** MUST NOT BE REMOVED FROM DOFSTART
                 TS              SMODE                   # ***** MUST NOT BE REMOVED FROM DOFSTART
-                TS              DNLSTCOD                # SELECT P00 DOWNLIST
+                TS              DNLSTCOD                # SELECT POO DOWNLIST
                 TS              AGSWORD                 # ALLOW AGS INITIALIZATION
                 TS              UPSVFLAG                # ZERO UPDATE STATE VECTOR REQUEST FLAGWRD
                 EXTEND
@@ -170,7 +171,7 @@ MR.KLEAN        INHINT
                 DXCH            -PHASE2
 
 ## Page 225
-P00KLEAN        EXTEND
+POOKLEAN        EXTEND
                 DCA             NEG0
                 DXCH            -PHASE4
 V37KLEAN        EXTEND
@@ -330,7 +331,7 @@ PINACT          CCS             MPAC            +5      # PROCESS ALL RESTART GR
                 CAF             BIT15                   # IS MODE -0
                 MASK            MODREG
                 EXTEND
-                BZF             CALGOP00                # NO
+                BZF             CALGOPOO                # NO
                 TCF             ENDRSTRT                # YES
 PTBAD           TC              ALARM                   # SET ALARM TO SHOW PHASE TABLE FAILURE.
                 OCT             1107
@@ -338,7 +339,7 @@ PTBAD           TC              ALARM                   # SET ALARM TO SHOW PHAS
                 TCF             DOFSTRT1
 
 ## Page 229
-# DO NOT USE GOPROG2 OR ENEMA WITHOUT CONSULTING P00H PEOPLE
+# DO NOT USE GOPROG2 OR ENEMA WITHOUT CONSULTING POOH PEOPLE
 
 OCT10000        =               BIT13
 OCT30000        =               PRIO30
@@ -628,7 +629,7 @@ SWINIT          OCT             0
                 OCT             40000                   # BIT 15 = LRBYPASS.
 
 ## Page 235
-# PROGRAM NAME    GOTOP00H                   ASSEMBLY       SUNDANCE
+# PROGRAM NAME    GOTOPOOH                   ASSEMBLY       SUNDANCE
 # LOG SECTION     FRESH START AND RESTART
 
 # FUNCTIONAL DESCRIPTION
@@ -637,7 +638,7 @@ SWINIT          OCT             0
 
 # INPUT/OUTPUT INFORMATION
 
-#       A. CALLING SEQUENCE        TC GOTOP00H
+#       A. CALLING SEQUENCE        TC GOTOPOOH
 
 #       B. ERASABLE INITIALIZATION       NONE
 
@@ -657,24 +658,24 @@ SWINIT          OCT             0
                 SETLOC          FFTAG5
                 BANK
 
-                COUNT*          $$/P00
-GOTOP00H        CAF             OCT33                   # 4.33 SPOT FOR GOP00FIX
+                COUNT*          $$/POO
+GOTOPOOH        CAF             OCT33                   # 4.33 SPOT FOR GOPOOFIX
                 TS              L
                 COM
                 DXCH            -PHASE4
 
                 TC              POSTJUMP
-                CADR            GOP00FIX
+                CADR            GOPOOFIX
 OCT24           MM              20
 OCT31           MM              25
 
 
 
 
-CALGOP00        CAF             PRIO30
+CALGOPOO        CAF             PRIO30
                 TC              NOVAC
                 EBANK=          WHOCARES
-                2CADR           GOTOP00H
+                2CADR           GOTOPOOH
                 TC              POSTJUMP
                 CADR            DUMMYJOB        +2
 
@@ -683,8 +684,8 @@ CALGOP00        CAF             PRIO30
                 SETLOC          VERB37
                 BANK
 
-                COUNT*          $$/P00                  # VERB 37 AND P00 IN BANK 4.
-GOP00FIX        TC              DOWNFLAG                # ALLOW X-AXIS OVERRIDE
+                COUNT*          $$/POO                  # VERB 37 AND POO IN BANK 4.
+GOPOOFIX        TC              DOWNFLAG                # ALLOW X-AXIS OVERRIDE
                 ADRES           XOVINFLG
 
                 TC              DOWNFLAG                # INSURE THAT ULLAGE IS OFF
@@ -716,7 +717,7 @@ V37N99          VN              3799
 #       6. TRACK AND UPDATE FLAGS ARE SET TO ZERO.
 #       7. DISPLAY SYSTEM IS RELEASED.
 #       8. THE FOLLOWING ARE PERFORMED FOR EACH OF THE THREE CASES.
-#          A. PROGRAM SELECTED IS P00.
+#          A. PROGRAM SELECTED IS POO.
 #             1. RENDEZVOUS AND P25 FLAGS ARE RESET.(KILL P20 AND P25)
 #             2. STATINT1     IS SCHEDULED BY SETTING RESTART GROUP 2.
 #             3. MAJOR MODE 00 IS STORED IN THE MODE REGISTER (MODREG).
@@ -733,7 +734,7 @@ V37N99          VN              3799
 #                AND IF IT HAS, NO NEW PROGRAM IS SCHEDULED, THE EXISTING
 #                P20 OR P25 IS RESTARTED TO CONTINUE, AND ITS M M IS SET.
 #             3. CONTROL IS TRANSFERRED TO GOPROG2.
-#          C. PROGRAM SELECTED IS NEITHER P00,P20, NOR P25
+#          C. PROGRAM SELECTED IS NEITHER POO,P20, NOR P25
 #             1. V37XEQ IS SCHEDULED (AS A JOB) BY SETTING RESTART GROUP 4
 #             2. ALL CURRENT ACTIVITY EXCEPT RENDEZVOUS AND TRACKING IS DISCONTINUED BY CLEARING ALL RESTART
 #                GROUPS. IF THE RENDEZVOUS OR THE P25 FLAG IS ON, GROUP 2 IS NOT CLEARED, ALLOWING THESE PROGRAMS
@@ -790,7 +791,7 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 EXTEND
                 BZF             SETUP71                 # YES
 
-                CA              MMNUMBER                # IS NEW REQUEST P00
+                CA              MMNUMBER                # IS NEW REQUEST POO
                 EXTEND
                 BZF             ISSERVON                # YES, CHECK SERVICER STATUS
 
@@ -876,7 +877,7 @@ DUMMYAD         EXIT
                 ADRES           3AXISFLG                # RESET 3-AXIT FLAG
 
                 TC              DOWNFLAG
-                ADRES           P00HFLAG
+                ADRES           POOHFLAG
 
                 TC              DOWNFLAG                # CLEAR FOR NORMAL INFLIGHT MARKING
                 ADRES           FLT59FLG
@@ -898,13 +899,13 @@ DUMMYAD         EXIT
 
                 TC              DOWNFLAG                # ALLOW X-AXIS OVERRIDE.
                 ADRES           XOVINFLG
-                CCS             MMNUMBER                # IS THIS A P00H REQUEST
+                CCS             MMNUMBER                # IS THIS A POOH REQUEST
                 TCF             NOUVEAU                 # NO, PICK UP NEW PROGRAM
 
-P00H            TC              RELDSP                  # RELEASE DISPLAY SYSTEM
+POOH            TC              RELDSP                  # RELEASE DISPLAY SYSTEM
 
                 CAF             PRIO5                   # SET VARIABLE RESTART PRIORITY FOR
-                TS              PHSPRDT2                # P00 INTEGRATION.
+                TS              PHSPRDT2                # POO INTEGRATION.
 
                 TC              CLRADMOD                # CLRADMOD DOES AN INHINT.
 
@@ -922,9 +923,9 @@ P00H            TC              RELDSP                  # RELEASE DISPLAY SYSTEM
                 MASK            FLAGWRD0
                 TS              FLAGWRD0                #                        RENDFLG
 
-                CAF             DNLADP00
+                CAF             DNLADPOO
 
-SEUDOP00        TS              DNLSTCOD                # SET UP APPROPRIATE DOWNLIST CODE
+SEUDOPOO        TS              DNLSTCOD                # SET UP APPROPRIATE DOWNLIST CODE
                 TS              AGSWORD                 #  (CURRENT LIST WILL BE COMPLETED BEFORE
                                                         #   NEW ONE IS STARTED)
 
@@ -944,10 +945,10 @@ SEUDOP00        TS              DNLSTCOD                # SET UP APPROPRIATE DOW
                 TC              IBNKCALL                # KILL GROUPS 1,3,5,6
                 CADR            V37KLEAN
 
-                CCS             MMNUMBER                # IS IT P00H
+                CCS             MMNUMBER                # IS IT POOH
                 TCF             RENDV00                 # NO
 GOMOD           TC              IBNKCALL                # REDUNDANT EXCEPT FOR GROUP 4
-                CADR            P00KLEAN
+                CADR            POOKLEAN
 
                 CA              MMNUMBER
                 TS              MODREG
@@ -977,7 +978,7 @@ RENDV00         CS              MODREG                  # IS CURRENT PROGRAM 22
                 CA              OCT500                  # NO, IS EITHER P20 OR P25 RUNNING
                 MASK            FLAGWRD0
                 CCS             A
-                TCF             P00FIZZ                 # YES, LEAVE GROUP 2 TO PICK UP P20 OR P25
+                TCF             POOFIZZ                 # YES, LEAVE GROUP 2 TO PICK UP P20 OR P25
 
 RESET22         CS              OCT700                  # CLEAR RENDEZVOUS,P25
                 MASK            FLAGWRD0                # AND IMU IN USE FLAGS
@@ -988,7 +989,7 @@ KILL2           EXTEND                                  # NO, KILL 2
                 DCA             NEG0
                 DXCH            -PHASE2
 
-P00FIZZ         CAF             V37QCAD                 # RESTART POINT FOR V37XEQ
+POOFIZZ         CAF             V37QCAD                 # RESTART POINT FOR V37XEQ
                 TS              TEMPFLSH
 
                 TCF             GOGOPROG
@@ -1033,7 +1034,7 @@ NOUVEAU         CAF             OCT500                  # IS P20 OR P25 FLAG SET
                 CAF             DNLADMM1                # OBTAIN APPROPIRATE DOWNLIST ADDRESS
 
                 INHINT
-                TCF             SEUDOP00
+                TCF             SEUDOPOO
 
 V37NONO         TC              FALTON                  # COME HERE IF MM REQUESTED DOESNT EXIST
 
@@ -1196,7 +1197,7 @@ PREMM1          EQUALS
                 OCT             27614                   # MM 12  EBANK 7  PRIO 13
                 OCT             27006                   # MM 06  EBANK 4  PRIO 13
 # NOTE.     THE FOLLOWING CONSTANT IS THE NUMBER OF ENTRIES IN EACH OF
-# ----      THE ABOVE LISTS-1(IE, THE NUMBER OF MAJOR MODES(EXCEPT P00)
+# ----      THE ABOVE LISTS-1(IE, THE NUMBER OF MAJOR MODES(EXCEPT POO)
 #           THAT CAN BE CALLED FROM THE KEYBOARD MINUS ONE)
 
 NOV37MM         DEC             25                      # MM'S - 1
@@ -1231,7 +1232,7 @@ DNLADMM1        EQUALS
                 ADRES           RENDEZVL                # P20
                 ADRES           DESASCNT                # P12
                 ADRES           COSTALIL                # P06
-DNLADP00        =               ZERO
+DNLADPOO        =               ZERO
 COSTALIL        =               0
 AGSUPDAT        =               1
 RENDEZVL        =               2
@@ -1246,7 +1247,7 @@ LUNRSALN        =               5
 
                 EBANK=          RRECTCSM
 
-# THIS ROUTINE DOES THE P00 INTEGRATION
+# THIS ROUTINE DOES THE POO INTEGRATION
 
 STATEUP         SET             BOF                     # EXTRAPOLATE CM STATE VECTOR
                                 VINTFLAG

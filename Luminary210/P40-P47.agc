@@ -24,6 +24,7 @@
 ##				bringing the average errors-per-page to *exactly* 1.  :-)
 ##		2015-12-02 RSB	4 more errors found, with additional improvements to
 ##				ProoferComments.py ... so, 38 errors for 34 lines.
+##              1016-12-07 HG   fix P00 -> POO (appears only in a comment)
 
 ## Page 747
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -76,7 +77,7 @@
 #	   V16N40  FINAL VALUES OF TG, VG, DELTAVM
 #	   V16N85  COMP OF VG (BODY AXES) FOR POSS. RCS MANUAL MANEUVER
 #	   V05N09  POSSIBLE ALARMS
-#	   V50N07  PLEASE SELECT P00
+#	   V50N07  PLEASE SELECT POO
 #
 ## Page 748
 #	   VIA R30

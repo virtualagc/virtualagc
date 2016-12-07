@@ -13,6 +13,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+##              2016-11-29 HG   Transcribed
+##              2012-12-07 HG   fix P00 -> POO
 
 ## Page 624
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
@@ -168,10 +170,10 @@
 #       VARALARM
 #       BANKCALL
 #       GOFLASH
-#       GOTOP00H
+#       GOTOPOOH
 
 ## Page 627
-#       VNP00H
+#       VNPOOH
 #       GOFLASHR
 #       BLANKET
 #       ENDOFJOB
@@ -207,7 +209,7 @@ ALMXIT          LXC,1
                 CAF             V05N09
                 TC              BANKCALL
                 CADR            GOFLASH
-                TC              GOTOP00H
+                TC              GOTOPOOH
                 TC              -4
 P32/P72A        TC              P20FLGON
                 CAF             P30ZERO
@@ -215,7 +217,7 @@ P32/P72A        TC              P20FLGON
                 TS              TCSI
                 TS              TCSI            +1
 VN0611          CAF             V06N11                  # TCSI
-                TC              VNP00H
+                TC              VNPOOH
                 TC              INTPRET
                 DLOAD           DCOMP
                                 TCSI
@@ -246,11 +248,11 @@ VN0655          EXIT
                 CAF             V06N55                  # NN, ELEV(RGLOS)
                 TC              BANKCALL
                 CADR            GOFLASH
-                TC              GOTOP00H
+                TC              GOTOPOOH
                 TC              +2
                 TC              -5
                 CAF             V06N37                  # TTPI
-                TC              VNP00H
+                TC              VNPOOH
                 TC              INTPRET
                 DLOAD
                                 TCSI
@@ -293,7 +295,7 @@ P32/P72F        STORE           T2TOT3
                                 P32/P72F
                 EXIT
                 CAF             V06N75
-                TC              VNP00H
+                TC              VNPOOH
                 TC              INTPRET
                 VLOAD           CALL
                                 DELVEET1
@@ -454,7 +456,7 @@ P32/P72F        STORE           T2TOT3
 #       AVFLAGA
 #       AVFLAGP
 #       P20FLGON
-#       VNP00H
+#       VNPOOH
 #       SELECTMU
 #       ADVANCE
 #       CDHMVR
@@ -465,7 +467,7 @@ P32/P72F        STORE           T2TOT3
 #       ALARM
 #       BANKCALL
 #       GOFLASH
-#       GOTOP00H
+#       GOTOPOOH
 #       S32/33.1
 
 ## Page 633
@@ -477,7 +479,7 @@ P33             TC              AVFLAGA
 P73             TC              AVFLAGP
 P33/P73A        TC              P20FLGON
                 CAF             V06N13                  # TCDH
-                TC              VNP00H
+                TC              VNPOOH
                 TC              INTPRET
                 DLOAD
                                 TTPIO
@@ -517,7 +519,7 @@ P33/P73B        CALL
                 CAF             V05N09
                 TC              BANKCALL
                 CADR            GOFLASH
-                TC              GOTOP00H
+                TC              GOTOPOOH
                 TC              +2
 
 ## Page 634
@@ -554,7 +556,7 @@ P33/P73F        ABS             DSU
                 STORE           T2TOT3
                 EXIT
                 CAF             V06N75
-                TC              VNP00H
+                TC              VNPOOH
                 TC              INTPRET
                 VLOAD           CALL
                                 DELVEET2
@@ -596,7 +598,7 @@ P20FLGON        EXTEND
 # SUBROUTINES USED
 
 #       S32/33.X
-#        VNP00H
+#        VNPOOH
 
 DISDVLVC        STORE           DELVLVC
                 STQ             CALL
@@ -610,7 +612,7 @@ DISDVLVC        STORE           DELVLVC
                 STORE           DELVLVC
                 EXIT
                 CA              VERBNOUN
-                TC              VNP00H
+                TC              VNPOOH
                 TC              INTPRET
                 GOTO
                                 NORMEX

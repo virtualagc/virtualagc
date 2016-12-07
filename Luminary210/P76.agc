@@ -16,6 +16,7 @@
 ##		2016-12-01 RSB	Completed.
 ##              2016-12-01 HG   Add missing instructions for INTADR, UPDATADR
 ##                              fix operand GOTOPOOH  -> GOTOP00H
+##              2016-12-07 HG   'unfix' and revert P00 -> POO
 
 
 ## Page 711
@@ -153,7 +154,7 @@ OUT		CLEAR	EXIT		# ALLOW V37.  NO NEED TO CLEAR NODOFLAG AT
 					#  RESPONSES TRANSFER THERE FROM P76+.
 ENDP76		CAF	ZERO
 		TS	MARKCTR		# CLEAR RR TRACKING MARK COUNTER
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 
 V06N84		NV	0684
 		NV	0681

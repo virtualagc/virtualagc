@@ -14,7 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 RRB  Updated from Luminary210 source.
-#3              2016-11-30 HG   fix operand GOTOPOOH -> GOTOP00H
+##              2016-11-30 HG   fix operand GOTOPOOH -> GOTOP00H
+##              2016-12-07 HG   unfix and revert P00 -> POO 
 
 
 ## Page 657
@@ -81,7 +82,7 @@ PROG21          CAF     ONE
                 CAF     BIT2            # OPTION 2
                 TC      BANKCALL
                 CADR    GOPERF4
-                TC      GOTOP00H        # TERMINATE
+                TC      GOTOPOOH        # TERMINATE
                 TC      +2              # PROCEED VALUE OF ASSUMED VEHICLE OK
                 TC      -5              # R2 LOADED THROUGH DSKY
                 CAF     ZERO            # INITIAL TIME = PRESENT TIME
@@ -90,7 +91,7 @@ PROG21          CAF     ONE
 P21PROG1        CAF     V6N34           # LOAD DESIRED TIME OF LAT-LONG.
                 TC      BANKCALL
                 CADR    GOFLASH
-                TC      GOTOP00H        # TERM
+                TC      GOTOPOOH        # TERM
                 TC      +2              # PROCEED VALUES OK
                 TC      -5              # TIME LOADED THROUGH DSKY
                 TC      INTPRET
@@ -183,8 +184,8 @@ P21DSP          CLEAR   SLOAD           # GENERATE DISPLAY DATA
                 CAF     V06N43          # DISPLAY LAT, LONG, ALT
                 TC      BANKCALL        # LAT, LONG = 1/2 REVS B0
                 CADR    GOFLASH         # ALT = KM B14
-                TC      GOTOP00H        # TERM
-                TC      GOTOP00H
+                TC      GOTOPOOH        # TERM
+                TC      GOTOPOOH
                 TC      INTPRET         # V32E RECYCLE
                 DLOAD   DAD
                         P21TIME

@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-01-12 HG   Transcribed
+##              2016-12-07 HG   fix P00 -> POO
 
 ## Page 726
 
@@ -748,7 +749,7 @@ VB97DEX         =               OCT35                   # NEGATIVE OF THIS IS PR
                 CA              NVWORD          +2      # NVWORD+2 CONTAINS V06 & APPROPRIATE NOUN
                 TC              BANKCALL
                 CADR            CLOCPLAY
-                TCF             STOPCLOK                # TERMINATE CLOKTASK ON THE WAY TO P00H
+                TCF             STOPCLOK                # TERMINATE CLOKTASK ON THE WAY TO POOH
                 TCF             COMFAIL1
                 TCF             COMFAIL2
 
@@ -777,7 +778,7 @@ V99RECYC        EQUALS
                 CAF             0                       # DISPLAY; IT IS INITIATED AT TIG-5 SEC.
                 TC              BANKCALL                # THE DISPLAY IS A V99NXX, WHERE XX IS
                 CADR            CLOCPLAY                # NOUN THAT HAD PREVIOUSLY BEEN DISPLAYED
-                TCF             STOPCLOK                # TERMINATE GOTOP00H TURNS OFF ULLAGE.
+                TCF             STOPCLOK                # TERMINATE GOTOPOOH TURNS OFF ULLAGE.
                 TCF             *PROCEED
                 TCF             *ENTER
 
@@ -791,7 +792,7 @@ DISPNOT         TCF             ENDOFJOB                # AVERAGE G IS STARTING.
 
 
 STOPCLOK        TC              NULLCLOK                # STOP CLOKTASK & TURN OFF ULLAGE ON THE
-                TCF             GOTOP00H                #     WAY TO P00  (GOTOP00H RELINTS)
+                TCF             GOTOPOOH                #     WAY TO POO  (GOTOPOOH RELINTS)
 
 NULLCLOK        INHINT
                 EXTEND
@@ -895,7 +896,7 @@ REP40ALM        CAF             V05N09                  # (14)
                 TC              BANKCALL
                 CADR            GOFLASH
 
-                TCF             GOTOP00H                # V34E  TERMINATE
+                TCF             GOTOPOOH                # V34E  TERMINATE
                 TCF             +2                      # PROCEED  CHECK FOR P42
                 TCF             REP40ALM                # V32E  REDISPLAY ALARM
 
@@ -934,7 +935,7 @@ P40A/P          TC              BANKCALL                # SUBROUTINE TO CHECK PG
 TURNITON        CAF             P40A/PMD                # DISPLAYS V50N25 R1=203  PLEASE PERFORM
                 TC              BANKCALL                # CHECKLIST 203 TURN ON PGNCS ETC.
                 CADR            GOPERF1
-                TCF             GOTOP00H                # V34E TERMINATE
+                TCF             GOTOPOOH                # V34E TERMINATE
                 TCF             P40A/P                  # RECYCLE
 GOBACK          CA              TEMPR60
                 TC              BANKJUMP                # GOODBYE.  COME AGAIN SOON.
@@ -969,7 +970,7 @@ LUNLANAD        2CADR           LUNLAND
                 EBANK=          DVCNTR
 ATMAGADR        2CADR           ATMAG
 
-?               =               GOTOP00H
+?               =               GOTOPOOH
 
 D29.9SEC        2DEC            2990
 

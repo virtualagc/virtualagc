@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 HG   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 781
                 BANK            32
@@ -231,7 +232,7 @@ P63SPOT3        CA              BIT6                    # IS THE LR ANTENNA IN P
                 CAF             CODE500                 # ASTRONAUT: PLEASE CRANK THE
                 TC              BANKCALL                #            SILLY THING AROUND
                 CADR            GOPERF1
-                TCF             GOTOP00H                # TERMINATE
+                TCF             GOTOPOOH                # TERMINATE
                 TCF             P63SPOT3                # PROCEED    SEE IF HE'S LYING
 
 P63SPOT4        CAF             TWO                     # ENTER      INITIALIZE LANDING RADAR
@@ -313,7 +314,7 @@ LANDJUNK        TC              PHASCHNG
                 CAF             V06N43*                 # ASTRONAUT:  NOW LOOK WHERE YOU ENDED UP
                 TC              BANKCALL
                 CADR            GOFLASH
-                TCF             GOTOP00H                # TERMINATE
+                TCF             GOTOPOOH                # TERMINATE
                 TCF             +2                      # PROCEED
                 TCF             -5                      # RECYCLE
 
@@ -329,7 +330,7 @@ LANDJUNK        TC              PHASCHNG
                                 REFMF
                 EXIT
 
-                TCF             GOTOP00H                # ASTRONAUT:  PLEASE SELECT P57
+                TCF             GOTOPOOH                # ASTRONAUT:  PLEASE SELECT P57
 
 
 V06N43*         VN              0643
