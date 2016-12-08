@@ -10,7 +10,9 @@
 ##               2016-10-03 JL   Transcribed pages 425-430.
 ##               2016-10-16 HG   Fix operand LASTXMCD -> LASTXCMD
 ##                                           RUPTREG12 -> RUPTREG2 
-##
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
 ## Don Eyles.  The digitization was performed by archive.org.
@@ -175,7 +177,7 @@ CDUINC          TS      TEM2            # 1S COMPL.QUANT. ARRIVES IN ACC. STORE 
                 AD      ONE
                 TCF     +4
                 AD      ONE
-                AD      ONE             # OVEFLOW HERE IF 2S COMPL. IS 180 DEG.
+                AD      ONE             # OVERFLOW HERE IF 2S COMPL. IS 180 DEG.
                 COM
 
                 AD      TEM2            # ADD IN INCREMENT. WILL OVERFLOW IF RE-
@@ -232,7 +234,7 @@ RRSIM2          CAF     BIT2            # SEE IF RR ECTR ENABLED.
                 MSU     7               # TO 1S COMPLEMENT.
                 TC      SPCOS           #                                 *
                 EXTEND                  # SPCOS NOW GIVES COS SCALED AT 1 *
-                MP      BIT14           #                                 *
+                MP      BIT14           #     (A DAP GROUP FIX)           *
                 CCS     A
                 TCF     +3
                 TCF     +2

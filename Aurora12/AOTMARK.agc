@@ -7,6 +7,8 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        218-226
 ## Mod history:  2016-09-20 JL   Created.
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 but no errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -141,7 +143,7 @@ DETVB21         CAF             V21N43E
                 INDEX           DETCODE
                 CA              AOTEL           -1
                 INDEX           BASVAC
-                TS              9D                      # STORE ELEVATION ANGLE IN VAC +9
+                TS              9D                      # STORE ELV ANGLE IN VAC +9
                 INDEX           DETCODE
                 CA              AOTAZ           -1
                 INDEX           BASVAC

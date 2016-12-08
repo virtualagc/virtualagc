@@ -1722,7 +1722,7 @@ GENSHFT2        TS              MPTEMP                  # DECREMENTED SHIFT COUN
                 MP              ADDRWD
                 MASK            LOW2                    # JUMPS ON SHIFT DIRECTION (BIT8) AND
                 INDEX           A
-                TCF             +1                      # ORIGINAL SHIFT DIRECTION (BIT 9)
+                TCF             +1                      # ORIGINAL SHIFT DIRECTION (BIT 9).
                 TCF             RIGHT-                  # NEGATIVE SHIFT COUNT FOR SL OR SLR.
                 TCF             LEFT                    # SL OR SLR.
                 TCF             LEFT-                   # NEGATIVE SHIFT COUNT WITH SR OR SRR.

@@ -10,6 +10,8 @@
 ##               2016-09-21 OH   Initial Transcription
 ##               2016-10-08 HG   fix BANK 20 -> BANK 12  (p.0635)
 ##               2016-10-16 HG   add missed label RCSMNTR
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 but no errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of

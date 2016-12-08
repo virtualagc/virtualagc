@@ -7,7 +7,7 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        0500-0513
 ## Mod history:  2016-09-20 JL   Created.
-## 	        2016-10-03 OH	Initial Transcription from images
+## 	         2016-10-03 OH	 Initial Transcription from images
 ##               2016-10-16 HG   Fix operand OGCECADR -> OGC
 ##               2016-10-18 HG   Fix label DEG/SECC -> DEG/SEC
 ##                               Fix operand modifier TS TANG +  -> TS TANG +1
@@ -38,17 +38,17 @@
 
 
 SILVER          EXTEND
-                QXCH    QPLACE          # SHOULD BE ADDRESS OF STARTWACH
+                QXCH    QPLACE          #  SHOULD BE ADDRESS OF STRTWACH
 
-                CCS     CALCDIR 2F      # COMMAND IS POSITIVE THE MINUS TORQ
-                CAF     BIT9            # WINDING IS TO BE ENERGIZED
+                CCS     CALCDIR 2F      # 2F COMMAND IS POSITIVE THE MINUS TORQ
+                CAF     BIT9            #  WINDING IS TO BE ENERGIZED
                 TC      +2
-                TC      TORK            # COMMAND IS NEG SO USE PLUS WINDING
+                TC      TORK            #  COMMAND IS NEG SO USE PLUS WINDING
                 EXTEND
-                WOR     14C             # SELECTS THE MINUS WINDING
+                WOR     14C             #  SELECTS THE MINUS WINDING
 
 TORK            CAF     POSMAX
-                TS      GYROCTR         # 16383 PULSES =2.8125 DEG LESS ONE PULSES
+                TS      GYROCTR         # 16383 PULSES =2.8125 DEG LESS ONE PULSE
                 
                 CCS     GYTOBETQ        # C(K)= 1 FOR X, -0 FOR y, -1FOR Z.
                 TC      SELECTX
@@ -56,7 +56,7 @@ TORK            CAF     POSMAX
                 TC      SELECTZ
                 TC      SELECTY
 SELECTX         CAF     TORKX           # BBITS 7AND 10 IN CHANNEL 14 WILL
-                EXTEND                  # SELECT X GYRO AND TURN ON BCSW 1/3200
+                EXTEND                  #  SELECT X GYRO AND TURN ON BCSW 1/3200
                 WOR     14C             # SSEC LATER BY CHANNEL OUTPUT DESIGN.....
                 TC      QPLACE
                 
@@ -333,7 +333,7 @@ CDURATE         EXTEND
                 
                 CS      CDULIMIT
                 INDEX   CDUNDX
-                AD      CDUX            # CATCH FIRST PULSES
+                AD      CDUX            # CATCH FIRST PULSE
                 EXTEND
                 BZMF    CDURATE +3      # LOOK AGAIN
                 

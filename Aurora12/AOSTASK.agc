@@ -7,10 +7,12 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        0630-0634
 ## Mod history:  2016-09-20 JL   Created.
-##               2016-09-22 OH	Initial Transcription
+##               2016-09-22 OH	 Initial Transcription
 ##               2016-10-05 HG   Add missing   TS ITEMP1
 ##                               Add missing page 634.
 ##                               use new formatting
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -34,7 +36,7 @@
                 BANK            25
                 EBANK=          AOSQ
 
-AOSTASK         CAF             BIT8                    # TEST POWERED ASCENT FLAG (BIT8/DPBOOLS)
+AOSTASK         CAF             BIT8                    # TEST POWERED ASCENT FLAG (BIT8/DAPBOOLS)
                 MASK            DAPBOOLS                # 0- NOT POWERED ASCENT
                 EXTEND                                  # 1- POWERED ASCENT
                 BZF             COASTASC                # END CYCLE OF TASKS DURING ASCENT COAST
@@ -86,7 +88,7 @@ COEFFA1         CAE             ITEMP2                  # FORM COEFFA(AOSQ)
 ## Page 0631
 
                 MP              AOSQ
-                TS              AOSQ                    # FIRST TERM OF NEW AOSQ, ,SCALED AT PI/2
+                TS              AOSQ                    # FIRST TERM OF NEW AOSQ, SCALED AT PI/2
                 
                 CAE             ITEMP2                  # FORM COEFFA(AOSR)
                 EXTEND          
@@ -95,7 +97,7 @@ COEFFA1         CAE             ITEMP2                  # FORM COEFFA(AOSQ)
 
 ## Next 5 lines were marked with a pencil as if they are highlighted
                 CS              ITEMP2                  # FORM .5(1-COEFFA) SCALED AT 2
-                EXTEND                                  # FORM COEFFA SCALED AT 1 WHICH IS THE
+                EXTEND                                  # FROM COEFFA SCALED AT 1 WHICH IS THE
                 MP              BIT13                   # SAME AS 2(COEFFA) SCALED AT 2
                 AD              BIT13                   # SO MULTIPLY BY 1/4 TO GET .5(COEFFA)
                 TS              ITEMP2                  # AND 1/4 IS 1/2 WHEN SCALED AT 2
@@ -120,7 +122,7 @@ COEFFA1         CAE             ITEMP2                  # FORM COEFFA(AOSQ)
                 ADS             AOSR                    # SCALED AT PI/2 RADIANS/SECOND(2)
                 
                 CAE             ITEMP1  
-                EXTEND                                  # FORM TERM FR RATE DERIVATION
+                EXTEND                                  # FORM TERM FOR RATE DERIVATION
                 MP              AOSQ                    # (.1-.05K)AOSQ
                 TS              AOSQTERM                # SCALED AT PI/4 RADIANS/SECOND
                 
@@ -170,7 +172,7 @@ ACCMINVL        INDEX           AXISCNTR
                 INDEX           AXISCNTR                # 1JETAC(U,V)-ABAOS(1,V)-.02RAD/SEC(2)
                 SU              ABVLAOSQ                # EACH SUM HAS EACH TERM SCALED AT PI/2
                 INDEX           AXISCNTR                # THE "OUTER LOOP" IS DEFINED TO CALCULATE
-                AD              1JACCQ                  # THE VALUES 1JACCV, 1JACCR SCALED AT PI/4
+                AD              1JACCQ                  # THE VALUES 1JACCQ, 1JACCR SCALED AT PI/4
                 EXTEND                                  # AND 1JACCU, 1JACCV SCALED AT PI/2 WHERE
                 BZMF            DEMANDAC                # 1JACCU = 2(.707)(1JACCQ+1JACCR) AND
                 CAF             ZERO                    # 1JACCV = 2(.707)(1JACCQ+1JACCR)

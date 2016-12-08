@@ -7,8 +7,10 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        148-150
 ## Mod history:  2016-09-20 JL   Created.
-##		2016-10-03 JL	Transcribed pages 148-150.
+##		 2016-10-03 JL	 Transcribed pages 148-150.
 ##               2016-10-08 HG   change TS LXCH -> TS L
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -29,7 +31,7 @@
 ##       https://archive.org/details/aurora00dapg
 
 ## Page 148
-# 	THE FOLLOWING ROUTINES ARE PROVIDED TO MAINTAIN THE PHASE TABLE. TWO ROUTINES ARE AVILABLE:
+# 	THE FOLLOWING ROUTINES ARE PROVIDED TO MAINTAIN THE PHASE TABLE. TWO ROUTINES ARE AVAILABLE:
 
 #		TC	PHASCHNG	SLOWER BUT LESS STORAGE.
 #		OCT	PPPGG		CHANGE RESTART GROUP GG TO PHASE PPP

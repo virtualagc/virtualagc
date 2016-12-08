@@ -8,6 +8,8 @@
 ## Pages:        258-284
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-10-20 HG   Finalized transcription
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -31,14 +33,14 @@
                 BANK            11
                 EBANK=          OGC
 
-
+# FAN-OUT
 
 LST2FAN         TC              VBZERO                  # VB40 ZERO (USED WITH NOUN 20 OR 40 ONLY)
                 TC              VBCOARK                 # VB41 COARSE ALIGN (USED WITH NOUN 20 OR
                                                         #                                 40 ONLY)
                 TC              IMUFINEK                # VB42 FINE ALIGN IMU
                 TC              IMUATTCK                # VB43  LOAD IMU ATTITUDE ERROR METERS.
-                TC              ALM/END                 # ILLEGAL VERB
+                TC              ALM/END                 # ILLEGAL VERB.
                 TCF             LRPOS2K                 # VB45 COMMAND LR TO POSITION 2.
                 TC              REGRSAMP                # VB46 SAMPLE RADAR ONCE PER SECOND
                 TC              DOFCSTST                # VB47 PERFORM LEM FCS TEST
@@ -132,7 +134,7 @@ RRIMUDIF        OCT             -20
 ## Page 260
 # KEYBOARD REQUEST TO ZERO IMU ENCODERS
 
-IMUZEROK        TC              TESTXACT                # ZERO ENCODERS
+IMUZEROK        TC              TESTXACT                # ZERO ENCODERS.
                 TC              BANKCALL
                 CADR            IMUZERO
 
@@ -235,7 +237,7 @@ IMUFINEK        TC              TESTXACT                # FINE ALIGN WITH GYRO T
                 CADR            IMUSTALL
                 TC              ENDEXTVB
 
-FINEK2          CAF             LGYROBIN                # PINBALL LEFT COMMANDS IN OGC REGISTERS
+FINEK2          CAF             LGYROBIN                # PINBALL LEFT COMMANDS IN OGC REGIST5RS
                 TC              BANKCALL
                 CADR            IMUPULSE
 
@@ -277,7 +279,7 @@ OPTCOARV        EQUALS          IMUCOARV                # DIFFERENT NOUNS.
 RRDESK2         TC              INTPRET
 
                 CALL
-                                RRDESNB                 # RETURNS IN BASIC
+                                RRDESNB                 # RETURNS IN BASIC.
 
                 TC              RWAITK
 
@@ -354,7 +356,7 @@ REDO            CAF             LQPL                    # ASK FOR TEST OPTION (1
                 TC              REDO
 
                 TC              NEWMODEX
-                OCT             07                      # DISPLAY MAJOR MODE 5 - SYSTEM TESTS
+                OCT             07        
 
                 INHINT
                 CAF             PRIO20
@@ -384,7 +386,7 @@ TESTCADR        CADR            ALM/END                 # 0  ILLEGAL
                 CADR            FSTRSAMP                # 14 HIGH SPEED RADAR SAMPLING.
 
                 CADR            ZEROERAS
-                CADR            DISINDT                 # DISPLAY INTERTIAL DATA TEST.
+                CADR            DISINDT                 # DISPLAY INERTIAL DATA TEST.
 TESTNV          OCT             2101
 LQPL            ECADR           QPLACE
 
@@ -406,7 +408,7 @@ FSTRSAMP        CAF             RSTKLIST                # HIGH SPEED SAMPLING. S
                 TCF             RSAMPTST
 
 REGRSAMP        TC              GRABWAIT
-                CAF             1SEC+1                  # SHOWS NO TM BUFFERNG.
+                CAF             1SEC+1                  # SHOWS NO TM BUFFERING.
 
 RSAMPTST        TS              MPAC            +2
                 INHINT
@@ -530,7 +532,7 @@ AGSJOB          CAF             PRIO30                  # ENTER AGSINIT JOB VIA 
                 TC              TASKOVER
 
 SENDIT          INHINT
-                CAF             LAGSLIST                # SWITCH TO SPECIAL DOWNLIST FOR 10 SEC.
+                CAF             LAGSLIST                # SWITCH TO SPECIAL DOWNLIST FOR 10 SECS.
                 XCH             DNLSTADR
                 TS              AGSWORD                 # TO SHOW INITIALIZATION IN PROGRESS.
 
@@ -570,7 +572,7 @@ IMUATTCK        TC              TESTXACT
                 WOR             12
                 CAF             TWO
                 INHINT
-                TC              WAITLIST                # PUT OUT COMMANDS IN .32 SECS.
+                TC              WAITLIST                # PUT OUT COMMAND IN .32 SECS.
                 2CADR           ATTCK2
 
                 TCF             TERMEXTV                # FREES DISPLAY.
@@ -730,7 +732,7 @@ MSGVN           OCT             0535
 
 AURLOKON        TC              MAKECADR
                 TS              DESRET
-                CAF             RV33                    # ASSUMES DSKY GRABBED
+                CAF             RV33                    # ASSUMES DSKY GRABBED.
                 TC              NVSBWAIT
                 TC              FLASHON
                 TC              ENDIDLE
@@ -763,7 +765,7 @@ DISINDT         CAF             FLVELVN                 # ASK FOR FORWARD, LATER
                 TC              ENDIDLE
                 TCF             ENDDISIN
                 TCF             +1
-                CAF             ALT,R,VN                # ASK FOR INITIAL AND FINAL ALTITUDES AND
+                CAF             ALT,R,VN                # ASK FOR INITIAL AND FINIAL ALTITUDES AND
                 TC              NVSBWAIT                # ALTITUDE RATE.
                 TC              ENDIDLE
                 TCF             ENDDISIN
@@ -865,10 +867,10 @@ PRESTAND        CAF             EBANK3                  # COMES HERE FROM LST2FA
                 XCH             EBANK                   # SET UP EBANK FOR BANK 3
                 INHINT
                 CA              TIME1
-                TS              TIMESAV                 # THIS ROUTNE WILL LOOK AT TIME1 UNTIL
+                TS              TIMESAV                 # THIS ROUTINE WILL LOOK AT TIME1 UNTIL
                 CAF             OKT30                   #  TIME1 IS INCREMENTED, THEN IT WILL
 LONGER          TS              TIMAR                   # SNATCH THE MISSION TIME REGS AND STORE
-                CS              TIMESAV                 # THEM IN TIMESAV FOR LATER USE IN ARITH.
+                CS              TIMESAV                 # THEM IN TIMESAV FOR LATER ISE IN ARITH.
                 AD              TIME1                   # OPERATIONS WHICH SHOULD FIND THE
                 EXTEND                                  # STANDING DIFFERENCE BETWEEN THE SCALAR
                 BZF             CHKTIME                 # AND THE TIME1-TIME2S REGS.
@@ -919,7 +921,7 @@ POSTAND         CAF             EBANK3                  # COMES HERE FROM LST2FA
                 DXCH            TIMAR                   # READ THE SCALAR AND SEE IF IT OVERFLOW-
                 RELINT                                  # ED WHILE THE CGC WAS IN STBY, IF SO
                 CAE             TIMAR                   # THE OVERFLOW MUST BE ADDED OR IT WILL
-                EXTEND                                  # SEEM THAT THE REALATIVITY THEOYR WORKS
+                EXTEND                                  # SEEM THAT THE REALATIVITY THEORY WORKS
                 SU              SCALSAV                 # BETTER THAN IT SHOULD...
                 EXTEND
                 BZMF            ADDTIME                 # IF ITS NEG. IT MUST HAVE OV:FLWD..
@@ -946,7 +948,7 @@ CORCTTIM        EXTEND
                 TC              ENDOFJOB
 
 ADDTIME         EXTEND
-                DCA             DPOSMAX                 # IF THE SCALAR OVEFLOWED, FIND OUT HOW
+                DCA             DPOSMAX                 # IF THE SCALAR OVERFLOWED, FIND OUT HOW
                 DXCH            TIMEDIFF                # MUCH TIME REMAINED WHEN READ THE FIRST
                 TC              INTPRET                 # TIME AND THEN ADD THE PRESENT READING-
                 DLOAD           DSU                     # WHICH WILL BE THE TOTAL TIME SPENT IN
@@ -955,7 +957,7 @@ ADDTIME         EXTEND
                 DAD             SRR                     # CORRECT TO 10 MSEC..
                                 TIMAR                   # **** THE TIME IN STANDBY MODE MUST NOT
                                 5                       # EXCEED 23 HOURS IF TIME IS TO BE
-                DAD                                     # CORRECTLY COMPUTED BY THIS ROUTIEN.*****
+                DAD                                     # CORRECTLY COMPUTED BY THIS ROUTINE.*****
                                 TIMESAV
                 STORE           TIMAR
 ## Page 284

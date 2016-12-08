@@ -7,7 +7,7 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        0604-0614
 ## Mod history:  2016-09-20 JL   Created.
-##		2016-09-26 OH	Initial Transcription
+##		 2016-09-26 OH	Initial Transcription
 ##               2016-10-04 HG   Add missed statements on page 607, added missing ## coments for page numbers
 ##                               M520F->MS20F, READ +4 -> READ 4
 ##               2016-10-15 HG   Fix operand   D2CDU2FL -> D2CDUZFL  
@@ -15,6 +15,8 @@
 ##                                             MS2OF    -> MS20F  
 ##                               fix label     FILTSTART -> FILSTART
 ## 
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -36,7 +38,7 @@
 
 ## Page 0604
 
-# THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH INITIALIZES THE KALMAN FILTERS AND SETS UP A P-AXIS RUPT TO
+# THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH INITIALIZES THE KALMAN FILTER AND SETS UP A P-AXIS RUPT TO
 # OCCUR 20 MS FROM ITS BEGINNING.
 
                 BANK    26
@@ -60,7 +62,7 @@ FILTINIT        CAF     MS20F           # RESET TIMER IMMEDIATELY: DT = 20 MS
 
 FIRSTADR        GENADR  FILFIRST
 
-# THE FOLLOWING T5RUPT ENTRY BEGINS THE KALMAN FILTER PROGRAM.  THIS SECTION ALSO SETS UP A T5RUPT
+# THE FOLLOWING T5RUPT ENTRY BEGINS THE KALMAN FILTER PROGRAM.  THIS SECTION ALSO SETS UP A T5RUPT TO OCCUR 20 MS
 # FROM ITS BEGINNING AND SETS IT TO GO TO THE LOCATION AT THE TOP OF THE POST FILTER RUPT LIST.
 
 MOSTPASS        GENADR  DTCALC          # WORD IN FILTPASS FOR THESE PASSES
@@ -114,7 +116,7 @@ DTCALC          CS      L
                 EXTEND                  # TIME NOW SCALED AT 5.12 SECONDS
                 MP      BIT7            # FIRST RESCALE TO 5.12/64
                 CS      .64
-                EXTEND                  # THEN RESCALE TO 5/12/(64*.64) OR
+                EXTEND                  # THEN RESCALE TO 5.12/(64*.64) OR
                 MP      L               # 5.12/40.96 WHICH IS THE SAME AS
                 TS      DT              # DT SCALED AT 1/8
 
@@ -166,6 +168,7 @@ FLTYAXIS        INDEX   QRCNTR
 # SO IT MUST BE READ NON-DESTRUCTIVELY BUT NEED NOT BE RESTORED AFTER EACH KALMAN FILTER PASS.
 
 ## Page 0607
+# INTEGRATION EXTRAPOLATION EQUATIONS:
 
 KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
                 EXTEND
@@ -185,9 +188,9 @@ KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
                 TS      ITEMP5          # (SAVE FOR ALPHA INTEGRATION)
                 EXTEND
                 MP      BIT7            # RESCALE BY RIGHT SHIFT 8
-                AD      CDU2DOT         # A + .5ADOTDT SCALED AT PI/64
+                AD      CDU2DOT         # A + .5ADOTDT SCALED AT PI/8
                 EXTEND
-                MP      DT
+                MP      DT		# *A + .5ADOTDT)DT SCALED AT PI/64
                 EXTEND
                 MP      BIT11           # RESCALE BY RIGHT SHIFT 4 (KEEP D.P.)
                 DAS     CDUDOT          # W = W + (A + .5ADOTDT)DT SCALED AT PI/4
@@ -240,9 +243,9 @@ KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
                 EXTEND                  #  .     .
                 MP      W1              # CDU = CDU + DPDIFF (D.P.) * W1 (S.P.)
                 DAS     CDUDOT
-                CAE     ITEMP5          # W1 IS CALED AT 32
+                CAE     ITEMP5          # W1 IS SCALED AT 32
                 EXTEND                  # DPDIFF IS RESCALED TO PI/128
-                MP      W1              # W1DPDIFF IS SCALED AT PI/4 (AS CDUDOT)
+                MP      W1              # W1*DPDIFF IS SCALED AT PI/4 (AS CDUDOT)
                 ADS     CDUDOT +1
                 TS      L
                 TCF      +2
@@ -298,7 +301,7 @@ FILTAXIS        DXCH    CDU
 # SUBROUTINE FOR FILTER WHICH TAKES 1 COMPLEMENT NUMBER INTO A 2 COMP.
 
 ONETOTWO        DDOUBL                  # SEE RTB OP CODES IN BANK 15 FOR NOTES ON
-                CCS     A               #   THIS COMPUTATION
+                CCS     A               #   THIS COMPUTATION.
 
 ## Page 0610
 
@@ -312,12 +315,12 @@ ONETOTWO        DDOUBL                  # SEE RTB OP CODES IN BANK 15 FOR NOTES 
                 ADS     ITEMP5
                 TC      Q               # RETURN
 
-# THIS PROGRAM INITIALIZES THE KALMAN FILTER PROGRAM
+# THIS PROGRAM INITIALIZES THE KALMAN FILTER PROGRAM.
 
-FILFIRST        LXCH    DAPTIME         # INITIALIZE TIME
+FILFIRST        LXCH    DAPTIME         # INITIALIZE TIME.
                 CAF     POINT=90        # INITIALIZE THE WEIGHTING VECTOR POINTER
                 TS      WPOINTER
-                CAF     MOSTPASS        # SET UP FOR THE NEXT PASSES
+                CAF     MOSTPASS        # SET UP FOR NEXT PASSES
                 TS      STEERADR
                 EXTEND                  # SET UP POST FILTER RUPT LIST
                 DCA     DGTSFADR
@@ -344,7 +347,7 @@ FILFIRST        LXCH    DAPTIME         # INITIALIZE TIME
                 MP      BIT14
                 DXCH    CDUZFIL
                 CA      ZERO
-                TS      DCDUYFIL        # INITIALIZE THE DERIVATIES OF THE STATE
+                TS      DCDUYFIL        # INITIALIZE THE DERIVATIVES OF THE STATE
                 TS      DCDUYFIL +1
                 TS      DCDUZFIL
                 TS      DCDUZFIL +1
@@ -378,7 +381,7 @@ POSTPFIL        2CADR   FILTER
 ## Page 0612
 
 # THE KALMAN FILTER WEIGHTINF VECTORS ARE LISTED IN THE FOLLOWING TABLE ALONG WITH THE TIME FROM THE LAST FILTER
-# INITIALIZATION FOR WHICH THEY ARE TO BE USED. (THE VECTORS ARE STORED IN ORDERED TRIPLETS (W0,W1,W2) IN
+# INITIALIZATION FOR WHICH THEY ARE TO BE USED. (THE VECTORS ARE STORED IN ORDERED TRIPLES (W0,W1,W2) IN
 # DESCENDING ORDER IN TIME WITH THE STEADY STATE VALUES AT THE TOP.)
 #
 # THE COMPONENTS ARE SCALED AS FOLLOWS:

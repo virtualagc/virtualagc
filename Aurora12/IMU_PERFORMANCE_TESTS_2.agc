@@ -20,7 +20,9 @@
 ##                               fix operand CHECKCG -> CHECKG
 ##                                           WAITPL2 -> WAITLP2 
 ##                                           WAITLP -> WAITLP1
-##               2016-10-18 HG  fix operand REULTCT -> RESULTCT
+##               2016-10-18 HG   fix operand REULTCT -> RESULTCT
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -76,7 +78,7 @@ IMUBACK         CA              ZERO
                 TS              DSPTEM2
                 TC              BANKCALL                # ISS RETURNS IN COARSE ALIGN MODE TO
                 CADR            IMUCOARS                # ENABLE OPERATOR TO DECIDE WHAT TO DO
-
+# ABOUT GIMBAL LOCK
                 TC              SHOWLD
                 TC              SHOW
 
@@ -178,7 +180,7 @@ PIPACHK         INDEX           NDXCTR                  # TORQUE PLATFORM TO COR
                 STORE           DSPTEM2
                 EXIT
                 TC              SHOW
-VERTDRFT        CA              3990DEC                 # NUMBER OF SECONDS TO SPEND ESTMATING
+VERTDRFT        CA              3990DEC                 # NUMBER OF SECONDS TO SPEND ESTIMATING
                 TS              LENGTHOT
                 TC              BANKCALL                # THIS WILL CORRECT FOR EARTH RATE DURING
                 CADR            EARTHR                  # TIME SPENT IN SHOW ABOVE*
@@ -361,7 +363,7 @@ DRIVRAD         TC              BANKCALL                # IN SC WHEN RAD PRESENT
                 TC              ENDIDLE                 # IN S/C DO V33 TO CONTINUE WITH SHAFT
                 TC              ENDTEST1                # TEST
                 TC              +1                      # IN LAB TURN RADAR OFF CHANGE RES STANDAR
-                CA              ZERO                    # TO SHAFT AND SET FRO -45DEG.
+                CA              ZERO                    # TO SHAFT AND SET FOR -45DEG.
                 TS              TANG                    # THEN DO A V33 IF WANT TO REPEAT CHECK
                 CS              45DEG                   # DO A V34 TO TERMINATE
                 TS              TANG            +1
@@ -391,7 +393,7 @@ SIZLOOK         MASK            NEG3                    # T ENTER TEST NO THAT I
                 BZF             GUDENTRY                #   THIS IS CONSIDERED NECESSARY BECAUSE
                 TC              TESTCALL                # OF FOLLOWING INDEXED TC WHICH COULD
 
-NEGSIZ          COM                                     # SEND THE COMPUTER OFF INTO BOONDOCKS
+NEGSIZ          COM                                     # SEND THE COMPUTER OFF INTO THE BOONDOCKS
                 TC              SIZLOOK                 # TO PLAY WITH ITSELF IF THE OPERATOR
 GUDENTRY        CA              CALCDIR                 # MAKES ABAD ENTRY******
                 AD              FOUR
@@ -418,8 +420,8 @@ GUDENTRY        CA              CALCDIR                 # MAKES ABAD ENTRY******
                 TS              SAVE            +1
                 TC              FREEDSP
                 CAF             ZERO
-                TS              NBPOS                   # SET UP NB COORD TO NORTH, X UP
-                TS              SAVE            +2      # INTIALIZE FOR EARTHR DESIGNATE USAGE
+                TS              NBPOS                   # SET UP NB COORD TO Z NORTH, X UP
+                TS              SAVE            +2      # INITIALIZE FOR EARTHR DESIGNATE USAGE
                 TS              TESTNO                  # INITIALIZE FOR TEST ABORT ROUTINE
                 TS              CDUFLAG                 # ZEROS FOR STRTWACH USE
                 CAF             SFCONST
@@ -446,7 +448,7 @@ ENABLE          CAF             BIT6
                 WOR             14C                     # ON CAL MODULE RELAY
 
                 INHINT
-                CS              TWO                     # SETS UP EXEC SWITCH SO IMPULSE WILL
+                CS              TWO                     # SETS UP EXEC SWITCH SO IMUPULSE WILL
                 MASK            IMODES33                # NOT TURN OFF GYRO TORQ ENABLE RELAY
                 AD              TWO
                 TS              IMODES33
@@ -457,8 +459,8 @@ ENABLE          CAF             BIT6
                 TC              WAITLOOP
                 CCS             COUNTPL
                 TC              WAITLP2
-DIRECTN         TC              BANKCALL                # TORQUING ROUTINE IN IMU PERFORMANCE
-                CADR            SILVER                  #  BANK 3
+DIRECTN         TC              BANKCALL                #  TORQUING ROUTINE IN IMU PERFORMANCE
+                CADR            SILVER                  #    BANK 3
                 CCS             SOUTHDR                 # A ONE FIRST TIME THROUGH, THEN ZERO
                 TC              WAITFIVE
 
@@ -468,7 +470,7 @@ STRTWACH        CCS             CDUFLAG                 #  RETURNS HERE VIA QPLA
                 TC              LOOKCDUP        -4
                 TC              LOOKCDUP
 CORRECT         CAF             ZERO
-                TS              LGYRO                   #  RELEASES GYROS FOR IMPULSE USAGE
+                TS              LGYRO                   #  RELEASES GYROS FOR IMUPULSE USAGE
                 TC              BANKCALL                # EARTHRATE CORRECTION TO GYROS NOT EAST
                 CADR            EARTHR                  # OR WEST
                 CAF             ONE
@@ -483,7 +485,7 @@ CORRECT         CAF             ZERO
                 BZF             STOPTEST                # OR THE CDU,S ARE NOT WORKING.
                 TC              DIRECTN
 
-                CAF             ZERO                    # ZERO CDU REG WHICH WILL BE USED TO
+                CAF             ZERO                    # ZEROS CDU REG WHICH WILL BE USED TO
                 TS              SAVE            +1
                 INDEX           CDUNDX                  # MEASURE ANGLE.
                 TS              CDUX
@@ -494,7 +496,7 @@ STILLOOK        TS              TIMER
                 CCS             CDUX                    # STARTS
                 TC              OUTPLUS                 # HERE IS PLUS PULSE
                 TC              TIMEWACH
-                TC              ALARMS                  # TTELL OPERATOR FISRT CDU PULSE WAS MISSD
+                TC              ALARMS                  # TTELL OPERATOR FIRST CDU PULSE WAS MISSD
                 TC              OUTNEG                  # HERE IS MINUS PULSE
 TIMEWACH        CCS             TIMER                   # WATCHES TIME IN INHINT SO COPS WILL NOT
                 TC              STILLOOK                # CATCH US
@@ -561,14 +563,14 @@ CALCSFE         CA              SAVE                    # GYROCTR AT TEST START
                 EXTEND                                  # THIS ROUTINE TESTS SAVE-(SAVE+1) TO SEE
                 BZF             NEGSFE                  # IF THE RESULT IS WITHIN PERMISSIBLE SIZE
                 CS              SAVE            +2      # AND DETERMINES POLARITY OF SFE USING THE
-                MASK            SIZCHK                  # PRESENCE OD ABSENCE OF BITS 12,13,14.
+                MASK            SIZCHK                  # PRESENCE OR ABSENCE OF BITS 12,13,14.
                 EXTEND                                  # IF BITS ARE PRESENT IN POSITIVE SAVE +2
                 BZF             POSSFE                  # THEN THE SFE MUST BE POS. IF DIFFERENCE
                 TC              STOPTEST                # IS GREATER THAN 2047 PULSES FROM THE
 NEGSFE          CAE             SAVE            +2      # IDEAL NO OF PULSES, THE SFE EXCEEDS
                 TC              ARITH                   # 15600 PPM, THE TEST IS NOT VALID AND
 
-# THERFORE ABORTS AND TURNS ON PROGRAM ALARM
+# THEREFORE ABORTS AND TURNS ON PROGRAM ALARM
 POSSFE          CAF             POSMAX                  # POS SFE DEFINITION = IRIG SF IN SEC OF
                 EXTEND                                  # ARC PER PULSE IS GREATER THAN
                 SU              SAVE            +2      # .61798095703125  SEC OF ARC/ PULSE
@@ -612,7 +614,7 @@ STOPTEST        TC              BANKCALL
 
 ## Page 487
 CHECKG          EXTEND                                  # PIP PULSE CATCHING ROUTINE
-                QXCH            QPLACE                  # RECORDS TIME AT OCCURENCE OF A DELTA V
+                QXCH            QPLACE                  # RECORDS TIME AT OCCURRENCE OF A DELTA V
 CHECKG1         RELINT                                  # KEEPS CONTENT OF PIPA REG INTACT
                 CCS             NEWJOB
                 TC              CHANG1
@@ -767,7 +769,7 @@ FALNE1          CA              CDUX
                 TC              QPLACE
 
 ## Page 491
-WAITLOOP        EXTEND                                  # LOOPS IN X SEC INCREMETNS FOR NUMBER OF
+WAITLOOP        EXTEND                                  # LOOPS IN X SEC INCREMENTS FOR NUMBER OF
                 QXCH            QPLAC
                 TS              COUNTPL                 # NUMBER PUT INTO LENGTHOT
 WAITLP1         CCS             COUNTPL
@@ -950,7 +952,7 @@ POSN2           CS              HALF                    # X DOWN, Y WEST, Z NORT
 
 POSN3           CA              HALF                    # Z UP, Y WEST ,X NORTH
                 TS              ZSM
-                COM
+                COM					# NBDX = -DH
                 TS              XSM             +2
                 TS              YSM             +4
 NSFLAGD         CA              TWO
@@ -998,10 +1000,10 @@ POSN6           CA              HALF                    # Y DOWN, Z EAST, X SOUT
 
 
 
-POSN7           CS              HALF                    # Z UP-EAST,Y UP-WEST,X NORTH.THIS POSITION
+POSN7           CS              HALF                    # Z UP-EAST,Y UP-WEST,X NORTH.THIS POSITON
                 TS              XSM             +2
                 CA              ROOT1/2
-                TS              YSM
+                TS              YSM			#  NBDX - .707 ADSRAX = -DH
                 TS              ZSM
                 TS              ZSM             +4
                 COM
@@ -1038,7 +1040,7 @@ OPCHKPOS        CA              ROOT1SQ                 # OG=+45DEG,IG=-45DEG,MG
                 TS              ZSM             +2
                 TC              QPLACE
 
-POSN9           CA              HALF                    # X UP EAST,Y UP WEST,Z SOUTH.THIS POSITION
+POSN9           CA              HALF                    # X UP EAST,Y UP WEST,Z SOUTH.THIS POSITON
                 TS              ZSM             +2
                 CA              ROOT1/2                 #  -NBDZ +.707 SRAZ =DH
                 TS              XSM

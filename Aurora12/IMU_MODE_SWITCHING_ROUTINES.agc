@@ -9,6 +9,8 @@
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-09-28 MAS  Began.
 ##               2016-09-30 MAS  Finished transcription.
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -94,7 +96,7 @@ IMUZERO2        TC              CAGETSTQ                        # POSSIBLY SWITC
                 EXTEND                                          
                 WAND            12                          
 
-                CAF             3SECSM                          # WAIT FOR COUNTERS TO SYNCHRONIZE.
+                CAF             3SECSM                          # WAIT FOR COUNTERS TO SYNCRONIZE.
                 TC              VARDELAY                        
 
 IMUZERO3        TC              CAGETSTQ                       
@@ -159,7 +161,7 @@ COARS1          TS              CDUIND
 
 ## Page 193
 COARS2          TC              CAGETEST                        # DONT CONTINUE IF CAGED.
-                TS              ITEMP1                          # SET TO +0.
+                TS              ITEMP1                          # SETS TO +0.
                 CAF             TWO                             # SET CDU INDICATOR
  +3             TS              CDUIND                          
 
@@ -223,7 +225,7 @@ COARSERR        AD              COARSTOL                        # 2 DEGREES.
 
                 TCF             IMUBAD                          
 
-COARSTOL        DEC             -.01111                         # 2 DEGREES SCALED AT HALF-REVOLUTIONS
+COARSTOL        DEC             -.01111                         # 2 DEGREES SCALED AT HALF-REVOLUTIONS.
 
 ## Page 195
 COMNEG          AD              -COMMAX                         
@@ -292,7 +294,7 @@ PFAILOK         TC              CAGETSTQ                        # ENABLE PIP FAI
 ## Page 197
 # ROUTINES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS. NO IMUSTALL REQUIRED IN EITHER CASE.
 
-PIPUSE          TC              CAGETSTQ                        # DONT ENABLE PIPA FAIL IF IMU IS BEING CAGED
+PIPUSE          TC              CAGETSTQ                        # DONT ENABLE PIPA FAIL IF IMU BEING CAGED
                 TCF             SWRETURN                        
 
                 INHINT                                          
@@ -330,7 +332,7 @@ PIPFREE         INHINT                                          # PROGRAM DONE W
 ## Page 198
 #          THE FOLLOWING ROUTINE TORQUES THE IRIGS ACCORDING TO DOUBLE PRECISION INPUTS IN THE SIX REGISTERS
 # BEGINNING AT THE ECADR ARRIVING IN A. THE MINIMUM SIZE OF ANY PULSE TRAIN IS 16 PULSES (.25 CDU COUNTS). THE
-# UNSENT PORTION OF THE COMMAND IS LEFT INTACT AT THE INPUT COMMAND REGISTERS.
+# UNSENT PORTION OF THE COMMAND IS LEFT INTACT IN THE INPUT COMMAND REGISTERS.
 
                 EBANK=          1400                            # VARIABLE, ACTUALLY.
 
@@ -599,7 +601,7 @@ GYROFRAC        2DEC            .215            B-21
 ## Page 205
 # IMU MODE SWITCHING ROUTINES COME HERE WHEN ACTION COMPLETE.
 
-ENDIMU          EXTEND                                          # MODE IS BAD IF CAGE HAS OCCURRED OR IF
+ENDIMU          EXTEND                                          # MODE IS BAD IF CAGE HAS OCCURED OR IF
                 READ            11                              # ISS WARNING IS ON.
                 MASK            BIT1                            
                 CCS             A                               
@@ -701,7 +703,7 @@ MODESLP         TC              MAKECADR                        # CALL FROM SWIT
                 TS              MODECADR                        
                 TCF             JOBSLEEP                        
 
-MODABORT        TC              ABORT                           # TWO PROGRAMS USING THE SAME DEVICE.
+MODABORT        TC              ABORT                           # TWO PROGRAMS USING SAME DEVICE.
                 OCT             1210                            
 
 ## Page 208

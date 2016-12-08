@@ -14,6 +14,8 @@
 ##				2CADR's come out right.
 ##		2016-10-21 RSB	Removed yesterday's EBANK=, due to
 ##				yaYUL fixes HG gave me.
+##		2016-12-08 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -401,7 +403,7 @@ DAS-+           EXTEND
                 TC              -1CHK                           
                 EXTEND                                          
                 DCS             SKEEP1                          # $ DCS ERASABLE (+1, -2)
-                XCH             L                               # $ XCH SC, (-2, +1)
+                XCH             L                               # $ XCH SC (-2, +1)
                 AD              S+1                             
                 TC              -1CHK                           
                 CA              L                               
@@ -431,7 +433,7 @@ MP-+            EXTEND
                 AUG             SKEEP6                          # $ AUG ERASABLE, -2
                 AD              L                               # 40000
 MP--            EXTEND                                          
-                MP              SKEEP6                          # +1, 37776
+                MP              SKEEP6                          # $ +1, 37776
                 TC              +1CHK                           
                 CS              L                               # 40001
                 AD              DVCON                           
@@ -443,7 +445,7 @@ MP--            EXTEND
                 TC              -1CHK                           
 
 ## Page 385
-# DVCH AND DVQXCHK CHECK ALL PULSES OF DV AND QXCH.
+# DVCH AND DVQXCHK CHECK ALL OF PULSES OF DV AND QXCH.
 # ALSO CHECKS TS WITH UNDERFLOW
 DVCHK           CA              SBIT14                          # 20000
                 TS              SKEEP1                          
@@ -585,7 +587,7 @@ D--SC           CA              S+2
                 TC              -1CHK                           
 
 # D--LCHK CHECKS THAT OVERFLOW IS LOST IN PROCESS OF GOING THROUGH L REG.
-# ALO CHECKS THAT Q WILL HOLD 16 BITS
+# ALSO CHECKS THAT Q WILL HOLD 16 BITS
 D--LCHK         CA              S-2                             
                 TS              Q                               
                 CA              S-MAX                           
@@ -787,7 +789,7 @@ ENDOFUF         CA              SKEEP5
 # BANK NUMBERS IN EB.
 # SKEEP3 HOLDS LAST ADDRESS BEING CHECKED (HIGHEST ADDRESS).
 # SKEEP2 HOLDS C(EBANK) DURING CHECKNJ
-# ERASCHK TAKES APPROXIMATELY 7 SECONDS.
+# ERASCHK TAKES APPROXMATELY 7 SECONDS
 ERASCHK         CA              S+1                             
                 TS              SKEEP4                          
 0EBANK          CA              S+ZERO                          
@@ -857,11 +859,11 @@ ERASLOOP        INHINT
                 TC              ERASLOOP                        # GO TO NEXT ADDRESS IN SAME BANK
                 CCS             SKEEP4                          
                 TC              NOEBANK                         
-                INCR            SKEEP4                          # PUT +1 IN SKEEP4.
+                INCR            SKEEP4                          # PUT +1 IN SKEEP4
                 CA              EBANK                           
                 AD              SBIT9                           
                 TS              EBANK                           
-                AD              ERASCON5                        # 76377, CHECK FOR BANK E3
+                AD              ERASCON5                        # 76377 CHECK FOR BANK E3
                 EXTEND                                          
                 BZF             2EBANK                          
                 CCS             EBANK                           
@@ -911,7 +913,7 @@ CYCLSHFT        CA              CONC+S1                         # 25252
 # SKEEP4 HOLDS BANK NUMBER
 # SKEEP5 COUNTS 2 SUCCESSIVE TC SELF WORDS
 # SKEEP6 CONTROLS ROPECHK OR SHOWSUM OPTION
-# SKEEP7 CONTROLS WHEN ROUTINE IS IN COMMON FIXED OR FIXED FIXED BANKS
+# SKEEP7 CONTROLS WHEN ROUNTINE IS IN COMMON FIXED OR FIXED FIXED BANKS
 
 STSHOSUM        TC              GRABDSP                         
                 TC              PREGBSY                         
