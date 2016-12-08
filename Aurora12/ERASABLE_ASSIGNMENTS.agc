@@ -12,6 +12,8 @@
 ##                               fix label   SQRANG -> SQRARG
 ##               2016-10-15 HG   fix label   LASTXMCD -> LASTXCMD  
 ##               2016-10-16 HG   FIX LABEL   SCALSAVE -> SCALSAV                   
+##		 2016-12-07 RSB	 Proofed comments with octopus/ProoferComments
+##				 and made a few changes.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -157,7 +159,7 @@ ITEMP5          ERASE
 NEWLOC          EQUALS          ITEMP5
 
 ITEMP6          ERASE
-NEWLOC+1        EQUALS          ITEMP6
+NEWLOC+1        EQUALS          ITEMP6				# DP ADDRESS.
 
 RUPTREG1        ERASE
 RUPTREG2        ERASE
@@ -213,7 +215,7 @@ BUF             ERASE           +2                              # TEMPORARY SCAL
 BUF2            ERASE           +1
 INDEXLOC        EQUALS          BUF                             # CONTAINS ADDRESS OF SPECIFIED INDEX.
 SWWORD          EQUALS          BUF                             # ADDRESS OF SWITCH WORD.
-SWBIT           EQUALS          BUF             +1              # SWITCH BIT WITHIN SWITCH WORD
+SWBIT           EQUALS          BUF             +1              # SWITCH BIT WITHIN SWITCH WORD.
 MPTEMP          ERASE                                           # TEMPORARY USED IN MULTIPLY AND SHIFT.
 DOTINC          ERASE                                           # COMPONENT INCREMENT FOR DOT SUBROUTINE.
 DVSIGN          EQUALS          DOTINC                          # DETERMINES SIGN OF DDV RESULT.
@@ -304,7 +306,7 @@ DSPTAB          ERASE           +11D                            # 0-10D, DISPLAY
 CADRSTOR        ERASE                                           # ENDIDLE STORAGE
 GRABLOCK        ERASE                                           # INTERNAL INTERLOCK FOR DISPLAY SYSTEM 
 NVQTEM          ERASE                                           # NVSUB STORAGE FOR CALLING ADDRESS
-                                                                # MUST = NVBNKTEM-1.
+                                                                # MUST = NVBNKTEM-1
 NVBNKTEM        ERASE                                           # NVSUB STORAGE FOR CALLING BANK
                                                                 # MUST = NVQTEM+1
 DSPLIST         ERASE           +2                              # WAITING LIST FOR DSP SYST INTERNAL USE
@@ -318,7 +320,7 @@ DSPTEM2         ERASE           +2                              # BUFFER STORAGE
 # RESERVED FOR PINBALL INTERRUPT ACTION
 
 DSPCNT          ERASE                                           # COUNTER FOR DSPOUT
-UPLOCK          ERASE                                           # BIT1 = UPLINK INTERLOCK ACTIVATED BY
+UPLOCK          ERASE                                           # BIT1 = UPLINK INTERLOCK (ACTIVATED BY
                                                                 # RECEPTION OF A BAD MESSAGE IN UPLINK)
 # END OF ERASABLES RESERVED FOR PINBALL INTERRUPT ACTION
 
@@ -366,7 +368,7 @@ XYMARK          ERASE
                 SETLOC          400
 
 ## Page 16
-# TEMPORARY PHONY ASSIGNMENTS TO KEEP PINBALL FROM HAVING BAD ASSEBLIES
+# TEMPORARY PHONY ASSIGNMENTS TO KEEP PINBALL FROM HAVING BAD ASSEMBLIES
 
 THETAD          ERASE           +2
 DELVX           ERASE           +5
@@ -526,6 +528,8 @@ GCOMPSW         ERASE
 COMMAND         EQUALS          GCOMP
 CDUIND          EQUALS          GCOMP           +3
 
+# STORAGE FOR RR TASKS.
+
 RRRET           ERASE
 RDES            ERASE
 RRINDEX         ERASE
@@ -541,6 +545,8 @@ DESLOTSX        EQUALS
 
 ROLL            ERASE           +2
 LANDMARK        ERASE           +5
+
+# THE FOLLOWING REGS ARE USED BY THE STANDBY VERBS
 
 TIMESAV         ERASE           +1
 SCALSAV         ERASE           +1
