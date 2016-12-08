@@ -27,10 +27,12 @@ if len(sys.argv) < 5:
 	print '      The AGC-file inclusion directive $ is supported, so the top-level file'
 	print '      MAIN.agc can be used in order to make scripting easier.' 
 	print 'SCALE (optional, default 1.0) represents the resolution of the imagery, relative'
-	print '      to archive.org\'s scan of Sunburst 120, which is 3025 pixels high.  The'
-	print '      process is not *very* sensitive to this, but you will want to adjust it'
-	print '      anyway.  For example, Aurora 12 scans are 3450 pixels high, so SCALE=1.14.'
-	print '      Non-archive.org imagery has a very different scale. Think of it as being'
+	print '      to archive.org\'s scan of Sunburst 120, which is nominally 3025 pixels high.'
+	print '      The process is not *very* sensitive to this, but you will want to adjust it'
+	print '      anyway.  For example, for Aurora 12 scans I settled on SCALE=1.15.  (Sadly,'
+	print '      not all of the archive.org pages have precisely identical dimensions, even'
+	print '      when those pages are all from the sames set of scans for the same harcopy.)'
+	print '      Non-archive.org imagery has a very different scale. Think of SCALE as being'
 	print '      a multiplier for the DPI.  (By which I mean the true DPI of the physical'
 	print '      page, and not the value for the DPI embedded in the graphics files, which'
 	print '      may not be accurate.)'
@@ -177,6 +179,20 @@ for box in file:
 		addIt = 1 # For general characters.
 		numBoxWidths += 1
 		sumBoxWidths += boxWidth
+	# On a number of these printouts, there's an occasional short vertical stroke immediately to
+	# the right of a legitimate character ... perhaps the edge of the physical metal block containing
+	# the raised impression of the character itself.  At any rate, octopus's noise filters can't deal
+	# it with, and if we don't treat it as special, it will sometimes get past the exceptions we've
+	# built in below to allow detection of mutilated parentheses and T's.  What we calculate below is
+	# the "distance" between the left-hand edge of the current box and the immediately-preceding
+	# box, if in the same row.  If the box is too narrow AND AT THE SAME TIME too close, we will reject it.
+	rejectIt = 0
+	distance = 100
+	if len(boxes) > 0 and boxRight >= boxes[len(boxes)-1]['boxRight'] and \
+	   boxBottom <= boxes[len(boxes)-1]['boxBottom'] and boxTop >= boxes[len(boxes)-1]['boxTop']:
+		distance = boxRight - boxes[len(boxes)-1]['boxRight']
+	if distance < 8 * scale:
+		rejectIt = 1;
 	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
 	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
 	# that some printouts (like Sunburst 120) liked to stick in as short vertical line segments next to
@@ -207,7 +223,7 @@ for box in file:
 			      'boxHeight':int(round(nominalRowHeight))})
 		boxBottom = int(round(boxTop + nominalRowHeight))
 		boxHeight = int(round(nominalRowHeight))
-	if addIt:
+	if addIt and not rejectIt:
 		# New line?
 		boxIndex = len(boxes)
 		if numCharsInRow > 0:
