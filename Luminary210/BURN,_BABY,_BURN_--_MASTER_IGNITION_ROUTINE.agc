@@ -15,6 +15,7 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-01-12 HG   Transcribed
 ##              2016-12-07 HG   fix P00 -> POO
+##                              Change POO -> P00 in some comments
 
 ## Page 726
 
@@ -749,7 +750,7 @@ VB97DEX         =               OCT35                   # NEGATIVE OF THIS IS PR
                 CA              NVWORD          +2      # NVWORD+2 CONTAINS V06 & APPROPRIATE NOUN
                 TC              BANKCALL
                 CADR            CLOCPLAY
-                TCF             STOPCLOK                # TERMINATE CLOKTASK ON THE WAY TO POOH
+                TCF             STOPCLOK                # TERMINATE CLOKTASK ON THE WAY TO P00H
                 TCF             COMFAIL1
                 TCF             COMFAIL2
 
@@ -792,7 +793,7 @@ DISPNOT         TCF             ENDOFJOB                # AVERAGE G IS STARTING.
 
 
 STOPCLOK        TC              NULLCLOK                # STOP CLOKTASK & TURN OFF ULLAGE ON THE
-                TCF             GOTOPOOH                #     WAY TO POO  (GOTOPOOH RELINTS)
+                TCF             GOTOPOOH                #     WAY TO P00  (GOTOPOOH RELINTS)
 
 NULLCLOK        INHINT
                 EXTEND

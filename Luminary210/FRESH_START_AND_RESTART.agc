@@ -15,6 +15,12 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-22 HG   Transcribed
 ##              2016-12-07 HG   fix P00 -> POO
+##                              Change DNLADPOO -> DNLADP00
+##                                     COUNT* $$/POO -> COUNT* $$/P00
+##                                     R00 -> ROO
+##                                     R00AD -> ROOAD 
+##                                     RENDN00 -> RENDNOO
+##                                     change POO -> P00 in some comments
 
 ## Page 222
                 BANK            10
@@ -658,7 +664,7 @@ SWINIT          OCT             0
                 SETLOC          FFTAG5
                 BANK
 
-                COUNT*          $$/POO
+                COUNT*          $$/P00
 GOTOPOOH        CAF             OCT33                   # 4.33 SPOT FOR GOPOOFIX
                 TS              L
                 COM
@@ -684,7 +690,7 @@ CALGOPOO        CAF             PRIO30
                 SETLOC          VERB37
                 BANK
 
-                COUNT*          $$/POO                  # VERB 37 AND POO IN BANK 4.
+                COUNT*          $$/P00                  # VERB 37 AND P00 IN BANK 4.
 GOPOOFIX        TC              DOWNFLAG                # ALLOW X-AXIS OVERRIDE
                 ADRES           XOVINFLG
 
@@ -717,7 +723,7 @@ V37N99          VN              3799
 #       6. TRACK AND UPDATE FLAGS ARE SET TO ZERO.
 #       7. DISPLAY SYSTEM IS RELEASED.
 #       8. THE FOLLOWING ARE PERFORMED FOR EACH OF THE THREE CASES.
-#          A. PROGRAM SELECTED IS POO.
+#          A. PROGRAM SELECTED IS P00.
 #             1. RENDEZVOUS AND P25 FLAGS ARE RESET.(KILL P20 AND P25)
 #             2. STATINT1     IS SCHEDULED BY SETTING RESTART GROUP 2.
 #             3. MAJOR MODE 00 IS STORED IN THE MODE REGISTER (MODREG).
@@ -734,7 +740,7 @@ V37N99          VN              3799
 #                AND IF IT HAS, NO NEW PROGRAM IS SCHEDULED, THE EXISTING
 #                P20 OR P25 IS RESTARTED TO CONTINUE, AND ITS M M IS SET.
 #             3. CONTROL IS TRANSFERRED TO GOPROG2.
-#          C. PROGRAM SELECTED IS NEITHER POO,P20, NOR P25
+#          C. PROGRAM SELECTED IS NEITHER P00,P20, NOR P25
 #             1. V37XEQ IS SCHEDULED (AS A JOB) BY SETTING RESTART GROUP 4
 #             2. ALL CURRENT ACTIVITY EXCEPT RENDEZVOUS AND TRACKING IS DISCONTINUED BY CLEARING ALL RESTART
 #                GROUPS. IF THE RENDEZVOUS OR THE P25 FLAG IS ON, GROUP 2 IS NOT CLEARED, ALLOWING THESE PROGRAMS
@@ -861,13 +867,13 @@ CANV37          CAF             ZERO
 
                 WRITE           SUPERBNK
 
-                CAF             R00AD
+                CAF             ROOAD
                 TS              TEMPFLSH
 
                 TC              PHASCHNG
                 OCT             14
 
-R00             TC              INTPRET
+ROO             TC              INTPRET
 
                 CALL                                    # WAIT FOR INTEGRATION TO FINISH
                                 INTSTALL
@@ -905,7 +911,7 @@ DUMMYAD         EXIT
 POOH            TC              RELDSP                  # RELEASE DISPLAY SYSTEM
 
                 CAF             PRIO5                   # SET VARIABLE RESTART PRIORITY FOR
-                TS              PHSPRDT2                # POO INTEGRATION.
+                TS              PHSPRDT2                # P00 INTEGRATION.
 
                 TC              CLRADMOD                # CLRADMOD DOES AN INHINT.
 
@@ -923,7 +929,7 @@ POOH            TC              RELDSP                  # RELEASE DISPLAY SYSTEM
                 MASK            FLAGWRD0
                 TS              FLAGWRD0                #                        RENDFLG
 
-                CAF             DNLADPOO
+                CAF             DNLADP00
 
 SEUDOPOO        TS              DNLSTCOD                # SET UP APPROPRIATE DOWNLIST CODE
                 TS              AGSWORD                 #  (CURRENT LIST WILL BE COMPLETED BEFORE
@@ -970,10 +976,10 @@ RENDV00         CS              MODREG                  # IS CURRENT PROGRAM 22
 
                 AD              NEG2                    # IS NEW PROGRAM = P20 OR P25
                 EXTEND
-                BZF             RENDN00                 # YES
+                BZF             RENDNOO                 # YES
                 AD              FIVE                    # 25
                 EXTEND
-                BZF             RENDN00                 # YES
+                BZF             RENDNOO                 # YES
 
                 CA              OCT500                  # NO, IS EITHER P20 OR P25 RUNNING
                 MASK            FLAGWRD0
@@ -994,7 +1000,7 @@ POOFIZZ         CAF             V37QCAD                 # RESTART POINT FOR V37X
 
                 TCF             GOGOPROG
 
-RENDN00         CS              MODREG
+RENDNOO         CS              MODREG
                 AD              OCT24
                 EXTEND
                 BZF             KILL2                   # P20 OR P25 ON TOP OF P20 OR P25 -
@@ -1089,7 +1095,7 @@ NEG7            EQUALS          OCT77770
 MMTEMP          EQUALS          PHSPRDT3
 BASETEMP        EQUALS          TBASE4
 V37QCAD         CADR            V37XEQ          +3
-R00AD           CADR            DUMMYAD
+ROOAD           CADR            DUMMYAD
 OCT37667        OCT             37667
 OCT40072        OCT             40072
 OCT700          OCT             700
@@ -1197,7 +1203,7 @@ PREMM1          EQUALS
                 OCT             27614                   # MM 12  EBANK 7  PRIO 13
                 OCT             27006                   # MM 06  EBANK 4  PRIO 13
 # NOTE.     THE FOLLOWING CONSTANT IS THE NUMBER OF ENTRIES IN EACH OF
-# ----      THE ABOVE LISTS-1(IE, THE NUMBER OF MAJOR MODES(EXCEPT POO)
+# ----      THE ABOVE LISTS-1(IE, THE NUMBER OF MAJOR MODES(EXCEPT P00)
 #           THAT CAN BE CALLED FROM THE KEYBOARD MINUS ONE)
 
 NOV37MM         DEC             25                      # MM'S - 1
@@ -1232,7 +1238,7 @@ DNLADMM1        EQUALS
                 ADRES           RENDEZVL                # P20
                 ADRES           DESASCNT                # P12
                 ADRES           COSTALIL                # P06
-DNLADPOO        =               ZERO
+DNLADP00        =               ZERO
 COSTALIL        =               0
 AGSUPDAT        =               1
 RENDEZVL        =               2

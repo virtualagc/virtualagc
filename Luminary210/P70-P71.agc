@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-01 RSB	Completed transcription.
+##              2016-12-07 HG   Fix pseudo operator ADDRESS -> ADRES
 
 ## Page 831
 		BANK	21
@@ -38,7 +39,7 @@ STORPCTR	TS	PIPCTR1
 
 		CAF	OCT31
 		TC	TWIDDLE
-		ADDRESS	R10,R11
+		ADRES	R10,R11
 R10,R11A	CAF	HFLSHBIT
 FLASHH?		MASK	FLGWRD11
 		EXTEND
