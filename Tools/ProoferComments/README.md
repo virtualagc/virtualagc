@@ -148,7 +148,7 @@ ProoferComments.py requires the files match0.png-match127.png and nomatch0.png-n
 These font images must reside in the asciiFont/ folder, which must be present in the same folder as ProoferComments.py itself. You must 'cd' to the folder containing ProoferComments.py before running it, or the font images won't be found.  However,
 input and output files for it can reside an any other folder.
 
-     ./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE \[SCALE\]
+     ./ProoferComments.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER AGCSOURCEFILE \[SCALE \[NODASHES \[PSM\]\]\]
 
 The command-line parameters are:
 
@@ -159,8 +159,20 @@ The command-line parameters are:
   by comments in the source code of the form "## Page `PAGENUMBER`".
 * `AGCSOURCEFILE` is the source-code file (\*.agc) in which the `PAGENUMBER` resides.
 * `SCALE` (optional, default 1.0) is a multiplier for the resolution (DPI) of the `BWINPUTIMAGE`.
-  It should not be necessary for archive.org scans, since they are all very similar to one another,
-  but is needed for imagery of a significantly-different resolution obtained from other sources.
+  It is relative to the scale of the archive.org Sunburst 120 images, which are nominally 3050 
+  pixels high.  In fact, not all of the pages in any given set of images are necessarily the 
+  exact same size, so the `SCALE` value used may need to be fiddled with somewhat.  For example,
+  for Aurora 12, I used the value `SCALE` = 1.15.
+* `NODASHES` (optional, default 0) is used to instruct ProoferComments that Tesseract is going to
+  ignore lines consisting entirely of spaces and dashes, or spaces and underlines. I'm not sure
+  the conditions under which Tesseract does this, but I tend to always use 1 for this value, and
+  think the default value of 0 is probably inappropriate.
+* `PSM` (optional, default 6) is a parameter passed directly to Tesseract during bounding-box 
+  generation.  The only useful values are 6 and 4.  6 is safer.  The reason that one might wish 
+  to use `PSM` = 4 on an isolated page is that in generating bounding boxes, Tesseract sometimes
+  (though rarely) simply decides to ignore words or even entire lines.  Since `PSM` 6 and 4 tend
+  to do this at _different_ times and places, you can often fix such an error by reprocessing the
+  page with 4.
 
 # Markings in the Proofing Images Output by ProoferComments.py
 
