@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-07 RRB	Transcribed from Luminary210.
+##              2016-12-08 HG   Fix operand AGCINDIC -> AGSINDIC
 
 
 ## Page 1407
@@ -61,7 +62,7 @@ CHEKMORE	CAF	BIT10		# BIT 10 OF 30 IS PGNCS CONTROL OF S/C
 		EXTEND
 		RAND	CHAN30		# BITS IN 30 ARE INVERTED
 		CCS	A
-		TCF	AGCINDIC	# AGS: GO SET NPGNCSFL BUT CONTROL ANYHOW.
+		TCF	AGSINDIC	# AGS: GO SET NPGNCSFL BUT CONTROL ANYHOW.
 		CS	FLGWRD10
 		MASK	NPGNCSBT
 		CCS	A

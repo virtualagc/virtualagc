@@ -24,8 +24,9 @@
 ##				bringing the average errors-per-page to *exactly* 1.  :-)
 ##		2015-12-02 RSB	4 more errors found, with additional improvements to
 ##				ProoferComments.py ... so, 38 errors for 34 lines.
-##              1016-12-07 HG   fix P00 -> POO (appears only in a comment)
+##              2016-12-07 HG   fix P00 -> POO (appears only in a comment)
 ##                              revert above change
+##              2016-12-07 HG   Add missing label S40RET
 
 ## Page 747
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -516,7 +517,7 @@ COASTSET	TC	IBNKCALL	# DO DAP COASTING INITIALIZATION
 UPDATEVG	STQ	CALL
 			QTEMP1
 			S40.8		# X-PRODUCT STEERING
-		BON	BON		# WILL RETURN HERE FROM S40.8
+S40RET		BON	BON		# WILL RETURN HERE FROM S40.8
 			XDELVFLG
 			QTEMP1
 			NORMSW
