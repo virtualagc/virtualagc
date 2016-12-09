@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-06 RRB	Updated from Luminary210 scans.
+##              2016-12-09 HG   Add missing SETLOC RTBCODES (changes to Bank 10, because Bank 14 is full)
 
 
 ## Page 1394
@@ -172,6 +173,9 @@ DPMODE		CAF	ZERO		# SETS MPAC +2 TO ZERO IN THE PROCESS
 		EXTEND
 		DCS	DPOSMAX
 		TCF	SLOAD2
+                
+                SETLOC  RTBCODES
+                BANK
 
 # 	RTB OP CODE NORMUNIT IS LIKE INTERPRETIVE INSTRUCTION UNIT, EXCEPT THAT IT CAN BE DEPENDED ON NOT TO BLOW
 # UP WHEN THE VECTOR BEING UNITIZED IS VERY SAMLL -- IT WILL BLOW UP WHEN ALL COMPONENT ARE ZERO.  IF NORMUNIT
