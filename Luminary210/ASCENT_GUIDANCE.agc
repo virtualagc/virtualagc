@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ## 		2016-12-01 RSB	Completed the transcription.
+##              2016-12-08 HG   Fix operand V16N63 -> V16N94
 
 ## Page 844
 		BANK	34
@@ -506,7 +507,7 @@ ENGOFF1		TC	IBNKCALL	# SHUT OFF THE ENGINE.
 CUTOFF		TC	UPFLAG		# SET FLRCS FLAG.
 		ADRES	FLRCS
 
- -5		CAF	V16N63
+ -5		CAF	V16N94
  		TC	BANKCALL
 		CADR	GOFLASH
 		TCF	+3

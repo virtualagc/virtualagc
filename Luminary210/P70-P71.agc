@@ -15,6 +15,7 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-01 RSB	Completed transcription.
 ##              2016-12-07 HG   Fix pseudo operator ADDRESS -> ADRES
+##              2016-12-08 HG   Fix operand LANDISP -> LANADISP
 
 ## Page 831
 		BANK	21
@@ -69,7 +70,7 @@ P71NOW?		CS	MODREG		# YES.  ARE WE IN P71 NOW?
 		AD	1DEC71
 		EXTEND
 ## Page 832
-		BZF	LANDISP		# YES.  PROCEED TO R10.
+		BZF	LANADISP	# YES.  PROCEED TO R10.
 		
 		CAF	BIT1
 		MASK	CHANBKUP
@@ -87,13 +88,13 @@ P71NOW?		CS	MODREG		# YES.  ARE WE IN P71 NOW?
 P70NOW?		CS	MODREG		# NO. ARE WE IN P70 NOW?
 		AD	1DEC70
 		EXTEND
-		BZF	LANDISP		# YES.  PROCEED TO R10.
+		BZF	LANADISP	# YES.  PROCEED TO R10.
 
 		CA	L		# NO.  IS AN ABORT COMMANDED?
 		MASK	BIT1
 		CCS	A
 		TCF	P70A		# YES.
-		TCF	LANDISP		# NO.  PROCEED TO R10.
+		TCF	LANADISP	# NO.  PROCEED TO R10.
 
 		COUNT*	$$/P70
 

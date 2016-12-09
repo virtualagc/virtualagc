@@ -24,6 +24,11 @@
 ##              2016-11-28 HG   Fix operand SAMPLIN  -> SAMPLIM
 ##              2016-11-29 HG   fix label   DVCNTRL  -> DVCNTR1
 ##              2016-12-02 HG   fix operand FLPASSO  -> FLPASS0
+##              2016-12-07 HG   fix operand QAXIZ    -> QAXIS  adn mofidier +2 -> +6, fixes ZAXIS1
+##                                  label   1/DVO    -> 1/DV0
+##                                          ACSAVE   -> ASCSAVE
+##                                          DSPFLAG  -> DSPLG
+##                              add missing definition for label ZV
 
 
 ## Page 92
@@ -606,7 +611,7 @@ PIPCTR          =               PHSPRDT2                # USED TO COUNT DOWN R10
 NVWORD1         ERASE                                   # B(1) * USED DURING POWERED FLIGHT ONLY *
 
 EBANKSAV        ERASE
-DSPFLAG         =               EBANKSAV
+DSPFLG          =               EBANKSAV
 MARKFLAG        ERASE
 EBANKTEM        ERASE
 MARK2PAC        ERASE
@@ -662,6 +667,7 @@ LAT             EQUALS          COLREG          +1      # I(2)
 LONG            EQUALS          LAT             +2      # I(2)
 ALT             EQUALS          LONG            +2      # I(2)
 YV              EQUALS          ALT             +2      # I(6)
+ZV              EQUALS          YV              +6      # I(6) 
 #
 
 #          MISCELLANEOUS UNSWITCHED.                     (20D)
@@ -1615,14 +1621,14 @@ JPARM           EQUALS          CG                      # I(2) JPARM WILL EQUAL 
 KPARM           EQUALS          JPARM           +2      # I(2) KPARM WILL EQUAL K1PARM OR K2PARM
 RP              EQUALS          KPARM           +2      # I(2) PREDICTED BURNOUT RADIUS M*2(-24)
 QAXIS           EQUALS          RP              +2      # I(6) ASCENT CROSSRANGE HALF-UNIT VECTOR
-ZAXIS1          EQUALS          QAXIZ           +2      # i(6) ASCENT DOWNRANGE HALF-UNIT VECTOR
+ZAXIS1          EQUALS          QAXIS           +6      # i(6) ASCENT DOWNRANGE HALF-UNIT VECTOR
 L*WCR*T         =               BUF
 H*GHCR*T        =               BUF             +1
 
 
 #          Q-SAVE REGISTER FOR ASCENT                    (1D)
 
-ACSAVE          EQUALS          DLAND           +6      # I(1)TMP ASCENT Q-SAVE
+ASCSAVE         EQUALS          DLAND           +6      # I(1)TMP ASCENT Q-SAVE
 
 
 #          ALIGNMENT/SYSTEST/CALCSMSC COMMON STORAGE     (36D)
@@ -2980,7 +2986,7 @@ VGVECT          EQUALS          ENGOFFDT        +1      # I(6)OUT VELOCITY-TO-BE
 TXO             EQUALS          VGVECT          +6      # I(2)TMP TIME AT WHICH X-AXIS OVERRIDE
                                                         # IS ALLOWED.
 
-1/DVO           EQUALS          MASS1                   # B(2)TMEP  ATMAG TEMPORARY
+1/DV0           EQUALS          MASS1                   # B(2)TMEP  ATMAG TEMPORARY
 
 
 # END OF THE ASCENT GUIDANCE ERASABLES.
