@@ -24,7 +24,7 @@
 # for the paper and printer used on the Sunburst 120 listing; it will very
 # likely need to be modified for use with other scripts.
 
-
+import os.path
 import numpy as np
 import cv2
 import sys
@@ -48,6 +48,9 @@ group.add_argument('--comanche55', help="Perform COMANCHE 55 processing", action
 group.add_argument('--luminary99', help="Perform LUMINARY 99 processing", action="store_true")
 
 args = parser.parse_args()
+if not os.path.isfile(args.input_file):
+	print "Cannot open file", args.input_file
+	sys.exit(1)
 
 img = cv2.imread(args.input_file)
 
