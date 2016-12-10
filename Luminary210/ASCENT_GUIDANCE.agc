@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ## 		2016-12-01 RSB	Completed the transcription.
 ##              2016-12-08 HG   Fix operand V16N63 -> V16N94
+##              2016-12-10 HG   remove BANK 7 operation
+##                                     SETLOC ASENT2 -> SETLOC ASENT7
 
 ## Page 844
 		BANK	34
@@ -418,8 +420,7 @@ OFFROT		CLRGO
 			ROTFLAG
 			CLRXFLAG
 
-		BANK	7
-		SETLOC	ASENT2
+		SETLOC	ASENT7
 		BANK
 		COUNT*	$$/ASENT
 

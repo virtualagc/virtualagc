@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ## 		2016-12-01 RSB	Completed transcription
+##              2016-12-10 HG   fix operator DXCH  -> XCH
+##                                           DOUBLE -> DDOUBL
 
 ## Page 789
 		BANK	31
@@ -111,7 +113,7 @@ LOWFCOLD	CS	H*GHCR*T
 		BZMF	DOPIF		# BRANCH IF FC < OR = HIGHCRIT
 
 		CA	FMAXPOS		# NO:   THROTTLE-UP
-FLATOUT1	DXCH	FCODD
+FLATOUT1	XCH	FCODD
 		CA	FEXTRA
 ## Page 791
 FLATOUT2	TS	PIFPSET
@@ -186,7 +188,7 @@ FWCOMP		CAF	2SECS
 		DV	Q
 		EXTEND
 		MP	PIF
-		DOUBLE
+		DDOUBL
 		DXCH	FWEIGHT
 		CCS	PIF
 		AD	ONE

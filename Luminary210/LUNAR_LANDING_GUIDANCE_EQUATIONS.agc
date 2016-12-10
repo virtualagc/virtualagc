@@ -15,6 +15,9 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-02 HG   Transcribed
 ##              2016-12-07 HG   Fix P00 -> POO
+##              2016-12-10 HG   add missing CCS MPAC
+##                                          EXTEND
+##                              fix opcode CAF -> TC
 
 ## Page 794
                 EBANK=          E2DPS
@@ -697,6 +700,7 @@ CGCALC          CA              WCHPHOLD
                 TS              L
                 DAS             MPAC
                 CCS             MPAC            +1
+                CCS             MPAC
                 TCF             EXITSPOT
                 TCF             EXITSPOT
                 NOOP
@@ -872,7 +876,7 @@ DISPEX66        =               DISPEXIT        +3
                 INDEX           WCHPHOLD
                 TCF             WHATDISP
 
-P63DISPS        CAF             VACRLEAS
+P63DISPS        TC              VACRLEAS
                 CS              FLGWRD11                # HAVE LR UPDATES BEEN PERMITTED?
                 MASK            LRINHBIT
                 EXTEND
@@ -1308,6 +1312,7 @@ DEIMUBOB        CA              EBANK6
                 CS              OMEGAQ                  # PITCH RATE IN UNITS 45 DEG/SEC
                 INCR            BBANK
                 EBANK=          END-E7
+                EXTEND
                 MP              RIMUZ                   # IMU Z IN UNITS (180/PI 45) 2(14) CM
                 ADS             OLDPIPAX                # CURRENT PIPA X IN UNITS 2(14) CM/SEC
                 TC              Q
