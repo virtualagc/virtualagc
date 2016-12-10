@@ -206,7 +206,7 @@ for box in file:
 		   	if boxTop < lastTop:
 		   		lastTop = boxTop
 		   	lastHeight = lastBottom - lastTop + 1
-		   	if lastHeight >= 24 * scale and lastHeight <= 28 * scale:
+		   	if lastHeight >= 22 * scale and lastHeight <= 28 * scale:
 		   		# Accept it!
 		   		boxes[len(boxes)-1]['boxRight'] = lastRight
 		   		boxes[len(boxes)-1]['boxLeft'] = lastLeft
@@ -233,6 +233,11 @@ for box in file:
 		distance = boxRight - boxes[len(boxes)-1]['boxRight']
 	if distance < 8 * scale:
 		rejectIt = 1;
+	# Here's something to help apostrophes to be recognized:
+	if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
+	   boxHeight <= 16 * scale and numCharsInRow > 0 and \
+	   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
+	   	addIt = 1 		
 	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
 	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
 	# that some printouts (like Sunburst 120) liked to stick in as short vertical line segments next to
