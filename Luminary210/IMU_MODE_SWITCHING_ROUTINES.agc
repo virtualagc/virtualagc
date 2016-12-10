@@ -600,7 +600,7 @@ LASTSEG		TS	GYROCMD
 		EBANK=	CDUIND
 		2CADR	TWOPULSE
 
-GYROEXIT	TC      GYROEXIT
+EXITGYRO	TC      GYROEXIT
 		TCF	TASKOVER
 OUTPULSE        CA      BIT2
                 TS      GYROCMD
@@ -706,7 +706,7 @@ CAGETSTG        CS      IMODES30
                 TC      Q
 
 DONTPULS        CAF     ZERO
-                TS      LGRYO
+                TS      LGYRO
 
                 CAF     LGWAKE
                 TC      JOBWAKE
