@@ -11,6 +11,7 @@
 #               2016-12-05 JL   Transcribed pages 283-287.
 #               2016-12-08 JL   Transcribed pages 288-294.
 #               2016-12-09 JL   Transcribed pages 295-302.
+#               2016-12-10 JL   Transcribed pages 303-308.
 
 # Annotations:
 #
@@ -1875,30 +1876,335 @@ R1624   FIELDS.  THE FIRST AND SECOND SPECS IN EACH PAIR POINT TO THE END AND BE
 # Page 303
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  39        PAGE  39
 
+P1712              SUBROUTINE IN PASS 2 TO TRANSLATE THE ADDRESS FIELD OF A DECIMAL CONSTANT.  EXPECTS TO FIND THE FIELD
+R1714   DELIMITED BY AN ATSERISK.  DELIVERS THE RESULT AS AN INTEGER WITH SIGN IN BIT 1 IN NUMBER, OR DELIVERS
+R1716   ..BAD WORD.. IN NUMBER IF THE VALUE CANNOT BE DETERMINED.  ENTER WITH RETURN IN X4 AND WITH THE FWA OF THE
+R1718   ADDRESS FIELD IN S3, THE MAXIMUM INTEGER IN FLOATING DECIMAL FOR THE CONSTANT TYPE AND MACHINE IN MAX DECML, THE
+R1720   SAME QUANTITY +1 IN ISCALE, AND THE MAXIMUM NUMBER AS ABOVE IN BINARY IN MAX NUMBR. APPROPRIATE CUSSING IS DONE.
+
+
+
+ 1722   DEC CONST  TX           PLUS 75       -             EXPONENT            INITIALLY ASSUME INTEGER.
+ 1724              TX           BIT 1         -             MANTISSA            INITIALLY ASSUME PLUS.
+ 1726              BS           ZERO          ONE           FULL DELT           EXPO INCREASES WHEN WD FULL, NO POINT.
+ 1728              TS           ZERO          NFUL DELT     NORMA CON +2   C    BUT POINT MOVES DOWN WHEN WD NOT FULL.
+ 1730              NA, D12      CARACTER      ZERO          NEXT CHAR +1        BRANCH IF CANNOT BE A SIGN.
+ 1732              LA           CARACTER      ZERO          NEXT CHAR +2
+ 1733              SWS, BIT 1   CARACTER      43,L          MANTISSA            PLACE EXPLICIT SIGN ON MANTISSA.
+
+ 1735   NEXT CHAR  TS, CHAR8    CHAR 8        CON WORD      NORMA CON +1   C    CREAM LAST CHARACTER AND GET NEXT.
+ 1737              LA           TEN           CARACTER      NON DIGIT
+
+ 1738              LA, D2T12    BIT 12        MANTISSA      FULL MANT           10 (NORMALIZED) DIGITS IS  FULL MANT.
+
+ 1740              SPE, D1T11   MANTISSA      D,1,L         MANTISSA
+ 1741              SM           MANTISSA      BIT 2         MANTISSA            SIGNAL THERES AT LEAST ONE DIGIT.
+ 1743              BA           EXPONENT      NFUL DELT     EXPONENT
+ 1744              TS, D12      CARACTER      MANTISSA      NEXT CHAR           PUT DIGIT INTO MANTISSA.
+
+ 1746   FULL MANT  BA           EXPONENT      FULL DELT     EXPONENT
+ 1747              TS, BIT 1    ONES          CUSS LIST +13 NEXT CHAR           SIGNAL MORE THAN 10 DIGITS.
+
+ 1749   NON DIGIT  NA           NFUL DELT     ZERO          NON POINT           BRANCH IF A POINT HAS OCCURRED.
+ 1751              NA           CARACTER      POINT C8      NON POINT           BRANCH IF NOT A POINT.
+ 1753              TX           ONE           -             NFUL DELT
+ 1754              TS           ZERO          FULL DELT     NEXT CHAR           SIGNAL POINT OCCURRENCE AND GET NEXT.
+
+ 1756   NON POINT  SSL, ONE     MANTISSA      46            C,+1                TEST NONE/SOME DIGITS INDICATOR.
+ 1758              TS           FL UNITY      NUMBER        E QUEST             NUMBER = 1.0 IF NO DIGITS BEFORE E OR B.
+
+ 1760              SWE, B2T8    EXPONENT      40,L          EXPONENT
+ 17601             EX           MANTISSA      B1B5T48       NUMBER
+ 1761              FFN          EXPONENT      NUMBER        NUMBER              FLOAT NUMBER BEFORE E OR B ADJUST.
+
+ 1763   E QUEST    NA           CARACTER      EC8           NON(E)              BRANCH IF NOT AN  E  .
+
+ 1765              TX           BIT 1         -             E NUMBER            INITIALLY ASSUME PLUS E NUMBER.
+ 1767              SM           MANTISSA      BIT 2         MANTISSA            SIGNAL NON-VOID FIELD.
+ 1769              TS           ZERO          DEC DIGS      NORMA CON      C
+ 1770              NA, D12      CARACTER      ZERO          NEXT ECAR +1
+ 1771              LA           CARACTER      ZERO          NEXT ECAR +2
+ 1772              SWS, BIT 1   CARACTER      43,L          E NUMBER            PUT EXPLICIT SIGN ON E NUMBER.
 
 # Page 304
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  40        PAGE  40
 
+P1774   LOOP TO DEAL WITH DIGITS AFTER E.
+
+ 1775   NEXT ECAR  TS, CHAR8    CHAR8         CON WORD      NORMA CON +1   C    CREAM LAST CHARACTER AND GET NEXT.
+ 1777              LA           TEN           CARACTER      NON E DIG           BRANCH IF NOT A DIGIT.
+ 1779              BT           E NUMBER      10            E NUMBER
+ 1780              WA           E NUMBER      CARACTER      E NUMBER
+ 1781              WA           DEC DIGS      ONE           DEC DIGS
+ 1782              LA           DEC DIGS      THREE         NEXT ECAR           BRANCH IF E NUMBER NOT TOO LONG.
+
+ 1784              TS, BIT 17   ONES          CUSS LIST +13 EX RANGE +1
+
+ 1785   NON E DIG  LA           DEC DIGS      ZERO          BAD CONST           NO DIGITS AFTER E IS WRONG.
+
+ 1787              TX           BIT 1         -             COMMON
+ 1788              SWS, B42T48  NUMBER        40            COMMON
+ 1789              BA           E NUMBER      COMMON        E NUMBER            ADD IMPLICIT AND EXPLICIT EXPONENTS.
+ 1791              LN           E NUMBER      ONE           EX RANGE            NEGATIVE RESULT IS WRONG.
+ 1793              LA, C2T8     BIT 41        E NUMBER      EX RANGE            128 OR MORE IS WRONG TOO.
+ 1795              SWS, B2T8    E NUMBER      40,L          NUMBER              TRUE MAGNITUDE OF NUMBER IS NOW KNOWN.
+
+ 1797   NON(E)     NA           CARACTER      BC8           NON(B)              BRANCH IF CHARACTER IS NOT B.
+
+ 1799              SM           MANTISSA      BIT 2         MANTISSA            SIGNAL NON-VOID FIELD.
+ 1801   B FACTOR   TX           BIT 1         -             B NUMBER            INITIALLY ASSUME PLUS.
+ 1803              TS           ZERO          DEC DIGS      NORMA CON      C
+ 1804              NA, D12      CARACTER      ZERO          NEXT B CAR +1
+ 1805              LA           CARACTER      ZERO          NEXT B CAR +2
+ 1806              SWS, BIT 1   CARACTER      43,L          B NUMBER            PUT IN EXPLICIT SIGN.
+
+ 1808   NEXT B CAR TS, CHAR8    CHAR8         CON WORD      NORMACON +1    C
+ 1809              LA           TEN           CARACTER      NON B DIG           BRANCH IF NOT A DIGIT.
+ 1811              BT           B NUMBER      10            B NUMBER
+ 1812              WA           B NUMBER      CARACTER      B NUMBER
+ 1813              WA           DEC DIGS      ONE           DEC DIGS
+ 1814              LA           DEC DIGS      THREE         NEXT B CAR          ERROR IF B NUMBER IS TOO LONG.
+ 1816              TS, BIT 17   ONES          CUSS LIST +13 EX RANGE +1
+
+ 1817   NON B DIG  LA           DEC DIGS      ZERO          BAD CONST           NO DIGITS AFTER B IS WRONG.
+ 1819              NN           B NUMBER      ZERO          C,+2                BRANCH IF B NUMBER NOT TRIVIAL.
+ 1821              TS           -             -             NON(B)
+
+ 1822              LA, CAC3     B210          B NUMBER      EX RANGE            B NUMBER MORE THAN 209 IS WRONG.
+ 1824              LN           B NUMBER      ZERO          C,+2                BRANCH IF B NUMBER NORZ.
+ 1826              TS           L POWERS 2    Z,S3          C,+2
+ 1827              SWE, CAC3    L POWERS 2    16            Z,S3                CHOOSE POS OR NEG POWERS OF 2.
+ 1829              TS           FL UNITY      COMMON        BUILD B +3
 
 # Page 305
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  41        PAGE  41
 
+P1830   LOOP TO FORM SCALING FACTOR BY A PRODUCT OF FACTORS OF THE FORM 2**(2**N) WHERE N = 0(1)7.
+
+ 1832   BUILD B    SM           Z,S3,1        Z,SC,3        -                   ADVANCE INDEX AND SKIP.
+ 1834              FDM          N,S3,1        COMMON        COMMON              FORM PROD(2**(+-POWERS OF 2)).
+ 1836              SWE, CAC3    B NUMBER      1             B NUMBER
+ 1837              SSL, ONE     B NUMBER      0             BUILD B
+ 1838              NA           B NUMBER      ZERO          BUILD B +2          BRANCH IF B NUMBER NOT EXHAUSTED.
+
+ 1840              EX           NUMBER        B2T8          COMMON +1
+ 1841              EX           COMMON        B2T8          COMMON +2
+ 1842              WA           COMMON +1     COMMON +2     COMMON +1           TENTATIVELY COMBINE EXPONENTS.
+ 1844              LA           COMMON +1     HEX 49L       EX RANGE            BRANCH IF PRODUCT WILL UNDERFLOW.
+ 1846              LA           B1B2          COMMON +1     EX RANGE            BRANCH IF PRODUCT WILL OVERFLOW.
+ 1848              FDM          NUMBER        COMMON        NUMBER              SCALE BY B FACTOR.
+
+ 1850   NON(B)     NA           CARACTER      STAR C8       BAD CONST           ERROR IF CHARACTER IS NOT ASTERISK.
+ 1852              SSL, ONE     MANTISSA      46            C,+1                TEST NONE/SOME DIGITS INDICATOR.
+ 1854              TS, BIT 33   ONES          CUSS LIST +2  BAD CONST +2        VOID FIELD IS ILLEGAL.
+
+ 1856              LA, ALLBUTB1 FL UNITY      NUMBER        INTEGER
+
+ 1857              FDM          NUMBER        ISCALE        NUMBER              TURN FRACTION INTO INTEGER FOR MACHINE.
+ 18582             LA, ALLBUTB1 HALF ADJ      NUMBER        C,+3                OK IF NUMBER WILL ASSEMBLE AS NON-ZERO.
+ 18584             LA, ALLBUTB1 NUMBER        ZERO          C,+2                ZERO IS OK IF IT WAS MEANT TO BE ZERO.
+ 18586             SM           CUSS LIST +13 BIT 33        CUSS LIST +13       INADVERTENT ZERO IS A SCALING BLUNDER.
+ 1859              TS           NUMBER        COMMON        DEC TO BIN     C
+ 1860              LA           NUMBER        MAX NUMBR     SET SIGN            BRANCH IF WE DIDNT ROUND UP TO ONE.
+ 1862              TS           MAX NUMBR     NUMBER        SET SIGN            USE 1 - EPSILON IN THAT CASE.
+
+ 1864   INTEGER    LA, ALLBUTB1 NUMBER        MAX DECML     C,+2
+ 1865              TS, BIT 17   ONES          CUSS LIST +13 EX RANGE +1         ERROR IF TOO-BIG INTEGER.
+
+ 1867              FDAU         NUMBER        FLI ZERO      COMMON              CREATE INTEGER VERSION OF NUMBER.
+ 1869              FDS          NUMBER        COMMON        NUMBER
+ 1870              FNN          NUMBER        FL ZERO       C,+2                BRANCH IF THE FRACTIONAL PART ISNT ZERO.
+ 1872              TS           Z,SC,1        -             DEC TO BIN +2  C
+ 1873              TS, BIT 33   ONES          CUSS LIST +13 DEC TO BIN +2  C    CUSS FRACTION LOSS AND CONVERT.
+
+ 1875   SET SIGN   TX           SAVE W6       -             CARD +5             RESTORE POSSIBLY STARRED WORD IN CARD.
+ 1877              SS           COMMON        BIT  1        NUMBER              ATTACH SIGN.
+ 1879              TS           ONES          E NUMBER      N,X4                DECLARE NUMBER TO BE SIGNED, EXIT.
+
+ 1881   BAD CONST  TS, BIT 33   ONES          CUSS LIST +2  C,+2                SIGNAL MEANINGLESS ADDRESS FORMAT.
+
+ 1883   EX RANGE   SM           CUSS LIST +13 BIT 17        CUSS LIST +13       SIGNAL RANGE ERROR.
+ 18841             TX           SAVE W6       -             CARD +5
+ 1885              TS           W BAD WORD    NUMBER        N,X4                EXIT WHEN VALUE IS UNDETERMINED.
 
 # Page 306
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  42        PAGE  42
 
+P1887   CLOSED SUBROUTINE TO SET NEXT NON-BLANK CHARACTER.
+
+ 1888   ROTACON    SWS, ONES    CON WORD      A,1,L         CON WORD       C
+ 1889              NA, CHAR8    CON WORD      BLANKS        ROTAXIT        C    BRANCH IF CHARACTER NON-BLANK.
+ 1891   NORMA CON  SM           CON WORD      CHAR8         CON WORD       C    CREAM LAST CHARACTER.
+ 1893              NA           CON WORD      ONES          ROTACON        C    BRANCH IF WORD NOT EXHAUSTED.
+ 1895              TS           N,S3,1        CON WORD      ROTACON        C    BEGIN NEXT WORD.
+ 1897   ROTAXIT    EX           CON WORD      CHAR 8        CARACTER            ISOLATE CHARACTER AND EXIT.
+
+
+
+R1899   CLOSED SUBROUTINE TO SINK A FLOATING DECIMAL NUMBER INTO THE BINARY DEEP.
+
+ 1901   DEC TO BIN SS           COMMON        BIT 1         HALF ADJ       C    ROUND.
+ 19021             FDA          COMMON        HALF ADJ      COMMON         C
+ 1903              FDAU         COMMON        FLI ZERO      COMMON         C    SINK.
+ 1905              SWS, ONES    COMMON        D,3,L         COMMON         C
+ 1906              TX           TEN           -             Z,S3           C    INITIALIZE DIGIT COUNT.
+ 1908              TS           ZERO          NUMBER        DTOB LOOP +3   C
+
+ 1909   DTOB LOOP  WA           NUMBER        COMMON +1     NUMBER         C
+ 1910              BT           NUMBER        10            NUMBER         C
+ 1911              SWS, ONES    COMMON        D,1,L         COMMON         C
+ 1912              EX           COMMON        D12           COMMON +1      C
+ 1913              NA           Z,S3,1        ONE           DTOB LOOP      C
+ 1914              WA           NUMBER        COMMON +1     NUMBER
+
+
+
+ 1915   L POWERS 2 CAC                        POW POW 2M    POW POW 2P
+
+ 1916   POW POW 2M FLDEC        .5, .25, .0625, .390625 E-2
+ 1917              FLDEC        .15 2587 8906 E-4, .23 2830 6437 E-9
+ 1918              FLDEC        .54 2101 0864 E-19, .29 3873 5877 E-38
+
+ 1919   POW POW 2P FLDEC        2.0, 4.0, 16.0, 256.0, 65536.0
+ 1920              FLDEC        .42 9496 7296 E10, .18 4467 4407 E20
+ 1921              FLDEC        .34 0282 3669 E39
 
 # Page 307
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  43        PAGE  43
 
+P1922              SUBROUTINE IN PASS 2 TO TRANSLATE THE ADDRESS FIELD OF AN OCTAL CONSTANT.  EXPECTS TO FIND THE FIELD
+R1924   DELIMITED BY AN ASTERISK.  DELIVERS THE RESULT AS AN INTEGER WITH SIGN IN BIT 1 IN NUMBER, OR DELIVERS
+R1926   ..BAD WORD.. IN NUMBER IF THE VALUE CANNOT BE DETERMINED.  ENTER WITH RETURN IN X4 AND WITH THE FWA OF THE
+R1928   ADDRESS FIELD IN S3, AND THE MAXIMUM OCTAL UNSIGNED INTEGER FOR THE MACHINE AND THE CONSTANT TYPE IN MAX NUMBR.
+R1930   EXPECTS THE EXPRESSION TO BE AN INTEGER, AND CUSSES IF A FRACTIONAL PART IS LOST BY TRUNCATION.
+
+
+
+ 1932   OCT CONST  TX           PLUS 42       -             EXPONENT            INITIALLY ASSUME INTEGER.
+ 1934              TX           ZERO          -             E NUMBER            INITIALLY ASSUME UNSIGNED NUMBER.
+ 1936              TX           BIT 1         -             MANTISSA            INITIALLY ASSUME PLUS.
+ 1938              TX           PLUS 3        -             FULL DELT
+ 1939              TS           ZERO          NFUL DELT     NORMA CON +2   C    GET FIRST CHARACTER.
+ 1941              NA, D12      CARACTER      ZERO          NEXT 8CAR +1   C    BRANCH IF CANNOT BE A SIGN.
+ 1943              LA           CARACTER      ZERO          NEXT 8CAR +2   C    BRANCH IF ZERO RATHER THAN SIGN.
+ 1945              SWS, BIT 1   CARACTER      43,L          MANTISSA            SHIFT SIGN BIT INTO PLACE.
+ 1947              TX           ONES          -             E NUMBER            DECLARE NUMBER TO BE SIGNED.
+ 1949   SIGNO OCT  SWE, D2T12   MAX NUMBR     0             MAX NUMBR           SMALLER NUMBER IS MAX IF SIGNED.
+ 1951   NEXT 8CAR  TS, CHAR8    CHAR 8        CON WORD      NORMA CON +1   C    CREAM LAST CHARACTER AND GET NEXT.
+ 1953              LA           EIGHT         CARACTER      NON 8 DIG           BRANCH IF NOT AN OCTAL DIGIT.
+
+ 1955              LA, D2T12    BIT 9         MANTISSA      FUL 8 MANT          14 OCTAL DIGITS MAKE A FULL MANTISSA.
+
+ 1957              SPE,B1THRU45 MANTISSA      3,L           MANTISSA            PUT DIGIT INTO MANTISSA.
+ 1958              SM           MANTISSA      CARACTER      MANTISSA            INDICATE SOME DIGITS.
+ 1960              SM           MANTISSA      BIT 2         MANTISSA
+ 1962              BS           EXPONENT      NFUL DELT     EXPONENT
+ 1963              TS           -             -             NEXT 8CAR
+
+ 1964   FUL8 MANT  BA           EXPONENT      FULL DELT     EXPONENT
+ 1965              TS, BIT 1    ONES          CUSS LIST +14 NEXT 8CAR           CUSS TOO MANY OCTAL DIGITS.
+
+ 1967   NON 8 DIG  NA           NFUL DELT     ZERO          NO 8 POINT          BRANCH IF A POINT HAS OCCURRED.
+ 1969              NA           CARACTER      POINT C8      NO 8 POINT          BRANCH IF THIS IS NOT A POINT.
+ 1971              TX           PLUS 3        -             NFUL DELT
+ 1972              TS           ZERO          FULL DELT     NEXT 8CAR           SIGNAL POINT OCCURRENCE AND GET NEXT.
+
+ 1974   NO 8 POINT SSL, TWO     MANTISSA      45            C,+1                TEST NONE/SOME DIGITS INDICATOR.
+ 1976              NA           CARACTER      BC8           BAD CONST           ONLY B IS LEGAL HERE IF NO DIGITS.
+ 1978              TS, ALLBUTB1 ONE           MANTISSA      C,+2                NUMBER = 1 IF NO DIGITS BEFORE B.
+
+ 1980              NA           CARACTER      BC8           NON(B)8
+
+ 1981              TX           BIT 1         -             B NUMBER            INITIALLY ASSUME PLUS B NUMBER.
+ 1983              TS           ZERO          DEC DIGS      NORMA CON      C
+ 1984              NA, D12      CARACTER      ZERO          NEX B8 CAR +1
+ 1985              LA           CARACTER      ZERO          NEX B8 CAR +2       BRANCH IF NOT A SIGN.
+ 1987              SWS, BIT 1   CARACTER      43,L          B NUMBER            SHIFT SIGN BIT INTO POSITION.
 
 # Page 308
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  44        PAGE  44
 
+P1989   LOOP TO DEAL WITH DIGITS AFTER B.
+
+ 1990   NEX B8 CAR TS, CHAR8    CHAR 8        CON WORD      NORMA CON +1   C
+
+ 1991              LA           TEN           CARACTER      NON B8 DIG          B-FACTOR IS MADE OF DECIMAL DIGITS.
+
+ 1993              BT           B NUMBER      10            B NUMBER
+ 1994              WA           B NUMBER      CARACTER      B NUMBER
+ 1995              WA           DEC DIGS      ONE           DEC DIGS
+ 1996              LA           DEC DIGS      TWO           NEX B8 CAR
+ 1997              TS, BIT 17   ONES          CUSS LIST +13 EX RANGE +1         ABORT WHEN B-FACTOR IS TOO LONG.
+
+ 1999   NON B8 DIG LA           DEC DIGS      ZERO          BAD CONST           NO DIGITS AFTER B IS ILLEGAL.
+ 2001              BA           EXPONENT      B NUMBER      EXPONENT            COMBINE IMPLICIT AND EXPLICIT EXPONENTS.
+
+ 2003   NON(B)8    NA           CARACTER      STAR C8       BAD CONST           ONLY ASTERISK IS OK HERE.
+ 2005              LN           PLUS 42       EXPONENT      ALL BINT            BRANCH IF VALUE IS INTEGER.
+ 2007              SSL, ONE     MANTISSA      0             C,+1                TEST VALUE OF BIT TO BE DISCARDED.
+ 2009              TX           Z,SC,1        -             -
+ 2010              SM           CUSS LIST +13 BIT 33        CUSS LIST +13       CUSS LOST FRACTIONAL BITS.
+ 2012              SPE,D1D3T12  MANTISSA      1             MANTISSA            DISCARD LOWEST BIT.
+ 2014              BS           EXPONENT      ONE           EXPONENT
+ 2015              TS           -             -             NON(B)8 +1          CONTINUE UNTIL WE HAVE AN INTEGER.
+
+ 2017   ALL BINT   LA, D2T12    MANTISSA      MAX NUMBR     C,+2                BRANCH IF NUMBER IS OF OK SIZE.
+ 2019              TS, BIT 17   ONES          CUSS LIST +13 EX RANGE +1
+
+ 2020              LN           EXPONENT      PLUS 42       OCT INTGR           BRANCH IF SCALING IS FINISHED.
+ 2022              SPE, ONES    MANTISSA      1,L           MANTISSA            SHIFT NUMBER UP.
+ 2024              WD           EXPONENT      ONE           EXPONENT
+ 2025              TS           -             -             ALL BINT
+
+ 2026   OCT INTGR  EX           MANTISSA      B1B5T48       NUMBER              PREPARE FINAL FORMAT OF CONSTANT.
+ 2028              TS           SAVE W6       CARD +5       N,X4                RESTORE POSSIBLY STARRED WORD, EXIT.
 
 # Page 309
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  45        PAGE  45
 
+P2030              SUBROUTINE IN PASS 2 TO BUFFER & PRINT A LINE WITH PAGINATION AND VERTICAL FORMAT CONTROL.  ENTRY IS
+R2032              TS           Z,SC          Z,X4          PRINT LIN           THE SYMBOL ..LINE.. IS ASSIGNED TO 0,0.
+R2034   ERROR AND WARNING LINES FROM PASS 2 COME WITH AN ..E.. IN THE EQUIVALENT OF COLUMN 1, AND CONTINUATION LINES
+R2036   COME WITH A ..C.. THERE.  PAGE SKIPS ARE INSERTED BEFORE CARDS WITH ..P.. OR ..L.. IN COLUMN 1.  LOG CARDS ARE
+R2038   PRINTED AS SUBSIDIARY PAGE HEADS (SP2) ON SUCCEEDING PAGES, UNTIL SUPPLANTED BY ANOTHER LOG CARD.  STRICTLY
+R20382  SPEAKING, THIS SUBROUTINE PRINTS THE LINE LAST DELIVERED TO IT.  WHEN SUPPRESSING INACTIVE SUBROUTINES, PRINTS
+R20384  CUSSED LINES WITH THEIR CUSSES.
+
+ 20389  PRINT LIN  TX           L OLD LINE    
+ 203891            TX           Z,X0          
+ 203893            NA, CHAR1    LINE +1       
+
+ 203896            NA           LINE          
+ 203898 SP2 THIS   TX           BIT 11        
+ 2039              TX, C5T8     BLANKS        
+ 203902            SS           ZERO          
+ 203904            SS           ZSUP ONE      
+ 203906            TN           LINE +1       
+ 203908            MT           N,AU2,1       
+ 20391             TX           ONE           
+ 203911            NA, BIT44    SWITCH        
+ 203913            NA, BIT3     SWITCH        
+ 203915            NA           3,1           
+ 203916            TS, BIT3     ONES          
+ 203918            WA           Z,X3          
+ 203919            MT           BLANKS        
+ 203921            TS, BIT3     ONES          
+
+ 203923 NO NEW LOG NA, CHAR7    LINE +1       
+ 203925            SS           BLANKS        
+ 203927            NA, CHAR6    LINE +1       
+ 20393             SS           BLANKS        
+
+ 20394  PRIN SUP Q NA, BIT44    SWITCH        
+ 203942            NA           LINE +1       
+ 203946            TS           BIT 12        
+ 203948            NA, BIT3     SWITCH        
+ 20395             TS           -             
+
+ 203952 WAS LAST E NA           3,1           
+ 203954            WA, ALLBUTB1 LIN COUNT     
+ 203956            LA           LIN COUNT     
+ 203958            TS, BIT3     ONES          
 
 # Page 310
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  46        PAGE  46
