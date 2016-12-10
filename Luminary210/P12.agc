@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-01 RSB	Completed transcription
+##              2016-12-10 HG   Fix constant  VINJNOM -> 16.79299
 
 ## Page 839
 		BANK	24
@@ -215,7 +216,7 @@ GUIDINIT	STQ	SETPD
 
 49FPS		2DEC	.149352 B-6	# EXPECTED RDOT AT TIPOVER
 
-VINJNOM		2DEC	16.7924 B-7	# 5509.5 FPS(APO=30NM WITH RDOT=19.5FPS)
+VINJNOM		2DEC	16.79299 B-7	# 5509.5 FPS(APO=30NM WITH RDOT=19.5FPS)
 
 RDOTDNOM	2DEC	.059436 B-7	# 19.5 FPS
 

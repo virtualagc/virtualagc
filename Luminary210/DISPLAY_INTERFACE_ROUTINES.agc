@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-08 JS   Compared to Luminary210 images. Updated where needed.
+##              2016-12-10 HG   Add missing operator ZL (label NVDSP)
 
 ## Page 1338
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -1063,7 +1064,8 @@ NORMBNCH	TC	UPFLAG		# SET PINBRANCH BIT
 
 		TCF	PLAYJUM1
 
-NVDSP		TC	COPYPACS
+NVDSP           ZL
+		TC	COPYPACS
 
 		CA	TEMPOR2		# SET UP BLANK BITS FOR NVMONOPT IN CASE
 		MASK	SEVEN		# USER REQUESTS BLANKING MONITOR
