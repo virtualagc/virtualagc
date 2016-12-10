@@ -110,6 +110,7 @@ nominalColSpacing = 4 * scale
 nominalRowSpacing = 10 * scale
 nominalRowHeight = 24 * scale
 nominalTwoRowHeight = nominalRowHeight + nominalRowSpacing + nominalRowHeight
+#lastRejected = 0
 row = 0
 for box in file:
 	boxFields = box.split()
@@ -128,6 +129,7 @@ for box in file:
 		if pendingBoxes[0]['boxBottom'] < boxTop:
 			rejectedBoxes.append(pendingBoxes[0])
 			del pendingBoxes[0]
+			#lastRejected = 0
 		elif pendingBoxes[0]['boxTop'] >= boxBottom - 1.3 * nominalRowHeight and \
 		     pendingBoxes[0]['boxBottom'] < boxBottom + 0.6 * nominalRowHeight and \
 		     pendingBoxes[0]['boxRight'] <= boxLeft:
@@ -173,12 +175,50 @@ for box in file:
 					print pendingBoxes[0]
 				rejectedBoxes.append(pendingBoxes[0])
 			del pendingBoxes[0]	
+			#lastRejected = 0
 	addIt = 0
 	addAs = 1
 	if boxWidth > 8 * scale and boxHeight > 8 * scale and boxWidth < 28 * scale and boxHeight < 44 * scale:
 		addIt = 1 # For general characters.
 		numBoxWidths += 1
 		sumBoxWidths += boxWidth
+	# There's an effect which occurs frequently, but *very* frequently when the contrast in the
+	# original scans is poorer (such as non-archive.org imagery) in which wide characters
+	# with a narrow crossbar, like M, H, U, and particularly N, may be split into two adjacent
+	# boxes.  The following filter tries to detect that case and turn them into a single wider
+	# box ... but it only does so within a *very* narrow range of combined-box sizes.
+	if len(boxes) > 0:
+		lastBox = boxes[len(boxes)-1]
+		lastTop = lastBox['boxTop']
+		lastBottom = lastBox['boxBottom']
+		lastLeft = lastBox['boxLeft']
+		lastRight = lastBox['boxRight']
+		combinedWidth = boxRight - lastLeft 
+		#print combinedWidth
+		if combinedWidth >= 16 * scale and combinedWidth <= 19 * scale:
+		   	# Convert all of the lastXXXX variables to describe the
+		   	# combined box.  We already know that the width is within
+		   	# the range we want, but let's check the height.
+		   	lastRight = boxRight
+		   	lastWidth = lastRight - lastLeft + 1
+		   	if boxBottom > lastBottom:
+		   		lastBottom = boxBottom
+		   	if boxTop < lastTop:
+		   		lastTop = boxTop
+		   	lastHeight = lastBottom - lastTop + 1
+		   	if lastHeight >= 24 * scale and lastHeight <= 28 * scale:
+		   		# Accept it!
+		   		boxes[len(boxes)-1]['boxRight'] = lastRight
+		   		boxes[len(boxes)-1]['boxLeft'] = lastLeft
+		   		boxes[len(boxes)-1]['boxTop'] = lastTop
+		   		boxes[len(boxes)-1]['boxBottom'] = lastBottom
+		   		boxes[len(boxes)-1]['boxWidth'] = lastWidth
+		   		boxes[len(boxes)-1]['boxHeight'] = lastHeight
+		   		#addIt = 1
+		   		#print "Combined ", boxes[len(boxes)-1]
+		   		continue
+		#del rejectedBoxes[len(rejectedBoxes)-1]
+		#lastRejected = 0
 	# On a number of these printouts, there's an occasional short vertical stroke immediately to
 	# the right of a legitimate character ... perhaps the edge of the physical metal block containing
 	# the raised impression of the character itself.  At any rate, octopus's noise filters can't deal
@@ -247,9 +287,10 @@ for box in file:
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 				      'boxHeight':boxHeight})
 			boxLeft += boxWidth + nominalColSpacing - 1
-			boxRight += boxWidth + nominalColSpacing - 1
-			
+			boxRight += boxWidth + nominalColSpacing - 1	
+		#lastRejected = 0
 	else:
+		#lastRejected = 1
 		rejectedBoxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 				      'boxHeight':boxHeight})
