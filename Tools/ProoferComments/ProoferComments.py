@@ -350,14 +350,14 @@ for ascii in range(128):
 	if os.path.isfile(filename):
 		imagesMatch.append(Image(filename=filename))
 	else:
-		imagesMatch.append(Image(filename="asciiFont/127.png"))
+		imagesMatch.append(Image(filename="asciiFont/match127.png"))
 imagesNomatch = []
 for ascii in range(128):
 	filename = "asciiFont/nomatch" + str(ascii) + ".png"
 	if os.path.isfile(filename):
 		imagesNomatch.append(Image(filename=filename))
 	else:
-		imagesNomatch.append(Image(filename="asciiFont/127.png"))
+		imagesNomatch.append(Image(filename="asciiFont/nomatch127.png"))
 
 # Prepare a drawing-context.
 draw = Drawing()
