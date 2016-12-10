@@ -10,6 +10,7 @@
 #               2016-12-03 JL   Transcribed pages 279-282.
 #               2016-12-05 JL   Transcribed pages 283-287.
 #               2016-12-08 JL   Transcribed pages 288-294.
+#               2016-12-09 JL   Transcribed pages 295-302.
 
 # Annotations:
 #
@@ -1489,34 +1490,387 @@ R12476  GENERAL MULTIPROGRAMMABLE SUBROUTINE IN PASS 2 TO PUT INTO SYPT STATUS T
 # Page 295
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  31        PAGE  31
 
+P1260              SUBROUTINE IN PASS 2 TO PROCESS THE ADDRESS FIELD OF INSTRUCTIONS OR CLERICAL CODES WITH SIMILAR
+R1262   ADDRESS FORMAT.  ENTER WITH RETURN ADDRESS IN X6.  THE ADDRESS VALUE IS DELIVERED AS AN UNSIGNED INTEGER IN
+R1264   ADDRESS, OR A WORD OF ONES IS DELIVERED THERE IF THE ADDRESS VALUE CANNOT BE DETERMINED.  SOME ADDRESS CUSSING
+R1266   IS DONE, ADDRESS SYMBOL TRANSFORMATIONS ARE DONE, AND ALL ADDRESS SYMBOL CUSSING IS DONE.
+
+
+
+ 1268   PROC ADR   TS           Z,SC          Z,X4          ADR FIELD           FORM SUBFIELDS FROM ADDRESS FIELD.
+ 1270              NA           FIELD COD     ONES          C,+2
+ 1271              TS, BIT33    ONES          CUSS LIST +2  NO ADRESS           CUSS AND EXIT ON MEANINGLESS FIELD.
+
+ 1273              NA           FIELD COD     ZERO          C,+2
+ 1274              TS           ZERO          ADR WD +1     REL ADRES           FAKE ZERO MODIFIER WHEN FIELD IS BLANK.
+
+ 1276              NA, B2B6     FIELD COD     BIT 2         NON REL AD          BR IF MAIN PART IS NOT SIGNED NUMERIC.
+ 12771             LA, BIT 2    ONES          SWITCH        REL ADRES +3        BRANCH IF RELATIVE TO LEFTOVER LOCATION.
+ 1278              LA           FIELD COD +1  ZERO          C,+2
+ 1279              BA           ADR WD        ADR WD +1     ADR WD              ADD TWO SIGNED NUMERIC PARTS.
+ 1281              TX           ADR WD        -             ADR WD +1           MODIFIER RELATIVE TO CURRENT LOCATION.
+
+ 1283   REL ADRES  SM           LOCATION      BIT 1         ADR WD
+ 1286              NA           ADR WD        ONES          MINAD CHK -1
+ 1287              TS, BIT 33   ONES          CUSS LIST +9  NO ADRESS           CUSS AND EXIT WHEN LOCATION IS SYMBOLIC.
+
+ 1289   NON REL AD LA           BIT 1         FIELD COD     SYMBOL AD           BRANCH IF MAIN PART IS SYMBOLIC.
+ 1291              LA           FIELD COD +1  ZERO          C,+2
+ 1292              BA           ADR WD        ADR WD +1     ADR WD              ADD MODIFIER TO MAIN PART.
+
+ 1294   MINAD CHK  LN           MIN ADRES     ADR WD        C,+2                BRANCH IF VALUE NOT TOO NEGATIVE.
+ 1296              TS, BIT 17   ONES          CUSS LIST +3  NO ADRESS           CUSS AND EXIT WHEN ADDRESS VALUE FAULTY.
+
+ 1298              LA, C2T8     BIT 32        ADR WD        C,-1                BRANCH IF VALUE IS MORE THAN CAC3.
+ 1300              EX           ADR WD        CAC3          ADDRESS
+ 1301              TX           Z,X6          -             Z,SC                NORMAL EXIT.
+
+ 1303   SYMBOL AD  TS           ADR WD        COMMON        ANAL SYMB      C    ANALYZE HISTORY OF SYMBOL.
+ 1305              NA           COMMON +2     ONES          SYMB FITS
+ 1306              SWS, B38T48  CUSS LIST +5  32            Z,R5
+ 1307              TS, BIT1     ONES          CUSS LIST +5  SYM CUSS 1          CUSS AND EXIT WHEN NEW SYMBOL DONT FIT.
+
+ 13082  SYMB FITS  EBA          Z,X2          ZERO          L REF SYM           SAVE ADDRESS OF SYMBOL REFERRED TO.
+ 1309              LA           CD8           COMMON +2     C,+2                BRANCH IF HEALTH OF SYMBOL IS C OR MORE.
+ 1311              SSL, B44T47  COMMON +2     15            STATE 0             CHOOSE CUSS FOR SYMBOL HEALTHS 0 TO 8.
+
+ 1313              SS           CUSS LIST +7  B38T48        Z,R5
+ 1314              TS, BIT33    ONES          CUSS LIST +7  SYM CUSS 2     C    MULTIPLE DEFINITION CUSS.
+ 1316              SSL, B44T47  COMMON +2     15            STATES 8C -22       CHOOSE CUSS FOR SYMBOL HEALTHS C TO G.
 
 # Page 296
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  32        PAGE  32
 
+P1318   DISPOSITIONS OF VARIOUS STATES OF ADDRESS SYMBOL.
+
+ 1319   STATE 0    SWS, B38T48  CUSS LIST +3  32            Z,R5
+ 1320              TS, BIT1     ONES          CUSS LIST +3  SYM CUSS 1          UNDEFINED.
+
+ 1322   STATE 1    SS           CUSS LIST +15 B38T48        Z,R5
+ 1323              TS, BIT33    ONES          CUSS LIST +15 SYM CUSS 1          NEARLY DEFINED BY EQUALS.
+
+ 1325   STATE 2    SWS, B38T48  CUSS LIST +16 32            Z,R5
+ 1326              TS, BIT1     ONES          CUSS LIST +16 SYM CUSS 1          MULTIPLY DEFINED INCLUDING NEARLY BY =.
+
+ 1328   STATE 3    TS           -             -             SYMB MOD Q          DEFINED BY EQUALS (NO CUSS).
+ 1330   L REF SYM  OCT          0
+
+ 1331   STATE 4    SS           CUSS LIST +16 B38T48        Z,R5
+ 1332              TS, BIT33    ONES          CUSS LIST +16 SYM CUSS 3          MULTIPLY DEFINED INCLUDING BY EQUALS.
+
+ 1334   STATE 5    SWS, B38T48  CUSS LIST +16 16            Z,R5
+ 1335              TS, BIT 17   ONES          CUSS LIST +16 SYM CUSS 1          FAILED LEFTOVER.
+
+ 1337   SYMB MOD Q TX           BIT 1         -             ADR WD              SET UP VALUE OF ADDRESS SYMBOL AS A
+ 1339              TS, CAC3     COMMON +2     ADR WD        NON REL AD +1       FULL-WORD SIGNED INTEGER, CHEK MODIFIER.
+
+ 1374   STATE 7    SS           CUSS LIST +7  B38T48        Z,R5
+ 1375              TS, BIT33    ONES          CUSS LIST +7  SYM CUSS 3          MULTIPLY DEFINED.
+
+ 1377   STATES 8C  SWS, B38T48  CUSS LIST +7  32            Z,R5
+ 1378              TS, BIT 1    ONES          CUSS LIST +7  SYM CUSS 1          OVERSIZE DEFINITION.
+
+ 1380   STATES 9D  SS           CUSS LIST +5  B38T48        Z,R5
+ 1381              TS, BIT33    ONES          CUSS LIST +5  SYM CUSS 3          WRONG MEMORY TYPE.
+
+ 1383   STATES BE  SWS, B38T48  CUSS LIST +6  16            Z,R5
+ 1384              TS, BIT17    ONES          CUSS LIST +6  SYM CUSS 3          CONFLICT.
+
+ 1386   STATE F    SWS, B38T48  CUSS LIST +8  16            Z,R5
+ 1387              TS, BIT 17   ONES          CUSS LIST +8  STATE G +2          MULTIPLE ERRORS.
+
+ 1389   STATE G    SWS, B38T48  CUSS LIST +9  32            Z,R5
+ 13891             SS           ONES          BIT 1         CUSS LIST +9        MISCELLANEOUS TROUBLE.
+ 1391              SS           ZERO          BIT 33        CUSS LIST +7        NO MULTIPLE DEFINITION CUSS FOR F AND G.
+
+ 1392   SYM CUSS 1 SWS, C2T8    COMMON        6             N,R5,1              PUT SYMBOL IN QUOTES.
+ 1394              SWS, CHAR1   COMMON        6             N,R5
+ 1395   NO ADRESS  TS           ONES          ADDRESS       N,X6                COMMON FAILURE EXIT.
+
+ 1397   SYM CUSS 3 SWS, C2T8    COMMON        6             N,R5,1              FINAL CUSS FOR DEFINED ADDRESS.
+ 1399              SWS, CHAR1   COMMON        6             N,R5
+ 1400              TS           -             -             SYMB MOD Q
+
+ 1401   SYMB MOD A TX           BIT 1         -             ADR WD              CONSTANT TO BE RESTORED IN SYMB MOD Q.
+
+ 1403   SYM CUSS 2 SWS, C2T8    COMMON        6             N,R5,1         C    CLOSED PROFANITY SUBROUTINE.
+ 1405              SWS, CHAR1   COMMON        6             N,R5           S    
 
 # Page 297
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  33        PAGE  33
 
+P1407              SUBROUTINE TO BREAK AN ADDRESS FIELD DOWN INTO SUBFIELDS.  PUT RETURN ADDRESS INTO X4 ON ENTERING.
+R1409   RESULTS ARE DELIVERED IN FIELDCOD AND FIELDCOD+1, AND IN ADRWD AND ADRWD+1, AS FOLLOWS....
+
+R1411   FIELDCOD ALL ZERO                     BLANK ADDRESS FIELD
+R1412   FIELDCOD ALL ONES                     ILLEGAL FORMAT
+R1413   FIELDCOD+1 ALL ZERO                   NO MODIFIER
+R1414   FIELDCOD+1 INDICATES SIGNED NUM       MODIFIER GIVEN IN ADRWD+1
+R1415   FIELDCOD INDICATES SYMBOLIC           ADDRESS SYMBOL IN ADRWD
+R1416   FIELDCOD INDICATES S OR US NUM        VALUE GIVEN IN ADRWD.
+
+R1417   USES ANALSUBF, S3, X3, AND X5.
+
+
+
+ 1418   ADR FIELD  NA           ADDRESS 1     BLANKS        TEST WD2
+ 1419              NA           ADDRESS 2     BLANKS        MOV ADRES
+ 1420              TS           ZERO          FIELD COD     N,X4                INDICATE BLANK ADDRESS FIELD AND EXIT.
+
+ 1422   TEST WD2   NA           ADDRESS 2     BLANKS        MOV ADRES           BRANCH IF BOTH WORDS NON-BLANK.
+ 1424              TX           ADDRESS 1     -             AFIELD +1
+ 1425              TS           BLANKS        AFIELD        MOV ADRES +1        SHORT CUT WHEN WORD 2 IS BLANK.
+
+ 1427   MOV ADRES  TN           ADDRESS 1     2             AFIELD
+
+ 1428              SWE, ONES    C,+3          16            Z,X3                INITIAL PROCEDURE FOR NON-NUM ADDRESS.
+ 1430              TX           ZERO          -             FIELD COD +1        INITIALLY ASSUME NO MODIFIER.
+ 1432              TS           C,+1          Z,X5          LD A2 S3
+
+ 1433              CAC                        NO MODIF      FOUND RNB           SET UP TO LOOK FOR SIGNS INITIALLY.
+
+ 1435   LD A2 S3   TX           EIGHT         -             Z,S3                MAXIMUM NUMBER OF NBCS IN A SUBFIELD.
+ 1437              TS           BLANKS        AFIELD +2     FIND NBCS
+
+
+
+R1438   MINOR SUBROUTINES TO SHIFT TWO OR THREE WORDS RIGHT BY ONE CHARACTER.
+
+ 1439   3SRT 1C    SWS, ONES    AFIELD +2     A,1           AFIELD +2      C
+ 1440              SWS, CHAR1   AFIELD +1     A,1           AFIELD +2      C
+
+ 1441   2SRT 1C    SWS, ONES    AFIELD +1     A,1           AFIELD +1      C
+ 1442              SWS, ONES    AFIELD        A,1           AFIELD         C
+ 1443              SS           AFIELD        CHAR1         AFIELD +1      C
+ 1444              SS           BLANKS        CHAR1         AFIELD
 
 # Page 298
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  34        PAGE  34
 
+P14441
+
+ 1445   FIND NBCS  NA, CHAR8    AFIELD +1     BLANKS        
+
+ 1447              TS           C,+1          Z,SC          2SRT 1C        C    SHIFT AFIELD AND AFIELD+1 RIGHT 1 CHAR.
+ 1449              SPEC                                     FIND NBCS
+
+ 1450   FOUND RNB  TS           Z,S3,1        -             3SRT 1C        C    PROCEDURE WHEN SEEKING SIGN.
+ 1452              NA, B3T6     AFIELD +2     ZERO          NOT SIGN
+ 1453              LA, CHAR1    AFIELD +2     ZERO          NOT SIGN
+
+ 1454              NA, CHAR8    AFIELD +1     BLANKS        NO MODIF            BRANCH IF SIGN NOT PRECEDED BY A BLANK.
+
+ 1456              TS           AFIELD +2     COMMON        ANAL SUBF +2   C    ANALYZE POSSIBLE MODIFIER.
+ 1458              NA, B2B6     FIELD COD     BIT2          NO MODIF            BRANCH IF TWASNT A SIGNED NUMERIC SUBF.
+
+ 1460              NA           AFIELD +1     BLANKS        ALSO MAIN
+ 1461              NA           AFIELD        BLANKS        ALSO MAIN           BRANCH IF COMPOUND ADDRESS.
+
+ 1463              TS           COMMON +1     ADR WD        N,X4                EXIT FOR SIGNED NUMERIC FIELD.
+
+ 1465   FOUND MNB  TS           Z,S3,1        -             3SRT 1C        C    PROCEDURE WHEN NOT SEEKING SIGN.
+
+ 1467   NOT SIGN   NA           AFIELD +1     BLANKS        8 NBC Q
+ 1468              NA           AFIELD        BLANKS        8 NBC Q             BRANCH IF MORE NBCS TO EXAMINE.
+
+ 1470              TS           AFIELD +2     COMMON        ANAL SUBF +2   C    ANALYZE POSSIBLE MAIN ADDRESS.
+ 1472              NA, BIT2     FIELD COD     ONES          3,0                 BRANCH IF NOT NUMERIC.
+
+ 1474              TS           COMMON +1     ADR WD        N,X4                EXIT WHEN MAIN ADDRESS IS S OR US NUM.
+
+ 1476   NO MODIF   TN           ADDRESS 1     2             AFIELD              SET UP PUTATIVE SYMBOLIC SUBFIELD.
+ 1478              TS           BLANKS        AFIELD +2     SEEK HEAD +1
+
+ 14783             TN           ALSO MAIN -2  2             AFIELD              RECOVER NON-MODIFIER PART OF ADR FIELD.
+ 14785             TS           BLANKS        AFIELD +2     SEEK HEAD +1
+
+ 1479   SEEK HEAD  NA, CHAR1    AFIELD +2     BLANKS        C,+3                BRANCH WHEN POSSIBLE HEAD FOUND.
+
+ 1481              TS           C,+1          Z,SC          3SRT 1C        C    TRIPLE SHIFT RIGHT TO FIND HEAD.
+ 1483              SPEC                                     SEEK HEAD
 
 # Page 299
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  35        PAGE  35
 
+P14831
+
+ 1484              NA, CHAR8    AFIELD +1     BLANKS        NO HEAD             CHAR, PRECEDED BY NON-BLANK ISNT HEAD.
+
+ 1486              NA           AFIELD        BLANKS        SRT SYM             MOVE SYMBOL RIGHT TO INSERT HEAD.
+
+ 1488              NA           AFIELD +1     BLANKS        C,+2
+
+ 1489              TS           AFIELD +2     ADR WD        N,X4                EXIT WHEN MAIN ADDRESS IS 1-CHAR. SYM.
+
+ 1491              NA, CHAR1    AFIELD +1     BLANKS        PLACE HED           MOVE SYMBOL LEFT TO INSERT HEAD.
+ 1493              SWS, ONES    AFIELD +1     A,1,L         AFIELD +1
+ 1494              TS           -             -             C,-2
+
+ 1495   SRT SYM    TS           -             -             2SRT 1C        C
+ 1496              NA, CHAR8    AFIELD +1     BLANKS        BAD ADRES           ERROR IF NO ROOM FOR HEAD.
+ 1498              NA           AFIELD        BLANKS        C,-2                SHIFT UNTIL NORMALIZED IN AFIELD +1.
+
+ 1500   PLACE HED  SWS, CHAR8   AFIELD +2     A,1,L         AFIELD +1           INSERT HEAD CHARACTER.
+
+ 15011             TX           BIT 1         -             FIELD COD           ANNOUNCE SYMBOLIC ADDRESS PART.
+ 1502              TS           AFIELD +1     ADR WD        N,X4                EXIT WHEN MAIN ADDRESS IS SYMBOLIC.
+
+ 1504   NO HEAD    SWS, ONES    AFIELD +1     A,1,L         AFIELD +1           BACKTRACK AFTER NO-HEAD FINDING.
+ 1506              NA, CHAR8    AFIELD +1     BLANKS        BAD ADRES           ERROR IF SYMBOL IS TOO LONG.
+ 1508              NA           AFIELD        BLANKS        BAD ADRES           ERROR IF SYMBOL IS TOO LONG.
+
+ 1510              SWS, CHAR8   AFIELD +2     A,1,L         AFIELD +1           FINISH BACKTRACKING.
+ 1512              NA, CHAR1    AFIELD +1     BLANKS        PLACE HED +1        BRANCH WHEN SYMBOL IS NORMALIZED.
+ 1514              SWS, ONES    AFIELD +1     A,1,L         AFIELD +1
+ 1515              TS           -             -             C,-2
+
+ 1516   8 NBC Q    NA           Z,S3          ZERO          FIND NBCS           SEEK ANOTHER NON-BLANK CHARACTER.
+
+ 1518   BAD ADRES  TS           ONES          FIELD COD     N,X4                ERROR EXIT.
+
+ 15191             RESERVE      2
+ 1520   ALSO MAIN  TX           FIELD COD     -             FIELD COD +1        INDICATE PRESENCE OF MODIFIER.
+ 15211             TN           AFIELD        2             ALSO MAIN -2        SAVE ORIGINAL FORM OF REST OF FIELD.
+ 1522              SM           Z,X3,2        Z,X5,9        -                   SET UP TO OMIT SIGN SEARCH.
+ 1524              TS           COMMON +1     ADR WD +1     LD A2 S3            DELIVER VALUE OF MODIFIER.
 
 # Page 300
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  36        PAGE  36
 
+P1526             SUBROUTINE TO ANALYZE A SUBFIELD OF EIGHT CHARACTERS.  ENTER WITH THE SUBFIELD IN COMMON.  C(COMMON)
+R1528   IS NORMALIZED ON RETURN.  IF THE SUBFIELD IS NUMERIC, THE RESULTING BINARY INTEGER IS DELIVERED IN COMMON+1 WITH
+R1530   THE SPECIFIED SIGN IF ANY OR A PLUS SIGN IF NO SIGN IS GIVEN.  C(FIELDCOD) GIVES THE RESULTS OF ANALYSIS....
+
+R1532   BIT 1      ZERO -- NON-SYMBOLIC SUBFIELD            ONE -- SYMBOLIC SUBFIELD
+R1534   BIT 2      ZERO -- NON-NUMERIC SUBFIELD             ONE -- NUMERIC SUBFIELD
+R1536   BIT 5      ZERO -- MINUS SIGNED SUBFIELD            ONE -- UNSIGNED OR PLUS SIGNED SUBFIELD
+R1538   BIT 6      ZERO -- SIGNED NUMERIC SUBFIELD          ONE -- UNSIGNED NUMERIC SUBFIELD
+
+R1540   BIT 9 OF HEALTH IS SET TO 1 IF A DECIMAL SUBFIELD IS WRITTEN WITHOUT A D
+
+
+
+ 1541   ANAL SUBF  NA           COMMON        BLANKS        C,+2           C
+ 1542              TX           ZERO          -             FIELD COD           INDICATE BLANK SUBFIELD AND EXIT.
+
+ 1544              TS           UNSIG NUM     FIELD COD     NORMALED -1    C    TEMPORARILY ASSUME UNSIGNED NUMERIC.
+ 1546              NA, CHAR1    COMMON        BLANKS        NORMALED       C
+ 1547              SWS, ONES    COMMON        A,1,L         COMMON         C    NORMALIZE.
+ 1549              TS           COMMON        COMMON +1     C,-2           C
+
+ 1550   NORMALED   LA, CHAR1    COMMON +1     ZERO          SET DIG        C    BR IF 1ST CHAR OF SUBFIELD IS ZERO.
+
+ 1552              TX           ONES          -             DIG FILE       C    INDICATE NO DIGITS YET.
+ 1554              NA, B3T6     COMMON +1     ZERO          NO SIGN        C    BR IF 1ST CHAR OF SUBFIELD ISNT A SIGN.
+ 1556              SWS, B5T6    COMMON +1     3             FIELD COD      C    INDICATE SIGN AND WHICH SIGN.
+ 1558              NA, C2T8     COMMON +1     BLANKS        BLANK FIL +2   C
+
+ 1559   SYMBOLIC   TX           BIT 1         -             FIELD COD           INDICATE SYMBOLIC AND EXIT.
+
+R1561   NO SIGN IS THE BEGINNING OF THE LOOP TO EXAMINE EACH CHARACTER.
+
+ 1562   NO SIGN    LA, CHAR1    COMMON +1     ALF 9 C1      DIGITS         C    BRANCH IF CHARACTER IS A NUMERAL.
+
+ 1564              NA, CHAR1    COMMON +1     D C1          SYMBOLIC       C    BRANCH IF NEITHER NUMERAL NOR D.
+
+ 1566              NA, C2T8     COMMON +1     BLANKS        SYMBOLIC       C    BRANCH IF D WITH MORE TO COME.
+
+ 1568              LA           ONES          DIG FILE      SYMBOLIC       C    BRANCH IF D WITH NO PRECEDING NUMERALS.
+
+ 1570   DECIMAL)   TS           C,+1          CONV LOOP     CONV LOOP -1   C    SET UP CONVERSION, DECIMAL TO BINARY.
+ 1572              BT           COMMON +1     10            COMMON +1      C
 
 # Page 301
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  37        PAGE  37
 
+P15721
+
+ 1573   DIGITS     SM, BIT3     FIELD COD     COMMON +1     FIELD COD      C    TELLTALE BIT FOR 8S AND 9S.
+ 1575              NA           DIG FILE      ONES          FILE DIG       C    BRANCH IF 2ND OR SUBSEQUENT DIGIT.
+
+ 1577   SET DIG    TX           L DIG FILE    -             Z,S0           C    PROCEDURE FOR FIRST DIGIT.
+ 1579              TX           ZERO          -             DIG FILE       C    FAKE A ZERO PRECEDING FIRST DIGIT.
+ 1581              TX           L DIG FILE    -             Z,S1           C
+
+ 1582   FILE DIG   NA, CHAR1    COMMON +1     ZERO          NZ DIGIT       C
+ 1583              LA           DIG FILE      ZERO          NZ DIGIT +1    C    SUPPRESS INSIGNIFICANT ZEROS.
+
+ 1585   NZ DIGIT   SWE, D12     COMMON +1     A,7           N,S0,1         C    FILE SIGNIFICANT DIGIT.
+ 1587              NA, C2T8     COMMON +1     BLANKS        BLANK FIL =2   C    CONTINUE IF MORE TO COME.
+
+ 1589              NA, BIT3     FIELD COD     ONES          OCTAL)         C    BRANCH IF NO D AND NO 8S OR 9S.
+
+ 1591              TS, BIT9     ONES          HEALTH        DECIMAL)       C    SET COMPLAINT WHEN 8S OR 9S AND NO D.
+
+ 1593   BLANK FIL  SWS, ONES    COMMON +1     A,1,L         COMMON +1      C
+ 1594              NA, CHAR1    COMMON +1     BLANKS        NO SIGN        C
+ 1595              TS, CHAR1    BLANKS        COMMON +1     BLANK FIL      C    INSERT BLANK FOR USED DIGIT, NORMALIZE.
+
+ 1597   OCTAL)     TS           C,+1          CONV LOOP     CONV LOOP -1   C    SET UP CONVERSION, OCTAL TO BINARY.
+ 1599              SWE, OCTMASK COMMON +1     3,L           COMMON +1      C
+
+ 1600              TS           ZERO          COMMON +1     CONV LOOP +2   C
+ 1601   CONV LOOP  TS           -             -             DISASTER            (SHOULD ALWAYS GET REPLACED)
+ 1603              WA           COMMON +1     N,S1,1        COMMON +1      C
+ 1604              NA           Z,S0          Z,S1          CONV LOOP      C    LOOP UNTIL ALL SIGNIFICANT DIGITS USED.
+
+ 1606              SWS, BIT1    FIELD COD     4,L           COMMON +1           INSERT CORRECT SIGN AND EXIT.
 
 # Page 302
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  38        PAGE  38
 
+P1608              SUBROUTINE IN PASS 2 TO ANALYZE THE HISTORY OF A SYMBOL.  ENTER WITH THE NORMALIZED SYMBOL IN COMMON.
+R1610   PREVAILING HEAD IS APPENDED TO SYMBOL IN COMMON IF THERE IS ROOM.  THE PRESENT HEALTH AND DEFINITION (IF ANY)
+R1612   ARE DELIVERED IN COMMON+2 IN BITS 29-48, BUT ALL ONES IS DELIVERED IN COMMON+2 IF THE SYMBOL IS NEW AND THERE
+R1614   IS NO ROOM IN THE TABLE.  Z,X2 IS SET TO THE ADDRESS OF THE SECOND WORD OF THE TABLE ENTRY, OR TO COPY BUFF -1
+R1616   IF THE TABLE IS FULL.  Z,X3 IS SET TO THE ADDRESS OF A WORD WHOSE RIGHT CAC FIELD POINTS TO THE SYMBOL, EXCEPT
+R1618   IF THE TABLE IS FULL.  NEW SYMBOLS ARE INSERTED IN THE TABLE WITH ALPHABETICAL ORDERING BY A COMBINATION OF
+R1620   ASSOCIATIVE REFERENCING ON THE FRONT 7 BITS AND THREADING FROM SYMBOL TO SYMBOL.  SEARCHING IS AIDED BY DIVIDING
+R1622   THE SET OF SYMBOLS UP IMTO STRINGS WHOSE MAXIMUM SIZE IS 11 SYMBOLS, THE DIVIDERS BEING UP TO 1024 PAIRS OF SPEC
+R1624   FIELDS.  THE FIRST AND SECOND SPECS IN EACH PAIR POINT TO THE END AND BEGINNING OF ITS STRING.
+
+
+
+ 1626   ANAL SYMB  TX           L SYM THR     -             Z,X5           C    ADDRESS OF LIST OF 126 SPECPAIR THREADS.
+ 1628              NA, CHAR8    COMMON        BLANKS        C,+2           C
+ 1629              TX, CHAR8    HEAD          -             COMMON         C    APPEND HEAD IF THERE IS ROOM.
+ 1631              SWS, B19T25  COMMON        18            SYM SHIFT      C    CHOOSE THREAD BY 7 FRONT BITS OF SYMBOL.
+ 1633   SYM SHIFT  SWE, CAC3    5,0           0             Z,X3           C    THREAD FOR 1 OF 126 OF 1024 SPEC PAIRS.
+ 1635              LA           ONES          COMMON        FULLNESS       C    "¢¢¢¢¢¢¢¢" IS SOCIALLY UNFIT FOR TABLE.
+
+ 1637   SEEK STRG  S, ETS       3,0           ZX +2         C,+1                POINT TO LAST SYMBOL IN STRING.
+ 1639              LA           COMMON        N,X2,1        IN STRING      C    BRANCH IF SYMBOL MUST BE IN THIS STRING.
+ 1641              TS           N,X2          Z,X3          SEEK STRG      C    POINT TO SPEC PAIR FOR NEXT STRING.
+ 1643   IN STRING  TS           Z,X3,1        -             SEEK SYMB +3   C
+
+ 1647   SEEK SYMB  LA           COMMON        N,X2          FIND OR NO     C
+ 1648              S, ETS       2,1           ZX +3         C,+1                ARGUMENT IS GREATER.  TRY NEXT SYMBOL.
+ 1650              LA           COMMON        N,X3,1        C,+2           C
+ 1651              S, ETS       3,0           ZX +2         SEEK SYMB           ARGUMENT IS GREATER.  TRY NEXT SYMBOL.
+
+ 1653              EBA          Z,X2          ONE           Z,X3           C    POINT TO SECOND WORD OF PRECEDING SYMB.
+ 1655              S, ETS       3,0           ZX +2         C,+1                POINT TO EQUAL OR GREATER SYMBOL.
+
+ 1657   FIND OR NO NA           N,X2,1        COMMON        C,+3           C    BRANCH IF SYMBOL IS NOT IN TABLE.
+ 1659              LA           2,1           CAC12         FOUND SYM      C    BRANCH IF SYMBOL, NOT MULT. DEF. FLAG.
+ 1661              S, ETS       2,1           ZX +2         C,-2                POINT TO CURRENT MEMBER OF MULT DEF SET.
+ 1663              NA           SYM PLACE     END SY TAB    NEW SYMB       C    BRANCH IF SYMBOL TABLE IS NOT FULL.
+
+ 1665   FULLNESS   DS           SYM TAB XS    ONE           SYM TAB XS     C    COUNT HOW MANY TOO MANY.
+ 1667              WD           L COP BUFS    ONE           Z,X2           C    PREVEMT POSSIBLE TROUBLE WITH 2,N REFS.
+ 1669              TX           ONES          -             COMMON +2      S    SET FULLNESS SIGNAL AND EXIT.
+
+ 1671   NEW SYMB   TX           N,X3          -             Z,SH           C    SAVE ADDRESS OF NEXT SYM OR SPEC PAIR.
+ 16722             NA           SYM PLACE     SPEC MAG      C,+2           C
+ 16724             WA           SYM PLACE     THREE         SYM PLACE      C    SKIP OVER 32K STOPPER.
+ 1673              SS           SYM PLACE     CAC3          N,X3           C    THREAD TO THIS FROM LAST SYM OR SPEC PR.
+ 1675              EBA          SYM PLACE     BIT 25        Z,X2           C
+ 1676              TX           COMMON        -             N,X2,1         C    PUT NEW SYMBOL IN SYMBOL TABLE.
+ 1678              TX           Z,SH          -             N,X2           C    THREAD TO NEXT SYMBOL OR SPEC PAIR.
+ 1680              TX           ZERO          -             2,1            C    INITIALIZE ANALYZER WORD.
+ 1682              WA           SYM PLACE     THREE         SYM PLACE      C
+
+ 1684   FOUND SYM  SWE, B8T12   N,X2          16            COMMON +2      S    DELIVER HEALTH AND EQUIVALENT OF SYMBOL.
 
 # Page 303
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  39        PAGE  39
