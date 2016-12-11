@@ -16,6 +16,7 @@
 ##              2016-11-17 HG   Transcribed
 ##              2016-12-08 HG   Fix label  HBEAMANB  -> HBEAMNB
 ##              2016-12-11 HG   fix value for STAR 22 Z
+##                                            BSUBO
 
 
 ## Page 39
@@ -582,7 +583,7 @@ FDOT            2DEC*           4.253263471     E-9 B27*        #    REV/CSEC
 BDOT            2DEC*           -1.145529390    E-16 B28*       # REV/CSEC
 NODIO           2DEC*           8.788308600     E-1  B 0*       #  REV
 FSUBO           2DEC*           6.552737750     E-1  B 0*       #  REV
-BSUBO           2DEC*           1.160576171     E-2  B 0*       #  REV
+BSUBO           2DEC*           6.511941688     E-2  B 0*       #  REV
 WEARTH          2DEC*           1.160576171     E-7  B23*       #    REV/CSEC
 AZO             2DEC*           7.733314844     E-1  B 0*       # REVS
 

@@ -27,6 +27,7 @@
 ##              2016-12-07 HG   fix P00 -> POO (appears only in a comment)
 ##                              revert above change
 ##              2016-12-07 HG   Add missing label S40RET
+##              2016-12-11 HG   Fix pseudo operation GOTO -> CALL
 
 ## Page 747
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -978,7 +979,7 @@ ALARMIT		EXIT
 		TC	ALARM
 		OCT	01407		# SKIP TGO COMPUTATION BUT CALL FINDCDUW.
 		TC	INTPRET
-GOFIND		GOTO		
+GOFIND		CALL		
 			FINDCDUW -2
 		GOTO
 			S40RET		# LOCATION FOLLOWING CALL TO S40.8
