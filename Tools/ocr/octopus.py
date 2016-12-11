@@ -92,6 +92,7 @@ elif args.comanche55 or args.luminary99:
     # Blur a bit more then threshold the image
     diff = cv2.GaussianBlur(diff, (7,7), 0)
     thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 4)
+    thresh = thresh[20:,20:]
 else:
     raise RuntimeError("Unknown program type selected")
 
@@ -146,188 +147,191 @@ if args.no_crop:
     sys.exit(0)
 
 if args.comments:
-    # First we need to remove holes along the left side. Find them by dilating vertically and looking for
-    # a wide-enough left column
-    hole_vdilated = cv2.dilate(~result, np.ones((61,21), np.uint8), iterations=1)
-    cimg, contours, hierarchy = cv2.findContours(hole_vdilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    contours.sort(key=lambda c: cv2.boundingRect(c)[0])
+    try:
+        # First we need to remove holes along the left side. Find them by dilating vertically and looking for
+        # a wide-enough left column
+        hole_vdilated = cv2.dilate(~result, np.ones((61,21), np.uint8), iterations=1)
+        cimg, contours, hierarchy = cv2.findContours(hole_vdilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        contours.sort(key=lambda c: cv2.boundingRect(c)[0])
 
-    left_lim = 0
-    right_edge = result.shape[1]
-    right_lim = right_edge
+        left_lim = 0
+        right_edge = result.shape[1]
+        right_lim = right_edge
 
-    for c in contours:
-        box = cv2.boundingRect(c)
-        #print(box, left_lim)
-        if (box[0] <= 1 or box[0] <= 80) and box[2] < 80:
-            # This is very likely a column of holes. Crop it out.
-            left_lim = box[0]+box[2]
-        else:
-            break
+        for c in contours:
+            box = cv2.boundingRect(c)
+            #print(box, left_lim)
+            if box[0] <= 1 or (box[0] <= 80 and box[2] < 80):
+                # This is very likely a column of holes. Crop it out.
+                left_lim = box[0]+box[2]
+            else:
+                break
 
-    for c in reversed(contours):
-        box = cv2.boundingRect(c)
-        if box[0]+box[2] >= right_edge-100:
-            # This is very likely a column of holes. Crop it out.
-            right_lim = box[0]
-        else:
-            break
+        for c in reversed(contours):
+            box = cv2.boundingRect(c)
+            if box[0]+box[2] >= right_edge-100:
+                # This is very likely a column of holes. Crop it out.
+                right_lim = box[0]
+            else:
+                break
 
-    target_image = result[:,left_lim:right_lim]
-    thresh = thresh[:,left_lim:right_lim]
+        target_image = result[:,left_lim:right_lim]
+        thresh = thresh[:,left_lim:right_lim]
 
-    # Create a structuring element to dilate to the right (trying to preserve exact leftmost pixels)
-    element = np.zeros((1,15), np.uint8)
-    for i in range(int(element.shape[1]/2)+1):
-        element[0,i] = 1
+        # Create a structuring element to dilate to the right (trying to preserve exact leftmost pixels)
+        element = np.zeros((1,15), np.uint8)
+        for i in range(int(element.shape[1]/2)+1):
+            element[0,i] = 1
 
-    # Do the dilation. This should bleed together most of the header.
-    dilated = cv2.dilate(~target_image, element, iterations=5)
+        # Do the dilation. This should bleed together most of the header.
+        dilated = cv2.dilate(~target_image, element, iterations=5)
 
-    # Locate the top header line, which stretches all 120 columns and thus both bounds and
-    # provides reference to where on the page the various columns begin
-    cimg, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        # Locate the top header line, which stretches all 120 columns and thus both bounds and
+        # provides reference to where on the page the various columns begin
+        cimg, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
-    # Sort the contours by "line", considering lines breaks to be about 15 characters apart.
-    # This approximates top-to-bottom, left-to-right reading order, as we would get from
-    # something like Tesseract.
-    def line_sort(a,b):
-        ax,ay,_,_ = cv2.boundingRect(a)
-        bx,by,_,_ = cv2.boundingRect(b)
-        if abs(ay-by) > 15:
-            return ay-by
-        else:
-            return ax-bx
-    contours.sort(key=functools.cmp_to_key(line_sort))
+        # Sort the contours by "line", considering lines breaks to be about 15 characters apart.
+        # This approximates top-to-bottom, left-to-right reading order, as we would get from
+        # something like Tesseract.
+        def line_sort(a,b):
+            ax,ay,_,_ = cv2.boundingRect(a)
+            bx,by,_,_ = cv2.boundingRect(b)
+            if abs(ay-by) > 15:
+                return ay-by
+            else:
+                return ax-bx
+        contours.sort(key=functools.cmp_to_key(line_sort))
 
-    # Locate the header in the boxes. It'll be towards the front (hopefully exactly the front), and
-    # pretty wide
-    header_box = None
-    for i,c in enumerate(contours):
-        box = cv2.boundingRect(c)
-        if (box[2] > 1000):
-            header_start = i
-            header_box = list(box)
-            break
+        # Locate the header in the boxes. It'll be towards the front (hopefully exactly the front), and
+        # pretty wide
+        header_box = None
+        for i,c in enumerate(contours):
+            box = cv2.boundingRect(c)
+            if (box[2] > 1000):
+                header_start = i
+                header_box = list(box)
+                break
 
-    # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
-    # dilation above doesn't quite bleed everything together)
-    for c in contours[header_start+1:]:
-        box = cv2.boundingRect(c)
-        if abs(header_box[0]-box[0]) <= 30:
-            break
-        rightmost_point = max(header_box[0]+header_box[2], box[0]+box[2])
-        lowest_point = max(header_box[1]+header_box[3], box[1]+box[3])
-        header_box[0] = min(header_box[0], box[0])
-        header_box[1] = min(header_box[1], box[1])
-        header_box[2] = rightmost_point - header_box[0]
-        header_box[3] = lowest_point - header_box[1]
+        # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
+        # dilation above doesn't quite bleed everything together)
+        for c in contours[header_start+1:]:
+            box = cv2.boundingRect(c)
+            if abs(header_box[0]-box[0]) <= 30:
+                break
+            rightmost_point = max(header_box[0]+header_box[2], box[0]+box[2])
+            lowest_point = max(header_box[1]+header_box[3], box[1]+box[3])
+            header_box[0] = min(header_box[0], box[0])
+            header_box[1] = min(header_box[1], box[1])
+            header_box[2] = rightmost_point - header_box[0]
+            header_box[3] = lowest_point - header_box[1]
 
-    # Calculate the average column width for rough cropping
-    # TODO: Possibly make the cropping smarter
-    header_width = header_box[2]-7*5
-    column_width = int(header_width/120)
+        # Calculate the average column width for rough cropping
+        # TODO: Possibly make the cropping smarter
+        header_width = header_box[2]-7*5
+        column_width = int(header_width/120)
 
-    # Create a mask onto which we'll draw the contours of words and lines we want to let through
-    mask = np.ones(target_image.shape[:2], dtype=np.uint8) * 255
+        # Create a mask onto which we'll draw the contours of words and lines we want to let through
+        mask = np.ones(target_image.shape[:2], dtype=np.uint8) * 255
 
-    # line_x and line_y keep track of the top left pixel of the bounding box for each line
-    line_x = header_box[0]
-    line_y = header_box[1]
-    line_num = 0 # current estimated line number
-    in_comment = True # whether or not we're inside a comment
-    const_second_word = False
-    crop_top = 0
+        # line_x and line_y keep track of the top left pixel of the bounding box for each line
+        line_x = header_box[0]
+        line_y = header_box[1]
+        line_num = 0 # current estimated line number
+        in_comment = True # whether or not we're inside a comment
+        const_second_word = False
+        crop_top = 0
 
-    for i,c in enumerate(contours):
-        x,y,w,h = cv2.boundingRect(c)
-        if (w < 10 or h < 10):
-            # Probably junk that's made it through
-            continue
+        for i,c in enumerate(contours):
+            x,y,w,h = cv2.boundingRect(c)
+            if (w < 10 or h < 10):
+                # Probably junk that's made it through
+                continue
 
-        # Check the x-position of the bounding box. If it's sufficiently close to the start of
-        # the previous line, we can use its x-position to determine whether or not we're still
-        # in a comment. It's handled this way because distortions on the image can be as large
-        # as one to two character widths from the top to the bottom of the card type column.
-        x_delta = x-line_x
-        if abs(x_delta < 3*column_width):
-            # This is the start of a line. Record its x position.
-            line_x = x
+            # Check the x-position of the bounding box. If it's sufficiently close to the start of
+            # the previous line, we can use its x-position to determine whether or not we're still
+            # in a comment. It's handled this way because distortions on the image can be as large
+            # as one to two character widths from the top to the bottom of the card type column.
+            x_delta = x-line_x
+            if abs(x_delta < 3*column_width):
+                # This is the start of a line. Record its x position.
+                line_x = x
 
-            # If this is the end of line 3, record the top of it as the top cropping point
-            if line_num == 3:
-                crop_top = line_y
+                # If this is the end of line 3, record the top of it as the top cropping point
+                if line_num == 3:
+                    crop_top = line_y
 
-            line_num += 1
-            line_y = y
+                line_num += 1
+                line_y = y
 
-            const_second_word = False
-            if in_comment and x_delta > column_width*.5:
-                # This line does not start with a card type indicator, meaning it's code or something else.
-                in_comment = False
-            elif not in_comment and x_delta < -column_width*.5:
-                # This line starts with a card type indicator, so it's a comment.
-                in_comment = True
+                const_second_word = False
+                if in_comment and x_delta > column_width*.5:
+                    # This line does not start with a card type indicator, meaning it's code or something else.
+                    in_comment = False
+                elif not in_comment and x_delta < -column_width*.5:
+                    # This line starts with a card type indicator, so it's a comment.
+                    in_comment = True
 
-                # For YUL listings, a card marker following a non-comment line might possibly be a C, indicating
-                # the second word of a multi-word pseudo op (2DEC, 2CADR, etc.). Try to determine whether or not
-                # we've got such a line.
-                if line_num > 2:
-                    pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
-                    txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
-                    if txt and (txt[0] == 'C' or txt[0] == '0'):
-                        const_second_word = True
+                    # For YUL listings, a card marker following a non-comment line might possibly be a C, indicating
+                    # the second word of a multi-word pseudo op (2DEC, 2CADR, etc.). Try to determine whether or not
+                    # we've got such a line.
+                    if line_num > 2:
+                        pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
+                        txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
+                        if txt and (txt[0] == 'C' or txt[0] == '0'):
+                            const_second_word = True
 
-        # If the y position of this box is less than line_y, mark it as the new highest point on the line
-        if y < line_y:
-            line_y = y
+            # If the y position of this box is less than line_y, mark it as the new highest point on the line
+            if y < line_y:
+                line_y = y
 
-        # Draw this contour if we're in a comment and beyond the headers
-        if in_comment and not const_second_word and line_num > 2:
-            cv2.drawContours(mask, [c], -1, 0, -1)
+            # Draw this contour if we're in a comment and beyond the headers
+            if in_comment and not const_second_word and line_num > 2:
+                cv2.drawContours(mask, [c], -1, 0, -1)
 
-    # Special case for only a single line on the page
-    if line_num == 3:
-        crop_top = line_y
+        # Special case for only a single line on the page
+        if line_num == 3:
+            crop_top = line_y
 
-    # We also want everything from column 80 on
-    cv2.rectangle(mask, (header_box[0] + column_width*80, crop_top), (target_image.shape[1], target_image.shape[0]), 0, -1)
+        # We also want everything from column 80 on
+        cv2.rectangle(mask, (header_box[0] + column_width*80, crop_top), (target_image.shape[1], target_image.shape[0]), 0, -1)
 
-    # But we don't want anything left of column ~7 or right of the header
-    left_limit = header_box[0]+7*column_width
-    right_limit = header_box[0]+header_width
-    cv2.rectangle(mask, (0, 0), (left_limit, target_image.shape[0]), 255, -1)
+        # But we don't want anything left of column ~7 or right of the header
+        left_limit = header_box[0]+7*column_width
+        right_limit = header_box[0]+header_width
+        cv2.rectangle(mask, (0, 0), (left_limit, target_image.shape[0]), 255, -1)
 
-    # Apply the mask. We should be down to just comments now.
-    comments_only = target_image + mask
-    inside_header = comments_only[crop_top-20:, left_limit-20:header_box[0]+header_width+20]
+        # Apply the mask. We should be down to just comments now.
+        comments_only = target_image + mask
+        inside_header = comments_only[crop_top-20:, left_limit-20:header_box[0]+header_width+20]
 
-    # # Look for contours in the imge to find the final limits
-    # _,thresh2 = cv2.threshold(inside_header, 180, 255, cv2.THRESH_BINARY)
-    # dilated2 = cv2.dilate(~thresh2, np.ones((5,5), np.uint8), iterations=4)
-    # cimg, contours, hierarchy = cv2.findContours(dilated2, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    
-    # xmin = 99999
-    # ymin = 99999
-    # xmax = 0
-    # ymax = 0
+        # # Look for contours in the imge to find the final limits
+        # _,thresh2 = cv2.threshold(inside_header, 180, 255, cv2.THRESH_BINARY)
+        # dilated2 = cv2.dilate(~thresh2, np.ones((5,5), np.uint8), iterations=4)
+        # cimg, contours, hierarchy = cv2.findContours(dilated2, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        
+        # xmin = 99999
+        # ymin = 99999
+        # xmax = 0
+        # ymax = 0
 
-    # for c in contours:
-    #     x,y,w,h = cv2.boundingRect(c)
-    #     if x < xmin:
-    #         xmin = x
-    #     if y < ymin:
-    #         ymin = y
-    #     if x+w > xmax:
-    #         xmax = x+w
-    #     if y+h > ymax:
-    #         ymax = y+h
+        # for c in contours:
+        #     x,y,w,h = cv2.boundingRect(c)
+        #     if x < xmin:
+        #         xmin = x
+        #     if y < ymin:
+        #         ymin = y
+        #     if x+w > xmax:
+        #         xmax = x+w
+        #     if y+h > ymax:
+        #         ymax = y+h
 
-    # if xmin < xmax:
-    #     final_image = inside_header[max(ymin-20,0):ymax+20, max(xmin-20,0):xmax+20]
-    # else:
-    #     final_image = inside_header
-    final_image = inside_header
+        # if xmin < xmax:
+        #     final_image = inside_header[max(ymin-20,0):ymax+20, max(xmin-20,0):xmax+20]
+        # else:
+        #     final_image = inside_header
+        final_image = inside_header
+    except:
+        final_image = thresh
 
 
 else:
