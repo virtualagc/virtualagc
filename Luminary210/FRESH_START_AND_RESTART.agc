@@ -21,6 +21,7 @@
 ##                                     R00AD -> ROOAD 
 ##                                     RENDN00 -> RENDNOO
 ##                                     change POO -> P00 in some comments
+##              2016-12-11 HG  Fix operator CA BANKCALL -> TC BANKCALL
 
 ## Page 222
                 BANK            10
@@ -327,7 +328,7 @@ NXTRST          TS              MPAC            +5
 PACTIVE         TS              MPAC
                 INCR            MPAC                    # ABS OF PHASE.
                 INCR            MPAC            +6      # INDICATE GROUP DEMANDS PRESENT.
-                CA              BANKCALL
+                TC              BANKCALL
                 CADR            RESTARTS
 PINACT          CCS             MPAC            +5      # PROCESS ALL RESTART GROUPS.
                 TCF             NXTRST

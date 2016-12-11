@@ -15,6 +15,7 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-17 HG   Transcribed
 ##              2016-12-08 HG   Fix label  HBEAMANB  -> HBEAMNB
+##              2016-12-11 HG   fix value for STAR 22 Z
 
 
 ## Page 39
@@ -432,7 +433,7 @@ REMDIST         2DEC            384402000       B-29    # MEAN DISTANCE BETWEEN 
 
                 2DEC            -.9168160791    B-1     # STAR 22       X
                 2DEC            -.3506241694    B-1     # STAR 22       Y
-                2DEC            -.1907834362    B-1     # STAR 22       Z
+                2DEC            -.1910784362    B-1     # STAR 22       Z
 
 ## Page 51
                 2DEC            -.4521486548    B-1     # STAR 21       X

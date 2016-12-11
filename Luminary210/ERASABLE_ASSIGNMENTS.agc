@@ -29,6 +29,7 @@
 ##                                          ACSAVE   -> ASCSAVE
 ##                                          DSPFLAG  -> DSPLG
 ##                              add missing definition for label ZV
+##              2016-12-11 HG   Fix operand modification VVECT(X,Y,Z) + 1 -> VVECT(X,Y,Z)+ 2
 
 
 ## Page 92
@@ -2904,9 +2905,9 @@ DT              =               RUNITZ          +1      # TIME SINCE LAST PIPTIM
 VVECTX          =               DT              +1      # B(2)    X-COMPONENT OF SM REL. VELOCITY
 
 ## Page 158
-VVECTY          =               VVECTX          +1      # B(2)    Y-COMPONENT OF SM REL. VELOCITY
-VVECTZ          =               VVECTY          +1      # B(2)    Z-COMPONENT OF SM REL. VELOCITY
-ALTRATE         =               VVECTZ          +1      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
+VVECTY          =               VVECTX          +2      # B(2)    Y-COMPONENT OF SM REL. VELOCITY
+VVECTZ          =               VVECTY          +2      # B(2)    Z-COMPONENT OF SM REL. VELOCITY
+ALTRATE         =               VVECTZ          +2      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
 ALTITUDE        =               ALTRATE         +2      # B(2)    ALTITUDE IN UNITS OF 2(15) M
 LATVMETR        =               ALTITUDE        +2      # B(1)    LATERAL VELOCITY METER INDICATOR
 FORVMETR        =               LATVMETR        +1      # B(1)    FORWARD VELOCITY METER INDICATOR

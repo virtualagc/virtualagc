@@ -15,6 +15,9 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-08 MAS  Began transcription
 ##              2016-12-09 MAS  Completed updates for Luminary 210.
+##              2016-12-11 HG   Fix operand CAGETEST -> CAGETSTG
+##                                          GYROEXIT -> EXITGYRO
+##                                          CAGETEST -> COARSTST    
 
 ## Page 1306
 		SETLOC	FFTAG3
@@ -488,7 +491,7 @@ STRTGYRO	CS	GDESELCT	# DE-SELECT LAST GYRO.
 		EXTEND
 		WAND	CHAN14
 
-		TC	CAGETEST
+		TC	CAGETSTG
 
 STRTGYR2	CA	LGYRO		# JUMP ON PHASE COUNTER IN BITS 13-14.
 		EXTEND
@@ -633,8 +636,8 @@ AUG3		EXTEND			# GET WAITLIST DT TO TIME WHEN TRAIN IS
 		EBANK=	CDUIND
 		2CADR	8192AUG
 
-		TCF	GYROEXIT
-8192AUG		TC	CAGETEST
+		TCF	EXITGYRO
+8192AUG		TC	COARSTST
 
 		CA	LGYRO		# ADD 8192 PULSES TO GYROCMD
 		TS	EBANK
