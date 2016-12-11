@@ -49,7 +49,7 @@ group.add_argument('--luminary99', help="Perform LUMINARY 99 processing", action
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
-	print "Cannot open file", args.input_file
+	print("Cannot open file", args.input_file)
 	sys.exit(1)
 
 img = cv2.imread(args.input_file)
@@ -148,7 +148,7 @@ if args.no_crop:
 if args.comments:
     # First we need to remove holes along the left side. Find them by dilating vertically and looking for
     # a wide-enough left column
-    hole_vdilated = cv2.dilate(~result, np.ones((121,21), np.uint8), iterations=1)
+    hole_vdilated = cv2.dilate(~result, np.ones((61,21), np.uint8), iterations=1)
     cimg, contours, hierarchy = cv2.findContours(hole_vdilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     contours.sort(key=lambda c: cv2.boundingRect(c)[0])
 
@@ -159,7 +159,7 @@ if args.comments:
     for c in contours:
         box = cv2.boundingRect(c)
         #print(box, left_lim)
-        if box[0] <= 1 or (box[0] <= 80 and box[2] < 80):
+        if (box[0] <= 1 or box[0] <= 80) and box[2] < 80:
             # This is very likely a column of holes. Crop it out.
             left_lim = box[0]+box[2]
         else:
