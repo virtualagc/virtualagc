@@ -12,6 +12,7 @@
 #               2016-12-08 JL   Transcribed pages 288-294.
 #               2016-12-09 JL   Transcribed pages 295-302.
 #               2016-12-10 JL   Transcribed pages 303-308.
+#               2016-12-10 JL   Transcribed pages 309-310.
 
 # Annotations:
 #
@@ -2170,45 +2171,98 @@ R2038   PRINTED AS SUBSIDIARY PAGE HEADS (SP2) ON SUCCEEDING PAGES, UNTIL SUPPLA
 R20382  SPEAKING, THIS SUBROUTINE PRINTS THE LINE LAST DELIVERED TO IT.  WHEN SUPPRESSING INACTIVE SUBROUTINES, PRINTS
 R20384  CUSSED LINES WITH THEIR CUSSES.
 
- 20389  PRINT LIN  TX           L OLD LINE    
- 203891            TX           Z,X0          
- 203893            NA, CHAR1    LINE +1       
+ 20389  PRINT LIN  TX           L OLD LINE    -             Z,X3
+ 203891            TX           Z,X0          -             L OLD LINE          NEW LINE AGES SUDDENLY.
+ 203893            NA, CHAR1    LINE +1       L COLUMN 1    NO NEW LOG
 
- 203896            NA           LINE          
- 203898 SP2 THIS   TX           BIT 11        
- 2039              TX, C5T8     BLANKS        
- 203902            SS           ZERO          
- 203904            SS           ZSUP ONE      
- 203906            TN           LINE +1       
- 203908            MT           N,AU2,1       
- 20391             TX           ONE           
- 203911            NA, BIT44    SWITCH        
- 203913            NA, BIT3     SWITCH        
- 203915            NA           3,1           
- 203916            TS, BIT3     ONES          
- 203918            WA           Z,X3          
- 203919            MT           BLANKS        
- 203921            TS, BIT3     ONES          
+ 203896            NA           LINE          BIT 12        C,+2
+ 203898 SP2 THIS   TX           BIT 11        -             LINE           S    CHANGE LOG CARD SP1 TO SP2.
+ 2039              TX, C5T8     BLANKS        -             USERLOG +15         ERASE ANY SPECIAL FLAG AT END OF LOGLIN.
+ 203902            SS           ZERO          LAST REM      SWITCH              LOSE ANY RIGHT PRINT ON LOG CARD.
+ 203904            SS           ZSUP ONE      C5T8          USERLOG +13         ALWAYS START PAGE NUMBER AT 1.
+ 203906            TN           LINE +1       10            USERLOG +1          KEEP LOG LINE FOR PAGE SUBHEADS.
+ 203908            MT           N,AU2,1       5             N,AU1,1             SET UP "USER'S OWN PAGE NO."
+ 20391             TX           ONE           -             USER PAGE
+ 203911            NA, BIT44    SWITCH        ZERO          PRIN SKIP           BRANCH UNLESS PRINTING IS SUPPRESSED.
+ 203913            NA, BIT3     SWITCH        ZERO          PRINT OLD +2        EXIT AT ONCE IF PAGE HEAD IS OWED.
+ 203915            NA           3,1           E COLUMN 1    C,+2
+ 203916            TS, BIT3     ONES          SWITCH        ENDOFORM -1         PRINT E AND OWE HEADS IF E IS OWED.
+ 203918            WA           Z,X3          ONE           Z,AU2
+ 203919            MT           BLANKS        15            N,AU2,1             IF NOTHING IS OWED, WE'RE IN MID-PAGE.
+ 203921            TS, BIT3     ONES          SWITCH        ENDOFORM -2         SO PRINT BLANK LINE(S) TO GET TO E-O-F.
 
- 203923 NO NEW LOG NA, CHAR7    LINE +1       
- 203925            SS           BLANKS        
- 203927            NA, CHAR6    LINE +1       
- 20393             SS           BLANKS        
+ 203923 NO NEW LOG NA, CHAR7    LINE +1       ZERO          PRIN SUP Q          MAKE CARD NUMBER LOOK HELPFUL BY
+ 203925            SS           BLANKS        CHAR7         LINE +1             SUPPRESSING AT MOST TWO ZEROS.
+ 203927            NA, CHAR6    LINE +1       ZERO          PRIN SUP Q          FROM RIGHT TO LEFT (COLUMNS 7 AND 6).
+ 20393             SS           BLANKS        CHAR6         LINE +1
 
- 20394  PRIN SUP Q NA, BIT44    SWITCH        
- 203942            NA           LINE +1       
- 203946            TS           BIT 12        
- 203948            NA, BIT3     SWITCH        
- 20395             TS           -             
+ 20394  PRIN SUP Q NA, BIT44    SWITCH        ZERO          P SKIP Q            BRANCH UNLESS PRINTING IS SUPPRESSED.
+ 203942            NA           LINE +1       E COLUMN 1    WAS LAST E          BRANCH UNLESS OWE A CUSS OR CUSSED LINE.
+ 203946            TS           BIT 12        N,X3          SP2 THIS       C    SINGLE-SPACE ANY LINE PRECEDING E-LINE.
+ 203948            NA, BIT3     SWITCH        ZERO          PAGE UNIT -1        BRANCH IF WE OWE HEADS.
+ 20395             TS           -             -             PRINT OLD -1
 
- 203952 WAS LAST E NA           3,1           
- 203954            WA, ALLBUTB1 LIN COUNT     
- 203956            LA           LIN COUNT     
- 203958            TS, BIT3     ONES          
+ 203952 WAS LAST E NA           3,1           E COLUMN 1    PRINT OLD +2        EXIT AT ONCE IF NOR THIS NOR LAST WAS E.
+ 203954            WA, ALLBUTB1 LIN COUNT     3,0           LIN COUNT           ADD TO LINE COUNT FROM LAST LINE.
+ 203956            LA           LIN COUNT     N LINES       PRINT OLD           BRANCH TO NORMAL PRINT.
+ 203958            TS, BIT3     ONES          SWITCH        ENDOFORM -1
 
 # Page 310
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  46        PAGE  46
 
+P20396  ARRANGE FOR A PAGE SKIP IF NECESSARY.
+
+ 203962            NA, ONE      SWITCH        ONES          SUPP SKIP           BRANCH IF NO CUSSES ON THIS PAGE.
+ 203966            TS, ONE      ZERO          SWITCH        C,+2
+
+ 20397  ENDOFORM   MT           BLANS         15            N,AU1,1             GO TO END OF FORM BY BLANK LINES W/ SP2.
+ 203974            TS           BIT 11        N,X3          WAS LAST E +1  C    SET UP SP2 AND RECORD IT IN LINE COUNT.
+ 203978            NA           N COPIES      ZERO          COPY PRT5
+ 203982            S, PHI PRINT 3,0
+ 203984 X3P1AU1    WA           Z,X3          ONE           Z,AU1          S
+ 203986            LA           LIN COUNT     N LINES       ENDOFORM            BRANCH IF NOT YET AT END OF FORM.
+
+ 20399             MT           BLOT WORD     15            N,AU1,1        S    PREPARE A WHAM FOR LAST LINE OF PAGE.
+ 203994 SUPP SKIP  NA           N COPIES      ZERO          COPY PRT5           BRANCH IF MORE COPIES SHOULD BE DONE.
+ 203996            S, PHI PRINT DEPAGIN8
+ 203998            TS           BIT 1         N,X3          PRINT OLD           PRINT LAST LINE, SKIP, AND OWE HEADS.
+
+ 2040   P SKIP Q   NA, CHAR1    LINE +1       P COLUMN 1    C,+2                UNLESS IMMEDIATELY FOLLOWING A LOG CARD,
+ 2041              NA, CHAR1    3,1           L COLUMN 1    PRIN SKIP           SKIP TO HEAD OF FORM BEFORE ..P.. CARD.
+ 2042              NA, CHAR1    LINE +1       A COLUMN 1    IS THIS E
+ 2043              NA, CHAR1    3,1           C COLUMN 1    ASK SKIP            BRANCH UNLESS A-LINE AFTER C-LINE.
+ 2044              TN           3,2           5             LINE +2             MAYBE COPY 2ND LOC AND WORD OF DP CONST.
+ 2045              NA           BLANKS        LINE +6       PRINT OLD +2        ABSORB IT INTO A-LINE IF IT WAS.
+ 2046   IS THIS E  NA, CHAR1    LINE +1       E COLUMN 1    C,+2                BRANCH IF NOT PASS 2 ERROR/WARNING LINE.
+ 2048              TS           -             -             C,+2
+ 2049              NA, CHAR1    LINE +1       C COLUMN 1    ASK SKIP            BRANCH IF NOT PASS 2 CONTINUATION LINE.
+
+ 20501             NA           LIN COUNT     N LINES       C,+2
+ 20503             WD           LIN COUNT     BIT 12        LIN COUNT           KEEP "E" AND "C" LINES ON SAME PAGE.
+ 2051              LA           BIT 1         N,X3          ASK SKIP -1         BRANCH IF LAST LINE IS ALREADY SKIP.
+ 2053              LA           N,X3          BIT 12        C,+3                BRANCH IF LAST LINE IS SP1.
+ 2055              WD           N,X3          BIT 12        LINE                IF NOT, SPACE THIS LINE 1 LESS.
+ 2057              TS           BIT 12        N,X3          ASK SKIP +1         MAKE LAST LINE SP1.
+ 2059              TS           BIT 12        LINE          C,-1                IF LAST LINE IS SP1, SO IS THIS E-LINE.
+ 2061              TS           BIT 1         LINE          C,-2                MOVE LAST LINES SKIP TO THIS E-LINE.
+
+ 2063   ASK SKIP   LA           BIT 1         N,X3          PRIN SKIP           BRANCH IF LAST LINE IS SKIP.
+ 2065              WA           LIN COUNT     N,X3          LIN COUNT           ADD TO LINE COUNT FROM LAST LINE.
+ 2067              LA           LIN COUNT     N LINES       PRINT OLD           BRANCH TO NORMAL PRINT.
+
+ 2069   PRIN SKIP  SSL, TWO     SWITCH        1,L           C,+1                "BRANCH" IF ANY CUSSES ON THIS PAGE.
+ 20692             TS           BIT 1         N,X3          DPAGINAT            SKIP AFTER LAST LINE AT END OF PAGE.
+ 20694             MT           BLANKS        15            N,AU1,1             GO TO END OF FORM BY BLANK LINES W/ SP2.
+ 20696             TS           BIT 11        N,X3          ASK SKIP +1    C    SET UP SP2 AND RECORD IT IN LINE COUNT.
+ 20698             NA           N COPIES      ZERO          COPY PRT5           BRANCH IF MORE COPIES SHOULD BE DONE.
+ 2070              S, PHI PRINT 3,0
+ 20702             TS, ONE      ZERO          SWITCH        X3P1AU1        C    TURN OFF CUSSES-ON-THIS-PAGE FLAG.
+ 20704             LA           LIN COUNT     N LINES       PRIN SKIP +2        BRANCH IF NOT YET AT END OF FORM.
+ 20706             TS           BIT 1         N,X3          SUPP SKIP -1   C    PREPARE A WHAM FOR LAST LINE OF PAGE.
+ 2071   DPAGINAT   NA           N COPIES      ZERO          COPY PRT5           BRANCH IF MORE COPIES SHOULD BE MADE.
+ 20711             S, PHI PRINT DEPAGIN8
+ 20714             NA           N COPIES      ZERO          COPY PRT5           BRANCH IF MORE COPIES SHOULD BE DONE.
+ 20716             S, PHI PRINT 3,0
 
 # Page 311
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  47        PAGE  47
