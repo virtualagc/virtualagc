@@ -9,6 +9,8 @@
 ## Contact:	Onno Hommes <ohommes@cmu.edu>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	05/07/09 OH	Transcription Batch 1 Assignment 
+##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 

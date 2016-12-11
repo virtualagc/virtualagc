@@ -9,6 +9,8 @@
 ## Contact:	Onno Hommes <ohommes@cmu.edu>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	05/07/09 OH	Transcription Batch 1 Assignment 
+##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -43,7 +45,7 @@
 		COUNT	22/KALC
 		
 NEWDELHI	CS	HOLDFLAG	# SEE IF MANEUVER HAS BEEN INTERRUPTED
-		EXTEND			# BY ASTRONAUT.
+		EXTEND			# BY ASTRONAUT
 		BZMF	NOGO	-2	# IF SO, TERMINATE KALCMANU
 NEWANGL		TC	INTPRET
 		AXC,1	AXC,2
@@ -78,7 +80,7 @@ INCRDCDU	TS	KSPNDX
 		EXTEND			# CDU ANGLES
 		MP	QUADROT
 		INDEX	KDPNDX
-		DXCH	DELCDUX		# ANGEL INCREMENTS TO BE ADDED TO
+		DXCH	DELCDUX		# ANGLE INCREMENTS TO BE ADDED TO
 ## Page 415
 		INDEX	KSPNDX		# DCDU EVERY TENTH SEC
 		CA	NCDU		# BY LEM DAP
@@ -206,7 +208,7 @@ MANUSTOP	TC	STOPYZ
 ENDROLL		CA	CPHI
 		TS	CDUXD		# SET CDUXD TO THE COMMANDED OUTER GIMBAL
 		TC	STOPRATE
-ENDMANU		CA	ATTPRIO		# RESTORE USERS PRIO
+ENDMANU		CA	ATTPRIO		# RESTORE USERS PRIORITY
 		TS	NEWPRIO
 		
 		CA	ZERO		# ZERO ATTCADR

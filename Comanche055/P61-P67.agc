@@ -15,6 +15,8 @@
 ##				interpreter operands fixed stuff like
 ##				N-M,1 to N -M,1
 ##		2010-08-28 JL	Fixed some indentation.
+##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##				GOTOPOOH, and I've changed them back.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -83,7 +85,7 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 					# XXX.XX DEG	XXX.XX DEG	XXXXX.
 		TC	BANKCALL
 		CADR	GOFLASHR
-		TC	GOTOP00H
+		TC	GOTOPOOH
 ## Page 790
 		TC	P61.4
 		TC	-5
@@ -127,7 +129,7 @@ P61.1		TC	CLEARMRK
 		TC	BANKCALL
 		CADR	GOFLASH
 		
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		TC	P61.2		# PROCEED
 		TC	-5
 		
@@ -147,7 +149,7 @@ P61.2		TC	INTPRET		# CORRECT TTE FOR TIME LAPSE DURING
 					# XXXX.X NM	XXXXX. FPS	XXBXX M,S
 		TC	BANKCALL
 		CADR	GOFLASH
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		TC	+2
 		TC	P61.2		# REDO
 		
@@ -200,7 +202,7 @@ P62.2		EXTEND
 		CAF	OCT41			# REQUEST SEPARATION
 		TC	BANKCALL
 		CADR	GOPERF1R
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		TC	+3			# PROCEED
 ## Page 793
 						# NOTE:  NODOFLAG WILL BE SET IN CM/DAPON. ***
@@ -480,7 +482,7 @@ P67.1		CA	V16N67			# RTOGO		LAT		LONG
 						# XXXX.X NM	XXX.XX DEG	XXX.XX DEG
 		TC	BANKCALL
 		CADR	GOFLASH
-		TC	+3			# EFFECTIVE GOTOP00H
+		TC	+3			# EFFECTIVE GOTOPOOH
 		TC	+2
 		TC	P67.1			# REDO
 		
@@ -495,7 +497,7 @@ P67.1		CA	V16N67			# RTOGO		LAT		LONG
 ## Page 801
 		DXCH	AVEGEXIT
 		
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 		
 ## Page 802
 P67.2		VLOAD	CLEAR			# CALC PRESENT LAT, LONG, ALT.
