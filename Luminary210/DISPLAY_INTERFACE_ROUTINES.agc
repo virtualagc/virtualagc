@@ -15,6 +15,7 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-08 JS   Compared to Luminary210 images. Updated where needed.
 ##              2016-12-10 HG   Add missing operator ZL (label NVDSP)
+##              2016-12-11 HG   fix operand NVDISP -> NVDSP
 
 ## Page 1338
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -749,13 +750,13 @@ KEEPPRIO	CAF	ZERO		# START UP PRIO DISPLAY
 		CS	DSPFLG
 		MASK	BIT8
 		CCS	A
-		TCF	NVDISP
+		TCF	NVDSP
 		CA	NVWORD
 		MASK	MID7
 		TS	L
 		CS	NVWORD
 		TS	NVWORD
-		TCF	NVDISP +1
+		TCF	NVDSP   +1
 
 MAKEPLAY	CA	PRIORITY	# SAVE USERS PRIORITY
 		MASK	PRIO37

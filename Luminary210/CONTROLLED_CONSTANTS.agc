@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-17 HG   Transcribed
 ##              2016-12-08 HG   Fix label  HBEAMANB  -> HBEAMNB
+##              2016-12-11 HG   fix value for STAR 22 Z
+##                                            BSUBO
 
 
 ## Page 39
@@ -432,7 +434,7 @@ REMDIST         2DEC            384402000       B-29    # MEAN DISTANCE BETWEEN 
 
                 2DEC            -.9168160791    B-1     # STAR 22       X
                 2DEC            -.3506241694    B-1     # STAR 22       Y
-                2DEC            -.1907834362    B-1     # STAR 22       Z
+                2DEC            -.1910784362    B-1     # STAR 22       Z
 
 ## Page 51
                 2DEC            -.4521486548    B-1     # STAR 21       X
@@ -581,7 +583,7 @@ FDOT            2DEC*           4.253263471     E-9 B27*        #    REV/CSEC
 BDOT            2DEC*           -1.145529390    E-16 B28*       # REV/CSEC
 NODIO           2DEC*           8.788308600     E-1  B 0*       #  REV
 FSUBO           2DEC*           6.552737750     E-1  B 0*       #  REV
-BSUBO           2DEC*           1.160576171     E-2  B 0*       #  REV
+BSUBO           2DEC*           6.511941688     E-2  B 0*       #  REV
 WEARTH          2DEC*           1.160576171     E-7  B23*       #    REV/CSEC
 AZO             2DEC*           7.733314844     E-1  B 0*       # REVS
 

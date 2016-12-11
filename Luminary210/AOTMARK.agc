@@ -19,6 +19,7 @@
 ##                                           GOMARKER-> GOMARKFR
 ##                                           CMKCNTR -> XMKCNTR 
 ##              2016-12-07 HG   fix P00 -> POO
+##              2016-12-11 HG   Fix operation CS NOMKCNT -> CA NOMKCNT
 
 ## Page 255
                 SETLOC          AOTMARK1
@@ -557,7 +558,7 @@ MKALARM         TC              ALARM                   # NOT A PAIR TO PROCESS-
 
 ASKASTR         CAF             OCT16
                 TS              DSPTEM1
-                CS              NOMKCNT
+                CA              NOMKCNT
                 TS              DSPTEM1         +1
                 CAF             V50N25
                 TC              BANKCALL

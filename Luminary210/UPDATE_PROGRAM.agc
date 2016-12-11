@@ -16,6 +16,7 @@
 ##		2016-12-06 RRB	Updated for Luminary210.
 ##              2016-12-07 HG   Fix P00 -> POO (appears only in comments)
 ##                         Change POO -> P00 in some comments
+##              2016-12-11 HG   Add missing operation  AD BIT1
 
 ## Page 1383
 # PROGRAM NAME:		P27
@@ -256,6 +257,7 @@ UPVERIFY	CAF	ADUPTEMP	# PLACE ECADR WHERE COMPONENT NO. INDEX
 		BZMF	UPVERIFY	# NO, IT IS NOT POSITIVE NONZERO
 		CS	UPTEMP
 		AD	COMPNUMB
+                AD      BIT1
 		EXTEND
 ## Page 1388
 		BZMF	UPVERIFY	# NO

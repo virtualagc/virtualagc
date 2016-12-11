@@ -14,7 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-22 HG   Transcribed
-
+##              2016-12-11 HG   fix operand LMORBM05 -> LMCSTA05
+##                                          LMLSAL09 -> LMLSAL08
+##                                          LMLSAL05 -> LMSAL05
 ## Page 204
                 BANK            22
                 SETLOC          DOWNTELM
@@ -327,7 +329,7 @@ LMREND03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
 ## Page 211
 LMREND04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
 
-LMREND05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
+LMREND05        EQUALS          LMCSTA05                # COMMON DOWNLIST DATA
 
 LMREND06        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 
@@ -481,14 +483,14 @@ SURFALIN        EQUALS                                  # SEND ID BY SPECIAL COD
                 DNPTR           LMLSAL03                # COLLECT SNAPSHOT
                 6DNADR          DNTMBUFF                # SEND SHAPSHOT
                 DNPTR           LMLSAL04                # COMMON DATA
-                DNPTR           LMLSAL09                # COMMON DATA
+                DNPTR           LMLSAL08                # COMMON DATA
                 3DNADR          GSAV                    # GSAV +0...+5
                 1DNADR          AGSK                    # AGSK,+1
                 1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
                 1DNADR          LEMMASS                 # LEMMASS,CSMMASS
                 1DNADR          IMODES30                # IMODES30,IMODES33
                 1DNADR          TIG                     # TIG,+1
-                DNPTR           LMLSAL05                # COMMON DATA
+                DNPTR           LMSAL05                 # COMMON DATA
                 1DNADR          AOTCODE                 # AOTCODE,GARBAGE
                 DNPTR           LMLSAL09                # COMMON DATA
                 DNPTR           LMLSAL06                # COMMON DATA

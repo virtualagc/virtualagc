@@ -17,6 +17,7 @@
 ##              2016-12-01 HG   Add missing instructions for INTADR, UPDATADR
 ##                              fix operand GOTOPOOH  -> GOTOP00H
 ##              2016-12-07 HG   'unfix' and revert P00 -> POO
+##              2016-12-11 HG   Fix operand -5 -> -6
 
 
 ## Page 711
@@ -75,7 +76,7 @@ P76ER77		CA	MODREG
 		CADR	GOFLASH
 		TCF	ENDP76
 		TC	+2
-		TC	-5		# STORE DATA & REPEAT FLASHING DSP
+		TC	-6		# STORE DATA & REPEAT FLASHING DSP
 		TC	INTPRET		# RETURN TO INTERPRETIVE CODE
 		DLOAD	SET
 			TIG

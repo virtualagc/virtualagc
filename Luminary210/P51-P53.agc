@@ -15,7 +15,9 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-07 MAS  Began transcription.
 ##              2016-12-08 MAS  Finished updates for Luminary 210.
-
+##              2016-12-11 HG   Fix operand FLT69FLG -> FLT59FLG
+##                                  Opertaor TCF GOTOPOOH -> TC GOTOPOOH   
+##                                           TC	 CHKOUT   -> TCF CHKOUT   
 ## Page 923
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
 # MOD NO- 0                                                                              LOG SECTION- P51-P53
@@ -640,7 +642,7 @@ R51.1		EXIT
 		OCT	04024
 
 R51C		TC	DOWNFLAG
-		ADRES	FLT69FLG
+		ADRES	FLT59FLG
 		
 		CAF	OCT15
 		TC	BANKCALL
@@ -850,8 +852,8 @@ CHKSDATA	VLOAD	DOT
 		CAF	VB6N5
 		TC	BANKCALL
 		CADR	GOFLASH
-		TCF	GOTOPOOH	# V34
-		TC	CHKOUT		# V33-PROCEED
+		TC	GOTOPOOH	# V34
+		TCF	CHKOUT		# V33-PROCEED
 		TC	DOWNFLAG	# V32-REJECT DATA-CLEAR FLAG
 		ADRES	FREEFLAG
 CHKOUT		TC	INTPRET

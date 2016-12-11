@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-08 RRB	Updated for Luminary210.
+##              2016-12-11 HG   Fix operands    CDSPOTX,Y,Z -> CDUSPOTX,Y,Z
 
 ## Page 1256
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
@@ -112,11 +113,11 @@ TR*GL**P	MASK	SIX		# MAKE IT EVEN AND SMALLER
 
 QTPROLOG	INHINT
 		CA	CDUX
-		TS	CDSPOTX
+		TS	CDUSPOTX
 		CA	CDUY
-		TS	CDSPOTY
+		TS	CDUSPOTY
 		CA	CDUZ
-		TS	CDSPOTZ
+		TS	CDUSPOTZ
 
 QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
 		EXTEND
