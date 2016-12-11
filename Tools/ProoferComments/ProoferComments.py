@@ -111,6 +111,8 @@ nominalRowSpacing = 10 * scale
 nominalRowHeight = 24 * scale
 nominalTwoRowHeight = nominalRowHeight + nominalRowSpacing + nominalRowHeight
 row = 0
+alnumPattern = re.compile(r"[0-9A-Z]")
+lastBoxChar = '?'
 for box in file:
 	boxFields = box.split()
 	boxChar = boxFields[0]
@@ -255,6 +257,16 @@ for box in file:
 	   boxHeight <= 16 * scale and numCharsInRow > 0 and \
 	   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
 	   	addIt = 1 		
+	# Here's something to help hyphens to be recognized:
+	if boxChar == '-' and numCharsInRow > 0:
+		#print boxWidth/scale, boxHeight/scale, numCharsInRow, sumBottomsInRow, lastBoxChar
+		if boxWidth > 14 * scale and boxWidth < 19 * scale and boxHeight > 6 * scale and boxHeight < 9 * scale:
+			midPoint = (boxTop + boxBottom) / 2.0
+			#print midPoint - sumBottomsInRow/numCharsInRow
+			if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 2 * scale:
+				#print "Adding"
+		 		addIt = 1
+	lastBoxChar = boxChar
 	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
 	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
 	# that some printouts (like Sunburst 120) liked to stick in as short vertical line segments next to
@@ -303,8 +315,9 @@ for box in file:
 		boxWidth = int(boxWidth/addAs) - 1
 		boxRight = boxLeft + boxWidth - 1 + nominalColSpacing
 		for i in range(0,addAs):
-			sumBottomsInRow += boxBottom
-			numCharsInRow += 1
+			if alnumPattern.match(boxChar):
+				sumBottomsInRow += boxBottom
+				numCharsInRow += 1
 			boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 				      'boxHeight':boxHeight})
