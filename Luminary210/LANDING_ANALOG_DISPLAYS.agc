@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-27 HG   Transcribed
+##              2016-12-12 HG   Fix opernand modifier none -> +4
 
 ## Page 895
                 BANK            21
@@ -64,7 +65,7 @@ LANADISP        LXCH            PIPCTR1                 # UPDATE TBASE2 AND PIPC
                 DCS             VSURFACE        +4
                 DXCH            VVECTZ
                 EXTEND
-                DCA             V
+                DCA             V               +4
                 DDOUBL
 
 ## Page 896

@@ -17,6 +17,7 @@
 ##              2016-12-08 HG   Fix label  HBEAMANB  -> HBEAMNB
 ##              2016-12-11 HG   fix value for STAR 22 Z
 ##                                            BSUBO
+##              2016-12-12 HG   fix value for HBEAMNB
 
 
 ## Page 39
@@ -154,7 +155,7 @@ RANGCONV        2DEC            2.859024        B-3     # CONVERTS RR RANGE READ
 
 HBEAMNB         2DEC            -0.7147168647           # POS 1 ALT BEAM IN NAV BASE COORDINATES
                 2DEC            -0.0731086602
-                2DEC            -0.6955824327
+                2DEC            -0.6955824372
 
 VZBEAMNB        2DEC            -0.4067366430           # POS 1 VZ  BEAM
                 2DEC            +0.0954915028
