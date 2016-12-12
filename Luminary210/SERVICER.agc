@@ -19,6 +19,7 @@
 ##                              comments.
 ##              2016-11-29 HG   fix opcode  BDSL  -> BDSU
 ##              2016-12-07 HG   fix P00 -> POO (appears only in comments)
+##              2016-12-12 hg   Fix operator BZMF -> BZF
 
 ## Page 860
 		BANK	37
@@ -1379,7 +1380,7 @@ VALTCHK		TC	QUIKFAZ5	# DO NOT REPEAT ABOVE
 HIGATCHK	CS	FLGWRD11	# IS PSTHIBIT SET (BY HIGATASK)?
 		MASK	PSTHIBIT
 		EXTEND
-		BZMF	CONTSERV	# YES:  BYPASS HIGATE CHECK
+		BZF	CONTSERV	# YES:  BYPASS HIGATE CHECK
 
 ## Page 892
 		CA	TTF/8

@@ -16,6 +16,9 @@
 ##              2016-01-12 HG   Transcribed
 ##              2016-12-07 HG   fix P00 -> POO
 ##                              Change POO -> P00 in some comments
+##              2016-12-12 HG   Fix constant value (P42TABLE)   2640 -> 2390
+##                                  operator TCF, BZF -> TC  
+##                                           
 
 ## Page 726
 
@@ -97,7 +100,7 @@ P42TABLE        VN              0640                    # (0)
                 TCF             GOPOST                  # (3)
                 TCF             TASKOVER                # (4)
                 TCF             P42SPOT                 # (5)
-                DEC             2640                    # (6) ULLAGE ON AT TIG-6 SECS.
+                DEC             2390                    # (6) ULLAGE ON AT TIG-6 SECS.
                 EBANK=          OMEGAQ
                 2CADR           STEERING                # (7)
                 TCF             P40SJUNK                # (11)
@@ -163,7 +166,7 @@ B*RNB*B*        EXTEND
                 RELINT
 
                 INDEX           WHICH
-                TCF             5
+                TC              5
 
 P42SPOT         =               P40SPOT                 # (5)
 P12SPOT         =               P40SPOT                 # (5)
@@ -301,7 +304,7 @@ TIG-30          CAF             S24.9SEC
                 TS              TBASE1
 
                 INDEX           WHICH
-                TCF             1
+                TC              1
 
 WANTAPS         CS              FLGWRD10                # (1) FOR P42 ENSURE APSFLAG IS SET. IF IT
                 MASK            APSFLBIT                # WASN'T SET, DAP WILL BE INITIALIZED TO
@@ -359,7 +362,7 @@ TIG-5           EXTEND
                 ADRES           ZOOMFLAG
 
                 INDEX           WHICH
-                TCF             11
+                TC              11
 
 P40SJUNK        CCS             PHASE3                  # (11) P40 AND P42.  S40.13 IN PROGRESS?
                 TCF             DISPCHNG                # YES
@@ -404,7 +407,7 @@ IGNYET?         CAF             ASTNBIT                 # CHECK ASTNFLAG:  HAS A
                 CCS             A
                 TCF             IGNITION
                 INDEX           WHICH
-                BZF             12                      # BRANCH IF HE HAS NOT RESPONDED YET
+                TC              12                      # BRANCH IF HE HAS NOT RESPONDED YET
 
 IGNITION        CS              FLAGWRD5                # INSURE ENGONFLG IS SET.
                 MASK            ENGONBIT
@@ -436,7 +439,7 @@ IGNITION        CS              FLAGWRD5                # INSURE ENGONFLG IS SET
                 TS              FLAGWRD8
 
                 INDEX           WHICH
-                TCF             13
+                TC              13
 
 P63IGN          EXTEND                                  # (13)  INITIATE BURN DISPLAYS
                 DCA             LUNLANAD
@@ -603,7 +606,7 @@ COMFAIL         TC              UPFLAG                  # (15)
                 TCF             ENDOFJOB
 
 COMFAIL1        INDEX           WHICH
-                TCF             2
+                TC              2
 
 COMFAIL3        CA              Z                       # (15)       KILL CLOKTASK USING Z
                 TCF             +2
@@ -828,7 +831,7 @@ ASTNRETN        TC              PHASCHNG
 
 *ENTER          INHINT
                 INDEX           WHICH
-                TCF             3
+                TC              3
 
 GOPOST          CAF             PRIO12                  # (3) MUST BE LOWER PRIORITY THAN CLOKJOB
                 TC              FINDVAC
@@ -902,7 +905,7 @@ REP40ALM        CAF             V05N09                  # (14)
                 TCF             REP40ALM                # V32E  REDISPLAY ALARM
 
                 INDEX           WHICH                   # FOR P42, ALLOW CREW TO PROCEED EVEN
-                TCF             14                      # THOUGH VEHICLE IS UNSTAGED.
+                TC              14                      # THOUGH VEHICLE IS UNSTAGED.
 
 #       ********************************
 

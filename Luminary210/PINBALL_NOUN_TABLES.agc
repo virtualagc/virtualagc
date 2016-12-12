@@ -17,6 +17,7 @@
 ##              2016-11-22 MAS  Completed corrections. There's some new nouns, as well
 ##                              as some changes to old ones.
 ##              2016-12-11 HG   fix operand DSPTEM1 -> N26/PRI
+##              2016-12-12 HG   fix value for forward/lateral velocity
 
 ## Page 313
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -629,7 +630,7 @@ SFOUTAB		OCT	05174			# WHOLE, DP TIME (SEC)
 		OCT	31757
 		OCT	02476			# ALTITUDE RATE
 		OCT	05531
-		2DEC	5.517 E-5 B14		# FORWARD/LATERAL VELOCITY
+		2DEC	5.571 E-5 B14		# FORWARD/LATERAL VELOCITY
 		
 		OCT	00007			# ROT HAND CONT ANGLE RATE
 		OCT	13734

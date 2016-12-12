@@ -17,6 +17,7 @@
 ##              2016-12-08 HG   Fix operand V16N63 -> V16N94
 ##              2016-12-10 HG   remove BANK 7 operation
 ##                                     SETLOC ASENT2 -> SETLOC ASENT7
+##              2016-12-12 HG   remove superfluous interpretive operator BON
 
 ## Page 844
 		BANK	34
@@ -348,7 +349,7 @@ MAINLINE	VLOAD	VCOMP
 		BON
 			ROTFLAG
 			ANG1CHEK
-CLRXFLAG	CLEAR	BON	
+CLRXFLAG	CLEAR	
 			XOVINFLG	#   (XOVINFLG)
 ASCTERM		EXIT
 		CA	FLAGWRD9

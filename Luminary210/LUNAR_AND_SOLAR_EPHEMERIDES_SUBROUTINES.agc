@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 HG   Transcribed
+##              2016-12-12 HG   Fix for interpretive operands 8D -> 9D
+##                                                            5D -> 6D 
 
 ## Page 982
 #  NAME - LSPOS  - LOCATE SUN AND MOON                   DATE - 25 OCT 67
@@ -119,7 +121,7 @@ POSITB          DLOAD           DMP*
                                 VAL67           +4,1    # 1/27 OR 1/32 OR 1/365
 ## Page 984
                 SL              DAD*
-                                8D
+                                9D
                                 VAL67           +2,1    # AARG
                 SIN             DMP*                    # SIN(T/27+PHI) OR T/32 OR T/365
                                 VAL67,1                 # (A0**2+A1**2)**1/2 SIN(X+PHIA)
@@ -134,7 +136,7 @@ POSITD          DLOAD           DMP*
                                 TIMEP                   # T
                                 RATESP,2                # LOMR,LOSR,LONR
                 SL              DAD*
-                                5D
+                                6D
                                 RATESP          +6,2    # LOM0,LOS0,LON0
                 DSU
                                 GTMP

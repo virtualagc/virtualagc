@@ -15,6 +15,7 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-01 RSB	Completed transcription
 ##              2016-12-10 HG   Fix constant  VINJNOM -> 16.79299
+##              2016-12-12 hg   Fix interpretive operator STOVL -> STCALL
 
 ## Page 839
 		BANK	24
@@ -121,7 +122,7 @@ NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE, AND APOLUNE VALUES.
 ## Page 841
 		DOT	SL1
 			UNIT/R/
-		STOVL	RDOT		# RDOT = 2(-7)
+		STCALL	RDOT		# RDOT = 2(-7)
 			ASCENT
 P12RET		DLOAD
 			ATP		# ATP(2)*2(18)
