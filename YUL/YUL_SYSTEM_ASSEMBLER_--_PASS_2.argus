@@ -12,7 +12,8 @@
 #               2016-12-08 JL   Transcribed pages 288-294.
 #               2016-12-09 JL   Transcribed pages 295-302.
 #               2016-12-10 JL   Transcribed pages 303-308.
-#               2016-12-10 JL   Transcribed pages 309-310.
+#               2016-12-11 JL   Transcribed pages 309-310.
+#               2016-12-12 JL   Transcribed pages 311-317.
 
 # Annotations:
 #
@@ -2267,30 +2268,345 @@ P20396  ARRANGE FOR A PAGE SKIP IF NECESSARY.
 # Page 311
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  47        PAGE  47
 
+P20718  PRINTING OF PAGE HEAD AND SUBHEAD (LOC), AND DETAIL LINES.
+
+ 2072              DA           PAGE NO       ONE           PAGE NO
+ 2073   PAGE UNIT  SWE, CAC2    PAGE NO       D,4,L         ARG 1
+ 2075              TS           -             -             P2 D2A LZS     C
+ 2077              SS           ARG 1         C5T8          PAGE HEAD +15       PUT PAGE NUMBER ALPHA IN PAGE HEAD.
+
+ 20822  PRINT HED  NA           N COPIES      ZERO          COPY PRT5
+ 2083              S, PHI PRINT PAGE HEAD
+ 2084              TX           PAGE HEAD     -             LIN COUNT           RESET LINE COUNT TO 3.
+ 208402            LA           USER PAGE     ZERO          PRINT OLD -2        FINISH UP AND EXIT IF NO LOG.
+
+ 208404            NA           USER PAGE     ONE           PRINT LOG           GO TO PRINT IF NOT NEW LOG.
+ 20841             NA, BIT3     SWITCH        ZERO          PLOG LINE           PRINT LOG LINE NOW IF HEADS ARE OWED.
+ 20842             TS           TWO           USER PAGE     PRINT OLD +2        ADVANCE PAGE NO. FOR NEXT USE OF LOG.
+
+ 20843  PRINT LOG  SWE, CAC2    USER PAGE     D,4,L         ARG 1
+ 20844             TS           -             -             P2 D2A LZS     C
+ 20845             SS           ARG 1         C5T8          USERLOG +13         PUT PAGE NO. IN ALPHA IN PAGE SUBHEAD.
+
+ 2085   PLOG LINE  NA           N COPIES      ZERO          COPY PRT5
+ 20852             S, PHI PRINT USERLOG                                         PRINT LOG LINE AND DOUBLE SPACE.
+ 2086              DA           USER PAGE     ONE           USER PAGE
+ 20862             WA           LIN COUNT     USER LOG      LIN COUNT           ACCORDINGLY SET LINE COUNT TO 5.
+ 20865             NA, BIT3     SWITCH        ONES          PRINT OLD +2        EXIT NOW UNLESS HEADS WERE OWED.
+ 20867             TS, BIT3     ZERO          SWITCH        WAS LAST E +1  C    NOW HEADS ARE PAID UP, PRINT A CUSSED L.
+
+ 2087   PRINT OLD  NA           N COPIES      ZERO          COPY PRT5
+ 2088              S, PHI PRINT 3,0
+ 2089              TX           Z,X3,1        -             Z,X0                OLD LINE DISCOVERS FOUNTAIN OF YOUTH.
+ 2091              MT           BLANKS        15            N,X3,1
+ 2092              TS           ZERO          N,X0          N,X4                AND IS MOREOVER MADE CLEAN AGAIN.
+
+
+
+R20931  MINOR SUBROUTINE TO COPY PRINTING ONTO TAPE 5.
+
+ 20932  COPY PRT5  SS           N,SH          A ADRES       C,+2
+ 20933             WA           L COP BUFS    ONE           Z,X0
+ 20934             TN                         16            N,X0,15             COLLECT 4 LINES BEFORE WRITING.
+ 209342            TX           Z,SH          -             CAC N
+ 209344            NA           0,3           EOR           COPY EXIT           BRANCH IF RECORD NOT FILLED YET.
+
+ 209348            TX           0,4           -             Z,X0
+ 20935             CC           0,1           -             0,65
+ 20936             TS           N,X0          L COP BUFS    PHI TAPE            SWAP TAPE BUFFERS.
+ 20937             WF,5         0,1           -             DISASTER
+
+ 20938             TX           CAC N         -             Z,SC
+ 20939  COPY EXIT  TS           Z,X0          L COP BUFS    C,-1                ADVANCE POINTER WITHIN BUFFER.
 
 # Page 312
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  48        PAGE  48
 
+P2094              CUSSING ROUTINE IN PASS 2.  GOES THROUGH THE ENTIRE CUSS LIST LOOKING FOR CUSS DEMAND BITS IN BITS
+R2096   1, 17, AND 33.  THE LIST TERMINATES IN A SENTINEL OF ALL ONES.  EACH THIRD OF A WORD IN THE CUSS LIST CONSISTS
+R2098   OF A DEMAND BIT (RESET BY THIS ROUTINE), A POISON BIT TO DETERMINE IF THIS CUSS IS FATAL, THREE BITS GIVING THE
+R2100   NUMBER OF WORDS IN THE CUSS, AND AN 11-BIT SUBADDRESS.  THE CUSSES THEMSELVES ARE IN BANK 5.
+
+ 21012  CUSSER     TX           ZERO          -             COMMON
+ 2102              TS           L CUS LIST    Z,X6          C,+2
+ 2103              TX           Z,X6,1        -             -
+ 2104              LA, B1B17B33 6,0           ZERO          C,-1                BRANCH IF NO CUSSES IN THAT WORD.
+
+ 21053             NA           N,X6          ONES          TRY BIT 1           BRANCH IF REAL CUSS, NOT END OF LIST.
+
+ 21056             LA           COMMON        ZERO          PASS 2              EXIT IF NO CUSSES FOR THIS LINE.
+ 21059             TS           TEN           COMMON        COUNT CUS      C
+
+ 2108   TRY BIT 1  NA, BIT 1    6,0           ONES          TRY BIT 17
+ 2109              SWE, CAC3    N,X6          32            COMMON
+ 2110              TS, BIT 1    ZERO          6,0           PRIN CUSS      C    RESET DEMAND BIT AND CUSS.
+
+ 2112   TRY BIT 17 NA, BIT 17   6,0           ONES          TRY BIT 33
+ 2113              SWE, CAC3    N,X6          16            COMMON
+ 2114              TS, BIT 17   ZERO          6,0           PRIN CUSS      C    RESET DEMAND BIT AND CUSS.
+
+ 2116   TRY BIT 33 NA, BIT 33   6,0           ONES          C,+3
+ 2117              TS           N,X6          COMMON        PRIN CUSS      C
+ 2118              SS           ZERO          BIT 33        N,X6                CUSS AND RESET DEMAND BIT.
+ 21192             TS, ONE      ONES          SWITCH        CUSSER +1           SHOW THAT THERE ARE CUSSES ON THIS PAGE.
+
+R2120   CLOSED SUBROUTINE TO SET THE CUSSES IN PRINT.
+
+ 2121   PRIN CUSS  SS           COMMON        B38T48        Z,R5           C    R5 MAINTAINS BANK INDICATOR 5 IN PASS 2.
+ 2123              SWS, B28T30  COMMON        7,L           C,+1           C
+ 2124              TN           N,R5          0             LINE +3        C
+ 21242             TX           Z,AU2         -             Z,X5           C    IF 1ST CUSS OF PAGE, LEFT END OF BLOTS.
+ 2125              NA, BIT 34   COMMON        ZERO          C,+2           C    BIT 34 INDICATES FATAL CUSS (BAD ASSY).
+ 2127   GO NUM CUS TS           Z,SC          Z,X4          NUMB CUSS      S    GET INTO SC MODE FOR DEC-TO-ALF, PRINT.
+ 2129              SWS, BIT14   SWITCH        4,L           SWITCH         C    EFFECT CONDITIONAL SUPPRESSION.
+ 2131              TS, BIT34    ONES          SWITCH        GO NUM CUS     C    INDICATE THAT ASSEMBLY IS BAD.
+
+ 2133   NUMB CUSS  DA           N ERR LINS    ONE           ARG 1               FORM SERIAL NUMBER FOR THIS CUSSED LINE.
+ 2135              SWE, ONES    ARG 1         D,4,L         ARG 1
+ 2136              TS           E COLUMN 1    LINE +1       P2 D2A LZS     C
+ 2137              SWE, ONES    ARG 1         A,1,L         ARG 1
+ 2138              LA, CHAR1    BLANKS        ARG 1         C,-1                NORMALIZE ALPHA SERIAL OF CUSSED LINE.
+ 2140              SWE, ONES    ARG 1         A,2           LINE +2
+ 2141              TS, CHAR1    SHARP C1      LINE +2       PRINT LIN           PRINT SERIAL "# NN  " AND TEXT OF CUSS.
 
 # Page 313
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  49        PAGE  49
 
+P2143              SUBROUTINE IN PASS 2 TO COUNT CUSSED LINES AND KEEP TRACK OF FIRST AND LAST PAGE NUMBERS.  ALSO PUTS
+R2145   "PRECEDING CUSSED LINE IS ON PAGE NNN" ON THE LAST CUSS OF THE FIRST CUSSED LINE OF A PAGE.
+
+ 2149              TS           BLOT WORD     N,X5,1        PREV CUSS -2   C    FILL EMPTY PART OF 1ST CUSS WITH BLOTS.
+
+ 2150   NEW PAGE   SWS, C1T4    ERR PAGES     A,4,L         PREV CUSS +4   C    SUPPLY FORMER LAST-PAGE-WITH-CUSSES.
+ 2152              WA           L OLD LINE    COMMON        Z,X3           C    POINT TO OLD LINE OR OLD LINE +5.
+ 21532             LA           Z,X5          Z,X3          NEW PAGE -1    C    BRANCH UNTIL BLOT FILLING IS DONE.
+ 2154              TN           N,CSC,7       5             3,1            C    MSG TO UNUSED PART OF LINE, TAB TO SS.
+
+ 2156   PREV CUSS  ALF,5        PRECEDING CUSSED LINE IS ON PAGE      ▪▪▪
+
+ 21568  COUNT CUS  DA           N ERR LINS    ONE           N ERR LINS     C    INCREMENT NUMBER OF ERROR LINES.
+ 2157              SWS, C1T4    PAGE HEAD +15 A,4,L         ERR PAGES      C    ON FIRST ERROR, SAVE PAGE NUMBER.
+ 2159              TN           N,CSC,1       3             COUNT CUS +1   C    INHIBIT ABOVE FOR ERRORS AFTER FIRST.
+ 2161              NA, C5T8     ERR PAGES     PAGE HEAD +15 NEW PAGE       C    BRANCH IF CUSSED LINE IS FIRST ON PAGE.
+ 2163              SS           PAGE HEAD +15 C5T8          ERR PAGES      C    SHOW LATEST PAGE NUMBER WITH ERROR.
+ 2165              LN           COMMON        ZERO          PASS 2         S    RETURN TO EITHER OF TWO PLACES.
+
+
+
+R2167              SUBROUTINE IN PASS 2 TO CONVERT A DECIMAL NUMBER TO ALPHABETIC AND SUPPRESS LEFT ZEROS IN IT.
+
+ 21688             SWE, D4T8    ARG 1         D,2           ARG 1          C    SPECIAL ENTRY TO FLUSH DIGITS RIGHT.
+ 2169   P2 D2A LZS SWS, C5T8    ARG 1         8             ARG 1          C
+ 2172              SWS,DECALFM1 ARG 1         4             ARG 1          C
+ 2174              SWS,DECALFM2 ARG 1         2             ARG 1          C
+ 2176              SWS,DECALFM3 ARG 1         2             ARG 1          C
+ 2177              TS           C1T7          CACN          C,+3           C    SUPPRESS AT MOST 7 LEFT ZEROS.
+ 2179   ARG 1      RESERVE      1
+ 2181              SWS, C1T7    CACN          A,1,L         CACN           C
+ 2183              NA, CACN     ARG 1         ZERO          C,-1           C
+ 2184              SS           BLANKS        CACN          ARG 1          S    BLANK OUT LEADING ZEROS, EXIT.
 
 # Page 314
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  50        PAGE  50
 
+P2398   FINALIZING ACTIONS FOR PASS 2.
+
+ 2399   END PASS 2 SSL, ONE     SWITCH        44            RELS OR RW     C    RELEASE OR REWIND TAPE 2, AS REQUIRED.
+ 23993             RW,2         -             -             -
+ 23995             LA           L LINE        Z,X0          C,+3
+ 2400              TN           LINE STOR     16            OLD LINE            ENSURE THAT STORED LINE IS IN INTERPASS.
+ 2402              TX           Z,X0          -             L OLD LINE
+
+ 2406              NA           NEW BUF Q     UNSET NEW     C,+2                BRANCH IF LAST WD RECORD HAS BEEN SENT.
+ 2408              TS           -             -             SEND WBUF      C    FINISH AND WRITE LAST WORD RECORD.
+
+ 2410              TS           Z,R0          N WD RECS     PHI TAPE
+ 2411              WF,4         -             -             DISASTER
+ 2412              TS, BIT 33   ZERO          N WD RECS     PHI TAPE            SAVE WORD RECORD COUNT IN UNSIGNED FORM.
+ 2414   6 CAC 3    RW,4         -             0             6
+
+ 2415              TS           Z,SC,1        -             MON WAKE       C    WAKE RD3 AND RD1 JUST IN CASE.
+ 2419              TS           -             -             MON SLEEP      C    SLEEP UNTIL PARAPROGRAMS DIE.
+ 2421   PARA WAIT  NA           END PARAS     ZERO          C,-1
+ 2426              S, PHI LOAD  PASS 3        1             BASE ADDR
+
+
+
+R2427   ITEMS TO BE FILLED IN BY PARTICULAR PASS 2.
+
+ 2428   PATCHES    RESERVE      10
+
+ 24289  SIZ PASS 2 EQUALS       PATCHES - PROG NAME + 10
+
+ 2429   M PROC OP  EQUALS       PATCHES +10
+ 2430   M PROC 1P  EQUALS       M PROC OP
+ 2431   M PLOC IS  EQUALS       M PROC OP
+ 2432   D1 PARAMS  EQUALS       PATCHES +11
+ 2433   K1 MAXNUM  EQUALS       PATCHES +14
+ 2434   D2 PARAMS  EQUALS       PATCHES +15
+ 2435   M PROC 2P  EQUALS       PATCHES +18
+ 2436   M PLOC EB  EQUALS       M PROC 2P
+ 2438   K2 MAXNUM  EQUALS       PATCHES +19
+ 2439   MAXLOC     EQUALS       PATCHES +20
+ 24391  CON MASK   EQUALS       PATCHES +21
+ 2440   PRET FLAG  EQUALS       PATCHES +23
+ 2441   FLAG MASK  EQUALS       PATCHES +24
+ 2442   CONS FLAG  EQUALS       PATCHES +25
+ 24421  M MXR      EQUALS       PATCHES +26
+ 24422  MISC FLAG  EQUALS       PATCHES +27
 
 # Page 315
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  51        PAGE  51
 
+P2450              ON THESE PAGES IS A PRELUDE TO PASS 2 INITIALIZATION, WHICH, AS IT REALLY PROCESSES THE CONSEQUENCES
+R2452   OF PASS 1, IS CALLED PASS 1.5.  IT BEGINS BY DEFINING ALL THE LEFTOVER SYMBOLS SPECIFIED IN PASS 1, IN THE ORDER
+R2453   OF THEIR INTRODUCTION.  IT THEN EXAMINES ALL THE NEARLY DEFINED SYMBOLS AND FOLLOWS THREADS TO DEFINERS AND DE-
+R24532  FINEES TO DEFINE THEM.  IT PERFORMS NO OTHER ACTION FOR REPRINT.  FOR A REJECTED (I.E. BAD-MERGE) ASSEMBLY, IT
+R2454   SETS "▪REJECT " NEXT TO THE PAGE NUMBER IN THE PAGE HEAD AND SUBTRACTS ONE FROM THE REVISION NUMBER (REVISION)
+R2456   OR DEMANDS A SILENT DELETION OF AN ABORTED VERSION.  FOR A NON-REJECTED ASSEMBLY, IT CLEARS OUT THE LIST OF PRO-
+R2458   GRAMS AND SUBROUTINES TO BE DELETED AND MAKES OR REMAKES A LIST OF THREADS TO SUBROUTINES DIRECTLY CALLED BY THE
+R2460   PROGRAM OR SUBROUTINE BEING ASSEMBLED.
+
+
+
+ 2463              SETLOC,7C    SIZ PASS 2    B1                                PASS 1.5 IS OVERLAID BY PARTICULAR PAS2.
+
+
+
+ 2465              MASKGRP,7    S,7           F,7
+
+
+
+R2466   FIELD MASKS FOR PASS 1.5.
+
+ 24668  B,BIT7H    OCT          004
+ 2467   B,BIT9H    OCT          001
+ 2468   B,BIT11H   OCT          0002
+ 2469   B,BIT12H   OCT          0001
+
+ 2470   B,BIT13H   OCT          00004
+ 2471   B,BIT25H   OCT          -4000 0000
+ 2472   B,BIT32H   OCT          -20 0000
+ 2473   B,BIT36H   OCT          -1 0000
+
+ 2474   B,BIT37H   OCT          -4000
+ 2475   B,B10B12H  OCT          0005
+ 24755  B,B12B13H  OCT          00014
+ 2476   B,B122436H OCT          0001 0001 0001
+
+ 2477   B,B13B36H  OCT          0000 4000 0001
+ 24779  B,D4H      DEC          000 G
+ 2478   B,D4T6H    DEC          000 GGG
+ 2479   B,CHAR5H   OCT          -7700 0000
+
+ 2480   B,CAC3H    OCT          -17 7777
+ 24801  B,LSTYPEH  OCT          -7000 0000
+ 24802  B,AVMSKH   OCT          0
+ 248022 B,C7T8H    OCT          -7777
+
+ 24803  B,FIXMAGH  DEC          0GG GGG GGG GGG
+ 24804  B,CAC1H    DEC          GGGG
 
 # Page 316
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  52        PAGE  52
 
+P2481   FURTHER SHIFT MASKS FOR PASS 1.5.
+
+ 2482   S,BIT012H  OCT          7777
+ 2483   S,SPECMAGH OCT          -77777
+ 24831  S,B26T30H  OCT          -3700 0000
+ 248311 S,B27T30H  OCT          -1700 0000
+ 24832  S,B38T48H  OCT          -3777
+
+ 24834  S,B1SPCMAG OCT          4000 0000 0007 7777
+ 24835  S,CHAR8H   OCT          -77
+ 24836  S,LEFTMASK OCT          0
+ 2485   S,CAC2H    OCT          0000 0377 7760 0000
+
+ 24854  S,ACH2     OCT          0017
+ 24855  S,ACH3     OCT          000017
+ 2486   S,THRED10H OCT          -3776
+ 2487   S,OTHRD11H OCT          3777
+ 2488   S,ATHRD11H OCT          0000 3777
+ 24889  S,BTHRD10H OCT          -3776 0000
+ 2489   S,BTHRD11H OCT          -3777 0000
+ 2490   S,THRED11H OCT          -3777
+
+ 2491   S,ONEH     OCT          -1
+ 2492   S,TWOH     OCT          -2
+ 2493   S,FOURH    OCT          -4
+ 2494   S,ONESH    OCT          7777 7777 7777 7777
+
+
+
+R2495   CONSTANTS NEEDED ONLY DURING PASS 1.5 OR INITIALIZATION OF PASS 2.
+
+ 24958  P2 SIDE GP ALF          YULSIDE2
+ 2496   W REJECT   ALF          ▪REJECT
+ 2497  *DELE CARD  ALF,4                 DELETE REVISION 000 OF
+ 2498   W PROGRAM  ALF,2             PROGRAM
+ 2499   W SUBROTI  ALF,2             SUBROUTINE
+ 2500   W BY       ALF             BY
+
+ 25006  BIT 6H     OCT          01
+ 2501   BIT 10H    OCT          0004
+ 2502   BIT 24H    OCT          0000 0001
+ 25021  BIT 43H    OCT          -40
+ 2503   B13B25     OCT          0000 4000 4
+ 2504   B132537    OCT          -4000 4000 4000
+ 2505   B24 B36    OCT          -1 0001 0000
+ 2506   12(12)48   OCT          0001 0001 0001 0001
 
 # Page 317
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  53        PAGE  53
 
+P250605 PASS 1.5 CONSTANTS CONCLUDED.
+
+
+
+ 25061  3D4H       DEC          0003
+ 25062  4D4H       DEC          0004
+ 250622 5D4H       DEC          0005
+ 25063  8D4H       DEC          0008
+ 25064  CD4H       DEC          000C
+ 25069  ACH4       OCT          0000 0017
+ 2507   SIXH       OCT          -6
+ 2508   SEVEN H    OCT          -7
+ 25081  C259       FXBIN        -259
+ 25082  C1T3       OCT          777777
+ 2509   CAC12H     OCT          7777 7777 7760
+ 2510   CAC3M1     OCT          -17 7776
+ 25102  CHECKED    DEC          -1GG GGGG GGGG
+
+ 25107  L STOPPER  SPEC,B3                                  DAMN ZERO
+ 25109  L UNAVS    CAC                        END CAT Q     END WD Q
+ 2511   P1▪5 MXR   MASKBASE     S,7           F,7
+ 25111  L SYMTH 14 SPEC,B5                                  848
+ 2513   DIRWORD8   SPEC,B7                                  8
+ 25132  L B2 START SPEC,B7                                  707
+ 2514   MON WAA    SPEC,B7                                  600
+
+
+
+R2515   SYMBOL SELECTION LOGIC FOR LEFTOVER SYMBOL RESOLUTION ON NEXT PAGE.
+
+ 25155  PASS 1▪5   TX           L CUS LIST    -             Z,X1                LOAD ADDRESS OF CUSS LIST AND MASKS.
+ 2516              TX           L AV TABLE    -             Z,X6
+ 2517              S, ETS       6,1           ZX +6         C,+1                SEE WHETHER NEXT SYMBOL IS LEFTOVER.
+ 2519              LA           ONES          N,X6          RESOLVEM -1         BRANCH IF NO MORE SYMBOLS IN TABLE.
+ 2521              LA           6,2           CAC12         FIX LEFTO           BRANCH IF SYMBOL, NOT MULT. DEF. FLAG.
+
+ 2523              EBA          Z,X6,2        ZERO          COMMON +7
+ 2524              S, ETS       6,0           ZX +5         NX6 TO C6
+ 25252             SM           CAC12         5,1           N,X6                LET MULT DEF. FLAG POINT TO FIRST DEF.
+ 2526              WA           NEXT LSYM     EIGHT         NEXT LSYM           MODIFY PROCEDURE FOR MULTIPE DEFS.
+ 2528              S, ETS       COMMON +6     ZX +6         FIX LEFTO           DO LAST DEFINITION FIRST.
+
+ 2530              NA, CAC3H    6,1           COMMON +6     PASS 1▪5 +2         LOOP UNTIL POINTING TO LAST DEF. AGAIN.
+ 2532              WD           NEXT LSYM     EIGHT         NEXT LSYM
+ 2533              S, ETS       COMMON +7     ZX +6         NEXT LSYM
+
+ 25334  NX6 TO C6  TS           N,X6          COMMON +6     PASS 1▪5 +7         POINT TO LAST DEFINITION OF SYMBOL.
 
 # Page 318
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  54        PAGE  54
