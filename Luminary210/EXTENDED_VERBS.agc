@@ -19,7 +19,8 @@
 ##              2016-12-07 HG   Fix P00 -> POO
 ##                              Change POO -> P00 in some comments
 ##              2016-12-11 HG   Fix operator CS FLAGWRD5 -> CA FLAGWRD5
-##                                  operand  AGSBUFF -> AGSK   
+##                                  operand  AGSBUFF -> AGSK  
+##              2016-12-12 HG   comment out previous [WORKAROUND] with SBANK= 
 
 ## Page 275
                 BANK    7
@@ -546,7 +547,7 @@ CKMODCAD        CA      MODECADR
 #              5. RELEASE EXT VERB DISPLAY SYSTEM
 
 ## [WORKAROUND] Moved from the top of VERB 50 a few lines above here --- RSB 2004.
-                SBANK=  PINSUPER        # FOR LOADLV1 AND SHOWSUM CADR'S
+#                SBANK=  PINSUPER        # FOR LOADLV1 AND SHOWSUM CADR'S
 ## [WORKAROUND]
 
 ALINTIME        TC      TESTXACT

@@ -16,6 +16,7 @@
 ##		2016-12-08 JS   Compared to Luminary210 images. Updated where needed.
 ##              2016-12-10 HG   Add missing operator ZL (label NVDSP)
 ##              2016-12-11 HG   fix operand NVDISP -> NVDSP
+##              2016-12-12 HG   add [WORKAROUND] with SBANK=
 
 ## Page 1338
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -861,6 +862,9 @@ GODSPRS1	INHINT			# IMMEDIATE RETURN IS CALL CADR +4
 		TCF	VACDSP		# YES, MAKE DSPLAY JOB A VAC
 		CA	NEWPRIO		# NO, MAKE DSPLAY JOB A NOVAC
 		TC	NOVAC
+## [WORKAROUND]      not in original                
+                SBANK=  LOWSUPER        # to adjust subsequent 2CADR
+## [WORKAROUND]      not in original                
 		EBANK=	WHOCARES
 		2CADR	MAKEPLAY
 
