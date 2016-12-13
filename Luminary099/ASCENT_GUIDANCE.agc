@@ -12,6 +12,7 @@
 ##		2009-06-05 RSB	Fixed a couple of typos.
 ##		2009-06-07 RSB	Corrected a typo.
 ##		2010-12-31 JL	Fixed page number comment.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -562,7 +563,7 @@ TERMASC		TC	PHASCHNG
 		CADR	RESTORDB
 		TC	DOWNFLAG	# DISALLOW ABORTS AT THIS TIME.
 		ADRES	LETABORT
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 
 V16N85C		VN	1685
 

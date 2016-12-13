@@ -11,6 +11,7 @@
 ## Mod history:	2009-05-17 RSB	Adapted from the corresponding 
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -52,7 +53,7 @@
 #
 #	B.	TERMINATE -- IF IN P00 GO TO STEP 5A.  OTHERWISE CHECK IF R61 IS
 #		THE CALLING PROGRAM.  IF IN R61 AN EXIT IS MADE TO GOTOV56.  IF
-#		NOT IN R61 AN EXIT IS DONE VIA GOTOP00H.
+#		NOT IN R61 AN EXIT IS DONE VIA GOTOPOOH.
 #
 #	C.	PROCEED -- CONTINUE WITH PROGRAM AT STEP 6.
 #
@@ -212,7 +213,7 @@ R61TEST		CA	MODREG		# IF WE ARE IN P00 IT MUST BE V49 OR V89
 		CA	FLAGWRD4	# ARE WE IN R61 (P20 OR P25)
 		MASK	PDSPFBIT
 		EXTEND
-		BZF	GOTOP00H	# NO
+		BZF	GOTOPOOH	# NO
 		TC	GOTOV56		# YES
 		
 BIT14+7		OCT	20100

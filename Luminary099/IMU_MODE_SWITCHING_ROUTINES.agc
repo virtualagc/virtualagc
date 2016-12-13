@@ -13,6 +13,7 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2011-05-08 JL	Removed workaround. Flagged SBANK= 
 ##				workaround for future removal.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -895,7 +896,7 @@ KALEBCON	ECADR	BCDU
 #	AT L+2 OF CALLING SEQUENCE
 #
 # ALARM OR ABORT EXIT MODES
-#	GOTOP00H, WITH ALARM
+#	GOTOPOOH, WITH ALARM
 #
 # ERASABLE INITIALIZATION REQUIRED
 #	NONE
@@ -921,7 +922,7 @@ R02BOTH		CAF	REFSMBIT
 		AD	OCT220		# SEND REFSMM ALARM
 		TC	VARALARM
 
-		TC	GOTOP00H
+		TC	GOTOPOOH
 
 R02ZERO		TC	UPFLAG
 ## Page 1333
@@ -1069,5 +1070,5 @@ POSTCOM		EXTEND			# C(MPAC,+1) IS MAGNITUDE OF DELTA SCALER.
 		TC	DOWNFLAG	# CLEAR NODOFLAG
 		ADRES	NODOFLAG
 
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		

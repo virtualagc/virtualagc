@@ -11,6 +11,7 @@
 ## Mod history:	2009-05-19 RSB	Adapted from the corresponding 
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -147,7 +148,7 @@ INTOTHIS	STCALL	TDEC1
 OUT		EXIT
 ENDP76		CAF	ZERO
 		TS	MARKCTR		# CLEAR RR TRACKING MARK COUNTER
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 
 V06N84		NV	0684
 		NV	0633

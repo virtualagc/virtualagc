@@ -9,6 +9,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	838-842
 ## Mod history:	2009-05-23 HG	Transcribed from page images.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -63,7 +64,7 @@ P12LM		TC	PHASCHNG
 		CAF	V06N33A
 		TC	BANKCALL	# FLASH TIG
 		CADR	GOFLASH
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 		TCF	+2		# PROCEED
 		TCF	-5		# ENTER
 
@@ -112,7 +113,7 @@ P12LMB		DLOAD
 NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE, AND APOLUNE VALUES.
 		TC	BANKCALL
 		CADR	GOFLASH
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 		TCF	+2		# PROCEED
 		TCF	NEWLOAD		# ENTER NEW DATA.
 

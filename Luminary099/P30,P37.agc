@@ -13,6 +13,7 @@
 ##				images from Luminary 1A.
 ##		2009-06-05 RSB	Removed 4 lines of code that shouldn't
 ##				have survived from Luminary 131.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -42,10 +43,10 @@
 #
 # CALLING SEQUENCE VIA JOB FROM V37
 #
-# EXIT VIA V37 CALL OR TO GOTOP00H (V34E)
+# EXIT VIA V37 CALL OR TO GOTOPOOH (V34E)
 #
 # SUBROUTINE CALLS --	FLAGUP, PHASCHNG, BANKCALL, ENDOFJOB, GOFLASH, GOFLASHR
-#			GOPERF3R, INTPRET, BLANKET, GOTOP00H, R02BOTH, S30.1,
+#			GOPERF3R, INTPRET, BLANKET, GOTOPOOH, R02BOTH, S30.1,
 #			TIG/N35, MIDGIM, DISPMGA
 #
 # ERASABLE INITIALIZATION -- STATE VECTOR

@@ -16,6 +16,7 @@
 ##		2009-06-07 RSB	Fixed a typo.
 ##		2011-01-06 JL	Fixed pseudo-labels which were incorrectly real labels.
 ##		2011-05-07 JL	Removed workaround.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -867,7 +868,7 @@ P64DISPS	CA	TREDES		# HAS TREDES REACHED ZERO?
 		CAF	V06N64		# OTHERWISE USE FLASHING DISPLAY
 		TC	BANKCALL
 		CADR	REFLASHR
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TCF	P64CEED		# PROCEED	PERMIT REDESIGNATIONS
 		TCF	P64DISPS	# RECYCLE
 ## Page 815

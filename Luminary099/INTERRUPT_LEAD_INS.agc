@@ -9,6 +9,8 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	0153-0154
 ## Mod history:	2009-05-14 OH	Transcribed from page images.
+##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -40,7 +42,7 @@
 		DCA	T6ADR
 		DTCB
 		
-		DXCH	ARUPT		# T5RUPT -- AUTOPILOT
+		DXCH	ARUPT		# T5RUPT - AUTOPILOT
 		EXTEND
 		DCA	T5ADR
 		DTCB

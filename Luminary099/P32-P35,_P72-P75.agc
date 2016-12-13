@@ -11,6 +11,7 @@
 ## Mod history:	2009-05-18 RSB	Adapted from the Luminary 131 file of the
 ##				same name, as corrected from Luminary 099
 ## 				page images.
+##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -181,7 +182,7 @@
 #	VARALARM
 #	BANKCALL
 #	GOFLASH
-#	GOTOP00H
+#	GOTOPOOH
 ## Page 621
 #	VNP00H
 #	GOFLASHR
@@ -219,7 +220,7 @@ ALMXIT		LXC,1
 		CAF	V05N09
 		TC	BANKCALL
 		CADR	GOFLASH
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		TC	-4
 P32/P72A	TC	P20FLGON
 		CAF	P30ZERO
@@ -258,7 +259,7 @@ VN0655		EXIT
 		CAF	V06N55		# NN, ELEV(RGLOS)
 		TC	BANKCALL
 		CADR	GOFLASH
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		TC	+2
 		TC	-5
 		CAF	V06N37		# TTPI
@@ -474,7 +475,7 @@ P32/P72F	STORE	T2TOT3
 #	ALARM
 #	BANKCALL
 #	GOFLASH
-#	GOTOP00H
+#	GOTOPOOH
 #	S32/33.1
 ## Page 627
 #	VN1645
@@ -525,7 +526,7 @@ P33/P73B	CALL
 		CAF	V05N09
 		TC	BANKCALL
 		CADR	GOFLASH
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		TC	+2
 ## Page 628
 		TC	P33/P73A

@@ -10,6 +10,8 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	028-037
 ## Mod history:	2009-05-16	JVL	Transcribed from page images.
+##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -26,9 +28,7 @@
 ##    16:27 JULY 14, 1969
 
 ## Page 28
-# TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-
-# 		COUNT	BANKSUM
+ 		COUNT	BANKSUM
 
 # MODULE 1 CONTAINS BANKS 0 THROUGH 5
 
@@ -328,7 +328,7 @@ LOUNITX		EQUALS	XUNIT			# 2DEC .5
 LOUNITY		EQUALS	YUNIT			# 2DEC 0
 LOUNITZ		EQUALS	ZUNIT			# 2DEC 0
 
-DELRSPL		EQUALS	SPLRET			# COL PGM, ALSO CALLED BY R30 IN LUMINARY.
+DELRSPL		EQUALS	SPLRET			# COL PGM, ALSO CALLED BY R30 IN LUMINARY
 
 # ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETERMINING INTEGRATION AREA ENTRIES.
 
