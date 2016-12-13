@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-09 HG   Transcribed
+##              2016-12-12 MAS  Pushed in a +1 relative label.
 
 ## Page 905
 # PROGRAM NAME:   FINDCDUW
@@ -700,7 +701,7 @@ ONESTO2S        CCS             A
 NOATTCNT        TC              ALARM
                 OCT             00402                   # NO ATTITUDE CONTROL
 
-+2              INHINT                                  # COME HERE FOR NOATTCNT WITHOUT ALARM
+ +2             INHINT                                  # COME HERE FOR NOATTCNT WITHOUT ALARM
                 TC              IBNKCALL                # RELINT AT TC INTPRET AFTER TCQCDUW
                 FCADR           STOPRATE
                 TCF             TCQCDUW                 # RETURN TO USER SKIPPING AUTOPILOT CMDS

@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-11 HG   Transcribed
+##              2016-12-12 MAS  Pushed in some relative labels.
 
 ## Page 1419
                 BANK            16
@@ -249,7 +250,7 @@ LMONLY          EXTEND                                  #    UNDOCKED
                 DCA             LMOMEGAN
                 DXCH            DAPTREG4
                 CA              LMTRAP
-+5              TS              DAPTREG6
+ +5             TS              DAPTREG6
                 CCS             TRAPEDP
                 TCF             +2
                 TCF             SMALPDIF
@@ -982,7 +983,7 @@ SELECTP         CA              SIX
                 TCF             JETSOFF                 # *****TCF   ALARMJET *********************
 SELECTYZ        TS              NUMBERT
                 TCF             SELECTP         +1
--1              TCF             ABORTYZ         +2
+ -1             TCF             ABORTYZ         +2
 JETSALL         OCT             00252
                 OCT             00125                   #   +P
                 OCT             00140                   #   -Y
