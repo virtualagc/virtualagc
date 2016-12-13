@@ -15,9 +15,6 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2017-11-20 HG   Transcribed
 
-## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
-
-
 ## Page 163
                 SETLOC          4000
 

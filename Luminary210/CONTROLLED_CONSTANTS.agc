@@ -18,6 +18,7 @@
 ##              2016-12-11 HG   fix value for STAR 22 Z
 ##                                            BSUBO
 ##              2016-12-12 HG   fix value for HBEAMNB
+##              2016-12-12 MAS  Split up some Exx Bxx scalers.
 
 
 ## Page 39
@@ -90,15 +91,15 @@ AT/RCS          2DEC            .0000785        B+10    # 4 JETS IN A DRY LEM
 
 # *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST NOT BE CHANGED *******
 
-APSVEX          DEC             -3030           E-2 B-5 # 9942 FT/SEC IN M/CS.
-DPSVEX          DEC*            -2.95588868     E+1B-05*#         VE (DPS) +2.95588868E+ 3
+APSVEX          DEC             -3030           E-2 B-5   # 9942 FT/SEC IN M/CS.
+DPSVEX          DEC*            -2.95588868     E+1 B-05* #         VE (DPS) +2.95588868E+ 3
 # ************************************************************************
 
                 SETLOC          F2DPS*31
                 BANK
                 COUNT*          $$/F2DPS
 
-TRIMACCL        2DEC*           +3.50132708     E-5B+08*#         A (T)    +3.50132708E- 1
+TRIMACCL        2DEC*           +3.50132708     E-5 B+08* #         A (T)    +3.50132708E- 1
 
 ## Page 41
 # THROTTLING AND THRUST DETECTION PARAMETERS
@@ -123,16 +124,16 @@ THRESH2         DEC             308
                 BANK
                 COUNT*          $$/THROT
 
-FMAXODD         DEC             +3841                   # FSAT          +4.81454413 E+ 4
-FMAXPOS         DEC             +3467                   # FMAX          +4.34546769 E+ 4
-THROTLAG        DEC             +8                      # TAU (TH)       +0.08 SECONDS
-SCALEFAC        2DEC*           +7.97959872     E+2B-16*# BITPERF       +7.97959872 E- 2
+FMAXODD         DEC             +3841                     # FSAT          +4.81454413 E+ 4
+FMAXPOS         DEC             +3467                     # FMAX          +4.34546769 E+ 4
+THROTLAG        DEC             +8                        # TAU (TH)       +0.08 SECONDS
+SCALEFAC        2DEC*           +7.97959872     E+2 B-16* # BITPERF       +7.97959872 E- 2
 
                 SETLOC          F2DPS*32
                 BANK
                 COUNT*          $$/F2DPS
 
-DPSTHRSH        DEC             36                      # (THRESH1 + THRESH3 FOR P63)
+DPSTHRSH        DEC             36                        # (THRESH1 + THRESH3 FOR P63)
 
 ## Page 42
 # LM HARDWARE-RELATED PARAMETERS
