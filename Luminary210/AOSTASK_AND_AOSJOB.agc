@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-10 HG   Transcribed
+##              2016-12-12 HG   Bumped a -1 into column 2 to fix a yaYUL warning.
 
 ## Page 1483
 # PROGRAM NAME: 1/ACCS
@@ -574,7 +575,7 @@ EPSILON         EQUALS          MPAC            +1
 
                 COUNT*          $$/DAPAO
 
--1              TS              INGTS                   # ZERO INGTS IN ASCENT
+ -1             TS              INGTS                   # ZERO INGTS IN ASCENT
 1/ACCONT        CA              DB                      # INITIALIZE DBVAL1,2,3
                 EXTEND
                 MP              BIT13
