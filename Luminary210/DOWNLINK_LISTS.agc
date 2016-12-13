@@ -17,6 +17,7 @@
 ##              2016-12-11 HG   fix operand LMORBM05 -> LMCSTA05
 ##                                          LMLSAL09 -> LMLSAL08
 ##                                          LMLSAL05 -> LMSAL05
+##              2016-12-12 MAS  Fixed a couple more typos.
 ## Page 204
                 BANK            22
                 SETLOC          DOWNTELM
@@ -157,7 +158,7 @@ DL1O3           =               NEGTORKU
 DL104           =               POSTORKV
 DL105           =               NEGTORKV
 DL106           =               DUMLOOPS
-DL107           =               DNRROOT
+DL107           =               DNRRDOT
 DL108           =               DNLRVELY
 
 ## Page 207
@@ -451,7 +452,7 @@ LMDSAS09        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 #                                                         LOCATION          LIST NAME
 
 DL401           =               TIME1                   # DESC/ASC
-DL402           =               NEFTORKU
+DL402           =               NEGTORKU
 DL403           =               POSTORKV
 DL404           =               NEGTORKV
 DL405           =               LASTXCMD

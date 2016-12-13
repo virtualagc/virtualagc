@@ -22,6 +22,7 @@
 ##              2016-12-07 HG   Fix P00 -> POO
 ##                              Change POO -> P00 in some comments
 ##              2016-12-11 HG   fix operator BZF -> BZMF
+##              2016-12-12 MAS  Corrected a TCF that should have been a BZF.
 
 ## Page 507
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -2910,7 +2911,7 @@ SCALADJ		CA	RADMODES	# TEST SCALE BIT
 		
 		MASK 	BIT3		# HI SCALE - TEST FOR LR
 		EXTEND			# IF BIT3 = 0,THEN IT IS LR
-		TCF	LRSCK
+		BZF	LRSCK
 		
 		DXCH	ITEMP3		# RESCALE RR DATA TO LO SCALING
 		DDOUBL			# MULTIPLY BY 8.
