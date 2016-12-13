@@ -11,8 +11,8 @@ endif
 default: boxAGC
 
 boxAGC: boxAGC.c imageUtilities.c imageUtilities.h
-	gcc -o $@ $^ -lm
+	${cc} -o $@ $^ -lm
 
 clean:
-	${cc} -f boxAGC *.o *.exe *-macosx 
+	-rm boxAGC *.o *.exe *-macosx 
 
