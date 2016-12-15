@@ -15,17 +15,18 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
+##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
 
 ## Page 373
-# NAME --	IMU PERFORMANCE TESTS 2
+# NAME -	IMU PERFORMANCE TESTS 2
 #
-# DATE --	MARCH 20, 1967
+# DATE -	MARCH 20, 1967
 #
-# BY --		SYSTEM TEST GROUP 864-6900 EXT. 1274
+# BY -		SYSTEM TEST GROUP 864-6900 EXT. 1274
 #
-# MODNO. --	ZERO
+# MODNO. -	ZERO
 #
 # FUNCTIONAL DESCRIPTION
 #
@@ -132,7 +133,7 @@ PIPACHK		INDEX	NDXCTR		# PIPA TEST
 		TC	+1
 		TC	EARTHR*
 		CA	DEC17		# ALLOW PIP COUNTER TO OVERFLOW 17 TIMES
-		TS	DATAPL	+4	# IN THE ALLOTTED TIME INTERVAL
+		TS	DATAPL	+4	# IN THE ALLOTED TIME INTERVAL
 		CA	DEC58
 		TS	LENGTHOT
 		CA	ONE
@@ -209,8 +210,8 @@ VERTDRFT	CA	3990DEC		# ABOUT 1 HOUR VERTICAL DRIFT TEST
 		CS	SOUTHDR -2
 		TS	DRIFTT
 		CCS	PIPINDEX	# OFFSET PLATFORM TO MISS PIP DEAD-ZONES
-		TCF	PON4		# Z-UP IN POS 4
-PON2		CS	BIT5		# X-UP
+		TCF	PON4		# Z UP IN POS 4
+PON2		CS	BIT5		# X UP
 		ADS	ERCOMP 	+2
 		CA	BIT5
 		ADS	ERCOMP 	+4

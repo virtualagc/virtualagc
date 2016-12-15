@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
+##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
 

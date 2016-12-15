@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
+##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
 
@@ -28,7 +29,7 @@
 # RADAR SAMPLING LOOP.
 
 		COUNT*	$$/RLEAD
-RADSAMP		CCS	RSAMPDT		# TIMES NORMAL ONCE PER SECOND SAMLING
+RADSAMP		CCS	RSAMPDT		# TIMES NORMAL ONCE-PER-SECOND SAMPLING.
 		TCF	+2
 		TCF	TASKOVER	# +0 INSERTED MANUALLY TERMINATES TEST.
 		
@@ -75,12 +76,12 @@ DORSAMP2	INHINT
 		CA	RTSTLOC
 		AD	TWO		# STORAGE IS DP
 		TS	RTSTLOC
-		TCF	ENDOFJOB	# CONTINUOUS SAMPLING AND 2N TRIES -- GONE.
+		TCF	ENDOFJOB	# CONTINUOUS SAMPLING AND 2N TRIES - GONE.
 		
 # VARIABLE RADAR DATA CALLER FOR ONE MEASUREMENT ONLY.
 
 VARADAR		CAF	ONE		# WILL BE SENT TO RADAR ROUTINE IN A BY
-		TS	BUF2		# SWCALL
+		TS	BUF2		# SWCALL.
 		INDEX	RTSTDEX
 		CAF	RDRLOCS
 		TCF	SWCALL		# NOT TOUCHING Q.

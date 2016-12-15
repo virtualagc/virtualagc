@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
+##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
 
@@ -59,15 +60,16 @@ INCRDCDU	TS	SPNDX
 		MSU	NCDU
 		EXTEND
 		
-		# The following 2 lines seem to have no purpose at all.
-		# I am removing them because they only serve to confuse
-		# the assembler by getting in between EXTEND and MP.
-		#					--- RSB 2009.
-		#SETLOC	KALCMON1
-		#BANK
+## The following 2 lines seem to have no purpose at all.
+## I am removing them because they only serve to confuse
+## the assembler by getting in between EXTEND and MP.<br>&mdash;RSB 2009
+## <pre>
+##		SETLOC	KALCMON1
+##		BANK
+## </pre>		
 		
 		MP	DT/TAU
-		CCS	A		# CONVERT TO 2'S COMPLEMENT
+		CCS	A		# CONVERT TO 2S COMPLEMENT
 		AD	ONE
 		TCF	+2
 		COM
@@ -85,7 +87,7 @@ INCRDCDU	TS	SPNDX
 		
 		RELINT
 		
-# COMPARE PRESENT TIME WTIH TIME TO TERMINATE MANEUVER
+# COMPARE PRESENT TIME WITH TIME TO TERMINATE MANEUVER
 
 TMANUCHK	TC	TIMECHK
 		TCF	CONTMANU
@@ -204,7 +206,7 @@ MANUSTOP	CAF	ZERO		# ZERO MANEUVER RATES
 ENDROLL		CA	CPHI		# NO FINAL YAW
 		TS	CDUXD
 		CAF	ZERO
-		TS	OMEGAPD		# I.E., MANEUVER DID NOT GO THRU
+		TS	OMEGAPD		# I.E. MANEUVER DID NOT GO THRU
 		TS	DELDCDU		# GIMBAL LOCK ORIGINALLY
 		TS	DELPEROR
 GOODMANU	CA	ATTPRIO		# RESTORE USERS PRIO
