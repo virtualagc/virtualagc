@@ -12,6 +12,8 @@
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
+##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -29,13 +31,13 @@
 ##	16:27 JULY 14, 1969 
 
 ## Page 373
-# NAME --	IMU PERFORMANCE TESTS 2
+# NAME -	IMU PERFORMANCE TESTS 2
 #
-# DATE --	MARCH 20, 1967
+# DATE -	MARCH 20, 1967
 #
-# BY --		SYSTEM TEST GROUP 864-6900 EXT. 1274
+# BY -		SYSTEM TEST GROUP 864-6900 EXT. 1274
 #
-# MODNO. --	ZERO
+# MODNO. -	ZERO
 #
 # FUNCTIONAL DESCRIPTION
 #
@@ -142,7 +144,7 @@ PIPACHK		INDEX	NDXCTR		# PIPA TEST
 		TC	+1
 		TC	EARTHR*
 		CA	DEC17		# ALLOW PIP COUNTER TO OVERFLOW 17 TIMES
-		TS	DATAPL	+4	# IN THE ALLOTTED TIME INTERVAL
+		TS	DATAPL	+4	# IN THE ALLOTED TIME INTERVAL
 		CA	DEC58
 		TS	LENGTHOT
 		CA	ONE
@@ -219,8 +221,8 @@ VERTDRFT	CA	3990DEC		# ABOUT 1 HOUR VERTICAL DRIFT TEST
 		CS	SOUTHDR -2
 		TS	DRIFTT
 		CCS	PIPINDEX	# OFFSET PLATFORM TO MISS PIP DEAD-ZONES
-		TCF	PON4		# Z-UP IN POS 4
-PON2		CS	BIT5		# X-UP
+		TCF	PON4		# Z UP IN POS 4
+PON2		CS	BIT5		# X UP
 		ADS	ERCOMP 	+2
 		CA	BIT5
 		ADS	ERCOMP 	+4
