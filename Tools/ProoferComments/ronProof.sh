@@ -5,8 +5,13 @@
 
 AGC=$1
 SCALE=$2
-page=$3
-PSM=$4
+PSM=$3
 
-num=`printf "%04d" $page`
-./ProoferComments.py ~/Desktop/ocr/prepared$AGC/$num.png proofing$AGC/$num.png $page ../../$AGC/MAIN.agc $SCALE 1 $PSM
+while [[ "$4" != "" ]]
+do
+	page=$4
+	num=`printf "%04d" $page`
+	echo Page $num
+	./ProoferComments.py ~/Desktop/ocr/prepared$AGC/$num.png proofing$AGC/$num.png $page ../../$AGC/MAIN.agc $SCALE 1 $PSM
+	shift
+done
