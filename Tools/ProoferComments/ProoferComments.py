@@ -260,10 +260,10 @@ for box in file:
 	# Here's something to help hyphens to be recognized:
 	if boxChar == '-' and numCharsInRow > 0:
 		#print boxWidth/scale, boxHeight/scale, numCharsInRow, sumBottomsInRow, lastBoxChar
-		if boxWidth > 14 * scale and boxWidth < 19 * scale and boxHeight > 6 * scale and boxHeight < 9 * scale:
+		if boxWidth > 14 * scale and boxWidth < 19 * scale and boxHeight > 4 * scale and boxHeight < 9 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
 			#print midPoint - sumBottomsInRow/numCharsInRow
-			if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 2 * scale:
+			if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 3 * scale:
 				#print "Adding"
 		 		addIt = 1
 	lastBoxChar = boxChar
@@ -329,6 +329,8 @@ for box in file:
 				      'boxHeight':boxHeight})
 file.close()
 
+
+
 # At this point, one thing we have, for each row of characters, is the sum of all the box widths
 # for "wide" characters (e.g., not I or 1), and the number of boxes used to compute the sum.
 # These are in the sumBoxWidthsByLine[] and numBoxesByLine[] arrays, respectively.  If we divide
@@ -374,6 +376,7 @@ currentPage = -1
 blankLinePattern = re.compile(r"\A\s*\Z")
 allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
 allUnderlinesPattern = re.compile(r"\A\s*[_][_\s]*\Z")
+allDotsPattern = re.compile(r"^\s*[.][.\s]*$")
 def readFile( filename ):
 	"Reads an AGC source file, recursively if containing $ operators."
 	global lines, currentPage, pageNumber, blankLinePattern, allDashesPattern, allUnderlinesPattern, nodashes
@@ -404,6 +407,8 @@ def readFile( filename ):
 		if nodashes >= 1 and re.match(allDashesPattern, comment):
 			continue
 		if nodashes >= 1 and re.match(allUnderlinesPattern, comment):
+			continue
+		if nodashes >= 1 and re.match(allDotsPattern, comment):
 			continue
 		if nodashes >= 2:
 			comment = comment.replace("-", "")
