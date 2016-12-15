@@ -46,6 +46,7 @@ group.add_argument('--luminary210A', help="Perform LUMINARY 210 processing, but 
 group.add_argument('--luminary69', help="Perform LUMINARY 69 processing", action="store_true")
 group.add_argument('--comanche55', help="Perform COMANCHE 55 processing", action="store_true")
 group.add_argument('--luminary99', help="Perform LUMINARY 99 processing", action="store_true")
+group.add_argument('--retread44', help="Perform RETREAD 44 processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -93,6 +94,10 @@ elif args.comanche55 or args.luminary99:
     diff = cv2.GaussianBlur(diff, (7,7), 0)
     thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 4)
     thresh = thresh[20:,20:]
+elif args.retread44:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    #thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 51)
+    _,thresh = cv2.threshold(blurred, 125, 255, cv2.THRESH_BINARY)
 else:
     raise RuntimeError("Unknown program type selected")
 
