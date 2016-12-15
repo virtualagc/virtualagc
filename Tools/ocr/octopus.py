@@ -181,7 +181,6 @@ if args.comments:
                 break
 
         target_image = result[:,left_lim:right_lim]
-        thresh = thresh[:,left_lim:right_lim]
 
         # Create a structuring element to dilate to the right (trying to preserve exact leftmost pixels)
         element = np.zeros((1,15), np.uint8)
@@ -336,7 +335,7 @@ if args.comments:
         #     final_image = inside_header
         final_image = inside_header
     except:
-        final_image = thresh
+        final_image = result
 
 
 else:
