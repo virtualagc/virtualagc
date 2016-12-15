@@ -501,10 +501,13 @@ for row in range(0, len(lines)):
 		# horizontal lines on the input pages.  One side effect is that '=' is often
 		# eliminated, which is very troublesome.  However, there are patterns we can
 		# try to use to reinsert an = where one is missing.
-		if numCharsInRow > 0 and index < len(charList)-1 and \
+		lastRight = 0
+		if (numCharsInRow > 0):
+			lastRight = boxes[boxIndex-1]['boxRight']
+		if index < len(charList)-1 and \
 		   character == '=' and boxes[boxIndex]['boxChar'] != '=' and \
 		   boxes[boxIndex]['boxChar'] == charList[index+1] and \
-		   boxes[boxIndex]['boxLeft'] > boxes[boxIndex-1]['boxRight'] + 80*scale: 
+		   boxes[boxIndex]['boxLeft'] > lastRight + 80*scale: 
 			boxLeft = boxes[boxIndex]['boxLeft'] - 40 * scale
 			fontChar = imagesNomatch[ord('=')].clone()
 			draw.composite(operator='darken', left=boxLeft, 
