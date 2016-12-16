@@ -47,9 +47,9 @@ for line in file:
 	if octalPattern.match(line):
 		lines.append(line)
 file.close()
-if len(lines) != 044 * 4 * 8 * 4:
-	print "Binsource file", binsourceFilename, "is not 044 banks long."
-	sys.exit()
+#if len(lines) != 044 * 4 * 8 * 4:
+#	print "Binsource file", binsourceFilename, "is not 044 banks long."
+#	sys.exit()
 
 # Read in the octal-digit files.
 images = []
@@ -119,13 +119,33 @@ for index in range(startIndex, endIndex):
 		digitIndex = int(characters[characterIndex])
 		if boxOctal == digitIndex:
 			digit = images[digitIndex].clone()
-			operator = 'darken' #'xor' 
 		else:
 			digit = imagesColored[digitIndex].clone()
-			operator = 'darken'
-		digit.resize(boxWidth, boxHeight, 'cubic')
-		
-		draw.composite(operator=operator, left=boxLeft, top=boxTop, width=boxWidth, height=boxHeight, image=digit)
+		operator = 'darken'
+		fontWidth = digit.width
+		fontHeight = digit.height
+		minFontHeight = 0.9*fontHeight
+		maxFontHeight = 1.3*fontHeight
+		minFontWidth = 0.7*fontWidth
+		maxFontWidth = 1.3*fontWidth
+		if boxHeight > minFontHeight and boxHeight < maxFontHeight and \
+		   boxWidth > minFontWidth and boxWidth < maxFontWidth:
+			digit.resize(boxWidth, boxHeight, 'cubic')
+			draw.composite(operator=operator, left=boxLeft, top=boxTop, width=boxWidth, height=boxHeight, image=digit)
+		else:
+			if fontWidth <= minFontWidth:
+				fontWidth = minFontWidth
+			elif fontWidth >= maxFontWidth:
+				fontWidth = maxFontWidth
+			if fontHeight <= minFontHeight:
+				fontHeight = minFontHeight
+			elif fontHeight >= maxFontHeight:
+				fontHeight = maxFontHeight
+			digit.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
+			draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth)/2.0), 
+				       top=round((boxTop+boxBottom-fontHeight)/2.0), width=fontWidth, 
+				       height=fontHeight, image=digit)
+
 		
 		characterIndex += 1
 		col += 1
