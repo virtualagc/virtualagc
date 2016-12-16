@@ -168,15 +168,15 @@ for box in file:
 					width = int(width/n) - 1
 					height = pendingBoxes[0]['boxHeight']
 					left = pendingBoxes[0]['boxLeft']
-					right = left + width - 1 + nominalColSpacing
+					right = int(round(left + width - 1 + nominalColSpacing))
 					top = pendingBoxes[0]['boxTop']
 					bottom = pendingBoxes[0]['boxBottom']
 					for i in range(0,n):
 						boxes.append({'boxChar':boxChar, 'boxLeft':left, 'boxBottom':bottom,
 							      'boxRight':right, 'boxTop':top, 'boxWidth':width, 
 							      'boxHeight':height})
-						left += width + nominalColSpacing - 1
-						right += width + nominalColSpacing - 1
+						left += int(round(width + nominalColSpacing - 1))
+						right += int(round(width + nominalColSpacing - 1))
 			else:
 				if 0:
 					print "B"
@@ -216,7 +216,7 @@ for box in file:
 				lastLeft = lastBox['boxLeft']
 				lastRight = lastBox['boxRight']
 				combinedWidth = boxRight - lastLeft 
-				#print combinedWidth
+				#print combinedWidth, boxRight, lastLeft
 				if combinedWidth >= 13.5 * scale and combinedWidth <= 20.5 * scale:
 				   	# Convert all of the lastXXXX variables to describe the
 				   	# combined box.  We already know that the width is within
@@ -230,6 +230,7 @@ for box in file:
 				   	lastHeight = lastBottom - lastTop + 1
 				   	if lastHeight >= 20 * scale and lastHeight <= 30 * scale:
 				   		# Accept it!
+						#print combinedWidth, boxRight, lastLeft
 				   		if whichBoxes == 0:
 					   		boxes[len(boxes)-1]['boxRight'] = lastRight
 					   		boxes[len(boxes)-1]['boxLeft'] = lastLeft
@@ -334,7 +335,7 @@ for box in file:
 			sumBoxWidthsByLine[row] += boxWidth
 			numBoxesByLine[row] += 1
 		boxWidth = int(boxWidth/addAs) - 1
-		boxRight = boxLeft + boxWidth - 1 + nominalColSpacing
+		boxRight = int(round(boxLeft + boxWidth - 1 + nominalColSpacing))
 		for i in range(0,addAs):
 			if alnumPattern.match(boxChar):
 				#sumBottomsInRow += boxBottom
@@ -346,8 +347,8 @@ for box in file:
 			boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 				      'boxHeight':boxHeight})
-			boxLeft += boxWidth + nominalColSpacing - 1
-			boxRight += boxWidth + nominalColSpacing - 1	
+			boxLeft += int(round(boxWidth + nominalColSpacing - 1))
+			boxRight += int(round(boxWidth + nominalColSpacing - 1))	
 	else:
 		rejectedBoxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
@@ -536,11 +537,11 @@ for row in range(0, len(lines)):
 		   character == '=' and boxes[boxIndex]['boxChar'] != '=' and \
 		   boxes[boxIndex]['boxChar'] == charList[index+1] and \
 		   boxes[boxIndex]['boxLeft'] > lastRight + 80*scale: 
-			boxLeft = boxes[boxIndex]['boxLeft'] - 40 * scale
+			boxLeft = int(round(boxes[boxIndex]['boxLeft'] - 40 * scale))
 			fontChar = imagesNomatch[ord('=')].clone()
 			draw.composite(operator='darken', left=boxLeft, 
-				       top=boxes[boxIndex]['boxTop'], width=fontChar.width * scale, 
-				       height=fontChar.height * scale, image=fontChar)
+				       top=boxes[boxIndex]['boxTop'], width=int(round(fontChar.width * scale)), 
+				       height=int(round(fontChar.height * scale)), image=fontChar)
 			# Note that this will advance index (the pointer to characters in the line)
 			# but not boxIndex.
 			continue
@@ -562,6 +563,7 @@ for row in range(0, len(lines)):
 		minFontWidth = 0.7*fontWidth
 		maxFontWidth = 1.3*fontWidth
 		operator = 'darken' 
+		#print boxes[boxIndex]
 		if boxes[boxIndex]['boxHeight'] > minFontHeight and boxes[boxIndex]['boxHeight'] < maxFontHeight and \
 		   boxes[boxIndex]['boxWidth'] > minFontWidth and boxes[boxIndex]['boxWidth'] < maxFontWidth:
 			fontChar.resize(boxes[boxIndex]['boxWidth'], boxes[boxIndex]['boxHeight'], 'cubic')
@@ -578,9 +580,9 @@ for row in range(0, len(lines)):
 			elif fontHeight >= maxFontHeight:
 				fontHeight = maxFontHeight
 			fontChar.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
-			draw.composite(operator=operator, left=round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0), 
-				       top=round((boxes[boxIndex]['boxTop']+boxes[boxIndex]['boxBottom']-fontHeight)/2.0), width=fontWidth, 
-				       height=fontHeight, image=fontChar)
+			draw.composite(operator=operator, left=int(round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0)), 
+				       top=int(round((boxes[boxIndex]['boxTop']+boxes[boxIndex]['boxBottom']-fontHeight)/2.0)), width=int(round(fontWidth)), 
+				       height=int(round(fontHeight)), image=fontChar)
 		boxIndex += 1
 	
 	#if numCharsInRow > 0 and boxIndex < len(boxes) and \
