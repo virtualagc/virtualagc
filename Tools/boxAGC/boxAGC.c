@@ -77,38 +77,42 @@ main (int argc, char *argv[])
   
   // If it's an image from an AGC printout, the following should allow determining
   // the angle of the top line.
-  tempImage = densifyImage(inputImage, width / 10, 1, 200);
+  tempImage = densifyImage(inputImage, width / 5, 1, 200);
   thresholdImage(tempImage, 224);
-  angle = topAngle(tempImage, width / 9);
+  angle = topAngle(tempImage, width / 4);
   freeImage(tempImage);
   printf("Angle = %lf\n", angle);
 
   // Let's undo the rotation on the image.
   rotatedImage = rotateImage(inputImage, -angle);
+  outputImageToFile(rotatedImage, "rotated.raw");
 
-  // If we now densify the rotated image, we should be able to easily find all of the line
-  // locations, and the lines should be horizontal as opposed to tilted, or at least good
-  // enough for our purposes.
-  //tempImage = densifyImage(rotatedImage, width / 10, 0, height);
-  //thresholdImage(tempImage, 240);
-  //blackenLines(tempImage, width / 10, 0, 10);
-  tempImage = cloneImage(rotatedImage);
-  blackenLines(tempImage, 0, 0, 1);
-  outputImageToFile(tempImage, "blackenedLines.raw");
+  if (0)
+    {
+      // If we now densify the rotated image, we should be able to easily find all of the line
+      // locations, and the lines should be horizontal as opposed to tilted, or at least good
+      // enough for our purposes.
+      //tempImage = densifyImage(rotatedImage, width / 10, 0, height);
+      //thresholdImage(tempImage, 240);
+      //blackenLines(tempImage, width / 10, 0, 10);
+      tempImage = cloneImage(rotatedImage);
+      blackenLines(tempImage, 0, 0, 1);
+      outputImageToFile(tempImage, "blackenedLines.raw");
 
-  // Let's now do the same thing for columns, which should have some spaces between them,
-  // since the image has been rotated.
-  //tempImage2 = densifyImage(rotatedImage, 0, height / 20, height);
-  //thresholdImage(tempImage2, 248);
-  //blackenColumns(tempImage2, 0, height / 20, 10);
-  tempImage2 = cloneImage(rotatedImage);
-  blackenColumns(tempImage2, 0, 0, 2);
-  outputImageToFile(tempImage2, "blackenedColumns.raw");
+      // Let's now do the same thing for columns, which should have some spaces between them,
+      // since the image has been rotated.
+      //tempImage2 = densifyImage(rotatedImage, 0, height / 20, height);
+      //thresholdImage(tempImage2, 248);
+      //blackenColumns(tempImage2, 0, height / 20, 10);
+      tempImage2 = cloneImage(rotatedImage);
+      blackenColumns(tempImage2, 0, 0, 2);
+      outputImageToFile(tempImage2, "blackenedColumns.raw");
 
-  // Combine the two to get the possible locations of bounding boxes.
-  maskImage(tempImage, tempImage2);
-  freeImage(tempImage2);
-  outputImageToFile(tempImage, "possibleBoxes.raw");
+      // Combine the two to get the possible locations of bounding boxes.
+      maskImage(tempImage, tempImage2);
+      freeImage(tempImage2);
+      outputImageToFile(tempImage, "possibleBoxes.raw");
+    }
 
   return (0);
 }
