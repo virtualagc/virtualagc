@@ -1,4 +1,11 @@
 #!/usr/bin/python
+# coding=utf-8
+# NOTE: The reason the encoding of this file is specified as UTF-8 is that Tesseract
+# sometimes returns UTF-8 characters as its guesses, and in those rare cases that 
+# we're actually interested in what Tesseract thinks, we may have string literals 
+# whose values are UTF-8.  The only example of this as I'm writing this is the
+# hyphen filter.
+
 # This file was written by Ron Burkey, who declares it to be in the public domain.
 
 # This program is similar to ProoferBox.py, which is used for checking octals
@@ -205,7 +212,7 @@ for box in file:
 				lastRight = lastBox['boxRight']
 				combinedWidth = boxRight - lastLeft 
 				#print combinedWidth
-				if combinedWidth >= 15 * scale and combinedWidth <= 19 * scale:
+				if combinedWidth >= 13.5 * scale and combinedWidth <= 20.5 * scale:
 				   	# Convert all of the lastXXXX variables to describe the
 				   	# combined box.  We already know that the width is within
 				   	# the range we want, but let's check the height.
@@ -216,7 +223,7 @@ for box in file:
 				   	if boxTop < lastTop:
 				   		lastTop = boxTop
 				   	lastHeight = lastBottom - lastTop + 1
-				   	if lastHeight >= 20 * scale and lastHeight <= 28 * scale:
+				   	if lastHeight >= 20 * scale and lastHeight <= 30 * scale:
 				   		# Accept it!
 				   		if whichBoxes == 0:
 					   		boxes[len(boxes)-1]['boxRight'] = lastRight
@@ -254,13 +261,13 @@ for box in file:
 		rejectIt = 1;
 	# Here's something to help apostrophes to be recognized:
 	if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
-	   boxHeight <= 16 * scale and numCharsInRow > 0 and \
+	   boxHeight <= 17 * scale and numCharsInRow > 0 and \
 	   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
 	   	addIt = 1 		
 	# Here's something to help hyphens to be recognized:
-	if boxChar == '-' and numCharsInRow > 0:
-		#print boxWidth/scale, boxHeight/scale, numCharsInRow, sumBottomsInRow, lastBoxChar
-		if boxWidth > 14 * scale and boxWidth < 19 * scale and boxHeight > 4 * scale and boxHeight < 9 * scale:
+	if (boxChar == '-' or boxChar == '_' or boxChar == '—') and numCharsInRow > 0:
+		#print boxWidth/scale, boxHeight/scale, boxBottom, sumBottomsInRow/float(numCharsInRow), lastBoxChar
+		if boxWidth > 14 * scale and boxWidth < 20 * scale and boxHeight > 4 * scale and boxHeight < 9 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
 			#print midPoint - sumBottomsInRow/numCharsInRow
 			if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 3 * scale:
