@@ -109,8 +109,10 @@ sumBoxWidthsByLine = [0]
 numBoxesByLine = [0]
 charForWidthsPattern = re.compile(r"[A-HK-Z02-9]")
 rowFloor = 15 * scale
-sumBottomsInRow = 0
+#sumBottomsInRow = 0
 numCharsInRow = 0
+avgBottom = 0
+decayBottom = 0.8
 numBoxWidths = 10
 sumBoxWidths = 16 * numBoxWidths * scale
 nominalColSpacing = 4 * scale
@@ -120,6 +122,7 @@ nominalTwoRowHeight = nominalRowHeight + nominalRowSpacing + nominalRowHeight
 row = 0
 alnumPattern = re.compile(r"[0-9A-Z]")
 lastBoxChar = '?'
+lastHyphenMidPoint = 0
 for box in file:
 	boxFields = box.split()
 	boxChar = boxFields[0]
@@ -144,7 +147,9 @@ for box in file:
 		     	startOfRow = 0
 		     	if pendingBoxes[0]['boxLeft'] < lastBox['boxLeft']:
 		     		startOfRow = 1
-		     	if numCharsInRow > 0 and pendingBoxes[0]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+		     	#if numCharsInRow > 0 and pendingBoxes[0]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+		     	#	startOfRow = 1
+		     	if numCharsInRow > 0 and pendingBoxes[0]['boxBottom'] > avgBottom + rowFloor:
 		     		startOfRow = 1
 		     	if startOfRow == 0 or pendingBoxes[0]['boxLeft'] >= lastBox['boxRight']:
 			     	# Add the pending box to the list of actual boxes.  Normally these
@@ -260,19 +265,26 @@ for box in file:
 	if distance < 8 * scale:
 		rejectIt = 1;
 	# Here's something to help apostrophes to be recognized:
+	#if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
+	#   boxHeight <= 17 * scale and numCharsInRow > 0 and \
+	#   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
 	if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
-	   boxHeight <= 17 * scale and numCharsInRow > 0 and \
-	   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
+	   boxHeight <= 18 * scale and numCharsInRow > 0 and \
+	   boxBottom <= avgBottom - 7 * scale:
 	   	addIt = 1 		
 	# Here's something to help hyphens to be recognized:
-	if (boxChar == '-' or boxChar == '_' or boxChar == '—') and numCharsInRow > 0:
+	if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
 		#print boxWidth/scale, boxHeight/scale, boxBottom, sumBottomsInRow/float(numCharsInRow), lastBoxChar
-		if boxWidth > 14 * scale and boxWidth < 20 * scale and boxHeight > 4 * scale and boxHeight < 9 * scale:
+		if boxWidth > 14 * scale and boxWidth < 20 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
 			#print midPoint - sumBottomsInRow/numCharsInRow
-			if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 3 * scale:
+			#if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 3 * scale or \
+			#   abs(midPoint - lastHyphenMidPoint) <= 2 * scale:
+			if abs(midPoint - avgBottom + 12.5 * scale) <= 3 * scale or \
+			   abs(midPoint - lastHyphenMidPoint) <= 2 * scale:
 				#print "Adding"
 		 		addIt = 1
+		 		lastHyphenMidPoint = midPoint
 	lastBoxChar = boxChar
 	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
 	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
@@ -308,11 +320,13 @@ for box in file:
 		# New line?
 		boxIndex = len(boxes)
 		if numCharsInRow > 0:
-		   	if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > sumBottomsInRow/numCharsInRow + rowFloor:
+		   	#if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > sumBottomsInRow/numCharsInRow + rowFloor:
+		   	if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > avgBottom + rowFloor:
 		   		sumBoxWidthsByLine.append(0)
 		   		numBoxesByLine.append(0)
 		   		row += 1
-		   		sumBottomsInRow = 0
+		   		#sumBottomsInRow = 0
+		   		avgBottom = 0
 		   		numCharsInRow = 0
 		# Is it a box we want to use for figuring out the width of space characters?
 		if re.match(charForWidthsPattern,boxChar) and boxWidth > 16 and boxWidth < 24:
@@ -323,7 +337,11 @@ for box in file:
 		boxRight = boxLeft + boxWidth - 1 + nominalColSpacing
 		for i in range(0,addAs):
 			if alnumPattern.match(boxChar):
-				sumBottomsInRow += boxBottom
+				#sumBottomsInRow += boxBottom
+				if numCharsInRow == 0:
+					avgBottom = boxBottom
+				else:
+					avgBottom = (1.0 - decayBottom) * boxBottom + decayBottom * avgBottom
 				numCharsInRow += 1
 			boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
@@ -480,7 +498,8 @@ for row in range(0, len(lines)):
 		draw.line((middle,top), (middle,bottom))
 		break
 	# Loop on non-blank characters in the row.
-	sumBottomsInRow = 0
+	#sumBottomsInRow = 0
+	avgBottom = 0
 	numCharsInRow = 0
 	charList = list(re.sub(r"\s+" ,"", lines[row]))
 	for index in range(0,len(charList)):
@@ -495,8 +514,10 @@ for row in range(0, len(lines)):
 			draw.line((middle,top), (middle,bottom))
 			break
 		if numCharsInRow > 0:
+			#if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
+			#   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
-			   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+			   boxes[boxIndex]['boxBottom'] > avgBottom + rowFloor:
 				#print 'Out of boxes in row', row, "character", character
 				left = boxes[boxIndex-1]['boxRight']
 				right = backgroundWidth
@@ -523,7 +544,11 @@ for row in range(0, len(lines)):
 			# Note that this will advance index (the pointer to characters in the line)
 			# but not boxIndex.
 			continue
-		sumBottomsInRow += boxes[boxIndex]['boxBottom']
+		#sumBottomsInRow += boxes[boxIndex]['boxBottom']
+		if numCharsInRow == 0:
+			avgBottom = boxes[boxIndex]['boxBottom']
+		else:
+			avgBottom = (1.0 - decayBottom) * boxes[boxIndex]['boxBottom'] + decayBottom * avgBottom
 		numCharsInRow += 1
 		asciiCode = ord(character)
 		if boxes[boxIndex]['boxChar'] == character:
@@ -558,13 +583,18 @@ for row in range(0, len(lines)):
 				       height=fontHeight, image=fontChar)
 		boxIndex += 1
 	
+	#if numCharsInRow > 0 and boxIndex < len(boxes) and \
+	#   boxes[boxIndex]['boxLeft'] >= boxes[boxIndex-1]['boxLeft'] and \
+	#   boxes[boxIndex]['boxBottom'] <= sumBottomsInRow/numCharsInRow + rowFloor:
 	if numCharsInRow > 0 and boxIndex < len(boxes) and \
 	   boxes[boxIndex]['boxLeft'] >= boxes[boxIndex-1]['boxLeft'] and \
-	   boxes[boxIndex]['boxBottom'] <= sumBottomsInRow/numCharsInRow + rowFloor:
+	   boxes[boxIndex]['boxBottom'] <= avgBottom + rowFloor:
 	   	#print 'Extra boxes in row', row
 		while boxIndex < len(boxes):
+			#if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
+			#   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
-			   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+			   boxes[boxIndex]['boxBottom'] > avgBottom + rowFloor:
 				break
 			else:
 				boxTop = boxes[boxIndex]['boxTop']
