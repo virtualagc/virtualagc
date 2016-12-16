@@ -14,6 +14,7 @@
 #               2016-12-10 JL   Transcribed pages 303-308.
 #               2016-12-11 JL   Transcribed pages 309-310.
 #               2016-12-12 JL   Transcribed pages 311-317.
+#               2016-12-16 JL   Transcribed pages 318-320.
 
 # Annotations:
 #
@@ -2611,14 +2612,138 @@ R2515   SYMBOL SELECTION LOGIC FOR LEFTOVER SYMBOL RESOLUTION ON NEXT PAGE.
 # Page 318
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  54        PAGE  54
 
+P2534              ASSIGNMENT OF LEFTOVER SYMBOLS TO FIXED OR ERASABLE MEMORY.  MAKES USE OF THE FOLLOWING PATTERN IN
+R2536   THE SECOND SYMBOL TABLE ENTRY WORD, PLACED THERE BY PASS 1:  BIT 1, 0 FOR FIXED OR 1 FOR ERASABLE; BITS 2-6, 16
+R2538   MINUS MODULARITY; BITS 7-12, THE NUMBER OF ADDITIONAL BLOCKS ALLOWED; BITS 13-16, 0101; BITS 17-32, MINIMUM
+R2540   BASE ADDRESS (AN INTEGER TIMES 2**MODULARITY) PLUS RESERVATION SIZE - 1.  THE IDEA IS THAT LEFTOVERS MUST FIT
+R2542   IN SPECIFIED REGIONS OF MEMORY AND MAY NOT CROSS CERTAIN BOUNDARIES (SUCH AS THE SWITCHED BANKS OF AGC4).  THIS
+R2544   PROCESS MUST BE DONE FOR ALL LEFTOVER SYMBOLS BEFORE ANY NEARLY-DEFINED EQUALS DEFINITIONS ARE RESOLVED.
+
+ 2546   FIX LEFTO  NA, D4H      6,1           5 D4 H        NEXT LSYM           BRANCH IF THIS SYMBOL IS NOT LEFTOVER.
+
+ 2548              SWS, B26T30H 6,1           A,4           C,+1                USE (16-MODULARITY) AS SHIFT COUNT.
+ 2550              SWE, CAC3H   CAC3                        LEFT MASK           FORM 2**MODULARITY - 1.
+ 2552              SWE,LEFTMASK 6,1           16            COMMON +1           FETCH BLOCK LENGTH - 1.
+ 2554              SWE,SPECMAGH 6,1           16            COMMON
+ 2555              HA           COMMON        COMMON +1     Z,R1                FORM MINIMUM BASE ADDRESS FOR BLOCK.
+ 2557              SWE, CHAR8H  6,1           A,6           COMMON +2           FETCH NUMBER OF ADDITIONAL BLOCKS.
+ 2559              LA           BIT 1         6,1           C,+2
+ 2560              TS, LSTYPEH  TYPE F        SWITCH        C,+2                LEFTOVER INSTRUCTION OR CONSTANT.
+ 2562              SS           TYPE E        L STYPE H     SWITCH              LEFTOVER ERASED REGION.
+ 2564              SS           ZERO          C1T2          6,1                 MAKE ROOM FOR PAGE NUMBERS IN PASS 2.
+
+ 2566   FORM LIML  SM           Z,R1          LEFT MASK     COMMON +3           FORM MAXIMUM ADDRESS FOR LAST WORD.
+ 2568              TX           Z,R1          -             COMMON
+ 2569              TX           L TYP TAB     -             Z,X4
+ 2570              LA, CAC3H    COMMON        4,0           C,+2                FIND NEAREST MEMORY TYPE CATEGORY LIMIT.
+ 2572              TS           Z,X4,1        -             C,-1
+ 2573              TX           N,X4          -             Z,R2
+ 2574              LA           Z,R2          COMMON +3     C,+2                CHOOSE MIN (CATEGORY END, BLOCK END).
+ 2576              TX           COMMON +3     -             Z,R2
+ 2577              NA, LSTYPEH  4,0           SWITCH        NEXT CAT            BRANCH IF WRONG MEMORY TYPE.
+
+ 2579   CAT OK TYP SWE, B38T48H Z,R1          5             Z,X2
+ 2580              WA           Z,X2          L AV TABLE    Z,X2                FORM ADDRESS OF AVAILABILITY WORD.
+ 2582              SM           Z,R1          C31           Z,R3                FORM LAST ADDRESS FOR THIS AVAIL WORD.
+
+ 2584   COMP ENDS  LA           Z,R2          Z,R3          LEFT SRCH           BRANCH IF END CATEGORY IN THIS AVAIL WD.
+ 2586              TS           L UNAVS       Z,X3          LEFT SRCH +1        SET UP TO CHECK END OF AVAIL WD FIRST.
+
+ 2588   END CAT Q  NA           Z,R1          Z,R2          NEXT ABIT -1        BRANCH IF NOT END OF CATEGORY.
+
+ 2590   NEXT CAT   WA           Z,R2          ONE           Z,R1                FIRST ADDRESS OF NEXT CATEGORY.
+ 2592              LA           Z,R1          COMMON +3     FORM LIML +1        BRANCH IF NEXT CATEGORY IS IN SAME BLOK.
+ 2594              BS           COMMON +2     ONE           COMMON +2           DECREASE COUNT OF ADDITIONAL BLOCKS.
+ 2596              LN           COMMON +2     ZERO          FORM LIML           BRANCH IF WE MAY TRY ANOTHER BLOCK.
+
+ 2598   NEXT LSYM  LA, CAC3H    6,1           L AV TABLE    PASS 1▪5 +2         GO LOOK FOR ANOTHER LEFTOVER SYMBOL.
+ 25992             TS           6,1           Z,X6          C,-1                SKIP OVER SPEC PAIR.
+
+ 2600   LEFT SRCH  SWE, CAC3H   L UNAVS       16            Z,X3                SET UP TO CHECK END CATEGORY FIRST.
+ 2602              LA           N,X2          CAC3          3,1                 BRANCH IF ALL OF AVAIL WD IS RESERVED.
 
 # Page 319
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  55        PAGE  55
 
+P2604   FIND A SINGLE FREE LOCATION FIRST, AND THEN SEE IF THERE'S ROOM FOR THE ENTIRE RESERVATION.
+
+ 2606              SWS, B26T30H Z,R1          18,L          C,+1
+ 2607              SWE, ONESH   BIT 1                       AV MSK H            FORM MASK TO EXAMINE AVAIL WORD.
+ 2609              TS           -             -             NEXT ABIT +1
+
+ 2610              WA           Z,R1          ONE           Z,R1
+ 2611   NEXT ABIT  SWE, ONESH   AV MSK H      1             AV MSK H            ADVANCE MASK TO EXAMINE NEXT BIT.
+ 2613              NA, AVMSKH   2,0           ONES          3,0                 BRANCH IF LOCATION IS RESERVED.
+
+ 2615              HA           N,X2          AV MSK H      N,X2                OTHERWISE RESERVE IT NOW (TENTATIVELY).
+ 2617              TX           Z,R1          -             COMMON              RECORD INITIAL ADDRESS.
+ 2619              SM           AV MSK H      Z,X2          COMMON +5           SAVE MASK AND ADDRESS IN CASE OF FAIL.
+ 2621              LA           COMMON +1     ZERO          DEF LEFTO           BRANCH IF BLOCK SIZE = 1 AND IT WAS OK.
+
+ 2623              WA           Z,R1          COMMON +1     COMMON +4           IF NOT DONE YET, FORM END OF BLOCK ADDR.
+ 2625              LA           COMMON +4     Z,R2          END WD Q 2          BRANCH IF BLOCK FITS IN THIS CATEGORY.
+ 2627              TS, AVMSKH   ONES          2,0           NEXT CAT            UNRESERVE FIRST WORD IF IT DOESN'T.
+
+ 2629   END WD Q   NA           Z,R1          Z,R3          NEXT ABIT -1        CHECK NEXT BIT IN SAME AVAIL WORD.
+ 2631              WA           Z,R3          ONE           Z,R1
+ 2632              TS           Z,X2,1        -             COMP ENDS -1        START ON NEW AVAILABILITY WORD.
+
+ 2634   END WD Q 2 NA           Z,R1          Z,R3          NEND WD 2           BRANCH IF NOT END OF AVAIL WORD.
+ 2636              WA           Z,R3          BIT 43H       Z,R3
+ 2637              SWE, ONEH    Z,X2,1        15            AV MSK H
+
+ 2638   NEND WD 2  WA           Z,R1          ONE           Z,R1
+ 2639              SWE, ONESH   AV MSK H      1             AV MSK H            ADVANCE MASK.
+ 2641              NA, AVMSKH   2,0           ONES          FAILURE             BRANCH IF PART OF TENT. BLOCK IS IN USE.
+ 2643              HA           N,X2          AV MSK H      N,X2                RESERVE LOCATION TENTATIVELY.
+ 2645              NA           Z,R1          COMMON +4     END WD Q 2          BRANCH UNLESS BLOCK ALL TESTED AND RSVD.
+
+ 2647   DEF LEFTO  SWS, CAC2H   COMMON        16,L          6,1                 PUT DEFINITION INTO SYMBOL TABLE...
+ 2649              TS, D4H      6 D4          6,1           NEXT LSYM           CALL IT NORMALLY DEFINED, SEEK ANOTHER.
+
+ 2651   FAILURE    TX           COMMON +5     -             Z,X2
+ 2652              HA           COMMON +5     Z,X2          AV MSK H            RESTORE AVAILABILITY WORD ADDRESS & BIT.
+ 2654   UNRESERV   SM           N,X2          AV MSK H      N,X2                PUT AVAILABILITY BITS BACK.
+ 2656              WA           COMMON        ONE           COMMON
+ 2657              LA           Z,R1          COMMON        END LFAIL           BRANCH IF UNRESERVING IS DONE.
+ 2659              NA           AV MSK H      BIT 32        C,+2                BRANCH IF NOT END OF AVAIL WORD.
+ 2661              SWE, CAC3H   Z,X2,1        15            AV MSK H            ADVANCE COUNTER, SET MASK = 1.
+ 2663              SWE, ONESH   AV MSK H      1             AV MSK H            ADVANCE MASK.
+ 2665              TS, AVMSKH   ONES          2,0           UNRESERV +1         PUT AVAILABILITY BITS BACK.
+
+ 2667   END LFAIL  LA           Z,R2          Z,R1          NEXT CAT            BRANCH IF AT END OF CATEGORY.
+ 2669              WA           Z,R1          ONE           Z,R1
+ 2670              TS           -             -             CAT OK TYP
 
 # Page 320
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  56        PAGE  56
 
+P2671              RESOLUTION OF RANDOMLY ORDERED EQUALS DEFINITIONS, USING THREADS ATTACHED TO NEARLY DEFINED SYMBOLS
+R2673   IN THE SYMBOL TABLE AND TO THEIR DEFINERS.  THE THREADS FORM A CAC IN THE THIRD WORD OF THE TABLE ENTRY, THUS:
+R2675   LEFT CAC, THREAD TO DEFINER; MIDDLE CAC, THREAD TO NEXT CO-DEFINEE; RIGHT CAC, THREAD TO FIRST DEFINEE.  ALL
+R2677   THREADS ARE TO THE SECOND WORD OF A SYMBOL TABLE ENTRY.  THE METHOD IS ROUGHLY AS FOLLOWS:  (1) SCAN THE TABLE
+R2679   FOR NEARLY DEFINED SYMBOLS.  (2) WHEN ONE IS FOUND, USE DEFINER THREADS, MARKING EACH ONE FOUND, UNTIL A SYMBOL
+R2681   IS FOUND THAT IS NOT NEARLY DEFINED.  (3) IF IT IS DEFINED, THE SYMBOLS DEPENDENT ON IT MAY BE DEFINED.  IF NOT, 
+R2683   ALL ITS DEPENDENTS ARE UNDEFINABLE.  FOLLOW ITS FIRST-DEFINEE THREAD TO DEFINE ITS FIRST DEPENDENT, THEN FOLLOW
+R2685   CO-DEFINEE THREADS TO DEFINE ALL DIRECT DEPENDENTS.  (OR, MARK THEM UNDEFINABLE.)  (4) USING THE SYMBOL IN THAT
+R2687   SET WHICH HAS A MARKED THREAD (I.E. WAS USED IN THE DEFINER SEARCH), REPEAT STEP (3) UNTIL ALL LEVELS OF DEFINEE
+R2689   THREADS ARE EXHAUSTED.  THIS PROCESS IS GUARANTEED TO INCLUDE THE SYMBOL FOUND BY THE ORIGINAL SCAN.
+
+
+
+ 2691              WA           L AV TABLE    ONE           Z,X6
+ 2692   RESOLVEM   S, ETS       6,0           ZX +6         C,+1
+ 2694              LA           ONES          N,X6,1        OPTI THRS           BRANCH IF NO MORE SYMBOLS IN TABLE.
+ 2696              LA           6,1           CAC12         NEARLY Q            BRANCH IF SYMBOL, NOT MULT. DEF. FLAG.
+
+ 2698              EBA          Z,X6,1        ZERO          COMMON +7
+ 2699              TX           N,X6          -             COMMON +6           POINT TO FIRST DEFINITION OF SYMBOL.
+ 2703              WA           NEX EQ SYM +1 SEVEN H       NEX EQ SYM +1       MODIFY PROCEDURE FOR MULTIPLE DEFS.
+ 2705              S, ETS       COMMON +6     ZX +6         NEARLY Q -1         DO FIRST DEFINITION FIRST.
+
+ 2707              NA, CAC3H    6,0           COMMON +6     RESOLVEM            LOOP UNTIL POINTING TO FIRST DEF. AGAIN.
+ 2709              WD           NEX EQ SYM +1 SEVEN H       NEX EQ SYM +1
+ 2710              S, ETS       COMMON +7     ZX +6         NEX EQ SYM +1
 
 # Page 321
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  57        PAGE  57
