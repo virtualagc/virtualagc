@@ -12,7 +12,6 @@ do
 	num=`printf "%04d" $page`
 	echo "Page=$num"
 	python ../octopus.py ~/git/virtualagc/Tools/ProoferComments/raw$AGC/$num.png $num.png $SWITCHES
-	gimp $num.png
 	shift
 done
 
