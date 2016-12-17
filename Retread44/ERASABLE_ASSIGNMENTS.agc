@@ -13,10 +13,11 @@
 ## Contact:      Ron Burkey <info@sandroid.org>.
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
+##               2016-12-16 MAS  Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Retread 44.
+## Page 5
+## At the top, above the addresses and labels, is written the word OCTAL.
 
-## Page 7
 A               EQUALS          0
 L               EQUALS          1                               # L AND Q ARE BOTH CHANNELS AND REGISTERS.
 Q               EQUALS          2
@@ -29,7 +30,6 @@ BBANK           EQUALS          6                               # (DTCB) AND DXC
 ARUPT           EQUALS          10                              # INTERRUPT STORAGE.
 LRUPT           EQUALS          11
 QRUPT           EQUALS          12
-SAMPTIME        EQUALS          13                              # SAMPLED TIME 1 & 2.
 ZRUPT           EQUALS          15                              # (13 AND 14 ARE SPARES.)
 BANKRUPT        EQUALS          16                              # USUALLY HOLDS FBANK OR BBANK.
 BRUPT           EQUALS          17                              # RESUME ADDRESS AS WELL.
@@ -38,6 +38,7 @@ CYR             EQUALS          20
 SR              EQUALS          21
 CYL             EQUALS          22
 EDOP            EQUALS          23                              # EDITS INTERPRETIVE OPERATION CODE PAIRS.
+
 
 
 TIME2           EQUALS          24
@@ -55,25 +56,19 @@ PIPAX           EQUALS          37
 PIPAY           EQUALS          40
 PIPAZ           EQUALS          41
 BMAGX           EQUALS          42
-RHCP            EQUALS          42
 BMAGY           EQUALS          43
-RHCY            EQUALS          43
 BMAGZ           EQUALS          44
-RHCR            EQUALS          44
 INLINK          EQUALS          45
 RNRAD           EQUALS          46
 GYROCTR         EQUALS          47
-GYROCMD         EQUALS          47
 CDUXCMD         EQUALS          50
 CDUYCMD         EQUALS          51
-
-## Page 8
 CDUZCMD         EQUALS          52
 OPTYCMD         EQUALS          53
 OPTXCMD         EQUALS          54
 EMSD            EQUALS          55
-THRUST          EQUALS          55
 LEMONM          EQUALS          56
+## Page 6
 OUTLINK         EQUALS          57
 ALTM            EQUALS          60
 
@@ -88,70 +83,13 @@ S1              EQUALS          40D
 S2              EQUALS          41D
 QPRET           EQUALS          42D
 
-## Page 9
-
+## Page 7
 # GENERAL ERASABLE ASSIGNMENTS.
 
-                SETLOC          61
+#          THE FOLLOWING ARE EXECUTIVE TEMPORARIES WHICH MAY BE USED BETWEEN CCS NEWJOB INQUIRIES.
 
-# INTERPRETIVE SWITCH RESERVATIONS.
+		SETLOC		100
 
-STATE           ERASE           +3                              # 60 SWITCHES PRESENTLY.
-
-# INTERPRETIVE SWITCH BIT ASSIGNMENTS:
-
-WMATFLAG        EQUALS          0
-JSWITCH         EQUALS          1
-MIDFLAG         EQUALS          2
-MOONFLAG        EQUALS          3
-NBSMBIT         EQUALS          4
-COAROFIN        EQUALS          5
-BODYFLAG        EQUALS          6
-IMUSE           EQUALS          7
-RRUSE           EQUALS          8D
-RRNBSW          EQUALS          9D
-LOKONSW         EQUALS          10D
-# END OF SWITCH ASSIGNMENTS
-
-#       THE FOLLOWING SET COMPRISES THE INTERRUPT TEMPORARY STORAGE POO
-
-#       ANY OF THESE MAY BE USED AS TEMPORARIES DURING INTERRUPT OR WITH INTERRUPT INHIBITED. THE ITEMP SERIES
-# IS USED DURING CALLS TO THE EXECUTIVE AND WAITLIST - THE RUPTREGS ARE NOT.
-
-ITEMP1          ERASE
-WAITEXIT        EQUALS          ITEMP1
-EXECTEM1        EQUALS          ITEMP1
-
-ITEMP2          ERASE
-WAITBANK        EQUALS          ITEMP2
-EXECTEM2        EQUALS          ITEMP2
-
-                SETLOC          70
-
-ITEMP3          ERASE
-RUPTSTOR        EQUALS          ITEMP3
-WAITADR         EQUALS          ITEMP3
-NEWPRIO         EQUALS          ITEMP3
-
-ITEMP4          ERASE
-LOCCTR          EQUALS          ITEMP4
-WAITTEMP        EQUALS          ITEMP4
-
-ITEMP5          ERASE
-## Page 10
-NEWLOC          EQUALS          ITEMP5
-
-ITEMP6          ERASE
-NEWLOC+1        EQUALS          ITEMP6				# DP ADDRESS.
-
-RUPTREG1        ERASE
-RUPTREG2        ERASE
-RUPTREG3        ERASE
-RUPTREG4        ERASE
-KEYTEMP1        EQUALS          RUPTREG4
-DSRUPTEM        EQUALS          RUPTREG4
-
-#       THE FOLLOWING ARE EXECUTIVE TEMPORARIES WHICH MAY BE USED BETWEEN CCS NEWJOB INQUIRIES.
 INTB15+         ERASE                                           # REFLECTS 15TH BIT OF INDEXABLE ADDRESSES
 DSEXIT          =               INTB15+                         # RETURN FOR DSPIN
 EXITEM          =               INTB15+                         # RETURN FOR SCALE FACTOR ROUTINE SELECT
@@ -162,8 +100,6 @@ WRDRET          =               INTBIT15                        # RETURN FOR 5BL
 WDRET           =               INTBIT15                        # RETURN FOR DSPWD
 DECRET          =               INTBIT15                        # RETURN FOR PUTCOM(DEC LOAD)
 21/22REG        =               INTBIT15                        # TEMP FOR CHARIN
-
-#       THE REGISTERS BETWEEN ADDRWD AND PRIORITY MUST STAY IN THE FOLLOWING ORDER FOR INTERPRETIVE TRACE.
 
 ADDRWD          ERASE                                           # 12 BIT INTERPRETIVE OPERAND SUB-ADDRESS.
 POLISH          ERASE                                           # HOLDS CADR MADE FROM POLISH ADDRESS.
@@ -188,7 +124,7 @@ SFTEMP1         =               VBUF            +1              # STORAGE FOR SF
 
 CODE            =               VBUF            +2              # FOR DSPIN
 SFTEMP2         =               VBUF            +2              # STORAGE FOR SF CONST LO PART(=SFTEMP1+1)
-## Page 11
+
 MIXTEMP         =               VBUF            +3              # FOR MIXNOUN DATA
 SIGNRET         =               VBUF            +3              # RETURN FOR +,- ON
 
@@ -198,6 +134,7 @@ BUF             ERASE           +2                              # TEMPORARY SCAL
 BUF2            ERASE           +1
 INDEXLOC        EQUALS          BUF                             # CONTAINS ADDRESS OF SPECIFIED INDEX.
 SWWORD          EQUALS          BUF                             # ADDRESS OF SWITCH WORD.
+## Page 8
 SWBIT           EQUALS          BUF             +1              # SWITCH BIT WITHIN SWITCH WORD.
 MPTEMP          ERASE                                           # TEMPORARY USED IN MULTIPLY AND SHIFT.
 DOTINC          ERASE                                           # COMPONENT INCREMENT FOR DOT SUBROUTINE.
@@ -239,7 +176,6 @@ NOUNADD         =               TEM5                            # TEMP STORAGE F
 NNADTEM         ERASE                                           # TEMP FOR NOUN ADDRESS TABLE ENTRY
 NNTYPTEM        ERASE                                           # TEMP FOR NOUN TYPE TABLE ENTRY
 IDAD1TEM        ERASE                                           # TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)
-## Page 12
                                                                 # MUST = IDAD2TEM-1, = IDAD3TEM-2.
 IDAD2TEM        ERASE                                           # TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)
                                                                 # MUST = IDAD1TEM+1, = IDAD3TEM-1.
@@ -249,8 +185,9 @@ RUTMXTEM        ERASE                                           # TEMP FOR SF RO
 
 
 
-#       STORAGE USED BY THE EXECUTIVE.
+#          STORAGE USED BY THE EXECUTIVE.
 
+## Page 9
 MPAC            ERASE           +6                              # MULTI-PURPOSE ACCUMULATOR.
 MODE            ERASE                                           # +1 FOR TP, +0 FOR DP, OR -1 FOR VECTOR.
 LOC             ERASE                                           # LOCATION ASSOCIATED WITH JOB.
@@ -260,8 +197,45 @@ PRIORITY        ERASE                                           # PRIORITY OF PR
 
                 ERASE           +71D                            # SEVEN SETS OF 12 REGISTERS EACH.
 
-## Page 13
+VAC1USE         ERASE
+VAC1            ERASE           +42D
+VAC2USE         ERASE
+VAC2            ERASE           +42D
+VAC3USE         ERASE
+VAC3            ERASE           +42D
+VAC4USE         ERASE
+VAC4            ERASE           +42D
+VAC5USE         ERASE
+VAC5            ERASE           +42D
+
+#          INTERPRETIVE SWITCH RESERVATIONS.
+
+STATE		ERASE		+3				# 60 SWITCHES PRESENTLY.
+
+#          THE FOLLOWING SET COMPRISES THE INTERRUPT TEMPORARY STORAGE POOL.
+
+WAITEXIT	ERASE
+KEYTEMP1	=		WAITEXIT			# TEMP FOR KEYRUPT, UPRUPT
+DSRUPTEM	=		WAITEXIT			# TEMP FOR DSPOUT
+
+WAITBANK	ERASE
+EXECTEM1	ERASE
+EXECTEM2	ERASE
+WAITADR		ERASE
+WAITTEMP	ERASE
+
+NEWPRIO		ERASE						# EXECUTIVE RESERVATIONS (TEMP ONLY).
+NEWLOC		ERASE		+1
+LOCCTR		ERASE
+
+#          WAITLIST REPEAT FLAG:
+
+RUPTAGN		ERASE
+KEYTEMP2	=		RUPTAGN				# TEMP FOR KEYRUPT, UPRUPT
+
+## Page 10
 # THE FOLLOWING REGISTERS ARE RESERVED FOR PINBALL
+
 
 
 # RESERVED FOR PINBALL EXECUTIVE ACTION
@@ -307,530 +281,87 @@ UPLOCK          ERASE                                           # BIT1 = UPLINK 
                                                                 # RECEPTION OF A BAD MESSAGE IN UPLINK)
 # END OF ERASABLES RESERVED FOR PINBALL INTERRUPT ACTION
 
+## Page 11
+# TEMPORARY PHONY ASSIGNMENTS TO KEEP PINBALL FROM HAVING BAD ASSEMBLIES
 
+THETAD          ERASE           +2
+FAILREG		ERASE
+TDEC		ERASE		+1
+TET		ERASE		+1
+MEASQ		ERASE		+1
+ROLL		ERASE		+2
+LANDMARK	ERASE		+5
+GBIASX		ERASE		+2
+ADIAX		ERASE		+2
+ADSRAX		ERASE		+2
+DESOPTX		ERASE		+1
+SAMPTIME	ERASE		+1
+DELVX           ERASE           +5
+PBIASX		ERASE
+PIPASCFX	ERASE
+PBIASY		ERASE
+PIPASCFY	ERASE
+PBIASZ		ERASE
+PIPASCFZ	ERASE
+		SETLOC		1000
+DELR		ERASE		+5
+DELVEL		ERASE		+5
+MEASMODE	ERASE
+DELTAQ		ERASE		+1
+WASKSET		ERASE
+# END OF PHONY ASSIGNMENTS
 
-#        DAP STORAGE IN NON-SWITCHED ERASABLE.
+## Page 12
 
-## Page 14
-T6LOC           ERASE           +1
-T6ADR           EQUALS          T6LOC
-T5LOC           ERASE           +1
-T5ADR           EQUALS          T5LOC
-
-## Page 15
 # ASSIGNMENTS FOR T4RUPT PROGRAM
-T4LOC           ERASE
 DSRUPTSW        ERASE
-DIDFLG          ERASE
-ALT             ERASE           +1
-ALTRATE         ERASE
-FINALT          ERASE           +1                              # (MAY NOT BE REQUIRED FOR FLIGHTS).
-LGYRO           ERASE
-FORVEL          ERASE
-LATVEL          ERASE
-LASTYCMD        ERASE
-LASTXCMD        ERASE
-
-ALTSAVE         ERASE           +1
-LMPCMD          ERASE
-
+OLDERR		ERASE
+WASOPSET	ERASE
 # END OF T4RUPT ASSIGNMENTS
 
 
 
-IMODES30        ERASE
-IMODES33        ERASE
-MODECADR        ERASE           +2
-IMUCADR         EQUALS          MODECADR
-AOTCADR         EQUALS          MODECADR        +1
-OPTCADR         EQUALS          AOTCADR
-RADCADR         EQUALS          MODECADR        +2
+# ASSIGNMENTS FOR DOWNRUPT
 
-MARKSTAT        ERASE
-XYMARK          ERASE
-                SETLOC          400
-
-## Page 16
-# TEMPORARY PHONY ASSIGNMENTS TO KEEP PINBALL FROM HAVING BAD ASSEMBLIES
-
-THETAD          ERASE           +2
-DELVX           ERASE           +5
-# END OF PHONY ASSIGNMENTS
+DISPBUF		ERASE
+TMKEYBUF	ERASE
+# END OF DOWNRUPT ASSIGNMENTS
 
 
 
-#        DOWNLINK LIST ADDRESS.
-DNLSTADR        ERASE
+# ASSIGNMENTS FOR SELF CHECK
 
-# AGS DUMMY ID WORD
-AGSWORD         ERASE
-# RADAR ERASABLE
+# ADDRESSES TO BE USED FOR INDEX INSTRUCTION WITHOUT EXTRACODES
+NDX+0		ERASE
+NDX+MAX		ERASE
+NDXKEEP1	ERASE
+NDXKEEP2	ERASE
+NDXKEEP3	ERASE
+NDXSELF1	ERASE
+NDXSELF2	ERASE
 
-RADMODES        ERASE
-SAMPLIM         ERASE
-SAMPLSUM        ERASE           +1
-SAMPSUM         EQUALS          SAMPLSUM
-OPTYHOLD        ERASE           +1
-TIMEHOLD        ERASE           +1
-RRTARGET        EQUALS          SAMPLSUM                        # HALF UNIT VECTOR IN SM OR NB AXES.
-TANG            ERASE           +1                              # DESIRED TRUNNION AND SHAFT ANGLES.
-MODEA           EQUALS          TANG
-MODEB           ERASE           +1                              # DODES CLOBBERS TANG +2.
-NSAMP           EQUALS          MODEB
-DESRET          ERASE
-OLDATAGD        EQUALS          DESRET                          # USED IN DATA READING ROUTINES.
-DESCOUNT        ERASE
-# END OF RADAR ERASABLE ASSIGNMENTS
+KEEP1		ERASE
+KEEP2		ERASE
+KEEP3		ERASE
+KEEP4		ERASE
+KEEP5		ERASE
+KEEP6		ERASE
+KEEP7		ERASE
 
-VAC1USE         ERASE
-VAC1            ERASE           +42D
-VAC2USE         ERASE
-VAC2            ERASE           +42D
-VAC3USE         ERASE
-VAC3            ERASE           +42D
-VAC4USE         ERASE
-VAC4            ERASE           +42D
-VAC5USE         ERASE
-VAC5            ERASE           +42D
+SELFRET		ERASE
+SFAIL		ERASE
+ERCOUNT		ERASE
+SCOUNT		ERASE
+SMODE		ERASE
 
-# UNSWITCHED ERASABLE STORAGE ASSIGNMENTS FOR THE DAP
+# END OF SELF CHECK ASSIGNMENTS
 
-DAPBOOLS        ERASE
-T6NEXT          ERASE           +1
-T6NEXTJT        ERASE           +2
 
-DELAYCTR        ERASE
-# THESE ARE WRITTEN INTO FROM SEVERAL PROGRAMS
-
-## Page 17
-CDUXD           ERASE
-CDUYD           ERASE
-CDUZD           ERASE
-                SETLOC          1000
-
-# ERASABLE STORAGE FOR AVERAGE G INTEGRATOR
-
-RN              ERASE           +5
-VN              ERASE           +5
-NSHIFT          ERASE
-XSHIFT          ERASE
-UNITR           ERASE           +5
-UNITW           ERASE           +5
-RMAG            ERASE           +1
-RMAGSQ          ERASE           +1
-GRAVITY         ERASE           +5
-DELV            ERASE           +5
-DELTAT          ERASE           +1
-RN1             ERASE           +5
-VN1             ERASE           +5
-#       WAITLIST REPEAT FLAG:
-
-RUPTAGN         ERASE
-KEYTEMP2        =               RUPTAGN                         # TEMP FOR KEYRUPT, UPRUPT
-
-#       PHASE TABLE AND RESTART COUNTER.
-
--PHASE0         ERASE
-PHASE0          ERASE
--PHASE1         ERASE
-PHASE1          ERASE
--PHASE2         ERASE
-PHASE2          ERASE
--PHASE3         ERASE
-PHASE3          ERASE
--PHASE4         ERASE
-PHASE4          ERASE
--PHASE5         ERASE
-PHASE5          ERASE
-
-# ERASABLE FOR SINGLE PRECISION SUBROUTINES.
-
-HALFY           ERASE
-ROOTRET         ERASE
-SQRARG          ERASE
-TEMK            EQUALS          HALFY
-SQ              EQUALS          ROOTRET
-
-1/PIPADT        ERASE                                           # IMU COMPENSATION PACKAGE
-OLDBT1          =               1/PIPADT
-
-## Page 18
-# ASSIGNMENTS RESERVED EXCLUSIVELY FOR SELF-CHECK
-SELFERAS        ERASE           1360            -       1377
-
-SELFRET         =               1360
-SMODE           =               1361
-REDOCTR         =               1362                            # KEEPS TRACK OF RESTARTS
-FAILREG         =               1363
-SFAIL           =               1364
-ERCOUNT         =               1365
-SCOUNT          =               1366
-SKEEP1          =               1371
-SKEEP2          =               1372
-SKEEP3          =               1373
-SKEEP4          =               1374
-SKEEP5          =               1375
-SKEEP6          =               1376
-SKEEP7          =               1377
 
 # WAITLIST TASK LISTS
 
                 SETLOC          1400
 
-LST1            ERASE           +7                              # DELTA T'S.
-LST2            ERASE           +17D                            # 2CADR TASK ADDRESSES.
-
-# IMU COMPENSATION PARAMETERS:
-
-PBIASX          ERASE                                           # PIPA BIAS AND PIPA SCALE FACTOR TERMS
-PIPABIAS        =               PBIASX                          #       INTERMIXED.
-PIPASCFX        ERASE
-PIPASCF         =               PIPASCFX
-PBIASY          ERASE
-PIPASCFY        ERASE
-PBIASZ          ERASE
-PIPASCFZ        ERASE
-
-NBDX            ERASE                                           # GYRO BIAS DRIFTS
-GBIASX          =               NBDX
-NBDY            ERASE
-NBDZ            ERASE
-
-ADIAX           ERASE                                           # ACCELERATION SENSITIVE DRIFT ALONG THE
-ADIAY           ERASE                                           # INPUT AXIS
-ADIAZ           ERASE
-
-ADSRAX          ERASE                                           # ACCELERATION SENSITIVE DRIFT ALONG THE
-ADSRAY          ERASE                                           # SPIN REFERENCE AXIS
-ADSRAZ          ERASE
-
-GCOMP           ERASE           +5                              # CONTAINS COMPENSATING TORQUES
-
-## Page 19
-GCOMPSW         ERASE
-COMMAND         EQUALS          GCOMP
-CDUIND          EQUALS          GCOMP           +3
-
-# STORAGE FOR RR TASKS.
-
-RRRET           ERASE
-RDES            ERASE
-RRINDEX         ERASE
-
-# AOT CALIBRATIONS IN AZIMUTH AND ELEVATION AT DETENTS
-AOTAZ           ERASE           +2
-AOTEL           ERASE           +2
-#       ASSIGNMENTS FOR PRESENTLY UNUSED NOUNS.
-AZANG           EQUALS                                          # DELETE WHEN OPTICAL TRACKER NOUNS GONE.
-ELANG           EQUALS
-DESLOTSY        EQUALS
-DESLOTSX        EQUALS
-
-ROLL            ERASE           +2
-LANDMARK        ERASE           +5
-
-# THE FOLLOWING REGS ARE USED BY THE STANDBY VERBS
-
-TIMESAV         ERASE           +1
-SCALSAV         ERASE           +1
-TIMAR           ERASE           +1
-TIMEDIFF        ERASE           +1
-
-                SETLOC          2000
-
-AMEMORY         ERASE           +150D
-#       THE FOLLOWING A MEMORY LOCATIONS ARE USED BY MID-COURSE NAVIGATION:
-
-RRECT           EQUALS          AMEMORY         +000D
-RIGNTION        EQUALS          AMEMORY         +000D
-VRECT           EQUALS          AMEMORY         +006D
-VIGNTION        EQUALS          AMEMORY         +006D
-TDELTAV         EQUALS          AMEMORY         +012D
-NEWDLTAV        EQUALS          AMEMORY         +012D
-TNUV            EQUALS          AMEMORY         +018D
-NEWNUV          EQUALS          AMEMORY         +018D
-RCV             EQUALS          AMEMORY         +024D
-FOUNDR          EQUALS          AMEMORY         +024D
-VCV             EQUALS          AMEMORY         +030D
-FOUNDV          EQUALS          AMEMORY         +030D
-TC              EQUALS          AMEMORY         +036D
-TET             EQUALS          AMEMORY         +038D
-XKEP            EQUALS          AMEMORY         +040D
-ALPHAV          EQUALS          AMEMORY         +042D
-## Page 20
-DELR            EQUALS          AMEMORY         +042D
-BETAV           EQUALS          AMEMORY         +048D
-DELVEL          EQUALS          AMEMORY         +048D
-PHIV            EQUALS          AMEMORY         +054D
-BVECTOR         EQUALS          AMEMORY         +054D
-PSIV            EQUALS          AMEMORY         +060D
-FV              EQUALS          AMEMORY         +066D
-
-VECTAB          EQUALS          AMEMORY         +072D
-
-TAVEGON         EQUALS          AMEMORY         +072D
-TRESUME         EQUALS          AMEMORY         +074D
-RAVEGON         EQUALS          AMEMORY         +076D
-VAVEGON         EQUALS          AMEMORY         +082D
-RIG-4SEC        EQUALS          AMEMORY         +088D
-ALPHAM          EQUALS          AMEMORY         +108D
-BETAM           EQUALS          AMEMORY         +110D
-TAU             EQUALS          AMEMORY         +112D
-GIVENT          EQUALS          AMEMORY         +112D
-DT/2            EQUALS          AMEMORY         +114D
-H               EQUALS          AMEMORY         +116D
-TDEC            EQUALS          AMEMORY         +118D
-FBRANCH         EQUALS          AMEMORY         +120D
-HBRANCH         EQUALS          AMEMORY         +121D
-GMODE           EQUALS          AMEMORY         +122D
-QREADY          EQUALS          AMEMORY         +123D
-MEASQ           EQUALS          AMEMORY         +124D
-DELTAQ          EQUALS          AMEMORY         +126D
-
-MEASMODE        EQUALS          AMEMORY         +128D
-NVCODE          EQUALS          AMEMORY         +129D
-MIDEXIT         EQUALS          AMEMORY         +130D
-DSPRTRN         EQUALS          AMEMORY         +130D
-INCORPEX        EQUALS          AMEMORY         +131D
-STEPEXIT        EQUALS          AMEMORY         +132D
-DIFEQCNT        EQUALS          AMEMORY         +133D
-NORMGAM         EQUALS          AMEMORY         +133D
-SCALEA          EQUALS          AMEMORY         +134D
-SCALEB          EQUALS          AMEMORY         +135D
-SCALDT          EQUALS          AMEMORY         +136D
-SCALDELT        EQUALS          AMEMORY         +137D
-SCALER          EQUALS          AMEMORY         +138D
-
-YV              EQUALS          AMEMORY         +139D
-ZV              EQUALS          AMEMORY         +145D
-
-PBODY           ERASE
-W               ERASE           +071D
-
-## Page 21
-#  THE FOLLOWING ERASABLE REGISTERS ARE USED BY THE  ENTRY AND INITIALIZATION JOB OF THE FCS TEST FOR LEM.
-
-FCSCNTR         EQUALS          AMEMORY         +000D
-
-#   THE FOLLOWING ERASABLE REGISTERS ARE USED BY THE JETSET TASK.
-
-# (OPTIMUM PRELAUNCH A C USES JETSTEP-JETSTEP +77D FOR RESTART PROOF)
-
-XJBUF           EQUALS          AMEMORY         +001D
-YZJBUF          EQUALS          AMEMORY         +002D
-JFBUF           EQUALS          AMEMORY         +003D
-FCNTR           EQUALS          AMEMORY         +004D
-THBUF           EQUALS          AMEMORY         +005D
-OFFTMBUF        EQUALS          AMEMORY         +006D
-JETSTEP         EQUALS          AMEMORY         +007D
-NTIMES          EQUALS          AMEMORY         +008D
-NEXTTIME        EQUALS          AMEMORY         +016D
-JETONTM         EQUALS          AMEMORY         +024D
-XJETS           EQUALS          AMEMORY         +032D
-YZJETS          EQUALS          AMEMORY         +040D
-JETOFFTM        EQUALS          AMEMORY         +048D
-
-#    THE FOLLOWING ERASABLE REGISTERS ARE USED BY THE ENGINE ON-OFF TASK.
-
-ENGSTEP         EQUALS          AMEMORY         +056D
-CYLTIMES        EQUALS          AMEMORY         +057D
-NEXTCYLT        EQUALS          AMEMORY         +060D
-ONTIME          EQUALS          AMEMORY         +063D
-OFFTIME         EQUALS          AMEMORY         +066D
-OFFTIMER        EQUALS          AMEMORY         +069D
-
-#   THE FOLLOWING ERASABLE REGISTERS ARE USED BY THE TRIM TASK.
-
-TRIMSTEP        EQUALS          AMEMORY         +072D
-NUMTIMES        EQUALS          AMEMORY         +073D
-STEPDLYT        EQUALS          AMEMORY         +085D
-TRIMONT         EQUALS          AMEMORY         +097D
-TRIMOFFT        EQUALS          AMEMORY         +109D
-TRIMIND         EQUALS          AMEMORY         +121D
-
-#   THE FOLLOWING ERASABLE REGISTERS ARE USED BY THE THROTTLE TASK.
-
-THRTSTEP        EQUALS          AMEMORY         +133D
-DOTIMES         EQUALS          AMEMORY         +134D
-DELAY           EQUALS          AMEMORY         +140D
-THR1TIME        EQUALS          AMEMORY         +146D
-THCOMM1         EQUALS          AMEMORY         +152D
-THCOMM2         EQUALS          AMEMORY         +158D
-
-#  THE FOLLOWING ERASABLE REGISTERS ARE USED BY THE INTERFACE LOOK TASK.
-
-## Page 22
-30BUF1          EQUALS          AMEMORY         +164D
-30BUF0          EQUALS          AMEMORY         +168D
-QUITLOOK        EQUALS          AMEMORY         +172D
-CHCNTR          EQUALS          AMEMORY         +173D
-
-                SETLOC          2400
-# THE FOLLOWING ERASABLE LOCATIONS ARE UTILIZED BY THE IN-FLIGHT ALIGNMENT ROUTINES
-
-XSM             ERASE           +17D
-YSM             =               XSM             +6
-ZSM             =               XSM             +12D
-XDC             ERASE           +17D
-YDC             =               XDC             +6
-ZDC             =               XDC             +12D
-XNB             =               XDC
-YNB             =               XDC             +6
-ZNB             =               XDC             +12D
-STARAD          ERASE           +17D
-STAR            ERASE           +5
-SAC             ERASE           +1
-PAC             ERASE           +1
-OGC             ERASE           +1
-IGC             ERASE           +1
-MGC             ERASE           +1
-ZPRIME          =               22D
-PDA             =               22D
-COSTH           =               16D
-SINTH           =               18D
-THETA           =               20D
-STARM           =               32D
-
-
-
-# THE FOLLOWING ERASABLE LOCATIONS ARE UTILIZED BY THE SYSTEM TESTS
-AZIMUTH         ERASE           +1
-LATITUDE        ERASE           +1
-
-EROPTN          ERASE
-ERVECTOR        ERASE           +5
-GYROD           ERASE           +5
-LENGTHOT        ERASE
-LOSVEC          ERASE           +5
-NBPOS           ERASE
-NDXCTR          ERASE
-PIPANO          ERASE
-PIPINDEX        ERASE
-PIPNDX          ERASE           +1
-POSITON         ERASE
-QPLAC           ERASE
-
-## Page 23
-QPLACE          ERASE
-QPLACES         ERASE
-RUN             ERASE
-STOREPL         ERASE
-SOUTHDR         ERASE
-TAZEL1          ERASE           +5
-TEMPTIME        ERASE           +1
-TESTNO          ERASE
-TMARK           ERASE           +1
-SHAFTA          ERASE
-TRUNA           ERASE
-ZERONDX         =               ERCOMP          +5
-GENPL           ERASE           +111D
-
-CDUTIMEI        =               GENPL
-CDUTIMEF        =               GENPL           +2
-CDUDANG         =               GENPL           +4
-CDUREADF        =               GENPL           +5
-CDUREADI        =               GENPL           +6
-CDULIMIT        =               GENPL           +7
-
-TEMPADD         =               GENPL           +4
-TEMP            =               GENPL           +5
-NOBITS          =               GENPL           +6
-CHAN            =               GENPL           +7
-
-LOS1            =               GENPL           +8D
-LOS2            =               GENPL           +14D
-
-CALCDIR         EQUALS          GENPL           +20D
-CDUFLAG         EQUALS          GENPL           +21D
-GYTOBETQ        EQUALS          GENPL           +22D
-OPTNREG         EQUALS          GENPL           +23D
-SAVE            EQUALS          GENPL           +24D            # THREE CONSEC LOC
-SFCONST1        EQUALS          GENPL           +27D
-TIMER           EQUALS          GENPL           +28D
-
-DATAPL          EQUALS          GENPL           +30D
-RDSP            EQUALS          GENPL                           # FIX LATER   POSSIBLY KEEP1
-MASKREG         EQUALS          GENPL           +64D
-CDUNDX          EQUALS          GENPL           +66D
-RESULTCT        EQUALS          GENPL           +67D
-COUNTPL         EQUALS          GENPL           +70D
-
-CDUANG          EQUALS          GENPL           +71D
-AINLA           =               GENPL                           # 110 DEC OR 156 OCT LOCATIONS
-
-WANGO           EQUALS          AINLA                           # VERT ERATE
-WANGI           EQUALS          AINLA           +2D             # HO
-WANGT           EQUALS          AINLA           +4D             # T
-## Page 24
-TORQNDX         =               WANGT
-DRIFTT          EQUALS          AINLA           +6D             # EAST AX
-ALX1S           EQUALS          AINLA           +8D             # IN
-CMPX1           EQUALS          AINLA           +9D             # IND
-ALK             EQUALS          AINLA           +10D            # GAINS
-VLAUNS          EQUALS          AINLA           +22D
-THETAX          =               VLAUNS
-WPLATO          EQUALS          AINLA           +24D
-INTY            EQUALS          AINLA           +28D            # SOUTH PIP INTE
-ANGZ            EQUALS          AINLA           +30D            # EAST AXIS
-INTZ            EQUALS          AINLA           +32D            # EAST PIP I
-ANGY            EQUALS          AINLA           +34D            # SOUTH
-THETAN          =               INTY
-ANGX            EQUALS          AINLA           +36D            # VE
-DRIFTO          EQUALS          AINLA           +38D            # VERT
-DRIFTI          EQUALS          AINLA           +40D            # SOU
-VLAUN           EQUALS          AINLA           +44D            # LAUNCH
-FILDELV         =               VLAUN
-ACCWD           EQUALS          AINLA           +46D            # LAUN
-INTVEC          =               ACCWD
-POSNV           EQUALS          AINLA           +52D            # LAUNC
-DPIPAY          EQUALS          AINLA           +54D            # SOUTH
-DPIPAZ          EQUALS          AINLA           +58D            # NORTH PIP INCREMENT
-ALTIM           EQUALS          AINLA           +60D            # LENG
-ALTIMS          EQUALS          AINLA           +61D            #  INDEX
-ALDK            EQUALS          AINLA           +62D            #  TIME CONSTAN
-DELM            EQUALS          AINLA           +76D
-WPLATI          EQUALS          AINLA           +84D
-GEOSAVED        EQUALS          AINLA           +86D
-PREMTRXC        EQUALS          AINLA           +87D
-PRELMTRX        EQUALS          AINLA           +88D
-TRANSM1         =               PRELMTRX
-GEOCOMPS        EQUALS          AINLA           +106D
-GTSOPNDZ        EQUALS          AINLA           +107D
-1SECXT          EQUALS          AINLA           +108D
-GTSWTLST        EQUALS          AINLA           +109D
-ERECTIME        EQUALS          AINLA           +110D
-GEOMTRX         EQUALS          AINLA           +111D
-ERCOMP          EQUALS          AINLA           +129D
-
-## Page 25
-BMEMORY         EQUALS          GENPL
-DELVY           EQUALS          DELVX           +2
-DELVZ           EQUALS          DELVX           +4
-                SETLOC          3400
-
-#       DOWNLINK STORAGE.
-
-LDATALST        ERASE
-DNTMGOTO        ERASE
-TMINDEX         ERASE
-DNTMBUFF        ERASE           +21D                            # SNAPSHOT BUFFER.
-
-#       RADAR TEST STORAGE.
-
-RTSTDEX         ERASE
-RTSTMAX         ERASE                                           # 66 FOR HI SPEED, 6 FOR LOW SPEED RR,
-                                                                # AND 18 FOR LOW SPEED LR.
-RTSTBASE        ERASE                                           # USED FOR CYCLIC SAMPLING.
-RTSTLOC         ERASE                                           # GOES 0(6)RTSTMAX
-RSTKLOC         EQUALS          RTSTLOC
-RSAMPDT         ERASE                                           # PNZ FOR CYCLIC SAMPLING, -1 FOR HI SPEED
-                                                                # INSERT +0 HERE MANUALLY TO TERMINATE TST
-RFAILCNT        ERASE
-RSTACK          ERASE           +71D                            # BUFFERS FOR RADAR TESTING.
-
-# AGS INITIALIZATION
-AGSBUFF         ERASE           +27D
-#       STORAGE FOR INBIT SCANNER.
-
-LAST30          ERASE           +2                              # LAST SAMPLED INBITS.
-MSGCNT          ERASE
+## Page 13
+LST1            ERASE           +4                              # DELTA TS.
+LST2            ERASE           +11D                            # 2CADR TASK ADDRESSES.
