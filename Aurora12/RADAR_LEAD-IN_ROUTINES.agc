@@ -8,6 +8,8 @@
 ## Pages:        227-255
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-10-20 HG   finished transcription
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -43,9 +45,9 @@ MAGSUB          EXTEND
                 INDEX           Q
                 AD              0
                 EXTEND
-                BZMF            +3                      # ABS(A) LEQ CONSTANT
+                BZMF            +3                      # ABS(A) G CONST
                 INDEX           Q
-                TC              1                       # ABS(A) G CONSTANT
+                TC              1                       # ABS(A) LEQ CONST
 
 MAGLESS         INDEX           Q
                 TC              2
@@ -105,7 +107,7 @@ RRLIMOK         INDEX           L
 ## Page 229
 #          THE FOLLOWING ROUTINE UPDATES THE TRACKER FAIL LAMP ON THE DSKY, IF EITHER:
 
-#          1. N SAMPLES OF RR DATA COULD NOT BE OBTAINS FROM 2N TRIES.
+#          1. N SAMPLES OF RR DATA COULD NOT BE OBTAINED FROM 2N TRIES
 #          2. N SAMPLES OF LR DATA COULD NOT BE TAKEN IN 2N TRIES WITH EITHER THE ALT OR VEL INFORMATION.
 #          3. RR CDU FAILED WITH RR IN AUTO MODE AND RR CDU NOT BEING ZEROED.
 
@@ -119,10 +121,10 @@ SETTRKF         CAF             BIT1                    # NO ACTION IF DURING LA
                 EXTEND
                 BZF             TRKFLON                 # CONDITION 3 ABOVE.
 
-                CS              RADMODES                # SEE IF LR FAILED
+                CS              RADMODES                # SEE IF LR FAILED.
                 MASK            8,5
                 EXTEND
-                BZF             TRKFLON                 # CONDITION 2 ABOVE
+                BZF             TRKFLON                 # CONDITION 2 ABOVE.
 
                 CAF             BIT4                    # SEE IF RR DATA FAILED.
                 MASK            RADMODES
@@ -134,7 +136,7 @@ TRKFLON         CAF             BIT8
                 BZF             TCQ                     # NO CHANGE.
 
                 TS              L                       # INVERT BIT 8 AND SET BIT 15.
-                CA              DSPTAB          +11D    # CAN'T USE LXCH DSPTAB +11D (RESTART PROB)
+                CA              DSPTAB          +11D    # CANT USE LXCH DSPTAB +11D (RESTART PROB)
                 EXTEND
                 RXOR            L
                 MASK            POSMAX
@@ -154,7 +156,7 @@ ENDRMODF        EQUALS
 
 RRTURNON        TC              RRZEROSB
                 TC              FIXDELAY                # WAIT 1 SEC BEFORE REMOVING TURN ON FLAG
-                DEC             100                     # SO A MONITOR REPOSITION WON'T ALARM.
+                DEC             100                     # SO A MONITOR REPOSITION WONT ALARM.
                 CS              BIT1
                 MASK            RADMODES
                 TS              RADMODES
@@ -228,13 +230,13 @@ DORREPOS        TC              SETRRECR                # SET UP RR CDU ERROR CO
                 CAF             BIT15                   # 0 FOR MODE 1 AND 180 FOR MODE 2.
                 TC              RRTONLY
 
-                CAF             BIT12                   # NOW PUT SHAFT IN RIGHT POSITION
+                CAF             BIT12                   # NOW PUT SHAFT IN RIGHT POSITION.
                 MASK            RADMODES
                 CCS             A
                 CS              HALF                    # -90 FOR MODE 2.
                 TC              RRSONLY
 
-REPOSRPT        CS              BIT11                   # RETURNS HERE FROM RR1AXIS IN REMODE
+REPOSRPT        CS              BIT11                   # RETURNS HERE FROM RR1AXIS IF REMODE
                                                         # REQUESTED DURING REPOSITION.
                 MASK            RADMODES                # REMOVE REPOSITION BIT.
                 TS              RADMODES
@@ -246,7 +248,7 @@ REPOSRPT        CS              BIT11                   # RETURNS HERE FROM RR1A
                 WAND            12
                 TCF             TASKOVER
 
-SETRRECR        CAF             BIT2                    # SET UP RR ERROR COUNTERS
+SETRRECR        CAF             BIT2                    # SET UP RR ERROR COUNTERS.
                 EXTEND
                 WOR             12
 
@@ -255,7 +257,7 @@ SETRRECR        CAF             BIT2                    # SET UP RR ERROR COUNTE
                 TS              LASTXCMD
                 TC              Q
 
-## Page 232
+## Page 233
 #          GENERAL REMODING SUBROUTINE. DRIVES TRUNION TO 0 (180), THEN DRIVES SHAFT TO -45, AND FINALLY DRIVES
 # TRUNNION TO -130 (-50) BEFORE INITIATING 2-AXIS CONTROL. ALL RE-MODING IONE WITH SINGLE AXIS ROTATIONS (RR1AXIS)
 REMODE          CAF             BIT12                   # DRIVE TRUNNION TO 0 (180).
@@ -296,7 +298,7 @@ RMODINV         LXCH            RADMODES                # INVERT THE MODE STATUS
 ## Page 234
 #          SUBROUTINES FOR DOING SINGLE AXIS RR MANEUVERS FOR REMODE AND REPOSITION. DRIVES TO WITHIN 1 DEGREE.
 
-RRTONLY         TS              RDES                    # DESIRED TRUNNION ANGLE.
+RRTONLY         TS              RDES                    # DESIRED TRUNION ANGLE.
                 CAF             ZERO
                 TCF             RR1AXIS
 
@@ -324,7 +326,7 @@ RR1AX2          CS              RADMODES                # IF SOMEONE REQUESTES A
                 EXTEND
                 MP              RRSPGAIN                # TRIES TO NULL .7 OF ERROR OVER NEXT .5
                 TS              L
-                CA              Q                       # SEE IF WITHIN 1 DEGREE
+                CA              Q                       # SEE IF WITHIN 1 DEGREE.
                 TC              MAGSUB
                 DEC             -.00555                 # SCALED IN HALF-REVS.
 
@@ -346,14 +348,14 @@ RRSPGAIN        DEC             .59062                  # NULL .7 ERROR IN .5 SE
 #          THE FOLLOWING ROUTINE RECEIVES RR GYRO COMMANDS IN TANG,+1 IN ERROR COUNTER SCALING. RROUT LIMITS THEM
 # AND GENERATES COMMANDS TO THE CDU TO ADJUST THE ERROR COUNTERS TO THE DESIRED VALUES. RUPT MUST BE INHIBITED.
 
-RROUT           LXCH            Q                       # SAVE RETURN
+RROUT           LXCH            Q                       # SAVE RETURN.
                 CAF             ONE                     # LOOP TWICE.
 RROUT2          TS              ITEMP2
                 INDEX           A
                 CA              TANG
-                TS              ITEMP1                  # SAVE SIGN COMMAND FOR LIMITING.
+                TS              ITEMP1                  # SAVE SIGN OF COMMAND FOR LIMITING.
 
-                TC              MAGSUB                  # SEE IF WITHIN LIMITS.
+                TC              MAGSUB                  # SEE IF WITHIN LMITS.
 -RRLIMIT        DEC             -384
                 TCF             RROUTLIM                # LIMIT COMMAND TO MAG OF 384.
 
@@ -396,7 +398,7 @@ RRZERO          INHINT
                 TCF             ROADBACK
 
                 CAF             BIT11                   # SEE IF MONITOR REPOSITION IN PROGRESS.
-                MASK            RADMODES                # IF SO, DON'T RE-ZERO CDUS.
+                MASK            RADMODES                # IF SO, DONT RE-ZERO CDUS.
                 CCS             A
                 TCF             RADNOOP                 # (IMMEDIATE TASK TO RGOODEND).
 
@@ -500,7 +502,7 @@ NODESSM         TC              RMODINV                 # RE-INVERT MODE AND RET
 #          DESIGNATE TO SPECIFIC RR GIMBAL ANGLES (INDEPENDENT OF VEHICLE MOTION).  ENTER WITH DESIRED ANGLES IN
 # TANG AND TANG +1.
 
-RRDESNB         STQ             EXIT                    # ENTER IN INTERP. - EXIT IN BASIC
+RRDESNB         STQ             EXIT                    # ENTER IN INTERP. - EXIT IN BASIC.
                                 DESRET
 
                 INHINT                                  # SEE IF CURRENT MODE OK.
@@ -531,7 +533,7 @@ TRYSWN          TC              RMODINV                 # SEE IF OTHER MODE WILL
                 ADS             RADMODES
                 TCF             OKDESNB
 
-NODESNB         CAF             BIT1                    # CALL FOR ERROR RETURN
+NODESNB         CAF             BIT1                    # CALL FOR ERROR RETURN.
                 TC              WAITLIST
                 2CADR           RDBADEND
 
@@ -558,7 +560,7 @@ STDESIG         CAF             BIT11                   # ENTRY FROM BEGDES AND 
                 TCF             BADDES                  # REPOSITION TO BE IN PROGRESS.
 
                 CCS             RADMODES                # SEE IF CONTINUOUS DESIGNATE WANTED.
-                TCF             +3                      # IF SO, DON'T CHECK BIT 10 TO SEE IF IN
+                TCF             +3                      # IF SO, DONT CHECK BIT 10 TO SEE IF IN
                 TCF             +2                      # LIMITS BUT GO RIGHT TO FINDVAC ENTRY.
                 TCF             MOREDES         +1
 
@@ -567,7 +569,7 @@ STDESIG         CAF             BIT11                   # ENTRY FROM BEGDES AND 
                 CCS             A                       # WITHIN LIMITS IF NOT). IF SO, EXIT AFTER
                 TCF             ENDRADAR                # CHECKING RR CDU FAIL.
 
-                CCS             DESCOUNT                # SEE IF THE TIME LIMIT HAS EXPIRED.
+                CCS             DESCOUNT                # SEE IF TIME LIMIT HAS EXPIRED.
                 TCF             MOREDES
 
                 TC              ALARM                   # OUT OF TIME.
@@ -575,7 +577,7 @@ STDESIG         CAF             BIT11                   # ENTRY FROM BEGDES AND 
                 CS              B14+B2                  # IF OUT OF TIME, REMOVE ECR ENABLE + TRKR
                 EXTEND
                 WAND            12
-BADDES          CS              BIT10                   # REMOVE DESIGNATE FLAG
+BADDES          CS              BIT10                   # REMOVE DESIGNATE FLAG.
                 MASK            RADMODES
                 TS              RADMODES
                 TCF             RDBADEND
@@ -618,7 +620,7 @@ DONBRD          SETPD           SLOAD                   # DO NAVBASE TO RADAR DI
                                 0
                                 TANG            +1
                 RTB             PUSH                    # SHAFT COMMAND = V(32D).(COS(S), 0,
-                                CDULOGIC                #       -SIN(S)).
+                                CDULOGIC                #       (-SIN(S)).
                 SIN             PDDL                    # SIN(S) TO 0 AND COS(S) TO 2.
                 COS             PUSH
                 DMP             PDDL
@@ -658,7 +660,7 @@ DONBRD          SETPD           SLOAD                   # DO NAVBASE TO RADAR DI
                 TCF             +3                      # GYRO CAUSES A POSITIVE CHANGE IN THE
 
                 CS              TANG +1                 # SHAFT ANGLE.  COMPENSATE FOR THIS SWITCH
-                TS              TANG +1                 # BY CHANGING THE POLARITY FOR OUR COMMAND.
+                TS              TANG +1                 # BY CHANGING THE POLARITY OF OUR COMMAND.
 
                 CAF             ZERO
                 TS              MPAC +1
@@ -731,7 +733,7 @@ RDESGAIN        DEC             .53624                  # TRIES TO NULL .5 ERROR
 ## Page 246
 # RADAR READ INITIALIZATION
 
-# RADAR DATA READ BY A BANKCALL FOR THE APPROPRIATE LEAD-IN BELOW.
+# RADAR DATA ARE READ BY A BANKCALL FOR THE APPROPRIATE LEAD-IN BELOW.
 
 
 
@@ -855,7 +857,7 @@ VELCHK          CAF             BIN3                    # = 00003 OCT
                 MASK            BIT1
                 DXCH            ITEMP3
 
-                CAF             BIT8                    # DATA GOOD ISN'T CHECKED UNTIL AFTER READ-
+                CAF             BIT8                    # DATA GOOD ISNT CHECKED UNTIL AFTER READ-
                 TC              DGCHECK                 # ING DATA SO SOME RADAR TESTS WILL WORK
                                                         # INDEPENDENT OF DATA GOOD.
 
@@ -866,7 +868,7 @@ GOODRAD         CS              ONE
                 CS              ITEMP1                  # WHEN ENOUGH GOOD DATA HAS BEEN GATHERED,
                 MASK            RADMODES                # RESET DATA FAIL FLAGS FOR SETTRKF.
                 TS              RADMODES
-                TC              SETTRKF                 # LAMPS MIGHT GO OFF IF DATA JUST GOOD.
+                TC              SETTRKF                 # LAMP MIGHT GO OFF IF DATA JUST GOOD.
                 TC              RGOODEND        -2
 
 NOEND           TS              NSAMP
@@ -890,16 +892,16 @@ RENDRAD         CAF             BIT11                   # MAKE SURE ANTENNA HAS 
                 CCS             A
                 TCF             BADRAD
 
-                CS              RADMODES                # BE SURE RR CDU HASN'T FAILED.
+                CS              RADMODES                # BE SURE RR CDU HASNT FAILED.
                 MASK            BIT7
                 CCS             A
                 TCF             BADRAD
 
 ## Page 250
-                CAF             BIT12                   # DONT ACCEPT RR DATA IF TRUNION MORE
+                CAF             BIT12                   # DONT ACCEPT RR DATA IF TRUNNION MORE
                 MASK            RADMODES                # THAN 55 DEGREES FROM NOMINAL POSITION.
                 CCS             A
-                CAF             BIT15                   # 180 FOR MODE 2 - 0 FRO MODE 1.
+                CAF             BIT15                   # 180 FOR MODE 2 - 0 FOR MODE 1.
                 EXTEND
                 MSU             OPTY
                 TC              MAGSUB
@@ -926,7 +928,7 @@ SCALECHK        EXTEND
                 EXTEND
                 RXOR            01                      # SEE IF THEY DIFFER
                 CCS             A
-                TC              SCALCHNG                # THEY DIFFER.
+                TC              SCALCHNG                # THEY DIFFER
 
 RADIN           CAF             POSMAX
                 MASK            RNRAD
@@ -960,9 +962,9 @@ SCALCHNG        LXCH            RADMODES
                 TCF             BADRAD
 
 ## Page 252
-#          THE FOLLOWING ROUTINE INCORPORATES RR RANGE AND LR ALT SCALE INFORMATION AND LEAVES DATA LO SCALE.
+#          THE FOLLOWING ROUTINE INCORPORATES RR RANGE AND LR ALT SCALE INFORMATION AND LEAVES DATA AT LO SCALE.
 
-SCALADJ         CCS             L                       # L HAS SCALE INHIBIT FOR THIS RADAR.
+SCALADJ         CCS             L                       # L HAS SCALE INBIT FOR THIS RADAR.
                 TCF             +2                      # ON HIGH SCALE.
                 TCF             DGCHECK2
 
@@ -1018,7 +1020,7 @@ DATAFAIL        CS              ITEMP1                  # IN THE ABOVE CASE, SET
                 TCF             NOMORE
 
 LRRATIO         DEC             4.9977          B-3
-LVELBIAS        DEC             -12000                  # LANDING RADAR BIAS.
+LVELBIAS        DEC             -12000                  # LANDING RADAR VELOCITY BIAS.
 RDOTBIAS        2DEC            17000                   # BIAS COUNT FOR RR RANGE RATE
 
 ## Page 254
@@ -1026,7 +1028,7 @@ RDOTBIAS        2DEC            17000                   # BIAS COUNT FOR RR RANG
 
 LRPOS2          INHINT
 
-                CS              BIT6                    # SHOW DESIRED LR POSITION IS NOW 2.
+                CS              BIT6                    # DESIRED LR POSITION IS NOW 2.
                 MASK            RADMODES
                 AD              BIT6
                 TS              RADMODES
@@ -1047,7 +1049,7 @@ LRPOS2          INHINT
 
                 TC              ROADBACK
 
-MAKESURE        CS              BIT13                   # REMOVE LR POSITION COMMAND OUTBIT
+MAKESURE        CS              BIT13                   # REMOVE LR POSITION COMMAND OUTBIT.
                 EXTEND
                 WAND            12
 

@@ -10,6 +10,8 @@
 ##  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 ## Website:	http://www.ibiblio.org/apollo.
 ## Mod history:	10/05/09 FB	Transcription of Batch FB-1 Assignment.
+##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed
 ## from scanned documents.
@@ -37,8 +39,10 @@
 		EBANK=	DNTMBUFF
 
 # SPECIAL DOWNLINK OP CODES
-#	OP CODE		ADDRESS (EXAMPLE)	SENDS...		BIT 15		BITS 14-12	BITS 11-0
-#	-------		-----------------	--------		------		----------	---------
+#	OP CODE		ADDRESS (EXAMPLE)	SENDS..			BIT 15		BITS 14-12	BITS 11
+#													     -0
+#	-------		----------		----------		------		----------	-------
+#													     --
 #	1DNADR		TIME2			(2 AGC WDS)		0		0		ECADR
 #	2DNADR		TEPHEM			(4 AGC WDS)		0		1		ECADR
 #	3DNADR		VGBODY			(6 AGC WDS)		0		2		ECADR
@@ -48,9 +52,9 @@
 #	DNCHAN		30			CHANNELS		0		7		CHANNEL
 #													ADDRESS
 #	DNPTR		NEXTLIST		POINTS TO NEXT		0		6		ADRES
-#						LIST
+#						LIST.
 #
-# DOWNLIST FORMAT DEFINITIONS AND RULES --
+# DOWNLIST FORMAT DEFINITIONS AND RULES-
 # 1. END OF A LIST = -XDNADR (X = 1 TO 6), -DNPTR, OR -DNCHAN.
 # 2. SNAPSHOT SUBLIST = LIST WHICH STARTS WITH A -1DNADR.
 # 3. SNAPSHOT SUBLIST CAN ONLY CONTAIN 1DNADRS.
@@ -73,7 +77,7 @@ UPDNLIST	EQUALS	CMENTRDL			# UPDATE PROGRAM (P27) DOWNLIST
 ## Page 171
 # CSM POWERED FLIGHT DOWNLIST
 #
-# --------------------- CONTROL LIST -------------------------
+# --------------------------CONTROL LIST----------------------------------
 
 CMPOWEDL	EQUALS
 		DNPTR	CMPOWE01			# COLLECT SNAPSHOT
@@ -86,7 +90,7 @@ CMPOWEDL	EQUALS
 		3DNADR	RTARG				# RTARG,+1,+2,...+5
 		1DNADR	TGO				# TGO,+1
 		1DNADR	PIPTIME1			# PIPTIME1,+1
-		3DNADR	DELV				# DELV,+1,...,+4,+5
+		3DNADR	DELV				# DELV,+1,...+4,+5
 		1DNADR	PACTOFF				# PACTOFF,YACTOFF
 		1DNADR	PCMD				# PCMD,YCMD
 		1DNADR	CSTEER				# CSTEER,+1
@@ -94,7 +98,7 @@ CMPOWEDL	EQUALS
 		6DNADR	REFSMMAT			# REFSMMAT,+1,...+10,+11
 		DNPTR	CMPOWE04			# COMMON DATA
 		1DNADR	TIME2				# TIME2,TIME1
-		DNPTR	CMPOWE05			# COMMON DATA
+		DNPTR	CMPOWE05			# COLLECT SNAPSHOT
 		6DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMPOWE02			# COLLECT SNAPSHOT
 		4DNADR	DNTMBUFF			# SEND SNAPSHOT
@@ -103,15 +107,15 @@ CMPOWEDL	EQUALS
 		1DNADR	ELEV				# ELEV,+1
 		1DNADR	CENTANG				# CENTANG,+1
 		1DNADR	DELTAR				# DELTAR,+1
-		1DNADR	STATE	+10D			# FLAGWORDS 10 AND 11
+		1DNADR	STATE	+10D			# FALGWRDS 10 AND 11
 		1DNADR	TEVENT				# TEVENT,+1
 		1DNADR	PCMD				# PCMD,YCMD
 		1DNADR	OPTMODES			# OPTMODES,HOLDFLAG
 		DNPTR	CMPOWE07			# COMMON DATA
-		3DNADR	VGTIG				# VGTIG,+1,...,+4,+5
+		3DNADR	VGTIG				# VGTIG,+1,...+4,+5
 		-3DNADR DELVEET2			# CDH DELTA VELOCITY COMPONENTS   (98-100)
 
-# --------------------- SUB LISTS ---------------------------
+# ---------------------------SUB LISTS------------------------------------
 
 CMPOWE01	-1DNADR	RN	+2			# RN +2,+3			SNAPSHOT DATA
 		1DNADR	RN	+4			# RN +4,+5
@@ -157,11 +161,11 @@ CMPOWE07	1DNADR	LEMMASS				# LEMMASS,CSMMASS		COMMON DATA
 		DNCHAN	30				# CHANNELS 30,31
 		-DNCHAN	32				# CHANNELS 32,33
 
-# -----------------------------------------------------------
+# ------------------------------------------------------------------------
 ## Page 173
 # CSM COAST AND ALIGNMENT DOWNLIST
 
-# --------------------- CONTROL LIST ------------------------
+# ------------------------------CONTROL LIST------------------------------
 
 CMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMCSTA01			# COLLECT SNAPSHOT
@@ -171,8 +175,8 @@ CMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMCSTA03			# COMMON DATA
 		1DNADR	TIG				# TIG,+1
 		1DNADR	BESTI				# BESTI,BESTJ
-		4DNADR	MARKDOWN			# MARKDOWN,+1,...+5,+6,GARBAGE
-		4DNADR	MARK2DWN			# MARK2DWN,+1,...+5,+6
+		4DNADR	MARKDOWN			# MARKDOWN,+1...+5,+6,GARBAGE
+		4DNADR	MARK2DWN			# MARK2DWN,+1...+5,+6
 		2DNADR	HAPOX				# APOGEE AND PERIGEE FROM R30   (28-29)
 		1DNADR	PACTOFF				# PACTOFF, YACTOFF                 (30)
 		3DNADR	VGTIG				# VGTIG,...+5
@@ -186,14 +190,14 @@ CMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMCSTA03			# COMMON DATA
 		DNPTR	CMCSTA06			# COMMON DATA
 		3DNADR	OGC				# OGC,+1,IGC,+1,MGC,+1
-		1DNADR	STATE	+10D			# FLAGWRDS 10 AND 11
+		1DNADR	STATE	+10D			# FALGWRDS 10 AND 11
 		1DNADR	TEVENT				# TEVENT,+1
 		1DNADR	LAUNCHAZ			# LAUNCHAZ,+1
 		1DNADR	OPTMODES			# OPTMODES,HOLDFLAG
 		DNPTR	CMCSTA07			# COMMON DATA
 		-6DNADR	DSPTAB				# DISPLAY TABLES
 
-# --------------------- SUB LISTS ---------------------------
+# --------------------------SUB LISTS-------------------------------------
 
 CMCSTA01	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
 
@@ -210,11 +214,11 @@ CMCSTA06	EQUALS	CMPOWE06			# COMMON DOWNLIST DATA
 CMCSTA07	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 
 ## Page 174
-# -----------------------------------------------------------
+# ------------------------------------------------------------------------
 ## Page 175
 # CSM RENDEZVOUS AND PRETHRUST LIST
 
-# --------------------- CONTROL LIST ------------------------
+# --------------------CONTROL LIST----------------------------------------
 
 CMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMREND01			# COLLECT SNAPSHOT
@@ -224,7 +228,7 @@ CMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMREND03			# COMMON DATA
 		1DNADR	TIG				# TIG,+1
 		1DNADR	DELLT4				# DELLT4,+1
-		3DNADR	RTARG				# RTARG,+1,...+4,+5
+		3DNADR	RTARG				# RTARG,+1...+4,+5
 		1DNADR	VHFTIME				# VHFTIME,+1
 		4DNADR	MARKDOWN			# MARKTIME(DP),YCDU,SCDU,ZCDU,TCDU,XCDU,RM
 		1DNADR	VHFCNT				# VHFCNT,+1
@@ -243,18 +247,18 @@ CMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		4DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMREND03			# COMMON DATA
 		DNPTR	CMREND06			# COMMON DATA
-		1DNADR	DIFFALT				# CDH DELTA ALTITUDE
+		1DNADR	DIFFALT				# CDH DELTA ALTITUDE			(74)
 		1DNADR	CENTANG				# CENTANG,+1
 		1DNADR	DELTAR				# DELTAR,+1
-		3DNADR	DELVEET3			# DELVEET3,+1,...,+4,+5
+		3DNADR	DELVEET3			# DELVEET3,+1,...+4,+5
 		1DNADR	OPTMODES			# OPTMODES,HOLDFLAG
 		DNPTR	CMREND07			# COMMON DATA
 		1DNADR	RTHETA				# RTHETA,+1
 		2DNADR	LAT(SPL)			# LAT(SPL),LNG(SPL),+1
 		2DNADR	VPRED				# VPRED,+1,GAMMAEI,+1
-		-1DNADR	STATE	+10D			# FLAGWRDS 10 AND 11
+		-1DNADR	STATE	+10D			# FALGWRDS 10 AND 11
 
-# --------------------- SUB LISTS ----------------------------
+# --------------------------SUB LISTS-------------------------------------
 
 CMREND01	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
 
@@ -270,22 +274,22 @@ CMREND06	EQUALS	CMPOWE06			# COMMON DOWNLIST DATA
 
 CMREND07	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 
-# ------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 ## Page 177
 # CSM ENTRY AND UPDATE DOWNLIST
-# --------------------- CONTROL LIST -------------------------
+# ---------------------------CONTROL LIST---------------------------------
 
 CMENTRDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMENTR01			# COLLECT SNAPSHOT
 		6DNADR	DNTMBUFF			# SEND SNAPSHOT
-		DNPTR	CMENTR02			# COLLECT SNAPSHOT
+		DNPTR	CMENTR02			# COLLECT SECOND SNAPSHOT
 		4DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMENTR03			# COMMON DATA
 		2DNADR	CMDAPMOD			# CMDAPMOD,PREL,QREL,RREL
-		1DNADR	L/D1				# L/D1,+1
-		6DNADR	UPBUFF				# UPBUFF,+1,...+10,+11
-		4DNADR	UPBUFF	+12D			# UPBUFF+12,13,...+18,+19D
+		1DNADR	L/D1				# L/D1.+1
+		6DNADR	UPBUFF				# UPBUFF,+1...+10,+11
+		4DNADR	UPBUFF	+12D			# UPBUFF+12,13...+18,19D
 		2DNADR	COMPNUMB			# COMPNUMB,UPOLDMOD,UPVERB,UPCOUNT
 		1DNADR	PAXERR1				# PAXERR1,ROLLTM
 		3DNADR	LATANG				# LATANG,+1,RDOT,+1,THETAH,+1
@@ -296,12 +300,12 @@ CMENTRDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMENTR05			# COLLECT SNAPSHOT
 		6DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMENTR02			# COLLECT SNAPSHOT
-		4DNADR	DNTMBUFF			# SENT SNAPSHOT
+		4DNADR	DNTMBUFF			# SEND SNAPSHOT
 		2DNADR	AK				# AK,AK1,AK2,RCSFLAGS
 		3DNADR	ERRORX				# ERRORX/Y/Z,THETADX/Y/Z
 		2DNADR	CMDAPMOD			# CMDAPMOD,PREL,QREL,RREL
-		6DNADR	UPBUFF				# UPBUFF+0,+1,...+10,+11D
-		4DNADR	UPBUFF	+12D			# UPBUFF+12,+13,...+18,+19D
+		6DNADR	UPBUFF				# UPBUFF+0,+1...+10,+11D
+		4DNADR	UPBUFF	+12D			# UPBUFF+12,+13...+18,+19D
 		1DNADR	LEMMASS				# LEMMASS,CSMMASS
 		1DNADR	DAPDATR1			# DAPDATR1,DAPDATR2
 		1DNADR	ROLLTM				# ROLLTM,ROLLC
@@ -315,10 +319,10 @@ CMENTRDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNCHAN	32				# CHANNELS 32,33
 		1DNADR	RSBBQ				# RSBBQ,+1
 		3DNADR	CADRFLSH			# CADRFLSH,+1,+2,FAILREG,+1,+2
-		1DNADR	STATE	+10D			# FLAGWRDS 10 AND 11
+		1DNADR	STATE	+10D			# FALGWRDS 10 AND 11
 		-1DNADR	GAMMAEI				# GAMMAEI,+1
 
-# --------------------- SUB LISTS ----------------------------
+# ----------------------------SUB LISTS-----------------------------------
 
 CMENTR01	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
 ## Page 178
@@ -338,10 +342,12 @@ CMENTR05	-1DNADR	DELV				# DELV,+1			SNAPSHOT DATA
 
 CMENTR07	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 ## Page 179
-# --------------------- CONTROL LIST --------------------------
+# P22 DOWNLISTS
+
+# --------------------------CONTROL LIST----------------------------------
 
 CMPG22DL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMPG2201			# COLLECT SNAPSHOT
@@ -350,7 +356,7 @@ CMPG22DL	EQUALS					# SEND ID BY SPECIAL CODING
 		4DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMPG2203			# COMMON DATA
 		6DNADR	SVMRKDAT			# LANDING SITE MARK DATA
-		6DNADR	SVMRKDAT +12D			# SVMRKDAT+0,...+34
+		6DNADR	SVMRKDAT +12D			# SVMRKDAT+0...+34
 		6DNADR	SVMRKDAT +24D			# LANDING SITE MARK DATA
 		1DNADR	LANDMARK			# LANDMARK,GARBAGE
 		1DNADR	SPARE
@@ -369,7 +375,7 @@ CMPG22DL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMPG2203			# COMMON DATA
 		DNPTR	CMPG2206			# COMMON DATA
 		1DNADR	8NN				# 8NN,GARBAGE
-		1DNADR	STATE	+10D			# FLAGWRDS 10 AND 11
+		1DNADR	STATE	+10D			# FALGWRDS 10 AND 11
 		3DNADR	RLS				# RLS,+1,...+4,+5
 		1DNADR	SPARE
 		1DNADR	OPTMODES			# OPTMODES,HOLDFLAG
@@ -381,7 +387,7 @@ CMPG22DL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	SPARE
 		-1DNADR	SPARE
 
-# --------------------- SUB LISTS --------------------------
+# -----------------------------SUB LISTS----------------------------------
 
 CMPG2201	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
 
@@ -399,7 +405,7 @@ CMPG2206	EQUALS	CMPOWE06			# COMMON DOWNLIST DATA
 
 CMPG2207	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 
-# -----------------------------------------------------------
+# ------------------------------------------------------------------------
 
 DNTABLE		GENADR	CMCSTADL
 		GENADR	CMENTRDL
@@ -407,5 +413,5 @@ DNTABLE		GENADR	CMCSTADL
 		GENADR	CMPOWEDL
 		GENADR	CMPG22DL
 
-# -----------------------------------------------------------
+# ------------------------------------------------------------------------
 

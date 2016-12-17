@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    PINBALL_GAME__BUTTONS_AND_LIGHTS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -15,6 +16,7 @@
 ##              2016-11-18 MAS  Started corrections.
 ##              2016-11-20 MAS  Completed. Mostly comments, bank movements,
 ##                              and minor changes related to new lights.
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 402
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -2820,7 +2822,7 @@ DSPALARM	CS	NVSBENDL
 		TC	PASTEVB		# PUT MONITOR VERB BACK IN VERBREG
 CHARALRM	TC	FALTON		# NOT NVSUB INITIATED. TURN ON OPR ERROR
 		TC	ENDOFJOB
-		TC	P00DOO
+		TC	POODOO
 		OCT	21501
 MONADR		GENADR	PASTEVB
 NVSBENDL	TC	NVSUBEND
@@ -3741,8 +3743,8 @@ PINTEST		EQUALS	LST2FAN
 		
 		COUNT*	$$/PIN
 VBTSTLTS	INHINT
-		TC	BANKCALL	# OPP ERR IF NOT IN P00
-		CADR	CHKP00H
+		TC	BANKCALL	# OPP ERR IF NOT IN POO
+		CADR	CHKPOOH
 		CS	BIT1		# SET BIT 1 OF IMODES33 SO IMUMON WONT
 		MASK	IMODES33	# TURN OUT ANY LAMPS.
 		AD	BIT1

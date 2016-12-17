@@ -10,6 +10,8 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-29 MAS  Adapted from Colossus 237.
 ##		 2016-10-31 RSB	 Typos.
+##		 2016-12-06 RSB	 Comment-proofing via octopus/ProoferComments;
+##				 no changes were made.
 
 ## Page 842
 # *************************************************************************************************************

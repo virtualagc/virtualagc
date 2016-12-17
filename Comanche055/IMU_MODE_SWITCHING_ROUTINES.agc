@@ -13,6 +13,8 @@
 ##				using Comanche055 page images.
 ##		2010-08-20 JL	Fixed page number comment (p1447).
 ##				Fixed some pseudo-label indents.
+##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##				GOTOPOOH, and I've changed them back.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -890,7 +892,7 @@ KALEBCON	ECADR	BCDU
 #	AT L+2 OF CALLING SEQUENCE
 #
 # ALARM OR ABORT EXIT MODES
-#	GOTOP00H, WITH ALARM
+#	GOTOPOOH, WITH ALARM
 #
 # ERASABLE INITIALIZATION REQUIRED
 #	NONE
@@ -917,7 +919,7 @@ R02BOTH		CAF	BIT13
 		AD	OCT220		# SEND REFSMM ALARM
 		TC	VARALARM
 
-		TC	GOTOP00H
+		TC	GOTOPOOH
 
 ## Page 1444
 R02ZERO		TC	UPFLAG
@@ -1065,7 +1067,7 @@ POSTCOM		EXTEND			# C(MPAC,+1) IS MAGNITUDE OF DELTA SCALER.
 		TC	DOWNFLAG	# CLEAR NODOFLAG
 		ADRES	NODOFLAG
 
-		TC	GOTOP00H
+		TC	GOTOPOOH
 		
 
 

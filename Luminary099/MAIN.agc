@@ -99,8 +99,8 @@ $PINBALL_GAME__BUTTONS_AND_LIGHTS.agc		        # pp. 390-471
 $R60,R62.agc					        # pp. 472-485
 $S-BAND_ANTENNA_FOR_LM.agc			        # pp. 486-489
 $RADAR_LEADIN_ROUTINES.agc			        # pp. 490-491
-$P20-P25.agc					        # pp. 492-614
-$P30,P37.agc					        # pp. 615-617
+$P20-P25.agc					        # pp. 492-613
+$P30,P37.agc					        # pp. 614-617
 $P32-P35,_P72-P75.agc				        # pp. 618-650
 $LAMBERT_AIMPOINT_GUIDANCE.agc			        # pp. 651-653
 $GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc        # pp. 654-657

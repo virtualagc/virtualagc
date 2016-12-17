@@ -10,6 +10,8 @@
 ##               2016-09-30 MAS  Began.
 ##               2016-10-01 MAS  Completed transcription.
 ##               2016-10-04 HG   Capitalize SETLOC`
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 but no errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 

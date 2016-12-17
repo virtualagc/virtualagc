@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    RESTART_TABLES.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -13,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-18 MAS  Transcribed.
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 249
 # RESTART TABLES
@@ -227,11 +229,11 @@ SIZETAB		TC	1.2SPOT -12006
 
 4.33SPOT	OCT	46777
 		EBANK=	DVCNTR
-		2CADR	GOP00FIX
+		2CADR	GOPOOFIX
 		
 4.35SPOT	OCT	46777
 		EBANK=	DVCNTR
-		2CADR	GOP00DOO
+		2CADR	GOPOODOO
 		
 4.37SPOT	OCT	52777
 		EBANK=	WHICH

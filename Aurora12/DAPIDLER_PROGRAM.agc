@@ -8,6 +8,8 @@
 ## Pages:        557-561
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-10-15 HG   FIx operand IZZMASK -> IZZTASK
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -126,7 +128,7 @@ STARTDAP        CAF             ZERO
                 CA              .075DEC                 # INITIALIZE 100 MS JET PULSE TORQUE TERMS
                 TS              100MSPTQ                #   TO VALUES WHEN K = 1/2.
                 TS              QR.1STOQ                # AOSTASK MUST VARY THESE AS K VARIES.
-# ****** JON ADDELSTON TAKE NOTE OF THE ABOVE COMMENT - DICK GRAN.
+# ****** JON ADDELSTON TAKE NOT OF THE ABOVE COMMENT - DICK GRAN.
 ## Page 559
                 CA              10AT16
                 TS              WFORP                   ## HANDWRITTEN NOTATION:
@@ -151,7 +153,7 @@ STARTDAP        CAF             ZERO
                 
 # THIS SECTION COMPUTES THE RATE OF CHANGE OF ACCELERATION DUE TO THE
 #   ROTATION OF THE GIMBAL ENGINE. THE EQUATION IMPLEMENTED IN BOTH THE
-#   X-Y PLANE AND THE Z-X PLANE IS -- D(ALPHA)/DT = T L/I * D(DELTA)/DT
+#   Y-X PLANE AND THE Z-X PLANE IS -- D(ALPHA)/DT = T L/I * D(DELTA)/DT
 #   WHERE ----
 #             T = ENGINE THRUST COMMAND
 #             L = PIVOT TO CG DISTANCE OF THE GIMBAL ANGLE
@@ -220,7 +222,7 @@ GOIDLADR        EQUALS          IDLERADR
 VISFZADR        GENADR          CHKVISFZ
 WCHANGER        CA              0.31250                 # CHANGE WFORP AND WFORQR
                 TS              WFORP                   # TO REFLECT 100 MS INTERVAL
-                TS              WFORQR                  # WHICH CAUSES SMOTHING IN RATE FILTER.
+                TS              WFORQR                  # WHICH CAUSES SMOOTHING IN RATE FILTER.
                 TCF             TASKOVER                # BETWEEN 1ST QR AND 2ND P AFTER STARTDAP
 .707P           DEC             .70711                  # SQUARE ROOT OF 1/2
 PAXADIDL        2CADR           PAXIS

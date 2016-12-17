@@ -13,6 +13,11 @@
 ## Website:	www.ibiblio.org/apollo
 ## Mod history:	05/24/03 RSB.	Began transcribing.
 ##		2010-01-05 JL	Fixed indentation of STADR instruction.
+##		2016-12-01 RSB	There were a number of "modern" comments about hand-written
+##				notations, which I had added back in 2003, but whiche never
+##				got converted to ##-style.  However, after having changed them
+##				to ##-style, they no longer worked properly after being rendered
+##				to html, so they had to be considerably reworked to fix that.
 
 ## Page 752
 # PROGRAM DESCRIPTION: F40BOTH		DECEMBER 22, 1966
@@ -22,7 +27,7 @@
 # FUNCTIONAL DESCRIPTION
 #	1)	TO COMPUTE A PREFERRED IMU ORIENTATION AND A PREFERRED VEHICLE ATTITUDE FOR A LM DPS
 #		THRUSTING MANEUVER.
-# (There is no item #2 in the original program listing --- RSB 2003.)
+## There is no item #2 in the original program listing &mdash; RSB 2003.
 #	3)	TO DO THE VEHICLE MANEUVER TO THE THRUSTING ATTITUDE.
 #	4)	TO CONTROL THE PGNCS DURING COUNTDOWN, IGNITION, THRUSTING, AND THRUST TERMINATION OF A
 #		PGNCS CONTROLLED DPS MANEUVER.
@@ -201,9 +206,9 @@ P41LM		CAF	P41ADRES	# INITIALIZATION FOR BURNBABY
 		CADR	R02BOTH
 
 		TC	INTPRET		# BOTH LM
-# In the original program listing, the following line has a hand-written notation in the
-# label field which appears to be "rrPIN" or "PPPIN". I don't claim to know that this means,
-# but I present it for your delectation.---RSB 2003.
+## In the original program listing, the following line has a hand-written notation in the
+## label field which appears to be "rrPIN" or "PPPIN". I don't claim to know that this means,
+## but I present it for your delectation.&mdash;RSB 2003.
 		BON	DLOAD		# IF NJETSFLAG IS SET, LOAD Z JET F
 			NJETSFLG
 			P41FJET1
@@ -993,8 +998,8 @@ S40.13		TC	INTPRET
 			S40.13D		# FOR DPS ENGINE
 			NOTHROTL
 		DLOAD	DDV		# 00D = MAG OF VGTIG CORRECTED
-		# In the following line in the original program listing, +24 is crossed
-		# out and +23 written in by hand.---RSB 2003
+		## In the following line in the original program listing, +24 is crossed
+		## out and +23 written in by hand.&mdash;RSB 2003
 			K1VAL		# M.NEWTONS-CS AT +23
 			WEIGHT/G
 		BDSU	BMN
@@ -1026,8 +1031,8 @@ S40.13		TC	INTPRET
 			S40.132
 S40.131		DLOAD	DMP
 			WEIGHT/G
-		# In the following line in the original program listing, PUSH is
-		# hand-circled.---RSB 2003
+## In the following line in the original program listing, PUSH is
+## hand-circled.&mdash;RSB 2003
 		SR1	PUSH
 		DAD	DDV
 			K2VAL		# M.NEWTON CS AT +24
@@ -1036,12 +1041,12 @@ S40.132		SET	EXIT
 			IMPULSW
 S40.132*	TC	TPAGREE
 		CA	MPAC
-		# In the following line in the original program listing,
-		# TS TGO +1 is hand-written in the comment area.---RSB 2003
+## In the following line in the original program listing,
+## TS TGO +1 is hand-written in the comment area.&mdash;RSB 2003
 		XCH	L
 		CA	ZERO
-		# In the original program listing, TS TGO is hand-written,
-		# seemingly between CA ZERO and DXCH TGO.---RSB 2003.
+## In the original program listing, TS TGO is hand-written,
+## seemingly between CA ZERO and DXCH TGO.&mdash;RSB 2003.
 		DXCH	TGO
 		TCF	S40.134
 
@@ -1182,43 +1187,71 @@ RASTEER1	VLOAD	ABVAL
 			MU/A
 		BDSU
 			MUASTEER
-		# In the original program listing, the following line has a hand-written
-		# comment which appears to be something like
-		#             (S - C) u
-		#	( u - --------- )
-		#                2 a
-		# where `u' represents a lower-case Greek MU.  Other similar handwritten
-		# comments are included below without further apology.---RSB 2003.
+## In the original program listing, the following line has a hand-written
+## comment which appears to be something like
+## <pre>
+##          (S - C) &mu;
+##    ( &mu; - --------- )
+##             2 a
+## </pre>
+## Other similar handwritten comments are included below without further apology.&mdash;RSB 2003.
+## (RSB 2016.)  If you refer to the equivalent log section for Luminary 210, you'll see that the
+## code code has remained the same but that actual program comments similar to these hand-written
+## comments have appeared.
 		PDDL	DSU
 			SS
-			RMAG		# (S-R) is written in by hand.
+## (S-R) is written in by hand.
+			RMAG
 		NORM	SR1
-			X1		#   (S - R)       u (S - C)
-		DDV	DMP		# 2 ------- ( u - --------- )
-			R1C		#     R C            2 a
+			X1		
+## <pre>
+##   (S - R)       &mu; (S - C)
+## 2 ------- ( &mu; - --------- )
+##     R C            2 a
+## </pre>
+		DDV	DMP
+			R1C
 		XSU,2	SL*
 			X1
 			1,2
-		LXA,2			#        2 (S - R)      u (S - C)
-			MUSCALE		# SQRT ( --------- (u - --------- ) )
-		SQRT	SIGN		#           R C            2 a
-			GEOMSGN		# (GEOMSGN = SGNA)
+		LXA,2			
+			MUSCALE		
+## <pre>
+##        2 (S - R)      &mu; (S - C)
+## SQRT ( --------- (&mu; - --------- ) )
+##           R C            2 a
+## </pre>
+		SQRT	SIGN		
+## (GEOMSGN = SGNA)
+			GEOMSGN		
 		STORE	32D		# + OR - A
-		#                  2 (S - R)      u (S - C)
-		# A = SGNA (SQRT ( --------- (u - ---------) ) )
-		#                     R C            2 a
+## <pre>
+##                  2 (S - R)      &mu; (S - C)
+## A = SGNA (SQRT ( --------- (&mu; - ---------) ) )
+##                     R C            2 a
+## </pre>
 		DLOAD	DMP
 			SS
-			MU/A		#     u S
-		BDSU			# u - ___
-			MUASTEER	#     2 a
+			MU/A		
+## <pre>
+##     &mu; S
+## &mu; - ___
+##     2 a
+## </pre>
+		BDSU			
+			MUASTEER	
 		PDDL	DSU
 			SS
 			RTMAG
 		NORM	SR1
-			X1		# 2 (S - R T)       u S
-		DDV	DMP		# ----------- ( u - --- )
-					#     R C           2 a
+			X1		
+## <pre>
+## 2 (S - R T)       &mu; S
+## ----------- ( &mu; - --- )
+##     R C           2 a
+## </pre>
+		DDV	DMP		
+					
 ## Page 778
 			R1C
 		XSU,2	SL*
@@ -1230,33 +1263,47 @@ RASTEER1	VLOAD	ABVAL
 			30D
 			SS
 		SQRT	PUSH
-		SR1	ASIN		# ASIN ( SQRT (S-C)/S ) )
+## ASIN ( SQRT (S-C)/S ) )
+		SR1	ASIN		
 		DMP	PDDL
 			2PI+3
 		PDDL	DDV
 			30D
 			SS
-		BOV			# SQRT (C/S) SQRT ( (S-C)/S )
+## SQRT (C/S) SQRT ( (S-C)/S ) =
+		BOV			
 			+1
-		SQRT	DMP		# SQRT(C/S) SQRT((S-C)/S) = (1/S) SQRT(C(S-C))
+## SQRT(C/S) SQRT((S-C)/S) = (1/S) SQRT(C(S-C))
+		SQRT	DMP		
 		SR3	BDSU
+## SGNA( ARCSIN( SQRT((S-C)/S) ) - (1/S) SQRT(C(S-C)) )
 		SIGN	PDDL
-			GEOMSGN		# SGNA( ARCSIN( SQRT((S-C)/S) ) - (1/S) SQRT(C(S-C)) )
+			GEOMSGN		
 			2PI+3
-		SR2	DSU		# (C/S) (PI/2 - SGNA(                           ) )
+## (C/S) (PI/2 - SGNA(...) )
+		SR2	DSU		
 		DMP	PDDL
 			SS
-			SS		#                   3
-		SR3	SQRT		# S SQRT(S) = SQRT(S )
+			SS
+## S SQRT(S) = SQRT(S<sup>3</sup>)
+		SR3	SQRT		
 		DMP
-		PDDL	SL3		#        3
-			MUASTEER	#       S
-		SQRT	BDDV		# SQRT(---)
-		DSU	DAD		#      2 u
-			TPASS4		# TMIN ENERGY
+		PDDL	SL3		
+			MUASTEER	
+## <pre>
+##        3
+##       S
+## SQRT(---)
+##      2 &mu;
+## </pre>
+## TMIN ENERGY
+		SQRT	BDDV		
+		DSU	DAD		
+			TPASS4		
 			PIPTIME
-		STODL	30D		# (t  - t  )
-		SIGN			#   M    2
+## (t<sub>M</sub> - t<sub>2</sub> )
+		STODL	30D		
+		SIGN			
 			30D		# B WITH SIGN
 		STORE	30D
 		BON	VLOAD
@@ -1265,14 +1312,19 @@ RASTEER1	VLOAD	ABVAL
 			IC
 		VSU	UNIT
 			UNIT/R/
-		VXSC	PDVL		# UNCM
-			30D		# B UNCM
+## UNCM
+		VXSC	PDVL
+## B UNCM		
+			30D		
 			IC
 		VAD	UNIT
-			UNIT/R/		# VNC
+## VNC
+			UNIT/R/		
 ## Page 779
+
+## A UNCP
 GETVRVG1	VXSC	VAD
-			32D		# A UNCP
+			32D		
 GETVRVG2	LXC,2	VSR*
 			RTX2
 			0 -1,2
@@ -1324,8 +1376,8 @@ FIRSTTME	SLOAD	BZE
 ## Page 780
 			DELVEET3
 			NOGOBL
-# In the original program listing, VLOAD UNIT RN below is circled, and connected to the
-# comment after 34D ("34D = /RN/ etc.") with an arrow.---RSB 2003.
+## In the original program listing, VLOAD UNIT RN below is circled, and connected to the
+## comment after 34D ("34D = /RN/ etc.") with an arrow.&mdash;RSB 2003.
 GETGOBL		VLOAD	UNIT		# CALCULATE OBLATENESS TERM.
 			RN
 		DLOAD	DSU

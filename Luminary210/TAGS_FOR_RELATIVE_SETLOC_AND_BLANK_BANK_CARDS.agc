@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -12,12 +13,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
-##              2016-11-17 HG   Trnascribed
+##              2016-11-17 HG   Transcribed
+##              2016-11-28 HG   fix label  ABTFLAGS  --> ABTFLGS
+##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
+##				and corrected the errors found.
 
 
 ## Page 29
-# TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-
                 COUNT           BANKSUM
 
 # MODULE 1 CONTAINS BANKS 0 THROUGH 5
@@ -155,7 +157,7 @@ LOADDAP         EQUALS
 
                 BANK            21
 DAPS4           EQUALS
-ABTFLAGS        EQUALS
+ABTFLGS         EQUALS
 R10             EQUALS
 R11             EQUALS
 MANUR           EQUALS
@@ -339,7 +341,7 @@ LOUNITZ         EQUALS  ZUNIT                   # 2DEC 0
 
 
 
-DELRSPL         EQUALS  SPLRET                  # COL PGM, ALSO CALLED BY R30 IN LUMINARY.
+DELRSPL         EQUALS  SPLRET                  # COL PGM, ALSO CALLED BY R30 IN LUMINARY
 
 # ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN         DETERMINING INTEGRATION AREA ENTRIES.
 

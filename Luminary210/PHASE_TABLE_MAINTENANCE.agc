@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    PHASE_TABLE_MAINTENANCE.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -13,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-18 MAS  Transcribed.
+##              2016-11-27 HG   fix operand  PHASETAB1 -> PHASTAB1
 
 ## Page 1291
 #          SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -43,7 +45,7 @@ CHECKMM		INDEX	Q
 
 TCQ		=	Q+2 +1
 
-		SETLOC	PHASETAB1
+		SETLOC	PHASTAB1
 		BANK
 
 		COUNT*	$$/PHASE

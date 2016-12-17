@@ -15,6 +15,8 @@
 ##               2016-10-15 HG   fix label CHECKDRIV -> CHEKDRIV
 ##                                         QRUPFILT  -> QRJPFILT
 ##                                         -TGNBD+1  -> -TGBND+1
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -261,7 +263,7 @@ GTSQAXIS        EXTEND
                 EXTEND
                 BZMF            ACCDOTSM                        # BRANCH IF ACCDOT IS SMALL
 
-ACCDOTLG        CAF             BIT14                           # ACCDOT IS COMPARATIVELY LARGE
+ACCDOTLG        CAF             BIT14                           # ACCDOT IS COMPARITIVELY LARGE
                 TS              SF1                             # SET UP SCALE FACTORS
                 CAF             BIT12
 WSFTEST         TS              SF2
@@ -432,7 +434,7 @@ FUNCT3          CAE             A2CNTRAL                        # CALCULATE (2/3
                 TC              SPROOT                          # SQUARE ROOT SUBROUTINE CALL
                 EXTEND                                          #         3/2
                 MP              FUNCTION        +1              # FUNCTION
-                EXTEND                                          # (needs to be shifted right 21 places)
+                EXTEND                                          # (NEEDS TO BE SHIFTED RIGHT 21 PLACES)
                 MP              BIT8
                 XCH             L
                 CAF             ZERO                            #              3/2
@@ -656,21 +658,21 @@ RTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VA
 # GIMBAL ANGLE, AND WHERE ZERO INDICATES NO DRIVE.
 #        5. CHANNEL 12 CONTAINS THE TRIM GIMBAL DRIVES AND OTHER BITS.
 
-# ERASEABLE STORAGE CONFIGURATION (NEEDED BY THE INDEXING METHODS):
+# ERASABLE STORAGE CONFIGURATION (NEEDED BY THE INDEXING METHODS):
 ## Page 628
-#               NEGUQ           ERASE           +2                              # NEGATIVE OF Q-AXIS GIMBAL DRIVE
-#               (SPWORD)        EQUALS          NEGUQ           +1              # ANY S.P. ERASABLE NUMBER, NOW THRSTCMD
-#               NEGUR           EQUALS          NEGUQ           +2              # NEGATIVE OF R-AXIS GIMBAL DRIVE
+#               NEGUQ           ERASE           +2                              NEGATIVE OF Q-AXIS GIMBAL DRIVE
+#               (SPWORD)        EQUALS          NEGUQ           +1              ANY S.P. ERASABLE NUMBER, NOW THRSTCMD
+#               NEGUR           EQUALS          NEGUQ           +2              NEGATIVE OF R-AXIS GIMBAL DRIVE
 
-#               QACCDOT         ERASE           +2                              # Q-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
-#               (SPWORD)        EQUALS          QACCDOT         +1              # ANY S.P. ERASABLE NUMBER, NOW ACCDOTR
-#               RACCDOT         EQUALS          QACCDOT         +2              # R-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
-                                                                # NOTE: NOW ACCDOTQ MUST PRECEDE QACCDOT
+#               QACCDOT         ERASE           +2                              Q-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
+#               (SPWORD)        EQUALS          QACCDOT         +1              ANY S.P. ERASABLE NUMBER, NOW ACCDOTR
+#               RACCDOT         EQUALS          QACCDOT         +2              R-JERK SCALED AT PI/2(7) RAD/SEC(3) +SGN
+#										NOTE: NOW ACCDOTQ MUST PRECEDE QACCDOT
 
-#               ALPHAQ          ERASE           +2                              # Q-AXIS ACCELERATION SCALED AT PI/8 R/S2
-#               (SPWORD)        EQUALS          ALPHAQ          +1              # ANY S.P. ERASABLE NUMBER, NOW OMEGAR
-#               ALPHAR          EQUALS          ALPHAQ          +2              # R-AXIS ACCELERATION SCALED AT PI/8 R/S2
-                                                                                # NOTE: NOW OMEGAP,OMEGAQ PRECEDE ALPHAQ
+#               ALPHAQ          ERASE           +2                              Q-AXIS ACCELERATION SCALED AT PI/8 R/S2
+#               (SPWORD)        EQUALS          ALPHAQ          +1              ANY S.P. ERASABLE NUMBER, NOW OMEGAR
+#               ALPHAR          EQUALS          ALPHAQ          +2              R-AXIS ACCELERATION SCALED AT PI/8 R/S2
+#                                                                               NOTE: NOW OMEGAP,OMEGAQ PRECEDE ALPHAQ
 
 # DEBRIS: L, Q, ITEMP1, ITEMP2, ITEMP6
 
@@ -699,7 +701,7 @@ NEGTIME         INDEX           QRNDXER                         # COMPLEMENT THE
 
 POSTIME         INDEX           QRNDXER                         # TIME = -ACC/ACCDOT (POSITIVE VALUE)
                 CS              ALPHAQ                          # SCALED AT PI/8 RADIANS/SECOND(2)
-                EXTEND                                          # MULTIPLY 1/16
+                EXTEND                                          # MULTIPLY BY 1/16
                 MP              BIT11                           # TO CHANGE SCALING TO 2PI RAD/SEC(2)
                 EXTEND                                          # ACCDOT SCALED AT PI/2(7) IN DENOMINATOR
                 DV              NZACCDOT                        # YIELDS TIME SCALED AT 256 SECONDS

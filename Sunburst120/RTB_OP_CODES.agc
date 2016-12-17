@@ -10,6 +10,8 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-16 RSB	Transcribed.
 ##		2016-10-31 RSB	Typos.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
+##				changes made.
 
 ## Page 360
 		BANK	15
@@ -156,7 +158,7 @@ CDUINC          TS      TEM2            # 1S COMPL.QUANT. ARRIVES IN ACC. STORE 
                 AD      ONE
                 TCF     +4
                 AD      ONE
-                AD      ONE             # OVEFLOW HERE IF 2S COMPL. IS 180 DEG.
+                AD      ONE             # OVERFLOW HERE IF 2S COMPL. IS 180 DEG.
                 COM
 
                 AD      TEM2            # ADD IN INCREMENT. WILL OVERFLOW IF RE-
@@ -235,7 +237,7 @@ RRSIM2          CAF     BIT2            # SEE IF RR ECTR ENABLED.
 
 LOPTY           ADRES   OPTY
 RRSIMG          DEC     .59259
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967********************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 ## Page 366
 
 		EBANK=	DNCDUCNT
@@ -262,4 +264,4 @@ RRSIMG          DEC     .59259
 GMBLBITS	OCT	7400
 
 CHKSUM15	OCT	37777
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGU
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************

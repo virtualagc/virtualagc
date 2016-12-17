@@ -12,6 +12,8 @@
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
 ##		2016-11-02 RSB	More typos.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
+##				changes made.
 
 ## Page 340
 		BANK	15
@@ -23,7 +25,7 @@
 # THE INPUT IS THE DESIRED STABLE MEMBER COORDINATES REFERRED TO PRESENT STABLE MEMBER COORDINATES.  THE THREE
 # HALF-UNIT VECTORS ARE STORED AT XDC, YDC, AND ZDC.
 
-# THE OUTPUTS ARE THE THREE GYRO TORQUE ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
+# THE OUTPUTS ARE THE THREE GYRO TORQUING ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
 # MGC, AND OGC RESPECTIVELY. ANGLES ARE SCALED PROPERLY FOR IMUPULSE.
 
 
@@ -125,7 +127,7 @@ TRIG2		DLOAD	SIGN		# (135,-135)
 # THE INPUTS ARE  1) THE STAR VECTOR REFERRED TO PRESENT STABLE MEMBER COORDINATES STORED AT LOCATION 32D OF THE
 # VAC AREA.  2) THE GIMBAL ANGLES (CDUY,CDUZ,CDUX) STORED AT ALTERNATING LOCATIONS RESPECTIVELY. THE ANGLES ARE
 # USUALLY STORED AT LOCATIONS 2,4, AND 6 OF THE MARK VAC AREA. THEY CAN BE STORED AT LOCATIONS 20,22, AND 24 OF
-# YOUR JOB VAC AREA.  3) THE BASE ADDRESS OF THE GIMBAL ANGLES STORED SP AT LOCATION S1 OF yOUR JOB VAC AREA.
+# YOUR JOB VAC AREA.  3) THE BASE ADDRESS OF THE GIMBAL ANGLES STORED SP AT LOCATION S1 OF YOUR JOB VAC AREA.
 
 # THE OUTPUT IS THE STAR VECTOR REFERRED TO NAVIGATION BASE COORDINATES STORED AT 32D OF THE VAC AREA. THE OUTPUT
 # IS ALSO AVAILABLE AT MPAC.
@@ -243,7 +245,7 @@ ACCUROT         COS
                 VLOAD		RVQ
                 		32D
 AXISROT1        DAD             STADR                           #   MPAC + PD2      .
-		STORE		32D		+4,2		# S3    S1    S2    .
+		STORE		32D		+4,2		# S3    S1    S2
 		DLOAD*
 				8D,1
 ## Page 346
@@ -251,7 +253,7 @@ AXISROT1        DAD             STADR                           #   MPAC + PD2  
                 32D             +4,1                            # S1COS S2COS S3COS .
 
                 DSU             STADR                           #   MPAC - PD0      .
-                STORE           32D             +4,1            # S1    S2    S3    .
+                STORE           32D             +4,1            # S1    S2    S3
                 VLOAD		RVQ
                 		32D                                             
 # CALCGA COMPUTES THE CDU DRIVING ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.
@@ -335,7 +337,7 @@ GIMLOCK1        EXIT
 # AT LOCATIONS XDC, XDC +6, XDC +12D, AND STARAD, STARAD +6, STARAD +12D.
 
 
-AXISGEN         AXT,1           SSP                             # PUSHDOWN 00-22D,24-28D,30D
+AXISGEN         AXT,1           SSP                             # PUSHDOWN 00-22D,24D-28D,30D
 		                STARAD          +6                              
 		                S1                                              
 		                STARAD          -6                              
@@ -407,7 +409,7 @@ AXISGEN3        TIX,2
 
 ## Page 350
 
-# TRANSPSE COMPUTES THE TRANSPOSE OF A MATRIX (TRANSPOSE = INVERSE OF ORTHOGONAL TRANSOFRMATION).
+# TRANSPSE COMPUTES THE TRANSPOSE OF A MATRIX (TRANSPOSE = INVERSE OF ORTHOGONAL TRANSFORMATION).
 
 # THE INPUT IS A MATRIX DEFINING COORDINATE SYSTEM A WITH RESPECT TO COORDINATE SYSTEM B STORED IN STARAD THRU
 # STARAD +17D.
@@ -434,7 +436,7 @@ TRANSPSE        DXCH            STARAD          +2              # PUSHDOWN NONE
 # EARTH REFERENCE COORDINATES TO ALIGN THE STABLE MEMBER TO SPECIFIED GIMBAL ANGLES.
 
 # THE INPUTS ARE 1) THE MATRIX DEFINING THE EARTH REFERENCE COORDINATE FRAME WITH RESPECT TO THE NAVIGATION BASE
-# COORDINATE FRAME. 2) SAME AS 3) AND 3) of SMNB.
+# COORDINATE FRAME. 2) SAME AS 3) AND 3) OF SMNB.
 
 # THE OUTPUT IS THE DESIRED STABLE MEMBER COORDINATES WITH RESPECT TO THE EARTH REFERENCE COORDINATE FRAME. THE
 # THREE UNIT VECTORS ARE STORED AT XSM, YSM, AND ZSM.
@@ -486,9 +488,9 @@ ZERODP          2DEC            0
 
 ## Page 352
 
-# AOTNB CONVERTS THE TWO RETICLE ROTATION ANGLE (YROT AND SROT) AND
+# AOTNB CONVERTS THE AOT RETICLE ROTATION ANGLE (YROT AND SROT) AND
 # THE DETENT SETTING TO A HALF UNIT STAR VECTOR REFERRED TO THE
-# NAVIGATION BASE.
+# NAVIGATION BASE FOR NON-FLIGHT ALIGNMENT MODES
 #
 # THE INPUTS ARE 
 #
@@ -506,7 +508,7 @@ ZERODP          2DEC            0
 
 AOTNB           SETPD           SLOAD*                          
 		                0          
-		                10D,1				# AOT FOV TILT COMPENSATOIN ANGLE
+		                10D,1				# AOT FOV TILT COMPENSATION ANGLE
 		SR1		PUSH				# RESCALE TILT TO 2PI                                     
                	SLOAD*          RTB                             
                			3,1
@@ -611,7 +613,7 @@ NEARONE         2DEC            .999999999
 # THE BASE ADDRESS OF THE CDUS IS STORED AT LOCATION S1
 
 # THE OUTPUT IS A STAR VECTOR REFERRED TO STABLE MEMBER AT LOC 32D
-# AND AVAILABLE IN MPAC
+# AND AVAILBLE IN MPAC
 
 AOTSM           STQ		SETPD
 				29D                             # SET UP RETURN
@@ -682,7 +684,7 @@ AOTSM           STQ		SETPD
 		STCALL		20D				# Z COMPONENT OF Y-PLANE VECTOR 20-21
 		
 				NBSM				# TRANSFORM TO SM
-		STOVL		10D				# STORE X-PLANE VECTOR (SM)
+		STOVL		10D				# STORE X-PLAVE VECTOR (SM)
 		
 				16D             		# LOAD Y-PLANE VECTOR (NB)
                 XCHX,1          INCR,1                          
@@ -716,7 +718,7 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
                 		34D                             # ANGLE LATER, WE CAN FIND THE MODE 1
                 SETPD           ASIN                            # TRUNNION BY SIMPLY TAKING THE ARCSIN OF
                 0                                               # THE Y COMPONENT, THE ASIN GIVING AN
-                PUSH            BDSU                            # ANSWER WHOSE ABS VAL IS LES THAN 90 DEG
+                PUSH            BDSU                            # ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG
                 		HALFDP                                          
                 STODL           4                               # MODE 2 TRUNNION TO 4.
 
@@ -769,16 +771,16 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
 RRNB            SLOAD           RTB                             
 		                TANG                                            
 		                CDULOGIC                                        
-                SETPD           PUSH                            # TRUNNION ANGLE TO 0.
+                SETPD           PUSH                            # TRUNNION ANGLE TO 0
                 		0                                               
                 SIN             DCOMP                           
-                STODL           34D                             # Y COMPONENT.
+                STODL           34D                             # Y COMPONENT
 
-                COS             PUSH                            # .5 COS(T) TO 0.
+                COS             PUSH                            # .5 COS(T) TO 0
                 SLOAD           RTB                             
 		                TANG            +1                              
 		                CDULOGIC                                        
-                PUSH            COS                             # SHAFT ANGLE TO 2.
+                PUSH            COS                             # SHAFT ANGLE TO 2
                 DMP             SL1                             
                 		0                                               
                 STODL           36D                             # Z COMPONENT

@@ -13,6 +13,8 @@
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
 ##		2016-11-02 RSB	More typos.
+##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
+##				completed, changes made.
 
 ## Page 519
                 BANK            17
@@ -23,32 +25,33 @@
                 EBANK=          DT
 NULLFILT        2CADR           FILDUMMY
 
-QRAXIS          CAF             MS20QR                  # RESET TIME IMMEDIATELY - DT = 20 MS
+QRAXIS          CAF             MS20QR                  # RESET TIMER IMMEDIATELY - DT = 20 MS
                 TS              TIME5
 
                 LXCH            BANKRUPT                # INTERRUPT LEAD IN (CONTINUED)
                 EXTEND
                 QXCH            QRUPT
 
-# SET UP DUMMY KALMAN FILTER T5RUPT.  (THIS MAY BE RESET TO THE KALMAN FILTER INITIALIZATION PASS, IF THE TRIM
+# SET UP A DUMMY KALMAN FILTER T5RUPT.  (THIS MAY BE RESET TO THE KALMAN FILTER INITIALIZATION PASS, IF THE TRIM
 # GIMBAL CONTROL SYSTEM SHOULD BE USED.)
 
                 EXTEND
                 DCA             NULLFILT
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*****************
-
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
+## In the original printout, the following line actually ended with a 1/2 symbol (&frac12;)
+## rather than a question mark.
 INSERT17	TCF		TRMCHECK		# ARE EXTRAORDINARY GTS ENTRIES NEEDED?
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 # CALCULATE LEM BODY RATES FOR Q AND R AXES:
 
-# THIS COMPUTATION IS VALID FOR BOTH ASCENT ADN DESCENT SINCE THE OFFSET ACCELERATION TERM IS INCLUDED ALWAYS,
+# THIS COMPUTATION IS VALID FOR BOTH ASCENT AND DESCENT SINCE THE OFFSET ACCELERATION TERM IS INCLUDED ALWAYS,
 # BUT HAS VALUE ZERO IN DESCENT, AND SINCE THE WEIGHTING FACTORS ARE IN ERASABLE AND DISTINCT.
 
 # FIRST, CONSTRUCT Y AND Z CDU INCREMENTS:
 
-BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASUREMENT SCALED AT PI
+BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASUREMENT SCALED AT PI.
                 TS              L                       # (SAVE FOR UPDATING OF OLDYFORQ)
                 EXTEND                                  # FORM INCREMENT IN CDUY FOR LAST 100 MS
                 MSU             OLDYFORQ                # (100 MS OLD CDUY SAVED FROM LAST PASS)
@@ -62,7 +65,7 @@ BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASURE
                 TS	        ITEMP2                  # SAVE 1'S COMPLEMENT VALUE TEMPORARILY
 
 ## Page 520
-# SECOND TRANSFORM CPU INCREMENTS TO BODY-ANGLE INCREMENTS:
+# SECOND, TRANSFORM CPU INCREMENTS TO BODY-ANGLE INCREMENTS:
 
                 CAE             M31                     # MATRIX*VECTOR(WITH x COMPONENT ZERO)
                 EXTEND
@@ -97,7 +100,7 @@ BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASURE
                 MP              WFORQR                  # FORM WEIGHTED VALUE OF MEASURED DATA
                 XCH             OMEGAQ                  # SAVE AND BEGIN TO WEIGHT VALUE OF OLD W
                 EXTEND                                  # (1-K) IS SCALED AT 1 FOR EFFICIENT CALC
-                MP              (1-K)                   # (K CHANGES EVERY 2 SECS IN ASCENT)
+                MP              (1-K)                   # (K CHANGES EVERY 2 SECONDS IN ASCENT.)
                 AD              JETRATEQ                # WEIGHTED TERM DUE TO JET ACCELERATION
                 AD              AOSQTERM                # TERM DUE TO ASCENT OFFSET ACCELERATION
                 ADS             OMEGAQ                  # TOTAL RATE ESTIMATE SCALED AT PI/4
@@ -107,7 +110,7 @@ BODYRATE        CAE             CDUY                    # 2:S COMPLEMENT MEASURE
                 MP              WFORQR                  # FORM WEIGHTED VALUE OF MEASURED DATA
                 XCH             OMEGAR                  # SAVE AND BEGIN TO WEIGHT VALUE OF OLD W
                 EXTEND                                  # (1-K) IS SCALED AT 1 FOR EFFICIENT CALC
-                MP              (1-K)                   # (K CHANGES EVERY 2 SECS IN ASCENT)
+                MP              (1-K)                   # (K CHANGES EVERY 2 SECONDS IN ASCENT.)
                 AD              JETRATER                # WEIGHTED TERM DUE TO JET ACCELERATION
                 AD              AOSRTERM                # TERM DUE TO ASCENT OFFSET ACCELERATION
                 ADS             OMEGAR                  # TOTAL RATE ESTIMATE SCALED AT PI/4
@@ -119,31 +122,34 @@ SKIPQRAX        CA              NORMQADR
                 TCF		CHKGIMBL		# CHKGIMBL ATTEMPTS TO USE GTS.
                 
 NORMQADR	GENADR		NORMALQ
-NORMALQ		TCF		ATTSTEER		# NO RHC INPUTS IN 206.
+NORMALQ		TCF		ATTSTEER		# NO RHC INPUTS ON 206.
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*****************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 TRMCHECK	DXCH		T5ADR			# SET UP NEXT T5RUPT ADDRESS.
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****************
-
 # CHECK IF TRIMCNTR HAS BEEN COUNTED DOWN TO ZERO, INDICATING THAT 20.0 SECONDS HAVE PASSED SINCE DPS ON AND
 # CONTROL SHOULD BE TRANSFERRED TO GTS.  THEN SEE IF A RECENT ENGINE-ON REQUIRES AN EARLY GTS ENTRY.
-
+## In the original printout, the following line actually ended with a 1/2 symbol (&frac12;)
+## rather than a question mark.
 		CCS		TRIMCNTR		# IS GTS NEEDED PRIOR TO THROTTLE-UP?
 		TCF		CHKMNITR		#   NOT YET, BUT CHECK IF FIRST GTS DONE.
 		TC		CCSHOLE			#   ILLEGAL VALUE OF TRIMCNTR.
-		TCF		INSERT17	+1	#   NOT ACTIVE, RETURN TO RCS CONTROL
+		TCF		INSERT17	+1	#   NOT ACTIVE, RETURN TO RCS CONTROL.
+## In the original printout, the following line actually ended with a 1/2 symbol (&frac12;)
+## rather than a question mark.
 OKAYGTS		CAF		USEQRJTS		#   YES, IS GIMBAL SYSTEM USABLE?
 		MASK		DAPBOOLS
 		EXTEND
 		BZF		GOGIMBAL		# USABLE.  GO TO GTS.
 		TCF		INSERT17	+1	# NOT USABLE.  GO ON WITH RCS CONTROL.
 		
+## In the original printout, the following line actually ended with a 1/2 symbol (&frac12;)
+## rather than a question mark.
 CHKMNITR	CCS		GTSMNITR		# IS AN IMMEDIATE (FIRST) GTS CALLED FOR?
 		TCF		OKAYGTS			#   YES, CHECK IF GIMBAL SYSTEM USABLE.
 		TCF		INSERT17	+1	#   NO, RETURN TO RCS CONTROL.
-GOGIMBAL	CS		THREE			# RESET TIME5 COUTNER FROM 20 TO 50 MSEC.
+GOGIMBAL	CS		THREE			# RESET TIME5 COUNTER FROM 20 TO 50 MSEC.
 		ADS		TIME5
 		
 		CS		BGIM24			# TURN OFF GIMBALS FOR BETTER FILTERING.
@@ -279,7 +285,7 @@ KILLAVEG	2CADR		AVEGKILL
 
 # FOLLOWING CODING LEFT IN PLACE TO KEEP ADDRESSES CONSTANT.
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 NOQJETS         TC		CCSHOLE			# LABEL PREVENTS ASSEMBLER CUSSES.
                 TCF             XTRANS
@@ -371,7 +377,7 @@ RTJETIME        CCS             RATEDIF                 # SCALED AT PI/4 RADIANS
                 AD              ONE                     # ABS(RATEDIF)
 ## Page 526
                 EXTEND
-                MP              1/NJETAC                # SCALED AT 2(8)/PI SECONDS(2)/RADIANS
+                MP              1/NJETAC                # SCALED AT 2(8)/PI SECOND(2)/RADIANS
                 EXTEND
                 MP              BIT4                    # SCALED AT 2(3) SECONDS
                 CAE             L
@@ -515,9 +521,9 @@ FROMROOT	EXTEND					# ENTER HERE FROM DORUTDUM (IN K.E. BANK)
 		BZF		JTSAREON		# A=0,THUS ALL JETS TO GO ON ARE NOW ON.
 ## Page 530
 TRSLTMN2        CAE             JTSATCHG
-                MASK            POSMAX                  # REMOVE BIT15 FROM JSATCHG
+                MASK            POSMAX                  # REMOVE BIT15 FROM JTSATCHG.
                 EXTEND
-                BZF             NOTRANS                 # IF JFSTACHG = 0 THEN NO TRANSLATION NOW.
+                BZF             NOTRANS                 # IF JTSATCHG = 0 THEN NO TRANSLATION NOW.
                 CA              14-TQRMN
                 ADS             TOFJTCHG                # INSURE T GREATER THAN 14 MS.
                 TCF             TOJTLST
@@ -563,10 +569,10 @@ MS50QR          OCTAL           37773
 BIT8,9          OCTAL           00600
 MCOMPTQR        DEC             -16                     # -10 MS SCALED AS TIME6.
 14-TQRMN        DEC             11
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*********************
+# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 ## Page 531
 MINTADR         GENADR          CCSHOLE
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*********************
+# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 -.88975         DEC             -.88975
 (1-K),QR        DEC             0.50000                 # K = 1/2
 (1-KQ)/8        DEC             0.06250
@@ -593,7 +599,7 @@ RTJETADR        GENADR          RTJETIME
 # NEITHER OUT OF DETENT NOR IS THE RATE COMMAND BIT SET IN DAPBOOLS)
 
 CHKGIMBL	EXTEND
-		DCA		TRYGTSAD		# TRYGTS ATTEMPTS GTS CONTROL
+		DCA		TRYGTSAD		# TRYGTS ATTEMPTS GTS CONTROL.
 		DXCH		Z
 		TC		CCSHOLE
 		
@@ -601,11 +607,11 @@ BGIM24		OCTAL		07400
 DESCADR		GENADR		TJETLAW
 
 		EBANK=		DT
-TRYGTSAD	2CADR		TRYGTS			# TRYGTS ATTEMPS GTS CONTROL.
+TRYGTSAD	2CADR		TRYGTS			# TRYGTS ATTEMPTS GTS CONTROL.
 
 
 ## Page 533
-# "ATTSTEER" IS THE NOMINAL ENTRY POINT FOR THE REACTION CONTROL SYSTEM ATTITUDE STEERING
+# "ATTSTEER" IS THE NOMINAL ENTRY POINT FOR REACTION CONTROL SYSTEM ATTITUDE STEERING
 
 ATTSTEER	EQUALS		QERRCALC
 QERRCALC	CAE		CDUY			# Q-ERROR CALCULATION
@@ -656,7 +662,7 @@ GIMBLTRY	CAF		USEQRJTS		# IS JET USAGE MANDATORY.
 		BZF		XTRANS			# NO.   GO TO XTRANS.
 		
 ## Page 534
-		CAF		ZERO			# YES.  TURN ON JETS.
+		CAF		ZERO			# YES.  TURN OFF JETS.
 		EXTEND
 		WRITE		5
 		
@@ -694,7 +700,7 @@ STILLRCS	CCS		DAPBOOLS		# BRANCH TO SPS-BACKUP RCS CONTROL LOGIC.
 		TCF		SPSBAKUP		# WHEN BIT15/DAPBOOLS = 0.
 		NOOP
 		CAF		DESCADR			# SET JET SELECT LOGIC RETURN ADDRESS TO
-		TS		TJETADR			# Q,R-AXIS TJETLAW CALCULATION
+		TS		TJETADR			# THE Q,R-AXIS TJETLAW CALCULATION
 		
 		TC		T6JOBCHK		# CHECK T6 CLOCK RUPT BEFORE SUBROUTINE
 		
@@ -772,7 +778,7 @@ QUICKURG	CAE		EDOT			# EDOT.L.-0,FPQR.E.-0 (FROM 2ND CCS).
 		AD		FPQR			# IMPLICIT MULT. OF FPQR BY 1/SEC.
 		TCF		URGMULT			# THIS URGENCY = (1/ACC)(FPQR+EDOT).
 		
-EDOTMAX		CCS		A			# GURANTEED NOT +0 OR -0.
+EDOTMAX		CCS		A			# GUARANTEED NOT +0 OR -0.
 		CAF		POSMAX
 		TCF		EDOTSTOR		# SET EDOT TO SIGNED MAXIMUM.
 		CS		POSMAX
@@ -879,7 +885,7 @@ URGFUDGE	TS		URGLIMIT
 
 # USE URGENCY FUNCTION CORRECTION FACTOR WHEN NECESSARY:
 
-		CCS		AOSQ			# IF C(AOSQ) ZERO OR IF(URGENCYQ) ZERO,
+		CCS		AOSQ			# IF C(AOSQ) ZERO OR IF C(URGENCYQ) ZERO,
 		CS		URGENCYQ		# THEN IT IS CLEARLY UNNECESSARY TO FUDGE.
 		TCF		+2			# WHILE MAKING THIS TEST, WE CALCULATE
 		CAE		URGENCYQ		# -SIGN(AOSQ)(URGENCYQ) WHICH IF POSITIVE
@@ -902,7 +908,7 @@ URGFUDG1	CCS		AOSR			# HERE WE DO THE SAME LOGIC FOR THE R-AXIS
 		EXTEND					# NO D.P. ACCURACY IS NEEDED.  SECOND, BY
 		MP		URGENCYR		# BY MULTIPLYING BY THE FUDGE RATIO DURING
 		TS		URGENCYR		# APS BURNS, WE PREVENT SOME RCS FIRINGS
-							# WHICH WOULD OVER-CORRECT DU TO THE AOS.
+							# WHICH WOULD OVER-CORRECT DUE TO THE AOS.
 							
 URGPLANE	CAE		URGENCYQ		# BEGIN URGENCY-PLANE COMPUTATIONS:
 		EXTEND
@@ -1081,7 +1087,7 @@ PLUSU           CAE             1/AMINU
                 TCF             2JETSM+U
                 TC              UXFORM
                 CAF             ZERO
-                TCF             POLTYPE                 # GO FIND BEST POLICY
+                TCF             POLTYPE                 # GO TO FIND BEST POLICY
 
 2JETSM+U        TC              UXFORM
 2+U.RATE        CAF             ONE
@@ -1168,7 +1174,7 @@ UVEDOT1		TS		EDOT			# RATE ERROR SCALED AT PI/16.
 		SQUARE
 		TS		EDOT(2)			# SAVE RATE SQUARED SCALED AT PI(2)/2(8)
                 
-                CAE             EQ                      # TRANSFORM ANGULAR ERROR TO U/V-AXIS
+                CAE             EQ                      # TRANSFORM ATTITUDE ERROR TO U/V -AXIS
                 AD              ER
                 EXTEND
                 MP              .707
@@ -1181,7 +1187,7 @@ UVEDOT1		TS		EDOT			# RATE ERROR SCALED AT PI/16.
 -TJMIN16	DEC		-.00097
 -TJMINQR	EQUALS		-TJMIN16
 38.7MAT4	DEC		0.00242
--MS35AT4	DEC		-.00219			# 35MS SCALED AT 4
+-MS35AT4	DEC		-.00219			# -35MS SCALED AT 4
 ## Page 546
 MAXRATE		DEC		0.88889			# 10 DEGREES/SECOND SCALED AT PI/16
 MAXRATE2	DEC		0.79012			# 100 DEG(2)/SEC(2) SCALED AT PI(2)/2(8)
@@ -1209,7 +1215,7 @@ EDOTVGEN        CAE             1/2JETSV                # FOR V-AXIS TRANSFORMAT
                 TC              Q
 
 
-.707            DEC             0.70711                 # SQRT(1/2)
+.707            DEC             0.70711      
 
 SPSBAKUP	EXTEND
 		DCA		SPSRCSAD
@@ -1219,47 +1225,47 @@ SPSRCSAD	2CADR		SPSRCS
 
 
 ## Page 548
-# *********TJETLAW*********************************************************************************
+# *********TJETLAW************************************************************************************************
 
-TJETLAW         CS              EDOT                    # TEST EDOT SIGN
+TJETLAW         CS              EDOT                    # TEST ON EDOT SIGN:
                 EXTEND
                 BZMF            +4
-                TS              EDOT                    # SIGNS OF E AND EDOT CHANGED IF EDOT NEG
-                CS              E                       # TO CONSIDER FUNCTIONS IN UPPER HALF OF
-                TS              E                       # THE E,EDOT PHASE PLANE
+                TS              EDOT                    # SIGNS OF E AND EDOT CHANGED IF EDOT NEG,
+                CS              E                       # TO CONSIDER FUNCTIONS IN THE UPPER HALF
+                TS              E                       # OF THE E-DOT PHASE PLANE.
 
-                CAE             EDOT(2)                 # SCALED AT PI(2)/2(8) RAD(2)/SEC(2)
-                EXTEND                                  # (1/NJETAC HAS BEEN SET FOR N JETS)
+                CAE             EDOT(2)                 # SCALED AT PI(2)/2(+8) RAD(2)/SEC(2)
+                EXTEND                                  # 1/NETACC HAS BEEN SET FOR N-JETS WITH
                 MP              1/NETACC                # IMPLICIT FACTOR OF (1/2).
-                AD              E                       # SCALED AT PI RADIANS (ERROR)
-                EXTEND
-                SU              DB                      # SCALED AT PI RADIANS (DEADBAND)
-                TS              HDAP                    # E + .5EDOT(2)/NJETACC - DB
+                AD              E                       # ATTITUDE ERROR SCALED AT PI RADIANS.
+                EXTEND					# DEADBAND VALUE SCALED AT PI RADIANS.
+                SU              DB                      # E+.5EDOT/NETACC-DB
+                TS              HDAP                    # SCALED AT PI RADIANS.
 
                 EXTEND
                 BZMF            NEGHDAP
 
-                CAE             EDOT                    # SCALED AT PI/16 RAD/SEC (RATE)
-                EXTEND
+                CAE             EDOT                    # RATE ERROR; LIMITED TO +/- 11.25 DEG/SEC
+                EXTEND					# SCALED AT PI/16 RADIANS/SECOND.
                 MP              1/NETACC                # SCALED AT 2(+8)/PI SEC(2)/RAD: (ACC) (-1)
-                DDOUBL
+                DDOUBL					# SCALED AT 2(+4) SECONDS.
                 TS              TERMA 
                 
                 AD		-1.5CSPQ		# (EDOT/NETACC)-1.5CSP SCALED AT 16 SECS.
                 EXTEND
                 BZMF            +3
 
-MAXTJET         CAF             BIT14                   # (1/2) IS LIKE POSMAX AT THIS SCALING
-                TCF             NORMRETN                # (OVERFLOW IS THUS PREVENTED)
+MAXTJET         CAF             BIT14                   # (1/2) IS LIKE POSMAX AT THIS SCALING.
+                TCF             NORMRETN                # (OVERFLOW IS PREVENTED IN THIS WAY.)
 
-                CS              HDAP                    # -DBMINIMP + E + EDOT(2)/NJETACC - DB
-                AD              MINIMPDB                # SCALED AT PI RADIANS
-                EXTEND
+                CS              HDAP                    # MINIMPDB-E-(EDOT(2)/NETACC)+DB
+                AD              MINIMPDB                # SCALED AT PI RADIANS.
+                EXTEND					# (DURING APS BURNS, MINIMPDB = -DB.)
                 BZMF            MAINBRCH
 
-                CAE             TERMA                   # EDOT/NJETACC - .5TJMIN SCALED AT 16 SECS
+                CAE             TERMA                   # EDOT/NETACC-35MS SCALED AT 16 SECONDS.
                 AD              -MS35AT4
-                EXTEND					# COMPARE TIME-GO-GET-ZERO-RATE WITH 35MS.
+                EXTEND					# COMPARE TIME-TO-GET-ZERO-RATE WITH 35MS.
                 BZMF            INZONE4
 
                 AD              38.7MAT4		# TIME-TO-GET-ZERO-RATE + 1/2 MINIMP.
@@ -1290,17 +1296,17 @@ ROTRAXIS	CAE		OMEGARD			# WITH R-AXIS JETS, ZERO THE RATE ERROR.
 DOTJMIN		CAF		+TJMINT6		# USE MINIMUM IMPULSE DT FOR TQR.
 		TCF		NORMRETN
 		
-NEGHDAP         CAE             EDOT(2)                 # SCALED AT PI(2)/2(8) RAD(2)/SEC(2)
+NEGHDAP         CAE             EDOT(2)                 # RATE ERROR SQUARED SCALED AT PI(2)/2(8).
                 EXTEND
                 MP              .5ACCMNE                # .5(1/ACCMIN) AT 2(8)/PI SEC(2)/RAD.
                 AD              E                       # ATTITUDE ERROR SCALED AT PI RADIANS
-                AD              DB                      # DEADBANDS (2) SCALED AT PI RADIANS.
+                AD              DB                      # DEADBANDS (2) SCALED AT PI RADIANS
                 AD              DBMINIMP		# (DURING APS BURNS DBMINIMP = 0.)
                 EXTEND
                 BZMF            +2
                 TCF             XTRANS			# NO ROTATION JETS NEEDED.
 
- +2             CS              MAXRATE                 # 10 DEG/SEC SCALED AT PI/16 RAD/SEC
+ +2             CS              MAXRATE                 # 10 DEGREES/SECOND SCALED AT PI/16.
                 AD              EDOT                    # EDOT-MAXRATE SCALED AT PI/16 RAD/SEC.
                 EXTEND
                 BZMF            +2
@@ -1312,11 +1318,11 @@ NEGHDAP         CAE             EDOT(2)                 # SCALED AT PI(2)/2(8) R
                 DDOUBL					# SCALED AT 2(+4) SECONDS.
                 TS              TERMA 
 
-                CS              HDAP                    # - E + .5EDOT(2)/NJETACC + DB
+                CS              HDAP                    # -E+(.5EDOT(2)/NETACC)+DB
                 AD              E
-                AD              E                       # TWICE ERROR NEGATES E OF HDAP(OLD)
+                AD              E                       # TWICE ERROR NEGATES E OF HDAP(ABOVE)
                 AD              MINIMPDB
-MAINBRCH        TS              HDAP                    # -HDAP(OLD) + 2E + DBMINIMP AT PI RADS
+MAINBRCH        TS              HDAP                    # -HDAP(ABOVE)+2E+DBMINIMP AT PI RADIANS.
 
                 CAE             1/NETACC		# .5(1/NETACC+1/ACCMIN) SCALED AT 2(8)/PI.
 ## Page 550
@@ -1388,7 +1394,7 @@ NOROOT		CAF		MAXRATE
 		AD		.6DEG/SC		# MAXRATE+DEL SCALED AT PI/16 RAD/SEC.
 		EXTEND
 		MP		1/NETACC		# (MAXRATE+DEL)/NETACC
-		DDOUBL					# SCALED AT 2(+4) SECONDS.
+		DDOUBL					# SCALED AT 2(+4) SECONDS
 TJSUM		AD		TERMA	
 TJETSCAL	DOUBLE					# NOW SCALED AT 2(+3) SECONDS.
 		EXTEND
@@ -1420,11 +1426,11 @@ CHKSUM17	OCT		37777
 ## Page 552
 # SUBROUTINE NAME: DAPSQRT        MOD. NO. 0  DATE: DECEMBER 28, 1966
 
-# AUTHOR: JONATHAN D. ADDLESTON (ADAMS ASSOCIATES)
+# AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 
 # DAPSQRT IS A SUBROUTINE WHICH PERFORMS THE NECESSARY AND APPROPRIATE INTERFACE FUNCTIONS BETWEEN THE LM DAP AND
 # THE PRESENT SPROOT SUBROUTINE IN MASTER.  DAPSQRT EXPECTS A DOUBLE PRECISION ARGUMENT IN C(A,L) AND WILL SHIFT
-# THAT QUANTITY SIX OR FOUR BITS TO THE LEFT TO FORM A MORE ACCURAGE SINGLE PRECISION ARGUMENT FOR SPROOT (AND
+# THAT QUANTITY SIX OR FOUR BITS TO THE LEFT TO FORM A MORE ACCURATE SINGLE PRECISION ARGUMENT FOR SPROOT (AND
 # THEN SHIFT THE SINGLE PRECISION RESULT OF SPROOT THREE OR TWO BITS TO THE RIGHT IN ORDER TO MAINTAIN SCALING
 # CONSISTENCY).  DAPSQRT ALSO PERFORMS THE HERETOFORE NEGLECTED FUNCTION OF SAVING AND RESTORING THE CONTENTS OF
 # THE SR (SHIFT-RIGHT) REGISTER WHICH MUST BE DONE BY ALL USERS OF SPROOT IN INTERRUPT.
@@ -1495,7 +1501,7 @@ SQRTSL6		CAF		BIT9			# SET UP TO SHIFT D.P. ARG. LEFT 6 BITS
 		CAF		BIT12			# AND TO SHIFT SPROOT ANS. RIGHT 3 BITS.
 		TCF		DAPSQRT2
 		
-SQRTSL4		CAF		BIT11			# SET UP AND SHIFT D.P. ARG. LEFT 4 BITS
+SQRTSL4		CAF		BIT11			# SET UP TO SHIFT D.P. ARG. LEFT 4 BITS
 		TS		Q
 		CAF		BIT13			# AND TO SHIFT SPROOT ANS. RIGHT 2 BITS.
 DAPSQRT2	XCH		SQRTTEMP		# (RECONSTRUCT D.P. ARGUMENT.)

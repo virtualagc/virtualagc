@@ -18,6 +18,8 @@
 ##				as well as code for dealing with superbanks,
 ##				which instead come from Luminary 99.
 ##		2016-10-31 RSB	Typos.
+##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
+##				changes made.
 
 ## Page 1075
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
@@ -52,7 +54,7 @@
 
 # WARNINGS
 
-#      SMODE LOADED WITH GREATER THAN OCTAL 11 PUTS COMPUTER INTO BACKUP IDLE LOOP.
+#      SMODE LOADED WITH GREATER THAN OCTAL 11 PUTS COMPUTER INTO THE BACKUP IDLE LOOP.
 
 
 
@@ -70,10 +72,10 @@
 # EXIT MODES, NORMAL AND ALARM
 
 #      SELF-CHECK NORMALLY CONTINUES INDEFINITELY UNLESS THERE IS AN ERROR DETECTED. IF SO + OPTION NUMBERS PUT
-# COMPUTER INTO BACKUP IDLE LOOP, - OPTIONS NUMBERS RESTART THE OPTION.
+# COMPUTER INTO BACKUP IDLE LOOP, - OPTION NUMBERS RESTART THE OPTION.
 #      THE -0 OPTION PROCEEDS FROM THE LINE FOLLOWING THE LINE WHERE THE ERROR WAS DETECTED.
 #      COMPLETION OF DSKYCHK PUTS THE COMPUTER INTO THE BACKUP IDLE LOOP.
-#      SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E). THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP.
+#      SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E). THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP
 
 
 # OUTPUT
@@ -82,9 +84,9 @@
 # TRIGGERS THE ALARM. THE ALARM ROUTINE DISPLAYS THE THREE FAILREGS. IF OPERATOR DESIRES FURTHER INFORMATION HE
 # MAY KEY IN   V 05 N 31 E    DSKY DISPLAY IN R1 WILL BE ADDRESS +1 OF WHERE THE ERROR WAS DETECTED, IN R2 THE
 # BANK NUMBER OF SELF-CHECK (37 OCTAL), AND IN R3 THE TOTAL NUMBER OF ERRORS DETECTED BY SELF-CHECK SINCE THE LAST
-# FRESH START.
+# FRESH START
 #      DSKYCHK LIGHTS UP THE DSKY DISPLAY ELEMENTS STARTING WITH THE DIGIT9 IN ALL POSITIONS. EACH DISPLAY LASTS
-# 5 SECONDS.
+# 5 SECONDS
 #      SHOW-BANKSUM STARTING WTIH BANK 0 DISPLAYS IN R1 +- THE BANK SUM (SHOULD EQUAL THE BANK NUMBER), IN R2 THE
 # BANK NUMBER, AND IN R3 THE BUGGER WORD.
 
@@ -92,7 +94,7 @@
 # ERASABLE INITIALIZATION REQUIRED
 
 #      ACCOMPLISHED BY FRESH START
-#           SMODE SET TO +0
+#           SMODE & ERESTORE SET TO +0
 
 
 # DEBRIS
@@ -481,7 +483,7 @@ DAS-+           EXTEND
                 TC              -1CHK                           
                 EXTEND                                          
                 DCS             SKEEP1                          # $ DCS ERASABLE (+1, -2)
-                XCH             L                               # $ XCH SC, (-2, +1)
+                XCH             L                               # $ XCH SC (-2, +1)
                 AD              S+1                             
                 TC              -1CHK                           
                 CA              L                               
@@ -511,7 +513,7 @@ MP-+            EXTEND
                 AUG             SKEEP6                          # $ AUG ERASABLE, -2
                 AD              L                               # 40000
 MP--            EXTEND                                          
-                MP              SKEEP6                          # +1, 37776
+                MP              SKEEP6                          # $ +1, 37776
                 TC              +1CHK                           
                 CS              L                               # 40001
                 AD              DVCON                           
@@ -523,7 +525,7 @@ MP--            EXTEND
                 CA              SKEEP6                          
                 TC              -1CHK                           
 
-# DVCH AND DVQXCHK CHECK ALL PULSES OF DV AND QXCH.
+# DVCH AND DVQXCHK CHECK ALL OF PULSES OF DV AND QXCH.
 # ALSO CHECKS TS WITH UNDERFLOW
 DVCHK           CA              SBIT14                          # 20000
                 TS              SKEEP1                          
@@ -730,7 +732,7 @@ INHNTCHK        INHINT                                          # T3 RUPT SHOULD
                 RELINT                                          
 C(BRUPT)        CS              ZRUPT                           # INTERRUPT SHOULD HAPPEN HERE
                 EXTEND                                          
-                BZF             +6                              # MAKES SURE AN INTERRUPT DID HAPPEN
+                BZF             +6                              # MAKES SURE AN INTERRUPT DID OCCUR
                 TC              IN-OUT1                         # AN INTERRUPT. END OF RUPTCHK
 TSKADRS         CS              ZRUPT                           
                 AD              RUPTCON                         
@@ -866,7 +868,7 @@ ENDOFUF         CA              SKEEP5
 # BANK NUMBERS IN EB.
 # SKEEP3 HOLDS LAST ADDRESS BEING CHECKED (HIGHEST ADDRESS).
 # SKEEP2 HOLDS C(EBANK) DURING CHECKNJ
-# ERASCHK TAKES APPROXIMATELY 7 SECONDS.
+# ERASCHK TAKES APPROXMATELY 7 SECONDS
 ERASCHK         CA              S+1                             
                 TS              SKEEP4                          
 0EBANK          CA              S+ZERO                          
@@ -900,7 +902,7 @@ ERASLOOP        INHINT
                 EXTEND                                          
                 INDEX           SKEEP7                          
                 DCA             0000                            
-                DXCH            SKEEP5                          # STORES C(X) AND C(X-1) IN SKEEP6 AND 5
+                DXCH            SKEEP5                          # STORES C(X) AND C(X-1) IN SKEEP6 AND 5.
                 CA              SKEEP7                          
                 TS              ERESTORE                        # IF RESTART, RESTORE C(X) AND C(X+1)
                 TS              L                               
@@ -949,18 +951,18 @@ ELOOPFIN        RELINT
                 TC              ERASLOOP                        # GO TO NEXT ADDRESS IN SAME BANK
                 CCS             SKEEP4                          
                 TC              NOEBANK                         
-                INCR            SKEEP4                          # PUT +1 IN SKEEP4.
+                INCR            SKEEP4                          # PUT +1 IN SKEEP4
                 CA              EBANK                           
                 AD              SBIT9                           
                 TS              EBANK                           
-                AD              ERASCON5                        # 76377, CHECK FOR BANK E3
+                AD              ERASCON5                        # 76777, CHECK FOR BANK E3
                 EXTEND                                          
                 BZF             2EBANK                          
                 CCS             EBANK                           
                 TC              E134567B                        # GO TO EBANKS 1,3,4,5,6, AND 7
                 CA              ERASCON6                        # END OF ERASCHK
                 TS              EBANK                           
-# CNTRCHK PERFORMS A CS OF ALL REGISTERS FROM OCT. 61 THROUGH OCT. 10.
+# CNTRCHK PERFORMS A CS OF ALL REGISTERS FROM OCT. 60 THROUGH OCT. 10.
 # INCLUDED ARE ALL COUNTERS, T6-1, CYCLE AND SHIFT, AND ALL RUPT REGISTERS
 CNTRCHK         CAF             CNTRCON                         # 00050
 CNTRLOOP        TS              SKEEP2                          
@@ -1003,7 +1005,7 @@ CYCLSHFT        CA              CONC+S1                         # 25252
 # SKEEP4 HOLDS BANK NUMBER AND SUPER BANK NUMBER
 # SKEEP5 COUNTS 2 SUCCESSIVE TC SELF WORDS
 # SKEEP6 CONTROLS ROPECHK OR SHOWSUM OPTION
-# SKEEP7 CONTROLS WHEN ROUTINE IS IN COMMON FIXED OR FIXED FIXED BANKS
+# SKEEP7 CONTROLS WHEN ROUNTINE IS IN COMMON FIXED OR FIXED FIXED BANKS
 
 STSHOSUM        TC              GRABDSP                         
                 TC              PREGBSY                         
@@ -1106,7 +1108,7 @@ CHKSUPR         MASK            HI5
                 ADS             SKEEP4                          
                 TC              GONXTBNK                        
 NXTSUPR         AD              SUPRCON                         # SET BNK 30 + INCR SUPR BNK AND CANCEL
-                ADS             SKEEP4                          # ERC BIT OF TEH 37 TO 40 ADVANCE.
+                ADS             SKEEP4                          # ERC BIT OF THE 37 TO 40 ADVANCE.
 GONXTBNK        CCS             SKEEP7                          
                 TC              COMMFX                          
                 CA              S+1                             
@@ -1118,7 +1120,7 @@ ENDSUMS         CCS             SKEEP6
                 TC              ROPECHK         +2              # START SHOWSUM AGAIN
 S+MAX           OCTAL           37777                           # ** S+MAX AND S-MAX MUST BE TOGETHER
 S-MAX           OCTAL           40000                           # FOR DOUBLE PRECISION CHECKING.
-                TC              RPCHKFIN                        # ROPECHK IS COMPLETED
+                TC              RPCHKFIN                        # ROPECHK IS COMPLETE
 
 SOPTION         CA              SKEEP4                          
                 MASK            HI5                             # = BANK BITS

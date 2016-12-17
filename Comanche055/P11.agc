@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     P11.agc
-## Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
-##               It is part of the source code for the Command Module's (CM)
-##               Apollo Guidance Computer (AGC), for Apollo 11.
-## Assembler:    yaYUL
-## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-## Website:      www.ibiblio.org/apollo.
+## Copyright:   Public domain.
+## Filename:    P11.agc
+## Purpose:     Part of the source code for Colossus 2A, AKA Comanche 055.
+##              It is part of the source code for the Command Module's (CM)
+##              Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:   yaYUL
+## Contact:     Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:     www.ibiblio.org/apollo.
 ## Pages:	533-550
-## Mod history:  2009-05-13 HG   Started adapting from the Colossus249/ file 
+## Mod history: 2009-05-13 HG   Started adapting from the Colossus249/ file 
 ##                		of the same name, using Comanche055 page 
 ##                		images 0533.jpg - 0550.jpg. 
 ##		2009-05-20 RSB	Corrections: ERTHALT -> EARTHALT, 
@@ -18,7 +18,8 @@
 ##		2010-08-24 JL	Fixed page numbers. Added missing comment character on p537.
 ##		2011-05-08 JL	Flagged SBANK= workaround for future removal.
 ##		2011-05-17 JL	Removed all SBANK= workarounds.
-
+##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -35,7 +36,9 @@
 ##
 ##    This AGC program shall also be referred to as
 ##            Colossus 2A
+
 ## Page 533
+
 # EARTH ORBIT INSERTION MONITOR PROGRAM
 # *************************************
 #
@@ -58,23 +61,25 @@
 #		4. CHANGE MAJOR MODE TO 11
 #		5. CLEAR DSKY IN CASE OF V 75
 #		6. STORE LIFTOFF IMU-CDU ANGLES FOR ATT. ERROR DISPLAY
-#		7. TERMINATE GYROCOMPASSING	__  __
-#		8. COMPUTE INITIAL VECTORS	RN, VN            _  _  _
+#		7. TERMINATE GYROCOMPASSING	-   -
+#		8. COMPUTE INITIAL VECTORS	RN, VN            -  -  -
 #		9. COMPUTE REFSMMAT FOR PRELAUNCH ALIGNMENT WHERE U ,U ,U  ARE
-#			_         _                                X  Y  Z
-#			U =(UNIT(-R) 	LOCAL VERTICAL AT TIME OF LIFTOFF
-#			_Z      _       _
+#			-        -                                 X  Y  Z
+#			U =UNIT(-R) 	LOCAL VERTICAL AT TIME OF LIFTOFF
+#			 Z     
+#			-       -
 #			U =UNIT(A),	A=HOR VECTOR AT LAUNCH AZIMUTH
-#			_X _   _
+#			 X
+#			-  -   -
 #			U =U * U
 #			 U  Z   X
 #		10. SET REFSMMAT KNOWN FLAG
 #		11. SET AVGEXIT IN SERVICER TO VHHDOT TO
 #		    COMPUTE AND DISPLAY NOUN 62 EVERY 2 SECONDS
 #
-#			R1	V1   -- INERTIAL VELOCITY MAGNITUDE IN FPS
-#			R2	HDOT -- RATE OF CHANGE OF VEHICLE VEL IN FPS
-#			R3	H    -- VEHICLE ALTITUDE ABOVE PAD IN NM
+#			R1	V1   - INTERTIAL VELOCITY MAGNITUDE IN FPS
+#			R2	HDOT - RATE OF CHANGE OF VEHICLE VEL IN FPS
+#			R3	H    - VEHICLE ALTITUDE ABOVE PAD IN NM
 #		
 #		12. DISPLAY BODY AXES ATT. ERRORS ON FDAI NEEDLES
 #
@@ -97,24 +102,24 @@
 #
 # ASTRONAUT REQUESTS (IF ALTITUDE ABOVE 300,000 FT)
 #
-#	DSKY --
+#	DSKY -
 #		MONITOR DISPLAY OF TIME TO PERIGEE R1 HOURS
 #						   R2 MINUTES
 #
-#	DSKY --
+#	DSKY -
 #		MONITOR DISPLAY OF R1 APOGEE ALTITUDE IN NAUTICAL MILES
 #				   R2 PERIGEE ALTITUDE IN NAUTICAL MILES
 #				   R3 TFF IN MINUTES/SECS
 #
 #	IF ASTRONAUT HAS REQUESTED ANY OF THESE DISPLAYS HE MUST
-# HIT PROCEED TO RETURN TO NORMAL NOUN 62 DISPLAY.
+# HIT PROCEED TO RETURN TO NORMAL NOUN 62 DISPLAY
 # NORMAL EXIT MODE
 #
 #	ASTRONAUT	VERB 37 ENTER 00 ENTER
 #
-# ALARM MODES -- NONE
+# ALARM MODES - NONE
 #
-# ABORT EXIT MODES --
+# ABORT EXIT MODES -
 #
 # OUTPUT
 #
@@ -130,7 +135,7 @@
 #	PADLONG
 #	TEPHEM
 #	PGNCSALT
-#	POLYNUM THRU POLYNUM +14D
+#	POLYNUM THRU POLYNUM +14D)
 #	RPSTART
 #	POLYSTOP
 # FLAGS SET OR RESET
@@ -146,7 +151,7 @@
 #	SPOLYARG
 #	BODY1, BODY2, BODY3
 #	VMAG2, ALTI, HDOT
-#	CENTRALS, CORE SET, AND VAC AREAS
+#	CENTRALS, CORE SET AND VAC AREAS
 
 		COUNT	34/P11
 		
@@ -172,7 +177,7 @@ P11+7		EXTEND
 		
 		EXTEND
 		DCA	TIME2
-		DXCH	LIFTTEMP	# FORE RESTARTS
+		DXCH	LIFTTEMP	# FOR RESTARTS
 		
 		CA	ZERO
 		ZL
@@ -191,7 +196,7 @@ REP11A		INHINT
 		EXTEND
 		DCA	TLIFTOFF
 		DAS	TEPHEM1	+1
-		ADS	TEPHEM1		# CORRECT FOR OVERFLOW
+		ADS	TEPHEM1		# CORRECTOFOR OVERFLOW
 		
 		TC	PHASCHNG
 		OCT	05023
@@ -278,7 +283,7 @@ MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
 			HI6ZEROS	# TIME = 0
 		CLEAR	CALL
 			ERADFLAG
-			LALOTORV	# CONVERT TO POSITION VECTOR IN REF. COORDS.
+			LALOTORV	# CONVERT TO POSITION VECTOR IN REF.COORDS
 			
 		STCALL	RN1             #              _   
 			GETDOWN 	# RETURN WITH VECTOR FOR DOWN DIRECTION
@@ -315,6 +320,7 @@ MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
 			DPHALF		# 1/2 REV
 			LAUNCHAZ
 		DAD	PDDL
+		
 			AZIMUTH
 			SATRLRT		# SET SATRLRT = -SATRLRT IF
 		SIGN	STADR		# (1/2REV -LAVNCHAZ +AZIMUTH) IS NEGATIVE
@@ -347,8 +353,8 @@ MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
 		CCS	A		# CHECK TO INSURE DT IS POSITIVE
 		TCF	+3		# TIME POSITIVE
 		TCF	+2		# CANNOT GET HERE
-		CA	ZERO		# TIME NEGATIVE -- SET TO 1
-		AD	ONE		# RESTORE TIME  --  OR MAKE POSITIVE
+		CA	ZERO		# TIME NEGATIVE - SET TO 1
+		AD	ONE		# RESTORE TIME  -  OR MAKE POSITIVE
 		
 		TC	WAITLIST
 		EBANK=	AOG
@@ -446,10 +452,10 @@ GETDOWN         STQ     SETPD
 #                         2    3    4    5    6
 #	PITCH = A0+A1T+A2T +A3T +A4T +A5T +A6T
 #		SCALED TO 32 REVS.                                   -14
-#	IF TL = TIME IN SECS FROM L.O., THEN	T = 100(TL-RPSTART0)2
+#	IF TL = TIME IN SECS FROM L.O., THEN	T = 100(TL-RPSTART)2
 #	WHERE	TL GE RPSTART
 #		TL LE (-POLYSTOP + RPSTART)
-#	COMPUTE DESIRED ROLL WEHRE ROLL EQUALS ANGLE FROM
+#	COMPUTE DESIRED ROLL WHERE ROLL EQUALS ANGLE FROM
 #	LAUNCHAZ TO -Z(S/C) AS SEEN FROM X(S/C).
 #	ROLL = LAUNCHAZ-AZIMUTH-.5+SATRLRT*T	IN REV
 #	SATRLRT = RATE OF ROLL IN REV/CENTI-SEC
@@ -474,13 +480,13 @@ GETDOWN         STQ     SETPD
 #	(XDC)			(OGC)
 #	(YDC) ---) CALCGTA ---) (IGC)
 #	(ZDC)			(MGC)
-#			   _
+#			   -
 #	DEFINE THE VECTOR DELTACDU.
 #
-#	 _         (OGC)   (CDUX)
+#	 -         (OGC)   (CDUX)
 #	DELTACDU = (IGC) - (CDUY)
 #	           (MGC)   (CDUZ)
-#				 _		_    *    _
+#				 -		-    *    -
 #	COMPUTE ATTITUDE ERRORS, A, WHERE	A = TGSC*DELTACDU
 #
 #	 *     (1	      SIN(CDUZ)             0    )   THE GIMBAL ANGLES
@@ -495,23 +501,23 @@ GETDOWN         STQ     SETPD
 ATERJOB		CAE	FLAGWRD6	# CHECK FLAGWRD6
 		MASK    OCT60000        # BITS 14, 15
 		EXTEND
-		BZF     +2              # OK -- CONTINUE
-		TC      ENDOFJOB	# STAURN STICK ON -- KILL JOB
+		BZF     +2              # OK - CONTINUE
+		TC      ENDOFJOB	# SATURN STICK ON - KILL JOB
 		CAF     BIT10           # CHECK IF S/C CONTROL
 		EXTEND                  # OF SATURN PANEL
 		RAND    CHAN30          # SWITCH IS ON
 		EXTEND
-		BZF     STRSAT          # IT IS -- GO STEER
-		CCS     SATSW           # IT IS NOT -- WAS IT ON LAST CYCLE
-		TC      ATTDISP         # NO -- CONTINUE
-		TC      ATRESET         # YES -- REINITIALIZE NEEDLER
-		TC      ATRESET         # YES -- REINITIALIZE NEEDLER
+		BZF     STRSAT          # IT IS - GO STEER
+		CCS     SATSW           # IT IS NOT - WAS IT ON LAST CYCLE
+		TC      ATTDISP         # NO - CONTINUE
+		TC      ATRESET         # YES - REINITIALIZE NEEDLER
+		TC      ATRESET         # YES - REINITIALIZE NEEDLER
 ATTDISP		CS	RPSTART		# PITCH/ROLL START TIME
 		AD	TIME1
 		EXTEND
 		BZMF	NOPOLY		# IF MINUS THEN ATTITUDE HOLD
 		TS	MPAC		# MPAC = TIME1 - RPSTART
-		TS	SPOLYARG	# SAVE FOR USE IN ROLL CALCULATION
+		TS	SPOLYARG	# SAVE FOR USE IN ROLL CALUCLATION
 		AD	POLYSTOP	# NEG PITCHOVER TIME IN CSECS
 		EXTEND
 		BZMF	+2
@@ -525,12 +531,12 @@ ATTDISP		CS	RPSTART		# PITCH/ROLL START TIME
 		CAF	COEFPOLY	# EVALUATE PITCH POLYNOMIAL
 		TC	POWRSERS	# SCALED TO 32 REVOLUTIONS
 		CA      ZERO            # RETURN WITH PITCH(32REV)
-		TS	MODE		# STORED MPAC, MPAC +1
+		TS	MODE		# STORED IN MPAC, MPAC +1
 		TC	INTPRET
 		SETPD	SL		# 32(PITCH(32REV)) = PITCH(REV)
 			0
 			5
-		PUSH			# LET P(RAD) = 2*PI*PITCH(REV)
+		PUSH			# LET P(RAD) = 2.PI.PITCH(REV)
 		GOTO
 			ATTDISP1	# AROUND SETLOC
 ## Page 543
@@ -551,7 +557,7 @@ ATTDISP1	COS	DCOMP
 		
 #	EVALUATE ROLL = LAUNCHAZ-AZIMUTH-.5+SATRLRT*T
 		SLOAD	DMP
-			SPOLYARG	# TIME1 - RSPSTART, CSECS B-14.
+			SPOLYARG	# TIME1 - RPSTART, CSECS B-14.
 			SATRLRT
 		SL	DSU
 			14D
@@ -595,7 +601,7 @@ ATTDISPR	PUSH	COS		# CONTINUE COMPUTING TSMV
 			CALCGTA		#			-COS(R)*SIN(P))
 			
 #	CALL CALCGTA TO COMPUTE DESIRED SM ORIENTATION	OGC,IGC, AND MGC
-#				 _          _   _
+#				 -          -   -
 #	FIND DIFFERENCE VECTOR	DELTACDU = OGC-CDUX
 #  
 #	ENTER HERE IF ATTITUDE HOLD
@@ -604,7 +610,7 @@ NOPOLYM		VLOAD	PUSH		#        OGC      IGC
 			OGC		# CHANGE IGC  TO  MGC FOR COMPATIBILITY
 		PUSH	CALL		#        MGC      OGC
 			CDUTRIG		# WITH Y,Z,X ORDER OF CDUSPOT
-		VLOAD	RTB		#  _         DPHI     OGC-CDUX , PD4
+		VLOAD	RTB		#  -         DPHI     OGC-CDUX , PD4
 			2		# DELTACDU = DTHETA = IGC-CDUY , 0
 			V1STO2S		#            DPSI     MGC-CDUZ , 2
 		STOVL	BOOSTEMP
@@ -655,9 +661,9 @@ ATTDISP2	STODL	16D		# 16D, .5(DPHI + DTHETA*SIN(CDUZ))
 		
 		CA      SATSW
 		CCS     A               # CHK TAKEOVER STATUS
-		TC      SATOUT          # POS -- DISPLAY ONLY
-		TC      AKLOAD          # 0      STORE BIAS
-STEERSAT        TC      INTPRET         # NEG    STEER L/V
+		TC      SATOUT          # POS - DISPLAY ONLY
+		TC      AKLOAD          # 0     STORE BIAS
+STEERSAT        TC      INTPRET         # NEG   STEER L/V
 		TLOAD   TAD
 			BIASAK
 			AK
@@ -691,22 +697,22 @@ AKLOAD          CS      AK              # STORE AKS
 		CS      BIT1            # SET SW
 		TS      SATSW           # TO STEER
 		TC      STEERSAT        # GO STEER
-STRSAT		CA      SATSW           # CHECK IF NEDLER
+STRSAT		CA      SATSW           # CHECK IF NEEDLER
 		EXTEND                  # HAS BEEN INITIALIZED
-		BZMF    ATTDISP         # YES -- CONTINUE
-ATRESET		CS      RCSFLAGS        # NO -- SET
+		BZMF    ATTDISP         # YES - CONTINUE
+ATRESET		CS      RCSFLAGS        # NO - SET
 		MASK    BIT3            # INITIALIZATION SW
-		ADS     RCSFLAGS        # FOR NEDLER
+		ADS     RCSFLAGS        # FOR NEEDLER
 		TC      BANKCALL        # AND GO
 		CADR    NEEDLER         # DO IT
 		CAF     REVCNT          # OCT 6
 		TC      BANKCALL        # DELAY JOB
-		CADR    DELAYJOB        # 60 MS --WAIT TILL IMUERRCNTR ZEROED
+		CADR    DELAYJOB        # 60 MS -WAIT TILL IMUERRCNTR ZEROED
 		CCS     SATSW          	# CHECK SW STATUS
 		TC      TAKEON          # POS   STEER INIT.
 		TC      +1              # 0     RETURN TO DISPLAY
 		CA      BIT1            # NEG   RETURN TO DISPLAY
-		TS      SATSW           # SW = DISPLAY ON
+		TS      SATSW           # SW = DISPLAY ONLY
 		CS      BIT9            # DISABLE
 		EXTEND                  # SIVB
 		WAND    CHAN12          # TAKEOVER
@@ -812,13 +818,13 @@ RESCALES        EXTEND                  # RESCALE AK S FOR
 #
 # ASTRONAUT REQUESTS
 #
-#	ENTRY --  VERB 46 ENTER
-#		  (CONDITION -- BITS 13, 14 OF DAPDATR1 SET)
+#	ENTRY -  VERB 46 ENTER
+#		 (CONDITION - BITS 13, 14 OF DAPDATR1 SET)
 #
-#	EXIT --   VERB 48 ENTER	(FLASH V06N46)
-#		  VERB 21 ENTER	AXXXX ENTER WHERE A=0 OR 1
-#		  VERB 34 ENTER
-#		  VERB 46 ENTER
+#	EXIT -   VERB 48 ENTER	(FLASH V06N46)
+#		 VERB 21 ENTER	AXXXX ENTER WHERE A=0 OR 1
+#		 VERB 34 ENTER
+#		 VERB 46 ENTER
 #
 # NORMAL EXIT MODE
 #
@@ -888,7 +894,7 @@ REDOSAT		LXCH	BANKRUPT	# ALSO COMES HERE FOR RESTARTS
 		TS	TIME5
 		TCF	RESUME		# END OF SATURN STICK INITIALIZATION
 		
-#	THIS SECTION IS EXECUTED EVERY 100 MSECS.
+#	THIS SECTION IS EXECUTED EVERY 100 MSECS
 ## Page 550
 SATSTICK	LXCH	BANKRUPT
 		EXTEND

@@ -44,7 +44,12 @@
  * 				it appeared, since it wasn't being used
  * 				and was generating compiler warnings.
  * 		09/12/16 OH	Add /fmt capabilities to print and output
- * 		09/20/18 OH	Support floating point with scalar types.
+ * 		09/20/16 OH	Support floating point with scalar types.
+ * 		11/24/16 RSB	Changed a printf with a %#u format to %u ...
+ * 				it causes compiler warnings that have become
+ * 				increasingly troublesome to deal with on different
+ * 				platforms, and has no meaning whatever that I've
+ * 				been able to determine from googling.
  */
 
 #include <stdlib.h>
@@ -1761,7 +1766,7 @@ void GdbmiPrintFmt(GdbmiFmt_t fmt, unsigned value)
       printf("%#o",value);
       break;
     case 'u':
-      printf("%#u",value);
+      printf("%u",value); // RSB -- changed %#u to %u.
       break;
     case 'd':
       if (value & 0x00004000) printf("-%d",((value ^ 0x3fff) & 0x3fff));

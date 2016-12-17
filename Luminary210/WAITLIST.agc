@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    WAITLIST.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -13,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-18 MAS  Transcribed. Mostly just comment corrections.
+##              2016-12-07 HG   Fix P00 -> POO
 
 ## Page 1115
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -206,7 +208,7 @@ SVCT3X		TC	FIXDELAY	# DELAY MAX OF 2 TIMES FOR IMUZERO.
 WAIT2		TS	WAITBANK	# BBANK OF CALLING PROGRAM.
 		CA	Q
 		EXTEND
-		BZMF	WAITP00H
+		BZMF	WAITPOOH
 
 		CS	TIME3
 		AD	BIT8		# BIT 8 = OCT 200
@@ -520,10 +522,10 @@ LNGCALL2	LXCH	LONGEXIT +1	# SAVE THE CORRECT BB FOR RETURN
 		CCS	A
 		TCF	LONGCYCL	# HI-ORDER OK --> ALL IS OK.
 		TCF	+2		# HI-ORDER ZERO --> CHECK LO-ORDER.
-		TCF	LONGP00H	# HI-ORDER NEG. --> NEG. DT
+		TCF	LONGPOOH	# HI-ORDER NEG. --> NEG. DT
  +2		CA	LONGTIME +1	# CHECK LO-ORDER FOR ZERO OR NEGATIVE.
 		EXTEND
-		BZMF	LONGP00H	# BAD DELTA-TIME.  ABORT
+		BZMF	LONGPOOH	# BAD DELTA-TIME.  ABORT
 
 #          *** WAITLIST TASK LONGCYCL ***
 LONGCYCL	EXTEND			# CAN WE SUCCESFULLY TAKE ABOUT 1.25
@@ -567,8 +569,8 @@ MUCHTIME	CA	BIT14		# WE HAVE OVER OUR ABOUT 1.25 MINUTES
 GETCADR		DXCH	LONGCADR	# GET THE LONGCALL THAT WE WISHED TO START
 		TCF	SUPDXCHZ	# AND TRANSFER CONTROL
 TSKOVCDR	GENADR	TASKOVER
-LONGP00H	DXCH	LONGEXIT
+LONGPOOH	DXCH	LONGEXIT
 		TCF	+2
-WAITP00H	DXCH	WAITEXIT
- +2		TC	P00DOO1
+WAITPOOH	DXCH	WAITEXIT
+ +2		TC	POODOO1
 		OCT	21204

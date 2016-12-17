@@ -1,17 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     MP4-CONTINGENCY_ORBIT_INSERTION.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-24 MAS  Transcribed.
-##               2016-10-31 RSB  Typos.
-##               2016-11-01 RSB  Correction for overprinted area (p. 707).
-##               2016-11-06 MAS  Removed workaround for overprinted area.
+## Copyright:   Public domain.
+## Filename:    MP4-CONTINGENCY_ORBIT_INSERTION.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-24 MAS  Transcribed.
+##              2016-10-31 RSB  Typos.
+##              2016-11-01 RSB  Correction for overprinted area (p. 707).
+##              2016-11-06 MAS  Removed workaround for overprinted area.
+##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
+##				changes made.
 
 ## Page 696
                 BANK            33
@@ -54,7 +56,7 @@ MP4JOB          TC              PHASCHNG
                 TC              FLAG1UP
                 OCT             00040                           # POOH FLAG ON
 
-                TC              NEWMODEX                        # START CONTINGENCY ABORT INSERTION
+                TC              NEWMODEX                        # START CONTINGENCY ORBIT INSERTION
                 OCT             72
 
                 CAF             FOUR                            # SIGNAL START OF MISSION PHASE 4
@@ -117,6 +119,8 @@ OPESYS          TC              2LMP+DT
                 DEC             400                             # DELAY FOUR SECONDS
 
 ## Page 698
+# END RCS ABORT PRESSURIZATION ROUTINE
+
 TUMBLCHK        CA              FLAGWRD1
                 MASK            BIT13
                 EXTEND
@@ -557,7 +561,7 @@ TCO+15          TC              2LMP+DT
 
 # ************************************************************************
 # TIME INCREMENTS FOR WAITLISTS IN MP4 - XXXXXCEK = DEC XXXXX00 CS
-# ************************************************************************
+# ************************************************************************	   4
 002CEK          DEC             200
 ## The two above lines were printed on top of each other. Luckily the first is all asterisks so it's easy
 ## to tell what should have happened.

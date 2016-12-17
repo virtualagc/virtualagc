@@ -15,6 +15,8 @@
 ##		2009-05-23 RSB	In RTD18, corrected a STOVL DELVLVC to 
 ##				STODL DELVLVC and a STODL 02D to STORE 02D.
 ##		2010-08-28 JL	Added missing comment characters.
+##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##				GOTOPOOH, and I've changed them back.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -473,7 +475,7 @@ P370GOFR	EXTEND
 		QXCH	RTENCKEX
 		TCR	BANKCALL
 		CADR	GOFLASHR
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TCF	+3
 		TCF	+4
 		TC	RTENCKEX	# IMMEDIATE RETURN
@@ -489,7 +491,7 @@ P370GOF		EXTEND
 		QXCH	SPRTEX
 		TCR	BANKCALL
 		CADR	GOFLASH
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 		TCF	+2
 		TC	SPRTEX
 P37PROC		INDEX	SPRTEX
@@ -515,7 +517,7 @@ P370ALRM	STQ	EXIT
 		CAF	V5N09RTE
 		TC	BANKCALL
 		CADR	GOFLASH
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 		TCF	-4
 		TC	INTPRET
 		GOTO

@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-19 RSB	Adapted from the corresponding 
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
+##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -73,7 +75,7 @@ V83CALL		CS	FLAGWRD7	# TEST AVERAGE G FLAG
 		CS	FLAGWRD8
 		MASK	SURFFBIT
 		EXTEND
-		BZF	ONEBASE		# ON SURFACE -- BYPASS LEMPREC
+		BZF	ONEBASE		# ON SURFACE - BYPASS LEMPREC
 
 		TC	INTPRET		# EXTRAPOLATE BOTH STATE VECTORS
 		RTB
@@ -213,12 +215,12 @@ GETRVN		CA	PRIO22		# INHIBIT SERVICER
 		TC	PRIOCHNG
 		TC	INTPRET
 		VLOAD	SETPD
-			RN		# LM STATE VECTOR IN RN,VN.
+			RN		# LM STATE VECTOR IN RN,VN
 			0
 		STOVL	RONE
 			VN
 		STOVL	VONE		# LOAD R(CSM),V(CSM) IN CASE MUNFLAG SET
-			V(CSM)		# (TO INSURE TIME COMPATIBILITY)
+			V(CSM)		# (TO INSURE TIME COMPATABILITY)
 		PDVL	PDDL
 			R(CSM)
 			PIPTIME
@@ -247,7 +249,7 @@ GETRVN2		CALL
 			OTHINT
 R31SURF		TC	INTPRET
 		RTB			# LM IS ON SURFACE, SO PRECISION
-			LOADTIME	# INTEGRATION USED PLANETARY INERTIAL
+			LOADTIME	# INTEGRATION USES PLANETARY INERTIAL
 		STCALL	TDEC1		# ORIENTATION SUBROUTINE
 			LEMPREC
 		GOTO			# DO CSM CONIC
@@ -264,5 +266,6 @@ ONEBASE		TC	INTPRET		# GET CSM BASE VECTOR
 
 V16N54		VN	1654
 
-## Page 708 (empty page)
+## Page 708
+## This page is empty.
 

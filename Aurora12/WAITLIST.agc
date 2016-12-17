@@ -7,6 +7,8 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        139-147
 ## Mod history:  2016-09-20 JL   Created.
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -73,7 +75,7 @@ DELAYEX         TCF     TASKOVER -2     # RETURNS TO TASKOVER
 
 ## Page 140
 
-# ENDTASK MUST ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
+# ENDTASK MUST BE ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
 
 ENDTASK         -2CADR  SVCT3
 
@@ -82,7 +84,7 @@ SVCT3           CCS     STATE   +2      # DRIFT FLAG
                 TCF     TASKOVER
                 TCF     +1
 
-                CAF     PRIO35          # COMPENSATE FOR NBD COEFFICIENTS ONLY.
+                CAF     PRIO35          # COMPENSATE FOR NBD COEFFICIENTS ONLY
                 TC      NOVAC           #     ENABLE EVERY 81.93 SECONDS
                 2CADR   NBDONLY         # EBANK IS SET TO 3
 
@@ -98,7 +100,7 @@ WAIT2           TS      WAITBANK        # BBANK OF CALLING PROGRAM.
                 CS      TIME3
                 AD      +1              # CCS  A  = + 1/4
                 CCS     A               # TEST  1/4 - C(TIME3).  IF POSITIVE,
-                                        # IT MEANS THAT TIME3 OVERFLOW HAS OCCURED PRIOR TO CS  TIME3 AND THAT
+                                        # IT MEANS THAT TIME3 OVERFLOW HAS OCCURRED PRIOR TO CS  TIME3 AND THAT
                                         # C(TIME3) = T - T1, INSTEAD OF 1.0 - (T1 - T).  THE FOLLOWING FOUR
                                         # ORDERS SET C(A) = TD - T1 + 1 IN EITHER CASE.
 
@@ -113,7 +115,7 @@ WAIT2           TS      WAITBANK        # BBANK OF CALLING PROGRAM.
                 CCS     A               # TEST TD - T1 + 1
 
                 AD      LST1            # IF TD - T1 POS, GO TO WTLST5 WITH
-                TCF     WTLST5          # C(A) = (TD - T1) + C(LIST1) = TD-T2+1
+                TCF     WTLST5          # C(A) = (TD - T1) + C(LST1) = TD-T2+1
 
                 NOOP
                 CS      Q
@@ -121,7 +123,7 @@ WAIT2           TS      WAITBANK        # BBANK OF CALLING PROGRAM.
 # NOTE THAT THIS PROGRAM SECTION IS NEVER ENTERED WHEN T-T1 G/E -1,
 # SINCE TD-T1+1 = (TD-T) + (T-T1+1), AND DELTA T = TD-T G/E +1 .  (G/E
 # SYMBOL MEANS GREATER THAN OR EQUAL TO).  THUS THERE NEED BE NO CON-
-# CERN OVER A PREVIOUS OR IMMINENT OVEFLOW OF TIME3 HERE.
+# CERN OVER A PREVIOUS OR IMMINENT OVERFLOW OF TIME3 HERE.
 
                 AD      POS1/2          # WHEN TD IS NEXT, FORM QUANTITY
                 AD      POS1/2          #   1.0 - DELTA T = 1.0 - (TD - T)

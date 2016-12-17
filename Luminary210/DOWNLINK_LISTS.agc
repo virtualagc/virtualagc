@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    DOWNLINK_LISTS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -13,7 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-22 HG   Transcribed
-
+##              2016-12-11 HG   fix operand LMORBM05 -> LMCSTA05
+##                                          LMLSAL09 -> LMLSAL08
+##                                          LMLSAL05 -> LMSAL05
+##              2016-12-12 MAS  Fixed a couple more typos.
 ## Page 204
                 BANK            22
                 SETLOC          DOWNTELM
@@ -154,7 +158,7 @@ DL1O3           =               NEGTORKU
 DL104           =               POSTORKV
 DL105           =               NEGTORKV
 DL106           =               DUMLOOPS
-DL107           =               DNRROOT
+DL107           =               DNRRDOT
 DL108           =               DNLRVELY
 
 ## Page 207
@@ -326,7 +330,7 @@ LMREND03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
 ## Page 211
 LMREND04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
 
-LMREND05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
+LMREND05        EQUALS          LMCSTA05                # COMMON DOWNLIST DATA
 
 LMREND06        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 
@@ -448,7 +452,7 @@ LMDSAS09        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 #                                                         LOCATION          LIST NAME
 
 DL401           =               TIME1                   # DESC/ASC
-DL402           =               NEFTORKU
+DL402           =               NEGTORKU
 DL403           =               POSTORKV
 DL404           =               NEGTORKV
 DL405           =               LASTXCMD
@@ -480,14 +484,14 @@ SURFALIN        EQUALS                                  # SEND ID BY SPECIAL COD
                 DNPTR           LMLSAL03                # COLLECT SNAPSHOT
                 6DNADR          DNTMBUFF                # SEND SHAPSHOT
                 DNPTR           LMLSAL04                # COMMON DATA
-                DNPTR           LMLSAL09                # COMMON DATA
+                DNPTR           LMLSAL08                # COMMON DATA
                 3DNADR          GSAV                    # GSAV +0...+5
                 1DNADR          AGSK                    # AGSK,+1
                 1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
                 1DNADR          LEMMASS                 # LEMMASS,CSMMASS
                 1DNADR          IMODES30                # IMODES30,IMODES33
                 1DNADR          TIG                     # TIG,+1
-                DNPTR           LMLSAL05                # COMMON DATA
+                DNPTR           LMSAL05                 # COMMON DATA
                 1DNADR          AOTCODE                 # AOTCODE,GARBAGE
                 DNPTR           LMLSAL09                # COMMON DATA
                 DNPTR           LMLSAL06                # COMMON DATA

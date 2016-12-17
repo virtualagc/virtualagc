@@ -12,6 +12,8 @@
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
 ##		2011-01-06 JL	Added missing comment characters.
+##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -69,15 +71,16 @@ INCRDCDU	TS	SPNDX
 		MSU	NCDU
 		EXTEND
 		
-		# The following 2 lines seem to have no purpose at all.
-		# I am removing them because they only serve to confuse
-		# the assembler by getting in between EXTEND and MP.
-		#					--- RSB 2009.
-		#SETLOC	KALCMON1
-		#BANK
+## The following 2 lines seem to have no purpose at all.
+## I am removing them because they only serve to confuse
+## the assembler by getting in between EXTEND and MP.<br>&mdash;RSB 2009
+## <pre>
+##		SETLOC	KALCMON1
+##		BANK
+## </pre>		
 		
 		MP	DT/TAU
-		CCS	A		# CONVERT TO 2'S COMPLEMENT
+		CCS	A		# CONVERT TO 2S COMPLEMENT
 		AD	ONE
 		TCF	+2
 		COM
@@ -95,7 +98,7 @@ INCRDCDU	TS	SPNDX
 		
 		RELINT
 		
-# COMPARE PRESENT TIME WTIH TIME TO TERMINATE MANEUVER
+# COMPARE PRESENT TIME WITH TIME TO TERMINATE MANEUVER
 
 TMANUCHK	TC	TIMECHK
 		TCF	CONTMANU
@@ -214,7 +217,7 @@ MANUSTOP	CAF	ZERO		# ZERO MANEUVER RATES
 ENDROLL		CA	CPHI		# NO FINAL YAW
 		TS	CDUXD
 		CAF	ZERO
-		TS	OMEGAPD		# I.E., MANEUVER DID NOT GO THRU
+		TS	OMEGAPD		# I.E. MANEUVER DID NOT GO THRU
 		TS	DELDCDU		# GIMBAL LOCK ORIGINALLY
 		TS	DELPEROR
 GOODMANU	CA	ATTPRIO		# RESTORE USERS PRIO

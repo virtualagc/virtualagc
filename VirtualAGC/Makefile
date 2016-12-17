@@ -88,6 +88,7 @@
 #				32-bit Linux VirtualAGC VM I'm now creating are
 #				added to the installation bundle.  These are
 #				related to debugging on Code::blocks. 
+#		2016-11-29 RSB	Fixed formation of .app sub-directories for Mac.
 
 APP=VirtualAGC
 ifndef MISSIONS
@@ -110,6 +111,20 @@ BIN_MAC=${HOME}/IMCROSS/mac/bin
 INC_MAC=${HOME}/IMCROSS/mac/include
 SDK_MAC=${HOME}/IMCROSS/mac/SDKs/MacOSX10.4u.sdk
 JAMMER_DIR=${HOME}/IMCROSS/installjammer
+
+PLATFORM=
+ifdef WIN32
+PLATFORM+=-DWIN32=yes
+endif
+ifdef MACOSX
+PLATFORM+=-DMACOSX=yes
+endif
+ifdef FREEBSD
+PLATFORM+=-DFREEBSD=yes
+endif
+ifdef SOLARIS
+PLATFORM+=-DSOLARIS=yes
+endif
 
 # cp and sed work slightly differently on Mac OS X than elsewhere.
 INPLACE=-i~
@@ -186,7 +201,7 @@ SOURCES:=${APP}.cpp \
 HEADERS:=${APP}.h
 
 ${APP}: ${SOURCES} ${HEADERS}
-	${CC} -DONNO_STYLE \
+	${CC} -DONNO_STYLE ${PLATFORM} \
 		${YADSKY2} ${YADEDA2} \
 		`wx-config --cxxflags` \
 		-o $@ ${SOURCES} \
@@ -225,7 +240,7 @@ temp/lVirtualAGC/Resources temp/VirtualAGC/Resources temp/VirtualAGC.app/Content
 	for n in ${MISSIONS}; do \
 		sh ./CopyApolloSource.sh $@ $$n ${EXTSW} ${WIN32} ;\
 	done
-	${CP} *.png $@
+	${CP} *.png *.ico $@
 	${CP} ../yaDSKY/src/*.ini $@
 ifeq "${YADSKY_SUFFIX}" ""	
 	${CP} ../yaDSKY/pixmaps $@/pixmaps/yaDSKY
@@ -370,7 +385,7 @@ temp/VirtualAGC.app : % : VirtualAGC-macosx create-bundle %/Contents/MacOS %/Con
 		mv $$n `echo $$n | sed "s/-macosx//"` ; \
 	done
 	tar -C $@/Contents/MacOS -xjf ../../Terminator.app.tar.bz2
-	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz ; \
+	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz yaDSKYb1 ; \
 	do \
 	  ${CP} template.app $@/Contents/MacOS/$$n.app ; \
 	  mv $@/Contents/MacOS/$$n.app/Contents/Resources/VirtualAGC.icns $@/Contents/MacOS/$$n.app/Contents/Resources/$$n.icns ; \
@@ -392,7 +407,7 @@ else # MACOSX
 temp/VirtualAGC.app : % : VirtualAGC create-bundle %/Contents/MacOS %/Contents/Resources
 	for n in ${EXECUTABLES} ; do ${CP} $$n $@/Contents/MacOS ; done
 	-tar -C $@/Contents/MacOS -xjf ../../Terminator.app.tar.bz2
-	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz ; \
+	for n in yaDSKY2 yaDEDA2 yaTelemetry jWiz yaDSKYb1 ; \
 	do \
 	  ${CP} template.app $@/Contents/MacOS/$$n.app ; \
 	  mv $@/Contents/MacOS/$$n.app/Contents/Resources/VirtualAGC.icns $@/Contents/MacOS/$$n.app/Contents/Resources/$$n.icns ; \

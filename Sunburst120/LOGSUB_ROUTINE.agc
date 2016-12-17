@@ -9,6 +9,8 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed.
+##		2016-12-06 RSB	Comment proofing via octopus/ProoferComments
+##				performed, but no changes made.
 
 ## Page 925
 # INPUT....X IN MPAC

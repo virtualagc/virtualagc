@@ -11,9 +11,11 @@
 ##               2016-10-26 HG   Transcribed
 ##		 2016-10-31 RSB	 Typos.
 ##		 2016-11-01 RSB	 More typos.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 776
-# FBR3 SETS UP A TIMESTEP CALL TO KEPLER
+# FBR3 SETS UP A TIMESTEP CALL TO KEPLER.
 
 
 
@@ -37,7 +39,7 @@ FBR3            DLOAD           SR3
 
 
 
-KEPLER          VLOAD           SETPD                   # UNIT OF RECTIFICATION POSTION TO 0
+KEPLER          VLOAD           SETPD                   # UNIT OF RECTIFICATION POSITION TO 0
                                 RRECT
                                 0
                 UNIT            PDDL                    # AND LENGTH OF ORIGINAL IN 6
@@ -235,7 +237,7 @@ GETRANDV        DLOAD           SETPD
                                 23D                     # LAST VALUE OF A3
                 SL2             VXSC
                                 VRECT
-                VAD             VSL1                    # ADDITION MUST BE DON IN THIS ORDER
+                VAD             VSL1                    # ADDITION MUST BE DONE IN THIS ORDER
                 PUSH            VAD
                                 RRECT
                 VAD             STADR
@@ -258,7 +260,7 @@ GETRANDV        DLOAD           SETPD
                 VXSC            VAD
                                 VRECT
                 VSL1
-                STCALL          FOUNDV                  # THIS COMPLETES TEH CALCULATION
+                STCALL          FOUNDV                  # THIS COMPLETES THE CALCULATION
                                 HBRANCH
 
 ## Page 784
@@ -269,7 +271,7 @@ POSTRUE         SSP             VLOAD                   # TIME STEP CALLS TO KEP
                                 ALPHAV
                 VSR             VAD
                                 10D
-                                RCV                     # POSITION OUTPUT TO KEPLER
+                                RCV                     # POSITION OUTPUT OF KEPLER
                 LXA,2           BOF
                                 DIFEQCNT
                                 WMATFLAG
@@ -380,7 +382,7 @@ GMODE12         VSL*                                    # -SCALE(GAMMA)-1 IS LEF
                                 31D,1                   # ADJUST GAMMA TO SCALE OF -32
                 STOVL           FV
                                 BETAV
-                STODL           ALPHAV                  # BETA VECTOR INTO ALPHA FOR NEXT ACCOMP.
+                STODL           ALPHAV                  # BETA VECTOR INTO ALPHA FOR NEXT ACCOMP
                                 BETAM
                 STORE           ALPHAM
                 BOFF            CALL
@@ -549,7 +551,7 @@ DIFEQ0          VLOAD                                   # POSITION DEVIATION INT
                                 DPZERO
                 STORE           H                       # START H AT ZERO. GOES O(DELT/2)DELT.
                 STCALL          DIFEQCNT                # ZERO DIFEQCNT AND REGISTER FOLLOWING.
-                                HBRANCH                 # GOES 0(-12D)(-24D)
+                                HBRANCH                 # GOES 0(-12D)(-24D).
 
 ## Page 792
 # THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCASIONALLY BY THE MEASUREMENT INCORPORATION
@@ -557,14 +559,14 @@ DIFEQ0          VLOAD                                   # POSITION DEVIATION INT
 
 
 
-RECTIFY         VLOAD           VSR8                    # RECITIFY - FORM TOTAL POSITION AND VEL.
+RECTIFY         VLOAD           VSR8                    # RECTIFY - FORM TOTAL POSITION AND VEL.
                                 TDELTAV                 # ADJUST SCALE DIFFERENCE (ASSUMED
                 VSR2            VAD                     #       CONSTANT HERE.)
                                 RCV
                 STORE           RRECT
                 STOVL           RCV                     # SET UP CONIC ,ANSWER, FOR TIMESTEP
                                 TNUV
-                VSR8            VAD                     # SAME FOR VELOCITY
+                VSR8            VAD                     # SAME FOR VELOCITY.
                                 VCV
                 STORE           VRECT
                 AXT,1           SSP
@@ -662,7 +664,7 @@ ENDSTATE        STOVL           TNUV
 
 
 
-DIFEQCOM        DLOAD           DAD                     # INCREMENT H AND DIFEQCNT
+DIFEQCOM        DLOAD           DAD                     # INCREMENT H AND DIFEQCNT.
                                 DT/2
                                 H
                 INCR,1          SXA,1
@@ -715,7 +717,7 @@ POS1/4          EQUALS          DP1/4
 3/8             EQUALS          THREE/8
 15/16           2DEC            15.             B -4
 3/4             2DEC            3.0             B -2
-J2REQSQ         2DEC            .335914874              # SECOND HARMONIC TIEMS SQUARE OF RADIUS.
+J2REQSQ         2DEC            .335914874              # SECOND HARMONIC TIMES SQUARE OF RADIUS.
 7/12            2DEC            .5833333333
 9/16            2DEC            9               B -4
 5/128           2DEC            5               B -7
@@ -727,11 +729,11 @@ DP2/3           2DEC            .6666666667
 2/3             EQUALS          DP2/3
 
 ## Page 798
-# DUMMYMOON POSITION ROUTINE, SUN POSITION, AND PBODY TABLE FOR CHECKOUT OF EARTH-ORBITAL ONLY.
+# DUMMYMOON POSITION ROUTINE, SUN POSITION ROUTINE, AND PBODY TABLE FOR CHECKOUT OF EARTH-ORBITAL ONLY.
 MOONPOS         VLOAD           ITCQ                    # LOAD CONSTANT VECTOR INTO A AND EXIT.
                                 MOONVEC
 
-SUNPOS          SETPD           VLOAD                   # RETURNS WITH VECTOR IN VAC AND IN PDL
+SUNPOS          SETPD           VLOAD                   # RETURNS WITH VECTOR IN VAC AND IN PDL.
                                 0
                                 SUNVEC
                 ITCQ

@@ -8,6 +8,8 @@
 ## Pages:        1-6
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-09-21 MAS  Filled out.
+##		 2016-12-07 RSB	 Proofed comments with octopus/ProoferComments
+##				 and made a few changes.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -71,7 +73,7 @@
 # 43  LOAD IMU ATTITUDE ERROR METERS
 # 44  ILLEGAL VERB
 # 45  COMMAND LR TO POSITION 2
-# 46  SAMPLE RADAR DATA ONCE PER SECOND
+# 46  SAMPLE RADAR ONCE PER SECOND
 # 47  PERFORM LEM FCS TEST
 # 50  PLEASE PERFORM
 ## Page 2
@@ -128,7 +130,7 @@
 # 30  STAR NUMBERS                                   (XXXXX.)
 # 31  FAILREG, SFAIL, ERCOUNT                        (OCTAL ONLY)
 # 32  DECISION TIME (MIDCOURSE)                      (XXX.XXHOURS (INTERNAL UNITS = WEEKS))
-# 33  EPHEMIRIS TIME (MIDCOURSE)                     (XXX.XXHOURS (INTERNAL UNITS = WEEKS))
+# 33  EPHEMERIS TIME (MIDCOURSE)                     (XXX.XXHOURS (INTERNAL UNITS = WEEKS))
 # 34  MEASURED QUANTITY (MIDCOURSE)                  (XXXX.XKILOMETERS)
 # 35  INBIT MESSAGE                                  (OCTAL ONLY)
 # 36  LANDMARK DATA 1                                (OCTAL ONLY)

@@ -10,6 +10,10 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-14 RSB	Transcribed.
 ##		2016-10-31 RSB	Typo.
+##		2016-12-05 RSB	Proofed with octopus/ProoferComments
+##				and various comments corrected, but the
+##				proofing process is not yet completed.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed.
 
 ## Page 316
 # PROGRAM NAME- UPDATE PROGRAM
@@ -32,8 +36,8 @@
 #				  GIVE CONTROL TO THE UPDATE PROGRAM.
 # SUBROUTINES CALLED- POSTJUMP,IBNKCALL, BANKCALL, CHECKMM, GRABWAIT,
 #          NEWMODEX, FREEDSP, WAITLIST, ENDOFJOB, NOVAC, TASKOVER, FINDVAC
-#          ENDUP, NOV67, DOV70, DOV71, DOV72, DOV73, DOV74, DFITMCAL,
-#	   GRRPLACE, NVSBWAIT, ENDIDLE, XACTALM, MGETUP, UPDATING, TPAGREE
+#          ENDUP, DOV67, DOV70, DOV71, DOV72, DOV73, DOV74, DFITMCAL,
+#	   GRRPLACE, NVSBWAIT, ENDIDLE, XACTALM, MGETUP, UPDATINT, TPAGREE
 # NORMAL EXIT MODE- TC    BANKCALL
 #		    CADR  ENDUP
 # ALARM OR ABORT EXIT MODE- BZF   XACTALM    IF MP IN PROGRESS
@@ -55,7 +59,7 @@
 # --------------- ----------------------------------- ---- ------ ---------------- -------------------------------
 # V64EIEXXXXXE    SET MISSION TIMER I TO ELAPSE AT A   1.    I    1,2,3,4          MISSION TIMERS
 #       XXXXXE    GIVEN GROUND ELAPSED TIME(GET).X-S   2.  XXXXX                   MSB OF GET(MUST BE IN)
-#                 ARE THE GET(IN CENTISECONDS) OF THE  3.  XXXXX                   LSB OF GET(THE FUTURE)
+#                 ARE THE GET(IN CENTISECONDS OF THE   3.  XXXXX                   LSB OF GET(THE FUTURE)
 #                 DESIRED EVENT.
 # V65E		  SET GUIDANCE REFERENCE RELEASE       NONE
 #		  DISCRETE.
@@ -66,23 +70,23 @@
 #                 REPRESENTING THE 8 BIT COMMAND TO
 #                 BE SENT TO THE LMP.
 # V70EIETTTTTE    INCREMENT TIMER I BY TTTTT OCTAL     1.    I    1,2,3,4          MISSION TIMERS
-#		  SECONDS.                             2.  TTTTT                   ***SEE NOTES TO LEFT***
+#		  SECONDS.                             2.  TTTTT                   **SEE NOTES TO LEFT**
 #                 **SEE BELOW FOR DESCRIPTION OF
 #		  :UPDATE OF TIMERI LOGIC : AND
 #		  :TIMER MAINTENANCE LOGIC:**
 # V71EIEPPE       SET MISSION PHASE REGISTER I TO      1.    I    1,2,3,4          MISSION PHASE REGISTERS
 #                 MISSION PHASE PP (OCTAL)             2.   PP 7,10,11,13,15(OCT)  MISSION PHASES
-# V71EIEPPETTTTTE (--COMBINATION OF V70 AND V71.--)
+# V72EIEPPETTTTTE (--COMBINATION OF V70 AND V71.--)
 # V73EIE          CHANGE THE STATE OF THE DPS COLD     1.    I     1               ENABLE/INHIBIT RCS TESTING
 #                 SOAK (MISSION PHASE 8) DISCRETE(I=2)       I     2		   ENABLE/INHIBIT DPS COLD SOAK
 #                                                            I     3               ENABLE/INHIBIT RCS COLD SOAK
 #                                                                                  (I = 1 OR 3 WILL ONLY INVERT
 #										   RESPECTIVE BITS OF FLAGWRD2 AND
-#										   HAVE NO OHTER EFFECT ON 206)
+#										   HAVE NO OTHER EFFECT ON 206)
 # V74E            MISSION IDLE COMMAND.                NONE
 #		  (VERB 15,NOUN 50, R1 = FAILREG,
 #		  R2 = FAILREG +1, R3 = FAILREG +2
-#		  WILL APPEAR ON THE DSKY)
+#		  WILL APPEAR ON DSKY)
 # V75E1EXXXXXE    UPDATE TARGET PARAMETERS FOR DPS1    1.    I     1               DPS1 TARGET PARAMS UPDATE CODE
 #       XXXXXE    BURN.(MISSION PHASE 9).              2.  XXXXX                   MSB OF R(P)   (RP   )
 #                                                      3.  XXXXX                   LSB OF R(P)   (RP +1)
@@ -99,7 +103,7 @@
 #									  DESIRED ORBITAL PLANE IN STABLE MEMBER
 #                                                                         COORDINATES)
 # V75E3EXXXXXE    UPDATE TARGET PARAMETERS FOR APS2    1.    I     3               APS2 TARGET PARAMS UPDATE CODE
-#       XXXXXE	  BURN (MISSION PHASE 13)              2.  XXXXX                   MSB OF RCSM(TA)0  (RIVEC   )
+#       XXXXXE	  BURN (MISSION PHASE 13).             2.  XXXXX                   MSB OF RCSM(TA)0  (RIVEC   )
 #       XXXXXE                                         3.  XXXXX                   LSB OF RCSM(TA)0  (RIVEC +1)
 #       XXXXXE                                         4.  XXXXX                   MSB OF RCSM(TA)1  (RIVEC +2)
 #       XXXXXE                                         5.  XXXXX                   LSB OF RCSM(TA)1  (RIVEC +3)
@@ -112,7 +116,7 @@
 #									  (RIVEC IS THE POSITION VECTOR OF THE
 #									   DESIRED INTERCEPT POINT IN STABLE
 #									   MEMBER COORD SCALED AT METERS 2(25).
-#									   TIME IS THE TIME SCALED AT CSEC 2(28).
+#									   TINT IS THE TIME SCALED AT CSEC 2(28).
 ## Page 318
 #                                                                          RCO IS THE DESIRED RADIUS AT CUTOFF
 #                                                                           SCALED AT METERS 2(25))
@@ -141,7 +145,7 @@
 #                                                       T
 # BEFORE   A        A                 A                 H
 # UPDATE   N        N                 N                 E
-# TIMERI = D UPDT = D TIMERI + UPDT = D TIEMRI + UPDT = N TIMERI =
+# TIMERI = D UPDT = D TIMERI + UPDT = D TIMERI + UPDT = N TIMERI =
 # -------- - ------ - --------------- - --------------- - -------------
 #          (        (
 #          (        ( OVERFLOW                            NO CHANGE (EXCEPT OPERATOR ERROR = ON)
@@ -176,7 +180,7 @@
 # ERASABLE INITIALIZATION REQUIRED- NONE
 # DEBRIS(ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM)- MPAC - MPAC +2,
 #          STCOUNT, EBANK, UPVERB, UPOLDMOD, FLAGWRD2(BIT6),UPTEMP,
-#	   UPTEMP1, COMPNUMB, REFRRECT - REFRECT +5, REFRCV - REFRCV +5,
+#	   UPTEMP1, COMPNUMB, REFRRECT - REFRRECT +5, REFRCV - REFRCV +5,
 #          REFVRECT - REFVRECT +5, REFVCV - REFVCV +5, TE - TE +1,
 #          DELTAV - DELTAV +5, NUV - NUV +5, REFTC -REFTC +1,
 #          REFKEP - REFKEP +1, UPINDEX, UPDT

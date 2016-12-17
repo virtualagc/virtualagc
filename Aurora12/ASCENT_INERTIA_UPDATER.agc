@@ -10,6 +10,8 @@
 ##               2016-09-21 MC   Filled out.
 ##               2016-10-05 HG   Insert missed TC ASCENGON
 ##               2016-10-16 HG   Fix operand 1/3JTS -> 1/2JTS
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 but no errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 

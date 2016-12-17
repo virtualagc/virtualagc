@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    FIXED-FIXED_CONSTANT_POOL.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -7,16 +8,15 @@
 ##              that the code format has been changed to conform to the
 ##              requirements of the yaYUL assembler rather than the
 ##              original YUL assembler.
-## Reference:   pp. XXX-XXX
+## Reference:   pp. 1093-1097
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+##		2016-12-05 RRB	Updated from Luminary210.
 
-## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
 
-
-## Page 1094
+## Page 1093
 		BLOCK	02
 		COUNT*	$$/FCONS
 
@@ -67,7 +67,7 @@ ELEVEN		DEC	11
 OCT15		OCT	15
 # R1D1		OCT	16		# PINBALL
 LOW4		OCT	17
-## Page 1095
+## Page 1094
 # BIT5		OCT	00020
 # NC1		OCT	21		# PINBALL
 # VD1		OCT	23		# PINBALL
@@ -118,7 +118,7 @@ C5/2		DEC	.0363551	#		   	(OCTAL 01124)
 V05N09		VN	0509		# (SAME AS OCTAL 1211)
 OCT1400		OCT	01400
 V06N22		VN	0622
-## Page 1096
+## Page 1095
 # MID5		OCT	1740		# PINBALL
 BITS2-10	OCT	1776
 LOW10		OCT	1777
@@ -151,10 +151,8 @@ OCT17770	OCT	17770
 # BIT14		OCT	20000
 #		OCT	20033		# T4RUPT	RELTAB +3D
 PRIO21		OCT	21000
-
 		BLOCK	03
-		COUNT*	$$/FCONS
-		
+		COUNT*	$$/FCONS		
 PRIO22		OCT	22000		# SERVICE ROUTINES
 PRIO23		OCT	23000
 PRIO24		OCT	24000
@@ -171,7 +169,7 @@ PRIO32		OCT	32000
 PRIO33		OCT	33000
 PRIO34		OCT	34000
 #		OCT	34034		# T4RUPT	RELTAB +6D		
-## Page 1097
+## Page 1096
 PRIO35		OCT	35000
 PRIO36		OCT	36000
 PRIO37		OCT	37000
@@ -189,8 +187,8 @@ DLOAD*		OCT	40015
 BIT15+6		OCT	40040
 OCT40200	OCT	40200
 #		OCT	44035		# T4RUPT	RELTAB +8D
-#		OCT	50037		# T4RUPT	RELTAB +9D
-#		OCT	54000		# T4RUPT	RELTAB +10D
+#		OCT	50037		# T4RUPT	 RELTAB +9D
+#		OCT	54000		# T4RUPT	 RELTAB +10D
 -BIT14		OCT	57777
 # RELTAB11	OCT	60000		# T4RUPT
 C3/2		DEC	-.3216147	#			(OCTAL 65552)
@@ -201,13 +199,13 @@ HIGH4		OCT	74000
 # HI5		OCT	76000		# PINBALL
 HIGH9		OCT	77700
 # -ENDVAC	DEC	-45		# INTERPRETER		(OCTAL 77722)
-# -OCT10	OCT	-10		#			(OCTAL 77767)
+# -OCT10	OCT	-10		#			 (OCT 77767)
 # NEG4		DEC	-4		#			(OCTAL 77773)
-NEG3		DEC	-3
+NEG3		DEC	-3		## In octal to left, "77774 0" is circled - RRB
 NEG2		OCT	77775
 NEGONE		DEC	-1
 
-## Page 1098
+## Page 1097
 
 # DEFINED BY EQUALS
 

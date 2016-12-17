@@ -10,6 +10,8 @@
 ##               2016-09-21 HG   Initial transcription from scans
 ##               2016-10-12 HG   Fix label VBU -> VBUF
 ##                                         GCOMPS -> GCOMPSW 
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -63,11 +65,11 @@
 # PULSES, THE COMMANDS ARE SENT TO THE GYROS.
 
 # DURING FREE-FALL PHASES OF A FLIGHT NBDX, NBDY, AND NBDZ ARE THE ONLY RELEVANT COEFFICIENTS. THESE BIAS TERMS
-# WILL BE INTEGRATED BY BY ROUTINE NBDONLY APPROXIMATELY EVERY 81.93 SECONDS FOLLOWING AN EXECUTIVE CALL BY THE DUMMY
+# WILL BE INTEGRATED BY ROUTINE NBDONLY APPROXIMATELY EVERY 81.93 SECONDS FOLLOWING AN EXECUTIVE CALL BY THE DUMMY
 # TASK OF THE WAITLIST PROGRAM. NBDONLY IS ENABLED WHEN BIT 15 OF FLAGWRD2 IS SET TO INDICATE FREE-FALL. DURING
 # THIS TIME 1/PIPA IS NOT CALLED.
 
-# LASTBIAS IS CALLED VIA EXECUTIVE WHEN MAKING THE TRANSITION FROM-FALL TO A PIPA READING MODE. THE NBD TERMS
+# LASTBIAS IS CALLED VIA EXECUTIVE WHEN MAKING THE TRANSITION FROM FREE-FALL TO A PIPA READING MODE. THE NBD TERMS
 # ARE COMPENSATED FOR FROM THE LAST NBDONLY CALL UP TO PIPA ZEROING. PREREAD WILL THEN ENABLE 1/PIPA AT ITS
 # REGULAR INTERVAL. THE DRIFT FLAG MUST BE DOWN JUST PRIOR TO LASTBIAS. GYROCOMPASS NEVER CALLS LASTBIAS.
 
@@ -84,14 +86,14 @@
 # CONVERSION TABLE
 #       1 PIPA PULSE = 1.00 (CM)/(SEC)(SEC)          1 ERU = 7.29209817 X 10(-5) (RAD)/(SEC)
 #       1 ERU = 15.04104488 (ARCSEC)/(SEC)           1 (CM)/(SEC)(SEC) = .01 (PIPA PULSES)/(CS)
-#       1 GYRO PULSE = .61798096 (ARCSEC)            1 MERU = .0024272592 (GYRO PULSES)/(CS)
-#       1 g = 979.24 (CM)/(SEC)(SEC)                 1 (MERU)/(G) = .000144787174 (GYRO PULSES)/(PIPA PULSE)
+#       1 GYRO PULSE = .61798096 ARCSEC              1 MERU = .0024272592 (GYRO PULSES)/(CS)
+#       1 G = 979.24 (CM)/(SEC)(SEC)  (AMR)          1 (MERU)/(G) = .000144787174 (GYRO PULSES)/(PIPA PULSE)
 
 # REFERENCES
-#       AGC PROGRAMMING MEMO NO. 12, I.S.S. MEMO NO. 247, I.S.S. MEMO NO 328, I.S.S. MEMO NO. 339
+#       AGC PROGRAMMING MEMO NO. 12, I.S.S. MEMO NO. 247, I.S.S. MEMO NO. 328, I.S.S. MEMO NO. 339
 
 # CALLING SEQUENCE 
-#       L      TC     BANKALL
+#       L      TC     BANKCALL
 #       L+1    CADR   1/PIPA
 #       L+2                       RETURNS HERE
 
@@ -214,7 +216,7 @@ IRIGZ           EXTEND
                 DCS     DELVY           # (PIPA PULSES) X 2(+14)
                 DXCH    MPAC            
                 CA      ADSRAZ          # (GYRO PULSES)/(PIPA PULSE) X 2(-6)     *
-                TC      GCOMPSUB        # -(ADSRAZ)(PIPAY)  (GYRO PULSES) X 2(+14)
+                TC      GCOMPSUB        # -(ADSRAZ)(PIPAY   (GYRO PULSES) X 2(+14)
 
                 EXTEND
                 DCS     DELVZ           # (PIPA PULSES) X 2(+14)
@@ -309,7 +311,7 @@ DRFTSUB2        CAF     TWO             # PIPAX, PIPAY, PIPAZ
 1/GYRO          CAF     FOUR            # PIPAZ, PIPAY, PIPAX
                 TS      BUF     
                 
-                INDEX   BUF             # SCALE GYRO COMMANDS FOR IMPULSE
+                INDEX   BUF             # SCALE GYRO COMMANDS FOR IMUPULSE
                 CA      GCOMP   +1      # FRACTIONAL PULSES
                 EXTEND
                 MP      BIT8            # SHIFT RIGHT 7
@@ -363,7 +365,7 @@ NBD2            CCS     A               # CALCULATE ELAPSED TIME
                 TCF     +2              # TIME1 OVERFLOW
                 TCF     ENDOFJOB        # IF ELAPSED TIME = 0  (DIFFERENCE = -0)
                 
-                COM                     # CALCULATE ABSOLUE DIFFERENCE
+                COM                     # CALCULATE ABSOLUTE DIFFERENCE
                 AD      POSMAX  
                 
 NBD3            EXTEND                  # C(A) = DELTAT    (CS) X 2(+14)
@@ -400,7 +402,7 @@ NBD3            EXTEND                  # C(A) = DELTAT    (CS) X 2(+14)
 FBIASSUB        XCH     Q
                 TS      BUF     +1
                 
-                CA      Q               # NBD SCALED (GRO PULSES)/(CS) X 2(-5)
+                CA      Q               # NBD SCALED (GYRO PULSES)/(CS) X 2(-5)
                 EXTEND
                 MP      MPAC            # DELTAT SCALED (CS) X 2(+19)
                 INDEX   BUF

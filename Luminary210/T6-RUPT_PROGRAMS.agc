@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    T6-RUPT_PROGRAMS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -7,14 +8,12 @@
 ##              that the code format has been changed to conform to the
 ##              requirements of the yaYUL assembler rather than the
 ##              original YUL assembler.
-## Reference:   pp. XXX-XXX
+## Reference:   pp. 1400-1402
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
-
-## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
-
+##              2016-11-30 RRB  Updated from Luminary210 images.
 
 ## Page 1400
 # PROGRAM NAMES:	(1) T6JOBCHK	MOD. NO. 5	OCTOBER 2, 1967
@@ -39,6 +38,7 @@
 #				C.	A T6RUPT IS IN PROCESS NOW.
 #	4.	ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK
 #		EVERY 5 MILLISECONDS TO PROCESS A POSSIBLE WAITING T6RUPT BEFORE IT CAN BE HONORED BY THE HARDWARE.
+#
 #      (5.	PROGRAM JTLST, IN Q,R-AXES, HANDLES THE INPUT LIST.)
 #
 # T6JOBCHK CALLING SEQUENCE:
@@ -152,5 +152,3 @@ DOT6RUPT	LXCH	BANKRUPT	# (INTERRUPT LEAD-INS CONTINUED)
 		TC	T6JOBCHK	# CALL T6JOBCHK.
 
 		TCF	RESUME		# END TIME6 INTERRUPT PROCESSOR.
-		
-

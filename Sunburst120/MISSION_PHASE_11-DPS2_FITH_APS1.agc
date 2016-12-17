@@ -9,6 +9,8 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-28 MAS  Transcribed.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 739
                 BANK            36
@@ -143,7 +145,7 @@ TIG11-30        CAF             BIT11                           # SEE IF ATTITUD
                 TC              NEWMODEX                        # SET MODE TO PROG42
                 OCT             42
 
-                CAF             AVEG11AD                        # SET UP SERVICER
+                CAF             AVEG11AD                        # SET UP SERVICER.
                 TS              DVSELECT
 
                 EXTEND

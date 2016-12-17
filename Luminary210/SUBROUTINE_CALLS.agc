@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    SUBROUTINE_CALLS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -13,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Artemis072 version.
 ##              2016-11-18 HG   Transcribed
+##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
+##				but no errors found.
 
 ## Page 91
 # SUBROUTINE_CALLS
@@ -27,4 +30,3 @@
                 SUBRO           SKIPPER         131
                 SUBRO           LMDAP           032
 
-# *** END OF MAIN PROGRAM ***

@@ -11,6 +11,8 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-08 PDJ  Updated against Sunburst120 scan.
 ##		 2016-10-31 RSB	 Some typos.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 1049
                 BLOCK           02                              
@@ -27,7 +29,7 @@ NOVAC           TS              NEWPRIO                         # SAVE PRIORITY 
                 TS              EXECTEM1                        
                 TCF             NOVAC2                          # ENTER EXECUTIVE BANK.
 
-# TO ENTER A JOB REQUEST REQUIREING A VAC AREA -- E.G., ALL (PARTIALLY) INTERPRETIVE JOBS.
+# TO ENTER A JOB REQUEST REQUIRING A VAC AREA - E.G., ALL (PARTIALLY) INTERPRETIVE JOBS.
 
 FINDVAC         TS              NEWPRIO                                         
                 EXTEND                                          
@@ -108,7 +110,7 @@ EXECBANK        CADR            FINDVAC2
 
 ## Page 1051
 
-# LOCATE AN AVAILABLE VAC AREA
+# LOCATE AN AVAILABLE VAC AREA.
 
                 BANK            01                              
 FINDVAC2        TS              EXECTEM1                        # (SAVE CALLER'S BANK FIRST.)
@@ -137,7 +139,7 @@ NOVAC2          CAF             ZERO                            # NOVAC ENTERS H
 NOVAC3          TS              EXECTEM2                        
                 INDEX           LOCCTR                          
                 CCS             PRIORITY                        # EACH PRIORITY REGISTER CONTAINS -0 IF
-                TCF             NEXTCORE                        # THE CORESPONDING CORE SET IS AVAILABLE.
+                TCF             NEXTCORE                        # THE CORrESPONDING CORE SET IS AVAILABLE.
 NO.CORES        DEC             6                               
                 TCF             NEXTCORE                        # AN ACTIVE JOB HAS A POSITIVE PRIORITY
                                                                 # BUT A DORMANT JOB'S PRIORITY IS NEGATIVE
@@ -147,9 +149,9 @@ NO.CORES        DEC             6
 CORFOUND        CA              NEWPRIO                         # SET THE PRIORITY OF THIS JOB IN THE CORE
                 INDEX           LOCCTR                          # SET'S PRIORITY REGISTER AND SET THE
                 TS              PRIORITY                        # JOB'S PUSH-DOWN POINTER AT THE BEGINNING
-                MASK            LOW9                            # OF THE WORK AREA AND OVERFLOW INDICATOR.
+                MASK            LOW9                            # OF THE WORK AREA AND OVERFLOW INDICATOR
                 INDEX           LOCCTR                          
-                TS              PUSHLOC                         # OFF TO PREPARE FOR INTERPRETIVE PROGRAMS.
+                TS              PUSHLOC                         # OFF TO PREPARE FOR INTERPRETIVE PROGRAMS
 
                 CCS             LOCCTR                          # IF CORE SET ZERO IS BEING LOADED, SET UP
                 TCF             SETLOC                          # OVFIND AND FIXLOC IMMEDIATELY.
@@ -247,7 +249,7 @@ ENDPRCHG        RELINT
 ## Page 1055
                 COM                                             # EPILOGUE TO JOB CHANGE FOR INTERPRETIVE
                 AD              ONE                             
-                TS              LOC                             # RESUME
+                TS              LOC                             # RESUME.
                 TCF             INTRSM                          
 
 # COMPLETE JOBSLEEP PREPARATIONS.
@@ -259,7 +261,7 @@ JOBSLP1         INHINT
                 MASK            BBANK                           
                 TS              BANKSET                         
                 CS              ZERO                            
-JOBSLP2         TS              BUF             +1              # HOLDS -- HIGHEST PRIORITY.
+JOBSLP2         TS              BUF             +1              # HOLDS - HIGHEST PRIORITY.
                 TCF             EJSCAN                          # SCAN FOR HIGHEST PRIORITY ALA ENDOFJOB.
 
 ## Page 1056
@@ -275,15 +277,15 @@ JOBWAKE2        TS              EXECTEM1
 JOBWAKE4        TS              EXECTEM2                        
                 INDEX           LOCCTR                          
                 CCS             PRIORITY                        
-                TCF             JOBWAKE3                        # ACTIVE JOB -- CHECK NEXT CORE SET.
+                TCF             JOBWAKE3                        # ACTIVE JOB - CHECK NEXT CORE SET.
 COREINC         DEC             12                              # 12 REGISTERS PER CORE SET.
-                TCF             WAKETEST                        # SLEEPING JOB -- SEE IF CADR MATCHES.
+                TCF             WAKETEST                        # SLEEPING JOB - SEE IF CADR MATCHES.
 
 JOBWAKE3        CAF             COREINC                         
                 ADS             LOCCTR                          
                 CCS             EXECTEM2                        
                 TCF             JOBWAKE4                        
-                CS              ONE                             # EXIT IF SLEEPIN JOB NOT FOUND.
+                CS              ONE                             # EXIT IF SLEEPINg JOB NOT FOUND.
                 TS              LOCCTR                          
                 TCF             ENDFIND                         
 
@@ -380,7 +382,7 @@ EJSCAN          CCS             PRIORITY        +12D
 
                 TCF             +2                              
                 TCF             DUMMYJOB                        
-                CCS             BUF                             # BUF IS ZERO IS THIS IS A PRIOCHNG AND
+                CCS             BUF                             # BUF IS ZERO IF THIS IS A PRIOCHNG AND
                 TCF             +2                              # CHANGED PRIORITY IS STILL HIGHEST.
                 TCF             ENDPRCHG                      
 

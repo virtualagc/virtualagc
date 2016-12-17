@@ -10,6 +10,8 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-29 MAS  Adapted from Luminary 099.
 ## 		 2016-10-31 RSB	 Typos.
+##		 2016-12-06 RSB	 Comment-proofing via octopus/ProoferComments;
+##				 changes were made.
 
 ## Page 835
 # *****  PIPA READER *****
@@ -94,9 +96,9 @@ REPIP4          CA              CDUX                            # READ CDUS INTO
 
 
 
-REREADAC        CCS             PHASE5                          # COMES HERE ON RESTARTS.   IS PHASE 5 ON?
+REREADAC        CCS             PHASE5                          # COMES HERE ON RESARTS.   IS PHASE 5 ON?
                 TCF             +2                              # YES..  GO ON.
-                TCF             TASKOVER                        # NO.. HAVE BEEN TO AVGEND SINCE GOJARM.
+                TCF             TASKOVER                        # NO.. HAVE BEEN TO AVGEND SINCE GOJAM.
 
                 CCS             PIPAGE                          # WAS 1 READING THE PIPS WHEN GOJAM OCCURD
                 TCF             PIPREAD                         # PIP READING NOT STARTED. GO TO BEGINNING

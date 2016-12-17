@@ -1,15 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     AOSTASK_AND_AOSJOB.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-19 MAS  Transcribed.
-## 		 2016-10-30 RSB	 Typos.
+## Copyright:   Public domain.
+## Filename:    AOSTASK_AND_AOSJOB.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-19 MAS  Transcribed.
+## 		2016-10-30 RSB	Typos.
+##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
+##				changes made.
 
 ## Page 605
 # PROGRAM NAME: AOSTASK           MOD. NO. 1  DATE: NOVEMBER 20, 1966
@@ -314,7 +316,7 @@ STCTR1          CA              MASS                            # IN KGS (+15)
                 TS              IXX                             # I(J)=(C(JX)MASS+B(JX))MASS+A(JX)  (+18)
                                                                 # I(-1)=L,PVT-CG  (+6)
 
-                CCS             INERCTR                         # CONTER 2,1,0,-1
+                CCS             INERCTR                         # COUNTER 2,1,0,-1
                 TCF             STCTR                           
                 TCF             COMMEQS                         
                 TCF             LRESC                           
@@ -563,11 +565,11 @@ INVLOOP         TS              JOBAXES                         # ADJACENT REGIS
                 EXTEND                                          
                 BZMF            FIFTY1                          # (BRANCH FOR CONSTANT VALUE OF INVERSE.)
 
-#            1/INET+2    = 1/( 2(1JACC   ) + AOS   )
-#                    Q,R              Q,R       Q,R
+#            1/NET+2    = 1/( 2(1JACC   ) + AOS   )
+#                   Q,R              Q,R       Q,R
 #        OR
-#            1/INET+1    = 1/(   1JACC    + AOS   )
-#                    U,V              U,V      U,V
+#            1/NET+1    = 1/(   1JACC    + AOS   )
+#                   U,V              U,V      U,V
 
                 TC              INVACC                          
 FIFTY1R         INDEX           TABPLACE                        
@@ -590,21 +592,21 @@ FIFTY1R         INDEX           TABPLACE
                 EXTEND                                          
                 BZMF            FIFTY2                          # (BRANCH FOR CONSTANT VALUE OF INVERSE.)
 
-#            1/INET-2    = 1/( 2(1JACC   ) - AOS   )
-#                    Q,R              Q,R       Q,R
+#            1/NET-2    = 1/( 2(1JACC   ) - AOS   )
+#                   Q,R              Q,R       Q,R
 #        OR
-#            1/INET-1    = 1/(   1JACC      - AOS   )
-#                    U,V              U,V        U,V
+#            1/NET-1    = 1/(   1JACC      - AOS   )
+#                   U,V              U,V        U,V
 
                 TC              INVACC                          
 FIFTY2R         INDEX           TABPLACE                        
                 TS              1/NET-2Q                        # SCALED AT 2(+8)/PI SECONDS(2)/RADIAN.
 
-#            1/INET-4    = 1/( 4(1JACC   ) - AOS   )
-#                    Q,R              Q,R       Q,R
+#            1/NET-4    = 1/( 4(1JACC   ) - AOS   )
+#                   Q,R              Q,R       Q,R
 #        OR
-#            1/INET-2    = 1/( 2(1JACC   ) - AOS   )
-#                    U,V              U,V       U,V
+#            1/NET-2    = 1/( 2(1JACC   ) - AOS   )
+#                   U,V              U,V       U,V
 
                 CAE             TEMPACC                         # FIRST, FROM 2(1JACCQ,R) FORM 4(1JACCQ,R)
                 DOUBLE                                          # OR FROM 1JACCU,V FORM 2(1JACCU,V) AND
@@ -616,11 +618,11 @@ FIFTY2R         INDEX           TABPLACE
                 INDEX           TABPLACE                        
                 TS              1/NET-4Q                        # SCALED AT 2(+8)/PI SECONDS(2)/RADIAN.
 
-#            1/INET+4    = 1/( 4(1JACC   ) + AOS   )
-#                    Q,R              Q,R       Q,R
+#            1/NET+4    = 1/( 4(1JACC   ) + AOS   )
+#                   Q,R              Q,R       Q,R
 #        OR
-#            1/INET+2    = 1/( 2(1JACC   ) + AOS   )
-#                    U,V              U,V       U,V
+#            1/NET+2    = 1/( 2(1JACC   ) + AOS   )
+#                   U,V              U,V       U,V
 
                 CS              TEMPAOS                         # FIRST, COMPUTE EITHER 4(1JACCQ,R)+AOSQ,R
                 AD              TEMPACC                         # OR 2(1JACCU,V)+AOSU,V AND SAVE FOR THE
@@ -939,7 +941,7 @@ INVACC          CAF             BIT7                            # BIT7 IS USED A
 
 # FROM DPSENGON: SET FLAGS FOR CRITICAL GTS ENTRIES.
 
-SETCNTR         TS              DVSELECT                        # SET SWITCH TO GO TO GIMBLON
+SETCNTR         TS              DVSELECT                        # SET SWITCH TO GO TO GIMBLMON
 
                 EXTEND                                          
                 DCA             GETADR                          # SPACE FOR NEW CODING IN BANK 17

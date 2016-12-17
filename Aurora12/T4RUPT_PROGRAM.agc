@@ -17,6 +17,8 @@
 ##                               fix label and operand
 ##                                            NXTIBIT   -> NTXIBT
 ##                                            GLOCKON   -> GLOCKOK
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -45,7 +47,7 @@ T4RUPT          EXTEND                                  # ZERO OUT0 EVERY T4RUPT
                 INDEX           T4LOC                   # NORMALLY TO NORMT4, BUT TO LMPRESET OR
                 TCF             0                       # DSKYRSET AFTER OUT0 COMMAND.
 
-NORMT4          CCS             DSRUPTSW                # GOR 7(-1)0.
+NORMT4          CCS             DSRUPTSW                # GOES 7(-1)0.
                 TCF             +2
                 CAF             SEVEN
                 TS              DSRUPTSW
@@ -85,7 +87,10 @@ RELTAB          OCT             04025
 RELTAB11        OCT             60000
 ## Page 161
 ENDT4FF         EQUALS
+
 ## Page 162
+#          SWITCHED-BANK PORTION.
+
                 SETLOC          ENDFRESS
 
 T4RUPTA         TS              BANKRUPT
@@ -97,7 +102,7 @@ LMPOUT          CCS             LMPCMD                  # SEE IF LMP COMMAND TO 
                 TCF             CDRVE                   # CONTAIN THE COMMAND.
 
                 CAF             LOW11
-                MASK            LMPCMD                  # LEAVE COMMAND PORTION INTACT
+                MASK            LMPCMD                  # LEAVE COMMAND PORTION INTACT.
                 TS              LMPCMD
                 AD              74K
                 EXTEND
@@ -117,11 +122,14 @@ CDRVE           CCS             DSPTAB          +11D
                 TS              DSPTAB          +11D
                 AD              RELTAB11
                 TC              DSPLAYC
+
 ## Page 163
+# DSPOUT PROGRAM. PUTS OUT DISPLAYS.
+
 DSPOUT          CCS             NOUT                    # DRIVE DISPLAY SYSTEM RELAYS.
                 TCF             +3
 
-NODSPOUT        CAF             120MRUPT                # SET UP FOR RUPT IN 120 MS IF NO RELAYS.
+NODSPOUT        CAF             120MRUPT                # SET FOR RUPT IN 120 MS IF NO RELAYS.
                 TCF             SETTIME4
 
                 TS              NOUT
@@ -216,7 +224,7 @@ OLDDATA         CA              ALTRATE                 # USE ALTRATE TO EXTRAPO
                 CAF             POSMAX                  # FORCE SIGN AGREEMENT ASSUMING ALTSAVE IS
                 AD              ONE                     # NOT NEGATIVE. IF IT IS, THE FINAL TS
                 AD              ALTSAVE         +1      # WILL NOT SKIP AND WE CAN SET ALTSAVE TO
-                TS              ALTSAVE         +1      # ZERO IN THAT CASE
+                TS              ALTSAVE         +1      # ZERO IN THAT CASE.
                 CAF             ZERO
                 AD              POSMAX
                 AD              ALTSAVE
@@ -335,7 +343,7 @@ NXTIFAIL        CCS             RUPTREG2                # PROCESS ANY ADDITIONAL
 TNONTEST        CS              IMODES30                # AFTER PROCESSING ALL CHANGES, SEE IF IT
                 MASK            BIT7                    # IS TIME TO ACT ON A TURN-ON SEQUENCE.
                 CCS             A
-                TCF             C33TEST                 # NO - EXAMINE CHANNEL 33
+                TCF             C33TEST                 # NO - EXAMINE CHANNEL 33.
 
                 CAF             BIT8                    # SEE IF FIRST SAMPLE OR SECOND.
                 MASK            IMODES30
@@ -408,9 +416,9 @@ ISSUP           CS              OCT54                   # REMOVE CAGING, IMU FAI
                 MASK            IMODES30                # ICDUFAIL INHIBIT FLAGS.
                 TS              IMODES30
 
-                TC              SETISSW                 # ISS WARNING LIGHT MIGHT HAVE BEEN INIHIBITED.
+                TC              SETISSW                 # ISS WARNING MIGHT HAVE BEEN INHIBITED.
 
-                CS              BIT15                   # REMMVE IMU DELAY COMPLETE DISCRETE.
+                CS              BIT15                   # REMOVE IMU DELAY COMPLETE DISCRETE.
                 EXTEND
                 WAND            12
 
@@ -468,7 +476,7 @@ C33TEST         CA              IMODES33                # SEE IF RELEVENT CHAN33
  -1             AD              ONE
 NXTIBT          INCR            RUPTREG1
  +1             DOUBLE
-                TS              A                       # (CODING IDENTICAL TO CHANNEL 30).
+                TS              A                       # (CODING IDENTICAL TO CHAN 30).
                 TCF             NXTIBT
 
                 XCH             RUPTREG2
@@ -481,17 +489,17 @@ NXTIBT          INCR            RUPTREG1
 NXTFL33         CCS             RUPTREG2                # PROCESS POSSIBLE ADDITIONAL CHANGES.
                 TCF             NXTIBT          -1
 ## Page 172
-# MONITOR FOR GIMBAL LOCK
+# MONITOR FOR GIMBAL LOCK.
 
 GLOCKMON        CCS             CDUZ
                 TCF             GLOCKCHK                # SEE IF MAGNITUDE OF MGA IS GREATER THAN
-                TCF             SETGLOCK                # 70 DEGRESS.
+                TCF             SETGLOCK                # 70 DEGREES.
                 TCF             GLOCKCHK
                 TCF             SETGLOCK
 
 GLOCKCHK        AD              -70DEGS
                 EXTEND
-                BZMF            SETGLOCK        -1      # NO LOCK
+                BZMF            SETGLOCK        -1      # NO LOCK.
 
                 CAF             BIT6                    # GIMAL LOCK.
                 TCF             SETGLOCK
@@ -523,7 +531,7 @@ GLAMPTST        TC              LAMPTEST                # TURN OFF UNLESS LAMP T
                 TCF             GLOCKOK
                 TCF             GLINVERT
 
--70DEGS         DEC             -.38888                 # -70 DEGREES SCALED IN HALF-REVOLUTIONS
+-70DEGS         DEC             -.38888                 # -70 DEGREES SCALED IN HALF-REVOLUTIONS.
 OCT37737        OCT             37737
 ## Page 173
 # SUBROUTINES TO PROCESS INBIT CHANGES. NEW VALUE OF BIT ARRIVES IN A, EXCEPT FOR TLIM.
@@ -556,7 +564,7 @@ ITURNON         CAF             BIT2                    # IF DELAY REQUEST HAS G
                 CAF             BIT14                   # SEE IF JUST ON OR OFF.
                 MASK            IMODES30
                 EXTEND
-                BZF             ITURNON2                # IF JUST ON
+                BZF             ITURNON2                # IF JUST ON.
 
                 CAF             BIT15
                 EXTEND                                  # SEE IF DELAY PRESENT DISCRETE HAS BEEN
@@ -653,14 +661,14 @@ UPTMFAST        CCS             A                       # SAME AS DNLINK TOO FAS
                 OCT             1106
                 TCF             NXTFL33
 ## Page 176
-# CLOSED SUBROUTINES FOR IMU MONITORING
+# CLOSED SUBROUTINES FOR IMU MONITORING.
 SETISSW         CAF             OCT15                   # SET ISS WARNING USING THE FAIL BITS IN
                 MASK            IMODES30                # BITS 13, 12, AND 10 OF IMODES30 AND THE
                 EXTEND                                  # FAILURE INHIBIT BITS IN POSITIONS
                 MP              BIT10                   # 4, 3, AND 1.
                 CA              IMODES30
                 EXTEND
-                ROR             L                       # 0 INDICATES FAILURE
+                ROR             L                       # 0 INDICATES FAILURE.
                 COM
                 MASK            OCT15000
                 CCS A
@@ -698,8 +706,8 @@ CAGESUB2        CS              OCT75                   # SET FLAGS TO INDICATE 
 IMUFAIL         EQUALS          SETISSW
 ICDUFAIL        EQUALS          SETISSW
 ## Page 177
-# JUMP TABLES AND CONSTANTS
-IFAILJMP        TCF             ITURNON                 # CHANNEL 30 DISPATCH
+# JUMP TABLES AND CONSTANTS.
+IFAILJMP        TCF             ITURNON                 # CHANNEL 30 DISPATCH.
                 TCF             IMUFAIL
                 TCF             ICDUFAIL
                 TCF             IMUCAGE
@@ -777,7 +785,7 @@ RROFF           CS              STATE                   # IF SOMEONE WAS USING T
                 TC              ALARM
                 OCT             514
 ## Page 179
-# CHECK FOR RR CDU FAIL
+# CHECK FOR RR CDU FAIL.
 RRCDUCHK        CA              RADMODES                # LAST SAMPLED BIT IN RADMODES.
                 EXTEND
                 RXOR            30
@@ -847,7 +855,7 @@ OCT20002        OCT             20002
 
 # ALARM/ABORT MODE: THERE ARE NO REAL ALARMS OR ABORTS.  HOWEVER, WHEN THE MIDDLE GIMBAL ANGLE NEARS GIMBAL LOCK,
 # A DIVISION BY COS(MG) WILL CAUSE OVERFLOW (I.E. A BAD QUOTIENT).  THIS CONDITION IS PREVENTED BY TESTING COS(MG)
-# AND SUBSTITUTING POSMAX/NEGMAX FOR THE INCALCULABLE QUANTITIES.
+# AND SUBSTITUTING POSMAX/NEGMAX FOR THE INCALCULABLE QUANTITITIES.
 
 # INPUT: CDUX,CDUY,CDUZ.          OUTPUT: M11,M21,M31,M22,M32,MR12,MR13.
 #                                         (ALSO MR22=M22,MR23=M32)        AM DOES NOT DETECT IT.
@@ -930,15 +938,15 @@ MR13STOR        TS              MR13                    # SCALED AT 2
 #          1) O.3 DEGREES IF IN ATTITUDE HOLD MODE OR IF IN AUTO WITH THE DEADBAND SELECT BIT OF DAPBOOLS SET
 #             TO MINIMUM.
 #          2) 5.0 DEGREES IF IN AUTO WITH DEADBAND SELECT BIT SET TO MAXIMUM.
-#          3) 1.0 DEGREES IF IN POWERED FLIGHT (ASCENT OR DESCENT) AND OVERRIDING ANY SETTING OF SCSMODE OR THE
+#          3) 1.0 DEGREES IF IN POWERED FLIGHT (ASCENT OR DESCENT) AND OVERRIDING ANY SETTITING OF SCSMODE OR THE
 #             DEADBAND SELECT BIT.  (*** SEE COMMENT AFTER CODING. ***)
 
 # ***** NOTICE *****
 
-# THE ABOVE CAPABILTY FULFILLS ALL THE KNOWN DEADBAND REQUIREMENTS FOR AS206, AS208B, AND AS278 (GIVEN THE
+# THE ABOVE CAPABILITY FULFILLS ALL THE KNOWN DEADBAND REQUIREMENTS FOR AS206, AS208B, AND AS278 (GIVEN THE
 # APPROPRIATE MISSION PROGRAMS).
 
-# (ALSO FOR MANNED FLIGHTS A DSKY ENTRY MUST BE SET UP TO SET THE DEADBAND BITS OF DAPBOOLS. - NOT DONE AS
+# (ALSO FOR MANNED FLIGHTS A DSKY ENTRY MUST BE SET UP TO SET THE DEADBAND SELECT BIT OF DAPBOOLS. - NOT DONE AS
 # OF 10/24/66.)
 
 # ***** DEADBAND SELECT BIT IS BIT13 OF DAPBOOLS. *****
@@ -978,7 +986,7 @@ ATTHLDDB        CAF             DBATTHLD                # SET MINUMUM (ATTITUDE 
 # ***** IMPORTANT NOTICE *****
 
 # FOR EFFICIENCY, THE OVERRIDING 1 DEGREE DEADBAND DURING POWERED FLIGHT IS NOT TESTED FOR ABOVE. THE PROGRAM
-# FOLLOWING (I.E. UP/DOWN) PERFORMS THIS FUNCTION AFTER THE APPROPRIATE TESTS. THEREFORE, DB MAY TRANSIENTLY BE
+# FOLLOWING (I.E. UP/DOWN) PERFORMS THIS FUNCTION AFTER THE APPROPRIATE TESTS. THEREFORE, DB MAY TRANSIENTLY BEP
 # INVALID, BUT THE DAP CANNOT USE IT THEN DUE TO T4RUPT MODE.
 ## Page 186
 # PROGRAM NAME: UP/DOWN           MOD. NO. 1  DATE: OCTOBER 25, 1966
@@ -1060,7 +1068,7 @@ ASCDAP          CAF             BIT8                    # CHECK AOSTASK BIT OF D
                 CAF             ZERO                    # SHIFT THE SWITCHING CURVE TO THE ORIGIN)
                 TS              DBMINIMP                # MINIMPDB = -DB, DBMINIMP = 0
 
-                CAF             ZERO                    # INITIALIZE THE SUM RATES
+                CAF             ZERO                    # INITIALIZE SUM RATES
                 TS              SUMRATEQ
                 TS              SUMRATER
                 TS              KCOEFCTR                # INITIALIZE TIME COUNTER
@@ -1076,7 +1084,7 @@ ASCDAP          CAF             BIT8                    # CHECK AOSTASK BIT OF D
                 2CADR           AOSTASK                 # 2 SECOND INTERVALS AND CHECKS FOR THE
                                                         # SHUTDOWN CONDITION IN BIT8 OF DAPBOOLS
 
-# ******************************************************************************
+# ****************************************************************************************************************
 
 # REMOVE THIS AND THE TASKS WHEN THE INERTIA ESTIMATOR WORKS.
 
@@ -1090,7 +1098,7 @@ ASCDAP          CAF             BIT8                    # CHECK AOSTASK BIT OF D
                 CAF             ONE                     # LINEAR APPROXIMATION TO INERTIAL CHANGE.
                 TC              WAITLIST
                 2CADR           IZZTASK                 # *** NOT TO BE USED IN MISSIONS ***
-# ******************************************************************************
+# ****************************************************************************************************************
 
                 TCF             ENDDAPT4                # (END OF UP/DOWN)
 

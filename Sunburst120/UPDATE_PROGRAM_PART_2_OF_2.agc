@@ -15,6 +15,8 @@
 ##				an operand.  Ended up supporting it in yaYUL
 ##				instead, since it had already been supported
 ##				for block 1 and BLK2 targets anyway.
+##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
+##				changes made.
 
 ## Page 321
 		BANK	26
@@ -47,7 +49,7 @@ UPPART2		CA	UPE4
 UPNO33		CA	ONE		# CONTINUE V75
 		AD	ASTBFM1
 		TS	MPAC	+2
-		CA	STATENV		# UPDATE PROGRAM IS READ TO ACCEPT TARGET
+		CA	STATENV		# UPDATE PROGRAM IS READY TO ACCEPT TARGET
 		TC	NVSBWAIT	# UPDATE INDEX. FLASH V 21 N 01
 		TC	ENDIDLE		# WAIT FOR V33, V34 OR DATA.
 		TCF	UPVERB34	# V34 TERMINATE UPDATE PROGRAM.
@@ -265,7 +267,7 @@ UPEND75		TC	PHASCHNG
 		INHINT			# INHINT BECAUSE PHASCHNG RELINTS AND BECA
 					# USE RESTARTED JOB WILL NEED IT.
 		INDEX	COMPNUMB	# V75
-		TC			# FAN TO V72 ROUTINES
+		TC			# FAN TO V75 ROUTINES
 OCTID		OCT	02102
 		TC	I=4
 I=1		EXTEND

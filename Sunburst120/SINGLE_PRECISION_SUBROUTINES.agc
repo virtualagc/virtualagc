@@ -10,6 +10,8 @@
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-19 RSB	Transcribed ... I think it's identical to the 
 ##				Aurora 12 version.
+##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
+##				no changes made.
 
 ## Page 1046
 		BLOCK		02             

@@ -9,6 +9,8 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-29 MAS  Transcribed.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 801
 #          THE FOLLOWING ROUTINES IMPLEMENT THE MISSION SCHEDULING LOGIC AS DESCRIBED IN CHAPTER 4 OF THE
@@ -188,7 +190,7 @@ MPENTRY         INHINT
 
                 INDEX           A                               # IF THIS MISSION PHASE REGISTER IS NOT
                 CCS             MPHASE4                         # -0, IT HAS BEEN CHANGED BY THE GROUND,
-                TCF             MENTRYT                         # SO LEAVE IT ALONE
+                TCF             MENTRYT                         # SO LEAVE IT ALONE.
                 TCF             MENTRYT
                 TCF             MENTRYT
 

@@ -10,16 +10,18 @@
 ## Pages:        1062-1074
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-10 PDJ  Updated based on Sunburst120 scans. 
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 changes made.
 
 ## Page 1062
 
-# PROGRAM DESCRIPTION--                                                         DATE -- 10 OCTOBER 1966
-# MOD NO -- 2                                                                   LOG SECTION -- WAITLIST
-# MOD BY -- MILLER      (DTMAX INCREASED TO 162.5 SEC)                          ASSEMBLY -- SUNBURST REV 5
+# PROGRAM DESCRIPTION                                                           DATE - 10 OCTOBER 1966
+# MOD NO - 2                                                                    LOG SECTION - WAITLIST
+# MOD BY - MILLER      (DTMAX INCREASED TO 162.5 SEC)                           ASSEMBLY SUNBURST REV 5
 
-# FUNCTIONAL DESCRIPTION --
-#       PART OF A SECTION OF PROGRAMS -- WAITLIST, TASKOVER, T3RUPT, USED TO CALL A PROGRAM (CALLED A TASK),
-#       WHICH IS TO BEGIN IN C(A) CENTISECONDS.  WAITLIST UPDATES TIME3, LST1, AND LST2.  THE MEANING OF THESE LISTS
+# FUNCTIONAL DESCRIPTION-
+#            PART OF A SECTION OF PROGRAMS,-WAITLIST, TASKOVER, T3RUPT, USED TO CALL A PROGRAM, (CALLED A TASK),
+#       WHICH IS TO BEGIN IN C(A) CENTISECONDS.  WAITLIST UPDATES TIME3, LST1 AND LST2.  THE MEANING OF THESE LISTS
 #       FOLLOW.
 #
 #               C(TIME3) = 16384 -(T1-T) CENTISECONDS, (T=PRESENT TIME, T1-TIME FOR TASK1)
@@ -27,26 +29,26 @@
 #                       C(LST1)         =       -(T2-T1)+1
 #                       C(LST1 +1)      =       -(T3-T2)+1
 #                       C(LST1 +2)      =       -(T4-T3)+1
-#                                      ...
-#                                      ...
+#                                       .
+#                                       .
 #                       C(LST1 +6)      =       -(T8-T7)+1
 #                       C(LST1 +7)      =       -(T9-T8)+1
 #
 #                       C(LST2)         =       2CADR OF TASK1
 #                       C(LST2 +2)      =       2CADR OF TASK2
-#                                      ...
-#                                      ...
+#                                       .
+#                                       .
 #                       C(LST2 +14)     =       2CADR OF TASK8
 #                       C(LST2 +16)     =       2CADR OF TASK9
 
-# WARNINGS --
-# -----------
+# WARNINGS-
+# --------
 #       1)      1 <= C(A) <= 16250D (1 CENTISECOND TO 162.5 SEC)
 #       2)      9 TASKS MAXIMUM
 #       3)      TASKS CALLED UNDER INTERRUPT INHIBITED
 #       4)      TASKS END BY TC TASKOVER
 
-# CALLING SEQUENCE --
+# CALLING SEQUENCE-
 #       L-2     CAF     DELTAT  (TIME IN CENTISECONDS TO TASK START)
 #       L-1     INHINT
 #       L       TC      WAITLIST
@@ -54,30 +56,33 @@
 #       L+2     (MINOR OF 2CADR)
 #       L+3     RELINT          (RETURNS HERE)
 
-# NORMAL EXIT MODES --
+# NORMAL EXIT MODES-
 #
-#       AT L+3 OF CALLING SEQUENCE.
+#       AT L+3 OF CALLING SEQUENCE
 
-# ALARM OR ABORT EXIT MODES --
+# ALARM OR ABORT EXIT MODES-
 
 ## Page 1063
 
 #       TC      ABORT
-#       OCT     1203    (WAITLIST OVERFLOW -- TOO MANY TASKS)
+#       OCT     1203    (WAITLIST OVERFLOW - TOO MANY TASKS)
 
-# ERASABLE INITIALIZATION REQUIRED --
-#       ACCOMPLISHED BY FRESH START --  LST2, ..., LST2 +16 =ENDTASK
-#                                       LST1, ..., LST1 +7  =NEG1/2
+# ERASABLE INITIALIZATION REQUIRED-
 
-# OUTPUT --
+#       ACCOMPLISHED BY FRESH START,--LST2,..., LST2 +16 =ENDTASK
+#                                     LST1,..., LST1 +7  =NEG1/2
+
+# OUTPUT--
+
 #       LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
 
-# DEBRIS --
-#       CENTRALS -- A,Q,L
-#       OTHER    -- WAITEXIT, WAITADR, WAITTEMP, WAITBANK
-# DETAILED ANALYSIS OF TIMING --
+# DEBRIS-
+
+#       CENTRALS- A,Q,L
+#       OTHER   - WAITEXIT, WAITADR, WAITTEMP, WAITBANK
+# DETAILED ANALYSIS OF TIMING-
 #
-#       CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR) IN EXACTLY DELTA T CENTISECONDS.
+#            CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR) IN EXACTLY DELTA T CENTISECONDS.
 #       THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS
 #
 #               LET T0 = THE TIME OF THE TC WAITLIST
@@ -85,24 +90,25 @@
 #               LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)
 #               LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT
 #               LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.
-#                        (Z=0, USUALLY).
+#       (Z=0, USUALLY)
 #               LET DELTD  = THE ACTUAL TIME TAKEN TO GIVE CONTROL TO 2CADR
-#               THEN DELTD = TS+DELTA T -X +Y +Z +1.05MS* +COUNTERS*
+#            THEN DELTD = TS+DELTA T -X +Y +Z +1.05MS* +COUNTERS*
 #
-#               *-THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.
-#       IN SHORT, THE ACTUAL TIME TO RETURN CONTROL TO A 2CADR IS AUGMENTED BY THE TIME TO SET UP THE TASK'S
+#       *-THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.
+#
+#            IN SHORT, THE ACTUAL TIME TO RETURN CONTROL TO A 2CADR IS AUGMENTED BY THE TIME TO SET UP THE TASK'S
 #       INTERRUPT, ALL COUNTERS TICKING, THE T3RUPT PROCESSING TIME, THE WAITLIST PROCESSING TIME AND THE POSSIBILITY
 #       OF OTHER TASKS INHIBITING THE INTERRUPT.
 
                 BLOCK           02                              
                 EBANK=          LST1                            # TASK LISTS IN SWITCHED E BANK.
 
-WAITLIST        XCH             Q                               # SAVE DELTA T IN Q AND RETURN IN                                          
+WAITLIST        XCH             Q                               #  SAVE DELTA T IN Q AND RETURN IN                                          
                 TS              WAITEXIT                        # WAITEXIT.
                 EXTEND                                          
                 INDEX           A                               
                 DCA             0                               # PICK UP 2CADR OF TASK.
-                TS              WAITADR                         # BBCON WILL REMAIN IN L
+                TS              WAITADR                         # BBCON WILL REMAIN IN L.
 DLY2            CAF             WAITBB                          # ENTRY FROM FIXDELAY AND VARDELAY.
                 XCH             BBANK                           
                 TCF             WAIT2                           
@@ -135,11 +141,11 @@ VARDELAY        XCH             Q                               # DT TO Q.  TASK
                 TS              WAITEXIT                        # GO TO TASKOVER AFTER TASK ENTRY.
                 TCF             DLY2                            
 
-DELAYEX         TCF             TASKOVER        -2              # RETURNS TO TASKOVER.
+DELAYEX         TCF             TASKOVER        -2              # RETURNS TO TASKOVER
 
 ## Page 1065
 
-# ENDTASK MUST ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
+# ENDTASK MUST BE ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
 
                 EBANK=          LST1                            
 ENDTASK         -2CADR          SVCT3                           
@@ -149,8 +155,8 @@ SVCT3           CCS             FLAGWRD2                        # DRIFT FLAG
                 TCF             TASKOVER                        
                 TCF             +1                              
 
-                CAF             PRIO35                          # COMPENSATE FOR NBD COEFFICIENTS ONLY.
-                TC              NOVAC                           #       ENABLE EVERY 81.93 SECONDS
+                CAF             PRIO35                          # COMPENSATE FOR NBD COEFFICIENTS ONLY
+                TC              NOVAC                           #     ENABLE EVERY 81.93 SECONDS
                 EBANK=          NBDX                            
                 2CADR           NBDONLY                         
 
@@ -177,7 +183,7 @@ WAIT2           TS              WAITBANK                        # BBANK OF CALLI
                 AD              OCT40201                        
                 AD              Q                               # RESULT = TD - T1 + 1.
 
-                CCS             A                               # TEST TD - T1 + 1.
+                CCS             A                               # TEST TD - T1 + 1
 
                 AD              LST1                            # IF TD - T1 POS, GO TO WTLST5 WITH
                 TCF             WTLST5                          # C(A) = (TD - T1) + C(LST1) = TD-T2+1
@@ -317,18 +323,18 @@ WTLST2          TS              WAITTEMP                        # C(A) = -(TD - 
 
 #       C(TIME3)        =       1.0 - (T1 - T)
 
-#       C(LST1)         =       - (T2 - T1) + 1
-#       C(LST1+1)       =       - (T3 - T2) + 1
-#       C(LST1+2)       =       - (T4 - T3) + 1
-#       C(LST1+3)       =       - (T5 - T4) + 1
-#       C(LST1+4)       =       - (T6 - T5) + 1
+#       C(LST1 )         =       - (T2 - T1) + 1
+#       C(LST1+1 )       =       - (T3 - T2) + 1
+#       C(LST1+2 )       =       - (T4 - T3) + 1
+#       C(LST1+3 )       =       - (T5 - T4) + 1
+#       C(LST1+4 )       =       - (T6 - T5) + 1
 
-#       C(LST2)         =       2CADR TASK1
-#       C(LST2+2)       =       2CADR TASK2
-#       C(LST2+4)       =       2CADR TASK3
-#       C(LST2+6)       =       2CADR TASK4
-#       C(LST2+8)       =       2CADR TASK5
-#       C(LST2+10)      =       2CADR TASK6
+#       C(LST2   )       =       2CADR TASK1
+#       C(LST2+2 )       =       2CADR TASK2
+#       C(LST2+4 )       =       2CADR TASK3
+#       C(LST2+6 )       =       2CADR TASK4
+#       C(LST2+8 )       =       2CADR TASK5
+#       C(LST2+10)       =       2CADR TASK6
 
 ## Page 1071
 
@@ -348,7 +354,7 @@ T3RUPT2         CAF             NEG1/2                          # DISPATCH WAITL
                 XCH             LST1            +1              #    INTERVAL 81.91 SEC FOR ENDTASK.
                 XCH             LST1                            
                 AD              POSMAX                          # 2. SET T3 = 1.0 - T2 - T USING LIST 1.
-                ADS             TIME3                           #    SO T3 WON'T TICK DURING UPDATE.
+                ADS             TIME3                           # SO T3 WONT TICK DURING UPDATE.
                 TS              RUPTAGN                         
                 CS              ZERO                            
                 TS              RUPTAGN                         # SETS RUPTAGN TO +1 ON OVERFLOW.
@@ -388,10 +394,15 @@ NOQBRSM         DXCH            ARUPT
 
 # LONGCALL
 
-#       LONGCALL IS CALLED WITH THE DELTA TIME ARRIVING IN A,L SCALED AS TIME2,TIME1 WITH THE 2CADR OF THE TASK
-#       IMMEDIATELY FOLLOWING THE TC LONGCALL.  FOR EXAMPLE, IT MIGHT BE DONE AS FOLLOWS WHERE TIMELOC IS THE NAME OF
-#       A DP REGISTER CONTAINING A DELTA TIME AND WHERE TASKTODO IS THE NAME OF THE LOCATION AT WHICH LONGCALL IS TO
-#       START.
+# LONGCALL IS CALLED WITH THE DELTA TIME ARRIVING IN A,L SCALED AS TIME2,TIME1 WITH THE 2CADR OF THE TASK
+# IMMEDIATELY FOLLOWING THE TC LONGCALL.  FOR EXAMPLE, IT MIGHT BE DONE AS FOLLOWS WHERE TIMELOC IS THE NAME OF
+# A DP REGISTER CONTAINING A DELTA TIME AND WHERE TASKTODO IS THE NAME OF THE LOCATION AT WHICH LONGCALL IS TO
+# START
+
+#		EXTEND
+#		DCA		TIMELOC
+#		TC		LONGCALL
+#		2CADR		TASKTODO
 
 # *** THE FOLLOWING IS TO BE IN FIXED-FIXED AND UNSWITCHED ERRASIBLE ***
 
@@ -425,7 +436,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
                 DCS             DPBIT14                         # MINUTES OFF OF LONGTIME
                 DAS             LONGTIME                        
 
-                CCS             LONGTIME        +1              # THE REASONING BEHIND THIS PART IS
+                CCS             LONGTIME        +1              # THE REASONIBG BEHIND THIS PART IS
                 TCF             MUCHTIME                        # INVOLVED, TAKING INTO ACCOUNT THAT THE
                                                                 # WORDS MAY NOT BE SIGNED CORRECTED (DP
                                                                 # BASIC INSTRUCTIONS
@@ -435,7 +446,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
 
 ## Page 1074                
 
-                NOOP                                            # CAN'T GET HERE *************
+                NOOP                                            # CAN'T GET HERE **********
                 TCF             +1                              
                 CCS             LONGTIME                        
                 TCF             MUCHTIME                        

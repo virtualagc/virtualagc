@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    R31.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -7,16 +8,18 @@
 ##              that the code format has been changed to conform to the
 ##              requirements of the yaYUL assembler rather than the
 ##              original YUL assembler.
-## Reference:   pp. XXX-XXX
+## Reference:   pp. 706-710
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+##		2016-12-01 RSB	Completed.  Other than correction of typos
+##				in comments and change in the positioning
+##				of the constant V16N54, there were no changes.
+##              2016-12-01 HG   fix operand V15N54  -> V16N54
+##                              remove V16N54 from its old location 
 
-## NOTE: Page numbers below have yet to be updated from Luminary131 to Luminary210!
-
-
-## Page 710
+## Page 706
 		BANK	40
 		SETLOC	R31LOC
 		BANK
@@ -42,11 +45,7 @@ DSPDELAY	TC	FIXDELAY
 
 		TCF	TASKOVER
 
-		BANK	37
-		SETLOC	R31
-		BANK
-		COUNT*	$$/R31
-
+V16N54		VN	1654
 DISPN5X		CAF	V16N54
 		TC	BANKCALL
 		CADR	GOMARKF
@@ -54,19 +53,23 @@ DISPN5X		CAF	V16N54
 		TC	B5OFF
 		TCF	DISPN5X
 
+		BANK	37
+		SETLOC	R31
+		BANK
+
 V83CALL		CS	FLAGWRD7	# TEST AVERAGE G FLAG
 		MASK	AVEGFBIT
 		EXTEND
-		BZF	MUNG?		# ON.  TEST MUNFLAG
+		BZF	MUNG?		# ON - TEST MUNFLAG
 
 		CS	FLAGWRD8
 		MASK	SURFFBIT
 		EXTEND
-		BZF	ONEBASE		# ON SURFACE -- BYPASS LEMPREC
+		BZF	ONEBASE		# ON SURFACE - BYPASS LEMPREC
 
 		TC	INTPRET		# EXTRAPOLATE BOTH STATE VECTORS
 		RTB
-## Page 711
+## Page 707
 			LOADTIME
 		STCALL	TDEC1
 			LEMPREC		# PRECISION BASE VECTOR FOR LM
@@ -89,7 +92,7 @@ DOCMBASE	STORE	BASETIME	# PRECISION BASE VECTOR FOR CM
 REV83		CS	FLAGWRD7
 		MASK	AVEGFBIT
 		EXTEND
-		BZF	GETRVN		# TF AVEGFLAG SET, USE RN,VN
+		BZF	GETRVN		# IF AVEGFLAG SET, USE RN,VN
 
 		CS	FLAGWRD8
 		MASK	SURFFBIT
@@ -115,13 +118,13 @@ REV83		CS	FLAGWRD7
 		SET
 			INTYPFLG	# CONIC EXTRAP.
 		STCALL	TET
-			INTEGRVS	# INTEGRATION --- AT LAST ---
+			INTEGRVS	# INTEGRATION --- AT LAST---
 OTHCONIC	VLOAD
-## Page 712
+## Page 708
 			RATT
 		STOVL	RONE
 			VATT
-		STCALL	VONE		# GET SET FOR CONIC EXTRAP., OTHER.
+		STCALL	VONE		# GET SET FOR CONIC EXTRAP.,OTHER.
 			INTSTALL
 		SET	DLOAD
 			INTYPFLG
@@ -159,7 +162,7 @@ COMPDISP	VLOAD	VSU
 			UNITZ
 		CALL
 			CDU*NBSM
-		VXM	PUSH		# UNIT(Z)/4 TO PD 6-1
+		VXM	PUSH		# UNIT(Z)/4 TO PD 6-11
 			REFSMMAT
 		VPROJ	VSL2		# UNIT(P)=UNIT(UZ-(UZ)PROJ(UR))
 			0D
@@ -168,11 +171,11 @@ COMPDISP	VLOAD	VSU
 		PDVL	VXV		# UNIT(P) TO PD 12-17
 			0D		# UNIT(RL)
 			VONE
-## Page 713
-		VXV	DOT		# (UR * VL) * UR . U(P)
+## Page 709
+		VXV	DOT		# (UR * VL)*UR . U(P)
 			0D
 			12D
-		PDVL			# SIGN TO 12-13, LOAD U(P)
+		PDVL			# SIGN TO 12-13 , LOAD U(P)
 		DOT	SIGN
 			6D
 			12D
@@ -180,7 +183,7 @@ COMPDISP	VLOAD	VSU
 		STOVL	RTHETA
 			0D
 		DOT	BPL		# IF UR.UZ NEG,
-			6D		#	RTHETA = 1 - RTHETA
+			6D		#   RTHETA = 1 - RTHETA
 			+5
 		DLOAD	DSU
 			DPPOSMAX
@@ -191,7 +194,7 @@ COMPDISP	VLOAD	VSU
 		CA	BIT5
 		MASK	EXTVBACT
 		EXTEND			# IF ANSWERED,
-		BZF	ENDEXT		#	TERMINATE
+		BZF	ENDEXT		#	 TERMINATE
 
 		CS	EXTVBACT
 		MASK	BIT12
@@ -218,7 +221,7 @@ GETRVN		CA	PRIO22		# INHIBIT SERVICER
 		BOFF	VLOAD
 			MUNFLAG
 			GETRVN2		# IF MUNFLAG RESET, DO CM DELTA PRECISION
-## Page 714
+## Page 710
 		VXM	VSR4		# CHANGE TO REFERENCE SYSTEM AND RESCALE
 			REFSMMAT
 		PDVL			# R TO PD 0-5
@@ -250,9 +253,4 @@ ONEBASE		TC	INTPRET		# GET CSM BASE VECTOR
 		RTB	GOTO
 			LOADTIME
 			DOCMBASE
-
-V16N54		VN	1654
-
-## Page 715
-# (The original program listing had no source lines on this page.)
-
+                        

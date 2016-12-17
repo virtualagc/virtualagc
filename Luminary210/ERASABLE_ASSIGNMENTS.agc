@@ -1,5 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
+## Filename:    ERASABLE_ASSIGNMENTS.agc
 ## Purpose:     A section of Luminary revision 210.
 ##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 15-17.
@@ -13,6 +14,23 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-19 HG   Transcribed
+##              2016-11-25 HG   Fix operand MARKCNTR -> WHATMARK
+##                                          ASBC0    -> ABSC0 
+##                                          ARPFGZ   -> ABRFGZ    
+##                                  label   HCASCLAD -> HCALCLAD   
+##                                          NETTOTKP -> NEGTORKP 
+##                                          RBRRGZ   -> RBRFGZ 
+##              2016-11-26 HG   Fix label   REULTCT  -> RESULTCT  
+##              2016-11-28 HG   Fix operand SAMPLIN  -> SAMPLIM
+##              2016-11-29 HG   fix label   DVCNTRL  -> DVCNTR1
+##              2016-12-02 HG   fix operand FLPASSO  -> FLPASS0
+##              2016-12-07 HG   fix operand QAXIZ    -> QAXIS  adn mofidier +2 -> +6, fixes ZAXIS1
+##                                  label   1/DVO    -> 1/DV0
+##                                          ACSAVE   -> ASCSAVE
+##                                          DSPFLAG  -> DSPLG
+##                              add missing definition for label ZV
+##              2016-12-11 HG   Fix operand modification VVECT(X,Y,Z) + 1 -> VVECT(X,Y,Z)+ 2
+
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -594,7 +612,7 @@ PIPCTR          =               PHSPRDT2                # USED TO COUNT DOWN R10
 NVWORD1         ERASE                                   # B(1) * USED DURING POWERED FLIGHT ONLY *
 
 EBANKSAV        ERASE
-DSPFLAG         =               EBANKSAV
+DSPFLG          =               EBANKSAV
 MARKFLAG        ERASE
 EBANKTEM        ERASE
 MARK2PAC        ERASE
@@ -619,7 +637,7 @@ SQ              ERASE                                   # (1)
 #     **** RADAR ****
 
 SAMPLIM         ERASE                                   # B(1)      LR    R12,P60S,R04,R77
-RADUSE          EQUALS          SAMPLIN                 # B(1)PRM   BOTH  P20,P22,R12,R04
+RADUSE          EQUALS          SAMPLIM                 # B(1)PRM   BOTH  P20,P22,R12,R04
 SAMPLSUM        ERASE           +3                      # B(1),I(2) BOTH
 RRTARGET        EQUALS          SAMPLSUM                # I(6)      RR  P20,P22,R04,V41
 
@@ -650,6 +668,7 @@ LAT             EQUALS          COLREG          +1      # I(2)
 LONG            EQUALS          LAT             +2      # I(2)
 ALT             EQUALS          LONG            +2      # I(2)
 YV              EQUALS          ALT             +2      # I(6)
+ZV              EQUALS          YV              +6      # I(6) 
 #
 
 #          MISCELLANEOUS UNSWITCHED.                     (20D)
@@ -1497,7 +1516,7 @@ VELBIAS         EQUALS          W                       # I(2) PL BIAS VALUE FOR
 # PLEASE PRESERVE THE ORDER OF RBRFGX THROUGH TCGIAPPR.
 RBRFGX          EQUALS          VELBIAS         +2      # I(2)  POSITION TARGETS
 RAPFGX          EQUALS          RBRFGX          +2      # I(2)
-RBRRGZ          EQUALS          RAPFGX          +2      # I(2)
+RBRFGZ          EQUALS          RAPFGX          +2      # I(2)
 RAPFGZ          EQUALS          RBRFGZ          +2      # I(2)
 VBRFGX          EQUALS          RAPFGZ          +2      # I(2)  VELOCITY TARGETS
 VAPFGX          EQUALS          VBRFGX          +2      # I(2)
@@ -1506,7 +1525,7 @@ VAPFGZ          EQUALS          VBRFGZ          +2      # I(2)
 ABRFGX          EQUALS          VAPFGZ          +2      # I(2)  ACCELERTAION TARGETS
 AAPFGX          EQUALS          ABRFGX          +2      # I(2)
 ABRFGZ          EQUALS          AAPFGX          +2      # I(2)
-AAPFGZ          EQUALS          ARPFGZ          +2      # I(62
+AAPFGZ          EQUALS          ABRFGZ          +2      # I(62
 VBRFG*          EQUALS          AAPFGZ          +2      # I(2)  SCALED TARGETS FOR TTF/8CL
 VAPFG*          EQUALS          VBRFG*          +2      # I(2)
 ABRFG*          EQUALS          VAPFG*          +2      # I(2)
@@ -1553,7 +1572,7 @@ LRWVFX          EQUALS          LRWVFY          +1      # B(1)   LR VEL WEIG    
 LRWVFF          EQUALS          LRWVFX          +1      # B(1)   LR VEL WEIG      FUNCTIONS
 
 ABSC0           EQUALS          LRWVFF          +1      # B(1)  ABSCISSAE DEFINING TERRAIN MODEL
-ABSC1           EQUALS          ASBC0           +1      # B(1)
+ABSC1           EQUALS          ABSC0           +1      # B(1)
 ABSC2           EQUALS          ABSC1           +1      # B(1)
 ABSC3           EQUALS          ABSC2           +1      # B(1)
 ABSC4           EQUALS          ABSC3           +1      # B(1)
@@ -1603,14 +1622,14 @@ JPARM           EQUALS          CG                      # I(2) JPARM WILL EQUAL 
 KPARM           EQUALS          JPARM           +2      # I(2) KPARM WILL EQUAL K1PARM OR K2PARM
 RP              EQUALS          KPARM           +2      # I(2) PREDICTED BURNOUT RADIUS M*2(-24)
 QAXIS           EQUALS          RP              +2      # I(6) ASCENT CROSSRANGE HALF-UNIT VECTOR
-ZAXIS1          EQUALS          QAXIZ           +2      # i(6) ASCENT DOWNRANGE HALF-UNIT VECTOR
+ZAXIS1          EQUALS          QAXIS           +6      # i(6) ASCENT DOWNRANGE HALF-UNIT VECTOR
 L*WCR*T         =               BUF
 H*GHCR*T        =               BUF             +1
 
 
 #          Q-SAVE REGISTER FOR ASCENT                    (1D)
 
-ACSAVE          EQUALS          DLAND           +6      # I(1)TMP ASCENT Q-SAVE
+ASCSAVE         EQUALS          DLAND           +6      # I(1)TMP ASCENT Q-SAVE
 
 
 #          ALIGNMENT/SYSTEST/CALCSMSC COMMON STORAGE     (36D)
@@ -1795,7 +1814,7 @@ LOS1            =               GENPL           +8D
 LOS2            =               GENPL           +14D
 
 DATAPL          EQUALS          GENPL           +30D
-REULTCT         EQUALS          GENPL           +67D
+RESULTCT        EQUALS          GENPL           +67D
 AINLA           =               GENPL                   # 110 DEC OR 156 OCT LOCATIONS
 
 WANGO           EQUALS          AINLA                   # VERT ERATE
@@ -2014,7 +2033,7 @@ JETRATER        EQUALS          JETRATE         +2      # SCALED AT PI/4 RADIANS
 
 DOWNTORK        ERASE           +5                      # ACCUMULATED JET TORQUE COMMANDED ABOUT
 POSTORKP        EQUALS          DOWNTORK                #   +,-P, +,-U, +,-V RESPECTIVELY.
-NETTOTKP        EQUALS          DOWNTORK        +1      #
+NEGTORKP        EQUALS          DOWNTORK        +1      #
 POSTORKU        EQUALS          DOWNTORK        +2      #   NOT INITIALIZED; PERMITTED TO OVERFLOW
 
 ## Page 138
@@ -2597,7 +2616,7 @@ DELTAQ          EQUALS          BVECTOR         +18D    # I(2)
 #          AOTMARK STORAGE                               (3D)
 
 WHATMARK        EQUALS          DELTAQ          +2      # B(1)TMP  SIGHTING TECHNIQUE DETERMINATOR
-XYMARK          EQUALS          MARKCNTR        +1      # B(1)TMP  MARK INDENTIFICATION REGISTER
+XYMARK          EQUALS          WHATMARK        +1      # B(1)TMP  MARK INDENTIFICATION REGISTER
 MKDEX           EQUALS          XYMARK          +1      # B(1)TMP INDEX FOR AOTMARK
 #
 
@@ -2737,7 +2756,7 @@ VN1             EQUALS          RN1             +6      # I(6)                  
 PIPTIME1        EQUALS          VN1             +6      # B(2)                      (    FOR   )
 GDT1/2          EQUALS          PIPTIME1        +2      # I(6)                      (   COPY   )
 MASS1           EQUALS          GDT1/2          +6      # I(2)                      (   CYCLE  )
-DVCNTRL         EQUALS          MASS1                   # B(1)TMP  RESTART REG FOR DVCNTR
+DVCNTR1         EQUALS          MASS1                   # B(1)TMP  RESTART REG FOR DVCNTR
 R1S             EQUALS          MASS1           +2      # I(6)
 V1S             EQUALS          R1S             +6      # I(6)
 
@@ -2820,7 +2839,7 @@ OURPERMS        =               FCOLD           +1      # MUSTN'T OVERLAY OURTEM
 WCHPHOLD        =               OURPERMS                # B(1)    GUIDANCE
 511CTR          =               WCHPHOLD        +1      # B(1) R12 - CONTROLS 511 ALARM
 FLPASS0         =               511CTR          +1      # B(1) GUIDANCE
-CNTTHROT        EQUALS          FLPASSO                 # B(1) CNT THROTS BETWEEN OMISSIONS OF P66
+CNTTHROT        EQUALS          FLPASS0                 # B(1) CNT THROTS BETWEEN OMISSIONS OF P66
 TPIP            =               FLPASS0         +1      # B(2)
 VGU             =               TPIP            +2      # B(6)    GUIDANCE
 LAND            =               VGU             +6      # B(6)    GUIDANCE    CONTIGUOUS
@@ -2876,7 +2895,7 @@ G-VBIASX        =               STILBADV        +1      # B(1)    ACC DUE TO GRA
 G-VBIASY        =               G-VBIASX        +1      # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
 G-VBIASZ        =               G-VBIASY        +1      # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
 VSURFACE        =               G-VBIASZ        +1      # B(6)    LUNAR SURFACE VELOCITY
-HCASCLAD        =               VSURFACE        +6      # B(2)    ALTITUDE IN UNITS OF 2(15) M
+HCALCLAD        =               VSURFACE        +6      # B(2)    ALTITUDE IN UNITS OF 2(15) M
 HDOTLAD         =               HCALCLAD        +2      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
 DALTRATE        =               HDOTLAD         +2      # B(1)    DALTRATE UNITS OF 2(-9) M/CS/CS
 RUNITX          =               DALTRATE        +1      # B(1)    X-COMPONENT OF UNIT/R/ FULL-SIZE
@@ -2886,9 +2905,9 @@ DT              =               RUNITZ          +1      # TIME SINCE LAST PIPTIM
 VVECTX          =               DT              +1      # B(2)    X-COMPONENT OF SM REL. VELOCITY
 
 ## Page 158
-VVECTY          =               VVECTX          +1      # B(2)    Y-COMPONENT OF SM REL. VELOCITY
-VVECTZ          =               VVECTY          +1      # B(2)    Z-COMPONENT OF SM REL. VELOCITY
-ALTRATE         =               VVECTZ          +1      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
+VVECTY          =               VVECTX          +2      # B(2)    Y-COMPONENT OF SM REL. VELOCITY
+VVECTZ          =               VVECTY          +2      # B(2)    Z-COMPONENT OF SM REL. VELOCITY
+ALTRATE         =               VVECTZ          +2      # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
 ALTITUDE        =               ALTRATE         +2      # B(2)    ALTITUDE IN UNITS OF 2(15) M
 LATVMETR        =               ALTITUDE        +2      # B(1)    LATERAL VELOCITY METER INDICATOR
 FORVMETR        =               LATVMETR        +1      # B(1)    FORWARD VELOCITY METER INDICATOR
@@ -2968,7 +2987,7 @@ VGVECT          EQUALS          ENGOFFDT        +1      # I(6)OUT VELOCITY-TO-BE
 TXO             EQUALS          VGVECT          +6      # I(2)TMP TIME AT WHICH X-AXIS OVERRIDE
                                                         # IS ALLOWED.
 
-1/DVO           EQUALS          MASS1                   # B(2)TMEP  ATMAG TEMPORARY
+1/DV0           EQUALS          MASS1                   # B(2)TMEP  ATMAG TEMPORARY
 
 
 # END OF THE ASCENT GUIDANCE ERASABLES.
