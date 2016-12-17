@@ -93,7 +93,7 @@ elif args.comanche55 or args.luminary99:
     # Blur a bit more then threshold the image
     diff = cv2.GaussianBlur(diff, (7,7), 0)
     thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 4)
-    thresh = thresh[20:,20:]
+    thresh = thresh[30:-70,70:]
 elif args.retread44:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     #thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 51)
