@@ -15,6 +15,7 @@
 #               2016-12-11 JL   Transcribed pages 309-310.
 #               2016-12-12 JL   Transcribed pages 311-317.
 #               2016-12-16 JL   Transcribed pages 318-320.
+#               2016-12-17 JL   Transcribed pages 321-323.
 
 # Annotations:
 #
@@ -2748,14 +2749,116 @@ R2689   THREADS ARE EXHAUSTED.  THIS PROCESS IS GUARANTEED TO INCLUDE THE SYMBOL
 # Page 321
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  57        PAGE  57
 
+P27102  IF A THREAD IS SEEN TO BE POINTING TO A MULTIPLE DEFINITION FLAG, IT WANTS TO POINT TO THE FIRST DEFINITION.
+
+ 2711              TX           Z,X6,1        -             -
+ 2712   NEARLY Q   LA, D4H      3D4H          6,0           NEX EQ SYM          
+ 2713              LA, D4H      6,0           ZERO          NEX EQ SYM          IF NOT NEARLY DEFINED, SEEK ANOTHER.
+ 2715              SWE, CAC3H   6,1           32            COMMON +5           FETCH DEFINER THREAD.
+ 2717              LA           COMMON +5     ZERO          NEX EQ SYM          BRANCH IF DEFINER DIDN'T FIT IN TABLE.
+ 27182             EBA          COMMON +5     BIT 25        Z,X4
+ 2719              SS           BIT 16        CAC1H         6,1                 MARK DEFINER THREAD TO FIND WAY BACK.
+
+ 2721   M DEF TEST LA           4,1           CAC12         DEF TEST            BRANCH IF SYMBOL, NOT MULT. DEF. FLAG.
+ 2723              S, ETS       4,1           ZX +4         C,+1                POINT TO FIRST DEFINITION.
+ 27242             TX           Z,X4,1        -             -
+ 2725   DEF TEST   SWS, B27T30H N,X4          14            C,+1                FETCH SYMBOL HEALTH CODE.
+ 2727              SSL, ONEH    DEF XFORM     16            C,+1                "BRANCH" IF SYMBOL HAS NO VALID DEFIN.
+ 2729              S, ETS       4,1           ZX +2         DEFINEM -1          FETCH FIRST-DEFINEE THREAD, GO DEFINE.
+ 2731              LA, D4H      4,0           ZERO          VOIDEM
+ 2732              LA, D4H      3D4H          4,0           VOIDEM              BRANCH IF SYMBOL IS UNDEFINABLE.
+ 2734              SWE, CAC3H   4,1           32            COMMON +5           FETCH DEFINER THREAD.
+ 2736              LA           COMMON +5     ONE           VOIDEM              VICIOUS CIRCLE IF MARKED, VOIDED IF 0.
+ 2738              SS           BIT 16        CAC1H         4,1
+ 2740              S, ETS       COMMON +5     ZX +4         M DEF TEST          CONTINUE DEFINER SEARCH.
+
+ 27412  VOID INAN  TX           ZERO          -             4,1                 INITIALIZE SYMBOL ANALYZER WORD.
+ 27413             LA, CAC3H    COMMON +5     ZERO          NEX EQ SYM          BRANCH IF DEFINER LACKS DEFINEE THREAD.
+ 27414             S, ETS       COMMON +5     ZX +4         VOID MRK Q +1
+ 2742   VOIDEM     TS           4,1           COMMON +5     VOID INAN           FETCH FIRST-DEFINEE THREAD.
+ 27432             EBA          Z,X4          ZERO          Z,X2                X2 POINTS TO FIRST OR MARKED DEFINEE.
+ 2744              SS           ZERO          CAC1 H        4,1                 VOID A DEFINER THREAD.
+ 2746              SWE, CAC3H   4,1           16            COMMON +5           FETCH CO-DEFINEE THREAD.
+ 2748              LA           COMMON +5     ZERO          VOID LOOP +1        BRANCH IF THERE ARE NO MORE CO-DEFINEES.
+ 27492             EBA          COMMON +5     BIT 25        Z,X4
+ 2750              LA           4,1           CAC12         VOID MRK Q
+ 2751              WA           4,1           ONE           COMMON +5
+ 27512             S, ETS       COMMON +5     ZX +4         C,+1
+ 2752   VOID MRK Q NA, CAC1H    4,1           BIT 16        VOIDEM +2           BRANCH IF THIS DEFINER THREAD UNMARKED.
+ 2754              LA           4,1           CAC12         VOIDEM +1
+ 2755              WA           4,1           ONE           COMMON +5
+ 2756   VOID LOOP  S, ETS       COMMON +5     ZX +4         VOIDEM +1
+
+ 2758              LA, CAC3H    2,1           ZERO          NEX EQ SYM          BRANCH IF PRIME DEFINEE DEFINES NOBODY.
+ 2760              EBA          Z,X2          ZERO          Z,X4                START ON NEXT LEVEL OF DEFINEES.
+ 27612             TS           4,1           COMMON +5     VOID INAN
+
+ 27619             TX           ZERO          -             4,1                 INITIALIZE SYMBOL ANALYZER WORD.
 
 # Page 322
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  58        PAGE  58
 
+P2762   APPLY A DEFINED DEFINER TO A TREE OF NEARLY DEFINED SYMBOLS.
+
+ 2763   DEFINER    SWE, CAC3H   N,X4          16            COMMON              FETCH VALUE OF DEFINED SYMBOL.
+ 27642             EBA          Z,X2          ZERO          Z,X4
+ 2765              LA           2,1           CAC12         GET AUGMT
+ 2766              WA           2,1           ONE           COMMON +5
+ 2767              S, ETS       COMMON +5     ZX +2         DEFINEM +1          COPY DEFINEE THREAD.
+
+ 2769              LA           4,1           CAC12         GET AUGMT
+ 2770              WA           4,1           ONE           COMMON +5
+ 27702             S, ETS       COMMON +5     ZX +4         C,-2                SEE CALL AT MARK TEST +4.
+ 2771   GET AUGMT  SWE,B1SPCMAG N,X4          17            COMMON +1           RECONSTITUTE SIGNED MODIFIER.
+ 2773              BS           COMMON        COMMON +1     COMMON +1           ALL SIGNS ARE BASS-ACKWARDS HERE.
+ 2774              LN           COMMON +1     ZERO          EQU 2 BIG Q         BRANCH IF DEFINITION VALUE IS POSITIVE.
+
+ 2776              SSL, ONEH    N,X4          32            C,+1
+ 2777              TS, D4H      CD4H          4,0           MARK TEST           MULT NEAR DEF BECOMES MULT OVERSIZE DEF.
+ 2779              TS, D4H      8D4H          4,0           MARK TEST           NEARLY DEF BECOMES OVERSIZE DEFINED.
+ 2781   EQU 2BIG Q LA, FIXMAGH  N WD RECS     COMMON +1     C,-3                BRANCH IF DEFINITION TOO BIG FOR MACH.
+
+ 2783              SWS, CAC2H   COMMON +1     16,L          N,X4                STORE GOOD DEFINITION.
+ 2785              SSL, ONEH    N,X4          32            C,+1
+ 2786              TS, D4H      4D4H          4,0           MARK TEST           MULT NEARLY DEF BECOMES MULT DEF BY =.
+ 2788              SS           3D4H          D4H           N,X4                NEARLY DEFINED BECOMES DEFINED BY =.
+
+ 2790   MARK TEST  LA           BIT 15        4,1           C,+3                BRANCH IF DEFINER THREAD UNMARKED.
+ 2792              EBA          Z,X4          ZERO          Z,X2
+ 27922             SS           ONES          CAC1H         4,1                 UNMARK IT AND SAVE ITS ADDRESS.
+ 2794              SWE, CAC3H   4,1           16            COMMON +5           FETCH CO-DEFINEE THREAD.
+ 2796              NA           COMMON +5     ZERO          GET AUGMT -1        BRANCH IF THERE IS A CO-DEFINEE.
+
+ 2798              LA, CAC3H    2,1           ZERO          NEX EQ SYM          BRANCH IF PRIME DEFINEE DEFINES NOBODY.
+ 27992             EBA          Z,X2          ZERO          Z,X4
+ 2800              TS           -             -             DEF TEST            GO TEST PRIME DEFINEE FOR GOOD DEFINE.
+
+ 2802   NEX EQ SYM SS           ZERO          CAC12H        6,1                 SHOW ABSENCE OF DEFINITION PAGE NUMBER.
+ 2804              LA, CAC3H    6,0           L AV TABLE    RESOLVEM            GO LOOK FOR ANOTHER NEARLY DEFINED SYM.
+ 28052             TX           N,X6          -             Z,X6
+ 28054             TS           Z,X6,1        -             C,-2                SKIP OVER SPEC PAIR.
 
 # Page 323
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  59        PAGE  59
 
+P2806   OPTIMIZATION OF SYMBOL TABLE CAC-THREADS, EACH OF WHICH IS TO POINT TO THE SPEC PAIR WHOSE STRING CONTAINS THE
+R2808   FIRST SYMBOL WHOSE LEFT 7 BITS CORRESPOND TO THAT CAC-THREAD.
+
+ 2809   OPTI THRS  TX           L SYM THR     -             Z,X4
+ 2810              TX           N,X4          -             Z,X2                POINT TO FIRST SPEC PAIR.
+ 2812              S, ETS       2,0           ZX +3         CH THREAD           POINT TO THE LAST SYMBOL IN A STRING.
+
+ 2814              SS           Z,X2          CAC3          N,X4                PUT OPTIMUM VALUE ON EVEN CAC-THREAD.
+ 2816   CH THREAD  LA           N,X3          CHECKED       NEXTRING            BR IF NO NEW CATEGORY IN THIS STRING.
+ 2818              WA           CHECKED       BIT 7         CHECKED
+ 2819              NA, BIT7H    CHECKED       ONES          CH THREAD -1        BRANCH IF DOING EVEN CAC-THREAD.
+ 2821              SWS, CAC14   Z,X2          32,L          N,X4                PUT OPTIMUM VALUE ON ODD CAC-THREAD.
+ 2823              NA           Z,X4,1        L SYMTH 14    CH THREAD           BRANCH IF NEXT IS NOT 13TH CAC-WORD.
+ 2825              WA           CHECKED       BIT 6H        CHECKED             LEAP OVER SUBRO DIRECTORY ORIGIN.
+ 2827              TS           Z,X4,1        -             CH THREAD
+
+ 2828   NEXTRING   LA           ONES          CHECKED       ASSY TYP Q          BRANCH WHEN ALL CAC-THREADS DONE.
+ 2830              TS           3,1           Z,X2          CH THREAD -1        POINT TO NEXT SPEC PAIR.
 
 # Page 324
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  60        PAGE  60
