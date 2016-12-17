@@ -10,4 +10,7 @@ BASENAME=Retread44
 # Only do syntax checking until proofing complete.
 EXTRA_YAYUL_ARGS=--blk2 --syntax
 
+# Retread does not have checksums, so disable them.
+OCT2BIN_ARGS=--no-checksums
+
 include ../Makefile.inc
