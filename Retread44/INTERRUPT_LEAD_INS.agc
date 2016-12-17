@@ -13,10 +13,11 @@
 ## Contact:      Ron Burkey <info@sandroid.org>.
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
+##               2016-12-16 MAS  Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Retread 44.
+## Page 15
+## The log section name, INTERRUPT LEAD INS, is circled in red.
 
-## Page 27
                 SETLOC          4000
                 
                 INHINT                                  # GO
@@ -24,15 +25,15 @@
                 XCH             BBANK
                 TCF             GOPROG
                 
-                DXCH            ARUPT                   # HERE ON A T6RUPT
-                EXTEND
-                QXCH            QRUPT
-                TCF             DOT6RUPT                # DOT6RUPT IS IN FIX-FIXED.(INTR-BANK COM)
-                
+                DXCH            ARUPT                   # T6RUPT
+                CAF             T6RPTBB
+                XCH             BBANK
+                TCF             RESUME      +3          # ***FIX LATER***
+
                 DXCH            ARUPT                   # T5RUPT
-                EXTEND
-                DCA             T5LOC                   # T5LOC EQUALS T5ADR
-                DTCB
+                CAF             T5RPTBB
+                XCH             BBANK
+                TCF             RESUME      +3          # ***FIX LATER***
                 
                 DXCH            ARUPT                   # T3RUPT
                 CAF             T3RPTBB
@@ -40,10 +41,9 @@
                 TCF             T3RUPT
                 
                 DXCH            ARUPT                   # T4RUPT
-                CAF             ZERO
+                CAF             T4RPTBB
+                XCH             BBANK
                 TCF             T4RUPT
-                EBANK=          M11
-T4RPTBB         BBCON           T4RUPTA
 
                 DXCH            ARUPT                   # KEYRUPT1
                 CAF             KEYRPTBB
@@ -51,9 +51,9 @@ T4RPTBB         BBCON           T4RUPTA
                 TCF             KEYRUPT1
                 
                 DXCH            ARUPT                   # KEYRUPT2
-                CAF             MKRUPTBB
+                CAF             KEYRPTBB
                 XCH             BBANK
-                TCF             MARKRUPT
+                TCF             KEYRUPT2
                 
                 DXCH            ARUPT                   # UPRUPT
                 CAF             UPRPTBB
@@ -63,22 +63,18 @@ T4RPTBB         BBCON           T4RUPTA
                 DXCH            ARUPT                   # DOWNRUPT
                 CAF             DWNRPTBB
                 XCH             BBANK
-                TCF             DODOWNTM
+                TCF             RESUME      +3          # ***FIX LATER***
                 
-                DXCH            ARUPT                   # RADAR RUPT
-                CAF             RDRPTBB
-## Page 28
-                XCH             BBANK
-                TCF             RADAREAD
-                
-# TRAPS 31B AND 32 SHOULD NEVER BE SET. THEREFORE-
-# RUPT 10 WILL ALWAYS REFER TO THE HAND CONTROLLER LPD OR MINIMUM IMPULSE
-# USE. SEE GEORGE CHERRY FOR RATIONALE REGARDING THE AFORESAID.
+                RESUME                                  # RADAR RUPT    ****FIX LATER******
 
-                DXCH            ARUPT                   # RUPT 10 USED FOR RHC MINIMP MODE ONLY.
-                CAF             TWO
-                TS              DELAYCTR
-                TCF             NOQRSM
+                SETLOC          4050
+## Page 16
+                RESUME                                  # HAND CONTROL RUPT   ***FIX LATER****
+
+
+
+                SETLOC          4054
+
                 
                 EBANK=          LST1                    # RESTART USES E0, E3
 GOBB            BBCON           GOPROG
@@ -86,21 +82,21 @@ GOBB            BBCON           GOPROG
                 EBANK=          TIME1
 T6RPTBB         BBCON           RESUME                  # ***FIX LATER***
 
+                EBANK=          TIME1
+T5RPTBB         BBCON           RESUME                  # ***FIX LATER***
+
                 EBANK=          LST1
 T3RPTBB         BBCON           T3RUPT
+
+                EBANK=          DSRUPTSW
+T4RPTBB         BBCON           T4RUPT
 
                 EBANK=          KEYTEMP1
 KEYRPTBB        BBCON           KEYRUPT1
 
-                EBANK=          AOTAZ
-MKRUPTBB        BBCON           MARKRUPT
-
 UPRPTBB         =               KEYRPTBB
 
-                EBANK=          DNTMBUFF
-DWNRPTBB        BBCON           DODOWNTM
-
-                EBANK=          RADMODES
-RDRPTBB         BBCON           RADAREAD
+                EBANK=          TIME1
+DWNRPTBB        BBCON           RESUME                  # ***FIX LATER ***
 
 ENDINTFF        EQUALS
