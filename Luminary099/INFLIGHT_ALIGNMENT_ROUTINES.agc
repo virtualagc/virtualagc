@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-26 RSB	Adapted from the corresponding 
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
+##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -39,7 +41,7 @@
 # THE INPUT IS THE DESIRED STABLE MEMBER COORDINATES REFERRED TO PRESENT STABLE MEMBER COORDINATES.  THE THREE
 # HALF-UNIT VECTORS ARE STORED AT XDC, YDC, AND ZDC.
 #
-# THE OUTPUTS ARE THE THREE GYRO TORQUE ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
+# THE OUTPUTS ARE THE THREE GYRO TORQUING ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
 # MGC, AND OGC RESPECTIVELY.
 
 		COUNT*	$$/INFLT
@@ -201,7 +203,7 @@ CALCGA1		VLOAD	DOT
 GIMLOCK1	EXIT
 		TC	ALARM
 		OCT	00401
-		TC	UPFLAG		# GIMBAL LOCK HAS OCCURRED
+		TC	UPFLAG		# GIMBAL LOCK HAS OCCURED
 		ADRES	GLOKFAIL
 
 		TC	INTPRET
@@ -297,5 +299,6 @@ QTSN45		2DEC	.1768
 
 .166...		2DEC	.1666666667
 
-## Page 1258 (empty page)
+## Page 1258
+## Empty page
 
