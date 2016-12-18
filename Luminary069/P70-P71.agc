@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
+##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
 
@@ -53,7 +54,7 @@ FLASHH?		MASK	FLGWRD11	# C(A) = 1 - HFLASH BIT
 		TS	L
 		TC	FLIP		# FLIP H LITE
 
-FLASHV?		CA	VFLSHBIT	# VLASHBIT MUST BE BIT 2.
+FLASHV?		CA	VFLSHBIT	# VFLASHBIT MUST BE BIT 2.
 		MASK	FLGWRD11
 		EXTEND
 		BZF	10,11		# V FLASH OFF
@@ -139,7 +140,7 @@ ABRTJASK	CAF	OCTAL27
 		MASK	APSFLBIT
 		ADS	FLGWRD10
 		CS	DAPBITS		# DAPBITS = OCT 640 = BITS 6, 8, 9
-		MASK	DAPBOOLS	# (TURN OFF ULLAGE, DRIFT, AND XOVINHIB
+		MASK	DAPBOOLS	# (TURN OFF: ULLAGE, DRIFT, AND XOVINHIB )
 		TS	DAPBOOLS
 
 		CS	FLAGWRD5	# SET ENGONFLG.
@@ -188,7 +189,6 @@ ABRTJASK	CAF	OCTAL27
 		COM
 		DXCH	-PHASE4
 
-# the 3 in OCT37774 could be something else, garbled
 		CAF	OCT37774	# SET T5RUPT TO CALL DAPIDLER IN	
 		TS	TIME5		# 40 MILLISECONDS.
 		
@@ -229,7 +229,7 @@ GOABORT		TC	INTPRET
 		TC	DOWNFLAG
 		ADRES	IDLEFLAG
 		
-		TC	UPFLAG		# INSURE 4-JET TRANSLATION CAPABILIITY.
+		TC	UPFLAG		# INSURE 4-JET TRANSLATION CAPABILITY.
 		ADRES	ACC4-2FL
 		
 		TC	CHECKMM
@@ -265,20 +265,20 @@ P70INIT		TC	INTPRET
 		SET	CALL
 			FLAP
 			COMMINIT
-		AXC,1	GOTO		# RETURN HERE IN P70, SET X1 FOR DPS COEFF.
+		AXC,1	GOTO		# RETURN HERE IN P70, SE X1 FOR DPS COEFF.
 			0D
 			BOTHPOLY
-INJTARG		AXC,1			# RETURN HERE IN P71, SET X1 FOR APS COEFF.
+INJTARG		AXC,1			# RETURN HERE IN P71, SET X1 FOR APS COEFF
 			8D
 BOTHPOLY	DLOAD*	DMP		# TGO D
 			ABTCOF,1
 			TGO
 ## Page 834
 		DAD*	DMP
-			ABTCOF +2,1	#	TGO(C+TGO )
+			ABTCOF +2,1	# TGO(C+TGO D)
 			TGO
 		DAD*	DMP
-			ABTCOF +4,1	# TGO(B+TGO d))
+			ABTCOF +4,1	# TGO(B+TGO(C + TGO D))
 			TGO
 		DAD*
 			ABTCOF +6,1	# A+TGO(B+TGO(C+TGO D))	
@@ -288,10 +288,10 @@ BOTHPOLY	DLOAD*	DMP		# TGO D
 			UPRATE		# IF BIG ENOUGH, LEAVE ZDOTD AS IS .
 		DLOAD
 			VMIN
-		STORE	ZDOTD		# IF TOO SMALL, REPLCAE WITH MINIMUM.
+		STORE	ZDOTD		# IF TOO SMALL, REPLACE WITH MINIMUM.
 UPRATE		DLOAD
 			ABTRDOT
-		STCALL	RDOTD		# INITIALZE RDOTD.
+		STCALL	RDOTD		# INITIALIZE RDOTD.
 			YCOMP		# COMPUTE Y
 		ABS	DSU
 			YLIM		# /Y/-DYMAX
@@ -345,7 +345,7 @@ P71RET		TC	DOWNFLAG
 			QPRET
 		CADR	INJTARG
 			P12INIT		# WILL EXIT P12INIT TO INJTARG
-OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
+OLDTIME		DLOAD	SL1		# IF FLAP=1,TGO=2 TGO
 			TGO
 		STCALL	TGO1
 			P12INIT
@@ -359,7 +359,7 @@ OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
 		TCF	UPTHROT1 -3
 
 TGO1		=	VGBODY
-# *************************************************************************
+# ************************************************************************
 
 		BANK	21
 		SETLOC	R11
@@ -392,7 +392,7 @@ ABORTALM	TC	FALTON
 
 		COUNT*	$$/P70
 
-# **********************************************************************
+# ************************************************************************
 
 TGOCOMP		RTB	DSU
 			LOADTIME
