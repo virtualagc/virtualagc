@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
+##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
 
@@ -25,9 +26,9 @@
 
 		EBANK=	E2DPS
 
-#	*************************************
+#	****************************************
 #	P63: THE LUNAR LANDING, BRAKING PHASE
-#	*************************************
+#	****************************************
 
 		COUNT*	$$/P63
 
@@ -64,11 +65,11 @@ FLAGORGY	TC	INTPRET		# DIONYSIAN FLAG WAVING
 			MUNFLAG
 		CLEAR	CLEAR
 			P25FLAG		# TERMINATE P25 IF IT IS RUNNING.
-			RNDVZFLG	# TERMINATE P20 IF IT IS RUNNING.
+			RNDVZFLG	# TERMINATE P20 IF IT IS RUNNING
 
-					# ********************************
+					# ****************************************
 
-IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:
+IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:-
 ## Page 786
 			0		# 	AT 0D LANDING SITE IN MOON FIXED FRAME
 			RLS		#	AT 6D ESTIMATED TIME OF LANDING
@@ -112,16 +113,15 @@ IGNALOOP	DLOAD
 		STCALL	GDT/2
 			?GUIDSUB	# WHICH DELIVERS N PASSES OF GUIDANCE
 
-# DDUMCALC IS PROGRAMMED AS FOLLOWS:
-#                                         2                                           ___
+# DDUMCALC IS PROGRAMMED AS FOLLOWS:-
+#                                         2                                           -
 #              (RIGNZ - RGU )/16 + 16(RGU  )KIGNY/B8 + (RGU - RIGNX)KIGNX/B4 + (ABVAL(VGU) - VIGN)KIGNV/B4
 #                          2             1                 0
 #	DDUM = -------------------------------------------------------------------------------------------
 #                                                10
 #                                               2   (VGU - 16 VGU KIGNX/B4)
+## Page 787
 #                                                       2        0
-## Page 787 new page is actually one line earlier but this would put the indices on a seperate line 
-# disconnected from their respective variables
 # THE NUMERATOR IS SCALED IN METERS AT 2(28).  THE DENOMINATOR IS A VELOCITY IN UNITS OF 2(10) M/CS.
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
 # THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/B8 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
@@ -191,9 +191,9 @@ DDUMGOOD	SLOAD	SR
 			LAND
 R60INIT		STOVL	OUTOFPLN	# INITIALIZATION FOR CALCMANU
 			UNFC/2
-		STORE	R60VSAVE		# STORE UNFC/2 TEMPORARILY IN R60SAVE
+		STORE	R60VSAVE	# STORE UNFC/2 TEMPORARILY IN R60SAVE
 		EXIT
-					# *******************************************
+					# ****************************************
 
 IGNALGRT	TC	PHASCHNG	# PREVENT REPEATING IGNALG
 		OCT	04024
@@ -267,9 +267,9 @@ DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 #	--------------------------------
 
 ## Page 791
-#	*************************
+#	****************************************
 #	P68: LANDING CONFIRMATION
-#	*************************
+#	****************************************
 
 		BANK	31
 		SETLOC	F2DPS*31
@@ -308,7 +308,7 @@ LANDJUNK	TC	PHASCHNG
 			R-TO-RP
 		STORE	RLS
 		EXIT
-		CAF	V06N43*		# ASTRONAUT:  NOW LOOK WHERE TO ENDED UP
+		CAF	V06N43*		# ASTRONAUT:  NOW LOOK WHERE YOU ENDED UP
 		TC	BANKCALL
 		CADR	GOFLASH
 		TCF	GOTOPOOH	# TERMINATE
