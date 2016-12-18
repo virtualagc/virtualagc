@@ -880,7 +880,7 @@ MP5--           CA              S-ZERO
                 TC              BANKJUMP
 CONTINU         CADR            DV1++           -1              # CONTINUE WITH INSTRUCTION CHECK
 
-SETLOC          30000
+                SETLOC          30000
 
                 TC              CHECKNJ                         # CHECK FOR NEW JOB
 
