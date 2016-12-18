@@ -7,8 +7,8 @@
 
 BASENAME=Retread44
 
-# Only do syntax checking until proofing complete.
-EXTRA_YAYUL_ARGS=--blk2 --syntax
+## Retread was built for the BLK2 target
+EXTRA_YAYUL_ARGS=--blk2
 
 # Retread does not have checksums, so disable them.
 OCT2BIN_ARGS=--no-checksums

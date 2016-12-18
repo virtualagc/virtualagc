@@ -13,7 +13,7 @@
 ## Contact:      Ron Burkey <info@sandroid.org>.
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-18 MAS  Transcribed.
+##               2016-12-18 MAS  Transcribed, then fixed typos.
 
 ## Page 135
 ## The log section name, PINBALL GAME  BUTTONS AND LIGHTS, is circled in red.
@@ -1805,7 +1805,7 @@ MONIT1          TS              MPAC            +1      # TEMP STORAGE
                 CCS             A
                 TC              RELDSP1                 # GRABLOCK=0,1, +0 INTO DSPLOCK AND
                 TC              +4                      # TURN OFF KEY RLSE LIGHT.
-                TC              CCSHOLE
+                LOC             +1
                 CAF             ZERO                    # GRABLOCK=2, +0 INTO DSPLOCK AND
                 TS              DSPLOCK                 # LEAVE KEY RLSE LIGHT ALONE
                 INHINT
@@ -2274,7 +2274,7 @@ BUMP            CAF             FIVE                    # R2D5
                 INDEX           A
                 CCS             DSPTAB
                 TC              +2
-                TC              CCSHOLE
+                LOC             +1
                 AD              ONE                     # DSMAG IN A
                 INDEX           COUNT
                 MASK            DSMSK
@@ -2288,7 +2288,7 @@ BUMP            CAF             FIVE                    # R2D5
                 CCS             A                       # TO PREVENT -0
                 AD              ONE
                 TC              +2
-                TC              CCSHOLE
+                LOC             +1
                 TS              COUNT
                 TC              DSPIN                   # CODE ALREADY IN CODE
                 CS              DSPCOUNT

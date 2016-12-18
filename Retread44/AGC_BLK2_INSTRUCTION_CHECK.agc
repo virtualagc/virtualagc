@@ -15,6 +15,7 @@
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
 ##               2016-12-16 MAS  Began.
 ##               2016-12-17 MAS  Completed transcription.
+##               2016-12-18 MAS  Typos.
 
 ## Page 210
                 SETLOC          ABORT           +1
@@ -151,8 +152,8 @@ TCCHK           TC              +2
 ## Written to the right of the next few lines is "Written for comp self test and in Gyro S.F. test", signed G&S.
 # NORMAL USE OF CA, CS, AND CCS
 CCSCHK          CA              S-3
-                TS              SKEEP1
-                CCS             SKEEP1
+                TS              KEEP1
+                CCS             KEEP1
                 TC              ERRORS                          
                 TC              ERRORS                          
                 TC              +2                              
@@ -202,7 +203,7 @@ MSKCHK          CS              S-ZERO
                 CA              S-ZERO                          # 77777
                 TS              EDOP                            # 00177
                 MASK            EDOP                            # 00177
-                TS              SKEEP1                          # 00177
+                TS              KEEP1                           # 00177
                 MASK            EDOP                            # 00177
                 CS              A                               # 77600
                 AD              KEEP1                           # 77777
@@ -984,7 +985,7 @@ DV3--           LXCH            A
                 DV              KEEP6
                 AD              KEEP1
                 TC              -0CHK
-                CS              -L
+                CS              L
                 TC              -0CHK           -1
 
 ## Page 229
