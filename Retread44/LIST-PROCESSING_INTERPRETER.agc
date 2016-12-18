@@ -1559,7 +1559,7 @@ TSSL            CA              SR                      # GET SHIFT COUNT FOR SR
                 TCF             TSSL            +1
 
                 CCS             CYR                     # SEE IF ROUND WANTED.
-ROUND           TC              ROUNDSUB                # YES - ROUND AND EXIT.
+                TC              ROUNDSUB                # YES - ROUND AND EXIT.
                 TCF             DANZIG                  # SL LEAVES A ZERO IN CYR FOR NO ROUND.
                 TCF             DANZIG                  # NO - EXIT IMMEDIATL
 
@@ -2303,7 +2303,7 @@ DSQ             TC              DSQSUB                  # SQUARE THE DP CONTENTS
                 TCF             DANZIG
 
 ROUND           TC              ROUNDSUB                # ROUNDS MPAC TO DOUBLE PRECISION.
-                CAF             AERO                    # FORCE DP MODE.
+                CAF             ZERO                    # FORCE DP MODE.
                 TCF             NEWMODE
 
 ABVALABS        CCS             MODE                    # ABVAL OR ABS INSTRUCTION.
