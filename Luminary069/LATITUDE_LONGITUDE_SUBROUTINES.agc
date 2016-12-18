@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
+##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
 
@@ -227,7 +228,7 @@ ATAN=90		DLOAD	SIGN
 2DZERO		=	DPZERO
 
 ## Page 1138
-# ***** SETGAMMA SUBROUTINE *****
+# ..... SETGAMMA SUBROUTINE .....
 # SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES
 #
 # GAMMA = B**2/A**2 FOR EARTH (B-1)
@@ -254,7 +255,7 @@ SETGMEX		STORE	GAMRP
 GAMRP		=	8D
 
 ## Page 1139
-# ***** SETRE SUBROUTINE *****
+# ..... SETRE SUBROUTINE .....
 # SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)
 #
 #	RE = RM FOR MOON
