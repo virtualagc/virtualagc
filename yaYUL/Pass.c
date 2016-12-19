@@ -100,6 +100,7 @@
  *                              It *almost* works, but not quite yet.
  *              2016-11-14 RSB  Added the '#>' construct in .yul files.  Added
  *                              --to-yul.
+ *              2016-12-18 MAS  Added the "LOC" alias for SETLOC.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -316,7 +317,7 @@ static ParserMatch_t ParsersBlock2[] =
 #define NUM_PARSERS_BLOCK2 (sizeof (ParsersBlock2) / sizeof (ParsersBlock2[0]))
 
 // This is the table of basic instructions for BLK2.  It is almost
-// identical to ParsersBlock2[], but look at STORE, STODL, STOVL, STCALL.
+// identical to ParsersBlock2[], but look at STORE, STODL, STOVL, STCALL, LOC.
 static ParserMatch_t ParsersBLK2[] =
   {
     { "-1DNADR", OP_DOWNLINK, ParseECADR, "", "", 0, 077777 },
@@ -393,6 +394,7 @@ static ParserMatch_t ParsersBLK2[] =
     { "INCR", OP_BASIC, ParseINCR },
     { "INDEX", OP_BASIC, ParseINDEX },
     { "INHINT", OP_BASIC, NULL, "TC", "$4" },
+    { "LOC", OP_PSEUDO, ParseSETLOC },
     { "LXCH", OP_BASIC, ParseLXCH },
     { "MASK", OP_BASIC, ParseMASK },
     { "MEMORY", OP_PSEUDO, NULL, "", "" },
