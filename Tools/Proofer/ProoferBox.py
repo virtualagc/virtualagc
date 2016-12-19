@@ -162,7 +162,8 @@ for index in range(startIndex, endIndex):
 draw(img)
 
 # Create the output image.
-img.format = 'png'
+img.format = 'jpg'
+img.compression_quality = 25
 img.save(filename=outImage)
 print 'output =', outImage
 

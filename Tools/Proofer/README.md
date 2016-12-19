@@ -142,8 +142,8 @@ RETREAD44, for example, that array looks like this:
 
 And then the actual script is:
 
-	n=$STARTINGPAGEOFOCTALS
-	i=0
+	n=$STARTINGPAGEOFOCTALS ; \
+	i=0 ; \
 	for bank in 2 3 0 1 `seq 4 $LASTBANKINDECIMAL`
 	do
 		for pageInBank in 0 1 2 3
@@ -151,7 +151,7 @@ And then the actual script is:
 			if [[ ${BLANKS[$i]} == 0 ]]
 			then
 				pageNum=`printf "%04d" $n`
-				./ProoferBox.py $BWIMAGEDIR/$pageNum.tif $OUTPUTDIR/$pageNum.png $bank $pageInBank $PATHTOBINSOURCEFILE
+				./ProoferBox.py $BWIMAGEDIR/$pageNum.$EXT $OUTPUTDIR/$pageNum.jpg $bank $pageInBank $PATHTOBINSOURCEFILE
 				n=$((n+1))
 			fi
 			i=$((i+1))
