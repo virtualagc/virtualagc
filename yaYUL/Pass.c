@@ -100,7 +100,11 @@
  *                              It *almost* works, but not quite yet.
  *              2016-11-14 RSB  Added the '#>' construct in .yul files.  Added
  *                              --to-yul.
- *              2016-12-18 MAS  Added the "LOC" alias for SETLOC.
+ *              2016-12-18 MAS  Added the "LOC" alias for SETLOC. Also altered
+ *                              processing of numeric opcodes, determining if
+ *                              a double-word operation is being assembled, and incrementing
+ *                              the operand if so. This is needed for a word in the Retread
+ *                              instruction checks.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -2291,9 +2295,45 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                 {
                   extern int
                   ParseGeneral(ParseInput_t *, ParseOutput_t *, int, int);
+                  int i, Value;
+                  int Flags = 0;
+
+                  // Based on "2 0002" assembling to "20003" in Retread, it appears that we need
+                  // to figure out if numeric codes correspond to double-word instructions (which
+                  // would increment the operand by 1, assuming "2 0002" is treated as "DAS 0002").
+                  // To do that we need to resolve the operand and figure out which quarter-code we're
+                  // getting.
+                  i = GetOctOrDec(ParseInputRecord.Operand, &Value);
+
+                  if (i) {
+                      // Operand wasn't numeric, so try it as a label.
+                      Address_t K;
+                      char args[32];
+                      args[0] = '\0';
+
+                      if (ParseInputRecord.Mod1) strcpy(args, ParseInputRecord.Mod1);
+                      i = FetchSymbolPlusOffset(&ParseInputRecord.ProgramCounter, ParseInputRecord.Operand, args, &K);
+                      if (i) {
+                          // Wasn't a symbol either. Panic.
+                          sprintf(ParseOutputRecord.ErrorMessage, "Symbol \"%s\" undefined or offset bad", 
+                                  ParseInputRecord.Operand);
+                          ParseOutputRecord.Fatal = 1;
+                      }
+                      // We were able to resolve our symbol
+                      Value = K.SReg;
+                  }
+                  
+                  // Check for one of the double-word instructions. If we find one, notify
+                  // ParseGeneral that one needs to be added to the operand.
+                  if ((!ParseInputRecord.Extend && (NumOperator == 2) && ((Value & 006000) == 0)) // DAS
+                     || (!ParseInputRecord.Extend && (NumOperator == 5) && ((Value & 006000) == 002000)) // DXCH
+                     || (ParseInputRecord.Extend && (NumOperator == 4)) // DCA
+                     || (ParseInputRecord.Extend && (NumOperator == 5))) { // DCS
+                      Flags |= KPLUS1;
+                  }
 
                   ParseGeneral(&ParseInputRecord, &ParseOutputRecord,
-                      NumOperator << 12, 0);
+                      NumOperator << 12, Flags);
                   ParseOutputRecord.Words[0] = AddAgc(
                       ParseOutputRecord.Words[0], OpcodeOffset);
                   ParseOutputRecord.EBank.oneshotPending = 0;
