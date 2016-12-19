@@ -36,7 +36,18 @@ binsourceFilename = sys.argv[5]
 # Shell out to have tesseract generate the box file, and read it in..
 call([ 'tesseract', backgroundImage, 'octal.burst.exp0', '-psm', '6', 'batch.nochop', 'makebox', 'octals' ])
 file =open ('octal.burst.exp0.box', 'r')
-boxes = file.readlines()
+boxes=[]
+for line in file:
+	boxFields = line.split()
+	boxLeft = int(boxFields[1])
+	boxBottom = int(boxFields[2])
+	boxRight = int(boxFields[3])
+	boxTop = int(boxFields[4])
+	boxWidth = boxRight + 1 - boxLeft
+	boxHeight = boxTop + 1 - boxBottom
+	#print boxWidth, boxHeight
+	if boxWidth >= 10 and boxWidth <= 24 and boxHeight >= 20 and boxHeight <= 36:
+		boxes.append(line)
 file.close()
 
 # Read in the binsource file.

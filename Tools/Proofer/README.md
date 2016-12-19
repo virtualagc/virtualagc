@@ -135,25 +135,28 @@ The command-line parameters are:
 Here is a simple bash script that applies ProoferBox.py to a complete set of B&W octal 
 pages.  Now, if there are any completely empty memory pages (page = quarter of a bank), 
 there won't be a page in the assembly listing for them either, and hence won't be any image file
-whose entries are 0 for each page which isn't blank, and 1 for each page which is blank.  For
+for that page.  This is handles by having an array, BLANKS[], 
+whose entries are 0 for each page which isn't blank, and 1 for each page which is blank.  Typically,
+BLANKS[] would simply be an array of 144 entries all equal to 0, but not always; for
 RETREAD44, for example, that array looks like this:
 
 	BLANKS=(0 0 0 1  0 0 0 0  0 0 0 0  0 0 0 1  0 0 0 0  0 0 0 0  0 0 1 1  0 0 0 1  0 0 0 1)
 
 And then the actual script is:
 
-	n=$STARTINGPAGEOFOCTALS ; \
-	i=0 ; \
-	for bank in 2 3 0 1 `seq 4 $LASTBANKINDECIMAL`
+	n=$STARTINGPAGEOFOCTALS; \
+	for i in `seq 0 $((NUMPAGES-1))`
 	do
-		for pageInBank in 0 1 2 3
-		do 
-			if [[ ${BLANKS[$i]} == 0 ]]
-			then
-				pageNum=`printf "%04d" $n`
-				./ProoferBox.py $BWIMAGEDIR/$pageNum.$EXT $OUTPUTDIR/$pageNum.jpg $bank $pageInBank $PATHTOBINSOURCEFILE
-				n=$((n+1))
-			fi
-			i=$((i+1))
-		done
+	  bank=$(( i/4 ))
+	  if [[ $bank -lt 4 ]]
+	  then
+	    bank=$(( bank^2 ))
+	  fi
+	  pageInBank=$(( i%4 ))
+	  if [[ ${BLANKS[$i]} == 0 ]]
+	  then
+	    pageNum=`printf "%04d" $n`
+	    ./ProoferBox.py $BWIMAGEDIR/$pageNum.$EXT $OUTPUTDIR/$pageNum.jpg $bank $pageInBank $PATHTOBINSOURCEFILE
+	    n=$((n+1))
+	  fi
 	done
