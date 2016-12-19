@@ -144,8 +144,8 @@ RETREAD44, for example, that array looks like this:
 
 And then the actual script is:
 
-	n=$STARTINGPAGEOFOCTALS; \
-	for i in `seq 0 $((NUMPAGES-1))`
+	n=$FIRSTOUTPAGE; \
+	for i in `seq $((FIRSTOUTPAGE-STARTINGPAGEOFOCTALS)) $((LASTOUTPAGE-STARTINGPAGEOFOCTALS))`
 	do
 	  bank=$(( i/4 ))
 	  if [[ $bank -lt 4 ]]

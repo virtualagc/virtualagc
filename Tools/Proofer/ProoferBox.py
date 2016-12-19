@@ -35,19 +35,23 @@ binsourceFilename = sys.argv[5]
 
 # Shell out to have tesseract generate the box file, and read it in..
 call([ 'tesseract', backgroundImage, 'octal.burst.exp0', '-psm', '6', 'batch.nochop', 'makebox', 'octals' ])
-file =open ('octal.burst.exp0.box', 'r')
-boxes=[]
+file = open ('octal.burst.exp0.box', 'r')
+boxes = []
+rejectedBoxes = []
 for line in file:
 	boxFields = line.split()
+	boxChar = boxFields[0]
 	boxLeft = int(boxFields[1])
 	boxBottom = int(boxFields[2])
 	boxRight = int(boxFields[3])
 	boxTop = int(boxFields[4])
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxTop + 1 - boxBottom
-	#print boxWidth, boxHeight
-	if boxWidth >= 10 and boxWidth <= 24 and boxHeight >= 20 and boxHeight <= 36:
+	#print boxChar, boxWidth, boxHeight
+	if boxWidth >= 8 and boxWidth <= 24 and boxHeight >= 16 and boxHeight <= 36:
 		boxes.append(line)
+	else:
+		rejectedBoxes.append(line)
 file.close()
 
 # Read in the binsource file.
@@ -98,10 +102,28 @@ if bankNumber < 4:
 startIndex = bankNumber * 4 * 8 * 4 + pageInBank * 4 * 8
 endIndex = startIndex + 4 * 8
 
+draw = Drawing()
+evilColor = Color("#FF00FF")
+extraColor = Color("#FF8000")
+draw.stroke_color = evilColor
+draw.stroke_width = 4
+draw.fill_opacity = 0
+
+# Draw empty frames around all of the rejected boxes.
+for i in range(0,len(rejectedBoxes)):
+	boxFields = rejectedBoxes[i].split()
+	boxLeft = int(boxFields[1])
+	boxBottom = backgroundHeight - 1 - int(boxFields[2])
+	boxRight = int(boxFields[3])
+	boxTop = backgroundHeight - 1 - int(boxFields[4])
+	draw.line((boxLeft,boxTop), (boxRight,boxTop))
+	draw.line((boxLeft,boxBottom), (boxRight,boxBottom))
+	draw.line((boxRight,boxTop), (boxRight,boxBottom))
+	draw.line((boxLeft,boxTop), (boxLeft,boxBottom))
+
 # Loop on lines on the selected page.  We're going to assume that the boxes are
 # in 1-to-1 correspondence with the binsource digit, in the order read from 
 # disk, except that there may be less boxes (on the last page of a bank).
-draw = Drawing()
 row = 0
 lastRight = 1000000
 boxIndex = 0
