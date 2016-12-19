@@ -88,6 +88,7 @@
  *                              possibility became a reality in Artemis072 when some fixes
  *                              to EQUALS/= needed for Sunburst120 were made.
  *              2016-11-14 RSB  Added --to-yul.
+ *              2016-12-18 MAS  Added --no-checksums.
  */
 
 #include "yaYUL.h"
@@ -109,6 +110,7 @@ int Force = 0;
 char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
 FILE *OutputFile = NULL;
+static int NoChecksums = 0;
 static int Hardware = 0;
 int flipBugger[044] =
   { 0 };
@@ -215,6 +217,8 @@ main(int argc, char *argv[])
           blk2 = 1;
           assemblyTarget = "BLK2";
         }
+      else if (!strcmp(argv[i], "--no-checksums"))
+        NoChecksums = 1;
       else if (!strcmp(argv[i], "--hardware"))
         Hardware = 1;
       else if (!strcmp(argv[i], "--format"))
@@ -433,56 +437,59 @@ main(int argc, char *argv[])
           if (Bank < 4 && !Hardware && !Block1)	// flip-flop 0,1 with 2,3 when not building for hardware targets
             Bank ^= 2;
           // Add bugger info to the bank.
-          if (Block1)
+          if (!NoChecksums)
             {
-              if (Bank == 0)
-                Offset = 02000;
-              else if (Bank == 1)
-                Offset = 04000;
-              else
-                Offset = 06000;
-            }
-          else
-            {
-              if (Bank == 2)
-                Offset = 04000;
-              else if (Bank == 3)
-                Offset = 06000;
-              else
-                Offset = 02000;
-            }
-          Value = GetBankCount(Bank);
-          if (Value > 0)
-            {
-              if (!Block1 && !blk2)
+              if (Block1)
                 {
-                  if (Value < 01776)
-                    {
-                      ObjectCode[Bank][Value] = Value + Offset;
-                      Value++;
-                    }
-                  if (Value < 01777)
-                    {
-                      ObjectCode[Bank][Value] = Value + Offset;
-                      Value++;
-                    }
-                }
-              if (Value < 02000)
-                {
-                  int tryBank;
-                  for (Bugger = Offset = 0; Offset < Value; Offset++)
-                    Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
-                  tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
-                  if (0 == (040000 & Bugger))
-                    GuessBugger = Add(tryBank, 077777 & ~Bugger);
+                  if (Bank == 0)
+                    Offset = 02000;
+                  else if (Bank == 1)
+                    Offset = 04000;
                   else
-                    GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
-                  ObjectCode[Bank][Value] = GuessBugger;
-                  printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
-                      (Block1 ? 06000 : 02000) + Value);
-                  if (HtmlOut != NULL)
-                    fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
-                        GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
+                    Offset = 06000;
+                }
+              else
+                {
+                  if (Bank == 2)
+                    Offset = 04000;
+                  else if (Bank == 3)
+                    Offset = 06000;
+                  else
+                    Offset = 02000;
+                }
+              Value = GetBankCount(Bank);
+              if (Value > 0)
+                {
+                  if (!Block1 && !blk2)
+                    {
+                      if (Value < 01776)
+                        {
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Value++;
+                        }
+                      if (Value < 01777)
+                        {
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Value++;
+                        }
+                    }
+                  if (Value < 02000)
+                    {
+                      int tryBank;
+                      for (Bugger = Offset = 0; Offset < Value; Offset++)
+                        Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
+                      tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
+                      if (0 == (040000 & Bugger))
+                        GuessBugger = Add(tryBank, 077777 & ~Bugger);
+                      else
+                        GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
+                      ObjectCode[Bank][Value] = GuessBugger;
+                      printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
+                          (Block1 ? 06000 : 02000) + Value);
+                      if (HtmlOut != NULL)
+                        fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
+                            GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
+                    }
                 }
             }
           // Output the binary data.
@@ -532,64 +539,65 @@ main(int argc, char *argv[])
           "The assembly listing, including symbol table and any error\n"
           "messages appear on the standard output.\n\n"
           "OPTIONS:\n");
-      printf("--help or /?     Display this message.\n");
-      printf("--max-passes=n   By default, the assembler makes at most\n"
-          "                 %d passes trying to resolve addresses.\n"
-          "                 This switch changes that value.\n", MaxPasses);
-      printf("--force          Force creation of core-rope image. (By\n"
-          "                 default, the core-rope is not created if\n"
-          "                 there were fatal errors during assembly.\n");
+      printf("--help or /?      Display this message.\n");
+      printf("--max-passes=n    By default, the assembler makes at most\n"
+          "                  %d passes trying to resolve addresses.\n"
+          "                  This switch changes that value.\n", MaxPasses);
+      printf("--force           Force creation of core-rope image. (By\n"
+          "                  default, the core-rope is not created if\n"
+          "                  there were fatal errors during assembly.\n");
       //printf ("--g              Output the binary symbol table to the file\n"
       //        "                 InputFile.symtab\n");
-      printf("--html           Causes an HTML file to be created, which is \n"
-          "                 the same as the output listing except that it\n"
-          "                 if a lot more convenient to use. It has syntax\n"
-          "                 highlighting and hyperlinks from where each\n"
-          "                 symbol is used back to where it was defined.\n"
-          "                 The top-level HTML file produced is named the\n"
-          "                 same as the input source file, except with .html\n"
-          "                 replacing .s (if applicable).  Separate HTML\n"
-          "                 files are produced for all source files included\n"
-          "                 with the $ directive, and links between the files\n"
-          "                 are provided.\n");
-      printf("--unpound-page   Bypass --html processing for \"## Page\".\n");
+      printf("--html            Causes an HTML file to be created, which is \n"
+          "                  the same as the output listing except that it\n"
+          "                  if a lot more convenient to use. It has syntax\n"
+          "                  highlighting and hyperlinks from where each\n"
+          "                  symbol is used back to where it was defined.\n"
+          "                  The top-level HTML file produced is named the\n"
+          "                  same as the input source file, except with .html\n"
+          "                  replacing .s (if applicable).  Separate HTML\n"
+          "                  files are produced for all source files included\n"
+          "                  with the $ directive, and links between the files\n"
+          "                  are provided.\n");
+      printf("--unpound-page    Bypass --html processing for \"## Page\".\n");
       printf(
-          "--block1         Assembles Block 1 code.  The default is Block 2.\n");
+          "--block1          Assembles Block 1 code.  The default is Block 2.\n");
       printf(
-          "--blk2           For the early version of Block 2 code, such as\n");
+          "--blk2            For the early version of Block 2 code, such as\n");
       printf(
-          "                 in the AURORA program.  Not used for Block 2 in\n");
+          "                  in the AURORA program.  Not used for Block 2 in\n");
       printf(
-          "                 The default (omitting both --block1 and --blk2)\n");
+          "                  The default (omitting both --block1 and --blk2)\n");
       printf(
-          "                 is correct for almost all surviving AGC software.\n");
+          "                  is correct for almost all surviving AGC software.\n");
       printf(
-          "                 general, though, and not for any flown missions.\n");
+          "                  general, though, and not for any flown missions.\n");
+      printf("--no-checksums Don't emit bank checksums. For use with Retread 44.\n");
       printf("--hardware       Emit binary with hardware bank order, and\n"
-          "                 enable parity bit calculation\n");
+          "                  enable parity bit calculation\n");
       printf(
-          "--format         Just reformat the file and re-output. Don't assemble.\n");
+          "--format          Just reformat the file and re-output. Don't assemble.\n");
       printf(
-          "--syntax         Perform syntax-checking only, no symbol resolution.\n");
+          "--syntax          Perform syntax-checking only, no symbol resolution.\n");
       printf(
-          "--max-passes     Set the max number of assembler passes (default: 10).\n");
+          "--max-passes      Set the max number of assembler passes (default: 10).\n");
       printf(
-          "--flip=B         By default, whenever possible, yaYUL chooses \"bugger\n");
+          "--flip=B          By default, whenever possible, yaYUL chooses \"bugger\n");
       printf(
-          "                 words\" that lead to bank checksums equal to B (where B\n");
+          "                  words\" that lead to bank checksums equal to B (where B\n");
       printf(
-          "                 is the fixed-bank number, in octal).  However, bank checksums\n");
+          "                  is the fixed-bank number, in octal).  However, bank checksums\n");
       printf(
-          "                 equal to -B (in 1's complement) are also valid.  This option\n");
+          "                  equal to -B (in 1's complement) are also valid.  This option\n");
       printf(
-          "                 is used to instruct yaYUL to use the -B bugger word for bank B.\n");
-      printf("                 Multiple --flip options can be used.\n");
-      printf("--yul            Assemble as YUL rather than GAP.  Has no effect at present.\n");
-      printf("--trace          Trace some of yaYUL's internal activity, for debugging.\n");
-      printf("--to-yul=S,L     Processes a single input file in .agc format, outputting\n");
-      printf("                 an equivalent .yul file on stdout.  S (a decimal number\n");
-      printf("                 is the initial card-sequence number.  L (a string) is the\n");
-      printf("                 name of the log section to use as a P-card.\n");
+          "                  is used to instruct yaYUL to use the -B bugger word for bank B.\n");
+      printf("                  Multiple --flip options can be used.\n");
+      printf("--yul             Assemble as YUL rather than GAP.  Has no effect at present.\n");
+      printf("--trace           Trace some of yaYUL's internal activity, for debugging.\n");
+      printf("--to-yul=S,L      Processes a single input file in .agc format, outputting\n");
+      printf("                  an equivalent .yul file on stdout.  S (a decimal number\n");
+      printf("                  is the initial card-sequence number.  L (a string) is the\n");
+      printf("                  name of the log section to use as a P-card.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);
