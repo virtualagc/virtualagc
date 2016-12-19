@@ -145,7 +145,6 @@ TCCHK           TC              +2
                 TC              CCSCHK                          
                 TCF             +2
                 TC              ERRORS                          
-                CS              S+3
                 TC              Q
                 TC              ERRORS                          
 
@@ -548,7 +547,7 @@ STRTXTRA        EXTEND
                 TS              L                               # 37777
                 AD              A                               # OV37776
                 EXTEND
-                DCA             A
+                DCS             A
                 TS              KEEP1
                 TC              ERRORS
                 CA              KEEP1
@@ -1289,7 +1288,7 @@ RORCHK          CA              S+ZERO
                 TS              L
                 EXTEND
                 ROR             L                               # 00000, 00000
-                TS              -0CHK           -1
+                TC              -0CHK           -1
                 CA              L
                 TC              -0CHK           -1
                 CA              S-ZERO

@@ -14,6 +14,7 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
 ##               2016-12-17 MAS  Transcribed.
+##               2016-12-18 MAS  Typos.
 
 ## Page 107
 
@@ -403,7 +404,7 @@ CHECKNJ         EXTEND                  # SPECIAL NEWJOB TEST FOR SELF-CHECK,
                 TCF     NUDIRECT        # EXECUTION.
 
                 CAF     SELFBANK        # RETURN TO SELF-CHECK.
-                TS      BBANK
+                TS      FBANK
                 TC      SELFRET
 
 NUDIRECT        EXTEND                  # TURN THE GREEN LIGHT BACK ON.

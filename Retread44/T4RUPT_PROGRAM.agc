@@ -13,7 +13,7 @@
 ## Contact:      Ron Burkey <info@sandroid.org>.
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-18 MAS  Transcribed.
+##               2016-12-18 MAS  Transcribed, then fixed typos.
 
 ## Page 128
 T4RUPT          TS              BANKRUPT
@@ -78,7 +78,7 @@ CDRVE           CCS             DSPTAB          +11D
 # DSPOUT PROGRAM. PUTS OUT DISPLAYS.
 
 DSPOUT          CCS             NOUT                    # ENTERED IN INTERRUPTED STATE AT END OF
-                TCF             +2                      #                         DSRUPT
+                TC              +2                      #                         DSRUPT
                 TC              LVDSRUPT
                 TS              NOUT
                 CS              ZERO

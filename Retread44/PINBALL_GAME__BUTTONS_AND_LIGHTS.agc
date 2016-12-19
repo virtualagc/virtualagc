@@ -530,6 +530,7 @@ ERROR           XCH             21/22REG                # RESTORE ORIGINAL C(DSP
                 TS              DSPLOCK                 # LIGHT RESET LEAVES DSPLOCK UNCHANGED.
                 CAF             BIT15                   # TURNS OFF  AUTO, HOLD, FREE, NO ATT,
                 TS              DSPTAB           +11D   # GIMBAL LOCK, TRACKER, PROG ALM.
+                CS              BIT10
                 EXTEND
                 WAND            CHAN13
                 CS              ERCON                   # TURN OFF UPLINK ACTIVITY,
@@ -1303,9 +1304,9 @@ DPOUTCOM        EXTEND
                 INDEX           A                       # MIXED         NORMAL
                 DCA             0                       # C(ESUBK)      C(E)
                 DXCH            MPAC                    # C((E SUBK)+1)      C(E+1)
-                TC              TPAGREE
                 TC              DMP
                 ADRES           SFTEMP1
+                TC              TPAGREE
                 TC              OVFIND
 
 DPOUTNOR        CA              NOUNADD                 # E
@@ -2778,7 +2779,7 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             04000                   # 26 3COMP  OCTAL ONLY
                 OCT             00140                   # 27 1COMP  WHOLE
                 OCT             04140                   # 30 3COMP  WHOLE
-                OCT             04000                   # 31 3COMP  OCTAL ONLY
+                OCT             02000                   # 31 3COMP  OCTAL ONLY
                 OCT             00252                   # 32 1COMP  TIME WEEKS
                 OCT             00252                   # 33 1COMP  TIME WEEKS
                 OCT             00350                   # 34 1COMP  POSITION
@@ -3307,7 +3308,7 @@ FREEDSP         XCH             Q
                 RELINT
                 TC              FREERET
 
-SHOTIME         DEC             1750
+SHOTIME         OCT             1750
 
 ## Page 207
                 SETLOC          ENDNVBSY        +1

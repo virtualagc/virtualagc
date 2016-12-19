@@ -14,6 +14,7 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
 ##               2016-12-17 MAS  Transcribed.
+##               2016-12-18 MAS  Typos.
 
 ## Page 17
 # SECTION 1  DISPATCHER
@@ -2179,7 +2180,7 @@ UNIT            TC              MPACVBUF                # SAVE THE ARGUMENT IN V
                 TC              SQRTSUB                 # GO TAKE THE NORMALIZED SQUARE ROOT.
 
                 CCS             MPAC                    # CHECK FOR UNIT OVERFLOW.
-                TCF             +5                      # MPAC IS NOT LESS THAN .5 UNLESS THE
+                TCF             +2                      # MPAC IS NOT LESS THAN .5 UNLESS THE
                 TCF             DVOVF                   # INPUT TO SQRTSUB WAS 0.
 
                 CS              FOURTEEN                # SEE IF THE INPUT WAS SO SMALL THE THE
@@ -2829,7 +2830,7 @@ XSU             TC              TAGSUB                  # ERASABLE SUBTRACT FROM
 
 TIX             TC              TAGSUB                  # BRANCH AND DECREMENT ON INDEX.
                 INDEX           INDEXLOC
-                CS              S1
+                CS              X1
                 INDEX           INDEXLOC
                 AD              X1
                 EXTEND                                  # NO OPERATION IF DECREMENTED INDEX IS
