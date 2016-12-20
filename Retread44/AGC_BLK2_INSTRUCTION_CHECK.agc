@@ -16,6 +16,8 @@
 ##               2016-12-16 MAS  Began.
 ##               2016-12-17 MAS  Completed transcription.
 ##               2016-12-18 MAS  Typos.
+##               2016-12-18 MAS  Added notes about bugs discovered in the
+##                               tests present here.
 
 ## Page 210
                 SETLOC          ABORT           +1
@@ -554,6 +556,22 @@ STRTXTRA        EXTEND
                 EXTEND
                 SU              L
                 TC              -1CHK           -1
+
+## The following test is, in the words of AGC developer Hugh Blair-Smith, "wrong wrong wrong".
+## The code appears to be assuming that the result of DCA L is  A <-- L and L <-- Q. However,
+## in reality, the L <-- Q happens bfore L is copied into A, so the net result is A <-- Q 
+## and L <-- Q. 
+## Hugh's theory is that Retread made it up to revision 44 mostly before hardware was
+## available to run it on. And the self-check code, which was tied to the hardware, was likely
+## not exercised as part of its development. Moreover, it's possible that the digital simulator
+## itself had an incorrect implementation of DCA based on a misunderstanding of the hareware
+## design.
+## There's a couple of ways to fix this test, but the most "correct" would probably be:
+##   DCA  L      # A = L = -2
+##   CS   A      # A = 2
+##   AD   L      # A = -2 + 2 = -0
+##   TC   -0CHK
+
 # CHECKS DCA OF AN SC REGISTER
                 CA              S-2                             # -2
                 TS              Q
@@ -1229,6 +1247,14 @@ RANDCHK         CA              S+ZERO
                 EXTEND
                 RAND            L                               # 77777, 77777
                 TC              -0CHK
+## The following test is slightly wrong. Its proper operation relies on the Q register
+## storing an overflow condition. However, it is run without interrupts inhibited, so
+## it's possible for an interrupt to occur and destroy Q's overflow (via QRUPT). The
+## test designers were likely either unaware of this possibility, or thought that
+## overlfow in Q would inhibit interrupts like it would in A. Or, perhaps, the
+## digital simulator could have been wrong as discussed above for "DCA L".
+## A correct version of the test would have an INHINT immediately prior to "XCH Q",
+## and a RELINT sometime after "RAND Q".
 RANDOV          CA              S+MAX
                 AD              S+2                             #  01 - 00001
                 XCH             Q
@@ -1267,6 +1293,7 @@ WANDCHK         CA              S+ZERO
                 WAND            L                               # 77777, 77777
                 AD              L
                 TC              -0CHK
+## The following test is slightly wrong. (See the discussion for RANDOV above.)
 WANDUF          CA              S+MAX
                 AD              S+2                             # 01 - 00001
                 XCH             Q
@@ -1311,6 +1338,7 @@ RORCHK          CA              S+ZERO
                 EXTEND
                 ROR             L                               # 77777, 77777
                 TC              -0CHK
+## The following test is slightly wrong. (See the discussion for RANDOV above.)
 ROROV           CA              S-MAX
                 AD              S-2                             # 10 - 37776
                 XCH             Q
@@ -1353,6 +1381,7 @@ WORCHK          CA              S+ZERO
                 TC              -0CHK
                 CA              L
                 TC              -0CHK
+## The following test is slightly wrong. (See the discussion for RANDOV above.)
 WOROV           CA              S-MAX
                 AD              S-2                             # 10 - 37776
                 XCH             Q
@@ -1399,6 +1428,7 @@ RXORCHK         CA              S+ZERO
                 CS              A
 ## Page 237
                 TS              Q
+## The following test is slightly wrong. (See the discussion for RANDOV above.)
 RXORUV          CA              S+MAX
                 AD              S+2                             # 01 - 00001
                 EXTEND
