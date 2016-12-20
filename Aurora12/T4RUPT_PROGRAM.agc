@@ -584,7 +584,7 @@ ITURNON2        CS              BIT7                    # SET BIT 7 TO INITIATE 
                 AD              BIT7
                 TS              IMODES30
                 TCF             NXTIFAIL
-## Page 173
+## Page 174
 IMUCAGE         CCS             A                       # NO ACTION IF GOING OFF.
                 TCF             NXTIFAIL
 

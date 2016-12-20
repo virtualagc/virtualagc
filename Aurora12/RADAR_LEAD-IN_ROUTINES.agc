@@ -88,7 +88,7 @@ RRLIMCHK        INDEX           Q                       # READ GIMBAL ANGLES INT
                 TC              RRLIMOK                 # IN LIMITS.
 
 MODE2CHK        CAF             82DEGS                  # MODE 2 IS DEFINED AS
-                AD              ITEMP2                  #     1. ABS(T) G 110 DEGS.
+                AD              ITEMP2                  #     1. ABS(T) G 110 DEGS
                 TC              MAGSUB                  #     2. ABS(S + 82 DEGS) L 57 DEGS
                 DEC             -.31667                 #         (SHAFT LIMITS AT -25, -139 DEGS)
                 TC              L

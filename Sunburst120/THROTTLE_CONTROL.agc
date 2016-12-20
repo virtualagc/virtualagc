@@ -183,15 +183,17 @@ PCNTJOB         INHINT                                          # SINCE THROTTLI
                 TCF             FOLDCALC
 
 
-
-# ========================================================================
+## In the following line, and the corresponding line a few lines below it,
+## it's unclear what the characters printed are supposed to be.  In the
+## hardcopy, they appear as small rectangular boxes.
+# ########################################################################
 SCALEFAC        2DEC            +51.946987      B-14            # QUASI-NEWTONS TO PULSE UNITS
 
 2.PG.FRT        DEC             12800                           # TWICE PGUID TIME PULSE RATE
 -LOCRIT         DEC             -2019                           # THE LOWER MID-SCALE CRITERION
 FEXTRA          =               -LOCRIT
 +FLOW           DEC             +438                            # MINIMUM ATTAINABLE THRUST
-# ========================================================================
+# ########################################################################
 
 ACCLJOB         TC              PHASCHNG
                 OCT             05024
@@ -382,13 +384,16 @@ DOIT            TS              THRUST
 
 +HICRIT         DEC             +2252           B-14            # THE HIGHER MID-SCALE CRITERION
 
-# ========================================================================
+## In the following line, and the corresponding line a few lines below it,
+## it's unclear what the characters printed are supposed to be.  In the
+## hardcopy, they appear as small rectangular boxes.
+# ########################################################################
 # SINCE BETWEEN REVISION 113 AND 114 IT WAS NECESSARY TO PRESERVE THE
 # LOCATIONS IN MEMORY OF LABELS ADDRESSED FROM OTHER BANKS (SINCE THE ROPE
 # IS ALREADY UNDER CONSTRUCTION) CERTAIN CONSTANTS WERE REMOVED FROM THIS
 # SECTION FOR USE AS FILLER ELSEWHERE.   THESE ARE -LOCRIT, +FLOW,
 # SCALEFAC, FEXTRA, THROTDT, PGUID, AND 2.PG.FRT.
-# ========================================================================
+# ########################################################################
 
 
 

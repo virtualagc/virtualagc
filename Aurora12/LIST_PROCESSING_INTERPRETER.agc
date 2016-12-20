@@ -90,7 +90,7 @@ OPJUMP          TS              CYR                     # LOWWD ENTERS HERE IF A
                 CCS             CYR                     # CODE IS TO BE PROCESSED. TEST PREFICES.
                 TCF             OPJUMP2                 # TEST SECOND PREFIX BIT.
 
-                TCF             EXIT                    # +0 OP CODE IS EXIT
+                TCF             EXIT                    # +0 OP CODE IS EXIT.
 
 ## Page 36
 #       PROCESS ADDRESSES WHICH MAY BE DIRECT, INDEXED, OR REFERENCE THE PUSHDOWN LIST.
@@ -1988,7 +1988,7 @@ BIASHI          DEC             .4192           B-1     # SQRT CONSTANTS
 
 #          A + SB .      (R - QD)                                             A + SB
 #          ------ = Q + S(------) WHERE Q AND R ARE QUOTIENT AND REMAINDER OF ------ RESPECTIVELY.
-#          C + SD        (  C   }                                               C
+#          C + SD        (  C   )                                               C
 
 GENDDV          DXCH             MPAC                   # WE NEED A AND B ONLY FOR FIRST DV.
  +1             EXTEND                                  # (SPECIAL UNIT PROLOGUE ENTERS HERE).
@@ -2453,7 +2453,7 @@ DSQSUB          CA              MPAC            +1      # SQUARES THE SCALAR CON
                 XCH             MPAC            +1
                 EXTEND
                 MP              MPAC
-                DDOUBL                                  # AND MAYBE OVEFLOW.
+                DDOUBL                                  # AND MAYBE OVERFLOW.
                 DAS             MPAC            +1      # AND SET A TO NET OVERFLOW.
                 XCH             MPAC
                 EXTEND
