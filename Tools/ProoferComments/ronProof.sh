@@ -12,6 +12,6 @@ do
 	page=$4
 	num=`printf "%04d" $page`
 	echo Page $num
-	./ProoferComments.py ~/Desktop/ocr/prepared$AGC/$num.png proofing$AGC/$num.png $page ../../$AGC/MAIN.agc $SCALE 1 $PSM
+	./ProoferComments.py ~/Desktop/ocr/prepared$AGC/$num.png proofing$AGC/$num.jpg $page ../../$AGC/MAIN.agc $SCALE 1 $PSM
 	shift
 done

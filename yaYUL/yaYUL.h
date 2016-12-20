@@ -347,7 +347,7 @@ typedef struct
   char *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2, *Comment, *Extra,
       *Alias;
   int Index;
-  unsigned Extend :1;
+  unsigned Extend :2;
   unsigned IndexValid :1;
   Bank_t EBank;
   Bank_t SBank;
@@ -374,7 +374,7 @@ typedef struct
   unsigned Warning :1;                   // Non-zero for warning.
   unsigned Fatal :1;                     // Non-zero for fatal error.
   unsigned LabelValueValid :1;           // Non-zero if LabelValue valid.
-  unsigned Extend :1;
+  unsigned Extend :2;
   unsigned IndexValid :1;
   Bank_t EBank;                         // For EBANK= manipulations.
   Bank_t SBank;                         // For SBANK= manipulations.

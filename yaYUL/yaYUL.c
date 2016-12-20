@@ -88,6 +88,7 @@
  *                              possibility became a reality in Artemis072 when some fixes
  *                              to EQUALS/= needed for Sunburst120 were made.
  *              2016-11-14 RSB  Added --to-yul.
+ *              2016-12-18 MAS  Added --no-checksums.
  */
 
 #include "yaYUL.h"
@@ -109,6 +110,7 @@ int Force = 0;
 char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
 FILE *OutputFile = NULL;
+static int NoChecksums = 0;
 static int Hardware = 0;
 int flipBugger[044] =
   { 0 };
@@ -215,6 +217,8 @@ main(int argc, char *argv[])
           blk2 = 1;
           assemblyTarget = "BLK2";
         }
+      else if (!strcmp(argv[i], "--no-checksums"))
+        NoChecksums = 1;
       else if (!strcmp(argv[i], "--hardware"))
         Hardware = 1;
       else if (!strcmp(argv[i], "--format"))
@@ -433,56 +437,59 @@ main(int argc, char *argv[])
           if (Bank < 4 && !Hardware && !Block1)	// flip-flop 0,1 with 2,3 when not building for hardware targets
             Bank ^= 2;
           // Add bugger info to the bank.
-          if (Block1)
+          if (!NoChecksums)
             {
-              if (Bank == 0)
-                Offset = 02000;
-              else if (Bank == 1)
-                Offset = 04000;
-              else
-                Offset = 06000;
-            }
-          else
-            {
-              if (Bank == 2)
-                Offset = 04000;
-              else if (Bank == 3)
-                Offset = 06000;
-              else
-                Offset = 02000;
-            }
-          Value = GetBankCount(Bank);
-          if (Value > 0)
-            {
-              if (!Block1 && !blk2)
+              if (Block1)
                 {
-                  if (Value < 01776)
-                    {
-                      ObjectCode[Bank][Value] = Value + Offset;
-                      Value++;
-                    }
-                  if (Value < 01777)
-                    {
-                      ObjectCode[Bank][Value] = Value + Offset;
-                      Value++;
-                    }
-                }
-              if (Value < 02000)
-                {
-                  int tryBank;
-                  for (Bugger = Offset = 0; Offset < Value; Offset++)
-                    Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
-                  tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
-                  if (0 == (040000 & Bugger))
-                    GuessBugger = Add(tryBank, 077777 & ~Bugger);
+                  if (Bank == 0)
+                    Offset = 02000;
+                  else if (Bank == 1)
+                    Offset = 04000;
                   else
-                    GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
-                  ObjectCode[Bank][Value] = GuessBugger;
-                  printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
-                      (Block1 ? 06000 : 02000) + Value);
-                  if (HtmlOut != NULL)
-                    fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
-                        GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
+                    Offset = 06000;
+                }
+              else
+                {
+                  if (Bank == 2)
+                    Offset = 04000;
+                  else if (Bank == 3)
+                    Offset = 06000;
+                  else
+                    Offset = 02000;
+                }
+              Value = GetBankCount(Bank);
+              if (Value > 0)
+                {
+                  if (!Block1 && !blk2)
+                    {
+                      if (Value < 01776)
+                        {
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Value++;
+                        }
+                      if (Value < 01777)
+                        {
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Value++;
+                        }
+                    }
+                  if (Value < 02000)
+                    {
+                      int tryBank;
+                      for (Bugger = Offset = 0; Offset < Value; Offset++)
+                        Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
+                      tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
+                      if (0 == (040000 & Bugger))
+                        GuessBugger = Add(tryBank, 077777 & ~Bugger);
+                      else
+                        GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
+                      ObjectCode[Bank][Value] = GuessBugger;
+                      printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
+                          (Block1 ? 06000 : 02000) + Value);
+                      if (HtmlOut != NULL)
+                        fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
+                            GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
+                    }
                 }
             }
           // Output the binary data.
@@ -565,6 +572,7 @@ main(int argc, char *argv[])
           "                 is correct for almost all surviving AGC software.\n");
       printf(
           "                 general, though, and not for any flown missions.\n");
+      printf("--no-checksums   Don't emit bank checksums. For use with Retread 44.\n");
       printf("--hardware       Emit binary with hardware bank order, and\n"
           "                 enable parity bit calculation\n");
       printf(

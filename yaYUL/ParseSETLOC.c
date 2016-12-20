@@ -21,6 +21,8 @@
   Purpose:      Assembles the SETLOC pseudo-op.
   Mode:         04/17/03 RSB.   Began.
                 07/24/04 RSB.   Now allow offsets.
+                12/18/16 MAS.   Added support for relative arguments
+                                (eg. SETLOC +2)
  */
 
 #include "yaYUL.h"
@@ -47,14 +49,20 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
     i = GetOctOrDec(InRecord->Operand, &Value);
     if (!i) {
-        // What we've found here is that a constant, like 04000, is the
-        // operand of the SETLOC pseudo-op.  I don't really know what is
-        // supposed to be done with this in general.  (I've seen
-        // `SETLOC 04000' in the source code, but I don't know if there
-        // are others.)  I'm going to ASSUME that the operand is a
-        // full 16-bit pseudo-address, and I'm going to choose the best
-        // memory type based on that assumption.
-        PseudoToSegmented(Value, OutRecord);
+        if (InRecord->Operand[0] == '+' || InRecord->Operand[0] == '-') {
+            // This is a relative SETLOC or LOC. Change the PC by the requested
+            // value.
+            IncPc(&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter);
+        } else {
+            // What we've found here is that a constant, like 04000, is the
+            // operand of the SETLOC pseudo-op.  I don't really know what is
+            // supposed to be done with this in general.  (I've seen
+            // `SETLOC 04000' in the source code, but I don't know if there
+            // are others.)  I'm going to ASSUME that the operand is a
+            // full 16-bit pseudo-address, and I'm going to choose the best
+            // memory type based on that assumption.
+            PseudoToSegmented(Value, OutRecord);
+        }
     } else {
         Symbol = GetSymbol(InRecord->Operand);
         if (!Symbol) {

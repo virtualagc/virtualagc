@@ -12,6 +12,8 @@
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
 ##		2010-12-31 JL	Fixed page number comment.
+##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -65,6 +67,6 @@ POLLEY		EXTEND
 		TC	Q
 ARG90		INDEX	A
 		CS	LIMITS
-		TC	Q		# RESULT SCALED AT 1.
+		TC	Q		# RESULT SCALED AT 1
 		
 

@@ -13,14 +13,14 @@
 ## Contact:      Ron Burkey <info@sandroid.org>.
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
+##               2016-12-17 MAS  Transcribed.
+##               2016-12-18 MAS  Typos.
 
-## NOTE: Page numbers below have not yet been updated to reflect Retread 44.
+## Page 107
 
-## Page 126
+                SETLOC  ENDIBNKF
 
-                SETLOC  ENDSUBSF
-
-# TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:
+#          TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:
 
 NOVAC           TS      NEWPRIO         # SAVE PRIORITY OF NEW JOB.
                 EXTEND
@@ -32,7 +32,7 @@ NOVAC           TS      NEWPRIO         # SAVE PRIORITY OF NEW JOB.
                 TS      EXECTEM1
                 TCF     NOVAC2          # ENTER EXECUTIVE BANK.
 
-# TO ENTER A JOB REQUEST REQUIRING A VAC AREA - E.G., ALL (PARTIALLY) INTERPRETIVE JOBS.
+#          TO ENTER A JOB REQUEST REQUIRING A VAC AREA - E.G., ALL (PARTIALLY) INTERPRETIVE JOBS.
 
 FINDVAC         TS      NEWPRIO
                 EXTEND
@@ -43,7 +43,7 @@ FINDVAC         TS      NEWPRIO
                 XCH     FBANK
                 TCF     FINDVAC2        # OFF TO EXECUTIVE SWITCHED-BANK.
 
-# TO SUSPEND A BASIC JOB SO A HIGHER PRIORITY JOB MAY BE SERVICED:
+#          TO SUSPEND A BASIC JOB SO A HIGHER PRIORITY JOB MAY BE SERVICED:
 
 CHANG1          CAF     EXECBANK
                 TS      L
@@ -52,23 +52,22 @@ CHANG1          CAF     EXECBANK
                 INHINT
                 TCF     CHANJOB
 
-# TO SUSPEND AN INTERPRETIVE JOB:
+#          TO SUSPEND AN INTERPRETIVE JOB:
 
 CHANG2          CAF     EXECBANK
                 TS      L
                 CS      LOC             # NEGATIVE LOC SHOWS JOB INTERPRETIVE.
                 TCF     CHANG1  +3
 
-## Page 127
-
-# TO VOLUNTARILY SUSPEND A JOB UNTIL THE COMPLETION OF SOME ANTICIPATED EVENT (I/O EVENT ETC.):
+## Page 108
+#          TO VOLUNTARILY SUSPEND A JOB UNTIL THE COMPLETION OF SOME ANTICIPATED EVENT (I/O EVENT ETC.):
 
 JOBSLEEP        TS      LOC
                 CAF     EXECBANK
                 TS      FBANK
                 TCF     JOBSLP1
 
-# TO AWAKEN A JOB PUT TO SLEEP IN THE ABOVE FASHION:
+#          TO AWAKEN A JOB PUT TO SLEEP IN THE ABOVE FASHION:
 
 JOBWAKE         TS      NEWLOC
                 CS      TWO             # EXIT IS VIA FINDVAC/NOVAC PROCEDURES.
@@ -77,7 +76,7 @@ JOBWAKE         TS      NEWLOC
                 XCH     FBANK
                 TCF     JOBWAKE2
 
-# TO CHANGE THE PRIORITY OF A JOB CURRENTLY UNDER EXECUTION:
+#          TO CHANGE THE PRIORITY OF A JOB CURRENTLY UNDER EXECUTION:
 
 PRIOCHNG        INHINT                  # NEW PRIORITY ARRIVES IN A. RETURNS TO
                 TS      NEWPRIO         # CALLER AS SOON AS NEW JOB PRIORITY IS
@@ -87,11 +86,7 @@ PRIOCHNG        INHINT                  # NEW PRIORITY ARRIVES IN A. RETURNS TO
                 CA      Q
                 TCF     PRIOCH2
 
-# TO FREE THE DISPLAY BEFORE ENDOFJOB:
-
-EJFREE          TC      FREEDSP
-
-# TO REMOVE A JOB FROM EXECUTIVE CONSIDERATIONS:
+#          TO REMOVE A JOB FROM EXECUTIVE CONSIDERATIONS:
 
 ENDOFJOB        CAF     EXECBANK
                 TS      FBANK
@@ -104,9 +99,8 @@ ENDFIND         CA      EXECTEM1        # RETURN TO CALLER AFTER JOB ENTRY
 
 EXECBANK        CADR    FINDVAC2
 
-## Page 128
-
-# LOCATE AN AVAILABLE VAC AREA.
+## Page 109
+#          LOCATE AN AVAILABLE VAC AREA.
 
                 SETLOC  ENDINTS1
 
@@ -121,8 +115,7 @@ FINDVAC2        TS      EXECTEM1        # (SAVE CALLER'S BANK FIRST.)
                 TCF     VACFOUND
                 CCS     VAC5USE
                 TCF     VACFOUND
-                TC      ABORT
-                OCT     1201            # NO VAC AREAS.
+                TC                      # ABORT IF NO VAC AREAS AVAILABLE.
 
 VACFOUND        AD      TWO             # RESERVE THIS VAC AREA BY STORING A ZERO
                 ZL                      # IN ITS VAC USE REGISTER AND STORE THE
@@ -130,7 +123,7 @@ VACFOUND        AD      TWO             # RESERVE THIS VAC AREA BY STORING A ZER
                 LXCH    0       -1      # LOW NINE BITS OF THE PRIORITY WORD.
                 ADS     NEWPRIO
 
-NOVAC2          CAF     ZERO            # NOVAC ENTERS HERE.  FIND A CORE SET.
+NOVAC2          CAF     ZERO            # NOVAC ENTERS HERE. FIND A CORE SET.
                 TS      LOCCTR
                 CAF     NO.CORES        # SEVEN SETS OF ELEVEN REGISTERS EACH.
 NOVAC3          TS      EXECTEM2
@@ -141,8 +134,7 @@ NO.CORES        DEC     6
                 TCF     NEXTCORE        # AN ACTIVE JOB HAS A POSITIVE PRIORITY
                                         # BUT A FORMANT JOB'S PRIORITY IS NEGATIVE
 
-## Page 129
-
+## Page 110
 CORFOUND        CA      NEWPRIO         # SET THE PRIORITY OF THIS JOB IN THE CORE
                 INDEX   LOCCTR          # SET'S PRIORITY REGISTER AND SET THE
                 TS      PRIORITY        # JOB'S PUSH-DOWN POINTER AT THE BEGINNING
@@ -151,15 +143,14 @@ CORFOUND        CA      NEWPRIO         # SET THE PRIORITY OF THIS JOB IN THE CO
                 TS      PUSHLOC         # OFF TO PREPARE FOR INTERPRETIVE PROGRAMS
 
                 CCS     LOCCTR          # IF CORE SET ZERO IS BEING LOADED, SET UP
-                TCF     SETLOC          # OVFIND AND FIXLOC IMMEDIATELY.
+                TCF     SETLOC          # OVFIND AND FIXLOC IMMEDIATELY .
                 TS      OVFIND
                 CA      PUSHLOC
                 TS      FIXLOC
 
 SPECTEST        CCS     NEWJOB          # SEE IF ANY ACTIVE JOBS WAITING (RARE).
                 TCF     SETLOC          # MUST BE AWAKENED BUT UNCHANGED JOB.
-                TC      CCSHOLE
-                TC      CCSHOLE
+                SETLOC  +2
                 TS      NEWJOB          # +0 SHOWS ACTIVE JOB ALREADY SET.
                 DXCH    NEWLOC
                 DXCH    LOC
@@ -181,12 +172,10 @@ NEXTCORE        CAF     COREINC
                 ADS     LOCCTR
                 CCS     EXECTEM2
                 TCF     NOVAC3
-                TC      ABORT           # NO CORE SETS.
-                OCT     1202
+                TC                      # ABORT IF NO MORE CORE SETS.
 
-## Page 130
-
-# THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.
+## Page 111
+#          THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.
 
  -1             DXCH    LOC
 CHANJOB         INDEX   NEWJOB          # LOC ARRIVES IN A AND BBANK IN L.
@@ -221,10 +210,6 @@ CHANJOB         INDEX   NEWJOB          # LOC ARRIVES IN A AND BBANK IN L.
                 INDEX   NEWJOB
                 DXCH    PUSHLOC
                 DXCH    PUSHLOC         # SWAPS PUSHLOC AND PRIORITY.
-                CAF     LOW9            # SET FIXLOC TO BASE OF VAC AREA.
-                MASK    PRIORITY
-                TS      FIXLOC
-
                 CCS     PUSHLOC         # SET OVERFLOW INDICATOR ACCORDING TO
                 CAF     ZERO
                 TCF     ENDPRCHG -1
@@ -236,23 +221,18 @@ CHANJOB         INDEX   NEWJOB          # LOC ARRIVES IN A AND BBANK IN L.
 
 ENDPRCHG        RELINT
                 DXCH    LOC             # BASIC JOBS HAVE POSITIVE ADDRESSES, SO
-
-## Page 131
-
                 EXTEND                  # DISPATCH WITH A DTCB.
                 BZMF    +2              # IF INTERPRETIVE, SET UP EBANK, ETC.
                 DTCB
 
-## Page 132
-
+## Page 112
                 COM                     # EPILOGUE TO JOB CHANGE FOR INTERPRETIVE
-                AD      ONE
                 TS      LOC             # RESUME.
                 CAF     FBANKMSK
                 MASK    L
                 TCF     INTRSM
 
-# COMPLETE JOBSLEEP PREPARATIONS.
+#          COMPLETE JOBSLEEP PREPARATIONS.
 
 JOBSLP1         INHINT
                 CS      PRIORITY        # NNZ PRIORITY SHOWS JOB ASLEEP.
@@ -264,9 +244,8 @@ JOBSLP1         INHINT
 JOBSLP2         TS      BUF     +1      # HOLDS - HIGHEST PRIORITY.
                 TCF     EJSCAN          # SCAN FOR HIGHEST PRIORITY ALA ENDOFJOB.
 
-## Page 133
-
-# TO WAKE UP A JOB, EACH CORE SET IS FOUND TO LOCATE ALL JOBS WHICH ARE ASLEEP. IF THE FCADR IN THE
+## Page 113
+#          TO WAKE UP A JOB, EACH CORE SET IS FOUND TO LOCATE ALL JOBS WHICH ARE ASLEEP. IF THE FCADR IN THE
 # LOC REGISTER OF ANY SUCH JOB MATCHES THAT SUPPLIED BY THE CALLER, THAT JOB IS AWAKENED. IF NO JOB IS FOUND,
 # LOCCTR IS SET TO -1 AND NO FURTHER ACTION TAKES PLACE.
 
@@ -298,7 +277,6 @@ WAKETEST        CS      NEWLOC
 
                 INDEX   LOCCTR          # RE-COMPLEMENT PRIORITY TO SHOW JOB AWAKE
                 CS      PRIORITY
-                TS      NEWPRIO
                 INDEX   LOCCTR
                 TS      PRIORITY
 
@@ -315,9 +293,8 @@ WAKETEST        CS      NEWLOC
                 TCF     SETLOC          # ALREADY IN THE RUN (0) POSITION.
                 TCF     SPECTEST
 
-## Page 134
-
-        # PRIORITY CHANGE. CHANGE THE CONTENTS OF PRIORITY AND SCAN FOR THE JOB OF HIGHEST PRIORITY.
+## Page 114
+#          PRIORITY CHANGE. CHANGE THE CONTENTS OF PRIORITY AND SCAN FOR THE JOB OF HIGHEST PRIORITY.
 
 PRIOCH2         TS      LOC
                 CAF     ZERO            # SET FLAG TO TELL ENDJOB SCANNER IF THIS
@@ -329,9 +306,8 @@ PRIOCH2         TS      LOC
                 COM
                 TCF     JOBSLP2         # AND TO EJSCAN.
 
-## Page 135
-
-# RELEASE THIS CORE SET AND VAC AREA AND SCAN FOR THE JOB OF HIGHEST ACTIVE PRIORITY.
+## Page 115
+#          RELEASE THIS CORE SET AND VAC AREA AND SCAN FOR THE JOB OF HIGHEST ACTIVE PRIORITY.
 
 ENDJOB1         INHINT
                 CS      ZERO
@@ -344,42 +320,39 @@ ENDJOB1         INHINT
 
 EJSCAN          CCS     PRIORITY +12D
                 TC      EJ1
-                TC      CCSHOLE
+                SETLOC  +1
                 TCF     +1
 
                 CCS     PRIORITY +24D   # EXAMINE EACH PRIORITY REGISTER TO FIND
                 TC      EJ1             # THE JOB OF HIGHEST ACTIVE PRIORITY.
-                TC      CCSHOLE
+LOW9            OCT     00777
                 TCF     +1
 
                 CCS     PRIORITY +36D
                 TC      EJ1
 -CCSPR          -CCS    PRIORITY
-                        TCF     +1
+                TCF     +1
 
                 CCS     PRIORITY +48D
                 TC      EJ1
-                TC      CCSHOLE
+                SETLOC  +1
                 TCF     +1
 
                 CCS     PRIORITY +60D
                 TC      EJ1
-                TC      CCSHOLE
+                SETLOC  +1
                 TCF     +1
 
                 CCS     PRIORITY +72D
                 TC      EJ1
-                TC      CCSHOLE
+                SETLOC  +1
                 TCF     +1
 
-## Page 136
-
-# EVALUATE THE RESULTS OF THE SCAN.
+## Page 116
+#          EVALUATE THE RESULTS OF THE SCAN.
 
                 CCS     BUF     +1      # SEE IF THERE ARE ANY ACTIVE JOBS WAITING
-                TC      CCSHOLE
-                TC      CCSHOLE
-
+                SETLOC  +2
                 TCF     +2
                 TCF     DUMMYJOB
                 CCS     BUF             # BUF IS ZERO IF THIS IS A PRIOCHNG AND
@@ -409,14 +382,11 @@ EJ2             TS      BUF     +1
 
 ENDEXECS        EQUALS
 
-## Page 137
-
-# IDLING AND COMPUTER ACTIVITY (GREEN) LIGHT MAINTENANCE. THE IDLING ROUTINE IS NOT A JOB IN ITSELF,
+## Page 117
+#          IDLING AND COMPUTER ACTIVITY (GREEN) LIGHT MAINTENANCE. THE IDLING ROUTINE IS NOT A JOB IN ITSELF,
 # BUT RATHER A SUBROUTINE OF THE EXECUTIVE.
 
                 SETLOC  EXECBANK +1
-
-                EBANK=  SELFRET         # SELF-CHECK STORAGE IN EBANK.
 
 DUMMYJOB        CS      ZERO            # SET NEWJOB TO -0 FOR IDLING.
                 TS      NEWJOB
@@ -433,8 +403,8 @@ CHECKNJ         EXTEND                  # SPECIAL NEWJOB TEST FOR SELF-CHECK,
                 CAF     TWO             # NEW JOB ALREADY IN POSITION FOR
                 TCF     NUDIRECT        # EXECUTION.
 
-ADVAN           CAF     SELFBANK        # (SIMULATOR ADVAN IF NEWJOB = 77777).
-                TS      BBANK
+                CAF     SELFBANK        # RETURN TO SELF-CHECK.
+                TS      FBANK
                 TC      SELFRET
 
 NUDIRECT        EXTEND                  # TURN THE GREEN LIGHT BACK ON.
@@ -450,41 +420,5 @@ NUCHANGE        CAF     TWO
                 INHINT                  # CHANGE JOBS
                 TCF     CHANJOB -1
 
-SELFBANK        BBCON   SELFCHK
-
-## Page 138
-
-# PRIORITY CONSTANTS (NOTE IN FIXED-FIXED).
-
-PRIO1           EQUALS  BIT10
-PRIO2           EQUALS  BIT11
-PRIO3           OCT     03000
-PRIO4           EQUALS  BIT12
-PRIO5           OCT     05000
-PRIO6           OCT     06000
-PRIO7           OCT     07000
-PRIO10          EQUALS  BIT13
-PRIO11          OCT     11000
-PRIO12          OCT     12000
-PRIO13          OCT     13000
-PRIO14          OCT     14000
-PRIO15          OCT     15000
-PRIO16          OCT     16000
-PRIO17          OCT     17000
-PRIO20          EQUALS  BIT14
-PRIO21          OCT     21000
-PRIO22          OCT     22000
-PRIO23          OCT     23000
-PRIO24          OCT     24000
-PRIO25          OCT     25000
-PRIO26          OCT     26000
-PRIO27          OCT     27000
-PRIO30          OCT     30000
-PRIO31          OCT     31000
-PRIO32          OCT     32000
-PRIO33          OCT     33000
-PRIO34          OCT     34000
-PRIO35          OCT     35000
-PRIO36          OCT     36000
-PRIO37          OCT     37000
+SELFBANK        CADR    ENDEDOP
 ENDEXECF        EQUALS

@@ -13,11 +13,10 @@
 ## Contact:      Ron Burkey <info@sandroid.org>.
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
+## Mod history:  2016-12-18 MAS  Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Retread 44.
-
-## Page 285
-                BANK            7
+## Page 131
+## The log section title, KEYRUPT, UPRUPT, is circled in red.
         
 KEYRUPT1        TS              BANKRUPT
                 XCH             Q
@@ -26,17 +25,31 @@ KEYRUPT1        TS              BANKRUPT
                 CAF             LOW5
                 EXTEND 
                 RAND            MNKEYIN
-KEYCOM          TS              RUPTREG4
+KEYCOM          AD              BIT11
+                TS              TMKEYBUF
                 CAF             CHRPRIO
                 TC              NOVAC
                 EBANK=          DSPCOUNT
                 2CADR           CHARIN
-                CA              RUPTREG4
+
+                CA              LOW5
+                MASK            TMKEYBUF
                 INDEX           LOCCTR
                 TS              MPAC                    # LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
                 TC              RESUME
 
-## Page 286
+
+
+KEYRUPT2        TS              BANKRUPT
+                XCH             Q
+                TS              QRUPT
+                TC              LODSAMPT                # TIME IS SNATCHED IN RUPT FOR NOUN 65.
+                CAF             LOW5
+                EXTEND
+                RAND            NAVKEYIN
+                TC              KEYCOM
+
+## Page 132
 # UPRUPT PROGRAM
 
 UPRUPT          TS              BANKRUPT
@@ -78,6 +91,7 @@ TSTUPLOK        CAF             BIT1
                 CCS             A
                 TC              RESUME                  # BIT1 OF UPLOCK = 1.
 ACCEPTUP        XCH             KEYTEMP1                # BIT1 OF UPLOCK = 0.
+                AD              BIT6
                 TC              KEYCOM
          
 TMFAIL2         TC              RESTORSR                # CODE IS BAD
@@ -85,9 +99,13 @@ TMFAIL2         TC              RESTORSR                # CODE IS BAD
                 MASK            UPLOCK                  # PUTTING 1 INTO BIT1 OF UPLOCK) UNTIL ELR
                 AD              BIT1                    # IS SENT UP UPLINK.
                 TS              UPLOCK
+                CAF             BIT9                    # SEND DOWN INDICATION THAT UPLINK HAS
+## Page 133
+                AD              BIT11                   # RECEIVED BAD CODE.
+                TS              TMKEYBUF
 TMFAIL1         TC              TMALM
                 TC              RESUME
-## Page 287
+
 RESTORSR        XCH             KEYTEMP2
                 DOUBLE
                 TS              SR
@@ -106,16 +124,20 @@ SRGHT5          CS              SR
 UPTEST          AD              KEYTEMP1
                 CCS             A
                 TC              TMFAIL2
-HI10            OCT             77740
+                LOC             +1
                 TC              TMFAIL2
                 TC              Q
+
+HI10            OCT             77740
+UPBANK          EQUALS          EXECBANK                # IN SAME BANK AS EXEC.
+
+B12-1           OCT             3777
                 
 # UPACT IS TURNED OFF BY VBRELDSP, ALSO BY ERROR LIGHT RESET.       
-## Page 288 
+
+## Page 134
 # THE RECEPTION OF A BAD CODE BY UPLINK LOCKS OUT FURTHER UPLINK ACTIVITY
 # BY PLACING A 1 INTO BIT1 OF UPLOCK. BIT9 (ALONG WITH BIT11) OF TMKEYBUF
 # IS SET TO 1 TO SEND AN INDICATION OF THIS SITUATION DOWN THE DOWNLINK.
 # THE UPLINK INTERLOCK IS ALLOWED WHEN AN ERROR LIGHT RESET CODE IS SENT
 # UP THE UPLINK, OR WHEN A FRESH START IS PERFORMED.
- 
- ENDKRURS       EQUALS

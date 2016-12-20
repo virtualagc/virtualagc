@@ -16,10 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
+##		2016-12-17 RRB	Updated for Luminary 69.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 490
+## Page 502
 		BANK	25
 		SETLOC	RRLEADIN
 		BANK
@@ -71,7 +70,7 @@ DORSAMP2	INHINT
 		AD	RTSTMAX
 		EXTEND
 		
-## Page 491		
+## Page 503		
 		BZF	+3
 		CA	RTSTLOC
 		AD	TWO		# STORAGE IS DP

@@ -286,6 +286,18 @@ for box in file:
 				#print "Adding"
 		 		addIt = 1
 		 		lastHyphenMidPoint = midPoint
+	# And underscores, '_':
+	if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
+		if boxWidth >= 20 * scale and boxWidth <= 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
+			midPoint = (boxTop + boxBottom) / 2.0
+			if abs(midPoint - avgBottom) <= 3 * scale:
+		 		addIt = 1
+	# And vertical lines, '|', though I guess it may serve for parentheses as well:
+	if boxChar == '|' or boxChar == 'I' or boxChar == 'l' or boxChar == '!' or boxChar == '1' or boxChar == '(' or boxChar == ')':
+		#print boxChar, boxWidth, boxHeight, scale
+		if boxWidth >= 5 * scale and boxWidth <= 8 * scale and boxHeight >= 28 * scale and boxHeight <= 33 * scale:
+			#print Added
+			addIt = 1
 	lastBoxChar = boxChar
 	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
 	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
@@ -403,6 +415,7 @@ blankLinePattern = re.compile(r"\A\s*\Z")
 allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
 allUnderlinesPattern = re.compile(r"\A\s*[_][_\s]*\Z")
 allDotsPattern = re.compile(r"^\s*[.][.\s]*$")
+allEqualsPattern = re.compile(r"\A\s*=[=\s]*\Z")
 def readFile( filename ):
 	"Reads an AGC source file, recursively if containing $ operators."
 	global lines, currentPage, pageNumber, blankLinePattern, allDashesPattern, allUnderlinesPattern, nodashes
@@ -435,6 +448,8 @@ def readFile( filename ):
 		if nodashes >= 1 and re.match(allUnderlinesPattern, comment):
 			continue
 		if nodashes >= 1 and re.match(allDotsPattern, comment):
+			continue
+		if nodashes >= 1 and re.match(allEqualsPattern, comment):
 			continue
 		if nodashes >= 2:
 			comment = comment.replace("-", "")
@@ -613,7 +628,8 @@ for row in range(0, len(lines)):
 draw(img)
 
 # Create the output image.
-img.format = 'png'
+img.format = 'jpg'
+img.compression_quality = 25
 img.save(filename=outImage)
 print 'output =', outImage
 

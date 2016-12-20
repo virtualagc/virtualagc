@@ -11,6 +11,8 @@
 ## Pages:	1133-1139
 ## Mod history:	2009-05-28 JL	Updated from page images.
 ##		2011-01-06 JL	Fixed interpretive indentation.
+##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -235,7 +237,7 @@ ATAN=90		DLOAD	SIGN
 2DZERO		=	DPZERO
 
 ## Page 1138
-# ***** SETGAMMA SUBROUTINE *****
+# ..... SETGAMMA SUBROUTINE .....
 # SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES
 #
 # GAMMA = B**2/A**2 FOR EARTH (B-1)
@@ -262,7 +264,7 @@ SETGMEX		STORE	GAMRP
 GAMRP		=	8D
 
 ## Page 1139
-# ***** SETRE SUBROUTINE *****
+# ..... SETRE SUBROUTINE .....
 # SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)
 #
 #	RE = RM FOR MOON
