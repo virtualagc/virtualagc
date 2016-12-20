@@ -18,10 +18,15 @@
 import sys
 import re
 import os.path
+from os import environ
 from subprocess import call
 from wand.image import Image, COMPOSITE_OPERATORS
 from wand.drawing import Drawing
 from wand.color import Color
+
+tesseract = 'tesseract'
+if 'BIN' in environ:
+	tesseract = environ['BIN'] + '/tesseract'
 
 # Parse command-line arguments
 if len(sys.argv) < 5:
@@ -100,7 +105,7 @@ img.alpha_channel = 'activate'
 # Mike advises to *always* use -psm=6, but -psm=4 works better for me (less
 # bad bounding boxes and text having no bounding boxes at all), and I don't
 # see the extra processing time he warns about. 
-call([ 'tesseract', backgroundImage, 'eng.agc.exp0', '-psm', psm, 'batch.nochop', 'makebox', 'agcChars.txt' ])
+call([ tesseract, backgroundImage, 'eng.agc.exp0', '-psm', psm, 'batch.nochop', 'makebox', 'agcChars.txt' ])
 file =open ('eng.agc.exp0.box', 'r')
 boxes = []
 rejectedBoxes = []
@@ -447,8 +452,8 @@ def readFile( filename ):
 			continue
 		if nodashes >= 1 and re.match(allUnderlinesPattern, comment):
 			continue
-		if nodashes >= 1 and re.match(allDotsPattern, comment):
-			continue
+		#if nodashes >= 1 and re.match(allDotsPattern, comment):
+		#	continue
 		if nodashes >= 1 and re.match(allEqualsPattern, comment):
 			continue
 		if nodashes >= 2:

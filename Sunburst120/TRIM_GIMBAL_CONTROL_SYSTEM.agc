@@ -261,7 +261,7 @@ GTSQAXIS        EXTEND
                 EXTEND                                          
                 BZMF            ACCDOTSM                        # BRANCH IF ACCDOT IS SMALL
 
-ACCDOTLG        CAF             BIT14                           # ACCDOT IS COMPARATIVELY LARGE
+ACCDOTLG        CAF             BIT14                           # ACCDOT IS COMPARITIVELY LARGE
                 TS              SF1                             # SET UP SCALE FACTORS
                 CAF             BIT12                           
 WSFTEST         TS              SF2                             

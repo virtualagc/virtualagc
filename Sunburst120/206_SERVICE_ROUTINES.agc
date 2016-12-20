@@ -263,7 +263,7 @@ PIPCHECK        TS              PIPCTR
                 INDEX           A
 ## The next 10 lines were printed on only 2. I'm not sure the exact distribution, but it seems likely that they
 ## were split evenly between the two. They were disassembled from the octal section, with help from the symbol
-## table. For the first line, I have chosen DELVX rathern than DELV to match SERVICER207 in Colossus 237.
+## table. For the first line, I have chosen DELVX rather than DELV to match SERVICER207 in Colossus 237.
 ## Fragments of comments were also printed on the second line. They read:
 ## "   O UE    T [DP] [P.]      M"
 ## where characters in brackets were printed on top of each other. In place of the original comments, I have 
@@ -506,8 +506,10 @@ GTHRSHLD        DEC             60                      # APPROXIMATELY 60 LBS T
 
 ## Page 826
 ## The following two lines were printed on top of each other. The first is a line comment which didn't quite
-## make it through. I've done my best to pick it out from behind the other characters.
-#     ROO   IN       O    RMINA    R ADACES AND AV RAGE G
+## make it through. I've done my best to pick it out from behind the other characters.<br>
+## <pre>
+##     ROO   IN       O    RMINA    R ADACES AND AV RAGE G
+## </pre>
                 EBANK=          DVTOTAL
 AVGEND          CA              PIPTIME         +1      # FINAL AVERAGE G EXIT
 ## The following line was not printed. It was instead taken from a picture of SHEPATIN rev 0 provided by Don Eyles,

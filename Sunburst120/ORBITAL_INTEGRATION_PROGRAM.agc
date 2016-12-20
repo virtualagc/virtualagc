@@ -153,7 +153,7 @@ GETNEWX         DLOAD           DMP
                 DMP             SL4R
                                 12D                     # A1
                 STODL           18D
-                                21D
+                                21D			# A2
                 DMP             SL1R
                                 8D                      # A4
                 DAD

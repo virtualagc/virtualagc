@@ -5,13 +5,25 @@
 
 AGC=$1
 SWITCHES=$2
+EXT=$3
 
-while [[ "$3" != "" ]]
+# Where octopus is, along with all its little friends.
+bin=$HOME/git/virtualagc/Tools/ocr
+# Where the image files are.
+images=$HOME/Desktop/Proofing/ProoferComments
+
+mkdir /tmp/octopus$$
+cd /tmp/octopus$$
+
+while [[ "$4" != "" ]]
 do
-	page=$3
+	page=$4
 	num=`printf "%04d" $page`
 	echo "Page=$num"
-	python ../octopus.py ~/git/virtualagc/Tools/ProoferComments/raw$AGC/$num.png $num.png $SWITCHES
+	python $bin/octopus.py $images/raw$AGC/$num.$EXT $images/prepared$AGC/$num.png $SWITCHES
 	shift
+	sleep 0.1
 done
 
+cd -
+rm /tmp/octopus$$ -rf

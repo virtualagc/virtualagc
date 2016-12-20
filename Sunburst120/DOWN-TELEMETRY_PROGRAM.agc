@@ -112,7 +112,7 @@ DNPHASE1	TC	SENDID		# SEND ID WORD(S)
 		TCF	DNPHASE1	# GO BACK AND START OVER
 		
 		
-# ...........................................
+# ........................................................................
 SENDID		CA	DNLSTADR	# INITIALIZE DOWNLIST ADDRESS AS SELECTED
 		TS	LDATALST	# BY A MISSION OR TEST PROGRAM
 		CS	BIT7		# SET WORD

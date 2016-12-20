@@ -614,6 +614,8 @@ CBLOCK          2DEC            0                               # RDOTD
                 2DEC            0                               # YDOTD
 
 ## There's a physical page break after the following line, brought on by more printer errors.
+## It appears as though a couple of lines are missing, but there's presently no way to 
+## regenerate them.
 # ************************************************************************            4   4
 # GENADRS, ECADRS, AND 2CADRS USED IN MP4
 # ************************************************************************
