@@ -16,6 +16,8 @@
 #               2016-12-12 JL   Transcribed pages 311-317.
 #               2016-12-16 JL   Transcribed pages 318-320.
 #               2016-12-17 JL   Transcribed pages 321-323.
+#               2016-12-19 JL   Transcribed pages 324-329.
+#               2016-12-20 JL   Transcribed pages 330-331.
 
 # Annotations:
 #
@@ -2863,31 +2865,380 @@ R2808   FIRST SYMBOL WHOSE LEFT 7 BITS CORRESPOND TO THAT CAC-THREAD.
 # Page 324
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  60        PAGE  60
 
+P2832   TEST FOR TYPE OF ASSEMBLY; DISPOSITION OF REPRINT AND BAD MERGE.
+
+
+
+ 2833   ASSY TYP Q NA, BIT11H   SWITCH        ONES          REAL ASSY           BRANCH IF NOT REPRINT OR BAD MERGE.
+ 2835              LA           BIT 1         SWITCH        INISH P2            BRANCH IF REPRINT, NOT BAD MERGE.
+
+ 2837              TX           W REJECT      -             PAGE HEAD +14       SAY "REJECT" ON EVERY PAGE.
+ 28382             TX           L PROG FIL    -             Z,X4
+ 2839              LA, B12B13H  SWITCH        ZERO          DECREVNO            BRANCH UNLESS VERSION OR TRANSFERRED.
+
+R2841   A VERSION OF TRANSFERRED ASSEMBLY IS REJECTED.  DELETE THE NEW PROG/SUB NAME WITHOUT TYPING ANYTHING.
+
+ 2843   WAA TO X5  TX           MON WAA       -             Z,X5                IN REJECTING A VERSION OR TRANSFER ASSY,
+ 2845  *           TX           ONES          -             N,X5,1              SET A SPECIAL FLAG IN THE SENTENCE AREA,
+ 2847  *           TN           DELE CARD     4             N,X5,3              AND SUPPLY AN INVISIBLE DIRECTOR CARD.
+ 28482             SWS, ACH2    4,1           4,L           N,X5
+ 28484             SWS, ACH3    4,1           2,L           N,X5                ALLOW FOR A TRANSFERRED ASSEMBLY WITH AN
+ 28486             SS           4,1           ACH 4         N,X5,1              UPGRADED REVISION NUMBER.
+ 2849              MT           BLANKS        6             N,AU2,1
+ 2850              TS           L COMP NAM    Z,SC          C,+3
+ 2851              TN           W PROGRAM     2             N,X5           S
+ 2852              TN           W SUBROTI     2             N,X5           S
+ 2853              SSL, ONEH    SWITCH        39            C,-2           C
+ 2854              SS           N,SH          C1T4          N,X5,2
+ 2855              TX           PROG NAME     -             N,X5,1
+ 2856              TX           W BY          -             N,X5,1
+ 28562             SM           SWITCH        BIT 12H       SWITCH              MAKE TRANSFERRED LOOK LIKE VERSION.
+ 2857              TX           L AUTH NAM    -             Z,AU1
+ 2858              TX           N,AU1,1       -             N,X5,1
+ 2859              SS           N,AU1         B38T48        Z,AU1
+ 2860              TS           N,AU1         N,X5          BIT 13 OFF
+
+R2861   A REVISION IS REJECTED.  SUBTRACT ONE FROM THE REVISION NUMBER.
+
+ 2863   DECREVNO   SSL, TWOH    4,1           22            C,+1                SEE WHETHER PROG/SUB HAS SUBROUTINES.
+ 2865              DS, D4T6H    4,1           BIT 24H       4,1                 PROGRAM OR SUBROUTINE WITHOUT SUBROS.
+ 2867   BIT 13 OFF TS, BIT13H   ZERO          SWITCH        INISH P2
+
+ 2868              SWS,THRED11H 4,1           24            Z,X4
+ 2869              SWS, ONESH   N,X4          12            N,X4
+ 2870              DS, D4T6H    4,0           BIT 24H       4,0                 PROGRAM OR SUBROUTINE WITH SUBROTUINES.
+ 2872              SWS, ONESH   N,X4          36            N,X4
+ 2873              TS           -             -             INISH P2
 
 # Page 325
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  61        PAGE  61
 
+P2874   ASSEMBLY OF A NEW PROGRAM OR SUBROUTINE, OR A WELL-MERGED REVISION OR VERSION.  CLEAN OUT THE DELETE LIST AND
+R2876   REFURBISH THE LISTS OF THREADS TO SUBSIDIARY SUBROUTINES.
+
+ 2877   REAL ASSY  TX           L DIRECTY     -             Z,X6
+ 2878              TX           6,9           -             Z,X4                GET INITIAL DELETE THREAD.
+ 2880              TS, CAC3H    L END THR     6,9           END DELE Q          MAKE INITIAL DELETE THREAD VACUOUS.
+
+ 2882   MT DELETS  SS           6,8           CAC 12H       4,1                 THREAD FROM HERE TO NEXT OF SINGLETON
+ 2884              SWS, CAC1H   Z,X4          32,L          6,8                 AND PAIR THREADS, AND POINT INITIAL
+ 2886              SWS, CAC2H   Z,X4          16,L          6,8                 THREADS OF THOSE TO HERE.
+ 2888              WA           6,8           BIT 16        N,X4                MAKE SINGLETON CONNECTION WITHIN PAIR.
+ 2890              SS           4,1           THREAD 10     Z,X4                FOLLOW THE DELETE THREAD.
+ 2892   END DELE Q NA           Z,X4          L END THR     MT DELETS           BRANCH IF MORE PROGRAMS TO DELETE.
+
+ 28938             SS           ZERO          BIT 13H       SWITCH
+ 2894              TS           L PROG FIL    Z,X1          WAA TO X5      C    POINT TO PROGRAM NAME AND TO DATE AREA.
+ 2896              NA, B10B12H  SWITCH        BIT 10H       MAKE THDS           BRANCH IF ANYTHING BUT REVISION.
+ 2898              NA, BIT25H   1,1           ONES H        PUT DATE            BRANCH IF NO SUBSIDIARY SUBROUTINES.
+
+ 2900              NA, BIT9H    SWITCH        ONES H        C,+3                BRANCH IF PROGRAM ASSEMBLY.
+ 2902              TN           Z,X1          3             Z,X2                DISTRIBUTE BANK INDICATOR 7.
+ 2904              TS           N,SC,1        NO MO SUBS +1 SUB THRDS      C
+ 2905              TS, BIT25H   ZERO          1,1           GIVE LOOP
+
+ 2906              WD           Z,CSC         ONE H         Z,AU1               IN SUBROUTINE ASSEMBLY, THE OBSOLETING
+ 2908              SS           N,AU1         CHAR 5H       C,+1                BITS THAT ARE RELAYED BY THE SUBROUTINE
+ 2910              SWS, ONEH    N,X3                        4,1                 ARE SAVED IN THE CALL BITS OF THE SUBRO
+ 2912              WD           Z,SC          FOURH         Z,SC           C    NAME ENTRY, AND RESTORED AT MAKE THDS.
+
+R2914   DESTROY THE EXISTING SUBRO THREAD WORD TREE AND REBUILD IT AT MAKE THDS.
+
+ 2915   GIVE LOOP  SWS,THRED11H 1,1           24            Z,X4                GET ADDRESS OF FIRST SUBRO THREAD WORD.
+ 29162             SWS, D4T6H   N,X4          12            1,1                 SAVE REVISION NUMBER.
+ 2917              SS           6,8           CAC1H         N,X4
+ 2918              SWS, CAC1H   Z,X4          32,L          6,8                 PUT LOCATION AT HEAD OF SINGLETON LIST.
+ 2920              TX           Z,X4          -             Z,X2
+ 2921              HA           Z,X4          ONE H         Z,X3                FORM ADDRESS OF OTHER HALF OF PAIR.
+ 2923              SWE, CAC3H   N,X4          32            Z,X4                FOLLOW THE SINGLETON THREAD.
+ 2925              LA           Z,X4          L END THR     END GIVE Q          BRANCH IF OTHER MEMBER OF PAIR OCCUPIED.
+
+ 2927              NA           Z,X4          Z,X3          C,-2
+ 2928              SS           ZERO          ONE H         Z,X4                OTHER MEMBER OF PAIR IS VACANT, SO THE
+ 2930              SM           Z,X3          ONE H         Z,X3                PAIR MUST BE DECLARED VACANT AS A PAIR.
+ 2932              SS           6,8           CAC2 H        N,X3
+ 2933              SWS, CAC2H   Z,X4          16,L          6,8                 PUT PAIR AT HEAD OF PAIR LIST.
+
+ 2935   END GIVE Q SS           N,X2          THRED11H      Z,X4                FOLLOW THREAD TO NEXT SUBRO THREAD WORD.
+ 2937              NA, BIT37H   2,0           ONES H        GIVE LOOP +2        BRANCH IF ANY SUBRO THREAD WORDS LEFT.
+
+ 2939   PUT DATE   SS           5,100         B1TO12H       1,1                 PUT PACKED REVISION DATE IN NAME ENTRY.
 
 # Page 326
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  62        PAGE  62
 
+P2941   WHEN AN OBSOLETE PROGRAM IS REVISED, IT NATURALLY CEASES TO BE OBSOLETE.  OBSOLETING BITS MUST BE REMOVED FROM
+R2943   THE SUBRO THREADS OF THOSE SUBROUTINES THAT USED TO RELAY OBSOLESCENCE UP FROM A SUBSIDIARY. SEE DELETE, PASS 0.
+
+ 2945              TX           L COMP NAM    -             Z,X0                POINT TO COMPUTER NAME ENTRY.
+ 2947              TN           Z,X1          3             Z,X2                DISTRIBUTE BANK INDICATOR 7.
+ 2949              SWS, BIT36H  1,1           23            SWITCH              TRANSFER OBSOLESCENCE BIT.
+ 2951              SWS, BIT13H  SWITCH        4             1,1                 PROG/SUB TO OBSOLESCENCE/OBSOLETING BIT.
+ 2953              NA, BIT13H   1,1           ZERO          RSUB TEST +1        BRANCH IF SUBROUTINE, NOT PROGRAM.
+
+ 2955              NA, BIT36H   SWITCH        ONES H        MAKE THDS           IF THIS PROG WASN'T OBSOLETE, SKIP IT.
+
+ 2957   END1 REVP  SWS,THRED10H N,X0          12            Z,X2                POINT TO 1ST PROG OR SUB FOR MACHINE.
+ 2959              NA, BIT36H   SWITCH        ONES H        LUP2 REVP +1        BRANCH WHEN ALL OBSOLETING SUBS MARKED.
+ 2961              TS, BIT36H   ZERO          SWITCH        LUP2 REVP +1        RESET SWITCH AND START ANOTHER PASS.
+
+ 2963   LUP1 REVP  SWS,THRED10H 2,1           0             Z,X2                FOLLOW THE THREAD TO NEXT PROG OR SUBRO.
+ 2965              LA           Z,X2          L END THR     END1 REVP           BRANCH AT END OF PASS.
+
+ 2967              SSL, FOURH   2,1           33            LUP1 REVP           SELECT ON OBSOLESCENCE/OBSOLETING BIT.
+ 2969              TS           Z,X4          Z,X2          LUP1 REVP +1        SUB THRDS EXIT WHEN NO MORE THREADS.
+ 2971              TS           C,-1          NO MO SUBS +1 SUB THRDS      C    REQUEST PRESENTATION OF SUBRO THREADS.
+
+ 2973              WD           Z,CSC         ONE H         Z,AU1
+ 2974              SS           N,AU1         CHAR 5H       C,+1
+ 2975              SSL, ONEH    N,X3                        C,+3                SELECT ON OBSOLETING BIT.
+
+ 2977              SM           4,1           BIT 13H       4,1                 PLANT OBSOLETING BIT ON SUBRO NAME.
+ 2979              SM           SWITCH        BIT 36 H      SWITCH              DEMAND THAT THERE BE ANOTHER PASS.
+ 2981              WD           Z,SC          SIXH          Z,SC           C    ASK FOR ANOTHER SUBRO THREAD.
+ 2983              SSL, TWOH    4,1           34            C,-3                SELECT ON OBSOLETING BIT.
+
+ 2985   OBSLING Q  SWS,THRED11H 2,1           24            Z,X3                MAYBE GET ADDRESS OF 1ST SUB THREAD WD.
+ 2987              NA, BIT25H   2,1           ZERO          C,+2                BRANCH IF IT REALLY WAS.
+ 2989              SS           Z,SC,7        BIT 13H       2,1                 CLEAR OBS BIT AND JUMP TO LUP2 REVP.
+
+ 2991              SS           ZERO          B24B36        N,X3                THIS SUBROUTINE NO LONGER OBSOLETES ANY
+ 2993              SSL, ONEH    N,X3          11            C,+1                PROGRAM, SO REMOVE ALL OBSOLETING BITS
+ 2995              TS           Z,SC,2        -             OP THREAD      C    FROM ITS SUBRO CALL THREADS.
+ 2997              SWS, ONEH    Z,SC,3        16            N,X3                END HERE IF ONLY ONE SUB THREAD WORD.
+
+ 2999              TS, B122436H ZERO          3,0           OP THREAD      C    CLEAR OBS BOTS, GET NEXT THREAD WORD.
+ 3001              SSL, TWOH    N,X3          10            C,-1                SELECT ON LAST-THREAD-WORD BIT.
+ 3003              SS           ZERO          12(12)48      N,X3                CLEAR OBS BITS OF LAST THREAD WORD.
+
+ 3005   LUP2 REVP  SWS,THRED10H 2,1           0             Z,X2                FOLLOW THREAD TO NEXT PROG OR SUBRO.
+ 3007              LA           Z,X2          L END THR     MAKE THDS           BRANCH WHEN ALL SUBROS HAVE BEEN TESTED.
+ 3009              NA, BIT36H   2,1           ONES H        LUP2 REVP           IF PROGRAM, LOOK AGAIN.
+ 3011              SSL, TWOH    2,1           34            OBSLING Q           SELECT ON OBSOLETING BIT.
 
 # Page 327
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  63        PAGE  63
 
+P3013   SUBROUTINE IN PASS 1.5 TO PRESENT IN X4 THE SUBROUTINE CALL THREADS OF THE PROGRAM OR SUBROUTINE WHOSE NAME IS
+R3015   INITIALLY POINTED TO BY X2.
+
+ 3016   SUB THRDS  SWS,THRED11H 2,1           24            Z,X3           C    MAYBE GET ADDRESS OF 1ST SUB THREAD WD.
+ 3018              NA, BIT25H   2,1           ZERO          A THREAD       C    BRANCH IF IT REALLY WAS.
+ 3020              TS           -             -             NO MO SUBS     C
+
+ 3021   OP THREAD  SWS,THRED11H N,X3          0             Z,X3           C    FOLLOW THREAD TO NEXT SUBRO THREAD WORD.
+ 3023              SWS,THRED10H N,X3          36            Z,X4           S    PRESENT OP CODE THREAD.
+
+ 3025   A THREAD   SWS,THRED10H N,X3          24            Z,X4           S    PRESENT A ADDRESS THREAD.
+
+ 3027              NA, BIT13H   3,0           ZERO          NO MO SUBS     C
+ 3028              SWS,THRED10H N,X3          12            Z,X4           S    PRESENT B ADDRESS THREAD.
+
+ 3030              NA, BIT25H   3,0           ZERO          NO MO SUBS     C
+ 3031              NA, BIT37H   3,0           ONES H        OP THREAD      C    BRANCH IF THERE IS ANOTHER THREAD WD.
+ 3033              SWS,THRED10H N,X3          0             Z,X4           S    PRESENT C ADDRESS THREAD.
+
+ 3035   NO MO SUBS SWS,THRED10H 2,1           0             Z,X4           C    TENTATIVELY FOLLOW THREAD TO NEXT PR/SU.
+ 3037              PR                                                           (TO BE FILLED IN ON INITIAL CALL).
+
+
+
+R3039   LOOP TO MARK THOSE PROGRAMS AND SUBROUTINES THAT CALL THE SUBROUTINE BEING REVISED, DIRECTLY OR INDIRECTLY.
+
+ 3041              SWS,THRED10H N,X0          12            Z,X2                THREAD TO FIRST PROG OR SUB OF MACHINE.
+
+ 3043   RSUB LOOP  TS           N,SC,2        NO MO SUBS +1 SUB THRDS      C    ASK FOR PRESENTATION OF SUBRO THREADS.
+ 3045              TS           Z,X4          Z,X2          RSUB TEST           (DISPOSITION WHEN THREADS RUN OUT).
+
+ 30462             TX           Z,X2          -             Z,X4           C    ASK FOR ANOTHER THREAD.
+ 3047              NA           Z,X4          COMMON        C,-1                BRANCH IF CALL IS NOT FOR THIS SUBRO.
+ 3049              WD           Z,CSC         ONE H         Z,X4
+ 3050              WD, CHAR5H   B25T26        4,0           C,+1                REVERSE DIRECTION OF SHIFT.
+ 3052              SWE, ONESH   ONE H                       COMMON +1
+ 3053              SM           N,X3          COMMON +1     N,X3                PLANT OBS BIT IN SUBRO THREAD WORD.
+ 3055              SM           2,1           BIT 13H       2,1                 PLANT OBSOLESCENCE/OBSOLETING BIT.
+ 3057              NA, BIT36H   2,1           ZERO          RSUB LOOP +2        BRANCH IF PROCESSING A SUBROUTINE.
+ 3059              SM           2,1           ONE H         2,1                 SAVE OBS-RELAYING BIT FOR MAKE THDS.
+ 3061              TS, BIT13H   ONES H        SWITCH        RSUB LOOP +2        SHOW THAT SOMETHING WAS OBSOLETED.
+
+ 3065   RSUB TEST  NA           Z,X2          L END THR     RSUB LOOP           BRANCH IF THERE ARE MORE PROGS OR SUBS.
+ 3067              SWS,THRED10H N,X0          12            Z,X2                THREAD TO FIRST PROG OR SUB.
+ 3069              NA, B13B36H  2,1           ONES H        C,+3                BRANCH IF NOT AN OBSOLETING SUBROUTINE.
+ 3071              HA           2,1           BIT 13H       2,1                 REMOVE OBSOLETING BIT FROM SUBRO NAME.
+ 3073              TS           Z,X2          COMMON        RSUB LOOP -1        SAVE SUBRO NAME ADR, LOOK FOR CALLERS.
+
+ 3075              SWS,THRED10H 2,1           0             Z,X2                FOLLOW THREAD TO NEXT PROG OR SUBRO.
+ 3077              NA           Z,X2          L END THR     RSUB TEST +2        BRANCH IF THERE ARE MORE.
+
+ 3079              TS, BIT36H   ONES H        SWITCH        END1 REVP           SUBS NOT TREED TO PROGS OBSOLETE NOBODY.
 
 # Page 328
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  64        PAGE  64
 
+P3081   EVERY ASSEMBLY EXCEPT REPRINT OR BAD MERGE COMES HERE TO GET A TREE OF SUBROUTINE THREAD WORDS MADE UP.
+
+ 3083   MAKE THDS  TS           L SYM THR     Z,X5          FIND SLOT -2   C    SET X5 AND CSC.
+
+ 3085   SET O THRD SWE,OTHRD11H N,X2          12            N,X3           C    MOVE C THREAD OF LAST WD TO OP THREAD.
+ 3087              SS           Z,X3          THRED 11H     N,X2           C    THREAD LAST WORD TO THIS ONE.
+ 3089              SM           N,X3          B132537       N,X3           C    TENTATIVELY PLANT LAST-THREAD BITS.
+ 3091              SWS,ATHRD11H N,X5          24,L          N,X3           S    PLANT A ADDRESS THREAD, EXIT.
+
+ 3093              HA           N,X3          BIT 13H       N,X3           C    REMOVE LAST-THREAD BIT FROM A FIELD.
+ 3095              SWS,BTHRD11H N,X5          12,L          N,X3           S    PLANT B-ADDRESS THREAD, EXIT.
+
+ 3097              HA           N,X3          BIT 25H       N,X3           C    REMOVE LAST-THREAD BIT FROM B FIELD.
+ 3099              SWS,THRED11H N,X5          0             N,X3           S    PLANT C-ADDRESS THREAD, EXIT.
+
+ 3101              TS           Z,X3          Z,X2          FIND SLOT      C    THIS WORD WILL BECOME LAST WORD.
+ 31022             EBA          5,13          BIT 25        Z,X5           C
+ 3103              TS           -             -             ANY SUBS Q     S    GET ADDRESS OF HEAD OF SUBRO DIRECTORY.
+
+ 3105   FIND SLOT  SWE, CAC3H   6,8           32            Z,X3           C    POINT TO HEAD OF SINGLETON LIST.
+ 3107              NA           Z,X3          L END THR     NOT ADD 1      C    BRANCH IF THERE'S AN INTERNAL SLOT.
+
+ 3109              TX           6,8           -             Z,X3           C    MAKE A VACANT PAIR AT END OF DIRECTORY.
+ 3111              EX           6,8           CAC1H         3,1            C    2ND WORD OF THAT GOES TO HEAD OF SLOTS.
+ 3113              WA           6,8           ONEH          6,8            C
+ 3114              SWS,CAC1H    6,8           32,L          6,8            C    MODIFY POINTER OF SINGLETON LIST.
+ 3116              WA           6,8           ONE H         6,8            C    FINISH EXPANDING DIRECTORY.
+ 3118              TS           -             -             NEW STWD       C
+
+ 3119   NOT ADD 1  SS           N,X3          CAC1H         6,8            C    DETACH SLOT FROM SINGLETON LIST.
+ 3121              EX           Z,X3          CAC3M1        Z,AU1          C    FORM ADDRESS OF PAIR THAT INCLUDES SLOT.
+ 3123              TS           DIRWORD8      Z,AU2         NEW STWD -1    C    WE MUST SEE IF SLOT IS IN VACANT PAIR.
+
+ 3125   PAIR SRCH  SWE, CAC3H   N,AU2         16            Z,AU2          C    FOLLOW THREAD TO NEXT VACANT PAIR.
+ 3127              LA           Z,AU2         L END THR     NEW STWD       C    BRANCH IF SLOT WAS NOT PART OF A PAIR.
+ 3129              NA           Z,AU2,1       Z,AU1         C,+3           C    BRANCH IF SLOT NOT PART OF THIS PAIR.
+ 3131              SS           N,AU2         CAC2 H        N,CSH          C    DETACH PAIR FROM PAIR LIST.
+ 3133              TS           -             -             NEW STWD       C
+ 3134              TS           Z,AU2         Z,CSC         PAIR SRCH      C    SAVE ADDRESS OF PAIR AND TRY NEXT ONE.
+
+ 3136   NEW STWD   SWE, B1TO12H 1,1           12,L          N,X3           C    MOVE REVISION NO. TO 1ST SUB THREAD WD.
+ 3138              SS           BIT 25H       B13 B25       1,1            C    CLEAR OBS BIT, SET SUBROS BIT.
+ 3140              SWS,ATHRD11H Z,X3          24,L          1,1            C    PLANT THREAD TO 1ST SUBRO THREAD WORD.
+ 3142              TS           C,+1          NEW STWD      SET O THRD +2  C    CHANGE NEW-WORD RESPONSE.
+ 3144              TS, BIT37H   ZERO          2,0           SET O THRD     C    REMOVE LAST-THREAD BIT FROM C FIELD.
+
+ 3148   DIR CALL Q NA, BIT32H   5,0           ONES H        C,+3                BRANCH IF CALL IS NOT DIRECT.
+ 3150              TX           N,X5          -             Z,X4
+ 3151              SS           4,1           ONE H         N,X5           C    SET OBS RELAY BIT FOR SUBRO, PLANT THRD.
+ 31522             SS           ZERO          ONE H         N,X5,1
+ 3153              EX           N,X5          CAC3H         ETS                 FOLLOW THREAD IN SUBROUTINE DIRECTORY.
+ 31542             EBA          ETS           BIT 25        Z,X5
+ 31544  ANY SUBS Q NA           N,X5          ONES H        DIR CALL Q          BRANCH IF NOT ALL OF DIRECTORY DONE.
 
 # Page 329
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  65        PAGE  65
 
+P3155              IN PROGRAM ASSEMBLY, MAKE PROGRAM FIRST IN COMPUTER'S LIST.  IN SUBROUTINE ASSEMBLY, RETHREAD THE
+R31552  SUBROUTINE TO PRECEDE THE SUBROUTINE WHOSE NAME IS IN NEXT NAME, OR TO COME LAST IF (NEXT NAME) = "END SYLT".
+R31554  THESE THINGS ARE DONE HERE TO BE SURE OF NO BAD MERGE.
+
+
+
+ 3156   BEFORE CH  TX           L COMP NAM    -             Z,X0
+ 3157              TX           L PROG FIL    -             Z,X1
+ 3158              TN           Z,X1          2             Z,X2                DISTRIBUTE BANK INDICATOR 7.
+ 3160              SWS,THRED10H N,X0          12            Z,X2                POINT TO FIRST PROGRAM OF COMPUTER.
+ 3162              NA           Z,X2          L PROG FIL    UNDO MAIN           BRANCH IF NOT PROG OR SUB IN ASSEMBLY.
+ 3164              NA, BIT9H    SWITCH        ONES H        INISH P2            EXIT IF PROGRAM IS ALREADY FIRST.
+
+ 3166              SWS,BTHRD10H 2,1           12,L          N,X0                DETACH SUBROUTINE FROM HEAD OF LIST.
+ 3168              TS           -             -             GET NEXTN
+
+ 3169              TX           Z,X3          -             Z,X2                ADVANCE POINTER PAIR THRU SUBRO LIST.
+ 3171   UNDO MAIN  SS           2,1           THRED 10 H    Z,X3           S    POINT TO NEXT PROG OR SUB.
+ 3173              NA           Z,X3          L PROG FIL    C,-2                BRANCH IF NOT PROG OR SUB IN ASSEMBLY.
+ 3175              SS           3,1           THRED 10 H    2,1                 DETACH IT AND SEW UP THE THREAD.
+ 3177              NA, BIT9H    SWITCH        ONES H        HEAD LIST           GO TO PUT PROGRAM AT HEAD OF LIST.
+
+ 3179   GET NEXTN  SWS,THRED10H N,X0          12            Z,X3                POINT TO FIRST OTHER PROG OR SUB OF COM.
+ 3181              LA           Z,X3          L END THR     HEAD LIST           BRANCH IF LIST IS NOW EMPTY.
+ 3183              NA           N,X3          NEXT NAME     NEXTN LUP           BRANCH UNLESS FIRST PROG/SUB IS NEX SUB.
+
+ 3185   HEAD LIST  SWS,THRED10H N,X0          12            1,1
+ 3186              SWS,BTHRD10H L PROG FIL    12,L          N,X0                RETHREAD PROG/SUB AT HEAD OF LIST.
+ 3188              TS           -             -             INISH P2
+
+ 3189   NEXTN LUP  TS           Z,X3          Z,X2          UNDO MAIN      C    ADVANCE SEARCH FOR SUCCESSOR SUBROUTINE.
+ 3191              LA           Z,X3          L END THR     C,+2                MUST HAVE BEEN END IF DIDN'T FIND IT.
+ 3193              NA           N,X3          NEXT NAME     NEXTN LUP           BRANCH IF DIDN'T FIND SUCCESSOR SUBRO.
+
+ 3195              SS           2,1           THRED 10 H    1,1                 RETHREAD SUBROUTINE TO PRECEDE ITS
+ 3197              SS           L PROG FIL    THRED 10 H    2,1                 IMPLICIT OR DESIGNATED SUCCESSOR.
 
 # Page 330
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  66        PAGE  66
 
+P3200              INITIALIZING PROCEDURE FOR PASS 2.  STARTS RD3 AND WR1, GRABS BUFFERS FOR POPOS AND WORDS, AND
+R3202   LOADS THE SPECIAL PROCESSING AND CUSSING PARTS, CALLING ON THE LATTER TO UNSCRAMBLE THE CUSS LIST.
+
+ 32032             MASKGRP      S,0           F,0
+
+ 3204   INISH P2   TS           L STOPPER     Z,X2          PHI TAPE
+ 3205              RF,2         2,0           -             DISASTER            BYPASS LABEL ON POPO TAPE.
+ 32062             SS           PASS 3        C1T3          P2 SIDE GP          SELECT VERSION OF YUL SYSTEM.
+ 32064             S, PHI LOAD  P2 SIDE GP    1             C,+1
+ 3207              TS           L CUS LIST    Z,X1          RESET MXR      C
+ 3208              TS           L B2 START    Z,X6          GRAB FREE      C    GRAB A BUFFER FOR POPOS.
+ 3211              TS           Z,AU1         Z,X5          GRAB FREE      C    GRAB A BUFFER FOR WORD RECORDS.
+ 3213              TS           Z,AU1         L WD BUFF     PHI TAPE       S
+ 3215              RF,2         -             -             DISASTER
+ 3216              WA           L WD BUFF     C259          WBUF FULL
+ 3217              TS, BIT44    ONES          SWITCH        PHI TAPE            TURN ON PRINT SWITCH FOR MAIN PART.
+ 32182             RF,3         2,0           -             DISASTER            BYPASS LABEL ON SAVE TAPE.
+ 3219              MT           N,SC,1        2             N,X6,3              SET UP PARAPROGRAM STARTS.
+
+ 3230              SPEC,B7                                  1159
+ 3231              SPEC,B7                                  1155
+
+ 3237   GET PARP   TS           L COMP NAM    Z,X6          MON WAKE       C    POINT TO COMPUTER NAME, START PARAPROGS.
+ 3239              SWS,THREAD10 6,1           24            Z,X6                ADDRESS OF PREFIX FOR PARTIC. PASS NAME.
+ 3241              TX           CHAR 1        -             AV MSK              MOVE LEADING NON-BLANK CHARACTERS OF
+ 3243              SS           N,X6          AV MSK        PARP NAME           REFERENCED COMPUTER NAME TO FORM
+ 3245              SWE, C1T4    AV MSK        A,1           AV MSK              COMPLETE NAME OF PARTICULAR PASS 2.
+ 3247              NA, AV MSK   6,0           BLANKS        C,-2
+
+ 3248              TS           BIT33         Z,R0          UN LAS REM     C    INITIALIZE COUNT OF WORD RECORDS.
+ 3250              NA, BIT 9    SWITCH        ZERO          SUBRASSY            BRANCH IF ASSEMBLING A SUBROUTINE.
+ 3252              SWE, CAC3    L PASS 2      16            Z,AU1               POINT TO AD HOC SUBRO DIRECTORY ORIGIN.
+ 3254              EX           N,AU1         CAC 3         L NEXT SUB          POINT TO AD HOC ENTRY OF FIRST SUBRO.
+ 3256              TS           ZERO          MERJ WAIT     RD POPO 1           KNOCK OUT MERGE WAIT IF ASSEMBLING PROG.
+
+ 3258   SUBRASSY   SWE, SPECMAG L PASS 2      32            L NEXT SUB          OTHERWISE POINT TO END-OF-THREAD SIGNAL.
+ 3260              TX           N,SC,1        -             HEALTH +1           DON'T CUSS NEAR-DEFINITION IN SUBRO ASSY
+ 3262              TS           -             -             HEALTH3
+ 32622             TX           N,SC,1        -             ASYM FITZ           NOR UNDEFINED SETLOCS
+ 32624             TS           Z,SC,7        Z,SH          FITS FITZ      C
+ 3263              TX           C,+2          -             STATE0 +1           NOR UNDEFINED
+ 3265              TX           N,SC,1        -             STATE1 +1           NOR NEARLY DEFINED SYMBOLS.
+ 3267              TS           -             -             NO ADRESS
+
+ 3268   RD POPO 1  TS           Z,X5          POPO BUFF     PHI TAPE
+ 3269              RF,2         5,0           -             DISASTER            READ FIRST POPO RECORD.
+
+ 3271              TX           ZERO          -             ERR PAGES
+ 3274              S, PHI LOAD  PARP NAME     1             END INIT 2          LOAD PARTICULAR PASS 2 FOR THIS MACHINE.
 
 # Page 331
 #      @YUL SYSTEM ASSEMBLER -- PASS 2                                           USER'S OWN PAGE NO.  67        PAGE  67
 
+P32755  FINAL PASS 2 INITIALIZATION, HIDING IN A BUFFER.
+
+
+
+ 3276              SETLOC,1     HEALTH
+
+ 3277   END INIT 2 TX           L CUS LIST    -             Z,AU1
+ 3278              TX           BANK 5        -             Z,AU2
+ 3279              TS           M MXR         Z,MXR         N,AU2,8        C    CODING IN BANK 5 PUTS CONVERTED CUSSLIST
+ 3281              TX           ONES          -             N,AU1               INTO THE FIRST 64 WORDS OF BANK 2.
+ 3283   RESET MXR  TX           GENL MXR      -             Z,MXR          S
+ 32832             WA           BIT 33        ONE           Z,R6                INITIALIZE PROGRAM'S RECORD COUNT.
+ 3284              TS           L LINE        Z,X0          PASS 2
+
+
+
+ SEQBRK            END          YUL PASS 2    GENERAL
