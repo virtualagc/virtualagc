@@ -8,6 +8,7 @@
 # Pages:        335-359
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-20 JL   Transcribed pages 335-341.
+#               2016-12-21 JL   Transcribed pages 342-346.
 
 # Annotations:
 #
@@ -305,39 +306,398 @@ R0165   INAPPROPRIATE ADDRESSES ARE CHECKED FOR, AND ADDRESS VALUE CUSSING IS DO
 # Page 342
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.   8        PAGE  78
 
+P0227   INACTIVE ADDRESS CHECK AND LIMIT SETUP FOR POLISH ADDRESSES.
+
+ 02272  POLISH AD  NA, CHAR1M   CARD +2       BIT 1         C,+3                BRANCH IF NO MINUS IN COL 17.
+ 02274             SWS, BIT 1M  SWITCH        16,L          CUSS LIST +22       CUSS MINUS IF FIRST ADDRESS OF EQUATION.
+ 022751            BS           ZERO          ONE           MIN ADRES           MINIMUM MAGNITUDE IS ONE IF MINUS.
+ 022754            NA, BIT17M   SWITCH        ONES          C,+4                BRANCH IF NOT FIRST ADDRESS OF EQUATION.
+ 022756            LA           OP COUNT      ZERO          C,+2                BRANCH IF LAST OPERATOR WORD COUNT OK.
+ 022758            SM           CUSS LIST +23 BIT 17        CUSS LIST +23       CUSS BAD OPERATOR WORD COUNT.
+ 02276             SS           ZERO          BIT 17        SWITCH              RESET PERMISSION BIT FOR MINUS POLADS.
+ 0228              LA           ADDITIVE      BIT 1         PO DIRECT           TEST FOR INACTIVE ADDRESS IF UNINDEXED.
+ 0230              TX           PL 57776      -             MAX ADRES           MAXIMUM AUGMENTER FOR POLISH INDEXED.
+
+ 02311  POL SIGN T NA, CHAR1M   CARD +2       BIT 1         MAX AD SET          TEST STORE AND/OR POLISH INDEXED ADDR.
+ 02313             TS           PL 72000      MIN ADRES     MAX AD SET          FORCE RANGE ERROR IF MINUS SIGN HERE.
+
+ 0232   PO DIRECT  TS           PL 77776      MAX ADRES     RITE NORM      C    MAXIMUM VALUE FOR POLISH UNINDEXED.
+ 0234              NA           ADDRESS 1     BLANKS        ACTIVE
+ 02342             NA           ADDRESS 2     BLANKS        C,+2
+ 02344             SM           CUSS LIST +11 BIT 17        CUSS LIST +11       POLAD W/ BL ADR FLD MAY BE BLANK CARD.
+ 0235              NA           ADDRESS 2     MINUS C8      ACTIVE
+ 0236              TN           SAV ADREF     2             ADDRESS 1           RESTORE ADDRESS FIELD IF INACTIVE.
+ 0238              TS, SPECMAGM ONES          WORD          GUD BASIC           MINUS ZERO REPRESENTS INACTIVE ADDRESS.
+ 0240   ACTIVE     TS           SPEC MAG      MIN ADRES     MAX AD SET          (PERMITTED UNTIL OPS ARE EXAMINED).
+
+ 0242   NON CONST  NA, B34T36M  WORD          OP CODE 4     C,+2                BRANCH TO PERMIT NEGATIVE ADDRESS.
+ 0244              TS           PL 71777      MAX ADRES     MAX AD SET          MAX FOR ALL CASES BUT POLISH AND STORE.
+ 0246              TS           OCT 7777      MIN ADRES     C,-1                ALLOW -7777 TO 71777 EXCEPT ON CS, MP.
+ 0248   MAX AD SET TX           GENL MXR      -             Z,MXR
+ 0249              TS           Z,SC          Z,X6          PROC ADR            TRANSLATE ADDRESS FIELD.
+ 0251              TN           SAV ADREF     2             ADDRESS 1           RESTORE ORIGINAL ADDRESS FIELD FOR PRNT.
+ 0253              TS           ZERO          MIN ADRES     AGC4 INST      C    RESTORE MIN ADR VALUE AND MXR.
+ 0255              SWS, BIT 17M HEALTH        8             CUSS LIST           CUSS LACK OF "D" IN DECIMAL SUBFIELD.
+ 0257              LA           ONES          ADDRESS       BAD BASIC           MEANINGLESS OR ATROCIOUS ADDRESS.
+ 0259              LN           ADR WD        MAX ADRES     CONST Q             BRANCH IF NO RANGE ERROR.
+ 0261              LN           PL 72000      ADR WD        C,+2
+ 0262   RNG ERROR  TS, BIT33M   ONES          CUSS LIST +11 PRB ADRES      C    PRINT BAD-SIZE ADDRESS IF POSSIBLE.
+ 0264              TS, BIT17M   ONES          CUSS LIST +3  BAD BASIC           CUSS RANGE ERROR IN ADDRESS VALUE.
+
+ 0266   CONST Q    LA           WORD          BIT 17        INSTROP             BRANCH IF NO CONSTANT FLAG.
+ 0268              LA, B25T29M  HEALTH        SPECOND 6     BASIC SBA           BRANCH IF CODE IS "ADRES".
+ 0271              LA, B25T29M  HEALTH        SPECOND 7     CADR
+ 02712             LA, B25T29M  SPECON 12     HEALTH        BASIC ADR           BRANCH IF CODE IS XCADR.
+
+ 02714  PO STOR AD LA           ADDRESS       OCT 1777      C,+4                INTERPRETIVE MAY ADDRESS ERASABLE ....
+ 027152            LA           ADDITIVE      BIT 1         C,+2
+ 027154            LA           ADDRESS       OCT 17777     C,+2                ...WITH SOME LATITUDE IF INDEXED...
+ 02716             LA           ADDRESS       MIN 37777     RNG ERROR           .... OR UPPER HALF OF SWITCHED BANKS.
+ 0272              WA, B35T48M  ADDRESS       ADDITIVE      WORD                USE ADDITIVE ON POLISH OR STORE ADDRESS.
+ 0274              LA           ADDITIVE      BIT 1         C,+2
+ 0275              WA, B35T48M  WORD          ADDRESS       WORD                USE 2 X ADDRESS IF INDEXED.
+ 02762             NA, CHAR1M   CARD +2       BIT 1         GUD BASIC           BRANCH IF NO MINUS SIGN IN COLUMN 17.
+ 02764             WD           WORD          TWO           WORD                SINCE INTERPRETER DOES NOT CCS THESE.
+ 0277              TS, C1T4M    ZERO          LINE +6       GUD BASIC +1        CLEAR ADDRESS IMAGE AND GO TO PRINT.
+ 0279   CADR       TS, SPECMAGM ADDRESS       WORD          GUD BASIC           USE ADDRESS AS IS FOR CADR.
 
 # Page 343
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.   9        PAGE  79
 
+P0293   SPECIFIC PROCESSING FOR BASIC INSTRUCTIONS.
+
+ 0294   INSTROP    LN           ZERO          ADR WD        C,+3                BRANCH IF POSITIVE ADDRESS VALUE.
+ 0296              NA, BIT 7M   SWITCH        ZERO          C,+2
+ 0297              SM           CUSS LIST +12 BIT 1         CUSS LIST +12       CUSS IF NO INDEX BEFORE MINUS ADDRESS.
+
+ 0299              LA, B25T29M  HEALTH        ZERO          BASIC ADR           BRANCH IF THERE ARE NO SPECIAL CONDS.
+ 0301              LA, B25T29M  HEALTH        SPECOND 2     CAF OVIND
+ 0302              LA, B25T29M  HEALTH        SPECOND 3     CCS
+ 0303              LA, B25T29M  HEALTH        SPECOND 4     INDEX
+ 03032             LA, B25T29M  HEALTH        SPECOND 5     TS
+
+ 0304   XTRACODE   NA, BIT7M    SWITCH        ZERO          BASIC ADR
+ 0305              TS, BIT 1M   ONES          CUSS LIST +12 BASIC ADR           CUSS UNINDEXED EXTRACODE.
+
+ 03062  TS         NA, BIT7M    SWITCH        ZERO          BASIC ADR           BYPASS CHECK IF INSTRUCTION IS INDEXED.
+ 03064             LA           ADDRESS       OCT 1777      BASIC ADR
+ 03066             TS, BIT17M   ONES          CUSS LIST +11 BASIC ADR           FIXED MEM ADRES INAPPROPRIATE FOR TS.
+
+ 0307   INDEX      TS, BIT28M   ONES          SWITCH        BASIC ADR           SET CURRENT INDEX BIT.
+
+ 0309   CCS        NA, BIT 7M   SWITCH        ZERO          BASIC ADR           NO CHECK ON INDEXED CCS.
+ 0311              LA           ADDRESS       OCT 1777      BASIC ADR           BRANCH IF VALUE CORRECT FOR CCS.
+ 0313              TS, BIT 33M  ONES          CUSS LIST +11 PRB ADRES      C
+ 0314              TS, BIT17M   ONES          CUSS LIST +12 BASIC ADR           CUSS CCS REFERENCE TO FIXED.
+
+ 03152  CAF OVIND  SWS, BIT 33M HEALTH        5             CUSS LIST +23       WARN OF OVIND'S COMING OBSOLESCENCE.
+ 0316              NA, BIT 7M   SWITCH        ZERO          BASIC ADR           NO CHECK ON INDEXED CAF OR OVIND.
+ 0318              LA           OCT 2000      ADDRESS       BASIC ADR           BRANCH IF VALUE CORRECT FOR CAF, OVIND.
+ 0320              SM           CUSS LIST +11 BIT 17        CUSS LIST +12       CUSS INAPPROPRIATE ADDRESS.
+
+ 0322   BASIC ADR  LN           ZERO          ADR WD        BASIC SBA           BRANCH IF POSITIVE ADDRESS.
+ 0324              NA           WORD          ZERO          C,+2
+ 0325              TX           SPEC MAG      -             WORD                +0 MUST BECOME -0 FOR SUBTRACTION.
+ 0327              WD           WORD          ADDRESS       WORD                ADD IN NEGATIVE ADDRESS.
+ 0329              TS, C1T4M    ZERO          LINE +6       GUD BASIC +1        CLEAR ADDRESS IMAGE AND GO TO PRINT.
+
+ 0331   BASIC SBA  LA           ADDRESS       OCT 5777      CUSS BANK +1        BRANCH IF ADDRESS NOT IN A BANK.
+
+ 0333              TX, BANKMASK OCT 6000      -             ADR WD              PUT SUBADDRESS IN 6000-7777 CLASS.
+ 0335              LA           LOCATION      OCT  5777     CUSS BANK +1        BRANCH IF LOCATION IS NOT IN A BANK.
+
+ 0339              NA, BANKMASK LOCATION      ADDRESS       C,+2                BRANCH ON BANK ERROR.
+ 0341              TS           -             -             CUSS BANK +1        GO TO ASSEMBLE WORD.
+
+ 0343              TX           Z,R5          -             Z,X6                PUT BANK INDICATOR 5 IN X6.
+ 03442             SWS, BIT2 M  SWITCH        5,L           CUSS LIST +11       SET POISON BIT OF BANK CUSS = -INDEXED.
+ 03444             HA           CUSS LIST +11 B1B2          CUSS LIST +11       CALL FOR BANK ERROR CUSS.
+ 0345              SWS, B38T48M CUSS LIST +11 32            Z,X6
+ 0346              SWS, ACO4    ADDRESS       11,L          6,2
+ 0347   CUSS BANK  SWS, ACO5    ADDRESS       8,L           6,2                 INSERT BANK NUMBER IN BANK CUSS.
+
+ 03502             WA, SPECMAGM WORD          ADR WD        WORD                PUT ADDRESS OR SUBADDRESS IN WORD.
 
 # Page 344
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  10        PAGE  80
 
+P0351   PRINTING PROCEDURES FOR BASIC INSTRUCTIONS AND ADDRESS CONSTANTS.
+
+ 0352   GUD BASIC  SS           ZERO          C1T4          LINE +6             CLEAR ADDRESS FIELD OF PRINT IMAGE.
+ 0354              NA, CHAR1M   CARD +2       BIT 1         C,+2                BRANCH IF NO MINUS SIGN IN COLUMN 17.
+ 0356              HA           WORD          SPEC MAG      WORD                COMPLEMENT NEGATIVE INSTRUCTION.
+ 0358              SWS, ACO1    WORD          33,L          LINE +6
+ 0359              SWS, ACO2    WORD          30,L          LINE +6
+ 0360              SWS, ACO3    WORD          27,L          LINE +6
+ 0361              SWS, ACO4    WORD          24,L          LINE +6             PUT BASIC CODE ADDRESS INTO PRINT IMAGE.
+ 0363              LA           DEC 6 FLAG    WORD          ACON PRNT           BRANCH IF WORD IS AN ADDRESS CONSTANT.
+
+ 0365   INST PRNT  SWS, CHAR7M  WORD          6             LINE +5             PRINT OP CODE OF INSTRUCTION.
+ 036602            NA, BIT 7M   SWITCH        ZERO          C,+2                BRANCH ON INDEXED INSTRUCTION.
+ 036604            TX, CHAR1M   DEC 48 FLG    -             WORD                MARK AS SUBJECT TO BAD REFERENCE CHECK.
+ 03661             SWS, CHAR3M  ADDRESS       20,L          WORD                SUPPLY BANK INDICATOR TO SIMULATOR.
+ 03663             SWS, CHAR4M  WORD          6             WORD                STORE IT TWICE TO MAKE PARITY OK.
+ 0367              SWS, BIT7M   SWITCH        21,L          SWITCH              MOVE CURRENT INDEX BIT TO PREVIOUS.
+ 0369              TS, BIT28M   ZERO          SWITCH        BC CHECK            CLEAR CURRENT INDEX BIT.
+
+ 0371   BAD BASIC  SS           BLOTS         C1T4          LINE +6             BLOT OUT BAD ADDRESS FIELD.
+ 0373              LA           WORD          BIT 17        C,+2
+ 0374              TS, CHAR8M   BLOTS         LINE +5       NAUGHTY             BLOT FIRST DIGIT OF BAD CONSTANT.
+
+ 0376              NA, B25T29M  HEALTH        SPECOND 4     C,+2
+ 0377              TS, BIT 7M   ONES          SWITCH        C,+2                SET PREVIOUS INDEX BIT IF INDEX.
+ 0379              SS           ZERO          BIT 7         SWITCH              CLEAR PREVIOUS INDEX BIT.
+ 0381              NA, CHAR1M   CARD +2       BIT 1         C,+2                BRANCH IF NO MINUS SIGN IN COLUMN 17.
+ 0383              HA           WORD          SPEC MAG      WORD                COMPLEMENT GOOD OP OF BAD NEG. INSTR.
+ 0385              SWS, CHAR7M  WORD          6             LINE +5             PRINT GOOD OP CODE IN BAD INSTRUCTION.
+
+ 0387   NAUGHTY    TS           W BAD WORD    WORD          BC CHECK
+
+ 0388   ACON PRNT  SWS, CHAR8M  WORD          12            LINE +5             PRINT FIRST DIGIT OF CONSTANT.
+
+ 0390   BC CHECK   NA, CHAR1M   CARD +2       BIT 1         C,+2
+ 0391              TS, BIT 1M   ZERO          CUSS LIST +12 C,+2                CLEAR "SHOULD-BE-INDEXED" CUSS IF MINUS.
+ 0393              NA, CHAR1M   CARD +2       BLANKS        QUEER C17           CUSS IF NEITHER BLANK OR MINUS IN CC 17.
+ 0395              NA, CHAR1M   CARD          J COLUMN 1    C,+2
+ 0396              TS, BIT 1M   ZERO          CUSS LIST +12 C,+2                CLEAR "SHOULD-BE-INDEXED" CUSS IF LFTVR.
+ 0398              NA, CHAR1M   CARD          BLANKS        QUEER C1            CUSS IF NEITHER BLANK NOR J IN COLUMN 1.
+ 0400              NA, CHAR8M   CARD +2       BLANKS        QUEER C24           CUSS IF COLUMN 24 NON-BLANK.
+ 0402   INSTR XIT  TS           MOD RETRN     Z,SC          RSTOR MXR      C    RETURN TO GENERAL PROCEDURE.
 
 # Page 345
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  11        PAGE  81
 
+P0404   WHEN ADDRESS IS WRONG BUT NOT ATROCIOUS, TELL THE MAN WHAT IT IS.
+
+ 0405   PRB ADRES  TX           Z,R5          -             Z,X4           C    BANK INDICATOR 5 TO X4.
+ 0407              SS           CUSS LIST +11 b38t48        Z,X4           C    SET UP ADDRESS OF ADR CUSS.
+ 0409              TX           HI EQUALS     -             ADRECUSS +1    C    INITIALIZE TO ALF =00,0000.
+ 0411              SS           ADDRESS       B46T48        ADRECUSS +1    C
+ 0412              SWS, B40T42M ADDRESS       3,L           ADRECUSS +1    C
+ 0413              SWS, B34T36M ADDRESS       6,L           ADRECUSS +1    C
+ 0414              SWS, B28T30M ADDRESS       9,L           ADRECUSS +1    C    PUT ADDRESS OR SUBADDRESS INTO CUSS.
+ 0416              LA           OCT 6000      ADDRESS       ACUSS BNK      C    BRANCH IF ADDRESS IS IN A BANK.
+
+ 0418              SWS, C3T6M   ADRECUSS +1   A,2,L         ADRECUSS +1    C    MOVE UP NON-BANK ADDRESS.
+ 04191             SS           BLANKS        CHAR 2        ADRECUSS +1    C
+ 0420              SS           BLANKS        C7T8          ADRECUSS +1
+
+ 0421   ACUSS BNK  SM           ADRECUSS +1   ALF 6000      ADRECUSS +1    C    PUT SUBADDRESS IN THE RANGE 6000-7777.
+ 0423              SWS, ACO2    ADDRESS       23,L          ADRECUSS +1    C    PUT BANK NUMBER INTO CUSS.
+ 0425              SWS, ACO3    ADDRESS       20,L          ADRECUSS +1
+
+
+
+R0426              MINOR SUBROUTINE IN AGC4 PASS 2 TO RIGHT-NORMALIZE THE ADDRESS FIELD BY SHIFTING END-OFF.  EXITS IF
+R0428   THE FIELD IS OR BECOMES ALL BLANK.
+
+ 0429   RITE NORM  NA, CHAR8M   ADDRESS 2     BLANKS        END RNORM      C    BRANCH IF FINISHED.
+ 0431              SWS, ONESM   ADDRESS 1     A,1           ADDRESS 1      C
+ 0432              SWS, ONESM   ADDRESS 2     A,1           ADDRESS 2      C
+ 0433              SS           ADDRESS 1     CHAR1         ADDRESS 2      C
+ 0434              SS           BLANKS        CHAR1         ADDRESS 1      C    SHIFT RIGHT ONE CHARACTER.
+ 0436              NA           ADDRESS 1     BLANKS        RITE NORM      C
+ 0437              NA           ADDRESS 2     BLANKS        RITE NORM      C    REPEAT UNLESS ALL BLANK.
+ 0439   END RNORM  TX           -             -             -
+
+
+
+R04392  OPERATOR WORD COUNT CHECKING FOR STORE ADDRESSES.
+
+ 04393  OP CK STOR NA, BIT17M   SWITCH        ONES          POL SIGN T          EXIT IF NOT BEGINNING OF EQUATION.
+ 04395             LA           OP COUNT      ZERO          C,+2
+ 04397             SM           CUSS LIST +23 BIT 17        CUSS LIST +23       CUSS BAD OPERATOR WORD COUNT.
+ 04399             TS,BIT17M    ZERO          SWITCH        POL SIGN T
 
 # Page 346
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  12        PAGE  82
 
+P0440   AGC4 PASS 2 PROCESSING FOR POLISH OPERATOR WORDS.
+
+ 0441   POLISH OP  SWE, B35T41M HEALTH        17            WORD                SET UP 7-BIT LEFT OPERATOR.
+ 04421             TS, BIT17M   ONES          SWITCH        SEL STAR 1          REVOKE PERMISSION FOR MINUS ADDRESSES.
+ 04422             SWS, BIT 40M HEALTH        29            WORD                MOVE INDEX BIT TO GENERAL OPERATOR.
+ 04423             SWS, BIT17M  HEALTH        6             CUSS LIST +22       CUSS INDEXING OF MISCELLANEOUS OPERATOR.
+ 04424  SPECON 13  OCT          -2604 7777
+ 04425             SWS, BIT 39M HEALTH        28            WORD                MOVE INDEX BIT TO UNARY OPERATOR.
+ 04426  SEL STAR 1 SSL, THREEM  HEALTH        24            C,-4           C    BRANCH ON TYPE OF FIRST OPERATOR.
+ 0443              NA, B25T31M  HEALTH        2 POLOP 7     NOT COUNT           BRANCH UNLESS SECOND HALF IS OP WORD CT.
+
+ 0445              TX           GENL MXR      -             Z,MXR
+ 0446              TS           Z,SC          Z,X6          PROC ADR            TRANSLATE ADDRESS FIELD.
+ 0448              TS           ADDRESS       OP COUNT      AGC4 INST      C    SET OP COUNT (PERHAPS TO ONES).
+ 0449              SWS, BIT 17M HEALTH        8             CUSS LIST           MAYBE CUSS "D" ERROR.
+ 0451              LA           ONES          ADDRESS       BAD POLE            BRANCH IF MEANINGLESS OR ATROCIOUS ADR.
+
+ 0453              LA           ADDRESS       OCT 177       OK COUMT            BRANCH IF COUNT IS 127 OR LESS.
+ 0455              LN           PL 72000      ADR WD        C,+2                BRANCH IF ADDRESS IS UNPRINTABLE.
+ 0457              TS, BIT 33M  ONES          CUSS LIST +11 PRB ADRES      C    PRINT OVERSIZE ADDRESS.
+ 04582             TX           ONES          -             OP COUNT            GUARANTEE OP COUNT CUSS.
+ 0459              TS, BIT 17M  ONES          CUSS LIST +3  BAD POLE            CUSS RANGE ERROR IN ADDRESS VALUE.
+
+ 0461   OK COUNT   TS, B24T48M  ADDRESS       WORD          SEL STAR 2 +2       SET UP COUNT AS OPERATOR 2.
+
+ 04624  NOT COUNT  NA           OP COUNT      ZERO          C,+2                BRANCH IF OP COUNT MIGHT STILL MAKE IT.
+ 04626             TS           ONES          OP COUNT      C,+2                GUARANTEE BAD COUNT IF TWAS TOO SMALL.
+ 04628             WD           OP COUNT      ONE           OP COUNT
+ 0463              NA, B25T31M  HEALTH        2 POLOP 17    C,+2
+ 0464              TS, BIT 33M  ONES          CUSS LIST +2  BAD POLE            CUSS MEANINGLESS ADDRESS FIELD.
+
+ 0466              NA, B25T31M  HEALTH        2 POLOP 27    TWO POLES
+ 0467              SM           CUSS LIST +21 BIT 17        CUSS LIST +21       CUSS UNPOLISH ADDRESS FIELD SYMBOL.
+ 0469   BAD POLE   SM           WORD          BIT 1         WORD                INDICATE BADNESS OF RIGHT OPERATOR.
 
 # Page 347
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  13        PAGE  83
 
+P04702  GENERAL PROCESSING OF RIGHT OPERATOR.
+
+ 0471   TWO POLES  
+ 04721             
+ 04722             
+ 04723             
+ 04724             
+ 04725  B46T48     
+ 04726             
+ 04727             
+ 04728  SEL STAR 2 
+ 04729             
+ 0473              
+ 0475              
+
+ 0477              
+ 0478              
+
+ 0480              
+ 0482              
+ 0484              
+ 0485              
+ 0487              
+
+ 0489              
+ 0490              
+ 0492              
+
+ 0494   BAD POLE 2 
+
+ 0496   POLE OFLO  
+ 0498              
 
 # Page 348
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  14        PAGE  84
 
+P0500              SUBROUTINE IN PASS 2 FOR AGC4 TO SET IN PRINT THE LOCATION OF AN INSTRUCTION OR CONSTANT, WITH BANK
+R0502   NUMBER IF ANY AND WITH A NOTATION FOR END OF BLOCK OR BANK IF REQUIRED.  BLOTS OUT LOCATION FIELD IF BAD LOC.
+
+
+
+ 0504   AGC4 PLEB  
+ 0506              
+
+ 0508              
+ 0509              
+ 0510              
+ 0511              
+ 0512              
+ 0514              
+ 0515              
+ 0516              
+ 0518              
+
+ 0520   END BANK Q 
+ 0522              
+
+ 0526              
+ 0527              
+ 0529              
+ 0530              
+ 0532              
+
+ 0534   PRINT LOC  
+ 0535              
+ 0536              
+ 0537              
+ 0538   RSTOR MXR  
 
 # Page 349
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  15        PAGE  85
 
+P0540              SUBROUTINE IN PASS 2 FOR AGC4 TO SET UP A SINGLE-PRECISION CONSTANT IN WORD AND IN PRINT.  THIS
+P0542   SUBROUTINE DOES NOT CARE WHETHER THE WORD IS SIGNED OR NOT, BUT DEMANDS THE OUTPUT OF DEC/OCT CONST IN NUMBER.
+
+ 0544   AGC4 1P    
+ 0546              
+ 0547              
+ 0549              
+
+ 0551   GOOD 1P    
+ 0552              
+ 0554              
+ 0555              
+
+ 0557   A4 BIN ALF 
+ 0558              
+ 0559              
+ 0560              
+ 0561              
+ 0562              
+ 0564              
+
+
+
+R0566              SUBROUTINE IN PASS 2 FOR AGC4 TO PROCESS A DOUBLE-PRECISION CONSTANT.  USING THE OUTPUT OF DEC
+R0568   CONST OR OCT CONST, AND DISTINGUISHING BETWEEN THE SIGNED AND UNSIGNED POSSIBILITIES (FOR OCTAL CONSTANTS ONLY),
+R0570   SETS UP THE HIGH-ORDER PART IN WORD AND THE LOW-ORDER PART IN 2ND HALF, SETS THE HIGH-ORDER PART IN PRINT, AND
+R0572   SETS UP THE LOW-ORDER PART IN PRINTABLE FORM IN 2ND ALF AND 2ND ALF +1.
+
+ 0573   AGC4 2P    
+ 0575              
+ 0578              
+
+ 0580   GOOD 2P    
+ 0581              
+ 0583              
+ 0584              
+
+ 0586              
+ 0587              
+
+ 0589              
+ 0591              
+ 0593              
+ 0594              
+
+ 0596              
+ 0597              
+ 0598              
+ 0599              
+ 0600              
+ 0602              
 
 # Page 350
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  16        PAGE  86
 
+R0604              SUBROUTINE IN PASS 2 FOR AGC4 TO SET IN PRINT A RIGHT-HAND LOCATION FOR SUCH AS SETLOC.  PUTS IN
+R0606   THE BANK INDICATOR, IF ANY.  BLOTS OUT AN INVALID LOCATION.
 
+ 0607   AGC4 PREL  
+ 0608              
+
+ 0610              
+ 0611              
+ 0612              
+ 0614              
+ 0616              
+ 0617              
+ 0618              
+ 0620              
+
+ 0622   PRINT VAL  
+ 0623              
+ 0624              
+ 0625              
+ 0626              
+ 
 # Page 351
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  17        PAGE  87
 
