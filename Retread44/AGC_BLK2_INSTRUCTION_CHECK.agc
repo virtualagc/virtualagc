@@ -18,6 +18,7 @@
 ##               2016-12-18 MAS  Typos.
 ##               2016-12-18 MAS  Added notes about bugs discovered in the
 ##                               tests present here.
+##               2016-12-20 MAS  Fixed a typo in a program label.
 
 ## Page 210
                 SETLOC          ABORT           +1
@@ -1067,7 +1068,7 @@ DV5+-           CA              S-MAX
                 TC              -0CHK
                 XCH             L
                 TC              -1CHK           -1
-DV-+            CA              S+MAX
+DV5-+           CA              S+MAX
                 TS              L                               # 37777
                 CS              S13BITS                         # 60000
                 EXTEND
