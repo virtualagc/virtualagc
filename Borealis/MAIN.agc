@@ -10,6 +10,7 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+## Mod history: 2016-12-21 MAS  Added Retread instruction checks.
 
 # Source file name
 # ----------------
@@ -37,6 +38,7 @@ $PINBALL_GAME__BUTTONS_AND_LIGHTS.agc
 $ALARM_AND_ABORT.agc
 $DOWN-TELEMETRY_PROGRAM.agc
 $AGC_BLOCK_TWO_SELF-CHECK.agc
+$AGC_BLK2_INSTRUCTION_CHECK.agc
 $INFLIGHT_ALIGNMENT_ROUTINES.agc
 $RTB_OP_CODES.agc
 $LEM_FLIGHT_CONTROL_SYSTEM_TEST.agc

@@ -11,6 +11,7 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+## Mod history: 2016-12-21 MAS  Pulled in erasables for Retread instruction checks.
 
 A               EQUALS          0
 L               EQUALS          1                               # L AND Q ARE BOTH CHANNELS AND REGISTERS.
@@ -449,6 +450,15 @@ SKEEP4          =               1374
 SKEEP5          =               1375
 SKEEP6          =               1376
 SKEEP7          =               1377
+
+# ADDRESSES TO BE USED FOR INDEX INSTRUCTION WITHOUT EXTRACODES
+NDX+0		ERASE
+NDX+MAX		ERASE
+NDXKEEP1	ERASE
+NDXKEEP2	ERASE
+NDXKEEP3	ERASE
+NDXSELF1	ERASE
+NDXSELF2	ERASE
 
 # WAITLIST TASK LISTS
 

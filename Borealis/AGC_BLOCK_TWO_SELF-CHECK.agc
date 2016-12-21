@@ -11,11 +11,13 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+## Mod history: 2016-12-21 MAS  Shuffled some things around for multi-bank handling,
+##                              and put in jumps to Retread instruction checks and back.
 
-                BANK            20                              
+                SETLOC          ENDIMUF
 
-SBIT1           EQUALS          BIT1                            
-SBIT2           EQUALS          BIT2                            
+SBIT1           OCT             00001                           # SBIT1 and SBIT2 must be together                          
+SBIT2           OCT             00002                           
 SBIT3           EQUALS          BIT3                            
 SBIT4           EQUALS          BIT4                            
 SBIT5           EQUALS          BIT5                            
@@ -31,8 +33,8 @@ SBIT14          EQUALS          BIT14
 SBIT15          EQUALS          BIT15                           
 
 S+ZERO          EQUALS          ZERO                            
-S+1             EQUALS          BIT1                            
-S+2             EQUALS          BIT2                            
+S+1             EQUALS          SBIT1                            
+S+2             EQUALS          SBIT2                            
 S+3             EQUALS          THREE                           
 S+4             EQUALS          FOUR                            
 S+5             EQUALS          FIVE                            
@@ -47,6 +49,8 @@ ERASCON3        OCTAL           01462                           # USED IN ERASCH
 ERASCON4        OCTAL           01774                           # USED IN ERASCHK
 S10BITS         EQUALS          LOW10                           # 01777, USED IN ERASCHK
 SBNK03          EQUALS          PRIO6                           # 06000, USED IN ROPECHK
+S+MAX           OCTAL           37777                           # ** S+MAX AND S-MAX MUST BE TOGETHER
+S-MAX           OCTAL           40000                           # FOR DOUBLE PRECISION CHECKING.
 S13BITS         OCTAL           17777                           
 CONC+S1         OCTAL           25252                           # USED IN CYCLSHFT
 OVCON           OCTAL           37737                           # USED IN RUPTCHK
@@ -64,10 +68,7 @@ S-ZERO          EQUALS          NEG0
 ADRS1           ADRES           SKEEP1                          
 
 SRADRS          ADRES           SR                              
-SELFADRS        ADRES           SELFCHK                         # SELFCHK RETURN ADDRESS.  SHOULD BE PUT
-                                                                # IN SELFRET WHEN GOING FROM SELFCHK TO
-                                                                # SHOWSUM AND PUT IN SKEEP1 WHEN GOING
-                                                                # FROM SHOWSUM TO SELF-CHECK.
+
 
 ERRORS          CA              Q                               
                 TS              SFAIL                           # SAVE Q FOR FAILURE LOCATION
@@ -77,8 +78,11 @@ ERRORS          CA              Q
                 CCS             SMODE                           
                 CA              S+ZERO                          
                 TS              SMODE                           
-                TC              SELFCHK                         # GO TO IDLE LOOP
+                TC              SELFIDLE                        # GO TO IDLE LOOP
                 TC              SFAIL                           # CONTINUE WITH SELF-CHECK
+
+SELFIDLE        TC              POSTJUMP
+                CADR            SELFCHK
 
 +0CHK           CS              A                               
 -0CHK           CCS             A                               
@@ -94,6 +98,13 @@ ERRORS          CA              Q
                 CCS             A                               
                 TCF             ERRORS                          
                 TC              Q                               
+
+ENDSELFF        EQUALS
+
+                BANK            20
+
+SELFADRS        ADRES           SELFCHK                         # SELFCHK RETURN ADDRESS.  SHOULD BE PUT
+                                                                # IN SELFRET WHEN GOING FROM SELFCHK TO
 
 SMODECHK        EXTEND                                          
                 QXCH            SKEEP1                          
@@ -601,7 +612,7 @@ TENMS           CS              SKEEP1
                 EBANK=          LST1                            
                 2CADR           TSKADRS                         
 
-                CA              S+MAX                           
+ASDF            CA              S+MAX                           
                 AD              OVCON                           # CONTROLS TIME SPENT IN OF-UF LOOP
                 RELINT                                          
 WAIT            CS              A                               
@@ -623,7 +634,11 @@ TSKADRS         CS              ZRUPT
                 TC              -1CHK                           
                 TC              TASKOVER                        
 
-                TC              SMODECHK                        
+INSTCHK         TC              CHECKNJ                         # CHECK FOR NEW JOB
+                TC              POSTJUMP
+                CADR            TCCHK
+
+INSTDONE        TC              SMODECHK                        
 
 # IN-OUT1 CHECKS ALL PULSES OF WRITE AND READ
 IN-OUT1         CA              S-1                             
@@ -965,15 +980,16 @@ NXTBNK          CA              SKEEP4
 
 ENDSUMS         CCS             SKEEP6                          
                 TC              ROPECHK         +2              # START SHOWSUM AGAIN
-S+MAX           OCTAL           37777                           # ** S+MAX AND S-MAX MUST BE TOGETHER
-S-MAX           OCTAL           40000                           # FOR DOUBLE PRECISION CHECKING.
+                TC              ERRORS                          # Available space.
+                TC              ERRORS
                 TC              MPNMBRS         -1              # ROPECHK IS COMPLETED
 
 SOPTION         CCS             SKEEP6                          # DECIDE ON ROPECHK OR SHOWSUM OPTION
                 TC              SDISPLAY                         
 VNCON           OCTAL           00501                           # USED IN SHOWSUM. DISPLAY 3 REGISTERS.
-NOBANKNO        OCTAL           33777                           # * CONSTANT, COMPLEMENT OF LAST BANK +1.
-# CHANGE TO 33777 IF BANK 21 IS LAST BANK USED
+NOBANKNO        OCTAL           31777                           # * CONSTANT, COMPLEMENT OF LAST BANK +1.
+
+# CHANGE TO 31777 IF BANK 23 IS LAST BANK USED
 BNKCHK          CCS             SKEEP1                          # WHEN C(SKEEP6) = -0
                 TC              +4                              
 SCADR           FCADR           SDISPLAY                        # * CONSTANT, USED IN SHOWSUM ONLY
