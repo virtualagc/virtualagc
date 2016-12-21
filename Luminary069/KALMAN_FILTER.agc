@@ -16,10 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
+##              2016-12-22 IJK  Updated for Luminary 69.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 1470
+## Page 1465
 		EBANK=	NO.UJETS
 		BANK	16
 		SETLOC	DAPS1
@@ -61,7 +60,7 @@ LOOPRATE	EXTEND
 		EXTEND
 		BZMF	NEGTORK
 STORTORK	INDEX	Q		# INCREMENT DOWNLIST REGISTER.
-		ADS	DOWNTORK	#	NOTE:  NOT INITIALIZED; OVERFLOWS.
+		ADS	DOWNTORK	#   NOTE: NOT INITIALIZED; OVERFLOWS.
 
 		CCS	DAPTEMP6
 		TCF	RATELOOP +1
@@ -70,7 +69,7 @@ SMALLTJU	CA	ZERO
 		INDEX	DAPTEMP6
 		XCH	TJP
 		EXTEND
-## Page 1471
+## Page 1466
 		MP	ELEVEN		# 10.24 PLUS
 		CA	L
 		TCF	LOOPRATE
