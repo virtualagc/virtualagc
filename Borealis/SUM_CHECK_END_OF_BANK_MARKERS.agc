@@ -11,8 +11,9 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+## Mod history: 2016-12-21 MAS  Updated for new end-of-bank locations for self-tests.
 
-                SETLOC  ENDIMUF
+                SETLOC  ENDRTRDF
                 TC
                 TC
                 
@@ -81,5 +82,13 @@
                 TC
                 
                 SETLOC  ENDPREL1
+                TC
+                TC
+
+                SETLOC  ENDINST1
+                TC
+                TC
+
+                SETLOC  ENDINST2
                 TC
                 TC

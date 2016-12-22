@@ -11,11 +11,13 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+## Mod history: 2016-12-21 MAS  Shuffled some things around for multi-bank handling,
+##                              and put in jumps to Retread instruction checks and back.
 
-                BANK            20                              
+                SETLOC          ENDIMUF
 
-SBIT1           EQUALS          BIT1                            
-SBIT2           EQUALS          BIT2                            
+SBIT1           OCT             00001                           # SBIT1 and SBIT2 must be together                          
+SBIT2           OCT             00002                           
 SBIT3           EQUALS          BIT3                            
 SBIT4           EQUALS          BIT4                            
 SBIT5           EQUALS          BIT5                            
@@ -31,8 +33,8 @@ SBIT14          EQUALS          BIT14
 SBIT15          EQUALS          BIT15                           
 
 S+ZERO          EQUALS          ZERO                            
-S+1             EQUALS          BIT1                            
-S+2             EQUALS          BIT2                            
+S+1             EQUALS          SBIT1                            
+S+2             EQUALS          SBIT2                            
 S+3             EQUALS          THREE                           
 S+4             EQUALS          FOUR                            
 S+5             EQUALS          FIVE                            
@@ -47,6 +49,8 @@ ERASCON3        OCTAL           01462                           # USED IN ERASCH
 ERASCON4        OCTAL           01774                           # USED IN ERASCHK
 S10BITS         EQUALS          LOW10                           # 01777, USED IN ERASCHK
 SBNK03          EQUALS          PRIO6                           # 06000, USED IN ROPECHK
+S+MAX           OCTAL           37777                           # ** S+MAX AND S-MAX MUST BE TOGETHER
+S-MAX           OCTAL           40000                           # FOR DOUBLE PRECISION CHECKING.
 S13BITS         OCTAL           17777                           
 CONC+S1         OCTAL           25252                           # USED IN CYCLSHFT
 OVCON           OCTAL           37737                           # USED IN RUPTCHK
@@ -64,10 +68,7 @@ S-ZERO          EQUALS          NEG0
 ADRS1           ADRES           SKEEP1                          
 
 SRADRS          ADRES           SR                              
-SELFADRS        ADRES           SELFCHK                         # SELFCHK RETURN ADDRESS.  SHOULD BE PUT
-                                                                # IN SELFRET WHEN GOING FROM SELFCHK TO
-                                                                # SHOWSUM AND PUT IN SKEEP1 WHEN GOING
-                                                                # FROM SHOWSUM TO SELF-CHECK.
+
 
 ERRORS          CA              Q                               
                 TS              SFAIL                           # SAVE Q FOR FAILURE LOCATION
@@ -77,8 +78,11 @@ ERRORS          CA              Q
                 CCS             SMODE                           
                 CA              S+ZERO                          
                 TS              SMODE                           
-                TC              SELFCHK                         # GO TO IDLE LOOP
+                TC              SELFIDLE                        # GO TO IDLE LOOP
                 TC              SFAIL                           # CONTINUE WITH SELF-CHECK
+
+SELFIDLE        TC              POSTJUMP
+                CADR            SELFCHK
 
 +0CHK           CS              A                               
 -0CHK           CCS             A                               
@@ -94,6 +98,13 @@ ERRORS          CA              Q
                 CCS             A                               
                 TCF             ERRORS                          
                 TC              Q                               
+
+ENDSELFF        EQUALS
+
+                BANK            20
+
+SELFADRS        ADRES           SELFCHK                         # SELFCHK RETURN ADDRESS.  SHOULD BE PUT
+                                                                # IN SELFRET WHEN GOING FROM SELFCHK TO
 
 SMODECHK        EXTEND                                          
                 QXCH            SKEEP1                          
@@ -623,7 +634,11 @@ TSKADRS         CS              ZRUPT
                 TC              -1CHK                           
                 TC              TASKOVER                        
 
-                TC              SMODECHK                        
+INSTCHK         TC              CHECKNJ                         # CHECK FOR NEW JOB
+                TC              POSTJUMP
+                CADR            TCCHK
+
+INSTDONE        TC              SMODECHK                        
 
 # IN-OUT1 CHECKS ALL PULSES OF WRITE AND READ
 IN-OUT1         CA              S-1                             
@@ -965,15 +980,16 @@ NXTBNK          CA              SKEEP4
 
 ENDSUMS         CCS             SKEEP6                          
                 TC              ROPECHK         +2              # START SHOWSUM AGAIN
-S+MAX           OCTAL           37777                           # ** S+MAX AND S-MAX MUST BE TOGETHER
-S-MAX           OCTAL           40000                           # FOR DOUBLE PRECISION CHECKING.
+                TC              ERRORS                          # Available space.
+                TC              ERRORS
                 TC              MPNMBRS         -1              # ROPECHK IS COMPLETED
 
 SOPTION         CCS             SKEEP6                          # DECIDE ON ROPECHK OR SHOWSUM OPTION
                 TC              SDISPLAY                         
 VNCON           OCTAL           00501                           # USED IN SHOWSUM. DISPLAY 3 REGISTERS.
-NOBANKNO        OCTAL           33777                           # * CONSTANT, COMPLEMENT OF LAST BANK +1.
-# CHANGE TO 33777 IF BANK 21 IS LAST BANK USED
+NOBANKNO        OCTAL           31777                           # * CONSTANT, COMPLEMENT OF LAST BANK +1.
+
+# CHANGE TO 31777 IF BANK 23 IS LAST BANK USED
 BNKCHK          CCS             SKEEP1                          # WHEN C(SKEEP6) = -0
                 TC              +4                              
 SCADR           FCADR           SDISPLAY                        # * CONSTANT, USED IN SHOWSUM ONLY
@@ -1224,7 +1240,7 @@ ENDSLFS1        EQUALS
 
 SBNKOPTN        TS              SKEEP1                          
                 CS              A                               # GO TO BACKUP IDLE LOOP IF C(SMODE) IS
-                AD              TWO                             # GREATER THAN OCTAL 11
+                AD              THREE                           # GREATER THAN OCTAL 12
                 EXTEND                                          
                 BZMF            TOSMODE         -2              
                 CA              S+ZERO                          # ZERO SMODE FOR OPTIONS ABOVE 8.
@@ -1233,6 +1249,7 @@ SBNKOPTN        TS              SKEEP1
                 NDX             A                               
                 TC              SOPTON11        -1              
 SOPTON11        TC              DSKYCHK                         
+SOPTON12        TC              RSTRTCHK
 
                 CA              S+ZERO                          
                 TS              SMODE                           
@@ -1314,7 +1331,7 @@ NXTNMBR         CCS             SKEEP3
                 TS              NOUT                            
                 TC              DSKYWAIT                        
 +SIGN           CS              ZERO                            
-                TS              SKEEP3                          
+                TS              SKEEP3
                 CA              S+1                             
                 TS              SKEEP2                          
                 INHINT                                          
@@ -1335,5 +1352,69 @@ LITESOUT        CS              S11CHAN
                 EXTEND                                          
                 WAND            DSALMOUT                        # TURN OFF COMPUTER ACTIVITY LIGHT.
                 TC              TASKOVER                        # END OF DSKYCHK
+
+TCTRPBIT        EQUALS          SBIT3
+
+ALRMSTRT        INDEX           PHASE2
+                TC              +0
+                TC              TCTRCONT                        # Phase 1: TC trap
+                TC              NOTCCONT                        # Phase 2: No TC
+
+RSTRTCHK        EXTEND                                          # Entry point to the hardware alarm / restart checks
+                WRITE           77                              # Clear channel 77 by writing to it
+
+TCTRPCHK        TC              PHASCHNG
+                OCT             00102
+
+                TC              WAITLIST                        # Schedule a task to break out of the loop if the
+                2CADR           TCTRPFAL                        # alarm doesn't work.
+
+                CAF             TCTRAPGO                        # Trigger a TC Trap. We do this in erasable  memory
+                TS              SKEEP1                          # so we can break out of it if the restart
+                TC              SKEEP1                          # doesn't occur as expected.
+TCTRAPGO        TC              SKEEP1
+
+TCTRPFAL        CAF             TCTRPXIT                        # It's been too long with no restart. Break the
+                TS              SKEEP1                          # loop at SKEEP1.
+                TC              TASKOVER
+TCTRPXIT        TC              TCTRCONT
+
+NOTCFAIL        CA              ONE                             # It's been too long with no restart. Break the
+                TS              SKEEP3                          # BZF loop by making SKEEP3 nonzero.
+                TC              TASKOVER
+
+TESTTCTR        CA              TCTRPBIT                        # Check to see if the TC TRAP bit is set in
+                EXTEND                                          # channel 77.
+                RAND            77
+                EXTEND
+                BZF             ERRORS
+                TC              Q
+
+TCTRCONT        TC              TESTTCTR
+
+NOTCCHK         EXTEND
+                WRITE           77                              # Blank channel 77.
+                EXTEND                                          # Just to be sure -- we won't check this next time
+                READ            77
+                TC              +0CHK
+                TS              SKEEP2                          # Zero SKEEP2 for the BZF loop
+
+                TC              PHASCHNG
+                OCT             00202
+
+                CAF             ONE                             # Set up a waitlist task to break us out of the
+                TC              WAITLIST                        # BZF loop if the alarm doesn't occur
+                2CADR           NOTCFAIL
+
+                CA              SKEEP2                          # Keep looping while SKEEP2 = 0
+                EXTEND
+SELFBZF         BZF             SELFBZF -2
+
+NOTCCONT        TC              TESTTCTR
+
+ALRMDONE        TC              PHASCHNG                        # All done with the hardware alarm checks.
+                OCT             00002
+
+                TC              TOSMODE
 
 ENDSLFS2        EQUALS                                          

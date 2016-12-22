@@ -1,69 +1,39 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     AGC_BLK2_INSTRUCTION_CHECK.agc
-## Purpose:      Part of the source code for Retread 44 (revision 0). It was
-##               the very first program for the Block II AGC, created as an
-##               extensive rewrite of the Block I program Sunrise.
-##               This file is intended to be a faithful transcription, except
-##               that the code format has been changed to conform to the
-##               requirements of the yaYUL assembler rather than the
-##               original YUL assembler.
-## Reference:    pp. 210-242
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-16 MAS  Began.
-##               2016-12-17 MAS  Completed transcription.
-##               2016-12-18 MAS  Typos.
-##               2016-12-18 MAS  Added notes about bugs discovered in the
-##                               tests present here.
-##               2016-12-20 MAS  Fixed a typo in a program label.
+## Copyright:   Public domain.
+## Filename:    AGC_BLK2_INSTRUCTION_CHECK.agc
+## Purpose:     This program is designed to extensively test the Apollo Guidance Computer
+##              (specifically the LM instantiation of it). It is built on top of a heavily
+##              stripped-down Aurora 12, with all code ostensibly added by the DAP Group
+##              removed. Instead Borealis expands upon the tests provided by Aurora,
+##              including corrected tests from Retread 44 and tests from Ron Burkey's
+##              Validation.
+## Assembler:   yaYUL
+## Contact:     Mike Stewart <mastewar1@gmail.com>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-12-20 MAS  Imported from Retread 44 into banks 22 and 23. Tweaked
+##                              to share memory with Aurora's SELF-CHECK in the process.
+##                              Some labels also had an "R" attached to denote the Retread
+##                              version of tests that had the same name in Aurora.
 
-## Page 210
-                SETLOC          ABORT           +1
+
+                EBANK=          3
+
+                SETLOC          ENDSELFF
+# Constants for retread instruction check. Some are shared between both banks.
 
 # ADDRESSES OF ERASABLE REGISTERS
-ADRS1           ADRES           KEEP1
-ADRS2           ADRES           KEEP2
-ADRS3           ADRES           KEEP3
+ADRS2           ADRES           SKEEP2
+ADRS3           ADRES           SKEEP3
 ADRS4           ADRES           SELF1
 ADRS5           ADRES           SELF2
 ADRS6           ADRES           S+MAX
 ADRS7           ADRES           SELF3
 
 # CONSTANTS USED THROUGHOUT THE INSTRUCTIONS CHECK
-SBIT1           OCTAL           00001
-SBIT2           OCTAL           00002
-SBIT3           OCTAL           00004
-SBIT4           OCTAL           00010
-SBIT5           OCTAL           00020
-SBIT6           OCTAL           00040
-SBIT7           OCTAL           00100
-SBIT8           OCTAL           00200
-SBIT9           OCTAL           00400
-SBIT10          OCTAL           01000
-SBIT11          OCTAL           02000
-SBIT12          OCTAL           04000
-SBIT13          OCTAL           10000
-SBIT14          OCTAL           20000
-SBIT15          OCTAL           40000
 
-## The 00000 below is lightly circled.
-S+ZERO          OCTAL           00000
-S+1             OCTAL           00001
-S+2             OCTAL           00002
-S+3             OCTAL           00003
-S+4             OCTAL           00004
-S+5             OCTAL           00005
-S+6             OCTAL           00006
-S+7             OCTAL           00007
 S6BITS          OCTAL           00077
 S7BITS          OCTAL           00177
-S13BITS         OCTAL           17777
 SODD            OCTAL           25252                           # SEVEN ONE BITS
-S+MAX           OCTAL           37777
-S-MAX           OCTAL           40000
 ALARMCON        OCTAL           40400
 SINOUT1         OCTAL           52500
 SEVENS          OCTAL           52525                           # EIGHT ONE BITS
@@ -72,90 +42,33 @@ CYRCON          OCTAL           57761
 SINOUT3         OCTAL           77725
 S-15            OCTAL           77760
 S-14            OCTAL           77761
-S-7             OCTAL           77770
-## Page 211
 S-6             OCTAL           77771
 S-5             OCTAL           77772
-S-4             OCTAL           77773
-S-3             OCTAL           77774
-S-2             OCTAL           77775
-S-1             OCTAL           77776
-S-ZERO          OCTAL           77777
 
 # NEXT TWO CONSTANTS ARE USED IN THE DEVIDE SUBROUTINE
 DV1CON          OCTAL           14000
 DV2CON          OCTAL           37776
 
 # NEXT TWO CONSTANTS ARE ADDRESSESS USED BY EXTRACODE INDEX INSTRUCTIONS
-ADRS+1          ADRES           S+1
+ADRS+1R         ADRES           S+1
 ADRSDV1         ADRES           DV1CON
 
-                CS              A                               
--0CHK           CCS             A                               
-                TCF             ERRORS                          
-                TCF             ERRORS                          
-                TCF             ERRORS                          
-                TC              Q                               
+ENDRTRDF        EQUALS
 
-                CS              A                               
--1CHK           CCS             A                               
-                TCF             ERRORS                          
-                TCF             ERRORS                          
-                CCS             A                               
-                TCF             ERRORS                          
-                TC              Q                               
-
-
-ERRORS          XCH             Q                               
-                TS              SFAIL                           # SAVE Q FOR FAILURE LOCATION
-                INCR            ERCOUNT                         # KEEP TRACK OF NUMBER OF MALFUNCTIONS
-                INHINT                                          # TURN ON PROGRAM ALARM LIGHT
-                CS              ALARMCON
-                MASK            DSPTAB          +11D
-                AD              ALARMCON
-                TS              DSPTAB          +11D
-                RELINT
-
-# IF C(SMODE) IS +NON-ZERO START CHECKING AGAIN AT TCCHK
-# IF C(SMODE) IS + PUT +0 IN SMODE AND IDLE
-## "CA SMODE" below is marked with a line drawn to a +, and "BZMF STOPCHK" is underlined and marked with a -
-                CA              SMODE
-                EXTEND
-                BZMF            STOPCHK
-                TC              SMODECHK
-STOPCHK         CA              S+ZERO
-                TS              SMODE
-## Page 212
-                TC              CHECKNJ
-## The following CCS has its branch conditions written in: +>0, +0, -<0, and -0.
-SMODECHK        CCS             SMODE                           
-                TC              +3
-                TC              SMODECHK        -1
-                TC              +1
-                TC              CHECKNJ
-                CAF             STRTCHK
-                TC              BANKJUMP                        # TO START OF CHECKING ROUTINES
-STRTCHK         CADR            TCCHK
-
-                SETLOC          26000
-
-                CA              S+ZERO                          # INITIALIZE COUNT REGISTER
-                TS              ERCOUNT
-                TS              SCOUNT
+                BANK            22
 
 # NORMAL USE OF TC AND TCF
 TCCHK           TC              +2                              
-                TC              CCSCHK                          
+                TC              RCCSCHK                          
                 TCF             +2
                 TC              ERRORS                          
                 TC              Q
                 TC              ERRORS                          
 
-## Written to the right of the next few lines is "Written for comp self test and in Gyro S.F. test", signed G&S.
 # NORMAL USE OF CA, CS, AND CCS
-CCSCHK          CA              S-3
-                TS              KEEP1
-                CCS             KEEP1
+RCCSCHK         CA              S-3
+                TS              SKEEP1
+                CCS             SKEEP1
                 TC              ERRORS                          
                 TC              ERRORS                          
                 TC              +2                              
@@ -178,7 +91,6 @@ CCSCHK          CA              S-3
                 CS              A
                 CCS             A                               # C(A) = -0, RESULT OF CCS +0
                 TC              ERRORS                          
-## Page 213
                 TC              ERRORS                          
                 TC              ERRORS                          
                 CCS             A                               # RESULT OF CCS -0
@@ -205,10 +117,10 @@ MSKCHK          CS              S-ZERO
                 CA              S-ZERO                          # 77777
                 TS              EDOP                            # 00177
                 MASK            EDOP                            # 00177
-                TS              KEEP1                           # 00177
+                TS              SKEEP1                          # 00177
                 MASK            EDOP                            # 00177
                 CS              A                               # 77600
-                AD              KEEP1                           # 77777
+                AD              SKEEP1                          # 77777
                 TC              -0CHK
 # CHECK MASK OF AN SC REGISTER
                 CA              S+1
@@ -219,37 +131,36 @@ MSKCHK          CS              S-ZERO
 
 # NORMAL USE OF XCH, AD, AND TS
                 CA              S+MAX                           # 37777
-                TS              KEEP1
-                AD              KEEP1                           # 01 - 37776
-                TS              KEEP2                           # 37776
+                TS              SKEEP1
+                AD              SKEEP1                          # 01 - 37776
+                TS              SKEEP2                          # 37776
                 TC              ERRORS
                 TC              -1CHK           -1
-                XCH             KEEP1                           # SKEEP1 NOW +0
+                XCH             SKEEP1                          # SSKEEP1 NOW +0
                 CS              A                               # 40000
                 AD              A                               # 10 - 00001
-                TS              KEEP3                           # 40001, C(A) = -1
+                TS              SKEEP3                          # 40001, C(A) = -1
                 TC              ERRORS
-## Page 214
-                AD              KEEP3                           # C(A) = 40000
-                AD              KEEP2                           # C(A) = -1
-                AD              KEEP1                           # C(A) = -1
-                TS              KEEP4                           # -1
-                CS              KEEP4                           # +1
+                AD              SKEEP3                          # C(A) = 40000
+                AD              SKEEP2                          # C(A) = -1
+                AD              SKEEP1                          # C(A) = -1
+                TS              SKEEP4                          # -1
+                CS              SKEEP4                          # +1
                 TC              -1CHK           -1
 
 # NORMAL USE OF INCR
 # NOT CHECKING COUNTER INTERRUPT
                 CA              S+MAX                           # 37777
-                TS              KEEP1
-                INCR            KEEP1                           # +0
-                INCR            KEEP1                           # +1
-                INCR            KEEP1                           # +2
+                TS              SKEEP1
+                INCR            SKEEP1                          # +0
+                INCR            SKEEP1                          # +1
+                INCR            SKEEP1                          # +2
                 AD              S-MAX
                 TC              -0CHK                           # CHECK C(A) HAS NOT CHANGED
-                CS              KEEP1
-                TS              KEEP1                           # -2
-                INCR            KEEP1                           # -1
-                CA              KEEP1
+                CS              SKEEP1
+                TS              SKEEP1                          # -2
+                INCR            SKEEP1                          # -1
+                CA              SKEEP1
                 TC              -1CHK
 # CHECK     INCREMENT OF AN SC REGISTER
                 CA              S-2
@@ -260,12 +171,12 @@ MSKCHK          CS              S-ZERO
 
 # NORMAL USE OF ADS
                 CA              SBIT13
-                TS              KEEP1                           # 10000
-                ADS             KEEP1                           # 20000
-                ADS             KEEP1                           # OV WITH +0
-                TS              KEEP2
+                TS              SKEEP1                          # 10000
+                ADS             SKEEP1                          # 20000
+                ADS             SKEEP1                          # OV WITH +0
+                TS              SKEEP2
                 TC              ERRORS
-                CS              KEEP1
+                CS              SKEEP1
                 TC              -0CHK
 # CHECKS ADS OF AN SC REGISTER
                 CA              S13BITS                         # 17777
@@ -280,13 +191,12 @@ MSKCHK          CS              S-ZERO
 
 # NORMAL USE OF LXCH
                 CA              S+1
-## Page 215
-                TS              KEEP1                           # +1
-                LXCH            KEEP1                           # +1 IN L
+                TS              SKEEP1                          # +1
+                LXCH            SKEEP1                          # +1 IN L
                 CS              A
-                TS              KEEP2                           # -1 IN KEEP2
-                LXCH            KEEP2                           # L = -1, KEEP2 = +1
-                CS              KEEP2
+                TS              SKEEP2                          # -1 IN SKEEP2
+                LXCH            SKEEP2                          # L = -1, SKEEP2 = +1
+                CS              SKEEP2
                 TC              -1CHK
                 CA              L
                 TC              -1CHK
@@ -299,127 +209,125 @@ MSKCHK          CS              S-ZERO
                 CS              S+MAX
                 AD              A                               # UV WITH 40001
                 LXCH            A                               # C(A) = 37776, C(L) = 40001
-                TS              KEEP1                           # 37776
+                TS              SKEEP1                          # 37776
                 TC              +2
                 TC              ERRORS
                 CA              L
-                TS              KEEP2                           # 40001
+                TS              SKEEP2                          # 40001
                 TC              +2
                 TC              ERRORS
-                AD              KEEP1                           # -0
+                AD              SKEEP1                          # -0
                 TC              -0CHK
 
 # NORMAL USE OF DXCH
                 CA              S+MAX
-                TS              KEEP2                           # 37777, K+1
+                TS              SKEEP2                          # 37777, K+1
                 CS              A
                 TS              L                               # 40000
                 AD              S+1
-                TS              KEEP1                           # 40001, K
+                TS              SKEEP1                          # 40001, K
                 CS              A                               # 37776
-                DXCH            KEEP1
-# A = 40001, L = 37777 ....... KEEP1 = 37776, KEEP2 = 40000
+                DXCH            SKEEP1
+# A = 40001, L = 37777 ....... SKEEP1 = 37776, SKEEP2 = 40000
                 AD              L
                 TC              -1CHK           -1
-                CA              KEEP1
-                AD              KEEP2
+                CA              SKEEP1
+                AD              SKEEP2
                 TC              -1CHK
 
 # NORMAL USE OF DAS (6 CHECKS)
 # IF ADDRESS OF K DOES NOT = ZERO, C(L) = +0 AND C(A) = NET OVERFLOW
 # C(A) = +0 IF NO OVERFLOW OR UNDERFLOW
 # DAD++ WITH NO OVERFLOW
-DAS++           CAF             S13BITS
-                TS              KEEP1                           # 17777
-## Page 216
-                TS              KEEP2                           # 17777
+RDAS++          CAF             S13BITS
+                TS              SKEEP1                          # 17777
+                TS              SKEEP2                          # 17777
                 TS              L                               # 17777
                 AD              S+1                             # 20000
-                DAS             KEEP1
-# C(KEEP1) = 37777, C(KEEP2) = 377776
+                DAS             SKEEP1
+# C(SKEEP1) = 37777, C(SKEEP2) = 377776
                 TC              -0CHK           -1
                 XCH             L
                 TC              -0CHK           -1
-                CS              KEEP1
-                AD              KEEP2
+                CS              SKEEP1
+                AD              SKEEP2
                 TC              -1CHK
 # DAS++ WITH OVERFLOW
 DAS++OV         CA              S+MAX
-                TS              KEEP1                           # 37777
-                TS              KEEP2                           # 37777
+                TS              SKEEP1                          # 37777
+                TS              SKEEP2                          # 37777
                 TS              L                               # 37777
                 CA              S+1                             # +1
-                DAS             KEEP1
-# C(KEEP1) = +1, C(KEEP2) = 37776, C(A) = +1,
+                DAS             SKEEP1
+# C(SKEEP1) = +1, C(SKEEP2) = 37776, C(A) = +1,
                 TC              -1CHK           -1
                 XCH             L
                 TC              -0CHK           -1
-                CS              KEEP1
+                CS              SKEEP1
                 TC              -1CHK
                 CA              S-MAX
-                AD              KEEP2
+                AD              SKEEP2
                 TC              -1CHK
 # DAS MIXED SIGNS
 DAS+--+         CA              S+MAX
-                TS              KEEP1                           # 37777
+                TS              SKEEP1                          # 37777
                 CS              A
-                TS              KEEP2                           # 40000
+                TS              SKEEP2                          # 40000
                 CS              A
                 AD              S-1
                 TS              L                               # 37776
                 CS              A                               # 40001
-                DAS             KEEP1
-# C(KEEP1) = +1, C(KEEP2) = -1
+                DAS             SKEEP1
+# C(SKEEP1) = +1, C(SKEEP2) = -1
                 TC              -0CHK           -1
                 XCH             L
                 TC              -0CHK           -1
-                CA              KEEP1
+                CA              SKEEP1
                 TC              -1CHK           -1
-                CA              KEEP2
+                CA              SKEEP2
                 TC              -1CHK
 # DAS-- WITH NO UNDERFLOW
 DAS--           CS              S13BITS
-                TS              KEEP1                           # 60000
-                TS              KEEP2                           # 60000
+                TS              SKEEP1                          # 60000
+                TS              SKEEP2                          # 60000
                 TS              L                               # 60000
-## Page 217
                 AD              S-1                             # 57777
-                DAS             KEEP1
-# C(KEEP1) = 40000, C(KEEP2) = 40001
+                DAS             SKEEP1
+# C(SKEEP1) = 40000, C(SKEEP2) = 40001
                 TC              -0CHK           -1
                 XCH             L
                 TC              -0CHK           -1
-                CS              KEEP2
-                AD              KEEP1
+                CS              SKEEP2
+                AD              SKEEP1
                 TC              -1CHK
 # DAS-- WITH UNDERFLOW
 DAS--UV         CA              S-MAX
-                TS              KEEP1                           # 40000
-                TS              KEEP2                           # 40000
+                TS              SKEEP1                          # 40000
+                TS              SKEEP2                          # 40000
                 TS              L                               # 40000
                 CA              S-1                             # -1
-                DAS             KEEP1
-# C:KEEP1) = -1, C(KEEP2) = 40001, C(A) = -1
+                DAS             SKEEP1
+# C:SKEEP1) = -1, C(SKEEP2) = 40001, C(A) = -1
                 TC              -1CHK
                 XCH             L
                 TC              -0CHK           -1
-                CA              KEEP1
+                CA              SKEEP1
                 TC              -1CHK
                 CA              S+MAX
-                AD              KEEP2
+                AD              SKEEP2
                 TC              -1CHK           -1
 # DAS A.  DOUBLES THE CONTENTS OF THE A REGISTER AND THE L REGISTER.
                 CA              S-MAX
-                TS              KEEP2                           # 40000
+                TS              SKEEP2                          # 40000
                 TS              L                               # 40000
                 CS              A
-                TS              KEEP1                           # 37777
+                TS              SKEEP1                          # 37777
                 DAS             A
 # C(A) = OV 37775, C(L) = 40001
-                TS              KEEP3
+                TS              SKEEP3
                 TC              ERRORS
                 CA              L
-                AD              KEEP3
+                AD              SKEEP3
                 TC              -1CHK
 
 # NORMAL USE OF INDEX WITHOUT EXTRACODE.
@@ -433,7 +341,6 @@ DAS--UV         CA              S-MAX
                 CA              ADRS1
                 TS              NDXKEEP1
                 CA              ADRS2
-## Page 218
                 TS              NDXKEEP2
                 CA              ADRS3
                 TS              NDXKEEP3
@@ -443,19 +350,19 @@ DAS--UV         CA              S-MAX
                 TS              NDXSELF2
 NDXCHK          NDX             NDX+MAX                         # CA S+MAX
                 CA              0000                            # A = 37777
-                NDX             NDXKEEP1                        # TS KEEP1
+                NDX             NDXKEEP1                       # TS SKEEP1
                 TS              0000                            # TS WITH NO OV, UV
                 NDX             NDX+0                           # CS   A
                 CS              0000                            # A = 40000
-                NDX             NDXKEEP1                        # XCH KEEP1
-                XCH             0000                            # A = +MAX, KEEP1 = - MAX
+                NDX             NDXKEEP1                       # XCH SKEEP1
+                XCH             0000                            # A = +MAX, SKEEP1 = - MAX
                 NDX             NDX+0                           # CCS A
                 CCS             0000                            # A = 37776
                 TC              +4
                 TC              ERRORS
                 TC              ERRORS
                 TC              ERRORS
-                NDX             NDXKEEP1                        # AD KEEP1
+                NDX             NDXKEEP1                       # AD SKEEP1
                 AD              0000                            # A = -1
 SELF1           NDX             NDXSELF1                        # TC +2
                 TC              0003
@@ -470,77 +377,75 @@ SELF2           NDX             NDXSELF2                        # TCF +2
 CNTINU          TC              -1CHK
                 CA              S+MAX
                 AD              S+1
-                NDX             NDXKEEP1                        # TS KEEP1 WITH OV
-                TS              0000                            # A = +1, KEEP1 = +0
+                NDX             NDXKEEP1                       # TS SKEEP1 WITH OV
+                TS              0000                            # A = +1, SKEEP1 = +0
                 TC              ERRORS
-                AD              KEEP1                           # A = +1
+                AD              SKEEP1                          # A = +1
                 NDX             NDX+MAX                         # MASK S+MAX
                 MASK            0000                            # A = +1
                 TC              -1CHK           -1
 
 # INDEX USED WITH ADS, NDX, AND INCR
                 CA              S13BITS
-                TS              KEEP1
+                TS              SKEEP1
                 NDX             NDX+0                           # INDEX +0
-                NDX             NDXKEEP1                        # ADS KEEP1
-                ADS             0000                            # C(A) AND C(KEEP1) = 377776
-## Page 219
-                NDX             NDXKEEP1                        # INCR KEEP1
-                INCR            0000                            # C(KEEP1) = 37777
+                NDX             NDXKEEP1                       # ADS SKEEP1
+                ADS             0000                            # C(A) AND C(SKEEP1) = 377776
+                NDX             NDXKEEP1                       # INCR SKEEP1
+                INCR            0000                            # C(SKEEP1) = 37777
                 CS              A                               # 40001
-                AD              KEEP1                           # A = +1
+                AD              SKEEP1                          # A = +1
                 TC              -1CHK           -1
 # INDEX USED WITH LXCH, DAS, AND DXCH
                 CA              S-MAX
-                TS              KEEP2                           # KEEP2 HOLDS 40000, KEEP1 HOLDS 37777
+                TS              SKEEP2                          # SKEEP2 HOLDS 40000, SKEEP1 HOLDS 37777
                 CA              S+1
-                TS              KEEP3                           # +1
-                NDX             NDXKEEP3                        # LXCH KEEP3
+                TS              SKEEP3                          # +1
+                NDX             NDXKEEP3                       # LXCH SKEEP3
                 LXCH            0000                            # C(L) = +1
                 CA              S-2
-                NDX             NDXKEEP1                        # DAS KEEP1
+                NDX             NDXKEEP1                       # DAS SKEEP1
                 DAS             0000
 # BEFORE DAS, K = 37777   K+1 = 40000
 #             A = -1      L   = +1
 # AFTER  DAS, K = 37775   K+1 = 40001
 #            A = +0    L  = +0
-                NDX             NDXKEEP1                        # DXCH KEEP1
+                NDX             NDXKEEP1                       # DXCH SKEEP1
                 DXCH            0000
                 AD              L
                 TC              -1CHK
-                CS              KEEP1
+                CS              SKEEP1
                 TC              -0CHK
-                CA              KEEP2
+                CA              SKEEP2
                 TC              -0CHK           -1
 # INDEX INSTRUCTION USED WITH OVERFLOW
                 CA              ADRS7                           # ADDRESS OF SELF3
                 AD              SBIT14
-                TS              KEEP7
-SELF3           NDX             KEEP7
+                TS              SKEEP7
+SELF3           NDX             SKEEP7
                 2               0002
                 TC              ERRORS
 # CHECK INDEX OF AN SC REGISTER
-                CA              ADRS1                           # 01371, ADDRESS OF KEEP1
+                CA              ADRS1                           # 01371, ADDRESS OF SKEEP1
                 NDX             A
-                TS              0000                            # PUT 01371 IN KEEP1
+                TS              0000                            # PUT 01371 IN SKEEP1
                 CS              A
-                AD              KEEP1
+                AD              SKEEP1
                 TC              -0CHK
 
-## Page 220
 # START CHECKING EXTRACODE INSTRUCTIONS
 # NORMAL USE OF DCA, DCS, AND SU
 STRTXTRA        EXTEND
                 DCA             SBIT1
 # C(A) = +1, C(L) = +2
-                TS              KEEP2                           # +1
+                TS              SKEEP2                          # +1
                 XCH             L
-                TS              KEEP1                           # +2
+                TS              SKEEP1                          # +2
                 EXTEND
-                SU              KEEP2                           # C(KEEP2) = +1
+                SU              SKEEP2                          # C(SKEEP2) = +1
                 TC              -1CHK           -1
                 EXTEND
-                DCS             KEEP1
+                DCS             SKEEP1
 # C(A) = -2, C(L) = -1
                 EXTEND
                 SU              L
@@ -551,27 +456,12 @@ STRTXTRA        EXTEND
                 AD              A                               # OV37776
                 EXTEND
                 DCS             A
-                TS              KEEP1
+                TS              SKEEP1
                 TC              ERRORS
-                CA              KEEP1
+                CA              SKEEP1
                 EXTEND
                 SU              L
                 TC              -1CHK           -1
-
-## The following test is, in the words of AGC developer Hugh Blair-Smith, "wrong wrong wrong".
-## The code appears to be assuming that the result of DCA L is  A <-- L and L <-- Q. However,
-## in reality, the L <-- Q happens bfore L is copied into A, so the net result is A <-- Q 
-## and L <-- Q. 
-## Hugh's theory is that Retread made it up to revision 44 mostly before hardware was
-## available to run it on. And the self-check code, which was tied to the hardware, was likely
-## not exercised as part of its development. Moreover, it's possible that the digital simulator
-## itself had an incorrect implementation of DCA based on a misunderstanding of the hareware
-## design.
-## There's a couple of ways to fix this test, but the most "correct" would probably be:
-##   DCA  L      # A = L = -2
-##   CS   A      # A = 2
-##   AD   L      # A = -2 + 2 = -0
-##   TC   -0CHK
 
 # CHECKS DCA OF AN SC REGISTER
                 CA              S-2                             # -2
@@ -581,22 +471,22 @@ STRTXTRA        EXTEND
                 CA              SBIT8
                 EXTEND
                 DCA             L
-                AD              L                               # -1
-                TC              -1CHK
+                CS              A                               # +2
+                AD              L                               # -0
+                TC              -0CHK
 
 # NORMAL USE OF QXCH
                 CA              QXCHCON1
-                TS              KEEP1                           # STORE ADDRESS OF AUGCHK IN KEEP1
+                TS              SKEEP1                          # STORE ADDRESS OF AUGCHK IN SKEEP1
                 TC              +2                              # Q NOW HOLDS ADDRESS OF QNMBR
 QNMBR           TC              ERRORS
                 EXTEND
-                QXCH            KEEP1                           # Q NOW HOLDS ADDRESS OF AUGCHK
+                QXCH            SKEEP1                          # Q NOW HOLDS ADDRESS OF AUGCHK
                 TC              Q                               # SHOULD GO TO QXCHCON2 +1, NOT QNMBR
                 TC              ERRORS
 QXCHCON1        ADRES           QXCHCON2        +1
-## Page 221
 QXCHCON2        ADRES           QNMBR
-                CS              KEEP1                           # CHECK THAT KEEP HOLDS B(Q)
+                CS              SKEEP1                          # CHECK THAT SKEEP HOLDS B(Q)
                 AD              QXCHCON2
                 TC              -0CHK
 # CHECKS QXCH OF AN SC REGISTER
@@ -612,23 +502,23 @@ QXCHCON2        ADRES           QNMBR
 
 # NORMAL USE OF AUG
 AUGCHK          CA              S+ZERO
-                TS              KEEP1                           # +0
+                TS              SKEEP1                          # +0
                 CS              A
-                TS              KEEP2                           # -0
+                TS              SKEEP2                          # -0
                 EXTEND
-                AUG             KEEP1                           # +1
+                AUG             SKEEP1                          # +1
                 EXTEND
-                AUG             KEEP1                           # +2
+                AUG             SKEEP1                          # +2
                 TC              -0CHK                           # CHECK C(A) HAS NOT CHANGED
                 EXTEND
-                AUG             KEEP2                           # -1
+                AUG             SKEEP2                          # -1
                 EXTEND
-                AUG             KEEP2                           # -2
+                AUG             SKEEP2                          # -2
                 EXTEND
-                AUG             KEEP2                           # -3
+                AUG             SKEEP2                          # -3
                 TC              -0CHK           -1
-                CA              KEEP2
-                AD              KEEP1
+                CA              SKEEP2
+                AD              SKEEP1
                 TC              -1CHK
 # CHECKS AUG OF AN SC REGISTER
                 CA              S-ZERO
@@ -638,42 +528,40 @@ AUGCHK          CA              S+ZERO
 
 # NORMAL USE OF DIM
 DIMCHK          CA              S+ZERO
-                TS              KEEP1                           # +0
+                TS              SKEEP1                          # +0
                 EXTEND
-                DIM             KEEP1
-                CA              KEEP1
+                DIM             SKEEP1
+                CA              SKEEP1
                 TC              -0CHK           -1
                 CS              A
-                TS              KEEP1                           # -0
-## Page 222
-## There is a physical page break here, but the next page does not have a header or its own number.
+                TS              SKEEP1                          # -0
                 EXTEND
-                DIM             KEEP1
-                CA              KEEP1
+                DIM             SKEEP1
+                CA              SKEEP1
                 TC              -0CHK
                 CA              S+2
-                TS              KEEP1                           # +2
+                TS              SKEEP1                          # +2
                 EXTEND
-                DIM             KEEP1                           # +1
+                DIM             SKEEP1                          # +1
                 AD              S-1
                 TC              -1CHK           -1              # CHECK C(A) HAS NOT CHANGED
-                CA              KEEP1
+                CA              SKEEP1
                 TC              -1CHK           -1
                 EXTEND
-                DIM             KEEP1
+                DIM             SKEEP1
                 TC              -0CHK           -1
-                CA              KEEP1
+                CA              SKEEP1
                 TC              -0CHK
                 CS              S+2
-                TS              KEEP2                           # -2
+                TS              SKEEP2                          # -2
                 EXTEND
-                DIM             KEEP2                           # -1
-                CA              KEEP2
+                DIM             SKEEP2                          # -1
+                CA              SKEEP2
                 TC              -1CHK
                 EXTEND
-                DIM             KEEP2                           # -0
+                DIM             SKEEP2                          # -0
                 TC              -0CHK           -1
-                CA              KEEP2
+                CA              SKEEP2
                 TC              -0CHK
 # CHECKS DIM OF AN SC REGISTER
                 CA              S-2
@@ -684,56 +572,55 @@ DIMCHK          CA              S+ZERO
 # NORMAL USE OF MSU
 # MSU SAME (S+MAX AND S+MAX), RESULT +0
                 CA              S+MAX
-                TS              KEEP1
+                TS              SKEEP1
                 EXTEND
-                MSU             KEEP1
+                MSU             SKEEP1
                 TC              -0CHK           -1
 # MSU SAME (+0 AND +0), RESULT +0
-                TS              KEEP2
+                TS              SKEEP2
                 EXTEND
-                MSU             KEEP2
+                MSU             SKEEP2
                 TC              -0CHK           -1
 # MSU SAME (-0 AND -0), RESULT +0
                 CA              S-ZERO
-                TS              KEEP3
+                TS              SKEEP3
                 EXTEND
-## Page 223
-                MSU             KEEP3
+                MSU             SKEEP3
                 TC              -0CHK           -1
 # MSU +0 AND 77777, RESULT = +1
                 EXTEND
-                MSU             KEEP3
+                MSU             SKEEP3
                 TC              -1CHK           -1
 # MSU 77777 AND +0, RESULT = -1
                 CS              A
                 EXTEND
-                MSU             KEEP2
+                MSU             SKEEP2
                 TC              -1CHK
 # MSU +6 AND +7, RESULT = -1
                 CA              S+7
-                TS              KEEP4
+                TS              SKEEP4
                 CA              S+6
-                TS              KEEP5
+                TS              SKEEP5
                 EXTEND
-                MSU             KEEP4
+                MSU             SKEEP4
                 TC              -1CHK
 # MSU +7 AND +6, RESULT = +1
                 CA              S+7
                 EXTEND
-                MSU             KEEP5
+                MSU             SKEEP5
                 TC              -1CHK           -1
 # MSU 77770 AND 77771, RESULT = -1
                 CA              S-6
-                TS              KEEP6
+                TS              SKEEP6
                 CA              S-7
-                TS              KEEP7
+                TS              SKEEP7
                 EXTEND
-                MSU             KEEP6
+                MSU             SKEEP6
                 TC              -1CHK
 # MSU 77771 AND 77770, RESULT = +1
                 CA              S-6
                 EXTEND
-                MSU             KEEP7
+                MSU             SKEEP7
                 TC              -1CHK           -1
 # CHECKS MSU OF AN SC REGISTER ( -0 AND -0 = +0)
                 CA              S-ZERO
@@ -743,13 +630,12 @@ DIMCHK          CA              S+ZERO
                 TC              -0CHK           -1
 
 # NORMAL USE OF BZF
-BZFCHK          TC              +2
-                TC              BZMFCHK                         # CORRECT ADDRESS IN Q
+RBZFCHK         TC              +2
+                TC              RBZMFCHK                        # CORRECT ADDRESS IN Q
                 CAF             S+5
                 EXTEND
                 BZF             ERRORS
 
-## Page 224
                 CS              A
                 EXTEND
                 BZF             ERRORS
@@ -761,10 +647,10 @@ BZFCHK          TC              +2
                 EXTEND
                 BZF             +2
                 TC              ERRORS
-                TC              Q                               # SHOULD GO TO BZFCHK +1
+                TC              Q                               # SHOULD GO TO RBZFCHK +1
                 TC              ERRORS
 
-BZMFCHK         TC              +2
+RBZMFCHK        TC              +2
                 TC              MP1++                           # CORRECT ADDRESS IN Q
                 CAF             SBIT9
                 EXTEND
@@ -781,7 +667,7 @@ BZMFCHK         TC              +2
                 EXTEND
                 BZMF            +2
                 TC              ERRORS
-                TC              Q                               # SHOULD GO TO BZMFCHK +1
+                TC              Q                               # SHOULD GO TO RBZMFCHK +1
                 TC              ERRORS
 
 # NORMAL USE OF MP
@@ -790,43 +676,42 @@ MP1++           CA              S+MAX                           # 37777
                 EXTEND
                 MP              S+2                             # C(A) = +1, C(L. = 37776
                 AD              L
-                TS              KEEP1                           # 37777
+                TS              SKEEP1                          # 37777
 MP1+-           EXTEND
                 MP              S-2                             # C(A) = -1, C(L) = 40001
                 AD              L
-                TS              KEEP2                           # 40000
+                TS              SKEEP2                          # 40000
 MP1-+           EXTEND
                 MP              S+2                             # C(A) = -1, C(L) = 40001
                 AD              L
-                TS              KEEP3                           # 40000
+                TS              SKEEP3                          # 40000
 MP1--           EXTEND
-## Page 225
                 MP              S-2                             # C(A) = +1, C(L) = 37776
                 AD              L                               # 37777
-                AD              KEEP3                           # 77777
-                AD              KEEP2                           # 40000
-                AD              KEEP1                           # 77777
+                AD              SKEEP3                          # 77777
+                AD              SKEEP2                          # 40000
+                AD              SKEEP1                          # 77777
                 TC              -0CHK
 # 37777 X 37777
 MP2++           CA              S+MAX                           # 37777
                 EXTEND                                          # CHECKS RSC PULSE
                 MP              A                               # C(A) = 37776, C(L) = +1
                 AD              L
-                TS              KEEP1                           # 37777
+                TS              SKEEP1                          # 37777
 MP2+-           EXTEND
                 MP              S-MAX                           # C(A) = 40001, C(L) = -1
                 AD              L
-                TS              KEEP2                           # 40000
+                TS              SKEEP2                          # 40000
 MP2-+           EXTEND
                 MP              S+MAX                           # C(A) = 40001, C(L) = -1
                 AD              L
-                TS              KEEP3                           # 40000
+                TS              SKEEP3                          # 40000
 MP2--           EXTEND
                 MP              S-MAX                           # C(A) = 37776, C(L) = +1
                 AD              L                               # 37777
-                AD              KEEP3                           # 77777
-                AD              KEEP2                           # 40000
-                AD              KEEP1                           # 77777
+                AD              SKEEP3                          # 77777
+                AD              SKEEP2                          # 40000
+                AD              SKEEP1                          # 77777
                 TC              -0CHK
 # C(A) = NON-ZERO, C(K) = ZERO
 # RESULT IS ALWAYS POSITIVE ZERO
@@ -851,7 +736,6 @@ MP3--           CA              S-ZERO
                 AD              L
                 TC              -0CHK           -1
 # C(A) = ZERO, C(K) = NON-ZERO,
-## Page 226
 # RESULT IS + ZERO FOR A POSITIVE SIGN AND NEGATIVE
 # ZERO FOR Z NEGATIVE SIGN
 MP4++           CA              S+ZERO
@@ -876,9 +760,9 @@ MP4--           CS              A
 # MULTIPLY ZERO X ZERO
 # RESULT IS ALWAYS PLUS ZERO
 MP5++           CA              S+ZERO
-                TS              KEEP1
+                TS              SKEEP1
                 EXTEND
-                MP              KEEP1
+                MP              SKEEP1
                 AD              L
                 TC              -0CHK           -1
 MP5+-           EXTEND
@@ -895,47 +779,49 @@ MP5--           CA              S-ZERO
                 MP              S-ZERO
                 TC              -0CHK           -1
 
-                CA              CONTINU
+                CA              RCONTINU
                 TC              BANKJUMP
-CONTINU         CADR            DV1++           -1              # CONTINUE WITH INSTRUCTION CHECK
+RCONTINU        CADR            RDV1++                          # CONTINUE WITH INSTRUCTION CHECK
 
-                SETLOC          30000
+ENDINST1        EQUALS
 
-                TC              CHECKNJ                         # CHECK FOR NEW JOB
+                BANK            23
 
-## Page 227
+# This is dangerous; see the other commented-out CHECKNJ above.
+                #TC              CHECKNJ                         # CHECK FOR NEW JOB
+
 # NORMAL USE OF DV ... REMAINDER HAS SIGN OF DIVIDEND
 # 1/4 DIVIDED BY 3/8
 # C(A) = 25252 WITH A + QUOTIENT AND 52525 WITH A - QUOTIENT.
 # C(L) = REMAINDER = /100000/ WITH SIGN OF DIVIDEND.
-DV1++           CA              DV1CON                          # 14000
-                TS              KEEP7                           # 14000, +3/8
+RDV1++          CA              DV1CON                          # 14000
+                TS              SKEEP7                          # 14000, +3/8
                 TS              Q
                 CS              A
-                TS              KEEP6                           # 63000, -3/8
+                TS              SKEEP6                          # 63000, -3/8
                 CA              S+ZERO
                 TS              L
                 CA              SBIT13                          # 10000
                 EXTEND
                 DV              Q                               # CHECKS RSC PULSE
-                TS              KEEP1                           # 25252
+                TS              SKEEP1                          # 25252
                 CA              S+ZERO
-DV1+-           LXCH            A
+RDV1+-          LXCH            A
                 EXTEND
-                DV              KEEP6
-                AD              KEEP1
+                DV              SKEEP6
+                AD              SKEEP1
                 TC              -0CHK
                 CA              S-ZERO
                 LXCH            A
-DV1-+           CS              A
+RDV1-+          CS              A
                 EXTEND
-                DV              KEEP7
-                TS              KEEP1                           # 52525
+                DV              SKEEP7
+                TS              SKEEP1                          # 52525
                 CA              S-ZERO
-DV1--           LXCH            A
+RDV1--          LXCH            A
                 EXTEND
-                DV              KEEP6
-                AD              KEEP1
+                DV              SKEEP6
+                AD              SKEEP1
                 TC              -0CHK
                 CA              L
                 AD              SBIT13
@@ -943,36 +829,35 @@ DV1--           LXCH            A
 # 1/2 TO 15TH DIVIDED BY 1/2 TO 14TH
 # C(A) SHOULD BE 1/D AND CONTENTS OF L SHOULD BE ZERO
 DV2++           CA              S+1
-                TS              KEEP7                           # 00001, DIVISOR
+                TS              SKEEP7                          # 00001, DIVISOR
                 CS              A
-                TS              KEEP6                           # 77776, DIVISOR
+                TS              SKEEP6                          # 77776, DIVISOR
                 CA              S+ZERO
                 CA              SBIT14                          # 20000
                 TS              L
                 CA              S+ZERO
                 EXTEND
-                DV              KEEP7                           # C(A) = 1/2, C(L) = +0
-                TS              KEEP1
+                DV              SKEEP7                          # C(A) = 1/2, C(L) = +0
+                TS              SKEEP1
 DV2+-           LXCH            A
-## Page 228
                 EXTEND
-                DV              KEEP6
-                TS              KEEP2                           # -1/2
-                AD              KEEP1
+                DV              SKEEP6
+                TS              SKEEP2                          # -1/2
+                AD              SKEEP1
                 TC              -0CHK
-                CA              KEEP2
+                CA              SKEEP2
                 LXCH            A
 DV2-+           CS              A
                 EXTEND
-                DV              KEEP7
-                TS              KEEP2
+                DV              SKEEP7
+                TS              SKEEP2
 DV2--           LXCH            A
                 EXTEND
-                DV              KEEP6
-                TS              KEEP1
-                AD              KEEP2
+                DV              SKEEP6
+                TS              SKEEP1
+                AD              SKEEP2
                 TC              -0CHK
-                CS              KEEP1                           # MAKE SURE QUOTIENT IS 1/2
+                CS              SKEEP1                          # MAKE SURE QUOTIENT IS 1/2
                 AD              SBIT14
                 TC              -0CHK
                 CA              L
@@ -984,62 +869,61 @@ DV3++           CA              SBIT14                          # 20000
                 TS              L
                 CA              S-ZERO
                 EXTEND
-                DV              KEEP7
-                TS              KEEP1                           # 20000
+                DV              SKEEP7
+                TS              SKEEP1                          # 20000
 DV3+-           LXCH            A
                 CS              A                               # A = -0
                 EXTEND
-                DV              KEEP6
-                AD              KEEP1
+                DV              SKEEP6
+                AD              SKEEP1
                 TC              -0CHK
                 CS              SBIT14                          # -1/2
 DV3-+           LXCH            A
                 EXTEND
-                DV              KEEP7
-                TS              KEEP1
+                DV              SKEEP7
+                TS              SKEEP1
 DV3--           LXCH            A
                 CS              A                               # A = +0
                 EXTEND
-                DV              KEEP6
-                AD              KEEP1
+                DV              SKEEP6
+                AD              SKEEP1
                 TC              -0CHK
                 CS              L
                 TC              -0CHK           -1
 
-## Page 229
 # C(A) = 17777 AND C(L) = 37777.  THIS IS DIVIDED BY 20000.  THE RESULT
 # SHOULD BE +-/37777/ AND THE REMAINDER +-/17777/
 DV4++           CA              S+MAX
                 TS              L
                 CA              SBIT14
-                TS              KEEP7                           # 20000
+                TS              SKEEP7                          # 20000
                 CS              A
-                TS              KEEP6                           # 57777
+                TS              SKEEP6                          # 57777
                 CA              S13BITS                         # 17777
                 EXTEND
-                DV              KEEP7
-                TS              KEEP1
+                DV              SKEEP7
+                TS              SKEEP1
 DV4+-           LXCH            A
                 EXTEND
-                DV              KEEP6
-                TS              KEEP2
-                AD              KEEP1
+                DV              SKEEP6
+                TS              SKEEP2
+                AD              SKEEP1
                 TC              -0CHK
-                CA              KEEP2
+                CA              SKEEP2
                 LXCH            A
 DV4-+           CS              A
                 EXTEND
-                DV              KEEP7
-                AD              KEEP1
+                DV              SKEEP7
+                AD              SKEEP1
                 TC              -0CHK
-                CA              KEEP2
+                CA              SKEEP2
 DV4--           LXCH            A
                 EXTEND
-                DV              KEEP6
-                TS              KEEP3
-                AD              KEEP2
+                DV              SKEEP6
+                TS              SKEEP3
+                AD              SKEEP2
                 TC              -0CHK
-                CS              KEEP3
+                CS              SKEEP3
                 AD              S+MAX
                 TC              -0CHK
                 CA              L
@@ -1049,45 +933,44 @@ DV4--           LXCH            A
 # THE QUOTIENT SHOULD BE +-/37774/ WITH THE SIGN DEPENDING ON THE SIGN OF
 # A AND THE SIGN OF THE DEVISOR. THE C(L) = +-/1/ DEPENDING ON THE SIGN
 # OF A.
-DV5++           CS              S+MAX
+RDV5++          CS              S+MAX
                 TS              L                               # 40000
                 CA              S13BITS                         # 17777
                 EXTEND
-                DV              KEEP7
-                TS              KEEP1                           # 37774
+                DV              SKEEP7
+                TS              SKEEP1                          # 37774
                 XCH             L
                 TC              -1CHK           -1
 
-## Page 230
-DV5+-           CA              S-MAX
+RDV5+-          CA              S-MAX
                 TS              L                               # 40000
                 CA              S13BITS                         # 17777
                 EXTEND
-                DV              KEEP6                           # C(A) = -37774, C(L) = +1
-                AD              KEEP1
+                DV              SKEEP6                          # C(A) = -37774, C(L) = +1
+                AD              SKEEP1
                 TC              -0CHK
                 XCH             L
                 TC              -1CHK           -1
-DV5-+           CA              S+MAX
+RDV5-+          CA              S+MAX
                 TS              L                               # 37777
                 CS              S13BITS                         # 60000
                 EXTEND
-                DV              KEEP7                           # C(A) = -37774, C(L) = -1
-                TS              KEEP2
-                AD              KEEP1
+                DV              SKEEP7                          # C(A) = -37774, C(L) = -1
+                TS              SKEEP2
+                AD              SKEEP1
                 TC              -0CHK
                 XCH             L
                 TC              -1CHK
-DV5--           CA              S+MAX
+RDV5--          CA              S+MAX
                 TS              L                               # 37777
                 CS              S13BITS                         # 60000
                 EXTEND
-                DV              KEEP6                           # C(A) = 37774, C(L) = -1
-                AD              KEEP2
+                DV              SKEEP6                          # C(A) = 37774, C(L) = -1
+                AD              SKEEP2
                 TC              -0CHK
                 XCH             L
                 TC              -1CHK
-                CA              KEEP2                           # -37774
+                CA              SKEEP2                          # -37774
                 AD              S-2                             # -37776
                 AD              S+MAX                           # +1
                 TC              -1CHK           -1              # CHECK THAT QUOTIENT IS +-/37774/
@@ -1098,69 +981,67 @@ DV5--           CA              S+MAX
 DV6++           CA              S+ZERO
                 TS              L
                 CS              DV2CON                          # 37776
-                TS              KEEP6                           # 40001
+                TS              SKEEP6                          # 40001
                 CS              A
-                TS              KEEP7                           # 37776
+                TS              SKEEP7                          # 37776
                 EXTEND
-                DV              KEEP7
+                DV              SKEEP7
                 CS              A
                 AD              L
                 TC              -1CHK
                 CA              S+ZERO
 DV6+-           LXCH            A
                 EXTEND
-## Page 231
-                DV              KEEP6
+                DV              SKEEP6
                 AD              L
                 TC              -1CHK
                 CA              S-ZERO
 DV6-+           LXCH            A
                 CS              A
                 EXTEND
-                DV              KEEP7
+                DV              SKEEP7
                 CS              A
                 AD              L
                 TC              -1CHK           -1
                 CA              S-ZERO
 DV6--           LXCH            A
                 EXTEND
-                DV              KEEP6
+                DV              SKEEP6
                 AD              L
                 TC              -1CHK           -1
                 CS              L
-                AD              KEEP6
+                AD              SKEEP6
                 TC              -0CHK
 # DIVIDE SAME (ZERO).  THE RESULT SHOULD BE MAXIMUM AND THE REMAINDER
 # SHOULD BE THE SAME VALUE AS THE DIVISOR WITH THE SAME SIGN AS THE
 # DIVIDEND.
 DV7++           CS              S+ZERO
-                TS              KEEP6                           # -0
+                TS              SKEEP6                          # -0
                 CS              A
-                TS              KEEP7                           # +0
+                TS              SKEEP7                          # +0
                 TS              L
                 EXTEND
-                DV              KEEP7
+                DV              SKEEP7
                 AD              S-MAX
                 TC              -0CHK
 DV7+-           LXCH            A                               # C(A) = C(L) = +0
                 EXTEND
-                DV              KEEP6
+                DV              SKEEP6
                 AD              S+MAX
                 TC              -0CHK
                 CS              A
 DV7-+           LXCH            A
                 CS              A                               # C(A) = C(L) = -0
                 EXTEND
-                DV              KEEP7
+                DV              SKEEP7
                 AD              S+MAX
                 TC              -0CHK
                 CS              A
 DV7--           LXCH            A                               # C(A) = C(L) = -0
                 EXTEND
-                DV              KEEP6
+                DV              SKEEP6
                 AD              S-MAX
                 TC              -0CHK
-## Page 232
                 CS              L
                 TC              -0CHK           -1
 
@@ -1170,48 +1051,47 @@ DV7--           LXCH            A                               # C(A) = C(L) = 
 # THE DEVISOR. THE SIGN OF THE REMAINDER IS THE SAME SIGN AS THE SIGN OF
 # THE L REGISTER BEFORE DEVISION. C(L)  REMAINS SAME
 DV8++           CA              S+ZERO
-                TS              KEEP7                           # +0
+                TS              SKEEP7                          # +0
                 TS              L
                 CS              A
-                TS              KEEP6                           # -0
+                TS              SKEEP6                          # -0
                 EXTEND                                          # A = -0, L = +0
-                DV              KEEP7                           # A = L = +0
-                TS              KEEP1
+                DV              SKEEP7                          # A = L = +0
+                TS              SKEEP1
                 CA              L                               # C(A) = C(L) = +0
                 TC              -0CHK           -1
 DV8+-           CS              A
                 EXTEND                                          # A = -0, L = +0
-                DV              KEEP6                           # A = -0, L = +0
-                AD              KEEP1
+                DV              SKEEP6                          # A = -0, L = +0
+                AD              SKEEP1
                 TC              -0CHK
                 CS              A
                 XCH             L                               # PUT -0 IN L
                 TC              -0CHK           -1              # CHECK C(L)
 DV8-+           EXTEND                                          # A = +0, L = -0
-                DV              KEEP7                           # A = L = -0
-                TS              KEEP2
-                AD              KEEP1
+                DV              SKEEP7                          # A = L = -0
+                TS              SKEEP2
+                AD              SKEEP1
                 TC              -0CHK
                 CS              A
                 XCH             L                               # PUT -0 IN L
                 TC              -0CHK                           # CHECK C(L)
 DV8--           EXTEND                                          # A = +0, L = -0
-                DV              KEEP6                           # A = +0, L = -0
-                AD              KEEP2
+                DV              SKEEP6                          # A = +0, L = -0
+                AD              SKEEP2
                 TC              -0CHK
                 CA              S+MAX                           # CHECK QUOTIENT IS CORRECT
-                AD              KEEP2
+                AD              SKEEP2
                 TC              -0CHK
                 XCH             L
                 TC              -0CHK                           # CHECK C(L)
 
 # INPUT-OUTPUT INSTRUCTIONS
 # NORMAL USE OF READ AND WRITE
-IN-OUT1         CA              S-1
+IN-OUT1R        CA              S-1
                 EXTEND
                 WRITE           L                               # 77776
                 CS              A                               # 00001
-## Page 233
                 EXTEND
                 READ            L                               # 77776
                 TC              -1CHK
@@ -1222,14 +1102,14 @@ IN-OUT1         CA              S-1
                 CS              A                               # 01 - 37776
                 EXTEND
                 READ            Q                               #  10 - 00001
-                TS              KEEP1
+                TS              SKEEP1
                 TC              ERRORS
-                CA              KEEP1
+                CA              SKEEP1
                 AD              S+MAX
                 TC              -1CHK           -1
 
 # NORMAL USE OF RAND, RAND = READ AND MASK
-RANDCHK         CA              S+ZERO
+RRANDCHK        CA              S+ZERO
                 TS              L
                 EXTEND
                 RAND            L                               # 00000, 00000
@@ -1248,29 +1128,22 @@ RANDCHK         CA              S+ZERO
                 EXTEND
                 RAND            L                               # 77777, 77777
                 TC              -0CHK
-## The following test is slightly wrong. Its proper operation relies on the Q register
-## storing an overflow condition. However, it is run without interrupts inhibited, so
-## it's possible for an interrupt to occur and destroy Q's overflow (via QRUPT). The
-## test designers were likely either unaware of this possibility, or thought that
-## overlfow in Q would inhibit interrupts like it would in A. Or, perhaps, the
-## digital simulator could have been wrong as discussed above for "DCA L".
-## A correct version of the test would have an INHINT immediately prior to "XCH Q",
-## and a RELINT sometime after "RAND Q".
 RANDOV          CA              S+MAX
                 AD              S+2                             #  01 - 00001
+                INHINT
                 XCH             Q
                 CA              S-ZERO                          #  77777
                 EXTEND
                 RAND            Q                               #  01 - 00001
-                TS              KEEP1
+                RELINT
+                TS              SKEEP1
                 TC              ERRORS
                 TC              -1CHK           -1
-                CS              KEEP1
+                CS              SKEEP1
                 TC              -1CHK
 
 # NORMAL USE OF WAND, WAND = WRITE AND MASK
-WANDCHK         CA              S+ZERO
-## Page 234
+RWANDCHK        CA              S+ZERO
                 TS              L
                 EXTEND
                 WAND            L                               # 00000, 00000
@@ -1294,25 +1167,26 @@ WANDCHK         CA              S+ZERO
                 WAND            L                               # 77777, 77777
                 AD              L
                 TC              -0CHK
-## The following test is slightly wrong. (See the discussion for RANDOV above.)
 WANDUF          CA              S+MAX
                 AD              S+2                             # 01 - 00001
-                XCH             Q
+                INHINT                                          # This INHINT...RELINT was not present
+                XCH             Q                               # in the original RETREAD, but is needed.
                 CA              S-ZERO                          # 77777
                 EXTEND
                 WAND            Q
-                TS              KEEP2
+                RELINT
+                TS              SKEEP2
                 TC              ERRORS
                 CA              Q
-                TS              KEEP1
+                TS              SKEEP1
                 TC              ERRORS
-                CS              KEEP1
+                CS              SKEEP1
                 TC              -1CHK
-                CS              KEEP2
+                CS              SKEEP2
                 TC              -1CHK
 
 # NORMAL USE OF ROR, READ AND SUPERIMPOSE
-RORCHK          CA              S+ZERO
+RRORCHK         CA              S+ZERO
                 TS              L
                 EXTEND
                 ROR             L                               # 00000, 00000
@@ -1322,8 +1196,6 @@ RORCHK          CA              S+ZERO
                 CA              S-ZERO
                 EXTEND
                 ROR             L                               # 77777, 00000
-
-## Page 235
                 TC              -0CHK
                 CA              L
                 TC              -0CHK           -1
@@ -1339,22 +1211,23 @@ RORCHK          CA              S+ZERO
                 EXTEND
                 ROR             L                               # 77777, 77777
                 TC              -0CHK
-## The following test is slightly wrong. (See the discussion for RANDOV above.)
 ROROV           CA              S-MAX
                 AD              S-2                             # 10 - 37776
+                INHINT
                 XCH             Q
                 CA              S+MAX
                 AD              S+1                             # 01 - 00000
                 EXTEND
                 ROR             Q                               # 11 - 37776
-                TS              KEEP1
+                RELINT
+                TS              SKEEP1
                 TC              +2
                 TC              ERRORS
-                CA              KEEP1
+                CA              SKEEP1
                 TC              -1CHK
 
 # NORMAL USE OF WOR, WOR = WRITE AND SUPERIMPOSE
-WORCHK          CA              S+ZERO
+RWORCHK         CA              S+ZERO
                 TS              L
                 EXTEND
                 WOR             L                               # 00000, 00000
@@ -1375,35 +1248,35 @@ WORCHK          CA              S+ZERO
                 TC              -0CHK
                 CA              L
                 TC              -0CHK
-## Page 236
                 CA              S-MAX
                 EXTEND
                 WOR             L                               # 77777, 77777
                 TC              -0CHK
                 CA              L
                 TC              -0CHK
-## The following test is slightly wrong. (See the discussion for RANDOV above.)
 WOROV           CA              S-MAX
                 AD              S-2                             # 10 - 37776
+                INHINT
                 XCH             Q
                 CA              S+MAX
                 AD              S+1                             # 01 - 00000
                 EXTEND
                 WOR             Q                               # 11 - 37776
-                TS              KEEP2                           # SHOULD NOT SKIP
+                RELINT
+                TS              SKEEP2                          # SHOULD NOT SKIP
                 TCF             +2
                 TC              ERRORS
                 XCH             Q
-                TS              KEEP3
+                TS              SKEEP3
                 TC              +2
                 TC              ERRORS
-                CA              KEEP3                           # CHECK C(Q)
+                CA              SKEEP3                          # CHECK C(Q)
                 TC              -1CHK
-                CA              KEEP2
+                CA              SKEEP2
                 TC              -1CHK                           # CHECK C(A)
 
 # NORMAL USE OF RXOR
-RXORCHK         CA              S+ZERO
+RRXORCHK        CA              S+ZERO
                 TS              L
                 EXTEND
                 RXOR            L                               # 00000, 00000
@@ -1427,19 +1300,23 @@ RXORCHK         CA              S+ZERO
                 CA              L
                 TC              -0CHK
                 CS              A
-## Page 237
                 TS              Q
-## The following test is slightly wrong. (See the discussion for RANDOV above.)
 RXORUV          CA              S+MAX
                 AD              S+2                             # 01 - 00001
                 EXTEND
                 RXOR            Q                               # 10 - 37776, C(Q) = -0
-                TS              KEEP1
+                TS              SKEEP1
                 TC              ERRORS
-                CA              KEEP1
+                CA              SKEEP1
                 TC              -1CHK
 
-                TC              CHECKNJ                         # CHECK FOR NEW JOB
+# Retread checked for a new job / fed the night watchman here. This is dangerous in Aurora;
+# if a new job is found, the EXECUTIVE coding assumes that the address it returns to
+# afterwards must be in the same bank as SELFCHECK, which means we'd end up jumping
+# somewhere in the middle of that. It appears that the Retread instrution check executes
+# quickly enough for this to be unnecessary, though, so I've simply commented it out for now.
+
+                #TC              CHECKNJ                         # CHECK FOR NEW JOB
                 TC              XTRANDX
 
 # NEXT THREE CONSTANTS ARE ADDRESSESS USED BY EXTRACODE INSTRUCTIONS
@@ -1462,14 +1339,14 @@ NDXBZMF         EXTEND
                 TC              ERRORS
 # INDEX INSTRUCTION USED WITH DCA
 NDXDCA          EXTEND
-                INDEX           ADRS+1                          # DCA S+1
+                INDEX           ADRS+1R                         # DCA S+1
                 DCA             0000                            # C(A) = +1, C(L) = +2
                 CS              A
                 AD              L
                 TC              -1CHK           -1
 # INDEX INSTRUCTION USED WITH DCS
                 EXTEND
-                INDEX           ADRS+1                          # DCS S+1
+                INDEX           ADRS+1R                         # DCS S+1
                 DCS             0000                            # C(A) = -1, C(L) = -2
                 CS              A
                 AD              L
@@ -1477,9 +1354,8 @@ NDXDCA          EXTEND
 # INDEX INSTRUCTION USED WITH MP AND SU
                 CA              S+MAX                           # 37777
                 EXTEND
-                NDX             ADRS+1
+                NDX             ADRS+1R
                 MP              0001                            # C(A) = 1, C(L) = 37776
-## Page 238
                 TC              -1CHK           -1
                 CA              S+MAX                           # 37777
                 EXTEND
@@ -1487,58 +1363,57 @@ NDXDCA          EXTEND
                 SU              0000
                 TC              -1CHK           -1
 # INDEX INSTRUCTION USED WITH DV
-NDXDV           CA              DV1CON                          # PUT 14000 (3/8) IN KEEP3
-                TS              KEEP3
+NDXDV           CA              DV1CON                          # PUT 14000 (3/8) IN SKEEP3
+                TS              SKEEP3
                 CA              S+ZERO
                 TS              L
                 CA              SBIT13                          # 10000
                 EXTEND
                 NDX             ADRS3
                 DV              0000                            # C(A) = 25252, C(L) = 10000
-                TS              KEEP1
+                TS              SKEEP1
                 CA              S-ZERO
                 XCH             L
                 CS              A
                 EXTEND
                 NDX             ADRS3
                 DV              0000
-                AD              KEEP1
+                AD              SKEEP1
                 TC              -0CHK
 # INDEX USED WITH MSU (C(A) = +0, C(K) = -0) (RESULT = -1)
 NDXMSU          CA              S+ZERO
-                TS              KEEP1
+                TS              SKEEP1
                 CS              A
                 EXTEND
-                NDX             ADRS1                           # MSU KEEP1
+                NDX             ADRS1                           # MSU SKEEP1
                 MSU             0000                            # C(A) = -1
                 TC              -1CHK
 # INDEX USED WITH QXCH
 NDXQXCH         CA              ADRSQXCH
-                TS              KEEP1
+                TS              SKEEP1
                 TC              +2
                 TC              ERRORS
                 EXTEND
-                NDX             ADRS1                           # QCH KEEP1
+                NDX             ADRS1                           # QCH SKEEP1
                 QXCH            0000
                 TC              Q
                 TC              ERRORS
 # INDEX USED WITH AUG
 NDXAUG          CS              S+ZERO
-                TS              KEEP1                           # 00000
+                TS              SKEEP1                          # 00000
                 EXTEND
-                NDX             ADRS1                           # AUG KEEP1
+                NDX             ADRS1                           # AUG SKEEP1
                 AUG             0000
-                CA              KEEP1
+                CA              SKEEP1
                 TC              -1CHK
 
-## Page 239
 # INDEX USED WITH DIM
 NDXDIM          CA              S+2
-                TS              KEEP1
+                TS              SKEEP1
                 EXTEND
-                NDX             ADRS1                           # DIM KEEP1
+                NDX             ADRS1                           # DIM SKEEP1
                 DIM             0000
-                CS              KEEP1
+                CS              SKEEP1
                 TC              -1CHK
 
 # NORMAL USE OF INDEX WITH IN-OUT INSTRUCTIONS
@@ -1582,7 +1457,6 @@ NDXINOUT        CA              S-1
 # INDEX USED WITH WOR
                 CA              S-7
                 TS              L                               # 77770
-## Page 240
                 CA              S+MAX
                 AD              S-1                             # 37776
                 EXTEND
@@ -1602,8 +1476,8 @@ NDXINOUT        CA              S-1
                 TC              -1CHK           -1
 # CHECKS EXTRACODE OF AN SC REGISTER
                 CA              S+2
-                TS              KEEP1
-                CA              ADRS1                           # ADDRESS OF KEEP1
+                TS              SKEEP1
+                CA              ADRS1                           # ADDRESS OF SKEEP1
                 TS              L
                 CA              S+1
                 EXTEND
@@ -1628,18 +1502,17 @@ ADDCHK          CA              SBIT14                          # 20000
 
 # NORMAL OPERATION OF CYCLE RIGHT REGISTER
 CYRCHK          CA              CYRCON                          # 57761
-                TS              KEEP5                           # COUNTDOWN REGISTER
+                TS              SKEEP5                          # COUNTDOWN REGISTER
                 CA              S-MAX                           # 40000
                 TS              CYR
 CYRLOOP         CCS             CYR
                 TC              CYRCNTDN
-## Page 241
                 TC              ERRORS
                 TC              ENDCYR
                 TC              ERRORS
-CYRCNTDN        INCR            KEEP5
+CYRCNTDN        INCR            SKEEP5
                 TC              CYRLOOP
-ENDCYR          CA              KEEP5                           # 57777
+ENDCYR          CA              SKEEP5                          # 57777
                 AD              CYR                             # C(CYR) = 20000
                 CCS             A                               # -0 = END OF CYCLE RIGHT CHECK
                 TC              ERRORS
@@ -1648,7 +1521,7 @@ ENDCYR          CA              KEEP5                           # 57777
 
 # NORMAL OPERATION OF CYCLE LEFT REGISTER
 CYLCHK          CA              S-15                            # 77760, -15
-                TS              KEEP5                           # COUNT REGISTER
+                TS              SKEEP5                          # COUNT REGISTER
                 CA              S-MAX                           # 40000
                 TS              CYL
 CYLLOOP         CCS             CYL
@@ -1656,35 +1529,34 @@ CYLLOOP         CCS             CYL
                 TC              ERRORS
                 TC              ENDCYL
                 TC              ERRORS
-CYLCNTDN        INCR            KEEP5
+CYLCNTDN        INCR            SKEEP5
                 TC              CYLLOOP
 ENDCYL          CA              CYL                             # C(CYL) SHOULD = +1
                 TC              -1CHK           -1
-                CA              KEEP5
+                CA              SKEEP5
                 TC              -1CHK
 
 # NORMAL OPERATION OF SHIFT RIGHT REGISTER
 SRCHK           CA              S-14                            # 77761, -14
-                TS              KEEP5                           # COUNT REGISTER
+                TS              SKEEP5                          # COUNT REGISTER
                 CA              S-MAX                           # 40000
                 TS              SR
 SRLOOP          CCS             SR
                 TC              ERRORS
                 TC              ERRORS
                 TC              SRCNTDN
-                CA              KEEP5                           # HAS SHIFTED 14 TIMES
+                CA              SKEEP5                          # HAS SHIFTED 14 TIMES
                 TC              -1CHK
                 TC              EDOPCHK                         # NEXT SUBROUTINE
-SRCNTDN         INCR            KEEP5                           # INCREMENT COUNT REGISTER
+SRCNTDN         INCR            SKEEP5                          # INCREMENT COUNT REGISTER
                 TC              SRLOOP
 
 # NORMAL OPERATION OF EDOP REGISTER.  BITS 8 - 14 OF G REGISTER GO TO
 # BITS 1 - 7 OF EDOP.
 EDOPCHK         CA              S-15                            # 77760, -15
-                TS              KEEP5                           # COUNT REGISTER
+                TS              SKEEP5                          # COUNT REGISTER
                 CA              S7BITS                          # 00177
                 TS              CYL
-## Page 242
 EDOPLOOP        CA              CYL
                 TS              EDOP
                 TS              CYR                             # SHIFT LEFT 7 TIMES
@@ -1697,23 +1569,21 @@ EDOPLOOP        CA              CYL
                 CA              CYR
                 MASK            S7BITS
                 CS              A
-                TS              KEEP1                           # COMPLEMENT OF C(EDOP)
+                TS              SKEEP1                          # COMPLEMENT OF C(EDOP)
                 CA              S-ZERO
                 MASK            EDOP
-                AD              KEEP1
+                AD              SKEEP1
                 TC              -0CHK
-                INCR            KEEP5                           # INCREMENT COUNT REGISTER
+                INCR            SKEEP5                          # INCREMENT COUNT REGISTER
                 CCS             EDOP
                 TC              EDOPLOOP
                 TC              ENDEDOP
                 TC              ERRORS
                 TC              ERRORS
-ENDEDOP         CA              KEEP5                           # SHOULD HAVE PERFORMED EDOPLOOP 14 TIMES
+ENDEDOP         CA              SKEEP5                          # SHOULD HAVE PERFORMED EDOPLOOP 14 TIMES
                 TC              -1CHK
 
-                INCR            SCOUNT                          # INCREMENT UPON SUCCESSFUL COMPLETION
+                TC              POSTJUMP
+                CADR            INSTDONE
 
-                TC              SMODECHK
-
-
-# END OF REVISION 0 OF PROGRAM RETRED44 BY NASA 2021100           LAST ASSEMBLED ON JUL 6, 1965
+ENDINST2        EQUALS

@@ -11,6 +11,7 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##              2016-12-22 MAS  Added the hardware alarm test restart group.
 
                 BANK            12 
                 EBANK=          LST1
@@ -337,7 +338,7 @@ NUMGRPS         EQUALS          FIVE                    # SIX GROUPS CURRENTLY.
 
 RACTCADR        CADR            10000                   # AVAILABLE FOR USE-NEXT ONE USED
                 CADR            OPTMSTRT                #  RESTARTS DURING OPTM ALIGN CALIBRATION
-                CADR            10000
+                CADR            ALRMSTRT
                 CADR            10000
                 CADR            10000
                 CADR            10000
