@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-20 JL   Transcribed pages 335-341.
 #               2016-12-21 JL   Transcribed pages 342-346.
+#               2016-12-22 JL   Transcribed pages 347-359.
 
 # Annotations:
 #
@@ -552,36 +553,36 @@ P0440   AGC4 PASS 2 PROCESSING FOR POLISH OPERATOR WORDS.
 
 P04702  GENERAL PROCESSING OF RIGHT OPERATOR.
 
- 0471   TWO POLES  
- 04721             
- 04722             
- 04723             
- 04724             
- 04725  B46T48     
- 04726             
- 04727             
- 04728  SEL STAR 2 
- 04729             
- 0473              
- 0475              
+ 0471   TWO POLES  SWS, B42T48M HEALTH        17            WORD                SET UP 7-BIT RIGHT OPERATOR.
+ 04721             TN           ADDRESS 1     2             SAV ADREF
+ 04722             TS           Z,SC,4        -             RITE NORM      C    RIGHT-NORMALIZE ADDRESS FIELD AND SKIP.
+ 04723             SM           WORD          TWO           WORD                APPLY INDEX BIT TO GENERAL OPERATOR.
+ 04724             SM           CUSS LIST +22 BIT 33        CUSS LIST +22       CUSS INDEXING OF MISCELLANEOUS OPERATOR.
+ 04725  B46T48     OCT          -7
+ 04726             SM           WORD          FOUR          WORD                APPLY INDEX BIT TO UNARY OPERATOR.
+ 04727             NA, CHAR8M   ADDRESS 2     ASTRISKS      C,+2                BRANCH IF OPERATOR 2 IS NOT INDEXED.
+ 04728  SEL STAR 2 SSL, THREEM  WORD          0             C,-5           C    BRANCH ON TYPE OF SECOND OPERATOR.
+ 04729             TN           SAV ADREF     2             ADDRESS 1           RESTORE ADDRESS FIELD FOR PRINTING.
+ 0473              WD, SPECMAGM OCT 77776     WORD          WORD                ADD ONE AND COMPLEMENT.
+ 0475              LA, SPECMAGM WORD          MIN 37777     POLE OFLO           BR IF BOTH OPS = 177 (VERY QUEER).
 
- 0477              
- 0478              
+ 0477              NA, CHAR1M   CARD +2       BIT 1         C,+2
+ 0478              HA           WORD          SPEC MAG      WORD                COMPLEMENT WORD IF "-" IN COL 17.
 
- 0480              
- 0482              
- 0484              
- 0485              
- 0487              
+ 0480              SS           ZERO          C1T4          LINE +6             CLEAR ADDRESS FIELD PRINT IMAGE.
+ 0482              SWS, CHAR8M  WORD          12            LINE +5             PRINT 1ST CHARACTER OF OPERATOR WORD.
+ 0484              SWS, ACO1    WORD          33,L          LINE +6
+ 0485              SWS, ACO2    WORD          30,L          LINE +6             PRINT REST OF LEFT OPERATOR.
+ 0487              LA           BIT 1         WORD          BAD POLE 2          BRANCH IF 2ND OPERATOR IS BAD.
 
- 0489              
- 0490              
- 0492              
+ 0489              SWS, ACO3    WORD          27,L          LINE +6
+ 0490              SWS, ACO4    WORD          24,L          LINE +6             PRINT REST OF OPERATOR WORD.
+ 0492              TS, CHAR1M   DEC 5 FLAG    WORD          BC CHECK            PLANT FLAG OF POLAND, JOIN MAIN PROC.
 
- 0494   BAD POLE 2 
+ 0494   BAD POLE 2 TS, C3T4M    BLOTS         LINE +6       NAUGHTY             BLOT OUT RIGHT OPERATOR, JOIN MAIN PROC.
 
- 0496   POLE OFLO  
- 0498              
+ 0496   POLE OFLO  SM           CUSS LIST +21 BIT 33        CUSS LIST +21       CUSS OVERFLOW OF OPERATOR WORD.
+ 0498              TS           BIT 1         WORD          BAD BASIC           SET TO BLOT OUT WORD LIKE CONSTANT.
 
 # Page 348
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  14        PAGE  84
@@ -591,33 +592,33 @@ R0502   NUMBER IF ANY AND WITH A NOTATION FOR END OF BLOCK OR BANK IF REQUIRED. 
 
 
 
- 0504   AGC4 PLEB  
- 0506              
+ 0504   AGC4 PLEB  NA           LOCATION      ONES          C,+2           C    BRANCH IF THERES A VALID LOCATION.
+ 0506              SS           BLOTS         C1T4          LINE +5             BLOT OUT LOCATION FIELD AND EXIT.
 
- 0508              
- 0509              
- 0510              
- 0511              
- 0512              
- 0514              
- 0515              
- 0516              
- 0518              
+ 0508              TX           AGC4 MXR      -             Z,MXR          C
+ 0509              SS           ZERO          C1T4          LINE +5        C
+ 0510              TX           LOCATION      -             COMMON         C
+ 0511              TX           COMMON        -             COMMON +1      C
+ 0512              LA           COMMON        OCT 5777      END BANK Q     C    BRANCH IF LOCATION IS NOT IN A BANK.
+ 0514              TX           COMMA C8      -             LINE +4        C
+ 0515              SWS, ACO6    COMMON        1             LINE +4        C
+ 0516              SWS, ACO7    COMMON        4             LINE +4        C    SET BANK NUMBER IN PRINT.
+ 0518              SM           COMMON        OCT 6000      COMMON +1      C    PUT SUBADDRESS IN THE CLASS 6000 - 7777.
 
- 0520   END BANK Q 
- 0522              
+ 0520   END BANK Q NA, B39T48M  COMMON +1     OBES          C,+2           C
+ 0522              TS, C1T4M    END BL MC     LINE +4       PRINT LOC      C    MARK LINE "EB" FOR END OF BLOCK OR BANK.
 
- 0526              
- 0527              
- 0529              
- 0530              
- 0532              
+ 0526              TX           L TYP TAB     -             Z,X6           C
+ 0527              LA, SPECMAGM COMMON        6,0           C,+2           C    BRANCH WHEN MEMORY TYPE CATEGORY FOUND.
+ 0529              TS           Z,X6,1        -             C,-1           C
+ 0530              NA, SPECMAGM COMMON        6,0           PRINT LOC      C    BRANCH IF NOT END OF MINOR BLOCK.
+ 0532              SWS, C1T4M   END BL MC     A,4,L         LINE +4        C    MARK LINE "MC" FOR MEMORY TYPE CHANGE.
 
- 0534   PRINT LOC  
- 0535              
- 0536              
- 0537              
- 0538   RSTOR MXR  
+ 0534   PRINT LOC  SWS, ACO1    COMMON +1     33,L          LINE +5        C
+ 0535              SWS, ACO2    COMMON +1     30,L          LINE +5        C
+ 0536              SWS, ACO3    COMMON +1     27,L          LINE +5        C
+ 0537              SWS, ACO4    COMMON +1     24,L          LINE +5        C
+ 0538   RSTOR MXR  TX           GENL MXR      -             Z,MXR               SET UP LOCATION IN PRINT AND EXIT.
 
 # Page 349
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  15        PAGE  85
@@ -625,23 +626,23 @@ R0502   NUMBER IF ANY AND WITH A NOTATION FOR END OF BLOCK OR BANK IF REQUIRED. 
 P0540              SUBROUTINE IN PASS 2 FOR AGC4 TO SET UP A SINGLE-PRECISION CONSTANT IN WORD AND IN PRINT.  THIS
 P0542   SUBROUTINE DOES NOT CARE WHETHER THE WORD IS SIGNED OR NOT, BUT DEMANDS THE OUTPUT OF DEC/OCT CONST IN NUMBER.
 
- 0544   AGC4 1P    
- 0546              
- 0547              
- 0549              
+ 0544   AGC4 1P    NA           NUMBER        W BAD WORD    GOOD 1P        C    BRANCH IF WORD IS VALID.
+ 0546              SS           BLOTS         CHAR 8        LINE +5        C
+ 0547              SS           BLOTS         C1T4          LINE +6        C    BLOT OUT WORD IN PRINT.
+ 0549              TX           W BAD WORD    -             WORD                SEND ALONG BAD NEWS AND EXIT.
 
- 0551   GOOD 1P    
- 0552              
- 0554              
- 0555              
+ 0551   GOOD 1P    TX           AGC4 MXR      -             Z,MXR          C
+ 0552              EX           NUMBER        D2T12         WORD           C    ISOLATE MAGNITUDE.
+ 0554              LA           BIT 1         NUMBER        C,+2           C
+ 0555              HA           WORD          SPEC MAG      WORD           C    COMPLEMENT NEGATIVE WORD.
 
- 0557   A4 BIN ALF 
- 0558              
- 0559              
- 0560              
- 0561              
- 0562              
- 0564              
+ 0557   A4 BIN ALF SS           ZERO          C1T4          LINE +6        C
+ 0558              SWS, CHAR8M  WORD          12            LINE +5        C
+ 0559              SWS, ACO1    WORD          33,L          LINE +6        C
+ 0560              SWS, ACO2    WORD          30,L          LINE +6        C
+ 0561              SWS, ACO3    WORD          27,L          LINE +6        C
+ 0562              SWS, ACO4    WORD          24,L          LINE +6        C    SET WORD IN PRINT.
+ 0564              TS, CHAR1M   DEC6 FLAG     WORD          RSTOR MXR      C    APPLY INTERNAL CONSTANT FLAG AND EXIT.
 
 
 
@@ -650,29 +651,29 @@ R0568   CONST OR OCT CONST, AND DISTINGUISHING BETWEEN THE SIGNED AND UNSIGNED P
 R0570   SETS UP THE HIGH-ORDER PART IN WORD AND THE LOW-ORDER PART IN 2ND HALF, SETS THE HIGH-ORDER PART IN PRINT, AND
 R0572   SETS UP THE LOW-ORDER PART IN PRINTABLE FORM IN 2ND ALF AND 2ND ALF +1.
 
- 0573   AGC4 2P    
- 0575              
- 0578              
+ 0573   AGC4 2P    NA           NUMBER        W BAD WORD    GOOD 2P        C    BRANCH IF CONSTANT IS VALID.
+ 0575              TN           BLOTS         2             2ND ALF        C    PREPARE BLOTS FOR LOW-ORDER PART.
+ 0578              TS           W BAD WORD    2ND HALF      AGC4 1P +1     C    GO TO JOIN SINGLE-PRECISION SADNESS.
 
- 0580   GOOD 2P    
- 0581              
- 0583              
- 0584              
+ 0580   GOOD 2P    TX           AGC4 MXR      -             Z,MXR          C
+ 0581              NA           E NUMBER      ZERO          C,+3           C    BRANCH IF NUMBER IS SIGNED.
+ 0583              SWE, B34T48M NUMBER        15            WORD           C
+ 0584              TS           SPEC MAG      COMMON        C,+3           C    SET UP UNSIGNED CONSTANT.
 
- 0586              
- 0587              
+ 0586              SWE, B35T48M NUMBER        14            WORD           C
+ 0587              TX           MIN 37777     -             COMMON         C    SET UP SIGNED CONSTANT.
 
- 0589              
- 0591              
- 0593              
- 0594              
+ 0589              EX           NUMBER        COMMON        2ND HALF       C    ISOLATE LOW-ORDER PART.
+ 0591              LA           BIT 1         NUMBER        C,+3           C    BRANCH IF NO MINUS SIGN.
+ 0593              HA           WORD          SPEC MAG      WORD           C
+ 0594              HA           2ND HALF      SPEC MAG      2ND HALF       C    COMPLEMENT HALVES OF NEGATIVE CONSTANT.
 
- 0596              
- 0597              
- 0598              
- 0599              
- 0600              
- 0602              
+ 0596              SWE, CHAR8M  2ND HALF      12            2ND ALF        C
+ 0597              SWE, ACO1    2ND HALF      33,L          2ND ALF +1     C
+ 0598              SWE, ACO2    2ND HALF      30,L          2ND ALF +1     C
+ 0599              SWE, ACO3    2ND HALF      27,L          2ND ALF +1     C
+ 0600              SWE, ACO4    2ND HALF      24,L          2ND ALF +1     C    MAKE PRINTABLE VERSION OF LOW-ORDER PRT.
+ 0602              TS, CHAR 1M  DEC6 FLAG     2ND HALF      A4 BIN ALF     C    GO TO JOIN SINGLE-PRECISION PROCEDURE.
 
 # Page 350
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  16        PAGE  86
@@ -680,56 +681,237 @@ R0572   SETS UP THE LOW-ORDER PART IN PRINTABLE FORM IN 2ND ALF AND 2ND ALF +1.
 R0604              SUBROUTINE IN PASS 2 FOR AGC4 TO SET IN PRINT A RIGHT-HAND LOCATION FOR SUCH AS SETLOC.  PUTS IN
 R0606   THE BANK INDICATOR, IF ANY.  BLOTS OUT AN INVALID LOCATION.
 
- 0607   AGC4 PREL  
- 0608              
+ 0607   AGC4 PREL  NA           LOCATION      ONES          C,+2           C
+ 0608              SS           BLOTS         C3T6          LINE +6             BLOT OUT BAD LOCATION AND EXIT.
 
- 0610              
- 0611              
- 0612              
- 0614              
- 0616              
- 0617              
- 0618              
- 0620              
+ 0610              TX           AGC4 MXR      -             Z,MXR          C
+ 0611              SS           ZERO          C3T6          LINE +6        C
+ 0612              TX           LOCATION      -             COMMON         C    ISOLATE LOCATION VALUE.
+ 0614              LA           COMMON        OCT 5777      PRINT VAL      C    BRANCH IF ADDRESS IS NOT IN A BANK.
+ 0616              TX           COMMA C2      -             LINE +6        C
+ 0617              SWS, CHAR8M  COMMON        13            LINE +5        C
+ 0618              SWS, ACO1    COMMON        32,L          LINE +6        C    SET BANK NUMBER IN PRINT.
+ 0620              SM           COMMON        OCT 6000      COMMON         C    PUT SUBADDRESS IN THE RANGE 6000-7777.
 
- 0622   PRINT VAL  
- 0623              
- 0624              
- 0625              
- 0626              
- 
+ 0622   PRINT VAL  SWS, ACO3    COMMON        21,L          LINE +6        C
+ 0623              SWS, ACO4    COMMON        18,L          LINE +6        C
+ 0624              SWS, ACO5    COMMON        15,L          LINE +6        C
+ 0625              SWS, ACO6    COMMON        12,L          LINE +6        C
+ 0626              TX           GENL MXR      -             Z,MXR               SET LOCATION IN PRINT AND EXIT.
+
 # Page 351
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  17        PAGE  87
 
+P0628              BANK 5 PORTION OF AGC4 PASS 2.  ENTER IN COSEQUENCE MODE WITH AGC4 MXR IN Z,MXR, ADDRESS CUSSALOG IN
+R0630   AU2, AND ADDRESS CUSS LIST IN AU1. BANK INDICATOR 5 IS LEFT IN R5.  BANK 5 ALSO CONTAINS MASKS FOR AGC4 PASS 2.
+
+
+
+ 0631              SETLOC,3     0             B5
+
+ 0632   UNSCRAMB   SWE, B38T48M N,AU2         0             N,AU1          C    ZERO DEMAND BITS, MOVE SUBADDR OF CUSS3.
+ 0634              SWS, B34T37M N,AU2         25            N,AU1          C    MOVE POISON BIT AND LENGTH OF CUSS 3.
+ 0636              SWS, B22T32M N,AU2         4,L           N,AU1          C    MOVE SUBADDRESS OF CUSS 2.
+ 0638              SWS, B18T21M N,AU2         13            N,AU1          C    MOVE POISON BIT AND LENGTH OF CUSS 2.
+ 0640              SWS, B6T16M  N,AU2         8,L           N,AU1          C    MOVE SUBADDRESS OF CUSS 1.
+ 0642              SWS, B2T5M   N,AU2,1       1             N,AU1,1        C    MOVE POISON BIT AND LENGTH OF CUSS 1.
+ 0644              NA           N,AU2         SENTINEL      UNSCRAMB       C
+
+ 0645              TX           Z,AU2         -             Z,R5           S    SET BANK INDICATOR 5 IN R5, EXIT.
+
+ 0647   CUSSALOG   M,D,44E      CDNO CUSS     D ERR CUSS    ILOP CUSS
+ 0648              M,D,EDD      LEFL CUSS     CNFL CUSS     TYPL CUSS
+ 0649              M,D,DCD      BADL CUSS     IPOX CUSS     MGLA CUSS
+ 0650              M,D,CD4      UDEF CUSS     ASIZ CUSS     IRAD CUSS
+ 0651              M,D,DFE      LEFM CUSS     PRED CUSS     NFIT CUS1
+
+ 0652              M,D,EFF      NFIT CUS2     STYP CUS1     STYP CUS2
+ 0653              M,D,EEE      SCNF CUS1     SCNF CUS2     SOVS CUS1
+ 0654              M,D,EEE      SOVS CUS2     SMD CUS1      SMD CUS2
+ 0655              M,D,FFE      SME CUS1      SME CUS2      SMIT CUS1
+ 0656              M,D,EEE      SMIT CUS2     SNDE CUS1     ARBL CUSS
+
+ 0657              M,D,EGF      SIDL CUS1     SBDE CUS1     SMDE CUS1
+ 0658              M,D,C52      ADRE BANK     INAP CUSS     ADR CUSS
+ 0659              M,D,545      SBIX CUSS     CCSF CUSS     IDBC CUSS
+ 0660              M,D,5D5      MTD CUSS      RANG CUSS     FRAC CUSS
+ 0661              M,D,54E      MFD CUSS      LONB CUSS     UND1 CUSS
+
+ 0662              M,D,GEE      NDE1 CUSS     LNSY CUSS     SNDE CUSS
+ 0663              M,D,GEF      SBDE CUS2     SIDL CUS2     SMDE CUS2
+ 0664              M,D,FED      SSNP CUSS     BNLF CUSS     NSCH CUSS
+ 0665              M,D,CDF      BFUL CUSS     ILOC CUSS     TOLA CUSS
+ 0666              M,D,GFE      MEMT CUSS     NMC1 CUSS     CAFS CUSS
+
+ 0667              M,D,444      QC1 CUSS      QC17 CUSS     QC24 CUSS
+ 0668              M,D,4FD      IMAD CUSS     POLE CUSS     POVF CUSS
+ 06681             M,D,FEE      P1N CUSS      IPX1 CUSS     IPX2 CUSS
+ 06682             M,D,ED4      NMC2 CUSS     OPCW CUSS     OVND CUSS
+
+ 06683             RESERVE      6
+ 06687             M,D,D00      IXOP CUSS     
+ 06688             M,D,D5E      SNNR CUSS     MCPS CUSS     CEHS CUSS
+
+ 0669   SENTINEL   DEC          BB00 FFFF
 
 # Page 352
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  18        PAGE  88
 
+P0670              CUSSES FOR AGC4, SHOWN IN THE ORDER OF THEIR CALLS IN THE CUSS LIST.
+
+
+
+ 0672   CDNO CUSS  ALF,4        CARD NUMBER OUT OF SEQUENCE
+ 0673   D ERR CUSS ALF,4        NO "D" IN DECIMAL SUBFIELD
+ 0674   ILOP CUSS  ALF,5        ILLEGAL OR MIS-SPELLED OPERATION CODE
+
+ 0675   LEFL CUSS  ALF,5        IMPROPER LEFTOVER LOCATION FIELD FORMAT
+ 0676   CNFL CUSS  ALF,4        CONFLICT IN USE OF THIS LOCATION
+ 0677   TYPL CUSS  ALF,4        LOCATION IS IN WRONG MEMORY TYPE
+
+ 0678   BADL CUSS  ALF,4        OVERSIZE OR ILL-DEFINED LOCATION
+ 0679   IPIX CUSS  ALF,3        ILLEGAL POLISH INDEXING
+ 0680   MGLA CUSS  ALF,4        ADDRESS FIELD IS MEANINGLESS
+
+ 0681   UDEF CUSS  ALF,3        "        " IS UNDEFINED
+ 0682   ASIZ CUSS  ALF,4        RANGE ERROR IN VALUE OF ADDRESS
+ 0683   IRAD CUSS  ALF,4        IRREGULAR BUT ACCEPTABLE ADDRESS
 
 # Page 353
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  19        PAGE  89
 
+P0684   AGC4 CUSSES CONTINUED.
+
+ 0685   LEFM CUSS  ALF,4        LEFTOVER WON'T FIT IN MEMORY
+ 0686   PRED CUSS  ALF,5        ATTEMPT TO PREDEFINE LOCATION SYMBOL FAI
+ 0687              ALF          LED
+ 0688   NFIT CUS1  ALF,5        "        " WON'T FIT IN SYMBOL TABLE
+
+ 0689   NFIT CUS2  ALF,5        "        " WON'T FIT IN SYMBOL TABLE
+ 0690   STYP CUS1  ALF,5        "        " ASSOCIATED WITH WRONG MEMORY
+ 0691              ALF          TYPE
+ 0692   STYP CUS2  ALF,5        "        " ASSOCIATED WITH WRONG MEMORY
+ 0693              ALF          TYPE
+
+ 0694   SCNF CUS1  ALF,5        "        " ASSOCIATED WITH CONFLICT
+ 0695   SCNF CUS2  ALF,5        "        " ASSOCIATED WITH CONFLICT
+ 0696   SOVS CUS1  ALF,5        "        " GIVEN OVERSIZE DEFINITION
 
 # Page 354
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  20        PAGE  90
 
+P0697   AGC4 CUSSES CONTINUED.
+
+ 0698   SOVS CUS2  ALF,5        "        " GIVEN OVERSIZE DEFINITION
+ 0699   SMD CUS1   ALF,5        "        " GIVEN MULTIPLE DEFINITIONS
+ 0700   SMD CUS2   ALF,5        "        " GIVEN MULTIPLE DEFINITIONS
+
+ 0701   SME CUS1   ALF,5        "        " ASSOCIATED WITH MULTIPLE ERRO
+ 0702              ALF          RS
+ 0703   SME CUS2   ALF,5        "        " ASSOCIATED WITH MULTIPLE ERRO
+ 0704              ALF          RS
+ 0705   SMIT CUS1  ALF,5        "        " IS IN MISCELLANEOUS TROUBLE
+
+ 0706   SMIT CUS2  ALF,5        "        " IS IN MISCELLANEOUS TROUBLE
+ 0707   SNDE CUS1  ALF,5        "        " WAS NEARLY DEFINED BY EQUALS
+ 0708   ARBL CUSS  ALF,5        ADDRESS DEPENDS ON UNKNOWN LOCATION
 
 # Page 355
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  21        PAGE  91
 
+P0709   AGC4 CUSSES CONTINUED.
+
+ 0710   SIDL CUS1  ALF,5        "        " IS INDEFINABLY LEFTOVER
+ 0711   SBDE CUS1  ALF,5        "        " MULTIPLY DEFINED INCLUDING NE
+ 07111             ALF,2        ARLY BY EQUALS
+ 0712   SMDE CUS1  ALF,5        "        " MULTIPLY DEFINED INCLUDING BY
+ 07121             ALF           EQUALS
+
+ 0713   ADRE BANK  ALF,3        ADDRESS IS IN BANK 00
+ 0714   INAP CUSS  ALF,5        ADDRESS IS INAPPROPRIATE FOR OP CODE
+ 0715   ADR CUSS   ALF,2        ADDRESS
+
+ 0716   SBIX CUSS  ALF,5        THIS INSTRUCTION SHOULD BE INDEXED
+ 0717   CCSF CUSS  ALF,4        CCS CANNOT REFER TO FIXED MEMORY
+ 0718   IDBC CUSS  ALF,5        INEXACT DECIMAL-TO-BINARY CONVERSION
+
+ 0719   MTD CUSS   ALF,5        MORE THAN 10 DIGITS IN DECIMAL CONSTANT
+ 0720   RANG CUSS  ALF,4        RANGE ERROR IN CONSTANT FIELD
 
 # Page 356
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  22        PAGE  92
 
+P07201  AGC4 CUSSES CONTINUED.
+
+ 0721   FRAC CUSS  ALF,5        FRACTIONAL PART LOST BY TRUNCATION
+
+ 0723   MFD CUSS   ALF,5        MORE THAN 14 DIGITS IN OCTAL CONSTANT
+ 0724   LONB CUSS  ALF,4        LOCATION FIELD SHOULD BE BLANK
+ 0725   UND1 CUSS  ALF,5        "        " WAS UNDEFINED IN PASS 1
+
+ 0726   NDE1 CUSS  ALF,5        "        " WAS NEARLY DEFINED BY EQUALS
+ 0727              ALF,2        IN PASS 1
+ 0728   LNSY CUSS  ALF,5        LOCATION FIELD SHOULD BE SYMBOLIC
+ 0729   SNDE CUS2  ALF,5        "        " WAS NEARLY DEFINED BY EQUALS
+
+ 0730   SBDE CUS2  ALF,5        "        " MULTIPLY DEFINED INCLUDING NE
+ 07301             ALF,2        ARLY BY EQUALS
+ 0731   SIDL CUS2  ALF,5        "        " IS INDEFINABLY LEFTOVER
 
 # Page 357
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  23        PAGE  93
 
+P07311  AGC4 CUSSES CONTINUED.
+
+ 0732   SMDE CUS2  ALF,5        "        " MULTIPLY DEFINED INCLUDING BY
+ 0733              ALF           EQUALS
+
+ 0734   SSNP CUSS  ALF,5        "        " SHOULDN'T HAVE BEEN PREDEFINE
+ 0735              ALF          D
+ 0736   BNLF CUSS  ALF,5        NUMERIC LOCATION FIELD IS ILLEGAL HERE
+ 0737   NSCH CUSS  ALF,4        NO SUCH BANK IN THIS MACHINE
+
+ 0738   BFUL CUSS  ALF,3        THIS BANK IS FULL
+ 0739   ILOC CUSS  ALF,4        ILLEGAL LOCATION FIELD FORMAT
+ 0740   TOLA CUSS  ALF,5        CARD IGNORED BECAUSE IT'S TOO LATE IN TH
+ 0741              ALF          E DECK
+
+ 0742   MEMT CUSS  ALF,5        CARD IGNORED BECAUSE IT MAKES MEMORY TAB
+ 0743              ALF,2        LE TOO LONG
+ 0744   NMC1 CUSS  ALF,5        NO MATCH FOUND FOR CARD NUMBER OR ACCEPT
+ 07441             ALF          OR TEXT
+ 0746   CAFS CUSS  ALF,5        FIRST CARD NUMBER NOT LESS THAN SECOND
 
 # Page 358
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  24        PAGE  94
 
+P0747   AGC4 CUSSES CONTINUED.
+
+ 0748   QC1 CUSS   ALF,4        QUEER INFORMATION IN COLUMN 1
+ 0749   QC17 CUSS  ALF,4        QUEER INFORMATION IN COLUMN 17
+ 0750   QC24 CUSS  ALF,4        QUEER INFORMATION IN COLUMN 24
+
+ 0751   IMAD CUSS  ALF,4        BLANK ADDRESS FIELD EXPECTED
+ 0753   POLE CUSS  ALF,5        ADDRESS FIELD SHOULD CONTAIN A POLISH OP
+ 0754              ALF          ERATOR
+ 0755   POVF CUSS  ALF,4        OVERFLOW IN POLISH OPERATOR WORD
+
+ 0756   P1N CUSS   ALF,5        FIRST ADDRESS OF AN EQUATION MUST BE POS
+ 0757              ALF          ITIVE
+ 0758   IPX1 CUSS  ALF,5        FIRST POLISH OPERATOR ILLEGALLY INDEXED
+ 0759   IPX2 CUSS  ALF,5        SECOND POLISH OPERATOR ILLEGALLY INDEXED
+
+ 0760   NMC2 CUSS  ALF,5        NO MATCH FOUND FOR SECOND CARD NUMBER
 
 # Page 359
 #      @YUL SYSTEM ASSEMBLER AGC4 PASS 2                                         USER'S OWN PAGE NO.  25        PAGE  95
 
+P0761   AGC4 CUSSES CONTINUED.
+
+ 0762   OPCW CUSS  ALF,4        LAST OPERATOR WORD COUNT WRONG
+ 0763   OVND CUSS  ALF,4        THIS CODE MAY BECOME OBSOLETE
+ 0797   IXOP CUSS  ALF,4        ASTERISK ILLEGAL ON THIS OP CODE
+
+ 0800   SNNR CUSS  ALF,4        SUBROUTINE NAME NOT RECOGNIZED
+ 0801   MCPS CUSS  ALF,5        MULTIPLE CALLS IN ONE PROGRAM OR SUBRO
+ 0802   CEHS CUSS  ALF,5        CONFLICT WITH EARLIER HEAD SPECIFICATION
