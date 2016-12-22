@@ -1369,7 +1369,7 @@ TCTRPCHK        TC              PHASCHNG
                 TC              WAITLIST                        # Schedule a task to break out of the loop if the
                 2CADR           TCTRPFAL                        # alarm doesn't work.
 
-                CAF             TCTRAPGO                        # Trigger a TC Trap. We do this in fixed memory
+                CAF             TCTRAPGO                        # Trigger a TC Trap. We do this in erasable  memory
                 TS              SKEEP1                          # so we can break out of it if the restart
                 TC              SKEEP1                          # doesn't occur as expected.
 TCTRAPGO        TC              SKEEP1
@@ -1387,9 +1387,7 @@ TESTTCTR        CA              TCTRPBIT                        # Check to see i
                 EXTEND                                          # channel 77.
                 RAND            77
                 EXTEND
-                BZF             +2
-                TCF             +2
-                TCF             ERRORS
+                BZF             ERRORS
                 TC              Q
 
 TCTRCONT        TC              TESTTCTR
