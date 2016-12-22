@@ -11,7 +11,7 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
-## Mod history: 2016-12-21 MAS  Pulled in erasables for Retread instruction checks.
+##              2016-12-21 MAS  Pulled in erasables for Retread instruction checks.
 
 A               EQUALS          0
 L               EQUALS          1                               # L AND Q ARE BOTH CHANNELS AND REGISTERS.

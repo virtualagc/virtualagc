@@ -612,7 +612,7 @@ TENMS           CS              SKEEP1
                 EBANK=          LST1                            
                 2CADR           TSKADRS                         
 
-ASDF            CA              S+MAX                           
+                CA              S+MAX                           
                 AD              OVCON                           # CONTROLS TIME SPENT IN OF-UF LOOP
                 RELINT                                          
 WAIT            CS              A                               
@@ -1240,7 +1240,7 @@ ENDSLFS1        EQUALS
 
 SBNKOPTN        TS              SKEEP1                          
                 CS              A                               # GO TO BACKUP IDLE LOOP IF C(SMODE) IS
-                AD              TWO                             # GREATER THAN OCTAL 11
+                AD              THREE                           # GREATER THAN OCTAL 12
                 EXTEND                                          
                 BZMF            TOSMODE         -2              
                 CA              S+ZERO                          # ZERO SMODE FOR OPTIONS ABOVE 8.
@@ -1249,6 +1249,7 @@ SBNKOPTN        TS              SKEEP1
                 NDX             A                               
                 TC              SOPTON11        -1              
 SOPTON11        TC              DSKYCHK                         
+SOPTON12        TC              RSTRTCHK
 
                 CA              S+ZERO                          
                 TS              SMODE                           
@@ -1330,7 +1331,7 @@ NXTNMBR         CCS             SKEEP3
                 TS              NOUT                            
                 TC              DSKYWAIT                        
 +SIGN           CS              ZERO                            
-                TS              SKEEP3                          
+                TS              SKEEP3
                 CA              S+1                             
                 TS              SKEEP2                          
                 INHINT                                          
@@ -1351,5 +1352,71 @@ LITESOUT        CS              S11CHAN
                 EXTEND                                          
                 WAND            DSALMOUT                        # TURN OFF COMPUTER ACTIVITY LIGHT.
                 TC              TASKOVER                        # END OF DSKYCHK
+
+TCTRPBIT        EQUALS          SBIT3
+
+ALRMSTRT        INDEX           PHASE2
+                TC              +0
+                TC              TCTRCONT                        # Phase 1: TC trap
+                TC              NOTCCONT                        # Phase 2: No TC
+
+RSTRTCHK        EXTEND                                          # Entry point to the hardware alarm / restart checks
+                WRITE           77                              # Clear channel 77 by writing to it
+
+TCTRPCHK        TC              PHASCHNG
+                OCT             00102
+
+                TC              WAITLIST                        # Schedule a task to break out of the loop if the
+                2CADR           TCTRPFAL                        # alarm doesn't work.
+
+                CAF             TCTRAPGO                        # Trigger a TC Trap. We do this in fixed memory
+                TS              SKEEP1                          # so we can break out of it if the restart
+                TC              SKEEP1                          # doesn't occur as expected.
+TCTRAPGO        TC              SKEEP1
+
+TCTRPFAL        CAF             TCTRPXIT                        # It's been too long with no restart. Break the
+                TS              SKEEP1                          # loop at SKEEP1.
+                TC              TASKOVER
+TCTRPXIT        TC              TCTRCONT
+
+NOTCFAIL        CA              ONE                             # It's been too long with no restart. Break the
+                TS              SKEEP3                          # BZF loop by making SKEEP3 nonzero.
+                TC              TASKOVER
+
+TESTTCTR        CA              TCTRPBIT                        # Check to see if the TC TRAP bit is set in
+                EXTEND                                          # channel 77.
+                RAND            77
+                EXTEND
+                BZF             +2
+                TCF             +2
+                TCF             ERRORS
+                TC              Q
+
+TCTRCONT        TC              TESTTCTR
+
+NOTCCHK         EXTEND
+                WRITE           77                              # Blank channel 77.
+                EXTEND                                          # Just to be sure -- we won't check this next time
+                READ            77
+                TC              +0CHK
+                TS              SKEEP2                          # Zero SKEEP2 for the BZF loop
+
+                TC              PHASCHNG
+                OCT             00202
+
+                CAF             ONE                             # Set up a waitlist task to break us out of the
+                TC              WAITLIST                        # BZF loop if the alarm doesn't occur
+                2CADR           NOTCFAIL
+
+                CA              SKEEP2                          # Keep looping while SKEEP2 = 0
+                EXTEND
+SELFBZF         BZF             SELFBZF -2
+
+NOTCCONT        TC              TESTTCTR
+
+ALRMDONE        TC              PHASCHNG                        # All done with the hardware alarm checks.
+                OCT             00002
+
+                TC              TOSMODE
 
 ENDSLFS2        EQUALS                                          
