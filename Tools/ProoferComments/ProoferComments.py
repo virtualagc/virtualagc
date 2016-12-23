@@ -270,7 +270,7 @@ for box in file:
 		distance = boxRight - boxes[len(boxes)-1]['boxRight']
 	if distance < 8 * scale:
 		rejectIt = 1;
-	# Here's something to help apostrophes to be recognized:
+	# Here's something to help apostrophes to be recognized.
 	#if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
 	#   boxHeight <= 17 * scale and numCharsInRow > 0 and \
 	#   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
@@ -591,13 +591,13 @@ for row in range(0, len(lines)):
 				       top=boxes[boxIndex]['boxTop'], width=boxes[boxIndex]['boxWidth'], 
 				       height=boxes[boxIndex]['boxHeight'], image=fontChar)
 		else:
-			if fontWidth <= minFontWidth:
+			if boxes[boxIndex]['boxWidth'] <= minFontWidth:
 				fontWidth = minFontWidth
-			elif fontWidth >= maxFontWidth:
+			elif boxes[boxIndex]['boxWidth'] >= maxFontWidth:
 				fontWidth = maxFontWidth
-			if fontHeight <= minFontHeight:
+			if boxes[boxIndex]['boxHeight'] <= minFontHeight:
 				fontHeight = minFontHeight
-			elif fontHeight >= maxFontHeight:
+			elif boxes[boxIndex]['boxHeight'] >= maxFontHeight:
 				fontHeight = maxFontHeight
 			fontChar.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
 			draw.composite(operator=operator, left=int(round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0)), 
@@ -628,6 +628,21 @@ for row in range(0, len(lines)):
 				draw.line((boxRight,boxTop), (boxRight,boxBottom))
 				draw.line((boxLeft,boxTop), (boxLeft,boxBottom))
 			boxIndex += 1
+
+# If there are still boxes left over, perhaps there were some comments at the end
+# of the page that never made it into the source.  Better show them all as orange
+# boxes.
+# Draw empty frames around all of the rejected boxes.
+if boxIndex < len(boxes):
+	for i in range(boxIndex,len(boxes)):
+		boxTop = boxes[i]['boxTop']
+		boxBottom= boxes[i]['boxBottom']
+		boxLeft = boxes[i]['boxLeft']
+		boxRight = boxes[i]['boxRight']
+		draw.line((boxLeft,boxTop), (boxRight,boxTop))
+		draw.line((boxLeft,boxBottom), (boxRight,boxBottom))
+		draw.line((boxRight,boxTop), (boxRight,boxBottom))
+		draw.line((boxLeft,boxTop), (boxLeft,boxBottom))
 
 # Perform all the pending drawing operations.
 draw(img)
