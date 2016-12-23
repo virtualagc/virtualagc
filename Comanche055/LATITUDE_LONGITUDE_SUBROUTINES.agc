@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 ##				same name, using Comanche055 page images.
 ##		2010-08-20 JL	Fixed indentation of RVQ opcode on line 180.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -74,7 +76,7 @@ CALLRTRP	CALL
 		UNIT			# UNIT RP B-1
 		STCALL	ALPHAV		# U2= 1/2 SINL FOR SETRE SUBR BELOW
 			SETGAMMA	#	SET GAMMA=B2/A2 FOR EARTH, =1 FOR MOON
-		CALL			#	SCALED B-1.
+		CALL			#	SCALED B-1
 			SETRE		# CALC RE METERS B-29
 		DLOAD	DSQ
 			ALPHAV
@@ -214,7 +216,7 @@ CLROVFLW	DLOAD	DSQ
 			COSTH
 		DAD
 		BZE	SQRT
-			ARCTANXX	# ATAN=0/0.  SET THETA=0
+			ARCTANXX	# ATAN=0/0  SET THETA=0
 		BDDV	BOV
 			SINTH
 			ATAN=90
@@ -243,7 +245,7 @@ ATAN=90		DLOAD	SIGN
 2DZERO		=	DPZERO
 
 ## Page 1241
-# ***** SETGAMMA SUBROUTINE *****
+# ..... SETGAMMA SUBROUTINE .....
 # SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES
 #
 # GAMMA = B**2/A**2 FOR EARTH (B-1)
@@ -270,7 +272,7 @@ SETGMEX		STORE	GAMRP
 GAMRP		=	8D
 
 ## Page 1242
-# ***** SETRE SUBROUTINE *****
+# ..... SETRE SUBROUTINE .....
 # SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)
 #
 #	RE = RM FOR MOON
