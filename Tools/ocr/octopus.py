@@ -49,6 +49,7 @@ group.add_argument('--luminary99', help="Perform LUMINARY 99 processing", action
 group.add_argument('--retread44', help="Perform RETREAD 44 processing", action="store_true")
 group.add_argument('--aurora12', help="Perform AURORA 12 processing", action="store_true")
 group.add_argument('--sunburst120', help="Perform SUNBURST120 processing (in Luminary 69 style)", action="store_true")
+group.add_argument('--luminary116', help="Perform LUMINARY 116 processing (for octals)", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -100,6 +101,14 @@ elif args.retread44:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     #thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 51)
     _,thresh = cv2.threshold(blurred, 125, 255, cv2.THRESH_BINARY)
+elif args.luminary116:
+    _,_,r_channel = cv2.split(img)
+    blurred = cv2.GaussianBlur(r_channel, (7,7), 0)
+    # Isolate the bands by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,51), np.uint8), iterations=1)
+    # Difference the original R channel with the isolated bands
+    diff = blurred + lines_only
+    _,thresh = cv2.threshold(diff, 240, 255, cv2.THRESH_BINARY)
 else:
     raise RuntimeError("Unknown program type selected")
 
