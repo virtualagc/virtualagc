@@ -1366,55 +1366,58 @@ RSTRTCHK        EXTEND                                          # Entry point to
 TCTRPCHK        TC              PHASCHNG
                 OCT             00102
 
-                TC              WAITLIST                        # Schedule a task to break out of the loop if the
-                2CADR           TCTRPFAL                        # alarm doesn't work.
+                CAF             TEN                             # Schedule a task to break out of the loop if the
+                TC              WAITLIST                        # alarm doesn't work.
+                2CADR           TCTRPFAL
 
-                CAF             TCTRAPGO                        # Trigger a TC Trap. We do this in erasable  memory
+                CAF             ADRS1                           # Trigger a TC Trap. We do this in erasable  memory
                 TS              SKEEP1                          # so we can break out of it if the restart
                 TC              SKEEP1                          # doesn't occur as expected.
-TCTRAPGO        TC              SKEEP1
 
 TCTRPFAL        CAF             TCTRPXIT                        # It's been too long with no restart. Break the
                 TS              SKEEP1                          # loop at SKEEP1.
                 TC              TASKOVER
 TCTRPXIT        TC              TCTRCONT
 
-NOTCFAIL        CA              ONE                             # It's been too long with no restart. Break the
-                TS              SKEEP3                          # BZF loop by making SKEEP3 nonzero.
+NOTCFAIL        CA              S+ZERO                          # It's been too long with no restart. Zero SKEEP2
+                TS              SKEEP2                          # so the CA..ADS loop exits.
                 TC              TASKOVER
 
-TESTTCTR        CA              TCTRPBIT                        # Check to see if the TC TRAP bit is set in
-                EXTEND                                          # channel 77.
-                RAND            77
+TESTRBIT        EXTEND                                          # Read the restart cause from channel 77
+                RXOR            77
                 EXTEND
-                BZF             ERRORS
-                TC              Q
+                WRITE           77                              # ... and clear it by writing back out.
+                TCF             +0CHK                           # Make sure only the correct bit was set.
 
-TCTRCONT        TC              TESTTCTR
+TCTRCONT        TC              PHASCHNG                        # Turn off the restart group so we don't come back
+                OCT             00002                           # here for an unexpected reason.
 
-NOTCCHK         EXTEND
-                WRITE           77                              # Blank channel 77.
-                EXTEND                                          # Just to be sure -- we won't check this next time
-                READ            77
-                TC              +0CHK
-                TS              SKEEP2                          # Zero SKEEP2 for the BZF loop
+                CAF             TCTRPBIT                        # Check for the TC trap bit
+                TC              TESTRBIT
 
-                TC              PHASCHNG
+NOTCCHK         TC              PHASCHNG
                 OCT             00202
 
                 CAF             ONE                             # Set up a waitlist task to break us out of the
-                TC              WAITLIST                        # BZF loop if the alarm doesn't occur
+                TC              WAITLIST                        # CA-ADS loop if the alarm doesn't occur
                 2CADR           NOTCFAIL
 
-                CA              SKEEP2                          # Keep looping while SKEEP2 = 0
-                EXTEND
-SELFBZF         BZF             SELFBZF -2
+                CA              S-2
+                TS              SKEEP2                          # Put -2 into SKEEP2.
 
-NOTCCONT        TC              TESTTCTR
+# There's many ways to do an infinite loop without TC or TCF. However, most of them appear to get transients
+# on the TC0 and TCF0 lines during instruction changeover in T12. Since neither pulse is gated to the alarm
+# circuit, these transients make the circuit think the computer executed an actual TC or TCF.
+# It is unclear if this is an error in the simulator or an actual design flaw.
+# Anyways, a CA and ADS loop *doesn't* generate transients on those lines, and so the alarm works as expected.
+                CA              SKEEP2                          # Add -2 to Z to loop in place.
+                ADS             Z
+NOTCCONT        TC              PHASCHNG                        # Turn off the restart group so we don't come back
+                OCT             00002                           # here for an unexpected reason.
 
-ALRMDONE        TC              PHASCHNG                        # All done with the hardware alarm checks.
-                OCT             00002
+                CAF             TCTRPBIT
+                TC              TESTRBIT
 
-                TC              TOSMODE
+ALRMDONE        TC              TOSMODE                         # All done with the hardware alarm checks.
 
 ENDSLFS2        EQUALS                                          
