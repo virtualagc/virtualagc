@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-11 JVL	Adapted from the Colossus249/ file
 ##				of the same name, using Comanche055 page
 ##				images.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -30,6 +32,4 @@
 ##            Colossus 2A
 
 ## Page 936
-
-# *** END OF TROUBLE .043 ***
-
+## This page (and this entire section) contains only assembler-generated messages.

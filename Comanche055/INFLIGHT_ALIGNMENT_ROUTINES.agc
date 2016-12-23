@@ -10,6 +10,8 @@
 ## Pages:	1355-1364
 ## Mod history:	2009-05-14 RSB	Adapted from the Colossus249/ file of the
 ##				same name, using Comanche055 page images.
+##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -40,7 +42,7 @@
 # THE INPUT IS THE DESIRED STABLE MEMBER COORDINATES REFERRED TO PRESENT STABLE MEMBER COORDINATES.  THE THREE
 # HALF-UNIT VECTORS ARE STORED AT XDC, YDC, AND ZDC.
 #
-# THE OUTPUTS ARE THE THREE GYRO TORQUE ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
+# THE OUTPUTS ARE THE THREE GYRO TORQUING ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
 # MGC, AND OGC RESPECTIVELY.
 
 		COUNT	23/INFLT
@@ -205,7 +207,7 @@ CALCGA1		VLOAD	DOT
 GIMLOCK1	EXIT
 		TC	ALARM
 		OCT	00401
-		TC	UPFLAG		# GIMBAL LOCK HAS OCCURRED
+		TC	UPFLAG		# GIMBAL LOCK HAS OCCURED
 		ADRES	GLOKFAIL
 
 		TC	INTPRET
@@ -300,6 +302,8 @@ AXISGEN3	TIX,2
 QTSN45		2DEC	.1768
 .166...		2DEC	.1666666667
 
-## Page 1364 (empty page)
+## Page 1364
+## This page is empty.
+
 
 

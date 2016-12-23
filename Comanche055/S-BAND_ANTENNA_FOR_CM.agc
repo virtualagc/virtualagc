@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-11 JVL	Adapted from the Colossus249/ file
 ##				of the same name, using Comanche055 page
 ##				images.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -30,8 +32,6 @@
 ##            Colossus 2A
 
 ## Page 934
-# S-BAND ANTENNA FOR CM
-
 		BANK	23
 		SETLOC	SBAND
 		BANK
@@ -62,7 +62,7 @@ SBANDANT	TC	BANKCALL	# V 64 E GETS US HERE
 			EISOI +2
 EISOI		VLOAD	VCOMP		# EARTH, R= -RCM
 			RATT
-		SETPD	MXV		# RCS TO STABLE MEMBER: B-1X B-29X B+1
+		SETPD	MXV		# RCS TO STABLE MEMBER- B-1X B-29X B+1
 			2D		# 2D
 			REFSMMAT	# STABLE MEMBER.  B-1X B-29X B+1= B-29
 		VSL1	PDDL		# 8D
@@ -87,7 +87,7 @@ COVCNV		UNIT	BOV		# TEST OVERFLOW FOR INDICATION OF NULL
 		SL1	ACOS		# REVOLUTIONS SCALED B0
 		PDVL	DOT		# 22D YAWANG
 			URP
-			HIUNITY		# COMPUTE FOLLOWING: URP.UY
+			HIUNITY		# COMPUTE FOLLOWING- URP.UY
 		SL1	BPL		# POSITIVE
 			NOADJUST	# YES, 0-180 DEGREES
 		DLOAD	DSU		# NO, 181-360 DEGREES 20D
