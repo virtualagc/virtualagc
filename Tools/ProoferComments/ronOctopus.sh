@@ -27,3 +27,9 @@ done
 
 cd -
 rm /tmp/octopus$$ -rf
+
+if [[ "$GIMP" != "" ]]
+then
+	gimp $images/prepared$AGC/$num.png
+fi
+

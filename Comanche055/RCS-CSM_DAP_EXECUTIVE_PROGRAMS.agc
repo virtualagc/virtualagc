@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 ##				same name, using Comanche055 page images.
 ##		2009-05-20 RSB	A "Page N" comment was corrected.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				but no errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
