@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-25 HG   Transcribed
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 382
                 EBANK=          XSM
@@ -36,7 +38,7 @@
 #                                                  TC     BANKCALL
 #                                                  CADR   E/BKCALL
 #                                                  CADR   ROUTINE         WHERE YOU WANT TO GO IN FIXED.
-#                                                  RETURN HERE FROM DISPLAY TERMINATE, BADD STALL OR TC Q.
+#                                                  RETURN HERE FROM DISPLAY TERMINATE, BAD STALL OR TC Q.
 #                                                  RETURN HERE FROM DISPLAY PROCEED OR GOOD RETURN FROM STALL.
 #                                                  RETURN HERE FROM DISPLAY ENTER OR RECYCLE.
 
@@ -80,7 +82,7 @@ E/CALL          LXCH            LOC                     # ADRES -1 OF CADR.
                 DXCH            EBUF2                   # STORE CADR AND RETURN.
                 TC              INTPRET
                 CALL
-                                EBUF2                   # INDIRECTLY EXECUTE ROUTING.  IT MUST
+                                EBUF2                   # INDIRECTLY EXECUTE ROUTINE.  IT MUST
                 EXIT                                    # LEAVE VIA RVQ OR EQUIVALENT.
                 LXCH            EBUF2           +1      # PICK UP RETURN.
                 TCF             INTPRET         +2      # SET LOC AND RETURN TO CALLER.
@@ -101,7 +103,7 @@ E/CALL          LXCH            LOC                     # ADRES -1 OF CADR.
 #                                                       .                     RETURNS HERE
 #                                                       .
 #                                                       .
-#                                                     RELINT                  IF YOU DID AND INHINT
+#                                                     RELINT                  IF YOU DID AN INHINT.
 
                 BANK            33
                 SETLOC          E/PROG

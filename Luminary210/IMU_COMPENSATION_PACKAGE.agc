@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-24 HG   Transcribed
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 338
                 BANK            7
@@ -52,7 +54,7 @@
                 EXTEND
                 MP              BIT6                    # SCALE 2(+9)   SHIFT RIGHT 9
                 INDEX           BUF             +2
-                DAS             DELVX                   # (PIPAI) + (PIPAI)(SF)
+                DAS             DELVX                   # (PIPAI) + (PIPAI)(SFE)
 
                 INDEX           BUF             +2
                 CS              PIPABIAS                # (PIPA PULSES)/(CS) X 2(-3)            *
@@ -143,8 +145,8 @@ IRIGY           EXTEND
 #               EXTEND                              ***
 #               DCS             DELVX               ***   (PIPA PULSES) X 2(+14)
 #               DXCH            MPAC                ***
-#               CA              ADOAY               ***   (GYRO PULSES)/(PIPA PULS) X 2(-6)     *
-#               TC              GCOMPSUB            ***   -(ADOAY)(/PIPAX)  (GYRO PULSES) X 2(+14)
+#               CA              ADOAY               ***   (GYRO PULSES)/(PIPA PULSE) X 2(-6)     *
+#               TC              GCOMPSUB            ***   -(ADOAY)(PIPAX)   (GYRO PULSES) X 2(+14)
 
                 TC              MPAC            +2
 
@@ -178,7 +180,7 @@ GCOMPSUB        XCH             MPAC                    # ADIA OR ADSRA COEFFICI
                 MP              MPAC                    # (GYRO PULSES)/(PIPA PULSE) X 2(-6)      *
                 DXCH            VBUF                    # NOW = (GYRO PULSES) X 2(+8)             *
 
-                CA              MPAC            +1      # MINOR PART OF PIPA PULSES
+                CA              MPAC            +1      # MINOR PART PIPA PULSES
                 EXTEND
                 MP              MPAC                    # ADIA OR ADSRA
                 TS              L
@@ -331,13 +333,13 @@ NBD3            EXTEND                                  # C(A) = DELTAT    (CS) 
                 TC              FBIASSUB                # -(NBOX)(DELTAT)   (GYRO PULSES) X 2(+14)
 
                 CCS             TEM1                    # IF SURFACE FLAG IS SET,
-                TC              IRIGY                   # COMPENSAGE ACCELERATION TERMS.
+                TC              IRIGY                   # COMPENSATE ACCELERATION TERMS.
 
 ## Page 347
                 EXTEND
                 DCS             VBUF            +2
                 DXCH            MPAC                    # DELTAT SCALED (CS) X 2(+19)
-                CA              NBDY                    # (BYRO PULSES)/(CS) X 2(-5)
+                CA              NBDY                    # (GYRO PULSES)/(CS) X 2(-5)
                 TC              FBIASSUB                # -(NBDY)(DELTAT)   (GYRO PULSES) X 2(+14)
 
                 CCS             TEM1                    # IF SURFACE FLAG IS SET,
@@ -363,7 +365,7 @@ FBIASSUB        XCH             Q
                 INDEX           BUF
                 DAS             GCOMP                   # HI(NBD)(DELTAT)   (GYRO PULSES) X 2(+14)
 
-                CA              Q                       # NO FRACTIONAL PART
+                CA              Q                       # NOW FRACTIONAL PART
                 EXTEND
                 MP              MPAC            +1
                 TS              L

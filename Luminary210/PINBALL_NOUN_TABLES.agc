@@ -18,6 +18,8 @@
 ##                              as some changes to old ones.
 ##              2016-12-11 HG   fix operand DSPTEM1 -> N26/PRI
 ##              2016-12-12 HG   fix value for forward/lateral velocity
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 313
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -188,7 +190,7 @@ SFCOM		DXCH	SFTEMP1
 		
 # GTSFIN LOADS SFTEMP1, SFTEMP2 WITH THE DP SFINTAB ENTRIES.
 
-GTSFIN		DXCH	SFTEMP1			# 2X(SFCONUM) ARIVES IN SFTEMP1.
+GTSFIN		DXCH	SFTEMP1			# 2X(SFCONUM) ARRIVES IN SFTEMP1.
 		EXTEND
 		INDEX	A
 		DCA	SFINTAB
@@ -302,7 +304,7 @@ NNADTAB		OCT	00000			# 00 NOT IN USE
 		OCT	24105			# 63 LR ALTITUDE MINUS COMPUTED ALTITUDE
 						#    ALTITUDE RATE
 						#    COMPUTED ALTITUDE
-		OCT	64110			# 64 TIME LEFT FOR REDISGNATION-LPD ANGLE
+		OCT	64110			# 64 TIME LEFT FOR REDESIGNATION-LPD ANGLE
 						#    ALTITUDE RATE
 						#    COMPUTED ALTITUDE
 		OCT	24113			# 65 SAMPLED AGC TIME (HRS,MIN,SEC)
@@ -601,7 +603,7 @@ SFOUTAB		OCT	05174			# WHOLE, DP TIME (SEC)
 		OCT	00000			# SPARE
 		OCT	00000
 		OCT	00000			# CDU DEGREES, 360-CDU DEGREES
-		OCT	00000			#     (SFCONS IN DEGOUTSF, 360 CDUO)
+		OCT	00000			#     (SFCONS IN DEGOUTSF, 360-CDUO)
 		OCT	00714			# DP DEGREES (90) (POINT BETWN BITS 7-8)
 		OCT	31463
 		OCT	13412			# DP DEGREES (360)
@@ -618,7 +620,7 @@ SFOUTAB		OCT	05174			# WHOLE, DP TIME (SEC)
 		OCT	15340
 		OCT	01031			# VELOCITY3       (POINT BETWN BITS 7-8)
 		OCT	21032
-		OCT	34631			# ELEVATION DETREES
+		OCT	34631			# ELEVATION DEGREES
 		OCT	23146
 		OCT	00636			# RENDEZVOUS RADAR RANGE
 		OCT	14552
@@ -672,7 +674,7 @@ IDADDTAB	ECADR	TTOGO			# 40 MIN/SEC                          M/S
 		ECADR	HPER			# 42 POS4                             DP3
 		ECADR	VGDISP			# 42 VEL3                             DP3
 		ECADR	LAT			# 43 DPDEG(360)                       DP4
-		ECADR	LONG			# 43 DPDEG(360                        DP4
+		ECADR	LONG			# 43 DPDEG(360)                        DP4
 		ECADR	ALT			# 43 POS4                             DP3
 		ECADR	HAPOX			# 44 POS4                             DP3
 		ECADR	HPERX			# 44 POS4                             DP3
