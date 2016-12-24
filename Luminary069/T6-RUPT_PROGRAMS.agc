@@ -16,10 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
+##		2016-12-24 RRB	Updated for Luminary 69.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 1403
+## Page 1398
 # PROGRAM NAMES:	(1) T6JOBCHK	MOD. NO. 5	OCTOBER 2, 1967
 #			(2) DOT6RUPT
 # MODIFICATION BY:	LOWELL G HULL (A.C.ELECTRONICS)
@@ -68,7 +67,7 @@
 # DEBRIS:	T6JOBCHK CLOBBERS A.  DOT6RUPT CLOBBERS NOTHING.
 
 		BLOCK	02
-## Page 1404
+## Page 1399
 		BANK	17
 		SETLOC	DAPS2
 		BANK
@@ -120,7 +119,7 @@ GOCH56		INDEX	L
 		CA	NEXTP
 WRITEP		EXTEND
 		WRITE	CHAN6
-## Page 1405
+## Page 1400
 		TC	Q
 
 		CA	NEXTU
