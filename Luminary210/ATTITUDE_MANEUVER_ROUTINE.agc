@@ -14,19 +14,21 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-24 HG   Transcribed
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 354
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
 
 
-# MOD 2           DATE 5/1/67     BY DONE KEENE
+# MOD 2           DATE 5/1/67     BY DON KEENE
 
 # PROGRAM DESCRIPTION
 
 #      KALCMANU IS A ROUTINE WHICH GENERATES COMMANDS FOR THE LM DAP TO CHANGE THE ATTITUDE OF THE SPACECRAFT
 # DURING FREE FALL.  IT IS DESIGNED TO MANEUVER THE SPACECRAFT FROM ITS INITIAL ORIENTATION TO SOME DESIRED
-# ORIENTATION SPECIFIED BY THe PROGRAM WHICH CALLS KALCMANU, AVOIDING GIMBAL LOCK IN THE PROCESS.  IN THE
-# MOD 2 VERSION, THIS DESIRED ATTITUDE IS SPECIFIED BY A SET OF THREE COMMANDED CDU ANGLES STORES AS 2S COMPLEMENT
+# ORIENTATION SPECIFIED BY THE PROGRAM WHICH CALLS KALCMANU, AVOIDING GIMBAL LOCK IN THE PROCESS.  IN THE
+# MOD 2 VERSION, THIS DESIRED ATTITUDE IS SPECIFIED BY A SET OF THREE COMMANDED CDU ANGLES STORED AS 2S COMPLEMENT
 # SINGLE PRECISION ANGLES IN THE THREE CONSECUTIVE LOCATIONS, CPHI, CTHETA, CPSI, WHERE
 
 #      CPHI = COMMANDED OUTER GIMBAL ANGLE
@@ -60,7 +62,7 @@
 # IN THIS CASE ONLY AN INCREMENTAL CDUX ANGLE (DELFROLL) IS SUPPLIED TO THE DAP.  AT THE END OF THE YAW
 # MANEUVER OR IN THE EVENT THAT THERE WAS NO FINAL YAW,  CDUXD IS SET EQUAL TO CPHI AND THE X-AXIS DESIRED
 # RATE SET TO ZERO.  THUS, UPON COMPLETION OF THE MANEUVER THE S/C WILL FINISH UP IN A LIMIT CYCLE ABOUT THE
-# DESIRED GIMBAL ANGLES.
+# DESIRED FINAL GIMBAL ANGLES.
 
 
 # PROGRAM LOGIC FLOW
@@ -77,14 +79,13 @@
 #      A)  AM LESS THAN .25 DEGREES (MINANG)
 #      B)  AM GREATER THAN 170 DEGREES (MAXANG)
 
-#      IF AM IS LESS THAN .25 DEGREES, NO COMPLICATED AUTOMATIC MANEUVERING IS NECESSARY.  THREFORE, WE CAN SIMPLY
+#      IF AM LESS THAN .25 DEGREES, NO COMPLICATED AUTOMATIC MANEUVERING IS NECESSARY.  THEREFORE WE CAN SIMPLY
 # SET CDU DESIRED EQUAL TO THE FINAL CDU DESIRED ANGLES AND TERMINATE THE JOB.
 #
-#      IF AM IS GREATER THAN .25 DEGREES BUT LESS THAN 170 DEGREES, THE AXES OF TEH SINGLE EQUIVALENT ROTATION
+#      IF AM IS GREATER THAN .25 DEGREES BUT LESS THAN 170 DEGREES, THE AXES OF THE SINGLE EQUIVALENT ROTATION
 #   -                                                       *
-# (COF) IS EXTRACTED FROM THE SKEW SYMMETRIC COMPONENTS OF MFI.
-#                                                                                      *      *
-#       IF AM GREATER T;HAN 170 DEGREES AN ALTERNATE METHOD EMPLOYING THE SYMMETRIC PART OF MFI (MFISYM) IS USED
+# (COF) IS EXTRACTED FROM THE SKEW SYMMETRIC COMPONENTS OF MFI.                             *      *
+#       IF AM GREATER THAN 170 DEGREES AN ALTERNATE METHOD EMPLOYING THE SYMMETRIC PART OF MFI (MFISYM) IS USED
 #               -
 # TO DETERMINE COF.
 
@@ -110,7 +111,7 @@
 #      AT THE BEGINNING OF THE MANEUVER THE AUTOPILOT DESIRED RATES (OMEGAPD, OMEGAQD, OMEGARD) AND THE
 # MANEUVER TIMINGS ARE ESTABLISHED.  ON THE FIRST PASS AND ON ALL SUBSEQUENT UPDATES THE CDU DESIRED
 # ANGLES ARE LOADED WITH THE APPROPRIATE VALUES AND THE INCREMENTAL CDU ANGLES ARE COMPUTED.  THE AGC CLOCKS
-# (TIME1 AND TIME2) ARE THEN CHECKED TO SEE IF THE MANEUVER WILL TERMINATE BEFORE THE NEXT UPDATE.  IF
+# (TIME1 AND TIME2) ARE THAN CHECKED TO SEE IF THE MANEUVER WILL TERMINATE BEFORE THE NEXT UPDATE.  IF
 # NOT, KALCMANU CALLS FOR ANOTHER UPDATE (RUN AS A JOB WITH PRIORITY TBD) IN ONE SECOND.  ANY DELAYS IN THIS
 # CALLING SEQUENCE ARE AUTOMATICALLY COMPENSATED IN CALLING FOR THE NEXT UPDATE.
 #
@@ -149,6 +150,7 @@
 # KEYBOARD ENTRY PRIOR TO THE EXECUTION OF KALCMANU.
 #     IT IS ALSO ASSUMED THAT THE AUTOPILOT IS IN THE AUTO MODE.  IF THE MODE SWITCH IS CHANGED DURING THE
 # MANEUVER, KALCMANU WILL TERMINATE VIA GOODEND WITHIN 1 SECOND SO THAT R60 MAY REQUEST A TRIM OF THE S/C ATTITUDE
+# THIS IS THE ONLY MEANS FOR MANUALLY TERMINATING A KALCMANU SUPERVISED MANEUVER.
 # SUBROUTINES
 
 #      KALCMANU USES A NUMBER OF INTERPRETIVE SUBROUTINES WHICH MAY BE OF GENERAL INTEREST.  SINCE THESE ROUTINES
@@ -228,7 +230,7 @@
 #            Y     =    INNER GIMBAL ANGLE
 #            Z     =    MIDDLE GIMBAL ANGLE
 
-#      THE INTERPRETATION OF THIS MATRIX IS AS FOLLOWS:
+#      THE INTERPRETATION OF THIS MATRIX IS AS FOLLOWS
 
 #      IF A , A , A  REPRESENT THE COMPONENTS OF A VECTOR IN S/C AXES THEN THE COMPONENTS OF THE SAME VECTOR IN
 #          X   Y   Z
@@ -242,7 +244,7 @@
 #            (B )      =    M    (A )
 #            ( Y)                ( Y)
 #            (  )                (  )
-#            (B )                (B )
+#            (B )                (A )
 #            (Z )                ( Z)
 
 #     THE SUBROUTINE WILL STORE THIS MATRIX IN SEQUENTIAL LOCATIONS OF ERASABLE MEMORY AS SPECIFIED BY THE CALLING
@@ -256,10 +258,10 @@
 #      DCM TO CDU
 #      ----------
 #                                                                           *
-#      THIS ROUTINE EXTRACTS THE CDU ANGLES FROM A DIRECTION COSINE MATRIX (M SCALED BY 2) RELATIVE S/C AXIS TO
+#      THIS ROUTINE EXTRACTS THE CDU ANGLES FROM A DIRECTION COSINE MATRIX (M SCALED BY 2) RELATING S/C AXIS TO
 #                                                                                 *
 # STABLE MEMBER AXES.  X1 MUST CONTAIN THE COMPLEMENT OF THE STARTING ADDRESS FOR M.  THE SUBROUTINE LEAVES THE
-# CORRESPONDING GIMBAL ANGLES IN V(MPAC) AS DOUBLE PRECISION 1:S COMPLEMENT ANGLES ACALED BY 2PI.  THE FORMULAS
+# CORRESPONDING GIMBAL ANGLES IN V(MPAC) AS DOUBLE PRECISION 1:S COMPLEMENT ANGLES SCALED BY 2PI.  THE FORMULAS
 # FOR THIS CONVERSION ARE
 
 #       Z    =    ARCSIN (M  )
@@ -275,7 +277,7 @@
 #       X    =    ARCSIN (-M /COSZ)
 #                           5
 
-# IF M  IS NEGATIVE, X IS REPLACED BY PI SGN X - X.
+# IF M  IS NEGATIVE X IS REPLACED BY PI SGN X - X
 #     4
 
 #      THIS ROUTINE DOES NOT SET THE PUSH DOWN POINTER, BUT USES THE NEXT 8 LOCATIONS OF THE PUSH DOWN LIST AND
@@ -322,7 +324,7 @@
 #                      (-U        U         0  )
 #                      (  Y        X           )
 
-## Page 359
+## Page 360
 #            -
 #            U    =    UNIT ROTATION VECTOR RESOLVED INTO S/C AXES
 #            A    =    ROTATION ANGLE
@@ -330,7 +332,7 @@
 #                             *
 #      THE INTERPRETATION OF DEL IS AS FOLLOWS
 
-#      IF A , A , A  REPRESENT THE COMPONENTS OF A VECTOR INTHE ROTATED FRAME, THEN THE COMPONENTS OF THE SAME
+#      IF A , A , A  REPRESENT THE COMPONENT OF A VECTOR INTHE ROTATED FRAME, THEN THE COMPONENTS OF THE SAME
 #        X   Y   Z
 # VECTOR IN THE ORIGINAL S/C AXES (B , B , B ) ARE
 #                                   X   Y   Z
@@ -341,7 +343,7 @@
 #             (B )     =    DEL       (A )
 #             ( Y)                    ( Y)
 #             (  )                    (  )
-#             (B )                    (B )
+#             (B )                    (A )
 #             ( Z)                    ( Z)
 
 #      THE ROUTINE WILL STORE THIS MATRIX (SCALED UNITY) IN SEQUENTIAL LOCATIONS OF ERASABLE MEMORY BEGINNING WITH
@@ -424,7 +426,7 @@
 #                        MXM3
 
 ## Page 362
-#                        TRANSPGS
+#                        TRANSPOS
 #                        SIGNMPAC
 #                        READCDUK
 #                        CDUTODCM
@@ -559,13 +561,13 @@ ALTCALC         VLOAD           VAD                     # IF AM GREATER THAN 170
                 PDDL            DSU                     # PDO CAM                                   $4
                                 DPHALF
                                 CAM
-                BOVB            PDDL                    # PS2 1 - CAM                               $2
+                BOVB            PDDL                    # PD2 1 - CAM                               $2
                                 SIGNMPAC
                                 MFISYM          +16D
                 DSU             DDV
                                 0
                                 2
-                SQRT            PDDL                    # COFZ = SQRT(MFISYM8-CAM)/(1-CAM)
+                SQRT            PDDL                    # COFZ = SQRT(MFISYM8-CAM)/1-CAM)
                                 MFISYM          +8D     #                                $ ROOT 2
                 DSU             DDV
                                 0
@@ -737,7 +739,7 @@ K4              2DEC            -.25                    # = -COS(D)             
 K4SQ            2DEC            .125                    # = COS(D)COS(D)                  $2
 SNGLCD          2DEC            .008725                 # = SIN(NGL)COS(D)                $2
 CNGL            2DEC            .499695                 # = COS(NGL)                      $2
-LOCKANGL        DEC             .388889                 # = 70 DEGREES                    $2
+LOCKANGL        DEC             .388889                 # = 70 DEGREES
 # INTERPRETIVE SUBROUTINE TO READ THE CDU ANGLES
 
 READCDUK        CA              CDUZ                    # LOAD T(MPAC) WITH CDU ANGLES
@@ -846,11 +848,11 @@ DELCOMP         SETPD           PUSH                    # MPAC CONTAINS THE ANGL
                                 0
                 SIN             PDDL                    # PD0 = SIN(A)
                 COS             PUSH                    # PD2 = COS(A)
-                SR2             PDDL                    # PD2 = COS(A)
+                SR2             PDDL                    # PD2 = COS(A)				$8
                 BDSU            BOVB
                                 DPHALF
                                 SIGNMPAC
-                PDDL                                    # PDA = 1-COS(A)
+                PDDL                                    # PD4 = 1-COS(A)
 
 # COMPUTE THE DIAGONAL COMPONENTS OF DEL
 
@@ -941,14 +943,14 @@ DELCOMP         SETPD           PUSH                    # MPAC CONTAINS THE ANGL
 
 # DIRECTION COSINE MATRIX TO CDU ANGLE ROUTINE
 # X1 CONTAINS THE COMPLEMENT OF THE STARTING ADDRESS FOR MATRIX (SCALED 2)
-# LEAVE CDU ANGLES SCALED 2PI IN V(MPAC)
+# LEAVES CDU ANGLES SCALED 2PI IN V(MPAC)
 # COS(MGA) WILL BE LEFT IN S1 (SCALED 1)
 
-# THE DIRECTION COSINE MATRIX RELATING S/C AXES TO STABLE MEMBER AXES CAN BE WRITTEN AS**
+# THE DIRECTION COSINE MATRIX RELATING S/C AXES TO STABLE MEMBER AXES CAN BE WRITTEN AS***
 
-#          C  =COS(THETA)COS(PSI
+#          C  =COS(THETA)COS(PSI)
 #           0
-#          C  =-COS(THETA)SIN(PSI)COS(PHI)+SIN(THETA)SIN(PHI)
+#          C  =-COS(THETA)SIN(PSI)COS(PHI)+SI (THETA)SIN(PHI)
 #           1
 #          C  =COS(THETA)SIN(PSI)SIN(PHI) + S N(THETA)COS(PHI)
 #           2

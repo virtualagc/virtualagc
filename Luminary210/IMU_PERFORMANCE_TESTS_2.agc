@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-26 HG   Transcribed            
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 385
 # NAME- IMU PERFORMANCE TESTS 2
@@ -131,7 +133,7 @@ PIPACHK         INDEX           NDXCTR                  # PIPA TEST
                 TC              +1              
                 TC              EARTHR*         
                 CA              DEC17                   # ALLOW PIP COUNTER TO OVERFLOW 17 TIMES
-                TS              DATAPL          +4      # IN THE ALLOTTED TIME INTERVAL
+                TS              DATAPL          +4      # IN THE ALLOTED TIME INTERVAL
                 CA              DEC58           
                 TS              LENGTHOT
                 CA              ONE
@@ -207,9 +209,9 @@ VERTDRFT        CA              3990DEC                 #  ABOUT 1 HOUR VERTICAL
                 INDEX           POSITON 
                 CS              SOUTHDR         -2      
                 TS              DRIFTT  
-                CCS             PIPINDEX                #  OFFSET PLATFORM TO MIS PIP DEAD-ZONES
-                TCF             PON4                    #  Z-UP IN POS 4
-PON2            CS              BIT5                    #  X-UP
+                CCS             PIPINDEX                #  OFFSET PLATFORM TO MISS PIP DEAD-ZONES
+                TCF             PON4                    #  Z UP IN POS 4
+PON2            CS              BIT5                    #  X UP
                 ADS             ERCOMP          +2       
                 CA              BIT5    
                 ADS             ERCOMP          +4       
