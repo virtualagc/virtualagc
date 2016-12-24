@@ -11,9 +11,30 @@
 import sys
 import re
 from subprocess import call
+from os import environ
 from wand.image import Image, COMPOSITE_OPERATORS
 from wand.drawing import Drawing
 from wand.color import Color
+
+# Environment variables.
+blatant={}
+if 'BLATANT0' in environ:
+	blatant['0'] = 'yes'
+if 'BLATANT1' in environ:
+	blatant['1'] = 'yes'
+if 'BLATANT2' in environ:
+	blatant['2'] = 'yes'
+if 'BLATANT3' in environ:
+	blatant['3'] = 'yes'
+if 'BLATANT4' in environ:
+	blatant['4'] = 'yes'
+if 'BLATANT5' in environ:
+	blatant['5'] = 'yes'
+if 'BLATANT6' in environ:
+	blatant['6'] = 'yes'
+if 'BLATANT7' in environ:
+	blatant['7'] = 'yes'
+print blatant
 
 # Parse command-line arguments
 if len(sys.argv) != 6:
@@ -150,7 +171,7 @@ for index in range(startIndex, endIndex):
 		boxHeight = boxBottom + 1 - boxTop
 		
 		digitIndex = int(characters[characterIndex])
-		if boxOctal == digitIndex:
+		if boxOctal == digitIndex and not (characters[characterIndex] in blatant) and not (boxFields[0] in blatant):
 			digit = images[digitIndex].clone()
 		else:
 			digit = imagesColored[digitIndex].clone()
@@ -158,22 +179,14 @@ for index in range(startIndex, endIndex):
 		fontWidth = digit.width
 		fontHeight = digit.height
 		minFontHeight = 0.9*fontHeight
-		maxFontHeight = 1.3*fontHeight
-		minFontWidth = 0.7*fontWidth
-		maxFontWidth = 1.3*fontWidth
+		maxFontHeight = 1.2*fontHeight
+		minFontWidth = 0.9*fontWidth
+		maxFontWidth = 1.2*fontWidth
 		if boxHeight > minFontHeight and boxHeight < maxFontHeight and \
 		   boxWidth > minFontWidth and boxWidth < maxFontWidth:
 			digit.resize(boxWidth, boxHeight, 'cubic')
 			draw.composite(operator=operator, left=boxLeft, top=boxTop, width=boxWidth, height=boxHeight, image=digit)
 		else:
-			if fontWidth <= minFontWidth:
-				fontWidth = minFontWidth
-			elif fontWidth >= maxFontWidth:
-				fontWidth = maxFontWidth
-			if fontHeight <= minFontHeight:
-				fontHeight = minFontHeight
-			elif fontHeight >= maxFontHeight:
-				fontHeight = maxFontHeight
 			digit.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
 			draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth)/2.0), 
 				       top=round((boxTop+boxBottom-fontHeight)/2.0), width=fontWidth, 
