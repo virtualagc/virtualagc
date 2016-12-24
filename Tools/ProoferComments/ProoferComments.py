@@ -591,14 +591,6 @@ for row in range(0, len(lines)):
 				       top=boxes[boxIndex]['boxTop'], width=boxes[boxIndex]['boxWidth'], 
 				       height=boxes[boxIndex]['boxHeight'], image=fontChar)
 		else:
-			if boxes[boxIndex]['boxWidth'] <= minFontWidth:
-				fontWidth = minFontWidth
-			elif boxes[boxIndex]['boxWidth'] >= maxFontWidth:
-				fontWidth = maxFontWidth
-			if boxes[boxIndex]['boxHeight'] <= minFontHeight:
-				fontHeight = minFontHeight
-			elif boxes[boxIndex]['boxHeight'] >= maxFontHeight:
-				fontHeight = maxFontHeight
 			fontChar.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
 			draw.composite(operator=operator, left=int(round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0)), 
 				       top=int(round((boxes[boxIndex]['boxTop']+boxes[boxIndex]['boxBottom']-fontHeight)/2.0)), width=int(round(fontWidth)), 
