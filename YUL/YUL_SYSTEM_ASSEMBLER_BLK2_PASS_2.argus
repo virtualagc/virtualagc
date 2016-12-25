@@ -8,6 +8,7 @@
 # Pages:        385-430
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-24 JL   Transcribed pages 385-400.
+#               2016-12-25 JL   Transcribed pages 401-414.
 
 # Annotations:
 #
@@ -814,58 +815,411 @@ R0684   CUSSING OF SUPERBANK ERRORS: USED BY FCADR, 2FCADR, AND POLISH.
 # Page 401
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  17        PAGE 137
 
+P1000              SUBROUTINE IN PASS 2 FOR BLK2 TO SET IN PRINT THE LOCATION OF AN INSTRUCTION OR CONSTANT, WITH BANK
+R1002   NUMBER IF ANY AND WITH A NOTATION FOR END OF BLOCK OR BANK IF REQUIRED.  BLOTS OUT LOCATION FIELD IF BAD LOC.
+
+
+
+ 1004   BLK2 PLEB  NA           LOCATION      ONES          C,+2           C    BRANCH IF THERES A VALID LOCATION.
+ 1006              SS           BLOTS         C1T4          LINE +5             BLOT OUT LOCATION FIELD AND EXIT.
+
+ 1008              TX           BLK2 MXR      -             Z,MXR          C
+ 1009              SS           ZERO          C1T4          LINE +5        C
+ 1010              TX           LOCATION      -             COMMON         C
+ 1011              TX           COMMON        -             COMMON +1      C
+ 1012              LA           COMMON        OCT 3777      E PLEB         C    BRANCH IF LOCATION IS IN ERASABLE.
+ 10132             LA, B39T48M  LOCATION      ZERO          DP CROSS Q     C    BRANCH IF LOCATION BEGINS BANK OR FF/2.
+ 1014              LA           COMMON        OCT 7777      END BANK Q     C    BRANCH IF LOCATION IS NOT IN A BANK.
+ 1016              TX           COMMA C8      -             LINE +4        C
+ 1017              WD           COMMON        OCT 10000     COMMON         C    REDUCE TO STANDARD BANK NOTATION.
+ 1019              SWS, ACO6    COMMON        1             LINE +4        C
+ 1020              SWS, ACO7    COMMON        4             LINE +4        C    SET BANK NUMBER IN PRINT.
+ 1022              TS, BANKMASK OCT 2000      COMMON +1     END BANK Q     C    PUT SUBADDRESS IN THE RANGE 2000 - 3777.
+
+ 10232             TS, BIT33M   ONES          CUSS LIST +21 C,+4           C
+ 10234  E PLEB     NA, CHAR1M   HEALTH        BIT 2         C,+2           C    BRANCH IF NOT AN ERASE CARD.
+ 10236             NA, EBANKMSK LOCATION      HEALTH        C,-2           C    BRANCH IF ERASE CROSSES EBANK BOUNDARY.
+ 10238             LA, B41T48M  LOCATION      ZERO          DP CROSS Q     C    BRANCH IF LOCATION BEGINS EBANK.
+ 1024              LA           COMMON        OCT 1377      END BANK Q +2  C    BRANCH IF LOCATION IS NOT IN AN EBANK.
+ 1026              TX           E COMMA       -             LINE +4        C
+ 1027              SWS, ACO7    COMMON        2             LINE +4        C    SET EBANK NUMBER IN PRINT.
+ 1029              TX, EBANKMSK OCT 1400      -             COMMON +1      C    PUT SUBADDRESS IN THE RANGE 1400 - 1777.
+
+ 1031   END BANK Q NA, B39T48M  COMMON +1     ONES          C,+2           C    BRANCH IF NOT END OF BLOCK OR BANK.
+ 1033              TS, C1T4M    END BL MC     LINE +4       PRINT LOC      C    "EB" PRECEDES SUCH LOCATIONS.
+
+ 1035              TX           L TYP TAB     -             Z,X6           C
+ 1036              LA, CAC3M    LOCATION      6,0           C,+2           C    BRANCH WHEN MEMORY TYPE CATEGORY FOUND.
+ 1038              TS           Z,X6,1        -             C,-1           C
+ 1039              NA, CAC3M    LOCATION      6,0           PRINT LOC      C    BRANCH IF NOT END OF MINOR BLOCK.
+ 1041              SWS, C1T4M   END BL MC     A,4,L         LINE +4        C    "MC" MARKS END OF MEMORY TYPE.
+
+ 1043   PRINT LOC  SWS, ACO1    COMMON +1     33,L          LINE +5        C
+ 1044              SWS, ACO2    COMMON +1     30,L          LINE +5        C
+ 1045              SWS, ACO3    COMMON +1     27,L          LINE +5        C
+ 1046              SWS, ACO4    COMMON +1     24,L          LINE +5        C
+ 1047   RSTOR MXR  TX           GENL MXR      -             Z,MXR               SET UP LOCATION IN PRINT AND EXIT.
+
+
+
+R10481             MINOR SUBROUTINE IN PASS 2 FOR BLK2 TO CUSS A DOUBLE PRECISION CONSTANT THAT CROSSES A BANK BOUNDARY.
+
+ 10484  DP CROSS Q TX           Z,CSH         -             Z,X6           C
+ 10486             NA           N,SC          2 BAD LOCS +1 N,X6           C    EXIT IF NOT A D. P. CONSTANT.
+ 10488             TS, BIT1M    ONES          CUSS LIST +28 6,0            C
 
 # Page 402
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  18        PAGE 138
 
+P1049              SUBROUTINE IN PASS 2 FOR BLK2 TO SET UP A SINGLE-PRECISION CONSTANT IN WORD AND IN PRINT.  THIS
+P1051   SUBROUTINE DOES NOT CARE WHETHER THE WORD IS SIGNED OR NOT, BUT DEMANDS THE OUTPUT OF DEC/OCT CONST IN NUMBER.
+
+ 1053   BLK2 1P    NA           NUMBER        W BAD WORD    GOOD 1P        C    BRANCH IF WORD IS VALID.
+ 1055              SS           BLOTS         CHAR 8        LINE +5        C
+ 1056              SS           BLOTS         C1T4          LINE +6        C    BLOT OUT WORD IN PRINT.
+ 1058              TX           W BAD WORD    -             WORD                SEND ALONG BAD NEWS AND EXIT.
+
+ 1060   GOOD 1P    TX           BLK2 MXR      -             Z,MXR          C
+ 1061              EX           NUMBER        D2T12         WORD           C    ISOLATE MAGNITUDE.
+ 1063              LA           BIT 1         NUMBER        C,+2           C
+ 1064              HA           WORD          SPEC MAG      WORD           C    COMPLEMENT NEGATIVE WORD.
+
+ 1066   B2 BIN ALF SS           ZERO          C1T4          LINE +6        C
+ 1067              SWS, CHAR8M  WORD          12            LINE +5        C
+ 1068              SWS, ACO1    WORD          33,L          LINE +6        C
+ 1069              SWS, ACO2    WORD          30,L          LINE +6        C
+ 1070              SWS, ACO3    WORD          27,L          LINE +6        C
+ 1071              SWS, ACO4    WORD          24,L          LINE +6        C    SET WORD IN PRINT.
+ 1073              TS, CHAR1M   DEC6 FLAG     WORD          RSTOR MXR      C    APPLY INTERNAL CONSTANT FLAG AND EXIT.
+
+
+
+R1075              SUBROUTINE IN PASS 2 FOR BLK2 TO PROCESS A DOUBLE-PRECISION CONSTANT.  USING THE OUTPUT OF DEC
+R1077   CONST OR OCT CONST, AND DISTINGUISHING BETWEEN THE SIGNED AND UNSIGNED POSSIBILITIES (FOR OCTAL CONSTANTS ONLY),
+R1078   SETS UP THE HIGH-ORDER PART IN WORD AND THE LOW-ORDER PART IN 2ND HALF, SETS THE HIGH-ORDER PART IN PRINT, AND
+R1081   SETS UP THE LOW-ORDER PART IN PRINTABLE FORM IN 2ND ALF AND 2ND ALF +1.
+
+ 1082   BLK2 2P    NA           NUMBER        W BAD WORD    GOOD 2P        C    BRANCH IF CONSTANT IS VALID.
+ 1084              TN           BLOTS         2             2ND ALF        C    PREPARE BLOTS FOR LOW-ORDER PART.
+ 1087              TS           W BAD WORD    2ND HALF      BLK2 1P +1     C    GO TO JOIN SINGLE-PRECISION SADNESS.
+
+ 1089   GOOD 2P    TX           BLK2 MXR      -             Z,MXR          C
+ 1090              NA           E NUMBER      ZERO          C,+3           C    BRANCH IF NUMBER IS SIGNED.
+ 1092              SWE, B34T48M NUMBER        15            WORD           C
+ 1093              TS           SPEC MAG      COMMON        C,+3           C    SET UP UNSIGNED CONSTANT.
+
+ 1095              SWE, B35T48M NUMBER        14            WORD           C
+ 1096              TX           MIN 37777     -             COMMON         C    SET UP SIGNED CONSTANT.
+
+ 1098              EX           NUMBER        COMMON        2ND HALF       C    ISOLATE LOW-ORDER PART.
+ 1100              LA           BIT 1         NUMBER        C,+3           C    BRANCH IF NO MINUS SIGN.
+ 1102              HA           WORD          SPEC MAG      WORD           C
+ 1103              HA           2ND HALF      SPEC MAG      2ND HALF       C    COMPLEMENT HALVES OF NEGATIVE CONSTANT.
+
+ 1105   PRINT 2P   SWE, CHAR8M  2ND HALF      12            2ND ALF        C    THE INSTRUCTIONS FROM PRINT 2P THROUGH
+ 1107              SWE, ACO1    2ND HALF      33,L          2ND ALF +1     C     B2 BIN ALF ARE BORROWED BY THE DOUBLE
+ 1109              SWE, ACO2    2ND HALF      30,L          2ND ALF +1     C     PRECISION ADDRESS CONSTANTS.
+ 1111              SWE, ACO3    2ND HALF      27,L          2ND ALF +1     C
+ 1112              SWE, ACO4    2ND HALF      24,L          2ND ALF +1     C    MAKE PRINTABLE VERSION OF LOW-ORDER PRT.
+ 1114              TS, CHAR 1M  DEC6 FLAG     2ND HALF      B2 BIN ALF     C    GO TO JOIN SINGLE-PRECISION PROCEDURE.
 
 # Page 403
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  19        PAGE 139
 
+P1116              SUBROUTINE IN PASS 2 FOR BLK2 TO SET IN PRINT A RIGHT-HAND LOCATION FOR SUCH AS SETLOC.  PUTS IN
+R1118   THE BANK INDICATOR, IF ANY.  BLOTS OUT AN INVALID LOCATION.
+
+
+
+ 1119   BLK2 PREL  NA           LOCATION      ONES          C,+2           C
+ 1120              SS           BLOTS         C3T6          LINE +6             BLOT OUT BAD LOCATION AND EXIT.
+
+ 1122              TX           BLK2 MXR      -             Z,MXR          C
+ 1123              SS           ZERO          C3T6          LINE +6        C
+ 1124              TX           LOCATION      -             COMMON         C    ISOLATE LOCATION VALUE.
+ 1126              LA           COMMON        OCT 3777      E PREL         C    BRANCH IF LOCATION IS IN ERASABLE.
+ 1128              LA           COMMON        OCT 7777      PRINT VAL      C    BRANCH IF LOCATION IS NOT IN A BANK. 
+ 1130              TX           COMMA C2      -             LINE +6        C
+ 1131              WD           COMMON        OCT 10000     COMMON         C    REDUCE TO STANDARD BANK NOTATION.
+ 1133              SWS, CHAR8M  COMMON        13            LINE +5        C
+ 1134              SWS, ACO1    COMMON        32,L          LINE +6        C    SET BANK NUMBER IN PRINT.
+ 1136              TS, BANKMASK OCT 2000      COMMON        PRINT VAL      C    PUT SUBADDRESS IN THE RANGE 2000-3777.
+
+ 1138   FPREL      LA           COMMON        OCT 1377      PRINT VAL      C    BRANCH IF LOCATION IS NOT IN AN EBANK.
+ 1140              TX           COMMA C2      -             LINE +6        C
+ 1141              SWS, CHAR8M  E CHAR 4      A,4           LINE +5        C
+ 1142              SWS, ACO1    COMMON        34,L          LINE +6        C    SET EBANK NUMBER IN PRINT.
+ 1144              TX, EBANKMSK OCT 1400      -             COMMON         C    PUT SUBADDRESS IN THE RANGE 1400-1777.
+
+ 1122   PRINT VAL  SWS, ACO3    COMMON        21,L          LINE +6        C
+ 1123              SWS, ACO4    COMMON        18,L          LINE +6        C
+ 1124              SWS, ACO5    COMMON        15,L          LINE +6        C
+ 1125              SWS, ACO6    COMMON        12,L          LINE +6        C
+ 1126              TX           GENL MXR      -             Z,MXR               SET LOCATION IN PRINT AND EXIT.
 
 # Page 404
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  20        PAGE 140
 
+P1152              BANK 5 PORTION OF BLK2 PASS 2.  ENTER IN COSEQUENCE MODE WITH BLK2 MXR IN Z,MXR, ADDRESS CUSSALOG IN
+R1154   AU2, AND ADDRESS CUSS LIST IN AU1. BANK INDICATOR 5 IS LEFT IN R5.  BANK 5 ALSO CONTAINS MASKS FOR BLK2 PASS 2.
+
+ 1156              SETLOC,3     0             B5
+
+ 1157   UNSCRAMB   SWE, B38T48M N,AU2         0             N,AU1          C    ZERO DEMAND BITS, MOVE SUBADDR OF CUSS3.
+ 1159              SWS, B34T37M N,AU2         25            N,AU1          C    MOVE POISON BIT AND LENGTH OF CUSS 3.
+ 1161              SWS, B22T32M N,AU2         4,L           N,AU1          C    MOVE SUBADDRESS OF CUSS 2.
+ 1163              SWS, B18T21M N,AU2         13            N,AU1          C    MOVE POISON BIT AND LENGTH OF CUSS 2.
+ 1165              SWS, B6T16M  N,AU2         8,L           N,AU1          C    MOVE SUBADDRESS OF CUSS 1.
+ 1167              SWS, B2T5M   N,AU2,1       1             N,AU1,1        C    MOVE POISON BIT AND LENGTH OF CUSS 1.
+ 1169              NA           N,AU2         SENTINEL      UNSCRAMB       C
+ 1170              TX           Z,AU2         -             Z,R5           S    SET BANK INDICATOR 5 IN R5, EXIT.
+
+ 1172   CUSSALOG   M,D,44E      CDNO CUSS     D ERR CUSS    ILOP CUSS
+ 1173              M,D,EDD      LEFL CUSS     CNFL CUSS     TYPL CUSS
+ 1174              M,D,DCD      BADL CUSS     IPOX CUSS     MGLA CUSS
+ 1175              M,D,CD4      UDEF CUSS     ASIZ CUSS     IRAD CUSS
+ 1176              M,D,DFE      LEFM CUSS     PRED CUSS     NFIT CUS1
+
+ 1177              M,D,EFF      NFIT CUS2     STYP CUS1     STYP CUS2
+ 1178              M,D,EEE      SCNF CUS1     SCNF CUS2     SOVS CUS1
+ 1179              M,D,EEE      SOVS CUS2     SMD CUS1      SMD CUS2
+ 1180              M,D,FFE      SME CUS1      SME CUS2      SMIT CUS1
+ 1181              M,D,EEE      SMIT CUS2     SNDE CUS1     ARBL CUSS
+
+ 1182              M,D,EGF      SIDL CUS1     SBDE CUS1     SMDE CUS1
+ 1183              M,D,C52      ADRE BANK     INAP CUSS     ADR CUSS
+ 1184              M,D,EE5      SBEX CUSS     SNEX CUSS     IDBC CUSS
+ 1185              M,D,5D5      MTD CUSS      RANG CUSS     FRAC CUSS
+ 1186              M,D,54E      MFD CUSS      LONB CUSS     UND1 CUSS
+
+ 1187              M,D,GEE      NDE1 CUSS     LNSY CUSS     SNDE CUS2
+ 1188              M,D,GEF      SBDE CUS2     SIDL CUS2     SMDE CUS2
+ 1189              M,D,FEE      SSNP CUSS     BNLF CUSS     NSCH CUSS
+ 1190              M,D,DDF      BFUL CUSS     ILOC CUSS     TOLA CUSS
+ 1191              M,D,GFE      MEMT CUSS     NMC1 CUSS     CAFS CUSS
+
+ 1192              M,D,444      QC1 CUSS      QC17 CUSS     QC24 CUSS
+ 1193              M,D,4F5      IMAD CUSS     POLE CUSS     ECEB CUSS
+ 1194              M,D,6EE      ECF1 CUSS     IPX1 CUSS     IPX2 CUSS
+ 1195              M,D,EG5      NMC2 CUSS     ECFB CUSS     SBIX CUSS
+ 11951             M,D,EFE      INXH CUSS     IMAS CUSS     STMF CUSS
+
+ 11952             M,D,FGG      PIWS CUSS     ROP2CUSS      MIMO CUSS
+ 11953             M,D,EEE      ANAD CUSS     ONCI CUSS     RIAH CUSS
+ 11954             M,D,7EF      CBBB CUSS     IAOS CUSS     NAWX CUSS
+ 11955             M,D,5EF      DPCB CUSS     MHBC CUSS     PWNL CUSS
+ 11956             M,D,FFD      CNRP CUSS     PUSH CUSS     POAD CUSS
+
+ 11687             M,D,DF0      IXOP CUSS     STOS CUSS
+ 11688             M,D,D5E      SNNR CUSS     MCPS CUSS     CEHS CUSS
+
+ 1169   SENTINEL   DEC          BB00 FFFF
 
 # Page 405
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  21        PAGE 141
 
+P1197              CUSSES FOR BLK2, SHOWN IN THE ORDER OF THEIR CALLS IN THE CUSS LIST.
+
+
+
+ 1199   CDNO CUSS  ALF,4        CARD NUMBER OUT OF SEQUENCE
+ 1200   D ERR CUSS ALF,4        NO "D" IN DECIMAL SUBFIELD
+ 1201   ILOP CUSS  ALF,5        ILLEGAL OR MIS-SPELLED OPERATION CODE
+
+ 1202   LEFL CUSS  ALF,5        IMPROPER LEFTOVER LOCATION FIELD FORMAT
+ 1203   CNFL CUSS  ALF,4        CONFLICT IN USE OF THIS LOCATION
+ 1204   TYPL CUSS  ALF,4        LOCATION IS IN WRONG MEMORY TYPE
+
+ 1205   BADL CUSS  ALF,4        OVERSIZE OR ILL-DEFINED LOCATION
+ 1206   IPOX CUSS  ALF,3        INDEXING IS ILLEGAL HERE
+ 1207   MGLA CUSS  ALF,4        ADDRESS FIELD IS MEANINGLESS
+
+ 1208   UDEF CUSS  ALF,3        "        " IS UNDEFINED
+ 1209   ASIZ CUSS  ALF,4        RANGE ERROR IN VALUE OF ADDRESS
+ 1210   IRAD CUSS  ALF,4        IRREGULAR BUT ACCEPTABLE ADDRESS
 
 # Page 406
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  22        PAGE 142
 
+P1211   BLK2 CUSSES CONTINUED.
+
+ 1212   LEFM CUSS  ALF,4        LEFTOVER WON'T FIT IN MEMORY
+ 1213   PRED CUSS  ALF,5        ATTEMPT TO PREDEFINE LOCATION SYMBOL FAI
+ 1214              ALF          LED
+ 1215   NFIT CUS1  ALF,5        "        " WON'T FIT IN SYMBOL TABLE
+
+ 1216   NFIT CUS2  ALF,5        "        " WON'T FIT IN SYMBOL TABLE
+ 1217   STYP CUS1  ALF,5        "        " ASSOCIATED WITH WRONG MEMORY
+ 1218              ALF          TYPE
+ 1219   STYP CUS2  ALF,5        "        " ASSOCIATED WITH WRONG MEMORY
+ 1220              ALF          TYPE
+
+ 1221   SCNF CUS1  ALF,5        "        " ASSOCIATED WITH CONFLICT
+ 1222   SCNF CUS2  ALF,5        "        " ASSOCIATED WITH CONFLICT
+ 1223   SOVS CUS1  ALF,5        "        " GIVEN OVERSIZE DEFINITION
 
 # Page 407
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  23        PAGE 143
 
+P1224   BLK2 CUSSES CONTINUED.
+
+ 1225   SOVS CUS2  ALF,5        "        " GIVEN OVERSIZE DEFINITION
+ 1226   SMD CUS1   ALF,5        "        " GIVEN MULTIPLE DEFINITIONS
+ 1227   SMD CUS2   ALF,5        "        " GIVEN MULTIPLE DEFINITIONS
+
+ 1228   SME CUS1   ALF,5        "        " ASSOCIATED WITH MULTIPLE ERRO
+ 1229              ALF          RS
+ 1230   SME CUS2   ALF,5        "        " ASSOCIATED WITH MULTIPLE ERRO
+ 1231              ALF          RS
+ 1232   SMIT CUS1  ALF,5        "        " IS IN MISCELLANEOUS TROUBLE
+
+ 1233   SMIT CUS2  ALF,5        "        " IS IN MISCELLANEOUS TROUBLE
+ 1234   SNDE CUS1  ALF,5        "        " WAS NEARLY DEFINED BY EQUALS
+ 1235   ARBL CUSS  ALF,5        ADDRESS DEPENDS ON UNKNOWN LOCATION
 
 # Page 408
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  24        PAGE 144
 
+P1236   BLK2 CUSSES CONTINUED.
+
+ 1237   SIDL CUS1  ALF,5        "        " IS INDEFINABLY LEFTOVER
+ 1238   SBDE CUS1  ALF,5        "        " MULTIPLY DEFINED INCLUDING NE
+ 12381             ALF,2        ARLY BY EQUALS
+ 1239   SMDE CUS1  ALF,5        "        " MULTIPLY DEFINED INCLUDING BY
+ 12391             ALF           EQUALS
+
+ 1240   ADRE BANK  ALF,3        ADDRESS IS IN BANK 00
+ 1241   INAP CUSS  ALF,5        ADDRESS IS INAPPROPRIATE FOR OP CODE
+ 1242   ADR CUSS   ALF,2        ADDRESS
+
+ 1243   SBEX CUSS  ALF,5        THIS INSTRUCTION SHOULD BE EXTENDED
+ 1244   SNEX CUSS  ALF,5        THIS INSTRUCTION SHOULD NOT BE EXTENDED
+ 1245   IDBC CUSS  ALF,5        INEXACT DECIMAL-TO-BINARY CONVERSION
+
+ 1246   MTD CUSS   ALF,5        MORE THAN 10 DIGITS IN DECIMAL CONSTANT
+ 1247   RANG CUSS  ALF,4        RANGE ERROR IN CONSTANT FIELD
 
 # Page 409
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  25        PAGE 145
 
+P1248   BLK2 CUSSES CONTINUED.
+
+ 1249   FRAC CUSS  ALF,5        FRACTIONAL PART LOST BY TRUNCATION
+
+ 1250   MFD CUSS   ALF,5        MORE THAN 14 DIGITS IN OCTAL CONSTANT
+ 1251   LONB CUSS  ALF,4        LOCATION FIELD SHOULD BE BLANK
+ 1252   UND1 CUSS  ALF,5        "        " WAS UNDEFINED IN PASS 1
+
+ 1253   NDE1 CUSS  ALF,5        "        " WAS NEARLY DEFINED BY EQUALS
+ 1254              ALF,2        IN PASS 1
+ 1255   LNSY CUSS  ALF,5        LOCATION FIELD SHOULD BE SYMBOLIC
+ 1256   SNDE CUS2  ALF,5        "        " WAS NEARLY DEFINED BY EQUALS
+
+ 1257   SBDE CUS2  ALF,5        "        " MULTIPLY DEFINED INCLUDING NE
+ 12571             ALF,2        ARLY BY EQUALS
+ 1258   SIDL CUS2  ALF,5        "        " IS INDEFINABLY LEFTOVER
 
 # Page 410
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  26        PAGE 146
 
+P12581  BLK2 CUSSES CONTINUED.
+
+ 1259   SMDE CUS2  ALF,5        "        " MULTIPLY DEFINED INCLUDING BY
+ 1260              ALF           EQUALS
+
+ 1261   SSNP CUSS  ALF,5        "        " SHOULDN'T HAVE BEEN PREDEFINE
+ 1262              ALF          D
+ 1263   BNLF CUSS  ALF,5        NUMERIC LOCATION FIELD IS ILLEGAL HERE
+ 1264   NSCH CUSS  ALF,5        NO SUCH BANK OR BLOCK IN THIS MACHINE
+
+ 1265   BFUL CUSS  ALF,4        THIS BANK OR BLOCK IS FULL
+ 1266   ILOC CUSS  ALF,4        ILLEGAL LOCATION FIELD FORMAT
+ 1267   TOLA CUSS  ALF,5        CARD IGNORED BECAUSE IT'S TOO LATE IN TH
+ 1268              ALF          E DECK
+
+ 1269   MEMT CUSS  ALF,5        CARD IGNORED BECAUSE IT MAKES MEMORY TAB
+ 1270              ALF,2        LE TOO LONG
+ 1271   NMC1 CUSS  ALF,5        NO MATCH FOUND FOR CARD NUMBER OR ACCEPT
+ 1272              ALF          OR TEXT
 
 # Page 411
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  27        PAGE 147
 
+P12721  BLK2 CUSSES CONTINUED.
+
+ 1273   CAFS CUSS  ALF,5        FIRST CARD NUMBER NOT LESS THAN SECOND
+
+ 1275   QC1 CUSS   ALF,4        QUEER INFORMATION IN COLUMN 1
+ 1276   QC17 CUSS  ALF,4        QUEER INFORMATION IN COLUMN 17
+ 1277   QC24 CUSS  ALF,4        QUEER INFORMATION IN COLUMN 24
+
+ 1278   IMAD CUSS  ALF,4        BLANK ADDRESS FIELD EXPECTED
+ 1280   POLE CUSS  ALF,5        ADDRESS FIELD SHOULD CONTAIN A POLISH OP
+ 1281              ALF          ERATOR
+ 1282   ECEB CUSS  ALF,4        ERASED REGION SHOULD NOT CROSS E-BANKS
+
+ 1283   ECF1 CUSS  ALF,5        EBANK OR SBANK CONFLICT WITH 1-SHOT DECL
+ 12831             ALF          ARATION
+ 1284   IPX1 CUSS  ALF,5        FIRST POLISH OPERATOR ILLEGALLY INDEXED
+ 1285   IPX2 CUSS  ALF,5        SECOND POLISH OPERATOR ILLEGALLY INDEXED
 
 # Page 412
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  28        PAGE 148
 
+P12851  BLK2 CUSSES CONTINUED.
+
+ 1286   NMC2 CUSS  ALF,5        NO MATCH FOUND FOR SECOND CARD NUMBER
+ 1287   INXH CUSS  ALF,5        INTERPRETIVE INSTRUCTION NOT EXPECTED
+ 1288   MIMOCUSS   ALF,5        RIGHT OPCODE'S MODE IN DISAGREES WITH MO
+ 12885             ALF,2        DE OUT SETTING
+ 1289   ANAD CUSS  ALF,5        ADDRESS HAS NO ASSOCIATED POLISH OPCODE
+ 1290   IMAS CUSS  ALF,5        POLISH ADDRESS(ES) MISSING PRIOR TO THIS
+ 12905             ALF           OP PAIR
+ 1291   STMF CUSS  ALF,5        STORE OP MUST BE NEXT OP AFTER STADR
+ 1292   PIWS CUSS  ALF,5        PUSHUP ILLEGAL BEFORE STORE OP WITHOUT S
+ 12925             ALF          TADR
+ 1293   ROP2CUSS   ALF,5        LEFT OPCODE'S MODE IN DISAGREES WITH MOD
+ 12935             ALF,2        E OUT SETTING
 
 # Page 413
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  29        PAGE 149
 
+P1294   BLK2 CUSSES CONTINUED.
+
+ 1295   ONCI CUSS  ALF,5        INT OPCODE DID NOT CALL FOR INDEXING
+ 1296   RIAH CUSS  ALF,5        INT OPCODE REQUIRES INDEXED ADDR HERE
+ 1297   CBBB CUSS  ALF,5        ADDRESS WORDS CROSS OVER BANK OR VAC ARE
+ 12975             ALF,2        A BOUNDARY
+ 1298   IAOS CUSS  ALF,5        INTERPRETIVE ADDR WORD OUT OF SEQUENCE
+ 1299   NAWX CUSS  ALF,5        CAN NOT HANDLE NEG ADDRESSES WITH INDEXI
+ 12995             ALF,1        NG HERE
+ 1300   ECFB CUSS  ALF,5        EBANK OR SBANK CONFLICT ILLEGAL EXCEPT F
+ 1301              ALF,2        OR BBCON, 2BCADR
+ 1302   SBIX CUSS  ALF,5        THIS INSTRUCTION SHOULD BE INDEXED
+ 1303   DPCB CUSS  ALF,5        D.P. CONSTANT SHOULD NOT CROSS BANKS
+ 1304   MHBCCUSS   ALF,5        ADDR MUST BE BASIC S.P. COSTANT FOR INST
 
 # Page 414
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  30        PAGE 150
 
+P1305   BLK2 CUSSES CONTINUED.
+
+ 1306   PWNL CUSS  ALF,5        POLISH WORDS REQUIRE BLANKS IN COLS 1, 1
+ 1307              ALF          7 AND 24
+
+ 1308   CNRP CUSS  ALF,5        PREVIOUS POLISH EQUATION NOT CONCLUDED P
+ 1309              ALF          ROPERLY
+ 1310   PUSHCUSS   ALF,5        POLISH PUSHUP REQUIRES NEGATIVE WORD HER
+ 1311              ALF          E
+ 1312   POAD CUSS  ALF ,4       POLISH ADDRESS EXPECTED HERE
+
+ 1313   IXOP CUSS  ALF,4        ASTERISK ILLEGAL ON THIS OPCODE
+
+ 1316   SNNR CUSS  ALF,4        SUBROUTINE NAME NOT RECOGNIZED
+ 1317   MCPS CUSS  ALF,5        MULTIPLE CALLS IN ONE PROGRAM OR SUBRO
+ 1318   CEHS CUSS  ALF,5        CONFLICT WITH EARLIER HEAD SPECIFICATION
+ 1319   STOS CUSS  ALF,5        LOCATION SYMBOL IMPROPER ON STADR'ED STO
+ 1320              ALF          RE WORD
 
 # Page 415
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  31        PAGE 151
