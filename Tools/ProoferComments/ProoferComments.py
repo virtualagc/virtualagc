@@ -295,7 +295,7 @@ for box in file:
 	if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
 		if boxWidth >= 20 * scale and boxWidth <= 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
-			if abs(midPoint - avgBottom) <= 3 * scale:
+			if abs(midPoint - (avgBottom+3*scale)) <= 2.5 * scale:
 		 		addIt = 1
 	# And vertical lines, '|', though I guess it may serve for parentheses as well:
 	if boxChar == '|' or boxChar == 'I' or boxChar == 'l' or boxChar == '!' or boxChar == '1' or boxChar == '(' or boxChar == ')':
