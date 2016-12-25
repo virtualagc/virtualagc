@@ -128,7 +128,10 @@ row = 0
 alnumPattern = re.compile(r"[0-9A-Z]")
 lastBoxChar = '?'
 lastHyphenMidPoint = 0
+lastX = 0
+lastY = 0
 for box in file:
+	newline = 0
 	boxFields = box.split()
 	boxChar = boxFields[0]
 	boxLeft = int(boxFields[1])
@@ -137,6 +140,10 @@ for box in file:
 	boxTop = backgroundHeight - 1 - int(boxFields[4])
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
+	if boxLeft < lastX or boxBottom > lastY + rowFloor:
+		newline = 1;
+	lastX = boxLeft
+	lastY = boxBottom
 	# Take care of a box in the pendingBoxes[] array, if there is one.
 	# This algorithm is going to discard the box if it happens to be at
 	# the very end of the row, but I don't really care about that.
@@ -279,21 +286,19 @@ for box in file:
 	   boxBottom <= avgBottom - 7 * scale:
 	   	addIt = 1 		
 	# Here's something to help hyphens to be recognized:
-	if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
-		#print boxWidth/scale, boxHeight/scale, boxBottom, sumBottomsInRow/float(numCharsInRow), lastBoxChar
-		if boxWidth > 14 * scale and boxWidth < 20 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
+	if boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~':
+		if boxWidth > 14 * scale and boxWidth < 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
-			#print midPoint - sumBottomsInRow/numCharsInRow
-			#if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 3 * scale or \
-			#   abs(midPoint - lastHyphenMidPoint) <= 2 * scale:
-			if abs(midPoint - avgBottom + 12.5 * scale) <= 3 * scale or \
+			if newline or numCharsInRow == 0 or \
+			   abs(midPoint - avgBottom + 12.5 * scale) <= 3 * scale or \
 			   abs(midPoint - lastHyphenMidPoint) <= 2 * scale:
 				#print "Adding"
 		 		addIt = 1
 		 		lastHyphenMidPoint = midPoint
 	# And underscores, '_':
-	if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
-		if boxWidth >= 20 * scale and boxWidth <= 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
+	#if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
+	if numCharsInRow > 0:
+		if boxWidth >= 20 * scale and boxWidth <= 26 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
 			if abs(midPoint - (avgBottom+3*scale)) <= 2.5 * scale:
 		 		addIt = 1
