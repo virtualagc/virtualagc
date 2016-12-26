@@ -286,7 +286,7 @@ for box in file:
 	   boxBottom <= avgBottom - 7 * scale:
 	   	addIt = 1 		
 	# Here's something to help hyphens to be recognized:
-	if boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~':
+	if boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '—' or boxChar == '=' or boxChar == '~':
 		if boxWidth > 14 * scale and boxWidth < 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
 			if newline or numCharsInRow == 0 or \
@@ -300,12 +300,12 @@ for box in file:
 	if numCharsInRow > 0:
 		if boxWidth >= 20 * scale and boxWidth <= 26 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
-			if abs(midPoint - (avgBottom+3*scale)) <= 2.5 * scale:
+			if abs(midPoint - (avgBottom+3*scale)) <= 3 * scale:
 		 		addIt = 1
 	# And vertical lines, '|', though I guess it may serve for parentheses as well:
 	if boxChar == '|' or boxChar == 'I' or boxChar == 'l' or boxChar == '!' or boxChar == '1' or boxChar == '(' or boxChar == ')':
 		#print boxChar, boxWidth, boxHeight, scale
-		if boxWidth >= 5 * scale and boxWidth <= 8 * scale and boxHeight >= 28 * scale and boxHeight <= 33 * scale:
+		if boxWidth >= 5 * scale and boxWidth <= 8 * scale and boxHeight >= 28 * scale and boxHeight <= 35 * scale:
 			#print Added
 			addIt = 1
 	lastBoxChar = boxChar
@@ -551,25 +551,31 @@ for row in range(0, len(lines)):
 				draw.line((left,middle), (right,middle))
 				break
 		
-		# Here is a thing to overcome a problem what octopus has to do to eliminate
-		# horizontal lines on the input pages.  One side effect is that '=' is often
-		# eliminated, which is very troublesome.  However, there are patterns we can
-		# try to use to reinsert an = where one is missing.
+		# "octopus --comments" often removes '=' from its output images, which is very troublesome.
+		# However, there are patterns we can try to use to reinsert an = where one is missing.
+		# ... The same also turns out to be true for various other characters.
+		goneMissing = [ '=', '-', '_', ':' ]
 		lastRight = 0
 		if (numCharsInRow > 0):
 			lastRight = boxes[boxIndex-1]['boxRight']
-		if index < len(charList)-1 and \
-		   character == '=' and boxes[boxIndex]['boxChar'] != '=' and \
-		   boxes[boxIndex]['boxChar'] == charList[index+1] and \
-		   boxes[boxIndex]['boxLeft'] > lastRight + 80*scale: 
-			boxLeft = int(round(boxes[boxIndex]['boxLeft'] - 40 * scale))
-			fontChar = imagesNomatch[ord('=')].clone()
-			draw.composite(operator='darken', left=boxLeft, 
-				       top=boxes[boxIndex]['boxTop'], width=int(round(fontChar.width * scale)), 
-				       height=int(round(fontChar.height * scale)), image=fontChar)
-			# Note that this will advance index (the pointer to characters in the line)
-			# but not boxIndex.
-			continue
+		if index < len(charList)-1:
+			bail = 0
+			for testChar in goneMissing:
+			   	if character == testChar and boxes[boxIndex]['boxChar'] != testChar and \
+					boxes[boxIndex]['boxChar'] == charList[index+1] and \
+					boxes[boxIndex]['boxLeft'] > lastRight + 80*scale: 
+						boxLeft = int(round(boxes[boxIndex]['boxLeft'] - 40 * scale))
+						fontChar = imagesNomatch[ord(testChar)].clone()
+						draw.composite(operator='darken', left=boxLeft, 
+							       top=boxes[boxIndex]['boxTop']+12-fontChar.height/2, 
+							       width=int(round(fontChar.width * scale)), 
+							       height=int(round(fontChar.height * scale)), image=fontChar)
+						# Note that this will advance index (the pointer to characters in the line)
+						# but not boxIndex.
+						bail = 1
+						break
+			if bail:
+				continue
 		#sumBottomsInRow += boxes[boxIndex]['boxBottom']
 		if numCharsInRow == 0:
 			avgBottom = boxes[boxIndex]['boxBottom']
