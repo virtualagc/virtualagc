@@ -16,10 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
+##		2016-12-26 RRB	Updated for Luminary 69.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 1100
+## Page 1095
 		SETLOC	INTPRET1
 		BANK
 
@@ -42,7 +41,7 @@ DPHALF		=	UNITX
 DPPOSMAX	OCT	37777
 		OCT	37777
 
-## Page 1101
+## Page 1096
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
 		SETLOC	INTPRET2

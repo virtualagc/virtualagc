@@ -258,7 +258,7 @@ if args.comments:
 
         for i,c in enumerate(contours):
             x,y,w,h = cv2.boundingRect(c)
-            if (w < 10 or h < 10):
+            if (w < 5 or h < 5):
                 # Probably junk that's made it through
                 continue
 
