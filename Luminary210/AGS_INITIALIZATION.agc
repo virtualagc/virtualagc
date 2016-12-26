@@ -14,10 +14,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-22 HG   Transcribed
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 218
 
-# PROGRAM NAME:   AGS INITIALIZIZATION (R47)
+# PROGRAM NAME:   AGS INITIALIZATION (R47)
 
 # WRITTEN BY  :   RHODE/KILROY/FOLLETT
 
@@ -32,7 +34,7 @@
 # FUNCT. DESC.:   (1) TO PROVIDE THE AGS ABORT ELECTRONICS ASSEMBLY(AEA) WITH THE LEM AND CSM STATE VECTORS
 #                 (POSITION,VELOCITY,TIME) IN LEM IMU COORDINATES BY MEANS OF THE LGC DIGITAL DOWNLINK.
 #
-#                 (2) TO ZERO THE ICDU, LGC, AND AEA GIMBAL ANGLE COUNTER SIMULTANEOUSLY IN ORDER TO ESTABLISH A
+#                 (2) TO ZERO THE ICDU, LGC AND AEA GIMBAL ANGLE COUNTERS SIMULTANEOUSLY IN ORDER TO ESTABLISH A
 #                 COMMON ZERO REFERENCE FOR THE MEASUREMENT OF GIMBAL(EULER) ANGLES WHICH DEFINE LEM ATTITUDE
 #                 (3) TO ESTABLISH THE GROUND ELAPSED TIME OF AEA CLOCK ZERO.(IF AN AEA CLOCK ZERO IS
 #                 REQUESTED DURING THIS PROGRAM
@@ -150,7 +152,7 @@ CKSTALL         CCS             IMUCADR                 # CHECK FOR IMU USAGE WH
                 TCF             CKSTALL
 
  +6             TC              BANKCALL                # IMU IS NOT IN USE
-                CADR            IMUZERO                 # SET IMU ZERO DISCRETE FOR 320 MSECS.
+                CADR            IMUZERO                 # SET IMU ZERO DISCRETE FOR 320 MSECS
                 TC              BANKCALL                # WAIT 3 SEC FOR COUNTERS TO INCREMENT
                 CADR            IMUSTALL
                 TC              AGSEND
@@ -168,8 +170,8 @@ SCALEVEC        VLOAD           MXV
                                 VSCALE
                 VAD             VAD                     # THIS SECTION ROUNDS THE VECTOR, AND
                                 AGSRND1                 # CORRECTS FOR THE FACT THAT THE AGS
-                                AGSRND2                 # IS A 2 S COMPLEMENT MACHINE WHILE THE
-                RTB                                     # LGC IS A 1 S COMPLEMENT MACHINE.
+                                AGSRND2                 # IS A 2 S COMPLIMENT MACHINE WHILE THE
+                RTB                                     # LGC IS A 1 S COMPLIMENT MACHINE.
                                 VECSGNAG
                 STOVL           VATT1
 

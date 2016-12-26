@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-18 MAS  Transcribed.
 ##              2016-12-07 HG   Fix P00 -> POO
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				but no errors found.
 
 ## Page 249
 # RESTART TABLES
