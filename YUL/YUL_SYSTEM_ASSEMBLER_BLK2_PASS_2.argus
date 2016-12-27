@@ -10,6 +10,7 @@
 #               2016-12-24 JL   Transcribed pages 385-400.
 #               2016-12-25 JL   Transcribed pages 401-414.
 #               2016-12-26 JL   Transcribed pages 415-421.
+#               2016-12-27 JL   Transcribed pages 422-430.
 
 # Annotations:
 #
@@ -1548,35 +1549,408 @@ R2745   FOR GENERAL SHIFTS BITS 25 TO 27 OF INT ADDR HOLD LIMITS DESIGNATION AND
 # Page 422
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  38        PAGE 158
 
+ 3235              NA           MODE OUT      B46M          C,-1           C    ERROR IF LAST MODE OUT NOT DT
+ 3245              TX           ICOMMON       -             ICOMMON
+ 3246   INT OP MUT SSL,B47T48M  ICOMMON       10            C,+1                BRANCH BY MODE IN REQUIREMENT
+ 3247              TS           B46B48M       MODE OUT      INT OP SAP          MODE NOW VECTOR
+ 3248              TS           B47T48MM      MODE OUT      INT OP SAP          MODE NOW D/T
+ 3249              TS           B47T48MM      MODE OUT      INT OP SAP
+ 3250              TS           B48M          MODE OUT      INT OP SAP
+ 3251   INT OP DOG LA           INT ADDR      ZEROM         INT OP BAR          NO SWEAT IF ALL ADDRESSES IN
+ 32513             NA,B33M      INT ADDR      ZEROM         INT OP BAR          SAME IF PUSH UP NOT ALLOWED
+ 3252              TS,B1M       ONESM         1,25          INT OP BAR          ERROR. NEED STADR CODE PREVIOUSLY
+ 3255   INT OP GOS TS           ZEROM         STORE COM     INT OP SET     C    STORE CODES/ALL ADDR WORDS ENTER HERE
+ 32555             SWE,ONESMM   L INT ADDR    16            Z,CSC          C    GO DO E-BANK SETTINGS CHECK
+ 3256              SWE,CHAR1M   B47T48MM      3             WORDM               SET CONSTANT TYPE FLAG FOR MEMORY MAP
+ 3260              LA,B28T30M   HEALTHM       B29T30MM      INT AD GO           JUMP TO INTERPRETIVE ADDRESS ROUTINE
+ 3262              NA           STADR         K 127 M       INT AD DOG          JUMP IF STADR DOES NOT PRECEDE STORE
+ 3270   INT OP BAR TS           -             -             INT AD CHK     C    CHECK IF ALL REQUIRED ADDR RECEIVED
+ 3280              TX           B26MM         -             INT ADDR            STORE CODES REQUIRE ARC-CCS E TYPE ADDR
+ 3285              SWS,B28T30M  MODE OUT      18,L          INT ADDR            LAST MODE OUT IS THIS OP MODE
+ 3295              WD           INT ADDR      B30M          INT ADDR
+ 3300              TS           Z,SC          STORE COM     INT AD TUM          GO PROCESS LIKE REG E ADDRESS
+ 3306              NA           ONESM         ADDRESSM      C,+4                JUMP UNLESS ADDRESS IS VERY BAD.
+ 33062             TX           LOC M         -             LOC HOLD            CANCEL LOCATION SEQUENCE CHECKS
+ 3307              TX           ZEROM         -             STORE COM           FLAG FOR BELOW
+ 3308              TX           ZEROM         -             ADDRESSM            AVOID OVERFLOW TROUBLE
+ 3310              NA,B24M      INT ADDR      ONESM         C,+4                JUMP IF NO INDEXING
+ 3320              WA           ADDRESSM      B38M          ADDRESSM            ASSUME X1 USED
+ 3330              NA,B7M       INT ADDR      ONESM         C,+2                JUMP IF SO
+ 3340              WA           ADDRESSM      B38M          ADDRESSM            NOW X2 USED
+ 3346              TX,N1M       ZERO M        -             1,30                REOPEN JUDGEMENT OF OPCODE ASTERISK.
+ 3350              SSL,B47T48M  HEALTHM       18            C,+1                BRANCH BY STORE CODE TYPE
+ 3360              TS           ZEROM         INT ADDR      INT OP BAS          STORE CODE
+ 3370              TS           B47T48MM      MODE OUT      INT OP SDL          SET MODE OUT TO DOUBLE
+ 3380              TS           B46B48M       MODE OUT      INT OP SVL          SET MODE OUT TO VECTOR
+ 3390              WA           ADDRESSM      B35T38M       ADDRESSM            CALL ADDITIVE = OCT36000
+ 3400              TS           B47M          MODE OUT      C,+1                MODE OUT = UNKNOWN.
+ 3405              SWS,B17M     HEALTHM       6             1,22                INDEXED OPCODE ILLEGAL
+ 3407              SWS,B17M     INT ADDR      7,L           1,2                 INDEXED ADDRESS ILLEGAL
+ 3410              NA,B24M      STOCALL       INT ADDR      INT OP BAT           UNKNOWN MODE. A ADDRESS, NO PUSHUP
+ 3425   INT OP SDL WA           ADDRESSM      B37T38MM      ADDRESSM            DLOAD ADDITIVE = OCT 06000
+ 3435              TS           STODL         INT ADDR      C,+1                DP MODE. A14 ADDR WITH PUSHUP
+ 3445   INT OP STL SWS,B24M     HEALTHM       13            INT ADDR            SET INDEX REQ FLAG FOR 2ND ADDR,IF REQ
+ 3450              SWS,B31M     HEALTHM       20            INT ADDR            IF INDEXING REQ,PUSHUP NOT ALLOWED
+ 3455              NA,B24M      ONESM         INT ADDR      C,+2                JUMP IF OPCODE NOT INDEXED
+ 3465              WA           ADDRESSM      B34T48MM      ADDRESSM            LOAD* ADDITIVE = OCT6000
+ 3475   INT OP BAT NA           STADR         K 127 M       C,+3
+ 3477              HA           ADDRESSM      B34T48MM      ADDRESSM            COMPLEMENT STORE WORD FOLLOWING STADR
+ 34772             SWS,B17M     HEALTHM       9             1,30                LOCATION SYMBOL NOT ALLOWED
+ 34782             LA           STORE COM     ZEROM         INT OP SOU          JUMP ON VERY BAD ADDRESS
+ 3479              NA,B17M      1,3           ZEROM         C,+2
+ 3480              TS           ZEROM         STADR         INT WD POT          ERASE STADR MARKER
+ 3482   INT OP SOU TS           ZEROM         STADR         INT WD NUT          EXIT IF ERASE ADDR BAD
+ 3485   INT OP SVL WA           ADDRESSM      B35B38M       ADDRESSM            VLOAD ADDITIVE = OCT22000
+ 3495              TS           STOVL         INT ADDR      INT OP STL          VMODE. A14 ADDRESS WITH PUSHUP
+
+ 3501   INT OP BAS SWS,B1M      HEALTHM       10,L          1,30                ASTERISK ON OPCODE ILLEGAL
 
 # Page 423
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  39        PAGE 159
 
+ 3502              TS           -             -             INT OP BAT
+ 3515   INT OP SET SWE,ONESMM   L B2P2BAS     0             Z,X2           C    BLK2 PASS 2 BLOCK 1 VARIABLE STOR BASE
+ 3522              TX           B48M          -             INTERP WD      C
+ 3523              NA           CHECK UP      ZEROM         C,+5           C
+ 35232             SWE,ONESMM   L B2P2 BAS    32            Z,X3           C
+ 35234             TX           N,CSC,1       -             N,X3           C
+ 35236             TX           L POL OP      -             Z,CSC          C    IGNORE A ADDRESS BANK ERROR
+ 35238             TX           Z,MXR         -             CHECK UP       C
+ 3535              TX           L GE BASE     -             Z,X3                GENERAL PASS 2 VARIABLE STORAGE ADDRESS
 
 # Page 424
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  40        PAGE 160
 
+P3536   ROUTINE TO HANDLE INTERPRETIVE ADDRESS WORDS
+ 
+ 3570   INT AD GO  NA           CARDM +3      BLANKS M      C,+3
+ 3572              NA           CARDM +4      BLANKS M      C,+2
+ 3574              TX, B17M     ONESM         -             1,11                CUSS POLISH ADDRESS WITH BLANK ADR FLD.
+ 3576              LA           INT ADDR      ZEROM         INT ERR 20          ERROR IF NO ASSOCIATED OPCODE.
+ 3610   INT AD TUM TN           CARDM +3      2             ICOMMON             SEARCH ADDR FIELD FOR ,1 OR ,2
+ 3620              TS           K 20 M        Z,X6          C,+2                16 CHAR SEARCH
+ 3630              TS           ICOMMON       ICOMMON +2    INT AD PEK     C    CYCLE RIGHT 16 CHARS
+ 3640              NA,CHAR8M    ICOMMON +1    BLANKSM       INT AD CAT          JUMP ON RIGHT MOST CHAR NON BLANK
+ 3650              NA           Z,X6,1        B48M          C,-2                JUMP IF SEARCH NOT DONE
+ 3656   INT AD NOX LA,B25T27M   INT ADDR      B26MM         C,+2
+ 3658              NA,B32M      INT ADDR      ONESM         INT AD GOT          JUMP IF NOT SUPPOSED TO BE ANY INDEXING
+ 3660              NA,B24M      INT ADDR      ONESM         INT AD GOT          JUMP IF OPCODE DID NOT REQUEST ANY
+ 3670              TS,B33M      ONESM         1,26          INT AD GOT          FLAG RIAH CUSS
+ 3680   INT AD CAT NA,C7T8M     ICOMMON +1    CMA 2 C7T8    C,+2                JUMP IF ADDRESS NOT ENDED BY ,2
+ 3690              TS,B7M       ONESM         INT ADDR      C,+2                POINTER TO SHOW X2 USED
+ 3700              NA,C7T8M     ICOMMON +1    CMA 1 C7T8    INT AD NOX          JUMP IF NON INDEXED ADDR
+ 3704              LA,B25T27M   INT ADDR      B26MM         C,+3                JUMP IF INDEXING ALLOWED.
+ 3706              NA,B32M      INT ADDR      ZEROM         C,+2                SAME
+ 3708              TS,B17M      ONESM         1,2           INT AD FOX          ERROR IF NOT ALLOWED
+ 3710              NA           STORE COM     ZEROM         C,+3                JUMP ON STORE WORD
+ 3720              NA,B24M      INT ADDR      ZEROM         C,+2                ERROR IF OPCODE DID NOT REQ INDEXING
+ 3730              TS,B17M      ONESM         1,26          C,+1                FLAG ONIC CUSS
+ 3740              TX,B24M      ONESM         -             INT ADDR            SET INDEXED ADDR FLAG
+ 3750   INT AD FOX TS,C7T8M     BLANKSM       ICOMMON +1    C,+2                BLANK OUT INDEXING CHARS OF ADDR
+ 3760              TS           ICOMMON       ICOMMON +2    INT AD PEK     C    CONTINUE THE RIGHT CYCLE
+ 3770              NA           Z,X6,1        ZEROM         C,-1                UNTIL FIELD BACK TO ORIGINAL POSITION
+ 3780              TN           ICOMMON       2             CARDM +3            STORE FIELD WITHOUT INDEX MARKS
+ 3790   INT AD GOT WD           K 47777 M     K 10000 M     MIN ADR             MOST NEGATIVE ALLOWABLE VALUE (C TYPE).
+ 3792              TX,B24M      ONESM         -             STADR               SET BRANCH TO INTERPRETIVE
+ 3795              SWE,ONESMM   L INT ADDR    16            Z,SC                GO TO MAX AD SET
+ 3810   INT AD PAT NA,B24M      STADR         ZEROM         C,+2                JUMP IF PROCESSING POLISH, NOT BASIC
+ 3816              TS           -             -             INT WD DOG     C    SPECIAL TRANSFER FROM BANK 1
+ 3820              TS,B24M      ZEROM         STADR         INT OP SET     C    CANCEL FLAG. RESTORE NECESSARY REGISTERS
+ 3855              LA           ONESM         ADDRESSM      INT WD SUM          JUMP ON BAD ADDRESS
+ 3860              SSL,B46T48M  INT ADDR      18            C,+1                BRANCH BY OP MODE TO CHOOSE NUMBER OF
+ 3870              TS           ZEROM         ADD REV       INT AD PON          WORDS THAT THIS ADDRESS WILL TAKE
+ 3880              TS           ZEROM         ADD REV       INT AD PON
+ 3885              TS           B48M          ADD REV       INT AD PON
+ 3890              TS           B47M          ADD REV       INT AD PON
+ 3895              TS           B46B48M       ADD REV       INT AD PON
+ 3900              TS           ZEROM         ADD REV       INT AD PON
+ 3905              TS           ZEROM         ADD REV       INT AD PON
+ 3910              TS           B44B48M       ADD REV       INT AD PON
+ 3915   INT AD PON NA,B32M      INT ADDR      ZEROM         INT AD SIR          JUMP IF ADDR FOR GENERAL SHIFT INST
+ 3925              SSL,B46T48M  INT ADDR      21            C,+1                BRANCH BY NON-ZERO ADDRESS TYPE
+ 3932              TS           -             -             INT ERR 20
+ 3935              TS           B46M          ICOMMON       INT AD A14          14 BIT ADDRESS,ARC-CCS FASHION
+ 3945              TS           B47M          ICOMMON       INT AD A14          E ADDRESS, ARC-CCS FASHION
+ 3955              TS           B48M          ICOMMON       INT AD A14          15 BIT ADDRESS
+ 3965              TS           -             -             INT AD F            FIXED 15 BIT ADDR
+ 3975              TS           ZEROM         ICOMMON       INT AD A14          E ADDRESS
+ 3981              TS           -             -             INT AD SW           SWITCH BIT NUMBER.
+ 3982              LN           ZEROM         ADDR WDM      C,+2                JUMP IF ADDRESS IS POSITIVE.
 
 # Page 425
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  41        PAGE 161
 
+ 39825             TS, B7M      ONES M        INT ADDR      PLAIN C             MAKE UP AN X2 FLAG FOR NEGATIVE OPERAND.
+ 3983              LA           K 20000 M     ADDRESS M     INT AD F +1         JUMP IF WOULD BE AN ADDR IN FIXED BANKS.
+ 39833             LA           B37M          ADDRESS M     PLAIN C
+ 39836             TS           ZERO M        I COMMON      INT AD A14 +3       MUST REDUCE IF IN E-BANK (SIGH).
+ 3984   PLAIN C    TS           ZERO M        I COMMON      INT AD OAF          OTHERWISE USE NUMBER AS IS.
+
+ 3985   INT AD SW  LN           ADDR WDM      B48M          INT ERR 41          ERROR IF ADDR LESS THAN ZERO.
+ 3995              LA           K360M         ADDRESSM      INT ERR 41          ERROR IF ADDR OVER 239.
+ 4005              TS           -             -             C,+2
+ 4010              WA           ADDRESSM      K 361 M       ADDRESSM            ADD OCT400. SUBTRACT OCT17
+ 4020              LA,B41T48M   K 17 M        ADDRESSM      C,-1                JUMP IF SWITCH ADDR NOT FORMULATED
+ 4040              SWS,B41T44M  INT ADDR      4,L           ADDRESSM            INSERT OPCODE ADDITIVE
+ 4050              TS           -             -             INT AD A10          FINISH UP ELSEWHERE
+ 4060   INT AD F   LN           ADDR WDM      MB36T48M      INT ERR 41          F TYPE ADDR CANNOT BE LESS THAN 20000
+ 4070              LA           B2MAXP1       ADDRESSM      INT ERR 41          NOR GREATER THAN BLK2 ADDRESS MAX
+ 4080              TS           ZEROM         ICOMMON       INT AD MAR -1
+ 4085   INT AD PEK TX,CHAR8M    ICOMMON +1    -             ICOMMON        C    FOUR INSTRUCTIONS TO FINISH CYCLING
+ 4087              TX,CHAR8M    ICOMMON +2    -             ICOMMON +1     C    RIGHT  16 CHAR 1 CHAR
+ 4090              SWE,ONESMM   ICOMMON       6             ICOMMON        C
+ 4095              SWE,ONESMM   ICOMMON +1    6             ICOMMON +1
+R4105   NEXT ROUTINE CHECKS TO SEE IF ALL ADDRESSES FOR THE PREVIOUS OPCODE PAIR HAVE BEEN RECEIVED.
+R4115   IF BIT 31 OF INT ADDR(X) = 1, AN EXPECTED ADDRESS HAS NOT BEEN PROCESSED.
+ 4116   INT AD MOD NA           B48M          MODE OUT      C,+2           C
+ 4117              TS,B1M       ONESM         1,29          C,+2           C
+ 4118              LA           B47T48MM      MODE OUT      C,-1           C
+ 4120              TX           B47M          -             MODE OUT       C    MODE OUT = UNKNOWN.
+ 4125              TS           LOC M         LOC HOLD      C,+4           C    RESET POLISH LOC COUNTER
+ 4135   INT AD CHK NA           LOC HOLD      LOC M         INT AD MOD     C    JUMP IF POLISH STRING BROKEN
+ 4145              NA           MODE OUT      ZEROM         C,+2           C    JUMP IF POLISH INST EXPECTED
+ 4155              TS,B1M       ONESM         1,24          C,-4           C    FLAG INXH CUSS
+ 4165              NA,B31M      INT ADDR      ZEROM         INT AD SOB     C    JUMP IF ANY OF FOUR ADDRESSES ACTIVE
+ 4175              NA,B31M      INT ADDR +1   ZEROM         INT AD SOB     C    AND PUSHUP NOT ALLOWED
+ 4185              NA,B31M      INT ADDR +2   ZEROM         INT AD SOB     C
+ 4195              NA,B31M      INT ADDR +3   ZEROM         INT AD SOB     C
+ 4205              TX           ZEROM         -             INT ADDR       C
+ 4210              TN           INT ADDR      4             INT ADDR +1         ZERO ALL ADDRESS DATA HOLDERS
+ 4212   INT AD SOB TS,B17M      ONESM         1,24          C,-2           C    POLISH ADDRESS(ES) MISSING ERROR. IMAS
+ 4215   INT AD SIR NA,B24M      INT ADDR      ONESM         C,+2                JUMP IF ADDRESS NOT INDEXED
+ 4225              TX,B25T27M   ZEROM         -             INT ADDR
+ 4227              EX           INT ADDR      B39T41M       ICOMMON             EXTRACT GENERAL SHIFT OPCODE ADDITIVE
+ 4230              SSL,B45T47M  INT ADDR      20            C,+3           C    BRANCH BY ADDRESS LIMITS TYPE
+ 4235              BS           ADDR WDM      ICOMMON       ADDRESSM            INSERT ADDITIVE PORTION
+ 4245              TS           -             -             INT AD A12
+ 4260              LA           K 200 M       ADDRESSM      INT ERR 41          LIMITS =-177 TO +177 OCTAL FOR INDEXED
+ 4270   K16MPLUS   OCT          +16
+ 4280              LA           K52M          ADDRESSM      INT ERR 41          LIMITS = -51 TO +51 OCTQL FOR SL AND SR
+ 4282   K34MPLUS   OCT          +34
+ 4285              LN           ADDR WDM      K 35 M        INT ERR 40     C    LIMITS = -34 TO +15 OCTAL FOR SLR
+ 4295              LN           K16MPLUS      ADDR WDM      INT ERR 41
+ 4300              LN           ADDR WDM      K 16 M        INT ERR 40     C    LIMITS = -15 TO +34 OCTAL FOR SRR
+ 4305              LA           K 35 M        ADDRESSM      INT ERR 41
+ 4310              LN           ADDR WDM      K 35 M        INT ERR 40     C    LIMITS = -34 TO +33 FOR VSL
+ 4320              LN           K34MPLUS      ADDR WDM      INT ERR 41
+ 4325              LN           ADDR WDM      K 34 M        INT ERR 40     C    LIMITS = -33 TO +34 VSR
+ 4335              LA           K 35 M        ADDRESSM      INT ERR 41
 
 # Page 426
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  42        PAGE 162
 
+ 4340   INT AD COT WA           ADDREV        B40M          ADD REV             ADD256 TO LOOK LIKE BOUNDARY CHECK
+ 4345              TS           -             -             INT AD OAF
+ 4350   INT AD STO TX           STORE COM     -             Z,SC
+ 4355   INT AD A14 LN           ADDR WDM      B48M          INT ERR 21          BOTTOM LIMIT IS ZERO
+ 4365              LA           ADDRESSM      K 52 M        INT AD ACE          JUMP IF ADDRESS IN BUFFER
+ 4375              LA           ADDRESSM      B43T48M       INT ERR 21          ERROR IF IN 53 TO 77 OCTAL RANGE
+ 4385              LA           ADDRESSM      K 1377 M      INT AD COT          JUMP IF IN 100 TO 1377 OCTAL RANGE
+ 4395              LA           B37M          ADDRESSM      INT AD A6           JUMP IF 4000 OCTAL OR OVER, MAYBE FIXED
+ 4410              NA,EBANKMSK  ADDRESSM      E BNK REGM    C,+2                JUMP IF ADDR NOT IN REQ E-BANK
+ 4415              TS,EBANKMSK  B39T40M       ADDRESSM      INT AD OAF          CHANGE ADDR TO 1400-1777 RANGE
+ 4440              SWE,ONESMM   L B2P2BAS     16            Z,CSC          C    GO TO CUSS BANK
+ 4450              SWS,ACO5     ADDR WDM      10,L          6,2
+ 4455              TS,CHAR4M    E CHAR 4M     6,2           C,-3                PUT E BANK NUMBER IN BANK ERROR CUSS
+ 4465   INT AD A6  LA           ICOMMON       ZEROM         INT ERR 41          ERROR IF ADDR E TYPE
+ 4470              LA           ICOMMON       B48M          INT AD F            JUMP IF 15 BIT A TYPE ADDR
+ 4475              LA           ICOMMON       B47M          INT ERR 41          ERROR IF ADDR ARC-CCS E TYPE
+ 4485              LA           LOCM          I LOW HALF    C,+4                JUMP IF INT INST LOC IN MEMORY LOW HALF
+ 4495              LA           ADDRESSM      K51777M       INT ERR 41          ERROR IF ADDRESS OUTSIDE 52000-167777.
+ 4505              LA           B2MAXP1       ADDRESSM      INT ERR 41
+ 4510              TS           K 37777       I COMMON +2   INT AD MAR          CHOP TO 14 BITS
+ 4520              LA           ADDRESSM      K17777M       INT ERR 41          ERROR IF ADDRESS OUTSIDE 20000-47776
+ 4530              LA           K47777M       ADDRESSM      INT ERR 41
+ 4533              TX           B34T48MM      -             ICOMMON +2
+ 4535   INT AD MAR WD           ADDRESSM      K 10000 M     ADDRESSM            CHANGE TO FCADR TYPE FORMAT
+ 4541              LA           ADDRESSM      M 57777       INT AD OAD -1       BRANCH IF ADDRESS ISN'T IN A SUPER-BANK.
+ 45412             LA, B33T35M  SBNK REGM     ZEROM         C,+2                BRANCH IF THERE IS NO SUPERBANK SETTING.
+ 45414             NA, B33T35M  ADDRESSM      SBNK REGM     SBNK CUSM           BRANCH TO CUSS SUPERBANK ERROR.
+ 4543              TS, B33T35M  I COMMON +2   ADDRESSM      INT AD OAF          REDUCE SUPER-BANKS.
+ 4544              EX           ADDRESS M     I COMMON +2   ADDRESSM
+ 4545   INT AD OAF NA,B24M      INT ADDR      ZEROM         INT AD A15          HOPE INDEXING WILL RIGHT A WRONG IF ANY
+ 4555              EX           ADDRESSM      K 1777 M      ICOMMON +2          CHECKING CROSSING BANK BOUNDARIES NOW
+ 4565              WA           I COMMON +2   ADD REV       ADD REV
+ 4570              LA           K 2000 M      ADD REV       INT ERR 25          JUMP IF BOUNARY CROSSED BY ADDR'S WORDS
+ 4580   INT AD A15 LA           ICOMMON       B48M          INT AD DUN          JUMP IF NOT USING ARC-CCS FORM
+ 4590   INT AD A12 WA           ADDRESSM      B48M          ADDRESSM            CHANGE TO ARC-CCS TYPE FORM
+ 4600   INT AD DUN NA           STORE COM     ZEROM         INT AD STO          RETURN TO STORE ROUTINE
+ 4610              NA,B7M       INT ADDR      ONESM         C,+2                JUMP IF X2 NOT USED
+ 4620              HA           ADDRESSM      B34T48MM      ADDRESSM            COMPLEMENT IF X2 USED
+ 4630   INT AD A10 TN           INT ADDR +1   4             INT ADDR            ADVANCE ADDR DATA WORDS OR ZEROES
+ 4640   INT WD POT NA           LOC M         LOC HOLD      INT ERR 33          ERROR IF NON POLISH WORD APPEARED
+ 4646   INT WD RUN LA           ONES M        LOC HOLD      INT ERR 33 -1
+ 4650              WA           LOC HOLD      B48M          LOC HOLD            INCREMENT POLISH COUNT
+ 4660   INT WD HAT SWS,CHAR8M   ADDRESSM      12            LINEM +5            PROCEED TO PLACE AGC WORD ON PRINT LINE
+ 4665   INT WD TOS TS,C1T4M     ZEROM         LINEM +6      INT WD 117     C
+ 4670              SWS,ACO1     ADDRESSM      33,L          LINEM +6
+ 4675   INT WD BAD SWS,ACO2     ADDRESSM      30,L          LINEM +6
+ 4680              SWS,ACO3     ADDRESSM      27,L          LINEM +6
+ 4685              SWS.ACO4     ADDRESSM      24,L          LINEM +6
+ 4687              SS           ADDRESSM      B34T48MM      WORDM               15 BIT AGC WORD IN WITH MEMORY MAP CHAR
+ 4690   INT WD RET TX           LBCCHECK      -             Z,SC                RETURN AT BC CHECK
+
+ 46952  SBNK CUSM  TX           ADDRESSM      -             ADDR WDM
+ 46954             SWE, CAC3M   LB2P2 BAS     16            Z,SC                USE GENERAL SUPERBANK CUSSING ROUTINE.
+
+ 4696   INT WD SUM NA           STORE COM     ZEROM         INT AD STO
 
 # Page 427
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  43        PAGE 163
 
+ 4700              TN           INT ADDR +1   4             INT ADDR            ADVANCE ADDRESSES
+ 4706   INT WD NUT NA           LOC HOLD      LOC M         INT ERR 33          ERROR IF NON POLISH WORD APPEARED
+ 47072  INT WD BOT LA           ONES M        LOC HOLD      INT ERR 33 -1       BRANCH IF LOC CTR HAS BAD VALUE.
+ 4708              WA           LOC HOLD      B48M          LOC HOLD            INCREMENT POLISH LOCATION COUNTER
+ 4710              TX,C1T4M     BLOTM         -             LINEM +6            BLOT 5 CHARACTERS
+ 4720              TS,CHAR8M    BLOTM         LINEM +5      INT WD 117     C
+ 4725              SWE,ONESMM   L BCCHECK     16            Z,SC                RETURN AT NAUGHTY
+ 4740   INT AD ACE NA,B24M      INT ADDR      ZEROM         INT AD A15          HOPE INDEXING WILL RIGHT WRONG IF ANY
+ 4750              WA           ADDRESSM      ADD REV       ADD REV
+ 4755              LA           ADD REV       K 52 M        INT AD A15          JUMP IF BUFFER BOUNDARY NOT EXCEEDED
+ 4765   INT ERR 25 TS,B1M       ONESM         1,27          INT AD A15          FLAG CBBB FLAG
+ 4775   INT ERR 4  TX           Z,R1          -             ICOMMON +4
+ 4777              LA, CAC3M    ICOMMON +4    L INT OPPP    C,+2
+ 4779              TS,B33M      ONESM         1,25          INT OP MUT          FLAG RIGHT OP MODE OUT/IN MISMATCH. MIMO
+ 4781              TS,B17M      ONESM         1,25          INT OP MUT          FLAG LEFT OP MODE OUT/IN MISMATCH. ROP2
+ 4795   INT ERR 8  TX           Z,R1          -             ICOMMON +4
+ 4796              LA, CAC3M    ICOMMON +4    L INT OPPP    C,+2
+ 4800              TS,B33M      ONESM         1,22          INT OP APE          RIGHT OPCODE ILLEGALLY INDEXED. IXP2
+ 4810              TS,B17M      ONESM         1,22          INT OP APE          LEFT OPCODE ILLEGALLY INDEXED. IXP2
+ 4820   INT ERR 20 TS,B1M       ONESM         1,26          INT WD SUM          NO OPCODE FOR THIS ADDRESS. ANAO
+ 4830   INT ERR 21 TX           Z,SH          -             Z,R1
+ 4835              NA,B24M      INT ADDR      ONESM         INT ERR 41          JUMP IF NOT INDEXED
+ 4845              LN           ZEROM         ADDR WDM      N,R1                JUMP IF ADDRESS POSITIVE
+ 4855              TS,B33M      ONESM         1,27          C,+2                CANNOT HANDLE NEG ADDR WITH INDEXING.
+ 4865   INT ERR 41 TS,B17M      ONESM         1,3           C,+1                BAD RANGE FOR ADDR. ASIZ
+ 4872              LA           B2 MAXP1      ADDRESS M     INT WD SUM          BRANCH IF ADDRESS IS UNPRINTABLE.
+ 4875              SWE,ONESMM   L PRB ADR     0             Z,CSC          C    GO TELL MAN WHAT ADDR VALUE IS
+ 4880              LN           ZEROM         ADDR WDM      INT WD SUM
+ 4882              TS           W NEGATIV     4,1           INT WD SUM          IF NEGATIVE ADDR, JUST SAY SO INSTEAD
+ 4891              TX           Z,SH,1        -             -
+ 4895   INT ERR 33 TX           LOC M         -             LOC HOLD            RESET INT LOCATION COUNTER
+ 4905              TX,B17M      ONESM         -             1,27                FLAG IAOS CUSS
+ 4915              TX           Z,SH          -             Z,SC
+ 4916   INT ERR 40 TS           -             -             INT ERR 41
+ 4930   INT WD 117 NA,CHAR1M    CARDM         BLANKSM       C,+3           C    COLUMN 1 MUST BE BLANK
+ 4940              NA,CHAR1M    CARDM +2      BLANKSM       C,+2           C
+ 4950              TX           -             -             -                   COLUMN 17 MUST BE BLANK
+ 4960              TX,B33M      ONESM         -             1,28
 
 # Page 428
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  44        PAGE 164
 
+P4980   PROCEDURE TO  LET BASIC CHECK UP ON POLISH EXPECTATIONS
+
+ 4982   INT WD DOG TX           L GE BASE     -             Z,X3           C    GENERAL PASS 2 VARIABLE STORAGE ADDR
+ 4984              TX           Z,MXR         -             PASS2 MXR      C    SWITCH MXRS
+ 4986              TX           CHECK UP      -             Z,MXR          C
+ 4987              LA           ONES M        LOC M         INT WD MUS     C    BRANCH IF LOCATION IS BAD.
+ 4989              NA           INTERP WD     ZEROM         INT WD NOT     C    JUMP IF LAST WORD WAS POLISH
+ 4991              NA,B25T27M   ONESM         INT ADDR      INT WD NAT     C    JUMP IF C TYPE ADDRESS NOT EXPECTED
+ 4993   INT WD SHO TN           INT ADDR +1   4             INT ADDR       C
+ 4994              NA           LOC HOLD      LOC M         INT WD FOS     C    JUMP IF POLISH SEQUENCE BROKEN
+ 4996   INT WD SOT LA           ONES M        LOC HOLD      C,+2           C
+ 4997              WA           LOC HOLD      B48 M         LOC HOLS       C    INCREMENT POLISH LOCATION COUNTER
+ 4999   INT WD NOT SWE,ONESMM   L B2P2 BAS    32            Z,X4           C    ADDR OF *SENDWORD*
+ 5001              TX           PASS2 MXR     -             Z,MXR          C    RESTORE MASKS
+ 5003              TS           ZEROM         INTERP WD     4,1            C    ZERO POLISH WORD FLAG AND EXIT
+ 5005   INT WD NAT LA           INT ADDR      ZEROM         INT WD ZAP     C    JUMP IF NO POLISH ADDR EXPECTED
+ 5007              NA,B31M      INT ADDR      ZEROM         INT WD TOM     C    JUMP IF PUSHUP NOT ALLOWED
+ 5009              NA           B48M          MODE OUT      C,+2           C
+ 5010   INT WD TOM TS,B33M      ONESM         1,29          INT WD SHO     C    CALL POLISH ADDR EXPECTED ERROR
+ 5012              LA           B47T48MM      MODE OUT      C,-1           C    JUMP IF POLISH WORD REQUIRED HERE
+ 5014              NA,B34M      WORD M        ZERO M        INT WD SHO     C    JUMP IF WORD IS NEGATIVE
+ 5016              TS,B17M      ONESM         1,29          INT WD SHO     C    ERROR. PUSHUP REQUIRES NEG WORD HERE
+ 5018   INT WD ZAP NA           B48M          MODE OUT      C,+2           C
+ 5019   INT WD FOS TS,B1M       ONESM         1,29          C,+2           C    ERROR. PREVIOUS EQUATION UNFINISHED
+ 5021              LA           B47T48MM      MODE OUT      C,-1           C    JUMP IF POLISH WORD EXPECTED HERE.
+ 5023              TS           B47M          MODE OUT      INT WD SOT     C    SET INTERPRETER TO UNKNOWN OUT MODE
+ 5025   INT WD MUS LA           ONES M        LOC HOLD      C,+2           C
+ 5026              WA           LOC HOLD      B48M          LOC HOLD       C    CAN'T TELL ANYTHING IF LOCATION IS BAD.
+ 5028              TX           PASS2 MXR     -             Z,MXR          C    RESTORE MXR. ZERO POLISH WORD FLAG.
+ 5030              TS           ZEROM         INTERP WD     N,SC,1         C    EXIT USING SENDWORD BRACH
+ 5032   INT PATCH  RESERVE      9
+ 5033              OCT          0
 
 # Page 429
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  45        PAGE 165
 
+P5034   PROCEDURE TO EVALUATE BNKSUM CONSTANTS.  THE ADDRESS FIELD SHOULD GIVE A BANK NUMBER OR AN ADDRESS WITHIN A
+R5036   FIXED BANK.  NORMALLY, THIS PROCEDURE PLACES TWO ADRES-SELF WORDS INTO THE NAMED OR IMPLIED BANK, STARTING AT
+R5038   THE FIRST UNUSED WORD IN THE BANK (THE BANK SHOULD BE EMPTY FROM THAT POINT ONWARD).  HOWEVER, IF THE FIRST HOLE
+R5040   OCCURS LATER THAN RELATIVE 3775, THE WORDS GO INTO 3775 AND 3776 WITH A CONFLICT CUSS.  IF THE BANK IS EMPTY,
+R5042   IT WILL RECEIVE THESE WORDS ONLY IF THERE IS A HIGHER OCCUPIED BANK.
+
+ 5043   BNKSUM     TS           L USD FMAX    Z,S3          INT OP SET     C    INITIALIZE VARIOUS REGISTERS.
+ 5045              LA           OCT 70 M      ADDRESS M     BNKSUM AD           BRANCH IF ADDRESS IS NOT A BANK NUMBER.
+ 5047              LA           B46M          ADDRESS M     C,+2
+ 5048              LA           B47M          ADDRESS M     C,+2
+ 5049              WA           ADDRESS M     B46M          ADDRESS M           ADD 4 TO ANY BANK NUMBER BUT 2 OR 3.
+ 5051              SWE, ONESMM  ADDRESS M     10,L          ADDRESS M           FORM ADDRESS 2000 WITHIN NAMED BANK.
+
+ 5053   BNK SUM AD LA           B37M          ADDRESS M     C,+2                ADDRESS MUST BE IN FIXED.
+ 5055              TX           L PR BADR     -             Z,SC
+ 5056              TX,B39T48M   ZERO M        -             ADDRESS M
+ 5057              SWE, CAC3M   L HOW HI F    16            Z,CSC          C    POINT TO BEGINNING OF BANK, FIND MAX BK.
+ 5059              LA           ONES M        N,S3          C,+2                BRANCH IF NO FIXED WAS OCCUPIED (ODD).
+ 5061              LA           ADDRESS M     N,S3          DO BNK SUM          BRANCH UNLESS BANKSUM IS UNNECESSARY.
+ 5063              SWE, CAC3M   L EBK2 XIT    32            Z,S3
+ 5064              TS           W NO NEED     LINE +6       N,S3                PLANT GOOD NEWS AND JOIN EBANK= PROC.
+
+ 5066   DO BNK SUM SWE, ONESMM  ADDRESS M     5             I COMMON
+ 5067              WA           M AV TABLE    I COMMON      Z,AU1               POINT TO FIRST AVAIL WORD FOR HIGH BANK.
+ 5069              TS           Z,AU1,31      Z,X6          C,+3                ALSO POINT TO LAST POSSIBLE AVAIL WORD.
+ 5071              WA           ADDRESS M     OCT 40 M      ADDRESS M
+ 5072              LA           Z,AU1         Z,X6          FOUND HOL +2        BRANCH IF ABOUT TO DO LAST POSS. AV WD.
+ 5074              LA           N,X6,1        CAC3          C,-2                FIND AN AVAIL WORD WITH A HOLE.
+ 5076   FOUND HOL  WD           Z,X6          ONE           Z,X6
+ 5077              TS           BIT 1         AV MSK        FIND AVWD           GOT ONE. NOW GO FIND THE HOLE.
+
+ 5079              LA           B30M          N,X6          FOUND HOL +1        BNKSUM MUST GO NO LATER THAN WORD 3775
+ 5081              SM           HEALTH M      BIT 16        HEALTH M            OF THE BANK, SO TOO BAD IF IT CONFLICTS.
+ 5083              TS, B29T30M  B30M          6,0           FOUND HOL +1
 
 # Page 430
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  46        PAGE 166
 
+P5084   FIND FIRST HOLE IN BANK FOR BNKSUM, OR FORCE ONE AT 3775.
+
+ 5085              MASKGRP      S,0           F,0
+
+ 5086   FIND AV WD TS           I GENL MXR    Z,MXR         C,+3
+ 5087              WA           ADDRESS M     ONE           ADDRESS M           KEEP ADDRESS GUESS UP TO DATE.
+ 5089              SWE, ONES    AV MSK        1             AV MSK
+ 5090              NA, AV MSK   6,0           ONES          C,-2                SEEK A ONE-WORD HOLE IN BANK.
+
+ 5092              TS, AV MSK   ZERO M        6,0           FIND AV WD +2  C    GET SET TO LOOK AT WORD FOR 2ND TC SELF.
+ 5094              LA           CAC3          AV MSK        C,+2
+ 5095              SWE, BIT 1   Z,X6,1        32,L          AV MSK              ADVANCE TO NEXT AVAIL WD IF NECESSARY.
+ 5097              NA, AV MSK   6,0           ZERO M        C,+2
+ 5098              SM           HEALTH M      BIT 16        HEALTH M            PLANT CONFLICT BIT FOR SECOND WORD.
+ 5100              SS           ZERO M        AV MSK        N,X6                BOTH WORDS ARE NOW SHOWN OCCUPIED.
+ 5102              SWE, CAC3    I TYP TAB     16            Z,X6
+ 5103              LA, CAC3     ADDRESS M     6,0           C,+2                BRANCH WHEN MEMORY TYPE IS FOUND.
+ 5105              TS           Z,X6,1        -             C,-1
+ 5106              SWE, ONES    B28T30        3,L           AV MSK
+ 5107              NA, AV MSK   6,0           B26MM         C,+2                BRANCH IF 1ST ADDRESS IS NOT IN FIXED.
+ 5109              NA, CAC3     ADDRESS M     6,0           C,+2                BRANCH IF SECOND WORD IS IN FIXED TOO.
+ 5111              SM           HEALTH M      BIT 15        HEALTH M            SET WRONG-MEMORY-TYPE FLAG.
+ 5113              SS           ADDRESS M     CAC3          HEALTH M            IMITATE THE ACTION OF PASS 1 FOR A CON.
+ 5115   BKSUM LOC  SS           ZERO M        BIT 8         HEALTH M            CLEAR SYMBOLIC-LOCATION FLAG.
+ 5117              SWE, ONES    B47T48MM      3             WORD M
+ 5118              SWE, CAC3    L INSTRNT     16            Z,X6
+ 5119              TS           Z,SC          Z,X4          6,2                 NOW DO LOCATION VALUE PROCESSING.
+ 5121              TX           ADDRESS M     -             ADDR WDM            DISTRIBUTE ADDRESS.
+ 5123              SWE, CAC3    I BLK2 MXR    32            Z,MXR
+
+ 5124              MASKGRP      S,1           F,1
+
+ 5125              NA           LOC M         ONES          C,+2
+ 5126              SWE, CAC3M   I BAD BASC    32            Z,SC                EXIT NOW IF LOCATION IS BAD.
+ 5128              LA           ADDRESS M     OCT 7777      C,+3                BRANCH IF IN FIXED FIXED.
+ 5130              TX, BANKMASK OCT 2000      -             ADDR WD M           CONVERT BANK NOTATION.
+ 5132              WD           ADDRESS M     OCT 10000     ADDRESS M
+ 5133              WA           ADDR WDM      ONE           2ND HALF M          FORM SECOND TC SELF WORD.
+ 5135              SM           ADDR WDM      BIT 1         ADDR WDM
+ 5136              SWE, CAC3M   L PRIN 2PA    32            Z,SC                MAKE ADR WD POSITIVE AND GO PRINT WORDS.
