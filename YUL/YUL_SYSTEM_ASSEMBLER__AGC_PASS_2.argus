@@ -8,6 +8,7 @@
 # Pages:        431-478
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-27 JL   Fixed header page numbers.
+#               2016-12-27 JL   Transcribed pages 431-444.
 
 # Annotations:
 #
@@ -27,57 +28,683 @@ L      @YUL SYSTEM ASSEMBLER  AGC PASS 2
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   1        PAGE 167
 
 
+R0001   WE ARE DEEPLY INDEBTED TO THE ONE, THE ONLY, THE GREAT JOHN SHAW FOR THE FOLLOWING STRONG MAGIC....
+R0003   JSOCTL
+
+
+
+R0004              THE AGC PART OF PASS 2 CONTAINS THE CUSS LIST AND CUSSES FOR AGC, TOGETHER WITH CODING TO PLANT A
+R0006   MODIFIED CUSS LIST AT THE BEGINNING OF BANK 2, AND CODING TO PROCESS INSTRUCTIONS AND CLERICAL CODES FOR AGC.
+
+R0008              THE CUSS LIST AND CUSSES ARE LOADED INTO BANK 5 ALONG WITH CODING TO CONVERT THE CUSS LIST FROM THE
+R0010   FOLLOWING MIXED-CONSTANT FORMAT:
+
+R0011   OP CODE:   FOR EACH OF 3 CUSSES, A POISON BIT AND A 3-BIT CUSS LENGTH.
+R0012   A ADDRESS: DEMAND BIT AND SUBADDRESS OF CUSS 1,
+R0013   B ADDRESS: DEMAND BIT AND SUBADDRESS OF CUSS 2,
+R0014   C ADDRESS: DEMAND BIT AND SUBADDRESS OF CUSS 3
+
+R0015   TO A CAC-WORD FORMAT IN WHICH EACH CAC CONTAINS THE DEMAND BIT, POISON BIT, LENGTH AND SUBADDRESS OF A CUSS.
+R0017   THE CONVERSION IS REQUIRED ONLY TO MAKE USE OF EXISTING MASKS IN GENERAL PASS 2.
+
+R0019              THE PROCESSING CODING IN THE BANK 1 PORTION OF AGC PASS 2 HAS THE FOLLOWING FUNCTIONS:
+
+R0021           1) FOR ALL WORDS, TO SET IN PRINT THE WORD AND ITS LOCATION, AND MARK BLOCK OR BANK END IF APPROPRIATE.
+
+R0023           2) FOR INSTRUCTIONS, TO TRANSLATE THE ADDRESS FIELD AND REDUCE IT IF ITS VALUE IS IN ONE OF THE BANKS
+R0025   00-67 OR ONE OF THE E-BANKS E3-E7, NOTING BANK ERROR IF APPROPRIATE.  SUPPLY IMPLIED ADDRESS IF REQUIRED.  CUSS
+R0027   POLISH INDEXING IF IT IS SPECIFIED.
+R0028              FOR BASIC INSTRUCTIONS, CHECK THAT LIMITED-ACCESS CODES REFER ONLY TO THEIR SPECIFIED MEMORIES, EX-
+R0030   CEPT THAT CODES REFERRING ONLY TO FIXED MEMORY MAY HAVE ADDRESSES IN THE RANGE 0-1777 IF PRECEDED BY "INDEX",
+R0032   AND CODES REFERRING ONLY TO ERASABLE MEMORY MAY HAVE ADDRESSES IN THE RANGE 4000-11777 IF PRECEDED BY "INDEX".
+R0034   CHECK THAT EXTRACODES ARE EXTENDED AND THAT BASIC CODES ARE NOT, AND FLAG "ADRES", "REMADR", "CADR" OR "FCADR",
+R0036   "GENADR", "ECADR", "BBCON", "2FCADR", AND "2CADR" OR "2BCADR" AS CONSTANTS.  FLAG UNINDEXED INSTRUCTIONS THAT
+R0038   REFER TO FIXED MEMORY.  EVALUATE AND ASSIGN MEMORY TO BNKSUM CONSTANTS.
+
+R0039           3) FOR CONSTANTS, TO FLAG THEM AS SUCH AND CHECK ON MAGNITUDE.
+
+R0040           4) FOR SETLOC, EQUALS, MEMORY, BLOCK, BANK, EBANK=, SBANK=, SUBRO, ERASE, PRINT APPROPRIATE ADDRESSES.
+
 # Page 432
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   2        PAGE 168
 
+P0042              QUANTITIES FILLED IN BY THE AGC PART OF PASS 2 FOR REFERENCE BY GENERAL PASS 2.
+
+
+
+ 0044              SETLOC,2     SIZ PASS 2    B1
+
+
+
+ 0045              MASKGRP,4    S,1           F,1
+
+
+
+ 0046   AG PROC OP CAC          AGC INST      AGC 1P        AGC PREL
+ 0047   AG D1 PARS FLDEC        16383.0, 16384.0
+ 0048              FXBIN        -16383
+
+ 0049   AG K1 MAX  OCT          -77777
+ 0050   AG D2 PARS FLDEC        268 435 455.0, 268 435 456.0
+ 0051              FXBIN        -268 435 455
+
+ 0052   AG PROC 2P CAC          AGC 2P        AGC PLEB      ADRES ADR
+ 0053   AG K2 MAX  OCT          -77 7777 7777
+ 0054   AG MAX LOC OCT          -167777
+
+ 0055   AG CON MSX OCT          -77, 7777 7777
+ 0056   AG PRET FL OCT          0000 0010
+ 0057   AG FLG MSK OCT          7400 0077
+
+ 0058   AG CONS FL OCT          0000 0020
+ 0059   AGC MXR    MASKBASE     S,1           F,1
+ 0060   AG MISC FL OCT          0000 0030
 
 # Page 433
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   3        PAGE 169
 
+P0061              FIELD AND SHIFT MASKS FOR AGC PART OF PASS 2.
+
+
+
+ 0062              SETLOC,4     768           B5
+
+
+
+ 0063   B,BIT1M    OCT          4
+ 0064   B,BIT6M    OCT          01
+ 0065   B,BIT7M    OCT          004
+ 0066   B,BIT17M   DEC          00008
+ 0067   B,BIT24M   OCT          0000 0001
+
+ 0068   B,BIT26M   OCT          -2000 0000
+ 0069   B,BIT27M   OCT          -1000 0000
+ 0070   B,BIT31M   OCT          -40 0000
+ 0071   B,BIT32M   OCT          -20 0000
+ 0072   B,BIT33M   OCT          -10 0000
+
+ 0073   B,BIT39M   OCT          -1000
+ 0074   B,B33T35M  OCT          -160000
+ 0075   B,B6T7M    OCT          014
+ 0076   B,B25T27M  OCT          -7000 0000
+ 0077   B,B28T30M  OCT          -700 0000
+
+ 0078   B,B29T30M  OCT          -300 0000
+ 0079   B,B34T36M  OCT          -7 0000
+ 0080   B,B33T38M  OCT          -17 6000
+ 0081   B,B34T48M  OCT          -77777
+
+ 0082   B,B39T48M  OCT          -1777
+ 0083   B,B41T48M  OCT          -377
+ 0084   B,ACO8     OCT          -7
+ 0085   B,CHAR1M   OCT          77
+ 0086   B,CHAR4M   OCT          0000 0077
+
+ 0087   B,CAC3M    OCT          -177777
+ 0088   B,CHAR8M   OCT          -77
+ 0089   B,C1T4M    OCT          7777 7777
+ 0090   B,BANKMASK OCT          -3400
+
+ 0091   B,B42T48M  OCT          -177
+ 0092   B,C7T8M    OCT          -7777
+ 0093   B,B34M     OCT          -40000
+ 0094   B,B25T48M  DEC          -GGGGGG
 
 # Page 434
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   4        PAGE 170
 
+P0095              FURTHER SHIFT MASKS FOR AGC PART OF PASS 2.
+
+ 0096   S,BIT2M    OCT          2
+ 0097   S,BIT28M   OCT          -400 0000
+ 0098   S,ONEM     OCT          -1
+ 0099   S,TWOM     OCT          -2
+
+ 0100   S,FOURM    OCT          -4
+ 0101   S,B2T5M    OCT          36
+ 0102   S,B6T16M   OCT          0177 74
+
+ 0103   S,B18T21M  OCT          0000 017
+ 0104   S,B22T32M  OCT          -7 7760 0000
+ 0105   S,B34T37M  OCT          -7 4000
+ 0106   S,B35T48M  OCT          -3 7777
+
+ 0107   S,B37T38M  OCT          -6000
+ 0108   S,B38T48M  OCT          -3777
+ 0109   S,ACO1     OCT          07
+ 0110   S,ACO2     OCT          0007
+
+ 0111   S,ACO3     OCT          0000 07
+ 0112   S,ACO4     OCT          0000 0007
+ 0113   S,ACO7     OCT          -700
+ 0114   S,THREEM   OCT          -3
+
+ 0115   S,CHAR2M   OCT          0077
+ 0116   S,CHAR3M   OCT          0000 77
+ 0117   S,CHAR6M   OCT          -77 0000
+ 0118   S,CHAR7M   OCT          -7700
+
+ 0119   S,C3T6M    OCT          0000 7777 7777
+ 0120   S,ONESMM   DEC          GGGG GGGG GGGG
+ 0121   S,B35T41M  OCT          -37600
+ 0122   S,B41T44M  OCT          -360
+
+ 0123   S,B45T47M  OCT          -16
+ 0124   S,CHAR5M   OCT          -7700 0000
+ 01241  S,B38 ACO8 OCT          -2007
 
 # Page 435
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   5        PAGE 171
 
+P0125              CONSTANTS, ETC. FOR THE AGC PART OF PASS 2.
+
+ 0126              SETLOC,2
+
+R0127   NUMERICAL CONSTANTS.  BIT 30 THROUGH OCT 57777 FORM AN ARRAY.
+
+ 0128   BIT 30     OCT          -100 0000
+ 0129   B28T29     OCT          -600 0000
+ 0130   C2 B28T34  OCT          0077 0000 0774
+ 0131   C2 C7T8    OCT          0077 0000 0000 7777
+
+ 0132   C3T6       OCT          0000 7777 7777
+ 0133   FIVE       OCT          -5
+ 0134   SIX        OCT          -6
+ 0135   SEVEN      OCT          -7
+ 0136   OCT 40     OCT          -40
+ 0137   OCT 70     OCT          -70
+
+ 0138   OCT 777    OCT          -777
+ 0139   OCT 1377   OCT          -1377
+ 0140   OCT 1400   OCT          -1400
+ 0141   OCT 4000   OCT          -4000
+
+ 0142   MIN 37777  OCT          -37777
+ 0143   PL PMAX    OCT          +777
+ 0144   PL EMAX    OCT          +3777
+
+ 0145   PL 11777   OCT          +11777
+ 0146   PL FMAX    OCT          +167777
+ 0147   PL FMAXP1  OCT          +170000
+ 0148   DEC 48 FLG DEC          48
+ 0149   BANK E2    OCT          -1000
+
+ 0150   OP CODE 3  OCT          -3 0000
+ 0151   DAS CODE   OCT          -20 000
+ 0152   DXCH CODE  OCT          -52 000
+
+ 0153   ADR CON 3  OCT          -3000000
+ 0154   ADR CON 4  OCT          -400 0000
+ 0155   EBANK REG  OCT          -4000 3417
+ 0156   OCT 17777  OCT          -17777
+ 0157   OCT 57777  OCT          -57777
+
+ 0158   B25T27     OCT          -7000 0000
+ 01581  HUNDRETH   DEC          G0 28G5D 28G5E
+ 01482  OCT 67777   OCT         -67777
+
+ 01483  MM PARAMS  FLDEC        99.0, 16384.0
+ 014831            FXBIN        -99
+ 01484  VN PARAMS  FLDEC        9999.0, 16384.0
+ 014841            FXBIN        -9999
 
 # Page 436
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   6        PAGE 172
 
+P015899 ADDRESS CONSTANTS.
+
+ 0159   L POL OP   CAC          INT OP COD    INT OP GOS    INT AD PAT +1
+
+ 01591  L BNKSUM   CAC                        BNKSUM        BKSUM LOC
+
+
+
+P0160   ALPHABETIC CONSTANTS.
+
+ 0161   ALF E1400  ALF           E  1400
+ 0163   COMMA C2   ALF          0,0000
+ 0164   COMMA C8   ALF               00,
+
+ 0165   END BL MC  ALF            EB  MC
+ 0166   BLOT C6    ALF               ▪
+ 0167   E COMMA    ALF               E0,
+ 0168   E CHAR 4   ALF             E
+ 0169   HI EQUALS  ALF          =00,0000
+
+
+
+R0170   RESERVATIONS, EQUIVALENCES, AND ASSIGNMENT.
+
+
+
+ 01709  LAST BANX  ALF
+ 0171   USED FMAX  DEC          GGGG GGGG GGGG
+ 0172   MAX ADRES  RESERVE      1
+ 0173   M COMMON   RESERVE      1
+ 0174   SAV ADREF  RESERVE      2
+
+ 0175   B19T24M    EQUALS       CHAR4M
+ 01751  SBANK REG  EQUALS       EBANK REG
+ 01752  L BSUM LOC EQUALS       L BNKSUM
+ 0176   ACO5       EQUALS       B28T30M
+ 0177   ACO6       EQUALS       B34T36M
+ 0178   B46T48M    EQUALS       ACO 8
+ 0179   BANKMASK   EQUALS       B33T38M
+ 0180   SPECMAG M  EQUALS       B34T48M
+
+ 0182   ADRE CUSS  ASSIGN       4,0
 
 # Page 437
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   7        PAGE 173
 
+P0183              SUBROUTINE IN PASS 2 FOR AGC TO FORM A WORD FROM AN OPERATION CODE AND AN ADDRESS (BASIC INSTRUC-
+R0185   TIONS AND ADDRESS CONSTANTS), OR FROM TWO POLISH OPERATOR CODES (POLISH OPERATOR WORDS).  THE OPERATION CODE(S)
+R0187   AND SOME ASSOCIATED INFORMATION BITS ARE TAKEN FROM THE HEALTH WORD OF THE CURRENT POPO ITEM.  THE ADDRESS IS
+R0189   OBTAINED FROM THE CARD VIA A GENERAL SUBROUTINE IN PASS 2 CALLED PROC ADR.  IMPLIED ADDRESSES, BANK ERRORS, AND
+R0191   INAPPROPRIATE ADDRESSES ARE CHECKED FOR, AND ADDRESS VALUE CUSSING IS DONE.
+
+ 0193   AGC INST   TX           AGC MXR       -             Z,MXR               USE MASKBASE FOR THIS MACHINE.
+ 0195              NA, BIT32M   HEALTH        ONES          C,+3
+ 0196              SWE,ONESMM   L POL OP      32            Z,SC
+ 0197   GO POL ADR SWE,ONESMM   L POL OP      16            Z,SC
+ 0198              SWE, B34T36M HEALTH        12            WORD                INSERT BASIC OP CODE INTO WORD.
+ 0200              SWS, BIT1M   HEALTH        10,L          CUSS LIST +30       MAYBE CUSS ILLEGAL OP CODE ASTERISK.
+ 0282              NA, BIT 31M  HEALTH        ONES          NO IMPLAD           BRANCH IF NO IMPLIED ADDRESS.
+
+R0204   DETERMINE ADDRESSES IMPLIED BY SPECIAL OP CODES.
+
+ 0205   IMPLAD     TS           PLF MAX       MAX ADRES     MAX AD SET    C     KEEP ASSEMBLER'S EBANK REG. UP TO DATE.
+ 0207              NA           ADDRESS 1     BLANKS        QC IMPLAD -1
+ 0208              NA           ADDRESS 2     BLANKS        QC IMPLAD -1
+ 02082             SWS, BIT17M  SWITCH        10            CUSS LIST +2        MAYBE CUSS INDEXING OF IMPLADS.
+ 0209              NA, BIT27M   HEALTH        ZERO          QC IMPLAD           BRANCH IF IMPLAD IS NOT IN HEALTH WORD.
+
+ 0211              SWE, ACO8    HEALTH        18            ADDRESS             SUPPLY IMPLIED ADDRESS.
+ 0215              NA           WORD          BIT 36        SIGND ADR           BRANCH IF NOT CODE 1 (HERE, NOOP).
+ 0217              LA           OCT 4000      LOCATION      NOOP(F)             FORM OF NOOP DEPENDS ON WHICH MEMORY.
+ 0219   NOOP(E)    TS           OP CODE 3     WORD          SIGND ADR           IN E MEMORY, NOOP = CA A.
+
+ 0221              TS, BIT 1M   ONES          CUSS LIST +21 IMPLAD +3           MILDLY CUSS NONBLANK ADR FLD, PROCEED.
+ 0223   QC IMPLAD  SWS, B37T38M HEALTH        9             WORD                PLACE QUARTER-CODE BITS IN INSTR. WORD.
+ 0225              SSL, THREE M WORD          12            C,+1                THREE-WAY BRANCH ON BITS 14,13 OF WORD.
+ 0227   EDRUPT     TS, BIT39M   ONES          WORD          OVSK                ED SMALLY'S RUPT IS PERIPHERAL CODE 7.
+ 0209              SSL, THREE M WORD          10            RESUME              THREE-WAY BRANCH ON QUARTERS OF CODE 5.
+ 0231              SSL, ONEM    WORD          10            C,+1                TWO-WAY BRANCH ON QUARTERS OF CODE 2.
+ 0233   DDOUBL     TS           ONE           ADDRESS       SIGND ADR           DAS A = DDOUBL (D.P. DOUBLE).
+ 0235   ZL OR ZQ   TS           SEVEN         ADDRESS       SIGND ADR           LXCH 7 = ZL (ZERO L), QXCH 7 = ZQ.
+ 0237   RESUME     TS           D12           ADDRESS       SIGND ADR           RESUME = INDEX 17.
+ 0239              SSL, ONE M   HEALTH        18            TCAA DTCF           PICK 1 OF 2 IMPLIED ADDRESSES FOR DXCH.
+ 0241              SSL, ONE M   HEALTH        18            C,+1                PICK 1 OF 2 IMPLIED ADDRESSES FOR TS.
+ 0243   OVSK       TS           ZERO          ADDRESS       SIGND ADR           OVSK = TS A. OTHER ZERO CASES COME HERE.
+ 0245   TCAA DTCF  TS           FIVE          ADDRESS       SIGND ADR           TCAA = TS Z.  DTCF = DXCH FBANK.
+ 0247   DTCB       TS           SIX           ADDRESS       SIGND ADR           DTCB = DXCH Z.
+ 0249   NOOP(F)    WA           LOCATION      ONE           ADDRESS             IN F MEMORY, NOOP = TCF +1.
+
+ 0251   SIGND ADR  BS           ZERO          ADDRESS       ADR WD
+ 0252              SWE, BIT17M  HEALTH        8,L           M COMMON            ISOLATE EXTRACODE BIT OF IMPLAD CODE.
+ 0254              TS           ADR WD        ADR WD +1     SET MIN AD     C    PLANT EXTRACODE FLAG FOR SIMULATOR.
+ 0256              SWS, B29T30M HEALTH        2             HEALTH         C    BIT 29 PLACES OP-ADDRESS PRINT SPLIT.
+ 0258              NA, BIT17M   M COMMON      SWITCH        EXTEND +1           BRANCH IF EXTENDED BASIC OR UNEX. EXTRA.
+ 0260              NA, BIT26M   HEALTH        ZERO          C,+2                BRANCH IF THIS IS THE "EXTEND" CODE.
+ 0262              TS, BIT17M   ZERO          SWITCH        BASIC ADR           CLEAR EXTENSION SWITCH.
+ 0264   EXTEND     TS, BIT17M   ONES          SWITCH        ADD ADR WD          SET EXTENSION SWITCH.
+ 0266              NA           M COMMON      BIT 17        C,+2
+ 0267              TS, BIT1M    ONES          CUSS LIST +12 EXTEND -1           ERROR WAS UNEXTENDED EXTRACODE.
+ 0269              TS, BIT17M   ONES          CUSS LIST +12 EXTEND -1           ERROR WAS AN EXTENDED BASIC CODE.
 
 # Page 438
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   8        PAGE 174
 
+P0271   PROCESS EXPLICIT ADDRESSES FOR INSTRUCTIONS OR CONSTANTS.
+
+ 0272   NO IMPLAD  TN           ADDRESS 1     2             SAV ADREF           SAVE ADDRESS FIELD IN CASE OF POLADRES.
+ 0274              NA, B25T27M  HEALTH        ONES          NON CONST           BRANCH IF INSTRUCTION, NOT ADR CONSTANT.
+ 0276   ADR CONST  SSL, THREEM  HEALTH        24            C,+1                BRANCH ON LEVEL OF ADDRESS CONSTANT.
+ 02772             TS, CHAR1M   DEC 6 FLAG    WORD          ADR CON E +1        LEVEL 0: BASIC ADDRESS CONSTANTS.
+ 0278              LA,B28T30M   ADR CON 3     HEALTH        GO POL ADR          BRANCH FOR POLISH ADDR OR STORE CODES.
+ 02792             TS           ONES          LOCATION      NWD BSUMS           REST OF LEVEL 1: EBANK=, SBANK=, BNKSUM.
+ 02794             TS, BIT1M    ZERO          CUSS LIST +30 MM VN               LEVEL 3: SPECIAL DECIMAL CONSTANTS.
+
+ 0280   NWD BSUMS  SWS, BIT17M  HEALTH        9             CUSS LIST +14       MAYBE CUSS NONBLANK LOC FIELD.
+ 0284              SSL, ACO8    HEALTH        17            ADR CON E           SELECT EBANK=, SBANK=, OR BNKSUM.
+ 0286   ADR CON E  TS           PL EMAX       MAX ADRES     MAX AD SET -1       E-ADDRESSES ONLY FOR ECADR, EBANK=.
+ 0290              LA, B28T30M  ADR CON 4     HEALTH        C,+2                BR IF ECADR, BBCON, 2FCADR, OR 2(B)CADR.
+ 0292   ADR CON F  TS           PL FMAX       MAX ADRES     MAX AD SET -1       ADRES,REMADR,GENADR,FCADR,SBANK=,BNKSUM.
+ 0294              LA, B28T30M  HEALTH        ADR CON 4     ADR CON E           BRANCH IF CODE IS ECADR.
+ 0296              LA, B29T30M  HEALTH        BIT 30        BBCONQ1 +1          BRANCH IF BBCON (SINGLE PRECISION).
+
+ 0298   DP ADR CON WA           L FINI 2P     ONE           MOD RETRN           MAKE RETURN GO TO D.P. CONSTANT PROC.
+ 0300              TX           W BAD WORD    -             2ND HALF
+ 0301              TN           BLOTS         2             2ND ALF             PREPARE FOR THE WORST.
+ 0303   BBCONQ1    LA, B29T30M  HEALTH        BIT 29        ADR CON F           BRANCH IF 2FCADR OR BNKSUM (NO ER PROB).
+ 0307              TS           Z,SC          Z,X6          LOC BNK CK
+ 0309              TS, BIT17M   ZERO          CUSS LIST +23 SET EBCON -1        MAY ERASE EBANK OR SBANK CONFLICT CUSS.
+
+ 0313   NON CONST  SWS, B37T38M HEALTH        12            WORD                PLACE QUARTER-CODE BITS IN INSTR. WORD.
+ 0315              LA, B29T30M  ONES          HEALTH        C,+2                BRANCH IF PERIPHERAL CODE.
+ 0317              SWS, BIT28M  HEALTH        1             SWITCH              SET SWITCH IF THIS IS AN INDEX ORDER.
+ 0319              SWE, BIT17M  HEALTH        11,L          M COMMON            ISOLATE EXTRACODE BIT OF EXPLAD CODE.
+ 0321              NA, BIT17M   M COMMON      SWITCH        C,+2                BRANCH IF EXT. BASIC OR UNEX. EXTRACODE.
+
+ 0323   UNEXTEND   TS, BIT17M   ZERO          SWITCH        SET MIN AD          CLEAR EXTENSION SWITCH.
+ 0325              NA           M COMMON      BIT 17        C,+2                BRANCH IF EXTENDED BASIC CODE ERROR.
+ 0327   UNEXTD XC  TS, BIT1M    ONES          CUSS LIST +12 SET MIN AD          CUSS AT UNEXTENDED EXTRACODE.
+ 0329              NA, BIT27M   HEALTH        ONES          BAD XTEND           BRANCH IF NOT AN INDEX ORDER.
+ 0331              TX, B29T30M  ZERO          -             HEALTH              EXTENDED INDEX EXTENDS, CAN REFER 2 ANY.
+ 0333              TS           BIT 17        M COMMON      SET MIN AD
+ 0334   BAD XTEND  TS, BIT17M   ONES          CUSS LIST +12 UNEXTEND            CUSS ANY EXTENDED BASIC CODE BUT INDEX.
+
+ 0336   SET MIN AD SWS, BIT27M  M COMMON      10            WORD
+ 0337              SWS, BIT28M  M COMMON      11            WORD                PLANT EXTRACODE FLAG FOR SIMULATOR.
+ 0339              TX           OCT 7777      -             MIN ADRES           IN GENERAL, ALLOW VALUES DOWN TO -7777.
+ 0341              SSL, THREEM  HEALTH        18            C,+1                4-WAY BRANCH ON MEMORY TYPE ALLOWANCE.
+ 0343              TS           PL FMAX       MAX ADRES     CHECK OP 4          NO RESTRICTION.
+
+ 0345   REFER TO F TS           PL FMAX       MAX ADRES     DP SSL              DITTO NOW, FIXED ONLY LATER.
+ 0347              TS           PL 11777      MAX ADRES     DP SSL              E-MEMORY OR INDEXED (QUARTER-CODE).
+ 0349              SWS, BIT39M  HEALTH        12            WORD                PERIPHERAL CODE. SUPPLY LAST P-CODE BIT.
+ 0351              TX           OCT 777       -             MIN ADRES           HERE ALLOW VALUES DOWN TO -777.
+ 0353              TS           PL PMAX       MAX ADRES     DP SSL
+ 0354   CHECK OP 4 NA, B34T36M  WORD          OP CODE 4     DP SSL              BRANCH IF NEGATIVE ADDRESS IS PERMITTED.
+ 0356              TS           ZERO          MIN ADRES     DP SSL              NEGATIVE ADDRESS HERE WOULD BE OVERFLOW.
 
 # Page 439
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.   9        PAGE 175
 
+P0358   IF OP CODE IS DOUBLE PRECISION, ADD 1 TO ADDRESS VALUE.
+
+ 0359              NA, B33T38M  WORD          DXCH CODE     MAX AD SET          BRANCH IF BASIC CODE AND NOT D.P.
+ 0361   DP CHECK   NA, B33T38M  WORD          DAS CODE      C,-1           C
+ 0362              TS, BIT6M    ONES          SWITCH        MAX AD SET          PLANT BIT, RETURN TO SEQUENCE MODE.
+ 0364   XCODE DP Q NA, B34T36M  WORD          OP CODE 3     C,+2           C    IF NOT DCA, CHECK FOR DCS.
+ 0366              TS, BIT6M    ONES          SWITCH        MAX AD SET          PLANT BIT, RETURN TO SEQUENCE MODE.
+ 0368              NA, B34T36M  WORD          OP CODE 4     MAX AD SET          BRANCH IF EXTRACODE AND NOT D.P.
+ 0320   DP SSL     SSL, TWO M   HEALTH        19            DP CHECK       C    ADD 00001 TO DOUBLE PRECISION ADDRESSES.
+ 0372              TS, BIT6M    ONES          SWITCH        MAX AD SET          SOME EQUALITIES FALL THRU INTO HERE.
+
+R0374   TRANSLATION OF ADDRESS FIELD, WITH FIRST-ORDER SIZE CHECKING.
+
+ 03748             LA           ONES          LOCATION      C,+2                EXCEPT FOR EBANK=, SBANK=, BNKSUM:
+ 0375   MAX AD SET TS           Z,SC          Z,X6          EBK LOC Q           KEEP ASSEMBLER'S EBANK REG. UP TO DATE.
+ 0377              TX           GENL MXR      -             Z,MXR
+ 0378              TS           Z,SC          Z,X6          PROC ADR            TRANSLATE ADDRESS FIELD.
+
+ 0380              TN           SAV ADREF     2             ADDRESS 1           RESTORE ORIG. ADDRESS FIELD FOR PRINT.
+ 0382              TS           ZERO          MIN ADRES     AGC INST       C    RESTORE MIN ADR VALUE AND MXR.
+ 0384              SWS, BIT17M  HEALTH        8             CUSS LIST           CUSS LACK OF "D" IN DECIMAL SUBFIELD.
+ 0386              WD           L POL OP      ONE           Z,CSC          C    GO SEE IF CURRENT WORD IS POLISH
+ 0388              LA           ONES          ADDRESS       RNG ERROR +2        BR. IF MEANINGLESS OR ATROCIOUS ADDRESS.
+
+ 0390              SWE, ONEM    SWITCH        42            M COMMON
+ 0391              BS           ADR WD        M COMMON      ADR WD +1           INCREMENT ADDRESS OF D.P. CODE.
+ 0393              LN           ADR WD        MAX ADRES     CONST Q             BRANCH IF ADDRESS SIZE OK FOR THIS OP.
+ 0395              LN           PL FMAX P1    ADR WD        C,+2                BRANCH IF ADDRESS TOO BIG TO PRINT.
+
+ 0397   RNG ERROR  TS, BIT33M   ONES          CUSS LIST +11 PRB ADRES      C    IF NOT ATROCIOUS, TELL HIM WHAT IT IS.
+ 0399              SM           CUSS LIST +3  BIT 17        CUSS LIST +3        CUSS RANGE ERROR IN ADDRESS VALUE.
+ 0401              LA, CHAR1M   HEALTH        HI EQUALS     BAD BASIC           BRANCH IF INSTRUCTION OR ADDRESS CONST.
+ 0403              SSL, THREEM  HEALTH        18            NW BADDR            CUSS RANG ERR IN EBANK=, SBANK=, BNKSUM.
+
+ 0405   CONST Q    NA, B25T27M  HEALTH        ONES          INSTROP             GO PROCESS INSTRUCTION IF NO CONST FLAG.
+ 0407              NA,BIT24M    HEALTH        ZERO          ADR CON 1           BRANCH IF NOT TYPE 0 ADDRESS CONSTANT.
+
+R0409   SELECT PROCEDURE FOR TYPE 0 ADDRESS CONSTANTS.
+
+ 04098  ADR CON 2  SWS, B34T37M HEALTH        16            WORD                MAY PUT PREFIX ON ECADR FOR DOWNLIST.
+ 0410              SSL, ACO8    HEALTH        18            C,+1                SELECT PROCEDURE FOR 1 OF 8 ADR CONSTS.
+ 0412   ADRES      TS           AG PROC 2P    Z,SC          BASIC ADR      C    ADRES IS JUST LIKE TC (EXCEPT FOR FLAG).
+ 0414              TS           -             -             REMADR              LIKE ADRES, BUT MUST BE DIFFERENT BANK.
+ 0416              TS           -             -             (F)CADR             COMPLETE ADDRESS FOR FIXED MEMORY.
+ 0418              TS           -             -             GENADR              LIKE ADRES, BUT NO BANK-ERROR CHECKS.
+ 0420   ECADR      TS           -             -             ADD ADR WD          COMPLETE ADDRESS FOR ERASABLE MEMORY.
+ 0422              TS           -             -             BBCON               BOTH-BANK CONSTANT, 5 BITS AND 3 BITS.
+ 0424              TS           ADDRESS       2ND HALF      2FCADR              FCADR (FOR FB) FOLLOWED BY GENADR.
+ 0426              TS           ADDRESS       2ND HALF      2(B)CADR            GENADR FOLLOWED BY BBCON (FOR BB).
 
 # Page 440
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.  10        PAGE 176
 
+P0428   SPECIFIC PROCESSING FOR 6 OF THE 8 TYPE 0 ADDRESS CONSTANTS.
+
+ 0429   REMADR     LA           ADDRESS       OCT 3777      E REM CHECK         BRANCH IF ADDRESS IS IN ERASABLE.
+ 0431              LA           ADDRESS       OCT 7777      ADD ADR WD          EXIT IF ADDRESS IS IN FIXED-FIXED.
+ 0433              LA           LOCATION      OCT 7777      F SUBADR            BRANCH HAPPILY IF LOC. NOT IN AN FBANK.
+ 0435              NA, BANKMASK LOCATION      ADDRESS       F SUBADR            OK IF LOC. AND ADR. IN DIFFERENT BANKS.
+ 0437              TS           -             -             CUS F BANK
+ 0438   E REM CHEK LA           ADDRESS       OCT 1377      ADD ADR WD          EXIT IF ADDRESS IS NOT IN AN EBANK.
+ 0440              LA, EBANKMSK EBANK REG     BANK E2       E SUBADR            OK IF WE HAVE A PSEUDO EBANK.
+ 0442              NA, EBANKMSK ADDRESS       EBANK REG     E SUBADR -1         OK IF LOC AND ADR IN DIFFERENT EBANKS.
+ 0444              TS           -             -             CUS E BANK
+
+ 0445   (F)CADR    LA           ADDRESS       OCT 7777      RNG ERROR           ADDRESS IN ERASABLE OR FIXFIX ILLEGAL.
+ 0447              WD           ADR WD        OCT 10000     ADR WD              PUT CADR IN THE RANGE 00000-77777.
+ 0449              LA, CAC3M    ADR WD        OCT 57777     ADD ADR WD          BRANCH IF ADDRESS ISN'T IN A SUPER-BANK.
+ 0451              LA, B33T35M  SBANK REG     ZERO          C,+2                BRANCH IF THERE IS NO SUPERBANK SETTING.
+ 04512             NA, B33T35M  ADR WD        SBANK REG     SBANK CUS           BRANCH TO CUSS SUPERBANK ERROR.
+ 0452              TS, B33T35M  SPEC MAG      ADR WD        ADD ADR WD
+
+ 0453   GENADR     LA           ADDRESS       OCT 3777      C,+3                BRANCH IF ADDRESS IS IN ERASABLE MEMORY.
+ 0455              LA           ADDRESS       OCT 7777      ADD ADR WD          ALL DONE IF IN FIXED-FIXED.
+ 0457              TS, BANKMASK OCT 2000      ADR WD        ADD ADR WD          PUT SUBADDRESS IN THE RANGE 2000-3777.
+ 0459              LA           ADDRESS       OCT 1377      ADD ADR WD          ALL DONE IF ADDRESS IN UNSWITCHED ERAS.
+ 0461              TS, EBANKMSK OCT 1400      ADR WD        ADD ADR WD          PUT SUBADDRESS IN THE RANGE 1400-1777.
+
+ 04622             LA, CHAR8M   EBANK REG     SEVEN         SET SBCON -1        BYPASS UPDATE IF 1-SHOT DECLARATION.
+ 04623  SET EBCON  SWS, ACO8    EBANK REG     8             EBANK REG      S    POSITION CURRENT SETTING FOR BBCON FMT.
+ 04624             SM           CUSS LIST +30 BIT 33        CUSS LIST +30       CUSS BBCON WORD WITHOUT 1-SHOT EBANK=.
+ 04625             NA, B25T27M  SBANK REG     BIT 25        C,+2                BYPASS UPDATE IF 1-SHOT DECLARATION.
+ 04626  SET SBCON  SWS, B28T30M SBANK REG     5,L           SBANK REG      S    COPY PERMANENT INTO TEMPORARY SUPERBITS.
+ 04627             SSL, ONEM    CUSS LIST +30 47            BBC STAR Q          SELECT ON * IN OP CODE (BBCON OR 2CADR).
+ 0463              TS, BIT1M    ONES          CUSS LIST +21 EDS BNKNO           MILDLY CUSS NONBLANK ADR FLD, PROCEED.
+ 0465   BBC STAR Q TS           PL FMAX       MAX ADRES     MAX AD SET +1
+ 0466              LA, B29T30M  BIT 29        HEALTH        C,-1                BRANCH IF 2CADR*, NOT BBCON*.
+ 0468              NA           ADDRESS 1     BLANKS        BBC STAR Q -1
+ 0469              NA           ADDRESS 2     BLANKS        BBC STAR Q -1
+ 0470   EDS BNKNO  TS, BIT1M    ZERO          CUSS LIST +30 HOW HIGH F     C    IGNORE ADDRESS FIELD OF BBCON* AND
+ 0472              TX           USED FMAX     -             ADDRESS             SUPPLY THE BANK NUMBER OF THE HIGHEST 
+ 0474              LA           ONES          ADDRESS       RNG ERROR           BANK OCCUPIED IN THIS ASSEMBLY.
+
+ 0476   BBCON      LA           ADDRESS       OCT 3777      BANK NO             IF NOT IN FIXED, SHOULD BE BANK NUMBER.
+ 0478              LA           ADDRESS       OCT 7777      BBC ADRES -1        NO REDUCTION NEEDED IF IN FIXED-FIXED.
+ 0480              WD           ADDRESS       OCT 10000     ADDRESS
+ 0481   BB SUPER Q LA           ADDRESS       OCT 57777     BBC ADRES -1        BRANCH IF ADDRESS ISN'T IN A SUPER-BANK.
+ 0483              NA, B25T27M  SBANK REG     ZERO          C,+3                BRANCH IF NO 1-SHOT SBANK=.
+ 04832             SWE, B28T30M ADDRESS       5,L           2ND ALF             SHIFT ADDRESS SUPERBITS TO MATCH TEMPS.
+ 04834             NA, B28T30M  2ND ALF       SBANK REG     1SH CONFL           MAY CUSS ADDRESS CONFL W/ 1-SHOT DECL.
+ 0484              SWS, B41T44M ADDRESS       9             WORD                PLANT SUPER-BANK BITS IN BBCON WORD.
+ 0486              TS, B33T35M  SPEC MAG      ADDRESS       BBC ADRES           REDUCE BANK NUMBER TO 3X.
+ 04872             SWS, B41T44M SBANK REG     14            WORD                SUPPLY DECLARED SBANK OR 0 IF NONE.
+ 0488   BBC ADRES  TX, BANKMASK ADDRESS       -             WORD                SET FB PART OF BBCON FROM ADDRESS.
+ 0490              TS, ACO8     EBANK REG     WORD          GUD BASIC           INSERT 1-SHOT OR ESTABLISHED EBANK NO.
+ 0492   BANK NO    LA           OCT 70        ADDRESS       RNG ERROR           ADDRESS IN ERASABLE ILLEGAL HERE.
+ 0494              SWE, ONESMM  ADDRESS       10,L          ADDRESS             SET FB PART OF BBCON FROM BANK NUMBER.
+ 0496              TS           -             -             BB SUPER Q
 
 # Page 441
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.  11        PAGE 177
 
+P0497   SUBROUTINE TO COMPUTE AN ADDRESS IN THE HIGHEST OCCUPIED FIXED BANK.
+
+ 0498   HOW HIGH F NA           USED FMAX     ONES          N,SC,1         C    EXIT IF PROBLEM HAS BEEN SOLVED.
+ 0500              SWE, CAC3M   PL FMAXP1     5             M COMMON       C
+ 0501              WA           M COMMON      OCT 17777     Z,AU1          C    POINT TO AVAIL TABLE WD FOR HIGHEST FIX.
+
+ 0503   FIND USED  LA           CAC 12        N,AU1,1       C,+0           C
+ 0504              LA           Z,AU1         OCT 17777     N,SC,1         C    BRANCH IF NO FIXED IS OCCUPIED.
+ 0506              WD           Z,AU1         OCT 17777     M COMMON       C
+ 0507              SWE, ONESMM  M COMMON      5,L           M COMMON       C    FORM ADDRESS OF 2000 OF LAST USED BANK.
+ 0509              TX           L TYP TAB     -             Z,X6           C
+ 0510              LA, CAC3M    M COMMON      6,0           C,+2           C    FIND MEMORY TYPE OF PUTATIVE BANK.
+ 0512              TS           Z,X6,1        -             C,-1           C
+ 0513              NA, B25T27M  6,0           TYPE F        FIND USED      C    BRANCH TO TRY AGAIN IF NOT FIXED.
+ 0515              TX           M COMMON      -             USED FMAX      S
+
+R0516   TYPE 0 ADDRESS CONSTANTS CONCLUDED: DOUBLE PRECISION TYPES.
+
+ 0517   2FCADR     LA           OCT 4000      ADDRESS       C,+2
+ 0518              TS           W BAD WORD    2ND HALF      RNG ERROR           ERROR EXIT IF REFERS TO ERASABLE.
+ 0520              LA           ADDRESS       OCT 7777      PRINT 2PA           ALL DONE IF IN FIXED-FIXED.
+ 0522              WD           ADR WD        OCT 10000     ADR WD              PUT CADR IN THE RANGE 00000-77777.
+ 0524              LA, CAC3M    ADR WD        OCT 57777     2(B)CADR -1         BRANCH IF ADDRESS ISN'T IN A SUPER-BANK.
+ 0526              LA, B33T35M  SBANK REG     ZERO          C,+2                BRANCH IF THERE IS NO SUPERBANK SETTING.
+ 05262             NA, B33T35M  ADR WD        SBANK REG     SBANK CUS           BRANCH TO CUSS SUPERBANK ERROR.
+ 0527              TX, B33T35M  SPEC MAG      -             ADR WD              REDUCE BANK 4X, 5X, OR 6X TO 3X.
+ 0529              TS, BANKMASK OCT 2000      2ND HALF      PRINT 2PA           PUT GENADR IN THE RANGE 2000-3777, EXIT.
+
+ 0531   2(B)CADR   SS           ZERO          OCT 1777      2ND HALF            ISOLATE BANK NUMBER IN BBCON WORD.
+ 05322             SWS, B41T44M SBANK REG     14            2ND HALF            SUPPLY DECLARED SBANK OR 0 IF NONE.
+ 0533              LA           ADDRESS       OCT 3777      2BCADR E            BRANCH IF REFERS TO ERASABLE.
+ 0535              LA           ADDRESS       OCT 7777      2BCADR E +1         BRANCH IF REFERS TO FIXED-FIXED.
+ 0537              WD           2ND HALF      OCT 10000     2ND HALF            REDUCE BANK NUMBER IN BBCON WORD.
+ 0539              LA           2ND HALF      OCT 57777     2BCADR E -1         BRANCH IF ADDRESS ISN'T IN A SUPER-BANK.
+ 0541              NA, B25T27M  SBANK REG     ZERO          C,+3                BRANCH IF NO 1-SHOT SBANK=.
+ 05412             SWE, B28T30M 2ND HALF      5,L           2ND ALF             SHIFT ADDRESS SUPERBITS TO MATCH TEMPS.
+ 05414             NA, B28T30M  2ND ALF       SBANK REG     1SH CONFL           MAY CUSS ADDRESS CONFL W/ 1-SHOT DECL.
+ 0542              SWS, B41T44M 2ND HALF      9             2ND HALF            PLANT SUPER-BANK BITS IN BBCON WORD.
+ 0544              TX, B33T35M  SPEC MAG      -             2ND HALF            REDUCE BANK 4X, 5X, OR 6X TO 3X.
+ 0546              TS, BANKMASK OCT 2000      ADR WD        2BCADR E +1         PUT GENADR IN THE RANGE 2000-3777.
+ 0548   2BCADR E   LA           OCT 1400      ADDRESS       C,+2                BRANCH IF REFERS TO AN EBANK.
+ 0550              TS, ACO8     EBANK REG     2ND HALF      PRINT 2PA           EXIT FOR ALL CASES BUT EBANK REFERENCE.
+ 0552              SWS, B38ACO8 ADDRESS       8             2ND HALF            HERE USE EBANK ACCORDING TO ADDRESS.
+ 0554              LA, CHAR8M   EIGHT         EBANK REG     C,+2                BRANCH IF THERE IS NO 1-SHOT DECLARATN.
+ 0556              NA, ACO8     2ND HALF      EBANK REG     1SH CONFL           OTHERWISE CHECK FOR CONFLICT.
+ 0558              TS, EBANKMSK OCT 1400      ADR WD        PRINT 2PA           PUT GENADR IN THE RANGE 1400-1777, EXIT.
+
+ 0562   PRINT 2PA  NA, CHAR1M   CARD +2       BIT 1         C,+2                BRANCH IF NO MINUS IN COLUMN 17.
+ 0564              HA           2ND HALF      SPEC MAG      2ND HALF       C
+ 0565              TS, BIT1M    ZERO          AG BINALF     PRINT 2P       C    TWEAK AND USE PART OF 2DEC, 2OCT.
+ 0567              TS, BIT1M    ONES          AG BINALF     ADD ADR WD          RESTORE IT AND EXIT.
 
 # Page 442
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.  12        PAGE 178
 
+P0569   LEVEL 3 ADDRESS CONSTANTS: SPECIAL DECIMAL CONSTANTS.
+
+ 05692             MASKGRP      S,0           F,0
+
+ 05694  MM VN      TS           GENL MXR      Z,MXR         DECIMAL +1     C    SET GENERAL MXR AND DELIMITING ASTERISK.
+ 05698             TX           BANK 5        -             Z,X4
+ 05702             TS           Z,SC          4,5           QU COL SSL +1       CUSS QUEER INFO IN COLUMNS A LA DECIMAL.
+ 05706             SSL, TWO     HEALTH        17            C,+1
+
+ 05708  MAJR MODE  TN           MM PARAMS     3             MAX DECML
+ 0571              TS           L FINI 1P     Z,X4          DEC CONST           MM = DEC WITH LIMIT OF 99.
+
+ 05714  VERB NOUN  TN           VN PARAMS     3             MAX DECML
+ 05716             TS           Z,SC          Z,X4          DEC CONST           FIRST DO DEC WITH LIMIT OF 9999.
+ 0572              NA           NUMBER        W BAD WORD    C,+2
+ 05722             TS           L PROC WD     Z,SC          AGC 1P +1      C    IF BAD WORD TREAT VN LIKE DEC.
+ 05726             BM           NUMBER        HUNDRETH      M COMMON            ISOLATE VERB IN M COMMON.
+ 0573              BT           M COMMON      10            M COMMON +1
+ 05732             BT           M COMMON +1   10            M COMMON +1
+ 05734             BS           NUMBER        M COMMON +1   M COMMON +1         ISOLATE NOUN IN M COMMON +1.
+ 05738             SPE, ONES    M COMMON      7,L           NUMBER
+ 0574              SWS, B42T48  M COMMON +1   0             NUMBER              STORE VERB AND NOUN AS 7-BIT GROUPS.
+ 05744             TS           L PROC WD     Z,SC          GOOD 1P        C    FINISH UP A LA DEC.
+
+ 05748             MASKGRP      S,1           F,1
 
 # Page 443
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.  13        PAGE 179
 
+P0576   SELECT PROCEDURE FOR LEVEL 1 ADDRESS CONSTANTS.  PROCEDURES FOR SBANK= AND EBANK=.
+
+ 0577   ADR CON 1  LA, B28T30M  HEALTH        ZERO          EBANK2              BRANCH TO PROCESS EBANK= CODE.
+
+ 0579              LA, B28T30M  HEALTH        BIT 30        SBANK2              BRANCH TO PROCESS SBANK= CODE.
+
+ 0581              SWE, CAC3M   L BNKSUM      16            Z,SC                GO TO OTHER BANK TO PROCESS BNKSUM CODE.
+
+R0583   ACTION OF "SBANK=" CODE UPON ASSEMBLER'S S BANK REG.
+
+ 0585   SBANK2     LA           ADDRESS       OCT 67777     RNG ERROR           ADDRESS MUST BE IN A SUPER-BANK.
+ 05862             WD           ADDRESS       OCT 10000     ADDRESS
+ 0587              SWS, CHAR5M  ADDRESS       5,L           SBANK REG           SET UP TEMP. SUPERBITS, CALL IT 1-SHOT.
+ 0589              SWS, CHAR6M  SBANK REG     A,1           LINE +6
+ 0591              SWS, CHAR5M  W LAST ASS    A,2           LINE +6             PRINT DECLARED SUPERBANK NO. AS "SN".
+ 05922             SWS, C1T4M   LINE +6       A,2,L         LAST BANX           SET SUPER-BANK FLAG INTO BUFFER.
+ 0593   SBNK2 XIT  TS           GENL MXR      Z,MXR         ZEQUALOC            EXIT, BYPASSING WORD PROCESSING.
+ 0595              SWS, CHAR5M  BIT 30        0             SBANK REG           SET SUPER-BANK TO 1 (BAD).
+ 0597              TS, C1T4M    BLANKS        LAST BANX     SBNK2 XIT -2   C    SHOW NEW SBANK DECLARAION.
+ 0599              TS           GENL MXR      Z,MXR         ZEQUALOC
+
+R0664   ACTION OF 'EBANK=' CODE UPON ASSEMBLER'S E BANK REG.
+
+ 0665   EBANK2     LA           EIGHT         ADDRESS       C,+3                BRANCH IF EBANK NUMBER IMPLIED BY ADR.
+ 06662             SM           CUSS LIST +11 BIT 17        CUSS LIST +11       FROWN ON USE OF PLAIN EBANK NUMBER.
+ 0667              TS, CHAR8M   ADDRESS       EBANK REG     C,+2                USE EBANK NUMBER DIRECTLY.
+ 0669              SWS, CHAR8M  ADDRESS       8             EBANK REG           PLANT EBANK NO. IN TENTATIVE POSITION.
+ 0671              SWS, CHAR6M  EBANK REG     12,L          LINE +6
+ 0673              SWS, CHAR5M  E CHAR 4      A,1           LINE +6        S    PRINT DECLARED EBANK NO. AS "EN".
+ 06732             SWS, C7T8M   LINE +6       A,2           LAST BANX           SET GOOD OR BAD EBANK FLAG IN BUFFER.
+ 0674   EBNK2 XIT  TS           GENL MXR      Z,MXR         ZEQUALOC            EXIT, BYPASSING WORD PROCESSING.
+ 06752             TS, CHAR8M   SEVEN         EBANK REG     EBNK2 XIT -2   C    SHOW NEW NON-TRIVIAL DECLARATION.
+ 06754             TS, C7T8M    BLANKS        LAST BANX     EBNK2 XIT           BUT SHOW THAT THE DECLARATION WAS BAD.
+
+R06755  DISPOSITION OF EBANK=, SBANK=, AND BNKSUM IF ADDRESS IS BAD.
+
+ 06756  NW BADDR   TS           BLOT C6       LINE +6       EBNK2 XIT +1
+ 06757             TS           BLOT C6       LINE +6       SBNK2 XIT +1
+ 06758             SM           HEALTH        BIT 14        HEALTH              BAD LOCATION VALUE FLAG.
+ 06759             TS           L BSUM LOC    Z,SC          RSTOR MXR      C    JOIN END OF BNKSUM PROCEDURE.
 
 # Page 444
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.  14        PAGE 180
 
+P0676   SPECIFIC PROCESSING FOR BASIC INSTRUCTIONS.
+
+ 0677   INSTROP    SWS, ONEM    SWITCH        42            WORD                SUPPLY INCREMENTING BIT FOR D.P. CODES.
+ 0679              LN           ZERO          ADR WD        F ONLY CHK          BRANCH IF ADDRESS VALUE IS POSITIVE.
+ 0681              NA, BIT7M    SWITCH        ZERO          C,+2
+ 0682              SM           CUSS LIST +23 BIT 33        CUSS LIST +23       CUSS NO INDEX BEFORE MINUS ADDRESS.
+ 0684              NA, SPECMAGM WORD          ZERO          C,+2
+ 0685              HA           WORD          SPEC MAG      WORD                +0 MUST BECOME -0 FOR SUBTRACTION.
+ 0687              WD           WORD          ADR WD        WORD                ADD NEGATIVE ADDRESS.
+ 0689              SWS, CHAR8M  FIVE          1,L           LINE +5             SET UP PRIME FOR FULL CODE PRINT.
+ 0691              TS           BANK E2       ADR WD        GUD BASIC           CALL FOR A PRIME IN QUARTER-CODE PRINT.
+
+ 0693   F ONLY CHK NA, B29T30M  HEALTH        BIT 30        BASIC ADR           BRANCH UNLESS MEMORY ALLOWANCE = F ONLY.
+ 0695              LA           OCT 4000      ADDRESS       BASIC ADR           BRANCH IF INDEED REFERS TO FIXED.
+ 0697              LA           OCT 2000      ADDRESS       RNG ERROR           ADDRESS IN BANKS E4-E7 IS NONSENSE HERE.
+ 0699              NA, BIT7M    SWITCH        ZERO          ADD ADR WD
+ 0700              TS, BIT33M   ONES          CUSS LIST +11 PRB ADRES      C
+ 0701              TS, BIT17M   ONES          CUSS LIST +3  ADD ADR WD          IF NOT INDEXED, WE'VE HAD IT, MATE.
+
+ 0703   BASIC ADR  LA           ADDRESS       OCT 3777      CHK EBANK           BRANCH IF ADDRESS IS IN ERASABLE.
+ 0705              NA, BIT7M    SWITCH        ZERO          ADRES ADR
+ 0706              NA           MAX ADRES     PL 11777      ADRES ADR -1        CUSS UNINDEXED 1/4-CODE REFERENCE TO F.
+ 0708              TS, BIT33M   ONES          CUSS LIST +11 PRB ADRES      C
+ 0709              TS, BIT17M   ONES          CUSS LIST +3  ADRES ADR           PUT MISC. FLAG ON UNINDEXED BASIC IN-
+ 0711              TX, CHAR1M   DEC 48 FLG    -             WORD                STRUCTIONS THAT REFER TO FIXED MEMORY.
+ 0713   ADRES ADR  LA, CAC3M    ADR WD +1     OCT 7777      ADD ADR WD          EXIT IF IN FIXED-FIXED.
+ 0715              NA, B6T7M    SWITCH        B2B6          C,+3                EXCEPT WHERE INSTRUCTION IS INDEXED, ...
+ 0717              NA, B39T48M  ADR WD        ONES          C,+3                CUSS D.P. ADDRESS THAT STRADDLES FBANKS.
+ 0719              TS, BIT17M   ONES          CUSS LIST +3  RNG ERROR      C
+ 0720              LA           ADDRESS       OCT 7777      ADD ADR WD          (FOR D.P. ADDRESS = 7777).
+ 0722              LA           LOCATION      OCT 7777      F SUBADR            BRANCH IF LOCATION IS NOT IN AN FBANK.
+ 0724              LA           MAX ADRES     PL 11777      F SUBADR            NO BANK CUSS ON XQC REF TO 2000-3777.
+ 0726              NA, BANKMASK LOCATION      ADDRESS       CUS F BANK
+ 0727   F SUBADR   TS, BANKMASK OCT 2000      ADR WD        ADD ADR WD          PUT SUBADDRESS IN THE RANGE 2000-3777.
+
+ 0729   CHK EBANK  LA, CAC3M    ADR WD +1     OCT 1377      ADD ADR WD          BRANCH IF ADDRESS IS NOT IN AN EBANK.
+ 0731              NA, B6T7M    SWITCH        B2B6          C,+3                EXCEPT WHERE INSTRUCTION IS INDEXED, ...
+ 0733              NA, B41T48M  ADR WD        ONES          C,+3                CUSS D.P. ADDRESS THAT STRADDLES EBANKS.
+ 0735              TS, BIT17M   ONES          CUSS LIST +3  RNG ERROR      C
+ 0736              LA           ADDRESS       OCT 1377      ADD ADR WD          (FOR D.P. ADDRESS = 1377).
+ 0738              LA, EBANKMSK E BANK REG    BANK E2       CUS E BANK          FORBID ALL EBANKS IF PSEUDO-BK DECLARED.
+ 0740              NA, EBANKMSK ADDRESS       EBANK REG     CUS E BANK          BRANCH ON E-BANK ERROR.
+ 07412             LA, C7T8M    USERLOG +15   BLANKS        CUS E BANK          CUSS IF THERE'S NO DECLARED EBANK.
+ 0742   E SUBADR   TS, EBANKMSK OCT 1400      ADR WD        ADD ADR WD          PUT SUBADDRESS IN THE RANGE 1400-1777.
+
+ 0529   CUS E BANK TS, EBANKMSK OCT 1400      ADR WD        CUSS BANK      C
+ 0530              SWS, ACO5    ADDRESS       10,L          6,2
+ 0531              TS, CHAR4M   E CHAR 4      6,2           ADD ADR WD          PUT EBANK NUMBER IN BANK ERROR CUSS.
+ 0541   CUS F BANK TS, BANKMASK OCT 2000      ADR WD        CUSS BANK      C
+ 0542              WD           ADDRESS       OCT 10000     M COMMON
+ 0543              SWS, CHAR4M  M COMMON      11,L          6,2
+ 0544              SWS, ACO5    M COMMON      8,L           6,2                 PUT FBANK NUMBER INTO BANK ERROR CUSS.
+
+ 0546   ADD ADR WD WA, SPECMAGM WORD          ADR WD        WORD                PUT EXPLICIT ADDRESS INTO WORD.
 
 # Page 445
 #      @YUL SYSTEM ASSEMBLER  AGC PASS 2                                         USER'S OWN PAGE NO.  15        PAGE 181
