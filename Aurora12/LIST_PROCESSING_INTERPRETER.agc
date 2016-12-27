@@ -1164,7 +1164,7 @@ VXM/MXV         TS              DOTINC
                 ADS             ADDRWD                  # FORMS BASE ADDRESS OF NEXT COLUMN(ROW).
 
                 TC              DOTSUB
-                DXCH            VBUF                    # MORE GIVEN VECTOR BACK TO MPAC, SAVING Y
+                DXCH            VBUF                    # MOVE GIVEN VECTOR BACK TO MPAC, SAVING Y
                 DXCH            MPAC                    # COMPONENT OF ANSWER IN VBUF +2.
                 DXCH            VBUF            +2
                 DXCH            MPAC            +3
@@ -1730,7 +1730,7 @@ GENSHFT2        TS              MPTEMP                  # DECREMENTED SHIFT COUN
 ## Page 85
 #          GENERAL SHIFT RIGHT.
 
-RIGHT           CCS             MODE                    # SET IF VECTOR OR SCALAR.
+RIGHT           CCS             MODE                    # SEE IF VECTOR OR SCALAR.
                 TCF             GENSCR
                 TCF             GENSCR
 

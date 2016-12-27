@@ -1,19 +1,21 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     WAITLIST.agc
-## Purpose:      Part of the source code for Retread 44 (revision 0). It was
-##               the very first program for the Block II AGC, created as an
-##               extensive rewrite of the Block I program Sunrise.
-##               This file is intended to be a faithful transcription, except
-##               that the code format has been changed to conform to the
-##               requirements of the yaYUL assembler rather than the
-##               original YUL assembler.
-## Reference:    pp. 118-123
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-18 MAS  Transcribed.
+## Copyright:   Public domain.
+## Filename:    WAITLIST.agc
+## Purpose:     Part of the source code for Retread 44 (revision 0). It was
+##              the very first program for the Block II AGC, created as an
+##              extensive rewrite of the Block I program Sunrise.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 118-123
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.
+##              2016-12-18 MAS  Transcribed.
+## 		2016-12-27 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 118
 ## The log section named, WAITLIST, is circled in red.
@@ -30,7 +32,7 @@ WAITLIST        XCH     Q               #  SAVE DELTA T IN Q AND RETURN IN
                 INDEX   A
                 DCA     0               # PICK UP 2CADR OF TASK.
                 TS      WAITADR         # BBCON WILL REMAIN IN L.
-DLY2            CAF     WAITBB          # ENTRY FROM FIXDELAY AND VARDELAY.
+DLY2            CAF     WAITBB 
                 XCH     BBANK
                 TCF     WAIT2
 
@@ -233,7 +235,7 @@ T3RUPT2         CAF     NEG1/2          # DISPATCH WAITLIST TASK.
 
 
 
-# RETURN, AFTER EXECUTION OF T3 OVERFLOW TASK.
+# RETURN, AFTER EXECUTION OF TIME3 OVERFLOW TASK.
 
 TASKOVER        CCS     RUPTAGN         # IF +1 RETURN TO T3RUPT, IF -0 RESUME.
                 CAF     WAITBB

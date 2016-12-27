@@ -1,21 +1,24 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     VERB_AND_NOUN_INFORMATION.agc
-## Purpose:      Part of the source code for Retread 44 (revision 0). It was
-##               the very first program for the Block II AGC, created as an
-##               extensive rewrite of the Block I program Sunrise.
-##               This file is intended to be a faithful transcription, except
-##               that the code format has been changed to conform to the
-##               requirements of the yaYUL assembler rather than the
-##               original YUL assembler.
-## Reference:    pp. 1-4
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-## Mod history:  2016-12-16 MAS  Transcribed.
+## Copyright:   Public domain.
+## Filename:    VERB_AND_NOUN_INFORMATION.agc
+## Purpose:     Part of the source code for Retread 44 (revision 0). It was
+##              the very first program for the Block II AGC, created as an
+##              extensive rewrite of the Block I program Sunrise.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 1-4
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.
+## Mod history: 2016-12-16 MAS  Transcribed.
+## 		2016-12-26 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1
+## This Page is empty.
 
 ## Page 2
 # VERB DEFINITIONS
@@ -112,14 +115,14 @@
 
 ## Page 4
 # MIXED NOUNS                                        SCALE AND DECIMAL POINT
-# 55  OCDU                                           (XXX.XXDEG, XXX.XXDEG)
-# 56  UNCALLED MARK DATA (OCDU & TIME(SECONDS))      (XXX.XXDEG, XXX.XXDEG, XXX.XXSEC)
-# 57  NEW ANGLES OCDU                                (XXX.XXDEG, XXX.XXDEG)
+# 55  OCDU                                           (XXX.XXDEG, XX.XXXDEG)
+# 56  UNCALLED MARK DATA (OCDU & TIME(SECONDS))      (XXX.XXDEG, XX.XXXDEG, XXX.XXSEC)
+# 57  NEW ANGLES OCDU                                (XXX.XXDEG, XX.XXXDEG)
 # 60  IMU MODE STATUS (IN3, WASKSET, OLDERR)         (OCTAL ONLY)
 # 61  TARGET AZIMUTH AND ELEVATION                   (XXX.XXDEG, XX.XXXDEG)
 # 62  ICDUZ AND TIME                                 (XXX.XXDEG, XXX.XXSEC)
 # 63  OCDUX AND TIME                                 (XXX.XXDEG, XXX.XXSEC)
-# 64  OCDUY AND TIME                                 (XXX.XXDEG, XXX.XXSEC)
+# 64  OCDUY AND TIME                                 (XX.XXXDEG, XXX.XXSEC)
 # 65  SAMPLED TIME (HOURS AND SECONDS)               (XXX.XXHOURS, XXX.XXSEC)
 #         (FETCHED IN INTERRUPT)
 # 66  SYSTEM TEST RESULTS                            (XXXXX., .XXXXX, XXXXX.)

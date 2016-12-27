@@ -1,19 +1,21 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     PINBALL_GAME__BUTTONS_AND_LIGHTS.agc
-## Purpose:      Part of the source code for Retread 44 (revision 0). It was
-##               the very first program for the Block II AGC, created as an
-##               extensive rewrite of the Block I program Sunrise.
-##               This file is intended to be a faithful transcription, except
-##               that the code format has been changed to conform to the
-##               requirements of the yaYUL assembler rather than the
-##               original YUL assembler.
-## Reference:    pp. 135-209
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-18 MAS  Transcribed, then fixed typos.
+## Copyright:   Public domain.
+## Filename:    PINBALL_GAME__BUTTONS_AND_LIGHTS.agc
+## Purpose:     Part of the source code for Retread 44 (revision 0). It was
+##              the very first program for the Block II AGC, created as an
+##              extensive rewrite of the Block I program Sunrise.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 135-209
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.
+##              2016-12-18 MAS  Transcribed, then fixed typos.
+## 		2016-12-27 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 135
 ## The log section name, PINBALL GAME  BUTTONS AND LIGHTS, is circled in red.
@@ -530,10 +532,10 @@ ERROR           XCH             21/22REG                # RESTORE ORIGINAL C(DSP
                 TS              DSPLOCK                 # LIGHT RESET LEAVES DSPLOCK UNCHANGED.
                 CAF             BIT15                   # TURNS OFF  AUTO, HOLD, FREE, NO ATT,
                 TS              DSPTAB           +11D   # GIMBAL LOCK, TRACKER, PROG ALM.
-                CS              BIT10
+                CS              BIT10			# TURN OFF :TEST ALARM: OUTBIT.
                 EXTEND
                 WAND            CHAN13
-                CS              ERCON                   # TURN OFF UPLINK ACTIVITY,
+                CS              ERCON                   # TURNS OFF  UPLINK ACTIVITY, TEMP,
                 EXTEND                                  # OPERATOR ERROR.
                 WAND            DSALMOUT
 TSTAB           CAF             BINCON                  # (DEC 10)
@@ -562,7 +564,7 @@ ERCOM           INDEX           ERCNT                   # ETC.
                 TS              SFAIL
                 TC              ENDOFJOB
 
-ERCON           OCT             00114                   # CHAN 11 BITS 3,4,7.
+ERCON           OCT             00114                   # CHAN 11 BIT 3,4,7.
                                                         # UPLINK ACTIVITY, TEMP, OPERATOR
                                                         # ERROR.
 NOTBIT12        OCT             73777
@@ -596,7 +598,7 @@ CLEAR           CCS             DSPCOUNT
 CLPASHI         CCS             INREL
                 TS              INREL
                 TC              LEGALTST
-                CAF             DOUBLK          +2       # +3 TO - NUMBER, BACKS DATA REQUESTS.
+                CAF             DOUBLK          +2      # +3 TO - NUMBER, BACKS DATA REQUESTS.
                 ADS             REQRET
                 CA              INREL
                 TS              MIXTEMP                 # TEMP STORAGE FOR INREL
@@ -2035,7 +2037,7 @@ DSPMSK          =               SEVEN
 
 DSP2BIT         TS              CYR
                 XCH             Q
-                TS              WDRET                   # CANT USE L AS RETURN. UPDATIN USES L.
+                TS              WDRET                   # CANT USE L AS RETURN. UPDATNN USES L.
                 CAF             ONE
                 TS              WDCNT
                 CS              CYR
@@ -2658,7 +2660,7 @@ MIXCON          OCT             55                      # FIRST MIXED NOUN = 55.
 
 
 
-# GTSFOUT LOADS SFTEMP1, SFTEMP2 WTIH THE DP SFOUTAB ENTRIES.
+# GTSFOUT LOADS SFTEMP1, SFTEMP2 WITH THE DP SFOUTAB ENTRIES.
 
 ## Page 194
 GTSFOUT         DXCH            SFTEMP1                 # 2X(SFCONUM) ARRIVES IN SFTEMP1.
@@ -2671,7 +2673,7 @@ SFCOM           DXCH            SFTEMP1
 
 
 
-# GTSFIN LOADS SFTEMP1, SFTEMP2 WITH THE DP SFINTAB INTRIES.
+# GTSFIN LOADS SFTEMP1, SFTEMP2 WITH THE DP SFINTAB ENTRIES.
 
 GTSFIN          DXCH            SFTEMP1                 # 2X(SFCONUM) ARRIVES IN SFTEMP1.
                 EXTEND
@@ -2949,8 +2951,8 @@ RUTMXTAB        OCT             00302                   # 01  DEGREES, Y OPT DEG
                 OCT             00302                   # 03  DEGREES, Y OPT DEGREES
                 OCT             00000                   # 04  OCTAL ONLY
                 OCT             00142                   # 05  DEGREES, ELEVATION DEGREES
-                OCT             00202                   # 06  DEGREES, SECOND
-                OCT             00202                   # 07  DEGREES, SECOND
+                OCT             00202                   # 06  DEGREES, SECONDS
+                OCT             00202                   # 07  DEGREES, SECONDS
                 OCT             00206                   # 10  Y OPT DEGREES, SECONDS
                 OCT             00205                   # 11  HOURS, SECONDS
                 OCT             06043                   # 12  WHOLE, FRACTIONAL, WHOLE

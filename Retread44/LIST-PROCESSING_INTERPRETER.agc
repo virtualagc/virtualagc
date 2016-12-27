@@ -1,20 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     LIST-PROCESSING_INTERPRETER.agc
-## Purpose:      Part of the source code for Retread 44 (revision 0). It was
-##               the very first program for the Block II AGC, created as an
-##               extensive rewrite of the Block I program Sunrise.
-##               This file is intended to be a faithful transcription, except
-##               that the code format has been changed to conform to the
-##               requirements of the yaYUL assembler rather than the
-##               original YUL assembler.
-## Reference:    pp. 17-104
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-17 MAS  Transcribed.
-##               2016-12-18 MAS  Typos.
+## Copyright:   Public domain.
+## Filename:    LIST-PROCESSING_INTERPRETER.agc
+## Purpose:     Part of the source code for Retread 44 (revision 0). It was
+##              the very first program for the Block II AGC, created as an
+##              extensive rewrite of the Block I program Sunrise.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 17-104
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.
+##              2016-12-17 MAS  Transcribed.
+##              2016-12-18 MAS  Typos.
+## 		2016-12-27 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 17
 # SECTION 1  DISPATCHER
@@ -73,7 +75,7 @@ OPJUMP          TS              CYR                     # LOWWD ENTERS HERE IF A
                 CCS             CYR                     # CODE IS TO BE PROCESSED. TEST PREFICES.
                 TCF             OPJUMP2                 # TEST SECOND PREFIX BIT.
 
-                TCF             EXIT                    # +0 OP CODE IS EXIT
+                TCF             EXIT                    # +0 OP CODE IS EXIT.
 
 ## Page 19
 #          PROCESS ADDRESSES WHICH MAY BE DIRECT, INDEXED, OR REFERENCE THE PUSHDOWN LIST.
@@ -983,7 +985,7 @@ ENDDOT          DXCH            BUF             +1      # LEAVE FINAL ACCUMULATI
                 TC              DOTRET
 
 ## Page 47
-# DOUBLE PRECISION POLYNOMIAL EVALUATOR
+# DOUBLE PRECISION POLYNOMIAL EVALUATOR.
 
 #                                    N        N-1
 #          THIS ROUTINE EVALUATES A X  + A   X    + ... + A X + A LEAVING THE DP RESULT IN MPAC ON EXIT.
@@ -1127,7 +1129,7 @@ VXM/MXV         TS              DOTINC
                 ADS             ADDRWD                  # FORMS BASE ADDRESS OF NEXT COLUMN(ROW).
 
                 TC              DOTSUB
-                DXCH            VBUF                    # MORE GIVEN VECTOR BACK TO MPAC, SAVING Y
+                DXCH            VBUF                    # MOVE GIVEN VECTOR BACK TO MPAC, SAVING Y
                 DXCH            MPAC                    # COMPONENT OF ANSWER IN VBUF +2.
                 DXCH            VBUF            +2
                 DXCH            MPAC            +3
@@ -1684,7 +1686,7 @@ GENSHFT2        TS              MPTEMP                  # DECREMENTED SHIFT COUN
 ## Page 67
 #          GENERAL SHIFT RIGHT.
 
-RIGHT           CCS             MODE                    # SET IF VECTOR OR SCALAR.
+RIGHT           CCS             MODE                    # SEE IF VECTOR OR SCALAR.
                 TCF             GENSCR
                 TCF             GENSCR
 
@@ -2402,7 +2404,7 @@ DSQSUB          CA              MPAC            +1      # SQUARES THE SCALAR CON
                 XCH             MPAC            +1
                 EXTEND
                 MP              MPAC
-                DDOUBL                                  # AND MAYBE OVEFLOW.
+                DDOUBL                                  # AND MAYBE OVERFLOW.
                 DAS             MPAC            +1      # AND SET A TO NET OVERFLOW.
                 XCH             MPAC
                 EXTEND
@@ -2952,7 +2954,7 @@ SWITCHES        CAF             LOW4                    # LEAVE THE SWITCH BIT I
                 CAF             BIT15                   # (NUMBER FROM LEFT TO RIGHT.)
                 TS              SWBIT
 
-                CAF             BIT8                    # LEAVE THE SWITCH NUMBER IN  SWWORD.
+                CAF             BIT8                    # LEAVE THE SWITCH WORD NUMBER IN  SWWORD
                 EXTEND
                 MP              POLISH
                 TS              SWWORD
