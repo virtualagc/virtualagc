@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-24 JL   Transcribed pages 385-400.
 #               2016-12-25 JL   Transcribed pages 401-414.
+#               2016-12-26 JL   Transcribed pages 415-421.
 
 # Annotations:
 #
@@ -1224,30 +1225,325 @@ P1305   BLK2 CUSSES CONTINUED.
 # Page 415
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  31        PAGE 151
 
+P1400   BLOCK 2 INTERPRETIVE OPCODES AND ADDRESSES
+ 1405              SETLOC,5     512           B2
+R1500   ASSIGNMENTS TO USE MAIN PASS TWO SCRATCH LOCATIONS
+
+ 1515   GEBASE     EQUALS       POPO BUFF
+ 1520   L GE BASE  CAC          GENL MXR      INT DATAB     GE BASE
+ 1525   HEALTHM    ASSIGN       3,2
+ 1530   CARDM      ASSIGN       3,3
+ 1535   LOC M      ASSIGN       3,19
+ 1536   2ND HALFM  ASSIGN       3,22
+ 1537   WORDM      ASSIGN       3,23
+ 1545   ICOMMON    ASSIGN       3,24
+ 1550   ADDR WDM   ASSIGN       3,37
+ 1555   ADDRESSM   ASSIGN       3,43
+ 1560   MIN ADR    ASSIGN       3,73
+ 1565   LINEM      ASSIGN       0,0
+
+R1580   ASSIGNMENTS TO USE BLK2 PASS 1 ERASABLES AND DATA
+
+ 1595   B2P2 BASE  EQUALS       BIT30
+ 1600   LB2P2 BASE CAC          SEND WORD     SBANK CUS     B2P2BASE
+ 1604   OCT 40M    ASSIGN       2,8
+ 1605   OCT 70M    ASSIGN       2,9
+ 1607   K 37777    ASSIGN       2,14
+ 1610   E BNK REGM ASSIGN       2,27
+ 1611   SBNK REGM  EQUALS       
+ 1612   M 57777    ASSIGN       2,29
+
+R1625   VARIABLE STORAGE
+
+ 1635   STADR      RESERVE      1
+ 1640   ADD REV    RESERVE      1
+ 1645   MODE OUT   RESERVE      1
+ 1650   INT ADDR   RESERVE      5
+ 1655   LOC HOLD   RESERVE      1
+
+ 1665   INTERP WD  RESERVE      1
+ 1667   STORE COM  RESERVE      1
+ 1668   CHECK UP   RESERVE      1
+ 1669   PASS2 MXR  RESERVE      1
 
 # Page 416
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  32        PAGE 152
 
+P1670   CONSTANTS AND MISCELLANEOUS
+
+ 1675   L INT ADDR CAC                        MAX AD SET    INT ADDR
+ 1680   L INT OPPP CAC                                      INT OP POP
+ 1685   L BCCHECK  CAC          BAD BASIC     NAUGHTY       BC CHECK
+ 1686   I BAD BASC EQUALS       L BC CHECK
+ 1690   L PRBADR   CAC          EBNK2 XIT     HOW HIGH F    RNG ERROR
+ 16901  L HOW HI F EQUALS       L PRBADR
+ 16902  L EBK2 XIT EQUALS       L PRBADR
+ 1691   L USD FMAX CAC          PRINT 2PA     INSTRONT      USED FMAX
+ 16911  L INSTRNT  EQUALS       L USD FMAX
+ 16912  L PRIN 2PA EQUALS       L USD FMAX
+ 1692   M AV TABLE CAC          11032         11140         8192
+ 16921  I TYP TAB  EQUALS       M AV TABLE
+ 16922  I BLK2 MXR EQUALS       M AV TABLE
+ 1693   I GENL MXR MASKBASE     S,0           F,0
+ 1695   ZERO M     OCT          -0
+ 1700   ONESM      OCT          GGGG GGGG GGGG
+ 1705   B48M       OCT          -1
+ 1710   B47M       OCT          -2
+ 1715   B46M       OCT          -4
+ 1720   B46B48M    OCT          -5
+ 1721   B42T48MM   OCT          -177
+ 1722   B34T48MM   OCT          -77777
+ 1723   B47T48MM   OCT          -3
+ 1724   B26MM      OCT          -20000000
+ 1726   B39T41M    OCT          -1600
+ 1727   B43T48M    OCT          -77
+ 1728   K 1777 M   OCT          -1777
+ 1730   B44B48M    OCT          -21
+ 1735   B 40 M     OCT          -400
+ 1740   B37M       OCT          -4000
+ 1745   B35B38M    OCT          -22000
+ 1747   B38M       OCT          -2000
+ 1750   B35T38M    OCT          -36000
+ 1755   B37T38MM   OCT          -6000
+ 1760   B39T40M    OCT          -1400
+ 1770   BXSPEC     OCT          -100000002
+ 1775   B28M       OCT          -4000000
+ 1780   B29M       OCT          -2000000
+ 1785   B30M       OCT          -1000000
+ 1787   B29T30MM   OCT          -3000000
+ 1790   B28T29M    OCT          -6000000
+ 1795   B28B30M    OCT          -5000000
+ 1800   B34T35M    OCT          -60000
+ 1805   MB36T48M   OCT          +17777
+ 1810   I LOW HALF OCT          -47777
+ 1815   B2MAXP1    OCT          -170000
+ 1820   BLANKSM    ALF          
+ 1821   K 16 M     OCT          -16
+ 1825   K 17 M     OCT          -17
+ 1830   K 20 M     OCT          -20
+ 1835   K34 M      OCT          -34
+ 1840   K 35 M     OCT          -35
+ 1842   K 36 M     OCT          -36
 
 # Page 417
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  33        PAGE 153
 
+ 1845   K 45 M     OCT          -45
+ 1850   K 52 M     OCT          -52
+ 1860   K 127M     OCT          -127
+ 1865   K 136 M    OCT          -136
+ 1870   K 137 M    OCT          -137
+ 1875   K 140 M    OCT          -140
+ 1880   K 157 M    OCT          -157
+ 1882   K 163 M    OCT          -163
+ 1885   K 200 M    OCT          -200
+ 1889   K 360 M    OCT          -360
+ 1890   K 361 M    OCT          -361
+ 1895   K 1377 M   OCT          -1377
+ 1900   K 51777 M  OCT          -51777
+ 1905   K 17777 M  OCT          -17777
+ 1910   K 47777 M  OCT          -47777
+ 1915   K 10000 M  OCT          -10000
+ 1916   K 20000 M  OCT          -20000
+ 1920   K 2000 M   OCT          -2000
+ 1925   CMA 1 C7T8 OCT          -7301
+ 1930   CMA 2 C7T8 OCT          -7302
+ 1935   ASTER C8   OCT          -54
+ 1940   STOCALL    OCT          -30420000
+ 1945   STODL      OCT          -12030000
+ 1950   STOVL      OCT          -14050000
+ 1955   BONSET     OCT          -72
+ 1960   BLOTM      ALF          ▪▪▪▪▪▪▪▪
+ 19602  F CHAR 4M  ALF             E
+ 19604  W NEGATIV  ALF          NEGATIVE
+ 19606  W NO NEED  ALF          NO NEED
 
 # Page 418
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  34        PAGE 154
 
+P19609  DOUBLED UP INTERPRETIVE OPCODE DATA
+
+ 1965   INT DATAB  OCT          1304 4006     1405 6002                         TAD        VLOAD    000
+ 1975              OCT          1505 6016     2206 6012                         VXSC       SIGN     002
+ 1985              OCT          1304 6026     2652 7022                         TLOAD      C GO TO  004
+ 1995              OCT          1505 6036     1203 6032                         V/SC       DLOAD    006
+ 2010              OCT          2646 7646     1143 6042                         SSP        SLOAD    010
+ 2020              OCT          1746 0056     1203 6052                         MXV        PDDL     012
+ 2035              OCT          2652 7066     1405 6062                         CCALL      PDVL     014
+ 2045              OCT          2146 4076     1746 0072                         NORM       VXM      016
+ 2055              OCT          1206 4106     1203 4102                         DDV        DMPR     020
+ 2065              OCT          1406 0122     1206 4112                         VAD        BDDV     022
+ 2075              OCT          1406 0132     1406 0126                         BVSU       VSU     024
+ 2085              OCT          1406 0142     1403 0136                         VXV        DOT     026
+ 2095              OCT          1206 4152     1406 0146                         DSU        VPROJ     030
+ 2105              OCT          1206 4162     1206 4156                         DAD        BDSU     032
+ 2115              OCT          1206 4172     0000 0000                         DMP        BLANK OP 034
+ 2125              OCT          1066 4316     2146 6176                         SL         SET PD   036
+ 2135              OCT          2063 5316     1066 4716                         SLR        SR       040
+ 2145              OCT          4065 0316     3063 5716                         VSL        SRR      042
+ 2155              OCT          7146 6003     5065 0716                         AXT        VSR      044
+ 2165              OCT          5146 6023     7146 6013                         LXA        AXC      046
+ 2175              OCT          5146 6043     5146 6033                         SXA        LXC      050
+ 2185              OCT          7146 6063     5146 6053                         INCR       XCHX     052
+ 2195              OCT          5146 6103     3146 6073                         XAD        TIX      054
+ 2205              OCT          3146 6123     5146 6113                         BZE        XSU      056
+ 2215              OCT          3146 6133     3152 6127                         BPL        GO TO    060
+ 2225              OCT          3152 6143     3146 6137                         CALL       BMN      062
+ 2235              OCT          4142 6153     5146 6147                         RTB        STQ      064
+ 2245              OCT          0000 0000     3146 6157                         BLANK OP   BHIZ     066
+ 2255              OCT          3146 6177     4146 6173                         BOV        BOVB     070
+ 2265              OCT          6652 6763     6646 6763                         SETGO      BONSET   072
+ 2275              OCT          6046 6163     6646 6763                         SET        BOFSET   074
+ 2285              OCT          6652 6763     6646 6763                         INVGO      BONINV   076
+ 2295              OCT          6046 6163     6646 6763                         INVERT     BOFINV   100
+ 2305              OCT          6652 6763     6646 6763                         CLRGO      BONCLR   102
+ 2315              OCT          6046 6163     6646 6763                         CLEAR      BOFCLR   104
+ 2325              OCT          3150 6143     6646 6763                         CALRB      BON      106
+ 2335              OCT          2650 7066     6646 6763                         CCLRB      BOFF     110
+ 2345              OCT          0046 4011     0050 6001                         SQRT       EXIT     112
+ 2355              OCT          0046 4031     0046 4021                         COS        SIN      114
+ 2365              OCT          0046 4051     0046 4041                         ACOS       ASIN     116
+ 2375              OCT          0043 4071     0046 4061                         ROUND      DSQ      120
+ 2385              OCT          0045 4111     0046 4101                         VDEF       DCOMP    122
+ 2395              OCT          0046 4131     0046 0121                         ABS        UNIT     124
+ 2405              OCT          0056 6151     0043 0141                         STADR      VSQ      126
+ 2420              OCT          0046 6171     0052 6161                         PUSH       RVQ      130
+ 2430              OCT          0043 0131     0046 0101                         ABVAL      VCOMP    132
+ 2440              OCT          0                                               BLANK OP   BLANK OP 134
+ 2450              OCT          0                                               BAD        BLANK    136
+ 2460   SHIFTDAT   OCT          0043 4005      0045 0005                        SCALER SHORT SHIFTS AND ALSO VECTORS
 
 # Page 419
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  35        PAGE 155
 
+P2475   OTHER EQUALITIES.
+
+ 2480   B1M        EQUALS       BIT1M
+ 2485   B7M        EQUALS       BIT7M
+ 2490   B17M       EQUALS       BIT17M
+ 2495   B24M       EQUALS       BIT24M
+ 2500   B31M       EQUALS       BIT31M
+ 2505   B32M       EQUALS       BIT32M
+ 2510   B33M       EQUALS       BIT33M
+ 2540   B47T48M    EQUALS       THREEM
 
 # Page 420
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  36        PAGE 156
 
+P2555   INDEX REGISTER USAGE
+
+R2557   X0 = LINE BASE
+R2560   X1 = CUSS LIST ADDRESS  (THROUGHOUT PASS 2)
+R2565   X2 = BASE OF VARIABLE/CONSTANT FOR BLK 2 PASS 2 BANK 1
+R2570   X3 = BASE OF VARIABLE STORAGE FOR GENERAL PASS 2
+R2575   X5 = INT ADDR RELATIVE LOC
+R2580   X6 = MISCELLANEOUS
+R2585   X7 = MONITOR
+R25851  OTHER REGISTERS USED ARE AU1, AU2, R1, R2
+
+R2590   BIT ASSIGNMENTS FOR COMMON WHEN OP CODE'S DATA EXTRACTED FROM DATA TABLE
+R2595              BITS 42 TO 48     AGC-INT OPCODE +1, NOT NECESSARILY COMPLETE
+R2600              BITS 39 TO 41     OP'S 2ND ADDR TYPE, IF ANY
+R2605              BITS 37 TO 38     MODE IN REQUIREMENT. 0 = V. 1 = D. 2 = DT.  3 = DON'T CARE.
+R2615              BITS 34 TO 36     MODE OUT SETTING. 0 = UNKNOWN, REQUIRE BASIC INST NEXT. 1 = UNKNOWN, REQUIRE INT
+R2625                                INST NEXT. 2 = UNKNOWN. 3 = D. 4 = T. 5 = V. 6 = NO CHANGE.
+R2635              BIT  33           THIS INST SHOULD BE RH OP OR , IF LH OP, RH OP MUST BE BLANK
+R2645              BIT  32           THIS INST IS GENERAL SHIFT
+R2650              BIT  31           0 = PUSH UP ALLOWED. 1 = NOT ALLOWED
+R2655              BITS 28 TO 30     OPCODE MODE.  0 = UNARY. 1 = S. 2 = D. 3 = T. 4 = V. 5 = VXSC OR V/SC. 6= TWO ADDR
+R2665                                SINGLE PRECISION OP. 7 = MATRIX.
+R2670              BITS 25 TO 27     OP'S 1ST ADDR TYPE, IF ANY. 0 = NONE. 1 = 14 BIT ADDR. 2 = E ADDR, ARG-CCS. 3 = FUL
+R2680                                L 15 BIT ADDR. 4 = FCADR. 5 = E ADDR. 6 = SW ADDRESS. 7 = 15 BIT C TYPE ADDRESS
+R2700   BIT ASSIGNMENT FOR INT ADDR USED IN INTERPRETIVE ADDRESS DETERMINATION
+R2705              BITS 42 TO 48     AGC-INT OPCODE +1, NOT NECESSARILY COMPLETE
+R2710              BITS 28 TO 30     OPCODE MODE. SEE ABOVE
+R2715              BIT  31           0 = PUSH UP ALLOWED. 1 = PUSH UP NOT ALLOWED
+R2725              BITS 25 TO 27     ADDRESS TYPE
+R2730              BIT 24            THIS ADDRESS MUST BE INDEXED
+R2735              BIT  7           UPON INSPECTION BY INT AD CHK ROUTINE, X2 USED BY THIS ADDRESS
+R2745   FOR GENERAL SHIFTS BITS 25 TO 27 OF INT ADDR HOLD LIMITS DESIGNATION ANDBITS 39 TO 41 HOLD ADDRESS ADDITIVE
+
+
+
+ 2755   INT OP COD TS           B46B48M       Z,R2          INT OP SET     C    GO SET VARIOUS ESSENTIAL REGISTERS
+ 2758              SWE,ONESMM   L INT ADDR    16            Z,CSC          C    GO DO E-BANK SETTING CHECK
+ 2765              TS           CARDM +2      ICOMMON +1    INT AD CHK     C    GO CHECK PREVIOUS ADDRESSES
+ 2766              NA           STADR         K 127 M       C,+2                JUMP IF STORE CODE NOT EXPECTED
+ 2767              TX,B33M      ONESM         -             1,24                STORE CODE SHOULD PRECEDE THIS OP PAIR.
+ 2768              SWE,CHAR1M   B46B48M       4             WORDM               SET UP INT OPCODE FLAG FOR MEMORY MAP
+ 2785              SWE,B42T48M  HEALTHM       24            STADR               EXTRACT 1ST INT OPCODE STORED BY PASS 1
+ 2795              TS           L INT ADDR    Z,X5          INT OP COM          MAKE SOME CHECKS ON THIS OPCODE
+ 2805              EX           ICOMMON       B42T48MM      ADDRESSM            PUT IN AGC WORD BITS 7-1
+ 2815              SWE,B42T48M  HEALTHM       17            ICOMMON +5          EXTRACT 2ND INT OPCODE
+ 2825              NA           ICOMMON +5    K137M         C,+2
+ 2830              TS,B17M      ONESM         1,21          INT WD BOT          BAD OPCODE. BLOT OUT WORD
+ 2840              NA           ICOMMON +5    K 136 M       INT OP POP
+ 2845              TS           K 136 M       I COMMON +5   INT OP SUP          2ND OPCODE IS BLANK
+ 2855   INT OP POP NA, B33M     ICOMMON       ONESM         C,+2
+ 2860              TS, B1M      ONESM         1,21          C,-2                ERROR IF RH OP IS NOT BLANK, IF REQUIRED
+ 2862              TX           ICOMMON +5    -             STADR
+ 2865              TN           CARDM +3      2             ICOMMON             ADDRESS FIELD HOLDS 2ND OPCODE
+ 2875              TS           K17M          Z,R2          INT OP COM          SET SEARCH FOR 15 CHARS
+ 2885              SWS,B35T41M  ICOMMON       7,L           ADDRESSM            PUT 2ND OPCODE INTO AGC WORD,BITS 14-8
 
 # Page 421
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  37        PAGE 157
 
+ 2895   INT OP SUP HA           ADDRESSM      B34T48MM      ADDRESSM            DO ONE'S COMPLEMENT
+ 2900              TS           -             -             INT WD RUN          GO INCREMENT LOC HOLD
+
+ 2910   INT OP COM TS           Z,SH          Z,R1          INT OP PAT
+ 2935   INT OP APE LA           STADR         K 137M        INT OP SMO          JUMP IF NOT SHORT SHIFT CODE
+ 2945              LA           STADR         K 157 M       C,+3                JUMP IF SCALER SHIFT
+ 2955              WD           STADR         K 20 M        STADR
+ 2960              TS,B25T48M   SHIFTDAT      ICOMMON       C,+2                BRING FORTH VECTOR 24 BIT DATA
+ 2970              SWE,B25T48M  SHIFTDAT      24            ICOMMON             BRING FORTH SCALERR 24 BIT DATA
+ 2980              WD           STADR         K 140 M       ICOMMON +1
+ 2985              SWS,ONESMM   ICOMMON +1    3,L           ICOMMON +1
+ 2990              WA,B42T48M   ICOMMON +1    ICOMMON       ICOMMON             FORM COMPLETE OPCODE
+ 3000              TS           -             -             INT OP NOT
+ 30012  INT OP PAT SWE,ONESMM   L GE BASE     16            Z,X6
+ 30014             SWS,B19T24M  STADR         23,L          C,+1
+ 30016             TX           6,0           -             ICOMMON +5          GET FULL WORD CONTAINING THIS OP'S DATA
+ 30018             SSL, ONEM    STADR         0             C,+1
+ 3002              SWE,ONESMM   ICOMMON +5    24            ICOMMON +5
+ 30022             SWE,B25T48M  ICOMMON +5    24            ICOMMON +5          SELECT PROPER HALF WORD
+ 30024             TS           -             -             INT OP TOM          GOT SEARCH FOR * OR ,1 ON OPCODE
+ 3005              TS           ICOMMON       ICOMMON +2    INT AD PEK     C    GO CYCLE 16 CHARS RIGHT ONE CHAR
+ 3015   INT OP TOM NA,CHAR8M    ICOMMON +1    BLANKSM       C,+2                JUMP ON RIGHT MOST NONBLANK CHAR
+ 3025              NA           Z,R2,1        ZEROM         C,-2                JUMP IF SEARCH NOT DONE
+ 3032              TX           ICOMMON +5    -             ICOMMON
+ 3035              NA,C7T8M     ICOMMON +1    CMA 1 C7T8    C,+2                JUMP IF RIGHT MOST NOT ,1
+ 3045              WA           B46M          ICOMMON +5    ICOMMON             OPCODE TO BE UPPED FOUR
+ 3055              NA,CHAR8M    ICOMMON +1    ASTER C8      INT OP APE          JUMP IF RIGHT MOST NOT *
+ 3057  *           SSL, THREEM  ICOMMON +5    0             C,+1                ONLY CODES ENDING IN 10 CAN TAKE *.
+ 3059              TS           -             -             INT ERR 8
+ 3061              TS           -             -             INT ERR 8           JUMP WHEN OPCODE NOT ALLOWED TO INDEX
+ 3062              NA           K 36 M        STADR         C,+2
+ 3063              TS           -             -             INT ERR 8           SETPD CAN NOT BE INDEXED
+ 3065              WA           BXSPEC        ICOMMON +5    ICOMMON             OPCODE INCR BY TWO. B24 SHOWS INDEXING
+ 3067              TX,B31M      ONESM         -             ICOMMON             DO NOT ALLOW PUSHUP NOW
+ 3085   INT OP SMO NA,B28T30M   ICOMMON       B28B30M       INT OP NOT          JUMP IF OPMODE NOT VXSC OR V/SC
+ 3095              LA           MODE OUT      B47M          C,+2                JUMP IF LAST MODEOUT = UNKNOWNS
+ 3105              LA           MODE OUT      B46M          C,+2                JUMP IF LAST MODE OUT = D OR T
+ 3115              TS,B28T30M   B29M          ICOMMON       INT OP SAP          SET OPMODE = D
+ 3125              TS,B28T30M   B28M          ICOMMON       INT OP SAP          SET OPMODE = V
+ 3135   INT OP NOT LA           MODE OUT      B47M          INT OP MUT          JUMP IF LAST MODE OUT = UNKNOWNS
+ 3137              SSL,B47T48M  ICOMMON       10            INT OP DUD     C    CHECK PROPER MODE IN
+ 3145   INT OP SAP LN,B34T36M   ICOMMON       B34T35M       C,+2                JUMP IF NEW MODE OUT = NO CHANGE
+ 3155              SWE,B46T48M  ICOMMON       12            MODE OUT            UPDATE MODE OUT
+ 3165              LA,B25T27M   ICOMMON       ZEROM         INT OP NOB          JUMP IF OPCODE EXPECTS NO ADDRESS
+ 3167              NA,B42T48M   ICOMMON       K 163 M       C,+4                JUMP IF NOT SWITCH TYPE OPCODE
+ 3170              TX           ICOMMON       -             ICOMMON +5
+ 3172              WD,B42T48M   STADR         BONSET        ICOMMON +5          DETERMINE OPCODE ADDITIVE
+ 3174              TS           ICOMMON +5    N,X5,1        C,+2                SAVE DATA FOR ADDR WORD USE
+ 3175              TX           ICOMMON       -             N,X5,1              SAVE DATA FOR ADDR WORD USE
+ 3185              NA,B28T30M   ICOMMON       B28T29M       INT OP NOB          JUMP IF ONLY ONE ADDRESS WORD EXPECTED
+ 3195              TX,B25T48M   ICOMMON       -             5,0                 GIVE DATA TO SECOND ADDRESS
+ 3205              SWS,B25T27M  5,0           14,L          N,X5,1              SHIFT ADDR TYPE TO CORRECT POSITION
+ 3211   INT OP NOB TS           -             -             N,R1
+ 3215   INT OP DUD NA           MODE OUT      B46B48M       INT ERR 4           ERROR IF LAST MODE NOT V
+ 3225              NA           MODE OUT      B47T48MM      INT ERR 4           ERROR IF LAST MODE NOT D
 
 # Page 422
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  38        PAGE 158
