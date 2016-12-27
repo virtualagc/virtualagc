@@ -200,6 +200,9 @@ if args.comments:
 
         # Do the dilation. This should bleed together most of the header.
         dilated = cv2.dilate(~target_image, element, iterations=5)
+        # cv2.imshow('image', dilated)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         # Locate the top header line, which stretches all 120 columns and thus both bounds and
         # provides reference to where on the page the various columns begin
@@ -222,10 +225,22 @@ if args.comments:
         header_box = None
         for i,c in enumerate(contours):
             box = cv2.boundingRect(c)
-            if (box[2] > 1000):
+            if (box[2] > 700):
                 header_start = i
                 header_box = list(box)
                 break
+
+        # Search backwards to make sure we aren't missing pieces of the header
+        for i in range(header_start-1,-1,-1):
+            box = cv2.boundingRect(contours[i])
+            if abs(box[1] - header_box[1]) < 20:
+                header_start = i
+                rightmost = max(box[0]+box[2], header_box[0]+header_box[2])
+                bottommost = max(box[1]+box[3], header_box[1]+header_box[3])
+                header_box[0] = min(box[0], header_box[0])
+                header_box[1] = min(box[1], header_box[1])
+                header_box[2] = rightmost-header_box[0]
+                header_box[3] = bottommost-header_box[0]
 
         # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
         # dilation above doesn't quite bleed everything together)
@@ -267,7 +282,7 @@ if args.comments:
             # in a comment. It's handled this way because distortions on the image can be as large
             # as one to two character widths from the top to the bottom of the card type column.
             x_delta = x-line_x
-            if abs(x_delta < 3*column_width):
+            if (abs(x_delta) < 3*column_width) or (args.retread44 and line_num < 3 and y > line_y+30):
                 # This is the start of a line. Record its x position.
                 line_x = x
 
@@ -308,7 +323,12 @@ if args.comments:
             crop_top = line_y
 
         # We also want everything from column 80 on
-        cv2.rectangle(mask, (header_box[0] + column_width*80, crop_top), (target_image.shape[1], target_image.shape[0]), 0, -1)
+        if args.retread44:
+            comment_column = header_box[0] + column_width*78
+        else:
+            comment_column = header_box[0] + column_width*80
+            
+        cv2.rectangle(mask, (comment_column, crop_top), (target_image.shape[1], target_image.shape[0]), 0, -1)
 
         # But we don't want anything left of column ~7 or right of the header
         left_limit = header_box[0]+7*column_width
