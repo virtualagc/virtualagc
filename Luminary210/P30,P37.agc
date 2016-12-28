@@ -16,6 +16,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-28 HG   Transcribed
 ##              2016-12-07 HG   fix P00 -> POO
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 620
 # PROGRAM DESCRIPTION P30       DATE 3-6-67
@@ -33,7 +35,7 @@
 
 # SUBROUTINE CALLS-FLAGUP, PHASCHNG, BANKCALL, ENDOFJOB, GOFLASH, GOFLASHR
 #                  GOPERF3R, INTPRET, BLANKET, GOTOPOOH, R02BOTH, S30.1,
-#                  TIG/N35, MIDGIM, DISPMGA
+#                  TTG/N35, MIDGIM, DISPMGA
 
 # ERASABLE INITIALIZATION- STATE VECTOR
 
@@ -53,7 +55,7 @@ P30             TC              UPFLAG                  # SET UPDATE FLAG
                 ADRES           TRACKFLG
 
 P30N33          CAF             V06N33                  # T OF IGN
-                TC              VNPOOH                  # RETURN ON PROCEED, POOH ON TERMINATE
+                TC              VNPOOH                  # RETURNS ON PROCEED, POOH ON TERMINATE
 
                 CAF             V06N81                  # DISPLAY DELTA V (LV)
                 TC              VNPOOH                  #     REDISPLAY ON RECYCLE
@@ -84,7 +86,7 @@ V06N33          VN              0633
 V06N42          VN              0642
 
 ## Page 622
-# PROGRAM DESCRPTION S30.1       DATE 9NOV66
+# PROGRAM DESCRIPTION S30.1       DATE 9NOV66
 
 # MOD NO 1        LOG SECTION   P30,P37
 # MOD  BY  RAMA AIYAWAR **
@@ -169,11 +171,11 @@ S30.1           STQ             DLOAD
                                 SHIFTR1                 # RESCALE IF NEEDED
                 CALL                                    # LIMIT DISPLAY TO 9999.9 N. MI.
                                 MAXCHK
-                STODL           HPER                    # PERIGEE ALT 2(29) METERS FOR DISPLAY
+                STODL           HPER                    # PERIGEE ALT 2(29) METERS, FOR DISPLAY
                                 4D
                 CALL
                                 SHIFTR1                 # RESCALE IF NEEDED
                 CALL                                    # LIMIT DISPLAY TO 9999.9 N. MI.
                                 MAXCHK
-                STCALL          HAPO                    # APOGEE ALT 2(29) METERS FOR DISPLAY
+                STCALL          HAPO                    # APOGEE ALT 2(29) METERS, FOR DISPLAY
                                 QTEMP

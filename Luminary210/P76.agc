@@ -18,6 +18,8 @@
 ##                              fix operand GOTOPOOH  -> GOTOP00H
 ##              2016-12-07 HG   'unfix' and revert P00 -> POO
 ##              2016-12-11 HG   Fix operand -5 -> -6
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 
 ## Page 711
@@ -108,7 +110,7 @@ DVTRANS		VXM	VSL1		# V(MPAC)=DELTA V IN REFCOSYS
 		VAD
 			VATT
 		STORE	6		# V(PD6)=VATT + DELTA V
-		CALL			# PRESENT WOULD-BE USER OF ORBITAL
+		CALL			# PREVENT WOULD-BE USER OF ORBITAL
 			INTSTALL	# INTEG FROM INTERFERING WITH UPDATING
 		CALL
 			P76SUB1
@@ -175,6 +177,6 @@ P76SUB1		AXT,2	SET
 			MOONFLAG
 
 ## Page 714
-## (This page is completely blank in the original assembly-listing hardcopy.)
+## This page is completely blank in the original assembly-listing hardcopy.
 
 

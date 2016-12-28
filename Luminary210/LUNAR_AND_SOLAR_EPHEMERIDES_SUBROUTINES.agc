@@ -16,11 +16,13 @@
 ##              2016-11-29 HG   Transcribed
 ##              2016-12-12 HG   Fix for interpretive operands 8D -> 9D
 ##                                                            5D -> 6D 
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 982
-#  NAME - LSPOS  - LOCATE SUN AND MOON                   DATE - 25 OCT 67
-# *MOD NO.2  (DATE OCT 70)
-#  MOD BY NEVILLE                                        ASSEMBLY SUNDANCE
+# NAME - LSPOS  - LOCATE SUN AND MOON                   DATE - 25 OCT 67
+# MOD NO.2  (DATE OCT 70)
+# MOD BY NEVILLE                                        ASSEMBLY SUNDANCE
 
 # FUNCTIONAL DESCRIPTION
 
@@ -40,7 +42,7 @@
 # LOS  AND LOS  ARE STORED AS LOSC AND LOSR IN RATESP.
 #    0        R
 # COS(OBL) AND SIN(OBL) ARE STORED IN THE MATRIX KONMAT.
-# T, TIME MEASURED IN DAYS (24 HOURS) IS STORED IN TIMEP.
+# T, TIME MEASURED IN DAYS (24 HOURS), IS STORED IN TIMEP.
 # C  AND C  ARE FUDGE FACTORS TO MINIMIZE THE DEVIATION.  THEY ARE STORED AS ONE CONSTANT(CMOD), SINCE
 #  0      1                               2  2 1/2
 # C *SIN(X)+C *COS(X) CAN BE WRITTEN AS (C +C )   *SIN(X+PHI), WHERE PHI=ARCTAN(C /C ).
@@ -56,8 +58,8 @@
 #   M=(COS(LOM), COS(OBL)*SIN(LOM)-SIN(OBL)*SIN(IM)*SIN(LOM-LON), SIN(OBL)*SIN(LOM)+COS(OBL)*SIN(IM)*SIN(LOM-LON))
 
 #   WHERE
-#      LOM=LOM +LOM *T-(A *SIN(2PI*T/27.5545)+A *COS(2PI*T/27.5545)+B *SIN(2PI*T/32)+B *COS(2PI*T/32)), AND
-#             0    R     0                     1                     0                     1
+#      LOM=LOM +LOM *T-(A *SIN 2PI*T/27.5545+A *COS(2PI*T/27.5545)+B *SIN 2PI*T/32+B *COS(2PI*T/32)), AND
+#             0    R     0                    1                     0               1
 #       LON=LON +LON
 #              0    R
 # A , A , B  AND B  ARE STORED AS AMOD AND BMOD (SEE DESCRIPTION OF CMOD, ABOVE).  COS(OBL), SIN(OBL)*SIN(IM),
@@ -158,7 +160,7 @@ POSITF          DLOAD           DSU                     # 3RD
                                 STMP
                 COS             VDEF                    # COS LOM
                 MXV             UNIT
-                                KONMAT                  # K1,K2,K3,K4
+                                KONMAT                  # K1,K2,K3,K4,
                 STORE           VMOON
                 DLOAD           PDDL
                                 KONMAT          +2      # ZERO
@@ -187,6 +189,3 @@ STMP            EQUALS          16D
 GTMP            EQUALS          22D
 
 TIMEP           EQUALS          24D
-
-
-# *** END OF LEMP50S .130 ***

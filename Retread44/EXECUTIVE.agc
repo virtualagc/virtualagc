@@ -1,20 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     EXECUTIVE.agc
-## Purpose:      Part of the source code for Retread 44 (revision 0). It was
-##               the very first program for the Block II AGC, created as an
-##               extensive rewrite of the Block I program Sunrise.
-##               This file is intended to be a faithful transcription, except
-##               that the code format has been changed to conform to the
-##               requirements of the yaYUL assembler rather than the
-##               original YUL assembler.
-## Reference:    pp. 107-117
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-17 MAS  Transcribed.
-##               2016-12-18 MAS  Typos.
+## Copyright:   Public domain.
+## Filename:    EXECUTIVE.agc
+## Purpose:     Part of the source code for Retread 44 (revision 0). It was
+##              the very first program for the Block II AGC, created as an
+##              extensive rewrite of the Block I program Sunrise.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 107-117
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.
+##              2016-12-17 MAS  Transcribed.
+##              2016-12-18 MAS  Typos.
+## 		2016-12-27 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 107
 
@@ -132,7 +134,7 @@ NOVAC3          TS      EXECTEM2
                 TCF     NEXTCORE        # THE CORRESPONDING CORE SET IS AVAILABLE.
 NO.CORES        DEC     6
                 TCF     NEXTCORE        # AN ACTIVE JOB HAS A POSITIVE PRIORITY
-                                        # BUT A FORMANT JOB'S PRIORITY IS NEGATIVE
+                                        # BUT A DORMANT JOB'S PRIORITY IS NEGATIVE
 
 ## Page 110
 CORFOUND        CA      NEWPRIO         # SET THE PRIORITY OF THIS JOB IN THE CORE

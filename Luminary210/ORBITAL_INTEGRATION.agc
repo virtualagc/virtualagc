@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-10 MAS  Updated for Luminary 210.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1225
 #          DELETE
@@ -409,7 +411,7 @@ COMTERM		STODL	UZ		# UZ  B-1 IN INERTIAL COORD        AT 20D
 			GOBAQUE
 		STODL	FV		#  B+16 FOR EARTH , B+20 FOR MOON
 			URPV		#  B-1  X-COMPONENT OF POSITION  IN
-		BOF	PUSH		#            PLANETARY COORD.      AT 02D
+		BOF	PUSH		#            PLANETORY COORD.      AT 02D
 ## Page 1234
 			MOONFLAG
 			NBRANCH		#         2
@@ -422,7 +424,7 @@ COMTERM		STODL	UZ		# UZ  B-1 IN INERTIAL COORD        AT 20D
 		VSL3	PDDL		#  B-3             5(Y -X )UR      AT 02D
 		VXSC	VAD
 			32D		#        2  2 -   2         -
-		PDVL	VXV		#    (5(Y.-X )UR/R ) +(2X/R)UX)    AT 02D
+		PDVL	VXV		#    (5(Y.-X )UR/R ) +(2X/R)UX     AT 02D
 			32D		#     B-1   UX
 			UZ		#     B-2  -UY =(UX * UZ)
 		VSL1	VXSC		#     B-3   -(2Y/R)UY

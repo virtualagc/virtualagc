@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 HG   Transcribed
 ##              2016-12-07 HG   Fix P00 -> POO
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 781
                 BANK            32
@@ -23,9 +25,9 @@
 
                 EBANK=          E2DPS
 
-#       *************************************
+#       ****************************************
 #       P63: THE LUNAR LANDING, BRAKING PHASE
-#       *************************************
+#       ****************************************
 
                 COUNT*          $$/P63
 
@@ -43,7 +45,7 @@ P63LM           TC              PHASCHNG
                 CAF             FOUR
                 TS              DVCNTR
 
-                CS              ONE                     # INITIALIZE WCHPHASE AND FLPASS0
+                CS              ONE                     # INITIALIZE WCHPHASE AND FLPASSO
                 TS              WCHPHASE
 
                 CA              ZERO
@@ -66,7 +68,7 @@ FLAGORGY        TC              INTPRET                 # DIONYSIAN FLAG WAVING
                                 P25FLAG                 # TERMINATE P25 IF IT IS RUNNING.
                                 RNDVZFLG                # TERMINATE P20 IF IT IS RUNNING
 
-                                                        # *****************************************
+							# ****************************************
 
 ## Page 782
 IGNALG          SETPD           VLOAD                   # FIRST SET UP INPUTS FOR RP-TO-R:-
@@ -113,7 +115,7 @@ IGNALOOP        DLOAD
                 STCALL          GDT/2
                                 ?GUIDSUB                # WHICH DELIVERS N PASSES OF GUIDANCE
 
-# DDUMCALC IS PROGRAMMED AS FOLLOWS:
+# DDUMCALC IS PROGRAMMED AS FOLLOWS:-
 #                                         2                                           -
 #              (RIGNZ - RGU )/16 + 16(RGU  )KIGNY/B8 + (RGU - RIGNX)KIGNX/B4 + (ABVAL(VGU) - VIGN)KIGNV/B4
 #                          2             1                 0
@@ -198,7 +200,7 @@ DDUMGOOD        VLOAD           UNIT                    # INITIALIZE KALCMANU
                                 TDEC1
                 STORE           TIG
                 EXIT
-                                                        # *****************************************
+                                                        # ****************************************
 
 IGNALGRT        TC              PHASCHNG                # PREVENT REPEATING IGNALG
                 OCT             04024
@@ -267,13 +269,13 @@ GUIDDURN        2DEC            +66440                  #         GUIDDURN +6.64
 DDUMCRIT        2DEC            +8              B-28    # CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 786
-HLROFFF         DEC             15.24           B-10    # LOADED DP, BUT ORDER DOESN'T MATTER
+HLROFFF         DEC             15.24           B-10    # LOADED DP, BUT LOW ORDER DOESN'T MATTER
 #       --------------------------------
 
 ## Page 787
-#       **************************************
+#       ****************************************
 #       P68: LANDING CONFIRMATION
-#       **************************************
+#       ****************************************
 
                 BANK            34
                 SETLOC          F2DPS*34
@@ -288,8 +290,8 @@ LANDJUNK        TC              PHASCHNG
                 TC              BANKCALL                # ZERO ATTITUDE ERROR
                 CADR            ZATTEROR
 
-                TC              INTPRET                 # TO INTERPRETATIVE AS TIME IS NOT CRITICAL
-                SET                                     # PREVENT RCS JET FIRINGS IF MOD CONT IS
+                TC              INTPRET                 # TO INTERPRETIVE AS TIME IS NOT CRITICAL
+                SET                                     # PREVENT RCS JET FIRINGS IF MODE CONT IS
                                 PULSEFLG                # IN ATT HOLD
                 SET             CLEAR
                                 SURFFLAG

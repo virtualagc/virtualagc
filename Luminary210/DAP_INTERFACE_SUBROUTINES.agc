@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-25 TB   Transcribed
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1403
                 BANK            20                              
@@ -53,11 +55,11 @@
 # MODIFIED:     1 MARCH 1968 BY P S WEISSMAN TO SAVE EBANK AND CREATE PFLITEDB
 
 # FUNCTIONAL DESCRIPTION:
-#       SETMAXDB -- SET DEADBAND TO 5.0 DEGREES
-#       SETMINDB -- SET DEADBAND TO 0.3 DEGREE
-#       RESTORDB -- SET DEADBAND TO .3,1, OR 5 ACCORDING TO BITS 4 AND 5 OF DAPBOOLS
-#       PFLITEDB -- SET DEADBAND TO 1.0 DEGREE AND ZERO THE COMMANDED ATTITUDE CHANGE AND COMMANDED RATE
-#       ALL ENTRIES SET UP A NOVAC JOB TO DO 1/ACCS SO TAT THE TJETLAW SWITCH CURVES ARE POSITIONED TO
+#       SETMAXDB - SET DEADBAND TO 5.0 DEGREES
+#       SETMINDB - SET DEADBAND TO 0.3 DEGREE
+#       RESTORDB - SET DEADBAND TO .3,1, OR 5 ACCORDING TO BITS 4 AND 5 OF DAPBOOLS
+#       PFLITEDB - SET DEADBAND TO 1.0 DEGREE AND ZERO THE COMMANDED ATTITUDE CHANGE AND COMMANDED RATE
+#       ALL ENTRIES SET UP A NOVAC JOB TO DO 1/ACCS SO THAT THE TJETLAW SWITCH CURVES ARE POSITIONED TO
 #       REFLECT THE NEW DEADBAND.  IT SHOULD BE NOTED THAT THE DEADBAND REFERS TO THE ATTITUDE IN THE P-,U-,AND V-AXES.
 
 # SUBROUTINE CALLED:    NOVAC
@@ -73,7 +75,7 @@ RESTORDB        CAE             DAPBOOLS                        # DETERMINE CREW
                 BZF             +2                              
                 TCF             SETMAXDB                        # BIT5 DAPBOOLS IS SET - CREW WANTS 5 DEG
                 CAE             DAPBOOLS                        
-                MASK            DBSELECT                        # CHECK FOR 1 DEG DEADBAND SELECTON
+                MASK            DBSELECT                        # CHECK FOR 1 DEG DEADBAND SELECTION
                 EXTEND                                          
                 BZF             SETMINDB                        
 

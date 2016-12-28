@@ -16,6 +16,8 @@
 ##		2016-12-01 RSB	Completed transcription.
 ##              2016-12-07 HG   Fix pseudo operator ADDRESS -> ADRES
 ##              2016-12-08 HG   Fix operand LANDISP -> LANADISP
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 831
 		BANK	21
@@ -51,7 +53,7 @@ FLASHH?		MASK	FLGWRD11
 		TS	L
 		TC	FLIP		# FLIP H LITE
 
-FLASHV?		CA	VFLSHBIT	# VLASHBIT MUST BE BIT 2.
+FLASHV?		CA	VFLSHBIT	# VFLASHBIT MUST BE BIT 2.
 		MASK	FLGWRD11
 		EXTEND
 		BZF	10,11		# VFLASH OFF
@@ -143,7 +145,7 @@ ABRTJASK	CAF	OCTAL27
 		MASK	APSFLBIT
 		ADS	FLGWRD10
 		CS	DAPBITS		# DAPBITS = OCT 40640 = BITS 6,8,9,15
-		MASK	DAPBOOLS	# RESET ULLAGE,DRIVT,XOVR11MM,AND PULSES
+		MASK	DAPBOOLS	# RESET ULLAGE,DRIFT,XOVRIINH,AND PULSES
 		TS	DAPBOOLS
 
 		CAF	1DEGDB		# INSURE DAP DEADBAND IS SET TO 1 DEGREE
@@ -252,7 +254,7 @@ P70INIT		TC	INTPRET
 			COMMINIT
 INJTARG		DLOAD
 			ABTRDOT
-		STCALL	RDOTD		# INITIALZE RDOTD.
+		STCALL	RDOTD		# INITIALIZE RDOTD.
 			YCOMP		# COMPUTE Y
 		ABS	DSU
 			YLIM		# /Y/-DYMAX
@@ -326,7 +328,7 @@ P71RET		TC	DOWNFLAG
 		GOTO
 ## Page 837
 			INJTARG
-OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
+OLDTIME		DLOAD	SL1		# IF FLAP=1,TGO=2 TGO
 			TGO
 		STORE	TGO1
 		EXIT
@@ -339,7 +341,7 @@ OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
 		DXCH	TGO
 		TCF	UPTHROT1
 
-# ***********************************************************************
+# ************************************************************************
 
 		BANK	21
 		SETLOC	R11
@@ -357,7 +359,7 @@ LEGAL?		CS	MMNUMBER	# IS THE DESIRED PGM ALREADY IN PROGRESS?
 		CCS	A
 		TCF	ABORTALM
 
-		CA	FLAGWRD7	# IS SERVICER ON THE A1R7
+		CA	FLAGWRD7	# IS SERVICER ON THE A1R?
 		MASK	AVEGFBIT
 		CCS	A
 		TC	Q		# YES.  ALL IS WELL.
@@ -372,7 +374,7 @@ ABORTALM	TC	FALTON
 
 		COUNT*	$$/P70
 
-# ***********************************************************************
+# ************************************************************************
 
 TGOCOMP		RTB	DSU
 ## Page 838
@@ -383,7 +385,7 @@ TGOCOMP		RTB	DSU
 		STORE	TGO
 		RVQ
 
-# ***********************************************************************
+# ************************************************************************
 
 THROTUP		CAF	BIT13
 		TS	THRUST
@@ -392,7 +394,7 @@ THROTUP		CAF	BIT13
 		WOR	CHAN14
 		TC	Q
 
-# ***********************************************************************
+# ************************************************************************
 
 10SECS		2DEC	1000
 

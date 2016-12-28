@@ -50,6 +50,7 @@ group.add_argument('--retread44', help="Perform RETREAD 44 processing", action="
 group.add_argument('--aurora12', help="Perform AURORA 12 processing", action="store_true")
 group.add_argument('--sunburst120', help="Perform SUNBURST120 processing (in Luminary 69 style)", action="store_true")
 group.add_argument('--luminary116', help="Perform LUMINARY 116 processing (for octals)", action="store_true")
+group.add_argument('--solarium55', help="Perform SOLARIUM 55 processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -87,6 +88,15 @@ elif args.luminary69 or args.aurora12 or args.sunburst120:
     # Difference the original L channel with the thickened lines (which is inverted)
     diff = blurred + thickend_lines
     thresh = ~cv2.inRange(diff, 30, 225) # Reject pixels too black or too white
+elif args.solarium55:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = ~cv2.inRange(diff, 30, 235) # Reject pixels too black or too white
 elif args.comanche55 or args.luminary99:
     blurred = cv2.GaussianBlur(l_channel, (3,3), 0)
     # Isolate the lines by eroding very strongly horizontally

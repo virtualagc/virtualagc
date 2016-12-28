@@ -2094,7 +2094,7 @@ DSPMSK          =               SEVEN
 
 DSP2BIT         TS              CYR
                 XCH             Q
-                TS              WDRET                   # CANT USE L AS RETURN. UPDATIN USES L.
+                TS              WDRET                   # CANT USE L AS RETURN. UPDATNN USES L.
                 CAF             ONE
                 TS              WDCNT
                 CS              CYR
@@ -2741,7 +2741,7 @@ MIXCON          OCT             55                      # FIRST MIXED NOUN = 55.
 
 
 
-# GTSFOUT LOADS SFTEMP1, SFTEMP2 WTIH THE DP SFOUTAB ENTRIES.
+# GTSFOUT LOADS SFTEMP1, SFTEMP2 WITH THE DP SFOUTAB ENTRIES.
 
 ## Page 348
 GTSFOUT         DXCH            SFTEMP1                 # 2X(SFCONUM) ARRIVES IN SFTEMP1.
@@ -2753,7 +2753,7 @@ SFCOM           DXCH            SFTEMP1
 
 
 
-# GTSFIN LOADS SFTEMP1, SFTEMP2 WITH THE DP SFINTAB INTRIES.
+# GTSFIN LOADS SFTEMP1, SFTEMP2 WITH THE DP SFINTAB ENTRIES.
 
 GTSFIN          DXCH            SFTEMP1                 # 2X(SFCONUM) ARRIVES IN SFTEMP1.
                 EXTEND
