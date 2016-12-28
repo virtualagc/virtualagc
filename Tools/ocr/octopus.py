@@ -79,7 +79,7 @@ elif args.luminary210A:
     # Difference the original L channel with the thickened lines (which is inverted)
     diff = blurred + thickend_lines
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
-elif args.luminary69 or args.aurora12 or args.sunburst120 or args.solarium55:
+elif args.luminary69 or args.aurora12 or args.sunburst120:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     # Isolate the lines by eroding very strongly horizontally
     lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
@@ -88,6 +88,15 @@ elif args.luminary69 or args.aurora12 or args.sunburst120 or args.solarium55:
     # Difference the original L channel with the thickened lines (which is inverted)
     diff = blurred + thickend_lines
     thresh = ~cv2.inRange(diff, 30, 225) # Reject pixels too black or too white
+elif args.solarium55:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = ~cv2.inRange(diff, 30, 235) # Reject pixels too black or too white
 elif args.comanche55 or args.luminary99:
     blurred = cv2.GaussianBlur(l_channel, (3,3), 0)
     # Isolate the lines by eroding very strongly horizontally
