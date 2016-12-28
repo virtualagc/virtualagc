@@ -1680,13 +1680,13 @@ P3536   ROUTINE TO HANDLE INTERPRETIVE ADDRESS WORDS
 # Page 425
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  41        PAGE 161
 
- 39825             TS, B7M      ONES M        INT ADDR      PLAIN C             MAKE UP AN X2 FLAG FOR NEGATIVE OPERAND.
+ 39825             TS, B7M      ONES M        INT ADDR      PLAIN C             FAKE UP AN X2 FLAG FOR NEGATIVE OPERAND.
  3983              LA           K 20000 M     ADDRESS M     INT AD F +1         JUMP IF WOULD BE AN ADDR IN FIXED BANKS.
  39833             LA           B37M          ADDRESS M     PLAIN C
  39836             TS           ZERO M        I COMMON      INT AD A14 +3       MUST REDUCE IF IN E-BANK (SIGH).
  3984   PLAIN C    TS           ZERO M        I COMMON      INT AD OAF          OTHERWISE USE NUMBER AS IS.
 
- 3985   INT AD SW  LN           ADDR WDM      B48M          INT ERR 41          ERROR IF ADDR LESS THAN ZERO.
+ 3985   INT AD SW  LN           ADDR WDM      B48M          INT ERR 41          ERROR IF ADDR LESS THAN ZERO
  3995              LA           K360M         ADDRESSM      INT ERR 41          ERROR IF ADDR OVER 239.
  4005              TS           -             -             C,+2
  4010              WA           ADDRESSM      K 361 M       ADDRESSM            ADD OCT400. SUBTRACT OCT17
