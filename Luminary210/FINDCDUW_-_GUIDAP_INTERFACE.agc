@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-09 HG   Transcribed
 ##              2016-12-12 MAS  Pushed in a +1 relative label.
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 905
 # PROGRAM NAME:   FINDCDUW
@@ -29,7 +31,7 @@
 #                           FETCHING FOR THE THRUST DIRECTION FILTER THE
 #                           CDUD'S IN PNGCS-AUTO, THE CDU'S IN ALL OTHER
 #                           MODES.
-#                 3.        TO SUBSTITUDE A STOPRATE FOR THE NORMAL
+#                 3.        TO SUBSTITUTE A STOPRATE FOR THE NORMAL
 #                           AUTOPILOT COMMANDS WHENEVER
 #                           1) NOT IN PNGCS-AUTO, OR
 #                           2) ENGINE IS OFF.
@@ -258,7 +260,7 @@ DCMCL           VLOAD           VXV
                                 NB2CDUSP                # YIELDS THE RQD GIMBAL ANGLES, 2'S, PI
                 EXIT
 
-# Page 911
+## Page 911
 # BIAS OUTER GIMBAL ANGLE
 
                 CA              OGABIAS
@@ -375,7 +377,7 @@ DELGMBLP        TS              TEM2
 ## Page 914
 # COMPUTE COMMANDED ATTITUDE RATES
 
-# * OMEGAPD *   * -2  -4 SINCDUZ          +0         * * -DELGMBZ *
+# * OMEGAPD *   * -2  -4 SINCDUZ          +0         * * -DELGMBX *
 # *         *   *                                    * *          *
 # * OMEGAQD * = * +0  -8 COSCDUZ COSCDUX  -4 SINCDUX * * -DELGMBY *
 # *         *   *                                    * *          *
@@ -446,8 +448,8 @@ CDUWXFR         TS              TEM2
                 EXTEND
                 MP              BIT11                   # 1/16
                 EXTEND
-                INDEX           TEM2                    #                  2
-                DV              1JACC                   # UNITS P/4 RAD/SEC
+                INDEX           TEM2                    #                   2
+                DV              1JACC                   # UNITS PI/4 RAD/SEC
                 TS              L
                 CA              DELERLIM
                 TC              LIMITSUB
@@ -499,9 +501,9 @@ UNWCTEST        DOT             DSQ
 
 ## Page 917
 # NB2CDUSP RETURNS THE 2'S COMPLEMENT, PI, SP CDU ANGLES X,Y,Z IN MPAC,+1,+2 GIVEN THE MATRIX WHOSE ROW VECTORS
-# ARE THE SEMI-UNIT NAV BASE VECTORS X,Y,X EXPRESSED IN STABLE MEMBER COORDINATES, LOCATED AT 0 IN THE PUSH LIST.
+# ARE THE SEMI-UNIT NAV BASE VECTORS X,Y,Z EXPRESSED IN STABLE MEMBER COORDINATES, LOCATED AT 0 IN THE PUSH LIST.
 
-# NB2CDUSP USES THE ARCTRGSP WHICH HAS A MAXIMUM ERROR OF +-4 BITS.
+# NB2CDUSP USES ARCTRGSP WHICH HAS A MAXIMUM ERROR OF +-4 BITS.
 
 NB2CDUSP        DLOAD           DSQ
                                 2
@@ -673,7 +675,7 @@ DPL9            DEC             8397
 # ARRIVING IN L TO THE POSITIVE LIMIT ARRIVING IN A.
 # THE SIGNED LIMITED VARIABLE IS RETURNED IN A.
 
-# VERSION COUTESY HUGH BLAIR-SMITH
+# VERSION COURTESY HUGH BLAIR-SMITH
 
 LIMITSUB        TS              TEM1
                 CA              ZERO
@@ -713,9 +715,11 @@ ALARMMGA        TC              ALARM
                 TCF             MGARET
 
 ## Page 922
+## The ':' at the end of the 2nd divider below is a workaround for our proof-reading system, 
+## but was simply another '=' in the original printout.
 #================================================================================================================
 # CONSTANTS
-#================================================================================================================
+#===============================================================================================================:
 
 # ADDRESS CONSTANTS
 
@@ -732,9 +736,9 @@ DUNFVLIM        DEC             .007            B-1     # 7 MR MAX CHG IN F DIR 
 UNFVLIM         DEC             .129            B-1     # 129 MR MAX THRUST OFFSET. 105 MR TRAVEL
                                                         # +10MR DEFL+5MR MECH MOUNT+9MR ABLATION.
 #
-# CONSTANT RELATED TO GIMBAL ANGLE COMPUTATIONS
+# CONSTANTS RELATED TO GIMBAL ANGLE COMPUTATIONS
 
-DOTSWFMX        DEC             .93302          B-4     # LIM COLNRTY OF UNWC/W & UNFC/2 TO 85 DEG
+DOTSWFMX        DEC             .93302          B-4     # LIM COLNRTY OF UNWC/2 & UNFC/2 TO 85 DEG
                                                         # LOWER PART COMES FROM NEXT CONSTANT
 
 DAXMAX          DEC             .11111111111            # DELATTX LIM TO 20 DEG IN 2 SECS, 1'S, PI
@@ -755,5 +759,3 @@ DT/DELT         DEC             .05                     # .1 SEC/2 SEC WHICH IS 
 DELERLIM        =               DAY/2MAX                # 10 DEG LIMIT FOR LAG ANGLES, 1'S, PI
 #
 
-
-# *** END OF FLY        .197 ***

@@ -121,7 +121,7 @@ IRIGX           EXTEND
                 TC              GCOMPSUB                # +(ADSRAX)(PIPAY)  (GYRO PULSES) X 2(+14)
 
 #               EXTEND                             ***
-#               DCS             DELVY              ***    (PIPA PULSES) X 2(+14)
+#               DCS             DELVZ              ***    (PIPA PULSES) X 2(+14)
 #               DXCH            MPAC               ***
 #               CA              ADOAX              ***    (GYRO PULSES)/(PIPA PULSE) X 2(-6)     *
 #               TC              GCOMPSUB           ***    -(ADOAX)(PIPAZ)   (GYRO PULSES) X 2(+14)

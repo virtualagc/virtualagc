@@ -16,7 +16,8 @@
 ##              2016-11-29 RRB  Updated from Luminary210 source.
 ##              2016-11-30 HG   fix operand GOTOPOOH -> GOTOP00H
 ##              2016-12-07 HG   unfix and revert P00 -> POO 
-
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 657
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -24,7 +25,7 @@
 # PROGRAM DESCRIPTION
 #       MOD NO - 1
 #       MOD BY - N. M. NEVILLE
-# FUNCTIONAL DESCRIPTION -
+# FUNCTIONAL DECRIPTION -
 #
 #       TO PROVIDE THE ASTRONAUT DETAILS OF THE LM OR CSM GROUND TRACK WITHOUT
 #       THE NEED FOR GROUND COMMUNICATION (REQUESTED BY DSKY).
@@ -39,7 +40,7 @@
 #       LAT-LONG
 # NORMAL EXIT MODES -
 #
-#       ASTRONAUT REQUEST THROUGH DSKY TO TERMINATE PROGRAM V34E
+#       ASTRONAUT REQUEST TROUGH DSKY TO TERMINATE PROGRAM V34E
 # ALARM OR ABORT EXIT MODES -
 #
 #       NONE
@@ -56,10 +57,11 @@
 #       AX0      2DEC   4.652459653 E-5 RADIANS         %68-69 CONSTANTS"
 #       -AY0     2DEC   2.147535898 E-5 RADIANS
 #       AZ0      2DEC   .7753206164     REVOLUTIONS
-#       FOR LUNAR ORBITS 504LM VECTOR IS NEEDED:
+#       FOR LUNAR ORBITS 504LM VECTOR IS NEEDED
 #       504LM    2DEC   -2.700340600 E-5 RADIANS
-#       504LM _2 2DEC   -7.514128400 E-4 RADIANS     ## should _2 and _4 be +2 and +4? - RRB
-#       504LM _4 2DEC   -2.553198641 E-4 RADIANS     ## value has _ instead of -, I think this is a typo - RRB
+## Should _2 and _4 be +2 and +4?  Value has _ instead of -, I think this is a typo &mdash; RRB
+#       504LM _2 2DEC   -7.514128400 E-4 RADIANS     
+#       504LM _4 2DEC   -2.553198641 E-4 RADIANS     
 #
 # NONE
 # DEBRIS
@@ -113,10 +115,10 @@ P21PROG2        STCALL  TDEC1           # INTEG TO TIME SPECIFIED IN TDEC1
                         DIM0FLAG
                         INTYPFLG        # PRECISION
                 CALL
-                        INTEGRV         #     CALCULATE
-                GOTO                    #       AND
+                        INTEGRV         # CALCULATE
+                GOTO                    # -AND
 ## Page 659
-                        P21VSAVE        # SAVE BASE VECTOR
+                        P21VSAVE        # -SAVE BASE VECTOR
 P21CONT         VLOAD
                         P21BASER        # RECYCLE -- INTEG FROM BASE VECTOR
                 STOVL   RCV             # --POS

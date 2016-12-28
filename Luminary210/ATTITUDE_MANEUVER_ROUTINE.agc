@@ -734,7 +734,7 @@ MAXANG          2DEC            0.472222222
 #          NGL = BUFFER ANGLE (TO AVOID DIVISIONS BY ZERO) = 2 DEGREES
 
 SD              2DEC            .433015                 # = SIN(D)                        $2
-K3S1            2DEC            .86603                  # = SIN(D)                        $2
+K3S1            2DEC            .86603                  # = SIN(D)                        $1
 K4              2DEC            -.25                    # = -COS(D)                       $2
 K4SQ            2DEC            .125                    # = COS(D)COS(D)                  $2
 SNGLCD          2DEC            .008725                 # = SIN(NGL)COS(D)                $2

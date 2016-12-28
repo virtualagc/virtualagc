@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-12 HG   Transcribed
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1440
                 BANK            17
@@ -32,7 +34,7 @@ CALLQERR        CA              BIT13                   # CALCULATE Q,R ERRORS U
                 CS              DAPBOOLS                # IN MANUAL RATE COMMAND?
                 MASK            OURRCBIT
                 EXTEND
-                BZF             Q,RORGTS                # IF SO BYPASS CALCULATION OF ERROS.
+                BZF             Q,RORGTS                # IF SO BYPASS CALCULATION OF ERRORS.
                 TC              QERRCALC
 
 Q,RORGTS        CCS             COTROLER                # CHOOSE CONTROL SYSTEM FOR THIS DAP PASS:
@@ -45,7 +47,7 @@ RCS             CAF             ZERO                    #       RCS (TRYGTS MAY 
                 TC              ROT-TOUV
                 DXCH            OMEGAU
 
-#                                         X - TRANSLATION
+#                                         X - TRANSLATION:
 
 #                                         INPUT:   BITS 7,8 OF CH31 (TRANSLATION CONTROLLER)
 #                                                  ULLAGER
@@ -391,7 +393,7 @@ BACKHAND        TS              AXISCTR
                 TCF             LOOPER
 
                 INDEX           AXISCTR
-                CCS             URATEDIF                # INDEX  AXIS    QUANTITY
+                CCS             URATEDIF                # INDEX  AXIS    QUANITY
                 CA              ZERO                    #   0     -U     1/JETACC-AOSU
                 TCF             +2                      #   1     +U     1/JETACC+AOSU
                 CA              ONE                     #  16     -V     1/JETACC-AOSV
@@ -401,7 +403,7 @@ BACKHAND        TS              AXISCTR
                 INDEX           A
                 CS              1/ANET2         +1
                 EXTEND
-                INDEX           AXISCTR                 # UPRATEDIF IS SCALED AT PI/4 RAD/SEC
+                INDEX           AXISCTR                 # URATEDIF IS SCALED AT PI/4 RAD/SEC
                 MP              URATEDIF                #  JET TIME IN A       SCALED 32 SEC
                 TS              Q
                 DAS             A
@@ -530,7 +532,7 @@ TJLAW           CA              TJLAWADR
                 CADR            SPSRCS                  # DETERMINE RCS CONTROL
                 RELINT
                 CAF             FOUR                    # ALWAYS CALL FOR 2-JET CONTROL ABOUT U,V.
-                TS              NUMBERT                 # FALL THROUGH TO JET SLECTION, ETC.
+                TS              NUMBERT                 # FALL THROUGH TO JET SELECTION, ETC.
 
 #                                              Q,R-JET-SELECTION-LOGIC
 
@@ -705,18 +707,18 @@ TJLAWADR        GENADR          TJLAW           +3      # RETURN ADDRESS FOR RCS
 #                                              CALLED BY:
 #                                                       CA  TJ            TIME WHEN NEXT JETS WILL BE WRITTEN
 #                                                       TS  T6FURTHA
-#                                                       CA  INDEX         AXIS TO BE WRITTEN AT TJ (FROM NOW)
+#                                                       CA  INDEX         AXIS TO BE WIRTTEN AT TJ (FROM NOW)
 #                                                       TS  T6FURTHA +1
 #                                                       TC  JTLST
 #
 #                                              EXAMPLE-  U-AXIS AUTOPILOT WILL WRITE ITS ROTATION CODE OF
-#                                              JETS INTO CHANNEL 5 .  IT IT DESIRES TO TURN OFF THIS POLICY WITHIN
+#                                              JETS INTO CHANNEL 5 .  IF IT DESIRES TO TURN OFF THIS POLICY WITHIN
 #                                              150MS AND THEN FIRE NEXTU, A CALL TO JTLST IS MADE WITH T6FURTHA
 #                                              CONTAINING THE TIME TO TURN OFF THE POLICY, T6FURTHA +1 THE INDEX
 #                                              OF THE U-AXIS(4), AND NEXTU WILL CONTAIN THE "U-TRANS" POLICY OR ZERO.
 
-#                                              THE LIST IS EXACTLY 3 LONG.(THIS LEADS UP TO SKIP LOGIC AND 150MS LIMIT)
-#                                               THE INPUT IS THE LAST MEMBER OF THE LIST.
+#                                              THE LIST IS EXACTLY 3 LONG.(THIS LEADS TO SKIP LOGIC AND 150MS LIMIT)
+#                                               THE INPUT IS THE LAST MEMBER OF THE LIST
 
 #                                              RETURNS BY:
 #                                                    +  TC  Q
@@ -727,7 +729,7 @@ TJLAWADR        GENADR          TJLAW           +3      # RETURN ADDRESS FOR RCS
 #                                              T6FURTHA          DELTA TIME FROM 2ND TO LAST RUPT
 #                                              NXT6ADR           AXIS INDEX       Q - P-AXIS
 #                                              T6NEXT +1         AXIS INDEX       4 - U-AXIS
-#                                              T6FURTHA +1       AXIS INDEX      13 -- V-AXIS
+#                                              T6FURTHA +1       AXIS INDEX      13 - V-AXIS
 JTLST           CS              T6FURTHA
                 AD              TIME6
                 EXTEND
@@ -752,7 +754,7 @@ TURNON          EXTEND
 
 MIDORLST        AD              T6NEXT
                 EXTEND
-                BZMF            LASTCHG                 # TIME6 + T6NEXT -- T IS IN A
+                BZMF            LASTCHG                 # TIME6 + T6NEXT - T IS IN A
 
                 LXCH            T6NEXT          +1
                 DXCH            T6FURTHA

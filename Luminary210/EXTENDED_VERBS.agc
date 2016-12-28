@@ -493,7 +493,7 @@ IMUFINEK        TC      CKMODCAD
                 CADR    IMUSTALL
                 TC      ENDEXTVB
 
-FINEK2          CAF     LGYROBIN                # PINBALL LEFT COMMANDS IN OGC REGISTERS
+FINEK2          CAF     LGYROBIN                # PINBALL LEFT COMMANDS IN OGC REGIST5RS
                 TC      BANKCALL
                 CADR    IMUPULSE
 

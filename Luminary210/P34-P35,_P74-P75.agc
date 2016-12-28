@@ -15,12 +15,14 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-07 HG   Transcribed
 ##              2016-12-07 HG   Fix P00 -> POO
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 661
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
 
 # MOD NO -1       LOG SECTION - P32-P35, P72-P75
-# MOD BY WHITE.P  DATE: 1JUNE67
+# MOD BY WHITE.P  DATE  1JUNE67
 
 # PURPOSE
 
@@ -91,7 +93,7 @@
 #           PREVIOUS SELECTION OF P20.  RADAR SIGHTING MARKS WILL BE MADE
 #           AUTOMATICALLY APPROXIMATELY ONCE A MINUTE WHEN ENABLED BY THE
 #           TRACK AND UPDATE FLAGS (SEE P20).  THE RENDEZVOUS TRACKING
-#           MARK COUNTER IS ZEROED BY TEH SELECTION OF P20 AND AFTER EACH
+#           MARK COUNTER IS ZEROED BY THE SELECTION OF P20 AND AFTER EACH
 #           THRUSTING MANEUVER.
 
 #       (5) THE ISS NEED NOT BE ON TO COMPLETE THIS PROGRAM.
@@ -110,8 +112,8 @@
 #               REQUIRED FOR EXECUTION OF THIS MANEUVER BY THE THRUSTING
 #               PROGRAM SELECTED AFTER COMPLETION OF THIS PROGRAM.
 
-#       (7) ONCE THE PARAMETERS REQUIRED FOR COMPUTATION OF THE MANEUVER
-#           HAVE BEEN COMPLETELY SPECIFIED, TEH VALUE OF THE ACTIVE
+#       (7) ONCE THE PARAMETWRS REQUIRED FOR COMPUTION OF THE MANEUVER
+#           HAVE BEEN COMPLETELY SPECIFIED, THE VALUE OF THE ACTIVE
 #           VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STURED.
 #           THIS NUMBER WILL BE AVAILABLE FOR DISPLAY TO THE ASTRONAUT
 #           THROUGH THE USE OF V06N52.
@@ -121,7 +123,7 @@
 
 ## Page 663
 #           170 TO 190 DEGREES.  IF THE ANGLE IS WITHIN THIS ZONE THE
-#           ASTRONAUT SHOULD REASSES THE INPUT TARGETING PARAMETERS BASED
+#           ASTRONAUT SHOULD REASSESS THE INPUT TARGETING PARAMETERS BASED
 #           UPON DELTA V AND EXPECTED MANEUVER TIME.
 
 #       (8) THIS PROGRAM IS SELECTED BY THE ASTRONAUT BY DSKY ENTRY -
@@ -153,8 +155,8 @@
 
 # DOWNLINK
 
-#       (1) TTPI     TIME OF TPI MANEUVER
-#       (2) TIG      TIME OF TPI MANEUVER
+#       (1) TTPI     TIME OF THE TPI MANEUVER
+#       (2) TIG      TIME OF THE TPI MANEUVER
 #       (3) ELEV     DESIRED LOS ANGLE AT TPI
 #       (4) CENTANG  ORBITAL CENTRAL ANGLE OF THE PASSIVE VEHICLE DURING
 #                    TRANSFER FROM TPI TO TIME OF INTERCEPT
@@ -329,7 +331,7 @@ P34/P74E        TC              INTPRET
 
 #       (1) TO CALCULATE THE REQUIRED DELTA V AND OTHER INITIAL CONDITIONS
 #           REQUIRED BY THE ACTIVE VEHICLE FOR EXECUTION OF THE NEXT
-#           MID-COURSE CORRECTION OF THE TRANSFER PHASE OF AN ACTIVE
+#           MIDCOURSE CORRECTION OF THE TRANSFER PHASE OF AN ACTIVE
 #           VEHICLE RENDEZVOUS.
 
 #       (2) TO DISPLAY TO THE ASTRONAUT AND THE GROUND CERTAIN DEPENDENT
@@ -355,7 +357,7 @@ P34/P74E        TC              INTPRET
 
 #       (4) THE OPERATION OF THE PROGRAM UTILIZES THE FOLLOWING FLAGS -
 
-#               THE ACTIVE VEHICLE FLAG - DESIGNATES THE VEHICLE WHICH IS
+#               ACTIVE VEHICLE FLAG - DESIGNATES THE VEHICLE WHICH IS
 #               DOING RENDEZVOUS THRUSTING MANEUVERS TO THE PROGRAM WHICH
 #               CALCULATES THE MANEUVER PARAMETERS.  SET AT THE START OF
 #               EACH RENDEZVOUS PRE-THRUSTING PROGRAM.
@@ -364,7 +366,7 @@ P34/P74E        TC              INTPRET
 #               SELECTED THE FINAL MANEUVER COMPUTATION CYCLE.
 
 #               EXTERNAL DELTA V FLAG - DESIGNATES THE TYPE OF STEERING
-#               REQUIRED FOR EXECUTION OF THIS MANEUVER BY TEH THRUSTING
+#               REQUIRED FOR EXECUTION OF THIS MANEUVER BY THE THRUSTING
 #               PROGRAM SELECTED AFTER COMPLETION OF THIS PROGRAM.
 
 #       (5) THE TIME OF INTERCEPT (T(INT)) WAS DEFINED BY PREVIOUS
@@ -372,7 +374,7 @@ P34/P74E        TC              INTPRET
 #           (P34/P74) AND IS PRESENTLY AVAILABLE IN STORAGE.
 
 ## Page 668
-#       (6) ONCE THE PARAMETERS REQUIRED FOR COMPUTATION OF THE MANEUVER
+#       (6) ONCE THE PARAMETERS REQUIRED FOR COMPUTION OF THE MANEUVER
 #           HAVE BEEN COMPLETELY SPECIFIED, THE VALUE OF THE ACTIVE
 #           VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STORED.
 #           THIS NUMBER WILL BE AVAILABLE FOR DISPLAY TO THE ASTRONAUT
@@ -397,7 +399,7 @@ P34/P74E        TC              INTPRET
 
 #       (1) TRKMKCNT NUMBER OF MARKS
 #       (2) TTOGO    TIME TO GO
-#       (3) +MGA     MIDOLF GIMBAL ANGLE
+#       (3) +MGA     MIDDLE GIMBAL ANGLE
 #       (4) DVLOS    DELTA VELOCITY AT MID - LINE OF SIGHT
 #       (5) DELVLVC  DELTA VELOCITY AT MID - LOCAL VERTICAL COORDINATES
 
@@ -411,7 +413,7 @@ P34/P74E        TC              INTPRET
 #       (1) TIG      TIME OF THE TPM MANEUVER
 #       (2) RTARG    OFFSET TARGET POSITION
 #       (3) TPASS4   TIME OF INTERCEPT
-#       (4) XDELVFLG RESET TO INDICATE LAMBERT (AIMPOINT) VG COMPUTATION.
+#       (4) XDELVFLG RESET TO INDICATE LAMBERT (AIMPOINT) VG COMPUTATION
 
 # SUBROUTINES USED
 
@@ -858,7 +860,7 @@ ALLSET          STOVL           TET
 #       GOFLASH
 #       GOTOPOOH
 #       S34/35.3
-#       S34.35.4
+#       S34/35.4
 #       VNPOOH
 
 S34/35.5        STQ             BON
@@ -1050,7 +1052,7 @@ EPSFOUR         2DEC            .0416666666
 130DEG          2DEC            .3611111111
 
 ## Page 688
-# ...... INITVEL .....
+# ..... INITVEL .....
 # MOD NO -1        LOG SECTION - P34-P35, P74-P75
 # MOD BY WHITE.P   DATE  21NOV67
 
@@ -1060,7 +1062,7 @@ EPSFOUR         2DEC            .0416666666
 #       A TRAJECTORY OF SPECIFIED TRANSFER TIME BETWEEN SPECIFIED INITIAL
 #       AND TARGET POSITIONS.  THE TRAJECTORY MAY BE EITHER CONIC OR
 #       PRECISION DEPENDING ON AN INPUT PARAMETER (NAMELY, NUMBER OF
-#       OFFSETS).  IN ADDITION, IN TEH PRECISION TRAJECTORY CASE, THE
+#       OFFSETS).  IN ADDITION, IN THE PRECISION TRAJECTORY CASE, THE
 #       SUBROUTINE ALSO COMPUTES AN OFFSET TARGET VECTOR, TO BE USED
 #       DURING PURE-CONIC CROSS-PRODUCT STEERING.  THE OFFSET TARGET
 #       VECTOR IS THE TERMINAL POSITION VECTOR OF A CONIC TRAJECTORY WHICH
@@ -1144,7 +1146,7 @@ HAVEGUES        VLOAD           STQ
 INITVEL1        SSP             DLOAD                   # SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 2D)
                                 ITCTR
                                 0               -1
-                COSINE          SR1                     # CALCULATE COSING (E4) (+2)
+                COSINE          SR1                     # CALCULATE COSINE (E4) (+2)
                 STODL           COZY4                   # SET COZY4 TO COSINE (E4)          (PL 0D)
                 LXA,2           SXA,2
                                 MPAC
@@ -1166,7 +1168,7 @@ INITVEL1        SSP             DLOAD                   # SET ITCTR TO -1,LOAD M
                                 VINIT                   # MPAC EQ UNIT(RI) X VI  (+8)
                 STOVL           UN
                                 RTARG1
-                UNIT            DOT                     # TEMP=RT.URI (+2)                 (PL 0D)
+                UNIT            DOT                     # TEMP=URT.URI (+2)                (PL 0D)
                 DAD             CLEAR
                                 COZY4
                                 NORMSW
@@ -1289,7 +1291,7 @@ INITVEL5        VLOAD
                                 X2
                                 INITVEL6
 
-# OFFSET CONIC TARGET VECTGOR
+# OFFSET CONIC TARGET VECTOR
 
                 VLOAD           VSU
                                 RTARG1
@@ -1357,7 +1359,7 @@ INITVELX        LXA,1           DLOAD*
 
 #          IF THE ACTIVE VEHICLE IS DOING THE COMPUTATION, MIDGIM COMPUTES
 # THE POSITIVE MIDDLE GIMBAL ANGLE OF THE ACTIVE VEHICLE TO THE INPUT
-# DELTA VELOCITY VECTOR (0D IN PUSY LIST),  OTHERWISE
+# DELTA VELOCITY VECTOR (0D IN PUSH LIST),  OTHERWISE
 # MIDGIM CONVERTS THE INPUT DELTA VELOCITY VECTOR FROM INERTIAL COORDIN-
 # ATES TO LOCAL VERTICAL COORDINATES OF THE ACTIVE VEHICLE.
 
@@ -1386,14 +1388,14 @@ INITVELX        LXA,1           DLOAD*
 
 #   .. NO SUBROUTINES CALLED ..
 
-#   .. DEBRIS - ERASABLE TEMPORARY USAGE ..
+#   .. DEBRIS - ERASEABLE TEMPORARY USAGE
 
 #        A,Q,L, PUSH LIST, MPAC.
 
 #   .. ALARMS - NONE ..
 
 ## Page 695
-# MODDLE GIMBAL ANGLE COMPUTATION.
+# MIDDLE GIMBAL ANGLE COMPUTATION.
 
                 SETLOC          MIDDGIM
                 BANK
@@ -1417,7 +1419,7 @@ GET+MGA         VLOAD           UNIT                    # (PL 0D) V (+7) TO MPAC
 SETMGA          STORE           +MGA
                 CLR             RVQ                     # CLEAR MGLVFLAG TO INDICATE +MGA CALC
                                 MGLVFLAG                #     AND EXIT
-GET.LVC         VLOAD           UNIT                    # (PL 6D)   R (+29) IN MPAC, UNITZE UR
+GET.LVC         VLOAD           UNIT                    # (PL 6D)   R (+29) IN MPAC, UNITIZE UR
                                 RINIT
                 VCOMP                                   # U(-R)
                 STORE           18D                     # U(-R) TO 18D
@@ -1480,7 +1482,7 @@ RTRNMU          STORE           RTMU
 
 #       SETRAD IS CALLED TO  DETERMINE THE RADIUS OF THE PRIMARY BODY.
 
-#       APSIDES IS CALLED TO SOVE FOR THE TWO BODY RADII OF APOCENTER AND
+#       APSIDES IS CALLED TO SOLVE FOR THE TWO BODY RADII OF APOCENTER AND
 #       PERICENTER AND THE ECCENTRICITY OF THE TRAJECTORY.
 
 # CALLING SEQUENCE
@@ -1553,6 +1555,8 @@ PERIAPO         STQ             CALL
                                 NORMEX
 
 ## Page 699
+# SETRAD
+
 SETRAD          DLOAD           PUSH
                                 RPAD
                 SXA,1           INCR,2
@@ -1567,6 +1571,8 @@ SETRAD          DLOAD           PUSH
 SETRADX         DLOAD           RVQ
 
 ## Page 700
+# PRECSET
+
 PRECSET         STQ
                                 NORMEX
                 STCALL          TDEC2
@@ -1599,6 +1605,8 @@ PASSIVE         STOVL           RPASS3
                 RVQ
 
 ## Page 701
+# VECSHIFT
+
 VECSHIFT        LXA,2           VSR*
                                 RTX2
                                 0,2
@@ -1609,6 +1617,8 @@ VECSHIFT        LXA,2           VSR*
                 RVQ
 
 ## Page 702
+# SHIFTR1
+
 SHIFTR1         LXA,2           SL*
                                 RTX2
                                 0,2
@@ -1670,7 +1680,7 @@ SHIFTR1         LXA,2           SL*
                 COUNT*          $$/R36
 
 R36             EXTEND
-                DCA             TIG                     # SET TIME-OF-EVEN TO TIG FOR NOMINAL
+                DCA             TIG                     # SET TIME-OF-EVENT TO TIG FOR NOMINAL
                 DXCH            DSPTEMX                 # DISPLAY
                 CAF             V06N16N
                 TC              BANKCALL
@@ -1681,7 +1691,7 @@ R36             EXTEND
                 TC              INTPRET
                 DLOAD           BZE
                                 DSPTEMX
-                                GETNOW                  # ASTRO-LOADED ZERO, GET PRESS TIME
+                                GETNOW                  # ASTOR-LOADED ZERO, GET PRES TIME
 R36INT          STCALL          TDEC1
                                 OTHPREC
                 VLOAD           PDVL
@@ -1708,7 +1718,7 @@ R36INT          STCALL          TDEC1
                 DOT             SL1
                                 UNP36                   # .   -   -
                 STOVL           YDOTLEM                 #
-                                06D                     # -      A
+                                06D                     # -      A   -
                 UNIT            PUSH                    # U  = UNIT( R  )                  18D
                 VXV             VXV                     #  RA          A
                                 00D                     #  -    -     -    -

@@ -884,7 +884,7 @@ ROO             TC              INTPRET
 DUMMYAD         EXIT
 
                 TC              DOWNFLAG
-                ADRES           3AXISFLG                # RESET 3-AXIT FLAG
+                ADRES           3AXISFLG                # RESET 3-AXIS FLAG
 
                 TC              DOWNFLAG
                 ADRES           POOHFLAG
