@@ -11,6 +11,8 @@
 ## Mod history:	2009-10-01 JL	Created.
 ##		2016-08-19 RSB	Added temporary "BANK 30" workaround.
 ##		2016-08-20 RSB	Typos.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 746
 
@@ -31,9 +33,9 @@
 
 
 #	CONTINUE ON IN BANK 30.
-# [ RSB - The original source code did not have the following BANK pseudo-op,
-# but for some reason I haven't tracked down yet, yaYUL can't resolve the addresses
-# without it.  Perhaps a bug in yaYUL.]
+## RSB &mdash; The original source code did not have the following BANK pseudo-op,
+## but for some reason I haven't tracked down yet, yaYUL can't resolve the addresses
+## without it.  Perhaps a bug in yaYUL.
 		BANK	30
 
 NORMLISE	ABVAL	3		# COUNT NUMBER OF LEADING ZEROS IN
@@ -118,7 +120,7 @@ REFAZE6		INHINT
 		INDEX	MPAC
 		CS	RN1		# RN1 AND VN1 MUST BE IN ORDER.
 		COM			# LEAVE RN1 ALONE  IN CASE OF RESTARTS.
-		INDEX	MPAC		# SELECT THE HIGH TERM.
+		INDEX	MPAC		# SELECT THE RIGHT TERM.
 		TS	RN		# ...AND GO THRU COPY CYCLE.
 		
 		CCS	MPAC		# ARE WE DONE..
@@ -247,7 +249,7 @@ J(RE)SQ		2DEC	.06006663 B-3	# SCALED AT 2(+43)M(+2)
 		VSLT
 			STBUFF +6
 			REFSMMAT
-			1		# THIS ASSUMES THAT UPDATE SCALED 2(+7)M/CS
+			1		# THIS ASSUMES THAT UPDATE SCALED 2(7)M/CS
 		STORE	VN1
 		
 		MXV	1

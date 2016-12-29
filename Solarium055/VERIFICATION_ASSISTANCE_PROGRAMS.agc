@@ -10,6 +10,8 @@
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 ## Mod history:	2009-09-21 JL	Created.
 ##		2016-08-20 RSB	Typo.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 754
 
@@ -40,7 +42,7 @@ WLTEST		XCH	IN2
 		CAF	ZERO		# TUNING CONSTANT.
 		CCS	A
 		TC	-1
-		CAF	ONE		# TASK ENTRY WITH T3 INC BETWEEN THE TWO T3
+		CAF	ONE		# TASK ENTRY WITH T3 INC BETWEEN TWO T3
 		TC	WAITLIST	# REFERENCES.
 		CADR	NOPLWAIT +2	# TASK IN HIGH SWITCHED BANK.
 

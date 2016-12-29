@@ -10,6 +10,9 @@
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 ## Mod history:	2009-09-15 JL	Created.
 ## 		2016-08-17 RSB	Corrected a duplicated symbol TFAIL2 on p. 479.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+
 ## Page 477
 
 		BANK	4
@@ -21,7 +24,7 @@ KEYRUPT1	MASK	LOW5		# C(IN0) IN A
 		CADR	CHARIN
 NOKEYBUF	XCH	RUPTREG4
 		INDEX	LOCCTR
-		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
+		TS	MPAC		# LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
 		TC	RESUME
 
 ## Page 478
@@ -38,7 +41,7 @@ UPRUPTB		TS	BANKRUPT
 		TS	KEYTEMP2	# MAG OF DSPTAB +7 INTO KEYTEMP2
 		MASK	BIT11
 		CCS	A
-		TC	UPRPT1		# BIT 11 ALREADY DONE
+		TC	UPRPT1		# BIT 11 ALREADY ONE
 		XCH	KEYTEMP2	# BIT 11 = 0
 		AD	BIT11
 		CS	A		# STORE NEGATIVELY
