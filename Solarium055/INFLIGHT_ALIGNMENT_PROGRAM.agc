@@ -9,6 +9,8 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 ## Mod history:	2009-10-03 JL	Created.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 366
 
@@ -94,7 +96,7 @@ ALTPULSS	INDEX	PIPSLECT
 		TS	SWAYPULS
 		CAF	THIRTEEN	# AND RESTART DTCOUNT AT 13
 DIMCOUNT	INDEX	PIPSLECT
-		TS	DTCOUNT		# DTCOUNT NOW DIMISHED BY ONE
+		TS	DTCOUNT		# DTCOUNT NOW DIMINISHED BY ONE
 					# OR RESET TO 13
 		INDEX	PIPSLECT
 		INDEX	DTCOUNT		# SELECT APPROPRIATE DELTA T FROM LIST
