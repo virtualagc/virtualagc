@@ -27,6 +27,9 @@ from wand.color import Color
 tesseract = 'tesseract'
 if 'BIN' in environ:
 	tesseract = environ['BIN'] + '/tesseract'
+font_s = 0
+if 'FONT_S' in environ:
+	font_s = 1
 
 # Parse command-line arguments
 if len(sys.argv) < 5:
@@ -39,9 +42,9 @@ if len(sys.argv) < 5:
 	print '      The AGC-file inclusion directive $ is supported, so the top-level file'
 	print '      MAIN.agc can be used in order to make scripting easier.' 
 	print 'SCALE (optional, default 1.0) represents the resolution of the imagery, relative'
-	print '      to archive.org\'s scan of Sunburst 120, which is nominally 3025 pixels high.'
-	print '      The process is not *very* sensitive to this, but you will want to adjust it'
-	print '      anyway.  For example, for Aurora 12 scans I settled on SCALE=1.15.  (Sadly,'
+	print '      to archive.org\'s scan of Sunburst 120.  The process is not *very* sensitive'
+	print '      to this, but you will want to adjust it if it is too far from 1.0.'
+	print '      For Aurora 12 scans I settled on SCALE=0.711111.  (Sadly,'
 	print '      not all of the archive.org pages have precisely identical dimensions, even'
 	print '      when those pages are all from the sames set of scans for the same harcopy.)'
 	print '      Non-archive.org imagery has a very different scale. Think of SCALE as being'
@@ -61,6 +64,12 @@ if len(sys.argv) < 5:
 	print '      bounding boxes at different locations on different pages.  I don\'t provide'
 	print '      any specific option for that, however.  I don\'t know if training affects the'
 	print '      selection of bounding boxes or not.'
+	print 'Note that while the default font works well enough, it can be annoying for the printouts'
+	print 'of some AGC versions.  For example, for Solarium 55, the default S superimposed on the'
+	print 'printed S looked somewhat like a $, and the * ends up looking more like a disk after'
+	print 'superposition. While you can easily work with it anyway, it takes more effort than it'
+	print 'should.  A slightly different font tailored for this condition can be selected'
+	print 'with the environment variable setting "export FONT_S=yes".'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -488,6 +497,11 @@ for ascii in range(128):
 		imagesNomatch.append(Image(filename=filename))
 	else:
 		imagesNomatch.append(Image(filename="asciiFont/nomatch127.png"))
+if font_s:
+	imagesMatch[42] = Image(filename="asciiFont/match42S.png")
+	imagesMatch[83] = Image(filename="asciiFont/match83S.png")
+	imagesNomatch[42] = Image(filename="asciiFont/nomatch42S.png")
+	imagesNomatch[83] = Image(filename="asciiFont/nomatch83S.png")
 
 # Prepare a drawing-context.
 draw = Drawing()
@@ -652,7 +666,7 @@ draw(img)
 
 # Create the output image.
 img.format = 'jpg'
-img.compression_quality = 25
+img.compression_quality = 50
 img.save(filename=outImage)
 print 'output =', outImage
 
