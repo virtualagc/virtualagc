@@ -91,17 +91,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014129,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-014130,000003:                                                                                                  <span class="co">## Filename:    INFLIGHT_ALIGNMENT_PROGRAM.agc</span>
-014131,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
-014132,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
-014133,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
-014134,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
-014135,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-014136,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-014137,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
-014138,000011:                                                                                                  <span class="co">## Mod history: 2009-10-03 JL   Created.</span>
-014139,000012: 
+014175,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+014176,000003:                                                                                                  <span class="co">## Filename:    INFLIGHT_ALIGNMENT_PROGRAM.agc</span>
+014177,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
+014178,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
+014179,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
+014180,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
+014181,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+014182,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+014183,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
+014184,000011:                                                                                                  <span class="co">## Mod history: 2009-10-03 JL   Created.</span>
+014185,000012:                                                                                                  <span class="co">##              2016-12-28 RSB  Proofed comment text using octopus/ProoferComments,</span>
+014186,000013:                                                                                                  <span class="co">##                              and fixed errors found.</span>
+014187,000014: 
 </pre>
 </span>
 </p>
@@ -117,57 +119,57 @@ Page 366
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014141,000014: 
-014142,000015: 22,6000                                           <span class="ps">SETLOC  </span> 44000                                 
-014143,000016: 
-<a name="5357415953544154"></a>014144,000017: 22,6000           34475        <span class="sm">SWAYSTAT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   <span class="co">#  PROGRAM START AND INITIAL CONDITIONS</span>
-014145,000018: 22,6001           51100                           <span class="op">TS      </span> <a href="#4454434F554E54">DTCOUNT</a>                               <span class="co">#  SET DTCOUNT = 6</span>
-014146,000019: 22,6002           51101                           <span class="op">TS      </span> <a href="#4454434F554E54">DTCOUNT</a>    +1                         
-014147,000020: 22,6003           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-014148,000021: 22,6004           51102                           <span class="op">TS      </span> <a href="#5357415950554C53">SWAYPULS</a>                              <span class="co">#  SET FIRST PIPA PULSE = +1</span>
-014149,000022: 22,6005           51103                           <span class="op">TS      </span> <a href="#5357415950554C53">SWAYPULS</a>   +1                         
-014150,000023: 22,6006           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-014151,000024: 22,6007           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-014152,000025: 22,6010           44024                           <span class="ps">CADR    </span> <a href="#53574159524F5459">SWAYROTY</a>                              
-014153,000026: 22,6011           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-014154,000027: 22,6012           61104                           <span class="op">AD      </span> <a href="#5048415A494E47">PHAZING</a>                               
-014155,000028: 22,6013           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-014156,000029: 22,6014           44017                           <span class="ps">CADR    </span> <a href="#53574159524F545A">SWAYROTZ</a>                              
-014157,000030: 22,6015           20016                           <span class="op">RELINT  </span>                                       
-014158,000031: 22,6016           02124                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-014159,000032: 
-014160,000033: 
-014161,000034: 
-<a name="53574159524F545A"></a>014162,000035: 22,6017           30003        <span class="sm">SWAYROTZ</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C50">LP</a>                                    <span class="co">#  STORE LP IN LPRUPT</span>
-014163,000036: 22,6020           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                
-014164,000037: 22,6021           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  SET INDEX PIPSLECT FOR SELECTION OF</span>
-014165,000038: 22,6022           51111                           <span class="op">TS      </span> <a href="#504950534C454354">PIPSLECT</a>                              <span class="co">#  PIPA TO BE INCREMENTED</span>
-014166,000039: 22,6023           06030                           <span class="op">TC      </span> <a href="#53574159524F5459">SWAYROTY</a>   +4                         
-014167,000040: 
-<a name="53574159524F5459"></a>014168,000041: 22,6024           30003        <span class="sm">SWAYROTY</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C50">LP</a>                                    
-014169,000042: 22,6025           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                
-014170,000043: 22,6026           35501                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
-014171,000044: 22,6027           51111                           <span class="op">TS      </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014172,000045: 
-014173,000046: 22,6030           45501                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
-014174,000047: 22,6031           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014175,000048: 22,6032           30045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
-014176,000049: 22,6033           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014177,000050: 22,6034           61102                           <span class="op">AD      </span> <a href="#5357415950554C53">SWAYPULS</a>                              
-014178,000051: 22,6035           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014179,000052: 22,6036           30045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
-014180,000053: 22,6037           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-014181,000054: 22,6040           64516                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  INCREMENT PIPA COUNTER IF PULSE</span>
-014182,000055: 22,6041           06045                           <span class="op">TC      </span> <a href="#414444494E43">ADDINC</a>     +1                         
-014183,000056: 22,6042           06044                           <span class="op">TC      </span> <a href="#414444494E43">ADDINC</a>                                
-014184,000057: 22,6043           06051                           <span class="op">TC      </span> <a href="#454E4443484543">ENDCHEC</a>                               
-014185,000058: 
-014186,000059: 
-014187,000060: 
-<a name="414444494E43"></a>014188,000061: 22,6044           44516        <span class="sm">ADDINC  </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-014189,000062: 22,6045           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014190,000063: 22,6046           60045                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
-014191,000064: 22,6047           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014189,000016: 
+014190,000017: 22,6000                                           <span class="ps">SETLOC  </span> 44000                                 
+014191,000018: 
+<a name="5357415953544154"></a>014192,000019: 22,6000           34475        <span class="sm">SWAYSTAT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   <span class="co">#  PROGRAM START AND INITIAL CONDITIONS</span>
+014193,000020: 22,6001           51100                           <span class="op">TS      </span> <a href="#4454434F554E54">DTCOUNT</a>                               <span class="co">#  SET DTCOUNT = 6</span>
+014194,000021: 22,6002           51101                           <span class="op">TS      </span> <a href="#4454434F554E54">DTCOUNT</a>    +1                         
+014195,000022: 22,6003           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+014196,000023: 22,6004           51102                           <span class="op">TS      </span> <a href="#5357415950554C53">SWAYPULS</a>                              <span class="co">#  SET FIRST PIPA PULSE = +1</span>
+014197,000024: 22,6005           51103                           <span class="op">TS      </span> <a href="#5357415950554C53">SWAYPULS</a>   +1                         
+014198,000025: 22,6006           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+014199,000026: 22,6007           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+014200,000027: 22,6010           44024                           <span class="ps">CADR    </span> <a href="#53574159524F5459">SWAYROTY</a>                              
+014201,000028: 22,6011           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+014202,000029: 22,6012           61104                           <span class="op">AD      </span> <a href="#5048415A494E47">PHAZING</a>                               
+014203,000030: 22,6013           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+014204,000031: 22,6014           44017                           <span class="ps">CADR    </span> <a href="#53574159524F545A">SWAYROTZ</a>                              
+014205,000032: 22,6015           20016                           <span class="op">RELINT  </span>                                       
+014206,000033: 22,6016           02124                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+014207,000034: 
+014208,000035: 
+014209,000036: 
+<a name="53574159524F545A"></a>014210,000037: 22,6017           30003        <span class="sm">SWAYROTZ</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C50">LP</a>                                    <span class="co">#  STORE LP IN LPRUPT</span>
+014211,000038: 22,6020           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                
+014212,000039: 22,6021           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  SET INDEX PIPSLECT FOR SELECTION OF</span>
+014213,000040: 22,6022           51111                           <span class="op">TS      </span> <a href="#504950534C454354">PIPSLECT</a>                              <span class="co">#  PIPA TO BE INCREMENTED</span>
+014214,000041: 22,6023           06030                           <span class="op">TC      </span> <a href="#53574159524F5459">SWAYROTY</a>   +4                         
+014215,000042: 
+<a name="53574159524F5459"></a>014216,000043: 22,6024           30003        <span class="sm">SWAYROTY</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C50">LP</a>                                    
+014217,000044: 22,6025           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                
+014218,000045: 22,6026           35501                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
+014219,000046: 22,6027           51111                           <span class="op">TS      </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014220,000047: 
+014221,000048: 22,6030           45501                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
+014222,000049: 22,6031           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014223,000050: 22,6032           30045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
+014224,000051: 22,6033           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014225,000052: 22,6034           61102                           <span class="op">AD      </span> <a href="#5357415950554C53">SWAYPULS</a>                              
+014226,000053: 22,6035           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014227,000054: 22,6036           30045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
+014228,000055: 22,6037           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+014229,000056: 22,6040           64516                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  INCREMENT PIPA COUNTER IF PULSE</span>
+014230,000057: 22,6041           06045                           <span class="op">TC      </span> <a href="#414444494E43">ADDINC</a>     +1                         
+014231,000058: 22,6042           06044                           <span class="op">TC      </span> <a href="#414444494E43">ADDINC</a>                                
+014232,000059: 22,6043           06051                           <span class="op">TC      </span> <a href="#454E4443484543">ENDCHEC</a>                               
+014233,000060: 
+014234,000061: 
+014235,000062: 
+<a name="414444494E43"></a>014236,000063: 22,6044           44516        <span class="sm">ADDINC  </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+014237,000064: 22,6045           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014238,000065: 22,6046           60045                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
+014239,000066: 22,6047           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
 </pre>
 </span>
 </p>
@@ -183,56 +185,56 @@ Page 367
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014193,000066: 22,6050           30045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
-014194,000067: 
-014195,000068: 
-014196,000069: 
-<a name="454E4443484543"></a>014197,000070: 22,6051           11105        <span class="sm">ENDCHEC </span>           <span class="op">CCS     </span> <a href="#454E4453524F54">ENDSROT</a>                               <span class="co">#  IF ENDSROT = +1 EXIT PROGRAM</span>
-014198,000071: 22,6052           06055                           <span class="op">TC      </span> <a href="#4344545448524545">CDTTHREE</a>                              <span class="co">#  WHEN DTCOUNT = 6</span>
-014199,000072: 22,6053           06065                           <span class="op">TC      </span> <a href="#54494D43414C43">TIMCALC</a>                               
-014200,000073: 22,6054           06055                           <span class="op">TC      </span> <a href="#4344545448524545">CDTTHREE</a>                              
-<a name="4344545448524545"></a>014201,000074: 22,6055           44475        <span class="sm">CDTTHREE</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   
-014202,000075: 22,6056           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014203,000076: 22,6057           61100                           <span class="op">AD      </span> <a href="#4454434F554E54">DTCOUNT</a>                               
-014204,000077: 22,6060           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-014205,000078: 22,6061           06065                           <span class="op">TC      </span> <a href="#54494D43414C43">TIMCALC</a>                               <span class="co">#  EXIT ON DTCOUNT = 6</span>
-014206,000079: 22,6062           06124                           <span class="op">TC      </span> <a href="#454E4453574159">ENDSWAY</a>                               
-014207,000080: 22,6063           06065                           <span class="op">TC      </span> <a href="#54494D43414C43">TIMCALC</a>                               
-014208,000081: 22,6064           06124                           <span class="op">TC      </span> <a href="#454E4453574159">ENDSWAY</a>                               
-014209,000082: 
-014210,000083: 
-014211,000084: 
-<a name="54494D43414C43"></a>014212,000085: 22,6065           21111        <span class="sm">TIMCALC </span>           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014213,000086: 22,6066           11100                           <span class="op">CCS     </span> <a href="#4454434F554E54">DTCOUNT</a>                               
-014214,000087: 22,6067           06100                           <span class="op">TC      </span> <a href="#44494D434F554E54">DIMCOUNT</a>                              <span class="co">#  ACC NOW CONTAINS DTCOUNT - 1</span>
-014215,000088: 22,6070           06073                           <span class="op">TC      </span> <a href="#414C5450554C5353">ALTPULSS</a>                              <span class="co">#  IF DTCOUNT NORZ CHANGE</span>
-014216,000089: 22,6071           06073                           <span class="op">TC      </span> <a href="#414C5450554C5353">ALTPULSS</a>                              <span class="co">#  SIGN OF SWAYPULSE</span>
-014217,000090: 22,6072           30000                           <span class="op">NOOP    </span>                                       
-<a name="414C5450554C5353"></a>014218,000091: 22,6073           21111        <span class="sm">ALTPULSS</span>           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014219,000092: 22,6074           41102                           <span class="op">CS      </span> <a href="#5357415950554C53">SWAYPULS</a>                              
-014220,000093: 22,6075           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014221,000094: 22,6076           51102                           <span class="op">TS      </span> <a href="#5357415950554C53">SWAYPULS</a>                              
-014222,000095: 22,6077           33535                           <span class="op">CAF     </span> <a href="501_MISSION_CONTROL_PROGRAM.agc.html#544849525445454E">THIRTEEN</a>                              <span class="co">#  AND RESTART DTCOUNT AT 13</span>
-<a name="44494D434F554E54"></a>014223,000096: 22,6100           21111        <span class="sm">DIMCOUNT</span>           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014224,000097: 22,6101           51100                           <span class="op">TS      </span> <a href="#4454434F554E54">DTCOUNT</a>                               <span class="co">#  DTCOUNT NOW DIMISHED BY ONE</span>
-014225,000098:                                                                                                  <span class="co">#  OR RESET TO 13</span>
-014226,000099: 22,6102           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014227,000100: 22,6103           21100                           <span class="op">INDEX   </span> <a href="#4454434F554E54">DTCOUNT</a>                               <span class="co">#  SELECT APPROPRIATE DELTA T FROM LIST</span>
-014228,000101: 22,6104           36130                           <span class="op">CAF     </span> <a href="#44454C5441">DELTA</a>                                 
-014229,000102: 22,6105           25777                           <span class="op">EXTEND  </span>                                       
-014230,000103: 22,6106           41110                           <span class="op">MP      </span> <a href="#54504552494F44">TPERIOD</a>                               <span class="co">#  AND MULTIPLY BY PERIOD</span>
-014231,000104: 22,6107           64477                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#46495645">FIVE</a>                                  <span class="co">#  ROUND RESULT</span>
-014232,000105: 22,6110           25777                           <span class="op">EXTEND  </span>                                       
-014233,000106: 22,6111           46146                           <span class="op">MP      </span> <a href="#4F4E4554454E5448">ONETENTH</a>                              
-014234,000107: 22,6112           50575                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505453544F52">RUPTSTOR</a>   +3                         <span class="co">#  TIME (DT) TILL NEXT INTERRUPT 10MS</span>
-<a name="4E45585452555054"></a>014235,000108: 22,6113           11111        <span class="sm">NEXTRUPT</span>           <span class="op">CCS     </span> <a href="#504950534C454354">PIPSLECT</a>                              
-014236,000109: 22,6114           06121                           <span class="op">TC      </span> <a href="#5A50495052555054">ZPIPRUPT</a>                              <span class="co">#  CALL WAITLIST FOR ZPIPA</span>
-014237,000110: 22,6115           30575                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505453544F52">RUPTSTOR</a>   +3                         
-014238,000111: 22,6116           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  CALL WAITLIST FOR YPIPA</span>
-014239,000112: 22,6117           44024                           <span class="ps">CADR    </span> <a href="#53574159524F5459">SWAYROTY</a>                              
-014240,000113: 22,6120           06124                           <span class="op">TC      </span> <a href="#454E4453574159">ENDSWAY</a>                               
-014241,000114: 
-<a name="5A50495052555054"></a>014242,000115: 22,6121           30575        <span class="sm">ZPIPRUPT</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505453544F52">RUPTSTOR</a>   +3                         
+014241,000068: 22,6050           30045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504159">PIPAY</a>                                 
+014242,000069: 
+014243,000070: 
+014244,000071: 
+<a name="454E4443484543"></a>014245,000072: 22,6051           11105        <span class="sm">ENDCHEC </span>           <span class="op">CCS     </span> <a href="#454E4453524F54">ENDSROT</a>                               <span class="co">#  IF ENDSROT = +1 EXIT PROGRAM</span>
+014246,000073: 22,6052           06055                           <span class="op">TC      </span> <a href="#4344545448524545">CDTTHREE</a>                              <span class="co">#  WHEN DTCOUNT = 6</span>
+014247,000074: 22,6053           06065                           <span class="op">TC      </span> <a href="#54494D43414C43">TIMCALC</a>                               
+014248,000075: 22,6054           06055                           <span class="op">TC      </span> <a href="#4344545448524545">CDTTHREE</a>                              
+<a name="4344545448524545"></a>014249,000076: 22,6055           44475        <span class="sm">CDTTHREE</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   
+014250,000077: 22,6056           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014251,000078: 22,6057           61100                           <span class="op">AD      </span> <a href="#4454434F554E54">DTCOUNT</a>                               
+014252,000079: 22,6060           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+014253,000080: 22,6061           06065                           <span class="op">TC      </span> <a href="#54494D43414C43">TIMCALC</a>                               <span class="co">#  EXIT ON DTCOUNT = 6</span>
+014254,000081: 22,6062           06124                           <span class="op">TC      </span> <a href="#454E4453574159">ENDSWAY</a>                               
+014255,000082: 22,6063           06065                           <span class="op">TC      </span> <a href="#54494D43414C43">TIMCALC</a>                               
+014256,000083: 22,6064           06124                           <span class="op">TC      </span> <a href="#454E4453574159">ENDSWAY</a>                               
+014257,000084: 
+014258,000085: 
+014259,000086: 
+<a name="54494D43414C43"></a>014260,000087: 22,6065           21111        <span class="sm">TIMCALC </span>           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014261,000088: 22,6066           11100                           <span class="op">CCS     </span> <a href="#4454434F554E54">DTCOUNT</a>                               
+014262,000089: 22,6067           06100                           <span class="op">TC      </span> <a href="#44494D434F554E54">DIMCOUNT</a>                              <span class="co">#  ACC NOW CONTAINS DTCOUNT - 1</span>
+014263,000090: 22,6070           06073                           <span class="op">TC      </span> <a href="#414C5450554C5353">ALTPULSS</a>                              <span class="co">#  IF DTCOUNT NORZ CHANGE</span>
+014264,000091: 22,6071           06073                           <span class="op">TC      </span> <a href="#414C5450554C5353">ALTPULSS</a>                              <span class="co">#  SIGN OF SWAYPULSE</span>
+014265,000092: 22,6072           30000                           <span class="op">NOOP    </span>                                       
+<a name="414C5450554C5353"></a>014266,000093: 22,6073           21111        <span class="sm">ALTPULSS</span>           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014267,000094: 22,6074           41102                           <span class="op">CS      </span> <a href="#5357415950554C53">SWAYPULS</a>                              
+014268,000095: 22,6075           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014269,000096: 22,6076           51102                           <span class="op">TS      </span> <a href="#5357415950554C53">SWAYPULS</a>                              
+014270,000097: 22,6077           33535                           <span class="op">CAF     </span> <a href="501_MISSION_CONTROL_PROGRAM.agc.html#544849525445454E">THIRTEEN</a>                              <span class="co">#  AND RESTART DTCOUNT AT 13</span>
+<a name="44494D434F554E54"></a>014271,000098: 22,6100           21111        <span class="sm">DIMCOUNT</span>           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014272,000099: 22,6101           51100                           <span class="op">TS      </span> <a href="#4454434F554E54">DTCOUNT</a>                               <span class="co">#  DTCOUNT NOW DIMINISHED BY ONE</span>
+014273,000100:                                                                                                  <span class="co">#  OR RESET TO 13</span>
+014274,000101: 22,6102           21111                           <span class="op">INDEX   </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014275,000102: 22,6103           21100                           <span class="op">INDEX   </span> <a href="#4454434F554E54">DTCOUNT</a>                               <span class="co">#  SELECT APPROPRIATE DELTA T FROM LIST</span>
+014276,000103: 22,6104           36130                           <span class="op">CAF     </span> <a href="#44454C5441">DELTA</a>                                 
+014277,000104: 22,6105           25777                           <span class="op">EXTEND  </span>                                       
+014278,000105: 22,6106           41110                           <span class="op">MP      </span> <a href="#54504552494F44">TPERIOD</a>                               <span class="co">#  AND MULTIPLY BY PERIOD</span>
+014279,000106: 22,6107           64477                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#46495645">FIVE</a>                                  <span class="co">#  ROUND RESULT</span>
+014280,000107: 22,6110           25777                           <span class="op">EXTEND  </span>                                       
+014281,000108: 22,6111           46146                           <span class="op">MP      </span> <a href="#4F4E4554454E5448">ONETENTH</a>                              
+014282,000109: 22,6112           50575                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505453544F52">RUPTSTOR</a>   +3                         <span class="co">#  TIME (DT) TILL NEXT INTERRUPT 10MS</span>
+<a name="4E45585452555054"></a>014283,000110: 22,6113           11111        <span class="sm">NEXTRUPT</span>           <span class="op">CCS     </span> <a href="#504950534C454354">PIPSLECT</a>                              
+014284,000111: 22,6114           06121                           <span class="op">TC      </span> <a href="#5A50495052555054">ZPIPRUPT</a>                              <span class="co">#  CALL WAITLIST FOR ZPIPA</span>
+014285,000112: 22,6115           30575                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505453544F52">RUPTSTOR</a>   +3                         
+014286,000113: 22,6116           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  CALL WAITLIST FOR YPIPA</span>
+014287,000114: 22,6117           44024                           <span class="ps">CADR    </span> <a href="#53574159524F5459">SWAYROTY</a>                              
+014288,000115: 22,6120           06124                           <span class="op">TC      </span> <a href="#454E4453574159">ENDSWAY</a>                               
+014289,000116: 
+<a name="5A50495052555054"></a>014290,000117: 22,6121           30575        <span class="sm">ZPIPRUPT</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505453544F52">RUPTSTOR</a>   +3                         
 </pre>
 </span>
 </p>
@@ -248,13 +250,13 @@ Page 368
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014244,000117: 22,6122           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-014245,000118: 22,6123           44017                           <span class="ps">CADR    </span> <a href="#53574159524F545A">SWAYROTZ</a>                              
-<a name="454E4453574159"></a>014246,000119: 22,6124           30032        <span class="sm">ENDSWAY </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  REPLACE LP</span>
-014247,000120: 22,6125           25777                           <span class="op">EXTEND  </span>                                       
-014248,000121: 22,6126           44516                           <span class="op">MP      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#42495431">BIT1</a>                                  
-014249,000122: 22,6127           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  END OF SWAY ROUTINE</span>
-014250,000123: 
+014292,000119: 22,6122           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+014293,000120: 22,6123           44017                           <span class="ps">CADR    </span> <a href="#53574159524F545A">SWAYROTZ</a>                              
+<a name="454E4453574159"></a>014294,000121: 22,6124           30032        <span class="sm">ENDSWAY </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  REPLACE LP</span>
+014295,000122: 22,6125           25777                           <span class="op">EXTEND  </span>                                       
+014296,000123: 22,6126           44516                           <span class="op">MP      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#42495431">BIT1</a>                                  
+014297,000124: 22,6127           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  END OF SWAY ROUTINE</span>
+014298,000125: 
 </pre>
 </span>
 </p>
@@ -270,41 +272,41 @@ Page 369
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014252,000125: 
-014253,000126:                                                                                                  <span class="co">#  MEMORY ASSIGNMENTS</span>
-014254,000127: 
-014255,000128: 
-014256,000129: 
-<a name="4454434F554E54"></a>014257,000130: 22,6130     1100               <span class="sm">DTCOUNT </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>                               <span class="co">#  YPIPA STATE COUNTER (0-7)</span>
-<a name="5357415950554C53"></a>014258,000131: 22,6130     1102               <span class="sm">SWAYPULS</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +2                         <span class="co">#  NEXT YPIPA PULSE (+1,-1)</span>
-<a name="5048415A494E47"></a>014259,000132: 22,6130     1104               <span class="sm">PHAZING </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +4                         <span class="co">#  TIME DELAY FOR ZPIPA START</span>
-014260,000133:                                                                                                  <span class="co">#  INITIALIZED BY KEYBOARD</span>
-014261,000134:                                                                                                  <span class="co">#  +XXXXX. E-2 SEC</span>
-014262,000135:                                                                                                  <span class="co">#  MUST BE GREATER THAN 00001</span>
-<a name="454E4453524F54"></a>014263,000136: 22,6130     1105               <span class="sm">ENDSROT </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +5                         <span class="co">#  FLAG FOR PROGRAM EXIT</span>
-014264,000137:                                                                                                  <span class="co">#  SET BY KEYBOARD</span>
-014265,000138:                                                                                                  <span class="co">#  = 00001. TO END SWAYROUTINE</span>
-014266,000139:                                                                                                  <span class="co">#  = +00000. TO CONTINUE</span>
-<a name="54504552494F44"></a>014267,000140: 22,6130     1110               <span class="sm">TPERIOD </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +8D                        <span class="co">#  PERIOD OF SWAY</span>
-014268,000141:                                                                                                  <span class="co">#  SET BY KEYBOARD</span>
-014269,000142:                                                                                                  <span class="co">#  = XX.XXX SEC</span>
-<a name="504950534C454354"></a>014270,000143: 22,6130     1111               <span class="sm">PIPSLECT</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +9D                        <span class="co">#  INDEX FOR PIPA SELECTION</span>
-<a name="44454C5441"></a>014271,000144: 22,6130           01602        <span class="sm">DELTA   </span>           <span class="ps">DEC     </span> .05482                                <span class="co">#  DELTA  TO</span>
-014272,000145: 22,6131           01064                           <span class="ps">DEC     </span> .03444                                <span class="co">#  1</span>
-014273,000146: 22,6132           00720                           <span class="ps">DEC     </span> .02833                                <span class="co">#  2</span>
-014274,000147: 22,6133           00636                           <span class="ps">DEC     </span> .02528                                <span class="co">#  3</span>
-014275,000148: 22,6134           00602                           <span class="ps">DEC     </span> .02356                                <span class="co">#  4</span>
-014276,000149: 22,6135           00562                           <span class="ps">DEC     </span> .02259                                <span class="co">#  5</span>
-014277,000150: 22,6136           00553                           <span class="ps">DEC     </span> .02213                                <span class="co">#  6</span>
-014278,000151: 22,6137           00553                           <span class="ps">DEC     </span> .02213                                <span class="co">#  7</span>
-014279,000152: 22,6140           00562                           <span class="ps">DEC     </span> .02259                                <span class="co">#  8</span>
-014280,000153: 22,6141           00602                           <span class="ps">DEC     </span> .02356                                <span class="co">#  9</span>
-014281,000154: 22,6142           00636                           <span class="ps">DEC     </span> .02528                                <span class="co">#  10</span>
-014282,000155: 22,6143           00720                           <span class="ps">DEC     </span> .02833                                <span class="co">#  11</span>
-014283,000156: 22,6144           01064                           <span class="ps">DEC     </span> .03444                                <span class="co">#  12</span>
-014284,000157: 22,6145           04173                           <span class="ps">DEC     </span> .1325                                 <span class="co">#  13</span>
-<a name="4F4E4554454E5448"></a>014285,000158: 22,6146           03146        <span class="sm">ONETENTH</span>           <span class="ps">DEC     </span> E-1        B-14                       
-014286,000159: 
+014300,000127: 
+014301,000128:                                                                                                  <span class="co">#  MEMORY ASSIGNMENTS</span>
+014302,000129: 
+014303,000130: 
+014304,000131: 
+<a name="4454434F554E54"></a>014305,000132: 22,6130     1100               <span class="sm">DTCOUNT </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>                               <span class="co">#  YPIPA STATE COUNTER (0-7)</span>
+<a name="5357415950554C53"></a>014306,000133: 22,6130     1102               <span class="sm">SWAYPULS</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +2                         <span class="co">#  NEXT YPIPA PULSE (+1,-1)</span>
+<a name="5048415A494E47"></a>014307,000134: 22,6130     1104               <span class="sm">PHAZING </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +4                         <span class="co">#  TIME DELAY FOR ZPIPA START</span>
+014308,000135:                                                                                                  <span class="co">#  INITIALIZED BY KEYBOARD</span>
+014309,000136:                                                                                                  <span class="co">#  +XXXXX. E-2 SEC</span>
+014310,000137:                                                                                                  <span class="co">#  MUST BE GREATER THAN 00001</span>
+<a name="454E4453524F54"></a>014311,000138: 22,6130     1105               <span class="sm">ENDSROT </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +5                         <span class="co">#  FLAG FOR PROGRAM EXIT</span>
+014312,000139:                                                                                                  <span class="co">#  SET BY KEYBOARD</span>
+014313,000140:                                                                                                  <span class="co">#  = 00001. TO END SWAYROUTINE</span>
+014314,000141:                                                                                                  <span class="co">#  = +00000. TO CONTINUE</span>
+<a name="54504552494F44"></a>014315,000142: 22,6130     1110               <span class="sm">TPERIOD </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +8D                        <span class="co">#  PERIOD OF SWAY</span>
+014316,000143:                                                                                                  <span class="co">#  SET BY KEYBOARD</span>
+014317,000144:                                                                                                  <span class="co">#  = XX.XXX SEC</span>
+<a name="504950534C454354"></a>014318,000145: 22,6130     1111               <span class="sm">PIPSLECT</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>    +9D                        <span class="co">#  INDEX FOR PIPA SELECTION</span>
+<a name="44454C5441"></a>014319,000146: 22,6130           01602        <span class="sm">DELTA   </span>           <span class="ps">DEC     </span> .05482                                <span class="co">#  DELTA  TO</span>
+014320,000147: 22,6131           01064                           <span class="ps">DEC     </span> .03444                                <span class="co">#  1</span>
+014321,000148: 22,6132           00720                           <span class="ps">DEC     </span> .02833                                <span class="co">#  2</span>
+014322,000149: 22,6133           00636                           <span class="ps">DEC     </span> .02528                                <span class="co">#  3</span>
+014323,000150: 22,6134           00602                           <span class="ps">DEC     </span> .02356                                <span class="co">#  4</span>
+014324,000151: 22,6135           00562                           <span class="ps">DEC     </span> .02259                                <span class="co">#  5</span>
+014325,000152: 22,6136           00553                           <span class="ps">DEC     </span> .02213                                <span class="co">#  6</span>
+014326,000153: 22,6137           00553                           <span class="ps">DEC     </span> .02213                                <span class="co">#  7</span>
+014327,000154: 22,6140           00562                           <span class="ps">DEC     </span> .02259                                <span class="co">#  8</span>
+014328,000155: 22,6141           00602                           <span class="ps">DEC     </span> .02356                                <span class="co">#  9</span>
+014329,000156: 22,6142           00636                           <span class="ps">DEC     </span> .02528                                <span class="co">#  10</span>
+014330,000157: 22,6143           00720                           <span class="ps">DEC     </span> .02833                                <span class="co">#  11</span>
+014331,000158: 22,6144           01064                           <span class="ps">DEC     </span> .03444                                <span class="co">#  12</span>
+014332,000159: 22,6145           04173                           <span class="ps">DEC     </span> .1325                                 <span class="co">#  13</span>
+<a name="4F4E4554454E5448"></a>014333,000160: 22,6146           03146        <span class="sm">ONETENTH</span>           <span class="ps">DEC     </span> E-1        B-14                       
+014334,000161: 
 </pre>
 </span>
 </p>
@@ -320,57 +322,57 @@ Page 370
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014288,000161: 
-014289,000162:                                                                                                  <span class="co">#  VERIFICATION ASSISTANVE FOR INFLIGHT</span>
-014290,000163: 
-014291,000164: 
-014292,000165: 
-<a name="4D5954455354"></a>014293,000166: 22,6147           04000        <span class="sm">MYTEST  </span>           <span class="op">TC      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#                                        456</span>
-014294,000167: 22,6150           45176                           <span class="in">DMOVE   </span> 0                                     <span class="co">#                                        356</span>
-014295,000168: 22,6151           05174                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#5A45524F4450">ZERODP</a>                                <span class="co">#  SET ANGLES TO ZERO AND TEST           256</span>
-014296,000169: 22,6152           33523                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   <span class="co">#                                        156</span>
-014297,000170: 
-014298,000171: 22,6153           47576                           <span class="in">NOLOD   </span> 0                                     <span class="co">#                                        056</span>
-014299,000172: 22,6154           33525                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   <span class="co">#                                        -56</span>
-014300,000173: 
-014301,000174: 22,6155           47576                           <span class="in">NOLOD   </span> 0                                     <span class="co">#                                        +56</span>
-014302,000175: 22,6156           33521                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
-014303,000176: 
-014304,000177: 22,6157           76776                           <span class="in">ITC     </span> 0                                     
-014305,000178: 22,6160           04262                                    <a href="#444F54455354">DOTEST</a>                                
-014306,000179: 
-014307,000180: 22,6161           47176                           <span class="in">COMP    </span> 0                                     <span class="co">#  SET ANGLES TO -HALF AND TEST</span>
-014308,000181: 22,6162           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
-014309,000182: 22,6163           33523                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
-014310,000183: 
-014311,000184: 22,6164           47576                           <span class="in">NOLOD   </span> 0                                     
-014312,000185: 22,6165           33525                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
-014313,000186: 
-014314,000187: 22,6166           47576                           <span class="in">NOLOD   </span> 0                                     
-014315,000188: 22,6167           33521                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
-014316,000189: 
-014317,000190: 22,6170           76776                           <span class="in">ITC     </span> 0                                     
-014318,000191: 22,6171           04262                                    <a href="#444F54455354">DOTEST</a>                                
-014319,000192: 
-<a name="434847494743"></a>014320,000193: 22,6172           45175        <span class="sm">CHGIGC  </span>           <span class="in">DMOVE   </span> 1                                     <span class="co">#  CHANGE IGC,MGC, AND OGC AND TEST</span>
-014321,000194: 22,6173           70776                           <span class="in">DAD     </span>                                       
-014322,000195: 22,6174           01317                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415A494D555448">AZIMUTH</a>                               
-014323,000196: 22,6175           04256                                    <a href="#494E43524D54">INCRMT</a>                                
-014324,000197: 22,6176           33523                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
-014325,000198: 
-014326,000199: 22,6177           47576                           <span class="in">NOLOD   </span> 0                                     
-014327,000200: 22,6200           33317                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415A494D555448">AZIMUTH</a>                               
-014328,000201: 
-014329,000202: 22,6201           66775                           <span class="in">DSU     </span> 1                                     
-014330,000203: 22,6202           43772                           <span class="in">BPL     </span> <span class="in">ITC       </span>                            
-014331,000204: 22,6203           01523                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
-014332,000205: 22,6204           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
-014333,000206: 22,6205           04260                                    <a href="#4F5554">OUT</a>                                   
-014334,000207: 22,6206           04262                                    <a href="#444F54455354">DOTEST</a>                                
-014335,000208: 
-<a name="4348474D4743"></a>014336,000209: 22,6207           45175        <span class="sm">CHGMGC  </span>           <span class="in">DMOVE   </span> 1                                     <span class="co">#  CHANGE MGC AND OGC AND TEST</span>
-014337,000210: 22,6210           70776                           <span class="in">DAD     </span>                                       
-014338,000211: 22,6211           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4759524F435357">GYROCSW</a>                               
+014336,000163: 
+014337,000164:                                                                                                  <span class="co">#  VERIFICATION ASSISTANVE FOR INFLIGHT</span>
+014338,000165: 
+014339,000166: 
+014340,000167: 
+<a name="4D5954455354"></a>014341,000168: 22,6147           04000        <span class="sm">MYTEST  </span>           <span class="op">TC      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#                                        456</span>
+014342,000169: 22,6150           45176                           <span class="in">DMOVE   </span> 0                                     <span class="co">#                                        356</span>
+014343,000170: 22,6151           05174                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#5A45524F4450">ZERODP</a>                                <span class="co">#  SET ANGLES TO ZERO AND TEST           256</span>
+014344,000171: 22,6152           33523                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   <span class="co">#                                        156</span>
+014345,000172: 
+014346,000173: 22,6153           47576                           <span class="in">NOLOD   </span> 0                                     <span class="co">#                                        056</span>
+014347,000174: 22,6154           33525                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   <span class="co">#                                        -56</span>
+014348,000175: 
+014349,000176: 22,6155           47576                           <span class="in">NOLOD   </span> 0                                     <span class="co">#                                        +56</span>
+014350,000177: 22,6156           33521                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+014351,000178: 
+014352,000179: 22,6157           76776                           <span class="in">ITC     </span> 0                                     
+014353,000180: 22,6160           04262                                    <a href="#444F54455354">DOTEST</a>                                
+014354,000181: 
+014355,000182: 22,6161           47176                           <span class="in">COMP    </span> 0                                     <span class="co">#  SET ANGLES TO -HALF AND TEST</span>
+014356,000183: 22,6162           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
+014357,000184: 22,6163           33523                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
+014358,000185: 
+014359,000186: 22,6164           47576                           <span class="in">NOLOD   </span> 0                                     
+014360,000187: 22,6165           33525                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
+014361,000188: 
+014362,000189: 22,6166           47576                           <span class="in">NOLOD   </span> 0                                     
+014363,000190: 22,6167           33521                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+014364,000191: 
+014365,000192: 22,6170           76776                           <span class="in">ITC     </span> 0                                     
+014366,000193: 22,6171           04262                                    <a href="#444F54455354">DOTEST</a>                                
+014367,000194: 
+<a name="434847494743"></a>014368,000195: 22,6172           45175        <span class="sm">CHGIGC  </span>           <span class="in">DMOVE   </span> 1                                     <span class="co">#  CHANGE IGC,MGC, AND OGC AND TEST</span>
+014369,000196: 22,6173           70776                           <span class="in">DAD     </span>                                       
+014370,000197: 22,6174           01317                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415A494D555448">AZIMUTH</a>                               
+014371,000198: 22,6175           04256                                    <a href="#494E43524D54">INCRMT</a>                                
+014372,000199: 22,6176           33523                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
+014373,000200: 
+014374,000201: 22,6177           47576                           <span class="in">NOLOD   </span> 0                                     
+014375,000202: 22,6200           33317                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415A494D555448">AZIMUTH</a>                               
+014376,000203: 
+014377,000204: 22,6201           66775                           <span class="in">DSU     </span> 1                                     
+014378,000205: 22,6202           43772                           <span class="in">BPL     </span> <span class="in">ITC       </span>                            
+014379,000206: 22,6203           01523                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
+014380,000207: 22,6204           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
+014381,000208: 22,6205           04260                                    <a href="#4F5554">OUT</a>                                   
+014382,000209: 22,6206           04262                                    <a href="#444F54455354">DOTEST</a>                                
+014383,000210: 
+<a name="4348474D4743"></a>014384,000211: 22,6207           45175        <span class="sm">CHGMGC  </span>           <span class="in">DMOVE   </span> 1                                     <span class="co">#  CHANGE MGC AND OGC AND TEST</span>
+014385,000212: 22,6210           70776                           <span class="in">DAD     </span>                                       
+014386,000213: 22,6211           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4759524F435357">GYROCSW</a>                               
 </pre>
 </span>
 </p>
@@ -386,56 +388,56 @@ Page 371
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014340,000213: 22,6212           04256                                    <a href="#494E43524D54">INCRMT</a>                                
-014341,000214: 22,6213           33525                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
-014342,000215: 
-014343,000216: 22,6214           47576                           <span class="in">NOLOD   </span> 0                                     
-014344,000217: 22,6215           33321                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4759524F435357">GYROCSW</a>                               
-014345,000218: 
-014346,000219: 22,6216           66775                           <span class="in">DSU     </span> 1                                     
-014347,000220: 22,6217           43772                           <span class="in">BPL     </span> <span class="in">ITC       </span>                            
-014348,000221: 22,6220           01525                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
-014349,000222: 22,6221           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
-014350,000223: 22,6222           04251                                    <a href="#52455345544D">RESETM</a>                                
-014351,000224: 22,6223           04262                                    <a href="#444F54455354">DOTEST</a>                                
-014352,000225: 
-<a name="4348474F4743"></a>014353,000226: 22,6224           45175        <span class="sm">CHGOGC  </span>           <span class="in">DMOVE   </span> 1                                     <span class="co">#  RESET OGC AND TEST</span>
-014354,000227: 22,6225           70776                           <span class="in">DAD     </span>                                       
-014355,000228: 22,6226           01323                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5052454C584741">PRELXGA</a>                               
-014356,000229: 22,6227           04256                                    <a href="#494E43524D54">INCRMT</a>                                
-014357,000230: 22,6230           33521                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
-014358,000231: 
-014359,000232: 22,6231           47576                           <span class="in">NOLOD   </span> 0                                     
-014360,000233: 22,6232           33323                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052454C584741">PRELXGA</a>                               
-014361,000234: 
-014362,000235: 22,6233           66775                           <span class="in">DSU     </span> 1                                     
-014363,000236: 22,6234           43772                           <span class="in">BPL     </span> <span class="in">ITC       </span>                            
-014364,000237: 22,6235           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
-014365,000238: 22,6236           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
-014366,000239: 22,6237           04244                                    <a href="#52455345544F">RESETO</a>                                
-014367,000240: 22,6240           04262                                    <a href="#444F54455354">DOTEST</a>                                
-014368,000241: 
-014369,000242: 22,6241           76776                           <span class="in">ITC     </span> 0                                     
-014370,000243: 22,6242           04225                                    <a href="#4348474F4743">CHGOGC</a>                                
-014371,000244: 
-<a name="52455345544F"></a>014372,000245: 22,6243           47176        <span class="sm">RESETO  </span>           <span class="in">COMP    </span> 0                                     <span class="co">#  RESET OGC TO-HALF</span>
-014373,000246: 22,6244           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                <span class="co">#  LOOP TO CHGMGC</span>
-014374,000247: 22,6245           33323                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052454C584741">PRELXGA</a>                               
-014375,000248: 
-014376,000249: 22,6246           76776                           <span class="in">ITC     </span> 0                                     
-014377,000250: 22,6247           04210                                    <a href="#4348474D4743">CHGMGC</a>                                
-014378,000251: 
-<a name="52455345544D"></a>014379,000252: 22,6250           47176        <span class="sm">RESETM  </span>           <span class="in">COMP    </span> 0                                     <span class="co">#  RESET MGC TO -HALF</span>
-014380,000253: 22,6251           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                <span class="co">#  LOOP TO CHGIGC</span>
-014381,000254: 22,6252           33321                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4759524F435357">GYROCSW</a>                               
-014382,000255: 
-014383,000256: 22,6253           76776                           <span class="in">ITC     </span> 0                                     
-014384,000257: 22,6254           04173                                    <a href="#434847494743">CHGIGC</a>                                
-014385,000258: 
-<a name="494E43524D54"></a>014386,000259: 22,6255           06314 31463  <span class="sm">INCRMT  </span>           <span class="ps">2DEC    </span> .20                                   
-014387,000260: 
-<a name="4F5554"></a>014388,000261: 22,6257           77576        <span class="sm">OUT     </span>           <span class="in">EXIT    </span> 0                                     <span class="co">#  END OF MAIN</span>
-<a name="4C415354574F5244"></a>014389,000262: 22,6260           02124        <span class="sm">LASTWORD</span>           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+014388,000215: 22,6212           04256                                    <a href="#494E43524D54">INCRMT</a>                                
+014389,000216: 22,6213           33525                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
+014390,000217: 
+014391,000218: 22,6214           47576                           <span class="in">NOLOD   </span> 0                                     
+014392,000219: 22,6215           33321                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4759524F435357">GYROCSW</a>                               
+014393,000220: 
+014394,000221: 22,6216           66775                           <span class="in">DSU     </span> 1                                     
+014395,000222: 22,6217           43772                           <span class="in">BPL     </span> <span class="in">ITC       </span>                            
+014396,000223: 22,6220           01525                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
+014397,000224: 22,6221           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
+014398,000225: 22,6222           04251                                    <a href="#52455345544D">RESETM</a>                                
+014399,000226: 22,6223           04262                                    <a href="#444F54455354">DOTEST</a>                                
+014400,000227: 
+<a name="4348474F4743"></a>014401,000228: 22,6224           45175        <span class="sm">CHGOGC  </span>           <span class="in">DMOVE   </span> 1                                     <span class="co">#  RESET OGC AND TEST</span>
+014402,000229: 22,6225           70776                           <span class="in">DAD     </span>                                       
+014403,000230: 22,6226           01323                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5052454C584741">PRELXGA</a>                               
+014404,000231: 22,6227           04256                                    <a href="#494E43524D54">INCRMT</a>                                
+014405,000232: 22,6230           33521                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+014406,000233: 
+014407,000234: 22,6231           47576                           <span class="in">NOLOD   </span> 0                                     
+014408,000235: 22,6232           33323                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052454C584741">PRELXGA</a>                               
+014409,000236: 
+014410,000237: 22,6233           66775                           <span class="in">DSU     </span> 1                                     
+014411,000238: 22,6234           43772                           <span class="in">BPL     </span> <span class="in">ITC       </span>                            
+014412,000239: 22,6235           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+014413,000240: 22,6236           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                
+014414,000241: 22,6237           04244                                    <a href="#52455345544F">RESETO</a>                                
+014415,000242: 22,6240           04262                                    <a href="#444F54455354">DOTEST</a>                                
+014416,000243: 
+014417,000244: 22,6241           76776                           <span class="in">ITC     </span> 0                                     
+014418,000245: 22,6242           04225                                    <a href="#4348474F4743">CHGOGC</a>                                
+014419,000246: 
+<a name="52455345544F"></a>014420,000247: 22,6243           47176        <span class="sm">RESETO  </span>           <span class="in">COMP    </span> 0                                     <span class="co">#  RESET OGC TO-HALF</span>
+014421,000248: 22,6244           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                <span class="co">#  LOOP TO CHGMGC</span>
+014422,000249: 22,6245           33323                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052454C584741">PRELXGA</a>                               
+014423,000250: 
+014424,000251: 22,6246           76776                           <span class="in">ITC     </span> 0                                     
+014425,000252: 22,6247           04210                                    <a href="#4348474D4743">CHGMGC</a>                                
+014426,000253: 
+<a name="52455345544D"></a>014427,000254: 22,6250           47176        <span class="sm">RESETM  </span>           <span class="in">COMP    </span> 0                                     <span class="co">#  RESET MGC TO -HALF</span>
+014428,000255: 22,6251           05200                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#48414C464450">HALFDP</a>                                <span class="co">#  LOOP TO CHGIGC</span>
+014429,000256: 22,6252           33321                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4759524F435357">GYROCSW</a>                               
+014430,000257: 
+014431,000258: 22,6253           76776                           <span class="in">ITC     </span> 0                                     
+014432,000259: 22,6254           04173                                    <a href="#434847494743">CHGIGC</a>                                
+014433,000260: 
+<a name="494E43524D54"></a>014434,000261: 22,6255           06314 31463  <span class="sm">INCRMT  </span>           <span class="ps">2DEC    </span> .20                                   
+014435,000262: 
+<a name="4F5554"></a>014436,000263: 22,6257           77576        <span class="sm">OUT     </span>           <span class="in">EXIT    </span> 0                                     <span class="co">#  END OF MAIN</span>
+<a name="4C415354574F5244"></a>014437,000264: 22,6260           02124        <span class="sm">LASTWORD</span>           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
 </pre>
 </span>
 </p>
@@ -451,56 +453,56 @@ Page 372
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014391,000264: 
-<a name="444F54455354"></a>014392,000265: 22,6261           45575        <span class="sm">DOTEST  </span>           <span class="in">ITA     </span> 1                                     
-014393,000266: 22,6262           75172                           <span class="in">VMOVE   </span> <span class="in">ITC       </span>                            
-014394,000267: 22,6263           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41544954554445">LATITUDE</a>                              
-014395,000268: 22,6264           15573                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495458">UNITX</a>                                 
-014396,000269: 22,6265           04313                                    <a href="#4D59524F54">MYROT</a>                                 
-014397,000270: 
-014398,000271: 22,6266           47576                           <span class="in">NOLOD   </span> 0                                     
-014399,000272: 22,6267           33403                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>                                
-014400,000273: 
-014401,000274: 22,6270           75175                           <span class="in">VMOVE   </span> 1                                     
-014402,000275: 22,6271           76776                           <span class="in">ITC     </span>                                       
-014403,000276: 22,6272           15601                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495459">UNITY</a>                                 
-014404,000277: 22,6273           04313                                    <a href="#4D59524F54">MYROT</a>                                 
-014405,000278: 
-014406,000279: 22,6274           47576                           <span class="in">NOLOD   </span> 0                                     
-014407,000280: 22,6275           33411                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6D                        
-014408,000281: 
-014409,000282: 22,6276           75176                           <span class="in">VMOVE   </span> 0                                     
-014410,000283: 22,6277           15573                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495458">UNITX</a>                                 
-014411,000284: 22,6300           32007                           <span class="in">STORE   </span> 6D                                    
-014412,000285: 
-014413,000286: 22,6301           75176                           <span class="in">VMOVE   </span> 0                                     
-014414,000287: 22,6302           15601                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495459">UNITY</a>                                 
-014415,000288: 22,6303           32015                           <span class="in">STORE   </span> 12D                                   
-014416,000289: 
-014417,000290: 22,6304           76776                           <span class="in">ITC     </span> 0                                     
-014418,000291: 22,6305           04761                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#4158495347454E">AXISGEN</a>                               
-014419,000292: 
-014420,000293: 22,6306           76776                           <span class="in">ITC     </span> 0                                     <span class="co">#  SEND NEW VECTORS TO CALCGTA</span>
-014421,000294: 22,6307           04353                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#43414C43475441">CALCGTA</a>                               
-014422,000295: 
-014423,000296: 22,6310           44576                           <span class="in">ITCI    </span> 0                                     
-014424,000297: 22,6311           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41544954554445">LATITUDE</a>                              
-<a name="4D59524F54"></a>014425,000298: 22,6312           45575        <span class="sm">MYROT   </span>           <span class="in">ITA     </span> 1                                     <span class="co">#  INITIALIZE</span>
-014426,000299: 22,6313           43411                           <span class="in">TEST    </span> <span class="in">SWITCH    </span>                            
-014427,000300: 22,6314           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-014428,000301: 22,6315           00006                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42534D424954">NBSMBIT</a>                               
-014429,000302: 22,6316           04321                                    <a href="#4D59524F5431">MYROT1</a>                                
-014430,000303: 22,6317           00006                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42534D424954">NBSMBIT</a>                               
-014431,000304: 
-<a name="4D59524F5431"></a>014432,000305: 22,6320           75575        <span class="sm">MYROT1  </span>           <span class="in">AXT,1   </span> 1                                     <span class="co">#  ROTATE X,Z  ABOUT  Y</span>
-014433,000306: 22,6321           74423                           <span class="in">AXT,2   </span> <span class="in">DMOVE     </span>                            
-014434,000307: 22,6322           00005                                    4                                     
-014435,000308: 22,6323           00001                                    0                                     
-014436,000309: 22,6324           01523                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
-014437,000310: 22,6325           32037                           <span class="in">STORE   </span> 30D                                   
-014438,000311: 
-014439,000312: 22,6326           76776                           <span class="in">ITC     </span> 0                                     
-014440,000313: 22,6327           04566                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#41434355524F54">ACCUROT</a>                               
+014439,000266: 
+<a name="444F54455354"></a>014440,000267: 22,6261           45575        <span class="sm">DOTEST  </span>           <span class="in">ITA     </span> 1                                     
+014441,000268: 22,6262           75172                           <span class="in">VMOVE   </span> <span class="in">ITC       </span>                            
+014442,000269: 22,6263           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41544954554445">LATITUDE</a>                              
+014443,000270: 22,6264           15573                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495458">UNITX</a>                                 
+014444,000271: 22,6265           04313                                    <a href="#4D59524F54">MYROT</a>                                 
+014445,000272: 
+014446,000273: 22,6266           47576                           <span class="in">NOLOD   </span> 0                                     
+014447,000274: 22,6267           33403                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>                                
+014448,000275: 
+014449,000276: 22,6270           75175                           <span class="in">VMOVE   </span> 1                                     
+014450,000277: 22,6271           76776                           <span class="in">ITC     </span>                                       
+014451,000278: 22,6272           15601                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495459">UNITY</a>                                 
+014452,000279: 22,6273           04313                                    <a href="#4D59524F54">MYROT</a>                                 
+014453,000280: 
+014454,000281: 22,6274           47576                           <span class="in">NOLOD   </span> 0                                     
+014455,000282: 22,6275           33411                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535441524144">STARAD</a>     +6D                        
+014456,000283: 
+014457,000284: 22,6276           75176                           <span class="in">VMOVE   </span> 0                                     
+014458,000285: 22,6277           15573                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495458">UNITX</a>                                 
+014459,000286: 22,6300           32007                           <span class="in">STORE   </span> 6D                                    
+014460,000287: 
+014461,000288: 22,6301           75176                           <span class="in">VMOVE   </span> 0                                     
+014462,000289: 22,6302           15601                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#554E495459">UNITY</a>                                 
+014463,000290: 22,6303           32015                           <span class="in">STORE   </span> 12D                                   
+014464,000291: 
+014465,000292: 22,6304           76776                           <span class="in">ITC     </span> 0                                     
+014466,000293: 22,6305           04761                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#4158495347454E">AXISGEN</a>                               
+014467,000294: 
+014468,000295: 22,6306           76776                           <span class="in">ITC     </span> 0                                     <span class="co">#  SEND NEW VECTORS TO CALCGTA</span>
+014469,000296: 22,6307           04353                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#43414C43475441">CALCGTA</a>                               
+014470,000297: 
+014471,000298: 22,6310           44576                           <span class="in">ITCI    </span> 0                                     
+014472,000299: 22,6311           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41544954554445">LATITUDE</a>                              
+<a name="4D59524F54"></a>014473,000300: 22,6312           45575        <span class="sm">MYROT   </span>           <span class="in">ITA     </span> 1                                     <span class="co">#  INITIALIZE</span>
+014474,000301: 22,6313           43411                           <span class="in">TEST    </span> <span class="in">SWITCH    </span>                            
+014475,000302: 22,6314           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+014476,000303: 22,6315           00006                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42534D424954">NBSMBIT</a>                               
+014477,000304: 22,6316           04321                                    <a href="#4D59524F5431">MYROT1</a>                                
+014478,000305: 22,6317           00006                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E42534D424954">NBSMBIT</a>                               
+014479,000306: 
+<a name="4D59524F5431"></a>014480,000307: 22,6320           75575        <span class="sm">MYROT1  </span>           <span class="in">AXT,1   </span> 1                                     <span class="co">#  ROTATE X,Z  ABOUT  Y</span>
+014481,000308: 22,6321           74423                           <span class="in">AXT,2   </span> <span class="in">DMOVE     </span>                            
+014482,000309: 22,6322           00005                                    4                                     
+014483,000310: 22,6323           00001                                    0                                     
+014484,000311: 22,6324           01523                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494743">IGC</a>                                   
+014485,000312: 22,6325           32037                           <span class="in">STORE   </span> 30D                                   
+014486,000313: 
+014487,000314: 22,6326           76776                           <span class="in">ITC     </span> 0                                     
+014488,000315: 22,6327           04566                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#41434355524F54">ACCUROT</a>                               
 </pre>
 </span>
 </p>
@@ -516,28 +518,28 @@ Page 373
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014442,000315: 22,6330           75575                           <span class="in">AXT,1   </span> 1                                     <span class="co">#   ROTATE X,Y  ABOUT  Z</span>
-014443,000316: 22,6331           74423                           <span class="in">AXT,2   </span> <span class="in">DMOVE     </span>                            
-014444,000317: 22,6332           00003                                    2                                     
-014445,000318: 22,6333           00005                                    4                                     
-014446,000319: 22,6334           01525                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
-014447,000320: 22,6335           32037                           <span class="in">STORE   </span> 30D                                   
-014448,000321: 
-014449,000322: 22,6336           76776                           <span class="in">ITC     </span> 0                                     
-014450,000323: 22,6337           04566                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#41434355524F54">ACCUROT</a>                               
-014451,000324: 
-014452,000325: 22,6340           75575                           <span class="in">AXT,1   </span> 1                                     <span class="co">#  ROTATE  Z,Y ABOUT  X</span>
-014453,000326: 22,6341           74423                           <span class="in">AXT,2   </span> <span class="in">DMOVE     </span>                            
-014454,000327: 22,6342           00001                                    0                                     
-014455,000328: 22,6343           00003                                    2                                     
-014456,000329: 22,6344           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
-014457,000330: 22,6345           32037                           <span class="in">STORE   </span> 30D                                   
-014458,000331: 
-014459,000332: 22,6346           76776                           <span class="in">ITC     </span> 0                                     
-014460,000333: 22,6347           04566                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#41434355524F54">ACCUROT</a>                               
-014461,000334: 
-014462,000335: 22,6350           44576                           <span class="in">ITCI    </span> 0                                     
-014463,000336: 22,6351           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+014490,000317: 22,6330           75575                           <span class="in">AXT,1   </span> 1                                     <span class="co">#   ROTATE X,Y  ABOUT  Z</span>
+014491,000318: 22,6331           74423                           <span class="in">AXT,2   </span> <span class="in">DMOVE     </span>                            
+014492,000319: 22,6332           00003                                    2                                     
+014493,000320: 22,6333           00005                                    4                                     
+014494,000321: 22,6334           01525                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4743">MGC</a>                                   
+014495,000322: 22,6335           32037                           <span class="in">STORE   </span> 30D                                   
+014496,000323: 
+014497,000324: 22,6336           76776                           <span class="in">ITC     </span> 0                                     
+014498,000325: 22,6337           04566                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#41434355524F54">ACCUROT</a>                               
+014499,000326: 
+014500,000327: 22,6340           75575                           <span class="in">AXT,1   </span> 1                                     <span class="co">#  ROTATE  Z,Y ABOUT  X</span>
+014501,000328: 22,6341           74423                           <span class="in">AXT,2   </span> <span class="in">DMOVE     </span>                            
+014502,000329: 22,6342           00001                                    0                                     
+014503,000330: 22,6343           00003                                    2                                     
+014504,000331: 22,6344           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+014505,000332: 22,6345           32037                           <span class="in">STORE   </span> 30D                                   
+014506,000333: 
+014507,000334: 22,6346           76776                           <span class="in">ITC     </span> 0                                     
+014508,000335: 22,6347           04566                                    <a href="INFLIGHT_ALIGNMENT_SUBROUTINES.agc.html#41434355524F54">ACCUROT</a>                               
+014509,000336: 
+014510,000337: 22,6350           44576                           <span class="in">ITCI    </span> 0                                     
+014511,000338: 22,6351           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
 
 End of include-file INFLIGHT_ALIGNMENT_PROGRAM.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

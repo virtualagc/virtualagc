@@ -91,18 +91,20 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-011320,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-011321,000003:                                                                                                  <span class="co">## Filename:    INTER-BANK_COMMUNICATION.agc</span>
-011322,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
-011323,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
-011324,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
-011325,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
-011326,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-011327,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-011328,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
-011329,000011:                                                                                                  <span class="co">## Mod history: 2009-09-15 JL   Created.</span>
-011330,000012:                                                                                                  <span class="co">##              2016-08-19 RSB  Typos.</span>
-011331,000013: 
+011356,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+011357,000003:                                                                                                  <span class="co">## Filename:    INTER-BANK_COMMUNICATION.agc</span>
+011358,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
+011359,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
+011360,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
+011361,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
+011362,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+011363,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+011364,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
+011365,000011:                                                                                                  <span class="co">## Mod history: 2009-09-15 JL   Created.</span>
+011366,000012:                                                                                                  <span class="co">##              2016-08-19 RSB  Typos.</span>
+011367,000013:                                                                                                  <span class="co">##              2016-12-28 RSB  Proofed comment text using octopus/ProoferComments,</span>
+011368,000014:                                                                                                  <span class="co">##                              but no errors found.</span>
+011369,000015: 
 </pre>
 </span>
 </p>
@@ -118,42 +120,42 @@ Page 290
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-011333,000015: 
-011334,000016:                                                                                                  <span class="co">#        THE FOLLOWING SUBROUTINES ARE INTENDED TO FACILITATE INTER-BANK COMMUNICATION. ROUTINES ARE PROVIDED</span>
-011335,000017:                                                                                                  <span class="co">#  FOR JUMPING TO A LOCATION IN ANOTHER BANK, CALLING A SUBROUTINE IN ANOTHER BANK, AND OBTAINING DATA FROM ANOTHER</span>
-011336,000018:                                                                                                  <span class="co">#  BANK. IN ADDITION, A ROUTINE IS PROVIDED FOR MAKING UP A RETURN_ADDRESS CADR FOR USE BY THE CALLED SUBROUTINE.</span>
-011337,000019: 
-011338,000020:    5654                                           <span class="ps">BANK    </span> 2                                     
-<a name="42414E4B43414C4C"></a>011339,000021:    5654           50062        <span class="sm">BANKCALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  SUBROUTINE CALL WITH TRANSMISSION BOTH</span>
-011340,000022:    5655           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  WAYS IN A. THE CADR OF THE CALLED</span>
-011341,000023:    5656           64516                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ROUTINE SHOULD IMMEDIATELY FOLLOW THE</span>
-011342,000024:    5657           50001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  TC BANKCALL.</span>
-011343,000025:    5660           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-011344,000026:    5661           27777                           <span class="op">CAF     </span> 0          -1                         <span class="co">#  PICK UP CADR AND FALL INTO SWCALL.</span>
-011345,000027: 
-<a name="535743414C4C"></a>011346,000028:    5662           50071        <span class="sm">SWCALL  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  SWCALL IS ALOS USED TO CALL SUBROUTINES</span>
-011347,000029:    5663           30015                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  IN OTHER BANKS, BUT THE CADR ARRIVES IN</span>
-011348,000030:    5664           50072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  A. DATA MAY BE TRANSMITTED BACK TO THE</span>
-011349,000031:    5665           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CALLING PROGRAM IN A, HOWEVER. </span>
-011350,000032:    5666           30071                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  RETURN INFORMATION NOW COMPLETE.</span>
-011351,000033:    5667           50114                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                
-011352,000034:    5670           72667                           <span class="op">MASK    </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#37304B">70K</a>                                   <span class="co">#  PROVISION FOR CALLING A ROUTINE IN</span>
-011353,000035:    5671           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  FIXED-FIXED (OF QUESTIONABLE VALUE).</span>
-011354,000036:    5672           05674                           <span class="op">TC      </span> +2                                    <span class="co">#  SPECIAL TREATMENT REQUIRED IF NON-ZERO.</span>
-011355,000037:    5673           05676                           <span class="op">TC      </span> +3                                    <span class="co">#  INPUT CADR OK AS IS.</span>
-011356,000038: 
-011357,000039:    5674           40015                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  FORM PROPER 12 BIT ADDRESS.</span>
-011358,000040:    5675           64373                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#364B">6K</a>                                    
-011359,000041:    5676           60114                 +3        <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                <span class="co">#  PROPER CADRS COME HERE WITH C(A) = 0.</span>
-011360,000042:    5677           30062                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  SO A CAN TRANSMIT WITH BANKCALL.</span>
-011361,000043:    5700           20062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
-011362,000044:    5701           00000                           <span class="op">TC      </span> 0                                     <span class="co">#  SETTING Q TO SWRETURN.</span>
-011363,000045: 
-<a name="535752455455524E"></a>011364,000046:    5702           30072        <span class="sm">SWRETURN</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  RETURN TO CALLER, TRANSMITTING THROUGH A</span>
-011365,000047:    5703           50015                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
-011366,000048:    5704           30072                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  RESTORE A AS UPON ARRIVAL TO SWRETURN.</span>
-011367,000049:    5705           00071                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  RETURN.</span>
-011368,000050: 
+011371,000017: 
+011372,000018:                                                                                                  <span class="co">#        THE FOLLOWING SUBROUTINES ARE INTENDED TO FACILITATE INTER-BANK COMMUNICATION. ROUTINES ARE PROVIDED</span>
+011373,000019:                                                                                                  <span class="co">#  FOR JUMPING TO A LOCATION IN ANOTHER BANK, CALLING A SUBROUTINE IN ANOTHER BANK, AND OBTAINING DATA FROM ANOTHER</span>
+011374,000020:                                                                                                  <span class="co">#  BANK. IN ADDITION, A ROUTINE IS PROVIDED FOR MAKING UP A RETURN_ADDRESS CADR FOR USE BY THE CALLED SUBROUTINE.</span>
+011375,000021: 
+011376,000022:    5654                                           <span class="ps">BANK    </span> 2                                     
+<a name="42414E4B43414C4C"></a>011377,000023:    5654           50062        <span class="sm">BANKCALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  SUBROUTINE CALL WITH TRANSMISSION BOTH</span>
+011378,000024:    5655           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  WAYS IN A. THE CADR OF THE CALLED</span>
+011379,000025:    5656           64516                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ROUTINE SHOULD IMMEDIATELY FOLLOW THE</span>
+011380,000026:    5657           50001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  TC BANKCALL.</span>
+011381,000027:    5660           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011382,000028:    5661           27777                           <span class="op">CAF     </span> 0          -1                         <span class="co">#  PICK UP CADR AND FALL INTO SWCALL.</span>
+011383,000029: 
+<a name="535743414C4C"></a>011384,000030:    5662           50071        <span class="sm">SWCALL  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  SWCALL IS ALOS USED TO CALL SUBROUTINES</span>
+011385,000031:    5663           30015                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  IN OTHER BANKS, BUT THE CADR ARRIVES IN</span>
+011386,000032:    5664           50072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  A. DATA MAY BE TRANSMITTED BACK TO THE</span>
+011387,000033:    5665           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CALLING PROGRAM IN A, HOWEVER. </span>
+011388,000034:    5666           30071                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  RETURN INFORMATION NOW COMPLETE.</span>
+011389,000035:    5667           50114                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                
+011390,000036:    5670           72667                           <span class="op">MASK    </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#37304B">70K</a>                                   <span class="co">#  PROVISION FOR CALLING A ROUTINE IN</span>
+011391,000037:    5671           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  FIXED-FIXED (OF QUESTIONABLE VALUE).</span>
+011392,000038:    5672           05674                           <span class="op">TC      </span> +2                                    <span class="co">#  SPECIAL TREATMENT REQUIRED IF NON-ZERO.</span>
+011393,000039:    5673           05676                           <span class="op">TC      </span> +3                                    <span class="co">#  INPUT CADR OK AS IS.</span>
+011394,000040: 
+011395,000041:    5674           40015                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  FORM PROPER 12 BIT ADDRESS.</span>
+011396,000042:    5675           64373                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#364B">6K</a>                                    
+011397,000043:    5676           60114                 +3        <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                <span class="co">#  PROPER CADRS COME HERE WITH C(A) = 0.</span>
+011398,000044:    5677           30062                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  SO A CAN TRANSMIT WITH BANKCALL.</span>
+011399,000045:    5700           20062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
+011400,000046:    5701           00000                           <span class="op">TC      </span> 0                                     <span class="co">#  SETTING Q TO SWRETURN.</span>
+011401,000047: 
+<a name="535752455455524E"></a>011402,000048:    5702           30072        <span class="sm">SWRETURN</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  RETURN TO CALLER, TRANSMITTING THROUGH A</span>
+011403,000049:    5703           50015                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
+011404,000050:    5704           30072                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  RESTORE A AS UPON ARRIVAL TO SWRETURN.</span>
+011405,000051:    5705           00071                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  RETURN.</span>
+011406,000052: 
 </pre>
 </span>
 </p>
@@ -169,43 +171,43 @@ Page 291
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-011370,000052: 
-<a name="4D414B4543414452"></a>011371,000053:    5706           35501        <span class="sm">MAKECADR</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  LEAVES RETURN-ADDRESS CADR (AS SET BY</span>
-011372,000054:    5707           60071                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  SWCALL OR BANKCALL) IN ADDRWD.</span>
-011373,000055:    5710           50062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
-011374,000056:    5711           62165                           <span class="op">AD      </span> <a href="#33324B">32K</a>                                   <span class="co">#  SEE IF BANK INFORMATION NEEDED (USUAL).</span>
-011375,000057:    5712           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
-011376,000058:    5713           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  ADDRWD SET OK IF NO OVERFLOW (IN FF).</span>
-011377,000059: 
-011378,000060:    5714           30034                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 <span class="co">#  CONTAINS LOW 10 BITS ONLY.</span>
-011379,000061:    5715           60072                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               
-011380,000062:    5716           50062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  RETURN CADR NOW COMPLETE.</span>
-011381,000063:    5717           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011382,000064: 
-<a name="33324B"></a>011383,000065:    5720     2165               <span class="sm">32K     </span>           <span class="ps">EQUALS  </span> <a href="EXECUTIVE.agc.html#5052494F3332">PRIO32</a>                                
-<a name="504F53544A554D50"></a>011384,000066:    5720           30001        <span class="sm">POSTJUMP</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  ONE-WAY BANK TO BANK JUMP, WITH NO</span>
-011385,000067:    5721           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  RETURN ADDRESS. THIS VERSION TRANSMITS</span>
-011386,000068:    5722           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  THROUGH A IF DESIRED.</span>
-011387,000069: 
-<a name="42414E4B4A554D50"></a>011388,000070:    5723           50015        <span class="sm">BANKJUMP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  SAME AS ABOVE ONLY ADDRESS ARRIVES IN A.</span>
-011389,000071:    5724           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  BANKJUMP AND POSTJUMP MAY BE USED IN</span>
-011390,000072:    5725           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  INTERRUPT OR UNDER EXEC, BUT BANKCALL</span>
-011391,000073:    5726           20001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  AND SWCALL MAY BE USED ONLY UNDER EXEC.</span>
-011392,000074:    5727           06000                           <span class="op">TC      </span> 6000                                  
-011393,000075: 
-011394,000076: 
-<a name="4441544143414C4C"></a>011395,000077:    5730           50114        <span class="sm">DATACALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                <span class="co">#  SUBROUTINE TO RETRIEVE DATA IN ANOTHER</span>
-011396,000078:    5731           30015                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  BANK. THE CADR OF THE LOCATION OF INTER-</span>
-011397,000079:    5732           30114                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                <span class="co">#  EST ARRIVES IN A AND ITS CONTENTS ARE IN</span>
-011398,000080:    5733           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  A ON EXIT. THIS MAY BE USED ONLY UNDER</span>
-011399,000081:    5734           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  EXECUTIVE.</span>
-011400,000082:    5735           36000                           <span class="op">CAF     </span> 6000                                  <span class="co">#  REQUESTED DATA NOW ACQUIRED.</span>
-011401,000083: 
-011402,000084:    5736           30114                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                
-011403,000085:    5737           50015                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
-011404,000086:    5740           30114                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                
-011405,000087:    5741           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011406,000088: 
+011408,000054: 
+<a name="4D414B4543414452"></a>011409,000055:    5706           35501        <span class="sm">MAKECADR</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  LEAVES RETURN-ADDRESS CADR (AS SET BY</span>
+011410,000056:    5707           60071                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 <span class="co">#  SWCALL OR BANKCALL) IN ADDRWD.</span>
+011411,000057:    5710           50062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
+011412,000058:    5711           62165                           <span class="op">AD      </span> <a href="#33324B">32K</a>                                   <span class="co">#  SEE IF BANK INFORMATION NEEDED (USUAL).</span>
+011413,000059:    5712           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
+011414,000060:    5713           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  ADDRWD SET OK IF NO OVERFLOW (IN FF).</span>
+011415,000061: 
+011416,000062:    5714           30034                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 <span class="co">#  CONTAINS LOW 10 BITS ONLY.</span>
+011417,000063:    5715           60072                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               
+011418,000064:    5716           50062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  RETURN CADR NOW COMPLETE.</span>
+011419,000065:    5717           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011420,000066: 
+<a name="33324B"></a>011421,000067:    5720     2165               <span class="sm">32K     </span>           <span class="ps">EQUALS  </span> <a href="EXECUTIVE.agc.html#5052494F3332">PRIO32</a>                                
+<a name="504F53544A554D50"></a>011422,000068:    5720           30001        <span class="sm">POSTJUMP</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  ONE-WAY BANK TO BANK JUMP, WITH NO</span>
+011423,000069:    5721           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  RETURN ADDRESS. THIS VERSION TRANSMITS</span>
+011424,000070:    5722           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  THROUGH A IF DESIRED.</span>
+011425,000071: 
+<a name="42414E4B4A554D50"></a>011426,000072:    5723           50015        <span class="sm">BANKJUMP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  SAME AS ABOVE ONLY ADDRESS ARRIVES IN A.</span>
+011427,000073:    5724           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  BANKJUMP AND POSTJUMP MAY BE USED IN</span>
+011428,000074:    5725           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  INTERRUPT OR UNDER EXEC, BUT BANKCALL</span>
+011429,000075:    5726           20001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  AND SWCALL MAY BE USED ONLY UNDER EXEC.</span>
+011430,000076:    5727           06000                           <span class="op">TC      </span> 6000                                  
+011431,000077: 
+011432,000078: 
+<a name="4441544143414C4C"></a>011433,000079:    5730           50114        <span class="sm">DATACALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                <span class="co">#  SUBROUTINE TO RETRIEVE DATA IN ANOTHER</span>
+011434,000080:    5731           30015                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               <span class="co">#  BANK. THE CADR OF THE LOCATION OF INTER-</span>
+011435,000081:    5732           30114                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                <span class="co">#  EST ARRIVES IN A AND ITS CONTENTS ARE IN</span>
+011436,000082:    5733           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  A ON EXIT. THIS MAY BE USED ONLY UNDER</span>
+011437,000083:    5734           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  EXECUTIVE.</span>
+011438,000084:    5735           36000                           <span class="op">CAF     </span> 6000                                  <span class="co">#  REQUESTED DATA NOW ACQUIRED.</span>
+011439,000085: 
+011440,000086:    5736           30114                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                
+011441,000087:    5737           50015                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
+011442,000088:    5740           30114                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455343415045">ESCAPE</a>                                
+011443,000089:    5741           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011444,000090: 
 </pre>
 </span>
 </p>
@@ -221,30 +223,30 @@ Page 292
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-011408,000090: 
-011409,000091:                                                                                                  <span class="co">#        THE FOLLOWING ROUTINES ARE INTERRUPT ANALOGS OF BANKCALL AND SWCALL. BANK-TO-BANK ONLY.</span>
-011410,000092: 
-<a name="49424E4B43414C4C"></a>011411,000093:    5742           50637        <span class="sm">IBNKCALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-011412,000094:    5743           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011413,000095:    5744           64516                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-011414,000096:    5745           50001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011415,000097:    5746           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-011416,000098:    5747           27777                           <span class="op">CAF     </span> 0          -1                         
-011417,000099: 
-<a name="49535743414C4C"></a>011418,000100:    5750           50641        <span class="sm">ISWCALL </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
-011419,000101:    5751           30015                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
-011420,000102:    5752           50640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
-011421,000103:    5753           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011422,000104:    5754           30641                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
-011423,000105:    5755           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 
-011424,000106:    5756           30637                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-011425,000107:    5757           20637                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-011426,000108:    5760           06000                           <span class="op">TC      </span> 6000                                  
-011427,000109: 
-<a name="495357524554524E"></a>011428,000110:    5761           30640        <span class="sm">ISWRETRN</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
-011429,000111:    5762           50015                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
-011430,000112:    5763           30640                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
-011431,000113:    5764           00641                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
+011446,000092: 
+011447,000093:                                                                                                  <span class="co">#        THE FOLLOWING ROUTINES ARE INTERRUPT ANALOGS OF BANKCALL AND SWCALL. BANK-TO-BANK ONLY.</span>
+011448,000094: 
+<a name="49424E4B43414C4C"></a>011449,000095:    5742           50637        <span class="sm">IBNKCALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+011450,000096:    5743           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011451,000097:    5744           64516                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+011452,000098:    5745           50001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011453,000099:    5746           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011454,000100:    5747           27777                           <span class="op">CAF     </span> 0          -1                         
+011455,000101: 
+<a name="49535743414C4C"></a>011456,000102:    5750           50641        <span class="sm">ISWCALL </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
+011457,000103:    5751           30015                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
+011458,000104:    5752           50640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
+011459,000105:    5753           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011460,000106:    5754           30641                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
+011461,000107:    5755           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 
+011462,000108:    5756           30637                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+011463,000109:    5757           20637                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+011464,000110:    5760           06000                           <span class="op">TC      </span> 6000                                  
+011465,000111: 
+<a name="495357524554524E"></a>011466,000112:    5761           30640        <span class="sm">ISWRETRN</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
+011467,000113:    5762           50015                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B524547">BANKREG</a>                               
+011468,000114:    5763           30640                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
+011469,000115:    5764           00641                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
 
 End of include-file INTER-BANK_COMMUNICATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
