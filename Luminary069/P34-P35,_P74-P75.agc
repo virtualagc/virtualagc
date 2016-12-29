@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-18 RRB	Updated for Luminary 69.
+##              2016-12-28 HG   Fix operand MXV\ -> MXV
 
 ## Page 667
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -724,7 +725,7 @@ NOPIE		STODL	ACTCENT
 			INITVEL
 		CALL
 			LOMAT
-		VLOAD	MXV\
+		VLOAD	MXV
 ## Page 683
 			DELVEET3
 			0D

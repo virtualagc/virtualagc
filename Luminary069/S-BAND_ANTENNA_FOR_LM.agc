@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-18 RRB	Updated for Luminary 69.
+##              2016-12-27 HG   Comment last line *** END OF LEMONAID.070 ***
 
 ## Page 498
 # SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM
@@ -188,4 +189,4 @@ UR		EQUALS	0D
 URP		EQUALS	6D
 		SBANK=	LOWSUPER
 		
-*** END OF LEMONAID.070 ***
+# *** END OF LEMONAID.070 ***
