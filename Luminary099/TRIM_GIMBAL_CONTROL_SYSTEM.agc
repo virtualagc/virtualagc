@@ -74,17 +74,18 @@ GTSGO+DN	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
 
 GOQTRIMG	CAF	ZERO		# SET INDEXER FOR Q-AXIS CALCULATIONS
 		TS	QRCNTR
-## Page 1473
-
-## Workaround, RSB 2009 &mdash; Everything
-## between this line and the corresponding line below was simply filled-in
-## as-is from Luminary 131, and then verified to assemble to the proper binary
-## values.  This area is blank on the Luminary 099 print-out, presumably due
-## to some problem with the printer.
+		
+## RSB 2016 &mdash; Everything between this line and the corresponding
+## line below was missing in the Luminary 099 print-out from the MIT Museum
+## (from which the remainder of the source-code was transcribed), presumably
+## due to some problem with the printer. It has been filled in from 
+## snapshots of page 1472 and 1473 of a different Luminary 99 print-out, 
+## thoughtfully made for us by Don Eyles.
 		INDEX	QRCNTR		# AOS SCALED AT PI/2
 		CA	AOSQ
 		EXTEND
 		MP	BIT2		# RESCALE AOS TO PI/4
+## Page 1473
 		EXTEND
 		BZF	GTSQAXIS -3	# USE FULL SCALE FOR LARGER AOS ESTIMATES.
 
@@ -93,7 +94,7 @@ GOQTRIMG	CAF	ZERO		# SET INDEXER FOR Q-AXIS CALCULATIONS
 		XCH	L		# LIMITS -1 CONTAINS POSMAX.
 
 		CCS	QRCNTR		# PICK UP RATE FOR THIS AXIS.  RATE CELLS
-		INDEX	A		# USE ADJACENT, NOT SEPARATED.  AT PI/4
+		INDEX	A		# ARE ADJACENT, NOT SEPARATED.  AT PI/4
 		CA	EDOTQ
 GTSQAXIS	DXCH	WCENTRAL
 
@@ -129,7 +130,8 @@ ALGORTHM	EXTEND			# Q(R)DIFF IS THETA (ERROR) SCALED AT PI.
 		EXTEND
 		DCS	A		# ALPHA(2)/2 - K
 		AD	KCENTRAL
-## End of workaround, RSB 2009.  The non-blank portion of page 1473 continues below:
+## RSB 2016 &mdash; End of material from Don Eyles's printout.  The non-blank portion
+## of page 1473 continues below:
 		EXTEND
 		DV	KCENTRAL	# HIGH ORDER OF QUOTIENT.
 		XCH	A2CNTRAL
