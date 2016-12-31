@@ -12,6 +12,8 @@
 ##		2010-12-04 JL	Remove Colossus 249 header comments. Change 
 ##				to double-hash page numbers.
 ##		2011-01-27 JL	Minor fixes.
+##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
 
 ## Page 403
 		BANK	15
@@ -70,4 +72,4 @@ QUADROT		2DEC	.1		# ROTATION MATRIX FROM S/C AXES TO CONTROL
 		2DEC	0
 		2DEC	.012620		# (.1)SIN7.25
 		2DEC	.099200		# (.1)COS7.25
-BIASCALE	2DEC	.0002543132	# (450/180)(1/0.6)(1/16384)
+BIASCALE	2DEC	.0002543132	# = (450/180)(1/0.6)(1/16384)

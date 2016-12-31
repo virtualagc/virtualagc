@@ -30,6 +30,9 @@ if 'BIN' in environ:
 font_s = 0
 if 'FONT_S' in environ:
 	font_s = 1
+Colossus237 = 0
+if 'COLOSSUS237' in environ:
+	Colossus237 =1
 
 # Parse command-line arguments
 if len(sys.argv) < 5:
@@ -285,7 +288,12 @@ for box in file:
 	   boxBottom <= boxes[len(boxes)-1]['boxBottom'] and boxTop >= boxes[len(boxes)-1]['boxTop']:
 		distance = boxRight - boxes[len(boxes)-1]['boxRight']
 	if distance < 8 * scale:
-		rejectIt = 1;
+		rejectIt = 1
+	# In Colossus237, there's an artifact that appears very often, that I've simply gotten tired
+	# of editing out: two adjacent short strokes, very near the center of the page, presumably
+	# a remnant of a horizontal line.  Fortunately, that lets us make the filter pretty specific.
+	if Colossus237 and (boxChar == '_' or boxChar == '-') and boxWidth >= 11 and boxWidth <= 17 and boxHeight >= 4 and boxHeight <= 5:
+		rejectIt = 1
 	# Here's something to help apostrophes to be recognized.
 	#if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
 	#   boxHeight <= 17 * scale and numCharsInRow > 0 and \
@@ -435,7 +443,7 @@ allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
 allUnderlinesPattern = re.compile(r"\A\s*[_][_\s]*\Z")
 allDotsPattern = re.compile(r"^\s*[.][.\s]*$")
 allEqualsPattern = re.compile(r"\A\s*=[=\s]*\Z")
-def readFile( filename ):
+def readFile( filename, depth ):
 	"Reads an AGC source file, recursively if containing $ operators."
 	global lines, currentPage, pageNumber, blankLinePattern, allDashesPattern, allUnderlinesPattern, nodashes
 	#print "Reading file", filename
@@ -445,7 +453,7 @@ def readFile( filename ):
 		if line.startswith("$"):
 			includedFile = re.sub(r'^[$](.*[.]agc).*', r'\1', line)
 			#print "Here '", includedFile, "'"
-			readFile(agcSourceDirectory + "/" + includedFile)
+			readFile(agcSourceDirectory + "/" + includedFile, depth + 1)
 			continue
 		#if line.lower().startswith("## page "):
 		if re.match(r"## page [0-9].*", line.lower()):
@@ -474,9 +482,10 @@ def readFile( filename ):
 			comment = comment.replace("-", "")
 		if nodashes >= 3:
 			comment = comment.replace("_", "")
-		lines.append(comment)
+		if depth > 0:
+			lines.append(comment)
 	file.close()
-readFile(agcSourceFilename)
+readFile(agcSourceFilename, 0)
 #print lines
 
 # At this point, we've populated lines[] with just the non-blank comments from,

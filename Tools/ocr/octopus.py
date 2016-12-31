@@ -51,6 +51,7 @@ group.add_argument('--aurora12', help="Perform AURORA 12 processing", action="st
 group.add_argument('--sunburst120', help="Perform SUNBURST120 processing (in Luminary 69 style)", action="store_true")
 group.add_argument('--luminary116', help="Perform LUMINARY 116 processing (for octals)", action="store_true")
 group.add_argument('--solarium55', help="Perform SOLARIUM 55 processing", action="store_true")
+group.add_argument('--colossus237', help="Perform COLOSSUS 237 processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -107,6 +108,19 @@ elif args.comanche55 or args.luminary99:
     diff = cv2.GaussianBlur(diff, (7,7), 0)
     thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 4)
     thresh = thresh[30:-70,70:]
+elif args.colossus237:
+    # Note that with Colossus237, we assume that the images have been pre-cropped
+    # and deskewed.
+    blurred = cv2.GaussianBlur(l_channel, (3,3), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + lines_only
+    # Blur a bit more then threshold the image
+    diff = cv2.GaussianBlur(diff, (1,1), 0)
+    thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 3)
+    #_,thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    thresh = thresh[20:]
 elif args.retread44:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     #thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 51)
