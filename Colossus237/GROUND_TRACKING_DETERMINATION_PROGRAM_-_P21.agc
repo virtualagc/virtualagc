@@ -1,21 +1,23 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-02-02 JL   Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-02-02 JL   Adapted from corresponding Colossus 249 file.
+##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
 
 ## Page 447
 # GROUND TRACKING DETERMINATION PROGRAM P21
 # PROGRAM DESCRIPTION
 # MOD NO - 1
 # MOD BY - N.M.NEVILLE
-# FUNCTIONAL DESCRIPTION-
+# FUNCTIONAL DECRIPTION-
 #
 # TO PROVIDE THE ASTRONAUT DETAILS OF THE LM OR CSM GROUND TRACK WITHOUT
 # THE NEED FOR GROUND COMMUNICATION (REQUESTED BY DSKY).
@@ -31,7 +33,7 @@
 # LAT-LONG
 # NORMAL EXIT MODES-
 #
-# ASTRONAUT REQUEST THROUGH DSKY TO TERMINATE PROGRAM V34E
+# ASTRONAUT REQUEST TROUGH DSKY TO TERMINATE PROGRAM V34E
 # ALARM OR ABORT EXIT MODES-
 #
 # NONE
