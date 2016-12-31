@@ -13,6 +13,9 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/10/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2016-12-30 RSB	Backported BYRO->GYRO from Colossus 237.
+##				(There's lots more that needs to be backported,
+##				but I found this one particularly annoying.)
 
 ## Page 333
 		BANK	7
@@ -181,12 +184,12 @@ GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 		MP	MPAC		# ADIA OR ADSRA
 		TS	L
 		CAF	ZERO
-		DAS	VBUF		# NO = (BYRO PULSES) X 2(+8)			*
+		DAS	VBUF		# NO = (GYRO PULSES) X 2(+8)			*
 
 		CA	VBUF		# PARTIAL RESULT -- MAJOR
 		EXTEND
 		MP	BIT9		# SCALE 2(+6)	SHIFT RIGHT 6			*
-		INDEX	BUF		# RESULT = (BYRO PULSES) X 2(+14)
+		INDEX	BUF		# RESULT = (GYRO PULSES) X 2(+14)
 		DAS	GCOMP		# HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)
 
 		CA	VBUF +1		# PARTIAL RESULT -- MINOR
@@ -334,7 +337,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		EXTEND
 		DCS	VBUF +2
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
-		CA	NBDY		# (BYRO PULSES)/(CS) X 2(-5)
+		CA	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# -(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
 		
 		CCS	TEM1		# IF SURFACE FLAG IS SET,

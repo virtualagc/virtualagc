@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 IMU_CALIBRATION_AND_ALIGNMENT.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-01-27 JL   Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	IMU_CALIBRATION_AND_ALIGNMENT.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-01-27 JL   Adapted from corresponding Colossus 249 file.
+##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
 
 ## Page 414
 # NAME- IMU PERFORMANCE TESTS 2
@@ -95,7 +97,7 @@ NBPOSPL		CA	DEC17
 		ADRES	GLOKFAIL	# BIT 14 FLAG 3
 		TC	IMUSTLLG
 		CCS	NDXCTR		# IF ONE GO AND DO A PIPA TEST ONLY
-		TC	PIPACHK		# ALIGN AND MEARSUE VERTICAL PIPA RATE
+		TC	PIPACHK		# ALIGN AND MEASURE VERTICAL PIPA RATE
 		TC	BANKCALL
 		CADR	IMUFINE
 		TC	IMUSTLLG
@@ -526,7 +528,7 @@ RSTGTS1		INHINT			#  COMES HERE PHASE1 RESTART
 #  COMES HERE AT THE END OF EVERY ITERATION THROUGH DRIFT TEST OR COMPASS
 
 # SET UP WAITLIST SECTION
-SLEEPIE		TS	LENGTHOT	# TEST NOT OVER-DECREMENT LENGHOT
+SLEEPIE		TS	LENGTHOT	# TEST NOT OVER-DECREMENT LENGTHOT
 		TC	PHASCHNG	#  CHANGE PHASE
 		OCT	00135
 		CCS	TORQNDX		# ARE WE DOING VERTDRIFT
@@ -772,7 +774,7 @@ PERFERAS	EXIT
 # 	   CAUTION
 
 # THE ERASABLE PROGRAM THAT DOES THE CALCULATIONS MUST BE LOADED
-# BEFORE ANY ATTEMPT IS MAKE TO RUN THE IMU PERFORMANCE TEST
+# BEFORE ANY ATTEMPT IS MADE TO RUN THE IMU PERFORMANCE TEST
 
 		EBANK=	LENGTHOT
 ONCEMORE	CCS	LENGTHOT
@@ -1088,7 +1090,7 @@ SETNBPOS	TC	NBPOSPL
 		CADR	MKRELEAS
 OPTDATA		CAF	BIT1		# CALLS FOR AZIMUTH AND ELEVATION OF TARGE
 		ZL			# T 1,THEN TARGET 2
-		LXCH	RUN		# AZIMUTH CLOCKWISE FROM NORTH TO TARGET
+		LXCH	RUN		# AZIMUTH CLOCKWSE FROM NORTH TO TARGET
 		TS	DSPTEM1 +2	# ELEVATION MEASURED FROM HORIZONTAL
 		EXTEND
 		INDEX	RUN
@@ -1120,7 +1122,7 @@ V05N30E		VN	0530
 
 		TC	INTPRET		#  UNDYNAMIC ASSEMBLER
 TAR/EREF	AXT,1	AXT,2		# TARGET VECTOR
-			2		# SIN(EL)  -COS(AZ)COS(EL)   SIN(AZ)COS(EL)
+			2		# SIN(EL)  -COS(AZ)COS(EL)   SIN(AZ)COS(EL
 			12D
 		SSP	SETPD
 			S2
@@ -1371,3 +1373,4 @@ AZMTHCG1	TC	INTPRET
 VN0629		VN	0629
 
 ## Page 446
+## This page is empty.
