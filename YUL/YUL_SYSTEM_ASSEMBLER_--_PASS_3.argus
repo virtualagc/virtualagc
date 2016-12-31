@@ -8,6 +8,7 @@
 # Pages:        482-539
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-29 JL   Transcribed pages 482-501.
+#               2016-12-31 JL   Transcribed pages 502-507.
 
 # Annotations:
 #
@@ -798,26 +799,299 @@ R04388  TINE COUNTS UP THE NUMBER OF SYMBOLS IN EACH STATE OF HEALTH.  SYMBOL IN
 # Page 502
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  21        PAGE  21
 
+P04528  EACH THIRD OF A LINE CONTAINS ALL THE INFORMATION ABOUT ONE SYMBOL.
+
+ 04529             SM           Z,X0,5        Z,S3,1        -                   ADVANCE TO NEXT COLUMN AND COMPARE REG.
+ 0453   SYM THIRD  EBS          1,N,R5,1      ONE           Z,X2                POINT TO A SYMBOL IN THE TABLE.
+ 04534             NA           Z,X2          ZERO          REAL SYM            BRANCH IF SYMBOL, NOT HORIZONTAL DIVIDR.
+ 04538             WA           Z,X0          ONE           Z,AU2
+ 0454              MT           BLOTS         5             N,AU2,1
+ 04542             TS, C5T8     BLOT C8       LINE +5       END THIRD +1        PLANT HORIZONTAL DIVIDER OF BLOTS.
+
+ 04564  REAL SYM   SWE, D12     2,1           32            Z,X6
+ 04566             LA           Z,X6          FOUR          C,+4                BRANCH IF ANY OF HEALTHS 0-4.
+ 0457              LA           SIX           Z,X6          C,+2                BRANCH IF ANY OF HEALTHS 6-G.
+ 04574             SSL, ONE     2,1           31            C,+1                BRANCH IF FAILED LEFTOVER ERASE, NOT WD.
+ 04578             WA           Z,X6          ONE           Z,X6                INCREMENT HEALTHS 5½ (FAILED J-CARD) UP.
+ 04582             WA           Z,X6          L SYMH VEC    Z,X6
+ 04584             DA, CAC3     6,0           ONE           6,0                 INCREMENT COUNT OF SYMS IN THIS STATE.
+ 04588             SWS, C6T8    N,X6          A,5           LINE +5             PLANT HEALTH FLAG AND VERTICAL DIVIDER.
+ 04592             LA, LSTYPE   6,0           TYPE F        C,+3                BRANCH IF SYMBOL HAS A VALID DEFINITION.
+ 04596             TX           USY PLACE     -             Z,CSC          C    OTHERWISE TRY TO PUT IT IN TYPING LIST.
+ 0460              TS           ONES          EQIVLENT      C,+2
+ 04602             SWE, CAC3    2,1           16            EQIVLENT
+ 04604             TX           M EDIT DEF    -             Z,CSC          C    SET DEFINITION OR BLOTS IN PRINT.
+ 046061            NA           N,X2          N,S3          C,+2                BRANCH IF DIFFERENT FROM LAST SYMBOL IN
+ 046063            TS           DITTO         LINE +1       C,+4                THIS COLUMN; OTHERWISE PRINT A DITTO.
+ 046065            TX           N,X2          -             N,S3                PLANT NEW SYMBOL FOR NEXT COMPARISON.
+ 046067            SWS, C3T8    N,X2          A,2           LINE +1
+ 046068            SWS, C1T2    N,X2          A,2           LINE +2             SET HEADED SYMBOL IN PRINT.
+ 04608             LA           D4            2,2           C,+2                BRANCH UNLESS SYMBOL WAS SIMPLY UNDEF.
+ 04612             TS, C5T8     DASH C6       LINE +3       C,+3                SHOW THAT THERE'S NO PAGE OF DEFINITION.
+ 04616             TS           2,2           ARG 1         P3 D2A LZS -3  C    CONVERT PAGE OF DEF TO ZERO-SUPP ALPHA.
+ 0462              SS           ARG 2         C5T8          LINE +3
+ 04622             SWE, A ADRES 2,2           D,6,L         ARG 1
+ 04624             NA           ARG 1         ZERO          C,+3                BRANCH IF SYMBOL WAS REFERRED TO.
+ 04628             TX           DASH C3 C7    -             LINE +4
+ 0463              TS, C1T4     DASH C3       LINE +5       END THIRD           SHOW LACK OF REFERENCES.
+ 04634             TS           -             -             P3 D2A LZS     C    CONVERT NUMBER OF REFERENCES TO Z/S ALF.
+ 04638             SWS, C1T4    ARG 2         A,2,L         LINE +4
+ 0464              NA           LINE +4       999 REFS      C,+2                BRANCH IF 998 REFERENCES OR FEWER.
+ 04644             TX           OVER 1000     -             LINE +4             SUBSTITUTE ">1K" FOR NO. OF REFS.
+ 04648             TS, DECALFM1 2,2           ARG 1         P3 D2A LZS -2  C    CONVERT PAGE OF FIRST REF TO Z/S ALPHA.
+ 04654             SWE, A ADRES 2,2           D,3,L         ARG 1
+ 04656             TS, C5T8     ARG 2         LINE +4       P3 D2A LZS -2  C    CONVERT PAGE OF LAST REF TO Z/S ALPHA.
+ 046592            NA, C5T8     ARG 2         LINE +4       C,+2                WHEN BOTH PAGE NUMBERS ARE THE SAME.
+ 046594            TX           BLANKS        -             ARG 2               PRINT ONLY THE FIRST ONE.
+ 0466              SWS, C1T4    ARG 2         A,4,L         LINE +5
+
+ 04661  END THIRD  NA           EQIVLENT      ONES          EECR TEST           BRANCH IF ANY DEFINITION EXISTS.
+ 04662             NA           SYM LINES     ONE           SYMB COL Q          BRANCH IF NOT DOING LAST LINE OF PAGE.
+ 04666             NA           SYM LINER     ZERO          C,+2                BRANCH UNLESS DOING LAST COLUMN.
+ 0467              TS, CHAR8    BLANKS        LINE +5       END SYM PG          REMOVE VERTICAL DIVIDER FROM LAST COL.
+
+ 04674             SWE, ONE     SYM LINER     1             SYM LINER           SHOW THAT LAST COLUMN IS APPROACHING.
+ 04682  SYMB COL Q NA           Z,X1,1        Z,S2          SYM THIRD -1        BRANCH TO DO ANOTHER COLUMN IN SAME LIN.
 
 # Page 503
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  22        PAGE  22
 
+P04686  THERE ARE AT MOST 45 LINES OF SYMBOL INFORMATION ON A PAGE (135 SYMBOLS).
+
+ 0469   END SYM LN WD           SYM LINES     ONE           SYM LINES
+ 04692             TS, CHAR8    BLANKS        LINE +5       C,+2           C    REMOVE LAST VERT. DIVIDER AND PRINT.
+ 04696             TS           L COMPARS     Z,S3          SYM LINE +1         GO TO START ON THE NEXT LINE.
+
+ 0470   END SYM PG TS           L NEW LINE    Z,X0          PRINT SP1      C
+ 04701             TX           L SYM FOOT    -             Z,X1
+ 04702             TN           N,X1,12       12            LINE +1
+ 04704             TS           SPACE 2       OLD SPACE     GO PRINT       C
+ 04706             TN           N,X1,15       15            LINE +1
+ 04708  SP2 PRINT  TS           SPACE 2       OLD SPACE     GO PRINT       C
+ 0471              TN           N,X1          15            LINE +1
+ 04712             TS           SPACE 1       OLD SPACE     GO PRINT       C    PRINT KEY TO HEALTH FLAGS AT END PAGE.
+ 04716             WA           ONE THIRD     ONE THIRD     SYM LINER           SHOW THAT NO PAGE IS UNDER CONSTRUCTION.
+ 0472              TS           L BANK 5      Z,X1          AV DIS PAG     C    POINT TO CONSTRUCTION AREA, SKIP TO HOF.
+
+ 04724  ONE SYM Q  NA           OWED SYM      ZERO          C,+2                BR. IF A SYMBOL IS OWED (NEW 1ST LTR).
+ 04728             TS           Z,X0          Z,R1          THREAD              RESTORE ADDRESS, FETCH ANOTHER SYMBOL.
+ 04732             TX           OWED SYM      -             LINE +1             SET IT UP FOR FIRST-LETTER COMPARISON.
+ 04736             TS           ZERO          OWED SYM      PL THREAD           CLEAR FLAG, GO TO PROCESS OWED SYMBOL.
+
+
+
+R0474   COSEQUENCE SUBROUTINES TO FILL A TYPEWRITER CUSS MESSAGE NAMING UP TO FOUR UN- OR ILL-DEFINED SYMBOLS.  ADVANCES
+R04741  ITS OWN ENTRY POINT UNTIL THE MESSAGE IS FULL.
+
+ 047415 1ST UNSYM  SWS, C5T8    N,X2          A,4           USYM CUSS +1   C
+ 04742             SWS, C1T4    N,X2          A,4,L         USYM CUSS +2   C
+ 047425            SS           Z,CSC         CAC3          USY PLACE      C
+
+ 04743  2ND UNSYM  TS           N,X2          USYM CUSS +3  LENGTHEN +1    C
+
+ 047435 3RD UNSYM  SWS, C5T8    N,X2          A,4           USYM CUSS +4   C
+ 04744             SWS, C1T4    N,X2          A,4,L         USYM CUSS +5   C
+ 047445            TS           -             -             LENGTHEN       C
+
+ 04745  4TH UNSYM  TS           N,X2          USYM CUSS +6  LENGTHEN +1    C
+
+ 047455 5TH UNSYM  TS           N,SC          N,CSC         LENGTHEN +1    C    UNVEIL " & MORE" AND MAKE SUBRO VACUOUS.
+
+ 047465 LENGTHEN   WA           USYM TYPE     SPEC SIGN     USYM TYPE      C
+ 04747             WA           USYM TYPE     SPEC SIGN     USYM TYPE      C
+ 047475            SS           Z,CSH         CAC3          USY PLACE      S    SET UP NEXT ENTRY POINT, EXIT.
 
 # Page 504
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  23        PAGE  23
 
+P0475              ROUTINE TO PRINT A SUMMARY OF THE SYMBOL TABLE ANALYSIS, GIVING THE NUMBER OF SYMBOLS IN EACH HEALTH
+R0477   STATE (OF WHICH FAILURE TO FIT IN THE SYMBOL TABLE IS ONE) AND THE GRAND TOTAL.  EMPTY HEALTH STATES ARE OMITTED
+R0479   FROM THE LISTING.
+
+
+
+ 0485   END PR SYM LA           SYM LINER     ACO 7         C,+2                BRANCH IF SYM TAB LISTING FILLED LAST P.
+ 0486              TS           C,-1          OWE SYM Q +1  SYM PAGE            PRINT LAST PAGE OF SYMBOL TABLE LISTING.
+
+ 04869             TX            L W SUMARY   -             Z,X2
+ 0487              TN           N,X2,4        4             PAGE HED2 +1        PAGE HEADING FOR SYMBOL TABLE SUMMARY.
+ 04882             MT           BLANKS        11            N,AU2,1             CLEAN OUT REST OF PAGE SUBHEAD, TOO.
+ 048832            TS           Z,X0          Z,AU2         C,-1           C    CLEAN PRINT LINE IN CASE OF SUPPRESS.
+ 0489              SS           SYM TAB XS    CAC3          SYMBOL XS           SYMBOL TABLE OVERFLOW INTO HEALTH VECTR.
+ 0491              NA, C5T8     USYM CUSS +1  BLANKS        C,+2                BRANCH IF THERE ARE SYMBOLS TO CUSS.
+ 04912             TS           L SYMH VEC    Z,X1          SUMM LOOP
+ 04914             S, MON TYPER USYM CUSS     SPRAM +16     -
+ 04916  USYM TYPE  S, MON TYPER USYM CUSS +2  SPRA +8       C,-2                NAME UP TO 4 UNDEFINED SYMBOLS ON TYPER.
+
+ 0492   SUMM LOOP  DA, CAC3     N SYMBOLS     1,0           N SYMBOLS           CONTRIBUTE TO GRAND TOTAL OF SYMBOLS.
+ 0494              SS           N,X1          B26T30        MOV HELTH           LENGTH IN WORDS OF HEALTH STATE DESCRIP.
+ 0496              LA, CAC3     1,0           ZERO          MOV HELTH +2        BRANCH IF NO SYMBOLS IN THIS STATE.
+ 0498              SWE, CAC1    N,X1          32,L          ARG 1
+ 0499              TS           SPACE 2       LINE          P3 D2A LZS     C    CONVERT COUNT FOR THIS STATE TO Z/S ALF.
+ 0501              SWS, C3T6    ARG 2         A,2           LINE +2
+ 0502              WA           Z,X0          THREE         Z,AU2
+ 0503   MOV HELTH  MT           N,X2,1                      N,AU2,1             SET HEALTH STATE DESCRIPTION IN PRINT.
+ 0505              TS           Z,SC,1        -             GO PRINT       C
+
+ 0506              TS           Z,X2          Z,AU2         MOV HELTH      C    ADVANCE X2 WHEN HEALTH STATE IS EMPTY.
+
+ 0508              LA           N,X1          CAC 3         SHO CHARS           EXIT IF JUST PRINTED GRAND TOTAL.
+ 0510              LA           N,X1,1        C1T4          SUMM LOOP           BRANCH UNLESS JUST DID EXCESS SYMBOLS.
+
+ 0512              TS           UNDRLINE      LINE +2       SET SP2        C    PLACE A LINE BETWEEN ADDENDS AND TOTAL.
+ 0514              TS           SPACE 1       OLD SPACE     GO PRINT       C
+ 0515              TS           W TOTAL       LINE +1       SUMM LOOP +1        PRINT GRAND TOTAL TO FINISH SUMMARY.
+
+ 051518 SHO CHARS  WD           Z,X2          ONE           Z,X2
+ 05152             TN           N,X2          15            LINE +1
+ 05154             TS           ACO2          OLD SPACE     GO PRINT       C    UPSPACE 7 AND PRINT CHARACTER SET.
+ 05156             TS           BIT 1         OLD SPACE     EECR TABL +1
 
 # Page 505
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  24        PAGE  24
 
+P05161             ROUTINE TO PRINT AN ERASABLE & EQUIVALENCE CROSS REFERENCE TABLE.  THERE ARE 5 COLUMNS ACROSS THE
+R05163  PAGE, AND UP TO 10 GROUPS OF 4 LINES EACH, MAKING A MAXIMUM OF 200 EECR SYMBOLS PER PAGE.  INPUTS ARE N EECRS,
+R06155  A POINTER TO THE FIRST ONE IN R0, AND THE THREADING OF THE EECR LIST IN CAC3 OF THE THIRD WORD IN EACH EECR
+R06157  SYMBOL TABLE ENTRY.  THE INPUTS ARE GENERATED DURING THE PRINTING OF THE SYMBOL TABLE ANALYSIS.
+
+
+
+ 05169  EECR TABL  S, ETS       2,2           ZX +8         C,-1                POINT TO FIRST EECR OF NEXT PAGE.
+ 05171             LA           N EECRS       ZERO          WC SUMARY           BRANCH WHEN EECR TABLE IS DONE.
+
+ 05173             TN           EECR SUBH     12            PAGE HED2 +1
+ 05174             MT           BLANKS        3             N,AU2,1
+ 05175             LA           N EECRS       C200          C,+2
+ 05176             TS           C200          EECR PAGE     C,+2                THERE ARE AT MOST 200 EECRS PER PAGE.
+ 05178             TX           N EECRS       -             EECR PAGE           SET NUMBER OF EECRS FOR LAST PAGE.
+ 0518              WD           N EECRS       EECR PAGE     N EECRS
+ 05181             WA           Z,X0          TWELVE        END LINE            SET LOCATION OF FIFTH COLUMN ON PAGE.
+ 05183             LA           SIX           EECR PAGE     SAVE BEGL           BRANCH UNLESS THERE WILL BE ONLY 1 LINE.
+
+ 05185             WD           EECR PAGE     ONE           EXCESS
+ 05186             BT           EXCESS        3             EXCESS
+ 05187             WA           Z,X0          EXCESS        END LINE            ALLOW FOR INCOMPLETE LINE.
+ 05191  SAVE BEGL  TX           Z,X0          -             L NEW LINE
+ 05193             BM           EECR PAGE     ONE FIFTH     COLUMN              FORM LENGTH OF MAX COLUMN - 1.
+ 05195             BT           COLUMN        5             EXCESS
+ 05196             WD           EECR PAGE     EXCESS        EXCESS              NUMBER OF EECRS IN LAST LINE.
+ 05198             EBA          Z,R0          ZERO          Z,X2                POINT TO FIRST EECR ON PAGE.
+ 0520              TS           FOUR          Z,R7          EECOL HDS           PRINT GROUPS OF FOUR LINES.
+
+R05202  PROCEDURE FOR HEADS OF COLUMNS, REPLACING BACKWARDS THREADS BY COLUMN-TO-COLUMN THREADS.
+
+ 05204  ADV COLUM  EBA          Z,X2          ZERO          Z,X1
+ 052042            LA           Z,X4,1        ZERO          C,+2
+ 052044            S, ETS       2,2           ZX +2         C,-1                ADVANCE TO HEAD OF NEXT COLUMN.
+ 05206             LA           EXCESS        ZERO          EECOL HDS -1        BRANCH IF NOW ON SHORTER COLUMNS.
+ 05208             S, ETS       2,2           ZX +2         C,+1                ADVANCE ONE MORE STEP ON LONGER ONES.
+ 0521              WD           EXCESS        ONE           EXCESS
+ 05211             SWS, CAC2    ETS           16,L          1,2                 HEAD OF LAST COL POINTS TO HEAD OF THIS.
+
+ 05213  EECOL HDS  TS           Z,SC          Z,X4          PRIN EECR           GO SET HEAD-OF-COLUMN EECR IN PRINT.
+ 052142            EBA          Z,R0          ZERO          Z,X1                POINT TO FIRST EECR OF SECOND ROW.
+ 05215             NA           N,SH          GO PR EECR    ND EECR PQ          BRANCH AFTER LINE IS PRINTED.
+ 05217             TS           COLUMN        Z,X4          ADV COLUM           GO PROCESS HEAD OF NEXT COLUMN ON PAGE.
 
 # Page 506
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  25        PAGE  25
 
+P05221  SUBROUTINE USED BY EECR TABL TO SET IN PRINT THE THREE-WORD INFORMATION ITEM ABOUT AN ERASE OR EQUALS SYMBOL.
+R05223  PRINTS A LINE WHEN IT IS FILLED, AND GOVERNS DOUBLE SPACING BETWEEN GROUPS OF 4 LINES.  ENTER WITH RETURN IN X4.
+
+
+ 05225  PRIN EECR  SWE, CAC3    2,1           16            EQIVLENT
+ 05226             TX           M EDIT DEF    -             Z,CSC          C    SET DEFINITION OF SYMBOL IN PRINT.
+ 05228             SWE, ONES    LINE +2       A,3,L         LINE +1
+ 05229             SWS, C6T8    LINE +3       A,3,L         LINE +1             SHIFT DEFINITION TO LEFT EDGE OF COLUMN.
+ 05231             TS           2,2           ARG 1         P3 D2A LZS -3  C
+ 05232             SWE, ONES    ARG 2         A,3,L         LINE +2             SET PAGE OF DEFINITION IN PRINT.
+ 052332            SWS, CHAR8   N,X2          A,1,L         LINE +2
+ 052334            SWS, C1T7    N,X2          A,1,L         LINE +3             SET SYMBOL IN PRINT.
+ 05234             WD           EECR PAGE     ONE           EECR PAGE
+ 05235             NA           Z,X0,3        END LINE      N,X4                EXIT IF LINE NOT FILLED YET.
+
+ 05237  GO PR EECR TX           L NEW LINE    -             Z,X0                RESET BEGINNING AND END OF LINE.
+ 052382            WA           L OLD LINE    TWELVE        END LINE
+ 05239             TX           L OLD LINE    -             L NEW LINE
+ 0524              LA           Z,R7,1        ONE           C,+2                BRANCH IF NOW END OF A 4-LINE GROUP.
+ 052412            TS           SPACE 1       LINE          PRINT LIN
+ 05242             TX           FOUR          -             Z,R7
+ 05243             TS           SPACE 2       LINE          PRINT LIN
+
+
+
+R05245  LOOP TO COLLECT EVERY EECR ON A PAGE AFTER THE FIRST ROW.
+
+
+ 05246  EECR LOOP  SWS, CAC2    1,2           16,L          2,2                 NTH EECR OF A COL POINTS TO NTH OF NEXT.
+ 05248             S, ETS       1,2           ZX +2         C,+1
+ 052485            TS           Z,SC          Z,X4          PRIN EECR           GO TO SET EECR IN PRINT.
+ 0525              SWE, CAC2    1,2           16            ARG 1
+ 052502            EBA          ARG 1         BIT 25        Z,X1                POINT TO (N-1)TH OF NEXT COLUMN.
+ 05252  ND EECR PQ NA           EECR PAGE     ZERO          EECR LOOP
+
+ 05253             NA           N,SH          GO PR EECR    EECR TABL           BRANCH IF LAST LINE WAS COMPLETE AND PR.
+ 05255             TS           L NEW LINE    Z,X0          GO PRINT       C    OTHERWISE PRINT LAST LINE OF EECR TABLE.
 
 # Page 507
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  26        PAGE  26
 
+P05257             ROUTINE TO PRINT A SUMMARY OF THE WORD COUNT DATA FOR EACH ROUTINE WHOSE NAME APPEARS IN ONE OR MORE
+R052572 COUNT CARDS.  THE FORMAT, PRINTED IN TWO COLUMNS, IS:  ROUTINE NAME; SERIAL NUMBER, FIRST AND LAST PAGES, AND
+R052574 WORD COUNT FOR LAST REACH OF EACH ROUTINE; TOTAL WORD COUNT FOR ROUTINE; AND A CUMULATIVE TOTAL ADDED FROM ROU-
+R052576 TINE TO ROUTINE.  THE NUMBER OF "UNCOUNTED" WORDS IS GIVEN IF APPROPRIATE. THIS SUMMARY IS OMITTED IF THE ASSEM-
+R052578 BLY HAD NO COUNT CARDS.
+
+ 05258  WC SUMARY  EBA          SPEC SIGN     BIT 25        Z,X1
+ 052584            EBA          Z,X1          ZERO          Z,X4                POINT TO ORIGIN OF ROUTINE LIST.
+ 052592            EX           N,X4          CAC3          COUNT PTR
+ 052596            TS           ZERO          ROUTINES      C,+3
+ 0526   INCRTNES   WA           ROUTINES      ONE           ROUTINES       S
+ 052604            EBA          Z,X2          ZERO          Z,X1                KEEP X1 ONE CYCLE BEHIND.
+ 052612            S, ETS       1,0           ZX +2         C,+1
+ 052616            NA           N,X2,1        ONES          C,-3                COUNT UP NUMBER OF ROUTINES.
+
+ 052632            TX           ZERO          -             TOTAL WDS
+ 052636            NA, C7T8     4,1           ZERO          INCL UNCO           BRANCH IF THERE WERE BLANK COUNT CARDS.
+ 052644            LA           ROUTINES      ZERO          AV DISPLY      S    EXIT NOW IF NO COUNT CARDS AT ALL.
+ 052652            LA           4,1           ZERO          WC PAGE +1          BRANCH IF COUNT CARDS, NONE UNCOUNTED.
+ 05266  INCL UNCO  TS, CAC3     1,0           4,0           INCRTNES       C    INCLUDE SUMMARY OF UNCOUNTED WORDS AS
+ 052668            TS, CAC3     SPEC SIGN     1,0           WC PAGE +1          FINAL ITEM OF SUMMARY.
+
+ 052676            EBS          Z,X1          BIT 25        COUNT PTR           2ND AND SUBSEQUENT PAGES BEGIN HERE.
+ 052682            TS           TOTAL WDS     TOTAL WDS +1  AV DIS PAG     C    SKIP BEFORE EACH PAGE.
+ 052684            TN           COUNT HDG     8             PAGE HED2 +1
+ 052688            TS           ROUTINES      COUNT PAG     INCL UNCO -2   C
+ 052692            NA           ROUTINES      ONE           OVER 1 WC           BRANCH IF MORE THAN 1 RTNE ON THIS PAGE.
+ 0527              MT           BLANKS        7             N,AU2,1             BLANK OUT RIGHT-HAND COLUMN HEADING.
+ 052708            TS           ZERO          ROUTINES      WC GROUP -1         GO TO PRINT ONE-ITEM PAGE.
+
+ 052716 WC PAGE    TN           COUNT HDG     7             N,AU2               PUT UP RIGHT-HAND COLUMN HEADING.
+ 052724            LA           ROUTINES      C 80          C,+2
+ 052728            TX           C 80          -             COUNT PAG           NO MORE THAN 80 ITEMS ON A PAGE.
+ 052736            WD           ROUTINES      COUNT PAG     ROUTINES
+ 052738            TS           D4T8          AVAIL MSK     WC GROUP -1    C    FAKE UP A D4T8 MASK.
+ 05274             WA           COUNT PAG     ONE           Z,R7
+ 052744            SWE, ONES    Z,R7          1             Z,R7
+ 052748            EBA          COUNT PTR     BIT 25        Z,X2                POINT TO FIRST ITEM ON PAGE.
+ 052752 FIND WCC2  DA, AVAILMSK TOTAL WDS     2,1           TOTAL WDS
+ 052754            DA, AVAILMSK TOTAL WDS     2,2           TOTAL WDS
+ 052756            S, ETS       2,1           ZX +2         C,+1
+ 052758            NA           Z,R7,1        ONE           FIND WCC2           POINT TO FIRST ITEM OF SECOND COLUMN.
+ 052764            EBS          Z,X2          BIT 25        THREAD 2
+ 05277             TS           THREAD 2      ARG 1         BGIN LACE
+
+ 052772 WC LACING  NA           Z,X2          SPEC SIGN     C,+2
+ 052774            TS, CAC3     THREAD 1      2,0           WC GROUP -1         SNEAK OUT IF GOT TO UNCOUNTED-WDS ITEM.
+ 052776            EBA          THREAD 1      BIT 25        Z,X1                REARRANGE THREADING ORDER WITHIN ROUTINE
+ 052784            EX           2,1           CAC3          THREAD 2            LIST SO THAT THE 80 OR LESS ITEMS FOR
+ 052792            SS           THREAD 1      CAC3          2,1                 THIS PAGE ARE THREADED FROM TOP OF LEFT
+ 0528              EBA          THREAD2       BIT 25        Z,X2                COLUMN TO TOP OF RIGHT COLUMN TO SECOND 
+ 052808 BGIN LACE  EX           1,1           CAC3          THREAD 1            OF LEFT COLUMN TO SECOND OF RIGHT COLUMN
+ 052814            SS           THREAD 2      CAC3          1,1                 TO THIRD OF LEFT COLUMN ETC.
+ 052824            NA, CAC3     THREAD 1      ARG 1         WC LACING           EXIT IF AGAIN POINTING TO TOP OF RIGHT.
 
 # Page 508
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  27        PAGE  27
