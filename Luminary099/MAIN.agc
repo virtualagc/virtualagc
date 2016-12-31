@@ -156,7 +156,7 @@ $P-AXIS_RCS_AUTOPILOT.agc			        # pp. 1421-1441
 $Q,R-AXES_RCS_AUTOPILOT.agc			        # pp. 1442-1459
 $TJET_LAW.agc					        # pp. 1460-1469
 $KALMAN_FILTER.agc				        # pp. 1470-1471
-$TRIM_GIMBAL_CONTROL_SYSTEM.agc			        # pp. 1473-1484
+$TRIM_GIMBAL_CONTROL_SYSTEM.agc			        # pp. 1472-1484
 $AOSTASK_AND_AOSJOB.agc				        # pp. 1485-1506
 $SPS_BACK-UP_RCS_CONTROL.agc			        # pp. 1507-1510
 						        # pp. 1511-1743: GAP-generated tables.
