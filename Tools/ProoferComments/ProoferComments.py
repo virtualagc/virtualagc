@@ -106,6 +106,8 @@ else:
 img = Image(filename=backgroundImage)
 backgroundWidth = img.width
 backgroundHeight = img.height
+middleFloor = 2 * img.height / 5
+middleCeiling = 3 * img.height / 5
 # Make certain conversions on the background image.
 img.type = 'truecolor'
 #img.alpha_channel = 'activate'
@@ -295,7 +297,8 @@ for box in file:
 	# In Colossus237, there's an artifact that appears very often, that I've simply gotten tired
 	# of editing out: two adjacent short strokes, very near the center of the page, presumably
 	# a remnant of a horizontal line.  Fortunately, that lets us make the filter pretty specific.
-	if Colossus237 and (boxChar == '_' or boxChar == '-') and boxWidth >= 11 and boxWidth <= 17 and boxHeight >= 4 and boxHeight <= 5:
+	if Colossus237 and (boxChar == '_' or boxChar == '-') and boxWidth >= 11 and boxWidth <= 17 and \
+		boxHeight >= 4 and boxHeight <= 5 and boxTop > middleFloor and boxTop < middleCeiling:
 		rejectIt = 1
 	# Here's something to help apostrophes to be recognized.
 	#if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
