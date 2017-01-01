@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TVCGEN3FILTERS.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-12 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	TVCGEN3FILTERS.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-12 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 958
 # PROGRAM NAME.... GEN3DAP FILTERS, CONSISTING OF NP0NODE, NP1NODE, NY0NODE, NY1NODE, ETC.
@@ -22,9 +24,9 @@
 
 #      1. FILTER COEFFICIENTS AND GAINS IN ERASABLE MEMORY
 #      2. UP TO THIRD-ORDER NUMERATOR OR DENOMINATOR
-#      3. OPERATIONAL FIT WITHIN THE STRUCTURE OF TEH REGULAR LEM-ON DAP CODING
+#      3. OPERATIONAL FIT WITHIN THE STRUCTURE OF THE REGULAR LEM-ON DAP CODING
 #      4. DENOMINATOR POLES INSIDE THE Z-PLANE UNIT CIRCLE
-#      5. NUMERATOR ZEROES INSIDE THE Z-PLANE DOUBLE-UNIT CIRCLE
+#      5. NUMERATOR ZEROS INSIDE THE Z-PLANE DOUBLE-UNIT CIRCLE
 #      6. HIGH FREQUENCY (BODE) GAIN LESS THAN 8ASCREVS, OR 8.6380088 DEG/DEG
 
 # THE FILTERS ARE SHOWN IN THE FOLLOWING DIAGRAMS.....
@@ -255,7 +257,7 @@ AP2(EP)		CAE	EP		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		ADS	NP2TMP		# COMPLETED NODE NP2
 
 NP3NODE		CS	NP0		# FORM NODE NP3....NO PAST NODES, DIRECT
-		EXTEND			#      DPXDP MULTIPLY FOR DENOMINATOR
+		EXTEND			#      TO DPXDP MULTIPLY FOR DENOMINATOR
 		MP	BP3		#      COMPONENT
 		DXCH	NP3TMP
 		CS	NP0 +1

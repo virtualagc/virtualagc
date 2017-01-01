@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 P37,P70.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-05 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	P37,P70.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-05 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 840
 		BANK	31
@@ -45,7 +47,7 @@
 #     INTSTALL
 #     INTEGRVS
 #   RTEVN
-#     RETDISP
+#     RTEDISP
 #     TMRAD100
 #     AUGEKUGL
 #     LAT-LONG
@@ -101,7 +103,7 @@ P37		TC	PHASCHNG	# P37 IS NOT RESTARTABLE.
 		TCR	P370GOF		#                OVERLAYED WITH TIG
 		TCF	-2		# DESPLAY NEW DATA
 		CAF	V6N60RTE	# INPUT REENTRY ANGLE IN GAMMAEI
-		TCR	P37GFRB1	#   AND DESIRED DELTA V IN RETDVD
+		TCR	P37GFRB1	#   AND DESIRED DELTA V IN RTEDVD
 		TCF	-2		# DISPLAY NEW DATA
 RTE299		TC	INTPRET
 		SSP	DLOAD
@@ -726,7 +728,7 @@ INVC125		VLOAD
 # PRECISION TRAJECTORY COMPUTATION SUBROUTINE
 
 # DESCRIPTION
-#   A NUMERICALLY INTEGRATED TRAJECTORY IS GENEATED WHICH FOR THE RETURN TO EARTH PROBLEM SATISFIES THE REENTRY
+#   A NUMERICALLY INTEGRATED TRAJECTORY IS GENERATED WHICH FOR THE RETURN TO EARTH PROBLEM SATISFIES THE REENTRY
 # CONSTRAINTS (RCON AND X(T2)) ACHIEVED BY THE INITIAL CONIC TRAJECTORY AND MEETS THE DVD REQUIREMENT AS CLOSELY
 # AS POSSIBLE.
 
@@ -756,7 +758,7 @@ INVC125		VLOAD
 #   MPAC
 #     NONE
 #   OTHER
-#     R(T1)/      INITIAL POSITION VECTOR                                 VECTOR  B28/B27 METERS
+#     R(T1)/      INITIAL POSITION VECTOR                                 VECTOR  B29/B27 METERS
 #     V2(T1)/     POST IMPULSE INITIAL VELOCITY VECTOR                    VECTOR  B7/B5   METERS/CS
 #     V(T1)/      INITIAL VELOCITY VECTOR                                 VECTOR  B7/B5   METERS/CS
 #     T1          INITIAL VECTOR TIME                                     DP      B28     CS
@@ -1157,7 +1159,7 @@ RTENCK3D	STORE	TDEC1
 # DESCRIPTION
 # A POST IMPULSE VELOCITY VECTOR (V2(T1)) IS COMPUTED WHICH EITHER
 # (1) MEETS THE INPUT VELOCITY CHANGE DESIRED (RTEDVD) IN A MINIMUM TIME  OR
-# (2) IF A VELOCITY CHANGE ISN:T SPECIFIED (RTEDVD = 0), A V2(T1) IS COMPUTED WHICH MINIMIZES THE IMPULSE (DV)
+# (2) IF A VELOCITY CHANGE ISN:T SPECIFIED (RTEDVD) = 0), A V2(T1) IS COMPUTED WHICH MINIMIZES THE IMPULSE (DV)
 # AND CONSEQUENTLY FUEL.
 
 # CALLING SEQUENCE
@@ -1336,7 +1338,7 @@ V2T115		DLOAD	BMN
 			V2T125
 V2T120		SQRT	RTB
 			DPMODE
-		PDDL	BMN		# BETA8**.5=X(T1)LIM              B5 PL18D
+		PDDL	BMN		# BETA6**.5=X(T1)LIM              B5 PL18D
 			PHI2
 			V2T130
 		DLOAD	STADR		#                                    PL16D
@@ -1683,7 +1685,7 @@ GAMDVX		GOTO
 #
 # DEBRIS
 #     28D         THETA3*PCON**.5                                         DP      B10/B8-N1
-#     C(PUSHLOC)  THETA3(PCON**.5)*X(T1)*UR1/                             VECTOR  B7/B5
+#     C(PUSLCC)   THETA3(PCON**.5)*X(T1)*UR1/                             VECTOR  B7/B5
 #     32D         DVCALC SUBROUTINE RETURN ADDRESS
 #     X1          NORMALIZATION FACTOR FOR VALUE IN 28D
 

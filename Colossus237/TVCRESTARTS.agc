@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TVCRESTARTS.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	TVCRESTARTS.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 913
 # NAME....TVCRESTART PACKAGE,  CONSISTING OF REDOTVC, ENABL1, 2, CMDSOUT, PHSCHK2, ETC.
@@ -54,11 +56,11 @@
 #     *IF A RESTART OCCURS DURING THE TVCEXEC....TVCEXFIN SEQUENCE THE
 #      COMPUTATIONS WILL BE COMPLETED, STARTING AT THE APPROPRIATE RESTART
 #      POINT, AFTER THE DAPS ARE READY TO GO ON THE AIR.
-#     *IF A RESTART OCCURS PRIOR TO TVCINIT4 (TVCPHAS = -1) E.G. DURING
+#     *IF A RESTART OCCURS PRIOR TO TVCINIT4 (TVCPHASE = -1) E.G. DURING
 #      THE EARLY DAP INITIALIZATION PHASE, THE DAP STARTUP SEQUENCE IS
 #      ENTERED AT MRCLEAN FOR A FULL INITIALIZATION.
 #     *RESTARTS ARE NOT CRITICAL TO THE ROLL DAP PERFORMANCES HENCE THE
-#      ROLL DAP IS MERELY RESTARTED.
+#      THE ROLL DAP IS MERELY RESTARTED.
 #     *RESTARTS DURING A STROKE TEST (STROKER IS NON-ZERO) WILL CAUSE THE
 #      STROKE TEST TO BE TERMINATED. A NEW V68 ENTRY WILL BE REQUIRED
 ## Page 914
@@ -86,7 +88,7 @@
 
 # OTHER INTERFACES....IGNOVER AND RCSDAPON (T5 BITS), ELRSKIP (CALLS IT)
 
-# ERASABLE ININTIALIZATION REQUIRED....
+# ERASABLE INITIALIZATION REQUIRED....
 
 #     *T5 BITS, TVCPHASE, TVCEXPHS
 #     *TVC DAP VARIABLES
@@ -102,7 +104,7 @@
 #     *TVC DAP INITIALIZATION AS REQUIRED
 #     *ALL TVC DAP OPERATIONS ON THE AIR
 
-# DEBRIS....TVC TEMPORARIES IN EBANK6
+# DERIS....TVC TEMPORARIES IN EBANK6
 
 
 		BANK	16
@@ -158,7 +160,7 @@ ENABL2		LXCH	BANKRUPT	# CONTINUE PREPARATION OF OUTCOUNTERS
 		TCF	NOQRSM
 
 
-CMDSOUT		LXCH	BANKRUPT	# CONTNUE PREPARATION OF OUTCOUNTERS
+CMDSOUT		LXCH	BANKRUPT	# CONTINUE PREPARATION OF OUTCOUNTERS
 		EXTEND
 		QXCH	QRUPT
 
@@ -185,7 +187,7 @@ CHKSTRK		CCS	STROKER		# CHECK FOR STROKE TEST IN PROGRESS
 		TCF	+2		# NO, PROCEED
 		TCF	TSTINITJ	# YES, KILL IT
 
-  +4		TC	POSTJUMP	#      IF POSTIVE OR ZERO, RESTART AT
+  +4		TC	POSTJUMP	#      IF POSITIVE OR ZERO, RESTART AT
 		CADR	TVCINIT4	#           TVCINIT4 (ZEROS TVCPHASE, AND
 #					            CALLS TVC DAPS)
 

@@ -11,6 +11,8 @@
 ## Mod history:	2010-05-22 OH	Adapted from corresponding Colossus 249 file.
 ##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 ##		2011-02-07 JL	Minor fixes.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				but no found.
 
 ## Page 1070
 # 	   THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE

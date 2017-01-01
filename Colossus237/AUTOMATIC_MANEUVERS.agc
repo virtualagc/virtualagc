@@ -11,6 +11,8 @@
 ## Mod history:	2010-06-01 OH	Adapted from corresponding Colossus 249 file.
 ##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 ##		2011-02-11 JL	Minor fixes.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 993
 		BANK	21
@@ -172,7 +174,7 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 
 # DETERMINE THE LOCATION OF THE RATE ERROR AND THE ATTITUDE ERROR RELATIVE TO THE SWITCHING LOGIC IN THE PHASE
 # PLANE.
-# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE S/C INTO THE
+# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE THE S/C INTO THE
 # APPROPRIATE DEADZONE.
 
 
@@ -187,11 +189,11 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #                   * -               .* R18      R20       R21           PLANE FOF COMPUTING DESIRED RESPONSE
 #                    *                . *
 #                     *-              .  *
-#   R22             R24*-             .   *
-#                       *             .    *
+#   R22             R24*-     R23     .   *
+#                       *-            .    *
 #                        *            .     *
 #                         + -ADB      .      * AF              ATTITUDE
-#  ........................+--+---------------+--+........................
+# .........................+--+---------------+--+........................
 #                           AF *      .     +ADB  +             ERROR
 #                               *     .            *
 #                                *    .            -*
@@ -432,12 +434,12 @@ J24		CS	AERR
 #           J
 
 #    DELTA W = DESIRED CHANGE IN S/C ANGULAR RATE AS DETERMINED BY THE
-#              SWITCHING LOGIC,  AT THIS PINT STORED IN KMPAC.
+#              SWITCHING LOGIC,  AT THIS POINT STORED IN KMPAC.
 
 #        J/M = S/C INERTIA TO TORQUE 9ATIO  SCALED BY
 #                (57.3/450)(B24/1600)(1/.8)
 #              FOR 1 JET OPERATION  (M = 700 FT-LB).
-#              IE  J/M = J(SLUG-FTFT) x 0.00000085601606
+#              IE  J/M = J(SLUG-FTFT) X 0.00000085601606
 
 #              THE CORRESPONDING COMPUTER VARIABLES ESTABLISHED BY
 #              KEYBOARD ENTRY ARE
@@ -445,7 +447,7 @@ J24		CS	AERR
 #                 J/M1 (PITCH)
 #                 J/M2 (YAW)
 
-#         T  = JET-ON TIME     SCALED 16384/1600 SEC
+#         T  = JET ON-TIME     SCALED 16384/1600 SEC
 #          J
 
 #              THE COMPUTER VARIABLES ARE
@@ -482,7 +484,7 @@ ZEROCMDS	CAF	ZERO
 		TS	TAU1
 		TS	TAU2
 T6PROG		EXTEND			# WHEN THE ROTATION COMMANDS (TAUS)
-		DCA	JETADDR		# HAVE BEEN DETERINED
+		DCA	JETADDR		# HAVE BEEN DETERMINED
 		DXCH	T5LOC		# RESET T5LOC FOR PHASE3
 		TCF	RESUME
 
