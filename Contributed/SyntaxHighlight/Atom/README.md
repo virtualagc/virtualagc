@@ -10,4 +10,4 @@ Information on the AGC assembly language itself may be [found here](http://www.i
 
 
 ### License
-[ISC](./LICENSE.md)
+[ISC](https://github.com/Alhadis/language-agc/blob/master/LICENSE.md)
