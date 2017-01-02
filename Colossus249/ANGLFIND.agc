@@ -9,6 +9,9 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/10/04 RSB.	Began transcribing.
+##		2017-01-02 RSB	Fixed a couple of comment errors, detected by
+##				comparison to Colossus 237 and Comanche 55.
+##				Lots more to come.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned document obtained from MIT's website,
@@ -57,7 +60,7 @@ KALCMAN3	TC	INTPRET
 			CPHI		# (MFS)
 		CALL
 			CDUTODCM
-SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED
+SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED		$2
 			MIS
 			TRANSPOS
 		VLOAD
@@ -111,7 +114,7 @@ SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED
 		DSU	DAD
 			DP1/4TH
 			MFI	+8D
-		STORE	CAM		# CAM = (MFI0+MFI4+MFI8-1)/2 HALF-SCALE
+		STORE	CAM		# CAM = (MFI0+MFI4+MFI8-1)/2 HALF SCALE
 		ARCCOS
 		STORE	AM		# AM=ARCCOS(CAM)  (AM SCALED BY 2)
 		DSU	BPL
