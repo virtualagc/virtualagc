@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2016-12-29 JL   Transcribed pages 482-501.
 #               2016-12-31 JL   Transcribed pages 502-507.
+#               2017-01-02 JL   Transcribed pages 508-516.
 
 # Annotations:
 #
@@ -1096,38 +1097,463 @@ R052578 BLY HAD NO COUNT CARDS.
 # Page 508
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  27        PAGE  27
 
+P05283  PRINT THE PAGEFUL OF WORD COUNT SUMMARIES ON THE PRECEDING PG.
+
+ 052832            EBA          COUNT PTR     BIT 25        Z,X1                AGAIN POINT TO FIRST ITEM OF PAGE.
+ 05284  WC GROUP   TX           FOUR          -             Z,R7                ARRANGE PRINTING INTO 4-LINE GROUPS.
+
+ 052848 WC LINE    TS           SPACE 1       LINE          SAVE BEGL      C    SAVE TRUE BEGINNING OF LINE.
+
+ 05286  WC HAF LIN LA           Z,X1          SPEC SIGN     C,+2                BRANCH IF DOING UNCOUNTED-WORDS ITEM.
+ 052868            TS           N,X1,1        LINE +1       C,+3                SET ROUTINE NAME IN PRINT.
+ 052876            TN           W UNCOUNT     5             LINE +1             ASSUME NO BLANK COUNT CARDS INITIALLY.
+ 052884            LA, C7T8     1,1           ZERO          WC NO REF           BRANCH IF ASSUMPTION IS RIGHT.
+ 052892            SWE,DECALFM1 1,1           D,6,L         ARG 1
+ 052896            TS, C5T8     W REF         LINE +2       P3 D2A LZS -2  C
+ 0529              SWE, ONES    ARG 2         A,5,L         LINE +3             SERIAL NUMBER OF LAST COUNT CARD.
+ 052908            NA           LINE +3       999 COUNT     C,+2
+ 052912            SWE, ONES    OVER 1000     A,1,L         LINE +3             FOR 999, SAY OVER 1000.
+ 05292             SWE,DECALFM1 N,X1          D,3           ARG 1
+ 052924            TS, C5T8     W LAST        LINE +3       P3 D2A LZS -2  C
+ 052928            SWE, ONES    ARG 2         A,3,L         LINE +4             SET IN PRINT PAGE OF LAST COUNT CARD.
+ 052936            SWE,DECALFM1 1,1           D,3           ARG 1
+ 05294             TS, C7T8     W TO C78      LINE +4       P3 D2A LZS -2  C
+ 052944            SWE, ONES    ARG 2         A,3,L         LINE +5             SET IN PRINT PAGE OF LAST WORD OF RTNE.
+
+ 052952 WC NO REF  TX           D4T8          -             AVAIL MSK           FAKE UP A D4T8 MASK.
+ 05296             EX           1,1           D4T8          ARG 1               WORD COUNT FOR LAST REACH.
+ 052968            DA, AVAILMSK 1,0           ARG 1         1,0                 FORM TOTAL WORD COUNT OF ROUTINE.
+ 052976            TS, C6T8     COLON C6      LINE +5       P3 D2A LZS     C
+ 05298             SWS, CHAR8   ARG 2         A,4           LINE +5
+ 052984            SWE, ONES    ARG 2         A,4,L         LINE +6             SET IN PRINT WORD COUNT OF LAST REACH.
+ 052992            EX           N,X1          D4T8          ARG 1
+ 052993            TX           TOTAL WDS     -             TOTAL WDS +2
+ 052994            TN           TOTAL WDS +1  2             TOTAL WDS           SWAP CUMULATIVE COLUMN TOTALS AND
+ 052996            DA           TOTAL WDS     ARG 1         TOTAL WDS           UPDATE TOTAL WORD COUNT OF ASSEMBLY.
+ 053004            TS           DASH C6       LINE +7       P3 D2A LZS     C    INITIALLY, ASSUME DOING UNCOUNTED ITEM.
+ 053012            SWS, C6T8    ARG 2         A,2           LINE +6
+ 053016            SWS, C1T2    ARG 2         A,6,L         LINE +7             SET IN PRINT WORD COUNT FOR ROUTINE.
+ 053024            TS           TOTAL WDS     ARG 1         P3 D2A LZS     C
+ 053028            LA           Z,X1          SPEC SIGN     C,+2                BRANCH IF DOING UNCOUNTED WORDS.
+ 053036            SS           ARG 2         C3T8          LINE +7             SET IN PRINT CUMULATIVE WORD TOTAL.
+ 053044            WD           COUNT PAG     ONE           COUNT PAG
+ 053048            S, ETS       1,0           ZX +1         C,+1                FOLLOW THREAD TO NEXT ITEM TO PRINT.
+ 053056            LA           COUNT PAG     ZERO          C,+2                BRANCH IF NO MORE FOR THIS PAGE.
+ 053064            LA           Z,X0,8        L NEW LINE    WC HAF LIN          BRANCH TO DO 2ND HALF-LINE.
+
+ 053072            TS           L NEW LINE    Z,X0          PRINT AVL      C    PRINT LINE WITH ONE OR TWO ITEMS.
+ 05308             LA           COUNT PAG     ZERO          WC PAGE
+
+ 053084            NA           Z,R7,1        ONE           WC LINE             BRANCH IF NEXT LINE IS IN SAME GROUP.
+ 053092            TS           SPACE 2       OLD SPACE     WC GROUP
 
 # Page 509
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  28        PAGE  28
 
+P0531              ROUTINE TO PRINT A DISPLAY OF THE MEMORY TYPE PATTERN USED IN THE CURRENT ASSEMBLY, AND THE STATE OF
+R05312  RESERVATION OR AVAILABILITY OF FIXED AND ERASABLE MEMORY.  THERE ARE FIVE TYPES OF ENTRIES IN THIS DISPLAY:
+R05314             SPECIAL OR NONEXISTENT MEMORY,
+R05315             RESERVED FIXED MEMORY,
+R05316             AVAILABLE FIXED MEMORY,
+R05317             RESERVED ERASABLE MEMORY, AND
+R05318             AVAILABLE ERASABLE MEMORY.
+R05319  THE DISPLAY CONSISTS OF AN ENTRY FOR EACH CONTIGUOUS GROUP OF ADDRESSES HAVING ONE ENTRY TYPE, GIVING THE LOWER
+R05321  AND UPPER ADDRESS LIMITS AND THE ENTRY TYPE.  PRINTED IN TWO COLUMNS AT UP TO 80 ENTRIES PER PAGE.
+
+ 05325  AV DISPLY  TX           ZERO          -             Z,S2                INITIALIZE ADDRESS TO ZERO.
+ 05335             TN           AV SUBHED     5             PAGE HED2 +1
+ 05336             MT           BLANKS        10            N,AU2,1
+
+ 0534   AV DIS PAG TX           BIT 1         -             OLD SPACE           SKIP TO H-O-F BEFORE EACH PAGE.
+ 0535              TX           L BANKS       -             Z,X1                TWO COLUMNS ARE BUILT UP IN BANK 5.
+ 0536   WHAT TYPE  TX           Z,S2          -             ADDRESS
+ 05365             TX           L TYP TAB     -             Z,X3
+ 0537              LA, CAC3     ADDRESS       3,0           C,+2                BRANCH WHEN MEMORY TYPE FOUND.
+ 0538              TS           Z,X3,1        -             C,-1
+ 05385             NA, LSTYPE   3,0           TYPE N        E OR F              BRANCH IF NOT SPECIAL OR NONEXISTENT.
+ 05395             SWE, CAC1    MTYPE CAX     32,L          N,X1                SAVE ADDRESS OF DESCRIPTION.
+ 05405  USE ENCAT  TS, CAC3     3,0           1,0           STO AV CAC +1       SAVE END CATEGORY = UPPER LIM OF ENTRY.
+
+ 05415  E OR F     NA, LSTYPE   3,0           TYPE F        ERASABLE
+ 0542              TS           ADDRESS       EQIVLENT      AVAIL Q        C    TEST AVAILABILITY OF FIRST LOCATION.
+ 0543              LA           BIT 32        EQIVLENT      F AVAIL             ONE OF BITS 1-32 IS ONE IF AVAILABLE.
+ 0544              SWE, CAC1    M TYPE CAX    16,L          N,X1                SAVE ADDRESS OF DESCRIPTION.
+ 0545              TS           ZERO          COMP BITS     FIDN END            GO TO FIND END OF RESERVED E OR F.
+ 0546   F AVAIL    TS           M TYPE CAX    N,X1          E AVAIL +1          SAVE ADDRESS OF DESCRIPTION.
+
+ 0547   ERASABLE   TS           ADDRESS       EQIVLENT      AVAIL Q        C    TEST AVAILABILITY OF FIRST LOCATION.
+ 0548              LA           BIT 32        EQIVLENT      E AVAIL
+ 05485             TS           M TYPE CAX +1 N,X1          F AVAIL -1          SAVE ADDRESS OF DESCRIPTION.
+ 05495  E AVAIL    SWE, CAC1    M TYPE CAX +1 16,L          N,X1                SAVE ADDRESS OF DESCRIPTION.
+ 05505             TX           B1 THRU 32    -             COMP BITS           SET UP TO FIND END OF AVAILABLE E OR F.
+ 05515             EX           EQIVLENT      CAC3          EQIVLENT            REMOVE AVAILABILITY BIT.
+
+ 05525  FIND END   LA, CAC3     3,0           EQIVLENT      USE ENCAT           ITEM DONE IF LOCATION IS END CATEGORY.
+ 05535             SWE, ONES    AVAIL MSK     1             AVAIL MSK           SET MASK TO TRY NEXT LOCATION.
+ 05545             LA           BIT 32        AVAIL MSK     TRY BIT N           BRANCH IF STILL IN SAME AVAIL. WORD.
+ 05555             TS           Z,X4,1        -             COMP WRDS           GO TO TEST 32 LOCATIONS AT ONCE.
+
+ 05565  TRY BIT 1  TX           BIT 1         -             AVAIL MSK           EXAMINE AT MOST 32 MORE LOCATIONS.
+ 05575  TRY BIT N  NA, AVAILMSK 4,0           COMP BITS     STO AV CAC          BRANCH ON CHANGE IN AVAILABILITY STATUS.
+ 05585             WA           EQIVLENT      ONE           EQIVLENT
+ 0559              TS           -             -             FIND END            CHECK CATEGORY END BEFORE NEXT LOCATION.
+
+ 0560   COMP WRDS  NA           N,X4          COMP BITS     TRY BIT 1           BRANCH ON ANY AVAIL CHANGE IN AVAILWORD.
+ 0561              WA           EQIVLENT      C32           EQIVLENT
+ 05615             LA, CAC3     3,0           EQIVLENT      USE ENCAT           BRANCH IF END CATEGORY WITHIN LAST AVWD.
+ 05625             TS           Z,X4,1        -             COMP WRDS           TRY THE NEXT 32 LOCATIONS.
 
 # Page 510
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  29        PAGE  29
 
+P05631  STORE IN BANK 5 A CAC OF THE FORM  L DESCRIP  FWA  LWA .
+
+ 05635  STO AV CAC SS           EQIVLENT      CAC3          N,X1                STORE UPPER LIMIT NOT END OF CATEGORY.
+ 05645             SWS, CAC2    ADDRESS       16,L          N,X1                STORE LOWER LIMIT OF ENTRY.
+ 05655             WA           N,X1,1        ONE           Z,S2                LOWER LIMIT FOR NEXT ENTRY.
+ 05665             LA           B5 LOC 80     Z,X1          C,+2                BRANCH IF A PAGEFUL IS READY.
+ 05675             LA           Z,S2          MAX LOC       WHAT TYPE           BRANCH IF MORE LOCATIONS FOR THIS PAGE.
+
+R05685  HAVING STORED UP TO 80 ENTRIES IN CONDENSED CAC-FORMAT, WE NOW PRINT THEM ON ONE PAGE IN TWO COLUMNS.
+
+ 05695             SWE, CHAR8   Z,X1          1             EQIVLENT
+ 0570              WD           Z,X1          EQIVLENT      Z,X3                LET X3 POINT TO BEGINNING OF 2ND COLUMN.
+ 0571              TX           L BANK5       -             Z,X2
+ 05715             TX           Z,X3          -             Z,S1                S1 SERVES AS LIMIT +1 FOR 1ST COLUMN.
+
+ 05725  AV GROUP   TX           FOUR          -             Z,R7                DOUBLE-SPACE BETWEEN GROUPS OF 4 LINES.
+ 05735  AV LINE    TX           SPACE 1       -             LINE
+ 0574              TX           Z,X0          -             Z,S3                SAVE TRUE BEGINNING OF LINE.
+ 0575              SWE, CAC3    N,X2          32            Z,AU1
+ 05755  AV DSCRIP  TN           N,AU1         4             LINE +4             STORE DESCRIPTION OF MEMORY TYPE.
+ 05765             SWE, CAC3    N,X2          16            ADDRESS             RETRIEVE LOWER LIMIT.
+ 05775             EX           N,X2,1        CAC3          EQIVLENT            RETRIEVE UPPER LIMIT.
+ 05785             WA           M EDIT DEF    TWO           Z,CSC          C    PRINT UPPER LIMIT OF CATEGORY.
+ 05795             LA           EQIVLENT      ADDRESS       C,+3                STOP THERE IF LENGTH IS 1.
+ 05805             SWE, CAC3    M EDIT AV1    16            Z,CSC          C    PRINT LOWER LIMIT OF CATEGORY.
+ 05815             SS           MW TO         MW TO MASK    LINE +2             INSERT "TO" BETWEEN LOW AND HIGH LIMITS.
+ 05825             LA           Z,S1          Z,X2          LAST LEFT           BRANCH IF 1ST (LEFT-HAND) COLUMN DONE.
+
+ 05835  SET UP RGT SWE, CAC3    N,X3          32            Z,AU1
+ 0584              TS           Z,X0,8        -             AV DSCRIP      C    MOVE TO RIGHT SIDE, PRINT DESCRIPTION.
+ 0585              SWE, CAC3    N,X3          16            ADDRESS             RETRIEVE LOWER LIMIT.
+ 0586              EX           N,X3,1        CAC3          EQIVLENT            RETRIEVE UPPER LIMIT.
+ 0587              WA           M EDIT DEF    TWO           Z,CSC          C    PRINT UPPER LIMIT OF CATEGORY.
+ 0588              LA           EQIVLENT      ADDRESS       C,+3                STOP THERE IF LENGTH IS 1.
+ 0589              SWE, CAC3    M EDIT AV1    16            Z,CSC          C    PRINT LOWER LIMIT OF CATEGORY.
+ 0590              SS           MW TO         MW TO MASK    LINE +2             INSERT "TO" BETWEEN LOW AND HIGH LIMITS.
+ 0591   RSTORE X0  TS           Z,S3          Z,X0          PRINT AVL      C    BISEQUENCE BIT IS A SLY SWITCH.
+ 0592              NA           Z,R7,1        ONE           AV LINE             BRANCH IF STILL IN SAME 4-LINE GROUP.
+ 0593              TS           SPACE 2       OLD SPACE     AV GROUP            OTHERWISE DOUBLE-SPACE & START ANOTHER.
+
+ 0594   LAST LEFT  HA           RSTORE X0     BIT 1         RSTORE X0           SET SWITCH TO RETURN HERE.
+ 0595              NA           Z,X1          Z,X3          SET UP RGT          INCLUDE 2ND COLUMN IF IT HAS AN ENTRY.
+ 0596   PRINT AVL  TS           Z,SC          Z,X4          PRINT LIN           PRINT LINE WITH 1 OR 2 COLUMNS.
+ 0597              HA           RSTORE X0     BIT 1         RSTORE X0           RESTORE SWITCH BIT.
+ 0598              LA           Z,S2          MAX LOC       AV DIS PAG          BRANCH IF MORE TO DO ON ANOTHER PAGE.
+ 0600              TX           Z,X0          -             L NEW LINE
+
+R06122             ROUTINE TO WAIT FOR WS3 TO PRINT THE INDEX TO OCCUPIED LOCATIONS.
+
+ 06124             LA           N RECORDS     ONE           E LOX GATE +1       BRANCH IF INDEX WILL BE OMITTED.
+ 06132             TS           -             -             MON WAKE       C
+ 06134  E LOX GATE TS           ZERO          PLOX GATE     PARAP NAP           LET WS3 BEGIN LOCATION INDEX.
 
 # Page 511
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  30        PAGE  30
 
+P0614              ROUTINE TO PRINT A SUMMARY OF THE PARAGRAPHS GENERATED BY THE CURRENT ASSEMBLY.  EACH LINE CONSISTS
+R0615   OF THE LOWER AND UPPER ADDRESS LIMITS FOR THE PARAGRAPH, THE PARAGRAPH NUMBER, AND THE CORRESPONDING MANUFACTUR-
+R0616   ING LOCATION CODE, WHICH WILL NORMALLY BE THE UNIT OF WORK FOR A MANUFACTURING TASK.  IT SHOULD BE NOTED HERE
+R0617   THAT THE WORD "PARAGRAPH" HAS REPLACED THE WORD "SUBSTRAND" AS THE MOST GENERAL TERM FOR 256 WORDS OF YUL ASSEM-
+R0618   BLY OUTPUT.  THIS CHANGE CAME AFTER THE WRITING OF GENERAL PASS 3, SO THAT THE TAGS AND ANNOTATION ARE NOT AL-
+R0619   WAYS CONSISTENT WITH THE PRINT-OUTS.  CAVEAT LECTOR.
+
+
+
+ 06192             TX           L OLD LINE    -             Z,X5
+ 0620              TS           L NEW LINE    Z,X0          AV DIS PAG     C    SKIP TO HEAD OF FORM AFTER AVAILABILITY.
+ 0622              TX           SPEC SIGN     -             Z,R0                EXAMINE SUBSTRAND ZERO FIRST.
+ 0624              TN           SUBSTRED      15            PAGE HED2 +1        PAGE SUBHEAD FOR SUBSTRAND SUMMARY.
+ 0626              NA           N RECORDS     ONE           P3 FIND SS          BRANCH IF THERE ARE ANY WDS FROM ASSY.
+ 0628              TN           NO WORDS      7             LINE
+ 0629              TS           CAC3          Z,X2          PRINT AVL      C    IN CASE OF BARREN ASSEMBLY (NO WORDS).
+ 06291             TS, BIT 34   ONES          SWITCH        WS3 DONE Q          ANNOUNCE LACK OF WORDS, GO TO FINALIZE.
+
+ 0631   P3 FIND SS SWE, D12     Z,R0          5             Z,X4
+ 0632              WA           Z,X4          L SUBSTRB     Z,X4
+ 0633              SWS, B26T30  Z,R0          18,L          C,+1
+ 0634              SWE, ONES    BIT 1         0             AVAIL MSK
+ 0635              LA, AVAILMSK 4,0           ZERO          P3 NEXT SS          BRANCH IF CURRENT SUBSTRAND WASN'T USED.
+
+ 0637   SET SP2    TX           SPACE 2       -             LINE
+ 0638              NA           Z,R0          LAST SS NO    C,+3                BRANCH IF THIS PH NOT SUCCESSOR OF LAST.
+ 0639              LA, THREE    LAST SS NO    ZERO          C,+2                BRANCH IF THIS PH BEGINS 4-PH GROUP.
+ 0640              TX           SPACE 1       -             OLD SPACE           SELECTIVELY CLOSE UP PH SUMMARY FORMAT.
+ 0642              SWE, CAC3    Z,R0          8,L           ADDRESS
+ 0643              SM           ADDRESS       OCT 377       EQIVLENT            FORM 1ST & LAST ADDRESSES OF PARAGRAPH.
+ 0645              SWE, CAC3    M PRINT PN    32            Z,CSC          C    PRINT MOST PARAGRAPH INFORMATION.
+ 0647              SWE, CAC3    M EDIT AV1    16            Z,CSC          C    CALL FOR LOWER LIMIT PRINT.
+ 0649              SS           MW TO         MW TO MASK    LINE +2             INSERT "TO" BETWEEN LIMIT ADDRESSES.
+ 0651   GO PRINT   TS           Z,SC          Z,X4          PRINT LIN           PRINT SUBSTRAND SUMMARY LINE.
+ 06522             WA           Z,R0          ONE           LAST SS NO          NAME OF LAST PARAGRAPH USED.
+ 0653   P3 NEXT SS NA           Z,R0,1        MAX SSNO      P3 FIND SS          BRANCH IF THERE ARE MORE PARAGRAPHS.
+
+ 06542             TN           SUP REVOK     15            PAGE HED2 +1        IN CASE OCTAL SUPPRESSION IS REVOKED.
+ 06544             SWE, ONES    PAGE NO       D,4,L         ARG 1
+ 06545             DA           ARG 1         BIT 32        ARG 1
+ 06546             TS           ZERO          N OCT ERRS    P3 D2A LZS     C
+ 06548             SS           ARG 2         C5T8          PAGE HEAD +15       PREPARE FOR CUSSES IN THE OCTAL STORMAP.
 
 # Page 512
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  31        PAGE  31
 
+P0655              ROUTINE TO EDIT THE SUBSTRANDS GENERATED BY THE CURRENT ASSEMBLY AT THE RATE OF ONE PER PAGE.  THE
+R0657   SUBSTRAND NUMBER AND A NOTATION KEY ARE PRINTED, AND EACH LINE BEGINS WITH THE ADDRESS OF THE FIRST OF THE 8
+R0659   WORDS ON THE LINE.  WORDS ARE REPLACED BY "@", "BAD WORD", OR "CONFLICT" IF APPROPRIATE.
+
+ 0665   EDIT LOOP  LA           PH FLAG A     ZERO          PARAP NAP           SLEEP UNTIL WS3 PREPARES A PARAGRAPH.
+ 0667              TS           PH FLAG A     Z,X2          -
+ 0669              TS           ZERO          PH FLAG A     MON WAKE       C    ALLOW WS3 TO PRESENT ANOTHER PARAGRAPH.
+ 0671              LA           CAC3          Z,X2          SUBR LIST           BRANCH IF NOT A SUBSTRAND BUT END FILE.
+
+ 0673              TS           Z,X2,2        Z,X3          AV DIS PAG     C    SAVE BUFFER NAME, GO TO H-O-F EACH PAR.
+ 0675              SSL, ONE     SWITCH        32            C,+1                SKIP IF OCTAL MAP IS SUPPRESSED.
+ 0680              SWE, CAC3    M EXPLAIN     16            Z,CSC          C    PRINT PAGE HEAD AND SUBHEAD FOR PARAGS.
+ 0682              SWE, CAC3    N,X2          8,L           ADDRESS             FORM 1ST ADDRESS OF PARAGRAPH.
+
+ 0684   LINE LOOP  SWE, CAC3    M EDIT AV1    16            Z,CSC          C    SET 1ST ADDRESS OF LINE IN PRINT.
+ 0686              TX           Z,X0          -             Z,R1
+ 0687              WA           Z,R1,2        FIFTEEN       END LINE            START WITH N,R1 = LINE +2.
+
+ 0689   HALF LINE  TS           M EDIT WD     Z,S3          EDIT CALL      C    MAKE UP 14-CHARACTER PRINT IMAGE OF WD.
+ 0691              SWS, C1T6    IMAGE         A,6           N,R1
+ 0692              SWS, C7T8    IMAGE +1      A,6           N,R1,1
+ 0693              SWS, C1T6    IMAGE +1      A,6           N,R1                SET IN PRINT 1ST OR 5TH WORD OF LINE.
+ 0695   EDIT CALL  TS           Z,X2,1        -             N,S3           C    MAKE UP IMAGE OF NEXT WORD.
+ 0697              SWS, C7T8    IMAGE         A,4           N,R1,1
+ 0698              SWS, C1T4    IMAGE         A,4           N,R1
+ 0699              SWS, C5T8    IMAGE +1      A,4           N,R1,1
+ 0700              SWS, C1T4    IMAGE +1      A,4           N,R1                SET IN PRINT 2ND OR 6TH WORD OF LINE.
+ 0702              TS           Z,X2,1        -             N,S3           C    MAKE UP IMAGE OF NEXT WORD.
+ 0704              SWS, C5T8    IMAGE         A,2           N,R1,1
+ 0705              SWS, C1T2    IMAGE         A,2           N,R1
+ 0706              SWS, C3T8    IMAGE +1      A,2           N,R1,1
+ 0707              SWS, C1T2    IMAGE +1      A,2           N,R1                SET IN PRINT 3RD OR 7TH WORD OF LINE.
+ 0709              TS           Z,X2,1        -             N,S3           C    MAKE UP IMAGE OF NEXT WORD.
+ 0711              SS           IMAGE         C3T8          N,R1,1
+ 0712              TX           IMAGE +1      -             N,R1,1              SET IN PRINT 4TH OR 8TH WORD OF LINE.
+ 0714              LA           Z,R1          END LINE      HALF LINE           BRANCH IF JUST DID FIRST HALF OF LINE.
+
+ 0716              NA, B44T45   ADDRESS       ONES          C,+2                BRANCH IF NOT LAST OF 4-LINE GROUP.
+ 0718              TS           SPACE 2       LINE          C,+2
+ 0719              TX           SPACE 1       -             LINE
+ 07192             SSL, ONE     SWITCH        32            C,+1                SKIP TO SUPPRESS OCTAL STORAGE MAP.
+ 0720              TS           Z,SC          Z,X4          PRINT LIN           PRINT AN ADDRESS AND EIGHT WORDS.
+ 0722              WA           ADDRESS       EIGHT         ADDRESS
+ 07221             NA, B41T48   ADDRESS       ZERO          LINE LOOP           BRANCH IF NOT END OF SUBSTRAND.
 
 # Page 513
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  32        PAGE  32
 
+P072214 AT END OF EACH PARAGRAPH (FORMERLY CALLED A SUBSTRAND), IF ANY OCTAL-MAP ERRORS WERE FOUND, PRINT A COMBINATION
+R072216 CUSS-WHAM LINE GIVING THE NUMBER(S) OF THE CUSS(ES) AND THE PAGE OF THE PRECEDING CUSSED LINE.
+
+ 07222             LA           N OCT ERRS    ZERO          ORTH PARA           BRANCH IF NO CUSSES ON THIS PAGE.
+
+ 07223  CUSS OCT   WA           Z,X0          TWO           Z,X4
+ 072235            DA           N ERR LINS    ONE           ARG 1               SERIAL NO. FOR FIRST CUSS OF PAGE.
+ 072245            SWE, ONES    ARG 1         D,4,L         ARG 1
+ 07225             TS           E BLOTS       LINE +1       P3 D2A LZS     C
+ 072255            SWE, ONES    ARG 2         A,1,L         ARG 2
+ 07226             LA, C1T4     BLANKS        ARG 2         C,-1
+ 072265            WA           35 C2         ARG 2         N,X4                LINE BEGINS "E▪▪▪▪▪▪  # NN  "
+ 072275            NA           N,X4,2        LINE +2       PR OCT ERR          BRANCH IF JUST DID SERIAL OF LAST CUSS.
+
+ 072285            TX           BLOTS         -             LINE +3
+ 07229             TN           LINE +3       12            LINE +4             FILL IT OUT AS A WHAM LINE.
+ 0723              LA           ERR PAGES     ZERO          PREV CUSS +5        BRANCH IF THIS IS THE FIRST CUSS PAGE.
+
+ 07231             SWS, C1T4    ERR PAGES     A,4,L         PREV CUSS +4
+ 072315            TN           N,SC,6        5             LINE +11            SET IN PRINT POINTER TO PREVIOUS CUSS.
+
+ 072325 PREV CUSS  ALF,5        PRECEDING CUSSED LINE IS ON PAGE     ▪▪▪
+
+ 07233             SWE, C1T4    PAGE HEAD +15 A,4,L         ERR PAGES           SHOW THAT FIRST CUSS IS ON THIS PAGE.
+ 07234             SS           PAGE HEAD +15 C5T8          ERR PAGES           SHOW THAT LATEST CUSS IS ON THIS PAGE.
+ 07235             DA           N ERR LINS    N OCT ERRS    N ERR LINS
+ 072355            LA           N OCT ERRS    ONE           PR OCT ERR          CUSS LINE IS DONE IF JUST ON ONE PAGE.
+
+ 072365            TX           W THROUGH     -             LINE +3
+ 07237             TS           N ERR LINS    ARG 1         CUSS OCT +2         MAKE IT "E▪▪▪▪▪▪  # NN   THROUGH  # NN".
+
+ 07238  PR OCT ERR SSL, ONE     SWITCH        32            C,+1                SKIP IF OCTAL MAP IS SUPPRESSED.
+ 07239             TS           Z,SC          Z,X4          PRINT LIN
+ 072395            TX           ZERO          -             N OCT ERRS          RESET COUNT FOR NEXT PAGE.
+
+ 07242  ORTH PARA  CC           N,X3          -             2,1                 ORTHOCOUNT FLAG-CORRECTED BYPT RECORD.
+ 07243             NA, BIT11    SWITCH        ZERO          WS3 DONE Q          BRANCH IF BYPT IS NOT TO BE WRITTEN.
+ 07244             TS, D4       C,+1          WRIT DISC +1  PHI TAPE            SUPPLY INDEX NUMBER TO DISC-WRITER.
+ 07246             WF,1         3,0           -             DISASTER            WRITE COMPLETED BYPT RECORD ON YULPROGS.
+ 072474            NA           DISC ADRS     ZERO          WRIT DISC           SEND PARAGRAPH TO DISC IF POSSIBLE,
+ 07248  WS3 DONE Q LA           CAC3          Z,X2          SUBR LIST
+ 0725              NA           PH FLAG C     ZERO          PARAP NAP           SLEEP IF WS3 HAS EARS CLOSED.
+ 0727              TS           Z,X3          PH FLAG C     MON WAKE       C    RETURN BUFFER TO WS3.
+ 0728              TS           -             -             EDIT LOOP
 
 # Page 514
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  33        PAGE  33
 
+P0729              ROUTINE TO PRINT A LIST OF THE SUBROUTINES CALLED BY THE PROGRAM OR SUBROUTINE BEING ASSEMBLED,
+R072904 GIVING EACH SUBROUTINE'S NAME, REVISION NUMBER, THE PAGE ON WHICH ITS CONFIRMING CALL IS PRINTED, AND (IF THE
+R072908 ASSEMBLY IS OF A PROGRAM) THE PAGE ON WHICH IT BEGINS.
+
+
+
+ 07291  SUBR LIST  TN           SUBL HEAD     4             PAGE HED2 +1
+ 072912            MT           BLANKS        11            N,AU2,1             SET UP PAGE SUBHEAD FOR SUBROUTINE LIST.
+ 072914            TS           ZERO          SUBRO NO      AV DIS PAG     C    INITIALIZE 4-LINES-PER-GROUP COUNTER.
+ 072916            WA           Z,X0          ONE           Z,AU2
+ 072917            MT           BLANKS        15            N,AU2,1             CLEAN LINE LEST OCTL MAP WAS SUPPRESSED.
+ 07292             TX           L SYM THR     -             Z,X2
+ 072922            S, ETS       2,13          ZX +2         NEXT SUB            BEGIN BY SEEING IF THERE ARE NONE.
+
+ 07293  SUBL LOOP  TS           N,X3          LINE +1       C,+4                SET SUBROUTINE NAME IN PRINT.
+ 072934            EX           3,1           A ADRES       ARG1           S    WHEN SUBROUTINE HAS NO SUBSIDIARIES.
+ 072938            SWS,THREAD11 3,1           24            Z,X3           C
+ 07294             SWE, A ADRES N,X3          D,3           ARG1           S    WHEN SUBROUTINE HAS SUBSIDIARY SUBROS.
+ 072944            SSL, ONE     3,1           23            C,-3           C
+ 072946            TS           -             -             P3 D2A LZS -2  C
+ 072948            SS           ARG 2         C6T8          LINE +2             SET REVISION NUMBER IN PRINT.
+ 072952            LA, CAC1     2,0           ZERO          LIST SUB            BRANCH IF SUBRO CALL WAS NOT CONFIRMED.
+
+ 072956            SWE, CAC2    N,X2          D,4           ARG 1
+ 072958            TS           -             -             P3 D2A LZS     C
+ 07296             SS           ARG 2         C5T8          LINE +3             SET IN PRINT PAGE OF CONFIRMING CALL.
+ 072964            LA, CAC1     2,1           ZERO          LIST SUB            BRANCH IF SUBROUTINE WAS NOT PRINTED.
+
+ 072968            SWE, CAC2    2,1           D,4           ARG 1
+ 07297             TS           -             -             P3 D2A LZS     C
+ 072972            SS           ARG 2         C5T8          LINE +4             SET IN PRINT PAGE WHERE SUBRO BEGINS.
+
+ 072976 LIST SUB   TX           SPACE 1       -             LINE
+ 072978            NA, THREE    SUBRO NO      ONES          C,+2
+ 07298             TX           SPACE 2       -             LINE                SP2 BETWEEN GROUPS OF FOUR LINES.
+ 072984            WA           SUBRO NO      ONE           SUBRO NO
+ 072986            S, ETS       2,1           ZX +2         C,+1
+ 072987            TS           Z,SC          Z,X4          PRINT LIN           ADVANCE TO NEXT SUBROUTINE AND PRINT.
+ 07299  NEXT SUB   LA           ONES          N,X2          CLOSE YUL           BRANCH IF THERE ARE NO MORE CALLED SUBS.
+ 072994            TS           N,X2          Z,X3          SUBL LOOP           POINT TO SUBRO NAME ENTRY IN DIRECTORY.
 
 # Page 515
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  34        PAGE  34
 
+P0730              SUBROUTINE IN PASS 3 TO PRINT A LINE WITH PAGINATION CONTROL.  ENTRY IS
+R0732              TS           Z,SC          Z,X4          PRINT LIN           THE SYMBOL ..LINE.. IS ASSIGNED TO 0,0.
+R0734   STRICTLY SPEAKING, THIS SUBROUTINE PRINTS THE LINE LAST DELIVERED TO IT.
+
+ 0735   PRINT LIN  TX           L OLD LINE    -             Z,X5
+ 07351             TX           Z,X0          -             L OLD LINE          NEW LINE AGES SUDDENLY.
+ 0736              LA           BIT 1         N,X5          PRIN SKIP           BRANCH IF LAST LINE IS SKIP.
+
+ 0738              WA           LIN COUNT     N,X5          LIN COUNT           ADD TO LINE COUNT FROM LAST LINE.
+ 0740              LA           LIN COUNT     N LINES       PRINT OLD           BRANCH TO NORMAL PRINT.
+ 0742              TX           BIT 1         -             N,X5                SKIP AFTER LAST LINE AT END OF PAGE.
+ 07432  PRIN SKIP  NA           N COPIES      ZERO          COPY PRTS           BRANCH IF MORE COPIES TO BE MADE.
+ 07434             S, PHI PRINT DEPAGIN8                                        AT EVERY SKIP, SUPPRESS MONITOR PAGEHED.
+ 0744              NA           N COPIES      ZERO          COPY PRTS           BRANCH IF MORE COPIES TO BE MADE.
+ 07442             S, PHI PRINT 5,0           -             -
+ 0745              DA           PAGE NO       ONE           PAGE NO
+ 0747              SWE, ONES    PAGE NO       D,4,L         ARG 1
+ 0749              TS           -             -             P3 D2A LZS     C    CONVERT PAGE NUMBER TO ZERO-SUPP ALPHA.
+ 0751              SS           ARG 2         C5T8          PAGE HEAD +15       PUT IT IN PAGE HEAD IN THAT FORM.
+
+ 07558  PRINT HED  NA           N COPIES      ZERO          COPY PRTS
+ 0756              S, PHI PRINT PAGE HEAD     -             -
+ 07561             NA           N COPIES      ZERO          COPY PRTS
+ 0757              S, PHI PRINT PAGE HED2     -             -                   PRINT SUBHEADING.
+ 0759              TS           5 LINES       LIN COUNT     C,+3
+
+ 0760   PRINT OLD  NA           N COPIES      ZERO          COPY PRTS
+ 0761              S, PHI PRINT 5,0           -             -
+ 0763              TX           Z,X5,1        -             Z,X0                OLD LINE DISCOVERS FOUNTAIN OF YOUTH.
+ 0765              MT           BLANKS        15            N,X5,1
+ 0766              TS           L OLD LINE    Z,X5          N,X4                AND IS MOREOVER MADE CLEAN AGAIN.
+
+
+
+R0768   MINOR SUBROUTINE TO COPY PRINTING ONTO TAPE 5.
+
+ 0769   COPY PRTS  SS           N,SH          A ADRES       C,+2
+ 0770              WA           L COP BUFS    ONE           Z,X0
+ 0771              TN                         16            N,X0,15             COLLECT 4 LINES BEFORE WRITING.
+ 0772              TX           Z,SH          -             AVAIL MSK
+ 0773              NA           0,3           EOR           COPY EXIT           BRANCH IF BUFFER NOT YET FILLED.
+
+ 0774              TX           0,4           -             Z,X0
+ 0775              CC           0,1           -             0,65
+ 0776              TS           N,X0          L COP BUFS    PHI TAPE            SWAP TAPE BUFFERS.
+ 0777              WF,5         0,1           -             DISASTER
+
+ 0778              TX           AVAIL MSK     -             Z,SC
+ 0779   COPY EXIT  TS           Z,X0          L COP BUFS    C,-1                ADVANCE POINTER WITHIN BUFFER.
 
 # Page 516
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  35        PAGE  35
 
+P0780              SUBROUTINE IN PASS 3 TO TEST THE AVAILABILITY OF A LOCATION.  WITH ADDRESS IN EQIVLENT,
+R0781   COSEQUENCE CALL TO AVAIL Q.  BITS 1 TO 32 OF EQIVLENT WILL BE ZERO ON RETURN ONLY IF THE LOCATION IS RESERVED.
+
+ 0783   AVAIL Q    SWS, B26T30  EQIVLENT      18,L          C,+1           C
+ 0784              SWE, ONES    BIT 1         0             AVAIL MSK      C    MASK TO SELECT ONE OF 32 BITS IN WORD.
+ 0786              SWE, B38T48  EQIVLENT      5             Z,X4           C
+ 0787              WA           Z,X4          L AV TABLE    Z,X4           C    SELECT WORD FROM AVAILABILITY TABLE.
+ 0789              SS           N,X4          AVAIL MSK     EQIVLENT            TRANSMIT AVAILABILITY BIT, EXIT.
+
+
+R0791              SUBROUTINE IN PASS 3 TO CONVERT DECIMAL TO ALPHABETIC AND BLANK OUT UP TO SEVEN LEADING ZEROS.
+R0793   COSEQUENCE CALL WITH ARGUMENT IN ARG 1.  USE EITHER RESULT OR BOTH.
+
+ 07934             SWE, A ADRES ARG 1         D,3           ARG 1          C    PAGE OF DEFINITION, ENTERING IN D1-3.
+ 07936             SWE, CAC2    ARG 1         D,2           ARG 1          C    OTHER 3- AND 4-DIGIT THINGS D3(4)-6.
+ 07938             DA           ZERO          ARG 1         ARG 1          C    CONVERT HEX HUNDREDS DIGIT BACK TO DEC.
+ 0794   P3 D2A LZS SWS, C5T8    ARG 1         8             ARG 1          C    NORMAL ENTRY.
+ 0795              SWS,DECALFM1 ARG 1         4             ARG 1          C
+ 0796              SWS,DECALFM2 ARG 1         2             ARG 1          C
+ 0797              SWS,DECALFM3 ARG 1         2             ARG 1          C    SPREAD LEFT 8 DIGITS OUT INTO ALPHA.
+ 0799              TS           C1T7          AVAIL MSK     C,+2           C
+ 0800   ARG 1      RESERVE      1
+ 0801              TS           ARG 1         ARG 2         C,+3           C
+ 0802   ARG 2      RESERVE      1
+ 0803              SWS, C1T7    AVAIL MSK     A,1,L         AVAIL MSK      C
+ 0804              NA, AVAILMSK ARG 2         ZERO          C,-1           C
+ 0805   P3 LZSUP   SS           BLANKS        AVAIL MSK     ARG 2          S    SUPPRESS UP TO 7 LEFT ZEROS, EXIT.
+
+
+R0807              SUBROUTINE IN PASS 3 TO WRITE BLOCKS OF 1024 WORDS (16 SECTORS) ON THE DISC.  SUBMIT 4-SECTOR BLOCKS
+R08074  BY FILLING IN D4 OF WRIT DISC +1 FROM THE CORRESPONDING TAPE ORDER, AND BRANCHING ON DISC ADRS NON-ZERO.
+
+ 08076  WRIT DISC  TX           DF PLACE      -             Z,CSH
+ 08078             RT           0,3           -             N,CSH,1             PLACE 256-WD BLOCK INTO 1024-WD BUFFER.
+ 0808              WA           Z,CSH         OCT 377       DF PLACE            WE ACTUALLY MOVED 259 BUT WILL KEEP 256.
+ 080812            WA           WRITE CWD     BIT 37        WRITE CWD           ADVANCE SECTOR COUNT BY 4 PER PARAGRAPH.
+ 08082  LAST RITE  TS           Z,SH          WDF RETRN     WRIT DISC      C
+ 080826            LA           ONES          N SUBFIL 1    C,+3                BRANCH IF WRITING IN SUBFILE 2.
+ 08083             WD           N SUBFIL 1    ONE           N SUBFIL 1
+ 080833            LA           N SUBFIL 1    ZERO          WRITE CWD -1        FORCE WRITING AT END OF 1ST SUBFILE.
+ 08084             NA           DF PLACE      END OF BUF    WDF EXIT            BRANCH IF BUFFER IS NOT YET FULL.
+
+ 08086             TS           EOR           N,CSH         DISCAP         C
+ 08088  WRITE CWD  OCT          -13                                             WRITE 16 SECTORS (MAYBE LESS LAST TIME).
+ 0809              CAC          DISC ADRS     DISC BUFF     INDEX
+ 08092             TS           L DISC BUF    DF PLACE      C,+2
+ 080925            TS           -             -             DISASTER
+ 08093             SS           ZERO          D31T39        WRITE CWD
+ 080935            NA           N SUBFIL 1    ZERO          C,+3                BRANCH UNLESS JUST FINISHED SUBFILE 1.
+ 08094             SWE, C2T4    INDEX +7      24,L          DISC ADRS           FETCH DISC BASE ADDRESS OF 2ND SUBFILE.
+ 080945            TS           ONES          N SUBFIL 1    WDF EXIT            SHOW THAT FURTHER WRITING IS IN 2ND SF.
+ 08095             WA           DISC ADRS     BIT 20        DISC ADRS
+ 08096  WDF EXIT   TX           WDF RETRN     -             Z,SC
 
 # Page 517
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  36        PAGE  36
