@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TVCMASSPROP.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	TVCMASSPROP.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 908
 # PROGRAM NAME....MASSPROP
@@ -40,8 +42,8 @@
 
 # ERASABLE INITIALIZATION REQUIRED
 
-#      LEMMASS MUST CONTAIN LEM MASS SCALED AT B+16 KILOGRAMS
-#      CSMMASS MUST CONTAIN CSM MASS SCALED AT B+16 KILOGRAMS
+#      LEMMASS MUST CONTAIN LEM MASS SCALED AT B+16 IN KILOGRAMS
+#      CSMMASS MUST CONTAIN CSM MASS SCALED AT B+16 IN KILOGRAMS
 
 #      DAPDATR1 MUST BE SET TO INDICATE VEHICLE CONFIGURATION.
 #               BITS (15,14,13)  =  ( 0 , 0 , 1 )     LEM OFF
@@ -85,9 +87,9 @@
 #  (2) IF LEM NOT DOCKED
 
 #      VARST0 = NOLEMVAL0    WHERE THE MEANING AND SCALING OF VARST0
-#         .                  TO VARST9 ARE THE SAME AS GIVEN ABOVE
-#         .
-#         .                  NOTE... FOR THIS CASE, VARST8,9 HAVE NO
+#         .          .       TO VARST9 ARE THE SAME AS GIVEN ABOVE
+#         .	     .
+#         .          .       NOTE... FOR THIS CASE, VARST8,9 HAVE NO
 #      VARST9 = NOLEMVAL9    MEANING (THEY ARE COMPUTED BUT NOT USED)
 
 
@@ -107,7 +109,7 @@
 #                                 LEM WEIGHT  (FULL)  32000 LBS
 #                                             (EMPTY) 14116 LBS
 
-# (WEIGHTS ARE FROM AMMENDMENT #1 (APRIL 24,1968) TO ABOVE DATA BOOK)
+# (WEIGHTS ARE FROM AMENDMENT #1 (APRIL 24,1968) TO ABOVE DATA BOOK)
 
 ## Page 910
 		BANK	25
@@ -183,7 +185,7 @@ PEGGY		INDEX	PHI333		# ALL IS READY - CALCULATE OUTPUTS NOW
 		CCS	A
 		CA	LEMMASS
 		AD	CSMMASS
-		TS	WEIGHT/G	# SCALED AT B+16 KILOGRAMS
+		TS	WEIGHT/G	# SCALED AT B+16 IN KILOGRAMS
 ENDMASSP	TC	Q
 
 BOKKEP2		TS	PSI333		# REDUCE PSI BY ONE

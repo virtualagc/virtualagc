@@ -11,6 +11,8 @@
 ## Mod history:	2010-06-03 OH	Adapted from corresponding Colossus 249 file.
 ##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 ##		2011-02-08 JL	Minor fixes.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1174
 		BLOCK	02

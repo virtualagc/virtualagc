@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-02-27 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-02-27 JL	Adapted from corresponding Colossus 249 file.
+##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
 
 ## Page 736
 # LUNAR AND SOLAR EPHEMERIDES SUBROUTINES
@@ -76,7 +78,7 @@
 # OUTPUT - LUNVEL
 
 #       MPAC CONTAINS THE VELOCITY VECTOR OF THE MOON RELATIVE TO THE
-#       EARTH AT THE TIME INPUT BY THE USER IN METERS/CS X B-7.
+#       EARTH AT TIME INPUT BY THE USER IN METERS/CS X B-7.
 
 # OUTPUT - SOLPOS
 

@@ -1,19 +1,21 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 PLANETARY_INERTIAL_ORIENTATION.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	PLANETARY_INERTIAL_ORIENTATION.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1210
 # ..... RP-TO-R SUBROUTINE .....
 # SUBROUTINE TO CONVERT RP (VECTOR IN PLANETARY COORDINATE SYSTEM,EITHER
-#  EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN BASIC REF. SYSTEM)
+#  EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN THE BASIC REF. SYSTEM)
 
 #  R=MT(T)*(RP+LPXRP)    MT= M MATRIX TRANSPOSE
 
@@ -178,7 +180,7 @@ MOONMX		STQ	SETPD
 		DMP	SL1R		#                         SOB*SIN(NODI)
 			SOB
 		STODL	BVECTR +4	# PD 8D
-		SIN	PUSH		#                        -SIN(NODI)   B-1
+		SIN	PUSH		# PD 10D                  -SIN(NODI)   B-1
 		DCOMP			#          26-31D=BVECTR= COB*COS(NODI)
 		STODL	BVECTR		# PD 8D                   SOB*COS(NODI)
 			AVECTR +2	# MOVE F FROM TEMP LOC. TO 504F
@@ -232,7 +234,7 @@ MOONMX		STQ	SETPD
 # 8-9D= X0 (REVS B-0),PUSHLOC SET AT 12D
 # 10-11D=XDOT (REVS/CSEC) SCALED B+23 FOR WEARTH,B+28 FOR NODDOT AND BDOT
 #                         AND B+27 FOR FDOT
-#  X1=DIFFERENCE IN 23 AND SCALING OF XDOT,=0 FOR WEARTH,5 FOR NDDOT AND
+#  X1=DIFFERENCE IN 23 AND SCALING OF XDOT,=0 FOR WEARTH,5 FOR NODDOT AND
 #                                          BDOT AND 4 FOR FDOT
 # 6-7D=T (CSEC B-28), TIMSUBO= (CSEC B-42 TRIPLE PREC.)
 
@@ -266,7 +268,7 @@ NEWANGLE	DLOAD	SR		# ENTER PD 12D
 #  L       CALL
 #  L+1            EARTHMX
 
-# SUBROUTINE USED
+# SUBROUTINES USED
 #  NEWANGLE
 
 # INPUT

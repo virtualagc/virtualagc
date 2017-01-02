@@ -27,12 +27,15 @@ from wand.color import Color
 tesseract = 'tesseract'
 if 'BIN' in environ:
 	tesseract = environ['BIN'] + '/tesseract'
-font_s = 0
-if 'FONT_S' in environ:
-	font_s = 1
+Solarium55 = 0
+if 'SOLARIUM55' in environ:
+	Solarium55 = 1
 Colossus237 = 0
 if 'COLOSSUS237' in environ:
 	Colossus237 =1
+Retread44 = 0
+if 'RETREAD44' in environ:
+	Retread44 =1
 
 # Parse command-line arguments
 if len(sys.argv) < 5:
@@ -67,12 +70,12 @@ if len(sys.argv) < 5:
 	print '      bounding boxes at different locations on different pages.  I don\'t provide'
 	print '      any specific option for that, however.  I don\'t know if training affects the'
 	print '      selection of bounding boxes or not.'
-	print 'Note that while the default font works well enough, it can be annoying for the printouts'
-	print 'of some AGC versions.  For example, for Solarium 55, the default S superimposed on the'
-	print 'printed S looked somewhat like a $, and the * ends up looking more like a disk after'
-	print 'superposition. While you can easily work with it anyway, it takes more effort than it'
-	print 'should.  A slightly different font tailored for this condition can be selected'
-	print 'with the environment variable setting "export FONT_S=yes".'
+	print 'There are also several environment variables that activate filters or font-changes'
+	print 'specific to particular AGC printouts:'
+	print '      RETREAD44'
+	print '      SOLARIUM55'
+	print '      COLOSSUS237'
+	print 'To use, you should do something like "export COLOSSUS237=yes".'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -103,9 +106,11 @@ else:
 img = Image(filename=backgroundImage)
 backgroundWidth = img.width
 backgroundHeight = img.height
+middleFloor = 2 * img.height / 5
+middleCeiling = 3 * img.height / 5
 # Make certain conversions on the background image.
 img.type = 'truecolor'
-img.alpha_channel = 'activate'
+#img.alpha_channel = 'activate'
 
 # Shell out to have tesseract generate the box file, and read it in.
 # While reading it in, we will reject all boxes that appear to us to be
@@ -292,7 +297,8 @@ for box in file:
 	# In Colossus237, there's an artifact that appears very often, that I've simply gotten tired
 	# of editing out: two adjacent short strokes, very near the center of the page, presumably
 	# a remnant of a horizontal line.  Fortunately, that lets us make the filter pretty specific.
-	if Colossus237 and (boxChar == '_' or boxChar == '-') and boxWidth >= 11 and boxWidth <= 17 and boxHeight >= 4 and boxHeight <= 5:
+	if Colossus237 and (boxChar == '_' or boxChar == '-') and boxWidth >= 11 and boxWidth <= 17 and \
+		boxHeight >= 4 and boxHeight <= 5 and boxTop > middleFloor and boxTop < middleCeiling:
 		rejectIt = 1
 	# Here's something to help apostrophes to be recognized.
 	#if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
@@ -506,11 +512,14 @@ for ascii in range(128):
 		imagesNomatch.append(Image(filename=filename))
 	else:
 		imagesNomatch.append(Image(filename="asciiFont/nomatch127.png"))
-if font_s:
-	imagesMatch[42] = Image(filename="asciiFont/match42S.png")
+# Some of the printers in specific printouts had S or * characters that were different
+# enough that I feel as though I should tweak them.
+if Solarium55 or Colossus237:
 	imagesMatch[83] = Image(filename="asciiFont/match83S.png")
-	imagesNomatch[42] = Image(filename="asciiFont/nomatch42S.png")
 	imagesNomatch[83] = Image(filename="asciiFont/nomatch83S.png")
+if Solarium55 or Retread44:
+	imagesMatch[42] = Image(filename="asciiFont/match42S.png")
+	imagesNomatch[42] = Image(filename="asciiFont/nomatch42S.png")
 
 # Prepare a drawing-context.
 draw = Drawing()
