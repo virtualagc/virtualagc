@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 KEYRUPT_UPRUPT.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	KEYRUPT_UPRUPT.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1413
 		BANK	14
@@ -34,7 +36,7 @@ ACCEPTUP	CAF	CHRPRIO		# (NOTE: RUPTREG4 = KEYTEMP1)
 		2CADR	CHARIN
 		CA	RUPTREG4
 		INDEX	LOCCTR
-		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
+		TS	MPAC		# LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
 		TC	RESUME
 
 ## Page 1414
@@ -71,7 +73,7 @@ UPCK		CS	ELRCODE		# CODE IS GOOD. IF CODE = 'ERROR RESET',
 		EXTEND			# IF CODE DOES NOT = 'ERROR RESET', ACCEPT
 		BZF	CLUPLOCK	# CODE ONLY IF UPLOCKFL IS CLEAR (=0).
 
-		CAF	BIT4		# TEST UPLOCKFL FOR 0 OR 1
+		CAF	BIT4		# TEST UPLOCKFL FOR 0 OR 1.
 		MASK	FLAGWRD7
 		CCS	A
 		TC	RESUME		# UPLOCKFL = 1

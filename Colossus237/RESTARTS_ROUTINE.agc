@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 RESTARTS_ROUTINE.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	RESTARTS_ROUTINE.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1378
 		BANK	01
@@ -61,7 +63,7 @@ ITSAVAR		MASK	OCT1400		# IS IT TYPE B ?
 		TCF	ITSLNGCL	# ITS A LONGCALL
 
 ## Page 1379
-RTRNCADR	TC	SWRETURN	# CANT GET HERE.
+RTRNCADR	TC	SWRETURN	# CANT GET HERE
 		TCF	ITSAWAIT
 
 		TCF	ITSAJOB		# ITS A JOB
@@ -87,7 +89,7 @@ TIMETEST	CCS	A		# IS IT AN IMMEDIATE RESTART
 
 		COUNT	02/RSROU
 
-ITSINDIR	LXCH	GOLOC +1	# GET THE CORRECT B BANK IN CASE THIS IS
+ITSINDIR	LXCH	GOLOC +1	# GET THE CORRECT E BANK IN CASE THIS IS
 		LXCH	BB		# SWITCHED ERRASIBLE
 
 		NDX	A		# GET THE TIME INDIRECTLY
@@ -106,7 +108,7 @@ ITSINDIR	LXCH	GOLOC +1	# GET THE CORRECT B BANK IN CASE THIS IS
 
 		COUNT	01/RSROU
 		
-FINDTIME	COM			# MAKE NEGATIVE SINCE IT WILL BE SUBTRACTD
+FINDTIME	COM			# MAKE NEGITIVE SINCE IT WILL BE SUBTRACTD
 		TS	L		# AND SAVE
 		NDX	TEMP2G
 		CS	TBASE1
@@ -176,7 +178,7 @@ CONTBL2		EXTEND			# FIND OUT WHAT:S IN THE TABLE
 
 		LXCH	GOLOC +1	# STORE THE BB INFORMATION
 
-		CCS	A		# IS IT A JOB OR IT IT  TIMED
+		CCS	A		# IS IT A JOB OR IS IT  TIMED
 		INCR	A		# POSITIVE, MUST BE A JOB
 		TCF	ITSAJOB2
 
@@ -218,7 +220,7 @@ ITSLGCL1	LXCH	GOLOC +1	# OBTAIN THE CORRECT E BANK
 		LXCH	BB		# RESTORE THE TASKS E AND F BANKS
 		LXCH	GOLOC +1	# AND PRESERVE OUR L
 
-		TCF	ITSLGCL2	# NOT LET:S PROCESS THIS LONGCALL
+		TCF	ITSLGCL2	# NOW LET:S PROCESS THIS LONGCALL
 
 # ***** YOU  MAY RETURN TO  SWITCHED FIXED *****
 
@@ -266,7 +268,7 @@ ITSWTLST	CS	GOLOC +1	# CORRECT THE BBCON INFORMATION
 		TS	GOLOC +1
 ## Page 1383
 		NDX	POINTER		# GET THE DT AND FIND OUT IF IT WAS STORED
-		CA	PRDTTAB		# DIRECTOY OR INDIRECTLY
+		CA	PRDTTAB		# DIRECTLY OR INDIRECTLY
 
 		TCF	TIMETEST	# FIND OUT HOW THE TIME IS STORED
 
@@ -277,7 +279,7 @@ ITSAJOB2	XCH	GOLOC		# STORE THE CADR
 
 		TCF	CHKNOVAC
 
-ITSEVEN		CA	TEMPSWCH	# SET FOR EITHER THE SECOND PART OF THE
+ITSEVEN		CA	TEMPSWCH	# SET UP FOR EITHER THE SECOND PART OF THE
 		TS	GOLOC +2	# TABLE, OR A RETURN FOR THE NEXT GROUP
 
 		NDX	TEMP2G		# SET UP POINTER FOR OUR LOCATION WITHIN
@@ -287,7 +289,7 @@ ITSEVEN		CA	TEMPSWCH	# SET FOR EITHER THE SECOND PART OF THE
 		AD	TEMPPHS
 		TS	POINTER
 
-		TCF	CONTBL2		# NO PROCESS WHAT IS IN THE TABLE
+		TCF	CONTBL2		# NOW PROCESS WHAT IS IN THE TABLE
 
 PHSPART2	CA	THREE		# SET THE POINTER FOR THE SECOND HALF OF
 		ADS	POINTER		# THE TABLE

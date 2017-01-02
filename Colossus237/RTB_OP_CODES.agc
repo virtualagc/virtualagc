@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 RTB_OP_CODES.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	RTB_OP_CODES.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1472
 		BANK	22
@@ -145,11 +147,11 @@ LOCTHETA	ADRES	THETAD
 
 CDUINC		TS	TEM2		# 1S COMPL.QUANT. ARRIVES IN ACC. STORE IT
 		INDEX	BUF
-		CCS	0		# CHANGE 2S COMPLE. ANGLE(IN BUF) INTO 1S
+		CCS	0		# CHANGE 2S COMPL. ANGLE(IN BUF) INTO 1S
 		AD	ONE
 		TCF	+4
 		AD	ONE
-		AD	ONE		# OVEFLOW HERE IF 2S COMPL. IS 180 DEG.
+		AD	ONE		# OVERFLOW HERE IF 2S COMPL. IS 180 DEG.
 		COM
 
 		AD	TEM2		# SULT MOVES FROM 2ND TO 3D QUAD.(OR BACK)
@@ -247,7 +249,7 @@ DPMODE		CAF	ZERO		# SETS MPAC +2 TO ZERO IN THE PROCESS
 		TCF	SLOAD2
 
 #     RTB OP CODE NORMUNIT IS LIKE INTERPRETIVE INSTRUCTION UNIT, EXCEPT THAT IT CAN BE DEPENDED ON NOT TO BLOW
-# UP WHEN THE VECTOR BEING UNITIZED IS VERY SAMLL -- IT WILL BLOW UP WHEN ALL COMPONENTS ARE ZERO.   IF NORMUNIT
+# UP WHEN THE VECTOR BEING UNITIZED IS VERY SMALL -- IT WILL BLOW UP WHEN ALL COMPONENTS ARE ZERO.   IF NORMUNIT
 # IS USED AND THE UPPER ORDER HALVES OF ALL COMPONENTS ARE ZERO, THE MAGNITUDE RETURNED IN 36D WILL BE TOO LARGE
 # BY A FACTOR OF 2(13) AND THE SQUARED MAGNITUDE RETURNED AT 34D WILL BE TOO BIG BY A FACTOR OF 2(26).
 

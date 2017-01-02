@@ -1,15 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 MEASUREMENT_INCORPORATION.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-13 JL	Adapted from corresponding Colossus 249 file.
-##		 2011-04-27 JL	Removed 2 lines.
+## Copyright:   Public domain.
+## Filename:	MEASUREMENT_INCORPORATION.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+##		2011-04-27 JL	Removed 2 lines.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1219
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -30,7 +32,7 @@
 #      DELTAX = STATE VECTOR DEVIATIONS 6 OR 9 DIMENSIONAL
 #          ZI = VECTOR USED FOR THE INCORPORATION 6 OR 9 DIMENSIONAL
 #     GAMMA = SCALAR
-#     OMEGA = OMEGA WEIGHTING VECTOR 6 OR 9 DIMENSIONAL
+#     OMEGA = OMEGA WEIGHTING VECTOR 6 OR 9 DIMENTIONAL
 # CALLING SEQUENCE
 #    L  CALL INCORP1
 
