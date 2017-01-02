@@ -1618,7 +1618,7 @@ MAT1B1		2DEC	1.0 B-1
 MBDYTCTL	2DEC	.5		#                 7.25 DEG NEGATIVE
 		2DEC	0		#                 X-AXIS ROTATION MATRIX
 		2DEC	0		#                 CONVERTS BODY TO CTL
-		2DEC	0		#                 AXES. CAME AS QUADROT
+		2DEC	0		#                 AXES. SAME AS QUADROT
 		2DEC	.99200495 B-1	# COS7.25 B1     BUT SCALED B1
 		2DEC	-.12619897 B-1	# -SIN7.25 B1
 		2DEC	0

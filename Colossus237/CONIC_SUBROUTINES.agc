@@ -249,7 +249,7 @@
 # WAS TOO SMALL TO PRODUCE A REALISTIC TRANSFER BETWEEN R1VEC AND R2VEC.  IN EITHER CASE THE FIX MUST BE MADE
 # ACCORDING TO THE NEEDS OF THE PARTICULAR USER.  THE ABORT EXIT MODE MAY BE CODED AS ...
 # LAMABORT DLOAD  ABS                      A MEASURE OF PROXIMITY TO 0 OR
-#                 1-CHTH                   360 DEGREES.
+#                 1-CSTH                   360 DEGREES.
 #          DSU    BWM
 #                 ONEBIT
 #                 CHANGER2                 CHANGE R2VEC DIRECTION SLIGHTLY.
@@ -1782,7 +1782,7 @@ TIMERAD		STQ	SETPD		#                                 PL AT 0
 		BOV
 			360LAMB		# NO SOLUTION SINCE CONIC IS A CIRCLE
 		PDDL	NORM		# 0D=UNIT(ECC) (+3)               PL AT 6
-			RDESIRED	# 35D=ECC (+3)
+			RDESIRED	# 36D=ECC (+3)
 			X1
 		PDDL	DMP		#                              PL AT 8
 			R1

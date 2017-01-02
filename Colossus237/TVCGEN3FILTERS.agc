@@ -67,9 +67,9 @@
 #      PITCH GEN3DAP....                                 YAW GEN3DAP....
 #          NPD = (B+4) KPGEN3 NP0                            NYD = (B+4) KYGEN3 NY0
 #          NP0 = AP0 EP	          +4(Z-1) NP1                NY0 = AY0 EY           +4(Z-1) NY1
-#          NP1 = AP1 EP - BP1 NP0 + (Z-1) NP2                NY1 = AY1 EY - BY1 NY0 + (Z-1) NY2
-#          NP2 = AP3 EP - BP2 NP0 + (Z-1) NP3                NY2 = AY2 EY - BY2 NY0 + (Z-1) NY3
-#          NP3 = AP3 EP - BP3 NP0                            NY3 = AY3 EY - BY3 NY0
+#          NY1 = AP1 EP - BP1 NP0 + (Z-1) NP2                NY1 = AY1 EY - BY1 NY0 + (Z-1) NY2
+#          NF2 = AP2 EP - BP2 NP0 + (Z-1) NP3                NY2 = AY2 EY - BY2 NY0 + (Z-1) NY3
+#          NF3 = AP3 EP - BP3 NP0                            NY3 = AY3 EY - BY3 NY0
 
 
 #      FILTER INPUTS EP AND EY ARE PICKED UP FROM REGULAR LEM-ON CODING AT ERRBTMP  (UPPER WORD ONLY),  THUS ARE
