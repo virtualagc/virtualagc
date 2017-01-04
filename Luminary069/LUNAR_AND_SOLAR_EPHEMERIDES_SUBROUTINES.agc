@@ -16,12 +16,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-04 RRB	Updated for Luminary 69. Notes on handwritted notations in Luminary 99
+##				were retained and marked as being from Lum99.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 984
-# NAME - LSPOS - LOCATE SUN AND MOON			DATE - 25 OCT 67
-# MOD NO. 1
+## Page 979
+# NAME - LSPOS  - LOCATE SUN AND MOON			DATE - 25 OCT 67
+# MOD NO.1
 # MOD BY NEVILLE					ASSEMBLY SUNDANCE
 #
 # FUNCTIONAL DESCRIPTION
@@ -43,9 +43,7 @@
 # LOS  AND LOS  ARE STORED AS LOSC AND LOSR IN RATESP.
 #    0        R
 # COS(OBL) AND SIN(OBL) ARE STORED IN THE MATRIX KONMAT.
-#
 # T, TIME MEASURED IN DAYS (24 HOURS), IS STORED IN TIMEP.
-#
 # C  AND C  ARE FUDGE FACTORS TO MINIMIZE THE DEVIATION.  THEY ARE STORED AS ONE CONSTANT (CMOD), SINCE
 #  0      1                               2  2 1/2
 # C *SIN(X)+C *COS(X) CAN BE WRITTEN AS (C +C )   *SIN(X+PHI), WHERE PHI=ARCTAN(C /C ).
@@ -72,7 +70,7 @@
 # THE THREE PHIS ARE STORED AS AARG, BARG, AND CARG(SUN).  ALL CONSTANTS ARE UPDATED BY YEAR.
 #
 # CALLING SEQUENCE
-## Page 985
+## Page 980
 #	CALL LSPOS.  RETURN IS VIA CPRET.
 #
 # ALARMS OR ABORTS
@@ -106,12 +104,12 @@ LSPOS		SETPD	SR
 			0
 			14D		# TP
 		TAD	DDV
-## The hand-written notation "in centisec B 42" appears to the right.	
+## In Lum99, the hand-written notation "in centisec B 42" appears to the right.	
 			TEPHEM		# TIME OF LAUNCH
 			CSTODAY		# 24 HOURS-8640000 CENTI-SECS/DAY B-33
-## The hand-written notation "@ B 9 = 512 days" appears to the right.
+## In Lum99, the hand-written notation "@ B 9 = 512 days" appears to the right.
 		STORE	TIMEP		# T IN DAYS
-## The hand-written notation "&there4; granularity &asymp; 0.164 sec" appears to the right.
+## In Lum99, the hand-written notation "&there4; granularity &asymp; 0.164 sec" appears to the right.
 		AXT,1	AXT,2
 			0
 			0
@@ -123,7 +121,7 @@ POSITA		DLOAD
 POSITB		DLOAD	DMP*
 			TIMEP		# T
 			VAL67 +4,1	# 1/27 OR 1/32 OR 1/365
-## Page 986
+## Page 981
 		SL	DAD*
 			8D
 			VAL67 +2,1	# AARG
@@ -141,7 +139,7 @@ POSITD		DLOAD	DMP*
 			RATESP,2	# LOMR,LOSR,LONR
 		SL	DAD*
 			5D
-			RATESP +6,2	# LOM0,LOS0,LON0
+			RATESP +6,2	# LOMO,LOSO,LONO
 		DSU
 			GTMP
 		STORE	STMP,2		# LOM,LOS,LON
@@ -174,7 +172,7 @@ POSITF		DLOAD	DSU		# 3RD
 			KONMAT
 		STORE	VSUN
 		RVQ
-## Page 987
+## Page 982
 POSITE		DLOAD
 			KONMAT +2	# ZEROS
 		STORE	GTMP
@@ -186,6 +184,10 @@ LUNVEL		RVQ			#        TO FOOL INTEGRATION
 
 		COUNT*	$$/EPHEM
 STMP		EQUALS	16D
+
 GTMP		EQUALS	22D
+
 TIMEP		EQUALS	24D
+
+# *** END OF LEMP50S .103 ***
 
