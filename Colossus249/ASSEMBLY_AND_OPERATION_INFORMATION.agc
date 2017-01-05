@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 3-26 of 1701.pdf.
+## Reference:	pp. 1-24
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/02/04 RSB.	Created.
 ##		2010-10-24 JL	Fixed page number.
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 3
+## Page 1
 
 # ASSEMBLY AND OPERATIONS INFORMATION
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
@@ -67,7 +69,7 @@
 #		P76
 #		R30
 #		STABLE ORBIT -- P38-P39
-## Page 4
+## Page 2
 #	PANDORA
 #		P11
 #		TP1 SEARCH
@@ -118,7 +120,7 @@
 #		POWERED FLIGHT SUBROUTINES
 #		TIME OF FREE FALL
 #		STAR TABLES
-## Page 5
+## Page 3
 #		AGC BLOCK TWO SELF-CHECK
 #		PHASE TABLE MAINTENANCE
 #		RESTARTS ROUTINE
@@ -140,7 +142,7 @@
 # OCCUPIED LOCATIONS TABLE
 # SUBROS CALLED & PROGRAM STATUS
 
-## Page 6
+## Page 4
 # VERB LIST FOR CSM
 
 # REGULAR VERBS
@@ -186,7 +188,7 @@
 # 38
 # 39
 
-## Page 7
+## Page 5
 
 # EXTEND VERBS
 
@@ -238,7 +240,7 @@
 # 85	REQUEST RENDEZVOUS PARAMETER DISPLAY NO. 2 (R34)
 # 86	REJECT RENDEZVOUS BACKUP SIGHTING MARK
 # 87	SET VHF RANGE FLAG
-## Page 8
+## Page 6
 # 88	RESET VHF RANGE FLAG
 # 89	REQUEST RENDEZVOUS FINAL ATTITUDE ROUTINE (R63)
 # 90	REQUEST RENDEZVOUS OUT OF PLANE DISPLAY ROUTINE (R36)
@@ -252,7 +254,7 @@
 # 98	ENABLE TRANSLUNAR INJECT
 # 99	PLEASE ENABLE ENGINE
 
-## Page 9
+## Page 7
 # IN THE FOLLOWING NOUN LIST THE 'NO LOAD' RESTRICTION MEANS THE NOUN
 # CONTAINS AT LEAST ONE COMONENT WHICH CANNOT BE LOADED, I.E. OF
 # SCALE TYPE L (MIN/SEC) OR PP (2 INTEGERS).
@@ -305,7 +307,7 @@
 # 27	SELF TEST ON/OFF SWITCH			1COMP	XXXXX.
 # 28	SPARE
 # 29	XSM LAUNCH AZIMUTH			1COMP	XXX.XX DEG		DEC ONLY
-## Page 10
+## Page 8
 # 30	TARGET CODES				3COMP	XXXXX. FOR EACH
 # 31	TIME OF LANDING SITE			3COMP	00XXX. HRS		DEC ONLY
 #							000XX. MIN		MUST LOAD 3 COMPS
@@ -335,7 +337,7 @@
 #							000XX. MIN		MUST LOAD 3 COMPS
 #							0XX.XX SEC
 
-## Page 11
+## Page 9
 # MIXED NOUNS				   COMPONENTS	SCALE & DECIMAL POINT	RESTRICTION
 #
 # 40	TIME FROM IGNITION/CUTOFF		3COMP	XXBXX  MIN/SEC		NO LOAD, DEC ONLY
@@ -386,7 +388,7 @@
 #	DELTA V TPF					XXXX.X FT/SEC
 # 59	DELTA VELOCITY LOS			3COMP	XXXX.X FT/SEC FOR EACH	DEC ONLY
 # 60	GMAX					3COMP	XXX.XX G		DEC ONLY
-## Page 12
+## Page 10
 #	VPRED						XXXXX. FT/SEC
 #	GAMMA EI					XXX.XX DEG
 # 61	IMPACT LATITUDE				3COMP	XXX.XX DEG		DEC ONLY
@@ -436,7 +438,7 @@
 #	VG						XXXXX. FT/SEC
 #	DELTA V (ACCUMULATED)				XXXXX. FT/SEC
 # 81	DELTA V (LV)				3COMP	XXXX.X FT/SEC FOR EACH	DEC ONLY
-## Page 13
+## Page 11
 # 82	SPARE
 # 83	DELTA V (BODY)				3COMP	XXXX.X FT/SEC FOR EACH	DEC ONLY
 # 84	DELTA V (OTHER VEHICLE)			3COMP	XXXX.X FT/SEC FOR EACH	DEC ONLY
@@ -468,7 +470,7 @@
 #	RMS IN VELOCITY					XXXX.X FT/SEC
 #	RMS OPTION					XXXXX.
 
-## Page 14
+## Page 12
 # REGISTERS AND SCALING FOR NORMAL NOUNS
 #
 # NOUN	REGISTER		SCALE TYPE
@@ -514,7 +516,7 @@
 # 38		TET		K
 # 39		T3TOT4		K
 
-## Page 15
+## Page 13
 # REGISTERS AND SCALING FOR MIXED NOUNS
 #
 # NOUN	COMP	REGISTER	SCALE TYPE
@@ -565,7 +567,7 @@
 # 57	1	DELTAR		Q
 # 58	1	POSTTPI		Q
 #	2	DELVTPI		S
-## Page 16
+## Page 14
 #	3	DELVTPP		S
 # 59	1	DVLOS		S
 #	2	DVLOS +2	S
@@ -616,7 +618,7 @@
 # 77	SPARE
 # 78	SPARE
 # 79	SPARE
-## Page 17
+## Page 15
 # 80	1	TTOGO		L
 #	2	VGDISP		P
 #	3	DVTOTAL		P
@@ -667,13 +669,13 @@
 # 	3	DSPTEM1 +2	C
 # 98	1	DSPTEM2		C
 #	2	DSPTEM2 +1	B
-## Page 18
+## Page 16
 #	3	DSPTEM2 +2	C
 # 99	1	WWPOS		XX
 #	2	WWVEL		YY
 #	3	WWOPT		C
 
-## Page 19
+## Page 17
 # NOUN SCALES AND FORMATS
 #
 # -SCALE TYPE-				PRECISION
@@ -725,7 +727,7 @@
 #			LOADED.
 #
 # -K-
-## Page 20
+## Page 18
 # TIME (HR, MIN, SEC)	00XXX. HR		DP	BIT 1 OF LOW REGISTER =
 #			000XX. MIN			  -2
 #			0XX.XX SEC			10   SEC
@@ -775,7 +777,7 @@
 # VELOCITY 3		XXXX.X FT/SEC		DP	BIT 1 OF HIGH REGISTER =
 #							 -7
 #							2   METERS/CENTI-SEC
-## Page 21
+## Page 19
 # -T-								  -2
 # G			XXX.XX G		SP	BIT 1 = 10   G
 #			(MAX 163.83)
@@ -826,7 +828,7 @@
 # VELOCITY/2VS		XXXXX. FEET/SEC		DP	FRACTIONAL PART OF 
 #			(MAX 51532.)			2VS FEET/SEC
 #							(VS = 25766.1973)
-## Page 22
+## Page 20
 # -VV-
 # POSITION8		XXXX.X NAUT MI		DP	BIT 1 OF LOW REGISTER =
 #									 -28
@@ -846,7 +848,7 @@
 
 # THAT'S ALL ON THE NOUNS.
 
-## Page 23
+## Page 21
 # ALARM CODES FOR 504
 
 # REPORT DEFICIENCIES TO JOHN SUTHERLAND:  MIT 617-864-6900 X1458
@@ -898,7 +900,7 @@
 # 01104      *	DELAY ROUTINE BUSY				EXEC			BAILOUT
 # 01105		DOWNLINK TOO FAST				T4RUPT			ALARM
 # 01106		UPLINK TOO FAST					T4RUPT			ALARM
-## Page 24
+## Page 22
 # 01107		PHASE TABLE FAILURE.  ASSUME			RESTART			ALARM
 #		ERASABLE MEMORY IS DESTROYED
 # 01201	     *	EXECUTIVE OVERFLOW - NO VAC AREAS		EXEC			BAILOUT
@@ -933,7 +935,7 @@
 #
 # 	     *	INDICATES ABORT TYPE. ALL OTHERS ARE NON-ABORTIVE
 
-## Page 25
+## Page 23
 # CHECKLIST CODES FOR 504
 
 # PLEASE REPORT ANY DEFICIENCIES IN THIS LIST TO JOHN SUTHERLAND.
@@ -956,7 +958,7 @@
 #		PERFORM DENOTES START OF END OF A TASK
 #		KEY IN DENOTES KEY IN OF DATA THRU THE DSKY
 
-## Page 26
+## Page 24
 # OPTION CODES FOR 504
 
 # PLEASE REPORT ANY DEFICIENCIES IN THIS LIST TO JOHN SUTHERLAND.
