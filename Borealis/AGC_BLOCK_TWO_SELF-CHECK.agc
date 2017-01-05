@@ -154,10 +154,10 @@ ADRS1           ADRES           SKEEP1
 
 SRADRS          ADRES           SR                              
 
+PRITYBIT        EQUALS          SBIT1
 TCTRPBIT        EQUALS          SBIT3
 RPTLKBIT        EQUALS          SBIT4
 WATCHBIT        EQUALS          SBIT5
-PRITYBIT        EQUALS          SBIT2
 300MSEC         DEC             30
 2SEC            DEC             200
 BNK34ADR        FCADR           BANK34                          # With superbank = 100, this becomes bank 44
