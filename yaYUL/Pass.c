@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2009,2016-2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -105,6 +105,7 @@
  *                              a double-word operation is being assembled, and incrementing
  *                              the operand if so. This is needed for a word in the Retread
  *                              instruction checks.
+ *              2017-01-05 RSB  Added BBCON* as distinct from BBCON.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -232,7 +233,7 @@ static ParserMatch_t ParsersBlock2[] =
     { "BLOCK", OP_PSEUDO, ParseBLOCK },
     { "BBCON", OP_PSEUDO, ParseBBCON },
   /*{ "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },*/
-    { "BBCON*", OP_PSEUDO, ParseBBCON },
+    { "BBCON*", OP_PSEUDO, ParseBBCONstar },
     { "BNKSUM", OP_PSEUDO, NULL, "", "" },
     { "BZF", OP_BASIC, ParseBZF },
     { "BZMF", OP_BASIC, ParseBZMF },
@@ -1449,6 +1450,7 @@ int
 Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
     int *Warnings)
 {
+  void SaveUsedCounts(void);
   int yulType = 0;
   int IncludeDirective;
   ParserMatch_t *Match;
@@ -1467,6 +1469,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   static char lastLines[10][sizeof(s)] =
     { "", "", "", "", "", "", "", "", "", "" };
 
+  SaveUsedCounts();
   isEstablishedSBANK = 1;
   thisIsTheLastPass = WriteOutput;
   numSymbolsReassigned = 0;
@@ -1972,7 +1975,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
       if (NULL == ParseInputRecord.Operand || 0 == ParseInputRecord.Operand[0])
         {
           if (!strcmp(ParseInputRecord.Operator, "TC")
-              || !strcmp(ParseInputRecord.Operator, "BBCON*"))
+              /*|| !strcmp(ParseInputRecord.Operator, "BBCON*") */)
             ParseInputRecord.Operand = "-0";
           else if (Block1)
             {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2004,2016-2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -18,14 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Filename:     ParseBBCON.c
- * Purpose:      Assembles the BBCON pseudo-ops.
- * History:      07/21/04 RSB.   Adapted from ParseECADR.c.
- *               11/02/16 RSB.   Changed handling of BBCON*, which was previously
- *                               hard-coded, but for which the value is no
- *                               longer correct in Sunburst 120.  Hopefully
- *                               works correctly in all cases now.
- *               11/03/16 RSB.   Permanently removed some code I had temporarily
- *                               commented out yesterday.
+ * Purpose:      Assembles the BBCON and BBCON* pseudo-ops.
+ * History:      07/21/04 RSB.  Adapted from ParseECADR.c.
+ *               11/02/16 RSB.  Changed handling of BBCON*, which was previously
+ *                              hard-coded, but for which the value is no
+ *                              longer correct in Sunburst 120.  Hopefully
+ *                              works correctly in all cases now.
+ *               11/03/16 RSB.  Permanently removed some code I had temporarily
+ *                              commented out yesterday.
+ *               2017-01-05 RSB Added BBCON* as distinct from BBCON.
  */
 
 #include "yaYUL.h"
@@ -36,7 +37,8 @@
 //-------------------------------------------------------------------------
 // Returns non-zero on unrecoverable error.
 
-int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+static int
+ParseBBCONraw(int star, ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
     Address_t Address, ebank;
     int Value, i;
@@ -67,9 +69,42 @@ int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
 
     i = GetOctOrDec(InRecord->Operand, &Value);
-    if (!i && *InRecord->Mod1 == 0) {
+    if ((!i && *InRecord->Mod1 == 0) || star) {
         IncPc(&InRecord->ProgramCounter, Value, &Address);
         DoIt:
+        if (star)
+          {
+            /*
+             * Since this is BBCON*, we need to generate an address, instead find the
+             * last address used in the last non-empty fixed bank.
+             */
+            int GetPriorBankCount(int bank); // From ParseBANK.c.
+            int bank, highestOffset = 0;
+            for (bank = 043; bank >= 0; bank--)
+              {
+                highestOffset = GetPriorBankCount(bank);
+                if (highestOffset > 0)
+                  break;
+              }
+            //printf("Debug %02o %04o\n", bank, highestOffset);
+            Address.Address = 1;
+            Address.Banked = 1;
+            Address.Constant = 0;
+            Address.EB = 0;
+            Address.Erasable = 0;
+            Address.FB = (bank >= 040) ? (bank - 010) : bank;
+            Address.Fixed = 1;
+            Address.Invalid = 0;
+            Address.Overflow = 0;
+            Address.SReg = 04000 + highestOffset;
+            Address.Super = (bank >= 040) ? 1 : 0;
+            Address.Syllable = 0;
+            Address.Unbanked = 0;
+            Address.Value = 010000 + (Address.SReg - 02000) + 02000 * Address.FB;
+            if (Address.Super && Address.FB >= 030)
+                Address.Value += 010 * 02000;
+          }
+
         if (Address.Invalid) {
             strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
             OutRecord->Fatal = 1;
@@ -123,5 +158,15 @@ int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 #endif
 
     return (0);
+}
+
+int ParseBBCON(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+{
+  return (ParseBBCONraw(0, InRecord, OutRecord));
+}
+
+int ParseBBCONstar(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+{
+  return (ParseBBCONraw(1, InRecord, OutRecord));
 }
 
