@@ -1146,9 +1146,9 @@ SOPT            CCS             SKEEP6
                 TC              SDISPLAY                        
 VNCON           OCTAL           00501                           # USED IN SHOWSUM. DISPLAY 3 REGISTERS.
 # BBCON* doesn't currently work in this case in yaYUL, so the expected result is hardcoded.
-#                EBANK=          NEWJOB                          
-#                BBCON*
-LSTBNKCH        OCT             66100                           # * CONSTANT, LAST BANK.                
+                EBANK=          NEWJOB                          
+LSTBNKCH        BBCON*
+#LSTBNKCH        OCT             66100                           # * CONSTANT, LAST BANK.                
 
 # CHANGE TO 31777 IF BANK 23 IS LAST BANK USED
 BNKCHK          CCS             SKEEP1                          # WHEN C(SKEEP6) = -0
