@@ -11,6 +11,8 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##              2017-01-04 MAS  Pulled back Sunburst's DATACALL and SUPDACALL because
+##                              Aurora didn't have any superbank handling.
 
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
 # CADR OF THE SUBROUTINE IMMEDIATELY FOLLOWS THE  TC BANKCALL  INSTRUCTION, WITH C(A) AND C(L) PRESERVED.
@@ -58,21 +60,36 @@ MAKECADR        CAF             LOW10
                 AD              BUF2            +1              
                 TC              Q                               
 
-# THE FOLLOWING ROUTINE OBTAINS THE TWO WORDS BEGINNING AT THE ADDRESS ARRIVING IN A, AND LEAVES THEM IN
-# A,L.
+# Pulled back from Sunburst 120 because Aurora 12 had no superbank handling.
+#          THE FOLLOWING ROUTINE OBTAINS THE ONE WORD AT THE ADDRESS ARRIVING IN A, AND LEAVES IT IN A.  ENTER
+# WITH THE CADR IN A, AT DATACALL WITH JUNK IN L IF NOT SWITCHING SUPERBANKS, OTHERWISE AT SUPDACAL WITH SUPERBANK
+# BITS IN BITS 7-5 IN L (BITS 15-8 AND 4-1 MAY BE JUNK).  DEBRIS = MTEMP.  INHINTS FOR ABOUT 165 MUSEC.
 
-DATACALL        TS              L                               
-                LXCH            FBANK                           
-                LXCH            MPTEMP                          # SAVE FORMER BANK.
-                MASK            LOW10                           
+DATACALL        TS              L                               # SAVE CADR (SOLE INPUT HERE).
                 EXTEND                                          
-                INDEX           A                               
-                DCA             10000                           
+                READ            SUPERBNK                        # THIS PROLOGUE MAKES SUPERSWITCH VACUOUS.
+                XCH             L                               # CADR IN A, SUPERBITS IN L.
 
-                XCH             MPTEMP                          
+SUPDACAL        TS              MPTEMP                          
+                XCH             FBANK                           # SET FBANK FOR DATA.
+                EXTEND                                          
+                ROR             SUPERBNK                        # SAVE FBANK IN BITS 15-11, AND
+                XCH             MPTEMP                          #  SUPERBANK IN BITS  7-5.
+                MASK            LOW10                           
+                XCH             L                               # SAVE REL. ADR. IN BANK, FETCH SUPERBITS.
+                INHINT                                          # BECAUSE RUPT DOES NOT SAVE SUPERBANK.
+                EXTEND                                          
+                WRITE           SUPERBNK                        # SET SUPERBANK FOR DATA.
+                INDEX           L                               
+                CA              10000                           
+
+                XCH             MPTEMP                          # SAVE 1ST WD, FETCH OLD FBANK AND SBANK.
+                EXTEND                                          
+                WRITE           SUPERBNK                        # RESTORE SUPERBANK.
+                RELINT                                          
                 TS              FBANK                           # RESTORE FBANK.
-                CA              MPTEMP                          
-                TC              Q                               
+                CA              MPTEMP                          # RECOVER FIRST WORD OF DATA.
+                RETURN                                          # 24 WDS. DATACALL 516 MU, SUPDACAL 432 MU
 
 # THE FOLLOWING SUBROUTINES PROVIDE TO THE BASIC PROGRAMMER ENTRY INTO AND RETURN FROM ANY INTERPRETIVE
 # CODING WHICH DOES NOT USE THE ENTERING CONTENTS OF Q AND WHICH RETURNS VIA DANZIG. C(A) AND C(L) ARE SAVED.

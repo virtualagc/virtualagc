@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
 ##              2016-12-21 MAS  Pulled in erasables for Retread instruction checks.
+##              2017-01-04 MAS  Added ERESTORE, used by Sunburst's erasable mem check.
 
 A               EQUALS          0
 L               EQUALS          1                               # L AND Q ARE BOTH CHANNELS AND REGISTERS.
@@ -450,6 +451,8 @@ SKEEP4          =               1374
 SKEEP5          =               1375
 SKEEP6          =               1376
 SKEEP7          =               1377
+
+ERESTORE        ERASE
 
 # ADDRESSES TO BE USED FOR INDEX INSTRUCTION WITHOUT EXTRACODES
 NDX+0		ERASE

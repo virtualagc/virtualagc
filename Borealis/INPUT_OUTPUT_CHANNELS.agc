@@ -11,9 +11,11 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##              2017-01-04 MAS  Added SUPERBNK.
 
 HISCALAR        EQUALS          3                               
 LOSCALAR        EQUALS          4                               
+SUPERBNK        EQUALS          7
 OUT0            EQUALS          10                              
 DSALMOUT        EQUALS          11                              
 CHAN12          EQUALS          12                              
