@@ -11,8 +11,90 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
-## Mod history: 2016-12-21 MAS  Shuffled some things around for multi-bank handling,
+##              2016-12-21 MAS  Shuffled some things around for multi-bank handling,
 ##                              and put in jumps to Retread instruction checks and back.
+##              2017-01-04 MAS  Fleshed out the rest of the hardware alarm tests. Also
+##                              pulled back all updates added by the time of Sunburst 120.
+##                              and put in jumps to Retread instruction checks and back.
+
+# PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
+# PROGRAM NAME - SELF-CHECK                                                   LOG SECTION AGC BLOCK TWO SELF-CHECK
+# MOD NO - 0                                                                  ASSEMBLY SUNBURST REV 107
+# MOD BY - GAUNTT
+
+
+# FUNCTIONAL DESCRIPTION
+
+#      PROGRAM HAS TWO MAIN PARTS. THE FIRST IS SELF-CHECK WHICH RUNS AS A ZERO PRIORITY JOB WITH NO CORE SET, AS
+# PART OF THE BACK-UP IDLE LOOP. THE SECOND IS SHOW-BANKSUM WHICH RUNS AS A REGULAR EXECUTIVE JOB WITH ITS OWN
+# STARTING VERB.
+#      THE PURPOSE OF SELF-CHECK IS TO CHECK OUT VARIOUS PARTS OF THE COMPUTER AS OUTLINED BELOW IN THE OPTIONS.
+#      THE PURPOSE OF SHOW-BANKSUM IS TO DISPLAY THE SUM OF EACH BANK, ONE AT A TIME.
+#      A THIRD SECTION, DSKYCHK, LIGHTS UP ALL THE DSKY ELECTROLUMINESCENT ELEMENTS.
+#      IN ALL THERE ARE 15 POSSIBLE OPTIONS IN THIS BLOCK II VERSION OF SELF-CHECK. MORE DETAIL DESCRIPTION MAY BE
+# FOUND IN E-2065 BLOCK II AGC SELF-CHECK AND SHOW BANKSUM BY EDWIN D. SMALLY DECEMBER 1966.
+#      THE DIFFERENT OPTIONS ARE CONTROLLED BY PUTTING DIFFERENT NUMBERS IN THE SMODE REGISTER (NOUN 27). BELOW IS
+# A DESCRIPTION OF WHAT PARTS OF THE COMPUTER THAT ARE CHECKED BY THE OPTIONS, AND THE CORRESPONDING NUMBER, IN
+# OCTAL, TO LOAD INTO SMODE.
+# +-1  ALL PULSES POSSIBLE BY INTERNAL CONTROL OF THE COMPUTER.
+# +-2  ALL THE IN-OUT INSTRUCTION PULSES.
+# +-3  SPECIAL AND CENTRAL REGISTERS, ALL BIT COMBINATIONS.
+# +-4  ERASABLE MEMORY
+# +-5  FIXED MEMORY
+# +-6,7,10  EVERYTHING IN THE PREVIOUS 5 OPTIONS.
+# +-11  TURNS ON THE ELECTROLUMINESCENT DISPLAY IN THE DSKY.
+# -0   SAME AS +-10 UNTIL AN ERROR IS DETECTED.
+# +0   NO CHECK, PUTS COMPUTER INTO THE BACKUP IDLE LOOP.
+
+
+# WARNINGS
+
+#      SMODE LOADED WITH GREATER THAN OCTAL 11 PUTS COMPUTER INTO THE BACKUP IDLE LOOP.
+
+
+
+# CALLING SEQUENCE
+
+#      TO CALL SELF-CHECK KEY IN
+#           V 21 N 27 E OPTION NUMBER E
+#      TO CALL DSKYCHK KEY IN
+#           V 21 N 27 E +-11 E
+#      TO CALL SHOW-BANKSUM KEY IN
+#           V 56 E         DISPLAYS FIRST BANK
+#           V 33 E         PROCEED, DISPLAYS NEXT BANK
+
+# EXIT MODES, NORMAL AND ALARM
+
+#      SELF-CHECK NORMALLY CONTINUES INDEFINITELY UNLESS THERE IS AN ERROR DETECTED. IF SO + OPTION NUMBERS PUT
+# COMPUTER INTO BACKUP IDLE LOOP, - OPTION NUMBERS RESTART THE OPTION.
+#      THE -0 OPTION PROCEEDS FROM THE LINE FOLLOWING THE LINE WHERE THE ERROR WAS DETECTED.
+#      COMPLETION OF DSKYCHK PUTS THE COMPUTER INTO THE BACKUP IDLE LOOP.
+#      SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E). THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP
+
+
+# OUTPUT
+
+#      SELF-CHECK UPON DETECTING AN ERROR LOADS THE SELF-CHECK ALARM CONSTANT (01102) INTO THE FAILREG SET AND
+# TRIGGERS THE ALARM. THE ALARM ROUTINE DISPLAYS THE THREE FAILREGS. IF OPERATOR DESIRES FURTHER INFORMATION HE
+# MAY KEY IN   V 05 N 31 E    DSKY DISPLAY IN R1 WILL BE ADDRESS +1 OF WHERE THE ERROR WAS DETECTED, IN R2 THE
+# BANK NUMBER OF SELF-CHECK (37 OCTAL), AND IN R3 THE TOTAL NUMBER OF ERRORS DETECTED BY SELF-CHECK SINCE THE LAST
+# FRESH START
+#      DSKYCHK LIGHTS UP THE DSKY DISPLAY ELEMENTS STARTING WITH THE DIGIT9 IN ALL POSITIONS. EACH DISPLAY LASTS
+# 5 SECONDS
+#      SHOW-BANKSUM STARTING WTIH BANK 0 DISPLAYS IN R1 +- THE BANK SUM (SHOULD EQUAL THE BANK NUMBER), IN R2 THE
+# BANK NUMBER, AND IN R3 THE BUGGER WORD.
+
+
+# ERASABLE INITIALIZATION REQUIRED
+
+#      ACCOMPLISHED BY FRESH START
+#           SMODE & ERESTORE SET TO +0
+
+
+# DEBRIS
+
+#      ALL EXITS FROM THE CHECK OF ERASABLE (ERASCHK) RESTORE ORIGINAL CONTENTS TO REGISTERS UNDER CHECK.
+# EXCEPTION IS A RESTART. RESTART THAT OCCURS DURING ERASCHK DOES A FRESH START.
 
                 SETLOC          ENDIMUF
 
@@ -41,20 +123,23 @@ S+5             EQUALS          FIVE
 S+6             EQUALS          SIX                             
 S+7             EQUALS          SEVEN                           
 S8BITS          EQUALS          LOW8                            # 00377
-CNTRCON         OCTAL           00051                           # USED IN CNTRCHK
-ERASCON1        OCTAL           00062                           # USED IN ERASCHK
+CNTRCON         OCTAL           00050                           # USED IN CNTRCHK
+ERASCON1        OCTAL           00061                           # USED IN ERASCHK
 ERASCON2        OCTAL           01374                           # USED IN ERASCHK
 ERASCON6        OCTAL           01400                           # USED IN ERASCHK
-ERASCON3        OCTAL           01462                           # USED IN ERASCHK
+ERASCON3        OCTAL           01461                           # USED IN ERASCHK
 ERASCON4        OCTAL           01774                           # USED IN ERASCHK
 S10BITS         EQUALS          LOW10                           # 01777, USED IN ERASCHK
 SBNK03          EQUALS          PRIO6                           # 06000, USED IN ROPECHK
+SIXTY           OCTAL           00060                           
+SUPRCON         OCTAL           60017                           # USED IN ROPECHK
 S+MAX           OCTAL           37777                           # ** S+MAX AND S-MAX MUST BE TOGETHER
 S-MAX           OCTAL           40000                           # FOR DOUBLE PRECISION CHECKING.
 S13BITS         OCTAL           17777                           
 CONC+S1         OCTAL           25252                           # USED IN CYCLSHFT
 OVCON           OCTAL           37737                           # USED IN RUPTCHK
 DVCON           OCTAL           37776                           
+SUPER100        EQUALS          BIT7
 CONC+S2         OCTAL           52400                           # USED IN CYCLSHFT
 ERASCON5        OCTAL           76777                           
 S-7             OCTAL           77770                           
@@ -69,7 +154,24 @@ ADRS1           ADRES           SKEEP1
 
 SRADRS          ADRES           SR                              
 
+TCTRPBIT        EQUALS          SBIT3
+RPTLKBIT        EQUALS          SBIT4
+WATCHBIT        EQUALS          SBIT5
+PRITYBIT        EQUALS          SBIT2
+300MSEC         DEC             30
+2SEC            DEC             200
+BNK34ADR        FCADR           BANK34                          # With superbank = 100, this becomes bank 44
 
+
+PRERRORS        CA              ERESTORE                        # IS IT NECESSARY TO RESTORE ERASABLE
+                EXTEND                                          
+                BZF             ERRORS                          # NO
+                EXTEND                                          
+                DCA             SKEEP5                          
+                INDEX           SKEEP7                          
+                DXCH            0000                            # RESTORE THE TWO ERASABLE REGISTERS
+                CA              S+ZERO                          
+                TS              ERESTORE                        
 ERRORS          CA              Q                               
                 TS              SFAIL                           # SAVE Q FOR FAILURE LOCATION
                 INCR            ERCOUNT                         # KEEP TRACK OF NUMBER OF MALFUNCTIONS.
@@ -93,10 +195,10 @@ SELFIDLE        TC              POSTJUMP
 
 +1CHK           CS              A                               
 -1CHK           CCS             A                               
-                TCF             ERRORS                          
-                TCF             ERRORS                          
+                TCF             PRERRORS                        
+                TCF             PRERRORS                        
                 CCS             A                               
-                TCF             ERRORS                          
+                TCF             PRERRORS                        
                 TC              Q                               
 
 ENDSELFF        EQUALS
@@ -105,6 +207,8 @@ ENDSELFF        EQUALS
 
 SELFADRS        ADRES           SELFCHK                         # SELFCHK RETURN ADDRESS.  SHOULD BE PUT
                                                                 # IN SELFRET WHEN GOING FROM SELFCHK TO
+                                                                # SHOWSUM AND PUT IN SKEEP1 WHEN GOING
+                                                                # FROM SHOWSUM TO SELF-CHECK.
 
 SMODECHK        EXTEND                                          
                 QXCH            SKEEP1                          
@@ -123,6 +227,7 @@ BNKOPTN         TC              POSTJUMP                        # GO TO ANOTHER 
                 CADR            SBNKOPTN                        
                 INCR            SCOUNT                          # FOR OPTIONS BELOW NINE.
                 AD              S+7                             
+
                 INDEX           A                               
                 TC              SOPTION1                        
 SOPTION1        TC              TC+TCF                          
@@ -627,17 +732,25 @@ INHNTCHK        INHINT                                          # T3 RUPT SHOULD
                 RELINT                                          
 C(BRUPT)        CS              ZRUPT                           # INTERRUPT SHOULD HAPPEN HERE
                 EXTEND                                          
-                BZF             ERRORS                          # MAKES SURE AN INTERRUPT DID HAPPEN
-                TC              +5                              # END OF RUPTCHK
+                BZF             +6                              # MAKES SURE AN INTERRUPT DID OCCUR
+                TC              INSTCHK                         # AN INTERRUPT. END OF RUPTCHK
 TSKADRS         CS              ZRUPT                           
                 AD              RUPTCON                         
                 TC              -1CHK                           
                 TC              TASKOVER                        
+                TC              ERRORS                          # NO INTERRUPT                        
 
+# Go perform the (bugfixed) instruction-level tests from Retread 44.
 INSTCHK         TC              CHECKNJ                         # CHECK FOR NEW JOB
                 TC              POSTJUMP
                 CADR            TCCHK
 
+# Retread tests are done, which means we're done with the overall control pulse tests.
+# There are more things that weren't tested here that should be. That list is currently as follows:
+# * EDRUPT
+# * BRUPT (changing out instruction to be executed on RESUME)
+# * Various corner cases checked by Ron Burkey's Validation
+# * More?
 INSTDONE        TC              SMODECHK                        
 
 # IN-OUT1 CHECKS ALL PULSES OF WRITE AND READ
@@ -771,7 +884,7 @@ ERASCHK         CA              S+1
                 TS              SKEEP4                          
 0EBANK          CA              S+ZERO                          
                 TS              EBANK                           
-                CA              ERASCON3                        # 01462
+                CA              ERASCON3                        # 01461
                 TS              SKEEP7                          # STARTING ADDRESS
                 CA              S10BITS                         # 01777
                 TS              SKEEP3                          # LAST ADDRESS CHECKED
@@ -790,23 +903,30 @@ E134567B        CA              ERASCON6                        # 01400
                 TC              ERASLOOP                        
 
 NOEBANK         TS              SKEEP4                          # +0
-                CA              ERASCON1                        # 00062
+                CA              ERASCON1                        # 00061
                 TS              SKEEP7                          # STARTING ADDRESS
                 CA              ERASCON2                        # 01374
                 TS              SKEEP3                          # LAST ADDRESS CHECKED
 
 ERASLOOP        INHINT                                          
+                EXTEND                                          
+                INDEX           SKEEP7                          
+                DCA             0000                            
+                DXCH            SKEEP5                          # STORES C(X) AND C(X-1) IN SKEEP6 AND 5.
                 CA              SKEEP7                          
+                TS              ERESTORE                        # IF RESTART, RESTORE C(X) AND C(X+1)
                 TS              L                               
                 INCR            L                               
                 NDX             A                               
                 DXCH            0000                            # PUTS OWN ADDRESS IN X AND X +1
-                DXCH            SKEEP5                          # STORES C(X) AND C(X-1) IN SKEEP6 AND 5
                 NDX             SKEEP7                          
-                CS              0001                            # CS X+1
+                CS              0001                            # CS  X+1
                 NDX             SKEEP7                          
                 AD              0000                            # AD X
                 TC              -1CHK                           
+                CA              ERESTORE                        # HAS ERASABLE BEEN RESTORED
+                EXTEND                                          
+                BZF             ELOOPFIN                        # YES, EXIT ERASLOOP.
                 EXTEND                                          
                 NDX             SKEEP7                          
                 DCS             0000                            # COMPLEMENT OF ADDRESS OF X AND X+1
@@ -817,10 +937,16 @@ ERASLOOP        INHINT
                 NDX             SKEEP7                          
                 AD              0001                            # AD X+1
                 TC              -1CHK                           
-                DXCH            SKEEP5                          
+                CA              ERESTORE                        # HAS ERASABLE BEEN RESTORED
+                EXTEND                                          
+                BZF             ELOOPFIN                        # YES, EXIT ERASLOOP.
+                EXTEND                                          
+                DCA             SKEEP5                          
                 NDX             SKEEP7                          
                 DXCH            0000                            # PUT B(X) AND B(X+1) BACK INTO X AND X+1
-                RELINT                                          
+                CA              S+ZERO                          
+                TS              ERESTORE                        # IF RESTART, DO NOT RESTORE C(X), C(X+1)
+ELOOPFIN        RELINT                                          
                 CA              EBANK                           # STORES C(EBANK)
                 TS              SKEEP2                          
                 TC              CHECKNJ                         # CHECK FOR NEW JOB
@@ -838,16 +964,16 @@ ERASLOOP        INHINT
                 CA              EBANK                           
                 AD              SBIT9                           
                 TS              EBANK                           
-                AD              ERASCON5                        # 76377 CHECK FOR BANK E3
+                AD              ERASCON5                        # 76777, CHECK FOR BANK E3
                 EXTEND                                          
                 BZF             2EBANK                          
                 CCS             EBANK                           
                 TC              E134567B                        # GO TO EBANKS 1,3,4,5,6, AND 7
                 CA              ERASCON6                        # END OF ERASCHK
                 TS              EBANK                           
-# CNTRCHK PERFORMS A CS OF ALL REGISTERS FROM OCT. 61 THROUGH OCT. 10.
+# CNTRCHK PERFORMS A CS OF ALL REGISTERS FROM OCT. 60 THROUGH OCT. 10.
 # INCLUDED ARE ALL COUNTERS, T6-1, CYCLE AND SHIFT, AND ALL RUPT REGISTERS
-CNTRCHK         CAF             CNTRCON                         # 00051
+CNTRCHK         CAF             CNTRCON                         # 00050
 CNTRLOOP        TS              SKEEP2                          
                 AD              SBIT4                           # +10 OCTAL
                 INDEX           A                               
@@ -884,7 +1010,7 @@ CYCLSHFT        CA              CONC+S1                         # 25252
 # SKEEP3 HOLDS PRESENT ADDRESS (00000 TO 01777 IN COMMON FIXED BANKS)
 #                              (04000 TO 07777 IN FXFX BANKS)
 # SKEEP3 HOLDS BUGGER WORD DURING SHOWSUM DISPLAY
-# SKEEP4 HOLDS BANK NUMBER
+# SKEEP4 HOLDS BANK NUMBER AND SUPER BANK NUMBER
 # SKEEP5 COUNTS 2 SUCCESSIVE TC SELF WORDS
 # SKEEP6 CONTROLS ROPECHK OR SHOWSUM OPTION
 # SKEEP7 CONTROLS WHEN ROUNTINE IS IN COMMON FIXED OR FIXED FIXED BANKS
@@ -903,9 +1029,11 @@ COMMFX          TS              SKEEP7
                 TS              SKEEP3                          
                 CA              S+1                             
                 TS              SKEEP5                          # COUNTS DOWN 2 TC SELF WORDS
-COMADRS         CA              SKEEP3                          
-                AD              SKEEP4                          
-                TC              DATACALL                        
+COMADRS         CA              SKEEP4                          
+                TS              L                               # TO SET SUPER BANK
+                MASK            HI5                             
+                AD              SKEEP3                          
+                TC              SUPDACAL                        # SUPER DATA CALL
                 TC              ADSUM                           
                 AD              SBIT11                          # 02000
                 TC              ADRSCHK                         
@@ -922,9 +1050,8 @@ FXFX            CS              A
                 TS              SKEEP1                          
                 CA              S+1                             
                 TS              SKEEP5                          # COUNTS DOWN 2 TC SELF WORDS
-FXADRS          EXTEND                                          
-                NDX             SKEEP3                          
-                DCA             0000                            
+FXADRS          INDEX           SKEEP3                          
+                CA              0000                            
                 TC              ADSUM                           
                 TC              ADRSCHK                         
 
@@ -938,15 +1065,19 @@ ADSUM           TS              SKEEP2
                 AD              SKEEP3                          
                 TC              Q                               
 
-ADRSCHK         CCS             A                               
+ADRSCHK         LXCH            A                               
+                CCS             SKEEP5                          # IS CHECKSUM FINISHED
+                TC              +3                              # NO
+                TC              +2                              # NO
+                TC              SOPTION                         # GO TO ROPECHK SHOWSUM OPTION
+                CCS             L                               # -0 MEANS A TC SELF WORD.
                 TC              CONTINU                         
                 TC              CONTINU                         
                 TC              CONTINU                         
                 CCS             SKEEP5                          
                 TC              CONTINU         +1              
-                CA              L                               
-                TC              ADSUM                           
-                TC              SOPTION                         # GO TO ROPECHK SHOSUM OPTION
+                CA              S-1                             
+                TC              CONTINU         +1              # AD IN THE BUGGER WORD
 CONTINU         CA              S+1                             # MAKE SURE TWO CONSECUTIVE TC SELF WORDS
                 TS              SKEEP5                          
                 CCS             SKEEP6                          # +1 IN SKEEP6, SHOWSUM VIA EXECUTIVE
@@ -962,20 +1093,34 @@ ADRS+1          INCR            SKEEP3
                 TC              FXADRS                          
                 TC              FXADRS                          
 
-NXTBNK          CA              SKEEP4                          
-                AD              SBIT11                          
-                TS              SKEEP4                          
-                TC              +3                              
-                CA              SBIT15                          
-                TS              SKEEP4                          
-                AD              NOBANKNO                        # FIRST BANK NOT USED.
+NXTBNK          CS              SKEEP4                          
+                AD              LSTBNKCH                        # LAST BANK TO BE CHECKED
                 EXTEND                                          
-                BZF             ENDSUMS                         
-                CCS             SKEEP7                          
+                BZF             ENDSUMS                         # END OF SUMMING OF BANKS.
+                CA              SKEEP4                          
+                AD              SBIT11                          
+                TS              SKEEP4                          # 37 TO 40 INCRMTS SKEEP4 BY END RND CARRY
+                TC              CHKSUPR                         
+17TO20          CA              SBIT15                          
+                ADS             SKEEP4                          # SET FOR BANK 20
+                TC              GONXTBNK                        
+CHKSUPR         MASK            HI5                             
+                EXTEND                                          
+                BZF             NXTSUPR                         # INCREMENT SUPER BANK
+27TO30          AD              S13BITS                         
+                EXTEND                                          
+                BZF             +2                              # BANK SET FOR 30
+                TC              GONXTBNK                        
+                CA              SIXTY                           # FIRST SUPER BANK
+                ADS             SKEEP4                          
+                TC              GONXTBNK                        
+NXTSUPR         AD              SUPRCON                         # SET BNK 30 + INCR SUPR BNK AND CANCEL
+                ADS             SKEEP4                          # ERC BIT OF THE 37 TO 40 ADVANCE.
+GONXTBNK        CCS             SKEEP7                          
                 TC              COMMFX                          
                 CA              S+1                             
                 TC              FXFX                            
-                CA              SBIT7                           # CAN BE ANY NUMBER LARGER THAN 36 DECIMAL
+                CA              SBIT7                           # HAS TO BE LARGER THAN NO OF FXSW BANKS.
                 TC              COMMFX                          
 
 ENDSUMS         CCS             SKEEP6                          
@@ -984,21 +1129,35 @@ ENDSUMS         CCS             SKEEP6
                 TC              ERRORS
                 TC              MPNMBRS         -1              # ROPECHK IS COMPLETED
 
-SOPTION         CCS             SKEEP6                          # DECIDE ON ROPECHK OR SHOWSUM OPTION
-                TC              SDISPLAY                         
+SOPTION         CA              SKEEP4                          
+                MASK            HI5                             # = BANK BITS
+                TC              LEFT5                           
+                TS              L                               # BANK NUMBER BEFORE SUPER BANK
+                CA              SKEEP4                          
+                MASK            S8BITS                          # = SUPER BANK BITS
+                EXTEND                                          
+                BZF             SOPT                            # BEFORE SUPER BANK
+                TS              SR                              # SUPER BANK NECESSARY
+                CA              L                               
+                MASK            SEVEN                           
+                AD              SR                              
+                TS              L                               # BANK NUMBER WITH SUPER BANK
+SOPT            CCS             SKEEP6                          
+                TC              SDISPLAY                        
 VNCON           OCTAL           00501                           # USED IN SHOWSUM. DISPLAY 3 REGISTERS.
-NOBANKNO        OCTAL           31777                           # * CONSTANT, COMPLEMENT OF LAST BANK +1.
+# BBCON* doesn't currently work in this case in yaYUL, so the expected result is hardcoded.
+#                EBANK=          NEWJOB                          
+#                BBCON*
+LSTBNKCH        OCT             66100                           # * CONSTANT, LAST BANK.                
 
 # CHANGE TO 31777 IF BANK 23 IS LAST BANK USED
 BNKCHK          CCS             SKEEP1                          # WHEN C(SKEEP6) = -0
                 TC              +4                              
-SCADR           FCADR           SDISPLAY                        # * CONSTANT, USED IN SHOWSUM ONLY
+SCADR           FCADR           NOKILL                          # * CONSTANT, USED IN SHOWSUM ONLY
                 TC              +2                              
                 CA              S-1                             # FOR BANK 00
                 TS              SKEEP1                          
-                CA              SKEEP4                          
-                TC              LEFT5                           
-                CS              A                               
+                CS              L                               # = - BANK NUMBER
                 AD              SKEEP1                          
                 TC              -1CHK                           
                 TC              NXTBNK                          
@@ -1020,8 +1179,7 @@ SHOWSUM         CAF             S+1
                 RELINT                                          
                 TC              ENDOFJOB                        
 
-SDISPLAY        CA              SKEEP4                          
-                TC              LEFT5                           # CYCLES LEFT 5 PLACES
+SDISPLAY        CA              L                               # = BANK NUMBER
                 XCH             SKEEP2                          # SKEEP2 HOLDS BANK NUMBER DURING DISPLAY
                 TS              SKEEP3                          # SKEEP3 HOLDS BUGGER WORD DURING DISPLAY
 NOKILL          CAF             ADRS1                           # ADDRESS OF SKEEP1
@@ -1353,23 +1511,28 @@ LITESOUT        CS              S11CHAN
                 WAND            DSALMOUT                        # TURN OFF COMPUTER ACTIVITY LIGHT.
                 TC              TASKOVER                        # END OF DSKYCHK
 
-TCTRPBIT        EQUALS          SBIT3
-
 ALRMSTRT        INDEX           PHASE2
                 TC              +0
                 TC              TCTRCONT                        # Phase 1: TC trap
                 TC              NOTCCONT                        # Phase 2: No TC
+                TC              RPLKCONT                        # Phase 3: Rupt lock
+                TC              NORPCONT                        # Phase 4: No rupts
+                TC              WTCHCONT                        # Phase 5: Night watchman
+                TC              PARCONT                         # Phase 6: Parity fail
 
 RSTRTCHK        EXTEND                                          # Entry point to the hardware alarm / restart checks
                 WRITE           77                              # Clear channel 77 by writing to it
 
+# Check the TC Trap alarm -- only TC executed for too long
 TCTRPCHK        TC              PHASCHNG
                 OCT             00102
 
-                CAF             TEN                             # Schedule a task to break out of the loop if the
+                INHINT
+                CAF             THREE                           # Schedule a task to break out of the loop if the
                 TC              WAITLIST                        # alarm doesn't work.
                 2CADR           TCTRPFAL
 
+                RELINT
                 CAF             ADRS1                           # Trigger a TC Trap. We do this in erasable  memory
                 TS              SKEEP1                          # so we can break out of it if the restart
                 TC              SKEEP1                          # doesn't occur as expected.
@@ -1385,23 +1548,35 @@ NOTCFAIL        CA              S+ZERO                          # It's been too 
 
 TESTRBIT        EXTEND                                          # Read the restart cause from channel 77
                 RXOR            77
-                EXTEND
-                WRITE           77                              # ... and clear it by writing back out.
                 TCF             +0CHK                           # Make sure only the correct bit was set.
+
+RSTRTRST        CAF             BIT10                           # Turn off the RESTART light
+                EXTEND
+                WOR             DSALMOUT
+                CS              BIT10
+                EXTEND
+                WAND            DSALMOUT
+                EXTEND
+                WRITE           77                              # Clear the restart cause from channel 77.
+                TC              Q
 
 TCTRCONT        TC              PHASCHNG                        # Turn off the restart group so we don't come back
                 OCT             00002                           # here for an unexpected reason.
 
                 CAF             TCTRPBIT                        # Check for the TC trap bit
                 TC              TESTRBIT
+                TC              RSTRTRST
 
+# Check the TC Trap alarm -- no TC executed for too long
 NOTCCHK         TC              PHASCHNG
                 OCT             00202
 
-                CAF             ONE                             # Set up a waitlist task to break us out of the
+                INHINT
+                CAF             THREE                           # Set up a waitlist task to break us out of the
                 TC              WAITLIST                        # CA-ADS loop if the alarm doesn't occur
                 2CADR           NOTCFAIL
 
+                RELINT
                 CA              S-2
                 TS              SKEEP2                          # Put -2 into SKEEP2.
 
@@ -1417,7 +1592,112 @@ NOTCCONT        TC              PHASCHNG                        # Turn off the r
 
                 CAF             TCTRPBIT
                 TC              TESTRBIT
+                TC              RSTRTRST
+
+# Check Rupt Lock -- execution stuck in an interrupt for ~140ms
+RPTLKCHK        TC              PHASCHNG
+                OCT             00302
+
+                CAF             300MSEC                         # Set up a 300ms BUSYLOOP
+                TS              SKEEP3
+                CAF             ZERO
+                TS              SKEEP2                          # SKEEP2 = 0 indicates that BUSYLOOP is a task
+                CAF             ONE                             # SKEEP1 will be used to indicate that our task has
+                TS              SKEEP1                          # exited without triggering a restart.
+                INHINT
+                TC              WAITLIST                        # Execute a 300ms loop as a waitlist task (inside
+                2CADR           BUSYLOOP                        # the TIME3 interrupt).
+
+                RELINT
+RPTWAIT         CS              NEWJOB                          # Play hardball... check in with the night watchman
+                                                                # without actually seeing if there's a job to do.
+                CCS             SKEEP1                          # We just need to stay alive until a reset or
+                TCF             RPTWAIT                         # BUSYLOOP exits.
+
+RPLKCONT        TC              PHASCHNG
+                OCT             00002
+
+                CAF             RPTLKBIT
+                TC              TESTRBIT
+                TC              RSTRTRST
+
+# Check Rupt Lock -- no interrupts for ~140ms
+NORPTCHK        TC              PHASCHNG
+                OCT             00402
+
+                CAF             ONE                             # Configure BUSYLOOP to just return here
+                TS              SKEEP2
+                INHINT                                          # Lock interrupts before heading in...
+                TC              BUSYLOOP
+                RELINT
+                
+NORPCONT        TC              PHASCHNG
+                OCT             00002
+
+                CAF             RPTLKBIT
+                TC              TESTRBIT
+                TC              RSTRTRST
+
+# Check the Night Watchman -- program fails to check NEWJOB for ~640ms
+WATCHCHK        TC              PHASCHNG
+                OCT             00502
+
+                CA              2SEC                            # Set up a 2 second BUSYLOOP
+                TS              SKEEP3
+                TC              BUSYLOOP                        # SKEEP2 still = 1
+
+WTCHCONT        TC              PHASCHNG
+                OCT             00002
+
+                CAF             WATCHBIT
+                TC              TESTRBIT
+                TC              RSTRTRST
+
+# Check the parity alarm. There's a couple ways this can happen -- for example, if a scaler or prime
+# power failure generating a STRT2 signal were to happen in the middle of an erasable memory cycle,
+# before the loaded data was written back out, that location would contain all 0s and therefore have
+# incorrect parity.
+# An easier guaranteed way, which we'll use here, is to try to access memory in a bank that doesn't
+# exist. The superbank bit provides a convenient means of doing this; only superbanks 40-43 exist,
+# so trying to hit anything in 44-47 should trigger a parity alarm.
+PARFLCHK        TC              PHASCHNG
+                OCT             00602
+
+                CAF             SUPER100                        # Simply try to load data from the start of bank 44.
+                TS              L
+                CAF             BNK34ADR
+                TC              SUPDACAL
+
+PARCONT         TC              PHASCHNG
+                OCT             00002
+
+                CAF             PRITYBIT
+                TC              TESTRBIT
+                TC              RSTRTRST
 
 ALRMDONE        TC              TOSMODE                         # All done with the hardware alarm checks.
+                
+# BUSYLOOP provides a simple means of aggravating certain hardware alarms; it fails to check NEWJOB
+# and makes use of a TCF. Its inputs are:
+# SKEEP2 = Run context. If positive, subroutine mode is used and control is returned to Q.
+#                       If +0, waitlist task mode is used and exit is through TASKOVER. SKEEP1 is set to 0 on exit.
+# SKEEP3 = Loop duration in TIME1 counts (10ms).
+BUSYLOOP        CS              TIME1                           # Store the start time in SKEEP3
+                TS              SKEEP4
+BUSYLOP1        CA              TIME1
+                AD              SKEEP4                          # Current time - start time
+                AD              HALF                            # Account for possible TIME1 overflow
+                AD              HALF
+                XCH             L                               # Pass the (likely) overflowed value through L
+                CS              SKEEP3  
+                AD              L                               # Calculate time delta minus expiration duration
+                EXTEND
+                BZF             +2
+                TCF             BUSYLOP1                        # Use a TCF to make sure we don't trigger TC trap
+                CCS             SKEEP2                          # All done. Check if we're returning or exiting a
+                TC              Q                               # waitlist task.
+                CAF             ZERO
+                TS              SKEEP1                          # Reset SKEEP1 to let the main test know we're done
+                TC              TASKOVER
 
 ENDSLFS2        EQUALS                                          

@@ -11,7 +11,9 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
-## Mod history: 2016-12-21 MAS  Updated for new end-of-bank locations for self-tests.
+##              2016-12-21 MAS  Updated for new end-of-bank locations for self-tests.
+##              2017-01-04 MAS  Added minimal words to all unused banks, to get self-
+##                              test to at least verify that all are accessible.
 
                 SETLOC  ENDRTRDF
                 TC
@@ -91,4 +93,70 @@
 
                 SETLOC  ENDINST2
                 TC
+                TC
+
+# The remaining banks are currently unused, but bank-end markers and banksums are put into
+# them to allow self-check to verify operation of every bank
+                BANK    24
+                TC
+                TC
+
+                BANK    25
+                TC
+                TC
+
+                BANK    26
+                TC
+                TC
+
+                BANK    27
+                TC
+                TC
+
+                BANK    30
+                TC
+                TC
+
+                BANK    31
+                TC
+                TC
+
+                BANK    32
+                TC
+                TC
+
+                BANK    33
+                TC
+                TC
+
+                BANK    34
+BANK34          TC
+                TC
+
+                BANK    35
+                TC
+                TC
+
+                BANK    36
+                TC
+                TC
+
+                BANK    37
+                TC
+                TC
+
+                BANK    40
+                TC
+                TC
+
+                BANK    41
+                TC
+                TC
+
+                BANK    42
+                TC
+                TC
+
+                BANK    43
+LASTBANK        TC
                 TC
