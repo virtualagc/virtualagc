@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 265-281 of 1701.pdf.
+## Reference:	pp. 263-279.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/08/04 RSB.	Began adapting from corresponding Luminary
 ##				131 file.
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 265
+## Page 263
 # THE FOLLOWING REFERS TO THE NOUN TABLES
 #
 # COMPONENT CODE NUMBER		INTERPRETATION
@@ -85,7 +87,7 @@
 #								USE ARITHDP3
 #	01000			POSITION4 (XXXX.X NAUTICAL MILES)
 #								USE ARITHDP3
-## Page 266
+## Page 264
 #	01001			VELOCITY2 (XXXXX. FT/SEC)	USE ARITHDP4
 #	01010			VELOCITY3 (XXXX.X FT/SEC)	USE ARITHDP3
 #	01011			ELEVATION DEGREES (89.999 MAX)	USE ARITH
@@ -120,7 +122,7 @@
 # ALARM IF AN ATTEMPT IS MADE TO LOAD "SPLIT MINUTES/SECONDS" (MMBSS).
 # THIS IS USED FOR DISPLAY ONLY.
 
-## Page 267
+## Page 265
 # THE FOLLOWING ROUTINES ARE FOR READING THE NOUN TABLES AND THE SF TABLES
 # (WHICH ARE IN A SEPARATE BANK FROM THE REST OF PINBALL).  THESE READING
 # ROUTINES ARE IN THE SAME BANK AS THE TABLES.  THEY ARE CALLED BY DXCH Z.
@@ -171,7 +173,7 @@ LODNLV		DXCH	IDAD2TEM		# PUT RETURN INFO INTO A, L.
 MIXCON		=	OCT50			# (DEC 40)
 
 # GTSFOUT LOADS SFTEMP1, SFTEMP2 WTIH THE DP SFOUTAB ENTRIES.
-## Page 268
+## Page 266
 
 GTSFOUT		DXCH	SFTEMP1			# 2X (SFCONUM) ARRIVES IN SFTEMP1.
 		EXTEND
@@ -221,7 +223,7 @@ NNADTAB		OCT	00000			# 00 	NOT IN USE
 						#	(USED WTIH PLEASE PERFORM ONLY)
 		ECADR	DSPTEM1			# 26	PRIO/DELAY, ADRES, BBCON
 		ECADR	SMODE			# 27	SELF TEST ON/OFF SWITCH
-## Page 269
+## Page 267
 		OCT	0			# 28	SPARE
 		ECADR	DSPTEM1			# 29	XSM LAUNCH AZIMUTH
 		ECADR	DSPTEM1			# 30	TARGET CODES
@@ -272,7 +274,7 @@ NNADTAB		OCT	00000			# 00 	NOT IN USE
 		OCT	24047			# 53	RANGE
 						#	RANGE RATE
 						#	PHI
-## Page 270
+## Page 268
 		OCT	24052			# 54	RANGE
 						#	RANGE RATE
 						#	THETA
@@ -323,7 +325,7 @@ NNADTAB		OCT	00000			# 00 	NOT IN USE
 						#	HORIZON
 		OCT	24140			# 72	DELT ANG
 						#	DELT ALT
-## Page 271
+## Page 269
 						# 	SEARCH OPTION
 		OCT	0			# 73	SPARE
 		OCT	0			# 74	SPARE
@@ -374,7 +376,7 @@ NNTYPTAB	OCT	00000			# 00	NOT IN USE
 		OCT	04102			# 03	3COMP CDU DEGREES
 		OCT	0			# 04	SPARE
 		OCT	00504			# 05	1COMP DPDEG(360)
-## Page 272
+## Page 270
 		OCT	02000			# 06	2COMP OCTAL ONLY
 		OCT	04000			# 07 	3COMP OCTAL ONLY
 		OCT	04000			# 08	3COMP OCTAL ONLY
@@ -425,7 +427,7 @@ NNTYPTAB	OCT	00000			# 00	NOT IN USE
 		OCT	10000			# 45	3COMP	2INT, MIN/SEC, DPDEG(360)
 						#		(NO LOAD, DEC ONLY)
 		OCT	00000			# 46	2COMP 	OCTAL ONLY FOR EACH
-## Page 273
+## Page 271
 		OCT	00306			# 47	2COMP	WEIGHT2 FOR EACH
 						#		(DEC ONLY)
 		OCT	00614			# 48	2COMP	TRIM DEG, TRIM DEG
@@ -476,7 +478,7 @@ NNTYPTAB	OCT	00000			# 00	NOT IN USE
 						#		(DEC ONLY)
 		OCT	0			# 73	SPARE
 		OCT	0			# 74	SPARE
-## Page 274
+## Page 272
 		OCT	0			# 75	SPARE
 		OCT	0			# 76	SPARE
 		OCT	0			# 77	SPARE
@@ -527,7 +529,7 @@ SFINTAB		OCT	00006			# WHOLE, DP TIME (SEC)
 		OCT	34345			#	UPPED BY 1
 		OCT	00005			# DEGREES (180)
 		OCT	21616
-## Page 275
+## Page 273
 		OCT	26113			# WEIGHT2
 		OCT	31713
 		OCT	00070			# POSITION5
@@ -577,7 +579,7 @@ SFOUTAB		OCT	05174			# WHOLE, DP TIME (SEC)
 		OCT	07176			# POSITION4
 		OCT	21603
 		OCT	15340			# VELOCITY2
-## Page 276
+## Page 274
 		OCT	15340
 		OCT	01031			# VELOCITY3	(POINT BETWN BITS 7-8)
 		OCT	21032
@@ -626,7 +628,7 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	CSMMASS			# 47	WEIGHT2			ARTH1
 		ECADR	LEMMASS			# 47	WEIGHT2			ARTH1
 		OCT	00000			# 47	SPARE COMPONENT
-## Page 277
+## Page 275
 		ECADR	PACTOFF			# 48	TRIM DEG2		ARTH
 		ECADR	YACTOFF			# 48	TRIM DEG2		ARTH
 		OCT	00000			# 48	SPARE COMPONENT
@@ -677,7 +679,7 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	TTE			# 63	MIN/SEC			M/S
 		ECADR	D			# 64 	DRAG ACCEL		DP2
 		ECADR	VMAGI			# 64	VEL2			DP4
-## Page 278
+## Page 276
 		ECADR	RTGON64			# 64	POS6			DP3
 		ECADR	SAMPTIME		# 65	HMS (MIXED ONLY TO KEEP CODE 65) HMS
 		ECADR	SAMPTIME		# 65	HMS			HMS
@@ -728,7 +730,7 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	VGDISP			# 80	VEL2			DP4
 		ECADR	DVTOTAL			# 80	VEL2			DP4
 		ECADR	DELVLVC			# 81	VEL3			DP3
-## Page 279
+## Page 277
 		ECADR	DELVLVC +2		# 81	VEL3			DP3
 		ECADR	DELVLVC +4		# 81	VEL3			DP3
 		OCT	00000			# 82	SPARE
@@ -779,7 +781,7 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	DSPTEM1			# 97	WHOLE			ARTH
 		ECADR	DSPTEM1 +1		# 97	WHOLE			ARTH
 		ECADR	DSPTEM1 +2		# 97	WHOLE			ARTH
-## Page 280
+## Page 278
 		ECADR	DSPTEM2			# 98	WHOLE			ARTH
 		ECADR	DSPTEM2 +1		# 98	FRAC			FRAC
 		ECADR	DSPTEM2 +2		# 98	WHOLE			ARTH
@@ -829,7 +831,7 @@ RUTMXTAB	OCT	16351			# 40	M/S, DP3, DP3
 		OCT	0			# 76	SPARE
 		OCT	0			# 77	SPARE
 		OCT	0			# 78	SPARE
-## Page 281
+## Page 279
 		OCT	0			# 79	SPARE
 		OCT	24511			# 80	M/S, DP4, DP4
 		OCT	16347			# 81	DP3, DP3, DP3

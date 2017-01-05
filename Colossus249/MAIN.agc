@@ -86,7 +86,7 @@ $T4RUPT_PROGRAM.agc				        # pp. 129-165
 $DOWNLINK_LISTS.agc				        # pp. 166-176
 $FRESH_START_AND_RESTART.agc			        # pp. 177-204
 $RESTART_TABLES.agc				        # pp. 205-215
-$SXTMARK.agc 					        # pp. 212-229
+$SXTMARK.agc 					        # pp. 216-229
 $EXTENDED_VERBS.agc				        # pp. 230-262
 $PINBALL_NOUN_TABLES.agc			        # pp. 263-279
 $CSM_GEOMETRY.agc				        # pp. 280-291
