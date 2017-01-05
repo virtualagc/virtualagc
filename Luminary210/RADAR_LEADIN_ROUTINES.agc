@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-27 HG   Transcribed
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 505
                 BANK            15
@@ -90,7 +92,7 @@ R77IN           CS              RTSTLOC                 # CYCLE RTSTLOC
 # VARIABLE RADAR DATA CALLER FOR ONE MEASUREMENT ONLY.
 
 VARADAR         CAF             ONE                     # WILL BE SENT TO RADAR ROUTINE IN A BY
-                TS              BUF2                    # SWCALL
+                TS              BUF2                    # SWCALL.
                 INDEX           RTSTDEX
                 CAF             RDRLOCS
                 TCF             SWCALL                  # NOT TOUCHING Q.

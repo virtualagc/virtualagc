@@ -11,6 +11,7 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##              2017-01-04 MAS  Pulled back PROCEED key functionality from Luminary 99.
 
 # KEYBOARD AND DISPLAY PROGRAM
 
@@ -2238,6 +2239,15 @@ VBPROC          CAF             ONE                     # PROCEED WITHOUT DATA
 VBTERM          TC              KILMONON                # TURN ON KILL MONITOR BIT
                 CS              ONE
                 TC              VBPROC          +1      # TERM VERB SETS LOADSTAT NEG
+
+# PROCKEY PERFORMS THE SAME FUNCTION AS VBPROC. IT MUST BE CALLED UNDER
+# EXECUTIVE CONTROL, WITH CHRPRIO.
+
+PROCKEY		CAF	ZERO		# SET REQRET FOR ENTER PASS 0.
+		TS	REQRET
+		CS	VD1		# BLOCK NUMERICAL CHARACTERS, SIGNS, CLEAR
+		TS	DSPCOUNT
+		TC	VBPROC
 
 
 

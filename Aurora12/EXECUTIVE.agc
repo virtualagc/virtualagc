@@ -151,7 +151,7 @@ NOVAC3          TS      EXECTEM2
                 TCF     NEXTCORE        # THE CORRESPONDING CORE SET IS AVAILABLE.
 NO.CORES        DEC     6
                 TCF     NEXTCORE        # AN ACTIVE JOB HAS A POSITIVE PRIORITY
-                                        # BUT A FORMANT JOB'S PRIORITY IS NEGATIVE
+                                        # BUT A DORMANT JOB'S PRIORITY IS NEGATIVE
 
 ## Page 129
 

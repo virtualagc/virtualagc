@@ -1,17 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TVCEXECUTIVE.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	TVCEXECUTIVE.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 900
-# PROGRAM NAME.... DVCEXECUTIVE, CONSISTING OF TVCEXEC, NEEDLEUP, VARGAINS
+# PROGRAM NAME.... TVCEXECUTIVE, CONSISTING OF TVCEXEC, NEEDLEUP, VARGAINS
 #                  REPCHEK, SWTCHOVR, CG.CORR, STRKUP, TVCEXFIN, ETC.
 # LOG SECTION....TVCEXECUTIVE     SUBROUTINE ....DAPCSM
 # MOD BY ENGEL                    DATE 23 OCT, 1967
@@ -46,7 +48,7 @@
 
 #     *TVCRESTART PACKAGE FOR RESTARTS
 #     *PITCHDAP, YAWDAP FOR VARIABLE GAINS AND ENGINE TRIM ANGLES
-#     *S40.6 KPRIMEDT AT SWITCHOVER
+#     *S40.8 FOR KPRIMEDT AT SWITCHOVER
 
 # ERASABLE INITIALIZATION REQUIRED....
 
@@ -120,7 +122,7 @@ VARGAINS	CAF	BIT13		# CHECK ENGINE-ON BIT TO INHIBIT VARIABLE
 		TS	TVCEXPHS	#      	    ALSO ENTRY FROM CCS BELOW WITH
 		TCF	SWT/COR		#      	    VCNTR = -0 (V97 R40 ENGFAIL)
 
-		CCS	VCNTR		#      TEST FOR GAIN OF UPDATE TIME
+		CCS	VCNTR		#      TEST FOR GAIN UPDATE TIME
 		TCF	+4		#           NOT YET
 		TCF	GAINCHNG	#           NOW
 		TCF	+0		#           NOT USED
@@ -167,7 +169,7 @@ SWT/COR		CCS	CNTR		# CHECK FOR SWITCHOVER/CG.CORRECTION
 REPCHEK		CAE	REPFRAC		# CHECK FOR REPETITIVE UPDATES
 		EXTEND
 		BZMF	+5		#      NO   (NEG OR +-ZERO)
-		TS	TEMPDAP +1	#      YES, SET UP CORRECTION FUNCTION
+		TS	TEMPDAP +1	#      YES, SET UP CORRECTION FRACTION
 		CAF	FIVE		#           ADVANCE TVCEXPHS
 		TS	TVCEXPHS
 		TCF	CORSETUP

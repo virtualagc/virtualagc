@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 SERVICE_ROUTINES.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	SERVICE_ROUTINES.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1449
 		BLOCK	3
@@ -182,7 +184,7 @@ WAKECAD		GENADR	WAKER
 
 # MOD 2 BY SCHULENBERG  (REMOVE RELINT)   SKIPPER REV 4 2/28/68
 
-#          THIS ROUTINE IS USEFUL FOR TRANSFERRING N CONSECUTIVE ERASABLE OR FIXED QUANTITIES TO SOME OTHER N
+#          THIS ROUTINE IS USEFULL FOR TRANSFERING N CONSECUTIVE ERASABLE OR FIXED QUANTITIES TO SOME OTHER N
 # CONSECUTIVE ERASABLE LOCATIONS.  IF BOTH BLOCKS OF DATA ARE IN SWITCHABLE EBANKS, THEY MUST BE IN THE SAME ONE.
 
 #          GENTRAN IS CALLABLE IN A JOB AS WELL AS A RUPT.  THE CALLING SEQUENCE IS:

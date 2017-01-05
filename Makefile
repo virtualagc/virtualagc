@@ -154,6 +154,7 @@
 #				Solaris.  Other fixes of a similar nature, for those
 #				same operating systems.
 #		2016-11-18 RSB	Removed yaACA2 from FreeBSD build.
+#		2016-12-28 RSB	Added RETREAD44 to the mission list.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -360,7 +361,7 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 # List of mission software directories to be built.
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
-MISSIONS += Aurora12 Sunburst120 Luminary210
+MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44
 export MISSIONS
 
 # Missions needing code::blocks project files.

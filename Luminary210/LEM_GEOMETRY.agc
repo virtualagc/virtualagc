@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-24 HG   Transcribed
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 332
                 BANK            23
@@ -25,7 +27,7 @@
 
 # THESE TWO ROUTINES COMPUTE THE ACTUAL STATE VECTOR FOR LM,CSM BY ADDING
 # THE CONIC R,V AND THE DEVIATIONSR,V. THE STATE VECTORS ARE CONVERTED TO
-# METERS B-29 AND METERS/CSEC B-7 AND STORED APPROPIRATELY IN RN,VN OR
+# METERS B-29 AND METERS/CSEC B-7 AND STORED APPROPRIATELY IN RN,VN OR
 # R-OTHER , V-OTHER FOR DOWNLINK. THE ROUTINES NAMES ARE SWITCHED IN THE
 # OTHER VEHICLES COMPUTER.
 
@@ -99,7 +101,7 @@ RRANGLES        STORE           32D
                                 34D                     # ANGLE LATER, WE CAN FIND THE MODE 1
                 SETPD           ASIN                    # TRUNNION BY SIMPLY TAKING THE ARCSIN OF
                                 0                       # THE Y COMPONENT, THE ASIN GIVING AN
-                PUSH            BDSU                    # ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG.
+                PUSH            BDSU                    # ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG
                                 LODPHALF
                 STODL           4                       # MODE 2 TRUNNION TO 4.
 

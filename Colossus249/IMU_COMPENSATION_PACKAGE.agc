@@ -11,6 +11,9 @@
 ## Mod history:	08/09/04 RSB.	Began adapting from corresponding Luminary131
 ##				source file.
 ##		2010-10-24 JL	Fixed page numbers.
+##		2016-12-30 RSB	Backported BYRO->GYRO from Colossus 237.
+##				(There's lots more that needs to be backported,
+##				but I found this one particularly annoying.)
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned document obtained from MIT's website,
@@ -187,12 +190,12 @@ GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 		MP	MPAC		# ADIA OR ADSRA
 		TS	L
 		CAF	ZERO
-		DAS	VBUF		# NOW = (BYRO PULSES) X 2(+8)			*
+		DAS	VBUF		# NOW = (GYRO PULSES) X 2(+8)			*
 
 		CA	VBUF		# PARTIAL RESULT -- MAJOR
 		EXTEND
 		MP	BIT12		# SCALE 2(+3)	SHIFT RIGHT 3			*
-		INDEX	BUF		# RESULT = (BYRO PULSES) X 2(+14)
+		INDEX	BUF		# RESULT = (GYRO PULSES) X 2(+14)
 		DAS	GCOMP		# HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)
 
 		CA	VBUF +1		# PARTIAL RESULT -- MINOR
@@ -329,7 +332,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		EXTEND
 		DCS	VBUF 
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
-		CA	NBDY		# (BYRO PULSES)/(CS) X 2(-5)
+		CA	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# -(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
 		
 		EXTEND

@@ -14,11 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-23 AS   Transcribed
-
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1468
-# KALMAN_FILTER
-
                 EBANK=                  NO.UJETS
                 BANK                    16
                 SETLOC	                DAPS1

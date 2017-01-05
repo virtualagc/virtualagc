@@ -50,6 +50,9 @@ group.add_argument('--retread44', help="Perform RETREAD 44 processing", action="
 group.add_argument('--aurora12', help="Perform AURORA 12 processing", action="store_true")
 group.add_argument('--sunburst120', help="Perform SUNBURST120 processing (in Luminary 69 style)", action="store_true")
 group.add_argument('--luminary116', help="Perform LUMINARY 116 processing (for octals)", action="store_true")
+group.add_argument('--solarium55', help="Perform SOLARIUM 55 processing", action="store_true")
+group.add_argument('--colossus237', help="Perform COLOSSUS 237 processing", action="store_true")
+group.add_argument('--artemis72', help="Perform COLOSSUS 237 processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -87,6 +90,15 @@ elif args.luminary69 or args.aurora12 or args.sunburst120:
     # Difference the original L channel with the thickened lines (which is inverted)
     diff = blurred + thickend_lines
     thresh = ~cv2.inRange(diff, 30, 225) # Reject pixels too black or too white
+elif args.solarium55:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = ~cv2.inRange(diff, 30, 235) # Reject pixels too black or too white
 elif args.comanche55 or args.luminary99:
     blurred = cv2.GaussianBlur(l_channel, (3,3), 0)
     # Isolate the lines by eroding very strongly horizontally
@@ -97,6 +109,19 @@ elif args.comanche55 or args.luminary99:
     diff = cv2.GaussianBlur(diff, (7,7), 0)
     thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 4)
     thresh = thresh[30:-70,70:]
+elif args.colossus237:
+    # Note that with Colossus237, we assume that the images have been pre-cropped
+    # and deskewed.
+    blurred = cv2.GaussianBlur(l_channel, (3,3), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + lines_only
+    # Blur a bit more then threshold the image
+    diff = cv2.GaussianBlur(diff, (1,1), 0)
+    thresh = cv2.adaptiveThreshold(diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 3)
+    #_,thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    thresh = thresh[20:]
 elif args.retread44:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     #thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 51)
@@ -107,6 +132,12 @@ elif args.luminary116:
     # Isolate the bands by eroding very strongly horizontally
     lines_only = cv2.erode(~blurred, np.ones((1,51), np.uint8), iterations=1)
     # Difference the original R channel with the isolated bands
+    diff = blurred + lines_only
+    _,thresh = cv2.threshold(diff, 240, 255, cv2.THRESH_BINARY)
+elif args.artemis72:
+    _,g_channel,r_channel = cv2.split(img)
+    blurred = cv2.GaussianBlur(g_channel, (5,5), 0)
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
     diff = blurred + lines_only
     _,thresh = cv2.threshold(diff, 240, 255, cv2.THRESH_BINARY)
 else:
@@ -200,6 +231,9 @@ if args.comments:
 
         # Do the dilation. This should bleed together most of the header.
         dilated = cv2.dilate(~target_image, element, iterations=5)
+        # cv2.imshow('image', dilated)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         # Locate the top header line, which stretches all 120 columns and thus both bounds and
         # provides reference to where on the page the various columns begin
@@ -222,10 +256,22 @@ if args.comments:
         header_box = None
         for i,c in enumerate(contours):
             box = cv2.boundingRect(c)
-            if (box[2] > 1000):
+            if (box[2] > 700):
                 header_start = i
                 header_box = list(box)
                 break
+
+        # Search backwards to make sure we aren't missing pieces of the header
+        for i in range(header_start-1,-1,-1):
+            box = cv2.boundingRect(contours[i])
+            if abs(box[1] - header_box[1]) < 20:
+                header_start = i
+                rightmost = max(box[0]+box[2], header_box[0]+header_box[2])
+                bottommost = max(box[1]+box[3], header_box[1]+header_box[3])
+                header_box[0] = min(box[0], header_box[0])
+                header_box[1] = min(box[1], header_box[1])
+                header_box[2] = rightmost-header_box[0]
+                header_box[3] = bottommost-header_box[0]
 
         # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
         # dilation above doesn't quite bleed everything together)
@@ -258,7 +304,7 @@ if args.comments:
 
         for i,c in enumerate(contours):
             x,y,w,h = cv2.boundingRect(c)
-            if (w < 10 or h < 10):
+            if (w < 5 or h < 5):
                 # Probably junk that's made it through
                 continue
 
@@ -267,7 +313,7 @@ if args.comments:
             # in a comment. It's handled this way because distortions on the image can be as large
             # as one to two character widths from the top to the bottom of the card type column.
             x_delta = x-line_x
-            if abs(x_delta < 3*column_width):
+            if (abs(x_delta) < 3*column_width) or (args.retread44 and line_num < 3 and y > line_y+30):
                 # This is the start of a line. Record its x position.
                 line_x = x
 
@@ -308,7 +354,12 @@ if args.comments:
             crop_top = line_y
 
         # We also want everything from column 80 on
-        cv2.rectangle(mask, (header_box[0] + column_width*80, crop_top), (target_image.shape[1], target_image.shape[0]), 0, -1)
+        if args.retread44:
+            comment_column = header_box[0] + column_width*78
+        else:
+            comment_column = header_box[0] + column_width*80
+            
+        cv2.rectangle(mask, (comment_column, crop_top), (target_image.shape[1], target_image.shape[0]), 0, -1)
 
         # But we don't want anything left of column ~7 or right of the header
         left_limit = header_box[0]+7*column_width

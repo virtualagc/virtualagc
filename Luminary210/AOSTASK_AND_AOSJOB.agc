@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-10 HG   Transcribed
 ##              2016-12-12 HG   Bumped a -1 into column 2 to fix a yaYUL warning.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1483
 # PROGRAM NAME: 1/ACCS
@@ -24,7 +26,7 @@
 # PROGRAM DESCRIPTION:
 
 #    1/ACCS PROVIDES THE INTERFACE BETWEEN THE GUIDANCE PROGRAMS AND THE DIGITAL AUTOPILOT. WHENEVER THERE IS A
-# CHANGE IN THE MASS OS THE VEHICLE, IN THE DEADBAND SELECTED, IN THE VEHICLE CONFIGURATION (ASCENT-DESCENT-
+# CHANGE IN THE MASS OF THE VEHICLE, IN THE DEADBAND SELECTED, IN THE VEHICLE CONFIGURATION (ASCENT-DESCENT-
 # DOCKED), AND DURING A FRESH START OR A RESTART, 1/ACCS IS CALLED TO COMMUNICATE THE DATA CHANGES TO THE DAP.
 
 #    THE INPUTS TO 1/ACCS ARE MASS, ACCELERATION (ABDELV), DEADBAND (DB), OFFSET ACCELERATIONS (AOSQ AND AOSR),
@@ -32,19 +34,19 @@
 # BIT14), AND SURFACE FLAG (FLAGWRD8,BIT8), AND CH5MASK.
 
 #    1/ACCS COMPUTES THE JET ACCELERATIONS (1JACC, 1JACCQ, 1JACCR) AS FUNCTIONS OF MASS. 1JACCU AND 1JACCV ARE
-# FORMED BY RESOLVING 1JACCQ AND 1JACCR. IN THE DESCENT CASE, THE DESCENT ENGINE MOMENT ARM (L,PVT-CG) IS ALSO
+# FORMED BY RESOLVING 1JACCQ NAD 1JACCR. IN THE DESCENT CASE, THE DESCENT ENGINE MOMENT ARM (L,PVT-CG) IS ALSO
 # COMPUTED AS A FUNCTION OF MASS. THE RATE OF CHANGE OF ACCELERATION DUE TO ROTATION OF THE GIMBAL (ACCDOTQ,
 # ACCDOTR) IS ALSO COMPUTED IN THE DESCENT CASE.
 
 #    AFTER THE ABOVE COMPUTATIONS, THE PROGRAM 1/ACCONT COMPUTES THE RECIPROCAL  NET ACCELERATIONS ABOUT THE P, U,
-# AND V AXES (2 JETS FOR P-AXIS, BOTH 1 AND 2 JETS FOR U AND V AXES), AND THE RECIPROCAL COAST ACCELERATIONS ABOUT
+# AND V AXES (2 JETS FOR P AXIS, BOTH 1 AND 2 JETS FOR U AND V AXES), AND THE RECIPROCAL COAST ACCELERATIONS ABOUT
 # THE P, U, AND V AXES. THE ACCELERATION FUNCTIONS (ACCFCTZ1 AND ACCFCTZ5)ARE ALSO COMPUTED FOR THESE AXES. THE
 # FIRE AND COAST DEADBANDS AND AXISDIST ARE COMPUTED FOR EACH AXIS. FLAT AND ZONE3LIM, THE WIDTH AND HEIGHT OF THE
 # MINIMUM IMPULSE ZONE, ARE COMPUTED. 1/ACCONT ALSO SETS ACCSWU AND ACCSWV, WHICH INDICATE WHEN 1 JET ACCELERATION
 # IS NOT SUFFICIENT TO PRODUCE MINIMUM ACCELERATION. AT THE COMPLETION OF 1/ACCS, THE ACCSOKAY BIT IS SET.
 
 
-# SUBROUTINES CALLED:
+# SUBBOUTINES CALLED:
 
 #          TIMEGMBL
 #          MAKECADR
@@ -52,16 +54,16 @@
 
 # CALLING SEQUENCE:
 
-#                                            TC     BANKCALL        # (1/ACCS MUST BE CALL BY BANKCALL
+#                                            TC     BANKCALL        (1/ACCS MUST BE CALL BY BANKCALL
 #                                            CADR   1/ACCS
 
-# NORMAL EXIT: VIA BANKJUMP       ALARM AND EXIT MODES: NONE.
+# NORMAL EXIT: VIA BANKJUMP       ALARM AND ABORT EXIT MODES: NONE.
 
 # INPUT/OUTPUT: SEE PROGRAM DESCRIPTION
 
 # DEBRIS:
 
-# ALL FO THE EXECUTIVE TEMPORARY REGISTERS, EXCEPT FIXLOC AND OVFIND, AND THE CORE SET AREA FROM MPAC TO BANKSET.
+# ALL OF THE EXECUTIVE TEMPORARY REGISTERS, EXCEPT FIXLOC AND OVFIND, AND THE CORE SET AREA FROM MPAC TO BANKSET.
 
 # RESTRICTIONS:
 
@@ -106,11 +108,11 @@
                 TS              ACCRETRN
 
 # DETERMINE MASS OF THE LEM.
-                CA              DAPBOOLS                # IS THE CSM DOCKED
+                CA              DAPBOOLS                # IS CSM DOCKED
                 MASK            CSMDOCKD
                 TS              DOCKTEMP                # STORE RECORD OF STATE IN TEMP (MPAC +3).
                 CCS             A
-                CS              CSMMASS                 #   DOCKED:  LEMMAS = MASS - CSMMASS
+                CS              CSMMASS                 #   DOCKED:  LEMMASS = MASS - CSMMASS
                 AD              MASS                    #   LEM ALONE: LEMMASS = MASS
                 TS              LEMMASS
 
@@ -166,7 +168,7 @@ DPSFLITE        CS              BIT10                   # FOUR JETS FOR P-AXIS R
 
 F(MASS)         RELINT
                 CCS             DOCKTEMP
-                TCF             DOCKED                  # DOCKED: USE SEPARATE COMPUTATION.
+                TCF             DOCKED                  # DOCKED: USE SEPERATE COMPUTATION.
                 CA              TWO
 STCTR           TS              MPAC            +1      # J=2,1,0 FOR 1JACCR,1JACCQ,1JACC
 
@@ -263,7 +265,7 @@ JACCUV          CS              COEFFQ
                 TS              MPAC +1
                 TCF             STCTR1
 # THIS SECTION COMPUTES THE RATE OF CHANGE OF ACCELERATION DUE TO THE ROTATION OF THE GIMBALS.  THE EQUATION IMPLE
-# MENTED IN BOTH THE Y-X PLANE AND THE Z-X PLANE IS -- D(ALPHA)/DT = TL/I*D(DELTA)/DT, WEHRE
+# MENTED IN BOTH THE Y-X PLANE AND THE Z-X PLANE IS -- D(ALPHA)/DT = TL/I*D(DELTA)/DT, WHERE
 #      T = ENGINE THRUST FORCE
 #      L = PIVOT TO CG DISTANCE OF ENGINE
 #      I = MOMENT OF INERTIA
@@ -407,7 +409,7 @@ MAXPLUS         CAF             POSMAX                  # -,- OR +,+
                 TC              Q
 
 # COEFFICIENTS FOR THE JET ACCELERATION CURVE FITS
-# THE CURVE FITS ARE OF THE FORM --
+# THE CURVE FITS ARE OF THE FORM -
 
 #          1JACC = A/(MASS + C) + B
 
@@ -451,7 +453,7 @@ GFACTM          OCT             337                     # 979.24/2.20462 AT B+15
 # CSM-DOCKED INERTIA COMPUTATIONS
 
 DOCKED          CA              ONE                     # COEFTR = 1 FOR INERTIA COEFFICIENTS
-## Note: The lable DOCKED is actually indented by one character originally. yaYul does not recognize this as proper label
+## Note: The label DOCKED is actually indented by one character originally. yaYul does not recognize this as proper label
 SPSLOOP1        TS              COEFCTR                 #         = 7 FOR CG COEFFICIENTS
                 CA              ONE                     # MASSCTR = 1 FOR CSM
                 TS              MASSCTR                 #         = 0 FOR LEM
@@ -539,18 +541,18 @@ TORQCONS        2DEC            0.51443         B-14    # CORRESPONDS TO 500 LB-
 #                                               COEFFICIENTS FOR CURVE FIT OF THE FORM Z = A X  +B Y  +C X Y +D X +E Y +F
 
 COEFF           DEC             .19518                  # C  COEFFICIENT OF INERTIA
-                DEC             -.00529                 # F              '"
-                DEC             -.17670                 # B              '"
-                DEC             -.03709                 # A              '"
-                DEC             .06974                  # E              '"
+                DEC             -.00529                 # F              ''
+                DEC             -.17670                 # B              ''
+                DEC             -.03709                 # A              ''
+                DEC             .06974                  # E              ''
                 DEC             .02569                  # D              ''
 
                 DEC             .20096                  # C  COEFFICIENT OF CG
-                DEC             .13564                  # F       "'
-                DEC             .75704                  # B       "'
-                DEC             -.37142                 # A       "'
-                DEC             -.63117                 # E       "'
-                DEC             .41179                  # D       "'
+                DEC             .13564                  # F       ''
+                DEC             .75704                  # B       ''
+                DEC             -.37142                 # A       ''
+                DEC             -.63117                 # E       ''
+                DEC             .41179                  # D       ''
 
 # ASSIGNMENT OF TEMPORARIES FOR 1/ACCS (EXCLUDING 1/ACCONT)
 
@@ -641,7 +643,7 @@ DOPAXIS         CA              1JACC                   # 1JACC AT PI/4 = 2JACC 
 
                 ZL
                 CCS             DRIFTER
-                DXCH            AOSU                    # ZERO AOSU,V IF IN DRIFT, JUST BE BE SURE
+                DXCH            AOSU                    # ZERO AOSU,V IF IN DRIFT, JUST TO BE SURE
 
 UAXIS           CA              ZERO                    # DO U AXIS COMPUTATIONS
                 TS              UV                      # ZERO FOR U AXIS, ONE FOR V AXIS.
@@ -700,10 +702,10 @@ SKIPDB1         CA              ABSAOS                  # ABS(AOS) GREATER THAN 
                 AD              ABSAOS                  # (9/8) ABSAOS.
                 TC              INVERT                  # ALL RIGHT TO DIVIDE
                 INDEX           -SIGNAOS
-                TS              1/ACOSTT        +1      # 1/ACOASTPOS(NET) = 1/ABS(AOS)
+                TS              1/ACOSTT        +1      # 1/ACOASTPOS(NEG) = 1/ABS(AOS)
                 CA              1/.03
                 INDEX           SIGNAOS
-                TS              1/ACOSTT                # 1/ACOASTNEG(POS) = 1/AIN
+                TS              1/ACOSTT                # 1/ACOASTNEG(POS) = 1/AMIN
 
                 CA              ABSAOS
                 AD              1JACCU
@@ -762,7 +764,7 @@ NOAOS           CA              DBVAL1
 SKIPDB2         CA              ABSAOS                  # ANETPOS(NEG) MAX = 2 JACC + ABS(AOS)
                 AD              1JACCU
                 AD              1JACCU
-                TS              ANET                    # CANNOT OVERFLOW HERE
+                TS              ANET                    # CONNOT OVERFLOW HERE
 CL1/NET+        TC              DO1/NET+                # COMPUTE 1/ANET, ACCFUN
 
 ACCTHERE        INDEX           -SIGNAOS
@@ -945,7 +947,7 @@ INVERT          TS              HOLD                    # ROUTINE TO INVERT   -I
                 TC              Q                       # RESULT AT 2(7)/PI
 
 DOWNGTS         CAF             ZERO                    # ZERO SWITCHES WHEN USEQRJTS BIT IS UP
-                TS              ALLOWGTS                #   OR DAP IS OFF
+                TS              ALLOWGTS                #   OR DAP IS OFF.
                 TS              INGTS
                 TCF             DOCKTEST
 
@@ -978,7 +980,7 @@ DOACCFUN        EXTEND
 
 NETNEG          CS              -.03R/S2                # ANET LESS THAN AMIN - SET EQUAL TO AMIN
                 TS              ANET
-                TCF             1/NETMIN +1             # CONTINUE AS IF NOTHING HAPPENED.
+                TCF             1/NETMIN +1             # CONTINUE AS IF NOTHING HAPPENED
 
 ## Page 1503
 FIXMIN          CCS             SIGNAOS

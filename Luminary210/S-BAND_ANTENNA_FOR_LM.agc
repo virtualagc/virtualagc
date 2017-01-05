@@ -14,7 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-27 HG   Transcribed
-
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
+  
 ## Page 501
 # SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM
 
@@ -43,9 +45,9 @@
 #     CDUTRIG
 #     *SMNB*
 #     BANKCALL
-#     B50OFF
+#     B5OFF
 #     ENDOFJOB
-#     BLANKRET
+#     BLANKET
 
 # RETURNS WITH
 
@@ -117,7 +119,7 @@ CONV5           SETPD           UNIT                    # UE = -UNIT((REM)(UEM) 
                                 RLM
                 UNIT            PDVL
                                 RLM
-                VPROJ           VSL2                    # PROJECTION OF R ONTO LM XZ PLANE.
+                VPROJ           VSL2                    # PROJECTION OF R ONTO LM XZ PLANE
 
 ## Page 503
                                 HIUNITY
@@ -192,5 +194,3 @@ V06N51          VN              0651
 UR              EQUALS          0D
 URP             EQUALS          6D
                 SBANK=          LOWSUPER
-
-# END OF LEMONAID.156 ***

@@ -1,15 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TVCINITIALIZE.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-06 JL	Adapted from corresponding Colossus 249 file.
-##		 2011-04-17 JL	Removed temporary line.
+## Copyright:   Public domain.
+## Filename:	TVCINITIALIZE.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+##		2011-04-17 JL	Removed temporary line.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 896
 # NAME     TVCDAPON (TVC DAP INITIALIZATION AND STARTUP CALL)
@@ -50,7 +52,7 @@
 		EBANK=	BZERO
 
 TVCDAPON	LXCH	BANKRUPT	# T5 RUPT ARRIVAL (CALL BY DOTVCON - P40)
-		EXTEND			# SAVE Q REQUIRED IN RESTART (MRCLEAN AND
+		EXTEND			# SAVE Q REQUIRED IN RESTARTS (MRCLEAN AND
 		QXCH	QRUPT		#      TVCINIT4 ARE ENTRIES)
 MRCLEAN		CAF	NZERO		# NUMBER TO ZERO, LESS ONE  (MUST BE ODD)
 #					       TVC RESTARTS ENTER HERE  (NEW BANK)
@@ -117,7 +119,7 @@ TVCINIT2	CAE	ETVCDT/2	# LEM-ON VALUE (PAD-LOAD,  CS / 2)
 		INDEX	CNTR		# PICK UP LEM-OFF,-ON KPRIME
 		CAE	EKPRIME
 		EXTEND
-		MP	KPRIMEDT	# (TVCDT/2, BC.AT B+14CS)
+		MP	KPRIMEDT	# (TVCDT/2, SC.AT B+14CS)
 		LXCH	A		#      SC.AT PI/8    (DIMENSIONLESS)
 		DXCH	KPRIMEDT
 
@@ -125,7 +127,7 @@ TVCINIT2	CAE	ETVCDT/2	# LEM-ON VALUE (PAD-LOAD,  CS / 2)
 		CAE	EREPFRAC
 		TS	REPFRAC
 
-		CAF	NEGONE		# PREVENT STOKE TEST UNTIL CALLED
+		CAF	NEGONE		# PREVENT STROKE TEST UNTIL CALLED
 		TS	STRKTIME
 
 		CAF	NINETEEN	# SET VCNTR FOR VARIABLE-GAIN UPDATES IN

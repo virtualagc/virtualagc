@@ -16,6 +16,8 @@
 ## 		2016-12-01 RSB	Completed transcription
 ##              2016-12-10 HG   fix operator DXCH  -> XCH
 ##                                           DOUBLE -> DDOUBL
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 789
 		BANK	31
@@ -27,7 +29,7 @@
 		EBANK=	PIF
 		
 		COUNT*	$$/THROT
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # HERE FC, DESIRED THRUST, AND FP, PRESENT THRUST, UNWEIGHTED, ARE COMPUTED.
 
 THROTTLE	CA	ABDELV		# COMPUTE PRESENT ACCELERATION IN UNITS OF
@@ -148,7 +150,7 @@ DOIT		CA	PIF
 		CA	TIME1
 		TS	TTHROT
 
-#     SINCE /AF/ IS NOT AN INSTANTANEOUS ACELERATION, BUT RATHER AN "AVERAGE" OF THE ACCELERATION LEVELS DURING
+#     SINCE /AF/ IS NOT AN INSTANTANEOUS ACCELERATION, BUT RATHER AN "AVERAGE" OF THE ACCELERATION LEVELS DURING
 # THE PRECEEDING PIPA INTERVAL, AND SINCE FP IS COMPUTED DIRECTLY FROM /AF/, FP IN ORDER TO CORRESPOND TO THE
 # ACTUAL THRUST LEVEL AT THE END OF THE INTERVAL MUST BE WEIGHTED BY
 
@@ -224,7 +226,7 @@ MASSMULT	EXTEND
 		DXCH	MPAC
 		TC	DMP
 		ADRES	MASS
-		TC	DMP		# LEAVES PROPERLY SCALED FORCE IN MPAC
+		TC	DMP		# LEAVES PROPERLY SCALED FORCE IM MPAC
 		ADRES	SCALEFAC
 		TC	TPAGREE
 		CA	MPAC
@@ -244,4 +246,4 @@ FEXTRA		=	BIT13		#        FEXT +5.13309020 E+4
 
 OCT17777	OCT	17777
 4FMAXNOM	DEC	14908		# EQUIVALENT TO 10,500 LBS.
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

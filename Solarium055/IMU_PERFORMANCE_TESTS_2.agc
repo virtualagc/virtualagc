@@ -12,6 +12,8 @@
 ##		2009-10-30 JL	Fixed filename comment.
 ##		2016-08-20 RSB	Typos.
 ##		2016-08-23 RSB	More of the same.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 426
 

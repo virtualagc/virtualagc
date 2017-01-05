@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TVCDAPS.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	TVCDAPS.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-06 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 918
 # PROGRAM NAME....TVCDAP, CONSISTING OF PITCHDAP, YAWDAP, ETC.
@@ -119,7 +121,7 @@
 		COUNT*	$$/DAPS
 
 ## Page 921
-# PITCH TVCDAP STARTS HERE....(INCOPORATES CSM/LEM DAP FILTER,  MODOR DESIGN)
+# PITCH TVCDAP STARTS HERE....(INCORPORATES CSM/LEM DAP FILTER,  MODOR DESIGN)
 
 
 PITCHDAP	LXCH	BANKRUPT	# T5 ENTRY,  NORMAL OR VIA DAPINIT
@@ -244,7 +246,7 @@ P2FILJMP	CAE	DAPDATR1	# CHECK FOR LEM-ON/-OFF
 
 
 BZSTORE		CAE	ERRBTMP		# PREPARE BZERO  (UPPER WORD OF ERRBTMP)
-		DOUBLE			#      FOR NUMERATOR LATTER....SC.AT B-1
+		DOUBLE			#      FOR NUMERATOR LADDER....SC.AT B-1
 		TS	B1TMP		#      SC.AT B-2 REVS FOR LADDER
 
 
@@ -456,7 +458,7 @@ YROUND		CAE	CMDTMP +1	# ROUND UP FOR OUTPUT
 
 YACLIM		TCR	ACTLIM		# YAW   ACTUATOR-COMMAND-LIMITER
 
-YOUT		CS	YCMD		# INCRMENTAL YAW   COMMAND
+YOUT		CS	YCMD		# INCREMENTAL YAW   COMMAND
 		AD	CMDTMP
 		ADS	TVCYAW		# UPDATE THE ERROR COUNTER (NO RESTART-
 #					       PROTECT, SINCE ERROR CNTR ZEROED)
@@ -474,7 +476,7 @@ Y2FILJMP	CAE	DAPDATR1	# CHECK FOR LEM-ON/-OFF
 
 
 CZSTORE		CAE	ERRBTMP		# PREPARE CZERO  (UPPER WORD OF ERRBTMP)
-		DOUBLE			#      FOR NUMERATOR LATTER....SC.AT B-1
+		DOUBLE			#      FOR NUMERATOR LADDER....SC.AT B-1
 		TS	C1TMP		#      SC.AT B-2 REVS FOR LADDER
 
 
@@ -671,7 +673,7 @@ ACTLIM		EXTEND			# CHECK FOR ACTUATOR COMMAND LIMIT
 # NUMERATOR-SUM COMPUTATION....
 
 NSUM		CAE	B1TMP		# PREPARE NUMERATOR SUM, SCALING IS AT
-		EXTEND			#      B+0 REVS  ( = B+2 x B-2 )
+		EXTEND			#      B+0 REVS  ( = B+2 X B-2 )
 		MP	N1
 		DXCH	NSUMTMP
 

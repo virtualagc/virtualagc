@@ -1,24 +1,26 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     AGC_BLK2_INSTRUCTION_CHECK.agc
-## Purpose:      Part of the source code for Retread 44 (revision 0). It was
-##               the very first program for the Block II AGC, created as an
-##               extensive rewrite of the Block I program Sunrise.
-##               This file is intended to be a faithful transcription, except
-##               that the code format has been changed to conform to the
-##               requirements of the yaYUL assembler rather than the
-##               original YUL assembler.
-## Reference:    pp. 210-242
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-12-13 MAS  Created from Aurora 12 version.
-##               2016-12-16 MAS  Began.
-##               2016-12-17 MAS  Completed transcription.
-##               2016-12-18 MAS  Typos.
-##               2016-12-18 MAS  Added notes about bugs discovered in the
-##                               tests present here.
-##               2016-12-20 MAS  Fixed a typo in a program label.
+## Copyright:   Public domain.
+## Filename:    AGC_BLK2_INSTRUCTION_CHECK.agc
+## Purpose:     Part of the source code for Retread 44 (revision 0). It was
+##              the very first program for the Block II AGC, created as an
+##              extensive rewrite of the Block I program Sunrise.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 210-242
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.
+##              2016-12-16 MAS  Began.
+##              2016-12-17 MAS  Completed transcription.
+##              2016-12-18 MAS  Typos.
+##              2016-12-18 MAS  Added notes about bugs discovered in the
+##                              tests present here.
+##              2016-12-20 MAS  Fixed a typo in a program label.
+## 		2016-12-27 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 210
                 SETLOC          ABORT           +1
@@ -501,7 +503,7 @@ CNTINU          TC              -1CHK
                 NDX             NDXKEEP1                        # DAS KEEP1
                 DAS             0000
 # BEFORE DAS, K = 37777   K+1 = 40000
-#             A = -1      L   = +1
+#             A = -2      L   = +1
 # AFTER  DAS, K = 37775   K+1 = 40001
 #            A = +0    L  = +0
                 NDX             NDXKEEP1                        # DXCH KEEP1
@@ -596,7 +598,7 @@ QNMBR           TC              ERRORS
 QXCHCON1        ADRES           QXCHCON2        +1
 ## Page 221
 QXCHCON2        ADRES           QNMBR
-                CS              KEEP1                           # CHECK THAT KEEP HOLDS B(Q)
+                CS              KEEP1                           # CHECK THAT KEEP1 HOLDS B(Q)
                 AD              QXCHCON2
                 TC              -0CHK
 # CHECKS QXCH OF AN SC REGISTER
@@ -941,7 +943,7 @@ DV1--           LXCH            A
                 AD              SBIT13
                 TC              -0CHK
 # 1/2 TO 15TH DIVIDED BY 1/2 TO 14TH
-# C(A) SHOULD BE 1/D AND CONTENTS OF L SHOULD BE ZERO
+# C(A) SHOULD BE 1/2 AND CONTENTS OF L SHOULD BE ZERO
 DV2++           CA              S+1
                 TS              KEEP7                           # 00001, DIVISOR
                 CS              A
@@ -1165,7 +1167,7 @@ DV7--           LXCH            A                               # C(A) = C(L) = 
                 TC              -0CHK           -1
 
 # DEVIDE SAME (ZERO). THE CONTENTS OF THE A REGISTER AND L REGISTER WILL
-# HAVE OPPOSITE SIGNS BEFORE DIVISION. THE SIGN OF THE QUOTIENT WILL
+# HAVE OPPOSITE SIGNS BEFORE DEVISION. THE SIGN OF THE QUOTIENT WILL
 # DEPEND ON THE SIGN OF THE L REGISTER BEFORE DEVISION AND THE SIGN OF
 # THE DEVISOR. THE SIGN OF THE REMAINDER IS THE SAME SIGN AS THE SIGN OF
 # THE L REGISTER BEFORE DEVISION. C(L)  REMAINS SAME
@@ -1518,7 +1520,7 @@ NDXQXCH         CA              ADRSQXCH
                 TC              +2
                 TC              ERRORS
                 EXTEND
-                NDX             ADRS1                           # QCH KEEP1
+                NDX             ADRS1                           # QXCH KEEP1
                 QXCH            0000
                 TC              Q
                 TC              ERRORS
@@ -1600,7 +1602,7 @@ NDXINOUT        CA              S-1
                 RXOR            0000                            # C(A) = 40001
                 AD              S+MAX
                 TC              -1CHK           -1
-# CHECKS EXTRACODE OF AN SC REGISTER
+# CHECKS EXTRACODE INDEX OF AN SC REGISTER
                 CA              S+2
                 TS              KEEP1
                 CA              ADRS1                           # ADDRESS OF KEEP1
@@ -1697,12 +1699,12 @@ EDOPLOOP        CA              CYL
                 CA              CYR
                 MASK            S7BITS
                 CS              A
-                TS              KEEP1                           # COMPLEMENT OF C(EDOP)
+                TS              KEEP1                           # COMPLEMEMT OF C(EDOP)
                 CA              S-ZERO
                 MASK            EDOP
                 AD              KEEP1
                 TC              -0CHK
-                INCR            KEEP5                           # INCREMENT COUNT REGISTER
+                INCR            KEEP5                           # INCREMEMT COUNT REGISTER
                 CCS             EDOP
                 TC              EDOPLOOP
                 TC              ENDEDOP
@@ -1711,9 +1713,8 @@ EDOPLOOP        CA              CYL
 ENDEDOP         CA              KEEP5                           # SHOULD HAVE PERFORMED EDOPLOOP 14 TIMES
                 TC              -1CHK
 
-                INCR            SCOUNT                          # INCREMENT UPON SUCCESSFUL COMPLETION
+                INCR            SCOUNT                          # INCREMENT UPON SUCCESSFUL COMLETION
 
                 TC              SMODECHK
 
 
-# END OF REVISION 0 OF PROGRAM RETRED44 BY NASA 2021100           LAST ASSEMBLED ON JUL 6, 1965

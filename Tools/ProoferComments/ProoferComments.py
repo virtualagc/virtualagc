@@ -27,6 +27,15 @@ from wand.color import Color
 tesseract = 'tesseract'
 if 'BIN' in environ:
 	tesseract = environ['BIN'] + '/tesseract'
+Solarium55 = 0
+if 'SOLARIUM55' in environ:
+	Solarium55 = 1
+Colossus237 = 0
+if 'COLOSSUS237' in environ:
+	Colossus237 =1
+Retread44 = 0
+if 'RETREAD44' in environ:
+	Retread44 =1
 
 # Parse command-line arguments
 if len(sys.argv) < 5:
@@ -39,9 +48,9 @@ if len(sys.argv) < 5:
 	print '      The AGC-file inclusion directive $ is supported, so the top-level file'
 	print '      MAIN.agc can be used in order to make scripting easier.' 
 	print 'SCALE (optional, default 1.0) represents the resolution of the imagery, relative'
-	print '      to archive.org\'s scan of Sunburst 120, which is nominally 3025 pixels high.'
-	print '      The process is not *very* sensitive to this, but you will want to adjust it'
-	print '      anyway.  For example, for Aurora 12 scans I settled on SCALE=1.15.  (Sadly,'
+	print '      to archive.org\'s scan of Sunburst 120.  The process is not *very* sensitive'
+	print '      to this, but you will want to adjust it if it is too far from 1.0.'
+	print '      For Aurora 12 scans I settled on SCALE=0.711111.  (Sadly,'
 	print '      not all of the archive.org pages have precisely identical dimensions, even'
 	print '      when those pages are all from the sames set of scans for the same harcopy.)'
 	print '      Non-archive.org imagery has a very different scale. Think of SCALE as being'
@@ -61,6 +70,12 @@ if len(sys.argv) < 5:
 	print '      bounding boxes at different locations on different pages.  I don\'t provide'
 	print '      any specific option for that, however.  I don\'t know if training affects the'
 	print '      selection of bounding boxes or not.'
+	print 'There are also several environment variables that activate filters or font-changes'
+	print 'specific to particular AGC printouts:'
+	print '      RETREAD44'
+	print '      SOLARIUM55'
+	print '      COLOSSUS237'
+	print 'To use, you should do something like "export COLOSSUS237=yes".'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -91,9 +106,11 @@ else:
 img = Image(filename=backgroundImage)
 backgroundWidth = img.width
 backgroundHeight = img.height
+middleFloor = 2 * img.height / 5
+middleCeiling = 3 * img.height / 5
 # Make certain conversions on the background image.
 img.type = 'truecolor'
-img.alpha_channel = 'activate'
+#img.alpha_channel = 'activate'
 
 # Shell out to have tesseract generate the box file, and read it in.
 # While reading it in, we will reject all boxes that appear to us to be
@@ -128,7 +145,10 @@ row = 0
 alnumPattern = re.compile(r"[0-9A-Z]")
 lastBoxChar = '?'
 lastHyphenMidPoint = 0
+lastX = 0
+lastY = 0
 for box in file:
+	newline = 0
 	boxFields = box.split()
 	boxChar = boxFields[0]
 	boxLeft = int(boxFields[1])
@@ -137,6 +157,10 @@ for box in file:
 	boxTop = backgroundHeight - 1 - int(boxFields[4])
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
+	if boxLeft < lastX or boxBottom > lastY + rowFloor:
+		newline = 1;
+	lastX = boxLeft
+	lastY = boxBottom
 	# Take care of a box in the pendingBoxes[] array, if there is one.
 	# This algorithm is going to discard the box if it happens to be at
 	# the very end of the row, but I don't really care about that.
@@ -269,7 +293,13 @@ for box in file:
 	   boxBottom <= boxes[len(boxes)-1]['boxBottom'] and boxTop >= boxes[len(boxes)-1]['boxTop']:
 		distance = boxRight - boxes[len(boxes)-1]['boxRight']
 	if distance < 8 * scale:
-		rejectIt = 1;
+		rejectIt = 1
+	# In Colossus237, there's an artifact that appears very often, that I've simply gotten tired
+	# of editing out: two adjacent short strokes, very near the center of the page, presumably
+	# a remnant of a horizontal line.  Fortunately, that lets us make the filter pretty specific.
+	if Colossus237 and (boxChar == '_' or boxChar == '-') and boxWidth >= 11 and boxWidth <= 17 and \
+		boxHeight >= 4 and boxHeight <= 5 and boxTop > middleFloor and boxTop < middleCeiling:
+		rejectIt = 1
 	# Here's something to help apostrophes to be recognized.
 	#if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
 	#   boxHeight <= 17 * scale and numCharsInRow > 0 and \
@@ -279,28 +309,26 @@ for box in file:
 	   boxBottom <= avgBottom - 7 * scale:
 	   	addIt = 1 		
 	# Here's something to help hyphens to be recognized:
-	if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
-		#print boxWidth/scale, boxHeight/scale, boxBottom, sumBottomsInRow/float(numCharsInRow), lastBoxChar
-		if boxWidth > 14 * scale and boxWidth < 20 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
+	if boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '—' or boxChar == '=' or boxChar == '~':
+		if boxWidth > 14 * scale and boxWidth < 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
-			#print midPoint - sumBottomsInRow/numCharsInRow
-			#if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 3 * scale or \
-			#   abs(midPoint - lastHyphenMidPoint) <= 2 * scale:
-			if abs(midPoint - avgBottom + 12.5 * scale) <= 3 * scale or \
+			if newline or numCharsInRow == 0 or \
+			   abs(midPoint - avgBottom + 12.5 * scale) <= 3 * scale or \
 			   abs(midPoint - lastHyphenMidPoint) <= 2 * scale:
 				#print "Adding"
 		 		addIt = 1
 		 		lastHyphenMidPoint = midPoint
 	# And underscores, '_':
-	if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
-		if boxWidth >= 20 * scale and boxWidth <= 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
+	#if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
+	if numCharsInRow > 0:
+		if boxWidth >= 20 * scale and boxWidth <= 26 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
-			if abs(midPoint - avgBottom) <= 3 * scale:
+			if abs(midPoint - (avgBottom+3*scale)) <= 3 * scale:
 		 		addIt = 1
 	# And vertical lines, '|', though I guess it may serve for parentheses as well:
 	if boxChar == '|' or boxChar == 'I' or boxChar == 'l' or boxChar == '!' or boxChar == '1' or boxChar == '(' or boxChar == ')':
 		#print boxChar, boxWidth, boxHeight, scale
-		if boxWidth >= 5 * scale and boxWidth <= 8 * scale and boxHeight >= 28 * scale and boxHeight <= 33 * scale:
+		if boxWidth >= 5 * scale and boxWidth <= 8 * scale and boxHeight >= 28 * scale and boxHeight <= 35 * scale:
 			#print Added
 			addIt = 1
 	lastBoxChar = boxChar
@@ -421,7 +449,7 @@ allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
 allUnderlinesPattern = re.compile(r"\A\s*[_][_\s]*\Z")
 allDotsPattern = re.compile(r"^\s*[.][.\s]*$")
 allEqualsPattern = re.compile(r"\A\s*=[=\s]*\Z")
-def readFile( filename ):
+def readFile( filename, depth ):
 	"Reads an AGC source file, recursively if containing $ operators."
 	global lines, currentPage, pageNumber, blankLinePattern, allDashesPattern, allUnderlinesPattern, nodashes
 	#print "Reading file", filename
@@ -431,7 +459,7 @@ def readFile( filename ):
 		if line.startswith("$"):
 			includedFile = re.sub(r'^[$](.*[.]agc).*', r'\1', line)
 			#print "Here '", includedFile, "'"
-			readFile(agcSourceDirectory + "/" + includedFile)
+			readFile(agcSourceDirectory + "/" + includedFile, depth + 1)
 			continue
 		#if line.lower().startswith("## page "):
 		if re.match(r"## page [0-9].*", line.lower()):
@@ -460,9 +488,10 @@ def readFile( filename ):
 			comment = comment.replace("-", "")
 		if nodashes >= 3:
 			comment = comment.replace("_", "")
-		lines.append(comment)
+		if depth > 0:
+			lines.append(comment)
 	file.close()
-readFile(agcSourceFilename)
+readFile(agcSourceFilename, 0)
 #print lines
 
 # At this point, we've populated lines[] with just the non-blank comments from,
@@ -483,6 +512,14 @@ for ascii in range(128):
 		imagesNomatch.append(Image(filename=filename))
 	else:
 		imagesNomatch.append(Image(filename="asciiFont/nomatch127.png"))
+# Some of the printers in specific printouts had S or * characters that were different
+# enough that I feel as though I should tweak them.
+if Solarium55 or Colossus237:
+	imagesMatch[83] = Image(filename="asciiFont/match83S.png")
+	imagesNomatch[83] = Image(filename="asciiFont/nomatch83S.png")
+if Solarium55 or Retread44:
+	imagesMatch[42] = Image(filename="asciiFont/match42S.png")
+	imagesNomatch[42] = Image(filename="asciiFont/nomatch42S.png")
 
 # Prepare a drawing-context.
 draw = Drawing()
@@ -546,25 +583,31 @@ for row in range(0, len(lines)):
 				draw.line((left,middle), (right,middle))
 				break
 		
-		# Here is a thing to overcome a problem what octopus has to do to eliminate
-		# horizontal lines on the input pages.  One side effect is that '=' is often
-		# eliminated, which is very troublesome.  However, there are patterns we can
-		# try to use to reinsert an = where one is missing.
+		# "octopus --comments" often removes '=' from its output images, which is very troublesome.
+		# However, there are patterns we can try to use to reinsert an = where one is missing.
+		# ... The same also turns out to be true for various other characters.
+		goneMissing = [ '=', '-', '_', ':' ]
 		lastRight = 0
 		if (numCharsInRow > 0):
 			lastRight = boxes[boxIndex-1]['boxRight']
-		if index < len(charList)-1 and \
-		   character == '=' and boxes[boxIndex]['boxChar'] != '=' and \
-		   boxes[boxIndex]['boxChar'] == charList[index+1] and \
-		   boxes[boxIndex]['boxLeft'] > lastRight + 80*scale: 
-			boxLeft = int(round(boxes[boxIndex]['boxLeft'] - 40 * scale))
-			fontChar = imagesNomatch[ord('=')].clone()
-			draw.composite(operator='darken', left=boxLeft, 
-				       top=boxes[boxIndex]['boxTop'], width=int(round(fontChar.width * scale)), 
-				       height=int(round(fontChar.height * scale)), image=fontChar)
-			# Note that this will advance index (the pointer to characters in the line)
-			# but not boxIndex.
-			continue
+		if index < len(charList)-1:
+			bail = 0
+			for testChar in goneMissing:
+			   	if character == testChar and boxes[boxIndex]['boxChar'] != testChar and \
+					boxes[boxIndex]['boxChar'] == charList[index+1] and \
+					boxes[boxIndex]['boxLeft'] > lastRight + 80*scale: 
+						boxLeft = int(round(boxes[boxIndex]['boxLeft'] - 40 * scale))
+						fontChar = imagesNomatch[ord(testChar)].clone()
+						draw.composite(operator='darken', left=boxLeft, 
+							       top=boxes[boxIndex]['boxTop']+12-fontChar.height/2, 
+							       width=int(round(fontChar.width * scale)), 
+							       height=int(round(fontChar.height * scale)), image=fontChar)
+						# Note that this will advance index (the pointer to characters in the line)
+						# but not boxIndex.
+						bail = 1
+						break
+			if bail:
+				continue
 		#sumBottomsInRow += boxes[boxIndex]['boxBottom']
 		if numCharsInRow == 0:
 			avgBottom = boxes[boxIndex]['boxBottom']
@@ -591,14 +634,6 @@ for row in range(0, len(lines)):
 				       top=boxes[boxIndex]['boxTop'], width=boxes[boxIndex]['boxWidth'], 
 				       height=boxes[boxIndex]['boxHeight'], image=fontChar)
 		else:
-			if boxes[boxIndex]['boxWidth'] <= minFontWidth:
-				fontWidth = minFontWidth
-			elif boxes[boxIndex]['boxWidth'] >= maxFontWidth:
-				fontWidth = maxFontWidth
-			if boxes[boxIndex]['boxHeight'] <= minFontHeight:
-				fontHeight = minFontHeight
-			elif boxes[boxIndex]['boxHeight'] >= maxFontHeight:
-				fontHeight = maxFontHeight
 			fontChar.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
 			draw.composite(operator=operator, left=int(round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0)), 
 				       top=int(round((boxes[boxIndex]['boxTop']+boxes[boxIndex]['boxBottom']-fontHeight)/2.0)), width=int(round(fontWidth)), 
@@ -649,7 +684,7 @@ draw(img)
 
 # Create the output image.
 img.format = 'jpg'
-img.compression_quality = 25
+img.compression_quality = 50
 img.save(filename=outImage)
 print 'output =', outImage
 

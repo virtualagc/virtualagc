@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-07 RRB	Updated for Luminary210.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1246
 		BANK	22
@@ -27,7 +29,7 @@
 # THE INPUT IS THE DESIRED STABLE MEMBER COORDINATES REFERRED TO PRESENT STABLE MEMBER COORDINATES.  THE THREE
 # HALF-UNIT VECTORS ARE STORED AT XDC, YDC, AND ZDC.
 #
-# THE OUTPUTS ARE THE THREE GYRO TORQUE ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
+# THE OUTPUTS ARE THE THREE GYRO TORQUING ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
 # MGC, AND OGC RESPECTIVELY.
 
 		COUNT*	$$/INFLT
@@ -189,7 +191,7 @@ CALCGA1		VLOAD	DOT
 GIMLOCK1	EXIT
 		TC	ALARM
 		OCT	00401
-		TC	UPFLAG		# GIMBAL LOCK HAS OCCURRED
+		TC	UPFLAG		# GIMBAL LOCK HAS OCCURED
 		ADRES	GLOKFAIL
 
 		TC	INTPRET
@@ -285,4 +287,4 @@ QTSN45		2DEC	.1768
 .166...		2DEC	.1666666667
 
 ## Page 1255
-# (There is no source code on this page of the original assembly listing.)
+## There is no source code on this page of the original assembly listing.

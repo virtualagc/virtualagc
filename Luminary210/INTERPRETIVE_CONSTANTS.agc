@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 RRB  Updated to Luminary210.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				but no errors found.
 
 ## Page 1098
 		SETLOC	INTPRET1

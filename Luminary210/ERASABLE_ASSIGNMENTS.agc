@@ -1245,7 +1245,7 @@ HPERX           EQUALS          HAPOX           +2      # I(2)
 VONE'           EQUALS          VECTAB          +30D    # I(6)TMP  NORMAL VELOCITY VONE /SQRT. MU
 
 
-#         R31 (V83) STORAGE. -SHARES WITH INTEGRATION STORAGE-      (28D)
+#         R31 (V83) STORAGE. -SHARES WITH INTEGRATION STORAGE-      (26D)
 
 BASETHV         EQUALS          RPQV                    # I(6)     BASE VEL VECTOR THIS VEH
 
@@ -2112,7 +2112,7 @@ FLAT            =               BLOCKTOP        +6      # WIDTH OF MINIMUM IMPUL
 ZONE3LIM        =               BLOCKTOP        +7      # HEIGHT OF MINIMUM IMPULSE ZONE (AT 4 SEC)
 
 COEFFQ          ERASE           +1                      # COEFFQ AND COEFFR ARE USED IN ROT-TOUV
-COEFFR          EQUALS          COEFFQ          +1      # TO REXOLVE Q,R COMPONENTS INTO U,V COMP.
+COEFFR          EQUALS          COEFFQ          +1      # TO RESOLVE Q,R COMPONENTS INTO U,V COMP.
 
 # VARIABLES FOR GTS-QRAXIS CONTROL EXCHANGE.              (4)
 
@@ -2311,7 +2311,7 @@ PTIGINC         ERASE           +1                      # B(2)PL
 AOTAZ           ERASE           +5                      # B(6)PL
 AOTEL           ERASE           +5                      # B(6)PL
 
-#          LANDING RADAR.        - PAD LOADED -        (2D)
+#          LANDING RADAR.        - PAD LOADED -        (3D)
 
 LRHMAX          ERASE                                   # B(1)
 LRWH            ERASE                                   # B(1)
@@ -2367,7 +2367,7 @@ DELVSLV         =               DELVLVC                 # (TEMP STORAGE OF SAME 
 TIG             ERASE           +1                      # B(2)
 
 
-#          INITVEL STORAGE.  USED BY P34,35,74,75, P40-42  (8D)
+#          INITVEL STORAGE:  USED BY P34,35,74,75, P40-42  (8D)
 
 RTARG           ERASE           +5                      # I(6) TARGET VECTOR
 DELLT4          ERASE           +1                      # I(2) TIME DIFFERENCE

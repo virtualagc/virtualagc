@@ -41,6 +41,10 @@ then
 	~/Desktop/jTessBoxEditor-1.6.1.jar
 	#less eng.agc.exp0.box
 fi
+if [[ "$LESS" == "yes" ]]
+then
+	less eng.agc.exp0.box
+fi
 
 cd -
 rm /tmp/ProoferComments$$ -rf

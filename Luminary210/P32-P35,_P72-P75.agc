@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 HG   Transcribed
 ##              2012-12-07 HG   fix P00 -> POO
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 624
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
@@ -24,7 +26,7 @@
 
 # PURPOSE
 
-#       (1) TO CALCULATE PARAMETERS ASSOCIATED WTIH THE TIME FOLLOWING
+#       (1) TO CALCULATE PARAMETERS ASSOCIATED WITH THE FOLLOWING
 #           CONCENTRIC FLIGHT PLAN MANEUVERS - THE CO-ELLIPTIC SEQUENCE
 #           INITIATION (CSI) MANEUVER AND THE CONSTANT DELTA ALTITUDE
 #           (CDH) MANEUVER.
@@ -34,7 +36,7 @@
 
 #       (3) TO DISPLAY TO THE ASTRONAUT AND THE GROUND DEPENDENT VARIABLES
 #           ASSOCIATED WITH THE CONCENTRIC FLIGNT PLAN MANEUVERS FOR
-#           APPROVAL BY THE ASTRRONAUT/GROUND.
+#           APPROVAL BY THE ASTRONAUT/GROUND.
 
 #       (4) TO STORE THE CSI TARGET PARAMETERS FOR USE BY THE DESIRED
 #           THRUSTING PROGRAM.
@@ -62,7 +64,7 @@
 #           IGNITION.
 
 #       (6) THE PERICENTER ALTITUDE OF THE ORBIT FOLLOWING CSI AND CDH
-#           MUST BE GREATER THAN 35,000 FT (LUNAR ORBIT) OR 85 NM (EARCH
+#           MUST BE GREATER THAN 35,000 FT (LUNAR ORBIT) OR 85 NM (EARTH
 #           ORBIT) FOR SUCCESSFUL COMPLETION OF THIS PROGRAM.
 
 #       (7) THE CSI AND CDH MANEUVERS ARE ORIGINALLY ASSUMED TO BE
@@ -114,7 +116,7 @@
 
 #               P32 IF THIS VEHICLE IS ACTIVE VEHICLE.
 
-#               P72 IF THIS VEHICLE IS THE PASSIVE VEHICLE.
+#               P72 IF THIS VEHICLE IS PASSIVE VEHICLE.
 
 # INPUT
 
@@ -318,7 +320,7 @@ P32/P72F        STORE           T2TOT3
 # CONSTANT DELTA HEIGHT (CDH) PROGRAMS (P33 AND P73)
 
 # MOD NO -1       LOG SECTION - P32-P35, P72-P75
-# MOD BY WHITE.P  DATE: 1JUNE67
+# MOD BY WHITE.P  DATE  1JUNE67
 # PURPOSE
 
 #       (1) TO CALCULATE PARAMETERS ASSOCIATED WITH THE CONSTANT DELTA
@@ -338,7 +340,7 @@ P32/P72F        STORE           T2TOT3
 
 #       (1) THIS PROGRAM IS BASED UPON PREVIOUS COMPLETION OF THE
 #           CO-ELLIPTIC SEQUENCE INITIATION (CSI) PROGRAM (P32/P72).
-#           THEREFORE -
+#           THERFORE -
 
 #           (A) AT A SELECTED TPI TIME (NOW IN STORAGE) THE LINE OF SIGHT
 #               BETWEEN THE ACTIVE AND PASSIVE VEHICLES WAS SELECTED TO BE
@@ -352,7 +354,7 @@ P32/P72F        STORE           T2TOT3
 #               COMPUTED TO BE GREATER THAN 10 MINUTES.
 #
 #           (D) THE VARIATION OF THE ALTITUDE DIFFERENCE BETWEEN THE
-#               ORBITS WAS MINIMIZED.
+#               ORBITS WAS MINMIZED.
 #
 #           (E) CSI BURN WAS DEFINED SUCH THAT THE IMPULSIVE DELTA V WAS
 #               IN THE HORIZONTAL PLANE DEFINED BY ACTIVE VEHICLE
@@ -374,7 +376,7 @@ P32/P72F        STORE           T2TOT3
 #           STATE VECTOR UPDATING INITIATED BY P20 (SEE ASSUMPTION 4).
 
 #       (3) COMPUTED VARIABLES MAY BE STORED FOR LATER VERIFICATION BY
-#           THE GROUND.  THESE STORAGE CAPABILITIES ARE NORMALLY LIMITED
+#           THE GROUND.  THESE STORAGE CAPABILITES ARE NORMALLY LIMITED
 #           ONLY TO THE PARAMETERS FOR ONE THRUSTING MANEUVER AT A TIME
 #           EXCEPT FOR CONCENTRIC FLIGHT PLAN MANEUVER SEQUENCES.
 
@@ -391,7 +393,7 @@ P32/P72F        STORE           T2TOT3
 
 #       (6) THE OPERATION OF THE PROGRAM UTILIZES THE FOLLOWING FLAGS -
 
-#               ACTIVE VEHICLE FLAG - DESIGNATES THE VEHICLE WHICH IS
+#               ACTIVE VEGICLE FLAG - DESIGNATES THE VEHICLE WHICH IS
 #               DOING RENDEZVOUS THRUSTING MANEUVERS TO THE PROGRAM WHICH
 #               CALCULATES THE MANEUVER PARAMETERS.  SET AT THE START OF
 #               EACH RENDEZVOUS PRE-THRUSTING PROGRAM.
@@ -437,7 +439,7 @@ P32/P72F        STORE           T2TOT3
 #       (1) TCDH      TIME OF THE CDH MANEUVER
 #       (2) TTPI      TIME OF THE TPI MANEUVER
 #       (3) TIG       TIME OF THE CDH MANEUVER
-#       (4) DELLVEET2 DELTA VELOCITY AT CDH -- REFERENCE COORDINATES
+#       (4) DELVEET2  DELTA VELOCITY AT CDH - REFERENCE COORDINATES
 #       (5) DIFFALT   DELTA ALTITUDE AT CDH
 #       (6) ELEV      DESIRED LOS ANGLE AT TPI
 # COMMUNICATION TO THRUSTING PROGRAMS
@@ -463,7 +465,7 @@ P32/P72F        STORE           T2TOT3
 #       INTINT3P
 #       ACTIVE
 #       PASSIVE
-#       S33/S34.1
+#       S33/34.1
 #       ALARM
 #       BANKCALL
 #       GOFLASH
@@ -673,7 +675,7 @@ TMIN            2DEC            60000                   # 10 MIN
 
 CSI/A           CLEAR           SET                     # INITIALIZE INDICATORS
                                 S32.1F1                 # DVT1 HAS EXCEEDED MAX INDICATOR
-                                S32.1F2                 # FIRST PASS FOR NEWTON ITERATION INDICATOR
+                                S32.1F2                 # FIRST PASS FOR NEWTON ITERATION INDICATR
 
 ## Page 639
                 CLEAR           SET
@@ -701,7 +703,7 @@ CSI/B           SETPD           VLOAD
                 NORM            PDDL                    #                                   PL02D
                                 X1
                                 RTMU
-                SR1             DDV                     #                        B38-B3= B7 PL00D
+                SR1             DDV                     #                       B38-B31= B7 PL00D
                 SL*             SQRT                    #                                B7
                                 0 -7,1
                 PDVL            UNIT                    #                                   PL02D
@@ -796,7 +798,7 @@ CSI/B23D        STCALL          VACT4
                                 RACT1
                                 VACT4
                 ABS             DDV
-                                02D                     # (/RDOTV/)/R1              B38-B29= B7
+                                02D                     # (/RDOTV/)/R1              B36-B29= B7
                 SL*             DSU
                                 0,1
                                 NICKELDP
@@ -994,7 +996,7 @@ K2.             DLOAD
                 VXV             DOT
                                 00D
                 STADR                                   #                                     PL12D
-                STOVL           12D                     # (URP3XV).(UVP3XURP3)=TEMP PL06D     PL06D
+                STOVL           12D                     # (URP3XV).(UVP3XURP3)=TEMP           PL06D
                 DOT             SL1                     #                                     PL00D
                 ARCCOS          SIGN
                                 12D                     #                                 B0
@@ -1075,7 +1077,7 @@ NEWTN           DLOAD           NORM
                 STORE           GAMPREV
                 DLOAD           ABS
                                 DELDV
-                PUSH            DSU
+                PUSH            DSU		#					PL08D
                                 EPSILN1
                 BMN             DLOAD
                                 CSI/SOL
@@ -1385,5 +1387,3 @@ COMPTGO         EXTEND
                 OCT             05024
                 OCT             13000
                 TC              RTRN
-
-# *** END OF LEMP30S .105 ***

@@ -1,15 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Sergio Navarro <sergionavarrog@gmail.com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2009-10-21 SN   Adapted from corresponding Colossus 249 file.
-##		 2011-01-17 JL	 Renamed to match 237 module name. Minor fixes.
+## Copyright:   Public domain.
+## Filename:    TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Sergio Navarro <sergionavarrog@gmail.com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2009-10-21 SN   Adapted from corresponding Colossus 249 file.
+##		2011-01-17 JL	 Renamed to match 237 module name. Minor fixes.
+##		2016-12-29 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
 
 ## Page 25
 
@@ -347,7 +349,7 @@ LOUNITZ		EQUALS	ZUNIT			# 2DEC 0
 		SBANK=	LOWSUPER
 
 
-# ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETVRUZVING INTEGRATION AREA ENTRIES
+# ROPE SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETVRUZVING INTEGRATION AREA ENTRIES
 
 OTHPREC		EQUALS	LEMPREC
 ATOPOTH		EQUALS	ATOPLEM
@@ -392,9 +394,6 @@ EBRN1		ECADR	RN1
 # ****************************************************************************************************************
 
 ## Page 33
-
-# SUBROUTINE CALLS
-
 		SUBRO	KILERASE
 		SUBRO	KOOLADE
 		SUBRO	SMOOCH
@@ -402,5 +401,3 @@ EBRN1		ECADR	RN1
 		SUBRO	DAPCSM
 		SUBRO	SATRAP
 		
-		
-# *** END OF MAIN PROGRAM ***

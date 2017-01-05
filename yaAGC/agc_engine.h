@@ -91,6 +91,7 @@
 		09/30/16 MAS	Added InhibitAlarms as a configuration global,
                                 alarm flags to state, and the constants related to
                                 channel 77.
+		01/04/17 MAS	Added the fixed parity fail CH77 bit.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -229,6 +230,7 @@ extern long random (void);
 #define ChanSCALER1 04
 #define ChanS 07
 
+#define CH77_PARITY_FAIL    000001
 #define CH77_TC_TRAP        000004
 #define CH77_RUPT_LOCK      000010
 #define CH77_NIGHT_WATCHMAN 000020
@@ -341,6 +343,7 @@ typedef struct
   unsigned NoTC:1;              // Set when TC is being watched. Cleared by executing TC or TCF
   unsigned Standby:1;           // Set while the computer is in standby mode.
   unsigned SbyPressed:1;        // Set while PRO is being held down; cleared by releasing PRO
+  unsigned ParityFail:1;        // Set when a parity failure is encountered accessing memory (in yaAGC, just hitting banks 44+)
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;
   // The following pointer is present for whatever use the Orbiter

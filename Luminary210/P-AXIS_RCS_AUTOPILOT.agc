@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-11 HG   Transcribed
 ##              2016-12-12 MAS  Pushed in some relative labels.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1419
                 BANK            16
@@ -75,7 +77,7 @@ PAXIS           CA              MS100
                 DIM             TCP                     # TIME COUNTERS.
                 EXTEND
                 DIM             TCQR
-# RATELOOP COMPUTES JETRATEQ, JETRATER, AND 1JACC*NO. PJEETS IN ITEMP1.
+# RATELOOP COMPUTES JETRATEQ, JETRATER, AND 1JACC*NO. PJETS IN ITEMP1.
 #   RETURNS TO BACKP.
 
 #   JETRATE = 1JACC*NO.PJETS*TJP  (NOTE TJ IS THE TIME FIRED DURING CSP)
@@ -90,7 +92,7 @@ PAXIS           CA              MS100
                 TC              Q
                 CS              A
                 TC              Q
-SUBDIVDE        EXTEND                                  # OVERFLOW PROTECTION ROUTINE TO GIVE
+SUBDIVDE        EXTEND                                  # OVERFLOW PROCTION ROUTINE TO GIVE
                 MP              DAPTEMP3                #   POSMAX OR NEGMAX IF THE DIVIDE WOULD
                 DAS             OMEGAU                  #   OVERFLOW
 
@@ -453,9 +455,9 @@ SKIPPAXS        CS              RCSFLAGS
                 ADS             RCSFLAGS                # BIT 12 SET TO 1.
                 TCF             QRAXIS                  # GO TO QRAXIS OR TO GTS.
 
-#                               Y-X TRANSLATION
+#                               Y-Z TRANSLATION
 
-#                               INPUT:  BITS 9-12 OF CH31 (FROM TRANSLATION CONTROLLER)
+#                               INPUT:  BITS 9-12 OF CH31 (FROM TRANSLATION CONTROLER)
 
 #                               OUTPUT: NEXTP
 
@@ -520,7 +522,7 @@ TSNEXTP         TS              NEXTP
 #                                   LPDPHASE                    GO TO PURGENCY
 #                                   PULSES                      MINIMUM PULSE LOGIC
 #                                   DETENT(BIT15 CH31)          RATE COMMAND
-#                                   GOTO TO PURGENCY
+#                                   GO TO PURGENCY
                 CA              BIT13                   # CHECK STICK IF IN ATT. HOLD.
                 EXTEND
                 RAND            CHAN31
@@ -530,7 +532,7 @@ TSNEXTP         TS              NEXTP
                 CA              DAPBOOLS
                 MASK            XOVINHIB
                 EXTEND
-                BZF             DETENTCK                # GOT CHECK FOR MANUAL X-AXIS OVERRIDE.
+                BZF             DETENTCK                # GO CHECK FOR MANUAL X-AXIS OVERRIDE.
                 INHINT
                 TCF             ZRORCBIT                # CLEAR OURRCBIT AND GO DO AUTOMATIC LOGIC
 
@@ -590,7 +592,7 @@ MANMODE         CA              PULSES                  # PULSES IS ONE FOR PULS
 
 ## Page 1430
 # OR VICE VERSA.  THIS ALLOWS A DEGREE OF ATTITUDE HOLD IN UNCONTROLLED AXES.  DUE TO U,V CONTROL, HOWEVER, Q AND
-# R AXES ARE COUPLED AND MUST USE TEH SAME CONTROL LAW.
+# R AXES ARE COUPLED AND MUST USE THE SAME CONTROL LAW.
 #
 # HAND CONTROLLER COMMANDS ARE SCALED BY A LINEAR/QUADRATIC LAW. FOR THE LM-ALONE, MAXIMUM COMMANDED RATES ARE 20
 # AND 4 D/S IN NORMAL AND FINE SCALING; HOWEVER, STICK SENSITIVITY AT ZERO COUNTS (OBTAINED AT A STICK DEFLECTION
@@ -610,12 +612,12 @@ DETENTCK        EXTEND
                 MASK            DAPBOOLS
                 EXTEND
                 BZF             PURGENCY                # BRANCH IF NOT IN RATE COMMAND LAST PASS.
-# .................................................................................................
+# ........................................................................
                 CA              BIT9                    # JUST IN DETENT??
                 MASK            RCSFLAGS
                 EXTEND
                 BZF             RUTH
-AUTOCHEK        CAF             BIT13                   # CLEAR JUSTIN AND QRBIT ONLY IF AUTO
+AUTOCHEK        CAF             BIT13                   # CLEAR JUSTIN AND QRBIT ONLY IF AUTO.
                 EXTEND
                 RAND            CHAN31
                 EXTEND
@@ -719,7 +721,7 @@ RATERROR        CA              CDUX                    # FINDCDUW REQUIRES THAT
                 TCF             +2
                 TCF             +1
                 DOUBLE                                  # LINEAR/QUADRATIC CONTROLLER SCALING
-                DOUBLE                                  # (SEE EXPLANATION OF Q,R-AXES RCS
+                DOUBLE                                  # (SEE EXPLANATION IN Q,R-AXES RCS
                 AD              LINRATP                 #  AUTOPILOT)
                 EXTEND
                 MP              P-RHCCTR
@@ -848,7 +850,7 @@ PJETSLEC        CA              ONE
                 CA              POLYTEMP
                 TC              WRITEP
 
-# Page 1435
+## Page 1435
                 CS              ABSTJ
                 AD              +150MST6
                 EXTEND
@@ -905,7 +907,7 @@ CALCPERR        CA              CDUY                    # P-ERROR CALCULATION.
                 MSU             CDUXD                   # CDU VALUE - ANGLE DESIRED (X-AXIS)
 #               EXTEND
 #               MP      M13
-                AD              DELPEROR                # KALCMANU INTERFACE ERROR
+                AD              DELPEROR                # KALCMANU INERFACE ERROR
                 ADS             E                       # SAVE SUM OF TERMS.  COULD BE OVERFLOW.
                 XCH             PERROR                  # SAVE P-ERROR FOR EIGHT-BALL DISPLAY.
                 TC              Q                       # RETURN TO CALLER
@@ -924,7 +926,7 @@ PURGENCY        TC              CALCPERR                # CALCULATE P-AXIS ERROR
                 MASK            CSMDOCKD
                 EXTEND
                 BZF             HEADTJET
-                INHINT                                  # IF CSMDOCKD = 1, GOT TO DOCKED RCS LOGIC
+                INHINT                                  # IF CSMDOCKD = 1, GO TO DOCKED RCS LOGIC
                 TC              IBNKCALL
                 CADR            SPSRCS
 
@@ -932,7 +934,7 @@ PURGENCY        TC              CALCPERR                # CALCULATE P-AXIS ERROR
                 EXTEND
                 BZF             DKALT                   # IF TJP = ZERO, CHANGE AORBSYST.
                 RELINT
-                TCF             PJETSLEC        -6      #    SELECT AORBSYST AND USE TWO JETS.
+                TCF             PJETSLEC        -6      #    SELECT AORBSYST AND USE TWO JETS
 HEADTJET        CA              ZERO
                 TS              SENSETYP
                 INHINT
@@ -958,7 +960,7 @@ HEADTJET        CA              ZERO
 -FOURDEG        DEC             -.08888
 
 ## Page 1438
-# JET POLICY CONTSTRUCTION SUBROUTINE
+# JET POLICY CONSTRUCTION SUBROUTINE
 
 #                                               INPUT: ROTINDEX, NUMBERT
 

@@ -15,11 +15,13 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-23 HG   Transcribed
 ##              2016-11-25 HG   Fix label    MARKREJ -> MKREJ
-##                                  opernand NOVAK   -> NOVAC
+##                                  operand  NOVAK   -> NOVAC
 ##                                           GOMARKER-> GOMARKFR
 ##                                           CMKCNTR -> XMKCNTR 
 ##              2016-12-07 HG   fix P00 -> POO
 ##              2016-12-11 HG   Fix operation CS NOMKCNT -> CA NOMKCNT
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 255
                 SETLOC          AOTMARK1
@@ -32,7 +34,7 @@ AOTMARK         INHINT
                 CAF             SIX                     # SEE IF EXT. VERB WORKING
                 MASK            EXTVBACT
                 CCS             A
-                TCF             MKABORT                 # YES -- ABORT
+                TCF             MKABORT                 # YES - ABORT
 
                 CAF             BIT2                    # NO-DISALLOW SOME EXTENDED VERB ACTION
                 ADS             EXTVBACT                # BIT2 RESET IN ENDMARK
@@ -86,6 +88,8 @@ KILLAOT         CAF             ZERO
                 TC              GOTOPOOH
 
 ## Page 257
+# GETDAT ROUTINE
+
 GETDAT          CS              MARKSTAT                # SET BIT12 TO DISCOURAGE MARKRUPT
                 MASK            BIT12                   #   BIT12 RESET AT GETMARK
                 ADS             MARKSTAT
@@ -140,7 +144,7 @@ CODE1TO6        INDEX           XYMARK                  # INDEX AOT POSITION BY 
                 TS              8D                      # STORE AZIMUTH IN VAC +8D
 
                 CA              AOTAZ           +1      # COMPENSATION FOR APPARENT ROTATION OF
-                EXTEND                                  # AOT FIELD OF VIEW IN LEFT AND RIGHT
+                EXTEND                                  # AOT FIELD OF VIEW IN LEFT AND RIGTHT
                 INDEX           FIXLOC                  # DETENTS IS STORED IN VAC +10D IN SP
                 MSU             8D                      # PRECISION ONES COMPLEMENT
 COASCODE        INDEX           FIXLOC
@@ -153,13 +157,13 @@ COASCODE        INDEX           FIXLOC
                                 OPTAXIS
 
 ## Page 259
-# THE OPTAXIS SOBROUTINE COMPUTES THE X AND Y MARK PLANE VECS AND
+# THE OPTAXIS SUBROUTINE COMPUTES THE X AND Y MARK PLANE VECS AND
 # AND ROTATES THEM THRU THE APPARENT FIELD OF VIEW ROTATION UNIQUE TO AOT
 # OPTAXIS USES OANB TO COMPUTE THE OPTIC AXIS
                 SETLOC          P50S1
                 BANK
 
-OPTAXIS         CALL                                    # GO COMPUTE OA AN X AND Y PLANE VECS
+OPTAXIS         CALL                                    # GO COMPUTE OA AND X AND Y PLANE VECS
                                 OANB
                 SLOAD           SR1                     # LOAD APP ROTATION IN ONES COMP
                                 10D                     # RESCALE BY 2PI
@@ -199,7 +203,7 @@ ENDAXIS         EXIT
                 CADR            GETMKS
 
 ## Page 260
-# THE OANB SUBROUTINE COMPUTES THE OPTIC AXIS OF THE SIGHTING INSTRUMENT
+# THE OANB ROUTINE COMPUTES THE OPTIC AXIS OF THE SIGHTING INSTRUMENT
 # FROM AZIMUTH AND ELEVATION INPUT FROM THE ASTRONAUT.
                 SETLOC          AOTMARK2
                 BANK
@@ -240,7 +244,7 @@ OANB            SETPD           STQ
                                 GCTR
 
 ## Page 261
-#    SURFSTAR COMPUTES A STAR VECTOR IN SM COORDINAGES FOR LUNAR
+#    SURFSTAR COMPUTES A STAR VECTOR IN SM COORDINATES FOR LUNAR
 #    SURFACE ALIGNMENT AND EXITS TO AVEIT TO AVERAGE STAR VECTORS.
                 SETLOC          P50S
                 BANK
@@ -261,7 +265,7 @@ SURFSTAR        SSP             AXT,2                   # INITIALIZE LOOP COUNTE
                                 CDULOGIC
                 STCALL          8D                      # SPIRAL IN REVS
                                 ROTCOMP
-                STODL*          POINTVSM                # YPRIME VEC SROT MEAS. COORDS.
+                STODL*          POINTVSM                # YPRIME VEC FOR SROT MEAS. COORDS.
                                 6,1                     # PICK UP CURSOR
                 RTB
                                 CDULOGIC
@@ -281,7 +285,7 @@ SURFSTAR        SSP             AXT,2                   # INITIALIZE LOOP COUNTE
                                 10D
                                 ABOUTONE
 THETRET         STORE           THETEST                 # INITIAL THET EST MUST BE BETWEEN
-                DSU             BPL                     # 24 AND 342 DEGRESS
+                DSU             BPL                     # 24 AND 342 DEGREES
                                 DEG342
                                 COOLIT
                 DLOAD           DSU
@@ -325,7 +329,7 @@ HOMEIN          DSU             PDDL
                 STCALL          DELTHET                 # FINE SOLUTION, THIS SHOULD GET SNB
                                 NEXTIT
 
-WHICHWAY        ABS             PDDL                    # ASB(ESTER1) 0-1
+WHICHWAY        ABS             PDDL                    # ABS(ESTER1) 0-1
                                 ESTER2
                 ABS             BDSU                    # ABS(ESTER1)-ABS(ESTER2)
                 BPL             BONSET
@@ -397,7 +401,7 @@ SNBCOMP         STQ
                 VSL1            VXSC                    # UP 6-7
                 STADR
                 STODL           24D                     # COS(T)SIN(T/12)(YP X OA)
-                DMP
+                DMP					# UP 4-5  UP 2-3
                 VXSC            BVSU
                                 POINTVSM                # SIN(T)SIN(T/12)YP
                                 24D
@@ -542,7 +546,7 @@ AVEIT           EXIT
                 UNIT
                 STORE           STARSAV2
                 EXIT
-COOLOUT         CCS             XMKCNTR                 # SEE IF ANOTHER MARK PAIR IN MKVAC
+COOLOUT         CCS             XMKCNTR                 # SEE IF MARK PAIR IN MKVAC
                 TCF             AVESTAR         -1      # THERE IS-GO GET IT-DECREMENT COUNTER
                 CCS             NOMKCNT                 # IF ANY MKS NOT USED DISPLAY V50N25
                 TCF             ASKASTR                 # AND THE NUMBER MKS NOT USED
@@ -578,7 +582,7 @@ V01N71          VN              171
 V06N87*         VN              687
 
 ## Page 269
-# MARKRUPT IS ENTERED FROM INTERRUPT LEAD-INS AND PROCESSES CHANNEL 16
+# MARKRUPT IS ENTERED FROM INTERUPT LEAD-INS AND PROCESSES CHANNEL 16
 # CAUSED BY X,Y MARK OR MARK REJECT OR BY THE RATE OF DESCENT SWITCH
 
 MARKRUPT        TS              BANKRUPT
@@ -607,7 +611,7 @@ FINDKEY         TC              VALIDCHK                # NO ROD INPUT-SEE IF VA
                 EXTEND
                 RAND            NAVKEYIN
                 CCS             A
-                TCF             MKREJ                   # IT'S A MARK REJECT
+                TCF             MKREJ                   # ITS A MARK REJECT
 
 CHKWHAT         CCS             WHATMARK
                 TCF             XMKRUPT                 # +1 FOR CURSOR MARK
@@ -619,7 +623,7 @@ FINDMARK        CAF             BIT4                    # SEE IF Y MARK
                 RAND            NAVKEYIN
                 CCS             A
 
-                TCF             YMKRUPT                 # IT'S A Y MARK OR SPIRAL MARK
+                TCF             YMKRUPT                 # ITS Y MARK OR SPIRAL MARK
                 CAF             BIT3                    # SEE IF X MARK
                 EXTEND
                 RAND            NAVKEYIN
@@ -629,7 +633,7 @@ FINDMARK        CAF             BIT4                    # SEE IF Y MARK
 113ALRM         TC              ALARM                   # NO INBITS IN CHANNEL 16
                 OCT             113
 
-## Page  270
+## Page 270
                 TC              RESUME
 
 XMKRUPT         CAF             ZERO
@@ -674,6 +678,8 @@ RODIN           CCS             L
                 TC              RESUME
 
 ## Page 271
+# DATA STORE ROUTINE
+
 VACSTOR         EXTEND
                 DCA             ITEMP1                  # STORE MARK TIME FOR DOWNLINK
                 DXCH            TSIGHT
@@ -700,6 +706,8 @@ VACSTOR         EXTEND
 ENDSTOR         TCF             REMARK
 
 ## Page 272
+# REMARK AND CURSOR-SPIRAL KEYIN ROUTINE
+
 REMARK          CAF             PRIO15                  # ENTER JOB TO CHANGE DISPLAY
                 TC              NOVAC
                 EBANK=          XYMARK
@@ -754,7 +762,7 @@ V06N79*         VN              679
 V21N79          VN              2179                    # CURSOR LOAD DISPLAY
 
 MKVB53          VN              5371                    # SPIRAL MARK REQUEST
-MKVB54          VN              5471                    # MAKE X OR Y MARK
+MKVB54          VN              5471                    # X OR Y MARK
 MKVB52          VN              5271                    # CURSOR MARK REQUEST
 DP1/8           2DEC            .125
 
@@ -762,16 +770,16 @@ DP1/8           2DEC            .125
 # MARK REJECT ROUTINE
 MKREJ           INDEX           XYMARK
                 CCS             XMKCNTR
-                TCF             REJMK
+                TCF             REJMK			# REJECT MARK
 
                 TC              ALARM
-                OCT             115
+                OCT             115			# NO MARK OF THIS KIND TO REJECT
                 TC              RESUME
 
 REJMK           INDEX           XYMARK
-                TS              XMKCNTR
+                TS              XMKCNTR			# STORE DECREMENTED MARK COUNTER
 
-                CAF             PRIO15
+                CAF             PRIO15			# ENTER JOB TO RE-DISPLAY MARK REQUEST
                 TC              NOVAC
                 EBANK=          XYMARK
                 2CADR           PREPAST
