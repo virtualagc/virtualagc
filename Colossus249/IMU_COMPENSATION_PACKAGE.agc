@@ -5,7 +5,7 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 294-303 of 1701.pdf.
+## Reference:	pp. 292-301.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/09/04 RSB.	Began adapting from corresponding Luminary131
@@ -14,10 +14,12 @@
 ##		2016-12-30 RSB	Backported BYRO->GYRO from Colossus 237.
 ##				(There's lots more that needs to be backported,
 ##				but I found this one particularly annoying.)
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -33,13 +35,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 295
+## Page 292
 		BANK	7
 		SETLOC	IMUCOMP
 		BANK	
@@ -91,12 +93,12 @@
 		DAS	DELVX		# (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)
 		
 		CCS	BUF +2		# PIPAZ, PIPAY, PIPAX
-## Page 296
+## Page 293
 		AD	NEG1
 		TCF	1/PIPA1 +1
 		NOOP			# LESS THAN ZERO IMPOSSIBLE
 		RELINT
-## Page 297
+## Page 294
 
 IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
 		TS	BUF		# INDEX COUNTER.  IRIGX, IRIGY, IRIGZ.
@@ -147,7 +149,7 @@ IRIGZ		EXTEND
 		DCS	DELVY		# (PIPA PULSES) X 2(-14)
 		DXCH	MPAC
 		CA	ADSRAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
-## Page 298
+## Page 295
 		TC	GCOMPSUB	# -(ADSRAZ)(PIPAY)	(GYRO PULSES) X 2(+14)
 		
 		EXTEND
@@ -165,7 +167,7 @@ IRIGZ		EXTEND
 		CA	NBDZ		#	(GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	#	+(NBDZ)(DELTAT)	(GYRO PULSES) X 2(+14)
 
-## Page 299
+## Page 296
 		CCS	GCOMPSW		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
 		TCF	+2		# YES	
 		TCF	IRIG1		# NO	
@@ -208,7 +210,7 @@ GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 
 		TC	Q
 
-## Page 300
+## Page 297
 DRIFTSUB	EXTEND
 		QXCH	BUF +1
 
@@ -241,7 +243,7 @@ DRFTSUB2	CAF	TWO		# PIPAX, PIPAY, PIPAZ
 		TS	GCOMPSW		# YES -- SET GCOMPSW POSITIVE
 		TC	BUF +1		# NO
 		
-## Page 301
+## Page 298
 1/GYRO		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 		TS	BUF
 		
@@ -289,7 +291,7 @@ GCOMP1		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 V06N30S		VN	0630
 		TCF	ENDOFJOB
 
-## Page 302		
+## Page 299		
 NBDONLY		CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 		TCF	+3
 		TCF	+2
@@ -340,12 +342,12 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
 		CS	NBDZ		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# +(NBDZ)(DELTAT)	(GYRO PULSES) X 2(+14)
-## Page 303		
+## Page 300		
 		CCS	GCOMPSW		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
 		TCF	1/GYRO		# YES
 		TCF	ENDOFJOB	# NO
 
-## Page 304
+## Page 301
 FBIASSUB	XCH	Q
 		TS	BUF +1
 		

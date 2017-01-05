@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 282-293 of 1701.pdf.
+## Reference:	pp. 280-291.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/08/04 RSB.	Began transcribing.
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 282
+## Page 280
 		BANK	22
 		SETLOC	COMGEOM1
 		BANK
@@ -83,7 +85,7 @@ SXTLOGIC	CAF	10DEGS-		# CORRECT FOR 19.775 DEGREE OFFSET
 		TC	SHORTMP
 		TC	DANZIG
 
-## Page 283
+## Page 281
 # CALCSXA COMPUTES THE SEXTANT SHAFT AND TRUNNION ANGLES REQUIRED TO POSITION THE OPTICS SUCH THAT A STAR LINE-
 # OF-SIGHT LIES ALONG THE STAR FECTOR.  THE ROUTINE TAKES THE GIVEN STAR VECTOR AND EXPRESSES IT AS A VECTOR REF-
 # ERENECED TO THE OPTICS COORDINATE SYSTEM.  IN ADDITION IT SETS UP THREE UNIT VECTORS DEFINING THE X, Y, AND Z AXES
@@ -112,7 +114,7 @@ CALCSXA		ITA	VLOAD		# PUSHDOWN 00-26D, 28D, 30D, 32D-36D
 		STCALL	ZNB1
 			SXTANG1
 
-## Page 284
+## Page 282
 # SXTANG COMPUTES THE SEXTANT SHAFT AND TRUNNION ANGLES REQUIRED TO POSITION THE OPTICS SUCH THAT A STAR LINE-OF-
 # SIGHT LIES ALONG THE STAR VECTOR.
 #
@@ -162,7 +164,7 @@ SXTANG1		VLOAD	VXV
 			YNB1
 		STCALL	COSTH		# COS(SA) = PDA . YNB
 			ARCTRIG
-## Page 285
+## Page 283
 		RTB
 			1STO2S
 		STOVL	SAC
@@ -195,7 +197,7 @@ ZNB=S1		DLOAD
 			CULTFLAG
 			28D
 
-## Page 286
+## Page 284
 # THESE TWO ROUTINES COMPUTE THE ACTUAL STATE VECTOR FOR LM, CSM BY ADDING
 # THE CONIC R,V AND THE DEVIATIONS R,V.  THE STATE VECTORS ARE CONVERTED TO
 # METERS B-29 AND METERS/CSEC B-7 AND STORED APPROPIRATELY IN RN,VN OR
@@ -243,7 +245,7 @@ SVDWN2		VLOAD	VSL*
 			0	-7,2
 		VAD	VSL*
 			RCV
-## Page 287
+## Page 285
 			0,2
 		STOVL	R-OTHER
 			TNUV
@@ -255,7 +257,7 @@ SVDWN2		VLOAD	VSL*
 		STORE	V-OTHER
 		RVQ
 
-## Page 288
+## Page 286
 # SUBROUTINE TO COMPUTE THE NATURAL LOG OF C(MPAC, MPAC +1).
 #
 #	ENTRY:	CALL
@@ -300,10 +302,10 @@ LOG		NORM	BDSU		# GENERATES LOG BY SHIFTING ARG
 		
 NEARLY1		2DEC	.999999999
 
-## Page 289
+## Page 287
 CLOG2/32	2DEC	.0216608494
 
-## Page 290
+## Page 288
 # SUBROUTINE NAME:  EARTH ROTATOR	(EARROT1 OR EARROT2)		DATE:  15 FEB 67
 # MOD NO:  N +1								LOG SECTION:  POWERED FLIGHT SUBROS
 # MOD BY:  ENTRY GROUP (BAIRNSFATHER)
@@ -350,7 +352,7 @@ CLOG2/32	2DEC	.0216608494
 #		DTEAROT	(-26) CS	TIME OF FLIGHT				LEFT BY CALLER
 #
 # DEBRIS:  QPRET, PDL+0 ... PDL+5
-## Page 291
+## Page 289
 		EBANK=	RTINIT
 		
 EARROT1		VLOAD	VXV
@@ -396,7 +398,7 @@ OVERADAY	DLOAD	SIGN
 NB2NB1		2DEC	+.8431756920 B-1
 		2DEC	0
 		2DEC	-.5376381241 B-1
-## Page 292
+## Page 290
 ZERINFLT	2DEC	0
 HALFNFLT	2DEC	.5
 		2DEC	0
@@ -412,7 +414,7 @@ NB1NB2		2DEC	+.8431756920 B-1
 		2DEC	-.5376381241 B-1
 		2DEC	0
 		2DEC	+.8431756920 B-1
-## Page 293
+## Page 291
 10DEGS-		DEC	3600
 270DEG		OCT	60000		# SHAFT 270 DEGREES	25 COMP.
 		OCT	00000
