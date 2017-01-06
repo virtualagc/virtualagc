@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 213-217 of 1729.pdf.
+## Reference:	pp. 208-212
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/05/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 213
+## Page 208
 
 # PROGRAM NAME:  AGS INITIALIZIZATION (R47)
 #
@@ -67,7 +70,7 @@
 AGSINIT		CAF	REFSMBIT
 		MASK	FLAGWRD3			# CHECK REFSMFLG.
 		CCS	A
-## Page 214
+## Page 209
 		TC	REDSPTEM			# REFSMMAT IS OK
 		TC	ALARM				# REFSMMAT IS BAD
 		OCT	220
@@ -118,7 +121,7 @@ AGSVCALC	TC	INTPRET
 			CSMPREC				# CALCULATE CSM STATE VECTOR FOR SAME TIME
 		CALL
 			SCALEVEC
-## Page 215
+## Page 210
 		STODL	AGSBUFF +6
 			TAT
 		DSU	DDV				# CALCULATE AND STORE THE TIME
@@ -169,7 +172,7 @@ SCALEVEC	VLOAD	MXV
 			REFSMMAT
 		VXSC	VSL2
 			VSCALE
-## Page 216
+## Page 211
 		VAD	VAD				# THIS SECTION ROUNDS THE VECTOR, AND
 			AGSRND1				# CORRECTS FOR THE FACT THAT THE AGS
 			AGSRND2				# IS A 2'S COMPLEMENT MACHINE WHILE THE
@@ -212,7 +215,7 @@ AGSRND1		2OCT	0000060000
 		2OCT	0000060000
 AGSRND2		2OCT	0000037777
 		2OCT	0000037777
-## Page 217
+## Page 212
 		2OCT	0000037777
 		
 		SBANK=	LOWSUPER			# FOR SUBSEQUENT LOW 2CADRS.

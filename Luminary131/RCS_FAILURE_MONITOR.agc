@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 197-199 of 1729.pdf.
+## Reference:	pp. 192-194
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/05/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 197
+## Page 192
 # PROGRAM DESCRIPTION:
 #
 # AUTHOR: J. S. MILLER
@@ -66,7 +69,7 @@ RCSMONEX	EQUALS	RESUME
 		BANK	23
 		SETLOC	RCSMONT
 		BANK
-## Page 198
+## Page 193
 		COUNT*	$$/T4RCS
 		
 RCSMONIT	CS	ZERO
@@ -116,7 +119,7 @@ RCSMONIT	CS	ZERO
 		
 		TCF	1/ACCFIX		# SET UP 1/ACCJOB AND EXIT.
 		
-## Page 199
+## Page 194
 VOPENED		INDEX	L			# A VALVE HAS JUST BEEN OPENED.
 		CS	5FAILTAB
 		MASK	CH5MASK

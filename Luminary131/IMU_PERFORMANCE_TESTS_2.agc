@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 380-388 of 1729.pdf.
+## Reference:	pp. 375-383
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/11/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 380
+## Page 375
 # NAME --	IMU PERFORMANCE TESTS 2
 #
 # DATE --	MARCH 20, 1967
@@ -65,7 +68,7 @@ LATAZCHK	DLOAD	SL2
 		TC	ENDTEST1
 		TC	+2
 		TC	-5
-## Page 381
+## Page 376
 		TC	INTPRET
 		SLOAD	RTB
 			DSPTEM1
@@ -116,7 +119,7 @@ GOESTIMS	CA	ESTICADR
 		TC	TASKOVER
 ESTICADR	CADR	ESTIMS
 TORQUE		CA	ZERO
-## Page 382
+## Page 377
 		TS	DSPTEM2
 		CA	DRIFTI
 		TS	DSPTEM2 +1
@@ -165,7 +168,7 @@ PIPJOBB		INDEX	NDXCTR
 		TC	+1
 		TC	EARTHR*
 		CA	LENGTHOT
-## Page 383
+## Page 378
 		EXTEND
 		BZMF	+2
 		TC	ENDOFJOB
@@ -216,7 +219,7 @@ PON4		CS	BIT5
 		CA	BIT5
 		ADS	ERCOMP
 PON		TC	EARTHR*
-## Page 384
+## Page 379
 		CA	ZERO		# ALLOW ONLY SOUTH GYRO EARTH RATE COMPENS
 		TS	ERVECTOR
 		TS	ERVECTOR +1
@@ -238,7 +241,7 @@ ENDTEST1	TC	DOWNFLAG
 		TC	NEWMODEA
 		TC	ENDEXT
 		
-## Page 385
+## Page 380
 OVERFFIX	DAD	DAD
 			DPPOSMAX
 			ONEDPP
@@ -286,7 +289,7 @@ CHECKG1		RELINT
 		CS	PIPAX
 		TS	ZERONDX
 		INHINT
-## Page 386
+## Page 381
 		INDEX	PIPINDEX
 		CA	PIPAX
 		AD	ZERONDX
@@ -315,7 +318,7 @@ ZEROING1	TS	ZERONDX
 		TCF	ZEROING1
 		TC	Q
 
-## Page 387
+## Page 382
 ERTHRVSE	DLOAD	PDDL
 			SCHZEROS	# PD24 = (SIN  (missing)  -COS (missing) 0)(OMEG/MS)
 			LATITUDE
@@ -366,7 +369,7 @@ EARTHR*		EXTEND
 		TC	QPLACES
 		
 SHOW		EXTEND
-## Page 388
+## Page 383
 		QXCH	QPLACE
 SHOW1		CA	POSITON
 		TS	DSPTEM2 +2

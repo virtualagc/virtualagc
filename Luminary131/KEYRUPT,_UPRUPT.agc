@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1335-1337 of 1729.pdf.
+## Reference:	pp. 1330-1332
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/06/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1335
+## Page 1330
 		BANK	14
 		SETLOC	KEYRUPT
 		BANK
@@ -42,7 +45,7 @@ ACCEPTUP	CAF	CHRPRIO		# (NOTE: RUPTREG4 = KEYTEMP1)
 		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
 		TC	RESUME
 
-## Page 1336
+## Page 1331
 # UPRUPT PROGRAM
 
 UPRUPT		TS	BANKRUPT
@@ -93,7 +96,7 @@ TMFAIL2		CS	FLAGWRD7	# LOCK OUT FURTHER UPLINK ACTIVITY
 		ADS	FLAGWRD7	# `ERROR RESET' IS SENT VIA UPLINK.
 		TC	RESUME
 UPTEST		AD	KEYTEMP1
-## Page 1337
+## Page 1332
 		CCS	A
 		TC	TMFAIL2
 HI10		OCT	77740

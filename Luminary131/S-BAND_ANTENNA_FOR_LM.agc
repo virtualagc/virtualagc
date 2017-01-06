@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 495-498 of 1729.pdf.
+## Reference:	pp. 490-493
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/14/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 495
+## Page 490
 # SUBROUTINE NAME: R05 -- S-BAND ANTENNA FOR LM
 #
 # MOD0 BY T. JAMES
@@ -62,7 +65,7 @@
 		EBANK=	WHOCARES
 		COUNT*	$$/R05
 SBANDANT	TC	INTPRET
-## Page 496
+## Page 491
 		SETPD	RTB
 			0D
 			LOADTIME	# PICK UP CURRENT TIME
@@ -113,7 +116,7 @@ CONV5		SETPD	UNIT		# UE = -UNIT(REM)(UEM)		MOON SPHERE
 		UNIT	PDVL
 			RLM
 		VPROJ	VSL2		# PROJECTION OF R ONTO LM XZ PLANE.
-## Page 497
+## Page 492
 			HIUNITY
 		BVSU	BOV		# CLEAR OVERFLOW INDICATOR IF ON
 			RLM
@@ -164,7 +167,7 @@ SBANDEX		EXIT
 		CAF	PRIO5
 		TC	PRIOCHNG
 		CAF	V06N51		# DISPLAY ANGLES
-## Page 498
+## Page 493
 		TC	BANKCALL
 		CADR	GOMARKFR
 		TC	B5OFF		# TERMINATE
@@ -182,5 +185,3 @@ UR		EQUALS	0D
 URP		EQUALS	6D
 		SBANK=	LOWSUPER
 		
-# END OF LEMONAID.104 ***
-

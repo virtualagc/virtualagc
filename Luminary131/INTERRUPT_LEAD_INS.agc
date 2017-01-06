@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 160-161 of 1729.pdf.
+## Reference:	pp. 155-156
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	04/11/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 160
+## Page 155
 		SETLOC	4000 
 		
 		COUNT*	$$/RUPTS	# FIX-FIX LEAD INS
@@ -65,7 +68,7 @@
 		
 		DXCH	ARUPT		# RADAR RUPT
 		CAF	RDRPTBB
-## Page 161
+## Page 156
 		XCH	BBANK
 		TCF	RADAREAD
 		

@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 244-249 of 1729.pdf.
+## Reference:	pp. 239-244
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/06/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 244
+## Page 239
 # RESTART TABLES
 # --------------
 #
@@ -58,7 +61,7 @@
 #				-2CADR	DUMMY		# WAS PUT ON THE WAITLIST IS UP, IT WILL BEGIN
 #							# IN 10 MS, OTHERWISE IT WILL BEGIN WHEN
 #							# IT NORMALLY WOULD HAVE BEGUN.
-## Page 245
+## Page 240
 #				-GENADR	DTIME		# WHERE DTIME CONTAINS THE DELTA TIME
 #				-2CADR	TASKTASK	# OTHERWISE THIS IS AS ABOVE
 #
@@ -110,7 +113,7 @@ SIZETAB		TC	1.2SPOT -12006
 # ANY MORE GROUP 2.EVEN RESTART VALUES SHOULD GO HERE
 
 2.3SPOT		GENADR	600SECS
-## Page 246
+## Page 241
 		-GENADR	STATEINT
 		EBANK=	RRECTCSM
 		BBCON	STATEINT
@@ -161,7 +164,7 @@ SIZETAB		TC	1.2SPOT -12006
 
 4.2SPOT		DEC	2500
 		EBANK=	TTOGO
-## Page 247
+## Page 242
 		-2CADR	TIG-5
 
 		OCT	77777
@@ -211,7 +214,7 @@ SIZETAB		TC	1.2SPOT -12006
 		EBANK=	SAVET-30
 		BBCON	TIG-35
 		
-## Page 248
+## Page 243
 4.27SPOT	OCT	52777
 		EBANK=	DVCNTR
 		2CADR	P70A
@@ -259,7 +262,7 @@ SIZETAB		TC	1.2SPOT -12006
 		EBANK=	DVCNTR
 		-2CADR	REDO5.5
 
-## Page 249
+## Page 244
 5.7SPOT		OCT	77777
 		EBANK=	DVCNTR
 		-2CADR	BIBIBIAS

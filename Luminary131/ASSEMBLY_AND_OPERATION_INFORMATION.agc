@@ -8,7 +8,7 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	Pages 6-32 of 1729.pdf.
+## Reference:	Pages 1-27
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	04/12/03 RSB.	Began transcribing.
@@ -16,26 +16,11 @@
 ##		12/06/03 RSB	Did some proofing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-08-24 JL	Fixed a bunch of page number comments.
-#
-# The contents of this file, and all associated "Luminary131" files, are
-# transcribed from a scanned document obtained from MIT's website,
-# http://hrst.mit.edu/hrs/apollo/public/archive/1729.pdf.  Notations on this
-# document read, in part:
-#
-#	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
-#	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
-#	This listing contains the flight program for the Lunar Module 
-#	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
-#
-# Refer directly to the online document mentioned above for further information.
-# Please report any errors in this listing (relative to 1729.pdf) to info@sandroid.org.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-# Source code starts on Page 6 of the listing.  Any pages with the notation "A" are proofed.
-# However, proofing is hard, so even though a lot of errors were fixed in proofing, it should
-# be assumed that lots of errors are still left.  Also, I somehow got file corruption while proofing,
-# so some of the changes I made in proofing got lost anyhow.  :-(
-
-## Page 6
+## Page 1
 
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
 # THE DETAILS OF IMPLEMENTATION ARE SPECIFIED IN REPORT R-567, AS AMENDED.
@@ -50,7 +35,7 @@
 
 #			  THIS PROGRAM IS REFERRED TO AS LUMINARY 1C
 
-## Page 7
+## Page 2
 # TABLE OF LOG CARDS
 #	ABSOLUTE ADDRESSES FOR UPDATE PROGRAM
 #	ASSEMBLY AND OPERATION INFORMATION
@@ -99,7 +84,7 @@
 #		P76
 #		R30
 #	FLY
-## Page 8
+## Page 3
 #		BURN, BABY, BURN -- MASTER IGNITION ROUTINE
 #		P40-P47
 #		THE LUNAR LANDING
@@ -150,12 +135,12 @@
 #		Q,R-AXIS RCS AUTOPILOT
 #		TJET LAW
 #		KALMAN FILTER
-## Page 9
+## Page 4
 #		TRIM GIMBAL CNTROL SYSTEM
 #		AOSTASK AND ACSJOB
 #		SPS BACK-UP RCS CONTROL
 
-## Page 10
+## Page 5
 # VERB LIST FOR LUMINARY
 
 # REGULAR VERBS
@@ -201,7 +186,7 @@
 # 38
 # 39
 
-## Page 11
+## Page 6
 # EXTENDED VERBS
 
 # 40	XERO CDU'S
@@ -252,7 +237,7 @@
 # 85	DISPLAY RR LOS AZ AND ELEV
 # 86
 # 87
-## Page 12
+## Page 7
 # 88
 # 89	REQUEST RENDEZVOUS FINAL ATTITUDE ROUTINE (R63)
 # 90	REQUEST RENDEZVOUS OUT OF PLANE DISPLAY ROUTINE (R36)
@@ -266,7 +251,7 @@
 # 98
 # 99	PLEASE ENABLE ENGINE
 
-## Page 13
+## Page 8
 # IN THE FOLLOWING NOUN LIST THE "NO LOAD" RESTRICTION MEANS THE NOUN
 # CONTAINS AT LEAST ONE COMPONENT WHICH CANNOT BE LOADED, I.E. OF
 # SCALE TYPE L (MIN/SEC), PP (2 INTEGERS) OR TT (LANDING RADAR POSITION).
@@ -317,7 +302,7 @@
 # 24	DELTA TIME FOR AGC CLOCK		3COMP	00xxx. HRS				DEC ONLY
 #							000xx. MIN				MUST LOAD 3 COMPS
 #							0xx.xx SEC
-## Page 14
+## Page 9
 # 25	CHECKLIST				3COMP	xxxxx. FOR EACH
 #	(USED WITH PLEASE PERFORM ONLY)
 # 26	PRIORITY/DELAY, ADRES, BBCON		3COMP	OCTAL ONLY FOR EACH
@@ -349,7 +334,7 @@
 #							0xx.xx SEC
 # 39	SPARE
 
-## Page 15
+## Page 10
 # MIXED NOUNS				   COMPONENTS	SCALE AND DECIMAL POINT			RESTRICTIONS
 # 40	TIME FROM IGNITION/CUTOFF		3COMP	xxBxx MIN/SEC				NO LOAD, DEC ONLY
 #	VG,						xxxx.x FT/SEC
@@ -399,7 +384,7 @@
 #	COMPUTED ALTITUDE				xxxxx. FEET
 # 61	TIME TO GO IN BRAKING PHASE		3COMP	xxBxx MIN/SEC				NO LOAD, DEC ONLY
 #	TIME FROM IGNITION				xxBxx MIN/SEC
-## Page 16
+## Page 11
 #	CROSS RANGE DISTANCE				xxxx.x NAUT MI
 # 62	ABSOLUTE VALUE OF VELOCITY		3COMP	xxxx.x FT/SEC				NO LOAD, DEC ONLY
 #	TIME FROM IGNITION				xxBxx MIN/SEC
@@ -450,7 +435,7 @@
 # 80	DATA INDICATOR,				2COMP	xxxxx.
 #	OMEGA						xxx.xx DEG
 # 81	DELTA V (LV)				3COMP	xxxx.x FT/SEC FOR EACH 			DEC ONLY
-## Page 17
+## Page 12
 # 82	DELTA V (LV)				3COMP	xxxx.x FT/SEC FOR EACH			DEC ONLY
 # 83	DELTA V (BODY)				3COMP	xxxx.x FT/SEC FOR EACH			DEC ONLY
 # 84	DELTA V (OTHER VEHICLE)			3COMP	xxxx.x FT/SEC FOR EACH			DEC ONLY
@@ -483,7 +468,7 @@
 #	RMS IN VELOCITY					xxxx.x FT/SEC
 #	RMS IN BIAS					xx.xxx RADIANS
 
-## Page 18
+## Page 13
 # REGISTERS AND SCALING FOR NORMAL NOUNS
 
 # NOUN		REGISTER		SCALE TYPE
@@ -528,7 +513,7 @@
 # 38			TET		K
 # 39		SPARE
 
-## Page 19
+## Page 14
 # REGISTERS AND SCALING FOR MIXED NOUNS
 
 # NOUN		COMP		REGISTER		SCALE TYPE
@@ -578,7 +563,7 @@
 #		2		DVLOS +2		S
 #		3		DVLOS +4		S
 # 60		1		FORVEL			CC
-## Page 20
+## Page 15
 #		2		HDOTDISP		S
 #		3		HCALC1			RR
 # 61		1		TTFDISP			L
@@ -629,7 +614,7 @@
 # 77		1		TTOGO			L
 #		2		YDOT			S
 # 78		1		DNRRANGE		U
-## Page 21
+## Page 16
 #		2		DNRRDOT			V
 #		3		TTOTIG			L
 # 79		1		CURSOR			D
@@ -680,7 +665,7 @@
 # 96		SPARE
 # 97		1		DSPTEM1			C
 #		2		DSPTEM1 +1		C
-## Page 22
+## Page 17
 #		3		DSPTEM1 +2		C
 # 98		1		DSPTEM2			C
 #		2		DSPTEM2 +1		B
@@ -688,7 +673,7 @@
 # 99		1		WWPOS			XX
 #		2		WWVEL			YY
 #		3		WWBIAS			AAA
-## Page 23
+## Page 18
 # NOUN SCALES AND FORMATS
 
 # -SCALE TYPE-			       PRECISION
@@ -729,7 +714,7 @@
 #							     28
 #			(MAX 359.99)			360/2   DEGREES
 
-## Page 24
+## Page 19
 # -K-
 # TIME (HR, MIN, SEC)	00xxx. HR		DP	BIT 1 OF LOW REGISTER =
 #			000xx. MIN			  -2
@@ -781,7 +766,7 @@
 #							 -7
 #							2   METERS/CENTI-SEC
 
-## Page 25
+## Page 20
 # -T-								  -2
 # G			xxx.xx G		SP	BIT 1 = 10   G
 #			(MAX 163.83)
@@ -832,7 +817,7 @@
 # VELOCITY		(MAX 09126.)			FEET/SEC
 
 # -DD-
-## Page 26
+## Page 21
 # ROTATIONAL HAND	xxxxx. DEG/SEC		SP	FRACTIONAL PART OF PI RAD
 # CONTROLLER ANGULAR	(MAX 00044.)				           4  SEC
 # RATES
@@ -884,7 +869,7 @@
 #			LOADED.)
 
 # -WW-
-## Page 27								    15
+## Page 22								    15
 # 360-CDU DEGREES	xxx.xx DEGREES		SP	BIT 1 = 360 - (360/2  )
 #			(MAX 359.99)			DEGREES
 #							(USES 15 BITS FOR MAGNI-
@@ -907,7 +892,7 @@
 
 # THAT-S ALL ON THE NOUNS.
 
-## Page 28
+## Page 23
 # ALARM CODES FOR LUMINARY
 
 # *9		*18						*60	COLUMN
@@ -958,7 +943,7 @@
 # 00601		PERIGEE ALTITUDE CSI LT PMIN1			P32, P72.
 # 00602		PERIGEE ALTITUDE CDH LT PMIN2			P32, P72.
 # 00603		CSI TO CDH TIME LT TMIN12			P32, P72, P33, P73
-## Page 29
+## Page 24
 # 00604		CDH TO TPI TIME LT TMIN23			P32, P72
 #		 OR COMPUTED CDH TIME GREATER THAN INPUT TP1 TIME
 # 00605		NUMBER OF ITERATIONS EXCEEDS LOOP MAXIMUM	P32, P72
@@ -1010,7 +995,7 @@
 # 21501		KEYBOARD AND DISPLAY ALARM DURING		PINBALL
 #		INTERNAL USE(NVSUB).ABORT
 
-## Page 30
+## Page 25
 # THE FOLLOWING CODE INDICATE A BAILOUT ABORT THAT RESULTS IN A SOFTWARE
 # RESTART
 
@@ -1026,7 +1011,7 @@
 # 31502		TWO PRIO DISPLAYS WAITING			DSP INTRFCE
 # 32000		DAP STILL IN PROGRESS AT NEXT TIMES RUPT	DAP
 
-## Page 31
+## Page 26
 # CHECKLIST CODES FOR LUMINARY
 
 # *9		*17		*26					*9	COLUMN
@@ -1048,7 +1033,7 @@
 #				PERFORM DENOTES START OR END OF A TASK
 #				KEY IN DENOTES KEY IN OF DATA THRU THE DSKY
 
-## Page 32
+## Page 27
 # OPTION CODES FOR LUMINARY
 
 # THE SPECIFIED OPTION CODES WIL BE FLASHED IN COMPONENT R1 IN

@@ -8,15 +8,18 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1378-1382 of 1729.pdf.
+## Reference:	pp. 1373-1377
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/07/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-25 JL	Indentation fixes.
 ##		2011-06-07 JL	Removed workarounds.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1378
+## Page 1373
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 #
@@ -68,7 +71,7 @@ PROGLARM	LXCH	FAILREG +2	# STORE AS "MCST RECENT" ALARM CODE
 		MASK	OCT40400
 		ADS	DSPTAB +11D
 
-## Page 1379
+## Page 1374
 MULTEXIT	XCH	ITEMP1		# OBTAIN RETURN ADDRESS IN A
 		RELINT
 		INDEX	A
@@ -118,7 +121,7 @@ OCT40400	OCT	40400
 		INHINT
 WHIMPER		CA	TWO
 		AD	Z
-## Page 1380
+## Page 1375
 		TS	BRUPT
 		RESUME
 		TC	POSTJUMP	# RESUME SENDS CONTROL HERE
@@ -170,7 +173,7 @@ BOTHABRT	TS	ITEMP1
 		TS	L
 		TCF	CHKFAIL1
 
-## Page 1381
+## Page 1376
 P00DOO1		INHINT
 		DXCH	ALMCADR
 		CAF	ADR77770
@@ -223,7 +226,7 @@ FLAGS		CS	STATEBIT
 		CS	NODOBIT
 		MASK	FLAGWRD2
 
-## Page 1382
+## Page 1377
 		TS	FLAGWRD2
 		TC	Q
 

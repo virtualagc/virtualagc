@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 710-715 of 1729.pdf.
+## Reference:	pp. 705-710
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/24/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 710
+## Page 705
 		BANK	40
 		SETLOC	R31LOC
 		BANK
@@ -64,7 +67,7 @@ V83CALL		CS	FLAGWRD7	# TEST AVERAGE G FLAG
 
 		TC	INTPRET		# EXTRAPOLATE BOTH STATE VECTORS
 		RTB
-## Page 711
+## Page 706
 			LOADTIME
 		STCALL	TDEC1
 			LEMPREC		# PRECISION BASE VECTOR FOR LM
@@ -115,7 +118,7 @@ REV83		CS	FLAGWRD7
 		STCALL	TET
 			INTEGRVS	# INTEGRATION --- AT LAST ---
 OTHCONIC	VLOAD
-## Page 712
+## Page 707
 			RATT
 		STOVL	RONE
 			VATT
@@ -166,7 +169,7 @@ COMPDISP	VLOAD	VSU
 		PDVL	VXV		# UNIT(P) TO PD 12-17
 			0D		# UNIT(RL)
 			VONE
-## Page 713
+## Page 708
 		VXV	DOT		# (UR * VL) * UR . U(P)
 			0D
 			12D
@@ -216,7 +219,7 @@ GETRVN		CA	PRIO22		# INHIBIT SERVICER
 		BOFF	VLOAD
 			MUNFLAG
 			GETRVN2		# IF MUNFLAG RESET, DO CM DELTA PRECISION
-## Page 714
+## Page 709
 		VXM	VSR4		# CHANGE TO REFERENCE SYSTEM AND RESCALE
 			REFSMMAT
 		PDVL			# R TO PD 0-5
@@ -251,6 +254,6 @@ ONEBASE		TC	INTPRET		# GET CSM BASE VECTOR
 
 V16N54		VN	1654
 
-## Page 715
-# (The original program listing had no source lines on this page.)
+## Page 710
+## The original program listing had no source lines on this page.
 

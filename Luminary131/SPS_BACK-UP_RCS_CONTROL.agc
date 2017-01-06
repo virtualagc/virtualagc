@@ -8,14 +8,17 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1504-1507 of 1729.pdf.
+## Reference:	pp. 1499-1502 
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/08/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-25 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1504
+## Page 1499
 # PROGRAM NAME:		SPSRCS
 # AUTHOR:		EDGAR M. CSHIKA (AC ELECTRONICS)
 # MODIFIED:		TO RETURN TO ALL AXES VIA Q BY P. S. WEISSMAN, OCT 7, 1968
@@ -57,7 +60,7 @@
 #			B) SET JET TIME TO ZERO AND RETURN IF INHIBITION COUNTER IS POSITIVE
 #		*NOTE: INHIBITION COUNTERS CAN BE SET TO 4 OR 10 FOR THE P AND UV AXES,
 #		RESPECTIVELY, IN SPSRCS.  THEY ARE DECREMENTED BY ONE AT THE BEGINNING OF
-## Page 1505
+## Page 1500
 #		EACH DAP PASS.
 #
 #	THE MINIMUM PULSE WIDTH OF THIS CONTROLLER IS DETERMINED BY THE REPETITION RATE AT WHICH THIS ROUTINE IS CALLED
@@ -104,7 +107,7 @@ NEGCHECK	INDEX	AXISCTR		# JETS FIRING NEGATIVELY
 		TCF	+1		# JETS COMMANDED OFF.  SET CTR AND RETURN
 SETCTR		INDEX	AXISCTR		# JET FIRING REVERSAL COMMANDED.  SET CTR,
 		CA	UTIME		# SET JET TIME TO ZER, AND RETURN
-## Page 1506
+## Page 1501
 		INDEX	AXISCTR
 		TS	UJETCTR
 ZAPTJ		CA	ZERO
@@ -155,7 +158,7 @@ SPSSTART	CA	EDOT		# OUTER RATE LIMIT TEST
 		TCF	+2
 		TCF	POSTHRST	# OUTER RATE LIMIT EXCEEDED
 		CA	EDOT		# COAST ZONE TEST
-## Page 1507
+## Page 1502
 		AD	E
 		EXTEND
 		MP	DKDB		# PAD LOADED DEADBAND.  FRESHSTART: 1.4 DEG
@@ -179,5 +182,3 @@ TJZERO		CA	ZERO
 
 RATELIM1	=	CALLCODE	# = 00032, CORRESPONDING TO 1.73 DEG/SEC
 RATEDB1		=	TBUILDFX	# = 00045, CORRESPONDS TO 0.101 DEG/SEC
-
-# *** END OF LM DAP  .025 ***

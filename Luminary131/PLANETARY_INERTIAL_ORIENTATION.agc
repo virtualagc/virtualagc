@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1139-1147 of 1729.pdf.
+## Reference:	pp. 1134-1142
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/01/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1139
+## Page 1134
 # PLANETARY INERTIAL ORIENTATION
 #
 # ***** RP-TO-R SUBROUTINE *****
@@ -67,14 +70,14 @@ RPTORA		CALL			# EARTH COMPUTATIONS
 			EARTHL		# L VECTOR RADIANS B0
 		MXV	VSL1		# LP=M(T)*L 	RAD B-0
 			MMATRIX
-## Page 1140
+## Page 1135
 		GOTO
 			RPTORB
 		SETLOC	PLANTIN
 		BANK
 		COUNT*	$$/LUROT
 
-## Page 1141
+## Page 1136
 # ***** R-TO-RP SUBROUTINE *****
 # SUBROUTINE TO CONVERT R (VECTOR IN REFERENCE COORD. SYSTEM) TO RP
 # (VECTOR IN PLANETARY COORD SYSTEM) EITHER EARTH-FIXED OR MOON-FIXED
@@ -126,7 +129,7 @@ RTORPA		CALL			# EARTH COMPUTATIONS
 		GOTO			# MPAC=L=(-AX,-AY,0) 	RAD B-0
 			RTORPB
 
-## Page 1142
+## Page 1137
 # ***** MOONMX SUBROUTINE *****
 # SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE MOON
 #
@@ -178,7 +181,7 @@ MOONMX		STQ	SETPD
 		AXT,1	CALL		# NODE REQUIRES SL 0, SL 5 IN NEWANGLE
 			5
 			NEWANGLE	# EXIT WITH PD 8D AND MPAC= NODI REVS B0
-## Page 1143
+## Page 1138
 		PUSH	COS		# PD 10D	8-9D= NODI REVS B0
 		PUSH			# PD 12D	10-11D= COS(NODI) B-1
 		STORE	AVECTR
@@ -230,7 +233,7 @@ MOONMXA		STODL	BVECTR		# PD 8D			SOB*COS(NODI)
 		COS	VXSC
 			DVECTR
 		PDDL	SIN		# PD 20D  14-19D= DVECTR*COSF B-2
-## Page 1144
+## Page 1139
 			504F
 		VXSC	VSU		# PD 14D	AVECTR*SINF B-2
 			AVECTR
@@ -276,7 +279,7 @@ NEWANGLE	DLOAD	SR		# ENTER PD 12D
 			+1		# INSTRUCTION BEFORE EXITING.
 		RVQ			# MPAC=X= X0+(XDOT)(T+T0)	REVS B0
 
-## Page 1145
+## Page 1140
 # ***** EARTHMX SUBROUTINE *****
 # SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE EARTH
 #
@@ -327,7 +330,7 @@ EARTHMX		STQ	SETPD		# SET 8-9D=AZO
 		GOTO
 			EARTHMXX
 
-## Page 1146
+## Page 1141
 # ***** EARTH SUBROUTINE *****
 # SUBROUTINE TO COMPUTE L VECTOR FOR EARTH
 #
@@ -358,7 +361,7 @@ EARTHL		DLOAD	DCOMP
 			504LPL
 		RVQ
 
-## Page 1147
+## Page 1142
 # CONSTANTS AND ERASABLE ASSIGNMENTS
 
 1B1		=	DP1/2		# 1 SCALED B-1

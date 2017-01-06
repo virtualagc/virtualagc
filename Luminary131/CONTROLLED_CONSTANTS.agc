@@ -5,30 +5,17 @@
 ##		It is part of the source code for the Lunar Module's (LM)
 ##		Apollo Guidance Computer (AGC) for Apollo 13.
 ## Assembler:	yaYUL
-## Reference:	pp. 43-58 of 1729.pdf.
+## Reference:	pp. 38-53
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	04/13/03 RSB.	Began.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-08-24 JL	Added missing page number.
-##
-## The contents of the "Luminary131" files, in general, are
-## transcribed from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1729.pdf.  Notations on this
-## document read, in part:
-##
-##	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
-##	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
-##	This listing contains the flight program for the Lunar Module 
-##	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
-##
-## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1729.pdf) to info@sandroid.org.
-##
-## THIS file contains pages 43-58 of the original program listing, which define
-## a series of numerical constants.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 43
+## Page 38
 # DPS AND APS ENGINE PARAMETERS
 
 		SETLOC	P40S
@@ -69,7 +56,7 @@ S40.136		2DEC	.4671 B-9		# .4671 M NEWTONS (DPS)
 S40.136_	2DEC	.4671 B+1		# S40.136 SHIFTED LEFT 10
 
 		SETLOC	ASENT1
-## Page 44
+## Page 39
 		BANK
 		COUNT*	$$/P70
 		
@@ -113,7 +100,7 @@ DPSVEX		DEC*	-2.95588868 E+1 B-05*	# VE (DPS) +2.95588868E+ 3
 		
 TRIMACCL	2DEC*	+3.50132708 E-5 B+08*	# A (T) +3.50132708E- 1
 
-## Page 45
+## Page 40
 # THROTTLING AND THRUST DETECTION PARAMETERS
 
 		SETLOC	P40S
@@ -145,7 +132,7 @@ SCALEFAC	2DEC*	+7.97959872 E+2 B-16*	# BITPERF +7.97959872 E-2
 		
 DPSTHRSH	DEC	36			# (THRESH1 + THRESH3 FOR P63) (comment garbled)
 
-## Page 46
+## Page 41
 # LM HARDWARE-RELATED PARAMETERS
 
 		SETLOC	RADARUPT
@@ -183,7 +170,7 @@ VXSCAL		2DEC	-.4020043770		# SCALES -.644 FT/SEC/BIT TO 2(18) M/CS.
 KPIP		DEC	.0512			# SCALES DELV TO UNITS OF 2(5) M/CS.
 KPIP1		2DEC	.0128			# SCALES DELV TO UNITS OF 2(7) M/CS.
 KPIP2		2DEC	.0064			# SCALES DELV TO UNITS OF 2(8) M/CS.
-## Page 47
+## Page 42
 ALTCONV		2DEC	1.399078846 B-4		# CONVERTS M*2(-24) TO BIT UNITS *2(-28).
 ARCONV1		2DEC	656.167979 B-10		# CONV. ALTRATE COMP. TO BIT UNITS
 
@@ -204,7 +191,7 @@ MAXVBITS	OCT	00547			# MAX. DISPLAYED VELOCITY 199.9989 FT/SEC.
 		
 TORKJET1	DEC	.03757			# 550 / .2 SCALED AT (+16) 64 / 180
 
-## Page 48
+## Page 43
 # PARAMETERS RELATING TO MASS, INERTIA, AND VEHICLE DIMENSIONS
 
 		SETLOC	FRANDRES
@@ -229,7 +216,7 @@ LOASCENT	DEC	2200 B-16		# MIN ASCENT LEM MASS -- 2(16) KG.
 HIDESCNT	DEC	15300 B-16		# MAX DESCENT LEM MASS -- 2(16) KG.
 LODESCNT	DEC	1750 B-16		# MIN DESCENT STAGE (ALONE) -- 2(16) KG.
 
-## Page 49
+## Page 44
 # PHYSICAL CONSTANTS (TIME-INVARIANT)
 
 		SETLOC	IMU2
@@ -276,7 +263,7 @@ MOONRATE	2DEC*	.26616994890062991 E-7 B+19*	# RAD/CS.
 -MUDTMUN	2DEC*	-9.8055560 E+10 B-38*
 RESQ		2DEC*	40.6809913 E12 B-58*
 
-## Page 50
+## Page 45
 20J		2DEC	3.24692010 E-2
 2J		2DEC	3.24692010 E-3
 
@@ -313,7 +300,7 @@ MUTABLE		2DEC*	3.986032 E10 B-36*	# MUE
 		
 # *************************************************************************
 
-## Page 51
+## Page 46
 		SETLOC	INTINIT
 		BANK
 		COUNT*	$$/INTIN
@@ -351,7 +338,7 @@ J2REQSQ		2DEC*	1.75501139 E21 B-72*
 		
 REMDIST		2DEC	384402000 B-29		# MEAN DISTANCE BETWEEN EARTH AND MOON.
 
-## Page 52
+## Page 47
 # PHYSICAL CONSTANTS (TIME-VARIANT)
 
 		SETLOC	STARTAB
@@ -388,7 +375,7 @@ REMDIST		2DEC	384402000 B-29		# MEAN DISTANCE BETWEEN EARTH AND MOON.
 		
 		2DEC	+.1217293692 B-1	# STAR 30	X
 		2DEC	-.7702732847 B-1	# STAR 30 	Y
-## Page 53
+## Page 48
 		2DEC	+.6259880410 B-1	# STAR 30	Z
 		
 		2DEC	-.1124304773 B-1	# STAR 29	X
@@ -423,7 +410,7 @@ REMDIST		2DEC	384402000 B-29		# MEAN DISTANCE BETWEEN EARTH AND MOON.
 		2DEC	-.3502146628 B-1	# STAR 22	Y
 		2DEC	-.1908999176 B-1	# STAR 22	Z
 		
-## Page 54
+## Page 49
 		2DEC	-.4523440203 B-1	# STAR 21	X
 		2DEC	-.0493710140 B-1	# STAR 21	Y
 		2DEC	-.8904759346 B-1	# STAR 21	Z
@@ -457,7 +444,7 @@ REMDIST		2DEC	384402000 B-29		# MEAN DISTANCE BETWEEN EARTH AND MOON.
 		2DEC	+.0924226975 B-1	# STAR 14	Z
 		
 		2DEC	-.1820751783 B-1	# STAR 13	X
-## Page 55
+## Page 50
 		2DEC	+.9404899869 B-1	# STAR 13	Y
 		2DEC	-.2869271926 B-1	# STAR 13	Z
 		
@@ -491,7 +478,7 @@ REMDIST		2DEC	384402000 B-29		# MEAN DISTANCE BETWEEN EARTH AND MOON.
 		
 		2DEC	+.0130968840 B-1	# STAR 5	X
 		2DEC	+.0078062795 B-1	# STAR 5	Y
-## Page 56
+## Page 51
 		2DEC	+.9998837600 B-1	# STAR 5	Z
 		
 		2DEC	+.4917678276 B-1	# STAR 4	X
@@ -526,7 +513,7 @@ KONMAT		2DEC	1.0 B-1			# ********************
 		2DEC	-.03571 B-1		# K2 SIN(OBL)SIN(IM) *
 		2DEC	0			#		     *
 		2DEC	.39784 B-1		# K3 SIN(OBL)	     *
-## Page 57
+## Page 52
 		2DEC	.082354 B-1		# K4 COS(OBL)SIN(IM) *
 CSTODAY		2DEC	8640000 B-33		# 		* NOTE:		 *
 RCB-13		OCT	00002			#		* TABLES CONTAIN *
@@ -557,7 +544,7 @@ COSI		2DEC*	9.996417320 E-1 B-1*	# COS (5521.5 SEC.)
 SINI		2DEC*	2.676579050 E-2 B-1*	# SIN (5521.5 SEC.)
 NODDOT		2DEC*	-1.703706190 E-11 B28*	# REV/CSEC
 FDOT		2DEC*	4.253263473 E-9 B27*	# REV/CSEC
-## Page 58
+## Page 53
 BDOT		2DEC*	-1.145529388 E-16 B28*	# REV/CSEC
 NODIO		2DEC*	9.862094363 E-1*	# REV
 FSUBO		2DEC*	8.290901511 E-1*	# REV
