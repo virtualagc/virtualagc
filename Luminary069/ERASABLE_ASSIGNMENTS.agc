@@ -16,6 +16,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-05 HG   Transcribed
+##              2017-01-06 HG   Fix operand JBREG* -> JBRFG*
+##                                          JAPEG* -> JAPFG* 
+##                                          TITOT2 -> T1TOT2
+##                                          TABLTFF-> TABLTTF
 
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -1341,7 +1345,7 @@ LRVTIMDL        EQUALS          LRZCDUDL        +1      # B(2) LANDING RADAR DOW
 
 #          ASCENT GUIDANCE FOR LUNAR LANDING                            (62D)
 
-AT              EQUALS          TITOT2                  # I(2)TMP  ENGINE DATA -- THRUST ACC.*2(9)
+AT              EQUALS          T1TOT2                  # I(2)TMP  ENGINE DATA -- THRUST ACC.*2(9)
 VE              EQUALS          AT              +2      # I(2)TMP  EXHAUST VELOCITY * 2(7)M/CS.
 TTO             EQUALS          VE              +2      # I(2)TMP  TAILOFF TIME * 2(17)CS.
 TBUP            EQUALS          TTO             +2      # I(2)TMP  (M/MDOT) * 2(17)CS.
@@ -1410,13 +1414,13 @@ ABRFG           EQUALS          VBRFG           +6      # I(6)         TARGET
 VBRFG*          EQUALS          ABRFG           +6      # I(2)            PARAMETERS:
 ABRFG*          EQUALS          VBRFG*          +2      # I(2)               HIGH
 JBRFG*          EQUALS          ABRFG*          +2      # I(2)                  GATE
-RAPFG           EQUALS          JBREG*          +1      # I(6) APPROACH
+RAPFG           EQUALS          JBRFG*          +1      # I(6) APPROACH
 VAPFG           EQUALS          RAPFG           +6      # I(6)      PHASE
 AAPFG           EQUALS          VAPFG           +6      # I(6)         TARGET
 VAPFG*          EQUALS          AAPFG           +6      # I(2)            PARAMETERS:
 AAPFG*          EQUALS          VAPFG*          +2      # I(2)               LOW
 JAPFG*          EQUALS          AAPFG*          +2      # I(2)                  GATE
-VIGN            EQUALS          JAPEG*          +2      # I(2)  DESIRED SPEED FOR IGNITION
+VIGN            EQUALS          JAPFG*          +2      # I(2)  DESIRED SPEED FOR IGNITION
 RIGNX           EQUALS          VIGN            +2      # I(2)  DESIRED 'ALTITUDE' FOR IGNITION
 RIGNZ           EQUALS          RIGNX           +2      # I(2)  DESIRED GROUND RANGE FOR IGNITION
 KIGNX/B4        EQUALS          RIGNZ           +2      # I(2)
@@ -2610,7 +2614,7 @@ TPIPOLD         =               TABLTTF         +9D     # B(2)    GUIDANCE
 
 # (ERASABLES WHICH OVERLAP WITH THE ABOVE BLOCK)
 
-FCODD           =               TABLTFF                 # B(2)    THROTTLE
+FCODD           =               TABLTTF                 # B(2)    THROTTLE
 FP              =               FCODD           +2      # B(2)    THROTTLE
 E2DPS           EQUALS          OURPERMS
 #
