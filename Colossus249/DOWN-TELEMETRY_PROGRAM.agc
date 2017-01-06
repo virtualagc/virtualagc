@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1075 of 1701.pdf.
+## Reference:	Starts on p. 1063.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/28/04 RSB.	Adapted from corresponding Luminary 131 file.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1075
+## Page 1063
 # PROGRAM NAME -- DOWN TELEMETRY PROGRAM
 # MOD NO. -- 0		TO COMPLETELY REWRITE THE DOWN TELEMETRY PROGRAM AND DOWNLINK ERASABLE DUMP PROGRAM FOR THE
 #			PURPOSE OF SAVING APPROXIMATELY 150 WORDS OF CORE STORAGE.
@@ -99,10 +101,10 @@
 #
 # DEBRIS (ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM) --
 #	LDATALST, DNTMBUFF TO DNTMBUFF +21D, TMINDEX, DNQ.
-## Page 1076
+## Page 1064
 # (No source on this page of the original assembly listing.)
 
-## Page 1077
+## Page 1065
 # DODOWNTM IS ENTERED EVERY 20 MS BY AN INTERRUPT TRIGGERED BY THE
 # RECEIPT OF AN ENDPULSE FROM THE SPACECRAFT TELEMETRY PROGRAMMER.
 #
@@ -149,7 +151,7 @@
 #	EQUIVALENT OF THE FOLLOWING ECADRS (I.E., IDNADRS): 377, 777, 1377, 1777, 2377, 2777, 3377, 3777.
 # 	(NOTE: TE TERM `EQUIVALENT' MEANT THAT THE IDNADR TO 6DNADR WILL BE PROCESSED LIKE 1 TO 6 ECADRS)
 # 3.	CONTROL LISTS AND SUBLISTS CANNOT HAVE ENTRIES = OCTAL 00000 OR OCTAL 77777
-## Page 1078
+## Page 1066
 # 4.	THE `1DNADR TIME2' WHICH WILL CAUSE THE DOWNLINT PROGRAM TO SET THE WORDER CODE TO 3 MUST APPEAR IN THE
 #	CONTROL SECTION OF THE DOWNLIST.
 # 5.	`DNCHAN 0' CANNOT BE USED.
@@ -195,7 +197,7 @@ MINTIME2	-1DNADR	TIME2		# NEGATIVE OF TIME2 1DNADR
 		TCF	+1		# (ECADR OF 3776 + 74001 = 77777)
 
 		CCS	SUBLIST		# IS THE SUBLIST IN CONTROL
-## Page 1079
+## Page 1067
 		TCF	NEXTINSL	# YES
 DNADRDCR	OCT	74001		# DNADR COUNT AND ECADR DECREMENTER
 
@@ -246,7 +248,7 @@ DODNCHAN	TC	6		# (EXECUTED AS EXTEND)  IT'S A CHANNEL
 
 WOZERO		CS	BIT7
 		EXTEND
-## Page 1080
+## Page 1068
 		WAND	CHAN13		# SET WORD ORDER CODE TO ZERO
 		TC	Q		# RETURN TO CALLER
 
@@ -295,7 +297,7 @@ LDNPHAS2	GENADR	DNPHASE2
 		EXTEND
 		INDEX	A
 		EBANK=	1401
-## Page 1081
+## Page 1069
 		DCA	1401		# PICK UP FIRST 2 WORDS OF SNAPSHOT.
 		EBANK=	DNTMBUFF
 SNAPEND		TCF	DNTMEXIT	# NOW TO SEND THEM.
@@ -340,7 +342,7 @@ DNECADR		EQUALS	TMINDEX
 CTLIST		EQUALS	LDATALST
 SUBLIST		EQUALS 	DNQ
 
-## Page 1082
+## Page 1070
 # SUBROUTINE NAME -- DNDUMP
 #
 # FUNCTIONAL DESCRIPTION -- TO SEND (DUMP) ALL 8 BANKS OF ERASABLE STORAGE TWICE.  BANKS ARE SENT ONE AT A TIME
@@ -401,7 +403,7 @@ SUBLIST		EQUALS 	DNQ
 #					      EEE = EBANK BITS
 #					 RRRRRRRR = RELATIVE ADDRESS WITHIN AN EBANK
 
-## Page 1083
+## Page 1071
 DNDUMPI		CA	ZERO		# INITIALIZE DOWNLINK
 		TS	DUMPLOC		# ERASABLE DUMP
  +2		TC	SENDID		# GO SEND ID AND SYNCH BITS
@@ -451,7 +453,7 @@ SENDID		EXTEND			# ** ENTRANCE USED BY ERASABLE DUMP PROG. **
 		CAF	ERASID		# TO LOCATION FOLLOWING `TC SENDID'
 
 		TS	L		# ** ENTRANCE USED BY REGULAR DOWNLINK PG **
-## Page 1084
+## Page 1072
 		TC	WOZERO		# GO SET WORD ORDER CODE TO ZERO
 		CAF	LOWIDCOD	# PLACE SPECIAL ID CODE INTO L
 		XCH	L		# AND ID BACK INTO A

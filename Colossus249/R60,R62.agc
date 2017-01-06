@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 385-393 of 1701.pdf.
+## Reference:	pp. 383-391.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/10/04 RSB.	Began adapting from corresponding Luminary131
 ##				source file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 385
+## Page 383
 		BANK	34
 		SETLOC	MANUVER
 		BANK
@@ -81,7 +83,7 @@ REDOMANC	CAF	BIT6
 		EXIT
 		
 TOBALLC		CAF	PRIO30		# IS MODE AUTO AND CTL GNC
-## Page 386
+## Page 384
 		EXTEND
 		RXOR	CHAN31
 		MASK	13,14,15
@@ -131,7 +133,7 @@ RELINUS		CAF	BIT5		# RESTORE ORIGINAL PRIORITY
 		ADRES	TARG1FLG	# FOR R52
 		
 		CAF	ZERO		# RESET TO ZERO, SINCE
-## Page 387
+## Page 385
 		TS	OPTIND		# OPTIND WAS SET TO -1 BY V379
 		
 		CAF	PRIO14		# RESTORE ORIGINAL PRIORITY
@@ -156,7 +158,7 @@ R61TEST		CA	MODREG		# ARE WE IN P00.  IF YES THIS MUST BE
 BIT14+7		OCT	20100
 V06N18		VN	0618
 
-## Page 388
+## Page 386
 # PROGRAM DESCRIPTION -- VECPOINT
 #
 # THIS INTERPRETIVE SUBROUTINE MAY BE USED TO POINT A SPACECRAFT AXIS IN A DESIRED DIRECTION.  THE AXIS
@@ -207,7 +209,7 @@ V06N18		VN	0618
 
 		SETLOC	VECPT
 		BANK
-## Page 389
+## Page 387
 		EBANK=	BCDU
 		COUNT	27/VECPT
 		
@@ -257,7 +259,7 @@ COMPMATX	CALL			# NO COMPUTE THE TRANSFORMATION FROM
 			SCAXIS		# THE THRUST AXIS
 		DSU	BPL
 			SINVEC1		# SIN 49.4 DEGS
-## Page 390
+## Page 388
 			FINDGIMB	# IF SO, WE ARE TRYING TO POINT IT INTO
 		VLOAD			# GIMBAL LOCK, ABORT COULD GO HERE
 		STADR
@@ -308,7 +310,7 @@ FINDGIMB	AXC,1	CALL
 			DCMTOCDU	# THIS MATRIX
 		RTB	SETPD
 			V1STO2S		# CONVERT TO 2'S COMPLEMENT
-## Page 391
+## Page 389
 			0
 		GOTO
 			VECQTEMP	# RETURN TO CALLER
@@ -355,13 +357,13 @@ VECANG2		2DEC	.09722222222	# = 35 DEGREES
 
 1BITDP		OCT	0		# KEEP THIS BEFORE DPB(-14)
 DPB-14		OCT	00001
-## Page 392
+## Page 390
 		OCT	00000
 		BANK	34
 		SETLOC	MANUVER
 		BANK
 		
-## Page 393
+## Page 391
 # ROUTINE FOR INITIATING AUTOMATIC MANEUVER VIA KEYBOARD (V49)
 
 		EBANK=	CPHI

@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 840-846 of 1701.pdf.
+## Reference:	pp. 836-842.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/21/04 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 840
+## Page 836
 		BANK	35
 		
 		SETLOC	BODYATT
@@ -82,7 +84,7 @@ CM/POSE2	STORE	UYA/2		#				REF COORDS
 			UXA/2		# FINISH OBTAINING TRAJECTORY TRIAD.
 		VSL1
 		STORE	UZA/2		#				REF COORDS
-## Page 841
+## Page 837
 		TLOAD			# PICK UP CDUX, CDUY, CDUZ CORRESPONDING
 			AOG/PIP		# TO PIPUP TIME IN 2'S C AND SAVE.
 CM/TRIO		STODL	24D
@@ -132,7 +134,7 @@ CM/TRIO		STODL	24D
 		VXM	VSL2
 			REFSMMAT	# .5 UNIT
 		STODL	UBY/2		# YB/2 DONE			REF COORDS
-## Page 842
+## Page 838
 					# CM /2 FROM PDL 2
 		VXSC	VSL1
 			UBX/2
@@ -183,7 +185,7 @@ CM/TRIO		STODL	24D
 		STOVL	8D		# -(ALFA/180) /2
 			UNITR		# UR/2				REF COORDS
 		DOT	SL1
-## Page 843
+## Page 839
 			UZA/2		# MORE ACCURATE AT LARGE ARG.
 		ARCCOS
 		STORE	10D		# (-GAMA/180)/2
@@ -192,7 +194,7 @@ CM/TRIO		STODL	24D
 					# -( (ROLL, BETA, ALFA) /180)/2
 			6D		# THESE VALUES CORRECT AT PIPUP TIME.
 
-## Page 844
+## Page 840
 # BASIC SUBROUTINE TO UPDATE ATTITUDE ANGLES
 
 		EBANK=	AOG
@@ -243,7 +245,7 @@ NOGAMDOT	CA	ZERO		# COME HERE INHINTED
 		SU	ROLL/PIP	# GET INCR SINCE PIPUP
 		AD	ROLL/180	# ONLY SINGLE OVFL POSSIBLE.
 		TC	CORANGOV	# CORRECT FOR OVFL IF ANY
-## Page 845
+## Page 841
 		TS	TEMPROLL
 		
 		CS	MPAC +2		# GET (ALFA EUL/180) /2
@@ -294,7 +296,7 @@ CM/POSE3	VLOAD	ABVAL		# RETURN FROM CM/ATUP.	(RESTART)
 CORANGOV	TS	L
 		TC	Q
 		INDEX	A
-## Page 846
+## Page 842
 		CA	LIMITS
 		ADS	L
 		TC	Q		# COSTS 2 MCT TO USE.  SEE ANGOVCOR.

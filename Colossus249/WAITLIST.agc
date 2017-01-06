@@ -5,17 +5,19 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Begins on p. 1203 of 1701.pdf.
+## Reference:	Begins on p. 1191
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	08/28/04   RSB	Began adapting from similar Luminary131 file.
 ##		05/14/05   RSB	Corrected website reference above.
 ##		2010-10-24 JL	Indentation fixes.
 ##		2011-05-07 JL	Remove workarounds.
-
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -31,13 +33,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1203
+## Page 1191
 # PROGRAM DESCRIPTION						DATE -- 10 OCTOBER 1966
 # MOD NO -- 2							LOG SECTION -- WAITLIST
 # MOD BY -- MILLER	(DTMAX INCREASED TO 162.5 SEC)		ASSEMBLY -- SUNBURST REV 5
@@ -80,7 +82,7 @@
 # TWIDDLE --
 #	TWIDDLE IS FOR USE WHEN THE TASK BEING SET UP IS IN THE SAME EBANK AND FBANK AS THE USER.  IN
 #	SUCH CASES, IT IMPROVES UPON WAITLIST BY ELIMINATING THE NEED FOR THE BBCON HALF OF THE 2CADR,
-## Page 1204
+## Page 1192
 #	SAVING A WORD.  TWIDDLE IS LIKE WAITLIST IN EVERY RESPECT EXCEPT CALLING SEQUENCE, TO WIT,
 #		L-1	CA	DELTAT
 #		L	TC	TWIDDLE
@@ -122,7 +124,7 @@
 #	OF OTHER TASKS INHIBITING THE INTERRUPT.
 
 		BLOCK	02
-## Page 1205
+## Page 1193
 		EBANK=	LST1		# TASK LISTS IN SWITCHED E BANK.
 
 		COUNT	02/WAIT
@@ -174,10 +176,10 @@ VARDELAY	XCH	Q		# DT TO Q.  TASK ADRES TO WAITADR.
 		TS	WAITEXIT	# GO TO TASKOVER AFTER TASK ENTRY.
 		TCF	DLY2
 
-## Page 1206
+## Page 1194
 DELAYEX		TCF	TASKOVER -2	# RETURNS TO TASKOVER.
 
-## Page 1207
+## Page 1195
 # ENDTASK MUST ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
 
 		EBANK=	LST1
@@ -201,7 +203,7 @@ SVCT3		CCS	FLAGWRD2	# DRIFT FLAG
 
 		TCF	TASKOVER
 
-## Page 1208
+## Page 1196
 # BEGIN TASK INSERTION.
 
 		BANK	01
@@ -244,7 +246,7 @@ WAIT2		TS	WAITBANK	# BBANK OF CALLING PROGRAM.
 		EXTEND			# ZERO INDEX Q.
 		QXCH	7		# (ZQ)
 
-## Page 1209
+## Page 1197
 WTLST4		XCH	LST1
 		XCH	LST1 +1
 		XCH	LST1 +2
@@ -273,7 +275,7 @@ WTLST4		XCH	LST1
 		BZF	LVWTLIST	# FIXED SO ITS ADRES ALONE DISTINGUISHES
 		TCF	WTABORT		# IT.
 
-## Page 1210
+## Page 1198
 WTLST5		CCS	A		# TEST TD - T2 + 1
 		AD	LST1 +1
 		TCF	+4
@@ -316,7 +318,7 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 		TC	WTLST2
 		OCT	6
 
-## Page 1211
+## Page 1199
  +4		CCS	A	
 		AD	LST1 +7
 		TCF	+4
@@ -334,7 +336,7 @@ WTABORT		TC	BAILOUT		# NO ROOM IN THE INN
 		
 OCT40201	OCT	40201
 		
-## Page 1212
+## Page 1200
 # THE ENTRY TC WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
@@ -373,7 +375,7 @@ WTLST2		TS	WAITTEMP	# C(A) = -(TD - T + 1)
 #	C(LST2+8)	=	2CADR TASK5
 #	C(LST2+10)	=	2CADR TASK6
 
-## Page 1213
+## Page 1201
 # ENTERS HERE ON T3 RUPT TO DISPATCH WAITLISTED TASK.
 
 T3RUPT		EXTEND
@@ -415,7 +417,7 @@ T3RUPT2		CAF	NEG1/2		# DISPATCH WAITLIST TASK.
 		XCH	L		# RESTORE TO L FOR DXCH Z.
 		DTCB
 
-## Page 1214
+## Page 1202
 # RETURN, AFTER EXECUTION OF T3 OVERFLOW TASK:
 
 		BLOCK	02
@@ -438,7 +440,7 @@ NOQBRSM		DXCH	ARUPT
 		RELINT
 		RESUME
 
-## Page 1215
+## Page 1203
 # LONGCALL
 # PROGRAM DESCRIPTION				DATE -- 17 MARCH 1967
 # PROGRAM WRITTEN BY W.H.VANDEVER		LOG SECTION WAITLIST
@@ -481,7 +483,7 @@ NOQBRSM		DXCH	ARUPT
 LONGCALL	DXCH	LONGTIME	# OBTAIN THE DELTA TIME
 
 		EXTEND			# OBTAIN THE 2CADR
-## Page 1216
+## Page 1204
 		NDX	Q
 		DCA	0
 		DXCH	LONGCADR
@@ -531,7 +533,7 @@ LASTTIME	CA	BIT14		# GET BACK THE CORRECT DELTA TFOR WAITLIST
 		2CADR	GETCADR		# THE ENTRY TO OUR LONGCADR
 
 LONGRTRN	CA	TSKOVCDR	# SET IT UP SO THAT ONLY THE FIRST EXIT IS
-## Page 1217
+## Page 1205
 		DXCH	LONGEXIT	# TO THE CALLER OF LONGCALL
 		DTCB			# THE REST ARE TO TASKOVER
 

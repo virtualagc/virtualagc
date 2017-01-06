@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 977 of 1701.pdf.
+## Reference:	Starts on p. 973.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/25/04 RSB.	Began transcribing.
 ##		2010-10-25 JL	Fixed page number.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 977
+## Page 973
 # T5 INTERRUPT PROGRAM FOR THE RCS-CSM AUTOPILOT
 
 # START OF T5 INTERRUPT PROGRAM
@@ -84,7 +86,7 @@ RCSATT		LXCH	BANKRUPT	# SAVE BB
 		EXTEND
 		RAND	CHAN31		# AND CHECK FREE FUNCTION (BIT14 CHAN31).
 		EXTEND
-## Page 978
+## Page 974
 		BZF	SETT5		# IF IN FREE MODE, GO TO SETT5.
 		
 		TS	T5PHASE		# IF NOT IN FREE MODE,
@@ -126,7 +128,7 @@ SETT5		CCS	T5PHASE
 		CAF	DELTATT2	# RESET FOR T5RUPT IN 20MS FOR PHASE2
 		TS	TIME5		# OF PROGRAM
 
-## Page 979
+## Page 975
 # IMU STATUS CHECK
 
 		CS	IMODES33	# CHECK IMU STATUS
@@ -178,7 +180,7 @@ DRHOLOOP	TS	SPNDX
 		INDEX	DPNDX
 		DAS	DRHO		# (1 -.064) DRHO
 		EXTEND
-## Page 980
+## Page 976
 		INDEX	DPNDX
 		DCS	ADOT
 		DXCH	KMPAC		# -(.1)ADOT
@@ -230,7 +232,7 @@ DRHOLOOP	TS	SPNDX
 		CA	AMGB8
 		EXTEND
 
-## Page 981
+## Page 977
 		MP	T5TEMP
 		DAS	DELTEMPZ	# DELTEMPZ = AMBG7(CDUY-RHO1)
 					#		  + AMGB8(CDUZ-RHO2)
@@ -279,7 +281,7 @@ KMATRIX		CA	ATTSEC
 		
 TENTHSEK	TS	ATTSEC
 
-## Page 982
+## Page 978
 # WHEN AUTOMATIC MANEUVERS ARE BEING PERFORMED, THE FOLLOWING ANGLE ADDITION MUST BE MADE TO PROVIDE A SMOOTH
 # SEQUENCE OF ANGULAR COMMANDS TO THE AUTOPILOT--
 #
@@ -330,7 +332,7 @@ DELOOP		TS	SPNDX
 		EXTEND
 		INDEX	A
 		DCA	CDUXD
-## Page 983
+## Page 979
 		DXCH	KMPAC
 		EXTEND
 		INDEX	DPNDX
@@ -345,7 +347,7 @@ DELOOP		TS	SPNDX
 		CCS	SPNDX
 		TCF	DELOOP
 		
-## Page 984
+## Page 980
 # RCS-CSM AUTOPILOT ATTITUDE ERROR DISPLAY
 #
 # THREE TYPES OF ATTITUDE ERRORS MAY BE DISPLAYED ON THE FDAI:
@@ -386,7 +388,7 @@ FDAIDSP1	ADS	RCSFLAGS
 		TC	NEEDLER
 KRESUME1	TCF	RESUME		# END PHASE 1
 
-## Page 985
+## Page 981
 # FDAI ATTITUDE ERROR DISPLAY SUBROUTINE
 #
 # PROGRAM DESCRIPTION:	D. KEENE  5/24/67
@@ -436,7 +438,7 @@ KRESUME1	TCF	RESUME		# END PHASE 1
 # SWITCHES;	RCSFLAGS	BITS 3,2
 #
 # I/O CHANNELS:	CHAN12		BIT 4		 (COARSE ALIGN - READ ONLY)
-## Page 986
+## Page 982
 #		CHAN12		BIT 6 		(IMU ERROR COUNTER ENABLE)
 #		CHAN14		BIT 13,14,15	(DAC ACTIVITY)
 #
@@ -485,7 +487,7 @@ NEEDLER2	CAF	BIT6		# ENABLE IMU ERROR COUNTERS
 		EXTEND
 		WOR	CHAN12
 		CS	SIX		# RESET RCSFLAGS TO DISPLAY ATTITUDE
-## Page 987
+## Page 983
 		MASK	RCSFLAGS	# ERRORS    WAIT AT LEAST 4 MS FOR
 		TS	RCSFLAGS	# RELAY CLOSURE
 		TC	Q
@@ -533,11 +535,11 @@ REINIT		CAF	DELAY200	# ........TILT LOGIC
 DELAY200	DEC	16364		# 200MS
 		DEC	-384
 		
-## Page 988
+## Page 984
 DACLIMIT	DEC	16000
 		DEC	384
 		
-## Page 989
+## Page 985
 # INITIALIZATION PROGRAM FOR RCS-CSM AUTOPILOT
 #
 # THE FOLLOWING QUANTITIES WILL BE ZEROED AND SHOULD APPEAR IN CONSECUTIVE LOCATIONS IN MEMORY AFTER WBODY
@@ -590,7 +592,7 @@ ZEROT5		TS	SPNDX		# ZERO ALL NECESSARY ERASABLE REGISTERS
 		CAF	ELEVEN
 		TS	ATTKALMN	# RESET TO PICK UP KALMAN FILTER TAINS
 					# TO INITIALIZE THE S/C ANGULAR RATES
-## Page 990
+## Page 986
 		CA	CDUX
 		TS	RHO
 		CA	CDUY
@@ -640,7 +642,7 @@ ZEROJET		CAF	ELEVEN		# ZERO BLAST2, BLAST1, BLAST, YWORD2,
 		TS	SPNDX		# YWORD1, PWORD2, PWORD1, RWORD2,
 		CAF	ZERO		# AND RWORD1
 		
-## Page 991
+## Page 987
 		INDEX	SPNDX
 		TS	RWORD1
 		CCS	SPNDX
@@ -680,7 +682,7 @@ T5PHASE2	CCS	ATTKALMN	# IF (+) INITIALIZE RATE ESTIMATE
 		CS	ONE
 NOHIAUTO	TS	ATTKALMN
 
-## Page 992
+## Page 988
 # MANUAL ROTATION COMMANDS
 
 		CS	OCT01760	# RESET FORCED FIRING BITS (BITS 10 TO 5
@@ -732,7 +734,7 @@ NOCHANGE	CS	CH31TEMP
 					# STICKCHK SO PMANNDX, YMANNDX, AND
 					# RMANNDX ARE NOT RESET TO ZERO BUT RATHER
 					# LEFT SET TO THEIR LAST OUT OF DETENT
-## Page 993
+## Page 989
 					# VALUES.
 					
 		CS	FLAGWRD1	# SET STIKFLAG TO INFORM STEERING
@@ -781,7 +783,7 @@ SETWBODY	TS	SPNDX
 		BZF	MERUPDAT	# MERUPDAT TO UPDATE CUMULATIVE ATTITUDE
 					# ERROR.
 
-## Page 994
+## Page 990
 ZEROER		CA	ZERO		# ZEROER ZEROS MERRORS
 		ZL
 		INDEX	DPNDX
@@ -831,7 +833,7 @@ MANTABLE	DEC	.0071111
 =+14MS		DEC	23
 
 FREEFUNC	INDEX	RMANNDX		# ACCELERATION
-## Page 995
+## Page 991
 		CA	FREETAU		# COMMANDS
 		TS	TAU
 		INDEX	PMANNDX
@@ -853,7 +855,7 @@ T6PROGM		CAF	ZERO		# FOR MANUAL ROTATIONS
 		TS	ERRORZ
 		TCF	T6PROG
 		
-## Page 996
+## Page 992
 		DEC	.2112		# FILTER GAIN FOR TRANSLATION, LEM ON
 		DEC	.8400		# FILTER GAIN FOR TRANSLATION 2(ZETA)WN DT
 		DEC	.2112		# FILTER GAIN FOR 4 DEGREE/SEC MANEUVERS
@@ -903,7 +905,7 @@ KALUPDT		TS	ATTKALMN	# INITIALIZATION OF ATTITUDE RATES USING
 					
 		CA	DELTATT		# =1SEC - 80MS
 		AD	T5TIME		# + DELAYS
-## Page 997
+## Page 993
 		TS	TIME5
 		TCF	+3
 		CAF	DELTATT2	# SAFETY PLAY TO ASSURE
@@ -948,7 +950,7 @@ GETAKS		EXTEND			# COMPUTE TOTAL ATTITUDE ERROR FOR
 		CA	T5TEMP
 		EXTEND
 		MP	AMGB4
-## Page 998
+## Page 994
 		TS	AK1
 		CA	T5TEMP
 		EXTEND
@@ -973,6 +975,6 @@ WRTN17		EXTEND			# GET SET TO COMPUTE TOTAL ASTRONAUT
 		CA	CPHIX
 		TCF	GETAKS
 		
-## Page 999
-# ... is blank. Yay! --- RSB 2004
- 
+## Page 995
+## Blank page.
+

@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1439 of 1701.pdf.
+## Reference:	Starts on p. 1417
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1439
+## Page 1417
 		BANK	14
 		SETLOC	KEYRUPT
 		BANK
@@ -62,7 +64,7 @@ ACCEPTUP	CAF	CHRPRIO		# (NOTE: RUPTREG4 = KEYTEMP1)
 		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
 		TC	RESUME
 
-## Page 1440
+## Page 1418
 # UPRUPT PROGRAM
 
 UPRUPT		TS	BANKRUPT
@@ -113,7 +115,7 @@ TMFAIL2		CS	FLAGWRD7	# LOCK OUT FURTHER UPLINK ACTIVITY
 		ADS	FLAGWRD7	# `ERROR RESET' IS SENT VIA UPLINK.
 		TC	RESUME
 UPTEST		AD	KEYTEMP1
-## Page 1441
+## Page 1419
 		CCS	A
 		TC	TMFAIL2
 HI10		OCT	77740

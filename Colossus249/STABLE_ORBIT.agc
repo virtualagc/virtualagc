@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 518-527 of 1701.pdf.
+## Reference:	pp. 516-523.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/12/04 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 518
+## Page 516
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
 #
 # MOD NO -1		LOG SECTION -- STABLE ORBIT -- P38-P39
@@ -85,7 +87,7 @@
 #	(1)  TRKMKCNT	NUMBER OF MARKS
 #	(2)  TTOGO	TIME TO GO
 #	(3)  +MGA	MIDDLE GIMBAL ANGLE
-## Page 519
+## Page 517
 #	(4)  DSPTEM1	TIME OF INTERCEPT OF PASSIVE VEHICLE ORBIT
 #			(FOR SOI ONLY)
 #	(5)  POSTTPI	PERIGEE ALTITUDE OF ACTIVE VEHICLE ORBIT AFTER
@@ -136,7 +138,7 @@ P78		TC	BANKCALL
 		TCR	BLANKET
 		TCF	ENDOFJOB
 		CAF	FIVE
-## Page 520
+## Page 518
 		TS	OPTION1
 		CAF	ONE
 		TS	OPTION2		# OPTION CODE IS SET TO 1
@@ -158,7 +160,7 @@ P78		TC	BANKCALL
 		STORE	TINTSOI		# STORE FOR SOR PHASE
 		CLRGO
 			OPTNSW		# OPTNSW
-## Page 521
+
 			JUNCTN1
 OPTN1		SET	CLEAR		# SOI
 			OPTNSW
@@ -188,10 +190,7 @@ JUNCTN1		CLEAR	CALL
 			SELECTMU	# SELECT MU, CLEAR FINALFLG, GO TO VN1645
 RECYCLE		CALL
 			PREC/TT
-## Page 522
-# This page of 1701.pdf is blank --- RSB 2004
-
-## Page 523
+## Page 519
 		BOFF	DLOAD
 			OPTNSW
 			OPTN2
@@ -245,7 +244,7 @@ MAINRTNE	STCALL	TDEC1		# PRECISION UPDATE PASSIVE VEHICLE TO
 			S3435.25
 TEST3979	BOFF	BON
 
-## Page 524
+## Page 520
 			P39/79SW
 			MAINRTN1
 			FINALFLG
@@ -297,7 +296,7 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 #
 #	P39 AND P79 CALCULATE THE REQUIRED DELTA V AND OTHER INITIAL
 #	CONDITIONS REQUIRED BY TEH AGC TO MAKE A MIDCOURSE CORRECTION
-## Page 525
+## Page 521
 #	MANEUVER AFTER COMPLETING THE SOI MANEUVER BUT BEFORE MAKING
 #	THE SOR MANEUVER.
 #
@@ -348,7 +347,7 @@ P39/P79A	DXCH	KT		# TIME TO PREPARE FOR BURN
 			P39/79SW
 			SELECTMU	# SELECT MU, CLEAR FINALFLG, GO TO VN1645
 P39/P79B	RTB	DAD
-## Page 526
+## Page 522
 			LOADTIME
 			KT
 		STORE	TIG		# TIG = T (PRESENT) + PREPARATION TIME
@@ -404,7 +403,7 @@ PREC/TT		STQ	DLOAD
 
 INTRPVP		STQ	BOFF		# PRECISION UPDATE PASSIVE VEHICLE TO
 			RTRN		#	TDEC1
-## Page 527
+## Page 523
 			AVFLAG
 			OTHERV
 		CALL
@@ -440,8 +439,5 @@ V06N57SR	VN	0657
 V06N34SR	VN	0634
 V06N58SR	VN	0658
 V06N81SR	VN	0681
-
-# *** END OF SMOOCH  .007 ***
-
 
 

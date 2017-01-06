@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1384 of 1701.pdf.
+## Reference:	Starts on p. 1362
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary13 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1384
+## Page 1362
 # PROGRAM DESCRIPTION				DATE:  20 DECEMBER 1967
 # PROGRAM NAME -- SELF-CHECK			LOG SECTION:  AGC BLOCK TWO SELF-CHECK
 # MOD NO -- 1					ASSEMBLY SUBROUTINE UTILITYM REV 25
@@ -81,7 +83,7 @@
 #	SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E).  THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP.
 #
 # OUTPUT
-## Page 1385
+## Page 1363
 #	SELF-CHECK UPON DETECTING AN ERROR LOADS THE SELF-CHECK ALARM CONSTANT (01102) INTO THE FAILREG SET AND
 #	TURNS ON THE ALARM LIGHT.  THE OPERATOR MAY THEN DISPLAY THE THREE FAILREGS BY KEYING IN V 05 N 09 E.  FOR FURTHER
 # 	INFORMATION HE MAY KEY IN V 05 N 08 E, THE DSKY DISPLAY IN R1 WILL BE ADDRESS+1 OF WHERE THE ERROR WAS DETECTED,
@@ -128,7 +130,7 @@ S+2		EQUALS	BIT2
 S+3		EQUALS	THREE
 S+4		EQUALS	FOUR
 S+5		EQUALS	FIVE
-## Page 1386
+## Page 1364
 S+6		EQUALS	SIX
 S+7		EQUALS	SEVEN
 S8BITS		EQUALS	LOW8		# 00377
@@ -179,7 +181,7 @@ TCALARM2	TC	ALARM2
 		OCT	01102		# SELF-CHECK MALFUNCTION INDICATOR
 		CCS	SMODE
 SIDLOOP		CA	S+ZERO
-## Page 1387
+## Page 1365
 		TS	SMODE
 		TC	SELFCHK		# GO TO IDLE LOOP
 		TC	SFAIL		# CONTINUE WITH SELF-CHECK
@@ -230,7 +232,7 @@ SELFCHK		TC	SMODECHK	# ** CHARLEY, COME IN HERE
 # SKEEP6 HOLDS B(X+1).
 # SKEEP5 HOLDS B(X).
 # SKEEP4 HOLDS C(EBANK) DURING ERASLOOP AND CHECKNJ
-## Page 1388
+## Page 1366
 # SKEEP3 HOLDS LAST ADDRESS BEING CHECKED (HIGHEST ADDRESS).
 # SKEEP2 CONTROLS CHECKING OF NON-SWITCHABLE ERASABLE MEMORY WITH BANK NUMBERS IN EB.
 #
@@ -283,7 +285,7 @@ ERASLOOP	INHINT
 		AD	0000		# AD X
 		TC	-1CHK
 		CA	ERESTORE	# HAS ERASABLE BEEN RESTORED
-## Page 1389
+## Page 1367
 		EXTEND
 		BZF	ELOOPFIN	# YES, EXIT ERASLOOP.
 		EXTEND
@@ -336,7 +338,7 @@ CNTRCHK		CA	CNTRCON		# 00050
 CNTRLOOP	TS	SKEEP2
 		AD	SBIT4		# +10 OCTAL
 		INDEX	A
-## Page 1390
+## Page 1368
 		CS	0000
 		CCS	SKEEP2
 		TC	CNTRLOOP
@@ -389,7 +391,7 @@ COMMFX		TS	SKEEP7
 		TS	SKEEP5		# COUNTS DOWN 2 TC SELF WORDS
 COMADRS		CA	SKEEP4
 		TS	L		# TO SET SUPER BANK
-## Page 1391
+## Page 1369
 		MASK	HI5
 		AD	SKEEP3
 		TC	SUPDACAL	# SUPER DATA CALL
@@ -440,7 +442,7 @@ ADRSCHK		LXCH	A
 		TC	CONTINU
 		CCS	SKEEP5
 		TC	CONTINU +1
-## Page 1392
+## Page 1370
 		CA	S-1
 		TC	CONTINU +1	# AD IN THE BUGGER WORD
 CONTINU		CA	S+1		# MAKE SURE TWO CONSECUTIVE TC SELF WORDS
@@ -491,7 +493,7 @@ GONXTBNK	CCS	SKEEP7
 SOPTION		CA	SKEEP4
 		MASK	HI5		# = BANK BITS
 		TC	LEFT5
-## Page 1393
+## Page 1371
 		TS	L		# BANK NUMBER BEFORE SUPER BANK
 		CA	SKEEP4
 		MASK	S8BITS		# = SUPER BANK BITS

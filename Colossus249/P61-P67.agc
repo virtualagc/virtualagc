@@ -5,7 +5,7 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 747-776 of 1701.pdf.
+## Reference:	pp. 743-772.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/17/04 RSB.	Began transcribing.
@@ -14,10 +14,12 @@
 ##		2010-10-25 JL	Fixed page number.
 ##		2011-05-07 JL	Flagged SBANK= workarounds for future removal. 
 ##				Fixed garbled lines.
-
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -33,13 +35,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 747
+## Page 743
 # PROGRAM:	P61
 # MOD NO.:	0	MAR. 13, 1967
 # MOD BY:	R. HIRSCHKOP
@@ -89,7 +91,7 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 		TC	BANKCALL
 		CADR	GOFLASHR
 		TC	GOTOP00H
-## Page 748
+## Page 744
 		TC	P61.4
 		TC	-5
 		
@@ -140,7 +142,7 @@ P61.2		TC	INTPRET		# CORRECT TTE FOR TIME LAPSE DURING
 					# ABOVE DISPLAY.
 		RTB	DSU
 			LOADTIME	# CURRENT TIME.
-## Page 749
+## Page 745
 			MM		# PIPTIME FOR RONE & VONE.
 		DAD
 			TTE1		# NEGATIVE OF FREE FALL TIME.
@@ -157,7 +159,7 @@ P61.2		TC	INTPRET		# CORRECT TTE FOR TIME LAPSE DURING
 		TC	P61.2		# REDO
 		
 #		.... THEN FALL INTO P62
-## Page 750
+## Page 746
 
 # PROGRAM:	P62
 # MOD NO.:	0	MAR. 13, 1967
@@ -207,7 +209,7 @@ P62.2		EXTEND
 		CADR	GOPERF1R
 		TC	GOTOP00H
 		TC	+3			# PROCEED
-## Page 751
+## Page 747
 						# NOTE:  NODOFLAG WILL BE SET IN CM/DAPON. ***
 		TC	-5			# ENTER
 		TC	P61.3			# FOR PHASCHNG AND ENDOFJOB
@@ -253,7 +255,7 @@ P62.1		CA	V06N61			# LAT(SPL)	LNG(SPL)	HEADSUP
 		TC	UPFLAG			# TURN ON ENTRY DISPLAY
 		ADRES	ENTRYDSP		# ENTRYDSP = 92D BIT 13 FLAG 6
 SKIP
-## Page 752
+## Page 748
 		CS	CMDAPMOD		# GO DIRECTLY TO P63 IF BODY ATTITUDE
 		MASK	ONE			# IS SUCH THAT THE DELAY TASK: WAKEP62
 		EXTEND				# WILL BE OMITTED.
@@ -288,7 +290,7 @@ P62.3		SSP	GOTO			# SET RETURN ADDRESS SO THAT ROUTINE
 			S62.3			# PUT DESIRED CDU VALUES IN CPHI=5 FOR
 						# N22 DISPLAY.
 
-## Page 753
+## Page 749
 # PROGRAM:	P63
 # MOD NO:	0	MAR. 13, 1967
 # MOD BY:	R. HIRSCHKOP
@@ -338,11 +340,11 @@ V06N63		VN	0663
 V06N64		VN	0664
 ENTCADR		CADR	STARTENT
 
-## Page 754
+## Page 750
 		EBANK=	RTINIT			# TO CARRY OVER INTO ENTRY STEERING.
 POSECADR	2CADR	CM/POSE
 
-## Page 755
+## Page 751
 # PROGRAM:	P64
 # MOD NO:	1	SEPT. 19, 1967
 # MOD BY:	R. HIRSCHKOP
@@ -374,7 +376,7 @@ P64		TC	NEWMODEX		# ENTER VIA RTB WHEN .05G IS EXCEEDED.
 		TC	DANZIG			# ... AND CONTINUE IN INITROLL ...
 V06N68		VN	0668
 
-## Page 756
+## Page 752
 # PROGRAM:	P65
 # MOD NO:  0	MOD BY:  RR BAIRNSFATHER	DATE:  17 JAN 68	COLOSSUS GSOP ADDITION.
 # FUNCTION:	TO CONTINUE ENTRY GUIDANCE, USING THE UP-CONTROL PHASE TO STEER TO A CONTROLLED EXIT
@@ -422,7 +424,7 @@ P65.1		TC	DOWNFLAG
 						# N06V68 VIA OVERNOUT, AS USED IN P64
 V16N69		VN	1669
 		
-## Page 757
+## Page 753
 # PROGRAM:	P66
 # MOD NO: 0	MOD BY: RR BAIRNSFATHER		DATE: 17 JAN 68		COLOSSUS GSOP ADDITIONS
 # FUNCTION:	KEEP CM ATTITUDE IN TRIM TO THE RELATIVE VELOCITY VECTOR.  ENTRY GUIDANCE STOPS GENERATING
@@ -444,7 +446,7 @@ P66		TC	NEWMODEX		# ENTER VIA RTB WHEN D < Q7 FPSS
 						
 						# ... AND CONTINUE AT KEP2 
 						
-## Page 758
+## Page 754
 # PROGRAM:	P67
 # MOD NO:	0	MAR. 16, 1967
 # MOD BY:	R. HIRSCHKOP
@@ -493,11 +495,11 @@ P67.1		CA	V16N67			# RTOGO		LAT		LONG
 		EXTEND
 		DCA	SERVCAD2
 		
-## Page 759
+## Page 755
 		DXCH	AVEGEXIT
 		TCF	GOTOP00H
 		
-## Page 760
+## Page 756
 P67.2		VLOAD	CLEAR			# CALC PRESENT LAT, LONG, ALT.
 			RN
 			ERADFLAG		# USE PAD RAD FOR ALT. (NOT SEEN ANYWAY)
@@ -513,7 +515,7 @@ V16N67		VN	1667
 OCT41		=	33DEC
 SERVCAD2	=	SERVCAD1
 
-## Page 761
+## Page 757
 # SUBROUTINE NAME:	S61.1	
 # MOD NO:	0					DATE:		21 FEB 67
 # MOD BY:	RR BAIRNSFATHER				LOG SECTION:	P61-P67
@@ -570,7 +572,7 @@ S61.1		EXTEND
 		TC	BANKCALL
 		CADR	R02BOTH
 		TC	INTPRET
-## Page 762
+## Page 758
 		BON	CALRB
 			AVEGFLAG	# IS AVERAGEG ON
 			S61.1A		# YES
@@ -620,7 +622,7 @@ S61.1A		BOVB	VLOAD
 		BOVB	RTB
 			RETRN1
 			RETRN3
-## Page 763
+## Page 759
 S61.1B		DCOMP	DAD
 			C(30)LIM	# = 1.0 - .5 COS(30)
 		BOVB	EXIT
@@ -648,7 +650,7 @@ C(30)LIM	2DEC	.566985		# = 1.0 - .5 COS(30)
 10SECS		DEC	1000		# 1000 CS
 60SECDP		2DEC	6000 B-28	# 6000 CS
 
-## Page 764
+## Page 760
 # PROGRAM NAME:		S61.2			DATE:		14 FEB 67
 # MOD NO:  	1				LOG SECTION:	P61-P67
 # MOD BY:	NORTH / BAIRNSFATHER
@@ -699,7 +701,7 @@ C(30)LIM	2DEC	.566985		# = 1.0 - .5 COS(30)
 #		ALL PDL LOCATIONS ABOVE 12D, INCLUDING X1,X2,S1,S2
 #		ALSO PDL+0 ... PDL+5, WHERE INITIAL PUSHLOC = PDL
 
-## Page 765
+## Page 761
 # THE FOLLOWING PUSH LIST LOCATIONS HAVE BEEN RESERVED FOR TFF ROUTINES AND ARE REPEATED HERE FOR CONVENIENCE.
 # OF COURSE FOR S61.2 USAGE, EARTH ORIGIN SCALING IS USED.
 #
@@ -720,7 +722,7 @@ C(30)LIM	2DEC	.566985		# = 1.0 - .5 COS(30)
 #	TFF/RTMU=	30D		1/SQRT(MU)		E:  (17)	M:  (14)
 #	TFFVSQ	=	20D		-(VN.VN/MU)	1/M	E:  (20)	M:  (18)
 
-## Page 766
+## Page 762
 		BANK	34
 		SETLOC	P60S2
 		BANK
@@ -769,7 +771,7 @@ CALLCON		CALL
 		CALL
 			DISPTARG
 		STCALL	RTGO
-## Page 767
+## Page 763
 			VGAMCALC
 			
 		DMP			# MPAC = GAMMA
@@ -817,7 +819,7 @@ CALLCON		CALL
 		DLOAD
 			HI6ZEROS
 		STODL	GMAX		# 100 GMAX (-14)
-## Page 768
+## Page 764
 # DISPLAY USES GMAX AS SP, SO LO WORD IS WRITTEN OVER BY VPRED.
 			ERADM		# = FISCHER RADIUS (-29) M
 		DAD	CALL		# 2 ND ITERATION FOR FISCHER RADIUS
@@ -860,7 +862,7 @@ KR1		2DEC	-.026666667	# = -2.4 4 / 360
 -6.05DEG	2DEC	-.016805556	# = -6.05 / 360
 KR2		2DEC	.54931641	# = (360/4) 100 (-14) = 9000 B-14
 KR3		2DEC	1000 B-14	# = 100 (10.0) (-14) O,S
-## Page 769
+## Page 765
 					# ASSUMES L/D = 0.3, BANK =0.
 RTRIAL		2DEC	6460097.16 B-29	# RPAD +264643 FT =21 194 545 FT
 					# RPAD DEFINED AS 20 909 901.57 FT =6 373 336 M
@@ -875,7 +877,7 @@ KR4		2DEC	.833333333
 VEMSCON		2DEC	-.0389676 B-14	# = -HS D / 2 PI (-14)	M SQ / CS SQ
 					# = -16369	.05G	32.2	.3048	.3048/2 PI	(-14)
 
-## Page 770
+## Page 766
 # SUBROUTINE NAME:  FISHCALC	(USED BY S61.2)		DATE:		01.21.67
 # MOD NO: 0						LOG SECTION:	P61-P67
 # MOD BY: NORTH / BAIRNSFATHER
@@ -929,7 +931,7 @@ DUMPFISH	GOTO
 			GETERAD		# SAVES FISCHER RAD (-29) M IN ERADM AND
 					# IN MPAC.  RETURNS TO CALLER VIO QPRET.
 					
-## Page 771
+## Page 767
 # SUBROUTINE NAME:  VGAMCALC	(USED BY S61.2)				DATE:		01.21.67
 # MOD NO: 0								LOG SECTION:	P61-P67
 # MOD BY: NORTH / BAIRNSFATHER
@@ -978,7 +980,7 @@ DUMPFISH	GOTO
 #
 # DEBRIS:	QPRET, PDL+0 ... PDL+3
 #		RTERM, NRTERM IF PREVGAM ENTERED.
-## Page 772
+## Page 768
 
 PREVGAM		SL*			# ENTER WITH NEW RTERM IN MPAC
 					# E: (-29)  M: (-27)
@@ -1011,7 +1013,7 @@ DUMPVGAM	RVQ
 					# CALLER MUST SUPPLY OWN SIGN ...
 					#			22W	27MS
 
-## Page 773
+## Page 769
 # SUBROUTINE NAME:	TFF/TRIG	(USED BY S61.2)		DATE:		01.17.67
 # MOD NO: 0							LOG SECTION:	P61-P67
 # MOD BY: RR BAIRNSFATHER
@@ -1071,7 +1073,7 @@ TFF/TRIG	DLOAD	SR1
 			HIDPHALF
 		STORE	CDELF/2		# .5 COS(THETA)
 		DSQ	DCOMP		# KEEP HONEST FOR SQRT.
-## Page 774
+## Page 770
 		DAD	SQRT
 			HIDP1/4
 DUMPTRIG	SIGN	RVQ
@@ -1097,6 +1099,8 @@ VRCALC		VLOAD	DOT
 		RVQ
 
 # END OF PROGRAM S61.2
+
+## Page 771
 # PROGRAM DESCRIPTION S62.3	DATE 10JAN67
 # MOD NO 1:			LOG SECTION P60-P67
 # MOD BY ZELDIN
@@ -1159,7 +1163,7 @@ VRCALC		VLOAD	DOT
 		BANK	10
 		SETLOC	P60S4
 		BANK
-## Page 775
+## Page 772
 		COUNT*	$$/S62.3
 		
 S62.3		SETPD	SLOAD

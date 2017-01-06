@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Begins on p. 1234 of 1701.pdf.
+## Reference:	Begins on p. 1222
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/28/04 RSB.	Adapted from corresponding Luminary131 file.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1234
+## Page 1222
 # INCORP1 -- PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITION
 # AND VELOCITY OR THE NINE-DIMENSIONAL DEVIATION OF POSITION, VELOCITY, AND
 # RADAR OR LANDMARK BIAS.  THE OUTPUT OF THE BVECTOR ROUTINE ALONG WITH THE
@@ -87,7 +89,7 @@ Z123		VLOAD	MXV*
 		STORE	ZI +18D,2
 		VLOAD
 			BVECTOR +6	# BVECTOR (1)
-## Page 1235
+## Page 1223
 		MXV*	VAD*
 			W +108D,1
 			ZI +18D,2
@@ -138,7 +140,7 @@ INCOR1B		SL2	BOV
 			INCOR1B
 INCOR1C		TLOAD	ROUND
 			TRIPA
-## Page 1236
+## Page 1224
 		DMP	SQRT
 			TEMPVAR
 		SL*	TAD
@@ -189,7 +191,7 @@ INCOR2		VLOAD	VXM*		# COMPUT OMEGA1,2,3
 		STORE	OMEGA +6
 		VLOAD	STADR
 		STORE	OMEGA
-## Page 1237
+## Page 1225
 		BON	VLOAD
 			DMENFLG
 			INCOR2AB
@@ -213,7 +215,7 @@ INCOR3		VLOAD*
 		GOTO
 			EGRESS
 
-## Page 1238
+## Page 1226
 # INCORP2 -- INCORPORATES THE COMPUTED STATE VECTOR DEVIATIONS INTO THE
 # ESTIMATED STATE VECTOR.  THE STATE VECTOR UPDATED MAY BE FOR EITHER THE
 # LEM OR THE CSM.  DETERMINED BY FLAG VEHUPFLG.  (ZERO = LEM) (1 = CSM)
@@ -266,7 +268,7 @@ INCORP2		STQ	CALL
 		TS	ZIXA		# INITIAL IX 2 SETTING FOR Z COMPONENT
 		TS	ZIXB
 FAZA		TC	PHASCHNG
-## Page 1239
+## Page 1227
 		OCT	04022
 		TC	UPFLAG
 		ADRES	REINTFLG
@@ -317,7 +319,7 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 		DLOAD*	DCOMP		# CALC LOWER 3X9 PARTITION OF W MATRIX
 			ZI,2
 		NORM	VXSC
-## Page 1240
+## Page 1228
 			S2
 			OMEGAM3
 		XCHX,2	LXC,2
@@ -368,7 +370,7 @@ FAZB5		SLOAD	DAD
 			FAZB2
 FAZC		CALL
 			GRP2PC
-## Page 1241
+## Page 1229
 		VLOAD	VAD		# START 3RD PHASE OF INCORP2
 			X789		# 7TH, 8TH, 9TH COMPONENTN OF STATE VECTOR
 			DELTAX +12D	# INCORPORATION FOR X789
@@ -419,7 +421,7 @@ FAZAB3		CALL
 		CALL
 			SVDWN2		# STORE DOWNLINK STATE VECTOR
 FAZAB4		CALL
-## Page 1242
+## Page 1230
 			GRP2PC		# PHASE CHANGE
 		BOFF	VLOAD
 			DMENFLG
@@ -471,7 +473,7 @@ NEWZCOMP	VLOAD	ABVAL
 			NORMZI
 			NORMZI		# SAVE X1
 		NORM	INCR,1
-## Page 1243
+## Page 1231
 			X1
 		DEC	2
 		VLOAD	VSL*

@@ -17,6 +17,10 @@
 #				numbers, which are no longer of interest to us.
 #				However, I haven't yet modified all of the 
 #				individual files in that manner yet.
+#		2017-01-06 RSB	All of the individual .agc files for the different
+#				log sections have now had their internal page-numbering
+#				adjusted to conform to the numbering of the printed 
+#				pages.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document obtained from MIT's website,

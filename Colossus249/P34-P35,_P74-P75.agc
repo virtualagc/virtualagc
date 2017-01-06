@@ -5,17 +5,19 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 454-497 of 1701.pdf.
+## Reference:	pp. 452-495.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/11/04 RSB.	Began adapting from corresponding Luminary131
 ##				source file.
 ##		2010-08-29 JL	Added missing comment characters. 
 ##		2011-05-07 JL	Removed workaround.
-
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -31,13 +33,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 454
+## Page 452
 # TRANSFER PHASE INITITIATION (TPI) PROGRAMS (P34 AND P74)
 # MOD NO -1			LOG SECTION -- P32-P35, P72-P75
 # MOD BY WHITE, P.		DATE: 1 JUNE 67
@@ -73,7 +75,7 @@
 #			ORBITS WAS MINIMIZED.
 #		(D)	THE PERICENTER ALTITUDES OF ORBITS FOLLOWING CSI AND
 #			CDH WERE COMPUTED TO BE GREATER THAN 35,000 FT FOR LUNAR
-## Page 455
+## Page 453
 #			ORBIT OR 85 NM FOR EARTH ORBIT.
 #		(E)	THE CSI AND CDH MANEUVERS WERE ASSUMED TO BE PARALLEL TO
 #			THE PLANE OF THE PASSIVE VEHICLE ORBIT.  HOWEVER, CREW
@@ -118,7 +120,7 @@
 #
 #		THE ASTRONAUT WILL CALL THIS DISPLAY TO VERIFY THAT THE
 #		CENTRAL ANGLE OF TRANSFER OF THE ACTIVE VEHICLE IS NOT WITHIN
-## Page 456
+## Page 454
 #		170 TO 190 DEGREES.  IF THE ANGLE IS WITHIN THIS ZONE THE
 #		ASTRONAUT SHOULD REASSES THE INPUT TARGETING PARAMETERS BASED
 #		UPON DELTA V AND EXPECTED MANEUVER TIME.
@@ -164,7 +166,7 @@
 #
 # SUBROUTINES USED
 #	AVFLAGA
-## Page 457
+## Page 455
 #	AVFLAGP
 #	VNP00H
 #	DISPLAYE
@@ -214,7 +216,7 @@ P34/P74C	DLOAD	SET
 			ITSWICH
 SWCHSET		STORE	NOMTPI
 INTLOOP		DLOAD	DAD
-## Page 458
+## Page 456
 			TTPI
 			NOMTPI
 		STCALL	TDEC1
@@ -265,7 +267,7 @@ P34/P74E	TC	INTPRET
 			TIMETHET
 		DLOAD
 			TTPI
-## Page 459
+## Page 457
 		STORE	INTIME		# FOR INITVEL
 		DAD
 			T		# RENDEZVOUS TIME
@@ -298,7 +300,7 @@ P34/P74E	TC	INTPRET
 		GOTO
 			P34/P74C
 
-## Page 460
+## Page 458
 # RENDEZVOUS MID-COURSE MANEUVER PROGRAMS (P35 AND P75)
 # MOD NO -1			LOG SECTION -- P32-P35, P72-P75
 # MOD BY WHITE, P.		DATE:  1 JUNE 67
@@ -341,7 +343,7 @@ P34/P74E	TC	INTPRET
 #	(5)	THE TIME OF INTERCEPT (T(INT)) WAS DEFINED BY PREVIOUS
 #		COMPLETION OF THE TRANSFER PHASE INITIATION (TPI) PROGRAM
 #		(P34/P74) AND IS PRESENTLY AVAILABLE IN STORAGE.
-## Page 461
+## Page 459
 #	(6)	ONCE THE PARAMETERS REQUIRED FOR COMPUTATION OF THE MANEUVER
 #		HAVE BEEN COMPLETELY SPECIFIED, THE VALUE OF THE ACTIVE
 #		VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STORED.
@@ -388,7 +390,7 @@ P34/P74E	TC	INTPRET
 #	PRECSET
 #	S34/35.1
 #	S34/35.2
-## Page 462
+## Page 460
 #	S34/35.5
 #	VN1645
 
@@ -426,7 +428,7 @@ P35/P75B	RTB
 			VN1645
 		GOTO
 			P35/P75B
-## Page 463
+## Page 461
 # ***** S33/34.1 *****
 
 S33/34.1	STQ	SSP
@@ -477,7 +479,7 @@ TESTY		BOFF	DLOAD
 		STORE	DELEL
 		ABS	DSU
 			ELEPS
-## Page 464
+## Page 462
 		BMN
 			TIMEX		# COMMERCIALS EVERYWHERE
 FIGTIME		SLOAD	SR1
@@ -528,7 +530,7 @@ FIGTIME		SLOAD	SR1
 		DOT	DMP
 			VPASS3
 			14D
-## Page 465
+## Page 463
 		BDSU
 		NORM	PDVL		# NORMALIZED WA-WP 12D
 			X1
@@ -579,7 +581,7 @@ REPETE		DLOAD	DMP
 		DMP
 			THIRD
 		STODL	SECMAX
-## Page 466
+## Page 464
 		ABS	SR1		# CROSSED OVER SOLUTION
 		DCOMP	GOTO		# DT=(-SIGN(DTO)//DT//)/2
 			RESIGN
@@ -630,11 +632,11 @@ ELEX		DLOAD	DAD
 			TIMEX
 		STORE	ELEV
 TIMEX		DLOAD	GOTO
-## Page 467
+## Page 465
 			ZEROVECS
 			NORMEX
 
-## Page 468
+## Page 466
 # ***** S34/35.1 *****
 
 # COMPUTE UNIT NORMAL AND LINE OF SIGHT VECTORS GIVEN THE ACTIVE AND
@@ -651,7 +653,7 @@ S34/35.1	VLOAD	VSU
 		STORE	UNRM
 		RVQ
 
-## Page 469
+## Page 467
 # ***** S34/35.2 *****
 
 # ADVANCE PASSIVE VEH TO RENDEZVOUS TIME AND GET REQ VEL FROM LAMBERT
@@ -703,14 +705,14 @@ NOPIE		STODL	ACTCENT
 		CALL
 			LOMAT
 		VLOAD	MXV
-## Page 470
+## Page 468
 			DELVEET3
 			0D
 		VSL1
 		STCALL	DELVLVC
 			SUBEXIT
 
-## Page 471
+## Page 469
 # ***** S34/35.3 *****
 
 S34/35.3	STQ	CALL
@@ -749,7 +751,7 @@ NOVRWRT		VLOAD	PUSH
 		STCALL	DVLOS
 			NORMEX
 
-## Page 472
+## Page 470
 # ***** S34/35.4 *****
 
 S34/35.4	STQ	SETPD		# NO ASTRONAUT OVERWRITE
@@ -758,7 +760,7 @@ S34/35.4	STQ	SETPD		# NO ASTRONAUT OVERWRITE
 		GOTO
 			NOVRWRT
 
-## Page 473
+## Page 471
 # ***** LOMAT *****
 
 LOMAT		VLOAD	VCOMP
@@ -805,7 +807,7 @@ ALLSET		STOVL	TET
 			RATT
 			RTRN
 
-## Page 474
+## Page 472
 # ***** S34/35.5 *****
 #
 # SUBROUTINES USED
@@ -852,7 +854,7 @@ FLAGOFF		CALL
 		GOTO
 			SUBEXIT
 
-## Page 475
+## Page 473
 # ***** VN1645 *****
 #
 # SUBROUTINES USED
@@ -902,7 +904,7 @@ GET45		EXIT
 		TC	CLUPDATE	# RECYCLE -- RETURN FOR INITIAL COMPUTATION
 KILCLOCK	CA	Z
 		TS	DISPDEX
-## Page 476
+## Page 474
 		TC	GOTOP00H
 N45PROC		CS	FLAGWRD2
 		MASK	BIT6
@@ -921,7 +923,7 @@ CLUPDATE	CA	Z
 			UPDATFLG
 			QSAVED
 
-## Page 477
+## Page 475
 # ***** DISPLAYE *****
 #
 # SUBROUTINES USED
@@ -943,7 +945,7 @@ DISPLAYE	EXTEND
 		TCR	BLANKET
 		TCF	ENDOFJOB
 
-## Page 478
+## Page 476
 # ***** P3XORP7X *****
 
 P3XORP7X	CAF	HIGH9
@@ -970,7 +972,7 @@ VNP00H		EXTEND
 		TC	RTRN
 		TCF	-5
 
-## Page 479
+## Page 477
 # ***** CONSTANTS *****
 
 V06N37		VN	0637
@@ -988,7 +990,7 @@ DP-.01		OCT	77777		# CONSTANTS
 		OCT	61337		# ADJACENT	-.01 FOR MGA DSP
 EPSFOUR		2DEC	.0416666666
 
-## Page 480
+## Page 478
 # ***** INITVEL *****
 # MOD NO -1			LOG SECTION -- P34-P35, P74-P75
 # MOD BY WHITE, P.		DATE:  21 NOV 67
@@ -1035,7 +1037,7 @@ EPSFOUR		2DEC	.0416666666
 #	(9)	RTX2		COORDINATE SYSTEM ORIGIN -- 0 FOR EARTH, 2 FOR LUNAR
 #	PUSHLOC SET AT 4D
 #
-## Page 481
+## Page 479
 # OUTPUT
 #	(1)	RTARG		OFFSET TARGET POSITION VECTOR
 #	(2)	VIPRIME		MANEUVER VELOCITY REQUIRED
@@ -1084,7 +1086,7 @@ INITVEL1	SSP	DLOAD		# SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 2D)
 			RINIT
 		STOVL	R1VEC		# R1VEC EQ RINIT
 			RTARG1
-## Page 482
+## Page 480
 		STODL	R2VEC		# R2VEC EQ RTARG
 			DELLT4
 		STORE	TDESIRED	# TDESIRED EQ DELLT4
@@ -1136,7 +1138,7 @@ INITVEL3	DLOAD	PDVL		#				(PL 2D)
 			RTX1
 			18D
 		BMN	INCR,1
-## Page 483
+## Page 481
 			+2
 		DEC	-8
 		INCR,1	SLOAD
@@ -1187,7 +1189,7 @@ INITVEL4	LXA,2	SXA,2
 INITVEL5	VLOAD
 			RINIT
 		STORE	R1VEC
-## Page 484
+## Page 482
 		STOVL	RCV
 			VIPRIME
 		STODL	VCV
@@ -1240,7 +1242,7 @@ INITVEL7	VLOAD	VSU
 		STORE	VTPRIME
 		SLOAD	BHIZ
 			RTX2
-## Page 485
+## Page 483
 			INITVELX
 		VLOAD	VSR2
 			VTPRIME
@@ -1262,7 +1264,7 @@ INITVELX	SETPD	VLOAD
 
 # ***** END OF INITVEL ROUTINE *****
 
-## Page 486
+## Page 484
 # ***** MIDGIM *****
 # MOD NO. 0, BY WILLMAN, SUBROUTINE RENDGUID, LOG P34-P35, P74-P75
 # REVISION 03, 17 FEB 67
@@ -1298,7 +1300,7 @@ INITVELX	SETPD	VLOAD
 #
 # ** ALARMS -- NONE **
 
-## Page 487
+## Page 485
 # MIDDLE GIMBAL ANGLE COMPUTATION
 		SETLOC	MIDDGIM
 		BANK
@@ -1352,7 +1354,7 @@ GET.LVC		VLOAD	UNIT		# (PL 6D) R (+29) IN MPAC UNITZE UR
 
 # ***** END OF MIDGIM ROUTINE *****
 
-## Page 488
+## Page 486
 SELECTMU	AXC,1	AXT,2
 			2D
 			0D
@@ -1378,7 +1380,7 @@ RTRNMU		STORE	RTMU
 		GOTO
 			VN1645
 
-## Page 489
+## Page 487
 # ***** PERIAPO *****
 # MOD NO -1			LOG SECTION -- P34-P35, P74-P75
 # MOD BY WHITE, P.		DATE 18 JAN 68
@@ -1423,7 +1425,7 @@ RTRNMU		STORE	RTMU
 #
 # SUBROUTINES USED
 #	SETRAD
-## Page 490
+## Page 488
 #	APSIDES
 
 		SETLOC	APOPERI
@@ -1456,7 +1458,7 @@ PERIAPO		STQ	CALL
 			XXXALT
 		PUSH	GOTO		# 8D = PERIGEE ALTITUDE 	B29 OR B27
 			NORMEX
-## Page 491
+## Page 489
 SETRAD		DLOAD	PUSH
 			RPAD
 		SXA,1	INCR,2
@@ -1470,7 +1472,7 @@ SETRAD		DLOAD	PUSH
 		PDDL
 SETRADX		DLOAD	RVQ
 
-## Page 492
+## Page 490
 PRECSET		STQ
 			NORMEX
 		STCALL	TDEC2
@@ -1502,7 +1504,7 @@ PASSIVE		STOVL	RPASS3
 		STORE	VPASS3
 		RVQ
 
-## Page 493
+## Page 491
 VECSHIFT	LXA,2	VSR*
 			RTX2
 			0,2
@@ -1512,13 +1514,13 @@ VECSHIFT	LXA,2	VSR*
 			0,2
 		RVQ
 
-## Page 494
+## Page 492
 SHIFTR1		LXA,2	SL*
 			RTX2
 			0,2
 		RVQ
 
-## Page 495
+## Page 493
 # PROGRAM DESCRIPTION
 #
 # SUBROUTINE NAME	R36	OUT-OF-PLANE RENDEZVOUS ROUTINE
@@ -1563,7 +1565,7 @@ SHIFTR1		LXA,2	SL*
 		BANK	20
 		SETLOC	R36LM
 		BANK
-## Page 496
+## Page 494
 		EBANK=	RPASS36
 		COUNT*	$$/R36
 
@@ -1613,7 +1615,7 @@ R36INT		STCALL	TDEC1
 			UNP36		# .   _   _
 		STOVL	RRATE		# Y = U . V
 			06D		# _        A
-## Page 497
+## Page 495
 		UNIT	PUSH		# U  = UNIT ( R  )		18D
 		VXV	VXV		#  RA          A
 			00D		#  _    _     _     _

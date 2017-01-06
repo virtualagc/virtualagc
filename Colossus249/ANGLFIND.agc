@@ -5,17 +5,19 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 394-406 of 1701.pdf.
+## Reference:	pp. 392-404.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/10/04 RSB.	Began transcribing.
 ##		2017-01-02 RSB	Fixed a couple of comment errors, detected by
 ##				comparison to Colossus 237 and Comanche 55.
 ##				Lots more to come.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -31,13 +33,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 394
+## Page 392
 		BANK	15
 		SETLOC	KALCMON1
 		BANK
@@ -88,7 +90,7 @@ SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED		$2
 		STOVL	TMFI	+12D
 		STADR
 		STOVL	TMFI	+6
-## Page 395
+## Page 393
 		STADR
 		STORE	TMFI		# TMFI = TRANSPOSE (MFI) SCALED BY 4
 		
@@ -139,7 +141,7 @@ CHECKMAX	DLOAD	DSU
 			LOCSKIRT
 ALTCALC		VLOAD	VAD		# IF AM GREATER THAN 170 DEGREES
 			MFI
-## Page 396
+## Page 394
 			TMFI
 		VSR1
 		STOVL	MFISYM
@@ -189,7 +191,7 @@ COFMAXGO	DLOAD	DSU
 			COF
 		DSU	BMN
 			COF	+4
-## Page 397
+## Page 395
 			METHOD3		# COFZ G COFX OR COFY
 		GOTO
 			METHOD1		# COFX G COFY OR COFZ
@@ -240,7 +242,7 @@ CKU12		DLOAD	BPL
 		GOTO
 			LOCSKIRT
 METHOD3		DLOAD	BPL		# COFZ MAX
-## Page 398
+## Page 396
 			COFSKEW	+4	# UZ
 			U3POS
 		VLOAD	VCOMP
@@ -261,7 +263,7 @@ CKU31		DLOAD	BPL
 		GOTO
 			LOCSKIRT
 
-## Page 399
+## Page 397
 # MATRIX OPERATIONS
 
 MXM3		SETPD			# MXM3 MULTIPLIES 2 3X3 MATRICES
@@ -310,7 +312,7 @@ TRNSPSPD	DLOAD	PDDL		# ENTER WITH MATRIX IN PD LIST
 		STODL	12D
 			10D
 		PDDL
-## Page 400
+## Page 398
 			14D
 		STODL	10D
 		STADR
@@ -362,7 +364,7 @@ LOOPSIN		SLOAD*	RTB
 			6
 		DMP	SL1
 			10D
-## Page 401
+## Page 399
 		STORE	0,2
 		DLOAD
 			4
@@ -413,7 +415,7 @@ LOOPSIN		SLOAD*	RTB
 			8D
 		PDDL	DMP		# (PD7 COS(PHI)SIN(THETA)SIN(PSI)) SCALE 4
 			6
-## Page 402
+## Page 400
 			0
 		DAD	SL1		# (PUSH UP 7)
 		STADR			# C7=COS(PHI)SIN(THETA)SIN(PSI)
@@ -462,7 +464,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 		DSQ	DMP
 			4
 		DAD	SL3
-## Page 403
+## Page 401
 			2
 		BOVB
 			SIGNMPAC
@@ -513,7 +515,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 			0
 		DAD	SL2
 			6
-## Page 404
+## Page 402
 		BOVB
 			SIGNMPAC
 		STODL	DEL	+4	# UX UZ (1-COS(A))+UY SIN(A)
@@ -570,7 +572,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 #
 #	C =SIN(THETA)SIN(PSI)COS(PHI)+COS(THETA)SIN(PHI)
 #	 7
-## Page 405
+## Page 403
 #	C =-SIN(THETA)SIN(PSI)SIN(PHI)+COS(THETA)COS(PHI)
 #	 8
 #
@@ -619,7 +621,7 @@ SUHALFAP	DSU	GOTO
 CKPHI		DLOAD			# PUSH UP PHI
 VECOFANG	VDEF	RVQ
 
-## Page 406
+## Page 404
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 NOGOM2		INHINT			# THIS LOCATION ACCESSED BY A BZMF NOGO -2
