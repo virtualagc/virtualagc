@@ -12,6 +12,10 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-07 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -94,11 +98,11 @@ MINTAU		DEC	0
 		DEC	0
 		
 ## Page 998
-# CALCULATION OF ATTITUDE ERRORS:
-#	_    *     _      _          _
+# CALCULATION OF ATTITUDE ERRORS-
+#	-    *     -      -          -
 #	AK = AMGB (CDUX - THETADX) + BIAS
 #
-#	*AK *   * 1        SIN(PSI)        0	** CDUX - THETADX *    *BIAS *
+# IE	*AK *   * 1        SIN(PSI)        0	** CDUX - THETADX *    *BIAS *
 #	*   *   *                               **                *    *     *
 #	*AK1* = * 0   COS(PSI)COS(PHI)  SIN(PHI)** CDUY - THETADY *  + *BIAS1*
 #	*   *   *                               **                *    *     *
@@ -189,7 +193,7 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 # DETERMINE THE LOCATION OF THE RATE ERROR AND THE ATTITUDE ERROR RELATIVE TO THE SWITCHING LOGIC IN THE PHASE
 # PLANE.
 #
-# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE S/C INTO THE
+# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE THE S/C INTO THE
 # APPROPRIATE DEADZONE.
 #
 #                                     .
@@ -197,17 +201,17 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #        WL+H                         .
 # *********************************   .					***** SWITCH LINES ENCLOSING DEADZONES
 #   R23  WL                        *  .
-# ----------------------------------* .					----- DESIRED RATE LINES
+# --------------------------------- * .					----- DESIRED RATE LINES
 #   R23  WL-H       -                *.
 # ****************** -                .					R20, R21, R22, ETC REGIONS IN PHASE
 #                   * -               .* R18      R20       R21		PLANE FOF COMPUTING DESIRED RESPONSE
 #                    *                . *
 #                     *-              .  *
-#   R22             R24*-             .   *
-#                       *             .    *
+#   R22             R24*-     R23     .   *
+#                       *-            .    *
 #                        *            .     *
 #                         + -ADB      .      * AF              ATTITUDE
-#  ........................+--+---------------+--+........................
+# .........................+--+---------------+--+........................
 #                           AF *      .     +ADB  +             ERROR
 #                               *     .            *
 #                                *    .            -*
@@ -216,22 +220,23 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #                                   * .                *
 #                                    *.               - *
 #                                     .                - *****************
-#                                     .*-
+#                                     .*                -
 #                                     . * --------------------------------
-#                                     .
-#                                     .
+#                                     .  *
+#                                     .   ********************************
+#				      .
 #			FIG. 1	PHASE PLANE SWITCHING LOGIC
 #
 # CONSTANTS FOR JET SWITCHING LOGIC
 
-WLH/SLOP	DEC	.00463		# = WL+H/SLOPE = .83333 DEG	S180
-WL-H/SLP	DEC	.00277		# = WL-H/SLOPE = .5 DEG		S180
-WLH		2DEC	.0011111111	# = WL+H = 0.5 DED/SEC		S450
-WLMH		2DEC	.0006666666	# = WL-H = 0.3 DEG/SEC		S450
-WL		2DEC	.0008888888	# = WL   = 0.4 DEG/SEC		S450
+WLH/SLOP	DEC	.00463		# = WL+H/SLOPE = .83333 DEG	$180
+WL-H/SLP	DEC	.00277		# = WL-H/SLOPE = .5 DEG		$180
+WLH		2DEC	.0011111111	# = WL+H = 0.5 DEG/SEC		$450
+WLMH		2DEC	.0006666666	# = WL-H = 0.3 DEG/SEC		$450
+WL		2DEC	.0008888888	# = WL   = 0.4 DEG/SEC		$450
 
 ## Page 1001
-SLOPE2		DEC	.32		# = 0.8 DEG/SEC/DEG		S450/180
+SLOPE2		DEC	.32		# = 0.8 DEG/SEC/DEG		$450/180
 JETS		CA	ADB
 		AD	FOUR		# AF = FLAT REGION = .044 DEG
 		TS	T5TEMP		# ADB+AF
@@ -439,18 +444,18 @@ J24		CS	AERR
 		DAS	KMPAC
 		
 ## Page 1006
-# COMPUTE THE JET ON TIME NECESSARY TO ACCOMPLISH THE DESIRED CHANGE IN RATE, I.E.,
+# COMPUTE THE JET ON TIME NECESSARY TO ACCOMPLISH THE DESIRED CHANGE IN RATE, IE
 #
 #	     T  = J/M(DELTA W)
 #	      J
 #
 #	DELTA W = DESIRED CHANGE IN S/C ANGULAR RATE AS DETERMINED BY THE
-#		  SWITCHING LOGIC, AT THIS PINT STORED IN KMPAC.
+#		  SWITCHING LOGIC, AT THIS POINT STORED IN KMPAC.
 #
 #	    J/M = S/C INERTIA TO TORQUE 9ATIO SCALED BY
 #		  	(57.3/450)(B24/1600)(1/.8)
 #		  FOR 1 JET OPERATION  (M = 700 FT-LB).
-#		  I.E., J/M = J(SLUG-FTFT) x 0.00000085601606
+#		  IE  J/M = J(SLUG-FTFT) X 0.00000085601606
 #
 #	          THE CORRESPONDING COMPUTER VARIABLES ESTABLISHED BY
 #		  KEYBOARD ENTRY ARE
@@ -458,7 +463,7 @@ J24		CS	AERR
 #			J/M1 (PITCH)
 #			J/M2 (YAW)
 #
-#	     T  = JET-ON TIME    SCALED 16384/1600 SEC
+#	     T  = JET ON-TIME    SCALED 16384/1600 SEC
 #	      J
 #
 #	          THE COMPUTER VARIABLES ARE
@@ -494,7 +499,7 @@ ZEROCMDS	CAF	ZERO
 		TS	TAU1
 		TS	TAU2
 T6PROG		EXTEND			# WHEN THE ROTATION COMMANDS (TAUS)
-		DCA	JETADDR		# HAVE BEEN DETERINED
+		DCA	JETADDR		# HAVE BEEN DETERMINED
 		DXCH	T5LOC		# RESET T5LOC FOR PHASE3
 		TCF	RESUME
 		

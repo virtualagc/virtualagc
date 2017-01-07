@@ -23,20 +23,27 @@
 #				pages.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
-# from a scanned document obtained from MIT's website,
-# http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  I'd like to note
+# from a scanned document originally obtained from MIT's website,
+# http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf, though this has
+# been superceded by a different, much-clearn copy of the same printout 
+# we received from AGC developer Fred Martin.  I'd like to note
 # that the character-set of the line-printer used must not have completely
-# agreed with the one the developers had in mind, so I've interpreted various
+# agreed with the one the developers had in mind --- and this is supported by
+# detailed comparison to printouts of the slightly earlier Colossus 237 program
+# and the later Comanche 55 program ---  so I've interpreted various
 # wacky symbols appearing in the print as follows:
 #
 #	Print				Interpretation
 #	-----				--------------
 #	plus-minus			      <
+#	lower-case Greek alpha		      '
 #	lower-case Greek delta		      >
-#	lower-case Greek nu 		 | (sometimes)
+#	lower-case Greek nu 		      |
+#	lower-case Greek pi		      ?
 #	strange lower-case d		      &
-#	trailing '			      :
-#	other				still uninterpreted
+#	'			      	      :
+#	:				      @ 
+# As for whether a printed ' or : might sometimes really supposed to be ' or :, I don't know.
 #
 # Notations on the scanned document read, in part:
 #
