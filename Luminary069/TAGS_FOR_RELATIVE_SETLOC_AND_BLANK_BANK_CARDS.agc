@@ -16,6 +16,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-03 HG   Transcribed
+##              2017-01-06 HG   Fix label INPRET2 -> INTPRET2
 
 ## Page 27
                 COUNT           BANKSUM
@@ -103,7 +104,7 @@ MIDDGIM         EQUALS
 ORBITAL         EQUALS
 ORBITAL1        EQUALS
 INTVEL          EQUALS
-INPRET2         EQUALS
+INTPRET2        EQUALS
                 BNKSUM          11
 
 
