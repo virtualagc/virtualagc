@@ -13,10 +13,10 @@
 ## 		2009-09-04 JL	Fixed typo: COHTAGS should be CDHTAGS.
 ## 		2009-09-04 JL	Added missing LATLONG1 declaration in bank 16. Fix typos. Remove P23S and SXTMARK1.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-01-04 RSB	Proofed comment text using octopus/ProoferComments
+##				and fixed errors found.
 
 ## Page 27
-# TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-
 FIXED		MEMORY	120000 - 167777
 		COUNT	BANKSUM
 
@@ -133,8 +133,10 @@ ORBITAL2	EQUALS
 E/PROG1		EQUALS
 P24PROG		EQUALS
 		BNKSUM	13
-		
-# MODULE 3 CONTAINS BANKS 14 THROUGH 21
+
+# SPACER
+	
+#          MODULE 3 CONTAINS BANKS 14 THROUGH 21
 
 		BANK 	14
 P50S		EQUALS
@@ -359,7 +361,7 @@ LOUNITZ		EQUALS	ZUNIT			# 2DEC 0
 3/4LOWDP	EQUALS	3/4			# 2DEC 3.0 B-2
 		SBANK=	LOWSUPER
 
-# ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETVRUZVING INTEGRATION AREA ENTRIES
+# ROPE SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETVRUZVING INTEGRATION AREA ENTRIES
 OTHPREC		EQUALS	LEMPREC
 ATOPOTH		EQUALS	ATOPLEM
 ATOPTHIS	EQUALS	ATOPCSM
@@ -375,4 +377,4 @@ THISAXIS	=	UNITX
 ERASID		EQUALS	LOW10			# DOWNLINK ERASABLE DUMP ID
 DELAYNUM	EQUALS	THREE
 
-# **************************************************************************************************************
+# ****************************************************************************************************************
