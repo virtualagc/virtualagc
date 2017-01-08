@@ -33,17 +33,21 @@
 # and the later Comanche 55 program ---  so I've interpreted various
 # wacky symbols appearing in the print as follows:
 #
-#	Print				Interpretation
-#	-----				--------------
-#	plus-minus			      <
-#	lower-case Greek alpha		      '
-#	lower-case Greek delta		      >
-#	lower-case Greek nu 		      |
-#	lower-case Greek pi		      ?
-#	strange lower-case d		      &
-#	'			      	      :
-#	:				      @ 
+#	Printed Character		Intended Character
+#	-----------------		------------------
+#	plus-minus			      	<
+#	lower-case Greek alpha		      	'
+#	lower-case Greek delta		      	>
+#	lower-case Greek gamma 		      	|
+#	lower-case Greek pi		      	?
+#	strange lower-case d		      	&
+#	'			      	      	:
+#	:				      	@ 
+#	(discarded)				_
 # As for whether a printed ' or : might sometimes really supposed to be ' or :, I don't know.
+# As far as the underscore character is concerned (_), I will insert it if it appears from
+# closely-related program versions that it ought to be there, but there won't be anything
+# in the actual printout that tells me it should.
 #
 # Notations on the scanned document read, in part:
 #
