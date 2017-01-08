@@ -11,6 +11,8 @@
 ## Mod history: 2011-03-02 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 788
 #          VARIABLE    DESCRIPTION                        MAXIMUM VALUE *          COMPUTER NAME
@@ -216,8 +218,8 @@
 #          ---------- ------- --- ------- ---------
 
 #          ATK         ANGLE IN RAD TO NM                                  3437.7468   NM/RAD
-#          G5          NOMINAL G VALUE FOR SCALING                         32.2        FPSS
-#          H5          ATMOSPHERE SCALE HEIGHT                             28500       FT
+#          GS          NOMINAL G VALUE FOR SCALING                         32.2        FPSS
+#          HS          ATMOSPHERE SCALE HEIGHT                             28500       FT
 #          J           GRAVITY HARMONIC COEFFICIENT                        .00162346	
 #          KWE         EQUATORIAL EARTH RATE                               1546.70168  FPS
 #          MUE         EARTH GRAVITATIONAL CONSTANT                        3.986032233 E 14 CUBIC M/ SEC SEC
@@ -226,7 +228,7 @@
 #          VSAT        SATELLITE VELOCITY AT RE                            25766.1973  FPS
 #          WIE         EARTH RATE                                          .0000729211505 RAD/SEC
  
-#                                                  (END GSOP AS-276, VOL 1, FIG. 5.6-3   CONSTANTS,GAINS, ETC.)
+#                                                  (END GSOP AS-278, VOL 1, FIG. 5.6-3   CONSTANTS,GAINS, ETC.)
 
 
 #          DISPLAY QUANTITIES
