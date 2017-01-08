@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 661-664 of 1729.pdf.
+## Reference:	pp. 656-659
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/21/03 RSB.	Began transcribing. 
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 661
+## Page 656
 # GROUND TRACKING DETERMINATION PROGRAM -- P21
 #
 # PROGRAM DESCRIPTION
@@ -60,7 +63,7 @@
 #	504LM+4	2DEC	-2.553198641 E-4 RADIANS
 #
 # DEBRIS
-## Page 662
+## Page 657
 #	CENTRALS -- A,C,L
 #	OTHER -- THOSE USED BY THE ABOVE LISTED SUBROUTINES
 #	SEE LEMPREC, LAT-LONG
@@ -111,7 +114,7 @@ P21PROG2	STCALL	TDEC1		# INTEG TO TIME SPECIFIED IN TDEC1
 		CALL
 			INTEGRV		#     CALCULATE
 		GOTO			#       AND
-## Page 663
+## Page 658
 			P21VSAVE	# SAVE BASE VECTOR
 P21CONT		VLOAD
 			P21BASER	# RECYCLE -- INTEG FROM BASE VECTOR
@@ -162,7 +165,7 @@ P21DSP		CLEAR	SLOAD		# GENERATE DISPLAY DATA
 			LUNAFLAG
 			X2
 		BZE	SET
-## Page 664
+## Page 659
 			+2		# 0 = EARTH
 			LUNAFLAG
 		VLOAD

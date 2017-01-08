@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 345-348 of 1729.pdf.
+## Reference:	pp. 340-343
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/06/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 345
+## Page 340
 # SUBROUTINE NAME:	V89CALL
 # MOD NO:	0			DATE:		9 JAN 1968
 # MOD BY:	DIGITAL DEVEL GROUP	LOG SECTION:	R63
@@ -64,7 +67,7 @@
 # ERASABLE INITIALIZATION REQUIRED:  NONE
 #
 # DEBRIS:	OPTION1, +1, TDEC1, PCINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
-## Page 346
+## Page 341
 #		3AXISFLAG.
 
 		EBANK=	RONE
@@ -113,7 +116,7 @@ V89RECL		TC	INTPRET		#			2 FOR X AXIS
 ALINEX		TC	INTPRET		# X AXIS ALIGNMENT
 		VLOAD
 			UNITX		# READ (.5, 0, 0)
-## Page 347
+## Page 342
 V89CALL1	STCALL	SCAXIS		# STORE SELECTED ALIGNMENT AXIS
 			VECPOINT	# PUTS DESIRED GIM ANG (OG,IG,MG) IN TMPAC
 		STORE	CPHI		# STOR GIMBAL ANGLES FOR BALLANGS CALL
@@ -139,6 +142,6 @@ ALINEZ		TC	INTPRET		# Z AXIS ALIGNMENT
 			
 VB04N12		VN	412
 VB06N18		VN	0618
-## Page 348
+## Page 343
 DP1MIN		2DEC	6000
 

@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 743-746 of 1701.pdf.
+## Reference:	pp. 739-742.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/22/04 RSB.	Split off from P51-P53.agc.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 743
+## Page 739
 # LUNAR AND SOLAR EPHEMERIDES SUBROUTINES
 #
 # FUNCTIONAL DESCRIPTION
@@ -85,7 +87,7 @@
 #	ERASABLE DATA LOAD.
 #
 # OUTPUT -- LSPOS
-## Page 744
+## Page 740
 #
 #	1) 2D(?) OF VAC AREA CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE
 #	TO THE EARTH AT TIME INPUT BY THE USER IN METERS x B-38.
@@ -140,7 +142,7 @@ LSPOS		AXT,2			# COMPUTES POSITION VECTORS OF BOTH THE
 LUNPOS		AXT,1	GOTO		# COMPUTES THE POSITION VECTOR OF THE MOON
 			REM		# AND STORES IT IN MPAC.
 			LSTIME
-## Page 745
+## Page 741
 LUNVEL		AXT,1	GOTO		# COMPUTES THE VELOCITY VECTOR OF THE MOON
 			VEM		# AND STORES IT IN MPAC.
 			LSTIME
@@ -191,7 +193,7 @@ VEM		AXT,1	PDDL		#					PD -2
 			VECOEM
 VEMA		VXSC
 			0D
-## Page 746
+## Page 742
 		STODL	4D		#					PD -2
 		DSU	PUSH		#					PD -4
 			ONEB4

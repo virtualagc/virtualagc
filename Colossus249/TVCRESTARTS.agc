@@ -5,16 +5,18 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 920 of 1701.pdf.
+## Reference:	Starts on p. 916
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	08/23/04 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +32,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 920
+## Page 916
 # NAME....TVCRESTART PACKAGE, CONSISTING OF REDOTVC, ENABL1, 2, CMDSOUT, PHSCHK2, ETC.
 # LOG SECTION....TVCRESTART PACKAGE		SUBROUTINE....DAPCSM
 # MOD BY ENGEL					DATE....19 OCT, 1967
@@ -97,7 +99,7 @@
 #
 #      *RESTARTS DURING A STROKE TEST (STROKER IS NON-ZERO) WILL CAUSE THE
 #	STROKE TEST TO BE TERMINATED.  A NEW V68 ENTRY WILL BE REQUIRED
-## Page 921
+## Page 917
 #	TO GET IT GOING AGAIN (NO AUTOMATIC RESTART).
 #  
 #      *REDOTVC IS REACHED FOLLOWING ANY RESTART WHICH FINDS THE T5 BITS
@@ -159,7 +161,7 @@
 		
 		COUNT*	$$/RSRT
 REDOTVC		LXCH	BANKRUPT	# TVC RESTART PACKAGE
-## Page 922
+## Page 918
 		EXTEND
 		QXCH	QRUPT		# ("TCR" IN "FINCOPY")
 		
@@ -202,7 +204,7 @@ ENABL2		LXCH	BANKRUPT	# CONTINUE PREPARATION OF OUTCOUNTERS
 CMDSOUT		LXCH	BANKRUPT	# CONTNUE PREPARATION OF OUTCOUNTERS
 		EXTEND
 		QXCH	QRUPT
-## Page 923
+## Page 919
 		CS	ZERO		# MOST RECENT ACTUATOR COMMANDS
 		AD	PCMD		#	(AVOID +0)
 		TS	TVCPITCH
@@ -245,7 +247,7 @@ EXRSTRT		INDEX	TVCEXPHS	# TVCEXECUTIVE RESTARTS....GO TO
 		INDEX	A
 		TCF	0
 
-## Page 924
+## Page 920
 # TVC RESTART TABLES.... ORDER IS REQUIRED.  HI-ORDER WORDS ONLY, OF 2CADRS, SINCE BBCON IS ALREADY THERE.
 
 TVCADDR		=	TVCCADR		# TABLE OF CADRS, UNUSED LOCS FOR GENADRS

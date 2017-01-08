@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 896-906 of 1729.pdf.
+## Reference:	pp. 891-901
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/28/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 896
+## Page 891
 		BANK	21
 		SETLOC	R10
 		BANK
@@ -65,7 +68,7 @@ ARCOMP		CA	RUNIT		# COMPUTE ALTRATE = RUNIT.VVECT M/CS *(-16).
 		AD	RUPTREG1
 		TS	ALTRATE		# ALTITUDE RATE IN BIT UNITS*2(-14).
 		CS	ALTRATE
-## Page 897
+## Page 892
 		EXTEND			# CHECK POLARITY OF ALTITUDE RATE.
 		BZMF	+2
 		TCF	DATAOUT		# NEGATIVE -- SEND POS. PULSES TO ALTM REG.
@@ -116,7 +119,7 @@ OLDDATA		CA	ARTOA		# RATE APPLIES FOR .5 SEC. (4X/SEC. CYCLE)
 		AD	ONE		# NON-NEGATIVE ALTSAVE.
 		AD	ALTSAVE +1	# IF ALTSAVE IS NEGATIVE, ZERO ALTSAVE
 		TS	ALTSAVE +1	# AND ALTSAVE +1 AT ZERODATA.
-## Page 898
+## Page 893
 		CAF	ZERO
 		AD	POSMAX
 		AD	ALTSAVE
@@ -167,7 +170,7 @@ DISINDAT	EXTEND
 INTLZE		CAF	BIT2
 		EXTEND
 		WOR	CHAN12		# ENABLE RR ERROR COUNTER.
-## Page 899
+## Page 894
 		CS	IMODES33
 		MASK	BIT8
 		ADS	IMODES33	# SET INERTIAL DATA FLAG.
@@ -218,7 +221,7 @@ SPEEDRUN	CS	PIPTIME +1	# UPDATE THE VELOCITY VECTOR
 		EXTEND
 		MP	KPIP1(5)
 		ADS	VVECT +1
-## Page 900
+## Page 895
 		EXTEND
 		DCA	GDT/2 +4	# COMPUTE THE Z-COMPONENT OF VELOCITY.
 		DDOUBL
@@ -269,7 +272,7 @@ SPEEDRUN	CS	PIPTIME +1	# UPDATE THE VELOCITY VECTOR
 		MP	UHYP		# HI X OF CROSS-RANGE HALF-UNIT VECTOR
 		XCH	RUPTREG1
 		CA	ITEMP2
-## Page 901
+## Page 896
 		EXTEND
 		MP	UHYP +2		# Y
 		ADS	RUPTREG1	# ACCUMULATE PARTIAL PRODUCTS.
@@ -320,7 +323,7 @@ LADFWDV		CA	ITEMP4		# COMPUTE LATERAL AND FORWARD VELOCITIES.
 		XCH	LATVEL		# LATERAL VELOCITY IN BIT UNITS *2(-14).
 		CA	ITEMP4		# COMPUTE FORWARD VELOCITY.
 		EXTEND
-## Page 902
+## Page 897
 		MP	VHZ
 		XCH	RUPTREG1
 		CA	ITEMP3
@@ -371,7 +374,7 @@ CHKLASTY	INDEX	ITEMP5
 		INDEX	ITEMP5
 		CS	LATVEL
 		EXTEND
-## Page 903
+## Page 898
 		BZMF	LASTNEGY +4
 LASTOK		INDEX	ITEMP5
 		CCS	TRAKLATV
@@ -422,7 +425,7 @@ LVLIMITS	INDEX	ITEMP5
 		BZMF	+2
 		TCF	NEGLMLV
 		INDEX	ITEMP5
-## Page 904
+## Page 899
 		CS	LATVEL
 		EXTEND
 		BZMF	LVMINLM
@@ -473,7 +476,7 @@ LVMINLM		INDEX	ITEMP5
 		INDEX	ITEMP5
 		AD	LATVEL
 ZEROLSTY	INDEX	ITEMP5
-## Page 905
+## Page 900
 		XCH	RUPTREG3
 		CAF	ZERO
 		INDEX	ITEMP5
@@ -527,6 +530,6 @@ BITSET		=	PRIO6
 
 # ******************************************************************************
 
-## Page 906
-# (There is no source code on the original program listing.)
+## Page 901
+## There is no source code on the original program listing.
 

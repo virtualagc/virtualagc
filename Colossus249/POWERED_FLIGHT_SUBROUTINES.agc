@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1345 of 1701.pdf.
+## Reference:	Starts on p. 1333
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/29/04 RSB.	Began adapting from corresponding Luminary131 file.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1345
+## Page 1333
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
 		SETLOC	POWFLITE
 		BANK
@@ -86,7 +88,7 @@ CDUTRIGS	CA	CDUX
 		TS	CDUSPOT +4
 		CA	CDUY
 		TS	CDUSPOT
-## Page 1346
+## Page 1334
 		CA	CDUZ
 		TS	CDUSPOT +2
 
@@ -122,14 +124,13 @@ TR*GL**P	MASK	SIX		# MAKE IT EVEN AND SMALLER
 		CCS	TEM3
 		TCF	TR*GL**P
 		TC	TEM2
-## Page 1347
+## Page 1335
 # *******************************************************************************************************
 # QUICTRIG, INTENDED FOR QUIDANCE CYCLE USE WHERE TIME IS CRITICAL, IS A MUCH FASTER VERSION OF CD*TR*GS.
 # QUICTRIG COMPUTES AND STORES THE SINES AND COSINES OF THE 2'S COMPLEMENT ANGLES AT CDUSPOT, CDUSPOT +2,
 # AND CDUSPOT +4.  UNLIKE CD*TR*GS, QUICTRIG DOES NOT LEAVE THE 1'S COMPLEMENT VERSIONS OF THE ANGLES IN
 # CDUSPOT.  QUICTRIG'S EXECUTION TIME IS 4.1 MS.
-## Page 1348 --- blank --- RSB 2004
-## Page 1349
+
 # CALLED FROM INTERPRETIVE AS AN RTB OP-CODE, OR FROM BASIC VIA BANKCALL OR IBNKCALL.
 
 QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
@@ -158,8 +159,7 @@ QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
 		RELINT
 		TC	A
 
-## Page 1350 -- blank --- RSB 2004
-## Page 1351
+## Page 1336
 #****************************************************************************
 # THESE INTERFACE ROUTINES MAKE IT POSSIBLE TO CALL AX*SR*T, ETC., IN
 # INTERPRETIVE.  LATER, WHERE POSSIBLE, THEY WILL BE ELIMINATED.
@@ -182,18 +182,12 @@ NBSM		STQ
 # SETTING. ALL ARE STRICT INTERPRETIVE SUBROUTINES, CALLED USING "CALL",
 # RETURNING VIA QPRET.  ALL EXPECT AND RETURN THE VECTOR TO BE TRANSFORMED
 # INTERPRETER-STYLE IN MPAC.
-## Page 1352 --- blank --- RSB 2004
-## Page 1353
 #
 # TRG*SMNB AND TRG*NBSM BOTH EXPECT TO SEE THE 2'S COMPLEMENT ANGLES
 # AT CDUSPOT (ORDER Y Z X, AT CDUSPOT, CDUSPOT +2, AND CDUSPOT +4.
-## Page 1354 --- blank --- RSB 2004
-## Page 1355
 #
 # LOCATIONS NEED NOT BE ZEROED).  TRG*NBSM DOES THE NB TO SM 
 # TRANSFORMATION.
-## Page 1356 --- blank --- RSB 2004
-## Page 1357
 #
 # CDU*NBSM DOES ITS TRANSFORMATION USING THE PRESENT CONTENDS OF
 # THE CDL COUNTERS.  OTHERWISE IT IS LIKE TRG*NBSM.
@@ -215,8 +209,8 @@ C*MM*N2		TC	AX*SR*T
 
 CDU*NBSM	EXIT
 		TC	CDUTRIGS
-## Page 1358 --- blank --- RSB 2004
-## Page 1359
+
+## Page 1337
 
 		TCF	C*MM*N3
 
@@ -266,7 +260,7 @@ AX*SR*T		TS	DEXDEX		# WHERE IT BECOMES THE INDEX OF INDEXES.
 R*TL**P		CCS	DEXDEX		#       	+3 --> 0	-3 --> 2
 		CS	DEXDEX		# THUS:		+2 --> 1	-2 --> 1
 		AD	THREE		#		+1 --> 2	-1 --> 0
-## Page 1360
+## Page 1338
 		EXTEND
 		INDEX	A
 		DCA	INDEXI
@@ -317,7 +311,7 @@ LOOP1		DXCH	MPAC
 		EXTEND
 		DIM	DEXDEX		# DECREMENT MAGNITUDE PRESERVING SIGN
 
-## Page 1361
+## Page 1339
 TSTPOINT	CCS	DEXDEX		# ONLY THE BRANCHING FUNCTION IS USED
 		TCF	R*TL**P
 		TC	RTNSAVER
@@ -332,7 +326,7 @@ INDEXI		DEC	4		# **********   DON'T   ***********
 		DEC	4		# ********** CONSTANTS ***********
 
 # ******************************************************************************
-## Page 1362
+## Page 1340
 # THIS SUBROUTINE COMPUTES INCREMENTAL CHANGES IN CDU(GIMBAL) ANGLES FROM INCREMENTAL CHANGES ABOUT SM AXES.  IT
 # REQUIRES SM INCREMENTS AS A DP VECTOR SCALED AT ONE REVOLUTION(DTHETASM,+2,+4).  SIN,COS(CDUY,Z,X) ARE IN
 # SINCDU,+2,+4 AND COSCDU,+2,+4 RESPECTIVELY, SCALED TO ONE HALF.  CDU INCREMENTS ARE PLACED IN DCDU,+2,+4 SCALED TO

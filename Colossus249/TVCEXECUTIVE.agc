@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Begins at p. 907 of 1701.pdf.
+## Reference:	Begins at p. 903.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/22/04 RSB.	Transcribed.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 907
+## Page 903
 # PROGRAM NAME....	DVCEXECUTIVE, CONSISTING OF TVCEXEC, NEEDLEUP, VARGAINS
 #			REPCHEK, SWTCHOVER, CG.CORR, STRKUP, TVCEXFIN, ETC.
 # LOG SECTION....	TVCEXECUTIVE	SUBROUTINE ....DAPCSM
@@ -82,7 +84,7 @@
 #      *CDUX, OGAD
 #
 # OUTPUT....
-## Page 908
+## Page 904
 #      *ROLL TVC DAP LADDERS, FDAI NEEDLE (AK), AND PHASE PLANE OGAERR
 #      *VARIABLE GAINS FOR PITCH/YAW AND ROLL TVC DAPS
 #      *SINGLE-SHOT AND REPETITIVE CORRECTIONS TO ENGINE TRIM ANGLES
@@ -131,7 +133,7 @@ ROLLPREP	CAE	CDUX		# UPDATE ROLL LADDERS (NO NEED TO RESTART-
 NEEDLEUP	TC	IBNKCALL	# DO A NEEDLES UPDATE (RETURNS AFTER CADR)
 		CADR	NEEDLER		#	(NEEDLES RESTARTS ITSELF)
 
-## Page 909
+## Page 905
 VARGAINS	CAF	BIT13		# CHECK ENGINE-ON BIT TO INHIBIT VARIABLE
 		EXTEND			#	GAINS AND MASS IF ENGINE OFF
 		RAND	DSALMOUT	# CHANNEL 11
@@ -182,7 +184,7 @@ SWT/COR		CCS	CNTR		# CHECK FOR SWITCHOVER/CG.CORRECTION
  +4		TS	CNTRTMP		# COUNT DOWN
 		CAF	SEVEN		# SETUP TVCEXPHS FOR ENTRY AT CNTRCOPY
 		TS	TVCEXPHS
-## Page 910
+## Page 906
 		TCF	CNTRCOPY
 		
 REPCHEK		CAE	REPFRAC		# CHECK FOR REPETITIVE UPDATES
@@ -232,7 +234,7 @@ GAINDOWN	CAE	ETVCDT/2	# LEM-ON.... DROP GAIN BY (OLDTVCDT/8CS)SQ
 		TS	TKTLX/I		# (FOR COPYCYCLE)
 		
 SWTCOPY		INCR	TVCEXPHS	# RESTART-PROTECT THE COPYCYCLE		(3)
-## Page 911
+## Page 907
 		CAF	OCT37774	# LEM-ON ONLY..... T5 TIMER
 		TS	T5TVCDT
 		
@@ -283,7 +285,7 @@ CG.CORR		EXTEND			# PITCH TRIM-TRACKER CORRECTION
 		CS	PACTOFF
 		AD	DELPBAR
 		EXTEND
-## Page 912
+## Page 908
 		MP	TEMPDAP
 		DDOUBL
 		DDOUBL
@@ -333,7 +335,7 @@ STRKNOW		CAE	ESTROKER	# START THE STROKE TEST NOW....
 		TS	STRKTTMP
 		
 STRKTCPY	INCR	TVCEXPHS	# RESTART-PROTECT THE COPYCYCLE		(9)
-## Page 913
+## Page 909
 		CAE	STRKTTMP
 		TS	STRKTIME
 		
@@ -342,7 +344,7 @@ TVCEXFIN	CAF	ZERO		# RESET TVCEXPHS
 		
 		TCF	TASKOVER	# OVER AND OUT
 		
-## Page 914
+## Page 910
 # NAME 		S40.15 INERTIA COMPUTATIONS
 		
 		EBANK=	1/CONACC

@@ -8,26 +8,25 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	Pages 33-42 of 1729.pdf.
+## Reference:	Pages 28-37
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	04/23/03 RSB.	First draft.
 ##		05/14/05 RSB	Corrected website reference above.
-##
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+#
 ## The contents of this file, and all associated "Luminary131" files, are
-## transcribed from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1729.pdf.  Notations on this
-## document read, in part:
+## transcribed from scanned pages at http://www.ibiblio.org/apollo/ScansForConversion/.
+## Notations on these scanned pages read, in part:
 ##
 ##	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
 ##	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
-##	This listing contains the flight program for the Lunar Module
+##	This listing contains the flight program for the Lunar Module 
 ##	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
-##
-## Refer directly to the online document mentioned above for further information.
-## Please report any errors in this listing (relative to 1729.pdf) to info@sandroid.org.
 
-## Page 33
+## Page 28
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
 
 		COUNT	BANKSUM
@@ -75,7 +74,7 @@ UPDATE2		EQUALS
 E/PROG		EQUALS
 AOTMARK2	EQUALS
 
-## Page 34
+## Page 29
 
 		BNKSUM	04
 		
@@ -117,7 +116,7 @@ F2DPS*11	EQUALS
 INTVEL		EQUALS
 		BNKSUM	11
 		
-## Page 35
+## Page 30
 		BANK	12
 CONICS		EQUALS
 ORBITAL1	EQUALS
@@ -133,7 +132,7 @@ ORBITAL2	EQUALS
 ABTFLGS		EQUALS
 		BNKSUM	13
 		
-## Page 36
+## Page 31
 # BANK 3 CONTAINS BANKS 14 THROUGH 21
 
 		BANK 	14
@@ -166,7 +165,7 @@ DAPS4		EQUALS
 R10		EQUALS
 R11		EQUALS
 		BNKSUM	21
-## Page 37
+## Page 32
 
 # MODULE 4 CONTAINS BANKS 22 THROUGH 27
 
@@ -211,7 +210,7 @@ PLANTIN3	EQUALS
 		BNKSUM	25
 		
 		BANK	26
-## Page 38
+## Page 33
 P20S3		EQUALS
 BAWLANGS	EQUALS
 MANUVER		EQUALS
@@ -229,7 +228,7 @@ ASENT1		EQUALS
 SERV3		EQUALS
 		BNKSUM	27
 
-## Page 39
+## Page 34
 # MODULE 5 CONTAINS BANKS 30 THROUGH 35
 
 		BANK	30
@@ -272,7 +271,7 @@ ASCFILT		EQUALS
 R12STUFF	EQUALS
 SERV4		EQUALS
 F2DPS*34	EQUALS
-## Page 40
+## Page 35
 		BNKSUM	34
 		
 		BANK	35
@@ -282,7 +281,7 @@ P40S3		EQUALS
 P40S2		EQUALS
 		BNKSUM	35
 		
-## Page 41
+## Page 36
 # MODULE 6 CONTAINS BANKS 36 THROUGH 43
 
 		BANK	36
@@ -319,7 +318,7 @@ EXTVERBS	EQUALS
 SELFCHEC	EQUALS
 		BNKSUM	43
 		
-## Page 42
+## Page 37
 
 HI6ZEROS	EQUALS	ZEROVECS		# ZERO VECTOR ALWAYS IN HIGH MEMORY
 LO6ZEROS	EQUALS	ZEROVEC			# ZERO VECTOR ALWAYS IN LOW MEMORY

@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	p. 1101 of 1729.pdf.
+## Reference:	p. 1096
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/31/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1101
+## Page 1096
 		BLOCK	02
 
 # SINGLE PRECISION SINE AND COSINE

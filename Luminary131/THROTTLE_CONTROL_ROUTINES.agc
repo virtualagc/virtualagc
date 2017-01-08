@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 793-797 of 1729.pdf.
+## Reference:	pp. 788-792
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/24/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 793
+## Page 788
 		BANK	31
 		SETLOC	FTHROT
 		BANK
@@ -58,7 +61,7 @@ AFDUMP		TC	MASSMULT
 		AD	3SECS
 		EXTEND
 		BZMF	WHERETO		# BRANCH IF (TIME1-TTHROT +1) > 3 SECONDS
-## Page 794
+## Page 789
 		EXTEND
 		DCA	FWEIGHT
 		DAS	FP
@@ -107,7 +110,7 @@ FLATOUT2	TS	PIFPSET
 #		AS THERE IS ACTUALLY NO THROTTLE CHANGE.
 #
 # NOTE2		HERE, SINCE WE ARE ABOUT TO RETURN TO THE THROTTLEABLE REGION
-## Page 795
+## Page 790
 #		(BELOW 55%) THE QUANTITY -(FMAXODD-FP) IS COMPUTED AND PUT
 #		INTO PIFPSET TO COMPENSATE FOR THE DIFFERENCE BETWEEN THE
 #		NUMBER OF BITS CORRESPONDING TO FULL THROTTLE (FMAXODD) AND THE
@@ -155,7 +158,7 @@ DOIT		CA	PIF
 		TS	BUF
 		CAF	4SECS
 		TCF	FWCOMP +1
-## Page 796
+## Page 791
 
 FWCOMP		CAF	2SECS
  +1		TS	Q
@@ -204,7 +207,7 @@ MASSMULT	EXTEND
 		DXCH	MPAC
 		TC	DMP
 		ADRES	MASS
-## Page 797
+## Page 792
 		TC	DMP		# LEAVES PROPERLY SCALED FORCE IN MPAC
 		ADRES	SCALEFAC
 		TC	TPAGREE

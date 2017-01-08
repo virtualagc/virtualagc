@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1498 of 1701.pdf.
+## Reference:	Starts on p. 1476
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1498
+## Page 1476
 		BANK	22
 		SETLOC	RTBCODES
 		BANK
@@ -86,7 +88,7 @@ VECMODE		TCF	VMODE
 # FORCE TP SIGN AGREEMENT IN MPAC:
 
 SGNAGREE	TC	TPAGREE
-## Page 1499
+## Page 1477
 		TCF	DANZIG
 
 # CONVERT THE DP 1'S COMPLEMENT ANGLE SCALED IN REVOLUTIONS TO A SINGLE PRECISION 2'S COMPLEMENT ANGLE
@@ -137,7 +139,7 @@ TPMODE		CAF	ONE		# MODE IS TP.
 		COM			# THIS WAS REVERSE OF MSU.
 
 		TS	MPAC		# AND SKIP ON OVERFLOW.
-## Page 1500
+## Page 1478
 		TC	Q
 
 		INDEX	A		# OVERFLOW UNCORRECT AND IN MSU.
@@ -145,7 +147,7 @@ TPMODE		CAF	ONE		# MODE IS TP.
 		ADS	MPAC
 		TC	Q
 
-## Page 1501
+## Page 1479
 # SUBROUTINE TO INCREMENT CDUS
 
 INCRCDUS	CAF	LOCTHETA
@@ -193,7 +195,7 @@ CDUINC		TS	TEM2		# 1'S COMPL. QUANT. ARRIVES IN ACC.  STORE IT
 		TS	0		# STORE NEW ANGLE IN 2'S COMPLEMENT.
 		TC	Q
 
-## Page 1502
+## Page 1480
 # RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL.  ECADR OF COMMANDS ARRIVES IN X1.
 
 PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
@@ -202,7 +204,7 @@ PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
 		CADR	IMUPULSE
 		TCF	DANZIG
 
-## Page 1503
+## Page 1481
 # EACH ROUTINE TAKES A 3X3 MATRIX STORED IN DOUBLE PRECISION IN A FIXED AREA OF ERASABLE MEMORY AND REPLACES IT
 # WITH THE TRANSPOSE MATRIX.  TRANSP1 USES LOCATIONS XNB+0,+1 THROUGH XNB+16D,+17D AND TRANSP2 USES LOCATIONS
 # XNB1+0,+1 THROUGH XNB1+16D,+17D.  EACH MATRIX IS STORED BY ROWS.
@@ -243,7 +245,7 @@ TRANSP2		CAF	XNB1EB
 		DXCH	XNB1 +10D
 		TCF	DANZIG
 
-## Page 1504
+## Page 1482
 # THE SUBROUTINE SIGNMPAC SETS C(MPAC, MPAC +1) TO SIGN(MPAC).
 # FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.  ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.
 #
@@ -291,7 +293,7 @@ NORMUNIT	CAF	ZERO
 		TCF	NOSHIFT
 		TCF	+2
 		TCF	NOSHIFT
-## Page 1505
+## Page 1483
 		CA	MPAC +1		# SHIFT ALL COMPONENTS LEFT 13
 		EXTEND
 		MP	BIT14
@@ -318,9 +320,5 @@ NOSHIFT		CAF	ZERO
 VECSGNAG	TC	BANKCALL
 		CADR	VECAGREE
 		TC	DANZIG
-
-# *** END OF SATRAP  .007 ***
-
-
 
 

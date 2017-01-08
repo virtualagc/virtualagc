@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1394-1399 of 1729.pdf.
+## Reference:	pp. 1389-1394
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/07/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1394
+## Page 1389
 		BANK	22
 		SETLOC	RTBCODES
 		BANK
@@ -65,7 +68,7 @@ V1STO2S		TC	1TO2SUB		# ANSWER ARRIVES IN A AND MPAC.
 		DXCH	MPAC +5
 		DXCH	MPAC
 		TC	1TO2SUB
-## Page 1395
+## Page 1390
 		TS	MPAC +2
 
 		DXCH	MPAC +3
@@ -116,7 +119,7 @@ CDUINC		TS	TEM2		# 1'S COMPL. QUANT. ARRIVES IN ACC.  STORE IT
 		AD	ONE
 		TCF	+4
 		AD	ONE
-## Page 1396
+## Page 1391
 		AD	ONE		# OVEFLOW HERE IF 2'S COMPL. IS 180 DEG.
 		COM
 
@@ -135,7 +138,7 @@ CDUINC		TS	TEM2		# 1'S COMPL. QUANT. ARRIVES IN ACC.  STORE IT
 		TS	0		# STORE NEW ANGLE IN 2'S COMPLEMENT.
 		TC	Q
 
-## Page 1397
+## Page 1392
 # RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL.  ECADR OF COMMANDS ARRIVES IN X1.
 
 PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
@@ -144,7 +147,7 @@ PULSEIMU	INDEX	FIXLOC		# ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
 		CADR	IMUPULSE
 		TCF	DANZIG
 
-## Page 1398
+## Page 1393
 # THE SUBROUTINE SIGNMPAC SETS C(MPAC, MPAC +1) TO SIGN(MPAC).
 # FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.  ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.
 #
@@ -192,7 +195,7 @@ NORMUNIT	CAF	ZERO
 		TCF	NOSHIFT
 		TCF	+2
 		TCF	NOSHIFT
-## Page 1399
+## Page 1394
 		CA	MPAC +1		# SHIFT ALL COMPONENTS LEFT 13
 		EXTEND
 		MP	BIT14
@@ -219,7 +222,5 @@ NOSHIFT		CAF	ZERO
 VECSGNAG	TC	BANKCALL
 		CADR	VECAGREE
 		TC	DANZIG
-
-# *** END OF SKIPPER .101 ***
 
 

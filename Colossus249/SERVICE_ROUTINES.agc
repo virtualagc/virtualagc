@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1475 of 1701.pdf.
+## Reference:	Starts on p. 1453
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1475
+## Page 1453
 		BLOCK	3
 		SETLOC	FFTAG6
 		BANK
@@ -78,7 +80,7 @@ DOWNENT2	TS	L		# WHICH FLAGWORD IS IT
 OCT7		EQUALS	SEVEN
 		BANK	10
 
-## Page 1476
+## Page 1454
 # UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.  USING THEM, WHETHER OR
 # NOT IN INTERRUPT, ONE MAY SET OR CLEAR ANY SINGLE, NAMED BIT IN ANY ERASABLE REGISTER, SUBJECT OF COURSE TO
 # EBANK SETTING.  A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL
@@ -124,7 +126,7 @@ DEBIT		AD	ONE		# CET DE BITS
 		CA	0 -1		# ADRES
 		TS	L
 		CA	ZERO
-## Page 1477
+## Page 1455
 		EXTEND
 		DV	ITEMP1		# A = FLAGWRD, L = (15 - BIT)
 		DXCH	ITEMP1
@@ -135,7 +137,7 @@ DEBIT		AD	ONE		# CET DE BITS
 		CS	BIT15		# -(15 - BIT)
 		TC	Q
 
-## Page 1478
+## Page 1456
 # DELAYJOB -- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.
 #
 # ENTRANCE REQUIREMENTS ...
@@ -186,7 +188,7 @@ TCGETCAD	TC	MAKECADR	# GET CALLER'S FCADR
 WAKER		CAF	ZERO
 		INDEX	BBANK
 		XCH	DELAYLOC	# MAKE DELAYLOC AVAILABLE
-## Page 1479
+## Page 1457
 		TC	JOBWAKE
 
 		TC	TASKOVER
@@ -194,7 +196,7 @@ WAKER		CAF	ZERO
 TCSLEEP		GENADR	TCGETCAD -2
 WAKECAD		GENADR	WAKER
 
-## Page 1480
+## Page 1458
 # GENTRAN, A BLOCK TRANSFER ROUTINE
 # WRITTEN BY D. EYLES
 # MOD 1 BY KERNAN				UTILITYM REV 17 11/18/67
@@ -237,7 +239,7 @@ GENTRAN		INHINT
 		TCF	GENTRAN +1
 		TCF	Q+2		# RETURN TO CALLER.
 
-## Page 1481
+## Page 1459
 # B5OFF		ZERO BIT 5 OF EXTVBACK, WHICH IS SET BY TESTXACT.
 # MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
 
@@ -248,7 +250,7 @@ B5OFF		CS	BIT5
 		TS	EXTVBACT
 		TC	ENDOFJOB
 
-## Page 1482
+## Page 1460
 # SUBROUTINES TO TURNOFF AND TURN ON TRACKER FAIL LIGHT.
 
 TRFAILOF	INHINT

@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Begins on p. 915 of 1701.pdf.
+## Reference:	Begins on p. 911
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	08/23/04 RSB.	Began transcribing.
 ##		05/14/05 RSB.	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 915
+## Page 911
 # PROGRAM NAME....MASSPROP
 # LOG SECTION....TVCMASSPROP		PROGRAMMER...MELANSON (ENGEL, SCHLUNDT)
 #
@@ -82,7 +84,7 @@
 #	
 #	THEY ARE STORED IN CONSECUTIVE REGISTERS IXX0, IXX1, IXX2
 #	CONVERSION FACTOR:  (SLUG-FTSQ) = 0.737562 (KG-MSQ)
-## Page 916
+## Page 912
 #
 # OUTPUTS ARE CALCULATED AS FOLLOWS:
 #
@@ -128,7 +130,7 @@
 #							(EMPTY)	14116 LBS.
 #
 # 	(WEIGHTS ARE FROM AMMENDMENT ?1 (APRIL 24, 1968) TO ABOVE DATA BOOK)
-## Page 917
+## Page 913
 
 		BANK	25
 		SETLOC	DAPMASS
@@ -178,7 +180,7 @@ FIXCW		CAF	BIT2		# COMPUTATION PHASE BEGINS HERE. SET UP
 		AD	NEGBPW		# SLOPE LOCATIONS.
 		DOUBLE
 		TS	TEMP333
-## Page 918
+## Page 914
 		EXTEND
 		BZMF	PEGGY		# DETERMINE CORRECT SLOPE
 		CAF	NEG2
@@ -209,7 +211,7 @@ BOKKEP2		TS	PSI333		# REDUCE PSI BY ONE
 		DIM	PHI333
 		TCF	PEGGY
 		
-## Page 919
+## Page 915
 NOLEMVAL	DEC	25445 B-20
 		DEC	87450 B-20
 		DEC	.30715 B-2

@@ -5,16 +5,18 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 630-643 of 1701.pdf.
+## Reference:	pp. 626-639.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/15/04 RSB.	Began transcribing.  (A little comes from the
 ##				corresponding Luminary131 file.)
 ##		2010-10-24 JL	Fixed page numbers.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +32,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 630
+## Page 626
 		BANK	32
 		
 		SETLOC	P30S1
@@ -81,7 +83,7 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 		OCT	05024
 		OCT	13000
 		TC	PHSPRDT6
-## Page 631
+## Page 627
 # PROGRAM DESCRIPTION P30	DATE 3-6-67
 # MOD. I BY S. ZELDIN:  TO ADD P31 AND AD APT FOR P30 FOR P31 USE.	22DEC67
 #
@@ -130,7 +132,7 @@ P30		TC	P30/P31
 		EXIT
 		TC	PARAM30
 		TC	UPFLAG
-## Page 632
+## Page 628
 		ADRES	XDELVFLG	# SET XDELVFLG BIT 6 FLAG 2
 		TCF	GOTOP00H
 		
@@ -179,7 +181,7 @@ PARAM30		XCH	Q
 		CADR	GOFLASH
 		TC	GOTOP00H	# ON TERMINATION GOTOP00H
 		TCF	REFTEST		# ON PROCEED GO DO REFTEST
-## Page 633
+## Page 629
 		TCF	PARAM30 +2
 REFTEST		CAF	BIT13
 		MASK	STATE +3	# REFSMFLAG
@@ -209,7 +211,7 @@ V06N42		VN	0642
 V16N35		VN	1635
 V06N45		VN	0645
 
-## Page 634
+## Page 630
 # PROGRAM DESCRPTION S30.1	DATE 9NOV66
 # MOD NO 1			LOG SECTION P30,P37
 # MOD BY RAMA AIYAWAR **
@@ -267,7 +269,7 @@ S30.1		STQ	DLOAD
 			VATT
 			RTX2
 		STOVL	VTIG
-## Page 635
+## Page 631
 			RATT
 		STORE	RTIG
 		STORE	RACT3
@@ -302,7 +304,7 @@ S30.1		STQ	DLOAD
 		STCALL	HAPO		# APOGEE ALT B+29
 			QTEMP
 
-## Page 636
+## Page 632
 # S31.1 PROGRAM DESCRIPTION		26DEC67
 # MOD.1 BY S.ZELDIN
 #
@@ -359,7 +361,7 @@ S31.1		STQ	DLOAD
 		CALL
 			MAXCHK	
 		STOVL	HAPO		# B29
-## Page 637
+## Page 633
 			DELVEET3
 		STORE	0
 		SET	CALL
@@ -373,7 +375,7 @@ S31.1		STQ	DLOAD
 		STCALL	TPASS4		# FOR S40.1
 			QTEMP
 
-## Page 638
+## Page 634
 # SUBROUTINE NAME:	DELRSPL		(CONTINUATION OF V 62 IN CSM IF P11 ACTIVE)
 # TRANSFERRED COMPLETELY FROM SUNDISK, P30S REV 33.  9 SEPT 67.
 # MOD NO: 0	MOD BY: ZELDIN		DATE:
@@ -430,7 +432,7 @@ GETARG		STOVL	THETA(1)
 			HI6ZEROS
 		STODL	ALT		# ALT=0 = LAT +4
 			PIPTIME
-## Page 639
+## Page 635
 		BON	DLOAD
 			V37FLAG
 			+2
@@ -481,7 +483,7 @@ AUGEKUGL	VLOAD
 			V(4K)
 			LOOPSET
 		XCHX,2	XCHX,2
-## Page 640
+## Page 636
 			S1
 			X1
 		DSU	BMN
@@ -529,7 +531,7 @@ MAXPHIC		2DEC	.09259298	# 2000 NM FOR MAXIMUM PHI ENTRY
 		
 					# 		BELOW
 					# **** TABLE IS INDEXED. KEEP IN ORDER ***
-## Page 641
+## Page 637
 		2DEC	7.07304526 E-4	# 5500
 		2DEC	3.08641975 E-4	# 2400
 		2DEC	3.08641975 E-4	# 2400
@@ -557,9 +559,9 @@ X1CON		DEC	10
 		DEC	8
 		DEC	6
 					# **** TABLE IS INDEXED.  KEEP IN ORDER ***
-## Page 642
+## Page 638
 					#		ABOVE
-## Page 643
+## Page 639
 # ***** AVFLAG/P *****
 #
 # SUBROUTINES USED

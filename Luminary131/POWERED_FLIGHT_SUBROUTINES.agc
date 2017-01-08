@@ -8,14 +8,17 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1256-1264 of 1729.pdf.
+## Reference:	pp. 1251-1259
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/03/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-25 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1256
+## Page 1251
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
 		SETLOC	POWFLITE
 		BANK
@@ -66,7 +69,7 @@ CDUTRIGS	CA	CDUX
 		TS	CDUSPOT +4
 		CA	CDUY
 		TS	CDUSPOT
-## Page 1257
+## Page 1252
 		CA	CDUZ
 		TS	CDUSPOT +2
 
@@ -102,7 +105,7 @@ TR*GL**P	MASK	SIX		# MAKE IT EVEN AND SMALLER
 		CCS	TEM3
 		TCF	TR*GL**P
 		TC	TEM2
-## Page 1258
+## Page 1253
 # *******************************************************************************************************
 # QUICTRIG, INTENDED FOR QUIDANCE CYCLE USE WHERE TIME IS CRITICAL, IS A MUCH FASTER VERSION OF CD*TR*GS.
 # QUICTRIG COMPUTES AND STORES THE SINES AND COSINES OF THE 2'S COMPLEMENT ANGLES AT CDUSPOT, CDUSPOT +2,
@@ -136,7 +139,7 @@ QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
 		RELINT
 		TC	A
 
-## Page 1259
+## Page 1254
 #****************************************************************************
 # THESE INTERFACE ROUTINES MAKE IT POSSIBLE TO CALL AX*SR*T, ETC., IN
 # INTERPRETIVE.  LATER, WHERE POSSIBLE, THEY WILL BE ELIMINATED.
@@ -185,7 +188,7 @@ C*MM*N3		TC	MPACVBUF	# FOR AX*SR*T
 #
 # NOTE THAT JUST AS CD*TR*GS NEED BE CALLED ONLY ONCE FOR EACH SERIES
 # OF TRANSFORMATIONS USING THE SAME ANGLES, SO TOO ONLY ONE OF TRG*NBSM
-## Page 1260
+## Page 1255
 # AND TRG*SMNB NEED BE CALLED FOR EACH SERIES.  FOR SUBSEQUENT TRANFOR-
 # MATIONS USE *NBSM* AND *SMNB*.
 
@@ -233,7 +236,7 @@ R*TL**P		CCS	DEXDEX		#       	+3 --> 0	-3 --> 2
 		TCF	LOOP1		# REALLY BE A SUBTRACT, AND VICE VERSA
 
 LOOP2		DXCH	BUF		# LOADING VECTOR COMPONENT, STORING INDEX
-## Page 1261
+## Page 1256
 LOOP1		DXCH	MPAC
 		CA	SINSLOC
 		AD	DEX1
@@ -281,7 +284,7 @@ SINSLOC		ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
 INDEXI		DEC	4		# **********   DON'T   ***********
 		DEC	2		# **********   TOUCH   ***********
 		DEC	0		# **********   THESE   ***********
-## Page 1262
+## Page 1257
 		DEC	4		# ********** CONSTANTS ***********
 
 # ******************************************************************************
@@ -330,7 +333,7 @@ FLESHPOT	TS	TEM2
 		DCS	SINCDUY
 		DXCH	MPAC
 		TC	DMPSUB		# ADDRWD SET TO COSCDUZ
-## Page 1263
+## Page 1258
 		DXCH	MPAC
 		DDOUBL
 		INDEX	TEM1
@@ -382,7 +385,7 @@ FLESHPOT	TS	TEM2
 		TC	DMPSUB		# ADDRWD SET TO COSCDUX
 		DXCH	MPAC
 
-## Page 1264
+## Page 1259
 		DDOUBL
 		DAS 	BUF
 

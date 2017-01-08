@@ -292,6 +292,11 @@
  *		12/22/16 MAS	Fixed the No TC hardware alarm, discovered
  *				to be erroneously counting EXTENDS by
  *				BOREALIS.
+ *		01/04/17 MAS	Added parity fail alarms caused by accessing
+ *				nonexistent superbanks. There's still no way
+ *				to get an erasable parity fail, because I
+ *				haven't come up with a program that can cause
+ *				one to happen.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -560,6 +565,14 @@ FindMemoryWord (agc_t * State, int Address12)
       // Account for the superbank bit. 
       if (030 == (AdjustmentFB & 030) && (State->OutputChannel7 & 0100) != 0)
       AdjustmentFB += 010;
+      if (AdjustmentFB > 043)
+        {
+          // The program is trying to access banks that don't exist. Raise
+          // a parity fail alarm and return something that holds zero
+          State->ParityFail = 1;
+          State->InputChannel[077] |= CH77_PARITY_FAIL;
+          return (&State->Erasable[0][7]); // Not really, but we know this is zero
+        }
       return (&State->Fixed[AdjustmentFB][Address12 & 01777]);
     }
   else if (Address12 < 06000)	// Fixed-fixed.
@@ -1854,7 +1867,7 @@ agc_engine (agc_t * State)
 
 
       // If we triggered any alarms, simulate a GOJAM
-      if (TriggeredAlarm)
+      if (TriggeredAlarm || State->ParityFail)
         {
           if (!InhibitAlarms) // ...but only if doing so isn't inhibited
             {
@@ -1864,6 +1877,7 @@ agc_engine (agc_t * State)
               // The net result of those two is Z = 4000. Interrupt state is cleared.
               c(RegZ) = 04000;
               State->InIsr = 0;
+              State->ParityFail = 0;
 
               // Light the RESTART light on the DSKY, if we're not going into standby
               if (!State->Standby)

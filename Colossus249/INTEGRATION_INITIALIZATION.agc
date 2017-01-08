@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1291 of 1701.pdf.
+## Reference:	Starts on p. 1279
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/29/04 RSB.	Began adapting from corresponding Luminary131 file.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1291
+## Page 1279
 # 1.0 INTRODUCTION
 # ----------------
 #
@@ -87,7 +89,7 @@
 # THE PERMANENT STATE VECTORS WILL ALSO BE UPDATED WHENEVER THE W-MATRIX IS INTEGRATED OR WHEN A CALLER OF INTEGRV
 # SETS STATEFLG (THE NAVIGATION PROGRAMS P20, P22.)
 #
-## Page 1292
+## Page 1280
 # APPENDIX B OF THE USERS' GUIDE LISTS THE STATE VECTOR QUANTITIES.
 #
 # 2.1 RESTARTS
@@ -138,7 +140,7 @@
 #										 3	 -1
 #	NUVCSM(LEM)		VELOCITY DEVIATION		M/CSEC		2	2
 #				0 IF TCCSM(LEM) = 0
-## Page 1293
+## Page 1281
 #										 29	 27
 #	RCVSM(LEM)		CONIC POSITION			METERS		2	2
 #				EQUALS RRECTCSM(LEM) IF
@@ -194,7 +196,7 @@
 #	X2		COORDINT
 #	X2		COORDINATE SYSTEM ORIGIN			0	2
 #			(THIS, NOT MOONFLAG, SHOULD BE
-## Page 1294
+## Page 1282
 #			USED TO DETERMINE ORIGIN.)
 #
 # IN ADDITION TO THE ABOVE, THE PERMANENT STATE VECTOR IS UPDATED WHENEVER
@@ -245,7 +247,7 @@
 #		RCV	POSITION VECTOR			METERS
 #		VCV	VELOCITY VECTOR			M/CSEC
 #		TET	TIME OF STATE VECTOR (MAY = 0)	CSEC B-28
-## Page 1295
+## Page 1283
 #		TDEC1	TIME TO INTEGRATE TO		CSEC B-28 (PD 32D)
 #			(MAY BE INCREMENT IF TET=0)
 #	  OUTPUT
@@ -296,7 +298,7 @@ STATINT1	TC	INTPRET
 			QUITFLAG
 			NOINT		# NO STATEINT IF V96
 			LOADTIME
-## Page 1296
+## Page 1284
 		STORE	TDEC1
 		CALL
 			INTSTALL
@@ -347,7 +349,7 @@ ATOPCSM		STQ	RTB
 			MOVEACSM
 		SET	CALL
 			CMOONFLG
-## Page 1297
+## Page 1285
 			SVDWN1
 		BON	CLRGO
 			MOONFLAG
@@ -397,7 +399,7 @@ MOVEPCSM	TC	SETBANK
 		TC	DANZIG
 
 # ATOPLEM TRANSFERS RRECT TO RRECT +41 TO RRECTLEM TO RRECTLEM +41
-## Page 1298
+## Page 1286
 ATOPLEM		STQ	RTB
 			S2
 			MOVEALEM
@@ -446,7 +448,7 @@ USEPIOS		SETPD	VLOAD
 			TDEC1
 		STODL	TET
 			5/8
-## Page 1299
+## Page 1287
 		CALL
 			RP-TO-R
 		STOVL	RCV
@@ -495,7 +497,7 @@ INTBANK		BBCON	INTEGRV
 #	VINTFLAG	SET		SET		CLEAR		CLEAR
 #	INTYPFLG	CLEAR		SET		CLEAR		SET
 #	DIM0FLAG	CLEAR		CLEAR		CLEAR		CLEAR
-## Page 1300
+## Page 1288
 #
 # CALLING SEQUENCE
 #	L-X	STORE	TDEC1
@@ -547,7 +549,7 @@ IFLAGC		CLEAR	SETGO
 			INTEGRV1
 LEMCONIC	STQ	CALL
 			X1
-## Page 1301
+## Page 1289
 			INTSTALL
 		SXA,1	CLRGO
 			IRETURN
@@ -603,7 +605,7 @@ INTEGRVS	SET	SSP
 #	FLAGS AS ABOVE
 #	STORE TIME TO INTEGRATE TO IN TDEC1
 #
-## Page 1302
+## Page 1290
 # OUTPUT
 #	RATT	AS
 #	VATT	      DEFINED
@@ -653,7 +655,7 @@ RECTOUT		SETPD	CALL
 			0,2
 		PDVL	VSL*		# RATT TO PD0
 			VRECT
-## Page 1303
+## Page 1291
 			0,2
 		PDDL	PDVL		# VATT TO PD6	TAT TO PD12
 			TET
@@ -696,7 +698,7 @@ RVCON		DLOAD	DSU
 		STCALL	TET
 			RECTOUT
 
-## Page 1304
+## Page 1292
 TESTLOOP	BOF	CLRGO
 			QUITFLAG
 			+3
@@ -745,7 +747,7 @@ DT/2COMP	DLOAD	DSU
 USEMAXDT	DLOAD	SIGN
 			12D
 			DT/2
-## Page 1305
+## Page 1293
 		STCALL	DT/2
 			P00HCHK
 MAXDT		DLOAD	PDDL		# EXCHANGE DT/2MAX WITH COMPUTED MAX.
@@ -795,7 +797,7 @@ INTSTALL	EXIT
 ALLSTALL	TS	L
 		CA	RASFLAG
 		INDEX	L
-## Page 1306
+## Page 1294
 		MASK	INTBITAB	# IS THIS STALL AREA FREE
 		EXTEND
 		BZF	OKTOGRAB	# YES
@@ -846,7 +848,7 @@ OKTOGRAB	INDEX	L
 		ADS	RASFLAG
 GOBAC		TC	INTPRET
 		RVQ
-## Page 1307
+## Page 1295
 ERASTAL1	EXIT
 		CAF	ONE
 		TCF	ALLSTALL
@@ -865,7 +867,7 @@ INTBITAB	OCT	20100
 		OCT	10040
 		OCT	04020
 
-## Page 1308
+## Page 1296
 # AVETOMID
 #
 # THIS ROUTINE PERFORMS THE TRANSITION FROM A THRUSTING PHASE TO THE COAST
@@ -915,7 +917,7 @@ SETCOAST	AXT,2	CALL		# NOW MOVE PROPERLY SCALE RN,UN AS WELL AS
 			+2
 			0
 		VLOAD	VSR*
-## Page 1309
+## Page 1297
 			RN
 			0,2
 		STORE	RRECT
@@ -953,7 +955,7 @@ INT/W		DLOAD	CALL
 		GOTO
 			OTHERS		# NOW GO DO THE OTHER VEHICLE
 
-## Page 1310
+## Page 1298
 # MIDTOAV1
 #
 # THIS ROUTINE INTEGRATES (PRECISION) TO THE TIME SPECIFIED IN TDEC1.
@@ -1003,7 +1005,7 @@ ENTMID2		RTB	DAD
 ENTMID1		CALL
 			INTSTALL
 		CLEAR	CALL
-## Page 1311
+## Page 1299
 			DIM0FLAG	# NO W-MATRIX
 			THISVINT
 		CLEAR	SET
@@ -1055,7 +1057,7 @@ MID2		DLOAD	DSU
 		ABS	DSU
 			3CSECS
 
-## Page 1312
+## Page 1300
 		BMN	GOTO
 			A-PCHK
 			TIMEINC
@@ -1104,7 +1106,7 @@ INTWAKEU	RELINT
 		AXT,2	CLRGO		# EARTH SPHERE OF INFLUENCE.
 		DEC	0
 			MOONFLAG
-## Page 1313
+## Page 1301
 			INTWAKEC
 INTWAKEM	AXT,2	SET		# LUNAR SPHERE OF INFLUENCE.
 		DEC	2

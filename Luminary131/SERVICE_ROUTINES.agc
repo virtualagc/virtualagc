@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1371-1377 of 1729.pdf.
+## Reference:	pp. 1366-1372
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/06/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1371
+## Page 1366
 		BANK	10
 		SETLOC	DISPLAYS
 		BANK
@@ -38,7 +41,7 @@ DOWNENT2	INHINT
 
 OCT7		EQUALS	SEVEN
 
-## Page 1372
+## Page 1367
 # UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.  USING THEM, WHETHER OR
 # NOT IN INTERRUPT, ONE MAY SET OR CLEAR ANY SINGLE, NAMED BIT IN ANY ERASABLE REGISTER, SUBJECT OF COURSE TO
 # EBANK SETTING.  A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL
@@ -84,7 +87,7 @@ DEBIT		AD	ONE		# CET DE BITS
 		CA	0 -1		# ADRES
 		TS	L
 		CA	ZERO
-## Page 1373
+## Page 1368
 		EXTEND
 		DV	ITEMP1		# A = FLAGWRD, L = (15 - BIT)
 		DXCH	ITEMP1
@@ -95,7 +98,7 @@ DEBIT		AD	ONE		# CET DE BITS
 		CS	BIT15		# -(15 - BIT)
 		TC	Q
 
-## Page 1374
+## Page 1369
 # DELAYJOB -- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.
 #
 # ENTRANCE REQUIREMENTS ...
@@ -146,7 +149,7 @@ TCGETCAD	TC	MAKECADR	# GET CALLER'S FCADR
 
 WAKER		CAF	ZERO
 		INDEX	BBANK
-## Page 1375
+## Page 1370
 		XCH	DELAYLOC	# MAKE DELAYLOC AVAILABLE
 		TC	JOBWAKE
 
@@ -155,7 +158,7 @@ WAKER		CAF	ZERO
 TCSLEEP		GENADR	TCGETCAD -2
 WAKECAD		GENADR	WAKER
 
-## Page 1376
+## Page 1371
 # GENTRAN, A BLOCK TRANSFER ROUTINE
 # WRITTEN BY D. EYLES
 # MOD 1 BY KERNAN				UTILITYM REV 17 11/18/67
@@ -198,7 +201,7 @@ GENTRAN		INHINT
 		TCF	GENTRAN +1
 		TCF	Q+2		# RETURN TO CALLER.
 
-## Page 1377
+## Page 1372
 # B5OFF		ZERO BIT 5 OF EXTVBACK, WHICH IS SET BY TESTXACT.
 # MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
 

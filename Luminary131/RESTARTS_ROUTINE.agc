@@ -8,14 +8,17 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1300-1305 of 1729.pdf.
+## Reference:	pp. 1295-1300
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/05/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
 ##		2010-10-25 JL	Added missing # in comment.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1300
+## Page 1295
 		BANK	01
 		SETLOC	RESTART
 		BANK
@@ -65,7 +68,7 @@ ITSAVAR		MASK	OCT1400		# IS IT TYPE B ?
 		TCF	ITSLNGCL	# IT'S A LONGCALL
 
 RTRNCADR	TC	SWRETURN	# CAN'T GET HERE.
-## Page 1301
+## Page 1296
 		TCF	ITSAWAIT
 
 		TCF	ITSAJOB		# IT'S A JOB
@@ -116,7 +119,7 @@ FINDTIME	COM			# MAKE NEGATIVE SINCE IT WILL BE SUBTRACTED
 		SU	TIME1
 		CCS	A
 		COM
-## Page 1302
+## Page 1297
 		AD	OCT37776
 		AD	ONE
 		AD	L
@@ -167,7 +170,7 @@ ITSATBL		TS	CYR		# FIND OUT IF THE PHASE IS ODD OR EVEN
 		CA	TEMPPHS		# SET UP POINTER FOR FINDING OUR PLACE IN
 		TS	SR		# THE RESTART TABLES
 		AD	SR
-## Page 1303
+## Page 1298
 		NDX	TEMP2G
 		AD	SIZETAB +1
 		TS	POINTER
@@ -218,7 +221,7 @@ ITSLGCL1	LXCH	GOLOC +1	# OBTAIN THE CORRECT E BANK
 		LXCH	GOLOC +1	# RESTORE OUR E AND F BANK
 		LXCH	BB		# RESTORE THE TASKS E AND F BANKS
 		LXCH	GOLOC +1	# AND PRESERVE OUR L
-## Page 1304
+## Page 1299
 		TCF	ITSLGCL2	# NOT GET'S PROCESS THIS LONGCALL
 
 # ***** YOU MAY RETURN TO SWITCHED FIXED *****
@@ -270,7 +273,7 @@ ITSWTLST	CS	GOLOC +1	# CORRECT THE BBCON INFORMATION
 
 		TCF	TIMETEST	# FIND OUT HOW THE TIME IS STORED
 
-## Page 1305
+## Page 1300
 ITSAJOB2	XCH	GOLOC		# STORE THE CADR
 
 		NDX	POINTER		# ADD THE PRIORITY AND LET'S GO

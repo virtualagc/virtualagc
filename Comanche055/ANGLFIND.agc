@@ -13,6 +13,8 @@
 ##				images.
 ##		2009-05-22 RSB	In NOGOM2, TC ZEROEROR corrected to 
 ##				CADR ZEROEROR.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 237 and Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -431,13 +433,13 @@ ENDOCM		EQUALS
 		
 # CALCULATION OF THE MATRIX DEL......
 #
-#	*      *               __T           *
+#	*      *               --T           *
 #	DEL = (IDMATRIX)COS(A)+UU (1-COS(A))+UX SIN(A)		SCALED 1
 #
-#             _
+#             -
 #	WHERE U IS A UNIT VECTOR (DP SCALED 2) ALONG THE AXIS OF ROTATION.
 #	A IS THE ANGLE OF ROTATION (DP SCALED 2)
-#					   _
+#					   -
 #	UPON ENTRY THE STARTING ADDRESS OF U IS COF, AND A IS IN MPAC
 
 		COUNT	22/KALC
@@ -503,7 +505,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 		DMP	DMP
 			COF	+4
 			4
-		SL1	PDDL		# D6	UX UZ (1-COS A)			$ 4
+		SL1	PDDL		# D6	UX UZ (1-COS A )		$ 4
 			COF	+2
 		DMP	PUSH		# D8	UY SIN(A)
 			0
@@ -523,7 +525,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 			4
 		SL1	PDDL		# D6	UY UZ (1-COS(A))		$ 4
 			COF
-		DMP	PUSH		# D6	UX SIN(A)
+		DMP	PUSH		# D8	UX SIN(A)
 			0
 		DAD	SL2
 			6

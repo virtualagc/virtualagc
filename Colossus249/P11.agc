@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 528-544 of 1701.pdf.
+## Reference:	pp. 524-540.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/13/04   RSB	Began transcribing.
 ## 		2011-05-07 JL	Flag SBANK= workarounds for future removal.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 528
+## Page 524
 # EARTH ORBIT INSERTION MONITOR PROGRAM
 # *************************************
 #
@@ -84,7 +86,7 @@
 #			B) FROM RPSTART TO POLYSTOP (APPROX. +10 TO +133SECS AFTER L.O.)
 #			   DESIRED ATTITUDE IS SPECIFIED BY CMC PITCH AND ROLL
 #			   POLYNOMIALS DURING SATURN ROLLOUT AND PITCHOVER
-## Page 529
+## Page 525
 #			   THE DISPLAY IS RUN AS LOW PRIORITY JOB APPROX.
 #			   EVERY 1/2 SEC OR LESS AND IS DISABLED UPON OVFLO OF TIME1
 #
@@ -135,7 +137,7 @@
 #	PADLONG
 #	TEPHEM
 #	PGNCSALT
-## Page 530
+## Page 526
 #	POLYNUM THRU POLYNUM +14D
 #	RPSTART
 #	POLYSTOP
@@ -186,7 +188,7 @@ P11+7		EXTEND
 		DXCH	TIME2
 REP11A-2	DXCH	TLIFTOFF
 REP11A-1	DXCH	-PHASE3		# RESET PHASE
-## Page 531
+## Page 527
 REP11A		INHINT
 		EXTEND
 		DCA	TEPHEM	+1
@@ -236,7 +238,7 @@ REP11A		INHINT
 		OCT	00073
 		CAF	EBQPLACE
 		TS	EBANK
-## Page 532
+## Page 528
 		EBANK=	QPLACES
 		CA	P11XIT		# SET EXIT FROM PROUT IN EARTHR
 		TS	QPLACES
@@ -287,7 +289,7 @@ MATRXJOB	TC	INTPRET
 		VXV	VXSC
 			UNITW		# SCALED AT 1
 			-ERTHRAT	# V = EARTHRATE X R
-## Page 533
+## Page 529
 		VSL4			# SCALE TO 2(7) M/CS
 		STOVL	VN1
 			REFSMMAT +12D
@@ -338,7 +340,7 @@ MATRXJOB	TC	INTPRET
 		INHINT
 		CS	ZERO
 		TS	TBASE5		# RESTART READACCS 2 SECONDS AFTER LIFTOFF
-## Page 534
+## Page 530
 		CS	TIME1
 		AD	2SECS		# DO READACCS 2 SECONDS AFTER LIFTOFF
 		
@@ -384,7 +386,7 @@ ENDREP11	EXTEND
 		DCA	REP11SA
 		TCF	REP11A-1
 REP11S		2OCT	7776600011
-## Page 535
+## Page 531
 REP11SA		2OCT	7776400013
 
 P11XIT		GENADR	P11OUT
@@ -434,7 +436,7 @@ ATERTASK	CAF	PRIO1		# ESTABLISH JOB TO DISPLAY ATT ERRORS
 #	ROLL = LAUNCHAZ-AZIMUTH-.5+SATRLRT*T	IN REV
 #	SATRLRT = RATE OF ROLL IN REV/CENTI-SEC
 #	T, IN CENTI-SEC, IS DEFINED AS ABOVE, INCLUSIVE OF TIME RESTRICTIONS
-## Page 536
+## Page 532
 #
 #	FOR SIMPLICITY, LET	P = 2*PI*PITCH
 #				R = 2*PI*ROLL
@@ -483,7 +485,7 @@ ATERJOB		CAE	TIME2		# CHECK IF MORE THAN
 		TC	ATERSET		# EXIT -- SATURN STICK IN USE
 ATTDISP		CS	RPSTART		# PITCH/ROLL START TIME
 		AD	TIME1
-## Page 537
+## Page 533
 		EXTEND
 		BZMF	NOPOLY		# IF MINUS THEN ATTITUDE HOLD
 		TS	MPAC		# MPAC = TIME1 - RPSTART
@@ -535,7 +537,7 @@ ATTDISP1	COS	DCOMP
 		SIN
 		STODL	10D		# .5*SIN(P)
 			ZEROVECS
-## Page 538
+## Page 534
 		STORE	12D		# 0
 		
 #	EVALUATE ROLL = LAUNCHAZ-AZIMUTH-.5+SATRLRT*T
@@ -587,7 +589,7 @@ ATTDISPR	PUSH	COS		# CONTINUE COMPUTING TSMV
 #	CALL CALCGTA TO COMPUTE DESIRED SM ORIENTATION	OGC,IGC, AND MGC
 #				 _          _   _
 #	FIND DIFFERENCE VECTOR	DELTACDU = OGC-CDUX
-## Page 539
+## Page 535
 #	ENTER HERE IF ATTITUDE HOLD
 
 NOPOLYM		VLOAD	PUSH		#        OGC      IGC
@@ -638,7 +640,7 @@ ATTDISP2	STODL	16D		# 16D, .5(DPHI + DTHETA*SIN(CDUZ))
 		STADR
 		STORE	18D		# 18D,	.5(-DTHETA*SIN(CDUX)*COS(CDUZ)
 		TLOAD			#			+DPSI*COS(CDUX))
-## Page 540
+## Page 536
 			16D
 		STORE	AK		# STORE ATTITUDE ERRORS IN AK,AK1,AK2
 		EXIT
@@ -689,7 +691,7 @@ DELSTOR		CA	BOOSTEMP
 		CA	BOOSTEMP +2
 		EXTEND
 		MSU	MPAC +2
-## Page 541
+## Page 537
 		INDEX	FIXLOC
 		TS	4
 		TCF	DANZIG
@@ -741,7 +743,7 @@ V06N62		VN	0662
 #	ENDEXT
 #	IBNKCALL
 #	STICKCHK
-## Page 542
+## Page 538
 #	NEEDLER
 #	T5RUPT
 #	RESUME
@@ -792,7 +794,7 @@ SATSTKON	EXTEND
 		MASK	RELTAB11	# FLAGWRD6
 		ADS	FLAGWRD6	#	SATSTICK CONTROL OF T5
 		TC	IBNKCALL	# ZERO JET CHANNELS IN 14 MS AND THEN
-## Page 543
+## Page 539
 		CADR	ZEROJET		# LEAVE THE T6 CLOCK DISABLED
 		RELINT
 		TC	GOPIN		# EXIT THUS BECAUSE WE CAME VIA V46
@@ -845,7 +847,7 @@ SATSTICK	LXCH	BANKRUPT
 		INDEX	RMANNDX		# SET SATURN RATES
 		CA	SATRATE
 		TS	AK		#	ROLL
-## Page 544
+## Page 540
 		INDEX	PMANNDX
 		CA	SATRATE
 		TS	AK1		#	PITCH
@@ -865,7 +867,6 @@ STIKBITS	OCT	00077
 100MST5		DEC	16374
 ## [WORKAROUND] RSB 2004
 		SBANK=	PINSUPER
-## [WORKAROUND]
 		EBANK=	BODY3
 2SATSTCK	2CADR	SATSTICK
 

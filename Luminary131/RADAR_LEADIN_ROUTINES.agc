@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 499-500 of 1729.pdf.
+## Reference:	pp. 494-495
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/14/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 499
+## Page 494
 		BANK	25
 		SETLOC	RRLEADIN
 		BANK
@@ -64,7 +67,7 @@ DORSAMP2	INHINT
 		CA	RADMODES
 		EXTEND
 		RXOR	CHAN33
-## Page 500
+## Page 495
 		MASK	BIT6
 		EXTEND
 		BZF	R77IN

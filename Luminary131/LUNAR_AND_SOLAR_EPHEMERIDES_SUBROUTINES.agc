@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 983-986 of 1729.pdf.
+## Reference:	pp. 978-981
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/29/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 983
+## Page 978
 # NAME -- LSPOS -- LOCATE SUN AND MOON			DATE -- 25 OCT 67
 # MOD NO. 1
 # MOD BY NEVILLE					ASSEMBLY SUNDANCE
@@ -68,7 +71,7 @@
 # THE THREE PHIS ARE STORED AS AARG, BARG, AND CARG(SUN).  ALL CONSTANTS ARE UPDATED BY YEAR.
 #
 # CALLING SEQUENCE
-## Page 984
+## Page 979
 #	CALL LSPOS.  RETURN IS VIA CPRET.
 #
 # ALARMS OR ABORTS
@@ -116,7 +119,7 @@ POSITA		DLOAD
 POSITB		DLOAD	DMP*
 			TIMEP		# T
 			VAL67 +4,1	# 1/27 OR 1/32 OR 1/365
-## Page 985
+## Page 980
 		SL	DAD*
 			8D
 			VAL67 +2,1	# AARG
@@ -167,7 +170,7 @@ POSITF		DLOAD	DSU		# 3RD
 			KONMAT
 		STORE	VSUN
 		RVQ
-## Page 986
+## Page 981
 POSITE		DLOAD
 			KONMAT +2	# ZEROS
 		STORE	GTMP
@@ -181,4 +184,3 @@ STMP		EQUALS	16D
 GTMP		EQUALS	22D
 TIMEP		EQUALS	24D
 
-# *** END OF LEMP50S .119 ***

@@ -12,6 +12,8 @@
 ##		2011-01-16 JL	Minor fixes.
 ##		2016-12-29 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 1
 
@@ -336,7 +338,7 @@
 #     PERIGEE,					     XXXX.X NAUT MI
 #     TFF					     XXBXX  MIN/SEC
 # 45  MARKS (VHF - OPTICS)		     3 COMP  +XXBXX				 NO LOAD, DEC ONLY
-#     TPI OF NEXT BURN				     XXBXX  MIN/SEC
+#     TFI OF NEXT BURN				     XXBXX  MIN/SEC
 #     MGA					     XXX.XX DEG
 # 46  AUTOPILOT CONFIGURATION		     2COMP   OCTAL ONLY FOR EACH
 # 47  THIS VEHICLE WEIGHT		     2COMP   XXXXX. LBS				 DEC ONLY

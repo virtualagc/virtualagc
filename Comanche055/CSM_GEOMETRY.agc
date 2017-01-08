@@ -12,6 +12,8 @@
 ##				same name, using Comanche055 page images.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -312,15 +314,15 @@ CLOG2/32	2DEC	.0216608494
 #	ABOUT THE (FULL) UNIT POLAR AXIS UNITW THROUGH THE ANGLE  WIE DTEAROT  TO OBTAIN THE ROTATED
 #	TARGET VECTOR RT.  ALL VECTORS EXCEPT UNITW ARE HALF UNIT.
 #	THE EQUATIONS ARE
-#		_    _        _                      _
+#		-    -        -                      -
 #		RT = RTINIT + RTNORM (COS(WT) - 1) + RTEAST SIN(WT)
 #
 #	WHERE	WT = WIE DTEAROT
 #
 #		RTINIT = INITIAL TARGET VECTOR
-#		_        _       _
+#		-        -       -
 #		RTEAST = UNITW * RTINIT
-#		_        _        _
+#		-        -        -
 #		RTNORM = RTEAST * UNITW
 #
 #	FOR CONTINUOUS UPDATING, ONLY ONE ENTRY TO EARROT1 IS REQUIRED, WITH SUBSEQUENT ENTRIES AT EARROT2.

@@ -12,6 +12,8 @@
 ##				same name, using Comanche055 page images.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 237 and Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -217,6 +219,7 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #                                     . * --------------------------------
 #                                     .  *
 #                                     .   ********************************
+#				      .
 #			FIG. 1	PHASE PLANE SWITCHING LOGIC
 #
 # CONSTANTS FOR JET SWITCHING LOGIC
@@ -440,13 +443,13 @@ J24		CS	AERR
 ## Page 1035
 # COMPUTE THE JET ON TIME NECESSARY TO ACCOMPLISH THE DESIRED CHANGE IN RATE, IE
 #
-#	     T  - J/M(DELTA W)
+#	     T  = J/M(DELTA W)
 #	      J
 #
 #	DELTA W = DESIRED CHANGE IN S/C ANGULAR RATE AS DETERMINED BY THE
 #		  SWITCHING LOGIC, AT THIS POINT STORED IN KMPAC.
 #
-#	    J/M - S/C INERTIA TO TORQUE 9ATIO SCALED BY
+#	    J/M = S/C INERTIA TO TORQUE 9ATIO SCALED BY
 #		  	(57.3/450)(B24/1600)(1/.8)
 #		  FOR 1 JET OPERATION  (M = 700 FT-LB).
 #		  IE J/M = J(SLUG-FTFT) X 0.00000085601606
@@ -457,7 +460,7 @@ J24		CS	AERR
 #			J/M1 (PITCH)
 #			J/M2 (YAW)
 #
-#	     T  - JET ON-TIME    SCALED 16384/1600 SEC
+#	     T  = JET ON-TIME    SCALED 16384/1600 SEC
 #	      J
 #
 #	          THE COMPUTER VARIABLES ARE

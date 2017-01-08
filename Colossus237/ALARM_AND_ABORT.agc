@@ -13,6 +13,8 @@
 ##		2011-02-07 JL	Minor fixes.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				but no errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 1457
 # 	   THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED

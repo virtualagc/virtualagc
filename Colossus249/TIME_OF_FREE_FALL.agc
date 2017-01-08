@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Begins on p. 1363 of 1701.pdf.
+## Reference:	Begins on p. 1341
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04 RSB.	Began adapting from corresponding Luminary131 file.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1363
+## Page 1341
 # THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES.  THE TFF ROUTINES NEVER
 # KNOW WHICH ORIGIN APPLIES.  IT IS THE USER WHO KNOWS, AND WHO SUPPLIES RONE, VONE, AND 1/SQRT(MU) AT THE
 # APPROPIRATE SCALE LEVEL FOR THE PROPER PRIMARY BODY.
@@ -87,7 +89,7 @@ NRMAG		=	32D	#	PRESENT RADIUS  M	E: (-29+NR)
 				#					  M: (-27+NR)
 TFFX		=	34D     #
 TFFTEM		=	36D	#	TEMPORARY
-## Page 1364
+## Page 1342
 #		REGISTERS S1, S2 ARE UNTOUCED BY ANY TFF SUBROUTINE
 #		INDEX REGISTERS X1, X2 ARE USED BY ALL TFF SUBROUTINES.  THEY ARE ESTAB-
 #		LISHED IN TFF/CONIC AND MUST BE PRESERVED BETWEEN CALLS TO SUBSEQUENT
@@ -95,7 +97,7 @@ TFFTEM		=	36D	#	TEMPORARY
 #		-NR				C(X1) = NORM COUNT OF RMAG
 #		-NA				C(X2) = NORM COUNT OF SQRT(ABS(ALFA))
 
-## Page 1365
+## Page 1343
 # SUBROUTINE NAME:  TFFCONIC			DATE:  01.29.67
 # MOD NO:  0					LOG SECTION:  TIME OF FREE FALL
 # MOD BY:  RR BAIRNSFATHER
@@ -151,7 +153,7 @@ TFFTEM		=	36D	#	TEMPORARY
 #				M:(24-NR)
 #		TFFRTALF	E:(10+NA)		SQRT(ALFA), NORMALIZED
 #				M:(9+NA)
-## Page 1366
+## Page 1344
 #		X2					-NA, NORMCOUNT
 #		TFF1/ALF	E:(-22-2NA)		SIGNED SEMI-MAJOR AXIS, WEIGHTED BY NA
 #				M:(-20-2NA)
@@ -203,7 +205,7 @@ TFFCONMU	VLOAD	UNIT		# COME HERE WITH TFFRTMU LOADED.
 		STORE	TFFVSQ		# -(V SQ/MU)  E:(20) M:(18)
 					# SAVE FOR VGAMCALC
 		SR*	DAD
-## Page 1367
+## Page 1345
 			0 -6,1		# GET -VSQ/MU  E:(26-NR) M:(24-NR)
 		STADR
 					# 2/RMAG  FROM PDL+2
@@ -222,7 +224,7 @@ TFFCONMU	VLOAD	UNIT		# COME HERE WITH TFFRTMU LOADED.
  +2		STORE	TFF1/ALF	# 1/ALFA  E:(-22-2NA) M:(-20-2NA)
 DUMPCNIC	RVQ
 					#			39 W
-## Page 1368
+## Page 1346
 # SUBROUTINE NAME:  TFFRP/RA			DATE: 01.17.67
 # MOD NO:  0					LOG SECTION:  TIME OF FREE FALL
 # MOD NO:  1	MOD BY:  RR BAIRNSFATHER	DATE: 11 APR 67
@@ -270,7 +272,7 @@ DUMPCNIC	RVQ
 #
 # DEBRIS:	QPRET, PDL+0 ... PDL+1
 
-## Page 1369
+## Page 1347
 RAPO		=	16D		# APOGEE RADIUS  M  E:(-29) M:(-27)
 RPER		=	14D		# PERIGEE RADIUS  M  E:(-29) M:(-27)
 
@@ -307,7 +309,7 @@ MAXRA		DLOAD			# RAPO CALC IS NOT VALID.  SET RAPO =
  +3		STORE	RAPO		# APOGEE RADIUS  M  E:(-29) M:(-27)
 DUMPRPRA	RVQ
 					#			30 W
-## Page 1370
+## Page 1348
 # SUBROUTINE NAME:  CALCTPER / CALCTFF		DATE:  01.29.67
 # MOD NO:  0					LOG SECTION:  TIME OF FREE FALL
 # MOD BY:  RR BAIRNSFATHER
@@ -354,7 +356,7 @@ DUMPRPRA	RVQ
 #			C(MPAC) = TERMNL RAD M		C(MPAC) = PERIGEE RAD M
 #	FOR EITHER, E:(-29) M:(-27)
 #	FOR EITHER, PUSHLOC = PDL+0, ARBITRARY IF LEQ 8D.
-## Page 1371
+## Page 1349
 #
 # SUBROUTINES CALLED:	T(X), VIA RTB
 #
@@ -403,7 +405,7 @@ DUMPRPRA	RVQ
 #		RAPO		E:(-29) M(-27)	PDL 16D (=NRTERM)
 #		RPER		E:(-29) M(-27)	PDL 14D (=TFFQ1)
 
-## Page 1372
+## Page 1350
 CALCTPER	SETGO			# ENTER WITH RPER IN MPAC
 			TFFSW
 			+3
@@ -452,7 +454,7 @@ CALCTFF		CLEAR			# ENTER WITH RTERM IN MPAC
 		STODL	TFFX		# NUM=Q2-Q1  E:(-16) M:(-15)
 			TFFALFA		# ALFA  E:(26-NR) M:(24-NR)
 		DMP	BDSU
-## Page 1373
+## Page 1351
 			NRMAG		# RMAG  E:(-29+NR) M:(-27+NR)
 					# (2-RTERM ALFA)  (-3) FROM PDL+0
 SAVEDEN		PUSH	ABS		# DEN TO PDL+0	E:(-3) OR (-16)
@@ -504,7 +506,7 @@ TFFXTEST	DAD	PDDL		# (ABS(DEN) TO PDL+2)	E:(-3) OR (-16)
 					# DEN FROM PDL+0	E:(-3) OR (-16)
 					#			M:(-3) OR (-15)
 		STORE	TFFTEM		# Z SAVE FOR SIGN OF SDELF.
-## Page 1374
+## Page 1352
 					# E:(-13) M:(-12)
 		PUSH	DSQ		# Z TO PDL+0
 		PUSH	DMP		# Z SQ TO PDL+2  E:(-26) M:(-24)
@@ -556,7 +558,7 @@ ENDTFF		DMP	BOV		# TFF SQRT(MU) IN MPAC		E:(-45) M:(-42)
 
 DUMPTFF2	RVQ			# RETURN TFF (-28) CS IN MPAC.
 
-## Page 1375
+## Page 1353
 NEGTFF		DLOAD
 					# TFF SQRT(MU) FROM PDL+0, NEGATIVE.
 		GOTO
@@ -607,7 +609,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 		STODL	TFFTEM		# (Q1+R 1/Z) =SGN OF SDELF  E:(-16) M:(-15)
 			TFFNP		# LC P  E:(-38+2NR) M:(-36+2NR)
 		DMP	SL*		# CALC FOR ARG FOR TFF/TRIG.
-## Page 1376
+## Page 1354
 			TFF1/ALF	# 1/ALFA  E:(-22-2NA) M:(-20-2NA)
 			1,2		# X2=-NA
 		SIGN	SL*
@@ -631,7 +633,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 			0 -4,2
 			ENDTFF		# TFF SQRT(MU) IN MPAC E:(-145) M:(-42)
 
-## Page 1377
+## Page 1355
 # PROGRAM NAME:  T(X)				DATE:  01.17.67
 # MOD NO:  0					LOG SECTION:  TIME OF FREE FALL
 # MOD BY:  RR BAIRNSFATHER
@@ -682,7 +684,7 @@ ENDT(X)		TC	DANZIG
 
 TCDANZIG	=	ENDT(X)
 
-## Page 1378
+## Page 1356
 # TFF CONSTANTS
 
 		BANK	32

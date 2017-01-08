@@ -5,16 +5,18 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 498-503 of 1701.pdf.
+## Reference:	pp. 496-501.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/11/04 RSB.	Began adapting from corresponding Luminary131
 ##				source file.
 ##		2010-10-24 JL	Fixed indentation of last line (interpretive operand).
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +32,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 498
+## Page 496
 		BANK	34
 		SETLOC	R31
 		BANK
@@ -86,7 +88,7 @@ COMPDISP	VLOAD	VSU
 			X1		# RATT-RONE		PD= 0
 		VSR1
 		VSL*	UNIT
-## Page 499
+## Page 497
 			0,1
 		PDVL	VSU		# UNIT(LOS) TO 0D	PD= 6
 			VATT
@@ -137,7 +139,7 @@ R34ANG		VLOAD	UNIT
 		EXIT
 		CAF	BIT5
 		MASK	EXTVBACT
-## Page 500
+## Page 498
 		EXTEND
 		BZF	ENDEXT		# YES, DIE
 		
@@ -149,7 +151,7 @@ R34ANG		VLOAD	UNIT
 V16N54		VN	1654
 V16N53		VN	1653
 
-## Page 501
+## Page 499
 # THE STATEXTP SUBROUTINE DOES A PRECISION EXTRAPOLATION OF BOTH VEHICLES
 # STATE VECTORS TO PRESENT TIME AND SAVES THEM AS BASE VECTORS.
 # IF SERVICER IS OFF ---
@@ -201,7 +203,7 @@ HAVEBASE	BON	RTB
 			INTYPFLG	# CONIC EXTRAP.
 		STCALL	TET
 			INTEGRVS	# INTEGRATION --- AT LAST ---
-## Page 502
+## Page 500
 		VLOAD
 			RATT
 		STOVL	RONE
@@ -252,7 +254,7 @@ R34LOS		EXIT
 		CA	CDUT
 		INDEX	FIXLOC
 		TS	11D
-## Page 503
+## Page 501
 		CA	FIXLOC
 		AD	SIX
 		COM

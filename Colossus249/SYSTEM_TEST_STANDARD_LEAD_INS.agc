@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 415-417 of 1701.pdf.
+## Reference:	pp. 413-415.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/07/04 RSB.	Adapted from similar Luminary 131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 415
+## Page 413
 		EBANK=	XSM
 		
 		BANK	33
@@ -81,7 +83,7 @@ E/BKCALL	DXCH	BUF2		# SAVE A,L AND GET DP RETURN
 E/SWITCH	DXCH	EBUF2
 		DTCB
 		
-## Page 416
+## Page 414
 # E/CALL	FOR CALLING A FIXED MEMORY INTERPRETIVE SUBROUTINE FROM ERASABLE AND RETURNING TO ERASABLE.
 #
 # THE CALLING SEQUENCE IS...
@@ -104,7 +106,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 		LXCH	EBUF2 +1	# PICK UP RETURN.
 		TCF	INTPRET +2	# SET LOC AND RETURN TO CALLER.
 		
-## Page 417
+## Page 415
 # E/JOBWAK	FOR WAKING UP ERASABLE MEMORY JOBS.
 #
 # THIS ROUTINE MUST BE CALLED IN INTERRUPT OR WITH INTERRUPTS INHIBITED.

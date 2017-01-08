@@ -5,16 +5,18 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 903-906 of 1701.pdf.
+## Reference:	pp. 899-902.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	08/22/04 RSB.	Transcribed.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +32,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 903
+## Page 899
 # NAME		TVCDAPON (TVC DAP INITIALIZATION AND STARTUP CALL)
 # MOD NO 3					DATE 6 JUNE, 1967
 # MOD BY ENGEL					LOG SECTION P40-P47
@@ -94,7 +96,7 @@ MRCLEAN		CAF	NZERO		# NUMBER TO ZERO, LESS ONE  (MUST BE ODD)
 		DXCH	OMEGAYC		# FIRST (LAST) TWO LOCATIONS
 		CCS	CNTR
 		TCF	MRCLEAN +1
-## Page 904
+## Page 900
 		EXTEND			# SET UP ANOTHER T5 RUPT TO CONTINUE
 		DCA	INITLOC2	#	INITIALIZATION AT TVCINIT1
 		DXCH	T5LOC		# THE PHSCHK2 ENTRY (REDOTVC) AT TVCDAPON
@@ -145,7 +147,7 @@ TVCINIT2	CAE	ETVCDT/2	# LEM-ON VALUE (PAD-LOAD, CS / 2)
 		CS	BIT15		# RESET SWTOVER FLAG
 		MASK	FLAGWRD9
 		TS	FLAGWRD9
-## Page 905
+## Page 901
 		INDEX	CNTR		# PICK UP LEM-OFF,-ON KPRIME
 		CAE	EKPRIME
 		EXTEND
@@ -194,7 +196,7 @@ TVCINIT4	CAF	ZERO		# SET TVCPHASE TO INDICATE TVCDAPON-THRU-
 					
 		CAE	CDUX		# PREPARE ROLL DAP LADDERS
 		TS	OGANOW
-## Page 906
+## Page 902
 					# ROLL DAPS RE-START UPON A RESTART, BUT
 					#	RETAIN ORIGINAL OGAD (IGNOVER CDUX)
 					

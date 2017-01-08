@@ -5,21 +5,23 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 207-217 of 1701.pdf.
+## Reference:	pp. 205-215.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/07/04 RSB.	Adapted from similar Luminary 131 file.
 ##				Oddly, the 2 pages of introductory comments
 ##				aren't present in Luminary.
 ##		2010-10-25 JL	Fixed page number.
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
-## The contents of the "Colossus249" files, in general, are transcribed
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## The contents of the "Colossus249" files, in general, are transcribed 
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
-##	2021111-041.  October 28, 1968.
+##	2021111-041.  October 28, 1968.  
 ##
 ##	This AGC program shall also be referred to as
 ##				Colossus 1A
@@ -31,13 +33,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
-## In some cases, where the source code for Luminary 131 overlaps that of
+## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 207
+## Page 205
 # RESTART TABLES
 # --------------
 #
@@ -87,7 +89,7 @@
 #				-2CADR	DUMMY		# WAS PUT ON THE WAITLIST IS UP, IT WILL BEGIN
 #							# IN 10 MS, OTHERWISE IT WILL BEGIN WHEN
 #							# IT NORMALLY WOULD HAVE BEGUN.
-## Page 208
+## Page 206
 #				-GENADR	DTIME		# WHERE DTIME CONTAINS THE DELTA TIME
 #				-2CADR	TASKTASK	# OTHERWISE THIS IS AS ABOVE
 #
@@ -140,7 +142,7 @@ SIZETAB		TC	1.2SPOT -12006
 2.2SPOT		EQUALS	1.2SPOT
 
 # ANY MORE GROUP 2.EVEN RESTART VALUES SHOULD GO HERE
-## Page 209
+## Page 207
 
 2.3SPOT		GENADR	600SECS
 		-GENADR	STATEINT
@@ -193,7 +195,7 @@ SIZETAB		TC	1.2SPOT -12006
 		EBANK=	TGO
 		-2CADR	ENGINOFF
 
-## Page 210
+## Page 208
 # ANY MORE GROUP 3.ODD RESTART VALUES SHOULD GO HERE
 
 4.2SPOT		OCT	77777
@@ -244,7 +246,7 @@ SIZETAB		TC	1.2SPOT -12006
 
 4.15SPOT	OCT	16000			# PRELAUNCH OPTICAL VERIFICATION
 		EBANK=	OGC
-## Page 211
+## Page 209
 		2CADR	COMPVER			# CALLS FOR OPTICS DATA AGAIN (STD LEADIN)
 
 4.17SPOT	OCT	16000
@@ -294,7 +296,7 @@ SIZETAB		TC	1.2SPOT -12006
 
 4.45SPOT	OCT	13000			# PROTECT CONTINUING JOB S61.1
 		EBANK=	AOG			# (ENTRY IMU ALIGNMENT)
-## Page 212
+## Page 210
 		2CADR	S61.1A	-1
 
 4.47SPOT	OCT	17000			# PROTECT HUNTEST ITERATION
@@ -345,7 +347,7 @@ SIZETAB		TC	1.2SPOT -12006
 		EBANK=	DAPDATR1
 		-2CADR	SPSOFF97
 
-## Page 213
+## Page 211
 4.77SPOT	DEC	-0
 		EBANK=	PACTOFF
 		-2CADR	TIG-0
@@ -396,7 +398,7 @@ SIZETAB		TC	1.2SPOT -12006
 
 5.17SPOT	OCT	20000
 		EBANK=	XSM
-## Page 214
+## Page 212
 		2CADR	GEOSTRT4
 
 5.21SPOT	OCT	20000
@@ -445,7 +447,7 @@ SIZETAB		TC	1.2SPOT -12006
 		-2CADR	CLOKTASK
 
 # ANY MORE 6.ODD RESTART VALUES SHOULD GO HERE
-## Page 215
+## Page 213
 
 6.3SPOT		DEC	100
 		EBANK=	TIG
@@ -467,7 +469,7 @@ SIZETAB		TC	1.2SPOT -12006
 		DEC	0
 		DEC	0
 
-## Page 216
+## Page 214
 # PROGRAM DESCRIPTION: NEWPHASE						DATE:  11 NOV 1966
 # MOD: 1								ASSEMBLY:  SUNBURST REV
 # MOD BY: COPPS								LOG SECTION: PHASE TABLE MAINTENANCE
@@ -519,7 +521,7 @@ SIZETAB		TC	1.2SPOT -12006
 # OUTPUT:  PHASE TABLE AND TBASE TABLE UPDATED
 #
 # ERASABLE INITIALIZATION REQ'D:  NONE
-## Page 217
+## Page 215
 # DEBRIS:  A,L,TEMPG
 
 # *** WARNING *** THIS PROGRAM IS TO BE PLACED IN FIXED-FIXED AND UNSWITCHED ERASABLE.

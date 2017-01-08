@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Begins at p. 925 of 1701.pdf.
+## Reference:	Begins at p. 921.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/23/04 RSB.	Began transcribing.
 ##		2010-10-25 JL	Fixed page number.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 925
+## Page 921
 # PROGRAM NAME....TVCDAP, CONSISTING OF PITCHDAP, YAWDAP, ETC.
 # LOG SECTION....TVCDAP				SUBROUTINE....DAPCSM
 # MOD BY ENGEL					DATE....27 OCT, 1967
@@ -86,7 +88,7 @@
 # ALARM OR ABORT EXIT MODES....NONE
 #
 # SUBROUTINES CALLED....
-## Page 926
+## Page 922
 #
 #	HACK FOR STROKE TEST (V68) WAVEFORM GENERATION
 #	NP0-, NP1-, NY0-, AND NY1NODE FOR GEN3DAP (LEM-OFF) FILTERS
@@ -137,11 +139,11 @@
 		BANK	17
 		SETLOC	DAPS2
 		BANK
-## Page 927
+## Page 923
 		EBANK=	BZERO
 		COUNT*	$$/DAPS
 		
-## Page 928
+## Page 924
 # PITCH TVCDAP STARTS HERE....(INCOPORATES CSM/LEM DAP FILTER, MODOR DESIGN)
 
 PITCHDAP	LXCH	BANKRUPT	# T5 ENTRY, NORMAL OR VIA DAPINIT
@@ -191,7 +193,7 @@ PINTEGRL	EXTEND			# COMPUTE INTEGRAL OF BODY-AXIS PITCH-RATE
 		
 		CS	MCDUZDOT
 		EXTEND
-## Page 929
+## Page 925
 		MP	SINCDUX
 		DDOUBL
 		DAS	OMEGAYB		# (COMPLETED OMEGAYB, SC.AT 1/2TVCDT REVS)
@@ -242,7 +244,7 @@ POFFSET		EXTEND			# SIGN CHANGE IN FORWARD LOOP
 		DCA	PDELOFF
 		DAS	CMDTMP
 
-## Page 930
+## Page 926
 PROUND		CAE	CMDTMP +1	# ROUND UP FOR OUTPUT
 		DOUBLE
 		TS	L
@@ -287,7 +289,7 @@ PDLADDER	EXTEND			# PREPARE TEMPORARIES, FOR UPDATING PITCH
 		DXCH	J3TMP
 		EXTEND
 		DCA	J3
-## Page 931
+## Page 927
 		DXCH	J4TMP
 		EXTEND
 		DCA	J4
@@ -327,7 +329,7 @@ RLIMTEST	TS	CMDTMP		# TEST FOR EXCESSIVE CDU RATES
 		CAE	CMDTMP
 		TC	Q
 		
-## Page 932
+## Page 928
 # PITCH TVCDAP COPYCYCLE SUBROUTINE (CALLED VIA PITCH TVCDAP OR TVC RESTART PACKAGE)
 
 PCOPY		INCR	TVCPHASE	# RESTART-PROTECT THE COPYCYCLE.
@@ -378,7 +380,7 @@ PMISC		EXTEND			# MISC....PITCH-RATE-ERROR INTEGRATOR
 		TS	PCMD
 		
 		EXTEND			# 	PITCH OFFSET-TRACKER-FILTER
-## Page 933
+## Page 929
 		DCA	DELBRTMP
 		DXCH	DELPBAR
 		
@@ -386,7 +388,7 @@ PMISC		EXTEND			# MISC....PITCH-RATE-ERROR INTEGRATOR
 		
 		TC	Q
 
-## Page 934
+## Page 930
 # TVCDAP STARTS HERE....(INCORPORATES CSM/LEM DAP FILTER, MODOR DESIGN)
 
 YAWDAP		LXCH	BANKRUPT	# T5 ENTRY, NORMAL
@@ -437,7 +439,7 @@ YERORLIM	TCR	ERRORLIM	# YAW BODY-AXIS-ERROR INPUT LIMITER
 Y1FILJMP	CAE	DAPDATR1	# CHECK FOR LEM-ON/-OFF
 		MASK	BIT14		# (BIT 14 INDICATES LEM IS ON)
 		
-## Page 935
+## Page 931
 		CCS	A
 		TCF	+3		# USE LEM-ON FILTER
 		TC	POSTJUMP	# USE LEM-OFF (GEN3DAP) FILTER
@@ -488,7 +490,7 @@ YOUT		CS	YCMD		# INCRMENTAL YAW COMMAND
 		AD	CMDTMP
 		ADS	TVCYAW		# UPDATE THE ERROR COUNTER (NO RESTART-
 					#	PROTECT, SINCE ERROR CNTR ZEROED)
-## Page 936
+## Page 932
 		CAF	BIT12		# BIT FOR TVCYAW COUNT RELEASE
 		EXTEND
 		WOR	CHAN14
@@ -533,7 +535,7 @@ YDSUMC		TCR	DSUM		# YAW DENOMINATOR SUM
 DELBARY		CAE	CMDTMP		# UPDATE YAW OFFSET-TRACKER-FILTER
 		EXTEND			#	(GEN3DAP RETURNS AT "DELBARY")
 		MP	1-E(-AT)
-## Page 937
+## Page 933
 		DXCH	DELBRTMP
 		CAE	DELYBAR
 		EXTEND
@@ -551,7 +553,7 @@ YCOPYCYC	TCR	YCOPY		# YAW COPYCYCLE
 
 YDAPEND		TCF	RESUME		# YAW DAP COMPLETED
 
-## Page 938
+## Page 934
 # TVCDAP COPYCYCLE SUBROUTINE (CALLED VIA YAW   TVCDAP OR TVC RESTART PACKAGE)
 
 YCOPY		INCR	TVCPHASE	# RESTART-PROTECT THE COPYCYCLE.
@@ -602,7 +604,7 @@ YMISC		EXTEND			# MISC....YAW-RATE-ERROR INTEGRATOR
 		TS	YCMD
 		
 		EXTEND			#	YAW	OFFSET-TRACKER-FILTER
-## Page 939
+## Page 935
 		DCA	DELBRTMP
 		DXCH	DELYBAR
 		CAF	ZERO		# YAW   COPYCYCLE COMPLETED
@@ -610,7 +612,7 @@ YMISC		EXTEND			# MISC....YAW-RATE-ERROR INTEGRATOR
 		
 		TC	Q
 		
-## Page 940
+## Page 936
 # SUBROUTINES COMMON TO BOTH PITCH AND YAW DAPS....
 # INITIALIZATION PACKAGE FOR CDURATES....
 
@@ -657,7 +659,7 @@ OPTVARK		CAE	CMDTMP		# VARIABLE-GAIN PACKAGE....CMDTMP CONTAINS
 		MP	VARK
 		ADS	CMDTMP +1
 		TS	L
-## Page 941
+## Page 937
 		TCF	+2
 		ADS	CMDTMP
 		
@@ -706,7 +708,7 @@ NSUM		CAE	B1TMP		# PREPARE NUMERATOR SUM, SCALING IS AT
 		
 		CAE	B5TMP
 		EXTEND
-## Page 942
+## Page 938
 		MP	N5
 		DAS	NSUMTMP
 		
@@ -756,7 +758,7 @@ D2J2		CAE	J2TMP
 		MP	D2 +1
 		ADS	DSUMTMP +1
 		TS	L
-## Page 943
+## Page 939
 		TCF	+2
 		ADS	DSUMTMP
 		CAE	J2TMP +1
@@ -807,7 +809,7 @@ D4J4		CAE	J4TMP
 		
 D5J5		CAE	J5TMP
 		EXTEND
-## Page 944
+## Page 940
 		MP	D5
 		DAS	DSUMTMP
 		CAE	J5TMP
@@ -850,7 +852,7 @@ DSUMSC		DXCH	DSUMTMP		# FIX UP SCALING (NOW AT B+1 SPASCREV)
 		
 		TC	Q
 		
-## Page 945
+## Page 941
 # CONSTANTS FOR AUTOPILOTS
 # NOTE....1 ASCREV (ACTUATOR CMD SCALING) = 65.41 ARCSEC/BIT OR 1.07975111 REVS (85.41x16384/3600/360)
 #	  1 SPASCREV (SPECIAL ACTUATOR CMD SCALING) = 1.04620942 REVS
@@ -885,7 +887,7 @@ N6		DEC	-1.5101470 B-2
 N7		DEC	0.31243224 B-2
 
 D1		2DEC	-4.7798977 B-4	# DENOMINATOR COEFS (CSM/LEM), SC.AT B+4
-## Page 946
+## Page 942
 D2		2DEC	9.4452763 B-4
 D3		2DEC	-9.8593475 B-4
 D4		2DEC	5.7231811 B-4

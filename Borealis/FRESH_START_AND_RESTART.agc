@@ -12,6 +12,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
 ##              2016-12-22 MAS  Added the hardware alarm test restart group.
+##              2017-01-04 MAS  Added init/checking of ERESTORE for the updated
+##                              erasable check from Sunburst.
 
                 BANK            12 
                 EBANK=          LST1
@@ -27,6 +29,7 @@ SLAP1           INHINT                                  # FRESH START. COMES HER
 
 DOFSTART        CAF             ZERO                    # DO A FRESH START,
                 TS              SMODE
+                TS              ERESTORE                # Added from Sunburst.
                 TS              MODREG
                 TS              AGSWORD                 # ALLOW AGS INITIALIZATION
                 TS              UPLOCK                  # FREE UPLINK INTERLOCK
@@ -108,6 +111,11 @@ GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTE
                 EXTEND
                 BZF                             +2
                 TCF             PCLOOP          -1      # VERIFY PHASE TABLE.
+
+# This check is pulled back from Sunburst.
+                CA              ERESTORE                # IF SELF-CHECK ERASABLE-MEMORY TEST WAS
+                EXTEND                                  # INTERRUPTED BY A RESTART, DOUBT ERASABLE
+                BZF             +2                      # AND DO A FRESH START.
                 
                 CAF             BIT5
                 EXTEND

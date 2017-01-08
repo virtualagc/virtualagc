@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 802-839 of 1701.pdf.
+## Reference:	pp. 798-835.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/21/04 RSB.	Began transcribing.
 ##		2010-10-24 JL	Indentation fixes. Added missing # in comment.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 802
+## Page 798
 # ENTRY INITIALIZATION ROUTINE
 # ----------------------------
 
@@ -86,7 +88,7 @@ STARTENT	EXIT			# MM = 63
 			LATSLOPE
 		DMP	SR1		# KLAT = LAD/24
 			LAD
-## Page 803
+## Page 799
 		STODL	KLAT
 			Q7F
 		STODL	Q7		# Q7 = Q7F
@@ -137,7 +139,7 @@ STARTEN1	STQ	VLOAD
 			
 		STODL	LAT +4		# SET ALT=0.
 			PIPTIME		# ESTABLISH RTINIT AT TIME OF PRESENT
-## Page 804
+## Page 800
 					# RN AND VN.
 		STCALL	TIME/RTO	# SAVE TIME BASE OF RTINIT.
 			LALOTORV	# C(MPAC) =TIME  (PIPTIME)
@@ -156,7 +158,7 @@ STARTEN1	STQ	VLOAD
 500SEC		2DEC	50000 B-28	# CS.
 ENTMASK		OCT	11774
 ENTRYSW		OCT	11010		# ENTRYDSP B13.  GONEPAST B10.  LATSW B4
-## Page 805
+## Page 801
 
 SCALEPOP	CALL	
 			TARGETNG
@@ -203,7 +205,7 @@ REFAZE10	TC	PHASCHNG
 #		AND LONGITUDE ARE COMPUTED FOR DISPLAY.
 #		ENTRY IS TERMINATED WHEN DISKY RESPONSE IS MADE TO THIS FINAL FLASHING DISPLAY.
 
-## Page 806
+## Page 802
 # PROCESS AVERAGE G OUTPUT...SCALE IT AND GET INPUT DATA
 
 # * START  TARGETING ...
@@ -253,7 +255,7 @@ GETUNITV	UNIT	STQ
 DSTORE		STOVL	D		# ACCELERATION USED TO APPROX DRAG
 			VEL
 		VXV	UNIT		# UNI = UNIT(V*R)
-## Page 807
+## Page 803
 			UNITR
 		STORE	UNI		# .5 UNI		REF COORDS.
 		
@@ -304,7 +306,7 @@ THETDONE	STORE	THETAH		# THETAH/360
 		
 			D
 		DSU	BMN
-## Page 808
+## Page 804
 			.05G
 			NO.05G
 		SET	VLOAD
@@ -327,7 +329,7 @@ NO.05G		CLEAR	GOTO		# THIS WAY FOR DAP. (MAY INTERRUPT)
 			.05GSW		# .05GSW = 102D B3
 			NOLDCALC	# KEEP SINGLE EXIT FOR TARGETING
 
-## Page 809
+## Page 805
 # SUBROUTINES CALLED BY SCALEPOP (TARGETING):
 
 		BANK	26
@@ -378,7 +380,7 @@ SETMIND		DLOAD	GOTO
 			1BITDP
 			DSTORE
 			
-## Page 810
+## Page 806
 TINYTHET	DSU	ABS		# ENTER WITH X-.249
 			1BITDP +1	# GET 1/4 - MPAC
 		SL	SQRT		# SCALE UP BEFORE SQRT
@@ -387,7 +389,7 @@ TINYTHET	DSU	ABS		# ENTER WITH X-.249
 			KACOS
 			THETDONE
 			
-## Page 811
+## Page 807
 # * START	INITIAL ROLL ...
 
 		BANK	25
@@ -437,7 +439,7 @@ D0EQ		DLOAD	DMP		# D0 = KA3 LEQ + KA4
 			KA4
 		STORE	D0		# D0/805
 		BDDV	BOV
-## Page 812
+## Page 808
 			C001		# (-4/25 G) B-8
 			+1		# CLEAR OVFIND, IF ON.
 		STODL	C/D0		# (-4/D0) B-8
@@ -482,7 +484,7 @@ INITRL1		DLOAD	DAD		# IF RDOT + VRCONT POS, GO TO HUNTEST
 			
 			FOREHUNT	# INITIALIZE HUNTEST.
 			
-## Page 813
+## Page 809
 # * START	HUNT TEST ...
 					# MM = 64
 		SSP			# INITIALIZE HUNTEST ON FIRST PASS
@@ -532,7 +534,7 @@ V1LEAD		DLOAD	BPL		# IF L/D NEG, V1=V1 - 1000
 			
 		DLOAD	DSU
 			V1
-## Page 814
+## Page 810
 			VQUIT
 		STORE	V1
 		
@@ -583,7 +585,7 @@ HUNTEST1	DLOAD	DMP		# ALP = 2 C1 HS A0/LEWD V1 V1
 			PREFINAL
 			
 		DLOAD	DSQ
-## Page 815
+## Page 811
 			VL
 		STODL	VBARS		# VBARS / 4 VS VS
 		
@@ -634,13 +636,13 @@ HUNTEST3	STORE	GAMMAL
 		DSU			# GAMMAL1=GAMMAL1 +Q19 (GAMMAL-GAMMAL1)
 			GAMMAL1
 		DMP	DAD
-## Page 816
+## Page 812
 			Q19
 			GAMMAL1
 		STODL	GAMMAL1
 			GAMMAL
 
-## Page 817
+## Page 813
 # *START	RANGE PREDICTION ...
 					# C(MPAC) = GAMMAL.
 RANGER		DSQ	SR2		# COSG = 1-GAMMAL SQ/2, TRUNCATED SERIES
@@ -689,7 +691,7 @@ RANGER		DSQ	SR2		# COSG = 1-GAMMAL SQ/2, TRUNCATED SERIES
 			C12
 			GAMMAL1
 		STORE	ASPUP		# UP PHASE RANGE	ASPUP / 2 PI
-## Page 818
+## Page 814
 		PDDL	DMP		# ASPUP TO PDL 4.
 			KC3		# KC3 = -4 VS VS / 2 PI 805 RE
 					# ASPDWN = KC3 RDOT V / A0
@@ -740,7 +742,7 @@ GETLEWD		DLOAD	DMP
 		PDDL	DSU
 			DIFFOLD
 			DIFF
-## Page 819
+## Page 815
 		BDDV
 LWDSTORE	STADR
 		STORE	DLEWD
@@ -791,7 +793,7 @@ LEWDPTR		DLOAD	SR1
 		DCOMP	GOTO
 			LWDSTORE
 
-## Page 820
+## Page 816
 NEGAMA		DMP	DMP		# ENTER WITH GAMMAL IN MPAC
 
 			VL
@@ -836,7 +838,7 @@ DHOOKYQ7	SR1	DDV		# SUBROUTINE TO CALC DHOOK OR Q7
 		DDV	RVQ
 			FACT2
 			
-## Page 821
+## Page 817
 					# COME TO PRE-HUNT WHEN RESTART OCCURS AFTER
 					# HUNTEST IS SIDE-TRACKED AT SIDETRAK.
 					# PICK UP IN GROUP 4.
@@ -858,7 +860,7 @@ FOREHUNT	DLOAD			# INITIALIZE HUNTEST.
 		
 ADENDEXT	CADR	ENDEXIT
 
-## Page 822
+## Page 818
 # * START	UP CONTROL ...
 					# MM = 65
 GOTOUPSY	RTB			# END OF HUNTEST
@@ -907,7 +909,7 @@ CONT1		DLOAD			# IF D-A0 POS, L/D = LAD, GO TO LIMITL/D
 CONT3		DLOAD	DMP		# VREF=FACT1(1-SQRT(FACT2 D + ALP))
 			D
 			FACT2
-## Page 823
+## Page 819
 		DAD	SQRT
 			ALP
 		BDSU	DMP
@@ -956,7 +958,7 @@ CONTINU2	DLOAD	DSU
 		DDV	STADR
 		STORE	FACTOR		# FACTOR / 25G
 		
-## Page 824
+## Page 820
 # SKIPPER
 					# DELTA L/D=-((RDOT-RDOTREF)F1 KB1+V-VREF)F1 KB2
 					#	WHERE F1 = FACTOR
@@ -1008,7 +1010,7 @@ NEGTESTS	BOV	PUSH		# L/D TO PDL FOR USE IN NEGTESTS.
 		STCALL	L/D
 			LIMITL/D	# (GO TO)
 
-## Page 825
+## Page 821
 DCONSTD		DLOAD			# TWO RANGER ENTRIES TO CONSTD HERE
 			DIFF
 					# SAVE OLD VALUE OF DIFF FOR NEXT PASS.
@@ -1057,7 +1059,7 @@ DOWNCNTL	BOVB			# INITIAL PART OF UPCONTROL.
 			V1
 		DMP	DAD
 			LAD
-## Page 826
+## Page 822
 			RDOT
 		DMP	DAD
 			K2D
@@ -1080,7 +1082,7 @@ DOWNCNTL	BOVB			# INITIAL PART OF UPCONTROL.
 			
 					#              2           2
 					# DREF = (V/V1)  A0 -(V-V1)  LAD/2 C1 HS
-## Page 827
+## Page 823
 # * START	BALLISTIC PHASE ...
 					# MM = 66	UPCONTRL ENTRY INTO KEP2
 KEP		RTB	SSP
@@ -1107,7 +1109,7 @@ KEP2		DLOAD	DSU		# IF Q7F+KDMIN -D NEG, GO TO FINAL PHASE.
 			P62.3		# CALC DESIRED GIMBAL ANGLES AT PRESENT
 					# RN, VN TO YIELD TRIM ATTITUDE.
 					# AVAILABLE IN CPHI'S FOR N22.
-## Page 828
+## Page 824
 # START FINAL PHASE ...
 					# MM = 67
 PREFINAL	SSP	RTB
@@ -1156,7 +1158,7 @@ BACK		TS	JJ
 		
 		CAF	FIVE
 
-## Page 829
+## Page 825
 BACK2		TS	MM
 		CAF	THIRTEEN
 		ADS	JJ
@@ -1207,7 +1209,7 @@ BACK2		TS	MM
 			GONEGLAD
 			
 HAVDNRNG	STORE	DNRNGERR	# = (PREDANG - THETA) /360
-## Page 830
+## Page 826
 		DCOMP			# FALLS SHORT IF NEG, OVERSHOOT IF POS
 		BOVB	DDV
 			TCDANZIG	# CLEAR OVFIND IF ON.
@@ -1257,7 +1259,7 @@ GOPOSLAD	DLOAD
 			LAD
 STOREL/D	STORE	L/D
 
-## Page 831
+## Page 827
 LIMITL/D	DLOAD
 			L/D
 		STODL	L/D1
@@ -1307,7 +1309,7 @@ OVERNOUT	CA	BIT13		# ENTRYDSP =92D B13
 		MASK	CM/FLAGS
 		EXTEND
 		BZF	NODISKY		# OMIT DISPLAY.
-## Page 832
+## Page 828
 		CA	ENTRYVN		# ALL ENTRY DISPLAYS ARE DONE HERE.
 		TC	BANKCALL
 		CADR	REGODSPR	# NO ABORT IF DISKY IN USE
@@ -1318,7 +1320,7 @@ NODISKY		INHINT
 SERVNOUT	TC	POSTJUMP	# ( COME HERE FROM P67.3 )
 		CADR	SERVEXIT	# AND END AVERAGEG JOB VIA ENDOJOB.
 
-## Page 833
+## Page 829
 # DISPLAY WHEN V IS LESS THAN VQUIT.
 
 STEEROFF	EXIT
@@ -1350,7 +1352,7 @@ L357		DLOAD	SIGN		# L/D = L/DCMINR SIGN(L/D)
 		STCALL	L/D1
 			L355		# (GO TO)
 
-## Page 834
+## Page 830
 # TABLE USED FOR SUB-ORBITAL REFERENCT TRAJECTORY CONTROL.
 VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	.040809		# 13 POINTS ARE STORED AS THE INDEPENDENT
@@ -1394,7 +1396,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	-5.813617 B-3
 		DEC	-5.813617 B-3
 
-## Page 835
+## Page 831
 		DEC	-.0134001  B3	# RDOTREF	SCALED (8 RDT/2VS)
 		DEC	-.013947   B3
 		DEC	-.013462   B3
@@ -1437,7 +1439,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	-.007950
 		DEC	-.007950
 
-## Page 836
+## Page 832
 		DEC	.004491		# DRANGE/D L/D SCALED Y/2700
 		DEC	.008081
 		DEC	.016030
@@ -1452,7 +1454,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	.558519
 		DEC	.558519		# END OF STORED REFERENCE
 		
-## Page 837
+## Page 833
 # REENTRY CONSTANTS.
 
 # DEFINED BY EQUALS
@@ -1494,7 +1496,7 @@ Q7FKDMIN	2DEC	.0080745342	# 6.5/805  (Q7F +KDMIN) = 6 + .5)
 C1/16		=	DP2(-4)
 
 Q3		2DEC	.167003132	# .07 2VS/21600
-## Page 838
+## Page 834
 Q5		2DEC	.326388889	# .3 23500/21600
 Q6		2DEC	.0349		# 2 DEG, APPROX 820/23500
 Q7F		2DEC	.0074534161	# 6/805  (VALUE OF Q7 IN FIXED MEM.)
@@ -1521,7 +1523,7 @@ LATBIAS		2DEC	.00003		# APPRX .5 NM/ 4(21600/2 PI)
 KWE		2DEC	.120056652 B-1
 KACOS		2DEC	.004973592	# 1/32(2PI)
 CHOOK		2DEC	1 B-6		# .25/16
-## Page 839
+## Page 835
 1/24TH		2DEC	.0833333333 B-1
 CH1		2DEC	.32 B1		# 16 CH1/25 = 16 (1) /25
 KC3		2DEC	-.0247622232	# -(4 VS VS/ 2 PI 805 RE)

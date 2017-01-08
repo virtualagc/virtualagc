@@ -5,15 +5,17 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 218-231 of 1701.pdf.
+## Reference:	pp. 216-229.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/07/04 RSB.	Began data entry.
 ##		2010-10-24 JL	Pseudo-label indentation fixes.
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +31,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 218
+## Page 216
 # PROGRAM NAME:  SXTMARK					DATE:  5 APRIL 1967
 # PROGRAM MODIFIED BY 256/278 PROGRAMMERS			LOG SECTION SXTMARK
 # MOD BY: R. MELANSON TO ADD DOCUMENTATION			ASSEMBLY SUNDISK REV. 116
@@ -92,7 +94,7 @@ SXTMARK		INHINT
 		MASK	EXTVBACT		# BIT3 = EXTENDED VERB IN PROGRESS
 		CCS	A
 		TC	MKABORT
-## Page 219
+## Page 217
 		CAF	BIT2			# NOT SET
 		ADS	EXTVBACT		# SET IT, RESET IN ENDMARK
 		TC	MARKOK			# YES, FIND VAC AREA
@@ -143,7 +145,7 @@ MKVACFND	AD	TWO			# ADDRESS OF VAC AREA
 		RELINT
 		TCF	SWRETURN		# SAME AS MODEEXIT
 	
-## Page 220
+## Page 218
 # PROGRAM NAME:  MKRELEAS					DATE:  5 APRIL 1967
 # PROGRAM MODIFIED BY 256/278 PROGRAMMERS			LOG SECTION SXTMARK
 # MOD BY:  R. MELANSON TO ADD DOCUMENTATION			ASSEMBLY SUNDISK REV. 116
@@ -197,7 +199,7 @@ MKRLEES		INHINT
 		
 		RELINT
 		TC	SWRETURN
-## Page 221
+## Page 219
 # PROGRAM NAME:  MARKRUPT					DATE:  5 APRIL 1967
 # PROGRAM MODIFIED BY 256/278 PROGRAMMERS			LOG SECTION SXTMARK
 # MOD BY:  R. MELANSON TO ADD DOCUMENTATION			ASSEMBLY SUNDISK REV. 116
@@ -255,7 +257,7 @@ MARKRUPT	TS	BANKRUPT		# STORE CDUS AND OPTICS NOW
 		TS	QRUPT
 		
 		CAF	BIT6			# SEE IF MARK OR MKREJECT
-## Page 222
+## Page 220
 		EXTEND
 		RAND	NAVKEYIN
 		CCS	A
@@ -279,7 +281,7 @@ KEYCALL		CAF	OCT37			# NOT MARK OR MKREJECT, SEE IF KEYCODE
 		OCT	113
 		TC	RESUME
 		
-## Page 223
+## Page 221
 # PROGRAM NAME:  MARKCONT				DATE:  19 SEPT 1967
 # PROGRAM MODIFIED BY 258/278 PROGRAMMERS		LOG SECTION SXTMARK
 # MOD BY:  R. MELANSON TO ADD DOCUMENTATION		ASSEMBLY SUNDISK REV. 116
@@ -337,7 +339,7 @@ KEYCALL		CAF	OCT37			# NOT MARK OR MKREJECT, SEE IF KEYCODE
 #	3)	FOR NORMAL MARKING:
 #		A,MARKSTAT,ITEMP1,QPRET,VAC+1 TO VAC+7 OF VAC AREA IN USE.
 
-## Page 224
+## Page 222
 MARKCONT	CAF	BIT14
 		MASK	STATE	+2		# R21 MARK (SPECIAL MARKING FOR R21)
 		EXTEND
@@ -386,7 +388,7 @@ MARKET3		TC	ALARM
 		OCT	114
 		TCF	TASKOVER
 		
-## Page 225
+## Page 223
 # STORE MARK DATA IN MKVAC AND INCREMENT POINTER
 
 MARK2		AD	74K			# SEE IF MARKS WANTED-REDUCE MARKS WANTED
@@ -438,7 +440,7 @@ VACSTOR		EXTEND
 		
 		TCF	TASKOVER
 		
-## Page 226
+## Page 224
 # PROGRAM NAME:  MKREJECT					DATE:  5 APRIL 1967
 # PROGRAM MODIFIED BY 258/276 PROGRAMMERS			LOG SECTION SXTMARK
 # MOD BY:  R. MELANSON TO ADD DOCUMENTATION			ASSEMBLY SUNDISK REV. 116
@@ -496,7 +498,7 @@ MRKREJCT	CCS	MARKSTAT		# SEE IF MARKS BEING ACCEPTED
 REJECT2		CS	BIT10			# SEE IF MARK HAD BEEN MADE SINCE LAST
 		MASK	MARKSTAT		# REJECT, AND SET BIT10 TO ZERO TO
 		XCH	MARKSTAT		# SHOW MARK REJECT
-## Page 227
+## Page 225
 		MASK	BIT10
 		CCS	A
 		TC	REJECT3
@@ -525,7 +527,7 @@ REJECT3		CAF	LOW9			# DECREMENT POINTER TO REJECT MARK
 		
 		TC	RESUME
 		
-## Page 228
+## Page 226
 # PROGRAM DESCRIPTON MKVB51 AND MKVB50
 #
 # AUTHOR: 	BARNERT		DATE: 2-15-67		MOD: 0
@@ -577,7 +579,7 @@ ENTANSWR	CAF	LOW9			# PUT VAC ADR IN MARKSTAT AND NO. OF
 		COM
 		INDEX	MARKSTAT
 		AD	QPRET
-## Page 229
+## Page 227
 		EXTEND
 		BZMF	JAMIT			# NO MARKS MADE, SHOW IT IN QPRET, R53
 		EXTEND				#	WILL PICK IT UP AND RECYCLE
@@ -633,7 +635,7 @@ OCT37		=	LOW5
 
 MARKIT		CCS	CDUCHKWD
 		TCF	+3			# DELAY OF CDUCHKWD CS IF PNZ
-## Page 230
+## Page 228
 		TCF	+2
 		CAF	ZERO
 		AD	ONE			# 10 MS IF NO CHECK
@@ -689,7 +691,7 @@ DIFCHK		INCR	MKNDX			# INCREMENT INDEX
 
 		EXTEND
 		INDEX	MKNDX
-## Page 231
+## Page 229
 		MSU	CDUX			# GET MARK(ICDU) - CURRENT(ICDU)
 		CCS	A
 		TCF	+4

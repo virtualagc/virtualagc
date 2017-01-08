@@ -15,6 +15,8 @@
 ##		2016-11-02 RSB	Typo (offset-target +4 was not indented).
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 1031
 # SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.   GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
@@ -342,7 +344,7 @@ BODYRATE	CA	AMG		# THESE ARE 2S COMPL NOS, BUT USE ANYWAY.
 		TC	RATEAVG
 		TS	RREL		# YAWDOT = R TCDU/180
 
-# ROLLDOT:   P TCDU/180 = CDOT TCDU/180 + IDOT TCDO/180 SINM
+# ROLLDOT:   P TCDU/180 = CDOT TCDU/180 + IDOT TCDU/180 SINM
 
 		CA	AMG
 		TC	SPSIN
@@ -811,7 +813,7 @@ COMPAT		CA	LCX/360		# CORRECT FOR ASSUMED COORD TURN.
 		TS	-VT/180E	#                        DIAGNOSTIC  ****
 		XCH	-VT/180		# NOW CONTENTS OF -VT/180 AS LABELED
 		EXTEND
-		MP	-VT/180		# B(A) = -ZVT/180
+		MP	-VT/180		# B(A) = -2VT/180
 		EXTEND
 		MP	180/8ATT
 		TS	VSQ/4API

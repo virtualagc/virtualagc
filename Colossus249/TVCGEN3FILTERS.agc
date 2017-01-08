@@ -5,16 +5,18 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 965 of 1701.pdf.
+## Reference:	Starts on p. 961
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	08/24/04 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website references above.
 ##		2010-10-25 JL	Fixed page numbers.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +32,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 965
+## Page 961
 # PROGRAM NAME.... GEN3DAP FILTERS, CONSISTING OF NP0NODE, NP1NODE, NY0NODE, NY1NODE, ETC.
 # LOG SECTION.... GEN3DAP FILTERS		SUBROUTINE....DAPCSM
 # MOD BY ENGEL					20 OCT, 1967
@@ -81,7 +83,7 @@
 #               *                                       *
 #   		*****************************************
 #
-## Page 966
+## Page 962
 # THE IMPLEMENTING EQUATIONS FOR THESE FILTERS ARE AS FOLLOWS.....
 #
 #	PITCH GEN3DAP.....				YAW GEN3DAP....
@@ -127,6 +129,7 @@
 # SCALING AND YET OFFSET TRUNCATION LOSSES.  THIS APPEARS NECESSARY IF FILTER FLEXIBILITY IS TO BE MAINTAINED.
 # COMPUTATION TIME IS NOT CRITICAL.
 #
+## Page 963
 # CALLING SEQUENCE....
 #    
 #      *TC POSTJUMP....
@@ -167,7 +170,7 @@
 		EBANK=	EP
 		COUNT*	$$/GEN3
 		
-## Page 967
+## Page 964
 # PITCH GEN3DAP FILTER.....
 
 NP0NODE		EXTEND			# FORM NODE NP0....COLLECT (PAST NP1)
@@ -214,7 +217,7 @@ BP1(NP0)	CS	NP0		# DPXDP MULTIPLY FOR DENOMINATOR COMPONENT
 		TS	L
 		TCF	+2
 		ADS	NP1TMP
-## Page 968
+## Page 965
 		CS	NP0
 		EXTEND
 		MP	BP1 +1
@@ -265,7 +268,7 @@ AP2(EP)		CAE	EP		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		EXTEND
 		MP	AP2 +1
 		ADS	NP2TMP +1
-## Page 969
+## Page 966
 		TS	L
 		TCF	+2
 		ADS	NP2TMP		# COMPLETED NODE NP2
@@ -305,7 +308,7 @@ AP3(EP)		CAE	EP		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		CADR	DELBARP		#	OFFSET-TRACKER-FILTER COMPUTATIONS,
 					# 	AND PITCH DAP COPYCYCLE.
 					
-## Page 970
+## Page 967
 # YAW GEN3DAP FILTER
 
 NY0NODE		EXTEND			# FORM NODE NY0....COLLECT (PAST NY1)
@@ -352,7 +355,7 @@ BY1(NY0)	CS	NY0		# DPXDP MULTIPLY FOR DENOMINATOR COMPONENT
 		TS	L
 		TCF	+2
 		ADS	NY1TMP
-## Page 971
+## Page 968
 		CS	NY0
 		EXTEND
 		MP	BY1 +1
@@ -403,7 +406,7 @@ AY2(EY)		CAE	EY		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		CAE	EY
 		EXTEND
 		MP	AY2 +1
-## Page 972
+## Page 969
 		ADS	NY2TMP +1
 		TS	L
 		TCF	+2

@@ -5,16 +5,18 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1190 of 1701.pdf.
+## Reference:	Starts on p. 1178
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/28/04   RSB	Adapted from correspoinding Luminary131 file.
 ##		2010-10-24 JL	Indentation fixes.
 ##              2011-05-07 JL   Removed workarounds.
-
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +32,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1190
+## Page 1178
 		BLOCK	02
 
 # TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:
@@ -88,13 +90,13 @@ CHANG1		LXCH	Q
 CHANG2		CS	LOC		# NEGATIVE LOC SHOWS JOB = INTERPRETIVE.
 
 # ITRACE (4) REFERS TO "CHANG2"
-## Page 1191
+## Page 1179
 		TS	L
  +2		CAF	EXECBANK
  		TS	BBANK
 		TCF	CHANJOB -1
 
-## Page 1192
+## Page 1180
 # TO VOLUNTARILY SUSPEND A JOB UNTIL THE COMPLETION OF SOME ANTICIPATED EVENT (I/O EVENT ETC.):
 
 JOBSLEEP	TS	LOC
@@ -135,7 +137,7 @@ EXECBANK	CADR	FINDVAC2
 
 FAKEPRET	ADRES	MPAC -36D	# LOC(MPAC +6) - LOC(QPRET)
 
-## Page 1193
+## Page 1181
 # LOCATE AN AVAILABLE VAC AREA
 
 		BANK	01
@@ -172,7 +174,7 @@ NO.CORES	DEC	6
 		TCF	NEXTCORE	# AN ACTIVE JOB HAS A POSITIVE PRIORITY
 					# BUT A DORMANT JOB'S PRIORITY IS NEGATIVE
 
-## Page 1194
+## Page 1182
 CORFOUND	CA	NEWPRIO		# SET THE PRIORITY OF THIS JOB IN THE CORE
 		INDEX	LOCCTR		# SET'S PRIORITY REGISTER AND SET THE
 		TS	PRIORITY	# JOB'S PUSH-DOWN POINTER AT THE BEGINNING
@@ -213,7 +215,7 @@ NEXTCORE	CAF	COREINC
 		TCF	NOVAC3
 		TC	BAILOUT		# NO CORE SETS AVAILABLE.
 		OCT	1202
-## Page 1195
+## Page 1183
 # THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.
 
  -2		LXCH	LOC
@@ -265,7 +267,7 @@ CHANJOB		INHINT
 		CAF	ZERO
 		TCF	ENDPRCHG -1
 
-## Page 1196
+## Page 1184
 		CS	PUSHLOC
 		TS	PUSHLOC
 		CAF	ONE
@@ -277,7 +279,7 @@ ENDPRCHG	RELINT
 		EXTEND			# DISPATCH WITH A DTCB.
 		BZMF	+2		# IF INTERPRETIVE, SET UP EBANK, ETC.
 		DTCB
-## Page 1197
+## Page 1185
 		COM			# EPILOGUE TO JOB CHANGE FOR INTERPRETIVE
 		AD	ONE
 		TS	LOC		# RESUME
@@ -309,7 +311,7 @@ NUCHANG2	INHINT			# QUICK... DON'T LET NEWJOB CHANGE TO +0.
 		DXCH	LOC		# AND SAVE ADDRESS INFO FOR BENEFIT OF
 		TCF	CHANJOB +4	# 	POSSIBLE SLEEPINT JOB.
 
-## Page 1198
+## Page 1186
 # TO WAKE UP A JOB, EACH CORE SET IS FOUND TO LOCATE ALL JOBS WHICH ARE ASLEEP.  IF THE FCADR IN THE
 # LOC REGISTER OF ANY SUCH JOB MATCHES THAT SUPPLIED BY THE CALLER, THAT JOB IS AWAKENED.  IF NO JOB IS FOUND,
 # LOCCTR IS SET TO -1 AND NO FURTHER ACTION TAKES PLACE.
@@ -359,7 +361,7 @@ WAKETEST	CS	NEWLOC
 		TCF	SETLOC		# ALREADY IN THE RUN (0) POSITION.
 		TCF	SPECTEST
 
-## Page 1199
+## Page 1187
 # PRIORITY CHANGE.  CHANGE THE CONTENTS OF PRIORITY AND SCAN FOR THE JOB OF HIGHEST PRIORITY.
 
 PRIOCH2		TS	LOC
@@ -372,7 +374,7 @@ PRIOCH2		TS	LOC
 		COM
 		TCF	JOBSLP2		# AND TO EJSCAN.
 
-## Page 1200
+## Page 1188
 # RELEASE THIS CORE SET AND VAC AREA AND SCAN FOR THE JOB OF HIGHEST ACTIVE PRIORITY.
 
 ENDJOB1		INHINT
@@ -422,7 +424,7 @@ EJSCAN		CCS	PRIORITY +12D
 		TC	CCSHOLE
 		TCF	+1
 
-## Page 1201
+## Page 1189
 # EVALUATE THE RESULTS OF THE SCAN.
 
 		CCS	BUF +1		# SEE IF THERE ARE ANY ACTIVE JOBS WAITING
@@ -456,7 +458,7 @@ EJ2		TS	BUF +1
 		INDEX	BUF
 		TC	2
 
-## Page 1202
+## Page 1190
 # IDLING AND COMPUTER ACTIVITY (GREEN) LIGHT MAINTENANCE. THE IDLING ROUTIEN IS NOT A JOB IN ITSELF,
 # BUT RATHER A SUBROUTINE OF THE EXECUTIVE.
 

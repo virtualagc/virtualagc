@@ -5,7 +5,7 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 1182-1186 of 1701.pdf.
+## Reference:	pp. 1170-1174
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Mod history:	04/27/03 RSB.	Adapted from the Luminary131 file with the 
 ##				same name.  The changes were highly trivial
@@ -16,10 +16,12 @@
 ##				3.  Comments (such as pagination and header
 ##				    materials) were changed.
 ##				No constants changed value, to my knowledge.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -35,9 +37,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
+##
+## In some cases, where the source code for Luminary 131 overlaps that of 
+## Colossus 249, this code is instead copied from the corresponding Luminary 131
+## source file, and then is proofed to incorporate any changes.
 
-## Page 1182
+## Page 1170
 		BLOCK	02
 		COUNT*	02/FCONS
 
@@ -87,7 +93,7 @@ ELEVEN		DEC	11
 # OCT14		OCT	14		# ALARM AND ABORT (FILLER)
 OCT15		OCT	15
 # R1D1		OCT	16		# PINBALL
-## Page 1183
+## Page 1171
 LOW4		OCT	17
 # BIT5		OCT	00020
 # ND1		OCT	21		# PINBALL
@@ -138,7 +144,7 @@ V06N22		VN	0622
 # MID5		OCT	1740		# PINBALL
 BITS2-10	OCT	1776
 LOW10		OCT	1777
-## Page 1184
+## Page 1172
 # BIT11		OCT	02000
 # 2K+3		OCT	2003		# PINBALL
 LOW7+2K		OCT	2177		# OP CODE MASK + BANK 1 FBANK SETTING
@@ -190,7 +196,7 @@ PRIO34		OCT	34000
 #		OCT	34034		# T4RUPT	RELTAB +6D		
 PRIO35		OCT	35000
 PRIO36		OCT	36000
-## Page 1185
+## Page 1173
 PRIO37		OCT	37000
 63/64+1		OCT	37401
 # MID7		OCT	37600		# PINBALL
@@ -224,7 +230,7 @@ NEG3		DEC	-3
 NEG2		OCT	77775
 NEGONE		DEC	-1
 
-## Page 1186
+## Page 1174
 
 # DEFINED BY EQUALS
 

@@ -5,14 +5,16 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 507-517 of 1701.pdf.
+## Reference:	pp. 505-515.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/02/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +30,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 507
+## Page 505
 # SUBROUTINE NAME:  V82CALL
 # MOD NO: 0					DATE: 16 FEB 67
 # MOD BY: R. R. BAIRNSFATHER			LOG SECTION:  R30
@@ -83,7 +85,7 @@
 #		HPERX	(-29) M
 #		RAPO	(-29) M EARTH
 #			(-27) M MOON
-## Page 508
+## Page 506
 #		RPER	(-29) M EARTH
 #			(-27) M MOON
 #		TFF	(-28) CS	CONTAINS NEGATIVE QUANTITY
@@ -132,7 +134,7 @@ V82GOFLP	CAF	TFFBANK		# MAJOR RECYCLE LOOP ENTRY
 					# DECREMENTING OF TFF AND -TPER.
 		CAF	PRIO7
 		TC	FINDVAC		# V82GOFF1 WILL EXECUTE STATE VECTOR
-## Page 509
+## Page 507
 		EBANK=	TFF		# UPDATE AND ORBIT CALCULATIONS FOR
 		2CADR	V82GOFF1	# SELECTED VEHICLE ABOUT PROPER BODY.
 
@@ -182,7 +184,7 @@ BOTHSHIP	VLOAD			# MOVE RESULTS INTO TFFCONIC STORAGE AREAS
 			MINPERE,2
 		STORE	HPERMIN		# TFFRTMU, HPERMIN, AND RPADTEM ARE ALL
 		SLOAD	BHIZ		# EARTH/MOON PARAMETERS AS SET HERE.
-## Page 510
+## Page 508
 			X2
 			EARTHPAD
 		GOTO
@@ -230,7 +232,7 @@ TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED.
 		STORE	-TPER
 		EXIT
 			
-## Page 511
+## Page 509
 		CAF	BIT1
 		TS	V82FLAGS	# INFORMS TICKTEST TO INCREMENT ONLY -TPER
 		TC	ENDOFJOB
@@ -277,7 +279,7 @@ TPERTICK	CAF	1SEC
 		DAS	-TPER
 		TC	TASKOVER
 
-## Page 512
+## Page 510
 V82GON		EXIT			# AVERAGE G ON.  USE CURRENT STATE VECTOR
 					# FOR ORBITAL PARAMETER CALCULATIONS.
 		CAF	PRIO7		# LESS THAN LAMBERT
@@ -328,7 +330,7 @@ EARTHGON	CLEAR	DLOAD
 			RPAD
 V82GON2		STCALL	RPADTEM		# COMMON CODE FOR EARTH & MOON.
 			SR30.1
-## Page 513
+## Page 511
 		EXIT
 		TC	CHECKMM
 		DEC	11
@@ -353,7 +355,7 @@ V82GON3		CAF	BIT5
 		CADR	DELAYJOB	# ORBITAL PARAMETER COMPUTATION.
 		TC	V82GON1
 
-## Page 514
+## Page 512
 # SUBROUTINE NAME: SR30.1
 # MOD NO: 0								DATE: 16 FEB 67
 # MOD BY: R. R. BAIRNSFATHER						LOG SECTION: R32
@@ -407,7 +409,7 @@ V82GON3		CAF	BIT5
 #
 # DEBRIS:	QPREG, PDL, S2
 
-## Page 515
+## Page 513
 		COUNT*	$$/SR30S
 
 SR30.1		SETPD	STQ		# INITIALIZE PUSHDOWN LIST.
@@ -458,7 +460,7 @@ STORHAPO	STODL	HAPOX
 			+1
 		CALL			# IF HPER > MAXNM, SET HPER = 9999.9 NM.
 			MAXCHK
-## Page 516
+## Page 514
 STORHPER	STODL	HPERX		# STORE (RPER - RPADTEM) INTO HPERX.
 			MPAC +4
 		DSU	BPL		# HPERMIN AT (-29)M FOR EARTH, (-27)M MOON
@@ -490,9 +492,9 @@ MAXCHK		DSU	BPL		# IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM.
 
 MAXNM		2OCT	0106505603
 
-## Page 517
+## Page 515
 
-# There is no source code on this page --- RSB 2004
+## There is no source code on this page &mdash; RSB 2004
 
 
 

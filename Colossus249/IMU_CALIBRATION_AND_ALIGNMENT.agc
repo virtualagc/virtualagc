@@ -5,16 +5,18 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 418-450 of 1701.pdf.
+## Reference:	pp. 416-448.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/11/04   RSB	Began transcribing.
 ##		2010-10-24 JL	Indentation fixes.
 ##		2011-05-07 JL	Flag SBANK= workarounds for future removal.
-
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +32,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 418
+## Page 416
 # NAME --	IMU PERFORMANCE TESTS 2
 #
 # DATE --	MARCH 20, 1967
@@ -88,7 +90,7 @@ IMUBACK		CA	ZERO
 NBPOSPL		CA	DEC17
 		TS	ZERONDX1
 		CA	XNBADR
-## Page 419
+## Page 417
 		TC	ZEROING
 		CA	HALF
 		TS	XNB
@@ -141,7 +143,7 @@ GOESTIMS	CA	ESTICADR
 		TC	JOBWAKE
 		TC	TASKOVER
 ESTICADR	CADR	ESTIMS
-## Page 420
+## Page 418
 TORQUE		CA	ZERO
 		TS	DSPTEM2
 		CA	DRIFTI
@@ -194,7 +196,7 @@ PIPJOBB		INDEX	NDXCTR
 		BZMF	+2
 		TC	ENDOFJOB
 		CA	FIVE
-## Page 421
+## Page 419
 		TS	RESULTCT
 		TC	CHECKG
 		EXTEND
@@ -245,7 +247,7 @@ GUESS1		CAF	POSMAX
 		TS	TORQNDX +1
 		CA	CDUX
 		TS	LOSVEC
-## Page 422
+## Page 420
 		TC	ESTIMS
 VALMIS		CA	DRIFTO
 		TS	DSPTEM2 +1
@@ -260,7 +262,7 @@ ENDTEST1	TC	DOWNFLAG	# IMU NOT IN USE
 		TC	BANKCALL
 		CADR	MKRELEAS
 		TC	ENDEXT
-## Page 423
+## Page 421
 		
 OVERFFIX	DAD	DAD
 			DPPOSMAX
@@ -309,7 +311,7 @@ CHECKG1		RELINT
 		TC	FINETIME
 		INDEX	RESULTCT
 		TS	DATAPL +1
-## Page 424
+## Page 422
 		INDEX	RESULTCT
 		LXCH	DATAPL +2
 		RELINT
@@ -326,7 +328,7 @@ ZEROING1	TS	ZERONDX1
 		TCF	ZEROING1
 		TC	Q
 
-## Page 425
+## Page 423
 		SETLOC	IMUCAL3
 		BANK
 ERTHRVSE	DLOAD	PDDL
@@ -379,7 +381,7 @@ EARTHR*		EXTEND
 PROUT		EXIT
 		TC	IMUSTLLG
 		TC	QPLACES
-## Page 426
+## Page 424
 		
 SHOW		EXTEND
 		QXCH	QPLACE
@@ -430,7 +432,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 		READ	HISCALAR
 		TC Q
 		
-## Page 427
+## Page 425
 # PROGRAM NAME:  OPTIMUM PRELAUNCH ALIGNMENT CALIBRATION
 # DATE:  NOVEMBER 2 1966
 # BY:  GEORGE SCHMIDT IL 7-146 EXT. 126
@@ -484,7 +486,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 # ALARMS
 #
 # 1600	OVERFLOW IN DRIFT TEST
-## Page 428
+## Page 426
 # 1601	BAD IMU TORQUE ABORT
 # 1602	BAD OPTICS DURING VERIFICATION-RETURN TO COMPASS	CSM ONLY
 #
@@ -500,7 +502,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 #
 # ALL CENTRALS, ALL OF EBANK XSM
 
-## Page 429
+## Page 427
 # MOST OF THE ROUTINES COMMON TO ALIGNMENT AND CALIBRATION APPEAR
 # ON THE NEXT FEW PAGES.
 
@@ -552,11 +554,11 @@ RSTGTS1		INHINT			# COMES HERE PHASE1 RESTART
 		TC	NEWMODEX
 		MM	02
 		TC	BANKCALL	# SET UP PIPA FAIL TO CAUSE ISS ALARM
-## Page 430		
+## Page 428		
 		CADR	PIPUSE		# COMPASS NEVER TURNS THIS OFF
 		TC	ANNNNNN		# END OF FIRST TIME THROUGH
 
-## Page 431
+## Page 429
 # COMES HERE AT THE END OF EVERY ITERATION THROUGH DRIFT TEST OR COMPASS
 
 # SET UP WAITLIST SECTION
@@ -604,7 +606,7 @@ LOADSTDT	CAF	25DECML
 		TS	MPAC
 		INDEX	MPAC
 		CA	RESTARPT
-## Page 432
+## Page 430
 		INDEX	MPAC
 		TS	THETAX1
 		CCS	MPAC
@@ -645,7 +647,7 @@ SPECSTS		CAF	PRIO20
 		
 		TC	TASKOVER
 		
-## Page 433
+## Page 431
 # THIS IS PART OF THE JOB DONE EVERY ITERATION
 
 ALFLT		TC	STOREDTA	# STORE DATA IN CASE OF RESTART IN JOB
@@ -681,7 +683,7 @@ NORMLOP		TC	INTPRET
 		BMN	
 			ALWAYSG		# DO A QUICK COMPASS
 
-## Page 434
+## Page 432
 # NOW WE HAVE JUST THE CALIBRATION PARTS OF THE PROGRAM-NEXT PAGES
 
 		COUNT	33/COMST
@@ -732,7 +734,7 @@ ALKLP		LXC,1	SXA,1
 		DLOAD*	DMPR*
 			ALK +1,1
 			DELM +8D,2
-## Page 435
+## Page 433
 		DAD*
 			INTY +8D,2
 		STORE	INTY +8D,2
@@ -781,7 +783,7 @@ BOOP		DLOAD*	DMPR
 			GEORGEJ
 		SR2R
 		PUSH	SIN
-## Page 436
+## Page 434
 		SL3R	XAD,1
 			X1
 		STORE	16D,2
@@ -834,7 +836,7 @@ TORQINCH	TC	PHASCHNG
 		CCS	TORQNDX		# + IF IN VERTICAL DRIFT TEST
 		TC	VALMIS		# VERT DRIFT TEST OVER
 		TC	INTPRET
-## Page 437
+## Page 435
 		CALL			# SET UP ERATE FOR PIP TEST OR COMPASS
 			ERTHRVSE
 		EXIT
@@ -876,7 +878,7 @@ ALXXXZ		GENADR	ALX1S -1
 
 GTSCPSS		CAF	ONE		# CALLED BY V37
 		TS	GEOCOMP1	# THIS IS THE LEAD IN FOR COMPASS
-## Page 438
+## Page 436
 		CA	1/PIPAGT
 		TS	1/PIPADT
 NXXTENN		CA	BIT8
@@ -924,7 +926,7 @@ POSN17C		EXTEND			# COMPASS POSITION Z DOWN, X DOWNRANGE
 ALWAYSG		DLOAD*	DSU*		# COMPASS AND ERECT
 			DPIPAY +8D,1
 			FILDELV1 +8D,1
-## Page 439
+## Page 437
 		DMPR	DAD*
 			GEOCONS1
 			FILDELV1 +8D,1
@@ -973,7 +975,7 @@ ENDGTSAL	CCS	LENGTHOT	# IS 5 SEC OVER-THE TIME TO TORQ PLATFORM
 		TC	SLEEPIE		# NO-SET UP NEXT WAITLIST CALL FOR .5 SEC
 		TC	CHKCOMED
 		CCS	LGYRO		# YES BUT ARE GYROS BUSY
-## Page 440
+## Page 438
 		TCF	SLEEPIE +1	# BUSY-GET THEM .5 SECONDS FROM NOW
 		
 LASTGTS		TC	INTPRET
@@ -1024,7 +1026,7 @@ RESTEST3	TC	INTPRET
 			LAUNCHAZ
 		STODL	NEWAZMTH
 			0D
-## Page 441
+## Page 439
 ADERCOMP	STORE	ERCOMP +4
 		EXIT
 		TC	POSN17C
@@ -1069,7 +1071,7 @@ CHKCOMED	INHINT
 		RELINT
 		TC	Q		# CONTINUE PRELAUNCH
 PRELTERM	CA	PRIO22		# PRELAUNCH DONE -- SET UP P11
-## Page 442
+## Page 440
 		TC	PRIOCHNG	# INCREASE PRIORITY HIGHER THAN SERVICER
 		INHINT
 		TC	POSTJUMP
@@ -1081,10 +1083,10 @@ GEOCONS5	EQUALS	HIDPHALF
 17DECML		=	ND1		# OCT 21
 19DECML		=	VD1		# OCT 23
 1/2SECX		=	.5SEC
-## Page 443
+## Page 441
 GEOSTRT4	EQUALS	ENDOFJOB
 
-## Page 444
+## Page 442
 # OPTICAL VERIFICATION ROUTINES FOR GYROCOMPASS
 
 		COUNT	33/P03
@@ -1133,7 +1135,7 @@ TAR/EREF	AXT,1	AXT,2		# TARGET VECTOR
 		SSP	SETPD
 			S2
 			6
-## Page 445
+## Page 443
 			0
 TAR1		SLOAD*	SR2		# X1=2 X2=12 S2=6 X1=0 X2=6 S2=6
 			TAZEL1 +3,1	
@@ -1182,7 +1184,7 @@ NEXTBNKS	VLOAD	MXV
 		STORE	STARAD +6
 		CALL
 			LITTLSUB
-## Page 446
+## Page 444
 		STORE	LOSVEC
 		EXIT
 		TC	BANKCALL
@@ -1229,7 +1231,7 @@ GTSOPTSS	OCT	01602
 		TC	GCOMP5
 		BANK	34
 		SETLOC	IMUCAL1
-## Page 447
+## Page 445
 		BANK
 		
 		COUNT	34/COMST
@@ -1276,7 +1278,7 @@ TARGDRVE	EXTEND
 		STCALL	STAR
 			SXTANG
 		EXIT
-## Page 448
+## Page 446
 		CA	SAC
 		TS	DESOPTS
 		CA	PAC
@@ -1317,7 +1319,7 @@ GEORGEJ		2DEC	.63661977
 GEORGEK		2DEC	.59737013
 2DEGRES		2DEC	.00277778
 GEOCONS1	2DEC	.1
-## Page 449
+## Page 447
 GEOCONS2	2DEC	.005
 GEOCONS3	2DEC	.062
 GEOCONS4	2DEC	.0003
@@ -1365,6 +1367,6 @@ AZMTHCG1	TC	INTPRET
 	
 VN0629		VN	0629
 
-## Page 450
-# *** END OF KOOLADE .069 ***
+## Page 448
+## Empty page.
 
