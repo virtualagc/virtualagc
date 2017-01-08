@@ -20,7 +20,7 @@
 ##                                          JAPEG* -> JAPFG* 
 ##                                          TITOT2 -> T1TOT2
 ##                                          TABLTFF-> TABLTTF
-
+##              2017-01-08 HG   fix operand modifier JBRFG* +1 -> JBRFG* +2
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
 
@@ -1414,7 +1414,7 @@ ABRFG           EQUALS          VBRFG           +6      # I(6)         TARGET
 VBRFG*          EQUALS          ABRFG           +6      # I(2)            PARAMETERS:
 ABRFG*          EQUALS          VBRFG*          +2      # I(2)               HIGH
 JBRFG*          EQUALS          ABRFG*          +2      # I(2)                  GATE
-RAPFG           EQUALS          JBRFG*          +1      # I(6) APPROACH
+RAPFG           EQUALS          JBRFG*          +2      # I(6) APPROACH
 VAPFG           EQUALS          RAPFG           +6      # I(6)      PHASE
 AAPFG           EQUALS          VAPFG           +6      # I(6)         TARGET
 VAPFG*          EQUALS          AAPFG           +6      # I(2)            PARAMETERS:
