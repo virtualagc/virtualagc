@@ -10,7 +10,7 @@
 #               2016-12-29 JL   Transcribed pages 482-501.
 #               2016-12-31 JL   Transcribed pages 502-507.
 #               2017-01-02 JL   Transcribed pages 508-516.
-
+#               2017-01-08 JL   Transcribed pages 517-525.
 # Annotations:
 #
 #   B L A I R - S M I T H
@@ -1905,11 +1905,115 @@ P1057   CONSTANTS AND ASSIGNMENTS.
 # Page 524
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  43        PAGE  43
 
+P1083              INITIALIZING OF WS3 AND FIRST TASK: TO WRITE THE "AUTHMEMO" RECORD ON YULPROGS JUST AFTER THE SAVED
+R1085   BYPT RECORDS AND FOLLOW IT BY THE ALPHABETICALLY SORTED SYMBOL TABLE.
+
+ 1086   WS3        SPCR                                     WS3
+ 10862             TS           P3 MASKS      Z,MXR         LD EBUF 2      C
+ 1087              SWE,GROUPIND WS3           17            WS3
+ 1088              TX           PROG NAME     -             E BUFFER 2 +1       PROGRAM NAME FOR MISCELLANY RECORD.
+ 108812            TX           W AUTMEMO     -             E BUFFER 2 +2
+ 10882             SWS,THREAD10 0,1           12            Z,X0                FOLLOW AUTHOR THREADS IN PROGRAM NAME.
+ 10884             NA, D1       0,1           ONES          C,-1                ENTRIES UNTIL AUTHOR NAME ENTRY FOUND.
+ 1089              TX           N,X0,1        -             E BUFFER 2 +3       FETCH FIRST 8 CHARACTERS.
+ 10892             SS           N,X0          THREAD 11     Z,X0                THREAD TO REMAINDER.
+ 10894             TX           N,X0          -             E BUFFER 2 +4       FETCH SECOND 8 CHARACTERS.
+ 1090              TN           SUBSTRAB      8             E BUFFER 2 +5       SUBSTRAND TABLE.
+ 1092              TX           L SYM THR     -             Z,AU1
+ 1093              MT           N,AU1,1       58            N,AU2,1
+ 10932             TN           N,AU1         6             EBUFFER2 +102       SYMBOL TABLE INITIAL THREADS.
+ 1095              WD           SYM PLACE     L SYM TAB     E BUFFER 2 +71
+ 10952             BM           E BUFFER2 +71 2 THIRDS      E BUFFER2 +71       TWICE THE NUMBER OF SYMBOLS IN TABLE.
+ 10961             TS           L PROG FIL    Z,X0          REVNO SSL           ADDRESS OF PROGRAM NAME IN DIRECTORY.
+
+ 10963  WS3 REVNO  SS           0,1           A ADRES       E BUFFER 2 +71      SUPPLY REVISION NO. WHEN NO SUBROUTINES.
+ 10965             SWS,THREAD11 0,1           24            Z,X0           C
+ 10966             SWS, A ADRES N,X0          12            E BUFFER 2 +71      SUPPLY REVNO WHEN THERE ARE SUBROS.
+
+ 10968  REVNO SSL  SSL, ONE     0,1           23            WS3 REVNO      C    CHOOSE HOW TO GET REVISION NUMBER.
+ 1097              TX           RL TYP TAB    -             Z,S2
+ 1098              IT           N,S2,27       N,S2          E BUFFER 2 +72      STANDARD MEMORY TYPE TABLE.
+ 10991             TS           ZERO          EBUFFER2 +100 SET EBUF1      C
+ 10993             TX           ZERO          -             EBUFFER2 +101  C    SHOW NOT OBS., LET X1 POINT TO EBUFFER1.
+ 109942            NA, BIT34    SWITCH        ONES          C,+3
+ 109944            TX           BIT 1         -             EBUFFER2 +100
+ 109946            TX           BIT 1         -             INDEX +11           MARK BAD ASSEMBLY ON TAPE AND DISC.
+ 10995             TX           E BUFFERS     -             Z,X0                LET X0 POINT TO E BUFFER 2.
+ 10997             TX           PROG NAME     -             E BUFFER 1 +1
+ 10999             TX           Z,X1          -             Z,S0                SET UP INITIAL CONDITIONS FOR SORTING.
+ 1100              LA           E BUFFER 2    CAC3          PARAP NAP           SLEEP UNTIL PREVIOUS BYPT IS RESTORED.
+
+ 11016             WA           E BUFFER 2    ONE           N,S0
+ 11018             NA, BIT11    SWITCH        ZERO          EN TAP SYM +2       BRANCH TO BYPASS WRITING FOR ANY REASON.
+ 110195            TX           END SY BUF +1 -             Z,SH
+ 1102              CC           E BUFFER 2    -             N,SH
+ 1103              TS, D4       C,+1          WRIT DISC +1  PHI TAPE            SUPPLY INDEX NUMBER TO DISC-WRITER.
+ 1104              WF,1         3,0           -             DISASTER            WRITE AUTHMEMO RECORD.
+ 11054             NA           DISC ADRS     ZERO          WRIT DISC           SEND AUTHMEMO RECD TO DISC IF POSSIBLE.
+ 1106   SET EBUF1  SWE, CAC3    E BUFFERS     16            Z,R1
+ 1107              TX           Z,R1,3        -             Z,X1
+ 1108              TN           WS3 SY SPX    2             Z,R3
+ 1109              WA           E BUFFER 2    ONE           E BUFFER 1          SET UP E BUFFER 1 AND SPEC REGS FOR
+ 1111              TX           PROG NAME     -             E BUFFER 1 +1       RECEPTION OF SYMBOLS FROM READ SYMS.
+ 11122             TX           W SYMBLS 1    -             E BUFFER 1 +2
+ 1113              LA           SYM PLACE     L SYM TAB     EN TAP SYM          BRANCH IF NO SYMBOLS IN PROGRAM.
+ 1115              TS           -             -             READ SYMS
 
 # Page 525
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  44        PAGE  44
 
+P1117   PROCEDURE TO ACCEPT TWO-WORD SYMBOL TABLE ENTRIES FROM READ SYMS AND WRITE THEM ON YULPROGS IN LOTS OF 256,
+R1119   DOUBLE-BUFFERING THROUGH E BUFFER 1 AND E BUFFER 2.
 
+ 1120   TAPE SYM   NA, D4       3,0           6 D4          C,+2                BRANCH IF NOT NORMALLY DEFINED.
+ 11202             TX           Z,SC,1        -             -
+ 11204             NA, D4       3,0           3 D4          TBAD SYM            BRANCH IF NOT DEFINED BY EQUALS.
+ 11206             TX           N,X3          -             N,R1                ACCEPT ONLY GOOD DEFINITIONS.
+ 112072            SS           3,1           C1T2          N,R1,1              SEND PAGE OF DEFINITION TO SIM & EDIT.
+ 112074            TX           Z,SC,1        -             -
+
+ 11208  TRAD SYM   SM           CAC12         N,X3          N,R1,1              SPECIAL FLAG FOR BAD DEFINITION.
+ 1122              NA           Z,R1          END SY BUF    THREAD              RETURN IF NOT AT END OF BUFFER.
+
+ 1124              TX           Z,R1          -             END SY BUF +2       END-OF-BUFFER SPECS ARE ROTATED.
+ 1126              CC           N,X1          -             N,R1
+ 1127              TS           Z,X0          Z,R1          PHI TAPE            FETCH NAME OF ALTERNATE BUFFER.
+ 1129              WF,1         1,0           -             DISASTER
+ 1130              SS           C,-1          D4            WRIT DISC +1        SUPPLY INDEX NUMBER TO DISC-WRITER.
+ 1131              NA           DISC ADRS     ZERO          WRIT DISC           SEND SYMBOL RECORD TO DISC IF POSSIBLE.
+ 1132              WA           N,X1          ONE           N,X0                INCREMENT BANNER SERIAL.
+ 1134              WA           1,2           ONE           0,2                 INCREMENT N IN "SYMBOLSN".
+ 1136              TN           END SY BUF +1 2             END SY BUF          ROTATE END-OF-BUFFER SPECS.
+ 1138              TX           Z,X1          -             Z,X0
+ 1139              TS           Z,R1,3        Z,X1          THREAD              SET R1 FOR NEW BUFFER AND RETURN.
+
+
+R1141   PROCEDURE TO POLISH UP SYMBOL TABLE WRITING AND INITIALIZE FOR SORTING OPERATIONS.
+
+ 1147   EN TAP SYM TX           Z,X1,3        -             Z,S0                SET UP S0 FOR WORD-SORTING OPERATION.
+ 1149              NA           Z,X1          Z,R1          MID BUFF            BRANCH IF DIDN'T FILL LAST SYMBOL BUFFR.
+
+ 1151              TX           Z,S0          -             Z,X2                SET UP X2 FOR SORTING OPERATION.
+ 1153              WA           N,S0          SPEC SIGN     Z,X1                PUT BANNER SERIAL INTO X1.
+ 1157              WA           L B BUF1      L B BUF8      SJ LIM 9            SET UP FOR 2-WAY SCAN OF WORD RECORDS.
+ 1161              TX           L B BUF1      -             Z,X4
+ 1162              TX           SPEC SIGN     -             Z,R5                INITIALIZE NUMBER OF SUBSTRANDS.
+ 1164              SWE, CAC1    N WD RECS     32,L          W SERL LIM
+ 1165              WA           W SERL LIM    W SERL        HI RECS P1
+ 1166              TS           Z,X0          PH FLAG C     BARREN Q            CORRECT FLAG AND CHECK ON WORDLESSNESS.
+
+ 1168   MID BUFF   MT           ONES          2             N,R1,1
+ 1169              NA           Z,R1          END SY BUF    C,-1                FILL OUT LAST BUFFER WITH ONES.
+ 1171              CC           N,S0          -             N,R1
+ 1172              TS           Z,S0          Z,X2          PHI TAPE
+ 1173              WF,1         2,0           -             DISASTER            WRITE FINAL SYMBOL TABLE RECORD.
+ 11742             SS           C,-1          D4            WRIT DISC +1        SUPPLY INDEX NUMBER TO DISC-WRITER.
+ 11744             NA           DISC ADRS     ZERO          WRIT DISC           SEND IT TO DISC TOO IF POSSIBLE.
+ 1175              WA           N,X2          ONE           N,X0                PROVIDE SERIAL FOR 1ST SUBSTRAND RECORD.
+ 11752             TX           Z,X0          -             Z,S0                USE S0 AS TEMPORARY STORAGE.
+ 11754             TS           Z,X2          Z,X0          EN TAP SYM +2       GO TO INITIALIZATION OF SORTING.
+
+ 1177   BARREN Q   LA           N RECORDS     ONE           END WS3             BRANCH TO QUICK END IF NO WORDS.
 # Page 526
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  45        PAGE  45
 
