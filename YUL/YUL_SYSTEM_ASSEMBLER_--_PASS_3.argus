@@ -1558,30 +1558,349 @@ R08074  BY FILLING IN D4 OF WRIT DISC +1 FROM THE CORRESPONDING TAPE ORDER, AND 
 # Page 517
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  36        PAGE  36
 
+P0810   PARAPROGRAM RD4 - PASS 3 - GRP B
+R0811   --------------------------------
+
+R0812              THIS PARAPROGRAM OPERATES IN GROUP B DURING PASS 3 AND HAS TWO TASKS... FIRST TO COPY THE EXISTING
+R0814   BYPT FROM TAPE 4 TO TAPE 1, MARKING OBSOLETE PROGRAMS ON TAPE AND (IN ALL THEIR REVISIONS AND DIFFERENTLY LOG-
+R08142  NUMBERED INSTANCES) ON THE DISC, THEN TO DELIVER TO A SORTING PROGRAM THE UNSORTED WORD RECORDS WRITTEN BY PASS
+R0816   2. EIGHT BUFFERS ARE ALLOTTED FOR THESE TASKS.  THE SECOND TASK IS A BIT COMPLICATED, AND IS SUMMARIZED AS
+R0818   FOLLOWS... IF THE NUMBER OF WORD RECORDS IS 8 OR LESS, FILL AS MANY BUFFERS AS NEEDED, REWIND 4, AND DIE.
+R0820   OTHERWISE, TAPE 4 IS READ FORWARD AND BACKWARD AS MANY TIMES AS THERE ARE SUBSTRANDS (GROUPS OF 256 CONSECUTIVE
+R0822   ADDRESSES).  AT EACH TURNAROUND, THE 8 RECORDS JUST READ ARE PASSED OVER (SINCE THEY ARE STILL AVAILABLE TO THE
+R0824   SORTER).  EACH RECORD READ GOES TO THE BUFFER THAT IS FINISHED WITH EARLIEST.  NOTE THAT AT TURNAROUND TIME THE
+R0826   BUFFER CONTAINING THE EXTREMUM RECORD FULFILLS THIS CONDITION, AS THE 7 ADJACENT RECORDS MUST BE PROCESSED TWICE
+R0828   BEFORE THEIR BUFFERS ARE OVERWRITTEN.
+
+R0829   CONSTANTS AND ASSIGNMENTS.
+
+
+
+ 08299  ONDEX      RESERVE      15                                              INDEX AREA FOR OBSOLESCENCE PROCESSING.
+ 0830   RD4 SSTAB  RESERVE      8
+ 0831   BANNER     OCT          0
+ 0832   WD SER LIM RESERVE      1
+ 0833   WD SERIAL  RESERVE      1
+ 0834   N RECS P1  RESERVE      1
+ 0835   J LIM 9    RESERVE      1
+ 0836   7 DELTA J  RESERVE      1
+
+ 08367  LAST PROG  ALF
+ 0837   SPEC 260   OCT          -100404
+ 0838   BUF SIZE   FXBIN        -265
+ 0839   N LOX PH   OCT          0
+ 0840   B2T32      DEC          7GGG GGGG
+ 0841   DELTA B    OCT          0
+ 0842   DELTA J    OCT          -1
+ 0843   DELTA BUF  FXBIN        -265
+ 0844   DEC264     FXBIN        -264
+
+ 08448  L END THR  SPEC,B7                                  6
+ 08449  YUL WAA    SPEC,B7                                  600
+ 0845   L B BUF1   SPEC                                     11168
+ 0846   L B BUF23  CAC                        11433         11698
+ 0848   J LIM      SPEC                                     13023
+
+ 08496  YUL DATE   ASSIGN       6,101
+ 0850   YUL LOG    ASSIGN       6,104
+
+ 0852   L STOPPER  EQUALS       CAC3
 
 # Page 518
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  37        PAGE  37
 
+P0854   FIRST TASK... TO TRANSFER THE EXISTING BYPT TO TAPE 1, AND SUPPLY WS3 WITH THE NEW BANNER SERIAL IN ..BANNER..
+
+ 0856   RD4        TN           SUBSTRAB      8             RD4 SSTAB           CREATE LOCAL SUBSTRAND TABLE.
+ 0858              TX           P3 MASKS      -             Z,MXR
+ 0860              TS           L STOPPER     Z,X3          PHI TAPE
+ 0861              RF,4         3,0           -             DISASTER            BYPASS LABEL RECORD.
+ 0863              SWE, CAC3    L B BUF23     16            Z,X3                ADDRESS OF BUFFER 2.
+ 0865              TS           L B BUF1      Z,X2          PHI TAPE
+ 0866              RF,4         3,0           -             DISASTER            READ FIRST RECORD OF BYPT.
+ 0870              TS           L B BUF23     Z,X4          OBS OLDS            MARK OLD REVISIONS OF THIS PROGRAM OBS.
+
+ 08712             TS           Z,X1          Z,X4          PHI TAPE            (FOR XFER BYPT -2).
+ 0872   NEND BYPT  TX           Z,X4          -             Z,X3                THIS IS THE DANCE OF THE INDEX REGISTERS
+ 0874              WA           Z,X2          SPEC 260      Z,S3                AND QUITE A FANCY WHIRLIGIG IT IS TOO.
+ 0876              HA           N,S3          N,X2          N,S3                THE NET EFFECT IS TO COPY THE BYPT FROM
+ 0878              SS           Z,X5,1        SPEC MAG      N,X2                TAPE 4 TO TAPE 1, EXCEPT FOR THE TWO
+ 0880              HA           N,S3          N,X2          N,S3                SHORT END-OF-FILE RECORDS.  IN PARTICU-
+ 0882              NA, BIT11    SWITCH        ONES          C,+2                LAR, IF THERE IS NO PREVIOUS BYPT,
+ 08831             TS           Z,X1          Z,X4          XFER BYPT           NOTHING WILL BE WRITTEN ON TAPE 1.
+ 08832             NA, BIT13    SWITCH        ONES          XFER BYPT -2        BR. IF NO PROGS OBSOLETED BY THIS ASSY.
+
+ 088324            NA, C1T4     2,0           COMPUTER      XFER BYPT -2        BRANCH IF PROG BELONGS TO ANOTHER COMP.
+ 088328            NA           2,1           LAST PROG     C,+2                BRANCH IF THIS IS AN AUTHMEMO RECORD.
+ 088332            TS           -             -             XFER BYPT -2
+ 088334            TX           L COMP NAM    -             Z,X6
+ 088336            SWS,THREAD10 N,X6          12            Z,X6                POINT TO FIRST PROG OR SUB OF COMPUTER.
+ 08834             TS           2,1           LAST PROG     C,+2
+ 088342            SWS,THREAD10 6,1           0             Z,X6
+ 088344            NA           N,X6          LAST PROG     C,-1                WE ARE GUARANTEED TO FIND THE PROGRAM.
+ 088348            SSL, ONE     6,1           0             C,+1                TEST OBSOLETED-THIS-ASSEMBLY BIT.
+ 088352            TS           -             -             XFER BYPT -2
+
+ 088354            HA           6,1           ONE           6,1                 CLEAR THAT BIT.
+ 088358            TX           YUL WAA       -             Z,X6
+ 08836             HA           N,S3          2,100         N,S3
+ 088362            TX, AVMASK2  YUL DATE      -             2,100
+ 088364            HA           N,S3          2,100         N,S3,1
+ 088366            HA           N,S3          2,101         N,S3
+ 088368            TS           YUL DATE +1   2,101         C,-1           C    PLANT YUL DATE (ALPHA) AND FIX ORTHOWDS.
+ 08837  OBS OLDS   NA, BIT11    SWITCH        ZERO          XFER BYPT -2        REPRINTS AND BAD MERGES OBSOLETE NOBODY.
+ 088372            LA,C5T8      DISC STAT     C6T8          C,+2                BRANCH IF DISC IS INOPERATIVE.
+ 088376            TS           L PROG TAB    Z,X6          PROG DFQ            POINT TO START OF OWN DISC DIRECTORY.
+ 08838             S, MON TYPER OBS FRUST     SPRA +40      -                   "NO DISC: CAN'T MARK OBSOLETE PROGS ..."
+ 088382            TS           C,+0          C,-1          XFER BYPT -2        SAY THAT JUST ONCE.
+
+ 088384 PROG DFQ   LA           L END PTAB    Z,X6          XFER BYPT -2        BRANCH IF OBSOLETED PROGRAM NOT ON DISC.
+ 088388            NA           N,X6,6        LAST PROG     C,-1                GET ALL REVISIONS BY TESTING NAME ONLY.
+ 08839             WD           Z,X6          TWO           Z,X6
+ 088392            TX           N,X6          -             ONDEX +1
+ 088394            TX           BLANKS        -             N,X6,1              REMOVE NAME FROM OWN DIRECTORY...
+ 088398            TX           N,X6          -             ONDEX               ... AND PREPARE TO LOOK UP ALL INSTANCES
+ 088402            TX           ONES          -             ONDEX +2            (NOT REVISIONS) OF IT IN THE DISC INDEX.
 
 # Page 519
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  38        PAGE  38
 
+P088404 DURING FIRST TASK, MARK OBSOLETE PROGRAMS ON TAPE (ABOVE) AND DISC; CLOSE YULPROGS & SUPPRESS SORT IF POSSIBLE.
+
+ 088406 NEXT VERS  TS           YUL WAA       Z,X6          DISCAP         C
+ 088408            OCT          15                                              LOOK UP INSTANCES OF FILE SUCCESSIVELY.
+ 088412            SPEC                                     ONDEX
+ 088414            TS, AVMASK2  YUL DATE      ONDEX +11     C,+2                TENTATIVELY ASSUME NOT DISABLED.
+ 088418            TS           L PROG TAB    Z,X6          PROG DF Q +1        THAT REV NOT ON DISC. GO SEEK ANOTHER.
+ 088422            NA, D10D11   ONDEX +3      YUL FILE      NEXT VERS           BRANCH IF DISABLED FILE.
+ 088426            TS           YUL DATE +1   ONDEX +12     DISCAP         C
+ 088428            OCT          -12                                             PLANT ALPHA DATE OFFICIALLY IN INDEX.
+ 088432            SPEC                                     ONDEX
+ 088434            TS           -             -             NEXT VERS           CONTINUE SUCCESSIVE LOOKUP.
+ 088438            TS           -             -             DISASTER            BAD RETURN MUSTN'T HAPPEN HERE.
+
+ 08852             TS           NEND BYPT -1  C,+0          C,+2                CHANGE TO TAPE-COPYING PROCEDURE.
+ 08854             WF,1         2,0           -             DISASTER            NO WRITING IF REPRINT OR BAD MERGE.
+ 0886   XFER BYPT  TX           Z,X2          -             Z,X1
+ 0887              TS           Z,X3          Z,X2          PHI TAPE
+ 0888              RF,4         4,0           -             DISASTER            NEW BANNER SERIALS ARE SUPPLIED FROM X5.
+ 0890              NA, BANBITS  2,0           BAN EOFRI     NEN BYPT            THE RELEVANT ORTHOWORD BEING CORRECTED.
+
+ 0892              NA, BIT13    SWITCH        ONES          CHECK WF            BR. IF NO PROGS OBSOLETED BY THIS ASSY.
+ 08924             LA, C5T8     DISC STAT     C6T8          CHECK WF            BRANCH IF DISC IS INOPERABLE.
+ 08928             TX           L COMP NAM    -             Z,X2
+ 0893              SWS,THREAD10 N,X2          12            Z,X2                POINT TO FIRST PROG OR SUB OF COMPUTER.
+ 08934             TX           C,+2          -             XFER BYPT -2        MODIFY EXIT FROM DISC INDEX MARKER.
+ 08938             SSL, ONE     2,1           0             C,+1                TEST OBSOLETED-THIS-TIME BIT.
+ 08942             TS           -             -             C,+2
+ 08944             TS           N,X2          LAST PROG     PROG DFQ -3         GO TO MARK NEWLY OBSOLETE PROG ON DISC.
+ 08948             SWS,THREAD10 2,1           0             Z,X2
+ 0895              NA           Z,X2          L END THR     C,-4                BR. IF THERE'S MORE PROG/SUBS TO CHECK.
+
+ 08954  CHECK WF   NA, BIT11    SWITCH        ONES          C,+2                NO WRITING IF REPRINT OR BAD MERGE.
+ 08958             TS           N WD RECS     WD SER LIM    LD EBUF 2
+ 0896              TS           N WD RECS     WD SER LIM    PHI TAPE            SET UP SERIAL LIMIT FOR LATER USE.
+ 08964             WF,1         -             -             DISASTER            VERIFY FINAL WRITE IF ANY.
+ 08967  LD EBUF 2  TX           E BUFFERS     -             Z,X3           S
+ 08972             EX           Z,X5          SPEC MAG      E BUFFER 2          SET UP RECORD NO. FOR AUTHMEMO OR EOFRI.
+ 08974             NA, BIT11    SWITCH        ZERO          OCT MAP Q           BRANCH IF REPRINT OR BAD MERGE.
+ 0898              NA, PROGSUB  SWITCH        ONES          DO SORT -1          BRANCH IF DOING PROGRAM ASSEMBLY.
+ 08983             SM           SWITCH        B1 B11        SWITCH              FORBID FURTHER WRITING.
+ 08984  CLOS ERLY  S, MON EOFRI C,+2          -             E BUFFER 2          CLOSE YULPROGS NOW IF SUBRO ASSEMBLY.
+ 08988             TS           -             -             PHI TAPE
+ 08992             RW,1         -             -             -
+ 08994  OCT MAP Q  NA, BIT16    SWITCH        ONES          DO SORT             BRANCH IF PRINTING OCTAL STORAGE MAP.
+ 08998             TX           ZERO          -             RD4 SSTAB
+ 0900              TN           RD4 SSTAB     7             RD4 SSTAB +1        ALLOW TRANSMISSION OF WORD RECORDS FOR
+ 09004             TX           N,SC,2        -             SORT LOOP -1        OCCUPIED-LOCATION INDEX ONLY.
+ 09008             TS           -             -             DONT SORT
+ 09009             LA           N WD RECS     ZERO          CLOS ERLY -1
+ 0901   DO SORT    TS, C1T4     COMPUTER      E BUFFER 2    MON WAKE       C    PERMIT WS3 TO WRITE FROM E BUFFER 2.
+ 09014             TS, CAC3     E BUFFER 2    BANNER        PHI TAPE            SET UP BANNER SERIAL FOR USE BY WS3.
+ 09018             RF,4         -             -             DISASTER
+ 0902              LA           N WD RECS     ZERO          END RD4             CHECK FOR BARREN ASSEMBLY (VERY ODD).
 
 # Page 520
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  39        PAGE  39
 
+P0903   SECOND TASK... TO PRESENT WORD RECORDS TO WS3 FOR SORTING.
+
+ 0904              TS           L B BUF1      Z,X2          PHI TAPE            FIRST RECORD FOR SORTING TO BUFFER 1.
+ 0906              RF,4         2,0           -             DISASTER
+ 0907              TS           ONE           WD SERIAL     REMOTE 1
+
+ 0908   INIT RD WD WA           Z,X2          BUF SIZE      Z,X2
+ 0909              TS           -             -             PHI TAPE
+ 0910              RF,4         2,0           -             DISASTER            2ND THRU 8TH RECORDS (IF THAT MANY).
+ 0913              SWS, CAC1    WD SERIAL     32,L          N,X3                WAKE SORTER AND ATTACH FRESH SERIAL.
+ 0915              WA           WD SERIAL     ONE           WD SERIAL
+
+ 0916   REMOTE 1   TS           Z,X2          Z,X3          MON WAKE       C    FORM ADDRESS OF REMOTE RECORD.
+ 0918              NA           WD SERIAL     N WD RECS     FITS IN Q           BRANCH IF THERE ARE MORE RECORDS.
+
+ 0920              TS           -             -             PHI TAPE
+ 0921              RF,4         -             -             DISASTER
+ 0925              SWS, CAC1    WD SERIAL     32,L          N,X3                WAKE SORTER AND ATTACH FRESH SERIAL.
+ 0927              TS           N,SC          Z,SC          MON WAKE       C
+ 09272             SPEC                                     END RD4
+
+ 0928   FITS IN Q  NA           WD SERIAL     EIGHT         INIT RD WD          BRANCH TO GET NEXT REC OF FIRST EIGHT.
+ 0930              TS           L STOPPER     Z,X6          PHI TAPE            SET UP STOPPER ADDRESS FOR LATER USE.
+ 0932              RF,4         -             -             DISASTER            VERIFY 8TH READ OF MORE THAN 8 READS.
+ 0934              TS           L B BUF1      Z,X2          MON WAKE       C
+ 0935              SWS, CAC1    WD SERIAL     32,L          N,X3                WAKE SORTER AND ATTACH SERIAL NUMBER 8.
+ 0937              WA           N WD RECS     ONE           N RECS P1
+ 0938              WA           L B BUF1      L B BUF8      J LIM 9             USED TO GET FROM B1 TO B8 OR VICE VERSA.
+ 0940              TS           BIT 32        AV MASK 2     C,+2                INITIALIZE MASK FOR PARAGRAPH COUNTING.
+
+ 0942   COUNT PH   WA           AV MASK 2     AV MASK 2     AV MASK 2           SHIFT MASK LEFT 1 BIT.
+ 0943              NA, AVMASK2  RD4 SSTAB     ZERO          INC NLXPH
+ 0944              NA, AVMASK2  RD4 SSTAB +1  ZERO          INC NLXPH
+ 0945              NA, AVMASK2  RD4 SSTAB +2  ZERO          INC NLXPH
+ 0946              NA, AVMASK2  RD4 SSTAB +3  ZERO          INC NLXPH
+ 09461             NA, AVMASK2  RD4 SSTAB +4  ZERO          INC NLXPH
+ 09462             NA, AVMASK2  RD4 SSTAB +5  ZERO          INC NLXPH
+ 09463             NA, AVMASK2  RD4 SSTAB +6  ZERO          INC NLXPH
+ 09464             NA, AVMASK2  RD4 SSTAB +7  ZERO          INC NLXPH           STEP COUNTER FOR EACH PARAGRAPH USED.
+ 0948              NA           AV MASK 2     BIT 1         COUNT PH
+
+ 0954   BUSY Q     LA           N,X2          B2T32         PARAP NAP           GO TO SLEEP IF BUFFER NOT FINISHED WITH.
+ 0956              WA           Z,X2          DELTA B       Z,X3                FUDGE FACTOR TO ACCOUNT FOR BACKWD READ.
+ 0958              TS           -             -             PHI TAPE
+ 0959   RD WORDS   RF,4         3,0           -             DISASTER
+ 0960              BA           WD SERIAL     DELTA J       WD SERIAL           INCREMENT OR DECREMENT RECORD SERIAL.
+ 0962              TS, BIT 8    RD WORDS      C,+1          PHI TAPE            SET FORWARD/BACKWARD BIT OF OP CODE.
+ 0964              RF,4         -             -             DISASTER
+ 0966              SWS, CAC1    WD SERIAL     32,L          N,X2                WAKE SORTER AND ATTACH FRESH SERIAL.
+ 09672             TS           -             -             MON WAKE       C
+ 0968              NA           WD SERIAL     WD SER LIM    CH NEX RD4          BRANCH IF MORE TO READ THIS DIRECTION.
 
 # Page 521
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  40        PAGE  40
 
+P0970   PROCEDURE FOR CHANGING DIRECTION OF SCAN.
 
+ 0971              WD           N LOX PH      ONE           N LOX PH            COUNT DOWN WHEN SCAN IS DONE.
+ 0973              LA           N LOX PH      ZERO          END RD4 -3
+
+ 0980              TX           EIGHT         -             Z,S3
+ 0982              TS           -             -             PHI TAPE
+ 0983   PASS WDS   RB,4         6,0           -             DISASTER            READ EIGHT RECORDS INTO STOPPER.
+ 0985              NA           Z,S3,1        ONE           C,-2
+
+ 0986              HA           RD WORDS      BOT 8         RD WORDS            CHANGE DIRECTION OF MAIN READ.
+ 0988              HA           PASS WDS      BIT 8         PASS WDS            CHANGE DIRECTION OF BYPASS READ.
+ 0990              BS           ZERO          DELTA J       DELTA J             CHANGE SIGN OF SERIAL INCREMENT.
+ 0992              BT           DELTA J       7             7 DELTA 7
+ 0993              BA           7 DELTA J     WD SERIAL     WD SERIAL           CHANGE SERIAL FOR NEXT RECD READ IN.
+ 0995              BS           ZERO          DELTA BUF     DELTA BUF           CHANGE SIGN OF BUFFER ADDRESS INCREMENT.
+ 0997              WD           J LIM 9       J LIM         J LIM               SWITCH BUFFER ADDRESS LIMIT.
+ 0999              WD           DEC 264       DELTA B       DELTA B             SWITCH FUDGE FACTOR FOR READ ADDRESS.
+ 1001              WD           N RECS P1     WD SER LIM    WD SER LIM          SWITCH LIMIT ON SERIAL NUMBER.
+ 1003              TS           -             -             BUSY Q              BEGIN READS IN NEW DIRECTION.
+
+ 1005   CH NEX RD4 NA           Z,X2          J LIM         C,+3                BR UNLESS JUST DID BUFFER 1 OR 8.
+
+ 1007              WD           J LIM9        J LIM         Z,X2                CHANGE BUFFER 1 TO 8 OR VICE VERSA.
+ 1009              TS           -             -             BUSY Q
+
+ 1010              BA           Z,X2          DELTA BUF     Z,X2                INCREMENT OR DECREMENT BUFFER ADDRESS.
+ 1012              TS           -             -             BUSY Q
+
+R1013   TRIVIAL MULTI-PROGRAMMED SUBROUTINE TO INCREMENT THE COUNT OF LOCATION INDEX PAGES PLUS USED PARAGRAPHS.
+
+ 1015   INC NLXPH  WA           N LOX PH      ONE           N LOX PH
+ 1016              TX           Z,SH          -             Z,SC
+
+ 1017              LA           E LOX GATE    ZERO          END RD4             ALL DONE IF NOT DOING LOCATION INDEX.
+ 1019              NA           BLOCK IND     ZERO          PARAP NAP           SLEEP UNTIL PAGE OF INDEX IS FINISHED.
+ 1021              NA, CAC3     LAST MAX      INDEX MAX     PASS WDS -2         BRANCH IF INDEX IS NOT DONE YET.
+ 1023   END RD4    SSL, ONE     SWITCH        44            C,+1                SEE IF ANOTHER YUL TASK FOLLOWS.
+ 10232             TS           Z,SC,1        -             PHI RLEAS
+ 10234             TS           -             -             PHI TAPE            REWIND OR RELEASE WORKER ACCORDINGLY.
+ 1024              RW,4         -             -             -                   WE ARE NOW THROUGH WITH TAPE 4.
+ 1026              TS           ZERO          RD4 WAIT      DEAD STOP
+
+
+
+R10263             CLOSED SUBROUTINE FOR SEQUENCE MODE SLEEPING.
+
+ 10264  PARAP NAP  TS           -             -             MON SLEEP      C
+ 10265             WD           Z,SH          ONE           Z,SC
+
+R10266             FINAL STOP FOR ALL PARAPROGRAMS.
+
+ 10267  DEAD STOP  TS           Z,R0          Z,SC          MON WAKE       C    WAKE PASS 3.
 # Page 522
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  41        PAGE  41
 
+P1027   PARAPROGRAM WS4 - PASS 3 - GRP C
+R1028   --------------------------------
+
+R1029              THIS PARAPROGRAM OPERATES IN GROUP C DURING PASS 3 AND HAS THREE TASKS.  FIRST, IT WRITES A RECORD OF
+R1031   MISCELLANEOUS INFORMATION ABOUT THE PROGRAM ON YULPROGS AS THE FIRST BYPT RECORD FOR THE PROGRAM, AND FOLLOWS
+R1033   IT BY RECORDS CONTAINING THE SORTED SYMBOL TABLE.  NEXT, IT SCANS THE WORD RECORDS AND PRINTS AN INDEX SHOWING
+R10332  WHAT PAGE EACH WORD IS SPECIFIED ON.  FINALLY, WS3 SORTS WORDS INTO PARAGRAPHS (FORMERLY SUBSTRANDS) CONTAINING
+R1035   256 WORDS EACH.  FOR EACH PARAGRAPH WHICH IS KNOWN TO CONTAIN AT LEAST ONE WORD OF USED FIXED MEMORY, WS3
+R1037   CLEARS A BUFFERFUL OF 256 WORDS TO ALL ZEROS AND MAKES A PASS THROUGH ALL THE WORD RECORDS PRODUCED BY PASS 2.
+R1039   THE RESULTING BYPT RECORD CONSISTS OF A BANNER WORD WITH SERIAL FROM X1, THE ALPHABETIC PROGRAM NAME, THE PAR-
+R1041   AGRAPH NUMBER (EQUAL TO THE ADDRESS OF THE FIRST WORD IN THE RECORD DIVIDED BY 256, STORED AS A BINARY IN-
+R1043   TEGER), 256 WORD POSITIONS, TWO ORTHOWORDS, AND THE EOR WORD.  EACH WORD POSITION MAY BE AVAILABLE (ALL ZEROS),
+R1045   AN OBJECT MACHINE WORD WITH CORRECT PARITY AND CONSTANT OR INTERPRETIVE FLAGS IF REQUIRED, OR ONE OF THE ALPHA-
+R1047   BETIC FLAGS ..BAD WORD.. OR ..CONFLICT..  WHEN A PARAGRAPH IS COMPLETED, IT IS HANDED OVER TO THE EDITOR IN MAIN 
+R1049   PASS 3.  THE WORD RECORDS ARE OBTAINED FROM RD4, WHICH DELIVERS THEM IN 8 BUFFERS SO THAT THE SET OF WORD REC-
+R0151   ORDS MAY BE SCANNED IN ALTERNATING ORDER FOR SUCCESSIVE PARAGRAPHS.
 
 # Page 523
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  42        PAGE  42
 
+P1057   CONSTANTS AND ASSIGNMENTS.
+
+
+
+ 1058   BLOCK IND  RESERVE      1
+ 1059   FWA        RESERVE      1
+ 1060   LWA        RESERVE      1
+ 1061   LENGTH     RESERVE      1
+
+ 1062   COMMON     RESERVE      1
+ 1063   R7 LIM     RESERVE      1
+ 1064   W SER LIM  RESERVE      1
+ 1065   HI RECS P1 RESERVE      1
+
+ 10651  END LX BUF RESERVE      1
+ 10652  MIN PTR    RESERVE      1
+ 10653  FLW        RESERVE      1
+ 1066   WS3 SST    RESERVE      8
+
+ 1068   BIT 37     OCT          -4000
+ 1069   DELT SBUF  FXBIN        -265
+ 1070   W SERL     DEC          0001
+
+ 10701  NINE       FXBIN        -9
+ 10702  ELEVEN     FXBIN        -11
+ 10703  THIRTEEN   FXBIN        -13
+ 107031 C320       FXBIN        -320
+ 107032 2 THIRDS   DEC          +BB BBB BBB BBC
+ 10704  D8         DEC          -G 0000
+ 10705  D7D8       DEC          -GG 0000
+ 10706  LAST MAX   OCT          0
+ 10707  INDEX MAX  OCT          0
+
+ 10709  LOX SB HED ALF,4        OCCUPIED LOCATIONS  PAGE
+ 1071   W CONFLIC  ALF          CONFLICT
+
+ 1072   END SY BUF SPEC                                     4759
+ 1073              SPEC                                     5759
+ 1074              OCT          0
+ 1076   WS3 SY SPX SPEC                                     EN TAP SYM
+ 1077              SPEC                                     TAPE SYM
+ 10771  L ZERO     SPEC                                     ZERO
+ 1078   L ONES     SPEC                                     ONES
+ 1079   SJ LIM     SPEC                                     13023
+ 1080   WS3 SST P8 SPEC                                     WS3 SST +8
+ 10801  RL TYP TAB SPEC,B2                                  2000
+ 1081   L B BUF8   SPEC                                     13023
 
 # Page 524
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  43        PAGE  43
