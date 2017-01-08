@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-06 RRB	Updated for Luminary 69.
+##              2017-01-07 HG   Fix operand FLGWRD6 -> FLAGWRD6
 
 ## Page 797
 		BANK	31
@@ -90,7 +91,7 @@ LOWFCOLD	CS	H*GHCR*T
 		EXTEND
 		BZMF	DOPIF		# BRANCH IF FC < OR = HIGHCRIT
 		
-		CA	FLGWRD6		# IS POUTFLAG SET?
+		CA	FLAGWRD6        # IS POUTFLAG SET?
 		MASK	POUTBIT
 		EXTEND
 		BZF	FLATOUT1 -1
