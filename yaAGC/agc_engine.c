@@ -297,6 +297,11 @@
  *				to get an erasable parity fail, because I
  *				haven't come up with a program that can cause
  *				one to happen.
+ *		01/08/17 MAS	Corrected behavior of the EDRUPT instruction
+ *				(it really is just a generic interrupt request).
+ *				Along the way, re-enabled BRUPT substitution by
+ *				default and allowed interrupts to happen after
+ *				INDEXes.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -2052,66 +2057,90 @@ agc_engine (agc_t * State)
   // Fetch the instruction itself.
   //Instruction = *WhereWord;
   if (State->SubstituteInstruction)
-    {
-      Instruction = c(RegBRUPT);
-      if (0100000 & Instruction)
-	sExtraCode = 1;
-      Instruction &= 077777;
-    }
+    Instruction = c(RegBRUPT);
   else
     {
       // The index is sometimes positive and sometimes negative.  What to
       // do if the result has overflow, I can't say.  I arbitrarily 
       // overflow-correct it.
-      sExtraCode = State->ExtraCode;
       Instruction = OverflowCorrected (
-	  AddSP16 (SignExtend (State->IndexValue), SignExtend (*WhereWord)));
-      Instruction &= 077777;
-      // Handle interrupts.
-      if (DebuggerInterruptMasks[0] && !State->InIsr && State->AllowInterrupt
-	  && !State->ExtraCode && State->IndexValue == 0 && !State->PendFlag
-	  && !Overflow && //ProgramCounter > 060 && 
-	  Instruction != 3 && Instruction != 4 && Instruction != 6)
-	{
-	  int i;
-	  // Interrupt vectors are ordered by their priority, with the lowest
-	  // address corresponding to the highest priority interrupt. Thus,
-	  // we can simply search through them in order for the next pending
-	  // request. There's two extra MCTs associated with taking an
-	  // interrupt -- one each for filling ZRUPT and BRUPT.
-	  // Search for the next interrupt request.
-	  for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
-	    {
-	      if (State->InterruptRequests[i] && DebuggerInterruptMasks[i])
-		{
-		  BacktraceAdd (State, i);
-		  // Clear the interrupt request.
-		  State->InterruptRequests[i] = 0;
-		  State->InterruptRequests[0] = i;
-		  // Set up the return stuff.
-		  c (RegZRUPT)= ProgramCounter + 1;
-		  c (RegBRUPT)= Instruction;
-		  // Vector to the interrupt.
-		  State->InIsr = 1;
-		  NextZ = 04000 + 4 * i;
-	          State->ExtraDelay++;
-		  goto AllDone;
-		}
-	    }
-	}
+         AddSP16 (SignExtend (State->IndexValue), SignExtend (*WhereWord)));
     }
+  Instruction &= 077777;
 
-  //State->IndexValue = AGC_P0;         // Do AFTER the deley below.
-  //OpCode = Instruction & ~MASK12;
+  sExtraCode = State->ExtraCode;
+
+  ExtendedOpcode = Instruction >> 9;	//2;
+  if (sExtraCode)
+    ExtendedOpcode |= 0100;
+
   QuarterCode = Instruction & ~MASK10;
   Address12 = Instruction & MASK12;
   Address10 = Instruction & MASK10;
   Address9 = Instruction & MASK9;
 
+  // Handle interrupts.
+  if ((DebuggerInterruptMasks[0] && !State->InIsr && State->AllowInterrupt
+     && !State->ExtraCode && !State->PendFlag && !Overflow 
+     && Instruction != 3 && Instruction != 4 && Instruction != 6)
+     || ExtendedOpcode == 0107) // Always check if the instruction is EDRUPT.
+    {
+      int i;
+      int InterruptRequested = 0;
+      // Interrupt vectors are ordered by their priority, with the lowest
+      // address corresponding to the highest priority interrupt. Thus,
+      // we can simply search through them in order for the next pending
+      // request. There's two extra MCTs associated with taking an
+      // interrupt -- one each for filling ZRUPT and BRUPT.
+      // Search for the next interrupt request.
+      for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
+        {
+          if (State->InterruptRequests[i] && DebuggerInterruptMasks[i])
+            {
+              // Clear the interrupt request.
+              State->InterruptRequests[i] = 0;
+              State->InterruptRequests[0] = i;
+
+              NextZ = 04000 + 4 * i;
+
+              InterruptRequested = 1;
+              break;
+            }
+        }
+
+      // If no pending interrupts and we're dealing with EDRUPT, fall
+      // back to address 0 (A) as the interrupt vector
+      if (!InterruptRequested && ExtendedOpcode == 0107)
+        {
+          NextZ = 0;
+          InterruptRequested = 1;
+        }
+
+      if (InterruptRequested)
+        {
+          BacktraceAdd (State, i);
+          // Set up the return stuff.
+          c (RegZRUPT)= ProgramCounter + 1;
+          c (RegBRUPT)= Instruction;
+          // Clear various metadata. Extracode is cleared (this can only
+          // really happen with EDRUPT), and the index value and substituted
+          // instruction were both applied earlier and their effects were
+          // saved in BRUPT.
+          State->ExtraCode = 0;
+          State->IndexValue = AGC_P0;
+          State->SubstituteInstruction = 0;
+          // Vector to the interrupt.
+          State->InIsr = 1;
+          State->ExtraDelay++;
+          goto AllDone;
+        }
+    }
+
   // Add delay for multi-MCT instructions.  Works for all instructions 
-  // except EDRUPT, BZF, and BZMF.  For those, an extra cycle is added
+  // except EDRUPT, BZF, and BZMF.  For BZF and BZMF, an extra cycle is added
   // AFTER executing the instruction -- not because it's more logically
-  // correct, just because it's easier.
+  // correct, just because it's easier. EDRUPT's timing is handled with
+  // the interrupt logic.
   if (!State->PendFlag)
     {
       int i;
@@ -2155,9 +2184,6 @@ agc_engine (agc_t * State)
 
   // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
   // picture of what follows.
-  ExtendedOpcode = Instruction >> 9;	//2;
-  if (sExtraCode)
-    ExtendedOpcode |= 0100;
   switch (ExtendedOpcode)
     {
     case 000:			// TC.  
@@ -2435,9 +2461,7 @@ agc_engine (agc_t * State)
 	  BacktraceAdd (State, 0);
 	  NextZ = c (RegZRUPT) - 1;
 	  State->InIsr = 0;
-#ifdef ALLOW_BSUB
 	  State->SubstituteInstruction = 1;
-#endif
 	}
       else
 	{
@@ -2639,26 +2663,8 @@ agc_engine (agc_t * State)
 	}
       break;
       case 0107:			// EDRUPT
-      //State->InIsr = 0;
-      //State->SubstituteInstruction = 1;
-      //if (State->InIsr)
-      //  State->InterruptRequests[State->InterruptRequests[0]] = 0;
-      c (RegZRUPT) = c (RegZ);
-      State->InIsr = 1;
-      BacktraceAdd (State, 0);
-#if 0
-      if (State->InIsr)
-	{
-	  static int Count = 0;
-	  printf ("EDRUPT w/ ISR %d\n", ++Count);
-	}
-      else
-	{
-	  static int Count = 0;
-	  printf ("EDRUPT w/o ISR %d\n", ++Count);
-	}
-#endif // 0
-      NextZ = 0;
+      // It shouldn't be possible to get here, since EDRUPT is treated
+      // as an interrupt above.
       break;
       case 0110:			// DV
       case 0111:
