@@ -12,6 +12,8 @@
 ## Mod history:	10/05/09 FB	Transcription of Batch FB-1 Assignment.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed
 ## from scanned documents.
@@ -39,9 +41,9 @@
 		EBANK=	DNTMBUFF
 
 # SPECIAL DOWNLINK OP CODES
-#	OP CODE		ADDRESS (EXAMPLE)	SENDS..			BIT 15		BITS 14-12	BITS 11
+#	OP CODE		ADDRESS (EXAMPLE)	  SENDS..		BIT 15		BITS 14-12	BITS 11
 #													     -0
-#	-------		----------		----------		------		----------	-------
+#	------	       -----------		----------		------		----------	-------
 #													     --
 #	1DNADR		TIME2			(2 AGC WDS)		0		0		ECADR
 #	2DNADR		TEPHEM			(4 AGC WDS)		0		1		ECADR
@@ -218,7 +220,7 @@ CMCSTA07	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 ## Page 175
 # CSM RENDEZVOUS AND PRETHRUST LIST
 
-# --------------------CONTROL LIST----------------------------------------
+# ----------------------------CONTROL LIST--------------------------------
 
 CMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMREND01			# COLLECT SNAPSHOT
@@ -258,7 +260,7 @@ CMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		2DNADR	VPRED				# VPRED,+1,GAMMAEI,+1
 		-1DNADR	STATE	+10D			# FALGWRDS 10 AND 11
 
-# --------------------------SUB LISTS-------------------------------------
+# ----------------------------SUB LISTS-----------------------------------
 
 CMREND01	EQUALS	CMPOWE01			# COMMON DOWNLIST DATA
 
@@ -287,7 +289,7 @@ CMENTRDL	EQUALS					# SEND ID BY SPECIAL CODING
 		4DNADR	DNTMBUFF			# SEND SNAPSHOT
 		DNPTR	CMENTR03			# COMMON DATA
 		2DNADR	CMDAPMOD			# CMDAPMOD,PREL,QREL,RREL
-		1DNADR	L/D1				# L/D1.+1
+		1DNADR	L/D1				# L/D1,+1
 		6DNADR	UPBUFF				# UPBUFF,+1...+10,+11
 		4DNADR	UPBUFF	+12D			# UPBUFF+12,13...+18,19D
 		2DNADR	COMPNUMB			# COMPNUMB,UPOLDMOD,UPVERB,UPCOUNT
@@ -347,7 +349,7 @@ CMENTR07	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 ## Page 179
 # P22 DOWNLISTS
 
-# --------------------------CONTROL LIST----------------------------------
+# ----------------------------CONTROL LIST--------------------------------
 
 CMPG22DL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	CMPG2201			# COLLECT SNAPSHOT

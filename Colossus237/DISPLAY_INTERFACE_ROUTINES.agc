@@ -12,6 +12,8 @@
 ##		2016-11-02 RSB	Typo (offset-reference -1 was not indented).
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 1416
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -346,7 +348,7 @@
 
 #                                                  CAF    V5XNYY          X=0,1,2,3,4   YY=NOUN
 #                                                  TC     BANKCALL
-#                                                  CADR   GOMARK24
+#                                                  CADR   GOMARK2R
 #                                                  ...    ...             TERMINATE RETURN
 #                                                  ...    ...             PROCEED RETURN
 #                                                  ...    ...             ENTER RETURN
@@ -502,8 +504,8 @@
 # FLAGWORD DESCRIPTIONS--
 #     FLAGWRD4- SEE DESCRIPTION UNDER LOG SECTION ERASABLE ASSIGNMENTS
 
-#     DSPFLG, DSPFLG+1, DSPFLG+2-
-#     ---------------------------
+#     DSPFLG, DSPFLG+1, DSPFLG +2-
+#     ----------------------------
 # BITS 1 BLANK R1
 #      2 BLANK R2
 #      3 BLANK R3

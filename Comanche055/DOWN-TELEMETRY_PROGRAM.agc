@@ -16,6 +16,8 @@
 ##		2010-08-28 JL	Fixed indentation.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -228,7 +230,7 @@ SETWO		TC	WOZERO		# GO SET WORD ORDER CODE TO ZERO.
  +2		AD	MINB1314	# IS THIS A REGULAR DNADR?
  		EXTEND
 		BZMF	FETCH2WD	# YES.  (A MUST NEVER BE ZERO)
-		AD	MINB12		# NO.  IS IT A POINTER (DNPTR) OR A
+		AD	MINB12		# NO-  IS IT A POINTER (DNPTR) OR A
 		EXTEND			#	CHANNEL(DNCHAN)
 		BZMF	DODNPTR		# IT'S A POINTER.  (A MUST NEVER BE ZERO)
 
@@ -256,7 +258,7 @@ DODNPTR		INDEX	DNECADR		# DNECADR CONTAINS ADRES OF SUBLIST
 		CA	DNECADR		# NO, IT IS A REGULAR SUBLIST.
 		TCF	DOSUBLST	# A MUST NOT BE ZERO.
 
-		XCH	DNECADR		# YES.  IT IS A SNAPSHOT SUBLIST.
+		XCH	DNECADR		# YES, IT IS A SNAPSHOT SUBLIST.
 		TS	SUBLIST		# C(DNECADR) INTO SUBLIST
 		CAF	ZERO		#	A    INTO     A
 		XCH	TMINDEX		# (NOTE.. TMINDEX = DNECADR)
