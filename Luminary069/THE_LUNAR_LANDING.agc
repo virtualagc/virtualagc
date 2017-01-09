@@ -16,10 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-09 RRB	Updated for Luminary 69.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 785
+## Page 789
 		BANK	32
 		SETLOC	F2DPS*32
 		BANK
@@ -47,10 +46,9 @@ P63LM		TC	PHASCHNG
 		TS	DVCNTR
 
 		CS	ONE		# INITIALIZE WCHPHASE AND FLPASS0
+		ZL			#   FOR IGNITION ALGORITHM
 		TS	WCHPHASE
 
-		CA	ZERO
-		TS	FLPASS0
 
 		CS	BIT14
 		EXTEND
@@ -70,9 +68,9 @@ FLAGORGY	TC	INTPRET		# DIONYSIAN FLAG WAVING
 					# ****************************************
 
 IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:-
-## Page 786
 			0		# 	AT 0D LANDING SITE IN MOON FIXED FRAME
 			RLS		#	AT 6D ESTIMATED TIME OF LANDING
+## Page 790
 		PDDL	PUSH		#	MPAC NON-ZERO TO INDICATE LUNAR CASE
 			TLAND
 		STCALL	TPIP		# ALSO SET TPIP FOR FIRST GUIDANCE PASS
@@ -120,8 +118,8 @@ IGNALOOP	DLOAD
 #	DDUM = -------------------------------------------------------------------------------------------
 #                                                10
 #                                               2   (VGU - 16 VGU KIGNX/B4)
-## Page 787
 #                                                       2        0
+## Page 791
 # THE NUMERATOR IS SCALED IN METERS AT 2(28).  THE DENOMINATOR IS A VELOCITY IN UNITS OF 2(10) M/CS.
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
 # THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/B8 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
@@ -170,9 +168,9 @@ DDUMCALC	TS	NIGNLOOP
 			PIPTIME1
 		STOVL	TET		# HOPEFULLY ?GUIDSUB DID NOT
 			RATT1		#	CLOBBER RATT1 AND VATT1
-## Page 788
 		STOVL	RCV
 			VATT1
+## Page 792
 		STCALL	VCV
 			INTEGRVS
 		GOTO
@@ -221,9 +219,9 @@ P63SPOT2	VLOAD	UNIT		# INITIALIZE KALCMANU FOR BURN ATTITUDE
 		INHINT
 		TC	IBNKCALL
 		CADR	PFLITEDB
-## Page 789
 		RELINT
 
+## Page 793
 		TC	BANKCALL
 		CADR	R60LEM
 
@@ -254,7 +252,7 @@ P63SPOT4	TC	BANKCALL	# ENTER		INITIALIZE LANDING RADAR
 
 P63ADRES	GENADR	P63TABLE
 
-ASTNDEX		=	MD1		# OCT 25:  INDEX FOR CLOKTASK
+ASTNDEX		OCT	00027		# INDEX FOR CLOKTASK
 
 CODE500		OCT	00500
 
@@ -263,10 +261,10 @@ CODE500		OCT	00500
 GUIDDURN	2DEC	+66440		# GUIDDURN +6.64400314 E+2
 DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 
-## Page 790
+## Page 794
 #	--------------------------------
 
-## Page 791
+## Page 795
 #	****************************************
 #	P68: LANDING CONFIRMATION
 #	****************************************
@@ -315,8 +313,8 @@ LANDJUNK	TC	PHASCHNG
 		TCF	+2		# PROCEED
 		TCF	-5		# RECYCLE
 
+## Page 796
 		TC	INTPRET
-## Page 792
 		VLOAD			# INITIALIZE GSAV AND (USING REFMF)
 			UNITX		# YNBSAV, ZNBSAV AND ATTFLAG FOR P57
 		STCALL	GSAV
