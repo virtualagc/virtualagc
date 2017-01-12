@@ -13,6 +13,8 @@
 ##		2011-01-09 JL   Fixed indentation, whitespace.
 ##		2016-12-29 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 165
 
@@ -157,7 +159,7 @@ CMPOWE07	1DNADR	LEMMASS		# LEMMASS,CSMMASS	 COMMON DATA
 
 # CSM COAST AND ALIGNMENT DOWNLIST
 
-# ------------------------------CONTROL LIST-----------------------------
+# ------------------------------CONTROL LIST------------------------------
 
 CMCSTADL	EQUALS			# SEND ID BY SPECIAL CODING
 		DNPTR	CMCSTA01	# COLLECT SNAPSHOT

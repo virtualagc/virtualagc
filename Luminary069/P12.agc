@@ -17,6 +17,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-06 RRB	Updated for Luminary 69.
+##              2017-01-07 HG   Fix interpretive operation STORE -> STODL
+#3                                               operand   FLP1 -> FLPI
 
 ## Page 839
 		BANK	24
@@ -207,11 +209,11 @@ COMMINIT	DLOAD	DAD		# INITIALIZE TARGET DATA. USED BY P12, P70
 			RRECTCSM
 			REFSMMAT
 		UNIT
-		STORE	QAXIS
+		STODL	QAXIS
 			ABTVINJ2	# TENTATIVELY STORE LOW INJECTION VELOCITY
 		STORE	ZDOTD
 		BON
-			FLP1
+			FLPI
 			LOVEL
 		SLOAD	DSU
 			TBRKPNT		# TBRKPNT-GO
