@@ -12,6 +12,10 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-14 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -81,7 +85,7 @@ WCALC		LXC,1	DLOAD*
 ARATE		2DEC	.0022222222	# = .05 DEG/SEC
 		2DEC	.0088888889	# = .2 DEG/SEC
 		2DEC	.0222222222	# = .5 DEG/SEC
-		2DEC	.1777777777	# = 4 DEG/SEC
+		2DEC	.1777777777	# = 4 DEG/SEC		$ 22.5 DEG/SEC
 		
 ANGLTIME	2DEC	.000190735	# = 100B-19 
 					# MANEUVER ANGLE TO MANEUVER TIME
@@ -95,6 +99,6 @@ QUADROT		2DEC	.1		# ROTATION MATRIX FROM S/C AXES TO CONTROL
 		2DEC	0
 		2DEC	.012620		# (.1)SIN7.25
 		2DEC	.099200		# (.1)COS7.25
-BIASCALE	2DEC	.0002543132	# (450/180)(1/0.6)(1/16384)
+BIASCALE	2DEC	.0002543132	# = (450/180)(1/0.6)(1/16384)
 	
 
