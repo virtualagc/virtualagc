@@ -7,7 +7,7 @@
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        576-615
 # Mod history:  2016-10-06 JL   Created.
-#               2017-01-14 JL   Transcribed pages 576-591.
+#               2017-01-14 JL   Transcribed pages 576-592.
 
 # Annotations:
 #
@@ -635,6 +635,61 @@ R0435   SUBDIRECTOR *TESTING* IS OPTIONAL. SEE PAGE 34.
 # Page 592
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  17        PAGE  17
 
+P0554   *PUNCH 36K CORE ROPE SIMULATOR TAPE* SUBDIRECTOR ROUTINE HERE.
+R0555   EACH BANK IS A SEPARATE PIECE OF PAPER.
+R0556   AT LEAST ONE OF THE SUBDIRECTORS *PARAGRAPH* IS REQUIRED. SEE PAGE 24.
+R0557   SUBDIRECTOR *USE* IS OPTIONAL. SEE PAGE 26.
+R0558   SUBDIRECTOR *TESTING* IS OPTIONAL. SEE PAGE 34.
+
+ 0559   TRY 36K    NA           KCOMMON       W 36K         RAYTH PQ
+ 0560              TS           Z,SC          HOLD LOC      P24T36K             GO CHECK REST OF SUBDIRECTOR
+ 0562              S,MON TYPER  P36KT MSG     SPRA +40      C,+1
+ 0563              TS           Z,SC          HOLD LOC      READ A REQ          GO READ TASK SUBDIRECTORS
+ 0565   NEXT PARH  TS           Z,SC          Z,X5          GET REQ PN          GO LOCATE PARA IN BINARY RECORDS
+ 0567              TS           -             -             DNE BANKS           RETURN HERE WHEN ALL PARAS DONE
+ 0569              SWE,CAC3     PARAG NO      2             BANK NUM            SET BANK NUMBERS
+ 0571              NA           DNE BANKS     FINISH BK     FINISH BK           JUMP IF FIRST TIME HERE
+ 0573              LA           BANK NUM      LAST BANK     SME BANK            JUMP IF BANK HAS NOT CHANGED
+ 0575              WA           LAST BANK     ONE           LAST BANK
+ 0576              SWE,CAC3     LAST BANK     10,L          KCOMMON +1
+ 0577              TS           C,+1          CHKS ZERO     CHKS ZERO
+ 0578              LA           KCOMMON +1    KCOMMON       C,+1
+ 0579              TX           N,SC,1        -             CHKS ZERO
+ 0580              LA           KCOMMON +1    KCOMMON       SEND PARK
+ 0581   FINISH BK  TX           DNE BANKS     -             C,+0
+ 0582              TX           DNE BANKS +1  -             C,+0
+ 0583              TX           DNE BANKS +2  -             C,+0
+ 0584              TN           24 KSM MSG    5             TITLE MSG +5        INSERT TITLE MESSAGE
+ 0586              SWE,CAC3     STIK WIRE     16            Z,AU1
+ 0587              SWS,C3T5     N,AU1         A,2,L         TITLE MSG +8        INSERT MODULE NUMBER IN TITLE MESSAGE
+ 0589              SWS,ACO7     BANK NUM      3,L           TITLE MSG +9        INSERT BANK NUMBER IN TITLE MESSAGE
+ 0591              TX,SEVEN     BANK NUM      -             TITLE MSG +9
+ 0592              NA           BANK NUM      ZERO          C,+3
+ 0593              TN           E MEM         2             TITLE MSG +8        INSERT * E - MEMORY* IN TITLE MESSAGE
+ 0595              TN           TITLE MSG +4  3             TITLE MSG +5        CLOSE UP TITLE MESSAGE
+ 0597              TS           WB3 36K       FRAME         GO TITLE H          GO SEND TAPE PARAGRAPH LEADING MESSAGE
+ 0599              LA           THREE         BANK NUM      BANKSED             JUMP IF PARAGRAPH IN A FIXED BANK
+ 0601              TX           FF            -             FRAME               SET FIXED - FIXED CODE
+ 0603              SWS,B46T47   BANK NUM      1,L           FRAME               INSERT BANK NUMBER
+ 0605              NA           BANK NUM      ZERO          NON BANK            JUMP IF PARA IN FIXED - FIXED
+ 0607              TS           ERASE36K      FRAME         NON BANK            SET ERASABLE CODE
+ 0609   BANKSED    TS           FS            FRAME         CHK PARIT      C    SEND FIXED - SWITCHABLE CODE
+ 0611              TX           LOAD G        -             FRAME
+ 0612              SWS,B43T47   BANK NUM      1,L           FRAME               SET BANK BITS IN CODE
+ 0614   NON BANK   TS           -             -             CHK PARIT      C    SEND ONE FRAME
+ 0616              SWE,CAC3     BANK NUM      10,L          K COMMON            BASE ADDR OF CURRENT BANK
+ 0618              TX           BANK NUM      -             LAST BANK
+ 0619   SME BANK   SWE,CAC3     PARAG NO      8,L           KCOMMON +1          BASE ADDR OF CURRENT PARAGRAPH
+ 0621   CHKS ZERO  LA           KCOMMON +1    KCOMMON       SEND PARK           JUMP IF SIMULATOR ADDR IN PARAGRAPH
+ 0623              TS           LOADG         FRAME         CHK PARIT      C    OTHERWISE SEND OUT A ZERO WORD  WITH
+ 0625              TS           LOADG         FRAME         CHK PARIT      C    ODD PARITY
+ 0627              TS           STOP36K       FRAME         CHK PARIT      C
+ 0628              WA           KCOMMON       ONE           KCOMMON
+ 0629              TS           -             -             CHKS ZERO
+ 0630   SEND PARK  WA           KCOMMON +1    C 256         KCOMMON +1          BASE ADDR OF NEXT PARAGRAPH
+ 0632              WA           Z,X1          THREE         Z,R1                R1 SET TO PARAGRAPH FIRST WORD
+ 0634   SND WORD   LA           KCOMMON +1    KCOMMON       NEXT PARH           JUMP IF SIMULATOR ADDR OUT OF PARAGRAPH
+ 0636              EX           N,R1          B43T47        FRAME               OTHERWISE SEND AGC WORD TO SIMULATOR
 
 # Page 593
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  18        PAGE  18
