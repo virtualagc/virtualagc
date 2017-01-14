@@ -1,14 +1,14 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     INTER-BANK_COMMUNICATION.agc
-## Purpose:      Part of the source code for Comanche, build 055. It
-##               is part of the source code for the Command Module's
-##               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-## Assembler:    yaYUL
-## Reference:    pp. 1103-1106
-## Contact:      Ron Burkey <info@sandroid.org>
-## Website:      http://www.ibiblio.org/apollo.
-## Mod history:  2009-05-08 RSB	Adapted from Colossus249/ file of same name
+## Copyright:   Public domain.
+## Filename:    INTER-BANK_COMMUNICATION.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 1103-1106
+## Contact:     Ron Burkey <info@sandroid.org>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-08 RSB	Adapted from Colossus249/ file of same name
 ##				and page images. Corrected various typos
 ##				in the transcription of program comments,
 ##				and these should be back-ported to 
@@ -16,6 +16,8 @@
 ##		2011-05-08 JL	Removed workaround.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-14 RSB	Corrected comment-text errors located while diff'ing
+##				against Colossus 249.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -148,9 +150,9 @@ USPRCADR	TS	LOC		# SAVE A
 # THERE ARE FOUR POSSIBLE SETTINGS FOR CHANNEL 07.  (CHANNEL 07 CONTAINS THE SUPERBANK SETTING.)
 #
 #					PSEUDO-FIXED	 OCTAL PSEUDO
-# SUPERBANK	SETTING	S-REG. VALUE	BANK NUMBERS	   ADDRESSES
-# ---------	-------	------------	------------ 	   ---------
-# SUPERBANK 3	  OXX	 2000 - 3777	   30 - 37	 70000 - 107777		(WHERE XX CAN BE ANYTHING AND
+# SUPERBANK	SETTING	S-REG. VALUE	BANK NUMBERS	 ADDRESSES
+# ----------	-------	------------	 ------------ 	  ------------
+# SUPERBANK 3	  0XX	 2000 - 3777	   30 - 37	 70000 - 107777		(WHERE XX CAN BE ANYTHING AND
 #										WILL USUALLY BE SEEN AS 11)
 # SUPERBANK 4	  100	 2000 - 3777	   40 - 47	110000 - 127777		(AS FAR AS IT CAN BE SEEN,
 #										ONLY BANKS 40-43 WILL EVER BE
