@@ -54,8 +54,10 @@ Unknown ARGUS Opcodes
 - SPEC
 -- Special register, 16-bit word (see p29); note: systems with greater that 32KW have 24-bit special registers)
 - CAC (function unknown)
+-- I think this is for forming compressed address constants. Since H-x800 words are 48 bits wide, and addresses are only 16 bits, then 3 addresses can be packed into one memory word. I think this is what CAC does, and I hypothesise that it stands for "Condensed Address Constant". It seems to take from one to three arguments, I assume any unspecified argument is replaced by zero in the memory word formed, but that is a guess.
 - EQUALS
-- MASKGRP (function unknown - declaration of masks, fields?) 
+- MASKGRP (function unknown - declaration of masks, fields?)
+- MASKBASE 
 
 
 Constants
