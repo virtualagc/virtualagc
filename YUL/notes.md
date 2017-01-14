@@ -216,4 +216,23 @@ There are other names by which tapes (disks?) are referred to also:
     YULPROGS    
     EXPEROGS    
 
+
+Supported machine architectures
+-------------------------------
+
+There are several supported machine architectures. These are referred to as "COMPUTER" in the YUL source, sometimes as "MACHINE". The general parts of YUL refer to machine-specific variables as "M varname"; these are replaced at linkage by the machine-dependant variants. E.g. "M EXPLAIN" is replaced by 
+"AG EXPLAN", "SC EXPLAN", "B2 EXPLAN", "A4 EXPLAN".
+
+ - "SACO" (abbreviated "SC") 
+   This seems to be a variant of the AGC for use in a proposed Air Force program called "SABRE", hence probably "SAbre COmputer".
+
+ - "AGC"  (abbreviated "AG")
+   This is the Block I AGC.
+
+ - "BLK2" (abbreviated "B2") 
+   This is the original Block II AGC.
+
+ - "AGC4" (abbreviated "A4")
+   This is the revised, final, as-flown Block II AGC.
+
 -end-
