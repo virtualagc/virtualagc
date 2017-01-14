@@ -17,6 +17,8 @@
 ##		2011-05-17 JL	Removed all SBANK= workarounds.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located while 
+##				diff'ing with Colossus 249.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -471,7 +473,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 #
 # NORMAL EXIT
 #
-# DRIFT TESTS.  LENGTHOT GOES TO ZERO-RETURN TO IMU PERF TEST2 CONTROL
+# DRIFT TESTS-  LENGTHOT GOES TO ZERO-RETURN TO IMU PERF TEST2 CONTROL
 # GYROCOMPASS-MANY, SEE THE LISTING
 #
 # ALARMS
