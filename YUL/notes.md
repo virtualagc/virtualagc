@@ -40,6 +40,8 @@ Monitor Calls
 
  - $PAR IDLE ?
 
+I think "MON WAA" is a block of memory used for passing data into and out of the Monitor, but I can't be completely sure yet.
+
 
 Unknown ARGUS Opcodes
 ---------------------
