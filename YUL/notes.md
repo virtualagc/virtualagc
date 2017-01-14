@@ -23,14 +23,19 @@ However, there is no sub-48-bit access to memory, so the issue of endianess does
 Monitor Calls
 -------------
 
- - MON TYPER
- - MON TADDR
+ - MON EOFRI
  - MON LOK
- - MON RELOX 
- - MON WAKE
- - MON SLEEP
- - MON RLEAS
  - MON PCR
+ - MON PEEK
+ - MON PUNCH
+ - MON READ
+ - MON RELOX 
+ - MON RLEAS
+ - MON SLEEP
+ - MON TADDR
+ - MON TYPER
+ - MON UNLOK
+ - MON WAKE
  - MONITOR
 
  - $PAR IDLE ?
