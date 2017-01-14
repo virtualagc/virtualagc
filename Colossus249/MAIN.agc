@@ -31,15 +31,17 @@
 # agreed with the one the developers had in mind --- and this is supported by
 # detailed comparison to printouts of the slightly earlier Colossus 237 program
 # and the later Comanche 55 program ---  so I've interpreted various
-# wacky symbols appearing in the print as follows:
+# wacky symbols appearing in the printout as follows:
 #
 #	Printed Character		Intended Character
 #	-----------------		------------------
 #	plus-minus			      	<
 #	lower-case Greek alpha		      	'
+#	lower-case Greek beta			"
 #	lower-case Greek delta		      	>
 #	lower-case Greek gamma 		      	|
 #	lower-case Greek pi		      	?
+#	upper-case Greek Sigma			%
 #	strange lower-case d		      	&
 #	'			      	      	:
 #	:				      	@ 
