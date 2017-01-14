@@ -543,8 +543,8 @@ P25LEM1         TC              PHASCHNG
                 MASK            STATE           +1        
                 EXTEND          
                 
-## Page 515 XXXXX             
-                BZF             P25LMWT1                # NO - SKIP PHASE CHANGE AND WAIT 1 MINUTE
+## Page 515             
+                BZF             P25LMWT1                # NO-SKIP PHASE CHANGE AND WAIT 1 MINUTE
                 CAF             SEVEN                   # CALL R65 - FINE PREFERRED
                 TS              R65CNTR 
                 TC              BANKCALL                # TRACKING ATTITUDE ROUTINE
@@ -553,6 +553,7 @@ P25LEM1         TC              PHASCHNG
 P25LEMWT        TC              PHASCHNG        
                 OCT             00112   
 P25LMWT1        CAF             60SCNDS 
+                INHINT
                 TC              TWIDDLE                 # WAIT ONE MINUTE THEN CHECK AGAIN
                 ADRES           P25LEM2 
                 TC              ENDOFJOB        
@@ -560,1331 +561,1146 @@ P25LEM2         CAF             PRIO14
                 TC              FINDVAC
                 EBANK=          LOSCOUNT
                 2CADR           P25LEM1
-        
                 TC              TASKOVER
 60SCNDS         DEC             6000
+P25OK           EXIT
+                TC              P25LEMWT
         
-## Page 504
+## Page 516
 # DATA READ ROUTINE 22 (LEM)
 # PROGRAM DESCRIPTION
-#
-#       MOD NO - 2
-#       BY P VOLANTE
-#
+# MOD NO - 2
+# BY P VOLANTE
 # FUNCTIONAL DESCRIPTION
 #
-#       TO PROCESS AUTOMATIC RR MARK DATA TO UPDATE THE STATE VECTOR OF EITHER
-#       LM OR CSM AS DEFINED IN THE RENDEZVOUS NAVIGATION PROGRAM (P20)
-#
+#   TO PROCESS AUTOMATIC RR MARK DATA TO UPDATE THE STATE VECTOR OF EITHER
+# LM OR CSM AS DEFINED IN THE RENDEZVOUS NAVIGATION PROGRAM (P20)
 # CALLING SEQUENCE -
-#
-#       TC      BANKCALL
-#       CADR    R22LEM
-#
+#          TC     BANKCALL
+#          CADR   R22LEM
 # SUBROUTINES CALLED -
-#
-#       LSR22.1         GOFLASH         WAITLIST
-#       LSR22.2         PRIOLARM        BANKCALL
-#       LSR22.3         R61LEM
-#
-# NORMAL EXIT MODES -
-#
-#       R22 WILL CONTINUE TO RECYCLE, UPDATING STATE VECTORS WITH RADAR DATA
-#       UNTIL P20 CEASES TO OPERATE (RENDEZVOUS FLAG SET TO ZERO) AT WHICH TIME
-#       R22 WILL TERMINATE SELF.
-#
-# ALARM OR ABORT EXIT MODES -
-#
-#       PRIORITY ALARM
-#       PRIORITY ALARM 525 LOS NOT WITHIN 3 DEGREE LIMIT
-#
+#   LSR22.1           GOFLASH        WAITLIST
+#   LSR22.2           PRIOLARM       BANKCALL
+#   LSR22.3           R61LEM
+# NORMAL EXIT MODES-
+#   R22 WILL CONTINUE TO RECYCLE,UPDATING STATE VECTORS WITH RADAR DATA
+# UNTIL P20 CEASES TO OPERATE (RENDEZVOUS FLAG SET TO ZERO) AT WHICH TIME
+# R22 WILL TERMINATE SELF.
+# ALARM OR ABORT EXIT MODES-
+#   PRIORITY ALARM
+# PRIORITY ALARM 525 LOS NOT WITHIN 3 DEGREE LIMIT
 # OUTPUT
-#
-#       SEE OUTPUT FROM LSR22.3
-#
+#   SEE OUTPUT FROM LSR22.3
 # ERASABLE INITIALIZATION REQUIRED
-#
-#       SEE LSR22.1, LSR22.2, LSR22.3
-#
+#   SEE LSR22.1,LSR22.2,LSR22.3
 # FLAGS SET + RESET
-#
-#       NOANGFLG
-#
+#   NOANGFLG
 # DEBRIS
-#
-#       SEE LSR22.1, LSR22.2, LSR22.3
+#   SEE LSR22.1,LSR22.2,LSR22.3
+                EBANK=          LRS22.1X
+                COUNT*          $$/R22
+R22LEM          TC              PHASCHNG
+                OCT             04022
+                CAF             RNDVZBIT                # IS RENDESVOUS FLAG SET?
+                MASK            STATE   
+                EXTEND          
+                BZF             ENDOFJOB                # NO-EXIT R22 AND P20
+                CAF             TRACKBIT                # IS TRACKFLAG SET?
+                MASK            STATE           +1        
+                EXTEND          
+                BZF             R22WAIT                 # NO WAIT
+R22LEM12        CAF             BIT14                   # IS RR AUTO TRACK ENABLE DISCRETE STILL
+                EXTEND                                  # ON (A MONITOR REPOSITION BY R25 CLEARSIT
+                RAND            CHAN12  
+                EXTEND          
+                BZF             P20LEMA                 # NO - RETURN TO P20
+                CAF             BIT2                    # YES
+                EXTEND                                  # IS RR AUTO MODE DISCRETE PRESENT
+                RAND            CHAN33  
+                
+## Page 517
+                EXTEND          
+                BZF             +2                      # YES CONTINUE
+                TC              P20LEMB5                # NO - SET IT
+                CS              RADMODES                # ARE RR CDUS BEING ZEROED
+                MASK            BIT13                   # (BIT 13 RADMODES EQUAL ONE)
+                EXTEND          
+                BZF             R22LEM42                # CDUS BEING ZEROED
+                TC              PHASCHNG                # IF A RESTART OCCURS,AN EXTRA RADAR
+                OCT             00152                   # READING IS TAKEN,SO BAD DATA ISN'T USED
+                TC              BANKCALL                # YES READ DATA + CALCULATE LOS
+                CADR            LRS22.1                 # DATA READ SUBROUTINE
+                INDEX           MPAC    
+                TC              +1      
+                TC              R22LEM2                 # NORMAL RETURN (GOOD DATA)
+                TC              P20LEMC                 # COULD NOT READ RADAR-TRY TO REDESIGNATE
+                CAF             ALRM525                 # RR LOS NOT WITHIN 3 DEGREES (ALARM)
+                TC              BANKCALL        
+                CADR            PRIOLARM        
+                TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
+                TC              R22LEM1                 # PROC (DISPLAY DELTA THETA)
+                TC              -5                      # ENTER (ILLEGAL OPTION)
+                TC              ENDOFJOB        
+                
+                
+R22LEM1         TC              PHASCHNG        
+                OCT             04022   
+                CAF             V06N05                  # DISPLAY DELTA THETA
+                TC              BANKCALL        
+                CADR            PRIODSP 
+                TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
+                TC              R22LEM2                 # PROC (OK CONTINUE)
+                TC              P20LEMC                 # ENTER(RECYCLE)
+R22LEM2         TC              PHASCHNG        
+                OCT             04022   
+                TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE (P22FLAG SET)
+                TC              R22LEM3                 # YES-BYPASS FLAG CHECKS AND LRS22.2
+                CA              FLAGWRD1                # IS TRACK FLAG SET
+                MASK            TRACKBIT        
+                EXTEND          
+                BZF             R22WAIT                 # NO - WAIT
+                TC              BANKCALL                # YES
+                CADR            LRS22.2                 # CHECKS RR BORESIGHT WITHIN 30 DEG OF +Z
+                INDEX           MPAC    
+                TC              +1      
+                TC              R22LEM3                 # NORMAL RETURN(LOS WITHIN 30 OF Z-AXIS)
+                TC              BANKCALL        
+                CADR            R61LEM  
+                TC              R22WAIT                 # NOT WITHIN 30 DEG OF Z-AXIS
+R22LEM3         CS              FLAGWRD1                # SHOULD WE BYPASS STATE VECTOR UPDATE
+                MASK            NOUPFBIT                # (IS NO UPDATE FLAG SET?)
+                
+## Page 518             
+                EXTEND          
+                BZF             R22LEM42                # BRANCH-YES
+                CA              FLAGWRD1                # IS UPDATE FLAG SET
+                MASK            UPDATBIT        
+                EXTEND          
+                BZF             R22LEM42                # UPDATE FLAG NOT SET
+                CAF             PRIO26                  # INSURE HIGH PRIO IN RESTART
+                TS              PHSPRDT2        
+                
+                TC              INTPRET 
+                GOTO            
+                                LSR22.3 
+R22LEM93        EXIT                                    # NORMAL EXIT FROM LSR22.3
+                TC              PHASCHNG                # PHASE CHANGE TO PROTECT AGAINST
+                OCT             04022                   # CONFLICT WITH GRP2PC ERASEABLE
+                TCF             R22LEM44        
+R22LEM96        EXIT            
+                CAF             ZERO                    # SET N49FLAG = ZERO TO INDICATE
+                TS              N49FLAG                 # V06 N49 DISPLAY HASNT BEEN ANSWERED
+                TC              PHASCHNG        
+                OCT             04022                   # TO PROTECT DISPLAY
+                CAF             PRIO27                  # PROTECT DISPLAY
+                TC              NOVAC   
+                EBANK=          N49FLAG 
+                2CADR           N49DSP  
+                TC              INTPRET 
+                SLOAD           
+                                N49FLAG 
+                BZE             BMN                     # LOOP TO CHECK IF FLAG
+                                -3                      # SETTING CHANGED-BRANCH - NO
+                                R22LEM7                 # PROCEED
+                EXIT                                    # DISPLAY ANSWERED BY RECYCLE
+                TC              LUNSFCHK                # ARE WE ON LUNAR SURFACE
+                TC              R22WAIT                 # YES - 15 SECOND DELAY
+                CA              ZERO                    # NO - SET R65COUNTER = 0, DO FINE
+                TC              R22LEM45                # TRACKING TAKE ANOTHER RADAR READING
+R22LEM7         CALL                                    # PROCEED
+                                GRP2PC                  # PHASE CHANGE AND
+                GOTO                                    # GO TO INCORPORATE DATA.
+                                ASTOK   
+R22LEM44        INCR            MARKCTR                 # INCREMENT COUNT OF MARKS INCORPORATED.
+                TC              LUNSFCHK                # ARE WE ON LUNAR SURFACE
+                TC              R22LEM46                # YES - WAIT 2 SECONDS
+                CA              FIVE                    # NOT ON LUNAR SURFACE
+                TC              R22LEM45                # R65COUNTER = 5
+R22LEM42        TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE (P22FLAG SET)
+                TC              R22LEM46                # YES - WAIT 2 SECONDS
+                CA              TWO                     # NO-SET R65COUNTER = 2
+R22LEM45        TS              R65CNTR 
 
-                EBANK=  LRS22.1X
-                COUNT*  $$/R22
-R22LEM          TC      PHASCHNG
-                OCT     04022
-                CAF     RNDVZBIT        # IS RENDESVOUS FLAG SET?
-                MASK    STATE
-                EXTEND
-                BZF     ENDOFJOB        # NO - EXIT R22 AND P20
-                CAF     TRACKBIT        # IS TRACKFLAG SET?
-                MASK    STATE +1
-                EXTEND
-                BZF     R22WAIT         # NO WAIT
-R22LEM12        CAF     BIT14           # IS RR AUTO TRACK ENABLE DISCRETE STILL
-                EXTEND                  # ON (A MONITOR REPOSITION BY R25 CLEARSIT
-                RAND    CHAN12
-                EXTEND
-                BZF     P20LEMA         # NO - RETURN TO P20
-                CAF     BIT2            # YES
-                EXTEND                  # IS RR AUTO MODE DISCRETE PRESENT
-                RAND    CHAN33
-## Page 505
-                EXTEND
-                BZF     +2              # YES CONTINUE
-                TC      P20LEMB5        # NO - SET IT
-                CS      RADMODES        # ARE RR CDUS BEING ZEROED
-                MASK    RCDU0BIT
-                EXTEND
-                BZF     R22LEM42        # CDUS BEING ZEROED
-                TC      PHASCHNG        # IF A RESTART OCCURS, AN EXTRA RADAR
-                OCT     00152           # READING IS TAKEN, SO BAD DATA ISN'T USED
-                TC      BANKCALL        # YES READ DATA + CALCULATE LOS
-                CADR    LRS22.1         # DATA READ SUBROUTINE
-                INDEX   MPAC
-                TC      +1
-                TC      R22LEM2         # NORMAL RETURN (GOOD DATA)
-                TC      P20LEMC         # COULD NOT READ RADAR - TRY TO REDESIGNATE
-                CAF     ALRM525         # RR LOS NOT WITHIN 3 DEGREES (ALARM)
-                TC      BANKCALL
-                CADR    PRIOLARM
-                TC      GOTOV56         # TERMINATE EXITS P20 VIA V56 CODING
-                TC      R22LEM1         # PROC (DISPLAY DELTA THETA)
-                TC      -5              # ENTER (ILLEGAL OPTION)
-                TC      ENDOFJOB
+## Page 519             
+                TC              BANKCALL        
+                CADR            R65LEM                  # FINE PREFERRED TRACKING ATTITUDE
+                TC              R22LEM  
+R22WAIT         CAF             1500DEC 
+                TC              P20LEMWT        +1     
+                
+                
+R22LEM46        CAF             2SECS   
+                TC              P20LEMWT        +1      # WAIT 2 SECONDS AND TAKE ANOTHER MARK
 
-R22LEM1         TC      PHASCHNG
-                OCT     04022
-                CAF     V06N05          # DISPLAY DELTA THETA
-                TC      BANKCALL
-                CADR    PRIODSP
-                TC      GOTOV56         # TERMINATE EXITS P20 VIA V56 CODING
-                TC      R22LEM2         # PROC (OK CONTINUE)
-                TC      P20LEMC         # ENTER (RECYCLE)
-R22LEM2         TC      PHASCHNG
-                OCT     04022
-                TC      LUNSFCHK        # CHECK IF ON LUNAR SURFACE (P22FLAG SET)
-                TC      R22LEM3         # YES - BYPASS FLAG CHECKS AND LRS22.2
-                CA      FLAGWRD1        # IS TRACK FLAG SET
-                MASK    TRACKBIT
-                EXTEND
-                BZF     R22WAIT         # NO - WAIT
-                TC      BANKCALL        # YES
-                CADR    LRS22.2         # CHECKS RR BORESIGHT WITHIN 30 DEG OF +Z
-                INDEX   MPAC
-                TC      +1
-                TC      R22LEM3         # NORMAL RETURN (LOS WITHIN 30 OF Z-AXIS)
-                TC      BANKCALL
-                CADR    R61LEM
-                TC      R22WAIT         # NOT WITHIN 30 DEG OF Z-AXIS
-R22LEM3         CS      FLAGWRD1        # SHOULD WE BYPASS STATE VECTOR UPDATE
-                MASK    NOUPFBIT        # (IS NO UPDATE FLAG SET?)
-## Page 506
-                EXTEND
-                BZF     R22LEM42        # BRANCH - YES
-                CA      FLAGWRD1        # IS UPDATE FLAG SET
-                MASK    UPDATBIT
-                EXTEND
-                BZF     R22LEM42        # UPDATE FLAG NOT SET
-                CAF     PRIO26          # INSURE HIGH PRIO IN RESTART
-                TS      PHSPRDT2
+                
+N49DSP          CAF             V06N49NB        
+                TC              BANKCALL                # EXCESSIVE STATE VECTOR UPDATE - FLASH
+                CADR            PRIODSP                 # VERB 06 NOUN 49 R1=DELTA R, R2=DELTA V
+                TC              GOTOV56                 # TERMINATE - EXIT R22 AND P20
+                CS              ONE                     # PROCEED - N49FLAG = -1
+                TS              N49FLAG                 # RECYCLE - N49FLAG = + VALUE
+                TC              ENDOFJOB        
+R22RSTRT        TC              PHASCHNG                # IF A RESTART OCCURS WHILE READING RADAR
+                OCT             00152                   # COME HERE TO TAKE A RANGE-RATE READING
+                TC              BANKCALL                # WHICH ISNT USED TO PREVENT TAKING A BAD
+                CADR            RRRDOT                  # READING AND TRYING TO INCORPORATE THE
+                TC              BANKCALL                # BAD DATA
+                CADR            RADSTALL                # WAIT FOR READ COMPLETE
+                TC              P20LEMC                 # COULD NOT READ RADAR - TRY TO REDESIGNATE
+                TC              R22LEM                  # READ SUCCESSFUL - CONTINUE AT R22
 
-                TC      INTPRET
-                GOTO
-                        LSR22.3
-R22LEM93        EXIT                    # NORMAL EXIT FROM LSR22.3
-                TC      PHASCHNG        # PHASE CHANGE TO PROTECT AGAINST
-                OCT     04022           # CONFLICT WITH GRP2PC ERASEABLE
-                TCF     R22LEM44
-R22LEM96        EXIT
-                CAF     ZERO            # SET N49FLAG = ZERO TO INDICATE
-                TS      N49FLAG         # V06 N49 DISPLAY HASNT BEEN ANSWERED
-                TC      PHASCHNG
-                OCT     04022           # TO PROTECT DISPLAY
-                CAF     PRIO27          # PROTECT DISPLAY
-                TC      NOVAC
-                EBANK=  N49FLAG
-                2CADR   N49DSP
+                
+ALRM525         OCT             00525   
+V06N05          VN              00605
+V06N49NB        VN              00649
+1500DEC         DEC             1500
+45SECNDS        DEC             4500
+# LUNSFCHK-CLOSED SUBROUTINE TO CHECK IF ON LUNAR SURFACE (P22FLAG)
+#          RETURNS TO CALLER +1 IF P22FLAG SET
+#                  TO CALLER +2 IF P22FLAG NOT SET
 
-                TC      INTPRET
-                SLOAD
-                        N49FLAG
-                BZE     BMN             # LOOP TO CHECK IF FLAG
-                        -3              # SETTING CHANGED - BRANCH - NO
-                        R22LEM7         # PROCEED
-                EXIT                    # DISPLAY ANSWERED BY RECYCLE
-                TC      LUNSFCHK        # ARE WE ON LUNAR SURFACE
-                TC      R22WAIT         # YES - 15 SECOND DELAY
-                CA      ZERO            # NO - SET R65COUNTER = 0, DO FINE
-                TC      R22LEM45        # TRACKING TAKE ANOTHER RADAR READING
-R22LEM7         CALL                    # PROCEED
-                        GRP2PC          # PHASE CHANGE AND
-                GOTO                    # GO TO INCORPORATE DATA.
-                        ASTOK
-R22LEM44        INCR    MARKCTR         # INCREMENT COUNT OF MARKS INCORPORATED.
-                TC      LUNSFCHK        # ARE WE ON LUNAR SURFACE
-                TC      R22LEM46        # YES - WAIT 2 SECONDS
-                CA      FIVE            # NOT ON LUNAR SURFACE
-                TC      R22LEM45        # R65COUNTER = 5
-R22LEM42        TC      LUNSFCHK        # CHECK IF ON LUNAR SURFACE (P22FLAG SET)
-                TC      R22LEM46        # YES - WAIT 2 SECONDS
-                CA      TWO             # NO - SET R65COUNTER = 2
-R22LEM45        TS      R65CNTR
-## Page 507
-                TC      BANKCALL
-                CADR    R65LEM          # FINE PREFERRED TRACKING ATTITUDE
-                TC      R22LEM
-R22WAIT         CAF     1500DEC
-                TC      P20LEMWT +1
 
-R22LEM46        CAF     2SECS
-                TC      BANKCALL        # WAIT 2 SECONDS AND TAKE ANOTHER MARK
-                CADR    DELAYJOB
-                TC      R22LEM
+                COUNT*          $$/P22
+LUNSFCHK        CS              FLAGWRD8                # CHECK IF ON LUNAR SURFACE
+                MASK            SURFFBIT                # IS SURFFLAG SET?
+                CCS             A                       # BRANCH - P22FLAG SET
+                INCR            Q                       # NOT SET
+                TC              Q                       # RETURN
 
-N49DSP          CAF     V06N49NB
-                TC      BANKCALL        # EXCESSIVE STATE VECTOR UPDATE - FLASH
-                CADR    PRIODSP         # VERB 06 NOUN 49 R1=DELTA R, R2=DELTA V
-                TC      GOTOV56         # TERMINATE - EXIT R22 AND P20
-                CS      ONE             # PROCEED - N49FLAG = -1
-                TS      N49FLAG         # RECYCLE - N49FLAG = + VALUE
-                TC      ENDOFJOB
-R22RSTRT        TC      PHASCHNG        # IF A RESTART OCCURS WHILE READING RADAR
-                OCT     00152           # COME HERE TO TAKE A RANGE-RATE READING
-                TC      BANKCALL        # WHICH ISNT USED TO PREVENT TAKING A BAD
-                CADR    RRRDOT          # READING AND TRYING TO INCORPORATE THE
-                TC      BANKCALL        # BAD DATA
-                CADR    RADSTALL        # WAIT FOR READ COMPLETE
-                TC      P20LEMC         # COULD NOT READ RADAR - TRY TO REDESIGNATE
-                TC      R22LEM          # READ SUCCESSFUL - CONTINUE AT R22
-
-ALRM525         OCT     00525
-V06N05          VN      00605
-V06N49NB        VN      00649
-1500DEC         DEC     1500
-
-# LUNSFCHK - CLOSED SUBROUTINE TO CHECK IF ON LUNAR SURFACE (P22FLAG)
-#       RETURNS TO CALLER +1 IF P22FLAG SET
-#               TO CALLER +2 IF P22FLAG NOT SET
-
-                COUNT*  $$/P22
-LUNSFCHK        CS      FLAGWRD8        # CHECK IF ON LUNAR SURFACE
-                MASK    SURFFBIT        # IS SURFFLAG SET?
-                CCS     A               # BRANCH - P22FLAG SET
-                INCR    Q               # NOT SET
-                TC      Q               # RETURN
-
-## Page 508
+## Page 520
 # RR DESIGNATE ROUTINE (R21LEM)
 # PROGRAM DESCRIPTION
-#
-#       MOD NO - 2
-#       BY P VOLANTE
-#
+# MOD NO - 2
+# BY P VOLANTE
 # FUNCTIONAL DESCRIPTION
 #
-#       TO POINT THE RENDEZVOUS RADAR AT THE CSM UNTIL AUTOMATIC ACQUISITION
-#       OF THE CSM IS ACCOMPLISHED BY THE RADAR.  ROUTINE IS CALLED BY P20.
-#
+#   TO POINT THE RENDEZVOUS RADAR AT THE CSM UNTIL AUTOMATIC ACQUISITION
+# OF THE CSM IS ACCOMPLISHED BY THE RADAR. ROUTINE IS CALLED BY P20.
 # CALLING SEQUENCE -
-#
-#       TC      BANKCALL
-#       CADR    R21LEM
-#
+#          TC     BANKCALL
+#          CADR   R21LEM
 # SUBROUTINES CALLED -
-#
-#       FINDVAC         FLAGUP          ENDOFJOB        PRIOLARM
-#       NOVAC           INTPRET         LPS20.1         PHASCHNG
-#       WAITLIST        JOBSLEEP        JOBWAKE         FLAGDOWN
-#       TASKOVER        BANKCALL        RADSTALL        RRDESSM
-#
+#   FINDVAC        FLAGUP           ENDOFJOB        PRIOLARM
+#   NOVAC          INTPRET          LPS20.1         PHASCHNG
+#   WAITLIST       JOBSLEEP         JOBWAKE         FLAGDOWN
+#   TASKOVER       BANKCALL         RADSTALL        RRDESSM
 # NORMAL EXIT MODES
-#
-#       WHEN LOCK-ON IS ACHIEVED, BRANCH WILL BE TO P20 WHERE R22 (DATA READ
-#       WILL BE SELECTED OR A NEED FOR A MANEUVER (BRANCH TO P20LEMA)
-#
-# ALARM OR ABORT EXIT MODES -
-#
-#       PRIORITY ALARM 503 WHEN LOCK-ON HASN:T BEEN ACHIEVED AFTER 30SECS -
-#       THIS REQUIRES ASTRONAUT INTERFACE- SELECTION OF SEARCH OPTION OF
-#       ACQUISITION
-#
+#   WHEN LOCK-ON IS ACHIEVED,BRANCH WILL BE TO P20 WHERE R22 (DATA READ
+# WILL BE SELECTED OR A NEED FOR A MANEUVER(BRANCH TO P20LEMA)
+# ALARM OR ABORT EXIT MODES-
+#   PRIORITY ALARM 503 WHEN LOCK-ON HASN:T BEEN ACHIEVED AFTER 30SECS -
+# THIS REQUIRES ASTRONAUT INTERFACE- SELECTION OF SEARCH OPTION OF
+# ACQUISITION
 # OUTPUT
-#
-#       SEE LPS20.1, RRDESSM
-#
+#   SEE LPS20.1,RRDESSM
 # ERASABLE INITIALIZATION REQUIRED
-#
-#       RRTARGET, RADMODES ARE USED BY LPS20.1 AND RRDESSM
-#
+#   RRTARGET,RADMODES ARE USED BY LPS20.1 AND RRDESSM
 # FLAGS SET + RESET
-#
-#       LOSCMFLG        LOKONSW
-#
+#   LOSCMFLG      LOKONSW
 # DEBRIS
-#
-#       SEE LPS20.1, RRDESSM
+#   SEE LPS20.1,RRDESSM
+                EBANK=          LOSCOUNT
+                COUNT*          $$/R21
+R21LEM          CAF             MAXTRIES                # ALLOW 60 PASSES (APPROX 45 SECS.) TO
+                TS              DESCOUNT                # DESIGNATE AND LOCKON
+                TC              LUNSFCHK                
+                TC              R21LEM5         
+                CAF             ZERO                    #      COMMAND ANTENNA TO MODE CENTER
+                TS              TANG                    # IF NOT ON SURFACE-MODE 1-(T=0,S=0)
+                TS              TANG            +1         
+                TC              R21LEM6         
+R21LEM5         CAF             BIT15                   # IF ON LUNAR SURFACE-MODE 2-(T=180,S=-90)
+                TS              TANG            
+                CS              HALF            
+                TS              TANG            +1         
+R21LEM6         TC              DOWNFLAG                
+                ADRES           LOKONSW         
+                TC              BANKCALL                
+                CADR            RRDESNB         
+                TC              +1              
+                
+## Page 521                
+                TC              BANKCALL                
+                CADR            RADSTALL                
+                TC              R21-503                 # BAD RETURN FROM DESIGNATE -ISSUE ALARM
+R21LEM10        TC              UPFLAG                  # INDICATES LOS TO BE COMPUTED
+                ADRES           LOSCMFLG                # EVERY FOURTH PASS THRU DODES
+                CS              BIT14                   # REMOVE RR SELF TRACK ENABLE
+                EXTEND          
+                WAND            CHAN12
+R21LEM2         CAF             THREE           
+                TS              LOSCOUNT                
+R21LEM1         TC              INTPRET         
+                RTB             DAD             
+                                LOADTIME                
+                                HALFSEC                 # EXTRAPOLATE TO PRESENT TIME + .5 SEC.
+                STCALL          TDEC1                   # LOS DETERMINATION ROUTINE
+                                LPS20.1         
+                EXIT                    
+R21LEM3         TC              UPFLAG                  # SET LOKONSW TO RADAR-ON DESIRED
+                ADRES           LOKONSW         
+                TC              INTPRET         
+                CALL                                    # INPUT (RRTARGET UPDATED BY LPS20.1)
+                                RRDESSM                 # DESIGNATE ROUTINE
+                EXIT                    
+                TC              R21LEM4                 # LOS NOT IN MODE 2 COVERAGE
+                                                        # ON LUNAR SURFACE
+                TC              P20LEMA                 # VEHICLE MANEUVER REQUIRED.
+                TC              BANKCALL                # NO VEHICLE MANEUVER REQUIRED
+                CADR            RADSTALL                # WAIT FOR DESIGNATE COMPLETE - LOCKON OR
+                TC              +2                      # BADEND-LOCKON NOT ACHIEVED IN 60 TRIES
+                TC              R21END                  # EXIT ROUTINE RETURN TO P20 (LOCK-ON)
+R21-503         CAF             ALRM503                 # ISSUE ALARM 503
+                TC              BANKCALL                
+                CADR            PRIOLARM                
+                TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
+                TC              R21SRCH                 # PROC
+                TC              P20LEMC3                
+                TC              ENDOFJOB                
+R21END          TC              DOWNFLAG                
+                ADRES           LOSCMFLG                # RESET LOSCMFLG
+                TC              P20LEMWT                # EXIT R21 TO PERFORM DATA READ
+R21SRCH         TC              PHASCHNG                
+                OCT             04022           
+                TC              R24LEM                  # SEARCH ROUTINE
+ALRM503         OCT             00503           
+ALRM527         OCT             527             
 
-                EBANK=  LOSCOUNT
-                COUNT*  $$/R21
-R21LEM          CS      BIT14           # REMOVE RR SELF TRACK ENABLE
-                EXTEND
-                WAND    CHAN12
-                TC      LUNSFCHK
-                TC      R21LEM5
-                CAF     ZERO            # COMMAND ANTENNA TO MODE CENTER
-                TS      TANG            # IF NOT ON SURFACE - MODE 1 - (T=0,S=0)
-                TS      TANG +1
-                TC      R21LEM6
-R21LEM5         CAF     BIT12
-                MASK    RADMODES
-                CCS     A
-                TC      R21LEM10
-                CAF     BIT15
-                TS      TANG
-                CS      HALF
-                TS      TANG +1
-
-## Page 509
-R21LEM6         TC      DOWNFLAG
-                ADRES   LOKONSW
-                TC      BANKCALL
-                CADR    RRDESNB
-                TC      +1
-                TC      BANKCALL
-                CADR    RADSTALL
-                TC      R21-503         # BAD RETURN FROM DESIGNATE - ISSUE ALARM
-R21LEM10        TC      UPFLAG
-                ADRES   LOSCMFLG        # EVERY FOURTH PASS THRU DODES
-                CAF     MAXTRIES        # ALLOW 60 PASSES (APPROX 45 SECONDS)
-                TS      DESCOUNT        # TO DESIGNATE AND LOCK ON
-R21LEM2         CAF     THREE
-                TS      LOSCOUNT
-R21LEM1         TC      INTPRET
-                RTB     DAD
-                        LOADTIME
-                        HALFSEC         # EXTRAPOLATE TO PRESENT TIME + .5 SEC.
-                STCALL  TDEC1           # LOS DETERMINATION ROUTINE
-                        LPS20.1
-                EXIT
-R21LEM3         TC      UPFLAG          # SET LOKONSW TO RADAR - ON DESIRED
-                ADRES   LOKONSW
-                TC      DOWNFLAG
-                ADRES   NORRMON
-                TC      INTPRET
-                CALL                    # INPUT (RRTARGET UPDATED BY LPS20.1)
-                        RRDESSM         # DESIGNATE ROUTINE
-                EXIT
-                TC      R21LEM4         # LOS NOT IN MODE 2 COVERAGE
-                                        # ON LUNAR SURFACE
-                TC      P20LEMA         # VEHICLE MANEUVER REQUIRED.
-                TC      BANKCALL        # NO VEHICLE MANEUVER REQUIRED
-                CADR    RADSTALL        # WAIT FOR DESIGNATE COMPLETE - LOCKON OR
-                TC      +2              # BAD END - LOCKON NOT ACHIEVED IN 60 TRIES
-                TC      R21END          # EXIT ROUTINE RETURN TO P20 (LOCK-ON)
-R21-503         CAF     ALRM503         # ISSUE ALARM 503
-                TC      BANKCALL
-                CADR    PRIOLARM
-                TC      GOTOV56         # TERMINATE EXITS P20 VIA V56 CODING
-                TC      R21SRCH         # PROC
-                TC      P20LEMC3
-                TC      ENDOFJOB
-R21END          TC      DOWNFLAG
-                ADRES   LOSCMFLG        # RESET LOSCMFLG
-                TC      R21DISP         # PUT UP VERIFY MAIN LOBE LOCKON DISPLAY
-R21SRCH         TC      PHASCHNG
-                OCT     04022
-                TC      R24LEM          # SEARCH ROUTINE
-ALRM503         OCT     00503
-## Page 510
-ALRM527         OCT     527
-
-R21LEM4         CAF     MAXTRIES        # SET UP COUNTER FOR
-                TS      REPOSCNT        # 60 PASSES (APPROX 600 SECS.)
-                TC      UPFLAG
-                ADRES   FSPASFLG        # SET FIRST PASS FLAG
-                TC      DOWNFLAG        # RESET LOS BEING
-                ADRES   LOSCMFLG        # COMPUTED FLAG
-                TC      INTPRET
-R21LEM12        RTB
-                        LOADTIME
-                DAD
-                        TENSEC          # TIME T = T + 10 SECS.
-                STORE   REPOSTM         # SAVE FOR LONGCALL AND UPPSV
-                STCALL  TDEC1
-                        LPS20.1         # COMPUTE LOS AT TIME T
-                CALL
-                        RRDESSM
-                EXIT
-                TC      R21LEM13        # LOS NOT IN MODE 2 COVERAGE
-                TC      ENDOFJOB        # VEHICLE MANEUVER REQUIRED
-                TC      KILLTASK
-                CADR    BEGDES
-                TC      INTPRET
-                BOF
-                        FSPASFLG        # FIRST PASS THRU REPOSITION
-                        R21LEMB         # NO - GO TO CONTINUOUS DESIGNATE
-                CLRGO
-                        FSPASFLG        # YES - RESET FIRST PASS FLAG
-                        R21LEM7 +1
-R21LEM13        CCS     REPOSCNT        # HAVE WE TRIED 60 TIMES?
-                TC      R21LEM7         # NO - ADD 10 SECS.  RECOMPUTE LOS
-                TC      R21LEM11        # YES - PUT OUT ALARM 530
-R21LEM7         TS      REPOSCNT
-                TC      INTPRET
-                DLOAD   GOTO
-                        REPOSTM
-                        R21LEM12 +2
-R21LEMB         DLOAD
-                        REPOSTM
-                STCALL  TDEC1
-                        UPPSV
-                EXIT
-                TC      UPFLAG          # SET RADMODES BIT 15 FOR
-                ADRES   CDESFLAG        # CONTINUOUS DESIGNATION
-                TC      DOWNFLAG
-                ADRES   LOKONSW
-                TC      UPFLAG
-                ADRES   NORRMON
-## Page 511
-                TC      BANKCALL
-                CADR    RRDESNB
-                TC      +1
-                TC      INTPRET
-                RTB     BDSU
-                        LOADTIME        # COMPUTE DELTA TIME
-                        REPOSTM         # FOR LONGCALL
-                STORE   DELTATM
-                EXIT
-                EXTEND
-                DCA     DELTATM
-                TC      LONGCALL
-                EBANK=  LOSCOUNT
-                2CADR   R21LEM9
-
-                TC      ENDOFJOB
-R21LEM9         TC      KILLTASK
-                CADR    STDESIG
-                TC      CLRADMOD
-                CAF     PRIO26
-                TC      FINDVAC
-                EBANK=  LOSCOUNT
-                2CADR   R21LEM10
-
-                TC      TASKOVER
-R21LEM11        CAF     ALRM530         # ALARM 530 - LOS NOT IN COVERAGE
-                TC      BANKCALL        # AFTER TRYING TO DESIGNATE FOR
-                CADR    PRIOLARM        # 600 SECS.
-                TC      GOTOV56
-                TC      GOTOV56
-                TC      GOTOV56
-                TC      ENDOFJOB
-ALRM530         OCT     00530
-TENSEC          2DEC    1000 B-28
-
-HALFSEC         2DEC    50
-
-R21DISP         TC      PHASCHNG
-                OCT     04022
-                CAF     V06N72PV        # FLASH V 50 N 72 - PLEASE PERFORM RR
-                TC      BANKCALL        # MAIN LOBE LOCKON VERIFICATION
-                CADR    GOPERF2R
-                TC      GOTOV56         # TERMINATE EXITS VIA V 56
-                TC      P20LEMWT        # PROCEED CONTINUES TO R22
-                TC      -5              # ENTER ILLEGAL
-                CAF     BIT7
-                TC      LINUS           # SET BITS TO MAKE THIS A PRIORITY DISPLAY
-                TC      ENDOFJOB
-
-## Page 512
-V06N72PV        VN      00672
-
-## Page 513
+                        
+R21LEM4         CAF             ALRM527                 # ALARM 527-LOS NOT IN MODE 2 COVERAGE
+                TC              BANKCALL                # ON LUNAR SURFACE
+                CADR            PRIOLARM
+                
+## Page 522
+                TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING   
+                TC              P20LEMC3
+                TC              -5                      # ENTER
+HALFSEC         2DEC            50              
+                        
+## Page 523
 # MANUAL ACQUISITION ROUTINE R23LEM
 # PROGRAM DESCRIPTION
-#
-#       MOD NO - 2
-#       BY P VOLANTE
-#
+# MOD NO - 2
+# BY P VOLANTE
 # FUNCTIONAL DESCRIPTION
 #
-#       TO ACQUIRE THE CSM BY MANUAL OPERATION OF THE RENDEZVOUS RADAR
-#
+#   TO ACQUIRE THE CSM BY MANUAL OPERATION OF THE RENDEZVOUS RADAR
 # CALLING SEQUENCE -
-#
-#       TC      R23LEM
-#
+#          TC     R23LEM
 # SUBROUTINES CALLED
-#
-#       BANKCALL        R61LEM
-#       SETMINDB        GOPERF1
-#
+#   BANKCALL        R61LEM
+#   SETMINDB        GOPERF1
 # NORMAL EXIT MODES -
-#
-#       IN RESPONSE TO THE GOPERF1      ,SELECTION OF ENTER WILL RECYCLE R23
-#                                       ,SELECTION OF PROC WILL CONTINUE R23
-#                                       ,SELECTION OF TERM WILL TERMINATE R23 +P20
-#
+#   IN RESPONSE TO THE GOPERF1 ,SELECTION OF ENTER WILL RECYCLE R23
+#                              ,SELECTION OF PROC  WILL CONTINUE R23
+#                              ,SELECTION OF TERM  WILL TERMINATE R23 +P20
 # ALARM OR ABORT EXIT MODES -
-#
-#       SEE NORMAL EXIT MODES ABOVE
-#
+#   SEE NORMAL EXIT MODES ABOVE
 # OUTPUT
-#
-#       N.A.
-#
-# ERASABLE INITIALIZATION REQUIRED -
-#
-#       ACMODFLG MUST BE SET TO 1 (MANUAL MODE)
-
-                EBANK=  GENRET
-                COUNT*  $$/R23
-R23LEM          TC      UPFLAG          # SET NO ANGLE MONITOR FLAG
-                ADRES   NORRMON
-                INHINT
-                TC      IBNKCALL        # SELECT MINIMUM DEADBAND
-                CADR    SETMINDB
-                RELINT
-R23LEM1         CAF     BIT14           # ENABLE TRACKER
-                EXTEND
-                WOR     CHAN12
-                CAF     OCT205
-                TC      BANKCALL
-                CADR    GOPERF1
-                TC      R23LEM2         # TERMINATE
-                TC      R23LEM11        # PROCEDE
-                TC      R23LEM3         # ENTER - DO ANOTHER MANUVER
-R23LEM11        INHINT
-                TC      RRLIMCHK        # YES - CHECK IF ANTENNA IS WITHIN LIMITS
-                ADRES   CDUT
-                TC      OUTOFLIM        # NOT WITHIN LIMITS
-                TC      IBNKCALL        # RESTORE DEADBAND TO
-                CADR    RESTORDB        # ASTRONAUT SELECTED VALUE
-                RELINT
-                TC      DOWNFLAG        # CLEAR NO ANGLE MONITOR FLAG
-                ADRES   NORRMON
-                TC      P20LEMB1        # RADAR IS LOCKED ON CONTINUE IN P20
-OUTOFLIM        RELINT
-## Page 514
-                CAF     OCT501PV
-                TC      BANKCALL        # ISSUE ALARM - RR ANTENNA NOT WITHIN
-                CADR    PRIOLARM        # LIMITS
-                TC      R23LEM2         # TERMINATE - EXIT R23 TO R00 (GO TO POOH)
-                TC      OUTOFLIM +1     # PROCEED ILLEGAL
-                TC      R23LEM3         # RECYCLE - DO ANOTHER MANUVER
-                TC      ENDOFJOB
-R23LEM2         TC      DOWNFLAG        # CLEAR NO ANGLE MONITOR FLAG
-                ADRES   NORRMON
-                TC      GOTOV56         # AND EXIT VIA V56
-R23LEM3         TC      BANKCALL
-                CADR    R61LEM
-                TC      R23LEM1
-
-OCT501PV        OCT     501
-OCT205          OCT     205
-
-## Page 515
+#   N.A.
+# ERASABLE INITIALIZATION REQUIRED-
+#   ACMODFLG MUST BE SET TO 1 (MANUAL MODE)
+                EBANK=          GENRET
+                COUNT*          $$/R23
+R23LEM          TC              UPFLAG                  # SET NO ANGLE MONITOR FLAG
+                ADRES           NORRMON 
+                INHINT          
+                TC              IBNKCALL                # SELECT MINIMUM DEADBAND
+                CADR            SETMINDB        
+                RELINT          
+R23LEM1         CAF             BIT14                   # ENABLE TRACKER
+                EXTEND          
+                WOR             CHAN12  
+                CAF             OCT205  
+                TC              BANKCALL        
+                CADR            GOPERF1 
+                TC              R23LEM2                 # TERMINATE
+                TC              R23LEM11                # PROCEDE
+                TC              R23LEM3                 # ENTER- DO ANOTHER MANUVER
+R23LEM11        INHINT          
+                TC              RRLIMCHK                # YES - CHECK IF ANTENNA IS WITHIN LIMITS
+                ADRES           CDUT    
+                TC              OUTOFLIM                # NOT WITHIN LIMITS
+                TC              IBNKCALL                # RESTORE DEADBAND TO
+                CADR            RESTORDB                # ASTRONAUT SELECTED VALUE
+                RELINT          
+                TC              DOWNFLAG                # CLEAR NO ANGLE MONITOR FLAG
+                ADRES           NORRMON 
+                TC              P20LEMB1                # RADAR IS LOCKED ON CONTINUE IN P20
+OUTOFLIM        RELINT     
+     
+## Page 524             
+                CAF             OCT501PV        
+                TC              BANKCALL                # ISSUE ALARM - RR ANTENNA NOT WITHIN
+                CADR            PRIOLARM                # LIMITS
+                TC              R23LEM2                 # TERMINATE - EXIT R23 TO R00 (GO TO POOH)
+                TC              OUTOFLIM        +1      # PROCEED ILLEGAL
+                TC              R23LEM3                 # RECYCLE- DO ANOTHER MANUVER
+                TC              ENDOFJOB        
+R23LEM2         TC              DOWNFLAG                # CLEAR NO ANGLE MONITOR FLAG
+                ADRES           NORRMON 
+                TC              GOTOV56                 # AND EXIT VIA V56
+R23LEM3         TC              BANKCALL        
+                CADR            R61LEM  
+                TC              R23LEM1 
+        
+OCT501PV        OCT             501
+OCT205          OCT             205
+        
+## Page 525
 # SEARCH ROUTINE R24LEM
 # PROGRAM DESCRIPTION
-#
-#       MOD NO - 2
-#       BY P. VOLANTE
-#
+# MOD NO - 2
+# BY  P. VOLANTE
 # FUNCTIONAL DESCRIPTION
 #
-#       TO ACQUIRE THE CSM BY A SEARCH PATTERN WHEN THE RENDEZVOUS RADAR HAS
-#       FAILED TO ACQUIRE THE CSM IN THE AUTOMATIC TRACKING MODE AND TO ALLOW
-#       THE ASTRONAUT TO CONFIRM THAT REACQUISITION HAS NOT BEEN BY SIDELOBE.
-#
+#   TO ACQUIRE THE CSM BY A SEARCH PATTERN WHEN THE RENDEZVOUS RADAR HAS
+# FAILED TO ACQUIRE THE CSM IN THE AUTOMATIC TRACKING MODE AND TO ALLOW
+# THE ASTRONAUT TO CONFIRM THAT REACQUISITION HAS NOT BEEN BY SIDELOBE.
 # CALLING SEQUENCE
-#
-#       CAF     PRIONN
-#       TC      FINDVAC
-#       EBANK=  DATAGOOD
-#       2CADR   R24LEM
-#
+#          CAF    PRIONN
+#          TC     FINDVAC
+#          EBANK= DATAGOOD
+#          2CADR  R24LEM
 # SUBROUTINES CALLED
-#
-#       FLAGUP          FLAGDOWN        BANKCALL
-#       R61LEM          GOFLASHR        FINDVAC
-#       ENDOFJOB        NOVAC           LSR24.1
-#
-# NORMAL EXIT MODES -
-#
-#       ASTRONAUT RESPONSE TO DISPLAY OF OMEGA AND DATAGOOD.  HE CAN EITHER
-#       REJECT BY TERMINATING (SEARCH OPTION AND RESELECTING P20) OR ACCEPT BY
-#       PROCEEDING (EXIT ROUTINE AND RETURN TO AUTO MODE IN P20)
-#
-# ALARM OR ABORT EXIT MODES -
-#
-#       SEE NORMAL EXIT MODES ABOVE
-#
+#   FLAGUP        FLAGDOWN      BANKCALL
+#   R61LEM        GOFLASHR      FINDVAC
+#   ENDOFJOB      NOVAC         LSR24.1
+# NORMAL EXIT MODES-
+#   ASTRONAUT RESPONSE TO DISPLAY OF OMEGA AND DATAGOOD.HE CAN EITHER
+# REJECT BY TERMINATING (SEARCH OPTION AND RESELECTING P20) OR ACCEPT BY
+# PROCEEDING (EXIT ROUTINE AND RETURN TO AUTO MODE IN P20)
+# ALARM OR ABORT EXIT MODES-
+#   SEE NORMAL EXIT MODES ABOVE
 # OUTPUT -
-#
-#       SEE OUTPUT FROM LSR24.1 + R61LEM
-#
+#   SEE OUTPUT FROM LSR24.1 + R61LEM
 # ERASABLE INITIALIZATION REQUIRED
-#
-#       SEE INPUT FOR LSR24.1
-#
+#   SEE INPUT FOR LSR24.1
 # FLAGS SET + RESET
-#
-#       SRCHOPT, ACMODFLG
-
-                EBANK=  DATAGOOD
-                COUNT*  $$/R24
-R24LEM          TC      UPFLAG
-                ADRES   SRCHOPTN        # SET SRCHOPT FLAG
-                TC      DOWNFLAG        # RESET LOS BEING COMPUTED FLAG TO MAKE
-                ADRES   LOSCMFLG        # SURE DODES DOESN'T GO TO R21
-R24LEM1         CAF     ZERO
-                TS      DATAGOOD        # ZERO OUT DATA INDICATOR
-                TS      OMEGAD          # ZERO OMEGA DISPLAY REGS
-                TS      OMEGAD +1       # ZERO OMEGA DISPLAY REGS
-R24LEM2         TC      PHASCHNG
-                OCT     04022
-                CAF     V16N80
-                TC      BANKCALL
-                CADR    PRIODSPR
-                TC      GOTOV56
-                TC      R24END          # PROCEED EXIT R24 TO P20LEM1
-
-                TC      R24LEM3         # RECYCLE - CALL R61 TO MANEUVER S/C
-## Page 516
-                TC      BANKCALL
-                CADR    LRS24.1
-R24END          TC      KILLTASK
-                CADR    CALLDGCH
-                TC      CLRADMOD        # CLEAR BITS 10 & 15 OF RADMODES.
-                TCF     P20LEM1         # AND GO TO 400 MI. RANGE CHECK IN P20.
-
-                BLOCK   3
-                SETLOC  FFTAG6
-                BANK
-                COUNT*  $$/R24
-
-CLRADMOD        CS      BIT10+15
+#   SRCHOPT,ACMODFLG
+                EBANK=          DATAGOOD
+                COUNT*          $$/R24
+R24LEM          TC              UPFLAG
+                ADRES           SRCHOPTN                # SET SRCHOPT FLAG
+                TC              DOWNFLAG                # RESET LOS BEING COMPUTED FLAG TO MAKE
+                ADRES           LOSCMFLG                # SURE DODES DOESN'T GO TO R21
+R24LEM1         CAF             ZERO    
+                TS              DATAGOOD                # ZERO OUT DATA INDICATOR
+                TS              OMEGAD                  # ZERO OMEGA DISPLAY REGS
+                TS              OMEGAD          +1      # ZERO OMEGA DISPLAY REGS
+R24LEM2         TC              PHASCHNG        
+                OCT             04022   
+                CAF             V16N80  
+                TC              BANKCALL        
+                CADR            PRIODSPR        
+                TC              GOTOV56 
+                TC              R24END                  # PROCEED EXIT R24 TO P20LEM1
+                
+                
+                TC              R24LEM3                 # RECYCLE - CALL R61 TO MANEUVER S/C
+                
+## Page 526             
+                TC              BANKCALL        
+                CADR            LRS24.1 
+R24END          INHINT
+                TC              KILLTASK        
+                CADR            CALLDGCH        
+                TC              CLRADMOD                # CLEAR BITS 10 & 15 OF RADMODES.
+                TCF             P20LEM1                 # AND GO TO 400 MI. RANGE CHECK IN P20.
+                
+                BLOCK           3       
+                SETLOC          FFTAG6  
+                BANK            
+                COUNT*          $$/R24  
+                
+CLRADMOD        CS              BIT10+15        
+                INHINT          
+                MASK            RADMODES        
+                TS              RADMODES        
+                CS              BIT2                    # DISABLE RR ERROR COUNTERS
+                EXTEND          
+                WAND            CHAN12                  # USER WILL RELINT
+                
+                TC              Q       
+                
+BIT10+15        OCT             41000   
+                BANK            24      
+                SETLOC          P20S    
+                BANK            
+                COUNT*          $$/R24  
+                
+R24LEM3         TC              PHASCHNG        
+                OCT             04022   
                 INHINT
-                MASK    RADMODES
-                TS      RADMODES
-                CS      BIT2            # DISABLE RR ERROR COUNTERS
-                EXTEND
-                WAND    CHAN12          # USER WILL RELINT
+                TC              KILLTASK        
+                CADR            CALLDGCH                # KILL WAITLIST FOR NEXT POINT IN PATTERN
+                TC              CLRADMOD                # CLEAR BITS 10 + 15 OF RADMODES TO KILL
+                RELINT                                  # HALF SECOND DESIGNATE LOOP
+                CAF             .5SEC   
+                TC              BANKCALL                # WAIT FOR DESIGNATE LOOP TO DIE
+                CADR            DELAYJOB        
+                TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE
+                TC              R24LEM2                 # YES-DONT DO ATTITUDE MANEUVER
+                TC              BANKCALL                # CALL R61 TO DO PREFERRED TRACKING
+                CADR            R61LEM                  # ATTITUDE MANEUVER
+                CAF             ZERO                    # ZERO OUT RADCADR (WHICH WAS SET BY
+                TS              RADCADR                 # ENDRADAR WHEN DESIGNATE STOPPED) SO THAT
+                                                        # RRDESSM WILL RETURN TO CALLER
+                TC              R24LEM2                 # AND GO BACK TO PUT UP V16 N80 DISPLAY
 
-                TC      Q
+## Page 527                
+V16N80          VN              01680   
 
-BIT10+15        OCT     41000
-                BANK    24
-                SETLOC  P20S
-                BANK
-                COUNT*  $$/R24
-
-R24LEM3         TC      PHASCHNG
-                OCT     04022
-                TC      KILLTASK
-                CADR    CALLDGCH        # KILL WAITLIST FOR NEXT POINT IN PATTERN
-                TC      CLRADMOD        # CLEAR BITS 10 + 15 OF RADMODES TO KILL
-                RELINT                  # HALF SECOND DESIGNATE LOOP
-                CAF     .5SEC
-                TC      BANKCALL        # WAIT FOR DESIGNATE LOOP TO DIE
-                CADR    DELAYJOB
-                TC      LUNSFCHK        # CHECK IF ON LUNAR SURFACE
-                TC      R24LEM4         # YES - DONT DO ATTITUDE MANEUVER
-                TC      BANKCALL        # CALL R61 TO DO PREFERRED TRACKING
-                CADR    R61LEM          # ATTITUDE MANEUVER
-R24LEM4         CAF     ZERO            # ZERO OUT RADCADR (WHICH WAS SET BY
-                TS      RADCADR         # ENDRADAR WHEN DESIGNATE STOPPED) SO THAT
-                                        # RRDESSM WILL RETURN TO CALLER
-                TC      R24LEM2         # AND GO BACK TO PUT UP V16 N80 DISPLAY
-
-V16N80          VN      01680
-
-## Page 517
+## Page 528
 # PREFERRED TRACKING ATTITUDE ROUTINE R61LEM
 # PROGRAM DESCRIPTION
-#
-#       MOD NO: 3               DATE: 4-11-67
-#       MOD BY: P VOLANTE   SDC
-#
-# FUNCTIONAL DESCRIPTION -
-#
-#       TO COMPUTE THE PREFERRED TRACKING ATTITUDE OF THE LM TO ENABLE RR
-#       TRACKING OF THE CSM AND TO PERFORM THE MANEUVER TO THE PREFERRED
-#       ATTITUDE.
-#
-# CALLING SEQUENCE -
-#
-#       TC      BANKCALL
-#       CADR    R61LEM
-#
+# MOD NO : 3                      DATE : 4-11-67
+# MOD BY : P VOLANTE  SDC
+
+
+# FUNCTIONAL DESCRIPTION-
+#   TO COMPUTE THE PREFERRED TRACKING ATTITUDE OF THE LM TO ENABLE RR
+# TRACKING OF THE CSM AND TO PERFORM THE MANEUVER TO THE PREFERRED
+# ATTITUDE.
+# CALLING SEQUENCE-
+#          TC     BANKCALL
+#          CADR   R61LEM
 # SUBROUTINES CALLED
-#
-#       LPS20.1         VECPOINT
-#       KALCMAN3
-#
-# NORMAL EXIT MODES -
-#
-#       NORMAL RETURN IS TO CALLER + 1
-#
-# ALARM OR ABORT EXIT MODES -
-#
-#       TERMINATE P20 + R61 BY BRANCHING TO P20END IF BOTH TRACKFLAG +
-#       RENDEZVOUS FLAG ARE NOT SET.
-#
+#     LPS20.1       VECPOINT
+#     KALCMAN3
+
+
+# NORMAL EXIT MODES-
+#   NORMAL RETURN IS TO CALLER + 1
+# ALARM OR ABORT EXIT MODES-
+#   TERMINATE P20 + R61 BY BRANCHING TO P20END IF BOTH TRACKFLAG +
+# RENDEZVOUS FLAG ARE NOT SET.
 # OUTPUT -
-#
-#       SEE OUTPUT FOR LPS20.1 + ATTITUDE MANEUVER ROUTINE (R60)
-#
+#   SEE OUTPUT FOR LPS20.1 + ATTITUDE MANEUVER ROUTINE (R60)
 # ERASABLE INITIALIZATION REQUIRED
-#
-#       GENRET USED TO SAVE Q FOR RETURN
-#
+#   GENRET USED TO SAVE Q FOR RETURN
 # FLAGS SET + RESET
-#
-#       3AXISFLG
-#
+#   3AXISFLG
 # DEBRIS
-#
-#       SEE SUBROUTINES
-
-                SETLOC  R61
-                BANK
-                EBANK=  LOSCOUNT
-                COUNT*  $$/R61
-R61LEM          TC      MAKECADR
-                TS      GENRET
-                TC      UPFLAG          # SET R61 FLAG
-                ADRES   R61FLAG
-                TC      R61C+L01
-R65LEM          TC      MAKECADR
-                TS      GENRET
-                TC      DOWNFLAG        # RESET R61 FLAG
-                ADRES   R61FLAG
-R61C+L01        CAF     TRACKBIT        # TRACKFLAG
-                MASK    STATE +1
+#   SEE SUBROUTINES
+                SETLOC          R61
+                BANK    
+                EBANK=          LOSCOUNT
+                COUNT*          $$/R61
+R61LEM          TC              MAKECADR
+                TS              GENRET
+                TC              UPFLAG                  # SET R61 FLAG
+                ADRES           R61FLAG 
+                TC              R61C+L01        
+R65LEM          TC              MAKECADR        
+                TS              GENRET  
+                TC              DOWNFLAG                # RESET R61 FLAG
+                ADRES           R61FLAG 
+R61C+L01        CAF             TRACKBIT                # TRACKFLAG
+                MASK            STATE           +1        
+                EXTEND          
+                BZF             R61C+L1                 # NOT SET
+R61C+L03        TC              INTPRET                 # SET
+                VLOAD           
+                
+## Page 529             
+                                HIUNITZ 
+                STORE           SCAXIS                  # TRACK AXIS UNIT VECTOR
+                RTB             
+                                LOADTIME                # PRESENT TIME
+                DAD                                     # EXTARPULATE FORWARD FORWARD TO CENTER OF
+                                3SECONDS                # SIX SECOND PERIOD.
+                STCALL          TDEC1   
+                                LPS20.1                 # LOS DETERMINATION + VEH ATTITUDE
+                VLOAD           
+                                RRTARGET        
+                STORE           POINTVSM                # DIRECTION IN WHICH TRACK AXIS IS TO BE
+                CALL
+                                VECPOINT                # TO COMPUTE FINAL ANGLES
+                STORE           CPHI                    # STORE FINAL ANGLES - CPHI,CTHETA,CPSI
+                EXIT            
+                TC              PHASCHNG        
+                OCT             04022   
+                CAF             TRACKBIT                #  IS TRACK FLAG SET
+                MASK            FLAGWRD1        
+                EXTEND          
+                BZF             R61C+L1                 # BRANCH - NO SKIP THIS CYCLE OF R61/65
                 EXTEND
-                BZF     R65WAIT         # NOT SET
-R61C+L03        TC      INTPRET
-                VLOAD
-## Page 518
-                        HIUNITZ
-                STORE   SCAXIS          # TRACK AXIS UNIT VECTOR
-R61LEM1         RTB     DAD
-                        LOADTIME        # EXTRAPOLATE FORWARD TO CENTER
-                        3SECONDS        # SIX SECOND PERIOD.
-                STCALL  TDEC1
-                        LPS20.1         # LOS DETERMINATION + VEH ATTITUDE
-                VLOAD
-                        RRTARGET
-                STORE   POINTVSM
-                RTB     CALL            # GET DESIRED CDU'S FOR VECPNT1
-                        READCDUD
-                        VECPNT1         # COMPUTES FINAL ANGLES FROM PRESENT CDUDS
-                STORE   CPHI            # STORE FINAL ANGLES - CPHI, CTHETA, CPSI
+                READ            CHAN30                  # CHECK AUTO MODE
+                MASK            BIT10
+                CCS             A
+                TC              R61C+L04                # NOT IN G+N  C(A) = +
+                EXTEND
+                READ            CHAN31
+                MASK            BIT14                   # (+) = NOT IN AUTO, (+0) =AOK
+                CCS             A
+                TC              R61C+L04                # NOT IN AUTO MODE
+                TC              INTPRET 
+                VLOAD           CALL    
+                                RRTARGET        
+                                CDU*SMNB        
+                DLOAD           ACOS
+                                MPAC            +5 
+                STODL           PHI
+                                TENDEG
+                BDSU            BPL
+                                PHI
+                                R61C+L05                # PHI GRE 10DEG
+                EBANK=          CDUXD   
                 EXIT
-                TC      PHASCHNG
-                OCT     04022
-                CAF     TRACKBIT        # IS TRACK FLAG SET
-                MASK    FLAGWRD1
+                CAF             CDUBANK
+                TS              BBANK   
+                INHINT          
+                EXTEND          
+                DCA             CPHI    
+                DXCH            CDUXD   
+                
+## Page 530
+                CA              CPSI    
+                TS              CDUZD   
+                RELINT          
+                EBANK=          LOSCOUNT        
+                CAF             R61BANK
+                TS              BBANK   
+                TC              R61C+L06        
+R61C+L05        EXIT            
+                INHINT          
+                TC              IBNKCALL        
+                FCADR           ZATTEROR        
+                TC              IBNKCALL        
+                FCADR           SETMINDB                # REDUCE ATTITUDE ERROR
+                TC              DOWNFLAG        
+                ADRES           3AXISFLG        
+                TC              UPFLAG  
+                ADRES           PDSPFLAG                # SET PRIORITY DISPLAY FLAG
+                TC              BANKCALL        
+                CADR            R60LEM  
+                INHINT          
+                TC              IBNKCALL        
+                FCADR           RESTORDB        
+                TC              PHASCHNG        
+                OCT             04022   
+                TC              DOWNFLAG        
+                ADRES           PDSPFLAG                # RESET PRIORITY DISPLAY FLAG
+R61C+L06        CAF             R61FLBIT
+                MASK            STATE           +1
                 EXTEND
-                BZF     R65WAIT
-                TC      BANKCALL
-                CADR    G+N,AUTO        # CHECK FOR AUTO MODE
-                CCS     A
-                TC      R61C+L04        # NOT IN AUTO
-                TC      INTPRET
-                VLOAD   CALL
-                        RRTARGET
-                        CDU*SMNB
-                DLOAD   DSU             # GET PHI - ARCCOS OF Z-COMPONENT OF LOS
-                        MPAC +5
-                        COS15DEG
-R61LEM2         BMN     EXIT            # BRANCH - PHI > 15 DEGREES
-                        R61C+L05        # PHI GRE 10DEG
-                EBANK=  CDUXD
-                CAF     EBANK6
-                TS      EBANK
+                BZF             +2
+                TC              R61C+L4 
+                CCS             R65CNTR 
+                CCS             A
+                TC              +2      
+                TC              R61C+L4                 # R65CNTR = 0 - EXIT ROUTINE
+                TS              R65CNTR 
+                CAF             06SEC   
                 INHINT
-                EXTEND
-                DCA     CPHI
-                DXCH    CDUXD
-                CA      CPSI
-                TS      CDUZD
-                RELINT
-                EBANK=  LOSCOUNT
-                CAF     EBANK7
-                TS      EBANK
-                TC      R61C+L06
-R61C+L05        EXIT
-                INHINT
-## Page 519
-                TC      IBNKCALL
-                FCADR   ZATTEROR
-                TC      IBNKCALL
-                FCADR   SETMINDB        # REDUCE ATTITUDE ERROR
-                TC      DOWNFLAG
-                ADRES   3AXISFLG
-                TC      UPFLAG
-                ADRES   PDSPFLAG        # SET PRIORITY DISPLAY FLAG
-                TC      BANKCALL
-                CADR    R60LEM
-                INHINT
-                TC      IBNKCALL
-                FCADR   RESTORDB
-                TC      PHASCHNG
-                OCT     04022
-                TC      DOWNFLAG
-                ADRES   PDSPFLAG        # RESET PRIORITY DISPLAY FLAG
-R61C+L06        CA      FLAGWRD1
-                MASK    R61FLBIT
-                CCS     A
-                TC      R61C+L4
-                CCS     R65CNTR
-                TC      +2
-                TC      R61C+L4         # R65CNTR = 0 - EXIT ROUTINE
-                TS      R65CNTR
-                CAF     06SEC
-                TC      TWIDDLE
-                ADRES   R61C+L2
-                TC      ENDOFJOB
-R61C+L2         CAF     PRIO26
-                TC      FINDVAC
-                EBANK=  LOSCOUNT
-                2CADR   R61C+L01
-
-                TC      TASKOVER
-R61C+L04        TC      BANKCALL        # TO CONVERT ANGLES TO FDAI
-                CADR    BALLANGS
-                TC      R61C+L06
-R61C+L4         CAE     GENRET
-                TCF     BANKJUMP        # EXIT R61
-R61C+L1         CAF     BIT7+9PV        # IS RENDEZVOUS OR P25FLAG SET
-                MASK    STATE
-                EXTEND
-                BZF     ENDOFJOB        # NO - EXIT ROUTINE AND PROGRAM.
-                TC      R61C+L06        # YES EXIT ROUTINE
-R65WAIT         TC      POSTJUMP
-                CADR    P20LEMWT
-
-BIT7+9PV        OCT     00500
-## Page 520
-COS15DEG        2DEC    0.96593 B-1
-
-06SEC           DEC     600
-PHI             EQUALS  20D
-READCDUD        INHINT                  # READS DESIRED CDU'S AND STORES IN
-                CAF     EBANK6          # MPAC TP EXITS WITH MODE SET TO TP
-                XCH     EBANK
-                TS      RUPTREG1
-                EBANK=  CDUXD
-                CA      CDUXD
-                TS      MPAC
-                EXTEND
-                DCA     CDUYD
-                DXCH    MPAC +1
-                CA      RUPTREG1
-                TS      EBANK
-                RELINT
-                TCF     TMODE
-                BLOCK   02
-                SETLOC  RADARFF
+                TC              TWIDDLE 
+                ADRES           R61C+L2 
+                TC              ENDOFJOB        
+R61C+L2         CAF             PRIO26  
+                TC              FINDVAC 
+                EBANK=          LOSCOUNT        
+                2CADR           R61C+L01        
+                TC              TASKOVER        
+R61C+L04        TC              BANKCALL                # TO CONVERT ANGLES TO FDAI
+                CADR            BALLANGS        
+                TC              R61C+L06        
+                
+## Page 531
+R61C+L4         CAE             GENRET  
+                TCF             BANKJUMP                # EXIT R61
+R61C+L1         CAF             BIT7+9PV                # IS RENDEZVOUS OR P25FLAG SET
+                MASK            STATE   
+                EXTEND          
+                BZF             ENDOFJOB                # NO-EXIT ROUTINE AND PROGRAM.
+                TC              R61C+L06                # YES EXIT ROUTINE
+BIT7+9PV        OCT             00500   
+TENDEG          2DEC            0.2777777               # SCALED UNTS OF REVOLUTION B0
+06SEC           DEC             600     
+PHI             EQUALS          20D     
+                EBANK=          CDUXD
+CDUBANK         BBCON           R61C+L05
+                EBANK=          LOSCOUNT
+R61BANK         BBCON           R61C+L05
+                BLOCK           02
+                SETLOC          RADARFF
                 BANK
-
-                EBANK=  LOSCOUNT
-                COUNT*  $$/RRSUB
-
-## Page 521
-# THE FOLLOWING SUBROUTINE RETURNS TO CALLER +2 IF THE ABSOLUTE VALUE OF VALUE OF C(A) IS GREATER THAN THE
-# NEGATIVE OF THE NUMBER AT CALLER +1.  OTHERWISE IT RETURNS TO CALLER +3.  MAY BE CALLED IN RUPT OR UNDER EXEC.
+                
+                EBANK=          LOSCOUNT
+                COUNT*          $$/RRSUB
+        
+## Page 532
+# THE FOLLOWING SUBROUTINE RETURNS TO CALLER + 2 IF THE ABSOLUTE VALUE OF VALUE OF C(A) IS GREATER THAN THE
+# NEGATIVE OF THE NUMBER AT CALLER +1. OTHERWISE IT RETURNS TO CALLER +3. MAY BE CALLED IN RUPT OR UNDER EXEC.
 
 MAGSUB          EXTEND
-                BZMF    +2
-                TCF     +2
-                COM
+                BZMF            +2
+                TCF             +2
+                COM     
+        
+                INDEX           Q
+                AD              0
+                EXTEND  
+                BZMF            Q+2                     # ABS(A) <= CONST GO TO L+3
+                TCF             Q+1                     # ABS(A) >  CONST GO TO L+2
 
-                INDEX   Q
-                AD      0
-                EXTEND
-                BZMF    Q+2             # ABS(A) <= CONST GO TO L+3
-                TCF     Q+1             # ABS(A) > CONST GO TO L+2
+## Page 533
+# PROGRAM NAME_  RRLIMCHK                                                  ARE IN THE LIMITS OF THE CURRENT MODE.
 
-## Page 522
-# PROGRAM NAME_ RRLIMCHK                                                        ARE IN THE LIMITS OF THE CURRENT MODE.
-#
 # FUNCTIONAL DESCRIPTION_
-#
-#       RRLIMCHK CHECKS RR DESIRED GIMBAL ANGLES TO SEE IF THEY ARE WITHIN
-#       THE LIMITS OF THE CURRENT MODE.  INITIALLY THE DESIRED TRUNNION AND
-#       SHAFT ANGLES ARE STORED IN ITEMP1 AND ITEMP2.  THE CURRENT RR
-#       ANTENNAE MODE (RADMODES BIT 12) IS CHECKED WHICH IS = 0 FOR
-#       MODE 1 AND =1 FOR MODE 2.
-#
-#       MODE 1 - THE TRUNNION ANGLE IS CHECKED AT MAGSUB TO SEE IF IT IS
-#       BETWEEN -55 AND +55 DEGREES.  IF NOT, RETURN TO L +2.  IF WITHIN LIMITS,
-#       THE SHAFT ANGLE IS CHECKED TO SEE IF IT IS BETWEEN -70 AND +59 DEGREES.
-#       IF NOT, RETURN TO L +2.  IF IN LIMITS, RETURN TO L +3.
-#
-#       MODE 2 - THE SHAFT ANGLE IS CHECKED AT MAGSUB TO SEE IF IT IS
-#       BETWEEN -139 AND -25 DEGREES.  IF NOT, RETURN TO L +2.  IF WITHIN
-#       LIMITS, THE TRUNNION ANGLE IS CHECKED TO SEE IF IT IS BETWEEN +125
-#       AND -125 (+235) DEGREES.  IF NOT, RETURN TO L +2.  IF IN LIMITS, RETURN
-#       TO L +3.
-#
+# RRLIMCHK CHECKS RR DESIRED GIMBAL ANGLES TO SEE IF THEY ARE WITHIN
+# THE LIMITS OF THE CURRENT MODE. INITIALLY THE DESIRED TRUNNION AND
+# SHAFT ANGLES ARE STORED IN ITEMP1 AND ITEMP2. THE CURRENT RR
+# ANTENNAE MODE (RADMODES BIT 12) IS CHECKED WHICH IS = 0 FOR
+# MODE 1 AND =1 FOR MODE 2.
+# MODE 1 - THE TRUNNION ANGLE IS CHECKED AT MAGSUB TO SEE IF IT IS
+# BETWEEN -55 AND +55 DEGREES. IF NOT, RETURN TO L +2. IF WITHIN LIMITS,
+# THE SHAFT ANGLE IS CHECKED TO SEE IF IT IS BETWEEN -70 AND +59 DEGREES.
+# IF NOT, RETURN TO L +2. IF IN LIMITS, RETURN TO L +3.
+# MODE 2 - THE SHAFT ANGLE IS CHECKED AT MAGSUB TO SEE IF IT IS
+# BETWEEN -139 AND -25 DEGREES. IF NOT, RETURN TO L +2. IF WITHIN
+# LIMITS, THE TRUNNION ANGLE IS CHECKED TO SEE IF IT IS BETWEEN +125
+# AND -125 (+235) DEGREES. IF NOT, RETURN TO L +2. IF IN LIMITS, RETURN
+# TO L +3.
+
 # CALLING SEQUENCE:
-#
-#       L  TC  RRLIMCHK (WITH INTERRUPT INHIBITED)
-#       L  +1  ADRES  T,S  (DESIRED TRUNNION ANGLE ADDRESS)
-#
+# L  TC  RRLIMCHK (WITH INTERRUPT INHIBITED)
+# L +1  ADRES  T,S  (DESIRED TRUNNION ANGLE ADDRESS)
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RADMODES, MODEA, MODEB (OR DESIRED TRUNNION AND SHAFT
-#       ANGLES ELSEWHERE IN CONSECUTIVE LOCATIONS - UNSWITCHED ERASABLE OR
-#       CURRENT EBANK).
-#
-# SUBROUTINES CALLED_   MAGSUB
-#
+# RADMODES, MODEA, MODEB (OR DESIRED TRUNNION AND SHAFT
+# ANGLES ELSEWHERE IN CONSECUTIVE LOCATIONS - UNSWITCHED ERASABLE OR
+# CURRENT EBANK).
+
+# SUBROUTINES CALLED_  MAGSUB
+
 # JOBS OR TASKS INITIATED_  NONE
-#
+
 # ALARMS_  NONE
-#
-# EXIT_         L + 2   (EITHER OR BOTH ANGLES NOT WITHIN LIMITS OF CURRENT MODE)
-#               L + 3   (BOTH ANGLES WITHIN LIMITS OF CURRENT MODE)
+
+# EXIT_  L + 2 (EITHER OR BOTH ANGLES NOT WITHIN LIMITS OF CURRENT MODE)
+# L + 3 (BOTH ANGLES WITHIN LIMITS OF CURRENT MODE)
 
 RRLIMCHK        EXTEND
-                INDEX   Q
-                INDEX   0
-                DCA     0
-                INCR    Q
-                DXCH    ITEMP1
-                LXCH    Q               # L(CALLER +2) TO L.
+                INDEX           Q
+                INDEX           0
+                DCA             0
+                INCR            Q
+                DXCH            ITEMP1
+                LXCH            Q                       # L(CALLER +2) TO L.
+                        
+                CAF             BIT12                   # SEE WHICH MODE RR IS IN.
+                MASK            RADMODES        
+                CCS             A       
+                TCF             MODE2CHK        
+                        
+                CA              ITEMP1                  # MODE 1 IS DEFINED AS
+                
+## Page 534                     
+                TC              MAGSUB                  #     1. ABS(T) L 55 DEGS.
+                DEC             -.30555                 #     2. ABS(S + 5.5 DEGS) L 64.5 DEGS
+                TC              L                       #         (SHAFT LIMITS AT +59, -70 DEGS)
+                        
+                CAF             5.5DEGS 
+                AD              ITEMP2                  # S
+                TC              MAGSUB  
+                DEC             -.35833                 # 64.5 DEGS
+                TC              L       
+                TC              RRLIMOK                 # IN LIMITS.
+                        
+MODE2CHK        CAF             82DEGS                  # MODE 2 IS DEFINED AS
+                AD              ITEMP2                  #     1. ABS(T) G 125 DEGS.
+                TC              MAGSUB                  #     2. ABS(S + 82 DEGS) L 57 DEGS
+                DEC             -.31667                 #         (SHAFT LIMITS AT -25, -139 DEGS)
+                TC              L       
+                        
+                CA              ITEMP1  
+                TC              MAGSUB  
+                DEC             -.69444                 # 125 DEGS
+                        
+RRLIMOK         INDEX           L       
+                TC              L                       # ( = TC 1 )
+                        
+5.5DEGS         DEC             .03056  
+82DEGS          DEC             .45556  
 
-                CAF     ANTENBIT        # SEE WHICH MODE RR IS IN.
-                MASK    RADMODES
-                CCS     A
-                TCF     MODE2CHK
+## Page 535
+# PROGRAM NAME_  SETTRKF                                                  . IF EITHER:
 
-                CA      ITEMP1          # MODE 1 IS DEFINED AS
-## Page 523
-                TC      MAGSUB          #       1. ABS(T) L 55 DEGS.
-                DEC     -.30555         #       2. ABS(S + 5.5 DEGS) L 64.5 DEGS
-                TC      L               #               (SHAFT LIMITS AT +59, -70 DEGS)
-
-                CAF     5.5DEGS
-                AD      ITEMP2          # S
-                TC      MAGSUB
-                DEC     -.35833         # 64.5 DEGS
-                TC      L
-                TC      RRLIMOK         # IN LIMITS.
-
-MODE2CHK        CAF     82DEGS          # MODE 2 IS DEFINED AS
-                AD      ITEMP2          #       1. ABS(T) G 125 DEGS.
-                TC      MAGSUB          #       2. ABS(S + 82 DEGS) L 57 DEGS
-                DEC     -.31667         #               (SHAFT LIMITS AT -25, -139 DEGS)
-                TC      L
-
-                CA      ITEMP1
-                TC      MAGSUB
-                DEC     -.69444         # 125 DEGS
-
-RRLIMOK         INDEX   L
-                TC      L               # ( = TC 1 )
-
-5.5DEGS         DEC     .03056
-82DEGS          DEC     .45556
-
-## Page 524
-# PROGRAM NAME_ SETTRKF                                                         . IF EITHER:
-#
 # FUNCTIONAL DESCRIPTION_
-#       SETTRKF UPDATES THE TRACKER FAIL LAMP ON THE DSKY.                      HER THE ALT OR VEL INFORMATION.
-#       INITIALLY THE LAMP TEST FLAG (IMODES33 BIT 1) IS CHECKED.
-#       IF A LAMP TEST IS IN PROGRESS, THE PROGRAM EXITS TO L +1.
-#       IF NO LAMP TEST THE FOLLOWING IS CHECKED SEQUENTIALLY_
-#               1) RR CDU:S BEING ZEROED, RR CDU OK, AND RR NOT IN
-#                  AUTO MODE (RADMODES BITS 13, 7, 2).
-#               2) LR VEL DATA FAIL AND NO LR POS DATA (RADMODES BITS
-#                  8,5)
-#               3) NO RR DATA (RADMODES BIT 4)
-#       THE ABSENCE OF ALL THREE SIMULTANEOUSLY IN (1), THE PRESENCE OF BOTH
-#       IN (2), AND THE PRESENCE OF (3) RESULTS IN EITHER THE TRACKER FAIL
-#       LAMP (DSPTAB +11D BIT 8) BEING TURNED ON OR LEFT ON. OTHERWISE,
-#       THE TRACKER FAIL LAMP IS TURNED OFF OR IS LEFT OFF. THEREFORE, THE
-#       TRACKER FAIL LAMP IS TURNED ON IF_
-#               A) RR CDU FAILED WITH RR IN AUTO MODE AND RR CDU:S NOT BEING ZEROED.
-#               B) N SAMPLES OF LR DATA COULD NOT BE TAKEN IN 2N TRIES WITH
-#                  EITHER THE ALT OR VEL INFORMATION
-#               C) N SAMPLES OF RR DATA COULD NOT BE OBTAINED FROM 2N TRIES
-#                  WITH EITHER THE AL
-#
+# SETTRKF UPDATES THE TRACKER FAIL LAMP ON THE DSKY.                      HER THE ALT OR VEL INFORMATION.
+# INITIALLY THE LAMP TEST FLAG (IMODES33 BIT 1) IS CHECKED.
+# IF A LAMP TEST IS IN PROGRESS, THE PROGRAM EXITS TO L +1.
+# IF NO LAMP TEST THE FOLLOWING IS CHECKED SEQUENTIALLY_
+# 1) RR CDU:S BEING ZEROED, RR CDU OK, AND RR NOT IN
+# AUTO MODE (RADMODES BITS 13, 7, 2).
+# 2) LR VEL DATA FAIL AND NO LR POS DATA (RADMODES BITS
+# 8,5)
+# 3) NO RR DATA (RADMODES BIT 4)
+# THE ABSENCE OF ALL THREE SIMULTANEOUSLY IN (1), THE PRESENCE OF BOTH
+# IN (2), AND THE PRESENCE OF (3) RESULTS IN EITHER THE TRACKER FAIL
+# LAMP (DSPTAB +11D BIT 8) BEING TURNED ON OR LEFT ON. OTHERWISE,
+# THE TRACKER FAIL LAMP IS TURNED OFF OR IS LEFT OFF. THEREFORE, THE
+# TRACKER FAIL LAMP IS TURNED ON IF_
+# A ) RR CDU FAILED WITH RR IN AUTO MODE AND RR CDU:S NOT BEING ZEROED.
+# B) N SAMPLES OF LR DATA COULD NOT BE TAKEN IN 2N TRIES WITH
+# EITHER THE ALT OR VEL INFORMATION
+# C) N SAMPLES OF RR DATA COULD NOT BE OBTAINED FROM 2N TRIES
+# WITH EITHER THE AL
+
 # CALLING SEQUENCE:
-#
-#       L       TC      SETTRKF
-#
-# ERASABLE INITIALIZATION REQUIRED:  IMODES33, RADMODES, DSPTAB +11D
-#
+# L  TC  SETTRKF
+
+# ERASABLE INITIALIZATION REQUIRED: IMODES33, RADMODES, DSPTAB +11D
 # SUBROUTINES CALLED_  NONE
-#
+
 # JOBS OR TASKS INITIATED_  NONE
-#
+
 # ALARMS_  TRACKER FAIL LAMP
-#
-# EXIT_  L +1 (ALWAYS)                                                          ED.
 
-SETTRKF         CAF     BIT1            # NO ACTION IF DURING LAMP TEST.
-                MASK    IMODES33
-                CCS     A
-                TC      Q
-
-RRTRKF          CA      BIT8
-                TS      L
-
-                CAF     13,7,2          # SEE IF CDU FAILED.
-                MASK    RADMODES
-                EXTEND
-                BZF     TRKFLON         # CONDITION 3 ABOVE.
-
-RRCHECK         CAF     RRDATABT        # SEE IF RR DATA FAILED.
-                MASK    RADMODES
-## Page 525
-                CCS     A
-TRKFLON         CA      L
-                AD      DSPTAB +11D     # HALF ADD DESIRED AND PRESENT STATES.
-                MASK    L
-                EXTEND
-                BZF     TCQ             # NO CHANGE.
-
-FLIP            CA      DSPTAB +11D     # CANT USE LXCH DSPTAB +11D (RESTART PROB)
-                EXTEND
-                RXOR    LCHAN
-                MASK    POSMAX
-                AD      BIT15
-                TS      DSPTAB +11D
-                TC      Q
-
-13,7,2          OCT     10102
+# EXIT_  L +1 (ALWAYS)                                                    ED.     
+                                                  
+SETTRKF         CAF             BIT1                    # NO ACTION IF DURING LAMP TEST.
+                MASK            IMODES33        
+                CCS             A       
+                TC              Q       
+                
+RRTRKF          CA              BIT8    
+                TS              L       
+                
+                CAF             13,7,2                  # SEE IF CDU FAILED.
+                MASK            RADMODES        
+                EXTEND          
+                BZF             TRKFLON                 # CONDITION 3 ABOVE.
+                
+RRCHECK         CAF             BIT4                    # SEE IF RR DATA FAILED.
+                MASK            RADMODES 
+                
+## Page 536             
+                CCS             A       
+TRKFLON         CA              L       
+                AD              DSPTAB          +11D    # HALF ADD DESIRED AND PRESENT STATES.
+                MASK            L       
+                EXTEND          
+                BZF             TCQ                     # NO CHANGE.
+                
+FLIP            CA              DSPTAB          +11D    # CANT USE LXCH DSPTAB +11D (RESTART PROB)
+                EXTEND          
+                RXOR            LCHAN
+                MASK            POSMAX
+                AD              BIT15
+                TS              DSPTAB          +11D
+                TC              Q
+        
+13,7,2          OCT             10102
 ENDRMODF        EQUALS
 
-## Page 526
+## Page 537
 # PROGRAM NAME_  RRTURNON
-#
+
 # FUNCTIONAL DESCRIPTION_
-#
-#       RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WTIH
-#       RRZEROSB, ZEROS THE CDU:S AND DETERMINES THE RR MODE.
-#       INITIALLY, CONTROL IS TRANSFERRED TO RRZEROSB FOR THE
-#       ACTUAL TURN-ON SEQUENCE.  UPON RETURN THE PROGRAM
-#       WAITS 1 SECOND BEFORE REMOVING THE TURN-ON FLAG
-#       (RADMODES BIT1) SO THE REPOSITION ROUTINE WON:T
-#       INITIATE PROGRAM ALARM 00501.  A CHECK IS THEN MADE
-#       TO SEE IF A PROGRAM IS USING THE RR (STATE BIT 7).  IF
-#       SO, THE PROGRAM EXITS TO ENDRADAR SO THAT THE RR CDU
-#       FAIL FLAG (RADMODES BIT 7) CAN BE CHECKED BEFORE
-#       RETURNING TO THE WAITING PROGRAM.  IF NOT, THE PROGRAM EXITS
-#       TO TASKOVER.
-#
-# CALLING SEQUENCE:  WAITLIST TASK FROM RRAUTCHK IF THE RR POWER ON AUTO
-# BIT (CHAN 33 BIT 2) CHANGES TO 0 AND NO PROGRAM WAS USING
+
+# RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WTIH
+# RRZEROSB, ZEROS THE CDU:S AND DETERMINES THE RR MODE.
+# INITIALLY, CONTROL IS TRANSFERRED TO RRZEROSB FOR THE
+# ACTUAL TURN-ON SEQUENCE. UPON RETURN THE PROGRAM
+# WAITS 1 SECOND BEFORE REMOVING THE TURN-ON FLAG
+# (RADMODES BIT1) SO THE REPOSITION ROUTINE WON:T
+# INITIATE PROGRAM ALARM 00501. A CHECK IS THEN MADE
+# TO SEE IF A PROGRAM IS USING THE RR (STATE BIT 7). IF
+# SO, THE PROGRAM EXITS TO ENDRADAR SO THAT THE RR CDU
+# FAIL FLAG (RADMODES BIT 7) CAN BE CHECKED BEFORE
+# RETURNING TO THE WAITING PROGRAM. IF NOT, THE PROGRAM EXITS
+# TO TASKOVER.
+
+# CALLING SEQUENCE: WAITLIST TASK FROM RRAUTCHK IF THE RR POWER ON AUTO
+# BIT (CHAN 33 BIT 2) CHANGES TO 0 AND NO PROGRAM WAS USING 
 # THE RR (STATE BIT 7).
-#
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RADMODES, STATE
-#
+# RADMODES, STATE
+
 # SUBROUTINES CALLED_  RRZEROSB, FIXDELAY, TASKOVER, ENDRADAR
-#
+
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+# NONE
+
 # ALARMS_  NONE (SEE RRZEROSB)
-#
+
 # EXIT_  TASKOVER, ENDRADAR (WAITING PROGRAM)
 
-                BANK    24
-                SETLOC  P20S1
-                BANK
-
-                EBANK=  LOSCOUNT
-                COUNT*  $$/RSUB
-RRTURNON        TC      RRZEROSB
-                TC      FIXDELAY        # WAIT 1 SEC BEFORE REMOVING TURN ON FLAG
-                DEC     100             # SO A MONITOR REPOSITION WONT ALARM.
-                CS      TURNONBT
-                MASK    RADMODES
-                TS      RADMODES
-                TCF     TASKOVER
-## Page 527
+                BANK            24
+                SETLOC          P20S1
+                BANK    
+        
+                EBANK=          LOSCOUNT
+                COUNT*          $$/RSUB
+RRTURNON        TC              RRZEROSB
+                TC              FIXDELAY                # WAIT 1 SEC BEFORE REMOVING TURN ON FLAG
+                DEC             100                     # SO A MONITOR REPOSITION WONT ALARM.
+                CS              BIT1
+                MASK            RADMODES
+                TS              RADMODES
+                TCF             TASKOVER
+                
+## Page 538
 # PROGRAM NAME_  RRZEROSB
-#
+
 # FUNCTIONAL DESCRIPTION_
-#       RRZEROSB IS A CLOSED SUBROUTINE TO ZERO THE RR CDU:S,
-#       DETERMINE THE RR MODE, AND TURNS ON THE TRACKER FAIL
-#       LAMP IF REQUIRED.  INITIALLY THE RR CDU ZERO BIT (CHAN 12
-#       BIT 1) IS SET.  FOLLOWING A 20 MILLISECOND WAIT, THE LGC
-#       RR CDU COUNTERS (OPTY, OPTX) ARE SET = 0 AFTER
-#       WHICH THE RR CDU ZERO DISCRETE (CHAN 12 BIT 1) IS
-#       REMOVED.  A 4 SECOND WAIT IS SET TO ALL THE RR CDU:S
-#       TO REPEAT THE ACTUAL TRUNNION AND SHAFT ANGLES.  THE
-#       RR CDU ZERO FLAG (RADMODES BIT 13) IS REMOVED.  THE
-#       CONTENTS OF OPTY IS THEN CHECKED TO SEE IF THE TRUNNION
-#       ANGLE IS LESS THAN 90 DEGREES.  IF NOT, BIT 12 OF
-#       RADMODES IS SET = 1 TO INDICATE RR ANTENNA MODE 2.
-#       IF LESS THAN 90 DEGREES, BIT 12 OF RADMODES IS SET = 0 TO
-#       INDICATE RR ANTENNA MODE 1.  SETTRKF IS THEN CALLED TO
-#       SEE IF THE TRACKER FAIL LAMP SHOULD BE TURNED ON.
-#
-# CALLING SEQUENCE:  L  TC  RRZEROSB  (FROM RRTURNON AND RRZERO)
-#
+# RRZEROSB IS A CLOSED SUBROUTINE TO ZERO THE RR CDU:S,
+# DETERMINE THE RR MODE, AND TURNS ON THE TRACKER FAIL
+# LAMP IF REQUIRED. INITIALLY THE RR CDU ZERO BIT (CHAN 12
+# BIT 1) IS SET. FOLLOWING A 20 MILLISECOND WAIT, THE LGC
+# RR CDU COUNTERS (OPTY, OPTX) ARE SET = 0 AFTER 
+# WHICH THE RR CDU ZERO DISCRETE (CHAN 12 BIT 1) IS
+# REMOVED. A 4 SECOND WAIT IS SET TO ALL THE RR CDU:S
+# TO REPEAT THE ACTUAL TRUNNION AND SHAFT ANGLES. THE
+# RR CDU ZERO FLAG (RADMODES BIT 13) IS REMOVED. THE
+# CONTENTS OF OPTY IS THEN CHECKED TO SEE IF THE TRUNNION
+# ANGLE IS LESS THAN 90 DEGREES. IF NOT, BIT 12 OF
+# RADMODES IS SET = 1 TO INDICATE RR ANTENNA MODE 2.
+# IF LESS THAN 90 DEGREES, BIT 12 OF RADMODES IS SET = 0 TO
+# INDICATE RR ANTENNA MODE 1. SETTRKF IS THEN CALLED TO
+# SEE IF THE TRACKER FAIL LAMP SHOULD BE TURNED ON.
+
+# CALLING SEQUENCE: L  TC  RRZEROSB (FROM RRTURNON AND RRZERO)
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RADMODES (BIT 13 SET), DSPTAB +11D
-#
+# RADMODES (BIT 13 SET), DSPTAB +11D
+
 # SUBROUTINES CALLED_  FIXDELAY, MAGSUB, SETTRKF
-#
+
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+# NONE
+
 # ALARMS_  TRACKER FAIL
-#
+
 # EXIT_  L +1 (ALWAYS)
 
 RRZEROSB        EXTEND
-                QXCH    RRRET
-                CAF     BIT1            # BIT 13 OF RADMODES MUST BE SET BEFORE
-                EXTEND                  # COMING HERE.
-                WOR     CHAN12          # TURN ON ZERO RR CDU
-                TC      FIXDELAY
-                DEC     2
-
-                CAF     ZERO
-                TS      CDUT
-                TS      CDUS
-                CS      ONE             # REMOVE ZEROING BIT.
-                EXTEND
-                WAND    CHAN12
-                TC      FIXDELAY
-                DEC     1000            # RESET FAIL INHIBIT IN 10 SECS - D.281
-
-                CS      RCDU0BIT        # REMOVE ZEROING IN PROCESS BIT.
-## Page 528
-                MASK    RADMODES
-                TS      RADMODES
-
-                CA      CDUT
-                TC      MAGSUB
-                DEC     -.5
-                TCF     +3              # IF MODE 2.
-
-                CAF     ZERO
-                TCF     +2
-                CAF     ANTENBIT
-                XCH     RADMODES
-                MASK    -BIT12
-                ADS     RADMODES
-
-                TC      SETTRKF         # TRACKER LAMP MIGHT GO ON NOW.
-
-                TC      RRRET           # DONE.
-
--BIT12          EQUALS  -1/8            # IN SPROOT
-
-## Page 529
+                QXCH            RRRET
+                CAF             BIT1                    # BIT 13 OF RADMODES MUST BE SET BEFORE
+                EXTEND                                  # COMING HERE.
+                WOR             CHAN12                  # TURN ON ZERO RR CDU
+                TC              FIXDELAY        
+                DEC             2       
+                
+                CAF             ZERO    
+                TS              CDUT    
+                TS              CDUS    
+                CS              ONE                     # REMOVE ZEROING BIT.
+                EXTEND          
+                WAND            CHAN12  
+                TC              FIXDELAY        
+                DEC             1000                    # RESET FAIL INHIBIT IN 10 SECS - D.281
+                
+                CS              BIT13                   # REMOVE ZEROING IN PROCESS BIT.
+                
+## Page 539             
+                MASK            RADMODES        
+                TS              RADMODES        
+                
+                CA              CDUT    
+                TC              MAGSUB  
+                DEC             -.5     
+                TCF             +3                      # IF MODE 2.
+                
+                CAF             ZERO    
+                TCF             +2      
+                CAF             ANTENBIT        
+                XCH             RADMODES        
+                MASK            -BIT12  
+                ADS             RADMODES        
+                
+                TC              SETTRKF                 # TRACKER LAMP MIGHT GO ON NOW.
+                
+                TC              RRRET                   # DONE.
+                
+-BIT12          EQUALS          -1/8                    # IN SPROOT
+        
+## Page 540
 # PROGRAM NAME_  DORREPOS
-#
 # FUNCTIONAL DESCRIPTION_
-#
-#       DORREPOS IS A SEQUENCE OF TASKS TO DRIVE THE RENDEZVOUS RADAR
-#       TO A SAFE POSITION.  INITIALLY SETRRECR IS CALLED WHERE THE RR
-#       ERROR COUNTERS (CHAN 12 BIT 2) ARE ENABLED AND LASTYCMD
-#       AND LASTXCMD SET = 0 TO INDICATE THE DIFFERENCE BETWEEN THE
-#       DESIRED STATE AND PRESENT STATE OF THE COMMANDS.  THE RR
-#       TURN-ON FLAG (RADMODES BIT 1) IS CHECKED AND IF NOT PRESENT,
-#       PROGRAM ALARM 00501 IS REQUESTED BEFORE CONTINUING.  IN EITHER
-#       CASE, FOLLOWING A 20 MILLISECOND WAIT THE PROGRAM CHECKS THE CURRENT
-#       RR ANTENNA MODE (RADMODES BIT 12).  RRTONLY IS THEN CALLED
-#       TO DRIVE THE TRUNNION ANGLE TO 0 DEGREES IF IN MODE 1 AND TO 180
-#       DEGREES IF IN MODE 2.  UPON RETURN, THE CURRENT RR ANTENNA
-#       MODE (RADMODES BIT 12) IS AGAIN CHECKED.  RRSONLY IS THEN
-#       CALLED TO DRIVE THE SHAFT ANGLE TO 0 DEGREES IF IN MODE 1 AND TO
-#       -90 DEGREES IF IN MODE 2.  IF DURING RRTONLY OR RRSONLY A
-#       REMODE HAS BEEN REQUESTED (RADMODES BIT 14), AND ALWAYS
-#       FOLLOWING COMPLETION OF RRSONLY, CONTROL IS TRANSFERRED TO
-#       REPOSRPT.  HERE THE REPOSITION FLAG (RADMODES BIT 11) IS
-#       REMOVED.  A CHECK IS THEN MADE ON THE DESIGNATE FLAG (RADMODES
-#       BIT 10).  IF PRESENT, CONTROL IS TRANSFERRED TO BEGDES.  IF NOT PRESENT
-#       INDICATING NO FURTHER ANTENNA CONTROL REQUIRED, THE RR ERROR
-#       COUNTER BIT (CHAN 12 BIT 2) IS REMOVED AND THE ROUTINE EXITS TO
-#       TASKOVER.
-#
+# DORREPOS IS A SEQUENCE OF TASKS TO DRIVE THE RENDEZVOUS RADAR
+# TO A SAFE POSITION. INITIALLY SETRRECR IS CALLED WHERE THE RR
+# ERROR COUNTERS (CHAN 12 BIT 2) ARE ENABLED AND LASTYCMD
+# AND LASTXCMD SET = 0 TO INDICATE THE DIFFERENCE BETWEEN THE
+# DESIRED STATE AND PRESENT STATE OF THE COMMANDS. THE RR
+# TURN-ON FLAG (RADMODES BIT 1) IS CHECKED AND IF NOT PRESENT,
+# PROGRAM ALARM 00501 IS REQUESTED BEFORE CONTINUING. IN EITHER
+# CASE, FOLLOWING A 20 MILLISECOND WAIT THE PROGRAM CHECKS THE CURRENT
+# RR ANTENNA MODE (RADMODES BIT 12). RRTONLY IS THEN CALLED
+# TO DRIVE THE TRUNNION ANGLE TO 0 DEGREES IF IN MODE 1 AND TO 180
+# DEGREES IF IN MODE 2. UPON RETURN, THE CURRENT RR ANTENNA
+# MODE (RADMODES BIT 12) IS AGAIN CHECKED. RRSONLY IS THEN
+# CALLED TO DRIVE THE SHAFT ANGLE TO 0 DEGREES IF IN MODE 1 AND TO
+# -90 DEGREES IF IN MODE 2. IF DURING RRTONLY OR RRSONLY A
+# REMODE HAS BEEN REQUESTED (RADMODES BIT 14), AND ALWAYS
+# FOLLOWING COMPLETION OF RRSONLY, CONTROL IS TRANSFERRED TO
+# REPOSRPT. HERE THE REPOSITION FLAG (RADMODES BIT 11) IS 
+# REMOVED. A CHECK IS THEN MADE ON THE DESIGNATE FLAG (RADMODES
+# BIT 10). IF PRESENT, CONTROL IS TRANSFERRED TO BEGDES. IF NOT PRESENT
+# INDICATING NO FURTHER ANTENNA CONTROL REQUIRED, THE RR ERROR
+# COUNTER BIT (CHAN 12 BIT 2) IS REMOVED AND THE ROUTINE EXITS TO
+# TASKOVER.
+
 # CALLING SEQUENCE:
-#
-#       WAITLIST CALL FROM RRGIMON IF TRUNNION AND SHAFT CDU ANGLES
-#       NOT WITHIN LIMITS OF CURRENT MODE.
-#
+# WAITLIST CALL FROM RRGIMON IF TRUNNION AND SHAFT CDU ANGLES
+# NOT WITHIN LIMITS OF CURRENT MODE.
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RADMODES
-#
+# RADMODES
+
 # SUBROUTINES CALLED_
-#
-#       RRTONLY, RRSONLY, BEGDES (EXIT)
-#
+# RRTONLY, RRSONLY, BEGDES (EXIT)
+
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+# NONE
+
 # ALARMS-  NONE
-#
+
 # EXIT_  TASKOVER, BEGDES
 
-DORREPOS        TC      SETRRECR        # SET UP RR CDU ERROR COUNTERS.
+DORREPOS        TC              SETRRECR                # SET UP RR CDU ERROR COUNTERS.
 
 # ALARM 501 DELETED IN DANCE 279 PER PCR 97.
 
-                TC      FIXDELAY
-                DEC     2
+                TC              FIXDELAY
+                DEC             2
 
-                CAF     ANTENBIT        # MANEUVER TRUNNION ANGLE TO NOMINAL POS.
-## Page 530
-                MASK RADMODES
-                CCS     A
-                CAF     BIT15           # 0 FOR MODE 1 AND 180 FOR MODE 2.
-                TC      RRTONLY
-
-                CAF     ANTENBIT        # NOW PUT SHAFT IN RIGHT POSITION
-                MASK    RADMODES
-                CCS     A
-                CS      HALF            # -90 FOR MODE 2.
-                TC      RRSONLY
-
-REPOSRPT        CS      REPOSBIT        # RETURNS HERE FROM RR1AXIS IF REMODE
-                                        # REQUESTED DURING REPOSITION.
-                MASK    RADMODES        # REMOVE REPOSITION BIT.
-                TS      RADMODES
-                MASK    DESIGBIT        # SEE IF SOMEONE IS WAITING TO DESIGNATE.
-                CCS     A
-                TCF     BEGDES
-                CS      BIT2            # IF NO FURTHER ANTENNA CONTROL REQUIRED,
-                EXTEND                  # REMOVE ERROR COUNTER ENABLE.
-                WAND    CHAN12
-                TCF     TASKOVER
-
-SETRRECR        CAF     BIT2            # SET UP RR ERROR COUNTERS.
-                EXTEND
-                RAND    CHAN12
-                CCS     A               # DO NOT CLEAR LAST COMMAND IF
-                TC      Q               # ERROR COUNTERS ARE ENABLED.
-
-                TS      LASTYCMD
-                TS      LASTXCMD
-                CAF     BIT2
-                EXTEND
-                WOR     CHAN12          # ENABLE RR CDU ERROR COUNTERS.
-                TC      Q
-## Page 531
-# PROGRAM NAME_  REMODE                                                         IVES SHAFT TO -45, AND FINALLY DRIVES
+                CAF             BIT12                   # MANEUVER TRUNNION ANGLE TO NOMINAL POS.
+                
+## Page 541
+                MASK            RADMODES
+                CCS             A
+                CAF             BIT15                   # 0 FOR MODE 1 AND 180 FOR MODE 2.
+                TC              RRTONLY 
+                
+                CAF             BIT12                   # NOW PUT SHAFT IN RIGHT POSITION.
+                MASK            RADMODES        
+                CCS             A       
+                CS              HALF                    # -90 FOR MODE 2.
+                TC              RRSONLY 
+                
+REPOSRPT        CS              REPOSBIT                # RETURNS HERE FROM RR1AXIS IF REMODE
+                                                        # REQUESTED DURING REPOSITION.
+                MASK            RADMODES                # REMOVE REPOSITION BIT.
+                TS              RADMODES        
+                MASK            BIT10                   # SEE IF SOMEONE IS WAITING TO DESIGNATE.
+                CCS             A       
+                TCF             BEGDES  
+                CS              BIT2                    # IF NO FURTHER ANTENNA CONTROL REQUIRED,
+                EXTEND                                  # REMOVE ERROR COUNTER ENABLE.
+                WAND            CHAN12  
+                TCF             TASKOVER        
+                
+SETRRECR        CAF             BIT2                    # SET UP RR ERROR COUNTERS.
+                EXTEND          
+                RAND            CHAN12  
+                CCS             A                       # DO NOT CLEAR LAST COMMAND IF
+                TC              Q                       # ERROR COUNTERS ARE ENABLED.
+                
+                TS              LASTYCMD        
+                TS              LASTXCMD        
+                CAF             BIT2    
+                EXTEND          
+                WOR             CHAN12                  # ENABLE RR CDU ERROR COUNTERS.
+                TC              Q       
+                
+## Page 542     
+# PROGRAM NAME_  REMODE                                                   IVES SHAFT TO -45, AND FINALLY DRIVES
 #
-# FUNCTIONAL DESCRIPTION_                                                       S DONE WITH SINGLE AXIS ROTATIONS (SEE
-#       REMODE IS THE GENERAL REMODING SUBROUTINE.  IT DRIVES THE
-#       TRUNNION ANGLE TO 0 DEGREES IF THE CURRENT MODE IS MODE 1,
-#       180 DEGREES FOR MODE 2, THEN DRIVES THE SHAFT ANGLE TO -45
-#       DEGREES, AND FINALLY DRIVES THE TRUNNION ANGLE TO -130 DEGREES,
-#       TO PLACE THE RR IN MODE 2, -50 DEGREES FOR MODE 1, BEFORE
-#       INITIATING 2-AXIS CONTROL.  ALL REMODING IS DONE WITH SINGLE
-#       AXIS ROTATIONS (RR1AXIS).  INITIALLY THE RR ANTENNA MODE FLAG
-#       (RADMODES BIT 12) IS CHECKED.  CONTROL IS THEN TRANSFERRED TO
-#       RRTONLY TO DRIVE THR TRUNNION ANGLE TO 0 DEGREES IF IN MODE 1
-#       OR 180 DEGREES IF IN MODE 2.  RRSONLY IS THEN CALLED TO DRIVE
-#       THE SHAFT ANGLE TO -45 DEGREES. THE RR ANTENNA MODE FLAG
-#       (RADMODES BIT 12) IS CHECKED AGAIN.  CONTROL IS AGAIN
-#       TRANSFERRED TO RRTONLY TO DRIVE THE TRUNNION ANGLE TO -130
-#       DEGREES TO PLACE THE RR IN MODE 2 IF CURRENTLY IN MODE 1 OR TO
-#       -50 DEGREES IF IN MODE 2 TO PLACE THE RR IN MODE 1.  RMODINV
-#       IS THEN CALLED TO SET RADMODES BIT 12 TO INDICATE THE NEW
-#       RR ANTENNA MODE.  THE REMODE FLAG (RADMODES BIT 14)
-#       IS REMOVED TO INDICATE THAT REMODING IS COMPLETE.  THE PROGRAM
-#       THEN EXITS TO STDESIG TO BEGIN 2-AXIS CONTROL.
-#
+# FUNCTIONAL DESCRIPTION_                                                 S DONE WITH SINGLE AXIS ROTATIONS (SEE
+# REMODE IS THE GENERAL REMODING SUBROUTINE. IT DRIVES THE
+# TRUNNION ANGLE TO 0 DEGREES IF THE CURRENT MODE IS MODE 1,
+# 180 DEGREES FOR MODE 2, THEN DRIVES THE SHAFT ANGLE TO -45
+# DEGREES, AND FINALLY DRIVES THE TRUNNION ANGLE TO -130 DEGREES,
+# TO PLACE THE RR IN MODE 2, -50 DEGREES FOR MODE 1, BEFORE
+# INITIATING 2-AXIS CONTROL. ALL REMODING IS DONE WITH SINGLE
+# AXIS ROTATIONS (RR1AXIS). INITIALLY THE RR ANTENNA MODE FLAG
+# (RADMODES BIT 12) IS CHECKED. CONTROL IS THEN TRANSFERRED TO
+# RRTONLY TO DRIVE THR TRUNNION ANGLE TO 0 DEGREES IF IN MODE 1
+# OR 180 DEGREES IF IN MODE 2. RRSONLY IS THEN CALLED TO DRIVE
+# THE SHAFT ANGLE TO -45 DEGREES. THE RR ANTENNA MODE FLAG
+# (RADMODES BIT 12) IS CHECKED AGAIN. CONTROL IS AGAIN
+# TRANSFERRED TO RRTONLY TO DRIVE THE TRUNNION ANGLE TO -130
+# DEGREES TO PLACE THE RR IN MODE 2 IF CURRENTLY IN MODE 1 OR TO
+# -50 DEGREES IF IN MODE 2 TO PLACE THE RR IN MODE 1. RMODINV
+# IS THEN CALLED TO SET RADMODES BIT 12 TO INDICATE THE NEW
+# RR ANTENNA MODE. THE REMODE FLAG (RADMODES BIT 14)
+# IS REMOVED TO INDICATE THAT REMODING IS COMPLETE. THE PROGRAM
+# THEN EXITS TO STDESIG TO BEGIN 2-AXIS CONTROL.
+
 # CALLING SEQUENCE:
-#
-#       FROM BEGDES WHEN REMODE FLAG (RADMODES BIT 14) IS SET.
-#       THIS FLAG MAY BE SET IN RRDESSM AND RRDESNB IF RRLIMCHK
-#       DETERMINES THAT THE DESIRED ANGLES ARE WITHIN THE LIMITS OF THE
-#       OTHER MODE.
-#
+# FROM BEGDES WHEN REMODE FLAG (RADMODES BIT 14) IS SET.
+# THIS FLAG MAY BE SET IN RRDESSM AND RRDESNB IF RRLIMCHK
+# DETERMINES THAT THE DESIRED ANGLES ARE WITHIN THE LIMITS OF THE
+# OTHER MODE.
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RADMODES
-#
+# RADMODES
+
 # SUBROUTINES CALLED_
-#
-#       RRTONLY, RRSONLY, RMODINV (ACTUALLY PART OF)
-#
+# RRTONLY, RRSONLY, RMODINV (ACTUALLY PART OF)
+
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+# NONE
+
 # ALARMS_  NONE
-#
+
 # EXIT_  STDESIG
 
-REMODE          CAF     ANTENBIT        # DRIVE TRUNNION TO 0 (180)
-                MASK    RADMODES        # (ERROR COUNTER ALREADY ENABLED)
-                CCS     A
-                CAF     BIT15
-                TC      RRTONLY
-
-                CAF     -45DEGSR
-                TC      RRSONLY
-## Page 532
-                CS      RADMODES
-                MASK    ANTENBIT
-                CCS     A
-                CAF     -80DEGSR        # GO TO T = -130 (-50).
-                AD      -50DEGSR
-                TC      RRTONLY
-
-                CS      RADMODES
-                MASK    ANTENBIT
-                CCS     A
-                CAF     BIT15           # GO TO T = -180 (+0).
-                TC      RRTONLY
-
-                CS      RADMODES        # GO TO S = -90 (+0).
-                MASK    ANTENBIT
-                CCS     A
-                CS      HALF
-                TC      RRSONLY
-
-                TC      RMODINV
-
-                CS      REMODBIT        # END OF REMODE.
-                MASK    RADMODES
-                TS      RADMODES
-
-                CAF     DESIGBIT        # WAS REMODE CALLED DURING DESIGNATE?
-                MASK    RADMODES        # (BIT10 RADMODES = 1)
-                EXTEND
-                BZF     RGOODEND        # NO - RETURN TO CALLER WAITING IN RADSTALL
-                TC      STDESIG         # YES - RETURN TO DESIGNATE
--45DEGSR        =       13,14,15
--50DEGSR        DEC     -.27778
--80DEGSR        DEC     -.44444
-
-RMODINV         LXCH    RADMODES        # INVERT THE MODE STATUS.
-                CAF     ANTENBIT
-                EXTEND
-                RXOR    LCHAN
-                TS      RADMODES
-                TC      Q
-
-## Page 533
+REMODE          CAF             BIT12                   # DRIVE TRUNNION TO 0 (180).
+                MASK            RADMODES                # (ERROR COUNTER ALREADY ENABLED)
+                CCS             A       
+                CAF             BIT15   
+                TC              RRTONLY 
+                
+                CAF             -45DEGSR        
+                TC              RRSONLY 
+                
+## Page 543             
+                CS              RADMODES        
+                MASK            BIT12        
+                CCS             A       
+                CAF             -80DEGSR                # GO TO T = -130 (-50).
+                AD              -50DEGSR        
+                TC              RRTONLY 
+                
+                CS              RADMODES        
+                MASK            BIT12        
+                CCS             A       
+                CAF             BIT15                   # GO TO T = -180 (+0).
+                TC              RRTONLY 
+                
+                CS              RADMODES                # GO TO S = -90 (+0).
+                MASK            BIT12        
+                CCS             A       
+                CS              HALF    
+                TC              RRSONLY 
+                
+                TC              RMODINV 
+                
+                CS              BIT14                   # END OF REMODE.
+                MASK            RADMODES        
+                TS              RADMODES        
+                
+                CAF             BIT10                   # WAS REMODE CALLED DURING DESIGNATE
+                MASK            RADMODES                # (BIT10 RADMODES = 1)
+                EXTEND          
+                BZF             RGOODEND                # NO-RETURN TO CALLER WAITING IN RADSTALL
+                TC              STDESIG                 # YES - RETURN TO DESIGNATE
+-45DEGSR        =               13,14,15        
+-50DEGSR        DEC             -.27778 
+-80DEGSR        DEC             -.44444 
+                
+RMODINV         LXCH            RADMODES                # INVERT THE MODE STATUS.
+                CAF             BIT12        
+                EXTEND  
+                RXOR            LCHAN
+                TS              RADMODES
+                TC              Q
+        
+## Page 544 XXXXXXX
 # PROGRAM NAMES_        RRTONLY, RRSONLY
 #
 # FUNCTIONAL DESCRIPTION_
