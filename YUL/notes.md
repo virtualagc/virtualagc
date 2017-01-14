@@ -20,29 +20,6 @@ The architecture is big-endian (sorta). Bit 1 is the MSB and bit N is the LSB. S
 However, there is no sub-48-bit access to memory, so the issue of endianess doesn't really apply.
 
 
-Monitor Calls
--------------
-
- - MON EOFRI
- - MON LOK
- - MON PCR
- - MON PEEK
- - MON PUNCH
- - MON READ
- - MON RELOX 
- - MON RLEAS
- - MON SLEEP
- - MON TADDR
- - MON TYPER
- - MON UNLOK
- - MON WAKE
- - MONITOR
-
- - $PAR IDLE ?
-
-I think "MON WAA" is a block of memory used for passing data into and out of the Monitor, but I can't be completely sure yet.
-
-
 Unknown ARGUS Opcodes
 ---------------------
 
@@ -238,6 +215,29 @@ There are several supported machine architectures. These are referred to as "COM
 
  - "AGC4" (abbreviated "A4")
    This is the revised, final, as-flown Block II AGC.
+
+
+Monitor Calls
+-------------
+
+ - MON EOFRI
+ - MON LOK
+ - MON PCR
+ - MON PEEK
+ - MON PUNCH
+ - MON READ
+ - MON RELOX 
+ - MON RLEAS
+ - MON SLEEP
+ - MON TADDR
+ - MON TYPER
+ - MON UNLOK
+ - MON WAKE
+ - MONITOR
+
+ - $PAR IDLE ?
+
+I think "MON WAA" is a block of memory used for passing data into and out of the Monitor, but I can't be completely sure yet.
 
 
 PHI Routines
