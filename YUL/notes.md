@@ -237,4 +237,19 @@ There are several supported machine architectures. These are referred to as "COM
  - "AGC4" (abbreviated "A4")
    This is the revised, final, as-flown Block II AGC.
 
+
+PHI Routines
+------------
+
+There are a bunch of subroutines used throughout YUL, referred to as "PHI name". These mainly have to do with tape operations. It may be that these routine were developed for YUL by a contractor, Philip Hankins Inc., hence "PHI".
+
+ - PHI LABEL
+ - PHI LOAD
+ - PHI PEEK
+ - PHI PRINT
+ - PHI READ
+ - PHI SNACH
+ - PHI TAPE
+ - PHI WAA
+
 -end-
