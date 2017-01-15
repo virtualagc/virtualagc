@@ -12,6 +12,8 @@
 ##		2016-11-02 RSB	Typo (offset-reference -1 was not indented).
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located whilst diff'ing
+##				against Colossus 249.
 
 ## Page 1074
 # SECTION 1  DISPATCHER
@@ -1568,7 +1570,7 @@ TSSL		CA	SR		# GET SHIFT COUNT FOR SR.
 		CCS	CYR		# SEE IF ROUND WANTED.
 ROUND		TC	ROUNDSUB	# YES - ROUND AND EXIT.
 		TCF	DANZIG		# SL LEAVES A ZERO IN CYR FOR NO ROUND.
-		TCF	DANZIG		# NO - EXIT IMMEDIATE
+		TCF	DANZIG		# NO - EXIT IMMEDIATL
 
 ## Page 1122
 # VECTOR SHIFTING ROUTINES.
@@ -1987,7 +1989,7 @@ BIASHI		DEC	.4192 B-1	# SQRT CONSTANTS
 # TIVELY, THE FOLLOWING APPROXIMATION IS OBTAINED BY MULTIPLYING ABOVE AND BELOW BY C - SD AND NEGLECTING TERMS OF
 # ORDER S-SQUARED (POSSIBLY INTRODUCING ERROR INTO THE LOW TWO BITS OF THE RESULT). SIGN AGREEMENT IS UNNECESSARY.
 
-#          A + SB .      (R - CD)                                             A + SB
+#          A + SB .      (R - QD)                                             A + SB
 #          ------ = Q + S(------) WHERE Q AND R ARE QUOTIENT AND REMAINDER OF ------ RESPECTIVELY.
 #          C + SD        (  C   )                                                C
 
