@@ -13,6 +13,8 @@
 ##		2011-02-12 JL	Minor fixes.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-15 RSB	Fixed comment-text errors noted while diff'ing vs
+##				Colossus 249.
 
 ## Page 1298
 #          DELETE
@@ -45,7 +47,7 @@ KEPPREP		LXA,2	SETPD
 			4D
 		DSQ	PDDL		# (FS)SQ(+12 +2(N1-N2)) 8D       PL 10D
 			4D
-		DSQ	PDDL*		# SSQ/MU(-20R +2(N1-N2)) 10D       PL 12D
+		DSQ	PDDL*		# SSQ/MU(-2OR +2(N1-N2)) 10D       PL 12D
 			MUEARTH,2
 		SR3	SR4
 		PDVL	VSQ		# PREALIGN MU (+43 OR +37) 12D   PL 14D
@@ -840,7 +842,7 @@ DPZERO		EQUALS	ZEROVEC
 DP2/3		2DEC	.6666666667
 2/3		EQUALS	DP2/3
 OCT27		OCT	27
-# LM504 1S TEMPORARY
+# LM504 IS TEMPORARY
 		BANK	13
 		SETLOC	ORBITAL2
 		BANK
