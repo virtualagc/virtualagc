@@ -1700,1592 +1700,1623 @@ RMODINV         LXCH            RADMODES                # INVERT THE MODE STATUS
                 TS              RADMODES
                 TC              Q
         
-## Page 544 XXXXXXX
-# PROGRAM NAMES_        RRTONLY, RRSONLY
-#
+## Page 544
+# PROGRAM NAMES_  RRTONLY, RRSONLY
+
 # FUNCTIONAL DESCRIPTION_
-#
-#       RRTONLY AND RRSONLY ARE SUBROUTINES FOR DOING SINGLE AXIS
-#       RR MANEUVERS FOR REMODE AND REPOSITION.  IT DRIVES TO
-#       WITHIN 1 DEGREE.  INITIALLY, AT RR1AX2, THE REMODE AND REPOSITION
-#       FLAGS (RADMODES BITS 14, 11) ARE CHECKED.  IF BOTH EXIST,
-#       THE PROGRAM EXITS TO REPOSRPT (SEE DORREPOS).  THIS INDICATES
-#       THAT SOMEONE POSSIBLY REQUESTED A DESIGNATE (RADMODES BIT 10)
-#       WHICH REQUIRES A REMODE (RADMODES BIT 14) AND THAT A
-#       REPOSITION IS IN PROGRESS (RADMODES BIT 11).  IF NONE
-#       OR ONLY ONE OF THE FLAGS EXIST, REMODE OR REPOSITION, MAGSUB
-#       IS CALLED TO SEE IF THE APPROPRIATE ANGLE IS WITHIN 1 DEGREE.  IF YES,
-#       CONTROL RETURNS TO THE CALLING ROUTINE.  IF NOT, CONTROL IS
-#       TRANSFERRED TO RROUT FOR SINGLE AXIS MANEUVERS WITH THE OTHER
-#       ANGLE SET = 0.  FOLLOWING A .5 SECOND WAIT, THE ABOVE PROCEDURE IS
-#       REPEATED.
-#
-# CALLING SEQUENCE:     L-1     CAF     *ANGLE*         (DESIRED ANGLE SCALED PI)
-#                       L       TC      RRTONLY         (TRUNNION ONLY)
-#                       RRSONLY                         (SHAFT ONLY)
-#                       RRTONLY IS CALLED BY PREPOS29;
-#                       RRTONLY AND RRSONLY ARE CALLED BY DORREPOS AND REMODE
-#
+# RRTONLY AND RRSONLY ARE SUBROUTINES FOR DOING SINGLE AXIS
+# RR MANEUVERS FOR REMODE AND REPOSITION. IT DRIVES TO
+# WITHIN 1 DEGREE. INITIALLY, AT RR1AX2, THE REMODE AND REPOSITION
+# FLAGS (RADMODES BITS 14, 11) ARE CHECKED. IF BOTH EXIST,
+# THE PROGRAM EXITS TO REPOSRPT (SEE DORREPOS). THIS INDICATES
+# THAT SOMEONE POSSIBLY REQUESTED A DESIGNATE (RADMODES BIT 10)
+# WHICH REQUIRES A REMODE (RADMODES BIT 14) AND THAT A
+# REPOSITION IS IN PROGRESS (RADMODES BIT 11). IF NONE
+# OR ONLY ONE OF THE FLAGS EXIST, REMODE OR REPOSITION, MAGSUB
+# IS CALLED TO SEE IF THE APPROPRIATE ANGLE IS WITHIN 1 DEGREE. IF YES,
+# CONTROL RETURNS TO THE CALLING ROUTINE. IF NOT, CONTROL IS
+# TRANSFERRED TO RROUT FOR SINGLE AXIS MANEUVERS WITH THE OTHER
+# ANGLE SET = 0. FOLLOWING A .5 SECOND WAIT, THE ABOVE PROCEDURE IS
+# REPEATED.
+
+# CALLING SEQUENCE: L-1 CAF *ANGLE* (DESIRED ANGLE SCALED PI)
+# L  TC  RRTONLY (TRUNNION ONLY)
+# RRSONLY (SHAFT ONLY)
+# RRTONLY IS CALLED BY PREPOS29;
+# RRTONLY AND RRSONLY ARE CALLED BY DORREPOS AND REMODE
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       C(A) = DESIRED ANGLE, RADMODES
-#
+# C(A) = DESIRED ANGLE, RADMODES
+
 # SUBROUTINES CALLED_
-#
-#       FIXDELAY, REPOSRPT, MAGSUB, RROUT
-#
+# FIXDELAY, REPOSRPT, MAGSUB, RROUT
+
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+# NONE
+
 # ALARMS_  NONE
-#
-# EXIT_ REPOSRPT (REMODE AND REPOSITION FLAGS PRESENT - RADMODES
-#       BITS 14, 11)
-#       L+1 (ANGLE WITHIN ONE DEGREE OR RR OUT OF AUTO MODE)
 
-RRTONLY         TS      RDES            # DESIRED TRUNION ANGLE.
-                CAF     ZERO
-                TCF     RR1AXIS
+# EXIT_  REPOSRPT (REMODE AND REPOSITION FLAGS PRESENT - RADMODES
+# BITS 14, 11)
+# L+1  (ANGLE WITHIN ONE DEGREE OR RR OUT OF AUTO MODE)
 
-RRSONLY         TS      RDES            # SHAFT COMMANDS ARE UNRESOLVED SINCE THIS
-                CAF     ONE             # ROUTINE ENTERED ONLY WHEN T = 0 OR 180.
+RRTONLY         TS              RDES                    # DESIRED TRUNION ANGLE.
+                CAF             ZERO    
+                TCF             RR1AXIS 
+                
+RRSONLY         TS              RDES                    # SHAFT COMMANDS ARE UNRESOLVED SINCE THIS
+                CAF             ONE                     # ROUTINE ENTERED ONLY WHEN T = 0 OR 180.
+                
+RR1AXIS         TS              RRINDEX 
+                EXTEND          
+                QXCH            RRRET   
+                TCF             RR1AX2  
+                
+## Page 545             
+NXTRR1AX        TC              FIXDELAY        
+                DEC             50                      # 2 SAMPLES PER SECOND.
+                
+RR1AX2          CS              RADMODES                # IF SOMEONE REQUESTES AS DESIGNATE WHICH
+                MASK            PRIO22                  # REQUIRES A REMODE AND A REPOSITION IS IN
+                EXTEND                                  # PROGRESS, INTERRUPT IT AND START THE
+                BZF             REPOSRPT                # REMODE IMMEDIATELY.
+                
+                CA              RDES    
+                EXTEND          
+                INDEX           RRINDEX 
+                MSU             CDUT    
+                TS              ITEMP1                  # SAVE ERROR SIGNAL.
+                EXTEND          
+                MP              RRSPGAIN                # TRIES TO NULL .7 OF ERROR OVER NEXT .5
+                TS              L       
+                CA              RADMODES        
+                MASK            AUTOMBIT        
+                XCH             ITEMP1                  # STORE RR-OUT-OF-AUTO-MODE BIT.
+                TC              MAGSUB                  # SEE IF WITHIN ONE DEGREE.
+                DEC             -.00555                 # SCALED IN HALF-REVS.
+                
+                CCS             ITEMP1                  # NO.  IF RR OUT OF AUTO MODE, EXIT.
+                TC              RRRET                   # RETURN TO CALLER.
+                
+                CCS             RRINDEX                 # COMMAND FOR OTHER AXIS IS ZERO.
+                TCF             +2                      # SETTING A TO 0.
+                XCH             L       
+                DXCH            TANG    
+                
+                TC              RROUT   
+                
+                TCF             NXTRR1AX                # COME BACK IN .5 SECONDS.
+                
+RRSPGAIN        DEC             .59062                  # NULL .7 ERROR IN .5 SEC.
+                
+## Page 546
+# PROGRAM NAME_  RROUT                                                    RROR COUNTER SCALING. RROUT LIMITS THEM
 
-RR1AXIS         TS      RRINDEX
-                EXTEND
-                QXCH    RRRET
-                TCF     RR1AX2
-
-## Page 534
-NXTRR1AX        TC      FIXDELAY
-                DEC     50              # 2 SAMPLES PER SECOND.
-
-RR1AX2          CS      RADMODES        # IF SOMEONE REQUESTES AS DESIGNATE WHICH
-                MASK    PRIO22          # REQUIRES A REMODE AND A REPOSITION IS IN
-                EXTEND                  # PROGRESS, INTERRUPT IT AND START THE
-                BZF     REPOSRPT        # REMODE IMMEDIATELY.
-
-                CA      RDES
-                EXTEND
-                INDEX   RRINDEX
-                MSU     CDUT
-                TS      ITEMP1          # SAVE ERROR SIGNAL.
-                EXTEND
-                MP      RRSPGAIN        # TRIES TO NULL .7 OF ERROR OVER NEXT .5
-                TS      L
-                CA      RADMODES
-                MASK    AUTOMBIT
-                XCH     ITEMP1          # STORE RR-OUT-OF-AUTO-MODE BIT.
-                TC      MAGSUB          # SEE IF WITHIN ONE DEGREE.
-                DEC     -.00555         # SCALED IN HALF-REVS.
-
-                CCS     ITEMP1          # NO.  IF RR OUT OF AUTO MODE, EXIT.
-                TC      RRRET           # RETURN TO CALLER.
-
-                CCS     RRINDEX         # COMMAND FOR OTHER AXIS IS ZERO.
-                TCF     +2              # SETTING A TO 0.
-                XCH     L
-                DXCH    TANG
-
-                TC      RROUT
-
-                TCF     NXTRR1AX        # COME BACK IN .5 SECONDS.
-
-RRSPGAIN        DEC     .59062          # NULL .7 ERROR IN .5 SEC.
-
-## Page 535
-# PROGRAM NAME_  RROUT                                                          RROR COUNTER SCALING. RROUT LIMITS THEM
-#
 # FUNCTIONAL DESCRIPTION_
-#
-#       RROUT RECEIVES RR GYRO COMMANDS IN TANG, TANG +1 IN RR
-#       ERROR COUNTER SCALING.  RROUT THEN LIMITS THEM AND
-#       GENERATES COMMANDS TO THE CDU TO ADJUST THE ERROR COUNTERS
-#       TO THE DESIRED VALUES.  INITIALLY MAGSUB CHECKS THE MAGNITUDE OF
-#       THE COMMAND (SHAFT ON 1ST PASS) TO SEE IF IT IS GREATER THAN
-#       384 PULSES.  IF NOT, CONTROL IS TRANSFERRED TO RROUTLIM TO
-#       LIMIT THE COMMAND TO +384 OR -384 PULSES.  THE DIFFERENCE IS
-#       THEN CALCULATED BETWEEN THE DESIRED STATE AND THE PRESENT STATE OF
-#       THE ERROR COUNTER AS RECORDED IN LASTYCMD AND LASTXCMD.
-#       THE RESULT IS STORED IN OPTXCMD (1ST PASS) AND OPTYCMD (2ND
-#       PASS).  FOLLOWING THE SECOND PASS, FOR THE TRUNNION COMMAND, THE
-#       OCDUT AND OCDUS ERROR COUNTER DRIVE BITS (CHAN 14 BITS 12, 11)
-#       ARE SET.  THIS PROGRAM THEN EXITS TO THE CALLING PROGRAM.
-#
+# RROUT RECEIVES RR GYRO COMMANDS IN TANG, TANG +1 IN RR
+# ERROR COUNTER SCALING. RROUT THEN LIMITS THEM AND
+# GENERATES COMMANDS TO THE CDU TO ADJUST THE ERROR COUNTERS
+# TO THE DESIRED VALUES. INITIALLY MAGSUB CHECKS THE MAGNITUDE OF
+# THE COMMAND (SHAFT ON 1ST PASS) TO SEE IF IT IS GREATER THAN
+# 384 PULSES. IF NOT, CONTROL IS TRANSFERRED TO RROUTLIM TO
+# LIMIT THE COMMAND TO +384 OR -384 PULSES. THE DIFFERENCE IS
+# THEN CALCULATED BETWEEN THE DESIRED STATE AND THE PRESENT STATE OF
+# THE ERROR COUNTER AS RECORDED IN LASTYCMD AND LASTXCMD.
+# THE RESULT IS STORED IN OPTXCMD (1ST PASS) AND OPTYCMD (2ND
+# PASS). FOLLOWING THE SECOND PASS, FOR THE TRUNNION COMMAND, THE
+# OCDUT AND OCDUS ERROR COUNTER DRIVE BITS (CHAN 14 BITS 12, 11)
+# ARE SET. THIS PROGRAM THEN EXITS TO THE CALLING PROGRAM.
+
 # CALLING SEQUENCE:
-#
-#       L TC RROUT (WITH RUPT INHIBITED) RROUT IS CALLED BY
-#       RRTONLY, RRSONLY, AND DODES
-#
+# L TC RROUT (WITH RUPT INHIBITED) RROUT IS CALLED BY
+# RRTONLY, RRSONLY, AND DODES
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       TANG, TANG +1 (DESIRED COMMANDS), LASTYCMD, LASTXCMD
-#       (1ST PASS = 0), RR ERROR COUNTER ENAGLE SET (CHAN 12 BIT 2).
+# TANG, TANG +1 (DESIRED COMMANDS), LASTYCMD, LASTXCMD
+# (1ST PASS = 0), RR ERROR COUNTER ENABLE SET (CHAN 12 BIT 2).
 #
 # SUBROUTINES CALLED_
-#
-#       MAGSUB
-#
+# MAGSUB
+
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+# NONE
+
 # ALARMS_  NONE
-#
-# EXIT_  L+1 (ALWAYS)                                                           SIRED VALUES. RUPT MUST BE INHIBITED.
 
-RROUT           LXCH    Q               # SAVE RETURN.
-                CAF     ONE             # LOOP TWICE.
-RROUT2          TS      ITEMP2
-                INDEX   A
-                CA      TANG
-                TS      ITEMP1          # SAVE SIGN OF COMMAND FOR LIMITING.
+# EXIT_  L+1 (ALWAYS)                                                     SIRED VALUES. RUPT MUST BE INHIBITED.
 
-                TC      MAGSUB          # SEE IF WITHIN LMITS.
--RRLIMIT        DEC     -384
-                TCF     RROUTLIM        # LIMIT COMMAND TO MAG OF 384.
+RROUT           LXCH            Q                       # SAVE RETURN.
+                CAF             ONE                     # LOOP TWICE.
+RROUT2          TS              ITEMP2  
+                INDEX           A       
+                CA              TANG    
+                TS              ITEMP1                  # SAVE SIGN OF COMMAND FOR LIMITING.
+                        
+                TC              MAGSUB                  # SEE IF WITHIN LMITS.
+-RRLIMIT        DEC             -384    
+                TCF             RROUTLIM                # LIMIT COMMAND TO MAG OF 384.
+                        
+SETRRCTR        CA              ITEMP1                  # COUNT OUT DIFFERENCE BETWEEN DESIRED
+                INDEX           ITEMP2                  # STATE AND PRESENT STATE AS RECORDED IN
+                XCH             LASTYCMD                # LASTYCMD AND LASTXCMD
+                COM                     
+                
+## Page 547                     
+                AD              ITEMP1  
+                AD              NEG0                    # PREVENT +0 IN OUTCOUNTER
+                INDEX           ITEMP2  
+                TS              CDUTCMD 
+                        
+                CCS             ITEMP2                  # PROCESS BOTH INPUTS.
+                TCF             RROUT2  
+                        
+                CAF             PRIO6                   # ENABLE COUNTERS.
+                EXTEND                  
+                WOR             CHAN14                  # PUT ON CDU DRIVES S AND T
+                TC              L                       # RETURN.
+                        
+RROUTLIM        CCS             ITEMP1                  # LIMIT COMMAND TO ABS VAL OF 384.
+                CS              -RRLIMIT        
+                TCF             +2      
+                CA              -RRLIMIT        
+                TS              ITEMP1  
+                TCF             SETRRCTR        +1     
+                
+## Page 548             
+#          ROUTINE TO ZERO THE RR CDUS AND DETERMINE THE ANTENNA MODE.
 
-SETRRCTR        CA      ITEMP1          # COUNT OUT DIFFERENCE BETWEEN DESIRED
-                INDEX   ITEMP2          # STATE AND PRESENT STATE AS RECORDED IN
-                XCH     LASTYCMD        # LASTYCMD AND LASTXCMD
-                COM
-## Page 536
-                AD      ITEMP1
-                AD      NEG0            # PREVENT +0 IN OUTCOUNTER
-                INDEX   ITEMP2
-                TS      CDUTCMD
+RRZERO          CAF             BIT11+1                 # SEE IF MONITOR REPOSITION OR NOT IN AUTO
+                MASK            RADMODES                # IF SO, DONT RE-ZERO CDUS.
+                CCS             A       
+                TCF             RADNOOP                 # (IMMEDIATE TASK TO RGOODEND).
+                
+                INHINT          
+                CS              BIT13                   # SET FLAG TO SHOW ZEROING IN PROGRESS.
+                MASK            RADMODES        
+                AD              BIT13        
+                TS              RADMODES        
+                
+                CAF             ONE     
+                TC              WAITLIST        
+                EBANK=          LOSCOUNT        
+                2CADR           RRZ2    
+                
+                CS              RADMODES                # SEE IF IN AUTO MODE.
+                MASK            BIT2        
+                CCS             A       
+                TCF             ROADBACK        
+                TC              ALARM                   # AUTO DISCRETE NOT PRESENT - TRYING
+                OCT             510     
+ROADBACK        RELINT          
+                TCF             SWRETURN        
+                
+RRZ2            TC              RRZEROSB                # COMMON TO TURNON AND RRZERO.
+                TCF             ENDRADAR        
+        
+BIT11+1         OCT             02001
+        
+## Page 549
+# PROGRAM NAME_  RRDESSM                                                  R (HALF-UNIT) IN RRTARGET. REMODES IF
 
-                CCS     ITEMP2          # PROCESS BOTH INPUTS.
-                TCF     RROUT2
-
-                CAF     PRIO6           # ENABLE COUNTERS.
-                EXTEND
-                WOR     CHAN14          # PUT ON CDU DRIVES S AND T
-                TC      L               # RETURN.
-
-RROUTLIM        CCS     ITEMP1          # LIMIT COMMAND TO ABS VAL OF 384.
-                CS      -RRLIMIT
-                TCF     +2
-                CA      -RRLIMIT
-                TS      ITEMP1
-                TCF     SETRRCTR +1
-
-## Page 537
-# ROUTINE TO ZERO THE RR CDUS AND DETERMINE THE ANTENNA MODE.
-
-RRZERO          CAF     BIT11+1         # SEE IF MONITOR REPOSITION OR NOT IN AUTO
-                MASK    RADMODES        # IF SO, DONT RE-ZERO CDUS.
-                CCS     A
-                TCF     RADNOOP         # (IMMEDIATE TASK TO RGOODEND).
-
-                INHINT
-                CS      RCDU0BIT        # SET FLAG TO SHOW ZEROING IN PROGRESS.
-                MASK    RADMODES
-                AD      RCDU0BIT
-                TS      RADMODES
-
-                CAF     ONE
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   RRZ2
-
-                CS      RADMODES        # SEE IF IN AUTO MODE.
-                MASK    AUTOMBIT
-                CCS     A
-                TCF     ROADBACK
-                TC      ALARM           # AUTO DISCRETE NOT PRESENT - TRYING
-                OCT     510
-ROADBACK        RELINT
-                TCF     SWRETURN
-
-RRZ2            TC      RRZEROSB        # COMMON TO TURNON AND RRZERO.
-                TCF     ENDRADAR
-
-BIT11+1         OCT     02001
-
-## Page 538
-# PROGRAM NAME_  RRDESSM                                                        R (HALF-UNIT) IN RRTARGET. REMODES IF
-#
 # FUNCTIONAL DESCRIPTION_
-#
-#       THIS INTERPRETIVE ROUTINE WILL DESIGNATE, IF DESIRED ANGLES ARE
-#       WITHIN THE LIMITS OF EITHER MODE, TO A LINE-OF SIGHT (LOS) VECTOR
-#       (HALF-UNIT) KNOWN WITH RESPECT TO THE STABLE MEMBER PRESENT
-#       ORIENTATION.  INITIALLY THE IMU CDU:S ARE READ AND CONTROL
-#       TRANSFERRED TO SMNB TO TRANSFORM THE LOS VECTOR FROM STABLE
-#       MEMBER TO NAVIGATION BASE COORDINATES (SEE STG MEMO -699)
-#       RRANGLES IS THEN CALLED TO CALCULATE THE RR GIMBAL ANGLES,
-#       TRUNNION AND SHAFT, FOR BOTH THE PRESENT AND ALTERNATE MODE.
-#       RRLIMCHK IS CALLED TO SEE IF THE ANGLES CALCULATED FOR THE
-#       PRESENT MODE ARE WITHIN LIMITS.  IF WITHIN LIMITS, THE RETURN
-#       LOCATION IS INCREMENTED, INASMUCH AS NO VEHICLE MANEUVER IS
-#       REQUIRED, BEFORE EXITING TO STARTDES.  IF NOT WITHIN LIMITS OF THE
-#       CURRENT MODE, TRYSWS IS CALLED.  FOLLOWING INVERTING OF THE RR
-#       ANTENNA MODE FLAG (RADMODES BIT 12), RRLIMCHK IS CALLED
-#       TO SEE IF THE ANGLES CALCULATED FOR THE ALTERNATE MODE ARE WITHIN
-#       LIMITS.  IF YES, THE RR ANTENNA MODE FLAG IS AGAIN INVERTED,
-#       THE REMODE FLAG (RADMODES BIT 14) SET, AND THE RETURN LOCATION
-#       INCREMENTED, TO INDICATE NO VEHICLE MANEUVER IS REQUIRED, BEFORE
-#       EXITING TO STARTDES.  IF THESE ANGLES ARE NOT WITHIN LIMITS
-#       OF THE ALTERNATE MODE, THE RR ANTENNA MODE FLAG (RADMODES
-#       BIT 12) IS INVERTED BEFORE RETURNING DIRECTLY TO THE CALLING PROGRAM
-#       TO INDICATE THAT A VEHICLE MANEUVER IS REQUIRED.
-#
+# THIS INTERPRETIVE ROUTINE WILL DESIGNATE, IF DESIRED ANGLES ARE
+# WITHIN THE LIMITS OF EITHER MODE, TO A LINE-OF SIGHT (LOS) VECTOR
+# (HALF-UNIT) KNOWN WITH RESPECT TO THE STABLE MEMBER PRESENT
+# ORIENTATION. INITIALLY THE IMU CDU:S ARE READ AND CONTROL
+# TRANSFERRED TO SMNB TO TRANSFORM THE LOS VECTOR FROM STABLE
+# MEMBER TO NAVIGATION BASE COORDINATES (SEE STG MEMO -699)
+# RRANGLES IS THEN CALLED TO CALCULATE THE RR GIMBAL ANGLES,
+# TRUNNION AND SHAFT, FOR BOTH THE PRESENT AND ALTERNATE MODE.
+# RRLIMCHK IS CALLED TO SEE IF THE ANGLES CALCULATED FOR THE
+# PRESENT MODE ARE WITHIN LIMITS. IF WITHIN LIMITS, THE RETURN
+# LOCATION IS INCREMENTED, INASMUCH AS NO VEHICLE MANEUVER IS
+# REQUIRED, BEFORE EXITING TO STARTDES. IF NOT WITHIN LIMITS OF THE
+# CURRENT MODE, TRYSWS IS CALLED. FOLLOWING INVERTING OF THE RR
+# ANTENNA MODE FLAG (RADMODES BIT 12), RRLIMCHK IS CALLED
+# TO SEE IF THE ANGLES CALCULATED FOR THE ALTERNATE MODE ARE WITHIN
+# LIMITS. IF YES, THE RR ANTENNA MODE FLAG IS AGAIN INVERTED,
+# THE REMODE FLAG (RADMODES BIT 14) SET, AND THE RETURN LOCATION
+# INCREMENTED, TO INDICATE NO VEHICLE MANEUVER IS REQUIRED, BEFORE
+# EXITING TO STARTDES. IF THESE ANGLES ARE NOT WITHIN LIMITS
+# OF THE ALTERNATE MODE, THE RR ANTENNA MODE FLAG (RADMODES
+# BIT 12) IS INVERTED BEFORE RETURNING DIRECTLY TO THE CALLING PROGRAM
+# TO INDICATE THAT A VEHICLE MANEUVER IS REQUIRED.
+
 # CALLING SEQUENCE:
-#
-#       L       STCALL  RRTARGET        (LOS HALF-UNIT VECTOR IN SM COORDINATES)
-#       L+1     RRDESSM
-#       L+2     BASIC                   (VEHICLE MANEUVER REQUIRED)
-#       L+3     BASIC                   (NO VEHICLE MANEUVER REQUIRED)
-#
+# L  STCALL  RRTARGET  (LOS HALF-UNIT VECTOR IN SM COORDINATES)
+# L+1  RRDESSM
+# L+2  BASIC  (VEHICLE MANEUVER REQUIRED)
+# L+3  BASIC  (NO VEHICLE MANEUVER REQUIRED)
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RRTARGET, RADMODES
-#
+# RRTARGET, RADMODES
+
 # SUBROUTINES CALLED_
-#
-#       READCDUS, SMNB, RRANGLES, RRLIMCHK, TRYSWS (ACTUALLY
-#       PART OF), RMODINV
-#
+# READCDUS, SMNB, RRANGLES, RRLIMCHK, TRYSWS (ACTUALLY
+# PART OF), RMODINV
+
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+#    NONE
+
 # ALARMS_  NONE
-#
+
 # EXIT_  L+2 (NEITHER SET OF ANGLES ARE WITHIN LIMITS OF RELATED MODE)
-# STARTDES (DESIGNATE POSSIBLE AT PRESENT VEHICLE ATTITUDE - RETURNS
-# TO L+3 FROM STARTDES)                                                         CAN BE DONE IN PRESENT VEH ATTITUDE.
+# STARTDES (DESIGNATE POSSIBLE AT PRESENT VEHICLE ATTITUDE-RETURNS
+# TO L+3 FROM STARTDES)                                                   CAN BE DONE IN PRESENT VEH ATTITUDE.
 
-RRDESSM         STQ     CLEAR
-                        DESRET
-## Page 539
-                        RRNBSW
-                CALL                    # COMPUTES SINES AND COSINES, ORDER Y Z X
-                        CDUTRIG
-                VLOAD   CALL            # LOAD VECTOR AND CALL TRANSFORMATION
-                        RRTARGET
-                        *SMNB*
+RRDESSM         STQ             CLEAR
+                                DESRET
+## Page 550     
+                                RRNBSW
+                CALL                                    # COMPUTES SINES AND COSINES, ORDER Y Z X
+                                CDUTRIG 
+                VLOAD           CALL                    # LOAD VECTOR AND CALL TRANSFORMATION
+                                RRTARGET        
+                                *SMNB*  
+                
+                CALL                                    # GET RR GIMBAL ANGLES IN PRESENT AND
+                                RRANGLES                # ALTERNATE MODE.
+                EXIT            
+                
+                INHINT          
+                TC              RRLIMCHK        
+                ADRES           MODEA                   # CONFIGURATION FOR CURRENT MODE.
+                TC              +3                      # NOT IN CURRENT MODE
+OKDESSM         INCR            DESRET                  # INCREMENT SAYS NO VEHICLE MANEUVER REQ.
+                TC              STARTDES                # SHOW DESIGNATE REQUIRED
+                CS              FLAGWRD8        
+                MASK            SURFFBIT                # CHECK IF ON LUNAR SURFACE (SURFFLAG=P22F
+                EXTEND          
+                BZF             NORDSTAL                # BRANCH-YES-CANNOT DESIGNATE IN MODE 2
+                TC              TRYSWS  
+                
+                
+LUNDESCH        CS              FLAGWRD8                # OVERFLOW RETURN FROM RRANGLES
+                MASK            SURFFBIT                # CHECK IF ON LUNAR SURFACE
+                EXTEND          
+                BZF             NORDSTAL                # BRANCH-YES-RETURN TO CALLER - ALARM 527
+                CA              STATE   
+                MASK            RNDVZBIT        
+                CCS             A                       # TEST RNDVZFLG.
+                TC              NODESSM                 # NOT ON MOON-CALL FOR ATTITUDE MANEUVER
+                TCF             ENDOFJOB                # ...BUT NOT IN R29.
+                
+## Page 551
+# PROGRAM NAME_  STARTDES                                                 STORED AS A HALF-UNIT VECTOR IN RRTARGET
 
-                CALL                    # GET RR GIMBAL ANGLES IN PRESENT AND
-                        RRANGLES        # ALTERNATE MODE.
-                EXIT
+# FUNCTIONAL DESCRIPTION_                                                 CKON IS DESIRED. BIT14 OF RADMODES IS
+# STARTDES IS ENTERED WHEN WE ARE READY TO BEGIN DESIGNATION.             OR REPOSITION OPERATION. IN THIS
+# BIT 14 OF RADMODES IS ALREADY SET IF A REMODE IS REQUIRED.              THE REPOSITION WILL BE INTERRUPTED.
+# AT THIS TIME, THE RR ANTENNA MAY BE IN A REPOSITION                     GINS.
+# OPERATION. IN THIS CASE, IF A REMODE IS REQUIRED IT MAY HAVE
+# ALREADY BEGUN BUT IN ANY CASE THE REPOSITION WILL BE INTERRUPTED.
+# OTHERWISE, THE REPOSITION WILL BE COMPLETED BEFORE 2-AXIS
+# DESIGNATION BEGINS. INITIALLY DESCOUNT IS SET = 60 TO INDICATE
+# THAT 30 SECONDS WILL BE ALLOWED FOR THE RR DATA GOOD INBIT
+# (CHAN 33 BIT 4) IF LOCK-ON IS DESIRED (STATE BIT 5). BIT 10
+# OF RADMODES IS SET TO SHOW THAT A DESIGNATE IS REQUIRED.
+# THE REPOSITION FLAG (RADMODES BIT 11) IS CHECKED. IF SET,
+# THE PROGRAM EXITS TO L+3 OF THE CALLING PROGRAM (SEE RRDESSM
+# AND RRDESNB). THE PROGRAM WILL BEGIN DESIGNATING TO THE DESIRED
+# ANGLES FOLLOWING THE REPOSITION OR REMODE IF ONE WAS
+# REQUESTED. IF THE REPOSITION FLAG IS NOT SET, SETRRECR IS CALLED
+# WHICH SETS THE RR ERROR COUNTER ENABLE BIT (CHAN 12 BIT 2)
+# AND SETS LASTYCMD AND LASTXCMD = 0 TO INDICATE THE
+# DIFFERENCE BETWEEN THE PRESENT AND DESIRED STATE OF THE ERROR
+# COUNTERS. A 20 MILLISECOND WAITLIST CALL IS SET FOR BEGDES
+# AFTER WHICH THE PROGRAM EXITS TO L+3 OF THE CALLING PROGRAM.
 
-                INHINT
-                TC      RRLIMCHK
-                ADRES   MODEA           # CONFIGURATION FOR CURRENT MODE.
-                TC      +3              # NOT IN CURRENT MODE
-OKDESSM         INCR    DESRET          # INCREMENT SAYS NO VEHICLE MANEUVER REQ.
-                TC      STARTDES        # SHOW DESIGNATE REQUIRED
-                CS      FLAGWRD8
-                MASK    SURFFBIT        # CHECK IF ON LUNAR SURFACE (SURFFLAG=P22F
-                EXTEND
-                BZF     NORDSTAL        # BRANCH - YES - CANNOT DESIGNATE IN MODE 2
-                TC      TRYSWS
-
-LUNDESCH        CS      FLAGWRD8        # OVERFLOW RETURN FROM RRANGLES
-                MASK    SURFFBIT        # CHECK IF ON LUNAR SURFACE
-                EXTEND
-                BZF     NORDSTAL        # BRANCH - YES - RETURN TO CALLER - ALARM 527
-                CA      STATE
-                MASK    RNDVZBIT
-                CCS     A               # TEST RNDVZFLG.
-                TC      NODESSM         # NOT ON MOON - CALL FOR ATTITUDE MANEUVER
-                TCF     ENDOFJOB        # ... BUT NOT IN R29.
-
-## Page 540
-# PROGRAM NAME_  STARTDES                                                       STORED AS A HALF-UNIT VECTOR IN RRTARGET
-#
-# FUNCTIONAL DESCRIPTION_                                                       CKON IS DESIRED. BIT14 OF RADMODES IS
-#       STARTDES IS ENTERED WHEN WE ARE READY TO BEGIN DESIGNATION.             OR REPOSITION OPERATION. IN THIS
-#       BIT 14 OF RADMODES IS ALREADY SET IF A REMODE IS REQUIRED.              THE REPOSITION WILL BE INTERRUPTED.
-#       AT THIS TIME, THE RR ANTENNA MAY BE IN A REPOSITION                     GINS.
-#       OPERATION.  IN THIS CASE, IF A REMODE IS REQUIRED IT MAY HAVE
-#       ALREADY BEGUN BUT IN ANY CASE THE REPOSITION WILL BE INTERRUPTED.
-#       OTHERWISE, THE REPOSITION WILL BE COMPLETED BEFORE 2-AXIS
-#       DESIGNATION BEGINS.  INITIALLY DESCOUNT IS SET = 60 TO INDICATE
-#       THAT 30 SECONDS WILL BE ALLOWED FOR THE RR DATA GOOD INBIT
-#       (CHAN 33 BIT 4) IF LOCK-ON IS DESIRED (STATE BIT 5).  BIT 10
-#       OF RADMODES IS SET TO SHOW THAT A DESIGNATE IS REQUIRED.
-#       THE REPOSITION FLAG (RADMODES BIT 11) IS CHECKED.  IF SET,
-#       THE PROGRAM EXITS TO L+3 OF THE CALLING PROGRAM (SEE RRDESSM
-#       AND RRDESNB).  THE PROGRAM WILL BEGIN DESIGNATING TO THE DESIRED
-#       ANGLES FOLLOWING THE REPOSITION OR REMODE IF ONE WAS
-#       REQUESTED.  IF THE REPOSITION FLAG IS NOT SET, SETRRECR IS CALLED
-#       WHICH SETS THE RR ERROR COUNTER ENABLE BIT (CHAN 12 BIT 2)
-#       AND SETS LASTYCMD AND LASTXCMD = 0 TO INDICATE THE
-#       DIFFERENCE BETWEEN THE PRESENT AND DESIRED STATE OF THE ERROR
-#       COUNTERS.  A 20 MILLISECOND WAITLIST CALL IS SET FOR BEGDES
-#       AFTER WHICH THE PROGRAM EXITS TO L+3 OF THE CALLING PROGRAM.
-#
 # CALLING SEQUENCE:
-#
-#       FROM RRDESSM AND RRDESNB WHEN ANGLES WITHIN LIMITS.
-#
+# FROM RRDESSM AND RRDESNB WHEN ANGLES WITHIN LIMITS.
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RADMODES, (SEE DODES)
-#
+# RADMODES, (SEE DODES)
+
 # SUBROUTINES CALLED_
-#
-#       SETRRECR, WAITLIST
-#
+# SETRRECR, WAITLIST
+
 # JOBS OR TASKS INITIATED_
-#
-#       BEGDES
-#
+# BEGDES
+
 # ALARMS_  NONE
-#
-# EXIT_ L+3 OF CALLING PROGRAM (SEE RRDESSM)
-#       L+2 OF CALLING PROGRAM (SEE RRDESNB)
 
-STARTDES        INCR    DESRET
-                CS      RADMODES
-                MASK    DESIGBIT
-                ADS     RADMODES
-                MASK    REPOSBIT        # SEE IF REPOSITIONING IN PROGRESS.
-                CCS     A
-                TCF     DESRETRN        # ECTR ALREADY SET UP.
+# EXIT_  L+3 OF CALLING PROGRAM (SEE RRDESSM)
+# L+2 OF CALLING PROGRAM (SEE RRDESNB)
 
-                TC      SETRRECR        # SET UP ERROR COUNTERS.
-## Page 541
-                CAF     TWO
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   BEGDES
+STARTDES        INCR            DESRET
+                CS              RADMODES
+                MASK            BIT10
+                ADS             RADMODES
+                MASK            BIT11                   # SEE IF REPOSITIONING IN PROGRESS.
+                CCS             A       
+                TCF             DESRETRN                # ECTR ALREADY SET UP.
+                
+                TC              SETRRECR                # SET UP ERROR COUNTERS.
+## Page 552             
+                CAF             TWO     
+                TC              WAITLIST        
+                EBANK=          LOSCOUNT        
+                2CADR           BEGDES  
+                
+DESRETRN        CA              RADCADR                 # FIRST PASS THRU DESIGNATE
+                EXTEND          
+                BZF             DESRTRN                 # YES   SET EXIT
+                TC              ENDOFJOB                # NO
+DESRTRN         RELINT          
+                INCR            DESRET  
+                CA              DESRET  
+                TCF             BANKJUMP        
+                
+NORDSTAL        CAF             ZERO                    # ZERO RADCADR TO WIPE  OUT ANYONE
+                TS              RADCADR                 # WAITING IN RADSTALL SINCE WE ARE NOW
+                TCF             DESRTRN                 # RETURNING TO P20 AND MAY DO NEW RADSTALL
+        
+## Page 553
+#          SEE IF RRDESSM CAN BE ACCOMPLISHED AFTER A REMODE.
 
-DESRETRN        CA      RADCADR         # FIRST PASS THRU DESIGNATE
-                EXTEND
-                BZF     DESRTRN         # YES   SET EXIT
-                TC      ENDOFJOB        # NO
-DESRTRN         RELINT
-                INCR    DESRET
-                CA      DESRET
-                TCF     BANKJUMP
+TRYSWS          TC              RMODINV                 # (NOTE RUPT INHIBIT)
+                TC              RRLIMCHK                # TRY DIFFERENT MODE.
+                ADRES           MODEB   
+                TCF             NODESSM                 # VEHICLE MANEUVER REQUIRED.
+                
+                TC              RMODINV                 # RESET BIT12
+                CAF             BIT14                   # SET FLAG FOR REMODE.
+                ADS             RADMODES        
+                
+                TCF             OKDESSM 
+                
+NODESSM         TC              RMODINV                 # RE-INVERT MODE AND RETURN
+                INCR            DESRET                  # TO CALLER +2
+                TCF             NORDSTAL
+        
+MAXTRYS         DEC             60
 
-NORDSTAL        CAF     ZERO            # ZERO RADCADR TO WIPE OUT ANYONE
-                TS      RADCADR         # WAITING IN RADSTALL SINCE WE ARE NOW
-                TCF     DESRTRN         # RETURNING TO P20 AND MAY DO NEW RADSTALL
-
-## Page 542
-# SEE IF RRDESSM CAN BE ACCOMPLISHED AFTER A REMODE.
-
-TRYSWS          TC      RMODINV         # (NOTE RUPT INHIBIT)
-                TC      RRLIMCHK        # TRY DIFFERENT MODE.
-                ADRES   MODEB
-                TCF     NODESSM         # VEHICLE MANEUVER REQUIRED.
-
-                TC      RMODINV         # RESET BIT12
-                CAF     REMODBIT        # SET FLAG FOR REMODE.
-                ADS     RADMODES
-
-                TCF     OKDESSM
-
-NODESSM         TC      RMODINV         # RE-INVERT MODE AND RETURN
-                INCR    DESRET          # TO CALLER +2
-                TCF     NORDSTAL
-
-MAXTRYS         DEC     60
-
-## Page 543
-# DESIGNATE TO SPECIFIC RR GIMBAL ANGLES (INDEPENDENT OF VEHICLE MOTION).  ENTER WITH DESIRED ANGLES IN
+## Page 554
+#          DESIGNATE TO SPECIFIC RR GIMBAL ANGLES (INDEPENDENT OF VEHICLE MOTION). ENTER WITH DESIRED ANGLES IN
 # TANG AND TANG +1.
 
-RRDESNB         TC      MAKECADR
-                TS      DESRET
-
-                TC      DOWNFLAG        # RESET FLAG TO PREVENT DODES FROM GOING
-                ADRES   LOSCMFLG        # BACK TO R21
-                CA      MAXTRYS         # SET TIME LIMIT COUNTER
-                TS      DESCOUNT        # FOR DESIGNATE
-                INHINT                  # SEE IF CURRENT MODE OK.
-                TC      RRLIMNB         # DO SPECIAL V41 LIMIT CHECK
-                ADRES   TANG
-                TCF     TRYSWN          # SEE IF IN OTHER MODE.
-
-OKDESNB         RELINT
-                EXTEND
-                DCA     TANG
-                DXCH    TANGNB
-                TC      INTPRET
-
-                CALL                    # GET LOS IN NB COORDS.
-                        RRNB
-                STORE   RRTARGET
-
-                SET     EXIT
-                        RRNBSW
-
-                INHINT
-                TCF     STARTDES +1
-TRYSWN          TC      RMODINV         # SEE IF OTHER MODE WILL DO.
-                TC      RRLIMNB         # DO SPECIAL V41 LIMIT CHECK
-                ADRES   TANG
-                TCF     NODESNB         # NOT POSSIBLE.
-
-                TC      RMODINV
-                CAF     REMODBIT        # CALL FOR REMODE.
-                ADS     RADMODES
-                TCF     OKDESNB
-
-NODESNB         TC      RMODINV         # REINVERT MODE BIT.
-                TC      ALARM           # BAD INPUT ANGLES.
-                OCT     502
-                TC      CLRADMOD
-                TC      ENDOFJOB        # AVOID 503 ALARM.
-
-RRLIMNB         INDEX   Q               # THIS ROUTINE IS IDENTICAL TO RRLIMCHK
-                CAF     0               # EXCEPT THAT THE MODE 1 SHAFT LOWER
-                INCR    Q               # LIMIT IS -85 INSTEAD OF -70 DEGREES
-                EXTEND
-## Page 544
-                INDEX   A               # READ GIMBAL ANGLES INTO ITEMP STORAGE
-                DCA     0
-                DXCH    ITEMP1
-                LXCH    Q               # L(CALLER +2) TO L
-
-                CAF     ANTENBIT        # SEE WHICH MODE RR IS IN.
-                MASK    RADMODES
-                CCS     A
-                TCF     MODE2CHK        # MODE 2 CAN USE RRLIMCHK CODING
-                CA      ITEMP1
-                TC      MAGSUB          # MODE 1 IS DEFINED AS
-                DEC     -.30555         # 1.    ABS(T) L 55 DEGS
-                TC      L               # 2     SHAFT LIMITS AT +59, -85 DEGS
-
-                CA      ITEMP2          # LOAD SHAFT ANGLE
-                EXTEND
-                BZMF    NEGSHAFT        # IF NEGATIVE SHAFT ANGLE, ADD 20.5 DEGS
-                AD      5.5DEGS
-SHAFTLIM        TC      MAGSUB
-                DEC     -.35833         # 64.5 DEGREES
-                TC      L               # NOT IN LIMITS
-                TC      RRLIMOK         # IN LIMITS
-NEGSHAFT        AD      20.5DEGS        # MAKE NEGATIVE SHAFT LIMIT -85 DEGREES
-                TCF     SHAFTLIM
-
-20.5DEGS        DEC     .11389
-
-## Page 545
+RRDESNB         TC              MAKECADR
+                TS              DESRET
+                
+                TC              DOWNFLAG                # RESET FLAG TO PREVENT DODES FROM GOING
+                ADRES           LOSCMFLG                # BACK TO R21
+                CA              MAXTRYS                 # SET TIME LIMIT COUNTER
+                TS              DESCOUNT                # FOR DESIGNATE
+                INHINT                                  # SEE IF CURRENT MODE OK.
+                TC              RRLIMNB                 # DO SPECIAL V41 LIMIT CHECK
+                ADRES           TANG    
+                TCF             TRYSWN                  # SEE IF IN OTHER MODE.
+                        
+OKDESNB         RELINT                  
+                EXTEND                  
+                DCA             TANG    
+                DXCH            TANGNB  
+                TC              INTPRET 
+                        
+                CALL                                    # GET LOS IN NB COORDS.
+                                RRNB    
+                STORE           RRTARGET        
+                        
+                SET             EXIT    
+                                RRNBSW  
+                        
+                INHINT                  
+                TCF             STARTDES        +1     
+TRYSWN          TC              RMODINV                 # SEE IF OTHER MODE WILL DO.
+                TC              RRLIMNB                 # DO SPECIAL V41 LIMIT CHECK
+                ADRES           TANG    
+                TCF             NODESNB                 # NOT POSSIBLE.
+                        
+                TC              RMODINV 
+                CAF             BI14                    # CALL FOR REMODE.
+                ADS             RADMODES        
+                TCF             OKDESNB 
+                        
+NODESNB         TC              RMODINV                 # REINVERT MODE BIT.
+                TC              ALARM                   # BAD INPUT ANGLES.
+                OCT             502     
+                TC              CLRADMOD        
+                TC              ENDOFJOB                # AVOID 503 ALARM.
+                        
+RRLIMNB         INDEX           Q                       # THIS ROUTINE IS IDENTICAL TO RRLIMCHK
+                CAF             0                       # EXCEPT THAT THE MODE 1 SHAFT LOWER
+                INCR            Q                       # LIMIT IS -85 INSTEAD OF -70 DEGREES
+                EXTEND                  
+                
+## Page 555                     
+                INDEX           A                       # READ GIMBAL ANGLES INTO ITEMP STORAGE
+                DCA             0       
+                DXCH            ITEMP1  
+                LXCH            Q                       # L(CALLER +2) TO L
+                        
+                CAF             BIT12                   # SEE WHICH MODE RR IS IN.
+                MASK            RADMODES        
+                CCS             A       
+                TCF             MODE2CHK                # MODE 2 CAN USE RRLIMCHK CODING
+                CA              ITEMP1  
+                TC              MAGSUB                  # MODE 1 IS DEFINED AS
+                DEC             -.30555                 #   1. ABS(T) L 55 DEGS
+                TC              L                       #   2  SHAFT LIMITS AT +59, -85 DEGS
+                        
+                CA              ITEMP2                  # LOAD SHAFT ANGLE
+                EXTEND                  
+                BZMF            NEGSHAFT                # IF NEGATIVE SHAFT ANGLE, ADD 20.5 DEGS
+                AD              5.5DEGS 
+SHAFTLIM        TC              MAGSUB  
+                DEC             -.35833                 # 64.5 DEGREES
+                TC              L                       # NOT IN LIMITS
+                TC              RRLIMOK                 # IN LIMITS
+NEGSHAFT        AD              20.5DEGS                # MAKE NEGATIVE SHAFT LIMIT -85 DEGREES
+                TCF             SHAFTLIM        
+                        
+                        
+20.5DEGS        DEC             .11389  
+                
+## Page 556 
 # PROGRAM NAME_  BEGDES
-#
+
 # FUNCTIONAL DESCRIPTION_
-#
-#       BEGDES CHECKS VARIOUS DESIGNATE REQUESTS AND REQUESTS THE
-#       ACTUAL RR DESIGNATION.  INITIALLY A CHECK IS MADE TO SEE IF A
-#       REMODE (RADMODES BIT 14) IS REQUESTED OR IN PROGRESS.  IF SO,
-#       CONTROL IS TRANSFERRED TO STDESIG AFTER ROUTINE REMODE IS
-#       EXECUTED.  IF NO REMODE, STDESIG IS IMMEDIATELY CALLED WHERE
-#       FIRST THE REPOSITION FLAG (RADMODES BIT 11) IS CHECKED.  IF
-#       PRESENT, THE DESIGNATE FLAG (RADMODES BIT 10) IS REMOVED
-#       AFTER WHICH THE PROGRAM EXITS TO RDBADEND.  IF THE REPOSITION
-#       FLAG IS NOT PRESENT, THE CONTINUOUS DESIGNATE FLAG (RADMODES
-#       BIT 15) IS CHECKED.  IF PRESENT, ON EXECUTIVE CALL IS IMMEDIATELY
-#       MADE FOR DODES AFTER WHICH A .5 SECOND WAIT IS INITIATED BEFORE
-#       REPEATING AT STDESIG.  IF THE RR SEARCH ROUTINE (LRS24.1) IS DESIGNATING
-#       TO A NEW POINT (NEWPTFLG SET) THE CURRENT DESIGNATE TASK IS TERMINATED.
-#       IF CONTINUOUS DESIGNATE IS NOT WANTED, THE DESIGNATE FLAG (RADMODES
-#       BIT 10) IS CHECKED.  IF NOT PRESENT, THE PROGRAM EXITS TO ENDRADAR TO
-#       CHECK RR CDU FAIL BEFORE RETURNING TO THE CALLING PROGRAM.  IF DESIGNATE
-#       IS STILL REQUIRED, DESCOUNT IS CHECKED TO SEE IF THE 30 SECONDS HAS
-#       EXPIRED BEFORE RECEIVING THE RR DATA GOOD (CHAN 33 BIT 4)
-#       SIGNAL.  IF OUT OF TIME, PROGRAM ALARM 00503 IS REQUESTED, THE
-#       RR AUTO TRACKER ENABLE AND RR ERROR COUNTER ENABLE
-#       (CHAN 12 BITS 14,2) BITS REMOVED, AND THE DESIGNATE FLAG
-#       (RADMODES BIT 10) REMOVED BEFORE EXITING TO RDBADEND.  IF
-#       TIME HAS NOT EXPIRED, DESCOUNT IS DECREMENTED, THE
-#       EXECUTIVE CALL MADE FOR DODES, AND A .5 SECOND WAIT INITIATED
-#       BEFORE REPEATING THIS PROCEDURE AT STDESIG.
-#
+# BEGDES CHECKS VARIOUS DESIGNATE REQUESTS AND REQUESTS THE
+# ACTUAL RR DESIGNATION. INITIALLY A CHECK IS MADE TO SEE IF A
+# REMODE (RADMODES BIT 14) IS REQUESTED OR IN PROGRESS. IF SO,
+# CONTROL IS TRANSFERRED TO STDESIG AFTER ROUTINE REMODE IS
+# EXECUTED. IF NO REMODE, STDESIG IS IMMEDIATELY CALLED WHERE
+# FIRST THE REPOSITION FLAG (RADMODES BIT 11) IS CHECKED. IF
+# PRESENT, THE DESIGNATE FLAG (RADMODES BIT 10) IS REMOVED
+# AFTER WHICH THE PROGRAM EXITS TO RDBADEND. IF THE REPOSITION
+# FLAG IS NOT PRESENT, THE CONTINUOUS DESIGNATE FLAG (RADMODES
+# BIT 15) IS CHECKED. IF PRESENT, ON EXECUTIVE CALL IS IMMEDIATELY
+# MADE FOR DODES AFTER WHICH A .5 SECOND WAIT IS INITIATED BEFORE
+# REPEATING AT STDESIG. IF THE RR SEARCH ROUTINE (LRS24.1) IS DESIGNATING
+# TO A NEW POINT (NEWPTFLG SET) THE CURRENT DESIGNATE TASK IS TERMINATED.
+# IF CONTINUOUS DESIGNATE IS NOT WANTED, THE DESIGNATE FLAG (RADMODES
+# BIT 10) IS CHECKED. IF NOT PRESENT, THE PROGRAM EXITS TO ENDRADAR TO
+# CHECK RR CDU FAIL BEFORE RETURNING TO THE CALLING PROGRAM. IF DESIGNATE
+# IS STILL REQUIRED, DESCOUNT IS CHECKED TO SEE IF THE 30 SECONDS HAS
+# EXPIRED BEFORE RECEIVING THE RR DATA GOOD (CHAN 33 BIT 4)
+# SIGNAL. IF OUT OF TIME, PROGRAM ALARM 00503 IS REQUESTED, THE
+# RR AUTO TRACKER ENABLE AND RR ERROR COUNTER ENABLE
+# (CHAN 12 BITS 14,2) BITS REMOVED, AND THE DESIGNATE FLAG
+# (RADMODES BIT 10) REMOVED BEFORE EXITING TO RDBADEND. IF
+# TIME HAS NOT EXPIRED, DESCOUNT IS DECREMENTED, THE
+# EXECUTIVE CALL MADE FOR DODES, AND A .5 SECOND WAIT INITIATED
+# BEFORE REPEATING THIS PROCEDURE AT STDESIG.
+
 # CALLING SEQUENCE:
-#
-#       WAITLIST CALL FROM STARTDES
-#       TCF BEGDES FROM DORREPOS
-#       TC STDESIG RETURNING, FROM REMODE
-#
+# WAITLIST CALL FROM STARTDES
+# TCF BEGDES FROM DORREPOS
+# TC STDESIG RETURNING, FROM REMODE
+
 # ERASABLE INITIALIZATION REQUIRED:
-#       DESCOUNT, RADMODES
-#
+# DESCOUNT, RADMODES
+
 # SUBROUTINES CALLED_
-#       ENDRADAR. FINDVAC
-#
+# ENDRADAR, FINDVAC
+
 # JOBS OR TASKS INITIATED_  DODES
-#
+
 # ALARMS_  PROGRAM ALARM 00503 (30 SECONDS HAVE EXPIRED) WITH NO RR DATA
 # GOOD (CHAN 33 BIT 4) RECEIVED WHEN LOCK-ON (STATE BIT 5) WAS REQUESTED.
-#
-# EXIT_         TASKOVER (SEARCH PATTERN DESIGNATING TO NEW POINT)
-#               ENDRADAR (NO DESIGNATE - RADMODES BIT 10)
-#               RDBADEND (REPOSITION OR 30 SECONDS EXPIRED)
 
-BEGDES          CS      RADMODES
-## Page 546
-                MASK    REMODBIT
-                CCS     A
-                TC      STDESIG
-                TC      REMODE
-DESLOOP         TC      FIXDELAY        # 2 SAMPLES PER SECOND.
-                DEC     50
+# EXIT_  TASKOVER (SEARCH PATTERN DESIGNATING TO NEW POINT)
+# ENDRADAR (NO DESIGNATE - RADMODES BIT 10)
+# RDBADEND (REPOSITION OR 30 SECONDS EXPIRED)
 
-STDESIG         CAF     REPOSBIT
-                MASK    RADMODES        # SEE IF GIMBAL LIMIT MONITOR HAS FOUND US
-                CCS     A               # OUT OF BOUNDS.  IF SO, THIS BIT SHOWS A
-                TCF     BADDES          # REPOSITION TO BE IN PROGRESS.
+BEGDES          CS              RADMODES
 
-                CCS     RADMODES        # SEE IF CONTINUOUS DESIGNATE WANTED.
-                TCF     +3              # IF SO, DONT CHECK BIT 10 TO SEE IF IN
-                TCF     +2              # LIMITS BUT GO RIGHT TO FINDVAC ENTRY.
-                TCF     MOREDES +1
-
-                CS      RADMODES        # IF NON-CONTINUOUS, SEE IF END OF
-                MASK    DESIGBIT        # PROBLEM (DATA GOOD IF LOCK-ON WANTED OR
-                CCS     A               # WITHIN LIMITS IF NOT).  IF SO, EXIT AFTER
-                TCF     ENDRADAR        # CHECKING RR CDU FAIL.
-
-STDESIG1        CCS     DESCOUNT        # SEE IF THE TIME LIMIT HAS EXPIRED
-                TCF     MOREDES
-
-                CS      B14+B2          # IF OUT OF TIME, REMOVE ECR ENABLE + TRKR
-                EXTEND
-                WAND    CHAN12
-BADDES          CS      DESIGBIT        # REMOVE DESIGNATE FLAG
-                MASK    RADMODES
-                TS      RADMODES
-                TCF     RDBADEND
-
-MOREDES         TS      DESCOUNT
-                CAF     PRIO26          # UPDATE GYRO TORQUE COMMANDS.
-                TC      FINDVAC
-                EBANK=  LOSCOUNT
-                2CADR   DODES
-
-                TCF     DESLOOP
-
-B14+B2          OCT     20002
-
-## Page 547
+## Page 557
+                MASK            REMODBIT
+                CCS             A
+                TC              STDESIG
+                TC              REMODE
+DESLOOP         TC              FIXDELAY                # 2 SAMPLES PER SECOND.
+                DEC             50              
+                        
+STDESIG         CAF             BIT11                
+                MASK            RADMODES                # SEE IF GIMBAL LIMIT MONITOR HAS FOUND US
+                CCS             A                       # OUT OF BOUNDS. IF SO, THIS BIT SHOWS A
+                TCF             BADDES                  # REPOSITION TO BE IN PROGRESS.
+                        
+                CCS             RADMODES                # SEE IF CONTINUOUS DESIGNATE WANTED.
+                TCF             +3                      # IF SO, DONT CHECK BIT 10 TO SEE IF IN
+                TCF             +2                      # LIMITS BUT GO RIGHT TO FINDVAC ENTRY.
+                TCF             MOREDES         +1              
+                        
+                CS              RADMODES                # IF NON-CONTINUOUS, SEE IF END OF
+                MASK            BIT10                   # PROBLEM (DATA GOOD IF LOCK-ON WANTED OR
+                CCS             A                       # WITHIN LIMITS IF NOT). IF SO, EXIT AFTER
+                TCF             ENDRADAR                # CHECKING RR CDU FAIL.
+                        
+STDESIG1        CCS             DESCOUNT                # SEE IF THE TIME LIMIT HAS EXPIRED
+                TCF             MOREDES         
+                        
+                CS              B14+B2                  # IF OUT OF TIME, REMOVE ECR ENABLE + TRKR
+                EXTEND                  
+                WAND            CHAN12          
+BADDES          CS              BIT10                   # REMOVE DESIGNATE FLAG.
+                MASK            RADMODES                
+                TS              RADMODES                
+                TCF             RDBADEND                
+                        
+MOREDES         TS              DESCOUNT                
+                CAF             PRIO26                  # UPDATE GYRO TORQUE COMMANDS.
+                TC              FINDVAC         
+                EBANK=          LOSCOUNT                
+                2CADR           DODES
+        
+                TCF             DESLOOP
+        
+B14+B2          OCT             20002
+        
+## Page 558
 # PROGRAM NAME_  DODES
-#
+
 # FUNCTIONAL DESCRIPTION_
-#
-#       DODES CALCULATES AND REQUESTS ISSUANCE OF RR GYRO TORQUE
-#       COMMANDS.  INITIALLY THE CURRENT RR CDU ANGLES ARE STORED AND
-#       THE LOS HALF-UNIT VECTOR TRANSFORMED FROM STABLE MEMBER TO
-#       NAVIGATION BASE COORDINATES VIA SMNB IF NECESSARY.  THE
-#       SHAFT AND TRUNNION COMMANDS ARE THEN CALCULATED AS FOLLOWS_
-#               + SHAFT = LOS . (COS(S), 0, -SIN(S))  (DOT PRODUCT)
-#               - TRUNNION = LOS . (SIN(T)SIN(S), COS(T), SIN(T)COS(S))
-#       THE SIGN OF THE SHAFT COMMAND IS THEN REVERSED IF IN MODE 2
-#       (RADMODES BIT 12) BECAUSE A RELAY IN THE RR REVERSES THE
-#       POLARITY OF THE COMMAND.  AT RRSCALUP EACH COMMAND IS
-#       SCALED AND IF EITHER, OR BOTH, OF THE COMMANDS IS GREATER THAN
-#       .5 DEGREES, MPAC +1 IS SET POSITIVE.  IF A CONTINUOUS DESIGNATE
-#       (RADMODES BIT 15) IS DESIRED AND THE SEARCH ROUTINE IS NOT OPERATING,
-#       THE RR AUTO TRACKER ENABLE BIT (CHAN 12 BIT 14) IS CLEARED AND RROUT
-#       CALLED TO PUT OUT THE COMMANDS PROVIDED NO REPOSITION (RADMODES BIT 11)
-#       IS IN PROGRESS.  IF A CONTINUOUS DESIGNATE AND THE SEARCH ROUTINE IS
-#       OPERATING (SRCHOPT FLAG SET) THE TRACK ENABLE IS NOT CLEARED.  IF NO
-#       CONTINUOUS DESIGNATE AND BOTH COMMANDS ARE NOT LESS THAN .5 DEGREES AS
-#       INDICATED BY MPAC +1, THE RR AUTO TRACKER ENABLE BIT (CHAN 12 BIT 14) IS
-#       CLEARED AND RROUT CALLED TO PUT OUT THE COMMANDS PROVIDED NO REPOSITION
-#       (RADMODES BIT 11) IS IN PROGRESS.  IF BOTH COMMANDS ARE LESS THAN .5
-#       DEGREES AS INDICATED BY MPAC+1, THE RR AUTO TRACKER ENABLE BIT
-#       (CHAN 12 BIT 14) IS CLEARED AND RROUT CALLED TO PUT OUT THE
-#       COMMANDS PROVIDED NO REPOSITION (RADMODES BIT 11) IS IN
-#       PROGRESS.  IF BOTH COMMANDS ARE LESS THAN .5 DEGREES, THE
-#       LOCK-ON FLAG (STATE BIT 5) IS CHECKED.  IF NOT PRESENT, THE
-#       DESIGNATE FLAG (RADMODES BIT 10) IS CLEARED, THE RR ERROR
-#       COUNTER ENABLE BIT (CHAN 12 BIT 2) IS CLEARED, AND ENDOFJOB
-#       CALLED. IF LOCK-ON IS DESIRED, THE RR AUTO TRACKER (CHAN 12
-#       BIT 14) IS ENABLED FOLLOWED BY A CHECK OF THE RECEIPT OF THE
-#       RR DATA GOOD (CHAN 33 BIT 4) SIGNAL.  IF RR DATA GOOD
-#       PRESENT, THE DESIGNATE FLAG (RADMODES BIT 10) IS CLEARED,
-#       THE RR ERROR COUNTER ENABLE BIT (CHAN 12 BIT 2) IS CLEARED,
-#       AND ENDOFJOB CALLED.  IF RR DATA GOOD IS NOT PRESENT, RROUT
-#       IS CALLED TO PUT OUT THE COMMANDS PROVIDED NO REPOSITION
-#       (RADMODES BIT 11) IS IN PROGRESS AFTER WHICH THE JOB IS TERMINATED
-#       VIA ENDOFJOB.
-#
+# DODES CALCULATES AND REQUESTS ISSUANCE OF RR GYRO TORQUE
+# COMMANDS. INITIALLY THE CURRENT RR CDU ANGLES ARE STORED AND
+# THE LOS HALF-UNIT VECTOR TRANSFORMED FROM STABLE MEMBER TO
+# NAVIGATION BASE COORDINATES VIA SMNB IF NECESSARY. THE
+# SHAFT AND TRUNNION COMMANDS ARE THEN CALCULATED AS FOLLOWS_
+# + SHAFT = LOS  . (COS(S), 0, -SIN (S)) (DOT PRODUCT)
+# -TRUNNION = LOS  . (SIN (T) SIN (S), COS (T), SIN (T) COS (S) )
+# THE SIGN OF THE SHAFT COMMAND IS THEN REVERSED IF IN MODE 2
+# (RADMODES BIT 12) BECAUSE A RELAY IN THE RR REVERSES THE 
+# POLARITY OF THE COMMAND. AT RRSCALUP EACH COMMAND IS
+# SCALED AND IF EITHER, OR BOTH, OF THE COMMANDS IS GREATER THAN
+# .5 DEGREES, MPAC +1 IS SET POSITIVE. IF A CONTINUOUS DESIGNATE 
+# (RADMODES BIT 15) IS DESIRED AND THE SEARCH ROUTINE IS NOT OPERATING,
+# THE RR AUTO TRACKER ENABLE BIT (CHAN 12 BIT 14) IS CLEARED AND RROUT
+# CALLED TO PUT OUT THE COMMANDS PROVIDED NO REPOSITION (RADMODES BIT 11)
+# IS IN PROGRESS. IF A CONTINUOUS DESIGNATE AND THE SEARCH ROUTINE IS
+# OPERATING (SRCHOPT FLAG SET) THE TRACK ENABLE IS NOT CLEARED. IF NO
+# CONTINUOUS DESIGNATE AND BOTH COMMANDS ARE NOT LESS THAN .5 DEGREES AS
+# INDICATED BY MPAC +1, THE RR AUTO TRACKER ENABLE BIT (CHAN 12 BIT 14) IS
+# CLEARED AND RROUT CALLED TO PUT OUT THE COMMANDS PROVIDED NO REPOSITION
+# (RADMODES BIT 11) IS IN PROGRESS. IF BOTH COMMANDS ARE LESS THAN .5
+# DEGREES AS INDICATED BY MPAC+1, THE RR AUTO TRACKER ENABLE BIT
+# (CHAN 12 BIT 14) IS CLEARED AND RROUT CALLED TO PUT OUT THE
+# COMMANDS PROVIDED NO REPOSITION (RADMODES BIT 11) IS IN
+# PROGRESS. IF BOTH COMMANDS ARE LESS THAN .5 DEGREES, THE
+# LOCK-ON FLAG (STATE BIT 5) IS CHECKED. IF NOT PRESENT, THE
+# DESIGNATE FLAG (RADMODES BIT 10) IS CLEARED, THE RR ERROR
+# COUNTER ENABLE BIT (CHAN 12 BIT 2) IS CLEARED, AND ENDOFJOB
+# CALLED. IF LOCK-ON IS DESIRED, THE RR AUTO TRACKER (CHAN 12
+# BIT 14) IS ENABLED FOLLOWED BY A CHECK OF THE RECEIPT OF THE
+# RR DATA GOOD (CHAN 33 BIT 4) SIGNAL. IF RR DATA GOOD
+# PRESENT, THE DESIGNATE FLAG (RADMODES BIT 10) IS CLEARED,
+# THE RR ERROR COUNTER ENABLE BIT (CHAN 12 BIT 2) IS CLEARED,
+# AND ENDOFJOB CALLED. IF RR DATA GOOD IS NOT PRESENT, RROUT
+# IS CALLED TO PUT OUT THE COMMANDS PROVIDED NO REPOSITION
+# (RADMODES BIT 11) IS IN PROGRESS AFTER WHICH THE JOB IS TERMINATED
+# VIA ENDOFJOB.
+
 # CALLING SEQUENCE:
-#
-#       EXECUTIVE CALL EVERY .5 SECONDS FROM BEGDES.
-#
+# EXECUTIVE CALL EVERY .5 SECONDS FROM BEGDES.
+
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       RRTARGET (HALF-UNIT LOS VECTOR IN EITHER SM OR NB COORDINATES),
-#       LOKONSW (STATE BIT 5), RRNBSW (STATE BIT 6), RADMODES
-#
+# RRTARGET (HALF-UNIT LOS VECTOR IN EITHER SM OR NB COORDINATES),
+# LOKONSW (STATE BIT 5), RRNBSW (STATE BIT 6), RADMODES
+
 # SUBROUTINES CALLED_
-#
-#       READCDUS, SMNB, CDULOGIC, MAGSUB, RROUT
-## Page 548
-#
+# READCDUS, SMNB, CDULOGIC, MAGSUB, RROUT
+
+## Page 559
 # JOBS OR TASKS INITIATED_
-#
-#       NONE
-#
+# NONE
+
 # ALARMS_  NONE
-#
+
 # EXIT_  ENDOFJOB (ALWAYS)
 
 DODES           EXTEND
-                DCA     CDUT
-                DXCH    TANG
-
-                TC      INTPRET
-
-                SETPD   VLOAD
-                        0
-                        RRTARGET
-                BON     VXSC
-                        RRNBSW
-                        DONBRD          # TARGET IN NAV-BASE COORDINATES
-                        MLOSV           # MULTIPLY UNIT LOS BY MAGNITUDE
-                VSL1    PDVL
-                        LOSVEL
-                VXSC    VAD             # ADD ONE SECOND RELATIVE VELOCITY TO LOS
-                        MCTOMS
-                UNIT    CALL
-                        CDUTRIG
-                CALL
-                        *SMNB*
-
-DONBRD          STODL   32D
-                        TANG +1
-                RTB     PUSH            # SHAFT COMMAND = V(32D).(COS(S), 0,
-                        CDULOGIC        #       (-SIN(S)).
-                SIN     PDDL            # SIN(S) TO 0 AND COS(S) TO 2.
-                COS     PUSH
-                DMP     PDDL
-                        32D
-                        36D
-                DMP     BDSU
-                        0
-                STADR
-                STORE   TANG +1         # SHAFT COMMAND
-
-                SLOAD   RTB
-                        TANG
-                        CDULOGIC
-                PUSH    COS             # COS(T) TO 4.
-                PDDL    SIN
-                PUSH    DMP             # SIN(T) TO 6.
-                        2
-## Page 549
-                SL1     PDDL            # DEFINE VECTOR U =     (SIN(T)SIN(S))
-                        4               #                       (   COS(T)   )
-                PDDL    DMP             #                       (SIN(T)COS(S))
-                        6
-                        0
-                SL1     VDEF
-                DOT     EXIT            # DOT U WITH LOS TO GET TRUNNION COMMAND.
-                        32D
-
-## Page 550
-# AT THIS POINT WE HAVE A ROTATION VECTOR IN DISH AXES LYING IN THE TS PLANE.  CONVERT THIS TO A
+                DCA             CDUT
+                DXCH            TANG
+        
+                TC              INTPRET
+        
+                SETPD           VLOAD
+                                0
+                                RRTARGET
+                BON             VXSC
+                                RRNBSW
+                                DONBRD                  # TARGET IN NAV-BASE COORDINATES
+                                MLOSV                   # MULTIPLY UNIT LOS BY MAGNITUDE
+                VSL1            PDVL    
+                                LOSVEL  
+                VXSC            VAD                     # ADD ONE SECOND RELATIVE VELOCITY TO LOS
+                                MCTOMS  
+                UNIT            CALL    
+                                CDUTRIG 
+                CALL            
+                                *SMNB*  
+                
+DONBRD          STODL           32D     
+                                TANG            +1 
+                RTB             PUSH                    # SHAFT COMMAND = V(32D).(COS(S), 0,
+                                CDULOGIC                #      (-SIN(S)).
+                SIN             PDDL                    # SIN(S) TO 0 AND COS(S) TO 2.
+                COS             PUSH    
+                DMP             PDDL    
+                                32D     
+                                36D     
+                DMP             BDSU    
+                                0       
+                STADR           
+                STORE           TANG            +1      # SHAFT COMMAND
+                
+                SLOAD           RTB     
+                                TANG    
+                                CDULOGIC        
+                PUSH            COS                     # COS(T) TO 4.
+                PDDL            SIN     
+                PUSH            DMP                     # SIN(T) TO 6.
+                                2       
+                                
+## Page 560             
+                SL1             PDDL                    # DEFINE VECTOR U = (SIN(T)SIN(S))
+                                4                       #                   (COS(T)      )
+                PDDL            DMP                     #                   (SIN(T)COS(S))
+                                6       
+                                0       
+                SL1             VDEF    
+                DOT             EXIT                    # DOT U WITH LOS TO GET TRUNNION COMMAND.
+                                32D     
+        
+## Page 561
+#          AT THIS POINT WE HAVE A ROTATION VECTOR IN DISH AXES LYING IN THE TS PLANE. CONVERT THIS TO A
 # COMMANDED RATE AND ENABLE THE TRACKER IF WE ARE WITHIN .5 DEGREES OF THE TARGET.
 
-                CS      MPAC            # DOT WAS NEGATIVE OF DESIRED ANGLE.
-                EXTEND
-                MP      RDESGAIN        # SCALING ON INPUT ANGLE WAS 4 RADIANS.
-                TS      TANG            # TRUNNION COMMAND.
-                CS      RADMODES        # A RELAY IN THE RR REVERSES POLARITY OF
-                MASK    BIT12           # THE SHAFT COMMANDS IN MODE 2 SO THAT A
-                EXTEND                  # POSITIVE TORQUE APPLIED TO THE SHAFT
-                BZF     +3              # GYRO CAUSES A POSITIVE CHANGE IN THE
-                CA      TANG +1         # SHAFT ANGLE.  COMPENSATE FOR THIS SWITCH
-                TCF     +2              # BY CHANGING THE POLARITY OF OUR COMMAND.
- +3             CS      TANG +1
-                EXTEND
-                MP      RDESGAIN        # SCALING ON INPUT ANGLE WAS 4 RADIANS.
-                TS      TANG +1         # SHAFT COMMAND.
-                TC      INTPRET
+                CS              MPAC                    # DOT WAS NEGATIVE OF DESIRED ANGLE.
+                EXTEND          
+                MP              RDESGAIN                # SCALING ON INPUT ANGLE WAS 4 RADIANS.
+                TS              TANG                    # TRUNNION COMMAND.
+                CS              RADMODES                # A RELAY IN THE RR REVERSES POLARITY OF
+                MASK            BIT12                   # THE SHAFT COMMANDS IN MODE 2 SO THAT A
+                EXTEND                                  # POSITIVE TORQUE APPLIED TO THE SHAFT
+                BZF             +3                      # GYRO CAUSES A POSITIVE CHANGE IN THE
+                CA              TANG            +1      # SHAFT ANGLE. COMPENSATE FOR THIS SWITCH
+                TCF             +2                      # BY CHANGING THE POLARITY OF OUR COMMAND.
+        +3      CS              TANG            +1 
+                EXTEND          
+                MP              RDESGAIN                # SCALING ON INPUT ANGLE WAS 4 RADIANS.
+                TS              TANG            +1      # SHAFT COMMAND.
+                TC              INTPRET 
+                
+                DLOAD           DMP     
+                                2                       # COS(S).
+                                4                       # COS(T).
+                SL1             PDDL                    # Z COMPONENT OF URR.
+                DCOMP           PDDL                    # Y COMPONENT = -SIN(T).
+                                0                       # SIN(S).
+                DMP             SL1     
+                                4                       # COS(T).
+                VDEF            BON                     # FORM URR IN NB AXES.
+                                RRNBSW                  # BYPASS NBSM CONVERSION IN VERB 41.
+                                +3      
+                CALL            
+                                *NBSM*                  # GET URR IN SM AXES.
+                DOT             EXIT    
+                                RRTARGET                # GET COSINE OF ANGLE BETWEEN RR AND LOS.
+                
+                EXTEND          
+                DCS             COS1/2DG        
+                DAS             MPAC                    # DIFFERENCE OF COSINES, SCALED B-2.
+                CCS             MPAC    
+                CA              ZERO                    # IF COS ERROR BIGGER, ERROR IS SMALLER.
+                TCF             +2      
+                CA              ONE     
+                TS              MPAC            +1      # ZERO IF RR IS POINTED OK, ONE IF NOT.
+                
+## Page 562             
+#          SEE IF TRACKER SHOULD BE ENABLED OR DISABLED.
 
-                DLOAD   DMP
-                        2               # COS(S).
-                        4               # COS(T).
-                SL1     PDDL            # Z COMPONENT OF URR.
-                DCOMP   PDDL            # Y COMPONENT = -SIN(T).
-                        0               # SIN(S).
-                DMP     SL1
-                        4               # COS(T).
-                VDEF    BON             # FORM URR IN NB AXES.
-                        RRNBSW          # BYPASS NBSM CONVERSION IN VERB 41.
-                        +3
-                CALL
-                        *NBSM*          # GET URR IN SM AXES.
-                DOT     EXIT
-                        RRTARGET        # GET COSINE OF ANGLE BETWEEN RR AND LOS.
-
-                EXTEND
-                DCS     COS1/2DG
-                DAS     MPAC            # DIFFERENCE OF COSINES, SCALED B-2.
-                CCS     MPAC
-                CA      ZERO            # IF COS ERROR BIGGER, ERROR IS SMALLER.
-                TCF     +2
-                CA      ONE
-                TS      MPAC +1         # ZERO IF RR IS POINTED OK, ONE IF NOT.
-## Page 551
-# SEE IF TRACKER SHOULD BE ENABLED OR DISABLED.
-
-                CCS     RADMODES        # IF CONTINUOUS DESIGNATE WANTED, PUT OUT
-                TCF     SIGNLCHK        # COMMANDS WITHOUT CHECKING MAGNITUDE OF
-                TCF     SIGNLCHK        # ERROR SIGNALS
-                TCF     DORROUT
-SIGNLCHK        CCS     MPAC +1         # SEE IF BOTH AXES WERE WITHIN .5 DEGS.
-                TCF     DGOODCHK
-                CS      STATE           # IF WITHIN LIMITS AND NO LOCK-ON WANTED,
-                MASK    LOKONBIT        # PROBLEM IS FINISHED.
-                CCS     A
-                TCF     RRDESDUN
-
-                CAF     BIT14           # ENABLE THE TRACKER.
-                EXTEND
-                WOR     CHAN12
-
-DGOODCHK        CAF     BIT4            # SEE IF DATA GOOD RECEIVED YET
-                EXTEND
-                RAND    CHAN33
-                CCS     A
-                TCF     DORROUT
-
-RRDESDUN        CS      BIT10           # WHEN PROBLEM DONE, REMOVE BIT 10 SO NEXT
-                MASK    RADMODES        # WAITLIST TASK WE WILL GO TO RGOODEND.
-                INHINT
-                TS      RADMODES
-
-                TC      DOWNFLAG        # RESET LOSCMFLG TO PREVENT A
-                ADRES   LOSCMFLG        # RECOMPUTATION OF LOS AFTER DATA GOOD
-                CS      BIT2            # TURN OFF ENABLE RR ERROR COUNTER
-                EXTEND
-                WAND    CHAN12
-                TCF     ENDOFJOB        # WITH ECTR DISABLED.
-
-DORROUT         CA      FLAGWRD2        # IF BOTH LOSCMFLAG AND SEARCH FLAG ARE
-                MASK    BIT12,14        # ZERO, BYPASS VELOCITY ADJUSTMENT TO LOS
-                EXTEND
-                BZF     NOTP20
-                TC      INTPRET
-                VLOAD   VXSC            # MULTIPLY UNIT LOS BY MAGNITUDE
-                        RRTARGET
-                        MLOSV
-                VSL1    PUSH
-                VLOAD   VXSC            # ADD .5 SEC. OF VELOCITY
-                        LOSVEL          # TO LOS VECTOR
-                        MCTOMS
-                VSR1    VAD
-                UNIT
-                STODL   RRTARGET        # STORE VELOCITY-CORRECTED LOS (UNIT)
-## Page 552
-                        36D
-                STORE   MLOSV           # AND STORE MAGNITUDE
-                EXIT
-NOTP20          INHINT
-                CS      RADMODES        # PUT OUT COMMAND UNLESS MONITOR
-                MASK    REPOSBIT        # REPOSITION HAS TAKEN OVER.
-                CCS     A
-                TC      RROUT
-
-                CA      FLAGWRD2
-                MASK    LOSCMBIT        # IF LOSCMFLG NOT SET, DON'T TEST
-                EXTEND                  # LOS COUNTER
-                BZF     ENDOFJOB
-                CCS     LOSCOUNT        # TEST LOS COUNTER TO SEE IF TIME TO GET
-                TC      DODESEND        # A NEW LOS
-                INHINT
-                TC      KILLTASK        # YES - KILL TASK WHICH SCHEDULES DODES
-                CADR    DESLOOP +2
-                RELINT
-                CCS     NEWJOB
-                TC      CHANG1
-                TC      BANKCALL
-                CADR    R21LEM2
-
-DODESEND        TS      LOSCOUNT
-                TC      ENDOFJOB
-
-RDESGAIN        DEC     .53624          # TRIES TO NULL .5 ERROR IN .5 SEC.
-BIT12,14        EQUALS  PRIO24          # OCT 24000
-COS1/2DG        2DEC    .999961923 B-2  # COSINE OF 0.5 DEGREES.
-MCTOMS          2DEC    100 B-13
-
-## Page 553
+                CCS             RADMODES                # IF CONTINUOUS DESIGNATE WANTED, PUT OUT
+                TCF             SIGNLCHK                # COMMANDS WITHOUT CHECKING MAGNITUDE OF
+                TCF             SIGNLCHK                # ERROR SIGNALS
+                TCF             DORROUT 
+SIGNLCHK        CCS             MPAC            +1      # SEE IF BOTH AXES WERE WITHIN .5 DEGS.
+                TCF             DGOODCHK        
+                CS              STATE                   # IF WITHIN LIMITS AND NO LOCK-ON WANTED,
+                MASK            LOKONBIT                # PROBLEM IS FINISHED.
+                CCS             A       
+                TCF             RRDESDUN        
+                
+                CAF             BIT14                   # ENABLE THE TRACKER.
+                EXTEND          
+                WOR             CHAN12  
+                
+DGOODCHK        CAF             BIT4                    # SEE IF DATA GOOD RECEIVED YET
+                EXTEND          
+                RAND            CHAN33  
+                CCS             A       
+                TCF             DORROUT 
+                
+RRDESDUN        CS              BIT10                   # WHEN PROBLEM DONE, REMOVE BIT 10 SO NEXT
+                MASK            RADMODES                # WAITLIST TASK WE WILL GO TO RGOODEND.
+                INHINT          
+                TS              RADMODES        
+                
+                TC              DOWNFLAG                # RESET LOSCMFLG TO PREVENT A
+                ADRES           LOSCMFLG                # RECOMPUTATION OF LOS AFTER DATA GOOD
+                CS              BIT2                    # TURN OFF ENABLE RR ERROR COUNTER
+                EXTEND          
+                WAND            CHAN12  
+                TCF             ENDOFJOB                # WITH ECTR DISABLED.
+                
+DORROUT         CA              FLAGWRD2                # IF NOT IN P20/P22 BUT V41,DON'T DO
+                MASK            RNDVZBIT                # VELOCITY CORRECTION
+                EXTEND          
+                BZF             NOTP20  
+                TC              INTPRET 
+                VLOAD           VXSC                    # MULTIPLY UNIT LOS BY MAGNITUDE
+                                RRTARGET        
+                                MLOSV   
+                VSL1            PUSH    
+                VLOAD           VXSC                    # ADD .5 SEC. OF VELOCITY
+                                LOSVEL                  # TO LOS VECTOR
+                                MCTOMS  
+                VSR1            VAD     
+                UNIT            
+                STODL           RRTARGET                # STORE VELOCITY-CORRECTED LOS (UNIT)
+                
+## Page 563
+                                36D     
+                STORE           MLOSV                   # AND STORE MAGNITUDE
+                EXIT            
+NOTP20          INHINT          
+                CS              RADMODES                # PUT OUT COMMAND UNLESS MONITOR
+                MASK            BIT11                   # REPOSITION HAS TAKEN OVER.
+                CCS             A       
+                TC              RROUT   
+                
+                CA              FLAGWRD2        
+                MASK            LOSCMBIT                # IF LOSCMFLG NOT SET, DON'T TEST
+                EXTEND                                  # LOS COUNTER
+                BZF             ENDOFJOB        
+                CCS             LOSCOUNT                # TEST LOS COUNTER TO SEE IF TIME TO GET
+                TC              DODESEND                # A NEW LOS
+                INHINT          
+                TC              KILLTASK                # YES - KILL TASK WHICH SCHEDULES DODES
+                CADR            DESLOOP         +2      
+                RELINT          
+                CCS             NEWJOB  
+                TC              CHANG1  
+                TC              BANKCALL        
+                CADR            R21LEM2 
+                
+                
+DODESEND        TS              LOSCOUNT        
+                TC              ENDOFJOB        
+                
+                
+RDESGAIN        DEC             .53624                  # TRIES TO NULL .5 ERROR IN .5 SEC.
+COS1/2DG        2DEC            .999961923      B-2     # COSINE OF 0.5 DEGREES.
+MCTOMS          2DEC            100             B-13        
+                
+## Page 564
 # RADAR READ INITIALIZATION
-#
+ 
 # RADAR DATA ARE READ BY A BANKCALL FOR THE APPROPRIATE LEAD-IN BELOW.
 
-LRALT           TC      INITREAD -1     # ONE SAMPLE PER READING.
-ALLREAD         OCT     17
-
-LRVELZ          TC      INITREAD
-                OCT     16
-
-LRVELY          TC      INITREAD
-                OCT     15
-
-LRVELX          TC      INITREAD
-                OCT     14
-
-RRRDOT          TC      INITREAD -1
-                OCT     12
-
-RRRANGE         TC      INITREAD -1
-                OCT     11
+LRALT           TC              INITREAD         -1     # ONE SAMPLE PER READING.
+ALLREAD         OCT             17
+        
+LRVELZ          TC              INITREAD
+                OCT             16
+        
+LRVELY          TC              INITREAD
+                OCT             15
+        
+LRVELX          TC              INITREAD
+                OCT             14
+        
+RRRDOT          TC              INITREAD        -1
+                OCT             12
+        
+RRRANGE         TC              INITREAD        -1
+                OCT             11
 
 # LRVEL IS THE ENTRY TO THE LR VELOCITY READ ROUTINE WHEN 5 SAMPLES ARE
-# WANTED.  ENTER WITH C(A)= 0,2,4 FOR LRVELZ,LRVELY,LRVELX RESP.
+# WANTED. ENTER WITH C(A)= 0,2,4 FOR LRVELZ,LRVELY,LRVELX RESP.
 
-LRVEL           TS      TIMEHOLD        # STORE VBEAM INDEX HERE MOMEMTARILY
-                CAF     FIVE            # SPECIFY FIVE SAMPLES
-                INDEX   TIMEHOLD
-                TCF     LRVELZ
-
-## Page 554
- -1             CAF     ONE             # ENTRY TO TAKE ONLY 1 SAMPLE.
-INITREAD        INHINT
-
-                TS      TIMEHOLD        # GET DT OF MIDPOINT OF NOMINAL SAMPLING
-                EXTEND                  # INTERVAL (ASSUMES NO BAD SAMPLES WILL BE
-                MP      BIT3            # ENCOUNTERED).
-                DXCH    TIMEHOLD
-
-                CCS     A
-                TS      NSAMP
-                AD      ONE
-# INSERT FOLLOWING INSTRUCTION TO GET 2N TRIES FOR N SAMPLES.
-#               DOUBLE
-                TS      SAMPLIM
-
-                CAF     DGBITS          # READ CURRENT VALUE OF DATA GOOD BITS.
-                EXTEND
-                RAND    CHAN33
-                TS      OLDATAGD
-
-                CS      ALLREAD
-                EXTEND
-                WAND    CHAN13          # REMOVE ALL RADAR BITS
-
-                INDEX   Q
-                CAF     0
-                EXTEND
-                WOR     CHAN13          # SET NEW RADAR BITS
-
-                EXTEND
-                DCA     TIME2
-                DAS     TIMEHOLD        # TIME OF NOMINAL MIDPOINT.
-
-                CAF     ZERO
-                TS      L
-                DXCH    SAMPLSUM
-                TCF     ROADBACK
-
-DGBITS          OCT     230
-
-## Page 555
+LRVEL           TS              TIMEHOLD                # STORE VBEAM INDEX HERE MOMEMTARILY
+                CAF             FIVE                    # SPECIFY FIVE SAMPLES
+                INDEX           TIMEHOLD        
+                TCF             LRVELZ  
+                
+## Page 565             
+ -1             CAF             ONE                     # ENTRY TO TAKE ONLY 1 SAMPLE.
+INITREAD        INHINT          
+                
+                TS              TIMEHOLD                # GET DT OF MIDPOINT OF NOMINAL SAMPLING
+                EXTEND                                  # INTERVAL (ASSUMES NO BAD SAMPLES WILL BE
+                MP              BIT3                    # ENCOUNTERED).
+                DXCH            TIMEHOLD
+        
+                CCS             A
+                TS              NSAMP
+                AD              ONE
+#          INSERT FOLLOWING INSTRUCTION TO GET 2N TRIES FOR N SAMPLES.
+#                                                  DOUBLE
+                TS              SAMPLIM
+        
+                CAF             DGBITS                  # READ CURRENT VALUE OF DATA GOOD BITS.
+                EXTEND                  
+                RAND            CHAN33          
+                TS              OLDATAGD                
+                        
+                CS              ALLREAD         
+                EXTEND                  
+                WAND            CHAN13                  # REMOVE ALL RADAR BITS
+                        
+                INDEX           Q               
+                CAF             0               
+                EXTEND                  
+                WOR             CHAN13                  # SET NEW RADAR BITS
+                        
+                EXTEND                  
+                DCA             TIME2           
+                DAS             TIMEHOLD                # TIME OF NOMINAL MIDPOINT.
+                        
+                CAF             ZERO
+                TS              L
+                DXCH            SAMPLSUM
+                TCF             ROADBACK
+        
+DGBITS          OCT             230
+        
+## Page 566
 # RADAR RUPT READER
-#
-# THIS ROUTINE STARTS FROM A RADARUPT.  IT READS THE DATA $ LOTS MORE.
+ 
+# THIS ROUTINE STARTS FROM A RADARUPT. IT READS THE DATA $ LOTS MORE.
 
-                SETLOC  RADARUPT
-                BANK
-
-                COUNT*  $$/RRUPT
-RADAREAD        EXTEND                  # MUST SAVE SBANK BECAUSE OF RUPT EXITS
-                ROR     SUPERBNK        # VIA TASKOVER (BADEND OR GOODEND)
-                TS      BANKRUPT
-                EXTEND
-                QXCH    QRUPT
-
-                CAF     SEVEN
-                EXTEND
-                RAND    CHAN13
-                TS      DNINDEX
-                EXTEND                  # IF RADAR SELECT BITS ZERO, DO NOT STORE
-                BZF     TRYCOUNT        # DATA FOR DOWNLIST (ERASABLE PROBLEMS)
-                CA      RNRAD
-                INDEX   DNINDEX
-                TS      DNRRANGE -1
-TRYCOUNT        CCS     SAMPLIM
-                TCF     PLENTY
-                TCF     NOMORE
-                TC      ALARM
-                OCT     520
-                TC      RESUME
-
-NOMORE          CA      FLGWRD11        # IS LRBYPASS SET?
-                MASK    LRBYBIT
-                EXTEND
-                BZF     BADRAD          # NO.  R12 IS ON -- BYPASS 521 ALARM.
-
-                CS      FLAGWRD3        # CHECK R04FLAG.
-                MASK    R04FLBIT        # IF 1, R04 IS RUNNING.  DO NOT ALARM-
-                EXTEND
-                BZF     BADRAD
-
-                TC      ALARM           # P20 WANTS THE ALARM.
-                OCT     521
-BADRAD          CS      ONE
-                TS      SAMPLIM
-                TC      RDBADEND -2
-PLENTY          TS      SAMPLIM
-                CAF     BIT3
-                EXTEND
-                RAND    CHAN13          # TO FIND OUT WHICH RADAR
-                EXTEND
-## Page 556
-                BZF     RENDRAD
-
-                TC      R77CHECK        # R77 QUITS HERE.
-LRPOSCHK        CA      RADMODES        # SEE IF LR IN DESIRED POSITION.
-                EXTEND
-                RXOR    CHAN33
-                MASK    BIT6
-                EXTEND
-                BZF     VELCHK
-
-                TC      ALARM
-                OCT     522
-                TC      BADRAD
-
-VELCHK          CAF     BIN3            # = 00003 OCT
-                EXTEND
-                RXOR    CHAN13          # RESET ACTIVITY BIT
-                MASK    BIN3
-                EXTEND
-                BZF     LRHEIGHT        # TAKE A LR RANGE READING
-
-                CAF     POSMAX
-                MASK    RNRAD
-                AD      LVELBIAS
-                TS      L
-                CAE     RNRAD
-                DOUBLE
-                MASK    BIT1
-                DXCH    ITEMP3
-
-                CAF     BIT8            # DATA GOOD ISNT CHECKED UNTIL AFTER READ-
-                TC      DGCHECK         # ING DATA SO SOME RADAR TESTS WILL WORK
-                                        # INDEPENDENT OF DATA GOOD.
-
-                CCS     NSAMP
-                TC      NOEND
-GOODRAD         CS      ONE
-                TS      SAMPLIM
-                CS      ITEMP1          # WHEN ENOUGH GOOD DATA HAS BEEN GATHERED,
-                MASK    RADMODES        # RESET DATA FAIL FLAGS FOR SETTRKF.
-                TS      RADMODES
-                TC      RADLITES        # LAMPS MAY GO OFF IF DATA JUST GOOD.
-                TC      RGOODEND -2
-
-NOEND           TS      NSAMP
-RESAMPLE        CCS     SAMPLIM         # SEE IF ANY MORE TRIES SHOULD BE MADE.
-                TCF     +2
-                TCF     DATAFAIL        # N SAMPLES NOT AVAILABLE.
-                CAF     BIT4            # RESET ACTIVITY BIT.
-                EXTEND
-## Page 557
-                WOR     CHAN13          # RESET ACTIVITY BIT
-                TC      RESUME
-
-
-LRHEIGHT        CAF     BIT5
-                TS      ITEMP1          # (POSITION OF DATA GOOD BIT IN CHAN 33)
-
-                CAF     BIT9
-                TC      SCALECHK -1
-
-RENDRAD         CAF     REPOSBIT        # MAKE SURE ANTENNA HAS NOT GONE OUT OF
-                MASK    RADMODES        # LIMITS.
-                CCS     A
-                TCF     BADRAD
-
-                CS      RADMODES        # BE SURE RR CDU HASNT FAILED.
-                MASK    RCDUFBIT
-                CCS     A
-                TCF     BADRAD
-
-                CAF     BIT4            # SEE IF DATA HAS BEEN GOOD.
-                TS      ITEMP1          # (POSITION OF DATA GOOD BIT IN CHAN 33)
-
-                CAF     BIT1            # SEE IF RR RDOT.
-                EXTEND
-                RAND    CHAN13
-                TS      Q               # FOR LATER TESTING.
-                CCS     A
-                TCF     +2
-                TCF     RADIN           # NO SCALE CHECK FOR RR RDOT.
-                CAF     BIT3
-                TS      L
-
-SCALECHK        EXTEND
-                RAND    CHAN33          # SCALE STATUS NOW
-                XCH     L
-                MASK    RADMODES        # SCALE STATUS BEFORE
-                EXTEND
-                RXOR    LCHAN           # SEE IF THEY DIFFER
-                CCS     A
-                TC      SCALCHNG        # THEY DIFFER
-
-RADIN           CAF     POSMAX
-                MASK    RNRAD
-                TS      ITEMP4
-
-                CAE     RNRAD
-                DOUBLE
-                MASK    BIT1
-                TS      ITEMP3
-## Page 558
-                CCS     Q               # SEE IF RR RDOT.
-                TCF     SCALADJ         # NO, BUT SCALE CHANGING MAY BE NEEDED.
-
-                EXTEND                  # IF RR RANGE RATE, THROW OUT BIAS.
-                DCS     RDOTBIAS
-DASAMPL         DAS     ITEMP3
-DGCHECK2        CA      ITEMP1          # SEE THAT DATA HAS BEEN GOOD BEFORE AND
-                TC      DGCHECK +1      # AFTER TAKING SAMPLE.
-                TC      GOODRAD
-
-SCALCHNG        LXCH    RADMODES
-                AD      BIT1
-                EXTEND
-                RXOR    LCHAN
-                TS      RADMODES
-                CAF     DGBITS          # UPDATE LAST VALUE OF DATA GOOD BITS.
-                EXTEND
-                RAND    CHAN33
-                TS      OLDATAGD
-                TC      UPFLAG          # SET RNGSCFLG
-                ADRES   RNGSCFLG        # FOR LRS24.1
-                TCF     BADRAD
+                SETLOC          RADARUPT
+                BANK    
+        
+                COUNT*          $$/RRUPT
+RADAREAD        EXTEND                                  # MUST SAVE SBANK BECAUSE OF RUPT EXITS
+                ROR             SUPERBNK                # VIA TASKOVER (BADEND OR GOODEND.
+                TS              BANKRUPT        
+                EXTEND          
+                QXCH            QRUPT   
+                
+                CAF             SEVEN   
+                EXTEND          
+                RAND            CHAN13  
+                TS              DNINDEX 
+                EXTEND                                  # IF RADAR SELECT BITS ZERO,DO NOT STORE
+                BZF             TRYCOUNT                # DATA FOR DOWNLIST (ERASABLE PROBLEMS)
+                CA              RNRAD   
+                INDEX           DNINDEX 
+                TS              DNRRANGE        -1     
+TRYCOUNT        CCS             SAMPLIM 
+                TCF             PLENTY  
+                TCF             NOMORE  
+                TC              ALARM   
+                OCT             520     
+                TC              RESUME  
+                
+NOMORE          CA              FLGWRD11                # IS LRBYPASS SET?
+                MASK            LRBYBIT 
+                EXTEND          
+                BZF             BADRAD                  # NO.  R12 IS ON -- BYPASS 521 ALARM.
+                
+                CS              FLAGWRD3                # CHECK R04FLAG.
+                MASK            R04FLBIT                # IF 1,R04 IS RUNNING. DO NOT ALARM-
+                EXTEND          
+                BZF             BADRAD  
+                
+                TC              ALARM                   # P20 WANTS THE ALARM.
+                OCT             521     
+BADRAD          CS              ONE     
+                TS              SAMPLIM 
+                TC              RDBADEND        -2     
+PLENTY          TS              SAMPLIM 
+                CAF             BIT3    
+                EXTEND          
+                RAND            CHAN13                  # TO FIND OUT WHICH RADAR
+                EXTEND          
+                
+## Page 567             
+                BZF             RENDRAD 
+                
+                TC              R77CHECK                # R77 QUITS HERE.
+LRPOSCHK        CA              RADMODES                # SEE IF LR IN DESIRED POSITION.
+                EXTEND          
+                RXOR            CHAN33  
+                MASK            BIT6    
+                EXTEND          
+                BZF             VELCHK  
+                
+                TC              ALARM   
+                OCT             522     
+                TC              BADRAD  
+                
+VELCHK          CAF             BIN3                    # = 00003 OCT
+                EXTEND          
+                RXOR            CHAN13                  # RESET ACTIVITY BIT
+                MASK            BIN3    
+                EXTEND          
+                BZF             LRHEIGHT                # TAKE A LR RANGE READING
+                
+                CAF             POSMAX  
+                MASK            RNRAD   
+                AD              LVELBIAS        
+                TS              L       
+                CAE             RNRAD   
+                DOUBLE          
+                MASK            BIT1    
+                DXCH            ITEMP3  
+                
+                CAF             BIT8                    # DATA GOOD ISNT CHECKED UNTIL AFTER READ-
+                TC              DGCHECK                 # ING DATA SO SOME RADAR TESTS WILL WORK
+                                                        # INDEPENDENT OF DATA GOOD.
+                
+                CCS             NSAMP   
+                TC              NOEND   
+GOODRAD         CS              ONE     
+                TS              SAMPLIM 
+                CS              ITEMP1                  # WHEN ENOUGH GOOD DATA HAS BEEN GATHERED,
+                MASK            RADMODES                # RESET DATA FAIL FLAGS FOR SETTRKF.
+                TS              RADMODES        
+                TC              RADLITES                # LAMPS MAY GO OFF IF DATA JUST GOOD.
+                TC              RGOODEND        -2     
+                
+NOEND           TS              NSAMP   
+RESAMPLE        CCS             SAMPLIM                 # SEE IF ANY MORE TRIES SHOULD BE MADE.
+                TCF             +2      
+                TCF             DATAFAIL                # N SAMPLES NOT AVAILABLE.
+                CAF             BIT4                    # RESET ACTIVITY BIT.
+                EXTEND          
+                
+## Page 568             
+                WOR             CHAN13                  # RESET ACTIVITY BIT
+                TC              RESUME  
+                
+                
+LRHEIGHT        CAF             BIT5    
+                TS              ITEMP1                  # (POSITION OF DATA GOOD BIT IN CHAN 33)
+                
+                CAF             BIT9    
+                TC              SCALECHK        -1     
+                
+RENDRAD         CAF             BIT11                   # MAKE SURE ANTENNA HAS NOT GONE OUT OF
+                MASK            RADMODES                # LIMITS.
+                CCS             A       
+                TCF             BADRAD  
+                
+                CS              RADMODES                # BE SURE RR CDU HASNT FAILED.
+                MASK            BIT7        
+                CCS             A       
+                TCF             BADRAD  
+                
+                CAF             BIT4                    # SEE IF DATA HAS BEEN GOOD.
+                TS              ITEMP1                  # (POSITION OF DATA GOOD BIT IN CHAN 33)
+                
+                CAF             BIT1                    # SEE IF RR RDOT.
+                EXTEND          
+                RAND            CHAN13  
+                TS              Q                       # FOR LATER TESTING.
+                CCS             A       
+                TCF             +2      
+                TCF             RADIN                   # NO SCALE CHECK FOR RR RDOT.
+                CAF             BIT3    
+                TS              L       
+                
+SCALECHK        EXTEND          
+                RAND            CHAN33                  # SCALE STATUS NOW
+                XCH             L       
+                MASK            RADMODES                # SCALE STATUS BEFORE
+                EXTEND          
+                RXOR            LCHAN                   # SEE IF THEY DIFFER
+                CCS             A       
+                TC              SCALCHNG                # THEY DIFFER
+                
+RADIN           CAF             POSMAX  
+                MASK            RNRAD   
+                TS              ITEMP4  
+                
+                CAE             RNRAD   
+                DOUBLE          
+                MASK            BIT1    
+                TS              ITEMP3  
+                
+## Page 569             
+                CCS             Q                       # SEE IF RR RDOT.
+                TCF             SCALADJ                 # NO, BUT SCALE CHANGING MAY BE NEEDED.
+                
+                EXTEND                                  # IF RR RANGE RATE, THROW OUT BIAS.
+                DCS             RDOTBIAS        
+DASAMPL         DAS             ITEMP3  
+DGCHECK2        CA              ITEMP1                  # SEE THAT DATA HAS BEEN GOOD BEFORE AND
+                TC              DGCHECK         +1      # AFTER TAKING SAMPLE.
+                TC              GOODRAD 
+                
+SCALCHNG        LXCH            RADMODES        
+                AD              BIT1    
+                EXTEND          
+                RXOR            LCHAN   
+                TS              RADMODES        
+                CAF             DGBITS                  # UPDATE LAST VALUE OF DATA GOOD BITS.
+                EXTEND          
+                RAND            CHAN33  
+                TS              OLDATAGD        
+                TC              UPFLAG                  # SET RNGSCFLG
+                ADRES           RNGSCFLG                # FOR LRS24.1
+                TCF             BADRAD  
 
 # R77 MUST IGNORE DATA FAILS SO AS NOT TO DISTURB THE ASTRONAUT.
 
-R77CHECK        CS      FLAGWRD5
-                MASK    R77FLBIT
-                CCS     A
-                TC      Q               # NOT R77
-                CS      BITS5,8         # UPDATE LR DATA GOOD BITS IN RADMODES
-                MASK    RADMODES
-                TS      L
-                CA      BITS5,8
-                EXTEND
-                RAND    CHAN33
-                AD      L
-                TS      RADMODES
-                TC      RGOODEND -2
-BITS5,8         OCT     220
+R77CHECK        CS              FLAGWRD5
+                MASK            R77FLBIT
+                CCS             A
+                TC              Q                       # NOT R77
+                CS              BITS5,8                 # UPDATE LR DATA GOOD BITS IN RADMODES
+                MASK            RADMODES
+                TS              L
+                CA              BITS5,8
+                EXTEND  
+                RAND            CHAN33
+                AD              L
+                TS              RADMODES
+                TC              RGOODEND        -2
+BITS5,8         OCT             220
 
-## Page 559
-# THE FOLLOWING ROUTINE INCORPORATES RR RANGE AND LR ALT SCALE INFORMATION AND LEAVES DATA AT LO SCALE.
+## Page 570
+#          THE FOLLOWING ROUTINE INCORPORATES RR RANGE AND LR ALT SCALE INFORMATION AND LEAVES DATA AT LO SCALE.
 
-SCALADJ         CCS     L               # L HAS SCALE INBIT FOR THIS RADAR.
-                TCF     +2              # ON HIGH SCALE.
-                TCF     DGCHECK2
+SCALADJ         CCS             L                       # L HAS SCALE INBIT FOR THIS RADAR.
+                TCF             +2                      # ON HIGH SCALE.
+                TCF             DGCHECK2        
+                        
+                CA              DNINDEX 
+                MASK            BIT3    
+                CCS             A       
+                TCF             LRSCK   
+                        
+                DXCH            ITEMP3  
+                DDOUBL                  
+                DDOUBL                  
+                DDOUBL                  
+                DXCH            ITEMP3  
+                        
+                TCF             DGCHECK2        
+                        
+LRSCK           CCS             ITEMP3  
+                TCF             +11     
+                CS              ITEMP4  
+                AD              HISCALIM        
+                EXTEND                  
+                BZMF            +5      
+                        
+                CS              FLGWRD11        
+                MASK            SCABBIT 
+                ADS             FLGWRD11        
+                TCF             +4      
+                        
+                CS              SCABBIT 
+                MASK            FLGWRD11        
+                TS              FLGWRD11        
+                        
+                EXTEND                  
+                DCA             ITEMP3  
+                DDOUBL                  
+                DDOUBL                  
+                TCF             DASAMPL 
+                        
+HISCALIM        DEC             460                     # 2481.7 FT  *****************************
 
-                CA      DNINDEX
-                MASK    BIT3
-                CCS     A
-                TCF     LRSCK
-
-                DXCH    ITEMP3
-                DDOUBL
-                DDOUBL
-                DDOUBL
-                DXCH    ITEMP3
-
-                TCF     DGCHECK2
-
-LRSCK           CCS     ITEMP3
-                TCF     +11
-                CS      ITEMP4
-                AD      HISCALIM
-                EXTEND
-                BZMF    +5
-
-                CS      FLGWRD11
-                MASK    SCABBIT
-                ADS     FLGWRD11
-                TCF     +4
-
-                CS      SCABBIT
-                MASK    FLGWRD11
-                TS      FLGWRD11
-
-                EXTEND
-                DCA     ITEMP3
-                DDOUBL
-                DDOUBL
-                TCF     DASAMPL
-
-HISCALIM        DEC     460             # 2481.7 FT *****************************
-## Page 560
-DGCHECK         TS      ITEMP1          # UPDATE DATA GOOD BIT IN OLDATAGD AND
-                EXTEND                  # MAKE SURE IT WAS ON BEFORE AND AFTER THE
-                RAND    CHAN33          # SAMPLE WAS TAKEN BEFORE RETURNING.  IF
-                TS      L               # NOT, GOES TO RESAMPLE TO TRY AGAIN.  IF
-                CS      ITEMP1          # MAX NUMBER OF TRIES HAS BEEN REACHED,
-                MASK    OLDATAGD        # THE BIT CORRESPONDING TO THE DATA GOOD
-                AD      L               # WHICH FAILED TO APPEAR IS IN ITEMP1 AND
-                XCH     OLDATAGD        # CAN BE USED TO SET RADMODES WHICH VIA
-                MASK    ITEMP1          # SETTRKF SETS THE TRACKER FAIL LAMP.
-                AD      L
-                CCS     A               # SHOULD BOTH BE ZERO.
-                TC      RESAMPLE
-                DXCH    ITEMP3          # IF DATA GOOD BEFORE AND AFTER, ADD TO
-                DAS     SAMPLSUM        # ACCUMULATION.
-                TC      Q
-
-DATAFAIL        CS      ITEMP1          # IN THE ABOVE CASE, SET RADMODES BIT
-                MASK    RADMODES        # SHOWING SOME RADAR DATA FAILED.
-                AD      ITEMP1
-                TS      RADMODES
-
-                DXCH    ITEMP3          # IF WE HAVE BEEN UNABLE TO GATHER N
-                DXCH    SAMPLSUM        # SAMPLES, USE LAST ONE ONLY.
-                TC      RADLITES
-                TCF     NOMORE
-## Page 561
+## Page 571                     
+DGCHECK         TS              ITEMP1                  # UPDATE DATA GOOD BIT IN OLDATAGD AND
+                EXTEND                                  # MAKE SURE IT WAS ON BEFORE AND AFTER THE
+                RAND            CHAN33                  # SAMPLE WAS TAKEN BEFORE RETURNING. IF
+                TS              L                       # NOT, GOES TO RESAMPLE TO TRY AGAIN. IF
+                CS              ITEMP1                  # MAX NUMBER OF TRIES HAS BEEN REACHED,
+                MASK            OLDATAGD                # THE BIT CORRESPONDING TO THE DATA GOOD
+                AD              L                       # WHICH FAILED TO APPEAR IS IN ITEMP1 AND
+                XCH             OLDATAGD                # CAN BE USED TO SET RADMODES WHICH VIA
+                MASK            ITEMP1                  # SETTRKF SETS THE TRACKER FAIL LAMP.
+                AD              L       
+                CCS             A                       # SHOULD BOTH BE ZERO.
+                TC              RESAMPLE        
+                DXCH            ITEMP3                  # IF DATA GOOD BEFORE AND AFTER, ADD TO
+                DAS             SAMPLSUM                # ACCUMULATION.
+                TC              Q       
+                        
+DATAFAIL        CS              ITEMP1                  # IN THE ABOVE CASE, SET RADMODES BIT
+                MASK            RADMODES                # SHOWING SOME RADAR DATA FAILED.
+                AD              ITEMP1  
+                TS              RADMODES        
+                        
+                DXCH            ITEMP3                  # IF WE HAVE BEEN UNABLE TO GATHER N
+                DXCH            SAMPLSUM                # SAMPLES, USE LAST ONE ONLY.
+                TC              RADLITES
+                TCF             NOMORE
+                
+## Page 572             
 # THIS ROUTINE CHANGES THE LR POSITION, AND CHECKS THAT IT GOT THERE.
 
-                SETLOC  P20S1
-                BANK
+                SETLOC          P20S1
+                BANK    
+        
+                COUNT*          $$/RSUB
+LRPOS2          INHINT  
+        
+                CS              RADMODES
+                MASK            BIT6                    # SHOW DESIRED LR POSITION IS 2
+                ADS             RADMODES        
+                
+                CAF             BIT7    
+                EXTEND          
+                RAND            CHAN33                  # SEE IF ALREADY THERE.
+                EXTEND          
+                BZF             RADNOOP 
+                
+                CAF             BIT13   
+                EXTEND          
+                WOR             CHAN12                  # COMMAND TO POSITION 2
+                CAF             6SECS                   # START SCANNING FOR INBIT AFTER 7 SECS.
+                TC              WAITLIST        
+                EBANK=          LOSCOUNT        
+                2CADR           LRPOSCAN        
+                
+                TC              ROADBACK        
+                
+LRPOSNXT        TS              SAMPLIM 
+                TC              FIXDELAY                # SCAN ONCE PER SECOND 15 TIMES MAX AFTER
+                DEC             100                     # INITIAL DELAY OF 7 SECONDS.
+                
+                CAF             BIT7                    # SEE IF LR POS2 IS ON
+                EXTEND          
+                RAND            CHAN33  
+                EXTEND          
+                BZF             LASTLRDT                # IF THERE, WAIT FINAL SECOND FOR BOUNCE.
+                
+                CCS             SAMPLIM                 # SEE IF MAX TIME UP.
+                TCF             LRPOSNXT        
+                
+                CS              BIT13                   # IF TIME UP, DISABLE COMMAND AND ALARM.
+                EXTEND          
+                WAND            CHAN12  
+                TCF             RDBADEND        
+                
+RADNOOP         CAF             ONE                     # NO FURTHER ACTION REQUESTED.
+                TC              WAITLIST        
+                EBANK=          LOSCOUNT        
+                2CADR           RGOODEND   
+                
+## Page 573             
+                TC              ROADBACK        
+                
+LASTLRDT        CA              2SECS                   # WAIT TWO SECONDS AFTER RECEIPT OF INBIT
+                TC              VARDELAY                # TO WAIT FOR ANTENNA BOUNCE TO DIE OUT.
+                
+                CS              BIT13                   # REMOVE COMMAND
+                EXTEND          
+                WAND            CHAN12  
+                TCF             RGOODEND        
+                
+LRPOSCAN        CAF             FOURTEEN                # SET UP FOR 15 SAMPLES.
+                TCF             LRPOSNXT     
+                
+6SECS           DEC             600     
 
-                COUNT*  $$/RSUB
-LRPOS2          INHINT
+## Page 574     
+#          SEQUENCES TO TERMINATE RR OPERATIONS.
 
-                CS      RADMODES
-                MASK    LRPOSBIT        # SHOW DESIRED LR POSITION IS 2
-                ADS     RADMODES
+ENDRADAR        CAF             BIT7                    # PROLOG TO CHECK RR CDU FAIL BEFORE END.
+                MASK            RADMODES        
+                CCS             A       
+                TCF             RGOODEND        
+                TCF             RDBADEND        
+ -2             CS              ZERO                    # RGOODEND WHEN NOT UNDER WAITLIST CONTROL
+                TS              RUPTAGN 
+                
+RGOODEND        CAF             TWO     
+                TC              POSTJUMP        
+                CADR            GOODEND 
+                
+ -2             CS              ZERO                    # RDBADEND WHEN NOT UNDER WAITLIST.
+                TS              RUPTAGN 
+RDBADEND        CAF             TWO
+                TC              POSTJUMP
+                CADR            BADEND
+        
+BIN3            EQUALS          THREE
+        
+## Page 575
+# PROGRAM NAME_ LPS20.1 VECTOR EXTRAPOLATION AND LOS COMPUTATION
+# MOD. NO.  2      BY  J.D. COYNE    SDC    DATE   12-7-66
 
-                CAF     BIT7
-                EXTEND
-                RAND    CHAN33          # SEE IF ALREADY THERE.
-                EXTEND
-                BZF     RADNOOP
 
-                CAF     BIT13
-                EXTEND
-                WOR     CHAN12          # COMMAND TO POSITION 2
-                CAF     6SECS           # START SCANNING FOR INBIT AFTER 7 SECS.
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   LRPOSCAN
-
-                TC      ROADBACK
-
-LRPOSNXT        TS      SAMPLIM
-                TC      FIXDELAY        # SCAN ONCE PER SECOND 15 TIMES MAX AFTER
-                DEC     100             # INITIAL DELAY OF 7 SECONDS.
-
-                CAF     BIT7            # SEE IF LR POS2 IS ON
-                EXTEND
-                RAND    CHAN33
-                EXTEND
-                BZF     LASTLRDT        # IF THERE, WAIT FINAL SECOND FOR BOUNCE.
-
-                CCS     SAMPLIM         # SEE IF MAX TIME UP.
-                TCF     LRPOSNXT
-
-                CS      BIT13           # IF TIME UP, DISABLE COMMAND AND ALARM.
-                EXTEND
-                WAND    CHAN12
-                TCF     RDBADEND
-
-RADNOOP         CAF     ONE             # NO FURTHER ACTION REQUESTED.
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   RGOODEND
-## Page 562
-                TC      ROADBACK
-
-LASTLRDT        CA      2SECS           # WAIT TWO SECONDS AFTER RECEIPT OF INBIT
-                TC      VARDELAY        # TO WAIT FOR ANTENNA BOUNCE TO DIE OUT.
-
-                CS      BIT13           # REMOVE COMMAND
-                EXTEND
-                WAND    CHAN12
-                TCF     RGOODEND
-
-LRPOSCAN        CAF     FOURTEEN        # SET UP FOR 15 SAMPLES.
-                TCF     LRPOSNXT
-6SECS           DEC     600
-## Page 563
-# SEQUENCES TO TERMINATE RR OPERATIONS.
-
-ENDRADAR        CAF     RCDUFBIT        # PROLOG TO CHECK RR CDU FAIL BEFORE END.
-                MASK    RADMODES
-                CCS     A
-                TCF     RGOODEND
-                TCF     RDBADEND
- -2             CS      ZERO            # RGOODEND WHEN NOT UNDER WAITLIST CONTROL
-                TS      RUPTAGN
-
-RGOODEND        CAF     TWO
-                TC      POSTJUMP
-                CADR    GOODEND
-
- -2             CS      ZERO            # RDBADEND WHEN NOT UNDER WAITLIST.
-                TS      RUPTAGN
-RDBADEND        CAF     TWO
-                TC      POSTJUMP
-                CADR    BADEND
-
-BIN3            EQUALS  THREE
-
-## Page 564
-# PROGRAM NAME_  LPS20.1 VECTOR EXTRAPOLATION AND LOS COMPUTATION
-# MOD. NO. 2    BY J.D. COYNE   SDC     DATE 12-7-66
-#
 # FUNCTIONAL DESCRIPTION_
-#       1)      EXTRAPOLATE THE LEM AND CSM VECTORS IN ACCORDANCE WITH THE TIME REFERED TO IN CALLER + 1.
-#       2)      COMPUTES THE LOS VECTOR TO THE CSM, CONVERTS IT TO STABLE MEMBER COORDINATES AND STORES IT IN RRTARGET.
-#       3)      COMPUTES THE MAGNITUDE OF THE LOS VECTOR AND STORES IT IN MLOSV
-#
-# CALLING SEQUENCE      CALL
+
+# 1) EXTRAPOLATE THE LEM AND CSM VECTORS IN ACCORDANCE WITH THE TIME REFERED TO IN CALLER + 1.
+# 2) COMPUTES THE LOS VECTOR TO THE CSM, CONVERTS IT TO STABLE MEMBER COORDINATES AND STORES IT IN RRTARGET.
+# 3) COMPUTES THE MAGNITUDE OF THE LOS VECTOR AND STORES IT IN MLOSV
+
+
+# CALLING SEQUENCE       CALL
 #                               LPS20.1
-#
+
 # SUBROUTINES CALLED_
-#       LEMPREC, CSMPREC
-#
-# NORMAL EXIT_  RETURN TO CALLER + 2
-#
-# ERROR EXITS_  NONE
-#
-# ALARMS_  NONE
-#
+
+# LEMPREC,CSMPREC
+
+
+# NORMAL EXIT_ RETURN TO CALLER + 2
+
+
+# ERROR EXITS_ NONE
+
+
+# ALARMS_ NONE
+
+
 # OUTPUT_
-#       LOS VECTOR (HALF UNIT) IN SM COORDINATES STORED IN RRTARGET
-#       MAGNITUDE OF THE LOS VECTOR (METERS SCALED B-29) STORED IN MSLOV
-#       RRNBSW CLEARED
-#
+
+# LOS VECTOR (HALF UNIT) IN SM COORDINATES STORED IN RRTARGET
+# MAGNITUDE OF THE LOS VECTOR (METERS SCALED B-29) STORED IN MSLOV
+# RRNBSW CLEARED
+
+
 # INITIALIZED ERASEABLE
-#       TDEC1 MUST CONTAIN THE TIME FOR EXTRAPOLATION
-#       SEE ORBITAL INTEGRATION ROUTINE
-#
+
+# TDEC1 MUST CONTAIN THE TIME FOR EXTRAPOLATION
+# SEE ORBITAL INTEGRATION ROUTINE
+
+
 # DEBRIS_
-#       MPAC DESTROYED BY THIS ROUTINE
 
-                BANK    23
-                SETLOC  P20S
-                BANK
-## Page 565
-                COUNT*  $$/LPS20
+# MPAC DESTROYED BY THIS ROUTINE
 
-LPS20.1         STQ     BOFF
-                        LS21X
-                        LOSCMFLG        # LOSCMFLG = 0 MEANS NOT CALLED BY R21
-                        LMINT           # SO CALL LEMCONIC TO GET LM STATE
-                BON                     # IF IN R21 AND ON LUNAR SURFACE
-                        SURFFLAG        # DON'T CALL LEMCONIC
-                        CSMINT
-LMINT           CALL
-                        LEMCONIC        # EXTRAPOLATE LEM
-                VLOAD
-                        RATT
-                STOVL   LMPOS           # SAVE LM POSITION B-29
-                        VATT
-                STODL   LMVEL           # SAVE LM VELOCITY B-7
-                        TAT
-CSMINT          STCALL  TDEC1
-                        CSMCONIC        # EXTRAPOLATE CSM
-                VLOAD   VSU             # COMPUTE RELATIVE VELOCITY V(CSM) - V(LM)
-                        VATT
-                        LMVEL
-                MXV     VSL1
-                        REFSMMAT
-                EXIT
-                TC      KILLTASK        # KILL THE TASK WHICH CALLS DODES SINCE
-                CADR    DESLOOP +2      # STORING INTO ERASEABLES DODES USES
-                TC      INTPRET
-                STOVL   LOSVEL
-                        RATT
-                VSU     BOFF
-                        LMPOS
-                        RNDVZFLG
-                        NOTSHIFT
-                BOVB
-                        TCDANZIG
-                VSL
-                        9D
-NOTSHIFT        UNIT    BOVB            # IF OVERFLOW, RANGE MUST BE GREATER
-                        526ALARM        # THAN 400 N. M.
-                MXV     VSL1
-                        REFSMMAT        # CONVERT TO STABLE MEMBER
-                STODL   RRTARGET
-                        36D             # SAVE MAGNITUDE OF LOS VECTOR FOR
-                STORE   MLOSV           # VELOCITY CORRECTION IN DESIGNATE
-                CLRGO
-                        RRNBSW
-                        LS21X
+                BANK            23
+                SETLOC          P20S
+                BANK    
+                
+## Page 576     
+                COUNT*          $$/LPS20
+        
+LPS20.1         STQ             BOFF
+                                LS21X
+                                LOSCMFLG                # LOSCMFLG = 0 MEANS NOT CALLED BY R21
+                                LMINT                   # SO CALL LEMCONIC TO GET LM STATE
+                BON                                     # IF IN R21 AND ON LUNAR SURFACE
+                                SURFFLAG                # DON'T CALL LEMCONIC
+                                CSMINT  
+LMINT           CALL            
+                                LEMCONIC                # EXTRAPOLATE LEM
+                VLOAD           
+                                RATT    
+                STOVL           LMPOS                   # SAVE LM POSITION B-29
+                                VATT    
+                STODL           LMVEL                   # SAVE LM VELOCITY B-7
+                                TAT     
+CSMINT          STCALL          TDEC1   
+                                CSMCONIC                #  EXTRAPOLATE CSM
+                VLOAD           VSU                     # COMPUTE RELATIVE VELOCITY V(CSM) - V(LM)
+                                VATT    
+                                LMVEL   
+                MXV             VSL1    
+                                REFSMMAT        
+                EXIT            
+                TC              KILLTASK                # KILL THE TASK WHICH CALLS DODES SINCE
+                CADR            DESLOOP         +2      # STORING INTO ERASEABLES DODES USES
+                TC              INTPRET 
+                STOVL           LOSVEL  
+                                RATT    
+                VSU             BOFF    
+                                LMPOS   
+                                RNDVZFLG        
+                                NOTSHIFT        
+                BOVB            
+                                TCDANZIG        
+                VSL             BOVB
+                                9D      
+                                526ALARM
+NOTSHIFT        UNIT                                   
+                MXV             VSL1    
+                                REFSMMAT                # CONVERT TO STABLE MEMBER
+                STODL           RRTARGET        
+                                36D                     # SAVE MAGNITUDE OF LOS VECTOR FOR
+                STORE           MLOSV                   # VELOCITY CORRECTION IN DESIGNATE
+                CLRGO           
+                                RRNBSW  
+                                LS21X
+        
+## Page 577
+# PROGRAM NAME_ : LPS20.2 400 NM RANGE CHECK
+# MOD. NO. 2   BY J.D. COYNE    SDC    DATE  12-7-66
 
-## Page 566
-# PROGRAM NAME_  LPS20.2  400 NM RANGE CHECK
-# MOD. NO. 2    BY J.D. COYNE   SDC     DATE 12-7-66
-#
+
 # FUNCTIONAL DESCRIPTION_
-#       COMPARES THE MAGNITUDE OF THE LOS VECTOR TO 400 NM
-#
-# CALLING SEQUENCE      CALL
+
+# COMPARES THE MAGNITUDE OF THE LOS VECTOR TO 400 NM
+
+
+# CALLING SEQUENCE       CALL
 #                               LPS20.2
-#
-# SUBROUTINES CALLED_  NONE
-#
-# NORMAL EXIT_  RETURN TO CALLER +1, MPAC EQ 0 (RANGE 400NM OR LESS.)
-#
-# ERROR EXITS_  RETURN TO CALLER +1, MPAC EQ 1 (RANGE GREATER THAN 400NM)
-#
-# ALARMS_  NONE
-#
-# OUTPUT_  NONE
-#
+
+
+# SUBROUTINES CALLED_ NONE
+
+
+# NORMAL EXIT _ RETURN TO CALLER +1, MPAC EQ 0 (RANGE 400NM OR LESS.)
+
+
+# ERROR EXITS _ RETURN TO CALLER +1, MPAC EQ 1 (RANGE GREATER THAN 400NM)
+
+
+# ALARMS_ NONE
+
+
+# OUTPUT_ NONE
+
+
 # INITIALIZED ERASEABLE_
-#       PDL 36D MUST CONTAIN THE MAGNITUDE OF THE VECTOR
-#
+
+# PDL 36D MUST CONTAIN THE MAGNITUDE OF THE VECTOR
 # DEBRIS
-#       MPAC DESTROYED BY THIS ROUTINE
 
-                SETLOC  P20S1
-                BANK
-                COUNT*  $$/LPS20
+# MPAC DESTROYED BY THIS ROUTINE
 
-LPS20.2         DLOAD   DSU
-                        MLOSV           # MAGNITUDE OF LOS
-                        FHNM            # OVER 400NM  _
-                BPL
-                        TOFAR
-                SLOAD   RVQ
-                        ZERO/SP
-TOFAR           SLOAD   RVQ
-                        ONE/SP
-ONE/SP          DEC     1
-## Page 567
-FHNM            2DEC    740800 B-20     # 400 NAUTICAL MILES IN METERS B-20
+                SETLOC          P20S1
+                BANK    
+                COUNT*          $$/LPS20
+        
+LPS20.2         DLOAD           DSU
+                                MLOSV                   # MAGNITUDE OF LOS
+                                FHNM                    # OVER 400NM  _
+                BPL     
+                                TOFAR
+                SLOAD           RVQ
+                                ZERO/SP
+TOFAR           SLOAD           RVQ
+                                ONE/SP
+ONE/SP          DEC             1
 
-## Page 568
-# PROGRAM NAME:  LRS22.1 (DATA READ SUBROUTINE 1)
-# MOD. NO.: 1           BY: P. VOLANTE  SDC             DATE:  11-15-66
-#
+## Page 578     
+FHNM            2DEC            740800          B-20    # 400 NAUTICAL MILES IN METERS B-20
+
+## Page 579
+# PROGRAM NAME: LRS22.1 (DATA READ SUBROUTINE 1)
+# MOD. NO.: 1       BY:  P. VOLANTE  SDC           DATE:  11-15-66
+
+
 # FUNCTIONAL DESCRIPTION
-#       1)      READS RENDEZVOUS RADAR RANGE AND RANGE-RATE, TRUNION AND SHAFT ANGLES, THREE CDU VALUES AND TIME.  CONVERTS THIS
-#               DATA AND LEAVES IT FOR THE MEASUREMENT INCORPORATION ROUTINE (LSR22.3).  CHECKS FOR THE RR DATA GOOD DISCRETE, FOR
-#               RR REPOSITION AND RR CDU FAIL
-#       2)      COMPARES RADAR LOS WITH LOS COMPUTED FROM STATE VECTORS TO SEE IF THEY ARE WITHIN THREE DEGREES
-#
-# CALLING SEQUENCE:  BANKCALL FOR LRS22.1
-#
+
+# 1) READS RENDEZVOUS RADAR RANGE AND RANGE-RATE,TRUNION AND SHAFT ANGLES,THREE CDU VALUES AND TIME. CONVERTS THIS
+# DATA AND LEAVES IT FOR THE MEASUREMENT INCORPORATION ROUTINE (LSR22.3). CHECKS FOR THE RR DATA GOOD DISCRETE,FOR
+# RR REPOSITION AND RR CDU FAIL
+
+# 2) COMPARES RADAR LOS WITH LOS COMPUTED FROM STATE VECTORS TO SEE IF THEY ARE WITHIN THREE DEGREES
+
+
+# CALLING SEQUENCE: BANKCALL FOR LRS22.1
+
+
 # SUBROUTINES CALLED:
-#       RRRDOT          LPS20.1
-#       RRRANGE         BANKCALL
-#       RADSTALL        CDULOGIC
-#       RRNB            SMNB
-#
-# NORMAL EXIT:  RETURN TO CALLER+1 WITH MPAC SET TO +0
-#
-# ERROR EXITS:  RETURN TO CALLER+1 WITH ERROR CODE STORED IN MPAC AS FOLLOWS:
-#       00001 - ERROR EXIT 1 - RR DATA NO GOOD (NO RR DATA GOOD DISCRETE OR RR CDU FAIL OR RR REPOSITION)
-#       00002 - ERROR EXIT 2 - RR LOS NOT WITHIN THREE DEGREES OF LOS COMPUTED FROM STATE VECTORS
-#
-# ALARMS:  521 - COULD NOT READ RADAR DATA (RR DATA GOOD DISCRETE NOT PRESENT BEFORE AND AFTER READING THE RADAR)
-#       (THIS ALARM IS ISSUED BY THE RADAREAD SUBROUTINE WHICH IS ENTERED FROM A RADARUPT)
-#
-# OUTPUT:  RRLOSVEC - THE RR LINE-OF-SIGHT VECTOR (USED BY LRS22.2) - A HALF-UNIT VECTOR
-#       RM - THE RR RANGE READING (TO THE CSM) DP, IN METERS SCALED B-29 (USED BY LRS22.2 AND LRS22.3)
-#
-#       ALL OF THE FOLLOWING OUTPUTS ARE USED BY LRS22.3:
-#               RDOTM - THE RR RANGE-RATE READING, DP, IN METERS PER CENTISECOND, SCALED B-7
-#               RRTRUN - RR TRUNION ANGLE, DP, IN REVOLUTIONS, SCALED B0
-#               RRSHAFT - RR SHAFT ANGLE, DP, IN REVOLUTIONS, SCALED B0
-#               AIG,AMG,AOG - THE CDU ANGLES, THREE SP WORDS
-#               MKTIME - THE TIME OF THE RR READING, DP, IN CENTISECONDS
-#
+
+#        RRRDOT   LPS20.1
+#        RRRANGE  BANKCALL
+#        RADSTALL CDULOGIC
+#        RRNB     SMNB
+# NORMAL EXIT: RETURN TO CALLER+1 WITH MPAC SET TO +0
+
+
+# ERROR EXITS: RETURN TO CALLER+1 WITH ERROR CODE STORED IN MPAC AS FOLLOWS:
+
+#              00001-ERROR EXIT 1-RR DATA NO GOOD (NO RR DATA GOOD DISCRETE OR RR CDU FAIL OR RR REPOSITION)
+#              00002-ERROR EXIT 2-RR LOS NOT WITHIN THREE DEGREES OF LOS COMPUTED FROM STATE VECTORS
+
+
+# ALARMS:  521-COULD NOT READ RADAR DATA (RR DATA GOOD DISCRETE NOT PRESENT BEFORE AND AFTER READING THE RADAR)
+#  (THIS ALARM IS ISSUED BY THE RADAREAD SUBROUTINE WHICH IS ENTERED FROM A RADARUPT)
+
+
+# OUTPUT: RRLOSVEC- THE RR LINE-OF-SIGHT VECTOR(USED BY LRS22.2)-A HALF-UNIT VECTOR
+#         RM- THE RR RANGE READING(TO THE CSM) DP, IN METERS SCALED B-29(USED BY LRS22.2 AND LRS22.3)
+
+#    ALL OF THE FOLLOWING OUTPUTS ARE USED BY LRS22.3:
+
+#         RDOTM- THE RR RANGE-RATE READING,DP, IN METERS PER CENTISECOND, SCALED B-7
+#         RRTRUN-RR TRUNION ANGLE,DP,IN REVOLUTIONS,SCALED B0
+#         RRSHAFT-RR SHAFT ANGLE,DP,IN REVOLUTIONS,SCALED B0
+#         AIG,AMG,AOG-THE CDU ANGLES,THREE SP WORDS
+#         MKTIME-THE TIME OF THE RR READING,DP,IN CENTISECONDS
+
+
 # ERASABLE INITIALIZATION REQUIRED:
-#       RNRAD, THE RADAR READ COUNTER FROM WHICH IS OBTAINED:
-## Page 569
-#               1) RR RANGE SCALED 9.38 FT. PER BIT ON THE LOW SCALE AND 75.04 FT. PER BIT ON THE HIGH SCALE
-#               2) RR RANGE RATE, SCALED .6278 FT./SEC. PER BIT
-#       THE CDU ANGLES FROM CDUX, CDUY, CDUZ AND TIME1 AND TIME2
-#
-# DEBRIS:  LRS22.1X, A, L, Q, PUSHLIST
 
-                BANK    32
-                SETLOC  LRS22
-                BANK
-                COUNT*  $$/LRS22
+#    RNRAD,THE RADAR READ COUNTER FROM WHICH IS OBTAINED:
 
-LRS22.1         TC      MAKECADR
-                TS      LRS22.1X
-                TC      DOWNFLAG
-                ADRES   RNGSCFLG
-                INHINT
-                CAF     BIT3
-                EXTEND                  # GET RR RANGE SCALE
-                RAND    CHAN33          # FROM CHANNEL 33 BIT 3
-                TS      L
-                CS      RRRSBIT
-                MASK    RADMODES
-                AD      L
-                TS      RADMODES
-                RELINT
-READRDOT        TC      BANKCALL
-                CADR    RRRDOT          # READ RANGE-RATE (ONE SAMPLE)
-                TC      BANKCALL
-                CADR    RADSTALL        # WAIT FOR DATA READ COMPLETION
-                TCF     EREXIT1         # COULD NOT READ RADAR-ERROR EXIT 1
+## Page 580
+#     1)RR RANGE SCALED 9.38 FT. PER BIT ON THE LOW SCALE AND 75.04 FT. PER BIT ON THE HIGH SCALE
+#     2)RR RANGE RATE,SCALED .6278 FT./SEC. PER BIT
 
-                INHINT                  # NO INTERRUPTS WHILE READING TIME AND CDU
-                DXCH    TIMEHOLD        # SET MARK TIME EQUAL TO THE MID-POINT
-                DXCH    MPAC +5         # TEMP BUFFER FOR DOWNLINK
-                DXCH    SAMPLSUM        # SAVE RANGE-RATE READING
-                DXCH    RDOTMSAV
-                EXTEND
-                DCA     CDUY            # SAVE ICDU ANGLES
-                DXCH    MPAC +3         # TEMP BUFFER FOR DOWNLINK
-                CA      CDUX
-                TS      MPAC +2         # TEMP BUFFER FOR DOWNLINK
-                EXTEND
-                DCA     TIME2           # SAVE TIME
-                DXCH    MPAC            # SAVE TIME OF CDY READINGS IN MPAC
-                EXTEND
-                DCA     CDUT            # SAVE TRUNION AND SHAFT ANGLES FOR RRNB
-                DXCH    TANG
-## Page 570
-                RELINT
-                TC      BANKCALL
-                CADR    RRRANGE         # READ RR RANGE (ONE SAMPLE)
-                TC      BANKCALL
-                CADR    RADSTALL        # WAIT FOR READ COMPLETE
-                TC      CHEXERR         # CHECK FOR ERRORS DURING READ
-                INHINT                  # COPY CYCLE FOR MARK DATA ON DOWNLINK
-                DXCH    DNRRANGE        # RANGE, RANGE RATE (RAW DATA)
-                DXCH    RANGRDOT
-                DXCH    MPAC +5
-                DXCH    MKTIME          # MARK TIME
-                DXCH    MPAC +3
-                DXCH    AIG             # CDUY, CDUZ
-                EXTEND
-                DCA     TANG            # PRESERVE TANG
-                DXCH    TANGNB          # TRUNNION AND SHAFT ANGLES
-                CA      MPAC +2
-                TS      AOG             # CDUX
-                TC      INTPRET
-                STODL   20D             # SAVE TIME OF CDU READINGS IN 20D
-                        RDOTMSAV        # CONVERT RDOT UNITS AND SCALING
-                SL      DMPR            # START WITH READING SCALED B-28, -.6278
-                        14D             # FT./SECOND PER BIT
-                        RDOTCONV        # END WITH METERS/CENTISECOND, B-7
-                STORE   RDOTM
-                SLOAD   RTB
-                        TANG            # GET TRUNION ANGLE
-                        CDULOGIC        # CONVERT TO DP ONES COMP. IN REVOLUTIONS
-                STORE   RRTRUN          # AND SAVE FOR TMI ROUTINE (LSR22.3)
-                SLOAD   RTB
-                        TANG +1         # DITTO FOR SHAFT ANGLE
-                        CDULOGIC
-                STODL   RRSHAFT
-                        SAMPLSUM
-                DMP     SL2R            # CONVERT UNITS AND SCALING OF RANGE
-                        RANGCONV        # PER BIT, END WITH METERS, SCALED -29
-                STCALL  RM
-                        RRNB            # COMPUTE RADAR LOS USING RRNB
-                STODL   RRBORSIT        # AND SAVE
-                        20D
-                STCALL  TDEC1           # GET STATE VECTOR LOS AT TIME OF CDU READ
-                        LPS20.1
-                EXIT
-                CA      AIG             # STORE IMU CDU ANGLES AT MARKTIME
-                TS      CDUSPOT         # IN CDUSPOT FOR TRG*SMNB
-                CA      AMG
-                TS      CDUSPOT +2
-                CA      AOG
-                TS      CDUSPOT +4
-                TC      INTPRET
-## Page 571
-                VLOAD   CALL            # LOAD VECTOR AND CALL TRANSFORMATION
-                        RRTARGET
-                        TRG*SMNB        # ROTATE LOS AT MARKTIME FROM SM TO NB.
-                DOT                     # DOT WITH RADAR LOS TO GET ANGLE
-                        RRBORSIT
-                SL1     ACOS            # BETWEEN THEM
-                STORE   DSPTEM1         # STORE FOR POSSIBLE DISPLAY
-                DSU     BMN             # IS IT LESS THAN 3 DEGREES
-                        THREEDEG
-                        NORMEXIT        # YES - NORMAL EXIT
+#    THE CDU ANGLES FROM CDUX,CDUY,CDUZ AND TIME1 AND TIME2
 
-                EXIT                    # ERROR EXIT 2
-                CAF     BIT2            # SET ERROR CODE
-                TS      MPAC
-                TCF     OUT22.1
 
-NORMEXIT        EXIT                    # NORMAL EXIT - SET MPAC EQUAL ZERO
-                CAF     ZERO
-                TS      MPAC
-OUT22.1         CAE     LRS22.1X        # EXIT FROM LRS22.1
-                TC      BANKJUMP
-CHEXERR         CAE     FLAGWRD5
-                MASK    RNGSCBIT
-                CCS     A               # CHECK IF RANGE SCALE CHANGED
-                TCF     READRDOT        # YES - TAKE ANOTHER READING
+# DEBRIS:  LRS22.1X,A,L,Q,PUSHLIST
 
-EREXIT1         CA      BIT1            # SET ERROR CODE
-                TS      MPAC
-                TC      OUT22.1
-THREEDEG        2DEC    .008333333      # THREE DEGREES, SCALED REVS, B0
-
-RRLOSVEC        EQUALS  RRTARGET
-
-## Page 572
+                BANK            32
+                SETLOC          LRS22
+                BANK    
+                COUNT*          $$/LRS22
+        
+LRS22.1         TC              MAKECADR
+                TS              LRS22.1X
+                TC              DOWNFLAG
+                ADRES           RNGSCFLG
+                INHINT  
+                CAF             BIT3
+                EXTEND                                  # GET RR RANGE SCALE
+                RAND            CHAN33                  # FROM CHANNEL 33 BIT 3
+                TS              L               
+                CS              BIT3         
+                MASK            RADMODES                
+                AD              L               
+                TS              RADMODES                
+                RELINT                  
+READRDOT        TC              BANKCALL                
+                CADR            RRRDOT                  # READ RANGE-RATE (ONE SAMPLE)
+                TC              BANKCALL                
+                CADR            RADSTALL                # WAIT FOR DATA READ COMPLETION
+                TCF             EREXIT1                 # COULD NOT READ RADAR-ERROR EXIT 1
+                        
+                INHINT                                  # NO INTERRUPTS WHILE READING TIME AND CDU
+                DXCH            TIMEHOLD                # SET MARK TIME EQUAL TO THE MID-POINT
+                DXCH            MKTIME                  # TEMP BUFFER FOR DOWNLINK
+                DXCH            SAMPLSUM                # SAVE RANGE-RATE READING
+                DXCH            RDOTMSAV                
+                EXTEND                  
+                DCA             CDUY                    # SAVE ICDU ANGLES
+                DXCH            AIG                     
+                CA              CDUX            
+                TS              AOG                     
+                EXTEND                  
+                DCA             TIME2                   #  SAVE TIME
+                DXCH            MPAC                    # SAVE TIME OF CDY READINGS IN MPAC
+                EXTEND                  
+                DCA             CDUT                    # SAVE TRUNION AND SHAFT ANGLES FOR RRNB
+                DXCH            TANG        
+                
+## Page 581                     
+                RELINT                  
+                TC              BANKCALL                
+                CADR            RRRANGE                 # READ RR RANGE (ONE SAMPLE)
+                TC              BANKCALL                
+                CADR            RADSTALL                # WAIT FOR READ COMPLETE
+                TC              CHEXERR                 # CHECK FOR ERRORS DURING READ
+                TC              INTPRET         
+                STODL           20D                     # SAVE TIME OF CDU READINGS IN 20D
+                                RDOTMSAV                # CONVERT RDOT UNITS AND SCALING
+                SL              DMPR                    # START WITH READING SCALED B-28, -.6278
+                                14D                     # FT./SECOND PER BIT
+                                RDOTCONV                # END WITH METERS/CENTISECOND, B-7
+                STODL           RDOTM                   # STORE FOR USE BY LSR22.3
+                                TANG
+                STORE           TANGNB
+                SLOAD           RTB             
+                                TANG                    # GET TRUNION ANGLE
+                                CDULOGIC                # CONVERT TO DP ONES COMP. IN REVOLUTIONS
+                STORE           RRTRUN                  # AND SAVE FOR TMI ROUTINE (LSR22.3)
+                SLOAD           RTB             
+                                TANG            +1      # DITTO FOR SHAFT ANGLE
+                                CDULOGIC                
+                STODL           RRSHAFT         
+                                SAMPLSUM                
+                DMP             SL2R                    # CONVERT UNITS AND SCALING OF RANGE
+                                RANGCONV                # PER BIT, END WITH METERS,SCALED -29
+                STCALL          RM              
+                                RRNB                    # COMPUTE RADAR LOS USING RRNB
+                STODL           RRBORSIT                # AND SAVE
+                                20D             
+                STCALL          TDEC1                   # GET STATE VECTOR LOS AT TIME OF CDU READ
+                                LPS20.1         
+                EXIT                    
+                CA              AIG                     # STORE IMU CDU ANGLES AT MARKTIME
+                TS              CDUSPOT                 # IN CDUSPOT FOR TRG*SMNB
+                CA              AMG             
+                TS              CDUSPOT         +2              
+                CA              AOG             
+                TS              CDUSPOT         +4              
+                TC              INTPRET         
+                VLOAD           CALL                    # LOAD VECTOR AND CALL TRANSFORMATION
+                                RRTARGET                
+                                TRG*SMNB                # ROTATE LOS AT MARKTIME FROM SM TO NB.
+                DOT                                     # DOT WITH RADAR LOS TO GET ANGLE
+                                RRBORSIT                
+                SL1             ACOS                    # BETWEEN THEM
+                STORE           DSPTEM1                 # STORE FOR POSSIBLE DISPLAY
+                DSU             BMN                     # IS IT LESS THAN 3 DEGREES
+                                THREEDEG                
+                                NORMEXIT                # YES-NORMAL EXIT
+                                
+## Page 582
+                        
+                EXIT                                    # ERROR EXIT 2
+                CAF             BIT2                    # SET ERROR CODE
+                TS              MPAC            
+                TCF             OUT22.1         
+                        
+NORMEXIT        EXIT                                    # NORMAL EXIT-SET MPAC EQUAL ZERO
+                CAF             ZERO            
+                TS              MPAC            
+OUT22.1         CAE             LRS22.1X                # EXIT FROM LRS22.1
+                TC              BANKJUMP                
+CHEXERR         CAE             FLAGWRD5                
+                MASK            RNGSCBIT                
+                CCS             A                       # CHECK IF RANGE SCALE CHANGED
+                TCF             READRDOT                # YES-TAKE ANOTHER READING
+                        
+EREXIT1         CA              BIT1                    # SET ERROR CODE
+                TS              MPAC            
+                TC              OUT22.1         
+THREEDEG        2DEC            .008333333              # THREE DEGREES,SCALED  REVS,B0
+RRLOSVEC        EQUALS          RRTARGET                
+        
+## Page 583
 # PROGRAM NAME - LRS22.2 (DATA READ SUBROUTINE 2)
-# MOD. NO.: 1           BY: P VOLANTE  SDC              DATE   4-11-67
+
+
+# MOD. NO. : 1       BY: P VOLANTE  SDC           DATE  4-11-67
 #
 # FUNCTIONAL DESCRIPTION-
-## Yes, I know point #1 is missing.  It is missing from the program listing &mdash; RSB 2003
-#       2)  CHECKS IF THE RR LOS (I.E. THE RADAR BORESIGHT VECTOR) IS WITHIN 30 DEGREES OF THE LM +Z AXIS
-#
-# CALLING SEQUENCE-  BANKCALL FOR LRS22.2
-#
-# SUBROUTINES CALLED:  G+N, AUTO   SETMAXDB
-#
-# NORMAL EXIT-  RETURN TO CALLER WITH MPAC SET TO +0 (VIA SWRETURN)
-#
-# ERROR EXIT-  RETURN TO CALLER WITH MPAC SET TO 00001 - RADAR LOS NOT WITHIN 30 DEGREES OF LM +Z AXIS
-#
-# ALARMS-  NONE                                                             IN THE AUTO MODE
-#
+
+##   (Yes, I know point #1 is missing.  It is missing from the program listing -- RSB 2003)
+#    2) CHECKS IF THE RR LOS (I.E. THE RADAR BORESIGHT VECTOR) IS WITHIN 30 DEGREES OF THE LM +Z AXIS
+
+
+# CALLING SEQUENCE- BANKCALL FOR LRS22.2
+
+
+# SUBROUTINES CALLED: G+N,AUTO   SETMAXDB
+# NORMAL EXIT - RETURN TO CALLER WITH MPAC SET TO +0 (VIA SWRETURN)
+
+
+# ERROR EXIT - RETURN TO CALLER WITH MPAC SET TO 00001 -RADAR LOS NOT WITHIN 30 DEGREES OF LM +Z AXIS
+
+
+# ALARMS - NONE                                                            IN THE AUTO MODE
+
+
 # ERASABLE INITIALIZATION REQUIRED -
-#       RRLOSVEC - THE RR LINE-OF-SIGHT VECTOR - A HALF UNIT VECTOR COMPUTED BY LRS22.1
-#       RM - RR RANGE, METERS B-29, FROM LRS22.1
-#       BIT 14 CHANNEL 31 - INDICATES AUTOPILOT IS IN AUTO MODE
-#
-# DEBRIS - A,L,Q MPAC - PUSHLIST AND PUSHLOC ARE NOT CHANGED BY THIS ROUTINE
+#      RRLOSVEC - THE RR LINE-OF-SIGHT VECTOR-A HALF UNIT VECTOR COMPUTED BY LRS22.1
+#      RM - RR RANGE, METERS B-29, FROM LRS22.1
+#      BIT 14 CHANNEL 31 -INDICATES AUTOPILOT IS IN AUTO MODE
 
-                SETLOC  P20S
-                BANK
-LRS22.2         TC      MAKECADR
-                TS      LRS22.1X
-                TC      INTPRET
-                                        # CHECK IF RR LOS IS WITHIN 30 DEG OF
-30DEGCHK        DLOAD   ACOS            # THE SPACECRAFT +Z AXIS
-                        RRBORSIT +4     # BY TAKING ARCCOS OF Z-COMP. OF THE RR
-                                        # LOS VECTOR, A HALF UNIT VECTOR
-                                        # IN NAV BASE AXES)
-                DSU     BMN
-                        30DEG
-                        OKEXIT          # NORMAL EXIT - WITHIN 30 DEG.
-                EXIT                    # ERROR EXIT - NOT WITHIN 30 DEG.
-                CAF     BIT1            # SET ERROR CODE IN MPAC
-                TS      MPAC
-                TCF     OUT22.2
-OKEXIT          EXIT                    # NORMAL EXIT - SET MPAC = ZERO
 
-## Page 573
-                CAF     ZERO
-                TS      MPAC
-OUT22.2         CAE     LRS22.1X
-                TC      BANKJUMP
+# DEBRIS -  A,L,Q MPAC -PUSHLIST AND PUSHLOC ARE NOT CHANGED BY THIS ROUTINE
 
-30DEG           2DEC    .083333333      # THIRTY DEGREES, SCALED REVS, B0
+                SETLOC          P20S
+                BANK    
+LRS22.2         TC              MAKECADR
+                TS              LRS22.1X
+                TC              INTPRET
+                                                        # CHECK IF RR LOS IS WITHIN 30 DEG OF
+30DEGCHK        DLOAD           ACOS                    # THE SPACECRAFT +Z AXIS
+                                RRBORSIT        +4      # BY TAKING ARCCOS OF Z-COMP. OF THE RR
+                                                        # LOS VECTOR,A HALF UNIT VECTOR
+                                                        # IN NAV BASE AXES)
+                DSU             BMN             
+                                30DEG           
+                                OKEXIT                  # NORMAL EXIT-WITHIN 30 DEG.
+                EXIT                                    # ERROR EXIT-NOT WITHIN 30 DEG.
+                CAF             BIT1                    # SET ERROR CODE IN MPAC
+                TS              MPAC            
+                TCF             OUT22.2         
+OKEXIT          EXIT                                    # NORMAL EXIT-SET MPAC = ZERO
+                        
+## Page 584    
+                CAF             ZERO
+                TS              MPAC
+OUT22.2         CAE             LRS22.1X
+                TC              BANKJUMP
+        
+30DEG           2DEC            .083333333              # THIRTY DEGREES,SCALED REVS,B0
 
-## Page 574
+## Page 574 XXXXXXX
 # PROGRAM NAME - LSR22.3                                DATE - 29 MAY 1967
 # MOD. NO 3                                             LOG SECTION - P20-25
 # MOD. BY - DANFORTH                                    ASSEMBLY LEMP20S REV 10
